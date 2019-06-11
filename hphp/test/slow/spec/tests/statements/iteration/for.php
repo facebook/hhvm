@@ -16,10 +16,11 @@ for ($i = 1; $i <= 10; ++$i)
 // omit 1st and 3rd expressions
 
 $i = 1;
-for (; $i <= 10;):
+for (; $i <= 10;)
+{
     echo "$i\t".($i * $i)."\n"; // output a table of squares
     ++$i;
-endfor;
+}
 
 // omit all 3 expressions
 

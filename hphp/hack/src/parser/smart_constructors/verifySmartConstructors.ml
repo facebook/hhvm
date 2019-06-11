@@ -433,14 +433,6 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
 
-  let make_alternate_loop_statement p0 p1 p2 p3 stack =
-    match stack with
-    | a3 :: a2 :: a1 :: a0 :: rem ->
-      let () = verify ~stack [p0; p1; p2; p3] [a0; a1; a2; a3] "alternate_loop_statement" in
-      let node = Syntax.make_alternate_loop_statement p0 p1 p2 p3 in
-      node :: rem, node
-    | _ -> failwith "Unexpected stack state"
-
   let make_expression_statement p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -529,30 +521,6 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
 
-  let make_alternate_if_statement p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 stack =
-    match stack with
-    | a9 :: a8 :: a7 :: a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
-      let () = verify ~stack [p0; p1; p2; p3; p4; p5; p6; p7; p8; p9] [a0; a1; a2; a3; a4; a5; a6; a7; a8; a9] "alternate_if_statement" in
-      let node = Syntax.make_alternate_if_statement p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 in
-      node :: rem, node
-    | _ -> failwith "Unexpected stack state"
-
-  let make_alternate_elseif_clause p0 p1 p2 p3 p4 p5 stack =
-    match stack with
-    | a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
-      let () = verify ~stack [p0; p1; p2; p3; p4; p5] [a0; a1; a2; a3; a4; a5] "alternate_elseif_clause" in
-      let node = Syntax.make_alternate_elseif_clause p0 p1 p2 p3 p4 p5 in
-      node :: rem, node
-    | _ -> failwith "Unexpected stack state"
-
-  let make_alternate_else_clause p0 p1 p2 stack =
-    match stack with
-    | a2 :: a1 :: a0 :: rem ->
-      let () = verify ~stack [p0; p1; p2] [a0; a1; a2] "alternate_else_clause" in
-      let node = Syntax.make_alternate_else_clause p0 p1 p2 in
-      node :: rem, node
-    | _ -> failwith "Unexpected stack state"
-
   let make_try_statement p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -606,14 +574,6 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
     | a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
       let () = verify ~stack [p0; p1; p2; p3; p4; p5; p6] [a0; a1; a2; a3; a4; a5; a6] "switch_statement" in
       let node = Syntax.make_switch_statement p0 p1 p2 p3 p4 p5 p6 in
-      node :: rem, node
-    | _ -> failwith "Unexpected stack state"
-
-  let make_alternate_switch_statement p0 p1 p2 p3 p4 p5 p6 p7 stack =
-    match stack with
-    | a7 :: a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
-      let () = verify ~stack [p0; p1; p2; p3; p4; p5; p6; p7] [a0; a1; a2; a3; a4; a5; a6; a7] "alternate_switch_statement" in
-      let node = Syntax.make_alternate_switch_statement p0 p1 p2 p3 p4 p5 p6 p7 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
 

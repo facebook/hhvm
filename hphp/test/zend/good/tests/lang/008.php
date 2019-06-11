@@ -8,7 +8,7 @@ function Test()
 {
     echo TestStatics::$a . " ";
     TestStatics::$a++;
-    if(TestStatics::$a<10): Test(); endif;
+    if(TestStatics::$a<10) Test();
 }
 <<__EntryPoint>> function main() {
 Test();

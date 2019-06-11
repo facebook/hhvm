@@ -16,10 +16,6 @@ $v = 10;
 switch ($v)
     echo "Here I am.\n";
 
-switch ($v):
-    echo "Here I am.\n";
-endswitch;
-
 switch ($v)
 default: echo $v;
 */
@@ -31,8 +27,6 @@ switch ($v)     // yes
 {
 }
 
-switch ($v):    // yes
-endswitch;
 //*/
 
 ///*
@@ -45,13 +39,6 @@ switch ($v)
     //;
 }
 //*/
-
-/*
-switch ($v):    // No, can't have {} with alternate form
-{
-}
-endswitch;
-*/
 
 ///*
 switch ($v)
@@ -72,21 +59,6 @@ case 10:
 case 30:
     echo "case 30\n";   // no break, but then none is really needed either
 }
-
-switch ($v):
-
-default:
-    echo "default case\n";
-    break;
-case 20:
-    echo "case 20\n";
-    break;
-case 10:
-    echo "case 10\n";
-case 30:
-    echo "case 30\n";
-
-endswitch;
 //*/
 
 ///*
@@ -139,21 +111,6 @@ default;        // <================ ;
     echo "default case: \$v is $v\n";
     break;
 }
-
-$v = 10;
-switch ($v):
-
-case 10;        // <================ ;
-    echo "case 10\n";
-    break;
-case 20:        // <================ :
-    echo "case 20\n";
-    break;
-default;        // <================ ;
-    echo "default case: \$v is $v\n";
-    break;
-
-endswitch;
 //*/
 
 ///*

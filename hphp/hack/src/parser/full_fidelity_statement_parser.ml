@@ -304,12 +304,7 @@ module WithExpressionAndDeclAndTypeParser
     let parser, for_end_of_loop_expr = parse_comma_list_opt
       parser RightParen SyntaxError.error1015 parse_expression in
     let parser, for_right_paren = require_right_paren parser in
-    let parser, for_statement =
-      let _, open_token = next_token parser in
-      match Token.kind open_token with
-      | Colon -> parse_alternate_loop_statement parser ~terminator:Endfor
-      | _ -> parse_statement parser
-    in
+    let parser, for_statement = parse_statement parser in
     Make.for_statement
       parser
       for_keyword_token
@@ -353,11 +348,7 @@ module WithExpressionAndDeclAndTypeParser
     in
     let parser, right_paren_token = require_right_paren parser in
     let parser = Parser.pop_scope parser [ RightParen ] in
-    let parser, foreach_statement =
-      match peek_token_kind parser with
-      | Colon -> parse_alternate_loop_statement parser ~terminator:Endforeach
-      | _ -> parse_statement parser
-    in
+    let parser, foreach_statement = parse_statement parser in
     Make.foreach_statement
       parser
       foreach_keyword_token
@@ -395,11 +386,7 @@ module WithExpressionAndDeclAndTypeParser
     let (parser, left_paren_token, expr_node, right_paren_token) =
       parse_paren_expr parser
     in
-    let (parser, statement_node) =
-      match peek_token_kind parser with
-      | Colon -> parse_alternate_loop_statement parser ~terminator:Endwhile
-      | _ -> parse_statement parser
-    in
+    let (parser, statement_node) = parse_statement parser in
     Make.while_statement
       parser
       while_keyword_token
@@ -502,28 +489,16 @@ module WithExpressionAndDeclAndTypeParser
     (* SPEC:
   if-statement:
     if   (   expression   )   statement   elseif-clauses-opt    else-clause-opt
-    if   (   expression   ):  statement   alt-elif-clauses-opt  alt-else-clause-opt endif;
 
   elseif-clauses:
     elseif-clause
     elseif-clauses   elseif-clause
 
-  alt-elif-clauses:
-    alt-elif-clause
-    alt-elif-clauses   alt-elif-clause
-
   elseif-clause:
     elseif   (   expression   )   statement
 
-  alt-elif-clause:
-    elseif   (   expression   ):  statement
-
   else-clause:
     else   statement
-
-  alt-else-clause:
-    else:  statement
-
     *)
 
     (* parses the "( expr ) statement" segment of If, Elseif or Else clauses.
@@ -532,17 +507,11 @@ module WithExpressionAndDeclAndTypeParser
     let parse_if_body_helper parser_body =
       let (parser_body, left_paren_token, expr_node, right_paren_token) =
         parse_paren_expr parser_body in
-      let parser1, opening_token = next_token parser_body in
-      let (parser1, opening_token_syntax) = Make.token parser1 opening_token in
-      let (parser_body, statement_node) = match Token.kind opening_token with
-      | Colon -> parse_alternate_if_block parser1 parse_statement
-      | _ -> parse_statement parser_body in
+      let (parser_body, statement_node) = parse_statement parser_body in
       ( parser_body
       , left_paren_token
       , expr_node
       , right_paren_token
-      , opening_token
-      , opening_token_syntax
       , statement_node
       )
     in
@@ -553,22 +522,10 @@ module WithExpressionAndDeclAndTypeParser
             , elseif_left_paren
             , elseif_condition_expr
             , elseif_right_paren
-            , elseif_opening_token
-            , elseif_opening_token_syntax
             , elseif_statement
             ) =
           parse_if_body_helper parser_elseif in
-        let (parser_elseif, elseif_syntax) = match Token.kind elseif_opening_token with
-        | Colon ->
-          Make.alternate_elseif_clause
-            parser_elseif
-            elseif_token
-            elseif_left_paren
-            elseif_condition_expr
-            elseif_right_paren
-            elseif_opening_token_syntax
-            elseif_statement
-        | _ ->
+        let (parser_elseif, elseif_syntax) =
           Make.elseif_clause
             parser_elseif
             elseif_token
@@ -587,65 +544,29 @@ module WithExpressionAndDeclAndTypeParser
       if SC.is_missing else_token then
         (parser_else, else_token)
       else
-        let parser1, opening_token = next_token parser_else in
-        match Token.kind opening_token with
-        | Colon ->
-          let (_parser, opening_token_syntax) =
-            Make.token parser opening_token
-          in
-          let (parser_else, else_consequence) =
-            parse_alternate_if_block parser1 parse_statement
-          in
-          Make.alternate_else_clause
-            parser_else
-            else_token
-            opening_token_syntax
-            else_consequence
-        | _ ->
-          let (parser_else, else_consequence) = parse_statement parser_else in
-          Make.else_clause parser_else else_token else_consequence
+        let (parser_else, else_consequence) = parse_statement parser_else in
+        Make.else_clause parser_else else_token else_consequence
     in
     let (parser, if_keyword_token) = assert_token parser If in
     let ( parser
         , if_left_paren
         , if_expr
         , if_right_paren
-        , if_opening_token
-        , if_opening_token_syntax
         , if_consequence
         ) =
       parse_if_body_helper parser in
     let (parser, elseif_syntax) =
       parse_list_until_none parser parse_elseif_opt in
     let (parser, else_syntax) = parse_else_opt parser in
-    match Token.kind if_opening_token with
-    | Colon ->
-      let (parser, closing_token) =
-        require_token parser Endif (SyntaxError.error1059 Endif)
-      in
-      let (parser, semicolon_token) = require_semicolon parser in
-      Make.alternate_if_statement
-        parser
-        if_keyword_token
-        if_left_paren
-        if_expr
-        if_right_paren
-        if_opening_token_syntax
-        if_consequence
-        elseif_syntax
-        else_syntax
-        closing_token
-        semicolon_token
-    | _ ->
-      Make.if_statement
-        parser
-        if_keyword_token
-        if_left_paren
-        if_expr
-        if_right_paren
-        if_consequence
-        elseif_syntax
-        else_syntax
+    Make.if_statement
+      parser
+      if_keyword_token
+      if_left_paren
+      if_expr
+      if_right_paren
+      if_consequence
+      elseif_syntax
+      else_syntax
 
   and parse_switch_statement parser =
     (* SPEC:
@@ -725,46 +646,25 @@ module WithExpressionAndDeclAndTypeParser
     let (parser, switch_keyword_token) = assert_token parser Switch in
     let (parser, left_paren_token, expr_node, right_paren_token) =
       parse_paren_expr parser in
-    let (_, opening_token) = next_token parser in
-    let ((parser, opening_token_syntax), closing_token_kind) =
-    match Token.kind opening_token with
-    | Colon -> assert_token parser Colon, Endswitch
-    | _ -> require_left_brace parser, RightBrace in
+    let (parser, left_brace_token) = require_left_brace parser in
     let (parser, section_list) =
       let (parser1, token) = next_token parser in
       match Token.kind token with
-      | Semicolon when peek_token_kind parser1 = closing_token_kind ->
+      | Semicolon when peek_token_kind parser1 = RightBrace ->
         make_list parser1 []
       | _ ->
-        parse_terminated_list parser parse_switch_section closing_token_kind
+        parse_terminated_list parser parse_switch_section RightBrace
     in
-    match closing_token_kind with
-    | Endswitch ->
-      let (parser, endswitch_token_syntax) =
-        require_token parser Endswitch (SyntaxError.error1059 Endswitch)
-      in
-      let (parser, semicolon) = require_semicolon parser in
-      Make.alternate_switch_statement
-        parser
-        switch_keyword_token
-        left_paren_token
-        expr_node
-        right_paren_token
-        opening_token_syntax
-        section_list
-        endswitch_token_syntax
-        semicolon
-    | _ ->
-      let (parser, right_brace_token) = require_right_brace parser in
-      Make.switch_statement
-        parser
-        switch_keyword_token
-        left_paren_token
-        expr_node
-        right_paren_token
-        opening_token_syntax
-        section_list
-        right_brace_token
+    let (parser, right_brace_token) = require_right_brace parser in
+    Make.switch_statement
+      parser
+      switch_keyword_token
+      left_paren_token
+      expr_node
+      right_paren_token
+      left_brace_token
+      section_list
+      right_brace_token
 
   and is_switch_fallthrough parser =
     peek_token_kind parser = Fallthrough &&
@@ -1106,20 +1006,6 @@ module WithExpressionAndDeclAndTypeParser
       let (parser, right_brace_token) = require_right_brace parser in
       Make.compound_statement parser left_brace_token statement_list
         right_brace_token
-
-  and parse_alternate_loop_statement parser ~terminator =
-    let (parser, colon_token) = assert_token parser Colon in
-    let (parser, statement_list) =
-      parse_terminated_list parser parse_statement terminator in
-    let (parser, terminate_token) = require_token parser terminator
-      (SyntaxError.error1059 terminator) in
-    let (parser, semicolon_token) = require_semicolon parser in
-    Make.alternate_loop_statement
-      parser
-      colon_token
-      statement_list
-      terminate_token
-      semicolon_token
 
 end
 end (* WithSmartConstructors *)

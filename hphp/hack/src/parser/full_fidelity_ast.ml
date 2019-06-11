@@ -2018,13 +2018,7 @@ and pStmt : stmt parser = fun node env ->
   extract_and_push_docblock node;
   let pos = pPos node env in
   let result = match syntax node with
-  | AlternateElseClause _ | AlternateIfStatement _ | AlternateElseifClause _
-  | AlternateLoopStatement _  | AlternateSwitchStatement _ when is_typechecker env ->
-    raise_parsing_error env (`Node node) SyntaxError.alternate_control_flow;
-    missing_syntax "alternative control flow" node env (* this should never get hit *)
-  | SwitchStatement { switch_expression=expr; switch_sections=sections; _ }
-  | AlternateSwitchStatement { alternate_switch_expression=expr;
-    alternate_switch_sections=sections; _ } ->
+  | SwitchStatement { switch_expression=expr; switch_sections=sections; _ } ->
     lift_awaits_in_statement env pos (fun () ->
       let pSwitchLabel : (block -> case) parser = fun node env cont ->
         match syntax node with
@@ -2064,12 +2058,7 @@ and pStmt : stmt parser = fun node env ->
     { if_condition=cond;
       if_statement=stmt;
       if_elseif_clauses=elseif_clause;
-      if_else_clause=else_clause; _ }
-  | AlternateIfStatement
-    { alternate_if_condition=cond;
-      alternate_if_statement=stmt;
-      alternate_if_elseif_clauses=elseif_clause;
-      alternate_if_else_clause=else_clause; _ } ->
+      if_else_clause=else_clause; _ } ->
     lift_awaits_in_statement env pos (fun () ->
       (* Because consistency is for the weak-willed, Parser_hack does *not*
        * produce `Noop`s for compound statements **in if statements**
@@ -2079,9 +2068,7 @@ and pStmt : stmt parser = fun node env ->
       let if_elseif_statement =
         let pElseIf : (block -> block) parser = fun node env ->
           match syntax node with
-          | ElseifClause { elseif_condition=ei_cond; elseif_statement=ei_stmt; _ }
-          | AlternateElseifClause { alternate_elseif_condition=ei_cond;
-            alternate_elseif_statement=ei_stmt; _ } ->
+          | ElseifClause { elseif_condition=ei_cond; elseif_statement=ei_stmt; _ } ->
             fun next_clause ->
               let elseif_condition = pExpr ei_cond env in
               let elseif_statement = unwrap_extra_block @@ pStmtUnsafe ei_stmt env in
@@ -2091,8 +2078,7 @@ and pStmt : stmt parser = fun node env ->
         List.fold_right ~f:(@@)
             (couldMap ~f:pElseIf elseif_clause env)
             ~init:( match syntax else_clause with
-              | ElseClause { else_statement=e_stmt; _ }
-              | AlternateElseClause { alternate_else_statement=e_stmt; _ } ->
+              | ElseClause { else_statement=e_stmt; _ } ->
                 unwrap_extra_block @@ pStmtUnsafe e_stmt env
               | Missing -> [Pos.none, Noop]
               | _ -> missing_syntax "else clause" else_clause env
@@ -2114,8 +2100,6 @@ and pStmt : stmt parser = fun node env ->
       | _ -> []
     in
     handle_loop_body pos compound_statements tail env
-  | AlternateLoopStatement { alternate_loop_statements; _ } ->
-    handle_loop_body pos alternate_loop_statements [] env
   | SyntaxList _ ->
     handle_loop_body pos node [] env
   | ThrowStatement { throw_expression; _ } ->

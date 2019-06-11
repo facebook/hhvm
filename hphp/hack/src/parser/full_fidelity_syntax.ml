@@ -105,7 +105,6 @@ module WithToken(Token: TokenType) = struct
       | InclusionExpression               _ -> SyntaxKind.InclusionExpression
       | InclusionDirective                _ -> SyntaxKind.InclusionDirective
       | CompoundStatement                 _ -> SyntaxKind.CompoundStatement
-      | AlternateLoopStatement            _ -> SyntaxKind.AlternateLoopStatement
       | ExpressionStatement               _ -> SyntaxKind.ExpressionStatement
       | MarkupSection                     _ -> SyntaxKind.MarkupSection
       | MarkupSuffix                      _ -> SyntaxKind.MarkupSuffix
@@ -117,9 +116,6 @@ module WithToken(Token: TokenType) = struct
       | IfStatement                       _ -> SyntaxKind.IfStatement
       | ElseifClause                      _ -> SyntaxKind.ElseifClause
       | ElseClause                        _ -> SyntaxKind.ElseClause
-      | AlternateIfStatement              _ -> SyntaxKind.AlternateIfStatement
-      | AlternateElseifClause             _ -> SyntaxKind.AlternateElseifClause
-      | AlternateElseClause               _ -> SyntaxKind.AlternateElseClause
       | TryStatement                      _ -> SyntaxKind.TryStatement
       | CatchClause                       _ -> SyntaxKind.CatchClause
       | FinallyClause                     _ -> SyntaxKind.FinallyClause
@@ -127,7 +123,6 @@ module WithToken(Token: TokenType) = struct
       | ForStatement                      _ -> SyntaxKind.ForStatement
       | ForeachStatement                  _ -> SyntaxKind.ForeachStatement
       | SwitchStatement                   _ -> SyntaxKind.SwitchStatement
-      | AlternateSwitchStatement          _ -> SyntaxKind.AlternateSwitchStatement
       | SwitchSection                     _ -> SyntaxKind.SwitchSection
       | SwitchFallthrough                 _ -> SyntaxKind.SwitchFallthrough
       | CaseLabel                         _ -> SyntaxKind.CaseLabel
@@ -296,7 +291,6 @@ module WithToken(Token: TokenType) = struct
     let is_inclusion_expression                 = has_kind SyntaxKind.InclusionExpression
     let is_inclusion_directive                  = has_kind SyntaxKind.InclusionDirective
     let is_compound_statement                   = has_kind SyntaxKind.CompoundStatement
-    let is_alternate_loop_statement             = has_kind SyntaxKind.AlternateLoopStatement
     let is_expression_statement                 = has_kind SyntaxKind.ExpressionStatement
     let is_markup_section                       = has_kind SyntaxKind.MarkupSection
     let is_markup_suffix                        = has_kind SyntaxKind.MarkupSuffix
@@ -308,9 +302,6 @@ module WithToken(Token: TokenType) = struct
     let is_if_statement                         = has_kind SyntaxKind.IfStatement
     let is_elseif_clause                        = has_kind SyntaxKind.ElseifClause
     let is_else_clause                          = has_kind SyntaxKind.ElseClause
-    let is_alternate_if_statement               = has_kind SyntaxKind.AlternateIfStatement
-    let is_alternate_elseif_clause              = has_kind SyntaxKind.AlternateElseifClause
-    let is_alternate_else_clause                = has_kind SyntaxKind.AlternateElseClause
     let is_try_statement                        = has_kind SyntaxKind.TryStatement
     let is_catch_clause                         = has_kind SyntaxKind.CatchClause
     let is_finally_clause                       = has_kind SyntaxKind.FinallyClause
@@ -318,7 +309,6 @@ module WithToken(Token: TokenType) = struct
     let is_for_statement                        = has_kind SyntaxKind.ForStatement
     let is_foreach_statement                    = has_kind SyntaxKind.ForeachStatement
     let is_switch_statement                     = has_kind SyntaxKind.SwitchStatement
-    let is_alternate_switch_statement           = has_kind SyntaxKind.AlternateSwitchStatement
     let is_switch_section                       = has_kind SyntaxKind.SwitchSection
     let is_switch_fallthrough                   = has_kind SyntaxKind.SwitchFallthrough
     let is_case_label                           = has_kind SyntaxKind.CaseLabel
@@ -989,17 +979,6 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc compound_statements in
          let acc = f acc compound_right_brace in
          acc
-      | AlternateLoopStatement {
-        alternate_loop_opening_colon;
-        alternate_loop_statements;
-        alternate_loop_closing_keyword;
-        alternate_loop_closing_semicolon;
-      } ->
-         let acc = f acc alternate_loop_opening_colon in
-         let acc = f acc alternate_loop_statements in
-         let acc = f acc alternate_loop_closing_keyword in
-         let acc = f acc alternate_loop_closing_semicolon in
-         acc
       | ExpressionStatement {
         expression_statement_expression;
         expression_statement_semicolon;
@@ -1129,53 +1108,6 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc else_keyword in
          let acc = f acc else_statement in
          acc
-      | AlternateIfStatement {
-        alternate_if_keyword;
-        alternate_if_left_paren;
-        alternate_if_condition;
-        alternate_if_right_paren;
-        alternate_if_colon;
-        alternate_if_statement;
-        alternate_if_elseif_clauses;
-        alternate_if_else_clause;
-        alternate_if_endif_keyword;
-        alternate_if_semicolon;
-      } ->
-         let acc = f acc alternate_if_keyword in
-         let acc = f acc alternate_if_left_paren in
-         let acc = f acc alternate_if_condition in
-         let acc = f acc alternate_if_right_paren in
-         let acc = f acc alternate_if_colon in
-         let acc = f acc alternate_if_statement in
-         let acc = f acc alternate_if_elseif_clauses in
-         let acc = f acc alternate_if_else_clause in
-         let acc = f acc alternate_if_endif_keyword in
-         let acc = f acc alternate_if_semicolon in
-         acc
-      | AlternateElseifClause {
-        alternate_elseif_keyword;
-        alternate_elseif_left_paren;
-        alternate_elseif_condition;
-        alternate_elseif_right_paren;
-        alternate_elseif_colon;
-        alternate_elseif_statement;
-      } ->
-         let acc = f acc alternate_elseif_keyword in
-         let acc = f acc alternate_elseif_left_paren in
-         let acc = f acc alternate_elseif_condition in
-         let acc = f acc alternate_elseif_right_paren in
-         let acc = f acc alternate_elseif_colon in
-         let acc = f acc alternate_elseif_statement in
-         acc
-      | AlternateElseClause {
-        alternate_else_keyword;
-        alternate_else_colon;
-        alternate_else_statement;
-      } ->
-         let acc = f acc alternate_else_keyword in
-         let acc = f acc alternate_else_colon in
-         let acc = f acc alternate_else_statement in
-         acc
       | TryStatement {
         try_keyword;
         try_compound_statement;
@@ -1286,25 +1218,6 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc switch_left_brace in
          let acc = f acc switch_sections in
          let acc = f acc switch_right_brace in
-         acc
-      | AlternateSwitchStatement {
-        alternate_switch_keyword;
-        alternate_switch_left_paren;
-        alternate_switch_expression;
-        alternate_switch_right_paren;
-        alternate_switch_opening_colon;
-        alternate_switch_sections;
-        alternate_switch_closing_endswitch;
-        alternate_switch_closing_semicolon;
-      } ->
-         let acc = f acc alternate_switch_keyword in
-         let acc = f acc alternate_switch_left_paren in
-         let acc = f acc alternate_switch_expression in
-         let acc = f acc alternate_switch_right_paren in
-         let acc = f acc alternate_switch_opening_colon in
-         let acc = f acc alternate_switch_sections in
-         let acc = f acc alternate_switch_closing_endswitch in
-         let acc = f acc alternate_switch_closing_semicolon in
          acc
       | SwitchSection {
         switch_section_labels;
@@ -2935,17 +2848,6 @@ module WithToken(Token: TokenType) = struct
         compound_statements;
         compound_right_brace;
       ]
-      | AlternateLoopStatement {
-        alternate_loop_opening_colon;
-        alternate_loop_statements;
-        alternate_loop_closing_keyword;
-        alternate_loop_closing_semicolon;
-      } -> [
-        alternate_loop_opening_colon;
-        alternate_loop_statements;
-        alternate_loop_closing_keyword;
-        alternate_loop_closing_semicolon;
-      ]
       | ExpressionStatement {
         expression_statement_expression;
         expression_statement_semicolon;
@@ -3075,53 +2977,6 @@ module WithToken(Token: TokenType) = struct
         else_keyword;
         else_statement;
       ]
-      | AlternateIfStatement {
-        alternate_if_keyword;
-        alternate_if_left_paren;
-        alternate_if_condition;
-        alternate_if_right_paren;
-        alternate_if_colon;
-        alternate_if_statement;
-        alternate_if_elseif_clauses;
-        alternate_if_else_clause;
-        alternate_if_endif_keyword;
-        alternate_if_semicolon;
-      } -> [
-        alternate_if_keyword;
-        alternate_if_left_paren;
-        alternate_if_condition;
-        alternate_if_right_paren;
-        alternate_if_colon;
-        alternate_if_statement;
-        alternate_if_elseif_clauses;
-        alternate_if_else_clause;
-        alternate_if_endif_keyword;
-        alternate_if_semicolon;
-      ]
-      | AlternateElseifClause {
-        alternate_elseif_keyword;
-        alternate_elseif_left_paren;
-        alternate_elseif_condition;
-        alternate_elseif_right_paren;
-        alternate_elseif_colon;
-        alternate_elseif_statement;
-      } -> [
-        alternate_elseif_keyword;
-        alternate_elseif_left_paren;
-        alternate_elseif_condition;
-        alternate_elseif_right_paren;
-        alternate_elseif_colon;
-        alternate_elseif_statement;
-      ]
-      | AlternateElseClause {
-        alternate_else_keyword;
-        alternate_else_colon;
-        alternate_else_statement;
-      } -> [
-        alternate_else_keyword;
-        alternate_else_colon;
-        alternate_else_statement;
-      ]
       | TryStatement {
         try_keyword;
         try_compound_statement;
@@ -3232,25 +3087,6 @@ module WithToken(Token: TokenType) = struct
         switch_left_brace;
         switch_sections;
         switch_right_brace;
-      ]
-      | AlternateSwitchStatement {
-        alternate_switch_keyword;
-        alternate_switch_left_paren;
-        alternate_switch_expression;
-        alternate_switch_right_paren;
-        alternate_switch_opening_colon;
-        alternate_switch_sections;
-        alternate_switch_closing_endswitch;
-        alternate_switch_closing_semicolon;
-      } -> [
-        alternate_switch_keyword;
-        alternate_switch_left_paren;
-        alternate_switch_expression;
-        alternate_switch_right_paren;
-        alternate_switch_opening_colon;
-        alternate_switch_sections;
-        alternate_switch_closing_endswitch;
-        alternate_switch_closing_semicolon;
       ]
       | SwitchSection {
         switch_section_labels;
@@ -4882,17 +4718,6 @@ module WithToken(Token: TokenType) = struct
         "compound_statements";
         "compound_right_brace";
       ]
-      | AlternateLoopStatement {
-        alternate_loop_opening_colon;
-        alternate_loop_statements;
-        alternate_loop_closing_keyword;
-        alternate_loop_closing_semicolon;
-      } -> [
-        "alternate_loop_opening_colon";
-        "alternate_loop_statements";
-        "alternate_loop_closing_keyword";
-        "alternate_loop_closing_semicolon";
-      ]
       | ExpressionStatement {
         expression_statement_expression;
         expression_statement_semicolon;
@@ -5022,53 +4847,6 @@ module WithToken(Token: TokenType) = struct
         "else_keyword";
         "else_statement";
       ]
-      | AlternateIfStatement {
-        alternate_if_keyword;
-        alternate_if_left_paren;
-        alternate_if_condition;
-        alternate_if_right_paren;
-        alternate_if_colon;
-        alternate_if_statement;
-        alternate_if_elseif_clauses;
-        alternate_if_else_clause;
-        alternate_if_endif_keyword;
-        alternate_if_semicolon;
-      } -> [
-        "alternate_if_keyword";
-        "alternate_if_left_paren";
-        "alternate_if_condition";
-        "alternate_if_right_paren";
-        "alternate_if_colon";
-        "alternate_if_statement";
-        "alternate_if_elseif_clauses";
-        "alternate_if_else_clause";
-        "alternate_if_endif_keyword";
-        "alternate_if_semicolon";
-      ]
-      | AlternateElseifClause {
-        alternate_elseif_keyword;
-        alternate_elseif_left_paren;
-        alternate_elseif_condition;
-        alternate_elseif_right_paren;
-        alternate_elseif_colon;
-        alternate_elseif_statement;
-      } -> [
-        "alternate_elseif_keyword";
-        "alternate_elseif_left_paren";
-        "alternate_elseif_condition";
-        "alternate_elseif_right_paren";
-        "alternate_elseif_colon";
-        "alternate_elseif_statement";
-      ]
-      | AlternateElseClause {
-        alternate_else_keyword;
-        alternate_else_colon;
-        alternate_else_statement;
-      } -> [
-        "alternate_else_keyword";
-        "alternate_else_colon";
-        "alternate_else_statement";
-      ]
       | TryStatement {
         try_keyword;
         try_compound_statement;
@@ -5179,25 +4957,6 @@ module WithToken(Token: TokenType) = struct
         "switch_left_brace";
         "switch_sections";
         "switch_right_brace";
-      ]
-      | AlternateSwitchStatement {
-        alternate_switch_keyword;
-        alternate_switch_left_paren;
-        alternate_switch_expression;
-        alternate_switch_right_paren;
-        alternate_switch_opening_colon;
-        alternate_switch_sections;
-        alternate_switch_closing_endswitch;
-        alternate_switch_closing_semicolon;
-      } -> [
-        "alternate_switch_keyword";
-        "alternate_switch_left_paren";
-        "alternate_switch_expression";
-        "alternate_switch_right_paren";
-        "alternate_switch_opening_colon";
-        "alternate_switch_sections";
-        "alternate_switch_closing_endswitch";
-        "alternate_switch_closing_semicolon";
       ]
       | SwitchSection {
         switch_section_labels;
@@ -6929,18 +6688,6 @@ module WithToken(Token: TokenType) = struct
           compound_statements;
           compound_right_brace;
         }
-      | (SyntaxKind.AlternateLoopStatement, [
-          alternate_loop_opening_colon;
-          alternate_loop_statements;
-          alternate_loop_closing_keyword;
-          alternate_loop_closing_semicolon;
-        ]) ->
-        AlternateLoopStatement {
-          alternate_loop_opening_colon;
-          alternate_loop_statements;
-          alternate_loop_closing_keyword;
-          alternate_loop_closing_semicolon;
-        }
       | (SyntaxKind.ExpressionStatement, [
           expression_statement_expression;
           expression_statement_semicolon;
@@ -7081,56 +6828,6 @@ module WithToken(Token: TokenType) = struct
           else_keyword;
           else_statement;
         }
-      | (SyntaxKind.AlternateIfStatement, [
-          alternate_if_keyword;
-          alternate_if_left_paren;
-          alternate_if_condition;
-          alternate_if_right_paren;
-          alternate_if_colon;
-          alternate_if_statement;
-          alternate_if_elseif_clauses;
-          alternate_if_else_clause;
-          alternate_if_endif_keyword;
-          alternate_if_semicolon;
-        ]) ->
-        AlternateIfStatement {
-          alternate_if_keyword;
-          alternate_if_left_paren;
-          alternate_if_condition;
-          alternate_if_right_paren;
-          alternate_if_colon;
-          alternate_if_statement;
-          alternate_if_elseif_clauses;
-          alternate_if_else_clause;
-          alternate_if_endif_keyword;
-          alternate_if_semicolon;
-        }
-      | (SyntaxKind.AlternateElseifClause, [
-          alternate_elseif_keyword;
-          alternate_elseif_left_paren;
-          alternate_elseif_condition;
-          alternate_elseif_right_paren;
-          alternate_elseif_colon;
-          alternate_elseif_statement;
-        ]) ->
-        AlternateElseifClause {
-          alternate_elseif_keyword;
-          alternate_elseif_left_paren;
-          alternate_elseif_condition;
-          alternate_elseif_right_paren;
-          alternate_elseif_colon;
-          alternate_elseif_statement;
-        }
-      | (SyntaxKind.AlternateElseClause, [
-          alternate_else_keyword;
-          alternate_else_colon;
-          alternate_else_statement;
-        ]) ->
-        AlternateElseClause {
-          alternate_else_keyword;
-          alternate_else_colon;
-          alternate_else_statement;
-        }
       | (SyntaxKind.TryStatement, [
           try_keyword;
           try_compound_statement;
@@ -7248,26 +6945,6 @@ module WithToken(Token: TokenType) = struct
           switch_left_brace;
           switch_sections;
           switch_right_brace;
-        }
-      | (SyntaxKind.AlternateSwitchStatement, [
-          alternate_switch_keyword;
-          alternate_switch_left_paren;
-          alternate_switch_expression;
-          alternate_switch_right_paren;
-          alternate_switch_opening_colon;
-          alternate_switch_sections;
-          alternate_switch_closing_endswitch;
-          alternate_switch_closing_semicolon;
-        ]) ->
-        AlternateSwitchStatement {
-          alternate_switch_keyword;
-          alternate_switch_left_paren;
-          alternate_switch_expression;
-          alternate_switch_right_paren;
-          alternate_switch_opening_colon;
-          alternate_switch_sections;
-          alternate_switch_closing_endswitch;
-          alternate_switch_closing_semicolon;
         }
       | (SyntaxKind.SwitchSection, [
           switch_section_labels;
@@ -9227,21 +8904,6 @@ module WithToken(Token: TokenType) = struct
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 
-      let make_alternate_loop_statement
-        alternate_loop_opening_colon
-        alternate_loop_statements
-        alternate_loop_closing_keyword
-        alternate_loop_closing_semicolon
-      =
-        let syntax = AlternateLoopStatement {
-          alternate_loop_opening_colon;
-          alternate_loop_statements;
-          alternate_loop_closing_keyword;
-          alternate_loop_closing_semicolon;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
       let make_expression_statement
         expression_statement_expression
         expression_statement_semicolon
@@ -9415,65 +9077,6 @@ module WithToken(Token: TokenType) = struct
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 
-      let make_alternate_if_statement
-        alternate_if_keyword
-        alternate_if_left_paren
-        alternate_if_condition
-        alternate_if_right_paren
-        alternate_if_colon
-        alternate_if_statement
-        alternate_if_elseif_clauses
-        alternate_if_else_clause
-        alternate_if_endif_keyword
-        alternate_if_semicolon
-      =
-        let syntax = AlternateIfStatement {
-          alternate_if_keyword;
-          alternate_if_left_paren;
-          alternate_if_condition;
-          alternate_if_right_paren;
-          alternate_if_colon;
-          alternate_if_statement;
-          alternate_if_elseif_clauses;
-          alternate_if_else_clause;
-          alternate_if_endif_keyword;
-          alternate_if_semicolon;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_alternate_elseif_clause
-        alternate_elseif_keyword
-        alternate_elseif_left_paren
-        alternate_elseif_condition
-        alternate_elseif_right_paren
-        alternate_elseif_colon
-        alternate_elseif_statement
-      =
-        let syntax = AlternateElseifClause {
-          alternate_elseif_keyword;
-          alternate_elseif_left_paren;
-          alternate_elseif_condition;
-          alternate_elseif_right_paren;
-          alternate_elseif_colon;
-          alternate_elseif_statement;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_alternate_else_clause
-        alternate_else_keyword
-        alternate_else_colon
-        alternate_else_statement
-      =
-        let syntax = AlternateElseClause {
-          alternate_else_keyword;
-          alternate_else_colon;
-          alternate_else_statement;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
       let make_try_statement
         try_keyword
         try_compound_statement
@@ -9609,29 +9212,6 @@ module WithToken(Token: TokenType) = struct
           switch_left_brace;
           switch_sections;
           switch_right_brace;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_alternate_switch_statement
-        alternate_switch_keyword
-        alternate_switch_left_paren
-        alternate_switch_expression
-        alternate_switch_right_paren
-        alternate_switch_opening_colon
-        alternate_switch_sections
-        alternate_switch_closing_endswitch
-        alternate_switch_closing_semicolon
-      =
-        let syntax = AlternateSwitchStatement {
-          alternate_switch_keyword;
-          alternate_switch_left_paren;
-          alternate_switch_expression;
-          alternate_switch_right_paren;
-          alternate_switch_opening_colon;
-          alternate_switch_sections;
-          alternate_switch_closing_endswitch;
-          alternate_switch_closing_semicolon;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

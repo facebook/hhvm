@@ -132,7 +132,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.UsingStatementFunctionScoped _ -> tag validate_using_statement_function_scoped (fun x -> TLDUsingStatementFunctionScoped x) x
     | Syntax.WhileStatement _ -> tag validate_while_statement (fun x -> TLDWhile x) x
     | Syntax.IfStatement _ -> tag validate_if_statement (fun x -> TLDIf x) x
-    | Syntax.AlternateIfStatement _ -> tag validate_alternate_if_statement (fun x -> TLDAlternateIf x) x
     | Syntax.TryStatement _ -> tag validate_try_statement (fun x -> TLDTry x) x
     | Syntax.DoStatement _ -> tag validate_do_statement (fun x -> TLDDo x) x
     | Syntax.ForStatement _ -> tag validate_for_statement (fun x -> TLDFor x) x
@@ -170,7 +169,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | TLDUsingStatementFunctionScoped thing -> invalidate_using_statement_function_scoped (value, thing)
     | TLDWhile                        thing -> invalidate_while_statement                (value, thing)
     | TLDIf                           thing -> invalidate_if_statement                   (value, thing)
-    | TLDAlternateIf                  thing -> invalidate_alternate_if_statement         (value, thing)
     | TLDTry                          thing -> invalidate_try_statement                  (value, thing)
     | TLDDo                           thing -> invalidate_do_statement                   (value, thing)
     | TLDFor                          thing -> invalidate_for_statement                  (value, thing)
@@ -379,7 +377,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     match Syntax.syntax x with
     | Syntax.InclusionDirective _ -> tag validate_inclusion_directive (fun x -> StmtInclusionDirective x) x
     | Syntax.CompoundStatement _ -> tag validate_compound_statement (fun x -> StmtCompound x) x
-    | Syntax.AlternateLoopStatement _ -> tag validate_alternate_loop_statement (fun x -> StmtAlternateLoop x) x
     | Syntax.ExpressionStatement _ -> tag validate_expression_statement (fun x -> StmtExpression x) x
     | Syntax.MarkupSection _ -> tag validate_markup_section (fun x -> StmtMarkupSection x) x
     | Syntax.MarkupSuffix _ -> tag validate_markup_suffix (fun x -> StmtMarkupSuffix x) x
@@ -389,13 +386,11 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.UsingStatementFunctionScoped _ -> tag validate_using_statement_function_scoped (fun x -> StmtUsingStatementFunctionScoped x) x
     | Syntax.WhileStatement _ -> tag validate_while_statement (fun x -> StmtWhile x) x
     | Syntax.IfStatement _ -> tag validate_if_statement (fun x -> StmtIf x) x
-    | Syntax.AlternateIfStatement _ -> tag validate_alternate_if_statement (fun x -> StmtAlternateIf x) x
     | Syntax.TryStatement _ -> tag validate_try_statement (fun x -> StmtTry x) x
     | Syntax.DoStatement _ -> tag validate_do_statement (fun x -> StmtDo x) x
     | Syntax.ForStatement _ -> tag validate_for_statement (fun x -> StmtFor x) x
     | Syntax.ForeachStatement _ -> tag validate_foreach_statement (fun x -> StmtForeach x) x
     | Syntax.SwitchStatement _ -> tag validate_switch_statement (fun x -> StmtSwitch x) x
-    | Syntax.AlternateSwitchStatement _ -> tag validate_alternate_switch_statement (fun x -> StmtAlternateSwitch x) x
     | Syntax.SwitchFallthrough _ -> tag validate_switch_fallthrough (fun x -> StmtSwitchFallthrough x) x
     | Syntax.ReturnStatement _ -> tag validate_return_statement (fun x -> StmtReturn x) x
     | Syntax.GotoLabel _ -> tag validate_goto_label (fun x -> StmtGotoLabel x) x
@@ -411,7 +406,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     match thing with
     | StmtInclusionDirective           thing -> invalidate_inclusion_directive            (value, thing)
     | StmtCompound                     thing -> invalidate_compound_statement             (value, thing)
-    | StmtAlternateLoop                thing -> invalidate_alternate_loop_statement       (value, thing)
     | StmtExpression                   thing -> invalidate_expression_statement           (value, thing)
     | StmtMarkupSection                thing -> invalidate_markup_section                 (value, thing)
     | StmtMarkupSuffix                 thing -> invalidate_markup_suffix                  (value, thing)
@@ -421,13 +415,11 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | StmtUsingStatementFunctionScoped thing -> invalidate_using_statement_function_scoped (value, thing)
     | StmtWhile                        thing -> invalidate_while_statement                (value, thing)
     | StmtIf                           thing -> invalidate_if_statement                   (value, thing)
-    | StmtAlternateIf                  thing -> invalidate_alternate_if_statement         (value, thing)
     | StmtTry                          thing -> invalidate_try_statement                  (value, thing)
     | StmtDo                           thing -> invalidate_do_statement                   (value, thing)
     | StmtFor                          thing -> invalidate_for_statement                  (value, thing)
     | StmtForeach                      thing -> invalidate_foreach_statement              (value, thing)
     | StmtSwitch                       thing -> invalidate_switch_statement               (value, thing)
-    | StmtAlternateSwitch              thing -> invalidate_alternate_switch_statement     (value, thing)
     | StmtSwitchFallthrough            thing -> invalidate_switch_fallthrough             (value, thing)
     | StmtReturn                       thing -> invalidate_return_statement               (value, thing)
     | StmtGotoLabel                    thing -> invalidate_goto_label                     (value, thing)
@@ -1523,24 +1515,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       }
     ; Syntax.value = v
     }
-  and validate_alternate_loop_statement : alternate_loop_statement validator = function
-  | { Syntax.syntax = Syntax.AlternateLoopStatement x; value = v } -> v,
-    { alternate_loop_closing_semicolon = validate_token x.alternate_loop_closing_semicolon
-    ; alternate_loop_closing_keyword = validate_token x.alternate_loop_closing_keyword
-    ; alternate_loop_statements = validate_list_with (validate_statement) x.alternate_loop_statements
-    ; alternate_loop_opening_colon = validate_token x.alternate_loop_opening_colon
-    }
-  | s -> validation_fail (Some SyntaxKind.AlternateLoopStatement) s
-  and invalidate_alternate_loop_statement : alternate_loop_statement invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.AlternateLoopStatement
-      { alternate_loop_opening_colon = invalidate_token x.alternate_loop_opening_colon
-      ; alternate_loop_statements = invalidate_list_with (invalidate_statement) x.alternate_loop_statements
-      ; alternate_loop_closing_keyword = invalidate_token x.alternate_loop_closing_keyword
-      ; alternate_loop_closing_semicolon = invalidate_token x.alternate_loop_closing_semicolon
-      }
-    ; Syntax.value = v
-    }
   and validate_expression_statement : expression_statement validator = function
   | { Syntax.syntax = Syntax.ExpressionStatement x; value = v } -> v,
     { expression_statement_semicolon = validate_token x.expression_statement_semicolon
@@ -1747,74 +1721,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       }
     ; Syntax.value = v
     }
-  and validate_alternate_if_statement : alternate_if_statement validator = function
-  | { Syntax.syntax = Syntax.AlternateIfStatement x; value = v } -> v,
-    { alternate_if_semicolon = validate_token x.alternate_if_semicolon
-    ; alternate_if_endif_keyword = validate_token x.alternate_if_endif_keyword
-    ; alternate_if_else_clause = validate_option_with (validate_alternate_else_clause) x.alternate_if_else_clause
-    ; alternate_if_elseif_clauses = validate_list_with (validate_alternate_elseif_clause) x.alternate_if_elseif_clauses
-    ; alternate_if_statement = validate_list_with (validate_statement) x.alternate_if_statement
-    ; alternate_if_colon = validate_token x.alternate_if_colon
-    ; alternate_if_right_paren = validate_token x.alternate_if_right_paren
-    ; alternate_if_condition = validate_expression x.alternate_if_condition
-    ; alternate_if_left_paren = validate_token x.alternate_if_left_paren
-    ; alternate_if_keyword = validate_token x.alternate_if_keyword
-    }
-  | s -> validation_fail (Some SyntaxKind.AlternateIfStatement) s
-  and invalidate_alternate_if_statement : alternate_if_statement invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.AlternateIfStatement
-      { alternate_if_keyword = invalidate_token x.alternate_if_keyword
-      ; alternate_if_left_paren = invalidate_token x.alternate_if_left_paren
-      ; alternate_if_condition = invalidate_expression x.alternate_if_condition
-      ; alternate_if_right_paren = invalidate_token x.alternate_if_right_paren
-      ; alternate_if_colon = invalidate_token x.alternate_if_colon
-      ; alternate_if_statement = invalidate_list_with (invalidate_statement) x.alternate_if_statement
-      ; alternate_if_elseif_clauses = invalidate_list_with (invalidate_alternate_elseif_clause) x.alternate_if_elseif_clauses
-      ; alternate_if_else_clause = invalidate_option_with (invalidate_alternate_else_clause) x.alternate_if_else_clause
-      ; alternate_if_endif_keyword = invalidate_token x.alternate_if_endif_keyword
-      ; alternate_if_semicolon = invalidate_token x.alternate_if_semicolon
-      }
-    ; Syntax.value = v
-    }
-  and validate_alternate_elseif_clause : alternate_elseif_clause validator = function
-  | { Syntax.syntax = Syntax.AlternateElseifClause x; value = v } -> v,
-    { alternate_elseif_statement = validate_list_with (validate_statement) x.alternate_elseif_statement
-    ; alternate_elseif_colon = validate_token x.alternate_elseif_colon
-    ; alternate_elseif_right_paren = validate_token x.alternate_elseif_right_paren
-    ; alternate_elseif_condition = validate_expression x.alternate_elseif_condition
-    ; alternate_elseif_left_paren = validate_token x.alternate_elseif_left_paren
-    ; alternate_elseif_keyword = validate_token x.alternate_elseif_keyword
-    }
-  | s -> validation_fail (Some SyntaxKind.AlternateElseifClause) s
-  and invalidate_alternate_elseif_clause : alternate_elseif_clause invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.AlternateElseifClause
-      { alternate_elseif_keyword = invalidate_token x.alternate_elseif_keyword
-      ; alternate_elseif_left_paren = invalidate_token x.alternate_elseif_left_paren
-      ; alternate_elseif_condition = invalidate_expression x.alternate_elseif_condition
-      ; alternate_elseif_right_paren = invalidate_token x.alternate_elseif_right_paren
-      ; alternate_elseif_colon = invalidate_token x.alternate_elseif_colon
-      ; alternate_elseif_statement = invalidate_list_with (invalidate_statement) x.alternate_elseif_statement
-      }
-    ; Syntax.value = v
-    }
-  and validate_alternate_else_clause : alternate_else_clause validator = function
-  | { Syntax.syntax = Syntax.AlternateElseClause x; value = v } -> v,
-    { alternate_else_statement = validate_list_with (validate_statement) x.alternate_else_statement
-    ; alternate_else_colon = validate_token x.alternate_else_colon
-    ; alternate_else_keyword = validate_token x.alternate_else_keyword
-    }
-  | s -> validation_fail (Some SyntaxKind.AlternateElseClause) s
-  and invalidate_alternate_else_clause : alternate_else_clause invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.AlternateElseClause
-      { alternate_else_keyword = invalidate_token x.alternate_else_keyword
-      ; alternate_else_colon = invalidate_token x.alternate_else_colon
-      ; alternate_else_statement = invalidate_list_with (invalidate_statement) x.alternate_else_statement
-      }
-    ; Syntax.value = v
-    }
   and validate_try_statement : try_statement validator = function
   | { Syntax.syntax = Syntax.TryStatement x; value = v } -> v,
     { try_finally_clause = validate_option_with (validate_finally_clause) x.try_finally_clause
@@ -1972,32 +1878,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; switch_left_brace = invalidate_token x.switch_left_brace
       ; switch_sections = invalidate_list_with (invalidate_switch_section) x.switch_sections
       ; switch_right_brace = invalidate_token x.switch_right_brace
-      }
-    ; Syntax.value = v
-    }
-  and validate_alternate_switch_statement : alternate_switch_statement validator = function
-  | { Syntax.syntax = Syntax.AlternateSwitchStatement x; value = v } -> v,
-    { alternate_switch_closing_semicolon = validate_token x.alternate_switch_closing_semicolon
-    ; alternate_switch_closing_endswitch = validate_token x.alternate_switch_closing_endswitch
-    ; alternate_switch_sections = validate_list_with (validate_switch_section) x.alternate_switch_sections
-    ; alternate_switch_opening_colon = validate_token x.alternate_switch_opening_colon
-    ; alternate_switch_right_paren = validate_token x.alternate_switch_right_paren
-    ; alternate_switch_expression = validate_expression x.alternate_switch_expression
-    ; alternate_switch_left_paren = validate_token x.alternate_switch_left_paren
-    ; alternate_switch_keyword = validate_token x.alternate_switch_keyword
-    }
-  | s -> validation_fail (Some SyntaxKind.AlternateSwitchStatement) s
-  and invalidate_alternate_switch_statement : alternate_switch_statement invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.AlternateSwitchStatement
-      { alternate_switch_keyword = invalidate_token x.alternate_switch_keyword
-      ; alternate_switch_left_paren = invalidate_token x.alternate_switch_left_paren
-      ; alternate_switch_expression = invalidate_expression x.alternate_switch_expression
-      ; alternate_switch_right_paren = invalidate_token x.alternate_switch_right_paren
-      ; alternate_switch_opening_colon = invalidate_token x.alternate_switch_opening_colon
-      ; alternate_switch_sections = invalidate_list_with (invalidate_switch_section) x.alternate_switch_sections
-      ; alternate_switch_closing_endswitch = invalidate_token x.alternate_switch_closing_endswitch
-      ; alternate_switch_closing_semicolon = invalidate_token x.alternate_switch_closing_semicolon
       }
     ; Syntax.value = v
     }

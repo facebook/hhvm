@@ -823,19 +823,6 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
         compound_right_brace;
       Newline;
     ]
-  | Syntax.AlternateLoopStatement {
-      alternate_loop_opening_colon;
-      alternate_loop_statements;
-      alternate_loop_closing_keyword;
-      alternate_loop_closing_semicolon; } ->
-    Concat [
-      handle_alternate_loop_statement env
-        alternate_loop_opening_colon
-        alternate_loop_statements
-        alternate_loop_closing_keyword
-        alternate_loop_closing_semicolon;
-      Newline;
-    ]
   | Syntax.UnsetStatement {
       unset_keyword = kw;
       unset_left_paren = left_p;
@@ -927,54 +914,6 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
           Space;
         ]
       | _ -> transform_consequence t env x.else_statement x.else_keyword;
-    ]
-  | Syntax.AlternateIfStatement {
-      alternate_if_keyword = kw;
-      alternate_if_left_paren = left_p;
-      alternate_if_condition = condition;
-      alternate_if_right_paren = right_p;
-      alternate_if_colon = colon;
-      alternate_if_statement = if_body;
-      alternate_if_elseif_clauses = elseif_clauses;
-      alternate_if_else_clause = else_clause;
-      alternate_if_endif_keyword = endif_kw;
-      alternate_if_semicolon = semicolon; } ->
-    Concat [
-      t env kw;
-      Space;
-      transform_condition env left_p condition right_p;
-      t env colon;
-      handle_possible_compound_statement env if_body;
-      handle_possible_list env elseif_clauses;
-      t env else_clause;
-      t env endif_kw;
-      t env semicolon;
-      Newline;
-    ]
-  | Syntax.AlternateElseifClause {
-      alternate_elseif_keyword = kw;
-      alternate_elseif_left_paren = left_p;
-      alternate_elseif_condition = condition;
-      alternate_elseif_right_paren = right_p;
-      alternate_elseif_colon = colon;
-      alternate_elseif_statement = body; } ->
-    Concat [
-      t env kw;
-      Space;
-      transform_condition env left_p condition right_p;
-      t env colon;
-      handle_possible_compound_statement env body;
-    ]
-  | Syntax.AlternateElseClause x ->
-    Concat [
-      t env x.alternate_else_keyword;
-      match Syntax.syntax x.alternate_else_statement with
-      | Syntax.IfStatement _ -> Concat [
-          Space;
-          t env x.alternate_else_statement;
-          Space;
-        ]
-      | _ -> handle_possible_compound_statement env x.alternate_else_statement
     ]
   | Syntax.TryStatement {
       try_keyword = kw;
@@ -1121,24 +1060,6 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       delimited_nest env left_p right_p [t env expr];
       Space;
       braced_block_nest env left_b right_b (List.map sections (t env));
-      Newline;
-    ]
-  | Syntax.AlternateSwitchStatement {
-      alternate_switch_keyword = kw;
-      alternate_switch_left_paren = left_p;
-      alternate_switch_expression = expr;
-      alternate_switch_right_paren = right_p;
-      alternate_switch_opening_colon = colon;
-      alternate_switch_sections = sections;
-      alternate_switch_closing_endswitch = endswitch;
-      alternate_switch_closing_semicolon = semicolon; } ->
-    let sections = Syntax.syntax_node_to_list sections in
-    Concat [
-      t env kw;
-      Space;
-      delimited_nest env left_p right_p [t env expr];
-      Space;
-      coloned_block_nest env colon endswitch semicolon (List.map sections (t env));
       Newline;
     ]
   | Syntax.SwitchSection {
@@ -2281,22 +2202,6 @@ and braced_block_nest env ?(allow_collapse=true) open_b close_b nodes =
       t env close_b;
     ]
 
-and coloned_block_nest env open_colon close_token close_semi nodes =
-  let leading, close_token = remove_leading_trivia close_token in
-  let close_token, trailing = remove_trailing_trivia close_token in
-  Concat [
-    t env open_colon;
-    Newline;
-    BlockNest [
-      Concat nodes;
-      transform_leading_trivia leading;
-      Newline;
-    ];
-    t env close_token;
-    t env close_semi;
-    transform_trailing_trivia trailing;
-  ]
-
 and delimited_nest env
     ?(split_when_children_split=true)
     ?(force_newlines=false)
@@ -2387,19 +2292,6 @@ and handle_possible_compound_statement env
         compound_right_brace;
       if space then Space else Nothing;
     ]
-  | Syntax.AlternateLoopStatement {
-      alternate_loop_opening_colon;
-      alternate_loop_statements;
-      alternate_loop_closing_keyword;
-      alternate_loop_closing_semicolon; } ->
-    Concat [
-      handle_alternate_loop_statement env
-        alternate_loop_opening_colon
-        alternate_loop_statements
-        alternate_loop_closing_keyword
-        alternate_loop_closing_semicolon;
-      if space then Space else Nothing;
-    ]
   | Syntax.Token _ ->
     t env node
   | _ ->
@@ -2419,18 +2311,6 @@ and handle_compound_statement env
   Concat [
     Space;
     braced_block_nest env ~allow_collapse left_b right_b [
-      handle_possible_list env statements
-    ];
-  ]
-
-and handle_alternate_loop_statement env
-    open_colon
-    statements
-    close_keyword
-    close_semi
-  =
-  Concat [
-    coloned_block_nest env open_colon close_keyword close_semi [
       handle_possible_list env statements
     ];
   ]

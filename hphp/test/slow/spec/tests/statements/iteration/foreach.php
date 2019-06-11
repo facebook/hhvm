@@ -18,9 +18,10 @@ $colors = array("red", "white", "blue");
 
 // access each element's value
 
-foreach ($colors as $color)  :
+foreach ($colors as $color)
+{
     echo $color."\n";
-endforeach  ;
+}
 echo $color."\n";
 
 // access each element's value anf its element number

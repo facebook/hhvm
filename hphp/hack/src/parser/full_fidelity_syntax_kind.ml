@@ -66,7 +66,6 @@ type t =
   | InclusionExpression
   | InclusionDirective
   | CompoundStatement
-  | AlternateLoopStatement
   | ExpressionStatement
   | MarkupSection
   | MarkupSuffix
@@ -78,9 +77,6 @@ type t =
   | IfStatement
   | ElseifClause
   | ElseClause
-  | AlternateIfStatement
-  | AlternateElseifClause
-  | AlternateElseClause
   | TryStatement
   | CatchClause
   | FinallyClause
@@ -88,7 +84,6 @@ type t =
   | ForStatement
   | ForeachStatement
   | SwitchStatement
-  | AlternateSwitchStatement
   | SwitchSection
   | SwitchFallthrough
   | CaseLabel
@@ -251,7 +246,6 @@ let to_string kind =
   | InclusionExpression               -> "inclusion_expression"
   | InclusionDirective                -> "inclusion_directive"
   | CompoundStatement                 -> "compound_statement"
-  | AlternateLoopStatement            -> "alternate_loop_statement"
   | ExpressionStatement               -> "expression_statement"
   | MarkupSection                     -> "markup_section"
   | MarkupSuffix                      -> "markup_suffix"
@@ -263,9 +257,6 @@ let to_string kind =
   | IfStatement                       -> "if_statement"
   | ElseifClause                      -> "elseif_clause"
   | ElseClause                        -> "else_clause"
-  | AlternateIfStatement              -> "alternate_if_statement"
-  | AlternateElseifClause             -> "alternate_elseif_clause"
-  | AlternateElseClause               -> "alternate_else_clause"
   | TryStatement                      -> "try_statement"
   | CatchClause                       -> "catch_clause"
   | FinallyClause                     -> "finally_clause"
@@ -273,7 +264,6 @@ let to_string kind =
   | ForStatement                      -> "for_statement"
   | ForeachStatement                  -> "foreach_statement"
   | SwitchStatement                   -> "switch_statement"
-  | AlternateSwitchStatement          -> "alternate_switch_statement"
   | SwitchSection                     -> "switch_section"
   | SwitchFallthrough                 -> "switch_fallthrough"
   | CaseLabel                         -> "case_label"

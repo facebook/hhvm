@@ -81,7 +81,6 @@ module type SmartConstructors_S = sig
   val make_inclusion_expression : r -> r -> t -> t * r
   val make_inclusion_directive : r -> r -> t -> t * r
   val make_compound_statement : r -> r -> r -> t -> t * r
-  val make_alternate_loop_statement : r -> r -> r -> r -> t -> t * r
   val make_expression_statement : r -> r -> t -> t * r
   val make_markup_section : r -> r -> r -> r -> t -> t * r
   val make_markup_suffix : r -> r -> t -> t * r
@@ -93,9 +92,6 @@ module type SmartConstructors_S = sig
   val make_if_statement : r -> r -> r -> r -> r -> r -> r -> t -> t * r
   val make_elseif_clause : r -> r -> r -> r -> r -> t -> t * r
   val make_else_clause : r -> r -> t -> t * r
-  val make_alternate_if_statement : r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
-  val make_alternate_elseif_clause : r -> r -> r -> r -> r -> r -> t -> t * r
-  val make_alternate_else_clause : r -> r -> r -> t -> t * r
   val make_try_statement : r -> r -> r -> r -> t -> t * r
   val make_catch_clause : r -> r -> r -> r -> r -> r -> t -> t * r
   val make_finally_clause : r -> r -> t -> t * r
@@ -103,7 +99,6 @@ module type SmartConstructors_S = sig
   val make_for_statement : r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
   val make_foreach_statement : r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
   val make_switch_statement : r -> r -> r -> r -> r -> r -> r -> t -> t * r
-  val make_alternate_switch_statement : r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
   val make_switch_section : r -> r -> r -> t -> t * r
   val make_switch_fallthrough : r -> r -> t -> t * r
   val make_case_label : r -> r -> r -> t -> t * r
@@ -273,7 +268,6 @@ end) = struct
     let inclusion_expression parser arg0 arg1 = call parser (SCI.make_inclusion_expression arg0 arg1)
     let inclusion_directive parser arg0 arg1 = call parser (SCI.make_inclusion_directive arg0 arg1)
     let compound_statement parser arg0 arg1 arg2 = call parser (SCI.make_compound_statement arg0 arg1 arg2)
-    let alternate_loop_statement parser arg0 arg1 arg2 arg3 = call parser (SCI.make_alternate_loop_statement arg0 arg1 arg2 arg3)
     let expression_statement parser arg0 arg1 = call parser (SCI.make_expression_statement arg0 arg1)
     let markup_section parser arg0 arg1 arg2 arg3 = call parser (SCI.make_markup_section arg0 arg1 arg2 arg3)
     let markup_suffix parser arg0 arg1 = call parser (SCI.make_markup_suffix arg0 arg1)
@@ -285,9 +279,6 @@ end) = struct
     let if_statement parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 = call parser (SCI.make_if_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6)
     let elseif_clause parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_elseif_clause arg0 arg1 arg2 arg3 arg4)
     let else_clause parser arg0 arg1 = call parser (SCI.make_else_clause arg0 arg1)
-    let alternate_if_statement parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 = call parser (SCI.make_alternate_if_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9)
-    let alternate_elseif_clause parser arg0 arg1 arg2 arg3 arg4 arg5 = call parser (SCI.make_alternate_elseif_clause arg0 arg1 arg2 arg3 arg4 arg5)
-    let alternate_else_clause parser arg0 arg1 arg2 = call parser (SCI.make_alternate_else_clause arg0 arg1 arg2)
     let try_statement parser arg0 arg1 arg2 arg3 = call parser (SCI.make_try_statement arg0 arg1 arg2 arg3)
     let catch_clause parser arg0 arg1 arg2 arg3 arg4 arg5 = call parser (SCI.make_catch_clause arg0 arg1 arg2 arg3 arg4 arg5)
     let finally_clause parser arg0 arg1 = call parser (SCI.make_finally_clause arg0 arg1)
@@ -295,7 +286,6 @@ end) = struct
     let for_statement parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 = call parser (SCI.make_for_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8)
     let foreach_statement parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 = call parser (SCI.make_foreach_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9)
     let switch_statement parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 = call parser (SCI.make_switch_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6)
-    let alternate_switch_statement parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 = call parser (SCI.make_alternate_switch_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7)
     let switch_section parser arg0 arg1 arg2 = call parser (SCI.make_switch_section arg0 arg1 arg2)
     let switch_fallthrough parser arg0 arg1 = call parser (SCI.make_switch_fallthrough arg0 arg1)
     let case_label parser arg0 arg1 arg2 = call parser (SCI.make_case_label arg0 arg1 arg2)

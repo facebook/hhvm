@@ -168,9 +168,6 @@ module WithOp(Op : Op_S) = struct
   let make_compound_statement arg0 arg1 arg2 state =
     if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 then state, Op.zero
     else state, Op.flatten [arg0; arg1; arg2]
-  let make_alternate_loop_statement arg0 arg1 arg2 arg3 state =
-    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 then state, Op.zero
-    else state, Op.flatten [arg0; arg1; arg2; arg3]
   let make_expression_statement arg0 arg1 state =
     if Op.is_zero arg0 && Op.is_zero arg1 then state, Op.zero
     else state, Op.flatten [arg0; arg1]
@@ -204,15 +201,6 @@ module WithOp(Op : Op_S) = struct
   let make_else_clause arg0 arg1 state =
     if Op.is_zero arg0 && Op.is_zero arg1 then state, Op.zero
     else state, Op.flatten [arg0; arg1]
-  let make_alternate_if_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 state =
-    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 && Op.is_zero arg4 && Op.is_zero arg5 && Op.is_zero arg6 && Op.is_zero arg7 && Op.is_zero arg8 && Op.is_zero arg9 then state, Op.zero
-    else state, Op.flatten [arg0; arg1; arg2; arg3; arg4; arg5; arg6; arg7; arg8; arg9]
-  let make_alternate_elseif_clause arg0 arg1 arg2 arg3 arg4 arg5 state =
-    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 && Op.is_zero arg4 && Op.is_zero arg5 then state, Op.zero
-    else state, Op.flatten [arg0; arg1; arg2; arg3; arg4; arg5]
-  let make_alternate_else_clause arg0 arg1 arg2 state =
-    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 then state, Op.zero
-    else state, Op.flatten [arg0; arg1; arg2]
   let make_try_statement arg0 arg1 arg2 arg3 state =
     if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 then state, Op.zero
     else state, Op.flatten [arg0; arg1; arg2; arg3]
@@ -234,9 +222,6 @@ module WithOp(Op : Op_S) = struct
   let make_switch_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 state =
     if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 && Op.is_zero arg4 && Op.is_zero arg5 && Op.is_zero arg6 then state, Op.zero
     else state, Op.flatten [arg0; arg1; arg2; arg3; arg4; arg5; arg6]
-  let make_alternate_switch_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 state =
-    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 && Op.is_zero arg4 && Op.is_zero arg5 && Op.is_zero arg6 && Op.is_zero arg7 then state, Op.zero
-    else state, Op.flatten [arg0; arg1; arg2; arg3; arg4; arg5; arg6; arg7]
   let make_switch_section arg0 arg1 arg2 state =
     if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 then state, Op.zero
     else state, Op.flatten [arg0; arg1; arg2]

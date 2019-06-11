@@ -78,7 +78,6 @@ module type SyntaxKind_S = sig
   val is_inclusion_expression : r -> bool
   val is_inclusion_directive : r -> bool
   val is_compound_statement : r -> bool
-  val is_alternate_loop_statement : r -> bool
   val is_expression_statement : r -> bool
   val is_markup_section : r -> bool
   val is_markup_suffix : r -> bool
@@ -90,9 +89,6 @@ module type SyntaxKind_S = sig
   val is_if_statement : r -> bool
   val is_elseif_clause : r -> bool
   val is_else_clause : r -> bool
-  val is_alternate_if_statement : r -> bool
-  val is_alternate_elseif_clause : r -> bool
-  val is_alternate_else_clause : r -> bool
   val is_try_statement : r -> bool
   val is_catch_clause : r -> bool
   val is_finally_clause : r -> bool
@@ -100,7 +96,6 @@ module type SyntaxKind_S = sig
   val is_for_statement : r -> bool
   val is_foreach_statement : r -> bool
   val is_switch_statement : r -> bool
-  val is_alternate_switch_statement : r -> bool
   val is_switch_section : r -> bool
   val is_switch_fallthrough : r -> bool
   val is_case_label : r -> bool
@@ -286,7 +281,6 @@ module SyntaxKind(SC : SC_S)
   let make_inclusion_expression arg0 arg1 state = compose SK.InclusionExpression (SC.make_inclusion_expression (snd arg0) (snd arg1) state)
   let make_inclusion_directive arg0 arg1 state = compose SK.InclusionDirective (SC.make_inclusion_directive (snd arg0) (snd arg1) state)
   let make_compound_statement arg0 arg1 arg2 state = compose SK.CompoundStatement (SC.make_compound_statement (snd arg0) (snd arg1) (snd arg2) state)
-  let make_alternate_loop_statement arg0 arg1 arg2 arg3 state = compose SK.AlternateLoopStatement (SC.make_alternate_loop_statement (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
   let make_expression_statement arg0 arg1 state = compose SK.ExpressionStatement (SC.make_expression_statement (snd arg0) (snd arg1) state)
   let make_markup_section arg0 arg1 arg2 arg3 state = compose SK.MarkupSection (SC.make_markup_section (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
   let make_markup_suffix arg0 arg1 state = compose SK.MarkupSuffix (SC.make_markup_suffix (snd arg0) (snd arg1) state)
@@ -298,9 +292,6 @@ module SyntaxKind(SC : SC_S)
   let make_if_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 state = compose SK.IfStatement (SC.make_if_statement (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) state)
   let make_elseif_clause arg0 arg1 arg2 arg3 arg4 state = compose SK.ElseifClause (SC.make_elseif_clause (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) state)
   let make_else_clause arg0 arg1 state = compose SK.ElseClause (SC.make_else_clause (snd arg0) (snd arg1) state)
-  let make_alternate_if_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 state = compose SK.AlternateIfStatement (SC.make_alternate_if_statement (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) (snd arg7) (snd arg8) (snd arg9) state)
-  let make_alternate_elseif_clause arg0 arg1 arg2 arg3 arg4 arg5 state = compose SK.AlternateElseifClause (SC.make_alternate_elseif_clause (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) state)
-  let make_alternate_else_clause arg0 arg1 arg2 state = compose SK.AlternateElseClause (SC.make_alternate_else_clause (snd arg0) (snd arg1) (snd arg2) state)
   let make_try_statement arg0 arg1 arg2 arg3 state = compose SK.TryStatement (SC.make_try_statement (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
   let make_catch_clause arg0 arg1 arg2 arg3 arg4 arg5 state = compose SK.CatchClause (SC.make_catch_clause (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) state)
   let make_finally_clause arg0 arg1 state = compose SK.FinallyClause (SC.make_finally_clause (snd arg0) (snd arg1) state)
@@ -308,7 +299,6 @@ module SyntaxKind(SC : SC_S)
   let make_for_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 state = compose SK.ForStatement (SC.make_for_statement (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) (snd arg7) (snd arg8) state)
   let make_foreach_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 state = compose SK.ForeachStatement (SC.make_foreach_statement (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) (snd arg7) (snd arg8) (snd arg9) state)
   let make_switch_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 state = compose SK.SwitchStatement (SC.make_switch_statement (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) state)
-  let make_alternate_switch_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 state = compose SK.AlternateSwitchStatement (SC.make_alternate_switch_statement (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) (snd arg7) state)
   let make_switch_section arg0 arg1 arg2 state = compose SK.SwitchSection (SC.make_switch_section (snd arg0) (snd arg1) (snd arg2) state)
   let make_switch_fallthrough arg0 arg1 state = compose SK.SwitchFallthrough (SC.make_switch_fallthrough (snd arg0) (snd arg1) state)
   let make_case_label arg0 arg1 arg2 state = compose SK.CaseLabel (SC.make_case_label (snd arg0) (snd arg1) (snd arg2) state)
@@ -470,7 +460,6 @@ module SyntaxKind(SC : SC_S)
   let is_inclusion_expression                 = has_kind SK.InclusionExpression
   let is_inclusion_directive                  = has_kind SK.InclusionDirective
   let is_compound_statement                   = has_kind SK.CompoundStatement
-  let is_alternate_loop_statement             = has_kind SK.AlternateLoopStatement
   let is_expression_statement                 = has_kind SK.ExpressionStatement
   let is_markup_section                       = has_kind SK.MarkupSection
   let is_markup_suffix                        = has_kind SK.MarkupSuffix
@@ -482,9 +471,6 @@ module SyntaxKind(SC : SC_S)
   let is_if_statement                         = has_kind SK.IfStatement
   let is_elseif_clause                        = has_kind SK.ElseifClause
   let is_else_clause                          = has_kind SK.ElseClause
-  let is_alternate_if_statement               = has_kind SK.AlternateIfStatement
-  let is_alternate_elseif_clause              = has_kind SK.AlternateElseifClause
-  let is_alternate_else_clause                = has_kind SK.AlternateElseClause
   let is_try_statement                        = has_kind SK.TryStatement
   let is_catch_clause                         = has_kind SK.CatchClause
   let is_finally_clause                       = has_kind SK.FinallyClause
@@ -492,7 +478,6 @@ module SyntaxKind(SC : SC_S)
   let is_for_statement                        = has_kind SK.ForStatement
   let is_foreach_statement                    = has_kind SK.ForeachStatement
   let is_switch_statement                     = has_kind SK.SwitchStatement
-  let is_alternate_switch_statement           = has_kind SK.AlternateSwitchStatement
   let is_switch_section                       = has_kind SK.SwitchSection
   let is_switch_fallthrough                   = has_kind SK.SwitchFallthrough
   let is_case_label                           = has_kind SK.CaseLabel

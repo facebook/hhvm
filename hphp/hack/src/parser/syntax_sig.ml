@@ -294,12 +294,6 @@ module type Syntax_S = sig
     ; compound_statements                                : t
     ; compound_right_brace                               : t
     }
-  | AlternateLoopStatement            of
-    { alternate_loop_opening_colon                       : t
-    ; alternate_loop_statements                          : t
-    ; alternate_loop_closing_keyword                     : t
-    ; alternate_loop_closing_semicolon                   : t
-    }
   | ExpressionStatement               of
     { expression_statement_expression                    : t
     ; expression_statement_semicolon                     : t
@@ -370,31 +364,6 @@ module type Syntax_S = sig
     { else_keyword                                       : t
     ; else_statement                                     : t
     }
-  | AlternateIfStatement              of
-    { alternate_if_keyword                               : t
-    ; alternate_if_left_paren                            : t
-    ; alternate_if_condition                             : t
-    ; alternate_if_right_paren                           : t
-    ; alternate_if_colon                                 : t
-    ; alternate_if_statement                             : t
-    ; alternate_if_elseif_clauses                        : t
-    ; alternate_if_else_clause                           : t
-    ; alternate_if_endif_keyword                         : t
-    ; alternate_if_semicolon                             : t
-    }
-  | AlternateElseifClause             of
-    { alternate_elseif_keyword                           : t
-    ; alternate_elseif_left_paren                        : t
-    ; alternate_elseif_condition                         : t
-    ; alternate_elseif_right_paren                       : t
-    ; alternate_elseif_colon                             : t
-    ; alternate_elseif_statement                         : t
-    }
-  | AlternateElseClause               of
-    { alternate_else_keyword                             : t
-    ; alternate_else_colon                               : t
-    ; alternate_else_statement                           : t
-    }
   | TryStatement                      of
     { try_keyword                                        : t
     ; try_compound_statement                             : t
@@ -453,16 +422,6 @@ module type Syntax_S = sig
     ; switch_left_brace                                  : t
     ; switch_sections                                    : t
     ; switch_right_brace                                 : t
-    }
-  | AlternateSwitchStatement          of
-    { alternate_switch_keyword                           : t
-    ; alternate_switch_left_paren                        : t
-    ; alternate_switch_expression                        : t
-    ; alternate_switch_right_paren                       : t
-    ; alternate_switch_opening_colon                     : t
-    ; alternate_switch_sections                          : t
-    ; alternate_switch_closing_endswitch                 : t
-    ; alternate_switch_closing_semicolon                 : t
     }
   | SwitchSection                     of
     { switch_section_labels                              : t
@@ -1168,7 +1127,6 @@ module type Syntax_S = sig
   val make_inclusion_expression : t -> t -> t
   val make_inclusion_directive : t -> t -> t
   val make_compound_statement : t -> t -> t -> t
-  val make_alternate_loop_statement : t -> t -> t -> t -> t
   val make_expression_statement : t -> t -> t
   val make_markup_section : t -> t -> t -> t -> t
   val make_markup_suffix : t -> t -> t
@@ -1180,9 +1138,6 @@ module type Syntax_S = sig
   val make_if_statement : t -> t -> t -> t -> t -> t -> t -> t
   val make_elseif_clause : t -> t -> t -> t -> t -> t
   val make_else_clause : t -> t -> t
-  val make_alternate_if_statement : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
-  val make_alternate_elseif_clause : t -> t -> t -> t -> t -> t -> t
-  val make_alternate_else_clause : t -> t -> t -> t
   val make_try_statement : t -> t -> t -> t -> t
   val make_catch_clause : t -> t -> t -> t -> t -> t -> t
   val make_finally_clause : t -> t -> t
@@ -1190,7 +1145,6 @@ module type Syntax_S = sig
   val make_for_statement : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_foreach_statement : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_switch_statement : t -> t -> t -> t -> t -> t -> t -> t
-  val make_alternate_switch_statement : t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_switch_section : t -> t -> t -> t
   val make_switch_fallthrough : t -> t -> t
   val make_case_label : t -> t -> t -> t
@@ -1351,7 +1305,6 @@ module type Syntax_S = sig
   val is_inclusion_expression : t -> bool
   val is_inclusion_directive : t -> bool
   val is_compound_statement : t -> bool
-  val is_alternate_loop_statement : t -> bool
   val is_expression_statement : t -> bool
   val is_markup_section : t -> bool
   val is_markup_suffix : t -> bool
@@ -1363,9 +1316,6 @@ module type Syntax_S = sig
   val is_if_statement : t -> bool
   val is_elseif_clause : t -> bool
   val is_else_clause : t -> bool
-  val is_alternate_if_statement : t -> bool
-  val is_alternate_elseif_clause : t -> bool
-  val is_alternate_else_clause : t -> bool
   val is_try_statement : t -> bool
   val is_catch_clause : t -> bool
   val is_finally_clause : t -> bool
@@ -1373,7 +1323,6 @@ module type Syntax_S = sig
   val is_for_statement : t -> bool
   val is_foreach_statement : t -> bool
   val is_switch_statement : t -> bool
-  val is_alternate_switch_statement : t -> bool
   val is_switch_section : t -> bool
   val is_switch_fallthrough : t -> bool
   val is_case_label : t -> bool

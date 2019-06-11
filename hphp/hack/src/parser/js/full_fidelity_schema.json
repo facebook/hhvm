@@ -893,16 +893,6 @@
         { "field_name" : "statements" },
         { "field_name" : "right_brace" }
       ] },
-    { "kind_name" : "AlternateLoopStatement",
-      "type_name" : "alternate_loop_statement",
-      "description" : "alternate_loop_statement",
-      "prefix" : "alternate_loop",
-      "fields" : [
-        { "field_name" : "opening_colon" },
-        { "field_name" : "statements" },
-        { "field_name" : "closing_keyword" },
-        { "field_name" : "closing_semicolon" }
-      ] },
     { "kind_name" : "ExpressionStatement",
       "type_name" : "expression_statement",
       "description" : "expression_statement",
@@ -1017,43 +1007,6 @@
         { "field_name" : "keyword" },
         { "field_name" : "statement" }
       ] },
-    { "kind_name" : "AlternateIfStatement",
-      "type_name" : "alternate_if_statement",
-      "description" : "alternate_if_statement",
-      "prefix" : "alternate_if",
-      "fields" : [
-        { "field_name" : "keyword" },
-        { "field_name" : "left_paren" },
-        { "field_name" : "condition" },
-        { "field_name" : "right_paren" },
-        { "field_name" : "colon" },
-        { "field_name" : "statement" },
-        { "field_name" : "elseif_clauses" },
-        { "field_name" : "else_clause" },
-        { "field_name" : "endif_keyword" },
-        { "field_name" : "semicolon" }
-      ] },
-    { "kind_name" : "AlternateElseifClause",
-      "type_name" : "alternate_elseif_clause",
-      "description" : "alternate_elseif_clause",
-      "prefix" : "alternate_elseif",
-      "fields" : [
-        { "field_name" : "keyword" },
-        { "field_name" : "left_paren" },
-        { "field_name" : "condition" },
-        { "field_name" : "right_paren" },
-        { "field_name" : "colon" },
-        { "field_name" : "statement" }
-      ] },
-    { "kind_name" : "AlternateElseClause",
-      "type_name" : "alternate_else_clause",
-      "description" : "alternate_else_clause",
-      "prefix" : "alternate_else",
-      "fields" : [
-        { "field_name" : "keyword" },
-        { "field_name" : "colon" },
-        { "field_name" : "statement" }
-      ] },
     { "kind_name" : "TryStatement",
       "type_name" : "try_statement",
       "description" : "try_statement",
@@ -1140,20 +1093,6 @@
         { "field_name" : "left_brace" },
         { "field_name" : "sections" },
         { "field_name" : "right_brace" }
-      ] },
-    { "kind_name" : "AlternateSwitchStatement",
-      "type_name" : "alternate_switch_statement",
-      "description" : "alternate_switch_statement",
-      "prefix" : "alternate_switch",
-      "fields" : [
-        { "field_name" : "keyword" },
-        { "field_name" : "left_paren" },
-        { "field_name" : "expression" },
-        { "field_name" : "right_paren" },
-        { "field_name" : "opening_colon" },
-        { "field_name" : "sections" },
-        { "field_name" : "closing_endswitch" },
-        { "field_name" : "closing_semicolon" }
       ] },
     { "kind_name" : "SwitchSection",
       "type_name" : "switch_section",

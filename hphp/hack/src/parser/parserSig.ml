@@ -94,7 +94,6 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val inclusion_expression : t -> SC.r -> SC.r -> t * SC.r
         val inclusion_directive : t -> SC.r -> SC.r -> t * SC.r
         val compound_statement : t -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val alternate_loop_statement : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val expression_statement : t -> SC.r -> SC.r -> t * SC.r
         val markup_section : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val markup_suffix : t -> SC.r -> SC.r -> t * SC.r
@@ -106,9 +105,6 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val if_statement : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val elseif_clause : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val else_clause : t -> SC.r -> SC.r -> t * SC.r
-        val alternate_if_statement : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val alternate_elseif_clause : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val alternate_else_clause : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val try_statement : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val catch_clause : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val finally_clause : t -> SC.r -> SC.r -> t * SC.r
@@ -116,7 +112,6 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val for_statement : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val foreach_statement : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val switch_statement : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val alternate_switch_statement : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val switch_section : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val switch_fallthrough : t -> SC.r -> SC.r -> t * SC.r
         val case_label : t -> SC.r -> SC.r -> SC.r -> t * SC.r

@@ -407,12 +407,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; compound_statements                                : t
     ; compound_right_brace                               : t
     }
-  | AlternateLoopStatement            of
-    { alternate_loop_opening_colon                       : t
-    ; alternate_loop_statements                          : t
-    ; alternate_loop_closing_keyword                     : t
-    ; alternate_loop_closing_semicolon                   : t
-    }
   | ExpressionStatement               of
     { expression_statement_expression                    : t
     ; expression_statement_semicolon                     : t
@@ -483,31 +477,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { else_keyword                                       : t
     ; else_statement                                     : t
     }
-  | AlternateIfStatement              of
-    { alternate_if_keyword                               : t
-    ; alternate_if_left_paren                            : t
-    ; alternate_if_condition                             : t
-    ; alternate_if_right_paren                           : t
-    ; alternate_if_colon                                 : t
-    ; alternate_if_statement                             : t
-    ; alternate_if_elseif_clauses                        : t
-    ; alternate_if_else_clause                           : t
-    ; alternate_if_endif_keyword                         : t
-    ; alternate_if_semicolon                             : t
-    }
-  | AlternateElseifClause             of
-    { alternate_elseif_keyword                           : t
-    ; alternate_elseif_left_paren                        : t
-    ; alternate_elseif_condition                         : t
-    ; alternate_elseif_right_paren                       : t
-    ; alternate_elseif_colon                             : t
-    ; alternate_elseif_statement                         : t
-    }
-  | AlternateElseClause               of
-    { alternate_else_keyword                             : t
-    ; alternate_else_colon                               : t
-    ; alternate_else_statement                           : t
-    }
   | TryStatement                      of
     { try_keyword                                        : t
     ; try_compound_statement                             : t
@@ -566,16 +535,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; switch_left_brace                                  : t
     ; switch_sections                                    : t
     ; switch_right_brace                                 : t
-    }
-  | AlternateSwitchStatement          of
-    { alternate_switch_keyword                           : t
-    ; alternate_switch_left_paren                        : t
-    ; alternate_switch_expression                        : t
-    ; alternate_switch_right_paren                       : t
-    ; alternate_switch_opening_colon                     : t
-    ; alternate_switch_sections                          : t
-    ; alternate_switch_closing_endswitch                 : t
-    ; alternate_switch_closing_semicolon                 : t
     }
   | SwitchSection                     of
     { switch_section_labels                              : t
@@ -1237,7 +1196,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | TLDUsingStatementFunctionScoped of using_statement_function_scoped
   | TLDWhile                        of while_statement
   | TLDIf                           of if_statement
-  | TLDAlternateIf                  of alternate_if_statement
   | TLDTry                          of try_statement
   | TLDDo                           of do_statement
   | TLDFor                          of for_statement
@@ -1343,7 +1301,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and statement =
   | StmtInclusionDirective           of inclusion_directive
   | StmtCompound                     of compound_statement
-  | StmtAlternateLoop                of alternate_loop_statement
   | StmtExpression                   of expression_statement
   | StmtMarkupSection                of markup_section
   | StmtMarkupSuffix                 of markup_suffix
@@ -1353,13 +1310,11 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | StmtUsingStatementFunctionScoped of using_statement_function_scoped
   | StmtWhile                        of while_statement
   | StmtIf                           of if_statement
-  | StmtAlternateIf                  of alternate_if_statement
   | StmtTry                          of try_statement
   | StmtDo                           of do_statement
   | StmtFor                          of for_statement
   | StmtForeach                      of foreach_statement
   | StmtSwitch                       of switch_statement
-  | StmtAlternateSwitch              of alternate_switch_statement
   | StmtSwitchFallthrough            of switch_fallthrough
   | StmtReturn                       of return_statement
   | StmtGotoLabel                    of goto_label
@@ -1762,12 +1717,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; compound_statements: statement listesque value
     ; compound_right_brace: Token.t value
     }
-  and alternate_loop_statement =
-    { alternate_loop_opening_colon: Token.t value
-    ; alternate_loop_statements: statement listesque value
-    ; alternate_loop_closing_keyword: Token.t value
-    ; alternate_loop_closing_semicolon: Token.t value
-    }
   and expression_statement =
     { expression_statement_expression: expression option value
     ; expression_statement_semicolon: Token.t value
@@ -1838,31 +1787,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { else_keyword: Token.t value
     ; else_statement: statement value
     }
-  and alternate_if_statement =
-    { alternate_if_keyword: Token.t value
-    ; alternate_if_left_paren: Token.t value
-    ; alternate_if_condition: expression value
-    ; alternate_if_right_paren: Token.t value
-    ; alternate_if_colon: Token.t value
-    ; alternate_if_statement: statement listesque value
-    ; alternate_if_elseif_clauses: alternate_elseif_clause listesque value
-    ; alternate_if_else_clause: alternate_else_clause option value
-    ; alternate_if_endif_keyword: Token.t value
-    ; alternate_if_semicolon: Token.t value
-    }
-  and alternate_elseif_clause =
-    { alternate_elseif_keyword: Token.t value
-    ; alternate_elseif_left_paren: Token.t value
-    ; alternate_elseif_condition: expression value
-    ; alternate_elseif_right_paren: Token.t value
-    ; alternate_elseif_colon: Token.t value
-    ; alternate_elseif_statement: statement listesque value
-    }
-  and alternate_else_clause =
-    { alternate_else_keyword: Token.t value
-    ; alternate_else_colon: Token.t value
-    ; alternate_else_statement: statement listesque value
-    }
   and try_statement =
     { try_keyword: Token.t value
     ; try_compound_statement: compound_statement value
@@ -1921,16 +1845,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; switch_left_brace: Token.t value
     ; switch_sections: switch_section listesque value
     ; switch_right_brace: Token.t value
-    }
-  and alternate_switch_statement =
-    { alternate_switch_keyword: Token.t value
-    ; alternate_switch_left_paren: Token.t value
-    ; alternate_switch_expression: expression value
-    ; alternate_switch_right_paren: Token.t value
-    ; alternate_switch_opening_colon: Token.t value
-    ; alternate_switch_sections: switch_section listesque value
-    ; alternate_switch_closing_endswitch: Token.t value
-    ; alternate_switch_closing_semicolon: Token.t value
     }
   and switch_section =
     { switch_section_labels: switch_label listesque value

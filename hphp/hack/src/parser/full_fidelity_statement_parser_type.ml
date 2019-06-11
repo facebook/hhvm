@@ -26,9 +26,6 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       val context : t -> Context.t
       val env : t -> Full_fidelity_parser_env.t
       val sc_state : t -> SC.t
-      val parse_alternate_loop_statement : t
-        -> terminator:Full_fidelity_token_kind.t
-        -> t * SC.r
       val parse_compound_statement : t -> t * SC.r
       val parse_statement : t -> t * SC.r
       val parse_header: t

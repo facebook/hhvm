@@ -40,12 +40,12 @@ class dafna_class {
 <<__EntryPoint>> function main() {
 error_reporting(1023);
 
-for ($i=0; $i<200; $i++):
+for ($i=0; $i<200; $i++) {
     print "$i\n";
     call_user_func("dafna");
     call_user_func("print_stuff","Hey there!!\n");
     print "$i\n";
-endfor;
+}
 
 $dafna = new dafna_class();
 

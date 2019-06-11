@@ -606,19 +606,6 @@ let schema : schema_node list =
       ; "right_brace", Token
       ]
     }
-  ; { kind_name   = "AlternateLoopStatement"
-    ; type_name   = "alternate_loop_statement"
-    ; func_name   = "alternate_loop_statement"
-    ; description = "alternate_loop_statement"
-    ; prefix      = "alternate_loop"
-    ; aggregates  = [ Statement ]
-    ; fields =
-      [ "opening_colon", Token
-      ; "statements", ZeroOrMore (Aggregate Statement)
-      ; "closing_keyword", Token
-      ; "closing_semicolon", Token
-      ]
-    }
   ; { kind_name   = "ExpressionStatement"
     ; type_name   = "expression_statement"
     ; func_name   = "expression_statement"
@@ -766,52 +753,6 @@ let schema : schema_node list =
       ; "statement", Aggregate Statement
       ]
     }
-  ; { kind_name   = "AlternateIfStatement"
-    ; type_name   = "alternate_if_statement"
-    ; func_name   = "alternate_if_statement"
-    ; description = "alternate_if_statement"
-    ; prefix      = "alternate_if"
-    ; aggregates  = [ TopLevelDeclaration; Statement ]
-    ; fields =
-      [ "keyword", Token
-      ; "left_paren", Token
-      ; "condition", Aggregate Expression
-      ; "right_paren", Token
-      ; "colon", Token
-      ; "statement", ZeroOrMore (Aggregate Statement)
-      ; "elseif_clauses", ZeroOrMore (Just "AlternateElseifClause")
-      ; "else_clause", ZeroOrOne (Just "AlternateElseClause")
-      ; "endif_keyword", Token
-      ; "semicolon", Token
-      ]
-    }
-  ; { kind_name   = "AlternateElseifClause"
-    ; type_name   = "alternate_elseif_clause"
-    ; func_name   = "alternate_elseif_clause"
-    ; description = "alternate_elseif_clause"
-    ; prefix      = "alternate_elseif"
-    ; aggregates  = []
-    ; fields =
-      [ "keyword", Token
-      ; "left_paren", Token
-      ; "condition", Aggregate Expression
-      ; "right_paren", Token
-      ; "colon", Token
-      ; "statement", ZeroOrMore (Aggregate Statement)
-      ]
-    }
-  ; { kind_name   = "AlternateElseClause"
-    ; type_name   = "alternate_else_clause"
-    ; func_name   = "alternate_else_clause"
-    ; description = "alternate_else_clause"
-    ; prefix      = "alternate_else"
-    ; aggregates  = []
-    ; fields =
-      [ "keyword", Token
-      ; "colon", Token
-      ; "statement", ZeroOrMore (Aggregate Statement)
-      ]
-    }
   ; { kind_name   = "TryStatement"
     ; type_name   = "try_statement"
     ; func_name   = "try_statement"
@@ -918,23 +859,6 @@ let schema : schema_node list =
       ; "left_brace", Token
       ; "sections", ZeroOrMore (Just "SwitchSection")
       ; "right_brace", Token
-      ]
-    }
-  ; { kind_name   = "AlternateSwitchStatement"
-    ; type_name   = "alternate_switch_statement"
-    ; func_name   = "alternate_switch_statement"
-    ; description = "alternate_switch_statement"
-    ; prefix      = "alternate_switch"
-    ; aggregates  = [ Statement ]
-    ; fields =
-      [ "keyword", Token
-      ; "left_paren", Token
-      ; "expression", Aggregate Expression
-      ; "right_paren", Token
-      ; "opening_colon", Token
-      ; "sections", ZeroOrMore (Just "SwitchSection")
-      ; "closing_endswitch", Token
-      ; "closing_semicolon", Token
       ]
     }
   ; { kind_name   = "SwitchSection"

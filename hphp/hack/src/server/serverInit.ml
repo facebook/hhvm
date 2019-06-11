@@ -63,9 +63,14 @@ let save_state
       genv.ServerEnv.local_config.ServerLocalConfig.enable_naming_table_fallback
     in
     let save_decls = genv.local_config.ServerLocalConfig.store_decls_in_saved_state in
+    let dep_table_as_blob = match (ServerArgs.save_with_spec genv.ServerEnv.options) with
+    | None -> false
+    | Some _ -> true
+    in
     let replace_state_after_saving = ServerArgs.replace_state_after_saving genv.ServerEnv.options in
     let (env, result) = SaveStateService.save_state
         ~enable_naming_table_fallback
+        ~dep_table_as_blob
         ~save_decls
         env
         output_filename

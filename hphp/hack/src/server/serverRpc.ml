@@ -131,6 +131,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           genv.local_config.ServerLocalConfig.enable_naming_table_fallback in
         SaveStateService.go
           ~enable_naming_table_fallback
+          ~dep_table_as_blob:false
           ~save_decls
           env
           filename

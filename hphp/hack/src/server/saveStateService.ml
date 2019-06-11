@@ -195,6 +195,7 @@ let update_save_state
 * edges dumped into the database. *)
 let save_state
     ~(enable_naming_table_fallback: bool)
+    ~(dep_table_as_blob: bool)
     ~(save_decls: bool)
     (env: ServerEnv.env)
     (output_filename: string)
@@ -213,14 +214,24 @@ let save_state
     let errors = env.ServerEnv.errorl in
     let t = Unix.gettimeofday () in
     dump_saved_state ~save_decls output_filename naming_table errors;
-    let naming_table_rows_changed = if enable_naming_table_fallback then begin
-      Hh_logger.log "Saving file info (naming table) into a new SQLite table.\n";
-      Naming_table.save naming_table db_name
-    end else 0 in
+
+    let naming_table_rows_changed =
+      if enable_naming_table_fallback then
+      begin
+        Hh_logger.log "Saving file info (naming table) into a SQLite table.\n";
+        Naming_table.save naming_table db_name
+      end
+      else 0
+    in
+
+    let dep_table_saver =
+      if dep_table_as_blob then
+        SharedMem.save_dep_table_blob
+      else
+        SharedMem.save_dep_table_sqlite in
+
     let dep_table_edges_added =
-      (* Tatiana's TODO: make this conditional *)
-      (* SharedMem.save_dep_table_sqlite db_name Build_id.build_revision replace_state_after_saving in *)
-      SharedMem.save_dep_table_blob
+      dep_table_saver
         db_name
         Build_id.build_revision
         replace_state_after_saving in
@@ -257,6 +268,7 @@ let get_in_memory_dep_table_entry_count () : (int, string) result =
 (* TODO: write some other stats, e.g., the number of names, the number of errors, etc. *)
 let go
     ~(enable_naming_table_fallback: bool)
+    ~(dep_table_as_blob: bool)
     ~(save_decls: bool)
     (env: ServerEnv.env)
     (output_filename: string)
@@ -265,6 +277,7 @@ let go
   begin
     fun () -> save_state
       ~enable_naming_table_fallback
+      ~dep_table_as_blob
       ~save_decls
       env
       output_filename

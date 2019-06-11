@@ -29,7 +29,9 @@ struct Object;
 // object.
 struct WeakRefData {
   TypedValue pointee; // Object being weakly referenced.
-  TYPE_SCAN_IGNORE_FIELD(pointee);
+  TYPE_SCAN_CUSTOM() {
+    scanner.weak(this);
+  }
 
   // Invalidate WeakRefData associated with a refcounted object.
   static void invalidateWeakRef(uintptr_t ptr);

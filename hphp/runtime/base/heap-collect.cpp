@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/base/weakref-data.h"
 #include "hphp/runtime/base/rds-local.h"
-#include "hphp/runtime/ext/weakref/weakref-data-handle.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/cycles.h"
@@ -485,12 +484,10 @@ NEVER_INLINE void Collector::sweep() {
 
   // Clear weak references as needed.
   for (auto w : type_scanner_.m_weak) {
-    auto wref = static_cast<const WeakRefDataHandle*>(w);
-    assertx(wref->acquire_count == 0);
-    assertx(wref->wr_data);
-    auto type = wref->wr_data->pointee.m_type;
+    auto wr_data = static_cast<const WeakRefData*>(w);
+    auto type = wr_data->pointee.m_type;
     if (type == KindOfObject) {
-      auto h = find(wref->wr_data->pointee.m_data.pobj);
+      auto h = find(wr_data->pointee.m_data.pobj);
       if (!marked(h)) {
         WeakRefData::invalidateWeakRef(uintptr_t(h));
         mm.reinitFree();

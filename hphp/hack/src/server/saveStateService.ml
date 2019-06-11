@@ -89,16 +89,9 @@ let load_saved_state
 let dump_contents
     (output_filename: string)
     (contents: 'a) : unit =
-  let chan = Sys_utils.open_out_bin_no_fail output_filename in
+  let chan = Pervasives.open_out_bin output_filename in
   Marshal.to_channel chan contents [];
-  Sys_utils.close_out_no_fail output_filename chan
-
-let dump_contents_exn
-    (output_filename: string)
-    (contents: 'a) : unit =
-  let oc = Pervasives.open_out_bin output_filename in
-  Marshal.to_channel oc contents [];
-  Pervasives.close_out oc
+  Pervasives.close_out chan
 
 let get_hot_classes_filename () =
   let prefix = Relative_path.(path_of_prefix Root) in
@@ -132,7 +125,7 @@ let dump_class_decls filename =
     Hh_logger.log "Exporting %d class declarations..." @@ SSet.cardinal classes;
     let decls = Decl_export.export_class_decls classes in
     Hh_logger.log "Marshalling class declarations...";
-    dump_contents_exn filename decls;
+    dump_contents filename decls;
     ignore @@ Hh_logger.log_duration "Saved class declarations" start_t
   with exn ->
     let stack = Printexc.get_backtrace () in
@@ -145,10 +138,16 @@ let dump_saved_state
     (output_filename: string)
     (naming_table: Naming_table.t)
     (errors: Errors.t) : unit =
+  Hh_logger.log "Marshalling the naming table...";
   let (naming_table_saved: Naming_table.saved_state_info) =
     Naming_table.to_saved naming_table
   in
   dump_contents output_filename naming_table_saved;
+
+  if not (Sys.file_exists output_filename) then
+    failwith (Printf.sprintf "Did not find file infos file '%s'" output_filename)
+  else
+    Hh_logger.log "Saved file infos to '%s'" output_filename;
 
   (* Let's not write empty error files. *)
   if Errors.is_empty errors then () else begin
@@ -219,7 +218,9 @@ let save_state
       Naming_table.save naming_table db_name
     end else 0 in
     let dep_table_edges_added =
-      SharedMem.save_dep_table_sqlite
+      (* Tatiana's TODO: make this conditional *)
+      (* SharedMem.save_dep_table_sqlite db_name Build_id.build_revision replace_state_after_saving in *)
+      SharedMem.save_dep_table_blob
         db_name
         Build_id.build_revision
         replace_state_after_saving in

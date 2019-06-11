@@ -417,11 +417,11 @@ and class_decl c =
     | Some {elt_abstract = true; _} -> false
     | _ -> true in
   let impl = c.sc_extends @ c.sc_implements @ c.sc_uses in
-  let impl = match SMap.get SN.Members.__toString m with
-    | Some { elt_origin = cls; _} when cls_name <> SN.Classes.cStringish ->
+  let impl = match List.find c.sc_methods ~f:(fun sm ->
+    (snd sm.sm_name) = SN.Members.__toString) with
+    | Some { sm_name = (pos, _); _ } when cls_name <> SN.Classes.cStringish ->
       (* HHVM implicitly adds Stringish interface for every class/iface/trait
        * with a __toString method; "string" also implements this interface *)
-      let pos = method_pos ~is_static:false cls SN.Members.__toString  in
       (* Declare Stringish and parents if not already declared *)
       let class_env = { stack = SSet.empty } in
       let ty = (Reason.Rhint pos, Tapply ((pos, SN.Classes.cStringish), [])) in

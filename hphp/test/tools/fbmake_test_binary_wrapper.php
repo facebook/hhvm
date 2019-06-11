@@ -24,7 +24,7 @@ function finish($status) {
             'test' => ToolsFbmakeTestBinaryWrapperPhp::$current,
             'details' => '',
             'status' => $status));
-  array_push(ToolsFbmakeTestBinaryWrapperPhp::$results, array('name'   => ToolsFbmakeTestBinaryWrapperPhp::$current,
+  array_push(&ToolsFbmakeTestBinaryWrapperPhp::$results, array('name'   => ToolsFbmakeTestBinaryWrapperPhp::$current,
                              'status' => $status));
   ToolsFbmakeTestBinaryWrapperPhp::$current = '';
 }
@@ -74,11 +74,11 @@ $cmd = "./hphp/tools/run_test_binary.sh " .
        "2>/dev/null";
 
 loop_tests($cmd, function ($line) {
-  if (preg_match('/^(Test[a-zA-Z]*)\.\.\.\.\.\.$/', $line, $m)) {
+  if (preg_match('/^(Test[a-zA-Z]*)\.\.\.\.\.\.$/', $line, &$m)) {
     start($m[1]);
   } else if (preg_match('/^Test[a-zA-Z]* (OK|\#\#\#\#\#\>\>\> FAILED)/',
                         $line,
-                        $m)) {
+                        &$m)) {
     finish($m[1] == 'OK' ? 'passed' : 'failed');
   }
 });

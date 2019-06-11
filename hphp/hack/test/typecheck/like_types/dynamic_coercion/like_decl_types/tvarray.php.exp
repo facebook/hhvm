@@ -1,0 +1,12 @@
+File "tvarray.php", line 5, characters 24-30:
+Invalid return type (Typing[4110])
+File "tvarray.php", line 5, characters 37-42:
+This is a varray
+File "tvarray.php", line 5, characters 24-30:
+It is incompatible with a dynamic value
+File "tvarray.php", line 9, characters 21-32:
+Invalid return type (Typing[4110])
+File "tvarray.php", line 9, characters 39-49:
+This is a varray
+File "tvarray.php", line 9, characters 21-32:
+It is incompatible with a dynamic value

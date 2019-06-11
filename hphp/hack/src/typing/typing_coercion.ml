@@ -49,6 +49,18 @@ let supports_coercion_from_dynamic env (ty_expect_decl: decl ty) =
   | Valid -> Some (Tast_env.tast_env_as_typing_env env)
   | Invalid (_reason, _kind) -> None
 
+(* Typing_union.union normalizes a union out of two types, but it creates Toption for unions with
+ * null. This function unwraps the null. TODO: remove in accordance with T45650596 *)
+let force_null_union env r t =
+  let null = Typing_make_type.null r in
+  let _, union = Typing_union.union env null t in
+  match union with
+  | r, Toption (_, Tunion tyl) ->
+    r, Tunion (null::tyl)
+  | r, Toption ty ->
+    r, Tunion [null; ty]
+  | _ -> union
+
 (*
 * These are the main coercion functions.
 *
@@ -62,7 +74,9 @@ let supports_coercion_from_dynamic env (ty_expect_decl: decl ty) =
 *    (you can coerce t1 to optional type if the inner type is a valid coercion target)
 * 4. t is enforceable |- dynamic ~> t
 *    (coercion from dynamic to enforceable types is permitted)
-* 5. t1 <: t2 |- t1 ~> t2
+* 5. T1 ~> T and T2 ~> T |- T1|T2 ~> T
+*    (coercion from a union is valid if coercion from each element is valid)
+* 6. t1 <: t2 |- t1 ~> t2
 *    (you can coerce t1 to any of its supertypes)
 *
 * This boils down to running the normal sub_type procedure whenever possible,
@@ -76,14 +90,12 @@ let supports_coercion_from_dynamic env (ty_expect_decl: decl ty) =
 *)
 
 (* checks coercion that isn't just subtyping *)
-let rec can_coerce env ty_have ?ty_expect_decl ty_expect =
+let rec can_coerce env ?(ur=Reason.URnone) ty_have ?ty_expect_decl ty_expect =
   let env, ety_expect = Env.expand_type env ty_expect in
   let env, ety_have = Env.expand_type env ty_have in
   match ety_have, ety_expect with
 
   | _, (_, Tdynamic) -> Some env
-
-  | _, (_, Toption ty) -> can_coerce env ty_have ?ty_expect_decl ty
 
   (* dynamic ~> T if T is enforceable
    *
@@ -95,11 +107,30 @@ let rec can_coerce env ty_have ?ty_expect_decl ty_expect =
     let open Option in
     ty_expect_decl >>= (supports_coercion_from_dynamic env)
 
+  (* T1|T2 ~> T if T1 ~> T and T2 ~> T *)
+  | (_, Tunion tyl), _
+    when (TypecheckerOptions.coercion_from_dynamic (Env.get_tcopt env)) ->
+    (* If coercion and subtyping fail for any of the elements of the union,
+     * errors will be emitted *)
+    Some (List.fold tyl ~init:env ~f:(fun env ty ->
+      let p = Reason.to_pos (fst ty) in
+      coerce_type p ur env ty ?ty_expect_decl ty_expect
+    ))
+
+  (* TODO: remove in accordance with T45650596 *)
+  | (r, Toption t), _
+    when (TypecheckerOptions.coercion_from_dynamic (Env.get_tcopt env)) ->
+    let union: locl ty = force_null_union env r t in
+    can_coerce env ~ur union ?ty_expect_decl ty_expect
+
+  (* TODO: remove in accordance with T45650596 *)
+  | _, (_, Toption ty) -> can_coerce env ty_have ?ty_expect_decl ty
+
   | _ -> None
 
 (* does coercion, including subtyping *)
-let coerce_type p ?sub_fn:(sub=Typing_ops.sub_type) ur env ty_have ?ty_expect_decl ty_expect =
-  match can_coerce env ty_have ?ty_expect_decl ty_expect with
+and coerce_type p ?sub_fn:(sub=Typing_ops.sub_type) ur env ty_have ?ty_expect_decl ty_expect =
+  match can_coerce env ~ur ty_have ?ty_expect_decl ty_expect with
   | Some e -> e
   | None -> sub p ur env ty_have ty_expect
 

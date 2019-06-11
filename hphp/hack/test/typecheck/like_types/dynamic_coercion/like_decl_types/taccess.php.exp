@@ -1,0 +1,8 @@
+File "taccess.php", line 7, characters 21-28:
+Invalid return type (Typing[4110])
+File "taccess.php", line 7, characters 35-41:
+This is an int
+File "taccess.php", line 5, characters 18-20:
+  resulting from expanding the type constant C::T
+File "taccess.php", line 7, characters 21-28:
+It is incompatible with a dynamic value

@@ -1,0 +1,12 @@
+File "tgeneric.php", line 4, characters 24-30:
+Invalid return type (Typing[4110])
+File "tgeneric.php", line 4, characters 37-42:
+This is a value of generic type Terase
+File "tgeneric.php", line 4, characters 24-30:
+It is incompatible with a dynamic value
+File "tgeneric.php", line 8, characters 30-36:
+Invalid return type (Typing[4110])
+File "tgeneric.php", line 8, characters 43-48:
+This is a value of generic type Treify
+File "tgeneric.php", line 8, characters 30-36:
+It is incompatible with a dynamic value

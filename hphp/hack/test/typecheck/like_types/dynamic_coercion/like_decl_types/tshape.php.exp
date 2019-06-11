@@ -1,0 +1,6 @@
+File "tshape.php", line 4, characters 12-29:
+Invalid return type (Typing[4110])
+File "tshape.php", line 4, characters 36-52:
+This is a shape
+File "tshape.php", line 4, characters 12-29:
+It is incompatible with a dynamic value

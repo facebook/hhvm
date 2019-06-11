@@ -941,7 +941,7 @@ let is_strict env = FileInfo.is_strict (get_mode env)
 let is_decl env = get_mode env = FileInfo.Mdecl
 
 let iter_anonymous env f =
-  IMap.iter (fun _id (_, _, ftys, pos, _) ->
+  IMap.iter (fun _id { counter = ftys; pos; _ } ->
     let (untyped,typed) = !ftys in f pos (untyped @ typed)) env.genv.anons
 
 (*****************************************************************************)

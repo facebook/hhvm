@@ -136,14 +136,16 @@ and genv = {
  *)
 and anon_log = locl_ty list * locl ty list
 
-and anon =
-  reactivity *
-  Nast.is_coroutine *
-  anon_log ref *
-  Pos.t *
-  (?el:Nast.expr list ->
-  ?ret_ty: locl_ty ->
-  env ->
-  locl fun_params ->
-  locl fun_arity ->
-  env * Tast.expr * locl_ty)
+and anon = {
+  rx : reactivity;
+  is_coroutine : Nast.is_coroutine;
+  counter : anon_log ref;
+  pos : Pos.t;
+  typecheck :
+    ?el:Nast.expr list ->
+    ?ret_ty: locl_ty ->
+    env ->
+    locl fun_params ->
+    locl fun_arity ->
+    env * Tast.expr * locl_ty;
+}

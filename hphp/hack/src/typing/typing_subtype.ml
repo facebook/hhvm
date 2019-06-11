@@ -493,7 +493,7 @@ and simplify_subtype
     begin match Env.get_anonymous env id with
       | None ->
         invalid_with (fun () -> Errors.anonymous_recursive_call (Reason.to_pos r_sub))
-      | Some (reactivity, is_coroutine, ftys, _, anon) ->
+      | Some { Env. rx = reactivity; is_coroutine; counter = ftys; typecheck = anon; _ } ->
         let p_super = Reason.to_pos r_super in
         let p_sub = Reason.to_pos r_sub in
         (* Add function type to set of types seen so far *)

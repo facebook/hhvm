@@ -272,9 +272,9 @@ module Full = struct
     | Ttuple tyl -> list "(" k tyl ")"
     | Tanon (_, id) ->
       begin match Env.get_anonymous env id with
-      | Some (Reactive _, true, _, _, _) -> text "[coroutine rx fun]"
-      | Some (Nonreactive, true, _, _, _) -> text "[coroutine fun]"
-      | Some (Reactive _, false, _, _, _) -> text "[rx fun]"
+      | Some { Env. rx = Reactive _; is_coroutine = true; _ } -> text "[coroutine rx fun]"
+      | Some { Env. rx = Nonreactive; is_coroutine = true; _ } -> text "[coroutine fun]"
+      | Some { Env. rx = Reactive _; is_coroutine = false; _ } -> text "[rx fun]"
       | _ -> text "[fun]"
       end
     | Tunion [] ->

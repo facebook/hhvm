@@ -2548,7 +2548,9 @@ and expr_
               let env, tefun, _, anon_id = Errors.try_with_error
                 (fun () ->
                   let (_, tefun, ty) = anon env declared_ft.ft_params declared_ft.ft_arity in
-                  let anon_fun = reactivity, is_coroutine, counter, pos, anon in
+                  let anon_fun =
+                    { Env. rx = reactivity ; typecheck = anon
+                    ; is_coroutine ; counter ; pos } in
                   let env, anon_id = Env.add_anonymous env anon_fun in
                   env, tefun, ty, anon_id)
                 (fun () ->
@@ -2557,7 +2559,9 @@ and expr_
                   let anon_ign ?el:_ ?ret_ty:_ env fun_params =
                     Errors.ignore_ (fun () -> (anon env fun_params)) in
                   let (_, tefun, ty) = anon_ign env declared_ft.ft_params declared_ft.ft_arity in
-                  let anon_fun = reactivity, is_coroutine, counter, pos, anon in
+                  let anon_fun =
+                    { Env. rx = reactivity ; typecheck = anon
+                    ; is_coroutine ; counter ; pos } in
                   let env, anon_id = Env.add_anonymous env anon_fun in
                   env, tefun, ty, anon_id) in
               let env = Env.set_env_reactive env old_reactivity in
@@ -3586,7 +3590,11 @@ and is_abstract_ft fty = match fty with
       | Tfun { ft_is_coroutine = true; _ } ->
         env, Some true
       | Tanon (_, id) ->
-        env, Some (Option.value_map (Env.get_anonymous env id) ~default:false ~f:(fun (_,b,_,_,_) -> b))
+        env, Some (Option.value_map
+          (Env.get_anonymous env id)
+          ~default:false
+          ~f:(fun ty_ -> ty_.Env.is_coroutine)
+        )
       | Tunion ts -> are_coroutines env ts
       | _ ->
         env, Some false
@@ -5344,7 +5352,7 @@ and call ~(expected: ExpectedTy.t option) ?method_call_info pos env fty el uel =
         | None ->
           Errors.anonymous_recursive_call pos;
           env, tel, tuel, err_witness env pos
-        | Some (reactivity, is_coroutine, ftys, _, anon) ->
+        | Some { Env. rx = reactivity ; is_coroutine; counter = ftys; typecheck = anon; _ } ->
           let () = check_arity pos fpos (Typing_defs.arity_min call_arity) arity in
           let tyl = List.map tyl TUtils.default_fun_param in
           let env, _, ty = anon ~el env tyl call_arity in

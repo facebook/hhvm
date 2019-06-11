@@ -49,6 +49,7 @@ let visitor opts =
   Method_type_param_check.handler;
   Foreach_collection_reactivity_check.handler;
   Obj_get_check.handler;
+  This_hint_check.handler;
 ])
 
 let program opts = (visitor opts)#go

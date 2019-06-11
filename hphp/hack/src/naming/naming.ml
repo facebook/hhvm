@@ -906,20 +906,9 @@ module Make (GetLocals : GetLocals) = struct
       | x when x = SN.Typehints.this && not forbid_this ->
           if not (phys_equal hl [])
           then Errors.this_no_argument p;
-          (match (fst env).current_cls with
-          | None ->
-            Errors.this_hint_outside_class p;
-            N.Hany
-          | Some _c ->
-            N.Hthis
-          )
+          N.Hthis
       | x when x = SN.Typehints.this ->
-          (match (fst env).current_cls with
-          | None ->
-              Errors.this_hint_outside_class p
-          | Some _ ->
-              Errors.this_type_forbidden p
-          );
+          Errors.this_type_forbidden p;
           N.Hany
       | x when x = SN.Classes.cClassname && (List.length hl) <> 1 ->
           Errors.classname_param p;

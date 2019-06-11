@@ -348,7 +348,9 @@ SSATmp* simplifyLdFuncRxLevel(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyIsReifiedName(State& env, const IRInstruction* inst) {
   // Names coming from LdClsName can never be reified
-  if (inst->src(0)->inst()->is(LdClsName)) return cns(env, false);
+  auto const src = inst->src(0);
+  if (src->inst()->is(LdClsName)) return cns(env, false);
+  if (src->hasConstVal(TStr)) return cns(env, isReifiedName(src->strVal()));
   return nullptr;
 }
 

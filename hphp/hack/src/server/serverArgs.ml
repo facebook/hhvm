@@ -33,7 +33,8 @@ type options = {
   replace_state_after_saving: bool;
   root: Path.t;
   save_filename: string option;
-  should_detach: bool;
+  save_with_spec: save_state_spec_info option;
+  should_detach: bool; (* AKA, daemon mode *)
   waiting_client: Unix.file_descr option;
   watchman_debug_logging: bool;
   with_saved_state: saved_state_target option;
@@ -68,6 +69,30 @@ module Messages = struct
   let log_inference_constraints = " (for hh debugging purpose only) log type" ^
     " inference constraints into external logger (e.g. Scuba)"
   let max_procs = " max numbers of workers"
+  let save_state_spec_json_descr =
+{|A JSON specification of how and what to save, e.g.:
+  {
+    "files_to_check": [
+      "/some/path/prefix1",
+      {
+        "from_prefix_incl": "/from/path/prefix1",
+        "to_prefix_excl": "/to/path/prefix1"
+      },
+      {
+        "from_prefix_incl": "/from/path/prefix2",
+        "to_prefix_excl": "/to/path/prefix2"
+      },
+      {
+        "from_prefix_incl": "/from/path/only"
+      },
+      {
+        "to_prefix_excl": "/to/path/only"
+      }
+    ],
+    "filename": "/some/dir/some_filename",
+    "gen_with_errors": true
+  }
+|}
   let saved_state_json_descr =
     "Either\n" ^
     "   { \"data_dump\" : <saved_state_target json> }\n" ^
@@ -87,6 +112,9 @@ module Messages = struct
                         " to replace the program state; otherwise, the state files are not" ^
                         " used after being written to disk (default: false)"
   let save_state = " save server state to file"
+  let save_with_spec = " save server state given a JSON spec" ^
+                        " Expects a JSON string specified as" ^
+                        save_state_spec_json_descr
   let waiting_client= " send message to fd/handle when server has begun" ^
                       " starting and again when it's done starting"
   let watchman_debug_logging =
@@ -103,12 +131,61 @@ let print_json_version () =
 (*****************************************************************************)
 (* The main entry point *)
 (*****************************************************************************)
+let get_path (key: string) json_obj : Relative_path.t option =
+  let value = Hh_json.Access.get_string key json_obj in
+  match value with
+  | Ok ((value: string), _keytrace) -> Some (Relative_path.from_root value)
+  | Error _ -> None
+
+let get_spec (spec_json: Hh_json.json) : files_to_check_spec =
+  try
+    Prefix (Hh_json.get_string_exn spec_json |> Relative_path.from_root)
+  with _ ->
+    let from_prefix_incl = get_path "from_prefix_incl" (spec_json, []) in
+    let to_prefix_excl = get_path "to_prefix_excl" (spec_json, []) in
+    Range {
+      from_prefix_incl;
+      to_prefix_excl;
+    }
+
+let parse_save_state_json ((json: Hh_json.json), _keytrace) =
+  let open Hh_json.Access in
+  let files_to_check = Option.value
+    ~default:[]
+    (Hh_json.(get_field_opt (get_array "files_to_check")) json) in
+  let files_to_check = List.map files_to_check ~f:get_spec in
+  let json = return json in
+  json >>= get_string "filename" >>= fun (filename, _filename_keytrace) ->
+  json >>= get_bool "gen_with_errors" >>= fun (gen_with_errors, _gen_with_errors_keytrace) ->
+  return {
+    files_to_check;
+    filename;
+    gen_with_errors;
+  }
+
+let verify_save_with_spec (v: string option) : save_state_spec_info option =
+  match v with
+  | None -> None
+  | Some blob ->
+    let open Hh_json.Access in
+    let json = Hh_json.json_of_string blob in
+    let json = return json in
+    let parsed_spec_result = json >>= parse_save_state_json in
+    match parsed_spec_result with
+    | Ok ((parsed_spec: save_state_spec_info), _keytrace) ->
+      Hh_logger.log "Parsed save state spec, everything's good";
+      Some parsed_spec
+    | Error spec_failure ->
+      let message = access_failure_to_string spec_failure in
+      Hh_logger.log "parsing optional arg --save-with-spec failed:\n%s" message;
+      Hh_logger.log "See input: %s" blob;
+      raise (Arg.Bad ("--save-with-spec " ^ message))
 
 let parse_saved_state_json (json, _keytrace) =
   let array_to_path_list = List.map
     ~f:(fun file -> Hh_json.get_string_exn file |> Relative_path.from_root) in
-  let prechecked_changes = Option.value ~default:[]
-    (Hh_json.(get_field_opt (Access.get_array "prechecked_changes")) json) in
+  let prechecked_changes = (Hh_json.(get_field_opt (Access.get_array "prechecked_changes")) json) in
+  let prechecked_changes = Option.value ~default:[] prechecked_changes in
   let json = Hh_json.Access.return json in
   let open Hh_json.Access in
   json >>= get_string "state" >>= fun (state, _state_keytrace) ->
@@ -126,7 +203,8 @@ let parse_saved_state_json (json, _keytrace) =
       changes;
     })
 
-let verify_with_saved_state (v: string option ref) : saved_state_target option = match !v with
+let verify_with_saved_state (v: string option) : saved_state_target option =
+  match v with
   | None -> None
   | Some blob ->
     let json = Hh_json.json_of_string blob in
@@ -190,6 +268,7 @@ let parse_options () =
   let root = ref "" in
   let replace_state_after_saving = ref false in
   let save = ref None in
+  let save_with_spec = ref None in
   let should_detach = ref false in
   let version = ref false in
   let waiting_client= ref None in
@@ -200,6 +279,7 @@ let parse_options () =
   let set_ai = fun s -> ai_mode := Some (Ai_options.prepare ~server:true s) in
   let set_max_procs = fun n -> max_procs := Some n in
   let set_save_state = fun s -> save := Some s in
+  let set_save_with_spec = fun s -> save_with_spec := Some s in
   let set_wait = fun fd -> waiting_client := Some (Handle.wrap_handle fd) in
   let set_with_saved_state = fun s -> with_saved_state := Some s in
   let set_from = fun s -> from := s in
@@ -238,6 +318,7 @@ let parse_options () =
         Messages.replace_state_after_saving;
       "--save-mini", Arg.String set_save_state, Messages.save_state;
       "--save-state", Arg.String set_save_state, Messages.save_state;
+      "--save-state-with-spec", Arg.String set_save_with_spec, Messages.save_with_spec;
       "--version", Arg.Set version, "";
       "--waiting-client", Arg.Int set_wait, Messages.waiting_client;
       "--watchman-debug-logging", Arg.Set watchman_debug_logging, Messages.watchman_debug_logging;
@@ -259,7 +340,8 @@ let parse_options () =
     Printf.eprintf "--check is incompatible with wait modes!\n";
     Exit_status.(exit Input_error)
   end;
-  let with_saved_state = verify_with_saved_state with_saved_state in
+  let save_with_spec = verify_save_with_spec !save_with_spec in
+  let with_saved_state = verify_with_saved_state !with_saved_state in
   (match !root with
   | "" ->
       Printf.eprintf "You must specify a root directory!\n";
@@ -274,8 +356,13 @@ let parse_options () =
         else Some (ai)
     | None -> None);
   Wwwroot.assert_www_directory root_path;
+  if (Option.is_some (!save) && Option.is_some save_with_spec) then begin
+    Printf.eprintf "--save-state and --save-state-with-spec cannot be combined\n%!";
+    exit 1
+  end;
   if (!gen_saved_ignore_type_errors) && not (Option.is_some (!save)) then begin
-    Printf.eprintf "--ignore-type-errors is only valid when producing saved states\n%!";
+    Printf.eprintf
+      "--gen-saved-ignore-type-errors is only valid when combined with --save-state\n%!";
     exit 1
   end;
   {
@@ -297,6 +384,7 @@ let parse_options () =
     replace_state_after_saving = !replace_state_after_saving;
     root = root_path;
     save_filename = !save;
+    save_with_spec;
     should_detach = !should_detach;
     waiting_client = !waiting_client;
     watchman_debug_logging = !watchman_debug_logging;
@@ -324,6 +412,7 @@ let default_options ~root = {
   replace_state_after_saving = false;
   root = Path.make root;
   save_filename = None;
+  save_with_spec = None;
   should_detach = false;
   waiting_client = None;
   watchman_debug_logging = false;
@@ -353,6 +442,7 @@ let profile_log options = options.profile_log
 let replace_state_after_saving options = options.replace_state_after_saving
 let root options = options.root
 let save_filename options = options.save_filename
+let save_with_spec options = options.save_with_spec
 let should_detach options = options.should_detach
 let waiting_client options = options.waiting_client
 let watchman_debug_logging options = options.watchman_debug_logging
@@ -398,6 +488,7 @@ let to_string
     replace_state_after_saving;
     root;
     save_filename;
+    save_with_spec;
     should_detach;
     waiting_client;
     watchman_debug_logging;
@@ -416,6 +507,9 @@ let to_string
     let save_filename_str = match save_filename with
       | None -> "<>"
       | Some path -> path in
+    let save_with_spec_str = match save_with_spec with
+      | None -> "<>"
+      | Some _ -> "SaveStateSpec(...)" in
     let prechecked_str = match prechecked with
       | None -> "<>"
       | Some b -> string_of_bool b in
@@ -445,6 +539,7 @@ let to_string
         "replace_state_after_saving: "; string_of_bool replace_state_after_saving; ", ";
         "root: "; Path.to_string root; ", ";
         "save_filename: "; save_filename_str; ", ";
+        "save_with_spec: "; save_with_spec_str; ", ";
         "should_detach: "; string_of_bool should_detach; ", ";
         "waiting_client: "; waiting_client_str; ", ";
         "watchman_debug_logging: "; string_of_bool watchman_debug_logging; ", ";

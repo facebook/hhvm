@@ -13,6 +13,27 @@ module Types = struct
     | Informant_induced_saved_state_target of ServerMonitorUtils.target_saved_state
     | Saved_state_target_info of saved_state_target_info
 
+  (* The idea of a file range necessarily means that the hypothetical list
+    of them is sorted in some way. It is valid to have None as either endpoint
+    because that simply makes it open-ended. For example, a range of files
+    { None - "/some/path" } includes all files with path less than /some/path *)
+  type files_to_check_range = {
+    from_prefix_incl: Relative_path.t option;
+    to_prefix_excl: Relative_path.t option;
+  }
+
+  type files_to_check_spec =
+  | Range of files_to_check_range
+  | Prefix of Relative_path.t
+
+  type save_state_spec_info = {
+    files_to_check: files_to_check_spec list;
+    (* The base name of the file into which we should save the naming table. *)
+    filename: string;
+    (* Indicates whether we should generate a state in the presence of errors. *)
+    gen_with_errors: bool;
+  }
+
 end
 
 module Abstract_types = struct
@@ -29,7 +50,6 @@ module type S = sig
 
   val default_options: root:string -> options
   val parse_options: unit -> options
-  val print_json_version: unit -> unit
 
   (****************************************************************************)
   (* Accessors *)
@@ -53,6 +73,7 @@ module type S = sig
   val replace_state_after_saving: options -> bool
   val root: options -> Path.t
   val save_filename: options -> string option
+  val save_with_spec: options -> save_state_spec_info option
   val should_detach: options -> bool
   val waiting_client: options -> Unix.file_descr option
   val watchman_debug_logging: options -> bool
@@ -70,5 +91,7 @@ module type S = sig
   (****************************************************************************)
   (* Misc *)
   (****************************************************************************)
+  val print_json_version: unit -> unit
   val to_string: options -> string
+  val verify_save_with_spec: string option -> save_state_spec_info option
 end

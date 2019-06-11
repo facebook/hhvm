@@ -1,1 +1,2 @@
-No errors
+File "await_in_rx6.php", line 10, characters 8-12:
+Unbound name: genva (a global function) (Naming[2049])

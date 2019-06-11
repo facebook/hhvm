@@ -104,7 +104,7 @@ let assert_subtype p reason env ty_have ty_expect =
   Typing_ops.sub_type p reason env ty_have ty_expect
 
 let can_subtype env ty_sub ty_super =
-  Typing_subtype.is_sub_type env ty_sub ty_super
+  Typing_subtype.is_sub_type_LEGACY_DEPRECATED env ty_sub ty_super
 
 let is_stringish ?allow_mixed env ty =
   Errors.ignore_ (fun () ->

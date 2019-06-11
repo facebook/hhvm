@@ -86,7 +86,7 @@ let check_param : Env.env -> Nast.fun_param -> unit =
       else
         let r, _ = ty in
         let memoizable_type = MakeType.class_type r SN.Classes.cIMemoizeParam [] in
-        if SubType.is_sub_type env ty memoizable_type
+        if SubType.is_sub_type_LEGACY_DEPRECATED env ty memoizable_type
         then ()
         else error ty;
     | _, Tfun _

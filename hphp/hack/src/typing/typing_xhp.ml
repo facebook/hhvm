@@ -120,4 +120,4 @@ let is_xhp_child env pos ty =
   let ty_traversable = MakeType.traversable reason (Reason.none, TUtils.tany env) in
   let ty_traversable = MakeType.nullable reason ty_traversable in
   let tys = [ty_child; ty_traversable] in
-  List.exists ~f:(fun super -> SubType.is_sub_type env ty super) tys
+  List.exists ~f:(fun super -> SubType.is_sub_type_LEGACY_DEPRECATED env ty super) tys

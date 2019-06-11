@@ -77,7 +77,7 @@ let condition_type_matches ~is_self env ty cond_ty =
   get_associated_condition_type ~is_self env ty
   |> Option.value_map ~default:false ~f:(fun arg_cond_ty ->
     let arg_cond_ty = CT.localize_condition_type env arg_cond_ty in
-    SubType.is_sub_type env arg_cond_ty cond_ty)
+    SubType.is_sub_type_LEGACY_DEPRECATED env arg_cond_ty cond_ty)
 
 (* checks if ty matches the criteria specified by argument of __OnlyRxIfImpl *)
 let check_only_rx_if_impl env ~is_receiver ~is_self pos reason ty cond_ty =
@@ -86,7 +86,7 @@ let check_only_rx_if_impl env ~is_receiver ~is_self pos reason ty cond_ty =
     - type has linked condition type which is a subtype of condition type *)
   let cond_ty = CT.localize_condition_type env cond_ty in
   let ok =
-    SubType.is_sub_type env ty cond_ty ||
+    SubType.is_sub_type_LEGACY_DEPRECATED env ty cond_ty ||
     condition_type_matches ~is_self env ty cond_ty in
   if not ok
   then begin

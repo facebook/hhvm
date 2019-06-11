@@ -27,23 +27,21 @@ module ConditionTypes : sig
     locl ty
 end
 
-val is_sub_type :
+val is_sub_type_LEGACY_DEPRECATED :
   Env.env ->
   locl ty ->
   locl ty ->
   bool
 
 (** Non-side-effecting test for subtypes.
-Result is
-   result = Some true implies ty1 <: ty2
-   result = Some false implies NOT ty1 <: ty2
-   result = None, we don't know
+    result = true implies ty1 <: ty2
+    result = false implies NOT ty1 <: ty2 OR we don't know
 *)
-val is_sub_type_alt :
+val is_sub_type :
   Env.env ->
   locl ty ->
   locl ty ->
-  bool option
+  bool
 
 (**
   Checks that ty_sub is a subtype of ty_super, and returns an env.

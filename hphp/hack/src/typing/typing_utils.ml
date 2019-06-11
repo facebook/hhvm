@@ -46,14 +46,14 @@ type sub_type = Env.env -> locl ty -> locl ty -> Env.env
 let (sub_type_ref: sub_type ref) = ref not_implemented
 let sub_type x = !sub_type_ref x
 
-type is_sub_type_type = Env.env -> locl ty -> locl ty -> bool
+type is_sub_type_LEGACY_DEPRECATED_type = Env.env -> locl ty -> locl ty -> bool
+let (is_sub_type_LEGACY_DEPRECATED_ref: is_sub_type_LEGACY_DEPRECATED_type ref) = ref not_implemented
+let is_sub_type_LEGACY_DEPRECATED x = !is_sub_type_LEGACY_DEPRECATED_ref x
+
+type is_sub_type_type =
+  Env.env -> locl ty -> locl ty -> bool
 let (is_sub_type_ref: is_sub_type_type ref) = ref not_implemented
 let is_sub_type x = !is_sub_type_ref x
-
-type is_sub_type_alt_type =
-  Env.env -> locl ty -> locl ty -> bool option
-let (is_sub_type_alt_ref: is_sub_type_alt_type ref) = ref not_implemented
-let is_sub_type_alt x = !is_sub_type_alt_ref x
 
 type add_constraint = Pos.Map.key -> Env.env -> Ast.constraint_kind -> locl ty -> locl ty -> Env.env
 let (add_constraint_ref: add_constraint ref) = ref not_implemented
@@ -113,11 +113,11 @@ let this_of ty = Tabstract (AKdependent `this, Some ty)
 
 let is_option env ty =
   let null =  MakeType.null Reason.Rnone in
-  is_sub_type_alt env null ty = Some true
+  is_sub_type env null ty
 
 let is_mixed env ty =
   let mixed = MakeType.mixed Reason.Rnone in
-  is_sub_type_alt env mixed ty = Some true
+  is_sub_type env mixed ty
 
 let ensure_option env r ty = if is_option env ty then ty else (r, Toption ty)
 
@@ -203,11 +203,10 @@ let try_over_concrete_supertypes env ty f =
 (*****************************************************************************)
 let is_dynamic env ty =
   let dynamic = MakeType.dynamic Reason.Rnone in
-  is_sub_type_alt env dynamic ty = Some true &&
-  not (is_mixed env ty)
+  is_sub_type env dynamic ty && not (is_mixed env ty)
 
 let is_hack_collection env ty =
-  is_sub_type env ty
+  is_sub_type_LEGACY_DEPRECATED env ty
     (MakeType.const_collection Reason.Rnone (MakeType.mixed Reason.Rnone))
 
 (*****************************************************************************)
@@ -651,10 +650,10 @@ let add_function_type env fty logged =
   match tyl with
   | [] -> [ty]
   | ty'::tyl' ->
-    if is_sub_type env ty ty' && not (HasTany.check ty)
+    if is_sub_type_LEGACY_DEPRECATED env ty ty' && not (HasTany.check ty)
     then try_intersect env ty tyl'
     else
-    if is_sub_type env ty' ty && not (HasTany.check ty')
+    if is_sub_type_LEGACY_DEPRECATED env ty' ty && not (HasTany.check ty')
     then try_intersect env ty' tyl'
     else ty' :: try_intersect env ty tyl'
 in

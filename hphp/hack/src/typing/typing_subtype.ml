@@ -1423,7 +1423,7 @@ and subtype_param_rx_if_impl
   | None, Some cond_type_super ->
     Option.value_map declared_type_sub
       ~default:false
-      ~f:(fun declared_type_sub -> is_sub_type env declared_type_sub cond_type_super)
+      ~f:(fun declared_type_sub -> is_sub_type_LEGACY_DEPRECATED env declared_type_sub cond_type_super)
   (* condition types are set for both sub and super types: contravariant check
     interface A {}
     interface B extends A {}
@@ -1453,7 +1453,7 @@ and subtype_param_rx_if_impl
     }
    *)
   | Some cond_type_sub, Some cond_type_super ->
-    is_sub_type env cond_type_super cond_type_sub
+    is_sub_type_LEGACY_DEPRECATED env cond_type_super cond_type_sub
   (* condition type is set for super type, check if declared type of
      subtype is a subtype of condition type
      interface Rx {
@@ -1471,7 +1471,7 @@ and subtype_param_rx_if_impl
   | Some cond_type_sub, None ->
     Option.value_map declared_type_sub
       ~default:false
-      ~f:(fun declared_type_sub -> is_sub_type env declared_type_sub cond_type_sub)
+      ~f:(fun declared_type_sub -> is_sub_type_LEGACY_DEPRECATED env declared_type_sub cond_type_sub)
 
 (* checks reactivity conditions for function parameters *)
 and subtype_fun_params_reactivity
@@ -1828,7 +1828,7 @@ and sub_type_inner
  * hiding the "error", and so we need to disable the fixme mechanism
  * before calling sub_type and then re-enable it afterwards.
  *)
-and is_sub_type
+and is_sub_type_LEGACY_DEPRECATED
   (env : Env.env)
   (ty_sub : locl ty)
   (ty_super : locl ty) : bool =
@@ -1856,6 +1856,9 @@ and is_sub_type_alt env ty1 ty2 =
   if TL.is_unsat prop then Some false
   else None
 
+and is_sub_type env ty1 ty2 =
+  is_sub_type_alt env ty1 ty2 = Some true
+
 (* Attempt to compute the intersection of a type with an existing list intersection.
  * If try_intersect env t [t1;...;tn] = [u1; ...; um]
  * then u1&...&um must be the greatest lower bound of t and t1&...&tn wrt subtyping.
@@ -1870,17 +1873,17 @@ and try_intersect env ty tyl =
   match tyl with
   | [] -> [ty]
   | ty'::tyl' ->
-    if is_sub_type_alt env ty ty' = Some true
+    if is_sub_type env ty ty'
     then try_intersect env ty tyl'
     else
-    if is_sub_type_alt env ty' ty = Some true
+    if is_sub_type env ty' ty
     then tyl
     else
     let nonnull_ty = (fst ty, Tnonnull) in
     match ty, ty' with
-    | (_, Toption t), _ when is_sub_type_alt env ty' nonnull_ty = Some true ->
+    | (_, Toption t), _ when is_sub_type env ty' nonnull_ty ->
       try_intersect env t (ty'::tyl')
-    | _, (_, Toption t) when is_sub_type_alt env ty nonnull_ty = Some true ->
+    | _, (_, Toption t) when is_sub_type env ty nonnull_ty ->
       try_intersect env t (ty::tyl')
     | _, _ -> ty' :: try_intersect env ty tyl'
 
@@ -1902,10 +1905,10 @@ and try_union env ty tyl =
   match tyl with
   | [] -> [ty]
   | ty'::tyl' ->
-    if is_sub_type_alt env ty ty' = Some true
+    if is_sub_type env ty ty'
     then tyl
     else
-    if is_sub_type_alt env ty' ty = Some true
+    if is_sub_type env ty' ty
     then try_union env ty tyl'
     else match snd ty, snd ty' with
     | Tprim Nast.Tfloat, Tprim Nast.Tint
@@ -1947,7 +1950,7 @@ let rec sub_string
       else stringish::tyl in
     let stringlike = (Reason.Rwitness p, Toption (Reason.Rwitness p, Tunion tyl)) in
     let error env ty_sub ty_super = match snd ty_sub with
-      | _ when is_sub_type_alt env ty_sub stringish = Some true &&
+      | _ when is_sub_type env ty_sub stringish &&
                stringish_deprecated ->
         Errors.object_string_deprecated p
       | Tclass _ ->
@@ -2724,7 +2727,7 @@ let widen env widen_concrete_type ty =
   widen env ty
 
 let is_nothing env ty =
-  is_sub_type_alt env ty (Reason.none, Tunion []) = Some true
+  is_sub_type env ty (Reason.none, Tunion [])
 
 (* Using the `widen_concrete_type` function to compute an upper bound,
  * narrow the constraints on a type that are valid for an operation.
@@ -2806,6 +2809,6 @@ let log_prop env =
 
 let () = Typing_utils.sub_type_ref := sub_type
 let () = Typing_utils.add_constraint_ref := add_constraint
+let () = Typing_utils.is_sub_type_LEGACY_DEPRECATED_ref := is_sub_type_LEGACY_DEPRECATED
 let () = Typing_utils.is_sub_type_ref := is_sub_type
-let () = Typing_utils.is_sub_type_alt_ref := is_sub_type_alt
 let () = Typing_utils.expand_type_and_solve_ref := expand_type_and_solve

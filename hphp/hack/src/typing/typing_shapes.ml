@@ -167,7 +167,7 @@ let is_shape_field_required env shape_pos fun_name field_name shape_ty =
     sft_optional = false;
     sft_ty = MakeType.mixed Reason.Rnone
   } in
-  Typing_subtype.is_sub_type env
+  Typing_subtype.is_sub_type_LEGACY_DEPRECATED env
     shape_ty
     (make_idx_fake_super_shape shape_pos fun_name field_name field_ty)
 

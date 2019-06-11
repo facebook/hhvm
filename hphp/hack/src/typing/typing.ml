@@ -2282,7 +2282,7 @@ and expr_
       expr ~is_using_clause env e in
       (* Expected type of `e` in `yield from e` is KeyedTraversable<Tk,Tv> (but might be dynamic)*)
     let expected_yield_from_ty = MakeType.keyed_traversable (Reason.Ryield_gen p) key value in
-    let from_dynamic = SubType.is_sub_type env yield_from_ty (MakeType.dynamic (fst yield_from_ty)) in
+    let from_dynamic = SubType.is_sub_type_LEGACY_DEPRECATED env yield_from_ty (MakeType.dynamic (fst yield_from_ty)) in
     let env =
       if from_dynamic
       then env (* all set if dynamic, otherwise need to check against KeyedTraversable *)
@@ -2363,7 +2363,7 @@ and expr_
     let refine_type env lpos lty rty =
       let reason = Reason.Ras lpos in
       let env, rty = Env.expand_type env rty in
-      if snd rty <> Tdynamic && SubType.is_sub_type env lty rty
+      if snd rty <> Tdynamic && SubType.is_sub_type_LEGACY_DEPRECATED env lty rty
       then env, lty
       else safely_refine_type env p reason lpos lty rty
     in
@@ -3226,7 +3226,7 @@ and check_shape_keys_validity env pos keys =
           if cls1 <> cls2 then
             Errors.shape_field_class_mismatch
               key_pos witness_pos (strip_ns cls2) (strip_ns cls1);
-          if not (SubType.is_sub_type env ty1 ty2 && SubType.is_sub_type env ty2 ty1)
+          if not (SubType.is_sub_type_LEGACY_DEPRECATED env ty1 ty2 && SubType.is_sub_type_LEGACY_DEPRECATED env ty2 ty1)
           then
             Errors.shape_field_type_mismatch
               key_pos witness_pos
@@ -3664,7 +3664,7 @@ and is_abstract_ft fty = match fty with
          | [(_, Array_get (ea, Some _))], [] ->
            let env, _te, ty = expr env ea in
            let tany = (Reason.Rnone, Typing_utils.tany env) in
-           if List.exists ~f:(fun super -> SubType.is_sub_type env ty super) [
+           if List.exists ~f:(fun super -> SubType.is_sub_type_LEGACY_DEPRECATED env ty super) [
              MakeType.dict Reason.Rnone tany tany;
              MakeType.keyset Reason.Rnone tany;
              if disallow_varray then
@@ -4620,7 +4620,7 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
         if member_ce.ce_const && valkind = `lvalue then
           if not (env.Env.inside_constructor &&
             (* expensive call behind short circuiting && *)
-            SubType.is_sub_type env (Env.get_self env) concrete_ty) then
+            SubType.is_sub_type_LEGACY_DEPRECATED env (Env.get_self env) concrete_ty) then
             Errors.assigning_to_const id_pos;
 
         env, member_ty, Some (mem_pos, vis)
@@ -5423,8 +5423,8 @@ and enforce_sub_ty env p ty1 ty2 =
 (* throws typing error if neither t <: ty nor t <: dynamic, and adds appropriate
  * constraint to env otherwise *)
 and check_type ty p env t =
-  let is_ty = SubType.is_sub_type env t ty in
-  let is_dynamic = SubType.is_sub_type env t (MakeType.dynamic (fst ty)) in
+  let is_ty = SubType.is_sub_type_LEGACY_DEPRECATED env t ty in
+  let is_dynamic = SubType.is_sub_type_LEGACY_DEPRECATED env t (MakeType.dynamic (fst ty)) in
   match is_ty, is_dynamic with
   | false, true -> enforce_sub_ty env p t (MakeType.dynamic (fst ty))
   | _ -> enforce_sub_ty env p t ty
@@ -5433,11 +5433,11 @@ and check_type ty p env t =
 and check_num env p t r =
   let env2, t2 = check_type (MakeType.num r) p env t in
   let r2 = fst t2 in
-  env2, if SubType.is_sub_type env2 t (MakeType.int r2)
+  env2, if SubType.is_sub_type_LEGACY_DEPRECATED env2 t (MakeType.int r2)
     then MakeType.int r2
-    else if SubType.is_sub_type env2 t (MakeType.float r2)
+    else if SubType.is_sub_type_LEGACY_DEPRECATED env2 t (MakeType.float r2)
     then MakeType.float r2
-    else if SubType.is_sub_type env2 t (MakeType.num r2)
+    else if SubType.is_sub_type_LEGACY_DEPRECATED env2 t (MakeType.num r2)
     then MakeType.num r2
     else MakeType.dynamic r2
 
@@ -5445,7 +5445,7 @@ and check_num env p t r =
 and check_int env p t r =
   let env2, t2 = check_type (MakeType.int r) p env t in
   let r2 = fst t2 in
-  env2, if SubType.is_sub_type env2 t (MakeType.int r2)
+  env2, if SubType.is_sub_type_LEGACY_DEPRECATED env2 t (MakeType.int r2)
     then MakeType.int r2
     else MakeType.dynamic r2
 
@@ -5634,8 +5634,8 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
       let ty_datetimeimmutable = MakeType.datetime_immutable (Reason.Rcomp p) in
       let ty_dynamic = MakeType.dynamic (Reason.Rcomp p) in
       let both_sub tyl =
-        (List.exists tyl ~f:(SubType.is_sub_type env ty1))
-        && (List.exists tyl ~f:(SubType.is_sub_type env ty2)) in
+        (List.exists tyl ~f:(SubType.is_sub_type_LEGACY_DEPRECATED env ty1))
+        && (List.exists tyl ~f:(SubType.is_sub_type_LEGACY_DEPRECATED env ty2)) in
       (*
        * Comparison here is allowed when both args are num, both string, or both
        * DateTime | DateTimeImmutable. Alternatively, either or both args can be
@@ -5858,7 +5858,7 @@ and condition ?lhs_of_null_coalesce env tparamet
               env, (Reason.Rwitness ivar_pos, Tobject)
 
             | Some class_info ->
-              if SubType.is_sub_type env x_ty obj_ty
+              if SubType.is_sub_type_LEGACY_DEPRECATED env x_ty obj_ty
               then
                 (* If the right side of the `instanceof` object is
                  * a super type of what we already knew. In this case,
@@ -5900,7 +5900,7 @@ and condition ?lhs_of_null_coalesce env tparamet
       let ivar_pos, ivar_ty = fst ivar in
       let env, ivar = get_instance_var env (T.to_nast_expr ivar) in
       let env, hint_ty =
-        if snd hint_ty <> Tdynamic && SubType.is_sub_type env ivar_ty hint_ty
+        if snd hint_ty <> Tdynamic && SubType.is_sub_type_LEGACY_DEPRECATED env ivar_ty hint_ty
         then env, ivar_ty
         else safely_refine_type env p reason ivar_pos ivar_ty hint_ty in
       set_local env ivar hint_ty

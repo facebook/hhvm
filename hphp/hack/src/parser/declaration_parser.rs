@@ -946,13 +946,22 @@ where
     fn parse_xhp_required_opt(&mut self) -> S::R {
         // SPEC (Draft)
         // xhp-required :
-        //   @  required
+        //   @  (required | lateinit)
         //
         // Note that these are two tokens. They can have whitespace between them.
         if self.peek_token_kind() == TokenKind::At {
             let at = self.assert_token(TokenKind::At);
-            let req = self.require_required();
-            S!(make_xhp_required, self, at, req)
+            let req_kind = self.next_token();
+            let kind = req_kind.kind();
+            let req = S!(make_token, self, req_kind);
+            match kind {
+                TokenKind::Required => S!(make_xhp_required, self, at, req),
+                TokenKind::Lateinit => S!(make_xhp_lateinit, self, at, req),
+                _ => {
+                    self.with_error(Errors::error1051);
+                    S!(make_missing, self, self.pos())
+                },
+            }
         } else {
             S!(make_missing, self, self.pos())
         }

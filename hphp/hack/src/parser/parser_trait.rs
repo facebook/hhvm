@@ -1319,10 +1319,6 @@ where
         }
     }
 
-    fn require_required(&mut self) -> S::R {
-        self.require_token(TokenKind::Required, Errors::error1051)
-    }
-
     fn require_name_allow_all_keywords(&mut self) -> S::R {
         let mut parser1 = self.clone();
         let token = parser1.next_token_as_name();

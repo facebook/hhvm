@@ -1919,8 +1919,8 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         let res = match lower.as_ref() {
             "__halt_compiler" | "abstract" | "and" | "array" | "as" | "bool" | "boolean"
             | "break" | "callable" | "case" | "catch" | "class" | "clone" | "const"
-            | "continue" | "declare" | "default" | "die" | "do" | "echo" | "else" | "elseif"
-            | "empty" | "enddeclare" | "endfor" | "endforeach" | "endif" | "endswitch"
+            | "continue" | "default" | "die" | "do" | "echo" | "else" | "elseif"
+            | "empty" | "endfor" | "endforeach" | "endif" | "endswitch"
             | "endwhile" | "eval" | "exit" | "extends" | "false" | "final" | "finally" | "for"
             | "foreach" | "function" | "global" | "goto" | "if" | "implements" | "include"
             | "include_once" | "inout" | "instanceof" | "insteadof" | "int" | "integer" | "interface"

@@ -960,7 +960,7 @@ where
                 _ => {
                     self.with_error(Errors::error1051);
                     S!(make_missing, self, self.pos())
-                },
+                }
             }
         } else {
             S!(make_missing, self, self.pos())

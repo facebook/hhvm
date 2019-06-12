@@ -264,26 +264,26 @@ where
         self.parse_remaining_expression(term)
     }
 
-    fn with_reset_precedence<U>(&mut self, parse_function: &Fn(&mut Self) -> U) -> U {
+    fn with_reset_precedence<U, F: FnOnce(&mut Self) -> U>(&mut self, parse_function: F) -> U {
         self.with_numeric_precedence(0, parse_function)
     }
 
     fn parse_expression_with_reset_precedence(&mut self) -> S::R {
-        self.with_reset_precedence(&|x| x.parse_expression())
+        self.with_reset_precedence(|x| x.parse_expression())
     }
 
     fn parse_expression_with_operator_precedence(&mut self, operator: Operator) -> S::R {
-        self.with_operator_precedence(operator, &|x| x.parse_expression())
+        self.with_operator_precedence(operator, |x| x.parse_expression())
     }
 
     fn with_precedence(&mut self, precedence: usize) {
         self.precedence = precedence
     }
 
-    fn with_numeric_precedence<U>(
+    fn with_numeric_precedence<U, F: FnOnce(&mut Self) -> U>(
         &mut self,
         new_precedence: usize,
-        parse_function: &Fn(&mut Self) -> U,
+        parse_function: F,
     ) -> U {
         let old_precedence = self.precedence;
         self.with_precedence(new_precedence);
@@ -292,10 +292,10 @@ where
         result
     }
 
-    fn with_operator_precedence(
+    fn with_operator_precedence<F: FnOnce(&mut Self) -> S::R>(
         &mut self,
         operator: Operator,
-        parse_function: &Fn(&mut Self) -> S::R,
+        parse_function: F,
     ) -> S::R {
         let new_precedence = operator.precedence(&self.env);
         self.with_numeric_precedence(new_precedence, parse_function)
@@ -1465,7 +1465,7 @@ where
             (left_kind, _) => {
                 let left_token = S!(make_token, self, left);
                 let index = self.with_as_expressions(/* enabled :*/ true, &|x| {
-                    x.with_reset_precedence(&|x| x.parse_expression())
+                    x.with_reset_precedence(|x| x.parse_expression())
                 });
                 let right = match left_kind {
                     TokenKind::LeftBracket => self.require_right_bracket(),
@@ -1514,7 +1514,7 @@ where
         //
         // This function parses the parens as well.
         self.parse_parenthesized_comma_list_opt_allow_trailing(&|x| {
-            x.with_reset_precedence(&|x| x.parse_decorated_expression_opt())
+            x.with_reset_precedence(|x| x.parse_decorated_expression_opt())
         })
     }
 
@@ -1909,15 +1909,17 @@ where
         if self.peek_token_kind() == TokenKind::LeftBrace {
             self.parse_compound_statement()
         } else {
-            self.with_reset_precedence(&|x| x.parse_expression())
+            self.with_reset_precedence(|x| x.parse_expression())
         }
     }
 
     fn parse_parenthesized_expression(&mut self) -> S::R {
         let left_paren = self.assert_token(TokenKind::LeftParen);
-        let expression = self.with_as_expressions(/* enabled:*/ true, &|p| {
-            p.with_reset_precedence(&|p| p.parse_expression())
-        });
+        let expression =
+            self.with_as_expressions(
+                /* enabled:*/ true,
+                &|p| p.with_reset_precedence(|p| p.parse_expression()),
+            );
         let right_paren = self.require_right_paren();
         S!(
             make_parenthesized_expression,
@@ -2173,7 +2175,7 @@ where
             let right_term = if is_rhs_of_assignment {
                 // reset the current precedence to make sure that expression on
                 // the right hand side of the assignment is fully consumed
-                parser.with_reset_precedence(&|p| p.parse_term())
+                parser.with_reset_precedence(|p| p.parse_term())
             } else {
                 parser.parse_term()
             };
@@ -2320,7 +2322,7 @@ where
         let consequence = if missing_consequence {
             S!(make_missing, self, self.pos())
         } else {
-            self.with_reset_precedence(&|p| p.parse_expression())
+            self.with_reset_precedence(|p| p.parse_expression())
         };
         let colon = self.require_colon();
         let term = self.parse_term();
@@ -2610,14 +2612,14 @@ where
     //   expression
     //   expression => expression
     fn parse_array_element_init(&mut self) -> S::R {
-        let expr1 = self.with_reset_precedence(&|p| p.parse_expression());
+        let expr1 = self.with_reset_precedence(|p| p.parse_expression());
         let mut parser1 = self.clone();
         let token = parser1.next_token();
         match token.kind() {
             TokenKind::EqualGreaterThan => {
                 self.continue_from(parser1);
                 let arrow = S!(make_token, self, token);
-                let expr2 = self.with_reset_precedence(&|p| p.parse_expression());
+                let expr2 = self.with_reset_precedence(|p| p.parse_expression());
                 S!(make_element_initializer, self, expr1, arrow, expr2)
             }
             _ => expr1,
@@ -2640,9 +2642,9 @@ where
         // ERROR RECOVERY: We allow any expression on the left-hand side,
         // even though only some expressions are legal;
         // we will give an error in a later pass
-        let name = self.with_reset_precedence(&|p| p.parse_expression());
+        let name = self.with_reset_precedence(|p| p.parse_expression());
         let arrow = self.require_arrow();
-        let value = self.with_reset_precedence(&|p| p.parse_expression());
+        let value = self.with_reset_precedence(|p| p.parse_expression());
         S!(make_field_initializer, self, name, arrow, value)
     }
 

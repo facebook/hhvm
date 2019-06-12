@@ -1952,7 +1952,8 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                 Some(TokenKind::Let) if (!(self.is_experimental_mode())) => TokenKind::Name,
                 Some(keyword) => {
                     if self.lowercase_error(original_text, &text) {
-                        self.with_error(Errors::uppercase_kw(original_text));
+                        let err = Errors::uppercase_kw(original_text);
+                        self.with_error(err);
                     }
                     keyword
                 }

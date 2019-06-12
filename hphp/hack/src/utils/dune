@@ -29,7 +29,7 @@
     str
     unix)
   (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+    (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)))
 
 ; splitted utils:utils
 (library
@@ -95,7 +95,7 @@
     collections
     sys_utils)
   (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+    (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)))
 
 (library
   (name pos)
@@ -199,7 +199,7 @@
     marshal_tools_lwt
     sys_utils)
   (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+    (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)))
 
 (library
   (name http_lite)
@@ -242,7 +242,9 @@
     file_url
     hh_json
     jsonrpc
-    utils_core))
+    utils_core)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)))
 
 (library
   (name server_load_flag)
@@ -267,4 +269,4 @@
     core_kernel
     utils_core)
   (preprocess
-    (pps lwt_ppx ppx_deriving.std)))
+    (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)))

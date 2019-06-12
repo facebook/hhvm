@@ -1793,6 +1793,25 @@ let do_initialize () : Initialize.result =
     }
   }
 
+let do_didChangeWatchedFiles_registerCapability () : Lsp.lsp_request =
+  let registration_options = DidChangeWatchedFilesRegistrationOptions
+    { DidChangeWatchedFiles.
+      watchers = [
+        { DidChangeWatchedFiles.
+          (* We could be more precise here, but some language clients (such as
+          LanguageClient-neovim) don't currently support rich glob patterns.
+          We'll do further filtering at a later stage. *)
+          globPattern = "**";
+        };
+      ];
+    }
+  in
+  let registration =
+    Lsp.RegisterCapability.make_registration registration_options in
+  Lsp.RegisterCapabilityRequest { RegisterCapability.
+    registrations = [registration];
+  }
+
 let set_up_hh_logger_for_client_lsp () : unit =
   (* Log to a file on disk. Note that calls to `Hh_logger` will always write to
   `stderr`; this is in addition to that. *)
@@ -2304,6 +2323,23 @@ let handle_event
     result |> print_rage |> Jsonrpc.respond to_stdout c;
     Lwt.return_unit
 
+  | _, Client_message c
+    when env.use_serverless_ide
+      && c.method_ = "workspace/didChangeWatchedFiles" ->
+    let open DidChangeWatchedFiles in
+    let notification = parse_didChangeWatchedFiles c.params in
+    let changes = notification.changes
+      |> List.filter ~f:(fun change ->
+          let path = lsp_uri_to_path change.uri in
+          FindUtils.file_filter path
+        )
+    in
+    List.iter changes ~f:(fun change ->
+      (* TODO: forward notification to serverless IDE instead of logging *)
+      log "Registered change to file %s" change.uri
+    );
+    Lwt.return_unit
+
   (* initialize request *)
   | Pre_init, Client_message c when c.method_ = "initialize" ->
     let initialize_params = c.params |> parse_initialize in
@@ -2314,6 +2350,20 @@ let handle_event
     let%lwt new_state = connect !state in
     state := new_state;
     do_initialize () |> print_initialize |> Jsonrpc.respond to_stdout c;
+
+    if env.use_serverless_ide then begin
+      Relative_path.set_path_prefix Relative_path.Root
+        (Path.make (Lsp_helpers.get_root initialize_params));
+
+      let id = NumberId (Jsonrpc.get_next_request_id ()) in
+      let message = do_didChangeWatchedFiles_registerCapability () in
+      to_stdout (print_lsp_request id message);
+      let on_result ~result:_ state = Lwt.return state in
+      let on_error ~code:_ ~message:_ ~data:_ state = Lwt.return state in
+      callbacks_outstanding :=
+        IdMap.add id (on_result, on_error) !callbacks_outstanding;
+    end;
+
     if not @@ Sys_utils.is_test_mode () then
       Lsp_helpers.telemetry_log to_stdout ("Version in hhconfig=" ^ !hhconfig_version);
     Lwt.return_unit
@@ -2627,6 +2677,23 @@ let run_ide_service
     : unit Lwt.t =
   if env.use_serverless_ide then begin
     let%lwt root = get_root_wait () in
+    let initialize_params = initialize_params_exc () in
+    begin if Lsp.Initialize.(initialize_params
+      .client_capabilities
+      .workspace
+      .didChangeWatchedFiles
+      .dynamicRegistration
+    ) then
+      log "Language client reports that it supports file-watching"
+    else
+      log (
+        "Warning: the language client does not report " ^^
+        "that it supports file-watching; " ^^
+        "file change notifications may not be processed, " ^^
+        "and consequently, IDE queries may return stale results."
+      )
+    end;
+
     let%lwt ide_service' =
       ClientIdeService.make_from_saved_state ~root in
     ide_service := ide_service';

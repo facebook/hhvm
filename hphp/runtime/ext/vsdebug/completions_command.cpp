@@ -433,25 +433,23 @@ void CompletionsCommand::addClassConstantCompletions(
   folly::dynamic& targets
 ) {
   HPHP::String classStr(context.matchContext.c_str());
-  Class* cls = Unit::lookupClass(classStr.get());
+  Class* cls = Unit::loadClass(classStr.get());
 
-  while (cls != nullptr) {
-    for (Slot i = 0; i < cls->numConstants(); i++) {
-      const std::string& name = cls->constants()[i].name->toCppString();
-      addIfMatch(name, context.matchPrefix, CompletionTypeValue, targets);
+  // Add constants of this class. Note that here and in methods, we get
+  // everything from this class and its ancestors
+  for (Slot i = 0; i < cls->numConstants(); i++) {
+    const std::string& name = cls->constants()[i].name->toCppString();
+    addIfMatch(name, context.matchPrefix, CompletionTypeValue, targets);
+  }
+
+  // Add static methods of this class.
+  int methodCount = cls->numMethods();
+  for (Slot i = 0; i < methodCount; ++i) {
+    const Func* method = cls->getMethod(i);
+    if (method != nullptr && method->attrs() & AttrStatic) {
+      const std::string& name = method->name()->toCppString();
+      addIfMatch(name, context.matchPrefix, CompletionTypeFn, targets);
     }
-
-    // Add static methods of this class.
-    int methodCount = cls->numMethods();
-    for (Slot i = 0; i < methodCount; ++i) {
-      const Func* method = cls->getMethod(i);
-      if (method != nullptr && method->attrs() & AttrStatic) {
-        const std::string& name = method->name()->toCppString();
-        addIfMatch(name, context.matchPrefix, CompletionTypeFn, targets);
-      }
-    }
-
-    cls = cls->parent();
   }
 }
 
@@ -460,7 +458,7 @@ void CompletionsCommand::addClassStaticCompletions(
   folly::dynamic& targets
 ) {
   HPHP::String classStr(context.matchContext.c_str());
-  Class* cls = Unit::lookupClass(classStr.get());
+  Class* cls = Unit::loadClass(classStr.get());
 
   while (cls != nullptr) {
     // Add static propreties of this class.

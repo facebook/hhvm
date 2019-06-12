@@ -619,7 +619,7 @@ private:
 
 //////  Handles completions requests from the client                //////
 struct CompletionsCommand : public VSCommand {
-  VS_COMMAND_COMMON_IMPL(CompletionsCommand, CommandTarget::Request, true);
+  VS_COMMAND_COMMON_IMPL(CompletionsCommand, CommandTarget::Request, false);
   request_id_t targetThreadId(DebuggerSession* session) override;
 
 private:

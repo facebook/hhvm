@@ -1,1 +1,3 @@
+
+Warning: Argument 1 to ReflectionFile::__construct() got coerced from null to string in %s/ReflectionFile_null_file.php on line 4
 ReflectionException: File '' does not exist

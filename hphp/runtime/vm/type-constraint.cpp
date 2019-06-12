@@ -1172,17 +1172,33 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
       // generate false positives for objects.
       if (*dt != KindOfObject) {
         assertx(verify_fail_may_coerce(func));
+        assertx(id != ReturnId);
+        assertx(func->isBuiltin());
+        auto const actualType = describe_actual_type(tv, isHHType());
+        auto const warnOnCoerce = [&] {
+          raise_warning(
+            folly::format(
+              "Argument {} to {}() got coerced from {} to {}",
+              id + 1,
+              func->fullDisplayName(),
+              actualType,
+              displayName(func->cls())
+            ).str()
+          );
+        };
         // HNI conversions implicitly unbox references, this behavior is wrong,
         // in particular it breaks the way type conversion works for PHP 7
         // scalar type hints
         if (isRefType(tv->m_type)) {
           auto inner = tv->m_data.pref->var()->asTypedValue();
           if (tvCoerceParamInPlace(inner, *dt, func->isBuiltin())) {
+            warnOnCoerce();
             tvAsVariant(tv) = tvAsVariant(inner);
             return;
           }
         } else {
           if (tvCoerceParamInPlace(tv, *dt, func->isBuiltin())) {
+            warnOnCoerce();
             return;
           }
         }

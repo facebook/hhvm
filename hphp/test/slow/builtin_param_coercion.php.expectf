@@ -1,0 +1,3 @@
+
+Warning: Argument 1 to __hhvm_intrinsics\id_string() got coerced from C to string in %s/builtin_param_coercion.php on line 7
+string(3) "lol"

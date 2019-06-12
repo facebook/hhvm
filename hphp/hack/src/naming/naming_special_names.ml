@@ -147,6 +147,7 @@ module UserAttributes = struct
   let uaSoft                = "__Soft"
   let uaWarn                = "__Warn"
   let uaMockClass           = "__MockClass"
+  let uaProvenanceSkipFrame = "__ProvenanceSkipFrame"
 
   let as_set = List.fold_right ~f:SSet.add ~init:SSet.empty
     [
@@ -184,6 +185,7 @@ module UserAttributes = struct
       uaSoft;
       uaWarn;
       uaMockClass;
+      uaProvenanceSkipFrame;
     ]
 end
 

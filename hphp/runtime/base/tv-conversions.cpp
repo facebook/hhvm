@@ -1704,10 +1704,6 @@ enable_if_lval_t<T, bool> tvCoerceParamToBooleanInPlace(T tv, bool builtin) {
 
   switch (type(tv)) {
     case KindOfNull:
-      // In PHP 7 mode handling of null types is stricter
-      if (RuntimeOption::PHP7_ScalarTypes && !builtin) return false;
-      // fall-through
-
     case KindOfUninit:
     case KindOfBoolean:
     case KindOfInt64:
@@ -1744,15 +1740,12 @@ enable_if_lval_t<T, bool> tvCoerceParamToBooleanInPlace(T tv, bool builtin) {
 template<typename T>
 static enable_if_lval_t<T, bool> tvCanBeCoercedToNumber(T tv, bool builtin) {
   switch (type(tv)) {
+    case KindOfNull:
     case KindOfUninit:
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
       return true;
-
-    case KindOfNull:
-      // In PHP 7 mode handling of null types is stricter
-      return !RuntimeOption::PHP7_ScalarTypes || builtin;
 
     case KindOfPersistentString:
     case KindOfString:
@@ -1789,13 +1782,6 @@ enable_if_lval_t<T, bool> tvCoerceParamToInt64InPlace(T tv, bool builtin) {
   if (!tvCanBeCoercedToNumber(tv, builtin)) {
     return false;
   }
-  // In PHP 7 mode doubles only convert to integers when the conversion is non-
-  // narrowing
-  if (RuntimeOption::PHP7_ScalarTypes && type(tv) == KindOfDouble) {
-    if (val(tv).dbl < std::numeric_limits<int64_t>::min()) return false;
-    if (val(tv).dbl > std::numeric_limits<int64_t>::max()) return false;
-    if (std::isnan(val(tv).dbl)) return false;
-  }
   tvCastToInt64InPlace(tv);
   return true;
 }
@@ -1818,12 +1804,6 @@ enable_if_lval_t<T, bool> tvCoerceParamToStringInPlace(T tv, bool builtin) {
 
   switch (type(tv)) {
     case KindOfNull:
-      // In PHP 7 mode handling of null types is stricter
-      if (RuntimeOption::PHP7_ScalarTypes && !builtin) {
-        return false;
-      }
-      // fall-through
-
     case KindOfUninit:
     case KindOfBoolean:
     case KindOfInt64:

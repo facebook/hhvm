@@ -1015,22 +1015,8 @@ Class* Unit::defClosure(const PreClass* preClass) {
   return newClass.get();
 }
 
-namespace {
-bool isPHP7ReservedType(const StringData* alias) {
-  return
-    !strcmp("int",    alias->data()) ||
-    !strcmp("bool",   alias->data()) ||
-    !strcmp("float",  alias->data()) ||
-    !strcmp("string", alias->data());
-}
-}
-
 bool Unit::aliasClass(const StringData* original, const StringData* alias,
                       bool autoload) {
-  if (RuntimeOption::PHP7_ScalarTypes && isPHP7ReservedType(alias)) {
-    raise_error("Fatal error: Cannot use '%s' as class name as it is reserved",
-                alias->data());
-  }
   auto const origClass =
     autoload ? Unit::loadClass(original)
              : Unit::lookupClass(original);

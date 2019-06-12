@@ -35,7 +35,6 @@ std::string show(const Repo::GlobalData& gd) {
   SHOW(ElideAutoloadInvokes);
   SHOW(PHP7_IntSemantics);
   SHOW(PHP7_NoHexNumerics);
-  SHOW(PHP7_ScalarTypes);
   SHOW(PHP7_Builtins);
   SHOW(PHP7_Substr);
   SHOW(PromoteEmptyObject);

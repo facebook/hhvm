@@ -97,13 +97,6 @@ struct Repo::GlobalData {
   bool PHP7_NoHexNumerics = false;
 
   /*
-   * Indicates whether the repo was compiled with PHP7 scalar type hint support.
-   * In this mode non hh units will default to weak types and scalar types will
-   * be available outside the HH namespace.
-   */
-  bool PHP7_ScalarTypes = false;
-
-  /*
    * Indicates whether the repo was compiled with PHP7 builtins enabled.
    */
   bool PHP7_Builtins = false;
@@ -212,7 +205,6 @@ struct Repo::GlobalData {
       (ElideAutoloadInvokes)
       (PHP7_IntSemantics)
       (PHP7_NoHexNumerics)
-      (PHP7_ScalarTypes)
       (PHP7_Substr)
       (PHP7_Builtins)
       (PromoteEmptyObject)

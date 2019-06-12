@@ -1,1 +1,0 @@
-Fatal error: Cannot use 'bar\int' as class name as it is reserved in %s/test/slow/php7_backported/scalar-types/scalar_relative_typehint_disallowed.php on line 3

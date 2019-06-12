@@ -11,7 +11,6 @@ open Core_kernel
 open Hhbc_string_utils
 
 module A = Ast
-module HOpt = Hhbc_options
 module SN = Naming_special_names
 module TC = Hhas_type_constraint
 
@@ -283,40 +282,7 @@ let param_hint_to_type_info ~kind ~skipawaitable ~nullable ~tparams ~namespace h
     let tc_flags = try_add_nullable ~nullable h tc_flags in
     make_type_info ~tparams ~namespace h tc_name tc_flags
 
-let fail_if_contains_reserved_id hint namespace =
-  (* Based on Parser::onTypeAnnotation,
-   * for type hints like foo\bar, check that bar isn't a reserved scalar type
-   * like int or string *)
-  let must_check = HOpt.php7_scalar_types !HOpt.compiler_options in
-  if must_check
-  then
-    let is_reserved id =
-      let fully_qualified_id =
-        Hhbc_id.Class.elaborate_id namespace id
-        |> Hhbc_id.Class.to_unmangled_string in
-      SN.Typehints.is_namespace_with_reserved_hh_name fully_qualified_id in
-    let fail_if_reserved (pos, id as pos_id) =
-      if is_reserved pos_id
-      then
-        Emit_fatal.raise_fatal_parse
-          pos
-          (Printf.sprintf "Cannot use '%s' as class name as it is reserved" id) in
-    let checking_visitor =
-      object(self) inherit [_] Tast.iter as super
-        method! on_hint () hint =
-          match snd hint with
-          | Aast.Happly (id, hints) ->
-            fail_if_reserved id;
-            List.iter hints ~f:(self#on_hint ())
-          | Aast.Haccess (h, ids) ->
-            List.iter ids ~f:fail_if_reserved;
-            self#on_hint () h
-          | _ -> super#on_hint () hint
-      end in
-    checking_visitor#on_hint () hint
-
 let hint_to_type_info ~kind ~skipawaitable ~nullable ~tparams ~namespace h =
-  fail_if_contains_reserved_id h namespace;
   match kind with
   | Param ->
     param_hint_to_type_info ~kind ~skipawaitable ~nullable ~tparams ~namespace h
@@ -334,7 +300,6 @@ let hint_to_type_info ~kind ~skipawaitable ~nullable ~tparams ~namespace h =
     make_type_info ~tparams ~namespace h tc_name tc_flags
 
 let hint_to_class ~namespace (h : Aast.hint) =
-  fail_if_contains_reserved_id h namespace;
   match h with
   | (_, Aast.Happly (id, _)) ->
     let fq_id = Hhbc_id.Class.elaborate_id namespace id in

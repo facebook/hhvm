@@ -13,7 +13,6 @@ module J = Hh_json
 
 (* Compiler configuration options, as set by -v key=value on the command line *)
 type t = {
-  option_php7_scalar_types                : bool;
   option_constant_folding                 : bool;
   option_optimize_null_check              : bool;
   option_max_array_elem_size_on_the_stack : int;
@@ -62,7 +61,6 @@ type t = {
 }
 
 let default = {
-  option_php7_scalar_types = false;
   option_constant_folding = true;
   option_optimize_null_check = false;
   option_max_array_elem_size_on_the_stack = 64;
@@ -113,7 +111,6 @@ let default = {
   option_use_rust_parser = false;
 }
 
-let php7_scalar_types o = o.option_php7_scalar_types
 let constant_folding o = o.option_constant_folding
 let optimize_null_check o = o.option_optimize_null_check
 let max_array_elem_size_on_the_stack o =
@@ -168,8 +165,7 @@ let to_string o =
     |> List.map ~f:(fun (root, path) -> root ^ ": " ^ path)
     |> String.concat ~sep:", " in
   String.concat ~sep:"\n"
-    [ Printf.sprintf "php7_scalar_types: %B" @@ php7_scalar_types o
-    ; Printf.sprintf "constant_folding: %B" @@ constant_folding o
+    [ Printf.sprintf "constant_folding: %B" @@ constant_folding o
     ; Printf.sprintf "optimize_null_check: %B" @@ optimize_null_check o
     ; Printf.sprintf "max_array_elem_size_on_the_stack: %d"
       @@ max_array_elem_size_on_the_stack o
@@ -244,8 +240,6 @@ let set_option options name value =
   (* Keep both for backwards compatibility until next release *)
   | "hack.compiler.sourcemapping" | "eval.disassemblersourcemapping" ->
     { options with option_source_mapping = as_bool value }
-  | "hhvm.php7.scalar_types" ->
-    { options with option_php7_scalar_types = as_bool value }
   | "hhvm.php7.ltr_assign" ->
     { options with option_php7_ltr_assign = as_bool value }
   | "hhvm.php7.uvs" ->
@@ -383,8 +377,6 @@ let set_value name get set config opts =
 let value_setters = [
   (set_value "hhvm.aliased_namespaces" get_value_from_config_kv_list @@
     fun opts v -> { opts with option_aliased_namespaces = Some v });
-  (set_value "hhvm.php7.scalar_types" get_value_from_config_int @@
-    fun opts v -> { opts with option_php7_scalar_types = (v = 1) });
   (set_value "hack.compiler.constant_folding" get_value_from_config_int @@
     fun opts v -> { opts with option_constant_folding = (v = 1) });
   (set_value "hack.compiler.optimize_null_checks" get_value_from_config_int @@

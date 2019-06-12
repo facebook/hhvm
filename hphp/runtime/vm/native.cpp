@@ -318,11 +318,6 @@ void coerceFCallArgs(TypedValue* args,
       continue;
     }
 
-    if (RuntimeOption::PHP7_ScalarTypes && call_uses_strict_types(func)) {
-      tc.verifyParam(&args[-i], func, i);
-      return;
-    }
-
     auto msg = param_type_error_message(
       func->displayName()->data(),
       i+1,

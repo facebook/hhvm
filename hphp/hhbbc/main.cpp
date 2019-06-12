@@ -359,7 +359,6 @@ void write_global_data(
   gd.ElideAutoloadInvokes        = options.ElideAutoloadInvokes;
   gd.PHP7_IntSemantics           = RuntimeOption::PHP7_IntSemantics;
   gd.PHP7_NoHexNumerics          = RuntimeOption::PHP7_NoHexNumerics;
-  gd.PHP7_ScalarTypes            = RuntimeOption::PHP7_ScalarTypes;
   gd.PHP7_Substr                 = RuntimeOption::PHP7_Substr;
   gd.PHP7_Builtins               = RuntimeOption::PHP7_Builtins;
   gd.PromoteEmptyObject          = RuntimeOption::EvalPromoteEmptyObject;

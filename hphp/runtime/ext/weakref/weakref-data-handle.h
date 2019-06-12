@@ -38,7 +38,7 @@ struct WeakRefDataHandle final {
       if (acquire_count) {
         scanner.scan(wr_data->pointee);
       }
-      scanner.scan(wr_data.get());
+      scanner.scan(*wr_data.get());
     }
   }
 

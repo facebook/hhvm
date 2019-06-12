@@ -1,0 +1,11 @@
+bool(true)
+object(DateTime) (3) {
+  ["date"]=>
+  string(26) "2019-06-12 14:56:49.000000"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(19) "America/Los_Angeles"
+}
+bool(false)
+NULL

@@ -235,12 +235,12 @@ and localize_tparam pos (env, ety_env) ty { tp_name = (_, name); tp_constraints 
       let newable = Attributes.mem SN.UserAttributes.uaNewable tp_user_attributes in
       let env, new_name = Env.add_fresh_generic_parameter env name ~reified ~enforceable ~newable in
       let ty_fresh = (r, Tabstract (AKgeneric new_name, None)) in
-      let env = List.fold_left cstrl ~init:env ~f:(fun env (ck, ty) ->
-        let env, ty = localize ~ety_env env ty in
-        TUtils.add_constraint pos env ck ty_fresh ty) in
       (* Substitute fresh type parameters for original formals in constraint *)
       let substs = SMap.add name ty_fresh ety_env.substs in
       let ety_env = { ety_env with substs; } in
+      let env = List.fold_left cstrl ~init:env ~f:(fun env (ck, ty) ->
+        let env, ty = localize ~ety_env env ty in
+        TUtils.add_constraint pos env ck ty_fresh ty) in
       (env, ety_env), ty_fresh
     | _ ->
       let env, ty = localize ~ety_env env ty in

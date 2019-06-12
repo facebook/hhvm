@@ -978,7 +978,7 @@ void TypeConstraint::verifyParamFail(const Func* func, TypedValue* tv,
     isSoft() ||
     (isThis() && couldSeeMockObject()) ||
     (RuntimeOption::EvalHackArrCompatTypeHintNotices &&
-     isArrayType(tv->m_type)) ||
+     isArrayType(tvToCell(tv)->m_type)) ||
     check(tv, func->cls())
   );
 }

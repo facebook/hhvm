@@ -163,19 +163,12 @@ and emit_stmt env (pos, stmt) =
       emit_return env;
     ]
   | A.Expr (ann, A.Await e) ->
-    begin match try_inline_genva_call env e GI_ignore_result with
-    | Some r -> r
-    | None ->
-      gather [
-        emit_await env (fst ann) e;
-        instr_popc;
-      ]
-    end
+    gather [
+      emit_await env (fst ann) e;
+      instr_popc;
+    ]
   | A.Expr
     (_, A.Binop ((Ast.Eq None), ((_, A.List l) as e1), ((await_pos, _), A.Await e_await))) ->
-    begin match try_inline_genva_call env e_await (GI_list_assignment l) with
-    | Some r -> r
-    | None ->
     let awaited_instrs = emit_await env await_pos e_await in
     let has_elements = List.exists l ~f: (function
       | _, A.Omitted -> false
@@ -191,7 +184,6 @@ and emit_stmt env (pos, stmt) =
       instr_unsetl temp
     else
       gather [ awaited_instrs; instr_popc ]
-    end
   | A.Expr (_, A.Binop (Ast.Eq None, e_lhs, ((await_pos, _), A.Await e_await))) ->
     emit_await_assignment env await_pos e_lhs e_await
   | A.Expr (_, A.Yield_from e) ->

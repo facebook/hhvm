@@ -1392,15 +1392,7 @@ and try_inline_gen_call env (e : A.expr) =
     when String.lowercase (SU.strip_global_ns s) = "gena"->
     Some (inline_gena_call env arg)
   | _ ->
-    try_inline_genva_call env e GI_expression
-
-and try_inline_genva_call env (e : A.expr) (inline_context : genva_inline_context) =
-  if not (can_inline_gen_functions ()) then None
-  else match e with
-  | pos, A.Call (_, (_, A.Id (_, s)), _, args, uargs)
-    when String.lowercase (SU.strip_global_ns s) = "genva"->
-    try_inline_genva_call_ env pos args uargs inline_context
-  | _ -> None
+    None
 
 (* emits iteration over the ~collection where loop body is
    produced by ~f *)
@@ -1465,109 +1457,6 @@ and inline_gena_call env (arg : A.expr) = Local.scope @@ fun () ->
   ],
   (* after *)
   instr_pushl arr_local
-
-and try_inline_genva_call_ env annot (args : A.expr list) (uargs : A.expr list) (inline_context : genva_inline_context) =
-  let (pos, _) = annot in
-  let args_count = List.length args in
-  let is_valid_list_assignment l =
-    List.findi l ~f:(fun i (_, x) -> i >= args_count && x <> A.Omitted)
-    |> Option.is_none in
-  let emit_list_assignment (lhs : A.expr list) rhs =
-    let rec combine (lhs : A.expr list) rhs =
-      (* ensure that list of values on left hand side and right hand size
-         has the same length *)
-      match lhs, rhs with
-      | l :: lhs, r :: rhs -> (l, r) :: combine lhs rhs
-      (* left hand size is smaller - pad with omitted expression *)
-      | [], r :: rhs -> ((Tast_annotate.null_annotation Pos.none, A.Omitted), r) :: combine [] rhs
-      | _, [] -> [] in
-    let generate values ~is_ltr =
-      let rec aux lhs_acc set_acc = function
-      | [] -> (if is_ltr then List.rev lhs_acc else lhs_acc), List.rev set_acc
-      | ((_, A.Omitted), _) :: tail -> aux lhs_acc set_acc tail
-      | (lhs, rhs) :: tail ->
-        let lhs_instrs, set_instrs =
-          emit_lval_op_list ~last_usage:true env pos (Some rhs) [] lhs in
-        aux (lhs_instrs::lhs_acc) (set_instrs::set_acc) tail in
-      aux [] [] (if is_ltr then values else List.rev values) in
-    let reify = gather @@ List.map rhs ~f:begin fun l ->
-      let label_done = Label.next_regular () in
-      gather [
-        instr_istypel l OpNull;
-        instr_jmpnz label_done;
-        instr_pushl l;
-        instr_whresult;
-        instr_popl l;
-        instr_label label_done;
-      ]
-    end in
-    let pairs = combine lhs rhs in
-    let lhs, set = generate pairs ~is_ltr:(php7_ltr_assign ()) in
-    gather [
-      reify;
-      gather lhs;
-      gather set;
-      gather @@ List.map pairs
-        ~f:(function (_, A.Omitted), l -> instr_unsetl l | _ -> empty);
-    ] in
-  match inline_context with
-  | GI_list_assignment l when not (is_valid_list_assignment l) ->
-    None
-  | _ when not (List.is_empty uargs) ->
-    Emit_fatal.raise_fatal_runtime pos "do not use ...$args with genva()"
-  | GI_ignore_result | GI_list_assignment _ when args_count = 0 ->
-    Some empty
-  | GI_expression when args_count = 0 ->
-    Some instr_lit_empty_varray
-  | _ when args_count > max_array_elem_on_stack () ->
-    None
-  | _ ->
-  let load_args =
-    gather @@ List.map args ~f:begin fun arg ->
-      emit_expr env arg
-    end in
-  let some result = Some result in
-  some @@ Scope.with_unnamed_locals @@ fun () ->
-  let reserved_locals =
-    List.init args_count (fun _ -> Local.get_unnamed_local ()) in
-  let reserved_locals_reversed =
-    List.rev reserved_locals in
-  let init_locals =
-    gather @@ List.map reserved_locals_reversed ~f:instr_popl in
-  let await_all =
-    gather [
-      instr_awaitall_list reserved_locals_reversed;
-      instr_popc;
-    ] in
-  let process_results =
-    let reify ~pop_result =
-      gather @@ List.map reserved_locals ~f:begin fun l ->
-        let label_done = Label.next_regular() in
-        gather [
-          instr_pushl l;
-          instr_dup;
-          instr_istypec OpNull;
-          instr_jmpnz label_done;
-          instr_whresult;
-          instr_label label_done;
-          if pop_result then instr_popc else empty;
-        ]
-      end in
-    match inline_context with
-    | GI_ignore_result ->
-      reify ~pop_result:true
-    | GI_expression ->
-      gather [
-        reify ~pop_result:false;
-        instr_lit_const (if hack_arr_dv_arrs ()
-                         then (NewVecArray args_count)
-                         else (NewVArray args_count));
-      ]
-    | GI_list_assignment l ->
-      emit_list_assignment l reserved_locals in
-  gather [ load_args; init_locals ],     (* before *)
-  gather [ await_all; process_results ], (* inner *)
-  empty                                  (* after *)
 
 and emit_await env pos (expr : A.expr) =
   begin match try_inline_gen_call env expr with

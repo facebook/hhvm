@@ -33,10 +33,10 @@ async function bar() {
 
 async function foo() {
   foreach (bar() await as list($x, $y)) {
-    list($a, $b) = await genva(
-      baz($x),
-      baz($y),
-    );
+    concurrent {
+      $a = await baz($x);
+      $b = await baz($y);
+    }
     yield 100 * $a + $b;
   }
 }

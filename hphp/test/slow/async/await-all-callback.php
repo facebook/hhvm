@@ -13,7 +13,11 @@ async function answer() {
 }
 
 async function test() {
-  list($a, $b, $c) = await genva(answer(), answer(), answer());
+  concurrent {
+    $a = await answer();
+    $b = await answer();
+    $c = await answer();
+  }
   return $a;
 }
 

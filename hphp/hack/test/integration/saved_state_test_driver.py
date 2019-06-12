@@ -71,19 +71,23 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
         if assert_edges_added is not None:
             print(stdout)
             obj = json.loads(stdout)
-            saved_state_result = obj.get("saved_state_result", None)
+            saved_state_result = obj.get("save_state_result", None)
             result = obj.get("result", None)
             obj = saved_state_result if saved_state_result is not None else result
+
+            if obj is None:
+                raise Exception(
+                    'Failed. Missing result field: "%s" stderr: "%s"' % (stdout, stderr)
+                )
+
             if obj is not None:
                 edges_added = obj.get("dep_table_edges_added", None)
-                naming_table_rows_changed = obj.get(
-                    "naming_table_rows_changed",
-                    None
-                )
+                naming_table_rows_changed = obj.get("naming_table_rows_changed", None)
 
             if edges_added is None:
                 raise Exception(
-                    'Failed. Missing result field: "%s" stderr: "%s"' % (stdout, stderr)
+                    'Failed. Missing dep_table_edges_added field: "%s" stderr: "%s"'
+                    % (stdout, stderr)
                 )
 
         return SaveStateCommandResult(retcode, edges_added, naming_table_rows_changed)
@@ -180,12 +184,13 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
         self.write_watchman_config()
 
     def save_partial(
-            self,
-            files_to_check: List[str] = None,
-            filename: str = None,
-            gen_with_errors: bool = True,
-            init_dir: str = None,
-            assert_edges_added: bool = False) -> SaveStateCommandResult:
+        self,
+        files_to_check: List[str] = None,
+        filename: str = None,
+        gen_with_errors: bool = True,
+        init_dir: str = None,
+        assert_edges_added: bool = False,
+    ) -> SaveStateCommandResult:
         if files_to_check is None:
             files_to_check = []
 
@@ -198,22 +203,23 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
             init_dir = self.repo_dir
 
         spec = {
-            'files_to_check': files_to_check,
-            'filename': filename,
-            'gen_with_errors': gen_with_errors,
+            "files_to_check": files_to_check,
+            "filename": filename,
+            "gen_with_errors": gen_with_errors,
         }
 
         return self.exec_save_command(
             hh_command=[
                 hh_server,
-                '--check',
-                '--json',
-                '--save-state-with-spec',
+                "--check",
+                "--json",
+                "--save-state-with-spec",
                 json.dumps(spec),
                 init_dir,
             ],
             ignore_errors=gen_with_errors,
-            assert_edges_added=assert_edges_added)
+            assert_edges_added=assert_edges_added,
+        )
 
     def start_hh_server(self, changed_files=None, saved_state_path=None):
         if changed_files is None:
@@ -263,8 +269,11 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
             self.assertIn(
                 "loading saved state succeeded",
                 logs,
-                msg=("***Logs contain an init with no saved state. Did your "
-                     "hh_server die and get restarted by the monitor?***"))
+                msg=(
+                    "***Logs contain an init with no saved state. Did your "
+                    "hh_server die and get restarted by the monitor?***"
+                ),
+            )
         return result
 
     def assertEqualString(self, first, second, msg=None):

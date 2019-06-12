@@ -14,6 +14,20 @@
 open Core_kernel
 open Utils
 
+let get_save_state_result_props_json
+    (save_state_result: SaveStateServiceTypes.save_state_result)
+    : (string * Hh_json.json) list =
+  let open SaveStateServiceTypes in
+  [
+    "naming_table_rows_changed", Hh_json.int_ save_state_result.naming_table_rows_changed;
+    "dep_table_edges_added", Hh_json.int_ save_state_result.dep_table_edges_added;
+  ]
+
+let get_save_state_result_json
+    (save_state_result: SaveStateServiceTypes.save_state_result)
+    : (string * Hh_json.json) =
+  "save_state_result", Hh_json.JSON_Object (get_save_state_result_props_json save_state_result)
+
 let get_error_list_json
     (error_list: (Pos.absolute Errors.error_ list))
     ~(save_state_result: SaveStateServiceTypes.save_state_result option)
@@ -32,15 +46,8 @@ let get_error_list_json
   let properties = match save_state_result with
   | None -> properties
   | Some save_state_result ->
-    let saved_state_result =
-      let open SaveStateServiceTypes in
-      "saved_state_result", Hh_json.JSON_Object
-        [
-          "naming_table_rows_changed", Hh_json.int_ save_state_result.naming_table_rows_changed;
-          "edges_added", Hh_json.int_ save_state_result.dep_table_edges_added;
-        ]
-    in
-    saved_state_result :: properties in
+    let save_state_result_json = get_save_state_result_json save_state_result in
+    save_state_result_json :: properties in
   let open ServerCommandTypes.Recheck_stats in
   let properties = match recheck_stats with
   | None -> properties

@@ -61,20 +61,17 @@ let verify_targ_valid env tparam targ =
   begin match tparam.tp_reified with
   | Nast.Reified
   | Nast.SoftReified ->
-    begin match targ with
-    | _, Happly ((p, h), []) when h = Naming_special_names.Typehints.wildcard ->
+    begin match Env.hint_to_ty env targ with
+    | _, Tapply ((p, h), []) when h = Naming_special_names.Typehints.wildcard ->
       if not @@ Env.get_allow_wildcards env then
         Errors.invalid_reified_argument tparam.tp_name (p, h) "a wildcard"
-    | _ ->
-      let ty = Env.hint_to_ty env targ in
-      begin match (Typing_generic.IsGeneric.ty ty) with
-      | Some (p, t) ->
-        begin match (Env.get_reified env t) with
-        | Nast.Erased -> Errors.invalid_reified_argument tparam.tp_name (p, t) "not reified"
-        | Nast.SoftReified -> Errors.invalid_reified_argument tparam.tp_name (p, t) "soft reified"
-        | Nast.Reified -> () end
-      | None -> () end
-    end
+    | _, Tgeneric t ->
+      let p = fst targ in
+      begin match (Env.get_reified env t) with
+      | Nast.Erased -> Errors.invalid_reified_argument tparam.tp_name (p, t) "not reified"
+      | Nast.SoftReified -> Errors.invalid_reified_argument tparam.tp_name (p, t) "soft reified"
+      | Nast.Reified -> () end
+    | _ -> () end;
   | Nast.Erased -> () end;
 
   begin if Attributes.mem UA.uaEnforceable tparam.tp_user_attributes then

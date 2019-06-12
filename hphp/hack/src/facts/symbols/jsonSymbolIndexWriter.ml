@@ -8,6 +8,7 @@
 *)
 open Core_kernel
 open Hh_json
+open IndexBuilderTypes
 open SearchUtils
 
 let record_one_jsonfile
@@ -40,18 +41,18 @@ let record_one_jsonfile
 let record_in_jsonfiles
     (chunk_size: int)
     (filename_prefix: string)
-    (symbols: si_results) =
+    (symbols: si_scan_result) =
 
   (* Note that glean elements must start with high ID numbers *)
   let json_element_id = ref 500_000 in
 
   (* Create an array of all JSON elements *)
-  let json_array = List.map symbols ~f:(fun symbol -> begin
+  let json_array = List.map symbols.sisr_capture ~f:(fun symbol -> begin
         json_element_id := !json_element_id + 1;
-        let kind_int = kind_to_int symbol.si_kind in
+        let kind_int = kind_to_int symbol.sif_kind in
         JSON_Object [ ("key", JSON_Object [
             ("kind", JSON_Number (string_of_int kind_int));
-            ("name", JSON_String symbol.si_name);
+            ("name", JSON_String symbol.sif_name);
           ]);
             ("id", JSON_Number (string_of_int !json_element_id));
           ]

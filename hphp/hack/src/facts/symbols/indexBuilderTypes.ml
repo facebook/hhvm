@@ -18,3 +18,10 @@ type index_builder_context = {
   custom_repo_name: string option;
   include_builtins: bool;
 }
+
+(* Fully parsed data structure *)
+type si_scan_result = {
+  sisr_capture: SearchUtils.si_capture;
+  sisr_namespaces: (string, int) Caml.Hashtbl.t;
+  sisr_filepaths: (string, int64) Caml.Hashtbl.t;
+}

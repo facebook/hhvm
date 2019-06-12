@@ -8,6 +8,9 @@
 *)
 val mangle_xhp_mode: bool ref
 
+val flags_abstract: int
+val flags_final: int
+
 val extract_as_json:
   php5_compat_mode: bool ->
   hhvm_compat_mode: bool ->

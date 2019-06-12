@@ -18,18 +18,39 @@ let files_scanned = ref 0
 let error_count = ref 0
 
 
+(* Extract kind, abstract, and final flags *)
+let get_details_from_info
+    (info_opt: Facts.type_facts option): si_kind * bool * bool =
+  let open Facts_parser in
+  match info_opt with
+  | None -> (SI_Unknown, false, false)
+  | Some info -> begin
+      let k = match info.kind with
+      | TKClass -> SI_Class
+      | TKInterface -> SI_Interface
+      | TKEnum -> SI_Enum
+      | TKTrait -> SI_Trait
+      | TKMixed -> SI_Mixed
+      | _ -> SI_Unknown
+      in
+      let is_abstract = ((info.flags land flags_abstract) > 0) in
+      let is_final = ((info.flags land flags_final) > 0) in
+      (k, is_abstract, is_final)
+  end
+;;
+
 (* Parse one single file and capture information about it *)
 let parse_file
     (ctxt: index_builder_context)
-    (filename: string): si_results =
+    (filename: string): si_capture =
   if Sys.is_directory filename then begin
     []
   end else begin
-    let rel_path_str = String.substr_replace_first
+    let path = String.substr_replace_first
       filename ~pattern:ctxt.repo_folder ~with_:"" in
-    let path_hash = SharedMem.get_hash rel_path_str in
     let text = In_channel.read_all filename in
     let rp = Relative_path.from_root filename in
+
     (* Just the facts ma'am *)
     Facts_parser.mangle_xhp_mode := false;
     let fact_opt = Facts_parser.from_text
@@ -47,45 +68,41 @@ let parse_file
         let class_keys = InvSMap.keys facts.types in
         let classes_mapped = List.map class_keys ~f:(fun key -> begin
           let info_opt = InvSMap.get key facts.types in
-          let kind = begin
-            match info_opt with
-            | None -> SI_Unknown
-            | Some info -> begin
-                match info.kind with
-                | TKClass -> SI_Class
-                | TKInterface -> SI_Interface
-                | TKEnum -> SI_Enum
-                | TKTrait -> SI_Trait
-                | TKMixed -> SI_Mixed
-                | _ -> SI_Unknown
-              end
-          end in
+          let (kind, is_abstract, is_final) = get_details_from_info info_opt in
           {
-            si_name = key;
-            si_kind = kind;
-            si_filehash = path_hash;
+            sif_name = key;
+            sif_kind = kind;
+            sif_filepath = path;
+            sif_is_abstract = is_abstract;
+            sif_is_final = is_final;
           }
         end) in
 
         (* Identify all functions in the file *)
         let functions_mapped = List.map facts.functions ~f:(fun funcname -> {
-          si_name = funcname;
-          si_kind = SI_Function;
-          si_filehash = path_hash;
+          sif_name = funcname;
+          sif_kind = SI_Function;
+          sif_filepath = path;
+          sif_is_abstract = false;
+          sif_is_final = false;
         }) in
 
         (* Handle typedefs *)
         let types_mapped = List.map facts.type_aliases ~f:(fun typename -> {
-          si_name = typename;
-          si_kind = SI_Typedef;
-          si_filehash = path_hash;
+          sif_name = typename;
+          sif_kind = SI_Typedef;
+          sif_filepath = path;
+          sif_is_abstract = false;
+          sif_is_final = false;
         }) in
 
         (* Handle constants *)
         let constants_mapped = List.map facts.constants ~f:(fun constantname -> {
-          si_name = constantname;
-          si_kind = SI_GlobalConstant;
-          si_filehash = path_hash;
+          sif_name = constantname;
+          sif_kind = SI_GlobalConstant;
+          sif_filepath = path;
+          sif_is_abstract = false;
+          sif_is_final = false;
         }) in
 
         (* Return unified results *)
@@ -103,8 +120,8 @@ let parse_file
 
 let parse_batch
     (ctxt: index_builder_context)
-    (acc: si_results)
-    (files: string list): si_results =
+    (acc: si_capture)
+    (files: string list): si_capture =
   List.fold files ~init:acc ~f:begin fun acc file ->
     if Path.file_exists (Path.make file) then
       try
@@ -123,7 +140,7 @@ let parse_batch
 let parallel_parse
     ~(workers: MultiWorker.worker list option)
     (files: string list)
-    (ctxt: index_builder_context): si_results =
+    (ctxt: index_builder_context): si_capture =
   MultiWorker.call workers
     ~job:(parse_batch ctxt)
     ~neutral:[]
@@ -163,6 +180,32 @@ let measure_time ~f ~(name: string) =
   result
 ;;
 
+(* All data is ready.  Identify unique namespaces and filepaths *)
+let convert_capture (incoming: si_capture): si_scan_result =
+  let result = {
+    sisr_capture = incoming;
+    sisr_namespaces = Caml.Hashtbl.create 0;
+    sisr_filepaths = Caml.Hashtbl.create 0;
+  } in
+  let ns_id = ref 1 in
+  List.iter incoming ~f:(fun s ->
+
+    (* Find / add namespace *)
+    let (namespace, _name) = Utils.split_ns_from_name s.sif_name in
+    if not (Caml.Hashtbl.mem result.sisr_namespaces namespace) then begin
+      Caml.Hashtbl.add result.sisr_namespaces namespace !ns_id;
+      incr ns_id;
+    end;
+
+    (* Find / add filepath hashes *)
+    if not (Caml.Hashtbl.mem result.sisr_filepaths s.sif_filepath) then begin
+      let path_hash = SharedMem.get_hash s.sif_filepath in
+      Caml.Hashtbl.add result.sisr_filepaths s.sif_filepath path_hash;
+    end;
+  );
+  result
+;;
+
 (* Run the index builder project *)
 let go (ctxt: index_builder_context) (workers: MultiWorker.worker list option): unit =
 
@@ -184,7 +227,10 @@ let go (ctxt: index_builder_context) (workers: MultiWorker.worker list option): 
 
   (* Spawn the parallel parser *)
   let name = Printf.sprintf "Parsed %d files in " (List.length files) in
-  let results = measure_time ~f:(fun () -> parallel_parse ~workers files ctxt) ~name in
+  let capture = measure_time ~f:(fun () -> parallel_parse ~workers files ctxt) ~name in
+
+  (* Convert the raw capture into results *)
+  let results = convert_capture capture in
 
   (* Are we exporting a sqlite file? *)
   begin
@@ -193,7 +239,7 @@ let go (ctxt: index_builder_context) (workers: MultiWorker.worker list option): 
       ()
     | Some filename ->
       let name = Printf.sprintf "Wrote %d symbols to sqlite in "
-        (List.length results) in
+        (List.length results.sisr_capture) in
       measure_time ~f:(fun () ->
           SqliteSymbolIndexWriter.record_in_db filename results;
         ) ~name;
@@ -206,7 +252,7 @@ let go (ctxt: index_builder_context) (workers: MultiWorker.worker list option): 
       ()
     | Some filename ->
       let name = Printf.sprintf "Wrote %d symbols to text in "
-        (List.length results) in
+        (List.length results.sisr_capture) in
       measure_time ~f:(fun () ->
           TextSymbolIndexWriter.record_in_textfile filename results;
         ) ~name;
@@ -219,7 +265,7 @@ let go (ctxt: index_builder_context) (workers: MultiWorker.worker list option): 
       []
     | Some filename ->
       let name = Printf.sprintf "Wrote %d symbols to json in "
-        (List.length results) in
+        (List.length results.sisr_capture) in
       measure_time ~f:(fun () ->
           JsonSymbolIndexWriter.record_in_jsonfiles
             ctxt.json_chunk_size filename results;

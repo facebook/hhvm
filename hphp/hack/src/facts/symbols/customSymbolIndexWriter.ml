@@ -7,7 +7,7 @@
  *
 *)
 
-(* Export all files matching this prefix to glean *)
+(* Export all files matching this prefix to a custom symbol service *)
 let send_to_custom_writer
     (_files: string list)
     (_service: string)

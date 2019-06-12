@@ -6,11 +6,12 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
 *)
+open IndexBuilderTypes
 open SearchUtils
 
 let record_in_textfile
     (filename: string)
-    (symbols: si_results): unit =
+    (symbols: si_scan_result): unit =
 
   (* Open a temporary file *)
   let open Core_kernel in
@@ -18,11 +19,17 @@ let record_in_textfile
   let channel = Out_channel.create temp_filename in
 
   (* Write lines to file *)
-  List.iter symbols ~f:(fun symbol -> begin
-    let kindstr = Printf.sprintf "%d" (kind_to_int symbol.si_kind) in
-      Out_channel.output_string channel symbol.si_name;
+  List.iter symbols.sisr_capture ~f:(fun symbol -> begin
+    let kindstr = Printf.sprintf "%d" (kind_to_int symbol.sif_kind) in
+      Out_channel.output_string channel symbol.sif_name;
       Out_channel.output_string channel " ";
       Out_channel.output_string channel kindstr;
+      if SearchUtils.valid_for_acid symbol then
+        Out_channel.output_string channel " acid ";
+      if SearchUtils.valid_for_acnew symbol then
+        Out_channel.output_string channel " acnew ";
+      if SearchUtils.valid_for_actype symbol then
+        Out_channel.output_string channel " actype ";
       Out_channel.output_string channel "\n";
   end);
 

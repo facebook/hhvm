@@ -7,6 +7,7 @@
  *
 *)
 open Core_kernel
+open IndexBuilderTypes
 open SearchUtils
 open Sqlite_utils
 
@@ -69,7 +70,7 @@ let sql_create_indexes =
 (* Begin the work of creating an SQLite index DB *)
 let record_in_db
     (filename: string)
-    (symbols: si_results): unit =
+    (symbols: si_scan_result): unit =
 
   (* If the file exists, remove it before starting over *)
   if Sys.file_exists filename then begin
@@ -87,34 +88,23 @@ let record_in_db
   Sqlite3.exec db sql_insert_kinds |> check_rc;
   Sqlite3.exec db sql_begin_transaction |> check_rc;
 
-  (* Insert namespaces into the database and construct a map to their IDs *)
-  let namespace_tbl = Caml.Hashtbl.create 0 in
-  let ns_id = ref 1 in
-
   (* Insert symbols and link them to namespaces *)
   begin
     let stmt = Sqlite3.prepare db sql_insert_symbol in
-    List.iter symbols ~f:(fun symbol -> begin
+    List.iter symbols.sisr_capture ~f:(fun symbol -> begin
 
-      (* Determine the namespace of this symbol, if any *)
-      let (namespace, _name) = Utils.split_ns_from_name symbol.si_name in
-      let nsid_opt = Caml.Hashtbl.find_opt namespace_tbl namespace in
-      let nsid = match nsid_opt with
-      | Some id -> id
-      | None ->
-        let id = !ns_id in
-        Caml.Hashtbl.add namespace_tbl namespace id;
-        incr ns_id;
-        id
-      in
+      (* Find nsid and filehash *)
+      let (ns, _) = Utils.split_ns_from_name symbol.sif_name in
+      let nsid = Caml.Hashtbl.find symbols.sisr_namespaces ns in
+      let file_hash = Caml.Hashtbl.find symbols.sisr_filepaths symbol.sif_filepath in
 
       (* Insert this symbol *)
       Sqlite3.reset stmt |> check_rc;
       Sqlite3.bind stmt 1 (Sqlite3.Data.INT (Int64.of_int nsid)) |> check_rc;
-      Sqlite3.bind stmt 2 (Sqlite3.Data.INT symbol.si_filehash) |> check_rc;
-      Sqlite3.bind stmt 3 (Sqlite3.Data.TEXT symbol.si_name) |> check_rc;
+      Sqlite3.bind stmt 2 (Sqlite3.Data.INT file_hash) |> check_rc;
+      Sqlite3.bind stmt 3 (Sqlite3.Data.TEXT symbol.sif_name) |> check_rc;
       Sqlite3.bind stmt 4 (Sqlite3.Data.INT
-        (Int64.of_int (kind_to_int symbol.si_kind))) |> check_rc;
+        (Int64.of_int (kind_to_int symbol.sif_kind))) |> check_rc;
       Sqlite3.step stmt |> check_rc;
     end);
     Sqlite3.finalize stmt |> check_rc;
@@ -124,12 +114,11 @@ let record_in_db
   begin
     let stmt = Sqlite3.prepare db sql_insert_namespace in
     Caml.Hashtbl.iter (fun ns id -> begin
-      Caml.Hashtbl.add namespace_tbl ns id;
       Sqlite3.reset stmt |> check_rc;
       Sqlite3.bind stmt 1 (Sqlite3.Data.INT (Int64.of_int id)) |> check_rc;
       Sqlite3.bind stmt 2 (Sqlite3.Data.TEXT ns) |> check_rc;
       Sqlite3.step stmt |> check_rc;
-    end) namespace_tbl;
+    end) symbols.sisr_namespaces;
     Sqlite3.finalize stmt |> check_rc;
   end;
 

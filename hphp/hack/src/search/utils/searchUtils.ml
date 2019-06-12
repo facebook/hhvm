@@ -202,10 +202,48 @@ let to_ty_string (item: si_item): string =
   | SI_GlobalConstant -> "constant"
   | SI_XHP -> "XHP class"
   | SI_Namespace -> "namespace"
+(* More complete representation of a symbol index item *)
+type si_fullitem = {
+  sif_name: string;
+  sif_kind: si_kind;
+  sif_filepath: string;
+  sif_is_abstract: bool;
+  sif_is_final: bool;
+}
+
+(* ACID represents a statement.  Everything other than interfaces are valid *)
+let valid_for_acid (s: si_fullitem): bool =
+  match s.sif_kind with
+  | SI_Mixed
+  | SI_Unknown
+  | SI_Interface -> false
+  | _ -> true
+
+(* ACTYPE represents a type definition that can be passed as a parameter *)
+let valid_for_actype (s: si_fullitem): bool =
+  match s.sif_kind with
+  | SI_Mixed
+  | SI_Unknown
+  | SI_Trait
+  | SI_Function
+  | SI_GlobalConstant -> false
+  | _ -> true
+
+(* ACNEW represents instantiation of an object, so cannot be abstract *)
+let valid_for_acnew (s: si_fullitem): bool =
+  match s.sif_kind with
+  | SI_Class
+  | SI_Typedef
+  | SI_XHP -> (not s.sif_is_abstract)
+  | _ -> false
 
 (* Internal representation of a full list of results *)
 type si_results =
   si_item list
+
+(* Fully captured information from a scan of WWW *)
+type si_capture =
+  si_fullitem list
 
 (* Which system notified us of a file changed? *)
 type file_source =

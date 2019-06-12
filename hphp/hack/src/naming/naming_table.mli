@@ -37,6 +37,7 @@ val get_file_info : t -> Relative_path.t -> FileInfo.t option
 val get_file_info_unsafe : t -> Relative_path.t -> FileInfo.t
 val has_file : t -> Relative_path.t -> bool
 val iter : t -> f:(Relative_path.t -> FileInfo.t -> unit) -> unit
+val remove : t -> Relative_path.t -> t
 val update : t -> Relative_path.t -> FileInfo.t  -> t
 val update_many : t -> FileInfo.t Relative_path.Map.t -> t
 val save : t -> string -> int

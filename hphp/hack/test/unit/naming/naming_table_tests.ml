@@ -94,12 +94,12 @@ let run_naming_table_test f =
       (Naming_table.save naming_table db_name)
       "Expected to add eight rows (four files and four symbols)";
     Naming_table.set_sqlite_fallback_path db_name;
-    f ();
+    f ~naming_table;
     true
   end
 
 
-let test_get_pos () = run_naming_table_test begin fun () ->
+let test_get_pos () = run_naming_table_test begin fun ~naming_table:_ ->
   Types_pos_asserter.assert_option_equals
     (Some (FileInfo.File (FileInfo.Class, Relative_path.from_root "foo.php"), Naming_table.TClass))
     (Naming_table.Types.get_pos "\\Foo")
@@ -120,7 +120,7 @@ let test_get_pos () = run_naming_table_test begin fun () ->
     "Check for const"
 end
 
-let test_get_canon_name () = run_naming_table_test begin fun () ->
+let test_get_canon_name () = run_naming_table_test begin fun ~naming_table:_ ->
   (* Since we're parsing but not naming, the canon heap must fall back to the
      files on disk, which is the situation we'd be in when loading from a
      saved state. *)
@@ -138,8 +138,22 @@ let test_get_canon_name () = run_naming_table_test begin fun () ->
     "Check for typedef canon name";
 end
 
+let test_remove () = run_naming_table_test begin fun
+    ~naming_table:unbacked ->
+  let foo_path = Relative_path.from_root "foo.php" in
+  assert (Naming_table.get_file_info unbacked foo_path |> Option.is_some);
+  let unbacked = Naming_table.remove unbacked foo_path in
+  assert (Naming_table.get_file_info unbacked foo_path |> Option.is_none);
+
+  let backed = Naming_table.from_db () in
+  assert (Naming_table.get_file_info backed foo_path |> Option.is_some);
+  let backed = Naming_table.remove backed foo_path in
+  assert (Naming_table.get_file_info backed foo_path |> Option.is_none)
+end
+
 let () =
   Unit_test.run_all [
     ("test_get_pos", test_get_pos);
     ("test_get_canon_name", test_get_canon_name);
+    ("test_remove", test_remove);
   ]

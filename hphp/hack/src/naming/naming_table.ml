@@ -760,6 +760,13 @@ let iter a ~f =
   | Unbacked a -> Relative_path.Map.iter a ~f
   | Backed local_changes -> Sqlite.fold ~init:() ~f:(fun path fi () -> f path fi) ~local_changes
 
+let remove a key =
+  match a with
+  | Unbacked a ->
+    Unbacked (Relative_path.Map.remove a key)
+  | Backed local_changes ->
+    Backed (Relative_path.Map.add local_changes ~key ~data:Deleted)
+
 let update a key data =
   match a with
   | Unbacked a -> Unbacked (Relative_path.Map.add a ~key ~data)

@@ -160,6 +160,9 @@ let hh_server_state: (float * hh_server_state) list ref = ref [] (* head is newe
 let ref_from: string ref = ref ""
 let showStatus_outstanding: string ref = ref ""
 
+let log s =
+  Hh_logger.log ("[client-lsp] " ^^ s)
+
 let initialize_params_exc () : Lsp.Initialize.params =
   match Lwt.poll initialize_params_promise with
   | None -> failwith "initialize_params not yet received"
@@ -720,7 +723,7 @@ let do_shutdown
     (state: state)
     (ide_service: ClientIdeService.t)
     (ref_unblocked_time: float ref): state Lwt.t =
-  Hh_logger.log "Received shutdown request";
+  log "Received shutdown request";
   let state = dismiss_ui state in
   let%lwt () =
     begin match state with
@@ -1810,7 +1813,7 @@ let set_up_hh_logger_for_client_lsp () : unit =
     client_lsp_log_fn
     ~append:true
   );
-  Hh_logger.log "Starting clientLsp at %s" client_lsp_log_fn
+  log "Starting clientLsp at %s" client_lsp_log_fn
 
 let start_server (root: Path.t) : unit =
   (* This basically does "hh_client start": a single attempt to open the     *)
@@ -2121,7 +2124,7 @@ let hack_log_error
     (unblocked_time: float)
   : unit =
   let root = get_root_opt () in
-  Hh_logger.log "Exception: message: %s, stack trace: %s"
+  log "Exception: message: %s, stack trace: %s"
     message
     stack;
   match event with
@@ -2632,7 +2635,7 @@ let run_ide_service
     Lwt.return_unit
 
 let shutdown_ide_service (ide_service: ClientIdeService.t ref): unit Lwt.t =
-  Hh_logger.log "Shutting down IDE service process...";
+  log "Shutting down IDE service process...";
   let%lwt () = ClientIdeService.destroy !ide_service in
   Lwt.return_unit
 

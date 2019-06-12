@@ -23,7 +23,7 @@
  *   with error keys if passed an array.
  *
  */
-<<__Native>>
+<<__Native, __NonRx('APC')>>
 function apc_add(mixed $key_or_array,
                  mixed $var = null,
                  int $ttl = 0): mixed;
@@ -49,7 +49,7 @@ function apc_add(mixed $key_or_array,
  *   error keys if passed an array.
  *
  */
-<<__Native>>
+<<__Native, __NonRx('APC')>>
 function apc_store(mixed $key_or_array,
                    mixed $var = null,
                    int $ttl = 0): mixed;
@@ -66,7 +66,7 @@ function apc_store(mixed $key_or_array,
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native, __NonRx('APC')>>
 function apc_store_as_primed_do_not_use(string $key,
                                         mixed $var): bool;
 
@@ -81,7 +81,7 @@ function apc_store_as_primed_do_not_use(string $key,
  *   on failure
  *
  */
-<<__Native>>
+<<__Native, __NonRx('APC')>>
 function apc_fetch(mixed $key,
                    mixed &$success = null): mixed;
 
@@ -93,7 +93,7 @@ function apc_fetch(mixed $key,
  * @return mixed - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native, __NonRx('APC')>>
 function apc_delete(mixed $key): mixed;
 
 /**
@@ -114,7 +114,7 @@ function apc_delete(mixed $key): mixed;
  *   data. This typically occurs when APC is not enabled.
  *
  */
-<<__Native>>
+<<__Native, __NonRx('APC')>>
 function apc_cache_info(string $cache_type = "", bool $limited = false): mixed;
 
 /**
@@ -123,7 +123,7 @@ function apc_cache_info(string $cache_type = "", bool $limited = false): mixed;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native, __NonRx('APC')>>
 function apc_clear_cache(string $cache_type = ""): bool;
 
 /**
@@ -135,7 +135,7 @@ function apc_clear_cache(string $cache_type = ""): bool;
  * @return array - Array of Shared Memory Allocation data; FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native, __NonRx('APC')>>
 function apc_sma_info(bool $limited = false): darray;
 
 /**
@@ -150,7 +150,7 @@ function apc_sma_info(bool $limited = false): darray;
  *   FALSE on failure
  *
  */
-<<__Native>>
+<<__Native, __NonRx('APC')>>
 function apc_inc(string $key,
                  int $step = 1,
                  mixed &$success = null): mixed;
@@ -167,7 +167,7 @@ function apc_inc(string $key,
  *   FALSE on failure
  *
  */
-<<__Native>>
+<<__Native, __NonRx('APC')>>
 function apc_dec(string $key,
                  int $step = 1,
                  mixed &$success = null): mixed;
@@ -182,7 +182,7 @@ function apc_dec(string $key,
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native, __NonRx('APC')>>
 function apc_cas(string $key,
                  int $old_cas,
                  int $new_cas): bool;
@@ -198,7 +198,7 @@ function apc_cas(string $key,
  *   array if none exist.
  *
  */
-<<__Native>>
+<<__Native, __NonRx('APC')>>
 function apc_exists(mixed $key): mixed;
 
 /**
@@ -209,5 +209,5 @@ function apc_exists(mixed $key): mixed;
  * @return mixed - Returns the current size of a key or null on failure.
  *
  */
-<<__Native>>
+<<__Native, __NonRx('APC')>>
 function apc_size(string $key): ?int;

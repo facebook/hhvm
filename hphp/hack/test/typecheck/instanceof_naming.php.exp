@@ -1,2 +1,0 @@
-File "instanceof_naming.php", line 4, characters 21-30:
-Unexpected node on right hand side of new or instanceof: array_intrinsic_expression (Parsing[1002])

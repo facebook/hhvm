@@ -26,9 +26,9 @@ class A {
   }
 
   public A function getX(dyn $obj) {
-    $y = (!($obj instanceof A) || $obj->setX(new A()));
-    $y = (($obj instanceof A) && $obj->setX(new A()));
-    if (($x = $this->x) && ($x instanceof A)) {
+    $y = (!($obj is A) || $obj->setX(new A()));
+    $y = (($obj is A) && $obj->setX(new A()));
+    if (($x = $this->x) && ($x is A)) {
       return $x;
     }
     return $this;

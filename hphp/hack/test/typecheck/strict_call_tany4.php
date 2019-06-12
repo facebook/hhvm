@@ -19,6 +19,6 @@ class D extends C {
 async function expload(): Awaitable<void> {
   $any = any();
   $x = await $any;
-  invariant($x instanceof C, '');
+  invariant($x is C, '');
   $x->dd();
 }

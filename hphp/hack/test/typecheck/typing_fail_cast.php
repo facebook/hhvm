@@ -20,7 +20,7 @@ class A<T> extends Exception implements B {
 }
 
 function test1(mixed $x): A<bool> {
-  if($x instanceof A) {
+  if($x is A<_>) {
     return (A<bool>)$x;
   }
   throw new A();

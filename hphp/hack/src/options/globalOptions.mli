@@ -63,8 +63,8 @@ type t = {
  (* Namespace aliasing map *)
  po_auto_namespace_map : (string * string) list;
 
- (* Should we auto import into the HH namespace? *)
- po_enable_hh_syntax_for_hhvm : bool;
+ (* Are we emitting bytecode? *)
+ po_codegen : bool;
 
  (* Flag for disabling functions in HHI files with the __PHPStdLib attribute *)
  po_deregister_php_stdlib : bool;
@@ -276,7 +276,7 @@ val po_disallow_execution_operator : t -> bool
 val po_disable_nontoplevel_declarations : t -> bool
 val po_disable_static_closures : t -> bool
 val po_allow_goto : t -> bool
-val po_enable_hh_syntax_for_hhvm : t -> bool
+val po_codegen : t -> bool
 val tco_log_inference_constraints : t -> bool
 val tco_disallow_ambiguous_lambda : t -> bool
 val tco_disallow_array_typehint : t -> bool

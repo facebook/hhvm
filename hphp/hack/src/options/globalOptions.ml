@@ -15,7 +15,7 @@ type t = {
   tco_dynamic_view : bool;
   tco_disallow_array_as_tuple : bool;
   po_auto_namespace_map : (string * string) list;
-  po_enable_hh_syntax_for_hhvm : bool;
+  po_codegen : bool;
   po_deregister_php_stdlib : bool;
   po_disallow_execution_operator : bool;
   po_disable_nontoplevel_declarations : bool;
@@ -192,7 +192,7 @@ let default = {
  tco_dynamic_view = false;
  tco_disallow_array_as_tuple = false;
  po_auto_namespace_map = [];
- po_enable_hh_syntax_for_hhvm = false;
+ po_codegen = false;
  po_disallow_execution_operator = false;
  po_deregister_php_stdlib = false;
  po_disable_nontoplevel_declarations = false;
@@ -284,7 +284,7 @@ let make
   tco_dynamic_view;
   tco_disallow_array_as_tuple;
   po_auto_namespace_map;
-  po_enable_hh_syntax_for_hhvm = false;
+  po_codegen = false;
   ignored_fixme_codes;
   ignored_fixme_regex;
   po_deregister_php_stdlib;
@@ -338,7 +338,7 @@ let po_disable_nontoplevel_declarations t = t.po_disable_nontoplevel_declaration
 let po_disable_static_closures t = t.po_disable_static_closures
 let po_allow_goto t = t.po_allow_goto
 let tco_log_inference_constraints t = t.tco_log_inference_constraints
-let po_enable_hh_syntax_for_hhvm t = t.po_enable_hh_syntax_for_hhvm
+let po_codegen t = t.po_codegen
 let po_disallow_execution_operator t = t.po_disallow_execution_operator
 let tco_disallow_ambiguous_lambda t = t.tco_disallow_ambiguous_lambda
 let tco_disallow_array_typehint t = t.tco_disallow_array_typehint

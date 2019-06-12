@@ -42,7 +42,6 @@ type env =
    * typechecking properly. *)
   ; show_all_errors          : bool
   ; lower_coroutines         : bool
-  ; enable_hh_syntax         : bool
   ; fail_open                : bool
   ; parser_options           : ParserOptions.t
   ; fi_mode                  : FileInfo.mode
@@ -89,7 +88,6 @@ let make_env
   ?(quick_mode               = false                   )
   ?(show_all_errors          = false                   )
   ?(lower_coroutines         = true                    )
-  ?(enable_hh_syntax         = false                   )
   ?(fail_open                = true                    )
   ?(parser_options           = ParserOptions.default   )
   ?(fi_mode                  = FileInfo.Mpartial       )
@@ -99,8 +97,7 @@ let make_env
   (file : Relative_path.t)
   : env
   =
-    let parser_options = ParserOptions.with_hh_syntax_for_hhvm parser_options
-      (codegen && (enable_hh_syntax || is_hh_file)) in
+    let parser_options = ParserOptions.with_codegen parser_options codegen in
     { is_hh_file
     ; codegen = codegen || systemlib_compat_mode
     ; systemlib_compat_mode
@@ -117,7 +114,6 @@ let make_env
          )
     ; show_all_errors
     ; lower_coroutines
-    ; enable_hh_syntax
     ; parser_options
     ; fi_mode
     ; fail_open
@@ -3614,7 +3610,6 @@ let lower_tree
         else ParserErrors.HHVMCompat in
       let error_env = ParserErrors.make_env tree
         ~hhvm_compat_mode
-        ~enable_hh_syntax:env.enable_hh_syntax
         ~codegen:env.codegen
         ~parser_options:env.parser_options
       in
@@ -3641,7 +3636,6 @@ let lower_tree
       | [] ->
         let error_env = ParserErrors.make_env tree
           ~hhvm_compat_mode:ParserErrors.HHVMCompat
-          ~enable_hh_syntax:env.enable_hh_syntax
           ~codegen:env.codegen
           ~hhi_mode:is_hhi
           ~parser_options:env.parser_options
@@ -3653,12 +3647,10 @@ let lower_tree
   let mode = Option.value mode ~default:(FileInfo.Mpartial) in
   let env = { env with fi_mode = mode; is_hh_file = mode <> FileInfo.Mphp } in
   let popt = env.parser_options in
-  (* If we are generating code and this is an hh file or hh syntax is enabled,
-   * then we want to inject auto import types into HH namespace during namespace
-   * resolution.
+  (* If we are generating code, then we want to inject auto import types into
+   * HH namespace during namespace resolution.
    *)
-  let popt = ParserOptions.with_hh_syntax_for_hhvm popt
-    (env.codegen && (ParserOptions.enable_hh_syntax_for_hhvm popt || env.is_hh_file)) in
+  let popt = ParserOptions.with_codegen popt env.codegen in
   let env = { env with parser_options = popt } in
   let lower =
     if env.lower_coroutines

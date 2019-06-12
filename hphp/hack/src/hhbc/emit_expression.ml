@@ -21,9 +21,7 @@ module ULS = Unique_list_string
 module Opts = Hhbc_options
 
 let can_inline_gen_functions () =
-  let opts = !Opts.compiler_options in
-  (Opts.enable_hiphop_syntax opts) &&
-  not (Opts.jit_enable_rename_function opts)
+  not (Opts.jit_enable_rename_function !Opts.compiler_options)
 
 let max_array_elem_on_stack () =
   Hhbc_options.max_array_elem_size_on_the_stack !Hhbc_options.compiler_options

@@ -98,7 +98,6 @@ type env =
   { syntax_tree          : SyntaxTree.t
   ; level                : error_level
   ; hhvm_compat_mode     : hhvm_compat_mode
-  ; enable_hh_syntax     : bool
   ; codegen              : bool
   ; hhi_mode             : bool
   ; parser_options       : ParserOptions.t
@@ -108,7 +107,6 @@ type env =
 let make_env
   ?(level                = Typical         )
   ?(hhvm_compat_mode     = NoCompat        )
-  ?(enable_hh_syntax     = false           )
   ?(hhi_mode             = false           )
   ~(parser_options : ParserOptions.t)
   (syntax_tree : SyntaxTree.t)
@@ -127,7 +125,6 @@ let make_env
     { syntax_tree
     ; level
     ; hhvm_compat_mode
-    ; enable_hh_syntax
     ; codegen
     ; hhi_mode
     ; parser_options

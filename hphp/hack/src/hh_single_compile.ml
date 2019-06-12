@@ -270,8 +270,6 @@ let parse_text compiler_options popt fn text =
   let () = set_stats_if_enabled ~compiler_options in
   let ignore_pos =
     not (Hhbc_options.source_mapping !Hhbc_options.compiler_options) in
-  let enable_hh_syntax =
-    Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options in
   let php5_compat_mode =
     not (Hhbc_options.enable_uniform_variable_syntax !Hhbc_options.compiler_options) in
   let hacksperimental =
@@ -289,7 +287,6 @@ let parse_text compiler_options popt fn text =
     ~fail_open:false
     ~systemlib_compat_mode
     ~php5_compat_mode
-    ~enable_hh_syntax
     ~hacksperimental
     ~keep_errors:false
     ~lower_coroutines
@@ -463,10 +460,10 @@ let make_popt () =
   let co = !compiler_options in
   ParserOptions.make
     ~auto_namespace_map:(aliased_namespaces co)
+    ~codegen:true
     ~disallow_execution_operator:(phpism_disallow_execution_operator co)
     ~disable_nontoplevel_declarations:(phpism_disable_nontoplevel_declarations co)
     ~disable_static_closures:(phpism_disable_static_closures co)
-    ~enable_hh_syntax_for_hhvm:(enable_hiphop_syntax co)
     ~disable_lval_as_an_expression:(disable_lval_as_an_expression co)
     ~disable_instanceof:(phpism_disable_instanceof co)
     ~rust:(use_rust_parser co)

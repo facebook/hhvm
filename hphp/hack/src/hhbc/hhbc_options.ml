@@ -13,7 +13,6 @@ module J = Hh_json
 
 (* Compiler configuration options, as set by -v key=value on the command line *)
 type t = {
-  option_enable_hiphop_syntax             : bool;
   option_php7_scalar_types                : bool;
   option_constant_folding                 : bool;
   option_optimize_null_check              : bool;
@@ -63,7 +62,6 @@ type t = {
 }
 
 let default = {
-  option_enable_hiphop_syntax = false;
   option_php7_scalar_types = false;
   option_constant_folding = true;
   option_optimize_null_check = false;
@@ -115,7 +113,6 @@ let default = {
   option_use_rust_parser = false;
 }
 
-let enable_hiphop_syntax o = o.option_enable_hiphop_syntax
 let php7_scalar_types o = o.option_php7_scalar_types
 let constant_folding o = o.option_constant_folding
 let optimize_null_check o = o.option_optimize_null_check
@@ -171,8 +168,7 @@ let to_string o =
     |> List.map ~f:(fun (root, path) -> root ^ ": " ^ path)
     |> String.concat ~sep:", " in
   String.concat ~sep:"\n"
-    [ Printf.sprintf "enable_hiphop_syntax: %B" @@ enable_hiphop_syntax o
-    ; Printf.sprintf "php7_scalar_types: %B" @@ php7_scalar_types o
+    [ Printf.sprintf "php7_scalar_types: %B" @@ php7_scalar_types o
     ; Printf.sprintf "constant_folding: %B" @@ constant_folding o
     ; Printf.sprintf "optimize_null_check: %B" @@ optimize_null_check o
     ; Printf.sprintf "max_array_elem_size_on_the_stack: %d"
@@ -241,8 +237,6 @@ let get_hhjs_node_modules_from_string = function
 
 let set_option options name value =
   match String.lowercase name with
-  | "eval.enablehiphopsyntax" ->
-    { options with option_enable_hiphop_syntax = as_bool value }
   | "hack.compiler.constantfolding" ->
     { options with option_constant_folding = as_bool value }
   | "hack.compiler.optimizenullcheck" ->
@@ -389,8 +383,6 @@ let set_value name get set config opts =
 let value_setters = [
   (set_value "hhvm.aliased_namespaces" get_value_from_config_kv_list @@
     fun opts v -> { opts with option_aliased_namespaces = Some v });
-  (set_value "hhvm.force_hh" get_value_from_config_int @@
-    fun opts v -> { opts with option_enable_hiphop_syntax = (v = 1) });
   (set_value "hhvm.php7.scalar_types" get_value_from_config_int @@
     fun opts v -> { opts with option_php7_scalar_types = (v = 1) });
   (set_value "hack.compiler.constant_folding" get_value_from_config_int @@

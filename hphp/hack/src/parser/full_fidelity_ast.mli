@@ -31,7 +31,6 @@ val make_env
   -> ?quick_mode:bool
   -> ?show_all_errors:bool
   -> ?lower_coroutines:bool
-  -> ?enable_hh_syntax:bool
   -> ?fail_open:bool
   -> ?parser_options:ParserOptions.t
   -> ?fi_mode:FileInfo.mode

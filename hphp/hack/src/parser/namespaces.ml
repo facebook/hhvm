@@ -276,7 +276,7 @@ let elaborate_id_impl nsenv kind id =
           elaborate_into_current_ns nsenv id
         | Some (typechecker_ns, compiler_ns) ->
           let ns =
-            if ParserOptions.enable_hh_syntax_for_hhvm nsenv.ns_popt
+            if ParserOptions.codegen nsenv.ns_popt
             then compiler_ns
             else typechecker_ns
           in

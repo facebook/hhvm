@@ -26,7 +26,6 @@ TEST(Config, HdfToIni) {
   EXPECT_EQ("hhvm.server.ssl_port", Config::IniName("Server.SSLPort"));
   EXPECT_EQ("max_file_uploads",
             Config::IniName("Server.Upload.MaxFileUploads"));
-  EXPECT_EQ("hhvm.force_hh", Config::IniName("Eval.EnableHipHopSyntax"));
   EXPECT_EQ("server.ssl_port", Config::IniName("Server.SSLPort", false));
 }
 

@@ -59,7 +59,6 @@ module FullFidelityParseArgs = struct
     keep_errors : bool;
     quick_mode : bool;
     lower_coroutines : bool;
-    enable_hh_syntax : bool;
     fail_open : bool;
     (* Defining the input *)
     files : string list;
@@ -91,7 +90,6 @@ module FullFidelityParseArgs = struct
     keep_errors
     quick_mode
     lower_coroutines
-    enable_hh_syntax
     fail_open
     show_file_name
     files
@@ -121,7 +119,6 @@ module FullFidelityParseArgs = struct
     keep_errors;
     quick_mode;
     lower_coroutines;
-    enable_hh_syntax;
     fail_open;
     show_file_name;
     files;
@@ -271,7 +268,7 @@ No errors are filtered out.";
         "Unset the fail_open option for the parser.";
       "--force-hh-syntax",
         Arg.Set enable_hh_syntax,
-        "Force hh syntax for the parser.";
+        "Ignored. Do not use.";
       "--show-file-name",
         Arg.Unit set_show_file_name,
         "Displays the file name.";
@@ -328,7 +325,6 @@ No errors are filtered out.";
       !keep_errors
       !quick_mode
       !lower_coroutines
-      !enable_hh_syntax
       !fail_open
       !show_file_name
       (List.rev !files)
@@ -349,8 +345,7 @@ let print_full_fidelity_error source_text error =
 
 let handle_existing_file args filename =
   let popt = ParserOptions.default in
-  let popt = ParserOptions.with_hh_syntax_for_hhvm popt
-    (args.codegen && args.enable_hh_syntax) in
+  let popt = ParserOptions.with_codegen popt args.codegen in
   let popt = ParserOptions.with_disable_lval_as_an_expression popt
     (args.disable_lval_as_an_expression) in
   let popt = ParserOptions.setup_pocket_universes popt
@@ -405,7 +400,6 @@ let handle_existing_file args filename =
         ~keep_errors:(args.keep_errors && not print_errors)
         ~quick_mode:args.quick_mode
         ~lower_coroutines:args.lower_coroutines
-        ~enable_hh_syntax:args.enable_hh_syntax
         ~parser_options:popt
         ~fail_open:args.fail_open
         ~is_hh_file:args.is_hh_file

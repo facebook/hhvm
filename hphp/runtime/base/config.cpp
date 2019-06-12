@@ -85,7 +85,6 @@ std::string Config::IniName(const std::string& config,
   // No use of Eval in our ini strings
   boost::replace_first(out, ".eval.", ".");
   boost::replace_first(out, ".my_sql.", ".mysql.");
-  boost::replace_first(out, ".enable_hip_hop_syntax", ".force_hh");
 
   return out;
 }

@@ -21,7 +21,6 @@ module WithSmartConstructors : functor (SmartConstructors : SmartConstructors.Sm
     (* Optional parts *)
        ?level:error_level
     -> ?hhvm_compat_mode:hhvm_compat_mode
-    -> ?enable_hh_syntax:bool
     -> ?hhi_mode:bool
     (* Required parts *)
     -> parser_options:ParserOptions.t

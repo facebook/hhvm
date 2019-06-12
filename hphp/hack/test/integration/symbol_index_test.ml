@@ -1,5 +1,5 @@
 open Core_kernel
-open IndexBuilder
+open IndexBuilderTypes
 open SearchUtils
 open Test_harness
 

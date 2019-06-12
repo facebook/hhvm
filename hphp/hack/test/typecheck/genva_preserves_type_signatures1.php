@@ -25,10 +25,6 @@ async function heisenberg(): Awaitable<PositionOrVelocity> {
   return new PositionOrVelocity();
 }
 
-function test() : Awaitable<(int, string, PositionOrVelocity)> {
-  return genva(funtimes(), animals(), heisenberg());
-}
-
 function test2() : Awaitable<(int, string, PositionOrVelocity)> {
   return \HH\Asio\va(funtimes(), animals(), heisenberg());
 }

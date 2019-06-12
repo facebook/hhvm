@@ -8,5 +8,5 @@ async function toasync(int $a): Awaitable<int> {
 <<__Rx>>
 async function f(): Awaitable<void> {
   // OK
-  await genva(1 |> toasync($$));
+  await (1 |> toasync($$));
 }

@@ -8,5 +8,5 @@ async function f(): Awaitable<int> {
 <<__Rx>>
 async function g(): Awaitable<void> {
   // OK
-  $a = await genva(f(), f());
+  $a = await f();
 }

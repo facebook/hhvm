@@ -4214,16 +4214,22 @@ and is_abstract_ft fty = match fty with
           | OG_nullsafe -> Some p
         ) in
       let tel = ref [] and tuel = ref [] and tftyl = ref [] in
-      let k = (fun (env, fty, fty_decl, _) ->
+      let k = (fun (env, fty, method_decl_, _) ->
         let env = check_coroutine_call env fty in
+        (* extract decl fun_type record for call function *)
+        let fty_decl = Option.bind method_decl_ ~f:(fun f ->
+          match f with
+          | _, Tfun fd -> Some fd
+          | _ -> None
+        ) in
         let env, tel_, tuel_, method_ =
           call ~expected
             ~method_call_info:(TR.make_call_info ~receiver_is_self:false
-              ~is_static:false ty1 (snd m)) ~fty_decl:None
+              ~is_static:false ty1 (snd m)) ~fty_decl
             p env fty el uel in
         tel := tel_; tuel := tuel_;
         tftyl := fty :: !tftyl;
-        env, method_, fty_decl, None) in
+        env, method_, method_decl_, None) in
       let env, ty = obj_get ~obj_pos:(fst e1) ~is_method ~nullsafe ~pos_params:el
                       ~explicit_tparams:tal env ty1 (CIexpr e1) m k in
       let tfty =

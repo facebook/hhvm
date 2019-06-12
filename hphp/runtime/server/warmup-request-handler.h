@@ -83,12 +83,14 @@ struct InternalWarmupWorker : JobQueueWorker<WarmupJob> {
 };
 
 struct InternalWarmupRequestPlayer : JobQueueDispatcher<InternalWarmupWorker> {
-  explicit InternalWarmupRequestPlayer(int threadCount)
-    : JobQueueDispatcher<InternalWarmupWorker>(threadCount, threadCount,
-                                               0, false, nullptr) {}
-  ~InternalWarmupRequestPlayer() {
-    waitEmpty();
-  }
+  // Don't inline into header file without testing performance on MacOS:
+  // https://github.com/facebook/hhvm/issues/8515
+  // Problem tested on 2019-06-11 on MacOS High Sierra and Mojave
+  // Apple LLVM version 10.0.1 (clang-1001.0.46.4)
+  // Target: x86_64-apple-darwin18.5.0
+  explicit InternalWarmupRequestPlayer(int threadCount);
+  ~InternalWarmupRequestPlayer();
+
   // Start running after an optional delay.
   void runAfterDelay(const std::vector<std::string>& files,
                      unsigned nTimes = 1,

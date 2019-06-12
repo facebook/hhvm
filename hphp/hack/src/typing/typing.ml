@@ -1796,7 +1796,7 @@ and expr_
      * is public+not static and then return its type.
      *)
     let env, te, ty1 = expr env instance in
-    let env, result, vis =
+    let env, result, _decl_ty, vis =
       obj_get_with_visibility ~obj_pos:p ~is_method:true ~nullsafe:None
         ~valkind:`other ~pos_params:None env ty1 (CIexpr instance) meth (fun x -> x) in
     let env, result = Env.FakeMembers.check_instance_invalid env instance (snd meth) result in
@@ -3360,9 +3360,9 @@ and assign_ p ur env e1 ty2 =
         | OG_nullsafe -> Some pobj in
       let env, tobj, obj_ty = expr ~accept_using_var:true no_fakes obj in
       let env = might_throw env in
-      let k (env, member_ty, vis) =
-        let env = Type.coerce_type p ur env ty2 member_ty in
-        env, member_ty, vis in
+      let k (env, member_ty, member_ty_decl, vis) =
+        let env = Type.coerce_type p ur env ty2 ?ty_expect_decl:member_ty_decl member_ty in
+        env, member_ty, member_ty_decl, vis in
       let env, result =
         obj_get ~obj_pos:(fst obj) ~is_method:false ~nullsafe ~valkind:`lvalue
           env obj_ty (CIexpr e1) m k in
@@ -4098,10 +4098,10 @@ and is_abstract_ft fty = match fty with
              * calculates the SN.Typehints.this type *)
             let k_lhs _ = this_ty in
             let ftys = ref [] in
-            let env, method_, _ =
+            let env, method_, _method_decl, _ =
               obj_get_ ~is_method:true ~nullsafe:None ~obj_pos:pos
                 ~pos_params:(Some el) ~valkind:`other env ty1 CIparent m
-              begin fun (env, fty, _) ->
+              begin fun (env, fty, method_decl, _) ->
                 let fty = check_abstract_parent_meth (snd m) p fty in
                 let env = check_coroutine_call env fty in
                 let env, _tel, _tuel, method_ = call ~expected
@@ -4109,7 +4109,7 @@ and is_abstract_ft fty = match fty with
                     ~is_static:false this_ty (snd m)) ~fty_decl: None
                   p env fty el uel in
                 ftys := fty :: !ftys;
-                env, method_, None
+                env, method_, method_decl, None
               end
               k_lhs
             in
@@ -4185,7 +4185,7 @@ and is_abstract_ft fty = match fty with
       let env, _, ty1 = static_class_id ~check_constraints:true p env [] infer_e in
       let nullsafe = None in
       let tel = ref [] and tuel = ref [] and tftyl = ref [] in
-      let fn = (fun (env, fty, _) ->
+      let fn = (fun (env, fty, fty_decl, _) ->
         let env, tel_, tuel_, method_ =
           call
             ~expected
@@ -4194,7 +4194,7 @@ and is_abstract_ft fty = match fty with
             p env fty el uel in
         tel := tel_; tuel := tuel_;
         tftyl := fty :: !tftyl;
-        env, method_, None) in
+        env, method_, fty_decl, None) in
       let env, ty = obj_get ~obj_pos:p ~is_method:true ~nullsafe ~pos_params:el
                       ~explicit_tparams:tal env ty1 infer_e m fn in
       let tfty =
@@ -4214,7 +4214,7 @@ and is_abstract_ft fty = match fty with
           | OG_nullsafe -> Some p
         ) in
       let tel = ref [] and tuel = ref [] and tftyl = ref [] in
-      let k = (fun (env, fty, _) ->
+      let k = (fun (env, fty, fty_decl, _) ->
         let env = check_coroutine_call env fty in
         let env, tel_, tuel_, method_ =
           call ~expected
@@ -4223,7 +4223,7 @@ and is_abstract_ft fty = match fty with
             p env fty el uel in
         tel := tel_; tuel := tuel_;
         tftyl := fty :: !tftyl;
-        env, method_, None) in
+        env, method_, fty_decl, None) in
       let env, ty = obj_get ~obj_pos:(fst e1) ~is_method ~nullsafe ~pos_params:el
                       ~explicit_tparams:tal env ty1 (CIexpr e1) m k in
       let tfty =
@@ -4496,7 +4496,7 @@ and member_not_found pos ~is_method class_ member_name r =
  *)
 and obj_get ~obj_pos ~is_method ~nullsafe ?(valkind = `other) ?(explicit_tparams=[])
             ?(pos_params: expr list option) env ty1 cid id k =
-  let env, method_, _ =
+  let env, method_, _method_decl, _ =
     obj_get_with_visibility ~is_method ~nullsafe ~valkind ~obj_pos ~pos_params
       ~explicit_tparams env ty1 cid id k in
   env, method_
@@ -4510,7 +4510,7 @@ and obj_get_with_visibility ~is_method ~nullsafe ~valkind ~obj_pos ~pos_params
  * bounds, or a Tunion. *)
 and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
     env concrete_ty class_id (id_pos, id_str) k_lhs =
-  let default () = env, (Reason.Rwitness id_pos, Typing_utils.tany env), None in
+  let default () = env, (Reason.Rwitness id_pos, Typing_utils.tany env), None, None in
   let mk_ety_env r class_info x e paraml =
     let this_ty = k_lhs (r, (Tclass(x, e, paraml))) in
     {
@@ -4591,7 +4591,7 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
             ft_arity = Fellipsis (0, arity_pos); ft_tparams = ([], FTKtparams); ft_params = []; } in
 
           let member_ty = (r, Tfun ft) in
-          env, member_ty, Some (mem_pos, vis)
+          env, member_ty, None, Some (mem_pos, vis)
 
         | _ -> assert false
 
@@ -4610,10 +4610,10 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
           | _ -> ()
         end;
         TVis.check_obj_access id_pos env (mem_pos, vis);
-        let member_ty = Typing_enum.member_type env member_ce in
+        let member_decl_ty = Typing_enum.member_type env member_ce in
         let ety_env = mk_ety_env r class_info x exact paraml in
         let env, member_ty =
-          begin match member_ty with
+          begin match member_decl_ty with
             | (r, Tfun ft) ->
               (* We special case function types here to be able to pass explicit type
                * parameters. *)
@@ -4622,7 +4622,7 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
                   ~ety_env env ft) in
               env, (r, Tfun ft)
             | _ ->
-              Phase.localize ~ety_env env member_ty
+              Phase.localize ~ety_env env member_decl_ty
           end in
 
         if member_ce.ce_const && valkind = `lvalue then
@@ -4631,13 +4631,13 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
             SubType.is_sub_type_LEGACY_DEPRECATED env (Env.get_self env) concrete_ty) then
             Errors.assigning_to_const id_pos;
 
-        env, member_ty, Some (mem_pos, vis)
+        env, member_ty, Some member_decl_ty, Some (mem_pos, vis)
       end (* match member_info *)
 
     end (* match Env.get_class env (snd x) *)
   | _, Tdynamic ->
     let ty = MakeType.dynamic (Reason.Rdynamic_prop id_pos) in
-    env, ty, None
+    env, ty, None, None
   | _, Tobject
   | _, Tany
   | _, Terr ->
@@ -4698,22 +4698,22 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~obj_pos
       (widen_class_for_obj_get ~is_method ~nullsafe id_str) obj_pos ty1 in
   let nullable_obj_get ty = match nullsafe with
     | Some p1 ->
-        let env, method_, x = obj_get_ ~obj_pos ~is_method ~nullsafe ~valkind
+        let env, method_, method_decl_, x = obj_get_ ~obj_pos ~is_method ~nullsafe ~valkind
           ~pos_params ~explicit_tparams env ty cid id k k_lhs in
         let env, method_ = TUtils.non_null env id_pos method_ in
-        env, MakeType.nullable (Reason.Rnullsafe_op p1) method_, x
+        env, MakeType.nullable (Reason.Rnullsafe_op p1) method_, method_decl_, x
     | None ->
         Errors.null_member id_str id_pos
           (Reason.to_string
              "This is what makes me believe it can be null"
              (fst ety1)
           );
-        k (env, (fst ety1, Typing_utils.terr env), None) in
+        k (env, (fst ety1, Typing_utils.terr env), None, None) in
   match ety1 with
   | _, Tunion tyl ->
       let (env, vis), tyl = List.map_env (env, None) tyl
         begin fun (env, vis) ty ->
-          let env, ty, vis' =
+          let env, ty, _decl_ty, vis' =
             obj_get_ ~obj_pos ~is_method ~nullsafe ~valkind ~pos_params
               ~explicit_tparams env ty cid id k k_lhs in
           (* There is one special case where we need to expose the
@@ -4727,7 +4727,7 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~obj_pos
           (env, vis), ty
         end in
       let env, ty = Union.union_list env (fst ety1) tyl in
-      env, ty, vis
+      env, ty, None, vis
 
   | p', (Tabstract(ak, Some ty)) ->
     let k_lhs' ty = match ak with
@@ -4753,16 +4753,16 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~obj_pos
           Errors.non_object_member
             id_str id_pos (Typing_print.error env ety1)
             (Reason.to_pos (fst ety1));
-          k (env, err_witness env id_pos, None)
+          k (env, err_witness env id_pos, None, None)
         end
-      | ((_env, ty, _vis) as res)::rest ->
-        if List.exists rest (fun (_, ty', _) -> not @@ ty_equal ty' ty)
+      | ((_env, ty, _decl_ty, _vis) as res)::rest ->
+        if List.exists rest (fun (_, ty', _, _) -> not @@ ty_equal ty' ty)
         then
         begin
           Errors.ambiguous_member
             id_str id_pos (Typing_print.error env ety1)
             (Reason.to_pos (fst ety1));
-          k (env, err_witness env id_pos, None)
+          k (env, err_witness env id_pos, None, None)
         end
         else k res
     end
@@ -4774,7 +4774,7 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~obj_pos
   (* We are trying to access a member through a value of unknown type *)
   | r, Tvar _ ->
     Errors.unknown_object_member id_str id_pos (Reason.to_string "It is unknown" r);
-    k (env, (r, Typing_utils.terr env), None)
+    k (env, (r, Typing_utils.terr env), None, None)
 
   | _, _ ->
     k (obj_get_concrete_ty ~is_method ~valkind ~explicit_tparams env ety1 cid id k_lhs)
@@ -6550,9 +6550,9 @@ and class_var_def ~is_static env cv =
         if Option.is_some cv.cv_xhp_attr && (Env.is_strict env)
           then Env.set_mode env FileInfo.Mpartial
           else env in
-      let cty = Decl_hint.hint env.Env.decl_env cty in
-      let env, cty = Phase.localize_with_self env cty in
-      env, Some (ExpectedTy.make p Reason.URhint cty) in
+      let decl_cty = Decl_hint.hint env.Env.decl_env cty in
+      let env, cty = Phase.localize_with_self env decl_cty in
+      env, Some (ExpectedTy.make_and_allow_coercion p Reason.URhint cty (Some decl_cty)) in
   (* Next check the expression, passing in expected type if present *)
   let env, typed_cv_expr =
     match cv.cv_expr with
@@ -6570,8 +6570,8 @@ and class_var_def ~is_static env cv =
             pos = p;
             reason = ur;
             locl_ty = cty;
-            decl_ty = _;
-          }) -> Type.coerce_type p ur env ty cty in
+            decl_ty = decl_cty;
+          }) -> Type.coerce_type p ur env ty ?ty_expect_decl:decl_cty cty in
       env, Some te in
   let env =
     if is_static

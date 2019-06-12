@@ -2328,21 +2328,10 @@ let handle_event
       && c.method_ = "workspace/didChangeWatchedFiles" ->
     let open DidChangeWatchedFiles in
     let notification = parse_didChangeWatchedFiles c.params in
-    let changes = notification.changes
-      |> List.filter ~f:(fun change ->
-          let path = lsp_uri_to_path change.uri in
-          FindUtils.file_filter path
-        )
-    in
-    List.iter changes ~f:(fun change ->
+    List.iter notification.changes ~f:(fun change ->
       let path = lsp_uri_to_path change.uri in
-      let path = Relative_path.strip_root_if_possible path in
-      match path with
-      | Some path ->
-        let relative_path = Relative_path.from_root path in
-        ClientIdeService.notify_file_changed ide_service relative_path
-      | None ->
-        ()
+      let path = Path.make path in
+      ClientIdeService.notify_file_changed ide_service path
     );
     Lwt.return_unit
 

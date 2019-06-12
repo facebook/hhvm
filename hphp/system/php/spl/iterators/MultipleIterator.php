@@ -42,20 +42,20 @@ class MultipleIterator implements Iterator {
   /** @param $iter new Iterator to attach.
   * @param $inf associative info forIteraotr, must be NULL, integer or string
   *
-  * @throws IllegalValueException if a inf is none of NULL, integer or string
-  * @throws IllegalValueException if a inf is already an associated info
+  * @throws InvalidArgumentException if a inf is none of NULL, integer or string
+  * @throws InvalidArgumentException if a inf is already an associated info
   */
   public function attachIterator(Iterator $iter, $inf = NULL) {
 
     if (!is_null($inf)) {
       if (!is_int($inf) && !is_string($inf)){
-        throw new IllegalValueException(
+        throw new InvalidArgumentException(
           'Inf must be NULL, integer or string');
       }
 
       foreach($this->iterators as $iter) {
         if ($inf == $this->iterators->getInfo()) {
-          throw new IllegalValueException('Key duplication error');
+          throw new InvalidArgumentException('Key duplication error');
         }
       }
     }
@@ -121,7 +121,7 @@ class MultipleIterator implements Iterator {
   * all registered Iterator instances current() result.
   * @throws RuntimeException      if mode MIT_NEED_ALL is set and at least one
   *                               attached Iterator is not valid().
-  * @throws IllegalValueException if a key is NULL and MIT_KEYS_ASSOC is set.
+  * @throws InvalidArgumentException if a key is NULL and MIT_KEYS_ASSOC is set.
   */
   public function current() {
     if (!sizeof($this->iterators)) {
@@ -133,7 +133,7 @@ class MultipleIterator implements Iterator {
         if ($this->flags & self::MIT_KEYS_ASSOC) {
           $key = $this->iterators->getInfo();
           if (is_null($key)) {
-            throw new IllegalValueException(
+            throw new InvalidArgumentException(
               'Sub-Iterator is associated with NULL');
           }
           $retval[$key] = $iter->current();

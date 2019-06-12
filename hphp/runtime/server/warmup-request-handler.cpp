@@ -100,6 +100,14 @@ void InternalWarmupWorker::doJob(WarmupJob job) {
   }
 }
 
+InternalWarmupRequestPlayer::InternalWarmupRequestPlayer(int threadCount)
+: JobQueueDispatcher<InternalWarmupWorker>(threadCount, threadCount,
+                                           0, false, nullptr) {}
+
+InternalWarmupRequestPlayer::~InternalWarmupRequestPlayer() {
+  waitEmpty();
+}
+
 void InternalWarmupRequestPlayer::
 runAfterDelay(const std::vector<std::string>& files,
               unsigned nTimes, unsigned delaySeconds) {

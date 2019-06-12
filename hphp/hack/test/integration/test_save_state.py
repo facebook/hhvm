@@ -6,7 +6,7 @@ import shlex
 import stat
 import time
 import unittest
-from typing import IO, Optional, Union
+from typing import IO, Optional
 
 import common_tests
 import hierarchy_tests
@@ -132,31 +132,31 @@ watchman_init_timeout = 1
         self.proc_call([hh_client, "stop", self.repo_dir])
         self.assertIn("Watchman_sig.Types.Timeout", self.get_server_logs())
 
-    def test_save_partial_state(self):
+    def test_save_partial_state(self) -> None:
         self.start_hh_server()
 
         result1 = self.save_partial(
             files_to_check=["class_1.php"], assert_edges_added=True, filename="partial1"
         )
 
-        self.assertTrue(result1.edges_added == 0, "class_1 has no dependencies")
+        self.assertTrue(result1.get_edges_added() == 0, "class_1 has no dependencies")
 
         result2 = self.save_partial(
             files_to_check=["class_2.php"], assert_edges_added=True, filename="partial2"
         )
-        assert result2.edges_added > 0
+        assert result2.get_edges_added() > 0
 
         result3 = self.save_partial(
             files_to_check=["class_3.php"], assert_edges_added=True, filename="partial3"
         )
-        assert result3.edges_added > 0
+        assert result3.get_edges_added() > 0
 
         result4 = self.save_partial(
             files_to_check=["class_1.php", "class_2.php", "class_3.php"],
             assert_edges_added=True,
             filename="partial4",
         )
-        assert result4.edges_added == result3.edges_added
+        assert result4.get_edges_added() == result3.get_edges_added()
 
         result5 = self.save_partial(
             files_to_check=[
@@ -165,7 +165,7 @@ watchman_init_timeout = 1
             assert_edges_added=True,
             filename="partial5",
         )
-        assert result5.edges_added == result2.edges_added
+        assert result5.get_edges_added() == result2.get_edges_added()
 
     def test_incrementally_generated_saved_state(self) -> None:
         old_saved_state: SaveStateResult = self.dump_saved_state()
@@ -175,12 +175,9 @@ watchman_init_timeout = 1
         new_saved_state: SaveStateResult = (
             self.dump_saved_state(assert_edges_added=True)
         )
-        assert (
-            new_saved_state.returned_values.edges_added is not None
-            and new_saved_state.returned_values.edges_added > 0
-        )
+        assert new_saved_state.returned_values.get_edges_added() > 0
         if self.assert_naming_table_rows:
-            assert new_saved_state.returned_values.naming_table_rows_changed > 0
+            assert new_saved_state.returned_values.get_naming_table_rows_changed() > 0
 
         self.change_return_type_on_base_class(
             os.path.join(self.repo_dir, "class_1.php")
@@ -236,12 +233,9 @@ watchman_init_timeout = 1
         self.add_file_that_depends_on_class_a(new_file)
         self.check_cmd(["No errors!"], assert_loaded_saved_state=True)
         new_saved_state = self.dump_saved_state(assert_edges_added=True)
-        assert (
-            new_saved_state.returned_values.edges_added is not None
-            and new_saved_state.returned_values.edges_added > 0
-        )
+        assert new_saved_state.returned_values.get_edges_added() > 0
         if self.assert_naming_table_rows:
-            assert new_saved_state.returned_values.naming_table_rows_changed > 0
+            assert new_saved_state.returned_values.get_naming_table_rows_changed() > 0
 
         self.change_return_type_on_base_class(
             os.path.join(self.repo_dir, "class_1.php")
@@ -357,24 +351,19 @@ watchman_init_timeout = 1
     def test_replace_state_after_saving(self) -> None:
         # Save state
         result = self.dump_saved_state(assert_edges_added=True)
-        assert (
-            result.returned_values.edges_added is not None
-            and result.returned_values.edges_added > 0
-        )
+        assert result.returned_values.get_edges_added() > 0
         if self.assert_naming_table_rows:
-            assert (
-                result.returned_values.naming_table_rows_changed is not None
-                and result.returned_values.naming_table_rows_changed > 0
-            )
+            assert result.returned_values.get_naming_table_rows_changed() > 0
 
         # Save state again - confirm the same number of edges is dumped
         result2 = self.dump_saved_state(assert_edges_added=True)
         self.assertEqual(
-            result.returned_values.edges_added, result2.returned_values.edges_added
+            result.returned_values.get_edges_added(),
+            result2.returned_values.get_edges_added(),
         )
         self.assertEqual(
-            result.returned_values.naming_table_rows_changed,
-            result2.returned_values.naming_table_rows_changed,
+            result.returned_values.get_naming_table_rows_changed(),
+            result2.returned_values.get_naming_table_rows_changed(),
         )
 
         # Save state with the 'replace' arg
@@ -383,20 +372,22 @@ watchman_init_timeout = 1
         )
 
         self.assertEqual(
-            result.returned_values.edges_added,
-            replace_result1.returned_values.edges_added,
+            result.returned_values.get_edges_added(),
+            replace_result1.returned_values.get_edges_added(),
         )
         self.assertEqual(
-            result.returned_values.naming_table_rows_changed,
-            replace_result1.returned_values.naming_table_rows_changed,
+            result.returned_values.get_naming_table_rows_changed(),
+            replace_result1.returned_values.get_naming_table_rows_changed(),
         )
 
         # Save state with the new arg - confirm there are 0 new edges
         replace_result2 = self.dump_saved_state(
             assert_edges_added=True, replace_state_after_saving=True
         )
-        self.assertEqual(replace_result2.returned_values.edges_added, 0)
-        self.assertEqual(0, replace_result2.returned_values.naming_table_rows_changed)
+        self.assertEqual(replace_result2.returned_values.get_edges_added(), 0)
+        self.assertEqual(
+            0, replace_result2.returned_values.get_naming_table_rows_changed()
+        )
 
         # Make a change
         # Save state - confirm there are only the # of new edges
@@ -409,11 +400,10 @@ watchman_init_timeout = 1
         )
 
         assert (
-            replace_incremental.returned_values.edges_added is not None
-            and replace_incremental.returned_values.edges_added
-            < result.returned_values.edges_added
+            replace_incremental.returned_values.get_edges_added()
+            < result.returned_values.get_edges_added()
         )
-        assert replace_incremental.returned_values.edges_added > 0
+        assert replace_incremental.returned_values.get_edges_added() > 0
         self.check_cmd(["No errors!"], assert_loaded_saved_state=False)
 
     def add_file_that_depends_on_class_a(self, filename: str) -> None:

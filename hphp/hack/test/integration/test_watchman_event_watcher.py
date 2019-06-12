@@ -104,10 +104,10 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
     def tearDownClass(cls):
         super().tearDownClass()
 
-    def setUp(self):
+    def setUp(self) -> None:
         pass
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         pass
 
     def check_call(self, cmd, timeout=None):

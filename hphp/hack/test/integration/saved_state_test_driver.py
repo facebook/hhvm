@@ -5,7 +5,7 @@ import os
 import shlex
 import shutil
 import tempfile
-from typing import List, NamedTuple, Optional, Union
+from typing import Any, List, NamedTuple, Optional
 
 import common_tests
 from hh_paths import hh_client, hh_server
@@ -17,8 +17,16 @@ def write_echo_json(f, obj):
 
 class SaveStateCommandResult(NamedTuple):
     retcode: int
-    edges_added: Union[int, None]
+    edges_added: Optional[int]
     naming_table_rows_changed: Optional[int]
+
+    def get_edges_added(self) -> int:
+        assert self.edges_added is not None
+        return self.edges_added
+
+    def get_naming_table_rows_changed(self) -> int:
+        assert self.naming_table_rows_changed is not None
+        return self.naming_table_rows_changed
 
 
 class SaveStateResult(NamedTuple):
@@ -30,6 +38,7 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
 
     repo_dir: str
     enable_naming_table_fallback = False
+    saved_state_dir: str
 
     @classmethod
     def setUpClass(cls):
@@ -96,7 +105,7 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
     def save_command(
         cls,
         init_dir: str,
-        saved_state_path: str = None,
+        saved_state_path: Optional[str] = None,
         assert_edges_added: bool = False,
         ignore_errors: bool = False,
         replace_state_after_saving: bool = False,
@@ -177,7 +186,7 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
 
         os.mkdir(os.path.join(self.repo_dir, ".hg"))
 
-    def setUp(self):
+    def setUp(self) -> None:
         super(SavedStateTestDriver, self).setUp()
         self.write_local_conf()
         self.write_hhconfig()
@@ -185,10 +194,10 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
 
     def save_partial(
         self,
-        files_to_check: List[str] = None,
-        filename: str = None,
+        files_to_check: Optional[List[Any]] = None,
+        filename: Optional[str] = None,
         gen_with_errors: bool = True,
-        init_dir: str = None,
+        init_dir: Optional[str] = None,
         assert_edges_added: bool = False,
     ) -> SaveStateCommandResult:
         if files_to_check is None:

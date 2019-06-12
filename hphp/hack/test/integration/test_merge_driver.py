@@ -59,11 +59,11 @@ use_dummy_informant = false
                 'mergedriver_test_env.json'), 'w') as f:
             f.write(test_env_json)
 
-    def setUp(self):
+    def setUp(self) -> None:
         shutil.copytree(self.template_repo, self.repo_dir)
         self.write_merge_driver()
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         pass
 
     def write_hgrc(self):

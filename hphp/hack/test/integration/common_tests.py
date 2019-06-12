@@ -23,7 +23,8 @@ class CommonTestDriver(unittest.TestCase):
     # This needs to be overridden in child classes. The files in this
     # directory will be used to set up the initial environment for each
     # test.
-    template_repo: Union[str, None] = None
+    template_repo: str
+    repo_dir: str
 
     @classmethod
     def setUpClass(cls):
@@ -100,7 +101,7 @@ class CommonTestDriver(unittest.TestCase):
         with open(log_file) as f:
             return f.read()
 
-    def setUp(self):
+    def setUp(self) -> None:
         shutil.copytree(self.template_repo, self.repo_dir)
 
     def tearDownWithRetries(self, retries=3):
@@ -117,7 +118,7 @@ class CommonTestDriver(unittest.TestCase):
         else:
             self.assertEqual(exit_code, 0, msg="Stopping hh_server failed")
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         self.tearDownWithRetries()
 
     @classmethod

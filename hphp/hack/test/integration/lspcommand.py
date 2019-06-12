@@ -237,4 +237,3 @@ class LspCommandProcessor:
     @staticmethod
     def dummy_request_id() -> str:
         return LspCommandProcessor._client_request_id({"id": -1})
-

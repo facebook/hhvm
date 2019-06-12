@@ -25,6 +25,7 @@ use_watchman = true
 watchman_subscribe_v2 = true
 interrupt_on_watchman = true
 interrupt_on_client = true
+max_workers = 2
 load_state_natively_v4 = {use_saved_state}
 use_mini_state = {use_saved_state}
 require_mini_state = {use_saved_state}

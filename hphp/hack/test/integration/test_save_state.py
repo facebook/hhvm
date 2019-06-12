@@ -36,6 +36,7 @@ lazy_parse = true
 lazy_init2 = true
 incremental_init = true
 enable_fuzzy_search = false
+max_workers = 2
 """
             )
 

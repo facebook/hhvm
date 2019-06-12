@@ -9,5 +9,5 @@ REPO="$(mktemp -d)"
 cat > "${REPO}/.hhconfig" <<EOF
 unsafe_rx=false
 EOF
-"${HH_SERVER}" --check "${REPO}"
+"${HH_SERVER}" --check "${REPO}" --config max_workers=2
 rm -rf "${REPO}"

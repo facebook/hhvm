@@ -107,7 +107,9 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
             "--json",
             "--save-state",
             actual_saved_state_path,
-            init_dir
+            init_dir,
+            "--config",
+            "max_workers=2"
         ]
 
         if cls.enable_naming_table_fallback:
@@ -238,6 +240,8 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
             "--with-mini-state",
             json.dumps(with_state_arg),
             self.repo_dir,
+            "--max-procs",
+            "2",
         ]
 
         self.proc_call(cmd)
@@ -275,7 +279,15 @@ class SavedStateClassicTestDriver(SavedStateTestDriver):
     @classmethod
     def save_command(cls, init_dir):
         stdout, stderr, retcode = cls.proc_call(
-            [hh_server, "--check", init_dir, "--save-state", cls.saved_state_path()]
+            [
+                hh_server,
+                "--check",
+                init_dir,
+                "--save-state",
+                cls.saved_state_path(),
+                "--max-procs",
+                "2"
+            ]
         )
         if retcode != 0:
             raise Exception(

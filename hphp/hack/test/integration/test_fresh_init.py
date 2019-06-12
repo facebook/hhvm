@@ -34,6 +34,8 @@ class FreshInitTestDriver(common_tests.CommonTestDriver):
                 "--no-load",
                 "--error-format",
                 "raw",
+                "--config",
+                "max_workers=2",
                 self.repo_dir,
             ]
             + list(map(lambda x: x.format(root=root), options)),

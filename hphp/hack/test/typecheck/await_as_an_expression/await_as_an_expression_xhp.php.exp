@@ -1,2 +1,1 @@
-File "await_as_an_expression_xhp.php", line 8, characters 14-38:
-Await cannot be used as an expression in this location because it's conditionally executed. (Parsing[1002])
+No errors

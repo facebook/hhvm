@@ -66,6 +66,9 @@ async function foo(): Awaitable<void> {
   $x = (await genx()) ^ (await geny());
   $x = (await genx()) |> f($$);
 
+  <div attr={await genx()} {...(await genx())}/>;
+  <div attr={await genx()} {...(await genx())}>{await genx()}</div>;
+
   +(await genx());
   -(await genx());
   !(await genx());

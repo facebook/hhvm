@@ -2271,7 +2271,7 @@ let handle_event
     ~(env: env)
     ~(state: state ref)
     ~(client: Jsonrpc.queue)
-    ~(ide_service: ClientIdeService.t ref)
+    ~(ide_service: ClientIdeService.t)
     ~(event: event)
     ~(ref_unblocked_time: float ref)
   : unit Lwt.t =
@@ -2303,7 +2303,7 @@ let handle_event
 
   (* shutdown request *)
   | _, Client_message c when c.method_ = "shutdown" ->
-    let%lwt new_state = do_shutdown !state !ide_service ref_unblocked_time in
+    let%lwt new_state = do_shutdown !state ide_service ref_unblocked_time in
     state := new_state;
     print_shutdown () |> Jsonrpc.respond to_stdout c;
     Lwt.return_unit
@@ -2335,8 +2335,14 @@ let handle_event
         )
     in
     List.iter changes ~f:(fun change ->
-      (* TODO: forward notification to serverless IDE instead of logging *)
-      log "Registered change to file %s" change.uri
+      let path = lsp_uri_to_path change.uri in
+      let path = Relative_path.strip_root_if_possible path in
+      match path with
+      | Some path ->
+        let relative_path = Relative_path.from_root path in
+        ClientIdeService.notify_file_changed ide_service relative_path
+      | None ->
+        ()
     );
     Lwt.return_unit
 
@@ -2454,7 +2460,7 @@ let handle_event
       && c.method_ = "textDocument/hover" ->
     let%lwt () = cancel_if_stale client c short_timeout in
     let%lwt result = parse_hover c.params
-      |> do_hover_local !ide_service
+      |> do_hover_local ide_service
     in
     result |> print_hover |> Jsonrpc.respond to_stdout c;
     Lwt.return_unit
@@ -2673,7 +2679,7 @@ let handle_event
 
 let run_ide_service
     (env: env)
-    (ide_service: ClientIdeService.t ref)
+    (ide_service: ClientIdeService.t)
     : unit Lwt.t =
   if env.use_serverless_ide then begin
     let%lwt root = get_root_wait () in
@@ -2694,16 +2700,21 @@ let run_ide_service
       )
     end;
 
-    let%lwt ide_service' =
-      ClientIdeService.make_from_saved_state ~root in
-    ide_service := ide_service';
-    Lwt.return_unit
+    let%lwt result =
+      ClientIdeService.initialize_from_saved_state ide_service ~root in
+    match result with
+    | Ok () ->
+      let%lwt () = ClientIdeService.serve ide_service in
+      Lwt.return_unit
+    | Error message ->
+      log "IDE services could not be initialized: %s" message;
+      Lwt.return_unit
   end else
     Lwt.return_unit
 
-let shutdown_ide_service (ide_service: ClientIdeService.t ref): unit Lwt.t =
+let shutdown_ide_service (ide_service: ClientIdeService.t): unit Lwt.t =
   log "Shutting down IDE service process...";
-  let%lwt () = ClientIdeService.destroy !ide_service in
+  let%lwt () = ClientIdeService.destroy ide_service in
   Lwt.return_unit
 
 (* main: this is the main loop for processing incoming Lsp client requests,
@@ -2714,7 +2725,7 @@ let main (env: env) : Exit_status.t Lwt.t =
 
   HackEventLogger.set_from env.from;
   let client = Jsonrpc.make_queue () in
-  let ide_service = ref ClientIdeService.uninitialized in
+  let ide_service = ClientIdeService.make () in
   let deferred_action : (unit -> unit Lwt.t) option ref = ref None in
   let state = ref Pre_init in
   let ref_event = ref None in

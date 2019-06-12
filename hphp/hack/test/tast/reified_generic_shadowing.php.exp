@@ -1,6 +1,4 @@
 Errors:
-  [6:12-16] Name already bound: Tcat
-  [4:7-11] Previous definition is here
   [7:7-11] Erased generics can only be used in type hints because they do not exist at runtime.
   [7:3-13] Tcat cannot be used with `new` because it does not have the <<__Newable>> attribute
 [(Class

@@ -1,4 +1,4 @@
-File "instanceof_generic_bad.php", line 4, characters 21-21:
-Name already bound: T (Naming[2012])
-File "instanceof_generic_bad.php", line 3, characters 7-7:
-Previous definition is here
+File "instanceof_generic_bad.php", line 5, characters 18-18:
+Invalid "is" expression hint (Typing[4195])
+File "instanceof_generic_bad.php", line 5, characters 18-18:
+The "is" operator cannot be used with an erased generic type parameter

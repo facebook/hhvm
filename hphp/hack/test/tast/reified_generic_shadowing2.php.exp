@@ -1,7 +1,5 @@
 Errors:
   [6:21-23] Tc is a type parameter. Type parameters cannot themselves take type parameters (e.g. Tc<int> doesn't make sense)
-  [4:10-12] Name already bound: Tc
-  [4:7-9] Previous definition is here
 [(Class
     { c_span = [4:1-7:2]; c_annotation = (); c_mode = <opaque>;
       c_final = false; c_is_xhp = false; c_kind = Cnormal;

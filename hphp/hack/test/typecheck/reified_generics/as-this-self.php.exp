@@ -1,1 +1,4 @@
-No errors
+File "as-this-self.php", line 15, characters 11-15:
+This is a type constant, it cannot be used as a reified type argument (Typing[4305])
+File "as-this-self.php", line 21, characters 45-45:
+T is reified

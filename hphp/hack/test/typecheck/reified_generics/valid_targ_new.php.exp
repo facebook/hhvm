@@ -1,4 +1,4 @@
 File "valid_targ_new.php", line 7, characters 9-9:
-T is not reified, it cannot be used as a reified type argument (Typing[4305])
-  File "valid_targ_new.php", line 4, characters 15-16:
-  Tc is reified
+This is not reified, it cannot be used as a reified type argument (Typing[4305])
+File "valid_targ_new.php", line 4, characters 15-16:
+Tc is reified

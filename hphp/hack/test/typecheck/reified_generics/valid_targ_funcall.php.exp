@@ -1,4 +1,4 @@
 File "valid_targ_funcall.php", line 7, characters 5-5:
-T is not reified, it cannot be used as a reified type argument (Typing[4305])
-  File "valid_targ_funcall.php", line 4, characters 18-22:
-  Tpain is reified
+This is not reified, it cannot be used as a reified type argument (Typing[4305])
+File "valid_targ_funcall.php", line 4, characters 18-22:
+Tpain is reified

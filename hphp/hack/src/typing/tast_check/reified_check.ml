@@ -58,20 +58,51 @@ let verify_targ_valid env tparam targ =
   (* There is some subtlety here. If a type *parameter* is declared reified,
    * even if it is soft, we require that the argument be concrete or reified, not soft
    * reified or erased *)
+  if tparam.tp_reified = Nast.Erased then () else
   begin match tparam.tp_reified with
   | Nast.Reified
   | Nast.SoftReified ->
+    let p, _h = targ in
     begin match Env.hint_to_ty env targ with
-    | _, Tapply ((p, h), []) when h = Naming_special_names.Typehints.wildcard ->
-      if not @@ Env.get_allow_wildcards env then
-        Errors.invalid_reified_argument tparam.tp_name (p, h) "a wildcard"
+    | _, Tapply ((pw, h), [])
+      when h = Naming_special_names.Typehints.wildcard && not (Env.get_allow_wildcards env) ->
+      Errors.invalid_reified_argument tparam.tp_name pw "a wildcard"
+    | _, Tapply ((_, nt), _) when Typing_env.is_typedef nt ->
+      let env = Tast_env.tast_env_as_typing_env env in
+      begin match Typing_env.get_typedef env nt with
+      | Some { td_vis = Nast.Opaque; _ } ->
+        Errors.invalid_reified_argument tparam.tp_name p "an opaque type alias"
+      | _ -> () end
     | _, Tgeneric t ->
-      let p = fst targ in
       begin match (Env.get_reified env t) with
-      | Nast.Erased -> Errors.invalid_reified_argument tparam.tp_name (p, t) "not reified"
-      | Nast.SoftReified -> Errors.invalid_reified_argument tparam.tp_name (p, t) "soft reified"
+      | Nast.Erased -> Errors.invalid_reified_argument tparam.tp_name p "not reified"
+      | Nast.SoftReified -> Errors.invalid_reified_argument tparam.tp_name p "soft reified"
       | Nast.Reified -> () end
-    | _ -> () end;
+    | _, Tdynamic ->
+      Errors.invalid_reified_argument tparam.tp_name p "dynamic"
+    | _, Tarray _
+    | _, Tdarray _
+    | _, Tvarray _
+    | _, Tvarray_or_darray _ ->
+      Errors.invalid_reified_argument tparam.tp_name p "an array"
+    | _, Tfun _ ->
+      Errors.invalid_reified_argument tparam.tp_name p "a function type"
+    | _, Tthis ->
+      Errors.invalid_reified_argument tparam.tp_name p "the late static bound this type"
+    | _, Taccess _ ->
+      Errors.invalid_reified_argument tparam.tp_name p "a type constant"
+    | _, Tprim _
+    | _, Toption _
+    | _, Tshape _
+    | _, Ttuple _
+    | _, Tlike _
+    | _, Tapply _
+    | _, Tnothing
+    | _, Tnonnull
+    | _, Tmixed
+    | _, Tany
+    | _, Terr -> ()
+    end;
   | Nast.Erased -> () end;
 
   begin if Attributes.mem UA.uaEnforceable tparam.tp_user_attributes then

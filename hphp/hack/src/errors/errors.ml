@@ -2689,9 +2689,9 @@ let require_args_reify def_pos arg_pos =
     def_pos, "Definition is here"
   ]
 
-let invalid_reified_argument (def_pos, def_name) (arg_pos, arg_name) reification =
+let invalid_reified_argument (def_pos, def_name) arg_pos arg_kind =
   add_list (Typing.err_code Typing.InvalidReifiedArgument) [
-    arg_pos, arg_name ^ " is " ^ reification ^ ", it cannot be used as a reified type argument";
+    arg_pos, "This is " ^ arg_kind ^ ", it cannot be used as a reified type argument";
     def_pos, def_name ^ " is reified"
   ]
 

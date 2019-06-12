@@ -1,0 +1,4 @@
+File "valid_targ_this.php", line 6, characters 21-24:
+This is the late static bound this type, it cannot be used as a reified type argument (Typing[4305])
+File "valid_targ_this.php", line 3, characters 15-15:
+T is reified

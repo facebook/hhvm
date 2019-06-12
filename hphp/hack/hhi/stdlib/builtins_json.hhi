@@ -48,6 +48,7 @@ const int JSON_FB_WARN_EMPTY_DARRAYS = 0;
 const int JSON_FB_WARN_VEC_LIKE_DARRAYS = 0;
 const int JSON_FB_WARN_DICT_LIKE_DARRAYS = 0;
 const int JSON_FB_IGNORE_LATEINIT = 0;
+const int JSON_FB_THRIFT_SIMPLE_JSON = 0;
 
 <<__PHPStdLib>>
 function json_encode($value, int $options = 0, int $depth = 512);

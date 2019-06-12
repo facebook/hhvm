@@ -338,8 +338,8 @@ struct SimpleParser {
    */
   static bool TryParse(const char* inp, int length,
                        TypedValue* buf, Variant& out,
-                       JSONContainerType container_type) {
-    SimpleParser parser(inp, length, buf, container_type);
+                       JSONContainerType container_type, bool is_tsimplejson) {
+    SimpleParser parser(inp, length, buf, container_type, is_tsimplejson);
     bool ok = parser.parseValue();
     parser.skipSpace();
     if (!ok || parser.p != inp + length) {
@@ -353,11 +353,12 @@ struct SimpleParser {
 
  private:
   SimpleParser(const char* input, int length, TypedValue* buffer,
-               JSONContainerType container_type)
+               JSONContainerType container_type, bool is_tsimplejson)
     : p(input)
     , top(buffer)
     , array_depth(-kMaxArrayDepth) /* Start negative to simplify check. */
     , container_type(container_type)
+    , is_tsimplejson(is_tsimplejson)
   {
     assertx(input[length] == 0);  // Parser relies on sentinel to avoid checks.
   }
@@ -449,18 +450,30 @@ struct SimpleParser {
       case 'r': out = '\r'; return true;
       case 't': out = '\t'; return true;
       case 'u': {
-        uint16_t u16cp = 0;
-        for (int i = 0; i < 4; i++) {
-          auto const hexv = dehexchar(*p++);
-          if (hexv < 0) return false; // includes check for end of string
-          u16cp <<= 4;
-          u16cp |= hexv;
-        }
-        if (u16cp > 0x7f) {
-          return false;
-        } else {
-          out = u16cp;
+        if (UNLIKELY(is_tsimplejson)) {
+          auto const ch1 = *p++;
+          auto const ch2 = *p++;
+          auto const dch3 = dehexchar(*p++);
+          auto const dch4 = dehexchar(*p++);
+          if (UNLIKELY(ch1 != '0' || ch2 != '0' || dch3 < 0 || dch4 < 0)) {
+            return false;
+          }
+          out = (dch3 << 4) | dch4;
           return true;
+        } else {
+          uint16_t u16cp = 0;
+          for (int i = 0; i < 4; i++) {
+            auto const hexv = dehexchar(*p++);
+            if (hexv < 0) return false; // includes check for end of string
+            u16cp <<= 4;
+            u16cp |= hexv;
+          }
+          if (u16cp > 0x7f) {
+            return false;
+          } else {
+            out = u16cp;
+            return true;
+          }
         }
       }
       default: return false;
@@ -661,6 +674,7 @@ struct SimpleParser {
   TypedValue* top;
   int array_depth;
   JSONContainerType container_type;
+  bool is_tsimplejson;
 };
 
 /*
@@ -975,6 +989,16 @@ void utf16_to_utf8(UncheckedBuffer &buf, unsigned short utf16) {
   return utf16_to_utf8_tail(buf, utf16);
 }
 
+ALWAYS_INLINE
+void decode_escaped_bytes(UncheckedBuffer &buf, unsigned short bytes,
+                          bool is_tsimplejson) {
+  if (UNLIKELY(is_tsimplejson)) {
+    buf.append((char)bytes);
+  } else {
+    utf16_to_utf8(buf, bytes);
+  }
+}
+
 StaticString s__empty_("_empty_");
 
 static void object_set(Variant &var,
@@ -1112,11 +1136,13 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
       options == (options & (k_JSON_FB_LOOSE |
                              k_JSON_FB_DARRAYS |
                              k_JSON_FB_DARRAYS_AND_VARRAYS |
-                             k_JSON_FB_HACK_ARRAYS)) &&
+                             k_JSON_FB_HACK_ARRAYS |
+                             k_JSON_FB_THRIFT_SIMPLE_JSON)) &&
       depth >= SimpleParser::kMaxArrayDepth &&
       length <= RuntimeOption::EvalSimpleJsonMaxLength &&
       SimpleParser::TryParse(p, length, json->tl_buffer.tv, z,
-                             get_container_type_from_options(options))) {
+                             get_container_type_from_options(options),
+                             options & k_JSON_FB_THRIFT_SIMPLE_JSON)) {
     return true;
   }
 
@@ -1146,7 +1172,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
   static const int kMaxPersistentStringBufferCapacity = 256 * 1024;
 
   DataType type = kInvalidDataType;
-  unsigned short utf16 = 0;
+  unsigned short escaped_bytes = 0;
 
   auto reset_type = [&] { type = kInvalidDataType; };
 
@@ -1482,11 +1508,12 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
       /*
         Change the state and iterate.
       */
+      bool is_tsimplejson = options & k_JSON_FB_THRIFT_SIMPLE_JSON;
       if (type == KindOfString) {
         if (/*<fb>*/(/*</fb>*/s == 3/*<fb>*/ || s == 30)/*</fb>*/ &&
             state != 8) {
           if (state != 4) {
-            utf16_to_utf8(*buf, b);
+            decode_escaped_bytes(*buf, b, is_tsimplejson);
           } else {
             switch (b) {
             case 'b': buf->append('\b'); break;
@@ -1495,19 +1522,34 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             case 'f': buf->append('\f'); break;
             case 'r': buf->append('\r'); break;
             default:
-              utf16_to_utf8(*buf, b);
+              decode_escaped_bytes(*buf, b, is_tsimplejson);
               break;
             }
           }
         } else if (s == 6) {
-          utf16 = dehexchar(b) << 12;
+          if (UNLIKELY(is_tsimplejson)) {
+            if (UNLIKELY(b != '0'))  {
+              s_json_parser->error_code = JSON_ERROR_SYNTAX;
+              return false;
+            }
+            escaped_bytes = 0;
+          } else {
+            escaped_bytes = dehexchar(b) << 12;
+          }
         } else if (s == 7) {
-          utf16 += dehexchar(b) << 8;
+          if (UNLIKELY(is_tsimplejson)) {
+            if (UNLIKELY(b != '0'))  {
+              s_json_parser->error_code = JSON_ERROR_SYNTAX;
+              return false;
+            }
+          } else {
+            escaped_bytes += dehexchar(b) << 8;
+          }
         } else if (s == 8) {
-          utf16 += dehexchar(b) << 4;
+          escaped_bytes += dehexchar(b) << 4;
         } else if (s == 3 && state == 8) {
-          utf16 += dehexchar(b);
-          utf16_to_utf8(*buf, utf16);
+          escaped_bytes += dehexchar(b);
+          decode_escaped_bytes(*buf, escaped_bytes, is_tsimplejson);
         }
       } else if ((type == kInvalidDataType || type == KindOfNull) &&
                  (c == S_DIG || c == S_ZER)) {
@@ -1532,7 +1574,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
       } else if (type == kInvalidDataType && state == 19 && s == 9) {
         type = KindOfNull;
       } else if (type != KindOfString && c > S_WSP) {
-        utf16_to_utf8(*buf, b);
+        decode_escaped_bytes(*buf, b, is_tsimplejson);
       }
 
       state = s;

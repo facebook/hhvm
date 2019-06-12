@@ -84,11 +84,11 @@ eval "$(opam env)"
 opam install \
   core_kernel.v0.11.1 \
   dtoa.0.3.1 \
-  dune.1.9.3 \
+  dune.1.10.0 \
   lwt.4.1.0 \
   lwt_log.1.1.0 \
   lwt_ppx.1.2.1 \
-  merlin.3.2.2 \
+  merlin.3.3.0 \
   ocp-indent.1.7.0 \
   pcre.7.3.4 \
   ppx_deriving.4.2.1 \

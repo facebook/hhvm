@@ -1751,10 +1751,6 @@ inline void checkRefCompat(const char* kind, const Func* self,
 // Check compatibility vs interface and abstract declarations
 void checkDeclarationCompat(const PreClass* preClass,
                             const Func* func, const Func* imeth) {
-  bool relaxedCheck = !RuntimeOption::EnableHipHopSyntax
-                        && func->isCPPBuiltin()
-                        && !imeth->unit()->isHHFile();
-
   const Func::ParamInfoVec& params = func->params();
   const Func::ParamInfoVec& iparams = imeth->params();
 
@@ -1778,12 +1774,10 @@ void checkDeclarationCompat(const PreClass* preClass,
       auto const& p = params[i];
       if (p.isVariadic()) { raiseIncompat(preClass, imeth); }
       auto const& ip = iparams[i];
-      if (!relaxedCheck) {
-        // If the interface parameter is a type constant we require the
-        // implementer to specify a type
-        if (!p.userType && ip.typeConstraint.isTypeConstant()) {
-          raiseIncompat(preClass, imeth);
-        }
+      // If the interface parameter is a type constant we require the
+      // implementer to specify a type
+      if (!p.userType && ip.typeConstraint.isTypeConstant()) {
+        raiseIncompat(preClass, imeth);
       }
       if (!iparams[i].hasDefaultValue()) {
         // The leftmost of imeth's contiguous trailing optional parameters
@@ -1803,15 +1797,13 @@ void checkDeclarationCompat(const PreClass* preClass,
     }
   }
 
-  if (!relaxedCheck) {
-    // Verify that meth provides defaults, starting with the parameter that
-    // corresponds to the leftmost of imeth's contiguous trailing optional
-    // parameters and *not* including any variadic last param (variadics
-    // don't have any default values).
-    for (unsigned i = firstOptional; i < func->numNonVariadicParams(); ++i) {
-      if (!params[i].hasDefaultValue()) {
-        raiseIncompat(preClass, imeth);
-      }
+  // Verify that meth provides defaults, starting with the parameter that
+  // corresponds to the leftmost of imeth's contiguous trailing optional
+  // parameters and *not* including any variadic last param (variadics
+  // don't have any default values).
+  for (unsigned i = firstOptional; i < func->numNonVariadicParams(); ++i) {
+    if (!params[i].hasDefaultValue()) {
+      raiseIncompat(preClass, imeth);
     }
   }
 

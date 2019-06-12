@@ -1551,10 +1551,8 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
 
   if (mysql_real_query(conn, query.data(), query.size())) {
 #ifdef HHVM_MYSQL_TRACE_MODE
-    if (RuntimeOption::EnableHipHopSyntax) {
-      raise_notice("runtime/ext_mysql: failed executing [%s] [%s]",
-                   query.data(), mysql_error(conn));
-    }
+    raise_notice("runtime/ext_mysql: failed executing [%s] [%s]",
+                 query.data(), mysql_error(conn));
 #endif
 
     // When we are timed out, and we're SELECT-ing, we're potentially

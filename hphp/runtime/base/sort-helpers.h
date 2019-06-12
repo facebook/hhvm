@@ -324,8 +324,7 @@ struct ElmUCompare {
   AccessorT acc;
   const CallCtx* ctx;
 
-  // only warn with HH syntax enabled
-  ElmUCompare() : warned(!RuntimeOption::EnableHipHopSyntax) {}
+  ElmUCompare() : warned(false) {}
 
   bool operator()(ElmT left, ElmT right) const {
     TypedValue args[2] = {

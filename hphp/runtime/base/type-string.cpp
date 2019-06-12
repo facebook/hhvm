@@ -100,7 +100,7 @@ String::String(int n) : String(static_cast<int64_t>(n)) {}
 String::String(int64_t n) : m_str(buildStringData(n), NoIncRef{}) {}
 
 void formatPhpDblStr(char **pbuf, double n) {
-  if (RuntimeOption::EnableHipHopSyntax && n == 0.0) {
+  if (n == 0.0) {
     n = 0.0; // so to avoid "-0" output
   }
   vspprintf(pbuf, 0, "%.*G", 14, n);

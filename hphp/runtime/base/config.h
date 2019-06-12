@@ -50,7 +50,7 @@ struct Config {
    * Normalizes hdf string names to their ini counterparts
    *
    * We have special handling for a few hdf strings such as those containing
-   * MySQL, Eval, IPv[4|6] and EnableHipHopSyntax
+   * MySQL, Eval and IPv[4|6].
    */
   static std::string IniName(const Hdf& config,
                              const bool prepend_hhvm = true);

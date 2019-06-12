@@ -159,7 +159,7 @@ void StandardExtension::threadInitMisc() {
     );
     IniSetting::Bind(
       this, IniSetting::PHP_INI_ALL,
-      "display_errors", RuntimeOption::EnableHipHopSyntax ? "stderr" : "1",
+      "display_errors", "stderr",
       IniSetting::SetAndGet<std::string>(
         [](const std::string& value) {
           *s_misc_display_errors = value;

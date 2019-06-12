@@ -669,11 +669,7 @@ static String HHVM_METHOD(ReflectionFunctionAbstract, getName) {
 }
 
 static bool HHVM_METHOD(ReflectionFunctionAbstract, isHack) {
-  if (RuntimeOption::EnableHipHopSyntax) {
-    return true;
-  }
-  auto const func = ReflectionFuncHandle::GetFuncFor(this_);
-  return func->unit()->isHHFile();
+  return true;
 }
 
 static bool HHVM_METHOD(ReflectionFunctionAbstract, isInternal) {
@@ -701,13 +697,6 @@ static int64_t HHVM_METHOD(ReflectionFunctionAbstract, getNumberOfParameters) {
   return func->numParams();
 }
 
-// If we are in <?php and in PHP 7 mode w.r.t. scalar types
-ALWAYS_INLINE static bool isPhpTypeHintEnabled(const Func* func) {
-  return (!(func->unit()->isHHFile() || RuntimeOption::EnableHipHopSyntax) &&
-    RuntimeOption::PHP7_ScalarTypes
-  );
-}
-
 ALWAYS_INLINE
 static Array get_function_param_info(const Func* func) {
   const Func::ParamInfoVec& params = func->params();
@@ -733,13 +722,6 @@ static Array get_function_param_info(const Func* func) {
       : staticEmptyString();
     param.set(s_type_hint, make_tv<KindOfPersistentString>(typeHint));
 
-    std::string phpTypeHint(isPhpTypeHintEnabled(func) ? typeHint->toCppString() : "");
-
-    if (!phpTypeHint.empty() && phpTypeHint[0] == '?') {
-      phpTypeHint = phpTypeHint.substr(1);
-      param.set(s_type_hint, phpTypeHint);
-    }
-
     // callable typehint considered builtin; stdclass typehint is not
     if (
       fpi.typeConstraint.isCallable() ||
@@ -748,13 +730,6 @@ static Array get_function_param_info(const Func* func) {
       )
     ) {
       param.set(s_type_hint_builtin, true_varNR.tv());
-      // If we are in <?php and in PHP 7 mode w.r.t. scalar types, then we want
-      // the types to come back as PHP 7 style scalar types, not HH\ style
-      // scalar types.
-      if (!phpTypeHint.empty() && boost::starts_with(phpTypeHint, "HH\\")) {
-        phpTypeHint = phpTypeHint.substr(3);
-        param.set(s_type_hint, phpTypeHint);
-      }
     } else {
       param.set(s_type_hint_builtin, false_varNR.tv());
     }
@@ -841,9 +816,6 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getRetTypeInfo) {
     auto retType = func->returnTypeConstraint();
     if (retType.isNullable()) {
       retTypeInfo.set(s_type_hint_nullable, true_varNR.tv());
-      if (isPhpTypeHintEnabled(func)) {
-        name = name.substr(1); //removes '?' - e.g. ?int -> int
-      }
     } else {
       retTypeInfo.set(s_type_hint_nullable, false_varNR.tv());
     }
@@ -855,12 +827,6 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getRetTypeInfo) {
       )
     ) {
       retTypeInfo.set(s_type_hint_builtin, true_varNR.tv());
-      // If we are in <?php and in PHP 7 mode w.r.t. scalar types, then we want
-      // the types to come back as PHP 7 style scalar types, not HH\ style
-      // scalar types.
-      if (isPhpTypeHintEnabled(func) && boost::starts_with(name.toCppString(), "HH\\")) {
-        name = name.substr(3);
-      }
     } else {
       retTypeInfo.set(s_type_hint_builtin, false_varNR.tv());
     }
@@ -1095,11 +1061,7 @@ static String HHVM_METHOD(ReflectionClass, getParentName) {
 }
 
 static bool HHVM_METHOD(ReflectionClass, isHack) {
-  if (RuntimeOption::EnableHipHopSyntax) {
-    return true;
-  }
-  auto const cls = ReflectionClassHandle::GetClassFor(this_);
-  return cls->preClass()->unit()->isHHFile();
+  return true;
 }
 
 static bool HHVM_METHOD(ReflectionClass, isInternal) {

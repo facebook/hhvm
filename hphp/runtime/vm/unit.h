@@ -860,8 +860,7 @@ public:
   void* replaceUnit() const;
 
   /*
-   * Does this unit correspond to a file with "<?hh" at the top, irrespective of
-   * EnableHipHopSyntax?
+   * Does this unit correspond to a file with "<?hh" at the top?
    */
   bool isHHFile() const;
 

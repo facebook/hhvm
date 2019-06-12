@@ -614,8 +614,7 @@ static void xhp_children_stmt(Parser *_p, Token &out, Token &children) {
 static void only_in_hh_syntax(Parser *_p) {
   if (!_p->scanner().isHHSyntaxEnabled()) {
     HPHP_PARSER_ERROR(
-      "Syntax only allowed in Hack files (<?hh) or with -v "
-        "Eval.EnableHipHopSyntax=true",
+      "Syntax only allowed in Hack files (<?hh)",
       _p);
   }
 }

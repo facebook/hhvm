@@ -101,8 +101,7 @@ Variant json_guard_error_result(const String& partial_error_output,
 
    // Issue a warning on unsupported type in case of HH syntax.
   if (json_get_last_error_code() ==
-      json_error_codes::JSON_ERROR_UNSUPPORTED_TYPE &&
-      RuntimeOption::EnableHipHopSyntax) {
+      json_error_codes::JSON_ERROR_UNSUPPORTED_TYPE) {
     // Unhandled case is always returned as `false`; for partial output
     // we render "null" value.
     raise_warning("json_encode(): type is unsupported, encoded as %s",

@@ -232,11 +232,7 @@ void verifyTypeImpl(IRGS& env,
       always_assert(false);
     };
 
-    auto const strictTypes = RuntimeOption::EnableHipHopSyntax ||
-      curUnit(env)->isHHFile() ||
-      !RuntimeOption::PHP7_ScalarTypes;
-    auto const failHard = strictTypes
-      && RuntimeOption::RepoAuthoritative
+    auto const failHard = RuntimeOption::RepoAuthoritative
       && !tc.isSoft()
       && (!tc.isThis() || thisFailsHard());
     return fail(valType, failHard);

@@ -137,7 +137,7 @@ let parse_options () =
       );
       ("-v"
           , Arg.String (fun str -> config_list := str :: !config_list)
-            , " Configuration: Eval.EnableHipHopSyntax=<value> "
+            , " Configuration: Server.Port=<value> "
               ^ "\n"
               ^ "\t\tAllows overriding config options passed on a file"
       );

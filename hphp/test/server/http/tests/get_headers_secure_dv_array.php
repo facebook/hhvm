@@ -5,7 +5,6 @@ require_once('test_base.inc');
 function opts(bool $hack_arr = false): string {
   $args = array(
     '-vEval.HackArrCompatTypeHintNotices=1',
-    '-vEval.EnableHipHopSyntax=1',
   );
   if ($hack_arr) {
     $args[] = '-vEval.HackArrDVArrs=true';
@@ -16,7 +15,6 @@ function opts(bool $hack_arr = false): string {
 function hphp_opts(bool $hack_arr = false): string {
   $args = array(
     '-vRuntime.Eval.HackArrCompatTypeHintNotices=1',
-    '-vEnableHipHopSyntax=1',
   );
   if ($hack_arr) {
     $args[] = '-vHackArrDVArrs=1';

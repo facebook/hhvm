@@ -931,25 +931,11 @@ bool call_uses_strict_types(const Func* callee) {
     return false;
   }
 
-  if (LIKELY(RuntimeOption::EnableHipHopSyntax)) {
-    return true;
-  }
-
-  /* In PHP, if you have a function 'foo', and call array_map('foo', ...),
-   * array_map makes a call to 'foo', and that should *never* be strict in PHP
-   * mode, even if both foo and the call to array_map are in a strict file.
-   */
-  if (caller->isBuiltin() && !callee->isBuiltin()) {
-    return callee->unit()->isHHFile();
-  }
-
-  // Neither is builtin
   return true;
 }
 
 bool verify_fail_may_coerce(const Func* callee) {
-  if (callee->isBuiltin()) return true;
-  return !RuntimeOption::EnableHipHopSyntax;
+  return callee->isBuiltin();
 }
 
 ALWAYS_INLINE
@@ -1200,16 +1186,6 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
             return;
           }
         }
-      }
-    }
-  } else if (UNLIKELY((!func->unit()->isHHFile() || func->isBuiltin()) &&
-                      !RuntimeOption::EnableHipHopSyntax)) {
-    // PHP 7 allows for a widening conversion from Int to Float. We still ban
-    // this in HH files.
-    if (auto dt = underlyingDataType()) {
-      if (*dt == KindOfDouble && tv->m_type == KindOfInt64) {
-        assertx(verify_fail_may_coerce(func));
-        if (tvCoerceParamToDoubleInPlace(tv, func->isBuiltin())) return;
       }
     }
   }

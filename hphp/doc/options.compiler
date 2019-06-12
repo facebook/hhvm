@@ -158,12 +158,6 @@ Default is 1. Similar to scalar arrays, we have literal strings pre-generated
 in files. This option specifies how many of these files are generated for
 faster compilation.
 
-= EnableHipHopSyntax
-
-Default is false. Enables new syntax, including yield, new type names for
-function parameter, function return and class variable type hints (string,
-int, boolean, etc..), new array types (vector, map, set).
-
 = EnableShortTags
 
 Default is true. Is &lt;? allowed with PHP code?

@@ -1568,8 +1568,7 @@ bool setOpLSideEffects(const bc::SetOpL& op, const Type& lhs, const Type& rhs) {
     case SetOpOp::MulEqualO:
     case SetOpOp::SlEqual:
     case SetOpOp::SrEqual:
-      return RuntimeOption::EnableHipHopSyntax &&
-        (lhs.subtypeOf(BStr) || rhs.subtypeOf(BStr));
+      return lhs.subtypeOf(BStr) || rhs.subtypeOf(BStr);
   }
   not_reached();
 }

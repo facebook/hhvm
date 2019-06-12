@@ -256,12 +256,7 @@ Variant HHVM_FUNCTION(shell_exec,
   if (!fp) return init_null();
   StringBuffer sbuf;
   sbuf.read(fp);
-  auto ret = sbuf.detach();
-  if (ret.empty() && !RuntimeOption::EnableHipHopSyntax) {
-    // Match php5
-    return init_null();
-  }
-  return ret;
+  return sbuf.detach();
 }
 
 String HHVM_FUNCTION(exec,

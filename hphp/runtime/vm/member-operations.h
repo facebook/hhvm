@@ -446,9 +446,7 @@ inline tv_rval ElemClsMeth(
  * Elem when base is an Int64, Double, or Resource.
  */
 inline tv_rval ElemScalar() {
-  if (RuntimeOption::EnableHipHopSyntax) {
-    raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  }
+  raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
   return ElemEmptyish();
 }
 
@@ -3095,7 +3093,6 @@ inline tv_lval propPreNull(TypedValue& tvRef, MInstrPropState* pState) {
 
 template <class F>
 inline void promoteToStdClass(tv_lval base,
-                              bool warn,
                               F fun,
                               const MInstrPropState* pState) {
   if (!RuntimeOption::EvalPromoteEmptyObject) {
@@ -3143,28 +3140,26 @@ inline void promoteToStdClass(tv_lval base,
   base.type() = KindOfObject;
   base.val().pobj = obj.get();
 
-  if (warn) {
-    // Behavior here is observable.
-    // In PHP 5.6, raise_warning is called before updating base, so
-    // the error_handler sees the original base; but if an exception
-    // is thrown from the error handler, any catch block will see the
-    // updated base.
-    // In PHP 7+, raise_warning is called after updating base, but before
-    // doing the work of fun, and again, if an exception is thrown, fun
-    // still gets called before reaching the catch block.
-    // We'll match PHP7, because we have no way of ensuring that base survives
-    // across a call to the error_handler: eg $a[0][0][0]->foo = 0; if $a
-    // started out null, and the error handler resets it to null, base is
-    // left dangling.
-    // Note that this means that the error handler can overwrite the object
-    // so there is no guarantee that we have an object on return from
-    // promoteToStdClass.
-    try {
-      raise_warning(Strings::CREATING_DEFAULT_OBJECT);
-    } catch (const Object&) {
-      fun(obj.get());
-      throw;
-    }
+  // Behavior here is observable.
+  // In PHP 5.6, raise_warning is called before updating base, so
+  // the error_handler sees the original base; but if an exception
+  // is thrown from the error handler, any catch block will see the
+  // updated base.
+  // In PHP 7+, raise_warning is called after updating base, but before
+  // doing the work of fun, and again, if an exception is thrown, fun
+  // still gets called before reaching the catch block.
+  // We'll match PHP7, because we have no way of ensuring that base survives
+  // across a call to the error_handler: eg $a[0][0][0]->foo = 0; if $a
+  // started out null, and the error handler resets it to null, base is
+  // left dangling.
+  // Note that this means that the error handler can overwrite the object
+  // so there is no guarantee that we have an object on return from
+  // promoteToStdClass.
+  try {
+    raise_warning(Strings::CREATING_DEFAULT_OBJECT);
+  } catch (const Object&) {
+    fun(obj.get());
+    throw;
   }
 
   fun(obj.get());
@@ -3178,8 +3173,7 @@ tv_lval propPreStdclass(TypedValue& tvRef,
     return propPreNull<mode>(tvRef, pState);
   }
 
-  promoteToStdClass(base, RuntimeOption::EnableHipHopSyntax,
-                    [] (ObjectData*) {}, pState);
+  promoteToStdClass(base, [] (ObjectData*) {}, pState);
   if (UNLIKELY(base.type() != KindOfObject)) {
     // See the comments above. Although promoteToStdClass will have
     // either thrown an exception, or promoted base to an object, an
@@ -3369,7 +3363,6 @@ inline void SetPropStdclass(tv_lval base,
                             const MInstrPropState* pState) {
   promoteToStdClass(
     base,
-    true,
     [&] (ObjectData* obj) {
       auto const keySD = prepareKey(key);
       SCOPE_EXIT { decRefStr(keySD); };
@@ -3453,7 +3446,6 @@ inline tv_lval SetOpPropStdclass(TypedValue& tvRef, SetOpOp op,
                                  Cell* rhs, const MInstrPropState* pState) {
   promoteToStdClass(
     base,
-    true,
     [&] (ObjectData* obj) {
       StringData* keySD = prepareKey(key);
       SCOPE_EXIT { decRefStr(keySD); };
@@ -3539,7 +3531,6 @@ inline Cell IncDecPropStdclass(IncDecOp op, tv_lval base,
   Cell dest;
   promoteToStdClass(
     base,
-    true,
     [&] (ObjectData* obj) {
       StringData* keySD = prepareKey(key);
       SCOPE_EXIT { decRefStr(keySD); };

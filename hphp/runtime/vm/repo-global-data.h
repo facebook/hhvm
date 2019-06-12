@@ -37,11 +37,6 @@ struct Repo::GlobalData {
   bool UsedHHBBC = false;
 
   /*
-   * Was the repo compiled with EnableHipHopSyntax.
-   */
-  bool EnableHipHopSyntax = false;
-
-  /*
    * Copy of InitialNamedEntityTableSize for hhbbc to use.
    */
   uint32_t InitialNamedEntityTableSize = 0;
@@ -208,7 +203,6 @@ struct Repo::GlobalData {
 
   template<class SerDe> void serde(SerDe& sd) {
     sd(UsedHHBBC)
-      (EnableHipHopSyntax)
       (InitialNamedEntityTableSize)
       (InitialStaticStringTableSize)
       (ThisTypeHintLevel)

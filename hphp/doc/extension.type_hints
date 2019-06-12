@@ -1,9 +1,6 @@
 
 <h2>Richer type hints</h2>
 
-This feature requires the [[index.php?file=options.compiler | compiler option]]
-EnableHipHopSyntax=true, or interpreter option Eval.EnableHipHopSyntax=true.
-
 HipHop extends the support of type hints to primitive types, like bool, int, and
 double. It also supports string for type hints.
 

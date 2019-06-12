@@ -26,7 +26,6 @@ std::string show(const Repo::GlobalData& gd) {
   std::string out;
 #define SHOW(x) folly::format(&out, "  {}: {}\n", #x, gd.x)
   SHOW(UsedHHBBC);
-  SHOW(EnableHipHopSyntax);
   SHOW(InitialNamedEntityTableSize);
   SHOW(InitialStaticStringTableSize);
   SHOW(HardReturnTypeHints);

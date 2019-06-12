@@ -412,12 +412,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     Config::ParseHdfString(confString, config);
   }
   Hdf runtime = config["Runtime"];
-  if (config.exists("EnableHipHopSyntax")) {
-    // lots of RuntimeOptions depend on Eval.EnableHipHopSyntax, so we
-    // need to make sure it gets set correctly.
-    runtime["Eval.EnableHipHopSyntax"].set(
-      config["EnableHipHopSyntax"].configGet());
-  }
   // The configuration command line strings were already processed above
   // Don't process them again.
   //

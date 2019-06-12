@@ -637,15 +637,10 @@ void VariableSerializer::write(const Object& v) {
       if (v->isCollection()) {
         serializeCollection(v.get());
       } else if (v->instanceof(c_Closure::classof())) {
-        // We serialize closures as "{}" in JSON mode to be compatible
-        // with PHP. And issue a warning in HipHop syntax.
-        if (RuntimeOption::EnableHipHopSyntax) {
-          m_buf->append("null");
-          json_set_last_error_code(
-            json_error_codes::JSON_ERROR_UNSUPPORTED_TYPE);
-          return;
-        }
-        m_buf->append("{}");
+        m_buf->append("null");
+        json_set_last_error_code(
+          json_error_codes::JSON_ERROR_UNSUPPORTED_TYPE);
+        return;
       } else {
         auto props = v->toArray(true, m_ignoreLateInit);
         pushObjectInfo(v->getClassName(), 'O');

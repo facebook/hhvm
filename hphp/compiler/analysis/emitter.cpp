@@ -135,7 +135,6 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   auto gd                        = Repo::GlobalData{};
   gd.UsedHHBBC                   = RuntimeOption::EvalUseHHBBC;
   gd.Signature                   = nanos.count();
-  gd.EnableHipHopSyntax          = RuntimeOption::EnableHipHopSyntax;
   gd.HardReturnTypeHints         = RuntimeOption::EvalCheckReturnTypeHints >= 3;
   gd.CheckPropTypeHints          = RuntimeOption::EvalCheckPropTypeHints;
   gd.HardPrivatePropInference    = true;

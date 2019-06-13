@@ -433,10 +433,6 @@ and simplify_subtype
     then simplify_subtype ~seen_generic_params ~this_ty bound_sub bound_super env
     else simplify_subtype ~seen_generic_params ~this_ty bound_sub ty_super env
 
-  | Tabstract (AKdependent (`expr _), Some ty_sub), Tclass _ ->
-    let this_ty = Option.first_some this_ty (Some ety_sub) in
-    simplify_subtype ~seen_generic_params ~this_ty ty_sub ty_super env
-
   | Tabstract (AKdependent (`expr _), Some ty), Toption arg_ty_super ->
     let this_ty = Option.first_some this_ty (Some ety_sub) in
     env |>

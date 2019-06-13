@@ -6,6 +6,12 @@ File "hackarray.hhi", line 11, characters 34-41:
 This is an array key (int | string)
 File "index_array_bad.php", line 8, characters 8-12:
 It is incompatible with a mixed value
+File "index_array_bad.php", line 15, characters 9-18:
+This value is not a valid key type for this container (Typing[4298])
+File "index_array_bad.php", line 8, characters 3-18:
+This container is an object of type dict<mixed, bool>
+File "index_array_bad.php", line 15, characters 13-17:
+A bool cannot be used as a key for an object of type dict<mixed, bool>
 File "index_array_bad.php", line 12, characters 8-14:
 Invalid index type for this dict (Typing[4110])
 File "index_array_bad.php", line 6, characters 8-10:
@@ -36,9 +42,3 @@ File "index_array_bad.php", line 9, characters 18-20:
 This is an int
 File "index_array_bad.php", line 25, characters 28-30:
 It is incompatible with a string
-File "index_array_bad.php", line 15, characters 9-18:
-This value is not a valid key type for this container (Typing[4298])
-File "index_array_bad.php", line 8, characters 3-18:
-This container is an object of type dict<mixed, bool>
-File "index_array_bad.php", line 15, characters 13-17:
-A bool cannot be used as a key for an object of type dict<mixed, bool>

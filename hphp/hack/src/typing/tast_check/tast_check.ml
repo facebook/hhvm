@@ -36,8 +36,7 @@ let visitor opts =
   Callconv_check.handler;
   Xhp_check.handler;
   Discarded_awaitable_check.handler;
-  Invalid_arraykey_check.handler;
-  Invalid_arraykey_check.index_handler;
+  Invalid_index_check.handler;
   Basic_reactivity_check.handler;
   Pseudofunctions_check.handler;
   Reified_check.handler;

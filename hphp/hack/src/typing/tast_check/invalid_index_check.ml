@@ -13,32 +13,8 @@ open Typing_defs
 
 module Env = Tast_env
 module TCO = TypecheckerOptions
-module MakeType = Typing_make_type
 
 let should_enforce env = TCO.disallow_invalid_arraykey (Env.get_tcopt env)
-
-let info_of_type env ty : Pos.t * string =
-  (Reason.to_pos (fst ty), Env.print_error_ty env ty)
-
-let is_valid_arraykey env tcontainer tkey =
-  let is_maplike_container env e =
-    List.exists
-      [SN.Collections.cMap;
-       SN.Collections.cImmMap;
-       SN.Collections.cConstMap;
-       SN.Collections.cDict]
-      ~f:begin fun cls ->
-        Env.can_subtype env e
-          (Reason.Rnone,
-           Tclass ((Pos.none, cls),
-                   Nonexact,
-                   [Reason.Rnone, Tany; Reason.Rnone, Tany;]))
-      end ||
-      Env.can_subtype env tcontainer (Reason.Rnone, Tarraykind AKany)
-    in
-  Env.is_untyped env tcontainer ||
-  (not @@ is_maplike_container env tcontainer) ||
-  Env.can_subtype env tkey (Reason.Rnone, Tprim Tarraykey)
 
 (* For new-inference, types of keys in collection types may not be resolved
  * until TAST check time. For this reason, we replicate some of the checks that
@@ -94,18 +70,6 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
   | Terr | Tdynamic | Tany | Tarraykind _ | Tabstract _
   | _ -> ()
 
-let handler = object
-  inherit Tast_visitor.handler_base
-
-  method! at_expr env ((p, _), expr) =
-    match expr with
-    | Array_get (((_, tcontainer), _), Some ((_, tkey), _))
-      when should_enforce env &&
-        not (is_valid_arraykey env tcontainer tkey) ->
-      Errors.invalid_arraykey p (info_of_type env tcontainer) (info_of_type env tkey)
-    | _ -> ()
-end
-
 let index_visitor = object(this)
   inherit [_] Tast_visitor.iter_with_state as super
 
@@ -130,7 +94,7 @@ let index_visitor = object(this)
       super#on_expr (env, is_lvalue) e
 end
 
-let index_handler = object
+let handler = object
   inherit Tast_visitor.handler_base
 
   method! at_fun_def env = index_visitor#on_fun_def (env, false)

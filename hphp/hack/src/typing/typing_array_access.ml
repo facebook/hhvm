@@ -115,6 +115,26 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
   | _ ->
     env, None
 
+(* Check that an index to a map-like collection passes the basic test of
+ * being a subtype of arraykey
+ *)
+let check_arraykey_index env pos container_ty index_ty =
+  if TypecheckerOptions.disallow_invalid_arraykey (Env.get_tcopt env)
+  then
+    let reason =
+      match container_ty with
+      | _, Tclass((_, cn), _, _) -> Reason.index_class cn
+      | _ -> Reason.index_array in
+    let info_of_type ty = (Reason.to_pos (fst ty), Typing_print.error env ty) in
+    let ty_arraykey = MakeType.arraykey (Reason.Ridx_dict pos) in
+    (* Wrap generic type mismatch error with special error code *)
+    Errors.try_
+      (fun () -> Typing_coercion.coerce_type pos reason env index_ty ty_arraykey)
+      (fun _ ->
+        Errors.invalid_arraykey pos (info_of_type container_ty) (info_of_type index_ty);
+        env)
+  else env
+
 let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
   is_lvalue env ty1 e2 ty2 =
   Typing_log.(log_with_level env "typing" 1 (fun () ->
@@ -212,7 +232,7 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
         let env, k = Env.expand_type env k in
         let env =
           if (cn = SN.Collections.cDict || cn = SN.Collections.cKeyset)
-          then env (* TODO: enable arraykey checking here *)
+          then check_arraykey_index env expr_pos ety1 ty2
           else type_index env expr_pos ty2 k (Reason.index_class cn) in
         env, v
   (* Certain container/collection types are intended to be immutable/const,
@@ -250,11 +270,15 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
         (cn = SN.Collections.cConstVector || cn = SN.Collections.cImmVector) ->
     error_const_mutation env expr_pos ety1
   | Tarraykind (AKdarray (_k, v) | AKmap (_k, v)) ->
-      env, v
+    let env = check_arraykey_index env expr_pos ety1 ty2 in
+    env, v
   | Terr -> env, err_witness env expr_pos
   | Tdynamic -> env, ety1
-  | Tany | Tarraykind (AKany | AKempty) ->
-      env, (Reason.Rnone, TUtils.tany env)
+  | Tany ->
+    env, (Reason.Rnone, TUtils.tany env)
+  | Tarraykind (AKany | AKempty) ->
+    let env = check_arraykey_index env expr_pos ety1 ty2 in
+    env, (Reason.Rnone, TUtils.tany env)
   | Tprim Tstring ->
       let ty = MakeType.string (Reason.Rwitness expr_pos) in
       let ty1 = MakeType.int (Reason.Ridx (fst e2, r)) in
@@ -605,6 +629,7 @@ let rec assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
     env, ((fst ety1, Tclass (id, e, [tv'])), tv')
   | Tclass ((_, cn) as id, _, argl)
     when cn = SN.Collections.cMap || cn = SN.Collections.cStableMap ->
+    let env = check_arraykey_index env expr_pos ety1 tkey in
     let (tk, tv) = match argl with
       | [tk; tv] -> (tk, tv)
       | _ -> arity_error id; let any = err_witness env expr_pos in any, any in
@@ -612,6 +637,7 @@ let rec assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
     let env = Typing_ops.sub_type expr_pos ur env ty2 tv in
     env, (ety1, tv)
   | Tclass ((_, cn) as id, e, argl) when cn = SN.Collections.cDict ->
+    let env = check_arraykey_index env expr_pos ety1 tkey in
     let (tk, tv) = match argl with
       | [tk; tv] -> (tk, tv)
       | _ -> arity_error id; let any = err_witness env expr_pos in any, any in
@@ -631,10 +657,12 @@ let rec assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
     Errors.const_mutation expr_pos (Reason.to_pos r) (Typing_print.error env ety1);
     error
   | Tarraykind (AKdarray (tk, tv)) ->
+    let env = check_arraykey_index env expr_pos ety1 tkey in
     let env, tk' = Typing_union.union env tk tkey in
     let env, tv' = Typing_union.union env tv ty2 in
     env, ((fst ety1, Tarraykind (AKdarray (tk', tv'))), tv')
   | Tarraykind (AKmap (tk, tv)) ->
+    let env = check_arraykey_index env expr_pos ety1 tkey in
     let env, tk' = Typing_union.union env tk tkey in
     let env, tv' = Typing_union.union env tv ty2 in
     env, ((fst ety1, Tarraykind (AKmap (tk', tv'))), tv')
@@ -646,6 +674,7 @@ let rec assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
     let tany = Reason.Rwitness expr_pos, TUtils.tany env in
     env, (ety1, tany)
   | Tarraykind AKempty ->
+    let env = check_arraykey_index env expr_pos ety1 tkey in
     let tk = MakeType.arraykey (Reason.Rvarray_or_darray_key (Reason.to_pos r)) in
     let env = type_index env expr_pos tkey tk Reason.index_array in
     env, ((fst ety1, Tarraykind (AKvarray_or_darray ty2)), ty2)

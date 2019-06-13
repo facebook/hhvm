@@ -1825,8 +1825,7 @@ and expr_
         * types for its type parameters.
         *)
         let env, tvarl =
-          List.map_env env (Cls.tparams class_) (fun env _ ->
-            TUtils.unresolved_tparam ~reason:(Reason.Rtype_variable p) env) in
+          List.map_env env (Cls.tparams class_) (fun env _ -> Env.fresh_type env p) in
         let params = List.map (Cls.tparams class_) begin fun { tp_name = (p,n); _ } ->
           Reason.Rwitness p, Tgeneric n
         end in

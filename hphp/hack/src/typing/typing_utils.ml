@@ -505,15 +505,6 @@ let non_null env pos ty =
   | _ -> env, ty
 
 (*****************************************************************************)
-(* *)
-(*****************************************************************************)
-
-let unresolved_tparam ~reason env =
-  let v = Env.fresh () in
-  let env = Env.add_current_tyvar env (Reason.to_pos reason) v in
-  env, (reason, Tvar v)
-
-(*****************************************************************************)
 (*****************************************************************************)
 
 (* Try to unify all the types in a intersection *)

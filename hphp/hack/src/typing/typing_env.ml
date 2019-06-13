@@ -53,9 +53,6 @@ let log_env_change name old_env new_env =
   end;
   new_env
 
-let fresh () =
-  Ident.tmp()
-
 let add_subst env x x' =
   if x <> x'
   then { env with subst = IMap.add x x' env.subst }

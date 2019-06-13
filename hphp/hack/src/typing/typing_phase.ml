@@ -284,7 +284,7 @@ and localize_ft ?(instantiation) ~ety_env env ft =
         List.map_env env tparams (fun env tparam ->
           let reason =
             Reason.Rtype_variable_generics (use_pos, snd tparam.tp_name, use_name) in
-          let env, tvar = TUtils.unresolved_tparam ~reason env in
+          let env, tvar = Env.fresh_type_reason env reason in
           Typing_log.log_tparam_instantiation env use_pos tparam tvar;
           env, tvar) in
       let env, tvarl =
@@ -299,7 +299,7 @@ and localize_ft ?(instantiation) ~ety_env env ft =
           let type_argument env hint =
             match hint with
             | (pos, Nast.Happly ((_, id), [])) when id = SN.Typehints.wildcard ->
-              TUtils.unresolved_tparam ~reason:(Reason.Rwitness pos) env
+              Env.fresh_type env pos
             | _ -> localize_hint_with_self env hint in
           List.map_env env explicit_tparams type_argument
       in

@@ -15,7 +15,6 @@ open Type_parameter_env
 val show_env : env -> string
 val pp_env : Format.formatter -> env -> unit
 val get_tcopt : env -> TypecheckerOptions.t
-val fresh : unit -> int
 val fresh_type : env -> Pos.t -> env * locl ty
 val fresh_type_reason : env -> Reason.t -> env * locl ty
 val fresh_invariant_type_var : env -> Pos.t -> env * locl ty

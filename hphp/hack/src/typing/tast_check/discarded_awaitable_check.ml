@@ -10,6 +10,8 @@
 open Core_kernel
 open Tast
 open Typing_defs
+
+module Env = Tast_env
 module MakeType = Typing_make_type
 
 let is_awaitable env ty =
@@ -92,6 +94,16 @@ let visitor = object(this)
         if is_awaitable env obj_ty
         then allow_awaitable
         else disallow_non_nullable_awaitable ctx in
+      this#on_expr (env, ctx') e
+    | Is (e, hint)
+    | As (e, hint, _) ->
+      let hint_ty = Env.hint_to_ty env hint in
+      let env, hint_ty = Env.localize_with_self env hint_ty in
+      let ctx' =
+        if is_awaitable env hint_ty
+        then allow_awaitable
+        else disallow_non_nullable_awaitable ctx
+      in
       this#on_expr (env, ctx') e
     | _ ->
       if ctx.awaitable_disallowed then

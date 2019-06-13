@@ -25,6 +25,7 @@ slow/ext_weakref/weakref_basic.php
 slow/ext_weakref/weakref_clone_acquire_count.php
 slow/ext_weakref/weakref_clone_acquire_count.php
 slow/ext_weakref/weakref_gc.php
+slow/ext_weakref/weakref_gc_nativedata.php
 slow/ext_weakref/weakref_to_builtin_classes.php
 slow/ext_weakref/weakref_to_builtin_classes.php
 slow/facebook/ext_base_soft_map/default_trim_type.php

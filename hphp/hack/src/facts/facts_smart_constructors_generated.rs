@@ -230,10 +230,6 @@ impl<'a> SmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstructors 
         <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_compound_statement(s, arg0, arg1, arg2)
     }
 
-    fn make_alternate_loop_statement(s: HasScriptContent<'a>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> (HasScriptContent<'a>, Self::R) {
-        <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_alternate_loop_statement(s, arg0, arg1, arg2, arg3)
-    }
-
     fn make_expression_statement(s: HasScriptContent<'a>, arg0: Self::R, arg1: Self::R) -> (HasScriptContent<'a>, Self::R) {
         <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_expression_statement(s, arg0, arg1)
     }
@@ -278,18 +274,6 @@ impl<'a> SmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstructors 
         <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_else_clause(s, arg0, arg1)
     }
 
-    fn make_alternate_if_statement(s: HasScriptContent<'a>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R, arg7: Self::R, arg8: Self::R, arg9: Self::R) -> (HasScriptContent<'a>, Self::R) {
-        <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_alternate_if_statement(s, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
-    }
-
-    fn make_alternate_elseif_clause(s: HasScriptContent<'a>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R) -> (HasScriptContent<'a>, Self::R) {
-        <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_alternate_elseif_clause(s, arg0, arg1, arg2, arg3, arg4, arg5)
-    }
-
-    fn make_alternate_else_clause(s: HasScriptContent<'a>, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> (HasScriptContent<'a>, Self::R) {
-        <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_alternate_else_clause(s, arg0, arg1, arg2)
-    }
-
     fn make_try_statement(s: HasScriptContent<'a>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> (HasScriptContent<'a>, Self::R) {
         <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_try_statement(s, arg0, arg1, arg2, arg3)
     }
@@ -316,10 +300,6 @@ impl<'a> SmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstructors 
 
     fn make_switch_statement(s: HasScriptContent<'a>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R) -> (HasScriptContent<'a>, Self::R) {
         <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_switch_statement(s, arg0, arg1, arg2, arg3, arg4, arg5, arg6)
-    }
-
-    fn make_alternate_switch_statement(s: HasScriptContent<'a>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R, arg7: Self::R) -> (HasScriptContent<'a>, Self::R) {
-        <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_alternate_switch_statement(s, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
     }
 
     fn make_switch_section(s: HasScriptContent<'a>, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> (HasScriptContent<'a>, Self::R) {

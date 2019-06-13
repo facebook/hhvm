@@ -66,7 +66,6 @@ pub trait SyntaxType: SyntaxTypeBase
     fn make_inclusion_expression(inclusion_require: Self, inclusion_filename: Self) -> Self;
     fn make_inclusion_directive(inclusion_expression: Self, inclusion_semicolon: Self) -> Self;
     fn make_compound_statement(compound_left_brace: Self, compound_statements: Self, compound_right_brace: Self) -> Self;
-    fn make_alternate_loop_statement(alternate_loop_opening_colon: Self, alternate_loop_statements: Self, alternate_loop_closing_keyword: Self, alternate_loop_closing_semicolon: Self) -> Self;
     fn make_expression_statement(expression_statement_expression: Self, expression_statement_semicolon: Self) -> Self;
     fn make_markup_section(markup_prefix: Self, markup_text: Self, markup_suffix: Self, markup_expression: Self) -> Self;
     fn make_markup_suffix(markup_suffix_less_than_question: Self, markup_suffix_name: Self) -> Self;
@@ -78,9 +77,6 @@ pub trait SyntaxType: SyntaxTypeBase
     fn make_if_statement(if_keyword: Self, if_left_paren: Self, if_condition: Self, if_right_paren: Self, if_statement: Self, if_elseif_clauses: Self, if_else_clause: Self) -> Self;
     fn make_elseif_clause(elseif_keyword: Self, elseif_left_paren: Self, elseif_condition: Self, elseif_right_paren: Self, elseif_statement: Self) -> Self;
     fn make_else_clause(else_keyword: Self, else_statement: Self) -> Self;
-    fn make_alternate_if_statement(alternate_if_keyword: Self, alternate_if_left_paren: Self, alternate_if_condition: Self, alternate_if_right_paren: Self, alternate_if_colon: Self, alternate_if_statement: Self, alternate_if_elseif_clauses: Self, alternate_if_else_clause: Self, alternate_if_endif_keyword: Self, alternate_if_semicolon: Self) -> Self;
-    fn make_alternate_elseif_clause(alternate_elseif_keyword: Self, alternate_elseif_left_paren: Self, alternate_elseif_condition: Self, alternate_elseif_right_paren: Self, alternate_elseif_colon: Self, alternate_elseif_statement: Self) -> Self;
-    fn make_alternate_else_clause(alternate_else_keyword: Self, alternate_else_colon: Self, alternate_else_statement: Self) -> Self;
     fn make_try_statement(try_keyword: Self, try_compound_statement: Self, try_catch_clauses: Self, try_finally_clause: Self) -> Self;
     fn make_catch_clause(catch_keyword: Self, catch_left_paren: Self, catch_type: Self, catch_variable: Self, catch_right_paren: Self, catch_body: Self) -> Self;
     fn make_finally_clause(finally_keyword: Self, finally_body: Self) -> Self;
@@ -88,7 +84,6 @@ pub trait SyntaxType: SyntaxTypeBase
     fn make_for_statement(for_keyword: Self, for_left_paren: Self, for_initializer: Self, for_first_semicolon: Self, for_control: Self, for_second_semicolon: Self, for_end_of_loop: Self, for_right_paren: Self, for_body: Self) -> Self;
     fn make_foreach_statement(foreach_keyword: Self, foreach_left_paren: Self, foreach_collection: Self, foreach_await_keyword: Self, foreach_as: Self, foreach_key: Self, foreach_arrow: Self, foreach_value: Self, foreach_right_paren: Self, foreach_body: Self) -> Self;
     fn make_switch_statement(switch_keyword: Self, switch_left_paren: Self, switch_expression: Self, switch_right_paren: Self, switch_left_brace: Self, switch_sections: Self, switch_right_brace: Self) -> Self;
-    fn make_alternate_switch_statement(alternate_switch_keyword: Self, alternate_switch_left_paren: Self, alternate_switch_expression: Self, alternate_switch_right_paren: Self, alternate_switch_opening_colon: Self, alternate_switch_sections: Self, alternate_switch_closing_endswitch: Self, alternate_switch_closing_semicolon: Self) -> Self;
     fn make_switch_section(switch_section_labels: Self, switch_section_statements: Self, switch_section_fallthrough: Self) -> Self;
     fn make_switch_fallthrough(fallthrough_keyword: Self, fallthrough_semicolon: Self) -> Self;
     fn make_case_label(case_keyword: Self, case_expression: Self, case_colon: Self) -> Self;

@@ -190,9 +190,6 @@ where S: SmartConstructors<'a, State> {
     fn make_compound_statement(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R) {
         compose(SyntaxKind::CompoundStatement, S::make_compound_statement(st, arg0.1, arg1.1, arg2.1))
     }
-    fn make_alternate_loop_statement(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State, Self::R) {
-        compose(SyntaxKind::AlternateLoopStatement, S::make_alternate_loop_statement(st, arg0.1, arg1.1, arg2.1, arg3.1))
-    }
     fn make_expression_statement(st: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R) {
         compose(SyntaxKind::ExpressionStatement, S::make_expression_statement(st, arg0.1, arg1.1))
     }
@@ -226,15 +223,6 @@ where S: SmartConstructors<'a, State> {
     fn make_else_clause(st: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R) {
         compose(SyntaxKind::ElseClause, S::make_else_clause(st, arg0.1, arg1.1))
     }
-    fn make_alternate_if_statement(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R, arg8 : Self::R, arg9 : Self::R) -> (State, Self::R) {
-        compose(SyntaxKind::AlternateIfStatement, S::make_alternate_if_statement(st, arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1, arg6.1, arg7.1, arg8.1, arg9.1))
-    }
-    fn make_alternate_elseif_clause(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R) -> (State, Self::R) {
-        compose(SyntaxKind::AlternateElseifClause, S::make_alternate_elseif_clause(st, arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1))
-    }
-    fn make_alternate_else_clause(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R) {
-        compose(SyntaxKind::AlternateElseClause, S::make_alternate_else_clause(st, arg0.1, arg1.1, arg2.1))
-    }
     fn make_try_statement(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State, Self::R) {
         compose(SyntaxKind::TryStatement, S::make_try_statement(st, arg0.1, arg1.1, arg2.1, arg3.1))
     }
@@ -255,9 +243,6 @@ where S: SmartConstructors<'a, State> {
     }
     fn make_switch_statement(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R) -> (State, Self::R) {
         compose(SyntaxKind::SwitchStatement, S::make_switch_statement(st, arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1, arg6.1))
-    }
-    fn make_alternate_switch_statement(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R) -> (State, Self::R) {
-        compose(SyntaxKind::AlternateSwitchStatement, S::make_alternate_switch_statement(st, arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1, arg6.1, arg7.1))
     }
     fn make_switch_section(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R) {
         compose(SyntaxKind::SwitchSection, S::make_switch_section(st, arg0.1, arg1.1, arg2.1))

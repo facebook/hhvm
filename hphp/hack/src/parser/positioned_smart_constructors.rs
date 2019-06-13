@@ -237,10 +237,6 @@ impl<'a, State: StateType<'a, PositionedSyntax>> SmartConstructors<'a, State::T>
         <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_compound_statement(s, arg0, arg1, arg2)
     }
 
-    fn make_alternate_loop_statement(s: State::T, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> (State::T, Self::R) {
-        <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_alternate_loop_statement(s, arg0, arg1, arg2, arg3)
-    }
-
     fn make_expression_statement(s: State::T, arg0: Self::R, arg1: Self::R) -> (State::T, Self::R) {
         <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_expression_statement(s, arg0, arg1)
     }
@@ -285,18 +281,6 @@ impl<'a, State: StateType<'a, PositionedSyntax>> SmartConstructors<'a, State::T>
         <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_else_clause(s, arg0, arg1)
     }
 
-    fn make_alternate_if_statement(s: State::T, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R, arg7: Self::R, arg8: Self::R, arg9: Self::R) -> (State::T, Self::R) {
-        <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_alternate_if_statement(s, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
-    }
-
-    fn make_alternate_elseif_clause(s: State::T, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R) -> (State::T, Self::R) {
-        <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_alternate_elseif_clause(s, arg0, arg1, arg2, arg3, arg4, arg5)
-    }
-
-    fn make_alternate_else_clause(s: State::T, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> (State::T, Self::R) {
-        <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_alternate_else_clause(s, arg0, arg1, arg2)
-    }
-
     fn make_try_statement(s: State::T, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> (State::T, Self::R) {
         <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_try_statement(s, arg0, arg1, arg2, arg3)
     }
@@ -323,10 +307,6 @@ impl<'a, State: StateType<'a, PositionedSyntax>> SmartConstructors<'a, State::T>
 
     fn make_switch_statement(s: State::T, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R) -> (State::T, Self::R) {
         <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_switch_statement(s, arg0, arg1, arg2, arg3, arg4, arg5, arg6)
-    }
-
-    fn make_alternate_switch_statement(s: State::T, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R, arg7: Self::R) -> (State::T, Self::R) {
-        <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_alternate_switch_statement(s, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
     }
 
     fn make_switch_section(s: State::T, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> (State::T, Self::R) {

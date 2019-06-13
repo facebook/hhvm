@@ -513,17 +513,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_alternate_loop_statement(alternate_loop_opening_colon: Self, alternate_loop_statements: Self, alternate_loop_closing_keyword: Self, alternate_loop_closing_semicolon: Self) -> Self {
-        let syntax = SyntaxVariant::AlternateLoopStatement(Box::new(AlternateLoopStatementChildren {
-            alternate_loop_opening_colon,
-            alternate_loop_statements,
-            alternate_loop_closing_keyword,
-            alternate_loop_closing_semicolon,
-        }));
-        let value = V::from_syntax(&syntax);
-        Self::make(syntax, value)
-    }
-
     fn make_expression_statement(expression_statement_expression: Self, expression_statement_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::ExpressionStatement(Box::new(ExpressionStatementChildren {
             expression_statement_expression,
@@ -649,46 +638,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_alternate_if_statement(alternate_if_keyword: Self, alternate_if_left_paren: Self, alternate_if_condition: Self, alternate_if_right_paren: Self, alternate_if_colon: Self, alternate_if_statement: Self, alternate_if_elseif_clauses: Self, alternate_if_else_clause: Self, alternate_if_endif_keyword: Self, alternate_if_semicolon: Self) -> Self {
-        let syntax = SyntaxVariant::AlternateIfStatement(Box::new(AlternateIfStatementChildren {
-            alternate_if_keyword,
-            alternate_if_left_paren,
-            alternate_if_condition,
-            alternate_if_right_paren,
-            alternate_if_colon,
-            alternate_if_statement,
-            alternate_if_elseif_clauses,
-            alternate_if_else_clause,
-            alternate_if_endif_keyword,
-            alternate_if_semicolon,
-        }));
-        let value = V::from_syntax(&syntax);
-        Self::make(syntax, value)
-    }
-
-    fn make_alternate_elseif_clause(alternate_elseif_keyword: Self, alternate_elseif_left_paren: Self, alternate_elseif_condition: Self, alternate_elseif_right_paren: Self, alternate_elseif_colon: Self, alternate_elseif_statement: Self) -> Self {
-        let syntax = SyntaxVariant::AlternateElseifClause(Box::new(AlternateElseifClauseChildren {
-            alternate_elseif_keyword,
-            alternate_elseif_left_paren,
-            alternate_elseif_condition,
-            alternate_elseif_right_paren,
-            alternate_elseif_colon,
-            alternate_elseif_statement,
-        }));
-        let value = V::from_syntax(&syntax);
-        Self::make(syntax, value)
-    }
-
-    fn make_alternate_else_clause(alternate_else_keyword: Self, alternate_else_colon: Self, alternate_else_statement: Self) -> Self {
-        let syntax = SyntaxVariant::AlternateElseClause(Box::new(AlternateElseClauseChildren {
-            alternate_else_keyword,
-            alternate_else_colon,
-            alternate_else_statement,
-        }));
-        let value = V::from_syntax(&syntax);
-        Self::make(syntax, value)
-    }
-
     fn make_try_statement(try_keyword: Self, try_compound_statement: Self, try_catch_clauses: Self, try_finally_clause: Self) -> Self {
         let syntax = SyntaxVariant::TryStatement(Box::new(TryStatementChildren {
             try_keyword,
@@ -778,21 +727,6 @@ where
             switch_left_brace,
             switch_sections,
             switch_right_brace,
-        }));
-        let value = V::from_syntax(&syntax);
-        Self::make(syntax, value)
-    }
-
-    fn make_alternate_switch_statement(alternate_switch_keyword: Self, alternate_switch_left_paren: Self, alternate_switch_expression: Self, alternate_switch_right_paren: Self, alternate_switch_opening_colon: Self, alternate_switch_sections: Self, alternate_switch_closing_endswitch: Self, alternate_switch_closing_semicolon: Self) -> Self {
-        let syntax = SyntaxVariant::AlternateSwitchStatement(Box::new(AlternateSwitchStatementChildren {
-            alternate_switch_keyword,
-            alternate_switch_left_paren,
-            alternate_switch_expression,
-            alternate_switch_right_paren,
-            alternate_switch_opening_colon,
-            alternate_switch_sections,
-            alternate_switch_closing_endswitch,
-            alternate_switch_closing_semicolon,
         }));
         let value = V::from_syntax(&syntax);
         Self::make(syntax, value)
@@ -2290,13 +2224,6 @@ where
                 let acc = f(&x.compound_right_brace, acc);
                 acc
             },
-            SyntaxVariant::AlternateLoopStatement(x) => {
-                let acc = f(&x.alternate_loop_opening_colon, acc);
-                let acc = f(&x.alternate_loop_statements, acc);
-                let acc = f(&x.alternate_loop_closing_keyword, acc);
-                let acc = f(&x.alternate_loop_closing_semicolon, acc);
-                acc
-            },
             SyntaxVariant::ExpressionStatement(x) => {
                 let acc = f(&x.expression_statement_expression, acc);
                 let acc = f(&x.expression_statement_semicolon, acc);
@@ -2378,34 +2305,6 @@ where
                 let acc = f(&x.else_statement, acc);
                 acc
             },
-            SyntaxVariant::AlternateIfStatement(x) => {
-                let acc = f(&x.alternate_if_keyword, acc);
-                let acc = f(&x.alternate_if_left_paren, acc);
-                let acc = f(&x.alternate_if_condition, acc);
-                let acc = f(&x.alternate_if_right_paren, acc);
-                let acc = f(&x.alternate_if_colon, acc);
-                let acc = f(&x.alternate_if_statement, acc);
-                let acc = f(&x.alternate_if_elseif_clauses, acc);
-                let acc = f(&x.alternate_if_else_clause, acc);
-                let acc = f(&x.alternate_if_endif_keyword, acc);
-                let acc = f(&x.alternate_if_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::AlternateElseifClause(x) => {
-                let acc = f(&x.alternate_elseif_keyword, acc);
-                let acc = f(&x.alternate_elseif_left_paren, acc);
-                let acc = f(&x.alternate_elseif_condition, acc);
-                let acc = f(&x.alternate_elseif_right_paren, acc);
-                let acc = f(&x.alternate_elseif_colon, acc);
-                let acc = f(&x.alternate_elseif_statement, acc);
-                acc
-            },
-            SyntaxVariant::AlternateElseClause(x) => {
-                let acc = f(&x.alternate_else_keyword, acc);
-                let acc = f(&x.alternate_else_colon, acc);
-                let acc = f(&x.alternate_else_statement, acc);
-                acc
-            },
             SyntaxVariant::TryStatement(x) => {
                 let acc = f(&x.try_keyword, acc);
                 let acc = f(&x.try_compound_statement, acc);
@@ -2470,17 +2369,6 @@ where
                 let acc = f(&x.switch_left_brace, acc);
                 let acc = f(&x.switch_sections, acc);
                 let acc = f(&x.switch_right_brace, acc);
-                acc
-            },
-            SyntaxVariant::AlternateSwitchStatement(x) => {
-                let acc = f(&x.alternate_switch_keyword, acc);
-                let acc = f(&x.alternate_switch_left_paren, acc);
-                let acc = f(&x.alternate_switch_expression, acc);
-                let acc = f(&x.alternate_switch_right_paren, acc);
-                let acc = f(&x.alternate_switch_opening_colon, acc);
-                let acc = f(&x.alternate_switch_sections, acc);
-                let acc = f(&x.alternate_switch_closing_endswitch, acc);
-                let acc = f(&x.alternate_switch_closing_semicolon, acc);
                 acc
             },
             SyntaxVariant::SwitchSection(x) => {
@@ -3270,7 +3158,6 @@ where
             SyntaxVariant::InclusionExpression {..} => SyntaxKind::InclusionExpression,
             SyntaxVariant::InclusionDirective {..} => SyntaxKind::InclusionDirective,
             SyntaxVariant::CompoundStatement {..} => SyntaxKind::CompoundStatement,
-            SyntaxVariant::AlternateLoopStatement {..} => SyntaxKind::AlternateLoopStatement,
             SyntaxVariant::ExpressionStatement {..} => SyntaxKind::ExpressionStatement,
             SyntaxVariant::MarkupSection {..} => SyntaxKind::MarkupSection,
             SyntaxVariant::MarkupSuffix {..} => SyntaxKind::MarkupSuffix,
@@ -3282,9 +3169,6 @@ where
             SyntaxVariant::IfStatement {..} => SyntaxKind::IfStatement,
             SyntaxVariant::ElseifClause {..} => SyntaxKind::ElseifClause,
             SyntaxVariant::ElseClause {..} => SyntaxKind::ElseClause,
-            SyntaxVariant::AlternateIfStatement {..} => SyntaxKind::AlternateIfStatement,
-            SyntaxVariant::AlternateElseifClause {..} => SyntaxKind::AlternateElseifClause,
-            SyntaxVariant::AlternateElseClause {..} => SyntaxKind::AlternateElseClause,
             SyntaxVariant::TryStatement {..} => SyntaxKind::TryStatement,
             SyntaxVariant::CatchClause {..} => SyntaxKind::CatchClause,
             SyntaxVariant::FinallyClause {..} => SyntaxKind::FinallyClause,
@@ -3292,7 +3176,6 @@ where
             SyntaxVariant::ForStatement {..} => SyntaxKind::ForStatement,
             SyntaxVariant::ForeachStatement {..} => SyntaxKind::ForeachStatement,
             SyntaxVariant::SwitchStatement {..} => SyntaxKind::SwitchStatement,
-            SyntaxVariant::AlternateSwitchStatement {..} => SyntaxKind::AlternateSwitchStatement,
             SyntaxVariant::SwitchSection {..} => SyntaxKind::SwitchSection,
             SyntaxVariant::SwitchFallthrough {..} => SyntaxKind::SwitchFallthrough,
             SyntaxVariant::CaseLabel {..} => SyntaxKind::CaseLabel,
@@ -3760,14 +3643,6 @@ pub struct CompoundStatementChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
-pub struct AlternateLoopStatementChildren<T, V> {
-    pub alternate_loop_opening_colon: Syntax<T, V>,
-    pub alternate_loop_statements: Syntax<T, V>,
-    pub alternate_loop_closing_keyword: Syntax<T, V>,
-    pub alternate_loop_closing_semicolon: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
 pub struct ExpressionStatementChildren<T, V> {
     pub expression_statement_expression: Syntax<T, V>,
     pub expression_statement_semicolon: Syntax<T, V>,
@@ -3860,37 +3735,6 @@ pub struct ElseClauseChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
-pub struct AlternateIfStatementChildren<T, V> {
-    pub alternate_if_keyword: Syntax<T, V>,
-    pub alternate_if_left_paren: Syntax<T, V>,
-    pub alternate_if_condition: Syntax<T, V>,
-    pub alternate_if_right_paren: Syntax<T, V>,
-    pub alternate_if_colon: Syntax<T, V>,
-    pub alternate_if_statement: Syntax<T, V>,
-    pub alternate_if_elseif_clauses: Syntax<T, V>,
-    pub alternate_if_else_clause: Syntax<T, V>,
-    pub alternate_if_endif_keyword: Syntax<T, V>,
-    pub alternate_if_semicolon: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct AlternateElseifClauseChildren<T, V> {
-    pub alternate_elseif_keyword: Syntax<T, V>,
-    pub alternate_elseif_left_paren: Syntax<T, V>,
-    pub alternate_elseif_condition: Syntax<T, V>,
-    pub alternate_elseif_right_paren: Syntax<T, V>,
-    pub alternate_elseif_colon: Syntax<T, V>,
-    pub alternate_elseif_statement: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct AlternateElseClauseChildren<T, V> {
-    pub alternate_else_keyword: Syntax<T, V>,
-    pub alternate_else_colon: Syntax<T, V>,
-    pub alternate_else_statement: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
 pub struct TryStatementChildren<T, V> {
     pub try_keyword: Syntax<T, V>,
     pub try_compound_statement: Syntax<T, V>,
@@ -3961,18 +3805,6 @@ pub struct SwitchStatementChildren<T, V> {
     pub switch_left_brace: Syntax<T, V>,
     pub switch_sections: Syntax<T, V>,
     pub switch_right_brace: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct AlternateSwitchStatementChildren<T, V> {
-    pub alternate_switch_keyword: Syntax<T, V>,
-    pub alternate_switch_left_paren: Syntax<T, V>,
-    pub alternate_switch_expression: Syntax<T, V>,
-    pub alternate_switch_right_paren: Syntax<T, V>,
-    pub alternate_switch_opening_colon: Syntax<T, V>,
-    pub alternate_switch_sections: Syntax<T, V>,
-    pub alternate_switch_closing_endswitch: Syntax<T, V>,
-    pub alternate_switch_closing_semicolon: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -4868,7 +4700,6 @@ pub enum SyntaxVariant<T, V> {
     InclusionExpression(Box<InclusionExpressionChildren<T, V>>),
     InclusionDirective(Box<InclusionDirectiveChildren<T, V>>),
     CompoundStatement(Box<CompoundStatementChildren<T, V>>),
-    AlternateLoopStatement(Box<AlternateLoopStatementChildren<T, V>>),
     ExpressionStatement(Box<ExpressionStatementChildren<T, V>>),
     MarkupSection(Box<MarkupSectionChildren<T, V>>),
     MarkupSuffix(Box<MarkupSuffixChildren<T, V>>),
@@ -4880,9 +4711,6 @@ pub enum SyntaxVariant<T, V> {
     IfStatement(Box<IfStatementChildren<T, V>>),
     ElseifClause(Box<ElseifClauseChildren<T, V>>),
     ElseClause(Box<ElseClauseChildren<T, V>>),
-    AlternateIfStatement(Box<AlternateIfStatementChildren<T, V>>),
-    AlternateElseifClause(Box<AlternateElseifClauseChildren<T, V>>),
-    AlternateElseClause(Box<AlternateElseClauseChildren<T, V>>),
     TryStatement(Box<TryStatementChildren<T, V>>),
     CatchClause(Box<CatchClauseChildren<T, V>>),
     FinallyClause(Box<FinallyClauseChildren<T, V>>),
@@ -4890,7 +4718,6 @@ pub enum SyntaxVariant<T, V> {
     ForStatement(Box<ForStatementChildren<T, V>>),
     ForeachStatement(Box<ForeachStatementChildren<T, V>>),
     SwitchStatement(Box<SwitchStatementChildren<T, V>>),
-    AlternateSwitchStatement(Box<AlternateSwitchStatementChildren<T, V>>),
     SwitchSection(Box<SwitchSectionChildren<T, V>>),
     SwitchFallthrough(Box<SwitchFallthroughChildren<T, V>>),
     CaseLabel(Box<CaseLabelChildren<T, V>>),

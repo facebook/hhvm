@@ -375,14 +375,7 @@ where
                 x.parse_expression()
             });
         let for_right_paren = self.require_right_paren();
-        let for_statement = {
-            let mut parser1 = self.clone();
-            let open_token = parser1.next_token();
-            match open_token.kind() {
-                TokenKind::Colon => self.parse_alternate_loop_statement(TokenKind::Endfor),
-                _ => self.parse_statement(),
-            }
-        };
+        let for_statement = self.parse_statement();
         S!(
             make_for_statement,
             self,
@@ -436,10 +429,7 @@ where
         let right_paren_token = self.require_right_paren();
 
         self.pop_scope(ExpectedTokens::RightParen);
-        let foreach_statement = match self.peek_token_kind() {
-            TokenKind::Colon => self.parse_alternate_loop_statement(TokenKind::Endforeach),
-            _ => self.parse_statement(),
-        };
+        let foreach_statement = self.parse_statement();
         S!(
             make_foreach_statement,
             self,
@@ -478,10 +468,7 @@ where
     fn parse_while_statement(&mut self) -> S::R {
         let while_keyword_token = self.assert_token(TokenKind::While);
         let (left_paren_token, expr_node, right_paren_token) = self.parse_paren_expr();
-        let statement_node = match self.peek_token_kind() {
-            TokenKind::Colon => self.parse_alternate_loop_statement(TokenKind::Endwhile),
-            _ => self.parse_statement(),
-        };
+        let statement_node = self.parse_statement();
         S!(
             make_while_statement,
             self,
@@ -614,24 +601,13 @@ where
     }
 
     // parses the "( expr ) statement" segment of If, Elseif or Else clauses.
-    fn parse_if_body_helper(&mut self) -> (S::R, S::R, S::R, S::Token, S::R) {
+    fn parse_if_body_helper(&mut self) -> (S::R, S::R, S::R, S::R) {
         let (left_paren_token, expr_node, right_paren_token) = self.parse_paren_expr();
-        let mut parser1 = self.clone();
-        let opening_token = parser1.next_token();
-        // let opening_token_syntax = S!(make_token, parser1, opening_token);
-        let statement_node = match opening_token.kind() {
-            TokenKind::Colon => {
-                self.continue_from(parser1);
-                self.parse_alternate_if_block(&|x: &mut Self| x.parse_statement())
-            }
-            _ => self.parse_statement(),
-        };
+        let statement_node = self.parse_statement();
         (
             left_paren_token,
             expr_node,
             right_paren_token,
-            opening_token,
-            // opening_token_syntax,
             statement_node,
         )
     }
@@ -639,37 +615,17 @@ where
     fn parse_elseif_opt(&mut self) -> Option<S::R> {
         if self.peek_token_kind() == TokenKind::Elseif {
             let elseif_token = self.assert_token(TokenKind::Elseif);
-            let (
+            let (elseif_left_paren, elseif_condition_expr, elseif_right_paren, elseif_statement) =
+                self.parse_if_body_helper();
+            let elseif_syntax = S!(
+                make_elseif_clause,
+                self,
+                elseif_token,
                 elseif_left_paren,
                 elseif_condition_expr,
                 elseif_right_paren,
-                elseif_opening_token,
                 elseif_statement,
-            ) = self.parse_if_body_helper();
-            let elseif_syntax = match elseif_opening_token.kind() {
-                TokenKind::Colon => {
-                    let elseif_opening_token_syntax = S!(make_token, self, elseif_opening_token);
-                    S!(
-                        make_alternate_elseif_clause,
-                        self,
-                        elseif_token,
-                        elseif_left_paren,
-                        elseif_condition_expr,
-                        elseif_right_paren,
-                        elseif_opening_token_syntax,
-                        elseif_statement,
-                    )
-                }
-                _ => S!(
-                    make_elseif_clause,
-                    self,
-                    elseif_token,
-                    elseif_left_paren,
-                    elseif_condition_expr,
-                    elseif_right_paren,
-                    elseif_statement,
-                ),
-            };
+            );
             Some(elseif_syntax)
         } else {
             None
@@ -682,68 +638,40 @@ where
         if else_token.is_missing() {
             else_token
         } else {
-            let mut parser1 = self.clone();
-            let opening_token = parser1.next_token();
-            match opening_token.kind() {
-                TokenKind::Colon => {
-                    self.continue_from(parser1);
-                    let opening_token_syntax = S!(make_token, self, opening_token);
-                    let else_consequence = self.parse_alternate_if_block(&|x| x.parse_statement());
-                    S!(
-                        make_alternate_else_clause,
-                        self,
-                        else_token,
-                        opening_token_syntax,
-                        else_consequence,
-                    )
-                }
-                _ => {
-                    let else_consequence = self.parse_statement();
-                    S!(make_else_clause, self, else_token, else_consequence)
-                }
-            }
+            let else_consequence = self.parse_statement();
+            S!(make_else_clause, self, else_token, else_consequence)
         }
     }
 
     fn parse_if_statement(&mut self) -> S::R {
+        // SPEC:
+        // if-statement:
+        //   if   (   expression   )   statement   elseif-clauses-opt    else-clause-opt
+        //
+        // elseif-clauses:
+        //   elseif-clause
+        //   elseif-clauses   elseif-clause
+        //
+        // elseif-clause:
+        //   elseif   (   expression   )   statement
+        //
+        // else-clause:
+        //   else   statement
         let if_keyword_token = self.assert_token(TokenKind::If);
-        let (if_left_paren, if_expr, if_right_paren, if_opening_token, if_consequence) =
-            self.parse_if_body_helper();
+        let (if_left_paren, if_expr, if_right_paren, if_consequence) = self.parse_if_body_helper();
         let elseif_syntax = self.parse_list_until_none(&|x| x.parse_elseif_opt());
         let else_syntax = self.parse_else_opt();
-        match if_opening_token.kind() {
-            TokenKind::Colon => {
-                let closing_token =
-                    self.require_token(TokenKind::Endif, Errors::error1059(TokenKind::Endif));
-                let semicolon_token = self.require_semicolon();
-                let if_opening_token_syntax = S!(make_token, self, if_opening_token);
-                S!(
-                    make_alternate_if_statement,
-                    self,
-                    if_keyword_token,
-                    if_left_paren,
-                    if_expr,
-                    if_right_paren,
-                    if_opening_token_syntax,
-                    if_consequence,
-                    elseif_syntax,
-                    else_syntax,
-                    closing_token,
-                    semicolon_token,
-                )
-            }
-            _ => S!(
-                make_if_statement,
-                self,
-                if_keyword_token,
-                if_left_paren,
-                if_expr,
-                if_right_paren,
-                if_consequence,
-                elseif_syntax,
-                else_syntax,
-            ),
-        }
+        S!(
+            make_if_statement,
+            self,
+            if_keyword_token,
+            if_left_paren,
+            if_expr,
+            if_right_paren,
+            if_consequence,
+            elseif_syntax,
+            else_syntax,
+        )
     }
 
     fn parse_switch_statement(&mut self) -> S::R {
@@ -821,57 +749,32 @@ where
 
         let switch_keyword_token = self.assert_token(TokenKind::Switch);
         let (left_paren_token, expr_node, right_paren_token) = self.parse_paren_expr();
-        let opening_token_kind = self.peek_token_kind();
-        let (opening_token_syntax, closing_token_kind) = match opening_token_kind {
-            TokenKind::Colon => (self.assert_token(TokenKind::Colon), TokenKind::Endswitch),
-            _ => (self.require_left_brace(), TokenKind::RightBrace),
-        };
+        let left_brace_token = self.require_left_brace();
         let section_list = {
             let mut parser1 = self.clone();
             let token = parser1.next_token();
             match token.kind() {
-                TokenKind::Semicolon if parser1.peek_token_kind() == closing_token_kind => {
+                TokenKind::Semicolon if parser1.peek_token_kind() == TokenKind::RightBrace => {
                     self.continue_from(parser1);
                     S!(make_list, self, Box::new(vec![]), self.pos())
                 }
-                _ => self.parse_terminated_list(&|x| x.parse_switch_section(), closing_token_kind),
+                _ => {
+                    self.parse_terminated_list(&|x| x.parse_switch_section(), TokenKind::RightBrace)
+                }
             }
         };
-        match closing_token_kind {
-            TokenKind::Endswitch => {
-                let endswitch_token_syntax = self.require_token(
-                    TokenKind::Endswitch,
-                    Errors::error1059(TokenKind::Endswitch),
-                );
-                let semicolon = self.require_semicolon();
-                S!(
-                    make_alternate_switch_statement,
-                    self,
-                    switch_keyword_token,
-                    left_paren_token,
-                    expr_node,
-                    right_paren_token,
-                    opening_token_syntax,
-                    section_list,
-                    endswitch_token_syntax,
-                    semicolon,
-                )
-            }
-            _ => {
-                let right_brace_token = self.require_right_brace();
-                S!(
-                    make_switch_statement,
-                    self,
-                    switch_keyword_token,
-                    left_paren_token,
-                    expr_node,
-                    right_paren_token,
-                    opening_token_syntax,
-                    section_list,
-                    right_brace_token,
-                )
-            }
-        }
+        let right_brace_token = self.require_right_brace();
+        S!(
+            make_switch_statement,
+            self,
+            switch_keyword_token,
+            left_paren_token,
+            expr_node,
+            right_paren_token,
+            left_brace_token,
+            section_list,
+            right_brace_token,
+        )
     }
 
     fn is_switch_fallthrough(&self) -> bool {
@@ -1270,21 +1173,6 @@ where
                 )
             }
         }
-    }
-
-    fn parse_alternate_loop_statement(&mut self, terminator: TokenKind) -> S::R {
-        let colon_token = self.assert_token(TokenKind::Colon);
-        let statement_list = self.parse_terminated_list(&|x| x.parse_statement(), terminator);
-        let terminate_token = self.require_token(terminator, Errors::error1059(terminator));
-        let semicolon_token = self.require_semicolon();
-        S!(
-            make_alternate_loop_statement,
-            self,
-            colon_token,
-            statement_list,
-            terminate_token,
-            semicolon_token,
-        )
     }
 
     fn parse_expression(&mut self) -> S::R {

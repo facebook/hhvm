@@ -276,11 +276,6 @@ where
         (s, Self::R::make_compound_statement(arg0, arg1, arg2))
     }
 
-    fn make_alternate_loop_statement(s: State::T, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State::T, Self::R) {
-        let s = State::next(s, vec![&arg0, &arg1, &arg2, &arg3]);
-        (s, Self::R::make_alternate_loop_statement(arg0, arg1, arg2, arg3))
-    }
-
     fn make_expression_statement(s: State::T, arg0 : Self::R, arg1 : Self::R) -> (State::T, Self::R) {
         let s = State::next(s, vec![&arg0, &arg1]);
         (s, Self::R::make_expression_statement(arg0, arg1))
@@ -336,21 +331,6 @@ where
         (s, Self::R::make_else_clause(arg0, arg1))
     }
 
-    fn make_alternate_if_statement(s: State::T, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R, arg8 : Self::R, arg9 : Self::R) -> (State::T, Self::R) {
-        let s = State::next(s, vec![&arg0, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9]);
-        (s, Self::R::make_alternate_if_statement(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9))
-    }
-
-    fn make_alternate_elseif_clause(s: State::T, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R) -> (State::T, Self::R) {
-        let s = State::next(s, vec![&arg0, &arg1, &arg2, &arg3, &arg4, &arg5]);
-        (s, Self::R::make_alternate_elseif_clause(arg0, arg1, arg2, arg3, arg4, arg5))
-    }
-
-    fn make_alternate_else_clause(s: State::T, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State::T, Self::R) {
-        let s = State::next(s, vec![&arg0, &arg1, &arg2]);
-        (s, Self::R::make_alternate_else_clause(arg0, arg1, arg2))
-    }
-
     fn make_try_statement(s: State::T, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State::T, Self::R) {
         let s = State::next(s, vec![&arg0, &arg1, &arg2, &arg3]);
         (s, Self::R::make_try_statement(arg0, arg1, arg2, arg3))
@@ -384,11 +364,6 @@ where
     fn make_switch_statement(s: State::T, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R) -> (State::T, Self::R) {
         let s = State::next(s, vec![&arg0, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6]);
         (s, Self::R::make_switch_statement(arg0, arg1, arg2, arg3, arg4, arg5, arg6))
-    }
-
-    fn make_alternate_switch_statement(s: State::T, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R) -> (State::T, Self::R) {
-        let s = State::next(s, vec![&arg0, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7]);
-        (s, Self::R::make_alternate_switch_statement(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7))
     }
 
     fn make_switch_section(s: State::T, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State::T, Self::R) {

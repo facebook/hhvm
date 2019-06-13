@@ -74,7 +74,6 @@ pub trait SmartConstructors<'a, State> {
     fn make_inclusion_expression(st: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R);
     fn make_inclusion_directive(st: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R);
     fn make_compound_statement(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R);
-    fn make_alternate_loop_statement(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State, Self::R);
     fn make_expression_statement(st: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R);
     fn make_markup_section(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State, Self::R);
     fn make_markup_suffix(st: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R);
@@ -86,9 +85,6 @@ pub trait SmartConstructors<'a, State> {
     fn make_if_statement(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R) -> (State, Self::R);
     fn make_elseif_clause(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> (State, Self::R);
     fn make_else_clause(st: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R);
-    fn make_alternate_if_statement(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R, arg8 : Self::R, arg9 : Self::R) -> (State, Self::R);
-    fn make_alternate_elseif_clause(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R) -> (State, Self::R);
-    fn make_alternate_else_clause(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R);
     fn make_try_statement(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State, Self::R);
     fn make_catch_clause(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R) -> (State, Self::R);
     fn make_finally_clause(st: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R);
@@ -96,7 +92,6 @@ pub trait SmartConstructors<'a, State> {
     fn make_for_statement(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R, arg8 : Self::R) -> (State, Self::R);
     fn make_foreach_statement(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R, arg8 : Self::R, arg9 : Self::R) -> (State, Self::R);
     fn make_switch_statement(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R) -> (State, Self::R);
-    fn make_alternate_switch_statement(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R) -> (State, Self::R);
     fn make_switch_section(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R);
     fn make_switch_fallthrough(st: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R);
     fn make_case_label(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R);

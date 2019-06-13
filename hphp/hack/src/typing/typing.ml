@@ -4137,38 +4137,6 @@ and is_abstract_ft fty = match fty with
       let env, fty, _ =
         class_get ~is_method:true ~is_const:false ~explicit_tparams:tal
         env ty1 m e1 in
-      let () = match e1 with
-        | CIself when is_abstract_ft fty ->
-          begin match Env.get_self env with
-            | _, Tclass ((_, self), _, _) ->
-              (* at runtime, self:: in a trait is a call to whatever
-               * self:: is in the context of the non-trait "use"-ing
-               * the trait's code *)
-              begin match Env.get_class env self with
-                | Some cls when Cls.kind cls = Ast.Ctrait -> ()
-                | _ -> Errors.self_abstract_call (snd m) p (Reason.to_pos (fst fty))
-              end
-            | _ -> ()
-          end
-        | CI c when is_abstract_ft fty ->
-          Errors.classname_abstract_call (snd c) (snd m) p (Reason.to_pos (fst fty))
-        | CI (_, classname) ->
-          begin match Decl_provider.get_class classname with
-          | Some class_def ->
-            let (_, method_name) = m in
-            begin match Cls.get_smethod class_def method_name with
-            | None -> ()
-            | Some elt ->
-              if elt.ce_synthesized then
-                Errors.static_synthetic_method classname (snd m) p (Reason.to_pos (fst fty))
-            end
-          | None ->
-            (* This technically should be an error, but if we throw here we'll break a ton of our
-            tests since they reference classes that only exist in www, and any missing classes will
-            get caught elsewhere in the pipeline. *)
-            ()
-          end
-        | _ -> () in
       let env = check_coroutine_call env fty in
       let env, tel, tuel, ty =
         call ~expected

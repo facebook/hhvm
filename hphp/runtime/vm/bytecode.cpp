@@ -5532,6 +5532,10 @@ namespace {
 
 template <bool Local, bool Pop>
 bool initIterator(PC& pc, PC targetpc, Iter* it, Cell* c1) {
+  if (isClsMethType(type(c1))) {
+    raise_error(
+      "Invalid operand type was used: expects iterable, clsmeth was given");
+  }
   auto const hasElems = it->init<Local>(c1);
   if (!hasElems) pc = targetpc;
   if (Pop) vmStack().popC();

@@ -24,6 +24,46 @@
 namespace HPHP {
 namespace VSDEBUG {
 
+namespace {
+class FramePointer {
+  public:
+    FramePointer(Debugger *debugger, int frameDepth)
+      : m_fp(nullptr),
+      m_exitDummyContext(false) {
+        VMRegAnchor _;
+
+        if (debugger->isDummyRequest()) {
+          m_fp = vmfp();
+          if (m_fp == nullptr && vmStack().count() == 0) {
+            g_context->enterDebuggerDummyEnv();
+            m_fp = vmfp();
+            m_exitDummyContext = true;
+          }
+        } else {
+          m_fp = g_context->getFrameAtDepth(frameDepth);
+        }
+    }
+
+    ~FramePointer() {
+      if (m_exitDummyContext) {
+        g_context->exitDebuggerDummyEnv();
+      }
+    }
+
+    operator ActRec *() {
+      return m_fp;
+    }
+
+    ActRec * operator ->() {
+      return m_fp;
+    }
+
+  private:
+    ActRec *m_fp;
+    bool m_exitDummyContext;
+};
+}
+
 CompletionsCommand::CompletionsCommand(
   Debugger* debugger,
   folly::dynamic message
@@ -295,17 +335,18 @@ void CompletionsCommand::addVariableCompletions(
   SuggestionContext& context,
   folly::dynamic& targets
 ) {
-  if (m_frameObj == nullptr) {
-    return;
-  }
+  int frameDepth = m_frameObj ? m_frameObj->m_frameDepth : 0;
+  auto fp = FramePointer(m_debugger, frameDepth);
 
-  auto const fp = g_context->getFrameAtDepth(m_frameObj->m_frameDepth);
-  if (fp == nullptr || fp->func() == nullptr) {
+  if (fp == nullptr) {
     return;
   }
 
   // If there is a $this, add it.
-  if (fp->func()->cls() != nullptr && fp->hasThis()) {
+  if (
+    fp->func() != nullptr &&
+    fp->func()->cls() != nullptr &&
+    fp->hasThis()) {
     static const std::string thisName("this");
     if (context.matchPrefix.size() >= thisName.size() &&
         std::equal(

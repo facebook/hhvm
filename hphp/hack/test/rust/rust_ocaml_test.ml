@@ -212,13 +212,7 @@ let get_files_in_path ~args path =
     (not @@ String_utils.string_ends_with f "memory_exhaust.php") &&
     (not @@ String_utils.string_ends_with f "parser_massive_concat_exp.php") &&
     (not @@ String_utils.string_ends_with f "parser_massive_add_exp.php") &&
-    (not @@ String_utils.string_ends_with f "byref-assignment-lvarvar.php") &&
     (not @@ String_utils.string_ends_with f "giant-arrays.php") &&
-    (not @@ String_utils.string_ends_with f "byref-assignment4.php") &&
-    (not @@ String_utils.string_ends_with f "byref-assignment3.php") &&
-    (not @@ String_utils.string_ends_with f "byref-assignment2.php") &&
-    (not @@ String_utils.string_ends_with f "byref-assignment1.php") &&
-    (not @@ String_utils.string_ends_with f "phpvar1.php") &&
     (not @@ String_utils.string_ends_with f "bug64660.php") &&
     match args.parser with
     | COROUTINE ->

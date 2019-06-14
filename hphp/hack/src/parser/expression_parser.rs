@@ -20,7 +20,6 @@ use crate::type_parser::TypeParser;
 
 #[derive(PartialEq)]
 pub enum BinaryExpressionPrefixKind<P> {
-    PrefixByrefAssignment,
     PrefixAssignment,
     PrefixLessThan(P),
     PrefixNone,
@@ -30,13 +29,6 @@ impl<P> BinaryExpressionPrefixKind<P> {
     pub fn is_none(&self) -> bool {
         match self {
             BinaryExpressionPrefixKind::PrefixNone => true,
-            _ => false,
-        }
-    }
-
-    pub fn is_byref_assignment(&self) -> bool {
-        match self {
-            BinaryExpressionPrefixKind::PrefixByrefAssignment => true,
             _ => false,
         }
     }
@@ -181,8 +173,7 @@ where
         operand: S::R,
     ) -> S::R {
         let node = S!(make_prefix_unary_expression, self, operator, operand);
-        // TODO(kasper): implement the "track" part (see is_byref_assignment_source),
-        // or remove byref assignment parsing
+        // TODO(kasper): implement the "track" part
         node
     }
 
@@ -1197,12 +1188,6 @@ where
         //|| prefix_unary_expression_checker_helper ~is_rhs:false parser t Dollar
     }
 
-    fn _can_be_used_as_right_hand_side_of_byref_asignment(t: &S::R) -> bool {
-        Self::can_be_used_as_lvalue(t)
-            || t.is_object_creation_expression()
-            || t.is_function_call_expression()
-    }
-
     // detects if left_term and operator can be treated as a beginning of
     // assignment (respecting the precedence of operator on the left of
     // left term). Returns
@@ -1211,8 +1196,6 @@ where
     // assignment.
     // - PrefixAssignment - left_term  and operator can be interpreted as a
     // prefix of assignment
-    // - PrefixByrefAssignment - left_term and operator can be interpreted as a
-    // prefix of byref assignment.
     // - Prefix:LessThan - is the start of a specified function call f<T>(...)
     fn check_if_should_override_normal_precedence(
         &self,
@@ -1240,13 +1223,11 @@ where
                     BinaryExpressionPrefixKind::PrefixNone
                 } else {
                     match operator {
-                        TokenKind::Equal if Self::can_be_used_as_lvalue(&left_term) => {
-                            BinaryExpressionPrefixKind::PrefixByrefAssignment
-                        }
                         TokenKind::Equal if left_term.is_list_expression() => {
                             BinaryExpressionPrefixKind::PrefixAssignment
                         }
-                        TokenKind::PlusEqual
+                        TokenKind::Equal
+                        | TokenKind::PlusEqual
                         | TokenKind::MinusEqual
                         | TokenKind::StarEqual
                         | TokenKind::SlashEqual
@@ -2166,51 +2147,20 @@ where
         let is_rhs_of_assignment = !assignment_prefix_kind.is_none();
         assert!(!self.next_is_lower_precedence() || is_rhs_of_assignment);
 
-        let pre_assignment_precedence = self.precedence;
         let token = self.next_token();
-        let default = |parser: &mut Self, left_term: S::R, token: S::Token| {
-            let operator = Operator::trailing_from_token(token.kind());
-            let precedence = operator.precedence(&parser.env);
-            let token = S!(make_token, parser, token);
-            let right_term = if is_rhs_of_assignment {
-                // reset the current precedence to make sure that expression on
-                // the right hand side of the assignment is fully consumed
-                parser.with_reset_precedence(|p| p.parse_term())
-            } else {
-                parser.parse_term()
-            };
-            let right_term =
-                parser.parse_remaining_binary_expression_helper(right_term, precedence);
-            let term = S!(make_binary_expression, parser, left_term, token, right_term);
-            parser.parse_remaining_expression(term)
-        };
-        // if we are on the right hand side of the assignment - peek if next
-        // token is '&'. If it is - then parse next term. If overall next term is
-        // '&'PHP variable then the overall expression should be parsed as
-        // ... (left_term = & right_term) ...
-        if assignment_prefix_kind.is_byref_assignment()
-            && self.peek_token_kind() == TokenKind::Ampersand
-        {
-            let mut parser1 = self.clone();
-            parser1.with_precedence(Operator::precedence_for_assignment_in_expressions());
-            let _rigt_term = parser1.parse_term();
-            if false
-            // TODO(kasper) is_byref_assignment_source parser1 right_term
-            {
-                // We backtrack here to call smart constructors in the correct order.
-                let token = S!(make_token, self, token);
-                self.with_precedence(Operator::precedence_for_assignment_in_expressions());
-                let right_term = self.parse_term();
-                let left_term = S!(make_binary_expression, self, left_term, token, right_term);
-                let left_term = self
-                    .parse_remaining_binary_expression_helper(left_term, pre_assignment_precedence);
-                self.parse_remaining_expression(left_term)
-            } else {
-                default(self, left_term, token)
-            }
+        let operator = Operator::trailing_from_token(token.kind());
+        let precedence = operator.precedence(&self.env);
+        let token = S!(make_token, self, token);
+        let right_term = if is_rhs_of_assignment {
+            // reset the current precedence to make sure that expression on
+            // the right hand side of the assignment is fully consumed
+            self.with_reset_precedence(|p| p.parse_term())
         } else {
-            default(self, left_term, token)
-        }
+            self.parse_term()
+        };
+        let right_term = self.parse_remaining_binary_expression_helper(right_term, precedence);
+        let term = S!(make_binary_expression, self, left_term, token, right_term);
+        self.parse_remaining_expression(term)
     }
 
     fn parse_remaining_binary_expression_helper(
@@ -2253,32 +2203,12 @@ where
                 || is_parsable_as_assignment
             {
                 let old_precedence = self.precedence;
-                let precedence = if is_parsable_as_assignment {
-                    // if expression can be parsed as an assignment, keep track of
-                    // the precedence on the left of the assignment (it is ok since
-                    // we'll internally boost the precedence when parsing rhs of the
-                    // assignment)
-                    // This is necessary for cases like:
-                    // ... + $a = &$b * $c + ...
-                    // ^             ^
-                    // #             $
-                    // it should be parsed as
-                    // (... + ($a = &$b) * $c) + ...
-                    // when we are at position (#)
-                    // - we will first consume byref assignment as a e1
-                    // - check that precedence of '*' is greater than precedence of
-                    // the '+' (left_precedence) and consume e1 * $c as $e2
-                    // - check that precedence of '+' is less or equal than precedence
-                    // of the '+' (left_precedence) and stop so the final result
-                    // before we get to the point ($) will be
-                    // (... + $e2)
-                    //
-                    left_precedence
+                let right_term = if is_parsable_as_assignment {
+                    self.with_reset_precedence(|p| p.parse_remaining_expression(right_term))
                 } else {
-                    right_precedence
+                    self.with_precedence(right_precedence);
+                    self.parse_remaining_expression(right_term)
                 };
-                self.with_precedence(precedence);
-                let right_term = self.parse_remaining_expression(right_term);
                 self.with_precedence(old_precedence);
                 self.parse_remaining_binary_expression_helper(right_term, left_precedence)
             } else {

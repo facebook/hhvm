@@ -66,7 +66,6 @@ module WithStatementAndDeclAndTypeParser
 
   [@@@warning "-32"] (* next line warning 32 unused variable pp_binary_expression_prefix_kind *)
   type binary_expression_prefix_kind =
-    | Prefix_byref_assignment
     | Prefix_assignment
     | Prefix_less_than of (t * Parser.SC.r)
     | Prefix_none [@@deriving show]
@@ -897,11 +896,6 @@ module WithStatementAndDeclAndTypeParser
     || SC.is_scope_resolution_expression t
     || prefix_unary_expression_checker_helper ~is_rhs:false parser t Dollar
 
-  and can_be_used_as_right_hand_side_of_byref_asignment parser t =
-    can_be_used_as_lvalue parser t
-    || SC.is_object_creation_expression t
-    || SC.is_function_call_expression t
-
   (* Checks if given node is prefix unary expression and verifies operator kind.
   Recursively run can_be_used_as_lvalue *)
   and prefix_unary_expression_checker_helper ~is_rhs parser t kind =
@@ -909,16 +903,12 @@ module WithStatementAndDeclAndTypeParser
     | Some { operator_kind; operand; _ } ->
       if operator_kind = kind then
         if is_rhs
-        then can_be_used_as_right_hand_side_of_byref_asignment parser operand
+        then false
         else can_be_used_as_lvalue parser operand
       else
         false
     | None -> false
 
-  (* checks if expression is a valid right hand side in by-ref assignment
-   which is '&'PHP variable *)
-  and is_byref_assignment_source parser t =
-    prefix_unary_expression_checker_helper ~is_rhs:true parser t Ampersand
 
   (*detects if left_term and operator can be treated as a beginning of
    assignment (respecting the precedence of operator on the left of
@@ -928,8 +918,6 @@ module WithStatementAndDeclAndTypeParser
    assignment.
    - Prefix_assignment - left_term  and operator can be interpreted as a
    prefix of assignment
-   - Prefix_byref_assignment - left_term and operator can be interpreted as a
-   prefix of byref assignment.
    - Prefix_less_than - is the start of a specified function call f<T>(...)
    *)
   and check_if_should_override_normal_precedence parser left_term operator left_precedence
@@ -954,10 +942,8 @@ module WithStatementAndDeclAndTypeParser
     if left_precedence >= Operator.precedence_for_assignment_in_expressions then
       Prefix_none
     else match operator with
-    | Equal when can_be_used_as_lvalue parser left_term ->
-      Prefix_byref_assignment
     | Equal when SC.is_list_expression left_term -> Prefix_assignment
-    | PlusEqual | MinusEqual | StarEqual | SlashEqual |
+    | Equal | PlusEqual | MinusEqual | StarEqual | SlashEqual |
       StarStarEqual | DotEqual | PercentEqual | AmpersandEqual |
       BarEqual | CaratEqual | LessThanLessThanEqual |
       GreaterThanGreaterThanEqual | QuestionQuestionEqual
@@ -1717,60 +1703,25 @@ module WithStatementAndDeclAndTypeParser
       let is_rhs_of_assignment = assignment_prefix_kind <> Prefix_none in
       assert (not (next_is_lower_precedence parser) || is_rhs_of_assignment);
 
-      let pre_assignment_precedence = parser.precedence in
       let (parser, token) = next_token parser in
-      let default () =
-        let operator = Operator.trailing_from_token (Token.kind token) in
-        let precedence = Operator.precedence parser.env operator in
-        let (parser, token) = Make.token parser token in
-        let (parser, right_term) =
-          if is_rhs_of_assignment then
-            (* reset the current precedence to make sure that expression on
-              the right hand side of the assignment is fully consumed *)
-            with_reset_precedence parser parse_term
-          else
-            parse_term parser
-        in
-        let (parser, right_term) =
-          parse_remaining_binary_expression_helper parser right_term precedence
-        in
-        let (parser, term) =
-          Make.binary_expression parser left_term token right_term
-        in
-        parse_remaining_expression parser term
-      in
-      (*if we are on the right hand side of the assignment - peek if next
-      token is '&'. If it is - then parse next term. If overall next term is
-      '&'PHP variable then the overall expression should be parsed as
-      ... (left_term = & right_term) ...
-      *)
-      if assignment_prefix_kind = Prefix_byref_assignment &&
-         Token.kind (peek_token parser) = Ampersand then
-        let (parser1, right_term) =
-          parse_term @@ with_precedence
-            parser
-            Operator.precedence_for_assignment_in_expressions
-        in
-        if is_byref_assignment_source parser1 right_term then
-          (* We backtrack here to call smart constructors in the correct order. *)
-          let (parser, token) = Make.token parser token in
-          let (parser, right_term) =
-            parse_term @@ with_precedence
-              parser
-              Operator.precedence_for_assignment_in_expressions
-          in
-          let (parser, left_term) =
-            Make.binary_expression parser left_term token right_term
-          in
-          let (parser, left_term) =
-            parse_remaining_binary_expression_helper parser left_term
-              pre_assignment_precedence
-          in
-          parse_remaining_expression parser left_term
+      let operator = Operator.trailing_from_token (Token.kind token) in
+      let precedence = Operator.precedence parser.env operator in
+      let (parser, token) = Make.token parser token in
+      let (parser, right_term) =
+        if is_rhs_of_assignment then
+          (* reset the current precedence to make sure that expression on
+            the right hand side of the assignment is fully consumed *)
+          with_reset_precedence parser parse_term
         else
-          default ()
-      else
-        default ()
+          parse_term parser
+      in
+      let (parser, right_term) =
+        parse_remaining_binary_expression_helper parser right_term precedence
+      in
+      let (parser, term) =
+        Make.binary_expression parser left_term token right_term
+      in
+      parse_remaining_expression parser term
 
   and parse_remaining_binary_expression_helper
       parser right_term left_precedence =
@@ -1811,32 +1762,12 @@ module WithStatementAndDeclAndTypeParser
          right_precedence = left_precedence ) ||
          is_parsable_as_assignment then
         let (parser2, right_term) =
-          let precedence =
-            if is_parsable_as_assignment then
-              (* if expression can be parsed as an assignment, keep track of
-                 the precedence on the left of the assignment (it is ok since
-                 we'll internally boost the precedence when parsing rhs of the
-                 assignment)
-                 This is necessary for cases like:
-                 ... + $a = &$b * $c + ...
-                       ^             ^
-                       #             $
-                 it should be parsed as
-                 (... + ($a = &$b) * $c) + ...
-                 when we are at position (#)
-                 - we will first consume byref assignment as a e1
-                 - check that precedence of '*' is greater than precedence of
-                   the '+' (left_precedence) and consume e1 * $c as $e2
-                 - check that precedence of '+' is less or equal than precedence
-                   of the '+' (left_precedence) and stop so the final result
-                   before we get to the point ($) will be
-                   (... + $e2)
-                 *)
-              left_precedence
-            else
-              right_precedence
-          in
-          let parser1 = with_precedence parser precedence in
+          if is_parsable_as_assignment then
+            with_reset_precedence parser (fun p ->
+              parse_remaining_expression p right_term
+            )
+          else
+            let parser1 = with_precedence parser right_precedence in
           parse_remaining_expression parser1 right_term
         in
         let parser3 = with_precedence parser2 parser.precedence in

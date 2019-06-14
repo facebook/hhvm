@@ -120,6 +120,8 @@ struct Builtins {
 constexpr uint32_t kNumRATTags = REPO_AUTH_TYPE_TAGS 0 ;
 #undef TAG
 
+}
+
 struct Stats {
   std::array<std::atomic<uint64_t>,Op_count> op_counts;
   std::array<std::atomic<uint64_t>,kNumRATTags> ratL_tags;
@@ -146,6 +148,8 @@ struct Stats {
   TypeStat iterInitKBase;
   Builtins builtins;
 };
+
+namespace {
 
 void type_stat_string(std::string& ret,
                       const std::string& prefix,
@@ -511,15 +515,39 @@ void collect_stats(Stats& stats,
 
 //////////////////////////////////////////////////////////////////////
 
-void print_stats(const Index& index, const php::Program& program) {
+StatsHolder::StatsHolder() {
   if (!Trace::moduleEnabledRelease(Trace::hhbbc_time, 1)) return;
+  stats = new Stats{};
+}
 
-  trace_time timer("stats");
+StatsHolder::~StatsHolder() {
+  delete stats;
+}
 
-  Stats stats{};
-  collect_stats(stats, index, program);
+StatsHolder allocate_stats() {
+  return StatsHolder();
+}
 
-  auto const str = show(stats);
+void collect_stats(const StatsHolder& stats,
+                   const Index& index,
+                   const php::Unit* unit) {
+  if (!stats) return;
+  for (auto& c : unit->classes) {
+    collect_class(*stats.stats, index, *c);
+    for (auto& m : c->methods) {
+      collect_func(*stats.stats, index, *m);
+    }
+  }
+  for (auto& x : unit->funcs) {
+    collect_func(*stats.stats, index, *x);
+  }
+  collect_func(*stats.stats, index, *unit->pseudomain);
+}
+
+void print_stats(const StatsHolder& stats) {
+  if (!stats) return;
+
+  auto const str = show(*stats.stats);
   if (Trace::moduleEnabledRelease(Trace::hhbbc_time, 2)) {
     std::cout << str;
   }

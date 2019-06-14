@@ -452,7 +452,7 @@ void prop_type_hint_pass(Index& index, php::Program& program) {
  * bytecode/Blocks, because other threads may be doing unlocked
  * queries to php::Func and php::Class structures.
  */
-void final_pass(Index& index, php::Program& program) {
+void final_pass(Index& index, php::Program& program, const StatsHolder& stats) {
   trace_time final_pass("final pass");
   index.freeze();
   auto const dump_dir = debug_dump_to();
@@ -479,6 +479,7 @@ void final_pass(Index& index, php::Program& program) {
         }
         dump_index(dump_dir, index, unit.get());
       }
+      collect_stats(stats, index, unit.get());
     }
   );
 }
@@ -573,6 +574,7 @@ void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
 
   folly::Optional<Index> index;
   index.emplace(program.get());
+  auto stats = allocate_stats();
   if (!options.NoOptimizations) {
     while (true) {
       try {
@@ -593,11 +595,19 @@ void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
       }
     }
     index->mark_persistent_classes_and_functions(*program);
-    final_pass(*index, *program);
+    final_pass(*index, *program, stats);
   } else {
     debug_dump_program(*index, *program);
+    if (stats) {
+      parallel::for_each(
+        program->units,
+        [&] (const std::unique_ptr<php::Unit>& unit) {
+          collect_stats(stats, *index, unit.get());
+        }
+      );
+    }
   }
-  print_stats(*index, *program);
+  print_stats(stats);
 
   // running cleanup_for_emit can take a while... do it in parallel
   // with making the unit emitters.

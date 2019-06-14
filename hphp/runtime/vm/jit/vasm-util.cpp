@@ -122,7 +122,7 @@ bool splitCriticalEdges(Vunit& unit) {
       // successor to select the area of the new block.
       auto middle = unit.makeBlock(
         std::max(unit.blocks[pred].area_idx, unit.blocks[succ].area_idx),
-        unit.blocks[succ].weight
+        std::min(unit.blocks[pred].weight, unit.blocks[succ].weight)
       );
       forwardJmp(unit, catch_blocks, middle, succ);
       succ = middle;

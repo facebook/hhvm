@@ -46,6 +46,7 @@
 #include "hphp/runtime/base/tv-comparisons.h"
 
 #include "hphp/runtime/vm/native.h"
+#include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/trait-method-import-data.h"
 #include "hphp/runtime/vm/unit-util.h"
@@ -2139,21 +2140,15 @@ bool merge_xinits(Attr attr,
 }
 
 void rename_closure(NamingEnv& env, php::Class* cls) {
-  auto n = cls->name->toCppString();
-  auto p = n.find(';');
-  int id = 0;
+  auto n = cls->name->slice();
+  auto const p = n.find(';');
   if (p != std::string::npos) {
-    id = atoi(n.c_str() + p + 1);
-    if (id < 0) id = 0;
-    n = n.substr(0, p);
+    n = n.subpiece(0, p);
   }
-  while (id < INT_MAX) {
-    auto const newName = makeStaticString(folly::sformat("{};{}", n, ++id));
-    if (env.index.classes.count(newName)) continue;
-    cls->name = newName;
-    env.index.classes.emplace(newName, cls);
-    return;
-  }
+  auto const newName = makeStaticString(NewAnonymousClassName(n));
+  assertx(!env.index.classes.count(newName));
+  cls->name = newName;
+  env.index.classes.emplace(newName, cls);
 }
 
 void flatten_traits(NamingEnv& env, ClassInfo* cinfo) {

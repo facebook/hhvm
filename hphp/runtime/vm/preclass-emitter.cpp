@@ -28,22 +28,41 @@
 
 namespace HPHP {
 
-std::string NewAnonymousClassName(const std::string& name) {
-  static std::atomic<uint32_t> next_anon_class;
-  return folly::sformat("{};{}", name, next_anon_class.fetch_add(1));
-}
-
 namespace {
+
+/*
+ * Important: We rely on generating unique anonymous class names (ie
+ * Closures) by tacking ";<next_anon_class>" onto the end of the name.
+ *
+ * Its important that code that creates new closures goes through
+ * preClassName, or NewAnonymousClassName to make sure this works.
+ */
+static std::atomic<uint32_t> next_anon_class{};
 
 const StringData* preClassName(const std::string& name) {
   if (PreClassEmitter::IsAnonymousClassName(name)) {
-    if (name.find(';') == std::string::npos) {
+    auto const pos = name.find(';');
+    if (pos == std::string::npos) {
       return makeStaticString(NewAnonymousClassName(name));
+    }
+    auto const id = strtol(name.c_str() + pos + 1, nullptr, 10);
+    if (id > 0 && id < INT_MAX) {
+      auto next = next_anon_class.load(std::memory_order_relaxed);
+      while (id >= next &&
+             next_anon_class.compare_exchange_weak(
+               next, id + 1, std::memory_order_relaxed
+             )) {
+        // nothing to do; just try again.
+      }
     }
   }
   return makeStaticString(name);
 }
 
+}
+
+std::string NewAnonymousClassName(folly::StringPiece name) {
+  return folly::sformat("{};{}", name, next_anon_class.fetch_add(1));
 }
 
 //=============================================================================

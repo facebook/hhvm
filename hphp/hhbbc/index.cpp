@@ -4914,12 +4914,6 @@ Type Index::lookup_return_type_raw(const php::Func* f) const {
   return TInitCell;
 }
 
-Type Index::lookup_return_type_and_clear(
-  const php::Func* f) const {
-  auto it = func_info(*m_data, f);
-  return std::move(it->returnTy);
-}
-
 bool Index::lookup_this_available(const php::Func* f) const {
   return (f->attrs & AttrRequiresThis) && !f->isClosureBody;
 }

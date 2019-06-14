@@ -693,17 +693,14 @@ struct Index {
   Type lookup_return_type_raw(const php::Func*) const;
 
   /*
-   * As lookup_return_type_raw, but also clean out the FuncInfo struct.
-   * For use during emit, to keep memory usage down.
-   */
-  Type lookup_return_type_and_clear(const php::Func*) const;
-
-  /*
    * Return the best known types of a closure's used variables (on
    * entry to the closure).  The function is the closure body.
    *
    * If move is true, the value will be moved out of the index. This
-   * should only be done at emit time.
+   * should only be done at emit time. (note that the only other user
+   * of this info is analysis, which only uses it when processing the
+   * owning class, so its safe to kill after emitting the owning
+   * unit).
    */
   CompactVector<Type>
     lookup_closure_use_vars(const php::Func*,
@@ -732,7 +729,10 @@ struct Index {
    * are guaranteed to hold at any program point.
    *
    * If move is true, the value will be moved out of the index. This
-   * should only be done at emit time.
+   * should only be done at emit time. (note that the only other user
+   * of this info is analysis, which only uses it when processing the
+   * owning class, so its safe to kill after emitting the owning
+   * unit).
    */
   PropState lookup_private_props(const php::Class*,
                                  bool move = false) const;
@@ -746,7 +746,10 @@ struct Index {
    * that are guaranteed to hold at any program point.
    *
    * If move is true, the value will be moved out of the index. This
-   * should only be done at emit time.
+   * should only be done at emit time. (note that the only other user
+   * of this info is analysis, which only uses it when processing the
+   * owning class, so its safe to kill after emitting the owning
+   * unit).
    */
   PropState lookup_private_statics(const php::Class*,
                                    bool move = false) const;

@@ -452,8 +452,15 @@ void prop_type_hint_pass(Index& index, php::Program& program) {
  * bytecode/Blocks, because other threads may be doing unlocked
  * queries to php::Func and php::Class structures.
  */
-void final_pass(Index& index, php::Program& program, const StatsHolder& stats) {
+template<typename F>
+void final_pass(Index& index,
+                php::Program& program,
+                const StatsHolder& stats,
+                F emitUnit) {
   trace_time final_pass("final pass");
+  LitstrTable::fini();
+  LitstrTable::init();
+  LitstrTable::get().setWriting();
   index.freeze();
   auto const dump_dir = debug_dump_to();
   parallel::for_each(
@@ -480,6 +487,7 @@ void final_pass(Index& index, php::Program& program, const StatsHolder& stats) {
         dump_index(dump_dir, index, unit.get());
       }
       collect_stats(stats, index, unit.get());
+      emitUnit(*unit);
     }
   );
 }
@@ -575,6 +583,32 @@ void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
   folly::Optional<Index> index;
   index.emplace(program.get());
   auto stats = allocate_stats();
+  auto freeFuncMem = [&] (php::Func* fun) {
+    fun->blocks = {};
+  };
+  auto emitUnit = [&] (php::Unit& unit) {
+    auto ue = emit_unit(*index, unit);
+    if (RuntimeOption::EvalAbortBuildOnVerifyError && !ue->check(false)) {
+      fprintf(
+        stderr,
+        "The optimized unit for %s did not pass verification, "
+        "bailing because Eval.AbortBuildOnVerifyError is set\n",
+        ue->m_filepath->data()
+      );
+      _Exit(1);
+    }
+    ueq.push(std::move(ue));
+    for (auto& c : unit.classes) {
+      for (auto& m : c->methods) {
+        freeFuncMem(m.get());
+      }
+    }
+    for (auto& f : unit.funcs) {
+      freeFuncMem(f.get());
+    }
+    freeFuncMem(unit.pseudomain.get());
+  };
+
   if (!options.NoOptimizations) {
     while (true) {
       try {
@@ -595,40 +629,24 @@ void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
       }
     }
     index->mark_persistent_classes_and_functions(*program);
-    final_pass(*index, *program, stats);
+    final_pass(*index, *program, stats, emitUnit);
   } else {
     debug_dump_program(*index, *program);
-    if (stats) {
-      parallel::for_each(
-        program->units,
-        [&] (const std::unique_ptr<php::Unit>& unit) {
-          collect_stats(stats, *index, unit.get());
-        }
-      );
-    }
+    parallel::for_each(
+      program->units,
+      [&] (const std::unique_ptr<php::Unit>& unit) {
+        collect_stats(stats, *index, unit.get());
+        emitUnit(*unit);
+      }
+    );
   }
-  print_stats(stats);
 
-  // running cleanup_for_emit can take a while... do it in parallel
-  // with making the unit emitters.
+  // running cleanup_for_emit can take a while... start it as early as
+  // possible, and run in its own thread.
   folly::Baton<> done;
   auto cleanup_thread = std::thread([&] { index->cleanup_for_emit(&done); });
 
-  LitstrTable::fini();
-  LitstrTable::init();
-  LitstrTable::get().setWriting();
-  make_unit_emitters(*index, *program, [&] (std::unique_ptr<UnitEmitter> ue) {
-    if (RuntimeOption::EvalAbortBuildOnVerifyError && !ue->check(false)) {
-      fprintf(
-        stderr,
-        "The optimized unit for %s did not pass verification, "
-        "bailing because Eval.AbortBuildOnVerifyError is set\n",
-        ue->m_filepath->data()
-      );
-      _Exit(1);
-    }
-    ueq.push(std::move(ue));
-  });
+  print_stats(stats);
 
   arrTable = std::move(index->array_table_builder());
   done.post();

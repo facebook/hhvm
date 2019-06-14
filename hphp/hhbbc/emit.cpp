@@ -1320,7 +1320,7 @@ void emit_finish_func(EmitUnitState& state,
   fe.isMemoizeWrapperLSB = func.isMemoizeWrapperLSB;
   fe.isRxDisabled = func.isRxDisabled;
 
-  auto const retTy = state.index.lookup_return_type_and_clear(&func);
+  auto const retTy = state.index.lookup_return_type_raw(&func);
   if (!retTy.subtypeOf(BBottom)) {
     auto const rat = make_repo_type(*state.index.array_table_builder(), retTy);
     merge_repo_auth_type(fe.ue(), rat);

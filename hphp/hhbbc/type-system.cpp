@@ -1755,7 +1755,7 @@ bool Type::subtypeData(const Type& o) const {
         return true;
       }
       if (o.m_data.dobj.type == DObj::Sub) {
-        return m_data.dobj.cls.subtypeOf(o.m_data.dobj.cls);
+        return m_data.dobj.cls.mustBeSubtypeOf(o.m_data.dobj.cls);
       }
       return false;
     }();
@@ -1772,7 +1772,7 @@ bool Type::subtypeData(const Type& o) const {
       return true;
     }
     if (o.m_data.dcls.type == DCls::Sub) {
-      return m_data.dcls.cls.subtypeOf(o.m_data.dcls.cls);
+      return m_data.dcls.cls.mustBeSubtypeOf(o.m_data.dcls.cls);
     }
     return false;
   case DataTag::Str:
@@ -1819,10 +1819,10 @@ bool Type::couldBeData(const Type& o) const {
         if (o.m_data.dobj.type == DObj::Sub) {
           return o.m_data.dobj.cls.couldBe(m_data.dobj.cls);
         }
-        return o.m_data.dobj.cls.subtypeOf(m_data.dobj.cls);
+        return o.m_data.dobj.cls.maybeSubtypeOf(m_data.dobj.cls);
       }
       if (o.m_data.dobj.type == DObj::Sub) {
-        return m_data.dobj.cls.subtypeOf(o.m_data.dobj.cls);
+        return m_data.dobj.cls.maybeSubtypeOf(o.m_data.dobj.cls);
       }
       return false;
     }();
@@ -3408,11 +3408,11 @@ Type intersection_of(Type a, Type b) {
             return fixWh(a);
           }
           if (b.m_data.dobj.type == DObj::Sub &&
-              a.m_data.dobj.cls.subtypeOf(b.m_data.dobj.cls)) {
+              a.m_data.dobj.cls.mustBeSubtypeOf(b.m_data.dobj.cls)) {
             return fixWh(a);
           }
           if (a.m_data.dobj.type == DObj::Sub &&
-              b.m_data.dobj.cls.subtypeOf(a.m_data.dobj.cls)) {
+              b.m_data.dobj.cls.mustBeSubtypeOf(a.m_data.dobj.cls)) {
             return fixWh(b);
           }
           if (a.m_data.dobj.type == DObj::Sub &&

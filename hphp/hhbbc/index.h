@@ -177,7 +177,15 @@ struct Class {
    * still be a subtype of `o' at runtime, it just may not be known.
    * A typical example is with "non unique" classes.
    */
-  bool subtypeOf(const Class& o) const;
+  bool mustBeSubtypeOf(const Class& o) const;
+
+  /*
+   * Returns false if this class is definitely not going to be a subtype
+   * of `o' at runtime.  If this function returns true, this may
+   * still not be a subtype of `o' at runtime, it just may not be known.
+   * A typical example is with "non unique" classes.
+   */
+  bool maybeSubtypeOf(const Class& o) const;
 
   /*
    * If this function return false, it is known that this class
@@ -272,6 +280,7 @@ struct Class {
 
 private:
   Class(const Index*, Either<SString,ClassInfo*>);
+  template <bool> bool subtypeOfImpl(const Class&) const;
 
 private:
   friend std::string show(const Class&);

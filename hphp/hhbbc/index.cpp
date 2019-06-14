@@ -607,10 +607,11 @@ bool Class::same(const Class& o) const {
   return val == o.val;
 }
 
-bool Class::subtypeOf(const Class& o) const {
+template <bool returnTrueOnMaybe>
+bool Class::subtypeOfImpl(const Class& o) const {
   auto s1 = val.left();
   auto s2 = o.val.left();
-  if (s1 || s2) return s1 == s2;
+  if (s1 || s2) return returnTrueOnMaybe || s1 == s2;
   auto c1 = val.right();
   auto c2 = o.val.right();
 
@@ -627,6 +628,14 @@ bool Class::subtypeOf(const Class& o) const {
     return c1->baseList[c2->baseList.size() - 1] == c2;
   }
   return false;
+}
+
+bool Class::mustBeSubtypeOf(const Class& o) const {
+  return subtypeOfImpl<false>(o);
+}
+
+bool Class::maybeSubtypeOf(const Class& o) const {
+  return subtypeOfImpl<true>(o);
 }
 
 bool Class::couldBe(const Class& o) const {
@@ -5824,7 +5833,7 @@ bool Index::must_be_derived_from(const php::Class* cls,
     auto const rCls = res::Class { this, kvCls.second };
     for (auto& kvPar : parentClasses) {
       auto const rPar = res::Class { this, kvPar.second };
-      if (!rCls.subtypeOf(rPar)) return false;
+      if (!rCls.mustBeSubtypeOf(rPar)) return false;
     }
   }
   return true;

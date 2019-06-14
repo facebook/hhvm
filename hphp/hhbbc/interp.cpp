@@ -2643,7 +2643,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
       // generic mode, which can handle collections or classes which don't
       // implement getInstanceKey.
       if (resolvedCls &&
-          resolvedCls->subtypeOf(rclsIMemoizeParam) &&
+          resolvedCls->mustBeSubtypeOf(rclsIMemoizeParam) &&
           inTy.subtypeOf(tyIMemoizeParam)) {
         return reduce(
           env,
@@ -2667,7 +2667,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
       // or the integer 0. This might seem wasteful, but the JIT does a good job
       // inlining away the call in the null case.
       if (resolvedCls &&
-          resolvedCls->subtypeOf(rclsIMemoizeParam) &&
+          resolvedCls->mustBeSubtypeOf(rclsIMemoizeParam) &&
           inTy.subtypeOf(opt(tyIMemoizeParam))) {
         return reduce(
           env,
@@ -4940,7 +4940,7 @@ void in(ISS& env, const bc::OODeclExists& op) {
         if (is_systemlib_part(*unit)) return true;
         if (!env.ctx.cls) return false;
         auto thisClass = env.index.resolve_class(env.ctx.cls);
-        return thisClass.subtypeOf(*rcls);
+        return thisClass.mustBeSubtypeOf(*rcls);
       };
       if (canConstProp()) {
         constprop(env);

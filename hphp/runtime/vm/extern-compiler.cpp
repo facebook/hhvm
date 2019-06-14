@@ -21,11 +21,18 @@
 #include <mutex>
 #include <signal.h>
 #include <sstream>
+#include <stdexcept>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <thread>
 
 #include <folly/DynamicConverter.h>
+#include <folly/io/IOBuf.h>
+#include <folly/io/async/EventBase.h>
+#include <folly/io/async/AsyncPipe.h>
+#include <folly/io/async/AsyncSocketException.h>
+#include <folly/net/NetworkSocket.h>
 #include <folly/json.h>
 #include <folly/FileUtil.h>
 
@@ -179,6 +186,120 @@ struct CompilerOptions {
   bool inheritConfig;
 };
 
+
+struct PipeLogger : public folly::AsyncReader::ReadCallback {
+  explicit PipeLogger(int pid) : m_pid(pid) {}
+  virtual ~PipeLogger() {
+    stop();
+  }
+
+  void start(int fd) {
+    if (m_reader) {
+      return;
+    }
+
+    if (!m_thread) {
+      m_eventBase = std::make_unique<folly::EventBase>();
+
+      m_thread = std::make_unique<std::thread>([this]() {
+	  m_eventBase->loopForever();
+	});
+
+      m_eventBase->waitUntilRunning();
+    }
+
+    m_reader = folly::AsyncPipeReader::newReader(
+      m_eventBase.get(),
+      folly::NetworkSocket::fromFd(fd)
+    );
+    m_reader->setReadCB(this);
+  }
+
+  void stop() {
+    if (m_reader) {
+      // Destroying the AsyncPipeReader closes the fd.
+      auto* reader = m_reader.release();
+      m_eventBase->runInEventBaseThreadAndWait([reader]() {
+	  reader->destroy();
+	});
+
+      if (m_thread->joinable()) {
+	m_eventBase->terminateLoopSoon();
+	m_thread->join();
+      }
+      m_eventBase.reset();
+      m_thread.reset();
+    }
+  }
+
+  virtual void getReadBuffer(void** /*bufRet*/, size_t* /*lenRet*/) override {}
+  virtual void readDataAvailable(size_t /*len*/) noexcept override {}
+  virtual bool isBufferMovable() noexcept override { return true; }
+  virtual void readBufferAvailable(
+    std::unique_ptr<folly::IOBuf> readBuf
+  ) noexcept override {
+    // We expect unchained, unshared buffers thus unshare and coalesce should
+    // be no-ops. Further we expect most buffers to contain complete lines, so
+    // appendChain should rarely be called in practice.
+    readBuf->unshare();
+    if (m_buffer) {
+      m_buffer->appendChain(std::move(readBuf));
+    } else {
+      m_buffer = std::move(readBuf);
+    }
+    m_buffer->coalesce();
+
+    const char* start = reinterpret_cast<const char*>(m_buffer->data());
+    const char* tail = reinterpret_cast<const char*>(m_buffer->tail());
+
+    const char* s = start;
+    while (s != tail) {
+      if (*s == '\n') {
+	std::string line = std::string(s, s - start);
+	Logger::FError("[external compiler {}]: {}", m_pid, line);
+	start = s + 1;
+      }
+      s++;
+    }
+
+    if (start == tail) {
+      // Consumed complete buffer.
+      m_buffer.reset();
+      return;
+    }
+
+    // Trim consumed data.
+    m_buffer->trimStart(tail - start);
+  }
+
+  virtual void readEOF() noexcept override {
+    std::runtime_error exc("hangup");
+    logError(exc);
+  }
+
+  virtual void readErr(
+    const folly::AsyncSocketException& exc
+  ) noexcept override {
+    logError(exc);
+  }
+
+private:
+  void logError(const std::runtime_error& exc) {
+    if (RuntimeOption::ServerMode) {
+          Logger::FVerbose(
+            "Ceasing to log stderr from external compiler ({}): {}",
+            m_pid,
+            exc.what());
+        }
+  }
+
+  const int m_pid;
+  std::unique_ptr<folly::EventBase> m_eventBase;
+  std::unique_ptr<std::thread> m_thread;
+  folly::AsyncPipeReader::UniquePtr m_reader;
+  std::unique_ptr<folly::IOBuf> m_buffer;
+};
+
 constexpr int kInvalidPid = -1;
 
 struct ExternCompiler {
@@ -191,10 +312,15 @@ struct ExternCompiler {
     // Called from forked processes. Resets inherited pid of compiler process to
     // prevent it being closed in case child process exits
     m_pid = kInvalidPid;
-    // Don't call the destructor of the thread object.  The thread doesn't
-    // belong to this child process, so we just silently make sure we don't
-    // touch it.
-    m_logStderrThread.release();
+
+    // This is super-gross: it's possible we're in a forked child -- but fork()
+    // doesn't -- can't -- copy over threads, so m_stderrLogger's underlying
+    // thread is rubbish -- but joinable() in the child. When the child's
+    // ~ExternCompiler() destructor is called, it will attempt to destroy the
+    // thread object, terminating a joinable but unjoined thread, which causes
+    // a panic. We really shouldn't be mixing threads with forking, but we
+    // should just about get away with it by discarding the logger here.
+    m_stderrLogger.release();
   }
   ~ExternCompiler() { stop(); }
 
@@ -362,8 +488,7 @@ private:
   FILE* m_out{nullptr};
   std::string m_version;
 
-  FILE* m_err{nullptr};
-  std::unique_ptr<std::thread> m_logStderrThread;
+  std::unique_ptr<PipeLogger> m_stderrLogger;
 
   unsigned m_compilations{0};
   const CompilerOptions& m_options;
@@ -676,12 +801,11 @@ std::string ExternCompiler::readResult(StructuredLogEntry* log) const {
 }
 
 void ExternCompiler::stopLogStderrThread() {
-  SCOPE_EXIT { m_err = nullptr; };
-  if (m_err) {
-    fclose(m_err);   // need to unblock getline()
-  }
-  if (m_logStderrThread && m_logStderrThread->joinable()) {
-    m_logStderrThread->join();
+  SCOPE_EXIT {
+    m_stderrLogger.reset();
+  };
+  if (m_stderrLogger) {
+    m_stderrLogger->stop();
   }
 }
 
@@ -826,17 +950,6 @@ private:
 };
 
 void ExternCompiler::stop() {
-  // This is super-gross: it's possible we're in a forked child -- but fork()
-  // doesn't -- can't -- copy over threads, so m_logStderrThread is rubbish --
-  // but joinable() in the child. When the child's ~ExternCompiler() destructor
-  // is called, it will call m_logStderrThread's destructor, terminating a
-  // joinable but unjoined thread, which causes a panic. We really shouldn't be
-  // mixing threads with forking, but we should just about get away with it
-  // here.
-  SCOPE_EXIT {
-    stopLogStderrThread();
-  };
-
   if (m_pid == kInvalidPid) return;
 
   SCOPE_EXIT {
@@ -847,10 +960,10 @@ void ExternCompiler::stop() {
     // - the error handler thread in HHVM spews out the error
     // This makes the tests unrunnable, but probably doesn't have a practical
     // effect on real usage other than log spew on process shutdown.
-    if (m_err) fclose(m_err);
+    stopLogStderrThread(); // closes err
     if (m_in) fclose(m_in);
     if (m_out) fclose(m_out);
-    m_err = m_in = m_out = nullptr;
+    m_in = m_out = nullptr;
     m_pid = kInvalidPid;
   };
 
@@ -899,9 +1012,14 @@ struct Pipe final {
     if (fds[1] != -1) close(fds[1]);
   }
   FILE* detach(const char* mode) {
-    auto ret = fdopen(fds[*mode == 'r' ? 0 : 1], mode);
+    int fd = detachFD(mode);
+    auto ret = fdopen(fd, mode);
     if (!ret) throwErrno("unable to fdopen pipe");
+    return ret;
+  }
+  int detachFD(const char* mode) {
     close(fds[*mode == 'r' ? 1 : 0]);
+    int ret = fds[*mode == 'r' ? 0 : 1];
     fds[0] = fds[1] = -1;
     return ret;
   }
@@ -944,34 +1062,9 @@ void ExternCompiler::start() {
 
   m_in = in.detach("w");
   m_out = out.detach("r");
-  m_err = err.detach("r");
-
-  m_logStderrThread = std::make_unique<std::thread>([&]() {
-      int ret = 0;
-      auto pid = m_pid;
-      try {
-        pollfd pfd[] = {{fileno(m_err), POLLIN, 0}};
-        while ((ret = poll(pfd, 1, -1)) != -1) {
-          if (ret == 0) continue;
-          if (pfd[0].revents & (POLLHUP | POLLNVAL | POLLERR)) {
-            throw std::runtime_error("hangup");
-          }
-          if (pfd[0].revents) {
-            const auto line = readline(m_err);
-            Logger::FError("[external compiler {}]: {}", pid, line);
-          }
-        }
-      } catch (const std::exception& exc) {
-        // The stderr output messes with expected test output, which presumably
-        // come from non-server runs.
-        if (RuntimeOption::ServerMode) {
-          Logger::FVerbose(
-            "Ceasing to log stderr from external compiler ({}): {}",
-            pid,
-            exc.what());
-        }
-      }
-    });
+  m_stderrLogger = std::make_unique<PipeLogger>(m_pid);
+  int errFD = err.detachFD("r");
+  m_stderrLogger->start(errFD);
 
   // Here we expect the very first communication from the external compiler
   // process to be a single line of JSON representing the compiler version.

@@ -75,14 +75,14 @@ static bool same(const char *file1, const char *file2) {
     Logger::Error("unable to read %s", file1);
     return false;
   }
+  SCOPE_EXIT { fclose(f1); };
   FILE *f2 = fopen(file2, "r");
   if (f2 == nullptr) {
-    fclose(f1);
     Logger::Error("unable to read %s", file2);
     return false;
   }
+  SCOPE_EXIT { fclose(f2); };
 
-  bool ret = false;
   char buf1[8192];
   char buf2[sizeof(buf1)];
   int n1;
@@ -92,22 +92,19 @@ static bool same(const char *file1, const char *file2) {
     while (toread) {
       int n2 = fread(buf2 + pos, 1, toread, f2);
       if (n2 <= 0) {
-        goto exit_false;
+        return false;
       }
       toread -= n2;
       pos += n2;
     }
     if (memcmp(buf1, buf2, n1) != 0) {
-      goto exit_false;
+      return false;
     }
   }
   if (fread(buf2, 1, 1, f2) == 0) {
-    ret = true;
+    return true;
   }
- exit_false:
-  fclose(f2);
-  fclose(f1);
-  return ret;
+  return false;
 }
 
 void FileUtil::syncdir(const std::string &dest_, const std::string &src_,
@@ -124,13 +121,14 @@ void FileUtil::syncdir(const std::string &dest_, const std::string &src_,
     Logger::Error("syncdir: unable to open dest %s", dest.c_str());
     return;
   }
+  SCOPE_EXIT { closedir(ddest); };
 
   DIR *dsrc = opendir(src.c_str());
   if (dsrc == nullptr) {
-    closedir(ddest);
     Logger::Error("syncdir: unable to open src %s", src.c_str());
     return;
   }
+  SCOPE_EXIT { closedir(dsrc); };
 
   dirent *e;
 
@@ -196,14 +194,12 @@ void FileUtil::syncdir(const std::string &dest_, const std::string &src_,
       }
     }
   }
-
-  closedir(dsrc);
-  closedir(ddest);
 }
 
 int FileUtil::copy(const char *srcfile, const char *dstfile) {
   int srcFd = open(srcfile, O_RDONLY);
   if (srcFd == -1) return -1;
+  SCOPE_EXIT { close(srcFd); };
 
   struct stat st;
   int ret = fstat(srcFd, &st);
@@ -218,29 +214,22 @@ int FileUtil::copy(const char *srcfile, const char *dstfile) {
 
   int dstFd = open(dstfile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
   if (dstFd == -1) return -1;
+  SCOPE_EXIT { close(dstFd); };
 
   while (1) {
     char buf[8192];
-    bool err = false;
     ssize_t rbytes = read(srcFd, buf, sizeof(buf));
     ssize_t wbytes;
     if (rbytes == 0) break;
     if (rbytes == -1) {
-      err = true;
       Logger::Error("read failed: %s", folly::errnoStr(errno).c_str());
+      return -1;
     } else if ((wbytes = write(dstFd, buf, rbytes)) != rbytes) {
-      err = true;
       Logger::Error("write failed: %zd, %s", wbytes,
                     folly::errnoStr(errno).c_str());
-    }
-    if (err) {
-      close(srcFd);
-      close(dstFd);
       return -1;
     }
   }
-  close(srcFd);
-  close(dstFd);
   return 0;
 }
 
@@ -255,6 +244,7 @@ static int force_sync(int fd) {
 int FileUtil::directCopy(const char *srcfile, const char *dstfile) {
   int srcFd = open(srcfile, O_RDONLY);
   if (srcFd == -1) return -1;
+  SCOPE_EXIT { close(srcFd); };
 
   struct stat st;
   int ret = fstat(srcFd, &st);
@@ -269,6 +259,7 @@ int FileUtil::directCopy(const char *srcfile, const char *dstfile) {
 
   int dstFd = open(dstfile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
   if (dstFd == -1) return -1;
+  SCOPE_EXIT { close(dstFd); };
 
 #if defined(__APPLE__)
   fcntl(srcFd, F_NOCACHE, 1);
@@ -307,13 +298,9 @@ int FileUtil::directCopy(const char *srcfile, const char *dstfile) {
                     folly::errnoStr(errno).c_str());
     }
     if (err) {
-      close(srcFd);
-      close(dstFd);
       return -1;
     }
   }
-  close(srcFd);
-  close(dstFd);
   return 0;
 }
 

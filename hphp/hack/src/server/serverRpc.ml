@@ -49,10 +49,20 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | IDE_HOVER (fn, line, char) ->
         let basic_only = genv.local_config.ServerLocalConfig.basic_autocomplete_only in
         env, ServerHover.go env (fn, line, char) ~basic_only
-    | DOCBLOCK_AT (filename, line, char, base_class_name) ->
+    | DOCBLOCK_AT (filename, line, column, base_class_name) ->
         let basic_only = genv.local_config.ServerLocalConfig.basic_autocomplete_only in
-        env, ServerDocblockAt.go_location env (filename, line, char) ~base_class_name
-          ~basic_only
+        let r = ServerDocblockAt.go_docblock_at
+          ~env ~filename ~line ~column ~base_class_name ~basic_only in
+        env, r
+    | LOCATE_SYMBOL (symbol, kind) ->
+        let loc_opt = ServerDocblockAt.go_locate_symbol ~env ~symbol ~kind in
+        let r = match loc_opt with
+        | None -> (env, None)
+        | Some loc ->
+          let open DocblockService in
+          (env, Some (loc.dbs_filename, loc.dbs_line, loc.dbs_column, loc.dbs_base_class))
+        in
+        r
     | IDE_SIGNATURE_HELP (fn, line, char) ->
         let basic_only = genv.local_config.ServerLocalConfig.basic_autocomplete_only in
         env, ServerSignatureHelp.go env (fn, line, char) ~basic_only

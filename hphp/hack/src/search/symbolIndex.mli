@@ -70,3 +70,14 @@ val remove_files :
   Relative_path.Set.t ->
   SearchUtils.local_tracking_env ref ->
   unit
+
+(* Identify the position of an item *)
+val get_position_for_symbol:
+  string ->
+  SearchUtils.si_kind ->
+  (Relative_path.t * int * int) option
+
+(* Take an item and produce a position *)
+val get_pos_for_item:
+  SearchUtils.si_item ->
+  Pos.absolute

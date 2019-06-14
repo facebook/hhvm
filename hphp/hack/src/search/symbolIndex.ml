@@ -282,3 +282,58 @@ let remove_files
   | TrieIndex ->
     HackSearchService.MasterApi.clear_shared_memory paths
 ;;
+
+(* Fetch best available position information for a symbol *)
+let get_position_for_symbol
+    (symbol: string)
+    (kind: si_kind): (Relative_path.t * int * int) option =
+
+  (* Symbols can only be found if they have a backslash *)
+  let name_with_ns = Utils.add_ns symbol in
+  let pos_opt = match kind with
+  | SI_XHP
+  | SI_Interface
+  | SI_Trait
+  | SI_Enum
+  | SI_Typedef
+  | SI_Class ->
+    let fipos = match Naming_table.Types.get_pos name_with_ns with
+    | None -> None
+    | Some (pos, _) -> Some pos
+    in
+    fipos
+  | SI_Function ->
+    Naming_table.Funs.get_pos name_with_ns
+  | SI_GlobalConstant ->
+    Naming_table.Consts.get_pos name_with_ns
+  | SI_Unknown
+  | SI_Namespace
+  | SI_Mixed ->
+    None
+  in
+
+  (* Okay, we have a rough pos, convert that to a real pos *)
+  match pos_opt with
+  | None -> None
+  | Some fi ->
+    let (pos, _) = NamingGlobal.GEnv.get_full_pos (fi, name_with_ns) in
+    let relpath = FileInfo.get_pos_filename fi in
+    let (line, col, _) = Pos.info_pos pos in
+    Some (relpath, line, col)
+;;
+
+let absolute_none = Pos.none |> Pos.to_absolute
+
+(* Shortcut to use the above method to get an absolute pos *)
+let get_pos_for_item (item: si_item): Pos.absolute =
+  let result = get_position_for_symbol item.si_name item.si_kind in
+  match result with
+  | None -> absolute_none
+  | Some (relpath, line, col) ->
+    let symbol_len = String.length item.si_name in
+    let pos = Pos.make_from_lnum_bol_cnum
+      ~pos_file:relpath
+      ~pos_start:(line, 1, col)
+      ~pos_end:(line, 1, (col + symbol_len))
+    in
+    Pos.to_absolute pos

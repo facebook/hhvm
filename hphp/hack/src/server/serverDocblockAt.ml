@@ -113,16 +113,54 @@ let go_def def ~base_class_name ~file ~basic_only =
     fallback base_class_name def.SymbolDefinition.name
   | _ -> None
 
-let go_location env (filename, line, char) ~base_class_name ~basic_only =
-  let open Option.Monad_infix in
+(* Locate a symbol and return file, line, column, and base_class *)
+let go_locate_symbol
+    ~(env: ServerEnv.env)
+    ~(symbol: string)
+    ~(kind: SearchUtils.si_kind): DocblockService.dbs_symbol_location_result =
+
+  (* We may need env in the future, so avoid the warning *)
+  let _ = env in
+
+  (* Look up this class name *)
+  match SymbolIndex.get_position_for_symbol symbol kind with
+  | None -> None
+  | Some (relpath, line, column) ->
+    let filename = Relative_path.to_absolute relpath in
+    let base_class_name = None in
+    Some { DocblockService.
+      dbs_filename = filename;
+      dbs_line = line;
+      dbs_column = column;
+      dbs_base_class = base_class_name;
+    }
+
+(* Given a location, find best doc block *)
+let go_docblock_at
+  ~(env: ServerEnv.env)
+  ~(filename: string)
+  ~(line: int)
+  ~(column: int)
+  ~(base_class_name: string option)
+  ~(basic_only: bool): DocblockService.result =
+  let relpath = Relative_path.create_detect_prefix filename in
+
+  (* Okay, now that we know its position, let's gather a docblock *)
   let ServerEnv.{ tcopt; _ } = env in
-  let relative_path = Relative_path.create_detect_prefix filename in
-  File_provider.get_contents relative_path
-  >>= begin fun contents ->
+  let contents_opt = File_provider.get_contents relpath in
+  match contents_opt with
+  | None -> None
+  | Some contents ->
     let definitions =
-      ServerIdentifyFunction.go contents line char tcopt
+      ServerIdentifyFunction.go contents line column tcopt
       |> List.filter_map ~f:(fun (_, def) -> def)
     in
-    List.hd definitions
-  end
-  >>= go_def ~base_class_name ~file:(ServerCommandTypes.FileName filename) ~basic_only
+    match List.hd definitions with
+    | None -> None
+    | Some def ->
+      let result = go_def
+        ~base_class_name
+        ~file:(ServerCommandTypes.FileName filename)
+        ~basic_only
+        def in
+      result

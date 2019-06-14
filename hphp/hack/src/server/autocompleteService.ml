@@ -26,43 +26,6 @@ let autocomplete_is_complete : bool ref = ref true
 (* The position we're autocompleting at. This is used when computing completions
  * for global identifiers. *)
 let autocomplete_identifier: (Pos.t * string) option ref = ref None
-
-let absolute_none = Pos.to_absolute Pos.none
-
-(* Determine the position for an object of a specific kind *)
-let get_pos_for_item (item: si_item) =
-  let raw_pos_to_real_pos (raw_opt: FileInfo.pos option) (ns: string): Pos.absolute =
-    match raw_opt with
-    | Some raw ->
-      let (real_pos, _) = NamingGlobal.GEnv.get_full_pos (raw, ns) in
-      Pos.to_absolute real_pos
-    | None ->
-      absolute_none
-  in
-
-  (* In the naming table, we ALL have namespace prefixes *)
-  let namespaced_name = Utils.add_ns item.si_name in
-  match item.si_kind with
-  | SI_XHP
-  | SI_Interface
-  | SI_Trait
-  | SI_Enum
-  | SI_Typedef
-  | SI_Class ->
-    let raw = Naming_table.Types.get_pos namespaced_name
-      |> Option.map ~f:fst in
-    raw_pos_to_real_pos raw namespaced_name
-  | SI_Function ->
-    let raw = Naming_table.Funs.get_pos namespaced_name in
-    raw_pos_to_real_pos raw namespaced_name
-  | SI_GlobalConstant ->
-    let raw = Naming_table.Consts.get_pos namespaced_name in
-    raw_pos_to_real_pos raw namespaced_name
-  | SI_Unknown
-  | SI_Namespace
-  | SI_Mixed ->
-    absolute_none
-
 (*
  * Take the results, look them up, and add file position information.
  *)
@@ -72,7 +35,7 @@ let add_position_to_results (raw_results: SearchUtils.si_results): SearchUtils.r
   List.map raw_results ~f:(fun r ->
     {
       name = r.si_name;
-      pos = (get_pos_for_item r);
+      pos = (SymbolIndex.get_pos_for_item r);
       result_type = (kind_to_result r.si_kind);
     }
   )
@@ -877,6 +840,7 @@ let find_global_results
 
     (* TODO: This needs to be replaced with REAL namespace processing *)
     let query_text = Utils.strip_ns query_text in
+    let absolute_none = Pos.none |> Pos.to_absolute in
     let results = SymbolIndex.find_matching_symbols
       ~query_text
       ~max_results
@@ -889,7 +853,7 @@ let find_global_results
 
       (* Figure out how to display them *)
       let complete = {
-        res_pos         = (get_pos_for_item r);
+        res_pos         = absolute_none; (* This is okay - resolve will fill it in *)
         res_replace_pos = replace_pos;
         res_base_class  = None;
         res_ty          = (to_ty_string r);

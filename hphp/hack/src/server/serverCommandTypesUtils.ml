@@ -8,6 +8,7 @@ let debug_describe_t : type a. a t -> string = function
   | TYPED_AST                _ -> "TYPED_AST"
   | IDE_HOVER                _ -> "IDE_HOVER"
   | DOCBLOCK_AT              _ -> "DOCBLOCK_AT"
+  | LOCATE_SYMBOL            _ -> "LOCATE_SYMBOL"
   | IDE_SIGNATURE_HELP       _ -> "SIGNATURE_HELP"
   | COVERAGE_LEVELS          _ -> "COVERAGE_LEVELS"
   | AUTOCOMPLETE             _ -> "AUTOCOMPLETE"

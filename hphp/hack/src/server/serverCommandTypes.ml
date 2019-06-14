@@ -207,6 +207,7 @@ type _ t =
   | TYPED_AST : string -> string t
   | IDE_HOVER : file_input * int * int ->
       HoverService.result t
+  | LOCATE_SYMBOL : (string * SearchUtils.si_kind) -> (string * int * int * string option) option t
   | DOCBLOCK_AT : (string * int * int * string option) -> DocblockService.result t
   | IDE_SIGNATURE_HELP : (file_input * int * int) -> Lsp.SignatureHelp.result t
   | COVERAGE_LEVELS : file_input -> Coverage_level.result t

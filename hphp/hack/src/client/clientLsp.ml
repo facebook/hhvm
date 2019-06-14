@@ -1148,20 +1148,68 @@ let do_completion_legacy
   let%lwt result = rpc conn ref_unblocked_time command in
   make_ide_completion_response result filename
 
+let completion_kind_to_si_kind
+    (completion_kind: Completion.completionItemKind option): SearchUtils.si_kind =
+  let open Lsp in
+  let open SearchUtils in
+  match completion_kind with
+  | Some Completion.Class -> SI_Class
+  | Some Completion.Interface -> SI_Interface
+  | Some Completion.Function -> SI_Function
+  | Some Completion.Enum -> SI_Enum
+  | Some Completion.Constant -> SI_GlobalConstant
+  | Some Completion.TypeParameter -> SI_Typedef
+  | _ -> SI_Class
+
+exception NoLocationFound
+
 let do_completionItemResolve
   (conn: server_conn)
   (ref_unblocked_time: float ref)
   (params: CompletionItemResolve.params)
 : CompletionItemResolve.result Lwt.t =
-  match params.Completion.data with
-  | None -> Lwt.return params
-  | Some _ as data ->
-    let filename = Jget.string_exn data "filename" in
-    let line = Jget.int_exn data "line" in
-    let char = Jget.int_exn data "char" in
-    let base_class = Jget.string_opt data "base_class" in
-    let command =
-      ServerCommandTypes.DOCBLOCK_AT (filename, line, char, base_class)
+
+  (* We have to get the filename, line, and column either from JSON or a service *)
+  let%lwt loc_opt = try
+
+    (* First try fetching data from json *)
+    match params.Completion.data with
+    | None ->
+      raise NoLocationFound
+    | Some _ as data ->
+      let json_filename = Jget.string_exn data "filename" in
+      let json_line = Jget.int_exn data "line" in
+      let json_column = Jget.int_exn data "char" in
+      let json_base_class = Jget.string_opt data "base_class" in
+
+      (* Some JSON messages will contain zeroes indicating location not known *)
+      if (json_line = 0 && json_column = 0) then raise NoLocationFound;
+      Lwt.return
+        (Some (json_filename, json_line, json_column, json_base_class))
+
+  (* Let's instead locate the symbol using a service *)
+  with _ ->
+
+    (* Extract information from the request json *)
+    let symbolname = params.Completion.label in
+    let raw_kind = params.Completion.kind in
+    let kind = completion_kind_to_si_kind raw_kind in
+
+    (* Fetch location via the service *)
+    let command = ServerCommandTypes.LOCATE_SYMBOL (symbolname, kind) in
+    let%lwt result = rpc conn ref_unblocked_time command in
+    Lwt.return result
+  in
+
+  (* Did we get a location? *)
+  match loc_opt with
+  | None ->
+    Lwt.return params
+  | Some (filename, line, column, base_class) ->
+
+    (* Fetch the docblock for this location *)
+    let command = ServerCommandTypes.DOCBLOCK_AT
+      (filename, line, column, base_class)
     in
     let%lwt contents = rpc conn ref_unblocked_time command in
     Lwt.return { params with Completion.documentation = contents }

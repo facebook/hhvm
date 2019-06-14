@@ -15,10 +15,19 @@ val go_def :
   basic_only: bool ->
   DocblockService.result
 
-(** Returns the docblock for the symbol or expression at the given location. *)
-val go_location :
-  ServerEnv.env ->
-  (string * int * int) ->
-  base_class_name: string option ->
+(** Returns the docblock most appropriate to this position *)
+val go_docblock_at :
+  env:ServerEnv.env ->
+  filename:string ->
+  line:int ->
+  column:int ->
+  base_class_name:string option ->
   basic_only: bool ->
   DocblockService.result
+
+(** Returns the location of a symbol, which can be used to call go_docblock_at *)
+val go_locate_symbol :
+  env:ServerEnv.env ->
+  symbol:string ->
+  kind:SearchUtils.si_kind ->
+  DocblockService.dbs_symbol_location_result

@@ -8,3 +8,13 @@
  *)
 
 type result = string option
+
+(* Represents a symbol location determined by the docblock service *)
+type dbs_symbol_location = {
+  dbs_filename: string;
+  dbs_line: int;
+  dbs_column: int;
+  dbs_base_class: string option;
+}
+
+type dbs_symbol_location_result = dbs_symbol_location option

@@ -519,7 +519,7 @@ let load_state
   match ServerInit.init ~init_approach:(ServerInit.Saved_state_init load_state_approach) !genv with
   | env, ServerInit.Load_state_succeeded _ -> env
   | _env, ServerInit.Load_state_declined s ->
-    Printf.eprintf "> DECLINDED %s\n" s; assert false
+    Printf.eprintf "> DECLINED %s\n" s; assert false
   | _env, ServerInit.Load_state_failed s ->
     Printf.eprintf "> FAILED %s\n" s; assert false
 

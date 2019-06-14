@@ -35,30 +35,31 @@ let initialize_provider
     ~(namespace_map: (string * string) list)
     ~(workers: MultiWorker.worker list option): unit =
 
-  (* Will be used in the future *)
-  let _ = namespace_map in
-  match provider with
-  | SqliteIndex ->
-    SqliteSearchService.sqlite_file_path := savedstate_file_opt;
-    SqliteSearchService.initialize workers;
+  (* Basic initialization *)
+  let () = match provider with
+    | SqliteIndex -> SqliteSearchService.initialize workers savedstate_file_opt;
+    | GleanApiIndex
+    | NoIndex
+    | TrieIndex -> ()
+  in
 
-    (* Fetch sqlite namespaces *)
-    let namespace_list = SqliteSearchService.fetch_namespaces () in
-    List.iter namespace_list
-      ~f:(fun ns -> NamespaceSearchService.register_namespace ns);
+  (* Fetch namespaces from provider-specific query *)
+  let namespace_list = match provider with
+    | SqliteIndex -> SqliteSearchService.fetch_namespaces ()
+    | GleanApiIndex
+    | NoIndex
+    | TrieIndex -> []
+  in
 
-    (* Add namespace aliases from the .hhconfig file *)
-    List.iter namespace_map ~f:(fun (alias, target) ->
-      NamespaceSearchService.register_alias alias target
-    );
+  (* Register all namespaces *)
+  List.iter namespace_list
+    ~f:(fun ns -> NamespaceSearchService.register_namespace ns);
 
-    let namespace_list = SqliteSearchService.fetch_namespaces () in
-    List.iter namespace_list
-      ~f:(fun ns -> NamespaceSearchService.register_namespace ns);
-  | GleanApiIndex
-  | NoIndex
-  | TrieIndex ->
-    ()
+  (* Add namespace aliases from the .hhconfig file *)
+  List.iter namespace_map ~f:(fun (alias, target) ->
+    NamespaceSearchService.register_alias alias target
+  );
+;;
 
 (* Set the currently selected search provider *)
 let set_search_provider

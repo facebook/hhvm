@@ -14,7 +14,6 @@ open Sqlite_utils
 let select_symbols_stmt = ref None
 let select_symbols_by_kind_stmt = ref None
 let select_namespaces_stmt = ref None
-let sqlite_file_path = ref None
 
 (* SQL statements used by the autocomplete system *)
 let sql_select_symbols_by_kind =
@@ -28,8 +27,9 @@ let sql_select_namespaces =
 
 (* Determine the correct filename to use for the db_path or build it *)
 let find_or_build_sqlite_file
-    (workers: MultiWorker.worker list option): string =
-  match !sqlite_file_path with
+    (workers: MultiWorker.worker list option)
+    (savedstate_file_opt: string option): string =
+  match savedstate_file_opt with
   | Some path -> path
   | None ->
     (* Can we get one from the saved state fetcher? *)
@@ -65,10 +65,11 @@ let symbolindex_db = ref None
  * it.
  *)
 let initialize
-    (workers: MultiWorker.worker list option): unit =
+    (workers: MultiWorker.worker list option)
+    (savedstate_file_opt: string option): unit =
 
   (* Find the database and open it *)
-  let db_path = find_or_build_sqlite_file workers in
+  let db_path = find_or_build_sqlite_file workers savedstate_file_opt in
   let db = Sqlite3.db_open db_path in
   symbolindex_db := (Some db);
 

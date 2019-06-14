@@ -75,7 +75,7 @@ let autoimport_funcs =   [
   "asio_get_running_in_context", HH;
   "asio_get_running", HH;
   "class_meth", HH;
-  "darray", Global;
+  "darray", HH;
   "dict", Global;
   "fun", HH;
   "heapgraph_create", HH;
@@ -108,7 +108,7 @@ let autoimport_funcs =   [
   "thread_mark_stack", HH;
   "thread_memory_stats", HH;
   "type_structure", HH;
-  "varray", Global;
+  "varray", HH;
   "vec", Global;
   "xenon_get_data", HH;
 ]

@@ -19,10 +19,6 @@ class C {
     return 3;
   }
 }
-function darray<Tk, Tv>(KeyedTraversable<Tk, Tv> $arr): darray<Tk, Tv>
-{
-  return darray[];
-}
 
 function darray_map<Tk as arraykey, Tv1, Tv2>(
   (function(Tv1): Tv2) $value_func,

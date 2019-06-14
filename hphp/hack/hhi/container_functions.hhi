@@ -14,6 +14,8 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
+namespace {
+
 <<__PHPStdLib, __Rx>>
 function array_key_exists<Tk as arraykey, Tv>(mixed $key, <<__MaybeMutable>> ?KeyedContainer<Tk, Tv> $search): bool;
 
@@ -61,3 +63,15 @@ function vec<Tv>(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>> T
  */
 <<__Rx, __AtMostRxAsArgs>>
 function keyset<Tv as arraykey>(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>> Traversable<Tv> $arr): keyset<Tv>;
+
+}
+
+namespace HH {
+
+<<__Rx>>
+function darray<Tk, Tv>(KeyedTraversable<Tk, Tv> $arr): darray<Tk, Tv>;
+
+<<__Rx>>
+function varray<Tv>(Traversable<Tv> $arr): varray<Tv>;
+
+}

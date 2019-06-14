@@ -303,8 +303,8 @@ void Func::appendParam(bool ref, const Func::ParamInfo& info,
   // When called by FuncEmitter, the least significant bit of m_paramCounts
   // are not yet being used as a variadic flag, so numParams() cannot be
   // used
-  int qword = numParams / kBitsPerQword;
-  int bit   = numParams % kBitsPerQword;
+  const int qword = numParams / kBitsPerQword;
+  const int bit   = numParams % kBitsPerQword;
   assertx(!info.isVariadic() || (m_attrs & AttrVariadicParam));
   uint64_t* refBits = &m_refBitVal;
   // Grow args, if necessary.
@@ -452,9 +452,10 @@ bool Func::anyByRef() const {
     return true;
   }
 
-  if (UNLIKELY(numParams() >= kBitsPerQword)) {
-    auto limit = ((uint32_t) numParams() / kBitsPerQword);
-    for (int i = 0; i < limit; ++i) {
+  if (UNLIKELY(numParams() > kBitsPerQword)) {
+    auto limit = argToQword(numParams() - 1);
+    assertx(limit >= 0);
+    for (int i = 0; i <= limit; ++i) {
       if (shared()->m_refBitPtr[i]) {
         return true;
       }
@@ -470,7 +471,7 @@ bool Func::byRef(int32_t arg) const {
     if (arg >= numParams()) {
       return false;
     }
-    ref = &shared()->m_refBitPtr[(uint32_t)arg / kBitsPerQword - 1];
+    ref = &shared()->m_refBitPtr[argToQword(arg)];
   }
   int bit = (uint32_t)arg % kBitsPerQword;
   return *ref & (1ull << bit);

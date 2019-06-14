@@ -1337,6 +1337,9 @@ private:
   // Constants.
 
 private:
+  static constexpr int argToQword(int32_t arg) {
+    return static_cast<uint32_t>(arg) / kBitsPerQword - 1;
+  }
   static constexpr int kBitsPerQword = 64;
   static const StringData* s___call;
   static constexpr int kMagic = 0xba5eba11;

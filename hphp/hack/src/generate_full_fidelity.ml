@@ -20,9 +20,9 @@ type comment_style =
 [@@deriving show]
 
 let make_header comment_style (header_comment : string) : string =
-  let open_char, close_char = match comment_style with
-  | CStyle -> "/", '/'
-  | MLStyle -> "(", ')'
+  let open_char, close_char, generate_arg = match comment_style with
+  | CStyle -> "/", '/', " -- --rust"
+  | MLStyle -> "(", ')', ""
   in
   sprintf
 "%s**
@@ -38,7 +38,7 @@ let make_header comment_style (header_comment : string) : string =
  * THIS FILE IS @%s; DO NOT EDIT IT
  * To regenerate this file, run
  *
- *   buck run //hphp/hack/src:generate_full_fidelity
+ *   buck run //hphp/hack/src:generate_full_fidelity%s
  *
  **
  *%s
@@ -48,6 +48,7 @@ let make_header comment_style (header_comment : string) : string =
    * generated file in Phabricator. Cheeky trick to avoid making this script
    * being seen as generated. *)
   "generated"
+  generate_arg
   header_comment
   close_char
 

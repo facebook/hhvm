@@ -90,7 +90,7 @@ let get_lazy_level (genv: ServerEnv.genv) : lazy_level =
 
 (* entry point *)
 let init
-    ?(load_state_approach: load_state_approach option)
+    ~(init_approach: init_approach)
     (genv: ServerEnv.genv)
   : ServerEnv.env * init_result =
   let lazy_lev = get_lazy_level genv in
@@ -100,12 +100,12 @@ let init
   GlobalParserOptions.set env.popt;
   GlobalNamingOptions.set env.tcopt;
   let root = ServerArgs.root genv.options in
-  let (env, t), init_result = match lazy_lev, load_state_approach with
-    | Init, None ->
+  let (env, t), init_result = match lazy_lev, init_approach with
+    | Init, Full_init ->
       ServerLazyInit.full_init genv env,
       Load_state_declined "No saved-state requested (for lazy init)"
 
-    | Init, Some load_state_approach -> begin
+    | Init, Saved_state_init load_state_approach -> begin
       let result = ServerLazyInit.saved_state_init ~load_state_approach genv env root in
       (* Saved-state init is the only kind of init that might error... *)
       match result with
@@ -140,19 +140,17 @@ let init
           Exit_status.exit next_step
         end
       end
-
-    | Off, Some _
-    | Decl, Some _
-    | Parse, Some _ ->
+    | Off, Full_init
+    | Decl, Full_init
+    | Parse, Full_init ->
+      ServerEagerInit.init genv lazy_lev env,
+      Load_state_declined "No saved-state requested"
+    | Off, _
+    | Decl, _
+    | Parse, _ ->
       Hh_logger.log "Saved-state requested, but overridden by eager init";
       ServerEagerInit.init genv lazy_lev env,
       Load_state_declined "Saved-state requested, but overridden by eager init"
-
-    | Off, None
-    | Decl, None
-    | Parse, None ->
-      ServerEagerInit.init genv lazy_lev env,
-      Load_state_declined "No saved-state requested"
 
   in
   let env, t = ServerAiInit.ai_check genv env.naming_table env t in

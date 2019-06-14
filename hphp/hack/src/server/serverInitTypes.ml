@@ -22,6 +22,10 @@ type load_state_approach =
   | Load_state_natively of bool
   | Load_state_natively_with_target of ServerMonitorUtils.target_saved_state
 
+type init_approach =
+  | Full_init
+  | Saved_state_init of load_state_approach
+
 (** Docs are in .mli *)
 type init_result =
   | Load_state_succeeded of int option

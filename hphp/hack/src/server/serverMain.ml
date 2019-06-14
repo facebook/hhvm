@@ -816,39 +816,43 @@ let serve genv env in_fds =
  * 7. If "hh_server --load_state_canary", then load it! but by commit hash rather than public svn
  * 8. Otherwise, load it normally!
  *)
-let resolve_init_approach genv =
+let resolve_init_approach genv: ServerInit.init_approach * string =
   if not genv.local_config.ServerLocalConfig.use_saved_state then
-    None, "Local_config_saved_state_disabled"
+    ServerInit.Full_init, "Local_config_saved_state_disabled"
   else if ServerArgs.no_load genv.options then
-    None, "Server_args_no_load"
+    ServerInit.Full_init, "Server_args_no_load"
   else if ServerArgs.save_filename genv.options <> None then
-    None, "Server_args_saving_state"
+    ServerInit.Full_init, "Server_args_saving_state"
   else
     match
       (genv.local_config.ServerLocalConfig.load_state_natively),
       (ServerArgs.with_saved_state genv.options) with
       | _, Some (ServerArgs.Informant_induced_saved_state_target target) ->
-        Some (ServerInit.Load_state_natively_with_target target), "Load_state_natively_with_target"
+        ServerInit.Saved_state_init (ServerInit.Load_state_natively_with_target target),
+        "Load_state_natively_with_target"
       | _, Some (ServerArgs.Saved_state_target_info target) ->
-        Some (ServerInit.Precomputed target), "Precomputed"
+        ServerInit.Saved_state_init (ServerInit.Precomputed target),
+        "Precomputed"
       | false, None ->
-        None, "No_native_loading_or_precomputed"
+        ServerInit.Full_init,
+        "No_native_loading_or_precomputed"
       | true, None ->
         (** Use native loading only if the config specifies a load script,
          * and the local config prefers native. *)
         let use_canary = ServerArgs.load_state_canary genv.options in
-        Some (ServerInit.Load_state_natively use_canary), "Load_state_natively"
+        ServerInit.Saved_state_init (ServerInit.Load_state_natively use_canary),
+        "Load_state_natively"
 
 let program_init genv =
-  let load_state_approach, approach_name = resolve_init_approach genv in
+  let init_approach, approach_name = resolve_init_approach genv in
   Hh_logger.log "Initing with approach: %s" approach_name;
   let env, init_type, init_error, state_distance =
-    match load_state_approach with
-    | None ->
-      let env, _ = ServerInit.init genv in
+    match init_approach with
+    | ServerInit.Full_init ->
+      let env, _ = ServerInit.init ~init_approach genv in
       env, "fresh", None, None
-    | Some load_state_approach ->
-      let env, init_result = ServerInit.init ~load_state_approach genv in
+    | ServerInit.Saved_state_init _ ->
+      let env, init_result = ServerInit.init ~init_approach genv in
       begin match init_result with
         | ServerInit.Load_state_succeeded distance -> env, "state_load", None, distance
         | ServerInit.Load_state_failed err -> env, "state_load_failed", Some err, None

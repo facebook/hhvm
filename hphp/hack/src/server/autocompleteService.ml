@@ -881,6 +881,7 @@ let find_global_results
       ~query_text
       ~max_results
       ~kind_filter:!kind_filter
+      ~context:completion_type
       ~env
     in
     List.iter results ~f:(fun r ->

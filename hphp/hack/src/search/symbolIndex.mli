@@ -34,6 +34,7 @@ val log_symbol_index_search:
 val find_matching_symbols :
     query_text:string ->
     max_results:int ->
+    context:SearchUtils.autocomplete_type option ->
     kind_filter:SearchUtils.si_kind option ->
     env:SearchUtils.local_tracking_env ->
     SearchUtils.si_results

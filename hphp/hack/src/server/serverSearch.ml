@@ -88,6 +88,7 @@ let go workers query type_ (env: SearchUtils.local_tracking_env)
             ~query_text:class_name_query
             ~max_results:1
             ~kind_filter:(Some SearchUtils.SI_Class)
+            ~context:None
             ~env
           |> List.hd
           |> Option.map ~f:(fun r -> r.SearchUtils.si_name)
@@ -112,6 +113,7 @@ let go workers query type_ (env: SearchUtils.local_tracking_env)
           ~query_text:query
           ~max_results
           ~kind_filter:None
+          ~context:None
           ~env
         in
         AutocompleteService.add_position_to_results temp_results

@@ -138,9 +138,14 @@ let log_symbol_index_search
 let find_matching_symbols
     ~(query_text: string)
     ~(max_results: int)
+    ~(context: autocomplete_type option)
     ~(kind_filter: si_kind option)
     ~(env: SearchUtils.local_tracking_env): si_results =
   let provider = get_search_provider () in
+
+  (* Will be used in a future diff, but let's avoid the warning for now *)
+  let _ = context in
+
   (*
    * Nuclide often sends this exact request to verify that HH is working.
    * Let's capture it and avoid doing unnecessary work.

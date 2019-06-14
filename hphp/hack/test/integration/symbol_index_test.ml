@@ -34,6 +34,7 @@ let assert_autocomplete
     ~query_text
     ~max_results:100
     ~kind_filter:(Some kind)
+    ~context:None
     ~env:!env in
 
   (* Verify correct number of results *)

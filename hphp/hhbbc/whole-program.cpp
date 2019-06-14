@@ -455,6 +455,7 @@ void prop_type_hint_pass(Index& index, php::Program& program) {
 void final_pass(Index& index, php::Program& program) {
   trace_time final_pass("final pass");
   index.freeze();
+  auto const dump_dir = debug_dump_to();
   parallel::for_each(
     program.units,
     [&] (std::unique_ptr<php::Unit>& unit) {
@@ -472,6 +473,12 @@ void final_pass(Index& index, php::Program& program) {
       }
       assert(check(*unit));
       state_after("optimize", *unit);
+      if (!dump_dir.empty()) {
+        if (Trace::moduleEnabledRelease(Trace::hhbbc_dump, 2)) {
+          dump_representation(dump_dir, unit.get());
+        }
+        dump_index(dump_dir, index, unit.get());
+      }
     }
   );
 }
@@ -587,9 +594,9 @@ void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
     }
     index->mark_persistent_classes_and_functions(*program);
     final_pass(*index, *program);
+  } else {
+    debug_dump_program(*index, *program);
   }
-
-  debug_dump_program(*index, *program);
   print_stats(*index, *program);
 
   // running cleanup_for_emit can take a while... do it in parallel

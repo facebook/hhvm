@@ -63,17 +63,6 @@ void with_file(fs::path dir, const php::Unit* u, Operation op) {
   }
 }
 
-void dump_representation(fs::path dir, const php::Program& program) {
-  parallel::for_each(
-    program.units,
-    [&] (const std::unique_ptr<php::Unit>& u) {
-      with_file(dir, u.get(), [&] (std::ostream& out) {
-        out << show(*u, true);
-      });
-    }
-  );
-}
-
 using NameTy = std::pair<SString,PropStateElem<>>;
 std::vector<NameTy> sorted_prop_state(const PropState& ps) {
   std::vector<NameTy> ret(begin(ps), end(ps));
@@ -144,39 +133,12 @@ void dump_func_state(std::ostream& out,
   out << name << " :: " << show(retTy) << '\n';
 }
 
-void dump_index(fs::path dir,
-                const Index& index,
-                const php::Program& program) {
-  parallel::for_each(
-    program.units,
-    [&] (const std::unique_ptr<php::Unit>& u) {
-      if (!*u->filename->data()) {
-        // The native systemlibs: for now just skip.
-        return;
-      }
-
-      with_file(dir, u.get(), [&] (std::ostream& out) {
-        for (auto& c : u->classes) {
-          dump_class_state(out, index, c.get());
-          for (auto& m : c->methods) {
-            dump_func_state(out, index, m.get());
-          }
-        }
-
-        for (auto& f : u->funcs) {
-          dump_func_state(out, index, f.get());
-        }
-      });
-    }
-  );
-}
-
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void debug_dump_program(const Index& index, const php::Program& program) {
-  if (!Trace::moduleEnabledRelease(Trace::hhbbc_dump, 1)) return;
+std::string debug_dump_to() {
+  if (!Trace::moduleEnabledRelease(Trace::hhbbc_dump, 1)) return "";
 
   trace_time tracer("debug dump");
 
@@ -196,19 +158,68 @@ void debug_dump_program(const Index& index, const php::Program& program) {
   }();
   fs::create_directory(dir);
 
-  FTRACE_MOD(Trace::hhbbc_dump, 1, "debug dump going to {}\n", dir.string());
+  Trace::ftraceRelease("debug dump going to {}\n", dir.string());
+  return dir.string();
+}
+
+void dump_representation(const std::string& dir, const php::Unit* unit) {
+  auto const rep_dir = fs::path{dir} / "representation";
+  with_file(rep_dir, unit, [&] (std::ostream& out) {
+      out << show(*unit, true);
+    }
+  );
+}
+
+void dump_index(const std::string& dir,
+                const Index& index,
+                const php::Unit* unit) {
+  if (!*unit->filename->data()) {
+    // The native systemlibs: for now just skip.
+    return;
+  }
+
+  auto ind_dir = fs::path{dir} / "index";
+
+  with_file(ind_dir, unit, [&] (std::ostream& out) {
+      for (auto& c : unit->classes) {
+        dump_class_state(out, index, c.get());
+        for (auto& m : c->methods) {
+          dump_func_state(out, index, m.get());
+        }
+      }
+
+      for (auto& f : unit->funcs) {
+        dump_func_state(out, index, f.get());
+      }
+    }
+  );
+}
+
+void debug_dump_program(const Index& index, const php::Program& program) {
+  auto const dir = debug_dump_to();
+  if (dir.empty()) return;
 
   if (Trace::moduleEnabledRelease(Trace::hhbbc_dump, 2)) {
     trace_time tracer2("debug dump: representation");
-    dump_representation(dir / "representation", program);
+    parallel::for_each(
+      program.units,
+      [&] (const std::unique_ptr<php::Unit>& u) {
+        dump_representation(dir, u.get());
+      }
+    );
   }
 
   {
     trace_time tracer2("debug dump: index");
-    dump_index(dir / "index", index, program);
+    parallel::for_each(
+      program.units,
+      [&] (const std::unique_ptr<php::Unit>& u) {
+        dump_index(dir, index, u.get());
+      }
+    );
   }
 
-  FTRACE_MOD(Trace::hhbbc_dump, 1, "debug dump done\n");
+  Trace::ftraceRelease("debug dump done\n");
 }
 
 //////////////////////////////////////////////////////////////////////

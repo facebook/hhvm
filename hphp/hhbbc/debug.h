@@ -31,6 +31,9 @@ namespace HPHP { namespace HHBBC {
  * temporary directory as readable text.
  */
 void debug_dump_program(const Index&, const php::Program&);
+std::string debug_dump_to();
+void dump_representation(const std::string& dir, const php::Unit*);
+void dump_index(const std::string&, const Index&, const php::Unit*);
 
 /*
  * Utilities for printing the state of the program after various

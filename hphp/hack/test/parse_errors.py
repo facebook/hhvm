@@ -46,28 +46,14 @@ def end_of_file(line) -> bool:
 
 
 def parse_errors(output_file_name: str):
-    dirname = os.path.dirname(output_file_name)
-    hh_flags_filename = os.path.join(dirname, "HH_FLAGS")
-    multiple_error_file = False
-    try:
-        with open(hh_flags_filename) as hh_flags:
-            for line in hh_flags:
-                if "--all-errors" in line:
-                    multiple_error_file = True
-    except IOError:
-        pass
-
     with open(output_file_name) as output_file:
         try:
-            return parse_error(output_file, multiple_error_file)
-        except ParseException as e:
-            if multiple_error_file:
-                try:
-                    return parse_error(output_file, False)
-                except ParseException as ex:
-                    raise ParseException(f'at file {output_file_name}: {ex}')
-            else:
-                raise ParseException(f'at file {output_file_name}: {e}')
+            return parse_error(output_file, True)
+        except ParseException:
+            try:
+                return parse_error(output_file, False)
+            except ParseException as ex:
+                raise ParseException(f'at file {output_file_name}: {ex}')
 
 
 def same_error(line: str, multiple_error_file: bool):

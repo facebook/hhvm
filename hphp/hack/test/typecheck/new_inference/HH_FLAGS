@@ -1,4 +1,3 @@
---all-errors
 --disallow-stringish-magic
 --disallow-invalid-arraykey
 --hh-log-level prop 1

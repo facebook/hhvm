@@ -1,1 +1,1 @@
---disallow-stringish-magic --all-errors
+--disallow-stringish-magic

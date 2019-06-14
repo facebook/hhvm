@@ -97,6 +97,7 @@ let parse_check_args cmd =
   let saved_state_ignore_hhconfig = ref false in
   let logname = ref false in
   let log_inference_constraints = ref false in
+  let max_errors = ref None in
   let mode = ref None in
   let monitor_logname = ref false in
   let no_load = ref false in
@@ -374,6 +375,9 @@ let parse_check_args cmd =
     "--logname",
       Arg.Set logname,
       " (mode) show log filename and exit\n";
+    "--max-errors",
+      Arg.Int (fun num_errors -> max_errors := Some num_errors),
+        " Maximum number of errors to display";
     "--monitor-logname",
       Arg.Set monitor_logname,
       " (mode) show monitor log filename and exit\n";
@@ -564,6 +568,7 @@ let parse_check_args cmd =
     saved_state_ignore_hhconfig = !saved_state_ignore_hhconfig;
     paths = paths;
     log_inference_constraints = !log_inference_constraints;
+    max_errors = !max_errors;
     mode = mode;
     no_load = !no_load || (
       match mode with

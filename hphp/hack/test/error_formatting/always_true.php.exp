@@ -5,3 +5,4 @@ Typing[4151] This expression is always true
   4 |   if (null !== $arg) {
     |       ^^^^^^^^^^^^^
 
+1 error found.

@@ -1,1 +1,1 @@
---disallow-ambiguous-lambda --all-errors
+--disallow-ambiguous-lambda

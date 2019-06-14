@@ -404,7 +404,7 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       in
       let%lwt status = rpc args (Rpc.STATUS ignore_ide) in
       let exit_status =
-        ClientCheckStatus.go status args.output_json args.from args.error_format in
+        ClientCheckStatus.go status args.output_json args.from args.error_format args.max_errors in
       Lwt.return exit_status
     | MODE_STATUS_SINGLE filename ->
       let file_input = match filename with
@@ -421,7 +421,7 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
         last_recheck_stats = None;
       } in
       let exit_status =
-        ClientCheckStatus.go status args.output_json args.from args.error_format in
+        ClientCheckStatus.go status args.output_json args.from args.error_format args.max_errors in
       Lwt.return exit_status
     | MODE_SEARCH (query, type_) ->
       let%lwt results = rpc args @@ Rpc.SEARCH (query, type_) in

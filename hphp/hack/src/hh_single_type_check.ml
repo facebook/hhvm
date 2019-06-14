@@ -74,7 +74,7 @@ type options = {
   mode : mode;
   error_format : Errors.format;
   no_builtins : bool;
-  all_errors : bool;
+  max_errors : int option;
   tcopt : GlobalOptions.t;
   batch_mode : bool;
   out_extension : string;
@@ -125,30 +125,35 @@ let print_error format ?(oc = stderr) l =
   in
   Out_channel.output_string oc (formatter (Errors.to_absolute_for_test l))
 
-let write_error_list format errors oc =
+let write_error_list format errors oc max_errors =
+  let shown_errors = match max_errors with
+    | Some max_errors -> List.take errors max_errors
+    | None -> errors
+  in
   (if errors <> []
-  then List.iter ~f:(print_error format ~oc) errors
+   then
+     (List.iter ~f:(print_error format ~oc) shown_errors;
+      match Errors.format_summary format errors max_errors with
+      | Some summary -> Out_channel.output_string oc summary
+      | None -> ())
   else Out_channel.output_string oc "No errors\n");
   Out_channel.close oc
 
-let write_first_error format errors oc =
-  (if errors <> []
-  then print_error format ~oc (List.hd_exn errors)
-  else Out_channel.output_string oc "No errors\n");
-  Out_channel.close oc
-
-let print_error_list format errors =
+let print_error_list format errors max_errors =
+  let shown_errors = match max_errors with
+    | Some max_errors -> List.take errors max_errors
+    | None -> errors
+  in
   if errors <> []
-  then List.iter ~f:(print_error format) errors
+  then
+    (List.iter ~f:(print_error format) shown_errors;
+     match Errors.format_summary format errors max_errors with
+     | Some summary -> Out_channel.output_string stderr summary
+     | None -> ())
   else Printf.printf "No errors\n"
 
-let print_first_error format errors =
-  if errors <> []
-  then print_error format (List.hd_exn errors)
-  else Printf.printf "No errors\n"
-
-let print_errors format (errors:Errors.t) =
-  print_error_list format (Errors.get_error_list errors)
+let print_errors format (errors:Errors.t) max_errors : unit =
+  print_error_list format (Errors.get_error_list errors) max_errors
 
 let parse_options () =
   let fn_ref = ref [] in
@@ -158,7 +163,7 @@ let parse_options () =
   let line = ref 0 in
   let log_key = ref "" in
   let log_levels = ref SMap.empty in
-  let all_errors = ref false in
+  let max_errors = ref None in
   let batch_mode = ref false in
   let set_mode x () =
     if !mode <> Errors
@@ -207,9 +212,6 @@ let parse_options () =
     "--ai",
       Arg.String (set_ai),
     " Run the abstract interpreter (Zoncolan)";
-    "--all-errors",
-      Arg.Set all_errors,
-      " List all errors not just the first one";
     "--allow-user-attributes",
       Arg.Unit (set_bool allow_user_attributes),
       " Allow all user attributes";
@@ -280,6 +282,9 @@ let parse_options () =
         Arg.Int (fun column -> set_mode (Find_local (!line, column)) ());
       ]),
       "<pos> Find all usages of local at given line and column";
+    "--max-errors",
+      Arg.Int (fun num_errors -> max_errors := Some num_errors),
+      " Maximum number of errors to display";
     "--outline",
       Arg.Unit (set_mode Outline),
       " Print file outline";
@@ -489,7 +494,7 @@ let parse_options () =
   { files = fns;
     mode = !mode;
     no_builtins = !no_builtins;
-    all_errors = !all_errors;
+    max_errors = !max_errors;
     error_format = !error_format;
     tcopt;
     batch_mode = !batch_mode;
@@ -784,7 +789,7 @@ let typecheck_tasts tasts tcopt (filename:Relative_path.t) =
 
 let handle_mode
   mode filenames tcopt popt builtins files_contents files_info parse_errors
-  all_errors error_format batch_mode out_extension (env: SearchUtils.local_tracking_env) =
+  max_errors error_format batch_mode out_extension (env: SearchUtils.local_tracking_env) =
   let expect_single_file () : Relative_path.t =
     match filenames with
     | [x] -> x
@@ -1001,12 +1006,12 @@ let handle_mode
       files_contents in
     print_tasts tasts tcopt;
     if not @@ Errors.is_empty errors then begin
-      print_errors error_format errors;
+      print_errors error_format errors max_errors;
       Printf.printf "Did not typecheck the TAST as there are typing errors.";
       exit 2
     end else
       let tast_check_errors = typecheck_tasts tasts tcopt filename in
-      print_error_list error_format tast_check_errors;
+      print_error_list error_format tast_check_errors max_errors;
       if tast_check_errors <> [] then exit 2
     )
   | Dump_typed_full_fidelity_json ->
@@ -1081,8 +1086,7 @@ let handle_mode
       if parse_errors <> []
       then
         (* This closes the out channel *)
-        (if all_errors then write_error_list error_format parse_errors oc
-        else write_first_error error_format parse_errors oc)
+        write_error_list error_format parse_errors oc max_errors
       else
         begin
         Typing_log.out_channel := oc;
@@ -1090,8 +1094,7 @@ let handle_mode
         let files_contents = file_to_files filename in
         let parse_errors, individual_file_info = parse_name_and_decl popt files_contents in
         let errors = check_file tcopt (Errors.get_error_list parse_errors) individual_file_info in
-        (if all_errors then write_error_list error_format errors oc
-        else write_first_error error_format errors oc);
+        write_error_list error_format errors oc max_errors;
         ServerIdeUtils.revert_local_changes ()
         end
     )
@@ -1116,15 +1119,8 @@ let handle_mode
     )
   | Errors ->
       (* Don't typecheck builtins *)
-      let files_info = if all_errors then files_info else
-      Relative_path.Map.fold builtins
-        ~f:begin fun k _ acc -> Relative_path.Map.remove acc k end
-        ~init:files_info in
       let errors = check_file tcopt parse_errors files_info in
-      (if all_errors then
-        print_error_list error_format errors
-      else
-        print_first_error error_format errors);
+      print_error_list error_format errors max_errors;
       if errors <> [] then exit 2
   | Decl_compare ->
     let filename = expect_single_file () in
@@ -1180,7 +1176,7 @@ let decl_and_run_mode
     error_format;
     no_builtins;
     tcopt;
-    all_errors;
+    max_errors;
     batch_mode;
     out_extension;
   }
@@ -1227,7 +1223,7 @@ let decl_and_run_mode
     parse_name_and_decl popt to_decl in
 
   handle_mode mode files tcopt popt builtins files_contents files_info
-    (Errors.get_error_list errors) all_errors error_format batch_mode out_extension
+    (Errors.get_error_list errors) max_errors error_format batch_mode out_extension
     env
 
 let main_hack ({files; mode; tcopt; _} as opts) (env: SearchUtils.local_tracking_env): unit =

@@ -50,6 +50,7 @@ let visitor opts =
   Obj_get_check.handler;
   This_hint_check.handler;
   Static_method_call_check.handler;
+  Unresolved_type_variable_check.handler;
 ])
 
 let program opts = (visitor opts)#go

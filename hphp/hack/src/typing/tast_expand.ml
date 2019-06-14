@@ -28,7 +28,7 @@ module ETast = ExpandedTypeAnnotatedAST
  *   Transform completely unconstrained types to Tmixed
  *   Consider using a fresh datatype for TAST types.
  *)
-let expand_ty env ty =
+let expand_ty ?pos env ty =
   let rec exp_ty ty =
     let _, ety = Tast_env.expand_type env ty in
     let ety = match ety with
@@ -44,8 +44,11 @@ let expand_ty env ty =
         (p, Tshape (fk, Nast.ShapeMap.map exp_sft fields))
       | (p, Tarraykind ak) ->
         (p, Tarraykind (exp_array_kind ak))
-        (* TODO TAST: replace with a user error *)
-      | (p, Tvar v) -> (p, Tvar v)
+      | (p, Tvar v) -> (match pos with
+                      | None -> (p, Tvar v)
+                      | Some pos -> if TypecheckerOptions.disallow_unresolved_type_variables (Tast_env.get_tcopt env)
+                                then Errors.unresolved_type_variable pos;
+                                (p, Tvar v))
         (* TODO TAST: replace with Tfun type *)
       | (p, Tanon(x, y)) -> (p, Tanon(x,y))
       | (p, Terr) -> (p, Terr) in
@@ -105,7 +108,7 @@ let expand_ty env ty =
 
 let expander = object
   inherit Tast_visitor.endo
-  method! on_expr_annotation env (pos, ty) = (pos, expand_ty env ty)
+  method! on_expr_annotation env (pos, ty) = (pos, expand_ty ~pos env ty)
 end
 
 module ExpandAST =

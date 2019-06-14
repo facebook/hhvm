@@ -159,7 +159,7 @@ let handler = object
 
   method! at_expr env ((p, ty), _) =
     try
-      let ty = Tast_expand.expand_ty env ty in
+      let ty = Tast_expand.expand_ty env ~pos:p ty in
       let serialized_ty = Tast_env.ty_to_json env ty in
       let deserialized_ty = Tast_env.json_to_locl_ty serialized_ty in
       match deserialized_ty with

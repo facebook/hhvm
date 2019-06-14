@@ -215,6 +215,11 @@ type t = {
 
  (* static check xhp required attribute *)
  tco_check_xhp_attribute : bool;
+
+ (*
+  * Flag to produce an error whenever the TAST contains unresolved type variables
+  *)
+  tco_disallow_unresolved_type_variables : bool;
 } [@@deriving show]
 
 val make :
@@ -261,6 +266,7 @@ val make :
   ?tco_coercion_from_dynamic: bool ->
   ?error_codes_treated_strictly: ISet.t ->
   ?tco_check_xhp_attribute: bool ->
+  ?tco_disallow_unresolved_type_variables: bool ->
   unit ->
   t
 
@@ -332,3 +338,4 @@ val tco_pessimize_types : t -> bool
 val tco_coercion_from_dynamic : t -> bool
 val error_codes_treated_strictly : t -> ISet.t
 val tco_check_xhp_attribute : t -> bool
+val tco_disallow_unresolved_type_variables : t -> bool

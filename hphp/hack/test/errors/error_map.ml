@@ -555,4 +555,5 @@ MethodVariance = 4313
 MissingXhpRequiredAttr = 4314
 BadXhpAttrRequiredOverride = 4315
 ReifiedTparamVariadic = 4316
+UnresolvedTypeVariable = 4317
   |}]

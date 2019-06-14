@@ -298,6 +298,7 @@ let load config_filename options =
     ?tco_coercion_from_dynamic:(bool_opt "coercion_from_dynamic" config)
     ~error_codes_treated_strictly:(prepare_error_codes_treated_strictly config)
     ?tco_check_xhp_attribute:(bool_opt "check_xhp_attribute" config)
+    ?tco_disallow_unresolved_type_variables:(bool_opt "disallow_unresolved_type_variables" config)
     ()
   in
   Errors.ignored_fixme_codes :=

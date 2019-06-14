@@ -3665,6 +3665,10 @@ let typechecker_timeout (pos, fun_name) seconds =
   add (Typing.err_code Typing.TypecheckerTimeout) pos
     (Printf.sprintf "Type checker timed out after %d seconds whilst checking function %s" seconds fun_name)
 
+let unresolved_type_variable pos =
+  add (Typing.err_code Typing.UnresolvedTypeVariable) pos
+    ("The type of this expression contains an unresolved type variable")
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

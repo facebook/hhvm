@@ -52,6 +52,7 @@ type t = {
   tco_coercion_from_dynamic : bool;
   error_codes_treated_strictly : ISet.t;
   tco_check_xhp_attribute : bool;
+  tco_disallow_unresolved_type_variables : bool;
 } [@@deriving show]
 
 let tco_experimental_instanceof = "instanceof"
@@ -229,6 +230,7 @@ let default = {
  tco_coercion_from_dynamic = false;
  error_codes_treated_strictly = ISet.of_list [];
  tco_check_xhp_attribute = false;
+ tco_disallow_unresolved_type_variables = false;
 }
 
 let make
@@ -275,6 +277,7 @@ let make
   ?(tco_coercion_from_dynamic = default.tco_coercion_from_dynamic)
   ?(error_codes_treated_strictly = default.error_codes_treated_strictly)
   ?(tco_check_xhp_attribute = default.tco_check_xhp_attribute)
+  ?(tco_disallow_unresolved_type_variables = default.tco_disallow_unresolved_type_variables)
   ()
 = {
   tco_safe_array;
@@ -321,6 +324,7 @@ let make
   tco_coercion_from_dynamic;
   error_codes_treated_strictly;
   tco_check_xhp_attribute;
+  tco_disallow_unresolved_type_variables;
 }
 let tco_safe_array t = t.tco_safe_array
 let tco_safe_vector_array t = t.tco_safe_vector_array
@@ -374,6 +378,8 @@ let error_codes_treated_strictly t = t.error_codes_treated_strictly
 let tco_ignore_collection_expr_type_arguments t = t.tco_ignore_collection_expr_type_arguments
 
 let tco_check_xhp_attribute t = t.tco_check_xhp_attribute
+
+let tco_disallow_unresolved_type_variables t = t.tco_disallow_unresolved_type_variables
 
 let setup_pocket_universes env enabled =
   let exp_features = env.tco_experimental_features in

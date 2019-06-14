@@ -80,3 +80,5 @@ let pessimize_types = GlobalOptions.tco_pessimize_types
 let coercion_from_dynamic = GlobalOptions.tco_coercion_from_dynamic
 
 let check_xhp_attribute = GlobalOptions.tco_check_xhp_attribute
+
+let disallow_unresolved_type_variables = GlobalOptions.tco_disallow_unresolved_type_variables

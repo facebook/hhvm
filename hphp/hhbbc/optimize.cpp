@@ -367,35 +367,40 @@ void insert_assertions(const Index& index,
   if (cblk->hhbcs != newBCs) cblk.mutate()->hhbcs = std::move(newBCs);
 }
 
-bool persistence_check(const php::Block* const blk) {
-  for (auto& op : blk->hhbcs) {
-    switch (op.op) {
-      case Op::Nop:
-      case Op::DefCls:
-      case Op::DefClsNop:
-      case Op::DefCns:
-      case Op::DefTypeAlias:
-      case Op::Null:
-      case Op::True:
-      case Op::False:
-      case Op::Int:
-      case Op::Double:
-      case Op::String:
-      case Op::Vec:
-      case Op::Dict:
-      case Op::Keyset:
-      case Op::Array:
-        continue;
-      case Op::PopC:
-        // Not strictly no-side effects, but as long as the rest of
-        // the unit is limited to the above, we're fine (and we expect
-        // one following a DefCns).
-        continue;
-      case Op::RetC:
-        continue;
-      default:
-        return false;
+bool persistence_check(const php::Func* const func) {
+  auto bid = func->mainEntry;
+  while (bid != NoBlockId) {
+    auto const& blk = func->blocks[bid];
+    for (auto& op : blk->hhbcs) {
+      switch (op.op) {
+        case Op::Nop:
+        case Op::DefCls:
+        case Op::DefClsNop:
+        case Op::DefCns:
+        case Op::DefTypeAlias:
+        case Op::Null:
+        case Op::True:
+        case Op::False:
+        case Op::Int:
+        case Op::Double:
+        case Op::String:
+        case Op::Vec:
+        case Op::Dict:
+        case Op::Keyset:
+        case Op::Array:
+          continue;
+        case Op::PopC:
+          // Not strictly no-side effects, but as long as the rest of
+          // the unit is limited to the above, we're fine (and we expect
+          // one following a DefCns).
+          continue;
+        case Op::RetC:
+          continue;
+        default:
+          return false;
+      }
     }
+    bid = blk->fallthrough;
   }
   return true;
 }
@@ -972,29 +977,11 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
     }
   }
 
-  auto pseudomain = is_pseudomain(func);
-  func->attrs = (pseudomain ||
-                 func->attrs & AttrInterceptable ||
-                 ainfo.mayUseVV) ?
-    Attr(func->attrs | AttrMayUseVV) : Attr(func->attrs & ~AttrMayUseVV);
-
-  if (pseudomain && func->unit->persistent.load(std::memory_order_relaxed)) {
-    auto persistent = true;
-    visit_blocks("persistence check", index, ainfo, *collect,
-                 [&] (const Index&,
-                      const FuncAnalysis&,
-                      CollectedInfo&,
-                      BlockId bid,
-                      const State&) {
-                   auto const blk = ainfo.ctx.func->blocks[bid].get();
-                   if (persistent && !persistence_check(blk)) {
-                     persistent = false;
-                   }
-                 });
-    if (!persistent) {
-      func->unit->persistent.store(persistent, std::memory_order_relaxed);
-    }
-  }
+  attrSetter(func->attrs,
+             is_pseudomain(func) ||
+             func->attrs & AttrInterceptable ||
+             ainfo.mayUseVV,
+             AttrMayUseVV);
 
   if (options.InsertAssertions) {
     visit_blocks("insert assertions", index, ainfo, *collect,
@@ -1131,6 +1118,13 @@ void update_bytecode(
     }
   }
   blockUpdates.clear();
+
+  if (is_pseudomain(func) &&
+      func->unit->persistent.load(std::memory_order_relaxed)) {
+    func->unit->persistent_pseudomain.store(
+      persistence_check(func), std::memory_order_relaxed
+    );
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

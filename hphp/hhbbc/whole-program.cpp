@@ -129,24 +129,19 @@ struct WorkResult {
 
 //////////////////////////////////////////////////////////////////////
 
-// Return a Context for every function in the Program.
-std::vector<Context> all_function_contexts(const php::Program& program) {
-  std::vector<Context> ret;
-
-  for (auto& u : program.units) {
-    for (auto& c : u->classes) {
-      for (auto& m : c->methods) {
-        ret.push_back(Context { u.get(), m.get(), c.get()});
-      }
-    }
-    for (auto& f : u->funcs) {
-      ret.push_back(Context { u.get(), f.get() });
-    }
-    if (options.AnalyzePseudomains) {
-      ret.push_back(Context { u.get(), u->pseudomain.get() });
+template<typename F>
+void all_unit_contexts(const php::Unit* u, F&& fun) {
+  for (auto& c : u->classes) {
+    for (auto& m : c->methods) {
+      fun(Context { u, m.get(), c.get()});
     }
   }
-  return ret;
+  for (auto& f : u->funcs) {
+    fun(Context { u, f.get() });
+  }
+  if (options.AnalyzePseudomains) {
+    fun(Context { u, u->pseudomain.get() });
+  }
 }
 
 std::vector<Context> const_pass_contexts(const php::Program& program) {
@@ -173,19 +168,20 @@ std::vector<WorkItem> initial_work(const php::Program& program,
     );
     return ret;
   }
-  /*
-   * If we're not doing private property inference, schedule only
-   * function-at-a-time work items.
-   */
-  if (!options.HardPrivatePropInference) {
-    auto const ctxs = all_function_contexts(program);
-    std::transform(begin(ctxs), end(ctxs), std::back_inserter(ret),
-      [&] (Context ctx) { return WorkItem { WorkType::Func, ctx }; }
-    );
-    return ret;
-  }
 
   for (auto& u : program.units) {
+    /*
+     * If we're not doing private property inference, schedule only
+     * function-at-a-time work items.
+     */
+    if (!options.HardPrivatePropInference) {
+      all_unit_contexts(u.get(), [&] (Context&& c) {
+          ret.emplace_back(WorkType::Func, std::move(c));
+        }
+      );
+      continue;
+    }
+
     for (auto& c : u->classes) {
       if (c->closureContextCls) {
         // For class-at-a-time analysis, closures that are associated
@@ -425,20 +421,6 @@ void constant_pass(Index& index, php::Program& program) {
   analyze_iteratively(index, program, AnalyzeMode::ConstPass);
 }
 
-void mark_persistent_static_properties(const Index& index,
-                                       php::Program& program) {
-  trace_time update("mark persistent static properties");
-  for (auto& unit : program.units) {
-    for (auto& cls : unit->classes) {
-      for (auto& prop : cls->properties) {
-        if (index.lookup_public_static_immutable(cls.get(), prop.name)) {
-          prop.attrs |= AttrPersistent;
-        }
-      }
-    }
-  }
-}
-
 void prop_type_hint_pass(Index& index, php::Program& program) {
   trace_time tracer("optimize prop type-hints");
 
@@ -474,11 +456,22 @@ void final_pass(Index& index, php::Program& program) {
   trace_time final_pass("final pass");
   index.freeze();
   parallel::for_each(
-    all_function_contexts(program),
-    [&] (Context ctx) {
-      optimize_func(index,
-                    analyze_func(index, ctx, CollectionOpts{}),
-                    true);
+    program.units,
+    [&] (std::unique_ptr<php::Unit>& unit) {
+      // optimize_func can remove 86*init methods from classes, so we
+      // have to save the contexts for now.
+      std::vector<Context> contexts;
+      all_unit_contexts(unit.get(), [&] (Context&& ctx) {
+          contexts.push_back(std::move(ctx));
+        }
+      );
+      for (auto const& ctx : contexts) {
+        optimize_func(index,
+                      analyze_func(index, ctx, CollectionOpts{}),
+                      true);
+      }
+      assert(check(*unit));
+      state_after("optimize", *unit);
     }
   );
 }
@@ -585,10 +578,6 @@ void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
         index->init_public_static_prop_types();
         index->use_class_dependencies(options.HardPrivatePropInference);
         analyze_iteratively(*index, *program, AnalyzeMode::NormalPass);
-        final_pass(*index, *program);
-        index->mark_persistent_classes_and_functions(*program);
-        state_after("optimize", *program);
-        assert(check(*program));
         break;
       } catch (Index::rebuild& rebuild) {
         FTRACE(1, "whole_program: rebuilding index\n");
@@ -596,10 +585,8 @@ void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
         continue;
       }
     }
-  }
-
-  if (options.AnalyzePublicStatics) {
-    mark_persistent_static_properties(*index, *program);
+    index->mark_persistent_classes_and_functions(*program);
+    final_pass(*index, *program);
   }
 
   debug_dump_program(*index, *program);

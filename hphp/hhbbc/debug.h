@@ -42,6 +42,12 @@ inline void banner(const char* what) {
   FTRACE(2, "{:-^70}\n", what);
 }
 
+inline void state_after(const char* when, const php::Unit& u) {
+  TRACE_SET_MOD(hhbbc);
+  Trace::Bump bumper{Trace::hhbbc, kSystemLibBump, is_systemlib_part(u)};
+  FTRACE(4, "{:-^70}\n{}{:-^70}\n", when, show(u), "");
+}
+
 inline void state_after(const char* when, const php::Program& program) {
   TRACE_SET_MOD(hhbbc);
   banner(when);

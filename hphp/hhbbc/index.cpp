@@ -3539,16 +3539,22 @@ Index::~Index() {}
 //////////////////////////////////////////////////////////////////////
 
 void Index::mark_persistent_classes_and_functions(php::Program& program) {
+  auto persist = [] (const php::Unit* unit) {
+    return
+      unit->persistent.load(std::memory_order_relaxed) &&
+      unit->persistent_pseudomain.load(std::memory_order_relaxed);
+  };
   for (auto& unit : program.units) {
+    auto const persistent = persist(unit.get());
     for (auto& f : unit->funcs) {
       attribute_setter(f->attrs,
-                       unit->persistent && (f->attrs & AttrUnique),
+                       persistent && (f->attrs & AttrUnique),
                        AttrPersistent);
     }
 
     for (auto& t : unit->typeAliases) {
       attribute_setter(t->attrs,
-                       unit->persistent && (t->attrs & AttrUnique),
+                       persistent && (t->attrs & AttrUnique),
                        AttrPersistent);
     }
   }
@@ -3567,9 +3573,9 @@ void Index::mark_persistent_classes_and_functions(php::Program& program) {
 
   for (auto& c : m_data->allClassInfos) {
     attribute_setter(c->cls->attrs,
-                     (c->cls->unit->persistent ||
-                      c->cls->parentName == s_Closure.get()) &&
                      (c->cls->attrs & AttrUnique) &&
+                     (persist(c->cls->unit) ||
+                      c->cls->parentName == s_Closure.get()) &&
                      check_persistent(*c),
                      AttrPersistent);
   }

@@ -4096,17 +4096,18 @@ and is_abstract_ft fty = match fty with
              * We can deal with this by hijacking the continuation that
              * calculates the SN.Typehints.this type *)
             let k_lhs _ = this_ty in
-            let ftys = ref [] in
+            let tel = ref [] and tuel = ref [] and ftys = ref [] in
             let env, method_, _method_decl, _ =
               obj_get_ ~is_method:true ~nullsafe:None ~obj_pos:pos
                 ~pos_params:(Some el) ~valkind:`other env ty1 CIparent m
               begin fun (env, fty, method_decl, _) ->
                 let fty = check_abstract_parent_meth (snd m) p fty in
                 let env = check_coroutine_call env fty in
-                let env, _tel, _tuel, method_ = call ~expected
+                let env, tel_, tuel_, method_ = call ~expected
                   ~method_call_info:(TR.make_call_info ~receiver_is_self:false
                     ~is_static:false this_ty (snd m)) ~fty_decl: None
                   p env fty el uel in
+                tel := tel_; tuel := tuel_;
                 ftys := fty :: !ftys;
                 env, method_, method_decl, None
               end
@@ -4117,7 +4118,7 @@ and is_abstract_ft fty = match fty with
               | [fty] -> fty
               | l -> (Reason.none, Tunion l) in
             make_call env (T.make_typed_expr fpos fty (T.Class_const (tcid, m)))
-              tal [] [] method_
+              tal !tel !tuel method_
         else
             let env, fty, _ =
               class_get ~is_method:true ~is_const:false ~explicit_tparams:tal env ty1 m CIparent in

@@ -79,7 +79,7 @@ type first_use_or_def = {
 
 type error_level = Minimum | Typical | Maximum
 
-type hhvm_compat_mode = NoCompat | HHVMCompat | SystemLibCompat
+type hhvm_compat_mode = NoCompat | HHVMCompat
 
 type context =
   { active_classish           : Syntax.t option
@@ -132,8 +132,6 @@ let make_env
     }
 
 and is_hhvm_compat env = env.hhvm_compat_mode <> NoCompat
-
-and is_systemlib_compat env = env.hhvm_compat_mode = SystemLibCompat
 
 let is_typechecker env = not env.codegen
 
@@ -3619,7 +3617,7 @@ let class_property_visibility_errors env node errors =
   | _ -> errors
 
 
-let mixed_namespace_errors env node parents namespace_type errors =
+let mixed_namespace_errors _env node parents namespace_type errors =
   match syntax node with
   | NamespaceBody { namespace_left_brace; namespace_right_brace; _ } ->
     let s = start_offset namespace_left_brace in
@@ -3648,13 +3646,6 @@ let mixed_namespace_errors env node parents namespace_type errors =
       match parents with
       | [{ syntax = SyntaxList _; _} as decls; { syntax = Script _; _}] ->
         let decls = syntax_to_list_no_separators decls in
-        let decls = if not (is_systemlib_compat env) then decls else
-          (* Drop everything before yourself *)
-          fst @@ List.fold_right decls
-            ~init:([], false)
-            ~f:(fun n (l, seen as acc) ->
-              if seen then acc else (n::l, phys_equal n node))
-        in
         let rec is_first l =
           match l with
           | { syntax = MarkupSection {markup_text; _}; _} :: rest

@@ -14,7 +14,7 @@ module WithSmartConstructors : functor (SmartConstructors : SmartConstructors.Sm
 ) -> sig
   type error_level = Minimum | Typical | Maximum
 
-  type hhvm_compat_mode = NoCompat | HHVMCompat | SystemLibCompat
+  type hhvm_compat_mode = NoCompat | HHVMCompat
 
   type env
   val make_env :

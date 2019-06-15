@@ -31,7 +31,6 @@ type lifted_awaits = {
 type env =
   { is_hh_file               : bool
   ; codegen                  : bool
-  ; systemlib_compat_mode    : bool
   ; php5_compat_mode         : bool
   ; elaborate_namespaces     : bool
   ; include_line_comments    : bool
@@ -79,7 +78,6 @@ type env =
 
 let make_env
   ?(codegen                  = false                   )
-  ?(systemlib_compat_mode    = false                   )
   ?(php5_compat_mode         = false                   )
   ?(elaborate_namespaces     = true                    )
   ?(include_line_comments    = false                   )
@@ -99,8 +97,7 @@ let make_env
   =
     let parser_options = ParserOptions.with_codegen parser_options codegen in
     { is_hh_file
-    ; codegen = codegen || systemlib_compat_mode
-    ; systemlib_compat_mode
+    ; codegen
     ; php5_compat_mode
     ; elaborate_namespaces
     ; include_line_comments
@@ -3605,11 +3602,8 @@ let lower_tree
       )
     in
     if env.codegen && not env.lower_coroutines then
-      let hhvm_compat_mode = if env.systemlib_compat_mode
-        then ParserErrors.SystemLibCompat
-        else ParserErrors.HHVMCompat in
       let error_env = ParserErrors.make_env tree
-        ~hhvm_compat_mode
+        ~hhvm_compat_mode:ParserErrors.HHVMCompat
         ~codegen:env.codegen
         ~parser_options:env.parser_options
       in

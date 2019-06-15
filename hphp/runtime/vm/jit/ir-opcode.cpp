@@ -950,11 +950,11 @@ bool opcodeMayRaise(Opcode opc) {
   case PackMagicArgs:
   case PairIsset:
   case ProfileArrayKind:
-  case ProfileDictOffset:
+  case ProfileDictAccess:
   case ProfileInstanceCheck:
-  case ProfileKeysetOffset:
+  case ProfileKeysetAccess:
   case ProfileMethod:
-  case ProfileMixedArrayOffset:
+  case ProfileMixedArrayAccess:
   case ProfileSubClsCns:
   case ProfileSwitchDest:
   case ProfileType:

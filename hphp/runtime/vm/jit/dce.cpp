@@ -631,12 +631,12 @@ bool canDCE(IRInstruction* inst) {
   case EmptyProp:
   case IssetProp:
   case ElemX:
-  case ProfileMixedArrayOffset:
+  case ProfileMixedArrayAccess:
   case CheckMixedArrayOffset:
   case CheckArrayCOW:
-  case ProfileDictOffset:
+  case ProfileDictAccess:
   case CheckDictOffset:
-  case ProfileKeysetOffset:
+  case ProfileKeysetAccess:
   case CheckKeysetOffset:
   case ElemArrayX:
   case ElemArrayD:

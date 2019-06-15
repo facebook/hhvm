@@ -33,7 +33,7 @@ namespace jit {
 /*
  * Target profile for known MixedArray or SetArray access offsets.
  */
-struct ArrayOffsetProfile {
+struct ArrayAccessProfile {
   /*
    * Choose the "hot position" for the profiled array access using
    * questionable heuristics.
@@ -50,8 +50,8 @@ struct ArrayOffsetProfile {
    * Combine `l' and `r', retaining the kNumTrackedSamples with the highest
    * counts.
    */
-  static void reduce(ArrayOffsetProfile& l,
-                     const ArrayOffsetProfile& r);
+  static void reduce(ArrayAccessProfile& l,
+                     const ArrayAccessProfile& r);
 
   std::string toString() const;
 

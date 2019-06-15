@@ -48,8 +48,8 @@ struct StringData;
 struct Class;
 
 namespace jit {
+struct ArrayAccessProfile;
 struct ArrayKindProfile;
-struct ArrayOffsetProfile;
 struct CallTargetProfile;
 struct ClsCnsProfile;
 struct DecRefProfile;
@@ -234,8 +234,8 @@ struct LSBMemoCache {
 using Symbol = boost::variant< ClsConstant
                              , StaticMethod
                              , StaticMethodF
+                             , Profile<jit::ArrayAccessProfile>
                              , Profile<jit::ArrayKindProfile>
-                             , Profile<jit::ArrayOffsetProfile>
                              , Profile<jit::CallTargetProfile>
                              , Profile<jit::ClsCnsProfile>
                              , Profile<jit::DecRefProfile>

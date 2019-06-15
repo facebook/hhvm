@@ -26,7 +26,7 @@
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-state.h"
-#include "hphp/runtime/vm/jit/array-offset-profile.h"
+#include "hphp/runtime/vm/jit/array-access-profile.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/type-profile.h"
@@ -36,13 +36,13 @@ namespace HPHP { namespace jit { namespace irgen {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Use profiling data from an ArrayOffsetProfile to conditionally optimize
+ * Use profiling data from an ArrayAccessProfile to conditionally optimize
  * the array access represented by `generic' as `direct'.
  *
  * For profiling translations, this generates the profiling instructions, then
- * falls back to `generic'.  If we can perform the optimization, this branches
- * on a CheckMixedArrayOffset/CheckDictOffset/CheckKeysetOffset to either
- * `direct' or `generic'; otherwise, we fall back to `generic'.
+ * falls back to `generic'.  If we can perform the likely-offset optimization,
+ * this branches on a CheckMixedArrayOffset/CheckDictOffset/CheckKeysetOffset
+ * to either `direct' or `generic'; otherwise, we fall back to `generic'.
  *
  * The callback function signatures should be:
  *
@@ -61,23 +61,23 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key,
   // optimize it away completely.
   if (arr->hasConstVal() && key->hasConstVal()) return generic(key);
 
-  static const StaticString s_DictOffset{"DictOffset"};
-  static const StaticString s_KeysetOffset{"KeysetOffset"};
-  static const StaticString s_MixedArrayOffset{"MixedArrayOffset"};
-  auto const profile = TargetProfile<ArrayOffsetProfile> {
+  static const StaticString s_DictAccess{"DictAccess"};
+  static const StaticString s_KeysetAccess{"KeysetAccess"};
+  static const StaticString s_MixedArrayAccess{"MixedArrayAccess"};
+  auto const profile = TargetProfile<ArrayAccessProfile> {
     env.context,
     env.irb->curMarker(),
-    is_dict ? s_DictOffset.get() :
-    is_keyset ? s_KeysetOffset.get() :
-    s_MixedArrayOffset.get()
+    is_dict ? s_DictAccess.get() :
+    is_keyset ? s_KeysetAccess.get() :
+    s_MixedArrayAccess.get()
   };
 
   if (profile.profiling()) {
     gen(
       env,
-      is_dict ? ProfileDictOffset :
-        is_keyset ? ProfileKeysetOffset :
-        ProfileMixedArrayOffset,
+      is_dict ? ProfileDictAccess :
+        is_keyset ? ProfileKeysetAccess :
+        ProfileMixedArrayAccess,
       ArrayAccessProfileData { profile.handle(), cow_check },
       arr,
       key

@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/member-operations.h"
 
-#include "hphp/runtime/vm/jit/array-offset-profile.h"
+#include "hphp/runtime/vm/jit/array-access-profile.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
@@ -315,83 +315,83 @@ ISSET_EMPTY_OBJ_PROP_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-inline void profileMixedArrayOffsetHelper(const ArrayData* ad, int64_t i,
-                                          ArrayOffsetProfile* prof,
+inline void profileMixedArrayAccessHelper(const ArrayData* ad, int64_t i,
+                                          ArrayAccessProfile* prof,
                                           bool cowCheck) {
   prof->update(ad, i, cowCheck);
 }
-inline void profileMixedArrayOffsetHelper(const ArrayData* ad,
+inline void profileMixedArrayAccessHelper(const ArrayData* ad,
                                           const StringData* sd,
-                                          ArrayOffsetProfile* prof,
+                                          ArrayAccessProfile* prof,
                                           bool cowCheck) {
   prof->update(ad, sd, cowCheck);
 }
 
-#define PROFILE_MIXED_ARRAY_OFFSET_HELPER_TABLE(m)  \
+#define PROFILE_MIXED_ARRAY_ACCESS_HELPER_TABLE(m)  \
   /* name                      keyType */           \
-  m(profileMixedArrayOffsetS,  KeyType::Str)        \
-  m(profileMixedArrayOffsetI,  KeyType::Int)        \
+  m(profileMixedArrayAccessS,  KeyType::Str)        \
+  m(profileMixedArrayAccessI,  KeyType::Int)        \
 
 #define X(nm, keyType)                              \
 inline void nm(const ArrayData* a,                  \
                key_type<keyType> k,                 \
-               ArrayOffsetProfile* p,               \
+               ArrayAccessProfile* p,               \
                bool cowCheck) {                     \
-  profileMixedArrayOffsetHelper(a, k, p, cowCheck); \
+  profileMixedArrayAccessHelper(a, k, p, cowCheck); \
 }
-PROFILE_MIXED_ARRAY_OFFSET_HELPER_TABLE(X)
+PROFILE_MIXED_ARRAY_ACCESS_HELPER_TABLE(X)
 #undef X
 
 //////////////////////////////////////////////////////////////////////
 
-inline void profileDictOffsetHelper(const ArrayData* ad, int64_t i,
-                                    ArrayOffsetProfile* prof,
+inline void profileDictAccessHelper(const ArrayData* ad, int64_t i,
+                                    ArrayAccessProfile* prof,
                                     bool cowCheck) {
   prof->update(ad, i, cowCheck);
 }
-inline void profileDictOffsetHelper(const ArrayData* ad, const StringData* sd,
-                                    ArrayOffsetProfile* prof,
+inline void profileDictAccessHelper(const ArrayData* ad, const StringData* sd,
+                                    ArrayAccessProfile* prof,
                                     bool cowCheck) {
   prof->update(ad, sd, cowCheck);
 }
 
-#define PROFILE_DICT_OFFSET_HELPER_TABLE(m)                 \
+#define PROFILE_DICT_ACCESS_HELPER_TABLE(m)                 \
   /* name                keyType  */                        \
-  m(profileDictOffsetS,  KeyType::Str)                      \
-  m(profileDictOffsetI,  KeyType::Int)                      \
+  m(profileDictAccessS,  KeyType::Str)                      \
+  m(profileDictAccessI,  KeyType::Int)                      \
 
 #define X(nm, keyType)                                      \
 inline void nm(const ArrayData* a, key_type<keyType> k,     \
-               ArrayOffsetProfile* p, bool cowCheck) {      \
-  profileDictOffsetHelper(a, k, p, cowCheck);               \
+               ArrayAccessProfile* p, bool cowCheck) {      \
+  profileDictAccessHelper(a, k, p, cowCheck);               \
 }
-PROFILE_DICT_OFFSET_HELPER_TABLE(X)
+PROFILE_DICT_ACCESS_HELPER_TABLE(X)
 #undef X
 
 //////////////////////////////////////////////////////////////////////
 
-inline void profileKeysetOffsetHelper(const ArrayData* ad, int64_t i,
-                                      ArrayOffsetProfile* prof,
+inline void profileKeysetAccessHelper(const ArrayData* ad, int64_t i,
+                                      ArrayAccessProfile* prof,
                                       bool cowCheck) {
   prof->update(ad, i, cowCheck);
 }
-inline void profileKeysetOffsetHelper(const ArrayData* ad, const StringData* sd,
-                                      ArrayOffsetProfile* prof,
+inline void profileKeysetAccessHelper(const ArrayData* ad, const StringData* sd,
+                                      ArrayAccessProfile* prof,
                                       bool cowCheck) {
   prof->update(ad, sd, cowCheck);
 }
 
-#define PROFILE_KEYSET_OFFSET_HELPER_TABLE(m)               \
+#define PROFILE_KEYSET_ACCESS_HELPER_TABLE(m)               \
   /* name                keyType  */                        \
-  m(profileKeysetOffsetS,  KeyType::Str)                    \
-  m(profileKeysetOffsetI,  KeyType::Int)                    \
+  m(profileKeysetAccessS,  KeyType::Str)                    \
+  m(profileKeysetAccessI,  KeyType::Int)                    \
 
 #define X(nm, keyType)                                      \
 inline void nm(const ArrayData* a, key_type<keyType> k,     \
-               ArrayOffsetProfile* p, bool cowCheck) {      \
-  profileKeysetOffsetHelper(a, k, p, cowCheck);             \
+               ArrayAccessProfile* p, bool cowCheck) {      \
+  profileKeysetAccessHelper(a, k, p, cowCheck);             \
 }
-PROFILE_KEYSET_OFFSET_HELPER_TABLE(X)
+PROFILE_KEYSET_ACCESS_HELPER_TABLE(X)
 #undef X
 
 //////////////////////////////////////////////////////////////////////

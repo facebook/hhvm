@@ -1412,11 +1412,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DictLastKey:
     return may_load_store(AEmpty, AEmpty);
 
-  case ProfileMixedArrayOffset:
+  case ProfileMixedArrayAccess:
   case CheckMixedArrayOffset:
   case CheckArrayCOW:
-  case ProfileDictOffset:
-  case ProfileKeysetOffset:
+  case ProfileDictAccess:
+  case ProfileKeysetAccess:
   case CheckDictOffset:
   case CheckKeysetOffset:
     return may_load_store(AHeapAny, AEmpty);

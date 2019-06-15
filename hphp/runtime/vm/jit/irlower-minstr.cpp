@@ -27,7 +27,7 @@
 
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
-#include "hphp/runtime/vm/jit/array-offset-profile.h"
+#include "hphp/runtime/vm/jit/array-access-profile.h"
 #include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
@@ -417,7 +417,7 @@ void cgEmptyElem(IRLS& env, const IRInstruction* i) {
 
 namespace {
 
-void implProfileHackArrayOffset(IRLS& env, const IRInstruction* inst,
+void implProfileHackArrayAccess(IRLS& env, const IRInstruction* inst,
                                 const CallSpec& target) {
   auto& v = vmain(env);
 
@@ -477,26 +477,20 @@ void implCheckMixedArrayLikeOffset(IRLS& env, const IRInstruction* inst,
 
 }
 
-void cgProfileMixedArrayOffset(IRLS& env, const IRInstruction* inst) {
-  BUILD_OPTAB(PROFILE_MIXED_ARRAY_OFFSET_HELPER_TABLE,
+void cgProfileMixedArrayAccess(IRLS& env, const IRInstruction* inst) {
+  BUILD_OPTAB(PROFILE_MIXED_ARRAY_ACCESS_HELPER_TABLE,
               getKeyType(inst->src(1)));
-  auto& v = vmain(env);
-
-  auto const extra = inst->extra<ProfileMixedArrayOffset>();
-  cgCallHelper(v, env, target, kVoidDest, SyncOptions::Sync,
-               argGroup(env, inst).ssa(0).ssa(1)
-               .addr(rvmtl(), safe_cast<int32_t>(extra->handle))
-               .imm(extra->cowCheck));
+  implProfileHackArrayAccess(env, inst, target);
 }
 
-void cgProfileDictOffset(IRLS& env, const IRInstruction* inst) {
-  BUILD_OPTAB(PROFILE_DICT_OFFSET_HELPER_TABLE, getKeyType(inst->src(1)));
-  implProfileHackArrayOffset(env, inst, target);
+void cgProfileDictAccess(IRLS& env, const IRInstruction* inst) {
+  BUILD_OPTAB(PROFILE_DICT_ACCESS_HELPER_TABLE, getKeyType(inst->src(1)));
+  implProfileHackArrayAccess(env, inst, target);
 }
 
-void cgProfileKeysetOffset(IRLS& env, const IRInstruction* inst) {
-  BUILD_OPTAB(PROFILE_KEYSET_OFFSET_HELPER_TABLE, getKeyType(inst->src(1)));
-  implProfileHackArrayOffset(env, inst, target);
+void cgProfileKeysetAccess(IRLS& env, const IRInstruction* inst) {
+  BUILD_OPTAB(PROFILE_KEYSET_ACCESS_HELPER_TABLE, getKeyType(inst->src(1)));
+  implProfileHackArrayAccess(env, inst, target);
 }
 
 void cgCheckMixedArrayOffset(IRLS& env, const IRInstruction* inst) {

@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/array-offset-profile.h"
+#include "hphp/runtime/vm/jit/array-access-profile.h"
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/mixed-array.h"
@@ -36,7 +36,7 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::string ArrayOffsetProfile::toString() const {
+std::string ArrayAccessProfile::toString() const {
   if (!m_init) return std::string("uninitialized");
   std::ostringstream out;
   for (auto const& line : m_hits) {
@@ -47,7 +47,7 @@ std::string ArrayOffsetProfile::toString() const {
 }
 
 folly::Optional<uint32_t>
-ArrayOffsetProfile::choose() const {
+ArrayAccessProfile::choose() const {
   Line hottest;
   uint32_t total = 0;
 
@@ -68,7 +68,7 @@ ArrayOffsetProfile::choose() const {
     : folly::none;
 }
 
-bool ArrayOffsetProfile::update(int32_t pos, uint32_t count) {
+bool ArrayAccessProfile::update(int32_t pos, uint32_t count) {
   if (!m_init) init();
 
   if (!validPos(pos)) {
@@ -94,7 +94,7 @@ bool ArrayOffsetProfile::update(int32_t pos, uint32_t count) {
   return false;
 }
 
-void ArrayOffsetProfile::update(const ArrayData* ad, int64_t i, bool cowCheck) {
+void ArrayAccessProfile::update(const ArrayData* ad, int64_t i, bool cowCheck) {
   // We shouldn't count accesses that would fail to be detected by the offset
   // optimization.
   if (cowCheck && ad->cowCheck()) {
@@ -109,7 +109,7 @@ void ArrayOffsetProfile::update(const ArrayData* ad, int64_t i, bool cowCheck) {
   update(pos, 1);
 }
 
-void ArrayOffsetProfile::update(const ArrayData* ad, const StringData* sd,
+void ArrayAccessProfile::update(const ArrayData* ad, const StringData* sd,
                                 bool cowCheck) {
   // We shouldn't count accesses that would fail to be detected by the offset
   // optimization.  These include cases that require a COW, and cases where we
@@ -133,8 +133,8 @@ void ArrayOffsetProfile::update(const ArrayData* ad, const StringData* sd,
   update(pos, 1);
 }
 
-void ArrayOffsetProfile::reduce(ArrayOffsetProfile& l,
-                                const ArrayOffsetProfile& r) {
+void ArrayAccessProfile::reduce(ArrayAccessProfile& l,
+                                const ArrayAccessProfile& r) {
   if (!r.m_init) return;
 
   Line scratch[2 * kNumTrackedSamples];
@@ -170,7 +170,7 @@ void ArrayOffsetProfile::reduce(ArrayOffsetProfile& l,
   }
 }
 
-void ArrayOffsetProfile::init() {
+void ArrayAccessProfile::init() {
   assertx(!m_init);
   for (auto i = 0; i < kNumTrackedSamples; ++i) {
     m_hits[i] = Line{};

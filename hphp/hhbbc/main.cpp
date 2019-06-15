@@ -410,11 +410,7 @@ void compile_repo() {
   std::unique_ptr<ArrayTypeTable::Builder> arrTable;
   VMWorker wp_thread(
     [&] {
-      hphp_session_init(Treadmill::SessionKind::CompileRepo);
-      SCOPE_EXIT {
-        hphp_context_exit();
-        hphp_session_exit();
-      };
+      HphpSession _{Treadmill::SessionKind::CompileRepo};
       Trace::BumpRelease bumper(Trace::hhbbc_time, -1, logging);
       whole_program(std::move(input.first), ueq, arrTable);
     }

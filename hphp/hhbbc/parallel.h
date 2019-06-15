@@ -79,13 +79,7 @@ void for_each(Items&& inputs, Func func) {
   for (auto worker = size_t{0}; worker < num_threads; ++worker) {
     workers.push_back(std::thread([&, worker] {
       try {
-        hphp_thread_init();
-        hphp_session_init(Treadmill::SessionKind::HHBBC);
-        SCOPE_EXIT {
-          hphp_context_exit();
-          hphp_session_exit();
-          hphp_thread_exit();
-        };
+        HphpSessionAndThread _{Treadmill::SessionKind::HHBBC};
 
         for (;;) {
           auto start = index.fetch_add(work_chunk);
@@ -134,13 +128,7 @@ auto map(Items&& inputs, Func func) -> std::vector<decltype(func(inputs[0]))> {
   for (auto worker = size_t{0}; worker < num_threads; ++worker) {
     workers.push_back(std::thread([&] {
       try {
-        hphp_thread_init();
-        hphp_session_init(Treadmill::SessionKind::HHBBC);
-        SCOPE_EXIT {
-          hphp_context_exit();
-          hphp_session_exit();
-          hphp_thread_exit();
-        };
+        HphpSessionAndThread _{Treadmill::SessionKind::HHBBC};
 
         for (;;) {
           auto start = index.fetch_add(work_chunk);

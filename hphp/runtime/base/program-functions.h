@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include <boost/program_options/parsers.hpp>
+#include <folly/Optional.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -143,6 +144,33 @@ void bump_counter_and_rethrow(bool isPsp);
 
 // Log the first time a unit is loaded
 void log_loaded_unit(const Unit* u);
+
+struct HphpSession {
+  explicit HphpSession(Treadmill::SessionKind sk) {
+    hphp_session_init(sk);
+  }
+  ~HphpSession() {
+    hphp_context_exit();
+    hphp_session_exit();
+  }
+  HphpSession(const HphpSession&) = delete;
+  HphpSession& operator=(const HphpSession&) = delete;
+};
+
+struct HphpSessionAndThread {
+  explicit HphpSessionAndThread(Treadmill::SessionKind sk) {
+    hphp_thread_init();
+    session.emplace(sk);
+  }
+  ~HphpSessionAndThread() {
+    session.clear();
+    hphp_thread_exit();
+  }
+  HphpSessionAndThread(const HphpSessionAndThread&) = delete;
+  HphpSessionAndThread& operator=(const HphpSessionAndThread&) = delete;
+ private:
+  folly::Optional<HphpSession> session;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -3524,13 +3524,7 @@ Index::Index(php::Program* program,
   find_mocked_classes(*m_data);
   auto const logging = Trace::moduleEnabledRelease(Trace::hhbbc_time, 1);
   m_data->compute_iface_vtables = std::thread([&] {
-      hphp_thread_init();
-      hphp_session_init(Treadmill::SessionKind::HHBBC);
-      SCOPE_EXIT {
-        hphp_context_exit();
-        hphp_session_exit();
-        hphp_thread_exit();
-      };
+      HphpSessionAndThread _{Treadmill::SessionKind::HHBBC};
       auto const enable =
         logging && !Trace::moduleEnabledRelease(Trace::hhbbc_time, 1);
       Trace::BumpRelease bumper(Trace::hhbbc_time, -1, enable);

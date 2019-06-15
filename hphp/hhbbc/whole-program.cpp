@@ -629,9 +629,11 @@ void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
       }
     }
     index->mark_persistent_classes_and_functions(*program);
+    index->join_iface_vtable_thread();
     final_pass(*index, *program, stats, emitUnit);
   } else {
     debug_dump_program(*index, *program);
+    index->join_iface_vtable_thread();
     parallel::for_each(
       program->units,
       [&] (const std::unique_ptr<php::Unit>& unit) {

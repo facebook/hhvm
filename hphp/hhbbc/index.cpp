@@ -950,7 +950,11 @@ struct Index::IndexData {
   explicit IndexData(Index* index) : m_index{index} {}
   IndexData(const IndexData&) = delete;
   IndexData& operator=(const IndexData&) = delete;
-  ~IndexData() = default;
+  ~IndexData() {
+    if (compute_iface_vtables.joinable()) {
+      compute_iface_vtables.join();
+    }
+  }
 
   Index* m_index;
 
@@ -1085,6 +1089,8 @@ struct Index::IndexData {
    */
   std::vector<std::pair<SString, SString>> pending_class_aliases;
   std::mutex pending_class_aliases_mutex;
+
+  std::thread compute_iface_vtables;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -2445,6 +2451,7 @@ void compute_subclass_list_rec(IndexData& index,
 }
 
 void compute_subclass_list(IndexData& index) {
+  trace_time _("compute subclass list");
   auto fixupTraits = false;
   for (auto& cinfo : index.allClassInfos) {
     if (cinfo->cls->attrs & AttrInterface) continue;
@@ -2455,6 +2462,12 @@ void compute_subclass_list(IndexData& index) {
         cinfo->usedTraits.size()) {
       fixupTraits = true;
       compute_subclass_list_rec(index, cinfo.get(), cinfo.get());
+    }
+    // Also add instantiable classes to their interface's subclassLists
+    if (cinfo->cls->attrs & (AttrTrait | AttrEnum | AttrAbstract)) continue;
+    for (auto& ipair : cinfo->implInterfaces) {
+      auto impl = const_cast<ClassInfo*>(ipair.second);
+      impl->subclassList.push_back(cinfo.get());
     }
   }
 
@@ -2817,8 +2830,6 @@ void compute_iface_vtables(IndexData& index) {
 
     for (auto& ipair : cinfo->implInterfaces) {
       ++iface_uses[ipair.second->cls];
-      auto impl = const_cast<ClassInfo*>(ipair.second);
-      impl->subclassList.push_back(cinfo.get());
       for (auto& jpair : cinfo->implInterfaces) {
         cg.add(ipair.second->cls, jpair.second->cls);
       }
@@ -3511,7 +3522,21 @@ Index::Index(php::Program* program,
   mark_no_override_methods(*m_data);    // uses AttrUnique
   find_magic_methods(*m_data);          // uses the subclass lists
   find_mocked_classes(*m_data);
-  compute_iface_vtables(*m_data);
+  auto const logging = Trace::moduleEnabledRelease(Trace::hhbbc_time, 1);
+  m_data->compute_iface_vtables = std::thread([&] {
+      hphp_thread_init();
+      hphp_session_init(Treadmill::SessionKind::HHBBC);
+      SCOPE_EXIT {
+        hphp_context_exit();
+        hphp_session_exit();
+        hphp_thread_exit();
+      };
+      auto const enable =
+        logging && !Trace::moduleEnabledRelease(Trace::hhbbc_time, 1);
+      Trace::BumpRelease bumper(Trace::hhbbc_time, -1, enable);
+      compute_iface_vtables(*m_data);
+    }
+  );
   define_func_families(*m_data);        // AttrNoOverride, iface_vtables,
                                         // subclass_list
 
@@ -5146,6 +5171,12 @@ bool Index::lookup_class_init_might_raise(Context ctx, res::Class cls) const {
       return false;
     }
   );
+}
+
+void Index::join_iface_vtable_thread() const {
+  if (m_data->compute_iface_vtables.joinable()) {
+    m_data->compute_iface_vtables.join();
+  }
 }
 
 Slot

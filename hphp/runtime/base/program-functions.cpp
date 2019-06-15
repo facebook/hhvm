@@ -2342,10 +2342,6 @@ void hphp_process_init() {
   onig_init();
   BootStats::mark("onig_init");
 
-  // simple xml also needs one time init
-  xmlInitParser();
-  BootStats::mark("xmlInitParser");
-
   g_context.getCheck();
   // Some event handlers are registered during the startup process.
   g_context->acceptRequestEventHandlers(true);

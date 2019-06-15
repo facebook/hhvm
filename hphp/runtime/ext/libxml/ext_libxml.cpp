@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/root-map.h"
@@ -27,8 +28,7 @@
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
-
-#include <folly/FBVector.h>
+#include "hphp/util/alloc.h"
 
 #include <libxml/parserInternals.h>
 #include <libxml/tree.h>
@@ -40,15 +40,14 @@
 #include <libxml/xmlschemas.h>
 #endif
 
-#include <memory>
-#include <cstring>
+#include <folly/FBVector.h>
 
 TRACE_SET_MOD(libxml);
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct xmlErrorVec : folly::fbvector<xmlError> {
+struct xmlErrorVec : folly::fbvector<xmlError, LocalAllocator<xmlError>> {
   ~xmlErrorVec() {
     clearErrors();
   }
@@ -70,25 +69,25 @@ struct LibXmlRequestData final : RequestEventHandler {
   void requestInit() override {
     m_use_error = false;
     m_suppress_error = false;
-    m_errors = xmlErrorVec();
     m_entity_loader_disabled = false;
     m_streams_context = nullptr;
     m_streams.reset();
+    m_errors.reset();
   }
 
   void requestShutdown() override {
     m_use_error = false;
-    m_errors = xmlErrorVec();
     m_streams_context = nullptr;
     m_streams.reset();
+    m_errors.reset();
   }
 
   bool m_entity_loader_disabled;
   bool m_suppress_error;
   bool m_use_error;
-  xmlErrorVec m_errors;
   req::ptr<StreamContext> m_streams_context;
   RootMap<File> m_streams;
+  xmlErrorVec m_errors;
 };
 
 IMPLEMENT_STATIC_REQUEST_LOCAL(LibXmlRequestData, rl_libxml_request_data);
@@ -483,7 +482,7 @@ struct LibXmlDeferredTrees final {
     // they need to be dealt with now. We can't just walk the list because some
     // of these nodes may actually be in the same tree so first find the ones
     // that are definitely orphaned (and therefore the roots of their trees)
-    std::vector<xmlNodePtr> toFree;
+    req::vector<xmlNodePtr> toFree;
     for (auto par : m_refCounts) {
       if (isOrphanedRoot(par.first)) toFree.push_back(par.first);
     }
@@ -547,7 +546,7 @@ private:
     return reinterpret_cast<XMLNodeData*>(node->_private)->m_lastSeenRoot;
   }
 
-  req::fast_map<xmlNodePtr,uint32_t> m_refCounts;
+  req::fast_map<xmlNodePtr,uint32_t, pointer_hash<xmlNode>> m_refCounts;
 };
 RDS_LOCAL(LibXmlDeferredTrees, LibXmlDeferredTrees::rl_libxml_trees);
 
@@ -826,6 +825,45 @@ struct LibXMLExtension final : Extension {
     }
 
 } s_libxml_extension;
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+void* checked_local_malloc(size_t size) {
+  if (!size) return nullptr;
+  return local_malloc(size);
+}
+
+void checked_local_free(void* ptr) {
+  if (ptr) local_free(ptr);
+}
+
+void* checked_local_realloc(void* ptr, size_t size) {
+  if (!size) {
+    checked_local_free(ptr);
+    return nullptr;
+  }
+  return local_realloc(ptr, size);
+}
+
+char* local_strdup(const char* str) {
+  auto const size = strlen(str) + 1;
+  auto ret = local_malloc(size);
+  return (char*)memcpy(ret, str, size);
+}
+
+void processInitLibXML() {
+  // Use request-local allocator functions.
+  xmlMemSetup(checked_local_free,
+              checked_local_malloc,
+              checked_local_realloc,
+              local_strdup);
+  xmlInitParser();
+}
+
+InitFiniNode libxmlInit(processInitLibXML,
+                        InitFiniNode::When::ProcessPreInit);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

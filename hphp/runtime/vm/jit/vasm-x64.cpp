@@ -1150,6 +1150,12 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
     fun(unit);
   };
 
+    auto const doPass1 = [&]
+      (const char *name, const auto& arg, auto fun) {
+    rqtrace::EventGuard trace{name};
+    fun(unit, arg);
+  };
+
   doPass("VOPT_NOP",    removeTrivialNops);
   doPass("VOPT_PHI",    optimizePhis);
   doPass("VOPT_BRANCH", fuseBranches);
@@ -1175,10 +1181,7 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
     doPass("VOPT_FOLD_IMM", foldImms<x64::ImmFolder>);
   }
 
-  {
-    rqtrace::EventGuard trace{"VOPT_COPY"};
-    optimizeCopies(unit, abi);
-  }
+  doPass1("VOPT_COPY", abi, optimizeCopies);
 
   if (unit.needsRegAlloc()) {
     doPass("VOPT_DCE", removeDeadCode);
@@ -1189,14 +1192,12 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
           unit.context &&
           (unit.context->kind == TransKind::Optimize ||
            unit.context->kind == TransKind::OptPrologue)) {
-        rqtrace::EventGuard trace{"VOPT_GRAPH_COLOR"};
-        allocateRegistersWithGraphColor(unit, abi);
+        doPass1("VOPT_GRAPH_COLOR", abi, allocateRegistersWithGraphColor);
       } else {
-        rqtrace::EventGuard trace{"VOPT_XLS"};
-        allocateRegistersWithXLS(unit, abi);
+        doPass1("VOPT_XLS", abi, allocateRegistersWithXLS);
       }
-      rqtrace::EventGuard trace{"VOPT_SF_PEEPHOLES"};
-      sfPeepholes(unit, abi);
+      doPass1("VOPT_SF_PEEPHOLES", abi, sfPeepholes);
+      doPass("VOPT_POST_RA_SIMPLIFY", postRASimplify);
     }
   }
   if (unit.blocks.size() > 1) {

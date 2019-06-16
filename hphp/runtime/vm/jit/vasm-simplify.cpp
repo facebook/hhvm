@@ -284,6 +284,11 @@ bool simplify(Env&, const Inst& /*inst*/, Vlabel /*b*/, size_t /*i*/) {
   return false;
 }
 
+template <typename Inst>
+bool psimplify(Env&, const Inst& /*inst*/, Vlabel /*b*/, size_t /*i*/) {
+  return false;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 /*
  * Narrow compares
@@ -1534,6 +1539,91 @@ bool simplify(Env& env, const movzlq& inst, Vlabel b, size_t i) {
   });
 }
 
+struct regWidth {
+  explicit regWidth(Vreg r) { givenReg = r; };
+  template<class T> void imm (T) {}
+  template<class T> void def (T) {}
+  template<class T> void use (T) {}
+  void use (Vptr ptr) {
+    if (givenReg == ptr.base) {
+      has_vptr = true;
+      w = Width::Quad;
+    }
+    if (givenReg == ptr.index) {
+      has_vptr = true;
+      w = Width::Quad;
+    }
+  }
+  void use (Vreg8 r) { if (!has_vptr && r == givenReg) w = Width::Byte; }
+  void use (Vreg16 r) { if (!has_vptr && r == givenReg) w = Width::Word; }
+  void use (Vreg32 r) { if (!has_vptr && r == givenReg) w = Width::Long; }
+  void use (Vreg64 r) { if (r == givenReg) w = Width::Quad; }
+  void use (Vreg r) { if (r == givenReg) w = Width::Quad; }
+  void use (RegXMM r) { if (r == givenReg) w = Width::Octa; }
+
+  template<class T> void across (T) {}
+  template<class T, class H> void useHint(T s,H d) { use(s); }
+  template<class T, class H> void defHint(T,H) {}
+  template<Width w> void use(Vp<w>& m) { use(static_cast<Vptr>(m)); }
+
+  Vreg givenReg;
+  Width w {Width::None};
+  bool has_vptr {false};
+};
+
+Width usedWidth(Vreg reg, Vinstr inst) {
+  regWidth v{reg};
+  visitOperands(inst,v);
+  if (v.has_vptr) return Width::Quad;
+  if (v.w != Width::None) return v.w;
+  return Width::None;
+}
+
+// change  loadb into a zero extending load of the dest reg is used as a wide
+// reg.  Do it only if there is a use of the reg is a wider width.
+// When there is an assignment to a byte reg followed by a use of the full reg,
+// the HW has is merge the new 8 bits with the old 24 / 56 bits, which is a penalty
+// in all HW we use. The magnitude of the penalty is HW specific, and currently it is not
+// huge. Most HW does it via an injection of a micro operation.
+// If there is no wide use then a loadb is preferable to a loadzx because the encoding is
+// smaller. So only do this if we can find the wide use.
+// If there is another def after the loadb then it eliminates the penalty, and therefore
+// we avoid the transformation.
+// Do not do this is there already is a wide store to this reg.
+// register allocation generates register copies and creates opportunities for
+// this optimization.
+
+bool psimplify(Env& env, const loadb& vldb, Vlabel b, size_t i) {
+  bool found_wide_use = false;
+  bool found_def = false;
+  Vreg wide_reg;
+  for (auto x = i + 1; x < env.unit.blocks[b].code.size(); ++x) {
+    const auto xinst = env.unit.blocks[b].code[x];
+    if (Vinstr::phpret == xinst.op) continue;
+    visitDefs(env.unit, xinst, [&] (Vreg r) {
+      if (r == vldb.d) {
+        found_def = true;
+        return;
+      }
+    });
+    if (found_def) return false;
+    visitUses(env.unit, xinst, [&] (Vreg r) {
+      if (r == vldb.d) {
+        Width w = usedWidth(r, xinst);
+        if ((Width::Long == w) || (Width::Quad == w)) {
+          wide_reg = r;
+          found_wide_use = true;
+        }
+      }
+    });
+    if (found_wide_use) {
+      auto const zinst = loadzbl { vldb.s, wide_reg };
+      return vmodify(env.unit, b, i, [&] (Vout& v) { v << zinst; return 1; } );
+    }
+  }
+  return false;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 /*
  * Pushes and pops.
@@ -1667,6 +1757,21 @@ bool simplify(Env& env, Vlabel b, size_t i) {
   not_reached();
 }
 
+bool psimplify(Env& env, Vlabel b, size_t i) {
+  assertx(i <= env.unit.blocks[b].code.size());
+  auto& inst = env.unit.blocks[b].code[i];
+
+  switch (inst.op) {
+#define O(name, ...)    \
+    case Vinstr::name:  \
+      return psimplify(env, inst.name##_, b, i); \
+
+    VASM_OPCODES
+#undef O
+  }
+  not_reached();
+}
+
 /*
  * Perform architecture-specific peephole simplification.
  */
@@ -1714,6 +1819,32 @@ void simplify(Vunit& unit) {
   };
 
   printUnit(kVasmSimplifyLevel, "after vasm simplify", unit);
+}
+
+/*
+ * Peephole simplification pass after register allocation, for opportunities
+ * that either require physical regs or are created by register allocator.
+ */
+void postRASimplify(Vunit& unit) {
+  assertx(check(unit));
+  auto& blocks = unit.blocks;
+
+  Env env { unit };
+  auto const labels = sortBlocks(unit);
+
+  // The simplify() implementations may allocate scratch blocks and modify
+  // instruction streams, so we cannot use standard iterators here.
+  for (auto const b : labels) {
+    for (size_t i = 0; i < blocks[b].code.size(); ++i) {
+      // Simplify at this index until no changes are made.
+      while (psimplify(env, b, i)) {
+        // Stop if we simplified away the tail of the block.
+        if (i >= blocks[b].code.size()) break;
+      }
+    }
+  };
+
+  printUnit(kVasmSimplifyLevel, "after vasm postRASimplify", unit);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

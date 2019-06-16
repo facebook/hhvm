@@ -1,5 +1,5 @@
 
-Warning: fstat() expects parameter 1 to be resource, object given in %s/hphp/test/zend/good/ext/standard/tests/file/fstat_variation6.php on line 34
+Warning: fstat() expects parameter 1 to be resource, object given in %s/fstat_variation6.php on line 34
 
-Warning: fstat() expects parameter 1 to be resource, object given in %s/hphp/test/zend/good/ext/standard/tests/file/fstat_variation6.php on line 34
+Warning: fstat() expects parameter 1 to be resource, object given in %s/fstat_variation6.php on line 34
 ===DONE===

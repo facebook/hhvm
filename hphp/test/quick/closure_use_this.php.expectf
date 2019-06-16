@@ -1,2 +1,2 @@
 
-Fatal error: Cannot use $this as lexical variable in %s/hphp/test/quick/closure_use_this.php on line 3
+Fatal error: Cannot use $this as lexical variable in %s/closure_use_this.php on line 3

@@ -3,4 +3,4 @@
 45--
 --
 
-Warning: unlink() expects parameter 1 to be string, resource given in %s/hphp/test/zend/good/ext/standard/tests/streams/stream_get_contents_001.php on line 12
+Warning: unlink() expects parameter 1 to be string, resource given in %s/stream_get_contents_001.php on line 12

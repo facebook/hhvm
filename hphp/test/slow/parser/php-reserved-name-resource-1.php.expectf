@@ -1,1 +1,1 @@
-Fatal error: Cannot use 'Resource' as class name as it is reserved in %s/hphp/test/slow/parser/php-reserved-name-resource-1.php on line 6
+Fatal error: Cannot use 'Resource' as class name as it is reserved in %s/php-reserved-name-resource-1.php on line 6

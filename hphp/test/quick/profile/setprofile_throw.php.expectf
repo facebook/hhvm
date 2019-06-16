@@ -17,13 +17,13 @@ __ctor 14
 __ctor 15
 signal throwing
 
-Warning: signal handler 'signal_thrower' threw exception 'Exception' with message 'Sig exception' in %s/hphp/test/quick/profile/setprofile_throw.php:19
+Warning: signal handler 'signal_thrower' threw exception 'Exception' with message 'Sig exception' in %s/setprofile_throw.php:19
 Stack trace:
 #0 (): signal_thrower()
-#1 %s/hphp/test/quick/profile/setprofile_throw.php(48): posix_kill()
-#2 %s/hphp/test/quick/profile/setprofile_throw.php(92): func_entry()
-#3 %s/hphp/test/quick/profile/setprofile_throw.php(96): main()
-#4 {main} in %s/hphp/test/quick/profile/setprofile_throw.php on line 48
+#1 %s/setprofile_throw.php(48): posix_kill()
+#2 %s/setprofile_throw.php(92): func_entry()
+#3 %s/setprofile_throw.php(96): main()
+#4 {main} in %s/setprofile_throw.php on line 48
 __ctor 1
 __ctor 2
 __ctor 3
@@ -41,10 +41,10 @@ __ctor 14
 __ctor 15
 signal throwing
 
-Warning: signal handler 'signal_thrower' threw exception 'Exception' with message 'Sig exception' in %s/hphp/test/quick/profile/setprofile_throw.php:19
+Warning: signal handler 'signal_thrower' threw exception 'Exception' with message 'Sig exception' in %s/setprofile_throw.php:19
 Stack trace:
 #0 (): signal_thrower()
-#1 %s/hphp/test/quick/profile/setprofile_throw.php(74): posix_kill()
-#2 %s/hphp/test/quick/profile/setprofile_throw.php(93): func_backward()
-#3 %s/hphp/test/quick/profile/setprofile_throw.php(96): main()
-#4 {main} in %s/hphp/test/quick/profile/setprofile_throw.php on line 74
+#1 %s/setprofile_throw.php(74): posix_kill()
+#2 %s/setprofile_throw.php(93): func_backward()
+#3 %s/setprofile_throw.php(96): main()
+#4 {main} in %s/setprofile_throw.php on line 74

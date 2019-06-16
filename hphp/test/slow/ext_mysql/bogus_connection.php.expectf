@@ -1,7 +1,7 @@
-Warning: mysql_next_result() expects parameter 1 to be resource, integer given in %s/hphp/test/slow/ext_mysql/bogus_connection.php on line 7
+Warning: mysql_next_result() expects parameter 1 to be resource, integer given in %s/bogus_connection.php on line 7
 
-Warning: mysql_fetch_result() expects parameter 1 to be resource, integer given in %s/hphp/test/slow/ext_mysql/bogus_connection.php on line 8
+Warning: mysql_fetch_result() expects parameter 1 to be resource, integer given in %s/bogus_connection.php on line 8
 
-Warning: mysql_more_results() expects parameter 1 to be resource, integer given in %s/hphp/test/slow/ext_mysql/bogus_connection.php on line 9
+Warning: mysql_more_results() expects parameter 1 to be resource, integer given in %s/bogus_connection.php on line 9
 
-Warning: mysql_multi_query() expects parameter 2 to be resource, integer given in %s/hphp/test/slow/ext_mysql/bogus_connection.php on line 10
+Warning: mysql_multi_query() expects parameter 2 to be resource, integer given in %s/bogus_connection.php on line 10

@@ -1,6 +1,6 @@
 int(16)
-string(%d) "%s/hphp/test/slow/phpism/undefined_const5.php"
-string(%d) "%s/hphp/test/slow/phpism"
+string(%d) "%s/phpism/undefined_const5.php"
+string(%d) "%s/phpism"
 string(8) "Foo\main"
 string(3) "Foo"
 string(5) "hackc"

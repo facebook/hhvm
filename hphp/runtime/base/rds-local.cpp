@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/rds-local.h"
 
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/util/alloc.h"
 
 namespace HPHP {
 namespace rds {
@@ -72,7 +73,7 @@ void init() {
     detail::rl_hotSection.rdslocal_base =
       handleToPtr<void, Mode::Local>(detail::RDSLocalNode::s_RDSLocalsBase);
   } else {
-    detail::rl_hotSection.rdslocal_base = malloc(detail::s_usedbytes);
+    detail::rl_hotSection.rdslocal_base = local_malloc(detail::s_usedbytes);
   }
   always_assert(detail::rl_hotSection.rdslocal_base);
   always_assert((uintptr_t)detail::rl_hotSection.rdslocal_base % 16 == 0);
@@ -97,7 +98,7 @@ void fini(bool inrds) {
   }
   detail::iterate([](detail::RDSLocalNode* p) { p->fini(); });
   if (!inrds) {
-    free(detail::rl_hotSection.rdslocal_base);
+    local_free(detail::rl_hotSection.rdslocal_base);
   }
   detail::rl_hotSection.rdslocal_base = nullptr;
 }

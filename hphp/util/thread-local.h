@@ -23,6 +23,7 @@
 
 #include <folly/String.h>
 
+#include "hphp/util/alloc.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/type-scan.h"
 
@@ -199,14 +200,18 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// ThreadLocal allocates by calling new without parameters and frees by calling
-// delete
+// ThreadLocal allocates in the local arena, created using local_malloc()
+// followed by placement new and destroyed by calling destructor followed by
+// local_free() delete.
 
 template<typename T>
 void ThreadLocalOnThreadExit(void * p) {
-  ThreadLocalNode<T> * pNode = (ThreadLocalNode<T>*)p;
-  delete pNode->m_p;
-  pNode->m_p = nullptr;
+  auto pNode = (ThreadLocalNode<T>*)p;
+  if (pNode->m_p) {
+    pNode->m_p->~T();
+    local_free(pNode->m_p);
+    pNode->m_p = nullptr;
+  }
 }
 
 /**
@@ -235,8 +240,11 @@ struct ThreadLocalImpl {
   bool isNull() const { return m_node.m_p == nullptr; }
 
   void destroy() {
-    delete m_node.m_p;
-    m_node.m_p = nullptr;
+    if (m_node.m_p) {
+      m_node.m_p->~T();
+      local_free(m_node.m_p);
+      m_node.m_p = nullptr;
+    }
   }
 
   void nullOut() {
@@ -268,7 +276,7 @@ void ThreadLocalImpl<Check,T>::create() {
     ThreadLocalManager::PushTop(m_node);
   }
   assert(m_node.m_p == nullptr);
-  m_node.m_p = new T();
+  m_node.m_p = new (local_malloc(sizeof(T))) T();
 }
 
 template<typename T> using ThreadLocal = ThreadLocalImpl<true,T>;

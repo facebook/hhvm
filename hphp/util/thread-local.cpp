@@ -36,7 +36,8 @@ namespace HPHP {
 void ThreadLocalManager::OnThreadExit(void* p) {
   auto list = getList(p);
   p = list->head;
-  delete list;
+  list->~ThreadLocalList();
+  local_free(list);
   while (p != nullptr) {
     auto* pNode = static_cast<ThreadLocalNode<void>*>(p);
     if (pNode->m_on_thread_exit_fn) {
@@ -62,7 +63,8 @@ void ThreadLocalManager::PushTop(void* nodePtr, uint32_t nodeSize,
   auto key = GetManager().m_key;
   auto list = getList(pthread_getspecific(key));
   if (UNLIKELY(!list)) {
-    ThreadLocalSetValue(key, list = new ThreadLocalList);
+    list = new (local_malloc(sizeof(ThreadLocalList))) ThreadLocalList;
+    ThreadLocalSetValue(key, list);
   }
   node.m_next = list->head;
   node.m_size = nodeSize;

@@ -44,6 +44,7 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
   using AtomicInt = uint64_t;
 
   struct Hasher;
+  struct TbbHashCompare;
 
   /*
    * Used for SrcKeys corresponding to the prologue which precedes a function
@@ -178,6 +179,13 @@ struct SrcKey::Hasher {
 };
 
 using SrcKeySet = hphp_hash_set<SrcKey,SrcKey::Hasher>;
+
+///////////////////////////////////////////////////////////////////////////////
+
+struct SrcKey::TbbHashCompare {
+  static size_t hash(const SrcKey& sk) { return hash_int64(sk.toAtomicInt()); }
+  static bool equal(const SrcKey& a, const SrcKey& b) { return a == b; }
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 

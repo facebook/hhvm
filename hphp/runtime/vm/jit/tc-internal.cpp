@@ -110,7 +110,8 @@ static InitFiniNode s_func_counters_reinit(
   InitFiniNode::When::PostRuntimeOptions, "s_func_counters reinit"
 );
 
-using SrcKeyCounters = tbb::concurrent_hash_map<SrcKey::AtomicInt, uint32_t>;
+using SrcKeyCounters = tbb::concurrent_hash_map<SrcKey, uint32_t,
+                                                SrcKey::TbbHashCompare>;
 
 static SrcKeyCounters s_sk_counters;
 
@@ -144,10 +145,11 @@ bool shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
     s_func_counters.ensureSize(funcId + 1);
     s_func_counters[funcId].fetch_add(1, std::memory_order_relaxed);
     uint32_t skCount = 1;
-    SrcKeyCounters::accessor acc;
-    auto const key = sk.toAtomicInt();
-    if (!s_sk_counters.insert(acc, SrcKeyCounters::value_type(key, 1))) {
-      skCount = ++acc->second;
+    {
+      SrcKeyCounters::accessor acc;
+      if (!s_sk_counters.insert(acc, SrcKeyCounters::value_type(sk, 1))) {
+        skCount = ++acc->second;
+      }
     }
     auto const funcThreshold = isLive ? RuntimeOption::EvalJitLiveThreshold
                                       : RuntimeOption::EvalJitProfileThreshold;

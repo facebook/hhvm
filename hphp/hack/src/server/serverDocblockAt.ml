@@ -127,7 +127,19 @@ let go_locate_symbol
   | None -> None
   | Some (relpath, line, column) ->
     let filename = Relative_path.to_absolute relpath in
-    let base_class_name = None in
+
+    (* Determine base class properly *)
+    let base_class_name = if kind = SearchUtils.SI_Class then begin
+      let ns_name = Utils.add_ns symbol in
+      match Decl_provider.get_class ns_name with
+      | None -> None
+      | Some class_info -> Some (Cls.name class_info)
+
+    (* Anything other than a class doesn't have an ancestor *)
+    end else None
+    in
+
+    (* Here are the results *)
     Some { DocblockService.
       dbs_filename = filename;
       dbs_line = line;

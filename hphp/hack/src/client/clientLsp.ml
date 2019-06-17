@@ -1212,7 +1212,19 @@ let do_completionItemResolve
       (filename, line, column, base_class)
     in
     let%lwt contents = rpc conn ref_unblocked_time command in
-    Lwt.return { params with Completion.documentation = contents }
+    Lwt.return
+    {
+      params with
+      Completion.documentation = contents;
+      Completion.data = Some (Hh_json.JSON_Object [
+        ("filename", (Hh_json.JSON_String filename));
+        ("line", (Hh_json.JSON_Number (string_of_int line)));
+        ("char", (Hh_json.JSON_Number (string_of_int column)));
+        ("base_class", match base_class with
+        | None -> Hh_json.JSON_Null
+        | Some s -> Hh_json.JSON_String s);
+      ]);
+    }
 
 let do_workspaceSymbol
     (conn: server_conn)

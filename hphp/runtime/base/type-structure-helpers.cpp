@@ -854,7 +854,7 @@ bool checkTypeStructureMatchesCellImpl(
     case TypeStructure::Kind::T_darray:
     case TypeStructure::Kind::T_varray:
     case TypeStructure::Kind::T_varray_or_darray:
-      result = !isOrAsOp && isArrayLikeType(type);
+      result = !isOrAsOp && isArrayType(type);
       break;
     case TypeStructure::Kind::T_unresolved:
     case TypeStructure::Kind::T_typeaccess:

@@ -474,6 +474,7 @@ function get_options($argv) {
     'color' => 'c',
     'no-fun' => '',
     'cores' => '',
+    'dump-tc' => '',
     'no-clean' => '',
     'list-tests' => '',
     '*relocate:' => '',
@@ -917,6 +918,11 @@ function hhvm_cmd_impl($options, $config, ...$extra_args) {
 
     if (!isset($options['cores'])) {
       $args[] = '-vResourceLimit.CoreFileSize=0';
+    }
+
+    if (isset($options['dump-tc'])) {
+      $args[] = '-vEval.DumpIR=1';
+      $args[] = '-vEval.DumpTC=1';
     }
 
     if (isset($options['hh_single_type_check'])) {

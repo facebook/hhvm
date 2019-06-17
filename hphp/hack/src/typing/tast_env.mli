@@ -182,12 +182,6 @@ val can_subtype: env -> Tast.ty -> Tast.ty -> bool
 val simplify_unions: env -> Tast.ty -> env * Tast.ty
 (** Simplify unions in a type. *)
 
-val is_stringish: ?allow_mixed:bool -> env -> Tast.ty -> bool
-(** Return {true} when the given type can be used in a context where string is
-    required after resolving unbound type variables in the type (if any).
-    If {allow_mixed} is {true}, then mixed, nonnull, and abstract types with no
-    known concrete supertypes are considered valid. *)
-
 val referenced_typeconsts :
   env -> Aast.hint -> Aast.sid list -> (string * string * Pos.t) list
 (** Returns (class_name, tconst_name, tconst_reference_position) for each type

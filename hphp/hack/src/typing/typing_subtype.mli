@@ -61,7 +61,6 @@ val sub_type :
 
 (** Make a type a subtype of string. *)
 val sub_string :
-  ?allow_mixed:bool ->
   Pos.t ->
   Env.env ->
   locl ty ->

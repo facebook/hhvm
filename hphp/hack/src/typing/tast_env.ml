@@ -106,12 +106,6 @@ let assert_subtype p reason env ty_have ty_expect =
 let can_subtype env ty_sub ty_super =
   Typing_subtype.is_sub_type_LEGACY_DEPRECATED env ty_sub ty_super
 
-let is_stringish ?allow_mixed env ty =
-  Errors.ignore_ (fun () ->
-    Errors.try_
-      (fun () -> let _ = Typing_subtype.sub_string ?allow_mixed Pos.none env ty in true)
-      (fun _ -> false))
-
 let referenced_typeconsts env root ids =
   let root = hint_to_ty env root in
   let ety_env = {(Typing_phase.env_with_self env) with

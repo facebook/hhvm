@@ -7,7 +7,9 @@
  *
 *)
 
+open Core_kernel
 open Tast
+open Typing_defs
 
 module Env = Tast_env
 module TCO = TypecheckerOptions
@@ -33,6 +35,25 @@ let check__toString m =
     | None -> ()
   end
 
+let rec is_stringish env ty =
+  let env, ety = Env.expand_type env ty in
+  match snd ety with
+  | Toption ty' -> is_stringish env ty'
+  | Tunion tyl -> List.for_all ~f:(is_stringish env) tyl
+  | Tabstract (AKenum _, _) ->
+    (* Enums are either ints or strings, and so can always be used in a
+     * stringish context *)
+    true
+  | Tabstract _ ->
+    let env, tyl = Env.get_concrete_supertypes env ty in
+    List.for_all ~f:(is_stringish env) tyl
+  | Tclass (x, _, _) ->
+    Option.is_none (Env.get_class env (snd x))
+  | Tany | Terr | Tdynamic | Tobject | Tnonnull | Tprim _ ->
+    true
+  | Tarraykind _ | Tvar _ | Ttuple _ | Tanon (_, _) | Tfun _ | Tshape _ ->
+    false
+
 let handler = object
   inherit Tast_visitor.handler_base
 
@@ -40,8 +61,7 @@ let handler = object
     match expr with
     | Cast ((_, Hprim Tstring), te) when should_enforce env ->
       let ((_, ty), _) = te in
-      (* Whitelist mixed/nonnull *)
-      if not (Env.is_stringish env ty ~allow_mixed:true)
+      if not (is_stringish env ty)
       then Errors.string_cast p (Env.print_ty env ty)
     | _ -> ()
 

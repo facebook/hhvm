@@ -1913,8 +1913,7 @@ and try_union env ty tyl =
       try_union env t tyl'
     | _, _ -> ty' :: try_union env ty tyl'
 
-let rec sub_string
-  ?(allow_mixed = false)
+let sub_string
   (p : Pos.Map.key)
   (env : Env.env)
   (ty2 : locl ty) : Env.env =
@@ -1925,85 +1924,33 @@ let rec sub_string
    * We test against ?(arraykey | bool | float | resource | object | dynamic |
    * FormatString<T> | HH\FormatString<T>).
    *)
-  if not allow_mixed
-  then
-    let r = Reason.Rwitness p in
-    let env, formatter_tyvar = Env.fresh_invariant_type_var env p in
-    let tyl = [
-      MakeType.arraykey r;
-      MakeType.bool r;
-      MakeType.float r;
-      MakeType.resource r;
-      MakeType.dynamic r;
-      MakeType.class_type r SN.Classes.cFormatString [formatter_tyvar];
-      MakeType.class_type r SN.Classes.cHHFormatString [formatter_tyvar];
-    ] in
-    let stringish =
-      (Reason.Rwitness p, Tclass((p, SN.Classes.cStringish), Nonexact, [])) in
-    let tyl =
-      if stringish_deprecated
-      then tyl
-      else stringish::tyl in
-    let stringlike = (Reason.Rwitness p, Toption (Reason.Rwitness p, Tunion tyl)) in
-    let error env ty_sub ty_super = match snd ty_sub with
-      | _ when is_sub_type env ty_sub stringish &&
-               stringish_deprecated ->
-        Errors.object_string_deprecated p
-      | Tclass _ ->
-        Errors.object_string p (Reason.to_pos (fst ty_sub))
-      | _ ->
-        TUtils.uerror env (fst ty_super) (snd ty_super) (fst ty_sub) (snd ty_sub) in
-    sub_type ~error:(Some error) env ty2 stringlike
-  else
-  let sub_string = sub_string ~allow_mixed in
-  let env, ety2 = Env.expand_type env ty2 in
-  let fail () =
-    TUtils.uerror env (Reason.Rwitness p) (Tprim Nast.Tstring) (fst ety2) (snd ety2);
-    env in
-
-  match ety2 with
-  | (_, Toption ty2) -> sub_string p env ty2
-  | (_, Tunion tyl) ->
-      List.fold_left tyl ~f:(sub_string p) ~init:env
-  | (_, Tprim _) ->
-      env
-  | (_, Tabstract (AKenum _, _)) ->
-      (* Enums are either ints or strings, and so can always be used in a
-       * stringish context *)
-      env
-  | (_, Tabstract _) ->
-    begin match TUtils.get_concrete_supertypes env ty2 with
-      | _, [] when allow_mixed ->
-        env
-      | _, [] ->
-        fail ()
-      | env, tyl ->
-        List.fold_left tyl ~f:(sub_string p) ~init:env
-    end
-  | (r2, Tclass (x, _, _)) ->
-      let class_ = Env.get_class env (snd x) in
-      (match class_ with
-      | None -> env
-      | Some tc
-          (* A Stringish is a string or an object with a __toString method
-           * that will be converted to a string *)
-          when Cls.name tc = SN.Classes.cStringish
-          || Cls.has_ancestor tc SN.Classes.cStringish ->
-        if stringish_deprecated
-        then Errors.object_string_deprecated p;
-        env
-      | Some _ ->
-        Errors.object_string p (Reason.to_pos r2);
-        env
-      )
-  | _, (Tany | Terr | Tdynamic) ->
-    env (* Tany, Terr and Tdynamic are considered Stringish by default *)
-  | _, Tobject -> env
-  | _, Tnonnull when allow_mixed ->
-    env
-  | _, (Tnonnull | Tarraykind _ | Tvar _
-    | Ttuple _ | Tanon (_, _) | Tfun _ | Tshape _) ->
-  fail ()
+  let r = Reason.Rwitness p in
+  let env, formatter_tyvar = Env.fresh_invariant_type_var env p in
+  let tyl = [
+    MakeType.arraykey r;
+    MakeType.bool r;
+    MakeType.float r;
+    MakeType.resource r;
+    MakeType.dynamic r;
+    MakeType.class_type r SN.Classes.cFormatString [formatter_tyvar];
+    MakeType.class_type r SN.Classes.cHHFormatString [formatter_tyvar];
+  ] in
+  let stringish =
+    (Reason.Rwitness p, Tclass((p, SN.Classes.cStringish), Nonexact, [])) in
+  let tyl =
+    if stringish_deprecated
+    then tyl
+    else stringish::tyl in
+  let stringlike = (Reason.Rwitness p, Toption (Reason.Rwitness p, Tunion tyl)) in
+  let error env ty_sub ty_super = match snd ty_sub with
+    | _ when is_sub_type env ty_sub stringish &&
+             stringish_deprecated ->
+      Errors.object_string_deprecated p
+    | Tclass _ ->
+      Errors.object_string p (Reason.to_pos (fst ty_sub))
+    | _ ->
+      TUtils.uerror env (fst ty_super) (snd ty_super) (fst ty_sub) (snd ty_sub) in
+  sub_type ~error:(Some error) env ty2 stringlike
 
 (** Check that the method with signature ft_sub can be used to override
  * (is a subtype of) method with signature ft_super.

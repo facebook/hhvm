@@ -53,7 +53,6 @@ val is_sub_type :
     sub_type env int string => error
  *)
 val sub_type :
-  ?error:(Env.env -> locl ty -> locl ty -> unit) option ->
   Env.env ->
   locl ty ->
   locl ty ->

@@ -272,41 +272,6 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
 
     @flaky
     @run_watcher(daemonize=True)
-    def test_one_hg_update_daemonized(
-        self,
-        log_file=None,
-        sockname=None,
-        starter_process=None
-    ):
-        with open(log_file, 'r') as f:
-            initialized_msg = self.poll_line(f)
-            self.assertIn(
-                'initialized',
-                initialized_msg,
-                'initialized message')
-            self.check_call(['hg', 'update', '.~1'])
-            ignore = [
-                "State_enter hg.transaction",
-                "State_leave hg.transaction"
-            ]
-            state_enter = self.poll_line(f, retry_eof=True, ignore=ignore)
-            state_enter_revision = self.poll_line(f, retry_eof=True, ignore=ignore)
-            state_leave = self.poll_line(f, retry_eof=True, ignore=ignore)
-            state_leave_revision = self.poll_line(f, retry_eof=True, ignore=ignore)
-            sentinel_file = self.poll_line(
-                f, retries=300, retry_eof=True, ignore=ignore)
-            self.assertIn('State_enter hg.update', state_enter, 'state enter')
-            self.assertIn('Revision: ', state_enter_revision, 'state enter revision')
-            self.assertIn('State_leave hg.update', state_leave, 'state leave')
-            self.assertIn('Revision: ', state_leave_revision, 'state leave revision')
-            self.assertIn('Changes', sentinel_file, 'has changes')
-            self.assertIn(
-                'updatestate',
-                sentinel_file,
-                'changes includes updatestate')
-
-    @flaky
-    @run_watcher(daemonize=True)
     def test_sockname(
         self,
         log_file=None,

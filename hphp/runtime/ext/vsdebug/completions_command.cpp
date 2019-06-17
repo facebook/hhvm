@@ -376,7 +376,10 @@ void CompletionsCommand::addMemberCompletions(
   SuggestionContext& context,
   folly::dynamic& targets
 ) {
-  if (m_frameObj == nullptr) {
+  int frameDepth = m_frameObj ? m_frameObj->m_frameDepth : 0;
+  FramePointer fp(m_debugger, frameDepth);
+
+  if (fp == nullptr) {
     return;
   }
 
@@ -415,7 +418,7 @@ void CompletionsCommand::addMemberCompletions(
   ri->m_evaluationUnits.push_back(std::move(unit));
   const auto& result = g_context->evalPHPDebugger(
     rawUnit,
-    m_frameObj->m_frameDepth
+    frameDepth
   );
 
   if (result.failed) {
@@ -453,19 +456,15 @@ void CompletionsCommand::addMemberCompletions(
   }
 
   // Add any instance methods of this object's class, or any of its parent
-  // classes.
+  // classes. NB parent methods are automatic, no need to walk the tree.
   Class* cls = object->getVMClass();
-  while (cls != nullptr) {
-    int methodCount = cls->numMethods();
-    for (Slot i = 0; i < methodCount; ++i) {
-      const Func* method = cls->getMethod(i);
-      if (method != nullptr && (method->attrs() & AttrStatic) == 0) {
-        const std::string& name = method->name()->toCppString();
-        addIfMatch(name, context.matchPrefix, CompletionTypeFn, targets);
-      }
+  int methodCount = cls->numMethods();
+  for (Slot i = 0; i < methodCount; ++i) {
+    const Func* method = cls->getMethod(i);
+    if (method != nullptr && (method->attrs() & AttrStatic) == 0) {
+      const std::string& name = method->name()->toCppString();
+      addIfMatch(name, context.matchPrefix, CompletionTypeFn, targets);
     }
-
-    cls = cls->parent();
   }
 }
 

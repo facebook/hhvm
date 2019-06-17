@@ -1,4 +1,2 @@
 File "newtype9.php--useit.php", line 6, characters 24-49:
-This is an object of type Stringish (Typing[4110])
-File "newtype9.php--newtype.php", line 6, characters 10-18:
-It is incompatible with a mixed value arising from an implicit 'as ?nonnull' constraint on this type
+Expected an object convertible to string but got an object of type OpaqueInt (Typing[4318])

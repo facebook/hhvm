@@ -3661,6 +3661,10 @@ let invalid_arraykey pos (cpos, ctype) (kpos, ktype) =
     kpos, (String.capitalize ktype) ^ " cannot be used as a key for " ^ ctype;
   ]
 
+let invalid_sub_string pos ty =
+  add (Typing.err_code Typing.InvalidSubString) pos @@
+    "Expected an object convertible to string but got " ^ ty
+
 let typechecker_timeout (pos, fun_name) seconds =
   add (Typing.err_code Typing.TypecheckerTimeout) pos
     (Printf.sprintf "Type checker timed out after %d seconds whilst checking function %s" seconds fun_name)

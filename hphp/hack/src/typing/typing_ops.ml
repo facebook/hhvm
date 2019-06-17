@@ -28,6 +28,20 @@ let sub_type p ur env ty_sub ty_super =
     (fun () -> Typing_utils.sub_type env ty_sub ty_super)
     (fun () -> env)
 
+let sub_string p env ty =
+  Errors.try_
+    (fun () -> Typing_utils.sub_string p env ty)
+    (fun _ ->
+      let stringish_deprecated =
+        TypecheckerOptions.disallow_stringish_magic (Env.get_tcopt env) in
+      if stringish_deprecated && Typing_utils.is_stringish env ty then
+        Errors.object_string_deprecated p
+      else if Typing_utils.is_object env ty then
+        Errors.object_string p (Reason.to_pos (fst ty))
+      else
+        Errors.invalid_sub_string p (Typing_print.error env ty);
+      env)
+
 let coerce_type ?sub_fn:(sub=sub_type) p ur env ty_have ?ty_expect_decl ty_expect =
   Typing_utils.coerce_type ~sub_fn:sub p ur env ty_have ?ty_expect_decl ty_expect
 

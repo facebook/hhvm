@@ -606,3 +606,4 @@ val unsupported_trait_use_as : Pos.t -> unit
 val unsupported_instead_of : Pos.t -> unit
 val invalid_trait_use_as_visibility : Pos.t -> unit
 val unresolved_type_variable : Pos.t -> unit
+val invalid_sub_string : Pos.t -> string -> unit

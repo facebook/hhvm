@@ -46,6 +46,10 @@ type sub_type = Env.env -> locl ty -> locl ty -> Env.env
 let (sub_type_ref: sub_type ref) = ref not_implemented
 let sub_type x = !sub_type_ref x
 
+type sub_string = Pos.t -> Env.env -> locl ty -> Env.env
+let (sub_string_ref: sub_string ref) = ref not_implemented
+let sub_string x = !sub_string_ref x
+
 type is_sub_type_LEGACY_DEPRECATED_type = Env.env -> locl ty -> locl ty -> bool
 let (is_sub_type_LEGACY_DEPRECATED_ref: is_sub_type_LEGACY_DEPRECATED_type ref) = ref not_implemented
 let is_sub_type_LEGACY_DEPRECATED x = !is_sub_type_LEGACY_DEPRECATED_ref x
@@ -119,6 +123,13 @@ let is_option env ty =
 let is_mixed env ty =
   let mixed = MakeType.mixed Reason.Rnone in
   is_sub_type env mixed ty
+
+let is_stringish env ty =
+  let stringish = MakeType.class_type Reason.Rnone SN.Classes.cStringish [] in
+  is_sub_type env ty stringish
+
+let is_object env ty =
+  is_sub_type env ty (Reason.Rnone, Tobject)
 
 let ensure_option env r ty = if is_option env ty then ty else (r, Toption ty)
 

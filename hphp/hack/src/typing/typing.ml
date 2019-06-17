@@ -1742,7 +1742,7 @@ and expr_
       end else
         let env, te, ty = expr env e in
         let pe = fst e in
-        let env = SubType.sub_string pe env ty in
+        let env = Type.sub_string pe env ty in
         (match snd e with
         | String _ ->
             begin try make_result env p (T.PrefixedString (n, te))
@@ -5663,8 +5663,8 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
     (* A bit weird, this one:
      *   function(Stringish | string, Stringish | string) : string)
      *)
-      let env = SubType.sub_string p1 env ty1 in
-      let env = SubType.sub_string p2 env ty2 in
+      let env = Type.sub_string p1 env ty1 in
+      let env = Type.sub_string p2 env ty2 in
       make_result env te1 te2 (MakeType.string (Reason.Rconcat_ret p))
   | Ast.Barbar | Ast.Ampamp | Ast.LogXor ->
       make_result env te1 te2 (MakeType.bool (Reason.Rlogic_ret p))
@@ -6121,7 +6121,7 @@ and string2 env idl =
     List.fold_left idl ~init:(env,[]) ~f:begin fun (env,tel) x ->
       let env, te, ty = expr env x in
       let p = fst x in
-      let env = SubType.sub_string p env ty in
+      let env = Type.sub_string p env ty in
       env, te::tel
     end in
   env, List.rev tel

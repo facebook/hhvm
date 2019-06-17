@@ -1942,14 +1942,8 @@ let sub_string
     then tyl
     else stringish::tyl in
   let stringlike = (Reason.Rwitness p, Toption (Reason.Rwitness p, Tunion tyl)) in
-  let error env ty_sub ty_super = match snd ty_sub with
-    | _ when is_sub_type env ty_sub stringish &&
-             stringish_deprecated ->
-      Errors.object_string_deprecated p
-    | Tclass _ ->
-      Errors.object_string p (Reason.to_pos (fst ty_sub))
-    | _ ->
-      TUtils.uerror env (fst ty_super) (snd ty_super) (fst ty_sub) (snd ty_sub) in
+  let error env ty_sub ty_super =
+    TUtils.uerror env (fst ty_super) (snd ty_super) (fst ty_sub) (snd ty_sub) in
   sub_type ~error:(Some error) env ty2 stringlike
 
 (** Check that the method with signature ft_sub can be used to override
@@ -2751,6 +2745,7 @@ let log_prop env =
 (*****************************************************************************)
 
 let () = Typing_utils.sub_type_ref := sub_type
+let () = Typing_utils.sub_string_ref := sub_string
 let () = Typing_utils.add_constraint_ref := add_constraint
 let () = Typing_utils.is_sub_type_LEGACY_DEPRECATED_ref := is_sub_type_LEGACY_DEPRECATED
 let () = Typing_utils.is_sub_type_ref := is_sub_type

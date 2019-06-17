@@ -38,7 +38,7 @@ let initialize_provider
   (* Basic initialization *)
   let () = match provider with
     | SqliteIndex -> SqliteSearchService.initialize workers savedstate_file_opt;
-    | GleanApiIndex
+    | CustomIndex -> CustomSearchService.initialize ()
     | NoIndex
     | TrieIndex -> ()
   in
@@ -46,7 +46,7 @@ let initialize_provider
   (* Fetch namespaces from provider-specific query *)
   let namespace_list = match provider with
     | SqliteIndex -> SqliteSearchService.fetch_namespaces ()
-    | GleanApiIndex
+    | CustomIndex -> CustomSearchService.fetch_namespaces ()
     | NoIndex
     | TrieIndex -> []
   in
@@ -170,7 +170,7 @@ let find_matching_symbols
       | NoIndex
       | TrieIndex ->
         []
-      | GleanApiIndex
+      | CustomIndex
       | SqliteIndex ->
         LocalSearchService.search_local_symbols
           ~query_text
@@ -181,7 +181,11 @@ let find_matching_symbols
 
     (* Next search globals *)
     let global_results = match provider with
-      | GleanApiIndex
+      | CustomIndex ->
+        CustomSearchService.search_symbols
+          ~query_text
+          ~max_results
+          ~context;
       | NoIndex ->
         []
       | SqliteIndex ->
@@ -255,7 +259,7 @@ let update_files
     (paths: (Relative_path.t * info * file_source) list)
     (env: SearchUtils.local_tracking_env ref): unit =
   match get_search_provider () with
-  | GleanApiIndex
+  | CustomIndex
   | NoIndex
   | SqliteIndex ->
     List.iter paths ~f:(fun (path, info, detector) ->
@@ -274,7 +278,7 @@ let remove_files
     (paths: Relative_path.Set.t)
     (env: SearchUtils.local_tracking_env ref): unit =
   match get_search_provider () with
-  | GleanApiIndex
+  | CustomIndex
   | NoIndex
   | SqliteIndex ->
     Relative_path.Set.iter paths ~f:(fun path ->

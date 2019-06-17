@@ -10,12 +10,7 @@ open Reordered_argument_collections
 
 (* Known search providers *)
 type search_provider =
-  (*
-   * This is called the GleanApiIndex rather than GleanIndex since it
-   * actually calls a thrift API for all answers.  All other providers
-   * get their answers from data on the local devserver.
-   *)
-  | GleanApiIndex
+  | CustomIndex
   | NoIndex
   | SqliteIndex
   | TrieIndex
@@ -37,7 +32,7 @@ let provider_of_string (provider_str: string): search_provider =
   match provider_str with
   | "SqliteIndex" -> SqliteIndex
   | "NoIndex" -> NoIndex
-  | "GleanApiIndex" -> GleanApiIndex
+  | "CustomIndex" -> CustomIndex
   | "TrieIndex" -> TrieIndex
   | _ -> TrieIndex
 ;;
@@ -45,7 +40,7 @@ let provider_of_string (provider_str: string): search_provider =
 (* Convert a string to a human readable description of the provider *)
 let descriptive_name_of_provider (provider: search_provider): string =
   match provider with
-  | GleanApiIndex -> "Glean API"
+  | CustomIndex -> "Custom symbol index"
   | NoIndex -> "Symbol index disabled"
   | SqliteIndex -> "Sqlite"
   | TrieIndex -> "SharedMem/Trie"

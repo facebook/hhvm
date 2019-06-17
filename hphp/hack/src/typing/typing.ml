@@ -5018,8 +5018,11 @@ and call_construct p env class_ params el uel cid =
       env, tcid, tel, [], (Reason.Rnone, TUtils.terr env)
     | Some { ce_visibility = vis; ce_type = lazy m; _ } ->
       TVis.check_obj_access p env (Reason.to_pos (fst m), vis);
+      let fty_decl = match m with
+        | _, Tfun fd -> Some fd
+        | _ -> None in
       let env, m = Phase.localize ~ety_env env m in
-      let env, tel, tuel, _ty = call ~expected:None p env m ~fty_decl:None el uel in
+      let env, tel, tuel, _ty = call ~expected:None p env m ~fty_decl el uel in
       env, tcid, tel, tuel, m
 
 and check_arity ?(did_unpack=false) pos pos_def (arity:int) exp_arity =

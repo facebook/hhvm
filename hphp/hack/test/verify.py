@@ -315,8 +315,9 @@ def get_exp_out_dirs(test_file: str) -> Tuple[str, str]:
         exp_dir = os.environ['HACK_SOURCE_ROOT']
         out_dir = os.environ['HACK_BUILD_ROOT']
     else:
-        exp_dir = os.path.dirname(find_in_ancestors("test", test_file))
-        out_dir = exp_dir
+        fbcode = find_in_ancestors("fbcode", test_file)
+        exp_dir = os.path.join(fbcode, 'hphp', 'hack')
+        out_dir = os.path.dirname(find_in_ancestors("test", test_file))
     return exp_dir, out_dir
 
 

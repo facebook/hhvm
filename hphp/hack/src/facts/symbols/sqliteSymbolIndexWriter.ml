@@ -23,7 +23,12 @@ let sql_create_symbols_table =
   "    namespace_id INTEGER NOT NULL, " ^
   "    filename_hash INTEGER NOT NULL, " ^
   "    name TEXT NOT NULL, " ^
-  "    kind INTEGER NOT NULL " ^
+  "    kind INTEGER NOT NULL, " ^
+  "    valid_for_acid INTEGER NOT NULL, " ^
+  "    valid_for_acnew INTEGER NOT NULL, " ^
+  "    valid_for_actype INTEGER NOT NULL, " ^
+  "    is_abstract INTEGER NOT NULL, " ^
+  "    is_final INTEGER NOT NULL " ^
   ");"
 
 let sql_create_kinds_table =
@@ -52,9 +57,10 @@ let sql_insert_kinds =
 
 let sql_insert_symbol =
   "INSERT INTO symbols " ^
-  " (namespace_id, filename_hash, name, kind)" ^
+  " (namespace_id, filename_hash, name, kind, valid_for_acid, " ^
+  " valid_for_acnew, valid_for_actype, is_abstract, is_final)" ^
   " VALUES" ^
-  " (?, ?, ?, ?);"
+  " (?, ?, ?, ?, ?, ?, ?, ?, ?);"
 
 let sql_insert_namespace =
   "INSERT INTO namespaces " ^
@@ -63,9 +69,7 @@ let sql_insert_namespace =
   " (?, ?);"
 
 let sql_create_indexes =
-  "CREATE INDEX IF NOT EXISTS ix_symbols_name ON symbols (name);" ^
-  "CREATE INDEX IF NOT EXISTS ix_symbols_kindname ON symbols (kind, name);" ^
-  "CREATE INDEX IF NOT EXISTS ix_symbols_namespace ON symbols (namespace_id, name);"
+  "CREATE INDEX IF NOT EXISTS ix_symbols_name ON symbols (name);"
 
 (* Begin the work of creating an SQLite index DB *)
 let record_in_db
@@ -105,6 +109,11 @@ let record_in_db
       Sqlite3.bind stmt 3 (Sqlite3.Data.TEXT symbol.sif_name) |> check_rc;
       Sqlite3.bind stmt 4 (Sqlite3.Data.INT
         (Int64.of_int (kind_to_int symbol.sif_kind))) |> check_rc;
+      Sqlite3.bind stmt 5 (bool_to_sqlite (SearchUtils.valid_for_acid symbol)) |> check_rc;
+      Sqlite3.bind stmt 6 (bool_to_sqlite (SearchUtils.valid_for_acnew symbol)) |> check_rc;
+      Sqlite3.bind stmt 7 (bool_to_sqlite (SearchUtils.valid_for_actype symbol)) |> check_rc;
+      Sqlite3.bind stmt 8 (bool_to_sqlite symbol.sif_is_abstract) |> check_rc;
+      Sqlite3.bind stmt 9 (bool_to_sqlite symbol.sif_is_final) |> check_rc;
       Sqlite3.step stmt |> check_rc;
     end);
     Sqlite3.finalize stmt |> check_rc;

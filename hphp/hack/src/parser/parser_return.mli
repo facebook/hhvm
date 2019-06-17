@@ -14,3 +14,11 @@ type t = {
     ast        : Ast.program;
     content   : string;
   }
+
+type t_nast = {
+    file_mode_nast  : FileInfo.mode option; (* None if PHP *)
+    is_hh_file_nast : bool;
+    comments_nast   : (Pos.t * Prim_defs.comment) list;
+    nast            : Nast.program;
+    content_nast    : string;
+}

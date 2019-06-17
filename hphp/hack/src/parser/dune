@@ -109,6 +109,7 @@
     heap_shared_mem
     logging
     namespace_env
+    nast
     parser_ppl
     partial_provider
     utils_lint

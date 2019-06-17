@@ -19,7 +19,7 @@ let check_rc (rc: Sqlite3.Rc.t): unit =
 let prepare_or_reset_statement
     (db: Sqlite3.db)
     (stmt_ref: Sqlite3.stmt option ref)
-    (sql_command_text: string) =
+    (sql_command_text: string): Sqlite3.stmt =
   let stmt = match !stmt_ref with
     | Some s ->
       Sqlite3.reset s |> check_rc;

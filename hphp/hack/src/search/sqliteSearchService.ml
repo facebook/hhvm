@@ -13,11 +13,20 @@ open Sqlite_utils
 
 let select_symbols_stmt = ref None
 let select_symbols_by_kind_stmt = ref None
+let select_acid_stmt = ref None
+let select_acnew_stmt = ref None
+let select_actype_stmt = ref None
 let select_namespaces_stmt = ref None
 
 (* SQL statements used by the autocomplete system *)
 let sql_select_symbols_by_kind =
-  "SELECT name, filename_hash FROM symbols WHERE name LIKE ? AND kind = ? LIMIT ?"
+  "SELECT name, kind, filename_hash FROM symbols WHERE name LIKE ? AND kind = ? LIMIT ?"
+let sql_select_acid =
+  "SELECT name, kind, filename_hash FROM symbols WHERE name LIKE ? AND valid_for_acid = 1 LIMIT ?"
+let sql_select_acnew =
+  "SELECT name, kind, filename_hash FROM symbols WHERE name LIKE ? AND valid_for_acnew = 1 LIMIT ?"
+let sql_select_actype =
+  "SELECT name, kind, filename_hash FROM symbols WHERE name LIKE ? AND valid_for_actype = 1 LIMIT ?"
 let sql_select_all_symbols =
   "SELECT name, kind, filename_hash FROM symbols WHERE name LIKE ? LIMIT ?"
 let sql_check_alive =
@@ -76,42 +85,9 @@ let initialize
   (* Report that the database has been loaded *)
   Hh_logger.log "Initialized symbol index sqlite: [%s]" db_path
 
-(*
- * Symbol search for a specific kind.
- *)
-let search_symbols_by_kind
-    (query_text: string)
-    (max_results: int)
-    (kind_filter: si_kind)
-  : si_results =
+(* Single function for reading results from an executed statement *)
+let read_si_results (stmt: Sqlite3.stmt): si_results =
   let results = ref [] in
-  let stmt = prepare_or_reset_statement (Option.value_exn !symbolindex_db)
-    select_symbols_by_kind_stmt sql_select_symbols_by_kind in
-  Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT (query_text ^ "%")) |> check_rc;
-  Sqlite3.bind stmt 2 (Sqlite3.Data.INT (Int64.of_int (kind_to_int kind_filter))) |> check_rc;
-  Sqlite3.bind stmt 3 (Sqlite3.Data.INT (Int64.of_int max_results)) |> check_rc;
-  while Sqlite3.step stmt = Sqlite3.Rc.ROW do
-    let name = Sqlite3.Data.to_string (Sqlite3.column stmt 0) in
-    let filehash = to_int64 (Sqlite3.column stmt 1) in
-    results := {
-      si_name = name;
-      si_kind = kind_filter;
-      si_filehash = filehash;
-    } :: !results;
-  done;
-  !results
-
-(*
- * Symbol search for all symbols.
- *)
-let search_all_symbols
-    (query_text: string)
-    (max_results: int): si_results =
-  let results = ref [] in
-  let stmt = prepare_or_reset_statement (Option.value_exn !symbolindex_db)
-    select_symbols_stmt sql_select_all_symbols in
-  Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT (query_text ^ "%")) |> check_rc;
-  Sqlite3.bind stmt 2 (Sqlite3.Data.INT (Int64.of_int max_results)) |> check_rc;
   while Sqlite3.step stmt = Sqlite3.Rc.ROW do
     let name = Sqlite3.Data.to_string (Sqlite3.column stmt 0) in
     let kindnum = to_int (Sqlite3.column stmt 1) in
@@ -125,14 +101,70 @@ let search_all_symbols
   done;
   !results
 
+(* Find all symbols matching a specific kind *)
+let search_symbols_by_kind
+    (query_text: string)
+    (max_results: int)
+    (kind_filter: si_kind)
+  : si_results =
+  let stmt = prepare_or_reset_statement (Option.value_exn !symbolindex_db)
+    select_symbols_by_kind_stmt sql_select_symbols_by_kind in
+  Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT (query_text ^ "%")) |> check_rc;
+  Sqlite3.bind stmt 2 (Sqlite3.Data.INT (Int64.of_int (kind_to_int kind_filter))) |> check_rc;
+  Sqlite3.bind stmt 3 (Sqlite3.Data.INT (Int64.of_int max_results)) |> check_rc;
+  read_si_results stmt
+
+(* Symbol search for all symbols. *)
+let search_all_symbols
+    (query_text: string)
+    (max_results: int): si_results =
+  let stmt = prepare_or_reset_statement (Option.value_exn !symbolindex_db)
+    select_symbols_stmt sql_select_all_symbols in
+  Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT (query_text ^ "%")) |> check_rc;
+  Sqlite3.bind stmt 2 (Sqlite3.Data.INT (Int64.of_int max_results)) |> check_rc;
+  read_si_results stmt
+
+(* Symbol search for symbols valid in ACID context *)
+let search_acid
+    (query_text: string)
+    (max_results: int): si_results =
+  let stmt = prepare_or_reset_statement (Option.value_exn !symbolindex_db)
+    select_acid_stmt sql_select_acid in
+  Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT (query_text ^ "%")) |> check_rc;
+  Sqlite3.bind stmt 2 (Sqlite3.Data.INT (Int64.of_int max_results)) |> check_rc;
+  read_si_results stmt
+
+(* Symbol search for symbols valid in ACNEW context *)
+let search_acnew
+    (query_text: string)
+    (max_results: int): si_results =
+  let stmt = prepare_or_reset_statement (Option.value_exn !symbolindex_db)
+    select_acnew_stmt sql_select_acnew in
+  Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT (query_text ^ "%")) |> check_rc;
+  Sqlite3.bind stmt 2 (Sqlite3.Data.INT (Int64.of_int max_results)) |> check_rc;
+  read_si_results stmt
+
+(* Symbol search for symbols valid in ACTYPE context *)
+let search_actype
+    (query_text: string)
+    (max_results: int): si_results =
+  let stmt = prepare_or_reset_statement (Option.value_exn !symbolindex_db)
+    select_actype_stmt sql_select_actype in
+  Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT (query_text ^ "%")) |> check_rc;
+  Sqlite3.bind stmt 2 (Sqlite3.Data.INT (Int64.of_int max_results)) |> check_rc;
+  read_si_results stmt
+
 (* Main entry point *)
 let sqlite_search
     (query_text: string)
     (max_results: int)
-    (kind_filter: si_kind option): si_results =
-  match kind_filter with
-  | Some kind -> search_symbols_by_kind query_text max_results kind
-  | None -> search_all_symbols query_text max_results
+    (context: autocomplete_type option): si_results =
+  match context with
+  | Some Acid -> search_acid query_text max_results
+  | Some Acnew -> search_acnew query_text max_results
+  | Some Actype -> search_actype query_text max_results
+  | Some Actrait_only -> search_symbols_by_kind query_text max_results SI_Trait
+  | _ -> search_all_symbols query_text max_results
 
 (* Fetch all known namespaces from the database *)
 let fetch_namespaces (): string list =

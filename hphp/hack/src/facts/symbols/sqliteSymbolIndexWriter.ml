@@ -33,13 +33,13 @@ let sql_create_symbols_table =
 
 let sql_create_kinds_table =
   "CREATE TABLE IF NOT EXISTS kinds ( " ^
-  "    id INTEGER NOT NULL, " ^
+  "    id INTEGER NOT NULL PRIMARY KEY, " ^
   "    description TEXT NOT NULL " ^
   ");"
 
 let sql_create_namespaces_table =
   "CREATE TABLE IF NOT EXISTS namespaces ( " ^
-  "    namespace_id INTEGER NOT NULL, " ^
+  "    namespace_id INTEGER NOT NULL PRIMARY KEY, " ^
   "    namespace TEXT NOT NULL " ^
   ");"
 
@@ -68,8 +68,18 @@ let sql_insert_namespace =
   " VALUES" ^
   " (?, ?);"
 
+(*
+ * TS 2019-06-17 - Based on testing, creating ANY indexes slows down
+ * the performance of sqlite autocomplete.  By eliminating all indexes,
+ * we get average query time down to ~20 ms.
+ *
+ * This certainly isn't what we expected, but please be careful and run
+ * performance tests before you add indexes back.
+ *
+ * CREATE INDEX IF NOT EXISTS ix_symbols_name ON symbols (name);
+ *)
 let sql_create_indexes =
-  "CREATE INDEX IF NOT EXISTS ix_symbols_name ON symbols (name);"
+  ""
 
 (* Begin the work of creating an SQLite index DB *)
 let record_in_db

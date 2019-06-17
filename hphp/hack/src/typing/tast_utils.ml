@@ -140,7 +140,7 @@ type sketchy_type_kind =
       know that the string "0" is falsy, and may have intended only to check for
       emptiness. *)
 
-  | Traversable_interface of Env.t * Tast.ty
+  | Traversable_interface of string
   (** Interface types which implement Traversable but not Container may be
       always truthy, even when empty. *)
 
@@ -162,7 +162,7 @@ let rec find_sketchy_types env acc ty =
       | None -> acc
       | Some cls ->
         match Cls.kind cls with
-        | Cinterface -> Traversable_interface (env, ty) :: acc
+        | Cinterface -> Traversable_interface (Env.print_ty env ty) :: acc
         | Cnormal | Cabstract | Ctrait | Cenum | Crecord -> acc
     end
 

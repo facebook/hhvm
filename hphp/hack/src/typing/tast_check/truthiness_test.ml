@@ -38,8 +38,8 @@ let rec truthiness_test env ((p, ty), e) =
       | XHPChild ->
         let tystr = Utils.strip_ns SN.Classes.cXHPChild in
         Errors.sketchy_truthiness_test p tystr `XHPChild
-      | Traversable_interface (env, ty) ->
-        Errors.sketchy_truthiness_test p (Env.print_ty env ty) `Traversable
+      | Traversable_interface tystr ->
+        Errors.sketchy_truthiness_test p tystr `Traversable
     end;
     match truthiness env ty with
     | Always_truthy -> Errors.invalid_truthiness_test p (Env.print_ty env ty)

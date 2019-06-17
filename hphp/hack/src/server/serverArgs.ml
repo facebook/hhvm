@@ -286,6 +286,7 @@ let parse_options () =
 
   let options = [
       "--ai", Arg.String set_ai, Messages.ai;
+      "--allow-non-opt-build", Arg.Set allow_non_opt_build, "";
       "--check", Arg.Set check_mode, Messages.check;
       "--config",
         Arg.String (fun s -> config := (String_utils.split2_exn '=' s) :: !config),
@@ -300,9 +301,6 @@ let parse_options () =
         Arg.Set gen_saved_ignore_type_errors,
         Messages.gen_saved_ignore_type_errors;
       "--ignore-hh-version", Arg.Set ignore_hh, Messages.ignore_hh_version;
-      "--saved-state-ignore-hhconfig",
-        Arg.Set saved_state_ignore_hhconfig,
-        Messages.saved_state_ignore_hhconfig;
       "--json", Arg.Set json_mode, Messages.json;
       "--load-state-canary", Arg.Set load_state_canary, Messages.load_state_canary;
       "--log-inference-constraints",
@@ -319,13 +317,15 @@ let parse_options () =
       "--save-mini", Arg.String set_save_state, Messages.save_state;
       "--save-state", Arg.String set_save_state, Messages.save_state;
       "--save-state-with-spec", Arg.String set_save_with_spec, Messages.save_with_spec;
+      "--saved-state-ignore-hhconfig",
+        Arg.Set saved_state_ignore_hhconfig,
+        Messages.saved_state_ignore_hhconfig;
       "--version", Arg.Set version, "";
       "--waiting-client", Arg.Int set_wait, Messages.waiting_client;
       "--watchman-debug-logging", Arg.Set watchman_debug_logging, Messages.watchman_debug_logging;
       "--with-mini-state", Arg.String set_with_saved_state, Messages.with_saved_state;
       "-d", Arg.Set should_detach, Messages.daemon;
       "-s", Arg.String set_save_state, Messages.save_state;
-      "--allow-non-opt-build", Arg.Set allow_non_opt_build, "";
     ] in
   let options = Arg.align options in
   Arg.parse options (fun s -> root := s) usage;

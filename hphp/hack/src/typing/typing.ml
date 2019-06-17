@@ -4103,9 +4103,14 @@ and is_abstract_ft fty = match fty with
               begin fun (env, fty, method_decl, _) ->
                 let fty = check_abstract_parent_meth (snd m) p fty in
                 let env = check_coroutine_call env fty in
+                let fty_decl = Option.bind method_decl ~f:(fun f ->
+                  match f with
+                  | _, Tfun fd -> Some fd
+                  | _ -> None
+                ) in
                 let env, tel_, tuel_, method_ = call ~expected
                   ~method_call_info:(TR.make_call_info ~receiver_is_self:false
-                    ~is_static:false this_ty (snd m)) ~fty_decl: None
+                    ~is_static:false this_ty (snd m)) ~fty_decl
                   p env fty el uel in
                 tel := tel_; tuel := tuel_;
                 ftys := fty :: !ftys;

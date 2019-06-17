@@ -3387,9 +3387,6 @@ OPTBLD_INLINE void cgetg_body(bool warn) {
   lookup_gbl(vmfp(), name, to, fr);
   SCOPE_EXIT { decRefStr(name); };
   if (fr == nullptr) {
-    if (warn && MoreWarnings) {
-      raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
-    }
     tvDecRefGen(to);
     tvWriteNull(*to);
   } else if (fr->m_type == KindOfUninit) {

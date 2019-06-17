@@ -64,16 +64,6 @@ struct InvalidSetMException : std::runtime_error {
   req::root<TypedValue> m_tv;
 };
 
-// When MoreWarnings is set to true, the VM will raise more warnings
-// on SetOpM, IncDecM and CGetG, intended to match Zend.
-const bool MoreWarnings =
-#ifdef HHVM_MORE_WARNINGS
-  true
-#else
-  false
-#endif
-  ;
-
 /*
  * KeyType and the associated functions below are used to generate member
  * operation functions specialized for certain key types. Many functions take a
@@ -2072,9 +2062,6 @@ inline tv_lval SetOpElemEmptyish(SetOpOp op, tv_lval base,
 
   cellMove(make_tv<KindOfArray>(staticEmptyArray()), base);
   auto const lval = asArrRef(base).lvalAt(tvAsCVarRef(&key));
-  if (MoreWarnings) {
-    throwArrayKeyException(tvAsCVarRef(&key).toString().get(), false);
-  }
   setopBody(lval, op, rhs);
   return lval;
 }
@@ -2181,9 +2168,8 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
           )) {
         raiseHackArrCompatMissingSetOp();
       }
-      auto constexpr mode = MoreWarnings ? MOpMode::Warn : MOpMode::None;
       auto result =
-        ElemDArray<mode, false, KeyType::Any>(base, key);
+        ElemDArray<MOpMode::None, false, KeyType::Any>(base, key);
       result = tvToCell(result);
       setopBody(result, op, rhs);
       return result;
@@ -2358,9 +2344,6 @@ inline Cell IncDecElemEmptyish(
 
   cellMove(make_tv<KindOfArray>(staticEmptyArray()), base);
   auto const lval = asArrRef(base).lvalAt(tvAsCVarRef(&key));
-  if (MoreWarnings) {
-    throwArrayKeyException(tvAsCVarRef(&key).toString().get(), false);
-  }
   assertx(type(lval) == KindOfNull);
   return IncDecBody(op, lval);
 }
@@ -2456,9 +2439,8 @@ inline Cell IncDecElem(
           )) {
         raiseHackArrCompatMissingIncDec();
       }
-      auto constexpr mode = MoreWarnings ? MOpMode::Warn : MOpMode::None;
       auto result =
-        ElemDArray<mode, false, KeyType::Any>(base, key);
+        ElemDArray<MOpMode::None, false, KeyType::Any>(base, key);
       return IncDecBody(op, tvToCell(result));
     }
 

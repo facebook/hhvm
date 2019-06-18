@@ -561,58 +561,6 @@ SSATmp* lookupObjMethodNonExactFunc(IRGS& env, SSATmp* obj,
   return func;
 }
 
-void fpushObjMethodWithBaseClass(
-  IRGS& env,
-  SSATmp* obj,
-  const Class* baseClass,
-  const StringData* methodName,
-  uint32_t numArgs,
-  bool exactClass,
-  SSATmp* ts,
-  TargetProfile<MethProfile>* profile
-) {
-  assertx(!profile || !baseClass || isInterface(baseClass));
-
-  auto const profileMethod = [&] (SSATmp* callee) {
-    if (!profile || !profile->profiling()) return;
-    auto const cls = gen(env, LdObjClass, obj);
-    auto const pctData = ProfileCallTargetData { profile->handle() };
-    gen(env, ProfileMethod, pctData, cls, callee);
-  };
-
-  auto const lookup = lookupImmutableObjMethod(
-    baseClass, methodName, curFunc(env), exactClass);
-  switch (lookup.type) {
-    case ImmutableObjMethodLookup::Type::NotFound:
-      fpushObjMethodUnknown(env, obj, methodName, numArgs, ts, profileMethod);
-      return;
-    case ImmutableObjMethodLookup::Type::MagicFunc:
-      assertx(!profile);
-      lookupObjMethodExactFunc(env, obj, lookup.func);
-      prepareToCallKnown(env, lookup.func, obj, numArgs, methodName, false, ts);
-      return;
-    case ImmutableObjMethodLookup::Type::Func:
-      assertx(!profile);
-      lookupObjMethodExactFunc(env, obj, lookup.func);
-      prepareToCallKnown(env, lookup.func, obj, numArgs, nullptr, false, ts);
-      return;
-    case ImmutableObjMethodLookup::Type::Class: {
-      assertx(!profile);
-      auto const func = lookupObjMethodNonExactFunc(env, obj, lookup.func);
-      prepareToCallUnknown(env, func, obj, numArgs, nullptr, false, ts);
-      return;
-    }
-    case ImmutableObjMethodLookup::Type::Interface: {
-      auto const func = lookupObjMethodInterfaceFunc(env, obj, lookup.func);
-      prepareToCallUnknown(env, func, obj, numArgs, nullptr, false, ts);
-      profileMethod(func);
-      return;
-    }
-  }
-
-  not_reached();
-}
-
 const StaticString methProfileKey{ "MethProfile-FPushObjMethod" };
 
 inline SSATmp* ldCtxForClsMethod(IRGS& env,
@@ -689,7 +637,7 @@ inline SSATmp* ldCtxForClsMethod(IRGS& env,
 template<class Fn>
 void optimizeProfiledPushMethod(IRGS& env,
                                 SSATmp* objOrCls,
-                                const Class* knownClass,
+                                bool knownIfaceFunc,
                                 const StringData* methodName,
                                 uint32_t numParams,
                                 bool dynamic,
@@ -781,13 +729,6 @@ void optimizeProfiledPushMethod(IRGS& env,
     return;
   }
 
-  // If we know anything about the class, other than it's an interface, the
-  // remaining cases aren't worth the extra check.
-  if (knownClass != nullptr && !isInterface(knownClass)) {
-    emitFPush();
-    return;
-  }
-
   if (auto const baseMeth = data.baseMeth()) {
     if (!baseMeth->name()->isame(methodName)) {
       emitFPush();
@@ -815,9 +756,9 @@ void optimizeProfiledPushMethod(IRGS& env,
     return;
   }
 
-  // If we know anything about the class, the other cases below are not worth
-  // the extra checks they insert.
-  if (knownClass != nullptr) {
+  // If we know the object implements a known interface that defines the called
+  // method, the other cases below are not worth the extra checks they insert.
+  if (knownIfaceFunc) {
     emitFPush();
     return;
   }
@@ -856,7 +797,7 @@ void optimizeProfiledPushMethod(IRGS& env,
 void fpushObjMethod(IRGS& env,
                     SSATmp* obj,
                     const StringData* methodName,
-                    uint32_t numParams,
+                    uint32_t numArgs,
                     SSATmp* tsList) {
   implIncStat(env, Stats::ObjMethod_total);
 
@@ -875,24 +816,61 @@ void fpushObjMethod(IRGS& env,
     }
   }
 
+  auto const lookup = lookupImmutableObjMethod(
+    knownClass, methodName, curFunc(env), exactClass);
+  const Func* knownIfaceFunc = nullptr;
+
+  // If we know which exact or overridden method to call, we don't need PGO.
+  switch (lookup.type) {
+    case ImmutableObjMethodLookup::Type::MagicFunc:
+      lookupObjMethodExactFunc(env, obj, lookup.func);
+      prepareToCallKnown(env, lookup.func, obj, numArgs, methodName, false,
+                         tsList);
+      return;
+    case ImmutableObjMethodLookup::Type::Func:
+      lookupObjMethodExactFunc(env, obj, lookup.func);
+      prepareToCallKnown(env, lookup.func, obj, numArgs, nullptr, false,
+                         tsList);
+      return;
+    case ImmutableObjMethodLookup::Type::Class: {
+      auto const func = lookupObjMethodNonExactFunc(env, obj, lookup.func);
+      prepareToCallUnknown(env, func, obj, numArgs, nullptr, false, tsList);
+      return;
+    }
+    case ImmutableObjMethodLookup::Type::NotFound:
+      break;
+    case ImmutableObjMethodLookup::Type::Interface:
+      knownIfaceFunc = lookup.func;
+      break;
+  }
+
   auto const emitFPush = [&] (TargetProfile<MethProfile>* profile = nullptr) {
-    fpushObjMethodWithBaseClass(env, obj, knownClass, methodName, numParams,
-                                exactClass, tsList, profile);
+    auto const profileMethod = [&] (SSATmp* callee) {
+      if (!profile || !profile->profiling()) return;
+      auto const cls = gen(env, LdObjClass, obj);
+      auto const pctData = ProfileCallTargetData { profile->handle() };
+      gen(env, ProfileMethod, pctData, cls, callee);
+    };
+
+    if (knownIfaceFunc == nullptr) {
+      fpushObjMethodUnknown(env, obj, methodName, numArgs, tsList,
+                            profileMethod);
+    } else {
+      auto const func = lookupObjMethodInterfaceFunc(env, obj, knownIfaceFunc);
+      prepareToCallUnknown(env, func, obj, numArgs, nullptr, false, tsList);
+      profileMethod(func);
+    }
   };
 
-  // If we know the class exactly without profiling, then we don't need PGO.
   // If the method has reified generics, we can't burn the value in the JIT
-  if (!RuntimeOption::RepoAuthoritative ||
-      (knownClass && !isInterface(knownClass)) ||
-      tsList) {
-    emitFPush();
-    return;
+  if (!RuntimeOption::RepoAuthoritative || tsList) {
+    return emitFPush();
   }
 
   // If we don't know anything about the object's class, or all we know is an
   // interface that it implements, then enable PGO.
-  optimizeProfiledPushMethod(env, obj, knownClass, methodName, numParams, false,
-                             emitFPush);
+  optimizeProfiledPushMethod(env, obj, knownIfaceFunc != nullptr, methodName,
+                             numArgs, false, emitFPush);
 }
 
 void fpushFuncObj(IRGS& env, uint32_t numParams) {
@@ -1540,7 +1518,7 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
     return;
   }
 
-  optimizeProfiledPushMethod(env, clsVal, nullptr, methodName, numParams,
+  optimizeProfiledPushMethod(env, clsVal, false, methodName, numParams,
                              dynamic, emitFPush);
 }
 

@@ -14,9 +14,9 @@ let foo_returns_int_name = "foo_returns_int.php"
 let foo_returns_string_name = "foo_returns_string_name.php"
 
 let foo_contents = Printf.sprintf "<?hh // strict
-
+/* HH_FIXME[4110] */
 function foo() : %s {
-  //UNSAFE
+
 }
 "
 let foo_returns_int_contents = foo_contents "int"

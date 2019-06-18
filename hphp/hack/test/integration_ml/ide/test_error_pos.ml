@@ -15,8 +15,8 @@ let foo_name = "foo.php"
 let foo_contents = Printf.sprintf
 "<?hh // strict
 %s
+/* HH_FIXME[4110] */
 function foo(): string {
-  //UNSAFE
 }"
 
 let bar_name = Printf.sprintf "bar%d.php"
@@ -47,7 +47,7 @@ File "/bar107.php", line 4, characters 10-14:
 Invalid return type (Typing[4110])
 File "/bar107.php", line 3, characters 21-23:
 Expected int
-File "/foo.php", line 3, characters 17-22:
+File "/foo.php", line 4, characters 17-22:
 But got string
 |}
 
@@ -57,7 +57,7 @@ File "/bar107.php", line 4, characters 10-14:
 Invalid return type (Typing[4110])
 File "/bar107.php", line 3, characters 21-23:
 Expected int
-File "/foo.php", line 5, characters 17-22:
+File "/foo.php", line 6, characters 17-22:
 But got string
 |}
 
@@ -75,7 +75,7 @@ File "/bar108.php", line 4, characters 10-14:
 Invalid return type (Typing[4110])
 File "/bar108.php", line 3, characters 21-23:
 Expected int
-File "/foo.php", line 5, characters 17-22:
+File "/foo.php", line 6, characters 17-22:
 But got string
 |}
 
@@ -85,7 +85,7 @@ File "/bar109.php", line 4, characters 10-14:
 Invalid return type (Typing[4110])
 File "/bar109.php", line 3, characters 21-23:
 Expected int
-File "/foo.php", line 3, characters 17-22:
+File "/foo.php", line 4, characters 17-22:
 But got string
 |}
 

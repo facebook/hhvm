@@ -64,8 +64,8 @@ function test(Bar $bar): void {
 (* y that depends on x. x will change in a significant way *)
 let x_name = "x.php"
 let x_contents = Printf.sprintf {|<?hh // strict
+/* HH_FIXME[4110] */
 function x(): %s {
-  // UNSAFE BLOCK
 }
 |}
 let y_name = "y.php"

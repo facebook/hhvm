@@ -4,16 +4,16 @@ module Test = Integration_test_base
 
 let bar_contents = Printf.sprintf {|<?hh
 class %s {
+  /* HH_FIXME[4110] */
   public function bar() : int {
-    // UNSAFE_BLOCK
   }
 }
 
 |}
 
 let foo_contents = Printf.sprintf {|<?hh
+/* HH_FIXME[4110] */
 function foo() : %s {
-  // UNSAFE_BLOCK
 }
 |}
 
@@ -82,9 +82,9 @@ let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
     (fun x -> Test.assert_find_refs x [{|B::bar: File "/test.php", line 3, characters 17-19:|}]);
 
   Test.in_daemon @@ test temp_dir
-    ServerCommandTypes.((IDE_FIND_REFS (LabelledFileName "/B.php", 3, 22, true)))
+    ServerCommandTypes.((IDE_FIND_REFS (LabelledFileName "/B.php", 4, 22, true)))
     (fun x -> Test.assert_ide_find_refs x "B::bar" [
-      {|File "/B.php", line 3, characters 19-21:|};
+      {|File "/B.php", line 4, characters 19-21:|};
       {|File "/test.php", line 3, characters 17-19:|}
     ]);
 
@@ -98,19 +98,19 @@ let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
     }))
     (fun x -> Test.assert_refactor x
       ({|[{"filename":"/test.php","patches":[{"char_start":44,"char_end":47,"line":3,"col_start":17,"col_end":19,"patch_type":"replace","replacement":"baz"}]},|} ^
-        {|{"filename":"/B.php","patches":[{"char_start":33,"char_end":36,"line":3,"col_start":19,"col_end":21,"patch_type":"replace","replacement":"baz"}]}]|})
+        {|{"filename":"/B.php","patches":[{"char_start":56,"char_end":59,"line":4,"col_start":19,"col_end":21,"patch_type":"replace","replacement":"baz"}]}]|})
     );
 
   Test.in_daemon @@ test temp_dir
     ServerCommandTypes.(IDE_REFACTOR Ide_refactor_type.({
       filename = "/B.php";
-      line = 3;
+      line = 4;
       char = 22;
       new_name = "baz";
     }))
     (fun x -> Test.assert_ide_refactor x
       ({|[{"filename":"/test.php","patches":[{"char_start":44,"char_end":47,"line":3,"col_start":17,"col_end":19,"patch_type":"replace","replacement":"baz"}]},|} ^
-        {|{"filename":"/B.php","patches":[{"char_start":33,"char_end":36,"line":3,"col_start":19,"col_end":21,"patch_type":"replace","replacement":"baz"},|} ^
+        {|{"filename":"/B.php","patches":[{"char_start":56,"char_end":59,"line":4,"col_start":19,"col_end":21,"patch_type":"replace","replacement":"baz"},|} ^
         {|{"char_start":15,"char_end":15,"line":3,"col_start":1,"col_end":1,"patch_type":"insert","replacement":|} ^
         {|"\n  <<__Deprecated(\"Use `baz` instead\")>>\n  public function bar() : int {\n    return $this->baz();\n  }\n"}]}]|})
     );

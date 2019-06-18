@@ -6,15 +6,15 @@ module Test = Integration_test_base
  * initial rechecking is finished *)
 let x_contents = Printf.sprintf {|<?hh
 class %s {
+    /* HH_FIXME[4110] */
     public function bar() : %s {
-      // UNSAFE_BLOCK
     }
 }
 |}
 
 let foo_contents = Printf.sprintf {|<?hh
+/* HH_FIXME[4110] */
 function foo(): %s {
-  // UNSAFE_BLOCK
 }
 |}
 
@@ -29,7 +29,7 @@ File "/test.php", line 3, characters 10-21:
 Invalid return type (Typing[4110])
 File "/test.php", line 2, characters 19-21:
 Expected int
-File "/B.php", line 3, characters 29-34:
+File "/B.php", line 4, characters 29-34:
 But got string
 |}
 

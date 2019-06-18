@@ -22,8 +22,8 @@ let foo_contents = Printf.sprintf
 "<?hh // strict
 
 class Foo {
+  /* HH_FIXME[4110] */
   public function f() : %s {
-    // UNSAFE
   }
 }
 "
@@ -59,7 +59,7 @@ File \"/bar.php\", line 4, characters 12-20:
 Invalid argument (Typing[4110])
 File \"/take_int.php\", line 3, characters 19-21:
 Expected int
-File \"/foo.php\", line 4, characters 25-30:
+File \"/foo.php\", line 5, characters 25-30:
 But got string
 
 /baz.php:
@@ -67,7 +67,7 @@ File \"/baz.php\", line 4, characters 12-26:
 Invalid argument (Typing[4110])
 File \"/take_int.php\", line 3, characters 19-21:
 Expected int
-File \"/foo.php\", line 4, characters 25-30:
+File \"/foo.php\", line 5, characters 25-30:
 But got string
 "
 

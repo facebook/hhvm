@@ -5,8 +5,8 @@ module Test = Integration_test_base
  * independent, and there is no incremental mode involved. *)
 
 let x_contents = Printf.sprintf {|<?hh
+/* HH_FIXME[4110] */
 function %s(): %s {
-  //UNSAFE_BLOCK
 }
 |}
 
@@ -19,7 +19,7 @@ File "/d.php", line 2, characters 28-30:
 Invalid return type (Typing[4110])
 File "/d.php", line 2, characters 15-17:
 Expected int
-File "/c.php", line 2, characters 15-20:
+File "/c.php", line 3, characters 15-20:
 But got string
 |}
 
@@ -28,14 +28,14 @@ File "/b.php", line 2, characters 28-30:
 Invalid return type (Typing[4110])
 File "/b.php", line 2, characters 15-17:
 Expected int
-File "/a.php", line 2, characters 15-20:
+File "/a.php", line 3, characters 15-20:
 But got string
 
 File "/d.php", line 2, characters 28-30:
 Invalid return type (Typing[4110])
 File "/d.php", line 2, characters 15-17:
 Expected int
-File "/c.php", line 2, characters 15-20:
+File "/c.php", line 3, characters 15-20:
 But got string
 |}
 

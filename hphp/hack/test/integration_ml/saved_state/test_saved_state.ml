@@ -2,8 +2,8 @@ module Test = Integration_test_base
 
 let a_contents = Printf.sprintf {|<?hh
 class A {
+  /* HH_FIXME[4110] */
   public function foo(): %s {
-    // UNSAFE_EXPR
   }
 }
 |}

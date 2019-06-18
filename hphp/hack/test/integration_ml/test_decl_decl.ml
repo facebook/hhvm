@@ -15,8 +15,8 @@ let a_contents =
 "<?hh // strict
 
 class A {
+  /* HH_FIXME[4110] */
   final public function f() : C {
-    //UNSAFE_BLOCK
   }
 }
 "
@@ -34,7 +34,7 @@ class C {}
 "
 
 let errors = {|
-File "/A.php", line 4, characters 31-31:
+File "/A.php", line 5, characters 31-31:
 Unbound name: C (an object type) (Naming[2049])
 |}
 

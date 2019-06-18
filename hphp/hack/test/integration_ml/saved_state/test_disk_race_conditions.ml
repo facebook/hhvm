@@ -9,8 +9,8 @@ open Integration_test_base_types
 let foo_name = "foo.php"
 
 let foo_contents = Printf.sprintf {|<?hh
+/* HH_FIXME[4110] */
 function foo(): %s {
-  // UNSAFE_EXPR
 }
 |}
 

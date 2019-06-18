@@ -17,8 +17,8 @@ let foo_contents =
 "<?hh // strict
 
 class Foo {
+  /* HH_FIXME[4110] */
   public function f() : string {
-    // UNSAFE
   }
 }
 "
@@ -48,7 +48,7 @@ let bar_errors =
 Invalid argument (Typing[4110])
 File \"/bar.php\", line 3, characters 19-21:
 Expected int
-File \"/foo.php\", line 4, characters 25-30:
+File \"/foo.php\", line 5, characters 25-30:
 But got string
 "
 

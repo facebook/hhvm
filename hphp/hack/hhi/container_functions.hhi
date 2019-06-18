@@ -69,7 +69,7 @@ function keyset<Tv as arraykey>(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __M
 namespace HH {
 
 <<__Rx>>
-function darray<Tk, Tv>(KeyedTraversable<Tk, Tv> $arr): darray<Tk, Tv>;
+function darray<Tk as arraykey, Tv>(KeyedTraversable<Tk, Tv> $arr): darray<Tk, Tv>;
 
 <<__Rx>>
 function varray<Tv>(Traversable<Tv> $arr): varray<Tv>;

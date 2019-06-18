@@ -52,7 +52,7 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    *
    * Pairs must be constructed with "Pair {$first, $second}".
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Rx>>
   private function __construct();
 
   /**

@@ -1,0 +1,2 @@
+File "mutable_on_constructor2.php", line 9, characters 3-69:
+__Mutable, __MaybeMutable, and __MutableReturn annotations are not allowed on constructors. (Parsing[1002])

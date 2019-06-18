@@ -1,7 +1,7 @@
 <?hh // strict
 
 class Test {
-  <<__Rx, __Mutable>>
+  <<__Rx>>
   public function __construct(public int $val) {}
 }
 

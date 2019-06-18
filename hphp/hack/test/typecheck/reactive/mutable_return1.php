@@ -1,7 +1,7 @@
 <?hh // strict
 
 class A {
-  <<__Rx, __Mutable>>
+  <<__Rx>>
   public function __construct(private int $x) {
   }
   <<__Rx, __MutableReturn>>

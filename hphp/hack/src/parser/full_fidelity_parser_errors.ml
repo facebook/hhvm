@@ -1464,6 +1464,15 @@ let methodish_errors env node errors =
       then make_error_from_node node
         SyntaxError.mutability_annotation_on_static_method :: errors
       else errors in
+    let errors =
+      if String.lowercase method_name = SN.Members.__construct && (
+        attribute_specification_contains method_attrs SN.UserAttributes.uaMutable ||
+        attribute_specification_contains method_attrs SN.UserAttributes.uaMaybeMutable ||
+        attribute_specification_contains method_attrs SN.UserAttributes.uaMutableReturn
+      )
+      then make_error_from_node node
+        SyntaxError.mutability_annotation_on_constructor :: errors
+      else errors in
     let fun_semicolon = md.methodish_semicolon in
     let errors =
       produce_error errors

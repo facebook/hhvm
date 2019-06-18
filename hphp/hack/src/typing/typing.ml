@@ -3609,6 +3609,28 @@ and call_parent_construct pos env el uel =
   let check_class_function_in_suspend class_name function_name =
     check_function_in_suspend (class_name ^ "::" ^ function_name) in
 
+  let method_get_helper env getter call_continuation =
+    let tel = ref [] and tuel = ref [] and tftyl = ref [] in
+    let k = (fun (env, fty, method_decl_, _) ->
+      (* extract decl fun_type record for call function *)
+      let fty_decl = Option.bind method_decl_ ~f:(fun f ->
+        match f with
+        | _, Tfun fd -> Some fd
+        | _ -> None
+      ) in
+      let env, tel_, tuel_, method_ =
+        call_continuation env fty fty_decl in
+      tel := tel_; tuel := tuel_;
+      tftyl := fty :: !tftyl;
+      env, method_, method_decl_, None) in
+    let env, ty = getter env k in
+    let tfty =
+      match !tftyl with
+      | [fty] -> fty
+      | tftyl -> (Reason.none, Tunion tftyl)
+    in
+    env, ty, tfty, !tel, !tuel in
+
   match fun_expr with
   (* Special function `echo` *)
   | Id ((p, pseudo_func) as id) when pseudo_func = SN.SpecialFunctions.echo ->
@@ -4074,33 +4096,17 @@ and call_parent_construct pos env el uel =
              * We can deal with this by hijacking the continuation that
              * calculates the SN.Typehints.this type *)
             let k_lhs _ = this_ty in
-            let tel = ref [] and tuel = ref [] and ftys = ref [] in
-            let env, method_, _method_decl, _ =
-              obj_get_ ~is_method:true ~nullsafe:None ~obj_pos:pos
-                ~pos_params:(Some el) ~valkind:`other env ty1 CIparent m
-              begin fun (env, fty, method_decl, _) ->
-                let env = check_coroutine_call env fty in
-                let fty_decl = Option.bind method_decl ~f:(fun f ->
-                  match f with
-                  | _, Tfun fd -> Some fd
-                  | _ -> None
-                ) in
-                let env, tel_, tuel_, method_ = call ~expected
-                  ~method_call_info:(TR.make_call_info ~receiver_is_self:false
-                    ~is_static:false this_ty (snd m)) ~fty_decl
-                  p env fty el uel in
-                tel := tel_; tuel := tuel_;
-                ftys := fty :: !ftys;
-                env, method_, method_decl, None
-              end
-              k_lhs
-            in
-            let fty =
-              match !ftys with
-              | [fty] -> fty
-              | l -> (Reason.none, Tunion l) in
+            let getter env k =
+              let env, method_, _, _ = obj_get_ ~is_method:true ~nullsafe:None ~obj_pos:pos
+                ~pos_params:(Some el) ~valkind:`other env ty1 CIparent m k k_lhs in
+              env, method_ in
+            let call_continuation env fty fty_decl =
+              let env = check_coroutine_call env fty in
+              call ~expected ~method_call_info:(TR.make_call_info ~receiver_is_self:false
+                ~is_static:false this_ty (snd m)) ~fty_decl p env fty el uel in
+            let env, method_, fty, tel, tuel = method_get_helper env getter call_continuation in
             make_call env (T.make_typed_expr fpos fty (T.Class_const (tcid, m)))
-              tal !tel !tuel method_
+              tal tel tuel method_
         else
             let env, fty, _ =
               class_get ~is_method:true ~is_const:false ~explicit_tparams:tal env ty1 m CIparent in
@@ -4133,25 +4139,14 @@ and call_parent_construct pos env el uel =
       let infer_e = CI (p, "\\Infer") in
       let env, _, ty1 = static_class_id ~check_constraints:true p env [] infer_e in
       let nullsafe = None in
-      let tel = ref [] and tuel = ref [] and tftyl = ref [] in
-      let fn = (fun (env, fty, fty_decl, _) ->
-        let env, tel_, tuel_, method_ =
-          call
-            ~expected
-            ~method_call_info:(TR.make_call_info ~receiver_is_self:false
-              ~is_static:false ty1 (snd m)) ~fty_decl:None
-            p env fty el uel in
-        tel := tel_; tuel := tuel_;
-        tftyl := fty :: !tftyl;
-        env, method_, fty_decl, None) in
-      let env, ty = obj_get ~obj_pos:p ~is_method:true ~nullsafe ~pos_params:el
-                      ~explicit_tparams:tal env ty1 infer_e m fn in
-      let tfty =
-        match !tftyl with
-        | [fty] -> fty
-        | tftyl -> (Reason.none, Tunion tftyl)
-      in
-      make_call env (T.make_typed_expr fpos tfty (T.Fun_id m)) tal !tel !tuel ty
+      let call_continuation env fty _fty_decl =
+        call ~expected ~method_call_info:(TR.make_call_info ~receiver_is_self:false
+          ~is_static:false ty1 (snd m)) ~fty_decl:None p env fty el uel in
+      let getter env k =
+        obj_get ~obj_pos:p ~is_method:true ~nullsafe ~pos_params:el
+          ~explicit_tparams:tal env ty1 infer_e m k in
+      let env, ty, tfty, tel, tuel = method_get_helper env getter call_continuation in
+      make_call env (T.make_typed_expr fpos tfty (T.Fun_id m)) tal tel tuel ty
 
   (* Call instance method *)
   | Obj_get(e1, (pos_id, Id m), nullflavor) ->
@@ -4162,32 +4157,16 @@ and call_parent_construct pos env el uel =
           | OG_nullthrows -> None
           | OG_nullsafe -> Some p
         ) in
-      let tel = ref [] and tuel = ref [] and tftyl = ref [] in
-      let k = (fun (env, fty, method_decl_, _) ->
+      let call_continuation env fty fty_decl =
         let env = check_coroutine_call env fty in
-        (* extract decl fun_type record for call function *)
-        let fty_decl = Option.bind method_decl_ ~f:(fun f ->
-          match f with
-          | _, Tfun fd -> Some fd
-          | _ -> None
-        ) in
-        let env, tel_, tuel_, method_ =
-          call ~expected
-            ~method_call_info:(TR.make_call_info ~receiver_is_self:false
-              ~is_static:false ty1 (snd m)) ~fty_decl
-            p env fty el uel in
-        tel := tel_; tuel := tuel_;
-        tftyl := fty :: !tftyl;
-        env, method_, method_decl_, None) in
-      let env, ty = obj_get ~obj_pos:(fst e1) ~is_method ~nullsafe ~pos_params:el
-                      ~explicit_tparams:tal env ty1 (CIexpr e1) m k in
-      let tfty =
-        match !tftyl with
-        | [fty] -> fty
-        | tftyl -> (Reason.none, Tunion tftyl)
-      in
+        call ~expected ~method_call_info:(TR.make_call_info ~receiver_is_self:false
+          ~is_static:false ty1 (snd m)) ~fty_decl p env fty el uel in
+      let getter env k =
+        obj_get ~obj_pos:(fst e1) ~is_method ~nullsafe ~pos_params:el
+          ~explicit_tparams:tal env ty1 (CIexpr e1) m k in
+      let env, ty, tfty, tel, tuel = method_get_helper env getter call_continuation in
       make_call env (T.make_typed_expr fpos tfty (T.Obj_get(te1,
-        T.make_typed_expr pos_id tfty (T.Id m), nullflavor))) tal !tel !tuel ty
+        T.make_typed_expr pos_id tfty (T.Id m), nullflavor))) tal tel tuel ty
 
   (* Function invocation *)
   | Fun_id x ->

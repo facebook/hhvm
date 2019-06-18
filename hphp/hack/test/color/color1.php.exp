@@ -27,13 +27,3 @@ function strict(int $x): int {
 function use_strict() {
   <unchecked>echo</unchecked> <checked>strict</checked>(<checked>1</checked>);
 }
-
-function has_unsafe(int $a) {
-  <unchecked>echo</unchecked> <checked>$a</checked>;
-  // UNSAFE
-  echo $a;
-}
-
-function has_unsafeexpr(string $a) {
-  <unchecked>echo</unchecked> /* UNSAFE_EXPR */ <unchecked>$a + 1</unchecked>;
-}

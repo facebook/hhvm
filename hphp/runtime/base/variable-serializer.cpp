@@ -1716,6 +1716,8 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
       switch (getType()) {
       case VariableSerializer::Type::JSON:      return "json_encode";
       case VariableSerializer::Type::Serialize: return "serialize";
+      case VariableSerializer::Type::VarExport: return "var_export";
+      case VariableSerializer::Type::PrintR:    return "print_r";
       default:                                  return nullptr;
       }
     }();

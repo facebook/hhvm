@@ -1,5 +1,5 @@
 (library
-  (name fetcher)
+  (name fetcher_stubs)
   (wrapped false)
   (libraries
     facts

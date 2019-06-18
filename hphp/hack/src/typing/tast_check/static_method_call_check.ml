@@ -41,6 +41,8 @@ let handler = object
             end
           | _ -> ()
         end
+      | CIparent when is_abstract_ft fty ->
+        Errors.parent_abstract_call (snd m) p (Reason.to_pos (fst fty))
       | CI c when is_abstract_ft fty ->
         Errors.classname_abstract_call (snd c) (snd m) p (Reason.to_pos (fst fty))
       | CI (_, classname) ->

@@ -3138,7 +3138,7 @@ and new_object
                 validate_dty = None;
               } in
               let env, ctor_fty = Phase.localize ~ety_env env ty in
-              env, check_abstract_parent_meth SN.Members.__construct p ctor_fty
+              env, ctor_fty
             | None -> env, ctor_fty
           in
           gather env tel tuel ((obj_ty,ctor_fty)::res) classes
@@ -3534,21 +3534,6 @@ and call_parent_construct pos env el uel =
            Errors.parent_outside_class pos;
            let ty = (Reason.Rwitness pos, Typing_utils.terr env) in
            env, [], [], ty, ty, ty
-
-(* parent::method() in a class definition invokes the specific parent
- * version of the method ... it better be callable *)
-and check_abstract_parent_meth mname pos fty =
-  if is_abstract_ft fty
-  then Errors.parent_abstract_call mname pos (Reason.to_pos (fst fty));
-  fty
-
-and is_abstract_ft fty = match fty with
-  | _r, Tfun { ft_abstract = true; _ } -> true
-  | _r, (Terr | Tany | Tnonnull | Tarraykind _ | Toption _ | Tprim _
-            | Tvar _ | Tfun _ | Tclass _ | Tabstract _ | Ttuple _
-            | Tanon _ | Tunion _ | Tobject | Tshape _ | Tdynamic
-        )
-    -> false
 
 (* Depending on the kind of expression we are dealing with
  * The typing of call is different.
@@ -4076,7 +4061,6 @@ and is_abstract_ft fty = match fty with
          * methods *)
         let env, fty, _ =
           class_get ~is_method:true ~is_const:false ~explicit_tparams:tal env ty1 m CIparent in
-        let fty = check_abstract_parent_meth (snd m) p fty in
         let env = check_coroutine_call env fty in
         let env, tel, tuel, ty =
           call ~expected
@@ -4101,7 +4085,6 @@ and is_abstract_ft fty = match fty with
               obj_get_ ~is_method:true ~nullsafe:None ~obj_pos:pos
                 ~pos_params:(Some el) ~valkind:`other env ty1 CIparent m
               begin fun (env, fty, method_decl, _) ->
-                let fty = check_abstract_parent_meth (snd m) p fty in
                 let env = check_coroutine_call env fty in
                 let fty_decl = Option.bind method_decl ~f:(fun f ->
                   match f with
@@ -4127,7 +4110,6 @@ and is_abstract_ft fty = match fty with
         else
             let env, fty, _ =
               class_get ~is_method:true ~is_const:false ~explicit_tparams:tal env ty1 m CIparent in
-            let fty = check_abstract_parent_meth (snd m) p fty in
             let env = check_coroutine_call env fty in
             let env, tel, tuel, ty =
               call ~expected ~method_call_info:(TR.make_call_info ~receiver_is_self:false

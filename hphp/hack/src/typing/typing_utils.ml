@@ -50,14 +50,12 @@ type sub_string = Pos.t -> Env.env -> locl ty -> Env.env
 let (sub_string_ref: sub_string ref) = ref not_implemented
 let sub_string x = !sub_string_ref x
 
-type is_sub_type_LEGACY_DEPRECATED_type = Env.env -> locl ty -> locl ty -> bool
-let (is_sub_type_LEGACY_DEPRECATED_ref: is_sub_type_LEGACY_DEPRECATED_type ref) = ref not_implemented
-let is_sub_type_LEGACY_DEPRECATED x = !is_sub_type_LEGACY_DEPRECATED_ref x
-
 type is_sub_type_type =
   Env.env -> locl ty -> locl ty -> bool
 let (is_sub_type_ref: is_sub_type_type ref) = ref not_implemented
 let is_sub_type x = !is_sub_type_ref x
+let (is_sub_type_for_union_ref: is_sub_type_type ref) = ref not_implemented
+let is_sub_type_for_union x = !is_sub_type_for_union_ref x
 
 type add_constraint = Pos.Map.key -> Env.env -> Ast.constraint_kind -> locl ty -> locl ty -> Env.env
 let (add_constraint_ref: add_constraint ref) = ref not_implemented
@@ -118,11 +116,11 @@ let this_of ty = Tabstract (AKdependent `this, Some ty)
 
 let is_option env ty =
   let null =  MakeType.null Reason.Rnone in
-  is_sub_type env null ty
+  is_sub_type_for_union env null ty
 
 let is_mixed env ty =
   let mixed = MakeType.mixed Reason.Rnone in
-  is_sub_type env mixed ty
+  is_sub_type_for_union env mixed ty
 
 let is_stringish env ty =
   let stringish = MakeType.class_type Reason.Rnone SN.Classes.cStringish [] in
@@ -185,6 +183,12 @@ let get_concrete_supertypes env ty =
 
       | Tabstract (_, None) ->
         iter seen env acc tyl
+      | Tunion tyl' ->
+        let tys = TySet.of_list tyl' in
+        begin match TySet.elements tys with
+        | [ty] -> iter seen env acc (ty::tyl)
+        | _ -> iter seen env (TySet.add ty acc) tyl
+        end
       | _ ->
         iter seen env (TySet.add ty acc) tyl
   in
@@ -215,10 +219,10 @@ let try_over_concrete_supertypes env ty f =
 (*****************************************************************************)
 let is_dynamic env ty =
   let dynamic = MakeType.dynamic Reason.Rnone in
-  is_sub_type env dynamic ty && not (is_mixed env ty)
+  is_sub_type_for_union env dynamic ty && not (is_mixed env ty)
 
 let is_hack_collection env ty =
-  is_sub_type_LEGACY_DEPRECATED env ty
+  is_sub_type env ty
     (MakeType.const_collection Reason.Rnone (MakeType.mixed Reason.Rnone))
 
 (*****************************************************************************)
@@ -653,10 +657,10 @@ let add_function_type env fty logged =
   match tyl with
   | [] -> [ty]
   | ty'::tyl' ->
-    if is_sub_type_LEGACY_DEPRECATED env ty ty' && not (HasTany.check ty)
+    if is_sub_type_for_union env ty ty' && not (HasTany.check ty)
     then try_intersect env ty tyl'
     else
-    if is_sub_type_LEGACY_DEPRECATED env ty' ty && not (HasTany.check ty')
+    if is_sub_type_for_union env ty' ty && not (HasTany.check ty')
     then try_intersect env ty' tyl'
     else ty' :: try_intersect env ty tyl'
 in

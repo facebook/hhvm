@@ -1414,7 +1414,8 @@ and subtype_param_rx_if_impl
   | None, Some cond_type_super ->
     Option.value_map declared_type_sub
       ~default:false
-      ~f:(fun declared_type_sub -> is_sub_type_LEGACY_DEPRECATED env declared_type_sub cond_type_super)
+      ~f:(fun declared_type_sub ->
+        is_sub_type_LEGACY_DEPRECATED env declared_type_sub cond_type_super)
   (* condition types are set for both sub and super types: contravariant check
     interface A {}
     interface B extends A {}
@@ -1832,10 +1833,10 @@ and is_sub_type_LEGACY_DEPRECATED
     result
   end
 
-and is_sub_type_alt env ty1 ty2 =
+and is_sub_type_alt ~ignore_generic_params ~no_top_bottom env ty1 ty2 =
   let _env, prop = simplify_subtype
-    ~seen_generic_params:None
-    ~no_top_bottom:true
+    ~seen_generic_params:(if ignore_generic_params then None else empty_seen)
+    ~no_top_bottom
     ~this_ty:(Some ty1)
     ty1 ty2 env in
   if TL.is_valid prop then Some true
@@ -1844,7 +1845,16 @@ and is_sub_type_alt env ty1 ty2 =
   else None
 
 and is_sub_type env ty1 ty2 =
-  is_sub_type_alt env ty1 ty2 = Some true
+  is_sub_type_alt ~ignore_generic_params:false ~no_top_bottom:false env ty1 ty2 = Some true
+
+and is_sub_type_for_union env ty1 ty2 =
+  is_sub_type_alt ~ignore_generic_params:false ~no_top_bottom:true env ty1 ty2 = Some true
+
+and can_sub_type env ty1 ty2 =
+  is_sub_type_alt ~ignore_generic_params:false ~no_top_bottom:true env ty1 ty2 <> Some false
+
+and is_sub_type_ignore_generic_params env ty1 ty2 =
+  is_sub_type_alt ~ignore_generic_params:true ~no_top_bottom:true env ty1 ty2 = Some true
 
 (* Attempt to compute the intersection of a type with an existing list intersection.
  * If try_intersect env t [t1;...;tn] = [u1; ...; um]
@@ -1860,17 +1870,17 @@ and try_intersect env ty tyl =
   match tyl with
   | [] -> [ty]
   | ty'::tyl' ->
-    if is_sub_type env ty ty'
+    if is_sub_type_ignore_generic_params env ty ty'
     then try_intersect env ty tyl'
     else
-    if is_sub_type env ty' ty
+    if is_sub_type_ignore_generic_params env ty' ty
     then tyl
     else
     let nonnull_ty = (fst ty, Tnonnull) in
     match ty, ty' with
-    | (_, Toption t), _ when is_sub_type env ty' nonnull_ty ->
+    | (_, Toption t), _ when is_sub_type_ignore_generic_params env ty' nonnull_ty ->
       try_intersect env t (ty'::tyl')
-    | _, (_, Toption t) when is_sub_type env ty nonnull_ty ->
+    | _, (_, Toption t) when is_sub_type_ignore_generic_params env ty nonnull_ty ->
       try_intersect env t (ty::tyl')
     | _, _ -> ty' :: try_intersect env ty tyl'
 
@@ -1892,10 +1902,10 @@ and try_union env ty tyl =
   match tyl with
   | [] -> [ty]
   | ty'::tyl' ->
-    if is_sub_type env ty ty'
+    if is_sub_type_for_union env ty ty'
     then tyl
     else
-    if is_sub_type env ty' ty
+    if is_sub_type_for_union env ty' ty
     then try_union env ty tyl'
     else match snd ty, snd ty' with
     | Tprim Nast.Tfloat, Tprim Nast.Tint
@@ -2653,7 +2663,7 @@ let widen env widen_concrete_type ty =
   widen env ty
 
 let is_nothing env ty =
-  is_sub_type env ty (Reason.none, Tunion [])
+  is_sub_type_ignore_generic_params env ty (Reason.none, Tunion [])
 
 (* Using the `widen_concrete_type` function to compute an upper bound,
  * narrow the constraints on a type that are valid for an operation.
@@ -2736,6 +2746,6 @@ let log_prop env =
 let () = Typing_utils.sub_type_ref := sub_type
 let () = Typing_utils.sub_string_ref := sub_string
 let () = Typing_utils.add_constraint_ref := add_constraint
-let () = Typing_utils.is_sub_type_LEGACY_DEPRECATED_ref := is_sub_type_LEGACY_DEPRECATED
 let () = Typing_utils.is_sub_type_ref := is_sub_type
+let () = Typing_utils.is_sub_type_for_union_ref := is_sub_type_for_union
 let () = Typing_utils.expand_type_and_solve_ref := expand_type_and_solve

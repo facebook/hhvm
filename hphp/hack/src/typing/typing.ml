@@ -4583,7 +4583,7 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
         if member_ce.ce_const && valkind = `lvalue then
           if not (env.Env.inside_constructor &&
             (* expensive call behind short circuiting && *)
-            SubType.is_sub_type_LEGACY_DEPRECATED env (Env.get_self env) concrete_ty) then
+            SubType.is_sub_type env (Env.get_self env) concrete_ty) then
             Errors.assigning_to_const id_pos;
 
         env, member_ty, Some member_decl_ty, Some (mem_pos, vis)

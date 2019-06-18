@@ -43,6 +43,23 @@ val is_sub_type :
   locl ty ->
   bool
 
+val is_sub_type_ignore_generic_params :
+  Env.env ->
+  locl ty ->
+  locl ty ->
+  bool
+
+val is_sub_type_for_union :
+  Env.env ->
+  locl ty ->
+  locl ty ->
+  bool
+
+val can_sub_type :
+  Env.env ->
+  locl ty ->
+  locl ty ->
+  bool
 (**
   Checks that ty_sub is a subtype of ty_super, and returns an env.
 

@@ -178,7 +178,7 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
     | Some env -> env
     | None ->
         (* if subtype of dynamic, allow it to be used *)
-        if Typing_subtype.is_sub_type_LEGACY_DEPRECATED env ty_have (fst ty_have, Tdynamic)
+        if Typing_subtype.is_sub_type env ty_have (MakeType.dynamic Reason.none)
         then env
         (* fail with useful error *)
         else
@@ -583,7 +583,7 @@ let rec assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
     | Some e -> e
     | None ->
       (* if subtype of dynamic, allow it to be used *)
-      if Typing_subtype.is_sub_type_LEGACY_DEPRECATED env ty_have (fst ty_have, Tdynamic)
+      if Typing_subtype.is_sub_type env ty_have (MakeType.dynamic Reason.none)
       then env
       (* fail with useful error *)
       else Typing_ops.sub_type p reason env ty_have ty_expect in

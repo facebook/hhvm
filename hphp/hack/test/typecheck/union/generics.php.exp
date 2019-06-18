@@ -47,14 +47,13 @@ File "generics.php--file2.php", line 128, characters 3-13:
 File "generics.php--file2.php", line 131, characters 3-13:
   classname<C>
 File "generics.php--file2.php", line 134, characters 3-13:
-  (Tu | C)
+  Tu
   where Tu super \C
 File "generics.php--file2.php", line 137, characters 3-13:
-  (Tv | C)
-  where Tv as \C
+  C
 File "generics.php--file2.php", line 140, characters 3-13:
-  (Tu | Tv)
-  where Tu super \C, Tv as \C
+  Tu
+  where Tu super \C
 File "generics.php--file2.php", line 143, characters 3-13:
   (Tu | Tw)
   where Tu super \C, Tw super \C
@@ -66,11 +65,9 @@ File "generics.php--file2.php", line 22, characters 5-15:
 File "generics.php--file2.php", line 25, characters 5-15:
   ?(int | AA::Tabs)
 File "generics.php--file2.php", line 28, characters 5-15:
-  (int | AA::Tcstr)
-  where \AA::Tcstr as int
+  int
 File "generics.php--file2.php", line 31, characters 5-15:
-  ?(int | AA::Tcstr)
-  where \AA::Tcstr as int
+  ?int
 File "generics.php--file2.php", line 102, characters 32-33:
 Invalid argument (Typing[4110])
 File "generics.php--file2.php", line 100, characters 20-22:

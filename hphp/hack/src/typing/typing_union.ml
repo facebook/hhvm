@@ -58,11 +58,19 @@ let make_union r tyl reason_nullable_opt ~discard_singletons =
   | _, Some null_r, tyl -> (null_r, Toption (r, Tunion tyl))
 
 let rec union env (r1, _ as ty1) (r2, _ as ty2) =
+  let env, result =
   if ty_equal ty1 ty2 then env, ty1 else
-  if Typing_utils.is_sub_type env ty1 ty2 then env, ty2 else
-  if Typing_utils.is_sub_type env ty2 ty1 then env, ty1 else
+  if Typing_utils.is_sub_type_for_union env ty1 ty2 then env, ty2 else
+  if Typing_utils.is_sub_type_for_union env ty2 ty1 then env, ty1 else
   let r = union_reason r1 r2 in
-  union_ env ty1 ty2 r
+  union_ env ty1 ty2 r in
+    Typing_log.(log_with_level env "sub" 1 (fun () ->
+      log_types (Reason.to_pos r2) env
+      [Log_head ("Typing_union.union",
+         [Log_type ("ty1", ty1);
+          Log_type ("ty2", ty2); Log_type("result", result)])]));
+          env, result
+
 
 and union_ env ty1 ty2 r =
   let env, ty1 = Env.expand_type env ty1 in

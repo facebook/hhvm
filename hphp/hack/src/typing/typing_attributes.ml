@@ -33,7 +33,7 @@ let check_implements check_new_object attr_interface
        MakeType.class_type (Rwitness (Cls.pos attr_class)) (Cls.name attr_class) [] in
      let interface_locl_ty: (Typing_defs.locl Typing_defs.ty) =
        MakeType.class_type (Rwitness (Cls.pos intf_class)) (Cls.name intf_class) [] in
-      if not (Typing_subtype.is_sub_type_LEGACY_DEPRECATED env attr_locl_ty interface_locl_ty)
+      if not (Typing_subtype.is_sub_type env attr_locl_ty interface_locl_ty)
       then begin
         let expr_kind =
           match SMap.get attr_interface SN.AttributeKinds.plain_english_map  with

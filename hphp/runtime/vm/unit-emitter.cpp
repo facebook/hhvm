@@ -1169,7 +1169,7 @@ void UnitRepoProxy::GetUnitArraysStmt
   auto txn = RepoTxn{m_repo.begin()};
   if (!prepared()) {
     auto selectQuery = folly::sformat(
-      "SELECT arrayId, array, provenanceLine FROM {} "
+      "SELECT arrayId, array, provenanceLine, provenanceFile FROM {} "
       " WHERE unitSn == @unitSn ORDER BY arrayId ASC;",
       m_repo.table(m_repoId, "UnitArray"));
     txn.prepare(*this, selectQuery);
@@ -1190,6 +1190,9 @@ void UnitRepoProxy::GetUnitArraysStmt
       bool has_prov = !query.isNull(2);
       if (has_prov) query.getInt(2, prov_line);
 
+      StringData* prov_file;
+      query.getStaticString(3, prov_file);
+
       Variant v = unserialize_from_buffer(
         key.data(),
         key.size(),
@@ -1199,7 +1202,8 @@ void UnitRepoProxy::GetUnitArraysStmt
       ArrayData* ad = v.detach().m_data.parr;
       if (has_prov) {
         assertx(!ad->empty());
-        arrprov::setTag(ad, {ue.m_filepath, prov_line});
+        auto const file = prov_file ? prov_file : ue.m_filepath;
+        arrprov::setTag(ad, {file, prov_line});
       }
       ArrayData::GetScalarArray(&ad);
       Id id DEBUG_ONLY = ue.mergeArray(ad);

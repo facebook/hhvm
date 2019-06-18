@@ -1,0 +1,6 @@
+
+Notice: Observing vec in serialize from %s/double-logging.php:5 in %s/double-logging.php on line 6
+string(18) "v:3:{i:1;i:2;i:3;}"
+
+Notice: Observing vec in serialize from %s/double-logging.php:5 in %s/double-logging.php on line 7
+string(18) "v:3:{i:1;i:2;i:3;}"

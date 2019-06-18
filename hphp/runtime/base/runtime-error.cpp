@@ -190,16 +190,30 @@ void raise_hack_arr_compat_serialize_notice(const ArrayData* arr) {
 namespace {
 
 folly::Synchronized<
-  folly::F14FastSet<std::string>,
+  folly::F14FastSet<std::pair<PC, std::string>>,
   std::mutex
   > g_previouslyRaisedNotices;
 
 template <typename... Args>
 void raise_dynamically_sampled_notice(folly::StringPiece fmt, Args&& ... args) {
+  /*
+   * We want to dedupe notices, but not so much that we exclude
+   * notices at a new location, so we need to grab the first
+   * not-skipframe saved PC, since this is the first frame that will
+   * be listed in the backtrace
+   */
+  VMRegAnchor _;
+  auto const pc = [&] {
+    if (LIKELY(!vmfp()->skipFrame())) return vmpc();
+    Offset offset;
+    auto ar = g_context->getPrevVMStateSkipFrame(vmfp(), &offset);
+    return ar->func()->unit()->at(offset);
+  }();
+
   auto const str = folly::sformat(fmt, std::move(args) ...);
   {
     auto notices = g_previouslyRaisedNotices.lock();
-    auto const inserted = notices->insert(str);
+    auto const inserted = notices->emplace(pc, str);
     if (!inserted.second) return;
   }
   raise_notice(str);

@@ -3323,6 +3323,8 @@ struct SpillerResults {
   };
   jit::vector<PerBlock> perBlock;
   VregSet ssaize;
+  // Did we rematerialize anything?
+  bool rematerialized = false;
 
   std::string toString(const State& state) const {
     std::string ret;
@@ -3658,6 +3660,7 @@ size_t setup_initial_spiller_state(const State& state,
 // instruction is emitted. The number of instructions emitted is returned.
 size_t reload_with_remat(Vout& v,
                          State& state,
+                         SpillerResults& results,
                          const VregSet& gpInReg,
                          const VregSet& simdInReg,
                          Vreg src,
@@ -3706,6 +3709,7 @@ size_t reload_with_remat(Vout& v,
     [&] (Vreg)  { return temp; }
   );
   v << inst;
+  results.rematerialized = true;
 
   // If we used a new Vreg as the instruction output, assign it the same info as
   // the dest Vreg (except for the precolor), and insert a copy after the
@@ -4087,6 +4091,7 @@ size_t process_inst_spills(State& state,
           added += reload_with_remat(
             v,
             state,
+            results,
             spiller.gp.inReg,
             spiller.simd.inReg,
             r,
@@ -4531,6 +4536,7 @@ void fixup_spill_mismatches(State& state, SpillerResults& results) {
               reload_with_remat(
                 v,
                 state,
+                results,
                 pred->gp.inReg,
                 pred->simd.inReg,
                 r,
@@ -4806,8 +4812,9 @@ void insert_spills(State& state) {
 
   set_spill_reg_classes(state, results, mappings);
 
-  // Rematerialization may have created dead code, so remove it now.
-  removeDeadCode(state.unit);
+  // If we rematerialized anything, we may have created dead spills,
+  // so remove them.
+  if (results.rematerialized) removeDeadCode(state.unit);
 
   assertx(check(state.unit));
 }

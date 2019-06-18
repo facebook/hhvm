@@ -190,7 +190,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.DecoratedExpression _ -> tag validate_decorated_expression (fun x -> ExprDecorated x) x
     | Syntax.InclusionExpression _ -> tag validate_inclusion_expression (fun x -> ExprInclusion x) x
     | Syntax.AnonymousFunction _ -> tag validate_anonymous_function (fun x -> ExprAnonymousFunction x) x
-    | Syntax.Php7AnonymousFunction _ -> tag validate_php7_anonymous_function (fun x -> ExprPhp7AnonymousFunction x) x
     | Syntax.LambdaExpression _ -> tag validate_lambda_expression (fun x -> ExprLambda x) x
     | Syntax.CastExpression _ -> tag validate_cast_expression (fun x -> ExprCast x) x
     | Syntax.ScopeResolutionExpression _ -> tag validate_scope_resolution_expression (fun x -> ExprScopeResolution x) x
@@ -245,7 +244,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | ExprDecorated                    thing -> invalidate_decorated_expression           (value, thing)
     | ExprInclusion                    thing -> invalidate_inclusion_expression           (value, thing)
     | ExprAnonymousFunction            thing -> invalidate_anonymous_function             (value, thing)
-    | ExprPhp7AnonymousFunction        thing -> invalidate_php7_anonymous_function        (value, thing)
     | ExprLambda                       thing -> invalidate_lambda_expression              (value, thing)
     | ExprCast                         thing -> invalidate_cast_expression                (value, thing)
     | ExprScopeResolution              thing -> invalidate_scope_resolution_expression    (value, thing)
@@ -449,7 +447,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.InclusionExpression _ -> tag validate_inclusion_expression (fun x -> LambdaInclusion x) x
     | Syntax.CompoundStatement _ -> tag validate_compound_statement (fun x -> LambdaCompoundStatement x) x
     | Syntax.AnonymousFunction _ -> tag validate_anonymous_function (fun x -> LambdaAnonymousFunction x) x
-    | Syntax.Php7AnonymousFunction _ -> tag validate_php7_anonymous_function (fun x -> LambdaPhp7AnonymousFunction x) x
     | Syntax.LambdaExpression _ -> tag validate_lambda_expression (fun x -> LambdaLambda x) x
     | Syntax.CastExpression _ -> tag validate_cast_expression (fun x -> LambdaCast x) x
     | Syntax.ScopeResolutionExpression _ -> tag validate_scope_resolution_expression (fun x -> LambdaScopeResolution x) x
@@ -504,7 +501,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | LambdaInclusion                    thing -> invalidate_inclusion_expression           (value, thing)
     | LambdaCompoundStatement            thing -> invalidate_compound_statement             (value, thing)
     | LambdaAnonymousFunction            thing -> invalidate_anonymous_function             (value, thing)
-    | LambdaPhp7AnonymousFunction        thing -> invalidate_php7_anonymous_function        (value, thing)
     | LambdaLambda                       thing -> invalidate_lambda_expression              (value, thing)
     | LambdaCast                         thing -> invalidate_cast_expression                (value, thing)
     | LambdaScopeResolution              thing -> invalidate_scope_resolution_expression    (value, thing)
@@ -557,7 +553,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.DecoratedExpression _ -> tag validate_decorated_expression (fun x -> CExprDecorated x) x
     | Syntax.InclusionExpression _ -> tag validate_inclusion_expression (fun x -> CExprInclusion x) x
     | Syntax.AnonymousFunction _ -> tag validate_anonymous_function (fun x -> CExprAnonymousFunction x) x
-    | Syntax.Php7AnonymousFunction _ -> tag validate_php7_anonymous_function (fun x -> CExprPhp7AnonymousFunction x) x
     | Syntax.LambdaExpression _ -> tag validate_lambda_expression (fun x -> CExprLambda x) x
     | Syntax.CastExpression _ -> tag validate_cast_expression (fun x -> CExprCast x) x
     | Syntax.ScopeResolutionExpression _ -> tag validate_scope_resolution_expression (fun x -> CExprScopeResolution x) x
@@ -612,7 +607,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | CExprDecorated                    thing -> invalidate_decorated_expression           (value, thing)
     | CExprInclusion                    thing -> invalidate_inclusion_expression           (value, thing)
     | CExprAnonymousFunction            thing -> invalidate_anonymous_function             (value, thing)
-    | CExprPhp7AnonymousFunction        thing -> invalidate_php7_anonymous_function        (value, thing)
     | CExprLambda                       thing -> invalidate_lambda_expression              (value, thing)
     | CExprCast                         thing -> invalidate_cast_expression                (value, thing)
     | CExprScopeResolution              thing -> invalidate_scope_resolution_expression    (value, thing)
@@ -2138,40 +2132,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; anonymous_type = invalidate_option_with (invalidate_specifier) x.anonymous_type
       ; anonymous_use = invalidate_option_with (invalidate_anonymous_function_use_clause) x.anonymous_use
       ; anonymous_body = invalidate_compound_statement x.anonymous_body
-      }
-    ; Syntax.value = v
-    }
-  and validate_php7_anonymous_function : php7_anonymous_function validator = function
-  | { Syntax.syntax = Syntax.Php7AnonymousFunction x; value = v } -> v,
-    { php7_anonymous_body = validate_compound_statement x.php7_anonymous_body
-    ; php7_anonymous_type = validate_option_with (validate_specifier) x.php7_anonymous_type
-    ; php7_anonymous_colon = validate_option_with (validate_token) x.php7_anonymous_colon
-    ; php7_anonymous_use = validate_option_with (validate_anonymous_function_use_clause) x.php7_anonymous_use
-    ; php7_anonymous_right_paren = validate_token x.php7_anonymous_right_paren
-    ; php7_anonymous_parameters = validate_list_with (validate_parameter) x.php7_anonymous_parameters
-    ; php7_anonymous_left_paren = validate_token x.php7_anonymous_left_paren
-    ; php7_anonymous_function_keyword = validate_token x.php7_anonymous_function_keyword
-    ; php7_anonymous_coroutine_keyword = validate_option_with (validate_token) x.php7_anonymous_coroutine_keyword
-    ; php7_anonymous_async_keyword = validate_option_with (validate_token) x.php7_anonymous_async_keyword
-    ; php7_anonymous_static_keyword = validate_option_with (validate_token) x.php7_anonymous_static_keyword
-    ; php7_anonymous_attribute_spec = validate_option_with (validate_attribute_specification) x.php7_anonymous_attribute_spec
-    }
-  | s -> validation_fail (Some SyntaxKind.Php7AnonymousFunction) s
-  and invalidate_php7_anonymous_function : php7_anonymous_function invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.Php7AnonymousFunction
-      { php7_anonymous_attribute_spec = invalidate_option_with (invalidate_attribute_specification) x.php7_anonymous_attribute_spec
-      ; php7_anonymous_static_keyword = invalidate_option_with (invalidate_token) x.php7_anonymous_static_keyword
-      ; php7_anonymous_async_keyword = invalidate_option_with (invalidate_token) x.php7_anonymous_async_keyword
-      ; php7_anonymous_coroutine_keyword = invalidate_option_with (invalidate_token) x.php7_anonymous_coroutine_keyword
-      ; php7_anonymous_function_keyword = invalidate_token x.php7_anonymous_function_keyword
-      ; php7_anonymous_left_paren = invalidate_token x.php7_anonymous_left_paren
-      ; php7_anonymous_parameters = invalidate_list_with (invalidate_parameter) x.php7_anonymous_parameters
-      ; php7_anonymous_right_paren = invalidate_token x.php7_anonymous_right_paren
-      ; php7_anonymous_use = invalidate_option_with (invalidate_anonymous_function_use_clause) x.php7_anonymous_use
-      ; php7_anonymous_colon = invalidate_option_with (invalidate_token) x.php7_anonymous_colon
-      ; php7_anonymous_type = invalidate_option_with (invalidate_specifier) x.php7_anonymous_type
-      ; php7_anonymous_body = invalidate_compound_statement x.php7_anonymous_body
       }
     ; Syntax.value = v
     }

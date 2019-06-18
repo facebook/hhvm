@@ -892,25 +892,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_php7_anonymous_function(php7_anonymous_attribute_spec: Self, php7_anonymous_static_keyword: Self, php7_anonymous_async_keyword: Self, php7_anonymous_coroutine_keyword: Self, php7_anonymous_function_keyword: Self, php7_anonymous_left_paren: Self, php7_anonymous_parameters: Self, php7_anonymous_right_paren: Self, php7_anonymous_use: Self, php7_anonymous_colon: Self, php7_anonymous_type: Self, php7_anonymous_body: Self) -> Self {
-        let syntax = SyntaxVariant::Php7AnonymousFunction(Box::new(Php7AnonymousFunctionChildren {
-            php7_anonymous_attribute_spec,
-            php7_anonymous_static_keyword,
-            php7_anonymous_async_keyword,
-            php7_anonymous_coroutine_keyword,
-            php7_anonymous_function_keyword,
-            php7_anonymous_left_paren,
-            php7_anonymous_parameters,
-            php7_anonymous_right_paren,
-            php7_anonymous_use,
-            php7_anonymous_colon,
-            php7_anonymous_type,
-            php7_anonymous_body,
-        }));
-        let value = V::from_syntax(&syntax);
-        Self::make(syntax, value)
-    }
-
     fn make_anonymous_function_use_clause(anonymous_use_keyword: Self, anonymous_use_left_paren: Self, anonymous_use_variables: Self, anonymous_use_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::AnonymousFunctionUseClause(Box::new(AnonymousFunctionUseClauseChildren {
             anonymous_use_keyword,
@@ -2471,21 +2452,6 @@ where
                 let acc = f(&x.anonymous_body, acc);
                 acc
             },
-            SyntaxVariant::Php7AnonymousFunction(x) => {
-                let acc = f(&x.php7_anonymous_attribute_spec, acc);
-                let acc = f(&x.php7_anonymous_static_keyword, acc);
-                let acc = f(&x.php7_anonymous_async_keyword, acc);
-                let acc = f(&x.php7_anonymous_coroutine_keyword, acc);
-                let acc = f(&x.php7_anonymous_function_keyword, acc);
-                let acc = f(&x.php7_anonymous_left_paren, acc);
-                let acc = f(&x.php7_anonymous_parameters, acc);
-                let acc = f(&x.php7_anonymous_right_paren, acc);
-                let acc = f(&x.php7_anonymous_use, acc);
-                let acc = f(&x.php7_anonymous_colon, acc);
-                let acc = f(&x.php7_anonymous_type, acc);
-                let acc = f(&x.php7_anonymous_body, acc);
-                acc
-            },
             SyntaxVariant::AnonymousFunctionUseClause(x) => {
                 let acc = f(&x.anonymous_use_keyword, acc);
                 let acc = f(&x.anonymous_use_left_paren, acc);
@@ -3191,7 +3157,6 @@ where
             SyntaxVariant::SimpleInitializer {..} => SyntaxKind::SimpleInitializer,
             SyntaxVariant::AnonymousClass {..} => SyntaxKind::AnonymousClass,
             SyntaxVariant::AnonymousFunction {..} => SyntaxKind::AnonymousFunction,
-            SyntaxVariant::Php7AnonymousFunction {..} => SyntaxKind::Php7AnonymousFunction,
             SyntaxVariant::AnonymousFunctionUseClause {..} => SyntaxKind::AnonymousFunctionUseClause,
             SyntaxVariant::LambdaExpression {..} => SyntaxKind::LambdaExpression,
             SyntaxVariant::LambdaSignature {..} => SyntaxKind::LambdaSignature,
@@ -3920,22 +3885,6 @@ pub struct AnonymousFunctionChildren<T, V> {
     pub anonymous_type: Syntax<T, V>,
     pub anonymous_use: Syntax<T, V>,
     pub anonymous_body: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct Php7AnonymousFunctionChildren<T, V> {
-    pub php7_anonymous_attribute_spec: Syntax<T, V>,
-    pub php7_anonymous_static_keyword: Syntax<T, V>,
-    pub php7_anonymous_async_keyword: Syntax<T, V>,
-    pub php7_anonymous_coroutine_keyword: Syntax<T, V>,
-    pub php7_anonymous_function_keyword: Syntax<T, V>,
-    pub php7_anonymous_left_paren: Syntax<T, V>,
-    pub php7_anonymous_parameters: Syntax<T, V>,
-    pub php7_anonymous_right_paren: Syntax<T, V>,
-    pub php7_anonymous_use: Syntax<T, V>,
-    pub php7_anonymous_colon: Syntax<T, V>,
-    pub php7_anonymous_type: Syntax<T, V>,
-    pub php7_anonymous_body: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -4733,7 +4682,6 @@ pub enum SyntaxVariant<T, V> {
     SimpleInitializer(Box<SimpleInitializerChildren<T, V>>),
     AnonymousClass(Box<AnonymousClassChildren<T, V>>),
     AnonymousFunction(Box<AnonymousFunctionChildren<T, V>>),
-    Php7AnonymousFunction(Box<Php7AnonymousFunctionChildren<T, V>>),
     AnonymousFunctionUseClause(Box<AnonymousFunctionUseClauseChildren<T, V>>),
     LambdaExpression(Box<LambdaExpressionChildren<T, V>>),
     LambdaSignature(Box<LambdaSignatureChildren<T, V>>),

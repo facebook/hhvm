@@ -2242,42 +2242,36 @@ module WithStatementAndDeclAndTypeParser
     let (parser, left_paren, params, right_paren) =
       parse_parameter_list_opt parser
     in
-    let (parser1, use_clause) = parse_anon_use_opt parser in
-    if not (SC.is_missing use_clause) && peek_token_kind parser1 = Colon then
-      let (parser, colon, return_type) = parse_optional_return parser1 in
-      let (parser, body) = parse_compound_statement parser in
-      Make.php7_anonymous_function
+    let (parser, colon, return_type) = parse_optional_return parser in
+    let (parser, use_clause) = parse_anon_use_opt parser in
+    (* Detect if the user has the type in the wrong place
+       function() use(): T // wrong
+       function(): T use() // correct
+     *)
+    let parser =
+      if SC.is_missing use_clause then
         parser
-        attribute_spec
-        static
-        async
-        coroutine
-        fn
-        left_paren
-        params
-        right_paren
-        use_clause
-        colon
-        return_type
-        body
-    else
-      let (parser, colon, return_type) = parse_optional_return parser in
-      let (parser, use_clause) = parse_anon_use_opt parser in
-      let (parser, body) = parse_compound_statement parser in
-      Make.anonymous_function
-        parser
-        attribute_spec
-        static
-        async
-        coroutine
-        fn
-        left_paren
-        params
-        right_paren
-        colon
-        return_type
-        use_clause
-        body
+      else
+        (let (_, misplaced_colon) = optional_token parser Colon in
+         if SC.is_missing misplaced_colon then
+           parser
+         else
+           with_error parser "Bad signature: use(...) should occur after the type") in
+    let (parser, body) = parse_compound_statement parser in
+    Make.anonymous_function
+      parser
+      attribute_spec
+      static
+      async
+      coroutine
+      fn
+      left_paren
+      params
+      right_paren
+      colon
+      return_type
+      use_clause
+      body
 
   and parse_braced_expression parser =
     let (parser, left_brace) = assert_token parser LeftBrace in

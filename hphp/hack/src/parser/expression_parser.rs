@@ -4,6 +4,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::borrow::Cow;
 use std::marker::PhantomData;
 
 use crate::declaration_parser::DeclarationParser;
@@ -2736,49 +2737,36 @@ where
         let coroutine = self.optional_token(TokenKind::Coroutine);
         let fn_ = self.assert_token(TokenKind::Function);
         let (left_paren, params, right_paren) = self.parse_parameter_list_opt();
-        let mut parser1 = self.clone();
-        let use_clause = parser1.parse_anon_use_opt();
-        if !(use_clause.is_missing()) && parser1.peek_token_kind() == TokenKind::Colon {
-            self.continue_from(parser1);
-            let (colon, return_type) = self.parse_optional_return();
-            let body = self.parse_compound_statement();
-            S!(
-                make_php7_anonymous_function,
-                self,
-                attribute_spec,
-                static_,
-                async_,
-                coroutine,
-                fn_,
-                left_paren,
-                params,
-                right_paren,
-                use_clause,
-                colon,
-                return_type,
-                body,
-            )
-        } else {
-            let (colon, return_type) = self.parse_optional_return();
-            let use_clause = self.parse_anon_use_opt();
-            let body = self.parse_compound_statement();
-            S!(
-                make_anonymous_function,
-                self,
-                attribute_spec,
-                static_,
-                async_,
-                coroutine,
-                fn_,
-                left_paren,
-                params,
-                right_paren,
-                colon,
-                return_type,
-                use_clause,
-                body,
-            )
+        let (colon, return_type) = self.parse_optional_return();
+        let use_clause = self.parse_anon_use_opt();
+        // Detect if the user has the type in the wrong place
+        // function() use(): T // wrong
+        // function(): T use() // correct
+        if !use_clause.is_missing() {
+            let misplaced_colon = self.optional_token(TokenKind::Colon);
+            if !misplaced_colon.is_missing() {
+                self.with_error(Cow::Borrowed(
+                    "Bad signature: use(...) should occur after the type",
+                ));
+            }
         }
+        let body = self.parse_compound_statement();
+        S!(
+            make_anonymous_function,
+            self,
+            attribute_spec,
+            static_,
+            async_,
+            coroutine,
+            fn_,
+            left_paren,
+            params,
+            right_paren,
+            colon,
+            return_type,
+            use_clause,
+            body,
+        )
     }
 
     fn parse_braced_expression(&mut self) -> S::R {

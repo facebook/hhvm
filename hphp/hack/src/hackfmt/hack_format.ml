@@ -1231,39 +1231,6 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
         ~allow_collapse:true
         body;
     ]
-  | Syntax.Php7AnonymousFunction {
-      php7_anonymous_attribute_spec = attr;
-      php7_anonymous_static_keyword = static_kw;
-      php7_anonymous_async_keyword = async_kw;
-      php7_anonymous_coroutine_keyword = coroutine_kw;
-      php7_anonymous_function_keyword = fun_kw;
-      php7_anonymous_left_paren = lp;
-      php7_anonymous_parameters = params;
-      php7_anonymous_right_paren = rp;
-      php7_anonymous_use = use;
-      php7_anonymous_colon = colon;
-      php7_anonymous_type = ret_type;
-      php7_anonymous_body = body; } ->
-    Concat [
-      t env attr;
-      when_present attr space;
-      t env static_kw;
-      when_present static_kw space;
-      t env async_kw;
-      when_present async_kw space;
-      t env coroutine_kw;
-      when_present coroutine_kw space;
-      t env fun_kw;
-      transform_argish env lp params rp;
-      t env use;
-      t env colon;
-      when_present colon space;
-      t env ret_type;
-      handle_possible_compound_statement env
-        ~space:false
-        ~allow_collapse:true
-        body;
-    ]
   | Syntax.AnonymousFunctionUseClause {
       anonymous_use_keyword = kw;
       anonymous_use_left_paren = left_p;

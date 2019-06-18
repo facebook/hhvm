@@ -441,11 +441,6 @@ where
         (s, Self::R::make_anonymous_function(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11))
     }
 
-    fn make_php7_anonymous_function(s: State::T, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R, arg8 : Self::R, arg9 : Self::R, arg10 : Self::R, arg11 : Self::R) -> (State::T, Self::R) {
-        let s = State::next(s, vec![&arg0, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9, &arg10, &arg11]);
-        (s, Self::R::make_php7_anonymous_function(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11))
-    }
-
     fn make_anonymous_function_use_clause(s: State::T, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State::T, Self::R) {
         let s = State::next(s, vec![&arg0, &arg1, &arg2, &arg3]);
         (s, Self::R::make_anonymous_function_use_clause(arg0, arg1, arg2, arg3))

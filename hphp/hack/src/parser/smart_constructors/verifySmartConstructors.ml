@@ -697,14 +697,6 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
 
-  let make_php7_anonymous_function p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 stack =
-    match stack with
-    | a11 :: a10 :: a9 :: a8 :: a7 :: a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
-      let () = verify ~stack [p0; p1; p2; p3; p4; p5; p6; p7; p8; p9; p10; p11] [a0; a1; a2; a3; a4; a5; a6; a7; a8; a9; a10; a11] "php7_anonymous_function" in
-      let node = Syntax.make_php7_anonymous_function p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 in
-      node :: rem, node
-    | _ -> failwith "Unexpected stack state"
-
   let make_anonymous_function_use_clause p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->

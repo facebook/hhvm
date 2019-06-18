@@ -838,7 +838,6 @@ let is_immediately_in_lambda context =
   Option.value_map context.active_callable ~default:false ~f:(fun node ->
     match syntax node with
     | AnonymousFunction _
-    | Php7AnonymousFunction _
     | LambdaExpression _
     | AwaitableCreationExpression _ -> true
     | _ -> false
@@ -981,8 +980,6 @@ let is_inside_async_method context =
       end
     | AnonymousFunction { anonymous_async_keyword; _ } ->
       not @@ is_missing anonymous_async_keyword
-    | Php7AnonymousFunction { php7_anonymous_async_keyword; _ } ->
-      not @@ is_missing php7_anonymous_async_keyword
     | LambdaExpression { lambda_async; _ } ->
       not @@ is_missing lambda_async
     | AwaitableCreationExpression _ -> true
@@ -1237,7 +1234,6 @@ let check_nonrx_annotation node errors =
     | FunctionDeclaration { function_attribute_spec = s; _ } ->
       Some (syntax s, true)
     | AnonymousFunction { anonymous_attribute_spec = s; _ }
-    | Php7AnonymousFunction { php7_anonymous_attribute_spec = s; _ }
     | LambdaExpression { lambda_attribute_spec = s; _ }
     | AwaitableCreationExpression { awaitable_attribute_spec = s; _ } ->
       Some (syntax s, false)
@@ -1878,7 +1874,6 @@ let parameter_errors env node namespace_name names errors =
     names, errors
   | FunctionDeclarationHeader { function_parameter_list = params; _ }
   | AnonymousFunction { anonymous_parameters = params; _ }
-  | Php7AnonymousFunction { php7_anonymous_parameters = params; _ }
   | ClosureTypeSpecifier { closure_parameter_list = params; _ }
   | LambdaExpression
     { lambda_signature = {syntax = LambdaSignature { lambda_parameters = params; _ }; _}
@@ -2278,7 +2273,6 @@ let find_invalid_lval_usage nodes =
     let node = syntax syntax_node in
     match node with
     | AnonymousFunction _
-    | Php7AnonymousFunction _
     | LambdaExpression _
     | AwaitableCreationExpression _ ->
       errors, false
@@ -2510,7 +2504,6 @@ let await_as_an_expression_errors await_node parents =
 let node_has_await_child = rec_walk ~init:false ~f:(fun acc node _ ->
   let is_new_scope = match syntax node with
     | AnonymousFunction _
-    | Php7AnonymousFunction _
     | LambdaExpression _
     | AwaitableCreationExpression _ ->
       true
@@ -2794,7 +2787,6 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
     let errors = no_memoize_attribute_on_lambda s errors in
     no_async_before_lambda_body env body errors
   | AnonymousFunction { anonymous_attribute_spec = s; _ }
-  | Php7AnonymousFunction { php7_anonymous_attribute_spec = s; _ }
   | AwaitableCreationExpression { awaitable_attribute_spec = s; _ }
     -> no_memoize_attribute_on_lambda s errors
   | CollectionLiteralExpression
@@ -3754,7 +3746,7 @@ let assignment_errors _env node errors =
         check_lvalue ~allow_reassign_this e errors
       | SubscriptExpression { subscript_receiver = e; _ } ->
         check_lvalue ~allow_reassign_this:true e errors
-      | LambdaExpression _ | AnonymousFunction _ | Php7AnonymousFunction _
+      | LambdaExpression _ | AnonymousFunction _
       | AwaitableCreationExpression _
       | ArrayIntrinsicExpression _ | ArrayCreationExpression _
       | DarrayIntrinsicExpression _
@@ -3896,7 +3888,6 @@ let find_syntax_errors env =
             active_callable_attr_spec = Some s;
           }
         | AnonymousFunction { anonymous_attribute_spec = s; _ }
-        | Php7AnonymousFunction { php7_anonymous_attribute_spec = s; _ }
         | LambdaExpression { lambda_attribute_spec = s; _ }
         | AwaitableCreationExpression { awaitable_attribute_spec = s; _ } ->
           (* preserve context when entering lambdas (and anonymous functions) *)
@@ -3959,7 +3950,6 @@ let find_syntax_errors env =
       | IsExpression _
       | AsExpression _
       | AnonymousFunction _
-      | Php7AnonymousFunction _
       | SubscriptExpression _
       | ConstructorCall _
       | AwaitableCreationExpression _
@@ -4042,8 +4032,7 @@ let find_syntax_errors env =
     match syntax node with
     | LambdaExpression _
     | AwaitableCreationExpression _
-    | AnonymousFunction _
-    | Php7AnonymousFunction _ ->
+    | AnonymousFunction _ ->
       (* reset is_in_concurrent_block for functions *)
       let acc1 =
         make_acc

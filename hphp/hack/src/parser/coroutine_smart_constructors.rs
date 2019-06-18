@@ -126,29 +126,6 @@ impl<'a, S: SyntaxType> SyntaxSmartConstructors<'a, S, State<S>> for CoroutineSm
         )
     }
 
-    fn make_php7_anonymous_function(
-        st: Bool<'a>,
-        r1: Self::R,
-        r2: Self::R,
-        r3: Self::R,
-        coroutine: Self::R,
-        r5: Self::R,
-        r6: Self::R,
-        r7: Self::R,
-        r8: Self::R,
-        r9: Self::R,
-        r10: Self::R,
-        r11: Self::R,
-        r12: Self::R,
-    ) -> (Bool<'a>, Self::R) {
-        (
-            (st.0 || Self::is_coroutine(&coroutine), st.1),
-            Self::R::make_php7_anonymous_function(
-                r1, r2, r3, coroutine, r5, r6, r7, r8, r9, r10, r11, r12,
-            ),
-        )
-    }
-
     fn make_lambda_expression(
         st: Bool<'a>,
         r1: Self::R,

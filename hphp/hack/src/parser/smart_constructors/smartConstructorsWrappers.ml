@@ -111,7 +111,6 @@ module type SyntaxKind_S = sig
   val is_simple_initializer : r -> bool
   val is_anonymous_class : r -> bool
   val is_anonymous_function : r -> bool
-  val is_php7_anonymous_function : r -> bool
   val is_anonymous_function_use_clause : r -> bool
   val is_lambda_expression : r -> bool
   val is_lambda_signature : r -> bool
@@ -314,7 +313,6 @@ module SyntaxKind(SC : SC_S)
   let make_simple_initializer arg0 arg1 state = compose SK.SimpleInitializer (SC.make_simple_initializer (snd arg0) (snd arg1) state)
   let make_anonymous_class arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 state = compose SK.AnonymousClass (SC.make_anonymous_class (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) (snd arg7) (snd arg8) state)
   let make_anonymous_function arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 arg11 state = compose SK.AnonymousFunction (SC.make_anonymous_function (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) (snd arg7) (snd arg8) (snd arg9) (snd arg10) (snd arg11) state)
-  let make_php7_anonymous_function arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 arg11 state = compose SK.Php7AnonymousFunction (SC.make_php7_anonymous_function (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) (snd arg7) (snd arg8) (snd arg9) (snd arg10) (snd arg11) state)
   let make_anonymous_function_use_clause arg0 arg1 arg2 arg3 state = compose SK.AnonymousFunctionUseClause (SC.make_anonymous_function_use_clause (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
   let make_lambda_expression arg0 arg1 arg2 arg3 arg4 arg5 state = compose SK.LambdaExpression (SC.make_lambda_expression (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) state)
   let make_lambda_signature arg0 arg1 arg2 arg3 arg4 state = compose SK.LambdaSignature (SC.make_lambda_signature (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) state)
@@ -493,7 +491,6 @@ module SyntaxKind(SC : SC_S)
   let is_simple_initializer                   = has_kind SK.SimpleInitializer
   let is_anonymous_class                      = has_kind SK.AnonymousClass
   let is_anonymous_function                   = has_kind SK.AnonymousFunction
-  let is_php7_anonymous_function              = has_kind SK.Php7AnonymousFunction
   let is_anonymous_function_use_clause        = has_kind SK.AnonymousFunctionUseClause
   let is_lambda_expression                    = has_kind SK.LambdaExpression
   let is_lambda_signature                     = has_kind SK.LambdaSignature

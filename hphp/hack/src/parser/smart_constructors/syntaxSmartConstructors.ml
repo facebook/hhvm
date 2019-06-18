@@ -138,7 +138,6 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
     let make_simple_initializer arg0 arg1 state = State.next state [arg0; arg1], Syntax.make_simple_initializer arg0 arg1
     let make_anonymous_class arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 state = State.next state [arg0; arg1; arg2; arg3; arg4; arg5; arg6; arg7; arg8], Syntax.make_anonymous_class arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8
     let make_anonymous_function arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 arg11 state = State.next state [arg0; arg1; arg2; arg3; arg4; arg5; arg6; arg7; arg8; arg9; arg10; arg11], Syntax.make_anonymous_function arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 arg11
-    let make_php7_anonymous_function arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 arg11 state = State.next state [arg0; arg1; arg2; arg3; arg4; arg5; arg6; arg7; arg8; arg9; arg10; arg11], Syntax.make_php7_anonymous_function arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 arg11
     let make_anonymous_function_use_clause arg0 arg1 arg2 arg3 state = State.next state [arg0; arg1; arg2; arg3], Syntax.make_anonymous_function_use_clause arg0 arg1 arg2 arg3
     let make_lambda_expression arg0 arg1 arg2 arg3 arg4 arg5 state = State.next state [arg0; arg1; arg2; arg3; arg4; arg5], Syntax.make_lambda_expression arg0 arg1 arg2 arg3 arg4 arg5
     let make_lambda_signature arg0 arg1 arg2 arg3 arg4 state = State.next state [arg0; arg1; arg2; arg3; arg4], Syntax.make_lambda_signature arg0 arg1 arg2 arg3 arg4

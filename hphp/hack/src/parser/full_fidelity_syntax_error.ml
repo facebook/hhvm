@@ -542,8 +542,6 @@ let execution_operator =
   "The execution operator is not allowed in Hack files"
 let goto = "The `goto` operator is not allowed in Hack files"
 let invalid_octal_integer = "Invalid octal integers"
-let php7_anonymous_function =
-  "Type annotations should occur before the use() clause"
 
 let prefixed_invalid_string_kind = "Only double-quoted strings may be prefixed."
 

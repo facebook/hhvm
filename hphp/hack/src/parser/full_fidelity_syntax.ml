@@ -138,7 +138,6 @@ module WithToken(Token: TokenType) = struct
       | SimpleInitializer                 _ -> SyntaxKind.SimpleInitializer
       | AnonymousClass                    _ -> SyntaxKind.AnonymousClass
       | AnonymousFunction                 _ -> SyntaxKind.AnonymousFunction
-      | Php7AnonymousFunction             _ -> SyntaxKind.Php7AnonymousFunction
       | AnonymousFunctionUseClause        _ -> SyntaxKind.AnonymousFunctionUseClause
       | LambdaExpression                  _ -> SyntaxKind.LambdaExpression
       | LambdaSignature                   _ -> SyntaxKind.LambdaSignature
@@ -324,7 +323,6 @@ module WithToken(Token: TokenType) = struct
     let is_simple_initializer                   = has_kind SyntaxKind.SimpleInitializer
     let is_anonymous_class                      = has_kind SyntaxKind.AnonymousClass
     let is_anonymous_function                   = has_kind SyntaxKind.AnonymousFunction
-    let is_php7_anonymous_function              = has_kind SyntaxKind.Php7AnonymousFunction
     let is_anonymous_function_use_clause        = has_kind SyntaxKind.AnonymousFunctionUseClause
     let is_lambda_expression                    = has_kind SyntaxKind.LambdaExpression
     let is_lambda_signature                     = has_kind SyntaxKind.LambdaSignature
@@ -1373,33 +1371,6 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc anonymous_type in
          let acc = f acc anonymous_use in
          let acc = f acc anonymous_body in
-         acc
-      | Php7AnonymousFunction {
-        php7_anonymous_attribute_spec;
-        php7_anonymous_static_keyword;
-        php7_anonymous_async_keyword;
-        php7_anonymous_coroutine_keyword;
-        php7_anonymous_function_keyword;
-        php7_anonymous_left_paren;
-        php7_anonymous_parameters;
-        php7_anonymous_right_paren;
-        php7_anonymous_use;
-        php7_anonymous_colon;
-        php7_anonymous_type;
-        php7_anonymous_body;
-      } ->
-         let acc = f acc php7_anonymous_attribute_spec in
-         let acc = f acc php7_anonymous_static_keyword in
-         let acc = f acc php7_anonymous_async_keyword in
-         let acc = f acc php7_anonymous_coroutine_keyword in
-         let acc = f acc php7_anonymous_function_keyword in
-         let acc = f acc php7_anonymous_left_paren in
-         let acc = f acc php7_anonymous_parameters in
-         let acc = f acc php7_anonymous_right_paren in
-         let acc = f acc php7_anonymous_use in
-         let acc = f acc php7_anonymous_colon in
-         let acc = f acc php7_anonymous_type in
-         let acc = f acc php7_anonymous_body in
          acc
       | AnonymousFunctionUseClause {
         anonymous_use_keyword;
@@ -3243,33 +3214,6 @@ module WithToken(Token: TokenType) = struct
         anonymous_use;
         anonymous_body;
       ]
-      | Php7AnonymousFunction {
-        php7_anonymous_attribute_spec;
-        php7_anonymous_static_keyword;
-        php7_anonymous_async_keyword;
-        php7_anonymous_coroutine_keyword;
-        php7_anonymous_function_keyword;
-        php7_anonymous_left_paren;
-        php7_anonymous_parameters;
-        php7_anonymous_right_paren;
-        php7_anonymous_use;
-        php7_anonymous_colon;
-        php7_anonymous_type;
-        php7_anonymous_body;
-      } -> [
-        php7_anonymous_attribute_spec;
-        php7_anonymous_static_keyword;
-        php7_anonymous_async_keyword;
-        php7_anonymous_coroutine_keyword;
-        php7_anonymous_function_keyword;
-        php7_anonymous_left_paren;
-        php7_anonymous_parameters;
-        php7_anonymous_right_paren;
-        php7_anonymous_use;
-        php7_anonymous_colon;
-        php7_anonymous_type;
-        php7_anonymous_body;
-      ]
       | AnonymousFunctionUseClause {
         anonymous_use_keyword;
         anonymous_use_left_paren;
@@ -5112,33 +5056,6 @@ module WithToken(Token: TokenType) = struct
         "anonymous_type";
         "anonymous_use";
         "anonymous_body";
-      ]
-      | Php7AnonymousFunction {
-        php7_anonymous_attribute_spec;
-        php7_anonymous_static_keyword;
-        php7_anonymous_async_keyword;
-        php7_anonymous_coroutine_keyword;
-        php7_anonymous_function_keyword;
-        php7_anonymous_left_paren;
-        php7_anonymous_parameters;
-        php7_anonymous_right_paren;
-        php7_anonymous_use;
-        php7_anonymous_colon;
-        php7_anonymous_type;
-        php7_anonymous_body;
-      } -> [
-        "php7_anonymous_attribute_spec";
-        "php7_anonymous_static_keyword";
-        "php7_anonymous_async_keyword";
-        "php7_anonymous_coroutine_keyword";
-        "php7_anonymous_function_keyword";
-        "php7_anonymous_left_paren";
-        "php7_anonymous_parameters";
-        "php7_anonymous_right_paren";
-        "php7_anonymous_use";
-        "php7_anonymous_colon";
-        "php7_anonymous_type";
-        "php7_anonymous_body";
       ]
       | AnonymousFunctionUseClause {
         anonymous_use_keyword;
@@ -7115,34 +7032,6 @@ module WithToken(Token: TokenType) = struct
           anonymous_type;
           anonymous_use;
           anonymous_body;
-        }
-      | (SyntaxKind.Php7AnonymousFunction, [
-          php7_anonymous_attribute_spec;
-          php7_anonymous_static_keyword;
-          php7_anonymous_async_keyword;
-          php7_anonymous_coroutine_keyword;
-          php7_anonymous_function_keyword;
-          php7_anonymous_left_paren;
-          php7_anonymous_parameters;
-          php7_anonymous_right_paren;
-          php7_anonymous_use;
-          php7_anonymous_colon;
-          php7_anonymous_type;
-          php7_anonymous_body;
-        ]) ->
-        Php7AnonymousFunction {
-          php7_anonymous_attribute_spec;
-          php7_anonymous_static_keyword;
-          php7_anonymous_async_keyword;
-          php7_anonymous_coroutine_keyword;
-          php7_anonymous_function_keyword;
-          php7_anonymous_left_paren;
-          php7_anonymous_parameters;
-          php7_anonymous_right_paren;
-          php7_anonymous_use;
-          php7_anonymous_colon;
-          php7_anonymous_type;
-          php7_anonymous_body;
         }
       | (SyntaxKind.AnonymousFunctionUseClause, [
           anonymous_use_keyword;
@@ -9427,37 +9316,6 @@ module WithToken(Token: TokenType) = struct
           anonymous_type;
           anonymous_use;
           anonymous_body;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_php7_anonymous_function
-        php7_anonymous_attribute_spec
-        php7_anonymous_static_keyword
-        php7_anonymous_async_keyword
-        php7_anonymous_coroutine_keyword
-        php7_anonymous_function_keyword
-        php7_anonymous_left_paren
-        php7_anonymous_parameters
-        php7_anonymous_right_paren
-        php7_anonymous_use
-        php7_anonymous_colon
-        php7_anonymous_type
-        php7_anonymous_body
-      =
-        let syntax = Php7AnonymousFunction {
-          php7_anonymous_attribute_spec;
-          php7_anonymous_static_keyword;
-          php7_anonymous_async_keyword;
-          php7_anonymous_coroutine_keyword;
-          php7_anonymous_function_keyword;
-          php7_anonymous_left_paren;
-          php7_anonymous_parameters;
-          php7_anonymous_right_paren;
-          php7_anonymous_use;
-          php7_anonymous_colon;
-          php7_anonymous_type;
-          php7_anonymous_body;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

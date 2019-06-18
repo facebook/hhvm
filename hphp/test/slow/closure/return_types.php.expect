@@ -1,3 +1,2 @@
-int(4)
-string(61) "Value returned from closure must be of type string, int given"
+int(2)
 string(61) "Value returned from closure must be of type string, int given"

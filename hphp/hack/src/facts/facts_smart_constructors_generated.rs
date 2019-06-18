@@ -362,10 +362,6 @@ impl<'a> SmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstructors 
         <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_anonymous_function(s, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11)
     }
 
-    fn make_php7_anonymous_function(s: HasScriptContent<'a>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R, arg7: Self::R, arg8: Self::R, arg9: Self::R, arg10: Self::R, arg11: Self::R) -> (HasScriptContent<'a>, Self::R) {
-        <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_php7_anonymous_function(s, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11)
-    }
-
     fn make_anonymous_function_use_clause(s: HasScriptContent<'a>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> (HasScriptContent<'a>, Self::R) {
         <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_anonymous_function_use_clause(s, arg0, arg1, arg2, arg3)
     }

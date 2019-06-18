@@ -103,31 +103,6 @@ where
         )
     }
 
-    fn make_php7_anonymous_function(
-        st: Vec<bool>,
-        r1: Self::R,
-        r2: Self::R,
-        r3: Self::R,
-        r4: Self::R,
-        r5: Self::R,
-        r6: Self::R,
-        r7: Self::R,
-        r8: Self::R,
-        r9: Self::R,
-        r10: Self::R,
-        r11: Self::R,
-        body: Self::R,
-    ) -> (Vec<bool>, Self::R) {
-        let (saw_yield, st) = pop_n(st, 12);
-        let body = replace_body(body, saw_yield);
-        (
-            push(st, false),
-            Self::R::make_php7_anonymous_function(
-                r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, body,
-            ),
-        )
-    }
-
     fn make_awaitable_creation_expression(
         st: Vec<bool>,
         r1: Self::R,

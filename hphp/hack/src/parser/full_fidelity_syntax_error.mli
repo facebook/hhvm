@@ -296,7 +296,6 @@ val alternate_control_flow : string
 val execution_operator : string
 val goto : string
 val invalid_octal_integer : string
-val php7_anonymous_function : string
 val prefixed_invalid_string_kind : string
 val non_re_prefix : string
 val collection_intrinsic_generic: string

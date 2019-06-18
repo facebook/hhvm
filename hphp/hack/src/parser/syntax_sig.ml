@@ -508,20 +508,6 @@ module type Syntax_S = sig
     ; anonymous_use                                      : t
     ; anonymous_body                                     : t
     }
-  | Php7AnonymousFunction             of
-    { php7_anonymous_attribute_spec                      : t
-    ; php7_anonymous_static_keyword                      : t
-    ; php7_anonymous_async_keyword                       : t
-    ; php7_anonymous_coroutine_keyword                   : t
-    ; php7_anonymous_function_keyword                    : t
-    ; php7_anonymous_left_paren                          : t
-    ; php7_anonymous_parameters                          : t
-    ; php7_anonymous_right_paren                         : t
-    ; php7_anonymous_use                                 : t
-    ; php7_anonymous_colon                               : t
-    ; php7_anonymous_type                                : t
-    ; php7_anonymous_body                                : t
-    }
   | AnonymousFunctionUseClause        of
     { anonymous_use_keyword                              : t
     ; anonymous_use_left_paren                           : t
@@ -1160,7 +1146,6 @@ module type Syntax_S = sig
   val make_simple_initializer : t -> t -> t
   val make_anonymous_class : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_anonymous_function : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
-  val make_php7_anonymous_function : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_anonymous_function_use_clause : t -> t -> t -> t -> t
   val make_lambda_expression : t -> t -> t -> t -> t -> t -> t
   val make_lambda_signature : t -> t -> t -> t -> t -> t
@@ -1338,7 +1323,6 @@ module type Syntax_S = sig
   val is_simple_initializer : t -> bool
   val is_anonymous_class : t -> bool
   val is_anonymous_function : t -> bool
-  val is_php7_anonymous_function : t -> bool
   val is_anonymous_function_use_clause : t -> bool
   val is_lambda_expression : t -> bool
   val is_lambda_signature : t -> bool

@@ -99,7 +99,6 @@ type t =
   | SimpleInitializer
   | AnonymousClass
   | AnonymousFunction
-  | Php7AnonymousFunction
   | AnonymousFunctionUseClause
   | LambdaExpression
   | LambdaSignature
@@ -279,7 +278,6 @@ let to_string kind =
   | SimpleInitializer                 -> "simple_initializer"
   | AnonymousClass                    -> "anonymous_class"
   | AnonymousFunction                 -> "anonymous_function"
-  | Php7AnonymousFunction             -> "php7_anonymous_function"
   | AnonymousFunctionUseClause        -> "anonymous_function_use_clause"
   | LambdaExpression                  -> "lambda_expression"
   | LambdaSignature                   -> "lambda_signature"

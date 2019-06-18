@@ -289,9 +289,6 @@ where S: SmartConstructors<'a, State> {
     fn make_anonymous_function(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R, arg8 : Self::R, arg9 : Self::R, arg10 : Self::R, arg11 : Self::R) -> (State, Self::R) {
         compose(SyntaxKind::AnonymousFunction, S::make_anonymous_function(st, arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1, arg6.1, arg7.1, arg8.1, arg9.1, arg10.1, arg11.1))
     }
-    fn make_php7_anonymous_function(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R, arg8 : Self::R, arg9 : Self::R, arg10 : Self::R, arg11 : Self::R) -> (State, Self::R) {
-        compose(SyntaxKind::Php7AnonymousFunction, S::make_php7_anonymous_function(st, arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1, arg6.1, arg7.1, arg8.1, arg9.1, arg10.1, arg11.1))
-    }
     fn make_anonymous_function_use_clause(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State, Self::R) {
         compose(SyntaxKind::AnonymousFunctionUseClause, S::make_anonymous_function_use_clause(st, arg0.1, arg1.1, arg2.1, arg3.1))
     }

@@ -28,6 +28,7 @@ type env = {
   is_finally: bool;
   control_context: control_context;
   rx_is_enabled_allowed: bool;
+  array_append_allowed: bool;
 }
 
 let is_some_reactivity_attribute { ua_name = (_, name); _ } =
@@ -75,6 +76,7 @@ let get_empty_env () = {
   is_finally = false;
   control_context = Toplevel;
   rx_is_enabled_allowed = false;
+  array_append_allowed = false;
 }
 
 let def_env x =

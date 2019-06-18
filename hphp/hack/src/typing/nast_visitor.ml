@@ -33,6 +33,14 @@ class virtual iter = object (self)
   method! on_Switch env = super#on_Switch ({ env with control_context = SwitchContext })
   method! on_Efun env = super#on_Efun ({ env with is_finally = false; control_context = Toplevel })
   method! on_Lfun env = super#on_Lfun ({ env with is_finally = false; control_context = Toplevel })
+  method! on_Obj_get env = super#on_Obj_get ({ env with array_append_allowed = false })
+  method! on_Array_get env = super#on_Array_get ({ env with array_append_allowed = false })
+  method! on_Binop env op e1 e2=
+    match op with
+    | Ast.Eq _ ->
+      self#on_expr { env with array_append_allowed = true } e1;
+      self#on_expr env e2
+    | _ -> super#on_Binop env op e1 e2
 
   method! on_func_body env fb =
     match fb.fb_ast with

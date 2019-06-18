@@ -46,7 +46,6 @@ type env = {
   class_name: string option;
   class_kind: Ast.class_kind option;
   typedef_tparams : Nast.tparam list;
-  is_array_append_allowed: bool;
   is_reactive: bool; (* The enclosing function is reactive *)
   tenv: Env.env;
 }
@@ -352,8 +351,7 @@ let fun_is_reactive user_attributes =
   List.exists user_attributes ~f:is_some_reactivity_attribute
 
 let rec fun_ tenv f named_body =
-  let env = { is_array_append_allowed = false;
-              class_name = None; class_kind = None;
+  let env = { class_name = None; class_kind = None;
               typedef_tparams = [];
               tenv = tenv;
               function_name = None;
@@ -495,8 +493,7 @@ and check_happly unchecked_tparams env h =
 
 and class_ tenv c =
   let cname = Some (snd c.c_name) in
-  let env = { is_array_append_allowed = false;
-              class_name = cname;
+  let env = { class_name = cname;
               class_kind = Some c.c_kind;
               typedef_tparams = [];
               is_reactive = false;
@@ -716,17 +713,12 @@ and expr_ env _p = function
       ()
   | Clone e -> expr env e; ()
   | Obj_get (e1, e2, _) ->
-      let env' = {env with is_array_append_allowed = false} in
-      expr env' e1;
-      expr env' e2;
+      expr env e1;
+      expr env e2;
       ()
-  | Array_get ((p, _), None) when not env.is_array_append_allowed ->
-    Errors.reading_from_append p;
-    ()
   | Array_get (e, eopt) ->
-      let env' = {env with is_array_append_allowed = false} in
-      expr env' e;
-      maybe expr env' eopt;
+      expr env e;
+      maybe expr env eopt;
       ()
   | Call (_, e, _, el, uel) ->
       expr env e;
@@ -773,11 +765,8 @@ and expr_ env _p = function
       hint env h;
       expr env e;
       ()
-  | Binop (op, e1, e2) ->
-      let lvalue_env = match op with
-      | Ast.Eq _ -> { env with is_array_append_allowed = true }
-      | _ -> env in
-      expr lvalue_env e1;
+  | Binop (_, e1, e2) ->
+      expr env e1;
       expr env e2;
       ()
   | Eif (e1, None, e3) ->
@@ -841,8 +830,7 @@ and field env (e1, e2) =
   ()
 
 let typedef tenv t =
-  let env = { is_array_append_allowed = false;
-              class_name = None; class_kind = None;
+  let env = { class_name = None; class_kind = None;
               function_name = None;
               (* Since typedefs cannot have constraints we shouldn't check
                * if its type params satisfy the constraints of any tapply it

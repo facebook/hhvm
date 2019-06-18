@@ -31,8 +31,6 @@ val expand_var : env -> Reason.t -> Ident.t -> env * locl ty
 val expand_type : env -> locl ty -> env * locl ty
 val get_shape_field_name : Ast.shape_field_name -> string
 val get_shape_field_name_pos : Ast.shape_field_name -> Pos.t
-val empty_local : tpenv -> reactivity -> local_env
-val initial_local : tpenv -> reactivity -> local_env
 val empty : TypecheckerOptions.t -> Relative_path.t ->
   droot: Typing_deps.Dep.variant option -> env
 val is_typedef : typedef_key -> bool
@@ -40,7 +38,6 @@ val get_enum : env -> class_key -> class_decl option
 val is_enum : env -> class_key -> bool
 val get_enum_constraint : env -> class_key -> decl ty option
 val add_wclass : env -> string -> unit
-val fresh_tenv : env -> (env -> 'a) -> 'a
 val get_class : env -> class_key -> class_decl option
 val get_class_dep : env -> class_key -> class_decl option
 val get_typedef : env -> typedef_key -> typedef_decl option
@@ -150,7 +147,6 @@ val is_generic_parameter: env -> string -> bool
 val get_tyvar_lower_bounds : env -> Ident.t -> tparam_bounds
 val get_tyvar_upper_bounds : env -> Ident.t -> tparam_bounds
 (* Optionally supply intersection or union operations to simplify the bounds *)
-val empty_tyvar_info : tyvar_info
 val add_tyvar_upper_bound :
   ?intersect:(locl ty -> locl ty list -> locl ty list) ->
   env -> Ident.t -> locl ty -> env

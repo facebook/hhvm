@@ -597,14 +597,6 @@ let env_with_locals env locals =
 let reinitialize_locals env =
   env_with_locals env LEnvC.initial_locals
 
-let empty_local tpenv local_reactive = {
-  tpenv = tpenv;
-  per_cont_env = LEnvC.empty_locals;
-  local_using_vars = LID.Set.empty;
-  local_mutability = LID.Map.empty;
-  local_reactive = local_reactive;
-}
-
 let initial_local tpenv local_reactive = {
   tpenv = tpenv;
   per_cont_env = LEnvC.initial_locals;
@@ -736,16 +728,6 @@ let env_with_mut env local_mutability =
 
 let get_env_mutability env =
   env.lenv.local_mutability
-
-(* When we want to type something with a fresh typing environment *)
-let fresh_tenv env f =
-  f { env with
-      lenv = initial_local env.lenv.tpenv env.lenv.local_reactive;
-      tenv = IMap.empty;
-      in_loop = false;
-      in_try = false;
-      in_case = false;
-    }
 
 let get_enum env x =
   add_wclass env x;

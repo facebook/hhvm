@@ -531,84 +531,78 @@ and fun_def tcopt f : Tast.fun_def option =
   let env = Env.set_env_reactive env reactive in
   let env = Env.set_fun_mutable env mut in
   NastCheck.fun_ env f nb;
-  (* Fresh type environment is actually unnecessary, but I prefer to
-   * have a guarantee that we are using a clean typing environment. *)
-  let tfun_def = Env.fresh_tenv env (
-    fun env ->
-      let ety_env = Phase.env_with_self env in
-      let env, constraints =
-        Phase.localize_generic_parameters_with_bounds env f.f_tparams
-          ~ety_env in
-      let env = add_constraints pos env constraints in
-      let env =
-        Phase.localize_where_constraints ~ety_env env f.f_where_constraints in
-      let decl_ty = Option.map ~f:(Decl_hint.hint env.Env.decl_env) f.f_ret in
-      let env, locl_ty =
-        match decl_ty with
-        | None ->
-          env, (Reason.Rwitness pos, Typing_utils.tany env)
-        | Some ty ->
-          Phase.localize_with_self env ty in
-      let return = Typing_return.make_info f.f_fun_kind f.f_user_attributes env
-        ~is_explicit:(Option.is_some f.f_ret) locl_ty decl_ty in
-      let env, param_tys =
-        List.map_env env f.f_params make_param_local_ty in
-      let partial_callback = Partial.should_check_error (Env.get_mode env) in
-      let param_fn = fun p t -> (check_param env p t partial_callback) in
-      List.iter2_exn ~f:(param_fn) f.f_params param_tys;
-      Typing_memoize.check_function env f;
-      let env, typed_params = List.map_env env (List.zip_exn param_tys f.f_params)
-        bind_param in
-      let env, t_variadic = match f.f_variadic with
-        | FVvariadicArg vparam ->
-          let env, ty = make_param_local_ty env vparam in
-            check_param env vparam ty partial_callback;
-          let env, t_vparam = bind_param env (ty, vparam) in
-          env, T.FVvariadicArg t_vparam
-        | FVellipsis p ->
-          if Partial.should_check_error (Env.get_mode env) 4223 then
-            Errors.ellipsis_strict_mode ~require:`Type_and_param_name pos;
-          env, T.FVellipsis p
-        | FVnonVariadic -> env, T.FVnonVariadic in
-      let local_tpenv = env.Env.lenv.Env.tpenv in
-      let env, tb = fun_ env return pos nb f.f_fun_kind in
-      (* restore original reactivity *)
-      let env = Env.set_env_reactive env reactive in
-      begin match f.f_ret with
-        | None ->
-          Typing_return.suggest_return env pos return.Typing_env_return_info.return_type partial_callback
-        | Some hint ->
-          Typing_return.async_suggest_return (f.f_fun_kind) hint pos
-      end;
-      let env, file_attrs = file_attributes env f.f_file_attributes in
-      let env, tparams =
-        List.map_env env f.f_tparams type_param in
-      let env, user_attributes =
-        List.map_env env f.f_user_attributes user_attribute in
-      let env = SubType.solve_all_unsolved_tyvars env in
-      Typing_subtype.log_prop env;
-      let fundef = {
-        T.f_annotation = Env.save local_tpenv env;
-        T.f_span = f.f_span;
-        T.f_mode = f.f_mode;
-        T.f_ret = f.f_ret;
-        T.f_name = f.f_name;
-        T.f_tparams = tparams;
-        T.f_where_constraints = f.f_where_constraints;
-        T.f_variadic = t_variadic;
-        T.f_params = typed_params;
-        T.f_fun_kind = f.f_fun_kind;
-        T.f_file_attributes = file_attrs;
-        T.f_user_attributes = user_attributes;
-        T.f_body = { T.fb_ast = tb; fb_annotation = map_funcbody_annotation nb.fb_annotation };
-        T.f_external = f.f_external;
-        T.f_namespace = f.f_namespace;
-        T.f_doc_comment = f.f_doc_comment;
-        T.f_static = f.f_static;
-      } in
-      Typing_lambda_ambiguous.suggest_fun_def env fundef
-  ) in
-  tfun_def
+  let ety_env = Phase.env_with_self env in
+  let env, constraints =
+    Phase.localize_generic_parameters_with_bounds env f.f_tparams
+      ~ety_env in
+  let env = add_constraints pos env constraints in
+  let env =
+    Phase.localize_where_constraints ~ety_env env f.f_where_constraints in
+  let decl_ty = Option.map ~f:(Decl_hint.hint env.Env.decl_env) f.f_ret in
+  let env, locl_ty =
+    match decl_ty with
+    | None ->
+      env, (Reason.Rwitness pos, Typing_utils.tany env)
+    | Some ty ->
+      Phase.localize_with_self env ty in
+  let return = Typing_return.make_info f.f_fun_kind f.f_user_attributes env
+    ~is_explicit:(Option.is_some f.f_ret) locl_ty decl_ty in
+  let env, param_tys =
+    List.map_env env f.f_params make_param_local_ty in
+  let partial_callback = Partial.should_check_error (Env.get_mode env) in
+  let param_fn = fun p t -> (check_param env p t partial_callback) in
+  List.iter2_exn ~f:(param_fn) f.f_params param_tys;
+  Typing_memoize.check_function env f;
+  let env, typed_params = List.map_env env (List.zip_exn param_tys f.f_params)
+    bind_param in
+  let env, t_variadic = match f.f_variadic with
+    | FVvariadicArg vparam ->
+      let env, ty = make_param_local_ty env vparam in
+        check_param env vparam ty partial_callback;
+      let env, t_vparam = bind_param env (ty, vparam) in
+      env, T.FVvariadicArg t_vparam
+    | FVellipsis p ->
+      if Partial.should_check_error (Env.get_mode env) 4223 then
+        Errors.ellipsis_strict_mode ~require:`Type_and_param_name pos;
+      env, T.FVellipsis p
+    | FVnonVariadic -> env, T.FVnonVariadic in
+  let local_tpenv = env.Env.lenv.Env.tpenv in
+  let env, tb = fun_ env return pos nb f.f_fun_kind in
+  (* restore original reactivity *)
+  let env = Env.set_env_reactive env reactive in
+  begin match f.f_ret with
+    | None ->
+      Typing_return.suggest_return env pos return.Typing_env_return_info.return_type partial_callback
+    | Some hint ->
+      Typing_return.async_suggest_return (f.f_fun_kind) hint pos
+  end;
+  let env, file_attrs = file_attributes env f.f_file_attributes in
+  let env, tparams =
+    List.map_env env f.f_tparams type_param in
+  let env, user_attributes =
+    List.map_env env f.f_user_attributes user_attribute in
+  let env = SubType.solve_all_unsolved_tyvars env in
+  Typing_subtype.log_prop env;
+  let fundef = {
+    T.f_annotation = Env.save local_tpenv env;
+    T.f_span = f.f_span;
+    T.f_mode = f.f_mode;
+    T.f_ret = f.f_ret;
+    T.f_name = f.f_name;
+    T.f_tparams = tparams;
+    T.f_where_constraints = f.f_where_constraints;
+    T.f_variadic = t_variadic;
+    T.f_params = typed_params;
+    T.f_fun_kind = f.f_fun_kind;
+    T.f_file_attributes = file_attrs;
+    T.f_user_attributes = user_attributes;
+    T.f_body = { T.fb_ast = tb; fb_annotation = map_funcbody_annotation nb.fb_annotation };
+    T.f_external = f.f_external;
+    T.f_namespace = f.f_namespace;
+    T.f_doc_comment = f.f_doc_comment;
+    T.f_static = f.f_static;
+  } in
+  Typing_lambda_ambiguous.suggest_fun_def env fundef
   end (* with_timeout *)
 
 (*****************************************************************************)

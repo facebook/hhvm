@@ -122,7 +122,7 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
             actual_saved_state_path,
             init_dir,
             "--config",
-            "max_workers=2"
+            "max_workers=2",
         ]
 
         if cls.enable_naming_table_fallback:
@@ -304,7 +304,7 @@ class SavedStateClassicTestDriver(SavedStateTestDriver):
                 "--save-state",
                 cls.saved_state_path(),
                 "--max-procs",
-                "2"
+                "2",
             ]
         )
         if retcode != 0:

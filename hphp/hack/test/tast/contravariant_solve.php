@@ -5,12 +5,12 @@ interface I<-T> {}
 
 class E<T> implements I<T> {}
 
+/* HH_FIXME[4110] */
 function f<T>(I<T> $_, I<T> $_): I<T> {
-  // UNSAFE
 }
 
+/* HH_FIXME[4110] */
 function g<T>(T $_): E<T> {
-  // UNSAFE
 }
 
 function test(): void {

@@ -1,14 +1,13 @@
 [(Fun
     { f_span = [2:1-5:2]; f_annotation = (); f_mode = <opaque>;
       f_ret =
-      (Some ([3:18-45],
-             (Hfun (FReactive, false, [([3:32-35], (Hprim Tint))], [None],
-                [None], Hnon_variadic, ([3:39-43], (Hprim Tvoid)), false))));
-      f_name = ([3:10-13], "\\foo"); f_tparams = [];
+      (Some ([4:18-45],
+             (Hfun (FReactive, false, [([4:32-35], (Hprim Tint))], [None],
+                [None], Hnon_variadic, ([4:39-43], (Hprim Tvoid)), false))));
+      f_name = ([4:10-13], "\\foo"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
-      { fb_ast = [([Pos.none], (Unsafe_block []))];
-        fb_annotation = Has unsafe blocks };
+      { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
       f_fun_kind = FSync;
       f_user_attributes = [{ ua_name = ([2:3-7], "__Rx"); ua_params = [] }];
       f_file_attributes = []; f_external = false; f_namespace = <opaque>;

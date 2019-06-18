@@ -150,6 +150,7 @@ let register_alias (alias: string) (target_ns: string): unit =
   try
 
     (* First find the target and make sure there's only one *)
+    register_namespace target_ns;
     let target = find_exact_match target_ns in
 
     (* Now assert that the alias cannot have a backslash in it *)

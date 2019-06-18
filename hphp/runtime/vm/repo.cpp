@@ -109,6 +109,8 @@ Repo::Repo()
     m_insertFileHash{InsertFileHashStmt(*this, 0),
                      InsertFileHashStmt(*this, 1)},
     m_getFileHash{GetFileHashStmt(*this, 0), GetFileHashStmt(*this, 1)},
+    m_removeFileHash{RemoveFileHashStmt(*this, 0),
+                     RemoveFileHashStmt(*this, 1)},
     m_dbc(nullptr), m_localReadable(false), m_localWritable(false),
     m_evalRepoId(-1), m_txDepth(0), m_rollback(false), m_beginStmt(*this),
     m_rollbackStmt(*this), m_commitStmt(*this), m_urp(*this), m_pcrp(*this),
@@ -319,6 +321,17 @@ std::unique_ptr<Unit> Repo::loadUnit(const std::string& name, const SHA1& sha1,
   return m_urp.load(name, sha1, nativeFuncs);
 }
 
+void Repo::forgetUnit(const std::string& name) {
+  if (m_dbc == nullptr) {
+    return;
+  }
+
+  auto const repoId = repoIdForNewUnit(UnitOrigin::File);
+  auto txn = RepoTxn{begin()};
+  m_removeFileHash[repoId].remove(txn, name);
+  txn.commit();
+}
+
 std::vector<std::pair<std::string,SHA1>>
 Repo::enumerateUnits(int repoId, bool warn) {
   std::vector<std::pair<std::string,SHA1>> ret;
@@ -393,6 +406,18 @@ RepoStatus Repo::GetFileHashStmt::get(const char *path, SHA1& sha1) {
   } catch (RepoExc& re) {
     return RepoStatus::error;
   }
+}
+
+void Repo::RemoveFileHashStmt::remove(RepoTxn& txn, const std::string& path) {
+  if (!prepared()) {
+    auto insertQuery = folly::sformat(
+      "DELETE FROM {} WHERE path == @path;",
+      m_repo.table(m_repoId, "FileSha1"));
+    txn.prepare(*this, insertQuery);
+  }
+  RepoTxnQuery query(txn, *this);
+  query.bindStdString("@path", path);
+  query.exec();
 }
 
 RepoStatus Repo::findFile(const char *path, const std::string &root,

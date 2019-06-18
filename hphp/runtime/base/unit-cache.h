@@ -106,6 +106,12 @@ String resolveVmInclude(StringData* path,
                         bool allow_dir = false);
 
 /*
+ * Remove the specified unit from the cache, to force HHVM to
+ * recompile the file.
+ */
+void invalidateUnit(StringData* path);
+
+/*
  * Needed to avoid order of destruction issues. Destroying the unit
  * caches destroys the units, which destroys the classes, which tries
  * to grab global mutexes, which can fail if the mutexes have already

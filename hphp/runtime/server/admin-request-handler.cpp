@@ -349,6 +349,9 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/dump-pcre-cache: dump cached pcre's to /tmp/pcre_cache\n"
         "/dump-array-info: dump array tracer info to /tmp/array_tracer_dump\n"
 
+        "/invalidate-units: remove specified files from the unit cache\n"
+        "    path           absolute path of files to invalidate\n"
+
         "/start-stacktrace-profiler: set enable_stacktrace_profiler to true\n"
         "/relocate:        relocate translations\n"
         "    random        optional, default false, relocate random subset\n"
@@ -634,6 +637,10 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
     if (strncmp(cmd.c_str(), "dump-apc", 8) == 0 &&
         handleDumpCacheRequest(cmd, transport)) {
+      break;
+    }
+    if (strncmp(cmd.c_str(), "invalidate-units", 16) == 0 &&
+        handleInvalidateUnitRequest(cmd, transport)) {
       break;
     }
     if (strncmp(cmd.c_str(), "xenon-snap", 10) == 0) {
@@ -1200,6 +1207,37 @@ bool AdminRequestHandler::handleStatusRequest(const std::string &cmd,
     return send_status(transport, Writer::Format::HTML, "text/html");
   }
   return false;
+}
+
+bool AdminRequestHandler::handleInvalidateUnitRequest(const std::string &cmd,
+                                                      Transport *transport) {
+  if (RuntimeOption::RepoAuthoritative) {
+    transport->sendString("Cannot invalidate units in repo authoritative mode\n", 400);
+    return true;
+  }
+
+  std::string invalidated;
+  std::vector<std::string> paths;
+  // Support GET for convenience, and POST for large requests.
+  transport->getArrayParam("path", paths, Transport::Method::AUTO);
+
+  bool first = true;
+  for (auto const& path : paths) {
+    String translatedPath = File::TranslatePathKeepRelative(path);
+    invalidateUnit(translatedPath.get());
+
+    if (first) {
+      first = false;
+    } else {
+      invalidated += " ";
+    }
+    invalidated += translatedPath.c_str();
+  }
+
+  auto msg = folly::sformat("Invalidated {} path(s): {}\n",
+                            paths.size(), invalidated);
+  transport->sendString(msg);
+  return true;
 }
 
 bool AdminRequestHandler::handleMemoryRequest(const std::string &cmd,

@@ -44,6 +44,8 @@ private:
   bool handleProfileRequest(const std::string &cmd, Transport *transport);
   bool handleDumpCacheRequest (const std::string &cmd, Transport *transport);
   bool handleConstSizeRequest (const std::string &cmd, Transport *transport);
+  bool handleInvalidateUnitRequest(const std::string &cmd,
+                                   Transport *transport);
   bool handleStaticStringsRequest(const std::string &cmd,
                                   Transport *transport);
   bool handleDumpStaticStringsRequest(const std::string &cmd,

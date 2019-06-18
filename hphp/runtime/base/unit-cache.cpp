@@ -844,6 +844,12 @@ std::vector<Unit*> loadedUnitsRepoAuth() {
   return units;
 }
 
+void invalidateUnit(StringData* path) {
+  always_assert(RuntimeOption::RepoAuthoritative == false);
+  s_nonRepoUnitCache.erase(path);
+  Repo::get().forgetUnit(path->data());
+}
+
 String resolveVmInclude(StringData* path,
                         const char* currentDir,
                         struct stat* s,

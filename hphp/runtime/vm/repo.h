@@ -104,6 +104,7 @@ struct Repo : RepoProxy {
 
   std::unique_ptr<Unit> loadUnit(const std::string& name, const SHA1& sha1,
                                  const Native::FuncTable&);
+  void forgetUnit(const std::string& path);
   RepoStatus findFile(const char* path, const std::string& root, SHA1& sha1);
   RepoStatus insertSha1(UnitOrigin unitOrigin, UnitEmitter* ue, RepoTxn& txn);
   void commitSha1(UnitOrigin unitOrigin, UnitEmitter* ue);
@@ -169,8 +170,14 @@ struct Repo : RepoProxy {
     RepoStatus get(const char* path, SHA1& sha1);
   };
 
+  struct RemoveFileHashStmt : public RepoProxy::Stmt {
+    RemoveFileHashStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void remove(RepoTxn& txn, const std::string& path);
+  };
+
   InsertFileHashStmt m_insertFileHash[RepoIdCount];
   GetFileHashStmt m_getFileHash[RepoIdCount];
+  RemoveFileHashStmt m_removeFileHash[RepoIdCount];
 
  public:
   std::string table(int repoId, const char* tablePrefix);

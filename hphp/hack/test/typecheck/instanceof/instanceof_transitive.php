@@ -11,6 +11,7 @@ class D<+Td super C<Td>> extends E<Td> {
     return $this->ditem;
   }
 }
+/* HH_FIXME[4110] */
 function TestIt<Tt>(E<C<Tt>> $m): Tt {
   if ($m is D<_>) {
     // Should have $m : D<Td#1>
@@ -23,5 +24,4 @@ function TestIt<Tt>(E<C<Tt>> $m): Tt {
     $i = $m->Get();
     return $i;
   }
-  //UNSAFE
 }

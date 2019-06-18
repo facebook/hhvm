@@ -1,6 +1,0 @@
-File "unsafe_block_lambda.php", line 13, characters 14-18:
-Invalid argument (Typing[4110])
-File "unsafe_block_lambda.php", line 48, characters 21-23:
-Expected int
-File "unsafe_block_lambda.php", line 9, characters 33-37:
-But got string

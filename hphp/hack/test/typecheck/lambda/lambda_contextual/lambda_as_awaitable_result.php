@@ -27,14 +27,14 @@ async function genBoo(): Awaitable<StringFun> {
     return "a";
   };
 }
+/* HH_FIXME[4110] */
 async function genv<Tv>(
   Traversable<Awaitable<Tv>> $awaitables,
 ): Awaitable<Vector<Tv>> {
-  //UNSAFE
 }
 
+/* HH_FIXME[4110] */
 async function genNullable(arraykey $key): Awaitable<?C> {
-  // UNSAFE
 }
 async function moreComplexExample(varray<int> $property_ids): Awaitable<void> {
   $sss = array_map(

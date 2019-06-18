@@ -15,8 +15,8 @@ class C {
   }
 }
 
+/* HH_FIXME[4110] */
 function nullthrows<T>(?T $x): T {
-  // UNSAFE
 }
 
 async function f(): Awaitable<int> {

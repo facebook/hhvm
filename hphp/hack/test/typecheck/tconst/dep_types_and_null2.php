@@ -4,8 +4,8 @@ class C {}
 
 function expects_C<T as C>(?T $x): void {}
 
+/* HH_FIXME[4110] */
 function not_null<T>(?T $x): T {
-  // UNSAFE
 }
 
 async function test(bool $cond): Awaitable<C> {

@@ -4,11 +4,11 @@
 // From task 10355299
 class MyMaps {
 
+  /* HH_FIXME[4110] */
   public static function merge<Tk2 as arraykey, Tv2, Tk1 super Tk2 as arraykey, Tv1 super Tv2>(
     ConstMap<Tk1, Tv1> $map1,
     ConstMap<Tk2, Tv2> $map2,
   ): Map<Tk1, Tv1> {
-    // UNSAFE_BLOCK
   }
 
   // This should fail to check

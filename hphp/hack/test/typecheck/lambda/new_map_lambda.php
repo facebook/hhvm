@@ -7,10 +7,10 @@ enum MyEnum: string as string {
 }
 
 class MyMap<Tk, Tv> {
+  /* HH_FIXME[4110] */
   public function mapWithKey<Tu>(
     (function(Tk, Tv): Tu) $callback,
   ): MyMap<Tk, Tu> {
-    //UNSAFE
   }
 }
 class C {

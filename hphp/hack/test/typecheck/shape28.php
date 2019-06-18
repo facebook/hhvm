@@ -6,8 +6,9 @@
 
 interface I<-T> {}
 
+/* HH_FIXME[4110] */
 function f<Tv>(Tv $_): I<Tv> {
-  // UNSAFE
+
 }
 
 type s = shape(

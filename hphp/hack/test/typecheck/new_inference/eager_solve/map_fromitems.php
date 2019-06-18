@@ -3,18 +3,18 @@
 
 
 class MyMap<Tk, Tv> {
+  /* HH_FIXME[4110] */
   public function at(Tk $key):Tv {
-    //UNSAFE
   }
+  /* HH_FIXME[4110] */
   public static function fromItems(?Traversable<Pair<Tk, Tv>> $items)
     : MyMap<Tk, Tv> {
-  //UNSAFE
   }
 }
 
+/* HH_FIXME[4110] */
 function my_fromItems<Tk,Tv>(?Traversable<Pair<Tk, Tv>> $items)
   : MyMap<Tk, Tv> {
-//UNSAFE
 }
 
 class C {

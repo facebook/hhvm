@@ -2,8 +2,8 @@
 
 abstract class Foo {
   abstract const type T;
+  /* HH_FIXME[4110] */
   public function get(): this::T {
-    // UNSAFE
   }
   public function instance(): this::T {
     $instance = $this->get();

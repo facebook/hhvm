@@ -1,2 +1,0 @@
-File "unsafe_block_control_flow.php", line 32, characters 17-18:
-Variable $x is undefined, or there exists at least one control flow path reaching this point which does not define $x. (Naming[2050])

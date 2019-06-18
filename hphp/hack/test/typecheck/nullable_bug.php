@@ -1,8 +1,8 @@
 <?hh //strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
+/* HH_FIXME[4110] */
 function nullthrows<T>(?T $x): T {
-  //UNSAFE
 }
 
 abstract class PC<+T> {

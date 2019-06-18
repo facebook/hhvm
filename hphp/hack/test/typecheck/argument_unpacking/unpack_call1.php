@@ -21,16 +21,16 @@ class C2 extends C1 {
   }
 }
 
+/* HH_FIXME[4110] */
 function make_int_args(): Container<int> {
-  // UNSAFE
 }
 
+/* HH_FIXME[4110] */
 function make_mixed_args(): array<mixed> {
-  // UNSAFE
 }
 
+/* HH_FIXME[4110] */
 function make_str_args(): Vector<string> {
-  // UNSAFE
 }
 
 function test_basic(): void {

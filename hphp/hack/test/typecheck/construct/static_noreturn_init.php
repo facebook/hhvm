@@ -3,8 +3,8 @@
 class C {
   private int $x;
 
+  /* HH_FIXME[4110] */
   private static function invariant_violation(): noreturn {
-    // UNSAFE
   }
 
   public function __construct(bool $cond) {

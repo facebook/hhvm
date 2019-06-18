@@ -22,7 +22,7 @@ class B extends A {
   public function f1(): void {}
   public static function f2(): void {}
   public function test1(A $x): void {
-    // UNSAFE
+    /* HH_FIXME[4090] */
     $x::f1();
   }
   public static function test2(): void {}

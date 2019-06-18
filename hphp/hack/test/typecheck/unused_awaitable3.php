@@ -9,8 +9,9 @@
  *
  */
 
+/* HH_FIXME[4110] */
 function prep<T>(Awaitable<T> $x): T {
-  // UNSAFE
+
 }
 
 async function a(): Awaitable<int> {

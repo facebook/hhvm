@@ -2,10 +2,10 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 final class D {
+  /* HH_FIXME[4110] */
   public function addBranch(
     this $branch,
   ): this {
-    //UNSAFE
   }
 }
 

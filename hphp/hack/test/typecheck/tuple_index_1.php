@@ -1,11 +1,12 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
+/* HH_FIXME[4110] */
 function Dict_map<Tk as arraykey, Tv1, Tv2>(
   KeyedTraversable<Tk, Tv1> $traversable,
   (function(Tv1): Tv2) $value_func,
 ): dict<Tk, Tv2> {
-  // UNSAFE
+
 }
 
 function test(): void {

@@ -7,8 +7,8 @@ class ConfigChooser<-TContextProvider, +TResult> {
     private IConfigChooserProcessor<TContextProvider, TResult> $processor,
   ) {}
 
+  /* HH_FIXME[4110] */
   public function getValue(TContextProvider $context_provider): TResult {
-    //UNSAFE
   }
 }
 

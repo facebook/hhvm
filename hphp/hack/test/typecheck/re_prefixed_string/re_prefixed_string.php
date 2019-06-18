@@ -19,7 +19,6 @@ function f(): void {
 }
 
 function goodbye<T as HH\Lib\Regex\Match>(HH\Lib\Regex\Pattern<T> $pattern): T {
-  // UNSAFE_BLOCK
 }
 
 /* Bad regex patterns that can't be compiled by PCRE give type errors */

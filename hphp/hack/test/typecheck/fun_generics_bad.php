@@ -5,11 +5,11 @@ function cannot_be_nullable(int $val): int {
   return $val;
 }
 
+/* HH_FIXME[4110] */
 function special_array_map<T1, T2>(
   (function(T1): T2) $f,
   array<int, T1> $a,
 ): array<int, T2> {
-  // UNSAFE
 }
 
 function demo(): bool {

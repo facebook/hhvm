@@ -2,8 +2,8 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class MyList<Ta> {
+  /* HH_FIXME[4110] */
   public function match<Tb>(ListVisitor<Ta,Tb> $v): Tb {
-    // UNSAFE
   }
 }
 
@@ -12,11 +12,11 @@ type ListVisitor<Ta, Tb> = shape(
   'caseCons' => (function(Ta, MyList<Ta>): Tb)
 );
 
+/* HH_FIXME[4110] */
 function nil<Ta>(): MyList<Ta> {
-  //UNSAFE
 }
+/* HH_FIXME[4110] */
 function cons<Ta>(Ta $x, MyList<Ta> $xs) : MyList<Ta> {
-  // UNSAFE
 }
 
 function append<Tc>(MyList<Tc> $xs, MyList<Tc> $ys) : MyList<Tc> {

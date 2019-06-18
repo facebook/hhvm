@@ -1,13 +1,13 @@
 <?hh // strict
 
 <<__Rx>>
+/* HH_FIXME[4110] */
 function returnsReactive(): Rx<(function(): void)> {
-  // UNSAFE
 }
 
 <<__Rx>>
+/* HH_FIXME[4110] */
 function returnsNormal(): (function(): void) {
-  // UNSAFE
 }
 
 <<__Rx>>

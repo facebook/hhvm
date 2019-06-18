@@ -5,14 +5,16 @@ trait T {
 }
 
 class X {
+  /* HH_FIXME[4110] */
   public static function foo(): X {
-    //UNSAFE
+
   }
 }
 
 class A extends X {
+  /* HH_FIXME[4110] */
   public static function foo(): A {
-    //UNSAFE
+
   }
 }
 

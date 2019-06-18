@@ -14,8 +14,9 @@ abstract class MyVector<T> {
   abstract public function at(int $k): T;
   abstract public function isEmpty(): bool;
 
+  /* HH_FIXME[4110] */
   static public function newVector(T $x): MyVector<T> {
-    // UNSAFE
+
   }
 }
 

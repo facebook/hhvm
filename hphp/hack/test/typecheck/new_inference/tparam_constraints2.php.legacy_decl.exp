@@ -1,15 +1,15 @@
 File "tparam_constraints2.php", line 3, characters 10-23:
 Invalid return type (Typing[4110])
 File "tparam_constraints2.php", line 3, characters 10-23:
-This is void because this function implicitly returns void
+Expected void because this function implicitly returns void
 File "tparam_constraints2.php", line 6, characters 4-24:
-It is incompatible with an object of type Awaitable<keyset<Tk>>
+But got Awaitable<keyset<Tk>>
 File "tparam_constraints2.php", line 3, characters 10-23:
 Invalid return type (Typing[4110])
 File "tparam_constraints2.php", line 6, characters 4-24:
-This is an object of type Awaitable<keyset<Tk>>
+Expected Awaitable<keyset<Tk>>
 File "tparam_constraints2.php", line 3, characters 10-23:
-It is incompatible with void because this function implicitly returns void
+But got void because this function implicitly returns void
 File "tparam_constraints2.php", line 15, characters 24-34:
 Invalid return type (Typing[4110])
 File "tparam_constraints2.php", line 3, characters 35-42:

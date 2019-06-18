@@ -1,5 +1,0 @@
-File "unsafe_block.php", line 39, characters 3-13:
-  (_ | exact A | exact C)
-File "unsafe_block.php", line 41, characters 3-13:
-  (exact A | exact B | exact C)
-No errors

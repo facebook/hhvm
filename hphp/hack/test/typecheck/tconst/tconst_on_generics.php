@@ -7,8 +7,8 @@ abstract class Box {
 }
 class IntBox extends Box {
   const type T = int;
+  /* HH_FIXME[4110] */
   public function getK() : this::T {
-    // UNSAFE
   }
   public function setK(this::T $x) : void {}
 

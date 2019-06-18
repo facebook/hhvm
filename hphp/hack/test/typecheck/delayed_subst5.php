@@ -12,8 +12,7 @@ trait ATrait {
 }
 
 class Base<+T> {
-
+  /* HH_FIXME[4110] */
   public function get(): T {
-    // UNSAFE
   }
 }

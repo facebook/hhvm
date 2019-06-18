@@ -4,8 +4,8 @@ function correct(): noreturn {
   throw new Exception('not returning here');
 }
 
+/* HH_FIXME[4110] */
 async function meh(): Awaitable<int> {
-  // UNSAFE
 }
 
 async function generic(): Awaitable<noreturn> {

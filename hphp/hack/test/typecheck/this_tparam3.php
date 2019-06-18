@@ -14,7 +14,8 @@ interface IFoo<T> {
 }
 
 class Foo implements IFoo<Awaitable<this>> {
+  /* HH_FIXME[4110] */
   public function run(): Awaitable<Awaitable<this>> {
-    // UNSAFE
+
   }
 }

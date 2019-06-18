@@ -1,6 +1,6 @@
-File "tuple_index_2.php", line 19, characters 14-18:
+File "tuple_index_2.php", line 20, characters 14-18:
 Invalid return type (Typing[4110])
-File "tuple_index_2.php", line 11, characters 22-24:
+File "tuple_index_2.php", line 12, characters 22-24:
 Expected int
-File "tuple_index_2.php", line 15, characters 13-17:
+File "tuple_index_2.php", line 16, characters 13-17:
 But got string

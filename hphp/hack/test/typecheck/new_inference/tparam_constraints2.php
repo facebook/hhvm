@@ -4,7 +4,7 @@ function keyset_gen_map<Tv, Tk as arraykey>(
   Traversable<Tv> $_,
   (function(Tv): Awaitable<Tk>) $_,
 ): Awaitable<keyset<Tk>> {
-  // UNSAFE
+
 }
 
 async function f(int $_): Awaitable<void> {}

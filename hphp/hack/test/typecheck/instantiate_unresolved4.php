@@ -9,8 +9,8 @@
  *
  */
 
+/* HH_FIXME[4110] */
 function foo<T>(mixed $x): array<T> {
-  // UNSAFE
 }
 
 function a<T>(): array<T> {

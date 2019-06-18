@@ -9,8 +9,8 @@
  *
  */
 
+/* HH_FIXME[4110] */
 function cached_result<T>(T $x): Awaitable<T> {
-  // UNSAFE
 }
 
 function consume<T>(Awaitable<T> $x): void {}

@@ -12,8 +12,8 @@ abstract class B extends A {
   public function g(): void {}
 }
 
+/* HH_FIXME[4110] */
 function b(): B {
-  // UNSAFE
 }
 
 //// file2.php

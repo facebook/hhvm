@@ -5,15 +5,15 @@ interface Pred<-T> { }
 final class EqualsPred<Tv> implements Pred<Tv> {
 }
 
+/* HH_FIXME[4110] */
 function disj<Tv>(vec<Pred<Tv>> $predicates,
 ): Pred<Tv> {
-  //UNSAFE
 }
+/* HH_FIXME[4110] */
 function equals<Tv>(Tv $value): EqualsPred<Tv> {
-  //UNSAFE
 }
+/* HH_FIXME[4110] */
 function greaterThan<Tv>(Tv $value): Pred<Tv> {
-  //UNSAFE
 }
 function expect(Pred<?int> $predicate): void {
 }

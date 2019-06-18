@@ -43,8 +43,8 @@ function make_vector<T>(classname<T> $classname): Vector<T> {
   return $ret;
 }
 
+/* HH_FIXME[4110] */
 function factory<T>(classname<T> $classname): T {
-  // UNSAFE_BLOCK
 }
 
 function foo(): void {

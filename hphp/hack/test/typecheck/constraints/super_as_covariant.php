@@ -2,12 +2,12 @@
 
 class Cov<+T> {}
 
+/* HH_FIXME[4110] */
 function UseAs<Tv, Tu as Tv>(Cov<Tv> $x, Cov<Tu> $y): Tu {
-  //UNSAFE
 }
 
+/* HH_FIXME[4110] */
 function UseSuper<Tv super Tu, Tu>(Cov<Tv> $x, Cov<Tu> $y): Tu {
-  //UNSAFE
 }
 
 class MyBase {}

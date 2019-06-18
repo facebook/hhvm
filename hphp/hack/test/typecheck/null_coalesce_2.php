@@ -1,7 +1,7 @@
 <?hh // strict
 
+/* HH_FIXME[4110] */
 function f(): ?int {
-  // UNSAFE_BLOCK
 }
 
 function g(): int {

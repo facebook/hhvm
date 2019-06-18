@@ -2,5 +2,5 @@ File "reactive_calls4.php", line 26, characters 17-31:
 Invalid argument (Typing[4203])
 File "reactive_calls4.php", line 14, characters 24-45:
 This function is reactive.
-File "reactive_calls4.php", line 9, characters 27-44:
+File "reactive_calls4.php", line 10, characters 27-44:
 This function is non-reactive.

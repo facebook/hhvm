@@ -5,8 +5,8 @@ class A<T> {}
 final class B extends A<this::T> {
   const type T = int;
 }
+/* HH_FIXME[4110] */
 function foo(): A<int> {
-  // UNSAFE
 }
 class Something {
   final protected function f(A<int> $it): void {}

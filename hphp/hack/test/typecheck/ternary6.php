@@ -2,13 +2,15 @@
 
 function takes_string(string $x) {}
 
+/* HH_FIXME[4110] */
 function g(): ?string {
-  // UNSAFE
+
 }
 
 class Foo {
+  /* HH_FIXME[4110] */
   public function h(): array<string> {
-    // UNSAFE
+
   }
 }
 

@@ -1,11 +1,11 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
+/* HH_FIXME[4110] */
 function darray_filter<Tk as arraykey, Tv>(
   KeyedTraversable<Tk, Tv> $traversable,
   ?(function(Tv): bool) $f,
 ): darray<Tk, Tv> {
-  //UNSAFE
 }
 
 function is_not_null<T>(T $x): bool {

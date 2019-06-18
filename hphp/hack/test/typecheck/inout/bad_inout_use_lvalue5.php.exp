@@ -3,6 +3,6 @@ Arguments for inout parameters must be local variables or simple subscript expre
 File "bad_inout_use_lvalue5.php", line 6, characters 5-22:
 Invalid argument (Typing[4110])
 File "bad_inout_use_lvalue5.php", line 3, characters 18-27:
-This is an array (used like a vector)
+Expected array<int>
 File "bad_inout_use_lvalue5.php", line 6, characters 11-22:
-It is incompatible with a tuple of size 2
+But got (int, int)

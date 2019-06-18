@@ -7,15 +7,15 @@ But got string because this is the result of a concatenation
 File "re_prefixed_string.php", line 21, characters 10-16:
 Invalid return type (Typing[4110])
 File "re_prefixed_string.php", line 21, characters 10-16:
-This is void because this function implicitly returns void
+Expected void because this function implicitly returns void
 File "re_prefixed_string.php", line 21, characters 78-78:
-It is incompatible with a value of generic type T
+But got T
 File "re_prefixed_string.php", line 21, characters 10-16:
 Invalid return type (Typing[4110])
 File "re_prefixed_string.php", line 21, characters 78-78:
-This is a value of generic type T
+Expected T
 File "re_prefixed_string.php", line 21, characters 10-16:
-It is incompatible with a mixed value arising from an implicit 'as ?nonnull' constraint on this type
+But got mixed arising from an implicit 'as ?nonnull' constraint on this type
 File "re_prefixed_string.php", line 27, characters 13-35:
 Bad regex pattern; two named subpatterns have the same name [14]. (Typing[4275])
 File "re_prefixed_string.php", line 28, characters 13-29:

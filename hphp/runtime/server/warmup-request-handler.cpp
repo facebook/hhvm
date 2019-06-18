@@ -76,9 +76,9 @@ void WarmupRequestHandlerFactory::bumpReqCount() {
 }
 
 void InternalWarmupWorker::doJob(WarmupJob job) {
-  // No more profiling will happen after retranslateAll is scheduled.
-  if (jit::mcgen::retranslateAllScheduled()) return;
   if (f_server_is_stopping()) return;
+  if (f_server_uptime() > 0 &&
+      jit::mcgen::retranslateAllScheduled()) return;
   HttpServer::CheckMemAndWait();
   folly::StringPiece f(job.hdfFile);
   auto const pos = f.rfind('/');
@@ -101,8 +101,9 @@ void InternalWarmupWorker::doJob(WarmupJob job) {
 }
 
 InternalWarmupRequestPlayer::InternalWarmupRequestPlayer(int threadCount)
-: JobQueueDispatcher<InternalWarmupWorker>(threadCount, threadCount,
-                                           0, false, nullptr) {}
+  : JobQueueDispatcher<InternalWarmupWorker>(threadCount, threadCount,
+                                             0, false, nullptr) {
+}
 
 InternalWarmupRequestPlayer::~InternalWarmupRequestPlayer() {
   waitEmpty();

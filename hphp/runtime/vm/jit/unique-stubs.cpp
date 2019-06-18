@@ -802,11 +802,15 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
       auto const callerSaved = abi().gpUnreserved - abi().calleeSaved;
       PhysRegSaver prs{v, callerSaved};
 
-      // As a consequence of being called via callfaststub, we can't safely use
-      // any Vregs here except for status flags registers, at least not with
-      // the default vwrap() ABI.  Just use the argument registers instead.
+      // Since we've manually saved the caller saved registers, we can
+      // use those for Vregs. We use the helper ABI for this stub
+      // which only allows caller saved registers.
       assertx(callerSaved.contains(rdata));
       assertx(callerSaved.contains(rtype));
+      assertx(
+        (callerSaved & abi(CodeKind::Helper).gpUnreserved) ==
+        abi(CodeKind::Helper).gpUnreserved
+      );
 
       auto const dtor = lookupDestructor(v, rtype);
       v << callm{dtor, arg_regs(1)};
@@ -821,7 +825,7 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
     emitDecRefWork(v, v, rdata, destroy, false, TRAP_REASON);
 
     v << stubret{{}, fullFrame};
-  });
+  }, CodeKind::Helper);
 
   meta.process(nullptr);
   return start;

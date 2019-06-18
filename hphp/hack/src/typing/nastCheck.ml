@@ -806,12 +806,6 @@ and expr_ env _p = function
       ()
   | Callconv (_, e) ->
       expr env e;
-      let rec aux = function
-        | _, Lvar _ -> true
-        | _, Array_get (e1, Some _) -> aux e1
-        | _ -> false
-      in
-      if not (aux e) then Errors.inout_argument_bad_expr (fst e);
       ()
   | Shape fdm ->
       List.iter ~f:(fun (_, v) -> expr env v) fdm

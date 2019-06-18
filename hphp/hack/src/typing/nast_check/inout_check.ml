@@ -58,6 +58,17 @@ let check_call_expr env func_expr func_args =
     | _ -> ()
   end
 
+let check_callconv_expr e =
+  let rec check_callconv_expr_helper e1 =
+    match snd e1 with
+    | Lvar (_, x) when not (
+      Local_id.to_string x = SN.SpecialIdents.this ||
+      Local_id.to_string x = SN.SpecialIdents.dollardollar ) ->
+      ()
+    | Array_get (e2, Some _) -> check_callconv_expr_helper e2
+    | _ -> Errors.inout_argument_bad_expr (fst e)
+    in
+  check_callconv_expr_helper e
 
 let handler = object
   inherit Nast_visitor.handler_base
@@ -76,6 +87,8 @@ let handler = object
     begin match e with
     | Call (_, (_, func_expr), _, func_args, _) ->
       check_call_expr env func_expr func_args
+    | Callconv (_, e) ->
+      check_callconv_expr e
     | _ -> ()
     end
 end

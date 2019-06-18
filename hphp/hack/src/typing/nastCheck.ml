@@ -69,10 +69,7 @@ module CheckFunctionBody = struct
     | _, ( Noop | Fallthrough | GotoLabel _ | Goto _ | Break | Continue
          | TempContinue _ | TempBreak _ | Unsafe_block _ ) -> ()
     | _, Awaitall (el, b) ->
-        List.iter el (fun (_, y) ->
-          found_await f_type (fst y);
-          expr f_type env y;
-        );
+        List.iter el (fun (_, y) -> expr f_type env y);
         block f_type env b;
         ()
     | _, If (cond, b1, b2) ->
@@ -88,8 +85,7 @@ module CheckFunctionBody = struct
         expr f_type env e;
         block f_type env b;
         ()
-    | _, Using { us_has_await = has_await; us_expr = e; us_block = b; _ } ->
-        if has_await then found_await f_type (fst e);
+    | _, Using { us_expr = e; us_block = b; _ } ->
         expr_allow_await_list f_type env e;
         block f_type env b;
         ()
@@ -103,8 +99,6 @@ module CheckFunctionBody = struct
         expr f_type env e;
         List.iter cl (case f_type env);
         ()
-    | _, Foreach (_, (Await_as_v (p, _) | Await_as_kv (p, _, _)), _) ->
-        found_await f_type p
 
     | _, Foreach (v, _, b) ->
         expr f_type env v;
@@ -123,12 +117,6 @@ module CheckFunctionBody = struct
         ()
     | _, Block b -> block f_type env b;
     | _, Markup (_, eopt) -> (match eopt with Some e -> expr f_type env e | None -> ())
-
-  and found_await ftype p =
-    match ftype with
-    | Ast.FCoroutine -> ()
-    | Ast.FSync | Ast.FGenerator -> Errors.await_in_sync_function p
-    | _ -> ()
 
   and block f_type env stl =
     List.iter stl (stmt f_type env)
@@ -312,8 +300,7 @@ module CheckFunctionBody = struct
      * FAsyncGenerator. *)
     | (Ast.FSync | Ast.FAsync), (Yield _ | Yield_from _ | Yield_break) -> assert false
 
-    | (Ast.FGenerator | Ast.FSync | Ast.FCoroutine), Await _ ->
-      found_await f_type p
+    | (Ast.FGenerator | Ast.FSync | Ast.FCoroutine), Await _ -> ()
 
     | Ast.FAsync, Await _
     | Ast.FAsyncGenerator, Await _ -> Errors.await_not_allowed p

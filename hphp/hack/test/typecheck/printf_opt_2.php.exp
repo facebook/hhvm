@@ -1,6 +1,6 @@
 File "printf_opt_2.php", line 21, characters 17-17:
 Invalid argument (Typing[4110])
 File "printf_opt_2.php", line 21, characters 11-14:
-This is a string because of the %s format specifier
+Expected string because of the %s format specifier
 File "printf_opt_2.php", line 21, characters 17-17:
-It is incompatible with an int
+But got int

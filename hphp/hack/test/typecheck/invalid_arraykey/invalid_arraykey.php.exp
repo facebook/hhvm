@@ -37,24 +37,24 @@ A float cannot be used as a key for an object of type Map<[unresolved], [unresol
 File "invalid_arraykey.php", line 21, characters 3-14:
 Invalid index type for this Vector (Typing[4110])
 File "invalid_arraykey.php", line 21, characters 6-9:
-This is an int because only int can be used to index into a Vector or vec.
+Expected int because only int can be used to index into a Vector or vec.
 File "invalid_arraykey.php", line 21, characters 6-9:
-It is incompatible with null
+But got null
 File "invalid_arraykey.php", line 22, characters 3-13:
 Invalid index type for this Vector (Typing[4110])
 File "invalid_arraykey.php", line 22, characters 6-8:
-This is an int because only int can be used to index into a Vector or vec.
+Expected int because only int can be used to index into a Vector or vec.
 File "invalid_arraykey.php", line 22, characters 6-8:
-It is incompatible with a float
+But got float
 File "invalid_arraykey.php", line 26, characters 3-14:
 Invalid index type for this vec (Typing[4110])
 File "invalid_arraykey.php", line 26, characters 6-9:
-This is an int because only int can be used to index into a Vector or vec.
+Expected int because only int can be used to index into a Vector or vec.
 File "invalid_arraykey.php", line 26, characters 6-9:
-It is incompatible with null
+But got null
 File "invalid_arraykey.php", line 27, characters 3-13:
 Invalid index type for this vec (Typing[4110])
 File "invalid_arraykey.php", line 27, characters 6-8:
-This is an int because only int can be used to index into a Vector or vec.
+Expected int because only int can be used to index into a Vector or vec.
 File "invalid_arraykey.php", line 27, characters 6-8:
-It is incompatible with a float
+But got float

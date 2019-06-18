@@ -6,8 +6,8 @@ Read the following to see why:
 File "match_param.php", line 14, characters 19-20:
 Member do has the wrong type
 File "match_param.php", line 14, characters 22-28:
-This is a dynamic value
+Expected dynamic
 File "match_param.php", line 13, characters 33-37:
-It is incompatible with a mixed value
+But got mixed
 File "match_param.php", line 4, characters 22-24:
   via this generic Tin

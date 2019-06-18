@@ -1,6 +1,6 @@
 File "like_not_subtype.php", line 8, characters 15-20:
 Invalid return type (Typing[4110])
 File "like_not_subtype.php", line 8, characters 27-29:
-This is an int
+Expected int
 File "like_not_subtype.php", line 8, characters 15-20:
-It is incompatible with a string
+But got string

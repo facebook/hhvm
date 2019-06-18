@@ -56,7 +56,7 @@ let () =
     Test.fail "Expected the server to process disk updates";
 
   let expected_error = "File \"/bar.php\", line 2, characters 9-11:\n"
-                      ^"This is an int (Typing[4110])\n"
+                      ^"Expected int (Typing[4110])\n"
                       ^"File \"/foo.php\", line 2, characters 9-14:\n"
-                      ^"It is incompatible with a string" in
+                      ^"But got string" in
   Test.assertSingleError expected_error (Errors.get_error_list env.errorl);

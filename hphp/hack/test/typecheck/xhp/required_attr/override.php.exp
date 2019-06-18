@@ -35,9 +35,9 @@ Member :a has the wrong type
 File "override.php", line 15, characters 35-37:
 Typing error
 File "override.php", line 15, characters 35-37:
-This is an int
+Expected int
 File "override.php", line 14, characters 35-37:
-It is incompatible with a nullable type
+But got ?int
 File "override.php", line 16, characters 7-9:
 Class :c3 does not correctly implement all required members  (Typing[4110])
 File "override.php", line 16, characters 19-21:
@@ -48,6 +48,6 @@ Member :a has the wrong type
 File "override.php", line 16, characters 35-37:
 Typing error
 File "override.php", line 16, characters 35-37:
-This is an int
+Expected int
 File "override.php", line 14, characters 35-37:
-It is incompatible with a nullable type
+But got ?int

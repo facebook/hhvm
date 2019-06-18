@@ -6,6 +6,6 @@ Read the following to see why:
 File "abstract_implement8.php", line 16, characters 19-27:
 Member getMyName has the wrong type
 File "abstract_implement8.php", line 12, characters 32-37:
-This is a string
+Expected string
 File "abstract_implement8.php", line 16, characters 32-34:
-It is incompatible with an int
+But got int

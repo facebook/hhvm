@@ -1,6 +1,6 @@
 File "meth_caller11.php", line 31, characters 17-23:
 Invalid argument (Typing[4110])
 File "meth_caller11.php", line 24, characters 49-49:
-This is an object of type C
+Expected C
 File "meth_caller11.php", line 24, characters 42-44:
-It is incompatible with an int
+But got int

@@ -6,6 +6,6 @@ Read the following to see why:
 File "trait_matching2.php", line 23, characters 22-24:
 Member lol has the wrong type
 File "trait_matching2.php", line 13, characters 38-40:
-This is an int
+Expected int
 File "trait_matching2.php", line 23, characters 29-34:
-It is incompatible with a string
+But got string

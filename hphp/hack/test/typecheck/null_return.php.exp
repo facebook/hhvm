@@ -1,6 +1,6 @@
 File "null_return.php", line 12, characters 10-12:
 Invalid return type (Typing[4110])
 File "null_return.php", line 12, characters 10-12:
-This is void because this function implicitly returns void
+Expected void because this function implicitly returns void
 File "null_return.php", line 12, characters 17-20:
-It is incompatible with a nullable type
+But got ?int

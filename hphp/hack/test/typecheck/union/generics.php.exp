@@ -74,8 +74,8 @@ File "generics.php--file2.php", line 31, characters 5-15:
 File "generics.php--file2.php", line 102, characters 32-33:
 Invalid argument (Typing[4110])
 File "generics.php--file2.php", line 100, characters 20-22:
-This is an int
+Expected int
 File "generics.php--file2.php", line 16, characters 36-36:
   via this generic T
 File "generics.php--file2.php", line 102, characters 32-33:
-It is incompatible with a string
+But got string

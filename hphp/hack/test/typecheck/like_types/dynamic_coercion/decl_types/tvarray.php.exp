@@ -1,12 +1,12 @@
 File "tvarray.php", line 10, characters 10-14:
 Invalid return type (Typing[4110])
 File "tvarray.php", line 9, characters 27-32:
-This is a varray
+Expected varray<_>
 File "tvarray.php", line 4, characters 17-23:
-It is incompatible with a dynamic value
+But got dynamic
 File "tvarray.php", line 14, characters 10-14:
 Invalid return type (Typing[4110])
 File "tvarray.php", line 13, characters 24-34:
-This is a varray
+Expected varray<int>
 File "tvarray.php", line 4, characters 17-23:
-It is incompatible with a dynamic value
+But got dynamic

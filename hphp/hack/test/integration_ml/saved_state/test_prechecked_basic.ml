@@ -18,25 +18,25 @@ let d_errors = {|
 File "/d.php", line 2, characters 28-30:
 Invalid return type (Typing[4110])
 File "/d.php", line 2, characters 15-17:
-This is an int
+Expected int
 File "/c.php", line 2, characters 15-20:
-It is incompatible with a string
+But got string
 |}
 
 let all_errors = {|
 File "/b.php", line 2, characters 28-30:
 Invalid return type (Typing[4110])
 File "/b.php", line 2, characters 15-17:
-This is an int
+Expected int
 File "/a.php", line 2, characters 15-20:
-It is incompatible with a string
+But got string
 
 File "/d.php", line 2, characters 28-30:
 Invalid return type (Typing[4110])
 File "/d.php", line 2, characters 15-17:
-This is an int
+Expected int
 File "/c.php", line 2, characters 15-20:
-It is incompatible with a string
+But got string
 |}
 
 let () = Tempfile.with_real_tempdir @@ fun temp_dir ->

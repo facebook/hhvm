@@ -1,8 +1,8 @@
 File "object_is_subtype_of_nonnull.php", line 10, characters 12-19:
 Invalid return type (Typing[4110])
 File "object_is_subtype_of_nonnull.php", line 8, characters 24-30:
-This is a nonnull value
+Expected nonnull
 File "object_is_subtype_of_nonnull.php", line 6, characters 28-34:
-It is incompatible with the expression dependent type this::T
+But got this::T
 File "object_is_subtype_of_nonnull.php", line 9, characters 10-15:
   resulting from expanding the type constant C::T

@@ -323,8 +323,8 @@ class BarebonesTests(object):
         self.check_cmd(
             [
                 "{root}foo_4.php:4:24,26: Invalid return type (Typing[4110])",
-                "  {root}foo_4.php:3:27,29: This is an int",
-                "  {root}foo_4.php:4:24,26: It is incompatible with a string",
+                "  {root}foo_4.php:3:27,29: Expected int",
+                "  {root}foo_4.php:4:24,26: But got string",
             ]
         )
 
@@ -379,8 +379,8 @@ class BarebonesTests(object):
         self.check_cmd(
             [
                 "{root}class_3.php:5:12,19: Invalid return type (Typing[4110])",
-                "  {root}class_3.php:4:28,30: This is an int",
-                "  {root}class_1.php:4:51,54: It is incompatible with a bool",
+                "  {root}class_3.php:4:28,30: Expected int",
+                "  {root}class_1.php:4:51,54: But got bool",
             ]
         )
 
@@ -425,8 +425,8 @@ class CommonTests(BarebonesTests):
         self.check_cmd(
             [
                 "{root}foo_2.php:4:24,26: Invalid return type (Typing[4110])",
-                "  {root}foo_2.php:3:27,29: This is an int",
-                "  {root}foo_2.php:4:24,26: It is incompatible with a string",
+                "  {root}foo_2.php:3:27,29: Expected int",
+                "  {root}foo_2.php:4:24,26: But got string",
             ]
         )
 
@@ -514,8 +514,8 @@ class CommonTests(BarebonesTests):
         self.check_cmd(
             [
                 "{root}foo_1.php:4:24,26: Invalid return type (Typing[4110])",
-                "  {root}foo_1.php:3:27,32: This is a string",
-                "  {root}bar_2.php:3:23,25: It is incompatible with an int",
+                "  {root}foo_1.php:3:27,32: Expected string",
+                "  {root}bar_2.php:3:23,25: But got int",
             ]
         )
 
@@ -1180,8 +1180,8 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
         self.check_cmd(
             [
                 "{root}typing_error.php:2:32,34: Invalid return type (Typing[4110])",
-                "  {root}typing_error.php:2:19,21: This is an int",
-                "  {root}foo_3.php:3:23,28: It is incompatible with a string",
+                "  {root}typing_error.php:2:19,21: Expected int",
+                "  {root}foo_3.php:3:23,28: But got string",
             ],
             options=["--single", "{root}typing_error.php"],
             stdin="",
@@ -1190,8 +1190,8 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
         self.check_cmd(
             [
                 ":2:32,34: Invalid return type (Typing[4110])",
-                "  :2:19,21: This is an int",
-                "  {root}foo_3.php:3:23,28: It is incompatible with a string",
+                "  :2:19,21: Expected int",
+                "  {root}foo_3.php:3:23,28: But got string",
             ],
             options=["--single", "-"],
             stdin="<?hh //strict\n function aaaa(): int { return h(); }",

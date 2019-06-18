@@ -1,6 +1,6 @@
 File "hh_fixme2.php", line 4, characters 31-35:
 Invalid return type (Typing[4110])
 File "hh_fixme2.php", line 3, characters 18-20:
-This is an int
+Expected int
 File "hh_fixme2.php", line 4, characters 31-35:
-It is incompatible with a string
+But got string

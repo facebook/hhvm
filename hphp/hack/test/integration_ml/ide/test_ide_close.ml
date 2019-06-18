@@ -28,9 +28,9 @@ let foo_disk_errors = "
 File \"/foo.php\", line 6, characters 7-7:
 Invalid argument (Typing[4110])
 File \"/foo.php\", line 3, characters 14-19:
-This is a string
+Expected string
 File \"/foo.php\", line 6, characters 7-7:
-It is incompatible with an int
+But got int
 "
 
 let foo_disk_diagnostics = "
@@ -38,9 +38,9 @@ let foo_disk_diagnostics = "
 File \"/foo.php\", line 6, characters 7-7:
 Invalid argument (Typing[4110])
 File \"/foo.php\", line 3, characters 14-19:
-This is a string
+Expected string
 File \"/foo.php\", line 6, characters 7-7:
-It is incompatible with an int
+But got int
 "
 
 let foo_ide_contents =

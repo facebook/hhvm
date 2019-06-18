@@ -29,9 +29,9 @@ let test_errors = {|
 File "/test.php", line 3, characters 10-21:
 Invalid return type (Typing[4110])
 File "/test.php", line 2, characters 19-21:
-This is an int
+Expected int
 File "/B.php", line 3, characters 29-34:
-It is incompatible with a string
+But got string
 |}
 
 let () = Tempfile.with_real_tempdir @@ fun temp_dir ->

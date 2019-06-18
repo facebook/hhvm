@@ -1,6 +1,6 @@
 File "let_subtype_error.php", line 10, characters 18-25:
 Wrong type hint (Typing[4110])
 File "let_subtype_error.php", line 10, characters 18-25:
-This is an object of type Subclass
+Expected Subclass
 File "let_subtype_error.php", line 10, characters 33-36:
-It is incompatible with an object of exactly the class Base
+But got Base

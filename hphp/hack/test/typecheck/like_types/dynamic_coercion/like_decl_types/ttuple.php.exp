@@ -1,6 +1,6 @@
 File "ttuple.php", line 4, characters 12-22:
 Invalid return type (Typing[4110])
 File "ttuple.php", line 4, characters 29-38:
-This is a tuple of size 2
+Expected (int, int)
 File "ttuple.php", line 4, characters 12-22:
-It is incompatible with a dynamic value
+But got dynamic

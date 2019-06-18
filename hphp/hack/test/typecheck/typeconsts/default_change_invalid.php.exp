@@ -6,6 +6,6 @@ Read the following to see why:
 File "default_change_invalid.php", line 4, characters 23-23:
 Unable to satisfy constraint on this type constant
 File "default_change_invalid.php", line 4, characters 28-35:
-This is an array key (int | string)
+Expected arraykey
 File "default_change_invalid.php", line 8, characters 18-21:
-It is incompatible with a bool
+But got bool

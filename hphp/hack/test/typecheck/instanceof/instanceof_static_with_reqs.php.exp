@@ -9,6 +9,6 @@ File "instanceof_static_with_reqs.php", line 30, characters 5-19:
 File "instanceof_static_with_reqs.php", line 31, characters 12-17:
 Invalid return type (Typing[4110])
 File "instanceof_static_with_reqs.php", line 7, characters 49-52:
-This is the expression dependent type this
+Expected this
 File "instanceof_static_with_reqs.php", line 23, characters 19-27:
-It is incompatible with an object of type INeedsFoo<T#1>
+But got INeedsFoo<T#1>

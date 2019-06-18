@@ -6,8 +6,8 @@ Read the following to see why:
 File "ambiguous_inheritance.php", line 4, characters 19-21:
 Member foo has the wrong type
 File "ambiguous_inheritance.php", line 8, characters 26-28:
-This is an int
+Expected int
 File "ambiguous_inheritance.php", line 4, characters 26-30:
-It is incompatible with a mixed value
+But got mixed
 File "ambiguous_inheritance.php", line 4, characters 19-21:
 This declaration was inherited from an object of type I1. Redeclare this member in C with a compatible signature.

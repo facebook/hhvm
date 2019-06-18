@@ -1,6 +1,6 @@
 File "tapply_enum.php", line 6, characters 12-15:
 Invalid return type (Typing[4110])
 File "tapply_enum.php", line 6, characters 22-24:
-This is a value of Pos
+Expected Pos
 File "tapply_enum.php", line 6, characters 12-15:
-It is incompatible with a dynamic value
+But got dynamic

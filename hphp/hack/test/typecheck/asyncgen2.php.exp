@@ -9,6 +9,6 @@ File "asyncgen2.php", line 15, characters 5-15:[2]
 File "asyncgen2.php", line 13, characters 12-14:
 Invalid foreach (Typing[4110])
 File "asyncgen2.php", line 13, characters 12-14:
-This is an object of type KeyedTraversable<[unresolved], [unresolved]> because this is used in a foreach statement
+Expected KeyedTraversable<[unresolved], [unresolved]> because this is used in a foreach statement
 File "asyncgen2.php", line 7, characters 21-53:
-It is incompatible with an object of type AsyncGenerator<int, string, void>
+But got AsyncGenerator<int, string, void>

@@ -1,9 +1,9 @@
 File "test_foreach.php", line 14, characters 12-13:
 Invalid return type (Typing[4110])
 File "test_foreach.php", line 12, characters 37-42:
-This is a string
+Expected string
 File "test_foreach.php", line 12, characters 19-21:
-It is incompatible with an int
+But got int
 File "collections/Map.hhi", line 57, characters 59-60:
   via this generic Tk
 File "collections/interfaces.hhi", line 1126, characters 59-60:

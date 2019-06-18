@@ -1,6 +1,6 @@
 File "typing_fail_tuple1.php", line 13, characters 10-23:
 Invalid return type (Typing[4110])
 File "typing_fail_tuple1.php", line 12, characters 15-24:
-This is a tuple of size 2
+Expected (int, int)
 File "typing_fail_tuple1.php", line 13, characters 10-23:
-It is incompatible with a tuple of size 3
+But got (int, int, int)

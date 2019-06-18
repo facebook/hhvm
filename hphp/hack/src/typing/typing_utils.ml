@@ -306,10 +306,10 @@ let reactivity_to_string env r =
 (* Unification error *)
 (*****************************************************************************)
 let uerror env r1 ty1 r2 ty2 =
-  let ty1 = Typing_print.error env (r1,ty1) in
-  let ty2 = Typing_print.error env (r2,ty2) in
-  let left = Reason.to_string ("This is " ^ ty1) r1 in
-  let right = Reason.to_string ("It is incompatible with " ^ ty2) r2 in
+  let ty1 = Typing_print.with_blank_tyvars (fun () -> Typing_print.full_strip_ns env (r1,ty1)) in
+  let ty2 = Typing_print.with_blank_tyvars (fun () -> Typing_print.full_strip_ns env (r2,ty2)) in
+  let left = Reason.to_string ("Expected " ^ ty1) r1 in
+  let right = Reason.to_string ("But got " ^ ty2) r2 in
   match (r1, r2) with
   | Reason.Rcstr_on_generics (p, tparam), _ | _, Reason.Rcstr_on_generics (p, tparam) ->
     Errors.violated_constraint p tparam left right

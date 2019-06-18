@@ -5,6 +5,6 @@ Some type constraint(s) are violated here
 File "collections/Set.hhi", line 221, characters 23-24:
 Tu is a constrained type parameter
 File "collections/Set.hhi", line 221, characters 29-36:
-This is an array key (int | string)
+Expected arraykey
 File "async_lambda.php", line 6, characters 11-25:
-It is incompatible with an object of type Awaitable<[unresolved]> (result of 'async function')
+But got Awaitable<[unresolved]> (result of 'async function')

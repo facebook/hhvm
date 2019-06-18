@@ -1,6 +1,6 @@
 File "void_return.php", line 13, characters 10-13:
 Invalid return type (Typing[4110])
 File "void_return.php", line 12, characters 17-20:
-This is void
+Expected void
 File "void_return.php", line 13, characters 10-13:
-It is incompatible with null
+But got null

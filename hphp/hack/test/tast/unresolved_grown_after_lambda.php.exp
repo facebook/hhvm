@@ -1,7 +1,7 @@
 Errors:
   [13:3-16] Invalid assignment
-  [5:12-15] This is an int
-  [3:23-29] It is incompatible with a string
+  [5:12-15] Expected int
+  [3:23-29] But got string
 [(Fun
     { f_span = [3:1-15:2]; f_annotation = (); f_mode = <opaque>;
       f_ret = (Some ([3:35-38], (Hprim Tint)));

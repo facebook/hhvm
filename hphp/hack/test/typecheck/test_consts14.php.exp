@@ -4,6 +4,6 @@ File "test_consts14.php", line 15, characters 17-17:
 Some members are incompatible with those declared in type A
 Read the following to see why:
 File "test_consts14.php", line 4, characters 9-11:
-This is an int
+Expected int
 File "test_consts14.php", line 10, characters 9-14:
-It is incompatible with a string
+But got string

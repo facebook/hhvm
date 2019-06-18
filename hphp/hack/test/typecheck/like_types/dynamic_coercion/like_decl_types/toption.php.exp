@@ -1,6 +1,6 @@
 File "toption.php", line 12, characters 24-35:
 Invalid return type (Typing[4110])
 File "toption.php", line 12, characters 43-52:
-This is a tuple of size 2
+Expected (int, int)
 File "toption.php", line 12, characters 24-35:
-It is incompatible with a dynamic value
+But got dynamic

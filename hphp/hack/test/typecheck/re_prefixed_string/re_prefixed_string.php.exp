@@ -1,9 +1,9 @@
 File "re_prefixed_string.php", line 18, characters 16-17:
 Invalid argument (Typing[4110])
 File "re_prefixed_string.php", line 21, characters 43-65:
-This is an object of type HH\Lib\Regex\Pattern<[unresolved]>
+Expected HH\Lib\Regex\Pattern<[unresolved]>
 File "re_prefixed_string.php", line 15, characters 8-20:
-It is incompatible with a string because this is the result of a concatenation
+But got string because this is the result of a concatenation
 File "re_prefixed_string.php", line 28, characters 13-35:
 Bad regex pattern; two named subpatterns have the same name [14]. (Typing[4275])
 File "re_prefixed_string.php", line 29, characters 13-29:

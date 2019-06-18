@@ -49,9 +49,9 @@ let bar_diagnostics =
 File \"/bar.php\", line 6, characters 12-26:
 Invalid argument (Typing[4110])
 File \"/bar.php\", line 3, characters 19-21:
-This is an int
+Expected int
 File \"/foo.php\", line 4, characters 25-30:
-It is incompatible with a string
+But got string
 "
 
 let () =

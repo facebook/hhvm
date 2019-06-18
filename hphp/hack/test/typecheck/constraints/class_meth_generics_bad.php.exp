@@ -5,9 +5,9 @@ Some type constraint(s) are violated here
 File "class_meth_generics_bad.php", line 4, characters 9-9:
 T is a constrained type parameter
 File "class_meth_generics_bad.php", line 4, characters 14-21:
-This is an array key (int | string)
+Expected arraykey
 File "class_meth_generics_bad.php", line 19, characters 24-27:
-It is incompatible with a bool
+But got bool
 File "class_meth_generics_bad.php", line 27, characters 12-13:
 Invalid argument (Typing[4110])
 File "class_meth_generics_bad.php", line 4, characters 14-21:
@@ -15,9 +15,9 @@ Some type constraint(s) are violated here
 File "class_meth_generics_bad.php", line 4, characters 9-9:
 T is a constrained type parameter
 File "class_meth_generics_bad.php", line 4, characters 14-21:
-This is an array key (int | string)
+Expected arraykey
 File "class_meth_generics_bad.php", line 25, characters 24-28:
-It is incompatible with a float
+But got float
 File "class_meth_generics_bad.php", line 32, characters 12-13:
 Invalid argument (Typing[4110])
 File "class_meth_generics_bad.php", line 4, characters 14-21:
@@ -25,9 +25,9 @@ Some type constraint(s) are violated here
 File "class_meth_generics_bad.php", line 4, characters 9-9:
 T is a constrained type parameter
 File "class_meth_generics_bad.php", line 4, characters 14-21:
-This is an array key (int | string)
+Expected arraykey
 File "class_meth_generics_bad.php", line 30, characters 24-28:
-It is incompatible with a float
+But got float
 File "class_meth_generics_bad.php", line 32, characters 16-17:
 Invalid argument (Typing[4110])
 File "class_meth_generics_bad.php", line 11, characters 51-58:
@@ -35,6 +35,6 @@ Some type constraint(s) are violated here
 File "class_meth_generics_bad.php", line 11, characters 45-46:
 Tu is a constrained type parameter
 File "class_meth_generics_bad.php", line 11, characters 51-58:
-This is an array key (int | string)
+Expected arraykey
 File "class_meth_generics_bad.php", line 30, characters 34-41:
-It is incompatible with an object of type vec<int>
+But got vec<int>

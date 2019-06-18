@@ -37,15 +37,15 @@ Definition is here
 File "unpack_call1.php", line 85, characters 8-19:
 Invalid argument (Typing[4110])
 File "unpack_call1.php", line 85, characters 8-19:
-This is an object of type Traversable<int> (it is unpacked with '...')
+Expected Traversable<int> (it is unpacked with '...')
 File "unpack_call1.php", line 90, characters 24-28:
-It is incompatible with a mixed value
+But got mixed
 File "unpack_call1.php", line 85, characters 8-19:
 Invalid argument (Typing[4110])
 File "unpack_call1.php", line 85, characters 8-19:
-This is an object of type Traversable<_> (it is unpacked with '...')
+Expected Traversable<_> (it is unpacked with '...')
 File "unpack_call1.php", line 90, characters 24-28:
-It is incompatible with a mixed value
+But got mixed
 File "unpack_call1.php", line 85, characters 3-20:
 Too few arguments (required 1 but got 0) (Typing[4104])
 File "unpack_call1.php", line 3, characters 10-10:
@@ -53,15 +53,15 @@ Definition is here
 File "unpack_call1.php", line 87, characters 8-14:
 Invalid argument (Typing[4110])
 File "unpack_call1.php", line 87, characters 8-14:
-This is an object of type Traversable<int> (it is unpacked with '...')
+Expected Traversable<int> (it is unpacked with '...')
 File "unpack_call1.php", line 90, characters 24-28:
-It is incompatible with a mixed value
+But got mixed
 File "unpack_call1.php", line 87, characters 8-14:
 Invalid argument (Typing[4110])
 File "unpack_call1.php", line 87, characters 8-14:
-This is an object of type Traversable<_> (it is unpacked with '...')
+Expected Traversable<_> (it is unpacked with '...')
 File "unpack_call1.php", line 90, characters 24-28:
-It is incompatible with a mixed value
+But got mixed
 File "unpack_call1.php", line 87, characters 3-15:
 Too few arguments (required 1 but got 0) (Typing[4104])
 File "unpack_call1.php", line 3, characters 10-10:

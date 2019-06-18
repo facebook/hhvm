@@ -6,6 +6,6 @@ Read the following to see why:
 File "bad_subclass.php", line 18, characters 19-33:
 Member nameOfISubclass has the wrong type
 File "bad_subclass.php", line 8, characters 57-57:
-This is an object of type I
+Expected I
 File "bad_subclass.php", line 18, characters 48-53:
-It is incompatible with an object of type C_notI
+But got C_notI

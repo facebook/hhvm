@@ -1,6 +1,6 @@
 File "desugar_tuple2.php", line 13, characters 5-25:
 Invalid assignment (Typing[4110])
 File "desugar_tuple2.php", line 13, characters 5-16:
-This is a tuple of size 2
+Expected ([unresolved], [unresolved])
 File "desugar_tuple2.php", line 12, characters 14-28:
-It is incompatible with a tuple of size 3
+But got (int, int, int)

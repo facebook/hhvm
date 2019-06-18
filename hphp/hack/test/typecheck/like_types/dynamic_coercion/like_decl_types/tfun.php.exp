@@ -1,6 +1,6 @@
 File "tfun.php", line 4, characters 12-33:
 Invalid return type (Typing[4110])
 File "tfun.php", line 4, characters 40-60:
-This is a function
+Expected (function(): string)
 File "tfun.php", line 4, characters 12-33:
-It is incompatible with a dynamic value
+But got dynamic

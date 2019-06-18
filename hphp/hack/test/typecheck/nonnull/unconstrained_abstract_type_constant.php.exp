@@ -1,8 +1,8 @@
 File "unconstrained_abstract_type_constant.php", line 7, characters 12-13:
 Invalid return type (Typing[4110])
 File "unconstrained_abstract_type_constant.php", line 6, characters 34-40:
-This is a nonnull value
+Expected nonnull
 File "unconstrained_abstract_type_constant.php", line 6, characters 21-27:
-It is incompatible with the expression dependent type this::T
+But got this::T
 File "unconstrained_abstract_type_constant.php", line 6, characters 21-24:
   resulting from expanding the type constant C::T

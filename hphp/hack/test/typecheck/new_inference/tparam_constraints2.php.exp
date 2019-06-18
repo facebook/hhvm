@@ -5,6 +5,6 @@ Some type constraint(s) are violated here
 File "tparam_constraints2.php", line 3, characters 29-30:
 Tk is a constrained type parameter
 File "tparam_constraints2.php", line 3, characters 35-42:
-This is an array key (int | string)
+Expected arraykey
 File "tparam_constraints2.php", line 10, characters 37-40:
-It is incompatible with void
+But got void

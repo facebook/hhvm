@@ -1,6 +1,6 @@
 File "generic_primitive_invariant.php", line 15, characters 10-19:
 Invalid return type (Typing[4110])
 File "generic_primitive_invariant.php", line 14, characters 30-30:
-This is a value of generic type T
+Expected T
 File "generic_primitive_invariant.php", line 10, characters 26-28:
-It is incompatible with an int
+But got int

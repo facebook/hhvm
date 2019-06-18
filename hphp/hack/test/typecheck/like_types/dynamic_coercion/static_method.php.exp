@@ -1,6 +1,6 @@
 File "static_method.php", line 8, characters 10-14:
 Invalid argument (Typing[4110])
 File "static_method.php", line 7, characters 28-30:
-This is an int
+Expected int
 File "static_method.php", line 4, characters 17-23:
-It is incompatible with a dynamic value
+But got dynamic

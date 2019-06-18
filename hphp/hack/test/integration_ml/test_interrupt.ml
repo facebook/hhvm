@@ -20,9 +20,9 @@ let expected_errors = {|
 File "/bar2.php", line 4, characters 10-14:
 Invalid return type (Typing[4110])
 File "/bar2.php", line 3, characters 19-21:
-This is an int
+Expected int
 File "/foo.php", line 2, characters 18-23:
-It is incompatible with a string
+But got string
 |}
 
 

@@ -6,8 +6,8 @@ Read the following to see why:
 File "interface2.php", line 4, characters 23-23:
 The constraint on this type constant is inconsistent with its parent
 File "interface2.php", line 7, characters 28-35:
-This is an array key (int | string)
+Expected arraykey
 File "interface2.php", line 4, characters 28-32:
-It is incompatible with a mixed value
+But got mixed
 File "interface2.php", line 4, characters 23-23:
 This declaration was inherited from an object of type I1. Redeclare this member in I with a compatible signature.

@@ -1,12 +1,12 @@
 File "tapply_typedef.php", line 11, characters 10-14:
 Invalid return type (Typing[4110])
 File "tapply_typedef.php", line 10, characters 15-15:
-This is an int
+Expected int
 File "tapply_typedef.php", line 4, characters 17-23:
-It is incompatible with a dynamic value
+But got dynamic
 File "tapply_typedef.php", line 15, characters 10-14:
 Invalid return type (Typing[4110])
 File "tapply_typedef.php", line 14, characters 15-15:
-This is an int
+Expected int
 File "tapply_typedef.php", line 4, characters 17-23:
-It is incompatible with a dynamic value
+But got dynamic

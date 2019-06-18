@@ -1,15 +1,15 @@
 File "unpack_call3.php", line 7, characters 8-12:
 Invalid argument (Typing[4110])
 File "unpack_call3.php", line 7, characters 8-12:
-This is an object of type Traversable<int> (it is unpacked with '...')
+Expected Traversable<int> (it is unpacked with '...')
 File "unpack_call3.php", line 6, characters 11-18:
-It is incompatible with a string
+But got string
 File "unpack_call3.php", line 7, characters 8-12:
 Invalid argument (Typing[4110])
 File "unpack_call3.php", line 7, characters 8-12:
-This is an object of type Traversable<_> (it is unpacked with '...')
+Expected Traversable<_> (it is unpacked with '...')
 File "unpack_call3.php", line 6, characters 11-18:
-It is incompatible with a string
+But got string
 File "unpack_call3.php", line 7, characters 3-13:
 Too few arguments (required 1 but got 0) (Typing[4104])
 File "unpack_call3.php", line 3, characters 10-10:

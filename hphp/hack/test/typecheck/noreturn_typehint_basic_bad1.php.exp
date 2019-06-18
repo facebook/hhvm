@@ -1,6 +1,6 @@
 File "noreturn_typehint_basic_bad1.php", line 3, characters 10-17:
 Invalid return type (Typing[4110])
 File "noreturn_typehint_basic_bad1.php", line 3, characters 10-17:
-This is void because this function implicitly returns void
+Expected void because this function implicitly returns void
 File "noreturn_typehint_basic_bad1.php", line 3, characters 22-29:
-It is incompatible with noreturn (throws or exits)
+But got noreturn

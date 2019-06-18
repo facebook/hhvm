@@ -1,6 +1,6 @@
 File "idx3_3.php", line 10, characters 10-11:
 Invalid return type (Typing[4110])
 File "idx3_3.php", line 7, characters 15-17:
-This is an int
+Expected int
 File "idx3_3.php", line 9, characters 21-26:
-It is incompatible with a string
+But got string

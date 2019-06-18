@@ -1,6 +1,6 @@
 File "printf_crash.php--printf.php", line 5, characters 10-19:
 Invalid return type (Typing[4110])
 File "printf_crash.php--printf.php", line 5, characters 10-19:
-This is void because this function implicitly returns void
+Expected void because this function implicitly returns void
 File "printf_crash.php--printf.php", line 5, characters 58-63:
-It is incompatible with a string
+But got string

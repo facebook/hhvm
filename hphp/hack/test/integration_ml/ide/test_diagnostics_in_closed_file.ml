@@ -39,9 +39,9 @@ let bar_diagnostics = "
 File \"/bar.php\", line 5, characters 10-14:
 Invalid return type (Typing[4110])
 File \"/bar.php\", line 4, characters 18-20:
-This is an int
+Expected int
 File \"/foo.php\", line 3, characters 18-23:
-It is incompatible with a string
+But got string
 "
 
 let bar_clear = "

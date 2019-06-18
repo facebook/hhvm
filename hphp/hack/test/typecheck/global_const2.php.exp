@@ -1,4 +1,4 @@
 File "global_const2.php", line 3, characters 7-9:
-This is an int (Typing[4110])
+Expected int (Typing[4110])
 File "global_const2.php", line 3, characters 15-21:
-It is incompatible with an empty array
+But got array (empty)

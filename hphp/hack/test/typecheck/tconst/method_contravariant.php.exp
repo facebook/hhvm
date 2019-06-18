@@ -1,10 +1,10 @@
 File "method_contravariant.php", line 31, characters 14-15:
 Invalid argument (Typing[4110])
 File "method_contravariant.php", line 12, characters 39-45:
-This is the expression dependent type <expr#1>::T
+Expected <expr#1>::T
 File "method_contravariant.php", line 4, characters 19-26:
   resulting from expanding the type constant X::T
 File "method_contravariant.php", line 31, characters 3-4:
   where '<expr#1>' is a reference to this expression
 File "method_contravariant.php", line 31, characters 14-15:
-It is incompatible with a string
+But got string

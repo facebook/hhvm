@@ -6,8 +6,8 @@ Read the following to see why:
 File "incompatible_interface.php", line 18, characters 19-21:
 Member foo has the wrong type
 File "incompatible_interface.php", line 13, characters 26-28:
-This is an int
+Expected int
 File "incompatible_interface.php", line 16, characters 9-9:
-It is incompatible with a value of generic type T
+But got T
 File "incompatible_interface.php", line 18, characters 26-26:
   via this generic T

@@ -5,9 +5,9 @@ Some type constraint(s) are violated here
 File "t21684610.php", line 9, characters 38-39:
 Ti is a constrained type parameter
 File "t21684610.php", line 9, characters 44-48:
-This is an object of type I1<[unresolved]>
+Expected I1<[unresolved]>
 File "t21684610.php", line 23, characters 27-27:
-It is incompatible with an int
+But got int
 File "t21684610.php", line 27, characters 16-16:
 Invalid argument (Typing[4110])
 File "t21684610.php", line 9, characters 44-48:
@@ -15,6 +15,6 @@ Some type constraint(s) are violated here
 File "t21684610.php", line 9, characters 38-39:
 Ti is a constrained type parameter
 File "t21684610.php", line 9, characters 44-48:
-This is an object of type I1<[unresolved]>
+Expected I1<[unresolved]>
 File "t21684610.php", line 27, characters 16-16:
-It is incompatible with an int
+But got int

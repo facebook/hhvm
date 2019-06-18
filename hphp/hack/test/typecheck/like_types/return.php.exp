@@ -1,18 +1,18 @@
 File "return.php", line 8, characters 10-17:
 Invalid return type (Typing[4110])
 File "return.php", line 7, characters 22-25:
-This is a dynamic value
+Expected dynamic
 File "return.php", line 8, characters 10-17:
-It is incompatible with a string
+But got string
 File "return.php", line 12, characters 10-28:
 Invalid return type (Typing[4110])
 File "return.php", line 11, characters 27-29:
-This is an int
+Expected int
 File "return.php", line 12, characters 22-28:
-It is incompatible with a dynamic value
+But got dynamic
 File "return.php", line 16, characters 10-19:
 Invalid return type (Typing[4110])
 File "return.php", line 15, characters 27-29:
-This is an int
+Expected int
 File "return.php", line 7, characters 22-25:
-It is incompatible with a dynamic value
+But got dynamic

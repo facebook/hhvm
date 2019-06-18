@@ -46,9 +46,9 @@ let bar_107_foo_line_3_diagnostics = {|
 File "/bar107.php", line 4, characters 10-14:
 Invalid return type (Typing[4110])
 File "/bar107.php", line 3, characters 21-23:
-This is an int
+Expected int
 File "/foo.php", line 3, characters 17-22:
-It is incompatible with a string
+But got string
 |}
 
 let bar_107_foo_line_5_diagnostics = {|
@@ -56,9 +56,9 @@ let bar_107_foo_line_5_diagnostics = {|
 File "/bar107.php", line 4, characters 10-14:
 Invalid return type (Typing[4110])
 File "/bar107.php", line 3, characters 21-23:
-This is an int
+Expected int
 File "/foo.php", line 5, characters 17-22:
-It is incompatible with a string
+But got string
 |}
 
 let bar106_cleared = {|
@@ -74,9 +74,9 @@ let bar_108_foo_line_5_diagnostics = {|
 File "/bar108.php", line 4, characters 10-14:
 Invalid return type (Typing[4110])
 File "/bar108.php", line 3, characters 21-23:
-This is an int
+Expected int
 File "/foo.php", line 5, characters 17-22:
-It is incompatible with a string
+But got string
 |}
 
 let bar_109_foo_line_3_diagnostics = {|
@@ -84,9 +84,9 @@ let bar_109_foo_line_3_diagnostics = {|
 File "/bar109.php", line 4, characters 10-14:
 Invalid return type (Typing[4110])
 File "/bar109.php", line 3, characters 21-23:
-This is an int
+Expected int
 File "/foo.php", line 3, characters 17-22:
-It is incompatible with a string
+But got string
 |}
 
 let () =

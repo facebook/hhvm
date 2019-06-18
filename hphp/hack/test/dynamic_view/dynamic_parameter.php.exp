@@ -4,13 +4,13 @@ File "dynamic_parameter.php", line 6, characters 31-41:
   dynamic
 File "dynamic_parameter.php", line 5, characters 13-14:
 Invalid argument (Typing[4110])
-  File "dynamic_parameter.php", line 2, characters 20-22:
-  This is an int
-  File "dynamic_parameter.php", line 3, characters 14-15:
-  It is incompatible with a dynamic value
+File "dynamic_parameter.php", line 2, characters 20-22:
+Expected int
+File "dynamic_parameter.php", line 3, characters 14-15:
+But got dynamic
 File "dynamic_parameter.php", line 3, characters 10-12:
 Invalid return type (Typing[4110])
-  File "dynamic_parameter.php", line 3, characters 10-12:
-  This is void because this function implicitly returns void
-  File "dynamic_parameter.php", line 3, characters 10-12:
-  It is incompatible with a dynamic value
+File "dynamic_parameter.php", line 3, characters 10-12:
+Expected void because this function implicitly returns void
+File "dynamic_parameter.php", line 3, characters 10-12:
+But got dynamic

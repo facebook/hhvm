@@ -1,10 +1,10 @@
 File "array_get_tconst.php", line 8, characters 12-13:
 Invalid return type (Typing[4110])
 File "array_get_tconst.php", line 6, characters 43-55:
-This is the expression dependent type this::MyArray
+Expected this::MyArray
 File "array_get_tconst.php", line 6, characters 43-46:
   resulting from expanding the type constant C::MyArray
 File "array_get_tconst.php", line 6, characters 43-55:
-It is incompatible with an array (used like a hashtable)
+But got array<mixed, mixed>
 File "array_get_tconst.php", line 4, characters 34-52:
   resulting from expanding the type constant C::MyArray

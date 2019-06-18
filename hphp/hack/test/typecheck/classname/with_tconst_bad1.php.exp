@@ -6,6 +6,6 @@ Read the following to see why:
 File "with_tconst_bad1.php", line 7, characters 23-24:
 Unable to satisfy constraint on this type constant
 File "with_tconst_bad1.php", line 7, characters 29-29:
-This is an object of type I
+Expected I
 File "with_tconst_bad1.php", line 12, characters 19-26:
-It is incompatible with an object of type stdClass
+But got stdClass

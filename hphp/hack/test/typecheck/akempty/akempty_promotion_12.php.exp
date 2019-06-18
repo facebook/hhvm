@@ -1,6 +1,6 @@
 File "akempty_promotion_12.php", line 9, characters 3-19:
 Invalid assignment (Typing[4110])
 File "akempty_promotion_12.php", line 7, characters 27-33:
-This is an empty array
+Expected array (empty)
 File "akempty_promotion_12.php", line 7, characters 27-33:
-It is incompatible with a varray_or_darray
+But got varray_or_darray<int>

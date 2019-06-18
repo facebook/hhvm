@@ -1,6 +1,6 @@
 File "tthis.php", line 5, characters 21-25:
 Invalid return type (Typing[4110])
 File "tthis.php", line 4, characters 13-13:
-This is an object of type C
+Expected C
 File "tthis.php", line 5, characters 21-25:
-It is incompatible with a dynamic value
+But got dynamic

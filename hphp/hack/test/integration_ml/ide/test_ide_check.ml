@@ -37,9 +37,9 @@ let a_contents3_diagnostics =
 File \"/a.php\", line 4, characters 5-12:
 Typing error (Typing[4110])
 File \"/a.php\", line 4, characters 10-12:
-This is a num (int | float) because this is used in an arithmetic operation
+Expected num because this is used in an arithmetic operation
 File \"/a.php\", line 4, characters 10-12:
-It is incompatible with a string"
+But got string"
 
 let b_name = "b.php"
 let b_contents = "<?hh // strict

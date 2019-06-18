@@ -1,6 +1,6 @@
 File "if_assign.php", line 15, characters 10-11:
 Invalid return type (Typing[4110])
 File "if_assign.php", line 12, characters 19-21:
-This is an int
+Expected int
 File "if_assign.php", line 13, characters 12-13:
-It is incompatible with a string
+But got string

@@ -40,7 +40,7 @@ let () =
   let expected_error = "File \"/foo.php\", line 3, characters 20-22:\n" ^
                       "Invalid return type (Typing[4110])\n" ^
                       "File \"/foo.php\", line 2, characters 23-25:\n" ^
-                      "This is an int\n" ^
+                      "Expected int\n" ^
                       "File \"/foo.php\", line 3, characters 20-22:\n" ^
-                      "It is incompatible with a string\n" in
+                      "But got string\n" in
   Test.assertSingleError expected_error (Errors.get_error_list env.errorl);

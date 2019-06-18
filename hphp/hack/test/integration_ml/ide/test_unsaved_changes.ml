@@ -33,18 +33,18 @@ let disk_diagnostics = {|
 File "/bar.php", line 4, characters 7-8:
 Invalid argument (Typing[4110])
 File "/foo.php", line 3, characters 14-16:
-This is an int
+Expected int
 File "/bar.php", line 3, characters 15-19:
-It is incompatible with a mixed value
+But got mixed
 |}
 
 let ide_diagnostics = {|
 File "/bar.php", line 4, characters 7-8:
 Invalid argument (Typing[4110])
 File "/foo.php", line 3, characters 14-19:
-This is a string
+Expected string
 File "/bar.php", line 3, characters 15-19:
-It is incompatible with a mixed value
+But got mixed
 |}
 
 let () =

@@ -6,6 +6,6 @@ Read the following to see why:
 File "skip_one.php", line 11, characters 14-14:
 The assigned type of this type constant is inconsistent with its parent
 File "skip_one.php", line 5, characters 39-41:
-This is an int
+Expected int
 File "skip_one.php", line 11, characters 18-23:
-It is incompatible with a string
+But got string

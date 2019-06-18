@@ -1,6 +1,6 @@
 File "array_filter1.php", line 4, characters 16-16:
 Invalid argument (Typing[4110])
 File "stdlib/builtins_array.hhi", line 82, characters 27-39:
-This is an object of type Container<[unresolved]>
+Expected Container<[unresolved]>
 File "array_filter1.php", line 4, characters 16-16:
-It is incompatible with an int
+But got int

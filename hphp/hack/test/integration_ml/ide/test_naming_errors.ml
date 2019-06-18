@@ -59,9 +59,9 @@ let foo_returns_string_diagnostics = "
 File \"/bar_expects_int.php\", line 4, characters 10-14:
 Invalid return type (Typing[4110])
 File \"/bar_expects_int.php\", line 3, characters 21-23:
-This is an int
+Expected int
 File \"/foo_returns_string_name.php\", line 3, characters 18-23:
-It is incompatible with a string
+But got string
 
 /bar_expects_string.php:
 "
@@ -80,9 +80,9 @@ let foo_returns_int_diagnostics = "
 File \"/bar_expects_string.php\", line 4, characters 10-14:
 Invalid return type (Typing[4110])
 File \"/bar_expects_string.php\", line 3, characters 24-29:
-This is a string
+Expected string
 File \"/foo_returns_int.php\", line 3, characters 18-20:
-It is incompatible with an int
+But got int
 
 /foo_returns_int.php:
 

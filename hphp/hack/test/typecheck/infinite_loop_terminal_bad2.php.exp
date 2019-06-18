@@ -1,6 +1,6 @@
 File "infinite_loop_terminal_bad2.php", line 5, characters 12-14:
 Invalid return type (Typing[4110])
 File "infinite_loop_terminal_bad2.php", line 3, characters 15-17:
-This is an int
+Expected int
 File "infinite_loop_terminal_bad2.php", line 5, characters 12-14:
-It is incompatible with a string
+But got string

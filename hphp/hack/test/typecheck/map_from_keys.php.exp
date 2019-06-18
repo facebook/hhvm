@@ -1,10 +1,10 @@
 File "map_from_keys.php--file2.php", line 5, characters 43-44:
 Invalid return type (Typing[4110])
 File "map_from_keys.php--file2.php", line 4, characters 54-65:
-This is a classname string
+Expected classname<C>
 File "map_from_keys.php--file2.php", line 4, characters 54-65:
 Considering that this type argument is invariant with respect to Map
 File "map_from_keys.php--file2.php", line 4, characters 46-51:
-It is incompatible with a string
+But got string
 File "map_from_keys.php--file2.php", line 4, characters 46-51:
 Considering that this type argument is invariant with respect to Map

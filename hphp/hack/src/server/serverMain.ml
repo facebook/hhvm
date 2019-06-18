@@ -823,6 +823,10 @@ let resolve_init_approach genv: ServerInit.init_approach * string =
     ServerInit.Full_init, "Server_args_no_load"
   else if ServerArgs.save_filename genv.options <> None then
     ServerInit.Full_init, "Server_args_saving_state"
+  else if ServerArgs.save_naming_filename genv.options <> None then
+    (* This needs to come after the check for save_filename because if we're
+     * saving both types of saved state we'll need to do a full init. *)
+    ServerInit.Parse_only_init, "Server_args_saving_naming"
   else
     match
       (genv.local_config.ServerLocalConfig.load_state_natively),
@@ -851,6 +855,9 @@ let program_init genv =
     | ServerInit.Full_init ->
       let env, _ = ServerInit.init ~init_approach genv in
       env, "fresh", None, None
+    | ServerInit.Parse_only_init ->
+      let env, _ = ServerInit.init ~init_approach genv in
+      env, "parse-only", None, None
     | ServerInit.Saved_state_init _ ->
       let env, init_result = ServerInit.init ~init_approach genv in
       begin match init_result with
@@ -1020,6 +1027,25 @@ let run_once options config local_config =
     | None, Some (spec: ServerArgs.save_state_spec_info) ->
       ServerInit.save_state genv env spec.ServerArgs.filename
     | Some _, Some _ -> failwith "Saved state file name is specified in two different ways!"
+  in
+  let env, naming_table_rows_changed =
+    match (ServerArgs.save_naming_filename genv.options) with
+    | None -> env, None
+    | Some filename -> env, Some (Naming_table.save env.naming_table filename)
+  in
+  let save_state_results =
+    match save_state_results, naming_table_rows_changed with
+    | Some results, Some naming_table_rows_changed ->
+      Some SaveStateServiceTypes.{ results with
+        naming_table_rows_changed = results.naming_table_rows_changed + naming_table_rows_changed;
+      }
+    | Some _, None -> save_state_results
+    | None, Some naming_table_rows_changed ->
+      Some SaveStateServiceTypes.{
+        dep_table_edges_added = 0;
+        naming_table_rows_changed = naming_table_rows_changed;
+      }
+    | None, None -> None
   in
 
   (* Finish up by generating the output and the exit code *)

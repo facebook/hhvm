@@ -14,6 +14,11 @@ val full_init :
   ServerEnv.env ->
   (ServerEnv.env * float)
 
+val parse_only_init :
+  ServerEnv.genv ->
+  ServerEnv.env ->
+  (ServerEnv.env * float)
+
 val saved_state_init :
   load_state_approach: load_state_approach ->
   ServerEnv.genv ->

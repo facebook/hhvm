@@ -156,6 +156,11 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
 
         return SaveStateResult(saved_state_path, result)
 
+    def dump_naming_saved_state(self) -> str:
+        saved_state_path = os.path.join(tempfile.mkdtemp(), "new_saved_naming.sql")
+        self.start_hh_server(args=["--check", "--save-naming", saved_state_path])
+        return saved_state_path
+
     def write_local_conf(self):
         with open(os.path.join(self.repo_dir, "hh.conf"), "w") as f:
             f.write(
@@ -230,7 +235,7 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
             assert_edges_added=assert_edges_added,
         )
 
-    def start_hh_server(self, changed_files=None, saved_state_path=None):
+    def start_hh_server(self, changed_files=None, saved_state_path=None, args=None):
         if changed_files is None:
             changed_files = []
 
@@ -238,6 +243,9 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
         # is from the object's state.
         if saved_state_path is None:
             saved_state_path = self.saved_state_path()
+
+        if args is None:
+            args = []
 
         state = {
             "state": saved_state_path,
@@ -257,7 +265,7 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
             self.repo_dir,
             "--max-procs",
             "2",
-        ]
+        ] + args
 
         self.proc_call(cmd)
         self.wait_until_server_ready()

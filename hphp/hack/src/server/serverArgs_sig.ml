@@ -74,6 +74,7 @@ module type S = sig
   val root: options -> Path.t
   val save_filename: options -> string option
   val save_with_spec: options -> save_state_spec_info option
+  val save_naming_filename: options -> string option
   val should_detach: options -> bool
   val waiting_client: options -> Unix.file_descr option
   val watchman_debug_logging: options -> bool

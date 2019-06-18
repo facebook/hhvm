@@ -18,6 +18,7 @@ type load_state_approach =
 
 type init_approach =
   | Full_init
+  | Parse_only_init
   | Saved_state_init of load_state_approach
 
 (* Saves the state that is used by init below and returns the number of

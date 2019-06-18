@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import json
 import os
 import shlex
+import sqlite3
 import stat
 import time
 import unittest
@@ -476,3 +477,28 @@ class ReverseNamingTableSavedStateTests(
     SavedStateTests, ReverseNamingTableFallbackTestDriver, unittest.TestCase
 ):
     assert_naming_table_rows = True
+
+    def test_save_naming_table(self) -> None:
+        """
+        We just verify that the naming tables match.  We don't verify anything
+        deeper than that.
+        """
+        saved_state_db = self.dump_saved_state().path + ".sql"
+        naming_db = self.dump_naming_saved_state()
+
+        saved_conn = sqlite3.connect(saved_state_db)
+        naming_conn = sqlite3.connect(naming_db)
+
+        tables = [
+            "NAMING_CONSTS",
+            "NAMING_FILE_INFO",
+            "NAMING_FUNS",
+            "NAMING_TYPES"
+        ]
+        for table in tables:
+            sqlite = "SELECT * FROM " + table
+            saved_entries = saved_conn.execute(sqlite).fetchall()
+            naming_entries = naming_conn.execute(sqlite).fetchall()
+            self.assertNotEqual(0, len(saved_entries))
+            self.assertNotEqual(0, len(naming_entries))
+            self.assertListEqual(saved_entries, naming_entries)

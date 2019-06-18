@@ -409,20 +409,27 @@ let get_updates_exn
     SSet.filter updates ~f:filter
     |> Relative_path.relativize_set Relative_path.Root
 
-(* If we fail to load a saved state, fall back to typechecking everything *)
-let full_init
-    (genv: ServerEnv.genv)
-    (env: ServerEnv.env)
-  : ServerEnv.env * float =
+let index_and_parse
+  (progress_message: string)
+  (genv: ServerEnv.genv)
+  (env: ServerEnv.env)
+: ServerEnv.env * float =
   SharedMem.cleanup_sqlite ();
-  ServerProgress.send_progress_to_monitor "full initialization";
+  ServerProgress.send_progress_to_monitor "%s" progress_message;
   let get_next, t = indexing genv in
   (* The full_fidelity_parser currently works better in both memory and time
      with a full parse rather than parsing decl asts and then parsing full ones *)
   let lazy_parse = not genv.local_config.SLC.use_full_fidelity_parser in
   (* full init - too many files to trace all of them *)
   let trace = false in
-  let env, t = parsing ~lazy_parse genv env ~get_next t ~trace in
+  parsing ~lazy_parse genv env ~get_next t ~trace
+
+(* If we fail to load a saved state, fall back to typechecking everything *)
+let full_init
+    (genv: ServerEnv.genv)
+    (env: ServerEnv.env)
+  : ServerEnv.env * float =
+  let env, t = index_and_parse "full initialization" genv env in
   if not (ServerArgs.check_mode genv.options) then
     SearchServiceRunner.update_fileinfo_map env.naming_table
       SearchUtils.SavedState;
@@ -433,6 +440,12 @@ let full_init
   let fast = Relative_path.Set.fold failed_parsing
       ~f:(fun x m -> Relative_path.Map.remove m x) ~init:fast in
   type_check genv env fast t
+
+let parse_only_init
+  (genv: ServerEnv.genv)
+  (env: ServerEnv.env)
+: ServerEnv.env * float =
+  index_and_parse "parse-only initialization" genv env
 
 let post_saved_state_initialization
     ~(genv: ServerEnv.genv)

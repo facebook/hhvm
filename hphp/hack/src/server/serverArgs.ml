@@ -33,6 +33,7 @@ type options = {
   replace_state_after_saving: bool;
   root: Path.t;
   save_filename: string option;
+  save_naming_filename: string option;
   save_with_spec: save_state_spec_info option;
   should_detach: bool; (* AKA, daemon mode *)
   waiting_client: Unix.file_descr option;
@@ -112,6 +113,7 @@ module Messages = struct
                         " to replace the program state; otherwise, the state files are not" ^
                         " used after being written to disk (default: false)"
   let save_state = " save server state to file"
+  let save_naming = " save naming table to file"
   let save_with_spec = " save server state given a JSON spec" ^
                         " Expects a JSON string specified as" ^
                         save_state_spec_json_descr
@@ -269,6 +271,7 @@ let parse_options () =
   let replace_state_after_saving = ref false in
   let save = ref None in
   let save_with_spec = ref None in
+  let save_naming = ref None in
   let should_detach = ref false in
   let version = ref false in
   let waiting_client= ref None in
@@ -280,6 +283,7 @@ let parse_options () =
   let set_max_procs = fun n -> max_procs := Some n in
   let set_save_state = fun s -> save := Some s in
   let set_save_with_spec = fun s -> save_with_spec := Some s in
+  let set_save_naming = fun s -> save_naming := Some s in
   let set_wait = fun fd -> waiting_client := Some (Handle.wrap_handle fd) in
   let set_with_saved_state = fun s -> with_saved_state := Some s in
   let set_from = fun s -> from := s in
@@ -315,6 +319,7 @@ let parse_options () =
         Arg.Set replace_state_after_saving,
         Messages.replace_state_after_saving;
       "--save-mini", Arg.String set_save_state, Messages.save_state;
+      "--save-naming", Arg.String set_save_naming, Messages.save_naming;
       "--save-state", Arg.String set_save_state, Messages.save_state;
       "--save-state-with-spec", Arg.String set_save_with_spec, Messages.save_with_spec;
       "--saved-state-ignore-hhconfig",
@@ -385,6 +390,7 @@ let parse_options () =
     root = root_path;
     save_filename = !save;
     save_with_spec;
+    save_naming_filename = !save_naming;
     should_detach = !should_detach;
     waiting_client = !waiting_client;
     watchman_debug_logging = !watchman_debug_logging;
@@ -413,6 +419,7 @@ let default_options ~root = {
   root = Path.make root;
   save_filename = None;
   save_with_spec = None;
+  save_naming_filename = None;
   should_detach = false;
   waiting_client = None;
   watchman_debug_logging = false;
@@ -443,6 +450,7 @@ let replace_state_after_saving options = options.replace_state_after_saving
 let root options = options.root
 let save_filename options = options.save_filename
 let save_with_spec options = options.save_with_spec
+let save_naming_filename options = options.save_naming_filename
 let should_detach options = options.should_detach
 let waiting_client options = options.waiting_client
 let watchman_debug_logging options = options.watchman_debug_logging
@@ -489,6 +497,7 @@ let to_string
     root;
     save_filename;
     save_with_spec;
+    save_naming_filename;
     should_detach;
     waiting_client;
     watchman_debug_logging;
@@ -510,6 +519,9 @@ let to_string
     let save_with_spec_str = match save_with_spec with
       | None -> "<>"
       | Some _ -> "SaveStateSpec(...)" in
+    let save_naming_filename_str = match save_naming_filename with
+      | None -> "<>"
+      | Some path -> path in
     let prechecked_str = match prechecked with
       | None -> "<>"
       | Some b -> string_of_bool b in
@@ -540,6 +552,7 @@ let to_string
         "root: "; Path.to_string root; ", ";
         "save_filename: "; save_filename_str; ", ";
         "save_with_spec: "; save_with_spec_str; ", ";
+        "save_naming_filename: "; save_naming_filename_str; ", ";
         "should_detach: "; string_of_bool should_detach; ", ";
         "waiting_client: "; waiting_client_str; ", ";
         "watchman_debug_logging: "; string_of_bool watchman_debug_logging; ", ";

@@ -100,17 +100,23 @@ let init
   GlobalParserOptions.set env.popt;
   GlobalNamingOptions.set env.tcopt;
   let root = ServerArgs.root genv.options in
-  let (env, t), init_result = match lazy_lev, init_approach with
+  let (env, t), init_result, skip_post_init = match lazy_lev, init_approach with
     | Init, Full_init ->
       ServerLazyInit.full_init genv env,
-      Load_state_declined "No saved-state requested (for lazy init)"
+      Load_state_declined "No saved-state requested (for lazy init)",
+      false
+
+    | Init, Parse_only_init ->
+      ServerLazyInit.parse_only_init genv env,
+      Load_state_declined "No saved-state requested (for lazy parse-only init)",
+      true
 
     | Init, Saved_state_init load_state_approach -> begin
       let result = ServerLazyInit.saved_state_init ~load_state_approach genv env root in
       (* Saved-state init is the only kind of init that might error... *)
       match result with
       | Ok ((env, t), ({state_distance; _}, _)) ->
-        (env, t), Load_state_succeeded state_distance
+        (env, t), Load_state_succeeded state_distance, false
       | Error err ->
         let (msg, retry, Utils.Callstack stack) = load_state_error_to_verbose_string err in
         let next_step_descr, next_step =
@@ -124,7 +130,7 @@ let init
         Hh_logger.log "Could not load saved state: %s" msg_verbose;
         if next_step = Exit_status.No_error then begin
           ServerProgress.send_to_monitor (MonitorRpc.PROGRESS_WARNING (Some msg));
-          ServerLazyInit.full_init genv env, Load_state_failed msg_verbose
+          ServerLazyInit.full_init genv env, Load_state_failed msg_verbose, false
         end else begin
           let finale_data = { ServerCommandTypes.
             exit_status = next_step;
@@ -144,15 +150,18 @@ let init
     | Decl, Full_init
     | Parse, Full_init ->
       ServerEagerInit.init genv lazy_lev env,
-      Load_state_declined "No saved-state requested"
+      Load_state_declined "No saved-state requested",
+      false
     | Off, _
     | Decl, _
     | Parse, _ ->
       Hh_logger.log "Saved-state requested, but overridden by eager init";
       ServerEagerInit.init genv lazy_lev env,
-      Load_state_declined "Saved-state requested, but overridden by eager init"
+      Load_state_declined "Saved-state requested, but overridden by eager init",
+      false
 
   in
+  if skip_post_init then env, init_result else
   let env, t = ServerAiInit.ai_check genv env.naming_table env t in
 
   (* Configure symbol index settings *)

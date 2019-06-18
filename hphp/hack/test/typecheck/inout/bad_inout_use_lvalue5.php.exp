@@ -1,2 +1,8 @@
 File "bad_inout_use_lvalue5.php", line 6, characters 11-22:
 Arguments for inout parameters must be local variables or simple subscript expressions on vecs, dicts, keysets, or arrays (NastCheck[3050])
+File "bad_inout_use_lvalue5.php", line 6, characters 5-22:
+Invalid argument (Typing[4110])
+File "bad_inout_use_lvalue5.php", line 3, characters 18-27:
+This is an array (used like a vector)
+File "bad_inout_use_lvalue5.php", line 6, characters 11-22:
+It is incompatible with a tuple of size 2

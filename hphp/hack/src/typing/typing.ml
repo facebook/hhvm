@@ -1805,10 +1805,10 @@ and expr_
         | _, Tfun fty -> check_deprecated p fty
         | _ -> ());
         (match vis with
-        | Some (method_pos, Vprivate _) ->
-            Errors.private_inst_meth method_pos p
-        | Some (method_pos, Vprotected _) ->
-            Errors.protected_inst_meth method_pos p
+        | Some (def_pos, Vprivate _) ->
+            Errors.private_inst_meth ~def_pos ~use_pos:(fst meth)
+        | Some (def_pos, Vprotected _) ->
+            Errors.protected_inst_meth ~def_pos ~use_pos:(fst meth)
         | _ -> ()
         );
         make_result env p (T.Method_id (te, meth)) result
@@ -1930,10 +1930,10 @@ and expr_
             | Vpublic ->
               make_result env p (T.Smethod_id(c, meth)) ty
             | Vprivate _ ->
-              Errors.private_class_meth (Reason.to_pos r) p;
+              Errors.private_class_meth ~def_pos:(Reason.to_pos r) ~use_pos:(fst meth);
               expr_error env p r
             | Vprotected _ ->
-              Errors.protected_class_meth (Reason.to_pos r) p;
+              Errors.protected_class_meth ~def_pos:(Reason.to_pos r) ~use_pos:(fst meth);
               expr_error env p r
           end
         | (r, _) ->

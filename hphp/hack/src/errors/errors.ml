@@ -2034,32 +2034,32 @@ let this_var_outside_class p =
 let unbound_global cst_pos =
   add (Typing.err_code Typing.UnboundGlobal) cst_pos "Unbound global constant (Typing)"
 
-let private_inst_meth method_pos p =
+let private_inst_meth ~def_pos ~use_pos =
   add_list (Typing.err_code Typing.PrivateInstMeth) [
-  method_pos, "This is a private method";
-  p, "you cannot use it with inst_meth \
-    (whether you are in the same class or not)."
+  use_pos, "You cannot use this method with inst_meth \
+    (whether you are in the same class or not).";
+  def_pos, "It is declared as private here";
 ]
 
-let protected_inst_meth method_pos p =
+let protected_inst_meth ~def_pos ~use_pos =
   add_list (Typing.err_code Typing.ProtectedInstMeth) [
-  method_pos, "This is a protected method";
-  p, "you cannot use it with inst_meth \
-    (whether you are in the same class hierarchy or not)."
+  use_pos, "You cannot use this method with inst_meth \
+    (whether you are in the same class hierarchy or not).";
+  def_pos, "It is declared as protected here";
 ]
 
-let private_class_meth pos1 pos2 =
+let private_class_meth ~def_pos ~use_pos =
   add_list (Typing.err_code Typing.PrivateClassMeth) [
-  pos1, "This is a private method";
-  pos2, "you cannot use it with class_meth \
-    (whether you are in the same class or not)."
+  use_pos, "You cannot use this method with class_meth \
+    (whether you are in the same class or not).";
+  def_pos, "It is declared as private here";
 ]
 
-let protected_class_meth pos1 pos2 =
+let protected_class_meth ~def_pos ~use_pos =
   add_list (Typing.err_code Typing.ProtectedClassMeth) [
-  pos1, "This is a protected method";
-  pos2, "you cannot use it with class_meth \
-    (whether you are in the same class hierarchy or not)."
+  use_pos, "You cannot use this method with class_meth \
+    (whether you are in the same class hierarchy or not).";
+  def_pos, "It is declared as protected here";
 ]
 
 let array_cast pos =

@@ -159,10 +159,10 @@ val too_many_type_arguments : Pos.t -> unit
 val return_in_void : Pos.t -> Pos.t -> unit
 val this_var_outside_class : Pos.t -> unit
 val unbound_global : Pos.t -> unit
-val private_inst_meth : Pos.t -> Pos.t -> unit
-val protected_inst_meth : Pos.t -> Pos.t -> unit
-val private_class_meth : Pos.t -> Pos.t -> unit
-val protected_class_meth : Pos.t -> Pos.t -> unit
+val private_inst_meth : def_pos:Pos.t -> use_pos:Pos.t -> unit
+val protected_inst_meth : def_pos:Pos.t -> use_pos:Pos.t -> unit
+val private_class_meth : def_pos:Pos.t -> use_pos:Pos.t -> unit
+val protected_class_meth : def_pos:Pos.t -> use_pos:Pos.t -> unit
 val array_cast : Pos.t -> unit
 val string_cast : Pos.t -> string -> unit
 val anonymous_recursive : Pos.t -> unit

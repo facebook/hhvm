@@ -72,15 +72,13 @@ end
 module Function = struct
   type t = string
 
-  let autoimport_funcs = List.map Namespaces.autoimport_funcs fst
-
   let has_hh_prefix s =
     let s = String.lowercase s in
     String_utils.string_starts_with s "hh\\"
 
   let is_hh_builtin s =
     let s = if has_hh_prefix s then String_utils.lstrip s "hh\\" else s in
-    List.mem ~equal:(=) autoimport_funcs s
+    SMap.mem s Namespaces.autoimport_funcs
 
   let from_raw_string s = s
   let to_raw_string s = s
@@ -93,7 +91,7 @@ module Function = struct
        * it's an HH\ or top-level function with implicit namespace.
        *)
     | Some id ->
-      if List.mem ~equal:(=) autoimport_funcs id
+      if SMap.mem id Namespaces.autoimport_funcs
       then SU.prefix_namespace "HH" id
       else fq_id
       (* Likewise for top-level, with no namespace *)

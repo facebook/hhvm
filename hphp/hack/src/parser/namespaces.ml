@@ -20,6 +20,11 @@ type autoimport_ns =
   | Global
   | HH
 
+type elaborate_kind =
+  | ElaborateFun
+  | ElaborateClass
+  | ElaborateConst
+
 (* When dealing with an <?hh file, HHVM automatically imports a few
  * "core" classes into every namespace, mostly collections. Their
  * unqualified names always refer to this global version.
@@ -30,7 +35,7 @@ type autoimport_ns =
  * in the global namespace relying on this autoimport, this makes the
  * most sense there.
  *)
-let autoimport_classes = [
+let autoimport_types = SMap.of_list [
   "AsyncFunctionWaitHandle", Global;
   "AsyncGenerator", Global;
   "AsyncGeneratorWaitHandle", Global;
@@ -38,6 +43,7 @@ let autoimport_classes = [
   "AsyncKeyedIterator", Global;
   "Awaitable", Global;
   "AwaitAllWaitHandle", Global;
+  "classname", Global;
   "Collection", Global;
   "ConditionWaitHandle", Global;
   "Container", Global;
@@ -56,6 +62,9 @@ let autoimport_classes = [
   "KeyedTraversable", Global;
   "keyset", Global;
   "Map", Global;
+  "ObjprofObjectStats", HH;
+  "ObjprofPathsStats", HH;
+  "ObjprofStringStats", HH;
   "Pair", Global;
   "RescheduleWaitHandle", Global;
   "ResumableWaitHandle", Global;
@@ -65,12 +74,15 @@ let autoimport_classes = [
   "StableMap", Global;
   "StaticWaitHandle", Global;
   "Traversable", Global;
+  "typename", Global;
+  "TypeStructure", HH;
   "TypeStructureKind", HH;
   "vec", Global;
   "Vector", Global;
   "WaitableWaitHandle", Global;
+  "XenonSample", HH;
 ]
-let autoimport_funcs =   [
+let autoimport_funcs = SMap.of_list [
   "asio_get_current_context_idx", HH;
   "asio_get_running_in_context", HH;
   "asio_get_running", HH;
@@ -112,55 +124,42 @@ let autoimport_funcs =   [
   "vec", Global;
   "xenon_get_data", HH;
 ]
-let autoimport_types = [
-  "classname", Global;
-  "ObjprofObjectStats", HH;
-  "ObjprofPathsStats", HH;
-  "ObjprofStringStats", HH;
-  "typename", Global;
-  "TypeStructure", HH;
-  "XenonSample", HH;
-]
-let autoimport_consts = [
+let autoimport_consts = SMap.of_list [
   "Rx\\IS_ENABLED", HH;
 ]
-
-let autoimport_map =
-  let autoimport_list =
-    autoimport_classes @
-    autoimport_funcs @
-    autoimport_types @
-    autoimport_consts
-  in
-  SMap.of_list autoimport_list
 
 (**
  * Return the namespace into which id is auto imported for the typechecker and
  * compiler, respectively. Return None if it is not auto imported.
  *)
-let get_autoimport_name_namespace id =
-  if SN.Typehints.is_reserved_global_name id then
-    Some (Global, Global)
-  else if SN.Typehints.is_reserved_hh_name id then
-    Some (Global, HH)
-  else if SMap.mem id autoimport_map then
-    Some (SMap.find id autoimport_map, HH)
-  else
-    None
+let get_autoimport_name_namespace id kind =
+  let lookup_name map =
+    Option.map (SMap.get id map) (fun ns -> ns, HH)
+  in
+  match kind with
+  | ElaborateClass ->
+    if SN.Typehints.is_reserved_global_name id then
+      Some (Global, Global)
+    else if SN.Typehints.is_reserved_hh_name id then
+      Some (Global, HH)
+    else
+      lookup_name autoimport_types
+  | ElaborateFun ->
+    lookup_name autoimport_funcs
+  | ElaborateConst ->
+    lookup_name autoimport_consts
 
-(* NOTE that the runtime is able to distinguish between class and
-   function names when auto-importing *)
-let is_autoimport_name id =
-  get_autoimport_name_namespace id <> None
+let is_autoimport_name id kind =
+  get_autoimport_name_namespace id kind <> None
 
 let is_always_global_function =
-  let h = HashSet.create 23 in
   let funcs = SN.PseudoFunctions.all_pseudo_functions @ [
     "\\assert";
     "\\echo";
     "\\exit";
     "\\die";
   ] in
+  let h = HashSet.create (List.length funcs) in
   List.iter funcs (HashSet.add h);
   fun x -> HashSet.mem h x
 
@@ -197,18 +196,13 @@ let rec translate_id ~reverse ns_map id =
 let aliased_to_fully_qualified_id alias_map id =
   translate_id ~reverse:true alias_map id
 
-type elaborate_kind =
-  | ElaborateFun
-  | ElaborateClass
-  | ElaborateConst
-
 (* Elaborate a defined identifier in a given namespace environment. For example,
  * a class might be defined inside a namespace. Return new environment if
  * ID is auto imported (e.g. Map) and so must be mapped when used.
  *)
 let elaborate_defined_id nsenv kind (p, id) =
   let newid = elaborate_into_current_ns nsenv id in
-  let update_nsenv = kind = ElaborateClass && is_autoimport_name id in
+  let update_nsenv = kind = ElaborateClass && is_autoimport_name id kind in
   let nsenv =
     if update_nsenv
     then {nsenv with ns_class_uses = SMap.add id newid nsenv.ns_class_uses}
@@ -271,7 +265,7 @@ let elaborate_id_impl nsenv kind id =
       if unaliased_id <> id then
         "\\" ^ unaliased_id
       else
-        match get_autoimport_name_namespace id with
+        match get_autoimport_name_namespace id kind with
         | None ->
           elaborate_into_current_ns nsenv id
         | Some (typechecker_ns, compiler_ns) ->

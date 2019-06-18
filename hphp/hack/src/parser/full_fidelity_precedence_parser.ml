@@ -20,14 +20,6 @@ module WithLexer(Lexer : Lexer_S) = struct
   (SC : SCWithToken_S with module Token = Syntax.Token) = struct
     module SC = SC
 
-    (* [Trick] Hack to keep track of prefix unary expressions created and change
-    parser behavior based on this knowledge *)
-    type prefix_unary_expression_type = {
-      node : SC.r;
-      operator_kind : TokenKind.t;
-      operand : SC.r;
-    } [@@deriving show]
-
 type context_type = Context.t
 let show_context_type _x = "<Full_fidelity_parser_context.WithToken(Syntax.Token).t>"
 let pp_context_type _fmt _x = Printf.printf "%s\n" "<Full_fidelity_parser_context.WithToken(Syntax.Token).t>"
@@ -40,7 +32,6 @@ type t = {
   allow_as_expressions: bool;
   env : Full_fidelity_parser_env.t;
   sc_state : SC.t;
-  prefix_unary_expression_stack : prefix_unary_expression_type list;
 } [@@deriving show]
 
     let pos parser = (Lexer.source parser.lexer, Lexer.end_offset parser.lexer)
@@ -60,7 +51,6 @@ let make env lexer errors context sc_state =
   ; precedence = 0
   ; env
   ; sc_state
-  ; prefix_unary_expression_stack = []
   ; allow_as_expressions = true
   }
 

@@ -71,18 +71,6 @@ module WithStatementAndDeclAndTypeParser
     | Prefix_none [@@deriving show]
   [@@@warning "+32"]
 
-  let make_and_track_prefix_unary_expression parser operator kind operand =
-    let (parser, node) = Make.prefix_unary_expression parser operator operand in
-    let prefix_unary_expression_stack =
-      {node; operator_kind = kind; operand} ::
-        parser.prefix_unary_expression_stack
-    in
-    {parser with prefix_unary_expression_stack}, node
-
-  let find_in_prefix_unary_expression_stack parser node =
-    List.find_opt (fun {node = n; _} -> n == node)
-      parser.prefix_unary_expression_stack
-
   let with_type_parser : 'a . t -> (TypeParser.t -> TypeParser.t * 'a) -> t * 'a
   = fun parser f ->
     let type_parser =
@@ -889,26 +877,11 @@ module WithStatementAndDeclAndTypeParser
   per PHP grammar:
   https://github.com/php/php-langspec/blob/master/spec/10-expressions.md#grammar-variable
    A variable is an expression that can in principle be used as an lvalue *)
-  and can_be_used_as_lvalue parser t =
+  and can_be_used_as_lvalue t =
     SC.is_variable_expression t
     || SC.is_subscript_expression t
     || SC.is_member_selection_expression t
     || SC.is_scope_resolution_expression t
-    || prefix_unary_expression_checker_helper ~is_rhs:false parser t Dollar
-
-  (* Checks if given node is prefix unary expression and verifies operator kind.
-  Recursively run can_be_used_as_lvalue *)
-  and prefix_unary_expression_checker_helper ~is_rhs parser t kind =
-    match find_in_prefix_unary_expression_stack parser t with
-    | Some { operator_kind; operand; _ } ->
-      if operator_kind = kind then
-        if is_rhs
-        then false
-        else can_be_used_as_lvalue parser operand
-      else
-        false
-    | None -> false
-
 
   (*detects if left_term and operator can be treated as a beginning of
    assignment (respecting the precedence of operator on the left of
@@ -947,7 +920,7 @@ module WithStatementAndDeclAndTypeParser
       StarStarEqual | DotEqual | PercentEqual | AmpersandEqual |
       BarEqual | CaratEqual | LessThanLessThanEqual |
       GreaterThanGreaterThanEqual | QuestionQuestionEqual
-      when can_be_used_as_lvalue parser left_term ->
+      when can_be_used_as_lvalue left_term ->
       Prefix_assignment
     | _ -> Prefix_none
 
@@ -1504,7 +1477,7 @@ module WithStatementAndDeclAndTypeParser
     let (parser, operand) =
       parse_expression_with_operator_precedence parser operator
     in
-    make_and_track_prefix_unary_expression parser token kind operand
+    Make.prefix_unary_expression parser token operand
 
   and parse_simple_variable parser =
     match peek_token_kind parser with
@@ -1526,7 +1499,7 @@ module WithStatementAndDeclAndTypeParser
         parse_expression_with_operator_precedence parser
           (Operator.prefix_unary_from_token Dollar)
     in
-    make_and_track_prefix_unary_expression parser dollar Dollar operand
+    Make.prefix_unary_expression parser dollar operand
 
   and parse_instanceof_expression parser left =
     (* SPEC:

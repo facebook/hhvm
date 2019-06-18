@@ -1,0 +1,2 @@
+
+Fatal error: Await cannot be used as an expression inside another await expression. Pull the inner await out into it's own statement. in %s/fn_call2.php on line 17

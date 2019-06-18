@@ -1,0 +1,17 @@
+async_main()
+bar()
+--- before x1
+baz()
+bak()
+line 1
+--- before y1
+baz()
+bak()
+line 2
+--- before concurrent
+baz()
+bak()
+baz()
+bak()
+line 1
+line 2

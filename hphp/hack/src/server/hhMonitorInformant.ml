@@ -148,7 +148,7 @@ module Revision_map = struct
     let find_xdb_match global_rev t =
       let query = try Some (Caml.Hashtbl.find t.xdb_queries global_rev) with
         | Caml.Not_found ->
-          let hhconfig_hash, _config = Config_file.parse
+          let hhconfig_hash, _config = Config_file.parse_hhconfig ~silent:false
             (Relative_path.to_absolute ServerConfig.filename) in
           let hhconfig_hash = if t.ignore_hhconfig
             then None

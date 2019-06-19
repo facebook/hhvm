@@ -65,7 +65,7 @@ let get_root_for_format files =
   | None -> cur
 
 let read_hhconfig path =
-  let config = Sys_utils.cat path |> Config_file.parse_contents in
+  let _hash, config = Config_file.parse_hhconfig ~silent:true path in
   FEnv.{
     add_trailing_commas = Config_file.Getters.bool_
       "hackfmt.add_trailing_commas"

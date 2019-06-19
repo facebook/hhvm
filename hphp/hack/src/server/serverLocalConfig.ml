@@ -178,23 +178,12 @@ let state_loader_timeouts_ ~default config =
     current_base_rev_timeout;
   }
 
-let load_ fn ~silent config_overrides =
-  (* Print out the contents in our logs so we know what settings this server
-   * was started with *)
-  let config =
-    try
-      let contents = Sys_utils.cat fn in
-      if not silent then Printf.eprintf "%s:\n%s\n" fn contents;
-      Config_file.parse_contents contents
-    with e ->
-      Hh_logger.log "Loading config exception: %s" (Printexc.to_string e);
-      Hh_logger.log "Could not load config at %s, using defaults" path;
-      SMap.empty
+let load_ fn ~silent overrides =
+  let config = Config_file.apply_overrides
+    ~silent
+    ~config:(Config_file.parse_local_config ~silent fn)
+    ~overrides
   in
-
-  (* In order for orverrides to take precedence over config values, they
-   * must be passed in "override-first" order to SMap.union *)
-  let config = SMap.union config_overrides config in
   let use_watchman = bool_if_version "use_watchman"
       ~default:default.use_watchman config in
   let use_saved_state = bool_if_version "use_mini_state"

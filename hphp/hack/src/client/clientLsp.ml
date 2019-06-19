@@ -268,19 +268,19 @@ let get_root_wait () : Path.t Lwt.t =
   Lwt.return (Wwwroot.get (Some path))
 
 
-let read_hhconfig_version () : string =
+let read_hhconfig_version () : string Lwt.t =
   match get_root_opt () with
   | None ->
-    "[NoRoot]"
+    Lwt.return "[NoRoot]"
   | Some root ->
     let file = Filename.concat (Path.to_string root) ".hhconfig" in
-    try
-      let contents = Sys_utils.cat file in
-      let config = Config_file.parse_contents contents in
+    let%lwt config = Config_file_lwt.parse_hhconfig file in
+    match config with
+    | Ok (_hash, config) ->
       let version = SMap.get "version" config in
-      Option.value version ~default:"[NoVersion]"
-    with e ->
-      Printf.sprintf "[NoHhconfig:%s]" (Exn.to_string e)
+      Lwt.return (Option.value version ~default:"[NoVersion]")
+    | Error message ->
+      Lwt.return (Printf.sprintf "[NoHhconfig:%s]" message)
 
 
 (* get_uris_with_unsaved_changes is the set of files for which we've          *)
@@ -2033,7 +2033,7 @@ and reconnect_from_lost_if_necessary
   in
   if should_reconnect then
     let has_unsaved_changes = not (SSet.is_empty (get_uris_with_unsaved_changes state)) in
-    let current_version = read_hhconfig_version () in
+    let%lwt current_version = read_hhconfig_version () in
     let needs_to_terminate = has_unsaved_changes || !hhconfig_version <> current_version in
     if needs_to_terminate then
       (* In these cases we have to terminate our LSP server, and trust the    *)
@@ -2401,7 +2401,8 @@ let handle_event
     Lwt.wakeup_later initialize_params_resolver initialize_params;
     set_up_hh_logger_for_client_lsp ();
 
-    hhconfig_version := read_hhconfig_version ();
+    let%lwt version = read_hhconfig_version () in
+    hhconfig_version := version;
     let%lwt new_state = connect !state in
     state := new_state;
     do_initialize () |> print_initialize |> Jsonrpc.respond to_stdout c;

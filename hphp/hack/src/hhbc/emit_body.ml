@@ -16,8 +16,9 @@ module RGH = Reified_generics_helpers
 let has_type_constraint env ti ast_param =
   match ti, ast_param.A.param_hint with
   | Some ti, Some h when Hhas_type_info.has_type_constraint ti ->
-    RGH.has_reified_type_constraint env h
-  | _ -> RGH.NoConstraint
+    let h = RGH.remove_erased_generics env h in
+    RGH.has_reified_type_constraint env h, Some h
+  | _ -> RGH.NoConstraint, None
 
 let emit_method_prolog ~env ~pos ~params ~ast_params ~should_emit_init_this =
   let init_this =
@@ -35,21 +36,21 @@ let emit_method_prolog ~env ~pos ~params ~ast_params ~should_emit_init_this =
       let param_type_info = Hhas_param.type_info param in
       let param_name = Param_named (Hhas_param.name param) in
       match has_type_constraint env param_type_info ast_param with
-      | RGH.NoConstraint -> None
-      | RGH.NotReified ->
+      | RGH.NoConstraint, _ -> None
+      | RGH.NotReified, _ ->
         Some (instr (IMisc (VerifyParamType param_name)))
-      | RGH.MaybeReified ->
+      | RGH.MaybeReified, Some h ->
         Some (gather [
-          Emit_expression.get_type_structure_for_hint env ~targ_map:SMap.empty
-            @@ Option.value_exn ast_param.A.param_hint;
+          Emit_expression.get_type_structure_for_hint
+            env ~targ_map:SMap.empty h;
           instr (IMisc (VerifyParamTypeTS param_name))
         ])
-      | RGH.DefinitelyReified ->
+      | RGH.DefinitelyReified, Some h ->
         let check =
           instr_istypel (Local.Named (Hhas_param.name param)) OpNull in
-        let hint = Option.value_exn ast_param.A.param_hint in
         let verify_instr = instr (IMisc (VerifyParamTypeTS param_name)) in
-        Some (RGH.simplify_verify_type env pos check hint verify_instr)
+        Some (RGH.simplify_verify_type env pos check h verify_instr)
+      | _ -> failwith "impossible"
   in
   let param_instr =
     List.filter_map

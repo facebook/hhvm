@@ -172,7 +172,7 @@ let emit_return ~verify_return ~verify_out ~num_out ~in_finally_epilogue env =
       match verify_return with
       | None -> empty
       | Some h ->
-        let h = RGH.convert_awaitable env h in
+        let h = RGH.convert_awaitable env h |> RGH.remove_erased_generics env in
         match RGH.has_reified_type_constraint env h with
         | RGH.NoConstraint -> empty
         | RGH.NotReified -> instr_verifyRetTypeC

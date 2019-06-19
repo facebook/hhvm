@@ -18,13 +18,15 @@ type type_constraint =
   | NotReified
   | NoConstraint
 
+let get_erased_tparams env =
+  Ast_scope.Scope.get_tparams (Emit_env.get_scope env)
+    |> List.filter_map ~f:(fun tp ->
+          if tp.T.tp_reified <> Tast.Reified
+          then Some (snd tp.T.tp_name) else None)
+
 let rec has_reified_type_constraint env h =
   let is_all_erased hl =
-    let erased_tparams =
-      Ast_scope.Scope.get_tparams (Emit_env.get_scope env)
-        |> List.filter_map ~f:(fun tp ->
-             if tp.T.tp_reified = Tast.Erased then Some (snd tp.T.tp_name) else None)
-    in
+    let erased_tparams = get_erased_tparams env in
     List.for_all hl ~f:(function _, Aast.Happly ((_, id), []) ->
                           List.mem ~equal:String.equal erased_tparams id
                         | _ -> false)
@@ -110,3 +112,37 @@ let simplify_verify_type env pos check hint verify_instr =
     ]
   | _ ->
     gather [ get_ts hint; verify_instr ]
+
+let remove_erased_generics env h =
+  let erased_tparams = get_erased_tparams env in
+  let modify id =
+    if List.mem ~equal:String.equal erased_tparams id then "_" else id in
+  let rec aux (pos, h) =
+    pos, match h with
+    | Aast.Happly ((pos, id), hl) ->
+      Aast.Happly ((pos, modify id), List.map ~f:aux hl)
+    | Aast.Hsoft h -> Aast.Hsoft (aux h)
+    | Aast.Hlike h -> Aast.Hlike (aux h)
+    | Aast.Hoption h -> Aast.Hoption (aux h)
+    | Aast.Htuple hl -> Aast.Htuple (List.map ~f:aux hl)
+    | Aast.Hshape si ->
+      let modify_sfi sfi = { sfi with Aast.sfi_hint = aux sfi.Aast.sfi_hint } in
+      let fields = List.map ~f:modify_sfi si.Aast.nsi_field_map in
+      Aast.Hshape { Aast.nsi_allows_unknown_fields =
+                      si.Aast.nsi_allows_unknown_fields
+                  ; Aast.nsi_field_map = fields }
+    | Aast.Hfun _
+    | Aast.Haccess _ -> h
+    | Aast.Hany
+    | Aast.Hmixed
+    | Aast.Hnonnull
+    | Aast.Habstr _
+    | Aast.Harray _
+    | Aast.Hdarray _
+    | Aast.Hvarray _
+    | Aast.Hvarray_or_darray _
+    | Aast.Hprim _
+    | Aast.Hthis
+    | Aast.Hnothing
+    | Aast.Hdynamic -> failwith "TODO Unimplemented Did not exist on legacy AST"
+  in aux h

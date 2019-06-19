@@ -87,9 +87,6 @@ void freeLocalsAndThis(IRGS& env) {
 
   if (shouldFreeInline) {
     decRefLocalsInline(env);
-    for (unsigned i = 0; i < localCount; ++i) {
-      env.irb->constrainLocal(i, DataTypeCountness, "inlined RetC/V");
-    }
   } else {
     gen(env, GenericRetDecRefs, fp(env));
   }

@@ -52,25 +52,6 @@ let record_in_jsonfiles
   (* Note that glean elements must start with high ID numbers *)
   let json_element_id = ref 500_000 in
 
-  (* Original schema 1 table *)
-  let hackIdentifiers = List.map symbols.sisr_capture ~f:(fun symbol ->
-    incr json_element_id;
-    let kind_int = kind_to_int symbol.sif_kind in
-    JSON_Object [
-      ("key", JSON_Object [
-        ("kind", JSON_Number (string_of_int kind_int));
-        ("name", JSON_String symbol.sif_name);
-      ]);
-      ("id", JSON_Number (string_of_int !json_element_id));
-    ]
-  ) in
-
-  (* Save schema 1 files by chunk size *)
-  let array_chunk_list = List.chunks_of hackIdentifiers chunk_size in
-  let hid_files = List.mapi array_chunk_list ~f:(fun chunk_id chunk ->
-        record_one_jsonfile path "hack.identifier.1" chunk_id chunk
-  ) in
-
   (* Revised schema tables *)
   let hackSymbols = List.map symbols.sisr_capture ~f:(fun symbol ->
     incr json_element_id;
@@ -156,7 +137,6 @@ let record_in_jsonfiles
   Out_channel.write_all kind_fn data;
 
   (* Final results *)
-  let results = List.append hid_files sym_files in
-  let results = List.append results ns_files in
-  let results = List.append results filepath_files in
+  let results = List.append sym_files ns_files
+    |> List.append filepath_files in
   kind_fn :: results

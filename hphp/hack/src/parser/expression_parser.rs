@@ -167,17 +167,6 @@ where
         r
     }
 
-    fn make_and_track_prefix_unary_expression(
-        &mut self,
-        operator: S::R,
-        _kind: TokenKind,
-        operand: S::R,
-    ) -> S::R {
-        let node = S!(make_prefix_unary_expression, self, operator, operand);
-        // TODO(kasper): implement the "track" part
-        node
-    }
-
     fn with_type_parser<U>(&mut self, f: &Fn(&mut TypeParser<'a, S, T>) -> U) -> U
     where
         T: Clone,
@@ -1185,8 +1174,6 @@ where
             || t.is_subscript_expression()
             || t.is_member_selection_expression()
             || t.is_scope_resolution_expression()
-        // TODO: (kasper)
-        //|| prefix_unary_expression_checker_helper ~is_rhs:false parser t Dollar
     }
 
     // detects if left_term and operator can be treated as a beginning of
@@ -1925,7 +1912,7 @@ where
         let operator = Operator::prefix_unary_from_token(kind);
         let token = S!(make_token, self, token);
         let operand = self.parse_expression_with_operator_precedence(operator);
-        self.make_and_track_prefix_unary_expression(token, kind, operand)
+        S!(make_prefix_unary_expression, self, token, operand)
     }
 
     pub fn parse_simple_variable(&mut self) -> S::R {
@@ -1950,7 +1937,7 @@ where
                 TokenKind::Dollar,
             )),
         };
-        self.make_and_track_prefix_unary_expression(dollar, TokenKind::Dollar, operand)
+        S!(make_prefix_unary_expression, self, dollar, operand)
     }
 
     fn parse_instanceof_expression(&mut self, left: S::R) -> S::R {
@@ -2743,7 +2730,7 @@ where
         // function() use(): T // wrong
         // function(): T use() // correct
         if !use_clause.is_missing() {
-            let misplaced_colon = self.optional_token(TokenKind::Colon);
+            let misplaced_colon = self.clone().optional_token(TokenKind::Colon);
             if !misplaced_colon.is_missing() {
                 self.with_error(Cow::Borrowed(
                     "Bad signature: use(...) should occur after the type",

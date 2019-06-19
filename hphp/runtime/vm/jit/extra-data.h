@@ -1531,6 +1531,27 @@ struct EndCatchData : IRSPRelOffsetData {
   CatchMode mode;
 };
 
+/*
+ * Func attributes
+ */
+struct AttrData : IRExtraData {
+  explicit AttrData(int32_t attr) : attr(attr) {}
+
+  std::string show() const {
+    return folly::format("{}", attr).str();
+  }
+
+  int32_t attr;
+};
+
+struct MethCallerData : IRExtraData {
+  explicit MethCallerData(bool isCls) : isCls(isCls) {}
+  std::string show() const {
+    return folly::format("{}", isCls).str();
+  }
+  bool isCls;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -1742,6 +1763,8 @@ X(VerifyRetFail,                ParamData);
 X(VerifyRetFailHard,            ParamData);
 X(VerifyReifiedLocalType,       ParamData);
 X(EndCatch,                     EndCatchData);
+X(FuncHasAttr,                  AttrData);
+X(LdMethCallerName,             MethCallerData);
 
 #undef X
 

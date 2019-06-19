@@ -317,18 +317,10 @@ SSATmp* simplifyEqFunc(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyFuncSupportsAsyncEagerReturn(State& env,
-                                             const IRInstruction* inst) {
+SSATmp* simplifyFuncHasAttr(State& env, const IRInstruction* inst) {
   auto const funcTmp = inst->src(0);
   return funcTmp->hasConstVal(TFunc)
-    ? cns(env, funcTmp->funcVal()->supportsAsyncEagerReturn())
-    : nullptr;
-}
-
-SSATmp* simplifyIsFuncDynCallable(State& env, const IRInstruction* inst) {
-  auto const funcTmp = inst->src(0);
-  return funcTmp->hasConstVal(TFunc)
-    ? cns(env, funcTmp->funcVal()->isDynamicallyCallable())
+    ? cns(env, (funcTmp->funcVal()->attrs() & inst->extra<AttrData>()->attr))
     : nullptr;
 }
 
@@ -3837,8 +3829,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LdPackedElem)
   X(MethodExists)
   X(CheckCtxThis)
-  X(FuncSupportsAsyncEagerReturn)
-  X(IsFuncDynCallable)
+  X(FuncHasAttr)
   X(IsClsDynConstructible)
   X(LdFuncRxLevel)
   X(LdObjClass)

@@ -194,31 +194,28 @@ void cgLdFuncName(IRLS& env, const IRInstruction* inst) {
   v << loadzlq{func[Func::nameOff()], dst};
 }
 
-void cgFuncSupportsAsyncEagerReturn(IRLS& env, const IRInstruction* inst) {
-  auto const func = srcLoc(env, inst, 0).reg();
+void cgLdMethCallerName(IRLS& env, const IRInstruction* inst) {
+  static_assert(Func::kMethCallerBit == 1,
+                "Fix the decq if you change kMethCallerBit");
   auto const dst = dstLoc(env, inst, 0).reg();
+  auto const func = srcLoc(env, inst, 0).reg();
+  auto const isCls = inst->extra<MethCallerData>()->isCls;
   auto& v = vmain(env);
-
-  auto const sf = v.makeReg();
-  v << testlim{
-    static_cast<int32_t>(AttrSupportsAsyncEagerReturn),
-    func[Func::attrsOff()],
-    sf
-  };
-  v << setcc{CC_NZ, sf, dst};
+  auto const off = isCls ?
+    Func::methCallerClsNameOff() : Func::methCallerMethNameOff();
+  auto const tmp = v.makeReg();
+  v << loadzlq{func[off], tmp};
+  v << decq{tmp, dst, v.makeReg()};
 }
 
-void cgIsFuncDynCallable(IRLS& env, const IRInstruction* inst) {
+void cgFuncHasAttr(IRLS& env, const IRInstruction* inst) {
   auto const func = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
+  auto const attr = inst->extra<AttrData>()->attr;
 
+  auto& v = vmain(env);
   auto const sf = v.makeReg();
-  v << testlim{
-    static_cast<int32_t>(AttrDynamicallyCallable),
-    func[Func::attrsOff()],
-    sf
-  };
+  v << testlim{attr, func[Func::attrsOff()], sf};
   v << setcc{CC_NZ, sf, dst};
 }
 

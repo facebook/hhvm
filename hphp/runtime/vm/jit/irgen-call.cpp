@@ -107,7 +107,11 @@ void emitCallerDynamicCallChecksUnknown(IRGS& env, SSATmp* callee) {
   ifElse(
     env,
     [&] (Block* skip) {
-      auto const dynCallable = gen(env, IsFuncDynCallable, callee);
+      auto const dynCallable = gen(
+        env,
+        FuncHasAttr,
+        AttrData {static_cast<int32_t>(AttrDynamicallyCallable)},
+        callee);
       gen(env, JmpNZero, skip, dynCallable);
     },
     [&] {
@@ -276,7 +280,11 @@ void callUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
   ifThenElse(
     env,
     [&] (Block* taken) {
-      auto const supportsAER = gen(env, FuncSupportsAsyncEagerReturn, callee);
+      auto const supportsAER = gen(
+        env,
+        FuncHasAttr,
+        AttrData {static_cast<int32_t>(AttrSupportsAsyncEagerReturn)},
+        callee);
       gen(env, JmpNZero, taken, supportsAER);
     },
     [&] {

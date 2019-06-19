@@ -199,6 +199,7 @@ bool canDCE(IRInstruction* inst) {
   case LdARNumParams:
   case LdFuncNumParams:
   case LdFuncName:
+  case LdMethCallerName:
   case LdStrLen:
   case LdVecElem:
   case LdPackedElem:
@@ -281,9 +282,8 @@ bool canDCE(IRInstruction* inst) {
   case LdARNumArgsAndFlags:
   case LdARReifiedGenerics:
   case KillARReifiedGenerics:
-  case FuncSupportsAsyncEagerReturn:
+  case FuncHasAttr:
   case IsFunReifiedGenericsMatched:
-  case IsFuncDynCallable:
   case IsClsDynConstructible:
   case LdFuncRxLevel:
   case StrictlyIntegerConv:

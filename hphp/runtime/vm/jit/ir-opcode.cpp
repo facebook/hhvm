@@ -725,7 +725,7 @@ bool opcodeMayRaise(Opcode opc) {
   case FinishMemberOp:
   case Floor:
   case FuncGuard:
-  case FuncSupportsAsyncEagerReturn:
+  case FuncHasAttr:
   case FwdCtxStaticCall:
   case GenericRetDecRefs:
   case GetMemoKeyScalar:
@@ -774,7 +774,6 @@ bool opcodeMayRaise(Opcode opc) {
   case IsCol:
   case IsDVArray:
   case IsFunReifiedGenericsMatched:
-  case IsFuncDynCallable:
   case IsClsDynConstructible:
   case IsReifiedName:
   case IsNType:
@@ -849,6 +848,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdLocPseudoMain:
   case LdMBase:
   case LdMem:
+  case LdMethCallerName:
   case LdMIPropStateAddr:
   case LdMIStateAddr:
   case LdObjClass:

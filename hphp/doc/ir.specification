@@ -1516,17 +1516,17 @@ To string conversions:
 
   Loads the full name of S0.
 
+| LdMethCallerName<isCls>, D(StaticStr), S(Func), NF
+
+  Loads the meth_caller cls or func name.
+
 | LdStrLen, D(Int), S(Str), NF
 
   Load the length of the string in S0.
 
-| FuncSupportsAsyncEagerReturn, D(Bool), S(Func), NF
+| FuncHasAttr<attr>, D(Bool), S(Func), NF
 
-  Tests for Func::m_attrs & AttrSupportsAsyncEagerReturn.
-
-| IsFuncDynCallable, D(Bool), S(Func), NF
-
-  Tests for Func::m_attrs & AttrDynamicallyCallable.
+  Tests for Func::m_attrs & attr.
 
 | IsClsDynConstructible, D(Bool), S(Cls), NF
 

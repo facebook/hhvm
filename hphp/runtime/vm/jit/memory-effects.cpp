@@ -1779,9 +1779,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdClsCnsVecLen:
   case ProfileSubClsCns:
   case CheckCtxThis:
-  case FuncSupportsAsyncEagerReturn:
+  case FuncHasAttr:
   case IsFunReifiedGenericsMatched:
-  case IsFuncDynCallable:
   case IsClsDynConstructible:
   case LdFuncMFunc:
   case LdFuncRxLevel:
@@ -1952,6 +1951,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdFuncName:
   case LdGblAddr:
   case LdGblAddrDef:
+  case LdMethCallerName:
   case LdObjClass:
   case LdObjInvoke:
   case LdObjMethod:

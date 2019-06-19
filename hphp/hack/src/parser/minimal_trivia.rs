@@ -51,20 +51,6 @@ impl LexableTrivia for MinimalTrivia {
         }
     }
 
-    fn make_unsafe(_source: &SourceText, _offset: usize, width: usize) -> Self {
-        Self {
-            kind: TriviaKind::Unsafe,
-            width,
-        }
-    }
-
-    fn make_unsafe_expression(_source: &SourceText, _offset: usize, width: usize) -> Self {
-        Self {
-            kind: TriviaKind::UnsafeExpression,
-            width,
-        }
-    }
-
     fn make_fix_me(_source: &SourceText, _offset: usize, width: usize) -> Self {
         Self {
             kind: TriviaKind::FixMe,

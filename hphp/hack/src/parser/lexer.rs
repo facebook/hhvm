@@ -20,8 +20,6 @@ pub struct Lexer<'a, Token: LexableToken> {
     offset: usize,
     errors: Vec<SyntaxError>,
     is_experimental_mode: bool,
-    enable_unsafe_expr: bool,
-    enable_unsafe_block: bool,
     in_type: bool,
     _phantom: PhantomData<Token>,
 }
@@ -43,8 +41,6 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     pub fn make_at(
         source: &'a SourceText<'a>,
         is_experimental_mode: bool,
-        disable_unsafe_expr: bool,
-        disable_unsafe_block: bool,
         offset: usize,
     ) -> Self {
         Self {
@@ -53,8 +49,6 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
             offset,
             errors: vec![],
             is_experimental_mode,
-            enable_unsafe_expr: !disable_unsafe_expr,
-            enable_unsafe_block: !disable_unsafe_block,
             in_type: false,
             _phantom: PhantomData,
         }
@@ -63,14 +57,10 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     pub fn make(
         source: &'a SourceText<'a>,
         is_experimental_mode: bool,
-        disable_unsafe_expr: bool,
-        disable_unsafe_block: bool,
     ) -> Self {
         Self::make_at(
             source,
             is_experimental_mode,
-            disable_unsafe_expr,
-            disable_unsafe_block,
             0,
         )
     }
@@ -1685,8 +1675,6 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     fn scan_single_line_comment(&mut self) -> Token::Trivia {
         // A fallthrough comment is two slashes, any amount of whitespace,
         // FALLTHROUGH, and any characters may follow.
-        // An unsafe comment is two slashes, any amount of whitespace,
-        // UNSAFE, and then any characters may follow.
         // TODO: Consider allowing lowercase fallthrough.
 
         self.advance(2);
@@ -1697,11 +1685,6 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         let remainder = self.offset - lexer_ws.offset;
         if remainder >= 11 && lexer_ws.peek_string(11) == "FALLTHROUGH".as_bytes() {
             Token::Trivia::make_fallthrough(self.source(), self.start, w)
-        } else if remainder >= 6
-            && lexer_ws.peek_string(6) == "UNSAFE".as_bytes()
-            && self.enable_unsafe_block
-        {
-            Token::Trivia::make_unsafe(self.source(), self.start, w)
         } else {
             Token::Trivia::make_single_line_comment(self.source(), self.start, w)
         }
@@ -1729,9 +1712,6 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     }
 
     fn scan_delimited_comment(&mut self) -> Token::Trivia {
-        // An unsafe expression comment is a delimited comment that begins with any
-        // whitespace, followed by UNSAFE_EXPR, followed by any text.
-        //
         // The original lexer lexes a fixme / ignore error as:
         //
         // slash star [whitespace]* HH_FIXME [whitespace or newline]* leftbracket
@@ -1750,9 +1730,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         let lexer_ws = self.clone();
         self.skip_to_end_of_delimited_comment();
         let w = self.width();
-        if self.enable_unsafe_expr && lexer_ws.match_string("UNSAFE_EXPR".as_bytes()) {
-            Token::Trivia::make_unsafe_expression(self.source(), self.start, w)
-        } else if lexer_ws.match_string("HH_FIXME".as_bytes()) {
+        if lexer_ws.match_string("HH_FIXME".as_bytes()) {
             Token::Trivia::make_fix_me(self.source(), self.start, w)
         } else if lexer_ws.match_string("HH_IGNORE_ERROR".as_bytes()) {
             Token::Trivia::make_ignore_error(self.source(), self.start, w)
@@ -1841,7 +1819,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     // * The first newline trivia encountered is the last trailing trivia.
     // * The newline which follows a // or # comment is not part of the comment
     //   but does terminate the trailing trivia.
-    // * A pragma to turn checks off (HH_FIXME, HH_IGNORE_ERROR and UNSAFE_EXPR) is
+    // * A pragma to turn checks off (HH_FIXME and HH_IGNORE_ERROR) is
     //   always a leading trivia.
     fn scan_leading_trivia(
         &mut self,
@@ -1882,7 +1860,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                         acc.push(t);
                         return acc;
                     }
-                    TriviaKind::FixMe | TriviaKind::IgnoreError | TriviaKind::UnsafeExpression => {
+                    TriviaKind::FixMe | TriviaKind::IgnoreError => {
                         return acc;
                     }
                     _ => {

@@ -9,12 +9,9 @@
 
 module Env : sig
   val set :
-    disable_unsafe_expr:bool ->
-    disable_unsafe_block:bool ->
     rust:bool ->
     unit
   val is_rust : unit -> bool
-  val get : unit -> (bool * bool)
 end
 
 module WithToken : functor (Token : Lexable_token_sig.LexableToken_S) -> sig
@@ -24,8 +21,6 @@ module WithToken : functor (Token : Lexable_token_sig.LexableToken_S) -> sig
     | Literal_heredoc of string [@@deriving show]
   val make :
     ?is_experimental_mode:bool ->
-    ?disable_unsafe_expr:bool ->
-    ?disable_unsafe_block:bool ->
     Full_fidelity_source_text.t -> t
   val make_at : ?is_experimental_mode:bool -> Full_fidelity_source_text.t -> int -> t
   val source : t -> Full_fidelity_source_text.t

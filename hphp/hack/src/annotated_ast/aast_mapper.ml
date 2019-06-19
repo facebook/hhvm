@@ -116,7 +116,6 @@ struct
         | S.Xhp_simple (p, e) -> T.Xhp_simple (p,map_expr menv e)
         | S.Xhp_spread e -> T.Xhp_spread (map_expr menv e)
       ), map_exprl menv el)
-    | S.Unsafe_expr e -> T.Unsafe_expr (map_expr menv e)
     | S.Callconv (k, e) -> T.Callconv (k, map_expr menv e)
     | S.Assert (S.AE_assert e) -> T.Assert (T.AE_assert (map_expr menv e))
     | S.Clone e -> T.Clone (map_expr menv e)
@@ -258,7 +257,6 @@ struct
       T.Try(map_block menv b1, List.map cl map_catch, map_block menv b2)
     | S.Def_inline d -> T.Def_inline (map_def menv d)
     | S.Noop -> T.Noop
-    | S.Unsafe_block b -> T.Unsafe_block(map_block menv b)
     | S.Fallthrough -> T.Fallthrough
     | S.Let(x, h, e) -> T.Let(x, h, map_expr menv e)
     | S.Block b -> T.Block (map_block menv b)

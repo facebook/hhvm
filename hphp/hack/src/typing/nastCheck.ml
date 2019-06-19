@@ -67,7 +67,7 @@ module CheckFunctionBody = struct
         expr_allow_await_or_rx_move f_type env e;
         ()
     | _, ( Noop | Fallthrough | GotoLabel _ | Goto _ | Break | Continue
-         | TempContinue _ | TempBreak _ | Unsafe_block _ ) -> ()
+         | TempContinue _ | TempBreak _ ) -> ()
     | _, Awaitall (el, b) ->
         List.iter el (fun (_, y) -> expr f_type env y);
         block f_type env b;
@@ -315,7 +315,6 @@ module CheckFunctionBody = struct
         List.iter attrl (fun attr -> expr f_type env (get_xhp_attr_expr attr));
         List.iter el (expr f_type env);
         ()
-    | _, Unsafe_expr _ -> ()
     | _, Callconv (_, e) ->
         expr f_type env e;
         ()
@@ -573,7 +572,6 @@ and stmt_ env = function
   | GotoLabel _
   | Goto _
   | Noop
-  | Unsafe_block _
   | Fallthrough
   | Break
   (* TempBreak is flagged as an error in naming.ml *)
@@ -674,7 +672,6 @@ and expr_ env _p = function
   | Dollardollar _
   | PU_identifier _
   | PU_atom _
-  | Unsafe_expr _
   | Class_const _ ->
     ()
   | Pipe (_, e1, e2) ->

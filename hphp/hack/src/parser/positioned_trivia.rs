@@ -56,22 +56,6 @@ impl LexableTrivia for PositionedTrivia {
         }
     }
 
-    fn make_unsafe(_source: &SourceText, offset: usize, width: usize) -> Self {
-        Self {
-            kind: TriviaKind::Unsafe,
-            offset,
-            width,
-        }
-    }
-
-    fn make_unsafe_expression(_source: &SourceText, offset: usize, width: usize) -> Self {
-        Self {
-            kind: TriviaKind::UnsafeExpression,
-            offset,
-            width,
-        }
-    }
-
     fn make_fix_me(_source: &SourceText, offset: usize, width: usize) -> Self {
         Self {
             kind: TriviaKind::FixMe,

@@ -20,7 +20,7 @@ let rec check_lvalue errorf = function
   | pos, Array_get ((_, Class_const _), _) ->
     errorf pos "Array-like class consts are not valid lvalues"
   | _, (PU_atom _ | Lvar _ | Obj_get _ | Array_get _ | Class_get _ |
-    Unsafeexpr _ | Omitted | BracedExpr _) -> ()
+    Omitted | BracedExpr _) -> ()
   | pos, Call ((_, Id (_, "tuple")), _, _, _) ->
     errorf pos "Tuple cannot be used as an lvalue. Maybe you meant list?"
   | _, List el -> List.iter (check_lvalue errorf) el

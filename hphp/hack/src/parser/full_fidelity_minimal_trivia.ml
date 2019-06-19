@@ -33,12 +33,6 @@ let make_single_line_comment _text _offset width =
 let make_fallthrough _text _offset width =
   { kind = FallThrough; width }
 
-let make_unsafe _text _offset width =
-  { kind = Unsafe; width }
-
-let make_unsafe_expression _text _offset width =
-  { kind = UnsafeExpression; width }
-
 let make_fix_me _text _offset width =
   { kind = FixMe; width}
 

@@ -88,7 +88,6 @@ and terminal_ nsenv ~in_try st =
   | Aast.GotoLabel _
   | Aast.Goto _
   | Aast.Awaitall _
-  | Aast.Unsafe_block _
     -> ()
 
 and terminal_catch nsenv ~in_try (_, _, b) =
@@ -227,8 +226,7 @@ let rec expr acc (_, e) =
   | Aast.Lfun _
   | Aast.Lvar _
   | Aast.PU_atom _
-  | Aast.PU_identifier _
-  | Aast.Unsafe_expr _ -> acc
+  | Aast.PU_identifier _ -> acc
   (* These are not in the original AST *)
   | Aast.This
   | Aast.Any
@@ -327,7 +325,6 @@ let rec stmt (acc:(Namespace_env.env * Pos.t SMap.t)) st =
     let lcl = List.map cl (catch nsenv) in
     let c = smap_inter_list (c :: lcl) in
     smap_union acc c
-  | Aast.Unsafe_block b -> block acc b
 
   and block acc l =
     List.fold_left

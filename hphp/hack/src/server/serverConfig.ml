@@ -281,8 +281,6 @@ let load config_filename options =
     ?tco_disallow_byref_dynamic_calls:(bool_opt "disallow_byref_dynamic_calls" config)
     ?po_disable_instanceof:(bool_opt "disable_instanceof" config)
     ?po_disable_lval_as_an_expression:(bool_opt "disable_lval_as_an_expression" config)
-    ?po_disable_unsafe_expr:(bool_opt "disable_unsafe_expr" config)
-    ?po_disable_unsafe_block:(bool_opt "disable_unsafe_block" config)
     ?tco_typecheck_xhp_cvars:(bool_opt "typecheck_xhp_cvars" config)
     ?tco_ignore_collection_expr_type_arguments:(bool_opt "ignore_collection_expr_type_arguments" config)
     ~ignored_fixme_codes:(prepare_ignored_fixme_codes config)

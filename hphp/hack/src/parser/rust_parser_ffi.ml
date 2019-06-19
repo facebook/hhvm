@@ -16,21 +16,17 @@ module PositionedSyntax = Full_fidelity_positioned_syntax
  * synchronize on the boundary between Rust and OCaml, the better. *)
 type parser_opts = (
   bool * (* is_experimental mode *)
-  bool * (* disable_unsafe_expr *)
-  bool * (* enable_unsafe_block *)
   bool * (* hhvm_compat_mode *)
   bool * (* php5_compat_mode *)
   bool   (* codegen *)
 )
 let env_to_opts env = (
   (Env.is_experimental_mode env),
-  (Env.disable_unsafe_expr env),
-  (Env.disable_unsafe_block env),
   (Env.hhvm_compat_mode env),
   (Env.php5_compat_mode env),
   (Env.codegen env)
 )
-let set_global_lexer_env env =
+let set_global_lexer_env _ =
   (* Parsing of file sets up global variables in lexer module. Those variables
    * are then accessed even after parsing, with the assumption that they have
    * not changed since the tree was created (which must accidentally be true,
@@ -39,8 +35,6 @@ let set_global_lexer_env env =
    * incorrect results. I'll just set them here directly to maintain the same
    * behavior. *)
   Full_fidelity_lexer.Env.set
-    ~disable_unsafe_expr:(Env.disable_unsafe_expr env)
-    ~disable_unsafe_block:(Env.disable_unsafe_block env)
     ~rust:true
 
 exception RustException of string

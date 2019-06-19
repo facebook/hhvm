@@ -1660,8 +1660,6 @@ and emit_expr (env : Emit_env.t) (expr: A.expr) =
   | A.Import (flavor, e) ->
     emit_import env annot flavor e
   | A.Omitted -> empty
-  | A.Unsafe_expr _ ->
-    failwith "Unsafe expression should be removed during closure conversion"
   | A.Suspend _ ->
     failwith "Codegen for 'suspend' operator is not supported"
   | A.List _ ->
@@ -3628,7 +3626,7 @@ and can_use_as_rhs_in_list_assignment (expr : A.expr_) =
   | Int _ | Float _ | String _ | String2 _
   | PrefixedString _ | Yield_break | Yield_from _ | Suspend _
   | InstanceOf _ | Is _ | BracedExpr _ | ParenthesizedExpr _
-  | Efun _ | Lfun _ | Xml _ | Unsafe_expr _
+  | Efun _ | Lfun _ | Xml _
   | Import _ | Callconv _ | List _ -> false
   | PU_identifier _ ->
     failwith "TODO(T35357243): Pocket Universes syntax must be erased by now"

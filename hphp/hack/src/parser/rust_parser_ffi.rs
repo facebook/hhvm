@@ -110,16 +110,12 @@ macro_rules! parse {
             let source_text = SourceText::make(&file_path.as_str(), &content.data());
 
             let is_experimental_mode = bool_field(&opts, 0);
-            let disable_unsafe_expr = bool_field(&opts, 1);
-            let disable_unsafe_block = bool_field(&opts, 2);
-            let hhvm_compat_mode = bool_field(&opts, 3);
-            let php5_compat_mode = bool_field(&opts, 4);
-            let codegen = bool_field(&opts, 5);
+            let hhvm_compat_mode = bool_field(&opts, 1);
+            let php5_compat_mode = bool_field(&opts, 2);
+            let codegen = bool_field(&opts, 3);
 
             let env = ParserEnv {
                 is_experimental_mode,
-                disable_unsafe_expr,
-                disable_unsafe_block,
                 hhvm_compat_mode,
                 php5_compat_mode,
                 codegen,
@@ -176,14 +172,10 @@ macro_rules! scan_trivia {
             let offset = offset.usize_val();
 
             let is_experimental_mode = false;
-            let disable_unsafe_expr = bool_field(&opts, 0);
-            let disable_unsafe_block = bool_field(&opts, 1);
 
             let mut lexer : Lexer<MinimalToken> = Lexer::make_at(
                 &source_text,
                 is_experimental_mode,
-                disable_unsafe_expr,
-                disable_unsafe_block,
                 offset,
             );
 

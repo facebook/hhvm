@@ -47,9 +47,7 @@ let rewrite_tree_no_whitespace source_text node =
         match EditableTrivia.kind t with
           | TriviaKind.ExtraTokenError
           | TriviaKind.FallThrough
-          | TriviaKind.Unsafe
           | TriviaKind.IgnoreError
-          | TriviaKind.UnsafeExpression
           | TriviaKind.FixMe
           | TriviaKind.SingleLineComment
           | TriviaKind.AfterHaltCompiler

@@ -34,12 +34,7 @@ where
     pub fn make(source: &'a SourceText<'a>, env: ParserEnv) -> Self {
         let sc_state = S::initial_state(&env, &source);
         Self {
-            lexer: Lexer::make(
-                source,
-                env.is_experimental_mode,
-                env.disable_unsafe_expr,
-                env.disable_unsafe_block,
-            ),
+            lexer: Lexer::make(source, env.is_experimental_mode),
             errors: vec![],
             env,
             sc_state,

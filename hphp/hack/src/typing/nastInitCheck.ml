@@ -342,7 +342,6 @@ and stmt env acc st =
       S.union acc c
     | Fallthrough -> S.empty
     | Def_inline _
-    | Unsafe_block _
     | Noop -> acc
     | Let (_, _, e) ->
       (* Scoped local variable cannot escape the block *)
@@ -450,8 +449,7 @@ and expr_ env acc p e =
   | Null
   | String _
   | String2 _
-  | PrefixedString _
-  | Unsafe_expr _ -> acc
+  | PrefixedString _ -> acc
   | Assert (AE_assert e) -> expr acc e
   | Yield e -> afield acc e
   | Yield_from e -> expr acc e

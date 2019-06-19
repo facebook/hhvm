@@ -52,7 +52,6 @@ type env =
   ; mutable ignore_pos       : bool
   ; mutable max_depth        : int    (* Filthy hack around OCaml bug *)
   ; mutable saw_yield        : bool   (* Information flowing back up *)
-  ; mutable unsafes          : ISet.t (* Offsets of UNSAFE_EXPR in trivia *)
   ; mutable lifted_awaits    : lifted_awaits option
   ; mutable tmp_var_counter  : int
   (* Whether we've seen COMPILER_HALT_OFFSET. The value of COMPILER_HALT_OFFSET
@@ -121,7 +120,6 @@ let make_env
     ; ignore_pos
     ; max_depth = 42
     ; saw_yield = false
-    ; unsafes = ISet.empty
     ; saw_compiler_halt_offset = ref None
     ; recursion_depth = ref 0
     ; cls_reified_generics = ref SSet.empty
@@ -815,7 +813,6 @@ let unwrap_extra_block (stmt : block) : block =
   | stmts -> stmts
   in
   match stmt with
-  | [pos, Unsafe; _, Block b] -> (pos, Unsafe) :: de_noop b
   | [_, Block b] -> de_noop b
   | blk -> blk
 
@@ -1898,27 +1895,6 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
     assert (!(env.recursion_depth) >= 0);
     result
   in
-  let outer_unsafes = env.unsafes in
-  let is_safe =
-    (* when in codegen ignore UNSAFE_EXPRs *)
-    if env.codegen then true
-    else
-    match leading_token node with
-    | None -> true
-    | Some t ->
-      let us =
-        if Token.has_trivia_kind t TriviaKind.UnsafeExpression
-        then Token.filter_leading_trivia_by_kind t TriviaKind.UnsafeExpression
-        else []
-      in
-      let f acc u = ISet.add (Trivia.start_offset u) acc in
-      let us = List.fold ~f ~init:ISet.empty us in
-      (* Have we already dealt with 'these' UNSAFE_EXPRs? *)
-      let us = ISet.diff us outer_unsafes in
-      let safe = ISet.is_empty us in
-      if not safe then env.unsafes <- ISet.union us outer_unsafes;
-      safe
-  in
   let result =
     match syntax node with
     | BracedExpression        { braced_expression_expression        = expr; _ }
@@ -1950,7 +1926,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       env.ignore_pos <- local_ignore_pos;
       p, expr_
   in
-  if is_safe then result else fst result, Unsafeexpr result
+  result
 and pBlock : block parser = fun node env ->
    let rec fix_last acc = function
    | x :: (_ :: _ as xs) -> fix_last (x::acc) xs
@@ -1965,10 +1941,10 @@ and pFunctionBody : block parser = fun node env ->
   | Missing -> []
   | CompoundStatement
     { compound_statements = {syntax = Missing; _}
-    ; compound_right_brace = { syntax = Token t; _ }
+    ; compound_right_brace = { syntax = Token _; _ }
     ; _} ->
       [ Pos.none
-      , if Token.has_trivia_kind t TriviaKind.Unsafe then Unsafe else Noop
+      , Noop
       ]
   | CompoundStatement {compound_statements = {syntax = SyntaxList [t]; _}; _}
     when Syntax.is_specific_token TK.Yield t ->
@@ -1988,9 +1964,7 @@ and pFunctionBody : block parser = fun node env ->
     )])
 and pStmtUnsafe : stmt list parser = fun node env ->
   let stmt = pStmt node env in
-  match leading_token node with
-  | Some t when Token.has_trivia_kind t TriviaKind.Unsafe -> [Pos.none, Unsafe; stmt]
-  | _ -> [stmt]
+  [stmt]
 and pStmt : stmt parser = fun node env ->
   clear_statement_scope env (fun () ->
   extract_and_push_docblock node;
@@ -2074,7 +2048,6 @@ and pStmt : stmt parser = fun node env ->
   | CompoundStatement { compound_statements; compound_right_brace; _ } ->
     let tail =
       match leading_token compound_right_brace with
-      | Some t when Token.has_trivia_kind t TriviaKind.Unsafe -> [pos, Unsafe]
       | _ -> []
     in
     handle_loop_body pos compound_statements tail env
@@ -2976,17 +2949,7 @@ and pDef : def list parser = fun node env ->
       ; f_constrs         = hdr.fh_constrs
       ; f_name            = hdr.fh_name
       ; f_params          = hdr.fh_parameters
-      ; f_body            =
-        begin
-          let containsUNSAFE node =
-            let tokens = all_tokens node in
-            let has_unsafe t = Token.has_trivia_kind t TriviaKind.Unsafe in
-            List.exists ~f:has_unsafe tokens
-          in
-          match block with
-          | [p, Noop] when containsUNSAFE function_body -> [p, Unsafe]
-          | b -> b
-        end
+      ; f_body            = block
       ; f_user_attributes = user_attributes
       ; f_doc_comment = doc_comment_opt
       ; f_external = is_external
@@ -3322,7 +3285,7 @@ let pScript node env =
 
 (* The full fidelity parser considers all comments "simply" trivia. Some
  * comments have meaning, though. This meaning can either be relevant for the
- * type checker (like UNSAFE, HH_FIXME, etc.), but also for other uses, like
+ * type checker (like HH_FIXME, etc.), but also for other uses, like
  * Codex, where comments are used for documentation generation.
  *
  * Inlining the scrape for comments in the lowering code would be prohibitively
@@ -3348,8 +3311,6 @@ let scour_comments
       match Trivia.kind t with
       | TriviaKind.WhiteSpace
       | TriviaKind.EndOfLine
-      | TriviaKind.Unsafe
-      | TriviaKind.UnsafeExpression
       | TriviaKind.FallThrough
       | TriviaKind.ExtraTokenError
       | TriviaKind.AfterHaltCompiler
@@ -3518,10 +3479,6 @@ let parse_text
         ~php5_compat_mode:env.php5_compat_mode
         ~disable_nontoplevel_declarations:
           (GlobalOptions.po_disable_nontoplevel_declarations env.parser_options)
-        ~disable_unsafe_expr:
-          (GlobalOptions.po_disable_unsafe_expr env.parser_options)
-        ~disable_unsafe_block:
-          (GlobalOptions.po_disable_unsafe_block env.parser_options)
         ~rust:(GlobalOptions.po_rust env.parser_options)
         ?mode
         ()

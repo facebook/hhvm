@@ -26,16 +26,6 @@ let make_ignore_error source_text offset width =
   ; text = SourceText.sub source_text offset width
   }
 
-let make_unsafe source_text offset width =
-  { kind = TriviaKind.Unsafe
-  ; text = SourceText.sub source_text offset width
-  }
-
-let make_unsafe_expression source_text offset width =
-  { kind = TriviaKind.UnsafeExpression
-  ; text = SourceText.sub source_text offset width
-  }
-
 let make_extra_token_error source_text offset width =
   { kind = TriviaKind.ExtraTokenError
   ; text = SourceText.sub source_text offset width

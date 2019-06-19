@@ -38,10 +38,6 @@ class virtual iter = object (self)
 
   method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
   method! on_Lfun env x = super#on_Lfun (Env.set_ppl_lambda env) x
-
-  (* By default, ignore unsafe code. To visit it, use {!iter_unsafe}. *)
-  method! on_Unsafe_expr _ _ = ()
-  method! on_Unsafe_block _ _ = ()
 end
 
 class virtual ['state] iter_with_state = object (self)
@@ -76,18 +72,6 @@ class virtual ['state] iter_with_state = object (self)
     super#on_Efun (Env.set_ppl_lambda env, state) x
   method! on_Lfun (env, state) x =
     super#on_Lfun (Env.set_ppl_lambda env, state) x
-
-  (* Ignore unsafe code. *)
-  method! on_Unsafe_expr _ _ = ()
-  method! on_Unsafe_block _ _ = ()
-end
-
-(** Like {!iter}, but visits unsafe code. Should not be used in the typechecker
-    or typed linters. Unsafe code should not be visible to the typechecker. *)
-class virtual iter_unsafe = object (self)
-  inherit iter
-  method! on_Unsafe_expr = self#on_expr
-  method! on_Unsafe_block = self#on_block
 end
 
 class virtual ['a] reduce = object (self)
@@ -119,18 +103,6 @@ class virtual ['a] reduce = object (self)
   method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
   method! on_Lfun env x = super#on_Lfun (Env.set_ppl_lambda env) x
 
-  (* By default, ignore unsafe code. To visit it, use {!reduce_unsafe}. *)
-  method! on_Unsafe_expr _ _ = self#zero
-  method! on_Unsafe_block _ _ = self#zero
-end
-
-(** Like {!reduce}, but visits unsafe code. Should not be used in the
-    typechecker or typed linters. Unsafe code should not be visible to the
-    typechecker. *)
-class virtual ['a] reduce_unsafe = object (self)
-  inherit ['a] reduce
-  method! on_Unsafe_expr = self#on_expr
-  method! on_Unsafe_block = self#on_block
 end
 
 class virtual map = object (self)
@@ -162,17 +134,6 @@ class virtual map = object (self)
   method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
   method! on_Lfun env x = super#on_Lfun (Env.set_ppl_lambda env) x
 
-  (* By default, ignore unsafe code. To visit it, use {!map_unsafe}. *)
-  method! on_Unsafe_expr _ e = Tast.Unsafe_expr e
-  method! on_Unsafe_block _ b = Tast.Unsafe_block b
-end
-
-(** Like {!map}, but visits unsafe code. Should not be used in the typechecker
-    or typed linters. Unsafe code should not be visible to the typechecker. *)
-class virtual map_unsafe = object (self)
-  inherit map
-  method! on_Unsafe_expr env e = Tast.Unsafe_expr (self#on_expr env e)
-  method! on_Unsafe_block env b = Tast.Unsafe_block (self#on_block env b)
 end
 
 class virtual endo = object (self)
@@ -204,21 +165,6 @@ class virtual endo = object (self)
   method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
   method! on_Lfun env x = super#on_Lfun (Env.set_ppl_lambda env) x
 
-  (* By default, ignore unsafe code. To visit it, use {!endo_unsafe}. *)
-  method! on_Unsafe_expr _ x _ = x
-  method! on_Unsafe_block _ x _ = x
-end
-
-(** Like {!endo}, but visits unsafe code. Should not be used in the typechecker
-    or typed linters. Unsafe code should not be visible to the typechecker. *)
-class virtual endo_unsafe = object (self)
-  inherit endo
-  method! on_Unsafe_expr env x e =
-    let e' = self#on_expr env e in
-    if e = e' then x else Tast.Unsafe_expr e'
-  method! on_Unsafe_block env x b =
-    let b' = self#on_block env b in
-    if b = b' then x else Tast.Unsafe_block b'
 end
 
 (** A {!handler} is an {!iter} visitor which is not in control of the iteration

@@ -156,8 +156,6 @@ let trivia_kinds = List.map trivia_node_from_list [
   [ "EndOfLine"; "end_of_line" ];
   [ "DelimitedComment"; "delimited_comment" ];
   [ "SingleLineComment"; "single_line_comment" ];
-  [ "Unsafe"; "unsafe" ];
-  [ "UnsafeExpression"; "unsafe_expression" ];
   [ "FixMe"; "fix_me" ];
   [ "IgnoreError"; "ignore_error" ];
   [ "FallThrough"; "fall_through" ];

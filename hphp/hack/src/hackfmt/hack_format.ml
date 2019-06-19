@@ -3120,7 +3120,6 @@ and transform_trivia ~is_leading trivia =
       (* ignore content that appears after __halt_compiler *)
       ()
     | TriviaKind.ExtraTokenError
-    | TriviaKind.UnsafeExpression
     | TriviaKind.FixMe
     | TriviaKind.IgnoreError
     | TriviaKind.DelimitedComment ->
@@ -3167,7 +3166,6 @@ and transform_trivia ~is_leading trivia =
 
       let should_break =
         match Trivia.kind triv with
-        | TriviaKind.UnsafeExpression
         | TriviaKind.FixMe
         | TriviaKind.IgnoreError
           -> false
@@ -3182,7 +3180,6 @@ and transform_trivia ~is_leading trivia =
       ]);
       last_comment_was_delimited := true;
       currently_leading := false;
-    | TriviaKind.Unsafe
     | TriviaKind.FallThrough
     | TriviaKind.SingleLineComment ->
       make_comment ();

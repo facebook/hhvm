@@ -22,8 +22,6 @@ type t =
   | EndOfLine
   | DelimitedComment
   | SingleLineComment
-  | Unsafe
-  | UnsafeExpression
   | FixMe
   | IgnoreError
   | FallThrough
@@ -38,8 +36,6 @@ let to_string kind =
   | EndOfLine         -> "end_of_line"
   | DelimitedComment  -> "delimited_comment"
   | SingleLineComment -> "single_line_comment"
-  | Unsafe            -> "unsafe"
-  | UnsafeExpression  -> "unsafe_expression"
   | FixMe             -> "fix_me"
   | IgnoreError       -> "ignore_error"
   | FallThrough       -> "fall_through"

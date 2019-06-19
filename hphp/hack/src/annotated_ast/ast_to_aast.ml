@@ -338,7 +338,6 @@ struct
     | BracedExpr e -> Aast.BracedExpr (on_expr e)
     | ParenthesizedExpr e -> Aast.ParenthesizedExpr (on_expr e)
     | Xml (id, xhpl, el) -> Aast.Xml (id, on_list on_xhp_attribute xhpl, on_list on_expr el)
-    | Unsafeexpr e -> Aast.Unsafe_expr (on_expr e)
     | Import (f, e) -> Aast.Import (on_import_flavor f, on_expr e)
     | Callconv (k, e) -> Aast.Callconv (k, on_expr e)
     | PU_atom id -> Aast.PU_atom (snd id)
@@ -372,7 +371,6 @@ struct
       let lid = Local_id.make_unscoped (snd id) in
       Aast.Let ((p, lid), optional on_hint h, on_expr e)
     | Block sl                  -> Aast.Block (on_block sl)
-    | Unsafe                    -> failwith "Unsafe statements should be removed in on_block"
     | Fallthrough               -> Aast.Fallthrough
     | Noop                      -> Aast.Noop
     | Markup (s, e)             -> Aast.Markup (s, optional on_expr e)
@@ -405,7 +403,6 @@ struct
   and on_block stmt_list : Aast.stmt list =
     match stmt_list with
     | [] -> []
-    | (p, Unsafe) :: rest -> [p, Aast.Unsafe_block (on_block rest)]
     | x :: rest -> (on_stmt x) :: (on_block rest)
 
   and on_tparam_constraint (kind, hint) : (constraint_kind * Aast.hint) =

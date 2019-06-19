@@ -250,8 +250,8 @@ let make_ocaml_scanner token fn =
     trivia
 
 let make_rust_scanner token fn =
-  fun offset ->
-    fn token.source_text (Full_fidelity_lexer.Env.get()) offset
+  fun (offset : int) ->
+    fn token.source_text offset
 
 let leading token =
   let scanner = match is_in_xhp token, Full_fidelity_lexer.Env.is_rust () with

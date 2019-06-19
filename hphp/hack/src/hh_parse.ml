@@ -65,8 +65,6 @@ module FullFidelityParseArgs = struct
     dump_nast : bool;
     disable_lval_as_an_expression : bool;
     pocket_universes : bool;
-    disable_unsafe_expr : bool;
-    disable_unsafe_block : bool;
     rust : bool;
   }
 
@@ -96,8 +94,6 @@ module FullFidelityParseArgs = struct
     dump_nast
     disable_lval_as_an_expression
     pocket_universes
-    disable_unsafe_expr
-    disable_unsafe_block
     rust
     = {
     full_fidelity_json;
@@ -125,8 +121,6 @@ module FullFidelityParseArgs = struct
     dump_nast;
     disable_lval_as_an_expression;
     pocket_universes;
-    disable_unsafe_expr;
-    disable_unsafe_block;
     rust;
   }
 
@@ -172,8 +166,6 @@ module FullFidelityParseArgs = struct
     let pocket_universes = ref false in
     let files = ref [] in
     let push_file file = files := file :: !files in
-    let disable_unsafe_expr = ref false in
-    let disable_unsafe_block = ref false in
     let rust = ref false in
     let options =  [
       (* modes *)
@@ -281,12 +273,6 @@ No errors are filtered out.";
       "--pocket-universes",
         Arg.Set pocket_universes,
         "Enables support for Pocket Universes";
-      "--disable-unsafe-expr",
-        Arg.Set disable_unsafe_expr,
-        "Treat UNSAFE_EXPR comments as just comments, the typechecker will ignore them";
-      "--disable-unsafe-block",
-        Arg.Set disable_unsafe_block,
-        "Treat UNSAFE block comments as just comments, the typechecker will ignore them";
       "--rust",
         Arg.Set rust,
         "Use the parser written in Rust instead of OCaml one";
@@ -331,8 +317,6 @@ No errors are filtered out.";
       !dump_nast
       !disable_lval_as_an_expression
       !pocket_universes
-      !disable_unsafe_expr
-      !disable_unsafe_block
       !rust
 end
 
@@ -358,8 +342,6 @@ let handle_existing_file args filename =
   let mode = Full_fidelity_parser.parse_mode ~rust:args.rust source_text in
   let env = Full_fidelity_parser_env.make
     ~disable_lval_as_an_expression:args.disable_lval_as_an_expression
-    ~disable_unsafe_expr:args.disable_unsafe_expr
-    ~disable_unsafe_block:args.disable_unsafe_block
     ~rust:args.rust
     ?mode () in
   let syntax_tree = SyntaxTree.make ~env source_text in

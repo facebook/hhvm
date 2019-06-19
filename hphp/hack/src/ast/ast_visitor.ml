@@ -125,7 +125,6 @@ class type ['a] ast_visitor_type = object
   method on_true : 'a -> 'a
   method on_try : 'a -> block -> catch list -> block -> 'a
   method on_unop : 'a -> uop -> expr -> 'a
-  method on_unsafe: 'a -> 'a
   method on_using: 'a -> using_stmt -> 'a
   method on_varray : 'a -> targ option -> expr list -> 'a
   method on_while : 'a -> expr -> block -> 'a
@@ -195,7 +194,6 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
   method on_continue acc _ = acc
   method on_noop acc = acc
   method on_fallthrough acc = acc
-  method on_unsafe acc = acc
   method on_include acc = acc
   method on_require acc = acc
   method on_includeOnce acc = acc
@@ -349,7 +347,6 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     acc
 
   method on_stmt_ acc = function
-    | Unsafe                  -> this#on_unsafe acc
     | Expr e                  -> this#on_expr acc e
     | Break level_opt         -> this#on_break acc level_opt
     | Block b                 -> this#on_block acc b
@@ -396,7 +393,6 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
 
   method on_expr_ acc e =
     match e with
-   | Unsafeexpr e-> this#on_expr acc e
    | Collection (i, tal, afl) -> this#on_collection acc i tal afl
    | Lfun f          -> this#on_lfun acc f
    | Import (ifv, e) -> this#on_import acc ifv e

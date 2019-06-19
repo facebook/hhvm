@@ -933,11 +933,6 @@ let rec convert_expr env st (p, expr_ as expr) =
     let st, pairs = List.map_env st pairs (convert_xhp_attr env) in
     let st, el = convert_exprs env st el in
     st, (p, Xml(id, pairs, el))
-  | Unsafe_expr e ->
-    (* remove unsafe expressions from the AST, they are not used during
-     * codegen
-     *)
-    convert_expr env st e
   | BracedExpr e ->
     let st, e = convert_expr env st e in
     (* For strings and lvars we should elide the braces *)
@@ -1202,9 +1197,6 @@ and convert_stmt (env : env) (st : state) (p, stmt_): _ * stmt =
     | Block b ->
       let st, b = convert_block env st b in
       st, Block b
-    | Unsafe_block b ->
-      let st, b = convert_block env st b in
-      st, Unsafe_block b
     | Throw e ->
       let st, e = convert_expr env st e in
       st, Throw e

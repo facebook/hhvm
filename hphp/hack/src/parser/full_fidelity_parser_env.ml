@@ -15,8 +15,6 @@ type t = {
   disable_nontoplevel_declarations: bool;
   mode: FileInfo.mode option;
   stats: Stats_container.t option;
-  disable_unsafe_expr: bool;
-  disable_unsafe_block: bool;
   rust : bool;
 } [@@deriving show]
 
@@ -26,8 +24,6 @@ let default = {
   codegen = false;
   disable_lval_as_an_expression = false;
   disable_nontoplevel_declarations = false;
-  disable_unsafe_expr = false;
-  disable_unsafe_block = false;
   rust = false;
   mode = None;
   stats = None;
@@ -41,8 +37,6 @@ let make
   ?(disable_nontoplevel_declarations = default.disable_nontoplevel_declarations)
   ?mode
   ?stats
-  ?(disable_unsafe_expr = default.disable_unsafe_expr)
-  ?(disable_unsafe_block = default.disable_unsafe_block)
   ?(rust = default.rust)
   () = {
     hhvm_compat_mode;
@@ -52,8 +46,6 @@ let make
     disable_nontoplevel_declarations;
     mode;
     stats;
-    disable_unsafe_expr;
-    disable_unsafe_block;
     rust;
   }
 
@@ -66,6 +58,4 @@ let mode e = e.mode
 let stats e = e.stats
 let is_experimental_mode e = e.mode = Some FileInfo.Mexperimental
 let is_strict e = e.mode = Some FileInfo.Mstrict
-let disable_unsafe_expr e = e.disable_unsafe_expr
-let disable_unsafe_block e = e.disable_unsafe_block
 let rust e = e.rust

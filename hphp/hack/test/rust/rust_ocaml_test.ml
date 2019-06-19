@@ -42,8 +42,6 @@ type args = {
    mode : mode;
    parser : parser;
    is_experimental : bool;
-   disable_unsafe_expr : bool;
-   disable_unsafe_block  : bool;
    hhvm_compat_mode : bool;
    php5_compat_mode : bool;
    codegen : bool;
@@ -250,8 +248,6 @@ let parse_args () =
   let mode = ref COMPARE in
   let parser = ref MINIMAL in
   let is_experimental = ref false in
-  let disable_unsafe_expr = ref false in
-  let disable_unsafe_block = ref false in
   let codegen = ref false in
   let hhvm_compat_mode = ref false in
   let php5_compat_mode = ref false in
@@ -268,8 +264,6 @@ let parse_args () =
     "--coroutine", Arg.Unit (fun () -> parser := COROUTINE), "";
     "--decl-mode", Arg.Unit (fun () -> (parser := DECL_MODE; check_json_equal_only := true)), "";
     "--experimental", Arg.Set is_experimental, "";
-    "--disable-unsafe-expr", Arg.Set disable_unsafe_expr, "";
-    "--disable-unsafe-block", Arg.Set disable_unsafe_block, "";
     "--codegen", Arg.Set codegen, "";
     "--hhvm-compat-mode", Arg.Set hhvm_compat_mode, "";
     "--php5-compat-mode", Arg.Set php5_compat_mode, "";
@@ -285,8 +279,6 @@ let parse_args () =
     mode = !mode;
     parser = !parser;
     is_experimental = !is_experimental;
-    disable_unsafe_expr = !disable_unsafe_expr;
-    disable_unsafe_block = !disable_unsafe_block;
     codegen = !codegen;
     hhvm_compat_mode = !hhvm_compat_mode;
     php5_compat_mode = !php5_compat_mode;
@@ -322,8 +314,6 @@ let () =
   let t = Unix.gettimeofday() in
   let mode = if args.is_experimental then Some (FileInfo.Mexperimental) else None in
   let make_env = Full_fidelity_parser_env.make
-    ~disable_unsafe_expr:args.disable_unsafe_expr
-    ~disable_unsafe_block:args.disable_unsafe_block
     ~hhvm_compat_mode:args.hhvm_compat_mode
     ~php5_compat_mode:args.php5_compat_mode
     ~codegen:args.codegen

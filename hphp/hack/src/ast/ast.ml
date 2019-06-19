@@ -378,7 +378,6 @@ and using_stmt = {
 
 and stmt = pos * stmt_
 and stmt_ =
-  | Unsafe
   | Fallthrough
   | Expr of expr
   | Block of block
@@ -471,7 +470,6 @@ and expr_ =
    *)
   | Lfun of fun_
   | Xml of id * xhp_attribute list * expr list
-  | Unsafeexpr of expr
   | Import of import_flavor * expr
   | Callconv of param_kind * expr
   (* Pocket Universe citizen, :@foo *)

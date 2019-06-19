@@ -19,7 +19,7 @@ module Env = Typing_env
 module Phase = Typing_phase
 module Partial = Partial_provider
 
-(** This happens, for example, when there are unsafe blocks, or gotos *)
+(** This happens, for example, when there are gotos *)
 exception Cant_check
 exception Not_implemented
 
@@ -190,7 +190,6 @@ let rec check_stmt env (stmt:ETast.stmt) (gamma:gamma) : delta =
     raise Not_implemented
   | Goto _
   | GotoLabel _
-  | Unsafe_block _
   | Block _
   | Markup _ ->
     raise Cant_check

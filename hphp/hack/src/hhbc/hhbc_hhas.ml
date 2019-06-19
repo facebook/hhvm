@@ -1236,7 +1236,6 @@ and string_of_param_default_value ~env expr =
         ~f:(string_of_param_default_value ~env) in
     let efalse = string_of_param_default_value ~env efalse in
     cond ^ " \\? " ^ etrue ^ " : " ^ efalse
-  | A.Unsafe_expr e -> string_of_param_default_value ~env  e
   | A.BracedExpr e -> "{" ^ string_of_param_default_value ~env e ^ "}"
   | A.ParenthesizedExpr e -> "(" ^ string_of_param_default_value ~env e ^ ")"
   | A.Cast (h, e) ->

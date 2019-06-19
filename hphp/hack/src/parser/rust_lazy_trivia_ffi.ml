@@ -11,16 +11,14 @@
 module SourceText = Full_fidelity_source_text
 module MinimalTrivia = Full_fidelity_minimal_trivia
 
-type lexer_opts = (bool * bool)
-
 external scan_leading_xhp_trivia:
-  SourceText.t -> lexer_opts -> int -> MinimalTrivia.t list = "scan_leading_xhp_trivia"
+  SourceText.t -> int -> MinimalTrivia.t list = "scan_leading_xhp_trivia"
 
 external scan_trailing_xhp_trivia:
-  SourceText.t -> lexer_opts -> int -> MinimalTrivia.t list = "scan_trailing_xhp_trivia"
+  SourceText.t -> int -> MinimalTrivia.t list = "scan_trailing_xhp_trivia"
 
 external scan_leading_php_trivia:
-  SourceText.t -> lexer_opts -> int -> MinimalTrivia.t list = "scan_leading_php_trivia"
+  SourceText.t -> int -> MinimalTrivia.t list = "scan_leading_php_trivia"
 
 external scan_trailing_php_trivia:
-  SourceText.t -> lexer_opts -> int -> MinimalTrivia.t list = "scan_trailing_php_trivia"
+  SourceText.t -> int -> MinimalTrivia.t list = "scan_trailing_php_trivia"

@@ -67,10 +67,6 @@ class EditableSyntax
       return DelimitedComment.from_json(json, position, source);
     case 'single_line_comment':
       return SingleLineComment.from_json(json, position, source);
-    case 'unsafe':
-      return Unsafe.from_json(json, position, source);
-    case 'unsafe_expression':
-      return UnsafeExpression.from_json(json, position, source);
     case 'fix_me':
       return FixMe.from_json(json, position, source);
     case 'ignore_error':
@@ -2823,10 +2819,6 @@ class EditableTrivia extends EditableSyntax
         return new DelimitedComment(trivia_text);
       case 'single_line_comment':
         return new SingleLineComment(trivia_text);
-      case 'unsafe':
-        return new Unsafe(trivia_text);
-      case 'unsafe_expression':
-        return new UnsafeExpression(trivia_text);
       case 'fix_me':
         return new FixMe(trivia_text);
       case 'ignore_error':
@@ -2885,24 +2877,6 @@ class SingleLineComment extends EditableTrivia
   with_text(text)
   {
     return new SingleLineComment(text);
-  }
-}
-
-class Unsafe extends EditableTrivia
-{
-  constructor(text) { super('unsafe', text); }
-  with_text(text)
-  {
-    return new Unsafe(text);
-  }
-}
-
-class UnsafeExpression extends EditableTrivia
-{
-  constructor(text) { super('unsafe_expression', text); }
-  with_text(text)
-  {
-    return new UnsafeExpression(text);
   }
 }
 
@@ -21158,8 +21132,6 @@ exports.WhiteSpace = WhiteSpace;
 exports.EndOfLine = EndOfLine;
 exports.DelimitedComment = DelimitedComment;
 exports.SingleLineComment = SingleLineComment;
-exports.Unsafe = Unsafe;
-exports.UnsafeExpression = UnsafeExpression;
 exports.FixMe = FixMe;
 exports.IgnoreError = IgnoreError;
 exports.FallThrough = FallThrough;

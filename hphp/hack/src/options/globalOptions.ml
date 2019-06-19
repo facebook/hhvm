@@ -41,8 +41,6 @@ type t = {
   ignored_fixme_regex : string option;
   log_levels : int SMap.t;
   po_disable_lval_as_an_expression : bool;
-  po_disable_unsafe_expr : bool;
-  po_disable_unsafe_block : bool;
   tco_typecheck_xhp_cvars : bool;
   tco_ignore_collection_expr_type_arguments : bool;
   tco_shallow_class_decl : bool;
@@ -221,8 +219,6 @@ let default = {
  ignored_fixme_regex = None;
  log_levels = SMap.empty;
  po_disable_lval_as_an_expression = false;
- po_disable_unsafe_expr = false;
- po_disable_unsafe_block = false;
  tco_typecheck_xhp_cvars = false;
  tco_ignore_collection_expr_type_arguments = false;
  tco_shallow_class_decl = false;
@@ -270,8 +266,6 @@ let make
   ?ignored_fixme_regex
   ?(log_levels = default.log_levels)
   ?(po_disable_lval_as_an_expression = default.po_disable_lval_as_an_expression)
-  ?(po_disable_unsafe_expr = default.po_disable_unsafe_expr)
-  ?(po_disable_unsafe_block = default.po_disable_unsafe_block)
   ?(tco_typecheck_xhp_cvars = default.tco_typecheck_xhp_cvars)
   ?(tco_ignore_collection_expr_type_arguments = default.tco_ignore_collection_expr_type_arguments)
   ?(tco_shallow_class_decl = default.tco_shallow_class_decl)
@@ -319,8 +313,6 @@ let make
   po_disable_instanceof;
   log_levels;
   po_disable_lval_as_an_expression;
-  po_disable_unsafe_expr;
-  po_disable_unsafe_block;
   tco_typecheck_xhp_cvars;
   tco_ignore_collection_expr_type_arguments;
   tco_shallow_class_decl;
@@ -374,8 +366,6 @@ let ignored_fixme_codes t = t.ignored_fixme_codes
 let ignored_fixme_regex t = t.ignored_fixme_regex
 let log_levels t = t.log_levels
 let po_disable_lval_as_an_expression t = t.po_disable_lval_as_an_expression
-let po_disable_unsafe_expr t = t.po_disable_unsafe_expr
-let po_disable_unsafe_block t = t.po_disable_unsafe_block
 let tco_typecheck_xhp_cvars t = t.tco_typecheck_xhp_cvars
 let tco_shallow_class_decl t = t.tco_shallow_class_decl
 let po_rust t = t.po_rust

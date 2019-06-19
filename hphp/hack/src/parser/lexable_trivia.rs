@@ -12,8 +12,6 @@ pub trait LexableTrivia: Clone + PartialEq {
     fn make_eol(source: &SourceText, offset: usize, width: usize) -> Self;
     fn make_single_line_comment(source: &SourceText, offset: usize, width: usize) -> Self;
     fn make_fallthrough(source: &SourceText, offset: usize, width: usize) -> Self;
-    fn make_unsafe(source: &SourceText, offset: usize, width: usize) -> Self;
-    fn make_unsafe_expression(source: &SourceText, offset: usize, width: usize) -> Self;
     fn make_fix_me(source: &SourceText, offset: usize, width: usize) -> Self;
     fn make_ignore_error(source: &SourceText, offset: usize, width: usize) -> Self;
     fn make_extra_token_error(source: &SourceText, offset: usize, width: usize) -> Self;

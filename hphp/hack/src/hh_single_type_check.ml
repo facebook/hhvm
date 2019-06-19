@@ -196,8 +196,6 @@ let parse_options () =
   let allow_ref_param_on_constructor = ref (Some false) in
   let disallow_byref_dynamic_calls = ref (Some false) in
   let set_bool x () = x := Some true in
-  let disable_unsafe_expr = ref None in
-  let disable_unsafe_block = ref None in
   let pocket_universes = ref false in
   let shallow_class_decl = ref false in
   let out_extension = ref ".out" in
@@ -390,12 +388,6 @@ let parse_options () =
     "--disallow-invalid-arraykey-constraint",
       Arg.Unit (set_bool disallow_invalid_arraykey_constraint),
         " Disallow using non-string, non-int types as array key constraints";
-    "--disable-unsafe-expr",
-      Arg.Unit (set_bool disable_unsafe_expr),
-      "Treat UNSAFE_EXPR comments as just comments, the typechecker will ignore them";
-    "--disable-unsafe-block",
-      Arg.Unit (set_bool disable_unsafe_block),
-      "Treat UNSAFE block comments as just comments, the typecheker will ignore them";
     "--check-xhp-cvar-arity",
       Arg.Unit (set_bool typecheck_xhp_cvars),
       "Typechecks xhp cvar arity";
@@ -464,8 +456,6 @@ let parse_options () =
     ?tco_timeout:(!timeout)
     ?tco_disallow_invalid_arraykey:(!disallow_invalid_arraykey)
     ?po_auto_namespace_map:(!auto_namespace_map)
-    ?po_disable_unsafe_expr:(!disable_unsafe_expr)
-    ?po_disable_unsafe_block:(!disable_unsafe_block)
     ?tco_typecheck_xhp_cvars:(!typecheck_xhp_cvars)
     ?tco_ignore_collection_expr_type_arguments:(!ignore_collection_expr_type_arguments)
     ?tco_disallow_byref_dynamic_calls:(!disallow_byref_dynamic_calls)

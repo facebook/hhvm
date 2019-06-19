@@ -100,9 +100,6 @@ module Env : sig
   val make_const_env :
     Aast.gconst -> genv * lenv
 
-  val has_unsafe : genv * lenv -> bool
-  val set_unsafe : genv * lenv -> bool -> unit
-
   val in_ppl : genv * lenv -> bool
   val set_ppl : genv * lenv -> bool -> genv * lenv
 
@@ -165,13 +162,6 @@ end = struct
      *)
     unbound_handler: unbound_handler option;
 
-    (* The presence of an "UNSAFE" in the function body changes the
-     * verifiability of the function's return type, since the unsafe
-     * block could return. For the sanity of the typechecker, we flatten
-     * this out, but need to track if we've seen an "UNSAFE" in order to
-     * do so. *)
-    has_unsafe: bool ref;
-
     (**
      * A map from goto label strings to named labels.
      *)
@@ -189,7 +179,6 @@ end = struct
     let_locals = ref SMap.empty;
     pipe_locals = ref [];
     unbound_handler;
-    has_unsafe = ref false;
     goto_labels = ref SMap.empty;
     goto_targets = ref SMap.empty;
   }
@@ -319,10 +308,6 @@ end = struct
     let lenv = empty_local None in
     let env  = genv, lenv in
     env
-
-  let has_unsafe (_genv, lenv) = !(lenv.has_unsafe)
-  let set_unsafe (_genv, lenv) x =
-    lenv.has_unsafe := x
 
   let in_ppl (genv, _lenv) = genv.in_ppl
 
@@ -1423,7 +1408,6 @@ module Make (GetLocals : GetLocals) = struct
 
   and check_constant_expr env (pos, e) =
     match e with
-    | Aast.Unsafe_expr _
     | Aast.Id _
     | Aast.Null
     | Aast.True
@@ -1521,8 +1505,6 @@ module Make (GetLocals : GetLocals) = struct
     ; c_tconst_type = type_
     ; c_tconst_user_attributes = attrs
     }
-
-  and func_body_had_unsafe env = Env.has_unsafe env
 
   and method_ genv m =
     let genv = extend_params genv m.Aast.m_tparams in
@@ -1716,7 +1698,6 @@ module Make (GetLocals : GetLocals) = struct
     let stmt = match st with
     | Aast.Let (x, h, e) -> let_stmt env x h e
     | Aast.Block _ -> failwith "stmt block error"
-    | Aast.Unsafe_block _ -> failwith "stmt unsafe_block error"
     | Aast.Fallthrough -> N.Fallthrough
     | Aast.Noop -> N.Noop
     | Aast.Markup (_, None) -> N.Noop
@@ -1898,14 +1879,9 @@ module Make (GetLocals : GetLocals) = struct
         let cl = catchl env cl in
         N.Try (b, cl, fb))
 
-  and stmt_list ?after_unsafe stl env =
-    let stmt_list = stmt_list ?after_unsafe in
+  and stmt_list stl env =
     match stl with
     | [] -> []
-    | (p, Aast.Unsafe_block b) :: _ ->
-      Env.set_unsafe env true;
-      let st = Errors.ignore_ (fun () -> p, N.Unsafe_block (stmt_list b env)) in
-      st :: Option.to_list after_unsafe
     | (_, Aast.Block b) :: rest ->
       (* Add lexical scope for block scoped let variables *)
       let b = Env.scope_lexical env (stmt_list b) in
@@ -1921,8 +1897,8 @@ module Make (GetLocals : GetLocals) = struct
     then Env.scope env (stmt_list stl)
     else stmt_list stl env
 
-  and branch ?after_unsafe env stmt_l =
-    Env.scope env (stmt_list ?after_unsafe stmt_l)
+  and branch env stmt_l =
+    Env.scope env (stmt_list stmt_l)
 
   (**
    * Names a goto label.
@@ -2453,8 +2429,6 @@ module Make (GetLocals : GetLocals) = struct
         end
       end in
       N.Shape (List.rev shp)
-    | Aast.Unsafe_expr e ->
-      N.Unsafe_expr (Errors.ignore_ (fun () -> expr env e))
     | Aast.BracedExpr _ ->
       N.Any
     | Aast.Yield_from e ->
@@ -2487,19 +2461,11 @@ module Make (GetLocals : GetLocals) = struct
   and expr_lambda env f =
     let env = Env.set_ppl env false in
     let h = Option.map f.Aast.f_ret (hint ~allow_retonly:true env) in
-    let previous_unsafe = Env.has_unsafe env in
-    (* save unsafe and yield state *)
-    Env.set_unsafe env false;
     let variadicity, paraml = fun_paraml env f.Aast.f_params in
     (* The bodies of lambdas go through naming in the containing local
      * environment *)
     let body_nast = f_body env f.Aast.f_body in
-    let annotation =
-      if func_body_had_unsafe env
-      then N.BodyNamingAnnotation.NamedWithUnsafeBlocks
-      else N.BodyNamingAnnotation.Named in
-    (* restore unsafe state *)
-    Env.set_unsafe env previous_unsafe;
+    let annotation = N.BodyNamingAnnotation.Named in
     (* These could all be probably be replaced with a {... where ...} *)
     let body = {
       N.fb_ast = body_nast;
@@ -2564,11 +2530,11 @@ module Make (GetLocals : GetLocals) = struct
   and case env c =
     match c with
     | Aast.Default b ->
-      let b = branch ~after_unsafe:(Pos.none, N.Fallthrough) env b in
+      let b = branch env b in
       N.Default b
     | Aast.Case (e, b) ->
       let e = expr env e in
-      let b = branch ~after_unsafe:(Pos.none, N.Fallthrough) env b in
+      let b = branch env b in
       N.Case (e, b)
 
   and catchl env l = List.map l (catch env)
@@ -2733,10 +2699,7 @@ module Make (GetLocals : GetLocals) = struct
         | N.FVvariadicArg param -> Env.add_param env param
       in
       let fub_ast = block env f.N.f_body.N.fb_ast in
-      let annotation =
-        if func_body_had_unsafe env
-        then N.BodyNamingAnnotation.NamedWithUnsafeBlocks
-        else N.BodyNamingAnnotation.Named in
+      let annotation = N.BodyNamingAnnotation.Named in
       Env.check_goto_references env;
       {
         N.fb_ast = fub_ast;
@@ -2759,10 +2722,7 @@ module Make (GetLocals : GetLocals) = struct
           | N.FVvariadicArg param -> Env.add_param env param
         in
         let fub_ast = block env m.N.m_body.N.fb_ast in
-        let annotation =
-          if func_body_had_unsafe env
-          then N.BodyNamingAnnotation.NamedWithUnsafeBlocks
-          else N.BodyNamingAnnotation.Named in
+        let annotation = N.BodyNamingAnnotation.Named in
         Env.check_goto_references env;
         { N.fb_ast = fub_ast;
           fb_annotation = annotation;

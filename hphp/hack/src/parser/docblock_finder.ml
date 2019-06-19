@@ -181,8 +181,6 @@ let get_docblock node =
       | TriviaKind.FixMe
       | TriviaKind.IgnoreError -> helper tail acc 1
       | TriviaKind.DelimitedComment
-      | TriviaKind.Unsafe
-      | TriviaKind.UnsafeExpression
       | TriviaKind.FallThrough
       | TriviaKind.ExtraTokenError
       | TriviaKind.AfterHaltCompiler ->

@@ -7,7 +7,7 @@
  *
  *)
 
- let scan_leading_xhp_trivia _ _ _ = failwith "not implemented"
- let scan_trailing_xhp_trivia _ _ _ = failwith "not implemented"
- let scan_leading_php_trivia _ _ _ = failwith "not implemented"
- let scan_trailing_php_trivia _ _ _ = failwith "not implemented"
+ let scan_leading_xhp_trivia _ _ = failwith "not implemented"
+ let scan_trailing_xhp_trivia _ _ = failwith "not implemented"
+ let scan_leading_php_trivia _ _ = failwith "not implemented"
+ let scan_trailing_php_trivia _ _ = failwith "not implemented"

@@ -62,7 +62,6 @@ and funcbody_annotation = Annotations.FuncBodyAnnotation.t [@visitors.opaque]
 and stmt = pos * stmt_
 
 and stmt_ =
-  | Unsafe_block of block
   | Fallthrough
   | Expr of expr
   | Break
@@ -171,7 +170,6 @@ and expr_ =
   | Efun of fun_ * lid list
   | Lfun of fun_ * lid list
   | Xml of sid * xhp_attribute list * expr list
-  | Unsafe_expr of expr
   | Callconv of Ast_defs.param_kind * expr
   | Import of import_flavor * expr
   (* TODO: T38184446 Consolidate collections in AAST *)
@@ -580,7 +578,6 @@ let expr_to_string expr =
   | Record _ -> "Record"
   | Efun _  -> "Efun"
   | Xml _  -> "Xml"
-  | Unsafe_expr _ -> "Unsafe_expr"
   | Callconv _ -> "Callconv"
   | Assert _  -> "Assert"
   | Clone _  -> "Clone"

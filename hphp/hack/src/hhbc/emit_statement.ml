@@ -221,7 +221,6 @@ and emit_stmt env (pos, stmt) =
     instr_label (Label.named label)
   | A.Goto (_, label) ->
     TFR.emit_goto ~in_finally_epilogue:false env label
-  | A.Unsafe_block b
   | A.Block b -> emit_stmts env b
   | A.If (condition, consequence, alternative) ->
     emit_if env pos condition consequence alternative
@@ -617,10 +616,7 @@ and emit_switch (env : Emit_env.t) pos scrutinee_expr cl =
   ]
 
 and block_pos (b : A.block) =
-  let get_pos (p, e) = match e with
-    | A.Unsafe_block e -> block_pos e
-    | _ -> p in
-  let bpos = List.map b get_pos in
+  let bpos = List.map b fst in
   let valid_pos = List.filter bpos (fun e -> e <> Pos.none) in
   if valid_pos = [] then Pos.none
   else Pos.btw (List.hd_exn valid_pos) (List.last_exn valid_pos)
@@ -648,7 +644,6 @@ and emit_catches (env : Emit_env.t) pos (catch_list : A.catch list) end_label =
 
 and is_empty_block (_, b) =
   match b with
-  | A.Unsafe_block l
   | A.Block l -> List.for_all ~f:is_empty_block l
   | A.Noop -> true
   | _ -> false
@@ -1109,8 +1104,7 @@ let rec emit_final_statement env s =
   | Tast.Throw _ | Tast.Return _ | Tast.Goto _
   | Tast.Expr (_, Tast.Yield_break) ->
     emit_stmt env s
-  | Tast.Block b
-  | Tast.Unsafe_block b ->
+  | Tast.Block b ->
     emit_final_statements env b
   | _ ->
     gather [

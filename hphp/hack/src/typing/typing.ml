@@ -105,13 +105,6 @@ let map_funcbody_annotation an =
   | Nast.Annotations.FuncBodyAnnotation.Unnamed _ ->
     failwith "Should not map over unnamed body"
 
-let ntm_env tcopt =
-  NastTanyMapper.{
-    map_env_annotation = (fun () -> Tast.empty_saved_env tcopt);
-    map_expr_annotation = (fun p -> p, (Reason.Rnone, Tany));
-    map_funcbody_annotation = map_funcbody_annotation;
-  }
-
 (*****************************************************************************)
 (* Debugging *)
 (*****************************************************************************)
@@ -732,14 +725,6 @@ and save_and_merge_next_in_catch env =
 
 and might_throw env = save_and_merge_next_in_catch env
 
-and gather_defined_in_block env b =
-  let locals = Typing_gather_defined.block env b in
-  Env.env_with_locals env locals
-
-and gather_defined_in_expr env e =
-  let locals = Typing_gather_defined.expr env e in
-  Env.env_with_locals env locals
-
 and stmt env (pos, st) =
   let env, st = stmt_ env pos st in
   Typing_debug.log_env_if_too_big pos env;
@@ -749,13 +734,6 @@ and stmt_ env pos st =
   let env = Env.open_tyvars env pos in
   (fun (env, tb) -> SubType.close_tyvars_and_solve env, tb) @@
   match st with
-  | Unsafe_block b ->
-    (* Do not run inference on the block, since unsafe is sometimes used to work
-       around inference performance problems. *)
-    let env = gather_defined_in_block env b in
-    let tcopt = Env.get_tcopt env in
-    let tb = NastTanyMapper.map_block (ntm_env tcopt) b in
-    env, T.Unsafe_block tb
   | Fallthrough ->
       let env = if env.Env.in_case
         then LEnv.move_and_merge_next_in_cont env C.Fallthrough
@@ -2600,13 +2578,6 @@ and expr_
         end ~init:env in
         make_result env p txml obj
       )
-  | Unsafe_expr e ->
-    (* Do not run inference on the expression, since unsafe is sometimes used to
-       work around inference performance problems. *)
-    let env = gather_defined_in_expr env e in
-    let tcopt = Env.get_tcopt env in
-    let te = NastTanyMapper.map_expr (ntm_env tcopt) e in
-    make_result env p (T.Unsafe_expr te) (Reason.Rnone, Tany)
   | Callconv (kind, e) ->
       let env, te, ty = expr env e in
       make_result env p (T.Callconv (kind, te)) ty

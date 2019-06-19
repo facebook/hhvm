@@ -14,17 +14,11 @@ module SyntaxError = Full_fidelity_syntax_error
 
 module Env = struct
 
-  let enable_unsafe_expr = ref true
-  let enable_unsafe_block = ref true
   let is_rust = ref false
-  let set ~disable_unsafe_expr ~disable_unsafe_block ~rust =
-    enable_unsafe_expr := not disable_unsafe_expr;
-    enable_unsafe_block := not disable_unsafe_block;
+  let set ~rust =
     is_rust := rust
 
   let is_rust () = !is_rust
-  let get () =
-    (not !enable_unsafe_expr, not !enable_unsafe_block)
 
 end
 
@@ -41,8 +35,6 @@ module Lexer : sig
   [@@@warning "+32"]
   val make :
     ?is_experimental_mode:bool ->
-    ?disable_unsafe_expr:bool ->
-    ?disable_unsafe_block:bool ->
     Full_fidelity_source_text.t -> t
   val make_at : ?is_experimental_mode:bool -> SourceText.t -> int -> t
   val start : t -> int
@@ -73,12 +65,10 @@ end = struct
 
   let make
     ?(is_experimental_mode = false)
-    ?(disable_unsafe_expr = false)
-    ?(disable_unsafe_block = false)
     text =
     (* this can be overridden in scan_header, but we need to explicitly reset *)
     (* it, as `scan_header` is never called for `.hack` files *)
-    Env.set ~disable_unsafe_expr ~disable_unsafe_block ~rust:false;
+    Env.set ~rust:false;
     { text; start = 0; offset = 0; errors = []; is_experimental_mode }
 
   let start  x = x.start
@@ -98,8 +88,6 @@ end = struct
     with_start_offset
       (make
         ?is_experimental_mode
-        ~disable_unsafe_expr:(not !Env.enable_unsafe_expr)
-        ~disable_unsafe_block:(not !Env.enable_unsafe_block)
         text)
       start_offset
       start_offset
@@ -1230,8 +1218,6 @@ let scan_hash_comment lexer =
 let scan_single_line_comment lexer =
   (* A fallthrough comment is two slashes, any amount of whitespace,
     FALLTHROUGH, and any characters may follow.
-    An unsafe comment is two slashes, any amount of whitespace,
-    UNSAFE, and then any characters may follow.
     TODO: Consider allowing lowercase fallthrough.
   *)
   let lexer = advance lexer 2 in
@@ -1242,8 +1228,6 @@ let scan_single_line_comment lexer =
   let c =
     if remainder >= 11 && peek_string lexer_ws 11 = "FALLTHROUGH" then
       Trivia.make_fallthrough (source lexer) (start lexer) w
-    else if remainder >= 6 && peek_string lexer_ws 6 = "UNSAFE" && !Env.enable_unsafe_block then
-      Trivia.make_unsafe (source lexer) (start lexer) w
     else
       Trivia.make_single_line_comment (source lexer) (start lexer) w in
   (lexer, c)
@@ -1265,10 +1249,7 @@ let skip_to_end_of_delimited_comment lexer =
   aux lexer 0
 
 let scan_delimited_comment lexer =
-  (* An unsafe expression comment is a delimited comment that begins with any
-    whitespace, followed by UNSAFE_EXPR, followed by any text.
-
-    The original lexer lexes a fixme / ignore error as:
+  (* The original lexer lexes a fixme / ignore error as:
 
     slash star [whitespace]* HH_FIXME [whitespace or newline]* leftbracket
     [whitespace or newline]* integer [any text]* star slash
@@ -1285,9 +1266,7 @@ let scan_delimited_comment lexer =
   let lexer = skip_to_end_of_delimited_comment lexer_ws in
   let w = width lexer in
   let c =
-    if !Env.enable_unsafe_expr && match_string lexer_ws "UNSAFE_EXPR" then
-      Trivia.make_unsafe_expression (source lexer) (start lexer) w
-    else if match_string lexer_ws "HH_FIXME" then
+    if match_string lexer_ws "HH_FIXME" then
       Trivia.make_fix_me (source lexer) (start lexer) w
     else if match_string lexer_ws "HH_IGNORE_ERROR" then
       Trivia.make_ignore_error (source lexer) (start lexer) w
@@ -1368,7 +1347,7 @@ we use are:
 * The first newline trivia encountered is the last trailing trivia.
 * The newline which follows a // or # comment is not part of the comment
   but does terminate the trailing trivia.
-* A pragma to turn checks off (HH_FIXME, HH_IGNORE_ERROR and UNSAFE_EXPR) is
+* A pragma to turn checks off (HH_FIXME and HH_IGNORE_ERROR) is
 * always a leading trivia.
 *)
 
@@ -1397,7 +1376,6 @@ let scan_trailing_trivia scanner lexer  =
       | TriviaKind.EndOfLine -> (lexer1, t :: acc)
       | TriviaKind.FixMe
       | TriviaKind.IgnoreError
-      | TriviaKind.UnsafeExpression
         -> (lexer, acc)
       | _ -> aux lexer1 (t :: acc)
       end in

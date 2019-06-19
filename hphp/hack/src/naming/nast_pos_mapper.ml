@@ -75,7 +75,6 @@ and expr_ f = function
     Efun (fun_, idl)
   | Xml (sid, attrl, el) ->
     Xml (pstring f sid, attr_list f attrl, List.map el (expr f))
-  | Unsafe_expr e -> Unsafe_expr (expr f e)
   | Callconv (kind, e) -> Callconv (kind, expr f e)
   | ValCollection (s, ta, el) -> ValCollection (s, ta, List.map el (expr f))
   | KeyValCollection (s, tap, fl) ->

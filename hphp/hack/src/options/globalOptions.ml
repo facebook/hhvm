@@ -50,6 +50,7 @@ type t = {
   tco_like_types : bool;
   tco_pessimize_types : bool;
   tco_coercion_from_dynamic : bool;
+  tco_disable_partially_abstract_typeconsts: bool;
   error_codes_treated_strictly : ISet.t;
   tco_check_xhp_attribute : bool;
   tco_disallow_unresolved_type_variables : bool;
@@ -229,6 +230,7 @@ let default = {
  tco_like_types = false;
  tco_pessimize_types = false;
  tco_coercion_from_dynamic = false;
+ tco_disable_partially_abstract_typeconsts = false;
  error_codes_treated_strictly = ISet.of_list [];
  tco_check_xhp_attribute = false;
  tco_disallow_unresolved_type_variables = false;
@@ -277,6 +279,7 @@ let make
   ?(tco_like_types = default.tco_like_types)
   ?(tco_pessimize_types = default.tco_pessimize_types)
   ?(tco_coercion_from_dynamic = default.tco_coercion_from_dynamic)
+  ?(tco_disable_partially_abstract_typeconsts = default.tco_disable_partially_abstract_typeconsts)
   ?(error_codes_treated_strictly = default.error_codes_treated_strictly)
   ?(tco_check_xhp_attribute = default.tco_check_xhp_attribute)
   ?(tco_disallow_unresolved_type_variables = default.tco_disallow_unresolved_type_variables)
@@ -325,6 +328,7 @@ let make
   tco_like_types;
   tco_pessimize_types;
   tco_coercion_from_dynamic;
+  tco_disable_partially_abstract_typeconsts;
   error_codes_treated_strictly;
   tco_check_xhp_attribute;
   tco_disallow_unresolved_type_variables;
@@ -378,6 +382,7 @@ let po_rust t = t.po_rust
 let tco_like_types t = t.tco_like_types
 let tco_pessimize_types t = t.tco_pessimize_types
 let tco_coercion_from_dynamic t = t.tco_coercion_from_dynamic
+let tco_disable_partially_abstract_typeconsts t = t.tco_disable_partially_abstract_typeconsts
 let error_codes_treated_strictly t = t.error_codes_treated_strictly
 
 let tco_ignore_collection_expr_type_arguments t = t.tco_ignore_collection_expr_type_arguments

@@ -492,10 +492,14 @@ let tconst_subsumption env parent_typeconst child_typeconst =
   let pos, name = child_typeconst.ttc_name in
   let parent_pos = fst parent_typeconst.ttc_name in
   let parent_is_concrete = Option.is_some parent_typeconst.ttc_type in
+  let disable_partially_abstract =
+     TypecheckerOptions.disable_partially_abstract_typeconsts (Env.get_tcopt env) in
   let is_final =
-    Option.is_none parent_typeconst.ttc_constraint &&
-    parent_is_concrete in
-
+    match parent_typeconst.ttc_abstract with
+    | TCPartiallyAbstract
+    | TCConcrete when disable_partially_abstract ->
+      true
+    | _ -> parent_is_concrete && Option.is_none parent_typeconst.ttc_constraint in
   (* Check that the child's constraint is compatible with the parent. If the
    * parent has a constraint then the child must also have a constraint if it
    * is abstract

@@ -296,6 +296,7 @@ let load config_filename options =
     ?tco_like_types:(bool_opt "like_types" config)
     ?tco_pessimize_types:(bool_opt "pessimize_types" config)
     ?tco_coercion_from_dynamic:(bool_opt "coercion_from_dynamic" config)
+    ?tco_disable_partially_abstract_typeconsts:(bool_opt "disable_partially_abstract_typeconsts" config)
     ~error_codes_treated_strictly:(prepare_error_codes_treated_strictly config)
     ?tco_check_xhp_attribute:(bool_opt "check_xhp_attribute" config)
     ?tco_disallow_unresolved_type_variables:(bool_opt "disallow_unresolved_type_variables" config)

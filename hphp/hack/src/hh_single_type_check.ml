@@ -204,6 +204,7 @@ let parse_options () =
   let like_types = ref false in
   let pessimize_types = ref false in
   let coercion_from_dynamic = ref false in
+  let disable_partially_abstract_typeconsts = ref false in
   let search_provider = ref "TrieIndex" in
   let rust = ref false in
   let symbolindex_file = ref None in
@@ -427,6 +428,9 @@ let parse_options () =
       Arg.Set coercion_from_dynamic,
       "Allows coercion from dynamic and like types to enforceable types at positions that \
        HHVM enforces";
+    "--disable-partially-abstract-typeconsts",
+      Arg.Set disable_partially_abstract_typeconsts,
+      "Treat partially abstract type constants as concrete type constants";
     "--search-provider",
       Arg.String (fun str -> search_provider := str),
       "Configure the symbol index search provider";
@@ -471,6 +475,7 @@ let parse_options () =
     ~tco_like_types:(!like_types)
     ~tco_pessimize_types:(!pessimize_types)
     ~tco_coercion_from_dynamic:(!coercion_from_dynamic)
+    ~tco_disable_partially_abstract_typeconsts:(!disable_partially_abstract_typeconsts)
     ~log_levels:(!log_levels)
     ~po_rust:!rust
     ()

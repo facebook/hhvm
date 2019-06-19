@@ -210,6 +210,9 @@ type t = {
     i.e. dynamic ~> int, ~string ~> string *)
  tco_coercion_from_dynamic : bool;
 
+ (* Treat partially abstract typeconsts like concrete typeconsts, disable overriding type *)
+ tco_disable_partially_abstract_typeconsts : bool;
+
  (* Set of codes to be treated as if they were in strict mode files *)
  error_codes_treated_strictly : ISet.t;
 
@@ -267,6 +270,7 @@ val make :
   ?tco_like_types: bool ->
   ?tco_pessimize_types: bool ->
   ?tco_coercion_from_dynamic: bool ->
+  ?tco_disable_partially_abstract_typeconsts: bool ->
   ?error_codes_treated_strictly: ISet.t ->
   ?tco_check_xhp_attribute: bool ->
   ?tco_disallow_unresolved_type_variables: bool ->
@@ -340,6 +344,7 @@ val po_rust : t -> bool
 val tco_like_types : t -> bool
 val tco_pessimize_types : t -> bool
 val tco_coercion_from_dynamic : t -> bool
+val tco_disable_partially_abstract_typeconsts : t -> bool
 val error_codes_treated_strictly : t -> ISet.t
 val tco_check_xhp_attribute : t -> bool
 val tco_disallow_unresolved_type_variables : t -> bool

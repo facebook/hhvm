@@ -4074,14 +4074,15 @@ and call_parent_construct pos env el uel =
       then begin
         (* in static context, you can only call parent::foo() on static
          * methods *)
-        let env, fty, _ = class_get ~is_method:true ~is_const:false ~explicit_tparams:tal
-          env ty1 m CIparent (fun x-> x) in
-        let env = check_coroutine_call env fty in
-        let env, tel, tuel, ty =
-          call ~expected
-          ~method_call_info:(TR.make_call_info ~receiver_is_self:false
-            ~is_static:true this_ty (snd m)) ~fty_decl:None
-          p env fty el uel in
+        let getter env k =
+          let env, fty, _ = class_get ~is_method:true ~is_const:false ~explicit_tparams:tal
+            env ty1 m CIparent k in
+          env, fty in
+        let call_continuation env fty fty_decl =
+          let env = check_coroutine_call env fty in
+          call ~expected ~method_call_info:(TR.make_call_info ~receiver_is_self:false
+            ~is_static:true this_ty (snd m)) ~fty_decl p env fty el uel in
+        let env, ty, fty, tel, tuel = method_get_helper env getter call_continuation in
         make_call env (T.make_typed_expr fpos fty
           (T.Class_const (tcid, m))) tal tel tuel ty
       end
@@ -4107,13 +4108,15 @@ and call_parent_construct pos env el uel =
             make_call env (T.make_typed_expr fpos fty (T.Class_const (tcid, m)))
               tal tel tuel method_
         else
-            let env, fty, _ = class_get ~is_method:true ~is_const:false
-              ~explicit_tparams:tal env ty1 m CIparent (fun x -> x) in
-            let env = check_coroutine_call env fty in
-            let env, tel, tuel, ty =
+            let getter env k =
+              let env, fty, _ = class_get ~is_method:true ~is_const:false
+                ~explicit_tparams:tal env ty1 m CIparent k in
+              env, fty in
+            let call_continuation env fty fty_decl =
+              let env = check_coroutine_call env fty in
               call ~expected ~method_call_info:(TR.make_call_info ~receiver_is_self:false
-                  ~is_static:true this_ty (snd m)) ~fty_decl:None
-                p env fty el uel in
+                ~is_static:true this_ty (snd m)) ~fty_decl p env fty el uel in
+            let env, ty, fty, tel, tuel = method_get_helper env getter call_continuation in
             make_call  env (T.make_typed_expr fpos fty
               (T.Class_const (tcid, m))) tal tel tuel ty
       end

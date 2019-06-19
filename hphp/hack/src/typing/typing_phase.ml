@@ -170,12 +170,7 @@ let rec localize ~ety_env env (dty: decl ty) =
     end
   | r, Toption ty ->
        let env, ty = localize ~ety_env env ty in
-       let ty_ =
-         if TUtils.is_option env ty then
-           snd ty
-         else
-           Toption ty in
-       env, (r, ty_)
+       TUtils.union env (MakeType.null r) ty
   | r, Tlike ty ->
       let env, ty = localize ~ety_env env ty in
       let env, lty = TUtils.union env (MakeType.dynamic r) ty in

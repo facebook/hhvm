@@ -2338,11 +2338,19 @@ and expr_
   | Cast (hint, e) ->
       let env, te, ty2 = expr env e in
       let env = might_throw env in
-      if (TypecheckerOptions.experimental_feature_enabled
-        (Env.get_tcopt env)
-        TypecheckerOptions.experimental_forbid_nullable_cast)
-        && TUtils.is_option env ty2 && not (TUtils.is_mixed env ty2)
-      then Errors.nullable_cast p (Typing_print.error env ty2) (Reason.to_pos (fst ty2));
+      let env =
+        if (TypecheckerOptions.experimental_feature_enabled
+          (Env.get_tcopt env)
+          TypecheckerOptions.experimental_forbid_nullable_cast)
+          && not (TUtils.is_mixed env ty2)
+        then
+          Errors.try_
+            (fun () ->
+              SubType.sub_type env ty2 (MakeType.nonnull (fst ty2)))
+            (fun _ ->
+              Errors.nullable_cast p (Typing_print.error env ty2) (Reason.to_pos (fst ty2));
+              env)
+        else env in
       let env, ty = Phase.localize_hint_with_self env hint in
       make_result env p (T.Cast (hint, te)) ty
   | InstanceOf (e, (pos, cid)) ->

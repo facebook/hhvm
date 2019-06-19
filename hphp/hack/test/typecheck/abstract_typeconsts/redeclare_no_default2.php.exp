@@ -1,0 +1,13 @@
+File "redeclare_no_default2.php", line 11, characters 16-16:
+Class C does not correctly implement all required members  (Typing[4110])
+File "redeclare_no_default2.php", line 11, characters 26-26:
+Some members are incompatible with those declared in type B
+Read the following to see why:
+File "redeclare_no_default2.php", line 4, characters 23-23:
+The constraint on this type constant is inconsistent with its parent
+File "redeclare_no_default2.php", line 8, characters 28-33:
+Expected string
+File "redeclare_no_default2.php", line 4, characters 28-32:
+But got mixed
+File "redeclare_no_default2.php", line 4, characters 23-23:
+This declaration was inherited from an object of type A. Redeclare this member in C with a compatible signature.

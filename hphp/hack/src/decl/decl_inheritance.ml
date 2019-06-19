@@ -489,6 +489,23 @@ let make_typeconst_cache class_name lin =
       | TCPartiallyAbstract, TCConcrete ->
         ancestor_tc
 
+      (* This covers the following case
+       *
+       * interface I {
+       *   abstract const type T as arraykey;
+       * }
+       *
+       * abstract class A {
+       *   abstract const type T as arraykey = string;
+       * }
+       *
+       * final class C extends A implements I {}
+       *
+       * C::T must come from A, not I, as A provides the default that will synthesize
+       * into a concrete type constant in C.
+       *)
+      | TCAbstract None, TCAbstract Some _ ->
+        ancestor_tc
       (* When a type constant is declared in multiple parents we need to make a
        * subtle choice of what type we inherit. For example, in:
        *

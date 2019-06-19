@@ -14,10 +14,12 @@ open Utils
 type file_info = Typing_check_service.file
 
 (* Return all the files that we need to typecheck *)
-let make_next_files (genv: ServerEnv.genv) : Relative_path.t list Bucket.next =
+let make_next_files
+    ~(indexer: unit -> string list)
+    ~(extra_roots: Path.t list) : Relative_path.t list Bucket.next =
   let next_files_root = compose
     (List.map ~f:(Relative_path.(create Root)))
-    (genv.indexer FindUtils.file_filter) in
+    indexer in
   let hhi_root = Hhi.get_hhi_root () in
   let hhi_filter = FindUtils.is_php in
   let next_files_hhi = compose
@@ -33,7 +35,6 @@ let make_next_files (genv: ServerEnv.genv) : Relative_path.t list Bucket.next =
       end
     end
   in
-  let extra_roots = ServerConfig.extra_paths genv.config in
   let next_files_extra = List.map extra_roots
     (fun root -> compose
       (List.map ~f:Relative_path.create_detect_prefix)
@@ -55,7 +56,9 @@ let is_check_mode (options: ServerArgs.options) : bool =
 let indexing (genv: ServerEnv.genv) : Relative_path.t list Bucket.next * float =
   ServerProgress.send_progress_to_monitor "indexing";
   let t = Unix.gettimeofday () in
-  let get_next = make_next_files genv in
+  let get_next = make_next_files
+    ~indexer:(genv.indexer FindUtils.file_filter)
+    ~extra_roots:(ServerConfig.extra_paths genv.config) in
   HackEventLogger.indexing_end t;
   let t = Hh_logger.log_duration "indexing" t in
   get_next, t

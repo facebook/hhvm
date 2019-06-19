@@ -11,6 +11,10 @@ val is_check_mode : ServerArgs.options -> bool
 
 val indexing : ServerEnv.genv -> Relative_path.t list Bucket.next * float
 
+val make_next_files :
+    indexer: (unit -> string list) ->
+    extra_roots: Path.t list -> Relative_path.t list Bucket.next
+
 val parsing :
   lazy_parse:bool ->
   ServerEnv.genv ->

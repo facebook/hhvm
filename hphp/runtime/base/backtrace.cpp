@@ -415,6 +415,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     }
 
     if (RuntimeOption::EnableArgsInBacktraces &&
+        !fp->localsDecRefd() &&
         fp->func()->hasReifiedGenerics()) {
       // First local is always $0ReifiedGenerics which comes right after params
       auto const tv = frame_local(fp, fp->func()->numParams());
@@ -434,6 +435,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       if (ctx != nullptr && !fp->func()->isClosureBody()) {
         String clsname{const_cast<StringData*>(ctx->name())};
         if (RuntimeOption::EnableArgsInBacktraces &&
+            !fp->localsDecRefd() &&
             ctx->hasReifiedGenerics() &&
             fp->hasThis()) {
           auto const reified_generics = getClsReifiedGenericsProp(ctx, fp);

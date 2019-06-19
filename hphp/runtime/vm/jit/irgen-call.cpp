@@ -184,7 +184,8 @@ IRSPRelOffset fsetActRec(
 
 //////////////////////////////////////////////////////////////////////
 
-void callUnpack(IRGS& env, const Func* callee, const FCallArgs& fca) {
+void callUnpack(IRGS& env, const Func* callee, const FCallArgs& fca,
+                bool unlikely) {
   auto const data = CallUnpackData {
     spOffBCFromIRSP(env),
     fca.numArgs + 1,
@@ -193,6 +194,7 @@ void callUnpack(IRGS& env, const Func* callee, const FCallArgs& fca) {
     callee,
   };
   push(env, gen(env, CallUnpack, data, sp(env), fp(env)));
+  if (unlikely) gen(env, Jmp, makeExit(env, nextBcOff(env)));
 }
 
 SSATmp* callImpl(IRGS& env, const Func* callee, const FCallArgs& fca,
@@ -208,12 +210,14 @@ SSATmp* callImpl(IRGS& env, const Func* callee, const FCallArgs& fca,
   return gen(env, Call, data, sp(env), fp(env));
 }
 
-void callRegular(IRGS& env, const Func* callee, const FCallArgs& fca) {
+void callRegular(IRGS& env, const Func* callee, const FCallArgs& fca,
+                 bool unlikely) {
   push(env, callImpl(env, callee, fca, false));
+  if (unlikely) gen(env, Jmp, makeExit(env, nextBcOff(env)));
 }
 
 void callWithAsyncEagerReturn(IRGS& env, const Func* callee,
-                              const FCallArgs& fca) {
+                              const FCallArgs& fca, bool unlikely) {
   auto const retVal = callImpl(env, callee, fca, true);
 
   ifThenElse(
@@ -226,38 +230,47 @@ void callWithAsyncEagerReturn(IRGS& env, const Func* callee,
     [&] {
       auto const ty = callee ? awaitedCallReturnType(callee) : TInitCell;
       push(env, gen(env, AssertType, ty, retVal));
-      jmpImpl(env, bcOff(env) + fca.asyncEagerOffset);
+      auto const asyncEagerOffset = bcOff(env) + fca.asyncEagerOffset;
+      if (unlikely) {
+        gen(env, Jmp, makeExit(env, asyncEagerOffset));
+      } else {
+        jmpImpl(env, asyncEagerOffset);
+      }
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
       auto const ty = callee ? callReturnType(callee) : TInitCell;
       push(env, gen(env, AssertType, ty, retVal));
+      if (unlikely) gen(env, Jmp, makeExit(env, nextBcOff(env)));
     }
   );
 }
 
 void callKnown(IRGS& env, const Func* callee, const FCallArgs& fca) {
   assertx(callee);
-  if (fca.hasUnpack()) return callUnpack(env, callee, fca);
+  if (fca.hasUnpack()) {
+    return callUnpack(env, callee, fca, false /* unlikely */);
+  }
 
   if (fca.asyncEagerOffset != kInvalidOffset &&
       callee->supportsAsyncEagerReturn()) {
-    return callWithAsyncEagerReturn(env, callee, fca);
+    return callWithAsyncEagerReturn(env, callee, fca, false /* unlikely */);
   }
 
-  return callRegular(env, callee, fca);
+  return callRegular(env, callee, fca, false /* unlikely */);
 }
 
-void callUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca) {
+void callUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
+                 bool unlikely) {
   assertx(!callee->hasConstVal() || env.formingRegion);
-  if (fca.hasUnpack()) return callUnpack(env, nullptr, fca);
+  if (fca.hasUnpack()) return callUnpack(env, nullptr, fca, unlikely);
 
   if (fca.asyncEagerOffset == kInvalidOffset) {
-    return callRegular(env, nullptr, fca);
+    return callRegular(env, nullptr, fca, unlikely);
   }
 
   if (fca.supportsAsyncEagerReturn()) {
-    return callWithAsyncEagerReturn(env, nullptr, fca);
+    return callWithAsyncEagerReturn(env, nullptr, fca, unlikely);
   }
 
   ifThenElse(
@@ -268,10 +281,10 @@ void callUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca) {
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
-      callRegular(env, nullptr, fca);
+      callRegular(env, nullptr, fca, unlikely);
     },
     [&] {
-      callWithAsyncEagerReturn(env, nullptr, fca);
+      callWithAsyncEagerReturn(env, nullptr, fca, unlikely);
     }
   );
 }
@@ -316,7 +329,7 @@ void callProfiledFunc(IRGS& env, SSATmp* callee,
                       TKnown callKnown, TUnknown callUnknown) {
   double profiledFuncBias{0};
   auto const profiledFunc = profiledCalledFunc(env, profiledFuncBias);
-  if (!profiledFunc) return callUnknown();
+  if (!profiledFunc) return callUnknown(false);
 
   ifThenElse(
     env,
@@ -337,10 +350,9 @@ void callProfiledFunc(IRGS& env, SSATmp* callee,
       if (unlikely) {
         hint(env, Block::Hint::Unlikely);
         IRUnit::Hinter h(env.irb->unit(), Block::Hint::Unlikely);
-        callUnknown();
-        gen(env, Jmp, makeExit(env, nextBcOff(env)));
+        callUnknown(true);
       } else {
-        callUnknown();
+        callUnknown(false);
       }
     }
   );
@@ -423,13 +435,13 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     // FCall to specialize using this information, we may infer narrower type
     // for the return value, erroneously preventing the region from breaking
     // on unknown type.
-    callUnknown(env, cns(env, callee), fca);
+    callUnknown(env, cns(env, callee), fca, false);
   }
 }
 
 void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
                            SSATmp* objOrClass, const StringData* invName,
-                           bool dynamicCall, SSATmp* tsList) {
+                           bool dynamicCall, SSATmp* tsList, bool unlikely) {
   assertx(callee->isA(TFunc));
   if (callee->hasConstVal()) {
     return prepareAndCallKnown(env, callee->funcVal(), fca, objOrClass, invName,
@@ -444,7 +456,7 @@ void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  callUnknown(env, callee, fca);
+  callUnknown(env, callee, fca, unlikely);
 }
 
 void prepareAndCallProfiled(IRGS& env, SSATmp* callee, const FCallArgs& fca,
@@ -457,9 +469,9 @@ void prepareAndCallProfiled(IRGS& env, SSATmp* callee, const FCallArgs& fca,
   };
   if (callee->hasConstVal()) return handleKnown(callee->funcVal());
 
-  auto const handleUnknown = [&] {
+  auto const handleUnknown = [&] (bool unlikely) {
     prepareAndCallUnknown(env, callee, fca, objOrClass, nullptr, dynamicCall,
-                          tsList);
+                          tsList, unlikely);
   };
   callProfiledFunc(env, callee, handleKnown, handleUnknown);
 }
@@ -1654,9 +1666,9 @@ void emitFCall(IRGS& env, FCallArgs fca, const StringData*, const StringData*) {
 
   if (callee->hasConstVal()) return doCallKnown(callee->funcVal());
 
-  auto const doCallUnknown = [&] {
+  auto const doCallUnknown = [&] (bool unlikely) {
     emitCallerReffinessChecksUnknown(env, callee, fca);
-    callUnknown(env, callee, fca);
+    callUnknown(env, callee, fca, unlikely);
   };
 
   callProfiledFunc(env, callee, doCallKnown, doCallUnknown);

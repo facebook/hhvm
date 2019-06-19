@@ -4120,16 +4120,16 @@ and call_parent_construct pos env el uel =
   (* Call class method *)
   | Class_const ((pid, e1), m) ->
       let env, te1, ty1 = static_class_id ~check_constraints:true pid env [] e1 in
-      let env, fty, _ =
-        class_get ~is_method:true ~is_const:false ~explicit_tparams:tal
-        env ty1 m e1 (fun x -> x) in
-      let env = check_coroutine_call env fty in
-      let env, tel, tuel, ty =
-        call ~expected
-        ~method_call_info:(TR.make_call_info ~receiver_is_self:(e1 = CIself)
-          ~is_static:true ty1 (snd m)) ~fty_decl:None
-        p env fty el uel in
-      make_call env (T.make_typed_expr fpos fty
+      let getter env k =
+        let env, ty, _ = class_get ~is_method:true ~is_const:false ~explicit_tparams:tal
+          env ty1 m e1 k in
+        env, ty in
+      let call_continuation env fty fty_decl =
+        let env = check_coroutine_call env fty in
+        call ~expected ~method_call_info:(TR.make_call_info ~receiver_is_self:(e1 = CIself)
+          ~is_static:true ty1 (snd m)) ~fty_decl p env fty el uel in
+      let env, ty, tfty, tel, tuel = method_get_helper env getter call_continuation in
+      make_call env (T.make_typed_expr fpos tfty
         (T.Class_const(te1, m))) tal tel tuel ty
   (* <<__PPL>>: sample, factor, observe, condition *)
   | Id (pos, id) when env.Env.inside_ppl_class && SN.PPLFunctions.is_reserved id ->

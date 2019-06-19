@@ -53,6 +53,7 @@ type t = {
   error_codes_treated_strictly : ISet.t;
   tco_check_xhp_attribute : bool;
   tco_disallow_unresolved_type_variables : bool;
+  tco_disallow_invalid_arraykey_constraint : bool;
 } [@@deriving show]
 
 let tco_experimental_instanceof = "instanceof"
@@ -231,6 +232,7 @@ let default = {
  error_codes_treated_strictly = ISet.of_list [];
  tco_check_xhp_attribute = false;
  tco_disallow_unresolved_type_variables = false;
+ tco_disallow_invalid_arraykey_constraint = false;
 }
 
 let make
@@ -278,6 +280,7 @@ let make
   ?(error_codes_treated_strictly = default.error_codes_treated_strictly)
   ?(tco_check_xhp_attribute = default.tco_check_xhp_attribute)
   ?(tco_disallow_unresolved_type_variables = default.tco_disallow_unresolved_type_variables)
+  ?(tco_disallow_invalid_arraykey_constraint = default.tco_disallow_invalid_arraykey_constraint)
   ()
 = {
   tco_safe_array;
@@ -325,6 +328,7 @@ let make
   error_codes_treated_strictly;
   tco_check_xhp_attribute;
   tco_disallow_unresolved_type_variables;
+  tco_disallow_invalid_arraykey_constraint;
 }
 let tco_safe_array t = t.tco_safe_array
 let tco_safe_vector_array t = t.tco_safe_vector_array
@@ -358,6 +362,7 @@ let tco_disallow_stringish_magic t = t.tco_disallow_stringish_magic
 let tco_new_inference_lambda t = t.tco_new_inference_lambda
 let tco_timeout t = t.tco_timeout
 let tco_disallow_invalid_arraykey t = t.tco_disallow_invalid_arraykey
+let tco_disallow_invalid_arraykey_constraint t = t.tco_disallow_invalid_arraykey_constraint
 let tco_disable_instanceof_refinement t = t.tco_disable_instanceof_refinement
 let tco_disallow_byref_dynamic_calls t = t.tco_disallow_byref_dynamic_calls
 let po_disable_instanceof t = t.po_disable_instanceof

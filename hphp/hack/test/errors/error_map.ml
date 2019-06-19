@@ -557,4 +557,5 @@ BadXhpAttrRequiredOverride = 4315
 ReifiedTparamVariadic = 4316
 UnresolvedTypeVariable = 4317
 InvalidSubString = 4318
+InvalidArrayKeyConstraint = 4319
   |}]

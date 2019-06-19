@@ -219,7 +219,10 @@ type t = {
  (*
   * Flag to produce an error whenever the TAST contains unresolved type variables
   *)
-  tco_disallow_unresolved_type_variables : bool;
+ tco_disallow_unresolved_type_variables : bool;
+
+ (* Disallow using non-string, non-int types as array key type constraints. *)
+ tco_disallow_invalid_arraykey_constraint : bool;
 } [@@deriving show]
 
 val make :
@@ -267,6 +270,7 @@ val make :
   ?error_codes_treated_strictly: ISet.t ->
   ?tco_check_xhp_attribute: bool ->
   ?tco_disallow_unresolved_type_variables: bool ->
+  ?tco_disallow_invalid_arraykey_constraint: bool ->
   unit ->
   t
 
@@ -339,3 +343,4 @@ val tco_coercion_from_dynamic : t -> bool
 val error_codes_treated_strictly : t -> ISet.t
 val tco_check_xhp_attribute : t -> bool
 val tco_disallow_unresolved_type_variables : t -> bool
+val tco_disallow_invalid_arraykey_constraint : t -> bool

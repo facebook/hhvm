@@ -746,7 +746,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - A `Vector` with the values from the provided `array`.
    */
   <<__Deprecated('Use `new Vector($arr)` instead.')>>
-  public static function fromArray<T>(darray<T, Tv> $arr): Vector<Tv>;
+  public static function fromArray<T as arraykey>(darray<T, Tv> $arr): Vector<Tv>;
 
   /**
    * Creates a `Vector` from the given `Traversable`, or an empty `Vector` if

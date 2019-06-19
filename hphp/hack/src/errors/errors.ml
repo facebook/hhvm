@@ -3655,7 +3655,7 @@ let redundant_rx_condition pos =
     "Reactivity condition for this method is always true, consider removing it."
 
 let invalid_arraykey pos (cpos, ctype) (kpos, ktype) =
-  add_list (Typing.err_code Typing.InvalidArrayKey) @@ [
+  add_list (Typing.err_code Typing.InvalidArrayKey) [
     pos, "This value is not a valid key type for this container";
     cpos, "This container is " ^ ctype;
     kpos, (String.capitalize ktype) ^ " cannot be used as a key for " ^ ctype;
@@ -3672,6 +3672,10 @@ let typechecker_timeout (pos, fun_name) seconds =
 let unresolved_type_variable pos =
   add (Typing.err_code Typing.UnresolvedTypeVariable) pos
     ("The type of this expression contains an unresolved type variable")
+
+let invalid_arraykey_constraint pos t =
+  add (Typing.err_code Typing.InvalidArrayKeyConstraint) pos
+    ("This type is " ^ t ^ ", which cannot be used as an arraykey (string | int)")
 
 (*****************************************************************************)
 (* Printing *)

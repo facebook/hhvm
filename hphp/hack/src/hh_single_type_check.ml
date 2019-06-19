@@ -208,6 +208,7 @@ let parse_options () =
   let rust = ref false in
   let symbolindex_file = ref None in
   let check_xhp_attribute = ref false in
+  let disallow_invalid_arraykey_constraint = ref None in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -385,6 +386,9 @@ let parse_options () =
     "--disallow-invalid-arraykey",
       Arg.Unit (set_bool disallow_invalid_arraykey),
         " Disallow using values that get casted to arraykey at runtime as array keys";
+    "--disallow-invalid-arraykey-constraint",
+      Arg.Unit (set_bool disallow_invalid_arraykey_constraint),
+        " Disallow using non-string, non-int types as array key constraints";
     "--disable-unsafe-expr",
       Arg.Unit (set_bool disable_unsafe_expr),
       "Treat UNSAFE_EXPR comments as just comments, the typechecker will ignore them";
@@ -461,6 +465,7 @@ let parse_options () =
     ?tco_typecheck_xhp_cvars:(!typecheck_xhp_cvars)
     ?tco_ignore_collection_expr_type_arguments:(!ignore_collection_expr_type_arguments)
     ?tco_disallow_byref_dynamic_calls:(!disallow_byref_dynamic_calls)
+    ?tco_disallow_invalid_arraykey_constraint:(!disallow_invalid_arraykey_constraint)
     ~tco_check_xhp_attribute:(!check_xhp_attribute)
     ~tco_shallow_class_decl:(!shallow_class_decl)
     ~tco_like_types:(!like_types)

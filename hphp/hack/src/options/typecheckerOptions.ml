@@ -78,7 +78,6 @@ let shallow_class_decl = GlobalOptions.tco_shallow_class_decl
 let like_types = GlobalOptions.tco_like_types
 let pessimize_types = GlobalOptions.tco_pessimize_types
 let coercion_from_dynamic = GlobalOptions.tco_coercion_from_dynamic
-
 let check_xhp_attribute = GlobalOptions.tco_check_xhp_attribute
-
 let disallow_unresolved_type_variables = GlobalOptions.tco_disallow_unresolved_type_variables
+let disallow_invalid_arraykey_constraint = GlobalOptions.tco_disallow_invalid_arraykey_constraint

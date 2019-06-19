@@ -626,7 +626,7 @@ final class Set<Tv as arraykey> implements MutableSet<Tv> {
    * @return - A `Set` with the values from the provided `array`.
    */
   <<__Deprecated('Use `new Set($arr)` instead.')>>
-  public static function fromArray<T>(darray<T, Tv> $arr): Set<Tv>;
+  public static function fromArray<T as arraykey>(darray<T, Tv> $arr): Set<Tv>;
 
   /**
    * Returns a `Set` containing all the values from the specified `array`(s).

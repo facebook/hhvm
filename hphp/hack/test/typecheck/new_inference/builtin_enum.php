@@ -6,6 +6,7 @@ enum E: string as string {
 }
 
 /* HH_IGNORE_ERROR[2053] */
+/* HH_FIXME[4110] Revealed by constraining darray key parameter to arraykey */
 function foo<T as HH\BuiltinEnum<T>>(classname<T> $class_name): void { }
 
 function testit(): void {

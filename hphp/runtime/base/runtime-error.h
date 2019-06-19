@@ -154,7 +154,6 @@ void raise_property_typehint_error(const std::string& msg, bool isSoft);
  */
 void raise_property_typehint_binding_error(const Class* declCls,
                                            const StringData* propName,
-                                           bool isStatic,
                                            bool isSoft);
 
 /*

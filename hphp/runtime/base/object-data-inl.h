@@ -184,7 +184,6 @@ inline void ObjectData::verifyPropTypeHintImpl(tv_rval val,
     raise_property_typehint_binding_error(
       prop.cls,
       prop.name,
-      false,
       tc.isSoft()
     );
     return;

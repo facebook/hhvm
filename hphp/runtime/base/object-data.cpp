@@ -96,7 +96,6 @@ void boxingTypeHint(const Class::Prop* prop) {
   raise_property_typehint_binding_error(
     prop->cls,
     prop->name,
-    false,
     prop->typeConstraint.isSoft()
   );
 }

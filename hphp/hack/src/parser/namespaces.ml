@@ -25,6 +25,13 @@ type elaborate_kind =
   | ElaborateClass
   | ElaborateConst
 
+(**
+ * Convenience function for maps that have been completely unified to autoimport
+ * into the HH namespace.
+ *)
+let autoimport_map_of_list ids =
+  List.fold_left ids ~init:SMap.empty ~f:(fun map id -> SMap.add id HH map)
+
 (* When dealing with an <?hh file, HHVM automatically imports a few
  * "core" classes into every namespace, mostly collections. Their
  * unqualified names always refer to this global version.
@@ -82,50 +89,50 @@ let autoimport_types = SMap.of_list [
   "WaitableWaitHandle", Global;
   "XenonSample", HH;
 ]
-let autoimport_funcs = SMap.of_list [
-  "asio_get_current_context_idx", HH;
-  "asio_get_running_in_context", HH;
-  "asio_get_running", HH;
-  "class_meth", HH;
-  "darray", HH;
-  "dict", Global;
-  "fun", HH;
-  "heapgraph_create", HH;
-  "heapgraph_dfs_edges", HH;
-  "heapgraph_dfs_nodes", HH;
-  "heapgraph_edge", HH;
-  "heapgraph_foreach_edge", HH;
-  "heapgraph_foreach_node", HH;
-  "heapgraph_foreach_root", HH;
-  "heapgraph_node_in_edges", HH;
-  "heapgraph_node_out_edges", HH;
-  "heapgraph_node", HH;
-  "heapgraph_stats", HH;
-  "idx", HH;
-  "inst_meth", HH;
-  "invariant_callback_register", HH;
-  "invariant_violation", HH;
-  "invariant", HH;
-  "is_darray", HH;
-  "is_dict", HH;
-  "is_keyset", HH;
-  "is_varray", HH;
-  "is_vec", HH;
-  "keyset", Global;
-  "meth_caller", HH;
-  "objprof_get_data", HH;
-  "objprof_get_paths", HH;
-  "objprof_get_strings", HH;
-  "server_warmup_status", HH;
-  "thread_mark_stack", HH;
-  "thread_memory_stats", HH;
-  "type_structure", HH;
-  "varray", HH;
-  "vec", Global;
-  "xenon_get_data", HH;
+let autoimport_funcs = autoimport_map_of_list [
+  "asio_get_current_context_idx";
+  "asio_get_running_in_context";
+  "asio_get_running";
+  "class_meth";
+  "darray";
+  "dict";
+  "fun";
+  "heapgraph_create";
+  "heapgraph_dfs_edges";
+  "heapgraph_dfs_nodes";
+  "heapgraph_edge";
+  "heapgraph_foreach_edge";
+  "heapgraph_foreach_node";
+  "heapgraph_foreach_root";
+  "heapgraph_node_in_edges";
+  "heapgraph_node_out_edges";
+  "heapgraph_node";
+  "heapgraph_stats";
+  "idx";
+  "inst_meth";
+  "invariant_callback_register";
+  "invariant_violation";
+  "invariant";
+  "is_darray";
+  "is_dict";
+  "is_keyset";
+  "is_varray";
+  "is_vec";
+  "keyset";
+  "meth_caller";
+  "objprof_get_data";
+  "objprof_get_paths";
+  "objprof_get_strings";
+  "server_warmup_status";
+  "thread_mark_stack";
+  "thread_memory_stats";
+  "type_structure";
+  "varray";
+  "vec";
+  "xenon_get_data";
 ]
-let autoimport_consts = SMap.of_list [
-  "Rx\\IS_ENABLED", HH;
+let autoimport_consts = autoimport_map_of_list [
+  "Rx\\IS_ENABLED";
 ]
 
 (**

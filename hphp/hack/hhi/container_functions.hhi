@@ -46,27 +46,29 @@ function uasort<Tk as arraykey, Tv, T as KeyedContainer<Tk, Tv>>(inout T $arg, m
 <<__PHPStdLib>>
 function uksort<Tk as arraykey, Tv, T as KeyedContainer<Tk, Tv>>(inout T $arg, mixed $c): bool;
 
+}
+
+namespace HH {
+
 /**
  * Creates a `dict` from a `KeyedTraversable`, preserving keys and order.
  */
 <<__Rx, __AtMostRxAsArgs>>
 function dict<Tk as arraykey, Tv>(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>> KeyedTraversable<Tk, Tv> $arr): dict<Tk, Tv>;
+
 /**
  * Creates a `vec` from a `Traversable`, preserving order. Keys are not
  * preserved.
  */
 <<__Rx, __AtMostRxAsArgs>>
 function vec<Tv>(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>> Traversable<Tv> $arr): vec<Tv>;
+
 /**
  * Create a `keyset` from a `Traversable` of strings or ints, preserving order.
  * Keys are not preserved.
  */
 <<__Rx, __AtMostRxAsArgs>>
 function keyset<Tv as arraykey>(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>> Traversable<Tv> $arr): keyset<Tv>;
-
-}
-
-namespace HH {
 
 <<__Rx>>
 function darray<Tk as arraykey, Tv>(KeyedTraversable<Tk, Tv> $arr): darray<Tk, Tv>;

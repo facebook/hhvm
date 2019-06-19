@@ -1186,11 +1186,6 @@ static int start_server(const std::string &username, int xhprof) {
 
   if (!RuntimeOption::EvalUnixServerPath.empty()) {
     start_cli_server();
-  } else {
-    // allocate hugetlb pages for pooled slabs
-    // it is not safe to do this after any threads that do hphp_thread_init
-    // have started (and start_cli_server creates such a thread)
-    SlabManager::init();
   }
 
   if (jit::mcgen::retranslateAllScheduled()) {
@@ -1198,9 +1193,17 @@ static int start_server(const std::string &username, int xhprof) {
     BootStats::Block timer("waitForRetranslateAll", true);
     jit::mcgen::joinWorkerThreads();
   }
+
 #ifdef USE_JEMALLOC
-  setup_local_arenas({RuntimeOption::EvalNum1GPagesForReqHeap,
-                      RuntimeOption::EvalNum2MPagesForReqHeap});
+  auto const reqHeapSpec = PageSpec{
+    RuntimeOption::EvalNum1GPagesForReqHeap +
+    RuntimeOption::EvalNum1GPagesForSlabs,
+    RuntimeOption::EvalNum2MPagesForReqHeap +
+    RuntimeOption::EvalNum2MPagesForSlabs
+  };
+  auto const nSlabs = RuntimeOption::EvalNum2MPagesForSlabs +
+    512 * RuntimeOption::EvalNum1GPagesForSlabs;
+  setup_local_arenas(reqHeapSpec, nSlabs);
 #endif
 
   HttpServer::Server->runOrExitProcess();

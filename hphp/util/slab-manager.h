@@ -14,14 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SLAB_MANAGER_H_
-#define incl_HPHP_SLAB_MANAGER_H_
+#ifndef incl_HPHP_UTIL_SLAB_MANAGER_H_
+#define incl_HPHP_UTIL_SLAB_MANAGER_H_
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/portability.h"
 
 #include <atomic>
-#include <vector>
 #include <utility>
 
 namespace HPHP {
@@ -32,7 +31,7 @@ constexpr size_t kSlabAlign = kSlabSize;
 
 // To mitigate the ABA problem (i.e., a slab is allocated and returned to the
 // list without another thread noticing), we tag the pointers on the lower 16
-// bits.  This should be sufficient for our purpose of slab management, so we
+// bits. This should be sufficient for our purpose of slab management, so we
 // don't consider also using other bits for now.
 struct TaggedSlabPtr {
   static constexpr uintptr_t TagMask = (1ul << 16) - 1;
@@ -83,43 +82,41 @@ struct TaggedSlabList {
       m_head.store(tagged, std::memory_order_relaxed);
       return;
     }
+    auto currHead = m_head.load(std::memory_order_acquire);
     while (true) {
-      auto currHead = m_head.load(std::memory_order_acquire);
       ptr->store(currHead, std::memory_order_release);
       if (m_head.compare_exchange_weak(currHead, tagged,
                                        std::memory_order_release)) {
         return;
-      }
+      } // otherwise currHead is updated with latest value of m_head.
     }
   }
 
   // Divide a preallocated piece of memory into slabs and add to the list.
-  NEVER_INLINE void addRange(void* ptr, std::size_t size);
+  template<bool local = false>
+  void addRange(void* ptr, std::size_t size) {
+    if (!ptr) return;
+    while (size >= kSlabSize) {
+      push_front<local>(ptr, 0);
+      size -= kSlabSize;
+      ptr = reinterpret_cast<char*>(ptr) + kSlabSize;
+    }
+  }
 
  protected:
   AtomicTaggedSlabPtr m_head;
 };
 
 struct SlabManager : TaggedSlabList {
-  // Create one SlabManager for each NUMA node, and add some slabs there.
-  // Currently they are backed by huge pages, see EvalNum1GPagesForSlabs and
-  // EvalNum2MPagesForSlabs.
-  static void init();
-
-  static SlabManager* get(int node = -1) {
-    if (node < 0) node = 0;
-    if (node >= s_slabManagers.size()) return nullptr;
-    return s_slabManagers[node];
-  }
-
   TaggedSlabPtr tryAlloc() {
-    while (auto currHead = m_head.load(std::memory_order_acquire)) {
+    auto currHead = m_head.load(std::memory_order_acquire);
+    while (currHead) {
       auto const ptr =reinterpret_cast<AtomicTaggedSlabPtr*>(currHead.ptr());
       auto next = ptr->load(std::memory_order_acquire);
       if (m_head.compare_exchange_weak(currHead, next,
                                        std::memory_order_release)) {
         return currHead;
-      }
+      } // otherwise currHead is updated with latest value of m_head.
     }
     return nullptr;
   }
@@ -134,17 +131,15 @@ struct SlabManager : TaggedSlabList {
     // No need to bump the tag here, as it is already bumped when forming the
     // local list.
     auto last = reinterpret_cast<AtomicTaggedSlabPtr*>(localTail);
+    auto currHead = m_head.load(std::memory_order_acquire);
     while (true) {
-      auto currHead = m_head.load(std::memory_order_acquire);
       last->store(currHead, std::memory_order_release);
       if (m_head.compare_exchange_weak(currHead, newHead,
                                        std::memory_order_release)) {
         return;
       }
-    }
+    } // otherwise currHead is updated with latest value of m_head.
   }
-
-  static std::vector<SlabManager*> s_slabManagers; // one for each NUMA node
 };
 
 }

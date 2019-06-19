@@ -31,6 +31,7 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/low-ptr-def.h"
+#include "hphp/util/slab-manager.h"
 
 enum class NotNull {};
 
@@ -113,8 +114,9 @@ struct PageSpec {
   unsigned n2MPages{0};
 };
 
-void setup_local_arenas(PageSpec);
+void setup_local_arenas(PageSpec, unsigned slabs);
 unsigned get_local_arena(uint32_t node);
+SlabManager* get_local_slab_manager(uint32_t node);
 
 void setup_arena0(PageSpec);
 

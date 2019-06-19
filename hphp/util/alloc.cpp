@@ -35,6 +35,7 @@
 #include "hphp/util/kernel-version.h"
 #include "hphp/util/managed-arena.h"
 #include "hphp/util/numa.h"
+#include "hphp/util/slab-manager.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -606,13 +607,24 @@ void arenas_thread_exit() {
 #endif // USE_JEMALLOC_EXTENT_HOOKS
 
 std::vector<unsigned> s_req_heap_arenas; // keyed by numa node id
-void setup_local_arenas(PageSpec spec) {
+std::vector<SlabManager*> s_slab_managers;
+void setup_local_arenas(PageSpec spec, unsigned slabs) {
+  s_req_heap_arenas.reserve(num_numa_nodes());
+  s_slab_managers.reserve(num_numa_nodes());
+  slabs /= num_numa_nodes();
+
   mallctlRead<unsigned>("arenas.narenas", &base_arena); // throw upon failure
   // The default one per node.
   for (int i = 0; i < num_numa_nodes(); i++) {
     unsigned arena = 0;
     mallctlRead<unsigned>(JEMALLOC_NEW_ARENA_CMD, &arena);
     always_assert(arena == base_arena + i);
+    if (slabs) {
+      auto mem = low_malloc(sizeof(SlabManager));
+      s_slab_managers.push_back(new (mem) SlabManager);
+    } else {
+      s_slab_managers.push_back(nullptr);
+    }
   }
 
 #if USE_JEMALLOC_EXTENT_HOOKS
@@ -650,6 +662,16 @@ void setup_local_arenas(PageSpec spec) {
                                  false,       // don't use normal pages
                                  1u << i,
                                  i);
+    // Allocate some slabs first, which are not given to the arena, but managed
+    // separately by the slab manager.
+    auto const totalSlabSize = std::min(slabs * kSlabSize, reserveSize);
+    if (totalSlabSize) {
+      auto slabRange = mapper->alloc(totalSlabSize, kSlabAlign);
+      if (slabRange) {
+        s_slab_managers[i]->addRange<true>(slabRange, totalSlabSize);
+      }
+    }
+    if (totalSlabSize == reserveSize) continue;
     arena->setLowMapper(mapper);
     s_req_heap_arenas[i] = arena->id();
   }
@@ -659,6 +681,11 @@ void setup_local_arenas(PageSpec spec) {
 unsigned get_local_arena(uint32_t node) {
   if (node >= s_req_heap_arenas.size()) return 0;
   return s_req_heap_arenas[node];
+}
+
+SlabManager* get_local_slab_manager(uint32_t node) {
+  if (node >= s_slab_managers.size()) return nullptr;
+  return s_slab_managers[node];
 }
 
 #endif // USE_JEMALLOC

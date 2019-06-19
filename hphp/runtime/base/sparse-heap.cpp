@@ -16,6 +16,7 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/util/alloc.h"
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/trace.h"
 
@@ -24,7 +25,9 @@ namespace HPHP {
 TRACE_SET_MOD(mm);
 
 void SparseHeap::threadInit() {
-  m_slabManager = SlabManager::get(s_numaNode);
+#ifdef USE_JEMALLOC
+  m_slabManager = get_local_slab_manager(s_numaNode);
+#endif
 }
 
 void SparseHeap::reset() {

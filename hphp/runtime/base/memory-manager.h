@@ -30,6 +30,7 @@
 #include "hphp/util/bloom-filter.h"
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/radix-map.h"
+#include "hphp/util/slab-manager.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/util/trace.h"
@@ -43,7 +44,6 @@
 #include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/req-malloc.h"
 #include "hphp/runtime/base/req-ptr.h"
-#include "hphp/runtime/base/slab-manager.h"
 
 namespace HPHP {
 

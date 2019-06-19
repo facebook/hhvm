@@ -2275,7 +2275,7 @@ and expr_
       expr ~is_using_clause env e in
       (* Expected type of `e` in `yield from e` is KeyedTraversable<Tk,Tv> (but might be dynamic)*)
     let expected_yield_from_ty = MakeType.keyed_traversable (Reason.Ryield_gen p) key value in
-    let from_dynamic = SubType.is_sub_type_LEGACY_DEPRECATED env yield_from_ty (MakeType.dynamic (fst yield_from_ty)) in
+    let from_dynamic = SubType.is_sub_type env yield_from_ty (MakeType.dynamic (fst yield_from_ty)) in
     let env =
       if from_dynamic
       then env (* all set if dynamic, otherwise need to check against KeyedTraversable *)
@@ -3223,7 +3223,7 @@ and check_shape_keys_validity env pos keys =
           if cls1 <> cls2 then
             Errors.shape_field_class_mismatch
               key_pos witness_pos (strip_ns cls2) (strip_ns cls1);
-          if not (SubType.is_sub_type_LEGACY_DEPRECATED env ty1 ty2 && SubType.is_sub_type_LEGACY_DEPRECATED env ty2 ty1)
+          if not (SubType.is_sub_type env ty1 ty2 && SubType.is_sub_type env ty2 ty1)
           then
             Errors.shape_field_type_mismatch
               key_pos witness_pos

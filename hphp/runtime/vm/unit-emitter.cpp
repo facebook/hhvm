@@ -234,7 +234,14 @@ void UnitEmitter::appendTopEmitter(std::unique_ptr<FuncEmitter>&& fe) {
 Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit,
                            const StringData* name, Attr attrs,
                            int numParams) {
-  auto const func = new (Func::allocFuncMem(numParams)) Func(unit, name, attrs);
+  Func *func = nullptr;
+  if (attrs & AttrIsMethCaller) {
+    auto const pair = Func::getMethCallerNames(name);
+    func = new (Func::allocFuncMem(numParams)) Func(
+      unit, name, attrs, pair.first, pair.second);
+  } else {
+    func = new (Func::allocFuncMem(numParams)) Func(unit, name, attrs);
+  }
   if (unit.m_extended) unit.getExtended()->m_funcTable.push_back(func);
   return func;
 }

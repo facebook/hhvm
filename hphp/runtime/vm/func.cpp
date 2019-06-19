@@ -107,6 +107,25 @@ Func::Func(Unit& unit, const StringData* name, Attr attrs)
 {
 }
 
+Func::Func(
+  Unit& unit, const StringData* name, Attr attrs,
+  const StringData *methCallerCls, const StringData *methCallerMeth)
+  : m_name(name)
+  , m_methCallerMethName(to_low(methCallerMeth, kMethCallerBit))
+  , m_u(methCallerCls)
+  , m_isPreFunc(false)
+  , m_hasPrivateAncestor(false)
+  , m_shouldSampleJit(StructuredLog::coinflip(RuntimeOption::EvalJitSampleRate))
+  , m_serialized(false)
+  , m_hasForeignThis(false)
+  , m_unit(&unit)
+  , m_shared(nullptr)
+  , m_attrs(attrs)
+{
+  assertx(methCallerCls != nullptr);
+  assertx(methCallerMeth != nullptr);
+}
+
 Func::~Func() {
   if (m_fullName != nullptr && m_maybeIntercepted != -1) {
     unregister_intercept_flag(fullNameStr(), &m_maybeIntercepted);
@@ -196,7 +215,7 @@ Func* Func::clone(Class* cls, const StringData* name) const {
   f->initPrologues(numParams);
   f->m_funcId = InvalidFuncId;
   if (name) f->m_name = name;
-  f->m_cls = cls;
+  f->m_u.setCls(cls);
   f->setFullName(numParams);
 
   if (RuntimeOption::EvalEnableReverseDataMap) {
@@ -213,7 +232,7 @@ Func* Func::clone(Class* cls, const StringData* name) const {
 }
 
 void Func::rescope(Class* ctx) {
-  m_cls = ctx;
+  m_u.setCls(ctx);
   setFullName(numParams());
 }
 
@@ -270,7 +289,8 @@ void Func::initPrologues(int numParams) {
 
 void Func::setFullName(int /*numParams*/) {
   assertx(m_name->isStatic());
-  if (m_cls) {
+  Class *clazz = cls();
+  if (clazz) {
     m_fullName = (StringData*)kNeedsFullName;
   } else {
     m_fullName = m_name.get();
@@ -286,8 +306,8 @@ void Func::setFullName(int /*numParams*/) {
   if (!RuntimeOption::RepoAuthoritative) {
     std::string tmp;
     const char* fn = [&] () -> const char* {
-      if (!m_cls) return m_name->data();
-      tmp = std::string(m_cls->name()->data()) + "::" + m_name->data();
+      if (!clazz) return m_name->data();
+      tmp = std::string(clazz->name()->data()) + "::" + m_name->data();
       return tmp.data();
     }();
     if (RuntimeOption::DynamicInvokeFunctions.count(fn)) {
@@ -351,13 +371,16 @@ const StringData* Func::genMemoizeImplName(const StringData* origName) {
   return makeStaticString(folly::sformat("{}$memoize_impl", origName->data()));
 }
 
-bool Func::isMethCallerName(const StringData* name) {
-  return (name->size() > 11) && !memcmp(name->data(), "MethCaller$", 11);
-}
-
-size_t Func::methCallerOffset(const StringData* name) {
-  if (isMethCallerName(name)) return 11;
-  return 0;
+std::pair<const StringData*, const StringData*> Func::getMethCallerNames(
+  const StringData* name) {
+  assertx(name->size() > 11 && !memcmp(name->data(), "MethCaller$", 11));
+  auto clsMethName = name->slice();
+  clsMethName.uncheckedAdvance(11);
+  auto const sep = folly::qfind(clsMethName, folly::StringPiece("$"));
+  assertx(sep != std::string::npos);
+  auto cls = clsMethName.uncheckedSubpiece(0, sep);
+  auto meth = clsMethName.uncheckedSubpiece(sep + 1);
+  return std::make_pair(makeStaticString(cls), makeStaticString(meth));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

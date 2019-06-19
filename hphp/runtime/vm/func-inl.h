@@ -118,7 +118,7 @@ inline Unit* Func::unit() const {
 }
 
 inline Class* Func::cls() const {
-  return m_cls;
+  return !isMethCaller() ? m_u.cls() : nullptr;
 }
 
 inline PreClass* Func::preClass() const {
@@ -126,7 +126,8 @@ inline PreClass* Func::preClass() const {
 }
 
 inline Class* Func::baseCls() const {
-  return m_baseCls;
+  return !(m_baseCls & kMethCallerBit) ?
+    reinterpret_cast<Class*>(m_baseCls) : nullptr;
 }
 
 inline Class* Func::implCls() const {
@@ -147,7 +148,7 @@ inline const StringData* Func::fullName() const {
   if (m_fullName == nullptr) return m_name;
   if (UNLIKELY((intptr_t)m_fullName.get() == kNeedsFullName)) {
     m_fullName = makeStaticString(
-      std::string(m_cls->name()->data()) + "::" + m_name->data());
+      std::string(cls()->name()->data()) + "::" + m_name->data());
   }
   return m_fullName;
 }
@@ -185,6 +186,17 @@ inline const NamedEntity* Func::getNamedEntity() const {
 
 inline void Func::setNamedEntity(const NamedEntity* e) {
   *reinterpret_cast<LowPtr<const NamedEntity>*>(&m_namedEntity) = e;
+}
+
+inline const StringData* Func::methCallerClsName() const {
+  assertx(isMethCaller() && isBuiltin());
+  return m_u.name();
+}
+
+inline const StringData* Func::methCallerMethName() const {
+  assertx(isMethCaller() && isBuiltin() &&
+          (m_methCallerMethName & kMethCallerBit));
+  return reinterpret_cast<StringData*>(m_methCallerMethName - kMethCallerBit);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -683,7 +695,7 @@ inline void Func::setAttrs(Attr attrs) {
 }
 
 inline void Func::setBaseCls(Class* baseCls) {
-  m_baseCls = baseCls;
+  m_baseCls = to_low(baseCls);
 }
 
 inline void Func::setFuncHandle(rds::Link<LowPtr<Func>,

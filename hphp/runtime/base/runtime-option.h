@@ -95,7 +95,6 @@ struct RepoOptions {
   E(std::string,    HHJSNodeModules,                "")               \
   E(bool,           EmitFuncPointers,               true)             \
   E(bool,           EmitInstMethPointers,           EmitFuncPointers) \
-  E(bool,           EmitMethCallerFuncPointers,     false)            \
   /**/
 
   std::string path() const { return m_path; }
@@ -1057,6 +1056,7 @@ struct RuntimeOption {
   F(bool, RaiseClsMethConversionWarning, false)                         \
   /* Raise warning when strings are used as classes. */                 \
   F(bool, RaiseStrToClsConversionWarning, false)                        \
+  F(bool, EmitMethCallerFuncPointers, false)                            \
   /* trigger E_USER_WARNING error when getClassName()/getMethodName()
    * is used on __SystemLib\MethCallerHelper */                         \
   F(bool, NoticeOnMethCallerHelperUse, false)                           \

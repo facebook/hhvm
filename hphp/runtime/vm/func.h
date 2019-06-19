@@ -33,6 +33,7 @@
 #include "hphp/runtime/vm/unit.h"
 
 #include "hphp/util/fixed-vector.h"
+#include "hphp/util/low-ptr.h"
 
 #include <atomic>
 #include <utility>
@@ -110,7 +111,6 @@ struct FPIEnt {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-
 /*
  * Metadata about a PHP function or method.
  *
@@ -187,6 +187,8 @@ struct Func final {
   // Creation and destruction.
 
   Func(Unit& unit, const StringData* name, Attr attrs);
+  Func(Unit& unit, const StringData* name, Attr attrs,
+    const StringData *methCallerCls, const StringData *methCallerMeth);
   ~Func();
 
   /*
@@ -327,6 +329,7 @@ struct Func final {
    */
   Class* cls() const;
   PreClass* preClass() const;
+  bool hasBaseCls() const;
   Class* baseCls() const;
   Class* implCls() const;
 
@@ -362,6 +365,12 @@ struct Func final {
    */
   NamedEntity* getNamedEntity();
   const NamedEntity* getNamedEntity() const;
+
+  /**
+   * meth_caller
+   */
+  const StringData* methCallerClsName() const;
+  const StringData* methCallerMethName() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // File info.                                                         [const]
@@ -723,10 +732,10 @@ struct Func final {
   static const StringData* genMemoizeImplName(const StringData*);
 
   /*
-   * Given a function name, return true if it's meth_caller.
+   * Given a meth_caller, return the class name or method name
    */
-  static bool isMethCallerName(const StringData*);
-  static size_t methCallerOffset(const StringData*);
+   static std::pair<const StringData*, const StringData*> getMethCallerNames(
+     const StringData* name);
 
   /////////////////////////////////////////////////////////////////////////////
   // Builtins.                                                          [const]
@@ -1127,8 +1136,6 @@ struct Func final {
     return offsetof(Func, m_##f);       \
   }
   OFF(attrs)
-  OFF(cls)
-  OFF(fullName)
   OFF(name)
   OFF(funcBody)
   OFF(maxStackCells)
@@ -1138,7 +1145,12 @@ struct Func final {
   OFF(refBitVal)
   OFF(shared)
   OFF(unit)
+  OFF(methCallerMethName)
 #undef OFF
+
+  static constexpr ptrdiff_t methCallerClsNameOff() {
+    return offsetof(Func, m_u);
+  }
 
   static constexpr ptrdiff_t sharedBaseOff() {
     return offsetof(SharedData, m_base);
@@ -1333,6 +1345,73 @@ private:
     std::atomic<Attr> m_attrs;
   };
 
+#ifdef USE_LOWPTR
+  using low_storage_t = uint32_t;
+#else
+  using low_storage_t = uintptr_t;
+#endif
+  /*
+   * Lowptr wrapper around std::atomic<Union> for Class* or StringData*
+   */
+  struct UnionWrapper {
+    union U {
+     low_storage_t m_cls;
+     low_storage_t m_methCallerClsName;
+    };
+    std::atomic<U> m_u;
+
+    // constructors
+    explicit UnionWrapper(Class *cls)
+      : m_u([](Class *cls){
+        U u;
+        u.m_cls = to_low(cls);
+        return u; }(cls)) {}
+    explicit UnionWrapper(const StringData *name)
+      : m_u([](const StringData *n){
+        U u;
+        u.m_methCallerClsName = to_low(n, kMethCallerBit);
+        return u; }(name)) {}
+    /* implicit */ UnionWrapper(std::nullptr_t /*px*/)
+      : m_u([](){
+        U u;
+        u.m_cls = 0;
+        return u; }()) {}
+    UnionWrapper(const UnionWrapper& r) :
+      m_u(r.m_u.load()) {
+    }
+
+    // Assignments
+    UnionWrapper& operator=(UnionWrapper r) {
+      m_u.store(r.m_u, std::memory_order_relaxed);
+      return *this;
+    }
+
+    // setter & getter
+    void setCls(Class *cls) {
+      U u;
+      u.m_cls = to_low(cls);
+      m_u.store(u, std::memory_order_relaxed);
+    }
+    Class* cls() const {
+      auto cls = m_u.load(std::memory_order_relaxed).m_cls;
+      assertx(!(cls & kMethCallerBit));
+      return reinterpret_cast<Class*>(cls);
+    }
+    StringData* name() const {
+     auto n = m_u.load(std::memory_order_relaxed).m_methCallerClsName;
+     assertx(n & kMethCallerBit);
+     return reinterpret_cast<StringData*>(n - kMethCallerBit);
+    }
+  };
+
+  template <class T>
+  static Func::low_storage_t to_low(T* px, Func::low_storage_t bit = 0) {
+    Func::low_storage_t ones = ~0;
+    auto ptr = reinterpret_cast<uintptr_t>(px) | bit;
+    always_assert((ptr & ones) == ptr);
+    return (Func::low_storage_t)(ptr);
+  }
+
   /////////////////////////////////////////////////////////////////////////////
   // Constants.
 
@@ -1349,6 +1428,8 @@ public:
   static std::atomic<bool>     s_treadmill;
   static std::atomic<uint32_t> s_totalClonedClosures;
 
+  // To conserve space, we use unions for pairs of mutually exclusive fields
+  static auto constexpr kMethCallerBit = 0x1;  // set for m_methCaller
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
   //
@@ -1365,12 +1446,20 @@ private:
   FuncId m_funcId{InvalidFuncId};
   mutable AtomicLowPtr<const StringData> m_fullName{nullptr};
   LowStringPtr m_name{nullptr};
-  // The first Class in the inheritance hierarchy that declared this method.
-  // Note that this may be an abstract class that did not provide an
-  // implementation.
-  LowPtr<Class> m_baseCls{nullptr};
-  // The Class that provided this method implementation.
-  AtomicLowPtr<Class> m_cls{nullptr};
+
+  union {
+    // The first Class in the inheritance hierarchy that declared this method.
+    // Note that this may be an abstract class that did not provide an
+    // implementation.
+    low_storage_t m_baseCls{0};
+    // m_methCallerMethName can be accessed by meth_caller() only
+    low_storage_t m_methCallerMethName;
+  };
+
+  // m_u is used to represent
+  // the Class that provided this method implementation, or
+  // the class name provided by meth_caller()
+  UnionWrapper m_u{nullptr};
   union {
     Slot m_methodSlot{0};
     LowPtr<const NamedEntity>::storage_type m_namedEntity;

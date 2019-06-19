@@ -373,44 +373,51 @@ String HHVM_FUNCTION(HH_class_meth_get_method, TypedValue v) {
 
 namespace {
 const StaticString
-  s_meth_caller_cls("\\__SystemLib\\MethCallerHelper"),
-  s_meth_caller_get_cls_name("getClassNameImpl"),
-  s_meth_caller_get_meth_name("getMethodNameImpl");
+  s_meth_caller_cls("__SystemLib\\MethCallerHelper"),
+  s_cls_prop("class"),
+  s_meth_prop("method");
+const Slot s_cls_idx{0};
+const Slot s_meth_idx{1};
 
-String getMethCallerClsOrMethNameHelper(
-  const char* fn, TypedValue v, bool isClass) {
+DEBUG_ONLY bool meth_caller_has_expected_prop(const Class* cls) {
+  return cls->lookupDeclProp(s_cls_prop.get()) == s_cls_idx &&
+        cls->lookupDeclProp(s_meth_prop.get()) == s_meth_idx &&
+        cls->declPropTypeConstraint(s_cls_idx).isString() &&
+        cls->declPropTypeConstraint(s_meth_idx).isString();
+}
+
+template<bool isGetClass>
+String getMethCallerClsOrMethNameHelper(const char* fn, TypedValue v) {
   if (tvIsFunc(v)) {
-    if (auto const pos = Func::methCallerOffset(val(v).pfunc->name())) {
-      auto clsMethName = val(v).pfunc->name()->slice();
-      clsMethName.uncheckedAdvance(pos);
-      auto const sep = folly::qfind(clsMethName, folly::StringPiece("$"));
-      assertx(sep != std::string::npos);
-      if (isClass) {
-        clsMethName = clsMethName.uncheckedSubpiece(0, sep);
-      } else {
-        clsMethName.uncheckedAdvance(sep + 1);
-      }
-      return String::attach(makeStaticString(clsMethName));
+    if (val(v).pfunc->isMethCaller()) {
+      return String::attach(const_cast<StringData*>(isGetClass ?
+        val(v).pfunc->methCallerClsName() :
+        val(v).pfunc->methCallerMethName()));
     }
   } else if (tvIsObject(v)) {
-    auto const obj = val(v).pobj;
-    if (obj->instanceof(s_meth_caller_cls)) {
-      return ObjectData::InvokeSimple(
-        obj,
-        isClass ? s_meth_caller_get_cls_name : s_meth_caller_get_meth_name)
-        .toString();
+    auto const mcCls = Unit::lookupClass(s_meth_caller_cls.get());
+    assertx(mcCls);
+    if (mcCls == val(v).pobj->getVMClass()) {
+      auto const obj = val(v).pobj;
+      assertx(meth_caller_has_expected_prop(obj->getVMClass()));
+      if (RuntimeOption::EvalEmitMethCallerFuncPointers &&
+          RuntimeOption::EvalNoticeOnMethCallerHelperUse) {
+        raise_notice("MethCallerHelper is used on %s()", fn);
+      }
+      return String::attach(
+        val(obj->propRvalAtOffset(isGetClass ? s_cls_idx : s_meth_idx)).pstr);
     }
   }
-  raise_error("Argument 1 passed to %s must be a MethCaller", fn);
+  raise_error("Argument 1 passed to %s() must be a MethCaller", fn);
 }
 }
 
 String HHVM_FUNCTION(HH_meth_caller_get_class, TypedValue v) {
-  return getMethCallerClsOrMethNameHelper(__FUNCTION__+5, v, true);
+  return getMethCallerClsOrMethNameHelper<true>(__FUNCTION__+5, v);
 }
 
 String HHVM_FUNCTION(HH_meth_caller_get_method, TypedValue v) {
-  return getMethCallerClsOrMethNameHelper(__FUNCTION__+5, v, false);
+  return getMethCallerClsOrMethNameHelper<false>(__FUNCTION__+5, v);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

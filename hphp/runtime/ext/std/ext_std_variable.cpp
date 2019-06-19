@@ -48,7 +48,7 @@ const StaticString
   s_array("array"),
   s_NULL("NULL"),
   s_null("null"),
-  s_meth_caller_cls("\\__SystemLib\\MethCallerHelper");
+  s_meth_caller_cls("__SystemLib\\MethCallerHelper");
 
 String HHVM_FUNCTION(gettype, const Variant& v) {
   if (v.getType() == KindOfResource && v.toCResRef().isInvalid()) {
@@ -209,11 +209,11 @@ bool HHVM_FUNCTION(is_resource, const Variant& v) {
 
 bool HHVM_FUNCTION(HH_is_meth_caller, TypedValue v) {
   if (tvIsFunc(v)) {
-    auto const f = val(v).pfunc;
-    return qfind(f->name()->slice(), folly::StringPiece("MethCaller$")) !=
-           std::string::npos;
+    return val(v).pfunc->isMethCaller();
   } else if (tvIsObject(v)) {
-    return val(v).pobj->instanceof(s_meth_caller_cls);
+    auto const mcCls = Unit::lookupClass(s_meth_caller_cls.get());
+    assertx(mcCls);
+    return mcCls == val(v).pobj->getVMClass();
   }
   return false;
 }

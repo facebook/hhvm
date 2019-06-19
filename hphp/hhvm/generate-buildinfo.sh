@@ -82,3 +82,13 @@ echo -n "${COMPILER_ID}" > "${COMPILER_FILE}"
 echo -n "${HHVM_REPO_SCHEMA}" > "${REPO_SCHEMA_FILE}"
 echo -n "${BUILD_ID}" > "${BUILD_ID_FILE}"
 echo -n "${HHJS_BABEL_TRANSFORM}" > "${HHJS_BABEL_TRANSFORM_PATH_FILE}"
+
+if [ -z "${COMPILER_ID}" ]; then
+  exit 1
+fi
+if [ -z "${HHVM_REPO_SCHEMA}" ]; then
+  exit 1
+fi
+if [ -z "${BUILD_ID}" ]; then
+  exit 1
+fi

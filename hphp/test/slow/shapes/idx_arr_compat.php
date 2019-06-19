@@ -12,5 +12,4 @@ function main() {
     var_dump($arr);
     var_dump(Shapes::idx($arr, 'x'));
   }
-  throw new Exception('done');
 }

@@ -43,14 +43,10 @@ struct StringData;
 
 #define X(kind) \
 template<typename T> \
-enable_if_lval_t<T, void> tvCastTo##kind##InPlace(T tv); \
-template<typename T> \
-enable_if_lval_t<T, bool> tvCoerceParamTo##kind##InPlace(T tv, bool builtin);
+enable_if_lval_t<T, void> tvCastTo##kind##InPlace(T tv);
 #define Y(kind) \
 template<typename T, IntishCast IC = IntishCast::None> \
-enable_if_lval_t<T, void> tvCastTo##kind##InPlace(T tv); \
-template<typename T, IntishCast IC = IntishCast::None> \
-enable_if_lval_t<T, bool> tvCoerceParamTo##kind##InPlace(T tv, bool builtin);
+enable_if_lval_t<T, void> tvCastTo##kind##InPlace(T tv);
 X(Boolean)
 X(Int64)
 X(Double)
@@ -83,28 +79,6 @@ enable_if_lval_t<T, void> tvCastInPlace(T tv, DataType DType) {
   X(Vec)
   X(Dict)
   X(Keyset)
-  X(Array)
-  X(Object)
-  X(Resource)
-#undef X
-  not_reached();
-}
-
-template<typename T> ALWAYS_INLINE
-enable_if_lval_t<T, bool> tvCoerceParamInPlace(T tv, DataType DType,
-                                               bool builtin) {
-#define X(kind) \
-  if (DType == KindOf##kind) \
-    return tvCoerceParamTo##kind##InPlace(tv, \
-                                          builtin);
-  X(Boolean)
-  X(Int64)
-  X(Double)
-  X(String)
-  X(Vec)
-  X(Dict)
-  X(Keyset)
-  X(Shape)
   X(Array)
   X(Object)
   X(Resource)

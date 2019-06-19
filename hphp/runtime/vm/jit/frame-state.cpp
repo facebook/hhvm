@@ -861,13 +861,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     setValue(Location::MBase{}, nullptr);
     break;
 
-  case VerifyParamFail:
-    if (verify_fail_may_coerce(func())) {
-      auto id = inst->src(0)->intVal();
-      setType(loc(id), TGen);
-    }
-    break;
-
   default:
     break;
   }

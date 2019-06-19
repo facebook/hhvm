@@ -20,10 +20,4 @@ object(HH\Map) (1) {
   int(1)
 }
 
-Warning: Argument 1 to HH\Shapes::idx() got coerced from HH\Map to HH\darray in %s/idx_arr_compat.php on line 13
-int(1)
-
-Fatal error: Uncaught exception 'Exception' with message 'done' in %s/test/slow/shapes/idx_arr_compat.php:15
-Stack trace:
-#0 (): main()
-#1 {main}
+Catchable fatal error: Argument 1 passed to HH\Shapes::idx() must be an instance of HH\darray, HH\Map given in %s/idx_arr_compat.php on line 13

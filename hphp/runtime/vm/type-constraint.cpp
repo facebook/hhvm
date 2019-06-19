@@ -913,31 +913,6 @@ std::string describe_actual_type(tv_rval val, bool isHHType) {
   not_reached();
 }
 
-bool call_uses_strict_types(const Func* callee) {
-  auto outer = [&] {
-    if (vmfp()->sfp()) return vmfp()->sfp()->func();
-    auto const next = g_context->getPrevVMState(vmfp());
-    return next ? next->func() : nullptr;
-  };
-  auto const caller =
-
-  (vmfp()->func() == callee) ? outer() : vmfp()->func();
-  if (!caller) {
-    // For example, HHBBC calling Foldable functions
-    return true;
-  }
-
-  if (callee->isBuiltin()) {
-    return false;
-  }
-
-  return true;
-}
-
-bool verify_fail_may_coerce(const Func* callee) {
-  return callee->isBuiltin();
-}
-
 ALWAYS_INLINE
 folly::Optional<AnnotType> TypeConstraint::checkDVArray(tv_rval val) const {
   auto const check = [&](AnnotType at) -> folly::Optional<AnnotType> {
@@ -1159,50 +1134,6 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
     if (cls->preClass()->userAttributes().count(s___MockClass.get()) &&
         cls->parent() == thisClass) {
       return;
-    }
-  }
-
-  const bool useStrictTypes = id == ReturnId || call_uses_strict_types(func);
-
-  if (UNLIKELY(!useStrictTypes)) {
-    if (auto dt = underlyingDataType()) {
-      // In non-strict mode we may be able to coerce a type failure. For object
-      // typehints there is no possible coercion in the failure case, but HNI
-      // builtins currently only guard on kind not class so the following wil
-      // generate false positives for objects.
-      if (*dt != KindOfObject) {
-        assertx(verify_fail_may_coerce(func));
-        assertx(id != ReturnId);
-        assertx(func->isBuiltin());
-        auto const actualType = describe_actual_type(tv, isHHType());
-        auto const warnOnCoerce = [&] {
-          raise_warning(
-            folly::format(
-              "Argument {} to {}() got coerced from {} to {}",
-              id + 1,
-              func->fullDisplayName(),
-              actualType,
-              displayName(func->cls())
-            ).str()
-          );
-        };
-        // HNI conversions implicitly unbox references, this behavior is wrong,
-        // in particular it breaks the way type conversion works for PHP 7
-        // scalar type hints
-        if (isRefType(tv->m_type)) {
-          auto inner = tv->m_data.pref->var()->asTypedValue();
-          if (tvCoerceParamInPlace(inner, *dt, func->isBuiltin())) {
-            warnOnCoerce();
-            tvAsVariant(tv) = tvAsVariant(inner);
-            return;
-          }
-        } else {
-          if (tvCoerceParamInPlace(tv, *dt, func->isBuiltin())) {
-            warnOnCoerce();
-            return;
-          }
-        }
-      }
     }
   }
 

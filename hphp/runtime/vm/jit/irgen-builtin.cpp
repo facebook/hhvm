@@ -957,15 +957,12 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Return the type that a parameter to a builtin function is supposed to be
- * coerced to.  What this means depends on how the builtin is dealing with
- * parameter coersion: new-style HNI builtins try to do a tvCoerceParamTo*,
- * while older ones use tvCastTo* semantics.
+ * Return the target type of  a parameter to a builtin function.
  *
  * If the builtin parameter has no type hints to cause coercion, this function
  * returns TBottom.
  */
-Type param_coerce_type(const Func* callee, uint32_t paramIdx) {
+Type param_target_type(const Func* callee, uint32_t paramIdx) {
   auto const& pi = callee->params()[paramIdx];
   auto const& tc = pi.typeConstraint;
   if (tc.isNullable() && !callee->byRef(paramIdx)) {
@@ -1003,7 +1000,7 @@ prepare_params(IRGS& /*env*/, const Func* callee, SSATmp* ctx,
   // Fill in in reverse order, since they may come from popC's (depending on
   // what loadParam wants to do).
   for (auto offset = uint32_t{numArgs}; offset-- > 0;) {
-    auto const ty = param_coerce_type(callee, offset);
+    auto const ty = param_target_type(callee, offset);
     auto& cur = ret[offset];
     auto& pi = callee->params()[offset];
 
@@ -1271,7 +1268,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
   auto stackIdx = uint32_t{0};
   for (auto paramIdx = uint32_t{0}; paramIdx < params.size(); ++paramIdx) {
     auto& param = params[paramIdx];
-    auto const targetTy = param_coerce_type(callee, paramIdx);
+    auto const targetTy = param_target_type(callee, paramIdx);
 
     seenBottom |= (param.value->type() == TBottom);
 

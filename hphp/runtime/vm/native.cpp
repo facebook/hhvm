@@ -287,8 +287,7 @@ void coerceFCallArgs(TypedValue* args,
       targetType = tc.underlyingDataType();
     }
 
-    // Skip tvCoerceParamTo*() call if we're already the right type, or if its a
-    // Variant.
+    // Check if we have the right type, or if its a Variant.
     if (!targetType || equivDataTypes(args[-i].m_type, *targetType)) {
       auto const c = &args[-i];
       auto const raise = [&] {

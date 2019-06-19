@@ -267,3 +267,5 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, files
     | IDENTIFY_TYPES (filename, line, char) ->
         env, ServerTypeDefinition.go env (filename, line, char)
+    | EXTRACT_STANDALONE name ->
+        env, ServerExtractStandalone.go name

@@ -264,6 +264,7 @@ type _ t =
   | LIST_FILES_WITH_ERRORS : string list t
   | FILE_DEPENDENCIES : string list -> string list t
   | IDENTIFY_TYPES : file_input * int * int -> (Pos.absolute * string) list t
+  | EXTRACT_STANDALONE : string -> string t
 
 
 let is_disconnect_rpc : type a. a t -> bool = function

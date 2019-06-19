@@ -254,6 +254,11 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       let%lwt () =
         ClientRefactor.go_ide conn args filename line char new_name in
       Lwt.return Exit_status.No_error
+    | MODE_EXTRACT_STANDALONE name ->
+      let%lwt pretty_printed_dependencies =
+        rpc args @@ Rpc.EXTRACT_STANDALONE name in
+      Printf.printf "%s\n" pretty_printed_dependencies;
+      Lwt.return Exit_status.No_error
     | MODE_IDENTIFY_SYMBOL1 arg
     | MODE_IDENTIFY_SYMBOL2 arg
     | MODE_IDENTIFY_SYMBOL3 arg ->

@@ -85,6 +85,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | FUN_IS_LOCALLABLE_BATCH _ -> false
   | FILE_DEPENDENCIES _ -> true
   | IDENTIFY_TYPES _ -> false
+  | EXTRACT_STANDALONE _ -> false
 
 let command_needs_full_check = function
   | Rpc x -> rpc_command_needs_full_check x

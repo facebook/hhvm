@@ -67,6 +67,7 @@
     serverCommandTypes
     serverCommandTypesUtils
     serverCoverageMetricTypes
+    ServerExtractStandalone
     serverIdeUtils
     serverFormatTypes
     serverHighlightRefsTypes

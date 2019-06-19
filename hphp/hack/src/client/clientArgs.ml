@@ -221,6 +221,9 @@ let parse_check_args cmd =
     "--dynamic-view",
       Arg.Set dynamic_view,
       " Replace occurrences of untyped code with dynamic";
+    "--extract-standalone",
+      Arg.String (fun name -> set_mode (MODE_EXTRACT_STANDALONE name) ()),
+      " extract a given function / method together with its dependencies as a standalone file";
     "--error-format",
       Arg.String (fun s ->
           match s with

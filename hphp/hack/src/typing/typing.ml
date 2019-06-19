@@ -3670,20 +3670,21 @@ and call_parent_construct pos env el uel =
            env
          | [(_, Array_get (ea, Some _))], [] ->
            let env, _te, ty = expr env ea in
-           let tany = (Reason.Rnone, Typing_utils.tany env) in
-           if List.exists ~f:(fun super -> SubType.is_sub_type_LEGACY_DEPRECATED env ty super) [
-             MakeType.dict Reason.Rnone tany tany;
-             MakeType.keyset Reason.Rnone tany;
-             if disallow_varray then
-               (Reason.Rnone, Tarraykind (AKmap (tany, tany)))
-             else (Reason.Rnone, Tarraykind AKany);
-           ] then env
-           else begin
-               checked_unset_error
-               p
-               (Reason.to_string ("This is " ^ Typing_print.error env ty) (fst ty));
-             env
-           end
+           let r = Reason.Rwitness p in
+           let tmixed = MakeType.mixed r in
+           let super =
+             (Reason.Rnone, Tunion [
+               MakeType.dict r tmixed tmixed;
+               MakeType.keyset r tmixed;
+               if disallow_varray then
+                 (r, Tarraykind (AKmap (tmixed, tmixed)))
+               else (r, Tarraykind AKany)]) in
+           Errors.try_
+             (fun () -> SubType.sub_type env ty super)
+             (fun _ ->
+               checked_unset_error p
+                 (Reason.to_string ("This is " ^ Typing_print.error env ty) (fst ty));
+               env)
          | _ -> checked_unset_error p []; env)
        in
       (match el with

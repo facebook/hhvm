@@ -39,7 +39,7 @@ File "/c.php", line 3, characters 15-20:
 But got string
 |}
 
-let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
+let test () = Tempfile.with_real_tempdir @@ fun temp_dir ->
   let temp_dir = Path.to_string temp_dir in
     (* - "b" depends on "a"
      * - "d" depends on "c"

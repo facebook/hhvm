@@ -70,7 +70,7 @@ let base_disk_state = [
   ("baz.php", baz);
 ]
 
-let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
+let test () = Tempfile.with_real_tempdir @@ fun temp_dir ->
   let temp_dir = Path.to_string temp_dir in
 
   Test.save_state ~enable_naming_table_fallback:true base_disk_state temp_dir;

@@ -20,6 +20,7 @@
   (modules
     runner
     test_added_parent
+    test_all_saved_state
     test_capitalization
     test_coverage_counts
     test_decl_decl

@@ -51,7 +51,7 @@ let test_parsing_error (expected_error: string) (bad_contents: string) () : unit
 
     ignore env
 
-let () =
+let test () =
   let expected_error =
     "File \"/foo.php\", line 4, characters 11-11:\n" ^
     "A semicolon (';') is expected here. (Parsing[1002])\n" in

@@ -25,7 +25,7 @@ let init_disk_state =
    line the HH_FIXME suppresses. We need to make sure the loaded declaration is
    oldified even though the decl AST hash has not changed. *)
 
-let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
+let test () = Tempfile.with_real_tempdir @@ fun temp_dir ->
   let temp_dir = Path.to_string temp_dir in
   Test.save_state init_disk_state temp_dir ~store_decls_in_saved_state:true;
   Test.in_daemon @@ fun () ->

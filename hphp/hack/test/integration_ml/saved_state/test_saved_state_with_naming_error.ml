@@ -9,7 +9,7 @@ let baz_contents = {|<?hh
 class C {}
 |}
 
-let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
+let test () = Tempfile.with_real_tempdir @@ fun temp_dir ->
   let temp_dir = Path.to_string temp_dir in
 
   let expected_error =

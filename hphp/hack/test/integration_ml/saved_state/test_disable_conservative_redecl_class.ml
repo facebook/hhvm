@@ -71,7 +71,7 @@ let run_test saved_state_dir test_case () =
   assert_equals expected_rechecked loop_output.total_rechecked_count @@
     "Wrong number of total files rechecked"
 
-let () =
+let test () =
   Tempfile.with_real_tempdir @@ fun temp_dir ->
     let saved_state_dir = Path.to_string temp_dir in
     Test.save_state init_disk_state saved_state_dir;

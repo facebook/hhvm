@@ -57,7 +57,7 @@ let init_disk_state =
    HH_FIXMEs heap and the DECL_HH_FIXMEs heap for the same file, we use the one
    in HH_FIXMEs. Thus we read stale data and fail to suppress the error. *)
 
-let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
+let test () = Tempfile.with_real_tempdir @@ fun temp_dir ->
   let temp_dir = Path.to_string temp_dir in
   Test.save_state init_disk_state temp_dir ~store_decls_in_saved_state:true;
   Test.in_daemon @@ fun () ->

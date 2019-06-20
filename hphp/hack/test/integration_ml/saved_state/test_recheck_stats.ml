@@ -81,7 +81,7 @@ let test_recheck_stats_after_simple_change saved_state_dir () =
 
   Test.assert_no_errors env
 
-let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
+let test () = Tempfile.with_real_tempdir @@ fun temp_dir ->
   let temp_dir = Path.to_string temp_dir in
   save_state temp_dir;
 

@@ -35,5 +35,5 @@ let test_parsing_error () : unit =
     let _ : ServerEnv.env = Test.assert_errors_in_phase env 1 Errors.Parsing in
     ()
 
-let () =
+let test () =
   Test.in_daemon @@ test_parsing_error

@@ -34,7 +34,7 @@ File "/B.php", line 4, characters 29-34:
 But got string
 |}
 
-let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
+let test () = Tempfile.with_real_tempdir @@ fun temp_dir ->
   let temp_dir = Path.to_string temp_dir in
 
   (* A and B are identical classes with a function named "bar" returning int *)

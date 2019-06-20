@@ -20,7 +20,7 @@ class Test {
 }
 |}
 
-let () =
+let test () =
   Tempfile.with_real_tempdir @@ fun temp_dir ->
     let temp_dir = Path.to_string temp_dir in
     let disk_state = [file] in

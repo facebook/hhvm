@@ -10,6 +10,35 @@ let run (f:unit -> unit): (unit -> bool) =
   (fun () -> f (); true)
 
 let tests = [
+  "saved_state/deps_all_members" , run Test_deps_all_members.test;
+  "saved_state/disable_conservative_redecl_class" , run Test_disable_conservative_redecl_class.test;
+  "saved_state/disk_race_conditions" , run Test_disk_race_conditions.test;
+  "saved_state/fun_deps_load_from_state" , run Test_fun_deps_load_from_state.test;
+  "saved_state/ide_cache" , run Test_ide_cache.test;
+  "saved_state/ide_tast_cache" , run Test_ide_tast_cache.test;
+  "saved_state/load_decls_cold_synthesized_ancestors" , run Test_load_decls_cold_synthesized_ancestors.test;
+  "saved_state/load_decls_enum_add_member" , run Test_load_decls_enum_add_member.test;
+  "saved_state/load_decls_fixme_in_hot_changed_class" , run Test_load_decls_fixme_in_hot_changed_class.test;
+  "saved_state/load_decls_fixme_in_hot_similar_class" , run Test_load_decls_fixme_in_hot_similar_class.test;
+  "saved_state/load_decls_fixme_in_hot_unchanged_interface" , run Test_load_decls_fixme_in_hot_unchanged_interface.test;
+  "saved_state/load_decls_stale_derived_class" , run Test_load_decls_stale_derived_class.test;
+  "saved_state/naming_table_sqlite_fallback" , run Test_naming_table_sqlite_fallback.test;
+  "saved_state/no_op_close" , run Test_no_op_close.test;
+  "saved_state/no_op_edit" , run Test_no_op_edit.test;
+  "saved_state/no_op_open" , run Test_no_op_open.test;
+  "saved_state/prechecked_advanced" , run Test_prechecked_advanced.test;
+  "saved_state/prechecked_basic" , run Test_prechecked_basic.test;
+  "saved_state/prechecked_find_refs" , run Test_prechecked_find_refs.test;
+  "saved_state/prechecked_incremental_after_init" , run Test_prechecked_incremental_after_init.test;
+  "saved_state/prechecked_incremental" , run Test_prechecked_incremental.test;
+  "saved_state/predeclare_ide_deps" , run Test_predeclare_ide_deps.test;
+  "saved_state/recheck_stats" , run Test_recheck_stats.test;
+  "saved_state/saved_state" , run Test_saved_state.test;
+  "saved_state/saved_state_with_decl_error" , run Test_saved_state_with_decl_error.test;
+  "saved_state/saved_state_with_mode_change" , run Test_saved_state_with_mode_change.test;
+  "saved_state/saved_state_with_naming_error" , run Test_saved_state_with_naming_error.test;
+  "saved_state/saved_state_with_parse_error" , run Test_saved_state_with_parse_error.test;
+  "saved_state/similar_files" , run Test_similar_files.test;
   "added_parent" , run Test_added_parent.test;
   "capitalization" , run Test_capitalization.test;
   "coverage_counts" , run Test_coverage_counts.test;

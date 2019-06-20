@@ -409,7 +409,7 @@ let hot_base_and_child_tests () = Tempfile.with_real_tempdir @@ fun temp_dir ->
     Test.in_daemon @@ test_incremental_state incremental_state_dir;
     ()
 
-let () =
+let test () =
   hot_base_tests ();
   hot_base_and_child_tests ();
   ()

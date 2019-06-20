@@ -3,7 +3,7 @@ open Integration_test_base_types
 open No_op_common
 
 (* Tests whether no-op OPEN causes any crazy fan-outs *)
-let () = No_op_common.go @@ fun env ->
+let test () = No_op_common.go @@ fun env ->
   (* We open the file without any changes *)
   let env = Test.connect_persistent_client env in
   let env = Test.open_file env foo_name in

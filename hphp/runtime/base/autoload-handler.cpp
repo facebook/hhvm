@@ -184,11 +184,11 @@ struct TypeExistsChecker {
     return m_ne->getCachedTypeAlias() != nullptr;
   }
 };
-// TODO (T41179180:Support records)
-struct ClassOrTypeExistsChecker {
+
+struct ClassOrTypeOrRecordExistsChecker {
   const String& m_name;
   mutable NamedEntity* m_ne;
-  explicit ClassOrTypeExistsChecker(const String& name)
+  explicit ClassOrTypeOrRecordExistsChecker(const String& name)
     : m_name(name), m_ne(nullptr) {}
   bool operator()() const {
     if (!m_ne) {
@@ -198,7 +198,8 @@ struct ClassOrTypeExistsChecker {
       }
     }
     return m_ne->getCachedClass() != nullptr ||
-           m_ne->getCachedTypeAlias() != nullptr;
+           m_ne->getCachedTypeAlias() != nullptr ||
+           m_ne->getCachedRecord() != nullptr;
   }
 };
 struct RecordExistsChecker {
@@ -474,11 +475,11 @@ AutoloadHandler::loadFromMapPartial(const String& className,
   return res;
 }
 
-bool AutoloadHandler::autoloadClassOrType(const String& clsName) {
+bool AutoloadHandler::autoloadClassOrTypeOrRecord(const String& clsName) {
   if (clsName.empty()) return false;
   const String& className = normalizeNS(clsName);
   if (m_map) {
-    ClassOrTypeExistsChecker cte(className);
+    ClassOrTypeOrRecordExistsChecker cte(className);
     bool tryType = true, tryTypeAlias = true;
     AutoloadMap::Result typeRes = AutoloadMap::Result::RetryAutoloading,
                         typeAliasRes = AutoloadMap::Result::RetryAutoloading;
@@ -503,9 +504,9 @@ bool AutoloadHandler::autoloadClassOrType(const String& clsName) {
         if (typeAliasRes == AutoloadMap::Result::Success) return true;
       }
       // If we reach this point, then for each map either nothing was found
-      // or the file we included didn't define a class or type alias with the
-      // specified name, and the failure callback (if one exists) did not throw
-      // or raise a fatal error.
+      // or the file we included didn't define a class or type alias or record
+      // with the specified name, and the failure callback (if one exists)
+      // did not throw or raise a fatal error.
       if (m_map->canHandleFailure()) {
         // First, call the failure callback for 'class' if we didn't do so
         // above

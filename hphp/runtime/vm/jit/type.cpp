@@ -1020,6 +1020,7 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
       case A::Float:      return TDbl;
       case A::String:     return TStr;
       case A::Array:      return TArr;
+      case A::Record:     return TRecord;
       // We only call this once we've attempted resolving the
       // type-constraint. If we successfully resolved it, we'll never get here,
       // So if we're here and we have AnnotType::Object, we don't know what the

@@ -93,15 +93,16 @@ public:
   bool autoloadClassPHP5Impl(const String& className, bool forceSplStack);
 
   /**
-   * autoloadClassOrType() tries to autoload either a class or a type alias
-   * with the specified name. This method avoids calling the failure callback
-   * until one of the following happens: (1) we tried to autoload the specified
-   * name from both the 'class' and 'type' maps but for each map either nothing
-   * was found or the file we included did not define a class or type alias
+   * autoloadClassOrTypeOrRecord() tries to autoload either a class or
+   * a type alias or a record with the specified name. This method avoids
+   * calling the failure callback until one of the following happens:
+   * (1) we tried to autoload the specified name from the 'class', 'type' and
+   * 'record' maps but for each map either nothing was found or the file
+   * we included did not define a class or type alias or record
    * with the specified name, or (2) there was an uncaught exception or fatal
    * error during an include operation.
    */
-  bool autoloadClassOrType(const String& className);
+  bool autoloadClassOrTypeOrRecord(const String& className);
 
   bool autoloadFunc(StringData* name);
   bool autoloadConstant(StringData* name);

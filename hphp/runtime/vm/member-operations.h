@@ -518,9 +518,8 @@ inline tv_rval ElemObject(TypedValue& tvRef,
 // TODO (T41029813): Handle different modes
 template <KeyType keyType>
 inline tv_rval ElemRecord(RecordData* base, key_type<keyType> key) {
-  auto const keyStr = tvCastToStringData(initScratchKey(key));
-  auto const ret =  base->fieldRval(keyStr);
-  decRefStr(keyStr);
+  auto const fieldName = tvCastToString(initScratchKey(key));
+  auto const ret = base->fieldRval(fieldName.get());
   return ret;
 }
 
@@ -1547,10 +1546,16 @@ inline void SetElemObject(tv_lval base, key_type<keyType> key,
 template <KeyType keyType>
 inline void SetElemRecord(tv_lval base, key_type<keyType> key,
                           Cell* value) {
-  auto const keyStr = tvCastToStringData(initScratchKey(key));
-  auto const tv = val(base).prec->fieldLval(keyStr);
+  auto const fieldName = tvCastToString(initScratchKey(key));
+  auto const recData = val(base).prec;
+  auto const rec = recData->record();
+  auto const& field = rec->field(fieldName.get());
+  auto const& tc = field.typeConstraint();
+  if (tc.isCheckable()) {
+    tc.verifyRecField(value, rec->name(), field.name());
+  }
+  auto const& tv = recData->fieldLval(fieldName.get());
   tvSet(*value, tv);
-  decRefStr(keyStr);
 }
 
 /*
@@ -2808,7 +2813,7 @@ void UnsetElemSlow(tv_lval base, key_type<keyType> key) {
       throw_cannot_unset_for_clsmeth();
 
     case KindOfRecord: // TODO(T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
+      raise_error("Cannot unset a record field");
 
     case KindOfRef:
       break;

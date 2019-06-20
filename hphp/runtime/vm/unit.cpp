@@ -1331,7 +1331,7 @@ TypeAliasReq resolveTypeAlias(Unit* unit, const TypeAlias* thisType) {
     return TypeAliasReq::From(unit, *targetTd, *thisType);
   }
 
-  if (AutoloadHandler::s_instance->autoloadClassOrType(
+  if (AutoloadHandler::s_instance->autoloadClassOrTypeOrRecord(
         StrNR(const_cast<StringData*>(typeName))
       )) {
     if (auto klass = Unit::lookupClass(targetNE)) {
@@ -1340,6 +1340,7 @@ TypeAliasReq resolveTypeAlias(Unit* unit, const TypeAlias* thisType) {
     if (auto targetTd = targetNE->getCachedTypeAlias()) {
       return TypeAliasReq::From(unit, *targetTd, *thisType);
     }
+    // TODO (T41179180): Support record type aliases
   }
 
   return TypeAliasReq::Invalid(unit);
@@ -1361,7 +1362,7 @@ const TypeAliasReq* Unit::loadTypeAlias(const StringData* name,
   auto ne = NamedEntity::get(name);
   auto target = ne->getCachedTypeAlias();
   if (!target) {
-    if (AutoloadHandler::s_instance->autoloadClassOrType(
+    if (AutoloadHandler::s_instance->autoloadClassOrTypeOrRecord(
           StrNR(const_cast<StringData*>(name))
         )) {
       target = ne->getCachedTypeAlias();

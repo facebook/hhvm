@@ -281,6 +281,7 @@ Cell annotDefaultValue(AnnotType at) {
     case AnnotType::Resource:
     case AnnotType::Object:
     case AnnotType::Nothing:
+    case AnnotType::Record:
     case AnnotType::NoReturn:
     case AnnotType::Null:     return make_tv<KindOfNull>();
     case AnnotType::Nonnull:

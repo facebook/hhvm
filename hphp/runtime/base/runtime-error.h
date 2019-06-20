@@ -149,6 +149,13 @@ void raise_return_typehint_error(const std::string& msg);
 void raise_property_typehint_error(const std::string& msg, bool isSoft);
 
 /*
+ * Raise the appropriate warning or error (with the given message) for some
+ * violation of a record field type-hint. If isSoft is true, than a warning is
+ * always raised.
+ */
+void raise_record_field_typehint_error(const std::string& msg, bool isSoft);
+
+/*
  * Raise the appropriate warning or error if we try to bind a property to a ref,
  * and that property has a type-hint which we're enforcing.
  */
@@ -195,7 +202,11 @@ void raise_hackarr_compat_type_hint_property_notice(const Class* declCls,
                                                     AnnotType at,
                                                     const StringData* propName,
                                                     bool isStatic);
-
+void raise_hackarr_compat_type_hint_rec_field_notice(
+    const StringData* recName,
+    const ArrayData* ad,
+    AnnotType at,
+    const StringData* fieldName);
 void raise_hackarr_compat_is_operator(const char* source, const char* target);
 
 void raise_hackarr_compat_notice(const std::string& msg);

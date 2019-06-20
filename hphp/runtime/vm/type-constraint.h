@@ -419,6 +419,9 @@ struct TypeConstraint {
                             const Class* thisCls,
                             const Class* declCls,
                             const StringData* propName) const;
+  void verifyRecField(tv_rval val,
+                   const StringData* recordName,
+                   const StringData* fieldName) const;
 
   void verifyFail(const Func* func, TypedValue* tv, int id) const;
   void verifyParamFail(const Func* func, TypedValue* tv, int paramNum) const;
@@ -430,6 +433,9 @@ struct TypeConstraint {
   void verifyPropFail(const Class* thisCls, const Class* declCls,
                       tv_rval val, const StringData* propName,
                       bool isStatic) const;
+  void verifyRecFieldFail(tv_rval val,
+                       const StringData* recordName,
+                       const StringData* fieldName) const;
 
 private:
   void init();
@@ -437,6 +443,7 @@ private:
   enum class CheckMode {
     Exact, // Do an exact check with autoloading
     ExactProp, // Do an exact prop check with autoloading
+    ExactRecField, // Do an exact record field check with autoloading
     AlwaysPasses, // Don't check environment at all. Return false if not sure.
     Assert // Check loaded classes/type-aliases, but don't autoload. Return true
            // if not sure.

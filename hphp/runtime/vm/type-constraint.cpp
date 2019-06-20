@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/type-constraint.h"
 
+#include <boost/variant.hpp>
+
 #include <folly/Format.h>
 #include <folly/MapUtil.h>
 
@@ -152,6 +154,7 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
       case AnnotType::VecOrDict: str = "vec_or_dict"; break;
       case AnnotType::ArrayLike: str = "arraylike"; break;
       case AnnotType::Nonnull:  str = "nonnull"; break;
+      case AnnotType::Record:    str = "record"; break;
       case AnnotType::Self:
       case AnnotType::This:
       case AnnotType::Parent:
@@ -212,31 +215,35 @@ const TypeAliasReq* getTypeAliasWithAutoload(const NamedEntity* ne,
  * type alias or an enum class; enum classes are strange in that it
  * *is* possible to have an instance of them even if they are not defined.
  */
-std::pair<const TypeAliasReq*, Class*>
-getTypeAliasOrClassWithAutoload(const NamedEntity* ne, const StringData* name) {
+boost::variant<const TypeAliasReq*, Record*, Class*>
+getTypeAliasOrClassOrRecordWithAutoload(const NamedEntity* ne,
+                                        const StringData* name) {
 
-  auto def = ne->getCachedTypeAlias();
+  if (auto def = ne->getCachedTypeAlias()) {
+    return def;
+  }
+  if (auto rec = Unit::lookupRecord(ne)) {
+    return rec;
+  }
   Class *klass = nullptr;
-  if (!def) {
-    klass = Unit::lookupClass(ne);
-    // We don't have the class or the typedef, so autoload.
-    if (!klass) {
-      String nameStr(const_cast<StringData*>(name));
-      if (AutoloadHandler::s_instance->autoloadClassOrType(nameStr)) {
-        // Autoload succeeded, try to grab a typedef and if that doesn't work,
-        // a class.
-        def = ne->getCachedTypeAlias();
-        if (!def) {
-          klass = Unit::lookupClass(ne);
-        }
+  klass = Unit::lookupClass(ne);
+  // We don't have the class, record or the typedef, so autoload.
+  if (!klass) {
+    String nameStr(const_cast<StringData*>(name));
+    if (AutoloadHandler::s_instance->autoloadClassOrTypeOrRecord(nameStr)) {
+      // Autoload succeeded, try to grab a typedef and if that doesn't work,
+      // a class.
+      if (auto def = ne->getCachedTypeAlias()) {
+        return def;
       }
+      if (auto rec = Unit::lookupRecord(ne)) {
+        return rec;
+      }
+      klass = Unit::lookupClass(ne);
     }
   }
-
-  assertx(!def || !klass);
-  return std::make_pair(def, klass);
+  return klass;
 }
-
 }
 
 MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
@@ -257,9 +264,14 @@ MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
   if (!isObject()) return t;
 
   assertx(t == KindOfObject);
-  auto p = getTypeAliasOrClassWithAutoload(m_namedEntity, m_typeName);
-  auto td = p.first;
-  auto c = p.second;
+  auto p = getTypeAliasOrClassOrRecordWithAutoload(m_namedEntity, m_typeName);
+
+  if (boost::get<Record*>(&p)) return KindOfRecord;
+
+  auto ptd = boost::get<const TypeAliasReq*>(&p);
+  auto td = ptd ? *ptd : nullptr;
+  auto pc = boost::get<Class*>(&p);
+  auto c = pc ? *pc : nullptr;
 
   // See if this is a type alias.
   if (td) {
@@ -291,9 +303,9 @@ bool TypeConstraint::isMixedResolved() const {
   // isCheckable() implies !isMixed(), so if its not an unresolved object here,
   // we know it cannot be mixed.
   if (!isObject() || isResolved()) return false;
-  auto const tyAlias =
-    getTypeAliasOrClassWithAutoload(m_namedEntity, m_typeName).first;
-  return tyAlias && tyAlias->type == AnnotType::Mixed;
+  auto v = getTypeAliasOrClassOrRecordWithAutoload(m_namedEntity, m_typeName);
+  auto const pTyAlias = boost::get<const TypeAliasReq*>(&v);
+  return pTyAlias && (*pTyAlias)->type == AnnotType::Mixed;
 }
 
 bool TypeConstraint::maybeMixed() const {
@@ -379,17 +391,30 @@ TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
 
     assertx(tc.isObject());
 
-    const TypeAliasReq* tyAlias;
-    Class* klass;
-    std::tie(tyAlias, klass) =
-      getTypeAliasOrClassWithAutoload(tc.m_namedEntity, tc.m_typeName);
-
+    const TypeAliasReq* tyAlias = nullptr;
+    Class* klass = nullptr;
+    Record* rec = nullptr;
+    auto v =
+      getTypeAliasOrClassOrRecordWithAutoload(tc.m_namedEntity, tc.m_typeName);
+    if (auto pT = boost::get<const TypeAliasReq*>(&v)) {
+      tyAlias = *pT;
+    }
+    if (auto pR = boost::get<Record*>(&v)) {
+      rec = *pR;
+    }
+    if (auto pK = boost::get<Class*>(&v)) {
+      klass = *pK;
+    }
     auto nullable = tc.isNullable();
     auto at = AnnotType::Object;
     if (tyAlias) {
       nullable |= tyAlias->nullable;
       at = tyAlias->type;
       klass = (at == Type::Object) ? tyAlias->klass : nullptr;
+    }
+
+    if (rec) {
+      at = AnnotType::Record;
     }
 
     if (klass && isEnum(klass)) {
@@ -444,22 +469,26 @@ bool TypeConstraint::checkTypeAliasNonObj(tv_rval val) const {
   assertx(val.type() != KindOfObject);
   assertx(isObject());
 
-  auto const p = [&]() -> std::pair<const TypeAliasReq*, Class*> {
+  auto const p = [&]() -> boost::variant<const TypeAliasReq*, Record*, Class*> {
     if (!Assert) {
-      return getTypeAliasOrClassWithAutoload(m_namedEntity, m_typeName);
+      return getTypeAliasOrClassOrRecordWithAutoload(m_namedEntity, m_typeName);
     }
     if (auto const def = m_namedEntity->getCachedTypeAlias()) {
-      return std::make_pair(def, nullptr);
+      return def;
     }
-    if (auto const klass = Unit::lookupClass(m_namedEntity)) {
-      return std::make_pair(nullptr, klass);
+    if (auto const rec = Unit::lookupRecord(m_namedEntity)) {
+      return rec;
     }
-    return std::make_pair(nullptr, nullptr);
+    return Unit::lookupClass(m_namedEntity);
   }();
-  auto td = p.first;
-  auto c = p.second;
+  auto ptd = boost::get<const TypeAliasReq*>(&p);
+  auto td = ptd ? *ptd : nullptr;
+  auto prec = boost::get<Record*>(&p);
+  auto rec = prec ? *prec : nullptr;
+  auto pc = boost::get<Class*>(&p);
+  auto c = pc ? *pc : nullptr;
 
-  if (Assert && !td && !c) return true;
+  if (Assert && !td && !rec && !c) return true;
 
   // Common case is that we actually find the alias:
   if (td) {
@@ -498,6 +527,10 @@ bool TypeConstraint::checkTypeAliasNonObj(tv_rval val) const {
     // Fall through to the check below, since this could be a type
     // alias to an enum type
     c = td->klass;
+  }
+
+  if (rec) {
+    return isRecordType(val.type()) && rec == val.val().prec->record();
   }
 
   // Otherwise, this isn't a proper type alias, but it *might* be a
@@ -574,11 +607,13 @@ bool TypeConstraint::checkImpl(tv_rval val,
   auto const isAssert = Mode == CheckMode::Assert;
   auto const isPasses = Mode == CheckMode::AlwaysPasses;
   auto const isProp   = Mode == CheckMode::ExactProp;
+  DEBUG_ONLY auto const isRecField = Mode == CheckMode::ExactRecField;
 
   // We shouldn't provide a context for the conservative checks.
   assertx(!isAssert || !context);
   assertx(!isPasses || !context);
   assertx(!isProp   || validForProp());
+  assertx(!isRecField || validForRecField());
 
   val = tvToCell(val);
   if (isNullable() && val.type() == KindOfNull) return true;
@@ -602,11 +637,13 @@ bool TypeConstraint::checkImpl(tv_rval val,
       switch (metaType()) {
         case MetaType::Self:
           assertx(!isProp);
+          assertx(!isRecField);
           if (isAssert) return true;
           if (isPasses) return false;
           c = context;
           break;
         case MetaType::This:
+          assertx(!isRecField);
           if (isAssert) return true;
           if (isPasses) return false;
           if (isProp) return val.val().pobj->getVMClass() == context;
@@ -627,18 +664,23 @@ bool TypeConstraint::checkImpl(tv_rval val,
           break;
         case MetaType::Parent:
           assertx(!isProp);
+          assertx(!isRecField);
           if (isAssert) return true;
           if (isPasses) return false;
           if (context) c = context->parent();
           break;
         case MetaType::Callable:
           assertx(!isProp);
+          assertx(!isRecField);
           if (isAssert) return true;
           if (isPasses) return false;
           return is_callable(cellAsCVarRef(*val));
-        case MetaType::Precise:
         case MetaType::Nothing:
         case MetaType::NoReturn:
+          assertx(!isProp);
+          assertx(!isRecField);
+          // fallthrogh
+        case MetaType::Precise:
         case MetaType::Number:
         case MetaType::ArrayKey:
         case MetaType::VArray:
@@ -668,6 +710,7 @@ bool TypeConstraint::checkImpl(tv_rval val,
     case AnnotAction::Fail: return false;
     case AnnotAction::CallableCheck:
       assertx(!isProp);
+      assertx(!isRecField);
       if (isAssert) return true;
       if (isPasses) return false;
       return is_callable(cellAsCVarRef(*val));
@@ -851,6 +894,15 @@ void TypeConstraint::verifyStaticProperty(tv_rval val,
   assertx(validForProp());
   if (UNLIKELY(!checkImpl<CheckMode::ExactProp>(val, thisCls))) {
     verifyPropFail(thisCls, declCls, val, propName, true);
+  }
+}
+
+void TypeConstraint::verifyRecField(tv_rval val,
+                                 const StringData* recordName,
+                                 const StringData* fieldName) const {
+  assertx(validForRecField());
+  if (UNLIKELY(!checkImpl<CheckMode::ExactRecField>(val, nullptr))) {
+    verifyRecFieldFail(val, recordName, fieldName);
   }
 }
 
@@ -1043,6 +1095,29 @@ void TypeConstraint::verifyOutParamFail(const Func* func,
   }
 }
 
+void TypeConstraint::verifyRecFieldFail(tv_rval val,
+                                     const StringData* recordName,
+                                     const StringData* fieldName) const {
+  assertx(validForRecField());
+
+  if (auto const at = checkDVArray(val)) {
+    raise_hackarr_compat_type_hint_rec_field_notice(
+      recordName, val.val().parr, *at, fieldName
+    );
+    return;
+  }
+
+  raise_record_field_typehint_error(
+    folly::sformat(
+      "Record field '{}::{}' declared as type {}, {} assigned",
+      recordName,
+      fieldName,
+      displayName(nullptr),
+      describe_actual_type(val, isHHType())
+    ),
+    isSoft()
+  );
+}
 void TypeConstraint::verifyPropFail(const Class* thisCls,
                                     const Class* declCls,
                                     tv_rval val,

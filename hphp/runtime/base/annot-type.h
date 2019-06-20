@@ -64,6 +64,7 @@ enum class AnnotType : uint16_t {
   Dict     = (uint8_t)KindOfDict     | (uint16_t)AnnotMetaType::Precise << 8,
   Vec      = (uint8_t)KindOfVec      | (uint16_t)AnnotMetaType::Precise << 8,
   Keyset   = (uint8_t)KindOfKeyset   | (uint16_t)AnnotMetaType::Precise << 8,
+  Record   = (uint8_t)KindOfRecord   | (uint16_t)AnnotMetaType::Precise << 8,
   // Precise is intentionally excluded
   Mixed    = (uint16_t)AnnotMetaType::Mixed << 8        | (uint8_t)KindOfUninit,
   Nonnull  = (uint16_t)AnnotMetaType::Nonnull << 8      | (uint8_t)KindOfUninit,

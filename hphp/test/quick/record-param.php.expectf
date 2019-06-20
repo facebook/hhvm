@@ -1,0 +1,3 @@
+int(11)
+
+Catchable fatal error: Argument 1 passed to foo() must be an instance of Foo, Bar given in %s/record-param.php on line 21

@@ -1,0 +1,13 @@
+Count: 0
+bool(true)
+
+Count: 1
+
+Catchable fatal error: Record field 'A::x' declared as type MaybeBool, bool assigned in %s/apc.php on line 26
+
+Count: 2
+bool(true)
+
+Count: 3
+
+Catchable fatal error: Record field 'A::x' declared as type MaybeBool, bool assigned in %s/apc.php on line 26

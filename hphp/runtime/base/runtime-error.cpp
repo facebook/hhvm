@@ -129,6 +129,16 @@ void raise_property_typehint_error(const std::string& msg, bool isSoft) {
   }
 }
 
+void raise_record_field_typehint_error(const std::string& msg, bool isSoft) {
+  if (isSoft) {
+    raise_warning_unsampled(msg);
+    return;
+  }
+  raise_recoverable_error(msg);
+  raise_error("Error handler tried to recover from a record field typehint "
+              "violation");
+}
+
 void raise_property_typehint_binding_error(const Class* declCls,
                                            const StringData* propName,
                                            bool isSoft) {
@@ -360,6 +370,22 @@ void raise_hackarr_compat_type_hint_property_notice(const Class* declCls,
     isStatic ? "Static property" : "Property",
     declCls->name()->data(),
     propName->data(),
+    name,
+    given
+  );
+}
+
+void raise_hackarr_compat_type_hint_rec_field_notice(
+    const StringData* recName,
+    const ArrayData* ad,
+    AnnotType at,
+    const StringData* fieldName) {
+  auto const name = arrayAnnotTypeToName(at);
+  auto const given = arrayToName(ad);
+  raise_notice(
+    "Hack Array Compat: Record field '%s::%s' declared as type %s, %s assigned",
+    recName->data(),
+    fieldName->data(),
     name,
     given
   );

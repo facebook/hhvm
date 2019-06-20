@@ -75,6 +75,17 @@ and aexpr_requires_deep_init aexpr =
   | T.AFkvalue (expr1, expr2) ->
     expr_requires_deep_init expr1 || expr_requires_deep_init expr2
 
+let valid_tc_for_record_field tc =
+  match (TC.name tc) with
+  | None -> true
+  | Some name ->
+     not (is_self name) &&
+     not (is_parent name) &&
+     not (String.lowercase name = "hh\\this") &&
+     not (String.lowercase name = "callable") &&
+     not (String.lowercase name = "hh\\nothing") &&
+     not (String.lowercase name = "hh\\noreturn")
+
 let valid_tc_for_prop tc =
   match (TC.name tc) with
   | None -> true
@@ -84,6 +95,12 @@ let valid_tc_for_prop tc =
      not (String.lowercase name = "callable") &&
      not (String.lowercase name = "hh\\nothing") &&
      not (String.lowercase name = "hh\\noreturn")
+
+let valid_tc_prop_field tc class_is_record =
+  if class_is_record then
+    valid_tc_for_record_field tc
+  else
+    valid_tc_for_prop tc
 
 let from_ast
     class_
@@ -98,6 +115,7 @@ let from_ast
     (_, (pos, cv_name), initial_value) =
   (* TODO: Hack allows a property to be marked final, which is nonsensical.
   HHVM does not allow this.  Fix this in the Hack parser? *)
+  let class_is_record = class_.T.c_kind = Ast.Crecord in
   let pid = Hhbc_id.Prop.from_ast_name cv_name in
   let attributes = Emit_attribute.from_asts namespace cv_user_attributes in
   let is_immutable = class_is_immutable || Hhas_attribute.has_const attributes in
@@ -125,10 +143,11 @@ let from_ast
           ~tparams
           ~namespace
           h in
-      if not (valid_tc_for_prop (Hhas_type_info.type_constraint tc))
+      if not (valid_tc_prop_field (Hhas_type_info.type_constraint tc) class_is_record)
       then
         Emit_fatal.raise_fatal_parse pos
-          (Printf.sprintf "Invalid property type hint for '%s::$%s'"
+          (Printf.sprintf "Invalid %s type hint for '%s::$%s'"
+            (if class_is_record then "record field" else "property")
             (Utils.strip_ns (snd class_.T.c_name))
             (Hhbc_id.Prop.to_raw_string pid))
       else tc

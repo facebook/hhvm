@@ -50,12 +50,20 @@ struct RecordData : Countable, type_scan::MarkCollectable<RecordData> {
                                const TypedValue* values);
   // Decrement ref-counts of all fields of the record and free the memory.
   void release() noexcept;
+  ALWAYS_INLINE void decRefAndRelease() {
+    assertx(kindIsValid());
+    if (decReleaseCheck()) release();
+  }
 
 private:
   const TypedValue* fieldVec() const;
 
   const Record* const m_record;
 };
+
+ALWAYS_INLINE void decRefRec(RecordData* rec) {
+  rec->decRefAndRelease();
+}
 
 }
 

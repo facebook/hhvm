@@ -1,0 +1,2 @@
+Catchable fatal error: Record field 'Foo::x' declared as type int, string assigned in %s on line %s
+

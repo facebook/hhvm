@@ -32,6 +32,16 @@ RecordData* RecordData::newRecord(const Record* rec,
                                   uint32_t initSize,
                                   const StringData* const *keys,
                                   const TypedValue* values) {
+  // Check type hints
+  for (auto i = 0; i < initSize; ++i) {
+    const auto&  field = rec->field(keys[i]);
+    auto const& val = values[initSize - i -1];
+    auto const& tc = field.typeConstraint();
+    if (tc.isCheckable()) {
+      tc.verifyRecField(&val, rec->name(), field.name());
+    }
+  }
+
   auto const size = sizeWithFields(rec);
   auto const recdata =
     new (NotNull{}, tl_heap->objMalloc(size)) RecordData(rec);

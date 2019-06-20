@@ -479,11 +479,11 @@ public:
   // Funcs, PreClasses, and RecordDescs.                                [const]
 
   /*
-   * Look up a Func or PreClass or RecordDesc by ID.
+   * Look up a Func or PreClass or PreRecordDesc by ID.
    */
   Func* lookupFuncId(Id id) const;
   PreClass* lookupPreClassId(Id id) const;
-  RecordDesc* lookupRecordId(Id id) const;
+  PreRecordDesc* lookupPreRecordId(Id id) const;
 
   /*
    * Range over all Funcs or PreClasses or RecordDescs in the Unit.
@@ -491,8 +491,8 @@ public:
   FuncRange funcs() const;
   folly::Range<PreClassPtr*> preclasses();
   folly::Range<const PreClassPtr*> preclasses() const;
-  folly::Range<RecordDescPtr*> records();
-  folly::Range<const RecordDescPtr*> records() const;
+  folly::Range<PreRecordDescPtr*> prerecords();
+  folly::Range<const PreRecordDescPtr*> prerecords() const;
 
   /*
    * Get a pseudomain for the Unit with the context class `cls'.
@@ -645,7 +645,8 @@ public:
    * Also always fatals if a type alias already exists in this request with the
    * same name as that of `record', regardless of the value of `failIsFatal'.
    */
-  static RecordDesc* defRecordDesc(RecordDesc* record, bool failIsFatal = true);
+  static RecordDesc* defRecordDesc(PreRecordDesc* record,
+                                   bool failIsFatal = true);
 
   /*
    * Look up the RecordDesc in this request with name `name', or with the name
@@ -657,12 +658,21 @@ public:
   static RecordDesc* lookupRecordDesc(const StringData* name);
 
   /*
-   * Look up, or autoload and define, the RecordDesc in this request with name
-   * `name', or with the name mapped to the NamedEntity `ne'.
+   * Autoload the RecordDesc with name `name' and bind it `ne' in this request.
    *
    * @requires: NamedEntity::get(name) == ne
    */
-  static RecordDesc* loadRecordDesc(const StringData* name);
+  static RecordDesc* loadMissingRecordDesc(const NamedEntity* ne,
+                                           const StringData* name);
+
+  /*
+   * Same as lookupRecordDesc(), but if `tryAutoload' is set, call and return
+   * loadMissingRecordDesc().
+   */
+  static RecordDesc* getRecordDesc(const NamedEntity* ne,
+                                   const StringData* name,
+                                   bool tryAutoload);
+  static RecordDesc* getRecordDesc(const StringData* name, bool tryAutoload);
 
   /////////////////////////////////////////////////////////////////////////////
   // Constant lookup.                                                  [static]
@@ -927,7 +937,7 @@ private:
   TypedValue m_mainReturn;
   PreClassPtrVec m_preClasses;
   TypeAliasVec m_typeAliases;
-  CompactVector<RecordDescPtr> m_records;
+  CompactVector<PreRecordDescPtr> m_preRecords;
   /*
    * Cached the EntryPoint for an unit, since compactMergeInfo() inside of
    * mergeImpl will drop the original EP.

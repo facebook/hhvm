@@ -37,6 +37,9 @@ RecordData* RecordData::newRecord(const RecordDesc* rec,
                                   uint32_t initSize,
                                   const StringData* const *keys,
                                   const TypedValue* values) {
+  if (rec->attrs() & AttrAbstract) {
+    raise_error("Cannot instantiate abstract record %s", rec->name()->data());
+  }
   auto const size = sizeWithFields(rec);
   auto const recdata =
     new (NotNull{}, tl_heap->objMalloc(size)) RecordData(rec);

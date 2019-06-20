@@ -1,0 +1,1 @@
+Fatal error: Cannot redeclare record field B::x in %s/record-field-dup.php on line 7

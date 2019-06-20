@@ -1415,6 +1415,7 @@ void emit_record(UnitEmitter& ue, const php::Record& rec) {
       std::get<0>(rec.srcInfo.loc),
       std::get<1>(rec.srcInfo.loc),
       rec.attrs,
+      rec.parentName,
       rec.srcInfo.docComment
   );
   re->setUserAttributes(rec.userAttributes);

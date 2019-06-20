@@ -91,10 +91,13 @@ struct RecordEmitter {
 
   RecordEmitter(UnitEmitter& ue, Id id, const std::string& name);
 
-  void init(int line1, int line2, Attr attrs, const StringData* docComment);
+  void init(int line1, int line2, Attr attrs,
+            const StringData* parentName,
+            const StringData* docComment);
 
   UnitEmitter& ue() const { return m_ue; }
   const StringData* name() const { return m_name; }
+  const StringData* parentName() const { return m_parent; }
   Attr attrs() const { return m_attrs; }
   UserAttributeMap userAttributes() const { return m_userAttributes; }
   void setUserAttributes(UserAttributeMap map) {
@@ -105,7 +108,7 @@ struct RecordEmitter {
 
   void commit(RepoTxn& txn) const; // throws(RepoExc)
 
-  RecordDesc* create(Unit& unit) const;
+  PreRecordDesc* create(Unit& unit) const;
 
   template<class SerDe> void serdeMetaData(SerDe&);
 
@@ -130,6 +133,7 @@ struct RecordEmitter {
     int m_line2;
     LowStringPtr m_name;
     Attr m_attrs;
+    LowStringPtr m_parent;
     LowStringPtr m_docComment;
     Id m_id;
     UserAttributeMap m_userAttributes;
@@ -137,7 +141,7 @@ struct RecordEmitter {
 };
 
 struct RecordRepoProxy : RepoProxy {
-  friend struct RecordDesc;
+  friend struct PreRecordDesc;
   friend struct RecordEmitter;
 
   explicit RecordRepoProxy(Repo& repo);

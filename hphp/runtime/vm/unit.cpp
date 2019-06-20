@@ -239,12 +239,12 @@ Unit::~Unit() {
     }
   }
 
-  for (auto const& rec : m_records) {
+  for (auto const& rec : m_preRecords) {
     RecordDesc* recList = rec->namedEntity()->recordList();
     while (recList) {
       RecordDesc* cur = recList;
       recList = recList->m_next;
-      if (cur == rec.get()) {
+      if (cur->preRecordDesc() == rec.get()) {
         cur->destroy();
       }
     }
@@ -1080,27 +1080,27 @@ bool Unit::classExists(const StringData* name, bool autoload, ClassKind kind) {
 ///////////////////////////////////////////////////////////////////////////////
 // RecordDesc lookup.
 
-RecordDesc* Unit::defRecordDesc(RecordDesc* record,
-                     bool failIsFatal /* = true */) {
-  auto const nameList = record->namedEntity();
+RecordDesc* Unit::defRecordDesc(PreRecordDesc* preRecord,
+                                bool failIsFatal /* = true */) {
+  auto const nameList = preRecord->namedEntity();
 
   // Error out if there is already a different type
   // with the same name in the request
   auto existingKind = checkSameName<RecordDesc>(nameList);
   if (existingKind) {
-    FrameRestore fr(record->unit(), Op::DefRecord, record->id());
+    FrameRestore fr(preRecord->unit(), Op::DefRecord, preRecord->id());
     raise_error("Cannot declare record with the same (%s) as an "
-                "existing %s", record->name()->data(), existingKind);
+                "existing %s", preRecord->name()->data(), existingKind);
     return nullptr;
   }
 
   // If there was already a record declared with DefRecordDesc, check if it's
   // compatible.
   if (auto cachedRec = nameList->getCachedRecordDesc()) {
-    if (cachedRec != record) {
+    if (cachedRec->preRecordDesc() != preRecord) {
       if (failIsFatal) {
-        FrameRestore fr(record->unit(), Op::DefRecord, record->id());
-        raise_error("Record already declared: %s", record->name()->data());
+        FrameRestore fr(preRecord->unit(), Op::DefRecord, preRecord->id());
+        raise_error("Record already declared: %s", preRecord->name()->data());
       }
       return nullptr;
     }
@@ -1110,13 +1110,47 @@ RecordDesc* Unit::defRecordDesc(RecordDesc* record,
   // Get a compatible predefined record, if one exists. Otherwise, add the
   // current one to the list of defined records.
   // Set the cached record in either case.
+  RecordDesc* parent = nullptr;
   auto top = nameList->recordList();
   for (;;) {
     for (auto rec = top; rec != nullptr; rec = rec->m_next) {
-      if (rec != record) continue;
-      rec->setCached();
-      return rec;
+      if (rec->preRecordDesc() != preRecord) continue;
+      auto avail = rec->availWithParent(parent, failIsFatal /*tryAutoload*/);
+      if (LIKELY(avail == RecordDesc::Avail::True)) {
+        rec->setCached();
+        return rec;
+      }
+      if (avail == RecordDesc::Avail::Fail) {
+        // parent is not available and cannot be autoloaded
+        if (failIsFatal) {
+          FrameRestore fr(preRecord->unit(), Op::DefRecord, preRecord->id());
+          raise_error("unknown record %s", parent->name()->data());
+        }
+        return nullptr;
+      }
+      assertx(avail == RecordDesc::Avail::False);
     }
+
+    // Create a new record.
+    if (!parent && preRecord->parentName()->size() != 0) {
+      // Load the parent
+      parent = Unit::getRecordDesc(preRecord->parentName(), failIsFatal);
+      if (parent == nullptr) {
+        if (failIsFatal) {
+          FrameRestore fr(preRecord->unit(), Op::DefRecord, preRecord->id());
+          raise_error("unknown record %s", preRecord->parentName()->data());
+        }
+        return nullptr;
+      }
+    }
+
+    RecordDescPtr newRecord;
+    {
+      FrameRestore fr(preRecord->unit(), Op::DefRecord, preRecord->id());
+      newRecord = RecordDesc::newRecordDesc(
+          const_cast<PreRecordDesc*>(preRecord), parent);
+    }
+
     Lock l(g_recordsMutex);
 
     if (UNLIKELY(top != nameList->recordList())) {
@@ -1124,20 +1158,40 @@ RecordDesc* Unit::defRecordDesc(RecordDesc* record,
       continue;
     }
     nameList->m_cachedRecordDesc.bind(rds::Mode::Normal);
-    record->setRecordDescHandle(nameList->m_cachedRecordDesc);
-    record->incAtomicCount();
-    nameList->pushRecordDesc(record);
-    record->setCached();
-    return record;
+    newRecord->setRecordDescHandle(nameList->m_cachedRecordDesc);
+    newRecord->incAtomicCount();
+    nameList->pushRecordDesc(newRecord.get());
+    newRecord->setCached();
+    return newRecord.get();
   }
 }
 
-RecordDesc* Unit::loadRecordDesc(const StringData* name) {
-  auto const rec = lookupRecordDesc(name);
-  if (LIKELY(rec != nullptr)) return rec;
+RecordDesc* Unit::loadMissingRecordDesc(const NamedEntity* ne,
+                                        const StringData* name) {
   VMRegAnchor _;
-  AutoloadHandler::s_instance->autoloadRecordDesc(StrNR(name));
-  return lookupRecordDesc(name);
+  AutoloadHandler::s_instance->autoloadRecordDesc(
+    StrNR(const_cast<StringData*>(name)));
+  return Unit::lookupRecordDesc(ne);
+}
+
+RecordDesc* Unit::getRecordDesc(const StringData* name, bool tryAutoload) {
+  String normStr;
+  auto ne = NamedEntity::get(name, true, &normStr);
+  if (normStr) {
+    name = normStr.get();
+  }
+  return getRecordDesc(ne, name, tryAutoload);
+}
+
+RecordDesc* Unit::getRecordDesc(const NamedEntity* ne,
+                                const StringData *name, bool tryAutoload) {
+  RecordDesc *rec = lookupRecordDesc(ne);
+  if (UNLIKELY(!rec)) {
+    if (tryAutoload) {
+      return loadMissingRecordDesc(ne, name);
+    }
+  }
+  return rec;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1640,7 +1694,7 @@ void Unit::merge() {
     mergeImpl<false>(mergeInfo());
   }
 
-  for (auto& r : records()) {
+  for (auto& r : prerecords()) {
     defRecordDesc(r.get());
   }
 }

@@ -663,7 +663,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
     u->m_preClasses.push_back(PreClassPtr(pce->create(*u)));
   }
   for (auto const& re : m_reVec) {
-    u->m_records.push_back(RecordDescPtr(re->create(*u)));
+    u->m_preRecords.push_back(PreRecordDescPtr(re->create(*u)));
   }
   u->m_typeAliases = m_typeAliases;
   u->m_metaData = m_metaData;

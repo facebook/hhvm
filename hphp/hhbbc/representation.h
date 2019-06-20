@@ -582,6 +582,7 @@ struct Record {
   Unit* unit;
   SrcInfo srcInfo;
   LSString name;
+  LSString parentName;
   Attr attrs;
   int32_t id;
   UserAttributeMap userAttributes;

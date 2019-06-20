@@ -3256,8 +3256,12 @@ void parse_class(AsmState& as) {
 }
 
 /*
- * directive-record : identifier ?line-range
- *                    '{' record-body
+ * directive-record : attribute identifier ?line-range
+ *                      extension-clause '{' record-body
+ *                  ;
+ *
+ * extension-clause : empty
+ *                  | "extends" identifier
  *                  ;
  */
 void parse_record(AsmState& as) {
@@ -3267,13 +3271,15 @@ void parse_record(AsmState& as) {
 
   as.in.skipWhitespace();
 
-  bool isTop = true;
-
-  UserAttributeMap userAttrs;
-  Attr attrs = parse_attribute_list(as, AttrContext::Class, &userAttrs, &isTop);
-  if (!SystemLib::s_inited) {
-    attrs |= AttrUnique | AttrPersistent | AttrBuiltin;
+  Attr attrs = parse_attribute_list(as, AttrContext::Class);
+  if (!(attrs & AttrFinal)) {
+    // parser only sets the final flag. If the final flag is not set,
+    // the record is abstract.
+    attrs |= AttrAbstract;
+  } else if (attrs & AttrAbstract) {
+    as.error("A record cannot be both final and abstract");
   }
+
 
   std::string name;
   if (!as.in.readname(name)) {
@@ -3284,10 +3290,18 @@ void parse_record(AsmState& as) {
   int line1;
   parse_line_range(as, line0, line1);
 
+  std::string parentName;
+  if (as.in.tryConsume("extends")) {
+    if (!as.in.readname(parentName)) {
+      as.error("expected parent record name after `extends'");
+    }
+  }
+
   as.re = as.ue->newBareRecordEmitter(name);
   as.re->init(line0,
               line1,
               attrs,
+              makeStaticString(parentName),
               staticEmptyString());
 
   as.in.expectWs('{');

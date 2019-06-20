@@ -260,9 +260,9 @@ inline PreClass* Unit::lookupPreClassId(Id id) const {
   return m_preClasses[id].get();
 }
 
-inline RecordDesc* Unit::lookupRecordId(Id id) const {
-  assertx(id < Id(m_records.size()));
-  return m_records[id].get();
+inline PreRecordDesc* Unit::lookupPreRecordId(Id id) const {
+  assertx(id < Id(m_preRecords.size()));
+  return m_preRecords[id].get();
 }
 
 inline Unit::FuncRange Unit::funcs() const {
@@ -277,12 +277,12 @@ inline folly::Range<const PreClassPtr*> Unit::preclasses() const {
   return { m_preClasses.data(), m_preClasses.size() };
 }
 
-inline folly::Range<RecordDescPtr*> Unit::records() {
-  return { m_records.data(), m_records.size() };
+inline folly::Range<PreRecordDescPtr*> Unit::prerecords() {
+  return { m_preRecords.data(), m_preRecords.size() };
 }
 
-inline folly::Range<const RecordDescPtr*> Unit::records() const {
-  return { m_records.data(), m_records.size() };
+inline folly::Range<const PreRecordDescPtr*> Unit::prerecords() const {
+  return { m_preRecords.data(), m_preRecords.size() };
 }
 
 template<class Fn> void Unit::forEachFunc(Fn fn) const {

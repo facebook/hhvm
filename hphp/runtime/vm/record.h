@@ -37,11 +37,21 @@ namespace HPHP {
 
 struct RecordEmitter;
 
-struct RecordDesc : AtomicCountable {
+/*
+ * A PreRecordDesc represents the source-level definition of a Hack Record.
+ * Includes name of the parent class (if any) and metadata about fields
+ * declared in the record.
+ *
+ * This is separate for an actual RecordDesc which represents a request specific
+ * instantiation of a record type. For example, the parent record name may
+ * resolve to different RecordDescs in different requests.
+ */
+struct PreRecordDesc : AtomicCountable {
   friend struct RecordEmitter;
+  friend struct RecordDesc;
 
   struct Field {
-    Field(RecordDesc* record,
+    Field(PreRecordDesc* record,
           const StringData* name,
           Attr attrs,
           const StringData* userType,
@@ -76,17 +86,18 @@ struct RecordDesc : AtomicCountable {
   /*
    * Called when the (atomic) refcount hits zero.
    *
-   * The Record is completely dead at this point, and its memory is freed
+   * The PreRecordDesc is completely dead at this point, and its memory is freed
    * immediately.
    */
   void atomicRelease();
 
 private:
-  typedef IndexedStringMap<Field,true,Slot> FieldMap;
+  using FieldMap = IndexedStringMap<Field,true,Slot>;
 
 public:
-  RecordDesc(Unit* unit, int line1, int line2, const StringData* n,
-         Attr attrs, const StringData* docComment, Id id);
+  PreRecordDesc(Unit* unit, int line1, int line2, const StringData* name,
+                Attr attrs, const StringData* parentName,
+                const StringData* docComment, Id id);
 
 
   Unit*             unit()         const { return m_unit; }
@@ -96,28 +107,20 @@ public:
   Id                id()           const { return m_id; }
   Attr              attrs()        const { return m_attrs; }
   const StringData* name()         const { return m_name; }
+  const StringData* parentName()   const { return m_parentName; }
   const StringData* docComment()   const { return m_docComment; }
 
   static const StringData* mangleFieldName(const StringData* recordName,
                                            const StringData* fieldName,
                                            Attr attrs);
 
-  size_t numFields() const { return m_fields.size(); }
+  // PreRecordDesc contains only fields declared in the record,
+  // not ones declared in parent(s)
   using FieldRange = folly::Range<const Field*>;
   FieldRange allFields() const {
     return FieldRange(m_fields.accessList(), m_fields.size());
   }
-  Slot lookupField(const StringData*) const;
-  const Field& field(const StringData*) const;
   void checkFieldDefaultValues() const;
-
-  AtomicLowPtr<RecordDesc> m_next{nullptr}; // used by NamedEntity
-
-  void setCached();
-  void setRecordDescHandle(rds::Link<LowPtr<RecordDesc>,
-                                     rds::Mode::NonLocal> link) const;
-
-  void destroy();
 
 private:
   Unit* m_unit;
@@ -127,15 +130,97 @@ private:
   Id m_id;
   Attr m_attrs;
   LowStringPtr m_name;
+  LowStringPtr m_parentName;
   LowStringPtr m_docComment;
+  FieldMap m_fields;
+};
+
+using PreRecordDescPtr = AtomicSharedPtr<PreRecordDesc>;
+using RecordDescPtr = AtomicSharedLowPtr<RecordDesc>;
+
+struct RecordDesc : AtomicCountable {
+  // There is nothing request specific in record fields
+  using Field = PreRecordDesc::Field;
+  using FieldMap = PreRecordDesc::FieldMap;
+  using FieldRange = PreRecordDesc::FieldRange;
+
+  // Record availability. See Record::availWithParent()
+  enum class Avail {
+    False,
+    True,
+    Fail
+  };
+
+  RecordDesc(PreRecordDesc* preRec, RecordDesc* parent);
+
+  Unit* unit()                   const { return m_preRec->unit(); }
+  const StringData* name()       const { return m_preRec->name(); }
+  Attr attrs()                   const { return m_preRec->attrs(); }
+  const StringData* parentName() const { return m_preRec->parentName();  }
+
+  // Fields declared in current record as well as in its parent(s)
+  size_t numFields() const { return m_fields.size(); }
+  FieldRange allFields() const {
+    return FieldRange(m_fields.accessList(), m_fields.size());
+  }
+  Slot lookupField(const StringData*) const;
+  const Field& field(const StringData*) const;
+
+  const PreRecordDesc* preRecordDesc() const { return m_preRec.get(); }
+
+  /* Allocate a new RecordDesc.
+   *
+   * Eventually deallocated using atomicRelease(), but can go through some
+   * phase changes before that (see destroy()).
+   */
+  static RecordDesc* newRecordDesc(PreRecordDesc* preRec, RecordDesc* parent);
+  void destroy();
+  /*
+   * Called when the (atomic) refcount hits zero.
+   *
+   * The RecordDesc is completely dead at this point, and its memory is freed
+   * immediately.
+   */
+  void atomicRelease();
+
+  AtomicLowPtr<RecordDesc> m_next{nullptr}; // used by NamedEntity
+
+  void setCached();
+  void setRecordDescHandle(rds::Link<LowPtr<RecordDesc>,
+                                     rds::Mode::NonLocal> link) const;
+
+  /*
+   * Check whether a RecordDesc from a previous request is available
+   * to be defined.
+   * The caller should check that it has the same PreRecordDesc that is being
+   * defined. Being available means that the parent is available
+   * (or become defined via autoload, if tryAutoload is true).
+   *
+   * @returns: Avail::True:  if it's available
+   *           Avail::Fail:  if the parent is not defined at all at this point
+   *           Avail::False: if the parent is defined but does not correspond
+   *                         to this particular RecordDesc*
+   *
+   * The parent parameter is used for two purposes: first, it lets us avoid
+   * looking up the active parent record for each potential RecordDesc*;
+   * and second, it is used on Fail to return the problem record so the caller
+   * can report the error correctly.
+   */
+  Avail availWithParent(RecordDesc*& parent, bool tryAutoload = false) const;
+  bool isZombie() const { return !m_cachedRecordDesc.bound(); }
+
+private:
+  void setParent();
+  void setFields();
+
+  RecordDescPtr m_parent;
+  PreRecordDescPtr m_preRec;
   FieldMap m_fields;
 
   mutable rds::Link<LowPtr<RecordDesc>, rds::Mode::NonLocal> m_cachedRecordDesc;
 };
 
 extern Mutex g_recordsMutex;
-
-typedef AtomicSharedPtr<RecordDesc> RecordDescPtr;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

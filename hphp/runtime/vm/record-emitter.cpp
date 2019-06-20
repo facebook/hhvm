@@ -47,7 +47,7 @@ RecordEmitter::Field::Field(const RecordEmitter* re,
   , m_typeConstraint(typeConstraint)
   , m_userAttributes(userAttributes)
 {
-  m_mangledName = RecordDesc::mangleFieldName(re->name(), n, attrs);
+  m_mangledName = PreRecordDesc::mangleFieldName(re->name(), n, attrs);
   memcpy(&m_val, val, sizeof(TypedValue));
 }
 
@@ -56,15 +56,14 @@ RecordEmitter::RecordEmitter(UnitEmitter& ue, Id id, const std::string& name)
   , m_name(makeStaticString(name))
   , m_id(id) {}
 
-void RecordEmitter::init(int line1, int line2,
-                         Attr attrs, const StringData* docComment) {
+void RecordEmitter::init(int line1, int line2, Attr attrs,
+                         const StringData* parentName,
+                         const StringData* docComment) {
   m_line1 = line1;
   m_line2 = line2;
   m_attrs = attrs;
+  m_parent = parentName;
   m_docComment = docComment;
-  if (!SystemLib::s_inited) {
-    m_attrs = m_attrs | AttrBuiltin;
-  }
 }
 
 void RecordEmitter::commit(RepoTxn& txn) const {
@@ -76,39 +75,25 @@ void RecordEmitter::commit(RepoTxn& txn) const {
       .insert(*this, txn, usn, m_id, m_name);
 }
 
-RecordDesc* RecordEmitter::create(Unit& unit) const {
-  Attr attrs = m_attrs;
-  if (attrs & AttrPersistent &&
-      !RuntimeOption::RepoAuthoritative && SystemLib::s_inited) {
-    attrs = Attr(attrs & ~AttrPersistent);
-  }
+PreRecordDesc* RecordEmitter::create(Unit& unit) const {
+  auto  rec = std::make_unique<PreRecordDesc>(
+      &unit, m_line1, m_line2, m_name, m_attrs, m_parent, m_docComment, m_id);
 
-  assertx(attrs & AttrPersistent || SystemLib::s_inited);
-  auto const mem = low_malloc(sizeof(RecordDesc));
-  RecordDesc* rec;
-  try {
-    rec = new (mem) RecordDesc(&unit, m_line1, m_line2, m_name,
-                           attrs, m_docComment, m_id);
-  } catch (...) {
-    low_free(mem);
-    throw;
-  }
-
-  RecordDesc::FieldMap::Builder fieldBuild;
+  PreRecordDesc::FieldMap::Builder fieldBuild;
   for (unsigned i = 0; i < m_fieldMap.size(); ++i) {
     const Field& field = m_fieldMap[i];
-    fieldBuild.add(field.name(), RecordDesc::Field(rec,
-                                                   field.name(),
-                                                   field.attrs(),
-                                                   field.userType(),
-                                                   field.typeConstraint(),
-                                                   field.docComment(),
-                                                   field.val(),
-                                                   field.repoAuthType(),
-                                                   field.userAttributes()));
+    fieldBuild.add(field.name(), PreRecordDesc::Field(rec.get(),
+                                                      field.name(),
+                                                      field.attrs(),
+                                                      field.userType(),
+                                                      field.typeConstraint(),
+                                                      field.docComment(),
+                                                      field.val(),
+                                                      field.repoAuthType(),
+                                                      field.userAttributes()));
   }
   rec->m_fields.create(fieldBuild);
-  return rec;
+  return rec.release();
 }
 
 bool RecordEmitter::addField(const StringData* n,
@@ -145,6 +130,7 @@ template<class SerDe> void RecordEmitter::serdeMetaData(SerDe& sd) {
   sd(m_line1)
     (m_line2)
     (m_attrs)
+    (m_parent)
     (m_docComment)
 
     (m_userAttributes)

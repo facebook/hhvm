@@ -599,7 +599,7 @@ void insertCodeAt(jit::vector<Vinstr>& dst, unsigned& j,
   for (auto const& inst : src) {
     dst[j] = inst;
     dst[j].set_irctx(irctx);
-    dst[j++].pos = pos;
+    dst[j++].id = pos;
   }
 }
 
@@ -629,7 +629,7 @@ jit::vector<LiveRange> computePositions(Vunit& unit,
     auto const start = pos;
 
     for (auto& inst : unit.blocks[b].code) {
-      inst.pos = pos;
+      inst.id = pos;
       pos += 2;
     }
     block_ranges[b] = { start, pos };
@@ -1256,7 +1256,7 @@ analyzePhiHints(const Vunit& unit, const VxlsContext& ctx,
 
         auto const pgid = def_phi_group(defs[i], true);
         addPhiGroupMember(variables, phi_groups,
-                          uses[i], last.pos, pgid, defs[i]);
+                          uses[i], last.id, pgid, defs[i]);
       }
     }
   }
@@ -2978,29 +2978,29 @@ DEBUG_ONLY void printInstr(std::ostringstream& str,
       }
       if (collapse_fixed) {
         fixed = var; // can be any.
-        fixed_covers[0] |= var->ivl()->covers(inst.pos);
-        fixed_covers[1] |= var->ivl()->covers(inst.pos + 1);
+        fixed_covers[0] |= var->ivl()->covers(inst.id);
+        fixed_covers[1] |= var->ivl()->covers(inst.id + 1);
         continue;
       }
     }
     str << " ";
-    str << draw(var, inst.pos, Light, [&](Interval* child, unsigned p) {
+    str << draw(var, inst.id, Light, [&](Interval* child, unsigned p) {
       return child->covers(p);
     });
-    str << draw(var, inst.pos, Heavy, [&](Interval* child, unsigned p) {
+    str << draw(var, inst.id, Heavy, [&](Interval* child, unsigned p) {
       return child->usedAt(p);
     });
   }
-  str << " " << draw(fixed, inst.pos, Heavy, [&](Interval*, unsigned p) {
-    assertx(p - inst.pos < 2);
-    return fixed_covers[p - inst.pos];
+  str << " " << draw(fixed, inst.id, Heavy, [&](Interval*, unsigned p) {
+    assertx(p - inst.id < 2);
+    return fixed_covers[p - inst.id];
   });
-  if (inst.pos == ctx.block_ranges[b].start) {
+  if (inst.id == ctx.block_ranges[b].start) {
     str << folly::format(" B{: <3}", size_t(b));
   } else {
     str << "     ";
   }
-  str << folly::format(" {: <3} ", inst.pos) << show(unit, inst) << "\n";
+  str << folly::format(" {: <3} ", inst.id) << show(unit, inst) << "\n";
 }
 
 DEBUG_ONLY void printVariables(const char* caption,

@@ -327,12 +327,14 @@ namespace {
 struct SSAConverter {
   SSAConverter(Vunit& unit,
                const VregSet& targets,
-               const jit::vector<Vlabel>& rpo)
+               const jit::vector<Vlabel>& rpo,
+               MaybeVinstrId clobber)
     : doneBlocks{unit.blocks.size()}
     , predecessors{computePreds(unit)}
     , targets{targets}
     , rpo{rpo}
-    , unit{unit} {}
+    , unit{unit}
+    , clobber{clobber} {}
 
   // Create a new Vreg, recording that it replaced the original specified Vreg.
   Vreg makeVreg(Vreg pre) {
@@ -475,7 +477,7 @@ struct SSAConverter {
       assertx(phi.second.inputs.size() > 1);
 
       // First insert a phidef
-      auto const& block = unit.blocks[phi.second.block];
+      auto& block = unit.blocks[phi.second.block];
       auto foundExistingPhi = false;
       if (block.code.empty() || block.code.front().op != Vinstr::phidef) {
         // Insert a phidef instruction because one doesn't exist.
@@ -488,6 +490,7 @@ struct SSAConverter {
         // Otherwise expand an existing one.
         auto const& phidef = block.code.front().phidef_;
         unit.tuples[phidef.defs].push_back(phi.first);
+        if (clobber) block.code.front().id = *clobber;
         foundExistingPhi = true;
       }
 
@@ -502,6 +505,7 @@ struct SSAConverter {
           assertx(pred.code.back().op == Vinstr::phijmp);
           auto const& phijmp = pred.code.back().phijmp_;
           unit.tuples[phijmp.uses].push_back(input);
+          if (clobber) pred.code.back().id = *clobber;
         } else {
           // Otherwise there should be a jmp instruction here. We should have
           // split critical edges, so there can only be an unconditional jmp at
@@ -512,6 +516,7 @@ struct SSAConverter {
           pred.code.back().op = Vinstr::phijmp;
           pred.code.back().phijmp_ =
             phijmp{jmp.target, unit.makeTuple({input})};
+          if (clobber) pred.code.back().id = *clobber;
         }
       }
     }
@@ -529,22 +534,27 @@ struct SSAConverter {
           assertx(targets[inst.ssaalias_.s]);
           assertx(targets[inst.ssaalias_.d]);
           inst.ssaalias_.s = read(label, inst.ssaalias_.s);
+          if (clobber) inst.id = *clobber;
           write(label, inst.ssaalias_.d, inst.ssaalias_.s);
           continue;
         }
 
+        auto changed = false;
         visitRegsMutable(
           unit, inst,
           [&](Vreg r) {
             if (!targets[r]) return r;
             // Lookup what this Vreg should be rewritten to
-            return read(label, r);
+            auto const r2 = read(label, r);
+            if (r != r2) changed = true;
+            return r2;
           },
           [&](Vreg r) {
             if (!targets[r]) return r;
             // Create a new Vreg and record that any usage of 'r' after this
             // point should instead use 'r2'.
             auto const r2 = makeVreg(r);
+            changed = true;
             write(label, r, r2);
             return r2;
           },
@@ -558,6 +568,7 @@ struct SSAConverter {
             return s;
           }
         );
+        if (changed && clobber) inst.id = *clobber;
       }
 
       // Mark this block as processed and check if this has made any successor
@@ -593,9 +604,15 @@ struct SSAConverter {
           continue;
         }
 
+        auto& inst = unit.blocks[label].code[i];
+        auto changed = false;
         visitRegsMutable(
-          unit, unit.blocks[label].code[i],
-          [&](Vreg r) { return rewrite(r); },
+          unit, inst,
+          [&](Vreg r) {
+            auto const r2 = rewrite(r);
+            if (r != r2) changed = true;
+            return r2;
+          },
           [&](Vreg r) { return r; },
           [&](RegSet s) {
             if (debug) s.forEach([&](Vreg r) { always_assert(!targets[r]); });
@@ -606,6 +623,7 @@ struct SSAConverter {
             return s;
           }
         );
+        if (changed && clobber) inst.id = *clobber;
 
         ++i;
       }
@@ -689,14 +707,16 @@ struct SSAConverter {
   const VregSet& targets;
   const jit::vector<Vlabel>& rpo;
   Vunit& unit;
+  MaybeVinstrId clobber;
 };
 
 }
 
 jit::fast_map<Vreg, Vreg> restoreSSA(Vunit& unit,
                                      const VregSet& targets,
-                                     const jit::vector<Vlabel>& rpo) {
-  SSAConverter converter{unit, targets, rpo};
+                                     const jit::vector<Vlabel>& rpo,
+                                     MaybeVinstrId clobber) {
+  SSAConverter converter{unit, targets, rpo, clobber};
   converter();
   return std::move(converter.newVregs);
 }

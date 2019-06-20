@@ -213,7 +213,7 @@ struct State {
 
   // All the instructions which have been converted to
   // pseudo-instructions. Those pseudo-instructions have the index into this
-  // vector stored in their "pos" field to map back.
+  // vector stored in their "id" field to map back.
   jit::vector<Vinstr> pseudos;
 
   // Liveness information
@@ -1553,7 +1553,7 @@ VregSet place_constants(State& state) {
  * involve rewriting physical registers into virtual ones). So, convert all such
  * instructions into "pseudo" instructions, which serve solely to make their
  * uses/defs explicit with Vregs. These instructions can then be manipulated
- * just like any other instruction. We use the "pos" field as an index to their
+ * just like any other instruction. We use the "id" field as an index to their
  * original instruction, which lets us convert these pseudo instructions back
  * when we're done. We have a variety of pseudo instructions to represent the
  * distinct categories of instructions that we care about.
@@ -1681,7 +1681,7 @@ void pseudo_convert(State& state) {
           assertx(!v.flagDef);
 
           state.pseudos.emplace_back(inst);
-          inst.pos = state.pseudos.size() - 1;
+          inst.id = state.pseudos.size() - 1;
 
           inst.op = Vinstr::pseudojmp;
           inst.pseudojmp_ = pseudojmp{
@@ -1706,7 +1706,7 @@ void pseudo_convert(State& state) {
           assertx(!v.flagUse);
 
           state.pseudos.emplace_back(inst);
-          inst.pos = state.pseudos.size() - 1;
+          inst.id = state.pseudos.size() - 1;
 
           inst.op = Vinstr::pseudocall;
           inst.pseudocall_ = pseudocall{
@@ -1729,7 +1729,7 @@ void pseudo_convert(State& state) {
           assertx(!v.flagDef);
 
           state.pseudos.emplace_back(inst);
-          inst.pos = state.pseudos.size() - 1;
+          inst.id = state.pseudos.size() - 1;
 
           inst.op = Vinstr::pseudojcc;
           inst.pseudojcc_ = pseudojcc{
@@ -1750,7 +1750,7 @@ void pseudo_convert(State& state) {
           assertx(v.flagDef);
 
           state.pseudos.emplace_back(inst);
-          inst.pos = state.pseudos.size() - 1;
+          inst.id = state.pseudos.size() - 1;
 
           inst.op = Vinstr::pseudodiv;
           inst.pseudodiv_ = pseudodiv{
@@ -1775,7 +1775,7 @@ void pseudo_convert(State& state) {
           Vlabel targets[2] = { succList[0], succList[1] };
 
           state.pseudos.emplace_back(inst);
-          inst.pos = state.pseudos.size() - 1;
+          inst.id = state.pseudos.size() - 1;
 
           inst.op = Vinstr::pseudocallphp;
           inst.pseudocallphp_ = pseudocallphp{
@@ -1800,7 +1800,7 @@ void pseudo_convert(State& state) {
           assertx(v.flagDef);
 
           state.pseudos.emplace_back(inst);
-          inst.pos = state.pseudos.size() - 1;
+          inst.id = state.pseudos.size() - 1;
 
           inst.op = Vinstr::pseudoshift;
           inst.pseudoshift_ = pseudoshift{
@@ -6984,19 +6984,19 @@ void restore_pseudo(State& state, Vinstr& inst) {
                             VregSF flags = InvalidReg,
                             Vreg defWithHint = InvalidReg,
                             Vreg useWithHint = InvalidReg) {
-    assertx(inst.pos < state.pseudos.size());
+    assertx(inst.id < state.pseudos.size());
     // Run the visitor on the original instruction, rewriting its operands.
     PseudoConvertRestoreVisitor v{
       defs, uses, uses64, acrosses, defWithHint, useWithHint, flags
     };
-    visitOperands(state.pseudos[inst.pos], v);
+    visitOperands(state.pseudos[inst.id], v);
 
     // We can't change implicit register effects, so make sure they weren't
     // changed in the pseudo.
     RegSet implicitUses, implicitAcross, implicitDefs;
     getEffects(
       state.abi,
-      state.pseudos[inst.pos],
+      state.pseudos[inst.id],
       implicitUses,
       implicitAcross,
       implicitDefs
@@ -7032,7 +7032,7 @@ void restore_pseudo(State& state, Vinstr& inst) {
     assertx(v.flags == InvalidReg);
 
     // Change the instruction back to the original (which has been rewritten).
-    inst = state.pseudos[inst.pos];
+    inst = state.pseudos[inst.id];
   };
 
   switch (inst.op) {

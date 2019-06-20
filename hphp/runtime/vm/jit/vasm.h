@@ -89,6 +89,11 @@ DECLARE_VNUM(VcallArgsId, uint32_t, true, "V");
 
 ///////////////////////////////////////////////////////////////////////////////
 
+using VinstrId = unsigned int;
+using MaybeVinstrId = folly::Optional<VinstrId>;
+
+///////////////////////////////////////////////////////////////////////////////
+
 /*
  * Assert invariants on a Vunit.
  */
@@ -116,10 +121,10 @@ void allocateRegistersWithGraphColor(Vunit&, const Abi&);
 void annotateSFUses(Vunit&);
 void fuseBranches(Vunit&);
 void optimizeCopies(Vunit&, const Abi&);
-void optimizeExits(Vunit&);
-void optimizeJmps(Vunit&);
+void optimizeExits(Vunit&, MaybeVinstrId = {});
+void optimizeJmps(Vunit&, MaybeVinstrId = {});
 void optimizePhis(Vunit&);
-void removeDeadCode(Vunit&);
+void removeDeadCode(Vunit&, MaybeVinstrId = {});
 void removeTrivialNops(Vunit&);
 void reuseImmq(Vunit&);
 template<typename Folder> void foldImms(Vunit&);

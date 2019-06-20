@@ -1145,22 +1145,16 @@ void lowerForX64(Vunit& unit) {
 void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
   Timer timer(Timer::vasm_optimize, unit.log_entry);
 
-  auto const doPass = [&] (const char* name, void fun(Vunit&)) {
+  auto const doPass = [&] (const char* name, auto fun) {
     rqtrace::EventGuard trace{name};
     fun(unit);
-  };
-
-    auto const doPass1 = [&]
-      (const char *name, const auto& arg, auto fun) {
-    rqtrace::EventGuard trace{name};
-    fun(unit, arg);
   };
 
   doPass("VOPT_NOP",    removeTrivialNops);
   doPass("VOPT_PHI",    optimizePhis);
   doPass("VOPT_BRANCH", fuseBranches);
-  doPass("VOPT_JMP",    optimizeJmps);
-  doPass("VOPT_EXIT",   optimizeExits);
+  doPass("VOPT_JMP",    [] (Vunit& u) { optimizeJmps(u); });
+  doPass("VOPT_EXIT",   [] (Vunit& u) { optimizeExits(u); });
 
   assertx(checkWidths(unit));
 
@@ -1181,27 +1175,29 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
     doPass("VOPT_FOLD_IMM", foldImms<x64::ImmFolder>);
   }
 
-  doPass1("VOPT_COPY", abi, optimizeCopies);
+  doPass("VOPT_COPY", [&] (Vunit& u) { optimizeCopies(u, abi); });
 
   if (unit.needsRegAlloc()) {
-    doPass("VOPT_DCE", removeDeadCode);
-    doPass("VOPT_JMP", optimizeJmps);
-    doPass("VOPT_DCE", removeDeadCode);
+    doPass("VOPT_DCE", [] (Vunit& u) { removeDeadCode(u); });
+    doPass("VOPT_JMP", [] (Vunit& u) { optimizeJmps(u); });
+    doPass("VOPT_DCE", [] (Vunit& u) { removeDeadCode(u); });
     if (regalloc) {
       if (RuntimeOption::EvalUseGraphColor &&
           unit.context &&
           (unit.context->kind == TransKind::Optimize ||
            unit.context->kind == TransKind::OptPrologue)) {
-        doPass1("VOPT_GRAPH_COLOR", abi, allocateRegistersWithGraphColor);
+        rqtrace::EventGuard trace{"VOPT_GRAPH_COLOR"};
+        allocateRegistersWithGraphColor(unit, abi);
       } else {
-        doPass1("VOPT_XLS", abi, allocateRegistersWithXLS);
+        rqtrace::EventGuard trace{"VOPT_XLS"};
+        allocateRegistersWithXLS(unit, abi);
       }
-      doPass1("VOPT_SF_PEEPHOLES", abi, sfPeepholes);
+      doPass("VOPT_SF_PEEPHOLES", [&] (Vunit& u) { sfPeepholes(u, abi); });
       doPass("VOPT_POST_RA_SIMPLIFY", postRASimplify);
     }
   }
   if (unit.blocks.size() > 1) {
-    doPass("VOPT_JMP", optimizeJmps);
+    doPass("VOPT_JMP", [] (Vunit& u) { optimizeJmps(u); });
   }
 }
 

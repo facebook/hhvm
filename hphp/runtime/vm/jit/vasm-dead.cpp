@@ -50,7 +50,7 @@ namespace HPHP { namespace jit {
 // RDF(b) for each block; then a branch is only useful if it controls whether
 // or not a useful block executes, and useless branches can be forwarded to
 // the nearest useful post-dominator.
-void removeDeadCode(Vunit& unit) {
+void removeDeadCode(Vunit& unit, MaybeVinstrId clobber) {
   Timer timer(Timer::vasm_dce);
 
   assertx(check(unit));
@@ -176,6 +176,7 @@ void removeDeadCode(Vunit& unit) {
               inst.copyargs_.s = unit.makeTuple(std::move(newSrcs));
               inst.copyargs_.d = unit.makeTuple(std::move(newDsts));
             }
+            if (clobber) inst.id = *clobber;
             changed = true;
             break;
           }
@@ -189,12 +190,14 @@ void removeDeadCode(Vunit& unit) {
                 inst.op = Vinstr::copy;
                 inst.copy_ = copy{s, d};
               }
+              if (clobber) inst.id = *clobber;
               changed = true;
             } else if (!isLive(inst.copy2_.d1)) {
               auto const s = inst.copy2_.s0;
               auto const d = inst.copy2_.d0;
               inst.op = Vinstr::copy;
               inst.copy_ = copy{s, d};
+              if (clobber) inst.id = *clobber;
               changed = true;
             }
             break;
@@ -229,6 +232,7 @@ void removeDeadCode(Vunit& unit) {
                 // makeTuple may have invalidated d
                 d = &unit.tuples[inst.phidef_.defs];
               }
+              if (clobber) phijmp.id = *clobber;
             }
 
             // Now likewise shrink the dests in the phidef
@@ -244,6 +248,7 @@ void removeDeadCode(Vunit& unit) {
               inst.phidef_.defs = unit.makeTuple(std::move(newDsts));
             }
 
+            if (clobber) inst.id = *clobber;
             changed = true;
             break;
           }
@@ -255,6 +260,7 @@ void removeDeadCode(Vunit& unit) {
             if (isLiveInst(inst)) continue;
             changed = true;
             inst = nop{};
+            if (clobber) inst.id = *clobber;
             break;
         }
       }

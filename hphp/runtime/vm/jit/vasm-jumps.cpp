@@ -174,7 +174,8 @@ bool isOnly(Vunit& unit, Vlabel b, Vinstr::Opcode op) {
  */
 bool diamondIntoCmov(Vunit& unit, jcc& jcc_i,
                      jit::vector<Vinstr>& code,
-                     jit::vector<int>& npreds) {
+                     jit::vector<int>& npreds,
+                     MaybeVinstrId clobber) {
   auto const next = jcc_i.targets[0];
   auto const taken = jcc_i.targets[1];
   if (!isOnly(unit, next, Vinstr::phijmp)) return false;
@@ -248,10 +249,12 @@ bool diamondIntoCmov(Vunit& unit, jcc& jcc_i,
   ++npreds[join];
   if (!--npreds[next]) {
     unit.blocks[next].code[0] = trap{TRAP_REASON};
+    if (clobber) unit.blocks[next].code[0].id = *clobber;
     --npreds[join];
   }
   if (!--npreds[taken]) {
     unit.blocks[taken].code[0] = trap{TRAP_REASON};
+    if (clobber) unit.blocks[taken].code[0].id = *clobber;
     --npreds[join];
   }
 
@@ -265,7 +268,7 @@ bool diamondIntoCmov(Vunit& unit, jcc& jcc_i,
 
 }
 
-void optimizeJmps(Vunit& unit) {
+void optimizeJmps(Vunit& unit, MaybeVinstrId clobber) {
   Timer timer(Timer::vasm_jumps);
 
   bool changed = false;
@@ -298,6 +301,7 @@ void optimizeJmps(Vunit& unit) {
         if (ss[0] == ss[1]) {
           // both edges have same target, change to jmp
           code.back() = jmp{ss[0]};
+          if (clobber) code.back().id = *clobber;
           --npreds[ss[0]];
           changed = true;
         } else {
@@ -306,6 +310,7 @@ void optimizeJmps(Vunit& unit) {
               isOnly(unit, jcc_i.targets[0], Vinstr::jmpi)) {
             jcc_i = jcc{ccNegate(jcc_i.cc), jcc_i.sf,
                         {jcc_i.targets[1], jcc_i.targets[0]}};
+            if (clobber) code.back().id = *clobber;
           }
 
           auto const taken = jcc_i.targets[1];
@@ -355,7 +360,7 @@ void optimizeJmps(Vunit& unit) {
             }
           }
 
-          changed |= diamondIntoCmov(unit, jcc_i, code, npreds);
+          changed |= diamondIntoCmov(unit, jcc_i, code, npreds, clobber);
         }
       }
 
@@ -397,8 +402,9 @@ void optimizeJmps(Vunit& unit) {
           code.emplace_back(jmp{target}, irctx);
 
           unit.blocks[target].code[0] = nop{};
-          --npreds[target];
+          if (clobber) unit.blocks[target].code[0].id = *clobber;
 
+          --npreds[target];
           changed = true;
         }
       }

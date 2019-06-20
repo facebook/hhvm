@@ -1384,9 +1384,11 @@ struct Vinstr {
   // 2-byte hole here.
 
   /*
-   * Instruction position, currently used only in vasm-xls.
+   * Private data usable by passes. Any pass can do what it wants with
+   * it. The only guarantee is that its always initialized to zero by
+   * default.
    */
-  unsigned pos;
+  VinstrId id = 0;
 
   /*
    * If present, the IRInstruction this Vinstr was originally created from.

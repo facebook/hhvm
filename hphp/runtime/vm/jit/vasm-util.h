@@ -110,9 +110,11 @@ LoopBlocks findLoopBlocks(const Vunit&,
  *   conjureuse %4
  *   conjureuse %3
  */
-jit::fast_map<Vreg, Vreg> restoreSSA(Vunit& unit,
-                                     const VregSet& targets,
-                                     const jit::vector<Vlabel>& rpo);
+jit::fast_map<Vreg, Vreg>
+restoreSSA(Vunit& unit,
+           const VregSet& targets,
+           const jit::vector<Vlabel>& rpo,
+           MaybeVinstrId = {});
 
 ///////////////////////////////////////////////////////////////////////////////
 

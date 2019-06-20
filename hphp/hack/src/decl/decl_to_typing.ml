@@ -20,14 +20,14 @@ open Typing_defs
 
 module Reason = Typing_reason
 
-(** [inheritable_elt] is a representation internal to Decl_inheritance which is
-    used for both methods and properties (members represented using
-    {!Typing_defs.class_elt}). Tagging these members with
-    [should_chown_privates] allows us to assign private trait members to the
-    class which used the trait and to filter out other private members. *)
-type inheritable_elt = {
+(** [tagged_elt] is a representation internal to Decl_inheritance which is used
+    for both methods and properties (members represented using
+    {!Typing_defs.class_elt}). Tagging these members with [inherit_when_private]
+    allows us to assign private trait members to the class which used the trait
+    and to filter out other private members. *)
+type tagged_elt = {
   id: string;
-  should_chown_privates: bool;
+  inherit_when_private: bool;
   elt: class_elt;
 }
 
@@ -77,14 +77,14 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
     ce_type = ty;
   }
 
-let shallow_method_to_ielt child_class mro subst meth : inheritable_elt =
+let shallow_method_to_telt child_class mro subst meth : tagged_elt =
   {
     id = snd meth.sm_name;
-    should_chown_privates = mro.mro_copy_private_members;
+    inherit_when_private = mro.mro_copy_private_members;
     elt = shallow_method_to_class_elt child_class mro subst meth;
   }
 
-let shallow_prop_to_ielt child_class mro subst prop : inheritable_elt =
+let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
   let visibility = base_visibility mro.mro_name prop.sp_visibility in
   let ty = lazy begin
     let ty = match prop.sp_type with
@@ -96,7 +96,7 @@ let shallow_prop_to_ielt child_class mro subst prop : inheritable_elt =
   end in
   {
     id = snd prop.sp_name;
-    should_chown_privates = mro.mro_copy_private_members;
+    inherit_when_private = mro.mro_copy_private_members;
     elt = {
       ce_abstract = false;
       ce_final = true;

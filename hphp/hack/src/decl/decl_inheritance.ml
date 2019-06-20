@@ -72,11 +72,11 @@ module SPairSet = Reordered_argument_set(Caml.Set.Make(struct
 end))
 
 (** Given a linearization filtered for method lookup, return a [Sequence.t]
-    containing each method (as an {!inheritable_elt}) in linearization order,
-    with method redeclarations already handled (that is, methods arising from a
+    containing each method (as an {!tagged_elt}) in linearization order, with
+    method redeclarations already handled (that is, methods arising from a
     redeclaration appear in the sequence as regular methods, and trait methods
     which were redeclared do not appear in the sequence). *)
-let method_ielts ~static child_class_name lin =
+let methods ~static child_class_name lin =
   Sequence.unfold ~init:(SPairSet.empty, lin) ~f:begin fun (removed, seq) ->
     match Sequence.next seq with
     | None -> None
@@ -89,7 +89,7 @@ let method_ielts ~static child_class_name lin =
       let methods_seq =
         Sequence.append (Sequence.of_list methods) methods_from_redecls
         |> Sequence.filter ~f:(fun sm -> not (SPairSet.mem removed (cid, snd sm.sm_name)))
-        |> Sequence.map ~f:(shallow_method_to_ielt child_class_name mro subst)
+        |> Sequence.map ~f:(shallow_method_to_telt child_class_name mro subst)
       in
       (* "Remove" all trait methods which were redeclared. If we encounter any
          of these trait methods later in the linearization, just ignore them. *)
@@ -103,13 +103,13 @@ let method_ielts ~static child_class_name lin =
   |> Sequence.concat
 
 (** Given a linearization filtered for property lookup, return a [Sequence.t]
-    emitting each property (as an {!inheritable_elt}) in linearization order. *)
-let prop_ielts ~static child_class_name lin =
+    emitting each property (as an {!tagged_elt}) in linearization order. *)
+let props ~static child_class_name lin =
   lin
   |> Sequence.map ~f:begin fun (mro, cls, subst) ->
     (if static then cls.sc_sprops else cls.sc_props)
     |> Sequence.of_list
-    |> Sequence.map ~f:(shallow_prop_to_ielt child_class_name mro subst)
+    |> Sequence.map ~f:(shallow_prop_to_telt child_class_name mro subst)
   end
   |> Sequence.concat
 
@@ -142,17 +142,17 @@ let chown_private child_class_name ancestor_sig =
     Mark private trait members as private to [child_class_name] instead. *)
 let filter_or_chown_privates
     (child_class_name: string)
-    (lin: inheritable_elt Sequence.t)
+    (lin: tagged_elt Sequence.t)
     : (string * class_elt) Sequence.t =
-  Sequence.filter_map lin begin fun {id; should_chown_privates; elt} ->
+  Sequence.filter_map lin begin fun {id; inherit_when_private; elt} ->
     let ancestor_name = elt.ce_origin in
     let is_private_and_inherited =
       ancestor_name <> child_class_name && is_private elt
     in
-    if is_private_and_inherited && not should_chown_privates
+    if is_private_and_inherited && not inherit_when_private
     then None
     else
-      if is_private_and_inherited && should_chown_privates
+      if is_private_and_inherited && inherit_when_private
       then Some (id, chown_private child_class_name elt)
       else Some (id, elt)
   end
@@ -371,14 +371,14 @@ let fold_constructors child_class_name acc ancestor =
 let get_all_methods ~static class_name lin =
   lin
   |> filter_for_method_lookup
-  |> method_ielts ~static class_name
+  |> methods ~static class_name
   |> filter_or_chown_privates class_name
   |> Sequence.memoize
 
 let props_cache ~static class_name lin =
   lin
   |> filter_for_prop_lookup
-  |> prop_ielts ~static class_name
+  |> props ~static class_name
   |> filter_or_chown_privates class_name
   |> make_elt_cache class_name
 

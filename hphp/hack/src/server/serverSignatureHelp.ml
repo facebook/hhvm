@@ -122,7 +122,7 @@ let go env (file, line, char) ~basic_only =
     >>= fun def ->
     let file =
       ServerCommandTypes.FileName (def.SymbolDefinition.pos |> Pos.to_absolute |> Pos.filename) in
-    ServerDocblockAt.go_def def ~base_class_name ~file ~basic_only
+    ServerDocblockAt.go_def ~def ~base_class_name ~file ~basic_only
   in
   let signature_information = {
     siginfo_label;

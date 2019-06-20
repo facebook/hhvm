@@ -9,7 +9,7 @@
 
 (** Returns the docblock for the given symbol or expression. *)
 val go_def :
-  Relative_path.t SymbolDefinition.t ->
+  def:Relative_path.t SymbolDefinition.t ->
   base_class_name: string option ->
   file: ServerCommandTypes.file_input ->
   basic_only: bool ->

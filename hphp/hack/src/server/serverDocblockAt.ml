@@ -99,7 +99,11 @@ let fallback class_name member_name =
   |> all_interfaces_or_first_class_docblock []
   |> render_ancestor_docblocks
 
-let go_def def ~base_class_name ~file ~basic_only =
+let go_def
+    ~(def: Relative_path.t SymbolDefinition.t)
+    ~(base_class_name: string option)
+    ~(file: ServerCommandTypes.file_input)
+    ~(basic_only: bool) =
   let open Option.Monad_infix in
   (** Read as "or-else." *)
   let (>>~) opt f = if Option.is_some opt then opt else f () in
@@ -174,5 +178,5 @@ let go_docblock_at
         ~base_class_name
         ~file:(ServerCommandTypes.FileName filename)
         ~basic_only
-        def in
+        ~def in
       result

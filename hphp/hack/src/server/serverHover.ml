@@ -49,7 +49,7 @@ let make_hover_doc_block ~basic_only file occurrence def_opt =
   match def_opt with
   | Some def ->
     let base_class_name = SymbolOccurrence.enclosing_class occurrence in
-    ServerDocblockAt.go_def def ~base_class_name ~file ~basic_only
+    ServerDocblockAt.go_def ~def ~base_class_name ~file ~basic_only
     |> Option.to_list
   | None -> []
 

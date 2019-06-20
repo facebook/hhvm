@@ -30,6 +30,8 @@ module Naming : Error_category
 module NastCheck : Error_category
 module Typing : Error_category
 
+val add_error : error -> unit
+
 (* Error codes that can never be suppressed with a FIXME. *)
 val default_ignored_fixme_codes : ISet.t
 (* Error codes that cannot be suppressed with a FIXME based on configuration. *)
@@ -183,7 +185,6 @@ val unset_nonidx_in_strict_no_varray : Pos.t -> (Pos.t * string) list -> unit
 val unpacking_disallowed_builtin_function : Pos.t -> string -> unit
 val array_get_arity : Pos.t -> string -> Pos.t -> unit
 val typing_error : Pos.t -> string -> unit
-val typing_error_l : error -> unit
 val undefined_field : use_pos:Pos.t -> name:string -> shape_type_pos:Pos.t -> unit
 val array_access : Pos.t -> Pos.t -> string -> unit
 val keyset_set : Pos.t -> Pos.t -> unit
@@ -393,6 +394,7 @@ val format_summary : format -> 'a error_ list -> int option -> string option
 val format_filename : Pos.absolute -> string
 val format_message : string -> Pos.absolute -> is_first:bool -> col_width:int option -> string * string
 val try_ : (unit -> 'a) -> (error -> 'a) -> 'a
+val try_with_result : (unit -> 'a) -> ('a -> error -> 'a) -> 'a
 val try_with_error : (unit -> 'a) -> (unit -> 'a) -> 'a
 val try_add_err : Pos.t -> string -> (unit -> 'a) -> (unit -> 'a) -> 'a
 

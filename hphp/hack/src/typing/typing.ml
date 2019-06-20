@@ -4248,32 +4248,18 @@ and class_get_ ~is_method ~is_const ~this_ty ?(explicit_tparams=[])
   | _, Tunion tyl ->
       let env, tyl =
         List.map_env env tyl begin fun env ty ->
-        let env, this_ty =
-          if is_method then
-            this_for_method env cid ty
-          else
-            env, ty in
-        let env, ty, _decl_ty, _ =
-          class_get_ ~is_method ~is_const ~this_ty ~explicit_tparams ~incl_tc
-                     env cid ty (p, mid) k
+        let env, ty, _ =
+          class_get ~is_method ~is_const ~explicit_tparams ~incl_tc
+                     env ty (p, mid) cid k
             in env, ty
         end in
       let env, ty = Union.union_list env (fst cty) tyl in
       env, ty, None, None
   | _, Tintersection tyl ->
-      (* TODO T44713456 This is incomplete: (A&B)::m should be ok if only A has m. *)
-      let env, tyl =
-        List.map_env env tyl begin fun env ty ->
-        let env, this_ty =
-          if is_method then
-            this_for_method env cid ty
-          else
-            env, ty in
-        let env, ty, _decl_ty, _ =
-          class_get_ ~is_method ~is_const ~this_ty ~explicit_tparams ~incl_tc
-                     env cid ty (p, mid) k
-            in env, ty
-        end in
+      let env, tyl = TUtils.run_on_intersection env tyl ~f:(fun env ty ->
+        let env, ty, _ =
+          class_get ~is_method ~is_const ~explicit_tparams ~incl_tc env ty (p, mid) cid k in
+        env, ty) in
       let env, ty = Inter.intersect_list env (fst cty) tyl in
       env, ty, None, None
   | _, Tabstract (_, Some ty) ->

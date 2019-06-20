@@ -214,6 +214,26 @@ let try_over_concrete_supertypes env ty f =
           (fun _ -> iter_over_types env resl tyl) in
   iter_over_types env [] tyl
 
+(** Run a function on an intersection represented by a list of types.
+Similarly to try_over_concrete_supertypes, we stay liberal with errors:
+discard the result of any run which has produced an error.
+If all runs have produced an error, gather all errors and results and add errors. *)
+let run_on_intersection :
+  'env -> f:('env -> locl ty -> 'env * 'a) -> locl ty list -> 'env * 'a list
+= fun env ~f tyl ->
+  let env, resl_errors = List.map_env env tyl ~f:(fun env ty ->
+    Errors.try_with_result
+      (fun () ->
+        let env, res = f env ty in
+        env, (res, None))
+      (fun (_, (res, _)) err -> env, (res, Some err))) in
+  let valid_resl = List.filter resl_errors ~f:(fun (_, err) -> Option.is_none err) |>
+    List.map ~f:fst in
+  let resl = if not (List.is_empty valid_resl) then valid_resl else begin
+    List.iter resl_errors ~f:(fun (_, err) -> Option.iter err ~f:Errors.add_error);
+    List.map ~f:fst resl_errors end in
+  env, resl
+
 (*****************************************************************************)
 (* Dynamicism  *)
 (*****************************************************************************)

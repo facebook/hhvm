@@ -2179,9 +2179,6 @@ let array_get_arity pos1 name pos2 =
 let typing_error pos msg =
   add (Typing.err_code Typing.GenericUnify) pos msg
 
-let typing_error_l err =
-  add_error err
-
 let undefined_field ~use_pos ~name ~shape_type_pos =
   add_list (Typing.err_code Typing.UndefinedField) [
     use_pos, "The field "^name^" is undefined";

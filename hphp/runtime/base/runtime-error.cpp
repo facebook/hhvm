@@ -139,6 +139,13 @@ void raise_record_field_typehint_error(const std::string& msg, bool isSoft) {
               "violation");
 }
 
+void raise_record_init_error(const StringData* recName,
+                             const StringData* fieldName) {
+  raise_error(
+    folly::sformat("Record field '{}::{}' not initialized", recName, fieldName)
+  );
+}
+
 void raise_property_typehint_binding_error(const Class* declCls,
                                            const StringData* propName,
                                            bool isSoft) {

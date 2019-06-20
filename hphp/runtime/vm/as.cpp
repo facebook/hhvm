@@ -2857,13 +2857,13 @@ void parse_prop_or_field_impl(AsmState& as,
 
   TypedValue tvInit = parse_member_tv_initializer(as);
   ((as.*em)->*add)(makeStaticString(name),
-                      attrs,
-                      userTyStr,
-                      typeConstraint,
-                      heredoc,
-                      &tvInit,
-                      RepoAuthType{},
-                      userAttributes);
+                   attrs,
+                   userTyStr,
+                   typeConstraint,
+                   heredoc,
+                   &tvInit,
+                   RepoAuthType{},
+                   userAttributes);
 }
 
 /*

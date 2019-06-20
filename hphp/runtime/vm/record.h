@@ -109,6 +109,7 @@ public:
   }
   Slot lookupField(const StringData*) const;
   const Field& field(const StringData*) const;
+  void checkFieldDefaultValues() const;
 
   AtomicLowPtr<RecordDesc> m_next{nullptr}; // used by NamedEntity
 

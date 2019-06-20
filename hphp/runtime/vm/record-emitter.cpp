@@ -98,14 +98,14 @@ RecordDesc* RecordEmitter::create(Unit& unit) const {
   for (unsigned i = 0; i < m_fieldMap.size(); ++i) {
     const Field& field = m_fieldMap[i];
     fieldBuild.add(field.name(), RecordDesc::Field(rec,
-                                               field.name(),
-                                               field.attrs(),
-                                               field.userType(),
-                                               field.typeConstraint(),
-                                               field.docComment(),
-                                               field.val(),
-                                               field.repoAuthType(),
-                                               field.userAttributes()));
+                                                   field.name(),
+                                                   field.attrs(),
+                                                   field.userType(),
+                                                   field.typeConstraint(),
+                                                   field.docComment(),
+                                                   field.val(),
+                                                   field.repoAuthType(),
+                                                   field.userAttributes()));
   }
   rec->m_fields.create(fieldBuild);
   return rec;
@@ -126,14 +126,14 @@ bool RecordEmitter::addField(const StringData* n,
   }
   RecordEmitter::Field field{
     this,
-      n,
-      attrs,
-      userType,
-      typeConstraint,
-      docComment,
-      val,
-      repoAuthType,
-      userAttributes
+    n,
+    attrs,
+    userType,
+    typeConstraint,
+    docComment,
+    val,
+    repoAuthType,
+    userAttributes
   };
   m_fieldMap.add(field.name(), field);
   return true;

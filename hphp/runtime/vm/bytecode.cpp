@@ -5795,6 +5795,7 @@ OPTBLD_INLINE void iopDefCls(uint32_t cid) {
 
 OPTBLD_INLINE void iopDefRecord(uint32_t cid) {
   RecordDesc* r = vmfp()->m_func->unit()->lookupRecordId(cid);
+  r->checkFieldDefaultValues();
   Unit::defRecordDesc(r);
 }
 

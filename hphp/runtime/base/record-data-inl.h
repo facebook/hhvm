@@ -22,8 +22,12 @@
 
 namespace HPHP {
 namespace {
+inline size_t fieldSize(const RecordDesc* rec) {
+  return sizeof(TypedValue) * rec->numFields();
+}
+
 inline size_t sizeWithFields(const RecordDesc* rec) {
-  return sizeof(RecordData) + sizeof(TypedValue) * rec->numFields();
+  return sizeof(RecordData) + fieldSize(rec);
 }
 }
 

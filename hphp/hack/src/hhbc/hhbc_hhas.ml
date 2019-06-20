@@ -1626,7 +1626,9 @@ let add_property (class_def : Hhas_class.t) buf property =
   if Hhas_class.is_closure_class class_def
   || initial_value = Some Typed_value.Uninit
   then Acc.add buf "uninit;"
-  else begin
+  else if Hhas_class.is_record class_def && initial_value = None
+  then Acc.add buf "uninit;"
+  else  begin
     Acc.add buf "\"\"\"";
     begin match initial_value with
       | None -> Acc.add buf "N;"

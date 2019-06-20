@@ -156,6 +156,12 @@ void raise_property_typehint_error(const std::string& msg, bool isSoft);
 void raise_record_field_typehint_error(const std::string& msg, bool isSoft);
 
 /*
+ * Raise  error if a record field is not inititialized after construction.
+ */
+void raise_record_init_error(const StringData* recName,
+                             const StringData* fieldName);
+
+/*
  * Raise the appropriate warning or error if we try to bind a property to a ref,
  * and that property has a type-hint which we're enforcing.
  */

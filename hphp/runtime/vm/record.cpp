@@ -106,4 +106,13 @@ Slot RecordDesc::lookupField(const StringData* fieldName) const {
 const RecordDesc::Field& RecordDesc::field(const StringData* fieldName) const {
   return m_fields[lookupField(fieldName)];
 }
+
+void RecordDesc::checkFieldDefaultValues() const {
+  for (auto const& field : allFields()) {
+    auto const& val = field.val();
+    if (val.m_type == KindOfUninit) continue;
+    auto const& tc = field.typeConstraint();
+    if (tc.isCheckable()) tc.verifyRecField(&val, m_name, field.name());
+  }
+}
 }

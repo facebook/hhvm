@@ -97,10 +97,10 @@ and union_ env ty1 ty2 r =
     | _ -> env, (r, Toption ty)
     end
   | (_, Tunion tyl1), (_, Tunion tyl2) ->
-    union_unresolved env tyl1 tyl2 r
+    union_lists env tyl1 tyl2 r
   | (r, Tunion tyl), ty2
   | ty2, (r, Tunion tyl) ->
-    union_unresolved env tyl [ty2] r
+    union_lists env tyl [ty2] r
   | (_, Tarraykind ak1), (_, Tarraykind ak2) ->
     let env, ak = union_arraykind env ak1 ak2 in
     env, (r, Tarraykind ak)
@@ -187,10 +187,10 @@ and union_ env ty1 ty2 r =
 
 and try_union env ty1 ty2 =
   match union env ty1 ty2 with
-  | _, (_, Tunion _) -> env, None
+  | env, (_, Tunion _) -> env, None
   | env, ty -> env, Some ty
 
-and union_unresolved env tyl1 tyl2 r =
+and union_lists env tyl1 tyl2 r =
   let attempt_union env tyl ty2 res_is_opt =
     let rec go env tyl ty2 missed res_is_opt =
       match tyl with

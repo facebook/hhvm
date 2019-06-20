@@ -12,4 +12,5 @@ open Typing_defs
 module Env = Typing_env
 module Reason = Typing_reason
 
+val intersect : Env.env -> Reason.t -> locl ty -> locl ty -> Env.env * locl ty
 val intersect_list : Env.env -> Reason.t -> locl ty list -> Env.env * locl ty

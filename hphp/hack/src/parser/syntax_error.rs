@@ -99,7 +99,8 @@ pub const error1046: Error = Cow::Borrowed("A lambda arrow ('==>') is expected h
 pub const error1047: Error = Cow::Borrowed("A scope resolution operator ('::') is expected here.");
 pub const error1048: Error = Cow::Borrowed("A name, variable name or 'class' is expected here.");
 pub const error1050: Error = Cow::Borrowed("A name or variable name is expected here.");
-pub const error1051: Error = Cow::Borrowed("The 'required' keyword is expected here.");
+pub const error1051: Error =
+    Cow::Borrowed("The 'required' or 'lateinit' keyword is expected here.");
 pub const error1052: Error =
     Cow::Borrowed("An XHP category name beginning with a '%' is expected here.");
 pub const error1053: Error = Cow::Borrowed("An XHP name or category name is expected here.");

@@ -993,7 +993,8 @@ module WithExpressionAndStatementAndTypeParser
       match Token.kind token with
       | TokenKind.Required -> Make.xhp_required parser at token'
       | TokenKind.Lateinit -> Make.xhp_lateinit parser at token'
-      | _ -> Make.missing parser (pos (with_error parser SyntaxError.error1051))
+      | _ -> let parser = with_error parser SyntaxError.error1051 in
+            Make.missing parser (pos parser)
     else
       Make.missing parser (pos parser)
 

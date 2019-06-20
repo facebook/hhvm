@@ -1,0 +1,2 @@
+File "syntax_error1.php", line 4, characters 30-30:
+The 'required' or 'lateinit' keyword is expected here. (Parsing[1002])

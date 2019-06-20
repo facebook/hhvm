@@ -9,6 +9,7 @@
 
 open Core_kernel
 open Coverage_level
+open Coverage_level_defs
 open Hh_json
 open Ide_api_types
 

@@ -85,7 +85,7 @@ val wait :
 val coverage_levels :
   ServerEnv.env ->
   ServerCommandTypes.file_input ->
-  ServerEnv.env * ('a, Coverage_level.result) loop_outputs
+  ServerEnv.env * ('a, Coverage_level_defs.result) loop_outputs
 
 val coverage_counts :
   ServerEnv.env ->
@@ -144,7 +144,7 @@ val get_diagnostics :
   ('a, 'b) loop_outputs -> (Pos.absolute Errors.error_ list) SMap.t
 
 val assert_coverage_levels :
-  ('a, Coverage_level.result) loop_outputs ->
+  ('a, Coverage_level_defs.result) loop_outputs ->
   string list ->
   unit
 

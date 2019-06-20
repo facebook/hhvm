@@ -1378,7 +1378,7 @@ let do_typeCoverage
 
   let filename = Lsp_helpers.lsp_textDocumentIdentifier_to_filename params.textDocument in
   let command = ServerCommandTypes.COVERAGE_LEVELS (ServerCommandTypes.FileName filename) in
-  let%lwt (results, counts): Coverage_level.result =
+  let%lwt (results, counts): Coverage_level_defs.result =
     rpc conn ref_unblocked_time command in
   let coveredPercent = Coverage_level.get_percent counts in
   let hack_coverage_to_lsp (pos, level) =

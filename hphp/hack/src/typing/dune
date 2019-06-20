@@ -2,6 +2,7 @@
   (name typing_defs)
   (wrapped false)
   (modules
+    coverage_level_defs
     pp_type
     typing_defs
     typing_reason)
@@ -9,6 +10,7 @@
     ast
     core_kernel
     heap_ident
+    ide_rpc_api_types
     nast
     pos
     utils_core)

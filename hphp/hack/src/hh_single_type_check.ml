@@ -572,7 +572,7 @@ let print_colored fn type_acc =
   else print_string (List.map ~f: replace_color results |> String.concat ~sep:"")
 
 let print_coverage type_acc =
-  ClientCoverageMetric.go ~json:false (Some (Coverage_level.Leaf type_acc))
+  ClientCoverageMetric.go ~json:false (Some (Coverage_level_defs.Leaf type_acc))
 
 let check_file opts errors files_info =
   Relative_path.Map.fold files_info ~f:begin fun fn fileinfo errors ->

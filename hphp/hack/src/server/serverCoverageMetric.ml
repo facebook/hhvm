@@ -9,6 +9,7 @@
 
 open Core_kernel
 open Coverage_level
+open Coverage_level_defs
 open Option.Monad_infix
 open Reordered_argument_collections
 open String_utils

@@ -101,7 +101,7 @@ let walk content pos_level_list =
 
 let go
     (str : string)
-    (pos_level_l, _ : Coverage_level.result) :
+    (pos_level_l, _ : Coverage_level_defs.result) :
     (coverage_level option * string) list =
   let get_pos_info_raw (pos, level) = (Pos.info_raw pos, level) in
   let pos_level_l = List.map pos_level_l ~f:get_pos_info_raw in

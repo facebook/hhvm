@@ -14,6 +14,7 @@ open Reordered_argument_collections
 open ServerCommandTypes
 open SearchServiceRunner
 open Coverage_level
+open Coverage_level_defs
 
 let root = "/"
 let hhi = "/hhi"

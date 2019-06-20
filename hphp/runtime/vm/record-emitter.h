@@ -105,7 +105,7 @@ struct RecordEmitter {
 
   void commit(RepoTxn& txn) const; // throws(RepoExc)
 
-  Record* create(Unit& unit) const;
+  RecordDesc* create(Unit& unit) const;
 
   template<class SerDe> void serdeMetaData(SerDe&);
 
@@ -137,7 +137,7 @@ struct RecordEmitter {
 };
 
 struct RecordRepoProxy : RepoProxy {
-  friend struct Record;
+  friend struct RecordDesc;
   friend struct RecordEmitter;
 
   explicit RecordRepoProxy(Repo& repo);

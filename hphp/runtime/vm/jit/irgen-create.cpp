@@ -606,7 +606,7 @@ void emitNewPair(IRGS& env) {
 }
 
 void emitNewRecord(IRGS& env, const StringData* name, const ImmVector& immVec) {
-  auto const cachedRec = gen(env, LdRecCached, cns(env, name));
+  auto const cachedRec = gen(env, LdRecDescCached, cns(env, name));
   auto const numArgs = immVec.size();
   auto const ids = immVec.vec32();
   NewStructData extra;

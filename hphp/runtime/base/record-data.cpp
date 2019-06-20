@@ -23,12 +23,12 @@
 
 namespace HPHP {
 
-RecordData::RecordData(const Record* record)
+RecordData::RecordData(const RecordDesc* record)
   : m_record(record) {
   initHeader(HeaderKind::Record, OneReference);
 }
 
-RecordData* RecordData::newRecord(const Record* rec,
+RecordData* RecordData::newRecord(const RecordDesc* rec,
                                   uint32_t initSize,
                                   const StringData* const *keys,
                                   const TypedValue* values) {

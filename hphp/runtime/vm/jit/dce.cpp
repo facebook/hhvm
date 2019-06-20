@@ -136,7 +136,7 @@ bool canDCE(IRInstruction* inst) {
   case EqRes:
   case NeqRes:
   case CmpRes:
-  case EqRec:
+  case EqRecDesc:
   case EqCls:
   case EqFunc:
   case EqStrPtr:
@@ -184,7 +184,7 @@ bool canDCE(IRInstruction* inst) {
   case LdSmashableFunc:
   case LdClsFromClsMeth:
   case LdFuncFromClsMeth:
-  case LdValRec:
+  case LdRecDesc:
   case FwdCtxStaticCall:
   case DefConst:
   case Conjure:
@@ -459,7 +459,7 @@ bool canDCE(IRInstruction* inst) {
   case LdClsCachedSafe:
   case LdClsTypeCns:
   case LdClsTypeCnsClsName:
-  case LdRecCached:
+  case LdRecDescCached:
   case LdCns:
   case LookupCnsE:
   case LdClsCns:

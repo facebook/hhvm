@@ -248,7 +248,7 @@ inline const RepoAuthType::Array* Unit::lookupArrayTypeId(Id id) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Funcs and PreClasses and Records.
+// Funcs and PreClasses and RecordDescs.
 
 inline Func* Unit::lookupFuncId(Id id) const {
   assertx(id < Id(mergeInfo()->m_firstHoistablePreClass));
@@ -260,7 +260,7 @@ inline PreClass* Unit::lookupPreClassId(Id id) const {
   return m_preClasses[id].get();
 }
 
-inline Record* Unit::lookupRecordId(Id id) const {
+inline RecordDesc* Unit::lookupRecordId(Id id) const {
   assertx(id < Id(m_records.size()));
   return m_records[id].get();
 }
@@ -277,11 +277,11 @@ inline folly::Range<const PreClassPtr*> Unit::preclasses() const {
   return { m_preClasses.data(), m_preClasses.size() };
 }
 
-inline folly::Range<RecordPtr*> Unit::records() {
+inline folly::Range<RecordDescPtr*> Unit::records() {
   return { m_records.data(), m_records.size() };
 }
 
-inline folly::Range<const RecordPtr*> Unit::records() const {
+inline folly::Range<const RecordDescPtr*> Unit::records() const {
   return { m_records.data(), m_records.size() };
 }
 
@@ -316,14 +316,14 @@ inline const UserAttributeMap& Unit::fileAttributes() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Record lookup.
+// RecordDesc lookup.
 
-inline Record* Unit::lookupRecord(const NamedEntity* ne) {
-  return ne->getCachedRecord();
+inline RecordDesc* Unit::lookupRecordDesc(const NamedEntity* ne) {
+  return ne->getCachedRecordDesc();
 }
 
-inline Record* Unit::lookupRecord(const StringData* name) {
-  return lookupRecord(NamedEntity::get(name));
+inline RecordDesc* Unit::lookupRecordDesc(const StringData* name) {
+  return lookupRecordDesc(NamedEntity::get(name));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

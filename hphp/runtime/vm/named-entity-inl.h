@@ -51,9 +51,9 @@ inline ArrayData* NamedEntity::getCachedReifiedGenerics() const {
     : nullptr;
 }
 
-inline Record* NamedEntity::getCachedRecord() const {
-  return LIKELY(m_cachedRecord.bound() && m_cachedRecord.isInit())
-    ? *m_cachedRecord
+inline RecordDesc* NamedEntity::getCachedRecordDesc() const {
+  return LIKELY(m_cachedRecordDesc.bound() && m_cachedRecordDesc.isInit())
+    ? *m_cachedRecordDesc
     : nullptr;
 }
 
@@ -61,7 +61,7 @@ inline Class* NamedEntity::clsList() const {
   return m_clsList;
 }
 
-inline Record* NamedEntity::recordList() const {
+inline RecordDesc* NamedEntity::recordList() const {
   return m_recordList;
 }
 

@@ -185,10 +185,10 @@ struct TypeExistsChecker {
   }
 };
 
-struct ClassOrTypeOrRecordExistsChecker {
+struct NamedTypeExistsChecker {
   const String& m_name;
   mutable NamedEntity* m_ne;
-  explicit ClassOrTypeOrRecordExistsChecker(const String& name)
+  explicit NamedTypeExistsChecker(const String& name)
     : m_name(name), m_ne(nullptr) {}
   bool operator()() const {
     if (!m_ne) {
@@ -199,7 +199,7 @@ struct ClassOrTypeOrRecordExistsChecker {
     }
     return m_ne->getCachedClass() != nullptr ||
            m_ne->getCachedTypeAlias() != nullptr ||
-           m_ne->getCachedRecord() != nullptr;
+           m_ne->getCachedRecordDesc() != nullptr;
   }
 };
 struct RecordExistsChecker {
@@ -214,7 +214,7 @@ struct RecordExistsChecker {
         return false;
       }
     }
-    return m_ne->getCachedRecord() != nullptr;
+    return m_ne->getCachedRecordDesc() != nullptr;
   }
 };
 }
@@ -366,7 +366,7 @@ bool AutoloadHandler::autoloadClass(const String& clsName,
   return autoloadClassPHP5Impl(className, forceSplStack);
 }
 
-bool AutoloadHandler::autoloadRecord(const String& recName) {
+bool AutoloadHandler::autoloadRecordDesc(const String& recName) {
   if (recName.empty()) return false;
   return m_map &&
          loadFromMap(recName, AutoloadMap::KindOf::Type,
@@ -379,8 +379,8 @@ bool AutoloadHandler::autoloadType<Class>(const String& name) {
   return autoloadClass(name);
 }
 template<>
-bool AutoloadHandler::autoloadType<Record>(const String& name) {
-  return autoloadRecord(name);
+bool AutoloadHandler::autoloadType<RecordDesc>(const String& name) {
+  return autoloadRecordDesc(name);
 }
 
 bool AutoloadHandler::autoloadClassPHP5Impl(const String& className,
@@ -475,11 +475,11 @@ AutoloadHandler::loadFromMapPartial(const String& className,
   return res;
 }
 
-bool AutoloadHandler::autoloadClassOrTypeOrRecord(const String& clsName) {
+bool AutoloadHandler::autoloadNamedType(const String& clsName) {
   if (clsName.empty()) return false;
   const String& className = normalizeNS(clsName);
   if (m_map) {
-    ClassOrTypeOrRecordExistsChecker cte(className);
+    NamedTypeExistsChecker cte(className);
     bool tryType = true, tryTypeAlias = true;
     AutoloadMap::Result typeRes = AutoloadMap::Result::RetryAutoloading,
                         typeAliasRes = AutoloadMap::Result::RetryAutoloading;

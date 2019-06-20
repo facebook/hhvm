@@ -2139,7 +2139,7 @@ OPTBLD_INLINE void iopNewDArray(uint32_t capacity) {
 
 // TODO (T29595301): Use id instead of StringData
 OPTBLD_INLINE void iopNewRecord(const StringData* s, imm_array<int32_t> ids) {
-  auto rec = Unit::loadRecord(s);
+  auto rec = Unit::loadRecordDesc(s);
   if (!rec) {
     raise_error(Strings::UNKNOWN_RECORD, s->data());
   }
@@ -5794,8 +5794,8 @@ OPTBLD_INLINE void iopDefCls(uint32_t cid) {
 }
 
 OPTBLD_INLINE void iopDefRecord(uint32_t cid) {
-  Record* r = vmfp()->m_func->unit()->lookupRecordId(cid);
-  Unit::defRecord(r);
+  RecordDesc* r = vmfp()->m_func->unit()->lookupRecordId(cid);
+  Unit::defRecordDesc(r);
 }
 
 OPTBLD_INLINE void iopAliasCls(const StringData* original,

@@ -659,7 +659,7 @@ void print_prop_or_field_impl(Output& out, const T& f) {
   });
 }
 
-void print_field(Output& out, const Record::Field& field) {
+void print_field(Output& out, const RecordDesc::Field& field) {
   print_prop_or_field_impl(out, field);
 }
 
@@ -779,11 +779,11 @@ void print_cls_directives(Output& out, const PreClass* cls) {
   for (auto* m : cls->allMethods())    print_method(out, m);
 }
 
-void print_rec_fields(Output& out, const Record* rec) {
+void print_rec_fields(Output& out, const RecordDesc* rec) {
   for (auto& f : rec->allFields()) print_field(out, f);
 }
 
-void print_rec(Output& out, const Record* rec) {
+void print_rec(Output& out, const RecordDesc* rec) {
   out.indent();
   out.fmt(".record {}", rec->name()->toCppString());
   out.fmt(" {{");

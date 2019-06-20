@@ -471,9 +471,9 @@ Vptr lookupDestructor(Vout& v, Vreg type, bool typeIsQuad) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-Vreg emitLdValRec(Vout& v, Vreg val, Vreg d) {
+Vreg emitLdRecDesc(Vout& v, Vreg val, Vreg d) {
   emitLdLowPtr(v, val[RecordData::getVMRecordOffset()], d,
-               sizeof(LowPtr<Record>));
+               sizeof(LowPtr<RecordDesc>));
   return d;
 }
 

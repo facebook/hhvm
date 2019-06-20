@@ -52,9 +52,9 @@ rds::Handle NamedEntity::getClassHandle() const {
   return m_cachedClass.handle();
 }
 
-rds::Handle NamedEntity::getRecordHandle() const {
-  m_cachedRecord.bind(rds::Mode::Normal);
-  return m_cachedRecord.handle();
+rds::Handle NamedEntity::getRecordDescHandle() const {
+  m_cachedRecordDesc.bind(rds::Mode::Normal);
+  return m_cachedRecordDesc.handle();
 }
 
 void NamedEntity::setCachedClass(Class* f) {
@@ -64,10 +64,10 @@ void NamedEntity::setCachedClass(Class* f) {
   }
 }
 
-void NamedEntity::setCachedRecord(Record* r) {
-  *m_cachedRecord = r;
-  if (m_cachedRecord.isNormal()) {
-    r ? m_cachedRecord.markInit() : m_cachedRecord.markUninit();
+void NamedEntity::setCachedRecordDesc(RecordDesc* r) {
+  *m_cachedRecordDesc = r;
+  if (m_cachedRecordDesc.isNormal()) {
+    r ? m_cachedRecordDesc.markInit() : m_cachedRecordDesc.markUninit();
   }
 }
 
@@ -139,11 +139,11 @@ void removeImpl(T* goner, NamedEntity::ListType<T>& list) {
 }
 }
 
-void NamedEntity::pushRecord(Record* rec) {
+void NamedEntity::pushRecordDesc(RecordDesc* rec) {
   pushImpl(rec, m_recordList);
 }
 
-void NamedEntity::removeRecord(Record* goner) {
+void NamedEntity::removeRecordDesc(RecordDesc* goner) {
   removeImpl(goner, m_recordList);
 }
 

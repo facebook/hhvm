@@ -37,11 +37,11 @@ namespace HPHP {
 
 struct RecordEmitter;
 
-struct Record : AtomicCountable {
+struct RecordDesc : AtomicCountable {
   friend struct RecordEmitter;
 
   struct Field {
-    Field(Record* record,
+    Field(RecordDesc* record,
           const StringData* name,
           Attr attrs,
           const StringData* userType,
@@ -85,7 +85,7 @@ private:
   typedef IndexedStringMap<Field,true,Slot> FieldMap;
 
 public:
-  Record(Unit* unit, int line1, int line2, const StringData* n,
+  RecordDesc(Unit* unit, int line1, int line2, const StringData* n,
          Attr attrs, const StringData* docComment, Id id);
 
 
@@ -110,11 +110,11 @@ public:
   Slot lookupField(const StringData*) const;
   const Field& field(const StringData*) const;
 
-  AtomicLowPtr<Record> m_next{nullptr}; // used by NamedEntity
+  AtomicLowPtr<RecordDesc> m_next{nullptr}; // used by NamedEntity
 
   void setCached();
-  void setRecordHandle(rds::Link<LowPtr<Record>,
-                                 rds::Mode::NonLocal> link) const;
+  void setRecordDescHandle(rds::Link<LowPtr<RecordDesc>,
+                                     rds::Mode::NonLocal> link) const;
 
   void destroy();
 
@@ -129,12 +129,12 @@ private:
   LowStringPtr m_docComment;
   FieldMap m_fields;
 
-  mutable rds::Link<LowPtr<Record>, rds::Mode::NonLocal> m_cachedRecord;
+  mutable rds::Link<LowPtr<RecordDesc>, rds::Mode::NonLocal> m_cachedRecordDesc;
 };
 
 extern Mutex g_recordsMutex;
 
-typedef AtomicSharedPtr<Record> RecordPtr;
+typedef AtomicSharedPtr<RecordDesc> RecordDescPtr;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

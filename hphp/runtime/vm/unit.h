@@ -476,23 +476,23 @@ public:
    const RepoAuthType::Array* lookupArrayTypeId(Id id) const;
 
   /////////////////////////////////////////////////////////////////////////////
-  // Funcs, PreClasses, and Records.                                    [const]
+  // Funcs, PreClasses, and RecordDescs.                                [const]
 
   /*
-   * Look up a Func or PreClass or Record by ID.
+   * Look up a Func or PreClass or RecordDesc by ID.
    */
   Func* lookupFuncId(Id id) const;
   PreClass* lookupPreClassId(Id id) const;
-  Record* lookupRecordId(Id id) const;
+  RecordDesc* lookupRecordId(Id id) const;
 
   /*
-   * Range over all Funcs or PreClasses or Records in the Unit.
+   * Range over all Funcs or PreClasses or RecordDescs in the Unit.
    */
   FuncRange funcs() const;
   folly::Range<PreClassPtr*> preclasses();
   folly::Range<const PreClassPtr*> preclasses() const;
-  folly::Range<RecordPtr*> records();
-  folly::Range<const RecordPtr*> records() const;
+  folly::Range<RecordDescPtr*> records();
+  folly::Range<const RecordDescPtr*> records() const;
 
   /*
    * Get a pseudomain for the Unit with the context class `cls'.
@@ -634,35 +634,35 @@ public:
                           bool autoload, ClassKind kind);
 
   /////////////////////////////////////////////////////////////////////////////
-  // Record lookup.                                                    [static]
+  // RecordDesc lookup.                                               [static]
 
   /*
-   * Define a new Record from `record' for this request.
+   * Define a new RecordDesc from `record' for this request.
    *
-   * Raises a fatal error in various conditions (e.g., Record already defined,
-   * etc.) if `failIsFatal' is set).
+   * Raises a fatal error in various conditions (e.g., RecordDesc already
+   * defined, etc.) if `failIsFatal' is set).
    *
    * Also always fatals if a type alias already exists in this request with the
    * same name as that of `record', regardless of the value of `failIsFatal'.
    */
-  static Record* defRecord(Record* record, bool failIsFatal = true);
+  static RecordDesc* defRecordDesc(RecordDesc* record, bool failIsFatal = true);
 
   /*
-   * Look up the Record in this request with name `name', or with the name
+   * Look up the RecordDesc in this request with name `name', or with the name
    * mapped to the NamedEntity `ne'.
    *
    * Return nullptr if the record is not yet defined in this request.
    */
-  static Record* lookupRecord(const NamedEntity* ne);
-  static Record* lookupRecord(const StringData* name);
+  static RecordDesc* lookupRecordDesc(const NamedEntity* ne);
+  static RecordDesc* lookupRecordDesc(const StringData* name);
 
   /*
-   * Look up, or autoload and define, the Record in this request with name
+   * Look up, or autoload and define, the RecordDesc in this request with name
    * `name', or with the name mapped to the NamedEntity `ne'.
    *
    * @requires: NamedEntity::get(name) == ne
    */
-  static Record* loadRecord(const StringData* name);
+  static RecordDesc* loadRecordDesc(const StringData* name);
 
   /////////////////////////////////////////////////////////////////////////////
   // Constant lookup.                                                  [static]
@@ -927,7 +927,7 @@ private:
   TypedValue m_mainReturn;
   PreClassPtrVec m_preClasses;
   TypeAliasVec m_typeAliases;
-  CompactVector<RecordPtr> m_records;
+  CompactVector<RecordDescPtr> m_records;
   /*
    * Cached the EntryPoint for an unit, since compactMergeInfo() inside of
    * mergeImpl will drop the original EP.

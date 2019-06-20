@@ -35,7 +35,7 @@ namespace HPHP {
 
 struct Func;
 struct String;
-struct Record;
+struct RecordDesc;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -124,19 +124,19 @@ struct NamedEntity {
 
 
   /////////////////////////////////////////////////////////////////////////////
-  // Record cache.
+  // RecordDesc cache.
 
   /*
-   * Get the rds::Handle that caches this Record*, creating a (non-persistent)
-   * one if it doesn't exist yet.
+   * Get the rds::Handle that caches this RecordDesc*,
+   * creating a (non-persistent) one if it doesn't exist yet.
    */
-  rds::Handle getRecordHandle() const;
+  rds::Handle getRecordDescHandle() const;
 
   /*
-   * Set and get the cached Record*.
+   * Set and get the cached RecordDesc*.
    */
-  void setCachedRecord(Record* c);
-  Record* getCachedRecord() const;
+  void setCachedRecordDesc(RecordDesc* c);
+  RecordDesc* getCachedRecordDesc() const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -198,10 +198,10 @@ struct NamedEntity {
   void setUniqueFunc(Func* func);
 
   /////////////////////////////////////////////////////////////////////////////
-  // Record.
-  Record* recordList() const;
-  void pushRecord(Record*);
-  void removeRecord(Record*);
+  // RecordDesc.
+  RecordDesc* recordList() const;
+  void pushRecordDesc(RecordDesc*);
+  void removeRecordDesc(RecordDesc*);
   /////////////////////////////////////////////////////////////////////////////
   // Global table.                                                     [static]
 
@@ -247,7 +247,7 @@ public:
     mutable rds::Link<TypeAliasReq, rds::Mode::NonLocal> m_cachedTypeAlias{};
     mutable rds::Link<ArrayData*, rds::Mode::NonLocal> m_cachedReifiedGenerics;
   };
-  mutable rds::Link<LowPtr<Record>, rds::Mode::NonLocal> m_cachedRecord;
+  mutable rds::Link<LowPtr<RecordDesc>, rds::Mode::NonLocal> m_cachedRecordDesc;
 
   template<class T>
   using ListType = AtomicLowPtr<T, std::memory_order_acquire,
@@ -255,7 +255,7 @@ public:
 private:
   ListType<Class> m_clsList{nullptr};
   ListType<Func> m_uniqueFunc{nullptr};
-  ListType<Record> m_recordList{nullptr};
+  ListType<RecordDesc> m_recordList{nullptr};
 };
 
 /*

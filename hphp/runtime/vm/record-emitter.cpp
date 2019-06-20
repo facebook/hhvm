@@ -47,7 +47,7 @@ RecordEmitter::Field::Field(const RecordEmitter* re,
   , m_typeConstraint(typeConstraint)
   , m_userAttributes(userAttributes)
 {
-  m_mangledName = Record::mangleFieldName(re->name(), n, attrs);
+  m_mangledName = RecordDesc::mangleFieldName(re->name(), n, attrs);
   memcpy(&m_val, val, sizeof(TypedValue));
 }
 
@@ -76,7 +76,7 @@ void RecordEmitter::commit(RepoTxn& txn) const {
       .insert(*this, txn, usn, m_id, m_name);
 }
 
-Record* RecordEmitter::create(Unit& unit) const {
+RecordDesc* RecordEmitter::create(Unit& unit) const {
   Attr attrs = m_attrs;
   if (attrs & AttrPersistent &&
       !RuntimeOption::RepoAuthoritative && SystemLib::s_inited) {
@@ -84,20 +84,20 @@ Record* RecordEmitter::create(Unit& unit) const {
   }
 
   assertx(attrs & AttrPersistent || SystemLib::s_inited);
-  auto const mem = low_malloc(sizeof(Record));
-  Record* rec;
+  auto const mem = low_malloc(sizeof(RecordDesc));
+  RecordDesc* rec;
   try {
-    rec = new (mem) Record(&unit, m_line1, m_line2, m_name,
+    rec = new (mem) RecordDesc(&unit, m_line1, m_line2, m_name,
                            attrs, m_docComment, m_id);
   } catch (...) {
     low_free(mem);
     throw;
   }
 
-  Record::FieldMap::Builder fieldBuild;
+  RecordDesc::FieldMap::Builder fieldBuild;
   for (unsigned i = 0; i < m_fieldMap.size(); ++i) {
     const Field& field = m_fieldMap[i];
-    fieldBuild.add(field.name(), Record::Field(rec,
+    fieldBuild.add(field.name(), RecordDesc::Field(rec,
                                                field.name(),
                                                field.attrs(),
                                                field.userType(),

@@ -209,7 +209,7 @@ Vptr lookupDestructor(Vout& v, Vreg type, bool typeIsQuad = false);
 /*
  * Load the Record type of `val' into `d', then return `d'.
  */
-Vreg emitLdValRec(Vout& v, Vreg val, Vreg d);
+Vreg emitLdRecDesc(Vout& v, Vreg val, Vreg d);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Class metadata.

@@ -22,7 +22,7 @@
 
 namespace HPHP {
 namespace {
-inline size_t sizeWithFields(const Record* rec) {
+inline size_t sizeWithFields(const RecordDesc* rec) {
   return sizeof(RecordData) + sizeof(TypedValue) * rec->numFields();
 }
 }
@@ -31,7 +31,7 @@ inline size_t RecordData::heapSize() const {
   return sizeWithFields(m_record);
 }
 
-inline const Record* RecordData::record() const {
+inline const RecordDesc* RecordData::record() const {
   return m_record;
 }
 

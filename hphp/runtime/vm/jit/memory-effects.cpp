@@ -1692,7 +1692,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case EndGuards:
   case EqBool:
   case EqCls:
-  case EqRec:
+  case EqRecDesc:
   case EqFunc:
   case EqStrPtr:
   case EqArrayDataPtr:
@@ -1954,7 +1954,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdGblAddrDef:
   case LdMethCallerName:
   case LdObjClass:
-  case LdValRec:
+  case LdRecDesc:
   case LdObjInvoke:
   case LdObjMethod:
   case LdStrLen:
@@ -2104,7 +2104,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdCls:          // autoload
   case LdClsCached:    // autoload
   case LdFuncCached:   // autoload
-  case LdRecCached:    // autoload
+  case LdRecDescCached:    // autoload
   case LdSwitchObjIndex:  // decrefs arg
   case InitClsCns:      // autoload
   case LookupClsMethodCache:  // autoload

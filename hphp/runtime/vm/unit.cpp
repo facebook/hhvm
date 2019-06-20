@@ -240,9 +240,9 @@ Unit::~Unit() {
   }
 
   for (auto const& rec : m_records) {
-    Record* recList = rec->namedEntity()->recordList();
+    RecordDesc* recList = rec->namedEntity()->recordList();
     while (recList) {
-      Record* cur = recList;
+      RecordDesc* cur = recList;
       recList = recList->m_next;
       if (cur == rec.get()) {
         cur->destroy();
@@ -850,7 +850,8 @@ template<class T>
 const char* checkSameName(NamedEntity* nameList) {
   if (!std::is_same<T, TypeAlias>::value && nameList->getCachedTypeAlias()) {
     return "type";
-  } else if (!std::is_same<T, Record>::value && nameList->getCachedRecord()) {
+  } else if (!std::is_same<T, RecordDesc>::value &&
+             nameList->getCachedRecordDesc()) {
     return "record";
   } else if (!std::is_same<T, PreClass>::value && nameList->getCachedClass()) {
     return "class";
@@ -1077,15 +1078,15 @@ bool Unit::classExists(const StringData* name, bool autoload, ClassKind kind) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Record lookup.
+// RecordDesc lookup.
 
-Record* Unit::defRecord(Record* record,
+RecordDesc* Unit::defRecordDesc(RecordDesc* record,
                      bool failIsFatal /* = true */) {
   auto const nameList = record->namedEntity();
 
   // Error out if there is already a different type
   // with the same name in the request
-  auto existingKind = checkSameName<Record>(nameList);
+  auto existingKind = checkSameName<RecordDesc>(nameList);
   if (existingKind) {
     FrameRestore fr(record->unit(), Op::DefRecord, record->id());
     raise_error("Cannot declare record with the same (%s) as an "
@@ -1093,9 +1094,9 @@ Record* Unit::defRecord(Record* record,
     return nullptr;
   }
 
-  // If there was already a record declared with DefRecord, check if it's
+  // If there was already a record declared with DefRecordDesc, check if it's
   // compatible.
-  if (auto cachedRec = nameList->getCachedRecord()) {
+  if (auto cachedRec = nameList->getCachedRecordDesc()) {
     if (cachedRec != record) {
       if (failIsFatal) {
         FrameRestore fr(record->unit(), Op::DefRecord, record->id());
@@ -1122,21 +1123,21 @@ Record* Unit::defRecord(Record* record,
       top = nameList->recordList();
       continue;
     }
-    nameList->m_cachedRecord.bind(rds::Mode::Normal);
-    record->setRecordHandle(nameList->m_cachedRecord);
+    nameList->m_cachedRecordDesc.bind(rds::Mode::Normal);
+    record->setRecordDescHandle(nameList->m_cachedRecordDesc);
     record->incAtomicCount();
-    nameList->pushRecord(record);
+    nameList->pushRecordDesc(record);
     record->setCached();
     return record;
   }
 }
 
-Record* Unit::loadRecord(const StringData* name) {
-  auto const rec = lookupRecord(name);
+RecordDesc* Unit::loadRecordDesc(const StringData* name) {
+  auto const rec = lookupRecordDesc(name);
   if (LIKELY(rec != nullptr)) return rec;
   VMRegAnchor _;
-  AutoloadHandler::s_instance->autoloadRecord(StrNR(name));
-  return lookupRecord(name);
+  AutoloadHandler::s_instance->autoloadRecordDesc(StrNR(name));
+  return lookupRecordDesc(name);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1331,7 +1332,7 @@ TypeAliasReq resolveTypeAlias(Unit* unit, const TypeAlias* thisType) {
     return TypeAliasReq::From(unit, *targetTd, *thisType);
   }
 
-  if (AutoloadHandler::s_instance->autoloadClassOrTypeOrRecord(
+  if (AutoloadHandler::s_instance->autoloadNamedType(
         StrNR(const_cast<StringData*>(typeName))
       )) {
     if (auto klass = Unit::lookupClass(targetNE)) {
@@ -1362,7 +1363,7 @@ const TypeAliasReq* Unit::loadTypeAlias(const StringData* name,
   auto ne = NamedEntity::get(name);
   auto target = ne->getCachedTypeAlias();
   if (!target) {
-    if (AutoloadHandler::s_instance->autoloadClassOrTypeOrRecord(
+    if (AutoloadHandler::s_instance->autoloadNamedType(
           StrNR(const_cast<StringData*>(name))
         )) {
       target = ne->getCachedTypeAlias();
@@ -1640,7 +1641,7 @@ void Unit::merge() {
   }
 
   for (auto& r : records()) {
-    defRecord(r.get());
+    defRecordDesc(r.get());
   }
 }
 

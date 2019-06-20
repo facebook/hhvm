@@ -142,7 +142,7 @@ constexpr const char* errorString<Class>() {
   return Strings::UNKNOWN_CLASS;
 }
 template<>
-constexpr const char* errorString<Record>() {
+constexpr const char* errorString<RecordDesc>() {
   return Strings::UNKNOWN_RECORD;
 }
 
@@ -187,8 +187,8 @@ rds::Handle handleFrom<Class>(const NamedEntity* ne) {
   return ne->getClassHandle();
 }
 template<>
-rds::Handle handleFrom<Record>(const NamedEntity* ne) {
-  return ne->getRecordHandle();
+rds::Handle handleFrom<RecordDesc>(const NamedEntity* ne) {
+  return ne->getRecordDescHandle();
 }
 
 template<class T, class SlowPath>
@@ -269,13 +269,13 @@ void cgLdClsCached(IRLS& env, const IRInstruction* inst) {
   });
 }
 
-void cgLdRecCached(IRLS& env, const IRInstruction* inst) {
+void cgLdRecDescCached(IRLS& env, const IRInstruction* inst) {
   auto const name = inst->src(0)->strVal();
 
-  implLdCached<Record>(env, inst, name, [&] (Vout& v, rds::Handle ch) {
+  implLdCached<RecordDesc>(env, inst, name, [&] (Vout& v, rds::Handle ch) {
     auto const ptr = v.makeReg();
     auto const args = argGroup(env, inst).imm(ch).ssa(0);
-    cgCallHelper(v, env, CallSpec::direct(lookupKnownType<Record>),
+    cgCallHelper(v, env, CallSpec::direct(lookupKnownType<RecordDesc>),
                  callDest(ptr), SyncOptions::Sync, args);
     return ptr;
   });

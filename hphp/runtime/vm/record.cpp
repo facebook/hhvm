@@ -24,9 +24,9 @@ namespace HPHP {
 
 Mutex g_recordsMutex;
 
-  Record::Record(Unit* unit, int line1, int line2,
-                 const StringData* n, Attr attrs,
-                 const StringData* docComment, Id id)
+  RecordDesc::RecordDesc(Unit* unit, int line1, int line2,
+                         const StringData* n, Attr attrs,
+                         const StringData* docComment, Id id)
     : m_unit(unit)
     , m_namedEntity(NamedEntity::get(n))
     , m_line1(line1)
@@ -36,29 +36,29 @@ Mutex g_recordsMutex;
     , m_name(n)
     , m_docComment(docComment) {}
 
-  void Record::atomicRelease() {
-    assertx(!m_cachedRecord.bound());
+  void RecordDesc::atomicRelease() {
+    assertx(!m_cachedRecordDesc.bound());
     assertx(!getCount());
-    this->~Record();
+    this->~RecordDesc();
   }
 
-  void Record::setCached() {
-    m_cachedRecord.initWith(this);
+  void RecordDesc::setCached() {
+    m_cachedRecordDesc.initWith(this);
   }
 
-  void Record::setRecordHandle(rds::Link<LowPtr<Record>,
-                               rds::Mode::NonLocal> link) const {
-    assertx(!m_cachedRecord.bound());
-    m_cachedRecord = link;
+  void RecordDesc::setRecordDescHandle(
+      rds::Link<LowPtr<RecordDesc>, rds::Mode::NonLocal> link) const {
+    assertx(!m_cachedRecordDesc.bound());
+    m_cachedRecordDesc = link;
   }
 
-  void Record::destroy() {
-    if (!m_cachedRecord.bound()) return;
+  void RecordDesc::destroy() {
+    if (!m_cachedRecordDesc.bound()) return;
 
     Lock l(g_recordsMutex);
-    if (!m_cachedRecord.bound()) return;
-    m_cachedRecord = rds::Link<LowPtr<Record>, rds::Mode::NonLocal>{};
-    namedEntity()->removeRecord(this);
+    if (!m_cachedRecordDesc.bound()) return;
+    m_cachedRecordDesc = rds::Link<LowPtr<RecordDesc>, rds::Mode::NonLocal>{};
+    namedEntity()->removeRecordDesc(this);
 
     Treadmill::enqueue(
       [this] {
@@ -67,15 +67,15 @@ Mutex g_recordsMutex;
     );
   }
 
-  Record::Field::Field(Record* record,
-                       const StringData* name,
-                       Attr attrs,
-                       const StringData* userType,
-                       const TypeConstraint& typeConstraint,
-                       const StringData* docComment,
-                       const TypedValue& val,
-                       RepoAuthType repoAuthType,
-                       UserAttributeMap userAttributes)
+  RecordDesc::Field::Field(RecordDesc* record,
+                           const StringData* name,
+                           Attr attrs,
+                           const StringData* userType,
+                           const TypeConstraint& typeConstraint,
+                           const StringData* docComment,
+                           const TypedValue& val,
+                           RepoAuthType repoAuthType,
+                           UserAttributeMap userAttributes)
   : m_name(name)
   , m_mangledName(mangleFieldName(record->name(), name, attrs))
   , m_attrs(attrs)
@@ -87,13 +87,14 @@ Mutex g_recordsMutex;
   , m_userAttributes(userAttributes)
 {}
 
-const StringData* Record::mangleFieldName(const StringData* recordName,
-                                          const StringData* fieldName,
-                                          Attr attrs) {
+const StringData* RecordDesc::mangleFieldName(
+    const StringData* recordName,
+    const StringData* fieldName,
+    Attr attrs) {
   return PreClass::manglePropName(recordName, fieldName, attrs);
 }
 
-Slot Record::lookupField(const StringData* fieldName) const {
+Slot RecordDesc::lookupField(const StringData* fieldName) const {
   auto idx = m_fields.findIndex(fieldName);
   if (idx == kInvalidSlot) {
     raise_error(folly::sformat("Field '{}' does not exist in record '{}'",
@@ -102,7 +103,7 @@ Slot Record::lookupField(const StringData* fieldName) const {
   return idx;
 }
 
-const Record::Field& Record::field(const StringData* fieldName) const {
+const RecordDesc::Field& RecordDesc::field(const StringData* fieldName) const {
   return m_fields[lookupField(fieldName)];
 }
 }

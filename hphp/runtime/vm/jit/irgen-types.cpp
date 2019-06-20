@@ -329,12 +329,12 @@ void verifyTypeImpl(IRGS& env,
       return;
     case AnnotAction::RecordCheck:
       assertx(valType <= TRecord);
-      auto const tcRec = gen(env, LdRecCached, cns(env, tc.typeName()));
-      auto const valRec = gen(env, LdValRec, val);
+      auto const tcRec = gen(env, LdRecDescCached, cns(env, tc.typeName()));
+      auto const valRec = gen(env, LdRecDesc, val);
       ifThen(
         env,
         [&] (Block* taken) {
-          gen(env, JmpZero, taken, gen(env, EqRec, tcRec, valRec));
+          gen(env, JmpZero, taken, gen(env, EqRecDesc, tcRec, valRec));
         },
         [&] {
           hint(env, Block::Hint::Unlikely);

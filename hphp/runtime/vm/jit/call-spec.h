@@ -112,9 +112,9 @@ template<typename A> struct jit_cpp_type<
 };
 
 template<typename A> struct jit_cpp_type<
-  A*, std::enable_if_t<std::is_base_of<Record, A>::value>
+  A*, std::enable_if_t<std::is_base_of<RecordDesc, A>::value>
 > {
-  static auto constexpr type() { return TRecType; }
+  static auto constexpr type() { return TRecDesc; }
 };
 /*
  * Parameter types: Many helper functions take various enums or pointers to

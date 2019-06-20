@@ -332,7 +332,7 @@ constexpr bool operator>(Mem a, Mem b) {
   c(Cls,             bits_t::bit<25>())                                 \
   c(ClsMeth,         bits_t::bit<26>())                                 \
   c(Record,          bits_t::bit<27>())                                 \
-  c(RecType,         bits_t::bit<28>())                                 \
+  c(RecDesc,         bits_t::bit<28>())                                 \
 // Boxed*:           29-57
 
 /*
@@ -340,10 +340,10 @@ constexpr bool operator>(Mem a, Mem b) {
  */
 #ifdef USE_LOWPTR
 #define UNCCOUNTED_INIT_UNION \
-        kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls|kRecType|kClsMeth
+        kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls|kRecDesc|kClsMeth
 #else
 #define UNCCOUNTED_INIT_UNION \
-        kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls|kRecType
+        kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls|kRecDesc
 #endif
 
 #ifdef USE_LOWPTR

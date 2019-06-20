@@ -439,7 +439,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdClsTypeCnsClsName:
   case LdFunc:
   case LdFuncCached:
-  case LdRecCached:
+  case LdRecDescCached:
   case LdObjMethod:
   case LdSSwitchDestSlow:
   case LdSwitchObjIndex:
@@ -712,7 +712,7 @@ bool opcodeMayRaise(Opcode opc) {
   case EqArrayDataPtr:
   case EqBool:
   case EqCls:
-  case EqRec:
+  case EqRecDesc:
   case EqDbl:
   case EqFunc:
   case EqInt:
@@ -852,7 +852,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdMethCallerName:
   case LdMIPropStateAddr:
   case LdMIStateAddr:
-  case LdValRec:
+  case LdRecDesc:
   case LdObjClass:
   case LdObjInvoke:
   case LdPackedArrayDataElemAddr:

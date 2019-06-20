@@ -334,14 +334,14 @@ CMP_DATA_OPS
 #undef CMP_DATA_OPS
 
 ///////////////////////////////////////////////////////////////////////////////
-void cgEqRec(IRLS& env, const IRInstruction* inst) {
+void cgEqRecDesc(IRLS& env, const IRInstruction* inst) {
   auto const dst  = dstLoc(env, inst, 0).reg();
   auto const src1 = srcLoc(env, inst, 0).reg();
   auto const src2 = srcLoc(env, inst, 1).reg();
   auto& v = vmain(env);
 
   auto const sf = v.makeReg();
-  emitCmpLowPtr<Record>(v, sf, src2, src1);
+  emitCmpLowPtr<RecordDesc>(v, sf, src2, src1);
   v << setcc{CC_E, sf, dst};
 }
 

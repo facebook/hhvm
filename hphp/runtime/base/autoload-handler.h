@@ -93,7 +93,7 @@ public:
   bool autoloadClassPHP5Impl(const String& className, bool forceSplStack);
 
   /**
-   * autoloadClassOrTypeOrRecord() tries to autoload either a class or
+   * autoloadNamedType() tries to autoload either a class or
    * a type alias or a record with the specified name. This method avoids
    * calling the failure callback until one of the following happens:
    * (1) we tried to autoload the specified name from the 'class', 'type' and
@@ -102,12 +102,12 @@ public:
    * with the specified name, or (2) there was an uncaught exception or fatal
    * error during an include operation.
    */
-  bool autoloadClassOrTypeOrRecord(const String& className);
+  bool autoloadNamedType(const String& className);
 
   bool autoloadFunc(StringData* name);
   bool autoloadConstant(StringData* name);
   bool autoloadType(const String& name);
-  bool autoloadRecord(const String& name);
+  bool autoloadRecordDesc(const String& name);
   DECLARE_STATIC_REQUEST_LOCAL(AutoloadHandler, s_instance);
 
   /**

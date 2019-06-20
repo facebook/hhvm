@@ -215,14 +215,14 @@ const TypeAliasReq* getTypeAliasWithAutoload(const NamedEntity* ne,
  * type alias or an enum class; enum classes are strange in that it
  * *is* possible to have an instance of them even if they are not defined.
  */
-boost::variant<const TypeAliasReq*, Record*, Class*>
-getTypeAliasOrClassOrRecordWithAutoload(const NamedEntity* ne,
-                                        const StringData* name) {
+boost::variant<const TypeAliasReq*, RecordDesc*, Class*>
+getNamedTypeWithAutoload(const NamedEntity* ne,
+                         const StringData* name) {
 
   if (auto def = ne->getCachedTypeAlias()) {
     return def;
   }
-  if (auto rec = Unit::lookupRecord(ne)) {
+  if (auto rec = Unit::lookupRecordDesc(ne)) {
     return rec;
   }
   Class *klass = nullptr;
@@ -230,13 +230,12 @@ getTypeAliasOrClassOrRecordWithAutoload(const NamedEntity* ne,
   // We don't have the class, record or the typedef, so autoload.
   if (!klass) {
     String nameStr(const_cast<StringData*>(name));
-    if (AutoloadHandler::s_instance->autoloadClassOrTypeOrRecord(nameStr)) {
-      // Autoload succeeded, try to grab a typedef and if that doesn't work,
-      // a class.
+    if (AutoloadHandler::s_instance->autoloadNamedType(nameStr)) {
+      // Autoload succeeded, try to grab a typedef, or record, or a class.
       if (auto def = ne->getCachedTypeAlias()) {
         return def;
       }
-      if (auto rec = Unit::lookupRecord(ne)) {
+      if (auto rec = Unit::lookupRecordDesc(ne)) {
         return rec;
       }
       klass = Unit::lookupClass(ne);
@@ -264,9 +263,9 @@ MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
   if (!isObject()) return t;
 
   assertx(t == KindOfObject);
-  auto p = getTypeAliasOrClassOrRecordWithAutoload(m_namedEntity, m_typeName);
+  auto p = getNamedTypeWithAutoload(m_namedEntity, m_typeName);
 
-  if (boost::get<Record*>(&p)) return KindOfRecord;
+  if (boost::get<RecordDesc*>(&p)) return KindOfRecord;
 
   auto ptd = boost::get<const TypeAliasReq*>(&p);
   auto td = ptd ? *ptd : nullptr;
@@ -303,7 +302,7 @@ bool TypeConstraint::isMixedResolved() const {
   // isCheckable() implies !isMixed(), so if its not an unresolved object here,
   // we know it cannot be mixed.
   if (!isObject() || isResolved()) return false;
-  auto v = getTypeAliasOrClassOrRecordWithAutoload(m_namedEntity, m_typeName);
+  auto v = getNamedTypeWithAutoload(m_namedEntity, m_typeName);
   auto const pTyAlias = boost::get<const TypeAliasReq*>(&v);
   return pTyAlias && (*pTyAlias)->type == AnnotType::Mixed;
 }
@@ -393,13 +392,13 @@ TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
 
     const TypeAliasReq* tyAlias = nullptr;
     Class* klass = nullptr;
-    Record* rec = nullptr;
+    RecordDesc* rec = nullptr;
     auto v =
-      getTypeAliasOrClassOrRecordWithAutoload(tc.m_namedEntity, tc.m_typeName);
+      getNamedTypeWithAutoload(tc.m_namedEntity, tc.m_typeName);
     if (auto pT = boost::get<const TypeAliasReq*>(&v)) {
       tyAlias = *pT;
     }
-    if (auto pR = boost::get<Record*>(&v)) {
+    if (auto pR = boost::get<RecordDesc*>(&v)) {
       rec = *pR;
     }
     if (auto pK = boost::get<Class*>(&v)) {
@@ -469,21 +468,22 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
   assertx(val.type() != KindOfObject);
   assertx(isObject() || isRecord());
 
-  auto const p = [&]() -> boost::variant<const TypeAliasReq*, Record*, Class*> {
+  auto const p = [&]() ->
+    boost::variant<const TypeAliasReq*, RecordDesc*, Class*> {
     if (!Assert) {
-      return getTypeAliasOrClassOrRecordWithAutoload(m_namedEntity, m_typeName);
+      return getNamedTypeWithAutoload(m_namedEntity, m_typeName);
     }
     if (auto const def = m_namedEntity->getCachedTypeAlias()) {
       return def;
     }
-    if (auto const rec = Unit::lookupRecord(m_namedEntity)) {
+    if (auto const rec = Unit::lookupRecordDesc(m_namedEntity)) {
       return rec;
     }
     return Unit::lookupClass(m_namedEntity);
   }();
   auto ptd = boost::get<const TypeAliasReq*>(&p);
   auto td = ptd ? *ptd : nullptr;
-  auto prec = boost::get<Record*>(&p);
+  auto prec = boost::get<RecordDesc*>(&p);
   auto rec = prec ? *prec : nullptr;
   auto pc = boost::get<Class*>(&p);
   auto c = pc ? *pc : nullptr;

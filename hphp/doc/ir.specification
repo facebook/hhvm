@@ -819,7 +819,7 @@ To string conversions:
 
   Checks if two Class values are equal.
 
-| EqRec,                       D(Bool), S(RecType) S(RecType),            NF
+| EqRecDesc,                   D(Bool), S(RecDesc) S(RecDesc),            NF
 
   Checks if two record types are equal.
 
@@ -1224,11 +1224,11 @@ To string conversions:
 
   Loads into D the func pointer stored in the higher 32 bits of S0.
 
-| LdValRec, D(RecType), S(Record), NF
+| LdRecDesc, D(RecDesc), S(Record), NF
 
   Load the record type out of the record in S0 and put it in D.
 
-| LdRecCached, D(RecType), CStr, NF
+| LdRecDescCached, D(RecDesc), CStr, NF
 
   Loads the record named S0 via the RDS. Invokes autoload and may raise an error
   if the record is not defined.
@@ -1685,7 +1685,7 @@ To string conversions:
   AllocVecArray that was too big to use a series of InitPackedLayoutArray
   instructions.
 
-| NewRecord<offset,keys...>, D(Record), S(RecType) S(StkPtr), PRc|CRc
+| NewRecord<offset,keys...>, D(Record), S(RecDesc) S(StkPtr), PRc|CRc
 
   Allocate a new record, given the type S0 and N immediate keys
   and taking N elements off the stack given by S1, at `offset'.

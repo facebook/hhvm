@@ -25,12 +25,12 @@
 
 namespace HPHP {
 
-struct Record;
+struct RecordDesc;
 struct StringData;
 
 struct RecordData : Countable, type_scan::MarkCollectable<RecordData> {
-  explicit RecordData(const Record*);
-  const Record* record() const;
+  explicit RecordData(const RecordDesc*);
+  const RecordDesc* record() const;
 
   size_t heapSize() const;
   bool kindIsValid() const;
@@ -44,7 +44,7 @@ struct RecordData : Countable, type_scan::MarkCollectable<RecordData> {
    * initial values, return a fully initialized instance of that Record.
    * The initial ref-count will be set to one.
    */
-  static RecordData* newRecord(const Record*,
+  static RecordData* newRecord(const RecordDesc*,
                                uint32_t initSize,
                                const StringData* const* keys,
                                const TypedValue* values);
@@ -68,7 +68,7 @@ private:
   template<bool (*fieldEq)(TypedValue, TypedValue)>
   static bool equalImpl(const RecordData*, const RecordData*);
 
-  const Record* const m_record;
+  const RecordDesc* const m_record;
 };
 
 ALWAYS_INLINE void decRefRec(RecordData* rec) {

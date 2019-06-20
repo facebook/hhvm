@@ -78,6 +78,7 @@ struct UnitEmitter {
   // Initialization and execution.
 
   explicit UnitEmitter(const SHA1& sha1,
+                       const SHA1& bcSha1,
                        const Native::FuncTable&,
                        bool useGlobalIds);
   UnitEmitter(UnitEmitter&&) = delete;
@@ -111,9 +112,14 @@ struct UnitEmitter {
   // Basic data.
 
   /*
-   * The SHA1 hash of the Unit.
+   * The SHA1 hash of the source for Unit.
    */
   const SHA1& sha1() const;
+
+  /*
+   * The SHA1 hash of the bytecode for Unit.
+   */
+  const SHA1& bcSha1() const;
 
   /*
    * Bytecode pointer and current emit position.
@@ -433,6 +439,7 @@ public:
 
 private:
   SHA1 m_sha1;
+  SHA1 m_bcSha1;
 
   unsigned char* m_bc;
   size_t m_bclen;

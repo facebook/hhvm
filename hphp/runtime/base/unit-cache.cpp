@@ -211,6 +211,7 @@ struct CachedUnitWithFree {
     }
   }
   ~CachedUnitWithFree() {
+    if (skipFree.load(std::memory_order_relaxed)) return;
     if (auto oldUnit = cu.unit) {
       if (needsTreadmill) {
         Treadmill::enqueue([oldUnit] { delete oldUnit; });
@@ -232,6 +233,7 @@ struct CachedUnitWithFree {
   bool needsTreadmill;
 
   SHA1 repoOptionsHash;
+  mutable std::atomic<bool> skipFree{false};
 };
 
 struct CachedUnitNonRepo {
@@ -326,13 +328,24 @@ CachedUnit createUnitFromString(const char* path,
                                 OptLog& ent,
                                 const Native::FuncTable& nativeFuncs,
                                 const RepoOptions& options,
-                                FileLoadFlags& flags) {
+                                FileLoadFlags& flags,
+                                copy_ptr<CachedUnitWithFree> orig = {}) {
   auto const sha1 = SHA1{mangleUnitSha1(string_sha1(contents.slice()),
                                         options)};
+  if (orig && orig->cu.unit && sha1 == orig->cu.unit->sha1()) return orig->cu;
+  auto const check = [&] (Unit* unit) {
+    if (orig && orig->cu.unit && unit &&
+        unit->bcSha1() == orig->cu.unit->bcSha1()) {
+      delete unit;
+      return orig->cu;
+    }
+    flags = FileLoadFlags::kEvicted;
+    return CachedUnit { unit, rds::allocBit() };
+  };
   // Try the repo; if it's not already there, invoke the compiler.
   if (auto unit = Repo::get().loadUnit(path, sha1, nativeFuncs)) {
     flags = FileLoadFlags::kHitDisk;
-    return CachedUnit { unit.release(), rds::allocBit() };
+    return check(unit.release());
   }
   LogTimer compileTimer("compile_ms", ent);
   rqtrace::EventGuard trace{"COMPILE_UNIT"};
@@ -340,7 +353,7 @@ CachedUnit createUnitFromString(const char* path,
   flags = FileLoadFlags::kCompiled;
   auto const unit = compile_file(contents.data(), contents.size(), sha1, path,
                                  nativeFuncs, options, releaseUnit);
-  return CachedUnit { unit, rds::allocBit() };
+  return check(unit);
 }
 
 CachedUnit createUnitFromUrl(const StringData* const requestedPath,
@@ -369,11 +382,12 @@ CachedUnit createUnitFromFile(const StringData* const path,
                               OptLog& ent,
                               const Native::FuncTable& nativeFuncs,
                               const RepoOptions& options,
-                              FileLoadFlags& flags) {
+                              FileLoadFlags& flags,
+                              copy_ptr<CachedUnitWithFree> orig = {}) {
   auto const contents = readFileAsString(w, path);
   return contents
     ? createUnitFromString(path->data(), *contents, releaseUnit, ent,
-                           nativeFuncs, options, flags)
+                           nativeFuncs, options, flags, orig)
     : CachedUnit{};
 }
 
@@ -492,8 +506,12 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
   SCOPE_EXIT { if (releaseUnit) delete releaseUnit; };
 
   auto const updateAndUnlock = [] (auto& cachedUnit, auto p) {
+    auto newU = p->cu.unit;
     auto old = cachedUnit.update_and_unlock(std::move(p));
     if (old) {
+      if (old->cu.unit == newU) {
+        old->skipFree.store(true, std::memory_order_relaxed);
+      }
       // We don't need to do anything explicitly; the copy_ptr
       // destructor will take care of it.
       Treadmill::enqueue([unit_to_delete = std::move(old)] () {});
@@ -528,8 +546,13 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
       }
 
       trace.finish();
-      auto const cu = createUnitFromFile(rpath, &releaseUnit, w, ent,
-                                         nativeFuncs, options, flags);
+      auto const cu = [&] {
+        auto tmp = RuntimeOption::EvalCheckUnitSHA1
+          ? cachedUnit.copy()
+          : copy_ptr<CachedUnitWithFree>{};
+        return createUnitFromFile(rpath, &releaseUnit, w, ent,
+                                  nativeFuncs, options, flags, tmp);
+      }();
       auto const isICE = cu.unit && cu.unit->isICE();
       auto p = copy_ptr<CachedUnitWithFree>(cu, statInfo, isICE, options);
       // Don't cache the unit if it was created in response to an internal error

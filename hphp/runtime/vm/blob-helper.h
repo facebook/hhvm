@@ -144,6 +144,10 @@ struct BlobEncoder {
     encode(b ? 1 : 0);
   }
 
+  void encode(const SHA1& sha1) {
+    for (auto w : sha1.q) encode(w);
+  }
+
   void encode(DataType t) {
     // always encode DataType as int8 even if it's a bigger size.
     assertx(DataType(int8_t(t)) == t);
@@ -342,6 +346,10 @@ struct BlobDecoder {
     IsNontrivialSerializable<T,BlobDecoder>::value
   >::type decode(T& t) {
     t.serde(*this);
+  }
+
+  void decode(SHA1& sha1) {
+    for (auto& w : sha1.q) decode(w);
   }
 
   void decode(DataType& t) {

@@ -592,7 +592,8 @@ Array HHVM_FUNCTION(get_compiled_units, int64_t kind) {
     case FileLoadFlags::kHitMem:  break;
     case FileLoadFlags::kWaited:  if (kind < 2) break;
     case FileLoadFlags::kHitDisk: if (kind < 1) break;
-    case FileLoadFlags::kCompiled:
+    case FileLoadFlags::kCompiled:if (kind < 0) break;
+    case FileLoadFlags::kEvicted:
       init.add(const_cast<StringData*>(u.first));
     }
   }

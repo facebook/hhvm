@@ -113,7 +113,8 @@ function get_request_count(): int;
  * units which ($kind = 0) were compiled in this request, ($kind = 1) were
  * compiled or loaded from the bytecode cache in this request, or ($kind = 2)
  * were compiled, loaded from disk cache, or caused the request to stall waiting
- * for loading to complete in another request.
+ * for loading to complete in another request. If $kind < 0, only return units
+ * which weren't shown to be identical at the bytecode level.
  */
 <<__Native>>
 function get_compiled_units(int $kind = 0): keyset;

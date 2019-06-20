@@ -29,6 +29,10 @@ inline const SHA1& UnitEmitter::sha1() const {
   return m_sha1;
 }
 
+inline const SHA1& UnitEmitter::bcSha1() const {
+  return m_bcSha1;
+}
+
 inline const unsigned char* UnitEmitter::bc() const {
   return m_bc;
 }

@@ -105,6 +105,7 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/zend/zend-string.h"
 
 TRACE_SET_MOD(hhas);
 
@@ -3585,7 +3586,8 @@ std::unique_ptr<UnitEmitter> assemble_string(
   bool swallowErrors,
   bool wantsSymbolRefs
 ) {
-  auto ue = std::make_unique<UnitEmitter>(sha1, nativeFuncs, false);
+  auto const bcSha1 = SHA1{string_sha1(folly::StringPiece(code, codeLen))};
+  auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, nativeFuncs, false);
   if (!SystemLib::s_inited) {
     ue->m_mergeOnly = true;
   }

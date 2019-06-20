@@ -129,7 +129,8 @@ enum class FileLoadFlags {
   kHitMem,
   kWaited,
   kHitDisk,
-  kCompiled
+  kCompiled,
+  kEvicted
 };
 
 using InvokeArgs = folly::Range<const TypedValue*>;

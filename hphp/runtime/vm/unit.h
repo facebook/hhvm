@@ -344,9 +344,14 @@ public:
   int64_t sn() const;
 
   /*
-   * SHA1 of the Unit.
+   * SHA1 of the source code for Unit.
    */
   SHA1 sha1() const;
+
+  /*
+   * SHA1 of the bytecode for Unit.
+   */
+  SHA1 bcSha1() const;
 
   /*
    * File and directory paths.
@@ -935,6 +940,7 @@ private:
 
   int64_t m_sn{-1};             // Note: could be 32-bit
   SHA1 m_sha1;
+  SHA1 m_bcSha1;
   VMFixedVector<const ArrayData*> m_arrays;
   mutable PseudoMainCacheMap* m_pseudoMainCache{nullptr};
   mutable LockFreePtrWrapper<VMCompactVector<LineInfo>> m_lineMap;

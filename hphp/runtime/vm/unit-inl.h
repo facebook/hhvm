@@ -145,6 +145,10 @@ inline SHA1 Unit::sha1() const {
   return m_sha1;
 }
 
+inline SHA1 Unit::bcSha1() const {
+  return m_bcSha1;
+}
+
 inline const StringData* Unit::filepath() const {
   assertx(m_filepath);
   return m_filepath;

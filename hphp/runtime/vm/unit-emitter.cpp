@@ -92,12 +92,14 @@ size_t hhbc_arena_capacity() {
 ///////////////////////////////////////////////////////////////////////////////
 
 UnitEmitter::UnitEmitter(const SHA1& sha1,
+                         const SHA1& bcSha1,
                          const Native::FuncTable& nativeFuncs,
                          bool useGlobalIds)
   : m_useGlobalIds(useGlobalIds)
   , m_mainReturn(make_tv<KindOfUninit>())
   , m_nativeFuncs(nativeFuncs)
   , m_sha1(sha1)
+  , m_bcSha1(bcSha1)
   , m_bc((unsigned char*)malloc(BCMaxInit))
   , m_bclen(0)
   , m_bcmax(BCMaxInit)
@@ -655,6 +657,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   u->m_isHHFile = m_isHHFile;
   u->m_dirpath = makeStaticString(FileUtil::dirname(StrNR{m_filepath}));
   u->m_sha1 = m_sha1;
+  u->m_bcSha1 = m_bcSha1;
   u->m_arrays = m_arrays;
   for (auto const& pce : m_pceVec) {
     u->m_preClasses.push_back(PreClassPtr(pce->create(*u)));
@@ -839,6 +842,7 @@ void UnitEmitter::serdeMetaData(SerDe& sd) {
     (m_metaData)
     (m_fileAttributes)
     (m_symbol_refs)
+    (m_bcSha1)
     ;
 
   if (RuntimeOption::EvalLoadFilepathFromUnitCache) {
@@ -926,7 +930,7 @@ std::unique_ptr<UnitEmitter> UnitRepoProxy::loadEmitter(
     const Native::FuncTable& nativeFuncs) {
   // We set useGlobalIds to false as a placeholder; it will be set
   // correctly by UnitRepoProxy::GetUnitStmt::get.
-  auto ue = std::make_unique<UnitEmitter>(sha1, nativeFuncs, false);
+  auto ue = std::make_unique<UnitEmitter>(sha1, SHA1{}, nativeFuncs, false);
   if (!RuntimeOption::EvalLoadFilepathFromUnitCache) {
     ue->m_filepath = makeStaticString(name);
   }
@@ -1424,7 +1428,8 @@ UnitRepoProxy::GetSourceLocTabStmt::get(int64_t unitSn,
 std::unique_ptr<UnitEmitter>
 createFatalUnit(StringData* filename, const SHA1& sha1, FatalOp /*op*/,
                 StringData* err) {
-  auto ue = std::make_unique<UnitEmitter>(sha1, Native::s_noNativeFuncs, false);
+  auto ue = std::make_unique<UnitEmitter>(sha1, SHA1{}, Native::s_noNativeFuncs,
+                                          false);
   ue->m_filepath = filename;
   ue->m_isHHFile = true;
   ue->initMain(1, 1);

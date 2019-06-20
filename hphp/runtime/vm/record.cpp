@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/record.h"
 
+#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/treadmill.h"
 
@@ -93,7 +94,12 @@ const StringData* Record::mangleFieldName(const StringData* recordName,
 }
 
 Slot Record::lookupField(const StringData* fieldName) const {
-  return m_fields.findIndex(fieldName);
+  auto idx = m_fields.findIndex(fieldName);
+  if (idx == kInvalidSlot) {
+    raise_error(folly::sformat("Field '{}' does not exist in record '{}'",
+                               fieldName, name()));
+  }
+  return idx;
 }
 
 const Record::Field& Record::field(const StringData* fieldName) const {

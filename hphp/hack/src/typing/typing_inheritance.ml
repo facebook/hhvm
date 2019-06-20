@@ -11,6 +11,8 @@
     inherited, including those which were overridden. *)
 
 open Core_kernel
+open Decl_defs
+open Reordered_argument_collections
 open Shallow_decl_defs
 open Typing_defs
 
@@ -73,7 +75,19 @@ let check_trait_override_annotations env cls ~static =
       | _ -> ()
   end
 
+let check_if_cyclic cls =
+  let cyclic_classes =
+    Decl_linearize.get_linearization (Cls.name cls)
+    |> Sequence.find_map ~f:(fun mro -> mro.mro_cyclic)
+  in
+  match cyclic_classes with
+  | None -> ()
+  | Some classes ->
+    let classes = SSet.add classes (Cls.name cls) in
+    Errors.cyclic_class_def classes (Cls.pos cls)
+
 let check_class env cls =
+  check_if_cyclic cls;
   if Cls.kind cls <> Ast.Ctrait then begin
     check_override_annotations cls ~static:false;
     check_override_annotations cls ~static:true;

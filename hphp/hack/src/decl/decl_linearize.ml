@@ -33,7 +33,7 @@ type state =
   | Next_ancestor
   (** [Next_ancestor] indicates that the next ancestor linearization should be
       lazily computed and emitted. *)
-  | Ancestor of linearization
+  | Ancestor of (string * linearization)
   (** [Ancestor] indicates that we are in the middle of emitting an ancestor
       linearization. For each of its elements, the element should be emitted as
       an element of the current linearization (with the appropriate source and
@@ -118,11 +118,26 @@ let mro_elements_equal a =
   let b = normalize_for_comparison b in
   a = b
 
+let empty_mro_element = {
+  mro_name = "";
+  mro_use_pos = Pos.none;
+  mro_ty_pos = Pos.none;
+  mro_type_args = [];
+  mro_class_not_found = false;
+  mro_cyclic = None;
+  mro_required_at = None;
+  mro_synthesized = false;
+  mro_xhp_attrs_only = false;
+  mro_consts_only = false;
+  mro_copy_private_members = false;
+  mro_passthrough_abstract_typeconst = false;
+}
+
 let rec ancestor_linearization
     (env : env)
     (child_class_abstract : bool)
     (ancestor : Pos.t * (Pos.t * string) * decl ty list * source_type)
-  : linearization =
+  : string * linearization =
   let ty_pos, (use_pos, class_name), type_args, source = ancestor in
   Decl_env.add_extends_dependency env.decl_env class_name;
   let lin = get_linearization env class_name in
@@ -156,7 +171,7 @@ let rec ancestor_linearization
     }
   end in
   match Sequence.next lin with
-  | None -> Sequence.empty
+  | None -> class_name, Sequence.empty
   | Some (c, rest) ->
     (* Fill in the type arguments applied to the ancestor and the position where
        it was included into the linearization of the child class. *)
@@ -176,22 +191,16 @@ let rec ancestor_linearization
         List.map c.mro_type_args ~f:(Decl_instantiate.instantiate subst)
       }
     end in
-    Sequence.append (Sequence.singleton c) rest
+    class_name, Sequence.append (Sequence.singleton c) rest
 
 (* Linearize a class declaration given its shallow declaration *)
 and linearize (env : env) (c : shallow_class) : linearization =
   let mro_name = snd c.sc_name in
   (* The first class doesn't have its type parameters filled in *)
-  let child = {
+  let child = { empty_mro_element with
     mro_name;
     mro_use_pos = fst c.sc_name;
     mro_ty_pos = fst c.sc_name;
-    mro_type_args = [];
-    mro_class_not_found = false;
-    mro_required_at = None;
-    mro_synthesized = false;
-    mro_xhp_attrs_only = false;
-    mro_consts_only = false;
     mro_copy_private_members = c.sc_kind = Ast_defs.Ctrait;
     mro_passthrough_abstract_typeconst = c.sc_kind = Ast_defs.Cabstract;
   } in
@@ -261,16 +270,21 @@ and next_state
   match state, ancestors with
   | Child child, _ -> Yield (child, (Next_ancestor, ancestors, child::acc, synths))
   | Next_ancestor, ancestor::ancestors ->
-    let lin = ancestor_linearization env child_class_abstract ancestor in
-    Skip (Ancestor lin, ancestors, acc, synths)
-  | Ancestor lin, ancestors ->
+    let name_and_lin = ancestor_linearization env child_class_abstract ancestor in
+    Skip (Ancestor name_and_lin, ancestors, acc, synths)
+  | Ancestor (name, lin), ancestors ->
     begin match Sequence.next lin with
     | None -> Skip (Next_ancestor, ancestors, acc, synths)
     (* Lazy.Undefined occurs if we attempt to include a linearization within
        itself. This will only happen when we have a class dependency cycle (and
        only in some particular circumstances), so it will not arise in legal
        programs. *)
-    | exception Lazy.Undefined -> Skip (Next_ancestor, ancestors, acc, synths)
+    | exception Lazy.Undefined ->
+      let next = { empty_mro_element with
+        mro_name = name;
+        mro_cyclic = Some (SSet.add env.class_stack name);
+      } in
+      Yield (next, (Next_ancestor, ancestors, next::acc, synths))
     | Some (next, rest) ->
       let should_skip, synths =
         match env.linearization_kind with
@@ -296,8 +310,8 @@ and next_state
           should_skip || List.mem acc next ~equal, synths
       in
       if should_skip
-      then Skip (Ancestor rest, ancestors, acc, synths)
-      else Yield (next, (Ancestor rest, ancestors, next::acc, synths))
+      then Skip (Ancestor (name, rest), ancestors, acc, synths)
+      else Yield (next, (Ancestor (name, rest), ancestors, next::acc, synths))
     end
   | Next_ancestor, [] ->
     let synths = List.rev synths in
@@ -311,7 +325,13 @@ and next_state
 
 and get_linearization (env : env) (class_name : string) : linearization =
   let { class_stack; linearization_kind; _ } = env in
-  if SSet.mem class_stack class_name then Sequence.empty else
+  if SSet.mem class_stack class_name
+  then
+    Sequence.singleton { empty_mro_element with
+      mro_name = class_name;
+      mro_cyclic = Some class_stack;
+    }
+  else
   let class_stack = SSet.add class_stack class_name in
   let env = { env with class_stack } in
   let key = class_name, linearization_kind in
@@ -337,18 +357,9 @@ and get_linearization (env : env) (class_name : string) : linearization =
            and we should look into removing it (along with
            Typing_classes_heap.members_fully_known) after we have removed legacy
            decl. *)
-        Sequence.singleton {
+        Sequence.singleton { empty_mro_element with
           mro_name = class_name;
-          mro_use_pos = Pos.none;
-          mro_ty_pos = Pos.none;
-          mro_type_args = [];
           mro_class_not_found = true; (* This class is not known to exist! *)
-          mro_required_at = None;
-          mro_synthesized = false;
-          mro_xhp_attrs_only = false;
-          mro_consts_only = false;
-          mro_copy_private_members = false;
-          mro_passthrough_abstract_typeconst = false;
         }
 
 let get_linearization ?(kind=Member_resolution) class_name =

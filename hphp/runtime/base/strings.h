@@ -61,10 +61,14 @@ auto constexpr METHOD_NAME_MUST_BE_STRING =
   "Method name must be a string";
 auto constexpr CANT_UNSET_STRING =
   "Cannot unset string offsets";
+auto constexpr CANT_UNSET_RECORD =
+  "Cannot unset record fields";
 auto constexpr OP_NOT_SUPPORTED_STRING =
   "Operator not supported for strings";
 auto constexpr OP_NOT_SUPPORTED_FUNC =
   "Operator not supported for funcs";
+auto constexpr OP_NOT_SUPPORTED_RECORD =
+  "Operator not supported for records";
 auto constexpr OP_NOT_SUPPORTED_CLASS =
   "Operator not supported for classes";
 auto constexpr ASYNC_WITHOUT_BODY =

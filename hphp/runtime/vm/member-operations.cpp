@@ -214,6 +214,12 @@ void throw_cannot_use_newelem_for_lval_read_clsmeth() {
   );
 }
 
+void throw_cannot_use_newelem_for_lval_read_record() {
+  SystemLib::throwInvalidOperationExceptionObject(
+    "Cannot use [] with record for reading in an lvalue context"
+  );
+}
+
 void throw_cannot_write_for_clsmeth() {
   SystemLib::throwInvalidOperationExceptionObject(
     "Cannot use [] with clsmeth for writing");

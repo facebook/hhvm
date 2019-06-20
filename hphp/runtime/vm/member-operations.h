@@ -163,6 +163,7 @@ inline ObjectData* instanceFromTv(tv_rval tv) {
 [[noreturn]] void throw_cannot_use_newelem_for_lval_read_dict();
 [[noreturn]] void throw_cannot_use_newelem_for_lval_read_keyset();
 [[noreturn]] void throw_cannot_use_newelem_for_lval_read_clsmeth();
+[[noreturn]] void throw_cannot_use_newelem_for_lval_read_record();
 [[noreturn]] void throw_cannot_write_for_clsmeth();
 [[noreturn]] void throw_cannot_unset_for_clsmeth();
 
@@ -912,6 +913,17 @@ inline tv_lval ElemDString(tv_lval base,
 }
 
 /**
+ * ElemD when base is a Record
+ */
+template <KeyType keyType>
+inline tv_lval ElemDRecord(tv_lval base, key_type<keyType> key) {
+  assertx(tvIsRecord(base));
+  assertx(tvIsPlausible(base.tv()));
+  auto const recData = val(base).prec;
+  auto const fieldName = tvCastToString(initScratchKey(key));
+  return recData->fieldLval(fieldName.get());
+}
+/**
  * ElemD when base is an Object
  */
 template<MOpMode mode, bool reffy, KeyType keyType>
@@ -998,10 +1010,9 @@ tv_lval ElemD(TypedValue& tvRef, tv_lval base,
       return ElemDObject<mode, reffy, keyType>(tvRef, base, key);
     case KindOfClsMeth:
       throw_cannot_write_for_clsmeth();
-
-    case KindOfRecord: // TODO(T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
-
+    case KindOfRecord:
+      assertx(!reffy);
+      return ElemDRecord<keyType>(base, key);
     case KindOfRef:
       break;
   }
@@ -1262,8 +1273,8 @@ tv_lval ElemU(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
       return ElemUArray<keyType>(base, key);
     case KindOfObject:
       return ElemUObject<keyType>(tvRef, base, key);
-    case KindOfRecord: // TODO(T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
+    case KindOfRecord:
+      raise_error(Strings::OP_NOT_SUPPORTED_RECORD);
     case KindOfRef:
       break;
   }
@@ -1381,8 +1392,8 @@ inline tv_lval NewElem(TypedValue& tvRef,
       return NewElemObject(tvRef, base);
     case KindOfClsMeth:
       throw_cannot_use_newelem_for_lval_read_clsmeth();
-    case KindOfRecord: // TODO(T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
+    case KindOfRecord:
+      throw_cannot_use_newelem_for_lval_read_record();
     case KindOfRef:
       break;
   }
@@ -2046,8 +2057,8 @@ inline void SetNewElem(tv_lval base,
       return SetNewElemObject(base, value);
     case KindOfClsMeth:
       throw_cannot_write_for_clsmeth();
-    case KindOfRecord: // TODO(T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
+    case KindOfRecord:
+      raise_error(Strings::OP_NOT_SUPPORTED_RECORD);
     case KindOfRef:
 
       break;
@@ -2197,8 +2208,12 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
     case KindOfClsMeth:
       throw_cannot_write_for_clsmeth();
 
-    case KindOfRecord: // TODO(T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
+    case KindOfRecord: {
+      auto result = ElemDRecord<KeyType::Any>(base, key);
+      result = tvAssertCell(result);
+      setopBody(result, op, rhs);
+      return result;
+    }
 
     case KindOfRef:
       break;
@@ -2297,8 +2312,8 @@ inline tv_lval SetOpNewElem(TypedValue& tvRef,
     case KindOfClsMeth:
       throw_cannot_use_newelem_for_lval_read_clsmeth();
 
-    case KindOfRecord: // TODO (T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
+    case KindOfRecord:
+      throw_cannot_use_newelem_for_lval_read_record();
 
     case KindOfRef:
       break;
@@ -2469,8 +2484,10 @@ inline Cell IncDecElem(
     case KindOfClsMeth:
       throw_cannot_write_for_clsmeth();
 
-    case KindOfRecord: // TODO(T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
+    case KindOfRecord: {
+      auto result = ElemDRecord<KeyType::Any>(base, key);
+      return IncDecBody(op, tvAssertCell(result));
+    }
 
     case KindOfRef:
       break;
@@ -2571,8 +2588,8 @@ inline Cell IncDecNewElem(
     case KindOfClsMeth:
       throw_cannot_use_newelem_for_lval_read_clsmeth();
 
-    case KindOfRecord: // TODO(T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
+    case KindOfRecord:
+      throw_cannot_use_newelem_for_lval_read_record();
 
     case KindOfRef:
       break;
@@ -2812,7 +2829,7 @@ void UnsetElemSlow(tv_lval base, key_type<keyType> key) {
     case KindOfClsMeth:
       throw_cannot_unset_for_clsmeth();
 
-    case KindOfRecord: // TODO(T41029813)
+    case KindOfRecord:
       raise_error("Cannot unset a record field");
 
     case KindOfRef:
@@ -2974,6 +2991,18 @@ bool IssetEmptyElemClsMeth(ClsMethDataRef base, key_type<keyType> key) {
 }
 
 /**
+ * IssetEmptyElem when base is a Record
+ */
+template <bool useEmpty, KeyType keyType>
+bool IssetEmptyElemRecord(RecordData* base, key_type<keyType> key) {
+  auto const  result = ElemRecord<keyType>(base, key);
+  if (useEmpty) {
+    return !cellToBool(tvAssertCell(result.tv()));
+  }
+  return !cellIsNull(tvAssertCell(result.tv()));
+}
+
+/**
  * isset/empty($base[$key])
  */
 template <bool useEmpty, KeyType keyType>
@@ -3038,8 +3067,8 @@ NEVER_INLINE bool IssetEmptyElemSlow(tv_rval base, key_type<keyType> key) {
       return IssetEmptyElemClsMeth<useEmpty, keyType>(val(base).pclsmeth, key);
     }
 
-    case KindOfRecord: // TODO(T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
+    case KindOfRecord:
+      return IssetEmptyElemRecord<useEmpty, keyType>(val(base).prec, key);
 
     case KindOfRef:
       break;
@@ -3212,13 +3241,11 @@ tv_lval propPre(TypedValue& tvRef, tv_lval base, MInstrPropState* pState) {
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfClsMeth:
+    case KindOfRecord:
       return propPreNull<mode>(tvRef, pState);
 
     case KindOfObject:
       return base;
-
-    case KindOfRecord: // TODO(T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
 
     case KindOfRef:
       break;
@@ -3401,6 +3428,7 @@ inline void SetProp(Class* ctx, tv_lval base, key_type<keyType> key,
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
+    case KindOfRecord:
       return SetPropNull<setResult>(val);
 
     case KindOfPersistentString:
@@ -3412,9 +3440,6 @@ inline void SetProp(Class* ctx, tv_lval base, key_type<keyType> key,
 
     case KindOfObject:
       return SetPropObj<keyType>(ctx, HPHP::val(base).pobj, key, val);
-
-    case KindOfRecord: // TODO(T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
 
     case KindOfRef:
       break;
@@ -3487,6 +3512,7 @@ inline tv_lval SetOpProp(TypedValue& tvRef,
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
+    case KindOfRecord:
       return SetOpPropNull(tvRef);
 
     case KindOfPersistentString:
@@ -3498,9 +3524,6 @@ inline tv_lval SetOpProp(TypedValue& tvRef,
 
     case KindOfObject:
       return SetOpPropObj(tvRef, ctx, op, instanceFromTv(base), key, rhs);
-
-    case KindOfRecord: // TODO(T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
 
     case KindOfRef:
       break;
@@ -3577,6 +3600,7 @@ inline Cell IncDecProp(
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
+    case KindOfRecord:
       return IncDecPropNull();
 
     case KindOfPersistentString:
@@ -3588,9 +3612,6 @@ inline Cell IncDecProp(
 
     case KindOfObject:
       return IncDecPropObj(ctx, op, instanceFromTv(base), key);
-
-    case KindOfRecord: // TODO(T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
 
     case KindOfRef:
       break;

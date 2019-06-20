@@ -59,6 +59,7 @@ CASE(Ref)
 CASE(Func)
 CASE(Class)
 CASE(ClsMeth)
+CASE(Record)
 
 #undef CASE
 

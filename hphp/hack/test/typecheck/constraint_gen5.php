@@ -12,5 +12,6 @@
 class Equal<T1 as T2, T2 as T1> extends Equal<T2, T1> {
 
   public function __construct(T1 $x, T2 $y) {
+    parent::__construct($x, $y);
   }
 }

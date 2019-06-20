@@ -1,4 +1,4 @@
-<?hh // partial
+<?hh // strict
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -8,6 +8,8 @@
  *
  *
  */
+
+class A {}
 
 class C extends A {
   <<__Override>>

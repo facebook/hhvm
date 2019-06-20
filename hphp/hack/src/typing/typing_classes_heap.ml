@@ -18,7 +18,6 @@ module SN = Naming_special_names
 
 type lazy_class_type = {
   sc: shallow_class;
-  c: class_type;
   ih: inherited_members;
   ancestors: decl ty LSTable.t;
   parents_and_traits: unit LSTable.t;
@@ -31,7 +30,7 @@ type class_type_variant =
   | Lazy of lazy_class_type
   | Eager of class_type
 
-let make_lazy_class_type class_name sc c =
+let make_lazy_class_type class_name sc =
   let Decl_ancestors.{
     ancestors;
     parents_and_traits;
@@ -43,7 +42,6 @@ let make_lazy_class_type class_name sc c =
   let inherited_members = Decl_inheritance.make class_name get_ancestor in
   {
     sc;
-    c;
     ih = inherited_members;
     ancestors;
     parents_and_traits;
@@ -100,12 +98,9 @@ module Classes = struct
             match Shallow_classes_heap.get class_name with
             | None -> raise Exit
             | Some sc ->
-              let c = get_eager_class_type class_name in
-              let lazy_class_type = make_lazy_class_type class_name sc c in
-              Lazy lazy_class_type
+              Lazy (make_lazy_class_type class_name sc)
           else
-            let class_type = get_eager_class_type class_name in
-            Eager class_type
+            Eager (get_eager_class_type class_name)
         in
         Cache.add class_name class_type_variant;
         Some class_type_variant
@@ -212,7 +207,7 @@ module Api = struct
 
   let decl_errors t =
     match t with
-    | Lazy lc -> lc.c.tc_decl_errors
+    | Lazy lc -> Some lc.sc.sc_decl_errors
     | Eager c -> c.tc_decl_errors
 
   let sort_by_key seq =

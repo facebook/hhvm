@@ -76,4 +76,29 @@ tv_lval RecordData::fieldLval(const StringData* fieldName) {
   return tv_lval(const_cast<TypedValue*>(&fieldVec()[idx]));
 }
 
+template<bool(*fieldEq)(TypedValue, TypedValue)>
+ALWAYS_INLINE
+bool RecordData::equalImpl(const RecordData* r1, const RecordData* r2) {
+  if (r1->m_record != r2->m_record) {
+    return false;
+  }
+  auto const fv1 = r1->fieldVec();
+  auto const fv2 = r2->fieldVec();
+  auto const numFields = r1->m_record->numFields();
+  for (size_t i = 0; i < numFields; ++i) {
+    if (!fieldEq(fv1[i], fv2[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+
+bool RecordData::equal(const RecordData* r1, const RecordData* r2) {
+  return equalImpl<tvEqual>(r1, r2);
+}
+bool RecordData::same(const RecordData* r1, const RecordData* r2) {
+  return equalImpl<tvSame>(r1, r2);
+}
+
 }

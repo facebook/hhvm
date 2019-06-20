@@ -55,8 +55,14 @@ struct RecordData : Countable, type_scan::MarkCollectable<RecordData> {
     if (decReleaseCheck()) release();
   }
 
+  static bool equal(const RecordData*, const RecordData*);
+  static bool same(const RecordData*, const RecordData*);
+
 private:
   const TypedValue* fieldVec() const;
+
+  template<bool (*fieldEq)(TypedValue, TypedValue)>
+  static bool equalImpl(const RecordData*, const RecordData*);
 
   const Record* const m_record;
 };

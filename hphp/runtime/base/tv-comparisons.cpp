@@ -157,7 +157,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, int64_t val) {
       }
 
     case KindOfRecord:
-      throw_record_compare_exception();
+      return op.recordVsNonRecord();
 
     case KindOfRef:
       break;
@@ -239,7 +239,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, double val) {
       }
 
     case KindOfRecord:
-      throw_record_compare_exception();
+      return op.recordVsNonRecord();
 
     case KindOfRef:
       break;
@@ -336,7 +336,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const StringData* val) {
       }
 
     case KindOfRecord:
-      throw_record_compare_exception();
+      return op.recordVsNonRecord();
 
     case KindOfRef:
       break;
@@ -435,7 +435,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ArrayData* ad) {
       }
 
     case KindOfRecord:
-      throw_record_compare_exception();
+      return op.recordVsNonRecord();
 
     case KindOfRef:
       break;
@@ -527,12 +527,20 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ObjectData* od) {
       }
 
     case KindOfRecord:
-      throw_record_compare_exception();
+      return op.recordVsNonRecord();
 
     case KindOfRef:
       break;
   }
   not_reached();
+}
+
+template<class Op>
+typename Op::RetType cellRelOp(Op op, Cell cell, const RecordData* rec) {
+  if (cell.m_type != KindOfRecord) {
+    op.recordVsNonRecord();
+  }
+  return op(cell.m_data.prec, rec);
 }
 
 template<class Op>
@@ -613,7 +621,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ResourceData* rd) {
       }
 
     case KindOfRecord:
-      throw_record_compare_exception();
+      return op.recordVsNonRecord();
 
     case KindOfRef:
       break;
@@ -699,7 +707,6 @@ typename Op::RetType cellRelOp(Op op, Cell cell, ClsMethDataRef clsMeth) {
     case KindOfString:
     case KindOfFunc:
     case KindOfClass:
-    case KindOfRecord:
     case KindOfResource: return op(false, true);
     case KindOfBoolean:  return op(cell.m_data.num, true);
     case KindOfClsMeth:  return op(cell.m_data.pclsmeth, clsMeth);
@@ -738,6 +745,8 @@ typename Op::RetType cellRelOp(Op op, Cell cell, ClsMethDataRef clsMeth) {
       auto const od = cell.m_data.pobj;
       return od->isCollection() ? op.collectionVsNonObj() : op(true, false);
     }
+    case KindOfRecord:
+      return op.recordVsNonRecord();
 
     case KindOfRef: break;
   }
@@ -778,8 +787,7 @@ typename Op::RetType cellRelOp(Op op, Cell c1, Cell c2) {
   case KindOfClass:
     return cellRelOp(op, c1, classToStringHelper(c2.m_data.pclass));
   case KindOfClsMeth:      return cellRelOp(op, c1, c2.m_data.pclsmeth);
-  case KindOfRecord:
-    throw_record_compare_exception();
+  case KindOfRecord:       return cellRelOp(op, c1, c2.m_data.prec);
   case KindOfRef:
     break;
   }
@@ -860,6 +868,9 @@ struct Eq {
   bool dictVsNonDict() const { return false; }
   bool keysetVsNonKeyset() const { return false; }
   bool collectionVsNonObj() const { return false; }
+  bool recordVsNonRecord() const {
+    throw_rec_non_rec_compare_exception();
+  }
 
   bool noticeOnArrNonArr() const { return false; }
   bool noticeOnArrHackArr() const {
@@ -868,6 +879,10 @@ struct Eq {
 
   bool operator()(ClsMethDataRef c1, ClsMethDataRef c2) const {
     return c1 == c2;
+  }
+
+  bool operator()(const RecordData* r1, const RecordData* r2) const {
+    return RecordData::equal(r1, r2);
   }
 };
 
@@ -916,6 +931,9 @@ struct CompareBase {
   RetType collectionVsNonObj() const {
     throw_collection_compare_exception();
   }
+  RetType recordVsNonRecord() const {
+    throw_rec_non_rec_compare_exception();
+  }
 
   bool noticeOnArrNonArr() const {
     return checkHACCompare();
@@ -934,6 +952,10 @@ struct CompareBase {
     auto const func1 = funcToStringHelper(c1->getFunc());
     auto const func2 = funcToStringHelper(c2->getFunc());
     return operator()(func1, func2);
+  }
+
+  RetType operator()(const RecordData*, const RecordData*) const {
+    throw_record_compare_exception();
   }
 };
 
@@ -1209,7 +1231,8 @@ bool cellSame(Cell c1, Cell c2) {
       return c1.m_data.pclsmeth == c2.m_data.pclsmeth;
 
     case KindOfRecord:
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
+      return c2.m_type == KindOfRecord &&
+        RecordData::same(c1.m_data.prec, c2.m_data.prec);
 
     case KindOfUninit:
     case KindOfNull:

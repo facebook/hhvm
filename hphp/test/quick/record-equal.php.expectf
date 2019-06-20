@@ -1,3 +1,0 @@
-Fatal error: Uncaught exception 'InvalidOperationException' with message 'Cannot use relational comparison operators to compare records' in %s:%s
-Stack trace:
-#0 {main}

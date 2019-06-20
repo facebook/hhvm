@@ -41,6 +41,7 @@ module Api : sig
   val tparams               : t -> decl tparam list
   val construct             : t -> class_elt option * consistent_kind
   val enum_type             : t -> enum_type option
+  val sealed_whitelist      : t -> SSet.t option
   val decl_errors           : t -> Errors.t option
 
   val get_ancestor : t -> string -> decl ty option

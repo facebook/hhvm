@@ -191,6 +191,25 @@ module Api = struct
     | Lazy lc -> lc.sc.sc_enum_type
     | Eager c -> c.tc_enum_type
 
+  let get_sealed_whitelist sc =
+    let open Nast in
+    match Attrs.find SN.UserAttributes.uaSealed sc.sc_user_attributes with
+    | None -> None
+    | Some { ua_params; _ } ->
+      let add_class_name names param =
+        match param with
+        | _, Class_const ((_, CI (_, cls)), (_, name))
+          when name = SN.Members.mClass ->
+          SSet.add cls names
+        | _ -> names
+      in
+      Some (List.fold_left ua_params ~f:add_class_name ~init:SSet.empty)
+
+  let sealed_whitelist t =
+    match t with
+    | Lazy lc -> get_sealed_whitelist lc.sc
+    | Eager c -> c.tc_sealed_whitelist
+
   let decl_errors t =
     match t with
     | Lazy lc -> lc.c.tc_decl_errors

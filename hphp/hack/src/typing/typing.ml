@@ -14,7 +14,6 @@
  * consistent) *)
 open Core_kernel
 open Common
-open Decl_defs
 open Nast
 open Typing_defs
 open Utils
@@ -6135,17 +6134,17 @@ and check_parent class_def class_type parent_type =
   else ()
 
 and check_parent_sealed child_type parent_type =
-  match parent_type.dc_sealed_whitelist with
+  match Cls.sealed_whitelist parent_type with
     | None -> ()
     | Some whitelist ->
-      let parent_pos = parent_type.dc_pos in
-      let parent_name = parent_type.dc_name in
-      let child_pos = (Cls.pos child_type) in
-      let child_name = (Cls.name child_type) in
+      let parent_pos = Cls.pos parent_type in
+      let parent_name = Cls.name parent_type in
+      let child_pos = Cls.pos child_type in
+      let child_name = Cls.name child_type in
       let check kind action =
         if not (SSet.mem child_name whitelist)
         then Errors.extend_sealed child_pos parent_pos parent_name kind action in
-      begin match parent_type.dc_kind, (Cls.kind child_type) with
+      begin match Cls.kind parent_type, Cls.kind child_type with
         | Ast.Cinterface, Ast.Cinterface -> check "interface" "extend"
         | Ast.Cinterface, _ -> check "interface" "implement"
         | Ast.Ctrait, _ -> check "trait" "use"
@@ -6159,7 +6158,7 @@ and check_parents_sealed env child_def child_type =
   let parents = child_def.c_extends @ child_def.c_implements @ child_def.c_uses in
   List.iter parents begin function
     | _, Happly ((_, name), _) ->
-      begin match Decl_env.get_class_dep env.Env.decl_env name with
+      begin match Env.get_class_dep env name with
         | Some parent_type -> check_parent_sealed child_type parent_type
         | None -> ()
       end

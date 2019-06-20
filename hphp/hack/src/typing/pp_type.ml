@@ -862,6 +862,17 @@ and pp_class_type : Format.formatter -> class_type -> unit = fun fmt x ->
     Format.pp_print_string fmt ")"
   );
   Format.fprintf fmt "@]";
+  Format.fprintf fmt ";@ ";
+
+  Format.fprintf fmt "@[%s =@ " "tc_sealed_whitelist";
+  (match x.tc_sealed_whitelist with
+  | None -> Format.pp_print_string fmt "None"
+  | Some x ->
+    Format.pp_print_string fmt "(Some ";
+    SSet.pp fmt x;
+    Format.pp_print_string fmt ")"
+  );
+  Format.fprintf fmt "@]";
 
   Format.fprintf fmt "@ }@]"
 

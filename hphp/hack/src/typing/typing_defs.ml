@@ -512,6 +512,7 @@ and class_type = {
   tc_req_ancestors_extends : SSet.t; (* the extends of req_ancestors *)
   tc_extends             : SSet.t;
   tc_enum_type           : enum_type option;
+  tc_sealed_whitelist    : SSet.t option;
   tc_decl_errors         : Errors.t option;
 }
 

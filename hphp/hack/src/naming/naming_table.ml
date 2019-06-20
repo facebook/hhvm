@@ -551,18 +551,11 @@ end = struct
         let description = "NamingTableDatabaseSettings"
       end)
 
-    let check_table_sqlite =
-      "SELECT NAME FROM SQLITE_MASTER WHERE TYPE='table' AND NAME='NAMING_FILE_INFO'"
-
     let open_db () =
       match Shared_db_settings.get "database_path" with
       | None -> None
       | Some path ->
         let db = Sqlite3.db_open path in
-        let has_table = ref false in
-        Sqlite3.exec db ~cb:(fun _ _ -> has_table := true) check_table_sqlite |> check_rc;
-        if not !has_table
-        then failwith @@ Printf.sprintf "Database %s does not have a naming table." path;
         Sqlite3.exec db "PRAGMA synchronous = OFF;" |> check_rc;
         Sqlite3.exec db "PRAGMA journal_mode = MEMORY;" |> check_rc;
         Some db

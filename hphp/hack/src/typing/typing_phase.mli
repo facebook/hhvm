@@ -56,7 +56,7 @@ val localize_where_constraints:
 val localize_with_dty_validator:
   Env.env ->
   decl ty ->
-  (decl ty -> unit) ->
+  (env -> decl ty -> unit) ->
   Env.env * locl ty
 val sub_type_decl:
   Env.env ->

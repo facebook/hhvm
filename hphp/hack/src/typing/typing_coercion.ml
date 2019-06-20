@@ -43,6 +43,7 @@ let supports_coercion_from_dynamic env (ty_expect_decl: decl ty) =
   let open Type_test_hint_check in
   let { validity; env; _ } = validator#on_type {
     env = Tast_env.typing_env_as_tast_env env;
+    ety_env = Typing_phase.env_with_self env;
     validity = Valid;
   } ty_expect_decl in
   match validity with

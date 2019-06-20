@@ -587,7 +587,7 @@ type expand_env = {
    * dependent types for type constants.
    *)
   from_class : Nast.class_id_ option;
-  validate_dty : (decl ty -> unit) option;
+  validate_dty : (expand_env -> decl ty -> unit) option;
 }
 
 let has_expanded {type_expansions; _} x =

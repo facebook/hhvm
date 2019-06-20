@@ -108,8 +108,10 @@ let env_with_self env =
 (*****************************************************************************)
 
 let rec localize ~ety_env env (dty: decl ty) =
-
-  Option.iter ety_env.validate_dty (fun validate_dty -> validate_dty dty);
+  Option.iter ety_env.validate_dty (fun validate_dty ->
+    (* Make sure we don't double validate *)
+    validate_dty { ety_env with validate_dty = None } dty
+  );
   match dty with
   | r, Terr ->
       env, (r, TUtils.terr env)

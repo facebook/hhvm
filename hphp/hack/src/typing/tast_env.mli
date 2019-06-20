@@ -130,6 +130,7 @@ val assert_nullable : Pos.t -> Ast.bop -> env -> Tast.ty -> unit
 val hint_to_ty : env -> Aast.hint -> Typing_defs.decl Typing_defs.ty
 (** Return the declaration-phase type the given hint represents. *)
 
+val localize : env -> Typing_defs.expand_env -> Typing_defs.decl Typing_defs.ty -> env * Tast.ty
 val localize_with_self : env -> Typing_defs.decl Typing_defs.ty -> env * Tast.ty
 (** Transforms a declaration phase type ({!Typing_defs.decl Typing_defs.ty})
     into a localized type ({!Typing_defs.locl Typing_defs.ty} = {!Tast.ty}).
@@ -144,7 +145,7 @@ val localize_with_self : env -> Typing_defs.decl Typing_defs.ty -> env * Tast.ty
 val localize_with_dty_validator:
   env ->
   Typing_defs.decl Typing_defs.ty ->
-  (Typing_defs.decl Typing_defs.ty -> unit) ->
+  (Typing_defs.expand_env -> Typing_defs.decl Typing_defs.ty -> unit) ->
   env * Tast.ty
 (** Identical to localize_with_self, but also takes a validator that is applied
     to every expanded decl type on the way to becoming a locl type. *)

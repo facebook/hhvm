@@ -84,6 +84,7 @@ let assert_nullable = Typing_equality_check.assert_nullable
 
 let hint_to_ty env = Decl_hint.hint env.Typing_env.decl_env
 
+let localize env ety_env = Typing_phase.localize ~ety_env env
 let localize_with_self = Typing_phase.localize_with_self
 let localize_with_dty_validator = Typing_phase.localize_with_dty_validator
 

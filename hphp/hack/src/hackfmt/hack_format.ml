@@ -2995,7 +2995,7 @@ and make_string text width =
 
 and has_n_or_more_newlines node n =
   let rec aux count node =
-    if count = n then raise Exit else
+    if count >= n then raise Exit else
     match Syntax.syntax node with
     | Syntax.Token token ->
       let count_eol count t =

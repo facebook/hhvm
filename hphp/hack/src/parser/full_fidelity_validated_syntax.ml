@@ -882,8 +882,11 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { record_right_brace = validate_token x.record_right_brace
     ; record_fields = validate_list_with (validate_record_field) x.record_fields
     ; record_left_brace = validate_token x.record_left_brace
+    ; record_extends_list = validate_list_with (validate_specifier) x.record_extends_list
+    ; record_extends_keyword = validate_option_with (validate_token) x.record_extends_keyword
     ; record_name = validate_token x.record_name
     ; record_keyword = validate_token x.record_keyword
+    ; record_modifier = validate_token x.record_modifier
     ; record_attribute_spec = validate_option_with (validate_attribute_specification) x.record_attribute_spec
     }
   | s -> validation_fail (Some SyntaxKind.RecordDeclaration) s
@@ -891,8 +894,11 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { Syntax.syntax =
       Syntax.RecordDeclaration
       { record_attribute_spec = invalidate_option_with (invalidate_attribute_specification) x.record_attribute_spec
+      ; record_modifier = invalidate_token x.record_modifier
       ; record_keyword = invalidate_token x.record_keyword
       ; record_name = invalidate_token x.record_name
+      ; record_extends_keyword = invalidate_option_with (invalidate_token) x.record_extends_keyword
+      ; record_extends_list = invalidate_list_with (invalidate_specifier) x.record_extends_list
       ; record_left_brace = invalidate_token x.record_left_brace
       ; record_fields = invalidate_list_with (invalidate_record_field) x.record_fields
       ; record_right_brace = invalidate_token x.record_right_brace

@@ -1,10 +1,10 @@
 <?hh
 
-record A {
+final record A {
   x: int,
 }
 
-record B {
+final record B {
   y: ?A,
 }
 

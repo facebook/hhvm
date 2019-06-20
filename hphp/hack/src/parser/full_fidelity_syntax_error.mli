@@ -77,6 +77,7 @@ val error1033 : string
 val error1034 : string
 val error1035 : string
 val error1036 : string
+val error1037 : string
 val error1038 : string
 val error1039 : string
 val error1041 : string

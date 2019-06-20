@@ -66,9 +66,9 @@ module WithOp(Op : Op_S) = struct
   let make_enumerator arg0 arg1 arg2 arg3 state =
     if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 then state, Op.zero
     else state, Op.flatten [arg0; arg1; arg2; arg3]
-  let make_record_declaration arg0 arg1 arg2 arg3 arg4 arg5 state =
-    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 && Op.is_zero arg4 && Op.is_zero arg5 then state, Op.zero
-    else state, Op.flatten [arg0; arg1; arg2; arg3; arg4; arg5]
+  let make_record_declaration arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 state =
+    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 && Op.is_zero arg4 && Op.is_zero arg5 && Op.is_zero arg6 && Op.is_zero arg7 && Op.is_zero arg8 then state, Op.zero
+    else state, Op.flatten [arg0; arg1; arg2; arg3; arg4; arg5; arg6; arg7; arg8]
   let make_record_field arg0 arg1 arg2 arg3 arg4 state =
     if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 && Op.is_zero arg4 then state, Op.zero
     else state, Op.flatten [arg0; arg1; arg2; arg3; arg4]

@@ -1,9 +1,9 @@
 <?hh
-record Foo {
+final record Foo {
   y: int,
 }
 
-record Bar {
+final record Bar {
   x:Foo,
 }
 

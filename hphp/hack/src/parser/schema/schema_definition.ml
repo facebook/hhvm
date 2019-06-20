@@ -164,8 +164,11 @@ let schema : schema_node list =
     ; aggregates  = [ TopLevelDeclaration ]
     ; fields =
       [ "attribute_spec", ZeroOrOne (Just "AttributeSpecification")
+      ; "modifier", Token
       ; "keyword", Token
       ; "name", Token
+      ; "extends_keyword", ZeroOrOne Token
+      ; "extends_list", ZeroOrOne (Aggregate Specifier)
       ; "left_brace", Token
       ; "fields", ZeroOrMore (Just "RecordField")
       ; "right_brace", Token

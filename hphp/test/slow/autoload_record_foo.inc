@@ -1,4 +1,4 @@
 <?hh
-record Foo {
+final record Foo {
   x:int,
 };

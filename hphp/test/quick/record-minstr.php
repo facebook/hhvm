@@ -1,6 +1,6 @@
 <?hh
 
-record Foo {
+final record Foo {
   x: vec,
 }
 
@@ -8,11 +8,11 @@ class A {
   public Foo $f;
 }
 
-record Bar {
+final record Bar {
   y: A,
 }
 
-record Baz {
+final record Baz {
   z: int,
 }
 

@@ -287,17 +287,25 @@ where
 
     fn parse_record_declaration(&mut self, attrs: S::R) -> S::R {
         // record-declaration:
-        //   record name { record-list }
+        //   (abstract|final) record name { record-list }
+        let modifier = self.require_token_one_of(
+            &vec![TokenKind::Abstract, TokenKind::Final],
+            Errors::error1037,
+        );
         let record = self.assert_token(TokenKind::RecordDec);
         let name = self.require_name();
+        let (record_extends, record_extends_list) = self.parse_extends_opt();
         let (left_brace, record_fields, right_brace) =
             self.parse_braced_list(&|x| x.parse_record_fields());
         S!(
             make_record_declaration,
             self,
             attrs,
+            modifier,
             record,
             name,
+            record_extends,
+            record_extends_list,
             left_brace,
             record_fields,
             right_brace
@@ -555,7 +563,7 @@ where
         let token = self.parse_classish_token();
         let name = self.require_class_name();
         let generic_type_parameter_list = self.parse_generic_type_parameter_list_opt();
-        let (classish_extends, classish_extends_list) = self.parse_classish_extends_opt();
+        let (classish_extends, classish_extends_list) = self.parse_extends_opt();
         let (classish_implements, classish_implements_list) = self.parse_classish_implements_opt();
         let body = self.parse_classish_body();
         S!(
@@ -712,7 +720,7 @@ where
         S!(make_list, self, Box::new(items), self.pos())
     }
 
-    fn parse_classish_extends_opt(&mut self) -> (S::R, S::R) {
+    fn parse_extends_opt(&mut self) -> (S::R, S::R) {
         let mut parser1 = self.clone();
         let extends_token = parser1.next_token();
         if (extends_token.kind()) != TokenKind::Extends {

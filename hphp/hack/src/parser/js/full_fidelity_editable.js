@@ -3817,31 +3817,55 @@ class RecordDeclaration extends EditableSyntax
 {
   constructor(
     attribute_spec,
+    modifier,
     keyword,
     name,
+    extends_keyword,
+    extends_list,
     left_brace,
     fields,
     right_brace)
   {
     super('record_declaration', {
       attribute_spec: attribute_spec,
+      modifier: modifier,
       keyword: keyword,
       name: name,
+      extends_keyword: extends_keyword,
+      extends_list: extends_list,
       left_brace: left_brace,
       fields: fields,
       right_brace: right_brace });
   }
   get attribute_spec() { return this.children.attribute_spec; }
+  get modifier() { return this.children.modifier; }
   get keyword() { return this.children.keyword; }
   get name() { return this.children.name; }
+  get extends_keyword() { return this.children.extends_keyword; }
+  get extends_list() { return this.children.extends_list; }
   get left_brace() { return this.children.left_brace; }
   get fields() { return this.children.fields; }
   get right_brace() { return this.children.right_brace; }
   with_attribute_spec(attribute_spec){
     return new RecordDeclaration(
       attribute_spec,
+      this.modifier,
       this.keyword,
       this.name,
+      this.extends_keyword,
+      this.extends_list,
+      this.left_brace,
+      this.fields,
+      this.right_brace);
+  }
+  with_modifier(modifier){
+    return new RecordDeclaration(
+      this.attribute_spec,
+      modifier,
+      this.keyword,
+      this.name,
+      this.extends_keyword,
+      this.extends_list,
       this.left_brace,
       this.fields,
       this.right_brace);
@@ -3849,8 +3873,11 @@ class RecordDeclaration extends EditableSyntax
   with_keyword(keyword){
     return new RecordDeclaration(
       this.attribute_spec,
+      this.modifier,
       keyword,
       this.name,
+      this.extends_keyword,
+      this.extends_list,
       this.left_brace,
       this.fields,
       this.right_brace);
@@ -3858,8 +3885,35 @@ class RecordDeclaration extends EditableSyntax
   with_name(name){
     return new RecordDeclaration(
       this.attribute_spec,
+      this.modifier,
       this.keyword,
       name,
+      this.extends_keyword,
+      this.extends_list,
+      this.left_brace,
+      this.fields,
+      this.right_brace);
+  }
+  with_extends_keyword(extends_keyword){
+    return new RecordDeclaration(
+      this.attribute_spec,
+      this.modifier,
+      this.keyword,
+      this.name,
+      extends_keyword,
+      this.extends_list,
+      this.left_brace,
+      this.fields,
+      this.right_brace);
+  }
+  with_extends_list(extends_list){
+    return new RecordDeclaration(
+      this.attribute_spec,
+      this.modifier,
+      this.keyword,
+      this.name,
+      this.extends_keyword,
+      extends_list,
       this.left_brace,
       this.fields,
       this.right_brace);
@@ -3867,8 +3921,11 @@ class RecordDeclaration extends EditableSyntax
   with_left_brace(left_brace){
     return new RecordDeclaration(
       this.attribute_spec,
+      this.modifier,
       this.keyword,
       this.name,
+      this.extends_keyword,
+      this.extends_list,
       left_brace,
       this.fields,
       this.right_brace);
@@ -3876,8 +3933,11 @@ class RecordDeclaration extends EditableSyntax
   with_fields(fields){
     return new RecordDeclaration(
       this.attribute_spec,
+      this.modifier,
       this.keyword,
       this.name,
+      this.extends_keyword,
+      this.extends_list,
       this.left_brace,
       fields,
       this.right_brace);
@@ -3885,8 +3945,11 @@ class RecordDeclaration extends EditableSyntax
   with_right_brace(right_brace){
     return new RecordDeclaration(
       this.attribute_spec,
+      this.modifier,
       this.keyword,
       this.name,
+      this.extends_keyword,
+      this.extends_list,
       this.left_brace,
       this.fields,
       right_brace);
@@ -3898,15 +3961,21 @@ class RecordDeclaration extends EditableSyntax
     let new_parents = parents.slice();
     new_parents.push(this);
     var attribute_spec = this.attribute_spec.rewrite(rewriter, new_parents);
+    var modifier = this.modifier.rewrite(rewriter, new_parents);
     var keyword = this.keyword.rewrite(rewriter, new_parents);
     var name = this.name.rewrite(rewriter, new_parents);
+    var extends_keyword = this.extends_keyword.rewrite(rewriter, new_parents);
+    var extends_list = this.extends_list.rewrite(rewriter, new_parents);
     var left_brace = this.left_brace.rewrite(rewriter, new_parents);
     var fields = this.fields.rewrite(rewriter, new_parents);
     var right_brace = this.right_brace.rewrite(rewriter, new_parents);
     if (
       attribute_spec === this.attribute_spec &&
+      modifier === this.modifier &&
       keyword === this.keyword &&
       name === this.name &&
+      extends_keyword === this.extends_keyword &&
+      extends_list === this.extends_list &&
       left_brace === this.left_brace &&
       fields === this.fields &&
       right_brace === this.right_brace)
@@ -3917,8 +3986,11 @@ class RecordDeclaration extends EditableSyntax
     {
       return rewriter(new RecordDeclaration(
         attribute_spec,
+        modifier,
         keyword,
         name,
+        extends_keyword,
+        extends_list,
         left_brace,
         fields,
         right_brace), parents);
@@ -3929,12 +4001,21 @@ class RecordDeclaration extends EditableSyntax
     let attribute_spec = EditableSyntax.from_json(
       json.record_attribute_spec, position, source);
     position += attribute_spec.width;
+    let modifier = EditableSyntax.from_json(
+      json.record_modifier, position, source);
+    position += modifier.width;
     let keyword = EditableSyntax.from_json(
       json.record_keyword, position, source);
     position += keyword.width;
     let name = EditableSyntax.from_json(
       json.record_name, position, source);
     position += name.width;
+    let extends_keyword = EditableSyntax.from_json(
+      json.record_extends_keyword, position, source);
+    position += extends_keyword.width;
+    let extends_list = EditableSyntax.from_json(
+      json.record_extends_list, position, source);
+    position += extends_list.width;
     let left_brace = EditableSyntax.from_json(
       json.record_left_brace, position, source);
     position += left_brace.width;
@@ -3946,8 +4027,11 @@ class RecordDeclaration extends EditableSyntax
     position += right_brace.width;
     return new RecordDeclaration(
         attribute_spec,
+        modifier,
         keyword,
         name,
+        extends_keyword,
+        extends_list,
         left_brace,
         fields,
         right_brace);
@@ -3957,8 +4041,11 @@ class RecordDeclaration extends EditableSyntax
     if (RecordDeclaration._children_keys == null)
       RecordDeclaration._children_keys = [
         'attribute_spec',
+        'modifier',
         'keyword',
         'name',
+        'extends_keyword',
+        'extends_list',
         'left_brace',
         'fields',
         'right_brace'];

@@ -47,7 +47,7 @@ module type SmartConstructors_S = sig
   val make_file_attribute_specification : r -> r -> r -> r -> r -> t -> t * r
   val make_enum_declaration : r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
   val make_enumerator : r -> r -> r -> r -> t -> t * r
-  val make_record_declaration : r -> r -> r -> r -> r -> r -> t -> t * r
+  val make_record_declaration : r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
   val make_record_field : r -> r -> r -> r -> r -> t -> t * r
   val make_alias_declaration : r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
   val make_property_declaration : r -> r -> r -> r -> r -> t -> t * r
@@ -233,7 +233,7 @@ end) = struct
     let file_attribute_specification parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_file_attribute_specification arg0 arg1 arg2 arg3 arg4)
     let enum_declaration parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 = call parser (SCI.make_enum_declaration arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8)
     let enumerator parser arg0 arg1 arg2 arg3 = call parser (SCI.make_enumerator arg0 arg1 arg2 arg3)
-    let record_declaration parser arg0 arg1 arg2 arg3 arg4 arg5 = call parser (SCI.make_record_declaration arg0 arg1 arg2 arg3 arg4 arg5)
+    let record_declaration parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 = call parser (SCI.make_record_declaration arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8)
     let record_field parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_record_field arg0 arg1 arg2 arg3 arg4)
     let alias_declaration parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 = call parser (SCI.make_alias_declaration arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7)
     let property_declaration parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_property_declaration arg0 arg1 arg2 arg3 arg4)

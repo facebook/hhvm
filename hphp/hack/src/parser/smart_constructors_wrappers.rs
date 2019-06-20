@@ -88,8 +88,8 @@ where S: SmartConstructors<'a, State> {
     fn make_enumerator(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State, Self::R) {
         compose(SyntaxKind::Enumerator, S::make_enumerator(st, arg0.1, arg1.1, arg2.1, arg3.1))
     }
-    fn make_record_declaration(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R) -> (State, Self::R) {
-        compose(SyntaxKind::RecordDeclaration, S::make_record_declaration(st, arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1))
+    fn make_record_declaration(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R, arg8 : Self::R) -> (State, Self::R) {
+        compose(SyntaxKind::RecordDeclaration, S::make_record_declaration(st, arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1, arg6.1, arg7.1, arg8.1))
     }
     fn make_record_field(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> (State, Self::R) {
         compose(SyntaxKind::RecordField, S::make_record_field(st, arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))

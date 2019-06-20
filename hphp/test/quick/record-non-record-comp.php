@@ -1,6 +1,6 @@
 <?hh
 
-record A {
+final record A {
   x: int,
 }
 

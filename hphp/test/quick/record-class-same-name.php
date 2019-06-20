@@ -3,5 +3,5 @@
 class Foo {
 }
 
-record Foo {
+final record Foo {
 }

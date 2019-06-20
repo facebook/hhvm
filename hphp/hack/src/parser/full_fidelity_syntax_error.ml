@@ -104,6 +104,7 @@ let error1033 = "A class member, method, type, trait usage, trait require, " ^
 let error1034 = "A left brace ('{') is expected here."
 let error1035 = "The 'class' keyword is expected here."
 let error1036 = "An equals sign ('=') is expected here."
+let error1037 = "Either 'abstract' or 'final' keyword is expected here."
 let error1038 = "A semicolon (';') or a namespace body is expected here."
 let error1039 = "A closing XHP tag is expected here."
 let error1041 = "A function body or a semicolon (';') is expected here."

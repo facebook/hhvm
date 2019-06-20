@@ -287,14 +287,26 @@ module WithExpressionAndStatementAndTypeParser
   and parse_record_declaration parser attrs =
     (*
     record-declaration:
-      record name { record-list }
+      (abstract|final) record name { record-list }
     *)
+  let (parser, modifier) = require_token_one_of parser [Abstract; Final] SyntaxError.error1037 in
   let (parser, record) = assert_token parser RecordDec in
   let (parser, name) = require_name parser in
+  let (parser, record_extends, record_extends_list) =
+      parse_extends_opt parser in
   let (parser, left_brace, record_fields, right_brace) =
     parse_braced_list parser parse_record_fields
   in
-  Make.record_declaration parser attrs record name left_brace record_fields
+  Make.record_declaration
+    parser
+    attrs
+    modifier
+    record
+    name
+    record_extends
+    record_extends_list
+    left_brace
+    record_fields
     right_brace
 
   and parse_namespace_declaration parser =
@@ -480,7 +492,7 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, generic_type_parameter_list) =
       parse_generic_type_parameter_list_opt parser in
     let (parser, classish_extends, classish_extends_list) =
-      parse_classish_extends_opt parser in
+      parse_extends_opt parser in
     let (parser, classish_implements, classish_implements_list) =
       parse_classish_implements_opt parser in
     let (parser, body) = parse_classish_body parser in
@@ -530,7 +542,7 @@ module WithExpressionAndStatementAndTypeParser
         let parser = with_error parser SyntaxError.error1035 in
         Make.missing parser (pos parser)
 
-  and parse_classish_extends_opt parser =
+  and parse_extends_opt parser =
     let (parser1, extends_token) = next_token parser in
     if (Token.kind extends_token) <> Extends then
       let (parser, missing1) = Make.missing parser (pos parser) in
@@ -1855,7 +1867,6 @@ module WithExpressionAndStatementAndTypeParser
     let parser2, token = next_token parser1 in
     match Token.kind token with
     | Enum -> parse_enum_declaration parser1 attribute_specification
-    | RecordDec -> parse_record_declaration parser1 attribute_specification
     | Type | Newtype -> parse_alias_declaration parser1 attribute_specification
     | Async | Coroutine | Function ->
       if SC.is_missing attribute_specification then
@@ -1916,11 +1927,16 @@ module WithExpressionAndStatementAndTypeParser
       | Use -> parse_namespace_use_declaration parser
       | Trait
       | Interface
-      | Abstract
-      | Final
       | Class ->
         let (parser, missing) = Make.missing parser (pos parser) in
         parse_classish_declaration parser missing
+      | Abstract
+      | Final ->
+        let (parser, missing) = Make.missing parser (pos parser) in
+        begin match peek_token_kind parser1 with
+        | RecordDec -> parse_record_declaration parser missing
+        | _ -> parse_classish_declaration parser missing
+        end
       | Async
       | Coroutine
       | Function ->

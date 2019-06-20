@@ -106,9 +106,9 @@ where
         (s, Self::R::make_enumerator(arg0, arg1, arg2, arg3))
     }
 
-    fn make_record_declaration(s: State::T, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R) -> (State::T, Self::R) {
-        let s = State::next(s, vec![&arg0, &arg1, &arg2, &arg3, &arg4, &arg5]);
-        (s, Self::R::make_record_declaration(arg0, arg1, arg2, arg3, arg4, arg5))
+    fn make_record_declaration(s: State::T, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R, arg8 : Self::R) -> (State::T, Self::R) {
+        let s = State::next(s, vec![&arg0, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7, &arg8]);
+        (s, Self::R::make_record_declaration(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8))
     }
 
     fn make_record_field(s: State::T, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> (State::T, Self::R) {

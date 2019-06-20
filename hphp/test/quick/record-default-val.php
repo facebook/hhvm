@@ -1,6 +1,6 @@
 <?hh
 
-record Foo {
+final record Foo {
   x: int = 42,
   z: ?bool = 1,
   y: string,

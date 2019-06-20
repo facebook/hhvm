@@ -1,4 +1,4 @@
 <?hh
-record A {
+final record A {
   x: noreturn,
 }

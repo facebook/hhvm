@@ -161,11 +161,11 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
 
-  let make_record_declaration p0 p1 p2 p3 p4 p5 stack =
+  let make_record_declaration p0 p1 p2 p3 p4 p5 p6 p7 p8 stack =
     match stack with
-    | a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
-      let () = verify ~stack [p0; p1; p2; p3; p4; p5] [a0; a1; a2; a3; a4; a5] "record_declaration" in
-      let node = Syntax.make_record_declaration p0 p1 p2 p3 p4 p5 in
+    | a8 :: a7 :: a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
+      let () = verify ~stack [p0; p1; p2; p3; p4; p5; p6; p7; p8] [a0; a1; a2; a3; a4; a5; a6; a7; a8] "record_declaration" in
+      let node = Syntax.make_record_declaration p0 p1 p2 p3 p4 p5 p6 p7 p8 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
 

@@ -8,7 +8,7 @@ enum Enum : string {
 
 type Alias = Enum;
 
-record A {
+final record A {
   x: Alias,
 }
 

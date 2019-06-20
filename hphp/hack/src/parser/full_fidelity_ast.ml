@@ -3107,7 +3107,9 @@ and pDef : def list parser = fun node env ->
       }]
   | RecordDeclaration
     { record_attribute_spec = attrs
+    ; record_modifier       = modifier
     ; record_name           = name
+    ; record_extends_list   = exts
     ; record_fields         = fields
     ; _ } ->
       let pFields node =
@@ -3133,12 +3135,12 @@ and pDef : def list parser = fun node env ->
       { c_mode            = mode_annotation env.fi_mode
       ; c_user_attributes = pUserAttributes env attrs
       ; c_file_attributes = []
-      ; c_final           = false
+      ; c_final           = (token_kind modifier = Some TK.Final)
       ; c_kind            = Crecord
       ; c_is_xhp          = false
       ; c_name            = pos_name name env
       ; c_tparams         = []
-      ; c_extends         = []
+      ; c_extends         = couldMap ~f:pHint exts env
       ; c_implements      = []
       ; c_body            = couldMap fields env ~f:pFields
       ; c_namespace       = Namespace_env.empty env.parser_options

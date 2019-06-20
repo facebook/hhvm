@@ -129,11 +129,14 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_record_declaration(record_attribute_spec: Self, record_keyword: Self, record_name: Self, record_left_brace: Self, record_fields: Self, record_right_brace: Self) -> Self {
+    fn make_record_declaration(record_attribute_spec: Self, record_modifier: Self, record_keyword: Self, record_name: Self, record_extends_keyword: Self, record_extends_list: Self, record_left_brace: Self, record_fields: Self, record_right_brace: Self) -> Self {
         let syntax = SyntaxVariant::RecordDeclaration(Box::new(RecordDeclarationChildren {
             record_attribute_spec,
+            record_modifier,
             record_keyword,
             record_name,
+            record_extends_keyword,
+            record_extends_list,
             record_left_brace,
             record_fields,
             record_right_brace,
@@ -1959,8 +1962,11 @@ where
             },
             SyntaxVariant::RecordDeclaration(x) => {
                 let acc = f(&x.record_attribute_spec, acc);
+                let acc = f(&x.record_modifier, acc);
                 let acc = f(&x.record_keyword, acc);
                 let acc = f(&x.record_name, acc);
+                let acc = f(&x.record_extends_keyword, acc);
+                let acc = f(&x.record_extends_list, acc);
                 let acc = f(&x.record_left_brace, acc);
                 let acc = f(&x.record_fields, acc);
                 let acc = f(&x.record_right_brace, acc);
@@ -3328,8 +3334,11 @@ pub struct EnumeratorChildren<T, V> {
 #[derive(Debug, Clone)]
 pub struct RecordDeclarationChildren<T, V> {
     pub record_attribute_spec: Syntax<T, V>,
+    pub record_modifier: Syntax<T, V>,
     pub record_keyword: Syntax<T, V>,
     pub record_name: Syntax<T, V>,
+    pub record_extends_keyword: Syntax<T, V>,
+    pub record_extends_list: Syntax<T, V>,
     pub record_left_brace: Syntax<T, V>,
     pub record_fields: Syntax<T, V>,
     pub record_right_brace: Syntax<T, V>,

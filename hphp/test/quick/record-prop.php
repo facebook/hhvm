@@ -4,11 +4,11 @@ class Foo {
   public A $x;
 }
 
-record A {
+final record A {
   x: int,
 }
 
-record B {
+final record B {
   x: int,
 }
 

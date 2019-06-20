@@ -12,7 +12,7 @@ class C {
   public function __construct() { $this->x = 20; }
 }
 
-record A {
+final record A {
   f: Base,
 }
 

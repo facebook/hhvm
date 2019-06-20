@@ -98,8 +98,8 @@ where
         <Self as SyntaxSmartConstructors<Self::R, State<Self::R>>>::make_enumerator(s, arg0, arg1, arg2, arg3)
     }
 
-    fn make_record_declaration(s: Bool<'a>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R) -> (Bool<'a>, Self::R) {
-        <Self as SyntaxSmartConstructors<Self::R, State<Self::R>>>::make_record_declaration(s, arg0, arg1, arg2, arg3, arg4, arg5)
+    fn make_record_declaration(s: Bool<'a>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R, arg7: Self::R, arg8: Self::R) -> (Bool<'a>, Self::R) {
+        <Self as SyntaxSmartConstructors<Self::R, State<Self::R>>>::make_record_declaration(s, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
     }
 
     fn make_record_field(s: Bool<'a>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> (Bool<'a>, Self::R) {

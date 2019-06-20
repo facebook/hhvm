@@ -94,8 +94,8 @@ impl<'a> SmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstructors 
         <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_enumerator(s, arg0, arg1, arg2, arg3)
     }
 
-    fn make_record_declaration(s: HasScriptContent<'a>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R) -> (HasScriptContent<'a>, Self::R) {
-        <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_record_declaration(s, arg0, arg1, arg2, arg3, arg4, arg5)
+    fn make_record_declaration(s: HasScriptContent<'a>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R, arg7: Self::R, arg8: Self::R) -> (HasScriptContent<'a>, Self::R) {
+        <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_record_declaration(s, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
     }
 
     fn make_record_field(s: HasScriptContent<'a>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> (HasScriptContent<'a>, Self::R) {

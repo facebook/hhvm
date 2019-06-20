@@ -82,8 +82,11 @@ module type Syntax_S = sig
     }
   | RecordDeclaration                 of
     { record_attribute_spec                              : t
+    ; record_modifier                                    : t
     ; record_keyword                                     : t
     ; record_name                                        : t
+    ; record_extends_keyword                             : t
+    ; record_extends_list                                : t
     ; record_left_brace                                  : t
     ; record_fields                                      : t
     ; record_right_brace                                 : t
@@ -1079,7 +1082,7 @@ module type Syntax_S = sig
   val make_file_attribute_specification : t -> t -> t -> t -> t -> t
   val make_enum_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_enumerator : t -> t -> t -> t -> t
-  val make_record_declaration : t -> t -> t -> t -> t -> t -> t
+  val make_record_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_record_field : t -> t -> t -> t -> t -> t
   val make_alias_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_property_declaration : t -> t -> t -> t -> t -> t

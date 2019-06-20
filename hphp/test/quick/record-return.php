@@ -1,10 +1,10 @@
 <?hh
 
-record Foo {
+final record Foo {
   f: int,
 }
 
-record Bar {
+final record Bar {
   f: int,
 }
 

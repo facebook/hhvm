@@ -33,6 +33,7 @@ class type ['a] type_visitor_type = object
   method on_ttuple : 'a -> Reason.t -> 'b ty list -> 'a
   method on_tanon : 'a -> Reason.t -> locl fun_arity -> Ident.t -> 'a
   method on_tunion : 'a -> Reason.t -> locl ty list -> 'a
+  method on_tintersection : 'a -> Reason.t -> locl ty list -> 'a
   method on_tobject : 'a -> Reason.t -> 'a
   method on_tshape :
     'a
@@ -90,6 +91,7 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
     fun acc _ tyl -> List.fold_left tyl ~f:this#on_type ~init:acc
   method on_tanon acc _ _ _ = acc
   method on_tunion acc _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
+  method on_tintersection acc _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
   method on_tobject acc _ = acc
   method on_tshape: type a. _ -> Reason.t -> shape_fields_known
     -> a shape_field_type Nast.ShapeMap.t -> _ =
@@ -138,6 +140,7 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
     | Ttuple tyl -> this#on_ttuple acc r tyl
     | Tanon (arity, id) -> this#on_tanon acc r arity id
     | Tunion tyl -> this#on_tunion acc r tyl
+    | Tintersection tyl -> this#on_tintersection acc r tyl
     | Tobject -> this#on_tobject acc r
     | Tshape (fields_known, fdm) -> this#on_tshape acc r fields_known fdm
     | Tclass (cls, exact, tyl) -> this#on_tclass acc r cls exact tyl

@@ -22,9 +22,10 @@ returns the type of `await e`.
 There is the special case that
   e : ?Awaitable<T> |- await e : ?T
 *)
-let rec overload_extract_from_awaitable env p opt_ty_maybe =
+let rec overload_extract_from_awaitable env ~p opt_ty_maybe =
   let r = Reason.Rwitness p in
-  let env, e_opt_ty = SubType.expand_type_and_solve ~description_of_expected:"an Awaitable" env p opt_ty_maybe in
+  let env, e_opt_ty =
+    SubType.expand_type_and_solve ~description_of_expected:"an Awaitable" env p opt_ty_maybe in
   (match e_opt_ty with
   | _, Tunion tyl ->
     (* If we cannot fold the union into a single type, we need to look at
@@ -38,6 +39,9 @@ let rec overload_extract_from_awaitable env p opt_ty_maybe =
       env, rtyl
     end tyl ~init:(env, []) in
     env, (r, Tunion rtyl)
+  | _, Tintersection tyl ->
+    let env, rtyl = List.fold_map ~init:env tyl ~f:(overload_extract_from_awaitable ~p) in
+    env, (r, Tintersection rtyl)
   | _, Toption ty ->
     (* We want to try to avoid easy double nullables here, so we handle Toption
      * with some special logic. *)
@@ -59,7 +63,7 @@ let rec overload_extract_from_awaitable env p opt_ty_maybe =
       | _, Tdynamic -> r, Tdynamic
       | _, (Tnonnull | Tarraykind _ | Tprim _ | Tvar _ | Tfun _
         | Tabstract _ | Tclass _ | Ttuple _ | Tanon _
-        | Toption _ | Tunion _ | Tobject | Tshape _) -> type_var
+        | Toption _ | Tunion _ | Tintersection _ | Tobject | Tshape _) -> type_var
     in
     let env = Type.sub_type p Reason.URawait env opt_ty_maybe expected_type in
     env, return_type

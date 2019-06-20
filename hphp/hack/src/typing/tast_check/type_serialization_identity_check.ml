@@ -9,7 +9,7 @@
 open Core_kernel
 open Typing_defs
 
-(* Replace unserialized information from the with dummy information.
+(* Replace unserialized information from the type with dummy information.
 
 For example, we don't currently serialize the arity of function types, so update
 the input type to set it to a default arity value. *)
@@ -83,6 +83,8 @@ let rec strip_ty : type a. a ty -> a ty = fun ty ->
       Tabstract (abstract_kind, strip_opt ty_opt)
     | Tunion tyl ->
       Tunion (strip_tyl tyl)
+    | Tintersection tyl ->
+      Tintersection (strip_tyl tyl)
     | Tclass (sid, exact, tyl) ->
       Tclass (sid, exact, strip_tyl tyl)
 

@@ -70,7 +70,7 @@ module ExprDepTy = struct
    * locl ty to create a new locl ty
    *)
   let apply env dep_tys ty =
-    let apply_single env dep_tys ty =
+    let apply_single env ~dep_tys ty =
       List.fold_left dep_tys ~f:begin fun (env, ty) (r, dep_ty) ->
           match dep_ty, ty with
           (* Always represent exact types without an access path as Tclass(_,Exact,_) *)
@@ -111,10 +111,11 @@ module ExprDepTy = struct
     | _, Tunion [x] when dep_tys = [] ->
        env, x
     | r, Tunion tyl ->
-      let env, tyl = List.fold tyl ~f:(fun (env, acc) ty ->
-        let env, ty = apply_single env dep_tys ty in
-        env, ty::acc) ~init:(env, []) in
+      let env, tyl = List.fold_map tyl ~init:env ~f:(apply_single ~dep_tys) in
       env, (r, Tunion tyl)
+    | r, Tintersection tyl ->
+      let env, tyl = List.fold_map tyl ~init:env ~f:(apply_single ~dep_tys) in
+      env, (r, Tintersection tyl)
     | _, Tvar _ -> env, ty
     | _ -> apply_single env dep_tys ety
 
@@ -153,6 +154,8 @@ module ExprDepTy = struct
     | Tabstract (AKdependent _, Some _) ->
         false
     | Tunion tyl ->
+        List.exists tyl (should_apply env)
+    | Tintersection tyl ->
         List.exists tyl (should_apply env)
     | Tclass (_, Exact, _) ->
         false

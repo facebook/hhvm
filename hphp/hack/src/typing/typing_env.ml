@@ -1223,7 +1223,7 @@ let rec get_tyvars env ty =
     env, ISet.empty, ISet.empty
   | Toption ty ->
     get_tyvars env ty
-  | Ttuple tyl | Tunion tyl ->
+  | Ttuple tyl | Tunion tyl | Tintersection tyl ->
     List.fold_left tyl ~init:(env, ISet.empty, ISet.empty) ~f:get_tyvars_union
   | Tshape (_, m) ->
     Nast.ShapeMap.fold

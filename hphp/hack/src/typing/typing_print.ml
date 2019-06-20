@@ -50,7 +50,8 @@ module Suggest = struct
     | Tarraykind _           -> "array"
     | Tdynamic               -> "dynamic"
     | Tthis                  -> SN.Typehints.this
-    | Tunion _          -> "..."
+    | Tunion _               -> "..."
+    | Tintersection _               -> "..."
     | Ttuple (l)             -> "("^list l^")"
     | Tany                   -> "..."
     | Terr                   -> "..."
@@ -340,13 +341,15 @@ module Full = struct
         if show_verbose env
           then Concat [text "(null |"; k ty; text ")"]
           else Concat [text "?"; k ty]
-      (* Type is nullable unresolved type *)
+      (* Type is nullable union type *)
       | _, _ ->
         Concat [
         text "?";
         delimited_list (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
         ]
       end
+    | Tintersection [] -> text "mixed"
+    | Tintersection tyl -> delimited_list (Space ^^ text "&" ^^ Space) "(" k tyl ")"
     | Tobject -> text "object"
     | Tshape (fields_known, fdm) ->
       let fields =
@@ -610,7 +613,9 @@ module ErrorString = struct
     | Tany               -> "an untyped value"
     | Terr               -> "a type error"
     | Tdynamic           -> "a dynamic value"
-    | Tunion l           -> unresolved env l
+    | Tunion l           -> union env l
+    | Tintersection []   -> "a mixed value"
+    | Tintersection l           -> intersection env l
     | Tarraykind (AKvarray_or_darray _) -> varray_or_darray
     | Tarraykind AKempty -> "an empty array"
     | Tarraykind AKany   -> array (None, None)
@@ -673,20 +678,24 @@ module ErrorString = struct
         ^Option.value_map cstr ~default:""
           ~f:(fun ty -> "\n  that is compatible with " ^ to_string env ty)
 
-  and unresolved env l =
+  and union env l =
     let null, nonnull = List.partition_tf l (fun ty -> snd ty = Tprim Nast.Tnull) in
     let l = List.map nonnull (to_string env) in
     let s = List.fold_right l ~f:SSet.add ~init:SSet.empty in
     let l = SSet.elements s in
     if null = [] then
-      unresolved_ l
+      union_ l
     else
       "a nullable type"
 
-  and unresolved_ = function
+  and union_ = function
     | []      -> "an undefined value"
     | [x]     -> x
-    | x :: rl -> x^" or "^unresolved_ rl
+    | x :: rl -> x^" or "^union_ rl
+
+  and intersection env l =
+    let l = List.map l ~f:(to_string env) in
+    String.concat l ~sep:" and "
 
   and class_kind c_kind final =
     let fs = if final then " final" else "" in
@@ -840,6 +849,12 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
     from_type env ty
   | Tunion tyl ->
     obj @@ kind "union" @ args tyl
+  | Tintersection [] ->
+    obj @@ kind "mixed"
+  | Tintersection [ty] ->
+    from_type env ty
+  | Tintersection tyl ->
+    obj @@ kind "intersection" @ args tyl
   | Taccess (ty, ids) ->
     obj @@ kind "path" @ typ ty @ path (List.map ids snd)
   | Tfun ft ->
@@ -1222,6 +1237,11 @@ let to_locl_ty
       get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
       aux_args args ~keytrace >>= fun tyl ->
       ty (Tunion tyl)
+
+    | "intersection" ->
+      get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
+      aux_args args ~keytrace >>= fun tyl ->
+      ty (Tintersection tyl)
 
     | "function"
     | "coroutine" as kind ->

@@ -48,18 +48,27 @@ let member_type env member_ce =
  * (int or string), blowing through typedefs to do it. Takes a function
  * to call to report the error if it isn't. *)
 let check_valid_array_key_type f_fail ~allow_any:allow_any env p t =
-  let ety_env = Phase.env_with_self env in
-  let env, (r, t'), trail =
-    Typing_tdef.force_expand_typedef ~ety_env env t in
-  (match t' with
-    | Tprim (Tint | Tstring) -> ()
+  let rec check_valid_array_key_type env t =
+    let ety_env = Phase.env_with_self env in
+    let env, (r, t'), trail =
+      Typing_tdef.force_expand_typedef ~ety_env env t in
+    match t' with
+    | Tprim (Tint | Tstring) -> env, None
     (* Enums have to be valid array keys *)
-    | Tabstract (AKenum _, _) -> ()
-    | Terr | Tany when allow_any -> ()
+    | Tabstract (AKenum _, _) -> env, None
+    | Terr | Tany when allow_any -> env, None
+    | Tintersection tyl ->
+      (* Ok if at least one element of the intersection is ok. *)
+      let env, errors = List.fold_map tyl ~init:env ~f:check_valid_array_key_type in
+      if List.exists errors ~f:Option.is_none
+      then env, None
+      else env, Option.value ~default:None (List.find errors ~f:Option.is_some)
     | Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic
       | Tvar _ | Tabstract _ | Tclass _ | Ttuple _ | Tanon _
       | Tfun _ | Tunion _ | Tobject | Tshape _ ->
-        f_fail p (Reason.to_pos r) (Typing_print.error env (r, t')) trail);
+      env, Some (fun () -> f_fail p (Reason.to_pos r) (Typing_print.error env (r, t')) trail) in
+  let env, err = check_valid_array_key_type env t in
+  Option.iter err (fun f -> f ());
   env
 
 let enum_check_const ty_exp env (_, (p, _), _) t =
@@ -108,7 +117,7 @@ let enum_class_check env tc consts const_types =
           | Tabstract (AKgeneric _, _) -> ()
           | Terr | Tany | Tarraykind _ | Tprim _ | Toption _ | Tvar _
             | Tabstract (_, _) | Tclass _ | Ttuple _ | Tanon (_, _)
-            | Tunion _ | Tobject | Tfun _ | Tshape _ | Tdynamic ->
+            | Tunion _ | Tintersection _ | Tobject | Tfun _ | Tshape _ | Tdynamic ->
               Errors.enum_type_bad (Reason.to_pos r)
                 (Typing_print.error env (r, ty_exp')) trail);
 

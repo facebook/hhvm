@@ -69,6 +69,10 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
       List.fold_left tyl ~init:env ~f:begin fun env ty ->
         check_exhaustiveness_ env pos ty caselist new_enum
       end
+    | Tintersection tyl ->
+      List.fold_left tyl ~init:env ~f:begin fun env ty ->
+        check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved
+      end
     | Tabstract (AKenum id, _) ->
       let dep = Typing_deps.Dep.AllMembers id in
       let decl_env = Env.get_decl_env env in

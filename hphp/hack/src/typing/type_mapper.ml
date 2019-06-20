@@ -44,6 +44,7 @@ class type type_mapper_type = object
   method on_tvarray_or_darray : env -> Reason.t -> locl ty -> result
   method on_ttuple : env -> Reason.t -> locl ty list -> result
   method on_tunion : env -> Reason.t -> locl ty list -> result
+  method on_tintersection : env -> Reason.t -> locl ty list -> result
   method on_toption : env -> Reason.t -> locl ty -> result
   method on_tfun : env -> Reason.t -> locl fun_type -> result
   method on_tabstract :
@@ -83,6 +84,7 @@ class shallow_type_mapper: type_mapper_type = object(this)
     env, (r, Tarraykind (AKvarray_or_darray tv))
   method on_ttuple env r tyl = env, (r, Ttuple tyl)
   method on_tunion env r tyl = env, (r, Tunion tyl)
+  method on_tintersection env r tyl = env, (r, Tintersection tyl)
   method on_toption env r ty = env, (r, Toption ty)
   method on_tfun env r fun_type = env, (r, Tfun fun_type)
   method on_tabstract env r ak opt_ty = env, (r, Tabstract (ak, opt_ty))
@@ -107,6 +109,7 @@ class shallow_type_mapper: type_mapper_type = object(this)
       this#on_tvarray_or_darray env r tv
     | Ttuple tyl -> this#on_ttuple env r tyl
     | Tunion tyl -> this#on_tunion env r tyl
+    | Tintersection tyl -> this#on_tintersection env r tyl
     | Toption ty -> this#on_toption env r ty
     | Tfun fun_type -> this#on_tfun env r fun_type
     | Tabstract (ak, opt_ty) -> this#on_tabstract env r ak opt_ty
@@ -126,6 +129,14 @@ class virtual tunion_type_mapper = object(this)
   method virtual on_type : env -> locl ty -> result
 end
 
+class virtual tinter_type_mapper = object(this)
+  method on_tintersection env r tyl: result =
+    let env, tyl = List.map_env env tyl (this#on_type) in
+    env, (r, Tintersection tyl)
+
+  method virtual on_type : env -> locl ty -> result
+end
+
 (* Implementation of type_mapper that recursively visits everything in the
  * type.
  * NOTE: by default it doesn't to anything to Tvars. Include one of the mixins
@@ -133,6 +144,7 @@ end
 class deep_type_mapper = object(this)
   inherit shallow_type_mapper
   inherit! tunion_type_mapper
+  inherit! tinter_type_mapper
 
   method! on_tarraykind_akvec env r tv =
     let env, tv = this#on_type env tv in

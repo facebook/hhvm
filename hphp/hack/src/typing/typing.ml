@@ -29,6 +29,7 @@ module Async        = Typing_async
 module SubType      = Typing_subtype
 module Unify        = Typing_unify
 module Union        = Typing_union
+module Inter        = Typing_intersection
 module SN           = Naming_special_names
 module TVis         = Typing_visibility
 module TNBody       = Typing_naming_body
@@ -3500,7 +3501,7 @@ and call_parent_construct pos env el uel =
             | None -> assert false)
         | _, (Terr | Tany | Tnonnull | Tarraykind _ | Toption _
               | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tvar _ | Tdynamic
-              | Tabstract (_, _) | Tanon (_, _) | Tunion _ | Tobject
+              | Tabstract (_, _) | Tanon (_, _) | Tunion _ | Tintersection _ | Tobject
              ) ->
            Errors.parent_outside_class pos;
            let ty = (Reason.Rwitness pos, Typing_utils.terr env) in
@@ -3550,7 +3551,7 @@ and call_parent_construct pos env el uel =
           ~default:false
           ~f:(fun ty_ -> ty_.Env.is_coroutine)
         )
-      | Tunion ts -> are_coroutines env ts
+      | Tunion ts | Tintersection ts -> are_coroutines env ts
       | _ ->
         env, Some false
     and are_coroutines env ts =
@@ -3702,6 +3703,9 @@ and call_parent_construct pos env el uel =
         | (r, Tunion x) ->
             let acc, x = List.map_env env x get_array_filter_return_type in
             acc, (r, Tunion x)
+        | (r, Tintersection tyl) ->
+            let env, tyl = List.map_env env tyl get_array_filter_return_type in
+            Inter.intersect_list env r tyl
         | (r, Tany) ->
             env, (r, Typing_utils.tany env)
         | (r, Terr) ->
@@ -3856,6 +3860,9 @@ and call_parent_construct pos env el uel =
               | (r, Tunion x) ->
                 let env, x = List.map_env env x build_output_container in
                 env, (fun tr -> (r, Tunion (List.map x (fun f -> f tr))))
+              | (r, Tintersection tyl) ->
+                let env, builders = List.map_env env tyl build_output_container in
+                env, (fun tr -> (r, Tintersection (List.map builders (fun f -> f tr))))
               | (r, _) ->
                 let env, tk = Env.fresh_type env p in
                 let env, tv = Env.fresh_type env p in
@@ -4253,6 +4260,22 @@ and class_get_ ~is_method ~is_const ~this_ty ?(explicit_tparams=[])
         end in
       let env, ty = Union.union_list env (fst cty) tyl in
       env, ty, None, None
+  | _, Tintersection tyl ->
+      (* TODO T44713456 This is incomplete: (A&B)::m should be ok if only A has m. *)
+      let env, tyl =
+        List.map_env env tyl begin fun env ty ->
+        let env, this_ty =
+          if is_method then
+            this_for_method env cid ty
+          else
+            env, ty in
+        let env, ty, _decl_ty, _ =
+          class_get_ ~is_method ~is_const ~this_ty ~explicit_tparams ~incl_tc
+                     env cid ty (p, mid) k
+            in env, ty
+        end in
+      let env, ty = Inter.intersect_list env (fst cty) tyl in
+      env, ty, None, None
   | _, Tabstract (_, Some ty) ->
       class_get_ ~is_method ~is_const ~this_ty ~explicit_tparams ~incl_tc
         env cid ty (p, mid) k
@@ -4645,6 +4668,26 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~obj_pos
       let env, ty = Union.union_list env (fst ety1) tyl in
       env, ty, None, vis
 
+  | _, Tintersection tyl ->
+      (* TODO T44713456 This is incomplete: (A&B)->m should be ok if only A has m. *)
+      let (env, vis), tyl = List.map_env (env, None) tyl
+        begin fun (env, vis) ty ->
+          let env, ty, _decl_ty, vis' =
+            obj_get_ ~obj_pos ~is_method ~nullsafe ~valkind ~pos_params
+              ~explicit_tparams env ty cid id k k_lhs in
+          (* There is one special case where we need to expose the
+           * visibility outside of obj_get (checkout inst_meth special
+           * function).
+           * We keep a witness of the "most restrictive" visibility
+           * we encountered (position + visibility), to be able to
+           * special case inst_meth.
+           *)
+          let vis = TVis.min_vis_opt vis vis' in
+          (env, vis), ty
+        end in
+      let env, ty = Inter.intersect_list env (fst ety1) tyl in
+      env, ty, None, vis
+
   | p', (Tabstract(ak, Some ty)) ->
     let k_lhs' ty = match ak with
     | AKnewtype (_, _) -> k_lhs ty
@@ -4703,7 +4746,7 @@ and class_id_for_new ~exact p env cid tal =
     | [] -> env, te, res
     | ty::tyl ->
       match snd ty with
-      | Tunion tyl' ->
+      | Tunion tyl' | Tintersection tyl' ->
         get_info res (tyl' @ tyl)
       | _ ->
         (* Instantiation on an abstract class (e.g. from classname<T>) is
@@ -4731,7 +4774,8 @@ and class_id_for_new ~exact p env cid tal =
           end
         | _, (Tany | Terr | Tnonnull | Tarraykind _ | Toption _
               | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Ttuple _
-              | Tanon (_, _) | Tunion _ | Tobject | Tshape _ | Tdynamic ) ->
+              | Tanon (_, _) | Tunion _ | Tintersection _ | Tobject | Tshape _
+              | Tdynamic ) ->
           get_info res tyl in
   get_info [] [cid_ty]
 
@@ -4866,7 +4910,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
           )
       | _, (Terr | Tany | Tnonnull | Tarraykind _ | Toption _ | Tprim _
             | Tfun _ | Ttuple _ | Tshape _ | Tvar _ | Tdynamic
-            | Tanon (_, _) | Tunion _ | Tabstract (_, _) | Tobject
+            | Tanon (_, _) | Tunion _ | Tintersection _ | Tabstract (_, _) | Tobject
            ) ->
         let parent = Env.get_parent env in
         let parent_defined = snd parent <> Typing_utils.tany env in
@@ -4916,6 +4960,9 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
         | r, Tunion tyl ->
           let env, tyl = List.map_env env tyl resolve_ety in
           env, (r, Tunion tyl)
+        | r, Tintersection tyl ->
+          let env, tyl = List.map_env env tyl resolve_ety in
+          Inter.intersect_list env r tyl
         | _, Tdynamic as ty -> env, ty
         | _, (Tany | Tprim Tstring | Tabstract (_, None) | Tobject)
               when not (Env.is_strict env) ->
@@ -5039,6 +5086,8 @@ and inout_write_back env { fp_type; _ } (_, e) =
       env
     | _ -> env
 
+(** Typechecks a call.
+Returns in this order the typed expressions for the arguments, for the variadic arguments, and the return type. *)
 and call ~(expected: ExpectedTy.t option) ?method_call_info pos env fty ~fty_decl el uel =
   let make_unpacked_traversable_ty pos ty = MakeType.traversable (Reason.Runpack_param pos) ty in
   let resl = TUtils.try_over_concrete_supertypes env fty begin fun env fty ->
@@ -5077,6 +5126,14 @@ and call ~(expected: ExpectedTy.t option) ?method_call_info pos env fty ~fty_dec
         let env, _, _, ty = call ~expected pos env ty ~fty_decl:None el uel in env, ty
       end in
       let ty = (r, Tunion retl) in
+      env, [], [], ty
+    | r, Tintersection tyl ->
+      (* TODO T44713456 It should be ok if some member of the intersection are
+      not function types, e.g. dynamic. *)
+      let env, retl = List.map_env env tyl begin fun env ty ->
+        let env, _, _, ty = call ~expected pos env ty ~fty_decl:None el uel in env, ty
+      end in
+      let env, ty = Inter.intersect_list env r retl in
       env, [], [], ty
     | r2, Tfun ft ->
       (* Typing of format string functions. It is dependent on the arguments (el)
@@ -5712,7 +5769,7 @@ and condition ?lhs_of_null_coalesce env tparamet
       | _, Tprim Tbool -> env
       | _, (Terr | Tany | Tnonnull | Tarraykind _ | Toption _ | Tdynamic
         | Tprim _ | Tvar _ | Tfun _ | Tabstract _ | Tclass _
-        | Ttuple _ | Tanon (_, _) | Tunion _ | Tobject | Tshape _
+        | Ttuple _ | Tanon (_, _) | Tunion _ | Tintersection _ | Tobject | Tshape _
         ) ->
           condition_nullity ~nonnull:tparamet env te)
   | T.Binop ((Ast.Diff | Ast.Diff2 as op), e1, e2) ->
@@ -5815,6 +5872,9 @@ and condition ?lhs_of_null_coalesce env tparamet
         | r, Tunion tyl ->
           let env, tyl = List.map_env env tyl resolve_obj in
           env, (r, Tunion tyl)
+        | r, Tintersection tyl ->
+          let env, tyl = List.map_env env tyl resolve_obj in
+          Inter.intersect_list env r tyl
         | _, (Terr | Tany | Tnonnull| Tarraykind _ | Tprim _ | Tvar _
             | Tfun _ | Tabstract ((AKenum _ | AKnewtype _ | AKdependent _), _)
             | Ttuple _ | Tanon (_, _) | Toption _ | Tobject | Tshape _
@@ -5871,7 +5931,7 @@ and safely_refine_type env p reason ivar_pos ivar_ty hint_ty =
       TUtils.non_null env p ivar_ty
     | _, (Tany | Tprim _ | Toption _ | Ttuple _
         | Tshape _ | Tvar _ | Tabstract _ | Tarraykind _ | Tanon _
-        | Tunion _ | Tobject | Terr | Tfun _  | Tdynamic) ->
+        | Tunion _ | Tintersection _ | Tobject | Terr | Tfun _  | Tdynamic) ->
       (* TODO(kunalm) Implement the type refinement for each type *)
       env, hint_ty
 

@@ -15,6 +15,7 @@ open Typing_defs
 module Reason = Typing_reason
 module Unify = Typing_unify
 module Env = Typing_env
+module Inter = Typing_intersection
 module Subst = Decl_subst
 module TUtils = Typing_utils
 module SN = Naming_special_names
@@ -1088,6 +1089,20 @@ and simplify_subtype
 
   | _, Tabstract (AKgeneric name_super, _) ->
     simplify_subtype_generic_super ty_sub name_super env
+
+  (* It's sound to reduce t1 & t2 <: t to (t1 <: t) || (t2 <: t), but
+   * not complete.
+   *)
+  | Tintersection tyl, _ ->
+    List.fold_left tyl ~init:(env, TL.Disj []) ~f:(fun res ty_sub ->
+      res ||| simplify_subtype ~seen_generic_params ty_sub ty_super)
+  (* t <: (t1 & ... & tn)
+   *   if and only if
+   * t <: t1 /\  ... /\ t <: tn
+   *)
+  | _, Tintersection tyl ->
+    List.fold_left tyl ~init:(env, TL.valid) ~f:(fun res ty_super ->
+      res &&& simplify_subtype ~seen_generic_params ty_sub ty_super)
 
 and simplify_subtype_variance
   ~(seen_generic_params : SSet.t option)
@@ -2250,6 +2265,9 @@ let rec freshen_inside_ty env ((r, ty_) as ty) =
   | Tunion tyl ->
     let env, tyl = List.map_env env tyl freshen_inside_ty in
     env, (r, Tunion tyl)
+  | Tintersection tyl ->
+    let env, tyl = List.map_env env tyl freshen_inside_ty in
+    Inter.intersect_list env r tyl
     (* Tuples are covariant *)
   | Ttuple tyl ->
     let env, tyl = List.map_env env tyl freshen_ty in
@@ -2410,7 +2428,7 @@ let bind_to_lower_bound ~freshen env r var lower_bounds =
 
 let is_not_union_with_tvar env var ty =
   let _env, ty = TUtils.simplify_unions env ty in
-  ty_equal ty (TUtils.diff ty (var_as_ty var)) ~normalize_union:true
+  ty_equal ty (TUtils.diff ty (var_as_ty var)) ~normalize_lists:true
 
 let bind_to_upper_bound env r var upper_bounds =
   Env.log_env_change "bind_to_upper_bound" env @@

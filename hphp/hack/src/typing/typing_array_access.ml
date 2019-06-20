@@ -16,6 +16,7 @@ module Env = Typing_env
 module TUtils = Typing_utils
 module Reason = Typing_reason
 module Union = Typing_union
+module Inter = Typing_intersection
 module MakeType = Typing_make_type
 module SubType = Typing_subtype
 module Partial = Partial_provider
@@ -189,6 +190,12 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
         array_get ~array_pos ~expr_pos ~lhs_of_null_coalesce is_lvalue env ty1 e2 ty2
       end in
       Union.union_list env r tyl
+  | Tintersection tyl ->
+      (* TODO T44713456 This is incomplete: (A&B)[m] should be ok even if only A[m] is ok. *)
+      let env, tyl = List.map_env env tyl begin fun env ty1 ->
+        array_get ~array_pos ~expr_pos ~lhs_of_null_coalesce is_lvalue env ty1 e2 ty2
+      end in
+      Inter.intersect_list env r tyl
   | Tarraykind (AKvarray ty | AKvec ty) ->
       let ty1 = MakeType.int (Reason.Ridx (fst e2, r)) in
       let env = type_index env expr_pos ty2 ty1 Reason.index_array in
@@ -490,6 +497,15 @@ let rec assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
     let env, ty1' = Union.union_list env r ty1l' in
     let env, ty' = Union.union_list env r tyl' in
     env, (ty1', ty')
+  | r, Tintersection ty1l ->
+    (* TODO T44713456 This is incomplete: (A&B)[m] should be ok even if only A[m] is ok. *)
+    let env, resl =
+      List.map_env env ty1l
+        (fun env ty1 -> assign_array_append ~expr_pos ~array_pos ur env ty1 ty2) in
+    let (ty1l', tyl') = List.unzip resl in
+    let env, ty1' = Inter.intersect_list env r ty1l' in
+    let env, ty' = Inter.intersect_list env r tyl' in
+    env, (ty1', ty')
   | _, Tabstract _ ->
     let resl = TUtils.try_over_concrete_supertypes env ty1 begin fun env ty1 ->
       let _env, res = assign_array_append ~expr_pos ~array_pos ur env ty1 ty2 in
@@ -595,6 +611,14 @@ let rec assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
     let (ty1l', tyl') = List.unzip resl in
     let env, ty1' = Union.union_list env r ty1l' in
     let env, ty' = Union.union_list env r tyl' in
+    env, (ty1', ty')
+  | Tintersection ty1l ->
+    (* TODO T44713456 This is incomplete: (A&B)[m] should be ok even if only A[m] is ok. *)
+    let env, resl = List.map_env env ty1l (fun env ty1 ->
+      assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2) in
+    let (ty1l', tyl') = List.unzip resl in
+    let env, ty1' = Inter.intersect_list env r ty1l' in
+    let env, ty' = Inter.intersect_list env r tyl' in
     env, (ty1', ty')
   | Tarraykind (AKvarray tv) ->
     let tk = MakeType.int (Reason.Ridx (fst key, fst ety1)) in

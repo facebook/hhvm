@@ -7,14 +7,16 @@
  *
  *)
 
+open Core_kernel
 open Tast
 open Typing_defs
 
 module Env = Tast_env
 module Cls = Decl_provider.Class
 
-let is_abstract_ft fty = match fty with
+let rec is_abstract_ft fty = match fty with
   | _, Tfun { ft_abstract = true; _ } -> true
+  | _r, Tintersection tyl -> List.for_all tyl ~f:is_abstract_ft
   | _ -> false
 
 (* This check prevents calls to static methods that are abstract, except in cases where the method

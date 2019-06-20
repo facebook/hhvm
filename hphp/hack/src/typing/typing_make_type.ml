@@ -85,3 +85,13 @@ let nullable r ty =
   | _ -> (r, Toption ty)
 let nothing r =
   (r, Tunion [])
+
+let union r tyl =
+  match tyl with
+  | [ty] -> ty
+  | _ -> (r, Tunion tyl)
+let intersection r tyl =
+  match tyl with
+  | [] -> mixed r
+  | [ty] -> ty
+  | _ -> (r, Tintersection tyl)

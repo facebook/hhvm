@@ -38,7 +38,7 @@ end = struct
     match snd ty with
     | Tprim p -> print_tprim p
     | Tany | Terr | Tvar _ | Tabstract ((AKdependent _ | AKgeneric _), _)
-    | Tanon _ | Tunion _ | Tobject | Tarraykind (AKany | AKempty) ->
+    | Tanon _ | Tunion _ | Tintersection _ | Tobject | Tarraykind (AKany | AKempty) ->
       raise Non_denotable
     | Tnonnull -> "nonnull"
     | Tdynamic -> "dynamic"

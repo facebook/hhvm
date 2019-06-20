@@ -116,6 +116,16 @@ and expand env ~as_tyvar_with_cnstr root =
   let expand = expand ~as_tyvar_with_cnstr in
   let tenv, (root_reason, root_ty as root) = Env.expand_type env.tenv root in
   let env = { env with tenv = tenv } in
+  let apply_dep_tys env tyl = List.map_env env tyl
+    begin fun prev_env ty ->
+      let env, ty = expand env ty in
+      (* If ty here involves a type access, we have to use
+        the current environment's dependent types. Otherwise,
+        we throw away type access information.
+      *)
+      let tenv, ty = ExprDepTy.apply env.tenv env.dep_tys ty in
+      { prev_env with tenv }, ty
+    end in
   match env.ids with
   | [] ->
       env, root
@@ -171,16 +181,11 @@ and expand env ~as_tyvar_with_cnstr root =
               dep_tys = (root_reason, (dep_ty, []))::env.dep_tys } in
           expand env ty
       | Tunion tyl ->
-          let env, tyl = List.map_env env tyl begin fun prev_env ty ->
-            let env, ty = expand env ty in
-            (* If ty here involves a type access, we have to use
-              the current environment's dependent types. Otherwise,
-              we throw away type access information.
-            *)
-            let tenv, ty = ExprDepTy.apply env.tenv env.dep_tys ty in
-            { prev_env with tenv }, ty
-          end in
+          let env, tyl = apply_dep_tys env tyl in
           { env with dep_tys = [] } , (root_reason, Tunion tyl)
+      | Tintersection tyl ->
+          let env, tyl = apply_dep_tys env tyl in
+          { env with dep_tys = [] } , (root_reason, Tintersection tyl)
       | Tvar n ->
           let tenv, ty = Typing_subtype_tconst.get_tyvar_type_const env.tenv n head in
           expand { env with ids = tail; tenv } ty

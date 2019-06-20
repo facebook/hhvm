@@ -26,7 +26,7 @@ let can_be_null env ty =
 let rec enforce_not_awaitable env p ty =
   let _, ety = Tast_env.expand_type env ty in
   match ety with
-  | _, Tunion tyl ->
+  | _, Tunion tyl | _, Tintersection tyl ->
     List.iter tyl (enforce_not_awaitable env p)
   | r, Tclass ((_, awaitable), _, _) when
       awaitable = SN.Classes.cAwaitable ->

@@ -169,19 +169,12 @@ and pp_ty_ : type a. Format.formatter -> a ty_ -> unit = fun fmt ty ->
     Format.fprintf fmt ",@ ";
     Ident.pp fmt a1;
     Format.fprintf fmt "@,))@]"
-  | Tunion a0 ->
+  | Tunion tyl ->
     Format.fprintf fmt "(@[<2>Tunion@ ";
-    Format.fprintf fmt "@[<2>[";
-    ignore
-      (List.fold_left
-        ~f:(fun sep x ->
-          if sep then Format.fprintf fmt ";@ ";
-          pp_ty fmt x;
-          true)
-        ~init:false
-        a0);
-    Format.fprintf fmt "@,]@]";
-    Format.fprintf fmt "@])"
+    pp_ty_list fmt tyl
+  | Tintersection tyl ->
+    Format.fprintf fmt "(@[<2>Tintersection@ ";
+    pp_ty_list fmt tyl
   | Tobject -> Format.pp_print_string fmt "Tobject"
   | Tclass (a0,_a2,a1) ->
     Format.fprintf fmt "(@[<2>Tclass (@,";
@@ -202,6 +195,19 @@ and pp_ty_ : type a. Format.formatter -> a ty_ -> unit = fun fmt ty ->
     Format.fprintf fmt "(@[<2>Tarraykind@ ";
     pp_array_kind fmt a0;
     Format.fprintf fmt "@])"
+
+and pp_ty_list : type a. Format.formatter -> a ty list -> unit = fun fmt tyl ->
+  Format.fprintf fmt "@[<2>[";
+  ignore
+    (List.fold_left
+      ~f:(fun sep x ->
+        if sep then Format.fprintf fmt ";@ ";
+        pp_ty fmt x;
+        true)
+      ~init:false
+      tyl);
+  Format.fprintf fmt "@,]@]";
+  Format.fprintf fmt "@])"
 
 and show_ty_ : type a. a ty_ -> string = fun x ->
   Format.asprintf "%a" pp_ty_ x

@@ -47,11 +47,12 @@ let check_param : Env.env -> Nast.fun_param -> unit =
     (* Allow unconstrined dependent type `abstract type const TID` just as we
      * allow unconstrained generics. *)
     | _, Tabstract (AKdependent _, None) -> ()
-    (* Handling Tunion case here for completeness, even though it
+    (* Handling Tunion and Tintersection case here for completeness, even though it
      * shouldn't be possible to have an unresolved type when check_memoizableing
      * the method declaration. No corresponding test case for this.
      *)
-    | _, Tunion tyl -> List.iter tyl (check_memoizable env)
+    | _, Tunion tyl
+    | _, Tintersection tyl -> List.iter tyl (check_memoizable env)
     (* Allow untyped arrays. *)
     | _, Tarraykind AKany
     | _, Tarraykind AKempty ->

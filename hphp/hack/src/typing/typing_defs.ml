@@ -204,6 +204,8 @@ and _ ty_ =
    *)
   | Tunion : locl ty list -> locl ty_
 
+  | Tintersection : locl ty list -> locl ty_
+
   (* Tobject is an object type compatible with all objects. This type is also
    * compatible with some string operations (since a class might implement
    * __toString), but not with string type hints. In a similar way, Tobject
@@ -685,9 +687,10 @@ let ty_con_ordinal ty =
   | Tabstract _ -> 10
   | Tanon _ -> 11
   | Tunion _ -> 12
-  | Tobject -> 13
-  | Tclass _ -> 14
-  | Tarraykind _ -> 15
+  | Tintersection _ -> 13
+  | Tobject -> 14
+  | Tclass _ -> 15
+  | Tarraykind _ -> 16
 
 let array_kind_con_ordinal ak =
   match ak with
@@ -715,7 +718,7 @@ let abstract_kind_con_ordinal ak =
  * But if ty_compare ty1 ty2 = 0, then the types must not be distinguishable
  * by any typing rules.
  *)
-let rec ty_compare ?(normalize_union = false) ty1 ty2 =
+let rec ty_compare ?(normalize_lists = false) ty1 ty2 =
   let rec ty_compare ty1 ty2 =
     let ty_1, ty_2 = (snd ty1, snd ty2) in
     match  ty_1, ty_2 with
@@ -725,13 +728,11 @@ let rec ty_compare ?(normalize_union = false) ty1 ty2 =
         ty_compare ty ty2
       | Tfun fty, Tfun fty2 ->
         tfun_compare fty fty2
-      | Tunion tyl1, Tunion tyl2 ->
-        let (tyl1, tyl2) = if normalize_union
-          then (List.sort ty_compare tyl1, List.sort ty_compare tyl2)
-          else (tyl1, tyl2) in
-        tyl_compare tyl1 tyl2
+      | Tunion tyl1, Tunion tyl2
+      | Tintersection tyl1, Tintersection tyl2 ->
+        tyl_compare ~sort:normalize_lists ~normalize_lists tyl1 tyl2
       | Ttuple tyl1, Ttuple tyl2 ->
-        tyl_compare tyl1 tyl2
+        tyl_compare ~sort:normalize_lists ~normalize_lists tyl1 tyl2
       | Tabstract (ak1, opt_cstr1), Tabstract (ak2, opt_cstr2) ->
         begin match abstract_kind_compare ak1 ak2 with
         | 0 -> opt_ty_compare opt_cstr1 opt_cstr2
@@ -741,7 +742,7 @@ let rec ty_compare ?(normalize_union = false) ty1 ty2 =
       | Tclass (id, exact, tyl), Tclass(id2, exact2, tyl2) ->
         begin match String.compare (snd id) (snd id2) with
         | 0 ->
-          begin match tyl_compare tyl tyl2 with
+          begin match tyl_compare ~sort:false tyl tyl2 with
           | 0 ->
             begin match exact, exact2 with
             | Exact, Exact -> 0
@@ -812,7 +813,7 @@ let rec ty_compare ?(normalize_union = false) ty1 ty2 =
       match ak1, ak2 with
       | AKmap (ty1, ty2), AKmap (ty3, ty4)
       | AKdarray (ty1, ty2), AKdarray (ty3, ty4) ->
-        tyl_compare [ty1; ty2] [ty3; ty4]
+        tyl_compare ~sort:false [ty1; ty2] [ty3; ty4]
       | AKvarray ty1, AKvarray ty2
       | AKvarray_or_darray ty1, AKvarray_or_darray ty2
       | AKvec ty1, AKvec ty2 ->
@@ -823,12 +824,14 @@ let rec ty_compare ?(normalize_union = false) ty1 ty2 =
     in
     ty_compare ty1 ty2
 
-and tyl_compare ?(normalize_union = false) tyl1 tyl2 =
-  let ty_compare = ty_compare ~normalize_union in
-  List.compare ty_compare tyl1 tyl2
+and tyl_compare ~sort ?(normalize_lists = false) tyl1 tyl2 =
+  let (tyl1, tyl2) = if sort
+    then (List.sort ty_compare tyl1, List.sort ty_compare tyl2)
+    else (tyl1, tyl2) in
+  List.compare (ty_compare ~normalize_lists) tyl1 tyl2
 
-and ft_params_compare ?(normalize_union = false) params1 params2 =
-  let ty_compare = ty_compare ~normalize_union in
+and ft_params_compare ?(normalize_lists = false) params1 params2 =
+  let ty_compare = ty_compare ~normalize_lists in
 
   let rec ft_params_compare params1 params2 =
     List.compare ft_param_compare params1 params2
@@ -844,12 +847,12 @@ and ft_params_compare ?(normalize_union = false) params1 params2 =
   in
   ft_params_compare params1 params2
 
-and abstract_kind_compare ?(normalize_union = false) t1 t2 =
-  let tyl_compare = tyl_compare ~normalize_union in
+and abstract_kind_compare ?(normalize_lists = false) t1 t2 =
+  let tyl_compare = tyl_compare ~normalize_lists in
   match t1, t2 with
   | AKnewtype (id, tyl), AKnewtype (id2, tyl2) ->
     begin match String.compare id id2 with
-    | 0 -> tyl_compare tyl tyl2
+    | 0 -> tyl_compare ~sort:false tyl tyl2
     | n -> n
     end
   | AKgeneric id1, AKgeneric id2
@@ -860,8 +863,8 @@ and abstract_kind_compare ?(normalize_union = false) t1 t2 =
   | _ ->
     abstract_kind_con_ordinal t1 - abstract_kind_con_ordinal t2
 
-let ty_equal ?(normalize_union = false) ty1 ty2 =
-  ty_compare ~normalize_union ty1 ty2 = 0
+let ty_equal ?(normalize_lists = false) ty1 ty2 =
+  ty_compare ~normalize_lists ty1 ty2 = 0
 
 let make_function_type_rxvar param_ty =
   match param_ty with

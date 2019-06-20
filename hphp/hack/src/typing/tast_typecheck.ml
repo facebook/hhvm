@@ -25,7 +25,7 @@ exception Not_implemented
 
 let expect_ty_equal env (pos, ty:Pos.t * locl ty) (expected_ty:locl ty_) =
   let expected_ty = (Reason.none, expected_ty) in
-  if not @@ ty_equal ~normalize_union:true ty expected_ty then
+  if not @@ ty_equal ~normalize_lists:true ty expected_ty then
     let actual_ty = Typing_print.debug env ty in
     let expected_ty = Typing_print.debug env expected_ty in
     Errors.unexpected_ty_in_tast pos ~actual_ty ~expected_ty

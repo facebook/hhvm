@@ -233,6 +233,7 @@ let rec is_any env ty =
   match Env.expand_type env ty with
   | (_, (_, (Tany | Terr))) -> true
   | (_, (_, Tunion tyl)) -> List.for_all tyl (is_any env)
+  | (_, (_, Tintersection tyl)) -> List.exists tyl (is_any env)
   | _ -> false
 
 (*****************************************************************************)
@@ -276,7 +277,7 @@ let get_class_ids env ty =
   let rec aux seen acc = function
     | _, Tclass ((_, cid), _, _) -> cid::acc
     | _, (Toption ty | Tabstract (_, Some ty)) -> aux seen acc ty
-    | _, Tunion tys -> List.fold tys ~init:acc ~f:(aux seen)
+    | _, Tunion tys | _, Tintersection tys -> List.fold tys ~init:acc ~f:(aux seen)
     | _, Tabstract (AKgeneric name, None) when not (List.mem ~equal:(=) seen name) ->
       let seen = name :: seen in
       let upper_bounds = Env.get_upper_bounds env name in
@@ -479,6 +480,14 @@ let rec push_option_out pos env ty =
           flatten_unresolved env ty tyl
           end ~init:(env, []) in
       env, (r, Tunion tyl)
+  | r, Tintersection tyl ->
+    let env, tyl = List.map_env env tyl (push_option_out pos) in
+    if List.for_all tyl is_option then
+      let r', tyl = List.fold_map tyl ~init:Reason.none
+        ~f:(fun r' ty -> match ty with r, Toption ty -> r, ty | _ -> r', ty) in
+      env, (r', Toption (r, Tintersection tyl))
+    else
+      env, (r, Tintersection tyl)
   | r, Tabstract (ak, _) ->
     begin match get_concrete_supertypes env ty with
     | env, [ty'] ->
@@ -522,7 +531,7 @@ let non_null env pos ty =
 (*****************************************************************************)
 (*****************************************************************************)
 
-(* Try to unify all the types in a intersection *)
+(* Try to unify all the types in a union *)
 let rec fold_unresolved env ty =
   let env, ety = Env.expand_type env ty in
   match ety with

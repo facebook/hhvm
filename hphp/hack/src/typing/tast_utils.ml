@@ -55,6 +55,13 @@ let fold_truthiness acc truthiness =
 
   | _ -> Possibly_falsy
 
+let intersect_truthiness tr1 tr2 =
+  match tr1, tr2 with
+  | Unknown, tr | tr, Unknown -> tr
+  | Always_truthy, _ | _, Always_truthy -> Always_truthy
+  | Always_falsy, _ | _, Always_falsy -> Always_falsy
+  | Possibly_falsy, Possibly_falsy -> Possibly_falsy
+
 let tclass_is_falsy_when_empty, is_traversable =
   let r = Typing_reason.Rnone in
   let simple_xml_el = MakeType.class_type r "\\SimpleXMLElement" [] in
@@ -111,6 +118,9 @@ let rec truthiness env ty =
     | [] -> Unknown
     | hd :: tl -> List.fold tl ~init:hd ~f:fold_truthiness
     end
+  | Tintersection tyl ->
+    List.map tyl (truthiness env) |>
+    List.fold ~init:Possibly_falsy ~f:intersect_truthiness
   | Tabstract _ ->
     let env, tyl = Env.get_concrete_supertypes env ty in
     begin match List.map tyl (truthiness env) with
@@ -166,7 +176,8 @@ let rec find_sketchy_types env acc ty =
         | Cnormal | Cabstract | Ctrait | Cenum | Crecord -> acc
     end
 
-  | Tunion tyl ->
+  | Tunion tyl
+  | Tintersection tyl ->
     List.fold tyl ~init:acc ~f:(find_sketchy_types env)
   | Tabstract _ ->
     let env, tyl = Env.get_concrete_supertypes env ty in

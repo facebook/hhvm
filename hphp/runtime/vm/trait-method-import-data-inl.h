@@ -282,7 +282,7 @@ TraitMethodImportData<TraitMethod, Ops>
     if (methods.size() > 1) {
       // This may or may not actually throw; if it doesn't, the client is okay
       // with the duplication.
-      Ops::errorDuplicateMethod(ctx, name);
+      Ops::errorDuplicateMethod(ctx, name, methods);
     }
 
     seenNames.insert(name);

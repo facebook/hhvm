@@ -1,2 +1,2 @@
 
-Fatal error: Method 'test' declared in multiple traits in %s/error_011.php on line 14
+Fatal error: Method 'test' declared in multiple traits (foo, c, b) in %s/error_011.php on line 14

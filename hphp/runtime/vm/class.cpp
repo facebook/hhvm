@@ -3836,10 +3836,19 @@ struct TMIOps {
     raise_error(Strings::TRAITS_UNKNOWN_TRAIT, traitName->data());
   }
   static void errorDuplicateMethod(const Class* cls,
-                                   const StringData* methName) {
+                                   const StringData* methName,
+                                   const std::list<TraitMethod>& methods) {
     // No error if the class will override the method.
     if (cls->preClass()->hasMethod(methName)) return;
-    raise_error(Strings::METHOD_IN_MULTIPLE_TRAITS, methName->data());
+
+    std::vector<folly::StringPiece> traitNames;
+    for (auto& method : methods) {
+      traitNames.push_back(method.trait->name()->slice());
+    }
+    std::string traits;
+    folly::join(", ", traitNames, traits);
+
+    raise_error(Strings::METHOD_IN_MULTIPLE_TRAITS, methName->data(), traits.c_str());
   }
   static void errorInconsistentInsteadOf(const Class* cls,
                                          const StringData* methName) {

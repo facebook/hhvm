@@ -88,7 +88,8 @@ namespace HPHP {
  *    // Errors.
  *    void errorUnknownMethod(const String& methName);
  *    void errorUnknownTrait(const String& traitName);
- *    void errorDuplicateMethod(Context ctx, const String& methName);
+ *    void errorDuplicateMethod(Context ctx, const String& methName,
+ *                              const std::list<TraitMethod>& methods);
  *    void errorInconsistentInsteadOf(Context ctx, const String& methName);
  *    void errorMultiplyExcluded(const String& traitName,
  *                               const String& methName);

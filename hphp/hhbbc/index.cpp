@@ -1291,7 +1291,8 @@ struct TMIOps {
     throw TMIException(folly::sformat("Unknown trait '{}'", traitName));
   }
   static void errorDuplicateMethod(class_type cls,
-                                   string_type methName) {
+                                   string_type methName,
+                                   const std::list<TraitMethod>&) {
     auto const& m = cls->cls->methods;
     if (std::find_if(m.begin(), m.end(),
                      [&] (auto const& f) {

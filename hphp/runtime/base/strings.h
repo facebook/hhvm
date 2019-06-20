@@ -77,7 +77,7 @@ auto constexpr TRAITS_UNKNOWN_TRAIT =
 auto constexpr TRAITS_UNKNOWN_TRAIT_METHOD =
   "Unknown trait method '%s'";
 auto constexpr METHOD_IN_MULTIPLE_TRAITS =
-  "Method '%s' declared in multiple traits";
+  "Method '%s' declared in multiple traits (%s)";
 auto constexpr TRAIT_REDECLARED_METHOD_INCONSISTENT_ATTRIBUTES =
   "Redeclaration of trait method '%s::%s' is inconsistent about '%s'";
 auto constexpr TRAIT_REDECLARED_FINAL_METHOD=

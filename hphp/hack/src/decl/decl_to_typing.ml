@@ -32,15 +32,25 @@ type tagged_elt = {
 }
 
 let method_redeclaration_to_shallow_method smr =
+  let {
+    smr_abstract = sm_abstract;
+    smr_final = sm_final;
+    smr_static = _;
+    smr_name = sm_name;
+    smr_type = sm_type;
+    smr_visibility = sm_visibility;
+    smr_trait = _;
+    smr_method = _;
+  } = smr in
   {
-    sm_abstract = smr.smr_abstract;
-    sm_final = smr.smr_final;
+    sm_abstract;
+    sm_final;
     sm_memoizelsb = false;
-    sm_name = smr.smr_name;
+    sm_name;
     sm_override = false;
     sm_reactivity = None;
-    sm_type = smr.smr_type;
-    sm_visibility = smr.smr_visibility;
+    sm_type;
+    sm_visibility;
   }
 
 let redecl_list_to_method_seq redecls =
@@ -56,21 +66,31 @@ let base_visibility origin_class_name = function
 let ft_to_ty ft = Reason.Rwitness ft.ft_pos, Tfun ft
 
 let shallow_method_to_class_elt child_class mro subst meth : class_elt =
-  let visibility = base_visibility mro.mro_name meth.sm_visibility in
+  let {
+    sm_abstract = ce_abstract;
+    sm_final = ce_final;
+    sm_memoizelsb = ce_memoizelsb;
+    sm_name = _;
+    sm_override = ce_override;
+    sm_reactivity = _;
+    sm_type;
+    sm_visibility;
+  } = meth in
+  let visibility = base_visibility mro.mro_name sm_visibility in
   let ty = lazy begin
-    let ty = ft_to_ty meth.sm_type in
+    let ty = ft_to_ty sm_type in
     if child_class = mro.mro_name then ty else
     Decl_instantiate.instantiate subst ty
   end in
   {
-    ce_abstract = meth.sm_abstract;
-    ce_final = meth.sm_final;
+    ce_abstract;
+    ce_final;
     ce_xhp_attr = None;
     ce_const = false;
     ce_lateinit = false;
-    ce_override = meth.sm_override;
+    ce_override;
     ce_lsb = false;
-    ce_memoizelsb = meth.sm_memoizelsb;
+    ce_memoizelsb;
     ce_synthesized = mro.mro_synthesized;
     ce_visibility = visibility;
     ce_origin = mro.mro_name;
@@ -85,26 +105,36 @@ let shallow_method_to_telt child_class mro subst meth : tagged_elt =
   }
 
 let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
-  let visibility = base_visibility mro.mro_name prop.sp_visibility in
+  let {
+    sp_const = ce_const;
+    sp_xhp_attr = ce_xhp_attr;
+    sp_lateinit = ce_lateinit;
+    sp_lsb = ce_lsb;
+    sp_name;
+    sp_needs_init = _;
+    sp_type;
+    sp_visibility;
+  } = prop in
+  let visibility = base_visibility mro.mro_name sp_visibility in
   let ty = lazy begin
-    let ty = match prop.sp_type with
-      | None -> Reason.Rwitness (fst prop.sp_name), Tany
+    let ty = match sp_type with
+      | None -> Reason.Rwitness (fst sp_name), Tany
       | Some ty -> ty
     in
     if child_class = mro.mro_name then ty else
     Decl_instantiate.instantiate subst ty
   end in
   {
-    id = snd prop.sp_name;
+    id = snd sp_name;
     inherit_when_private = mro.mro_copy_private_members;
     elt = {
       ce_abstract = false;
       ce_final = true;
-      ce_xhp_attr = prop.sp_xhp_attr;
-      ce_const = prop.sp_const;
-      ce_lateinit = prop.sp_lateinit;
+      ce_xhp_attr;
+      ce_const;
+      ce_lateinit;
       ce_override = false;
-      ce_lsb = prop.sp_lsb;
+      ce_lsb;
       ce_memoizelsb = false;
       ce_synthesized = false;
       ce_visibility = visibility;
@@ -114,17 +144,23 @@ let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
   }
 
 let shallow_const_to_class_const child_class mro subst const =
+  let {
+    scc_abstract = cc_abstract;
+    scc_expr = cc_expr;
+    scc_name;
+    scc_type;
+  } = const in
   let ty =
-    let ty = const.scc_type in
+    let ty = scc_type in
     if child_class = mro.mro_name then ty else
     Decl_instantiate.instantiate subst ty
   in
-  snd const.scc_name, {
+  snd scc_name, {
     cc_synthesized = mro.mro_synthesized;
-    cc_abstract = const.scc_abstract;
-    cc_pos = fst const.scc_name;
+    cc_abstract;
+    cc_pos = fst scc_name;
     cc_type = ty;
-    cc_expr = const.scc_expr;
+    cc_expr;
     cc_origin = mro.mro_name;
   }
 
@@ -172,34 +208,41 @@ let typeconst_structure mro class_name stc =
   }
 
 let shallow_typeconst_to_typeconst_type child_class mro subst stc =
+  let {
+    stc_abstract;
+    stc_constraint;
+    stc_name = ttc_name;
+    stc_type;
+    stc_enforceable = ttc_enforceable;
+  } = stc in
   let constraint_ =
-    if child_class = mro.mro_name then stc.stc_constraint else
-    Option.map stc.stc_constraint (Decl_instantiate.instantiate subst)
+    if child_class = mro.mro_name then stc_constraint else
+    Option.map stc_constraint (Decl_instantiate.instantiate subst)
   in
   let ty =
-    if child_class = mro.mro_name then stc.stc_type else
-    Option.map stc.stc_type (Decl_instantiate.instantiate subst) in
-  let abstract = match stc.stc_abstract with
+    if child_class = mro.mro_name then stc_type else
+    Option.map stc_type (Decl_instantiate.instantiate subst) in
+  let abstract = match stc_abstract with
   | TCAbstract default_opt when child_class <> mro.mro_name ->
     TCAbstract (Option.map default_opt (Decl_instantiate.instantiate subst))
-  | _ -> stc.stc_abstract in
+  | _ -> stc_abstract in
   let typeconst = match abstract with
   | TCAbstract (Some default) when not mro.mro_passthrough_abstract_typeconst ->
     {
       ttc_abstract = TCConcrete;
-      ttc_name = stc.stc_name;
+      ttc_name;
       ttc_constraint = None;
       ttc_type = Some default;
       ttc_origin = mro.mro_name;
-      ttc_enforceable = stc.stc_enforceable;
+      ttc_enforceable;
     }
   | _ ->
     {
       ttc_abstract = abstract;
-      ttc_name = stc.stc_name;
+      ttc_name;
       ttc_constraint = constraint_;
       ttc_type = ty;
       ttc_origin = mro.mro_name;
-      ttc_enforceable = stc.stc_enforceable;
+      ttc_enforceable;
     } in
-  snd stc.stc_name, typeconst
+  snd ttc_name, typeconst

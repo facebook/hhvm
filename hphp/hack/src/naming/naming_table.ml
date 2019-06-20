@@ -377,6 +377,11 @@ end = struct
         );
       " table_name
 
+    let create_index_sqlite =
+      Printf.sprintf "
+      CREATE INDEX IF NOT EXISTS TYPES_CANON ON %s (CANON_HASH);
+      " table_name
+
     let insert_sqlite =
       Printf.sprintf "
         INSERT INTO %s (HASH, CANON_HASH, FLAGS, FILE_INFO_ID) VALUES (?, ?, ?, ?);
@@ -441,6 +446,11 @@ end = struct
           CANON_HASH INTEGER NOT NULL,
           FILE_INFO_ID INTEGER NOT NULL
         );
+      " table_name
+
+    let create_index_sqlite =
+      Printf.sprintf "
+      CREATE INDEX IF NOT EXISTS FUNS_CANON ON %s (CANON_HASH);
       " table_name
 
     let insert_sqlite =
@@ -637,6 +647,8 @@ end = struct
       end
     in
     Sqlite3.exec db FileInfoTable.create_index_sqlite |> check_rc;
+    Sqlite3.exec db TypesTable.create_index_sqlite |> check_rc;
+    Sqlite3.exec db FunsTable.create_index_sqlite |> check_rc;
     Sqlite3.exec db "END TRANSACTION;" |> check_rc;
     if not @@ Sqlite3.db_close db
     then failwith @@ Printf.sprintf "Could not close database at %s" db_name;

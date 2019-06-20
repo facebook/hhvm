@@ -26,7 +26,12 @@ let handler = object
         |> Env.hint_to_ty env
         |> Env.localize_with_self env
       in
-      if not (Env.can_subtype env ty (Typing_make_type.arraykey Reason.Rnone)) then
+      let (env, bound) =
+        Typing_make_type.arraykey Reason.Rnone
+        |> Typing_make_type.like Reason.Rnone
+        |> Env.localize_with_self env
+      in
+      if not (Env.can_subtype env ty bound) then
         Errors.invalid_arraykey_constraint p (Env.print_error_ty env ty)
     | _ -> ()
 end

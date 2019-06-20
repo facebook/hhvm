@@ -74,6 +74,8 @@ let nonnull r =
   (r, Tnonnull)
 let dynamic r =
   (r, Tdynamic)
+let like r ty =
+  (r, Tlike ty)
 let mixed r =
   (r, Toption (r, Tnonnull))
 let resource r =

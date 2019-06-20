@@ -465,9 +465,9 @@ TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
 }
 
 template <bool Assert, bool ForProp>
-bool TypeConstraint::checkTypeAliasNonObj(tv_rval val) const {
+bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
   assertx(val.type() != KindOfObject);
-  assertx(isObject());
+  assertx(isObject() || isRecord());
 
   auto const p = [&]() -> boost::variant<const TypeAliasReq*, Record*, Class*> {
     if (!Assert) {
@@ -520,6 +520,9 @@ bool TypeConstraint::checkTypeAliasNonObj(tv_rval val) const {
       case AnnotAction::ConvertClass:
         return false; // verifyFail will deal with the conversion/warning
       case AnnotAction::ClsMethCheck:
+        return false;
+      case AnnotAction::RecordCheck:
+        // TODO (T41179180): Support record type aliases
         return false;
     }
     assertx(result == AnnotAction::ObjectCheck);
@@ -716,7 +719,7 @@ bool TypeConstraint::checkImpl(tv_rval val,
       return is_callable(cellAsCVarRef(*val));
     case AnnotAction::ObjectCheck:
       assertx(isObject());
-      return !isPasses && checkTypeAliasNonObj<isAssert, isProp>(val);
+      return !isPasses && checkNamedTypeNonObj<isAssert, isProp>(val);
     case AnnotAction::VArrayCheck:
       // Since d/varray type-hints are always soft, we can never assert on their
       // correctness.
@@ -738,6 +741,9 @@ bool TypeConstraint::checkImpl(tv_rval val,
       return false; // verifyFail will handle the conversion/warning
     case AnnotAction::ClsMethCheck:
       return false;
+    case AnnotAction::RecordCheck:
+      assertx(isRecord());
+      return !isPasses && checkNamedTypeNonObj<isAssert, isProp>(val);
   }
   not_reached();
 }
@@ -793,6 +799,7 @@ bool TypeConstraint::alwaysPasses(const StringData* clsName) const {
       case AnnotAction::WarnClass:
       case AnnotAction::ConvertClass:
       case AnnotAction::ClsMethCheck:
+      case AnnotAction::RecordCheck:
         // Can't get these with objects
         break;
     }
@@ -848,6 +855,7 @@ bool TypeConstraint::alwaysPasses(DataType dt) const {
     case AnnotAction::WarnClass:
     case AnnotAction::ConvertClass:
     case AnnotAction::ClsMethCheck:
+    case AnnotAction::RecordCheck:
       return false;
   }
   not_reached();

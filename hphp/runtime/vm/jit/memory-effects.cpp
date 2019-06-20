@@ -1692,6 +1692,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case EndGuards:
   case EqBool:
   case EqCls:
+  case EqRec:
   case EqFunc:
   case EqStrPtr:
   case EqArrayDataPtr:
@@ -1953,6 +1954,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdGblAddrDef:
   case LdMethCallerName:
   case LdObjClass:
+  case LdValRec:
   case LdObjInvoke:
   case LdObjMethod:
   case LdStrLen:

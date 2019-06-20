@@ -899,6 +899,7 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
     case T::OptFunc:        return TFunc       | TInitNull;
     case T::OptCls:         return TCls        | TInitNull;
     case T::OptClsMeth:     return TClsMeth    | TInitNull;
+    case T::OptRecord:      return TRecord     | TInitNull;
     case T::OptArrKey:      return TInt | TStr | TInitNull;
     case T::OptUncArrKey:   return TInt | TPersistentStr | TInitNull;
     case T::OptStrLike:     return TFunc | TStr | TInitNull;
@@ -917,6 +918,7 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
     case T::Func:           return TFunc;
     case T::Cls:            return TCls;
     case T::ClsMeth:        return TClsMeth;
+    case T::Record:         return TRecord;
 
     case T::Cell:           return TCell;
     case T::Ref:            return TBoxedInitCell;

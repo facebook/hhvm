@@ -879,7 +879,7 @@ void in(ISS& env, const bc::NewDArray& op) {
 
 void in(ISS& env, const bc::NewRecord& op) {
   discard(env, op.keys.size());
-  push(env, TInitCell);
+  push(env, TRecord);
 }
 
 void in(ISS& env, const bc::NewStructArray& op) {

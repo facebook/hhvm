@@ -332,7 +332,7 @@ constexpr bool operator>(Mem a, Mem b) {
   c(Cls,             bits_t::bit<25>())                                 \
   c(ClsMeth,         bits_t::bit<26>())                                 \
   c(Record,          bits_t::bit<27>())                                 \
-  c(RecType,             bits_t::bit<28>())                                 \
+  c(RecType,         bits_t::bit<28>())                                 \
 // Boxed*:           29-57
 
 /*

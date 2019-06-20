@@ -327,6 +327,21 @@ void verifyTypeImpl(IRGS& env,
       assertx(valType <= TClsMeth);
       if (!clsMethToVec(val)) return genFail();
       return;
+    case AnnotAction::RecordCheck:
+      assertx(valType <= TRecord);
+      auto const tcRec = gen(env, LdRecCached, cns(env, tc.typeName()));
+      auto const valRec = gen(env, LdValRec, val);
+      ifThen(
+        env,
+        [&] (Block* taken) {
+          gen(env, JmpZero, taken, gen(env, EqRec, tcRec, valRec));
+        },
+        [&] {
+          hint(env, Block::Hint::Unlikely);
+          genFail();
+        }
+      );
+      return;
   }
   assertx(result == AnnotAction::ObjectCheck);
   if (onlyCheckNullability) return;

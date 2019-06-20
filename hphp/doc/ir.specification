@@ -819,6 +819,10 @@ To string conversions:
 
   Checks if two Class values are equal.
 
+| EqRec,                       D(Bool), S(RecType) S(RecType),            NF
+
+  Checks if two record types are equal.
+
 | EqFunc,                      D(Bool), S(Func) S(Func),                  NF
 
   Checks if two Func values are equal.
@@ -1219,6 +1223,10 @@ To string conversions:
 | LdSmashableFunc, D(Func), S(Smashable), NF
 
   Loads into D the func pointer stored in the higher 32 bits of S0.
+
+| LdValRec, D(RecType), S(Record), NF
+
+  Load the record type out of the record in S0 and put it in D.
 
 | LdRecCached, D(RecType), CStr, NF
 

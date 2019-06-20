@@ -712,6 +712,7 @@ bool opcodeMayRaise(Opcode opc) {
   case EqArrayDataPtr:
   case EqBool:
   case EqCls:
+  case EqRec:
   case EqDbl:
   case EqFunc:
   case EqInt:
@@ -851,6 +852,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdMethCallerName:
   case LdMIPropStateAddr:
   case LdMIStateAddr:
+  case LdValRec:
   case LdObjClass:
   case LdObjInvoke:
   case LdPackedArrayDataElemAddr:

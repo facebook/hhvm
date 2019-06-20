@@ -204,6 +204,14 @@ void emitCall(Vout& v, CallSpec call, RegSet args);
 Vptr lookupDestructor(Vout& v, Vreg type, bool typeIsQuad = false);
 
 ///////////////////////////////////////////////////////////////////////////////
+// Record metadata
+
+/*
+ * Load the Record type of `val' into `d', then return `d'.
+ */
+Vreg emitLdValRec(Vout& v, Vreg val, Vreg d);
+
+///////////////////////////////////////////////////////////////////////////////
 // Class metadata.
 
 /*

@@ -70,8 +70,8 @@ bool mayHaveData(trep bits) {
   switch (bits) {
   case BSStr:    case BStr:
   case BOptSStr: case BOptStr:
-  case BObj:     case BInt:    case BDbl:
-  case BOptObj:  case BOptInt: case BOptDbl:
+  case BObj:     case BInt:    case BDbl:     case BRecord:
+  case BOptObj:  case BOptInt: case BOptDbl:  case BOptRecord:
   case BCls:
   case BArr:     case BSArr:     case BCArr:
   case BArrN:    case BSArrN:    case BCArrN:
@@ -220,6 +220,7 @@ bool canBeOptional(trep bits) {
   case BFunc:
   case BCls:
   case BClsMeth:
+  case BRecord:
     return true;
 
   case BSPArrE:
@@ -329,6 +330,7 @@ bool canBeOptional(trep bits) {
   case BOptFunc:
   case BOptCls:
   case BOptClsMeth:
+  case BOptRecord:
     return false;
 
   case BInitPrim:
@@ -1867,6 +1869,7 @@ bool Type::equivImpl(const Type& o) const {
 
   if (m_bits != o.m_bits) return false;
   if (hasData() != o.hasData()) return false;
+  //if (m_bits & BRecord) return false;
   if (!hasData()) return true;
 
   return equivData<contextSensitive>(o);
@@ -2836,6 +2839,9 @@ R tvImpl(const Type& t) {
   case BSKeysetE:
     return H::template make<KindOfPersistentKeyset>(staticEmptyKeysetArray());
 
+  case BRecord:
+    break;
+
   case BCStr:
   case BCArrE:
   case BCArrN:
@@ -3303,7 +3309,7 @@ Type from_DataType(DataType dt) {
   case KindOfDict:     return TDict;
   case KindOfPersistentKeyset:
   case KindOfKeyset:   return TKeyset;
-  case KindOfRecord:   //TODO(arnabde)
+  case KindOfRecord:   return TRecord;
   case KindOfPersistentShape:
   case KindOfShape:    not_implemented();
   case KindOfPersistentArray:

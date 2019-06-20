@@ -971,6 +971,7 @@ struct Index::IndexData {
   ISStringToMany<const php::TypeAlias>   typeAliases;
   ISStringToMany<const php::Class>       enums;
   ConstInfoConcurrentMap                 constants;
+  ISStringToMany<const php::Record>      records;
   hphp_fast_set<SString, string_data_hash, string_data_isame> classAliases;
 
   // Map from each class to all the closures that are allocated in
@@ -1853,6 +1854,10 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
 
   for (auto& ta : unit.typeAliases) {
     index.typeAliases.insert({ta->name, ta.get()});
+  }
+
+  for (auto& rec : unit.records) {
+    index.records.insert({rec->name, rec.get()});
   }
 
   for (auto& ca : unit.classAliases) {
@@ -4030,6 +4035,10 @@ Index::resolve_type_name_internal(SString inName) const {
 
   for (unsigned i = 0; ; ++i) {
     name = normalizeNS(name);
+    auto const rec_it = m_data->records.find(name);
+    if (rec_it != m_data->records.end()) {
+      return { AnnotType::Record, nullable, nullptr };
+    }
     auto const classes = find_range(m_data->classInfo, name);
     auto const cls_it = begin(classes);
     if (cls_it != end(classes)) {
@@ -4094,7 +4103,7 @@ struct Index::ConstraintResolution {
   bool maybeMixed;
 };
 
-Index::ConstraintResolution Index::resolve_class_or_type_alias(
+Index::ConstraintResolution Index::resolve_named_type(
   const Context& ctx, SString name, const Type& candidate) const {
 
   auto const res = resolve_type_name_internal(name);
@@ -4530,13 +4539,13 @@ Index::ConstraintResolution Index::get_type_for_annotated_type(
       case KindOfArray:        return TPArr;
       case KindOfResource:     return TRes;
       case KindOfClsMeth:      return TClsMeth;
+      case KindOfRecord:       return TRecord;
       case KindOfObject:
-        return resolve_class_or_type_alias(ctx, name, candidate);
+        return resolve_named_type(ctx, name, candidate);
       case KindOfUninit:
       case KindOfRef:
       case KindOfFunc:
       case KindOfClass:
-      case KindOfRecord:
         always_assert_flog(false, "Unexpected DataType");
         break;
       }
@@ -4612,6 +4621,9 @@ Type Index::lookup_constraint(Context ctx,
 
 bool Index::satisfies_constraint(Context ctx, const Type& t,
                                  const TypeConstraint& tc) const {
+  // T45709201: Currently record types in HHBBC are not specialized.
+  // Therefore, they can never satisfy a constrant.
+  if (t.subtypeOf(BOptRecord)) return false;
   auto const tcType = get_type_for_constraint<false>(ctx, tc, t);
   if (t.moreRefined(loosen_dvarrayness(tcType))) {
     // For d/varrays, we might satisfy the constraint, but still not want to

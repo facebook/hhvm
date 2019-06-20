@@ -1038,7 +1038,7 @@ private:
   /*
    * Try to resolve name in the given context. Follows TypeAliases.
    */
-  ConstraintResolution resolve_class_or_type_alias(
+  ConstraintResolution resolve_named_type(
       const Context& ctx, SString name, const Type& candidate) const;
 
   ConstraintResolution get_type_for_annotated_type(

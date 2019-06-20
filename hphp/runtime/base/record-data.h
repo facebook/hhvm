@@ -58,6 +58,10 @@ struct RecordData : Countable, type_scan::MarkCollectable<RecordData> {
   static bool equal(const RecordData*, const RecordData*);
   static bool same(const RecordData*, const RecordData*);
 
+  static constexpr ptrdiff_t getVMRecordOffset() {
+    return offsetof(RecordData, m_record);
+  }
+
 private:
   const TypedValue* fieldVec() const;
 

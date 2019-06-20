@@ -113,6 +113,7 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::OptFunc:
   case T::OptCls:
   case T::OptClsMeth:
+  case T::OptRecord:
   case T::OptArrKey:
   case T::OptUncArrKey:
   case T::OptStrLike:
@@ -141,6 +142,7 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::Func:
   case T::Cls:
   case T::ClsMeth:
+  case T::Record:
     return true;
 
   case T::SVec:
@@ -227,6 +229,9 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
   case T::OptClsMeth:   if (initNull) return true;
                         // fallthrough
   case T::ClsMeth:      return tv.m_type == KindOfClsMeth;
+  case T::OptRecord:    if (initNull) return true;
+                        // fallthrough
+  case T::Record:       return tv.m_type == KindOfRecord;
 
   case T::OptSStr:
     if (initNull) return true;
@@ -465,6 +470,7 @@ std::string show(RepoAuthType rat) {
   case T::OptFunc:       return "?Func";
   case T::OptCls:        return "?Cls";
   case T::OptClsMeth:    return "?ClsMeth";
+  case T::OptRecord:     return "?Record";
   case T::OptUncArrKey:  return "?UncArrKey";
   case T::OptArrKey:     return "?ArrKey";
   case T::OptUncStrLike: return "?UncStrLike";
@@ -493,6 +499,7 @@ std::string show(RepoAuthType rat) {
   case T::Func:          return "Func";
   case T::Cls:           return "Cls";
   case T::ClsMeth:       return "ClsMeth";
+  case T::Record:        return "Record";
 
   case T::OptSArr:
   case T::OptArr:

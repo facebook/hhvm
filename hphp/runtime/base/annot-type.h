@@ -145,6 +145,7 @@ enum class AnnotAction {
   WarnClass,
   ConvertClass,
   ClsMethCheck,
+  RecordCheck,
 };
 
 /*
@@ -189,6 +190,9 @@ enum class AnnotAction {
  *
  * NonVArrayOrDArrayCheck: `dt' is an array on which the caller needs to check
  * for non-dvarray-ness.
+ *
+ * RecordCheck: 'at' and 'dt' are both records and the caller needs to check
+ * if the record in the value matches annotation.
  *
  */
 inline AnnotAction
@@ -294,6 +298,10 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       return !RuntimeOption::EvalHackArrDVArrs ?
         AnnotAction::Fail : AnnotAction::ClsMethCheck ;
     }
+  }
+
+  if (at == AnnotType::Record) {
+    return dt == KindOfRecord ? AnnotAction::RecordCheck : AnnotAction::Fail;
   }
 
   if (at != AnnotType::Object) {

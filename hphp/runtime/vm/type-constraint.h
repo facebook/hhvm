@@ -273,6 +273,7 @@ struct TypeConstraint {
   bool isObject()   const { return m_type == Type::Object; }
   bool isInt()      const { return m_type == Type::Int; }
   bool isString()   const { return m_type == Type::String; }
+  bool isRecord()   const { return m_type == Type::Record; }
 
   bool isVArray()   const {
     return !RuntimeOption::EvalHackArrDVArrs && m_type == Type::VArray;
@@ -453,7 +454,7 @@ private:
   bool checkImpl(tv_rval val, const Class* context) const;
 
   template <bool, bool>
-  bool checkTypeAliasNonObj(tv_rval val) const;
+  bool checkNamedTypeNonObj(tv_rval val) const;
 
   template <bool>
   bool checkTypeAliasObjImpl(const Class* cls) const;

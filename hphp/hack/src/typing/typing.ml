@@ -4655,22 +4655,13 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~obj_pos
       env, ty, None, vis
 
   | _, Tintersection tyl ->
-      (* TODO T44713456 This is incomplete: (A&B)->m should be ok if only A has m. *)
-      let (env, vis), tyl = List.map_env (env, None) tyl
-        begin fun (env, vis) ty ->
-          let env, ty, _decl_ty, vis' =
-            obj_get_ ~obj_pos ~is_method ~nullsafe ~valkind ~pos_params
-              ~explicit_tparams env ty cid id k k_lhs in
-          (* There is one special case where we need to expose the
-           * visibility outside of obj_get (checkout inst_meth special
-           * function).
-           * We keep a witness of the "most restrictive" visibility
-           * we encountered (position + visibility), to be able to
-           * special case inst_meth.
-           *)
-          let vis = TVis.min_vis_opt vis vis' in
-          (env, vis), ty
-        end in
+      let (env, vis), tyl = TUtils.run_on_intersection (env, None) tyl ~f:(fun (env, vis) ty ->
+        let env, ty, _decl_ty, vis' =
+          obj_get_ ~obj_pos ~is_method ~nullsafe ~valkind ~pos_params
+            ~explicit_tparams env ty cid id k k_lhs in
+        (* The intersection of 2 visibilities is the most restrictive visibility. *)
+        let vis = TVis.min_vis_opt vis vis' in
+        (env, vis), ty) in
       let env, ty = Inter.intersect_list env (fst ety1) tyl in
       env, ty, None, vis
 

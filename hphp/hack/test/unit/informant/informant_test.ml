@@ -422,13 +422,3 @@ let tests =
     "test_watcher_in_unknown_state", (fun () ->
       run_test test_watcher_in_unknown_state); *)
   ]
-
-let setup_global_test_state () =
-  EventLogger.init EventLogger.Event_logger_fake 0.0;
-  Relative_path.(set_path_prefix Root (Path.make "/tmp"));
-  let hhconfig_path = Relative_path.(create Root "/tmp/.hhconfig") in
-  Disk.write_file (Relative_path.to_absolute hhconfig_path) "assume_php = false"
-
-let () =
-  setup_global_test_state ();
-  Unit_test.run_all tests

@@ -284,4 +284,6 @@ let tests =
 
 let () =
   setup_global_test_state ();
+
+  let tests = List.concat [ tests; Informant_test.tests; ] in
   Unit_test.run_all tests

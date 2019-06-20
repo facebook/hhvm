@@ -52,7 +52,7 @@ File \"/foo.php\", line 5, characters 25-30:
 But got string
 "
 
-let () =
+let test () =
   let env = Test.setup_server () in
   let env = Test.setup_disk env [
     foo_name, "";

@@ -20,7 +20,7 @@ function g(string $x): string {
 "
 let foo_name = "foo.php"
 
-let () =
+let test () =
 
   let env = Test.setup_server () in
   let env = Test.connect_persistent_client env in

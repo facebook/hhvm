@@ -16,6 +16,8 @@ open SearchServiceRunner
 open Coverage_level
 open Coverage_level_defs
 
+exception Integration_test_tailure
+
 let root = "/"
 let hhi = "/hhi"
 let tmp = "/tmp"
@@ -168,7 +170,7 @@ let prepend_root x = root ^ x
 let fail x =
   print_endline x;
   Caml.Printexc.(get_callstack 100 |> print_raw_backtrace stderr);
-  exit 1
+  raise Integration_test_tailure
 
 (******************************************************************************(
  * Utility functions to help format/throw errors for informative errors

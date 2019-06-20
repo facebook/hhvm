@@ -1,42 +1,22 @@
-(executable
-  (name test_coverage_levels_multi)
-  (modules test_coverage_levels_multi)
-  (libraries integration_test_base))
-
 (alias
   (name coverage_levels_multi)
-  (deps test_coverage_levels_multi.exe)
-  (action (run ./test_coverage_levels_multi.exe)))
-
-(executable
-  (name test_coverage_levels_checked)
-  (modules test_coverage_levels_checked)
-  (libraries integration_test_base))
+  (deps test_all.exe)
+  (action (run ../test_all.exe coverage_levels_multi)))
 
 (alias
   (name coverage_levels_checked)
-  (deps test_coverage_levels_checked.exe)
-  (action (run ./test_coverage_levels_checked.exe)))
-
-(executable
-  (name test_coverage_levels_unchecked)
-  (modules test_coverage_levels_unchecked)
-  (libraries integration_test_base))
+  (deps test_all.exe)
+  (action (run ../test_all.exe coverage_levels_checked)))
 
 (alias
   (name coverage_levels_unchecked)
-  (deps test_coverage_levels_unchecked.exe)
-  (action (run ./test_coverage_levels_unchecked.exe)))
-
-(executable
-  (name test_coverage_levels_partial)
-  (modules test_coverage_levels_partial)
-  (libraries integration_test_base))
+  (deps test_all.exe)
+  (action (run ../test_all.exe coverage_levels_unchecked)))
 
 (alias
   (name coverage_levels_partial)
-  (deps test_coverage_levels_partial.exe)
-  (action (run ./test_coverage_levels_partial.exe)))
+  (deps test_all.exe)
+  (action (run ../test_all.exe coverage_levels_partial)))
 
 (alias
   (name runtest)

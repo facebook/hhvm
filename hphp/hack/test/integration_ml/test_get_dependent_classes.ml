@@ -34,7 +34,7 @@ let files = [
   (name ^ ".php", "<?hh\n" ^ contents)
 end
 
-let () =
+let test () =
   let env = Test.setup_server () in
   let env = Test.setup_disk env files in
 

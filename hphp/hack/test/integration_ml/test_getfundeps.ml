@@ -240,7 +240,7 @@ let tests = [
   \"line\":4,\"char_start\":3,\"char_end\":4}}]}"
 ]
 
-let () =
+let test () =
   let env =
     Test.setup_server ()
       ~hhi_files:(Hhi.get_raw_hhi_contents () |> Array.to_list)

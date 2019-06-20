@@ -26,7 +26,7 @@ File "/foo.php", line 7, characters 9-9:
 Please add a type hint (Naming[2035])
 |}
 
-let () =
+let test () =
   let env = Test.setup_server () in
   let env = Test.setup_disk env [
     foo_file_name, foo_contents;

@@ -35,7 +35,7 @@ let bar_contents = "<?hh
 "
 let bar_name = "bar.php"
 
-let () =
+let test () =
 
   let env = Test.setup_server () in
   let env = Test.connect_persistent_client env in

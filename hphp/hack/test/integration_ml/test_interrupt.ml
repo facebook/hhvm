@@ -26,7 +26,7 @@ But got string
 |}
 
 
-let () =
+let test () =
   let env = Test.setup_server () in
   (* There are errors in both bar files *)
   let env = Test.setup_disk env [

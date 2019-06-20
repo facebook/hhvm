@@ -38,7 +38,7 @@ File "/A.php", line 5, characters 31-31:
 Unbound name: C (an object type) (Naming[2049])
 |}
 
-let () =
+let test () =
   let env = Test.setup_server () in
   let env = Test.setup_disk env [
     a_file_name, a_contents;

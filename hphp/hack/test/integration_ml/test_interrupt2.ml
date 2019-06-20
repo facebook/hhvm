@@ -33,7 +33,7 @@ File "/foo.php", line 3, characters 18-23:
 But got string
 |}
 
-let () =
+let test () =
   let env = Test.setup_server () in
   ServerMain.force_break_recheck_loop_for_test false;
 

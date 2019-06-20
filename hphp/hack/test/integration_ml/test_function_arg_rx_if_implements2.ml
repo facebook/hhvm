@@ -46,7 +46,7 @@ File "/A.php", line 9, characters 10-10:
 This is the function declaration
 |}
 
-let () =
+let test () =
   let env = Test.setup_server () in
   let env = Test.setup_disk env [
     file_a, content_a_0;

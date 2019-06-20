@@ -16,8 +16,34 @@
     test_injector_config))
 
 (executable
-  (name test_coverage_counts)
-  (modules test_coverage_counts)
+  (name test_all)
+  (modules
+    runner
+    test_added_parent
+    test_capitalization
+    test_coverage_counts
+    test_decl_decl
+    test_delete_file
+    test_duplicate_parent
+    test_duplicated_file
+    test_failed_decl
+    test_failed_naming
+    test_function_arg_rx_if_implements1
+    test_function_arg_rx_if_implements2
+    test_gconst_file
+    test_get_dependent_classes
+    test_getfundeps
+    test_ide_utils
+    test_infer_type
+    test_interrupt
+    test_interrupt2
+    test_isfunlocallable
+    test_lazy_decl_idempotence
+    test_modify_file
+    test_new_file
+    test_rx_if_implements
+    test_server_hover
+    test_unbound_name)
   (libraries
     integration_test_base
     errors
@@ -25,128 +51,53 @@
 
 (alias
   (name coverage_counts)
-  (deps test_coverage_counts.exe)
-  (action (run ./test_coverage_counts.exe)))
-
-
-(executable
-  (name test_new_file)
-  (modules test_new_file)
-  (libraries
-    integration_test_base
-    errors
-    server_env))
+  (deps test_all.exe)
+  (action (run ./test_all.exe coverage_counts)))
 
 (alias
   (name new_file)
-  (deps test_new_file.exe)
-  (action (run ./test_new_file.exe)))
-
-(executable
-  (name test_capitalization)
-  (modules test_capitalization)
-  (libraries
-    integration_test_base
-    errors
-    server_env))
+  (deps test_all.exe)
+  (action (run ./test_all.exe new_file)))
 
 (alias
   (name capitalization)
-  (deps test_capitalization.exe)
-  (action (run ./test_capitalization.exe)))
-
-(executable
-  (name test_modify_file)
-  (modules test_modify_file)
-  (libraries
-    integration_test_base
-    errors
-    server_env))
+  (deps test_all.exe)
+  (action (run ./test_all.exe capitalization)))
 
 (alias
   (name modify_file)
-  (deps test_modify_file.exe)
-  (action (run ./test_modify_file.exe)))
-
-
-(executable
-  (name test_delete_file)
-  (modules test_delete_file)
-  (libraries
-    integration_test_base
-    errors
-    server_env))
+  (deps test_all.exe)
+  (action (run ./test_all.exe modify_file)))
 
 (alias
   (name delete_file)
-  (deps test_delete_file.exe)
-  (action (run ./test_delete_file.exe)))
-
-(executable
-  (name test_duplicated_file)
-  (modules test_duplicated_file)
-  (libraries
-    integration_test_base
-    errors
-    server_env))
+  (deps test_all.exe)
+  (action (run ./test_all.exe delete_file)))
 
 (alias
   (name duplicated_file)
-  (deps test_duplicated_file.exe)
-  (action (run ./test_duplicated_file.exe)))
-
-(executable
-  (name test_failed_decl)
-  (modules test_failed_decl)
-  (libraries
-    integration_test_base
-    errors
-    server_env))
+  (deps test_all.exe)
+  (action (run ./test_all.exe duplicated_file)))
 
 (alias
   (name failed_decl)
-  (deps test_failed_decl.exe)
-  (action (run ./test_failed_decl.exe)))
-
-(executable
-  (name test_duplicate_parent)
-  (modules test_duplicate_parent)
-  (libraries
-    integration_test_base
-    errors
-    server_env))
+  (deps test_all.exe)
+  (action (run ./test_all.exe failed_decl)))
 
 (alias
   (name duplicate_parent)
-  (deps test_duplicate_parent.exe)
-  (action (run ./test_duplicate_parent.exe)))
-
-(executable
-  (name test_added_parent)
-  (modules test_added_parent)
-  (libraries
-    integration_test_base
-    errors
-    server_env))
+  (deps test_all.exe)
+  (action (run ./test_all.exe duplicate_parent)))
 
 (alias
   (name added_parent)
-  (deps test_added_parent.exe)
-  (action (run ./test_added_parent.exe)))
-
-
-(executable
-  (name test_get_dependent_classes)
-  (modules test_get_dependent_classes)
-  (libraries
-    integration_test_base
-    errors
-    server_env))
+  (deps test_all.exe)
+  (action (run ./test_all.exe added_parent)))
 
 (alias
   (name get_dependent_classes)
-  (deps test_get_dependent_classes.exe)
-  (action (run ./test_get_dependent_classes.exe)))
+  (deps test_all.exe)
+  (action (run ./test_all.exe get_dependent_classes)))
 
 ;         ":integration_test_base",
 ;         "//hphp/hack/src/decl:decl",
@@ -157,19 +108,12 @@
 ;         "//hphp/hack/src/utils:core",
 ;         "//hphp/hack/src/utils:relative_path",
 ;         "//hphp/hack/src/utils/collections:collections",
-; 
-(executable
-  (name test_infer_type)
-  (modules test_infer_type)
-  (libraries
-    integration_test_base
-    errors
-    server_env))
+;
 
 (alias
   (name infer_type)
-  (deps test_infer_type.exe)
-  (action (run ./test_infer_type.exe)))
+  (deps test_all.exe)
+  (action (run ./test_all.exe infer_type)))
 
 ;         ":integration_test_base",
 ;         "//hphp/hack/src/decl:decl",
@@ -186,87 +130,39 @@
 ;         "//hphp/hack/src/utils:core",
 ;         "//hphp/hack/src/utils/collections:collections",
 
-(executable
-  (name test_getfundeps)
-  (modules test_getfundeps)
-  (libraries
-    integration_test_base
-    errors
-    server_env))
-
 (alias
   (name getfundeps)
-  (deps test_getfundeps.exe)
-  (action (run ./test_getfundeps.exe)))
-
-(executable
-  (name test_isfunlocallable)
-  (modules test_isfunlocallable)
-  (libraries
-    integration_test_base
-    errors
-    server_env))
+  (deps test_all.exe)
+  (action (run ./test_all.exe getfundeps)))
 
 (alias
   (name isfunlocallable)
-  (deps test_isfunlocallable.exe)
-  (action (run ./test_isfunlocallable.exe)))
-
-(executable
-  (name test_server_hover)
-  (modules test_server_hover)
-  (libraries
-    integration_test_base
-    errors
-    server_env))
+  (deps test_all.exe)
+  (action (run ./test_all.exe isfunlocallable)))
 
 (alias
   (name server_hover)
-  (deps test_server_hover.exe)
-  (action (run ./test_server_hover.exe)))
-
-(executable
-  (name test_failed_naming)
-  (modules test_failed_naming)
-  (libraries
-    integration_test_base
-    errors
-    server_env))
+  (deps test_all.exe)
+  (action (run ./test_all.exe server_hover)))
 
 (alias
   (name failed_naming)
-  (deps test_failed_naming.exe)
-  (action (run ./test_failed_naming.exe)))
+  (deps test_all.exe)
+  (action (run ./test_all.exe failed_naming)))
 
 ;         ":integration_test_base",
 ;         "//hphp/hack/src/errors:errors",
 ;         "//hphp/hack/src/server:server_env",
 
-(executable
-  (name test_gconst_file)
-  (modules test_gconst_file)
-  (libraries
-    integration_test_base
-    errors
-    server_env))
-
 (alias
   (name gconst_file)
-  (deps test_gconst_file.exe)
-  (action (run ./test_gconst_file.exe)))
-
-(executable
-  (name test_ide_utils)
-  (modules test_ide_utils)
-  (libraries
-    integration_test_base
-    errors
-    server_env))
+  (deps test_all.exe)
+  (action (run ./test_all.exe gconst_file)))
 
 (alias
   (name ide_utils)
-  (deps test_ide_utils.exe)
-  (action (run ./test_ide_utils.exe)))
+  (deps test_all.exe)
+  (action (run ./test_all.exe ide_utils)))
 
 ;         ":integration_test_base",
 ;         "//hphp/hack/src/decl:decl",
@@ -281,48 +177,24 @@
 ;         "//hphp/hack/src/utils:core",
 ;         "//hphp/hack/src/utils/collections:collections",
 
-(executable
-  (name test_unbound_name)
-  (modules test_unbound_name)
-  (libraries
-    integration_test_base
-    errors
-    server_env))
-
 (alias
   (name unbound_name)
-  (deps test_unbound_name.exe)
-  (action (run ./test_unbound_name.exe)))
+  (deps test_all.exe)
+  (action (run ./test_all.exe unbound_name)))
 
 ;         ":integration_test_base",
 ;         "//hphp/hack/src/errors:errors",
 ;         "//hphp/hack/src/server:server_env",
 
-(executable
-  (name test_decl_decl)
-  (modules test_decl_decl)
-  (libraries
-    integration_test_base
-    errors
-    server_env))
-
 (alias
   (name decl_decl)
-  (deps test_decl_decl.exe)
-  (action (run ./test_decl_decl.exe)))
-
-(executable
-  (name test_rx_if_implements)
-  (modules test_rx_if_implements)
-  (libraries
-    integration_test_base
-    errors
-    server_env))
+  (deps test_all.exe)
+  (action (run ./test_all.exe decl_decl)))
 
 (alias
   (name rx_if_implements)
-  (deps test_rx_if_implements.exe)
-  (action (run ./test_rx_if_implements.exe)))
+  (deps test_all.exe)
+  (action (run ./test_all.exe rx_if_implements)))
 
 ;         ":integration_test_base",
 ;         "//hphp/hack/src/decl:decl",
@@ -331,44 +203,20 @@
 ;         "//hphp/hack/src/utils:core",
 ;         "//hphp/hack/src/utils/collections:collections",
 
-(executable
-  (name test_function_arg_rx_if_implements1)
-  (modules test_function_arg_rx_if_implements1)
-  (libraries
-    integration_test_base
-    errors
-    server_env))
-
 (alias
   (name function_arg_rx_if_implements1)
-  (deps test_function_arg_rx_if_implements1.exe)
-  (action (run ./test_function_arg_rx_if_implements1.exe)))
-
-(executable
-  (name test_function_arg_rx_if_implements2)
-  (modules test_function_arg_rx_if_implements2)
-  (libraries
-    integration_test_base
-    errors
-    server_env))
+  (deps test_all.exe)
+  (action (run ./test_all.exe function_arg_rx_if_implements1)))
 
 (alias
   (name function_arg_rx_if_implements2)
-  (deps test_function_arg_rx_if_implements2.exe)
-  (action (run ./test_function_arg_rx_if_implements2.exe)))
-
-(executable
-  (name test_lazy_decl_idempotence)
-  (modules test_lazy_decl_idempotence)
-  (libraries
-    integration_test_base
-    errors
-    server_env))
+  (deps test_all.exe)
+  (action (run ./test_all.exe function_arg_rx_if_implements2)))
 
 (alias
   (name lazy_decl_idempotence)
-  (deps test_lazy_decl_idempotence.exe)
-  (action (run ./test_lazy_decl_idempotence.exe)))
+  (deps test_all.exe)
+  (action (run ./test_all.exe lazy_decl_idempotence)))
 
 ;         ":integration_test_base",
 ;         "//hphp/hack/src/decl:decl",
@@ -385,18 +233,10 @@
 ;         "//hphp/hack/src/utils:relative_path",
 ;         "//hphp/hack/src/utils/collections:collections",
 
-(executable
-  (name test_interrupt)
-  (modules test_interrupt)
-  (libraries
-    integration_test_base
-    errors
-    server_env))
-
 (alias
   (name interrupt)
-  (deps test_interrupt.exe)
-  (action (run ./test_interrupt.exe)))
+  (deps test_all.exe)
+  (action (run ./test_all.exe interrupt)))
 
 ;         ":integration_test_base",
 ;         "//hphp/hack/src/decl:decl",
@@ -416,18 +256,10 @@
 ;         "//hphp/hack/src/utils:relative_path",
 ;         "//hphp/hack/src/utils/collections:collections",
 
-(executable
-  (name test_interrupt2)
-  (modules test_interrupt2)
-  (libraries
-    integration_test_base
-    errors
-    server_env))
-
 (alias
   (name interrupt2)
-  (deps test_interrupt2.exe)
-  (action (run ./test_interrupt2.exe)))
+  (deps test_all.exe)
+  (action (run ./test_all.exe interrupt2)))
 
 ;         ":integration_test_base",
 ;         "//hphp/hack/src/decl:decl",

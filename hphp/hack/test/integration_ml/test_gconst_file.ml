@@ -25,7 +25,7 @@ let foo_new_contents = "<?hh // strict
   const string A = '';
 "
 
-let () =
+let test () =
   let env = Test.setup_server () in
   let env, loop_output = Test.(run_loop_once env { default_loop_input with
     disk_changes = [

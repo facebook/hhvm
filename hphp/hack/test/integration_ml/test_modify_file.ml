@@ -15,7 +15,7 @@ let foo_changes = "<?hh
         }
 "
 
-let () =
+let test () =
   let env = Test.setup_server () in
   let env, loop_output = Test.(run_loop_once env { default_loop_input with
     disk_changes = [

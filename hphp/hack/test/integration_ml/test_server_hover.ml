@@ -928,7 +928,7 @@ let cases =
   @ classname_variable_cases
   @ bounded_generic_fun_cases
 
-let () =
+let test () =
   let env =
     Test.setup_server ()
       ~hhi_files:(Hhi.get_raw_hhi_contents () |> Array.to_list)

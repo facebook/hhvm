@@ -217,7 +217,7 @@ let tests: ((string * int * int) * string) list = [
       "path":"/f11.php","line":4,"start":23,"end":27,"code":4283}]}]}  |}
 ] |> List.map ~f:(fun (p, s) -> p, normalize s)
 
-let () =
+let test () =
   let env =
     Test.setup_server ()
       ~hhi_files:(Hhi.get_raw_hhi_contents () |> Array.to_list)

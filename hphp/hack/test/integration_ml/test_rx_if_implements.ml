@@ -47,7 +47,7 @@ File "/B.php", line 10, characters 19-19:
 This function is non-reactive.
 |}
 
-let () =
+let test () =
   let env = Test.setup_server () in
   let env = Test.setup_disk env [
     file_a, content_a_0;

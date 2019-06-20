@@ -334,7 +334,7 @@ let cases =
   @ lambda_param_cases
   @ class_id_cases
 
-let () =
+let test () =
   let env =
     Test.setup_server ()
       ~hhi_files:(Hhi.get_raw_hhi_contents () |> Array.to_list)

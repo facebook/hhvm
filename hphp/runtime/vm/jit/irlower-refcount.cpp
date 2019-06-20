@@ -331,6 +331,13 @@ CallSpec makeDtorCall(Vout& v, Type ty, Vloc loc, ArgGroup& args) {
       args.immPtr(cls);
       return CallSpec::direct(cls->releaseFunc().get());
     }
+    // Call the release function if the base class is a real class and not
+    // a builtin, as only builtins can override release method and builtins
+    // never subclass non-builtins.
+    if (!isInterface(cls) && !cls->isBuiltin()) {
+      args.reg(emitLdObjClass(v, loc.reg(0), v.makeReg()));
+      return CallSpec::direct(cls->releaseFunc().get());
+    }
   }
 
   return ty.isKnownDataType()

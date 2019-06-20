@@ -276,7 +276,13 @@ and next_state
         match env.linearization_kind with
         | Member_resolution ->
           if next.mro_synthesized
-          then true, next::synths
+          then
+            let synths =
+              if List.exists synths ~f:(mro_elements_equal next)
+              then synths
+              else next::synths
+            in
+            true, synths
           else List.exists acc ~f:(mro_elements_equal next), synths
         | Ancestor_types ->
           (* For ancestor types, we don't care about require-extends or
@@ -297,9 +303,7 @@ and next_state
     let synths = List.rev synths in
     Skip (Synthesized_elts synths, ancestors, acc, synths)
   | Synthesized_elts (next::synths), ancestors ->
-    if List.exists acc ~f:(mro_elements_equal next)
-    then Skip (Synthesized_elts synths, ancestors, acc, synths)
-    else Yield (next, (Synthesized_elts synths, ancestors, next::acc, synths))
+    Yield (next, (Synthesized_elts synths, ancestors, next::acc, synths))
   | Synthesized_elts [], _ ->
     let key = class_name, env.linearization_kind in
     Cache.add key (List.rev acc);

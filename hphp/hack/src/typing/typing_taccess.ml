@@ -42,10 +42,6 @@ type env = {
 
   (* A list of generics we've seen while expanding. *)
   gen_seen : TySet.t;
-
-  (* The identifiers for each class and typeconst pair seen while expanding,
-   * along with the location where the typeconst was referenced. *)
-  typeconsts_seen : (string * string * Pos.t) list;
 }
 
 let empty_env env ety_env ids = {
@@ -55,7 +51,6 @@ let empty_env env ety_env ids = {
   dep_tys = [];
   ids = ids;
   gen_seen = TySet.empty;
-  typeconsts_seen = [];
 }
 
 (** Expand a type constant access like A::T
@@ -100,10 +95,24 @@ and expand_with_env_ ety_env env ~as_tyvar_with_cnstr reason root ids =
 
   tenv, env, ty
 
-and referenced_typeconsts tenv ety_env r (root, ids) =
-  let tenv, root = Phase.localize ~ety_env tenv root in
-  let _, env, _ = expand_with_env_ ety_env ~as_tyvar_with_cnstr:false tenv r root ids in
-  List.rev env.typeconsts_seen
+and referenced_typeconsts env ety_env r (root, ids) =
+  let env, root = Phase.localize ~ety_env env root in
+  List.fold ids ~init:((env, root), []) ~f:begin fun ((env, root), acc) (pos, tconst) ->
+    let env, tyl = Typing_utils.get_concrete_supertypes env root in
+    let acc = List.fold tyl ~init:acc ~f:begin fun acc ty ->
+      match snd ty with
+      | Typing_defs.Tclass ((_, class_name), _, _) ->
+        let (>>=) = Option.(>>=) in
+        Option.value ~default:acc begin
+          Typing_env.get_class env class_name >>= fun class_ ->
+          Typing_env.get_typeconst env class_ tconst >>= fun typeconst ->
+          Some ((typeconst.Typing_defs.ttc_origin, tconst, pos) :: acc)
+        end
+      | _ -> acc
+    end in
+    expand_with_env ety_env env ~as_tyvar_with_cnstr:false r root [pos, tconst], acc
+  end
+  |> snd
 
 (* The root of a type access is a type. When expanding a type access this type
  * needs to resolve to the name of a class so we can look up if a given type
@@ -283,8 +292,6 @@ and get_typeconst env class_pos class_name pos tconst ~as_tyvar_with_cnstr =
               `class_typeconst pos ((Cls.pos class_), class_name) tconst `no_hint;
           raise Exit
       | Some tc -> tc in
-    let tc_tuple = ((Cls.name class_), snd typeconst.ttc_name, pos) in
-    let env = {env with typeconsts_seen = tc_tuple :: env.typeconsts_seen} in
     (* Check for cycles. We do this by combining the name of the current class
      * with the remaining ids that we need to expand. If we encounter the same
      * class name + ids that means we have entered a cycle.

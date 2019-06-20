@@ -20,11 +20,13 @@
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/analysis.h"
+#include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vm-protect.h"
@@ -84,7 +86,10 @@ const StaticString
   s_container_last_key("HH\\Lib\\_Private\\Native\\last_key"),
   s_class_meth_get_class("HH\\class_meth_get_class"),
   s_class_meth_get_method("HH\\class_meth_get_method"),
-  s_vm_switch_mode("__VMSwitchMode");
+  s_vm_switch_mode("__VMSwitchMode"),
+  s_is_meth_caller("HH\\is_meth_caller"),
+  s_meth_caller_get_class("HH\\meth_caller_get_class"),
+  s_meth_caller_get_method("HH\\meth_caller_get_method");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -868,8 +873,95 @@ SSATmp* opt_container_last_key(IRGS& env, const ParamPrep& params) {
 }
 
 namespace {
-const StaticString s_CLASS_CONVERSION("Class to string conversion");
-const StaticString s_FUNC_CONVERSION("Func to string conversion");
+const StaticString
+  s_CLASS_CONVERSION("Class to string conversion"),
+  s_FUNC_CONVERSION("Func to string conversion"),
+  s_MCHELPER_ON_GET_CLS("MethCallerHelper is used on meth_caller_get_class()"),
+  s_MCHELPER_ON_GET_METH(
+    "MethCallerHelper is used on meth_caller_get_method()"),
+  s_BAD_ARG_ON_MC_GET_CLS(
+    "Argument 1 passed to meth_caller_get_class() must be a MethCaller"),
+  s_BAD_ARG_ON_MC_GET_METH(
+    "Argument 1 passed to meth_caller_get_method() must be a MethCaller"),
+  s_meth_caller_cls("__SystemLib\\MethCallerHelper"),
+  s_cls_prop("class"),
+  s_meth_prop("method");
+const Slot s_cls_idx{0};
+const Slot s_meth_idx{1};
+
+DEBUG_ONLY bool meth_caller_has_expected_prop(const Class *mcCls) {
+  return mcCls->lookupDeclProp(s_cls_prop.get()) == s_cls_idx &&
+        mcCls->lookupDeclProp(s_meth_prop.get()) == s_meth_idx &&
+        mcCls->declPropTypeConstraint(s_cls_idx).isString() &&
+        mcCls->declPropTypeConstraint(s_meth_idx).isString();
+}
+
+template<bool isCls>
+SSATmp* meth_caller_get_name(IRGS& env, SSATmp *value) {
+  if (value->isA(TFunc)) {
+    return cond(
+        env,
+        [&] (Block* taken) {
+          auto const attr = AttrData {static_cast<int32_t>(AttrIsMethCaller)};
+          auto isMC = gen(env, FuncHasAttr, attr, value);
+          gen(env, JmpZero, taken, isMC);
+        },
+        [&] {
+          return gen(env, LdMethCallerName, MethCallerData{isCls}, value);
+        },
+        [&] { // Taken: src is not a meth_caller
+          hint(env, Block::Hint::Unlikely);
+          updateMarker(env);
+          env.irb->exceptionStackBoundary();
+          gen(env, RaiseError, cns(env, isCls ?
+            s_BAD_ARG_ON_MC_GET_CLS.get() : s_BAD_ARG_ON_MC_GET_METH.get()));
+          // Dead-code, but needed to satisfy cond().
+          return cns(env, staticEmptyString());
+        }
+      );
+  }
+  if (value->isA(TObj)) {
+    auto loadProp = [&] (bool isGetCls, SSATmp* obj) {
+      ptrdiff_t off = ObjectData::sizeForNProps(
+        isGetCls ? s_cls_idx : s_meth_idx);
+      auto const prop = gen(
+        env, LdPropAddr, ByteOffsetData{off}, TUncounted.lval(Ptr::Prop), obj);
+      return gen(env, LdMem, TStr, prop);
+    };
+
+    auto const mcCls = Unit::lookupClass(s_meth_caller_cls.get());
+    assertx(mcCls && meth_caller_has_expected_prop(mcCls));
+    return cond(
+      env,
+      [&] (Block* taken) {
+        auto isMC = gen(
+          env, EqCls, cns(env, mcCls), gen(env, LdObjClass, value));
+        gen(env, JmpZero, taken, isMC);
+      },
+      [&] {
+        if (RuntimeOption::EvalEmitMethCallerFuncPointers &&
+            RuntimeOption::EvalNoticeOnMethCallerHelperUse) {
+          updateMarker(env);
+          env.irb->exceptionStackBoundary();
+          auto const msg = cns(env, isCls ?
+            s_MCHELPER_ON_GET_CLS.get() : s_MCHELPER_ON_GET_METH.get());
+          gen(env, RaiseNotice, msg);
+        }
+        return loadProp(isCls, value);
+      },
+      [&] { // Taken: src is not a meth_caller
+        hint(env, Block::Hint::Unlikely);
+        updateMarker(env);
+        env.irb->exceptionStackBoundary();
+        gen(env, RaiseError, cns(env, isCls ?
+          s_BAD_ARG_ON_MC_GET_CLS.get() : s_BAD_ARG_ON_MC_GET_METH.get()));
+        // Dead-code, but needed to satisfy cond().
+        return cns(env, staticEmptyString());
+      }
+    );
+  }
+  return nullptr;
+}
 }
 
 SSATmp* opt_class_meth_get_class(IRGS& env, const ParamPrep& params) {
@@ -896,6 +988,34 @@ SSATmp* opt_class_meth_get_method(IRGS& env, const ParamPrep& params) {
     return gen(env, LdFuncName, gen(env, LdFuncFromClsMeth, value));
   }
   return nullptr;
+}
+
+SSATmp* opt_is_meth_caller(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  auto const value = params[0].value;
+  if (value->isA(TFunc)) {
+    return gen(
+      env,
+      FuncHasAttr,
+      AttrData {static_cast<int32_t>(AttrIsMethCaller)},
+      value);
+  }
+  if (value->isA(TObj)) {
+    auto const mcCls = Unit::lookupClass(s_meth_caller_cls.get());
+    assertx(mcCls);
+    return gen(env, EqCls, cns(env, mcCls), gen(env, LdObjClass, value));
+  }
+  return nullptr;
+}
+
+SSATmp* opt_meth_caller_get_class(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  return meth_caller_get_name<true>(env, params[0].value);
+}
+
+SSATmp* opt_meth_caller_get_method(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  return meth_caller_get_name<false>(env, params[0].value);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -943,6 +1063,9 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
     X(container_last_key)
     X(class_meth_get_class)
     X(class_meth_get_method)
+    X(is_meth_caller)
+    X(meth_caller_get_class)
+    X(meth_caller_get_method)
 
 #undef X
 

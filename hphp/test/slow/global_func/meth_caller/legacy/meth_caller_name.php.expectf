@@ -77,3 +77,5 @@ Warning: getClassName() called on __SystemLib\MethCallerHelper in %s/meth_caller
 Warning: getMethodName() called on __SystemLib\MethCallerHelper in %s/meth_caller_name.php on line 68
 string(8) "Ans\Acls"
 string(5) "bfunc"
+
+Fatal error: Argument 1 passed to meth_caller_get_method() must be a MethCaller in %s/meth_caller_name.php on line 71

@@ -66,4 +66,7 @@ new Acls()->bfunc();
 
 $x = \HH\meth_caller(Acls::class, "bfunc");
 \var_dump($x->getClassName(), $x->getMethodName());
+
+// bad argument
+\HH\meth_caller_get_method(new \stdClass());
 }

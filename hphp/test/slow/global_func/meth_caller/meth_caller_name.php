@@ -65,5 +65,5 @@ new Acls()->bfunc();
 \var_dump(\HH\is_meth_caller(new Acls()));
 
 // bad argument
-\HH\meth_caller_get_class('a');
+\HH\meth_caller_get_class(\HH\fun('afunc'));
 }

@@ -279,15 +279,27 @@ let rec class_decl_if_missing class_env (c: class_) =
   if check_if_cyclic class_env c_name
   then None
   else begin
-    match Decl_heap.Classes.get cid with
-    | Some _ as class_ ->
-      class_
-    | _ ->
-      (* Class elements are in memory if and only if the class itself is there.
-       * Exiting before class declaration is ready would break this invariant *)
-      WorkerCancel.with_no_cancellations @@ fun () ->
-      let class_ = class_naming_and_decl class_env cid c in
-      Some class_
+    if shallow_decl_enabled ()
+    then
+      (* This function is often called for its side effect of ensuring that the
+         class is declared. When shallow-decl is enabled, we still want this
+         side effect (for use cases like on-the-fly declaring entire files in
+         Decl_redecl_service for incremental typechecking), but since we are not
+         producing a folded class declaration, there is nothing we can return.
+         This is a code smell--we should use a function with a different
+         signature when we only want this side effect. *)
+      let _ : shallow_class = Shallow_classes_heap.class_decl_if_missing c in
+      None
+    else
+      match Decl_heap.Classes.get cid with
+      | Some _ as class_ ->
+        class_
+      | None ->
+        (* Class elements are in memory if and only if the class itself is there.
+         * Exiting before class declaration is ready would break this invariant *)
+        WorkerCancel.with_no_cancellations @@ fun () ->
+        let class_ = class_naming_and_decl class_env cid c in
+        Some class_
   end
 
 and class_naming_and_decl (class_env:class_env) cid c =

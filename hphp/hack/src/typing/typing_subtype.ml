@@ -358,8 +358,6 @@ and simplify_subtype
   | Tabstract ((AKnewtype _ | AKdependent _), None), _
   | _, Tabstract ((AKnewtype _ | AKdependent _), None) -> assert false
 
-  | Terr, _ | _, Terr -> if no_top_bottom then default () else valid ()
-
   | (Tprim Nast.(Tint | Tbool | Tfloat | Tstring | Tresource | Tnum |
                  Tarraykey | Tnoreturn) |
      Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tabstract (AKenum _, _) |
@@ -939,6 +937,9 @@ and simplify_subtype
     env |>
     simplify_subtype ~seen_generic_params ~this_ty t ty_super &&&
     simplify_subtype ~seen_generic_params ~this_ty (MakeType.null (fst ety_sub)) ty_super
+
+  | Terr, Terr -> valid ()
+  | Terr, _ | _, Terr -> if no_top_bottom then default () else valid ()
 
   | Tvar _, _ | _, Tvar _ ->
     default ()

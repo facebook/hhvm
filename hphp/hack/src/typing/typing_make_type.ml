@@ -78,10 +78,11 @@ let mixed r =
   (r, Toption (r, Tnonnull))
 let resource r =
   prim_type r Nast.Tresource
-let nullable r ty =
+let nullable : type a. Reason.t -> a ty -> a ty = fun r ty ->
   (* Cheap avoidance of double nullable *)
   match ty with
   | _, (Toption _ as ty_) -> (r, ty_)
+  | _, Tunion [] -> null r
   | _ -> (r, Toption ty)
 let nothing r =
   (r, Tunion [])

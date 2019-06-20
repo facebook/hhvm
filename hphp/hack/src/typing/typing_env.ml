@@ -42,8 +42,8 @@ let env_log_function = ref (fun _pos _name _old_env _new_env -> ())
 
 let set_env_log_function f = env_log_function := f
 
-let log_env_change name old_env new_env =
-  if get_log_level new_env name >= 1 || get_log_level new_env "env" >= 1
+let log_env_change name ?(level = 1) old_env new_env =
+  if get_log_level new_env name >= 1 || get_log_level new_env "env" >= level
   then begin
     let pos =
       match old_env.tyvars_stack with
@@ -148,6 +148,9 @@ let get_type_unsafe env x =
 
 let get_tyvar_info env var =
   Option.value (IMap.get var env.tvenv) ~default:empty_tyvar_info
+
+let set_tyvar_info env var tyvar_info =
+  { env with tvenv = IMap.add var tyvar_info env.tvenv }
 
 let get_tyvar_eager_solve_fail env var =
   let tvinfo = get_tyvar_info env var in
@@ -491,6 +494,18 @@ let get_tyvar_upper_bounds env var =
   match IMap.get var env.tvenv with
   | None -> empty_bounds
   | Some {upper_bounds; _} -> upper_bounds
+
+let set_tyvar_lower_bounds env var lower_bounds =
+  let tyvar_info = get_tyvar_info env var in
+  let tyvar_info = { tyvar_info with lower_bounds } in
+  let env = set_tyvar_info env var tyvar_info in
+  env
+
+let set_tyvar_upper_bounds env var upper_bounds =
+  let tyvar_info = get_tyvar_info env var in
+  let tyvar_info = { tyvar_info with upper_bounds } in
+  let env = set_tyvar_info env var tyvar_info in
+  env
 
 let rec is_tvar ~elide_nullable ty var =
   match ty with

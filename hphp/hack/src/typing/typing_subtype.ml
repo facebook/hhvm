@@ -2383,11 +2383,101 @@ let bind env var ty =
 
 let var_as_ty var = (Reason.Rnone, Tvar var)
 
-(* For the types that are lower bounds on a variable `var`, compute
- * a union type. Remove `var` itself, as this is redundant. *)
-let lower_bounds_as_union env r var lower_bounds =
-  let env, ty = TUtils.union_list env r (TySet.elements lower_bounds) in
-  env, TUtils.diff ty (var_as_ty var)
+(** If a type variable appear in one of its own lower bounds under a combination
+of unions and intersections, it can be simplified away from this lower bound by
+replacing any of its occurences with nothing.
+E.g.
+- if #1 has lower bound (#1 | A), the lower bound can be simplified to
+(nothing | A) = A.
+- if #1 has lower bound (#1 & A), the lower bound can be simplified to
+(nothing & A) = nothing.
+*)
+let remove_tyvar_from_lower_bound env var r lower_bound =
+  let is_nothing = ty_equal (MakeType.nothing r) in
+  let rec remove env ty =
+    let env, ty = Env.expand_type env ty in
+    match ty with
+    | _, Tvar v when v = var ->
+      env, MakeType.nothing r
+    | r, Toption ty ->
+      let env, ty = remove env ty in
+      env, MakeType.nullable r ty
+    | r, Tunion tyl ->
+      let env, tyl = List.fold_map tyl ~init:env ~f:remove in
+      let tyl = List.filter tyl ~f:(fun ty -> not (is_nothing ty)) in
+      env, MakeType.union r tyl
+    | r, Tintersection tyl ->
+      let env, tyl = List.fold_map tyl ~init:env ~f:remove in
+      let ty = if List.exists tyl ~f:is_nothing
+      then MakeType.nothing r else MakeType.intersection r tyl in
+      env, ty
+    | _ ->
+      env, ty in
+  remove env lower_bound
+
+let remove_tyvar_from_lower_bounds env var r lower_bounds =
+  TySet.fold (fun lower_bound (env, acc) ->
+    let env, lower_bound = remove_tyvar_from_lower_bound env var r lower_bound in
+    env, TySet.add lower_bound acc)
+    lower_bounds (env, TySet.empty)
+
+(** If a type variable appear in one of its own upper bounds under a combination
+of unions and intersections, it can be simplified away from this upper bound by
+replacing any of its occurences with mixed.
+E.g.
+- if #1 has upper bound (#1 & A), the upper bound can be simplified to
+(mixed & A) = A.
+- if #1 has upper bound (#1 | A), the upper bound can be simplified to
+(mixed | A) = mixed
+*)
+let remove_tyvar_from_upper_bound env var r upper_bound =
+  let is_mixed ty =
+    ty_equal ty (MakeType.mixed r) ||
+    ty_equal ty (MakeType.intersection r []) in
+  let rec remove env ty =
+    let env, ty = Env.expand_type env ty in
+    match ty with
+    | _, Tvar v when v = var ->
+      env, MakeType.mixed r
+    | r, Toption ty ->
+      let env, ty = remove env ty in
+      env, MakeType.nullable r ty
+    | r, Tunion tyl ->
+      let env, tyl = List.fold_map tyl ~init:env ~f:remove in
+      let ty = if List.exists tyl ~f:is_mixed
+      then MakeType.mixed r else MakeType.union r tyl in
+      env, ty
+    | r, Tintersection tyl ->
+      let env, tyl = List.fold_map tyl ~init:env ~f:remove in
+      let tyl = List.filter tyl ~f:(fun ty -> not (is_mixed ty)) in
+      env, MakeType.intersection r tyl
+    | _ ->
+      env, ty in
+  remove env upper_bound
+
+let remove_tyvar_from_upper_bounds env var r upper_bounds =
+  TySet.fold (fun upper_bound (env, acc) ->
+    let env, upper_bound = remove_tyvar_from_upper_bound env var r upper_bound in
+    env, TySet.add upper_bound acc)
+    upper_bounds (env, TySet.empty)
+
+(** Remove a type variable from its upper and lower bounds. More precisely,
+if a type variable appears in one of its bounds under any combination of unions
+and intersections, it can be simplified away from the bound.
+For example,
+- if #1 has lower bound (#1 | A), the lower bound can be simplified to A
+- if #1 has upper bound (#1 | B), the upper bound can be simplified to mixed
+and dually for intersections.
+*)
+let remove_tyvar_from_bounds env r var =
+  Env.log_env_change "remove_tyvar_from_bounds" ~level:3 env @@
+  let lower_bounds = Env.get_tyvar_lower_bounds env var in
+  let upper_bounds = Env.get_tyvar_upper_bounds env var in
+  let env, lower_bounds = remove_tyvar_from_lower_bounds env var r lower_bounds in
+  let env, upper_bounds = remove_tyvar_from_upper_bounds env var r upper_bounds in
+  let env = Env.set_tyvar_lower_bounds env var lower_bounds in
+  let env = Env.set_tyvar_upper_bounds env var upper_bounds in
+  env
 
 (* Solve type variable var by assigning it to the union of its lower bounds.
  * If freshen=true, first freshen the covariant and contravariant components of
@@ -2395,7 +2485,7 @@ let lower_bounds_as_union env r var lower_bounds =
  *)
 let bind_to_lower_bound ~freshen env r var lower_bounds =
   Env.log_env_change "bind_to_lower_bound" env @@
-  let env, ty = lower_bounds_as_union env r var lower_bounds in
+  let env, ty = TUtils.union_list env r (TySet.elements lower_bounds) in
   (* Freshen components of the types in the union wrt their variance.
    * For example, if we have
    *   Cov<C>, Contra<D> <: v
@@ -2426,14 +2516,8 @@ let bind_to_lower_bound ~freshen env r var lower_bounds =
   (* Now actually make the assignment var := ty, and remove var from tvenv *)
   bind env var ty
 
-let is_not_union_with_tvar env var ty =
-  let _env, ty = TUtils.simplify_unions env ty in
-  ty_equal ty (TUtils.diff ty (var_as_ty var)) ~normalize_lists:true
-
 let bind_to_upper_bound env r var upper_bounds =
   Env.log_env_change "bind_to_upper_bound" env @@
-  (* Remove bounds which are the union of var and something else *)
-  let upper_bounds = TySet.filter (is_not_union_with_tvar env var) upper_bounds in
   match Typing_set.elements upper_bounds with
   | [] -> bind env var (MakeType.mixed r)
   | [ty] ->
@@ -2509,18 +2593,18 @@ let ty_equal_shallow ty1 ty2 =
     ak1 = ak2
   | _ -> false
 
-let try_bind_to_equal_bound ~freshen env var =
+let try_bind_to_equal_bound ~freshen env r var =
   if tyvar_is_solved env var
   then env
   else
   Env.log_env_change "bind_to_equal_bound" env @@
+  let env = remove_tyvar_from_bounds env r var in
   let expand_all tyset = Typing_set.map
     (fun ty -> let _, ty = Env.expand_type env ty in ty) tyset in
   let tyvar_info = Env.get_tyvar_info env var in
   let lower_bounds = expand_all tyvar_info.Env.lower_bounds in
   let upper_bounds = expand_all tyvar_info.Env.upper_bounds in
   let equal_bounds = Typing_set.inter lower_bounds upper_bounds in
-  let equal_bounds = TySet.filter (is_not_union_with_tvar env var) equal_bounds in
   match Typing_set.choose_opt equal_bounds with
   | Some ty -> bind env var ty
   | None ->
@@ -2549,7 +2633,7 @@ let try_bind_to_equal_bound ~freshen env var =
  *)
 let rec always_solve_tyvar ~freshen env r var =
   (* If there is a type that is both a lower and upper bound, force to that type *)
-  let env = try_bind_to_equal_bound ~freshen env var in
+  let env = try_bind_to_equal_bound ~freshen env r var in
   if tyvar_is_solved env var
   then env
   else
@@ -2582,7 +2666,7 @@ let solve_tyvar_wrt_variance env r var =
       var, [])]));
 
   (* If there is a type that is both a lower and upper bound, force to that type *)
-  let env = try_bind_to_equal_bound ~freshen:false env var in
+  let env = try_bind_to_equal_bound ~freshen:false env r var in
   if tyvar_is_solved env var
   then env
   else
@@ -2643,7 +2727,7 @@ let expand_type_and_solve env ~description_of_expected p ty =
 let expand_type_and_solve_eq env ty =
   Typing_utils.simplify_unions env ty
     ~on_tyvar:(fun env r v ->
-      let env = try_bind_to_equal_bound ~freshen:true env v in
+      let env = try_bind_to_equal_bound ~freshen:true env r v in
       Env.expand_var env r v)
 
 (* When applied to concrete types (typically classes), the `widen_concrete_type`

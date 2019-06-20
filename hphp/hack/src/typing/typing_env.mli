@@ -57,7 +57,7 @@ val set_param : env -> Local_id.t -> locl ty * param_mode -> env
 val set_log_level : env -> string -> int -> env
 val get_log_level : env -> string -> int
 val set_env_log_function : (Pos.t -> string -> env -> env -> unit) -> unit
-val log_env_change : string -> env -> env -> env
+val log_env_change : string -> ?level:int -> env -> env -> env
 val clear_params : env -> env
 val with_env : env -> (env -> env * 'a) -> env * 'a
 val is_static : env -> bool
@@ -146,6 +146,8 @@ val is_generic_parameter: env -> string -> bool
 (* Get or add to bounds on type variables *)
 val get_tyvar_lower_bounds : env -> Ident.t -> tparam_bounds
 val get_tyvar_upper_bounds : env -> Ident.t -> tparam_bounds
+val set_tyvar_lower_bounds : env -> Ident.t -> tparam_bounds -> env
+val set_tyvar_upper_bounds : env -> Ident.t -> tparam_bounds -> env
 (* Optionally supply intersection or union operations to simplify the bounds *)
 val add_tyvar_upper_bound :
   ?intersect:(locl ty -> locl ty list -> locl ty list) ->

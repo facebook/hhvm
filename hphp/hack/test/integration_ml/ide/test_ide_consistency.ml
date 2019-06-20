@@ -51,7 +51,7 @@ let run_and_check_autocomplete env expected_rechecked =
   Test.assert_ide_autocomplete loop_output ["foo"];
   env, loop_output
 
-let () =
+let test () =
 
   let env = Test.setup_server () in
   let env = Test.connect_persistent_client env in

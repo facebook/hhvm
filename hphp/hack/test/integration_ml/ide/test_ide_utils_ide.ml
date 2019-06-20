@@ -167,6 +167,6 @@ let test_cleanup () =
     SharedMem.hash_stats () in
   expect_same used_slots after_used_slots
 
-let () =
+let test () =
   Test.in_daemon test_cleanup;
   Test.in_daemon test_early_revive

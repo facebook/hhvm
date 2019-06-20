@@ -59,7 +59,7 @@ File \"/foo.php\", line 3, characters 2-2:
 A right brace ('}') is expected here. (Parsing[1002])
 "
 
-let () =
+let test () =
 
   let env = Test.setup_server () in
   let env = Test.setup_disk env [

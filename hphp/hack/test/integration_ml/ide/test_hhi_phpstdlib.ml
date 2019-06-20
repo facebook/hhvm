@@ -34,7 +34,7 @@ let hhi_contents = "<?hh // strict
 "
 let hhi_name = "hhi.php"
 
-let () =
+let test () =
   let hhi_files = [
     hhi_name, hhi_contents;
   ] in

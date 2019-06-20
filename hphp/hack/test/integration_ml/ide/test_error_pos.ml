@@ -89,7 +89,7 @@ File "/foo.php", line 4, characters 17-22:
 But got string
 |}
 
-let () =
+let test () =
   let env = Test.setup_server () in
   (* 200 files with errors *)
   let disk_contents = [(foo_name, foo_contents "")] in

@@ -70,7 +70,7 @@ File "/foo.php", line 3, characters 17-22:
 But got string
 |}
 
-let () =
+let test () =
   let env = Test.setup_server () in
   let disk_contests = [(foo_name, foo_returns_int)] in
   let disk_contests = create_bars disk_contests 200 in

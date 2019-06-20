@@ -59,7 +59,7 @@ let c_clear_diagnostics = "
 /C.php:
 "
 
-let () =
+let test () =
   let env = Test.setup_server () in
   let env = Test.setup_disk env [
     a_name, a_with_foo_contents;

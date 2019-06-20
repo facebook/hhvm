@@ -42,7 +42,7 @@ let final_diagnostics = {|
 /foo2.php:
 |}
 
-let () =
+let test () =
   let env = Test.setup_server () in
   let env = Test.setup_disk env [
     foo1_name, foo_contents;

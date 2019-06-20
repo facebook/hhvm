@@ -90,7 +90,7 @@ function testTypecheck(): void {
 }
 "
 
-let () =
+let test () =
 
   let global_opts = GlobalOptions.make
     ~po_auto_namespace_map:[("ShortName", "HH\\LongName\\ShortName")]

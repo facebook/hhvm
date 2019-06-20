@@ -54,7 +54,7 @@ let check_has_errors env =
   | [] -> Test.fail "Expected to have errors"
   | _ -> ()
 
-let () =
+let test () =
 
   let env = Test.setup_server () in
   let env = Test.setup_disk env [

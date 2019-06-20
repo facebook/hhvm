@@ -48,7 +48,7 @@ let bar_clear = "
 /bar.php:
 "
 
-let () =
+let test () =
   let env = Test.setup_server () in
   let env = Test.setup_disk env [
     foo_name, foo_returns_int;

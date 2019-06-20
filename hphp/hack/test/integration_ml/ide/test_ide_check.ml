@@ -66,7 +66,7 @@ function test(B $b) : void {
 }
 "
 
-let () =
+let test () =
   let env = Test.setup_server () in
   let env = Test.setup_disk env [
     a_name, a_contents1;

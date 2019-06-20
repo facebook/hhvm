@@ -49,7 +49,7 @@ let build_code_edit st_line st_column ed_line ed_column text =
     text;
   }
 
-let () =
+let test () =
 
   let env = Test.setup_server () in
   let env = Test.setup_disk env [

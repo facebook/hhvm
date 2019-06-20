@@ -36,7 +36,7 @@ let check_identify_foo_response = function
     Test.assertEqual expected_pos string_pos
   | _ -> Test.fail "Expected to find exactly one definition"
 
-let () =
+let test () =
 
   let env = Test.setup_server () in
   let env = Test.setup_disk env [

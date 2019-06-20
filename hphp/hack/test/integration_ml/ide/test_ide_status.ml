@@ -39,7 +39,7 @@ File \"/bar.php\", line 4, characters 7-7:
 But got int
 "
 
-let () =
+let test () =
 
   let env = Test.setup_server () in
   let env = Test.setup_disk env [

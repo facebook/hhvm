@@ -50,7 +50,7 @@ File "/foo123.php", line 3, characters 37-37:
 But got int
 |}
 
-let () =
+let test () =
   (* Initialize a repo with errors in 200 files *)
   let env = Test.setup_server () in
   let disk_contests = create_foos [] 200 in

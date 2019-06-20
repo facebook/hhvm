@@ -47,7 +47,7 @@ File "/bar.php", line 3, characters 15-19:
 But got mixed
 |}
 
-let () =
+let test () =
 
   let env = Test.setup_server () in
   let env = Test.setup_disk env [

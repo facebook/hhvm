@@ -35,7 +35,7 @@ File \"/bar.php\", line 4, characters 3-5:
 Unbound name (typing): foo (Typing[4107])
 "
 
-let () =
+let test () =
 
   let env = Test.setup_server () in
   let env = Test.setup_disk env [

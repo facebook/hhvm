@@ -58,7 +58,7 @@ let assert_no_push_message loop_outputs =
   | None -> ()
 
 
-let () =
+let test () =
 
   let env = Test.setup_server () in
   let env = Test.connect_persistent_client env in

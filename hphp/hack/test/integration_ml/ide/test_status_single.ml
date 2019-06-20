@@ -27,7 +27,7 @@ let check_status_single_response = function
 | Some [] -> ()
 | Some _ -> Test.fail "Expected no errors"
 
-let () =
+let test () =
   let env = Test.setup_server () in
   let env = Test.setup_disk env [
     foo_name, foo_contents;

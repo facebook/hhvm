@@ -809,10 +809,13 @@ struct RuntimeOption {
   F(bool, HHIRGenOpts,                 true)                            \
   F(bool, HHIRRefcountOpts,            true)                            \
   F(bool, HHIREnableGenTimeInlining,   true)                            \
-  F(uint32_t, HHIRInliningVasmCostLimit, 175)                           \
-  F(uint32_t, HHIRInliningMinVasmCostLimit, 100)                        \
-  F(uint32_t, HHIRInliningMaxVasmCostLimit, 400)                        \
-  F(uint32_t, HHIRAlwaysInlineVasmCostLimit, 80)                        \
+  F(uint32_t, HHIRInliningCostFactorMain, 100)                          \
+  F(uint32_t, HHIRInliningCostFactorCold, 100)                          \
+  F(uint32_t, HHIRInliningCostFactorFrozen, 100)                        \
+  F(uint32_t, HHIRInliningVasmCostLimit, 17500)                         \
+  F(uint32_t, HHIRInliningMinVasmCostLimit, 10000)                      \
+  F(uint32_t, HHIRInliningMaxVasmCostLimit, 40000)                      \
+  F(uint32_t, HHIRAlwaysInlineVasmCostLimit, 8000)                      \
   F(uint32_t, HHIRInliningMaxDepth,    1000)                            \
   F(double,   HHIRInliningVasmCallerExp, .5)                            \
   F(double,   HHIRInliningVasmCalleeExp, .5)                            \

@@ -86,8 +86,34 @@ let check_if_cyclic cls =
     let classes = SSet.add classes (Cls.name cls) in
     Errors.cyclic_class_def classes (Cls.pos cls)
 
+let check_extend_kind parent_pos parent_kind child_pos child_kind =
+  let open Ast in
+  match parent_kind, child_kind with
+  | (Cabstract | Cnormal), (Cabstract | Cnormal)
+  | Cabstract, Cenum (* enums extend BuiltinEnum under the hood *)
+  | Ctrait, Ctrait
+  | Cinterface, Cinterface ->
+    ()
+  | _ ->
+    let parent = Ast.string_of_class_kind parent_kind in
+    let child = Ast.string_of_class_kind child_kind in
+    Errors.wrong_extend_kind child_pos child parent_pos parent
+
+let check_extend_kinds shallow_class =
+  let class_pos = fst shallow_class.sc_name in
+  let class_kind = shallow_class.sc_kind in
+  List.iter shallow_class.sc_extends ~f:begin fun ty ->
+    let _, (parent_pos, parent_name), _ = Decl_utils.unwrap_class_type ty in
+    match Shallow_classes_heap.get parent_name with
+    | None -> ()
+    | Some parent ->
+      check_extend_kind parent_pos parent.sc_kind class_pos class_kind
+  end
+
 let check_class env cls =
   check_if_cyclic cls;
+  let shallow_class = Cls.shallow_decl cls in
+  check_extend_kinds shallow_class;
   if Cls.kind cls <> Ast.Ctrait then begin
     check_override_annotations cls ~static:false;
     check_override_annotations cls ~static:true;

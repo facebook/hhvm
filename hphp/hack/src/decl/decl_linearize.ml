@@ -298,7 +298,7 @@ and next_state
     Skip (Synthesized_elts synths, ancestors, acc, synths)
   | Synthesized_elts (next::synths), ancestors ->
     if List.exists acc ~f:(mro_elements_equal next)
-    then Skip (Synthesized_elts synths, ancestors, next::acc, synths)
+    then Skip (Synthesized_elts synths, ancestors, acc, synths)
     else Yield (next, (Synthesized_elts synths, ancestors, next::acc, synths))
   | Synthesized_elts [], _ ->
     let key = class_name, env.linearization_kind in

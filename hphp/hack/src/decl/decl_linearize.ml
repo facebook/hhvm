@@ -125,6 +125,7 @@ let empty_mro_element = {
   mro_type_args = [];
   mro_class_not_found = false;
   mro_cyclic = None;
+  mro_trait_reuse = None;
   mro_required_at = None;
   mro_synthesized = false;
   mro_xhp_attrs_only = false;
@@ -132,6 +133,11 @@ let empty_mro_element = {
   mro_copy_private_members = false;
   mro_passthrough_abstract_typeconst = false;
 }
+
+let no_trait_reuse_enabled env =
+  TypecheckerOptions.experimental_feature_enabled
+    env.decl_env.Decl_env.decl_tcopt
+    TypecheckerOptions.experimental_no_trait_reuse
 
 let rec ancestor_linearization
     (env : env)
@@ -163,6 +169,7 @@ let rec ancestor_linearization
       child_class_abstract in
     { c with
       mro_required_at;
+      mro_trait_reuse = Option.map c.mro_trait_reuse ~f:(Fn.const class_name);
       mro_synthesized;
       mro_xhp_attrs_only;
       mro_consts_only;
@@ -286,7 +293,31 @@ and next_state
       } in
       Yield (next, (Next_ancestor, ancestors, next::acc, synths))
     | Some (next, rest) ->
-      let should_skip, synths =
+      let names_equal a b = a.mro_name = b.mro_name in
+      let skip_or_mark_trait_reuse equals_next =
+        let is_trait class_name =
+          match Shallow_classes_heap.get class_name with
+          | Some { sc_kind = Ast_defs.Ctrait; _ } -> true
+          | _ -> false
+        in
+        if no_trait_reuse_enabled env
+        && Option.is_none next.mro_trait_reuse
+        && is_trait next.mro_name
+        then
+          (* When the no_trait_reuse feature is enabled, we want to report
+             an error for reused traits. Instead of skipping trait
+             mro_elements when they are already present in the
+             linearization, we emit an element with the trait_reuse flag
+             set so that we can error later. *)
+          if List.exists acc ~f:(names_equal next)
+          then Some { next with mro_trait_reuse = Some name }
+          else Some next
+        else
+          if List.exists acc ~f:equals_next
+          then None
+          else Some next
+      in
+      let next, synths =
         match env.linearization_kind with
         | Member_resolution ->
           if next.mro_synthesized
@@ -296,8 +327,10 @@ and next_state
               then synths
               else next::synths
             in
-            true, synths
-          else List.exists acc ~f:(mro_elements_equal next), synths
+            None, synths
+          else
+            let next = skip_or_mark_trait_reuse (mro_elements_equal next) in
+            next, synths
         | Ancestor_types ->
           (* For ancestor types, we don't care about require-extends or
              require-implements relationships, except for the fact that we want
@@ -306,12 +339,16 @@ and next_state
           let should_skip =
             next.mro_synthesized && next.mro_name <> SN.Classes.cStringish
           in
-          let equal a b = a.mro_name = b.mro_name in
-          should_skip || List.mem acc next ~equal, synths
+          let next =
+            if should_skip
+            then None
+            else skip_or_mark_trait_reuse (names_equal next)
+          in
+          next, synths
       in
-      if should_skip
-      then Skip (Ancestor (name, rest), ancestors, acc, synths)
-      else Yield (next, (Ancestor (name, rest), ancestors, next::acc, synths))
+      match next with
+      | None -> Skip (Ancestor (name, rest), ancestors, acc, synths)
+      | Some next -> Yield (next, (Ancestor (name, rest), ancestors, next::acc, synths))
     end
   | Next_ancestor, [] ->
     let synths = List.rev synths in

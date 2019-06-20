@@ -9,7 +9,11 @@ Linearization for class \C:
 Linearization for class \T:
 [\T(copy_private_members), \T3(copy_private_members), \T2(copy_private_members)]
 Linearization for class \D:
-[\D, \T3(copy_private_members), \T(copy_private_members), \T2(copy_private_members)]
+[\D, \T3(copy_private_members), \T(copy_private_members), \T3(copy_private_members, trait reuse via \T), \T2(copy_private_members)]
+Linearization for class \E:
+[\E, \C, \T3, \T2, \T1]
+Linearization for class \F:
+[\F, \T3(copy_private_members), \E, \C, \T3(trait reuse via \E), \T2, \T1]
 Linearization for class \I:
 [\I]
 Linearization for class \I2:

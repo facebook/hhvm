@@ -20,6 +20,13 @@ class D  {
   use T, T3;
 }
 
+class E extends C  {}
+
+// class using trait which was used in indirect ancestor C
+class F extends E {
+  use T3;
+}
+
 interface I {}
 interface I2 {}
 trait Timplements implements I {

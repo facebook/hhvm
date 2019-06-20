@@ -77,6 +77,12 @@ type mro_element = {
      SSet.t is the set of class names known to have been involved in the
      inclusion of this class in the linearization. *)
   mro_cyclic : SSet.t option;
+  (* When this is [Some], this mro_element represents the use of a trait which
+     was already used earlier in the linearization. Normally, we do not emit
+     duplicate mro_elements at all--we include these in the linearization only
+     for error detection. The string is the name of the class through which this
+     trait was most recently included (as a duplicate). *)
+  mro_trait_reuse : string option;
   (* If this element is included in the linearization because it was directly
      required by some ancestor, this will be [Some], and the position will be
      the location where this requirement was most recently included into the

@@ -110,10 +110,31 @@ let check_extend_kinds shallow_class =
       check_extend_kind parent_pos parent.sc_kind class_pos class_kind
   end
 
+let no_trait_reuse_enabled env =
+  TypecheckerOptions.experimental_feature_enabled
+    (Env.get_tcopt env)
+    TypecheckerOptions.experimental_no_trait_reuse
+
+let check_trait_reuse shallow_class =
+  let class_name = snd shallow_class.sc_name in
+  Decl_linearize.(get_linearization ~kind:Ancestor_types) class_name
+  |> Sequence.iter ~f:begin fun mro ->
+    match mro.mro_trait_reuse with
+    | None -> ()
+    | Some parent_name ->
+      let parent_pos =
+        Shallow_classes_heap.get parent_name
+        |> Option.value_map ~default:Pos.none ~f:(fun p -> fst p.sc_name)
+      in
+      Errors.trait_reuse parent_pos parent_name shallow_class.sc_name mro.mro_name
+  end
+
 let check_class env cls =
   check_if_cyclic cls;
   let shallow_class = Cls.shallow_decl cls in
   check_extend_kinds shallow_class;
+  if no_trait_reuse_enabled env then
+    check_trait_reuse shallow_class;
   if Cls.kind cls <> Ast.Ctrait then begin
     check_override_annotations cls ~static:false;
     check_override_annotations cls ~static:true;

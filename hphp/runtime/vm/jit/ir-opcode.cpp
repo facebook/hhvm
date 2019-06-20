@@ -764,6 +764,7 @@ bool opcodeMayRaise(Opcode opc) {
   case InstanceOfBitmask:
   case InstanceOfIface:
   case InstanceOfIfaceVtable:
+  case InstanceOfRecDesc:
   case InterfaceSupportsArr:
   case InterfaceSupportsDbl:
   case InterfaceSupportsDict:

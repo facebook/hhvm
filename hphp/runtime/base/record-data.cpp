@@ -120,5 +120,4 @@ bool RecordData::equal(const RecordData* r1, const RecordData* r2) {
 bool RecordData::same(const RecordData* r1, const RecordData* r2) {
   return equalImpl<tvSame>(r1, r2);
 }
-
 }

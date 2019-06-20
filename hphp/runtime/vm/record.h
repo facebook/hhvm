@@ -158,6 +158,9 @@ struct RecordDesc : AtomicCountable {
   Attr attrs()                   const { return m_preRec->attrs(); }
   const StringData* parentName() const { return m_preRec->parentName();  }
 
+  const RecordDesc* parent() const { return m_parent.get(); }
+  bool recordDescOf(const RecordDesc* rec) const;
+
   // Fields declared in current record as well as in its parent(s)
   size_t numFields() const { return m_fields.size(); }
   FieldRange allFields() const {

@@ -533,7 +533,7 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
   }
 
   if (rec) {
-    return isRecordType(val.type()) && rec == val.val().prec->record();
+    return isRecordType(val.type()) && val.val().prec->instanceof(rec);
   }
 
   // Otherwise, this isn't a proper type alias, but it *might* be a

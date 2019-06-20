@@ -345,6 +345,13 @@ void cgEqRecDesc(IRLS& env, const IRInstruction* inst) {
   v << setcc{CC_E, sf, dst};
 }
 
+void cgInstanceOfRecDesc(IRLS& env, const IRInstruction* inst) {
+  // TODO: Optimize this. See T45403957.
+  cgCallHelper(vmain(env), env, CallSpec::method(&RecordDesc::recordDescOf),
+               callDest(env, inst), SyncOptions::None,
+               argGroup(env, inst).ssa(0).ssa(1));
+}
+
 void cgEqFunc(IRLS& env, const IRInstruction* inst) {
   auto const s0 = srcLoc(env, inst, 0).reg();
   auto const s1 = srcLoc(env, inst, 1).reg();

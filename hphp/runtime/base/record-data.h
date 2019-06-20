@@ -20,12 +20,12 @@
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/req-vector.h"
 #include "hphp/runtime/base/tv-val.h"
+#include "hphp/runtime/vm/record.h"
 
 #include "hphp/util/type-scan.h"
 
 namespace HPHP {
 
-struct RecordDesc;
 struct StringData;
 
 struct RecordData : Countable, type_scan::MarkCollectable<RecordData> {
@@ -57,6 +57,10 @@ struct RecordData : Countable, type_scan::MarkCollectable<RecordData> {
 
   static bool equal(const RecordData*, const RecordData*);
   static bool same(const RecordData*, const RecordData*);
+
+  bool instanceof(const RecordDesc* rec) const {
+    return m_record->recordDescOf(rec);
+  }
 
   static constexpr ptrdiff_t getVMRecordOffset() {
     return offsetof(RecordData, m_record);

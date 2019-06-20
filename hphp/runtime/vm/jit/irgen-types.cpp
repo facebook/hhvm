@@ -334,7 +334,7 @@ void verifyTypeImpl(IRGS& env,
       ifThen(
         env,
         [&] (Block* taken) {
-          gen(env, JmpZero, taken, gen(env, EqRecDesc, tcRec, valRec));
+          gen(env, JmpZero, taken, gen(env, InstanceOfRecDesc, valRec, tcRec));
         },
         [&] {
           hint(env, Block::Hint::Unlikely);

@@ -873,6 +873,10 @@ To string conversions:
   of the class named by S1, where S1 must have a bit allocated for it in the
   fast instance check bitvector (see class.h).
 
+| InstanceOfRecDesc, D(Bool), S(RecDesc) S(RecDesc), NF
+  
+  Sets D to true if S0 is a descendant of the record in S1, false otherwise.
+
 | InterfaceSupportsArr,        D(Bool), S(Str), NF
 
 | InterfaceSupportsVec,        D(Bool), S(Str), NF

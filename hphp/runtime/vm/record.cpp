@@ -194,4 +194,15 @@ RecordDesc::RecordDesc(PreRecordDesc* preRec, RecordDesc* parent)
   setParent();
   setFields();
 }
+
+bool RecordDesc::recordDescOf(const RecordDesc* rec) const {
+  // TODO: Optimize this. See T45403957.
+  assertx(rec);
+  auto curr = this;
+  while(curr) {
+    if (curr == rec) return true;
+    curr = curr->m_parent.get();
+  }
+  return false;
+}
 }

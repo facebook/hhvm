@@ -3596,7 +3596,7 @@ and call_parent_construct pos env el uel =
         | _, Tfun fd -> Some fd
         | _ -> None
       ) in
-      let env, tel_, tuel_, method_ =
+      let env, (tel_, tuel_, method_) =
         call_continuation env fty fty_decl in
       tel := tel_; tuel := tuel_;
       tftyl := fty :: !tftyl;
@@ -3680,7 +3680,7 @@ and call_parent_construct pos env el uel =
       check_function_in_suspend SN.StdlibFunctions.array_filter;
       (* dispatch the call to typecheck the arguments *)
       let env, fty, _decl_fty = fun_type_of_id env id tal in
-      let env, tel, tuel, res = call ~expected p env fty ~fty_decl:None el uel in
+      let env, (tel, tuel, res) = call ~expected p env fty ~fty_decl:None el uel in
       (* but ignore the result and overwrite it with custom return type *)
       let x = List.hd_exn el in
       let env, _tx, ty = expr env x in
@@ -3910,7 +3910,7 @@ and call_parent_construct pos env el uel =
               build_function env (fun tr ->
                 (r_fty, Tarraykind (AKvec(tr)))))
         | _ -> env, fty in
-      let env, tel, tuel, ty = call ~expected p env fty ~fty_decl:None el [] in
+      let env, (tel, tuel, ty) = call ~expected p env fty ~fty_decl:None el [] in
       make_call env (T.make_typed_expr fpos fty (T.Id x)) tal tel tuel ty
   (* Special function `idx` *)
   | Id ((_, idx) as id) when idx = SN.FB.idx ->
@@ -3950,7 +3950,7 @@ and call_parent_construct pos env el uel =
           ~instantiation:{ use_pos=p; use_name="idx"; explicit_tparams=[]}
           ~ety_env env fty) in
         let tfun = Reason.Rwitness fty.ft_pos, Tfun fty in
-        let env, tel, _tuel, ty = call ~expected p env tfun ~fty_decl:None el [] in
+        let env, (tel, _tuel, ty) = call ~expected p env tfun ~fty_decl:None el [] in
         make_call env (T.make_typed_expr fpos tfun (T.Id id)) [] tel [] ty
       | None -> unbound_name env id)
 
@@ -4160,13 +4160,13 @@ and call_parent_construct pos env el uel =
   | Fun_id x ->
       let env, fty, fty_decl = fun_type_of_id env x tal in
       let env = check_coroutine_call env fty in
-      let env, tel, tuel, ty =
+      let env, (tel, tuel, ty) =
         call ~expected p env fty ~fty_decl el uel in
       make_call  env (T.make_typed_expr fpos fty (T.Fun_id x)) tal tel tuel ty
   | Id (_, id as x) ->
       let env, fty, fty_decl = fun_type_of_id env x tal in
       let env = check_coroutine_call env fty in
-      let env, tel, tuel, ty =
+      let env, (tel, tuel, ty) =
         call ~expected p env fty ~fty_decl el uel in
       let is_mutable = id = SN.Rx.mutable_ in
       let is_move = id = SN.Rx.move in
@@ -4195,7 +4195,7 @@ and call_parent_construct pos env el uel =
       let env, fty = SubType.expand_type_and_solve
         ~description_of_expected:"a function value" env fpos fty in
       let env = check_coroutine_call env fty in
-      let env, tel, tuel, ty = call ~expected p env fty ~fty_decl:None el uel in
+      let env, (tel, tuel, ty) = call ~expected p env fty ~fty_decl:None el uel in
       make_call env te tal tel tuel ty
 
 and fun_type_of_id env x tal =
@@ -4988,7 +4988,7 @@ and call_construct p env class_ params el uel cid =
         | _, Tfun fd -> Some fd
         | _ -> None in
       let env, m = Phase.localize ~ety_env env m in
-      let env, tel, tuel, _ty = call ~expected:None p env m ~fty_decl el uel in
+      let env, (tel, tuel, _ty) = call ~expected:None p env m ~fty_decl el uel in
       env, tcid, tel, tuel, m
 
 and check_arity ?(did_unpack=false) pos pos_def (arity:int) exp_arity =
@@ -5095,23 +5095,21 @@ and call ~(expected: ExpectedTy.t option) ?method_call_info pos env fty ~fty_dec
         then MakeType.dynamic (Reason.Rdynamic_call pos)
         else (Reason.Rnone, Typing_utils.tany env)
       in
-      env, tel, [], ty
+      env, (tel, [], ty)
     | _, Tunion [ty] ->
       call ~expected pos env ty ~fty_decl:None el uel
     | r, Tunion tyl ->
       let env, retl = List.map_env env tyl begin fun env ty ->
-        let env, _, _, ty = call ~expected pos env ty ~fty_decl:None el uel in env, ty
+        let env, (_, _, ty) = call ~expected pos env ty ~fty_decl:None el uel in env, ty
       end in
       let ty = (r, Tunion retl) in
-      env, [], [], ty
+      env, ([], [], ty)
     | r, Tintersection tyl ->
-      (* TODO T44713456 It should be ok if some member of the intersection are
-      not function types, e.g. dynamic. *)
-      let env, retl = List.map_env env tyl begin fun env ty ->
-        let env, _, _, ty = call ~expected pos env ty ~fty_decl:None el uel in env, ty
-      end in
+      let env, resl = TUtils.run_on_intersection env tyl
+        ~f:(fun env ty -> call ~expected pos env ty ~fty_decl:None el uel) in
+      let retl = List.map resl ~f:(fun (_, _, x) -> x) in
       let env, ty = Inter.intersect_list env r retl in
-      env, [], [], ty
+      env, ([], [], ty)
     | r2, Tfun ft ->
       (* Typing of format string functions. It is dependent on the arguments (el)
        * so it cannot be done earlier.
@@ -5254,7 +5252,7 @@ and call ~(expected: ExpectedTy.t option) ?method_call_info pos env fty ~fty_dec
       let env = wfold_left2 inout_write_back env ft.ft_params el in
       let env, ret_ty =
         TR.get_adjusted_return_type env method_call_info ft.ft_ret in
-      env, tel, tuel, ret_ty
+      env, (tel, tuel, ret_ty)
     | r2, Tanon (arity, id) ->
       let env, tel, tyl = exprs ~is_func_arg:true env el in
       let expr_for_unpacked_expr_list env = function
@@ -5310,7 +5308,7 @@ and call ~(expected: ExpectedTy.t option) ?method_call_info pos env fty ~fty_dec
       (match anon with
         | None ->
           Errors.anonymous_recursive_call pos;
-          env, tel, tuel, err_witness env pos
+          env, (tel, tuel, err_witness env pos)
         | Some { Env. rx = reactivity ; is_coroutine; counter = ftys; typecheck = anon; _ } ->
           let () = check_arity pos fpos (Typing_defs.arity_min call_arity) arity in
           let tyl = List.map tyl TUtils.default_fun_param in
@@ -5336,18 +5334,18 @@ and call ~(expected: ExpectedTy.t option) ?method_call_info pos env fty ~fty_dec
               ft_returns_void_to_rx = false;
             }) in
           ftys := TUtils.add_function_type env fty !ftys;
-          env, tel, tuel, ty)
+          env, (tel, tuel, ty))
     | ty ->
       bad_call env pos ty;
       let env = call_untyped_unpack env uel in
-      env, [], [], err_witness env pos
+      env, ([], [], err_witness env pos)
   end in
   match resl with
   | [res] -> res
   | _ ->
     bad_call env pos fty;
     let env = call_untyped_unpack env uel in
-    env, [], [], err_witness env pos
+    env, ([], [], err_witness env pos)
 
 and call_param env param opt_dparam ((pos, _ as e), arg_ty) ~is_variadic =
   param_modes ~is_variadic param e;
@@ -6864,10 +6862,10 @@ and overload_function make_call fpos p env (cpos, class_id) method_id el uel f =
     class_get ~is_method:true ~is_const:false env ty method_id class_id (fun x -> x) in
   (* call the function as declared to validate arity and input types,
      but ignore the result and overwrite with custom one *)
-  let (env, tel, tuel, res), has_error = Errors.try_with_error
+  let (env, (tel, tuel, res)), has_error = Errors.try_with_error
     (* TODO: Should we be passing hints here *)
     (fun () -> (call ~expected:None p env fty ~fty_decl:None el uel), false)
-    (fun () -> (env, [], [], (Reason.Rwitness p, Typing_utils.tany env)), true) in
+    (fun () -> (env, ([], [], (Reason.Rwitness p, Typing_utils.tany env))), true) in
   (* if there are errors already stop here - going forward would
    * report them twice *)
   if has_error

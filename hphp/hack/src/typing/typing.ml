@@ -6069,16 +6069,16 @@ and string2 env idl =
  * the type parameters. *)
 and check_implements_tparaml (env: Env.env) ht =
   let _r, (p, c), paraml = TUtils.unwrap_class_type ht in
-  let class_ = Decl_env.get_class_dep env.Env.decl_env c in
+  let class_ = Env.get_class_dep env c in
   match class_ with
   | None ->
       (* The class lives in PHP land *)
       ()
   | Some class_ ->
-      let size1 = List.length class_.dc_tparams in
+      let size1 = List.length (Cls.tparams class_) in
       let size2 = List.length paraml in
-      if size1 <> size2 then Errors.class_arity p class_.dc_pos c size1;
-      let subst = Inst.make_subst class_.dc_tparams paraml in
+      if size1 <> size2 then Errors.class_arity p (Cls.pos class_) c size1;
+      let subst = Inst.make_subst (Cls.tparams class_) paraml in
       iter2_shortest begin fun t ty ->
         let ty_pos = Reason.to_pos (fst ty) in
         List.iter t.tp_constraints begin fun (ck, cstr) ->
@@ -6098,7 +6098,7 @@ and check_implements_tparaml (env: Env.env) ht =
             failwith "Typing.check_implements_tparaml: \
                       implement typing for 'from' constraints"
         end
-      end class_.dc_tparams paraml
+      end (Cls.tparams class_) paraml
 
 (* In order to type-check a class, we need to know what "parent"
  * refers to. Sometimes people write "parent::", when that happens,
@@ -6107,7 +6107,7 @@ and check_implements_tparaml (env: Env.env) ht =
 and class_def_parent env class_def class_type =
   match class_def.c_extends with
   | (_, Happly ((_, x), _) as parent_ty) :: _ ->
-      let parent_type = Decl_env.get_class_dep env.Env.decl_env x in
+      let parent_type = Env.get_class_dep env x in
       (match parent_type with
       | Some parent_type -> check_parent class_def class_type parent_type
       | None -> ());
@@ -6121,17 +6121,17 @@ and class_def_parent env class_def class_type =
 
 and check_parent class_def class_type parent_type =
   let position = fst class_def.c_name in
-  if (Cls.const class_type) && not parent_type.dc_const
+  if Cls.const class_type && not (Cls.const parent_type)
   then Errors.self_const_parent_not position;
-  if parent_type.dc_const && not (Cls.const class_type)
+  if Cls.const parent_type && not (Cls.const class_type)
   then Errors.parent_const_self_not position;
   (* Are all the parents in Hack? Do we know all their methods?
    * If so, let's check that the abstract methods have been implemented.
    *)
   if (Cls.members_fully_known class_type)
   then check_parent_abstract position parent_type class_type;
-  if parent_type.dc_final
-  then Errors.extend_final position parent_type.dc_pos parent_type.dc_name
+  if Cls.final parent_type
+  then Errors.extend_final position (Cls.pos parent_type) (Cls.name parent_type)
   else ()
 
 and check_parent_sealed child_type parent_type =
@@ -6168,7 +6168,7 @@ and check_parents_sealed env child_def child_type =
 
 and check_parent_abstract position parent_type class_type =
   let is_final = (Cls.final class_type) in
-  if parent_type.dc_kind = Ast.Cabstract &&
+  if Cls.kind parent_type = Ast.Cabstract &&
     ((Cls.kind class_type) <> Ast.Cabstract || is_final)
   then begin
     check_extend_abstract_meth ~is_final position (Cls.methods class_type);

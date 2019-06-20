@@ -47,10 +47,10 @@ let is_disposable_type env ty =
 let enforce_is_disposable env hint =
   match hint with
     | (_, Nast.Happly ((p, c), _)) ->
-      begin match Decl_env.get_class_dep env.Env.decl_env c with
+      begin match Env.get_class_dep env c with
       | None -> ()
       | Some c ->
-        if not c.Decl_defs.dc_is_disposable
+        if not (Cls.is_disposable c)
         then Errors.must_extend_disposable p
       end
     | _ -> ()

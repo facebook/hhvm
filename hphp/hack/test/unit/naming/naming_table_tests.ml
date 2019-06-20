@@ -87,69 +87,72 @@ let run_naming_table_test f =
       sample_rate = 0.0;
     } in
     let _ : SharedMem.handle = SharedMem.init config ~num_workers:0 in
-    let naming_table = write_and_parse_test_files () in
+    let unbacked_naming_table = write_and_parse_test_files () in
     let db_name = Path.to_string (Path.concat path "naming_table.sqlite") in
     Asserter.Int_asserter.assert_equals
       8
-      (Naming_table.save naming_table db_name)
+      (Naming_table.save unbacked_naming_table db_name)
       "Expected to add eight rows (four files and four symbols)";
-    Naming_table.set_sqlite_fallback_path db_name;
-    f ~naming_table;
+    let backed_naming_table = Naming_table.load_from_sqlite ~update_reverse_entries:false db_name in
+    f ~unbacked_naming_table ~backed_naming_table;
     true
   end
 
 
-let test_get_pos () = run_naming_table_test begin fun ~naming_table:_ ->
-  Types_pos_asserter.assert_option_equals
-    (Some (FileInfo.File (FileInfo.Class, Relative_path.from_root "foo.php"), Naming_table.TClass))
-    (Naming_table.Types.get_pos "\\Foo")
-    "Check for class type";
-  Pos_asserter.assert_option_equals
-    (Some (FileInfo.File (FileInfo.Fun, Relative_path.from_root "bar.php")))
-    (Naming_table.Funs.get_pos "\\bar")
-    "Check for function";
-  Types_pos_asserter.assert_option_equals
-    (Some (
-      FileInfo.File (FileInfo.Typedef, Relative_path.from_root "baz.php"),
-      Naming_table.TTypedef))
-    (Naming_table.Types.get_pos "\\Baz")
-    "Check for typedef type";
-  Pos_asserter.assert_option_equals
-    (Some (FileInfo.File (FileInfo.Const, Relative_path.from_root "qux.php")))
-    (Naming_table.Consts.get_pos "\\Qux")
-    "Check for const"
+let test_get_pos () =
+  run_naming_table_test begin fun ~unbacked_naming_table:_ ~backed_naming_table:_ ->
+    Types_pos_asserter.assert_option_equals
+      (Some (
+        FileInfo.File (FileInfo.Class, Relative_path.from_root "foo.php"),
+        Naming_table.TClass))
+      (Naming_table.Types.get_pos "\\Foo")
+      "Check for class type";
+    Pos_asserter.assert_option_equals
+      (Some (FileInfo.File (FileInfo.Fun, Relative_path.from_root "bar.php")))
+      (Naming_table.Funs.get_pos "\\bar")
+      "Check for function";
+    Types_pos_asserter.assert_option_equals
+      (Some (
+        FileInfo.File (FileInfo.Typedef, Relative_path.from_root "baz.php"),
+        Naming_table.TTypedef))
+      (Naming_table.Types.get_pos "\\Baz")
+      "Check for typedef type";
+    Pos_asserter.assert_option_equals
+      (Some (FileInfo.File (FileInfo.Const, Relative_path.from_root "qux.php")))
+      (Naming_table.Consts.get_pos "\\Qux")
+      "Check for const"
 end
 
-let test_get_canon_name () = run_naming_table_test begin fun ~naming_table:_ ->
-  (* Since we're parsing but not naming, the canon heap must fall back to the
-     files on disk, which is the situation we'd be in when loading from a
-     saved state. *)
-  Asserter.String_asserter.assert_option_equals
-    (Some "\\Foo")
-    (Naming_table.Types.get_canon_name "\\foo")
-    "Check for class canon name";
-  Asserter.String_asserter.assert_option_equals
-    (Some "\\bar")
-    (Naming_table.Funs.get_canon_name "\\bar")
-    "Check for function canon name";
-  Asserter.String_asserter.assert_option_equals
-    (Some "\\Baz")
-    (Naming_table.Types.get_canon_name "\\baz")
-    "Check for typedef canon name";
+let test_get_canon_name () =
+  run_naming_table_test begin fun ~unbacked_naming_table:_ ~backed_naming_table:_ ->
+    (* Since we're parsing but not naming, the canon heap must fall back to the
+       files on disk, which is the situation we'd be in when loading from a
+       saved state. *)
+    Asserter.String_asserter.assert_option_equals
+      (Some "\\Foo")
+      (Naming_table.Types.get_canon_name "\\foo")
+      "Check for class canon name";
+    Asserter.String_asserter.assert_option_equals
+      (Some "\\bar")
+      (Naming_table.Funs.get_canon_name "\\bar")
+      "Check for function canon name";
+    Asserter.String_asserter.assert_option_equals
+      (Some "\\Baz")
+      (Naming_table.Types.get_canon_name "\\baz")
+      "Check for typedef canon name"
 end
 
-let test_remove () = run_naming_table_test begin fun
-    ~naming_table:unbacked ->
-  let foo_path = Relative_path.from_root "foo.php" in
-  assert (Naming_table.get_file_info unbacked foo_path |> Option.is_some);
-  let unbacked = Naming_table.remove unbacked foo_path in
-  assert (Naming_table.get_file_info unbacked foo_path |> Option.is_none);
+let test_remove () =
+  run_naming_table_test begin fun ~unbacked_naming_table ~backed_naming_table ->
+    let foo_path = Relative_path.from_root "foo.php" in
+    assert (Naming_table.get_file_info unbacked_naming_table foo_path |> Option.is_some);
+    let unbacked_naming_table = Naming_table.remove unbacked_naming_table foo_path in
+    assert (Naming_table.get_file_info unbacked_naming_table foo_path |> Option.is_none);
 
-  let backed = Naming_table.from_db () in
-  assert (Naming_table.get_file_info backed foo_path |> Option.is_some);
-  let backed = Naming_table.remove backed foo_path in
-  assert (Naming_table.get_file_info backed foo_path |> Option.is_none)
-end
+    assert (Naming_table.get_file_info backed_naming_table foo_path |> Option.is_some);
+    let backed_naming_table = Naming_table.remove backed_naming_table foo_path in
+    assert (Naming_table.get_file_info backed_naming_table foo_path |> Option.is_none)
+  end
 
 let () =
   Unit_test.run_all [

@@ -386,9 +386,6 @@ watchman_init_timeout = 1
             assert_edges_added=True, replace_state_after_saving=True
         )
         self.assertEqual(replace_result2.returned_values.get_edges_added(), 0)
-        self.assertEqual(
-            0, replace_result2.returned_values.get_naming_table_rows_changed()
-        )
 
         # Make a change
         # Save state - confirm there are only the # of new edges

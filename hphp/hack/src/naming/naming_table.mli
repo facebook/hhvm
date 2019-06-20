@@ -18,8 +18,6 @@ type t [@@deriving show]
 type fast = FileInfo.names Relative_path.Map.t
 type saved_state_info = FileInfo.saved Relative_path.Map.t
 
-val set_sqlite_fallback_path : string -> unit
-
 (* Querying and updating forward naming tables. *)
 val combine : t -> t -> t
 val empty : t
@@ -41,11 +39,11 @@ val remove : t -> Relative_path.t -> t
 val update : t -> Relative_path.t -> FileInfo.t  -> t
 val update_many : t -> FileInfo.t Relative_path.Map.t -> t
 val save : t -> string -> int
-val save_incremental : t -> string -> int
+val save_incremental : t -> string -> unit
 
 (* Creation functions. *)
 val create : FileInfo.t Relative_path.Map.t -> t
-val from_db : unit -> t
+val load_from_sqlite : update_reverse_entries:bool -> string -> t
 
 (* Converting between different types of forward naming tables. *)
 val from_saved : saved_state_info -> t

@@ -139,14 +139,17 @@
        (although they do still occupy a hash slot).
 *)
 
-type forward_naming_table_delta =
-  | Modified of FileInfo.t
+type 'a forward_naming_table_delta =
+  | Modified of 'a
   | Deleted
   [@@deriving show]
 let _ = show_forward_naming_table_delta
+type local_changes = FileInfo.t forward_naming_table_delta Relative_path.Map.t
+let pp_local_changes =
+  Relative_path.Map.make_pp Relative_path.pp (pp_forward_naming_table_delta FileInfo.pp)
 type t =
   | Unbacked of FileInfo.t Relative_path.Map.t
-  | Backed of forward_naming_table_delta Relative_path.Map.t
+  | Backed of local_changes
   [@@deriving show]
 type fast = FileInfo.names Relative_path.Map.t
 type saved_state_info = FileInfo.saved Relative_path.Map.t
@@ -174,11 +177,15 @@ module Sqlite : sig
   val set_db_path : string -> unit
   val is_connected : unit -> bool
   val save_file_infos : string -> FileInfo.t Relative_path.Map.t -> save_result
-  val update_file_infos : string -> forward_naming_table_delta Relative_path.Map.t -> save_result
+  val update_file_infos :
+    string ->
+    local_changes ->
+    unit
+  val get_local_changes : unit -> local_changes
   val fold :
     init:'a ->
     f:(Relative_path.t -> FileInfo.t -> 'a -> 'a) ->
-    local_changes:(forward_naming_table_delta Relative_path.Map.t) ->
+    local_changes:(local_changes) ->
     'a
   val get_file_info : Relative_path.t -> FileInfo.t option
   val get_type_pos : string -> case_insensitive:bool -> (Relative_path.t * type_of_type) option
@@ -205,6 +212,74 @@ end = struct
     helper init
 
 
+  (* It's kind of weird to just dump this into the SQLite database, but removing
+   * entries one at a time during a normal incremental update leads to too many
+   * table scans, and I don't want to put this in a separate file because then
+   * the naming table and dep table in a given SQLite database might not agree
+   * with each other, and that just feels weird. *)
+  module LocalChanges = struct
+    let table_name = "NAMING_LOCAL_CHANGES"
+
+    let create_table_sqlite =
+      Printf.sprintf "
+        CREATE TABLE IF NOT EXISTS %s(
+          ID INTEGER PRIMARY KEY,
+          LOCAL_CHANGES BLOB NOT NULL
+        );
+      " table_name
+
+    let insert_sqlite =
+      Printf.sprintf "
+        INSERT INTO %s (ID, LOCAL_CHANGES) VALUES (0, ?);
+      " table_name
+
+    let update_sqlite =
+      Printf.sprintf "
+        UPDATE %s SET LOCAL_CHANGES = ? WHERE ID = 0;
+      " table_name
+
+    let get_sqlite =
+      Printf.sprintf "
+        SELECT LOCAL_CHANGES FROM %s;
+      " table_name
+
+    let prime db =
+      let insert_stmt = Sqlite3.prepare db insert_sqlite in
+      let empty = Marshal.to_string Relative_path.Map.empty [Marshal.No_sharing] in
+      Sqlite3.bind insert_stmt 1 (Sqlite3.Data.BLOB empty) |> check_rc;
+      Sqlite3.step insert_stmt |> check_rc;
+      Sqlite3.finalize insert_stmt |> check_rc
+
+    let update db (local_changes : local_changes) =
+      let local_changes_saved = Relative_path.Map.map local_changes ~f:begin fun delta ->
+        match delta with
+        | Modified fi -> Modified (FileInfo.to_saved fi)
+        | Deleted -> Deleted
+      end in
+      let local_changes_blob = Marshal.to_string local_changes_saved [Marshal.No_sharing] in
+      let update_stmt = Sqlite3.prepare db update_sqlite in
+      Sqlite3.bind update_stmt 1 (Sqlite3.Data.BLOB local_changes_blob) |> check_rc;
+      Sqlite3.step update_stmt |> check_rc;
+      Sqlite3.finalize update_stmt |> check_rc
+
+    let get db =
+      let get_stmt = Sqlite3.prepare db get_sqlite in
+      match Sqlite3.step get_stmt with
+      (* We don't include Sqlite3.Rc.DONE in this match because we always expect
+       * exactly one row. *)
+      | Sqlite3.Rc.ROW ->
+        let local_changes_blob = column_blob get_stmt 0 in
+        let local_changes_saved = (Marshal.from_string local_changes_blob 0) in
+        let local_changes = Relative_path.Map.mapi local_changes_saved ~f:begin fun path delta ->
+          match delta with
+          | Modified saved -> Modified (FileInfo.from_saved path saved)
+          | Deleted -> Deleted
+        end in
+        local_changes
+      | rc -> failwith (Printf.sprintf "Failure retrieving row: %s" (Sqlite3.Rc.to_string rc))
+  end
+
+
   (* These are just done as modules to keep the SQLite for related tables close together. *)
   module FileInfoTable = struct
     let table_name = "NAMING_FILE_INFO"
@@ -229,11 +304,6 @@ end = struct
         INSERT INTO %s
         (PATH_PREFIX_TYPE, PATH_SUFFIX, FILE_INFO)
         VALUES (?, ?, ?);
-      " table_name
-
-    let delete_sqlite =
-      Printf.sprintf "
-        DELETE FROM %s WHERE PATH_PREFIX_TYPE = ? AND PATH_SUFFIX = ?;
       " table_name
 
     let get_sqlite =
@@ -264,25 +334,6 @@ end = struct
       Sqlite3.bind insert_stmt 3 (Sqlite3.Data.BLOB file_info_blob) |> check_rc;
       Sqlite3.step insert_stmt |> check_rc;
       Sqlite3.finalize insert_stmt |> check_rc
-
-    let delete db relative_path =
-      let prefix_type = Relative_path.prefix_to_enum (Relative_path.prefix relative_path) in
-      let suffix = Relative_path.suffix relative_path in
-      let delete_stmt = Sqlite3.prepare db delete_sqlite in
-      Sqlite3.bind delete_stmt 1 (Sqlite3.Data.INT (Int64.of_int prefix_type)) |> check_rc;
-      Sqlite3.bind delete_stmt 2 (Sqlite3.Data.TEXT suffix) |> check_rc;
-      Sqlite3.step delete_stmt |> check_rc;
-      Sqlite3.finalize delete_stmt |> check_rc;
-      let rows_deleted = ref None in
-      Sqlite3.exec_not_null_no_headers db "SELECT changes();" ~cb:begin fun row ->
-        match row with
-        | [|num|] -> rows_deleted := Some (int_of_string num)
-        | [||] -> failwith "Empty row returned when requesting count of rows deleted."
-        | _ -> failwith "Too many columns returned when requesting count of rows deleted."
-      end |> check_rc;
-      match !rows_deleted with
-      | None -> failwith "Could not get count of rows deleted."
-      | Some n -> n
 
     let get_file_info db path =
       let get_stmt = Sqlite3.prepare db get_sqlite in
@@ -322,8 +373,7 @@ end = struct
           HASH INTEGER PRIMARY KEY NOT NULL,
           CANON_HASH INTEGER NOT NULL,
           FLAGS INTEGER NOT NULL,
-          FILE_INFO_ID INTEGER NOT NULL,
-          FOREIGN KEY(FILE_INFO_ID) REFERENCES NAMING_FILE_INFO(FILE_INFO_ID) ON DELETE CASCADE
+          FILE_INFO_ID INTEGER NOT NULL
         );
       " table_name
 
@@ -389,8 +439,7 @@ end = struct
         CREATE TABLE IF NOT EXISTS %s(
           HASH INTEGER PRIMARY KEY NOT NULL,
           CANON_HASH INTEGER NOT NULL,
-          FILE_INFO_ID INTEGER NOT NULL,
-          FOREIGN KEY(FILE_INFO_ID) REFERENCES NAMING_FILE_INFO(FILE_INFO_ID) ON DELETE CASCADE
+          FILE_INFO_ID INTEGER NOT NULL
         );
       " table_name
 
@@ -445,8 +494,7 @@ end = struct
       Printf.sprintf "
         CREATE TABLE IF NOT EXISTS %s(
           HASH INTEGER PRIMARY KEY NOT NULL,
-          FILE_INFO_ID INTEGER NOT NULL,
-          FOREIGN KEY(FILE_INFO_ID) REFERENCES NAMING_FILE_INFO(FILE_INFO_ID) ON DELETE CASCADE
+          FILE_INFO_ID INTEGER NOT NULL
         );
       " table_name
 
@@ -506,8 +554,6 @@ end = struct
     let check_table_sqlite =
       "SELECT NAME FROM SQLITE_MASTER WHERE TYPE='table' AND NAME='NAMING_FILE_INFO'"
 
-    let enable_foreign_keys_sqlite = "PRAGMA foreign_keys = ON; PRAGMA foreign_keys;"
-
     let open_db () =
       match Shared_db_settings.get "database_path" with
       | None -> None
@@ -516,18 +562,10 @@ end = struct
         let has_table = ref false in
         Sqlite3.exec db ~cb:(fun _ _ -> has_table := true) check_table_sqlite |> check_rc;
         if not !has_table
-        then failwith @@ Printf.sprintf "Database %s does not have a naming table." path
-        else
-        let supports_foreign_keys = ref false in
-        Sqlite3.exec db ~cb:(fun _ _ -> supports_foreign_keys := true) enable_foreign_keys_sqlite
-        |> check_rc;
-        if not !supports_foreign_keys
-        then failwith "SQLite has not been compiled with foreign keys support."
-        else begin
-          Sqlite3.exec db "PRAGMA synchronous = OFF;" |> check_rc;
-          Sqlite3.exec db "PRAGMA journal_mode = MEMORY;" |> check_rc;
-          Some db
-        end
+        then failwith @@ Printf.sprintf "Database %s does not have a naming table." path;
+        Sqlite3.exec db "PRAGMA synchronous = OFF;" |> check_rc;
+        Sqlite3.exec db "PRAGMA journal_mode = MEMORY;" |> check_rc;
+        Some db
 
     let db = ref (lazy (open_db ()))
 
@@ -588,10 +626,15 @@ end = struct
   let save_file_infos db_name file_info_map =
     let db = Sqlite3.db_open db_name in
     Sqlite3.exec db "BEGIN TRANSACTION;" |> check_rc;
+    Sqlite3.exec db LocalChanges.create_table_sqlite |> check_rc;
     Sqlite3.exec db FileInfoTable.create_table_sqlite |> check_rc;
     Sqlite3.exec db ConstsTable.create_table_sqlite |> check_rc;
     Sqlite3.exec db TypesTable.create_table_sqlite |> check_rc;
     Sqlite3.exec db FunsTable.create_table_sqlite |> check_rc;
+
+    (* Incremental updates only update the single row in this table, so we need
+     * to write in some dummy data to start. *)
+    LocalChanges.prime db;
     let save_result =
       Relative_path.Map.fold file_info_map ~init:empty_save_result ~f:begin fun path fi acc ->
         { acc with
@@ -613,25 +656,14 @@ end = struct
       | Some db -> db
       | None -> failwith @@ Printf.sprintf "Could not connect to %s" db_name
     in
-    Sqlite3.exec db "BEGIN TRANSACTION;" |> check_rc;
-    let save_result = Relative_path.Map.fold
-      local_changes
-      ~init:empty_save_result
-      ~f:begin fun path change_type acc ->
-        let rows_deleted = FileInfoTable.delete db path in
-        let (files_added, symbols_added) = match change_type with
-          | Deleted -> (0, 0)
-          | Modified file_info -> (1, save_file_info db path file_info)
-        in
-        {
-          rows_deleted = acc.rows_deleted + rows_deleted;
-          files_added = acc.files_added + files_added;
-          symbols_added = acc.symbols_added + symbols_added;
-        }
-      end
+    LocalChanges.update db local_changes
+
+  let get_local_changes () =
+    let db = match Database_handle.get_db () with
+      | Some db -> db
+      | None -> failwith @@ Printf.sprintf "Attempted to access non-connected database"
     in
-    Sqlite3.exec db "END TRANSACTION;" |> check_rc;
-    save_result
+    LocalChanges.get db
 
   let fold ~init ~f ~local_changes =
     (* We depend on [Relative_path.Map.bindings] returning results in increasing
@@ -706,8 +738,6 @@ end = struct
     | Some db ->
       ConstsTable.get db ~name
 end
-
-let set_sqlite_fallback_path = Sqlite.set_db_path
 
 
 (*****************************************************************************)
@@ -817,28 +847,13 @@ let save_incremental naming_table db_name =
   | Backed local_changes ->
     let t = Unix.gettimeofday () in
     Sqlite.set_db_path db_name;
-    let save_result = Sqlite.update_file_infos db_name local_changes in
+    Sqlite.update_file_infos db_name local_changes;
     let _ : float =
       Hh_logger.log_duration
-        (Printf.sprintf "Deleted %d files, then inserted %d files and %d symbols"
-          save_result.rows_deleted save_result.files_added save_result.symbols_added)
+        (Printf.sprintf "Updated a blob with %d entries" (Relative_path.Map.cardinal local_changes))
         t
     in
-    save_result.rows_deleted + save_result.files_added + save_result.symbols_added
-
-
-(*****************************************************************************)
-(* Creation functions *)
-(*****************************************************************************)
-
-
-let create a =
-  Unbacked a
-
-let from_db () =
-  if not (Sqlite.is_connected ())
-  then failwith "Cannot create a backed database without a SQLite connection."
-  else Backed Relative_path.Map.empty
+    ()
 
 
 (*****************************************************************************)
@@ -1184,6 +1199,40 @@ let has_local_changes () =
   || Funs.BlockedEntries.LocalChanges.has_local_changes ()
   || Consts.ConstPosHeap.LocalChanges.has_local_changes ()
   || Consts.BlockedEntries.LocalChanges.has_local_changes ()
+
+
+(*****************************************************************************)
+(* Forward naming table creation functions *)
+(*****************************************************************************)
+
+
+let create a =
+  Unbacked a
+
+let load_from_sqlite ~update_reverse_entries db_path =
+  Sqlite.set_db_path db_path;
+  let local_changes = Sqlite.get_local_changes () in
+  if update_reverse_entries then begin
+    Relative_path.Map.iter local_changes ~f:begin fun path delta ->
+      begin match Sqlite.get_file_info path with
+      | Some fi ->
+        Types.remove_batch (fi.FileInfo.classes |> List.map snd |> SSet.of_list);
+        Types.remove_batch (fi.FileInfo.typedefs |> List.map snd |> SSet.of_list);
+        Funs.remove_batch (fi.FileInfo.funs |> List.map snd |> SSet.of_list);
+        Consts.remove_batch (fi.FileInfo.consts |> List.map snd |> SSet.of_list);
+      | None -> ()
+      end;
+      begin match delta with
+      | Modified fi ->
+        List.iter (fun (pos, name) -> Types.add name (pos, TClass)) fi.FileInfo.classes;
+        List.iter (fun (pos, name) -> Types.add name (pos, TTypedef)) fi.FileInfo.typedefs;
+        List.iter (fun (pos, name) -> Funs.add name pos) fi.FileInfo.funs;
+        List.iter (fun (pos, name) -> Consts.add name pos) fi.FileInfo.consts;
+      | Deleted -> ()
+      end
+    end
+  end;
+  Backed local_changes
 
 
 (*****************************************************************************)

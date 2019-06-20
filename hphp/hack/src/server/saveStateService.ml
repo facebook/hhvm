@@ -67,8 +67,7 @@ let load_saved_state
   : Naming_table.t * saved_state_errors =
   let old_naming_table = match naming_table_fallback_path with
     | Some nt_path ->
-      Naming_table.set_sqlite_fallback_path nt_path;
-      Naming_table.from_db ()
+      Naming_table.load_from_sqlite ~update_reverse_entries:true nt_path
     | None ->
       let chan = In_channel.create ~binary:true saved_state_filename in
       let (old_saved: Naming_table.saved_state_info) =
@@ -176,7 +175,8 @@ let update_save_state
   dump_saved_state ~save_decls output_filename naming_table errors;
   let naming_table_rows_changed = if enable_naming_table_fallback then begin
     Hh_logger.log "Updating naming table in place...";
-    Naming_table.save_incremental naming_table db_name
+    Naming_table.save_incremental naming_table db_name;
+    1 (* But it's a doozy! *)
   end else begin
     Hh_logger.log "skip writing file info to sqlite table";
     0
@@ -187,8 +187,16 @@ let update_save_state
     replace_state_after_saving in
   ignore @@ Hh_logger.log_duration "Updating saved state took" t;
   let result = { naming_table_rows_changed; dep_table_edges_added } in
+
+  (* To support incremental generation we have to switch to a backed naming
+   * table. *)
   if enable_naming_table_fallback && replace_state_after_saving
-  then { env with ServerEnv.naming_table = Naming_table.from_db (); }, result
+  then
+    let naming_table = Naming_table.load_from_sqlite
+      ~update_reverse_entries:false
+      db_name
+    in
+    { env with ServerEnv.naming_table; }, result
   else env, result
 
 (** Saves the saved state to the given path. Returns number of dependency
@@ -239,8 +247,8 @@ let save_state
     let result = { naming_table_rows_changed; dep_table_edges_added } in
     if replace_state_after_saving && enable_naming_table_fallback
     then begin
-      Naming_table.set_sqlite_fallback_path db_name;
-      { env with ServerEnv.naming_table = Naming_table.from_db (); }, result
+      let naming_table = Naming_table.load_from_sqlite ~update_reverse_entries:false db_name in
+      { env with ServerEnv.naming_table; }, result
     end else env, result
   | Some old_table_filename ->
     (** If server is running from a loaded saved state, it's in-memory

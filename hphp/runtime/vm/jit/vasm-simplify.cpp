@@ -1465,26 +1465,6 @@ bool simplify(Env& env, const cmovq& inst, Vlabel b, size_t i) {
  * Copies, loads, and stores.
  */
 
-bool simplify(Env& env, const copyargs& inst, Vlabel b, size_t i) {
-  auto const& srcs = env.unit.tuples[inst.s];
-  auto const& dsts = env.unit.tuples[inst.d];
-  assertx(srcs.size() == dsts.size());
-
-  for (auto const src : srcs) {
-    for (auto const dst : dsts) {
-      if (src == dst) return false;
-    }
-  }
-
-  // If the srcs and dsts don't intersect, simplify to a sequence of copies.
-  return simplify_impl(env, b, i, [&] (Vout& v) {
-    for (auto i = 0; i < srcs.size(); ++i) {
-      v << copy{srcs[i], dsts[i]};
-    }
-    return 1;
-  });
-}
-
 /*
  * Simplify load followed by truncation:
  *  load{s, tmp}; movtqb{tmp, d} -> loadtqb{s, d}

@@ -1399,7 +1399,7 @@ Variant preg_match_all(const StringData* pattern, const StringData* subject,
 static String preg_do_repl_func(const Variant& function, const String& subject,
                                 int* offsets, const char* const* subpat_names,
                                 int count) {
-  Array subpats = Array::Create();
+  Array subpats = Array::CreateDArray();
   for (int i = 0; i < count; i++) {
     auto off1 = offsets[i<<1];
     auto off2 = offsets[(i<<1)+1];
@@ -1411,9 +1411,7 @@ static String preg_do_repl_func(const Variant& function, const String& subject,
     subpats.append(sub);
   }
 
-  Array args;
-  args.set(0, subpats);
-  return vm_call_user_func(function, args).toString();
+  return vm_call_user_func(function, make_varray(subpats)).toString();
 }
 
 static bool preg_get_backref(const char** str, int* backref) {

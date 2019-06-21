@@ -6,6 +6,7 @@ array(3) {
   [1]=>
   string(1) "b"
 }
+bool(true)
 array(3) {
   [0]=>
   string(0) ""
@@ -14,3 +15,4 @@ array(3) {
   [1]=>
   string(0) ""
 }
+bool(true)

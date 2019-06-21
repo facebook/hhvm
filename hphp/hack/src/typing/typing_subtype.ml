@@ -130,17 +130,17 @@ let (&&&) (env, p1) (f : Env.env -> Env.env * TL.subtype_prop) =
     let env, p2 = f env in
     env, TL.conj p1 p2
 
-let (|||) (env, p1) (f : Env.env -> Env.env * TL.subtype_prop) =
-  if TL.is_valid p1
-  then env, p1
-  else
-    let env, p2 = f env in
-    env, TL.disj p1 p2
-
 let if_unsat (f : unit -> Env.env * TL.subtype_prop) (env, p) =
   if TL.is_unsat p
   then f ()
   else env, p
+
+let ignore_hh_fixmes f =
+  let is_hh_fixme = !Errors.is_hh_fixme in
+  Errors.is_hh_fixme := (fun _ _ -> false);
+  let result = f () in
+  Errors.is_hh_fixme := is_hh_fixme;
+  result
 
 (** Check that a mutability type is a subtype of another mutability type *)
 let check_mutability
@@ -206,7 +206,7 @@ let anyfy env r ty =
   anyfyer#go ty
 
 (* Process the constraint proposition *)
-let rec process_simplify_subtype_result ~fail prop =
+let rec process_simplify_subtype_result prop =
   match prop with
   | TL.Unsat f ->
     f ()
@@ -215,18 +215,16 @@ let rec process_simplify_subtype_result ~fail prop =
     assert false
   | TL.Conj props ->
     (* Evaluates list from left-to-right so preserves order of conjuncts *)
-    List.iter ~f:(process_simplify_subtype_result ~fail) props
-  | TL.Disj [prop] ->
-    process_simplify_subtype_result ~fail prop
-
-  | TL.Disj props ->
+    List.iter ~f:process_simplify_subtype_result props
+  | TL.Disj (f, props) ->
     let rec try_disj props =
       match props with
       | [] ->
-        fail ()
+        f ()
       | prop :: props ->
-        Errors.try_ begin fun () ->
-          process_simplify_subtype_result ~fail prop end
+        Errors.try_
+          (fun () ->
+            ignore_hh_fixmes (fun () ->process_simplify_subtype_result prop))
           (fun _ -> try_disj props)
     in
       try_disj props
@@ -256,6 +254,12 @@ and simplify_subtype
   let env, ety_sub = Env.expand_type env ty_sub in
   let fail () =
     TUtils.uerror env (fst ety_super) (snd ety_super) (fst ety_sub) (snd ety_sub) in
+  let (|||) (env, p1) (f : Env.env -> Env.env * TL.subtype_prop) =
+    if TL.is_valid p1
+    then env, p1
+    else
+      let env, p2 = f env in
+      env, TL.disj ~fail p1 p2 in
   (* We *know* that the assertion is unsatisfiable *)
   let invalid_with f = env, TL.Unsat f in
   let invalid () = invalid_with fail in
@@ -1102,7 +1106,7 @@ and simplify_subtype
    * not complete.
    *)
   | Tintersection tyl, _ ->
-    List.fold_left tyl ~init:(env, TL.Disj []) ~f:(fun res ty_sub ->
+    List.fold_left tyl ~init:(env, TL.Disj (fail, [])) ~f:(fun res ty_sub ->
       res ||| simplify_subtype ~seen_generic_params ty_sub ty_super)
   (* t <: (t1 & ... & tn)
    *   if and only if
@@ -1762,17 +1766,18 @@ and props_to_env env remain props =
     props_to_env env remain props
   | TL.Conj props' :: props ->
     props_to_env env remain (props' @ props)
-  | TL.Disj disj_props :: conj_props ->
+  | TL.Disj (f, disj_props) :: conj_props ->
     (* For now, just find the first prop in the disjunction that works *)
     let rec try_disj disj_props =
       match disj_props with
       | [] ->
         (* For now let it fail later when calling
         process_simplify_subtype_result on the remaining constraints. *)
-        props_to_env env (TL.Disj [] :: remain) conj_props
+        props_to_env env (TL.Disj (f, []) :: remain) conj_props
       | prop :: disj_props' ->
         Errors.try_
-          (fun () -> props_to_env env remain (prop::conj_props))
+          (fun () ->
+            ignore_hh_fixmes (fun () -> props_to_env env remain (prop::conj_props)))
           (fun _ -> try_disj disj_props')
     in
     try_disj disj_props
@@ -1829,8 +1834,7 @@ and sub_type_inner
     ~this_ty ty_sub ty_super env in
   let env, prop = prop_to_env env prop in
   let env = Env.add_subtype_prop env prop in
-  let fail () = TUtils.uerror env (fst ty_super) (snd ty_super) (fst ty_sub) (snd ty_sub) in
-  process_simplify_subtype_result ~fail prop;
+  process_simplify_subtype_result prop;
   env
 
 (* BEWARE: hack upon hack here.
@@ -1846,16 +1850,11 @@ and is_sub_type_LEGACY_DEPRECATED
   (ty_super : locl ty) : bool =
   (* quick short circuit to help perf *)
   ty_equal ty_sub ty_super ||
-  begin
-    let f = !Errors.is_hh_fixme in
-    Errors.is_hh_fixme := (fun _ _ -> false);
-    let result =
-      Errors.try_
-        (fun () -> ignore(sub_type env ty_sub ty_super); true)
-        (fun _ -> false) in
-    Errors.is_hh_fixme := f;
-    result
-  end
+  Errors.try_
+    (fun () ->
+      ignore_hh_fixmes (fun () ->
+        ignore (sub_type env ty_sub ty_super); true))
+    (fun _ -> false)
 
 and is_sub_type_alt ~ignore_generic_params ~no_top_bottom env ty1 ty2 =
   let _env, prop = simplify_subtype
@@ -2069,7 +2068,7 @@ let subtype_method
     r_super ft_super_no_tvars
     env in
 
-  process_simplify_subtype_result ~fail:(fun () -> ()) res;
+  process_simplify_subtype_result res;
 
   (* This is (3) above *)
   let check_tparams_constraints env tparams =
@@ -2162,7 +2161,9 @@ and decompose_subtype_add_prop p env prop =
   match prop with
   | TL.Conj props ->
     List.fold_left ~f:(decompose_subtype_add_prop p) ~init:env props
-  | TL.Disj _props ->
+  | TL.Disj (_, [prop']) ->
+    decompose_subtype_add_prop p env prop'
+  | TL.Disj _ ->
     Typing_log.log_prop 2 env.Env.function_pos "decompose_subtype_add_prop" env prop;
     env
   | TL.Unsat _ ->

@@ -1644,8 +1644,8 @@ let subtype_prop env prop =
     | Conj [] -> "TRUE"
     | Conj ps ->
       "(" ^ (String.concat ~sep:" && " (List.map ~f:subtype_prop ps)) ^ ")"
-    | Disj [] -> "FALSE"
-    | Disj ps ->
+    | Disj (_, []) -> "FALSE"
+    | Disj (_, ps) ->
       "(" ^ (String.concat ~sep:" || " (List.map ~f:subtype_prop ps)) ^ ")"
     | IsSubtype (ty1, ty2) ->
       debug env ty1 ^ " <: " ^ debug env ty2 in

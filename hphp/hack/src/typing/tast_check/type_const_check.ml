@@ -9,6 +9,7 @@
 
 open Core_kernel
 open Tast
+open Typing_defs
 module Cls = Decl_provider.Class
 
 let handler = object
@@ -23,6 +24,16 @@ let handler = object
       begin match Cls.kind cls, c_tconst_abstract with
       | Ast.Cnormal, TCAbstract _ ->
         Errors.implement_abstract ~is_final:(Cls.final cls) (Cls.pos cls) p "type constant" name
-      | _ -> () end
+      | _ -> () end;
+
+      begin match Cls.get_typeconst cls name with
+      | Some tc ->
+        begin match tc.ttc_abstract, tc.ttc_type, tc.ttc_enforceable with
+        | TCAbstract (Some ty), _, (pos, true)
+        | (TCPartiallyAbstract | TCConcrete), Some ty, (pos, true) ->
+          Type_test_hint_check.validate_type env ty
+            (Errors.invalid_enforceable_type "constant" (pos, name))
+        | _ -> () end;
+      | None -> () end;
     | None -> ()
   end

@@ -533,11 +533,12 @@ let tconst_subsumption env parent_typeconst child_typeconst =
     parent_typeconst.ttc_constraint
     ~f:(Typing_ops.sub_type_decl parent_pos Reason.URtypeconst_cstr env);
 
-  begin match child_typeconst.ttc_type, parent_typeconst.ttc_enforceable with
-  | None, _ | _, (_, false) -> ()
-  | Some ty, (pos, true) ->
+  begin match child_typeconst.ttc_abstract, child_typeconst.ttc_type, parent_typeconst.ttc_enforceable with
+  | (TCAbstract (Some ty)), _, (pos, true)
+  | (TCPartiallyAbstract | TCConcrete), Some ty, (pos, true) ->
     Type_test_hint_check.validate_type (Tast_env.typing_env_as_tast_env env) ty
       (Errors.invalid_enforceable_type "constant" (pos, name))
+  | _ -> ()
   end;
 
   (* If the parent cannot be overridden, we unify the types otherwise we ensure

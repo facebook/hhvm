@@ -31,3 +31,10 @@ val go_locate_symbol :
   symbol:string ->
   kind:SearchUtils.si_kind ->
   DocblockService.dbs_symbol_location_result
+
+(** Simplified one-step symbol/docblock *)
+val go_docblock_for_symbol :
+  env:ServerEnv.env ->
+  symbol:string ->
+  kind:SearchUtils.si_kind ->
+  DocblockService.result

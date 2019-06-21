@@ -55,6 +55,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | IDE_HOVER _ -> false
   | DOCBLOCK_AT _ -> false
   | LOCATE_SYMBOL _ -> false
+  | DOCBLOCK_FOR_SYMBOL _ -> false
   | IDE_SIGNATURE_HELP _ -> false
   | COVERAGE_LEVELS _ -> false
   | AUTOCOMPLETE _ -> false

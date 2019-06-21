@@ -332,8 +332,7 @@
       "data": {
         "filename": "${root_path}${path_sep}completion_extras.php",
         "line": 9,
-        "char": 13,
-        "base_class": null
+        "char": 13
       }
     }
   },
@@ -450,8 +449,7 @@
       "data": {
         "filename": "${root_path}${path_sep}completion.php",
         "line": 8,
-        "char": 10,
-        "base_class": null
+        "char": 10
       }
     }
   },

@@ -54,6 +54,9 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let r = ServerDocblockAt.go_docblock_at
           ~env ~filename ~line ~column ~base_class_name ~basic_only in
         env, r
+    | DOCBLOCK_FOR_SYMBOL (symbol, kind) ->
+        let r = ServerDocblockAt.go_docblock_for_symbol ~env ~symbol ~kind in
+        env, r
     | LOCATE_SYMBOL (symbol, kind) ->
         let loc_opt = ServerDocblockAt.go_locate_symbol ~env ~symbol ~kind in
         let r = match loc_opt with

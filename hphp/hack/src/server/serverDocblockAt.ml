@@ -180,3 +180,20 @@ let go_docblock_at
         ~basic_only
         ~def in
       result
+
+(* Locate a symbol and return its docblock, no extra steps *)
+let go_docblock_for_symbol
+    ~(env: ServerEnv.env)
+    ~(symbol: string)
+    ~(kind: SearchUtils.si_kind): DocblockService.result =
+  match go_locate_symbol ~env ~symbol ~kind with
+  | None -> None
+  | Some location ->
+    let open DocblockService in
+    go_docblock_at
+      ~env
+      ~filename:location.dbs_filename
+      ~line:location.dbs_line
+      ~column:location.dbs_column
+      ~base_class_name:location.dbs_base_class
+      ~basic_only:false

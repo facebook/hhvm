@@ -500,8 +500,7 @@
       "data": {
         "filename": "${root_path}${path_sep}completion_extras.php",
         "line": 9,
-        "char": 13,
-        "base_class": null
+        "char": 13
       }
     }
   },
@@ -678,8 +677,7 @@
       "data": {
         "filename": "${root_path}${path_sep}completion.php",
         "line": 8,
-        "char": 10,
-        "base_class": null
+        "char": 10
       }
     }
   },
@@ -967,8 +965,7 @@
       "data": {
         "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
         "line": 49,
-        "char": 32,
-        "base_class": null
+        "char": 32
       }
     }
   },
@@ -1078,8 +1075,7 @@
       "data": {
         "filename": "${root_path}${path_sep}completion.php",
         "line": 18,
-        "char": 19,
-        "base_class": null
+        "char": 19
       }
     }
   },

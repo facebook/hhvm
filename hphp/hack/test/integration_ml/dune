@@ -16,12 +16,10 @@
     test_injector_config))
 
 (executable
-  (name test_all)
+  (name runner)
   (modules
     runner
     test_added_parent
-    test_all_ide
-    test_all_saved_state
     test_capitalization
     test_coverage_counts
     test_decl_decl
@@ -49,7 +47,19 @@
   (libraries
     integration_test_base
     errors
-    server_env))
+    server_env
+    unit_test
+    test_coverage_levels
+    test_all_saved_state
+    test_all_ide))
+
+(rule
+  (targets test_all.exe)
+  (action (copy runner.exe test_all.exe)))
+
+(rule
+  (targets test_all.bc)
+  (action (copy runner.bc test_all.bc)))
 
 (alias
   (name coverage_counts)

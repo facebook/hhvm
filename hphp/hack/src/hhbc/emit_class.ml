@@ -119,9 +119,12 @@ let from_constant env (_hint, name, const_init) =
 
 let from_type_constant namespace tc =
   let type_constant_name = snd tc.A.c_tconst_name in
-  match tc.A.c_tconst_type with
-  | None -> Hhas_type_constant.make type_constant_name None
-  | Some init ->
+  match tc.A.c_tconst_abstract, tc.A.c_tconst_type with
+  | A.TCAbstract None, _
+  | (A.TCPartiallyAbstract | A.TCConcrete), None ->
+    Hhas_type_constant.make type_constant_name None
+  | A.TCAbstract (Some init), _
+  | (A.TCPartiallyAbstract | A.TCConcrete), Some init ->
     (* TODO: Deal with the constraint *)
     let type_constant_initializer =
       (* Type constants do not take type vars hence tparams:[] *)

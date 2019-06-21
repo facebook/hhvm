@@ -817,16 +817,15 @@ let serve genv env in_fds =
  * 8. Otherwise, load it normally!
  *)
 let resolve_init_approach genv: ServerInit.init_approach * string =
-  if not genv.local_config.ServerLocalConfig.use_saved_state then
+  if ServerArgs.save_naming_filename genv.options <> None
+      && ServerArgs.save_filename genv.options = None
+    then ServerInit.Parse_only_init, "Server_args_saving_naming"
+  else if not genv.local_config.ServerLocalConfig.use_saved_state then
     ServerInit.Full_init, "Local_config_saved_state_disabled"
   else if ServerArgs.no_load genv.options then
     ServerInit.Full_init, "Server_args_no_load"
   else if ServerArgs.save_filename genv.options <> None then
     ServerInit.Full_init, "Server_args_saving_state"
-  else if ServerArgs.save_naming_filename genv.options <> None then
-    (* This needs to come after the check for save_filename because if we're
-     * saving both types of saved state we'll need to do a full init. *)
-    ServerInit.Parse_only_init, "Server_args_saving_naming"
   else
     match
       (genv.local_config.ServerLocalConfig.load_state_natively),

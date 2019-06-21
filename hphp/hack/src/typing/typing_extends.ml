@@ -500,6 +500,11 @@ let tconst_subsumption env parent_typeconst child_typeconst =
     | TCConcrete when disable_partially_abstract ->
       true
     | _ -> parent_is_concrete && Option.is_none parent_typeconst.ttc_constraint in
+
+  match parent_typeconst.ttc_abstract, child_typeconst.ttc_abstract with
+  | TCAbstract (Some _), TCAbstract None ->
+    Errors.override_no_default_typeconst pos parent_pos
+  | _ -> ();
   (* Check that the child's constraint is compatible with the parent. If the
    * parent has a constraint then the child must also have a constraint if it
    * is abstract

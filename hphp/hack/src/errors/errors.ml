@@ -3315,6 +3315,12 @@ let illegal_typeconst_direct_access pos =
     ^"Use type_structure(ValidClassname::class, 'TypeConstName') instead" in
   add (Typing.err_code Typing.IllegalTypeStructure) pos msg
 
+let override_no_default_typeconst pos_child pos_parent =
+  add_list (Typing.err_code Typing.OverrideNoDefaultTypeconst) [
+    pos_child, "This abstract type constant does not have a default type";
+    pos_parent, "It cannot override an abstract type constant that has a default type"
+  ]
+
 let class_property_only_static_literal pos =
   let msg =
     "Initialization of class property must be a static literal expression." in

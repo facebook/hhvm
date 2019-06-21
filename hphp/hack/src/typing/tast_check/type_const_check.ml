@@ -9,25 +9,20 @@
 
 open Core_kernel
 open Tast
-open Typing_defs
+module Cls = Decl_provider.Class
 
 let handler = object
   inherit Tast_visitor.handler_base
 
-  method! at_class_typeconst env { c_tconst_name = (_, name); c_tconst_type; _ } =
+  method! at_class_typeconst env { c_tconst_abstract; c_tconst_name = (p, name); _ } =
     let open Option in
-    let t = Tast_env.get_self_id env >>=
-      Tast_env.get_class env >>=
-      (fun cls -> Decl_provider.Class.get_typeconst cls name) in
-    match t with
-    | Some { ttc_enforceable = (pos, enforceable); _ } ->
-      (* using c_tconst_type here instead of ttc_type because the Type_test_hint_check works on
-       * hints instead of decl tys *)
-      begin match c_tconst_type with
-      | Some h when enforceable ->
-        Type_test_hint_check.validate_hint env h
-          (Errors.invalid_enforceable_type "constant" (pos, name))
+    let cls_opt = Tast_env.get_self_id env >>=
+      Tast_env.get_class env in
+    match cls_opt with
+    | Some cls ->
+      begin match Cls.kind cls, c_tconst_abstract with
+      | Ast.Cnormal, TCAbstract _ ->
+        Errors.implement_abstract ~is_final:(Cls.final cls) (Cls.pos cls) p "type constant" name
       | _ -> () end
-    | _ ->
-      ()
+    | None -> ()
   end

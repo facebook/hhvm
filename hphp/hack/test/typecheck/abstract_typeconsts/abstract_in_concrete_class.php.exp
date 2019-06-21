@@ -1,0 +1,8 @@
+File "abstract_in_concrete_class.php", line 4, characters 7-7:
+This class must be declared abstract, or provide an implementation for the abstract type constant 'T' (Typing[4047])
+File "abstract_in_concrete_class.php", line 5, characters 23-23:
+Declaration is here
+File "abstract_in_concrete_class.php", line 8, characters 13-13:
+This class was declared as final. It must provide an implementation for the abstract type constant 'T' (Typing[4047])
+File "abstract_in_concrete_class.php", line 9, characters 23-23:
+Declaration is here

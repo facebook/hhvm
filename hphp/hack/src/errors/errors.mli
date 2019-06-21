@@ -371,6 +371,7 @@ val cyclic_enum_constraint : Pos.t -> unit
 val invalid_classname : Pos.t -> unit
 val illegal_type_structure : Pos.t -> string -> unit
 val illegal_typeconst_direct_access : Pos.t -> unit
+val override_no_default_typeconst : Pos.t -> Pos.t -> unit
 val class_property_only_static_literal : Pos.t -> unit
 val reference_expr : Pos.t -> unit
 val unification_cycle : Pos.t -> string -> unit

@@ -533,9 +533,7 @@ let mutate_exceptions (input : HP.t) : mutation_monad =
                       faults]
          with Invalid_argument _ -> new_exn_region f is in
   let make_catch (label : Label.t) (body : IS.t) : IS.t * IS.t =
-    let open IS in gather [instr_try_catch_begin; body; instr_jmp label;
-                           instr_try_catch_middle; instr_throw;
-                           instr_try_catch_end; instr_label label], IS.empty in
+    IS.create_try_catch ~opt_done_label:label body IS.empty, IS.empty in
   let resume_label () =
     Label.get_next_label () |> string_of_int |> (^) "resume" |> Label.named in
   let new_catch = resume_label ()       |> make_catch |> new_exn_region in

@@ -478,20 +478,15 @@ and emit_using (env : Emit_env.t) pos is_block_scoped has_await (e : Tast.expr) 
         jump_instructions finally_end
     in
     let exn_local = Local.get_unnamed_local () in
-    let after_catch = Label.next_regular() in
     let middle =
       if is_empty_block b then empty
-      else gather [
-        instr_try_catch_begin;
-          body;
-          instr_jmp after_catch;
-        instr_try_catch_middle;
-          emit_pos (fst b);
-          make_finally_catch exn_local (emit_finally ());
-          emit_pos pos;
-        instr_try_catch_end;
-        instr_label after_catch;
-      ]
+      else create_try_catch ~skip_throw:true
+             body
+             (gather [
+               emit_pos (fst b);
+               make_finally_catch exn_local (emit_finally ());
+               emit_pos pos;
+             ])
     in
     gather [
       preamble;
@@ -658,17 +653,12 @@ and emit_try_catch_ (env : Emit_env.t) try_block catch_list =
   let end_label = Label.next_regular () in
   let (pos, _) = try_block in
   let try_env = Emit_env.with_try env in
-  gather [
-    instr_try_catch_begin;
-    emit_stmt try_env try_block;
-    Emit_pos.emit_pos pos;
-    instr_jmp end_label;
-    instr_try_catch_middle;
-    emit_catches env pos catch_list end_label;
-    instr_throw;
-    instr_try_catch_end;
-    instr_label end_label;
-  ]
+  create_try_catch ~opt_done_label:end_label
+    (gather [
+      emit_stmt try_env try_block;
+      Emit_pos.emit_pos pos;
+    ])
+    (emit_catches env pos catch_list end_label)
 
 and emit_try_finally env pos try_block finally_block =
   Local.scope @@ fun () ->
@@ -761,18 +751,12 @@ and emit_try_finally_ env pos try_block finally_block =
   emitter, get them fixed there. If not, get a clear explanation of
   what they are for and why they are required.
   *)
-  let after_catch = Label.next_regular() in
-  let middle = gather [
-    instr_try_catch_begin;
-      try_body;
-      instr_jmp after_catch;
-    instr_try_catch_middle;
+  let middle = create_try_catch ~skip_throw:true
+    try_body
+    (gather [
       emit_pos enclosing_span;
       make_finally_catch exn_local finally_body_for_catch;
-    instr_try_catch_end;
-    instr_label after_catch;
-  ]
-  in
+    ]) in
   (* Put it all together. *)
   gather [
     middle;
@@ -784,20 +768,16 @@ and emit_try_finally_ env pos try_block finally_block =
   ]
 
 and make_finally_catch exn_local finally_body =
-  let after_catch = Label.next_regular() in
   gather [
     instr_popl exn_local;
     instr_unsetl (Local.get_label_id_local ());
     instr_unsetl (Local.get_retval_local ());
-    instr_try_catch_begin;
-      finally_body;
-      instr_jmp after_catch;
-    instr_try_catch_middle;
-      instr_pushl exn_local;
-      instr_chain_faults;
-      instr_throw;
-    instr_try_catch_end;
-    instr_label after_catch;
+    create_try_catch
+      finally_body
+      (gather [
+        instr_pushl exn_local;
+        instr_chain_faults;
+      ]);
     instr_pushl exn_local;
     instr_throw;
   ]
@@ -1057,25 +1037,18 @@ and emit_foreach_ env pos collection iterator block =
 and emit_yield_from_delegates env pos e =
   let iterator_number = Iterator.get_iterator () in
   let loop_label = Label.next_regular () in
-  let done_label = Label.next_regular () in
   gather [
     emit_expr env e;
     emit_pos pos;
     instr_contAssignDelegate iterator_number;
-    instr_try_catch_begin;
-    (* try *)
-    instr_null;
-    instr_label loop_label;
-    instr_contEnterDelegate;
-    instr_yieldFromDelegate iterator_number loop_label;
-    instr_jmp done_label;
-    instr_try_catch_middle;
-    (* catch *)
-    instr_contUnsetDelegate_free iterator_number;
-    instr_throw;
-    instr_try_catch_end;
-    (* done *)
-    instr_label done_label;
+    create_try_catch
+      (gather [
+        instr_null;
+        instr_label loop_label;
+        instr_contEnterDelegate;
+        instr_yieldFromDelegate iterator_number loop_label;
+      ])
+      (instr_contUnsetDelegate_free iterator_number);
     instr_contUnsetDelegate_ignore iterator_number;
   ]
 

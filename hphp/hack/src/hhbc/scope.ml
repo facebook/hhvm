@@ -26,17 +26,9 @@ let with_unnamed_locals emit =
       ~f:(fun idx -> instr_unsetl (Unnamed (idx + current_next_local))) in
   next_local := current_next_local;
   temp_local_map := current_temp_local_map;
-  let after_label = Label.next_regular () in
   gather [
     before;
-    instr_try_catch_begin;
-    inner;
-    instr_jmp after_label;
-    instr_try_catch_middle;
-    local_unsets;
-    instr_throw;
-    instr_try_catch_end;
-    instr_label after_label;
+    create_try_catch inner local_unsets;
     after
   ]
 
@@ -60,18 +52,14 @@ let with_unnamed_locals_and_iterators emit =
   next_local := current_next_local;
   temp_local_map := current_temp_local_map;
   next_iterator :=  current_next_iterator;
-  let after_label = Label.next_regular () in
   gather [
     before;
-    instr_try_catch_begin;
-    inner;
-    instr_jmp after_label;
-    instr_try_catch_middle;
-    local_unsets;
-    iter_frees;
-    instr_throw;
-    instr_try_catch_end;
-    instr_label after_label;
+    create_try_catch
+      inner
+      (gather [
+        local_unsets;
+        iter_frees;
+      ]);
     after
   ]
 

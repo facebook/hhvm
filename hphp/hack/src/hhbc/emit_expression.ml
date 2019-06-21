@@ -3938,19 +3938,15 @@ and emit_unop env pos op e =
   | Ast.Usilence ->
     Local.scope @@ fun () ->
       let temp_local = Local.get_unnamed_local () in
-      let done_label = Label.next_regular () in
       gather [
         emit_pos pos;
         instr_silence_start temp_local;
-        instr_try_catch_begin;
-        emit_expr env e;
-        instr_jmp done_label;
-        instr_try_catch_middle;
-        emit_pos pos;
-        instr_silence_end temp_local;
-        instr_throw;
-        instr_try_catch_end;
-        instr_label done_label;
+        create_try_catch
+          (emit_expr env e)
+          (gather [
+            emit_pos pos;
+            instr_silence_end temp_local;
+          ]);
         emit_pos pos;
         instr_silence_end temp_local
       ]

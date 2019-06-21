@@ -337,6 +337,22 @@ let instr_trigger_sampled_error =
 
 let instr_nativeimpl = instr (IMisc NativeImpl)
 
+let create_try_catch ?(opt_done_label) ?(skip_throw=false)
+  try_instrs catch_instrs =
+  let done_label = match opt_done_label with
+    | None -> Label.next_regular ()
+    | Some l -> l in
+  gather [
+    instr (ITry TryCatchBegin);
+    try_instrs;
+    instr_jmp done_label;
+    instr (ITry TryCatchMiddle);
+    catch_instrs;
+    if skip_throw then empty else instr_throw;
+    instr (ITry TryCatchEnd);
+    instr_label done_label;
+  ]
+
 
 (* Functions on instr_seq that correspond to existing Hh_core.List functions *)
 module InstrSeq = struct
@@ -414,10 +430,6 @@ let instr_seq_to_list t =
     end
     | i :: is -> compact_src_locs (i :: acc) is in
   go [] [t] |> compact_src_locs []
-
-let instr_try_catch_begin = instr (ITry TryCatchBegin)
-let instr_try_catch_middle = instr (ITry TryCatchMiddle)
-let instr_try_catch_end = instr (ITry TryCatchEnd)
 
 let get_num_cls_ref_slots instrseq =
   InstrSeq.fold_left

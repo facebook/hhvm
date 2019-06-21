@@ -6,6 +6,7 @@ function main() {
     array('x' => 1),
     shape('x' => 1),
     darray['x' => 1],
+    varray[true, false],
     new Map(dict['x' => 1]),
   ];
   foreach ($arrs as $arr) {

@@ -10,11 +10,11 @@
 open Core_kernel
 open Decl_defs
 open Decl_subst
-open Decl_to_typing
 open Reordered_argument_collections
 open Shallow_decl_defs
 open Typing_defs
 
+module DTT = Decl_to_typing
 module LSTable = Lazy_string_table
 
 type inherited_members = {
@@ -84,12 +84,12 @@ let methods ~static child_class_name lin =
       let methods = if static then cls.sc_static_methods else cls.sc_methods in
       let redecls = cls.sc_method_redeclarations in
       let redecls = List.filter ~f:(fun x -> x.smr_static = static) redecls in
-      let methods_from_redecls = redecl_list_to_method_seq redecls in
+      let methods_from_redecls = DTT.redecl_list_to_method_seq redecls in
       let cid = mro.mro_name in
       let methods_seq =
         Sequence.append (Sequence.of_list methods) methods_from_redecls
         |> Sequence.filter ~f:(fun sm -> not (SPairSet.mem removed (cid, snd sm.sm_name)))
-        |> Sequence.map ~f:(shallow_method_to_telt child_class_name mro subst)
+        |> Sequence.map ~f:(DTT.shallow_method_to_telt child_class_name mro subst)
       in
       (* "Remove" all trait methods which were redeclared. If we encounter any
          of these trait methods later in the linearization, just ignore them. *)
@@ -109,7 +109,7 @@ let props ~static child_class_name lin =
   |> Sequence.map ~f:begin fun (mro, cls, subst) ->
     (if static then cls.sc_sprops else cls.sc_props)
     |> Sequence.of_list
-    |> Sequence.map ~f:(shallow_prop_to_telt child_class_name mro subst)
+    |> Sequence.map ~f:(DTT.shallow_prop_to_telt child_class_name mro subst)
   end
   |> Sequence.concat
 
@@ -142,9 +142,9 @@ let chown_private child_class_name ancestor_sig =
     Mark private trait members as private to [child_class_name] instead. *)
 let filter_or_chown_privates
     (child_class_name: string)
-    (lin: tagged_elt Sequence.t)
+    (lin: DTT.tagged_elt Sequence.t)
     : (string * class_elt) Sequence.t =
-  Sequence.filter_map lin begin fun {id; inherit_when_private; elt} ->
+  Sequence.filter_map lin begin fun DTT.{id; inherit_when_private; elt} ->
     let ancestor_name = elt.ce_origin in
     let is_private_and_inherited =
       ancestor_name <> child_class_name && is_private elt
@@ -216,7 +216,7 @@ let consts child_class_name get_ancestor lin =
     match Shallow_classes_heap.get child_class_name with
     | None -> Sequence.empty, lazy None
     | Some cls ->
-      Sequence.singleton (classname_const cls.sc_name),
+      Sequence.singleton (DTT.classname_const cls.sc_name),
       lazy (Decl_enum.enum_kind cls.sc_name cls.sc_enum_type get_ancestor)
   in
   let consts_and_typeconst_structures =
@@ -226,14 +226,14 @@ let consts child_class_name get_ancestor lin =
         cls.sc_consts
         |> Sequence.of_list
         |> Sequence.map
-          ~f:(shallow_const_to_class_const child_class_name mro subst)
+          ~f:(DTT.shallow_const_to_class_const child_class_name mro subst)
       in
       (* Each concrete type constant implicitly defines a class constant of the
          same name with that type's TypeStructure. *)
       let typeconst_structures =
         cls.sc_typeconsts
         |> Sequence.of_list
-        |> Sequence.map ~f:(typeconst_structure mro (snd cls.sc_name))
+        |> Sequence.map ~f:(DTT.typeconst_structure mro (snd cls.sc_name))
       in
       Sequence.append consts typeconst_structures
     end
@@ -259,7 +259,7 @@ let typeconsts child_class_name lin =
     cls.sc_typeconsts
     |> Sequence.of_list
     |> Sequence.map
-      ~f:(shallow_typeconst_to_typeconst_type child_class_name mro subst)
+      ~f:(DTT.shallow_typeconst_to_typeconst_type child_class_name mro subst)
   end
   |> Sequence.concat
 
@@ -352,7 +352,7 @@ let constructor_elt child_class_name (mro, cls, subst) =
   in
   let elt =
     Option.map cls.sc_constructor
-      ~f:(shallow_method_to_class_elt child_class_name mro subst)
+      ~f:(DTT.shallow_method_to_class_elt child_class_name mro subst)
   in
   elt, consistent
 

@@ -1,4 +1,4 @@
-<?hh 
+<?hh
 
 /* Inheritance test.  Pretty nifty if I do say so myself! */
 
@@ -25,7 +25,7 @@ class bar extends foo {
   }
 };
 
-
+<<__EntryPoint>> function main(): void {
 $foo1 = new foo;
 $foo1->a = 2;
 $foo1->b = 5;
@@ -40,3 +40,4 @@ $bar1->b = 3;
 $bar1->c = 12;
 $bar1->display();
 echo $bar1->mul()."\n";
+}

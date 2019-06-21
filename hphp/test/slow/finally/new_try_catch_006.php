@@ -56,5 +56,6 @@ function blah() {
   echo "fff\n";
   return 666;
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(blah());
+}

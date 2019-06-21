@@ -1,13 +1,13 @@
 <?hh
 /*
  * Prototype  : bool in_array ( mixed $needle, array $haystack [, bool $strict] )
- * Description: Searches haystack for needle and returns TRUE  
+ * Description: Searches haystack for needle and returns TRUE
  *              if it is found in the array, FALSE otherwise.
  * Source Code: ext/standard/array.c
 */
 
 /* Test in_array() with different possible needle values */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing in_array() with different needle values ***\n";
 $arrays = array (
   array(0),
@@ -17,7 +17,7 @@ $arrays = array (
   array(TRUE, FALSE),
   array("", array()),
   array("abcd\x00abcd\x00abcd"),
-  array("abcd\tabcd\nabcd\rabcd\0abcdefghij") 
+  array("abcd\tabcd\nabcd\rabcd\0abcdefghij")
 );
 
 $array_compare = array (
@@ -47,13 +47,14 @@ foreach($arrays as $array) {
   foreach($array_compare as $compare) {
     echo "-- Iteration $counter --\n";
     //strict option OFF
-    var_dump(in_array($compare,$array));  
+    var_dump(in_array($compare,$array));
     //strict option ON
-    var_dump(in_array($compare,$array,TRUE));  
+    var_dump(in_array($compare,$array,TRUE));
     //strict option OFF
-    var_dump(in_array($compare,$array,FALSE));  
+    var_dump(in_array($compare,$array,FALSE));
     $counter++;
  }
 }
-		
+
 echo "Done\n";
+}

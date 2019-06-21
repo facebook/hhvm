@@ -1,4 +1,5 @@
 <?hh
+<<__EntryPoint>>
 function foo () {
    $jmp = 1;
    try {
@@ -15,5 +16,3 @@ label:
        echo "okey";
    }
 }
-
-foo();

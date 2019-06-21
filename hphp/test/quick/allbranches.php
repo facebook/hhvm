@@ -1,8 +1,5 @@
 <?hh
 
-// disable array -> "Array" conversion notice
-error_reporting(error_reporting() & ~E_NOTICE);
-
 trait T {
   public function binary($la, $ra) {
     // Stick this in a trait, so we get different copies for different
@@ -103,7 +100,10 @@ class DifferentTypes {
   }
 }
 
+<<__EntryPoint>>
 function main() {
+  // disable array -> "Array" conversion notice
+  error_reporting(error_reporting() & ~E_NOTICE);
   $asc = new Ascending();
   $desc = new Descending();
   $eq = new Equal();
@@ -112,4 +112,3 @@ function main() {
   $bools = new Bools();
   $diff = new DifferentTypes();
 }
-main();

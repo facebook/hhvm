@@ -27,6 +27,8 @@ namespace B {
 namespace {
   use A; // overrides alias
   use namespace C; // overrides alias
+  <<__EntryPoint>> function main(): void {
   A\x(); // A\x();
   C\x(); // C\x();
+  }
 }

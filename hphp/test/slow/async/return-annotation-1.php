@@ -19,4 +19,6 @@ class C {
   function f8() { async (): Awaitable<void> ==> {}; }
   function f9() { async (): AsyncIterator<int> ==> { yield 1; }; }
 }
+<<__EntryPoint>> function main(): void {
 echo "Done\n";
+}

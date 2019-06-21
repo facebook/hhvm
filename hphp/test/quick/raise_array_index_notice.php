@@ -9,10 +9,8 @@ function rain() {
     print($arr[$i]."\n");
   }
 }
-
+<<__EntryPoint>>
 function main() {
   rain();
   print("not_reached\n");
 }
-
-main();

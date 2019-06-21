@@ -3,7 +3,6 @@
 
 
 function handler() { throw new Exception('Error'); }
-set_error_handler('handler');
 
 class A {
   public static int $x = 'abc';
@@ -21,4 +20,7 @@ function test() {
   }
 }
 
+<<__EntryPoint>> function main(): void {
+set_error_handler('handler');
 test();
+}

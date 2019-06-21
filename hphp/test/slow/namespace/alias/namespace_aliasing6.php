@@ -15,5 +15,7 @@ namespace Some\Other\Dict {
 namespace {
   use namespace Some\Other\Dict;
 
+  <<__EntryPoint>> function main(): void {
   Dict\foo();
+  }
 }

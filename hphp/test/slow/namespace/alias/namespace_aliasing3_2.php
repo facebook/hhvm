@@ -7,6 +7,8 @@ namespace HH\Lib\Dict {
 }
 
 namespace Main {
+  <<__EntryPoint>> function main(): void {
   \HH\Lib\Dict\foo(); // ok
   HH\Lib\Dict\foo(); // error
+  }
 }

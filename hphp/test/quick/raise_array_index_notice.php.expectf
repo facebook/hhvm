@@ -6,5 +6,5 @@
 Fatal error: Uncaught exception 'OutOfBoundsException' with message 'Undefined index: 4' in %s:9
 Stack trace:
 #0 %s(14): rain()
-#1 %s(18): main()
+#1 %S(%S): main()
 #2 {main}

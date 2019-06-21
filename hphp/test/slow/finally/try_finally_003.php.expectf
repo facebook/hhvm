@@ -2,4 +2,4 @@
 Fatal error: Uncaught exception 'Exception' with message 'ex' in %s/try_finally_003.php:7
 Stack trace:
 #0 %s/try_finally_003.php(16): foo()
-#1 {main}
+%a {main}

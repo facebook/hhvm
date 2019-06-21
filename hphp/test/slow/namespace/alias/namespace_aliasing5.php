@@ -15,5 +15,7 @@ namespace HH\Lib\Dict\Foo\Bar {
 namespace {
   use namespace Dict\Foo\Bar;
 
+  <<__EntryPoint>> function main(): void {
   Bar\foo();
+  }
 }

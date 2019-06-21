@@ -6,4 +6,7 @@ function foo() {
 test:
     }
 }
+
+<<__EntryPoint>> function main(): void {
 echo "okey";
+}

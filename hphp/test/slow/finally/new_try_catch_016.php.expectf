@@ -15,19 +15,19 @@
 Fatal error: Uncaught exception 'Exception' with message 'ble!' in %s/test/slow/finally/new_try_catch_016.php:13
 Stack trace:
 #0 %s/test/slow/finally/new_try_catch_016.php(%s): blah()
-#1 {main}
+%a {main}
 
 Next exception 'A' with message 'bla!' in %s/test/slow/finally/new_try_catch_016.php:25
 Stack trace:
 #0 %s/test/slow/finally/new_try_catch_016.php(%s): blah()
-#1 {main}
+%a {main}
 
 Next exception 'C' with message 'ble!' in %s/test/slow/finally/new_try_catch_016.php:29
 Stack trace:
 #0 %s/test/slow/finally/new_try_catch_016.php(58): blah()
-#1 {main}
+%a {main}
 
 Next exception 'B' with message '14' in %s/test/slow/finally/new_try_catch_016.php:41
 Stack trace:
 #0 %s/test/slow/finally/new_try_catch_016.php(58): blah()
-#1 {main}
+%a {main}

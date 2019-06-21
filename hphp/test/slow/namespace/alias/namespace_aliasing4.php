@@ -13,6 +13,8 @@ namespace HH\Lib\Dict {
 }
 
 namespace {
+  <<__EntryPoint>> function main(): void {
   Dict\foo();
   \Dict\foo();
+  }
 }

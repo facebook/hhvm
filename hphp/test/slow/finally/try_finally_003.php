@@ -12,5 +12,6 @@ function foo () {
       echo "4";
    }
 }
-
+<<__EntryPoint>> function main(): void {
 foo();
+}

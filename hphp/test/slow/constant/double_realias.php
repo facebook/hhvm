@@ -12,6 +12,7 @@ namespace {
   use const foo\BAR as fooBAR;
   use const foo\BAR as FOObar;
 
+  <<__EntryPoint>> function main(): void {
   \var_dump(foo\bar);
   \var_dump(foo\BAR);
 
@@ -19,4 +20,5 @@ namespace {
   \var_dump(FOOBAR);
   \var_dump(fooBAR);
   \var_dump(FOObar);
+}
 }

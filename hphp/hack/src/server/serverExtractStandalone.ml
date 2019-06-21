@@ -8,23 +8,44 @@
 
 open Typing_defs
 open Core_kernel
-open Ast
 
 exception FunctionNotFound
 
-let extract_function_body func =
+let get_filename func =
   let fname_pos = match Decl_provider.get_fun func with
     | Some f -> f.ft_pos
     | None -> raise FunctionNotFound in
-  let rel_filename = Pos.filename fname_pos in
-  let abs_filename = Pos.filename (Pos.to_absolute fname_pos) in
+  Pos.filename fname_pos
+
+let extract_function_body func =
+  let filename = get_filename func in
+  let abs_filename = Relative_path.to_absolute filename in
   let file_content = In_channel.read_all abs_filename in
-  match Ast_provider.find_fun_in_file rel_filename func with
+  let open Ast in
+  match Ast_provider.find_fun_in_file filename func with
     | Some ast_function ->
       let pos = ast_function.f_span in
       let include_first_whsp = Pos.merge (Pos.first_char_of_line pos) pos in
       Pos.get_text_from_pos file_content include_first_whsp
     | None -> raise FunctionNotFound
 
-let go function_name =
-  try extract_function_body function_name with FunctionNotFound -> "Function not found!"
+(* TODO: extract declaration *)
+let extract_object_declaration obj =
+  Typing_deps.Dep.to_string obj
+
+let collect_dependencies tcopt func =
+  Typing_deps.collect_dependencies := true;
+  Typing_deps.dependencies_of := Utils.strip_ns func;
+  let filename = get_filename func in
+  let ast = Ast_provider.get_ast ~full:true filename in
+  (* TODO: avoid complete re-typechecking *)
+  let _ : Tast.program = Typing.nast_to_tast tcopt (Naming.program (Ast_to_nast.convert ast)) in
+  HashSet.fold (fun el l -> (extract_object_declaration el) :: l) Typing_deps.dependencies []
+
+
+let go tcopt function_name =
+  try
+    let function_text = extract_function_body function_name in
+    let dependencies = collect_dependencies tcopt function_name in
+    dependencies @ [function_text]
+  with FunctionNotFound -> ["Function not found!"]

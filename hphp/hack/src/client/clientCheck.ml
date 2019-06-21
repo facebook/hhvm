@@ -257,7 +257,7 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
     | MODE_EXTRACT_STANDALONE name ->
       let%lwt pretty_printed_dependencies =
         rpc args @@ Rpc.EXTRACT_STANDALONE name in
-      Printf.printf "%s\n" pretty_printed_dependencies;
+      List.iter pretty_printed_dependencies print_endline;
       Lwt.return Exit_status.No_error
     | MODE_IDENTIFY_SYMBOL1 arg
     | MODE_IDENTIFY_SYMBOL2 arg

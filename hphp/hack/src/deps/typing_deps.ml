@@ -137,8 +137,20 @@ let trace = ref true
 let debug_trace = ref false
 let dbg_deps = Hashtbl.create 0
 
+let collect_dependencies = ref false
+let dependencies_of = ref ""
+let dependencies = HashSet.create 0
+
 let add_idep root obj =
   if root = obj then () else begin
+    if !collect_dependencies then begin
+      let name_from_variant v =
+        match String.split_on_char ' ' (Dep.to_string v) with
+        | _::object_name::_ -> object_name
+        | _ -> "" in
+      let root_name = name_from_variant root in
+      if root_name = !dependencies_of then HashSet.add dependencies obj;
+    end;
     if !trace then Graph.add (Dep.make obj) (Dep.make root);
     if !debug_trace then
       let root = Dep.to_string root in
@@ -148,7 +160,7 @@ let add_idep root obj =
       | None ->
         let set = HashSet.create 1 in
         HashSet.add set root;
-        Hashtbl.replace dbg_deps obj set
+        Hashtbl.replace dbg_deps obj set;
   end
 
 let sort_debug_deps deps =

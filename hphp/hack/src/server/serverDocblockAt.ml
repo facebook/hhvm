@@ -99,23 +99,31 @@ let fallback class_name member_name =
   |> all_interfaces_or_first_class_docblock []
   |> render_ancestor_docblocks
 
+(* Attempt to clean obvious cruft from a docblock *)
+let clean_docblock (docblock: string): string =
+  (String.strip docblock)
+
+(* Fetch a definition *)
 let go_def
     ~(def: Relative_path.t SymbolDefinition.t)
     ~(base_class_name: string option)
     ~(file: ServerCommandTypes.file_input)
     ~(basic_only: bool) =
-  let open Option.Monad_infix in
-  (** Read as "or-else." *)
-  let (>>~) opt f = if Option.is_some opt then opt else f () in
-  def.SymbolDefinition.docblock
-  >>~ fun () ->
-  ServerSymbolDefinition.get_definition_cst_node file def
-  >>= Docblock_finder.get_docblock
-  >>~ fun () ->
-  match def.SymbolDefinition.kind, base_class_name with
-  | SymbolDefinition.Method, Some base_class_name when not basic_only ->
-    fallback base_class_name def.SymbolDefinition.name
-  | _ -> None
+  match def.SymbolDefinition.docblock with
+  | Some db -> Some (clean_docblock db)
+  | None ->
+    let ffps_opt = ServerSymbolDefinition.get_definition_cst_node file def in
+    match ffps_opt with
+    | None -> None
+    | Some ffps ->
+      match Docblock_finder.get_docblock ffps with
+      | Some db -> Some (clean_docblock db)
+      | None ->
+        match def.SymbolDefinition.kind, base_class_name with
+        | SymbolDefinition.Method, Some base_class_name when not basic_only ->
+          fallback base_class_name def.SymbolDefinition.name
+        | _ -> None
+;;
 
 (* Locate a symbol and return file, line, column, and base_class *)
 let go_locate_symbol

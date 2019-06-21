@@ -947,7 +947,7 @@
       "detail": "function(mixed $value): bool",
       "inlineDetail": "(mixed $value)",
       "itemType": "bool",
-      "documentation": "\nReturns whether or not the value is defined as a constant.\n",
+      "documentation": "Returns whether or not the value is defined as a constant.",
       "insertTextFormat": 1,
       "textEdit": {
         "range": {

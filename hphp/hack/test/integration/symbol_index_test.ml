@@ -22,6 +22,8 @@ let assert_ns_matches
     IA.assert_equals 0 1 msg;
   end;
   ()
+;;
+
 
 let assert_autocomplete
     ~(query_text: string)
@@ -56,6 +58,7 @@ let assert_autocomplete
 
 let run_index_builder (harness: Test_harness.t): unit =
   Relative_path.set_path_prefix Relative_path.Root harness.repo_dir;
+  Relative_path.set_path_prefix Relative_path.Tmp (Path.make "/tmp");
   let repo_path = Path.to_string harness.repo_dir in
 
   (* Set up initial variables *)
@@ -261,6 +264,26 @@ let test_namespace_map (harness: Test_harness.t): bool =
   true
 ;;
 
+(* Rapid unit tests to verify docblocks are found and correct *)
+let test_docblock_finder (harness: Test_harness.t): bool =
+  run_index_builder harness;
+  let env = ServerEnvBuild.make_env ServerConfig.default_config in
+  let handle = SharedMem.init ~num_workers:0 GlobalConfig.default_sharedmem_config in
+  ignore (handle: SharedMem.handle);
+  GlobalNamingOptions.set (env.ServerEnv.tcopt);
+
+  (* Search for docblocks for various items *)
+  let root_prefix = Path.to_string harness.repo_dir in
+  let docblock = ServerDocblockAt.go_docblock_at
+    ~env ~filename:(root_prefix ^ "/bar_1.php") ~line:6 ~column:7
+    ~base_class_name:(Some "NoBigTrait") ~basic_only:false
+  in
+  SA.assert_option_equals (Some "This is a docblock for NoBigTrait")
+    docblock "Should find docblock";
+  true
+;;
+
+
 (* Main test suite *)
 let tests args =
   let harness_config = {
@@ -278,6 +301,9 @@ let tests args =
   ("test_namespace_map", fun () ->
     Test_harness.run_test ~stop_server_in_teardown:false harness_config
     test_namespace_map);
+  ("test_docblock_finder", fun () ->
+    Test_harness.run_test ~stop_server_in_teardown:false harness_config
+    test_docblock_finder);
   ]
 ;;
 

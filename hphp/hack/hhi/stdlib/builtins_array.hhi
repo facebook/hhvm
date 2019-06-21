@@ -117,10 +117,11 @@ function array_map($callback, $arr1, ...);
 function array_merge_recursive($array1, ...);
 <<__PHPStdLib, __Rx>>
 function array_merge($array1, ...);
-<<__Rx>>
+<<__PHPStdLib, __Rx>>
 function array_replace_recursive($array1, ...);
-<<__Rx>>
+<<__PHPStdLib, __Rx>>
 function array_replace($array1, ...);
+<<__PHPStdLib>>
 function array_multisort(
   mixed &$arg1,
   mixed &$arg2 = null,
@@ -140,6 +141,7 @@ function array_pop(&$array);
 function array_push(&$array, $var, ...);
 <<__PHPStdLib>>
 function array_rand($input, int $num_req = 1);
+<<__PHPStdLib>>
 function array_reduce($input, $callback, $initial = null);
 <<__PHPStdLib, __Rx>>
 function array_reverse($array, bool $preserve_keys = false);

@@ -837,7 +837,7 @@ void calculate_loop_info(State& state) {
       // block. These might include registers which aren't used by any
       // instructions in the block, but still increase the register pressure
       // (because they're live-thru).
-      state.liveOut[b].forEach(liveUse);
+      for (auto const r : state.liveOut[b]) liveUse(r);
 
       // The register pressure can increase and decrease within a particular
       // instruction (as we account for the uses and defs), so update the
@@ -1244,9 +1244,7 @@ compute_place_constants_block_info(const State& state) {
         if (!newState) newState.emplace();
         auto mutated = newState.mutate();
         mutated->definitelyUsed |= uses;
-        uses.forEach(
-          [&] (Vreg r) { mutated->nearestUse.insert_or_assign(r, b); }
-        );
+        for (auto const r : uses) mutated->nearestUse.insert_or_assign(r, b);
       }
       // Update this block's state and schedule any predecessors
       if (schedulePreds(newState.get())) blockIn[b] = newState;
@@ -1292,9 +1290,7 @@ compute_place_constants_block_info(const State& state) {
       // If this block uses a constant, that constant is definitely used at this
       // point.
       newState.definitelyUsed |= uses;
-      uses.forEach(
-        [&] (Vreg r) { newState.nearestUse.insert_or_assign(r, b); }
-      );
+      for (auto const r : uses) newState.nearestUse.insert_or_assign(r, b);
 
       // Update this block's state and schedule any predecessors
       if (schedulePreds(&newState)) blockIn[b].emplace(std::move(newState));
@@ -1524,7 +1520,7 @@ VregSet place_constants(State& state) {
       vmodify(
         unit, b, i,
         [&] (Vout& v) {
-          placeThisInst.forEach([&] (Vreg r) { materialize(v, r); });
+          for (auto const r : placeThisInst) materialize(v, r);
           return 0;
         }
       );
@@ -1869,7 +1865,7 @@ void prepare_unit(State& state) {
   vmodify(
     state.unit, state.unit.entry, 0,
     [&] (Vout& v) {
-      unreserved.forEach([&] (Vreg r) { v << conjure{r}; });
+      for (auto const r : unreserved) v << conjure{r};
       return 0;
     }
   );
@@ -2131,19 +2127,17 @@ void infer_register_classes(State& state) {
 
       // Otherwise we need to insert a copy before the use.
       jit::vector<std::pair<Vreg, Vreg>> copies;
-      incompatible.forEach(
-        [&] (Vreg r) {
-          assertx(!r.isPhys());
-          auto const newReg = unit.makeReg();
-          // Clone the register, except for the RegClass, which is automatically
-          // Any because its coming from a copy. We'll reprocess this
-          // instruction to set the RegClass appropriately.
-          auto& newInfo = reg_info_create(state, newReg);
-          newInfo = reg_info(state, r);
-          newInfo.regClass = RegClass::Any;
-          copies.emplace_back(r, newReg);
-        }
-      );
+      for (auto const r : incompatible) {
+        assertx(!r.isPhys());
+        auto const newReg = unit.makeReg();
+        // Clone the register, except for the RegClass, which is automatically
+        // Any because its coming from a copy. We'll reprocess this
+        // instruction to set the RegClass appropriately.
+        auto& newInfo = reg_info_create(state, newReg);
+        newInfo = reg_info(state, r);
+        newInfo.regClass = RegClass::Any;
+        copies.emplace_back(r, newReg);
+      }
       assertx(!copies.empty());
       addCopies(copies, b, i);
       // We've inserted a copy, so adjust the instruction index.
@@ -2695,14 +2689,12 @@ uint64_t spill_weight_at(const State& state,
   // If we get here, the Vreg isn't used from the start point to the end of the
   // block. We can just use the weight at the block exit. Check all registers in
   // the equivalence set and pick the minimum one.
-  regs.forEach(
-    [&] (Vreg r) {
-      auto const it = state.spillWeightsOut[b].find(r);
-      if (it != state.spillWeightsOut[b].end()) {
-        weight = std::min(weight, it->second);
-      }
+  for (auto const r : regs) {
+    auto const it = state.spillWeightsOut[b].find(r);
+    if (it != state.spillWeightsOut[b].end()) {
+      weight = std::min(weight, it->second);
     }
-  );
+  }
   return weight + instCount;
 }
 
@@ -3026,19 +3018,16 @@ void fix_constrained_inst_uses(const State& state,
     assertx(useInfo.precolor != InvalidReg);
 
     Vreg match;
-    defs.forEach(
-      [&] (Vreg def) {
-        assertx(!match.isValid());
-        auto const& defInfo = reg_info(state, def);
-        if (useInfo.precolor == defInfo.precolor) {
-          assertx(!matchedDef[def]);
-          assertx(compat_class(useInfo.regClass, defInfo.regClass));
-          match = def;
-          return false;
-        }
-        return true;
+    for (auto const def : defs) {
+      assertx(!match.isValid());
+      auto const& defInfo = reg_info(state, def);
+      if (useInfo.precolor == defInfo.precolor) {
+        assertx(!matchedDef[def]);
+        assertx(compat_class(useInfo.regClass, defInfo.regClass));
+        match = def;
+        break;
       }
-    );
+    }
     return match;
   };
 
@@ -3050,20 +3039,17 @@ void fix_constrained_inst_uses(const State& state,
     assertx(useInfo.precolor != InvalidReg);
 
     Vreg match;
-    defs.forEach(
-      [&] (Vreg def) {
-        assertx(!match.isValid());
-        if (matchedDef[def]) return true;
-        auto const& defInfo = reg_info(state, def);
-        if (defInfo.precolor != InvalidReg &&
-            compat_class(useInfo.regClass, defInfo.regClass)) {
-          assertx(useInfo.precolor != defInfo.precolor);
-          match = def;
-          return false;
-        }
-        return true;
+    for (auto const def : defs) {
+      assertx(!match.isValid());
+      if (matchedDef[def]) continue;
+      auto const& defInfo = reg_info(state, def);
+      if (defInfo.precolor != InvalidReg &&
+          compat_class(useInfo.regClass, defInfo.regClass)) {
+        assertx(useInfo.precolor != defInfo.precolor);
+        match = def;
+        break;
       }
-    );
+    }
     return match;
   };
 
@@ -3075,56 +3061,49 @@ void fix_constrained_inst_uses(const State& state,
     assertx(useInfo.precolor != InvalidReg);
 
     Vreg match;
-    defs.forEach(
-      [&] (Vreg def) {
-        assertx(!match.isValid());
-        if (matchedDef[def]) return true;
-        auto const& defInfo = reg_info(state, def);
-        if (defInfo.precolor == InvalidReg &&
-            compat_class(useInfo.regClass, defInfo.regClass)) {
-          match = def;
-          return false;
-        }
-        return true;
+    for (auto const def : defs) {
+      assertx(!match.isValid());
+      if (matchedDef[def]) continue;
+      auto const& defInfo = reg_info(state, def);
+      if (defInfo.precolor == InvalidReg &&
+          compat_class(useInfo.regClass, defInfo.regClass)) {
+        match = def;
+        break;
       }
-    );
+    }
     return match;
   };
 
   // Try to pair up uses with defs, preferring use/def pairs which have the same
   // precolor register first.
   auto const matchDef = [&] (auto f) {
-    uses.forEach(
-      [&] (Vreg r) {
-        if (matchedUse[r] ||
-            reg_info(state, r).precolor == InvalidReg ||
-            live_in_at(state, r, block, instIdx+1)) {
-          return;
-        }
-        auto const match = f(r);
-        if (match.isValid()) {
-          matchedUse.add(r);
-          matchedDef.add(match);
-        }
+    for (auto const r : uses) {
+      if (matchedUse[r] ||
+          reg_info(state, r).precolor == InvalidReg ||
+          live_in_at(state, r, block, instIdx+1)) {
+        continue;
       }
-    );
+      auto const match = f(r);
+      if (match.isValid()) {
+        matchedUse.add(r);
+        matchedDef.add(match);
+      }
+    }
   };
   matchDef(findMatchingPrecoloredDef);
   matchDef(findMatchingUnconstrainedDef);
 
   // If there's any unpaired uses left, force them to be "across".
   VregSet forcedAcross;
-  uses.forEach(
-    [&] (Vreg r) {
-      if (matchedUse[r] ||
-          reg_info(state, r).precolor == InvalidReg ||
-          live_in_at(state, r, block, instIdx+1)) {
-        return;
-      }
-      auto const match = findNotMatchingPrecoloredDef(r);
-      if (match.isValid()) forcedAcross.add(r);
+  for (auto const r : uses) {
+    if (matchedUse[r] ||
+        reg_info(state, r).precolor == InvalidReg ||
+        live_in_at(state, r, block, instIdx+1)) {
+      continue;
     }
-  );
+    auto const match = findNotMatchingPrecoloredDef(r);
+    if (match.isValid()) forcedAcross.add(r);
+  }
 
   uses -= forcedAcross;
   acrosses |= forcedAcross;
@@ -3214,13 +3193,11 @@ struct SpillerState {
       // spill weights at this point.
       jit::vector<std::pair<Vreg, uint64_t>> candidates;
       candidates.reserve(per.inReg.size());
-      per.inReg.forEach(
-        [&] (Vreg r) {
-          // Are we ignoring the forbidden set?
-          if (!recursed && forbidden[r]) return;
-          candidates.emplace_back(r, spill_weight_at(*state, r, b, instIdx));
-        }
-      );
+      for (auto const r : per.inReg) {
+        // Are we ignoring the forbidden set?
+        if (!recursed && forbidden[r]) continue;
+        candidates.emplace_back(r, spill_weight_at(*state, r, b, instIdx));
+      }
 
       // If we have less candidates than we need to spill, we're in trouble.
       auto const toRemove = per.inReg.size() - per.numRegs;
@@ -3260,16 +3237,14 @@ struct SpillerState {
                 Vlabel b,
                 size_t instIdx) {
     assertx(checkInvariants(Vlabel{}, 0));
-    candidates.forEach(
-      [&] (Vreg r) {
-        auto s = forReg(r);
-        if (!s) return;
-        assertx(s->inReg[r] || s->inMem[r]);
-        if (live_in_at(*state, r, b, instIdx+1)) return;
-        s->inReg.remove(r);
-        s->inMem.remove(r);
-      }
-    );
+    for (auto const r : candidates) {
+      auto s = forReg(r);
+      if (!s) continue;
+      assertx(s->inReg[r] || s->inMem[r]);
+      if (live_in_at(*state, r, b, instIdx+1)) continue;
+      s->inReg.remove(r);
+      s->inMem.remove(r);
+    }
   }
 
   std::string toString() const {
@@ -3290,16 +3265,14 @@ struct SpillerState {
       always_assert(per.inReg.size() <= per.numRegs);
       // A Vreg is either spilled or not.
       always_assert((per.inReg & per.inMem).none());
-      (per.inReg | per.inMem).forEach(
-        [&] (Vreg r) {
-          // A Vreg should only be tracked if its actually live at this
-          // position, and a Vreg should be in the per-class state appropriate
-          // for it.
-          always_assert(!r.isPhys());
-          always_assert(forReg(r) == &per);
-          always_assert(!b.isValid() || live_in_at(*state, r, b, instIdx));
-        }
-      );
+      for (auto const r : (per.inReg | per.inMem)) {
+        // A Vreg should only be tracked if its actually live at this
+        // position, and a Vreg should be in the per-class state appropriate
+        // for it.
+        always_assert(!r.isPhys());
+        always_assert(forReg(r) == &per);
+        always_assert(!b.isValid() || live_in_at(*state, r, b, instIdx));
+      }
     };
     impl(gp);
     impl(simd);
@@ -3431,25 +3404,21 @@ size_t setup_initial_spiller_state_loop(const State& state,
   auto const process = [&] (SpillerState::PerClass& s, size_t pressure) {
     // Assume that all Vregs used within the loop are non-spilled.
     size_t usedCount = 0;
-    usedWithin.forEach(
-      [&] (Vreg r) {
-        if (initial.forReg(r) != &s) return;
-        s.inReg.add(r);
-        ++usedCount;
-      }
-    );
+    for (auto const r : usedWithin) {
+      if (initial.forReg(r) != &s) continue;
+      s.inReg.add(r);
+      ++usedCount;
+    }
 
     if (usedCount < s.numRegs) {
       // There's still some space left after taking into account the Vregs used
       // within the loop. We might be able to allow some live-through Vregs to
       // be in registers.
       size_t throughCount = 0;
-      liveThrough.forEach(
-        [&] (Vreg r) {
-          if (initial.forReg(r) != &s) return;
-          ++throughCount;
-        }
-      );
+      for (auto const r : liveThrough) {
+        if (initial.forReg(r) != &s) continue;
+        ++throughCount;
+      }
 
       throughCount += s.numRegs;
       if (throughCount > pressure) {
@@ -3460,12 +3429,10 @@ size_t setup_initial_spiller_state_loop(const State& state,
 
         jit::vector<std::pair<Vreg, uint64_t>> candidates;
         candidates.reserve(liveThrough.size());
-        liveThrough.forEach(
-          [&] (Vreg r) {
-            if (initial.forReg(r) != &s) return;
-            candidates.emplace_back(r, spill_weight_at(state, r, b, 0));
-          }
-        );
+        for (auto const r : liveThrough) {
+          if (initial.forReg(r) != &s) continue;
+          candidates.emplace_back(r, spill_weight_at(state, r, b, 0));
+        }
 
         std::sort(
           candidates.begin(),
@@ -3491,12 +3458,10 @@ size_t setup_initial_spiller_state_loop(const State& state,
 
     // We used up all the space for Vregs used within the loop. The live-through
     // Vregs have to be spilled.
-    liveThrough.forEach(
-      [&] (Vreg r) {
-        if (initial.forReg(r) != &s) return;
-        s.inMem.add(r);
-      }
-    );
+    for (auto const r : liveThrough) {
+      if (initial.forReg(r) != &s) continue;
+      s.inMem.add(r);
+    }
   };
   process(initial.gp, loopInfo.gpPressure);
   process(initial.simd, loopInfo.simdPressure);
@@ -3836,9 +3801,7 @@ size_t process_copy_spills(State& state,
   always_assert(state.abi.canSpill);
 
   if (debug) {
-    spills.forEach(
-      [&] (Vreg r) { always_assert(spiller.forReg(r)); }
-    );
+    for (auto const r : spills) always_assert(spiller.forReg(r));
   }
 
   // We know which Vregs we want to spill. Copys can handle copying between
@@ -3953,12 +3916,10 @@ size_t process_copy_spills(State& state,
         v << spill{p.first, p.second};
         ++added;
       }
-      selfSpills.forEach(
-        [&] (Vreg r) {
-          v << spill{r, r};
-          ++added;
-        }
-      );
+      for (auto const r : selfSpills) {
+        v << spill{r, r};
+        ++added;
+      }
       return 0;
     }
   );
@@ -3997,18 +3958,16 @@ size_t process_inst_spills(State& state,
 
   // First process the uses (including acrosses). If any use is currently
   // spilled, make it non-spilled and record that it needs a reload.
-  uses.forEach(
-    [&] (Vreg r) {
-      auto s = spiller.forReg(r);
-      if (!s) return;
-      assertx(s->inReg[r] || s->inMem[r]);
-      if (s->inMem[r]) {
-        reloads.add(r);
-        s->inMem.remove(r);
-      }
-      s->inReg.add(r);
+  for (auto const r : uses) {
+    auto s = spiller.forReg(r);
+    if (!s) continue;
+    assertx(s->inReg[r] || s->inMem[r]);
+    if (s->inMem[r]) {
+      reloads.add(r);
+      s->inMem.remove(r);
     }
-  );
+    s->inReg.add(r);
+  }
   // Moving the uses into registers may require us to spill other Vregs (except
   // the ones we just reloaded).
   spills |= spiller.spill(b, instIdx, uses);
@@ -4030,15 +3989,13 @@ size_t process_inst_spills(State& state,
 
   // Process the defs. The defs always start in registers because the
   // instruction has to write them there.
-  defs.forEach(
-    [&] (Vreg r) {
-      auto s = spiller.forReg(r);
-      if (!s) return;
-      // We shouldn't already be tracking this
-      assertx(!s->inReg[r] && !s->inMem[r]);
-      s->inReg.add(r);
-    }
-  );
+  for (auto const r : defs) {
+    auto s = spiller.forReg(r);
+    if (!s) continue;
+    // We shouldn't already be tracking this
+    assertx(!s->inReg[r] && !s->inMem[r]);
+    s->inReg.add(r);
+  }
   // Adding the defs may have caused us to need to spill even more (but not any
   // uses or defs).
   spills |= spiller.spill(b, instIdx, defs | acrosses | uses);
@@ -4080,32 +4037,31 @@ size_t process_inst_spills(State& state,
     unit, b, instIdx,
     [&] (Vout& v) {
       // First emit the spills (which decreases register pressure).
-      spills.forEach(
-        [&] (Vreg r) { v << spill{r, r}; ++added; }
-      );
+      for (auto const r : spills) {
+        v << spill{r, r};
+        ++added;
+      }
 
       // Now emit the reloads (which increases register pressure), possibily
       // with rematerialization.
-      reloads.forEach(
-        [&] (Vreg r) {
-          added += reload_with_remat(
-            v,
-            state,
-            results,
-            spiller.gp.inReg,
-            spiller.simd.inReg,
-            r,
-            r
-          );
-        }
-      );
+      for (auto const r : reloads) {
+        added += reload_with_remat(
+          v,
+          state,
+          results,
+          spiller.gp.inReg,
+          spiller.simd.inReg,
+          r,
+          r
+        );
+      }
 
       // Always emit the copy/copyargs at the end. It needs to immediately
       // precede the constrained instruction. We always emit one instruction for
       // this.
       if (copies.any()) {
         VregList operands;
-        copies.forEach([&] (Vreg r) { operands.emplace_back(r); });
+        for (auto const r : copies) operands.emplace_back(r);
         if (operands.size() == 1) {
           v << copy{operands[0], operands[0]};
         } else {
@@ -4517,33 +4473,29 @@ void fixup_spill_mismatches(State& state, SpillerResults& results) {
           }
 
           // Then the spills, which reduce register pressure.
-          mismatch.spills.forEach(
-            [&] (Vreg r) {
-              auto const it = mismatch.spillDests.find(r);
-              auto const r2 =
-                (it == mismatch.spillDests.end()) ? r : it->second;
-              v << spill{r, r2};
-            }
-          );
+          for (auto const r : mismatch.spills) {
+            auto const it = mismatch.spillDests.find(r);
+            auto const r2 =
+              (it == mismatch.spillDests.end()) ? r : it->second;
+            v << spill{r, r2};
+          }
 
           // Then the reloads, which increases register pressure.
-          mismatch.reloads.forEach(
-            [&] (Vreg r) {
-              auto const it = mismatch.reloadDests.find(r);
-              auto const r2 =
-                (it == mismatch.reloadDests.end()) ? r : it->second;
-              auto const& pred = results.perBlock[b].out;
-              reload_with_remat(
-                v,
-                state,
-                results,
-                pred->gp.inReg,
-                pred->simd.inReg,
-                r,
-                r2
-              );
-            }
-          );
+          for (auto const r : mismatch.reloads) {
+            auto const it = mismatch.reloadDests.find(r);
+            auto const r2 =
+              (it == mismatch.reloadDests.end()) ? r : it->second;
+            auto const& pred = results.perBlock[b].out;
+            reload_with_remat(
+              v,
+              state,
+              results,
+              pred->gp.inReg,
+              pred->simd.inReg,
+              r,
+              r2
+            );
+          }
 
           return 0;
         }
@@ -5031,20 +4983,18 @@ void assert_precolor_avail(const FreeRegs& regs, const RegInfo& info, Vreg r) {
 void release_dead_regs(const State& state, FreeRegs& free,
                        const VregSet& candidates,
                        Vlabel block, size_t instIdx) {
-  candidates.forEach(
-    [&] (Vreg r) {
-      if (r.isPhys()) return;
-      auto const& info = reg_info(state, r);
-      if (!is_colorable(info.regClass)) return;
-      // Since we walk the unit in a dominance preserving order, every Vreg
-      // defined at this point should have a color assigned.
-      assertx(!is_color_none(info.color));
-      auto const reg = color_reg(info.color);
-      assertx(!free.available(reg, info.regClass));
-      if (live_in_at(state, r, block, instIdx + 1)) return;
-      free.release(reg, info.regClass);
-    }
-  );
+  for (auto const r : candidates) {
+    if (r.isPhys()) continue;
+    auto const& info = reg_info(state, r);
+    if (!is_colorable(info.regClass)) continue;
+    // Since we walk the unit in a dominance preserving order, every Vreg
+    // defined at this point should have a color assigned.
+    assertx(!is_color_none(info.color));
+    auto const reg = color_reg(info.color);
+    assertx(!free.available(reg, info.regClass));
+    if (live_in_at(state, r, block, instIdx + 1)) continue;
+    free.release(reg, info.regClass);
+  }
 }
 
 // Color the defs of the given instruction (which is unconstrained) at the given
@@ -5068,27 +5018,25 @@ void color_unconstrained(State& state, FreeRegs& free,
       if (!is_colorable(info.regClass)) return;
       always_assert(!is_color_none(info.color));
     };
-    uses.forEach(checkColored);
-    acrosses.forEach(checkColored);
+    std::for_each(uses.begin(), uses.end(), checkColored);
+    std::for_each(acrosses.begin(), acrosses.end(), checkColored);
   }
 
   // First release any colors held by now dead uses. This doesn't include
   // acrosses, which we removed from the uses set above.
   release_dead_regs(state, free, uses, block, instIdx);
 
-  defs.forEach(
-    [&] (Vreg r) {
-      auto& info = reg_info(state, r);
-      // This Vreg is being defined here, so it better not have a color already.
-      if (!is_colorable(info.regClass)) return;
-      assertx(is_color_none(info.color));
-      // Pick a color, assert we found something (which we always should) and
-      // then reserve it.
-      info.color = free.choose(info.regClass);
-      assert_found_color(r, info.color);
-      free.reserve(color_reg(info.color), info.regClass);
-    }
-  );
+  for (auto const r : defs) {
+    auto& info = reg_info(state, r);
+    // This Vreg is being defined here, so it better not have a color already.
+    if (!is_colorable(info.regClass)) continue;
+    assertx(is_color_none(info.color));
+    // Pick a color, assert we found something (which we always should) and
+    // then reserve it.
+    info.color = free.choose(info.regClass);
+    assert_found_color(r, info.color);
+    free.reserve(color_reg(info.color), info.regClass);
+  }
 
   // Release any now dead defs or acrosses.
   release_dead_regs(state, free, acrosses, block, instIdx);
@@ -5148,25 +5096,23 @@ void color_constrained(State& state, FreeRegs& finalFree,
   auto const constrained = [&] (const VregSet& regs,
                                 FreeRegs& free,
                                 FreeRegs* other) {
-    regs.forEach(
-      [&] (Vreg r) {
-        auto& info = reg_info(state, r);
-        assertx(!is_spill(info.regClass));
-        if (info.precolor == InvalidReg) return;
-        if (!is_colorable(info.regClass)) return;
+    for (auto const r : regs) {
+      auto& info = reg_info(state, r);
+      assertx(!is_spill(info.regClass));
+      if (info.precolor == InvalidReg) continue;
+      if (!is_colorable(info.regClass)) continue;
 
-        assertx(is_color_none(info.color));
-        assert_precolor_avail(free, info, r);
-        info.color = info.precolor;
-        free.reserve(info.precolor, info.regClass);
+      assertx(is_color_none(info.color));
+      assert_precolor_avail(free, info, r);
+      info.color = info.precolor;
+      free.reserve(info.precolor, info.regClass);
 
-        if (!other) return;
-        if (!isLiveThru(r)) return;
+      if (!other) continue;
+      if (!isLiveThru(r)) continue;
 
-        assert_precolor_avail(*other, info, r);
-        other->reserve(info.precolor, info.regClass);
-      }
-    );
+      assert_precolor_avail(*other, info, r);
+      other->reserve(info.precolor, info.regClass);
+    }
   };
   // Color the precolored uses, also reserving them in defsFree if live-thru.
   constrained(uses, usesFree, &defsFree);
@@ -5180,30 +5126,28 @@ void color_constrained(State& state, FreeRegs& finalFree,
                                   FreeRegs& free,
                                   FreeRegs& avoid,
                                   bool skipLiveThru) {
-    regs.forEach(
-      [&] (Vreg r) {
-        auto& info = reg_info(state, r);
-        assertx(!is_spill(info.regClass));
-        if (info.precolor != InvalidReg) return;
-        if (info.regClass == RegClass::SF) return;
-        assertx(is_color_none(info.color));
+    for (auto const r : regs) {
+      auto& info = reg_info(state, r);
+      assertx(!is_spill(info.regClass));
+      if (info.precolor != InvalidReg) continue;
+      if (info.regClass == RegClass::SF) continue;
+      assertx(is_color_none(info.color));
 
-        if (skipLiveThru && isLiveThru(r)) return;
+      if (skipLiveThru && isLiveThru(r)) continue;
 
-        // Choose a color. First pick among the Vregs available in free, but
-        // taken in avoid. If we can't find a color there, just choose from free
-        // (which should always succeed).
-        auto const color = [&]{
-          auto const preferred = (free - avoid).choose(info.regClass);
-          if (!is_color_none(preferred)) return preferred;
-          return free.choose(info.regClass);
-        }();
-        assert_found_color(r, color);
+      // Choose a color. First pick among the Vregs available in free, but
+      // taken in avoid. If we can't find a color there, just choose from free
+      // (which should always succeed).
+      auto const color = [&]{
+        auto const preferred = (free - avoid).choose(info.regClass);
+        if (!is_color_none(preferred)) return preferred;
+        return free.choose(info.regClass);
+      }();
+      assert_found_color(r, color);
 
-        info.color = color;
-        free.reserve(color_reg(color), info.regClass);
-      }
-    );
+      info.color = color;
+      free.reserve(color_reg(color), info.regClass);
+    }
   };
   // Color the non-precolored uses which aren't live-thru. Try to avoid free
   // registers available for defs.
@@ -5215,24 +5159,22 @@ void color_constrained(State& state, FreeRegs& finalFree,
   // Finally color the non-precolored uses which are live-thru. Use the
   // registers which are free in both usesFree and defsFree (which should always
   // exist).
-  uses.forEach(
-    [&] (Vreg r) {
-      auto& info = reg_info(state, r);
-      assertx(!is_spill(info.regClass));
-      if (info.precolor != InvalidReg) return;
-      if (info.regClass == RegClass::SF) return;
-      if (!isLiveThru(r)) return;
+  for (auto const r : uses) {
+    auto& info = reg_info(state, r);
+    assertx(!is_spill(info.regClass));
+    if (info.precolor != InvalidReg) continue;
+    if (info.regClass == RegClass::SF) continue;
+    if (!isLiveThru(r)) continue;
 
-      assertx(is_color_none(info.color));
+    assertx(is_color_none(info.color));
 
-      auto const color = (usesFree & defsFree).choose(info.regClass);
-      assert_found_color(r, color);
+    auto const color = (usesFree & defsFree).choose(info.regClass);
+    assert_found_color(r, color);
 
-      info.color = color;
-      usesFree.reserve(color_reg(color), info.regClass);
-      defsFree.reserve(color_reg(color), info.regClass);
-    }
-  );
+    info.color = color;
+    usesFree.reserve(color_reg(color), info.regClass);
+    defsFree.reserve(color_reg(color), info.regClass);
+  }
 
   // Now that we've colored the constrained instruction, color the copy (if it
   // exists). Since the copy is unconstrained, we can color its defs any way we
@@ -5242,13 +5184,11 @@ void color_constrained(State& state, FreeRegs& finalFree,
 
     auto const copyUses = usesSet(unit, *copy) - state.reservedRegs;
     if (debug) {
-      copyUses.forEach(
-        [&] (Vreg r) {
-          auto const& info = reg_info(state, r);
-          if (!is_colorable(info.regClass)) return;
-          always_assert(!is_color_none(info.color));
-        }
-      );
+      for (auto const r : copyUses) {
+        auto const& info = reg_info(state, r);
+        if (!is_colorable(info.regClass)) continue;
+        always_assert(!is_color_none(info.color));
+      }
     }
 
     FreeRegs copyDefsFree{state};
@@ -5343,16 +5283,14 @@ void assign_colors(State& state) {
     FreeRegs free{state};
 
     // Then reserve all the registers already assigned to live-in Vregs.
-    state.liveIn[b].forEach(
-      [&] (Vreg r) {
-        auto const& info = reg_info(state, r);
-        if (!is_colorable(info.regClass)) return;
-        assertx(!is_color_none(info.color));
-        auto const reg = color_reg(info.color);
-        always_assert(free.available(reg, info.regClass));
-        free.reserve(reg, info.regClass);
-      }
-    );
+    for (auto const r : state.liveIn[b]) {
+      auto const& info = reg_info(state, r);
+      if (!is_colorable(info.regClass)) continue;
+      assertx(!is_color_none(info.color));
+      auto const reg = color_reg(info.color);
+      always_assert(free.available(reg, info.regClass));
+      free.reserve(reg, info.regClass);
+    }
 
     auto const& block = unit.blocks[b];
     for (size_t i = 0; i < block.code.size(); ++i) {
@@ -6206,15 +6144,13 @@ bool recolor_avoid(State& state,
   // will require the least amount of work to re-color.
   auto const newReg = [&]{
     PhysReg::Map<size_t> uses;
-    neighbors.forEach(
-      [&] (Vreg neighbor) {
-        auto const& info = reg_info(state, neighbor);
-        if (is_spill(info.regClass)) return;
-        auto const reg = color_reg(info.color);
-        if (!recolor.available.contains(reg)) return;
-        ++uses[reg];
-      }
-    );
+    for (auto const neighbor : neighbors) {
+      auto const& info = reg_info(state, neighbor);
+      if (is_spill(info.regClass)) continue;
+      auto const reg = color_reg(info.color);
+      if (!recolor.available.contains(reg)) continue;
+      ++uses[reg];
+    }
 
     PhysReg best;
     size_t bestCount = 0;
@@ -6235,16 +6171,10 @@ bool recolor_avoid(State& state,
 
   // Then attempt to recursively re-color all of the interference neighbors to
   // something else.
-  auto success = true;
-  neighbors.forEach(
-    [&] (Vreg neighbor) {
-      assertx(success);
-      if (!recolor_avoid(state, recolor, neighbor, newReg)) success = false;
-      return success;
-    }
-  );
-
-  return success;
+  for (auto const neighbor : neighbors) {
+    if (!recolor_avoid(state, recolor, neighbor, newReg)) return false;
+  }
+  return true;
 }
 
 // Attempt to recolor the given Vreg to the given register, recursively
@@ -6264,24 +6194,19 @@ void recolor_single(State& state,
   auto const& neighbors = find_interferences(state, r);
   // Attempt to recolor all of its interference neighbors to a different
   // register.
-  neighbors.forEach(
-    [&] (Vreg neighbor) {
-      if (recolor_avoid(state, recolor, neighbor, p)) return true;
+  for (auto const neighbor : neighbors) {
+    if (!recolor_avoid(state, recolor, neighbor, p)) {
       // We failed to recolor this neighbor to a different register. We have to
       // stop with this attempt, so rollback the colors to their old value.
-      recolor.changed.forEach(
-        [&] (Vreg changed) {
-          reg_info(state, changed).color = recolor.old[changed];
-        }
-      );
-      return false;
+      for (auto const changed : recolor.changed) {
+        reg_info(state, changed).color = recolor.old[changed];
+      }
+      break;
     }
-  );
+  }
 
   // We fixed Vregs as we changed them. Unfix them all now.
-  recolor.changed.forEach(
-    [&] (Vreg changed) { recolor.fixed[changed] = false; }
-  );
+  for (auto const changed : recolor.changed) recolor.fixed[changed] = false;
 }
 
 struct AffinityChunkPriority {
@@ -6337,12 +6262,10 @@ void recolor_chunk(State& state,
     }
 
     // Roll-back the colors to what they were originally.
-    changed.forEach(
-      [&] (Vreg r) {
-        if (!recolor.notOrig[r]) return;
-        reg_info(state, r).color = recolor.orig[r];
-      }
-    );
+    for (auto const r : changed) {
+      if (!recolor.notOrig[r]) continue;
+      reg_info(state, r).color = recolor.orig[r];
+    }
 
     if (matched.none()) return;
 

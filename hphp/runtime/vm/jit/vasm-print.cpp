@@ -239,13 +239,11 @@ std::string show(const VregSet& s) {
   std::ostringstream str;
   auto comma = false;
   str << '{';
-  s.forEach(
-    [&] (Vreg r) {
-      if (comma) str << ", ";
-      comma = true;
-      str << show(r);
-    }
-  );
+  for (auto const r : s) {
+    if (comma) str << ", ";
+    comma = true;
+    str << show(r);
+  }
   str << '}';
   return str.str();
 }

@@ -28,7 +28,7 @@ namespace {
 
 VregList toVregList(const VregSet& s) {
   VregList ret;
-  s.forEach([&] (Vreg r) { ret.push_back(r); });
+  for (auto const r : s) ret.emplace_back(r);
   return ret;
 }
 

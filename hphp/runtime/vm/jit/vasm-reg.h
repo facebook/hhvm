@@ -168,33 +168,39 @@ struct VregSet {
   bool empty() const { return regs.empty(); }
   size_t size() const { return regs.size(); }
 
-  /*
-   * Call the provided callable on each vreg in the set. If the callable has a
-   * bool return value, a false return will stop iteration early.
-   */
-  template<typename F>
-  typename std::enable_if<
-    std::is_same<
-      typename std::result_of<F(Vreg)>::type,
-      bool
-    >::value,
-    void
-  >::type
-  forEach(F&& f) const {
-    for (auto const r : regs) { if (!f(r)) return; }
+  bool containsPhys() const { return !regs.empty() && regs.front().isPhys(); }
+  bool allPhys() const { return regs.empty() || regs.back().isPhys(); }
+
+  RegSet physRegs() const {
+    RegSet out;
+    for (auto const r : regs) {
+      // Physical registers always come before virtual ones, so we can
+      // stop once we see a non-physical one.
+      if (!r.isPhys()) break;
+      out |= r.physReg();
+    }
+    return out;
   }
 
-  template<typename F>
-  typename std::enable_if<
-    !std::is_same<
-      typename std::result_of<F(Vreg)>::type,
-      bool
-    >::value,
-    void
-  >::type
-  forEach(F&& f) const {
-    for (auto const r : regs) f(r);
-  }
+  struct iterator {
+    Vreg operator*() const { return *iter; }
+
+    iterator operator++() { return iterator{++iter}; }
+    iterator operator++(int) { return iterator{iter++}; }
+
+    iterator operator--() { return iterator{--iter}; }
+    iterator operator--(int) { return iterator{iter--}; }
+
+    bool operator==(const iterator& o) const { return iter == o.iter; }
+    bool operator!=(const iterator& o) const { return iter != o.iter; }
+  private:
+    explicit iterator(jit::vector<Vreg>::const_iterator iter) : iter{iter} {}
+    jit::vector<Vreg>::const_iterator iter;
+    friend struct VregSet;
+  };
+
+  iterator begin() const { return iterator{regs.begin()}; }
+  iterator end() const { return iterator{regs.end()}; }
 
   bool operator==(const VregSet& o) const { return regs == o.regs; }
   bool operator!=(const VregSet& o) const { return regs != o.regs; }
@@ -208,11 +214,14 @@ struct VregSet {
     if (it != regs.end() && *it == r) return;
     regs.emplace(it, r);
   }
+  void add(RegSet s) { s.forEach([this] (Vreg r) { add(r); }); }
+
   void remove(Vreg r) {
     auto const it = std::lower_bound(regs.begin(), regs.end(), r);
     if (it == regs.end() || *it != r) return;
     regs.erase(it);
   }
+
   void reset() { regs.clear(); }
 
   /*

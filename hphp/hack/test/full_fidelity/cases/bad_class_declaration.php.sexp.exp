@@ -17,6 +17,7 @@
              (missing 0 ())))))
          (() > 1 ())))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ())
        (classish_body 22
         ((missing 0 ())
          (list 21

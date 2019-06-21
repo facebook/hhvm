@@ -495,6 +495,8 @@ module WithExpressionAndStatementAndTypeParser
       parse_extends_opt parser in
     let (parser, classish_implements, classish_implements_list) =
       parse_classish_implements_opt parser in
+    let (parser, classish_where_clause) =
+      parse_classish_where_clause_opt parser in
     let (parser, body) = parse_classish_body parser in
     Make.classish_declaration
       parser
@@ -506,6 +508,7 @@ module WithExpressionAndStatementAndTypeParser
       classish_extends_list
       classish_implements
       classish_implements_list
+      classish_where_clause
       body
 
   and parse_classish_modifiers parser =
@@ -563,6 +566,12 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, implements_token) = Make.token parser1 implements_token in
     let (parser, implements_list) = parse_special_type_list parser in
     (parser, implements_token, implements_list)
+
+  and parse_classish_where_clause_opt parser =
+    if peek_token_kind parser <> Where then
+      Make.missing parser (pos parser)
+    else
+      parse_where_clause parser
 
   and parse_special_type parser =
     let (parser1, token) = next_xhp_class_name_or_other_token parser in

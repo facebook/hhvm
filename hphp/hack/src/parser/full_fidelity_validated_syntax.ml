@@ -1206,6 +1206,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_classish_declaration : classish_declaration validator = function
   | { Syntax.syntax = Syntax.ClassishDeclaration x; value = v } -> v,
     { classish_body = validate_classish_body x.classish_body
+    ; classish_where_clause = validate_option_with (validate_where_clause) x.classish_where_clause
     ; classish_implements_list = validate_list_with (validate_specifier) x.classish_implements_list
     ; classish_implements_keyword = validate_option_with (validate_token) x.classish_implements_keyword
     ; classish_extends_list = validate_list_with (validate_specifier) x.classish_extends_list
@@ -1229,6 +1230,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; classish_extends_list = invalidate_list_with (invalidate_specifier) x.classish_extends_list
       ; classish_implements_keyword = invalidate_option_with (invalidate_token) x.classish_implements_keyword
       ; classish_implements_list = invalidate_list_with (invalidate_specifier) x.classish_implements_list
+      ; classish_where_clause = invalidate_option_with (invalidate_where_clause) x.classish_where_clause
       ; classish_body = invalidate_classish_body x.classish_body
       }
     ; Syntax.value = v

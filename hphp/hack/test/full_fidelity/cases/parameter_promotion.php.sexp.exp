@@ -10,7 +10,7 @@
       ((missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
        (() name 11 ((whitespace 1))) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 51
         ((() { 1 ((end_of_line 1)))
          (list 45
@@ -38,7 +38,7 @@
       ((missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
        (() name 29 ((whitespace 1))) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 98
         ((() { 1 ((end_of_line 1)))
          (list 92
@@ -91,7 +91,7 @@
       ((missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
        (() name 21 ((whitespace 1))) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 68
         ((() { 1 ((end_of_line 1)))
          (list 62
@@ -128,7 +128,7 @@
       ((missing 0 ()) (missing 0 ())
        (((end_of_line 1)) trait 5 ((whitespace 1)))
        (() name 12 ((whitespace 1))) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 51
         ((() { 1 ((end_of_line 1)))
          (list 45
@@ -156,7 +156,7 @@
       ((missing 0 ()) (missing 0 ())
        (((end_of_line 1)) interface 9 ((whitespace 1)))
        (() name 16 ((whitespace 1))) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 49
         ((() { 1 ((end_of_line 1)))
          (list 43
@@ -182,7 +182,7 @@
        (list 8 ((((end_of_line 1)) abstract 8 ((whitespace 1)))))
        (() class 5 ((whitespace 1))) (() name 24 ((whitespace 1)))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ())
+       (missing 0 ()) (missing 0 ())
        (classish_body 60
         ((() { 1 ((end_of_line 1)))
          (list 54
@@ -212,7 +212,7 @@
       ((missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
        (() name 13 ((whitespace 1))) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 49
         ((() { 1 ((end_of_line 1)))
          (list 43

@@ -44,6 +44,7 @@ type node =
       name: node;
       extends: node;
       implements: node;
+      constrs: node;
       body: node
     }
   | FunctionDecl of node
@@ -211,9 +212,9 @@ module SC = struct
     else st, MethodDecl body
 
   let make_classish_declaration _attributes modifiers keyword name _type_parameters
-    _extends_keyword extends _implements_keyword implements body st =
+    _extends_keyword extends _implements_keyword implements constrs body st =
     if name = Ignored then st, Ignored
-    else st, ClassDecl { modifiers; kind = keyword; name; extends; implements; body }
+    else st, ClassDecl { modifiers; kind = keyword; name; extends; implements; constrs; body }
 
   let make_classish_body _left_brace elements _right_brace st =
     st, elements

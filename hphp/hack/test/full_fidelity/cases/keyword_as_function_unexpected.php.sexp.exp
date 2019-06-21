@@ -549,7 +549,7 @@
      (classish_declaration 70
       ((missing 0 ()) (list 8 ((((end_of_line 1)) abstract 8 ())))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 62
         ((missing 0 ())
          (list 62
@@ -580,7 +580,7 @@
      (classish_declaration 334
       ((missing 0 ()) (missing 0 ()) (() class 5 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ())
+       (missing 0 ()) (missing 0 ())
        (classish_body 329
         ((missing 0 ())
          (list 329
@@ -671,7 +671,7 @@
      (classish_declaration 158
       ((missing 0 ()) (missing 0 ()) (() interface 9 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ())
+       (missing 0 ()) (missing 0 ())
        (classish_body 149
         ((missing 0 ())
          (list 149
@@ -736,7 +736,7 @@
      (classish_declaration 56
       ((missing 0 ()) (missing 0 ()) (() trait 5 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ())
+       (missing 0 ()) (missing 0 ())
        (classish_body 51
         ((missing 0 ())
          (list 51

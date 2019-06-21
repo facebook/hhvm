@@ -12,7 +12,7 @@
        (list 8 ((((end_of_line 1)) abstract 8 ((whitespace 1)))))
        (() class 5 ((whitespace 1))) (() name 3 ((end_of_line 1)))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ())
+       (missing 0 ()) (missing 0 ())
        (classish_body 451
         ((() { 1 ((end_of_line 1)))
          (list 445
@@ -187,7 +187,7 @@
         ((list_item 3
           ((simple_type_specifier 3 ((() name 3 ((end_of_line 1)))))
            (missing 0 ())))))
-       (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 178
         ((() { 1 ((end_of_line 1)))
          (list 172

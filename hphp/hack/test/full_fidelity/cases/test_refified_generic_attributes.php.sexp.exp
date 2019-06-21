@@ -80,7 +80,7 @@
       ((missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
        (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 170
         ((() { 1 ((end_of_line 1)))
          (list 164
@@ -207,6 +207,7 @@
              (missing 0 ())))))
          (() > 1 ())))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ())
        (classish_body 2
         ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
      (classish_declaration 32
@@ -231,6 +232,7 @@
              (missing 0 ())))))
          (() > 1 ())))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ())
        (classish_body 2
         ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
      (classish_declaration 20
@@ -246,6 +248,7 @@
              (missing 0 ())))))
          (() > 1 ())))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ())
        (classish_body 2
         ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
      (alias_declaration 26

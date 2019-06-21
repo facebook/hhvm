@@ -10,7 +10,7 @@
       ((missing 0 ()) (list 5 ((() final 5 ((whitespace 1)))))
        (() class 5 ((whitespace 1))) (() name 21 ((whitespace 1)))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ())
+       (missing 0 ()) (missing 0 ())
        (classish_body 80
         ((() { 1 ((end_of_line 1)))
          (list 74

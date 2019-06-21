@@ -10,7 +10,7 @@
       ((missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
        (() name 13 ((whitespace 1))) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 23
         ((() { 1 ((end_of_line 1)))
          (list 17
@@ -32,7 +32,7 @@
       ((missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
        (() name 13 ((whitespace 1))) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 19
         ((() { 1 ((end_of_line 1)))
          (list 13
@@ -51,7 +51,7 @@
        (list 8 ((((end_of_line 1)) abstract 8 ((whitespace 1)))))
        (() class 5 ((whitespace 1))) (() name 13 ((whitespace 1)))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ())
+       (missing 0 ()) (missing 0 ())
        (classish_body 28
         ((() { 1 ((end_of_line 1)))
          (list 22
@@ -70,7 +70,7 @@
        (list 8 ((((end_of_line 1)) abstract 8 ((whitespace 1)))))
        (() class 5 ((whitespace 1))) (() name 13 ((whitespace 1)))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ())
+       (missing 0 ()) (missing 0 ())
        (classish_body 32
         ((() { 1 ((end_of_line 1)))
          (list 26
@@ -93,7 +93,7 @@
        (list 8 ((((end_of_line 1)) abstract 8 ((whitespace 1)))))
        (() class 5 ((whitespace 1))) (() name 10 ((whitespace 1)))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ())
+       (missing 0 ()) (missing 0 ())
        (classish_body 23
         ((() { 1 ((end_of_line 1)))
          (list 17
@@ -116,7 +116,7 @@
        (list 8 ((((end_of_line 1)) abstract 8 ((whitespace 1)))))
        (() class 5 ((whitespace 1))) (() name 10 ((whitespace 1)))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ())
+       (missing 0 ()) (missing 0 ())
        (classish_body 19
         ((() { 1 ((end_of_line 1)))
          (list 13

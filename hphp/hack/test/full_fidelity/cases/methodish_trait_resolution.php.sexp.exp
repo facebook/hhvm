@@ -8,7 +8,7 @@
       ((missing 0 ()) (missing 0 ())
        (((end_of_line 1)) trait 5 ((whitespace 1)))
        (() name 2 ((whitespace 1))) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 58
         ((() { 1 ((end_of_line 1)))
          (list 52
@@ -38,7 +38,7 @@
       ((missing 0 ()) (missing 0 ())
        (((end_of_line 1)) trait 5 ((whitespace 1)))
        (() name 2 ((whitespace 1))) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 58
         ((() { 1 ((end_of_line 1)))
          (list 52
@@ -68,7 +68,7 @@
       ((missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
        (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 65
         ((() { 1 ((end_of_line 1)))
          (list 59
@@ -101,7 +101,7 @@
       ((missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
        (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 153
         ((() { 1 ((end_of_line 1)))
          (list 141

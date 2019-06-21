@@ -733,6 +733,7 @@
         { "field_name" : "extends_list" },
         { "field_name" : "implements_keyword" },
         { "field_name" : "implements_list" },
+        { "field_name" : "where_clause" },
         { "field_name" : "body" }
       ] },
     { "kind_name" : "ClassishBody",

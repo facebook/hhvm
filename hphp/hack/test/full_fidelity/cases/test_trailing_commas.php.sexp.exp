@@ -11,7 +11,7 @@
        (((end_of_line 1) (delimited_comment 163) (end_of_line 1)) class 5
         ((whitespace 1)))
        (() name 5 ((whitespace 1))) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 3
         ((() { 1 ((end_of_line 1))) (missing 0 ())
          (() } 1 ((end_of_line 1)))))))
@@ -28,6 +28,7 @@
              (() , 1 ())))))
          (() > 1 ((whitespace 1)))))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ())
        (classish_body 3
         ((() { 1 ((end_of_line 1))) (missing 0 ())
          (() } 1 ((end_of_line 1)))))))

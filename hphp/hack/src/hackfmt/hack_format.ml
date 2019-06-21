@@ -558,6 +558,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       classish_extends_list = extends;
       classish_implements_keyword = impl_kw;
       classish_implements_list = impls;
+      classish_where_clause = where;
       classish_body = body } ->
     let after_each_ancestor is_last =
       if is_last then Nothing else space_split () in
@@ -605,6 +606,9 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
             ]
           ]])
         ]);
+
+        when_present where space;
+        t env where;
       ]);
       t env body;
     ]

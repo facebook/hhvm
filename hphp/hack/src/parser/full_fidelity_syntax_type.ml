@@ -315,6 +315,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; classish_extends_list                              : t
     ; classish_implements_keyword                        : t
     ; classish_implements_list                           : t
+    ; classish_where_clause                              : t
     ; classish_body                                      : t
     }
   | ClassishBody                      of
@@ -1611,6 +1612,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; classish_extends_list: specifier listesque value
     ; classish_implements_keyword: Token.t option value
     ; classish_implements_list: specifier listesque value
+    ; classish_where_clause: where_clause option value
     ; classish_body: classish_body value
     }
   and classish_body =

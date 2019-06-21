@@ -9,7 +9,7 @@
        (((single_line_comment 56) (end_of_line 1) (end_of_line 1)) trait 5
         ((whitespace 1)))
        (() name 2 ((whitespace 1))) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 884
         ((((extra_token_error 13) (whitespace 1)) { 1 ((end_of_line 1)))
          (list 878

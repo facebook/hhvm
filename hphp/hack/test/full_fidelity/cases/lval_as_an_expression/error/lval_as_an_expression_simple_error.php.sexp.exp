@@ -13,6 +13,7 @@
         ((list_item 11
           ((simple_type_specifier 11 ((() name 11 ((whitespace 1)))))
            (missing 0 ())))))
+       (missing 0 ())
        (classish_body 42
         ((() { 1 ((end_of_line 1)))
          (list 36

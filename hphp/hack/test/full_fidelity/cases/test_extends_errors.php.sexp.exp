@@ -19,7 +19,7 @@
          (list_item 1
           ((simple_type_specifier 1 ((() name 1 ((whitespace 1)))))
            (missing 0 ())))))
-       (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 3
         ((() { 1 ((end_of_line 1))) (missing 0 ())
          (() } 1 ((end_of_line 1)))))))
@@ -36,7 +36,7 @@
          (list_item 1
           ((simple_type_specifier 1 ((() name 1 ((whitespace 1)))))
            (missing 0 ())))))
-       (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 3
         ((() { 1 ((end_of_line 1))) (missing 0 ())
          (() } 1 ((end_of_line 1)))))))
@@ -53,7 +53,7 @@
          (list_item 1
           ((simple_type_specifier 1 ((() name 1 ((whitespace 1)))))
            (missing 0 ())))))
-       (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 3
         ((() { 1 ((end_of_line 1))) (missing 0 ())
          (() } 1 ((end_of_line 1)))))))
@@ -67,7 +67,7 @@
         ((list_item 1
           ((simple_type_specifier 1 ((() name 1 ((whitespace 1)))))
            (missing 0 ())))))
-       (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 3
         ((() { 1 ((end_of_line 1))) (missing 0 ())
          (() } 1 ((end_of_line 1)))))))
@@ -81,7 +81,7 @@
         ((list_item 1
           ((simple_type_specifier 1 ((() name 1 ((whitespace 1)))))
            (missing 0 ())))))
-       (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 3
         ((() { 1 ((end_of_line 1))) (missing 0 ())
          (() } 1 ((end_of_line 1)))))))
@@ -95,7 +95,7 @@
         ((list_item 1
           ((simple_type_specifier 1 ((() name 1 ((whitespace 1)))))
            (missing 0 ())))))
-       (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 3
         ((() { 1 ((end_of_line 1))) (missing 0 ())
          (() } 1 ((end_of_line 1)))))))
@@ -106,7 +106,7 @@
        (() name 1 ((whitespace 1))) (missing 0 ())
        (() extends 7 ((whitespace 1)))
        (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
-       (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 3
         ((() { 1 ((end_of_line 1))) (missing 0 ())
          (() } 1 ((end_of_line 1)))))))
@@ -117,7 +117,7 @@
        (() name 1 ((whitespace 1))) (missing 0 ())
        (() extends 7 ((whitespace 1)))
        (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
-       (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 3
         ((() { 1 ((end_of_line 1))) (missing 0 ())
          (() } 1 ((end_of_line 1)))))))
@@ -128,7 +128,7 @@
        (() name 1 ((whitespace 1))) (missing 0 ())
        (() extends 7 ((whitespace 1)))
        (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
-       (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 3
         ((() { 1 ((end_of_line 1))) (missing 0 ())
          (() } 1 ((end_of_line 1)))))))

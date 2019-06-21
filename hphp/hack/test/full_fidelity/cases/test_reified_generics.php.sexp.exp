@@ -27,6 +27,7 @@
              (missing 0 ())))))
          (() > 1 ())))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ())
        (classish_body 2
         ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
      (function_declaration 45

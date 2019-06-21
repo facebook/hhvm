@@ -569,6 +569,7 @@ let make_classish_declaration_syntax
     extends_list_syntax
     (* classish_implements_keyword *) (make_missing ())
     (* classish_implements_list *) (make_missing ())
+    (* classish_where_clause *) (make_missing ())
     classish_body
 
 let make_lambda_signature_from_method_syntax

@@ -2962,10 +2962,13 @@ and pDef : def list parser = fun node env ->
     ; classish_type_parameters = tparaml
     ; classish_extends_list    = exts
     ; classish_implements_list = impls
+    ; classish_where_clause
     ; classish_body            =
       { syntax = ClassishBody { classish_body_elements = elts; _ }; _ }
     ; _ } ->
       let env = non_tls env in
+      if not (is_missing classish_where_clause) then
+        raise_parsing_error env (`Node node) "Class-level where clauses not supported";
       let c_mode = mode_annotation env.fi_mode in
       let c_user_attributes = pUserAttributes env attr in
       let c_file_attributes = [] in

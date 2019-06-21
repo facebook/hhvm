@@ -30,6 +30,7 @@
         ((list_item 1
           ((simple_type_specifier 1 ((() name 1 ((whitespace 1)))))
            (missing 0 ())))))
+       (missing 0 ())
        (classish_body 2
         ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
      (end_of_file 0 ((() end_of_file 0 ()))))))))

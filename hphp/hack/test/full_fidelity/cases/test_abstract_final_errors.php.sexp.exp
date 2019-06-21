@@ -13,7 +13,7 @@
          (() final 5 ((whitespace 1)))))
        (() class 5 ((whitespace 1))) (() name 35 ((whitespace 1)))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ())
+       (missing 0 ()) (missing 0 ())
        (classish_body 20
         ((() { 1 ((end_of_line 1)))
          (list 14
@@ -34,7 +34,7 @@
          (() final 5 ((whitespace 1)))))
        (() class 5 ((whitespace 1))) (() name 35 ((whitespace 1)))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ())
+       (missing 0 ()) (missing 0 ())
        (classish_body 27
         ((() { 1 ((end_of_line 1)))
          (list 21
@@ -57,7 +57,7 @@
          (() final 5 ((whitespace 1)))))
        (() class 5 ((whitespace 1))) (() name 33 ((whitespace 1)))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ())
+       (missing 0 ()) (missing 0 ())
        (classish_body 34
         ((() { 1 ((end_of_line 1)))
          (list 28
@@ -81,7 +81,7 @@
          (() final 5 ((whitespace 1)))))
        (() class 5 ((whitespace 1))) (() name 33 ((whitespace 1)))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ())
+       (missing 0 ()) (missing 0 ())
        (classish_body 41
         ((() { 1 ((end_of_line 1)))
          (list 35

@@ -5923,6 +5923,7 @@ class ClassishDeclaration extends EditableSyntax
     extends_list,
     implements_keyword,
     implements_list,
+    where_clause,
     body)
   {
     super('classish_declaration', {
@@ -5935,6 +5936,7 @@ class ClassishDeclaration extends EditableSyntax
       extends_list: extends_list,
       implements_keyword: implements_keyword,
       implements_list: implements_list,
+      where_clause: where_clause,
       body: body });
   }
   get attribute() { return this.children.attribute; }
@@ -5946,6 +5948,7 @@ class ClassishDeclaration extends EditableSyntax
   get extends_list() { return this.children.extends_list; }
   get implements_keyword() { return this.children.implements_keyword; }
   get implements_list() { return this.children.implements_list; }
+  get where_clause() { return this.children.where_clause; }
   get body() { return this.children.body; }
   with_attribute(attribute){
     return new ClassishDeclaration(
@@ -5958,6 +5961,7 @@ class ClassishDeclaration extends EditableSyntax
       this.extends_list,
       this.implements_keyword,
       this.implements_list,
+      this.where_clause,
       this.body);
   }
   with_modifiers(modifiers){
@@ -5971,6 +5975,7 @@ class ClassishDeclaration extends EditableSyntax
       this.extends_list,
       this.implements_keyword,
       this.implements_list,
+      this.where_clause,
       this.body);
   }
   with_keyword(keyword){
@@ -5984,6 +5989,7 @@ class ClassishDeclaration extends EditableSyntax
       this.extends_list,
       this.implements_keyword,
       this.implements_list,
+      this.where_clause,
       this.body);
   }
   with_name(name){
@@ -5997,6 +6003,7 @@ class ClassishDeclaration extends EditableSyntax
       this.extends_list,
       this.implements_keyword,
       this.implements_list,
+      this.where_clause,
       this.body);
   }
   with_type_parameters(type_parameters){
@@ -6010,6 +6017,7 @@ class ClassishDeclaration extends EditableSyntax
       this.extends_list,
       this.implements_keyword,
       this.implements_list,
+      this.where_clause,
       this.body);
   }
   with_extends_keyword(extends_keyword){
@@ -6023,6 +6031,7 @@ class ClassishDeclaration extends EditableSyntax
       this.extends_list,
       this.implements_keyword,
       this.implements_list,
+      this.where_clause,
       this.body);
   }
   with_extends_list(extends_list){
@@ -6036,6 +6045,7 @@ class ClassishDeclaration extends EditableSyntax
       extends_list,
       this.implements_keyword,
       this.implements_list,
+      this.where_clause,
       this.body);
   }
   with_implements_keyword(implements_keyword){
@@ -6049,6 +6059,7 @@ class ClassishDeclaration extends EditableSyntax
       this.extends_list,
       implements_keyword,
       this.implements_list,
+      this.where_clause,
       this.body);
   }
   with_implements_list(implements_list){
@@ -6062,6 +6073,21 @@ class ClassishDeclaration extends EditableSyntax
       this.extends_list,
       this.implements_keyword,
       implements_list,
+      this.where_clause,
+      this.body);
+  }
+  with_where_clause(where_clause){
+    return new ClassishDeclaration(
+      this.attribute,
+      this.modifiers,
+      this.keyword,
+      this.name,
+      this.type_parameters,
+      this.extends_keyword,
+      this.extends_list,
+      this.implements_keyword,
+      this.implements_list,
+      where_clause,
       this.body);
   }
   with_body(body){
@@ -6075,6 +6101,7 @@ class ClassishDeclaration extends EditableSyntax
       this.extends_list,
       this.implements_keyword,
       this.implements_list,
+      this.where_clause,
       body);
   }
   rewrite(rewriter, parents)
@@ -6092,6 +6119,7 @@ class ClassishDeclaration extends EditableSyntax
     var extends_list = this.extends_list.rewrite(rewriter, new_parents);
     var implements_keyword = this.implements_keyword.rewrite(rewriter, new_parents);
     var implements_list = this.implements_list.rewrite(rewriter, new_parents);
+    var where_clause = this.where_clause.rewrite(rewriter, new_parents);
     var body = this.body.rewrite(rewriter, new_parents);
     if (
       attribute === this.attribute &&
@@ -6103,6 +6131,7 @@ class ClassishDeclaration extends EditableSyntax
       extends_list === this.extends_list &&
       implements_keyword === this.implements_keyword &&
       implements_list === this.implements_list &&
+      where_clause === this.where_clause &&
       body === this.body)
     {
       return rewriter(this, parents);
@@ -6119,6 +6148,7 @@ class ClassishDeclaration extends EditableSyntax
         extends_list,
         implements_keyword,
         implements_list,
+        where_clause,
         body), parents);
     }
   }
@@ -6151,6 +6181,9 @@ class ClassishDeclaration extends EditableSyntax
     let implements_list = EditableSyntax.from_json(
       json.classish_implements_list, position, source);
     position += implements_list.width;
+    let where_clause = EditableSyntax.from_json(
+      json.classish_where_clause, position, source);
+    position += where_clause.width;
     let body = EditableSyntax.from_json(
       json.classish_body, position, source);
     position += body.width;
@@ -6164,6 +6197,7 @@ class ClassishDeclaration extends EditableSyntax
         extends_list,
         implements_keyword,
         implements_list,
+        where_clause,
         body);
   }
   get children_keys()
@@ -6179,6 +6213,7 @@ class ClassishDeclaration extends EditableSyntax
         'extends_list',
         'implements_keyword',
         'implements_list',
+        'where_clause',
         'body'];
     return ClassishDeclaration._children_keys;
   }

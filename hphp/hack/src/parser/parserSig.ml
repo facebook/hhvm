@@ -77,7 +77,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val where_constraint : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val methodish_declaration : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val methodish_trait_resolution : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val classish_declaration : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val classish_declaration : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val classish_body : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val trait_use_precedence_item : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val trait_use_alias_item : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r

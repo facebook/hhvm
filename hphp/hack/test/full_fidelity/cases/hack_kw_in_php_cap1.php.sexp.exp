@@ -8,7 +8,7 @@
       ((missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1))) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ())
+       (missing 0 ()) (missing 0 ())
        (classish_body 2
         ((((extra_token_error 5) (whitespace 1)) { 1 ()) (missing 0 ())
          (() } 1 ((end_of_line 1)))))))
@@ -36,7 +36,7 @@
        (() name 3 ((whitespace 1))) (missing 0 ())
        (() extends 7 ((whitespace 1)))
        (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
-       (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 2
         ((((extra_token_error 5) (whitespace 1)) { 1 ()) (missing 0 ())
          (() } 1 ((end_of_line 1)))))))

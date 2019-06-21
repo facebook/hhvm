@@ -14,12 +14,7 @@ open Typing_defs
 module Env = Tast_env
 
 let check_xhp_children env pos ty =
-  let _, ty = Env.expand_type env ty in
-  let _, ty = Env.fold_unresolved env ty in
-  let tys = match ty with
-    | _, Tunion ts -> ts
-    | _ -> [ty] in
-  if not @@ List.for_all ~f:(Env.is_xhp_child env pos) tys
+  if not @@ Env.is_xhp_child env pos ty
   then
     let ty_str = Env.print_error_ty env ty in
     let msgl = Reason.to_string ("This is "^ty_str) (fst ty) in

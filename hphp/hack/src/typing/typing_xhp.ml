@@ -110,16 +110,11 @@ and get_spread_attributes env pos onto_xhp cty =
 
 (**
  * Typing rules for the body expressions of an XHP literal.
- * Until XHPChild type inference is improved, there is a cascading set of
- * checks here to allow for parity with what the runtime accepts.
  *)
 let is_xhp_child env pos ty =
-  let reason = Reason.Rwitness pos in
-  (* ?XHPChild *)
-  let ty_child = MakeType.class_type reason SN.Classes.cXHPChild [] in
-  let ty_child = MakeType.nullable reason ty_child in
-  (* Any ?Traversable *)
-  let ty_traversable = MakeType.traversable reason (MakeType.mixed reason) in
-  let ty_traversable = MakeType.nullable reason ty_traversable in
-     SubType.is_sub_type env ty ty_child
-  || SubType.is_sub_type env ty ty_traversable
+  let r = Reason.Rwitness pos in
+  (* XHPChild *)
+  let ty_child = MakeType.class_type r SN.Classes.cXHPChild [] in
+  (* Any Traversable *)
+  let ty_traversable = MakeType.traversable r (MakeType.mixed r) in
+  SubType.is_sub_type env ty (MakeType.nullable r (r, Tunion [ty_child; ty_traversable]))

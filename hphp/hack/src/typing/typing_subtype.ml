@@ -968,11 +968,19 @@ and simplify_subtype
     simplify_subtype ~seen_generic_params ~this_ty (MakeType.float r) ty_super &&&
     simplify_subtype ~seen_generic_params ~this_ty (MakeType.int r) ty_super
 
+   (* Likewise, reduce nullable on left to a union *)
+  | Toption ty, Tunion _ ->
+    let r = fst ty_sub in
+    env |>
+    simplify_subtype ~seen_generic_params ~this_ty (MakeType.null r) ty_super &&&
+    simplify_subtype ~seen_generic_params ~this_ty ty ty_super
+
   | Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tunion [] ->
     simplify_subtype ~seen_generic_params ~this_ty ty ty_super env
+
   | Tabstract (AKgeneric name_sub, opt_sub_cstr), Tunion [] ->
     simplify_subtype_generic_sub name_sub opt_sub_cstr ty_super env
-  | (Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tshape _ |
+  | (Tnonnull | Tdynamic | Tprim _ | Tfun _ | Ttuple _ | Tshape _ |
      Tanon _ | Tobject | Tclass _ | Tarraykind _ | Tabstract (AKenum _, _)),
     Tunion [] ->
     invalid ()

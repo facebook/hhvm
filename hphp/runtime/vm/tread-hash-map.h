@@ -233,8 +233,8 @@ private:
   Table* acquireAndGrowIfNeeded() {
     auto old = m_table.load(std::memory_order_acquire);
 
-    // 75% occupancy, avoiding the FPU.
-    if (LIKELY((old->size) < (old->capac / 4 + old->capac / 2))) {
+    // 50% occupancy, avoiding the FPU.
+    if (LIKELY((old->size) < (old->capac / 2))) {
       return old;
     }
 

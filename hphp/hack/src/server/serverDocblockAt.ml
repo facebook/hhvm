@@ -105,7 +105,7 @@ let clean_docblock (docblock: string): string =
 
 (* Fetch a definition *)
 let go_def
-    ~(def: Relative_path.t SymbolDefinition.t)
+    ~(def: 'a SymbolDefinition.t)
     ~(base_class_name: string option)
     ~(file: ServerCommandTypes.file_input)
     ~(basic_only: bool) =

@@ -961,9 +961,21 @@ let handle_mode
       end
     end;
   | Identify_symbol (line, column) ->
-    let filename = expect_single_file () in
-    let file = cat (Relative_path.to_absolute filename) in
-    begin match ServerIdentifyFunction.go_absolute file line column tcopt with
+    let path = expect_single_file () in
+    let ast = Ast_provider.get_ast path in
+    let (ctx, entry) = ServerIdeContext.update
+      ~tcopt
+      ~ctx:ServerIdeContext.empty
+      ~path
+      ~ast
+    in
+    let result = ServerIdentifyFunction.go_ctx
+      ~ctx
+      ~entry
+      ~line
+      ~char:column
+    in
+    begin match result with
       | [] -> print_endline "None"
       | result -> ClientGetDefinition.print_readable ~short_pos:true result
     end

@@ -21,37 +21,35 @@ let get_occurrence_and_map tcopt content line char ~f =
     f path file_info result
   end tcopt
 
+(* Order symbols from innermost to outermost *)
+let by_nesting x y =
+  if Pos.contains x.SymbolOccurrence.pos y.SymbolOccurrence.pos
+  then
+    if Pos.contains y.SymbolOccurrence.pos x.SymbolOccurrence.pos
+    then 0
+    else 1
+  else -1
+
+let rec take_best_suggestions l = match l with
+  | (first :: rest) ->
+    (* Check if we should stop finding suggestions. For example, in
+     "foo($bar)" it's not useful to look outside the local variable "$bar". *)
+    let stop = match first.SymbolOccurrence.type_ with
+      | SymbolOccurrence.LocalVar -> true
+      | SymbolOccurrence.Method _ -> true
+      | _ -> false
+    in
+    if stop then
+      (* We're stopping here, but also include the other suggestions for
+         this span. *)
+      first :: List.take_while rest ~f:(fun x -> by_nesting first x = 0)
+    else first :: take_best_suggestions rest
+  | [] -> []
+
 (** NOTE: the paths of any positions within any returned `SymbolOccurrence` or
     `SymbolDefinition` objects will be the empty string (`""`) if the symbol is
     located in the passed in content buffer. *)
 let go content line char (tcopt : TypecheckerOptions.t) =
-  (* Order symbols from innermost to outermost *)
-  let by_nesting x y =
-    if Pos.contains x.SymbolOccurrence.pos y.SymbolOccurrence.pos
-    then
-      if Pos.contains y.SymbolOccurrence.pos x.SymbolOccurrence.pos
-      then 0
-      else 1
-    else -1
-  in
-
-  let rec take_best_suggestions l = match l with
-    | (first :: rest) ->
-      (* Check if we should stop finding suggestions. For example, in
-       "foo($bar)" it's not useful to look outside the local variable "$bar". *)
-      let stop = match first.SymbolOccurrence.type_ with
-        | SymbolOccurrence.LocalVar -> true
-        | SymbolOccurrence.Method _ -> true
-        | _ -> false
-      in
-      if stop then
-        (* We're stopping here, but also include the other suggestions for
-           this span. *)
-        first :: List.take_while rest ~f:(fun x -> by_nesting first x = 0)
-      else first :: take_best_suggestions rest
-    | [] -> []
-  in
-
   get_occurrence_and_map tcopt content line char ~f:(fun path _ symbols ->
   let symbols = take_best_suggestions (List.sort by_nesting symbols) in
   let ast = Ast_provider.get_ast path in
@@ -67,3 +65,21 @@ let go_absolute content line char tcopt =
   List.map (go content line char tcopt) begin fun (x, y) ->
     SymbolOccurrence.to_absolute x, Option.map y SymbolDefinition.to_absolute
   end
+
+let go_ctx
+    ~(ctx : ServerIdeContext.t)
+    ~(entry : ServerIdeContext.entry)
+    ~(line : int)
+    ~(char : int) =
+  ServerIdeContext.with_context ~ctx ~f:(fun () ->
+    let ast = ServerIdeContext.get_ast entry in
+    let tast = ServerIdeContext.get_tast entry in
+    let symbols = IdentifySymbolService.go tast line char in
+    let symbols = take_best_suggestions (List.sort by_nesting symbols) in
+    List.map symbols ~f:(fun x ->
+      let symbol_occurrence = SymbolOccurrence.to_absolute x in
+      let symbol_definition = ServerSymbolDefinition.go ast x
+        |> Option.map ~f:SymbolDefinition.to_absolute in
+      (symbol_occurrence, symbol_definition)
+    )
+  )

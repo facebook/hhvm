@@ -7,7 +7,6 @@
  *
  *)
 
-
 val make_local_changes: unit -> unit
 val revert_local_changes: unit -> unit
 (* When typechecking a content buffer in IDE mode,

@@ -68,7 +68,6 @@
     serverCommandTypesUtils
     serverCoverageMetricTypes
     ServerExtractStandalone
-    serverIdeUtils
     serverFormatTypes
     serverHighlightRefsTypes
     serverLintTypes
@@ -120,14 +119,16 @@
     identifySymbolService
     methodJumps
     saveStateService
-    serverSymbolDefinition
-    serverIdentifyFunction
     serverAutoComplete
     serverFindLocals
     serverFunDepsBatch
     serverFunIsLocallableBatch
     serverGlobalState
+    serverIdeContext
+    serverIdeUtils
+    serverIdentifyFunction
     serverRxApiShared
+    serverSymbolDefinition
     symbolFunCallService
     symbolTypeService)
   (libraries

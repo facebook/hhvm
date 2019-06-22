@@ -20,6 +20,7 @@
   (libraries
     ast
     heap_shared_mem
+    provider_config
     relative_path
     sys_utils))
 

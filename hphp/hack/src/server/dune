@@ -171,6 +171,7 @@
     serverIdle
     serverInferType
     serverInferTypeBatch
+    serverInvalidateUnits
     serverLint
     serverMethodJumps
     serverMethodJumpsBatch
@@ -209,7 +210,11 @@
     watchman_utils
     (select serverHotClassesDescription.ml from
     (facebook signed_source_fb -> facebook/serverHotClassesDescription.ml)
-    (-> ../stubs/serverHotClassesDescription.ml))))
+    (-> ../stubs/serverHotClassesDescription.ml))
+    (select serverInvalidateUnits.ml from
+    (facebook signed_source_fb -> facebook/serverInvalidateUnits.ml)
+    (-> ../stubs/serverInvalidateUnits.ml))
+  ))
 
 (library
   (name hh_server_monitor)

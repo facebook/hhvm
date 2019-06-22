@@ -12,13 +12,9 @@ open Core_kernel
 module DepSet = Typing_deps.DepSet
 module Dep = Typing_deps.Dep
 
-let go
-    (genv: ServerEnv.genv)
-    (env: ServerEnv.env)
-    (filenames: string list) =
-  let workers = genv.ServerEnv.workers in
-  let naming_table = env.ServerEnv.naming_table in
-  let paths = List.map ~f:Relative_path.create_detect_prefix filenames in
+(* Given the naming table, a list of relative paths,
+ *   find the list of relative paths of all dependencies *)
+let deps_of_paths workers naming_table relative_paths =
   let find_dependencies acc paths =
     let fileinfos = List.filter_map ~f:(Naming_table.get_file_info naming_table) paths in
     let initial_deps =
@@ -40,8 +36,17 @@ let go
       ~job:find_dependencies
       ~neutral:DepSet.empty
       ~merge:DepSet.union
-      ~next:(MultiWorker.next workers paths) in
+      ~next:(MultiWorker.next workers relative_paths) in
   all_deps
     |> Typing_deps.get_files
     |> Relative_path.Set.elements
-    |> List.map ~f:Relative_path.to_absolute
+
+let go
+    (genv: ServerEnv.genv)
+    (env: ServerEnv.env)
+    (filenames: string list) =
+  let workers = genv.ServerEnv.workers in
+  let naming_table = env.ServerEnv.naming_table in
+  let paths = List.map ~f:Relative_path.create_detect_prefix filenames in
+  let all_deps = deps_of_paths workers naming_table paths in
+  List.map ~f:Relative_path.to_absolute all_deps

@@ -23,7 +23,7 @@ namespace HH {
  * definition below is not actually used at run time; it is simply
  * provided for the typechecker and for developer reference.
  */
-abstract class BuiltinEnum<T as arraykey> {
+abstract class BuiltinEnum<T> {
   /**
    * Get the values of the public consts defined on this class,
    * indexed by the string name of those consts.
@@ -40,7 +40,7 @@ abstract class BuiltinEnum<T as arraykey> {
    * @return array($value => 'CONST_NAME', ....)
    */
   <<__Rx>>
-  final public static function getNames(): darray<T, string>;
+  final public static function getNames(): darray<T, string> where T as arraykey;
 
   /**
    * Returns whether or not the value is defined as a constant.

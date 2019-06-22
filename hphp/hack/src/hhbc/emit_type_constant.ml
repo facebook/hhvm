@@ -133,10 +133,10 @@ and type_constant_access_list sl =
   else TV.VArray l
 
 and resolve_classname ~tparams ~namespace (p, s) =
-  let s = if s = "_" then s else add_ns namespace (p, Types.fix_casing s) in
+  let is_tparam = s = "_" || List.mem ~equal:(=) tparams s in
+  let s = if is_tparam then s else add_ns namespace (p, Types.fix_casing s) in
   if is_prim s || is_resolved_classname s then [], s
   else
-    let is_tparam = s = "_" || List.mem ~equal:(=) tparams s in
     let id = if is_tparam then "name" else "classname" in
     [TV.String id, TV.String s], s
 

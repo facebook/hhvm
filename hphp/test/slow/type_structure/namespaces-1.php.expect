@@ -1,0 +1,20 @@
+array(4) {
+  ["kind"]=>
+  int(13)
+  ["name"]=>
+  string(1) "T"
+  ["typevars"]=>
+  string(1) "T"
+  ["alias"]=>
+  string(3) "Bar"
+}
+array(4) {
+  ["kind"]=>
+  int(13)
+  ["name"]=>
+  string(1) "T"
+  ["typevars"]=>
+  string(1) "T"
+  ["alias"]=>
+  string(7) "Foo\Bar"
+}

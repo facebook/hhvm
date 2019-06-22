@@ -608,15 +608,6 @@ arr_lval Array::lvalAtImpl(const T& key, AccessFlags) {
 }
 
 template<typename T> ALWAYS_INLINE
-arr_lval Array::lvalAtRefImpl(const T& key, AccessFlags) {
-  if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
-  auto const lval = m_arr->lvalRef(key, m_arr->cowCheck());
-  if (lval.arr != m_arr) m_arr = Ptr::attach(lval.arr);
-  assertx(lval);
-  return lval;
-}
-
-template<typename T> ALWAYS_INLINE
 bool Array::existsImpl(const T& key) const {
   if (m_arr) return m_arr->exists(key);
   return false;
@@ -754,7 +745,6 @@ decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
 
 FOR_EACH_KEY_TYPE(rvalAt, tv_rval, const)
 FOR_EACH_KEY_TYPE(lvalAt, arr_lval, )
-FOR_EACH_KEY_TYPE(lvalAtRef, arr_lval, )
 
 #undef I
 #undef V
@@ -820,14 +810,6 @@ FOR_EACH_KEY_TYPE(setWithRef)
 arr_lval Array::lvalAt() {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
   auto const lval = m_arr->lvalNew(m_arr->cowCheck());
-  if (lval.arr != m_arr) m_arr = Ptr::attach(lval.arr);
-  assertx(lval);
-  return lval;
-}
-
-arr_lval Array::lvalAtRef() {
-  if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
-  auto const lval = m_arr->lvalNewRef(m_arr->cowCheck());
   if (lval.arr != m_arr) m_arr = Ptr::attach(lval.arr);
   assertx(lval);
   return lval;

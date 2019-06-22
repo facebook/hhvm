@@ -499,7 +499,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
     ReadNoWarn,
     ReadWarn,
     DimForWrite,
-    Bind,
   };
 
   template<PropMode mode>
@@ -524,8 +523,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   tv_lval propW(TypedValue* tvRef, const Class* ctx, const StringData* key);
   tv_lval propU(TypedValue* tvRef, const Class* ctx, const StringData* key);
   tv_lval propD(TypedValue* tvRef, const Class* ctx,
-                const StringData* key, MInstrPropState* pState);
-  tv_lval propB(TypedValue* tvRef, const Class* ctx,
                 const StringData* key, MInstrPropState* pState);
 
   bool propIsset(const Class* ctx, const StringData* key);

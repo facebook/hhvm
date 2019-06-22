@@ -49,11 +49,8 @@ struct APCLocalArray final : ArrayData,
   static bool ExistsInt(const ArrayData* ad, int64_t k);
   static bool ExistsStr(const ArrayData* ad, const StringData* k);
   static arr_lval LvalInt(ArrayData*, int64_t k, bool copy);
-  static arr_lval LvalIntRef(ArrayData*, int64_t k, bool copy);
   static arr_lval LvalStr(ArrayData*, StringData* k, bool copy);
-  static arr_lval LvalStrRef(ArrayData*, StringData* k, bool copy);
   static arr_lval LvalNew(ArrayData*, bool copy);
-  static arr_lval LvalNewRef(ArrayData*, bool copy);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v);
   static constexpr auto SetIntInPlace = &SetInt;
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v);

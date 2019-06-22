@@ -101,11 +101,8 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
     return false;
   }
   static arr_lval LvalInt(ArrayData*, int64_t k, bool copy);
-  static arr_lval LvalIntRef(ArrayData*, int64_t k, bool copy);
   static arr_lval LvalStr(ArrayData*, StringData* k, bool copy);
-  static arr_lval LvalStrRef(ArrayData*, StringData* k, bool copy);
   static arr_lval LvalNew(ArrayData*, bool copy);
-  static arr_lval LvalNewRef(ArrayData*, bool copy);
   static constexpr auto IterBegin = &ArrayCommon::ReturnInvalidIndex;
   static constexpr auto IterLast = &ArrayCommon::ReturnInvalidIndex;
   static constexpr auto IterEnd = &ArrayCommon::ReturnInvalidIndex;

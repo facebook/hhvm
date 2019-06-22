@@ -422,9 +422,7 @@ public:
   static arr_lval LvalInt(ArrayData*, int64_t, bool);
   static arr_lval LvalIntRef(ArrayData*, int64_t, bool);
   static arr_lval LvalStr(ArrayData*, StringData*, bool);
-  static arr_lval LvalStrRef(ArrayData*, StringData*, bool);
   static arr_lval LvalNew(ArrayData*, bool);
-  static arr_lval LvalNewRef(ArrayData*, bool);
   static ArrayData* SetInt(ArrayData*, int64_t, Cell);
   static constexpr auto SetIntInPlace = &SetInt;
   static ArrayData* SetStr(ArrayData*, StringData*, Cell);

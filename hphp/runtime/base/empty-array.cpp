@@ -267,18 +267,8 @@ arr_lval EmptyArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
   return LvalIntImpl<true>(ad, k, copy);
 }
 
-arr_lval EmptyArray::LvalIntRef(ArrayData* ad, int64_t k, bool copy) {
-  if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
-  return LvalInt(ad, k, copy);
-}
-
 arr_lval EmptyArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
   return LvalStrImpl<true>(ad, k, copy);
-}
-
-arr_lval EmptyArray::LvalStrRef(ArrayData* ad, StringData* k, bool copy) {
-  if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
-  return LvalStr(ad, k, copy);
 }
 
 arr_lval EmptyArray::LvalNew(ArrayData*, bool) {
@@ -286,11 +276,6 @@ arr_lval EmptyArray::LvalNew(ArrayData*, bool) {
     raise_hac_falsey_promote_notice("Lval on missing array element");
   }
   return EmptyArray::MakePacked(make_tv<KindOfNull>());
-}
-
-arr_lval EmptyArray::LvalNewRef(ArrayData* ad, bool copy) {
-  if (checkHACRefBind()) raiseHackArrCompatRefNew();
-  return LvalNew(ad, copy);
 }
 
 ArrayData* EmptyArray::Append(ArrayData*, Cell v) {

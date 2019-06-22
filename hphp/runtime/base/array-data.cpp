@@ -430,41 +430,32 @@ const ArrayFunctions g_array_funcs = {
 
   /*
    * arr_lval LvalInt(ArrayData*, int64_t k, bool copy)
-   * arr_lval LvalIntRef(ArrayData*, int64_t k, bool copy)
    *
    *   Look up a value in the array by the supplied integer key, creating it as
-   *   a KindOfNull if it doesn't exist, and return a reference to it.  Use the
-   *   ref variant if the retrieved value will be boxed.  This function has
-   *   copy/grow semantics.
+   *   a KindOfNull if it doesn't exist, and return a reference to it.  This
+   *   function has copy/grow semantics.
    */
   DISPATCH(LvalInt)
-  DISPATCH(LvalIntRef)
 
   /*
    * arr_lval LvalStr(ArrayData*, StringData* key, bool copy)
-   * arr_lval LvalStrRef(ArrayData*, StringData* key, bool copy)
    *
    *   Look up a value in the array by the supplied string key, creating it as
    *   a KindOfNull if it doesn't exist, and return a reference to it.  The
-   *   string `key' may not be an integer-like string.  Use the ref variant if
-   *   the retrieved value will be boxed.  This function has copy/grow
-   *   semantics.
+   *   string `key' may not be an integer-like string.  This function has
+   *   copy/grow semantics.
    */
   DISPATCH(LvalStr)
-  DISPATCH(LvalStrRef)
 
   /*
    * arr_lval LvalNew(ArrayData*, bool copy)
-   * arr_lval LvalNewRef(ArrayData*, bool copy)
    *
    *   Insert a new null value in the array at the next available integer key,
    *   and return a reference to it.  In the case that there is no next
    *   available integer key, this function returns a reference to the
-   *   lvalBlackHole.  Use the ref variant if the retrieved value will be
-   *   boxed.  This function has copy/grow semantics.
+   *   lvalBlackHole.  This function has copy/grow semantics.
    */
   DISPATCH(LvalNew)
-  DISPATCH(LvalNewRef)
 
   /*
    * ArrayData* RemoveInt(ArrayData*, int64_t key)

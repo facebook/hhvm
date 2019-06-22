@@ -449,12 +449,9 @@ public:
   /*
    * Get an lval to the element at `key'.
    *
-   * These are ArrayData::lval() and ArrayData::lvalRef(), with CoW and
-   * escalation.  As with those functions, the Ref versions should be used if
-   * the lval will be boxed, and the non-Ref versions should be used otherwise.
+   * This is ArrayData::lval() with CoW and escalation.
    */
   FOR_EACH_KEY_TYPE(lvalAt, arr_lval, )
-  FOR_EACH_KEY_TYPE(lvalAtRef, arr_lval, )
 
 #undef D
 #undef I
@@ -465,7 +462,6 @@ public:
    * Get an lval to a newly created element.
    */
   arr_lval lvalAt();
-  arr_lval lvalAtRef();
 
   /////////////////////////////////////////////////////////////////////////////
   // Element access and mutation.
@@ -564,7 +560,6 @@ private:
 
   template<typename T> tv_rval rvalAtImpl(const T& key, Flags) const;
   template<typename T> arr_lval lvalAtImpl(const T& key, Flags);
-  template<typename T> arr_lval lvalAtRefImpl(const T& key, Flags);
 
   template<typename T> bool existsImpl(const T& key) const;
   template<typename T> void removeImpl(const T& key);

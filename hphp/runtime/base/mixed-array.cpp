@@ -1076,18 +1076,8 @@ arr_lval MixedArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
   return asMixed(ad)->prepareForInsert(copy)->addLvalImpl<true>(k);
 }
 
-arr_lval MixedArray::LvalIntRef(ArrayData* ad, int64_t k, bool copy) {
-  if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
-  return LvalInt(ad, k, copy);
-}
-
 arr_lval MixedArray::LvalStr(ArrayData* ad, StringData* key, bool copy) {
   return asMixed(ad)->prepareForInsert(copy)->addLvalImpl<true>(key);
-}
-
-arr_lval MixedArray::LvalStrRef(ArrayData* ad, StringData* key, bool copy) {
-  if (checkHACRefBind()) raiseHackArrCompatRefBind(key);
-  return LvalStr(ad, key, copy);
 }
 
 arr_lval MixedArray::LvalSilentInt(ArrayData* ad, int64_t k, bool copy) {
@@ -1122,11 +1112,6 @@ arr_lval MixedArray::LvalNew(ArrayData* ad, bool copy) {
   a = a->prepareForInsert(copy);
   a->nextInsert(make_tv<KindOfNull>());
   return arr_lval { a, &a->data()[a->m_used - 1].data };
-}
-
-arr_lval MixedArray::LvalNewRef(ArrayData* ad, bool copy) {
-  if (checkHACRefBind()) raiseHackArrCompatRefNew();
-  return LvalNew(ad, copy);
 }
 
 ArrayData* MixedArray::SetInt(ArrayData* ad, int64_t k, Cell v) {
@@ -1887,24 +1872,6 @@ ArrayData* MixedArray::SetWithRefStrInPlaceDict(ArrayData* ad, StringData* k,
   return asMixed(ad)->prepareForInsert(false)->updateWithRef(k, v);
 }
 
-arr_lval MixedArray::LvalIntRefDict(ArrayData* adIn, int64_t, bool) {
-  assertx(asMixed(adIn)->checkInvariants());
-  assertx(adIn->isDictOrShape());
-  throwRefInvalidArrayValueException(adIn);
-}
-
-arr_lval MixedArray::LvalStrRefDict(ArrayData* adIn, StringData*, bool) {
-  assertx(asMixed(adIn)->checkInvariants());
-  assertx(adIn->isDictOrShape());
-  throwRefInvalidArrayValueException(adIn);
-}
-
-arr_lval MixedArray::LvalNewRefDict(ArrayData* adIn, bool) {
-  assertx(asMixed(adIn)->checkInvariants());
-  assertx(adIn->isDictOrShape());
-  throwRefInvalidArrayValueException(adIn);
-}
-
 ArrayData*
 MixedArray::AppendWithRefDict(ArrayData* adIn, TypedValue v) {
   assertx(asMixed(adIn)->checkInvariants());
@@ -1962,26 +1929,6 @@ ArrayData* MixedArray::SetWithRefStrInPlaceShape(ArrayData* ad, StringData* k,
   return RuntimeOption::EvalHackArrDVArrs
     ? SetWithRefStrInPlaceDict(ad, k, v)
     : SetWithRefStrInPlace(ad, k, v);
-}
-
-arr_lval MixedArray::LvalIntRefShape(ArrayData* adIn, int64_t k, bool copy) {
-  return RuntimeOption::EvalHackArrDVArrs
-    ? LvalIntRefDict(adIn, k, copy)
-    : LvalIntRef(adIn, k, copy);
-}
-
-arr_lval MixedArray::LvalStrRefShape(ArrayData* adIn,
-                                     StringData* k,
-                                     bool copy) {
-  return RuntimeOption::EvalHackArrDVArrs
-    ? LvalStrRefDict(adIn, k, copy)
-    : LvalStrRef(adIn, k, copy);
-}
-
-arr_lval MixedArray::LvalNewRefShape(ArrayData* adIn, bool copy) {
-  return RuntimeOption::EvalHackArrDVArrs
-    ? LvalNewRefDict(adIn, copy)
-    : LvalNewRef(adIn, copy);
 }
 
 ArrayData*

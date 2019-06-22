@@ -643,28 +643,16 @@ arr_lval SetArray::LvalInt(ArrayData*, int64_t, bool) {
   );
 }
 
-arr_lval SetArray::LvalIntRef(ArrayData* ad, int64_t, bool) {
-  throwRefInvalidArrayValueException(ad);
-}
-
 arr_lval SetArray::LvalStr(ArrayData*, StringData*, bool) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (lval string)"
   );
 }
 
-arr_lval SetArray::LvalStrRef(ArrayData* ad, StringData*, bool) {
-  throwRefInvalidArrayValueException(ad);
-}
-
 arr_lval SetArray::LvalNew(ArrayData*, bool) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (lval new)"
   );
-}
-
-arr_lval SetArray::LvalNewRef(ArrayData* ad, bool) {
-  throwRefInvalidArrayValueException(ad);
 }
 
 ArrayData* SetArray::SetInt(ArrayData*, int64_t, Cell) {

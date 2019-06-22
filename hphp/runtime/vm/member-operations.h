@@ -620,14 +620,12 @@ inline tv_rval Elem(TypedValue& tvRef,
   return ElemSlow<mode, keyType>(tvRef, base, key);
 }
 
-template<MOpMode mode, bool reffy>
+template<MOpMode mode>
 inline tv_lval ElemDArrayPre(tv_lval base, int64_t key, bool& defined) {
   auto oldArr = val(base).parr;
 
   defined = (mode != MOpMode::Warn) || oldArr->exists(key);
-  auto const lval = reffy
-    ? oldArr->lvalRef(key, oldArr->cowCheck())
-    : oldArr->lval(key, oldArr->cowCheck());
+  auto const lval = oldArr->lval(key, oldArr->cowCheck());
 
   if (lval.arr != oldArr) {
     type(base) = KindOfArray;
@@ -639,7 +637,7 @@ inline tv_lval ElemDArrayPre(tv_lval base, int64_t key, bool& defined) {
   return lval;
 }
 
-template<MOpMode mode, bool reffy>
+template<MOpMode mode>
 inline tv_lval ElemDArrayPre(tv_lval base, StringData* key,
                              bool& defined) {
   auto oldArr = val(base).parr;
@@ -647,7 +645,7 @@ inline tv_lval ElemDArrayPre(tv_lval base, StringData* key,
   auto const lval = [&]{
     auto const cow = oldArr->cowCheck();
     defined = (mode != MOpMode::Warn) || oldArr->exists(key);
-    return reffy ? oldArr->lvalRef(key, cow) : oldArr->lval(key, cow);
+    return oldArr->lval(key, cow);
   }();
 
   if (lval.arr != oldArr) {
@@ -659,33 +657,33 @@ inline tv_lval ElemDArrayPre(tv_lval base, StringData* key,
   return lval;
 }
 
-template<MOpMode mode, bool reffy>
+template<MOpMode mode>
 inline tv_lval ElemDArrayPre(tv_lval base, TypedValue key,
                              bool& defined) {
   auto const dt = key.m_type;
   if (isIntType(dt)) {
-    return ElemDArrayPre<mode, reffy>(
+    return ElemDArrayPre<mode>(
       base, key.m_data.num, defined
     );
   }
   if (isStringType(dt)) {
-    return ElemDArrayPre<mode, reffy>(base, key.m_data.pstr, defined);
+    return ElemDArrayPre<mode>(base, key.m_data.pstr, defined);
   }
   auto& arr = asArrRef(base);
   defined = (mode != MOpMode::Warn) || arr.exists(tvAsCVarRef(&key));
-  return reffy ? arr.lvalAtRef(key) : arr.lvalAt(key);
+  return arr.lvalAt(key);
 }
 
 /**
  * ElemD when base is an Array
  */
-template<MOpMode mode, bool reffy, KeyType keyType>
+template<MOpMode mode, KeyType keyType>
 inline tv_lval ElemDArray(tv_lval base, key_type<keyType> key) {
   assertx(tvIsArrayOrShape(base));
   assertx(tvIsPlausible(*base));
 
   bool defined;
-  auto lval = ElemDArrayPre<mode, reffy>(base, key, defined);
+  auto lval = ElemDArrayPre<mode>(base, key, defined);
 
   assertx(tvIsArray(base));
   assertx(tvIsPlausible(*base));
@@ -702,11 +700,9 @@ inline tv_lval ElemDArray(tv_lval base, key_type<keyType> key) {
 /**
  * ElemD when base is a Vec
  */
-template <bool reffy, bool copyProv>
+template <bool copyProv>
 inline tv_lval ElemDVecPre(tv_lval base, int64_t key) {
   ArrayData* oldArr = base.val().parr;
-
-  if (reffy) throwRefInvalidArrayValueException(oldArr);
 
   auto const lval = PackedArray::LvalIntVec(oldArr, key, oldArr->cowCheck());
   if (lval.arr != oldArr) {
@@ -719,27 +715,27 @@ inline tv_lval ElemDVecPre(tv_lval base, int64_t key) {
   return lval;
 }
 
-template <bool reffy, bool copyProv>
+template <bool copyProv>
 inline tv_lval ElemDVecPre(tv_lval base, StringData* key) {
   throwInvalidArrayKeyException(key, base.val().parr);
 }
 
-template <bool reffy, bool copyProv>
+template <bool copyProv>
 inline tv_lval ElemDVecPre(tv_lval base, TypedValue key) {
   auto const dt = key.m_type;
   if (LIKELY(isIntType(dt))) {
-    return ElemDVecPre<reffy, copyProv>(base, key.m_data.num);
+    return ElemDVecPre<copyProv>(base, key.m_data.num);
   } else if (isStringType(dt)) {
-    return ElemDVecPre<reffy, copyProv>(base, key.m_data.pstr);
+    return ElemDVecPre<copyProv>(base, key.m_data.pstr);
   }
   throwInvalidArrayKeyException(&key, base.val().parr);
 }
 
-template <bool reffy, KeyType keyType, bool copyProv>
+template <KeyType keyType, bool copyProv>
 inline tv_lval ElemDVec(tv_lval base, key_type<keyType> key) {
   assertx(tvIsVec(base));
   assertx(tvIsPlausible(base.tv()));
-  auto const result = ElemDVecPre<reffy, copyProv>(base, key);
+  auto const result = ElemDVecPre<copyProv>(base, key);
   assertx(tvIsVec(base));
   assertx(tvIsPlausible(base.tv()));
 
@@ -750,11 +746,9 @@ inline tv_lval ElemDVec(tv_lval base, key_type<keyType> key) {
 /**
  * ElemD when base is a Dict
  */
-template <bool reffy, bool copyProv>
+template <bool copyProv>
 inline tv_lval ElemDDictPre(tv_lval base, int64_t key) {
   ArrayData* oldArr = base.val().parr;
-
-  if (reffy) throwRefInvalidArrayValueException(oldArr);
 
   auto const lval =
     MixedArray::LvalSilentIntDict(oldArr, key, oldArr->cowCheck());
@@ -775,11 +769,9 @@ inline tv_lval ElemDDictPre(tv_lval base, int64_t key) {
   return lval;
 }
 
-template <bool reffy, bool copyProv>
+template <bool copyProv>
 inline tv_lval ElemDDictPre(tv_lval base, StringData* key) {
   ArrayData* oldArr = base.val().parr;
-
-  if (reffy) throwRefInvalidArrayValueException(oldArr);
 
   auto const lval =
     MixedArray::LvalSilentStrDict(oldArr, key, oldArr->cowCheck());
@@ -800,22 +792,22 @@ inline tv_lval ElemDDictPre(tv_lval base, StringData* key) {
   return lval;
 }
 
-template <bool reffy, bool copyProv>
+template <bool copyProv>
 inline tv_lval ElemDDictPre(tv_lval base, TypedValue key) {
   auto const dt = key.m_type;
   if (isIntType(dt)) {
-    return ElemDDictPre<reffy, copyProv>(base, key.m_data.num);
+    return ElemDDictPre<copyProv>(base, key.m_data.num);
   } else if (isStringType(dt)) {
-    return ElemDDictPre<reffy, copyProv>(base, key.m_data.pstr);
+    return ElemDDictPre<copyProv>(base, key.m_data.pstr);
   }
   throwInvalidArrayKeyException(&key, base.val().parr);
 }
 
-template <bool reffy, KeyType keyType, bool copyProv>
+template <KeyType keyType, bool copyProv>
 inline tv_lval ElemDDict(tv_lval base, key_type<keyType> key) {
   assertx(isDictType(base.type()));
   assertx(tvIsPlausible(base.tv()));
-  auto result = ElemDDictPre<reffy, copyProv>(base, key);
+  auto result = ElemDDictPre<copyProv>(base, key);
   assertx(isDictType(base.type()));
   assertx(tvIsPlausible(base.tv()));
 
@@ -826,35 +818,30 @@ inline tv_lval ElemDDict(tv_lval base, key_type<keyType> key) {
 /**
  * ElemD when base is a Keyset
  */
-template <bool reffy>
 [[noreturn]]
-inline tv_lval ElemDKeysetPre(tv_lval base, int64_t /*key*/) {
-  if (reffy) throwRefInvalidArrayValueException(base.val().parr);
+inline tv_lval ElemDKeysetPre(tv_lval /*base*/, int64_t /*key*/) {
   throwInvalidKeysetOperation();
 }
 
-template <bool reffy>
 [[noreturn]]
-inline tv_lval ElemDKeysetPre(tv_lval base, StringData* /*key*/) {
-  if (reffy) throwRefInvalidArrayValueException(base.val().parr);
+inline tv_lval ElemDKeysetPre(tv_lval /*base*/, StringData* /*key*/) {
   throwInvalidKeysetOperation();
 }
 
-template <bool reffy>
 [[noreturn]]
 inline tv_lval ElemDKeysetPre(tv_lval base, TypedValue key) {
   auto const dt = key.m_type;
-  if (isIntType(dt))    ElemDKeysetPre<reffy>(base, key.m_data.num);
-  if (isStringType(dt)) ElemDKeysetPre<reffy>(base, key.m_data.pstr);
+  if (isIntType(dt))    ElemDKeysetPre(base, key.m_data.num);
+  if (isStringType(dt)) ElemDKeysetPre(base, key.m_data.pstr);
   throwInvalidArrayKeyException(&key, base.val().parr);
 }
 
-template <bool reffy, KeyType keyType>
+template <KeyType keyType>
 [[noreturn]]
 inline tv_lval ElemDKeyset(tv_lval base, key_type<keyType> key) {
   assertx(tvIsKeyset(base));
   assertx(tvIsPlausible(base.tv()));
-  ElemDKeysetPre<reffy>(base, key);
+  ElemDKeysetPre(base, key);
 }
 
 /**
@@ -926,17 +913,13 @@ inline tv_lval ElemDRecord(tv_lval base, key_type<keyType> key) {
 /**
  * ElemD when base is an Object
  */
-template<MOpMode mode, bool reffy, KeyType keyType>
+template<MOpMode mode, KeyType keyType>
 inline tv_lval ElemDObject(TypedValue& tvRef, tv_lval base,
                            key_type<keyType> key) {
   auto scratchKey = initScratchKey(key);
   auto obj = base.val().pobj;
 
   if (LIKELY(obj->isCollection())) {
-    if (reffy) {
-      raise_error("Collection elements cannot be taken by reference");
-      return tv_lval(nullptr);
-    }
     return collections::atLval(obj, &scratchKey);
   } else if (obj->getVMClass()->classof(SystemLib::s_ArrayObjectClass)) {
     auto storage = obj->getPropLval(SystemLib::s_ArrayObjectClass,
@@ -953,7 +936,7 @@ inline tv_lval ElemDObject(TypedValue& tvRef, tv_lval base,
       always_assert(!prop.typeConstraint.isCheckable());
       always_assert(!(prop.attrs & AttrLateInit));
     }
-    return ElemDArray<mode, reffy, keyType>(storage, key);
+    return ElemDArray<mode, keyType>(storage, key);
   }
 
   tvRef = objOffsetGet(instanceFromTv(base), scratchKey);
@@ -969,6 +952,7 @@ template<MOpMode mode, bool reffy, KeyType keyType = KeyType::Any,
          bool copyProv>
 tv_lval ElemD(TypedValue& tvRef, tv_lval base,
               key_type<keyType> key, const MInstrPropState* pState) {
+  static_assert(!reffy, "references are dead");
   assertx(mode == MOpMode::Define);
 
   base = base.unboxed();
@@ -991,23 +975,23 @@ tv_lval ElemD(TypedValue& tvRef, tv_lval base,
       return ElemDString<mode, keyType>(base, key, pState);
     case KindOfPersistentVec:
     case KindOfVec:
-      return ElemDVec<reffy, keyType, copyProv>(base, key);
+      return ElemDVec<keyType, copyProv>(base, key);
     case KindOfPersistentDict:
     case KindOfDict:
-      return ElemDDict<reffy, keyType, copyProv>(base, key);
+      return ElemDDict<keyType, copyProv>(base, key);
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-      return ElemDKeyset<reffy, keyType>(base, key);
+      return ElemDKeyset<keyType>(base, key);
     case KindOfPersistentShape:
     case KindOfShape:
       return RuntimeOption::EvalHackArrDVArrs ?
-        ElemDDict<reffy, keyType, copyProv>(base, key) :
-        ElemDArray<mode, reffy, keyType>(base, key);
+        ElemDDict<keyType, copyProv>(base, key) :
+        ElemDArray<mode, keyType>(base, key);
     case KindOfPersistentArray:
     case KindOfArray:
-      return ElemDArray<mode, reffy, keyType>(base, key);
+      return ElemDArray<mode, keyType>(base, key);
     case KindOfObject:
-      return ElemDObject<mode, reffy, keyType>(tvRef, base, key);
+      return ElemDObject<mode, keyType>(tvRef, base, key);
     case KindOfClsMeth:
       throw_cannot_write_for_clsmeth();
     case KindOfRecord:
@@ -1326,11 +1310,10 @@ inline tv_lval NewElemString(TypedValue& tvRef,
 /**
  * NewElem when base is an Array
  */
-template <bool reffy>
 inline tv_lval NewElemArray(tv_lval base) {
   assertx(tvIsArray(base));
   assertx(tvIsPlausible(*base));
-  return reffy ? asArrRef(base).lvalAtRef() : asArrRef(base).lvalAt();
+  return asArrRef(base).lvalAt();
 }
 
 /**
@@ -1348,7 +1331,6 @@ inline tv_lval NewElemObject(TypedValue& tvRef, tv_lval base) {
 /**
  * $result = ($base[] = ...);
  */
-template <bool reffy>
 inline tv_lval NewElem(TypedValue& tvRef,
                        tv_lval base,
                        const MInstrPropState* pState) {
@@ -1384,10 +1366,10 @@ inline tv_lval NewElem(TypedValue& tvRef,
       if (RuntimeOption::EvalHackArrDVArrs) {
         throw_cannot_use_newelem_for_lval_read_dict();
       }
-      return NewElemArray<reffy>(base);
+      /* FALLTHROUGH */
     case KindOfPersistentArray:
     case KindOfArray:
-      return NewElemArray<reffy>(base);
+      return NewElemArray(base);
     case KindOfObject:
       return NewElemObject(tvRef, base);
     case KindOfClsMeth:
@@ -2131,9 +2113,9 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
     case KindOfVec: {
       auto result = [&]{
         if (RuntimeOption::EvalArrayProvenance) {
-          return ElemDVec<false, KeyType::Any, true>(base, key);
+          return ElemDVec<KeyType::Any, true>(base, key);
         } else {
-          return ElemDVec<false, KeyType::Any, false>(base, key);
+          return ElemDVec<KeyType::Any, false>(base, key);
         }
       }();
       result = tvAssertCell(result);
@@ -2145,9 +2127,9 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
     case KindOfDict: {
       auto result = [&]{
         if (RuntimeOption::EvalArrayProvenance) {
-          return ElemDDict<false, KeyType::Any, true>(base, key);
+          return ElemDDict<KeyType::Any, true>(base, key);
         } else {
-          return ElemDDict<false, KeyType::Any, false>(base, key);
+          return ElemDDict<KeyType::Any, false>(base, key);
         }
       }();
       result = tvAssertCell(result);
@@ -2164,9 +2146,9 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
       if (RuntimeOption::EvalHackArrDVArrs) {
         auto result = [&]{
           if (RuntimeOption::EvalArrayProvenance) {
-            return ElemDDict<false, KeyType::Any, true>(base, key);
+            return ElemDDict<KeyType::Any, true>(base, key);
           } else {
-            return ElemDDict<false, KeyType::Any, false>(base, key);
+            return ElemDDict<KeyType::Any, false>(base, key);
           }
         }();
         result = tvAssertCell(result);
@@ -2185,7 +2167,7 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
         raiseHackArrCompatMissingSetOp();
       }
       auto result =
-        ElemDArray<MOpMode::None, false, KeyType::Any>(base, key);
+        ElemDArray<MOpMode::None, KeyType::Any>(base, key);
       result = tvToCell(result);
       setopBody(result, op, rhs);
       return result;
@@ -2412,9 +2394,9 @@ inline Cell IncDecElem(
     case KindOfVec: {
       auto result = [&]{
         if (RuntimeOption::EvalArrayProvenance) {
-          return ElemDVec<false, KeyType::Any, true>(base, key);
+          return ElemDVec<KeyType::Any, true>(base, key);
         } else {
-          return ElemDVec<false, KeyType::Any, false>(base, key);
+          return ElemDVec<KeyType::Any, false>(base, key);
         }
       }();
       return IncDecBody(op, tvAssertCell(result));
@@ -2424,9 +2406,9 @@ inline Cell IncDecElem(
     case KindOfDict: {
       auto result = [&]{
         if (RuntimeOption::EvalArrayProvenance) {
-          return ElemDDict<false, KeyType::Any, true>(base, key);
+          return ElemDDict<KeyType::Any, true>(base, key);
         } else {
-          return ElemDDict<false, KeyType::Any, false>(base, key);
+          return ElemDDict<KeyType::Any, false>(base, key);
         }
       }();
       return IncDecBody(op, tvAssertCell(result));
@@ -2441,9 +2423,9 @@ inline Cell IncDecElem(
       if (RuntimeOption::EvalHackArrDVArrs) {
         auto result = [&]{
           if (RuntimeOption::EvalArrayProvenance) {
-            return ElemDDict<false, KeyType::Any, true>(base, key);
+            return ElemDDict<KeyType::Any, true>(base, key);
           } else {
-            return ElemDDict<false, KeyType::Any, false>(base, key);
+            return ElemDDict<KeyType::Any, false>(base, key);
           }
         }();
         return IncDecBody(op, tvAssertCell(result));
@@ -2460,7 +2442,7 @@ inline Cell IncDecElem(
         raiseHackArrCompatMissingIncDec();
       }
       auto result =
-        ElemDArray<MOpMode::None, false, KeyType::Any>(base, key);
+        ElemDArray<MOpMode::None, KeyType::Any>(base, key);
       return IncDecBody(op, tvToCell(result));
     }
 
@@ -3300,7 +3282,7 @@ inline tv_lval nullSafeProp(TypedValue& tvRef,
  * Returns a pointer to a number of possible places, but does not unbox it.
  * (The returned pointer is never pointing into a RefData.)
  */
-template<MOpMode mode, KeyType keyType = KeyType::Any, bool reffy = false>
+template<MOpMode mode, KeyType keyType = KeyType::Any>
 inline tv_lval PropObj(TypedValue& tvRef, const Class* ctx,
                        ObjectData* instance, key_type<keyType> key,
                        MInstrPropState* pState) {
@@ -3309,13 +3291,8 @@ inline tv_lval PropObj(TypedValue& tvRef, const Class* ctx,
 
   // Get property.
   if (mode == MOpMode::Define) {
-    if (reffy) {
-      return instance->propB(&tvRef, ctx, keySD, pState);
-    } else {
-      return instance->propD(&tvRef, ctx, keySD, pState);
-    }
+    return instance->propD(&tvRef, ctx, keySD, pState);
   }
-  assertx(!reffy);
   if (mode == MOpMode::None) {
     return instance->prop(&tvRef, ctx, keySD);
   }
@@ -3326,7 +3303,7 @@ inline tv_lval PropObj(TypedValue& tvRef, const Class* ctx,
   return instance->propU(&tvRef, ctx, keySD);
 }
 
-template<MOpMode mode, KeyType keyType = KeyType::Any, bool reffy = false>
+template<MOpMode mode, KeyType keyType = KeyType::Any>
 inline tv_lval Prop(TypedValue& tvRef,
                     const Class* ctx,
                     tv_lval base,
@@ -3335,7 +3312,7 @@ inline tv_lval Prop(TypedValue& tvRef,
   auto result = propPre<mode>(tvRef, base, pState);
   if (result.type() == KindOfNull) return result;
 
-  return PropObj<mode,keyType,reffy>(
+  return PropObj<mode,keyType>(
     tvRef, ctx, instanceFromTv(result), key, pState
   );
 }

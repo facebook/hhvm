@@ -1556,8 +1556,7 @@ template<ObjectData::PropMode mode>
 ALWAYS_INLINE
 tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
                              const StringData* key, MInstrPropState* pState) {
-  auto constexpr write = (mode == PropMode::DimForWrite) ||
-                         (mode == PropMode::Bind);
+  auto constexpr write = (mode == PropMode::DimForWrite);
   auto constexpr read = (mode == PropMode::ReadNoWarn) ||
                         (mode == PropMode::ReadWarn);
   auto const lookup = getPropImpl<write, read, false>(ctx, key);
@@ -1566,10 +1565,6 @@ tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
   if (prop) {
     if (lookup.accessible) {
       auto const checkImmutable = [&]() {
-        if (mode == PropMode::Bind) {
-          if (UNLIKELY(lookup.immutable)) throwBindImmutable(lookup.slot);
-          boxingTypeHint(lookup.prop);
-        }
         if (mode == PropMode::DimForWrite) {
           if (UNLIKELY(lookup.immutable) && !isBeingConstructed()) {
             throwMutateImmutable(lookup.slot);
@@ -1682,15 +1677,6 @@ tv_lval ObjectData::propD(
   MInstrPropState* pState
 ) {
   return propImpl<PropMode::DimForWrite>(tvRef, ctx, key, pState);
-}
-
-tv_lval ObjectData::propB(
-  TypedValue* tvRef,
-  const Class* ctx,
-  const StringData* key,
-  MInstrPropState* pState
-) {
-  return propImpl<PropMode::Bind>(tvRef, ctx, key, pState);
 }
 
 bool ObjectData::propIsset(const Class* ctx, const StringData* key) {

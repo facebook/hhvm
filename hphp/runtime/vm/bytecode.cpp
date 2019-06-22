@@ -3525,8 +3525,7 @@ OPTBLD_INLINE void iopBaseH() {
   mstate.base = &mstate.tvTempBase;
 }
 
-static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key,
-                                       bool reffy) {
+static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key) {
   auto& mstate = vmMInstrState();
   auto pState = &mstate.propState;
   auto ctx = arGetContextClass(vmfp());
@@ -3534,23 +3533,14 @@ static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key,
   auto const result = [&]{
     switch (mode) {
       case MOpMode::None:
-        assertx(!reffy);
         return Prop<MOpMode::None>(mstate.tvRef, ctx, mstate.base, key, pState);
       case MOpMode::Warn:
-        assertx(!reffy);
         return Prop<MOpMode::Warn>(mstate.tvRef, ctx, mstate.base, key, pState);
       case MOpMode::Define:
-        if (reffy) {
-          return Prop<MOpMode::Define,KeyType::Any,true>(
-            mstate.tvRef, ctx, mstate.base, key, pState
-          );
-        } else {
-          return Prop<MOpMode::Define,KeyType::Any,false>(
-            mstate.tvRef, ctx, mstate.base, key, pState
-          );
-        }
+        return Prop<MOpMode::Define,KeyType::Any>(
+          mstate.tvRef, ctx, mstate.base, key, pState
+        );
       case MOpMode::Unset:
-        assertx(!reffy);
         return Prop<MOpMode::Unset>(
           mstate.tvRef, ctx, mstate.base, key, pState
         );
@@ -3563,33 +3553,19 @@ static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key,
   mstate.base = ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
 }
 
-static OPTBLD_INLINE void propQDispatch(MOpMode mode, TypedValue key,
-                                        bool reffy) {
+static OPTBLD_INLINE void propQDispatch(MOpMode mode, TypedValue key) {
   auto& mstate = vmMInstrState();
   auto ctx = arGetContextClass(vmfp());
 
-  auto const result = [&] {
-    switch (mode) {
-      case MOpMode::None:
-      case MOpMode::Warn:
-        assertx(key.m_type == KindOfPersistentString);
-        return nullSafeProp(mstate.tvRef, ctx,
-                            mstate.base, key.m_data.pstr);
-      case MOpMode::Define:
-        if (reffy) raise_error(Strings::NULLSAFE_PROP_WRITE_ERROR);
-      case MOpMode::InOut:
-        always_assert_flog(false, "MOpMode::InOut can only occur on Elem");
-      case MOpMode::Unset:
-        always_assert(false);
-    }
-    not_reached();
-  }();
-
+  assertx(mode == MOpMode::None || mode == MOpMode::Warn);
+  assertx(key.m_type == KindOfPersistentString);
+  auto const result = nullSafeProp(mstate.tvRef, ctx, mstate.base,
+                                   key.m_data.pstr);
   mstate.base = ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
 }
 
 static OPTBLD_INLINE
-void elemDispatch(MOpMode mode, TypedValue key, bool reffy) {
+void elemDispatch(MOpMode mode, TypedValue key) {
   auto& mstate = vmMInstrState();
   auto const b = mstate.base;
 
@@ -3603,21 +3579,13 @@ void elemDispatch(MOpMode mode, TypedValue key, bool reffy) {
         return Elem<MOpMode::InOut>(mstate.tvRef, b, key);
       case MOpMode::Define:
         if (RuntimeOption::EvalArrayProvenance) {
-          return reffy
-            ? ElemD<MOpMode::Define, true, KeyType::Any, true>(
-              mstate.tvRef, b, key, &mstate.propState
-            )
-            : ElemD<MOpMode::Define, false, KeyType::Any, true>(
-              mstate.tvRef, b, key, &mstate.propState
-            );
+          return ElemD<MOpMode::Define, false, KeyType::Any, true>(
+            mstate.tvRef, b, key, &mstate.propState
+          );
         } else {
-          return reffy
-            ? ElemD<MOpMode::Define, true, KeyType::Any, false>(
-              mstate.tvRef, b, key, &mstate.propState
-            )
-            : ElemD<MOpMode::Define, false, KeyType::Any, false>(
-              mstate.tvRef, b, key, &mstate.propState
-            );
+          return ElemD<MOpMode::Define, false, KeyType::Any, false>(
+            mstate.tvRef, b, key, &mstate.propState
+          );
         }
       case MOpMode::Unset:
         return ElemU(mstate.tvRef, b, key);
@@ -3651,29 +3619,21 @@ static inline TypedValue key_tv(MemberKey key) {
   not_reached();
 }
 
-static OPTBLD_INLINE void dimDispatch(MOpMode mode, MemberKey mk,
-                                      bool reffy) {
+static OPTBLD_INLINE void dimDispatch(MOpMode mode, MemberKey mk) {
   auto const key = key_tv(mk);
   if (mk.mcode == MQT) {
-    propQDispatch(mode, key, reffy);
+    propQDispatch(mode, key);
   } else if (mcodeIsProp(mk.mcode)) {
-    propDispatch(mode, key, reffy);
+    propDispatch(mode, key);
   } else if (mcodeIsElem(mk.mcode)) {
-    elemDispatch(mode, key, reffy);
+    elemDispatch(mode, key);
   } else {
     if (mode == MOpMode::Warn) raise_error("Cannot use [] for reading");
 
     auto& mstate = vmMInstrState();
     auto const base = mstate.base;
     auto const result = [&] {
-      if (reffy) {
-        if (UNLIKELY(isHackArrayType(type(base)))) {
-          throwRefInvalidArrayValueException(val(base).parr);
-        }
-        return NewElem<true>(mstate.tvRef, base, &mstate.propState);
-      } else {
-        return NewElem<false>(mstate.tvRef, base, &mstate.propState);
-      }
+      return NewElem(mstate.tvRef, base, &mstate.propState);
     }();
     if (mode == MOpMode::Define) mstate.propState = MInstrPropState{};
     mstate.base = ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
@@ -3681,7 +3641,7 @@ static OPTBLD_INLINE void dimDispatch(MOpMode mode, MemberKey mk,
 }
 
 OPTBLD_INLINE void iopDim(MOpMode mode, MemberKey mk) {
-  dimDispatch(mode, mk, false);
+  dimDispatch(mode, mk);
 }
 
 static OPTBLD_INLINE void mFinal(MInstrState& mstate,
@@ -3708,7 +3668,7 @@ void queryMImpl(MemberKey mk, int32_t nDiscard, QueryMOp op) {
       // fallthrough
     case QueryMOp::CGet:
     case QueryMOp::CGetQuiet:
-      dimDispatch(getQueryMOpMode(op), mk, false);
+      dimDispatch(getQueryMOpMode(op), mk);
       tvDup(*tvToCell(mstate.base), result);
       break;
 

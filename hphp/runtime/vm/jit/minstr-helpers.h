@@ -465,7 +465,7 @@ ELEMD_HELPER_TABLE(X)
 inline tv_lval nm(tv_lval base, key_type<keyType> key) {        \
   auto cbase = tvToCell(base);                                  \
   assertx(isArrayType(type(cbase)));                            \
-  return ElemDArray<MOpMode::None, false, keyType>(cbase, key); \
+  return ElemDArray<MOpMode::None, keyType>(cbase, key); \
 }
 ELEM_ARRAY_D_HELPER_TABLE(X)
 #undef X
@@ -548,7 +548,7 @@ ARRAYGET_HELPER_TABLE(X)
 inline tv_lval nm(tv_lval base, int64_t key) {                 \
   auto cbase = tvToCell(base);                                 \
   assertx(isVecType(type(cbase)));                             \
-  return ElemDVec<false, KeyType::Int, copyProv>(cbase, key);  \
+  return ElemDVec<KeyType::Int, copyProv>(cbase, key);  \
 }
 ELEM_VEC_D_HELPER_TABLE(X)
 #undef X
@@ -566,7 +566,7 @@ ELEM_VEC_D_HELPER_TABLE(X)
 inline tv_lval nm(tv_lval base, key_type<keyType> key) {  \
   auto cbase = tvToCell(base);                            \
   assertx(isDictType(type(cbase)));                       \
-  return ElemDDict<false, keyType, copyProv>(cbase, key); \
+  return ElemDDict<keyType, copyProv>(cbase, key); \
 }
 ELEM_DICT_D_HELPER_TABLE(X)
 #undef X

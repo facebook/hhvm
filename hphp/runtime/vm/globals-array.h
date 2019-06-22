@@ -79,11 +79,8 @@ public:
   static constexpr auto NvTryGetStr = &NvGetStr;
 
   static arr_lval LvalInt(ArrayData*, int64_t k, bool copy);
-  static constexpr auto LvalIntRef = &LvalInt;
   static arr_lval LvalStr(ArrayData*, StringData* k, bool copy);
-  static constexpr auto LvalStrRef = &LvalStr;
   static arr_lval LvalNew(ArrayData*, bool copy);
-  static constexpr auto LvalNewRef = &LvalNew;
 
   static ArrayData* SetIntInPlace(ArrayData*, int64_t k, Cell v);
   static constexpr auto SetInt = &SetIntInPlace;

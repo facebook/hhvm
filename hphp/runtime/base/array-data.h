@@ -397,20 +397,12 @@ public:
 
   /*
    * Get an lval for the element at key `k'.
-   *
-   * The lvalRef() variant should be used when the caller might box the
-   * returned lval.
    */
   arr_lval lval(int64_t k, bool copy);
   arr_lval lval(StringData* k, bool copy);
   arr_lval lval(Cell k, bool copy);
   arr_lval lval(const String& k, bool copy);
   arr_lval lval(const Variant& k, bool copy);
-  arr_lval lvalRef(int64_t k, bool copy);
-  arr_lval lvalRef(StringData* k, bool copy);
-  arr_lval lvalRef(Cell k, bool copy);
-  arr_lval lvalRef(const String& k, bool copy);
-  arr_lval lvalRef(const Variant& k, bool copy);
 
   /*
    * Get an lval for a new element at the next available integer key.
@@ -931,11 +923,8 @@ struct ArrayFunctions {
   bool (*existsInt[NK])(const ArrayData*, int64_t k);
   bool (*existsStr[NK])(const ArrayData*, const StringData* k);
   arr_lval (*lvalInt[NK])(ArrayData*, int64_t k, bool copy);
-  arr_lval (*lvalIntRef[NK])(ArrayData*, int64_t k, bool copy);
   arr_lval (*lvalStr[NK])(ArrayData*, StringData* k, bool copy);
-  arr_lval (*lvalStrRef[NK])(ArrayData*, StringData* k, bool copy);
   arr_lval (*lvalNew[NK])(ArrayData*, bool copy);
-  arr_lval (*lvalNewRef[NK])(ArrayData*, bool copy);
   ArrayData* (*removeInt[NK])(ArrayData*, int64_t k);
   ArrayData* (*removeIntInPlace[NK])(ArrayData*, int64_t k);
   ArrayData* (*removeStr[NK])(ArrayData*, const StringData* k);

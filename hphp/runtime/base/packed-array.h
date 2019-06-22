@@ -108,11 +108,8 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static bool ExistsInt(const ArrayData* ad, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData*);
   static arr_lval LvalInt(ArrayData*, int64_t k, bool copy);
-  static arr_lval LvalIntRef(ArrayData*, int64_t k, bool copy);
   static arr_lval LvalStr(ArrayData*, StringData* k, bool copy);
-  static arr_lval LvalStrRef(ArrayData*, StringData* k, bool copy);
   static arr_lval LvalNew(ArrayData*, bool copy);
-  static arr_lval LvalNewRef(ArrayData*, bool copy);
   static ArrayData* RemoveInt(ArrayData*, int64_t k);
   static ArrayData* RemoveIntInPlace(ArrayData*, int64_t k);
   static ArrayData* RemoveStr(ArrayData*, const StringData* k);
@@ -169,9 +166,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* RemoveIntInPlaceVec(ArrayData*, int64_t);
   static arr_lval LvalIntVec(ArrayData*, int64_t, bool);
   static arr_lval LvalStrVec(ArrayData*, StringData*, bool);
-  static arr_lval LvalIntRefVec(ArrayData*, int64_t, bool);
-  static arr_lval LvalStrRefVec(ArrayData*, StringData*, bool);
-  static arr_lval LvalNewRefVec(ArrayData*, bool);
   static ArrayData* AppendWithRefVec(ArrayData*, TypedValue);
   static ArrayData* AppendWithRefInPlaceVec(ArrayData*, TypedValue);
   static ArrayData* PlusEqVec(ArrayData*, const ArrayData*);

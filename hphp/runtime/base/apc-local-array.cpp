@@ -165,12 +165,6 @@ arr_lval APCLocalArray::LvalInt(ArrayData* ad, int64_t k, bool /*copy*/) {
   return arr_lval { helper.release(lval.arr), lval };
 }
 
-arr_lval APCLocalArray::LvalIntRef(ArrayData* ad, int64_t k, bool /*copy*/) {
-  EscalateHelper helper{ad};
-  auto const lval = helper.escalated->lvalRef(k, false);
-  return arr_lval { helper.release(lval.arr), lval };
-}
-
 arr_lval
 APCLocalArray::LvalStr(ArrayData* ad, StringData* k, bool /*copy*/) {
   EscalateHelper helper{ad};
@@ -178,22 +172,9 @@ APCLocalArray::LvalStr(ArrayData* ad, StringData* k, bool /*copy*/) {
   return arr_lval { helper.release(lval.arr), lval };
 }
 
-arr_lval
-APCLocalArray::LvalStrRef(ArrayData* ad, StringData* k, bool /*copy*/) {
-  EscalateHelper helper{ad};
-  auto const lval = helper.escalated->lvalRef(k, false);
-  return arr_lval { helper.release(lval.arr), lval };
-}
-
 arr_lval APCLocalArray::LvalNew(ArrayData* ad, bool /*copy*/) {
   EscalateHelper helper{ad};
   auto const lval = helper.escalated->lvalNew(false);
-  return arr_lval { helper.release(lval.arr), lval };
-}
-
-arr_lval APCLocalArray::LvalNewRef(ArrayData* ad, bool /*copy*/) {
-  EscalateHelper helper{ad};
-  auto const lval = helper.escalated->lvalNewRef(false);
   return arr_lval { helper.release(lval.arr), lval };
 }
 

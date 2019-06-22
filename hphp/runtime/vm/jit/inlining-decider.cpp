@@ -537,6 +537,10 @@ bool shouldInline(const irgen::IRGS& irgs,
   };
 
   auto accept = [&] (std::string why) {
+    auto static inlineAccepts = ServiceData::createTimeSeries(
+      "jit.inline.accepts", {ServiceData::StatsType::COUNT});
+    inlineAccepts->addValue(1);
+
     if (annotationsPtr && RuntimeOption::EvalDumpInlDecision >= 2) {
       auto str = nameAndReason(callerSk.offset(),
                                callerSk.func()->fullName()->data(),
@@ -831,6 +835,9 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
                                  const SrcKey& sk,
                                  Annotations& annotations) {
   assertx(hasFCallEffects(sk.op()));
+  auto static inlineAttempts = ServiceData::createTimeSeries(
+    "jit.inline.attempts", {ServiceData::StatsType::COUNT});
+  inlineAttempts->addValue(1);
 
   auto kind = irgs.context.kind;
   auto annotationsPtr = mcgen::dumpTCAnnotation(kind) ?

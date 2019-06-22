@@ -240,13 +240,17 @@ bool typeStructureIsType(
         return inputT == tsKind || inputT == TypeStructure::Kind::T_null;
       }
       auto const soft = is_ts_soft(type);
-      auto const alias = type->exists(s_alias);
-      if (type->size() != input->size() + soft + alias) return false;
+      auto const aliasInType = type->exists(s_alias);
+      auto const aliasInInput = input->exists(s_alias);
+      if (type->size() + aliasInInput != input->size() + soft + aliasInType) {
+        return false;
+      }
       bool result = true;
       IterateKV(
         input,
         [&](Cell k, TypedValue v1) {
           assertx(tvIsString(k));
+          if (k.m_data.pstr->isame(s_alias.get())) return false;
           auto const v2 = type->rval(k.m_data.pstr);
           if (v2.is_set() && cellEqual(v1, v2.tv())) return false;
           result = false;

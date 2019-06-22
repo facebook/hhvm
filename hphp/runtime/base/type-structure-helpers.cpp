@@ -505,8 +505,10 @@ bool verifyReifiedLocalType(
       type = TypeStructure::resolve(type, nullptr, nullptr,
                                     req::vector<Array>(), persistent);
     } catch (Exception& e) {
+      if (is_ts_soft(type_)) warn = true;
       return false;
     } catch (Object& e) {
+      if (is_ts_soft(type_)) warn = true;
       return false;
     }
   }

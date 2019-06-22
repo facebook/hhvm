@@ -207,7 +207,7 @@ struct State {
   const RegSet simdUnreserved;
   // Registers not available for selection. These will be left untouched if
   // present.
-  const VregSet reservedRegs;
+  const RegSet reservedRegs;
   // SIMD scratch register for resolving shuffles.
   const PhysReg scratch;
 
@@ -485,6 +485,12 @@ RegInfo& reg_info_insert(State& state, Vreg r, RegInfo info) {
   assertx(!newInfo);
   newInfo.emplace(std::move(info));
   return *newInfo;
+}
+
+// Returns true if this Vreg is a physical register which is
+// reserved. Such a register is generally ignored by the allocator.
+bool is_ignored(const State& state, Vreg r) {
+  return r.isPhys() && state.reservedRegs.contains(r.physReg());
 }
 
 bool is_spill(RegClass cls) {
@@ -1045,7 +1051,7 @@ State make_state(Vunit& unit, const Abi& abi) {
     {},
     abi.gpUnreserved,
     abi.simdUnreserved - scratch,
-    VregSet{(abi.all() - (abi.gpUnreserved | abi.simdUnreserved)) | scratch},
+    (abi.all() - (abi.gpUnreserved | abi.simdUnreserved)) | scratch,
     scratch
   };
 
@@ -1100,6 +1106,11 @@ State make_state(Vunit& unit, const Abi& abi) {
  * given constant (which has a single Vreg) may be placed at multiple points,
  * which means that Vreg now has multiple definitions. This is fine, as the unit
  * will be rewritten into SSA form anyways, which will fix this.
+ *
+ * As an optimization, we look for "trivial" constants. These are
+ * constants used exactly one place (not within a loop). Such
+ * constants do not require the above mentioned dataflow and can be
+ * placed immediately before their use.
  */
 
 struct PlaceConstantsBlockInfo {
@@ -1109,9 +1120,12 @@ struct PlaceConstantsBlockInfo {
 
 // Calculate sink stop and liveness information for each constant for every
 // block, returning an empty vector if there's no constants.
-jit::vector<PlaceConstantsBlockInfo>
-compute_place_constants_block_info(const State& state) {
-  auto const& unit = state.unit;
+std::pair<
+  jit::vector<PlaceConstantsBlockInfo>,
+  jit::vector<VregSet>
+>
+compute_place_constants_block_info(State& state) {
+  auto& unit = state.unit;
   auto const& rpo = state.rpo;
   auto const& rpoOrder = state.rpoOrder;
   auto const& preds = state.preds;
@@ -1156,20 +1170,58 @@ compute_place_constants_block_info(const State& state) {
   boost::dynamic_bitset<> visited(unit.blocks.size());
   visited.flip();
 
+  // All constants with a use
+  VregSet allUsed;
+  // All constants with more than one use, or a use within a loop
+  VregSet nonTrivial;
+  // Per-block trivial uses
+  jit::vector<VregSet> trivialUses(unit.blocks.size());
+
   // Populate the constant usages for each block. Since this is a backwards
   // dataflow, start the worklist with successor-less blocks (the exits).
-  auto foundUse = false;
   for (size_t i = 0; i < rpo.size(); ++i) {
     auto const b = rpo[i];
-    auto const& block = unit.blocks[b];
+    auto& block = unit.blocks[b];
     auto& uses = blockUses[b];
 
-    for (auto const& inst : block.code) {
-      visitUses(
-        unit,
-        inst,
-        [&] (Vreg r) { if (unit.regToConst.count(r)) uses.add(r); }
-      );
+    for (auto& inst : block.code) {
+      // Special case: If we have a copy moving a constant into an
+      // ignored register, turn it into the appropriate ldimm
+      // instruction with that register as the destination. Otherwise
+      // we'll materialize the constant into an available register and
+      // then immediately copy it into the ignored register, which is
+      // inefficient. This happens a lot in stubs.
+      if (inst.op == Vinstr::copy &&
+          is_ignored(state, inst.copy_.d) &&
+          unit.regToConst.count(inst.copy_.s)) {
+        auto const d = inst.copy_.d;
+        auto const it = unit.regToConst.find(inst.copy_.s);
+        assertx(it != unit.regToConst.end());
+        auto const& vconst = it->second;
+        // TODO (T37584483): Undef constants can be dealt with better here.
+        switch (vconst.kind) {
+          case Vconst::Quad:
+          case Vconst::Double:
+            inst.op = Vinstr::ldimmq;
+            inst.ldimmq_.s = uint64_t(vconst.val);
+            inst.ldimmq_.d = d;
+            break;
+          case Vconst::Long:
+            inst.op = Vinstr::ldimml;
+            inst.ldimml_.s = int32_t(vconst.val);
+            inst.ldimml_.d = d;
+            break;
+          case Vconst::Byte:
+            inst.op = Vinstr::ldimmb;
+            inst.ldimmb_.s = uint8_t(vconst.val);
+            inst.ldimmb_.d = d;
+            break;
+        }
+      } else {
+        for (auto const r : usesSet(state.unit, inst)) {
+          if (unit.regToConst.count(r)) uses.add(r);
+        }
+      }
 
       // A constant should never have a definition (before we place them).
       if (debug) {
@@ -1181,17 +1233,42 @@ compute_place_constants_block_info(const State& state) {
       }
     }
 
+    // Update triviality information. Mark a constant as trivial if we
+    // haven't seen any previous uses. If we detect a second use, mark
+    // it as non-trivial. Since we don't update previous block
+    // information, it may be incorrect after this. We'll fix it up
+    // later by subtracting "nonTrivial" from it.
+    auto const inLoop = block_loop_depth(state, b) > 0;
+    for (auto const r : uses) {
+      if (inLoop || allUsed[r]) {
+        allUsed.add(r);
+        nonTrivial.add(r);
+        trivialUses[b].remove(r);
+        continue;
+      }
+      allUsed.add(r);
+      trivialUses[b].add(r);
+    }
+
     visited[b] = false;
-    if (!foundUse && uses.any()) foundUse = true;
     if (succs(block).size() == 0) worklist.push(i);
   }
 
-  // The unit has constants but they're never actually used. Bail out.
-  if (!foundUse) return {};
+  // We only need the dataflow if there's any non-trivial usages.
+  if (nonTrivial.none()) {
+    // Either the unit has no usages at all, or all usages are
+    // trivial.
+    if (allUsed.none()) return {};
+    return {{}, std::move(trivialUses)};
+  }
 
   while (!worklist.empty()) {
     auto const b = rpo[worklist.pop()];
     auto const& block = unit.blocks[b];
+
+    // Fixup the per-block trivial information by removing constants
+    // known to be non-trivial.
+    trivialUses[b] -= nonTrivial;
 
     auto const successors = succs(block);
 
@@ -1227,7 +1304,7 @@ compute_place_constants_block_info(const State& state) {
       return false;
     };
 
-    auto const& uses = blockUses[b];
+    auto const uses = blockUses[b] & nonTrivial;
     if (allSuccsIdentical) {
       // All the successors have identical state. We can just cheaply copy one
       // of the successors state for our own (because they're in copy_ptrs).
@@ -1322,17 +1399,21 @@ compute_place_constants_block_info(const State& state) {
     }
   }
 
-  return outInfo;
+  return {std::move(outInfo), std::move(trivialUses)};
 }
 
 // Materialize constants by placing instructions to create them at the
-// appropriate points. The set of registers used is returned.
+// appropriate points. The set of constants placed multiple times
+// (thus needing SSA restoration) is returned.
 VregSet place_constants(State& state) {
-  auto const blockInfo = compute_place_constants_block_info(state);
-  if (blockInfo.empty()) return {};
-
   auto& unit = state.unit;
-  assertx(blockInfo.size() == unit.blocks.size());
+
+  auto info = compute_place_constants_block_info(state);
+  auto const& blockInfo = info.first;
+  auto const& trivial = info.second;
+  if (blockInfo.empty() && trivial.empty()) return {};
+
+  assertx(trivial.size() == unit.blocks.size());
 
   auto const& rpo = state.rpo;
   auto const& rpoOrder = state.rpoOrder;
@@ -1340,98 +1421,116 @@ VregSet place_constants(State& state) {
 
   // The set of constants in each block which can be sunk to the beginning of
   // that block.
-  jit::vector<VregSet> inStates(unit.blocks.size());
+  jit::vector<VregSet> inStates;
   // The set of constants in each block which can be sunk to the end of that
   // block.
-  jit::vector<VregSet> outStates(unit.blocks.size());
-  boost::dynamic_bitset<> visited(unit.blocks.size());
+  jit::vector<VregSet> outStates;
 
-  dataflow_worklist<size_t> worklist(rpo.size());
+  // If we don't have block information, all uses are trivial so we
+  // don't need dataflow.
+  if (!blockInfo.empty()) {
+    assertx(blockInfo.size() == unit.blocks.size());
 
-  assertx(!rpo.empty() && rpo[0] == unit.entry);
-  worklist.push(0);
+    inStates.resize(unit.blocks.size());
+    outStates.resize(unit.blocks.size());
+    boost::dynamic_bitset<> visited(unit.blocks.size());
 
-  /*
-   * Dataflow:
-   *
-   * IN(B) = intersection of OUT(P) for each P in PREDS(B)
-   *
-   * (It is safe to sink a constant to the beginning of B if it can be sunk to
-   * the end of every predecessor).
-   *
-   * OUT(B) = (IN(B) - STOP(B)) & LIVE(B)
-   *
-   * (It is safe to sink a constant to the end of B if it can be sunk to the
-   * beginning of B, does not have a stop sink, and is live from B.
-   *
-   * PLACE(B) = (IN(B) & LIVE(B) & STOP(B)) | (OUT(B) - (intersection of IN(S)
-   *             for each S in SUCCS(B)))
-   *
-   * (A constant should be placed in B if it can be sunk to the beginning of B,
-   * is live in B, and is stopped in B. It should also be placed in B if it can
-   * be sunk to the end of B, and can not be sunk to the beginning of all of B's
-   * successors).
-   */
-  do {
-    auto const b = rpo[worklist.pop()];
-    auto const& info = blockInfo[b];
-    auto const& predList = preds[b];
-    auto& in = inStates[b];
-    auto& out = outStates[b];
+    dataflow_worklist<size_t> worklist(rpo.size());
 
-    if (b == unit.entry) {
-      assertx(predList.empty());
-      assertx(!visited[b]);
-      assertx(in.none());
-      assertx(out.none());
-      // A constant can be trivially "sunk" to the beginning of the entry block
-      // if its live.
-      in = info.liveIn;
-    } else {
-      assertx(!predList.empty());
+    assertx(!rpo.empty() && rpo[0] == unit.entry);
+    worklist.push(0);
 
-      // Find all the constants which can be sunk to the beginning of this
-      // block. A constant can be sunk to the beginning of this block if it can
-      // be sunk to the end of all of its predecessors.
+    /*
+     * Dataflow:
+     *
+     * IN(B) = intersection of OUT(P) for each P in PREDS(B)
+     *
+     * (It is safe to sink a constant to the beginning of B if it can be sunk to
+     * the end of every predecessor).
+     *
+     * OUT(B) = (IN(B) - STOP(B)) & LIVE(B)
+     *
+     * (It is safe to sink a constant to the end of B if it can be sunk to the
+     * beginning of B, does not have a stop sink, and is live from B.
+     *
+     * PLACE(B) = (IN(B) & LIVE(B) & STOP(B)) | (OUT(B) - (intersection of IN(S)
+     *             for each S in SUCCS(B)))
+     *
+     * (A constant should be placed in B if it can be sunk to the beginning of
+     * B, is live in B, and is stopped in B. It should also be placed in B if it
+     * can be sunk to the end of B, and can not be sunk to the beginning of all
+     * of B's successors).
+     */
+    do {
+      auto const b = rpo[worklist.pop()];
+      auto const& info = blockInfo[b];
+      auto const& predList = preds[b];
+      auto& in = inStates[b];
+      auto& out = outStates[b];
 
-      in.reset();
-      // Find the first visited predecessor. There has to be at least one
-      // because we're going in RPO order.
-      auto predIt = std::find_if(
-        predList.begin(),
-        predList.end(),
-        [&] (Vlabel p) { return visited[p]; }
-      );
-      assertx(predIt != predList.end());
+      if (b == unit.entry) {
+        assertx(predList.empty());
+        assertx(!visited[b]);
+        assertx(in.none());
+        assertx(out.none());
+        // A constant can be trivially "sunk" to the beginning of the entry
+        // block if its live.
+        in = info.liveIn;
+      } else {
+        assertx(!predList.empty());
 
-      in = outStates[*predIt];
-      for (++predIt; predIt != predList.end(); ++predIt) {
-        if (visited[*predIt]) in &= outStates[*predIt];
+        // Find all the constants which can be sunk to the beginning of this
+        // block. A constant can be sunk to the beginning of this block if it
+        // can be sunk to the end of all of its predecessors.
+
+        in.reset();
+        // Find the first visited predecessor. There has to be at least one
+        // because we're going in RPO order.
+        auto predIt = std::find_if(
+          predList.begin(),
+          predList.end(),
+          [&] (Vlabel p) { return visited[p]; }
+        );
+        assertx(predIt != predList.end());
+
+        in = outStates[*predIt];
+        for (++predIt; predIt != predList.end(); ++predIt) {
+          if (visited[*predIt]) in &= outStates[*predIt];
+        }
       }
-    }
 
-    // From the constants which can be sunk to the beginning of the block, find
-    // the subset which can be sunk to the end. A constant can be sunk through
-    // the block if there's not a sink stop and if its still live in the block.
-    auto newOut = in;
-    newOut -= info.stopSink;
-    newOut &= info.liveIn;
+      // From the constants which can be sunk to the beginning of the block,
+      // find the subset which can be sunk to the end. A constant can be sunk
+      // through the block if there's not a sink stop and if its still live in
+      // the block.
+      auto newOut = in;
+      newOut -= info.stopSink;
+      newOut &= info.liveIn;
 
-    // Schedule successors if the out state has changed.
-    if (!visited[b] || newOut != out) {
-      out = std::move(newOut);
-      for (auto const succ : succs(unit.blocks[b])) {
-        worklist.push(rpoOrder[succ]);
+      // Schedule successors if the out state has changed.
+      if (!visited[b] || newOut != out) {
+        out = std::move(newOut);
+        for (auto const succ : succs(unit.blocks[b])) {
+          worklist.push(rpoOrder[succ]);
+        }
       }
-    }
 
-    visited[b] = true;
-  } while (!worklist.empty());
+      visited[b] = true;
+    } while (!worklist.empty());
+  }
 
   VregSet allPlaced;
+  VregSet multiplePlaced;
   VregSet placeThisInst;
   for (auto const b : rpo) {
     auto place = [&] {
+      // If we have no in states, its because we didn't perform
+      // dataflow above, which only happens if we only have trivial
+      // uses. Therefore the trivial set is everything we might place.
+      if (inStates.empty()) return trivial[b];
+      assertx(inStates.size() == unit.blocks.size());
+      assertx(outStates.size() == unit.blocks.size());
+
       // Find the constants which should be materialized in this block. The
       // constant should be materialized if it can be sunk to the beginning of
       // the block, is live in that block, and we have a sink stop.
@@ -1454,8 +1553,9 @@ VregSet place_constants(State& state) {
         didntSink -= sunk;
         place |= didntSink;
       }
-      return place;
+      return place | trivial[b];
     }();
+    multiplePlaced |= (allPlaced & place);
     allPlaced |= place;
 
     auto block = &unit.blocks[b];
@@ -1487,11 +1587,7 @@ VregSet place_constants(State& state) {
         // couldn't sink to all predecessors. Materialize them here at the end.
         placeThisInst |= place;
       } else {
-        visitUses(
-          unit,
-          block->code[i],
-          [&] (Vreg r) { if (place[r]) placeThisInst.add(r); }
-        );
+        placeThisInst |= (place & usesSet(state.unit, block->code[i]));
       }
 
       if (placeThisInst.none()) continue;
@@ -1535,7 +1631,7 @@ VregSet place_constants(State& state) {
   unit.regToConst.clear();
   unit.constToReg.clear();
 
-  return allPlaced;
+  return multiplePlaced;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -3947,9 +4043,9 @@ size_t process_inst_spills(State& state,
   auto& unit = state.unit;
 
   // NB: acrosses is a subset of uses at this point
-  auto uses = usesSet(unit, inst) - state.reservedRegs;
-  auto acrosses = acrossesSet(unit, inst) - state.reservedRegs;
-  auto const defs = defsSet(unit, inst) - state.reservedRegs;
+  auto uses = usesSet(unit, inst) - VregSet{state.reservedRegs};
+  auto acrosses = acrossesSet(unit, inst) - VregSet{state.reservedRegs};
+  auto const defs = defsSet(unit, inst) - VregSet{state.reservedRegs};
 
   auto const isConstrained = is_constrained_inst(state, inst);
   VregSet reloads; // Vregs we'll have to reload
@@ -5006,9 +5102,10 @@ void color_unconstrained(State& state, FreeRegs& free,
 
   auto const& unit = state.unit;
 
-  auto const acrosses = acrossesSet(unit, inst) - state.reservedRegs;
-  auto const uses = usesSet(unit, inst) - state.reservedRegs - acrosses;
-  auto const defs = defsSet(unit, inst) - state.reservedRegs;
+  auto const acrosses = acrossesSet(unit, inst) - VregSet{state.reservedRegs};
+  auto const uses =
+    usesSet(unit, inst) - VregSet{state.reservedRegs} - acrosses;
+  auto const defs = defsSet(unit, inst) - VregSet{state.reservedRegs};
 
   // Make sure the uses of the instruction are all colored already (which should
   // be the case because we walk the unit in dominance preserving order).
@@ -5073,9 +5170,9 @@ void color_constrained(State& state, FreeRegs& finalFree,
   usesFree.releaseAll();
   defsFree.releaseAll();
 
-  auto uses = usesSet(unit, inst) - state.reservedRegs;
-  auto acrosses = acrossesSet(unit, inst) - state.reservedRegs;
-  auto const defs = defsSet(unit, inst) - state.reservedRegs;
+  auto uses = usesSet(unit, inst) - VregSet{state.reservedRegs};
+  auto acrosses = acrossesSet(unit, inst) - VregSet{state.reservedRegs};
+  auto const defs = defsSet(unit, inst) - VregSet{state.reservedRegs};
 
   // Just like with spilling, we might need to treat some uses as acrosses to
   // model register pressure properly.
@@ -5182,7 +5279,7 @@ void color_constrained(State& state, FreeRegs& finalFree,
   if (copy) {
     assertx(acrossesSet(unit, *copy).none());
 
-    auto const copyUses = usesSet(unit, *copy) - state.reservedRegs;
+    auto const copyUses = usesSet(unit, *copy) - VregSet{state.reservedRegs};
     if (debug) {
       for (auto const r : copyUses) {
         auto const& info = reg_info(state, r);

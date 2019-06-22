@@ -1,0 +1,49 @@
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+array(3) {
+  ["kind"]=>
+  int(1)
+  ["opaque"]=>
+  bool(true)
+  ["alias"]=>
+  string(1) "A"
+}
+array(2) {
+  ["kind"]=>
+  int(1)
+  ["alias"]=>
+  string(1) "B"
+}
+array(3) {
+  ["kind"]=>
+  int(10)
+  ["elem_types"]=>
+  array(2) {
+    [0]=>
+    array(3) {
+      ["kind"]=>
+      int(1)
+      ["opaque"]=>
+      bool(true)
+      ["alias"]=>
+      string(1) "A"
+    }
+    [1]=>
+    array(3) {
+      ["kind"]=>
+      int(1)
+      ["opaque"]=>
+      bool(true)
+      ["alias"]=>
+      string(1) "A"
+    }
+  }
+  ["alias"]=>
+  string(2) "A2"
+}

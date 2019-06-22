@@ -228,13 +228,14 @@ and hint_to_type_constant_list ~tparams ~namespace ~targ_map (h : Aast.hint) =
   | Aast.Hnothing
   | Aast.Hdynamic -> failwith "Hints not available on the original AST"
 
-and hint_to_type_constant
-    ?(is_typedef = false) ~tparams ~namespace ~targ_map (h : Aast.hint) =
+and hint_to_type_constant ?(is_typedef = false) ?(is_opaque = false)
+  ~tparams ~namespace ~targ_map (h : Aast.hint) =
   let l = hint_to_type_constant_list ~tparams ~namespace ~targ_map h in
   let tconsts =
-    if is_typedef
-    then l @ get_typevars tparams
-    else l in
+    if is_typedef then l @ get_typevars tparams else l in
+  let tconsts =
+    if is_opaque then tconsts @ [TV.String "opaque", TV.Bool true] else tconsts
+  in
   if hack_arr_dv_arrs ()
   then TV.Dict tconsts
   else TV.DArray tconsts

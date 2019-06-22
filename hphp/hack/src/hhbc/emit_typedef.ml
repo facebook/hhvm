@@ -19,8 +19,8 @@ let kind_to_type_info ~tparams ~namespace h =
   Emit_type_hint.(hint_to_type_info
     ~kind:TypeDef ~skipawaitable:false ~nullable ~tparams ~namespace h)
 
-let kind_to_type_structure ~tparams ~namespace h =
-  Emit_type_constant.hint_to_type_constant ~is_typedef:true ~tparams
+let kind_to_type_structure ~tparams ~namespace ~is_opaque h =
+  Emit_type_constant.hint_to_type_constant ~is_typedef:true ~is_opaque ~tparams
     ~namespace ~targ_map:SMap.empty h
 
 let emit_typedef ast_typedef : Hhas_typedef.t =
@@ -32,8 +32,10 @@ let emit_typedef ast_typedef : Hhas_typedef.t =
   let tparams = Emit_body.tparams_to_strings ast_typedef.T.t_tparams in
   let typedef_type_info =
     kind_to_type_info ~tparams ~namespace ast_typedef.T.t_kind in
+  let is_opaque = ast_typedef.T.t_vis = T.Opaque in
   let typedef_type_structure =
-    kind_to_type_structure ~tparams ~namespace ast_typedef.T.t_kind in
+    kind_to_type_structure ~tparams ~namespace ~is_opaque ast_typedef.T.t_kind
+  in
   Hhas_typedef.make
     typedef_name
     typedef_attributes

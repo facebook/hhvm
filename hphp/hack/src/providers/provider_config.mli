@@ -1,0 +1,19 @@
+(**
+ * Copyright (c) 2019, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
+ *)
+
+type decl_cache = (string, Obj.t) Memory_bounded_lru_cache.t
+(** Maps decl names to types. *)
+
+type backend = private
+  | Shared_memory
+  | Local_memory of { decl_cache: decl_cache }
+
+val set_shared_memory_backend : unit -> unit
+val set_local_memory_backend : max_size_in_words:int -> unit
+val get_backend : unit -> backend

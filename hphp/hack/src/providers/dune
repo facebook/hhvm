@@ -1,4 +1,19 @@
 (library
+  (name provider_config)
+  (wrapped false)
+  (modules provider_config)
+  (libraries
+    heap_shared_mem
+    memory_bounded_lru_cache))
+
+(library
+  (name memory_bounded_lru_cache)
+  (wrapped false)
+  (modules memory_bounded_lru_cache)
+  (libraries
+    core_kernel))
+
+(library
   (name file_provider)
   (wrapped false)
   (modules file_provider)
@@ -26,6 +41,7 @@
   (wrapped false)
   (modules decl_provider)
   (libraries
+    provider_config
     typing_heap))
 
 (library

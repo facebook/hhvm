@@ -9,26 +9,13 @@
 
 open Core_kernel
 open Decl_inheritance
-open Typing_defs
 open Shallow_decl_defs
+open Typing_defs
+open Typing_heap_defs
 
 module Attrs = Attributes
 module LSTable = Lazy_string_table
 module SN = Naming_special_names
-
-type lazy_class_type = {
-  sc: shallow_class;
-  ih: inherited_members;
-  ancestors: decl ty LSTable.t;
-  parents_and_traits: unit LSTable.t;
-  members_fully_known: bool Lazy.t;
-  req_ancestor_names: unit LSTable.t;
-  all_requirements: (Pos.t * decl ty) list Lazy.t;
-}
-
-type class_type_variant =
-  | Lazy of lazy_class_type
-  | Eager of class_type
 
 let make_lazy_class_type class_name sc =
   let Decl_ancestors.{

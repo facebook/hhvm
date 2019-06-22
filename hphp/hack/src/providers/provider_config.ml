@@ -7,7 +7,21 @@
  *
  *)
 
-type decl_cache = (string, Obj.t) Memory_bounded_lru_cache.t
+(* NOTE: we can't simply use a string as a key. In the case of a name conflict,
+we may put e.g. a function named 'foo' into the cache whose value is one type,
+and then later try to withdraw a class named 'foo' whose value is another type.
+
+The problem can be solved with a GADT, but making a GADT with references to
+types like `Typing_defs.ty` causes dependency cycles, since `typing` ends up
+depending on `Provider_config` transitively.
+*)
+type decl_cache_key =
+  | Fun_decl of string
+  | Class_decl of string
+  | Typedef_decl of string
+  | Gconst_decl of string
+
+type decl_cache = (decl_cache_key, Obj.t) Memory_bounded_lru_cache.t
 
 type backend =
   | Shared_memory

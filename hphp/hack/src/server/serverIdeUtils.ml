@@ -12,51 +12,29 @@ open Hh_core
 let make_local_changes () =
   Errors.set_allow_errors_in_default_path true;
   SharedMem.allow_hashtable_writes_by_current_process false;
-  Fixme_provider.local_changes_push_stack();
-  File_provider.local_changes_push_stack();
+
   Ast_provider.local_changes_push_stack();
+  Decl_provider.local_changes_push_stack();
+  File_provider.local_changes_push_stack();
+  Fixme_provider.local_changes_push_stack();
 
   Ide_parser_cache.activate ();
 
   Naming_table.push_local_changes ();
-
-  Decl_heap.Funs.LocalChanges.push_stack();
-  Decl_heap.Constructors.LocalChanges.push_stack();
-  Decl_heap.Props.LocalChanges.push_stack();
-  Decl_heap.StaticProps.LocalChanges.push_stack();
-  Decl_heap.Methods.LocalChanges.push_stack();
-  Decl_heap.StaticMethods.LocalChanges.push_stack();
-  Decl_heap.Classes.LocalChanges.push_stack();
-  Decl_heap.Typedefs.LocalChanges.push_stack();
-  Decl_heap.GConsts.LocalChanges.push_stack();
-
-  Shallow_classes_heap.push_local_changes ();
-  Decl_linearize.push_local_changes ();
   ()
 
 let revert_local_changes () =
   Errors.set_allow_errors_in_default_path false;
   SharedMem.allow_hashtable_writes_by_current_process true;
-  Fixme_provider.local_changes_pop_stack();
-  File_provider.local_changes_pop_stack();
+
   Ast_provider.local_changes_pop_stack();
+  Decl_provider.local_changes_pop_stack();
+  File_provider.local_changes_pop_stack();
+  Fixme_provider.local_changes_pop_stack();
 
   Ide_parser_cache.deactivate ();
 
   Naming_table.pop_local_changes ();
-
-  Decl_heap.Funs.LocalChanges.pop_stack();
-  Decl_heap.Constructors.LocalChanges.pop_stack();
-  Decl_heap.Props.LocalChanges.pop_stack();
-  Decl_heap.StaticProps.LocalChanges.pop_stack();
-  Decl_heap.Methods.LocalChanges.pop_stack();
-  Decl_heap.StaticMethods.LocalChanges.pop_stack();
-  Decl_heap.Classes.LocalChanges.pop_stack();
-  Decl_heap.Typedefs.LocalChanges.pop_stack();
-  Decl_heap.GConsts.LocalChanges.pop_stack();
-
-  Shallow_classes_heap.pop_local_changes ();
-  Decl_linearize.pop_local_changes ();
 
   SharedMem.invalidate_caches ();
   ()

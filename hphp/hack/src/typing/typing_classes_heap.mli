@@ -12,7 +12,7 @@ open Typing_defs
 
 module Classes : sig
   type key = StringKey.t
-  type t
+  type t = Typing_heap_defs.class_type_variant
 
   val get : key -> t option
   val mem : key -> bool

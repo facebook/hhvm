@@ -24,3 +24,6 @@ val get_fun : fun_key -> fun_decl option
 val get_class : class_key -> class_decl option
 val get_typedef : typedef_key -> typedef_decl option
 val get_gconst : gconst_key -> gconst_decl option
+
+val local_changes_push_stack : unit -> unit
+val local_changes_pop_stack : unit -> unit

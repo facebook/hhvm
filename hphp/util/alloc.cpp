@@ -649,8 +649,10 @@ void setup_local_arenas(PageSpec spec, unsigned slabs) {
       throw std::runtime_error{"mmap() failed to reserve address range"};
     }
     auto base = reinterpret_cast<uintptr_t>(ret);
-    if (base != desiredBase) {        // align to 1GB
-      base = (base + size1g - 1) & ~(size1g - 1);
+    if (base % size1g) {                // adjust to start at 1GB boundary
+      auto const newBase = (base + size1g - 1) & ~(size1g - 1);
+      munmap(reinterpret_cast<void*>(base), newBase - base);
+      base = newBase;
     }
     assert(base % size1g == 0);
     auto arena = PreMappedArena::CreateAt(low_malloc(sizeof(PreMappedArena)),

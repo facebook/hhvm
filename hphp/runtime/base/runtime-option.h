@@ -908,6 +908,7 @@ struct RuntimeOption {
   F(uint32_t, Num2MPagesForSlabs,      0)                               \
   F(uint32_t, Num1GPagesForReqHeap,    0)                               \
   F(uint32_t, Num2MPagesForReqHeap,    0)                               \
+  F(uint32_t, NumReservedSlabs,        0)                               \
   F(uint32_t, Num1GPagesForA0,         0)                               \
   F(uint32_t, Num2MPagesForA0,         0)                               \
   F(bool, LowStaticArrays,             true)                            \

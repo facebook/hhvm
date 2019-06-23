@@ -1195,14 +1195,19 @@ static int start_server(const std::string &username, int xhprof) {
   }
 
 #ifdef USE_JEMALLOC
+  // Eventually, we are going to remove options Eval.Num1GPagesForSlabs and
+  // Eval.Num2MPagesForSlabs, and use the ForReqHeap spec together with
+  // Eval.NumReservedSlabs. For now, we keep the old options working.
   auto const reqHeapSpec = PageSpec{
-    RuntimeOption::EvalNum1GPagesForReqHeap +
-    RuntimeOption::EvalNum1GPagesForSlabs,
-    RuntimeOption::EvalNum2MPagesForReqHeap +
-    RuntimeOption::EvalNum2MPagesForSlabs
+    std::max(RuntimeOption::EvalNum1GPagesForReqHeap,
+             RuntimeOption::EvalNum1GPagesForSlabs),
+    std::max(RuntimeOption::EvalNum2MPagesForReqHeap,
+             RuntimeOption::EvalNum2MPagesForSlabs)
   };
-  auto const nSlabs = RuntimeOption::EvalNum2MPagesForSlabs +
-    512 * RuntimeOption::EvalNum1GPagesForSlabs;
+  auto const nSlabs =
+    std::max(RuntimeOption::EvalNumReservedSlabs,
+             RuntimeOption::EvalNum2MPagesForSlabs +
+             512 * RuntimeOption::EvalNum1GPagesForSlabs);
   setup_local_arenas(reqHeapSpec, nSlabs);
 #endif
 

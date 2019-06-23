@@ -868,6 +868,7 @@ void in(ISS& env, const bc::NewVArray& op) {
   }
   discard(env, op.arg1);
   push(env, arr_packed_varray(std::move(elems)));
+  effect_free(env);
   constprop(env);
 }
 
@@ -920,6 +921,7 @@ void in(ISS& env, const bc::NewVecArray& op) {
     elems.push_back(std::move(topC(env, op.arg1 - i - 1)));
   }
   discard(env, op.arg1);
+  effect_free(env);
   constprop(env);
   push(env, vec(std::move(elems)));
 }
@@ -930,8 +932,10 @@ void in(ISS& env, const bc::NewKeysetArray& op) {
   auto ty = TBottom;
   auto useMap = true;
   auto bad = false;
+  auto mayThrow = false;
   for (auto i = uint32_t{0}; i < op.arg1; ++i) {
     auto k = disect_strict_key(popC(env));
+    mayThrow |= k.mayThrow;
     if (k.type == TBottom) {
       bad = true;
       useMap = false;
@@ -945,9 +949,10 @@ void in(ISS& env, const bc::NewKeysetArray& op) {
     }
     ty |= std::move(k.type);
   }
+  if (!mayThrow) effect_free(env);
   if (useMap) {
     push(env, keyset_map(std::move(map)));
-    constprop(env);
+    if (!mayThrow) constprop(env);
   } else if (!bad) {
     push(env, keyset_n(ty));
   } else {
@@ -1096,8 +1101,18 @@ void in(ISS& env, const bc::NewPair& /*op*/) {
 }
 
 void in(ISS& env, const bc::ColFromArray& op) {
-  popC(env);
+  auto const src = popC(env);
   auto const type = static_cast<CollectionType>(op.subop1);
+  assertx(type != CollectionType::Pair);
+  if (type == CollectionType::Vector || type == CollectionType::ImmVector) {
+    if (src.subtypeOf(TVec)) effect_free(env);
+  } else {
+    assertx(type == CollectionType::Map ||
+            type == CollectionType::ImmMap ||
+            type == CollectionType::Set ||
+            type == CollectionType::ImmSet);
+    if (src.subtypeOf(TDict)) effect_free(env);
+  }
   auto const name = collections::typeToString(type);
   push(env, objExact(env.index.builtin_class(name)));
 }

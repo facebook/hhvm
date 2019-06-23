@@ -1441,18 +1441,15 @@ void dce(Env& env, const bc::AddElemC& /*op*/) {
 
 template<typename Op>
 void dceNewArrayLike(Env& env, const Op& op) {
-  if (op.numPop() == 1 && allUnusedIfNotLastRef(env.dceState.stack.back())) {
+  if (op.numPop() == 1 &&
+      !env.flags.wasPEI &&
+      allUnusedIfNotLastRef(env.dceState.stack.back())) {
     // Just an optimization for when we have a single element array,
     // but we care about its lifetime. By killing the array, and
     // leaving its element on the stack, the lifetime is unaffected.
     return markDead(env);
   }
-  stack_ops(
-      env,
-      [&] (const UseInfo& ui) {
-        return allUnused(ui) ? PushFlags::MarkUnused : PushFlags::MarkLive;
-      }
-  );
+  pushRemovableIfNoThrow(env);
 }
 
 void dce(Env& env, const bc::NewPackedArray& op)  { dceNewArrayLike(env, op); }

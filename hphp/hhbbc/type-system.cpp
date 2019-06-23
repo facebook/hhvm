@@ -4104,6 +4104,8 @@ Type assert_nonemptiness(Type t) {
 //////////////////////////////////////////////////////////////////////
 
 folly::Optional<ArrKey> maybe_class_func_key(const Type& keyTy, bool strict) {
+  if (keyTy.subtypeOf(TNull)) return {};
+
   auto ret = ArrKey{};
 
   if (keyTy.subtypeOf(BOptCls | BOptFunc)) {

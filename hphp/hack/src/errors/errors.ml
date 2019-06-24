@@ -1414,10 +1414,6 @@ let await_not_allowed p =
     "await is only permitted as a statement, expression in a return statement \
       or as a right hand side in top level assignment."
 
-let async_in_interface p =
-  add (NastCheck.err_code NastCheck.AsyncInInterface) p
-    "async is only meaningful when it modifies a method body"
-
 let await_in_coroutine p =
   add (NastCheck.err_code NastCheck.AwaitInCoroutine) p
     "await is not allowed in coroutines."

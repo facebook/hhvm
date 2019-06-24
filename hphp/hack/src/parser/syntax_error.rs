@@ -211,10 +211,13 @@ pub const error2042: Error = Cow::Borrowed("Interfaces may not be declared 'abst
 pub const error2043: Error = Cow::Borrowed("Traits may not be declared 'abstract'.");
 pub const error2045: Error =
     Cow::Borrowed("No method inside an interface may be declared 'abstract'.");
-pub const error2046: Error = Cow::Borrowed(concat!(
-    "The 'async' annotation cannot be used on 'abstract' methods ",
-    "or methods inside of interfaces."
-));
+pub fn error2046(method_type: &str) -> Error {
+    Cow::Owned(format!(
+        "'async' cannot be used on {}. Use an Awaitable<...> return type instead.",
+        method_type.to_string(),
+    ))
+}
+
 pub const error2048: Error = Cow::Borrowed("Expected group use prefix to end with '\\'");
 pub const error2049: Error = Cow::Borrowed("A namespace use clause may not specify the kind here.");
 pub const error2050: Error =

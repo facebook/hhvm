@@ -142,7 +142,7 @@ val error2042 : string
 val error2043 : string
 val error2044 : string -> string -> string
 val error2045 : string
-val error2046 : string
+val error2046 : string -> string
 val error2047 : string -> string
 val error2048 : string
 val error2049 : string

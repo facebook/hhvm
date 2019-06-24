@@ -290,7 +290,6 @@ val toplevel_continue : Pos.t -> unit
 val continue_in_switch : Pos.t -> unit
 val await_in_sync_function : Pos.t -> unit
 val await_not_allowed : Pos.t -> unit
-val async_in_interface : Pos.t -> unit
 val await_in_coroutine : Pos.t -> unit
 val yield_in_coroutine : Pos.t -> unit
 val suspend_outside_of_coroutine : Pos.t -> unit

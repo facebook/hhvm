@@ -895,11 +895,6 @@ let is_inside_interface context =
 let is_inside_trait context =
   Option.is_some (first_parent_classish_node TokenKind.Trait context)
 
-(* Tests if md_node is either explicitly declared abstract or is
- * defined inside an interface *)
-let is_generalized_abstract_method md_node context =
-  is_abstract_declaration md_node || is_inside_interface context
-
 (* Returns the 'async'-annotation syntax node from the methodish_declaration
  * node. The returned node may have syntax kind 'Missing', but it will only be
  * None if something other than a methodish_declaration node was provided as
@@ -908,6 +903,22 @@ let extract_async_node md_node =
   get_modifiers_of_declaration md_node
   |> Option.value_map ~default:[] ~f:syntax_to_list_no_separators
   |> List.find ~f:is_async
+
+let is_abstract_and_async_method md_node _context =
+  let async_node = extract_async_node md_node in
+  match async_node with
+  | None -> false
+  | Some async_node ->
+     is_abstract_declaration md_node
+        && not (is_missing async_node)
+
+let is_interface_and_async_method md_node context =
+  let async_node = extract_async_node md_node in
+  match async_node with
+  | None -> false
+  | Some async_node ->
+    is_inside_interface context
+        && not (is_missing async_node)
 
 let get_params_for_enclosing_callable context =
   context.active_callable |> Option.bind ~f:(fun callable ->
@@ -1013,16 +1024,6 @@ let check_type_hint env node names errors =
       names, errors
   in
     check (names, errors) node
-
-(* Given a node and its context, tests if the node declares a method that is
- * both abstract and async. *)
-let is_abstract_and_async_method md_node context =
-  let async_node = extract_async_node md_node in
-  match async_node with
-  | None -> false
-  | Some async_node ->
-    is_generalized_abstract_method md_node context
-        && not (is_missing async_node)
 
 let extract_callconv_node node =
   match syntax node with
@@ -1492,12 +1493,15 @@ let methodish_errors env node errors =
       node SyntaxError.error2045 modifiers in
     let errors =
       methodish_memoize_lsb_on_non_static node errors in
+    let async_annotation = Option.value (extract_async_node node) ~default:node in
     let errors =
-      let async_annotation = Option.value (extract_async_node node)
-        ~default:node in
+      produce_error errors
+      (is_interface_and_async_method node) env.context
+      (SyntaxError.error2046 "a method in an interface") async_annotation in
+    let errors =
       produce_error errors
       (is_abstract_and_async_method node) env.context
-      SyntaxError.error2046 async_annotation in
+      (SyntaxError.error2046 "an abstract method") async_annotation in
     let errors =
       if is_typechecker env
       then produce_error errors

@@ -17,13 +17,6 @@ let enforce_no_body m =
     then Errors.not_public_or_protected_interface (fst m.m_name)
   | _ -> Errors.abstract_body (fst m.m_name)
 
-(* make sure that interface methods are not async, in line with HHVM *)
-let enforce_not_async m =
-  match m.m_fun_kind with
-  | Ast.FAsync -> Errors.async_in_interface (fst m.m_name)
-  | Ast.FAsyncGenerator -> Errors.async_in_interface (fst m.m_name)
-  | _ -> ()
-
 let check_interface c =
   List.iter c.c_uses (fun (p, _) -> Errors.interface_use_trait p);
 
@@ -50,8 +43,7 @@ let check_interface c =
   end;
 
   (* make sure that interfaces only have empty public methods *)
-  List.iter ~f:enforce_no_body c.c_methods;
-  List.iter ~f:enforce_not_async c.c_methods
+  List.iter ~f:enforce_no_body c.c_methods
 
 let handler = object
   inherit Nast_visitor.handler_base

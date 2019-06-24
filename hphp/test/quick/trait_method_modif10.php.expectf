@@ -1,2 +1,1 @@
-
-Fatal error: Cannot re-declare abstract method Base::f() abstract in class Foo in %s on line 8
+Foo

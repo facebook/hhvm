@@ -1875,10 +1875,11 @@ void Class::methodOverrideCheck(const Func* parentMethod, const Func* method) {
     }
   }
 
-  if ((method->attrs() & AttrAbstract) && !method->isFromTrait()) {
-    raise_error("Cannot re-declare %sabstract method %s::%s() abstract in "
+  if ((method->attrs() & AttrAbstract) &&
+      !(parentMethod->attrs() & AttrAbstract) &&
+      !method->isFromTrait()) {
+    raise_error("Cannot re-declare non-abstract method %s::%s() abstract in "
                 "class %s",
-                (parentMethod->attrs() & AttrAbstract) ? "" : "non-",
                 m_parent->m_preClass->name()->data(),
                 parentMethod->name()->data(), m_preClass->name()->data());
   }

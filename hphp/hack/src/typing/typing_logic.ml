@@ -19,13 +19,10 @@ type subtype_prop =
 (* Disjunction. Disj f [] means "false".  The error message function f
  * wraps the error that should be produced in this case. *)
 | Disj of (unit -> unit) * subtype_prop list
-(* Equivalent to Disj [], but with an error message function attached.
- * TODO: actually store the error rather than a suspension *)
-| Unsat of (unit -> unit)
 
 let rec size (p : subtype_prop) : int =
   match p with
-  | IsSubtype _ | Unsat _ -> 1
+  | IsSubtype _ -> 1
   | Conj l | Disj (_, l) ->
     let sizes = List.map l ~f:size in
     List.fold ~init:0 ~f:(+) sizes
@@ -33,7 +30,7 @@ let rec size (p : subtype_prop) : int =
 (** Sum of the sizes of the disjunctions. *)
 let rec n_disj (p : subtype_prop) : int =
   match p with
-  | IsSubtype _ | Unsat _ -> 0
+  | IsSubtype _ -> 0
   | Conj l ->
     let n_disjs = List.map l ~f:n_disj in
     List.fold ~init:0 ~f:(+) n_disjs
@@ -44,7 +41,7 @@ let rec n_disj (p : subtype_prop) : int =
 (** Sum of the sizes of the conjunctions. *)
 let rec n_conj (p : subtype_prop) : int =
   match p with
-  | IsSubtype _ | Unsat _ -> 0
+  | IsSubtype _ -> 0
   | Disj (_, l) ->
     let n_conjs = List.map l ~f:n_conj in
     List.fold ~init:0 ~f:(+) n_conjs
@@ -52,33 +49,25 @@ let rec n_conj (p : subtype_prop) : int =
     let n_conjs = List.map l ~f:n_conj in
     (List.length l) + (List.fold ~init:0 ~f:(+) n_conjs)
 
-let rec has_disj p =
-  match p with
-  | Disj _ -> true
-  | IsSubtype _ | Unsat _ -> false
-  | Conj l ->
-    List.exists l ~f:has_disj
-
 let valid = Conj []
+let invalid ~fail = Disj (fail, [])
 
-(* Is this proposition always true? (e.g. Conj [] but also Disj [Conj []; Unsat _]
+(* Is this proposition always true? (e.g. Conj [] but also Disj [Conj []; Disj (_, [])]
 * if not simplified
 *)
 let rec is_valid p =
 match p with
 | Conj ps -> List.for_all ps is_valid
 | Disj (_, ps) -> List.exists ps is_valid
-| Unsat _ -> false
 | IsSubtype (_, _) -> false
 
-(* Is this proposition always false? e.g. Unsat _ but also Conj [Conj []; Unsat _]
+(* Is this proposition always false? e.g. Unsat _ but also Conj [Conj []; Disj (_, [])]
 * if not simplified
 *)
 and is_unsat p =
 match p with
 | Conj ps -> List.exists ps is_unsat
 | Disj (_, ps) -> List.for_all ps is_unsat
-| Unsat _ -> true
 | IsSubtype (_, _) -> false
 
 (* Smart constructor for binary conjunction *)

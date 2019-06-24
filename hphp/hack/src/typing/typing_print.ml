@@ -1640,7 +1640,6 @@ let constraints_for_type env ty =
 let class_kind c_kind final = ErrorString.class_kind c_kind final
 let subtype_prop env prop =
   let rec subtype_prop = function
-    | Unsat _ -> "UNSAT"
     | Conj [] -> "TRUE"
     | Conj ps ->
       "(" ^ (String.concat ~sep:" && " (List.map ~f:subtype_prop ps)) ^ ")"

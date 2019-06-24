@@ -1,5 +1,5 @@
 File "classname_test.php", line 13, characters 10-17:
-  There are remaining unsolved constraints!: (UNSAT && FALSE)
+  There are remaining unsolved constraints!: (FALSE && FALSE)
 File "classname_test.php", line 6, characters 19-26:
-  There are remaining unsolved constraints!: UNSAT
+  There are remaining unsolved constraints!: FALSE
 No errors

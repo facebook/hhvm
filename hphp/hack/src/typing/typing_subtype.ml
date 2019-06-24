@@ -116,7 +116,7 @@ end
  *)
 let with_error (f : unit -> unit) ((env, p) : (Env.env * TL.subtype_prop))
   : Env.env * TL.subtype_prop =
-  env, TL.conj p (TL.Unsat f)
+  env, TL.conj p (TL.invalid ~fail:f)
 
 (* If `b` is false then fail with error function `f` *)
 let check_with b f r = if not b then with_error f r else r
@@ -169,7 +169,7 @@ let check_mutability
   (* maybe-mutable is not compatible with immutable/mutable *)
   | Some Param_maybe_mutable, (None | Some (Param_borrowed_mutable | Param_owned_mutable))
     ->
-    env, TL.Unsat (fun () -> Errors.mutability_mismatch
+    env, TL.invalid ~fail:(fun () -> Errors.mutability_mismatch
       ~is_receiver p_sub (str mut_sub) p_super (str mut_super))
   | _ ->
     valid env
@@ -208,8 +208,6 @@ let anyfy env r ty =
 (* Process the constraint proposition *)
 let rec process_simplify_subtype_result prop =
   match prop with
-  | TL.Unsat f ->
-    f ()
   | TL.IsSubtype (_ty1, _ty2) ->
     (* All subtypes should have been resolved *)
     assert false
@@ -261,9 +259,9 @@ and simplify_subtype
       let env, p2 = f env in
       env, TL.disj ~fail p1 p2 in
   (* We *know* that the assertion is unsatisfiable *)
-  let invalid_with f = env, TL.Unsat f in
+  let invalid_with f = env, TL.invalid ~fail:f in
   let invalid () = invalid_with fail in
-  let invalid_env_with env f = env, TL.Unsat f in
+  let invalid_env_with env f = env, TL.invalid ~fail:f in
   let invalid_env env = invalid_env_with env fail in
   (* We *know* that the assertion is valid *)
   let valid () = env, TL.valid in
@@ -1106,7 +1104,7 @@ and simplify_subtype
    * not complete.
    *)
   | Tintersection tyl, _ ->
-    List.fold_left tyl ~init:(env, TL.Disj (fail, [])) ~f:(fun res ty_sub ->
+    List.fold_left tyl ~init:(env, TL.invalid ~fail) ~f:(fun res ty_sub ->
       res ||| simplify_subtype ~seen_generic_params ty_sub ty_super)
   (* t <: (t1 & ... & tn)
    *   if and only if
@@ -1532,7 +1530,7 @@ and subtype_fun_params_reactivity
     begin match p_sub_type with
     | _, Tfun tfun when tfun.ft_reactive <> Nonreactive -> valid env
     | _, Tfun _ ->
-      env, TL.Unsat (fun () -> Errors.rx_parameter_condition_mismatch
+      env, TL.invalid ~fail:(fun () -> Errors.rx_parameter_condition_mismatch
         SN.UserAttributes.uaAtMostRxAsFunc p_sub.fp_pos p_super.fp_pos)
     (* parameter type is not function - error will be reported in different place *)
     | _ -> valid env
@@ -1773,7 +1771,7 @@ and props_to_env env remain props =
       | [] ->
         (* For now let it fail later when calling
         process_simplify_subtype_result on the remaining constraints. *)
-        props_to_env env (TL.Disj (f, []) :: remain) conj_props
+        props_to_env env (TL.invalid ~fail:f :: remain) conj_props
       | prop :: disj_props' ->
         Errors.try_
           (fun () ->
@@ -2165,8 +2163,6 @@ and decompose_subtype_add_prop p env prop =
     decompose_subtype_add_prop p env prop'
   | TL.Disj _ ->
     Typing_log.log_prop 2 env.Env.function_pos "decompose_subtype_add_prop" env prop;
-    env
-  | TL.Unsat _ ->
     env
   | TL.IsSubtype (ty1, ty2) ->
     decompose_subtype_add_bound env ty1 ty2

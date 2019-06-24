@@ -3293,6 +3293,34 @@ and assign_ p ur env e1 ty2 =
             | _ ->
                 Errors.pair_arity p;
                 make_result env (fst e1) T.Any (r, Typing_utils.terr env))
+          | (r, Tunion tyl) ->
+            (* Get one List expression per type in the union *)
+            let env, list_expressions = List.map_env env tyl begin fun env ty ->
+              let env, te, _ = assign p env e1 ty in
+              env, te
+            end in
+            (* Get a union of all valid tuple types for our list *)
+            let types = List.filter_map list_expressions ~f:(fun list_expression ->
+              match list_expression with
+              | _, T.List elements ->
+                List.map elements ~f:(fun ((_pos, ty), _element) -> ty) |> Option.some
+              | _ ->
+                (* Only other case is the error case of Pair, omit *)
+                None
+            ) in
+            begin match types with
+            | [] ->
+              (* Degenerate case, either destructured `nothing` or hit the error case of Pair *)
+              assign p env e1 (MakeType.nothing r)
+            | tup :: tups ->
+              (* Create a tuple of unions and assign it to the original list expression *)
+              let env, unions = List.fold_left_env env tups ~init:tup ~f:(fun env union tup ->
+                List.map2_env env union tup ~f:(fun env ty_union ty ->
+                  Typing_union.union env ty_union ty
+                )
+              ) in
+              assign p env e1 (r, Ttuple unions)
+            end
         (* Other, including tuples. Create a tuple type for the left hand
          * side and attempt subtype against it. In particular this deals with
          * types such as (string,int) | (int,bool) *)

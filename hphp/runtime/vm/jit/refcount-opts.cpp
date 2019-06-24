@@ -3093,7 +3093,7 @@ bool pre_insertions_for_delete_recur(PreEnv& penv, Block* blk,
     for (auto i = bitset_find_first(bitset);
          i < bitset.size();
          i = bitset_find_next(bitset, i)) {
-      auto const t = atFront ? b->back().src(i) : b->front().dst(i);
+      auto const t = atFront ? blk->back().src(i) : blk->front().dst(i);
       if (t == tmp) return i;
     }
     return -1;

@@ -1496,7 +1496,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; record_keyword: Token.t value
     ; record_name: Token.t value
     ; record_extends_keyword: Token.t option value
-    ; record_extends_list: specifier listesque value
+    ; record_extends_list: specifier option value
     ; record_left_brace: Token.t value
     ; record_fields: record_field listesque value
     ; record_right_brace: Token.t value

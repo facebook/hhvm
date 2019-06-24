@@ -58,6 +58,8 @@ static const char *tokNames[] = {
 
 namespace {
 
+const char* kPIDPlaceholder = "%{pid}";
+
 /*
  * Dummy class to get some code to run before main().
  */
@@ -89,10 +91,24 @@ public:
 
   static void EnsureInitFile(const char* file) {
     if (out && out != stderr) return;
-    if (!file) file = "/tmp/hphp.log";
-    out = fopen(file, "w");
+
+    auto const filename = [&] () -> std::string {
+      if (!file) return "/tmp/hphp.log";
+      std::string result{file};
+      size_t idx;
+      if ((idx = result.find(kPIDPlaceholder)) != std::string::npos) {
+        result.replace(idx, strlen(kPIDPlaceholder), std::to_string(getpid()));
+      }
+      return result;
+    }();
+
+    out = fopen(filename.c_str(), "w");
     if (!out) {
-      fprintf(stderr, "could not create log file (%s); using stderr\n", file);
+      fprintf(
+        stderr,
+        "could not create log file (%s); using stderr\n",
+        filename.c_str()
+      );
       out = stderr;
     }
   }

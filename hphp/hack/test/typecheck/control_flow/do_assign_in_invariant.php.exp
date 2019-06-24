@@ -165,7 +165,7 @@ Invalid argument (Typing[4110])
 File "do_assign_in_invariant.php", line 32, characters 20-21:
 Expected CE
 File "do_assign_in_invariant.php", line 33, characters 54-55:
-But got ?(C | E)
+But got ?<expr#1>
 File "do_assign_in_invariant.php", line 91, characters 15-16:
 Invalid argument (Typing[4110])
 File "do_assign_in_invariant.php", line 20, characters 22-23:

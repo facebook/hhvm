@@ -3,4 +3,4 @@ Invalid argument (Typing[4110])
 File "contravariance_bad2.php", line 12, characters 40-40:
 Expected I
 File "contravariance_bad2.php", line 12, characters 24-25:
-But got ?I
+But got null

@@ -108,6 +108,9 @@ module ExprDepTy = struct
       end ~init:(env, ty) in
     let env, ety = Env.expand_type env ty in
     match ety with
+    | r, Toption ty ->
+      let env, ty = apply_single env ~dep_tys ty in
+      env, (r, Toption ty)
     | _, Tunion [x] when dep_tys = [] ->
        env, x
     | r, Tunion tyl ->

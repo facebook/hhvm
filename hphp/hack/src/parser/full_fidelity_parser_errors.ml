@@ -1536,34 +1536,12 @@ let is_hashbang text =
     let count = List.length @@ String_utils.split_on_newlines text in
     count = 1 && Str.string_match r text 0 && Str.matched_string text = text
 
-let class_has_a_construct_method context =
-  match first_parent_classish_node TokenKind.Class context with
-  | Some ({ syntax = ClassishDeclaration
-            { classish_body =
-              { syntax = ClassishBody
-                { classish_body_elements = methods; _}; _}; _}; _}) ->
-    let methods = syntax_to_list_no_separators methods in
-    List.exists methods ~f:(function
-      { syntax = MethodishDeclaration
-          { methodish_function_decl_header =
-            { syntax = FunctionDeclarationHeader
-              { function_name; _}; _}; _}; _} ->
-        String.lowercase @@ text function_name = SN.Members.__construct
-      | _ -> false)
-  | _ -> false
-
-let is_in_construct_method context = if is_immediately_in_lambda context then false else
-  match first_parent_function_name context, first_parent_class_name context with
-  | None, _ -> false
+let is_in_construct_method context =
+  if is_immediately_in_lambda context then false else
+  match first_parent_function_name context with
   (* Function name is __construct *)
-  | Some s, _ when String.lowercase s = SN.Members.__construct -> true
-  (* Function name is same as class name *)
-  | Some s1, Some s2 ->
-    context.nested_namespaces = [] &&
-    not @@ class_has_a_construct_method context &&
-    String.lowercase s1 = String.lowercase s2
+  | Some s when String.lowercase s = SN.Members.__construct -> true
   | _ -> false
-
 
 (* If a variadic parameter has a default value, return it *)
 let variadic_param_with_default_value params =

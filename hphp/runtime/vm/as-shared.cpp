@@ -56,8 +56,8 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrUnique,                   C|F,     "unique");               \
   X(AttrBuiltin,                  C|F,     "builtin");              \
   X(AttrPersistent,               C|F|A,   "persistent");           \
-  X(AttrIsImmutable,              C|P,     "is_immutable");         \
-  X(AttrHasImmutable,             C,       "has_immutable");        \
+  X(AttrIsConst,                  C|P,     "is_const");             \
+  X(AttrHasConstProps,            C,       "has_const_props");      \
   X(AttrForbidDynamicProps,       C,       "no_dynamic_props");     \
   X(AttrNoOverrideMagicGet,       C,       "nov_get");              \
   X(AttrNoOverrideMagicSet,       C,       "nov_set");              \

@@ -102,12 +102,12 @@ void PreClass::prettyPrint(std::ostream &out) const {
   if (m_attrs & AttrNoOverride){ out << " (nooverride)"; }
   if (m_attrs & AttrUnique)     out << " (unique)";
   if (m_attrs & AttrPersistent) out << " (persistent)";
-  if (m_attrs & AttrIsImmutable) {
-    // AttrIsImmutable classes will always also have AttrHasImmutable and
+  if (m_attrs & AttrIsConst) {
+    // AttrIsConst classes will always also have AttrHasConstProps and
     // AttrForbidDynamicProps set, so don't bother printing those
-    out << " (immutable)";
+    out << " (const)";
   } else {
-    if (m_attrs & AttrHasImmutable) out << " (has-immutable)";
+    if (m_attrs & AttrHasConstProps) out << " (has-const-props)";
     if (m_attrs & AttrForbidDynamicProps) out << " (no-dynamic-props)";
   }
   if (m_attrs & AttrDynamicallyConstructible) out << " (dyn_constructible)";
@@ -195,7 +195,7 @@ void PreClass::Prop::prettyPrint(std::ostream& out,
   if (m_attrs & AttrProtected) { out << "protected "; }
   if (m_attrs & AttrPrivate) { out << "private "; }
   if (m_attrs & AttrPersistent) { out << "(persistent) "; }
-  if (m_attrs & AttrIsImmutable) { out << "(immutable) "; }
+  if (m_attrs & AttrIsConst) { out << "(const) "; }
   if (m_attrs & AttrTrait) { out << "(trait) "; }
   if (m_attrs & AttrNoBadRedeclare) { out << "(no-bad-redeclare) "; }
   if (m_attrs & AttrNoOverride) { out << "(no-override) "; }

@@ -14,7 +14,7 @@ type t = {
   property_is_public    : bool;
   property_is_static    : bool;
   property_is_deep_init : bool;
-  property_is_immutable : bool;
+  property_is_const     : bool;
   property_is_lsb       : bool;
   property_is_no_bad_redeclare : bool;
   property_has_system_initial : bool;
@@ -36,7 +36,7 @@ let make
   property_is_public
   property_is_static
   property_is_deep_init
-  property_is_immutable
+  property_is_const
   property_is_lsb
   property_is_no_bad_redeclare
   property_has_system_initial
@@ -55,7 +55,7 @@ let make
     property_is_public;
     property_is_static;
     property_is_deep_init;
-    property_is_immutable;
+    property_is_const;
     property_is_lsb;
     property_is_no_bad_redeclare;
     property_has_system_initial;
@@ -79,7 +79,7 @@ let is_static hhas_property = hhas_property.property_is_static
 let is_deep_init hhas_property = hhas_property.property_is_deep_init
 let initial_value hhas_property = hhas_property.property_initial_value
 let initializer_instrs hhas_property = hhas_property.property_initializer_instrs
-let is_immutable hhas_property = hhas_property.property_is_immutable
+let is_const hhas_property = hhas_property.property_is_const
 let is_lsb hhas_property = hhas_property.property_is_lsb
 let is_no_bad_redeclare hhas_property = hhas_property.property_is_no_bad_redeclare
 let has_system_initial hhas_property = hhas_property.property_has_system_initial

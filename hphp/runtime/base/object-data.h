@@ -152,9 +152,8 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
     IsWeakRefed        = 0x02, // Is pointed to by at least one WeakRef
     HasDynPropArr      = 0x04, // has a dynamic properties array
     IsBeingConstructed = 0x08, // Constructor for most derived class has not
-                               // finished. Only set during construction when
-                               // the class has immutable properties (to
-                               // temporarily allow writing to them).
+                               // finished. Set during construction to
+                               // temporarily allow writing to const props.
     UsedMemoCache      = 0x10, // Object has had data set in its memo slots
     HasUninitProps     = 0x20  // The object's properties are being initialized
   };
@@ -283,8 +282,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   // in C++, you need this.
   bool isCppBuiltin() const;
 
-  // Is this an object with (some) immutable properties for which construction
-  // has not finished yet?
+  // Is this an object for which construction has not finished yet?
   bool isBeingConstructed() const;
 
   // Set if we might re-enter while some of the properties contain
@@ -467,9 +465,9 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   Array& reserveProperties(int nProp = 2);
 
   [[noreturn]] NEVER_INLINE
-  void throwMutateImmutable(Slot prop) const;
+  void throwMutateConstProp(Slot prop) const;
   [[noreturn]] NEVER_INLINE
-  void throwBindImmutable(Slot prop) const;
+  void throwBindConstProp(Slot prop) const;
 
  public:
   // never box the lval returned from getPropLval; use propB instead
@@ -488,7 +486,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
     const Class::Prop* prop;
     Slot slot;
     bool accessible;
-    bool immutable;
+    bool isConst;
   };
 
   template <bool forWrite, bool forRead, bool ignoreLateInit>

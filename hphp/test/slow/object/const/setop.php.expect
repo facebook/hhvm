@@ -4,7 +4,7 @@ object(C) (2) {
   ["i"]=>
   int(1)
 }
-Cannot modify immutable property ci of class C after construction
+Cannot modify const property ci of class C after construction
 object(C) (2) {
   ["ci"]=>
   int(0)

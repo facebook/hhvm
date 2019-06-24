@@ -15,14 +15,14 @@ function test() {
 
   try {
     $c->ci = 9;
-    echo "FAIL: wrote to immutable scalar property\n";
+    echo "FAIL: wrote to const scalar property\n";
   } catch (Exception $e) {
     echo $e->getMessage() . "\n";
   }
 
   try {
     $c->cv[] = 99;
-    echo "FAIL: wrote through immutable hack array property\n";
+    echo "FAIL: wrote through const hack array property\n";
   } catch (Exception $e) {
     echo $e->getMessage() . "\n";
   }

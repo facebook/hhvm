@@ -134,7 +134,7 @@ let from_type_constant namespace tc =
     Hhas_type_constant.make type_constant_name type_constant_initializer
 
 let from_class_elt_classvars
-  ast_class class_is_immutable tparams =
+  ast_class class_is_const tparams =
   (* TODO: we need to emit doc comments for each property,
    * not one per all properties on the same line *)
   (* The doc comment is only for the first name in the list.
@@ -146,7 +146,7 @@ let from_class_elt_classvars
       cv.A.cv_user_attributes
       cv.A.cv_is_static
       cv.A.cv_visibility (* This used to be cv_kinds *)
-      class_is_immutable
+      class_is_const
       hint
       tparams
       ast_class.A.c_namespace
@@ -313,11 +313,11 @@ let emit_class (ast_class, hoisted) =
   let class_attributes = if is_closure_class then class_attributes else
       Emit_attribute.add_reified_parent_attribute env
         class_attributes ast_class.A.c_extends in
-  let class_is_immutable = Hhas_attribute.has_const class_attributes in
+  let class_is_const = Hhas_attribute.has_const class_attributes in
   (* In the future, we intend to set class_no_dynamic_props independently from
-   * class_is_immutable, but for now class_is_immutable is the only thing that
-   * turns it on. *)
-  let class_no_dynamic_props = class_is_immutable in
+   * class_is_const, but for now class_is_const is the only thing that turns
+   * it on. *)
+  let class_no_dynamic_props = class_is_const in
   let class_id =
     Hhbc_id.Class.elaborate_id namespace ast_class.A.c_name in
   let class_is_trait = ast_class.A.c_kind = Ast.Ctrait in
@@ -442,9 +442,9 @@ let emit_class (ast_class, hoisted) =
   in
   Label.reset_label ();
   let class_properties =
-    from_class_elt_classvars ast_class class_is_immutable tparams in
-  let class_has_immutable = class_is_immutable ||
-    List.exists class_properties (fun p -> Hhas_property.is_immutable p) in
+    from_class_elt_classvars ast_class class_is_const tparams in
+  let class_has_const_props = class_is_const ||
+    List.exists class_properties (fun p -> Hhas_property.is_const p) in
   let env = Emit_env.make_class_env ast_class in
   let class_constants =
     from_class_elt_constants env ast_class in
@@ -545,7 +545,7 @@ let emit_class (ast_class, hoisted) =
       Emit_xhp.properties_for_cache
         ~ns:namespace
         ast_class
-        class_is_immutable in
+        class_is_const in
   let additional_methods =
     Emit_memoize_method.emit_wrapper_methods env info ast_class ast_class.A.c_methods in
   add_symbol_refs
@@ -564,8 +564,8 @@ let emit_class (ast_class, hoisted) =
     class_is_record
     ast_class.A.c_is_xhp
     hoisted
-    class_is_immutable
-    class_has_immutable
+    class_is_const
+    class_has_const_props
     class_no_dynamic_props
     no_reifiedinit_needed
     class_uses

@@ -107,7 +107,7 @@ let from_ast
     cv_user_attributes
     is_static
     cv_visibility
-    class_is_immutable
+    class_is_const
     type_hint
     tparams
     namespace
@@ -118,7 +118,8 @@ let from_ast
   let class_is_record = class_.T.c_kind = Ast.Crecord in
   let pid = Hhbc_id.Prop.from_ast_name cv_name in
   let attributes = Emit_attribute.from_asts namespace cv_user_attributes in
-  let is_immutable = class_is_immutable || Hhas_attribute.has_const attributes in
+  let is_const = class_is_const ||
+    Hhas_attribute.has_const attributes in
   let is_lsb = Hhas_attribute.has_lsb attributes in
   let is_late_init = Hhas_attribute.has_late_init attributes in
   let is_soft_late_init = Hhas_attribute.has_soft_late_init attributes in
@@ -212,7 +213,7 @@ let from_ast
     is_public
     is_static
     is_deep_init
-    is_immutable
+    is_const
     is_lsb
     false (*no_bad_redeclare*)
     has_system_initial

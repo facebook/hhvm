@@ -88,7 +88,7 @@ struct PropInfo {
   PropInfo() = default;
   explicit PropInfo(int offset,
                     Slot slot,
-                    bool immutable,
+                    bool isConst,
                     bool lateInit,
                     bool lateInitCheck,
                     Type knownType,
@@ -97,7 +97,7 @@ struct PropInfo {
                     const Class* propClass)
     : offset{offset}
     , slot{slot}
-    , immutable{immutable}
+    , isConst{isConst}
     , lateInit{lateInit}
     , lateInitCheck{lateInitCheck}
     , knownType{std::move(knownType)}
@@ -108,7 +108,7 @@ struct PropInfo {
 
   int offset{-1};
   Slot slot{kInvalidSlot};
-  bool immutable{false};
+  bool isConst{false};
   bool lateInit{false};
   bool lateInitCheck{false};
   Type knownType{TGen};
@@ -199,7 +199,7 @@ PropInfo getPropertyOffset(IRGS& env,
   return PropInfo(
     baseClass->declPropOffset(idx),
     idx,
-    prop.attrs & AttrIsImmutable,
+    prop.attrs & AttrIsConst,
     prop.attrs & AttrLateInit,
     (prop.attrs & AttrLateInit) && !ignoreLateInit,
     knownTypeForProp(prop, baseClass, ctx, ignoreLateInit),
@@ -970,7 +970,7 @@ SSATmp* emitIncDecProp(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
 
   if (RuntimeOption::RepoAuthoritative &&
       propInfo.offset != -1 &&
-      !propInfo.immutable &&
+      !propInfo.isConst &&
       !mightCallMagicPropMethod(MOpMode::None, propInfo) &&
       !mightCallMagicPropMethod(MOpMode::Define, propInfo)) {
 
@@ -1391,7 +1391,7 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe) {
   auto const propInfo =
     getCurrentPropertyOffset(env, base, key->type(), false);
   if (propInfo.offset == -1 ||
-      propInfo.immutable ||
+      propInfo.isConst ||
       mode == MOpMode::Unset ||
       mightCallMagicPropMethod(mode, propInfo)) {
     return propGenericImpl(env, mode, base, key, nullsafe);
@@ -1712,7 +1712,7 @@ SSATmp* setPropImpl(IRGS& env, SSATmp* key) {
     getCurrentPropertyOffset(env, base, key->type(), true);
 
   if (propInfo.offset != -1 &&
-      !propInfo.immutable &&
+      !propInfo.isConst &&
       !mightCallMagicPropMethod(mode, propInfo)) {
 
     SSATmp* propPtr;
@@ -2302,7 +2302,7 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
     getCurrentPropertyOffset(env, base, key->type(), false);
 
   if (propInfo.offset != -1 &&
-      !propInfo.immutable &&
+      !propInfo.isConst &&
       !mightCallMagicPropMethod(MOpMode::Define, propInfo)) {
 
     SSATmp* propPtr;

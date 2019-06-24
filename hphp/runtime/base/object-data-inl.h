@@ -346,11 +346,11 @@ inline const Func* ObjectData::methodNamed(const StringData* sd) const {
   return getVMClass()->lookupMethod(sd);
 }
 
-[[noreturn]] void throw_cannot_modify_immutable_object(const char* className);
+[[noreturn]] void throw_cannot_modify_const_object(const char* className);
 
 inline TypedValue* ObjectData::propVecForWrite() {
-  if (UNLIKELY(m_cls->hasImmutableProps()) && !isBeingConstructed()) {
-    throw_cannot_modify_immutable_object(getClassName().data());
+  if (UNLIKELY(m_cls->hasConstProps()) && !isBeingConstructed()) {
+    throw_cannot_modify_const_object(getClassName().data());
   }
   return const_cast<TypedValue*>(propVec());
 }
@@ -365,7 +365,7 @@ inline const TypedValue* ObjectData::propVec() const {
 
 inline tv_lval ObjectData::propLvalAtOffset(Slot idx) {
   assertx(idx < m_cls->numDeclProperties());
-  assertx(!(m_cls->declProperties()[idx].attrs & AttrIsImmutable));
+  assertx(!(m_cls->declProperties()[idx].attrs & AttrIsConst));
   return tv_lval { const_cast<TypedValue*>(&propVec()[idx]) };
 }
 

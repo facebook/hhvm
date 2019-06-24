@@ -12,8 +12,8 @@ object(C) (2) {
     }
   }
 }
-Cannot modify immutable property cv of class C after construction
-Cannot modify immutable property cvv of class C after construction
+Cannot modify const property cv of class C after construction
+Cannot modify const property cvv of class C after construction
 object(C) (2) {
   ["cv"]=>
   object(HH\Vector) (2) {

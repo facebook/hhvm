@@ -130,7 +130,7 @@ let emit_xhp_use_attributes xual =
   in
   List.map ~f:aux xual
 
-let properties_for_cache ~ns class_ class_is_immutable =
+let properties_for_cache ~ns class_ class_is_const =
   let init_value = Tast_annotate.make T.Null in
   let prop =
     Emit_property.from_ast
@@ -138,7 +138,7 @@ let properties_for_cache ~ns class_ class_is_immutable =
       []
       true (* is_static *)
       Aast.Private
-      class_is_immutable
+      class_is_const
       None
       []
       ns

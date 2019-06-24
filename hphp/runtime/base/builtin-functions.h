@@ -249,11 +249,12 @@ void throw_instance_method_fatal(const char *name);
 [[noreturn]] void throw_param_is_not_container();
 [[noreturn]] void throw_invalid_inout_base();
 [[noreturn]] void throw_cannot_modify_immutable_object(const char* className);
+[[noreturn]] void throw_cannot_modify_const_object(const char* className);
 [[noreturn]] void throw_object_forbids_dynamic_props(const char* className);
-[[noreturn]] void throw_cannot_modify_immutable_prop(const char* className,
-                                                     const char* propName);
-[[noreturn]] void throw_cannot_bind_immutable_prop(const char* className,
-                                                   const char* propName);
+[[noreturn]] void throw_cannot_modify_const_prop(const char* className,
+                                                 const char* propName);
+[[noreturn]] void throw_cannot_bind_const_prop(const char* className,
+                                               const char* propName);
 [[noreturn]] void throw_late_init_prop(const Class* cls,
                                        const StringData* propName,
                                        bool isSProp);

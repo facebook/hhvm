@@ -315,8 +315,8 @@ inline bool Class::forbidsDynamicProps() const {
   return attrs() & AttrForbidDynamicProps;
 }
 
-inline bool Class::hasImmutableProps() const {
-  return attrs() & AttrHasImmutable;
+inline bool Class::hasConstProps() const {
+  return attrs() & AttrHasConstProps;
 }
 
 inline bool Class::serialize() const {

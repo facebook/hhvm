@@ -140,24 +140,30 @@ watchman_init_timeout = 1
             files_to_check=["class_1.php"], assert_edges_added=True, filename="partial1"
         )
 
-        self.assertTrue(result1.get_edges_added() == 0, "class_1 has no dependencies")
+        self.assertTrue(
+            result1.returned_values.get_edges_added() == 0,
+            "class_1 has no dependencies",
+        )
 
         result2 = self.save_partial(
             files_to_check=["class_2.php"], assert_edges_added=True, filename="partial2"
         )
-        assert result2.get_edges_added() > 0
+        assert result2.returned_values.get_edges_added() > 0
 
         result3 = self.save_partial(
             files_to_check=["class_3.php"], assert_edges_added=True, filename="partial3"
         )
-        assert result3.get_edges_added() > 0
+        assert result3.returned_values.get_edges_added() > 0
 
         result4 = self.save_partial(
             files_to_check=["class_1.php", "class_2.php", "class_3.php"],
             assert_edges_added=True,
             filename="partial4",
         )
-        assert result4.get_edges_added() == result3.get_edges_added()
+        assert (
+            result4.returned_values.get_edges_added()
+            == result3.returned_values.get_edges_added()
+        )
 
         result5 = self.save_partial(
             files_to_check=[
@@ -166,7 +172,10 @@ watchman_init_timeout = 1
             assert_edges_added=True,
             filename="partial5",
         )
-        assert result5.get_edges_added() == result2.get_edges_added()
+        assert (
+            result5.returned_values.get_edges_added()
+            == result2.returned_values.get_edges_added()
+        )
 
     def test_incrementally_generated_saved_state(self) -> None:
         old_saved_state: SaveStateResult = self.dump_saved_state()

@@ -3,7 +3,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import json
 import os
 import re
-import select
 import shutil
 import signal
 import subprocess
@@ -11,9 +10,9 @@ import sys
 import tempfile
 import time
 import unittest
-from typing import Optional, Union
 
-from hh_paths import hh_client, hh_server
+from typing import Optional, Union
+from hh_paths import hh_client, hh_merge_deps, hh_server
 
 
 class CommonTestDriver(unittest.TestCase):
@@ -36,17 +35,24 @@ class CommonTestDriver(unittest.TestCase):
         cls.hh_tmp_dir = tempfile.mkdtemp()
         cls.bin_dir = tempfile.mkdtemp()
         hh_server_dir = os.path.dirname(hh_server)
+
+        hh_merge_deps_dir = os.path.dirname(hh_merge_deps)
+        print("hh_server_dir " + hh_server_dir)
+        print("hh_merge_deps_dir " + hh_merge_deps_dir)
+
         cls.test_env = dict(
             os.environ,
             **{
                 "HH_TEST_MODE": "1",
                 "HH_TMPDIR": cls.hh_tmp_dir,
-                "PATH": "%s:%s:/bin:/usr/bin:/usr/local/bin"
-                % (hh_server_dir, cls.bin_dir),
+                "PATH": (
+                    "%s:%s:%s:/bin:/usr/bin:/usr/local/bin"
+                    % (hh_server_dir, hh_merge_deps_dir, cls.bin_dir)
+                ),
                 "HH_HOME": os.path.dirname(hh_client),
                 "OCAMLRUNPARAM": "b",
                 "HH_LOCALCONF_PATH": cls.repo_dir,
-            }
+            },
         )
 
     @classmethod

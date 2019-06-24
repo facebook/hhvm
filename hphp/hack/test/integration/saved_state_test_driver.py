@@ -8,7 +8,7 @@ import tempfile
 from typing import Any, List, NamedTuple, Optional
 
 import common_tests
-from hh_paths import hh_client, hh_server
+from hh_paths import hh_client, hh_merge_deps, hh_server
 
 
 def write_echo_json(f, obj):
@@ -197,6 +197,23 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
         self.write_hhconfig()
         self.write_watchman_config()
 
+    def merge_partial(self, files_to_merge: List[str], filename: str) -> int:
+
+        hh_command: List[str] = [
+            hh_merge_deps,
+            "--ignore-hh-version",
+            "true",
+            "--output_filename",
+            filename,
+        ] + files_to_merge
+
+        stdout, stderr, retcode = self.proc_call(hh_command)
+        if retcode != 0:
+            raise RuntimeError(
+                'Failed to save! stdout: "%s" stderr: "%s"' % (stdout, stderr)
+            )
+        return retcode
+
     def save_partial(
         self,
         files_to_check: Optional[List[Any]] = None,
@@ -204,25 +221,24 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
         gen_with_errors: bool = True,
         init_dir: Optional[str] = None,
         assert_edges_added: bool = False,
-    ) -> SaveStateCommandResult:
+    ) -> SaveStateResult:
         if files_to_check is None:
             files_to_check = []
 
-        if filename is None:
-            filename = self.saved_state_path()
-        else:
-            filename = os.path.join(self.saved_state_dir, filename)
+        saved_state_path = self.saved_state_path()
+        if filename is not None:
+            saved_state_path = os.path.join(self.saved_state_dir, filename)
 
         if init_dir is None:
             init_dir = self.repo_dir
 
         spec = {
             "files_to_check": files_to_check,
-            "filename": filename,
+            "filename": saved_state_path,
             "gen_with_errors": gen_with_errors,
         }
 
-        return self.exec_save_command(
+        result = self.exec_save_command(
             hh_command=[
                 hh_server,
                 "--check",
@@ -234,6 +250,8 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
             ignore_errors=gen_with_errors,
             assert_edges_added=assert_edges_added,
         )
+
+        return SaveStateResult(path=saved_state_path, returned_values=result)
 
     def start_hh_server(self, changed_files=None, saved_state_path=None, args=None):
         if changed_files is None:

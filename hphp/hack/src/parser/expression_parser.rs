@@ -1419,12 +1419,10 @@ where
         //
         // TODO: Produce an error for brace case in a later pass
         let left = self.next_token();
-        let mut parser1 = self.clone();
-        let right = parser1.next_token();
-        match (left.kind(), right.kind()) {
+        match (left.kind(), self.peek_token_kind()) {
             (TokenKind::LeftBracket, TokenKind::RightBracket)
             | (TokenKind::LeftBrace, TokenKind::RightBrace) => {
-                self.continue_from(parser1);
+                let right = self.next_token();
                 let left = S!(make_token, self, left);
                 let missing = S!(make_missing, self, self.pos());
                 let right = S!(make_token, self, right);
@@ -1850,10 +1848,8 @@ where
         //   variable-name
         //   (  anonymous-function-parameter-declaration-list-opt  ) /
         //      anonymous-function-return-opt
-        let mut parser1 = self.clone();
-        let token = parser1.next_token();
-        if token.kind() == TokenKind::Variable {
-            self.continue_from(parser1);
+        if self.peek_token_kind() == TokenKind::Variable {
+            let token = self.next_token();
             S!(make_token, self, token)
         } else {
             let (left, params, right) = self.parse_parameter_list_opt();
@@ -2361,10 +2357,8 @@ where
         // Rather than require at parse time that the list be all one or the other,
         // we allow both, and give an error in the type checker.
         let expr1 = self.parse_expression_with_reset_precedence();
-        let mut parser1 = self.clone();
-        let token = parser1.next_token();
-        if token.kind() == TokenKind::EqualGreaterThan {
-            self.continue_from(parser1);
+        if self.peek_token_kind() == TokenKind::EqualGreaterThan {
+            let token = self.next_token();
             let arrow = S!(make_token, self, token);
             let expr2 = self.parse_expression_with_reset_precedence();
             S!(make_element_initializer, self, expr1, arrow, expr2)
@@ -2531,11 +2525,9 @@ where
     //   expression => expression
     fn parse_array_element_init(&mut self) -> S::R {
         let expr1 = self.with_reset_precedence(|p| p.parse_expression());
-        let mut parser1 = self.clone();
-        let token = parser1.next_token();
-        match token.kind() {
+        match self.peek_token_kind() {
             TokenKind::EqualGreaterThan => {
-                self.continue_from(parser1);
+                let token = self.next_token();
                 let arrow = S!(make_token, self, token);
                 let expr2 = self.with_reset_precedence(|p| p.parse_expression());
                 S!(make_element_initializer, self, expr1, arrow, expr2)

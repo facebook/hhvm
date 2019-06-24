@@ -1005,11 +1005,9 @@ where
 
     fn parse_return_statement(&mut self) -> S::R {
         let return_token = self.assert_token(TokenKind::Return);
-        let mut parser1 = self.clone();
-        let semi_token = parser1.next_token();
-        if semi_token.kind() == TokenKind::Semicolon {
-            let missing = S!(make_missing, parser1, self.pos());
-            self.continue_from(parser1);
+        if self.peek_token_kind() == TokenKind::Semicolon {
+            let missing = S!(make_missing, self, self.pos());
+            let semi_token = self.next_token();
             let semi_token = S!(make_token, self, semi_token);
             S!(
                 make_return_statement,
@@ -1058,10 +1056,8 @@ where
         // here; add an error in a later pass.
         let default_token = self.assert_token(TokenKind::Default);
         let colon_token = {
-            let mut parser1 = self.clone();
-            let token = parser1.next_token();
-            if token.kind() == TokenKind::Semicolon {
-                self.continue_from(parser1);
+            if self.peek_token_kind() == TokenKind::Semicolon {
+                let token = self.next_token();
                 S!(make_token, self, token)
             } else {
                 self.require_colon()
@@ -1082,10 +1078,8 @@ where
         let case_token = self.assert_token(TokenKind::Case);
         let expr = self.parse_expression();
         let colon_token = {
-            let mut parser1 = self.clone();
-            let token = parser1.next_token();
-            if token.kind() == TokenKind::Semicolon {
-                self.continue_from(parser1);
+            if self.peek_token_kind() == TokenKind::Semicolon {
+                let token = self.next_token();
                 S!(make_token, self, token)
             } else {
                 self.require_colon()
@@ -1122,12 +1116,10 @@ where
     }
 
     fn parse_expression_statement(&mut self) -> S::R {
-        let mut parser1 = self.clone();
-        let token = parser1.next_token();
-        match token.kind() {
+        match self.peek_token_kind() {
             TokenKind::Semicolon => {
-                let missing = S!(make_missing, parser1, self.pos());
-                self.continue_from(parser1);
+                let missing = S!(make_missing, self, self.pos());
+                let token = self.next_token();
                 let token = S!(make_token, self, token);
                 S!(make_expression_statement, self, missing, token)
             }

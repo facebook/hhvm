@@ -340,10 +340,8 @@ where
     }
 
     fn optional_token(&mut self, kind: TokenKind) -> S::R {
-        let mut parser1 = self.clone();
-        let token = parser1.next_token();
-        if token.kind() == kind {
-            self.continue_from(parser1);
+        if self.peek_token_kind() == kind {
+            let token = self.next_token();
             S!(make_token, self, token)
         } else {
             S!(make_missing, self, self.pos())
@@ -728,9 +726,7 @@ where
         loop {
             // At this point we are expecting an item followed by a separator,
             // a close, or, if trailing separators are allowed, both
-            let mut parser1 = self.clone();
-            let token = parser1.next_token();
-            let kind = token.kind();
+            let kind = self.peek_token_kind();
             if close_predicate(kind) || kind == TokenKind::EndOfFile {
                 // ERROR RECOVERY: We expected an item but we found a close or
                 // the end of the file. Make the item and separator both
@@ -763,7 +759,7 @@ where
                 // the type argument list, it's associated with the formal
                 // parameter list.
 
-                self.continue_from(parser1);
+                let token = self.next_token();
                 if list_kind != SeparatedListKind::ItemsOptional {
                     self.with_error(error.clone())
                 }
@@ -776,9 +772,7 @@ where
                 // We got neither a close nor a separator; hopefully we're going
                 // to parse an item followed by a close or separator.
                 let item = parse_item(self);
-                let mut parser1 = self.clone();
-                let token = parser1.next_token();
-                let kind = token.kind();
+                let kind = self.peek_token_kind();
 
                 if close_predicate(kind) {
                     let missing = S!(make_missing, self, self.pos());
@@ -787,7 +781,7 @@ where
                     items.push(list_item);
                     break;
                 } else if kind == separator_kind {
-                    self.continue_from(parser1);
+                    let token = self.next_token();
 
                     let separator = S!(make_token, self, token);
                     let list_item = S!(make_list_item, self, item, separator);
@@ -1221,10 +1215,9 @@ where
     }
 
     fn require_token_one_of(&mut self, kinds: &[TokenKind], error: Error) -> S::R {
-        let mut parser1 = self.clone();
-        let token = parser1.next_token();
-        if kinds.iter().any(|x| *x == token.kind()) {
-            self.continue_from(parser1);
+        let token_kind = self.peek_token_kind();
+        if kinds.iter().any(|x| *x == token_kind) {
+            let token = self.next_token();
             S!(make_token, self, token)
         } else {
             // ERROR RECOVERY: Look at the next token after this. Is it the one we
@@ -1259,10 +1252,8 @@ where
 
     fn require_token(&mut self, kind: TokenKind, error: Error) -> S::R {
         // Must behave as `require_token_one_of parser [kind] error`
-        let mut parser1 = self.clone();
-        let token = parser1.next_token();
-        if token.kind() == kind {
-            self.continue_from(parser1);
+        if self.peek_token_kind() == kind {
+            let token = self.next_token();
             S!(make_token, self, token)
         } else {
             // ERROR RECOVERY: Look at the next token after this. Is it the one we
@@ -1290,11 +1281,8 @@ where
     }
 
     fn require_and_return_token(&mut self, kind: TokenKind, error: Error) -> Option<S::Token> {
-        let mut parser1 = self.clone();
-        let token = parser1.next_token();
-        if token.kind() == kind {
-            self.continue_from(parser1);
-            Some(token)
+        if self.peek_token_kind() == kind {
+            Some(self.next_token())
         } else {
             // ERROR RECOVERY: Look at the next token after this. Is it the one we
             // require? If so, process the current token as extra and return the next

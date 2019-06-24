@@ -444,10 +444,8 @@ where
         //
         let use_kind = self.parse_namespace_use_kind_opt();
         let name = self.require_qualified_name();
-        let mut parser1 = self.clone();
-        let as_token = parser1.next_token();
-        let (as_token, alias) = if as_token.kind() == TokenKind::As {
-            self.continue_from(parser1);
+        let (as_token, alias) = if self.peek_token_kind() == TokenKind::As {
+            let as_token = self.next_token();
             let as_token = S!(make_token, self, as_token);
             let alias = self.require_name();
             (as_token, alias)
@@ -528,11 +526,9 @@ where
         // in a later pass:
         // Qualified names are a superset of legal namespace names.
         let namespace_token = self.assert_token(TokenKind::Namespace);
-        let mut parser1 = self.clone();
-        let token = parser1.next_token();
-        let name = match token.kind() {
+        let name = match self.peek_token_kind() {
             TokenKind::Name => {
-                self.continue_from(parser1);
+                let token = self.next_token();
                 let token = S!(make_token, self, token);
                 self.scan_remaining_qualified_name(token)
             }
@@ -583,14 +579,12 @@ where
     }
 
     fn parse_classish_implements_opt(&mut self) -> (S::R, S::R) {
-        let mut parser1 = self.clone();
-        let implements_token = parser1.next_token();
-        if implements_token.kind() != TokenKind::Implements {
+        if self.peek_token_kind() != TokenKind::Implements {
             let missing1 = S!(make_missing, self, self.pos());
             let missing2 = S!(make_missing, self, self.pos());
             (missing1, missing2)
         } else {
-            self.continue_from(parser1);
+            let implements_token = self.next_token();
             let implements_token = S!(make_token, self, implements_token);
             let implements_list = self.parse_special_type_list();
             (implements_token, implements_list)
@@ -600,12 +594,10 @@ where
     fn parse_classish_modifiers(&mut self) -> S::R {
         let mut acc = vec![];
         loop {
-            let mut parser1 = self.clone();
-            let token = parser1.next_token();
-            match token.kind() {
+            match self.peek_token_kind() {
                 TokenKind::Abstract | TokenKind::Final => {
                     // TODO(T25649779)
-                    self.continue_from(parser1);
+                    let token = self.next_token();
                     let token = S!(make_token, self, token);
                     acc.push(token);
                 }
@@ -617,11 +609,10 @@ where
     fn parse_classish_token(&mut self) -> S::R {
         let spellcheck_tokens = vec![TokenKind::Class, TokenKind::Trait, TokenKind::Interface];
         let token_str = &self.current_token_text();
-        let mut parser1 = self.clone();
-        let token = parser1.next_token();
-        match token.kind() {
+        let token_kind = self.peek_token_kind();
+        match token_kind {
             TokenKind::Class | TokenKind::Trait | TokenKind::Interface => {
-                self.continue_from(parser1);
+                let token = self.next_token();
                 S!(make_token, self, token)
             }
             // Spellcheck case
@@ -721,15 +712,14 @@ where
     }
 
     fn parse_extends_opt(&mut self) -> (S::R, S::R) {
-        let mut parser1 = self.clone();
-        let extends_token = parser1.next_token();
-        if (extends_token.kind()) != TokenKind::Extends {
+        let token_kind = self.peek_token_kind();
+        if token_kind != TokenKind::Extends {
             let missing1 = S!(make_missing, self, self.pos());
             let missing2 = S!(make_missing, self, self.pos());
             (missing1, missing2)
         } else {
-            self.continue_from(parser1);
-            let extends_token = S!(make_token, self, extends_token);
+            let token = self.next_token();
+            let extends_token = S!(make_token, self, token);
             let extends_list = self.parse_special_type_list();
             (extends_token, extends_list)
         }
@@ -819,11 +809,10 @@ where
     }
 
     fn parse_xhp_children_trailing(&mut self, term: S::R) -> S::R {
-        let mut parser1 = self.clone();
-        let token = parser1.next_token();
-        match token.kind() {
+        let token_kind = self.peek_token_kind();
+        match token_kind {
             TokenKind::Star | TokenKind::Plus | TokenKind::Question => {
-                self.continue_from(parser1);
+                let token = self.next_token();
                 let token = S!(make_token, self, token);
                 S!(make_postfix_unary_expression, self, term, token)
             }
@@ -832,11 +821,10 @@ where
     }
 
     fn parse_xhp_children_bar(&mut self, left: S::R) -> S::R {
-        let mut parser1 = self.clone();
-        let token = parser1.next_token();
-        match token.kind() {
+        let token_kind = self.peek_token_kind();
+        match token_kind {
             TokenKind::Bar => {
-                self.continue_from(parser1);
+                let token = self.next_token();
                 let token = S!(make_token, self, token);
                 let right = self.parse_xhp_children_term();
                 let result = S!(make_binary_expression, self, left, token, right);
@@ -864,11 +852,10 @@ where
         //   children empty ;
         //   children xhp-children-expression ;
         let children = self.assert_token(TokenKind::Children);
-        let mut parser1 = self.clone();
-        let token = parser1.next_token();
-        let expr = match token.kind() {
+        let token_kind = self.peek_token_kind();
+        let expr = match token_kind {
             TokenKind::Empty => {
-                self.continue_from(parser1);
+                let token = self.next_token();
                 S!(make_token, self, token)
             }
             _ => self.parse_xhp_children_expression(),
@@ -1097,11 +1084,10 @@ where
         // ERROR RECOVERY: Detect if the implements/extends, name and semi are
         // missing.
         let req = self.assert_token(TokenKind::Require);
-        let mut parser1 = self.clone();
-        let req_kind_token = parser1.next_token();
-        let req_kind = match req_kind_token.kind() {
+        let token_kind = self.peek_token_kind();
+        let req_kind = match token_kind {
             TokenKind::Implements | TokenKind::Extends => {
-                self.continue_from(parser1);
+                let req_kind_token = self.next_token();
                 S!(make_token, self, req_kind_token)
             }
             _ => {
@@ -1530,12 +1516,10 @@ where
     }
 
     fn parse_return_type_hint_opt(&mut self) -> (S::R, S::R) {
-        let mut parser1 = self.clone();
-
-        let colon_token = parser1.next_token();
-        if colon_token.kind() == TokenKind::Colon {
-            self.continue_from(parser1);
-            let colon_token = S!(make_token, self, colon_token);
+        let token_kind = self.peek_token_kind();
+        if token_kind == TokenKind::Colon {
+            let token = self.next_token();
+            let colon_token = S!(make_token, self, token);
             let return_type =
                 self.with_type_parser(&|p: &mut TypeParser<'a, S, T>| p.parse_return_type());
             (colon_token, return_type)
@@ -1671,11 +1655,10 @@ where
     }
 
     fn parse_visibility_modifier_opt(&mut self) -> S::R {
-        let mut parser1 = self.clone();
-        let token = parser1.next_token();
-        match token.kind() {
+        let token_kind = self.peek_token_kind();
+        match token_kind {
             TokenKind::Public | TokenKind::Protected | TokenKind::Private => {
-                self.continue_from(parser1);
+                let token = self.next_token();
                 S!(make_token, self, token)
             }
             _ => S!(make_missing, self, self.pos()),
@@ -1690,11 +1673,10 @@ where
     // call-convention:
     //   inout
     fn parse_call_convention_opt(&mut self) -> S::R {
-        let mut parser1 = self.clone();
-        let token = parser1.next_token();
-        match token.kind() {
+        let token_kind = self.peek_token_kind();
+        match token_kind {
             TokenKind::Inout => {
-                self.continue_from(parser1);
+                let token = self.next_token();
                 S!(make_token, self, token)
             }
             _ => S!(make_missing, self, self.pos()),
@@ -1708,11 +1690,10 @@ where
     // constant-initializer:
     //   =  const-expression
     fn parse_simple_initializer_opt(&mut self) -> S::R {
-        let mut parser1 = self.clone();
-        let token = parser1.next_token();
-        match token.kind() {
+        let token_kind = self.peek_token_kind();
+        match token_kind {
             TokenKind::Equal => {
-                self.continue_from(parser1);
+                let token = self.next_token();
                 // TODO: Detect if expression is not const
                 let token = S!(make_token, self, token);
                 let default_value = self.parse_expression();
@@ -1743,11 +1724,10 @@ where
         //   =
         //   as
         //   super
-        let mut parser1 = self.clone();
-        let token = parser1.next_token();
-        match token.kind() {
+        let token_kind = self.peek_token_kind();
+        match token_kind {
             TokenKind::Equal | TokenKind::As | TokenKind::Super => {
-                self.continue_from(parser1);
+                let token = self.next_token();
                 S!(make_token, self, token)
             }
             _ =>
@@ -1846,11 +1826,10 @@ where
             let token = S!(make_token, x, token);
             S!(make_error, x, token)
         };
-        let mut parser1 = self.clone();
-        let token = parser1.next_token();
-        match token.kind() {
+        let token_kind = self.peek_token_kind();
+        match token_kind {
             TokenKind::Name | TokenKind::Construct | TokenKind::Destruct => {
-                self.continue_from(parser1);
+                let token = self.next_token();
                 S!(make_token, self, token)
             }
             TokenKind::LeftParen => {
@@ -1930,9 +1909,8 @@ where
     fn parse_methodish(&mut self, attribute_spec: S::R, modifiers: S::R) -> S::R {
         let header =
             self.parse_function_declaration_header(modifiers, /* is_methodish:*/ true);
-        let mut parser1 = self.clone();
-        let token = parser1.next_token();
-        match token.kind() {
+        let token_kind = self.peek_token_kind();
+        match token_kind {
             TokenKind::LeftBrace => {
                 let body = self.parse_compound_statement();
                 let missing = S!(make_missing, self, self.pos());
@@ -1947,7 +1925,7 @@ where
             }
             TokenKind::Semicolon => {
                 let pos = self.pos();
-                self.continue_from(parser1);
+                let token = self.next_token();
                 let missing = S!(make_missing, self, pos);
                 let semicolon = S!(make_token, self, token);
                 S!(
@@ -1990,7 +1968,7 @@ where
                 // neither. Use the offending token as the body of the method.
                 // TODO: Is this the right error recovery?
                 let pos = self.pos();
-                self.continue_from(parser1);
+                let token = self.next_token();
                 self.with_error(Errors::error1041);
                 let token = S!(make_token, self, token);
                 let error = S!(make_error, self, token);
@@ -2009,9 +1987,8 @@ where
     fn parse_modifiers(&mut self) -> (S::R, bool) {
         let mut items = vec![];
         loop {
-            let mut parser1 = self.clone();
-            let token = parser1.next_token();
-            match token.kind() {
+            let token_kind = self.peek_token_kind();
+            match token_kind {
                 TokenKind::Abstract
                 | TokenKind::Static
                 | TokenKind::Public
@@ -2020,7 +1997,7 @@ where
                 | TokenKind::Async
                 | TokenKind::Coroutine
                 | TokenKind::Final => {
-                    self.continue_from(parser1);
+                    let token = self.next_token();
                     let item = S!(make_token, self, token);
                     items.push(item)
                 }
@@ -2586,14 +2563,13 @@ where
         let mut declarations = vec![];
         header.map(|x| declarations.push(x));
         loop {
-            let mut parser1 = self.clone();
-            let token = parser1.next_token();
-            match token.kind() {
+            let token_kind = self.peek_token_kind();
+            match token_kind {
                 TokenKind::EndOfFile => {
-                    let token = S!(make_token, parser1, token);
+                    let token = self.next_token();
+                    let token = S!(make_token, self, token);
                     let end_of_file = S!(make_end_of_file, self, token);
                     declarations.push(end_of_file);
-                    self.continue_from(parser1);
                     break;
                 }
                 _ => declarations.push(self.parse_declaration()),

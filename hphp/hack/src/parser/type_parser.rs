@@ -446,11 +446,9 @@ where
     //   inout
 
     fn parse_call_convention_opt(&mut self) -> S::R {
-        let mut parser1 = self.clone();
-        let token = parser1.next_token();
-        match token.kind() {
+        match self.peek_token_kind() {
             TokenKind::Inout => {
-                self.continue_from(parser1);
+                let token = self.next_token();
                 S!(make_token, self, token)
             }
             _ => S!(make_missing, self, self.pos()),
@@ -491,24 +489,20 @@ where
     //   ...
 
     fn parse_closure_param_type_or_ellipsis(&mut self) -> S::R {
-        let mut parser1 = self.clone();
-        let token = parser1.next_token();
-        match token.kind() {
+        match self.peek_token_kind() {
             TokenKind::DotDotDot => {
-                let missing1 = S!(make_missing, parser1, self.pos());
-                let missing2 = S!(make_missing, parser1, self.pos());
-                self.continue_from(parser1);
+                let missing1 = S!(make_missing, self, self.pos());
+                let missing2 = S!(make_missing, self, self.pos());
+                let token = self.next_token();
                 let token = S!(make_token, self, token);
                 S!(make_variadic_parameter, self, missing1, missing2, token)
             }
             _ => {
                 let callconv = self.parse_call_convention_opt();
                 let ts = self.parse_type_specifier(false);
-                let mut parser1 = self.clone();
-                let token = parser1.next_token();
-                match token.kind() {
+                match self.peek_token_kind() {
                     TokenKind::DotDotDot => {
-                        self.continue_from(parser1);
+                        let token = self.next_token();
                         let token = S!(make_token, self, token);
                         S!(make_variadic_parameter, self, callconv, ts, token)
                     }
@@ -519,10 +513,8 @@ where
     }
 
     fn parse_optionally_reified_type(&mut self) -> S::R {
-        let mut parser1 = self.clone();
-        let token = parser1.next_token();
-        if token.kind() == TokenKind::Reify {
-            self.continue_from(parser1);
+        if self.peek_token_kind() == TokenKind::Reify {
+            let token = self.next_token();
             let reified_kw = S!(make_token, self, token);
             let type_argument = self.parse_type_specifier(false);
             S!(make_reified_type_argument, self, reified_kw, type_argument)
@@ -556,10 +548,8 @@ where
             Errors::error1007,
             &|x: &mut Self| x.parse_optionally_reified_type(),
         );
-        let mut parser1 = self.clone();
-        let close_angle = parser1.next_token();
-        if close_angle.kind() == TokenKind::GreaterThan {
-            self.continue_from(parser1);
+        if self.peek_token_kind() == TokenKind::GreaterThan {
+            let close_angle = self.next_token();
             let close_angle = S!(make_token, self, close_angle);
             let result = S!(make_type_arguments, self, open_angle, args, close_angle);
             (result, no_arg_is_missing)
@@ -840,11 +830,9 @@ where
         let coroutine = self.optional_token(TokenKind::Coroutine);
         let fnc = self.fetch_token();
         let ilp = self.require_left_paren();
-        let mut parser1 = self.clone();
-        let token = parser1.next_token();
-        let (pts, irp) = if token.kind() == TokenKind::RightParen {
-            let missing = S!(make_missing, parser1, self.pos());
-            self.continue_from(parser1);
+        let (pts, irp) = if self.peek_token_kind() == TokenKind::RightParen {
+            let missing = S!(make_missing, self, self.pos());
+            let token = self.next_token();
             let token = S!(make_token, self, token);
             (missing, token)
         } else {
@@ -887,10 +875,8 @@ where
 
         let left_paren = self.assert_token(TokenKind::LeftParen);
         let args = self.parse_type_list(TokenKind::RightParen);
-        let mut parser1 = self.clone();
-        let right_paren = parser1.next_token();
-        if right_paren.kind() == TokenKind::RightParen {
-            self.continue_from(parser1);
+        if self.peek_token_kind() == TokenKind::RightParen {
+            let right_paren = self.next_token();
             let token = S!(make_token, self, right_paren);
             S!(make_tuple_type_specifier, self, left_paren, args, token)
         } else {
@@ -1071,10 +1057,8 @@ where
         //   as  type-specifier
         // TODO: Is this correct? Or do we need to allow "super" as well?
         // TODO: What about = ?
-        let mut parser1 = self.clone();
-        let constraint_as = parser1.next_token();
-        if constraint_as.kind() == TokenKind::As {
-            self.continue_from(parser1);
+        if self.peek_token_kind() == TokenKind::As {
+            let constraint_as = self.next_token();
             let constraint_as = S!(make_token, self, constraint_as);
             let constraint_type = self.parse_type_specifier(false);
             S!(make_type_constraint, self, constraint_as, constraint_type)
@@ -1084,10 +1068,8 @@ where
     }
 
     pub fn parse_return_type(&mut self) -> S::R {
-        let mut parser1 = self.clone();
-        let token = parser1.next_token();
-        if token.kind() == TokenKind::Noreturn {
-            self.continue_from(parser1);
+        if self.peek_token_kind() == TokenKind::Noreturn {
+            let token = self.next_token();
             S!(make_token, self, token)
         } else {
             self.parse_type_specifier(false)

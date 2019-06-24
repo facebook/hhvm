@@ -1127,7 +1127,10 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
   // they exceed kMaxPersistentStringBufferCapacity at exit or if the thread
   // is explicitly flushed (e.g., due to being idle).
   json->initSb(length);
-
+  SCOPE_EXIT {
+    constexpr int kMaxPersistentStringBufferCapacity = 256 * 1024;
+    if (json->sb_cap > kMaxPersistentStringBufferCapacity) json->flushSb();
+  };
   // SimpleParser only handles the most common set of options. Also, only use it
   // if its array nesting depth check is *more* restrictive than what the user
   // asks for, to ensure that the precise semantics of the general case is
@@ -1169,7 +1172,6 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
 
   UncheckedBuffer *buf = &json->sb_buf;
   UncheckedBuffer *key = &json->sb_key;
-  static const int kMaxPersistentStringBufferCapacity = 256 * 1024;
 
   DataType type = kInvalidDataType;
   unsigned short escaped_bytes = 0;
@@ -1184,7 +1186,6 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
     json->stack.resize(depth);
   }
   SCOPE_EXIT {
-    if (json->sb_cap > kMaxPersistentStringBufferCapacity) json->flushSb();
     if (json->stack.empty()) return;
     for (int i = 0; i <= json->mark; i++) {
       json->stack[i].key.reset();

@@ -37,9 +37,7 @@ let collect_dependencies tcopt func =
   Typing_deps.collect_dependencies := true;
   Typing_deps.dependencies_of := Utils.strip_ns func;
   let filename = get_filename func in
-  let ast = Ast_provider.get_ast ~full:true filename in
-  (* TODO: avoid complete re-typechecking *)
-  let _ : Tast.program = Typing.nast_to_tast tcopt (Naming.program (Ast_to_nast.convert ast)) in
+  let _ : Tast.def option = Typing_check_service.type_fun tcopt filename func in
   HashSet.fold (fun el l -> (extract_object_declaration el) :: l) Typing_deps.dependencies []
 
 

@@ -62,7 +62,7 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    *
    * @return - an `array` containing the values from the current `Pair`.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Rx, __MaybeMutable, __PHPStdLib>>
   /* HH_IGNORE_ERROR[2082] T30260145 */
   public function toArray(): array;
 

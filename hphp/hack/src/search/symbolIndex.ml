@@ -182,10 +182,11 @@ let find_matching_symbols
     (* Next search globals *)
     let global_results = match provider with
       | CustomIndex ->
-        CustomSearchService.search_symbols
+        let r = CustomSearchService.search_symbols
           ~query_text
           ~max_results
-          ~context;
+          ~context in
+        LocalSearchService.extract_dead_results ~env ~results:r
       | NoIndex ->
         []
       | SqliteIndex ->

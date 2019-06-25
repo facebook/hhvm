@@ -1148,6 +1148,35 @@ let do_completion_legacy
   let%lwt result = rpc conn ref_unblocked_time command in
   make_ide_completion_response result filename
 
+let do_completion_local
+    (ide_service: ClientIdeService.t)
+    (params: Completion.params)
+  : Completion.result Lwt.t =
+  let open Completion in
+  let open TextDocumentIdentifier in
+  let pos = lsp_position_to_ide params.loc.TextDocumentPositionParams.position in
+  let filename = lsp_uri_to_path params.loc.TextDocumentPositionParams.textDocument.uri in
+  let is_manually_invoked = match params.context with
+    | None -> false
+    | Some c -> c.triggerKind = Invoked
+  in
+
+  (* this is what I want to fix *)
+  let request = { ClientIdeMessage.Lsp_autocomplete.
+    filename;
+    line = pos.Ide_api_types.line;
+    column = pos.Ide_api_types.column;
+    delimit_on_namespaces = true;
+    is_manually_invoked;
+  } in
+  let%lwt result = ClientIdeService.completion ide_service request in
+  match result with
+  | Ok infos ->
+    let%lwt response = make_ide_completion_response infos filename in
+    Lwt.return response
+  | Error error_message ->
+    failwith (Printf.sprintf "Local completion failed: %s" error_message)
+
 let completion_kind_to_si_kind
     (completion_kind: Completion.completionItemKind option): SearchUtils.si_kind =
   let open Lsp in
@@ -2527,6 +2556,16 @@ let handle_event
     let%lwt () = cancel_if_stale client c short_timeout in
     let%lwt result = parse_completion c.params
       |> do_completion menv.conn ref_unblocked_time
+    in
+    result |> print_completion |> Jsonrpc.respond to_stdout c;
+    Lwt.return_unit
+
+  | _, Client_message c
+    when env.use_serverless_ide
+      && c.method_ = "textDocument/completion" ->
+    let%lwt () = cancel_if_stale client c short_timeout in
+    let%lwt result = parse_completion c.params
+      |> do_completion_local ide_service
     in
     result |> print_completion |> Jsonrpc.respond to_stdout c;
     Lwt.return_unit

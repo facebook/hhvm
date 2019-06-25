@@ -7,3 +7,5 @@ let destroy () = Lwt.return_unit
 let notify_file_changed () _ = ()
 let hover () _ =
   Lwt.return_error "Serverless IDE not available in open-source build"
+let completion () _ =
+  Lwt.return_error "Serverless IDE not available in open-source build"

@@ -94,6 +94,7 @@ let tests = [
   "modify_file" , run Test_modify_file.test;
   "new_file" , run Test_new_file.test;
   "rx_if_implements" , run Test_rx_if_implements.test;
+  "server_config_overrides", run Test_serverConfig_overrides.test;
   "server_hover" , run Test_server_hover.test;
   "unbound_name" , run Test_unbound_name.test;
 ]

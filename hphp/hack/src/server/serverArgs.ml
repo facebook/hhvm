@@ -463,7 +463,10 @@ let allow_non_opt_build options = options.allow_non_opt_build
 
 let set_gen_saved_ignore_type_errors options ignore_type_errors = { options with
   gen_saved_ignore_type_errors = ignore_type_errors}
-let set_no_load options is_no_load = {options with no_load = is_no_load}
+
+let set_no_load options is_no_load = { options with no_load = is_no_load }
+
+let set_config options config = { options with config = config }
 
 let set_saved_state_target options target =
   match target with

@@ -232,6 +232,11 @@ let load config_filename options =
     ~silent:true
     (Relative_path.to_absolute config_filename)
   in
+  let config = Config_file.apply_overrides
+    ~silent:true
+    ~config
+    ~overrides:config_overrides
+  in
   process_untrusted_mode config;
   let local_config = ServerLocalConfig.load ~silent:false config_overrides in
   let local_config =

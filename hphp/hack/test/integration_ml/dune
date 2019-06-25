@@ -43,6 +43,7 @@
     test_new_file
     test_rx_if_implements
     test_server_hover
+    test_serverConfig_overrides
     test_unbound_name)
   (libraries
     integration_test_base
@@ -60,6 +61,11 @@
 (rule
   (targets test_all.bc)
   (action (copy runner.bc test_all.bc)))
+
+(alias
+  (name server_config_overrides)
+  (deps test_all.exe)
+  (action (run ./test_all.exe server_config_overrides)))
 
 (alias
   (name coverage_counts)

@@ -88,6 +88,7 @@ module type S = sig
   val set_gen_saved_ignore_type_errors: options -> bool -> options
   val set_saved_state_target: options -> ServerMonitorUtils.target_saved_state option -> options
   val set_no_load: options -> bool -> options
+  val set_config: options -> (string * string) list -> options
 
   (****************************************************************************)
   (* Misc *)

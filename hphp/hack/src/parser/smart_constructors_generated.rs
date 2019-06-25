@@ -57,7 +57,7 @@ pub trait SmartConstructors<'a, State> {
     fn make_where_constraint(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R);
     fn make_methodish_declaration(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State, Self::R);
     fn make_methodish_trait_resolution(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> (State, Self::R);
-    fn make_classish_declaration(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R, arg8 : Self::R, arg9 : Self::R) -> (State, Self::R);
+    fn make_classish_declaration(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R, arg8 : Self::R, arg9 : Self::R, arg10 : Self::R) -> (State, Self::R);
     fn make_classish_body(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R);
     fn make_trait_use_precedence_item(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R);
     fn make_trait_use_alias_item(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State, Self::R);

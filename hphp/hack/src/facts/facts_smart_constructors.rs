@@ -62,6 +62,7 @@ pub struct ClassDeclChildren {
     pub name: Node,
     pub extends: Node,
     pub implements: Node,
+    pub constrs: Node,
     pub body: Node,
 }
 
@@ -428,6 +429,7 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
         extends: Self::R,
         _implements_keyword: Self::R,
         implements: Self::R,
+        constrs: Self::R,
         body: Self::R,
     ) -> (HasScriptContent<'a>, Self::R) {
         (
@@ -440,6 +442,7 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
                     name,
                     extends,
                     implements,
+                    constrs,
                     body,
                 })),
             },

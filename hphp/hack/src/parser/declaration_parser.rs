@@ -561,6 +561,7 @@ where
         let generic_type_parameter_list = self.parse_generic_type_parameter_list_opt();
         let (classish_extends, classish_extends_list) = self.parse_extends_opt();
         let (classish_implements, classish_implements_list) = self.parse_classish_implements_opt();
+        let classish_where_clause = self.parse_classish_where_clause_opt();
         let body = self.parse_classish_body();
         S!(
             make_classish_declaration,
@@ -574,8 +575,17 @@ where
             classish_extends_list,
             classish_implements,
             classish_implements_list,
+            classish_where_clause,
             body,
         )
+    }
+
+    fn parse_classish_where_clause_opt(&mut self) -> S::R {
+        if self.peek_token_kind() == TokenKind::Where {
+            self.parse_where_clause()
+        } else {
+            S!(make_missing, self, self.pos())
+        }
     }
 
     fn parse_classish_implements_opt(&mut self) -> (S::R, S::R) {

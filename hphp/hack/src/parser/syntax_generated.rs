@@ -326,7 +326,7 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_classish_declaration(classish_attribute: Self, classish_modifiers: Self, classish_keyword: Self, classish_name: Self, classish_type_parameters: Self, classish_extends_keyword: Self, classish_extends_list: Self, classish_implements_keyword: Self, classish_implements_list: Self, classish_body: Self) -> Self {
+    fn make_classish_declaration(classish_attribute: Self, classish_modifiers: Self, classish_keyword: Self, classish_name: Self, classish_type_parameters: Self, classish_extends_keyword: Self, classish_extends_list: Self, classish_implements_keyword: Self, classish_implements_list: Self, classish_where_clause: Self, classish_body: Self) -> Self {
         let syntax = SyntaxVariant::ClassishDeclaration(Box::new(ClassishDeclarationChildren {
             classish_attribute,
             classish_modifiers,
@@ -337,6 +337,7 @@ where
             classish_extends_list,
             classish_implements_keyword,
             classish_implements_list,
+            classish_where_clause,
             classish_body,
         }));
         let value = V::from_syntax(&syntax);
@@ -2099,6 +2100,7 @@ where
                 let acc = f(&x.classish_extends_list, acc);
                 let acc = f(&x.classish_implements_keyword, acc);
                 let acc = f(&x.classish_implements_list, acc);
+                let acc = f(&x.classish_where_clause, acc);
                 let acc = f(&x.classish_body, acc);
                 acc
             },
@@ -3488,6 +3490,7 @@ pub struct ClassishDeclarationChildren<T, V> {
     pub classish_extends_list: Syntax<T, V>,
     pub classish_implements_keyword: Syntax<T, V>,
     pub classish_implements_list: Syntax<T, V>,
+    pub classish_where_clause: Syntax<T, V>,
     pub classish_body: Syntax<T, V>,
 }
 

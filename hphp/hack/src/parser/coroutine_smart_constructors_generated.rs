@@ -166,8 +166,8 @@ where
         <Self as SyntaxSmartConstructors<Self::R, State<Self::R>>>::make_methodish_trait_resolution(s, arg0, arg1, arg2, arg3, arg4)
     }
 
-    fn make_classish_declaration(s: Bool<'a>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R, arg7: Self::R, arg8: Self::R, arg9: Self::R) -> (Bool<'a>, Self::R) {
-        <Self as SyntaxSmartConstructors<Self::R, State<Self::R>>>::make_classish_declaration(s, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
+    fn make_classish_declaration(s: Bool<'a>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R, arg7: Self::R, arg8: Self::R, arg9: Self::R, arg10: Self::R) -> (Bool<'a>, Self::R) {
+        <Self as SyntaxSmartConstructors<Self::R, State<Self::R>>>::make_classish_declaration(s, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)
     }
 
     fn make_classish_body(s: Bool<'a>, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> (Bool<'a>, Self::R) {

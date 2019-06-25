@@ -49,7 +49,7 @@ pub trait SyntaxType: SyntaxTypeBase
     fn make_where_constraint(where_constraint_left_type: Self, where_constraint_operator: Self, where_constraint_right_type: Self) -> Self;
     fn make_methodish_declaration(methodish_attribute: Self, methodish_function_decl_header: Self, methodish_function_body: Self, methodish_semicolon: Self) -> Self;
     fn make_methodish_trait_resolution(methodish_trait_attribute: Self, methodish_trait_function_decl_header: Self, methodish_trait_equal: Self, methodish_trait_name: Self, methodish_trait_semicolon: Self) -> Self;
-    fn make_classish_declaration(classish_attribute: Self, classish_modifiers: Self, classish_keyword: Self, classish_name: Self, classish_type_parameters: Self, classish_extends_keyword: Self, classish_extends_list: Self, classish_implements_keyword: Self, classish_implements_list: Self, classish_body: Self) -> Self;
+    fn make_classish_declaration(classish_attribute: Self, classish_modifiers: Self, classish_keyword: Self, classish_name: Self, classish_type_parameters: Self, classish_extends_keyword: Self, classish_extends_list: Self, classish_implements_keyword: Self, classish_implements_list: Self, classish_where_clause: Self, classish_body: Self) -> Self;
     fn make_classish_body(classish_body_left_brace: Self, classish_body_elements: Self, classish_body_right_brace: Self) -> Self;
     fn make_trait_use_precedence_item(trait_use_precedence_item_name: Self, trait_use_precedence_item_keyword: Self, trait_use_precedence_item_removed_names: Self) -> Self;
     fn make_trait_use_alias_item(trait_use_alias_item_aliasing_name: Self, trait_use_alias_item_keyword: Self, trait_use_alias_item_modifiers: Self, trait_use_alias_item_aliased_name: Self) -> Self;

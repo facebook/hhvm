@@ -1774,6 +1774,14 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
   > closureMap;
 
   for (auto& c : unit.classes) {
+    auto const attrsToRemove =
+      AttrNoOverride |
+      AttrNoOverrideMagicGet |
+      AttrNoOverrideMagicSet |
+      AttrNoOverrideMagicIsset |
+      AttrNoOverrideMagicUnset;
+    attribute_setter(c->attrs, false, attrsToRemove);
+
     if (c->attrs & AttrEnum) {
       index.enums.insert({c->name, c.get()});
     }
@@ -2946,14 +2954,13 @@ void find_mocked_classes(IndexData& index) {
 
 void mark_no_override_classes(IndexData& index) {
   for (auto& cinfo : index.allClassInfos) {
-    auto const set = [&] {
-      if (!(cinfo->cls->attrs & AttrUnique) ||
-          cinfo->cls->attrs & AttrInterface) {
-        return false;
-      }
-      return cinfo->subclassList.size() == 1;
-    }();
-    attribute_setter(cinfo->cls->attrs, set, AttrNoOverride);
+    // We cleared all the NoOverride flags while building the
+    // index. Set them as necessary.
+    if (!(cinfo->cls->attrs & AttrUnique)) continue;
+    if (!(cinfo->cls->attrs & AttrInterface) &&
+        cinfo->subclassList.size() == 1) {
+      attribute_setter(cinfo->cls->attrs, true, AttrNoOverride);
+    }
 
     for (auto& kv : magicMethodMap) {
       if (kv.second.attrBit == AttrNone) continue;

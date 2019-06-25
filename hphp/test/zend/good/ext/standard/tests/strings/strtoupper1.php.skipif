@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 if( substr(PHP_OS, 0, 3) == 'WIN') {
   if (!setlocale(LC_ALL, 'C')) {
     die('skip need "C" locale (this windows is broken)');

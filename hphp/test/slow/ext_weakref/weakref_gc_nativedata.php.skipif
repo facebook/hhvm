@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 if (!gc_enabled()) echo "skip\n";
 // We've seen that with Interp/Eager, some of the WeakRef'd objects end up as
 // stale pointers on the C++ stack, and get conservatively scanned. As such,

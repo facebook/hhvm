@@ -1,4 +1,4 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 if (0 == memory_get_allocation()) exit("skip: jemalloc stats are not being tracked.");
 }

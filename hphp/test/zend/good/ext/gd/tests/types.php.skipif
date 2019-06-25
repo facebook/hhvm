@@ -1,4 +1,4 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 if (!function_exists('imagetypes')) die("skip gd extension not available\n");
 }

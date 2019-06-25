@@ -11,7 +11,55 @@ use crate::syntax_error::{self as Errors, Error, SyntaxError};
 use crate::token_kind::TokenKind;
 use crate::trivia_kind::TriviaKind;
 
-use std::marker::PhantomData;
+use std::cell::RefCell;
+use std::ops::DerefMut;
+use std::rc::Rc;
+
+#[derive(Debug)]
+struct LexerPreSnapshot {
+    start: usize,
+    offset: usize,
+    in_type: bool,
+}
+
+#[derive(Debug)]
+struct LexerPostSnapshot {
+    start: usize,
+    offset: usize,
+    in_type: bool,
+    errors: Vec<SyntaxError>,
+}
+
+impl<'a, Token: LexableToken> PartialEq<Lexer<'a, Token>> for LexerPreSnapshot {
+    fn eq(&self, other: &Lexer<Token>) -> bool {
+        self.start == other.start && self.offset == other.offset && self.in_type == other.in_type
+    }
+}
+
+/*
+Lexer Caching
+
+One token look ahead in parser is implemented by `parser.peek_token()` ... `parser.next_token()`.
+Re-scanning in next_token can be avoided by caching the result of `peek_token`, consecutive
+`peek_token`s can also get improved.
+
+`Lexer.peek_next_token()` checks cache first if cache misses it will clone of the current lexer and
+call next_token on cloned lexer. To cache the result, it takes a snapshot of lexer state before and
+after calling next_token, and store them in current lexer.
+
+Clone trait of Lexer is derived automatically, therefore `cache: Rc<...>` is also cloned. `Rc` ensures
+cloned lexer and original lexer share the same cache, this is intended! Other than one token look
+ahead still clones parser, therefore lexer get cloned, sharing cache allows cloned lexer uses
+cache from original lexer and vise versa. It is measured that 2% faster than not sharing cache.
+
+NOTE: There is an invariant assumed by this caching mechanism. `errors` in `Lexer` can only add new errors
+and must not remove any error when scanning forward! `Lexer.peek_next_token()` clones a new `Lexer` and
+reset `errors` to empty, look ahead may accumulate new errors and these errors will be appended to the original
+`Lexer`. The reason we need this invariant is that between `peek_next_token` and `next_token` we can not
+prove no new error added. Actually it is observed that new errors are added between these two calls.
+*/
+#[derive(Debug)]
+struct LexerCache<Token>(LexerPreSnapshot, Token, LexerPostSnapshot);
 
 #[derive(Debug, Clone)]
 pub struct Lexer<'a, Token: LexableToken> {
@@ -21,7 +69,8 @@ pub struct Lexer<'a, Token: LexableToken> {
     errors: Vec<SyntaxError>,
     is_experimental_mode: bool,
     in_type: bool,
-    _phantom: PhantomData<Token>,
+
+    cache: Rc<RefCell<Option<LexerCache<Token>>>>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -38,11 +87,24 @@ pub enum KwSet {
 }
 
 impl<'a, Token: LexableToken> Lexer<'a, Token> {
-    pub fn make_at(
-        source: &'a SourceText<'a>,
-        is_experimental_mode: bool,
-        offset: usize,
-    ) -> Self {
+    fn to_lexer_pre_snapshot(&self) -> LexerPreSnapshot {
+        LexerPreSnapshot {
+            start: self.start,
+            offset: self.offset,
+            in_type: self.in_type,
+        }
+    }
+
+    fn into_lexer_post_snapshot(self) -> LexerPostSnapshot {
+        LexerPostSnapshot {
+            start: self.start,
+            offset: self.offset,
+            in_type: self.in_type,
+            errors: self.errors,
+        }
+    }
+
+    pub fn make_at(source: &'a SourceText<'a>, is_experimental_mode: bool, offset: usize) -> Self {
         Self {
             source,
             start: offset,
@@ -50,19 +112,12 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
             errors: vec![],
             is_experimental_mode,
             in_type: false,
-            _phantom: PhantomData,
+            cache: Rc::new(RefCell::new(None)),
         }
     }
 
-    pub fn make(
-        source: &'a SourceText<'a>,
-        is_experimental_mode: bool,
-    ) -> Self {
-        Self::make_at(
-            source,
-            is_experimental_mode,
-            0,
-        )
+    pub fn make(source: &'a SourceText<'a>, is_experimental_mode: bool) -> Self {
+        Self::make_at(source, is_experimental_mode, 0)
     }
 
     fn continue_from(&mut self, l: Lexer<Token>) {
@@ -1897,15 +1952,15 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         let res = match lower.as_ref() {
             "__halt_compiler" | "abstract" | "and" | "array" | "as" | "bool" | "boolean"
             | "break" | "callable" | "case" | "catch" | "class" | "clone" | "const"
-            | "continue" | "default" | "die" | "do" | "echo" | "else" | "elseif"
-            | "empty" | "endfor" | "endforeach" | "endif" | "endswitch"
-            | "endwhile" | "eval" | "exit" | "extends" | "false" | "final" | "finally" | "for"
-            | "foreach" | "function" | "global" | "goto" | "if" | "implements" | "include"
-            | "include_once" | "inout" | "instanceof" | "insteadof" | "int" | "integer" | "interface"
-            | "isset" | "list" | "namespace" | "new" | "null" | "or" | "parent" | "print"
-            | "private" | "protected" | "public" | "require" | "require_once" | "return"
-            | "self" | "static" | "string" | "switch" | "throw" | "trait" | "try" | "true"
-            | "unset" | "use" | "using" | "var" | "void" | "while" | "xor" | "yield" => Some(lower),
+            | "continue" | "default" | "die" | "do" | "echo" | "else" | "elseif" | "empty"
+            | "endfor" | "endforeach" | "endif" | "endswitch" | "endwhile" | "eval" | "exit"
+            | "extends" | "false" | "final" | "finally" | "for" | "foreach" | "function"
+            | "global" | "goto" | "if" | "implements" | "include" | "include_once" | "inout"
+            | "instanceof" | "insteadof" | "int" | "integer" | "interface" | "isset" | "list"
+            | "namespace" | "new" | "null" | "or" | "parent" | "print" | "private"
+            | "protected" | "public" | "require" | "require_once" | "return" | "self"
+            | "static" | "string" | "switch" | "throw" | "trait" | "try" | "true" | "unset"
+            | "use" | "using" | "var" | "void" | "while" | "xor" | "yield" => Some(lower),
             _ => None,
         };
         res.map(|x| x.to_owned())
@@ -2019,14 +2074,51 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         self.scan_next_token(scanner, KwSet::NonReservedKeywords)
     }
 
-    // Entrypoints
-
-    pub fn next_token(&mut self) -> Token {
+    fn next_token_impl(&mut self) -> Token {
         if self.in_type {
             self.scan_next_token_as_keyword(&Self::scan_token_inside_type)
         } else {
             self.scan_next_token_as_keyword(&Self::scan_token_outside_type)
         }
+    }
+
+    // Entrypoints
+    pub fn peek_next_token(&self) -> Token {
+        {
+            let cache = self.cache.borrow();
+            if let Some(cache) = cache.as_ref() {
+                if cache.0 == *self {
+                    return cache.1.clone();
+                }
+            }
+        }
+
+        let mut lexer = self.clone();
+        lexer.errors = vec![];
+        let before = lexer.to_lexer_pre_snapshot();
+        let token = lexer.next_token_impl();
+        let after = lexer.into_lexer_post_snapshot();
+        self.cache
+            .replace(Some(LexerCache(before, token.clone(), after)));
+        token
+    }
+
+    pub fn next_token(&mut self) -> Token {
+        {
+            let mut cache = self.cache.borrow_mut();
+            if let Some(ref mut cache) = cache.deref_mut() {
+                if cache.0 == *self {
+                    self.start = (cache.2).start;
+                    self.offset = (cache.2).offset;
+                    self.in_type = (cache.2).in_type;
+                    if (cache.2).errors.len() != 0 {
+                        self.errors.append(&mut (cache.2).errors.clone());
+                    }
+                    return cache.1.clone();
+                }
+            }
+        }
+        self.next_token_impl()
     }
 
     pub fn next_token_no_trailing(&mut self) -> Token {

@@ -263,7 +263,9 @@ where
         let mut i = 0;
         loop {
             if i == lookahead {
-                return lexer.next_token();
+                // call peek_next_token instead of next_token for the last one to leverage
+                // lexer caching
+                return lexer.peek_next_token();
             }
             let _ = lexer.next_token();
             i = i + 1
@@ -271,22 +273,7 @@ where
     }
 
     fn peek_token(&self) -> S::Token {
-        // PERF ALERT!!! TODO (kasper, leoo):
-        // Almost entire parser is structured in a way equivalent to:
-        //   if self.peek_token() == X  {
-        //     ...
-        //     self.next_token()
-        //     ...
-        //   }
-        // Since peek_token is implemented in terms of next_token, we duplicate a lot of the work,
-        // on a very hot path. OCaml parser has an elegant solution for that (see next_token_cache
-        // in full_fidelity_lexer.ml), but it heavily relies on immutable lexers, OCaml memory
-        // representation and lack of multithreading. It does make the lexer ~2 faster though, so we
-        // need to do something here too. Good news is that while OCaml solution is very general,
-        // caching any consecutive calls to next_token on same lexer, in practice majority of cache
-        // hits are from values populated here, in peek_token function, so it might be enough to
-        // specialize it not to throw away the work it does (when cloned lexer is dropped).
-        self.peek_token_with_lookahead(0)
+        self.lexer().peek_next_token()
     }
 
     fn peek_token_kind(&self) -> TokenKind {

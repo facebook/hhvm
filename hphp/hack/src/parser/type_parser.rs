@@ -248,10 +248,8 @@ where
     //   type-constant-type-name  ::  name
     fn parse_remaining_type_constant(&mut self, left: S::R) -> S::R {
         let separator = self.fetch_token();
-        let mut parser1 = self.clone();
-        let right = parser1.next_token_as_name();
+        let right = self.next_token_as_name();
         if right.kind() == TokenKind::Name {
-            self.continue_from(parser1);
             let right = S!(make_token, self, right);
             let syntax = S!(make_type_constant, self, left, separator, right);
             let token = self.peek_token();
@@ -261,7 +259,6 @@ where
                 syntax
             }
         } else {
-            self.continue_from(parser1);
             // ERROR RECOVERY: Assume that the thing following the ::
             // that is not a name belongs to the next thing to be
             // parsed; treat the name as missing.

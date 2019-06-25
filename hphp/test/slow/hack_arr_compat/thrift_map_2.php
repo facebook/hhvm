@@ -98,13 +98,17 @@ function test() {
   var_dump($v1);
   thrift_protocol_write_binary($p, 'foomethod', 2, $v1, 20, true);
   var_dump(md5($p->getTransport()->buff));
-  var_dump(thrift_protocol_read_binary($p, 'Mappish', true));
+  $mappish_obj = thrift_protocol_read_binary($p, 'Mappish', true);
+  var_dump($mappish_obj);
+  var_dump(is_darray($mappish_obj->extraData));
 
   $p = new DummyProtocol();
   var_dump($v1);
   thrift_protocol_write_compact($p, 'foomethod', 2, $v1, 20, true);
   var_dump(md5($p->getTransport()->buff));
-  var_dump(thrift_protocol_read_compact($p, 'Mappish'));
+  $mappish_obj = thrift_protocol_read_compact($p, 'Mappish');
+  var_dump($mappish_obj);
+  var_dump(is_darray($mappish_obj->extraData));
 
   echo "-------\n\n";
 
@@ -114,13 +118,17 @@ function test() {
   var_dump($v1);
   thrift_protocol_write_binary($p, 'foomethod', 2, $v1, 20, true);
   var_dump(md5($p->getTransport()->buff));
-  var_dump(thrift_protocol_read_binary($p, 'Settish', true));
+  $settish_obj = thrift_protocol_read_binary($p, 'Settish', true);
+  var_dump($settish_obj);
+  var_dump(is_darray($settish_obj->extraData));
 
   $p = new DummyProtocol();
   var_dump($v1);
   thrift_protocol_write_compact($p, 'foomethod', 2, $v1, 20, true);
   var_dump(md5($p->getTransport()->buff));
-  var_dump(thrift_protocol_read_compact($p, 'Settish'));
+  $settish_obj = thrift_protocol_read_compact($p, 'Settish');
+  var_dump($settish_obj);
+  var_dump(is_darray($settish_obj->extraData));
 }
 
 <<__EntryPoint>>

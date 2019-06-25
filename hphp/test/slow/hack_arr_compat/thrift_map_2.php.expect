@@ -13,6 +13,7 @@ object(Mappish) (1) {
     string(1) "2"
   }
 }
+bool(true)
 object(Mappish) (1) {
   ["extraData"]=>
   object(HH\Map) (1) {
@@ -28,6 +29,7 @@ object(Mappish) (1) {
     string(1) "2"
   }
 }
+bool(true)
 -------
 
 object(Settish) (1) {
@@ -45,6 +47,7 @@ object(Settish) (1) {
     bool(true)
   }
 }
+bool(true)
 object(Settish) (1) {
   ["extraData"]=>
   dict(1) {
@@ -60,3 +63,4 @@ object(Settish) (1) {
     bool(true)
   }
 }
+bool(true)

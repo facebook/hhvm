@@ -33,7 +33,7 @@ enum TError {
 }
 
 inline void set_with_intish_key_cast(
-  ArrayInit& arr,
+  DArrayInit& arr,
   const Variant& key,
   const Variant& value
 ) {

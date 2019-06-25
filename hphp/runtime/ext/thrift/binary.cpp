@@ -253,7 +253,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
         }
         return Variant(std::move(obj));
       } else {
-        ArrayInit arr(size, ArrayInit::Mixed{});
+        DArrayInit arr(size);
         for (uint32_t i = 0; i < size; i++) {
           auto key =  binary_deserialize(types[0], transport, keyspec);
           auto val = binary_deserialize(types[1], transport, valspec);
@@ -290,11 +290,11 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
         } while (++i < size);
         return Variant(std::move(vec));
       } else {
-        PackedArrayInit pai(size);
+        VArrayInit vai(size);
         for (auto s = uint32_t{0}; s < size; ++s) {
-          pai.append(binary_deserialize(type, transport, elemspec));
+          vai.append(binary_deserialize(type, transport, elemspec));
         }
-        return pai.toVariant();
+        return vai.toVariant();
       }
     }
     case T_SET: { // array of key -> TRUE
@@ -329,7 +329,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
 
         return Variant(std::move(set_ret));
       } else {
-        ArrayInit init(size, ArrayInit::Mixed{});
+        DArrayInit init(size);
         for (uint32_t s = 0; s < size; ++s) {
           Variant key = binary_deserialize(type, transport, elemspec);
           set_with_intish_key_cast(init, key, true);

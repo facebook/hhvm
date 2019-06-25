@@ -104,4 +104,8 @@ let () =
   else
   let test_name = Sys.argv.(1) in
   let tests = List.filter (fun (name, _test) -> test_name = name) tests in
-  Unit_test.run_all tests
+
+  match tests with
+  | [] -> failwith (Printf.sprintf "Test named '%s' was not found!" test_name)
+  | [test] -> Unit_test.run_all [test]
+  | _::_::_ -> failwith (Printf.sprintf "More than one test named '%s' was found!" test_name)

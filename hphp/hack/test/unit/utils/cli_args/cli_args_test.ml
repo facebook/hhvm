@@ -1,14 +1,13 @@
 (**
- * Copyright (c) 2015, Facebook, Inc.
- * All rights reserved.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
  *
- *
-*)
+ *)
 
 open Asserter
+open Cli_args
 
 let spec_input = {|
 {
@@ -52,83 +51,83 @@ let compare_optional_paths
   | _, _ -> assert false
 
 let compare_files_to_check_spec
-    (expected: ServerArgs.files_to_check_spec)
-    (actual: ServerArgs.files_to_check_spec): unit =
+    (expected: files_to_check_spec)
+    (actual: files_to_check_spec): unit =
   match expected, actual with
-  | ServerArgs.Range expected, ServerArgs.Range actual ->
+  | Range expected, Range actual ->
     compare_optional_paths
-      expected.ServerArgs.from_prefix_incl
-      actual.ServerArgs.from_prefix_incl;
+      expected.from_prefix_incl
+      actual.from_prefix_incl;
 
     compare_optional_paths
-      expected.ServerArgs.to_prefix_excl
-      actual.ServerArgs.to_prefix_excl
-  | ServerArgs.Prefix expected, ServerArgs.Prefix actual ->
+      expected.to_prefix_excl
+      actual.to_prefix_excl
+  | Prefix expected, Prefix actual ->
     compare_paths expected actual
   | _, _ -> assert false
 
 let verify_parsed_spec parsed_spec =
   Int_asserter.assert_equals
     7
-    (List.length parsed_spec.ServerArgs.files_to_check)
+    (List.length parsed_spec.files_to_check)
     "There should be 7 file specs";
 
   let (from_path: Relative_path.t option) = Some (Relative_path.from_root "/from/path/prefix1") in
   let (to_path: Relative_path.t option) = Some (Relative_path.from_root "/to/path/prefix1") in
-  let (range1: ServerArgs.files_to_check_range) = {
-    ServerArgs.from_prefix_incl = from_path;
-    ServerArgs.to_prefix_excl = to_path;
+  let (range1: files_to_check_range) = {
+    from_prefix_incl = from_path;
+    to_prefix_excl = to_path;
   } in
 
   let (from_path: Relative_path.t option) = Some (Relative_path.from_root "/from/path/prefix2") in
   let (to_path: Relative_path.t option) = Some (Relative_path.from_root "/to/path/prefix2") in
-  let (range2: ServerArgs.files_to_check_range) = {
-    ServerArgs.from_prefix_incl = from_path;
-    ServerArgs.to_prefix_excl = to_path;
+  let (range2: files_to_check_range) = {
+    from_prefix_incl = from_path;
+    to_prefix_excl = to_path;
   } in
 
-  let (range3: ServerArgs.files_to_check_range) = {
-    ServerArgs.from_prefix_incl = None;
-    ServerArgs.to_prefix_excl = None;
+  let (range3: files_to_check_range) = {
+    from_prefix_incl = None;
+    to_prefix_excl = None;
   } in
 
-  let (range4: ServerArgs.files_to_check_range) = {
-    ServerArgs.from_prefix_incl = Some (Relative_path.from_root "/from/path/only");
-    ServerArgs.to_prefix_excl = None;
+  let (range4: files_to_check_range) = {
+    from_prefix_incl = Some (Relative_path.from_root "/from/path/only");
+    to_prefix_excl = None;
   } in
 
-  let (range5: ServerArgs.files_to_check_range) = {
-    ServerArgs.from_prefix_incl = None;
-    ServerArgs.to_prefix_excl = Some (Relative_path.from_root "/to/path/only");
+  let (range5: files_to_check_range) = {
+    from_prefix_incl = None;
+    to_prefix_excl = Some (Relative_path.from_root "/to/path/only");
   } in
 
   let expected = [
-    ServerArgs.Prefix (Relative_path.from_root "/some/path/prefix1");
-    ServerArgs.Range range1;
-    ServerArgs.Range range2;
-    ServerArgs.Prefix (Relative_path.from_root "/some/path/prefix2");
-    ServerArgs.Range range3;
-    ServerArgs.Range range4;
-    ServerArgs.Range range5;
+    Prefix (Relative_path.from_root "/some/path/prefix1");
+    Range range1;
+    Range range2;
+    Prefix (Relative_path.from_root "/some/path/prefix2");
+    Range range3;
+    Range range4;
+    Range range5;
   ] in
 
   List.iter2
     compare_files_to_check_spec
     expected
-    parsed_spec.ServerArgs.files_to_check
+    parsed_spec.files_to_check
 
-let test_save_with_spec () : bool =
+let test_save_state_spec () : bool =
   let spec = Some spec_input in
-  let parsed_spec = ServerArgs.verify_save_with_spec spec in
+  let parsed_spec = get_save_state_spec spec in
 
   match parsed_spec with
-  | Some parsed_spec ->
+  | Ok (Some parsed_spec) ->
     verify_parsed_spec parsed_spec;
     true
-  | None -> false
+  | Ok None | Error _ -> false
 
 let tests = [
-  ("Test --save-with-spec", test_save_with_spec);
+  ("Test save state spec", test_save_state_spec);
 ]
 
 let () =

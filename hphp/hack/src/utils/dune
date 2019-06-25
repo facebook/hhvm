@@ -98,6 +98,19 @@
     (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)))
 
 (library
+  (name cli_args)
+  (wrapped false)
+  (modules
+    cli_args
+    cli_args_sig)
+  (libraries
+    collections
+    hh_json
+    relative_path
+    sys_utils
+    utils_core))
+
+(library
   (name pos)
   (wrapped false)
   (modules

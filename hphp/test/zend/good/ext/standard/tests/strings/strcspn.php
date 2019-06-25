@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $a = "22222222aaaa bbb1111 cccc";
 $b = "1234";
 var_dump($a);

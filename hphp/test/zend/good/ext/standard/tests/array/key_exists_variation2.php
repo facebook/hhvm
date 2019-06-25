@@ -3,7 +3,7 @@ class ObjectA
 {
   public $foo = 'bar';
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** test key_exists() by using mixed type of arrays ***\n";
 
 // there is not a index = 0 element

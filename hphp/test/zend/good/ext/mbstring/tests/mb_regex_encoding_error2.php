@@ -7,7 +7,7 @@
 /*
  * Pass mb_regex_encoding an unknown type of encoding
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_regex_encoding() : error conditions ***\n";
 
 var_dump(mb_regex_encoding('unknown'));

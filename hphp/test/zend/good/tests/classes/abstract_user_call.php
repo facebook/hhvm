@@ -12,7 +12,7 @@ class test extends test_base
         echo __METHOD__ . "()\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o = new test;
 
 $o->func();

@@ -3,7 +3,7 @@
 /* Prototype: string sha1  ( string $str  [, bool $raw_output  ] )
  * Description: Calculate the sha1 hash of a string
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sha1() : basic functionality ***\n";
 
 echo "\n-- Without raw argument --\n";

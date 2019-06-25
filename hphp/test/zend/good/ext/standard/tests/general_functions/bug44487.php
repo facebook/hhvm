@@ -8,7 +8,7 @@ class Foo
                 throw new Exception();
         }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 try {
         $bar = new Foo();
         call_user_method_array('test', &$bar, array()) ;

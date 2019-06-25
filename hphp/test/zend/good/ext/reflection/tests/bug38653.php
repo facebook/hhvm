@@ -8,7 +8,7 @@ class foo {
 
 class bar extends foo {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $foo = new ReflectionClass("foo");
 var_dump($foo->getConstant("cons"));
 var_dump($foo->getConstant("cons1"));

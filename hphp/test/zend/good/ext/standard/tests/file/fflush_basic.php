@@ -2,7 +2,7 @@
 /*  Prototype: bool fflush ( resource $handle );
     Description: Flushes the output to a file
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fflush(): writing to a file and reading the contents ***\n";
 $data = <<<EOD
 first line of string

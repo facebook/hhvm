@@ -12,7 +12,7 @@ class sample  {
   return "object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strncmp() function: by supplying all types for 'str1' and 'str2' ***\n";
 /* get an unset variable */
 $unset_var = 'string_val';

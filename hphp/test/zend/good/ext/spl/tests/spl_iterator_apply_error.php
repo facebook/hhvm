@@ -7,7 +7,7 @@ class MyArrayIterator extends ArrayIterator {
 }
 
 function test() {}
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $it = new MyArrayIterator(array(1, 21, 22));
 
 try {

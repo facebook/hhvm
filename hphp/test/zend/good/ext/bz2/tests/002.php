@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 @unlink("bz_open_002.txt");
 
 $fp = fopen("bz_open_002.txt", "w");

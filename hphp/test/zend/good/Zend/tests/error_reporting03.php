@@ -14,7 +14,7 @@ function foo1() {
     error_reporting(E_ALL|E_STRICT);
     echo $undef2;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 error_reporting(E_ALL);
 
 try {

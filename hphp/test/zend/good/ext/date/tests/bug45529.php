@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 date_default_timezone_set('Europe/Oslo');
 $tz1 = new DateTimeZone('UTC');
 $tz2 = date_create('UTC')->getTimeZone();

@@ -3,7 +3,7 @@
  Prototype: bool fflush ( resource $handle );
  Description: Flushes the output to a file
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing error conditions ***\n";
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 

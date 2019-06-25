@@ -7,7 +7,7 @@
 /*
  * Testing strtok() : with invalid escape sequences in token
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strtok() : with invalid escape sequences in token ***\n";
 
 // defining arrays for input strings and tokens

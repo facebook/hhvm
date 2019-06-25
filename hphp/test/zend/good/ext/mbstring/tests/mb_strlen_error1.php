@@ -7,7 +7,7 @@
 /*
  * Pass mb_strlen an incorrect number of arguments to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_strlen() : error conditions ***\n";
 
 // Zero arguments

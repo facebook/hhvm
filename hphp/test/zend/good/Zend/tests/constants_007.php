@@ -8,6 +8,6 @@ class a {
     const a = 'c';
     const A = 'd';
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(a, A, a::a, a::A);
 }

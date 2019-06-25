@@ -20,7 +20,7 @@ class ABC {
     A::p insteadof B, C;
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $abc = new ABC();
 $abc->p();
 }

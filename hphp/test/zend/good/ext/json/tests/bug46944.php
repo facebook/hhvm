@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 for ($i = 1; $i <= 16; $i++) {
 	$first = 0xf0|($i >> 2);
 	$second = 0x8f|($i & 3) << 4;

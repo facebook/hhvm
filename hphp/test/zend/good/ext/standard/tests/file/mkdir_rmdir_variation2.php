@@ -2,7 +2,7 @@
 /*  Prototype: bool mkdir ( string $pathname [, int $mode [, bool $recursive [, resource $context]]] );
     Description: Makes directory
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $context = stream_context_create();
 
 $file_path = dirname(__FILE__);

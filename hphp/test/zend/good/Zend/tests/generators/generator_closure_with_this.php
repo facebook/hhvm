@@ -7,7 +7,7 @@ class Test {
         };
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $genFactory = (new Test)->getGenFactory();
 $gen = $genFactory();
 $gen->next();

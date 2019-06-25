@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "==Normal==\n";
 
 $arr = array(0=>0, 1=>1, 2=>2);

@@ -4,7 +4,7 @@
  *              and the elements of the second as the corresponding values 
  * Source code: ext/standard/array.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_combine() : error conditions ***\n";
 
 // Zero arguments

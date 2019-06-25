@@ -32,7 +32,7 @@ function unicode_info($cp) {
   echo "  charAge(): ", implode('.', IntlChar::charAge($cp)), "\n";
   echo "\n";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 printf("Codepoint range: %04x-%04x\n", IntlChar::CODEPOINT_MIN, IntlChar::CODEPOINT_MAX);
 $codepoints = array('P', 0xDF, 0x2603);
 foreach($codepoints as $cp) {

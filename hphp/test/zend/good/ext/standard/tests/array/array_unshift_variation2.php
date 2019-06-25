@@ -15,7 +15,7 @@ class classA
     return "Class A object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_unshift() : all possible values for \$var argument ***\n";
 
 // array to be passed to $array argument

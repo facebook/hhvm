@@ -4,7 +4,7 @@
  * Description: Generate a hash value (message digest)
  * Source code: ext/hash/hash.c
  * Alias to functions: */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing hash() : error conditions ***\n";
 
 echo "\n-- Testing hash() function with less than expected no. of arguments --\n";

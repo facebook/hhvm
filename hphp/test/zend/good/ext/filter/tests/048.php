@@ -16,7 +16,7 @@ function hex_inc($s) {
     return '1'.$s;
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $s = sprintf("%x", PHP_INT_MAX);
 var_dump(is_long(filter_var('0x'.$s, FILTER_VALIDATE_INT, array("flags"=>FILTER_FLAG_ALLOW_HEX))));
 

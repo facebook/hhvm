@@ -56,7 +56,7 @@ class StaticClass
     echo "This is a static method";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_unshift() : Passing object to \$var argument ***\n";
 
 // array to be passed to $array argument

@@ -16,7 +16,7 @@ class classA
     return "Class A object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing rewinddir() : usage variations ***\n";
 
 //get an unset variable

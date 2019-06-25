@@ -3,7 +3,7 @@
  * Description: Returns the decimal equivalent of the hexadecimal number represented by the hex_string  argument.
  * Source code: ext/standard/math.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing hexdec() : usage variations ***\n";
 //get an unset variable
 $unset_var = 10;

@@ -8,6 +8,6 @@
     }
     $y = ['hello'];
     A::$y[0]();
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "===DONE===\n";
 }

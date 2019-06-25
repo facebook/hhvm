@@ -3,7 +3,7 @@
    Description: Dumps a string representation of an internal zend value 
                 to output.
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing error conditions ***\n";
 
 /* passing zero argument */

@@ -18,7 +18,7 @@ class B
         $this->A = $A;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 for ($i = 0; $i < 2; $i++)
 {
     $Aobj = new A;

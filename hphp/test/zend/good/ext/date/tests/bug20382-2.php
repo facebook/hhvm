@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $tests = array(
 	array("Europe/Andorra",     17, 17, 17, 1, 24764, 1970),
 	array("Asia/Dubai",         17, 17, 17, 1, 1, 1970),

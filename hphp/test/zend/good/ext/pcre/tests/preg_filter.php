@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $subject = array('1', 'a', '2', 'b', '3', 'A', 'B', '4');
 $pattern = array('/\d/', '/[a-z]/', '/[1a]/');
 $replace = array('A:$0', 'B:$0', 'C:$0');

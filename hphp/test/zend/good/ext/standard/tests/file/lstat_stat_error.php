@@ -5,7 +5,7 @@
    Prototype: array stat ( string $filename );
    Description: Gives information about a file
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing lstat() for error conditions ***\n";
 $file_path = dirname(__FILE__);
 try { var_dump( lstat() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // args < expected

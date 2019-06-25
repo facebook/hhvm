@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $imp = new DOMImplementation();
 $doctype = $imp->createDocumentType("html",
     "-//W3C//DTD XHTML 1.0 Strict//EN",

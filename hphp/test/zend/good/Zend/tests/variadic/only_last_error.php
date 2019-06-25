@@ -2,4 +2,4 @@
 
 function test($foo, ...$bar, $baz) {}
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

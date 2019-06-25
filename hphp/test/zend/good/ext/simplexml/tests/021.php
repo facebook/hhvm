@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $ok = 1;
 $doc = simplexml_load_string('<root><exists>foo</exists></root>');
 if(!isset($doc->exists)) {

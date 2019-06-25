@@ -16,7 +16,7 @@ function test($name)
     var_dump($o->key());
     var_dump($o->eof());
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 test('fileobject_001a.txt');
 test('fileobject_001b.txt');
 

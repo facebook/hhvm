@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $dom = new DomDocument;
 $frag = $dom->createDocumentFragment();
 $frag->appendChild(new DOMElement('root'));

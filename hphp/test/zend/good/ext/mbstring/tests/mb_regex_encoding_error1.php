@@ -7,7 +7,7 @@
 /*
  * Test mb_regex_encoding with one more than expected number of arguments
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_regex_encoding() : error conditions ***\n";
 
 

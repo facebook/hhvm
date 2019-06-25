@@ -9,7 +9,7 @@ class Hello {
       echo "Hello\n";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing get_resource_type() : variation test ***\n";
 
 $res = fopen(__FILE__, "r");

@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(array_slice(range(1, 3), 0, NULL, true));
 var_dump(array_slice(range(1, 3), 0, 0, true));
 var_dump(array_slice(range(1, 3), 0, NULL));

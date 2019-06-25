@@ -6,7 +6,7 @@
 */
 
 /* Test array_search() with different possible haystack values */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_search() with different haystack values ***\n";
 
 $misc_array = array (

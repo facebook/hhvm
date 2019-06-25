@@ -13,7 +13,7 @@ class ClassB extends ClassA
 class ClassC extends ClassB
 {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "===INIT===\n";
 ClassA::$prop = 'A';
 ClassB::$prop = 'B';

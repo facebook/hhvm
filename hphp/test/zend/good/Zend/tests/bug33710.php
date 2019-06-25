@@ -18,7 +18,7 @@ class Foo implements ArrayAccess
         $this['blah'];
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $bar = new Foo();
 $bar->succeed();
 $bar->fail();

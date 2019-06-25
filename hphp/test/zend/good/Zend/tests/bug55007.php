@@ -9,7 +9,7 @@ function shutdown() {
   new MyErrorHandler();
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 register_shutdown_function('shutdown');
 
 new CompileErrorClass();

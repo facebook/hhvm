@@ -7,7 +7,7 @@
 /*
  * Pass iconv_strrpos() an encoding that doesn't exist
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing iconv_strrpos() : error conditions ***\n";
 
 $haystack = 'This is an English string. 0123456789.';

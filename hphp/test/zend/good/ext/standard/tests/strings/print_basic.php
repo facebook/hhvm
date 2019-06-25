@@ -5,7 +5,7 @@
  * Source code: n/a, print is a language construct not an extension function
  * Test based on php.net manual example.
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing print() : basic functionality ***\n";
 
 echo "\n-- Iteration 1 --\n";

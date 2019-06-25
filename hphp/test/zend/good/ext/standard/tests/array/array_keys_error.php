@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "\n*** Testing error conditions ***";
 var_dump(array_keys(100));
 var_dump(array_keys("string"));

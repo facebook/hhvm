@@ -17,7 +17,7 @@ function count_objects ($pix) {
   }
   return $objects;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $im = new Imagick ('magick:rose');
 $it1 = new ImagickPixelIterator ($im);
 

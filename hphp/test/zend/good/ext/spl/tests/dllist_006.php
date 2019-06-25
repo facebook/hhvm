@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $a = new SplDoublyLinkedList();
 $a->push(1);
 $a->push(2);

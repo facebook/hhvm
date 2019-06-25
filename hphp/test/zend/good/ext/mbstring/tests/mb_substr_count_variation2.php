@@ -15,7 +15,7 @@ class classA
     return "world";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_substr_count() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)

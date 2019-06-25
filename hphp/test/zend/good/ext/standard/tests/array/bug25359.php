@@ -14,6 +14,6 @@ function does_not_work()
 
     var_dump(ZendGoodExtStandardTestsArrayBug25359::$data);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 does_not_work();
 }

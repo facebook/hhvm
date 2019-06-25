@@ -8,7 +8,7 @@
 /*
  * Pass incorrect number of arguments to array_key_exists() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_key_exists() : error conditions ***\n";
 
 //Test array_key_exists with one more than the expected number of arguments

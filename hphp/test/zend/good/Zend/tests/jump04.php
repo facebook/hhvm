@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $s = "X";
 echo "1: ok\n";
 L1: if ($s != "X") {

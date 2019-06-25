@@ -6,7 +6,7 @@ class a
 class b extends a
 {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $ref1 = new ReflectionClass('a');
 $ref2 = new ReflectionClass('b');
 echo $ref1->getStartLine() . "\n";

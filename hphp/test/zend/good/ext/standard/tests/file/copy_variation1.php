@@ -7,7 +7,7 @@
 /* Test copy() function: In creation of destination file names containing numerics/strings 
      and checking the existence and size of destination files
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Test copy() function: destination file names containing numerics/strings ***\n";
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $src_file_name = $file_path."/copy_variation1.tmp";

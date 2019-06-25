@@ -50,7 +50,7 @@ class test {
         }
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $test = new test();
 $test->case1();
 $test->case2();

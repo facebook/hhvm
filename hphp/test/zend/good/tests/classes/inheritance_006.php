@@ -9,6 +9,6 @@ class B extends A {
 
 class C extends B {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(new C);
 }

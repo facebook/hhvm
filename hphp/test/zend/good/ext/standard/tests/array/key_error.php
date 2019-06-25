@@ -7,7 +7,7 @@
 /*
  * Pass incorrect number of arguments to key() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing key() : error conditions ***\n";
 
 // Zero arguments

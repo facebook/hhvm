@@ -7,7 +7,7 @@
 /*
  *test wordwrap() with break arguments as single spaces
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing wordwrap() : usage variations ***\n";
 
 // Initialize all required variables

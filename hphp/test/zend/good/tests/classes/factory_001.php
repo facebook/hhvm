@@ -20,7 +20,7 @@ function ShapeFactoryMethod($shape) {
             return new Square();
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 ShapeFactoryMethod("Circle")->draw();
 ShapeFactoryMethod("Square")->draw();
 }

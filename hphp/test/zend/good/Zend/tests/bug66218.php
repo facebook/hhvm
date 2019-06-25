@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $tab = get_extension_funcs("standard");
 $fcts = array("dl");
 foreach ($fcts as $fct) {

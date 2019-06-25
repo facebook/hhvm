@@ -9,7 +9,7 @@ class A {
 abstract final class Object654 {
   public static $a;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 Object654::$a = 1;
 $obj = new A();
 $obj->t();

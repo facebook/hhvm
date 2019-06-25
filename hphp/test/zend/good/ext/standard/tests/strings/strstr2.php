@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $email  = 'aexample.com';
 var_dump(strstr($email, '@'));
 var_dump(strstr($email, '@', true));

@@ -10,7 +10,7 @@
  * and test whether array_key_exists(() thinks they are equal and therefore
  * returns true when searching for them
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_key_exists() : usage variations ***\n";
 
 $unset = 10;

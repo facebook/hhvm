@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $array = array('foo', 'bar', 'baz');
 $iterator = new ArrayIterator($array);
 $regexIterator = new RegexIterator($iterator, "/f/", null, RegexIterator::USE_KEY);

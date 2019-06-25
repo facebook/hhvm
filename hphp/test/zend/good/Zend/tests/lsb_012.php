@@ -14,6 +14,6 @@ class Test2 extends Test1 {
         echo "ok";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 Test2::test();
 }

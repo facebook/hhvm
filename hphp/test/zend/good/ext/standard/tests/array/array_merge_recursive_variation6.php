@@ -8,7 +8,7 @@
  * Testing the functionality of array_merge_recursive() by passing 
  * array having duplicate keys.
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_merge_recursive() : array with duplicate keys for \$arr1 argument ***\n";
 
 /* initialize the array having duplicate keys */

@@ -3,7 +3,7 @@
 function gen() {
     yield [] => 1;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $gen = gen();
 $gen->next();
 var_dump($gen->key());

@@ -42,7 +42,7 @@ function runtest() {
         rmdir(ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir1.'/'.$extraDir);
         rmdir($extraDir);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $thisTestDir = $file_path.'.'.basename(__FILE__, ".php") . ".dir";
 mkdir($thisTestDir);

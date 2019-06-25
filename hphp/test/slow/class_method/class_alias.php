@@ -26,4 +26,4 @@ class ActualUserOfA1 implements UserOfA1 {
   public function someMethod(B1 $a) { }
 }
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

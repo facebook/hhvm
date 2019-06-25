@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $letexte="<br><br>";
 $ligne_horizontale = $puce = $debut_intertitre = $fin_intertitre = '';
 

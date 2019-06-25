@@ -4,7 +4,7 @@
  * Source code: ext/standard/filestat.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing file_exists() : error conditions ***\n";
 
 // Zero arguments

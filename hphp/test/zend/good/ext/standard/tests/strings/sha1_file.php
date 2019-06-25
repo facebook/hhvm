@@ -3,7 +3,7 @@
 /* Prototype: string sha1_file( string filename[, bool raw_output] )
  * Description: Calculate the sha1 hash of a file
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sha1_file() : basic functionality ***\n";
 
 /* Creating an empty file */

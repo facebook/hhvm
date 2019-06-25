@@ -8,7 +8,7 @@
  * Pass different integers to ctype_xdigit() to test which character codes are considered
  * valid hexadecimal 'digits'
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_xdigit() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");

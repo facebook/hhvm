@@ -10,7 +10,7 @@ trait bar {
 final class baz {
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $x = new ReflectionClass('foo');
 var_dump($x->isTrait());
 

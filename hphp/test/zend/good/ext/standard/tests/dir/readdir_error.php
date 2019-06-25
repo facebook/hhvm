@@ -7,7 +7,7 @@
 /*
  * Pass incorrect number of arguments to readdir() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing readdir() : error conditions ***\n";
 
 

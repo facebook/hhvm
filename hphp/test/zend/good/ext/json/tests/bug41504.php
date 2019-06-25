@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(json_decode('{"":"value"}', true));
 var_dump(json_decode('{"":"value", "key":"value"}', true));
 var_dump(json_decode('{"key":"value", "":"value"}', true));

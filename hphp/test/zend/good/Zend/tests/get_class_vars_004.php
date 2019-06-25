@@ -18,7 +18,7 @@ class A {
         var_dump(get_class_vars('A'));
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(get_class_vars('A'));
 
 new A;

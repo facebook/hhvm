@@ -4,7 +4,7 @@
  * or an alphanumeric character 
  * Source code: ext/ctype/ctype.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_punct() : basic functionality ***\n";
 
 $orig = setlocale(LC_CTYPE, "C"); 

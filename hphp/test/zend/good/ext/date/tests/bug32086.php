@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo $g = strtotime("2004-11-01"), "\n";
 echo $i = strtotime("2004-11-01 +1 day"), "\n";
 echo $j = strtotime("+1 day", $g), "\n";

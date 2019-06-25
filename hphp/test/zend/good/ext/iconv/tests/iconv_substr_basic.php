@@ -7,7 +7,7 @@
 /*
  * Test Basic Functionality of iconv_substr with ASCII characters and multibyte strings.
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing iconv_substr() : basic functionality ***\n";
 
 $string_ascii = b'ABCDEF';

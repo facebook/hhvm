@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $obj = new ArrayObject(array('1st', 1, 2=>'3rd', '4th'=>4));
 
 var_dump($obj->getArrayCopy());

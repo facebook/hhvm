@@ -6,7 +6,7 @@ abstract class pass {
 
 abstract class fail extends pass {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $t = new fail();
 $t = new pass();
 

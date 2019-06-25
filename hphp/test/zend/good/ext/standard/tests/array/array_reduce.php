@@ -7,7 +7,7 @@ function reduce_float($w, $v) { return $w + strlen($v) / 10; }
 function reduce_string($w, $v) { return $w . $v; }
 function reduce_array($w, $v) { $w[$v]++; return $w; }
 function reduce_null($w, $v) { return $w . $v; }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $array = array('foo', 'foo', 'bar', 'qux', 'qux', 'quux');
 
 echo "\n*** Testing array_reduce() to integer ***\n";

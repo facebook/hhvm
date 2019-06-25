@@ -3,7 +3,7 @@
 class F {
   private $foo;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $f = new F();
 
 unset($f->foo);

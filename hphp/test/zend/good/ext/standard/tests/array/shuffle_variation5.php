@@ -8,7 +8,7 @@
 * Test behaviour of shuffle() when an array of heredoc strings is passed to
 * 'array_arg' argument of the function
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing shuffle() : with array containing heredoc strings ***\n";
 
 // defining different heredoc strings

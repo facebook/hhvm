@@ -3,7 +3,7 @@
  * Description:  Returns the resource type
  * Source code: Zend/zend_builtin_functions.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing get_resource_type() : error conditions ***\n";
 
 echo "\n-- Testing get_resource_type() function with Zero arguments --\n";

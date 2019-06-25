@@ -8,7 +8,7 @@
 * Passing different arrays to $arr1 argument and testing whether
 * array_merge_recursive() behaves in an expected way.
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_merge_recursive() : Passing different arrays to \$arr1 argument ***\n";
 
 /* Different heredoc strings */

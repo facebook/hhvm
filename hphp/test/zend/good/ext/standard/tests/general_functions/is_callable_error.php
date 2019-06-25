@@ -3,7 +3,7 @@
    Description: Verify that the contents of a variable can be called as a function
                 In case of objects, $var = array($SomeObject, 'MethodName')
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "\n*** Testing error conditions ***\n";
 
 echo "\n-- Testing is_callable() function with less than expected no. of arguments --\n";

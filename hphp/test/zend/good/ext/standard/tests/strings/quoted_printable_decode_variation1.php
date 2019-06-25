@@ -15,7 +15,7 @@ class sample
     return "Object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing quoted_printable_decode() : with unexpected values for 'str' argument ***\n";
 
 // initialing required variables

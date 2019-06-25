@@ -53,7 +53,7 @@ function foo4() {
 }
 
 function case4() { foo3(); }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 try { case1(); } catch (Exception $x) { echo "Good1\n"; }
 try { case2(); } catch (Exception $x) { echo "Good2\n"; }
 try { case3(); } catch (Exception $x) { echo "Good3\n"; }

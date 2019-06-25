@@ -8,7 +8,7 @@
  * Test vsprintf() when different string formats and non-string values are passed to
  * the '$format' and '$args' arguments of the function
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 error_reporting(E_ALL & ~E_NOTICE);
 
 echo "*** Testing vsprintf() : string formats and non-string values ***\n";

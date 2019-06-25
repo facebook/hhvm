@@ -8,7 +8,7 @@ class Test implements ArrayAccess
         public function offsetSet( $offset, $data ) { }
         public function offsetUnset( $offset ) { }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $post = new Test;
 $id = 'page';
 echo $post[$id.'_show'];

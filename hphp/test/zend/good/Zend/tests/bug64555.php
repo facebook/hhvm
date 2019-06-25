@@ -21,7 +21,7 @@ class Foo {
         var_dump($a, array_keys($a));
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $f = new Foo;
 $f->test();
 }

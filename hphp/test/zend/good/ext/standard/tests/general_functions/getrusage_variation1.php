@@ -9,7 +9,7 @@
 /*
  * Pass different data types as $who argument to test behaviour of getrusage()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing getrusage() : usage variations ***\n";
 
 //get an unset variable

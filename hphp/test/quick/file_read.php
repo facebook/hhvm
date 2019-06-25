@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $f = tmpfile();
 fwrite($f, "foo.bar.baz");
 fseek($f, 0);

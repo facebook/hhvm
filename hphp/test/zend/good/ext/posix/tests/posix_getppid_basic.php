@@ -4,6 +4,6 @@
   $ppid = posix_getppid();
 
   var_dump($ppid);
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "===DONE====";
 }

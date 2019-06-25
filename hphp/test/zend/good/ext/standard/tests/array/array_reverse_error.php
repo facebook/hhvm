@@ -3,7 +3,7 @@
  * Description: Return input as a new array with the order of the entries reversed 
  * Source code: ext/standard/array.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_reverse() : error conditions ***\n";
 
 // zero arguments

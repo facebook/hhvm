@@ -3,7 +3,7 @@
  * Description: Get the string value of a variable.
  * Source code: ext/standard/string.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strval() : basic variations ***\n";
 
 error_reporting(E_ALL ^ E_NOTICE);

@@ -9,4 +9,4 @@ function baz($a) {
 function foo($x) {
   return call_user_func('baz', call_user_func('bar', $x));
 }
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

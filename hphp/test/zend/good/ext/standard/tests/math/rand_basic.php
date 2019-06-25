@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $default_max = getrandmax();
 
 echo "\nrand() tests with default min and max value (i.e 0 thru ", $default_max, ")\n";

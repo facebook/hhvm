@@ -10,7 +10,7 @@ class foo {
         return new self;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump((new foo())->bar());               // string(3) "foo"
 var_dump((new foo())->baz()->x);            // string(7) "testing"
 var_dump((new foo())->baz()->baz()->bar()); // string(3) "foo"

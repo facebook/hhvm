@@ -15,7 +15,7 @@ class C extends B {
     private $baz;
     protected $quux;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $rc = new ReflectionClass('C');
 $rp = $rc->getProperty('foo');
 var_dump($rp->getDeclaringClass()->getName()); // c

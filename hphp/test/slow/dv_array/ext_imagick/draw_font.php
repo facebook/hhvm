@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $draw = new ImagickDraw;
 
 $font_path = __DIR__.'/anonymous_pro_minus.ttf';

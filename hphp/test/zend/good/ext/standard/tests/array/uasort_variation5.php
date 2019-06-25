@@ -31,7 +31,7 @@ function cmp_function($value1, $value2)
 }
 
 // Different heredoc strings to be sorted
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $empty_heredoc =<<<EOT
 EOT;
 

@@ -8,7 +8,7 @@
 /*
 * Testing array_chunk() function with unexpected values for 'size' argument
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_chunk() : usage variations ***\n";
 
 // input array

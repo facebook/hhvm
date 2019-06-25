@@ -5,7 +5,7 @@ function __autoload($class)
 
     throw new \Exception('abcd');
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 try
 {
     \ns_test\test::go();

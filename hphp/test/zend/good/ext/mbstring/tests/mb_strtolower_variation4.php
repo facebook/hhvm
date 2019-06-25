@@ -7,7 +7,7 @@
 /*
  * Pass accented characters and Russian characters to check case conversion is correct
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_strtolower() :  usage variations ***\n";
 
 $uppers = array('Basic Latin' => b'ABCDEFGHIJKLMNOPQRSTUVWXYZ',

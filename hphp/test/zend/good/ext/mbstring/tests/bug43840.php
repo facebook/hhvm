@@ -10,7 +10,7 @@
  * Multibyte string was not returning error message until offset was passed the
  * byte count of the string. Should return error message when passed character count.
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $offsets = array(20, 21, 22, 53, 54);
 $string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII=');
 $needle = base64_decode('44CC');

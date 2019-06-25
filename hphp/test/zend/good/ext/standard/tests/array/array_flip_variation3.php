@@ -8,7 +8,7 @@
 * In 'input' array argument, values are expected to be valid keys i.e. string/integer
 * here testing for all different valid string and integer values
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_flip() : different valid values in 'input' array argument ***\n";
 
 $empty_heredoc = <<<EOT1

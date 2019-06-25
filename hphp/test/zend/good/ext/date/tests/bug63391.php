@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 ini_set('date.timezone', 'UTC');
 
 print "Date         PHP\n";

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 echo "aead_chacha20poly1305:\n";
 
 $msg = random_bytes(random_int(1, 1000));

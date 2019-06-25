@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $timezones = array (
     "America/Chicago", "Europe/Amsterdam", "Asia/Jerusalem",
     "Asia/Singapore", "America/Sao_Paulo"

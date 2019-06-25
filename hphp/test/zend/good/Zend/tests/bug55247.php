@@ -5,7 +5,7 @@ class Test{
         echo $method . PHP_EOL;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $method = 'method';
 
 $test = new Test();

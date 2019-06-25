@@ -10,7 +10,7 @@ class sample  {
     return "sample object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing stristr() function: with unexpected inputs for 'string' argument ***\n";
 
 //get an unset variable

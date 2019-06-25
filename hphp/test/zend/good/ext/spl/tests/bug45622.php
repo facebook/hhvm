@@ -3,7 +3,7 @@
 class C extends ArrayObject {
     public $p = 'object property';
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $ao = new C(array('p'=>'array element'));
 $ao->setFlags(ArrayObject::ARRAY_AS_PROPS);
 

@@ -4,7 +4,7 @@
  * Source code: ext/standard/exec.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "Simple testcase for escapeshellarg() function\n";
 
 var_dump(escapeshellarg("Mr O'Neil"));

@@ -4,7 +4,7 @@
 */
 
 /* test is_executable() with invalid arguments */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing is_readable(): usage variations ***\n";
 
 $file_handle = fopen(__FILE__, "r");

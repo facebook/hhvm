@@ -5,7 +5,7 @@
  * Alias to functions: 
  */
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ob_get_contents() : basic functionality ***\n";
 
 // Zero arguments

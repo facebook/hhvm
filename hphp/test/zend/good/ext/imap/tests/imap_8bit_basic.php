@@ -3,7 +3,7 @@
  * Description: Convert an 8bit string to a quoted-printable string.
  * Source code: ext/imap/php_imap.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing imap_8bit() : basic functionality ***\n";
 
 var_dump(imap_8bit("String with CRLF at end \r\n"));

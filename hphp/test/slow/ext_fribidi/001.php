@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 error_reporting (E_ALL ^ E_NOTICE);
 
 $b = "\xe1\xec\xe4\x20\x31\x39\x38\x20\x66\x6f\x6f\x20\xe1\xec\xe4\x20\x42"

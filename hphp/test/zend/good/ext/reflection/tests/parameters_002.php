@@ -60,7 +60,7 @@ function check_params($r)
         }
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 check_params(new ReflectionFunction('test'));
 
 check_params(new ReflectionMethod('test::test'));

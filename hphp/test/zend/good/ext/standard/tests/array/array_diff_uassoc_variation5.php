@@ -12,7 +12,7 @@ function key_compare_func($key1, $key2)
     }
     return ($key1 > $key2)? 1:-1;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff_uassoc() : usage variation ***\n";
 
 //Initialize variables

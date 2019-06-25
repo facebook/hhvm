@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $diriter = new RecursiveIteratorIterator( new RecursiveDirectoryIterator('.') );
 
 foreach ($diriter as $key => $file) {

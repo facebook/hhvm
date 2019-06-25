@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $array = array(0 => array('world'));
 
 $it = new RecursiveIteratorIterator(new RecursiveArrayIterator($array));

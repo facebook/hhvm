@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 date_default_timezone_set('Europe/Bratislava');
 
 $base = '2009-03-01 18:00:00';

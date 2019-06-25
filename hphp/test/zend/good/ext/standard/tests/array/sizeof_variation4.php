@@ -11,7 +11,7 @@ class test
 {
   public $member1;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sizeof() : usage variations ***\n";
 
 echo "--- Testing sizeof() for all kinds of unset variables in default, Normal and Recursive Modes ---\n";

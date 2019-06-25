@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $td = mcrypt_module_open('rijndael-256', '', 'ofb', '');
 mcrypt_generic($td, "foobar");
 mdecrypt_generic($td, "baz");

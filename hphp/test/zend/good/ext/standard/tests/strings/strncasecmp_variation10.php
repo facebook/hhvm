@@ -12,7 +12,7 @@ class sample  {
   return "object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strncasecmp() function: with unexpected values for 'str1' ***\n";
 /* get an unset variable */
 $unset_var = 'string_val';

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $a = array(array('A'), array('B'), array('C'), array('D'));
 $b = array($a, $a, $a, $a);
 $c = array($b, $b, $b, $b);

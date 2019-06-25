@@ -57,7 +57,7 @@ class NoRewindIteratorEx extends NoRewindIterator
         parent::next();
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $it = new NoRewindIteratorEx(new ArrayIteratorEx(range(0,3)));
 
 echo "===0===\n";

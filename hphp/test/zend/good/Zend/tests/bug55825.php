@@ -9,7 +9,7 @@ trait T1 {
 
 class C { use T1; }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $c1 = new C;
 $c1->inc();
 $c1->inc();

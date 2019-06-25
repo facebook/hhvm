@@ -4,7 +4,7 @@
  * Source code: ext/standard/base64.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "Decode an input string containing the whole base64 alphabet:\n";
 $allbase64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 var_dump(bin2hex(base64_decode($allbase64)));

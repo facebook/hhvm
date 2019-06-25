@@ -1,6 +1,6 @@
 <?hh
 // Create a image
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $image = imagecreatetruecolor( 100, 100 );
 // Draw a rectangle
 imagefilledrectangle( $image, 0, 0, 100, 100, imagecolorallocate( $image, 255, 255, 255 ) );

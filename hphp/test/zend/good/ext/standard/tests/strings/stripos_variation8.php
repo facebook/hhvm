@@ -7,7 +7,7 @@
 /* Test stripos() function with strings containing repetitive chars for haystak
  *  and with various needles & offsets 
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing stripos() function: strings repetitive chars ***\n";
 $haystack = "aBAbaBAbaBabAbAbaBa";
 $needles = array(

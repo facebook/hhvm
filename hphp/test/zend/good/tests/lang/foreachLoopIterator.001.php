@@ -36,7 +36,7 @@ class MealIterator implements Iterator {
     }
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $f = new MealIterator;
 var_dump($f);
 

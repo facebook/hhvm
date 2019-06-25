@@ -15,7 +15,7 @@ class BasicSingleton
         return self::$instance;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $db = BasicSingleton::singleton();
 $db_str = serialize($db);
 $db2 = unserialize($db_str);

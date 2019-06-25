@@ -2,7 +2,7 @@
 /* Prototype  : array gd_info()
  * Description: Retrieve information about the currently installed GD library
  * Source code: ext/gd/gd.c  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $extra_arg_number = 10;
 $extra_arg_string = "Hello";
 

@@ -19,7 +19,7 @@ class SimpleClass
     return $n * $n * $n;
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_map() :  with non-existent class and method ***\n";
 
 echo "-- with non-existent class --\n";

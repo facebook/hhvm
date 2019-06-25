@@ -19,7 +19,7 @@ class ErrorCodesDerived extends ErrorCodes {
 }
 
 /* Call the static function and move into the ErrorCodes scope */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 ErrorCodes::print_fatal_error_codes();
 ErrorCodesDerived::print_fatal_error_codes();
 }

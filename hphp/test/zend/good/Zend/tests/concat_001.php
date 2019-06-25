@@ -5,7 +5,7 @@ class test {
         return "this is test object";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = array(1,2,3);
 $o = new test;
 $s = "some string";

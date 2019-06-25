@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $d = date_create( "Mon, 23 May 1955 00:00:00 +0200" );
 var_dump( $d );
 echo $d->format( DATE_ISO8601 ), "\n";

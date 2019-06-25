@@ -3,7 +3,7 @@
  * Description: Find position of first occurrence of a case-insensitive string
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing stripos() function: basic functionality ***\n";
 $heredoc_str = <<<Identifier
 Hello, World

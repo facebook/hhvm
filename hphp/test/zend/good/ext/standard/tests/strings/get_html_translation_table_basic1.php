@@ -6,7 +6,7 @@
 
 /* Test get_html_translation_table() when table is specified as HTML_ENTITIES */
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing get_html_translation_table() : basic functionality ***\n";
 
 echo "-- with table = HTML_ENTITIES --\n";

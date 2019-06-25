@@ -16,7 +16,7 @@ class MyRecursiveRegexIterator extends RecursiveRegexIterator
         return $this->hasChildren() || parent::accept();
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $ar = new RecursiveArrayIterator(array('Foo', array('Bar'), 'FooBar', array('Baz'), 'Biz'));
 $it = new MyRecursiveRegexIterator($ar, '/Bar/');
 

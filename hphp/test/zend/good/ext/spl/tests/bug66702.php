@@ -2,7 +2,7 @@
 /**
  * @author Joshua Thijssen <jthijssen+php@noxlogic.nl>
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $it = new \ArrayIterator(array("foo", "bar", "baz"));
 $it2 = new \RegexIterator($it, "/^ba/", \RegexIterator::MATCH);
 print_r(iterator_to_array($it2));

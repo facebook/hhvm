@@ -7,7 +7,7 @@
  */
 
 // Fake URL to trigger an error
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $url = "fakeURL";
 echo "== Testing curl_error with a fake URL ==\n";
 

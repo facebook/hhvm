@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $fo = new SplFileObject(__FILE__);
 
 $fo->setFlags(SplFileObject::DROP_NEW_LINE);

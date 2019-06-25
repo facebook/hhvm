@@ -9,7 +9,7 @@
 * Passing different double quoted strings for 'str' argument to chunk_split()
 * here 'chunklen' is set to 5 and 'ending' is "????"
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing chunk_split() : with different double quoted values for 'str' argument ***\n";
 
 // Initializing variables

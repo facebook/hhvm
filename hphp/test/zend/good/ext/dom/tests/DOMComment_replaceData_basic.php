@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $dom = new DomDocument();
 $comment = $dom->createComment('test-comment');
 $comment->replaceData(4,1,'replaced');

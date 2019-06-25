@@ -100,7 +100,7 @@ class SubjectImpl implements SplSubject
         return $this->observers->contains($obj);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $sub = new SubjectImpl;
 
 $ob1 = new ObserverImpl("ob1");

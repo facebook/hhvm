@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $fp = finfo_open(FILEINFO_MIME_TYPE);
 $results = array();
 

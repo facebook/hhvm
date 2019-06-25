@@ -12,7 +12,7 @@ class sample  {
     return "object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing stripos() function with unexpected values for offset ***\n";
 
 // get an unset variable

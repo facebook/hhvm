@@ -4,7 +4,7 @@
  * Source code: ext/standard/array.c
 */
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_fill() : error conditions ***\n";
 
 // Zero arguments

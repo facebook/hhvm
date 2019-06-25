@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $s = new SplFileObject(__FILE__);
 echo $s->key(), "\n";
 $s->fgets();

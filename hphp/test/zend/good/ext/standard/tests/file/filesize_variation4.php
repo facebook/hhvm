@@ -6,7 +6,7 @@
 */
 
 /* Testing filesize() with data written using different file modes and by creating holes in file */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_path = dirname(__FILE__);
 
 echo "*** Testing filesize(): usage variations ***\n"; 

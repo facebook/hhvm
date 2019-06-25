@@ -7,7 +7,7 @@
 /*
  * Pass incorrect number of arguments to count() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing count() : error conditions ***\n";
 
 // Zero arguments

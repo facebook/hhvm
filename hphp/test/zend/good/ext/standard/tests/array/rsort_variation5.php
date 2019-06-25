@@ -7,7 +7,7 @@
 /*
  * Pass arrays containing different string data to rsort() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing rsort() : variation ***\n";
 
 $various_arrays = array (

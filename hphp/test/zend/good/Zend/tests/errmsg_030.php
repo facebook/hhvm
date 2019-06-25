@@ -2,6 +2,6 @@
 
 class test extends self {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "Done\n";
 }

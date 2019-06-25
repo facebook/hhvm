@@ -10,7 +10,7 @@
  * For the below strings:
  * 'English' is ASCII only, 'Japanese' has no ASCII characters and 'Greek' is mixed.
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_encode_mimeheader() : basic ***\n";
 
 $english = array('English' => 'This is an English string. 0123456789');

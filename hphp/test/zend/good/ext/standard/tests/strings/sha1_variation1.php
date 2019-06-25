@@ -12,7 +12,7 @@ class MyClass
   }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sha1() : unexpected values for 'str' ***\n";
 
 $raw = false;

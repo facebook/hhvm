@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $dirname = dirname(__FILE__) . '/';
 $arch = new ZipArchive;
 $arch->open($dirname.'foo.zip',ZIPARCHIVE::CREATE);

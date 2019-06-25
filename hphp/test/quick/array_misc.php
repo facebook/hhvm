@@ -24,6 +24,6 @@ function test($a) {
     var_dump($x);
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 test(42);
 }

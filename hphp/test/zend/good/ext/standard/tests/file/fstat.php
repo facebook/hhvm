@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $filename = dirname(__FILE__)."/fstat.dat";
 
 $fp = fopen($filename, "w");

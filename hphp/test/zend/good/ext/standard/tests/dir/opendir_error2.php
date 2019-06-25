@@ -7,7 +7,7 @@
 /*
  * Pass a non-existent directory as $path argument to opendir() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing opendir() : error conditions ***\n";
 
 echo "\n-- Pass a non-existent absolute path: --\n";

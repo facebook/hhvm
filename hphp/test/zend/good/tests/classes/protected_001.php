@@ -9,7 +9,7 @@ class pass {
         pass::fail();
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 pass::good();
 pass::fail();// must fail because we are calling from outside of class pass
 

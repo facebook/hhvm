@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $fp = fopen('SplFileObject__fgetcsv8.csv', 'w+');
 fwrite($fp, '"aaa","b""bb","ccc"');
 fclose($fp);

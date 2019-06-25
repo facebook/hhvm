@@ -8,7 +8,7 @@ function custom_readfunction($oCurl, $hReadHandle, $iMaxOut)
   }
   return $sData;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $sFileBase  = dirname(__FILE__).DIRECTORY_SEPARATOR.'curl_opt_CURLOPT_READFUNCTION';
 $sReadFile  = $sFileBase.'_in.tmp';
 $sWriteFile = $sFileBase.'_out.tmp';

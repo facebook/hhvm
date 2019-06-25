@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $link = __DIR__ . '/test_link';
 symlink(__FILE__, $link );
 $fileInfo = new SplFileInfo($link);

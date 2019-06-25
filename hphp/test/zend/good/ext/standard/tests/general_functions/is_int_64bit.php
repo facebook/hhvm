@@ -2,7 +2,7 @@
 /* Prototype: bool is_int ( mixed $var );
  * Description: Finds whether the given variable is an integer  
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing is_int(), is_integer() & is_long()  with valid integer values ***\n";
 // different valid  integer vlaues 
 $valid_ints = array(

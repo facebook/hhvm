@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $filepath = __FILE__ . ".tmp";
 $fd = fopen($filepath, "w+");
 fwrite($fd, "Line 1\n\n \n  \n\Line 3");

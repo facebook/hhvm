@@ -3,7 +3,7 @@
  * Description: Returns the decimal equivalent of the binary number represented by the binary_string  argument.
  * Source code: ext/standard/math.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing bindec() : usage variations ***\n";
 //get an unset variable
 $unset_var = 10;

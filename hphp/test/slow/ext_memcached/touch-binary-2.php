@@ -27,7 +27,7 @@ function status_print($op, $mem, $expected)
         echo PHP_EOL;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $mem = new Memcached();
 
 $mem->setOption(Memcached::OPT_BINARY_PROTOCOL, true);

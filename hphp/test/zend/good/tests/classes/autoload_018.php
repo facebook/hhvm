@@ -15,6 +15,6 @@ function __autoload($name)
 
     echo "OUT: " . __METHOD__ . "($name)\n";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(class_exists('UndefinedClass0'));
 }

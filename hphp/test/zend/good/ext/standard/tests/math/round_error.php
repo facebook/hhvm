@@ -8,7 +8,7 @@
 /*
  * Pass incorrect number of arguments to round() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing round() : error conditions ***\n";
 
 echo "\n-- Wrong nmumber of arguments --\n";

@@ -11,7 +11,7 @@ class fail extends pass {
         echo "Call to function fail::show()\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 pass::show();
 fail::show();
 

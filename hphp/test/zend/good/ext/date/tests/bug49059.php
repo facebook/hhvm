@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 date_default_timezone_set('Asia/Calcutta');
 
 $date1 = date_create("2009-03-27");

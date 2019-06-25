@@ -19,7 +19,7 @@ class Bar
         return 'first_name';
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_column() : basic functionality ***\n";
 /* Array representing a possible record set returned from a database */
 $records = array(

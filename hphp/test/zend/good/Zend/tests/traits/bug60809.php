@@ -23,7 +23,7 @@ trait ExampleTrait {
         echo $this->hello_world;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $x = new Example();
 $x->foo();
 $x->bar();

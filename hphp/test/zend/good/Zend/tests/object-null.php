@@ -3,7 +3,7 @@
 class Bla
 {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $b = new Bla;
 
 var_dump($b != null);

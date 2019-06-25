@@ -13,7 +13,7 @@ class bar {
         baz::test as zzz;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $x = new bar;
 var_dump($x->test());
 }

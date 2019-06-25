@@ -10,7 +10,7 @@
  Prototype: bool feof ( resource $handle );
  Description: Tests for end-of-file on a file pointer
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing basic operations of fopen() and fclose() functions ***\n";
 $modes = array(
   "w",

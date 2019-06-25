@@ -12,7 +12,7 @@ class try_class
         printf ("CHECKPOINT\n"); /* never reached */
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 try_class::main ();
 
 echo "Done\n";

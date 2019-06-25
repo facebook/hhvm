@@ -5,7 +5,7 @@ class Collator2 extends Collator{
         // ommitting parent::__construct($someLocale);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $c = new Collator2();
 $a = array('a', 'b');
 $c->sortWithSortKeys(&$a);

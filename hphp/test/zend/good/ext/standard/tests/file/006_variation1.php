@@ -7,7 +7,7 @@
   Description: Attempts to change the mode of the file specified by 
                filename to that given in mode
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fileperms() & chmod() : usage variations ***\n";
 
 $file_name = dirname(__FILE__)."/006_variation1.tmp";

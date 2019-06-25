@@ -25,7 +25,7 @@ class object implements ArrayAccess {
         unset($this->a[$index]);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $obj = new Object;
 
 var_dump($obj->a);

@@ -41,7 +41,7 @@ trait T2 {
         echo "From T2\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $f = new Foo();
 
 $f->newFunc(); //from T1

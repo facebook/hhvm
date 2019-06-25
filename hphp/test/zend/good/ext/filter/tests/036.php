@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $var = "1";
 
 $data = array('test1' => 1, 'test2' => $var);

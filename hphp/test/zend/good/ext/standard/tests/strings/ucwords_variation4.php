@@ -7,7 +7,7 @@
 /*
  * test ucwords() with different string prepared using double quote
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ucwords() : usage variations ***\n";
 
 // different strings containing regular chars and special chars

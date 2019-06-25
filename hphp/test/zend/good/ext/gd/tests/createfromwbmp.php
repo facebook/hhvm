@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $file = dirname(__FILE__) . '/src.wbmp';
 
 $im2 = imagecreatefromwbmp($file);

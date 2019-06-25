@@ -12,7 +12,7 @@ class C extends MessageFormatter {
 class D extends Spoofchecker {
         static $ARGS = array();
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 foreach (range('A', 'D') as $subclass) {
         $rc = new ReflectionClass($subclass);
             $obj = $rc->newInstanceArgs($subclass::$ARGS);

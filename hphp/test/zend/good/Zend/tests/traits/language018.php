@@ -8,4 +8,4 @@ class C1 {
     }
 }
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

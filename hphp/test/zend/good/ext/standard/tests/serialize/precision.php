@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $numbers = array(
 	"0000000000000000", //0
 	"2d431cebe2362a3f", //.0002

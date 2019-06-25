@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $magick = new Imagick(__DIR__.'/facebook.png');
 $iterator = new ImagickPixelIterator($magick);
 

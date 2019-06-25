@@ -34,7 +34,7 @@ class C extends B {
         parent::func($str);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $c = new C;
 $c->func('This should work!');
 }

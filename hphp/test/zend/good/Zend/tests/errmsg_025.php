@@ -10,6 +10,6 @@ interface test2 {
 
 class test implements test1, test2 {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "Done\n";
 }

@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new SplFixedArray(0);
 $a = new SplFixedArray(3);
 

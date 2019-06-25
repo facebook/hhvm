@@ -7,7 +7,7 @@
 /*
 * Using different types of repeatitive keys as well as values for 'input' array
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_flip() : 'input' array with repeatitive keys/values ***\n";
 
 // array with numeric key repeatition

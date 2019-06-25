@@ -19,7 +19,7 @@ class Bar extends Foo
         return 'Bar';
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $x = new Bar;
 var_dump($x->run());
 }

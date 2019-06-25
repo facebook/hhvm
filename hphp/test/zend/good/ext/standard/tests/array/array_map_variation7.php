@@ -17,7 +17,7 @@ function callback($a, $b)
 {
   return array($a => $b);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_map() : arrays with diff. size ***\n";
 
 // calling array_map with different arrays

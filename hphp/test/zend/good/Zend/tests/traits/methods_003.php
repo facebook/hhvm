@@ -9,6 +9,6 @@ trait foo {
 class bar {
     use foo;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 new bar;
 }

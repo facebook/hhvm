@@ -4,7 +4,7 @@ class Foo {
     return "Hello World";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $foo = new Foo();
 $server = new soapserver(null,array('uri'=>"http://testuri.org"));
 $server->setObject($foo);

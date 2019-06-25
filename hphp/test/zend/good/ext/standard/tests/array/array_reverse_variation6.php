@@ -7,7 +7,7 @@
 /*
  * testing the functionality of array_reverse() by giving 2-D arrays for $array argument
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_reverse() : usage variations ***\n";
 
 // Initializing the 2-d arrays

@@ -11,7 +11,7 @@ function run () {
     $x++;
     $lambda1();
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 run();
 
 echo "Done\n";

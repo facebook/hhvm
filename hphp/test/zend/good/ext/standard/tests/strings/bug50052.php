@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $salt = '$1$f+uslYF01$';
 $password = 'test';
 echo $salt . "\n";

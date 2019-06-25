@@ -12,7 +12,7 @@ class C2 {
   }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
   $o = new C1();
   // First pass through, "learn" that these calls go to C1::__call.
   for ($i = 0; $i < 12; $i++) {

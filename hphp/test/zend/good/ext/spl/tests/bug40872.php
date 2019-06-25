@@ -19,6 +19,6 @@
 
     var_dump($projects->offsetExists(1));
     var_dump($projects->offsetExists('2'));
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "===DONE===\n";
 }

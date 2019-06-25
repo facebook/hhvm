@@ -11,7 +11,7 @@ class sample  {
   return "obj'ct";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing exif_imagetype() : different types for filename argument ***\n";
 // initialize all required variables
 

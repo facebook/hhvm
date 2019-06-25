@@ -44,7 +44,7 @@ class for_string_arsort
    return (string)$this->value;
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing arsort() : object functionality ***\n";
 
 // array of integer objects

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $tmp_empty_file = __FILE__ . ".tmp";
 file_put_contents($tmp_empty_file, "");
 

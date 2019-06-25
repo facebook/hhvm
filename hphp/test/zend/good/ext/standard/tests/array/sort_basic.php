@@ -13,7 +13,7 @@
  *  SORT_NUMERIC - compare items numerically
  *  SORT_STRING - compare items as strings
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sort() : basic functionality ***\n";
 
 // associative array containing unsorted string values

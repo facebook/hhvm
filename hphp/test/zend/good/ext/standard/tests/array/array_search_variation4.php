@@ -6,7 +6,7 @@
 */
 
 /* checking for Resources */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing resource type with array_search() ***\n";
 //file type resource
 $file_handle = fopen(__FILE__, "r");

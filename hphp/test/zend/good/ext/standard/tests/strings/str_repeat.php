@@ -4,7 +4,7 @@
      greater than or equal to 0. If the multiplier is set to 0, the function
      will return an empty string.
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing str_repeat() with possible strings ***";
 $variations = array(
   'a',

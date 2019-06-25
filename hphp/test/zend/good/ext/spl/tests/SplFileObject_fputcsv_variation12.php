@@ -2,7 +2,7 @@
 
 /* Testing fputcsv() to write to a file when default enclosure value and delimiter value
    other than that in the field is provided */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fputcsv() : with default enclosure and different delimiter value ***\n";
 
 /* the array is with three elements in it. Each element should be read as 

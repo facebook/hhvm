@@ -3,7 +3,7 @@
  * Description: Reverse a string 
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strrev() : basic functionality ***\n";
 $heredoc = <<<EOD
 Hello, world

@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $array = array('' => 1, 1 => 2, 3 => 4);
 $ArrayObject = new ArrayObject($array);
 var_dump($ArrayObject);

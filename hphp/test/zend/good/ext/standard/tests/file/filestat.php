@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(fileinode("."));
 var_dump(fileowner("."));
 var_dump(filegroup("."));

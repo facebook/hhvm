@@ -36,7 +36,7 @@ class Overloaded
         $this->props[$prop] = $val;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 set_error_handler('my_error_handler');
 $y = new Overloaded(2);
 var_dump($y->x);

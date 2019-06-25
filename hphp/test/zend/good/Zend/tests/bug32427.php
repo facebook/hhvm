@@ -9,6 +9,6 @@ class ExampleImpl implements Example {
         echo "I am a silly error\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 ExampleImpl::sillyError();
 }

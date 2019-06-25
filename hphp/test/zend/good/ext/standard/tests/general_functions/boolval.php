@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 var_dump(boolval(false));
 var_dump(boolval(NULL));
 var_dump(boolval(""));

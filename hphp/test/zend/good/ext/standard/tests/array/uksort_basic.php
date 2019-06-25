@@ -9,7 +9,7 @@ function cmp($a, $b) {
     }
     return ($a < $b) ? -1 : 1;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = array(3, 2, 5, 6, 1);
 uasort(&$a, "cmp");
 foreach($a as $key => $value) {

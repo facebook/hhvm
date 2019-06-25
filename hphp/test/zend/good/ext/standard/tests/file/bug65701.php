@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $file_path = dirname(__FILE__) . "/bug65701/";
 
 mkdir($file_path);

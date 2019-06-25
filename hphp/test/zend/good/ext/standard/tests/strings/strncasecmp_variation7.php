@@ -5,7 +5,7 @@
 */
 
 /* Test strncasecmp() function with null terminated strings and binary values passed to 'str1' & 'str2' */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Test strncasecmp() function: with null terminated strings and binary inputs ***\n";
 
 /* A binary function should not expect a null terminated string, and it should treat input as a raw stream of data */

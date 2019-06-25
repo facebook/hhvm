@@ -16,7 +16,7 @@ function f3($x = \A\ArrayObject::STD_PROP_LIST) {
 function f4($x = B\ArrayObject::STD_PROP_LIST) {
     \var_dump($x);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 \var_dump(ArrayObject::STD_PROP_LIST);
 \var_dump(\ArrayObject::STD_PROP_LIST);
 \var_dump(B\ArrayObject::STD_PROP_LIST);

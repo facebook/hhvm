@@ -28,6 +28,6 @@ class D extends C implements Iterator {
   }
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 foreach (new D as $x) {}
 }

@@ -2,7 +2,7 @@
 /* Prototype: bool is_bool ( mixed $var );
  * Description: Finds whether the given variable is a boolean  
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing is_bool() with valid boolean values ***\n";
 // different valid  boolean vlaues 
 $valid_bools = array(

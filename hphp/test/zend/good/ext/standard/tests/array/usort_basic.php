@@ -19,7 +19,7 @@ function cmp($value1, $value2)
   else
     return -1;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing usort() : basic functionality ***\n";
 
 // Int array with default keys

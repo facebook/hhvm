@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $current = "2014-03-02 16:24:08";
 
 $i = DateTimeImmutable::createFromMutable( date_create( $current ) );

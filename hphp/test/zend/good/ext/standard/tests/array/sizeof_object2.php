@@ -58,7 +58,7 @@ class concrete_class extends abstract_class
     echo " class name is : concrete_class \n ";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sizeof() : object functionality ***\n";
 
 echo "--- Testing sizeof() with objects which doesn't implement Countable interface ---\n";

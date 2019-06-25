@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $ao = new ArrayObject();
 $swapIn = array();
 $cowRef = $swapIn; // create a copy-on-write ref to $swapIn

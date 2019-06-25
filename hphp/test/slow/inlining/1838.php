@@ -10,4 +10,4 @@ function g($x) {
   $c = f($x);
   return $c();
 }
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

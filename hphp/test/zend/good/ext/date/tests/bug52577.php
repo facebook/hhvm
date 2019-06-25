@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 date_default_timezone_set('Europe/Kiev');
 $date = '7.8.2010';
 echo "String: ".$date."\n";

@@ -19,7 +19,7 @@ class fail extends pass {
         $this->show();
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $t = new fail();
 $t->ok();
 $t->not_ok(); // calling a private function

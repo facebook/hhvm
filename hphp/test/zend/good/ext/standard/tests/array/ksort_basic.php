@@ -11,7 +11,7 @@
  *  3.SORT_NUMERIC - compare items numerically
  *  4.SORT_STRING - compare items as strings
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ksort() : basic functionality ***\n";
 
 // an array containing unsorted string values with indices

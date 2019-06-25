@@ -5,7 +5,7 @@
 */
 
 /* Test strncasecmp() function with upper-case and lower-case alphabets as inputs for 'str1' and 'str2' */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Test strncasecmp() function: with alphabets ***\n";
 echo "-- Passing upper-case letters for 'str1' --\n";
 for($ASCII = 65; $ASCII <= 90; $ASCII++) {

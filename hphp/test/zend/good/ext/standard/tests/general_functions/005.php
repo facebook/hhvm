@@ -1,6 +1,6 @@
 <?hh
 class foo {}
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump (is_scalar (TRUE));
 var_dump (is_scalar (1));
 var_dump (is_scalar (1.0));

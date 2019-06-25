@@ -8,7 +8,7 @@ function f1($x = ArrayObject::STD_PROP_LIST) {
 function f2($x = \ArrayObject::STD_PROP_LIST) {
     \var_dump($x);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 \var_dump(ArrayObject::STD_PROP_LIST);
 \var_dump(\ArrayObject::STD_PROP_LIST);
 f1();

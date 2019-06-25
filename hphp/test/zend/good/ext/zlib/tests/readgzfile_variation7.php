@@ -1,6 +1,6 @@
 <?hh
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $use_include_path = 0;
 
 

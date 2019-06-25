@@ -16,7 +16,7 @@ class classWithToString
 class classWithoutToString
 {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 include('compare_function.inc');
 echo "*** Testing array_udiff() : usage variation ***\n";
 

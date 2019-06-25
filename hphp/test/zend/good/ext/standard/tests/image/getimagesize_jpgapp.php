@@ -7,7 +7,7 @@
 
 /*
  * Load APP info from jpeg  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $arr = array();
 $arr['this'] = "will";
 $arr['all'] = "be destroyed!";

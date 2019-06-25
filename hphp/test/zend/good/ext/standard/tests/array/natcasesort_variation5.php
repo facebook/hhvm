@@ -7,7 +7,7 @@
 /*
  * Pass an array of different hex values to test how natcasesort() re-orders it
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing natcasesort() : usage variation ***\n";
 
 $unsorted_hex_array = array(0x1AB, 0xFFF, 0xF, 0xFF, 0x2AA, 0xBB, 0x1ab, 0xff, -0xFF, 0, -0x2aa);

@@ -2,7 +2,7 @@
 // Test rename() by trying to rename an existing file/dir/link to the same name
 // and one another.
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $dirname = "$file_path/rename_variation5_dir";
 mkdir($dirname);

@@ -13,7 +13,7 @@ class Foo
         echo "instance\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $foo = new Foo();
 $foo->start();
 }

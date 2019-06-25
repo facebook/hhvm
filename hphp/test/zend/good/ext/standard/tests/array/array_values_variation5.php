@@ -7,7 +7,7 @@
 /*
  * Test the position of the internal array pointer after a call to array_values
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_values() : usage variations ***\n";
 
 $input = array ('one' => 'un', 'two' => 'deux', 'three' => 'trois');

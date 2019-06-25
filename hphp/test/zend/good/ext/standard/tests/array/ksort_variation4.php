@@ -9,7 +9,7 @@
  *  1.flag value as defualt
  *  2.SORT_REGULAR - compare items normally
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ksort() : usage variations ***\n";
 
 // bool value array

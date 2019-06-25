@@ -7,6 +7,6 @@ function f() {
 abstract final class EvalOrder1527 {
   public static $a;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(array(EvalOrder1527::$a, f(), EvalOrder1527::$a));
 }

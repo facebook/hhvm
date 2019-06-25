@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $a = timezone_identifiers_list();
 $b = timezone_identifiers_list( DateTimezone::AMERICA );
 $c = timezone_identifiers_list( DateTimezone::ALL_WITH_BC );

@@ -5,7 +5,7 @@ function test($str) {
   var_dump((float)$str);
   var_dump($str > 0);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 test("..9");
 test(".9.");
 test("9..");

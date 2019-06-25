@@ -14,6 +14,6 @@ class foobar {
         print "ok!\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 new foobar;
 }

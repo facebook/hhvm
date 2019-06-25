@@ -13,7 +13,7 @@ class MyObject
         echo __METHOD__ . "() Must not be reached\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 try
 {
     new MyObject();

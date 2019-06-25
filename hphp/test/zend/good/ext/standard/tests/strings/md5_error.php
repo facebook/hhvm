@@ -3,7 +3,7 @@
  * Description: Calculate the md5 hash of a string
  * Source code: ext/standard/md5.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing md5() : error conditions ***\n";
 
 echo "\n-- Testing md5() function with no arguments --\n";

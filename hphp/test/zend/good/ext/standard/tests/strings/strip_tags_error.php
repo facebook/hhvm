@@ -4,7 +4,7 @@
  * Source code: ext/standard/string.c
 */
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strip_tags() : error conditions ***\n";
 
 // Zero arguments

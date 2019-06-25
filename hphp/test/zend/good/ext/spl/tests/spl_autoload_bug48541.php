@@ -7,7 +7,7 @@ class X {
     };
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = function ($class) {
     echo "a called\n";
 };

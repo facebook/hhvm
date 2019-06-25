@@ -9,6 +9,6 @@ class myZip extends ZipArchive {
         var_dump($this->testarray);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $z = new myZip;
 }

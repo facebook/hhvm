@@ -16,7 +16,7 @@ class test extends base {
     var_dump($this);
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "Original\n";
 $o1 = new test;
 $o1->a = array(1,2);

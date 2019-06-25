@@ -6,7 +6,7 @@
 
 require(__DIR__."/allowed_rounding_error.inc");
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 
 echo "acosh  1.1276259652064= ";
 var_dump(acosh(1.1276259652064));

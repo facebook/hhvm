@@ -6,7 +6,7 @@
 
 
 // get a resource type variable
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $fp = fopen (__FILE__, "r");
 fclose($fp);
 $dfp = opendir ( dirname(__FILE__) );

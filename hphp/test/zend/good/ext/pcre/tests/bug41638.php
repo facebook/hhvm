@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $str = "repeater id='loopt' dataSrc=subject colums=2";
 
 preg_match_all("/(['\"])((.*(\\\\\\1)*)*)\\1/sU",$str,&$str_instead);

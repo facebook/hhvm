@@ -7,7 +7,7 @@ function callback($string) {
     CallbackStatics::$callback_invocations++;
     return "[callback:" . CallbackStatics::$callback_invocations . "]$string\n";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 ob_start('callback', 0, 0);
 
 echo "This call will obtain the content:\n";

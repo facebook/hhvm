@@ -2,7 +2,7 @@
 /*
 * proto string preg_replace(mixed regex, mixed replace, mixed subject [, int limit [, count]])
 * Function is implemented in ext/pcre/php_pcre.c */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $string = '123456789 - Hello, world -           This is a string.';
 var_dump($string);
 var_dump(preg_replace('<- This is a string$>', 'This shouldn\'t work', $string)); //tries to find '- This is a string' at the end of a string but can't so replaces nothing and prints the unchanged $string.

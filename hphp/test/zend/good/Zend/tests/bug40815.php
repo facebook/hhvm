@@ -5,7 +5,7 @@ class ehandle{
         echo 'foo';
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 set_exception_handler("ehandle::exh");
 
 throw new Exception ("Whiii");

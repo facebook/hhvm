@@ -9,6 +9,6 @@ interface I2 {
 
 class C implements I1,I2 {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "Done\n";
 }

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 var_dump(strrpos("test test string", "test"));
 var_dump(strrpos("test string sTring", "string"));
 var_dump(strrpos("test strip string strand", "str"));

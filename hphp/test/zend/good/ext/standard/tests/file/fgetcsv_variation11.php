@@ -6,7 +6,7 @@
 
 /* Testing fgetcsv() by reading from a file when different enclosure that is not 
    present in the data being read and delimiter which is present in the data  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fgetcsv() : with different enclosure but same delimiter char ***\n";
 
 /* the array is with three elements in it. Each element should be read as 

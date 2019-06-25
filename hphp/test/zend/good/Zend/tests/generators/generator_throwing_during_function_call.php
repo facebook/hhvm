@@ -9,7 +9,7 @@ function gen() {
     strlen("foo", "bar", throwException());
     yield 'bar';
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $gen = gen();
 $gen->next();
 var_dump($gen->current());

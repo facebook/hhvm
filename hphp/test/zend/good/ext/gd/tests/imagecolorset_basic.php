@@ -1,6 +1,6 @@
 <?hh
 // Create a 300x100 image
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $im = imagecreate(300, 100);
 // Set the background to be red
 imagecolorallocate($im, 255, 0, 0);

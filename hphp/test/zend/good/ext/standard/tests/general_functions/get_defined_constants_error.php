@@ -3,7 +3,7 @@
  * Description:  Returns an associative array with the names of all the constants and their values
  * Source code: Zend/zend_builtin_functions.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing get_defined_constants() : error conditions ***\n";
 
 echo "\n-- Testing get_defined_constants() function with more than expected no. of arguments --\n";

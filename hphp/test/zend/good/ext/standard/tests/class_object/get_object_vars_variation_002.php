@@ -4,7 +4,7 @@
  * Source code: Zend/zend_builtin_functions.c
  * Alias to functions:
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $obj = new stdClass;
 var_dump(get_object_vars($obj));
 

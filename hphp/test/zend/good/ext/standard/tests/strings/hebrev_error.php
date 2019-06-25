@@ -4,7 +4,7 @@
  * Description: Convert logical Hebrew text to visual text
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing hebrev() : error conditions ***\n";
 
 echo "\n-- Testing hebrev() function with no arguments --\n";

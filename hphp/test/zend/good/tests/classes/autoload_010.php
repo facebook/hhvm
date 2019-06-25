@@ -9,4 +9,4 @@ class C implements UndefI
 {
 }
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

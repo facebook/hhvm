@@ -1,6 +1,6 @@
 <?hh
 class A extends SplObjectStorage { }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o1 = new StdClass;
 $o2 = new StdClass;
 $o3 = new StdClass;

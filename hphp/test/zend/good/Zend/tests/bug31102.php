@@ -22,7 +22,7 @@ function __autoload($class)
         return;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 while(ZendGoodZendTestsBug31102::$test++ < 5)
 {
     try

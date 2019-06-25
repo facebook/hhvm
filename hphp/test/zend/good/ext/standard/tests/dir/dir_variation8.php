@@ -9,7 +9,7 @@
  * Create more than one temporary directory & subdirectory and check if dir() function can open
  * those directories when wildcard characters are used to refer to them.
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing dir() : checking with wildcard characters ***\n";
 
 // create the temporary directories

@@ -11,7 +11,7 @@
  *   2. associative array with duplicate keys
  *   3. array with one element 
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_chunk() : usage variations ***\n";
 
 // input array

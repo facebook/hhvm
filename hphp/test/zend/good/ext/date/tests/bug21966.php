@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 echo '27/3/04 = ' . strval(mktime(0,0,0,3,27,2004)) . "\n";   // 1080345600
 echo '28/3/04 = ' . strval(mktime(0,0,0,3,28,2004)) . "\n";   // -3662  - should be 108043200
 echo '28/3/04 = ' . strval(mktime(2,0,0,3,28,2004)) . "\n";   // 1080435600

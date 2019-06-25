@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $haystack = "foob\x00ar";
 $needle = "a\x00b";
 

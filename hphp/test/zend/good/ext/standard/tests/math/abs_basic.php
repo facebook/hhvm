@@ -3,7 +3,7 @@
  * Description: Returns the absolute value of number.
  * Source code: ext/standard/math.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing abs() : basic functionality ***\n";
 
 $values = array(23,

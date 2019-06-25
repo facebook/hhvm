@@ -16,7 +16,7 @@ class ary implements ArrayAccess {
   }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
   $a = array(null, new ary(), array('cat' => 'meow', 'dog' => 'woof'));
   var_dump($a[0]['unused']);
   var_dump($a[1]['tick']);

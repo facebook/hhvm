@@ -11,7 +11,7 @@
  *    but has been created in a different order
  * 2. When doing a strict comparison of string representation
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff_assoc() : usage variations ***\n";
 
 $array = array ('zero',

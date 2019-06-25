@@ -19,7 +19,7 @@ class third extends second {
     }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $t1 = new first();
 $t1->do_show();
 

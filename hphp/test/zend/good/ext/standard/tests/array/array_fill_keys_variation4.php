@@ -10,7 +10,7 @@
 class classA {
   public function __toString() { return "Class A object"; }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_fill_keys() : parameter variations ***\n";
 
 $fp = fopen(__FILE__, "r");

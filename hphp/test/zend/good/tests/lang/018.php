@@ -1,5 +1,5 @@
 <?hh 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 error_reporting(0);
 
 $message = "echo \"hey\n\";";

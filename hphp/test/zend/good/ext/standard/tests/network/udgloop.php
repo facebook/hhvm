@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $uniqid = uniqid();
 if (file_exists("/tmp/$uniqid.sock"))
     die('Temporary socket /tmp/$uniqid.sock already exists.');

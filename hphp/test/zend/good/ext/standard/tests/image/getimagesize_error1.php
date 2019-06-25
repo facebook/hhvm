@@ -4,7 +4,7 @@
  * Source code: ext/standard/image.c
  * Alias to functions:
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing getimagesize() : error conditions ***\n";
 
 // Zero arguments

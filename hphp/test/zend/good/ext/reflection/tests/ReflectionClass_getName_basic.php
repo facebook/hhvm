@@ -5,7 +5,7 @@ class TrickClass {
         return "Exception";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $r1 = new ReflectionClass("stdClass");
 
 $myInstance = new stdClass;

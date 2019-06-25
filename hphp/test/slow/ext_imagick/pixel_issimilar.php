@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $sqrt3 = sqrt(3.0);
 
 $pixel = new ImagickPixel('red');

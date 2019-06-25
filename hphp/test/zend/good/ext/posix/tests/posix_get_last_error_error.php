@@ -4,7 +4,7 @@
  * Source code: ext/posix/posix.c
  * Alias to functions: posix_errno
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing posix_get_last_error() : error conditions ***\n";
 
 // One argument

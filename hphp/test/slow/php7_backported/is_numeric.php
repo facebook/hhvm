@@ -2,7 +2,7 @@
 /* Prototype: bool is_numeric ( mixed $var );
  * Description: Finds whether a variable is a number or a numeric string
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing is_numeric() with valid numeric values ***\n";
 // different valid numeric  vlaues
 $numerics = array(

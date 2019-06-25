@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $arr = array(0=>0, 1=>1, 2=>2);
 $obj = new ArrayObject($arr);
 

@@ -16,7 +16,7 @@ function some_other_function()
 
 
 // This is a lie.
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "Before function declaration...\n";
 echo "After function declaration...\n";
 

@@ -33,7 +33,7 @@ class baz extends bar {
     public function method_c() {
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(method_exists('baz', 'stat_a'));
 var_dump(method_exists('baz', 'stat_b'));
 var_dump(method_exists('baz', 'stat_c'));

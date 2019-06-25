@@ -1,7 +1,7 @@
 <?hh
 
 /* Convert valid DN */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(ldap_dn2ufn("cn=bob,dc=example,dc=com"));
 /* Convert valid DN */
 var_dump(ldap_dn2ufn("cn=bob,ou=users,dc=example,dc=com"));

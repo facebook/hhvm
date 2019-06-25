@@ -11,7 +11,7 @@ function chk_enc($str, $n, $enc = "UTF-8", $with_bom = false) {
         return $src;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 mb_substitute_character(0xfffd);
 
 

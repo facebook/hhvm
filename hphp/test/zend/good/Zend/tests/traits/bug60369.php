@@ -9,4 +9,4 @@ class Properties {
    public $same = true;
 }
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

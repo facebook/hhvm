@@ -8,7 +8,7 @@
 * Testing the behavior of array_intersect() by passing array with
 * binary values for $arr1 and $arr2 argument.
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_intersect() : binary safe checking ***\n";
 
 // array with binary values

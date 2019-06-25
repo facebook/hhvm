@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $im = new Imagick(__DIR__ . '/php.gif');
 var_dump($im->getImageLength());
 

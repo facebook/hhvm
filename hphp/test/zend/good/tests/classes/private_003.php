@@ -20,7 +20,7 @@ class fail extends pass {
     }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 ini_set("error_reporting", 2039);
 
 fail::ok();

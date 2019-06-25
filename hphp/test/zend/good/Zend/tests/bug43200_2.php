@@ -13,7 +13,7 @@ class C extends B {
         echo 'works';
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o = new C();
 $o->foo();
 }

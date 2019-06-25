@@ -6,7 +6,7 @@
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing str_split() : basic functionality ***\n";
 
 // Initialise all required variables

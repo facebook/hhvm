@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(gmp_strval(gmp_invert(123123,5467624)));
 var_dump(gmp_strval(gmp_invert(123123,"3333334345467624")));
 var_dump(gmp_strval(gmp_invert("12312323213123123",7624)));

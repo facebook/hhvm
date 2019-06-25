@@ -3,7 +3,7 @@
  * proto int ob_get_length(void)
  * Function is implemented in main/output.c
 */ 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $extra_arg = 1;
 
 echo "\nToo many arguments\n";

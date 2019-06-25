@@ -4,7 +4,7 @@
  * Description: Convert from one Cyrillic character set to another
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing convert_cyr_string() : basic functionality ***\n";
 
 $str = "Convert from one Cyrillic character set to another.";

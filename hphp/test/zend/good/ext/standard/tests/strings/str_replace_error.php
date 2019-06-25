@@ -6,7 +6,7 @@
                the replacement string
 */
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "\n*** Testing str_replace error conditions ***";
 /* Invalid arguments */
 try { var_dump( str_replace() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

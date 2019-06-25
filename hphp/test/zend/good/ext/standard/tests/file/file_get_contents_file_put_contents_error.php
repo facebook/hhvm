@@ -7,7 +7,7 @@
 /* Prototype: int file_put_contents( string $filename, mixed $data[, int $flags[, resource $context]] )
  * Description: Write a string to a file
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing error conditions ***\n";
 
 $file_path = dirname(__FILE__);

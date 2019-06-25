@@ -8,7 +8,7 @@ class fooClass {
        return "m";
    }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing php_uname() - usage variations\n";
 // Prevent notices about undefines variables
 error_reporting(E_ALL & ~E_NOTICE);

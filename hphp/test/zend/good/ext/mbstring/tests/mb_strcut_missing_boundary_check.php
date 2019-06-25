@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 mb_internal_encoding("UCS-4LE");
 var_dump(bin2hex(mb_strcut("\x61\x00\x00\x00\x62\x00\x00\x00\x63\x00\x00\x00", 0, 32)));
 mb_internal_encoding("UCS-4BE");

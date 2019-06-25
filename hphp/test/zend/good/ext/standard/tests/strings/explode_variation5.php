@@ -4,7 +4,7 @@
  * Description: Split a string by string.
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing explode() function: positive and negative limits ***\n";
 $str = 'one||two||three||four';
 

@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 file_put_contents('SplFileObject_getflags_basic.csv', 'eerste;tweede;derde');
 
 $fo = new SplFileObject('SplFileObject_getflags_basic.csv');

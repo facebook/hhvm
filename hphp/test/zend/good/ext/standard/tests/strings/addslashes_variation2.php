@@ -7,7 +7,7 @@
 /*
  * Test addslashes() with various strings containing characters thats can be backslashed
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing addslashes() : with various strings containing characters to be backslashed ***\n";
 
 // initialising a heredoc string

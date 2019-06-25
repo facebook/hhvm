@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $fileIterator = new FilesystemIterator(__DIR__, FilesystemIterator::KEY_AS_FILENAME);
 $regexpIterator = new RegexIterator($fileIterator, '#.*#');
 foreach ($fileIterator as $key => $file)

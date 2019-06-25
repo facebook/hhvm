@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $key = sodium_crypto_kdf_keygen();
 try {
   $subkey = sodium_crypto_kdf_derive_from_key(10, 0, "context!", $key);

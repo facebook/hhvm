@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $im = imagecreatetruecolor( 99, 99 ); 
 
 imagesetpixel($im, 0, 0, 0xFF);

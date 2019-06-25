@@ -36,7 +36,7 @@ class baz2 extends bar2 {
     protected $foo = 'baz2';
     protected $foo2 = 'baz22';
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $bar = new bar;
 $bar->printFoo();
 echo "---baz--\n";

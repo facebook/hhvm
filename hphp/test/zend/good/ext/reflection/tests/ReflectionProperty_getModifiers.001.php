@@ -22,7 +22,7 @@ class TestClass
     protected $prot = 4;
     private $priv = "keepOut";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 reflectProperty("TestClass", "pub");
 reflectProperty("TestClass", "stat");
 reflectProperty("TestClass", "prot");

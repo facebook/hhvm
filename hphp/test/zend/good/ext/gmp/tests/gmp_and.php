@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(gmp_strval(gmp_and("111111", "2222222")));
 var_dump(gmp_strval(gmp_and(123123, 435234)));
 var_dump(gmp_strval(gmp_and(555, "2342341123")));

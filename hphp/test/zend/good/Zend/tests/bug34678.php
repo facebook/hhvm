@@ -10,7 +10,7 @@ class B extends A {
         echo "foo\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 if (is_callable(array('B', 'foo'))) {
     call_user_func(array('B', 'foo'));
 }

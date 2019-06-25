@@ -19,7 +19,7 @@ function always_true($input)
 {
   return true;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_filter() : usage variations - different types of array for 'input' argument***\n";
 
 // different types of 'input' array

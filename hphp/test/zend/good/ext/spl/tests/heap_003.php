@@ -11,7 +11,7 @@ class myHeap extends SplHeap {
         return $result;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $h = new myHeap;
 
 $in = range(0,10);

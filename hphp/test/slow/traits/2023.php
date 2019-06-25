@@ -10,7 +10,7 @@ function someFun() {
   return __TRAIT__;
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $t = __TRAIT__;
 var_dump($t);
 $t = MyClass::test();

@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $xml = simplexml_load_string('<root>
 	<first_node_no_ns />
 	<ns1:node1 xmlns:ns1="#ns1" />

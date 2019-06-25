@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $c = new UConverter('utf-8', 'latin1');
 var_dump($c->convert("This is an ascii string"));
 // urlencode so that non-ascii shows up parsable in phpt file

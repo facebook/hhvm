@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(gmp_cmp(123123,-123123));
 var_dump(gmp_cmp("12345678900987654321","12345678900987654321"));
 var_dump(gmp_cmp("12345678900987654321","123456789009876543211"));

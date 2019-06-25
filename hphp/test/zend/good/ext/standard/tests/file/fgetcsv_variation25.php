@@ -8,7 +8,7 @@
    Testing fgetcsv() to read from a file when provided with negative length argument
    along with delimiter and enclosure arguments
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fgetcsv() : with negative length value ***\n";
 
 /* the array is with three elements in it. Each element should be read as

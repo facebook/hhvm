@@ -5,7 +5,7 @@
  * Source code: ext/standard/basic_functions.c
  * Alias to functions: count()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sizeof() : usage variations ***\n";
 
 echo "--- Testing sizeof() for all scalar types in default,COUNT_NORMAL and COUNT_RECURSIVE mode ---\n";

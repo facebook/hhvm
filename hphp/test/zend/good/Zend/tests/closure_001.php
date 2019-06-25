@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $lambda1 = function () {
 	echo "Hello World!\n";
 };

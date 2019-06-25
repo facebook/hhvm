@@ -3,7 +3,7 @@
  * Description: Finds the last occurrence of a character in a string. 
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strrchr() function: error conditions ***\n";
 $haystack = "Hello";
 $needle = "Hello";

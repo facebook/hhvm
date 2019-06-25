@@ -16,7 +16,7 @@ class Bar implements \SplSubject {
     function detach(\SplObserver $x) {
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $foo = new Foo();
 $bar = new Bar();
 $bar->attach($foo);

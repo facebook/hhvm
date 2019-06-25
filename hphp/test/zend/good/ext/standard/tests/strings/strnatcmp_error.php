@@ -3,7 +3,7 @@
  * Description: String comparisons using a "natural order" algorithm
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strnatcmp() : error conditions ***\n";
 echo "-- Testing strnatcmp() function with Zero arguments --\n";
 try { var_dump( strnatcmp() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

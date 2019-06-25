@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $array = array(
 	"127.0.0.1",
 	"10.0.0.1",

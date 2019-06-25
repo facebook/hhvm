@@ -30,7 +30,7 @@ abstract final class LangEngineAssignexecutionorder003 {
   public static $x;
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $b = "bb";
 LangEngineAssignexecutionorder003::$a = "aa";
 

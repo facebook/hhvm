@@ -11,7 +11,7 @@ class bar {
         return $this->z;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(clone (new bar)->z);
 var_dump(clone (new bar)->getZ());
 }

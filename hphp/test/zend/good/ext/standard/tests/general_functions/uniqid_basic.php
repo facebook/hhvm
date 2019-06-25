@@ -3,7 +3,7 @@
  * Description: Gets a prefixed unique identifier based on the current time in microseconds.
  * Source code: ext/standard/uniqid.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing uniqid() : basic functionality ***\n";
 echo "\nuniqid() without a prefix\n";
 var_dump(uniqid());

@@ -6,7 +6,7 @@
  */
 
 // Open handle
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file = 'vfprintf_error3.phpt.txt';
 $fp = fopen( $file, "a+" );
 

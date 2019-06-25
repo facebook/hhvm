@@ -11,7 +11,7 @@ function refVal(&$x, $y) {
     $y = 'changed.y';
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "\n\n-- Val, Ref --\n";
 $a = 'original.a';
 valRef($a, &$a);

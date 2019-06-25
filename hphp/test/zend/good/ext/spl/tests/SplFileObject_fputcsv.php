@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $file = __DIR__ . '/SplFileObject_fputcsv.csv';
 $fo = new SplFileObject($file, 'w');
 

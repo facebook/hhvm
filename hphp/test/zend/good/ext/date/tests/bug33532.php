@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 setlocale(LC_ALL, 'C');
 
 print "TZ has NOT been set\n";

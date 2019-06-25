@@ -3,7 +3,7 @@ function test($str) {
     $res = sha1($str)."\n";
     return $res;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo test("");
 echo test("a");
 echo test("abc");

@@ -5,6 +5,6 @@
   $sid = posix_getsid($pid);
 
   var_dump($sid);
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "===DONE====";
 }

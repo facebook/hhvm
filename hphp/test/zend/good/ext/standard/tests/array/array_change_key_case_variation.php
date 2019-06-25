@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $item = array ("one" => 1, "two" => 2, "THREE" => 3, "FOUR" => "four");
 
 /* use 'case' argument other than CASE_LOWER & CASE_UPPER */

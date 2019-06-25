@@ -8,7 +8,7 @@
 * Test nl2br() function by passing html string inputs containing line breaks and
 *   new line chars for 'str'
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing nl2br() : usage variations ***\n";
 
 //array of html strings

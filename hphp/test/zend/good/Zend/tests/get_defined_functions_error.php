@@ -5,7 +5,7 @@
  * Source code: Zend/zend_builtin_functions.c
 */
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing get_defined_functions() : error conditions ***\n";
 
 

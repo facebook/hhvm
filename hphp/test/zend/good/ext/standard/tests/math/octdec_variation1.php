@@ -3,7 +3,7 @@
  * Description: Returns the decimal equivalent of the octal number represented by the octal_string  argument.
  * Source code: ext/standard/math.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing octdec() : usage variations ***\n";
 //get an unset variable
 $unset_var = 10;

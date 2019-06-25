@@ -12,7 +12,7 @@ class MyClass
      return 'object';
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_flip() : usage variations - unexpected values for 'input' ***\n";
 
 //get an unset variable

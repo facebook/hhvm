@@ -5,7 +5,7 @@
 */
 
 /* Test strrchr() function: with binary values & null terminated strings passed to 'str1' & 'str2' */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Test strrchr() function: binary safe ***\n";
 $haystacks = array(
   "Hello".chr(0)."World",

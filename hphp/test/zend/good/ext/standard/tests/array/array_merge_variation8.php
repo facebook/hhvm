@@ -7,7 +7,7 @@
 /*
  * Test array_merge() with multi-dimensional arrays
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_merge() : usage variations ***\n";
 
 $arr1 = array('zero', 'one', 'two', array(0));

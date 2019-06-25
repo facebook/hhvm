@@ -6,7 +6,7 @@
 */
 
 /* Test fscanf() to scan a file for read when file is opened inwrite only mode */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_path = dirname(__FILE__);
 
 echo "*** Test fscanf(): to read from a file opened in write only mode ***\n"; 

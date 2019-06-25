@@ -9,4 +9,4 @@ class C {
   protected static $prop = 2;
 }
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

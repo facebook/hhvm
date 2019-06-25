@@ -4,6 +4,6 @@ namespace foo;
 
 class bar {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 \class_alias('bar', 'baz');
 }

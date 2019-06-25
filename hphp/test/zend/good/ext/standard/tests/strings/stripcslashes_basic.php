@@ -5,7 +5,7 @@
  *              octal and hexadecimal representation.
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing stripcslashes() : basic functionality ***\n";
 var_dump(stripcslashes('\H\e\l\l\o \W\or\l\d'));
 var_dump(stripcslashes('Hello World\\r\\n'));

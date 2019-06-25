@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 date_default_timezone_set("Pacific/Kwajalein");
 $ts = date_create("Fri Aug 20 1993 23:59:59");
 echo date_format($ts, 'D, d M Y H:i:s T'), "\n";

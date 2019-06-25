@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $xml = <<< XML
 <?xml version="1.0" ?>
 <books>

@@ -7,7 +7,7 @@ trait T1 {
 class C1 {
   use T1 { m1 as a1; }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o = new C1;
 $o->m1();
 $o->a1();

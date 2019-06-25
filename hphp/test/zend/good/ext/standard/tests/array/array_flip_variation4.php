@@ -15,7 +15,7 @@ class MyClass
      return 'object';
    }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_flip() : different invalid values in 'input' array argument ***\n";
 
 $obj = new MyClass();

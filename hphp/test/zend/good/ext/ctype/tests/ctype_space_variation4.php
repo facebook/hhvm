@@ -7,7 +7,7 @@
 /*
  * Pass octal and hexadecimal values as $c to ctype_space() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_space() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");

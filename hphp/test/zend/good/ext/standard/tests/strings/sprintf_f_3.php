@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 setlocale(LC_NUMERIC, "is_IS", "is_IS.UTF-8");
 var_dump(sprintf("%.3f", 100.426));
 var_dump(sprintf("%.2f", 100.426));

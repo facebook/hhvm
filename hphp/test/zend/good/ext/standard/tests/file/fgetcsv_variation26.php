@@ -5,7 +5,7 @@
 */
 
 /* Testing fgetcsv() to read from files opened in write only mode */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fgetcsv() : reading the files opened in write only mode ***\n";
 
 /* the array is with three elements in it. Each element should be read as 

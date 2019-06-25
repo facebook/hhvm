@@ -6,7 +6,7 @@ interface I {}
 class C implements I {}
 
 class X {}
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $classes = array("A", "B", "C", "I", "X");
 
 $instances = array(    "myA" => new A,

@@ -2,7 +2,7 @@
 /* Prototype : bool unlink ( string $filename [, resource $context] );
    Description : Deletes filename
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
 echo "*** Testing unlink() on a file ***\n";

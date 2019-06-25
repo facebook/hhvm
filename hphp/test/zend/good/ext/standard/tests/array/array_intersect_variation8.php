@@ -17,7 +17,7 @@ class classA
     return "Class A object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_intersect() : assoc array with diff values to \$arr2 argument ***\n";
 
 // get an unset variable

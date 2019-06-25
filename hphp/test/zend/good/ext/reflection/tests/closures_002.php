@@ -3,7 +3,7 @@
 class Test {
     function __invoke($a, $b = 0) { }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $rm = new ReflectionMethod(new Test, '__invoke');
 var_dump($rm->getName());
 var_dump($rm->getNumberOfParameters());

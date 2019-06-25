@@ -7,7 +7,7 @@
   Description: Attempts to change the mode of the file specified by
     filename to that given in mode
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing error conditions for fileperms(), chmod() ***\n";
 
 /* With standard files and dirs */

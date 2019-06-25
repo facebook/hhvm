@@ -5,7 +5,7 @@
 */
 
 /* Testing is_dir() with base and sub dirs */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
 echo "-- Testing is_dir() with an empty dir --\n";

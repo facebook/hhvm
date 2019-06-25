@@ -13,7 +13,7 @@ class Base {
 class MyHelloWorld extends Base{
   use SayWorld;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o = new MyHelloWorld();
 $o->sayHello();
 }

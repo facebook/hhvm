@@ -4,7 +4,7 @@ function test(closure $a) {
     var_dump($a());
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 test(function() { return new stdclass; });
 
 test(function() { });

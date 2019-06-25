@@ -7,7 +7,7 @@
 /*
  * Pass incorrect number of arguments to prev() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing prev() : error conditions ***\n";
 
 // Zero arguments

@@ -4,7 +4,7 @@
  * Description: Return ASCII value of character
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ord() : basic functionality ***\n";
 
 var_dump(ord("a"));

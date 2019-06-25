@@ -7,7 +7,7 @@
 /* Test nl2br() function by passing heredoc strings containing various
  *   combinations of new line chars to 'str' argument
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing nl2br() : usage variations ***\n";
 //heredoc string containing new line chars(\n, \r and combinations of \r & \n) and new lines
 $heredoc_str1 = <<<EOD

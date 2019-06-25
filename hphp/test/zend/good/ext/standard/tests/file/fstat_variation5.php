@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $variation_array = array (
     'int 0' => 0,
     'int 1' => 1,

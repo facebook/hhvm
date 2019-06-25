@@ -25,7 +25,7 @@ class B extends A {
     /** A doc comment for $e */
     var $e;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 foreach(array('A', 'B') as $class) {
     $rc = new ReflectionClass($class);
     $rps = $rc->getProperties();

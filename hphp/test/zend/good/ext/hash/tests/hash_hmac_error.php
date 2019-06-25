@@ -3,7 +3,7 @@
 * proto string hash_hmac ( string algo, string data, string key [, bool raw_output] )
 * Function is implemented in ext/hash/hash.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing hash_hmac() : error conditions ***\n";
 
 $data = "This is a sample string used to test the hash_hmac function with various hashing algorithms";

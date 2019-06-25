@@ -6,7 +6,7 @@ class T {
         echo "-\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o=new T();
 $o->f(new P);
 $o->f();

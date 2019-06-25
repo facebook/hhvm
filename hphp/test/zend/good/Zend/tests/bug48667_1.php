@@ -2,4 +2,4 @@
 
 abstract class A implements Iterator, IteratorAggregate { }
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

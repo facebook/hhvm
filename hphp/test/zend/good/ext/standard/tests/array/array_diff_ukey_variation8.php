@@ -8,7 +8,7 @@ function key_compare_func($key1, $key2)
 {
   return strcasecmp((string)$key1, (string)$key2);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff_ukey() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)

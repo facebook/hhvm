@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $map = array(0, 0x10FFFF, 0, 0xFFFFFF);
 var_dump(mb_decode_numericentity('&', $map, 'UTF-8'));
 var_dump(mb_decode_numericentity('&&&', $map, 'UTF-8'));

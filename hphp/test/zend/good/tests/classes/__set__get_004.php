@@ -16,7 +16,7 @@ class Test {
         $this->x[$name] = $val;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $foo = new Test();
 $bar = new Test();
 $bar->baz = "Check";

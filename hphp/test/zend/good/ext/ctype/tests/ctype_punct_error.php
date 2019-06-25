@@ -8,7 +8,7 @@
 /*
  * Pass incorrect number of arguments to ctype_punct() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_punct() : error conditions ***\n";
 
 $orig = setlocale(LC_CTYPE, "C"); 

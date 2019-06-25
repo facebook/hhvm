@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 mb_substitute_character(0x3f);
 
 echo "SJIS-Mobile to Unicode\n";

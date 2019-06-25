@@ -1,7 +1,7 @@
 <?hh
 class C {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $r1 = new ReflectionClass("stdClass");
 $r2 = new ReflectionClass("ReflectionClass");
 $r3 = new ReflectionClass("ReflectionProperty");

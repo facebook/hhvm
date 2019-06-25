@@ -10,7 +10,7 @@ class TraitsTest {
     use THello { THello::a as b; }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 error_reporting(E_ALL);
 $test = new TraitsTest();
 $test->a();

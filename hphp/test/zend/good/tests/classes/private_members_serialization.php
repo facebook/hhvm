@@ -13,6 +13,6 @@ class bar extends foo
         return array("\0foo\0private", 'protected', 'public');
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(str_replace("\0", '\0', serialize(new bar())));
 }

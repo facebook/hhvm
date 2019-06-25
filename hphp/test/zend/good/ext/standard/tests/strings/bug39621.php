@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $search =  "qxxx\0qqqqqqqq";
 $subject = "qxxx\0xxxxxxxx";
 $replace = "any text";

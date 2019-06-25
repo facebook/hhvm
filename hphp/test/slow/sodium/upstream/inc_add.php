@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $notStr = 123;
 try {
   sodium_increment(&$notStr);

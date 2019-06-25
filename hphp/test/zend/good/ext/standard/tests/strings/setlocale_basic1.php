@@ -34,7 +34,7 @@ function list_system_locales() {
 
 /* Collect existing system locales and set one among them,
    Check the currency settings in the new locale  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing setlocale() : basic functionality - set to a specific locale ***\n";
 //set of locales to be used
 $common_locales = array(

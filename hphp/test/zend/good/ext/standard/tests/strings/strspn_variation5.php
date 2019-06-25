@@ -9,7 +9,7 @@
 /*
 * Testing strspn() : with different heredoc strings as str argument
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strspn() : with heredoc strings ***\n";
 
 // initialing required variables

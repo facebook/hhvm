@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 date_default_timezone_set('UTC');
 $db = new DateTime( '2008-01-01' );
 $de = new DateTime( '2008-12-31' );

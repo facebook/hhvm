@@ -16,6 +16,6 @@ class FooBar extends Foo implements ia {
         return ia::c;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 new FooBar;
 }

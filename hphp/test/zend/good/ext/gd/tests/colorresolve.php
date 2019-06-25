@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $im = imagecreatetruecolor(5,5);
 $c = imagecolorresolve($im, 255,0,255);
 printf("%X\n", $c);

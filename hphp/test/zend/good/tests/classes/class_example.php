@@ -31,7 +31,7 @@ function test($u) {
   return $t;  /* and also return them as return values */
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $user1 = new user;
 $user2 = new user;
 

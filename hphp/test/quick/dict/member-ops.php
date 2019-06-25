@@ -348,7 +348,7 @@ function fini($a) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 base(dict[1 => ['a' => 100], 2 => "", "1" => ['a' => 500]]);
 dim([null, dict[1 => ['a' => 100], 2 => "", "1" => ['a' => 500]]]);
 fini([null, dict[1 => "abc", 2 => "", "1" => "def"]]);

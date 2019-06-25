@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $image = imagecreatetruecolor(100, 100);
 
 //setting the interlace bit to on

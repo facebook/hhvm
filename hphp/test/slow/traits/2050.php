@@ -16,7 +16,7 @@ trait T2 {
 trait T3 {
  use T2;
  }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 C::foo();
 D::foo();
 T::foo();

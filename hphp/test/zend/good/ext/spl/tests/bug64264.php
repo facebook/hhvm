@@ -3,7 +3,7 @@ class MyFixedArray extends \SplFixedArray {
     protected $foo;
     protected $bar;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $myFixedArr = new MyFixedArray(1);
 $myFixedArr[0] = 'foo';
 $myFixedArr->setSize(2);

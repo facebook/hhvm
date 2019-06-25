@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $f = dirname(__FILE__)."/004.txt.gz";
 $h = gzopen($f, 'r');
 $extra_arg = 'nothing';

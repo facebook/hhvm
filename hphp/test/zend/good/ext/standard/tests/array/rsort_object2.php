@@ -43,7 +43,7 @@ class for_string_rsort
     }
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing rsort() : object functionality ***\n";
 
 // array of integer objects

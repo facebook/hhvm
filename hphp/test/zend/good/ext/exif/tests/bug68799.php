@@ -22,7 +22,7 @@ function doStuff ($limit) {
 
   gc_collect_cycles();
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $iterations = 3;
 
 doStuff($iterations);

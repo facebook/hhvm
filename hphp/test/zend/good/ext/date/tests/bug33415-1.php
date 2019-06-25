@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 print "TZ=America/Jujuy  - Is it OK for this to be 2 AM, rather than 1
 AM as per most DST transitions?\n";
 date_default_timezone_set("America/Jujuy");

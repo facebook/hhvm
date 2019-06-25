@@ -8,7 +8,7 @@
    Testing fgetcsv() to read a file when provided with default enclosure character 
    and with delimiter of two characters 
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fgetcsv() : with default enclosure & delimiter of two chars ***\n";
 
 /* the array is with two elements in it. Each element should be read as 

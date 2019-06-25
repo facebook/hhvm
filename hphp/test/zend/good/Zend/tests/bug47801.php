@@ -15,7 +15,7 @@ class B extends A
     parent::getFoo();
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new A();
 $a->getFoo();
 

@@ -1,7 +1,7 @@
 <?hh
 
 // Create a image
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $image = imagecreatetruecolor(400, 300);
 // Draw a white ellipse
 imageellipse($image, 200, 150, 300, 200, 16777215);

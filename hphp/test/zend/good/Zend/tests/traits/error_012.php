@@ -7,7 +7,7 @@ trait foo {
 class bar {
     use foo { test as protected; }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $x = new bar;
 var_dump($x->test());
 }

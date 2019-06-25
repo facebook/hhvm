@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $url = "http://www.payp\xD0\xB0l.com";
 
 $x = new Spoofchecker();

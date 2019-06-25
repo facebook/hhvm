@@ -7,7 +7,7 @@
 /*
  * Pass rsort() an array of hexadecimal values to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing rsort() : variation ***\n";
 
 // an array contains unsorted hexadecimal values

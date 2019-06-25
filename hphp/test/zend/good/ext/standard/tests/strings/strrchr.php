@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(strrchr("", ""));
 var_dump(strrchr("abc", ""));
 var_dump(strrchr("", "abc"));

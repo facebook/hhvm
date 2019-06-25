@@ -14,7 +14,7 @@ class English {
     echo $this->getHi() . $this->getName();
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $e = new English();
 $e->sayHello();
 }

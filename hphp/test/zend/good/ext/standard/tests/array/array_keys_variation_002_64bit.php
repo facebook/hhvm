@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "\n*** Testing array_keys() on range of values ***\n";
 $arr_range = array(
   2147483647 => 1,

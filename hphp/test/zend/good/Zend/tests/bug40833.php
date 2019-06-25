@@ -54,7 +54,7 @@ class myset implements ArrayAccess
     {
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $entity = new entity();
 echo($entity->whatever[0]);
 

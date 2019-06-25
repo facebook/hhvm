@@ -4,7 +4,7 @@ class Foo {
     return array('Hello', 'World');
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $obj=new Foo();
 foreach($obj->arr as $value)
   echo "$value\n";

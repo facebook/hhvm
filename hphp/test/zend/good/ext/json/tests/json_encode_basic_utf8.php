@@ -3,7 +3,7 @@
  * Description: Returns the JSON representation of a value
  * Source code: ext/json/php_json.c
  * Alias to functions:  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing json_encode() : basic functionality with UTF-8 input***\n";
 
 $utf8_string = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII=');

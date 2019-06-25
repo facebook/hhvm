@@ -15,7 +15,7 @@ class A {
         echo $this->x."\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new A;
 $a->printX();
 $getClosure = $a->getClosureGetter();

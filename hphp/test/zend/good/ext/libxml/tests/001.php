@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(libxml_use_internal_errors(false));
 var_dump(libxml_use_internal_errors(true));
 var_dump(libxml_use_internal_errors());

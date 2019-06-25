@@ -6,7 +6,7 @@
  */
 class sample  {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing json_encode() : basic functionality ***\n";
 
 //get an unset variable

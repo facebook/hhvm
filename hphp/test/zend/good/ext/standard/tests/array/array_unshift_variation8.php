@@ -9,7 +9,7 @@
  * single quoted strings for $var argument that is prepended to the array
  * passed through $array argument
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_unshift() : single quoted strings for \$var argument ***\n";
 
 // array to be passed to $array argument

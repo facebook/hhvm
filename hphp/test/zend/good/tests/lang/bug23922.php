@@ -9,7 +9,7 @@ class foo
   function as_expr()
   { assert($this->foo == 1); }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $foo = new foo();
 $foo->as_expr();
 $foo->as_string();

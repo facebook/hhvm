@@ -7,7 +7,7 @@
 /* Test strrchr() function by passing heredoc string containing 
  *  escape sequences for haystack and with various needles
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strrchr() function: with heredoc strings ***\n";
 $escape_char_str = <<<EOD
 \tes\t st\r\rch\r using

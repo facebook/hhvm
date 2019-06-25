@@ -3,7 +3,7 @@ class aclass
 {
     const myConst = "hello";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "\nRead class constant.\n";
 var_dump(aclass::myConst);
 

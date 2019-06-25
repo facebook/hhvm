@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 print " 1 DOMDocument::createElement('valid')\n";
 try {
     $dom = new domDocument;

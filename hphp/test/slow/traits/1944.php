@@ -11,7 +11,7 @@ class TheWorldIsNotEnough {
     echo "Hello Universe!\n";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o = new TheWorldIsNotEnough();
 $o->sayHello();
 }

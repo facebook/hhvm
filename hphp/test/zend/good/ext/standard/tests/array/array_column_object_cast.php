@@ -11,7 +11,7 @@ class ValueClass {
     function __toString() { return '2135'; }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $column_key = new ColumnKeyClass();
 $index_key = new IndexKeyClass();
 $value = new ValueClass();

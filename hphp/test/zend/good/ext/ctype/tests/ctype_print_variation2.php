@@ -8,7 +8,7 @@
  * Pass different integers to ctype_print() to test which character codes are considered
  * valid printable characters
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_print() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");

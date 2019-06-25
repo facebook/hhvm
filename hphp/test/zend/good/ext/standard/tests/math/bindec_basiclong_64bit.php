@@ -4,7 +4,7 @@ const MAX_64Bit = 9223372036854775807;
 const MAX_32Bit = 2147483647;
 const MIN_64Bit = -9223372036854775807 - 1;
 const MIN_32Bit = -2147483647 - 1;
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $binLongStrs = array(
    '0'.str_repeat('1',63),
    str_repeat('1',64),

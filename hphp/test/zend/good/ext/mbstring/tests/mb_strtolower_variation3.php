@@ -8,7 +8,7 @@
  * Pass a Japanese string and a mixed Japanese and ASCII string to mb_strtolower
  * to check correct conversion is occuring (Japanese characters should not be converted).
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_strtolower() : usage variations ***\n";
 
 $string_mixed = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCUEhQLiAwMTIzNO+8le+8lu+8l++8mO+8meOAgg==');

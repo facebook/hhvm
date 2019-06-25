@@ -8,7 +8,7 @@
 /*
  * Test basic functionality of array_diff_assoc
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff_assoc() : basic functionality ***\n";
 $array_default_key = array('one',       2,            'three', '4');
 $array_numeric_key = array(1 => 'one',  2=> 'two',    3 => 4);

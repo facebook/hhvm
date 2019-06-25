@@ -6,7 +6,7 @@
    reached, (for network streams) when a packet becomes available, or (after
    opening userspace stream) when 8192 bytes have been read whichever comes first.
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing error conditions ***\n";
 $filename = __FILE__;
 $file_handle = fopen($filename, "r");

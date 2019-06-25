@@ -7,7 +7,7 @@ class foo {
         echo 'Called function foo:bar('.$param.')'."\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $foo = new foo();
 
 call_user_func_array( array( $foo , 'bar' ) , array( '2' ) );

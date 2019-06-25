@@ -6,7 +6,7 @@ function replace_spaces($text) {
     };
     return preg_replace_callback('/( +) /', $lambda, $text);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo replace_spaces("1 2 3\n");
 echo replace_spaces("1  2  3\n");
 echo replace_spaces("1   2   3\n");

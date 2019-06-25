@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $ts = new MongoTimestamp('60', '30');
 var_dump($ts->sec);
 var_dump($ts->inc);

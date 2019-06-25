@@ -3,7 +3,7 @@
  * Description: Returns the entries of arr1 that have keys which are not present in any of the others arguments. 
  * Source code: ext/standard/array.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff_key() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)

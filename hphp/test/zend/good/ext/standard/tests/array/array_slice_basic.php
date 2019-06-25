@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of array_slice()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_slice() : basic functionality ***\n";
 
 

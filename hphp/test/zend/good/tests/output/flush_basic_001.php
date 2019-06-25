@@ -5,7 +5,7 @@
  */
 
 // Verify return type
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(flush());
 // Ensure user buffers are not flushed by flush()
 ob_start();

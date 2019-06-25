@@ -4,7 +4,7 @@
  * Source code: main/output.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ob_clean() : error conditions ***\n";
 
 // One argument

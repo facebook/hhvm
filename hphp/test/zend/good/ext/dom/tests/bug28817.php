@@ -15,7 +15,7 @@ class z extends domDocument{
         $this->p_variable = 'Cessante causa cessat effectus';
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $z=new z();
 var_dump($z->p_array);
 var_dump($z->p_variable);

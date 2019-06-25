@@ -11,7 +11,7 @@ class foo {
         return $this;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $X = (new foo)->setX(10)->getX();
 var_dump($X); // int(10)
 }

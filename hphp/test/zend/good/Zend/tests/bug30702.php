@@ -15,7 +15,7 @@ class bar extends foo {
   public $c5=foo::C1;
   public $c6=parent::C1;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $x= new bar();
 var_dump($x);
 }

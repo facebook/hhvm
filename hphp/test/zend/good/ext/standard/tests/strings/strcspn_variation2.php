@@ -16,7 +16,7 @@ class sample  {
     return "object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 error_reporting(E_ALL & ~E_NOTICE);
 
 echo "*** Testing strcspn() : with different unexpected values of mask argument ***\n";

@@ -6,7 +6,7 @@ function foo () {
      throw new Exception("finally");
    }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 try {
   foo();
 } catch (Exception $e) {

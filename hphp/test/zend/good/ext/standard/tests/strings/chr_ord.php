@@ -4,7 +4,7 @@
 
    Prototype: int ord ( string $string );
    Description: Returns the ASCII value of the first character of string */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ord() & chr() basic operations ***\n";
 for($i=0; $i<256; $i++) echo !ord(chr($i)) == $i;
 

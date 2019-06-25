@@ -5,7 +5,7 @@ function start_elem($parser,$name,$attribs) {
 function end_elem()
 {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $xml = <<<HERE
 <foo:a xmlns:foo="http://example.com/foo"
        xmlns:bar="http://example.com/bar"

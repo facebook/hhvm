@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $obj = function(){};
 
 var_dump(property_exists($obj,'foo'));

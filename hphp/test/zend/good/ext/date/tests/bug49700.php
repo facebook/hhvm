@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 gc_enable();
 $objs = array();
 $objs[1] = new DateTime();

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $data = "openssl_open() test";
 $pub_key = "file://" . dirname(__FILE__) . "/public.key";
 $priv_key = "file://" . dirname(__FILE__) . "/private.key";

@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $large_exp = 20000;
 
 echo "\n-- The following all result in INF --\n";

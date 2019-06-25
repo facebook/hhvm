@@ -11,7 +11,7 @@ class a
        return "unknown method";
    }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 set_error_handler('my_error_handler');
 
 $b = new a;

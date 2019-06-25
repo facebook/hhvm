@@ -18,7 +18,7 @@ class C {
         throw new Exception;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $x = new C;
 $x->byePHP($x->plip());
 }

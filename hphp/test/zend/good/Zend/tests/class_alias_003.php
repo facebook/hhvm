@@ -9,7 +9,7 @@ class foo {
         return new static;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new foo;
 var_dump($a->test());
 }

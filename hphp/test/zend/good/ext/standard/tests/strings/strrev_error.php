@@ -3,7 +3,7 @@
  * Description: Reverse a string 
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strrev() : error conditions ***\n";
 echo "-- Testing strrev() function with Zero arguments --";
 try { var_dump( strrev() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

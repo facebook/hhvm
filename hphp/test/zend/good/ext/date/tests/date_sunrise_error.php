@@ -3,7 +3,7 @@
  * Description: Returns time of sunrise for a given day and location 
  * Source code: ext/date/php_date.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing date_sunrise() : error conditions ***\n";
 
 //Initialise the variables

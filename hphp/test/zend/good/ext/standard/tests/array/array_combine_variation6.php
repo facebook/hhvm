@@ -9,7 +9,7 @@
 * Testing the behavior of array_combine() by passing array with
 * binary values for $keys and $values argument.
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_combine() : binary safe checking ***\n";
 
 // array with binary values

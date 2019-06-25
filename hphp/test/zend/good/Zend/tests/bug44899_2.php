@@ -19,7 +19,7 @@ class myclass
         return $this->_data[$var];
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $arr = array('foo' => '');
 
 $myclass = new myclass($arr) ;

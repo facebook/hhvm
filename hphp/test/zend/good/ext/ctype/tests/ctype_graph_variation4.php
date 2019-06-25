@@ -7,7 +7,7 @@
 /*
  * Pass octal and hexadecimal values to ctype_graph() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_graph() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");

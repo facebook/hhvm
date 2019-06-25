@@ -2,7 +2,7 @@
 /* Prototype: array glob ( string $pattern [, int $flags] );
    Description: Find pathnames matching a pattern
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_path = dirname(__FILE__);
 
 // temp dirname used here

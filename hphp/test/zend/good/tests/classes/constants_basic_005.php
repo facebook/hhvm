@@ -5,6 +5,6 @@ class C
     const CONST_1 = self::BASE_CONST;
     const BASE_CONST = 'hello';
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(C::CONST_1, C::CONST_2);
 }

@@ -3,7 +3,7 @@
  * Description: Generates a URL-encoded query string from the associative (or indexed) array provided. 
  * Source code: ext/standard/http.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $mDimensional = array(
   20, 
   5 => 13, 

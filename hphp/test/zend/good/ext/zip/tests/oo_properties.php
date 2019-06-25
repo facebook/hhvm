@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $dirname = dirname(__FILE__) . '/';
 $file = $dirname . '__property_test.zip';
 

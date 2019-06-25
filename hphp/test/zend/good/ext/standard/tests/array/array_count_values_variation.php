@@ -14,7 +14,7 @@ class A {
       echo "Hello\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_count_values() : parameter variations ***\n";
 
 $ob = new A();

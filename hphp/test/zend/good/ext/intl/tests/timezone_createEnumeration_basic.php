@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 ini_set("intl.error_level", E_WARNING);
 $tz = IntlTimeZone::createEnumeration();
 var_dump(get_class($tz));

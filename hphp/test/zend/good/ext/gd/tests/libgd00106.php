@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $im = imagecreatetruecolor(10,10);
 imagerectangle($im, 1,1, 1,1, 0xFFFFFF);
 $c1 = imagecolorat($im, 1,1);

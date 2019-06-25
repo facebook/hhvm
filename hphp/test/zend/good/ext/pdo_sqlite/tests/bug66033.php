@@ -6,7 +6,7 @@ class DBStatement extends PDOStatement {
         throw new Exception("Blah");
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $pdo = new PDO('sqlite::memory:', '', '');
 $pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('DBStatement',
     array($pdo)));

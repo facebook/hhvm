@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of array_values()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_values() : basic functionality ***\n";
 
 

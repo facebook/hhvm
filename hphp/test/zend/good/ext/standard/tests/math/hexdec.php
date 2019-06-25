@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(hexdec("012345"));
 var_dump(hexdec("12345"));
 var_dump(hexdec("q12345"));

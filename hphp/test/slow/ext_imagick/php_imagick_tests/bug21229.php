@@ -17,7 +17,7 @@ class ImagickTest extends Imagick {
         return $this->test;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $test = new ImagickTest("magick:logo");
 $test->setTestValue("test value");
 

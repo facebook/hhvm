@@ -8,7 +8,7 @@
    Testing fgetcsv() to read a file whose file pointer is pointing to end of file
    and fgetcsv() provided with file handle and length arguments
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fgetcsv() : with file handle and length arguments, file pointer pointing at end of file ***\n";
 
 /* the array is with two elements in it. Each element should be read as 

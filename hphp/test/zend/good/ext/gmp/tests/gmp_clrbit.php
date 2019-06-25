@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $n = gmp_init(0);
 gmp_clrbit(&$n, 0);
 var_dump(gmp_strval($n));

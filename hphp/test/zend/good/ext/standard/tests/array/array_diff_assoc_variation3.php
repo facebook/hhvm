@@ -16,7 +16,7 @@ class classA
     return "Class A object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "\n*** Testing array_diff_assoc() : usage variations ***\n";
 
 $array = array(1, 2, 3);

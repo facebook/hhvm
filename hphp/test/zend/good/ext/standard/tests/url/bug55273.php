@@ -4,7 +4,7 @@ function test($s) {
     $r = base64_decode($v, True);
     var_dump($v, $r);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 test('PHP');
 test('PH');
 test('P');

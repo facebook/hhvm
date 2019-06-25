@@ -31,7 +31,7 @@ function runtest() {
     rmdir($tempDir);
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fopen() : variation ***\n";
 $newpath = create_include_path();
 set_include_path($newpath);

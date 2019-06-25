@@ -16,7 +16,7 @@ class foo {
 function test() {
     return new foo;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = test()->bar = 1;
 var_dump($a, count(foo::$bar), test()->whatever);
 

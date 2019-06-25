@@ -20,7 +20,7 @@ class MyHelloWorld{
     MY_TRAIT2::sayHello insteadof MY_TRAIT1, MY_TRAIT3;
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o = new MyHelloWorld();
 $o->sayHello();
 }

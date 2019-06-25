@@ -4,6 +4,6 @@
   $pgrp = posix_getpgrp();
 
   var_dump($pgrp);
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "===DONE====";
 }

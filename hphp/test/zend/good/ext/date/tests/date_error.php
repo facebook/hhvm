@@ -3,7 +3,7 @@
  * Description: Format a local time/date.
  * Source code: ext/date/php_date.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing date() : error conditions ***\n";
 
 //Set the default time zone 

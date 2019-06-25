@@ -3,7 +3,7 @@
  * Description: Find out the number of colors in an image's palette
  * Source code: ext/gd/gd.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing imagecolorstotal() : basic functionality ***\n";
 
 // Get an image 

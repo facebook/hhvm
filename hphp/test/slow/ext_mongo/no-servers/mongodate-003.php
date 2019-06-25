@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $date = new MongoDate(0, 0);
 printf("%d.%06d\n", $date->sec, $date->usec);
 

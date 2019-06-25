@@ -22,7 +22,7 @@ class hariCow extends FIIFO {
 
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $db = new hariCow;
 
 echo $db;

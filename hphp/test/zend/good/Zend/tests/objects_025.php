@@ -5,7 +5,7 @@ class foo {
         print "non-static - ok\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new foo;
 $a->foooo();
 

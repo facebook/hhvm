@@ -10,7 +10,7 @@ class foo {
         return new bar();
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $foo = new foo();
 try {
     echo $foo->bar->get_name();

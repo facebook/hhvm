@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $fn = __DIR__ . "/test.tmp";
 @unlink($fn);
 $fh = fopen($fn, 'xb');

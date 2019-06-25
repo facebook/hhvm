@@ -20,7 +20,7 @@ class classA {
         return "$this->dir_path";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing chdir() : usage variations ***\n";
 
 // create the temporary directory

@@ -5,7 +5,7 @@ class Test {
     }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $f = new ReflectionMethod('Test', 'func');
 var_dump($f->getNumberOfParameters());
 var_dump($f->getNumberOfRequiredParameters());

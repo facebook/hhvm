@@ -37,7 +37,7 @@ class dafna_class {
     }
 };
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 error_reporting(1023);
 
 for ($i=0; $i<200; $i++) {

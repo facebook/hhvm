@@ -8,7 +8,7 @@ class hello_world {
     return 'Bye ' . $to;
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $server = new SoapServer(NULL, array("uri"=>"test://"));
 $server->setClass('hello_world');
 $functions = $server->getFunctions();

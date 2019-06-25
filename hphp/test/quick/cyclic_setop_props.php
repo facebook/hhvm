@@ -27,7 +27,7 @@ function cyclic_prop_nondeclared_setop_props() {
   var_dump($a);
   var_dump($a->q0->r1 .= "ok");
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 cyclic_prop_declared_setop_props();
 cyclic_prop_nondeclared_setop_props();
 }

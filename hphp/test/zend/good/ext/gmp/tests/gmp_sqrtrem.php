@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $r = gmp_sqrtrem(-1);
 var_dump(gmp_strval($r[0]));
 var_dump(gmp_strval($r[1]));

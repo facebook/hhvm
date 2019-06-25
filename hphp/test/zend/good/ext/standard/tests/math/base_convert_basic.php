@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $frombase = array(2,8,10,16,36);
 $tobase = array(2,8,10,16,36);
 

@@ -18,7 +18,7 @@ function Error2Exception($errno, $errstr, $errfile, $errline)
 {
     throw new MyException($errstr, $errno, $errfile, $errline);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $err_msg = 'no exception';
 set_error_handler('Error2Exception');
 

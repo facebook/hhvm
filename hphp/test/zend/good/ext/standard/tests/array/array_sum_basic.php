@@ -3,7 +3,7 @@
  * Description: Returns the sum of the array entries 
  * Source code: ext/standard/array.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_sum() : basic functionality ***\n";
 
 // array with integer values

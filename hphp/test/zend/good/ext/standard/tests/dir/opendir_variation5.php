@@ -9,7 +9,7 @@
  *   1) remove write & execute permission from the 1st parent and test opendir()
  *   2) remove execute permission from 2nd parent and test opendir()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing opendir() : usage variations ***\n";
 
 /* create the temporary directory :

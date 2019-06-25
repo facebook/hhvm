@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 foreach (array(PREG_PATTERN_ORDER, PREG_SET_ORDER) as $flag) {
 	var_dump(preg_match_all('~
 		(?P<date>

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 echo bcdiv("1", "2"),"\n";
 echo bcdiv("1", "2", 2),"\n";
 echo bcdiv("-1", "5", 4),"\n";

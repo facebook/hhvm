@@ -2,7 +2,7 @@
 /*
 * proto string preg_quote(string str [, string delim_char])
 * Function is implemented in ext/pcre/php_pcre.c */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing preg_quote() : error conditions ***\n";
 // Zero arguments
 echo "\n-- Testing preg_quote() function with Zero arguments --\n";

@@ -18,7 +18,7 @@ class test
     return "testObject";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing join() : usage variations ***\n";
 // initialize all required variables
 $glue = '::';

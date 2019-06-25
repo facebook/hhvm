@@ -15,7 +15,7 @@ class C {
         echo "C::foo() works.\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o = new C;
 $o->foo();
 }

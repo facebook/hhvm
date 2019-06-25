@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $array = array('a', 'b', 'c');
 $arrayIterator = new ArrayIterator($array);
 

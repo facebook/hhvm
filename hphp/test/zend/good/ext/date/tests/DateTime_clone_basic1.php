@@ -1,7 +1,7 @@
 <?hh
 
 //Set the default time zone
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 date_default_timezone_set('Europe/London');
 echo "*** Testing clone on DateTime objects ***\n";
 

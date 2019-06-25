@@ -33,7 +33,7 @@ class SelfSerializingTest extends SerializingTest
         return $this;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $adata = array(
     'str'    => 'foo',
     'int'    => 1,

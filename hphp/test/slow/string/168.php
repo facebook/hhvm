@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $s = 'x';
 var_dump(strrpos($s.'0', $s));
 for ($i = -7;

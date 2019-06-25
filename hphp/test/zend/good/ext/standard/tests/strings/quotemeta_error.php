@@ -4,7 +4,7 @@
  * Description: Quote meta characters
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing quotemeta() : error conditions ***\n";
 
 echo "\n-- Testing quotemeta() function with no arguments --\n";

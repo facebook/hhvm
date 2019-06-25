@@ -22,7 +22,7 @@ class TestClass
         call_user_func(array('TestClass', 'test'));
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 TestClass::test();
 
 $a = new TestClass();

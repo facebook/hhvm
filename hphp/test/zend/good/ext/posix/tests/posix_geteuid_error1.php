@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 echo "*** Test by calling method or function with incorrect numbers of arguments ***\n";
 
 $extra_args = array( 12312, 2 => '1234', 'string' => 'string' );

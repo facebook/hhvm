@@ -8,7 +8,7 @@
   Testing fgetcsv() to read a line without any csv fields from a file
   when provided with default enclosure value
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fgetcsv() : with default enclosure, line without any csv fields ***\n";
 
 $filename = dirname(__FILE__) . '/fgetcsv_variation20.tmp';

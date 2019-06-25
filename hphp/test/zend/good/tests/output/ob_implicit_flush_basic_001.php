@@ -4,7 +4,7 @@
  * Source code: main/output.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ob_implicit_flush() : check return value ***\n";
 
 var_dump(ob_implicit_flush());

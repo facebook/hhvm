@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $str = <<< EOF
 [section]
 part1.*.part2 = 1

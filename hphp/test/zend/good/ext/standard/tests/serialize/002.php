@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 var_dump(unserialize('b:0;'));
 var_dump(unserialize('b:1;'));
 var_dump(unserialize('i:823;'));

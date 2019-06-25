@@ -12,7 +12,7 @@ class Ext extends Base
         echo $param, "\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new Ext();
 $a->someMethod("foo");
 $a->someMethod();

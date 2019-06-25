@@ -4,7 +4,7 @@
  * Description: Directory class with properties, handle and class and methods read, rewind and close
  * Source code: ext/standard/dir.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing dir() : error conditions ***\n";
 
 // Zero arguments

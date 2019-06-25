@@ -4,7 +4,7 @@
 */
 
 /* Delete link files - soft and hard links */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 // temp file used
 $filename = "$file_path/unlink_variation3.tmp";

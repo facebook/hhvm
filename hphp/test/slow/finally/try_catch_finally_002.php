@@ -32,6 +32,6 @@ function foo () {
     }
    return 7;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(foo());
 }

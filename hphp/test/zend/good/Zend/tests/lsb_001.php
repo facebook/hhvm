@@ -31,7 +31,7 @@ class ChildClass1 extends TestClass {
 }
 
 class ChildClass2 extends TestClass {}
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo TestClass::testStaticVar() . "\n";
 echo TestClass::testClassConst() . "\n";
 echo TestClass::testStaticFunction() . "\n";

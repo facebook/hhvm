@@ -7,7 +7,7 @@
 /*
  * Test stripslashes() with strings containing newline and tab characters.
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing stripslashes() : with strings containing newline and tab characters ***\n";
 
 // initialising  heredoc strings

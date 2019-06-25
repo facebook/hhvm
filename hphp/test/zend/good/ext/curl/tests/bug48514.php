@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $ch1 = curl_init();
 var_dump($ch1);
 var_dump(get_resource_type($ch1));

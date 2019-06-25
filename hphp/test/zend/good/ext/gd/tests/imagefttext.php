@@ -35,4 +35,4 @@
     var_dump(testrun($im, $fontfile_8859));
     imagedestroy($im);
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

@@ -20,7 +20,7 @@ function callback($a)
 {
   return $a;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_map() : unexpected values for 'arr1' ***\n";
 
 //get an unset array variable

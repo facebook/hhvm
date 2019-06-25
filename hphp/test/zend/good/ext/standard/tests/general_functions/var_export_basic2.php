@@ -5,7 +5,7 @@
  * Source code: ext/standard/var.c
  * Alias to functions:
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing var_export() with valid boolean values ***\n";
 // different valid  boolean vlaues
 $valid_bool = array(

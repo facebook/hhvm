@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $doc = new DOMDocument;
 
 $node = $doc->createElement("para");

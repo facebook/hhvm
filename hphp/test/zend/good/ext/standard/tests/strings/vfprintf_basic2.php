@@ -7,7 +7,7 @@
 /*
  *  Testing vfprintf() : basic functionality - using integer format
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing vfprintf() : basic functionality - using integer format ***\n";
 
 // Initialise all required variables

@@ -13,7 +13,7 @@
  try { var_dump( ltrim("", " ", 1) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* heredoc string */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $str = <<<EOD
 us
 ing heredoc string

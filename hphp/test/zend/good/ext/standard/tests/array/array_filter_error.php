@@ -12,7 +12,7 @@
 function odd($input) {
   return ($input % 2 != 0);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_filter() : error conditions ***\n";
 
 $input = array(0, 1, 2, 3, 5);

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $data = array(
     'product_id'    => 'libgd<script>',
     'component'     => '10dhsajkkdhk <do>',

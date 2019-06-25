@@ -11,7 +11,7 @@
  * Normalize author. Calculate the number of title text nodes (2).
  * Normalize title. Calculate the number of title text nodes (1).
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $doc = new DOMDocument();
 
 $root = $doc->createElement('book');

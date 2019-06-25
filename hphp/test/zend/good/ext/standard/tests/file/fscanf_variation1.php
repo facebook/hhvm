@@ -6,7 +6,7 @@
 */
 
 /* test fscanf() for its return type */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_path = dirname(__FILE__);
 
 echo "*** Testing fscanf(): for its return type without third argument ***\n";

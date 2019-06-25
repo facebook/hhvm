@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 echo md5("")."\n";
 echo md5("a")."\n";
 echo md5("abc")."\n";

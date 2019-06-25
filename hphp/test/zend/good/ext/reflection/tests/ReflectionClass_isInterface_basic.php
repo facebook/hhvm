@@ -3,7 +3,7 @@
 interface TestInterface {}
 class TestClass {}
 interface DerivedInterface extends TestInterface {}
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $reflectionClass = new ReflectionClass('TestInterface');
 $reflectionClass2 = new ReflectionClass('TestClass');
 $reflectionClass3 = new ReflectionClass('DerivedInterface');

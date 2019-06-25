@@ -27,7 +27,7 @@ class hariCow extends FIIFO {
     }
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 try {
     $db = new FIIFO();
 } catch(Exception $e) {

@@ -5,7 +5,7 @@
  */
 
 /* trim with empty string - retuns an empty string */
-<<__EntryPoint>> function main() { echo "\n";
+<<__EntryPoint>> function main(): void { echo "\n";
 $null_var = "";
 var_dump( trim($null_var) );
 

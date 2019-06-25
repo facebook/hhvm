@@ -4,7 +4,7 @@ namespace test\baz;
 
 class foo {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 new foo;
 
 $alias1 = __NAMESPACE__ .'\T';

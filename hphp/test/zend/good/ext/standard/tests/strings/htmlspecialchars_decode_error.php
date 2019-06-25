@@ -3,7 +3,7 @@
  * Description: Convert special HTML entities back to characters 
  * Source code: ext/standard/html.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing htmlspecialchars_decode() : error conditions ***\n";
 
 // Zero arguments

@@ -13,7 +13,7 @@ class Foo {
 class FooChild extends Foo {
     protected static $className = 'FooChild';
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 register_shutdown_function(array('Foo', 'bar'));
 register_shutdown_function(array('FooChild', 'bar'));
 

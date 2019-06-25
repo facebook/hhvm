@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $xml = '<?xml version="1.0" encoding="utf-8" ?>
 <test>
 

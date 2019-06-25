@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $ch = curl_init();
 curl_close($ch);
 var_dump($ch);

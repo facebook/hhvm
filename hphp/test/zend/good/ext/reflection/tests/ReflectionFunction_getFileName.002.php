@@ -17,7 +17,7 @@ function dumpFuncInfo($name) {
     $funcInfo = new ReflectionFunction($name);
     var_dump($funcInfo->getFileName());
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 dumpFuncInfo('foo');
 dumpFuncInfo('bar');
 dumpFuncInfo('array_pop');

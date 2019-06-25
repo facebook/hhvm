@@ -8,7 +8,7 @@ class Foo {
     $this = $__this;
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $f = new Foo;
 
 $f->Bar();

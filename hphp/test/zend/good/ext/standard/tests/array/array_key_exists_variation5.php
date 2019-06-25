@@ -8,7 +8,7 @@
 /*
  * Test how array_key_exists() behaves with multi-dimensional arrays
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_key_exists() : usage variations ***\n";
 
 $multi_array = array ('zero' => 'val1', 

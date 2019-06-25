@@ -3,7 +3,7 @@ class foo {
     static protected $bar = 'baz';
     static public $a = 'a';
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $class = new ReflectionClass('foo');
 $properties = $class->getStaticProperties();
 var_dump($properties, array_keys($properties));

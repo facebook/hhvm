@@ -7,4 +7,4 @@ interface if_a {
 class derived_a implements if_a {
 }
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

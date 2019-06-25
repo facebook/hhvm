@@ -1,6 +1,6 @@
 <?hh 
 /* $Id$ */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $xmlstring = '<?xml version="1.0" encoding="UTF-8"?>
 <books><book num="1"><test /></book><book num="2" /></books>';
 

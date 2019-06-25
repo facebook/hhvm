@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $x = array();
 $x[] = clone new stdclass;
 $x[] = clone new stdclass;

@@ -5,7 +5,7 @@ class MyArrayIterator extends ArrayIterator {
         throw new Exception('Make the iterator break');
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $it = new MyArrayIterator(array(4, 6, 2));
 
 try {

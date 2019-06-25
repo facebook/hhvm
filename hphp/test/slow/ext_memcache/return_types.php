@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $key = 'TEST_KEY_RETURN_TYPES';
 
 $memcache = new Memcache;

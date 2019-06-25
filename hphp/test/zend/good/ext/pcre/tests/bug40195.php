@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(preg_match('@^(/([a-z]*))*$@', '//abcde', &$m)); var_dump($m);
 var_dump(preg_match('@^(/(?:[a-z]*))*$@', '//abcde', &$m)); var_dump($m);
 

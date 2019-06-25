@@ -3,7 +3,7 @@
  * Description: Decimal to binary.
  * Source code: ext/standard/math.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing decoct() :  error conditions ***\n";
 
 echo "Incorrect number of arguments\n";

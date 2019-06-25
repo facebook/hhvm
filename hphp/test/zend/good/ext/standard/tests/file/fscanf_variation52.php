@@ -6,7 +6,7 @@
 */
 
 /* Test fscanf() to scan an empty file */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_path = dirname(__FILE__);
 
 echo "*** Test fscanf(): to read an empty file ***\n"; 

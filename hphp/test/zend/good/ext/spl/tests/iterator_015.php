@@ -25,7 +25,7 @@ class RecursiveArrayIteratorIterator extends RecursiveIteratorIterator
         return true;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $arr = array("a", array("ba", array("bba", "bbb"), array(array("bcaa"))), array("ca"), "d");
 $obj = new RecursiveArrayIterator($arr);
 $rit = new RecursiveArrayIteratorIterator($obj);

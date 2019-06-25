@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $test = array(
     '1e+308'                    => 1e+308,
     '1e+309'                    => false,

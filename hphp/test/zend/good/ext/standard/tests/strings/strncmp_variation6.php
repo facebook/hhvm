@@ -5,7 +5,7 @@
 */
 
 /* Test strncmp() function with binary values passed to 'str1' & 'str2' and with the null terminated strings */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Test strncmp() function: with binary inputs ***\n";
 
 echo "\n-- Checking with all 256 characters given, in binary format --\n";

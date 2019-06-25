@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $file = dirname(__FILE__) . '/im.wbmp';
 
 $im = imagecreatetruecolor(6,6);

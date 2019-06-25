@@ -1,7 +1,7 @@
 <?hh
 /* Prototype: string dirname ( string $path );
    Description: Returns directory name component of path. */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing error conditions ***\n";
 // zero arguments
 try { var_dump( dirname() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

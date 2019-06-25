@@ -1,6 +1,6 @@
 <?hh
 class Foo {}
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $storageA = new \SplObjectStorage();
 $storageA->attach(new \Foo);
 $storageA->attach(new \Foo);

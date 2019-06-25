@@ -70,7 +70,7 @@ class StudentList implements IteratorAggregate
         return $this->students->getIterator();
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $students = new StudentList();
 $students->add(new Student('01234123', 'Joe'));
 $students->add(new Student('00000014', 'Bob'));

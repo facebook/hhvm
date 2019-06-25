@@ -5,7 +5,7 @@ class A {
         echo "var:".$this->var."\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new A;
 $a->var = 2;
 

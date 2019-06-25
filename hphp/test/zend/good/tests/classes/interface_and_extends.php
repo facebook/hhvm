@@ -11,7 +11,7 @@ class Tester extends Test
         echo __METHOD__ . "\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o = new Tester;
 $o->show();
 

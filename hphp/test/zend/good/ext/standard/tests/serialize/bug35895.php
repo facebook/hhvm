@@ -12,7 +12,7 @@ class Child extends Parents {
         return array_merge(array("child"), parent::__sleep());
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $obj = new Child();
 serialize($obj);
 }

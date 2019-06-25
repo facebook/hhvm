@@ -1,7 +1,7 @@
 <?hh
 
 /* Explode with attributes */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(ldap_explode_dn("cn=bob,dc=example,dc=com", 0));
 /* Explode with attributes */
 var_dump(ldap_explode_dn("cn=bob,ou=users,dc=example,dc=com", 0));

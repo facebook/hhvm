@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $regex = '@';
 for($bar=0; $bar<1027; $bar++) {
 	$regex .= '((?P<x'.$bar.'>))';

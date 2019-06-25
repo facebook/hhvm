@@ -7,7 +7,7 @@
 /*
  * Test array_map() by passing anoymous callback function with following variations
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_map() : anonymous callback function ***\n";
 
 $array1 = array(1, 2, 3);

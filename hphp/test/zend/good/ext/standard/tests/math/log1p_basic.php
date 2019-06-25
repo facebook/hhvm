@@ -4,7 +4,7 @@
  *                when the value of number is close to zero
  * Source code: ext/standard/math.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing log1p() : basic functionality ***\n";
 
 $values = array(23,

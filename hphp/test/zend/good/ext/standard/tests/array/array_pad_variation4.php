@@ -9,7 +9,7 @@
 * array_pad() behaves in an expected way with the other arguments passed to the function.
 * The $input and $pad_size arguments passed are fixed values.
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_pad() : Passing binary values to \$pad_value argument ***\n";
 
 // initialize the $input and $pad_size argument

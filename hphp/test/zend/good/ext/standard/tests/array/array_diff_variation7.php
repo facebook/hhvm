@@ -10,7 +10,7 @@
  * 1. Contain referenced variables
  * 2. Have been referenced to each other
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff() : usage variations ***\n";
 $a = 'a';
 

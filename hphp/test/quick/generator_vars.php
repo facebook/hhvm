@@ -67,7 +67,7 @@ function manylocals() {
   yield array('a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l);
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
   dumpgen(create());
   dumpgen(unusedarg(new logger(), 5));
   dumpgen(getargs(1, 2, 3, 4, 5));

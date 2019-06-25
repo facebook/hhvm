@@ -14,7 +14,7 @@ class sample  {
     return "object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strrchr() function: with unexpected inputs for haystack ***\n";
 
 // get an unset variable

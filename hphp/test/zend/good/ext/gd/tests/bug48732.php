@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $cwd = dirname(__FILE__);
 $font = "$cwd/Tuffy.ttf";
 $g = imagecreate(100, 50);

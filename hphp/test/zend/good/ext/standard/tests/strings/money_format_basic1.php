@@ -7,7 +7,7 @@
 // ===========================================================================================
 // = We do not test for exact return-values, as those might be different between OS-versions =
 // ===========================================================================================
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing money_format() : basic functionality***\n";
 
 $value = 1234.5678;

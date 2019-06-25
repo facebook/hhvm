@@ -8,7 +8,7 @@
 /*
  * Test behaviour of array_diff() function with binary input
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff() : usage variations ***\n";
 
 

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $flags = imagetypes();
 
 if ($flags&0x1 && !function_exists("imagegif")) {

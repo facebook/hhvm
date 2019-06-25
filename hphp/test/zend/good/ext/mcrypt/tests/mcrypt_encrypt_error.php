@@ -4,7 +4,7 @@
  * Source code: ext/mcrypt/mcrypt.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mcrypt_encrypt() : error conditions ***\n";
 
 

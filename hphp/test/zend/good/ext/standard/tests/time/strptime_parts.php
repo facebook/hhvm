@@ -3,7 +3,7 @@
  * Description:  Parse a time/date generated with strftime()
  * Source code: ext/standard/datetime.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $orig = setlocale(LC_ALL, 'C');
 date_default_timezone_set("GMT"); 
 putenv("TZ=GMT");

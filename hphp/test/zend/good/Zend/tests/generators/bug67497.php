@@ -4,7 +4,7 @@ function gen() {
     $a = 1;
     yield $a;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 @eval('abc');
 
 $values = gen();

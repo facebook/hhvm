@@ -9,7 +9,7 @@
 /*
 * Test strcspn() : for error conditons
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strcspn() : error conditions ***\n";
 
 // Zero arguments

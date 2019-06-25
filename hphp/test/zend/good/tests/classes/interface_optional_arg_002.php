@@ -10,7 +10,7 @@ class foo implements test {
         var_dump($arg);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $foo = new foo;
 $foo->bar();
 }

@@ -5,7 +5,7 @@
  */
 
 /* passing array_fill() as the 'val' argument in array_fill() function */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_fill() : variation ***\n";
 
 $start_key = 0;

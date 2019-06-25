@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 echo hash('ripemd128', '') . "\n";
 echo hash('ripemd128', 'a') . "\n";
 echo hash('ripemd128', 'abc') . "\n";

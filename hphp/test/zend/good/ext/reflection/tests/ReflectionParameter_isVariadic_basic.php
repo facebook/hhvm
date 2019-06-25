@@ -3,7 +3,7 @@
 function test1($args) {}
 function test2(...$args) {}
 function test3($arg, ...$args) {}
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $r1 = new ReflectionFunction('test1');
 $r2 = new ReflectionFunction('test2');
 $r3 = new ReflectionFunction('test3');

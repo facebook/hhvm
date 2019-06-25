@@ -7,7 +7,7 @@
 /* Test strrpos() function by passing heredoc string containing escape chars for haystack 
  *  and with various needles & offsets 
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strrpos() function: with heredoc strings ***\n";
 echo "-- With heredoc string containing escape characters --\n";
 $control_char_str = <<<EOD

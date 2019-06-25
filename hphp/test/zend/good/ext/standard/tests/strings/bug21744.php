@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $test = <<< HERE
 <a href="test?test\\!!!test">test</a>
 <!-- test -->

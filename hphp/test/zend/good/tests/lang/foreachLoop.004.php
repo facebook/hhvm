@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a=array("a", "b", "c");
 $v=array();
 foreach($a as $v[0]) {

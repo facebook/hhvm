@@ -4,7 +4,7 @@
  * Description: PHP supports a portable way of locking complete files
  * in an advisory way
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing error conditions ***\n";
 
 $file = dirname(__FILE__)."/flock.tmp";

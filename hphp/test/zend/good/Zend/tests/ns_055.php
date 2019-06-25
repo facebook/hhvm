@@ -12,7 +12,7 @@ class Foo {
         echo "ok\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $foo = new Foo();
 $ex = new \Exception();
 $foo->test1($foo);

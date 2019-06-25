@@ -2,7 +2,7 @@
 
 class TestClass {}
 abstract class TestAbstractClass {}
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $testClass = new ReflectionClass('TestClass');
 $abstractClass = new ReflectionClass('TestAbstractClass');
 

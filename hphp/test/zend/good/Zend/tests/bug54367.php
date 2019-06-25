@@ -12,7 +12,7 @@ class MyObjet implements ArrayAccess
         };
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new MyObjet();
 echo $a['p']('foo');
 }

@@ -5,7 +5,7 @@
  * Alias to functions:
 */
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $string = 'Hello, world. [*], this is \ a string';
 
 var_dump(preg_match('/^[hH]ello,\s/', $string, &$match1));                            //finds "Hello, "

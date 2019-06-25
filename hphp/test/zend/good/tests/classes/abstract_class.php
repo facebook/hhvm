@@ -9,7 +9,7 @@ class pass extends fail {
         echo "Call to function show()\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $t2 = new pass();
 $t2->show();
 

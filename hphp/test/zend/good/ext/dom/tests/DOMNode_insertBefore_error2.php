@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $dom = new DOMDocument();
 
 $doc = $dom->load(dirname(__FILE__) . "/book.xml", LIBXML_NOBLANKS);

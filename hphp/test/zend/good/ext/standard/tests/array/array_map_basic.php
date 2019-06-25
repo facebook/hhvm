@@ -15,7 +15,7 @@ function square($p) {
 function concatenate($a, $b) {
   return "$a = $b";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_map() : basic functionality ***\n";
 
 // integer array

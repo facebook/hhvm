@@ -13,7 +13,7 @@ function too_many_parameters ($val1, $val2, $val3) {
 function too_few_parameters ($val1) {
   return 0;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_udiff() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)

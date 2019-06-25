@@ -9,7 +9,7 @@
 */
 
 /* Testing with miscellaneous Permission */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fileperms() & chmod() : usage variations ***\n";
 
 $file_name = dirname(__FILE__)."/006_variation2.tmp";

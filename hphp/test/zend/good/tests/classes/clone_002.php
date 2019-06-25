@@ -6,7 +6,7 @@ class test {
     public function __clone() {
     }
 };
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $obj = new test;
 $obj->p2 = 'A';
 $obj->p3 = 'B';

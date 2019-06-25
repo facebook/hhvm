@@ -14,7 +14,7 @@ class classA{
      return "Class A Object";
    }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strip_tags() : usage variations ***\n";
 
 // Initialise function argument

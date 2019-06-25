@@ -1,5 +1,5 @@
 <?hh 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $x = new SimpleXMLElement(
 '<?xml version="1.0" standalone="yes"?>
 <people xmlns:p="http://example.org/p" >

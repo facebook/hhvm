@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of mb_ereg_match
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 mb_internal_encoding('UTF-8');
 mb_regex_encoding('UTF-8');
 

@@ -12,7 +12,7 @@ class B extends A {
     static protected $cc = 6;
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(get_class_vars('A'));
 var_dump(get_class_vars('B'));
 }

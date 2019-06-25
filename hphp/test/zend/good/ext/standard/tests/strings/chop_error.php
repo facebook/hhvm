@@ -7,7 +7,7 @@
 /*
  * Testing chop() : error conditions
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing chop() : error conditions ***\n";
 
 // Zero argument

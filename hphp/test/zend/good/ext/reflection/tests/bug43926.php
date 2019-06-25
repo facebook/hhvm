@@ -10,7 +10,7 @@ class A extends D {
 
 class C extends A {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $ra = new ReflectionClass('A');
 $rc = new ReflectionClass('C');
 $rd = new ReflectionClass('D');

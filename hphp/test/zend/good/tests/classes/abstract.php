@@ -12,7 +12,7 @@ class pass extends fail {
         parent::show();
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $t = new pass();
 $t->show();
 $t->error();

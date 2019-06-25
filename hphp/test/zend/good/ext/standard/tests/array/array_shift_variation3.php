@@ -7,7 +7,7 @@
 /*
  * Pass arrays with different data types as keys to test how array_shift() re-assigns keys
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_shift() : usage variations ***\n";
 
 //get an unset variable

@@ -5,7 +5,7 @@
   Description: Replace all occurrences of the search string with
                the replacement string
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "\n*** Testing str_replace() on basic operations ***\n";
 
 var_dump( str_replace("", "", "") );

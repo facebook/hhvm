@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $socket = socket_create(AF_INET6, SOCK_DGRAM, SOL_UDP);
 if (!$socket) {
     die('Unable to create AF_INET6 socket');

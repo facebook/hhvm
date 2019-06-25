@@ -1,6 +1,6 @@
 <?hh
 //-=-=-=-
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(strlen(password_hash("foo", PASSWORD_BCRYPT)));
 
 $hash = password_hash("foo", PASSWORD_BCRYPT);

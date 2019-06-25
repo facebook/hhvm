@@ -1,7 +1,7 @@
 <?hh
 namespace test;
 class inner {}
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $inner = new \test\inner();
 
 echo "autoload == true:\n";

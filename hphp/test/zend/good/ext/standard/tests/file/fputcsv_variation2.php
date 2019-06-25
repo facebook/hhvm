@@ -5,7 +5,7 @@
 */
 
 /* Testing fputcsv() to write to a file when delimiter is NULL */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fputcsv() : with delimiter as NULL ***\n";
 
 /* the array is with three elements in it. Each element should be read as

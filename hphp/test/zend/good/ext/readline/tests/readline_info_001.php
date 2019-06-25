@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(@readline_info());
 var_dump(@readline_info('1'));
 var_dump(@readline_info('1','1'));

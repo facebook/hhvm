@@ -3,7 +3,7 @@
  * Description: Perform the rot13 transform on a string
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing str_rot13() : error conditions ***\n";
 echo "-- Testing str_rot13() function with Zero arguments --\n";
 try { var_dump( str_rot13() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 echo "Empty String\n";
 for($pass=3; $pass<=5; $pass++)
     for($bits=128; $bits <= 256; $bits += 32) {

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $im = imagecreatetruecolor(6,6);
 imagefill($im, 0,0, 0xffffff);
 

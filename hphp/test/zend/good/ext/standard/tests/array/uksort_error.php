@@ -4,7 +4,7 @@
  * Source code: ext/standard/array.c
  * Alias to functions:
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing uksort() : error conditions ***\n";
 
 echo "\n-- Testing uksort() function with more than expected no. of arguments --\n";

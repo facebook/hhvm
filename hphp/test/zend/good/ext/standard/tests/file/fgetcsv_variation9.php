@@ -8,7 +8,7 @@
    Testing fgetcsv() to read from a file when the delimiter argument value is not
    present in the line being read by the fgetcsv()
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fgetcsv() : with different delimiter but same enclosure ***\n";
 
 /* the array is with three elements in it. Each element should be read as 

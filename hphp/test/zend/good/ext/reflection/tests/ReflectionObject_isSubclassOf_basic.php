@@ -5,7 +5,7 @@ class C extends B {}
 
 interface I {}
 class X implements I {}
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $classNames = array('A', 'B', 'C', 'I', 'X');
 
 //Create ReflectionClasses

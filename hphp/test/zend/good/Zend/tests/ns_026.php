@@ -13,7 +13,7 @@ class Foo {
 function Bar() {
   echo "Func   - ".__FUNCTION__."\n";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $x = new Foo;
 \Foo\Bar();
 $x = new \Foo\Foo;

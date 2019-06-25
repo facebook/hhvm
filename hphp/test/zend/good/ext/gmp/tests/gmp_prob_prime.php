@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(gmp_prob_prime(10));
 var_dump(gmp_prob_prime("7"));
 var_dump(gmp_prob_prime(17));

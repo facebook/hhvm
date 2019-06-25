@@ -4,6 +4,6 @@ function foo () {
         echo "3";
    }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 foo();
 }

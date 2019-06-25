@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 date_default_timezone_set('UTC');
 $db1 = new DateTimeImmutable( '2008-01-01' );
 $db2 = new DateTime( '2008-01-01' );

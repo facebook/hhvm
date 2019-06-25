@@ -57,7 +57,7 @@ class SimpleClass2
         return $this->int_value;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing usort() : object functionality ***\n";
 
 // array of SimpleClass objects with only one property

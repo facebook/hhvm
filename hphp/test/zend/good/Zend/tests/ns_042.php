@@ -5,7 +5,7 @@ const FOO = "ok\n";
 
 use test\ns1 as ns2;
 use test as ns3;
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo FOO;
 echo \test\ns1\FOO;
 echo \test\ns1\FOO;

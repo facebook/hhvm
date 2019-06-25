@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of prev()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing prev() : basic functionality ***\n";
 
 $array = array('zero', 'one', 'two');

@@ -5,6 +5,6 @@ class foo extends ArrayObject {
         parent::__construct($arr);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump( (new foo( array(1, array(4, 5), 3) ))[1][0] ); // int(4)
 }

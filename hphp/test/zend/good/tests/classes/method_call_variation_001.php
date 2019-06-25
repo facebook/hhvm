@@ -27,4 +27,4 @@
   $c->functions[0](5, 6);
   $c->functions[1][2][3][4](7, 8);
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

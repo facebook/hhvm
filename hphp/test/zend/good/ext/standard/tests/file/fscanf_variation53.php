@@ -6,7 +6,7 @@
 */
 
 /* Test fscanf() to read a file when file pointer is pointing to EOF */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_path = dirname(__FILE__);
 
 echo "*** Test fscanf(): to read a file when file pointer is pointing to EOF ***\n"; 

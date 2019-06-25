@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $ds = array(
         0 => array("pipe", "r"),
         1 => array("pipe", "w"),

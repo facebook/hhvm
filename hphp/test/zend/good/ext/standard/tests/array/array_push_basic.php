@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of array_push with indexed and associative arrays
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_push() : basic functionality ***\n";
 
 $array = array ('zero', 'one', 'two');

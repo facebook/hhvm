@@ -1,7 +1,7 @@
 <?hh
 // note that gzclose is an alias to fclose. parameter checking tests will be
 // the same as fclose
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $f = dirname(__FILE__)."/004.txt.gz";
 $h = gzopen($f, 'r');
 gzread($h, 20);

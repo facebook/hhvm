@@ -89,7 +89,7 @@ function p1()
 {
   p2();
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 p1();
 echo "ok\n";
 }

@@ -19,7 +19,7 @@ class B extends A {
         parent::test4(1,'a');
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $b = new B();
 $b->test();
 }

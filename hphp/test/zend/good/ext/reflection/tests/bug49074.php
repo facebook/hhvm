@@ -8,7 +8,7 @@ class Test2 extends Test {
     private static $data2 = 2;
     public static $data3 = 3;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $r = new ReflectionClass('Test2');
 $m = $r->getStaticProperties();
 

@@ -8,7 +8,7 @@ class B{
     public function doit(A $a){
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $ref = new reflectionMethod('B','doit');
 $parameters = $ref->getParameters();
 foreach($parameters as $parameter)

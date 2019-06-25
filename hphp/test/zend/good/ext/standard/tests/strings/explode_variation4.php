@@ -4,7 +4,7 @@
  * Description: Split a string by string.
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing explode() function: match longer string ***\n";
 
 $pizza  = "piece1 piece2 piece3 piece4 piece5 piece6 p";

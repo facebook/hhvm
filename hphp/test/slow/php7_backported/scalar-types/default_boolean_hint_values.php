@@ -5,6 +5,6 @@ function foo(bool $x = true, bool $y = false) {
 }
 
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 foo();
 }

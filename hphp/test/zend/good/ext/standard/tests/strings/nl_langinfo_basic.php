@@ -4,7 +4,7 @@
  * Description: Query language and locale information
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing nl_langinfo() : basic functionality ***\n";
 
 $original = setlocale(LC_ALL, 'C');

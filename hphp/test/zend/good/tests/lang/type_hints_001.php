@@ -8,7 +8,7 @@ class Bar {
 
 function type_hint_foo(Foo $a) {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $foo = new Foo;
 $bar = new Bar;
 

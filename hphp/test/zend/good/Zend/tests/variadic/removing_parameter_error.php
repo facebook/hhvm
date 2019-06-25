@@ -12,4 +12,4 @@ class MySQL implements DB {
     public function query(...$params) { }
 }
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

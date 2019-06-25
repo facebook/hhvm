@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $url = "http://www.example.org";
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_PROXY, uniqid().":".uniqid());

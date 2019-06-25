@@ -7,7 +7,7 @@
 /*
  * Pass arrays where the keys are different data types to test behaviour of natcasesort()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing natcasesort() : usage variations ***\n";
 
 //get an unset variable

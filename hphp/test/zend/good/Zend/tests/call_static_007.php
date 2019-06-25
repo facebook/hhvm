@@ -9,7 +9,7 @@ class a {
     }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new a;
 
 $b = 'Test';

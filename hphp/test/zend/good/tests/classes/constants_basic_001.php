@@ -49,4 +49,4 @@
 
   echo "\nYou should not see this.";
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

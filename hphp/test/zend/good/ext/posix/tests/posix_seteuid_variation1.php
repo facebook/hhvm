@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $index_array = array(1, 2, 3);
 $assoc_array = array(1 => 'one', 2 => 'two');
 

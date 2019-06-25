@@ -8,7 +8,7 @@
 /*
  * Test base64_encode with single byte values.
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing base64_encode() : basic functionality ***\n";
 
 for ($i=0; $i<256; $i++) {

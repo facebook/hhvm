@@ -18,7 +18,7 @@ use test\ns1\Foo;
 use test\ns1\Foo as Bar;
 use \test\ns1\Foo2;
 use \test\ns1\Foo2 as Bar2;
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 Foo::bar();
 Bar::bar();
 Foo2::bar();

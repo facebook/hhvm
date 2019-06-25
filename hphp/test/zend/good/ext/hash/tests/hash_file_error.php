@@ -4,7 +4,7 @@
  * Source code: ext/hash/hash.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing hash_file() : error conditions ***\n";
 
 // Set up file

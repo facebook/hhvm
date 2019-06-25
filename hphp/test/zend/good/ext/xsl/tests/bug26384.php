@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $dom = new domDocument;
 $dom->load(dirname(__FILE__)."/area_name.xml");
 if(!$dom) {

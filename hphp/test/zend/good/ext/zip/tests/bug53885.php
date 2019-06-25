@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $fname = dirname(__FILE__)."/test53885.zip";
 if(file_exists($fname)) unlink($fname);
 touch($fname);

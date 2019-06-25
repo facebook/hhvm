@@ -7,7 +7,7 @@
 /*
  * test get_html_translation_table() with unexpected value for argument $table
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing get_html_translation_table() : usage variations ***\n";
 // initialize all required variables
 $quote_style = ENT_COMPAT;

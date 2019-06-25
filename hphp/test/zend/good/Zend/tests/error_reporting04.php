@@ -4,7 +4,7 @@ function foo() {
     echo $undef;
     error_reporting(E_ALL|E_STRICT);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 error_reporting(E_ALL);
 
 foo(@$var);

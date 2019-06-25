@@ -7,7 +7,7 @@
 /*
  * Pass arrays where keys are different data types as $array_arg to key() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing key() : usage variations ***\n";
 
 //get an unset variable

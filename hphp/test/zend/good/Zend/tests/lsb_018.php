@@ -31,7 +31,7 @@ class Bar extends Singleton {
 
 class Baz extends Bar {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $u = Foo::getInstance();
 $v = Bar::getInstance();
 $w = Baz::getInstance();

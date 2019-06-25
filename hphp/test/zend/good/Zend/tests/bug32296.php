@@ -23,7 +23,7 @@ abstract class quad extends shape_ {
 }
 
 class square extends quad{}
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new square();
 $a->buggy();
 print_r(get_class_methods("square"));

@@ -15,7 +15,7 @@ class classA
     return "Class A object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_map() : unexpected values for 'callback' argument ***\n";
 
 $arr1 = array(1, 2, 3);

@@ -2,6 +2,6 @@
 
 class Foo implements static {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "==DONE==";
 }

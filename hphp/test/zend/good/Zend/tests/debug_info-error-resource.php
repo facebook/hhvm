@@ -9,7 +9,7 @@ class C {
     $this->val = $val;
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $c = new C(fopen("data:text/plain,Foo", 'r'));
 var_dump($c);
 }

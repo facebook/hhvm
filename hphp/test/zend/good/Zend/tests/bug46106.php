@@ -10,7 +10,7 @@ abstract final class ZendGoodZendTestsBug46106 {
 function test($x) {
     try { $x->invokeArgs(array(0)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 ZendGoodZendTestsBug46106::$foo = array(1);
 
 set_error_handler('foobar');

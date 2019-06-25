@@ -13,7 +13,7 @@ class MY_CLASS extends MY_BASE {
     self::$x = 4;
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o = new MY_CLASS;
 $o->printX();
 var_dump(MY_BASE::$x);

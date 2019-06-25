@@ -21,7 +21,7 @@ class B extends A
         echo 'Overridden hello from '.get_class($this)."\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new A;
 $b = new B;
 

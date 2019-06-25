@@ -25,7 +25,7 @@ class Test implements ArrayAccess
         echo __METHOD__ . "($offset)\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $list = new Test();
 try
 {

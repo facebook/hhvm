@@ -3,7 +3,7 @@
 function fn($reqParam, $optParam = null, ...$params) {
     var_dump($reqParam, $optParam, $params);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 fn(1);
 fn(1, 2);
 fn(1, 2, 3);

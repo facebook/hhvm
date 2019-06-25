@@ -18,7 +18,7 @@ class ReportCollision {
     use TC1, TC2;
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "ReportCollision: ";
 $o = new ReportCollision;
 }

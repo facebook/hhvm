@@ -7,7 +7,7 @@
 /*
 * Test vfprintf() for char formats with an array of chars passed to the function
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing vfprintf() : char formats with char values ***\n";
 
 

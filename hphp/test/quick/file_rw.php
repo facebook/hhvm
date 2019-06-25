@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $fname = tempnam(__DIR__, "data");
 unlink("$fname");
 $w = fopen("$fname", "w");

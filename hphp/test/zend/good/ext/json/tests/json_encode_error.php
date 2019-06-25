@@ -4,7 +4,7 @@
  * Source code: ext/json/php_json.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing json_encode() : error conditions ***\n";
 
 echo "\n-- Testing json_encode() function with no arguments --\n";

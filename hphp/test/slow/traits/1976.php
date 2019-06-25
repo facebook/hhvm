@@ -15,7 +15,7 @@ class C1 {
 class C2 {
   use Counter;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o = new C1();
 $o->inc();
 $p = new C2();

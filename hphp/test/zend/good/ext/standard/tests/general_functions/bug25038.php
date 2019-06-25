@@ -4,7 +4,7 @@ function bar($x='no argument')
 {
     throw new Exception("This is an exception from bar({$x}).");
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 try
 {
     bar('first try');

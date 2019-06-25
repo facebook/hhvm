@@ -14,7 +14,7 @@ function run () {
 
     return array($lambda1, $lambda2);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 list ($lambda1, $lambda2) = run();
 
 $lambda1();

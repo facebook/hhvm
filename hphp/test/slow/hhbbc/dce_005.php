@@ -7,4 +7,4 @@ function foo($x = 0, $y, $z) {
   for (;;) { continue; }
 }
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

@@ -1,5 +1,5 @@
 <?hh // $Id$
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 chdir(dirname(__FILE__));
 setlocale(LC_ALL, 'en_US.UTF-8');
 bindtextdomain ("messages", "./locale");

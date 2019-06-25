@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 try {
 	new SplFileObject('foo', array());
 } catch (Exception $e) {

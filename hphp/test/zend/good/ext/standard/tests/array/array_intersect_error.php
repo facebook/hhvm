@@ -3,7 +3,7 @@
  * Description: Returns the entries of arr1 that have values which are present in all the other arguments 
  * Source code: ext/standard/array.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_intersect() : error conditions ***\n";
 
 // Testing array_intersect() with zero arguments

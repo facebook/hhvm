@@ -10,7 +10,7 @@ class foo
     return "Object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing str_val() with scalar values***\n";
 $heredoc_string = <<<EOD
 This is a multiline heredoc

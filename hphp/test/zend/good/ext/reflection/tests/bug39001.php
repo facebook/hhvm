@@ -10,7 +10,7 @@ class CParent extends Meta {
 
 class Child extends CParent {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $r = new ReflectionClass('Child');
 
 var_dump($r->getProperty('publicVar')->getDeclaringClass()->getName());

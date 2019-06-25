@@ -1,6 +1,6 @@
 <?hh
 //-=-=-=-
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(password_hash("foo", PASSWORD_BCRYPT, array("cost" => 3)));
 
 var_dump(password_hash("foo", PASSWORD_BCRYPT, array("cost" => 32)));

@@ -18,7 +18,7 @@ class TestClass {
     }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $testClassInstance = new TestClass();
 $testClassInstance->prop = "Hello";
 

@@ -3,7 +3,7 @@
  * Description: Calculate the soundex key of a string
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing soundex() : basic functionality ***\n";
 var_dump(soundex("Euler"));
 var_dump(soundex("Gauss"));

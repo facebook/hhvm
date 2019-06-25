@@ -5,7 +5,7 @@
  */
 
 /* Creating an empty file */
-<<__EntryPoint>> function main() { if (($handle = fopen( "md5_EmptyFile.txt", "w+")) == FALSE)
+<<__EntryPoint>> function main(): void { if (($handle = fopen( "md5_EmptyFile.txt", "w+")) == FALSE)
 return false;
 
 /* Creating a data file */

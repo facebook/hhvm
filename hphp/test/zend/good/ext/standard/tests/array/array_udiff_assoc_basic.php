@@ -13,7 +13,7 @@ class cr {
         return ($a->priv_member > $b->priv_member) ? 1 : -1;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = array("0.1" => new cr(9), "0.5" => new cr(12), 0 => new cr(23), 1 => new cr(4), 2 => new cr(-15),);
 $b = array("0.2" => new cr(9), "0.5" => new cr(22), 0 => new cr(3), 1 => new cr(4), 2 => new cr(-15),);
 $result = array_udiff_assoc($a, $b, array("cr", "comp_func_cr"));

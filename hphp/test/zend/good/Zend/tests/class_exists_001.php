@@ -5,7 +5,7 @@ namespace foo;
 class foo {
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 \class_alias(__NAMESPACE__ .'\foo', 'bar');
 
 

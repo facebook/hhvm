@@ -17,7 +17,7 @@ class bar  {
         print "ok\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $x = new bar;
 
 $x->test();

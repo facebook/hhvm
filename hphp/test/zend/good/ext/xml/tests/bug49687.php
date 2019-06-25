@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $tests = array(
     "\x41\xC2\x3E\x42",
     "\xE3\x80\x22",

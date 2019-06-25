@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 date_default_timezone_set("UTC");
 
 echo date(DATE_ISO8601, strtotime("Sat 26th Nov 2005 18:18")) . "\n";

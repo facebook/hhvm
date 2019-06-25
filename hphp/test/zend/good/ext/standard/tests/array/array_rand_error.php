@@ -3,7 +3,7 @@
  * Description: Return key/keys for random entry/entries in the array 
  * Source code: ext/standard/array.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_rand() : error conditions ***\n";
 
 // Zero arguments

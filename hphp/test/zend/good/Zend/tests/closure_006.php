@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $getClosure = function ($v) {
 	return function () use ($v) {
 		echo "Hello World: $v!\n";

@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of iconv_strlen()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing iconv_strlen() : basic functionality***\n";
 
 $string_ascii = b'abc def';

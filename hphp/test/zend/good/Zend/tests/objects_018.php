@@ -10,6 +10,6 @@ interface Itest2 {
 
 interface Itest3 extends Itest, Itest2 {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "done!\n";
 }

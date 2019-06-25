@@ -6,4 +6,4 @@ class B extends A {
     function A() { }
 }
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

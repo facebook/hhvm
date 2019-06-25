@@ -11,7 +11,7 @@
  reading line by line with allowable tags: <test>, <html>, <?>
 */
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fgetss() : usage variations ***\n";
 
 /* string with html and php tags */

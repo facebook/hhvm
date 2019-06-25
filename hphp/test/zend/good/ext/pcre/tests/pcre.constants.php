@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "PCRE constants test\n"; 
 
 echo "PREG_PATTERN_ORDER= ", PREG_PATTERN_ORDER, "\n";

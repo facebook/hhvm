@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $base = 'file://' . dirname(__FILE__) . DIRECTORY_SEPARATOR . '53965';
 
 $xml = new DOMDocument();

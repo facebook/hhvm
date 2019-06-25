@@ -9,7 +9,7 @@ class object_temp {
   public $file_var = "/foo//symlink.link";
   var $number = 12345;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing pathinfo() with miscelleneous input arguments ***\n";
 
 $fp = fopen(__FILE__, "r");

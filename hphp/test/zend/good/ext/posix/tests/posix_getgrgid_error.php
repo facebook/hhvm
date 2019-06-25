@@ -4,7 +4,7 @@
  * Source code: ext/posix/posix.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing posix_getgrgid() : error conditions ***\n";
 
 // Zero arguments

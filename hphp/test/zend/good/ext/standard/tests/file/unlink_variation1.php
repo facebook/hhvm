@@ -7,7 +7,7 @@
    Delete file having readonly permission but dir having default permission
 */
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
 // temp dir name used here

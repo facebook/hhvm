@@ -12,7 +12,7 @@ class classA
     return "UTF-8";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_split() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)

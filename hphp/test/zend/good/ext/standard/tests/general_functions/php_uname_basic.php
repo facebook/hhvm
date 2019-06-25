@@ -2,7 +2,7 @@
 /* Prototype: string php_uname  ([ string $mode  ] )
  * Description:  Returns information about the operating system PHP is running on
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing php_uname() - basic test\n";
 
 var_dump(php_uname());

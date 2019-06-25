@@ -1,7 +1,7 @@
 <?hh
 // this file is not used in the cron job
 // use it to test the gcc regex with the sample data provided
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $sampledata = "
 /p2/var/php_gcov/PHP_4_4/ext/ming/ming.c: In function `zif_swfbitmap_init':
 /p2/var/php_gcov/PHP_4_4/ext/ming/ming.c:323: warning: assignment from incompatible pointer type

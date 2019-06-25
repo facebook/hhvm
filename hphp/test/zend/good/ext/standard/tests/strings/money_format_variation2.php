@@ -18,7 +18,7 @@ class class_with_tostring  {
   }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing money_format() function: with unexpected inputs for 'number' argument ***\n";
 
 //get an unset variable

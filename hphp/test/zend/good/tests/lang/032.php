@@ -25,6 +25,6 @@ class X {
     function foo() {}
 }
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "OK\n";
 }

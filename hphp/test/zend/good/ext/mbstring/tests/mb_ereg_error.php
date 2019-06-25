@@ -7,7 +7,7 @@
 /*
  * Test behaviour of mb_ereg() when passed an incorrcect number of arguments
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_ereg() : error conditions ***\n";
 
 

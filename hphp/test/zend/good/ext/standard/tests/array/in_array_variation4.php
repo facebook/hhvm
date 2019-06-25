@@ -9,7 +9,7 @@
 /* Test in_array() with haystack as resouce and multidimentional arrays */
 
 /* checking for Resources */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing resource type with in_array() ***\n";
 //file type resource
 $file_handle = fopen(__FILE__, "r");

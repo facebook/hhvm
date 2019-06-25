@@ -6,7 +6,7 @@
 
 /* Trying to copy the links across dir paths given in various notations
      and dirs having limited access */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing copy() function: copying links across different directories ***\n";
 
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);

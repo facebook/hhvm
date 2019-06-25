@@ -4,4 +4,4 @@ trait abc { }
 
 class foo implements abc { }
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

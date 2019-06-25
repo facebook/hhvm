@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 echo "M_E= ";
 var_dump(M_E);
 echo "M_LOG2E= ";

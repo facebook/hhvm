@@ -7,7 +7,7 @@ class ext_heap extends SplMaxHeap {
     return 0;
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $h = new ext_heap();
 $h->insert(array('foobar'));
 $h->insert(array('foobar1'));

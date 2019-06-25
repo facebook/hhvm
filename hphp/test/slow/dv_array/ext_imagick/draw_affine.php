@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $affine_matrix = darray[
   'sx' => 1,
   'rx' => 0,

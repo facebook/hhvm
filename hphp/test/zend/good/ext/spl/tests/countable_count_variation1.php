@@ -29,7 +29,7 @@ class throwException implements Countable {
     }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "Count returns null:\n";
 var_dump(count(new returnNull));
 

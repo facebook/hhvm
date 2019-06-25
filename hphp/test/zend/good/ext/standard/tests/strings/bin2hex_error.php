@@ -4,7 +4,7 @@
  * Description: Convert binary data into hexadecimal representation
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing bin2hex() : error conditions ***\n";
 
 echo "\n-- Testing bin2hex() function with no arguments --\n";

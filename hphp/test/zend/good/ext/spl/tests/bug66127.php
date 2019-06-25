@@ -8,7 +8,7 @@ function crash()
     $var3 = $var;
     trigger_error('error');
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $items = new ArrayObject();
 
 try { unset($items[0]); } catch (Exception $e) { echo $e->getMessage()."\n"; }

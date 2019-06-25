@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 echo "\nNot an array.\n";
 $a = TRUE;
 foreach ($a as $v) {

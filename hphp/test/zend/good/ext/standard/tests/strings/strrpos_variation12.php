@@ -7,7 +7,7 @@
 /* Test strrpos() function with null terminated strings for 'haystack' argument 
  *  in order to check the binary safe 
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Test strrpos() function: binary safe ***\n";
 $haystacks = array(
   "Hello".chr(0)."World",

@@ -3,7 +3,7 @@
  Prototype: string fgetc ( resource $handle );
  Description: Gets character from file pointer
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing error conditions ***\n";
 // zero argument
 echo "-- Testing fgetc() with zero argument --\n";

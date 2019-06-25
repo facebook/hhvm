@@ -43,7 +43,7 @@ class Foo implements ArrayAccess {
   }
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $foo = new Foo();
 $a = "ok";
 

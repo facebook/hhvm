@@ -7,7 +7,7 @@ class TestClass
 function optionalTest(TestClass $a, TestClass $b, $c = 3)
 {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $function = new ReflectionFunction('optionalTest');
 $numberOfNotOptionalParameters = 0;
 $numberOfOptionalParameters = 0;

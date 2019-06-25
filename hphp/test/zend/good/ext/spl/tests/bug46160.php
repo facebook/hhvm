@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 try {
 	$x = new splqueue;
 	$x->offsetSet(0, 0);

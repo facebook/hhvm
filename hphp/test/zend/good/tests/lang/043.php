@@ -2,7 +2,7 @@
 class A {
     static function foo() { return 'foo'; }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $classname       =  'A';
 $wrongClassname  =  'B';
 

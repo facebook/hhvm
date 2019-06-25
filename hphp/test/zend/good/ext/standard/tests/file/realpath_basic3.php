@@ -2,7 +2,7 @@
 /* Prototype: string realpath ( string $path );
    Description: Returns canonicalized absolute pathname
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "\n*** Testing basic functions of realpath() with files ***\n";
 
 /* creating directories and files */

@@ -7,7 +7,7 @@
 /*
  * Pass an incorrect number of arguments to mb_strtolower() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_strtolower() : error conditions***\n";
 
 //Test mb_strtolower with one more than the expected number of arguments

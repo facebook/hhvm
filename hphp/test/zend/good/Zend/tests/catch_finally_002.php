@@ -9,6 +9,6 @@ function foo () {
    }
    return 2;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(foo());
 }

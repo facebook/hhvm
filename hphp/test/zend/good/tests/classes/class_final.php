@@ -8,7 +8,7 @@ final class base {
 
 class derived extends base {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $t = new base();
 
 echo "Done\n"; // shouldn't be displayed

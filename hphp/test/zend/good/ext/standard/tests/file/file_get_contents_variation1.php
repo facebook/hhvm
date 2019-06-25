@@ -21,7 +21,7 @@ abstract final class ZendGoodExtStandardTestsFileFileGetContentsVariation1 {
   public static $secondFile;
   public static $filename = "file_get_contents_variation1.txt";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing file_get_contents() : variation ***\n";
 
 // this doesn't create the include dirs in this directory

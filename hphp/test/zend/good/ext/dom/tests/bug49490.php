@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $doc = new DOMDocument();
 $doc->loadXML('<prefix:root xmlns:prefix="urn:a" />');
 

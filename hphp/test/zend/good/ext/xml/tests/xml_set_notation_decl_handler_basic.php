@@ -38,7 +38,7 @@ class XML_Parser
         xml_parser_free($parser);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $xml = <<<HERE
 <?xml version="1.0"?>
 <!DOCTYPE dates [

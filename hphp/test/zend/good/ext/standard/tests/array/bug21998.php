@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = array("a", "b", "c");
 
 var_dump(key(&$a));

@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "-- (1)\n";
 var_dump(filter_var_array(NULL));
 var_dump(filter_var_array(array()));

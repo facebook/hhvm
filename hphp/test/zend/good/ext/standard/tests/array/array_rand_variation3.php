@@ -8,7 +8,7 @@
 * Test behaviour of array_rand() function when multi-dimensional array
 * is passed to 'input' argument
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_rand() : with multi-dimensional array ***\n";
 
 // initialise the multi-dimensional array

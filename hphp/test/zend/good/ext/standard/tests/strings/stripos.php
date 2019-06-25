@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 var_dump(stripos("test string", "TEST"));
 var_dump(stripos("test string", "strIng"));
 var_dump(stripos("test string", "stRin"));

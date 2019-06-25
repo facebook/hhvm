@@ -8,7 +8,7 @@
 * Testing array_sum() with different types of integer arrays containing data of following type:
 *  integer, octal, hexadecimal, maximum and minimum integer values & mixed of all integers
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_sum() : different integer array ***\n";
 
 // Int array

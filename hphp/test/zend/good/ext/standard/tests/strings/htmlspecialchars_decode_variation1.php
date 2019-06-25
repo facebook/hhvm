@@ -15,7 +15,7 @@ class classA
     return "ClassAObject";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing htmlspecialchars_decode() : usage variations ***\n";
 
 //get a resource variable

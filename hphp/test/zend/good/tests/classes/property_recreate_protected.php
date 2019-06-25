@@ -14,7 +14,7 @@ class D extends C {
         $this->p = 'changed in D';
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $d = new D;
 echo "Unset and recreate a protected property from property's declaring class scope:\n";
 $d->unsetProtected();

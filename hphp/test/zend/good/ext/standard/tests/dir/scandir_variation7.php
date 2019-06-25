@@ -7,7 +7,7 @@
 /*
  * Create directories with different permissions to test whether scandir() can access them
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing scandir() : usage variations ***\n";
 
 // create the temporary directory

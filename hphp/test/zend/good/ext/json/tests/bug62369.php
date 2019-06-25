@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $array = array();
 for ($i=0; $i<550; $i++) {
     $array = array($array);

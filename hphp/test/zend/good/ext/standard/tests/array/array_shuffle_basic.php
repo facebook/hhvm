@@ -3,7 +3,7 @@
 * proto bool shuffle ( array &$array )
 * Function is implemented in ext/standard/array.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $numbers = range(1, 20);
 echo "*** testing array_shuffle  \n";
 $a = array();

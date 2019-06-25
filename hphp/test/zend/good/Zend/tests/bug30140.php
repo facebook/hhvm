@@ -7,7 +7,7 @@ class A {
 
 class B extends A {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 A::$test1 = "x";
 A::$test2 = "y";
 A::$test3 = "z";

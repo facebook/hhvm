@@ -19,7 +19,7 @@ class test extends base {
         $this->p5 = 'clone:5';
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $obj = new test;
 $obj->p4 = 'A';
 $copy = clone $obj;

@@ -7,7 +7,7 @@ function reverse(array $array) {
         prev(&$array);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $array = [
     'foo' => 'bar',
     'bar' => 'foo',

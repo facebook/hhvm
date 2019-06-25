@@ -11,7 +11,7 @@ class UrlBuilder
   protected $sort = 'desc,name';
   private $access = 'admin';
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $obj = new stdClass;
 $obj->name = 'homepage';
 $obj->page = 1;

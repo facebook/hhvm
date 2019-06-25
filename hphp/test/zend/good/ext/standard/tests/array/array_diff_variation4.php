@@ -9,7 +9,7 @@
  * Test how array_diff() compares indexed arrays containing different
  * data types as values in place of $arr2
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)

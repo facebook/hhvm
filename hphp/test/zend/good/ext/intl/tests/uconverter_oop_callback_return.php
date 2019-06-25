@@ -24,7 +24,7 @@ class MyConverter extends UConverter {
   }
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $c = new MyConverter('ascii', 'utf-8');
 // This line will trigger toUCallback
 var_dump($c->convert("\x80\x81\x82\x83"));

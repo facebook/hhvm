@@ -10,7 +10,7 @@ function bar($a = array(A => B)) {
 }
 const A = "ok";
 const B = A;
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo A . "\n";
 echo B . "\n";
 foo();

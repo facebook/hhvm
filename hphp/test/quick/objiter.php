@@ -26,7 +26,7 @@ class Child extends Base {
     }
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $b = new Base();
 $b->baseDynamic = "base dynamic";
 echo "\nBase context, Base object\n";

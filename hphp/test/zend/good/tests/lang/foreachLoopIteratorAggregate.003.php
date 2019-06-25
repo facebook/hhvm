@@ -47,7 +47,7 @@ class A3 implements IteratorAggregate {
         return new A2;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "\n-----( A1: )-----\n";
 foreach (new A1 as $k=>$v) {
     echo "$k => $v\n";

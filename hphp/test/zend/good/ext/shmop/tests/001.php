@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $hex_shm_id = 0xff3;
 $write_d1 = "test #1 of the shmop() extension";
 $write_d2 = "test #2 append data to shared memory segment";

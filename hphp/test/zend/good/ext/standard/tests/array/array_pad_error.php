@@ -3,7 +3,7 @@
  * Description: Returns a copy of input array padded with pad_value to size pad_size 
  * Source code: ext/standard/array.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_pad() : error conditions ***\n";
 
 // Zero arguments

@@ -27,7 +27,7 @@ function f7($x=array("aaa"=>A)) {
 function f8($x=array(A=>"aaa\n")) {
     echo $x["ok\n"];
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo A;
 echo \X\A;
 echo Y\A;

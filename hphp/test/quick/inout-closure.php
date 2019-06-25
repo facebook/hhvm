@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $closure = (inout $a, inout $b, inout $c) ==> {
   print("In closure: $a, $b, $c\n");
 };

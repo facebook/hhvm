@@ -1,6 +1,6 @@
 <?hh
 
 interface a { }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 throw new a();
 }

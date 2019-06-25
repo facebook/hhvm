@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 iconv_set_encoding("internal_encoding", "UTF-8");
 iconv_set_encoding("output_encoding",   "UTF-8");
 iconv_set_encoding("input_encoding",    "UTF-8");

@@ -16,7 +16,7 @@ class classA
     return "key";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_key_exists() : usage variations ***\n";
 
 // Initialise function arguments not being substituted

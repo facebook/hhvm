@@ -7,7 +7,7 @@
 /*
  * Test that the internal pointer is reset after calling array_shift()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_shift() : usage variations ***\n";
 
 $stack = array ('one' => 'un', 'two' => 'deux');

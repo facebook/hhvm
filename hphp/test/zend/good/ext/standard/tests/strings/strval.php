@@ -1,6 +1,6 @@
 <?hh
 const FOO = 'BAR';
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $foo = 'bar';
 var_dump(strval($foo));
 var_dump(strval(FOO));

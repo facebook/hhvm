@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(preg_quote('-oh really?'));
 
 // make sure there's no regression in matching

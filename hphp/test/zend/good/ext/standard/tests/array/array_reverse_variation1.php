@@ -11,7 +11,7 @@ class classA
     return "Class A object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_reverse() : usage variations - unexpected values for 'array' argument ***\n";
 
 //get an unset variable

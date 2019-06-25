@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file = dirname(__FILE__).'/iptcembed_001.data';
 $fp = fopen($file, "w");
 fwrite($fp, "-1-1");

@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $zip = new ZipArchive;
 $res = $zip->open(dirname(__FILE__) . '/bug64342.zip', ZipArchive::CREATE);
 if ($res === TRUE) {

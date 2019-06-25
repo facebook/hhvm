@@ -4,7 +4,7 @@ class test {
     public $p2 = 2;
     public $p3;
 };
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $obj = new test;
 $obj->p2 = 'A';
 $obj->p3 = 'B';

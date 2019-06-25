@@ -7,7 +7,7 @@ function R10($t) {
 function R500($t) {
     return str_repeat($t, 500);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $tests = array(
     array( "", "cbf29ce484222325" ),
     array( "a", "af63bd4c8601b7be" ),

@@ -5,6 +5,6 @@ class foo
     protected $protected = 'protected';
     public $public = 'public';
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_export((array) new foo);
 }

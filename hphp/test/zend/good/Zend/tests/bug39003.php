@@ -11,7 +11,7 @@ function __autoload($class)
 {
     var_dump("__autload($class)");
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $obj = new SomeClassName;
 test($obj);
 

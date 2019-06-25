@@ -13,7 +13,7 @@ class sample  {
     return " @#$%Object @#$%";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing chop() : with unexpected values for str argument ***\n";
 // initialize all required variables
 

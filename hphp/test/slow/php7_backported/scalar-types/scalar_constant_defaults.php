@@ -35,7 +35,7 @@ function string_add_val(string $a = STRING_ADD_VAL): string {
 function int_val_default_null(int $a = NULL_VAL) {
     return $a;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "Testing int val" . PHP_EOL;
 var_dump(int_val());
 

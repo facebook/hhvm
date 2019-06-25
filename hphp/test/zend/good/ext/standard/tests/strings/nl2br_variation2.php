@@ -7,7 +7,7 @@
 /* Test nl2br() function by passing single quoted strings containing various
  *   combinations of new line chars to 'str' argument
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing nl2br() : usage variations ***\n";
 $strings = array(
   '\n',

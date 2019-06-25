@@ -8,7 +8,7 @@
  * Test stripslashes() with various strings containing characters thats can be backslashed.
  * First adding slashes using addslashes() and then removing the slashes using stripslashes()
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing stripslashes() : with various strings containing backslashed characters ***\n";
 
 // initialising a heredoc string

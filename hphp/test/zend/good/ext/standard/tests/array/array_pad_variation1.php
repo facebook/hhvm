@@ -17,7 +17,7 @@ class classA
     return "Class A object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_pad() : passing non array values to \$input argument ***\n";
 
 // Initialise $pad_size and $pad_value

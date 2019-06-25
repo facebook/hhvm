@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $tz = new DateTimeZone("UTC");
 $date = "06/08/04 12:00";
 echo "==\n";

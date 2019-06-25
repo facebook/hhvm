@@ -50,7 +50,7 @@ class ArrayObjectGetSet extends ArrayObject
         return parent::offsetSet(str_rot13($offset), $value);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $values = ['foo' => '', 'bar' => null, 'baz' => 42];
 
 echo "==== class with offsetExists() and offsetGet() ====\n";

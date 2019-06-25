@@ -7,7 +7,7 @@
 /*
  * sum of array containing different float values
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_sum() : array with different float values ***\n";
 
 // Simple float array

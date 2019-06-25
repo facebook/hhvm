@@ -43,7 +43,7 @@ class for_string_sort
   }
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sort() : object functionality ***\n";
 
 // array of integer objects

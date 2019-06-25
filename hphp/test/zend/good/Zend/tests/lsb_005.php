@@ -28,7 +28,7 @@ class TestC {
 
 class TestBB extends TestB {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 TestA::test();
 echo "==DONE==";
 }

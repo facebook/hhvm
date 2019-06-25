@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $string = "Life it seems, will fade away
 Drifting further everyday
 Getting lost within myself

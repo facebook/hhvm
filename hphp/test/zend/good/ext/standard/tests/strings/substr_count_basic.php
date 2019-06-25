@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "***Testing basic operations ***\n";
 var_dump(@substr_count("", ""));
 var_dump(@substr_count("a", ""));

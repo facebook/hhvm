@@ -8,7 +8,7 @@
 /*
 * Testing array_chunk() function - input array containing different sub arrays
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_chunk() : usage variations ***\n";
 
 $size = 2;

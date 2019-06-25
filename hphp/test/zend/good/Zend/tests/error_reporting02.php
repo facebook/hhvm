@@ -7,7 +7,7 @@ function bar() {
     error_reporting(E_ALL|E_STRICT);
     throw new Exception("test");
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 error_reporting(E_ALL);
 
 try {

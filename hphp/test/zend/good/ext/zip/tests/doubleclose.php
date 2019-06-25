@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "Procedural\n";
 $zip = zip_open(dirname(__FILE__) . '/test.zip');
 if (!is_resource($zip)) {

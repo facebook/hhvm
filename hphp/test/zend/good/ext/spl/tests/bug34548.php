@@ -12,7 +12,7 @@ class Collection extends ArrayObject
         parent::offsetSet($index, $value);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $data1=array('one', 'two', 'three');
 $data2=array('four', 'five');
 

@@ -37,7 +37,7 @@ class AutoGen
         $this->x[$name] = $val;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $foo = new AutoGen();
 $foo->bar->baz = "Check";
 

@@ -4,7 +4,7 @@ class cls {
   static public $foo = 24;
   public $bar = 42;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $obj = new cls;
 
 // Static property $foo

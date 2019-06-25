@@ -5,7 +5,7 @@
  * Source code: ext/hash/hash.c
  * Alias to functions:
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing hash_pbkdf2() : basic functionality ***\n";
 
 echo "sha1: " . hash_pbkdf2('sha1', 'password', 'salt', 1, 20)."\n";

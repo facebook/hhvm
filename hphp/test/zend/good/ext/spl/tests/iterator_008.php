@@ -28,7 +28,7 @@ class ArrayIteratorEx extends ArrayIterator
         parent::next();
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $it = new InfiniteIterator(new ArrayIteratorEx(range(0,2)));
 
 $pos =0;

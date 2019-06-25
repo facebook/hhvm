@@ -25,7 +25,7 @@ class derived extends base {
         echo __METHOD__ . "()\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 base::show();
 derived::show();
 

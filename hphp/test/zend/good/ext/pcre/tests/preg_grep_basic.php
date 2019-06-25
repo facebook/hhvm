@@ -2,7 +2,7 @@
 /*
 * proto array preg_grep(string regex, array input [, int flags])
 * Function is implemented in ext/pcre/php_pcre.c */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $array = array('HTTP://WWW.EXAMPLE.COM', '/index.html', '/info/stat/', 'http://test.uk.com/index/html', '/display/dept.php');
 var_dump($array);
 var_dump(preg_grep('@^HTTP(.*?)\w{2,}$@i', $array)); //finds a string starting with http (regardless of case) (matches two)

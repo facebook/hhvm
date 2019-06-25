@@ -1,6 +1,6 @@
 <?hh
 // Expect warnings about INF.
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 ini_set("error_reporting", E_ALL & ~E_WARNING);
 $test = "
 [

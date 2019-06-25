@@ -80,7 +80,7 @@ class TestB extends TestA
         return $x($i);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $x = new TestB();
 echo "===A===\n";
 var_dump($x->doSomething(1));

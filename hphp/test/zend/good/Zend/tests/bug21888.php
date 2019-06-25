@@ -19,7 +19,7 @@ class child extends mom {
   }
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $c = new child();
 $c->callMom();
 $c->viewMom();

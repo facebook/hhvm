@@ -9,7 +9,7 @@ class B extends A
 {
     public function b() {}
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $B = new B();
 $R = new ReflectionObject($B);
 $m = $R->getMethods();

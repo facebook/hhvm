@@ -7,7 +7,7 @@
 /*
  * Pass mb_strrpos() an incorrect number of arguments
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_strrpos() : error conditions ***\n";
 
 

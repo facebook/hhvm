@@ -43,7 +43,7 @@ class myserv {
         return self::$drv;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $obj1 = new A(1);
 $obj1->func1();
 

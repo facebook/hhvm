@@ -6,7 +6,7 @@ class Foo {
         var_dump($a);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new Foo;
 call_user_func(array($a, 'aAa'));
 }

@@ -11,7 +11,7 @@
  *  SORT_REGULAR - compare items normally
  *  SORT_STRING  - compare items as strings
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing arsort() : usage variations ***\n";
 
 $various_arrays = array (

@@ -1,7 +1,7 @@
 <?hh
 
 /* Various combinations of arrays to be used for the test */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $mixed_array1 = array( 1,2,3,4,5,6,7,8,9 );
 $mixed_array = array(
   array(),

@@ -12,7 +12,7 @@ function __autoload($traitName) {
 
 trait MyTrait {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing trait_exists() : basic functionality ***\n";
 
 echo "Calling trait_exists() on non-existent trait with autoload explicitly enabled:\n";

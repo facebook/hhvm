@@ -11,7 +11,7 @@
  * SORT_REGULAR - compare items normally
  * SORT_NUMERIC - compare items numerically
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing arsort() : usage variations ***\n";
 
 // an array contains unsorted hexadecimal values

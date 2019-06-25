@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $headers = <<<HERE
 Return-Path: <internals-return-5651-***=***.example.com@lists.php.net>
 Received: from pb1.pair.com (pb1.pair.com [16.92.131.4]) by ***.example.com

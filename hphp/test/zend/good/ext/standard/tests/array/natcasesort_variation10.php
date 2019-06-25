@@ -7,7 +7,7 @@
 /*
  * Check position of internal array pointer after calling natcasesort()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing natcasesort() : usage variations ***\n";
 
 $array_arg = array ('img13', 'img20', 'img2', 'img1');

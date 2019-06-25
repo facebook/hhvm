@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 echo "\$_SERVER['REQUEST_TIME']: {$_SERVER['REQUEST_TIME']}\n";
 echo "\$_SERVER['REQUEST_TIME_FLOAT']: {$_SERVER['REQUEST_TIME_FLOAT']}\n";
 echo "time(): " . time() . "\n";

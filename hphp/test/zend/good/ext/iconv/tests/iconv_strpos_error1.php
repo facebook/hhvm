@@ -7,7 +7,7 @@
 /*
  * Test how iconv_strpos behaves when passed an incorrect number of arguments
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing iconv_strpos() : error conditions ***\n";
 
 

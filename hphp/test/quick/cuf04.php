@@ -13,7 +13,7 @@ class E {
 }
 
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
   $c = new C();
   $d = new D();
   $e = new E();

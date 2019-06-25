@@ -14,7 +14,7 @@ class C extends A {
 }
 class D extends A {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo A::test(B::test(C::test(D::test())))."\n";
 echo "==DONE==";
 }

@@ -3,7 +3,7 @@
  * Description: Decodes a JSON string
  * Source code: ext/json/php_json.c
  * Alias to functions:  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing json_decode() : basic functionality ***\n";
 
 // array with different values for $string

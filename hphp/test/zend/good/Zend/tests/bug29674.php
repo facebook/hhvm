@@ -15,7 +15,7 @@ class ChildClass extends BaseClass
 {
     private $private_child = "Child";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "===BASE===\n";
 $obj = new BaseClass;
 $obj->printVars();

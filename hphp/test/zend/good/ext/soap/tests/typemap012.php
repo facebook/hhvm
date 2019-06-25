@@ -15,7 +15,7 @@ class book{
 function book_to_xml($book) {
     throw new SoapFault("Client", "Conversion Error");
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $options=array(
         'actor' =>'http://schemas.nothing.com',
         'typemap' => array(array("type_ns"   => "http://schemas.nothing.com",

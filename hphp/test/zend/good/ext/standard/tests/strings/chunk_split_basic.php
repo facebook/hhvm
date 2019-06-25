@@ -9,7 +9,7 @@
 * Testing chunk_split() for basic functionality by passing all possible
 * arguments as well as with default arguments chunklen and ending
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing chunk_split() : basic functionality ***\n";
 
 

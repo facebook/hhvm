@@ -7,7 +7,7 @@
 /*
  * Testing array_unshift() by giving associative arrays for $array argument
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_unshift() : basic functionality with associative array ***\n";
 
 // Initialise the array

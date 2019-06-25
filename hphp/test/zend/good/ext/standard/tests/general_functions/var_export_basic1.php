@@ -4,7 +4,7 @@
  * Source code: ext/standard/var.c
  * Alias to functions:
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing var_export() with integer values ***\n";
 // different integer vlaues
 $valid_ints = array(

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $socket = socket_create(AF_UNIX, SOCK_DGRAM, SOL_UDP); // cause warning
 $socket = socket_create(AF_UNIX, SOCK_DGRAM, 0);
 if (!$socket) {

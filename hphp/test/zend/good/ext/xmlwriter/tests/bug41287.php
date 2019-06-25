@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $xw = xmlwriter_open_memory();
 xmlwriter_set_indent($xw, true);
 xmlwriter_start_document($xw);

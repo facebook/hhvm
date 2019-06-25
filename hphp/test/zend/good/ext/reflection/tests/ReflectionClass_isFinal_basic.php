@@ -2,7 +2,7 @@
 
 class TestClass {}
 final class TestFinalClass {}
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $normalClass = new ReflectionClass('TestClass');
 $finalClass = new ReflectionClass('TestFinalClass');
 

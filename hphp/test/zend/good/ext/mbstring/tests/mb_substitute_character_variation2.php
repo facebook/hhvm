@@ -4,7 +4,7 @@
  * Source code: ext/mbstring/mbstring.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_substitute_character() : variation ***\n";
 //japenese utf-8
 $string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI');

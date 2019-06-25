@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $date = date_create('asdfasdf');
 
 if ($date instanceof DateTime) {

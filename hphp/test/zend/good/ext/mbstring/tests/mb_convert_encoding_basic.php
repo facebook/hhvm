@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of mb_convert_encoding()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_convert_encoding() : basic functionality ***\n";
 
 //All strings are the same when displayed in their respective encodings

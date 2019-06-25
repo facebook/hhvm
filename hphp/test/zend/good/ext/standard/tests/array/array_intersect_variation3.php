@@ -9,7 +9,7 @@
 * array_intersect() behaves in expected way with the other arguments passed to the function
 * The $arr2 argument is a fixed array.
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_intersect() : Passing different types of arrays to \$arr1 argument ***\n";
 
 /* Different heredoc strings passed as argument to $arr1 */

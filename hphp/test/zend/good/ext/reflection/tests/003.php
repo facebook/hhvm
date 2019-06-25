@@ -15,7 +15,7 @@ class Bar extends Foo
         echo __METHOD__ . "\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o = new Bar;
 $r = new ReflectionMethod('Foo','Test');
 

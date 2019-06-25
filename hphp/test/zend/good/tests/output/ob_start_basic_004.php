@@ -13,7 +13,7 @@ function callback($string) {
     $len = strlen($string);
     return "f[call:".ObStartBasic::$callback_invocations."; len:$len]$string\n";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 for ($cs=-1; $cs<10; $cs++) {
   echo "\n----( chunk_size: $cs, output append size: 1 )----\n";
   ObStartBasic::$callback_invocations=0;

@@ -11,7 +11,7 @@ class bar {
     use foo, c { c::test insteadof foo; }
     use foo, c { c::test insteadof foo; }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $x = new bar;
 var_dump($x->test());
 }

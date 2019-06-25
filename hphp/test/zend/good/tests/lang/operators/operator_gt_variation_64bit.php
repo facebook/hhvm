@@ -4,7 +4,7 @@ const MAX_64Bit = 9223372036854775807;
 const MAX_32Bit = 2147483647;
 const MIN_64Bit = -9223372036854775807 - 1;
 const MIN_32Bit = -2147483647 - 1;
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $validGreaterThan = array (
 MAX_32Bit, array(MAX_32Bit - 1, "2147483646", "2147483646.999", 2.147483646e9, 2147483646.9, MIN_32Bit),
 -2147483647, array(MIN_32Bit, "-2147483648", "-2147483647.001", -2.1474836471e9, -2147483647.9),

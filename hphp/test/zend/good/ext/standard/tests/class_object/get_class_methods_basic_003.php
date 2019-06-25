@@ -29,7 +29,7 @@ class C implements I {
     }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "Accessing I from global scope:\n";
 var_dump(get_class_methods("I"));
 echo "Accessing C from global scope:\n";

@@ -15,7 +15,7 @@ class classA
         return "123456";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_digit() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");

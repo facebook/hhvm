@@ -7,7 +7,7 @@
 /*
  * Pass different data types as $length argument to array_slice to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_slice() : usage variations ***\n";
 
 // Initialise function arguments not being substituted

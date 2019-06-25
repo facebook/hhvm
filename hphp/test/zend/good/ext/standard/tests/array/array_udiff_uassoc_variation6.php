@@ -13,7 +13,7 @@ function too_many_parameters ($val1, $val2, $val3) {
 function too_few_parameters ($val1) {
   return 1;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_udiff_uassoc() : usage variation - differing comparison functions***\n";
 
 $arr1 = array(1);

@@ -33,7 +33,7 @@ function stat_fn( $filename ) {
   clearstatcache();
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fileattime(), filemtime(), filectime() & touch() : usage variations ***\n";
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 // create files

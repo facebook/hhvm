@@ -7,7 +7,7 @@
 /*
  * Testing strtok() : basic functionality
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strtok() : basic functionality ***\n";
 
 // Initialize all required variables

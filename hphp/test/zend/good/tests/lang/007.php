@@ -18,7 +18,7 @@ abstract final class Lang007 {
   public static $b;
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 error_reporting(0);
 $a = 10;
 

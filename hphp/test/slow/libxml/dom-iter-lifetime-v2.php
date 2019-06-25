@@ -12,7 +12,7 @@ function foo() {
 
   return $c->childNodes;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 foreach (foo() as $x) {
   var_dump($x->nodeValue);
 }

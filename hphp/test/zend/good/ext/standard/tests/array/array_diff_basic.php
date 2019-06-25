@@ -8,7 +8,7 @@
 /*
  * Test basic functionality of array_diff
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff() : basic functionality ***\n";
 
 //Test indexed array with integers as elements

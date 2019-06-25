@@ -34,7 +34,7 @@ function list_system_locales() {
 
 /* Collect existing system locales and get 2 valid locales that can be use to
    pass as argument to setlocale(), pass 2 invalid arguments along with two valid arguments*/
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing setlocale() by passing multiple valid/invalid locales as argument ***\n";
 //set of currency symbol according to above list of locales
 $currency_symbol = array(

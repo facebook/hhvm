@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $dom = new DOMDocument('1.0', 'UTF-8');
 $element = $dom->appendChild(new DOMElement('root'));
 $comment = new DOMComment("This is the first comment.");

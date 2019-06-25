@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $x = new MongoId(NULL);
 $x->__construct(NULL);
 $x->getInc(NULL);

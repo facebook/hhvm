@@ -9,7 +9,7 @@
 * various invalid values are passed to the 'input' and 'req_num'
 * parameters respectively
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_rand() : with invalid values for 'req_num' ***\n";
 
 // initialise associative arrays

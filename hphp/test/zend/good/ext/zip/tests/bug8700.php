@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $thisdir = dirname(__FILE__);
 $filename = $thisdir . "/bug8009.zip";
 

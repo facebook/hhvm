@@ -8,7 +8,7 @@
 * Passing different arrays to $input argument and testing whether
 * array_unique() behaves in an expected way.
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_unique() : Passing different arrays to \$input argument ***\n";
 
 /* Different heredoc strings passed as argument to arrays */

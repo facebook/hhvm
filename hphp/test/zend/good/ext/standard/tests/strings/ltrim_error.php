@@ -5,7 +5,7 @@
  * Source code: ext/standard/string.c
 */
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ltrim() : error conditions ***\n";
 
 echo "\n-- Testing ltrim() function with no arguments --\n";

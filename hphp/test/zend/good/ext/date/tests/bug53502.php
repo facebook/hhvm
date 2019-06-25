@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 for ($i = 0; $i < 1000; $i++) {
     strtotime('Monday 00:00 Europe/Paris');    // Memory leak
 }

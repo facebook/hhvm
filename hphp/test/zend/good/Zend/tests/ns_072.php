@@ -16,7 +16,7 @@ class test implements foo {
 
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 new bar(new test);
 new bar(null);
 new bar(new \stdclass);

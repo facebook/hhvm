@@ -5,7 +5,7 @@ class bar {
 }
 function foo(callable $bar) {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $closure = function (callable $arg) {};
 $rf = new ReflectionFunction("foo");
 var_dump($rf->getParameters()[0]->isCallable());

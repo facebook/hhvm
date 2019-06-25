@@ -7,7 +7,7 @@
 /*
  * Pass incorrect number of arguments to mb_substr() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_substr() : error conditions ***\n";
 
 //Test mb_substr with one more than the expected number of arguments

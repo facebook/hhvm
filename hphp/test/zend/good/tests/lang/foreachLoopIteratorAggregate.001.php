@@ -100,7 +100,7 @@ class EuropeanMeals implements IteratorAggregate {
     }
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $f = new EuropeanMeals;
 var_dump($f);
 

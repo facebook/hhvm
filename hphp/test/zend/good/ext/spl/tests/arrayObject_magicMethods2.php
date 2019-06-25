@@ -24,7 +24,7 @@ class UsesMagic {
     }
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $obj = new UsesMagic;
 
 $ao = new ArrayObject($obj);

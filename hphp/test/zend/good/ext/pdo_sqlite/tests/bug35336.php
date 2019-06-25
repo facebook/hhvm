@@ -4,7 +4,7 @@ class EEE {
         echo "hello world\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new PDO("sqlite::memory:");// pool ("sqlite::memory:");
 $a->query ("CREATE TABLE test (a integer primary key, b text)");
 $b = $a->prepare("insert into test (b) values (?)");

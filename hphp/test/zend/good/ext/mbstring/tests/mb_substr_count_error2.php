@@ -7,7 +7,7 @@
 /*
  * Test behaviour of mb_substr_count() function when passed an unknown encoding
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_substr_count() : error conditions ***\n";
 
 $haystack = 'Hello, World!';

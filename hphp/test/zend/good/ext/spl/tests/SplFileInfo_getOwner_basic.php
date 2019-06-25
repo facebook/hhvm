@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $filename = __DIR__ . "/SplFileInfo_getOwner_basic";
 touch($filename);
 $fileInfo = new SplFileInfo($filename);

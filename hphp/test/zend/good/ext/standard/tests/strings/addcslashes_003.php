@@ -1,7 +1,7 @@
 <?hh
 
 /* Miscellaneous input */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "\n*** Testing addcslashes() with miscellaneous input arguments ***\n";
 var_dump( addcslashes("", "") );
 var_dump( addcslashes("", "burp") );

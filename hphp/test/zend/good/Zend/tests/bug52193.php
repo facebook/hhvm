@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump((array) 1);
 var_dump((array) NULL);
 var_dump((array) new stdclass);

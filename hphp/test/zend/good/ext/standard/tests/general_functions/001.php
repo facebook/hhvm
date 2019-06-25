@@ -1,5 +1,5 @@
 <?hh 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $agent = sprintf("%.5s", "James Bond, 007");
 
 echo("sprintf string truncate test:   ");

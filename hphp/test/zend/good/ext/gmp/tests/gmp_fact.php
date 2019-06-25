@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(gmp_strval(gmp_fact(0)));
 var_dump(gmp_strval(gmp_fact("")));
 var_dump(gmp_strval(gmp_fact("0")));

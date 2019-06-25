@@ -11,7 +11,7 @@
  * SORT_REGULAR - compare items normally
  * Note: arrays are sorted based on total count of elements inside it, when all the elements are arrays
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing arsort() : usage variations ***\n";
 
 // array of arrays

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $tz = new DateTimeZone("Europe/Amsterdam");
 $dateObject = new DateTime( 'January 0099', $tz );
 echo $dateObject->format( 'Y' ), "\n";

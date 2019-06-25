@@ -11,7 +11,7 @@ class Tester
 {
     use TestTrait;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $foo = Tester::testStaticFunction();
 get_defined_constants();
 get_defined_constants(true);

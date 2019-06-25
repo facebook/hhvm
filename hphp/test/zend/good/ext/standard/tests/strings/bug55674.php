@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 var_dump(str_getcsv("0\t\t\"2\"\n", "\t"));
 var_dump(str_getcsv("0\t \t'2'\n", "\t", "'"));
 var_dump(str_getcsv(",,,,"));

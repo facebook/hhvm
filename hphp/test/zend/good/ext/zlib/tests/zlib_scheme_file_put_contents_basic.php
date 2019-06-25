@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $outputFileName = __FILE__.'tmp';
 $outFile = "compress.zlib://$outputFileName";
 $data = <<<EOT

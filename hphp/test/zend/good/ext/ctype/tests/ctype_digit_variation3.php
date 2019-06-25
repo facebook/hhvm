@@ -8,7 +8,7 @@
  * Pass strings containing different character types to ctype_digit() to test
  * which are considered valid decimal digit only strings
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_digit() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");

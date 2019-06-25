@@ -3,7 +3,7 @@
  * Description: Convert a number between arbitrary bases.
  * Source code: ext/standard/math.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing base_convert() : usage variations ***\n";
 
 //get an unset variable

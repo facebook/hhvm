@@ -8,7 +8,7 @@ function my_output($output, $flag) {
   ExtOutputObCleanHandler::$buffer = var_export(['output' => $output, 'flags' => $flag], true);
   return $output;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 ob_start('my_output');
 echo "herp";
 ob_clean();

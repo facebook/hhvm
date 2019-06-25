@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $v1 = headers_sent();
 $v2 = headers_list();
 var_dump(header("HTTP 1.0", true, 200));

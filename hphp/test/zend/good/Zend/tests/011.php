@@ -19,7 +19,7 @@ class bar extends foo {
         var_dump(property_exists("foo","pp3"));
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 try { var_dump(property_exists()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump(property_exists("")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(property_exists("foo","pp1"));

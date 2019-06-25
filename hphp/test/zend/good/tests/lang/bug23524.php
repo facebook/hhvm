@@ -5,7 +5,7 @@ function f($a=array(THE_CONST=>THE_CONST)) {
   print_r($a);
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "Begin\n";
 f();
 f();

@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 print "TZ=America/Mendoza - wrong day.\n";
 $tStamp = mktime (17, 17, 17, 1, 8327, 1970);
 print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";

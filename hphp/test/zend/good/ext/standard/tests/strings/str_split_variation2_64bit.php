@@ -15,7 +15,7 @@ class MyClass
   }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing str_split() : unexpected values for 'split_length' ***\n";
 
 // Initialise function arguments

@@ -9,7 +9,7 @@
 /*
 * Testing strspn() : with varying start and default len arguments
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strspn() : with different start and default len values ***\n";
 
 // initialing required variables

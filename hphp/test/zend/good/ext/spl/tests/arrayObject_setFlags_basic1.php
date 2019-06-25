@@ -12,7 +12,7 @@ function access_p($ao) {
   try { $ao->p = $ao->p . '.changed'; } catch (Exception $e) { echo $e->getMessage()."\n"; }
   try { var_dump($ao->p); } catch (Exception $e) { echo $e->getMessage()."\n"; }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $ao = new C(array('p'=>'array element'));
 $ao->setFlags(ArrayObject::ARRAY_AS_PROPS);
 

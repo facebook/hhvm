@@ -6,6 +6,6 @@ const INI_ALL = 0;
 function foo($x = \INI_ALL) {
     \var_dump($x);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 foo();
 }

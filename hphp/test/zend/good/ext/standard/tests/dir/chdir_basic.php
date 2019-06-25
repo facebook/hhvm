@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of chdir() with absolute and relative paths
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing chdir() : basic functionality ***\n";
 $base_dir_path = dirname(__FILE__);
 

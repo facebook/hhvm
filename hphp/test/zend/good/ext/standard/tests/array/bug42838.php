@@ -7,7 +7,7 @@ function key_compare_func($a, $b)
     }
     return ($a > $b)? 1:-1;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $array1 = array("a" => "green", "b" => "Brown", 'c' => 'blue', 0 => 'red');
 $array2 = array("a" => "green", "b" => "Brown", 'c' => 'blue', 0 => 'red');
 

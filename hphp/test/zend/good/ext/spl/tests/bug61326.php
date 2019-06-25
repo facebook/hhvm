@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $aobj1 = new ArrayObject(array(0));
 $aobj2 = new ArrayObject(array(1));
 var_dump($aobj1 == $aobj2);

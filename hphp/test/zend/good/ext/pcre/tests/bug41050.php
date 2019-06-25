@@ -1,6 +1,6 @@
 <?hh
 // by legolas558
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $regex = '/(insert|drop|create|select|delete|update)([^;\']*('."('[^']*')+".')?)*(;|$)/i';
 
 $sql = 'SELECT * FROM #__components';

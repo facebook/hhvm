@@ -28,7 +28,7 @@ class setter {
         }
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $foo = new Setter();
 
 // this doesn't go through __set()... should it?

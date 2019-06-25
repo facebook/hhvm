@@ -55,7 +55,7 @@ function test_stop_signal(){
         posix_kill($pid, SIGCONT);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 print "Staring wait.h tests....";
 test_exit_waits();
 test_exit_signal();

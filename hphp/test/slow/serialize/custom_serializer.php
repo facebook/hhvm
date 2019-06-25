@@ -1,7 +1,7 @@
 <?hh
 
 class A {}
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $ao = new ArrayObject();
 $ao->props = new A();
 

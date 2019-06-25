@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $n = gmp_nextprime(-1);
 var_dump(gmp_strval($n));
 $n = gmp_nextprime(0);

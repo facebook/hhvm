@@ -39,7 +39,7 @@ class DerivedClass extends TestClass {}
 interface TestInterface {
     public function int();
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 reflectMethod("DerivedClass", "foo");
 reflectMethod("TestClass", "stat");
 reflectMethod("TestClass", "priv");

@@ -12,7 +12,7 @@
  *   3. size value is zero
  *   4. Decimal size value
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_chunk() : usage variations ***\n";
 
 // input array

@@ -12,7 +12,7 @@ class C {
 
 class D extends C {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $myD = new D;
 $myD->doLoop();
 }

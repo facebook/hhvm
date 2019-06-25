@@ -10,7 +10,7 @@ function test($options, $queryPart) {
     return ''. (0 ? 1 : $queryPart);
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $options = array();
 
 var_dump(test($options, new Foo()));

@@ -15,7 +15,7 @@ class fail extends pass {
         fail::show();
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 pass::do_show();
 fail::do_show();
 

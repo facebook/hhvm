@@ -16,7 +16,7 @@ class Faulty
        echo "I heart me\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $Faulty = new Faulty();
 $Array = array('Some junk','Some other junk');
 

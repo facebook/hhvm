@@ -3,7 +3,7 @@
  * Description: Delays program execution for the given number of micro seconds.
  * Source code: ext/standard/basic_functions.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 set_time_limit(20);
 
 echo "*** Testing usleep() : basic functionality ***\n";

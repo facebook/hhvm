@@ -16,7 +16,7 @@ function callback2($a, $b)
 {
   return array($a => $b);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_map() : array with binary data for 'arr1' argument ***\n";
 
 // array with binary data

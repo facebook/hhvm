@@ -16,7 +16,7 @@ class A
     return "object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_merge_recursive() : Passing non array values to \$arr2 argument ***\n";
 
 // initialise the first argument

@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of array_shift()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_shift() : basic functionality ***\n";
 
 $array = array('zero', 'one', '3' => 'three', 'four' => 4);

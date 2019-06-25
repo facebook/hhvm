@@ -13,7 +13,7 @@ class NewConstructor {
         constructor as __construct;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "New constructor: ";
 $o = new NewConstructor;
 }

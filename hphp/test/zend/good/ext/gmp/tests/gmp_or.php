@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(gmp_strval(gmp_or("111111", "2222222")));
 var_dump(gmp_strval(gmp_or(123123, 435234)));
 var_dump(gmp_strval(gmp_or(555, "2342341123")));

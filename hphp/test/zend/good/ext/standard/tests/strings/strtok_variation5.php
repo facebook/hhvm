@@ -7,7 +7,7 @@
 /*
  * Testing strtok() : with miscellaneous combinations of string and token
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strtok() : with miscellaneous inputs ***\n";
 
 // defining arrays for input strings and tokens

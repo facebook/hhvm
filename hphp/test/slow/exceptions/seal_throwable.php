@@ -13,7 +13,7 @@ class foo implements Throwable {
   function getPrevious() {}
   function __toString() {}
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 try {
   try {
     throw new foo('try');

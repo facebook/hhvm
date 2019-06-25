@@ -5,6 +5,6 @@
   $groupinfo = posix_getgrgid($gid);
 
   print_r($groupinfo);
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "===DONE===\n";
 }

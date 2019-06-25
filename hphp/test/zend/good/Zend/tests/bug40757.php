@@ -8,7 +8,7 @@ class Base {
 }
 
 class Child extends Base { }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $base=new Base();
 print_r($base->getFields(new Base()));
 $child=new Child();

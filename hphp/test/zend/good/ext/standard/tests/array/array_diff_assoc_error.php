@@ -8,7 +8,7 @@
 /*
  * Test errors for array_diff with too few\zero arguments
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff_assoc() : error conditions ***\n";
 
 // Zero arguments

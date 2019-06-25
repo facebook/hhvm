@@ -13,7 +13,7 @@ function f2($x=B\Foo::C) {
 function f3($x=\A\Foo::C) {
     echo $x;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo Foo::C;
 echo B\Foo::C;
 echo \A\Foo::C;

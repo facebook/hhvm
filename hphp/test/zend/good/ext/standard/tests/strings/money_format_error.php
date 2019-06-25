@@ -7,7 +7,7 @@
 // ===========================================================================================
 // = We do not test for exact return-values, as those might be different between OS-versions =
 // ===========================================================================================
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $string = '%14#8.2n';
 $value = 1234.56;
 $extra_arg = 10;

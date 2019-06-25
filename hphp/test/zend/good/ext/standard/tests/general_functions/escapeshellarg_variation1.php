@@ -4,7 +4,7 @@
  * Description:  Escape a string to be used as a shell argument.
  * Source code: ext/standard/exec.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing escapeshellarg() : usage variations ***\n";
 
 //get an unset variable

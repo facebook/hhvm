@@ -10,7 +10,7 @@
  * Test how array_diff_assoc behaves when comparing 
  * multi-dimensional arrays
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff_assoc() : usage variations ***\n";
 
 $array1 = array('sub_array1' => array (1, 2, 3),

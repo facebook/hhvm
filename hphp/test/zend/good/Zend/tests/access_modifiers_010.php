@@ -20,6 +20,6 @@ class c extends b {
         $this->test();
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 new c;
 }

@@ -5,7 +5,7 @@ class foo extends ArrayIterator {
             'test3'=>'test999'));
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $h = new foo;
 $i = new RegexIterator($h, '/^test(.*)/', RegexIterator::REPLACE);
 $i->replacement = 42;

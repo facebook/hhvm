@@ -7,7 +7,7 @@
 /*
  * Testing strtok() : modifying the input string while it is getting tokenised
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strtok() : with modification of input string in between tokenising ***\n";
 
 $str = "this is a sample string";

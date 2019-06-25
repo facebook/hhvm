@@ -5,7 +5,7 @@
 */
 
 /* Creating soft and hard links to a file and applying is_file() on links */ 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 fclose( fopen($file_path."/is_file_variation2.tmp", "w") );
 

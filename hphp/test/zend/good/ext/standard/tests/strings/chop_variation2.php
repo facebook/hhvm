@@ -14,7 +14,7 @@ class sample  {
   return "@# $%12345";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing chop() : with different unexpected values for charlist argument ***\n";
 // initialize all required variables
 $str = 'hello world12345 ';

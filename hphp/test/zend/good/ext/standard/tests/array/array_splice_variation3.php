@@ -15,7 +15,7 @@ function test_splice ($offset, $length)
     var_dump (array_splice (&$input_array,$offset,$length,array ("A","B","C")));
     var_dump ($input_array);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** array_splice() function : usage variations - lengths and offsets\n";
 
 echo "absolute offset - absolute length - cut from beginning\n";

@@ -27,7 +27,7 @@ class MyTree implements ArrayAccess {
     }
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $id = 'Test';
 
 $root = new MyTree();

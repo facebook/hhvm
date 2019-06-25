@@ -4,7 +4,7 @@
  * Description: Get string length
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strlen() : unexpected number of arguments ***";
 
 

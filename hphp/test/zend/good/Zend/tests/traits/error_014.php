@@ -11,7 +11,7 @@ class baz {
 class bar extends baz {
     use foo { test as public; }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $x = new bar;
 var_dump($x->test());
 }

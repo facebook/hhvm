@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 date_default_timezone_set('UTC');
 var_dump(date('H:i:s', strtotime('back of 7')));
 var_dump(date('H:i:s', strtotime('front of 7')));

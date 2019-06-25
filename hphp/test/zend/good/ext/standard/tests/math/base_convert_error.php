@@ -8,7 +8,7 @@
 class classA
 {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing base_convert() : error conditions ***\n";
 
 echo "Incorrect number of arguments\n";

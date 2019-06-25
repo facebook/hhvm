@@ -8,7 +8,7 @@
 /*
  * Pass an incorrect number of arguments to preg_last_error() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing preg_last_error() : error conditions ***\n";
 
 // Test preg_last_error with one more than the expected number of arguments

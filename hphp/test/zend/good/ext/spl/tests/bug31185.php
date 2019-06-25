@@ -22,7 +22,7 @@ class FooBar implements ArrayAccess {
     }
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $i = 0; $j = 0;
 $foo = new FooBar();
 $foo[$j++] = $i++;

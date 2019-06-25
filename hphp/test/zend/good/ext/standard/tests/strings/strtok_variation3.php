@@ -7,7 +7,7 @@
 /*
  * Testing strtok() : with heredoc strings
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strtok() : with heredoc strings ***\n";
 
 // defining different heredoc strings

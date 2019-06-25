@@ -9,7 +9,7 @@
 /*
 * Testing strspn() : with heredoc string, varying mask and default start and len arguments
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strspn() : with different mask strings ***\n";
 
 // initialing required variables

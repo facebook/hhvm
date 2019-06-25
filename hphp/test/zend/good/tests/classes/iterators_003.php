@@ -38,7 +38,7 @@ class c implements IteratorAggregate {
         return new c_iter($this);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $t = new c();
 
 foreach($t as $v) {

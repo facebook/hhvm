@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(preg_quote('#'));
 
 var_dump(preg_match('~^(' . preg_quote('hello#world', '~') . ')\z~x', 'hello#world', &$m));

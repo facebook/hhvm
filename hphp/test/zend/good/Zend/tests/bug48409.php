@@ -50,7 +50,7 @@ class Runner
         }
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 try {
     $runner = new Runner;
     $runner->run(new AAA);

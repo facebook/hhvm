@@ -2,7 +2,7 @@
 
 class Bar {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $b = new Bar;
 
 var_dump($b == NULL);

@@ -11,7 +11,7 @@ class late {
         echo __CLASS__ . "::" . __FUNCTION__ . "\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $t = new early();
 $t->__construct();
 unset($t);

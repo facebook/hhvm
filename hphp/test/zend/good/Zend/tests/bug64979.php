@@ -10,7 +10,7 @@ function new_closure_gen() {
     yield ++$ref->val;
   };
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $closure1 = new_closure_gen();
 $closure2 = new_closure_gen();
 

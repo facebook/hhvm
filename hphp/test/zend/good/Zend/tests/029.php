@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $arr = array(new stdClass);
 
 $arr[0]->a = clone $arr[0];

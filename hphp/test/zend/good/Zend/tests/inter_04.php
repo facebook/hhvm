@@ -10,6 +10,6 @@ interface b {
 
 interface c extends a, b {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "done!\n";
 }

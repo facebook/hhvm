@@ -8,7 +8,7 @@ class C {
     private $e = "Original e";
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "\n\nSimple loop.\n";
 $obj = new C;
 foreach ($obj as $v) {

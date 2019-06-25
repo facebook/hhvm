@@ -16,7 +16,7 @@ class Bar extends Foo {
         $this->aProtectedMethod();
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o = new Bar;
 $o->aPublicMethod();
 }

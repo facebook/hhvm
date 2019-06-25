@@ -3,7 +3,7 @@
  * proto mixed min(mixed arg1 [, mixed arg2 [, mixed ...]])
  * Function is implemented in ext/standard/array.c
 */ 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "\n*** Testing arrays  ***\n";
 
 var_dump(min(array(2,1,2)));

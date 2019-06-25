@@ -4,7 +4,7 @@
  * Source code: ext/date/php_date.c
  * Alias to functions: timezone_name_get()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing DateTimeZone::getName() : basic functionality ***\n";
 
 //Set the default time zone 

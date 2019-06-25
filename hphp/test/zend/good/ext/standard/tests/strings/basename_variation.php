@@ -19,7 +19,7 @@ function check_basename( $path_arrays ) {
    }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_path_variations = array (
   /* paths with shortcut home dir char, with suffix variation */
   array("~/home/user/bar"),

@@ -29,7 +29,7 @@ function cmp_function($value1, $value2)
     return -1;
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing uasort() : different numeric arrays as 'array_arg' ***\n";
 
 // Int array

@@ -86,7 +86,7 @@ class class_g extends base implements if_f {
     function f_e() {}
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "class_a\n";
 
 $t = new class_a();

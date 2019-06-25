@@ -10,7 +10,7 @@ class MyHelloWorld{
     MY_TRAIT1::sayHello as falaOi;
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o = new MyHelloWorld();
 $o->falaOi();
 }

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $a = new SplMaxHeap;
 $a->insert($a);
 var_dump($a);

@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $document = new DOMDocument;
 $root = $document->createElement('root');
 $document->appendChild($root);

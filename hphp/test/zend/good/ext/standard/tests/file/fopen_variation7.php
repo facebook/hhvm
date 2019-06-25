@@ -35,7 +35,7 @@ function runtest() {
        unlink(ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir1.'/'.$tmpfile);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $thisTestDir =  basename(__FILE__, ".php") . ".dir";
 mkdir($thisTestDir);
 chdir($thisTestDir);

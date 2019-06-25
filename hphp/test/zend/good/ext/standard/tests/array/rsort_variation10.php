@@ -7,7 +7,7 @@
 /*
  * Pass rsort() an array containing octal values to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing rsort() : variation ***\n";
 
 // an array containing unsorted octal values

@@ -5,7 +5,7 @@ class test {
         return "blah";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $t = new test;
 $t->foo() = 1;
 

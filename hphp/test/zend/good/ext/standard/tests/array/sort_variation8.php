@@ -10,7 +10,7 @@
  * flag value as defualt
  * SORT_REGULAR - compare items normally
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sort() : usage variations ***\n";
 
 // array of arrays

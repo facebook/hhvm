@@ -5,7 +5,7 @@
  * Alias to functions: 
  */
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ob_get_contents() : error cases ***\n";
 
 try { var_dump(ob_get_contents("bob")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

@@ -5,7 +5,7 @@ function comp_func($a, $b) {
         return ($a > $b)? 1:-1;
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = array(1, 6, 2, -20, 15, 1200, -2500);
 $b = array(0, 7, 2, -20, 11, 1100, -2500);
 $c = array(0, 6, 2, -20, 19, 1000, -2500);

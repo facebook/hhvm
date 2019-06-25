@@ -20,7 +20,7 @@
  var_dump ( rtrim("rtrim test$#@", "#@$") );                     /* with some special characters as second Argument */
 
 /* String with embedded NULL */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "\n*** String with embedded NULL ***\n";
 var_dump( rtrim("234\x0005678\x0000efgh\xijkl\x0n1", "\x0n1") );
 

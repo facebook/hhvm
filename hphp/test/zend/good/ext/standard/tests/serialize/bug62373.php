@@ -1,7 +1,7 @@
 <?hh
 class A {}
 class B {}
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $size_of_ce = (((int)(log((float)PHP_INT_MAX) / log(2.0)) + 1 == 32 ? 368: 680) + 15) & ~15;
 $dummy = array();
 $b = new B();

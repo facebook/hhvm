@@ -8,7 +8,7 @@
 /*
  * Test how array_diff compares integers, floats and strings
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff() : usage variations ***\n";
 
 $arr_int = array(1, 2, 3);

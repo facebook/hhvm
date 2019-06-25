@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of end()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing end() : basic functionality ***\n";
 
 $array = array('zero', 'one', 200 => 'two');

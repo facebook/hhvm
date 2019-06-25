@@ -6,7 +6,7 @@ function encode_decode($json) {
     $pretty = json_decode($pretty);
     printf("Match: %d\n", $pretty == $struct);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 encode_decode('[1,2,3,[1,2,3]]');
 encode_decode('{"a":1,"b":[1,2],"c":{"d":42}}');
 }

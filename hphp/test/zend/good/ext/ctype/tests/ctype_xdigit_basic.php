@@ -3,7 +3,7 @@
  * Description: Checks for character(s) representing a hexadecimal digit 
  * Source code: ext/ctype/ctype.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_xdigit() : basic functionality ***\n";
 $orig = setlocale(LC_CTYPE, "C"); 
 

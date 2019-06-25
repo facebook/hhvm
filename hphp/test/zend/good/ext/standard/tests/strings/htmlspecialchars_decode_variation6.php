@@ -7,7 +7,7 @@
 /*
  * testing whether htmlspecialchars_decode() is binary safe or not
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing htmlspecialchars_decode() : usage variations ***\n";
 
 //various string inputs

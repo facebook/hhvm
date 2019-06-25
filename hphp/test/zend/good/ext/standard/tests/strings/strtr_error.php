@@ -3,7 +3,7 @@
  * Description: Translates characters in str using given translation tables 
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strtr() : error conditions ***\n";
 $str = "string";
 $from = "string";

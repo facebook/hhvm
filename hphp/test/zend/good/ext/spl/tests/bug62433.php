@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $dots = array_keys(iterator_to_array(new RecursiveDirectoryIterator(__DIR__)));
 $ndots = array_keys(iterator_to_array(new RecursiveDirectoryIterator(__DIR__, FilesystemIterator::SKIP_DOTS)));
 

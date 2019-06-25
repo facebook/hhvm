@@ -48,7 +48,7 @@ class mycollection implements Iterator {
 class class2 {
   public $dummy;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $obj = new class2();
 $col = new mycollection();
 

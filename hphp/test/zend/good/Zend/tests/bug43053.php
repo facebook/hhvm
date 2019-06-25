@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 echo 1200000.00."\n";
 echo 1300000.00."\n";
 echo 1400000.00."\n";

@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 date_default_timezone_set('UTC');
 
 $base_time = 1204200000; // 28 Feb 2008 12:00:00

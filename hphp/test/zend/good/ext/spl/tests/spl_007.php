@@ -6,7 +6,7 @@ class Foo {
         return true;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $it = new ArrayIterator(array(1, 2, 3));
 
 iterator_apply($it, array(new Foo, "foobar"));

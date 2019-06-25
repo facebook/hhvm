@@ -12,6 +12,6 @@ function custom_callback($traceName, $btInfo)
   echo isset($btInfo[0]['args']) ? count($btInfo[0]['args']) : 'does not exist';
   echo "\n";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 doit('a','b');
 }

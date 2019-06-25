@@ -7,7 +7,7 @@
 /*
  * Testing array_unshift() by giving array with default keys for $array argument
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_unshift() : basic functionality with default key array ***\n";
 
 // Initialise the array

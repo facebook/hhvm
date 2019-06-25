@@ -7,7 +7,7 @@
 /*
  * Pass incorrect number of arguments to ctype_lower() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_lower() : error conditions ***\n";
 
 // Zero arguments

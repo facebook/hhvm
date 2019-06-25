@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $array1 = array("a" => "green", "b" => "brown", "c" => "blue", "red", "");
 $array2 = array("a" => "green", "yellow", "red", TRUE);
 $array3 = array("red", "a"=>"brown", "");

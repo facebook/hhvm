@@ -11,7 +11,7 @@
 * passing different double quoted strings as 'str' argument to str_split()
 * split_length is set to 7
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing str_split() : double quoted strings for 'str' ***\n";
 
 //Initialize variables

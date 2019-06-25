@@ -4,7 +4,7 @@
  * Source code: ext/standard/basic_functions.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing parse_ini_file() : variation ***\n";
 $output_file = __FILE__.".ini";
 $iniFile = <<<FILE

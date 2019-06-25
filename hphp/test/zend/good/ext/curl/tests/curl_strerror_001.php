@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(strtolower(curl_strerror(CURLE_OK)));
 var_dump(strtolower(curl_strerror(CURLE_UNSUPPORTED_PROTOCOL)));
 var_dump(strtolower(curl_strerror(-1)));

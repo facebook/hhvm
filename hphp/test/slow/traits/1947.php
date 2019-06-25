@@ -12,7 +12,7 @@ class MyHelloWorld {
     echo 'Hello ';
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o = new MyHelloWorld();
 $o->sayHelloWorld();
 }

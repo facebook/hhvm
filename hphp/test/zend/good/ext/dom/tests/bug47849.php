@@ -1,5 +1,5 @@
 <?hh 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $aDOM= new DOMDocument();
 $aDOM->appendChild($aDOM->createElementNS('urn::root','r:root'));
 

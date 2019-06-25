@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 date_default_timezone_set("GMT");
 echo strtotime('20050518t090000Z')."\n";
 echo strtotime('20050518t091234Z')."\n";

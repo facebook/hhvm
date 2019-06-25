@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $x = new NumberFormatter('en_US', NumberFormatter::DECIMAL);
 var_dump($x->format(''));
 var_dump($x->format(1));

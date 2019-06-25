@@ -11,7 +11,7 @@ class Foo {
         $this::fOOBAr();
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new Foo;
 $a->test();
 }

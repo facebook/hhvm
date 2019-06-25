@@ -23,7 +23,7 @@ class fail extends third {
     }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 first::do_show();
 
 second::do_show();

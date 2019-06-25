@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $dir = dirname(__FILE__);
 $certs = array('bug39217cert2.txt', 'bug39217cert1.txt');
 foreach($certs as $cert) {

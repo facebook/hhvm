@@ -3,7 +3,7 @@
  * Description: Split array into chunks 
  * Source code: ext/standard/array.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_chunk() : error conditions ***\n";
 
 // Zero arguments

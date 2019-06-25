@@ -17,7 +17,7 @@ function callback_cat($a, $b)
 {
   return ($a . $b);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_map() : array with references for 'arr1' argument ***\n";
 
 // reference variables

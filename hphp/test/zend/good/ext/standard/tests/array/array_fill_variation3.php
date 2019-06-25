@@ -17,7 +17,7 @@ class test
     return "testObject";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_fill() : usage variations ***\n";
 
 // Initialise function arguments not being substituted

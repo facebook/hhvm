@@ -4,7 +4,7 @@
  * Source code: ext/standard/formatted_print.c
 */
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sprintf() : string formats with string values ***\n";
 
 // defining different heredoc strings

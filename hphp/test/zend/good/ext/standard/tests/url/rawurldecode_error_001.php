@@ -6,7 +6,7 @@
  */
 
 // NB: basic functionality tested in tests/strings/001.phpt
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing rawurldecode() : error conditions ***\n";
 
 // Zero arguments

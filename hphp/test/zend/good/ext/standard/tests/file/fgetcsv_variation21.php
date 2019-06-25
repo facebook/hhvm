@@ -8,7 +8,7 @@
   Testing fgetcsv() to read a file containing blank line when provided with 
   default enclosure argument
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fgetcsv() : with default enclosure, blank line ***\n";
 
 $filename = dirname(__FILE__) . '/fgetcsv_variation21.tmp';

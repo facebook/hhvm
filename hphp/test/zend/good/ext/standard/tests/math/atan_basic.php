@@ -6,7 +6,7 @@
 
 require(__DIR__."/allowed_rounding_error.inc");
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 
 echo "atan 1.7320508075689 = ";
 $atan1 = 360 * atan(1.7320508075689) / (2.0 * M_PI);

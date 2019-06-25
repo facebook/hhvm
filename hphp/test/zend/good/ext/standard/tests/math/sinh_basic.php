@@ -6,7 +6,7 @@
 
 require(__DIR__."/allowed_rounding_error.inc");
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 
 echo "sinh .5  = ";
 var_dump(sinh(0.5));

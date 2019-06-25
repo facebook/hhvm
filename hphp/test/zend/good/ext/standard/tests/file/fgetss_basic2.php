@@ -10,7 +10,7 @@
     x+, x+b, x+t
 */
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fgetss() : basic operations ***\n";
 
 /* string with html and php tags */

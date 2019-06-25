@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $keypair = sodium_crypto_sign_keypair();
 var_dump(strlen($keypair) === SODIUM_CRYPTO_SIGN_KEYPAIRBYTES);
 $sk = sodium_crypto_sign_secretkey($keypair);

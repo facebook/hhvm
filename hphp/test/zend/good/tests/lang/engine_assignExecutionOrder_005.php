@@ -29,7 +29,7 @@ function i6() {
         echo "i6\n";
         return 0;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = array(array(0));
 $b = array(array(1));
 $c = array(array(2));

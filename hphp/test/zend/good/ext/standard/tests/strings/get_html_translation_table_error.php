@@ -3,7 +3,7 @@
  * Description: Returns the internal translation table used by htmlspecialchars and htmlentities
  * Source code: ext/standard/html.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing get_html_translation_table() : error conditions ***\n";
 
 // More than expected number of arguments

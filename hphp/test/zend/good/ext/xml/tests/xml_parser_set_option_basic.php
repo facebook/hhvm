@@ -4,7 +4,7 @@
  * Source code: ext/xml/xml.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "Simple testcase for xml_parser_get_option() function\n";
 
 $parser = xml_parser_create_ns();

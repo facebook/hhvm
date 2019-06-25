@@ -7,7 +7,7 @@
 /*
  * Pass incorrect number of arguments to getcwd() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing getcwd() : error conditions ***\n";
 
 // One argument

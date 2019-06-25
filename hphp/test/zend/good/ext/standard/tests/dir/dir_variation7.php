@@ -10,7 +10,7 @@
  *   1) remove write & execute permission from the 1st parent and test dir()
  *   2) remove execute permission from 2nd parent and test dir()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing dir() : remove execute permission from the parent dir ***\n";
 
 /* create the temporary directory :

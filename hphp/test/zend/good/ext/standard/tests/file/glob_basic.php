@@ -7,7 +7,7 @@ function sort_var_dump($results) {
    sort(&$results);
    var_dump($results);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing glob() : basic functions ***\n";
 $file_path = dirname(__FILE__);
 

@@ -3,7 +3,7 @@
 class foo {
     protected $a = array();
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new foo;
 $x = json_encode($a);
 

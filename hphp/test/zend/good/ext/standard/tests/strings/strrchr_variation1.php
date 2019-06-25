@@ -5,7 +5,7 @@
 */
 
 /* Test strrchr() function by passing various double quoted strings for 'haystack' & 'needle' */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strrchr() function: with various double quoted strings ***";
 $haystack = "Hello,\t\n\0\n  $&!#%\o,()*+-./:;<=>?@hello123456he \x234 \101 ";
 $needle = array(

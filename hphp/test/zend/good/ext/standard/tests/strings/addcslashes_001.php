@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing addcslashes() for basic operations ***\n";
 /* checking normal operation of addcslashes */
 $string = "goodyear12345NULL\0truefalse\a\v\f\b\n\r\t";

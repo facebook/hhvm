@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $ar = array(0, "123", 123, 22 => "abc", "a2b", 22, "a2d" => 7, 42);
 
 foreach(new RegexIterator(new ArrayIterator($ar), "/2/") as $k => $v)

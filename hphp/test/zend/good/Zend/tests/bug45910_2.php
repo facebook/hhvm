@@ -16,7 +16,7 @@ class foo {
         self::$foo;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 foo::test();
 
 print 1;

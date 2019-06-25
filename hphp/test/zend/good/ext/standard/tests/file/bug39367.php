@@ -18,6 +18,6 @@ function test() {
   unlink('/tmp/1tmp');
   unlink('/tmp/testfile1');
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 @test();
 }

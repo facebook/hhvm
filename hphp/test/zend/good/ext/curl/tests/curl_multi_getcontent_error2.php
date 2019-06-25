@@ -36,4 +36,4 @@
     echo $results1;
     echo $results2;
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

@@ -7,7 +7,7 @@
 /*
 * Trying different keys in $input array argument
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_flip() : different keys for 'input' array argument ***\n";
 
 // different heredoc strings

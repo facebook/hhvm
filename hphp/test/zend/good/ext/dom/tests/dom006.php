@@ -15,7 +15,7 @@ class books extends domDocument {
     }
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $dom = new books;
 
 $dom->load(dirname(__FILE__)."/book.xml");

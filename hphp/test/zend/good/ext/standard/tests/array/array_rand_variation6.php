@@ -7,7 +7,7 @@
 /*
 * Test behaviour of array_rand() when keys of the 'input' array is heredoc string
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_rand() : with keys of input array as heredoc strings ***\n";
 
 // defining different heredoc strings

@@ -4,7 +4,7 @@
  * Source code: ext/standard/image.c
  * Alias to functions:
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing getimagesize() : tiff_mm format ***\n";
 var_dump(getimagesize(dirname(__FILE__) . "/2x2mm.tif", &$arr));
 var_dump($arr);

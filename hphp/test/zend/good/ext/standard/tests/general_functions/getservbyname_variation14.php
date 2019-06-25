@@ -1,6 +1,6 @@
 <?hh
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Test substituting argument 2 with string values ***\n";
 
 $service = "www"; 

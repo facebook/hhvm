@@ -8,7 +8,7 @@
 /*
  * test join() by passing different glue arguments
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing join() : usage variations ***\n";
 
 $glues = array (

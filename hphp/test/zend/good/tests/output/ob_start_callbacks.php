@@ -11,7 +11,7 @@ function my_strtoupper($foo, $bar) {
 }
 
 // Closure in variable
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = function ($s) { return strtoupper($s); };
 ob_start($a);
 echo 'closure in variable', "\n";

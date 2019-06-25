@@ -21,7 +21,7 @@ function test($value, $key, $inner) {
     );
     return $value === 1 || $value === 4;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $tests = array(
     'instance method'    => function() { return array(new A, 'test'); },
     'static method'      => function() { return array('B', 'test'); },

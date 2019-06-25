@@ -7,7 +7,7 @@
 /* Test copy() function: Checking case sensitivity in creation of destination file names 
      and the existence and size of destination files
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Test copy() function: checking case sensitivity in creation of destination file names ***\n";
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $src_file_name = $file_path."/copy_variation5.tmp";

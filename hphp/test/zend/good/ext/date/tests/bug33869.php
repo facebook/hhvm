@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 date_default_timezone_set("UTC");
 $tm = strtotime("2005-01-01 01:01:01");
 echo date(DATE_ISO8601, strtotime('+5days', $tm));

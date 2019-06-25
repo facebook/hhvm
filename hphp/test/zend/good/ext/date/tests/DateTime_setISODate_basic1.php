@@ -4,7 +4,7 @@
  * Source code: ext/date/php_date.c
  * Alias to functions: date_isodate_set
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing DateTime::setISODate() : basic functionality ***\n";
 
 //Set the default time zone 

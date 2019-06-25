@@ -3,7 +3,7 @@ class asserter {
     public function call($function) {
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $asserter = new asserter();
 $function = 'md5';
 

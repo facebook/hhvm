@@ -15,7 +15,7 @@ class Sample {
     return "My String";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing nl2br() : usage variations ***\n";
 
 //get an unset variable

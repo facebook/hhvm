@@ -63,7 +63,7 @@ function incdecrev($x)
     var_dump($y);
     echo "--- end incdecrev ---\n";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 error_reporting(-1);
 
 $i32 = 1 << 31; // if this is negative, we have a 32-bit int

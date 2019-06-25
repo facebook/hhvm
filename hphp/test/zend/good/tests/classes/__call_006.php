@@ -15,7 +15,7 @@ class B extends A {
         B::unknownCalledWithSROFromChild(1,2,3);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new A();
 
 echo "---> Invoke __call via simple method call.\n";

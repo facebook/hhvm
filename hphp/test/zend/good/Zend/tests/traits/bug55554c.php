@@ -34,7 +34,7 @@ class ReportCollision {
     }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "ReportCollision: ";
 $o = new ReportCollision;
 }

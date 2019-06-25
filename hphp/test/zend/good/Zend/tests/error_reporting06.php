@@ -10,7 +10,7 @@ function foo3($arg) {
     echo $undef3;
     throw new Exception("test");
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 error_reporting(E_ALL);
 
 try {

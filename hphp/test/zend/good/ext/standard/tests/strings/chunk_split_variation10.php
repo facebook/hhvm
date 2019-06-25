@@ -9,7 +9,7 @@
 * passing different single quoted strings for 'ending' arguments to chunk_split()
 * 'chunklen' is set to 9.2 for this testcase
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing chunk_split() : different single quoted strings as 'ending' ***\n";
 
 

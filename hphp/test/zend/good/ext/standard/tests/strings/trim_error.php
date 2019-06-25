@@ -5,7 +5,7 @@
  * Source code: ext/standard/string.c
 */
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing trim() : error conditions ***\n";
 
 echo "\n-- Testing trim() function with no arguments --\n";

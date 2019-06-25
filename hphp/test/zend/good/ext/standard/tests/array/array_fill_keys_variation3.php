@@ -6,7 +6,7 @@
  */
 
 /* Testing with unexpected argument types */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_fill_keys() : parameter variations ***\n";
 
 $simpleStr = "simple";

@@ -7,7 +7,7 @@ function DoTest($fp, $delim) {
 	echo "\t" . stream_get_line($fp, 9, $delim) . "\n";
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $fp = fopen(__FILE__, 'r'); // Open self
 
 DoTest($fp, 'ZZZ');  // test multi-char delimiter

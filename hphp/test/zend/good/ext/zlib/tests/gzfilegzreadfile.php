@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $original = <<<EOD
 blah blah blah blah blah blah blah
 blah blah blah blah blah blah blah

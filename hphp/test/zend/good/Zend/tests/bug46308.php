@@ -20,7 +20,7 @@ class relay
 class dummy
 {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 main::$dummy        = new dummy();
 main::$dataAccessor = new relay();
 main::$dataAccessor->bar;

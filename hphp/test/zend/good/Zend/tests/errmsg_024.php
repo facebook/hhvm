@@ -7,6 +7,6 @@ class test1 {
 class test extends test1 {
     static $var = 10;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "Done\n";
 }

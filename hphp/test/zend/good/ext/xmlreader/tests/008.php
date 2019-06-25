@@ -1,6 +1,6 @@
 <?hh
 /* $Id$ */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $xmlstring = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE LIST SYSTEM "dtdexample.dtd">
 <LIST>

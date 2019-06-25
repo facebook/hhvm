@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of mb_strlen()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_strlen() : basic functionality***\n";
 
 $string_ascii = b'abc def';

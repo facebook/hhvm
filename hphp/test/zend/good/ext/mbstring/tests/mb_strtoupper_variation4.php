@@ -8,7 +8,7 @@
  * Pass characters from different languages to check that mb_strtoupper is
  * doing a correct case conversion
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_strtoupper() : usage variations ***\n";
 
 $uppers = array('Basic Latin' => b'ABCDEFGHIJKLMNOPQRSTUVWXYZ',

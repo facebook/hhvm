@@ -12,7 +12,7 @@ function loopElements($nodes)
     }
     return $count;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $xml = <<<DOC
 <?xml version="1.0" encoding="UTF-8"?>
 <root xmlns:xi="http://www.w3.org/2001/XInclude">

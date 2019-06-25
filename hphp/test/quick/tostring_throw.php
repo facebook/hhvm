@@ -10,7 +10,7 @@ function foo() {
   $x = new stringer();
   ignore(new dtor(),  "foo" . $x);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 try {
   foo();
 } catch (Exception $e) {

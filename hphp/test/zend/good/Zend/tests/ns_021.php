@@ -10,7 +10,7 @@ class Test {
 function foo() {
     echo __FUNCTION__,"\n";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 foo();
 \test\foo();
 \test\test::foo();

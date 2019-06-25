@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 error_reporting(E_ALL|E_STRICT);
 
 $num_increments = 100;

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 echo hash('sha256', '') . "\n";
 echo hash('sha256', 'a') . "\n";
 echo hash('sha256', '012345678901234567890123456789012345678901234567890123456789') . "\n";

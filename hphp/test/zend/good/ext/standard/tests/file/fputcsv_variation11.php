@@ -5,7 +5,7 @@
 */
 
 /* Testing fputcsv() to write to a file when default enclosure value is provided */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fputcsv() : with default enclosure value ***\n";
 
 /* the array is with three elements in it. Each element should be read as 

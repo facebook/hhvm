@@ -19,7 +19,7 @@ function check_dirname( $paths ) {
      try { var_dump( dirname($paths[$loop_counter]) ); } catch (Exception $e) { var_dump($e->getMessage()); }
    }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_path_variations = array (
   /* home dir shortcut char */
   "~/home/user/bar",

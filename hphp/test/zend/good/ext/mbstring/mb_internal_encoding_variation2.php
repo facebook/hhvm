@@ -10,7 +10,7 @@
  * NB: The strings passed are *NOT* necessarily encoded in the encoding passed to the function.
  * This test is purely to see whether the function recognises the encoding.
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_internal_encoding() : usage variations ***\n";
 
 $encoding = array('UCS-4',            /*1*/

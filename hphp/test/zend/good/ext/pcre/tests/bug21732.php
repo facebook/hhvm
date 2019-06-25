@@ -5,7 +5,7 @@ class foo {
         return "yes!";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(preg_replace('', array(), ''));
 var_dump(preg_replace_callback("/(ab)(cd)(e)/", array(new foo(), "cb"), 'abcde'));
 }

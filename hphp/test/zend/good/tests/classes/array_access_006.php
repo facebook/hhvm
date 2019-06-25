@@ -23,7 +23,7 @@ class OverloadedArray implements ArrayAccess {
         unset($this->realArray[$index]);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new OverloadedArray;
 $a[1] += 10;
 var_dump($a[1]);

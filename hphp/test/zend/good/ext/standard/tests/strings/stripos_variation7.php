@@ -7,7 +7,7 @@
 /* Test stripos() function by passing empty heredoc string for haystack 
  *  and with various needles & offsets
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing stripos() function: with heredoc strings ***\n";
 echo "-- With empty heredoc string --\n";
 $empty_string = <<<EOD

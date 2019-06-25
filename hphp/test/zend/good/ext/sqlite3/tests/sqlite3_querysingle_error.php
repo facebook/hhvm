@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $db = new SQLite3(':memory:');
 echo 'Testing SQLite3 querySingle without parameters' . PHP_EOL;
 try { $db->querySingle(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

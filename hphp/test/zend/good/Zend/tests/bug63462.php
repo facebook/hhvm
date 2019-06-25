@@ -27,7 +27,7 @@ class Test {
         return isset($this->$name);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $test = new Test();
 
 $test->nonExisting;

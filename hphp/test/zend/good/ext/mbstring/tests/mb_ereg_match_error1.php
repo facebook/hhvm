@@ -7,7 +7,7 @@
 /*
  * Test mb_ereg_match by passing an incorrect number of arguments
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_ereg_match() : error conditions ***\n";
 
 

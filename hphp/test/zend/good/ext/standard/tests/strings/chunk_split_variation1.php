@@ -13,7 +13,7 @@ class MyClass
   }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing chunk_split() : with unexpected values for 'str' argument ***\n";
 
 // Initialising variables

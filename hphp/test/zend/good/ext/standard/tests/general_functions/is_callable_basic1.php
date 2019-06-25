@@ -42,7 +42,7 @@ function false() {
 /* function name with string and special character */
 function Hello_World() {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "\n*** Testing is_callable() on defined functions ***\n";
 $defined_functions = array (
   $functionVar1 = 'someFunction',

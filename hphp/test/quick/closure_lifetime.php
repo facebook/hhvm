@@ -6,7 +6,7 @@ class blah {
   public function foo() { return function() { return $this->t; }; }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
   $k = (new blah)->foo(); // only reference to obj is in the closure
   echo $k();
   unset($k);

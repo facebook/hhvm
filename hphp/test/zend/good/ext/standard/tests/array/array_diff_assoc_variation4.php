@@ -9,7 +9,7 @@
  * Test how array_diff_assoc() compares arrays containing different data types
  * as keys
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "\n*** Testing array_diff_assoc() : usage variations ***\n";
 
 $array = array(1, 2, 3);

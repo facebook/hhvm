@@ -3,7 +3,7 @@
  * Description:  Returns an array with information about sunset/sunrise and twilight begin/end.
  * Source code: ext/standard/data/php_date.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 date_default_timezone_set("UTC");
 
 echo "*** Testing date_sun_info() : usage variations ***\n";

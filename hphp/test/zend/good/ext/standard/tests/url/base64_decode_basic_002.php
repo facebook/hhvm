@@ -4,7 +4,7 @@
  * Source code: ext/standard/base64.c
  * Alias to functions:
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "Decode 'hello world!':\n";
 $noWhiteSpace = "aGVsbG8gd29ybGQh";
 var_dump(base64_decode($noWhiteSpace));

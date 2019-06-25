@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 mkdir("bug45181_x");
 var_dump(is_dir("bug45181_x"));
 $origdir = getcwd();

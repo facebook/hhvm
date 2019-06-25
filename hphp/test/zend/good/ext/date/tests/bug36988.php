@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 date_default_timezone_set('GMT');
 $start = microtime(true);
 $a = mktime(1, 1, 1, 1, 1, 11111111111);

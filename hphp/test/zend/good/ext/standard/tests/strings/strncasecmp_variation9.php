@@ -5,7 +5,7 @@
 */
 
 /* Test strncasecmp() function with here-doc strings for 'str1', 'str2' */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Test strncasecmp() function: with here-doc strings ***\n";
 
 /* multi line heredoc string */

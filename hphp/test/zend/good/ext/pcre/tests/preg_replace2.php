@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(preg_replace('', array(), ''));
 
 var_dump(preg_replace(array('/\da(.)/ui', '@..@'), '$1', '12Abc'));

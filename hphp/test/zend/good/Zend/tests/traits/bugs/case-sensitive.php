@@ -15,6 +15,6 @@ class MyClass {
     use B;
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 error_reporting(E_ALL);
 }

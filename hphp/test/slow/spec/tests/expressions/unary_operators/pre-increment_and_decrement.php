@@ -61,7 +61,7 @@ function incdecrev($a)
     echo '$a = '.$a." <---> "; var_dump($a);
     echo "--------------------------------------- end incdecrev ---\n";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 error_reporting(-1);
 
 ///*

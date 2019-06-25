@@ -3,7 +3,7 @@
 class test {
     function __call(&$name, $args) { }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $t = new test;
 $func = "foo";
 

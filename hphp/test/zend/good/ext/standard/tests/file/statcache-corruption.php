@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $a = stat(__FILE__);
 is_link(__FILE__);
 $b = stat(__FILE__);

@@ -8,7 +8,7 @@ class B implements Serializable {
     public function unserialize($data) {
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $data = array(new B);
 
 try {

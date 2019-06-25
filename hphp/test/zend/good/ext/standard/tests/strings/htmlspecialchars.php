@@ -4,7 +4,7 @@
 */
 
 /* retrieving htmlspecialchars from the ANSI character table */
-<<__EntryPoint>> function main() { echo "*** Retrieving htmlspecialchars for 256 characters ***\n";
+<<__EntryPoint>> function main(): void { echo "*** Retrieving htmlspecialchars for 256 characters ***\n";
 for($i=0; $i<256; $i++)
 var_dump( bin2hex( htmlspecialchars(b"chr($i)") ) );
 

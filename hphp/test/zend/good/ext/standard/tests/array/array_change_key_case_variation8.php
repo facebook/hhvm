@@ -7,7 +7,7 @@
 /*
  * Test how array_change_key_case() behaves with different strings
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_change_key_case() : usage variations ***\n";
 
 $inputs = array (

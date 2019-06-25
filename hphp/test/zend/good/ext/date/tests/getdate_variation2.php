@@ -4,7 +4,7 @@
  * Source code: ext/date/php_date.c
  * Alias to functions:
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing getdate() : usage variation ***\n";
 
 //Set the default time zone

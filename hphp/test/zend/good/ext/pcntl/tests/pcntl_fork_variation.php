@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 echo "*** Testing the process isolations between a process and its forks ***\n";
 
 $pid = pcntl_fork();

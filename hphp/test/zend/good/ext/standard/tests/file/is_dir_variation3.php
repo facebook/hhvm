@@ -5,7 +5,7 @@
 */
 
 /* Passing invalid arguments to is_dir() */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $dir_handle = opendir( $file_path );
 

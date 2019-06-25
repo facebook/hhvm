@@ -14,7 +14,7 @@ function run_test($file) {
     echo "\n";
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing file_put_contents() : usage variation ***\n";
 
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);

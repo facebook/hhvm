@@ -7,7 +7,7 @@
 /*
 * Passing built-in functions and different language constructs as 'callback' argument
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_filter() : usage variations - built-in functions as 'callback' argument ***\n";
 
 $input = array(0, 1, -1, 10, 100, 1000, 'Hello', null);

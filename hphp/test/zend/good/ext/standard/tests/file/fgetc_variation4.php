@@ -6,7 +6,7 @@
 
 /* read from fie using fgetc, file opened using different
    read read modes */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fgetc() : usage variations ***\n";
 echo "-- Testing fgetc() with files opened with different read modes --\n";
 

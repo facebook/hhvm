@@ -10,7 +10,7 @@ class Foo {
     return $this->str;
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $server = new soapserver(null,array('uri'=>"http://testuri.org"));
 $server->setclass("Foo","Hello");
 

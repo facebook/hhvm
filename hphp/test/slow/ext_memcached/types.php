@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $list = array(
   'boolean_true' => true,
   'boolean_false' => false,

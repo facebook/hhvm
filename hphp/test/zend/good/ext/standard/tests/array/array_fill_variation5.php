@@ -7,7 +7,7 @@
 /*
  * testing array_fill() by passing different types of array  values for 'val' argument
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_fill() : usage variations ***\n";
 
 // Initialise function arguments not being substituted 

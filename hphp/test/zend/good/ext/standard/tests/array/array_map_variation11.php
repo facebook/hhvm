@@ -14,7 +14,7 @@ function square_recur_single_array($var) {
      return array_map('square_recur_single_array', $var);
    return $var * $var;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_map() : recursive callback function ***\n";
 
 $array1 = array(1, array(2, 3, array(5)), array(4));

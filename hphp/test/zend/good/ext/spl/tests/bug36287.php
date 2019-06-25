@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator("."), true);
 
 $idx = 0;

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $values = array(1234.5678,
                 -1234.5678,
                 1234.6578e4,

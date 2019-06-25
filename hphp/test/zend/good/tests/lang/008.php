@@ -10,6 +10,6 @@ function Test()
     TestStatics::$a++;
     if(TestStatics::$a<10) Test();
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 Test();
 }

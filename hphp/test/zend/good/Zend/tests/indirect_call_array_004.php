@@ -10,7 +10,7 @@ class foo {
     }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $arr = array('foo', 'abc');
 
 try {

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 
 if (!$socket) {

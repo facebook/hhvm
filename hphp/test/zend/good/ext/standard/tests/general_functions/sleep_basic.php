@@ -3,7 +3,7 @@
  * Description: Delays the program execution for the given number of seconds .
  * Source code: ext/standard/basic_functions.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sleep() : basic functionality ***\n";
 
 $sleeptime = 5; // sleep for 5 seconds

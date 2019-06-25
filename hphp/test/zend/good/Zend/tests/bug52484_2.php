@@ -5,7 +5,7 @@ class A {
         $this->$prop = $val;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new A();
 $prop = null;
 

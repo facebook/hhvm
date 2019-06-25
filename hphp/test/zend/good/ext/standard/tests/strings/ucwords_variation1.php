@@ -14,7 +14,7 @@ class my
     return "myString";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ucwords() : usage variations ***\n";
 // initialize all required variables
 

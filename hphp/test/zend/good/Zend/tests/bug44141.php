@@ -15,7 +15,7 @@ class Y extends X
                 return new Y($x);
         }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $y = Y::cheat(5);
 echo $y->x, PHP_EOL;
 }

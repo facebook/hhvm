@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $dom = new DOMDocument();
 
 $dom->loadXML('<root/>');

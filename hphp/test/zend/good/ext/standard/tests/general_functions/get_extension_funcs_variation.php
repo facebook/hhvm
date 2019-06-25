@@ -11,7 +11,7 @@ class sample  {
     return "sample object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing get_extension_funcs() function: with unexpected inputs for 'module_name' argument ***\n";
 
 //get an unset variable

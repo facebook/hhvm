@@ -4,7 +4,7 @@
  * Description: Reads to EOF on the given file pointer from the current position
  *  and writes the results to the output buffer.
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fpassthru() function with files ***\n\n";
 
 echo "--- Testing with different offsets ---\n";

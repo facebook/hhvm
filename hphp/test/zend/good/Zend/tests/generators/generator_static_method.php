@@ -12,7 +12,7 @@ class Test {
 
 class ExtendedTest extends Test {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 foreach (ExtendedTest::gen() as $i) {
     var_dump($i);
 }

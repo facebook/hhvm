@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $ch = curl_init();
 $init = memory_get_usage();
 for ($i = 0; $i < 10000; $i++) {

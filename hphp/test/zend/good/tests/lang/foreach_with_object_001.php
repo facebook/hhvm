@@ -6,7 +6,7 @@ class Test {
    }
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $obj = new Test();
 foreach ($obj->c()->a as $value) {
     print "$value\n";

@@ -2,7 +2,7 @@
 namespace A\B;
 class Foo {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $function = new \ReflectionClass('stdClass');
 \var_dump($function->inNamespace());
 \var_dump($function->getName());

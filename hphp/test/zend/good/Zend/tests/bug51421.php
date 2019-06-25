@@ -10,4 +10,4 @@ class Test extends TestInterface {
     public function __construct() {}
 }
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

@@ -7,7 +7,7 @@ class TestClass {
 }
 
 class ChildClass extends TestClass {}
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo TestClass::getClassName() . "\n";
 echo ChildClass::getClassName() . "\n";
 echo "==DONE==";

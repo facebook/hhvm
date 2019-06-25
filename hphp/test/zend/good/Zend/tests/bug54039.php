@@ -33,7 +33,7 @@ function test_3() {
     return $f;
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $f = test_1(); $f();
 $f = test_1(); $f();
 

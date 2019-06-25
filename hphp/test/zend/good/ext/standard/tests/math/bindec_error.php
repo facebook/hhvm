@@ -12,7 +12,7 @@
 class classA
 {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing bindec() : error conditions ***\n";
 
 echo "Incorrect number of arguments\n";

@@ -21,7 +21,7 @@ class DbGowRecordSet {
     }
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $db = new DbGow;
 
 try {

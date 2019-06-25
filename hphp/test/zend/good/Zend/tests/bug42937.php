@@ -21,7 +21,7 @@ class B extends A {
         C::test6();
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new A();
 $a->test();
 

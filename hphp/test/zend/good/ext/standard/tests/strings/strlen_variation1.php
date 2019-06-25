@@ -11,7 +11,7 @@ class sample  {
     return "sample object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strlen() : with unexpected input for 'string' argument ***\n";
 
 //get an unset variable

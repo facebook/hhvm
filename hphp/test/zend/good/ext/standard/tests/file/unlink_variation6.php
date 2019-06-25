@@ -12,7 +12,7 @@ function f_exists($file) {
       echo "$file doesn't exist\n";
    }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing unlink() : variation: contexts and relative files ***\n";
 
 // test relative directories and stream contexts.

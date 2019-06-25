@@ -9,7 +9,7 @@ class test {
     }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 test::show_static();
 
 $t = new test;

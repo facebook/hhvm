@@ -7,7 +7,7 @@ class SplFileInfo62328 extends SplFileInfo
         return '__toString';
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $fi = new SplFileInfo62328(__FILE__);
 
 echo (string)$fi . PHP_EOL;

@@ -7,7 +7,7 @@
 /*
  * Test Basic functionality of mb_substr_count
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_substr_count() : basic functionality ***\n";
 
 $string_ascii = 'This is an English string. 0123456789.';

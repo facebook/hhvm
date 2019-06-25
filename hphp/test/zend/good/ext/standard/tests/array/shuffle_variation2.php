@@ -8,7 +8,7 @@
 * Test behaviour of shuffle() function when multi-dimensional array is
 * passed to 'array_arg' argument
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing shuffle() : with multi-dimensional array ***\n";
 
 // initialise the multi-dimensional array

@@ -14,7 +14,7 @@ class TheObj {
         unset($this->Var[$var]);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $SomeObj = new TheObj;
 
 // this will fine

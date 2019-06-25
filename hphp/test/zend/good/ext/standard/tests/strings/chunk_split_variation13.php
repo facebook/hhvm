@@ -8,7 +8,7 @@
 /*
 * passing long string as 'str' and testing default value of chunklen which is 76
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing chunk_split() : default 'chunklen' with long string 'str' ***\n";
 
 //Initializing variables

@@ -6,7 +6,7 @@
 function callback2($p, $q) {
   return $p * $q;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_map() : error conditions ***\n";
 
 echo "\n-- Testing array_map() function with less no. of arrays than callback function arguments --\n";

@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of reset()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing reset() : basic functionality ***\n";
 
 $array = array('zero', 'one', 200 => 'two');

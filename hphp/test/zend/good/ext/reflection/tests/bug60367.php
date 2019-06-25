@@ -14,7 +14,7 @@ class B extends A {
     const WHAT = 'B';
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $method = new ReflectionMethod("b::call");
 $method->invoke(null);
 $method->invokeArgs(null, array());

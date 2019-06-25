@@ -4,7 +4,7 @@
  */
 
 class foo {}
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing isset() : basic functionality ***\n";
 
 $i = 10;

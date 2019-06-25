@@ -2,7 +2,7 @@
 /* Prototype: array array_merge(array $array1 [, array $array2 [, array $...]]);
    Description: Merge one or more arrays
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "\n*** Testing array_merge() basic functionality ***";
 $begin_array = array(
   array(),

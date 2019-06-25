@@ -3,7 +3,7 @@ class A extends \SplFileInfo
 {
         public function __toString() {return ' -expected- ';}
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new A('/');
 
 // Works

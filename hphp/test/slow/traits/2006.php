@@ -8,7 +8,7 @@ trait T {
 class C {
   use T;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o = new C;
 $x = "value";
 $o->F(&$x);

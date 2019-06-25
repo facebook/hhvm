@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 number_format(1e80, 0, '', ' ');
 number_format(1e300, 0, '', ' ');
 number_format(1e320, 0, '', ' ');

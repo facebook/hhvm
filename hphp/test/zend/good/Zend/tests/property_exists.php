@@ -29,7 +29,7 @@ class A extends aParent {
     static protected $prot2 = "prot";
     static private $prot3 = "prot";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 A::staticTest();
 
 $a = new a;

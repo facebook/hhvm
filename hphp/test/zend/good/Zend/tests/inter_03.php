@@ -7,6 +7,6 @@ interface a {
 interface b extends a {
     const c = self::b;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(b::c, a::b);
 }

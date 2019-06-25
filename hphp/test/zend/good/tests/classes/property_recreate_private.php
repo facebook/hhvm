@@ -14,7 +14,7 @@ class D extends C {
         $this->p = 'changed in D';
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "Unset and recreate a superclass's private property:\n";
 $d = new D;
 $d->unsetPrivate();

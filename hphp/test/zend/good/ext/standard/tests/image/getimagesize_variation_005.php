@@ -3,7 +3,7 @@
  * Description: Get the size of an image as 4-element array
  * Source code: ext/standard/image.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing getimagesize() : basic functionality ***\n";
 
 var_dump( getimagesize(dirname(__FILE__)."/test13pix.swf", &$info) );

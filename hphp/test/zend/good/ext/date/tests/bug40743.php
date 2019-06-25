@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $dt = new DateTime('@1200506699', new DateTimeZone('Europe/Berlin'));
 echo $dt->format(DATE_RFC822), "\n";
 echo $dt->format('T e Z'), "\n";

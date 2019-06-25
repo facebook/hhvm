@@ -3,7 +3,7 @@
 class test {
      function throwException() { throw new Exception("Hello World!\n");
 } }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $array = array(new test(), 'throwException');
 try {
      call_user_func($array, 1, 2);

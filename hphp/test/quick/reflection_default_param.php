@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 echo "--SQLite3::open--\n";
 $ro = new ReflectionClass('SQLite3');
 $mo = $ro->getMethod('open');

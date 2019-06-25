@@ -4,7 +4,7 @@
  * Description: Unpack data from binary string
  * Source code: ext/standard/pack.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing unpack() : error conditions ***\n";
 
 echo "\n-- Testing unpack() function with no arguments --\n";

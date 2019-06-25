@@ -28,7 +28,7 @@ class derived extends base {
         print_r($this);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "Testing class base\n";
 $t = new base();
 unset($t);

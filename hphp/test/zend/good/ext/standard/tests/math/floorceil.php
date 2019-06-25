@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $a = ceil (-0);   $b = ceil (-1);    $c = ceil (-1.5);
 $d = ceil (-1.8); $e = ceil (-2.7);
 var_dump ($a, $b, $c, $d, $e);

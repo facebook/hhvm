@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $values = array(
 'http://example.com/index.html',
 'http://www.example.com/index.php',

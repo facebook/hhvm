@@ -5,7 +5,7 @@
 */
 
 /* Testing fgetcsv() by reading from a file when the file pointer is pointing to end of file */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fgetcsv() : with file pointer pointing to EOF ***\n";
 
 /* the array is with  three elements in it. Each element should be read as 

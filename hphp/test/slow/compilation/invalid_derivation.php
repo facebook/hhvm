@@ -9,4 +9,4 @@ class A {
     return self::class;
   }
 }
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

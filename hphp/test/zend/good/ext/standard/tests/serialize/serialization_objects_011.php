@@ -63,7 +63,7 @@ function prettyPrint($obj) {
     echo "Sanity check: ";
     var_dump($uobj->audit());
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "-- Test instance of A --\n";
 prettyPrint(new A);
 echo "\n\n-- Test instance of B --\n";

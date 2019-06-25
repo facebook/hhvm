@@ -19,7 +19,7 @@ function check_basename( $path_arrays ) {
    }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_paths = array (
   /* simple paths */
   array("bar"),

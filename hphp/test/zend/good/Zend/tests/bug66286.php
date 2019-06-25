@@ -12,7 +12,7 @@ class second extends first {
         $this->someValue = $someValue;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $objFirst = new second('123');
 $objSecond = new second('321');
 

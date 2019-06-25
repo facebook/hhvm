@@ -3,7 +3,7 @@
    Description: Tells whether the filename is a regular file
      Returns TRUE if the filename exists and is a regular file
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing is_file(): basic functionality ***\n";
 
 /* Checking with current file */

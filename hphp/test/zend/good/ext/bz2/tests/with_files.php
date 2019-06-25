@@ -1,5 +1,5 @@
 <?hh // $Id$
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 error_reporting(E_ALL);
 
 $filename = "with_files.bz2";

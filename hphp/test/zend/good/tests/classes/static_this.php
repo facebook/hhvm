@@ -17,7 +17,7 @@ class TestClass
         var_dump($this);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $obj = new TestClass;
 TestClass::Test2(new stdClass);
 

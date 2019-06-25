@@ -12,7 +12,7 @@ function __autoload($className) {
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
     echo "Error: $err_no - $err_msg, $filename($linenum)\n";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 set_error_handler('test_error_handler');
 echo "*** Testing method_exists() : usage variations ***\n";
 

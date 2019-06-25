@@ -10,7 +10,7 @@
 /*
 * passing different integer values for 'split_length' and heredoc string as 'str' argument to str_split()
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing str_split() : different intger values for 'split_length' with heredoc 'str' ***\n";
 //Initialise variables
 $str = <<<EOT

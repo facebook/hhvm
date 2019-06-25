@@ -9,7 +9,7 @@
 *   arguments passed by value
 *   arguments passed by reference
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing uasort() : anonymous function as 'cmp_function' ***\n";
 
 $cmp_function = ($value1, $value2) ==> { if($value1 == $value2) {return 0;} else if($value1 > $value2) {return 1;} else{return -1;} };

@@ -7,7 +7,7 @@
 /*
  * Testing stripslashes() for error conditions
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing stripslashes() : error conditions ***\n";
 
 // Zero argument

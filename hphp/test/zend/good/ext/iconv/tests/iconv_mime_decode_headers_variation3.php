@@ -15,7 +15,7 @@ class classA
     return "Class A object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing iconv_mime_decode_headers() : usage variations ***\n";
 
 // Some of the parameters actually passed to charset will request to use

@@ -3,7 +3,7 @@ function test($str) {
     $res = md5(base64_decode(base64_encode($str)))."\n";
     return $res;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo test("");
 echo test("a");
 echo test("abc");

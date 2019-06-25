@@ -9,7 +9,7 @@ class foo {
   }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $foo = new foo();
 $data = serialize($foo);
 var_dump(str_replace("\0", '\0', $data));

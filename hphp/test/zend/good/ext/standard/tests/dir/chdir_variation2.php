@@ -7,7 +7,7 @@
 /*
  * Test chdir() with variations of relative paths
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing chdir() : usage variations ***\n";
 
 $base_dir_path = dirname(__FILE__);

@@ -20,7 +20,7 @@ class FooBar implements Foo, Bar {
 
 class Blort {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new FooBar;
 $b = new Blort;
 

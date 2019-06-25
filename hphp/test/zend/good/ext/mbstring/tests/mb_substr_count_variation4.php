@@ -9,7 +9,7 @@
  * it counts only the first occurrence or all other occurrences regardless whether they
  * were part of previous match
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_substr_count() : usage variations ***\n";
 
 

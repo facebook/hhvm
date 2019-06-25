@@ -1,6 +1,6 @@
 <?hh 
 /* $Id$ */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $xw = new XMLWriter();
 $xw->openMemory();
 $xw->setIndent(TRUE);

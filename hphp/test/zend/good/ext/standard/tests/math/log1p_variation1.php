@@ -9,7 +9,7 @@
 class classA
 {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing log1p() : usage variations ***\n";
 
 //get an unset variable

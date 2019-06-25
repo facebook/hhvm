@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $s1 = 'Hello';
 
 $coll = collator_create('en_US');

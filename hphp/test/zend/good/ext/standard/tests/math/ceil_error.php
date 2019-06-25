@@ -3,7 +3,7 @@
  * Description: Round fractions up.
  * Source code: ext/standard/math.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ceil() :  error conditions ***\n";
 $arg_0 = 1.0;
 $extra_arg = 1;

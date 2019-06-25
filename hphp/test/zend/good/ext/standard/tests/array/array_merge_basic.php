@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of array_merge()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_merge() : basic functionality ***\n";
 
 //indexed array

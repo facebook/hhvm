@@ -3,7 +3,7 @@
  * Description: String comparisons using a "natural order" algorithm
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strnatcmp() : basic functionality ***\n";
 $a1 = "abc1";
 $b1 = "abc10";

@@ -7,7 +7,7 @@
 /*
  * Pass incorrect number of arguments to iconv_substr() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing iconv_substr() : error conditions ***\n";
 
 //Test iconv_substr with one more than the expected number of arguments

@@ -4,7 +4,7 @@
  * Source code: ext/gd/gd.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing imagecolorstotal() : basic functionality ***\n";
 
 // Palette image

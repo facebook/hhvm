@@ -21,7 +21,7 @@ function switchtest ($i, $j)
                 echo "Default taken\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 for ($i=0; $i<3; $i++) {
   for ($k=0; $k<10; $k++) {
     switchtest (0,$k);

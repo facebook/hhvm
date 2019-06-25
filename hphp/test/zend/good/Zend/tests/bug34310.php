@@ -4,7 +4,7 @@ class C
 {
     public $d;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $c = new C();
 
 $arr = array (1 => 'a', 2 => 'b', 3 => 'c');

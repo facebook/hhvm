@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $filename = dirname(__FILE__)."/sha1.dat";
 $a = array(
 	"abc",

@@ -10,7 +10,7 @@ function foo() {
     }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 try {
     foo();
 } catch (Exception $ex) {

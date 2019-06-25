@@ -6,7 +6,7 @@ class foo
 {
   var $array = array(10.5);
 };
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing is_float(), is_double() and is_real() with float values***\n";
 // different valid  float vlaues
 $floats = array(

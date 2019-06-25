@@ -11,7 +11,7 @@ class X {
         echo "method ok\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 new X();
 new Y\X();
 new \X\X();

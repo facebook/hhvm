@@ -4,7 +4,7 @@
  * Source code: ext/pcre/php_pcre.c
  * Alias to functions:
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $string = '123456789 - Hello, world -           This is a string.';
 var_dump($string);
 

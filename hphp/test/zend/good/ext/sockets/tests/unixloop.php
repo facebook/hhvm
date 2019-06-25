@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $sock_path = sprintf("/tmp/%s.sock", uniqid());
 
 if (file_exists($sock_path))

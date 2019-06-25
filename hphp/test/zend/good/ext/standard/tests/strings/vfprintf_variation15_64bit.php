@@ -8,7 +8,7 @@
  * Test vfprintf() when different unsigned formats and unsigned values
  * are passed to the '$format' and '$args' arguments of the function
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing vfprintf() : unsigned formats and unsigned values ***\n";
 
 // defining array of unsigned formats

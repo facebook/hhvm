@@ -18,7 +18,7 @@ class test
     return "3object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_rand() : unexpected values for 'num_req' parameter ***\n";
 
 // Initialise function arguments

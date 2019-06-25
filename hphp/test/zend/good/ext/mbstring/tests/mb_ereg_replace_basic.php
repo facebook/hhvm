@@ -8,7 +8,7 @@
 /*
  * Test Basic Functionality of mb_ereg_replace()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_ereg_replace() : basic functionality ***\n";
 
 mb_internal_encoding('UTF-8');

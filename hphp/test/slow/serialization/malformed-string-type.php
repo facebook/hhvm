@@ -4,7 +4,7 @@ class Foo {
   public $bar;
   public $bling;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $data = [
   's:5:"Hello"',
   's:5:"Hello";',

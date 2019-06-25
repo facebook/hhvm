@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $a = array(1 => 2);
 shuffle(&$a);
 var_dump($a);

@@ -9,7 +9,7 @@ class TestClass
         $this->test = $test;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $storage = new SplObjectStorage();
 
 foreach(array(1,"2","foo",true) as $value)

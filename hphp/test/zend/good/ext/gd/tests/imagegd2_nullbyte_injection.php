@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $image = imagecreate(1,1);// 1px image
 
 $tempdir = sys_get_temp_dir(). '/php-gdtest' . rand();

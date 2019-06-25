@@ -12,7 +12,7 @@ function valid ( ){}
 }
 
 class TestRegexIterator extends RegexIterator{}
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $rege = '/^a/';
 
 

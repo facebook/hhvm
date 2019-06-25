@@ -16,7 +16,7 @@ class MyClass
     }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_intersect_uassoc() : usage variation ***\n";
 
 //Initialize variables

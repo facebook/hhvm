@@ -1,6 +1,6 @@
 <?hh
 // BSON document: length
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $expected = pack('V', 23);
 // element: UTF-8 string
 $expected .= pack('Ca*xVa*x', 2, '0', 7, 'foobar');

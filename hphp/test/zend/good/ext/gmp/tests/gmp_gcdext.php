@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $n = gmp_init("34293864345");
 $n1 = gmp_init("23434293864345");
 

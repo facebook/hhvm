@@ -7,7 +7,7 @@
 /*
  * Pass an incorrect number of arguments to ctype_cntrl() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_cntrl() : error conditions ***\n";
 
 // Zero arguments

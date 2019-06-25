@@ -7,7 +7,7 @@
 /*
  * Testing strtok() : with embedded nulls in the strings
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strtok() : with embedded nulls in the strings ***\n";
 
 // defining varous strings with embedded nulls

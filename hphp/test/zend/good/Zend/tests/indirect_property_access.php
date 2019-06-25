@@ -7,7 +7,7 @@ class foo {
 class bar {
     public $y = 'foo';
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $x = 'bar';
 
 $bar = new bar;

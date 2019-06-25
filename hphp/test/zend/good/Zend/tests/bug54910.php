@@ -18,7 +18,7 @@ class A {
 }
 
 class B extends A {}
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $input = new B();
 echo $input->getEmail();
 }

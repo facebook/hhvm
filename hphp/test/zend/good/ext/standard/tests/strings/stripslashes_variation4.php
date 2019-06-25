@@ -12,7 +12,7 @@ function stripslashes_deep($value)  {
   $value = is_array($value) ? array_map('stripslashes_deep', $value) : stripslashes($value);
   return $value;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing stripslashes() : with double dimensional arrays ***\n";
 
 // initialising the string array

@@ -10,7 +10,7 @@ class C {
     T1::Func1 as public;
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o = new C;
 $o->Func1();
 }

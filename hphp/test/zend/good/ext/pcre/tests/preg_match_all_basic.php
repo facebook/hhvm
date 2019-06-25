@@ -2,7 +2,7 @@
 /*
 * proto int preg_match_all(string pattern, string subject, [array subpatterns [, int flags [, int offset]]])
 * Function is implemented in ext/pcre/php_pcre.c */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $string = 'Hello, world! This is a test. This is another test. \[4]. 34534 string.';
 var_dump(preg_match_all('/[0-35-9]/', $string, &$match1, PREG_OFFSET_CAPTURE|PREG_PATTERN_ORDER, -10)); //finds any digit that's not 4 10 digits from the end(1 match)
 var_dump($match1);

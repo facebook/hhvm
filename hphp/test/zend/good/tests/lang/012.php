@@ -4,7 +4,7 @@ function F () {
         return("Hello");
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $i=0;
 while ($i<2) {
     echo F();

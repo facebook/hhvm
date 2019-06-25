@@ -17,7 +17,7 @@ class classA
     return "Class A object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_pad() : possible values for \$pad_value argument ***\n";
 
 // Initialise $input and $pad_size argument

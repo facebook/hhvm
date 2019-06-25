@@ -9,7 +9,7 @@
 /*
  * Test Basic functionality of iconv_get_encoding/iconv_set_encoding
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing iconv_get_encoding()/iconv_set_encoding() : basic functionality ***\n";
 
 echo "--- Default get_encoding ---\n";

@@ -91,7 +91,7 @@ class Peoples implements ArrayProxyAccess
         unset($this->person[$element][$index]);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $people = new Peoples;
 
 var_dump($people->person[0]['name']);

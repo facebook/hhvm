@@ -4,7 +4,7 @@
  * Description: Strip whitespace (or other characters) from the beginning and end of a string.
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing trim() : basic functionality ***\n";
 
 $text  = "  \t\r\n\0\x0B  ---These are a few words---  \t\r\n\0\x0B  ";

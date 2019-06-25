@@ -15,7 +15,7 @@ class classA
     return "hello, world";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing iconv_strrpos() : usage variations ***\n";
 
 // Initialise function arguments not being substituted

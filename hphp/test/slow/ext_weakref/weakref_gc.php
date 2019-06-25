@@ -35,7 +35,7 @@ function factorial($n) {
   return $n * factorial($n-1);
 }
 // Test if unreachable.
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $wr = leaker(false);
 // Test if only reachable throuh WR.
 $wr2 = leaker(true);

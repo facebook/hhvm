@@ -8,7 +8,7 @@ function passbyRef(&$ref) {
     echo "\nInside passbyRef call:\n";
     var_dump($ref);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "\nPassing undefined by value\n";
 passbyVal($undef1[0]);
 echo "\nAfter call\n";

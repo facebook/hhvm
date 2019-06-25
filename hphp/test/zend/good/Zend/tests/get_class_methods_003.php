@@ -28,6 +28,6 @@ class B extends C implements A {
         var_dump(get_class_methods('C'));
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 new B;
 }

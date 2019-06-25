@@ -8,7 +8,7 @@
 /*
  * Passing a non-existent directory as argument to dir() function
  * and checking to see if proper warning message is output.  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing dir() : open a non-existent directory ***\n";
 
 // create the temporary directory

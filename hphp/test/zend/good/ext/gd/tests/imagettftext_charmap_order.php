@@ -1,6 +1,6 @@
 <?hh
 // this is an Apache Licensed font, see separate LICENSE file
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $font = __DIR__.'/Rochester-Regular.otf';
 // thank you Helgi
 $sample_string = "\xC3\x9E\xC3\xB6";

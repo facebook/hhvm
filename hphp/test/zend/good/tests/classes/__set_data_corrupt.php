@@ -16,7 +16,7 @@ class foo {
   }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $f = 'c="foo"';
 $f = new foo;
 $f->bar();

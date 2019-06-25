@@ -1,6 +1,6 @@
 <?hh
 /* Array from Bug Request #64493 test script */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $rows = array(
   456 => array('id' => '3', 'title' => 'Foo', 'date' => '2013-03-25'),
   457 => array('id' => '5', 'title' => 'Bar', 'date' => '2012-05-20'),

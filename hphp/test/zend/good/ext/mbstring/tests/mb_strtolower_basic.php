@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of mb_strtolower
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_strtolower() : basic functionality***\n";
 
 $ascii_lower = 'abcdefghijklmnopqrstuvwxyz';

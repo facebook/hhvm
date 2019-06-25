@@ -16,7 +16,7 @@ class sample
   return "object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing vsprintf() : with unexpected values for args argument ***\n";
 
 // initialising the required variables

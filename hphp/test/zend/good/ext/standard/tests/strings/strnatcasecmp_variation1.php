@@ -8,7 +8,7 @@
 function str_dump($a, $b) {
     var_dump(strnatcasecmp($a, $b));
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strnatcasecmp() : variation ***\n";
 
 str_dump('0', '');

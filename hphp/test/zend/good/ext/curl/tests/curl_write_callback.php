@@ -5,7 +5,7 @@ function curl_callback($curl_handle, $received_data)
     echo $received_data;
     return strlen($received_data);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $log_file = tempnam(sys_get_temp_dir(), 'php-curl-test');
 
 $fp = fopen($log_file, 'w+');

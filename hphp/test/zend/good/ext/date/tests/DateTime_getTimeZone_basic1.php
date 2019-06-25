@@ -4,7 +4,7 @@
  * Source code: ext/date/php_date.c
  * Alias to functions: date_timezone_get
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing DateTime::getTimezone() : basic functionality ***\n";
 
 date_default_timezone_set("Europe/London");

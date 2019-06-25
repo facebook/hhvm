@@ -9,7 +9,7 @@ trait TestTrait {
 class A {
     use TestTrait;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $class = "A";
 echo $class::test();
 }

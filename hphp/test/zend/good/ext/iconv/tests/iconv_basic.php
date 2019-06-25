@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of iconv()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing iconv() : basic functionality ***\n";
 
 //All strings are the same when displayed in their respective encodings

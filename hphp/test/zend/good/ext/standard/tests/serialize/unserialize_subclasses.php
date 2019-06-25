@@ -2,7 +2,7 @@
 
 class C {}
 class D extends C {}
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $c = serialize(new C);
 $d = serialize(new D);
 

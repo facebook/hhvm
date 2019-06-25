@@ -4,7 +4,7 @@
  * Description: Return information about characters used in a string
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing count_chars() : error conditions ***\n";
 
 echo "\n-- Testing count_chars() function with no arguments --\n";

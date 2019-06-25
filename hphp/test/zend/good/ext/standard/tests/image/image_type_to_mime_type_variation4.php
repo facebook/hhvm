@@ -4,7 +4,7 @@
  * Source code: ext/standard/image.c
  */
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing image_type_to_mime_type() : usage variations ***\n";
 
 error_reporting(E_ALL ^ E_NOTICE);

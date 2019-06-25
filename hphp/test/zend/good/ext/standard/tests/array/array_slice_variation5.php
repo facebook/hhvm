@@ -7,7 +7,7 @@
 /*
  * Pass different integers as $offset argument to test how array_slice() behaves
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_slice() : usage variations ***\n";
 
 $input = array ('one' => 1, 2 => 'two', 'three', 9 => 'nine', 'ten' => 10);

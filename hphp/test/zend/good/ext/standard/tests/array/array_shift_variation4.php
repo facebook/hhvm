@@ -7,7 +7,7 @@
 /*
  * Test popping elements from a sub-array and popping an array from an array
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_shift() : usage variations ***\n";
 
 $stack_first = array(array(1, 2, 3), 'one', 'two');

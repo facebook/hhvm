@@ -14,7 +14,7 @@ trait T2 {
         debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 A::Bmethod();
 A::t2method();
 

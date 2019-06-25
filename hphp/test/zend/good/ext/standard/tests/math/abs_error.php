@@ -7,7 +7,7 @@
 /*
  * Pass incorrect number of arguments to abs() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing abs() : error conditions ***\n";
 
 $arg_0 = 1.0;

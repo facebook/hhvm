@@ -4,7 +4,7 @@
  * Description: Query language and locale information
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing nl_langinfo() : error conditions ***\n";
 
 echo "\n-- Testing nl_langinfo() function with no arguments --\n";

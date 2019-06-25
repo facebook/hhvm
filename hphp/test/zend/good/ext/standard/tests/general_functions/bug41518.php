@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $tmp_dir = __DIR__ . "/bug41518/";
 @mkdir($tmp_dir);
 $tmp_file = $tmp_dir."/bug41418.tmp";

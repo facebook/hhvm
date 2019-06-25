@@ -13,7 +13,7 @@ function foo() {
 
   return $c;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $x = foo();
 while ($x) {
   var_dump($x->tagName);

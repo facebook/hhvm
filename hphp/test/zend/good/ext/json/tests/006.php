@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = array('<foo>',"'bar'",'"baz"','&blong&');
 
 echo "Normal: ", json_encode($a), "\n";

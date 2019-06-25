@@ -1,6 +1,6 @@
 <?hh
 class Test { public $x = 5; }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $testobj1 = new Test;
 $testobj2 = new Test;
 $testobj1->x = $testobj1;

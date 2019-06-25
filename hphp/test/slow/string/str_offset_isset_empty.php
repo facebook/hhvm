@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $str = "ABCDEFGHIJK";
 $arr = array(null, false, true, 3, 4.0, 5.3, 6.7, -2, -2.5, 21, 22.5,
              PHP_INT_MAX, '', '8', '9a', 'foo', '1 ', ' 2', " \t2", " \n2",

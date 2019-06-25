@@ -3,7 +3,7 @@
  * Description: Strips HTML and PHP tags from a string
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strip_tags() : basic functionality ***\n";
 
 // Calling strip_tags() with all possible arguments

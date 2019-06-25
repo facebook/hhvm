@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $arr = array(1,2,3);
 var_dump(apc_store('bluh', $arr));
 

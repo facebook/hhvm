@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $filename = dirname(__FILE__)."/DOMDocument_saveHTMLFile_basic".time().".html";
 $doc = new DOMDocument('1.0');
 $root = $doc->createElement('html');

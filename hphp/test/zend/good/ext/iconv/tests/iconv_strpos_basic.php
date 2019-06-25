@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of iconv_strpos with ASCII and multibyte characters
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing iconv_strpos() : basic functionality***\n";
 
 iconv_set_encoding("internal_encoding", "UTF-8");

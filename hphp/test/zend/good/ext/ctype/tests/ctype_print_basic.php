@@ -3,7 +3,7 @@
  * Description: Checks for printable character(s) 
  * Source code: ext/ctype/ctype.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_print() : basic functionality ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");

@@ -4,7 +4,7 @@
  * Source code: ext/standard/url.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing parse_url() : error conditions ***\n";
 
 // Zero arguments

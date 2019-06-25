@@ -14,7 +14,7 @@ function create($a, $b, $c, $d) {
   }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
   // These should succeed:
   var_dump(dict[]);
   var_dump(dict['a' => 1, 'b' => 2, 'c' => 3]);

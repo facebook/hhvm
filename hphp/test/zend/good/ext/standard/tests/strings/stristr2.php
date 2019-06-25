@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $email  = 'AbcCdEfGh';
 var_dump(stristr($email, 'c'));
 var_dump(stristr($email, 'c', true));

@@ -14,7 +14,7 @@ class sample  {
   return "obj-ect";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strtok() : with first argument as non-string ***\n";
 // initialize all required variables
 $token = '-';

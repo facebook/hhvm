@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $cwd = dirname(__FILE__);
 
 echo "GIF to JPEG conversion: ";

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $ao = new ArrayObject(array(), ArrayObject::STD_PROP_LIST|ArrayObject::ARRAY_AS_PROPS);
 var_dump($ao->getFlags());
 

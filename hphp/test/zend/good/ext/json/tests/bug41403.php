@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 setlocale(LC_NUMERIC, 'de_DE');
 var_dump(json_decode('[2.1]'));
 var_dump(json_decode('[0.15]'));

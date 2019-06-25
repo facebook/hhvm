@@ -3,7 +3,7 @@
 * Description: Calculates the similarity between two strings
 * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $extra_arg = 10;
 echo "\n-- Testing similar_text() function with more than expected no. of arguments --\n";
 try { similar_text("abc", "def", &$percent, $extra_arg); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

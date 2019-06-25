@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_content = "Bienvenue au CodeFest a Montreal";
 $temp_filename = dirname(__FILE__)."/fichier_a_lire.txt";
 $handle = fopen($temp_filename,"w");

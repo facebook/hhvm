@@ -3,7 +3,7 @@
  * Description: Perform the rot13 transform on a string
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing str_rot13() : basic functionality ***\n";
 echo "\nBasic tests\n";
 var_dump(str_rot13("str_rot13() tests starting"));

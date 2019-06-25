@@ -39,7 +39,7 @@ class derived_c extends derived_a implements if_b {
 
 class derived_d extends derived_c {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $t = new base();
 $t->test();
 

@@ -7,7 +7,7 @@
 /*
  * Pass incorrect number of arguments to chdir() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing chdir() : error conditions ***\n";
 
 // Zero arguments

@@ -44,7 +44,7 @@ class c implements IteratorAggregate {
         return new c_iter($this);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "===Array===\n";
 
 $a = array(0,1,2);

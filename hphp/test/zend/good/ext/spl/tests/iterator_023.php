@@ -107,7 +107,7 @@ class RecursiveArrayIteratorIterator extends RecursiveIteratorIterator
         echo __METHOD__ . "(".$this->getDepth().")\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 try
 {
     foreach(new RecursiveArrayIteratorIterator(new MyRecursiveArrayIterator(array("a", array("ba", array("bba", "bbb"), array(array("bcaa"), array("bcba"))), array("ca"), "d")), 2) as $k=>$v)

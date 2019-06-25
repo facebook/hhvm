@@ -5,7 +5,7 @@ class foo {
   }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $x = new foo();
 try {
   $y = $x->foo(1);

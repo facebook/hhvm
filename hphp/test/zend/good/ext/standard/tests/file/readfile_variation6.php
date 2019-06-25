@@ -21,7 +21,7 @@ abstract final class ZendGoodExtStandardTestsFileReadfileVariation6 {
   public static $secondFile;
   public static $filename = "readfile_variation6.txt";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing readfile() : variation ***\n";
 // this doesn't create the include dirs in this directory
 // we change to this to ensure we are not part of the

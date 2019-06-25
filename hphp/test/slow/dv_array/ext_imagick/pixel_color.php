@@ -14,7 +14,7 @@ function dump($exp) {
   );
   echo "$ret\n";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $pixel = new ImagickPixel;
 $pixel->setColor('yellow');
 dump($pixel->getHSL());

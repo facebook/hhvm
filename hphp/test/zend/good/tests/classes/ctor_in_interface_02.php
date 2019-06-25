@@ -27,4 +27,4 @@ class implem13 implements constr1, constr3
     }
 }
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

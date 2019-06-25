@@ -1,6 +1,6 @@
 <?hh
 /* This works */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $f = array('7' => 0);
 var_dump($f);
 var_dump(array_key_exists(7, $f));

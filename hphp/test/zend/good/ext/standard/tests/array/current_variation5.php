@@ -16,7 +16,7 @@ function current_variation5($a)
     var_dump(current(&$a));
     var_dump(next(&$a));
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing current() : usage variations ***\n";
 
 echo "\n-- Function: reference parameter --\n";

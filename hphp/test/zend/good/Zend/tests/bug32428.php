@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $data = @$not_exists;
 $data = @($not_exists);
 $data = @!$not_exists;

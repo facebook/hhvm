@@ -26,7 +26,7 @@ class XML_Parser
 
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $xml = <<<HERE
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <?xml-stylesheet href="default.xsl" type="text/xml"?>

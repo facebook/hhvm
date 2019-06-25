@@ -4,7 +4,7 @@
  * Source code: ext/standard/string.c
  * Alias of function: implode()
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing join() : basic functionality ***\n";
 
 // Initialize all required variables

@@ -12,7 +12,7 @@ class MY_CLASS{
     var_dump($this->x);
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o = new MY_CLASS;
 $o->printX();
 }

@@ -6,6 +6,6 @@ class MyCollection extends MongoCollection
         return parent::toIndexString($a);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(MyCollection::toIndexString(null));
 }

@@ -24,7 +24,7 @@ function key_compare_func($key1, $key2)
     else
         return ($key1 > $key2)? 1:-1;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_intersect_ukey() : usage variation ***\n";
 
 //Initialise arguments

@@ -2,7 +2,7 @@
 /* Prototype: int strcoll  ( string $str1  , string $str2  )
    Description: Locale based string comparison
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strcoll() : error conditions ***\n";
 
 echo "\n-- Testing strcoll() function with no arguments --\n";

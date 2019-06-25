@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $fd = bzopen(dirname(__FILE__)."/004_1.txt.bz2","r");
 var_dump(bzerror($fd));
 var_dump(bzerrstr($fd));

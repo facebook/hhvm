@@ -21,6 +21,6 @@ class same extends father {
 class fail extends same {
     private function f2() {}
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "Done\n"; // shouldn't be displayed
 }

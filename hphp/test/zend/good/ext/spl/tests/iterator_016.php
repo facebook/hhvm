@@ -38,7 +38,7 @@ class MenuOutput extends RecursiveIteratorIterator
         return true;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $arr = array("a", array("ba", array("bba", "bbb"), array(array("bcaa"))), array("ca"), "d");
 $obj = new Menu($arr);
 $rit = new MenuOutput($obj);

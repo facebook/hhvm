@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $c = new UConverter('utf-8', 'latin1');
 var_dump(UConverter::LATIN_1 === $c->getSourceType());
 var_dump(UConverter::UTF8    === $c->getDestinationType());

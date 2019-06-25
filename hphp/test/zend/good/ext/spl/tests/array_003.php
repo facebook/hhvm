@@ -15,7 +15,7 @@ class test
         $this->imp = "implicit";
     }
 };
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $test = new test;
 $test->dyn = "dynamic";
 

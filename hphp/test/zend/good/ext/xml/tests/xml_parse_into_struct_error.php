@@ -4,7 +4,7 @@
  * Source code: ext/xml/xml.c
  * Alias to functions:
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing xml_parse_into_struct() : error conditions ***\n";
 
 //Test xml_parse_into_struct with one more than the expected number of arguments

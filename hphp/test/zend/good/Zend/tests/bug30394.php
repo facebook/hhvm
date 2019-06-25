@@ -13,7 +13,7 @@ class Container
 
     private $_p = array();
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $c = new Container();
 $c->a = 1;
 $c->a += 1;

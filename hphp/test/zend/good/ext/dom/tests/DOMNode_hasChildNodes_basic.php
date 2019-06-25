@@ -8,7 +8,7 @@
  * Check for child nodes of the <book>, <title> and This is the title
  *
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $doc = new DOMDocument();
 
 $root = $doc->createElement('book');

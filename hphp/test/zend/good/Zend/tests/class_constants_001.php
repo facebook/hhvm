@@ -4,7 +4,7 @@ class test {
     const val = "string";
     const val2 = 1;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(test::val);
 var_dump(test::val2);
 

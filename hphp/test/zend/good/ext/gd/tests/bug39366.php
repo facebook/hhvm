@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $im = imagecreatetruecolor(10,10);
 imagealphablending($im, false);
 imagefilledrectangle($im, 0,0, 8,8, 0x32FF0000);

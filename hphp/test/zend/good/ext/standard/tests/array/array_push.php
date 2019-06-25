@@ -4,7 +4,7 @@
  * Description: Push one or more elements onto the end of array
  and returns the new number of elements in the array.
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $empty_array = array();
 $number = 5;
 $str = "abc";

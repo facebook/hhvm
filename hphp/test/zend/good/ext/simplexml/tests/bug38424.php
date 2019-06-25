@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $xml = simplexml_load_string('<xml></xml>');
 
 $str = "abc & def" ;

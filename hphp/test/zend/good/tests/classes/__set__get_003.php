@@ -4,4 +4,4 @@ class Test {
     }
 }
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

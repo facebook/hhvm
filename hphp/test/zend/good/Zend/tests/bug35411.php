@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $abc = "bar";
 echo "foo\{$abc}baz\n";
 echo "foo\{ $abc}baz\n";

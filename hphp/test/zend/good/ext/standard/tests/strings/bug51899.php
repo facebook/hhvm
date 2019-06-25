@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(parse_ini_string('a='));
 var_dump(parse_ini_string('a= '));
 var_dump(parse_ini_string('a='.PHP_EOL));

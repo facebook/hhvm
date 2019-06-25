@@ -4,7 +4,7 @@
  * Source code: ext/standard/string.c
  * Alias of function: implode()
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing join() : error conditions ***\n";
 
 // Zero argument

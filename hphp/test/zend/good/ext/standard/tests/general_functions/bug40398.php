@@ -55,7 +55,7 @@ class Derived_6 extends Base
         $x = array('parent', '__construct'); $x(...$args);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 new Derived_1('1');
 new Derived_2('2');
 new Derived_3('3');

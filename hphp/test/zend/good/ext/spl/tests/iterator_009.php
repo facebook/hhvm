@@ -28,7 +28,7 @@ class EmptyIteratorEx extends EmptyIterator
         parent::next();
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 foreach (new EmptyIteratorEx() as $v) {
     var_dump($v);
 }

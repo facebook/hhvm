@@ -3,5 +3,5 @@
 namespace {
     use const self as foo;
     use const parent as bar;
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}
 }

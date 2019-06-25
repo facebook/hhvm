@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $ts1 = new MongoTimestamp(60, 30);
 $ts2 = new MongoTimestamp(60, 30);
 var_dump($ts1 == $ts2);

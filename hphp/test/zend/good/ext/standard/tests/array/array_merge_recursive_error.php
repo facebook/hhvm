@@ -3,7 +3,7 @@
  * Description: Recursively merges elements from passed arrays into one array 
  * Source code: ext/standard/array.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_merge_recursive() : error conditions ***\n";
 
 // Zero arguments

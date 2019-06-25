@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 error_reporting(E_ALL & ~E_DEPRECATED);
 
 /* Prototype  : string mcrypt_ecb(int cipher, string key, string data, int mode, string iv)

@@ -8,7 +8,7 @@
 /*
  * test too few and too many parameters
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_split() : error conditions ***\n";
 
 

@@ -1,6 +1,6 @@
 <?hh
 // fopen with interesting windows paths.
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $testdir = __DIR__ . '/bug47177.tmpdir';
 mkdir($testdir);
 $t = time() - 3600;

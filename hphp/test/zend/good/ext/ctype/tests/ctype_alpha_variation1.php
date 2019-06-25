@@ -15,7 +15,7 @@ class classA
         return "abcdef";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_alpha() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");

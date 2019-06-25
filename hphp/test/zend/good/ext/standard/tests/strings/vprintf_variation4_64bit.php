@@ -8,7 +8,7 @@
  * Test vprintf() when different int formats and non-int values are passed to
  * the '$format' and '$args' arguments of the function
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing vprintf() : int formats and non-integer values ***\n";
 
 // defining array of int formats

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $dest = dirname(__FILE__);
 $arc_name = $dest . "/bug40228.zip";
 $zip = new ZipArchive;

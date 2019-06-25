@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $a = new FileSystemIterator(__DIR__);
 $b = clone $a;
 var_dump((string)$b == (string)$a);

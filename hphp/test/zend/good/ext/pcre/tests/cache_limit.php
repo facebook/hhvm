@@ -1,6 +1,6 @@
 <?hh
 const PREG_CACHE_SIZE = 4096+1;
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $re = '';
 $str = str_repeat('x', PREG_CACHE_SIZE);
 

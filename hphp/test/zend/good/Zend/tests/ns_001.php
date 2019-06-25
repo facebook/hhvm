@@ -15,7 +15,7 @@ class Foo {
     echo __CLASS__,"\n";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $x = new Foo;
 $x->bar();
 Foo::baz();

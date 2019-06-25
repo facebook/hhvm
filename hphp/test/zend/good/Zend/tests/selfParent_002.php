@@ -15,7 +15,7 @@ class B extends A {
         var_dump(parent::myDynConst);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 B::test();
 A::test();
 }

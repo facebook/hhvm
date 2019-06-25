@@ -9,7 +9,7 @@ class pass {
         pass::show();
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 pass::do_show();
 pass::show();
 

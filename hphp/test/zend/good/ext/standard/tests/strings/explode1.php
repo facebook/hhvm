@@ -5,7 +5,7 @@
                 If limit is set, the returned array will contain a maximum of limit
                 elements with the last element containing the rest of string.
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing explode() for basic operations ***\n";
 $delimiters = array (
   "",  // len=0

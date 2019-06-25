@@ -3,7 +3,7 @@
    Description: fnmatch() checks if the passed string would match 
      the given shell wildcard pattern. 
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing error conditions for fnmatch() ***";
 
 /* Invalid arguments */

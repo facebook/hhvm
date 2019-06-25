@@ -7,7 +7,7 @@ class bar {
         \var_dump($x);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 new bar(new \stdclass);
 new bar(null);
 }

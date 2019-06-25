@@ -10,7 +10,7 @@ class foo implements test {
         echo "foo\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 error_reporting(4095);
 
 $foo = new foo;

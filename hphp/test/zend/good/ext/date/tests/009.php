@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 date_default_timezone_set('Asia/Jerusalem');
 
 $t = mktime(0,0,0, 6, 27, 2006);

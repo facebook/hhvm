@@ -9,7 +9,7 @@ function blah()
 
   echo "hey=".BlahStatics::$hey++.", ",BlahStatics::$yo--."\n";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 blah();
 blah();
 blah();

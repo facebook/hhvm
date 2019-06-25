@@ -5,7 +5,7 @@
 */
 
 /* Test strncmp() function with more/less number of args and invalid args */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strncmp() function: error conditions ***\n";
 $str1 = 'string_val';
 $str2 = 'string_val';

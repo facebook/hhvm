@@ -32,7 +32,7 @@ function writeAndDump($fp, $format, $args)
     var_dump( $content );
     var_dump( $length );
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing vfprintf() : variation functionality ***\n";
 
 // Open handle

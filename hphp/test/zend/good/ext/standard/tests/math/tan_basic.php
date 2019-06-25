@@ -6,7 +6,7 @@
 
 require(__DIR__."/allowed_rounding_error.inc");
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 
 $sixty = M_PI / 3.0;
 $thirty = M_PI / 6.0;

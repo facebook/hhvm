@@ -7,7 +7,7 @@ function a($ary) {
 function cb($v, $elem) {
     return $v + a($elem);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $ary = array(
     array(
         array(

@@ -19,7 +19,7 @@ class foo {
     }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new foo;
 
 $a->sdfdsa();

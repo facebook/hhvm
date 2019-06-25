@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $data = 'data://,hello world';
 
 var_dump(file_get_contents($data));

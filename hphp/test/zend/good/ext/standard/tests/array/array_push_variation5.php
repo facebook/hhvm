@@ -7,7 +7,7 @@
 /*
  * Check the position of the internal array pointer after calling array_push()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_push() : usage variations ***\n";
 
 $stack = array ('one' => 'un', 'two' => 'deux');

@@ -15,7 +15,7 @@ class classA
     return "xyz";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_alnum() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");

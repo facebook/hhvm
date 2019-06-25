@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 echo "*** Testing curl_copy_handle(): add options after copy ***\n";
 
 // create a new cURL resource

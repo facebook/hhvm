@@ -15,7 +15,7 @@ class foo {
     }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 error_reporting (E_ALL);
 
 $a = new foo ();

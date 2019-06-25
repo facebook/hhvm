@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $array = array(
     'region_id' => 1,
     'discipline' => 23,

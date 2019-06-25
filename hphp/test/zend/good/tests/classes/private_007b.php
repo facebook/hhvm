@@ -13,7 +13,7 @@ class Foo extends Bar {
         echo "Foo::priv()\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $obj = new Foo();
 $obj->pub();
 $obj->priv();

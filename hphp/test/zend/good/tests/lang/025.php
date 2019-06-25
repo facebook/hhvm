@@ -10,6 +10,6 @@ function RekTest ($nr) {
     }
     echo "\n";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 RekTest(0);
 }

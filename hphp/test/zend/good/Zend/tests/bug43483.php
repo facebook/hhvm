@@ -10,6 +10,6 @@ class D extends C {
         echo "Successfully called D::prot().\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 D::test();
 }

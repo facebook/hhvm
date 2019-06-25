@@ -8,7 +8,7 @@
 /*
  * testing functionality of strip_tags() by giving heredoc strings as values for $str argument
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strip_tags() : usage variations ***\n";
 
 // null here doc string

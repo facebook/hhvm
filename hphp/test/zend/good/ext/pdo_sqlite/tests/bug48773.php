@@ -14,7 +14,7 @@ class foo extends PDO {
         $this->setAttribute(PDO::ATTR_STATEMENT_CLASS, array($this->statementClass, array($this)));
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $db = new foo('sqlite::memory:', '', '');
 $stmt = $db->query('SELECT 1');
 var_dump($stmt);

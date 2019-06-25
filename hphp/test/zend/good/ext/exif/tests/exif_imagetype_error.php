@@ -4,7 +4,7 @@
  * Description: Determine the type of an image
  * Source code: ext/exif/exif.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing exif_imagetype() : error conditions ***\n";
 
 echo "\n-- Testing exif_imagetype() function with no arguments --\n";

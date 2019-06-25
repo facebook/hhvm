@@ -4,7 +4,7 @@ class C {
   public $max = PHP_INT_MAX;
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
   $add = function($a,$b) { return $a + $b; };
   $sub = function($a,$b) { return $a - $b; };
   $mul = function($a,$b) { return $a * $b; };

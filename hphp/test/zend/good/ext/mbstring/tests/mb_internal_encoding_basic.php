@@ -8,7 +8,7 @@
 /*
  * Test basic functionality of mb_internal_encoding
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_internal_encoding() : basic functionality ***\n";
 
 var_dump(mb_internal_encoding());   //default internal encoding

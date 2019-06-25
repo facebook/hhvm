@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $xml =<<<EOF
 <people>
    <person name="Foo"></person>

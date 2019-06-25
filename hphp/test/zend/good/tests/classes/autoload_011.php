@@ -9,4 +9,4 @@ class C extends UndefBase
 {
 }
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

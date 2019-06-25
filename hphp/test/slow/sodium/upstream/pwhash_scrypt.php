@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $passwd = 'test';
 
 $hash = sodium_crypto_pwhash_scryptsalsa208sha256_str

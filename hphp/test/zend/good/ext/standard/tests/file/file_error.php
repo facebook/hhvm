@@ -3,7 +3,7 @@
    Prototype: array file ( string filename [,int use-include_path [,resource context]] );
    Description: Reads entire file into an array
                 Returns the  file in an array */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_path = dirname(__FILE__);
 echo "\n*** Testing error conditions ***";
 $file_handle = fopen($file_path."/file.tmp", "w");

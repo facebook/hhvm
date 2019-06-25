@@ -8,7 +8,7 @@
 /*
  * Test the position of the internal array pointer after a call to each()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing each() : usage variations ***\n";
 
 $arr = array('zero', 'one', 'two', 'abc', 'xyz');

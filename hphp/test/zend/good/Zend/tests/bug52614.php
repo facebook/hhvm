@@ -28,7 +28,7 @@ class foo {
 
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $foo = new foo;
 
 $foo->f2()[0] = 1;

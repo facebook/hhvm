@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $i = 0;
 while(100000 > $i++) {
 	$m0 = microtime(true);

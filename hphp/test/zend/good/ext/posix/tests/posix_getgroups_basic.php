@@ -8,6 +8,6 @@
   } else {
       echo "TEST PASSED\n";
   }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "===DONE===\n";
 }

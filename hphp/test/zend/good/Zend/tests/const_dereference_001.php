@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 error_reporting(E_ALL);
 
 var_dump(array(1, 2, 3, 4,)[3]);

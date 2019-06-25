@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 chdir(dirname(__FILE__));
 @unlink('test.file');
 @unlink('test.link');

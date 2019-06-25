@@ -17,7 +17,7 @@ class foo2son extends fooson {
                 echo "public!\n";
         }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $b = new foo2son();
 $b->barson();
 }

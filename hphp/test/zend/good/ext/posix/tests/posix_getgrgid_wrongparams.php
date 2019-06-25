@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $gid = PHP_INT_MAX; // obscene high gid
 var_dump(posix_getgrgid($gid));
 var_dump(posix_getgrgid(-1));

@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $tests = array('"A JSON payload should be an object or array, not a string."',
                '["Unclosed array"',
                '{unquoted_key: "keys must be quoted}',

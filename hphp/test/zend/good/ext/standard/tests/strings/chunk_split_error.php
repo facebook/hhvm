@@ -9,7 +9,7 @@
 * Testing error conditions of chunk_split() with zero arguments
 * and for more than expected number of arguments
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing chunk_split() : error conditions ***\n";
 
 // Zero arguments

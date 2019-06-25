@@ -11,7 +11,7 @@ class classWithToString
 class classWithoutToString
 {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Test substituting argument 1 with object values ***\n";
 
 $protocol = "tcp";

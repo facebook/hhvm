@@ -3,7 +3,7 @@
  * Description: Binary safe case-insensitive string comparison of the first n characters
  * Source code: Zend/zend_builtin_functions.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strncasecmp() function: error conditions ***\n";
 $str1 = 'string_val';
 $str2 = 'string_val';

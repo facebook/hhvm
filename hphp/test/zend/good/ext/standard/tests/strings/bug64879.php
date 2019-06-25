@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 quoted_printable_encode(str_repeat("\xf4", 1000)); 
 quoted_printable_encode(str_repeat("\xf4", 100000)); 
 

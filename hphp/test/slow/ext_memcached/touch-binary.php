@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $m = new Memcached();
 
 $m->setOption(Memcached::OPT_BINARY_PROTOCOL, true);

@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $ini_location = dirname(__FILE__) . '/bug48768.tmp';
 
 // Build ini data

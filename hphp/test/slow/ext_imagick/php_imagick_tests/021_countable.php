@@ -1,6 +1,6 @@
 <?hh
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $imagick = new Imagick(array (
             'magick:rose',
             'magick:rose',

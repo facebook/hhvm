@@ -5,7 +5,7 @@
    Prototype: string realpath ( string $path );
    Description: Returns canonicalized absolute pathname
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing readlink() and realpath() : usage variations ***\n";
 
 echo "\n*** Testing readlink() and realpath() with linkname as empty string, NULL and single space ***\n";

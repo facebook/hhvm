@@ -25,7 +25,7 @@ class InvokeFailure {}
 
 function invoke_it($x) { $x(); }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
   invoke_it(new Normal);
   invoke_it(new Weird2);
   invoke_it(new Weird3);

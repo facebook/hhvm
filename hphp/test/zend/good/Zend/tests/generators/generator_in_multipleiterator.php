@@ -9,7 +9,7 @@ function gen2() {
     yield 'b';
     yield 'bb';
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $it = new MultipleIterator;
 $it->attachIterator(gen1());
 $it->attachIterator(gen2());

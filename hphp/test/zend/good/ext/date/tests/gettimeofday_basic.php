@@ -4,7 +4,7 @@
  * Source code: ext/standard/microtime.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing gettimeofday() : basic functionality ***\n";
 
 date_default_timezone_set("Asia/Calcutta");

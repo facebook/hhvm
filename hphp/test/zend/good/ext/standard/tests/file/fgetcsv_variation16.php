@@ -7,7 +7,7 @@
 /* Testing fgetcsv() to read a file when provided with default enclosure character 
    and length value equal to zero  
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fgetcsv() : with default enclosure & length as 0 ***\n";
 
 /* the array is with two elements in it. Each element should be read as 

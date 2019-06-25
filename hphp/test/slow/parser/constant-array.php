@@ -5,6 +5,6 @@
 // echo great[1];
 // echo "\n";
 const great = "my";
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo great[1];
 }

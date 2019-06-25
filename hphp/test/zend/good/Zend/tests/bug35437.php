@@ -12,7 +12,7 @@ class TestClass
         $GLOBALS['t'] = new stdClass;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 set_error_handler('err2exception');
 
 try {

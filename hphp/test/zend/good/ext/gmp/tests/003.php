@@ -26,4 +26,4 @@
                 printf("%s\n", gmp_strval($test[$i]));
         }
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

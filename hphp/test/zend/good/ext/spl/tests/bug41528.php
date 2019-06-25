@@ -3,7 +3,7 @@ class ClassOne extends ArrayObject
 {
     public $a = 2;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $classOne    = new ClassOne();
 $classOne->a = 1;
 

@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $in = fopen('data://text/plain,', 'rb+');
 $out = fopen('php://memory', 'wb+');
 

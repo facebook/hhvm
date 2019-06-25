@@ -6,7 +6,7 @@ function foo( &$state ) {
     echo key(&$state) . " => " . current(&$state) . "\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $state = array("one" => 1, "two" => 2, "three" => 3);
 foo(&$state);
 reset(&$state);

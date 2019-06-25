@@ -6,7 +6,7 @@ class test {
         return "blah";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $t = new test;
 
 var_dump(filter_var("no", FILTER_VALIDATE_BOOLEAN));

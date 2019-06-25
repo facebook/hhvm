@@ -16,7 +16,7 @@ class User {
   /** @var string */
   public $sName;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $server = new soapserver(null,array('uri'=>"http://testuri.org", 'soap_version'=>SOAP_1_2));
 $server->addfunction("test");
 

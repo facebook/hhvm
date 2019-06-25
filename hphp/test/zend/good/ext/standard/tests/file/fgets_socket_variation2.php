@@ -2,7 +2,7 @@
 const LINE_OF_DATA = "12345678\n";
 
 // create a file
-<<__EntryPoint>> function main() { $filename = __FILE__ . ".tmp";
+<<__EntryPoint>> function main(): void { $filename = __FILE__ . ".tmp";
 $fd = fopen($filename, "w+");
 
 // populate the file with lines of data

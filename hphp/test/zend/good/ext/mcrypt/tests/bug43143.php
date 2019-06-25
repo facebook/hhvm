@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 echo "ECB\n";
 $input = 'to be encrypted';
 $mkey = hash('sha256', 'secret key', TRUE);

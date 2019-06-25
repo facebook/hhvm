@@ -14,7 +14,7 @@ trait SayWorld {
     echo 'World!';
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o = new MyHelloWorld();
 $o->sayHello();
 }

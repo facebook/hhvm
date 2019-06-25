@@ -2,7 +2,7 @@
 /*
 * proto string preg_quote(string str [, string delim_char])
 * Function is implemented in ext/pcre/php_pcre.c */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $string_before = '/this *-has \ metacharacters^ in $';
 print "\$string_before looks like: $string_before\n"; //$string_before is printed as is written
 $string_after = preg_quote($string_before, '/');

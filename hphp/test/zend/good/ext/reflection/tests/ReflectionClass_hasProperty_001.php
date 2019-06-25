@@ -19,7 +19,7 @@ class privf {
 }
 class subprivf extends privf  {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $classes = array("pubf", "subpubf", "protf", "subprotf",
                  "privf", "subprivf");
 foreach($classes as $class) {

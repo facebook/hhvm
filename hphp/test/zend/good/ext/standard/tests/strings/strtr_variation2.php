@@ -9,7 +9,7 @@
  *   string containing various special characters for 'str' argument and
  *   corresponding translation pair of chars for 'from', 'to' & 'replace_pairs' arguments
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strtr() : string containing special chars for 'str' arg ***\n";
 
 /* definitions of required input variables */

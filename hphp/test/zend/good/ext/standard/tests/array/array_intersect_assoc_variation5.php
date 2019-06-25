@@ -10,7 +10,7 @@
  * associative arrays having different possible keys to $arr1 argument.
  * The $arr2 argument passed is a fixed array
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_intersect_assoc() : assoc array with diff keys to \$arr1 argument ***\n";
 
 // get an unset variable

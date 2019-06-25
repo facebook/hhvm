@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $array = array('a', '1', 'q6', 'h20');
 
 var_dump(preg_grep('/^(\d|.\d)$/', $array));

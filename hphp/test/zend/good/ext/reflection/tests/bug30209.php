@@ -17,7 +17,7 @@ class Foo
         catch (Exception $e) {}
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $foo = new Foo;
 $foo->testBAR();
 echo "===DONE===\n";

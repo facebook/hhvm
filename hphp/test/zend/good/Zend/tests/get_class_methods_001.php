@@ -15,7 +15,7 @@ class B extends A {
     }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(get_class_methods('A'));
 var_dump(get_class_methods('B'));
 

@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(preg_match_all('/\b/', "a'", &$m, PREG_OFFSET_CAPTURE));
 var_dump($m);
 

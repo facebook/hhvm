@@ -5,7 +5,7 @@
 */
 
 /* Testing fgetcsv() to read a file when all its parameters are provided */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fgetcsv() : with all parameters specified ***\n";
 
 /* the array is with three elements in it. Each element should be read as 

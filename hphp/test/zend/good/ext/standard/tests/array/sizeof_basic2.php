@@ -11,7 +11,7 @@
  * Sizeof() has been tested for simple integer, string,
  * indexed and mixed arrays.
  */ 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sizeof() : basic functionality ***\n";
 
 $int_array = array(1, 2, 3, 4);

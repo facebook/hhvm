@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $foo = "ABC = DEF";
 $fmt = "%s = %s %n";
 

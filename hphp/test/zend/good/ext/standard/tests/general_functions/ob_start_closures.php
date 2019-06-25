@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 echo "*** Testing ob_start() : closures as output handlers ***\n";
 
 ob_start(function ($output) {

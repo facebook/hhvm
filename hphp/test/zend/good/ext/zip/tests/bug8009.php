@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $thisdir = dirname(__FILE__);
 $src = $thisdir . "/bug8009.zip";
 $filename = $thisdir . "/tmp8009.zip";

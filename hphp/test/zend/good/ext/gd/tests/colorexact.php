@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $im = imagecreatetruecolor(5,5);
 $c = imagecolorexact($im, 255,0,255);
 $c2 = imagecolorexactalpha($im, 255,0,255, 100);

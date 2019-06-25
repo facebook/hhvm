@@ -6,7 +6,7 @@
 
 require(__DIR__."/allowed_rounding_error.inc");
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 
 echo "atanh  0.46211715726001 = ";
 var_dump(atanh(0.46211715726001));

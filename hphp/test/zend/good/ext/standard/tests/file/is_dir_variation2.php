@@ -6,7 +6,7 @@
 
 /* Testing is_dir() with dir, soft & hard link to dir,
      and with file, soft & hard link to file */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
 echo "*** Testing is_dir() with dir and links to dir ***\n";

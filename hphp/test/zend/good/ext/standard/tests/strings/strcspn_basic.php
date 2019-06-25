@@ -9,7 +9,7 @@
 /*
 * Testing strcspn() : basic functionality
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strcspn() : basic functionality ***\n";
 
 

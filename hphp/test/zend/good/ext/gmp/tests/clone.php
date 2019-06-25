@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = gmp_init(3);
 $b = clone $a;
 gmp_clrbit(&$a, 0);

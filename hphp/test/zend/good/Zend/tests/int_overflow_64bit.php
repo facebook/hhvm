@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $doubles = array(
         PHP_INT_MAX,
         PHP_INT_MAX + 1,

@@ -24,7 +24,7 @@ class B extends A
     }
 }
 class C extends A {}
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $B = new B("B");
 var_dump($B);
 $C = new C("C");

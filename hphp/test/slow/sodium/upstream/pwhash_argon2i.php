@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $passwd = 'password';
 $hash = sodium_crypto_pwhash_str
   ($passwd, SODIUM_CRYPTO_PWHASH_OPSLIMIT_INTERACTIVE,

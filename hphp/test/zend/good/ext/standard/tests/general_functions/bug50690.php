@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 putenv("foo=ab");
 putenv("bar=c");
 var_dump(getenv("foo"));

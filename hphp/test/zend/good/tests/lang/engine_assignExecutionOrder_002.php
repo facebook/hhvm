@@ -12,7 +12,7 @@ abstract final class LangEngineAssignexecutionorder002 {
 
 
 // simple case with missing element
-<<__EntryPoint>> function main() { $f = array("hello","item2","bye");
+<<__EntryPoint>> function main(): void { $f = array("hello","item2","bye");
 list($a,,$b) = $f;
 echo "A=$a B=$b\n";
 

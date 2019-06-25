@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $configargs = array(
         "req_extensions" => "v3_req",
         "x509_extensions" => "usr_cert",

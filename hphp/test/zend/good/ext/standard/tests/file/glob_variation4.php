@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $path = dirname(__FILE__);
 
 ini_set('open_basedir', $path);

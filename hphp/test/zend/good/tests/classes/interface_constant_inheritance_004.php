@@ -8,6 +8,6 @@ interface IB extends IA {
 
 class C implements IA, IB {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "Done\n";
 }

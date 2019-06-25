@@ -13,7 +13,7 @@ function row_dump($row, $pixels) {
     printf("\n");
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $magick = new Imagick(__DIR__.'/facebook.png');
 
 $iterators = array(

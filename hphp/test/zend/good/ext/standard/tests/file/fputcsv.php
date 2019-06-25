@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $list = array (
   0 => 'aaa,bbb',
   1 => 'aaa,"bbb"',

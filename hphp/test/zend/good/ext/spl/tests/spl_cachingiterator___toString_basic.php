@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $ai = new ArrayIterator(array(new stdClass(), new stdClass()));
 $ci = new CachingIterator($ai);
 var_dump(

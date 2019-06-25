@@ -8,7 +8,7 @@
 /*
  * Test basic functionality of each()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing each() : basic functionality ***\n";
 
 $arr = array ('one' => 1, 'zero', 'two' => 'deux', 20 => 'twenty');

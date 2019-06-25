@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $array = new ArrayObject();
 $array->offsetSet('key', 'value');
 var_dump($array->offsetExists('key'));

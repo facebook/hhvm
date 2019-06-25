@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 echo "ARRAY:\n";
 try {
     $m = new MongoClient("localhost", array("connect" => false, "timeou" => 4));

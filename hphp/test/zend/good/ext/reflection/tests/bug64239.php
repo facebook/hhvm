@@ -9,7 +9,7 @@ trait T2 {
 
 class B extends A{
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $obj = new ReflectionClass("B");
 print_r($obj->getMethods());
 print_r(($method = $obj->getMethod("Bmethod")));

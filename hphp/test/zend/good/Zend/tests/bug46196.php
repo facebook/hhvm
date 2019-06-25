@@ -8,7 +8,7 @@
 function myErrorHandler($errno, $errstr, $errfile, $errline) {
     return true;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing restore_error_handler() : error bug #46196 ***\n";
 
 var_dump( set_error_handler( 'myErrorHandler' ) );

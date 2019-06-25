@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $closure = function($a, $b = 0) { };
 
 $ro = new ReflectionObject($closure);

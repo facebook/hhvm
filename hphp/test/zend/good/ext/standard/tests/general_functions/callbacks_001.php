@@ -65,7 +65,7 @@ class P extends O {
         $this->call(array($this, 'O::who'));
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o = new C;
 $o->test();
 

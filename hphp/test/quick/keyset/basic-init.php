@@ -17,7 +17,7 @@ function create($a, $b, $c) {
   }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
   // These should succeed:
   var_dump(keyset[]);
   var_dump(keyset['a', 'b', 'c']);

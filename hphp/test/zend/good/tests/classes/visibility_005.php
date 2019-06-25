@@ -17,7 +17,7 @@ class base
 class derived extends base
 {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o = new base;
 $o->d = 4;
 echo "===base::function===\n";

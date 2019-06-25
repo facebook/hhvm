@@ -4,7 +4,7 @@
  * Source code: ext/standard/url.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing parse_url() : error conditions: url component specifier out of range ***\n";
 $url = 'http://secret:hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123';
 

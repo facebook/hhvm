@@ -9,7 +9,7 @@
 /*
  * Test how array_diff_assoc() compares binary data
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff_assoc() : usage variations ***\n";
 
 $array1 = array( b"1", 

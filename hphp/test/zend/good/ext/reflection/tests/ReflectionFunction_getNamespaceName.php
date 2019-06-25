@@ -1,7 +1,7 @@
 <?hh
 namespace A\B;
 function foo() {}
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $function = new \ReflectionFunction('sort');
 \var_dump($function->inNamespace());
 \var_dump($function->getName());

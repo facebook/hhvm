@@ -4,7 +4,7 @@ class myHeap extends SplHeap {
         throw new exception("foo");
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $h = new myHeap;
 
 try {

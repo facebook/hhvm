@@ -15,7 +15,7 @@ class classA
         return "\n\t\r";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_space() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");

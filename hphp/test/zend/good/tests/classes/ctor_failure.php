@@ -7,7 +7,7 @@ class Test
         throw new Exception($msg);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 try
 {
     $o = new Test('Hello');

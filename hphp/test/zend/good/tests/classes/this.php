@@ -28,7 +28,7 @@ class Foo
         $other = $this;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $object = new Foo;
 $object->prop = "Hello\n";
 

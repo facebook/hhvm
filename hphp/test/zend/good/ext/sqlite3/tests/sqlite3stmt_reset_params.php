@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $db = new SQLite3(':memory:');
 echo "Creating Table\n";
 var_dump($db->exec('CREATE TABLE foobar (id INTEGER, name STRING)'));

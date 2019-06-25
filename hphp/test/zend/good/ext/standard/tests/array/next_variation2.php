@@ -10,7 +10,7 @@
  * 2. a sub-array
  * as $array_arg argument.
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing next() : usage variations ***\n";
 
 $array_arg = array ('a' => 'z', array(9, 8, 7));

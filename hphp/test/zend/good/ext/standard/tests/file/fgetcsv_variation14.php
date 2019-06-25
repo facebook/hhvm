@@ -5,7 +5,7 @@
 */
 
 /* Testing fgetcsv() by reading a file containing a blank line */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fgetcsv() : reading the blank line ***\n";
 
 

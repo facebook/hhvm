@@ -32,7 +32,7 @@ class SomeClass {
 class UsingIndirect {
     use Indirect;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $r = SomeClass::get_class_name();
 var_dump($r);
 $r = SomeClass::get_class_name2();

@@ -35,7 +35,7 @@ function callback5($input)
 {
   return array(8);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_filter() : usage variations - callback function with different return values***\n";
 
 $input = array(0, 1, -1, 10, 100, 1000, 'Hello', null, true);

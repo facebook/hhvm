@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $cert = file_get_contents(__DIR__.'/cert.crt');
 
 $data = <<<DATA

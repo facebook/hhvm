@@ -12,7 +12,7 @@ interface CHILD {
 
 class A extends BASE implements CHILD {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new A;
 var_dump(is_a($a, "B1"));
 var_dump(is_a($a, "A"));

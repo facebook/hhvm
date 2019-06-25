@@ -10,7 +10,7 @@ function foo() {
         echo "Hello World!\n";
     };
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $test = new Foo;
 $test->__invoke();
 $test = foo();

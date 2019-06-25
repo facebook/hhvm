@@ -16,7 +16,7 @@
    checking for the file pointer position,
    checking for the warning msg when trying to open an existing file in "xt" mode,
    and fclose function */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_path = dirname(__FILE__);
 $string = b"abcdefghij\nmnopqrst\tuvwxyz\n0123456789";
 $file = $file_path."/007_variation15.tmp";

@@ -34,7 +34,7 @@ function dump_methodModifierNames($class) {
         var_dump($obj->getName() . "::" . $method->getName(), Reflection::getModifierNames($method->getModifiers()));
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 dump_modifierNames('a');
 dump_modifierNames('b');
 dump_modifierNames('c');

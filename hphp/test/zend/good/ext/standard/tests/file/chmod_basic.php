@@ -1,7 +1,7 @@
 <?hh
 
 const MODE_MASK = 07777;
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $filename = __FILE__ . ".tmp";
 
 $fd = fopen($filename, "w+");

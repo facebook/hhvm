@@ -27,7 +27,7 @@ class myHeap extends SplHeap
         }
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $heap = new myHeap();
 $heap->insert(1);
 $heap->insert(2);

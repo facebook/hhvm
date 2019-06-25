@@ -1,7 +1,7 @@
 <?hh
 
 /* Generate array of pixels. 2000 pixels per color stripe */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $count = 2000 * 3;
 $pixels =
    array_merge(array_pad(array(), $count, 0),

@@ -11,7 +11,7 @@ class test {
         var_dump($this->blah);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 set_error_handler("err");
 
 $t = new test;

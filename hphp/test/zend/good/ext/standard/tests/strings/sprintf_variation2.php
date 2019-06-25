@@ -11,7 +11,7 @@ class sample
     return "Object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 error_reporting(E_ALL & ~E_NOTICE);
 
 echo "*** Testing sprintf() : with different types of values passed for arg1 argument ***\n";

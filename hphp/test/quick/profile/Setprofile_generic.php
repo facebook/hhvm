@@ -32,7 +32,7 @@ function profiler(...$args) {
   var_dump($args);
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
   pure_function_2(1, 2);
   fb_setprofile('profiler');
   pure_function_2(3, 4);

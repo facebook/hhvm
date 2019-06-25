@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 date_default_timezone_set('Europe/London');
 
 $endOfWeek = new DateTime('2010-07-27 09:46:49');

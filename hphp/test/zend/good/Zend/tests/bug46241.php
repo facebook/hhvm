@@ -26,7 +26,7 @@ function errorHandler2( $errno, $errstr )
     echo "Caught on second level: '$errstr'\n";
     return true;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $err = new ErrorHandling();
 
 set_error_handler( array( $err, 'errorHandler1' ) );

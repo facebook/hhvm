@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $invalid_utf8 = "\x9f";
 
 var_dump(json_encode($invalid_utf8));

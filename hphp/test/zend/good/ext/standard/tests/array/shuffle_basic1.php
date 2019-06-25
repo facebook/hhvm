@@ -10,7 +10,7 @@
 * changes in the input array by printing the input array
 * before and after shuffle() function is applied on it
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing shuffle() : with arrays having default keys ***\n";
 
 // Initialise the array with integers

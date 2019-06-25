@@ -7,7 +7,7 @@
 /*
 * Passing different anonymous callback functions with passed by value and reference arguments
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_filter() : usage variations - Anonymous callback functions ***\n";
 
 $input = array(0, 1, -1, 10, 100, 1000, 'Hello', null);

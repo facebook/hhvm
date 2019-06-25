@@ -6,7 +6,7 @@ class foo {
     return $this->sum += $num;
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $server = new soapserver(null,array('uri'=>"http://testuri.org"));
 $server->setclass("foo");
 $server->setpersistence(SOAP_PERSISTENCE_REQUEST);

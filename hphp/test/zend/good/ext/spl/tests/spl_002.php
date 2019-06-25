@@ -7,7 +7,7 @@ class Test implements Countable
         return 4;
     }
 };
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new Test;
 
 var_dump(count($a));

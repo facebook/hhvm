@@ -1,6 +1,6 @@
 <?hh
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $filename = dirname(__FILE__)."/004.txt.gz";
 
 

@@ -5,7 +5,7 @@
 */
 
 /* test get_html_translation_table() when $table argument is specified as HTML_SPECIALCHARS */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing get_html_translation_table() : basic functionality ***\n";
 
 // $table as HTML_SEPCIALCHARS and different quote style

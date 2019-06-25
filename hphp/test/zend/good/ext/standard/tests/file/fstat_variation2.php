@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $variation_array = array(
   'lowercase true' => true,
   'lowercase false' =>false,

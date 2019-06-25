@@ -1,7 +1,7 @@
 <?hh
 
 /* Testing fputcsv() to write to a file when default arguments values are considered */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fputcsv() : with default arguments value ***\n";
 
 /* the array is with three elements in it. Each element should be read as 

@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file = dirname(__FILE__)."/bug41445.ini";
 
 $data = <<<DATA

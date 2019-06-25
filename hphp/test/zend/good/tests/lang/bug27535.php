@@ -16,7 +16,7 @@ class Class2
         $this->storage->_Class2_obj = $this;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $foo = new Class2();
 echo "Alive!";
 }

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $xml = "<root></root>";
 $xml = simplexml_load_string($xml);
 $kids = $xml->children();

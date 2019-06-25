@@ -30,7 +30,7 @@ function manyInits() {
     State::$counter++;
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "\nSame variable used as static and non static.\n";
 
 staticNonStatic();

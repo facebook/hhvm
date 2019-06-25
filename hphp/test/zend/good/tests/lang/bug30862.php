@@ -10,7 +10,7 @@ class T2 {
     static $a = array(X=>"false", Y=>"true");
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 print_r(T::$a);
 
 echo "\n----------\n";

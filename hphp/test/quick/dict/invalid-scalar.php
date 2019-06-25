@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 try {
   $d = dict[1.1 => 1];
 } catch (Exception $e) {

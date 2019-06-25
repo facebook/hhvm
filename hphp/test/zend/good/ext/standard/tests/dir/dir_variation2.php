@@ -17,7 +17,7 @@ class classA
     $this->var = 10;
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing dir() : unexpected values for \$context argument ***\n";
 
 // create the temporary directory

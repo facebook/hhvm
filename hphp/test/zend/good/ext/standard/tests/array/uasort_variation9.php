@@ -26,7 +26,7 @@ function cmp(&$value1, &$value2)
   else
     return -1;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing uasort() : 'cmp_function' with reference arguments ***\n";
 
 // Int array with default keys

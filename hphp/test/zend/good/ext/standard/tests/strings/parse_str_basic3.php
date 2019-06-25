@@ -3,7 +3,7 @@
  * Description: Parses the string into variables
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing parse_str() : basic functionality ***\n";
 
 echo "\nTest string with array values and results array\n";

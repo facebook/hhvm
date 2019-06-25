@@ -2,7 +2,7 @@
 class A {}
 class B extends A {}
 class X {}
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $classes = array("A", "B", "X");
 
 $instances = array(    "myA" => new A,

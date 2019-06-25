@@ -19,4 +19,4 @@
       echo "In Exception catch block. Autoload should not have been triggered.\n";
   }
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

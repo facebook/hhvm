@@ -24,7 +24,7 @@ class B extends A
     }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $b = new B();
 $b->A();
 echo "===DONE===\n";

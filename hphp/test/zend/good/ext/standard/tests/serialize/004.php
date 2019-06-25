@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 error_reporting (E_ALL);
 $a      = array(4);
 $str    = serialize($a);

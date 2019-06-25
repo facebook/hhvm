@@ -9,7 +9,7 @@
    Prototype: int ftell ( resource $handle );
    Description: Tells file pointer read/write position
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ftell() : error conditions ***\n";
 // zero argument
 echo "-- Testing ftell() with zero argument --\n";

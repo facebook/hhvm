@@ -9,7 +9,7 @@
  * Source code: ext/standard/var.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "\n--- Testing Resource ---\n";
 $file_handle = fopen( __FILE__, "r" );
 $serialized_data = serialize( $file_handle );

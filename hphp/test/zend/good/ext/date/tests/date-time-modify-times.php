@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $tests = array(
     '2010-12-15 19:42:45 UTC' => array(
         'october 23:00', // October 23rd, with a broken time

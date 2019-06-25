@@ -3,7 +3,7 @@ const MEMC_SERIALIZED =          4;
 const MEMC_COMPRESSED =         16;
 const MEMC_COMPRESSION_ZLIB =   32;
 const MEMC_COMPRESSION_FASTLZ = 64;
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $keys = array(
   'no_compression'   => array(
     'flag' => MEMC_SERIALIZED,

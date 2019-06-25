@@ -36,6 +36,6 @@ class BaseL2 extends Level1Indirect {
 class BaseL1 extends Level1Direct {
     use ATrait;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo 'DONE';
 }

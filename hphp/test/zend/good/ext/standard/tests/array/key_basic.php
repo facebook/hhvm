@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of key()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing key() : basic functionality ***\n";
 
 $array = array ('zero', 99 => 'one', 'two', 'three' => 3);

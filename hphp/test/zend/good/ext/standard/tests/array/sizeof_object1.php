@@ -17,7 +17,7 @@ class sizeof_class implements Countable
     return 3; // return the count of member variables in the object
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sizeof() : object functionality ***\n";
 
 echo "-- Testing sizeof() with an object which implements Countable interface --\n";

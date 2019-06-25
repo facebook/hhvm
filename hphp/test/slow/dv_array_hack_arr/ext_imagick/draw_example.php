@@ -90,7 +90,7 @@ function test_shape(&$canvas) {
 
   $canvas->drawImage($draw);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $canvas = new Imagick;
 $canvas->newImage(640, 480, 'white');
 

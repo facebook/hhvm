@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $im = new Imagick();
 $im->newImage(50, 100, 'white');
 

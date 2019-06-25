@@ -5,7 +5,7 @@ class foo {
         throw new Exception('foobar');
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 try {
     $X = (new foo)->Inexistent(3);
 } catch (Exception $e) {

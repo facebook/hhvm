@@ -6,7 +6,7 @@
   Prototype: bool chmod ( string $filename, int $mode );
   Description: Attempts to change the mode of the file specified by
     filename to that given in mode */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $path = dirname(__FILE__);
 
 echo "*** Testing fileperms(), chmod() with files and dirs ***\n";

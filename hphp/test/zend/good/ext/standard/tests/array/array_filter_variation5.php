@@ -20,7 +20,7 @@ function always_false($input)
 {
   return false;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_filter() : usage variations - different false elements in 'input' ***\n";
 
 // unset variable

@@ -16,7 +16,7 @@ class classA
     return ",<.>";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_punct() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");

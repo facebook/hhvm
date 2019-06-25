@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of next()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing next() : basic functionality ***\n";
 
 $array = array('zero', 'one', 'two');

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 echo hash('tiger192,3', ''),"\n";
 echo hash('tiger192,3', 'abc'),"\n";
 echo hash('tiger192,3', str_repeat('a', 63)),"\n";

@@ -5,7 +5,7 @@
  *              octal and hexadecimal representation.
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing stripcslashes() : unexpected number of arguments ***";
 
 

@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 for ($i=0; $i<100; $i++) {
   $port = rand(10000, 65000);
   /* Setup socket server */

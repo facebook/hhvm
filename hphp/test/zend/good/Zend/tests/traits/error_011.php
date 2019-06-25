@@ -14,7 +14,7 @@ trait b {
 class bar {
     use foo, c, b;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $x = new bar;
 var_dump($x->test());
 }

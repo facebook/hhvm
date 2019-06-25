@@ -35,7 +35,7 @@ function utf32_utf8($k) {
     }
     return $retval;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $table = get_html_translation_table(HTML_ENTITIES, ENT_QUOTES, 'UTF-8');
 
 for ($i = 0; $i < 0x2710; $i++) {

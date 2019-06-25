@@ -11,7 +11,7 @@ class F extends E {
 }
 class X {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $classes = array("C", "D", "E", "F", "X");
 foreach($classes as $class) {
     echo "Reflecting on class $class: \n";

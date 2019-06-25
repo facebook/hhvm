@@ -16,7 +16,7 @@ class Foo {
   }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
   $foo1 = new Foo(1, 2);
   var_dump($foo1);
   apc_store('x', $foo1);

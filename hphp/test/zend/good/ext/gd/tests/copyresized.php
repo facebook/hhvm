@@ -28,7 +28,7 @@ function check_doublesize($dst) {
     }
     return true;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $src_tc = imagecreatetruecolor(19,19);
 imagefill($src_tc, 0,0, 0xffffff);
 imagefilledrectangle($src_tc, 0,0,4,4, 0xff0000);

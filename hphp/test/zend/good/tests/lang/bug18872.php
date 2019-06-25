@@ -6,7 +6,7 @@ class FooBar {
 function foo($biff = FooBar::BIFF) {
     echo $biff . "\n";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 foo();
 foo();
 }

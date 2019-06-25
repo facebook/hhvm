@@ -4,7 +4,7 @@
  * Source code: ext/standard/image.c
  */
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_types_array = array (
     //File containing text string
     "File with text data" => "test.txt",

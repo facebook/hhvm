@@ -3,7 +3,7 @@
  * Description: Inserts HTML line breaks before all newlines in a string.
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing nl2br() : error conditions ***\n";
 
 // Zero arguments

@@ -7,7 +7,7 @@
 /*
  * Open a file pointer using fopen and pass to readdir() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing readdir() : usage variations ***\n";
 
 // get a resource variable

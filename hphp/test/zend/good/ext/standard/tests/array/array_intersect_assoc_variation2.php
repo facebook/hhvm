@@ -18,7 +18,7 @@ class classA
     return "Class A object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_intersect_assoc() : Passing non-array values to \$arr2 argument ***\n";
 
 // array to be passsed to $arr1 as default argument

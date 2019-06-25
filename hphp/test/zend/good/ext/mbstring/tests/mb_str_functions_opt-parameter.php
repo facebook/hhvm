@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 echo mb_strpos('abb', 'b', 0, 'UTF-8') . "\n";
 echo mb_strrpos('abb', 'b', 0, 'UTF-8') . "\n";
 echo mb_stripos('abb', 'B', 0, 'UTF-8') . "\n";

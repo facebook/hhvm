@@ -3,7 +3,7 @@
      string strtoupper ( string $string );
    Description:
      Returns string with all alphabetic characters converted to uppercase */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 if( substr(PHP_OS, 0, 3) == 'WIN') {
   setlocale(LC_ALL, 'C');
 } else {

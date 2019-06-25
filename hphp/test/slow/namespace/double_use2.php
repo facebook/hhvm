@@ -3,4 +3,4 @@
 use A\B;
 use B;
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

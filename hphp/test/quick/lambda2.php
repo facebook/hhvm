@@ -22,7 +22,7 @@ class bar {
   }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
   var_dump((new bar)->foo());
   $k = (new bar)->getClos();
   // dtor prints here

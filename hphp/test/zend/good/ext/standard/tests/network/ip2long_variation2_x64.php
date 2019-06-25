@@ -4,7 +4,7 @@
  * Source code: ext/standard/basic_functions.c
  * Alias to functions:
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $ips = array(
     "1.1.011.011",
     "127.0.0.1",

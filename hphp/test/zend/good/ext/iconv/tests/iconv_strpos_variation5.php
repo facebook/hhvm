@@ -9,7 +9,7 @@
  * The character length of $string_ascii and $string_mb is the same,
  * and the needle appears at the same positions in both strings
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 iconv_set_encoding("internal_encoding", "UTF-8");
 
 echo "*** Testing iconv_strpos() : usage variations ***\n";

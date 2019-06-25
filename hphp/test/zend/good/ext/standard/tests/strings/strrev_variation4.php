@@ -12,7 +12,7 @@ class sample {
     return "object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strrev() : unexpected inputs for 'str' ***\n";
 //get the resource
 $resource = fopen(__FILE__, "r");

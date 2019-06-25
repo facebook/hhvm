@@ -8,7 +8,7 @@
  * Test array_map() by passing non-permmited built-in functions and language constructs i.e.
  *   echo(), array(), eval(), exit(), isset(), list(), print()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_map() : non-permmited built-in functions ***\n";
 
 // array to be passed as arguments

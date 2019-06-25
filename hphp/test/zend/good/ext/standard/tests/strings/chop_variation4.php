@@ -7,7 +7,7 @@
 /*
  * Testing chop() : with nulls embedded in input string
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing chop() : string with embedded nulls ***\n";
 
 // defining varous strings with embedded nulls

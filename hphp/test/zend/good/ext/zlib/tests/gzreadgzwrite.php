@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $original = str_repeat(b"hallo php",4096);
 $filename = tempnam("/tmp", "phpt");
 

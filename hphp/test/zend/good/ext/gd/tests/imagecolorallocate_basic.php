@@ -3,7 +3,7 @@
  * Description: Allocate a color for an image
  * Source code: ext/gd/gd.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing imagecolorallocate() : basic functionality ***\n";
 
 $im = imagecreatetruecolor(200, 200);

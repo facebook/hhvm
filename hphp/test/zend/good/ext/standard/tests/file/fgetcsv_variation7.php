@@ -5,7 +5,7 @@
 */
 
 /* Testing fgetcsv() to read from a file when provided with default value of arguments */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fgetcsv() : with default arguments value ***\n";
 
 /* the array is with three elements in it. Each element should be read as 

@@ -8,7 +8,7 @@
 /*
  * Test basic functionality of array_key_exists()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_key_exists() : basic functionality ***\n";
 
 $key1 = 'key';

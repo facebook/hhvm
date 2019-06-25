@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $xml = new XMLWriter();
 $xml->openMemory();
 $xml->startDocument('1.0', 'UTF-8');

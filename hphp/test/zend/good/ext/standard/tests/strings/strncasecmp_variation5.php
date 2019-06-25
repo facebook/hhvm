@@ -12,7 +12,7 @@ class sample  {
   return "object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Test strncasecmp() function: unexpected values for 'len' ***\n";
 
 /* definition of required variables */

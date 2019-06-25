@@ -14,7 +14,7 @@ class B extends A {
     public $b_var = 'foo';
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new A;
 $b = new B;
 

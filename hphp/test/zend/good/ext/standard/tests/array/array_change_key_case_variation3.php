@@ -8,7 +8,7 @@
  * Pass arrays with different data types as keys to array_change_key_case()
  * to test conversion
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_change_key_case() : usage variations ***\n";
 
 //get an unset variable

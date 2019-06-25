@@ -5,7 +5,7 @@
 */
 
 /* Testing fgetcsv() by providing two characters for enclosure and delimiter parameters */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fgetcsv() : with two chars as enclosure & delimiter ***\n";
 
 /* the array is with three elements in it. Each element should be read as 

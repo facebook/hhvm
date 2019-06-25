@@ -7,7 +7,7 @@
 /* Test strrchr() function by passing heredoc string containing 
  *  blank-line for haystack and with various needles
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strrchr() function: with heredoc strings ***\n";
 $blank_line = <<<EOD
 

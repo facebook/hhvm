@@ -7,7 +7,7 @@
 /*
  * Pass incorrect number of arguments to array_merge() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_merge() : error conditions ***\n";
 
 // Testing array_merge with zero arguments

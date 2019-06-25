@@ -28,7 +28,7 @@ class for_string_natcasesort
     }
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing natcasesort() : object functionality ***\n";
 
 // array of string objects

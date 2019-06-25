@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = 1;
 $fn1 = function() use ($a) {echo "$a\n"; $a++;};
 $fn2 = function() use ($a) {echo "$a\n"; $a++;};

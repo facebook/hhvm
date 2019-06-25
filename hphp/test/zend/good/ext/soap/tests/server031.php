@@ -38,7 +38,7 @@ class handlerClass {
             ));
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $server = new SoapServer(dirname(__FILE__)."/server030.wsdl");
 $server->setClass('handlerClass');
 

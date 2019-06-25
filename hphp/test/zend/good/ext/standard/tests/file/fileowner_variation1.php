@@ -5,7 +5,7 @@
  */
 
 /* Creating soft and hard links to a file and applying fileowner() on links */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 fclose( fopen($file_path."/fileowner_variation1.tmp", "w") );
 

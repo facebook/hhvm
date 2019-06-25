@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $nano = time_nanosleep(2, 100000);
 
 if ($nano === true) {

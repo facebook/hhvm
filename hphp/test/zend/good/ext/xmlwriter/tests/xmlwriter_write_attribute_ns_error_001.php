@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $xw = xmlwriter_open_memory();
 xmlwriter_set_indent($xw, TRUE);
 xmlwriter_start_document($xw, NULL, "UTF-8");

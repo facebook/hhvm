@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $date = new DateTime("2011-05-17T22:14:12");
 $date2 = DateTime::createFromFormat("D H i s", $date->format("D"). ' 0 00 00');
 echo $date->format("r"), "\n";

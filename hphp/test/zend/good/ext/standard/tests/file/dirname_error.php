@@ -4,7 +4,7 @@
  * Source code: ext/standard/string.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing dirname() : error conditions ***\n";
 
 // Zero arguments

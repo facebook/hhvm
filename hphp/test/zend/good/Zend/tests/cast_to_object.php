@@ -5,7 +5,7 @@ class test {
         return "10";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $r = fopen(__FILE__, "r");
 
 $o = new test;

@@ -5,7 +5,7 @@ class SplMinHeap2 extends SplMinHeap {
         throw new Exception('Corrupt heap');
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $h = new SplMinHeap2();
 
 // insert 2 elements to hit our overridden compare

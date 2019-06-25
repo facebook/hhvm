@@ -1,6 +1,6 @@
 <?hh
 // simple checks
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(basename("bar"));
 var_dump(basename("/foo/bar"));
 var_dump(basename("/bar"));

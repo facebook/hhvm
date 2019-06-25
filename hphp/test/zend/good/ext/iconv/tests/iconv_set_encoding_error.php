@@ -15,7 +15,7 @@ class classA
     return "UTF-8";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing iconv_set_encoding() : error functionality ***\n";
 
 //get an unset variable

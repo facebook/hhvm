@@ -13,7 +13,7 @@ class TestClass {
         throw new Exception('Call to undefined method'.get_class($this).'::'.$name.'()');
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 try {
     $test = new TestClass;
 } catch (Exception $e) {

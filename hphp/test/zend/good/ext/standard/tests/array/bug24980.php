@@ -21,7 +21,7 @@ function rmul($v, $w)
     $v *= $w;
     return $v;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $numbers = array (2,3,5,7);
 $total = array_reduce($numbers, 'add_up');
 print "Total is $total\n";

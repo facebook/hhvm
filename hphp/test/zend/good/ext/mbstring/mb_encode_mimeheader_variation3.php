@@ -16,7 +16,7 @@ class classA
     return "Class A object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_encode_mimeheader() : usage variations ***\n";
 
 mb_internal_encoding('utf-8');

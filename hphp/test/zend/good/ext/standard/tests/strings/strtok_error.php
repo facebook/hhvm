@@ -7,7 +7,7 @@
 /*
  * Testing strtok() for error conditions
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strtok() : error conditions ***\n";
 
 // Zero argument

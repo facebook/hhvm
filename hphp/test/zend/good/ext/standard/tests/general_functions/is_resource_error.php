@@ -3,7 +3,7 @@
  * Description:  Finds whether a variable is a resource
  * Source code: ext/standard/type.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing is_resource() : error conditions ***\n";
 
 echo "\n-- Testing is_resource() function with Zero arguments --\n";

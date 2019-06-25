@@ -10,7 +10,7 @@ class ChildClass extends ParentClass {
         var_dump(is_callable(array($this, 'static::testIsCallable2')));
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $child = new ChildClass();
 $child->testIsCallable();
 $child->testIsCallable2();

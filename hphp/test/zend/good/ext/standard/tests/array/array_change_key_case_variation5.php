@@ -7,7 +7,7 @@
 /*
  * Check the position of the internal array pointer after calling the function
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_change_key_case() : usage variations ***\n";
 
 $input = array ('one' => 'un', 'two' => 'deux', 'three' => 'trois');

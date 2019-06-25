@@ -1,5 +1,5 @@
 <?hh /* $Id$ */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump((object)1 instanceof stdClass);
 var_dump(! (object)1 instanceof Exception);
 }

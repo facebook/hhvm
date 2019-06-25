@@ -7,7 +7,7 @@
 /*
  * Pass an incorrect number of arguments to array_slice() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_slice() : error conditions ***\n";
 
 //Test array_slice with one more than the expected number of arguments

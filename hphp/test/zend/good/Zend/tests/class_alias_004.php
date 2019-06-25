@@ -7,4 +7,4 @@ interface test { }
 
 class_alias('foo', 'test');
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

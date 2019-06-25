@@ -8,7 +8,7 @@
  * Pass different data types as $case argument to array_change_key_case() to test behaviour
  * Where possible, CASE_UPPER has been entered as a string value
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_change_key_case() : usage variations ***\n";
 
 // Initialise function arguments not being substituted

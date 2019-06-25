@@ -1,5 +1,5 @@
 <?hh 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 eval("function test() { echo \"hey, this is a function inside an eval()!\\n\"; }");
 
 $i=0;

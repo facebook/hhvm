@@ -3,7 +3,7 @@
  * Description: Makes a copy of the file source to dest.
  *              Returns TRUE on success or FALSE on failure.
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing copy() function: to copy file from source to destination --\n"; 
 
 var_dump( file_exists(__FILE__) );

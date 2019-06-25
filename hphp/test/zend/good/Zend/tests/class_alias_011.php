@@ -10,7 +10,7 @@ class foo {
 }
 
 class_alias('FOO', 'bar');
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 call_user_func(array('bar', 'test'));
 
 

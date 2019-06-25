@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $str = 'rasmuslerdorf';
 $salt1 = 'rl';
 $res_1 = 'rl.3StKT.4T8M';

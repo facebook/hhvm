@@ -5,7 +5,7 @@
    You can pass two constants there, CASE_UPPER and CASE_LOWER(default).
    The function will leave number indices as is.
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $arrays = array (
   array (),
   array (0),

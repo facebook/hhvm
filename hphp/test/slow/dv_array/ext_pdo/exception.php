@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 try {
     new PDO('aoeu');
 } catch (PDOException $e) {

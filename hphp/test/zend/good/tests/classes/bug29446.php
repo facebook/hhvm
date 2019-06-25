@@ -8,6 +8,6 @@ class testClass {
     echo self::TEST_CONST;
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $test = new testClass;
 }

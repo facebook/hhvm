@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = 1;
 $b = $a;
 var_dump(stream_is_local($b));

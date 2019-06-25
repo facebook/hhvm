@@ -7,7 +7,7 @@
 /*
  * Pass an unknown encoding to mb_strpos() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_strpos() : error conditions ***\n";
 $haystack = 'Hello, world';
 $needle = 'world';

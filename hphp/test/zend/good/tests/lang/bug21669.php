@@ -12,7 +12,7 @@ class Factory {
         return $obj;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $factory = new Factory;
 $test = $factory->create();
 $test->say_hello();

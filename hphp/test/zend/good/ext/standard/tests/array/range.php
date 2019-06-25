@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing range() function on basic operations ***\n";
 
 echo "\n-- Integers as Low and High --\n";

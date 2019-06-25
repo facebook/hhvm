@@ -2,7 +2,7 @@
 /* Prototype: mixed array_shift(& array &array );
  * Description: Shifts the first value of the array off and returns it.
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $empty_array = array();
 $number = 5;
 $str = "abc";

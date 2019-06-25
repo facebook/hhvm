@@ -11,7 +11,7 @@ class sample  {
     return "sample object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing bin2hex() function: with unexpected inputs for 'str' argument ***\n";
 
 //get an unset variable

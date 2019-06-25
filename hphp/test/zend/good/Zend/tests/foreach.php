@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $foo = array(1,2,3,4);
 foreach($foo as $key => $val) {
     if($val == 3) {

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $port = 80;
 $protocol = "tcp";
 $extra_arg = 12;

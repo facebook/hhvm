@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file = __DIR__ . '/__tmp_rose.jpg';
 
 $imagick = new Imagick('magick:rose');

@@ -26,7 +26,7 @@ class Test
         var_dump($ar);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 Test::f1(array(42));
 Test::f2(NULL);
 Test::f2();

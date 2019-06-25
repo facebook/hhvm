@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $xml=<<<EOF
 <drinks xmlns:hot="http://www.example.com/hot">
  <hot:drink><hot:name>Coffee</hot:name></hot:drink>

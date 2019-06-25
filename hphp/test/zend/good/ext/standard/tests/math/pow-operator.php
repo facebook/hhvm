@@ -1,5 +1,5 @@
 <?hh // $Id$
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $x = 2;
 $x **= 3;
 

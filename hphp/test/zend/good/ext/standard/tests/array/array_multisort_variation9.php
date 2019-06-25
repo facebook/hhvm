@@ -13,7 +13,7 @@ class classWithToString {
 }
 
 class classWithoutToString { }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_multisort() : usage variation  - test sort order of all types***\n";
 
 $inputs = array(

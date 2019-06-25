@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(sprintf("%3.2f", 1.2));
 var_dump(sprintf("%-3.2f", 1.2));
 var_dump(sprintf("%03.2f", 1.2));

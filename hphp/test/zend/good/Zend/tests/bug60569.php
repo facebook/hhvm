@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 try {
     $msg = "Some error \x00 message";
     throw new Exception($msg);

@@ -22,7 +22,7 @@ function hphp_opts(bool $hack_arr = false): string {
   return implode(' ', $args);
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
   requestAll(
     array(
       array(

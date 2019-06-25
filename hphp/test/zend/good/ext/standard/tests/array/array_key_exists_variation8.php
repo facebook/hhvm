@@ -10,7 +10,7 @@
  * then pass many different data types as $key argument to test where array_key_exist()
  * returns true.
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_key_exists() : usage variations ***\n";
 
 //get an unset variable

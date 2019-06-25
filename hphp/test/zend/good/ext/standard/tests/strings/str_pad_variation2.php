@@ -14,7 +14,7 @@ class sample  {
     return "sample object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing str_pad() function: with unexpected inputs for 'pad_length' argument ***\n";
 
 //get an unset variable

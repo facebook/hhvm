@@ -1,6 +1,6 @@
 <?hh
 class It { public $n = 0; }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = 1;
 $it = new It;
 $x = function ($x) use ($a, $it) {

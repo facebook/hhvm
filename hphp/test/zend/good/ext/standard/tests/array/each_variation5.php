@@ -9,7 +9,7 @@
  * Test behaviour of each() when passed:
  * 1. a two-dimensional array
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing each() : usage variations ***\n";
 
 $arr = array ('zero',

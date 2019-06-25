@@ -15,7 +15,7 @@ class Test {
       }
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $obj = new Test;
 var_dump($obj->a);
 ++$obj->a;

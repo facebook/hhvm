@@ -6,7 +6,7 @@ function to_int(int &$x) {}
 function to_float(float &$x) {}
 function to_string(string &$x) {}
 function to_bool(bool &$x) {}
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $x = 1.0;
 var_dump($x);
 to_int(&$x); // because $x is by-reference, the weak type hint converts it

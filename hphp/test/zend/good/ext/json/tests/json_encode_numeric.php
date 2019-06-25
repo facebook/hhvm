@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 var_dump(
     json_encode("1", JSON_NUMERIC_CHECK),
     json_encode("9.4324", JSON_NUMERIC_CHECK),

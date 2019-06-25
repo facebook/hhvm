@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $doc1 = new DOMDocument();
 $doc2 = new DOMDocument();
 

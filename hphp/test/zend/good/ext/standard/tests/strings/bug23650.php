@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $str = <<< HERE
 1:<!-- abc -  -->
 2:<!doctype -- >

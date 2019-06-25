@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $id = new MongoId;
 if (getmypid() <= 65536) {
     $retval = $id->getPid() == getmypid();

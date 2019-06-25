@@ -3,7 +3,7 @@
 class test {
     function __unset(&$name) { }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $t = new test;
 $name = "prop";
 

@@ -6,7 +6,7 @@
 
 require(__DIR__."/allowed_rounding_error.inc");
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "asinh  0.52109530549375= ";
 var_dump(asinh(0.52109530549375));
 if (allowed_rounding_error(asinh(0.52109530549375), 0.5))

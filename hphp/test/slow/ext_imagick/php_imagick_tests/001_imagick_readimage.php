@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 print "--- Catch exception with try/catch\n";
 $imagick = new Imagick();
 try {

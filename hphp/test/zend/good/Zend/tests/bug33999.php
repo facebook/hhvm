@@ -2,7 +2,7 @@
 class Foo {
   public $bar = "bat";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $foo = new Foo;
 var_dump($foo);
 

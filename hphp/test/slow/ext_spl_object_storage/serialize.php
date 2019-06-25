@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $s = new SplObjectStorage();
 
 $o1 = new StdClass;

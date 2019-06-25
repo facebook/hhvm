@@ -4,7 +4,7 @@
 // 003.php.skipif is overly-cautious, so it would skip that test.  This test
 // also makes less assumptions about what the blocked signal set looks like
 // coming into the test.
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 pcntl_sigprocmask(SIG_SETMASK, array(), &$old);
 
 pcntl_sigprocmask(SIG_BLOCK, array(SIGCHLD,SIGTERM), &$first_set);

@@ -3,7 +3,7 @@ function f($x) {
     echo "f($x) ";
     return $x;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "Function call args:\n";
 var_dump(f($i=0) < f(++$i));
 var_dump(f($i=0) <= f(++$i));

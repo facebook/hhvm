@@ -23,7 +23,7 @@ function runtest() {
 abstract final class ZendGoodExtStandardTestsFileFilePutContentsVariation6 {
   public static $filename;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing file_put_contents() : variation ***\n";
 
 $test_dir = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);

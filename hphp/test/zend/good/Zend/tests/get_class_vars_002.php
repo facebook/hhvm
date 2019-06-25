@@ -20,6 +20,6 @@ class C extends B {
         var_dump($this->a, $this->b, $this->c);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 new C;
 }

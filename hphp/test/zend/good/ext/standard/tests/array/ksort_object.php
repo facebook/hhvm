@@ -35,7 +35,7 @@ class MyString
   }
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ksort() : object functionality ***\n";
 
 // array of integer objects

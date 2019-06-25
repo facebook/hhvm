@@ -7,7 +7,7 @@ class Test implements ArrayAccess
         public function offsetSet($offset, $data ) { throw new Exception(__METHOD__); }
         public function offsetUnset($offset)       { throw new Exception(__METHOD__); }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $t = new Test;
 
 try

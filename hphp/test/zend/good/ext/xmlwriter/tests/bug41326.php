@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $xml = new XmlWriter();
 $xml->openMemory();
 $xml->setIndent(true);

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 echo "ISO-2022-JP empty segment\n";
 echo bin2hex(mb_convert_encoding(pack("H*", "1b24401b24402121"), "UTF-8", "ISO-2022-JP")), "\n";
 echo bin2hex(mb_convert_encoding(pack("H*", "1b24421b24422121"), "UTF-8", "ISO-2022-JP")), "\n";

@@ -3,7 +3,7 @@
  * Description: Returns the user ID of the owner of the file, or
  *              FALSE in case of an error.
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fileowner(): basic functionality ***\n"; 
 
 echo "-- Testing with the file or directory created by owner --\n";

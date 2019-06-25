@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $it = new DirectoryIterator(__DIR__."/../../../../../sample_dir/");
 
 $count = 0;

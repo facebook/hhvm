@@ -7,7 +7,7 @@ class foo {
         var_dump($this);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $foo = new foo;
 $arr = array($foo, 'abc');
 $arr();

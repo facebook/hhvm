@@ -8,7 +8,7 @@
 /*
  * Test how mb_stripos behaves when passed an incorrect number of arguments
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_stripos() : error conditions ***\n";
 
 

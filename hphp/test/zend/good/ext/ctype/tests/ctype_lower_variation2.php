@@ -8,7 +8,7 @@
  * Pass different integers to ctype_lower() to test which character codes are considered
  * valid lowercase characters
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_lower() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");

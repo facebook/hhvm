@@ -27,7 +27,7 @@ function writeFile($file) {
    fclose($h);
    readFile2($file);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $tmpDir = $file_path.'/fopenVar19.Dir';
 $realFilename = basename(__FILE__).'.real';

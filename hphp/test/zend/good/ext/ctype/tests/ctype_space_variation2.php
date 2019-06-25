@@ -8,7 +8,7 @@
  * Pass different integers to ctype_space() to test which character codes are considered
  * valid whitespace characters
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_space() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");

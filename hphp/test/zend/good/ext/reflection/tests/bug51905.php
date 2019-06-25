@@ -8,7 +8,7 @@ class Foo extends Bar {
     const X = 12;
     public function x($x = 1, $y = array(self::X), $z = parent::Y) {}
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $clazz = new ReflectionClass('Foo');
 $method = $clazz->getMethod('x');
 foreach ($method->getParameters() as $param) {

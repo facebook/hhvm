@@ -7,7 +7,7 @@
 /* Test stripos() function with null terminated strings for 'needle' argument 
  *  in order to check binary safe 
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Test stripos() function: binary safe ***\n";
 $haystack = "\0Hello\0World\0";
 

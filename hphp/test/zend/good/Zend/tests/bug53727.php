@@ -6,7 +6,7 @@ interface MyInterface {
 class ParentClass implements MyInterface { }
 
 class ChildClass extends ParentClass { }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo (is_subclass_of('ChildClass', 'MyInterface') ? 'true' : 'false') . "\n";
 echo (defined('ChildClass::TEST_CONSTANT') ? 'true' : 'false') . "\n";
 

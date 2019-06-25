@@ -8,7 +8,7 @@ class MyClass
     // no toString() method defined
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strval() : error conditions ***\n";
 
 error_reporting(E_ALL ^ E_NOTICE);

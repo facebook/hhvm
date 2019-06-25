@@ -8,7 +8,7 @@
  * Pass array_merge() arrays with mixed keys to test how it attaches them to
  * existing arrays
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_merge() : usage variations ***\n";
 
 //mixed keys

@@ -7,7 +7,7 @@
 /*
  * Test Basic functionality of mb_regex_encoding
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_regex_encoding() : basic functionality ***\n";
 
 var_dump(mb_regex_encoding());

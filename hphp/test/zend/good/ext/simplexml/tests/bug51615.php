@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $dom = new DOMDocument;
 $dom->loadHTML('<span title=""y">x</span><span title=""z">x</span>');
 $html = simplexml_import_dom($dom);

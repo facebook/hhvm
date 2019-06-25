@@ -6,6 +6,6 @@ function __autoload($className) {
 
 function foo($c = ok::constant) {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 foo();
 }

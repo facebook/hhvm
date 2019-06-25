@@ -5,7 +5,7 @@
    | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
    +-------------------------------------------------------------+
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "============== var_dump(numeric_like_string) ===================\n\n";
 
 var_dump("12345xxx");                   // string(...)

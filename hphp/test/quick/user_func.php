@@ -12,7 +12,7 @@ function bar(&$a) {
 function baz($a) {
   return 2;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = array(1, 2);
 array_map("foo", $a);
 

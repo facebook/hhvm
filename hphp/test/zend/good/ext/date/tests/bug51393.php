@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $dt = DateTime::createFromFormat('O', '+0800');
 var_dump($dt->getOffset());
 

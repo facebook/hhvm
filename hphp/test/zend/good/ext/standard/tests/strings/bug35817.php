@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $a = pack("H3","181");
 $b = unpack("H3", $a);
 var_dump($b);

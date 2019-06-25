@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $numeric = 123;
 $bool = true;
 $foo = array($numeric, $bool);

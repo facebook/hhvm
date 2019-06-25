@@ -11,7 +11,7 @@ class baz
     public $zoo = 'baz::zoo';
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 error_reporting(E_ALL);
 $obj = new baz();
 echo $obj->zoo, "\n";

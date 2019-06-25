@@ -7,7 +7,7 @@
 /*
  * Testing sscanf() : basic functionality
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sscanf() : basic functionality - using integer format ***\n";
 
 $str = "Part: Widget Serial Number: 1234789 Stock: 25";

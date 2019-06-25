@@ -4,7 +4,7 @@ function __autoload($name) {
     eval("class $name {}");
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 try {
 } catch (A $e) {
 }

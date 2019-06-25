@@ -5,7 +5,7 @@ class MyAutoloader {
         // code to autoload based on directory
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $autloader1 = new MyAutoloader('dir1');
 spl_autoload_register(array($autloader1, 'autoload'));
 

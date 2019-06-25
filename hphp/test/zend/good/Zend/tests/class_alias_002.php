@@ -4,4 +4,4 @@ class foo { }
 
 class_alias('foo', 'FOO');
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

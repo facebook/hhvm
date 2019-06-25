@@ -8,7 +8,7 @@ class foo extends ArrayObject
         throw new Exception("hi");
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $test = new foo(array(1,2,3));
 
 try

@@ -11,7 +11,7 @@
  * 2.SORT_REGULAR - compare items normally
  * 3.SORT_NUMERIC - compare items numerically
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing asort() : usage variations ***\n";
 
 // an array contains unsorted octal values

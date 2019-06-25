@@ -3,7 +3,7 @@
  * Description: Removes duplicate values from array 
  * Source code: ext/standard/array.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_unique() : basic functionality ***\n";
 
 // array with default keys

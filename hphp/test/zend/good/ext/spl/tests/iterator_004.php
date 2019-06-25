@@ -53,7 +53,7 @@ class SeekableNumericArrayIterator extends NumericArrayIterator implements Seeka
         echo __METHOD__ . '(' . $index . ")\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = array(1, 2, 3, 4, 5);
 foreach (new LimitIterator(new NumericArrayIterator($a), 1, 3) as $v)
 {

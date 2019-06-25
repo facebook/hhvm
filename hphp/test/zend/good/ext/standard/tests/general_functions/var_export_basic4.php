@@ -5,7 +5,7 @@
  * Alias to functions:
  */
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing var_export() with valid strings ***\n";
 // different valid  string
 $valid_strings = array(

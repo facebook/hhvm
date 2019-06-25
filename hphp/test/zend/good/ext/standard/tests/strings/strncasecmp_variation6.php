@@ -5,7 +5,7 @@
 */
 
 /* Test strncasecmp() function with binary values passed to 'str1' & 'str2' */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Test strncasecmp() function: with binary inputs ***\n";
 
 /* A binary function should work with all 256 characters that a character(8-bit) can take */

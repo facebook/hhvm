@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $key = "TEST_KEY_COMPRESSION";
 $tmp_object = new stdClass;
 $tmp_object->str_attr = str_repeat("0", 100);

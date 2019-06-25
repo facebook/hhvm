@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $start    = new DateTime('20101212');
 $interval = DateInterval::createFromDateString('next day');
 $dp = new DatePeriod($start, $interval, 1);

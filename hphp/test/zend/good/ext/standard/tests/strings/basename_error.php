@@ -3,7 +3,7 @@
    Description: Given a string containing a path to a file,
                 this function will return the base name of the file.
                 If the filename ends in suffix this will also be cut off. */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing error conditions ***\n";
 // zero arguments
 try { var_dump( basename() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

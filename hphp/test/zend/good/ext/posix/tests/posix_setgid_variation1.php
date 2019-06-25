@@ -1,6 +1,6 @@
 <?hh
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Test substituting argument 1 with array values ***\n";
 
 $index_array = array(1, 2, 3);

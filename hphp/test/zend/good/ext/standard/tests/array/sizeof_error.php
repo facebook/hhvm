@@ -7,7 +7,7 @@
  */
 
 // Calling sizeof() with zero and more than expected arguments .
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sizeof() : error conditions ***\n";
 
 echo "-- Testing sizeof() with zero arguments --\n";

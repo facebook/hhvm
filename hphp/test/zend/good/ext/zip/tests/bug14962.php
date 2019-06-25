@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $dir = dirname(__FILE__);
 $file = '__tmp14962.txt';
 $fullpath = $dir . '/' . $file;

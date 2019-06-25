@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = str_repeat("a", 10 * 1024 * 1024);
 
 eval("class $a {}");

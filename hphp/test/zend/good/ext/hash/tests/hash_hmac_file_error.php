@@ -5,7 +5,7 @@
  * Source code: ext/hash/hash.c
  * Alias to functions:
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing hash() : error conditions ***\n";
 
 $file = dirname(__FILE__) . "hash_file.txt";

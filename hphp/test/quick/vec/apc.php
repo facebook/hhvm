@@ -81,7 +81,7 @@ function write($count) {
   apc_store("val11", vec[new Sleep(123)]);
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
   $count = get_count();
   echo "Count: $count\n";
   read();

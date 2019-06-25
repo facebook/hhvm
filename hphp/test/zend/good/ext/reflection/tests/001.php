@@ -14,7 +14,7 @@ class ReflectionClassEx extends ReflectionClass
         return $res;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $r = new ReflectionClassEx('ReflectionClassEx');
 
 $exp = array (

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $a = array(0,1);
 $b=[2];
 foreach($a as $b[0]) {

@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(filter_id("stripped"));
 var_dump(filter_id("string"));
 var_dump(filter_id("url"));

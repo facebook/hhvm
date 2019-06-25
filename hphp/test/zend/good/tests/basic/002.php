@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $post = $_POST;
 parse_str("a=Hello+World", &$post);
 $_POST = $post;

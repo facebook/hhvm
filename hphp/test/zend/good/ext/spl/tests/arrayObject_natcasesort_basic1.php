@@ -5,7 +5,7 @@
  * Source code: ext/spl/spl_array.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ArrayObject::natcasesort() : basic functionality ***\n";
 
 $ao1 = new ArrayObject(array('boo10','boo1','boo2','boo22','BOO5'));

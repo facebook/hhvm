@@ -8,7 +8,7 @@
  * Check the position of the internal array pointer after calling array_merge().
  * This test is also passing more than two arguments to array_merge().
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_merge() : usage variations ***\n";
 
 $arr1 = array ('zero', 'one', 'two');

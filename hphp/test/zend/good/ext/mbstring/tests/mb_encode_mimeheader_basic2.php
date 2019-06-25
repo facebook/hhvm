@@ -8,7 +8,7 @@
 /*
  * Test mb_encode_header() with different strings
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_encode_mimeheader() : basic2 ***\n";
 
 //All strings are the same when displayed in their respective encodings

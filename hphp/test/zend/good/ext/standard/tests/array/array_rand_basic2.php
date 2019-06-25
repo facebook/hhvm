@@ -7,7 +7,7 @@
 /*
  * Test array_rand() when associative array is passed to 'input' argument
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_rand() : with associative array ***\n";
 
 

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 echo hash('adler32', ''), "\n";
 echo hash('adler32', 'a'), "\n";
 echo hash('adler32', 'abc'), "\n";

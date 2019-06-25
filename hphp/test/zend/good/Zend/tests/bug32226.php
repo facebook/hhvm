@@ -16,7 +16,7 @@ class A
                 throw new Exception();
         }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 try
 {
 $a = new A();

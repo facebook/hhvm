@@ -5,7 +5,7 @@ function CommaSeparatedList($a, $b) {
     else
         return $a.','.$b;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $arr1 = array(1,2,3);
 $arr2 = array(1);
 

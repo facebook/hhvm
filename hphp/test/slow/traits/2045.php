@@ -11,7 +11,7 @@ trait foo {
 class bar {
  use foo;
  }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing class_uses() : basic ***\n";
 
 

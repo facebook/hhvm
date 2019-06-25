@@ -4,7 +4,7 @@
  * Source code: ext/standard/syslog.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing syslog() : error conditions ***\n";
 
 

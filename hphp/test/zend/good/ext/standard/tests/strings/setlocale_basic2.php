@@ -34,7 +34,7 @@ function list_system_locales() {
 
 /* Collect existing system locales and prepare a list of locales that can be used as
    input to setlocale() */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing setlocale() with an array containing list of locales ***\n";
 
 //set of locales to be used

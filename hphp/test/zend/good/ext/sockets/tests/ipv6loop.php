@@ -42,4 +42,4 @@
     socket_close($socket);
     socket_close($server);
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

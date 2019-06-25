@@ -19,7 +19,7 @@ class MyClass extends Base
 {
     use ATrait;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $i = new Base();
 $i->setAttribute();
 

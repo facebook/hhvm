@@ -8,7 +8,7 @@
 * Test behaviour of shuffle() function when arrays having different
 * types of values, are passed to 'array_arg' argument
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing shuffle() : arrays with diff types of values ***\n";
 
 // initialise different arrays

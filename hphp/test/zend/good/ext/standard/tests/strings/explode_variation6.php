@@ -12,7 +12,7 @@ function test_explode($delim, $string, $limit)
         var_dump(bin2hex($v));
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing explode() function: misc tests ***\n";
 
 $str = "one\x00two\x00three\x00four";

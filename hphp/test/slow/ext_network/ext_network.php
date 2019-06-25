@@ -24,7 +24,7 @@ function get_addresses($host) {
   }
   return $r;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(gethostname() != false);
 
 var_dump(strpos(gethostbyaddr("127.0.0.1"), 'localhost'));

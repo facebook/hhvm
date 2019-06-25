@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $original = 'aaaaaaaaaaaaaaa';
 $packed=gzdeflate($original);
 echo strlen($packed)." ".strlen($original)."\n";

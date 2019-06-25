@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 echo "Testing NAN:\n";
 echo "NAN= ";
 var_dump(NAN);

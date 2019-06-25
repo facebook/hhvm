@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 for ($i = -1; $i < 10; $i++) {
 	var_dump(gmp_strval(gmp_jacobi(($i*$i)-1, 3)));
 }

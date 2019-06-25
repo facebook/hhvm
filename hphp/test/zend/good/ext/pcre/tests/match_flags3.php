@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(preg_match('', '', &$match, 0xfff));
 
 var_dump(preg_match('/\d+/', '123 456 789 012', &$match, 0, -8));

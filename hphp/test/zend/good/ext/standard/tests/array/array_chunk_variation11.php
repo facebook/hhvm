@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $array = array (0 => 0, 3 => 2);
 
 var_dump ($array);

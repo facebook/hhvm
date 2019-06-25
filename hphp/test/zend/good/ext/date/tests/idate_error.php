@@ -4,7 +4,7 @@
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing idate() : error conditions ***\n";
 
 echo "\n-- Testing idate() function with Zero arguments --\n";

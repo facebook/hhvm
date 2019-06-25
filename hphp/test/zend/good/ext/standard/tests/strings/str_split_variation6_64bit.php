@@ -10,7 +10,7 @@
 /*
 * passing different integer values for 'split_length' argument to str_split()
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing str_split() : different intger values for 'split_length' ***\n";
 //Initialise variables
 $str = 'This is a string with 123 & escape char \t';

@@ -4,6 +4,6 @@
   $uname = posix_uname();
   unset($uname['domainname']);
   print_r($uname);
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "===DONE====";
 }

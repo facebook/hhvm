@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $image = imagecreatetruecolor(180, 30);
 
 // Writes the text and apply a gaussian blur on the image

@@ -3,7 +3,7 @@
  * Description: Get the size of an image as 4-element array
  * Source code: ext/standard/image.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $imagetype_filenames = array(
       // GIF file
       "GIF image file" => "200x100.gif",

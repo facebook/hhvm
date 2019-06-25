@@ -15,7 +15,7 @@ class sample
     return "Object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sprintf() : with unexpected values for format argument ***\n";
 
 // initialing required variables

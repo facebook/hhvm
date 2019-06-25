@@ -3,7 +3,7 @@
  * Description: Convert a quoted-printable string to an 8 bit string
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing quoted_printable_decode() : error conditions ***\n";
 
 echo "\n-- Testing quoted_printable_decode() function with no arguments --\n";

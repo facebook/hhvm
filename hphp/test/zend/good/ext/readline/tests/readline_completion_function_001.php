@@ -1,7 +1,7 @@
 <?hh
 
 function foo() { }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $data = array(
     'foo',
     'strtolower',

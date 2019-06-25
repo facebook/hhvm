@@ -14,6 +14,6 @@ class A {
 class B extends A {
     protected static $test = "Test B";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo B::test();
 }

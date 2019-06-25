@@ -2,7 +2,7 @@
 /*
 * proto array preg_split(string pattern, string subject [, int limit [, int flags]])
 * Function is implemented in ext/pcre/php_pcre.c */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $string = 'this is a_list: value1, Test__, string; Hello, world!_(parentheses)';
 var_dump(preg_split('/[:,;\(\)]/', $string, -1, PREG_SPLIT_NO_EMPTY)); //parts of $string separated by : , ; ( or ) are put into an array.
 var_dump(preg_split('/:\s*(\w*,*\s*)+;/', $string)); //all text between : and ; is removed

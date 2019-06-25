@@ -14,6 +14,6 @@ class C extends B {
     public function __construct() {
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "okey";
 }

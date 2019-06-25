@@ -4,7 +4,7 @@
 */
 
 /* Try deleting a file which is already deleted */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
 // temp file used

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $ipv6_test = array(
     "::127.0.0.1"                    => true,
     "FF01::101:127.0.1"             => false,

@@ -1,6 +1,6 @@
 <?hh
 /* $Id$ */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $xmlstring = '<TEI.2>hello</TEI.2>';
 $relaxngfile = dirname(__FILE__) . '/relaxNG.rng';
 $file = dirname(__FILE__) . '/_007.xml';

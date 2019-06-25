@@ -23,7 +23,7 @@ class MyClass3 {
     return $this->sayHello();
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new MyClass1;
 $a->sayHello();
 $a = new MyClass2;

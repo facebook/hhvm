@@ -6,6 +6,6 @@
    Have to find some small strings to truly reproduce
    the problem, this example being not a problem
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo dechex(crc32("platform independent")) . "\n";
 }

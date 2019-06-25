@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $regex = new MongoRegex('//nope');
 var_dump($regex->regex);
 var_dump($regex->flags);

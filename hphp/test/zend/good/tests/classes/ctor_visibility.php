@@ -48,7 +48,7 @@ class DerivedPriv extends TestPriv
         new DerivedPriv;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 Derived::f();
 
 TestPriv::f();

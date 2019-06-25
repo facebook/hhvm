@@ -28,7 +28,7 @@ function callback_without_ret($arr1)
 {
   echo "callback_without_ret called\n";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_map() : callback with diff return value ***\n";
 
 $array1 = array(1, 2, 3);

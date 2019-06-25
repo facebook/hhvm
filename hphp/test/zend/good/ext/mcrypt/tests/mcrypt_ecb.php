@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $key      = "0123456789012345";
 $secret   = "PHP Testfest 2008";
 $cipher   = MCRYPT_RIJNDAEL_128;

@@ -7,7 +7,7 @@ function fib() {
         list($a, $b) = [$b, $a + $b];
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 foreach (fib() as $n) {
     if ($n > 1000) break;
 

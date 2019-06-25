@@ -7,7 +7,7 @@
 /* Test get_html_translation_table() when table is specified as HTML_ENTITIES */
 
 //set locale to en_US.UTF-8
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 setlocale(LC_ALL, "en_US.UTF-8");
 
 echo "*** Testing get_html_translation_table() : basic functionality ***\n";

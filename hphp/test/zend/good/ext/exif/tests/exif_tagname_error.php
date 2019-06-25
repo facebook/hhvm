@@ -4,7 +4,7 @@
  * Description: Get the header name for an index
  * Source code: ext/exif/exif.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing exif_tagname() : error conditions ***\n";
 
 echo "\n-- Testing exif_tagname() function with no arguments --\n";

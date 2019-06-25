@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $inputstr = file_get_contents(__DIR__ . "/bug74651.pem");
 $pub_key_id = openssl_get_publickey($inputstr);
 var_dump($pub_key_id);

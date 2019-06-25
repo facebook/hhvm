@@ -1,6 +1,6 @@
 <?hh
 // run this test in ext/standard/tests (see bug #64714)
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 chdir(__DIR__); // ensure in ext/standard/tests/file
 chdir('..'); // move up to ext/standard/tests
 

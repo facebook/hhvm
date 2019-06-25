@@ -6,7 +6,7 @@
 
 /* Testing fputcsv() to write to a file when default enclosure value and delimiter
    of two chars is provided and file is opened in read only mode */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fputcsv() : with enclosure & delimiter of two chars and file opened in read mode ***\n";
 
 /* the array is with three elements in it. Each element should be read as 

@@ -19,7 +19,7 @@ trait HelloWorld {
 class MyHelloWorld {
    use HelloWorld;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 error_reporting(E_ALL);
 
 $o = new MyHelloWorld();

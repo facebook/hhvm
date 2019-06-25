@@ -16,7 +16,7 @@ class B extends A
         }
     }
 };
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $x = new B;
 $x->go();
 }

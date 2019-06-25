@@ -16,6 +16,6 @@ class Test
        var_export(self::$array);
    }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $test = new Test();
 }

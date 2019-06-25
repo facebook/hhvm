@@ -10,7 +10,7 @@
  * 2. correspond to character codes recognised as hexadecimal digits (see variation2)
  *    referred to as 'correct' integers below
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_xdigit() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");

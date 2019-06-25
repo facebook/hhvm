@@ -7,7 +7,7 @@
 /*
  * Testing stripslashes() with strings
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing stripslashes() : basic functionality ***\n";
 
 // Initialize all required variables

@@ -5,7 +5,7 @@ function gen(array $array) {
         yield $value;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $gen = gen(['Foo', 'Bar']);
 $gen->next();
 var_dump($gen->current());

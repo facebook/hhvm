@@ -20,7 +20,7 @@ function test4(\Exception $e) {
 function test5(\bar $bar) {
         echo "bug\n";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $x = new bar();
 $y = new \Exception();
 test1($x);

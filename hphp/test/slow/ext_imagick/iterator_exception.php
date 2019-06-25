@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $magick = new Imagick('magick:rose');
 $iterator = new ImagickPixelIterator($magick);
 

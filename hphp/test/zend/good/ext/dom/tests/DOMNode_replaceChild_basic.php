@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $document = new DOMDocument();
 $document->loadXML('<?xml version="1.0" encoding="utf-8"?>
 <root><foo><bar/><baz/></foo><spam><eggs/><eggs/></spam></root>');

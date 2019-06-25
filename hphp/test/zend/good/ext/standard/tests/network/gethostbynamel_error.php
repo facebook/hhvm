@@ -4,7 +4,7 @@
  * Source code: ext/standard/dns.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing gethostbynamel() : error conditions ***\n";
 
 // Zero arguments

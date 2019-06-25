@@ -10,7 +10,7 @@
 * to both $arr1 and $arr2 argument.
 * Optional argument takes the same value as that of $arr1
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_intersect_assoc() : passing two dimensional array to both \$arr1 and \$arr2 arguments ***\n";
 
 // two dimensional arrays for $arr1 and $arr2 argument

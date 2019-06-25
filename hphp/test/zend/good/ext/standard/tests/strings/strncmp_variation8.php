@@ -5,7 +5,7 @@
 */
 
 /* Test strncmp() function with single quoted strings for 'str1', 'str2' */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Test strncmp() function: with single quoted strings ***\n";
 $strings = array(
   'Hello, World',

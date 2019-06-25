@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $bad_utf8 = quoted_printable_decode('=B0');
 
 json_encode($bad_utf8);

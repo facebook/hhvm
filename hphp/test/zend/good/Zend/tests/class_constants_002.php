@@ -11,7 +11,7 @@ function foo($v = test::val) {
 function bar($b = NoSuchClass::val) {
     var_dump($b);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 foo();
 foo(5);
 

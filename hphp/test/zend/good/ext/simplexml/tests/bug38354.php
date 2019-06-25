@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $xml = simplexml_load_string(
 '<code>
 	<a href="javascript:alert(\'1\');"><strong>Item Two</strong></a>

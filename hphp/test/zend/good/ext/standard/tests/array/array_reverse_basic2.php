@@ -7,7 +7,7 @@
 /*
  * Testing array_reverse() with associative array for $array argument
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_reverse() : basic functionality ***\n";
 
 // Initialise the array

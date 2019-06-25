@@ -9,7 +9,7 @@
 /*
 * Testing strspn() : with varying mask and default start and len arguments
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strspn() : with different mask strings and default start and len arguments ***\n";
 
 // initialing required variables

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $ta = array(1, 2, 3);
 $ta[NULL] = "Null Value";
 

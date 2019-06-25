@@ -3,7 +3,7 @@ class Foo {
     public function bar(Foo $foo, $bar = 'bar') {
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $class = new ReflectionClass('Foo');
 $method = $class->getMethod('bar');
 

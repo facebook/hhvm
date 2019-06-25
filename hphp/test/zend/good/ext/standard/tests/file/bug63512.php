@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $array = parse_ini_string('
 		int = 123
 		constant = INSTALL_ROOT

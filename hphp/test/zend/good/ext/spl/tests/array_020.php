@@ -32,7 +32,7 @@ class ArrayIteratorEx extends ArrayIterator
         return ArrayIterator::next();
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $ar = new ArrayIteratorEx(array(1,2));
 foreach($ar as $k => $v)
 {

@@ -4,6 +4,6 @@
   $pid = posix_getpid();
 
   var_dump($pid);
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "===DONE====";
 }

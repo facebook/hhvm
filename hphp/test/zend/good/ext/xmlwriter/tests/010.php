@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file = dirname(__FILE__).'/010.tmp';
 
 $xw = xmlwriter_open_uri($file);

@@ -16,7 +16,7 @@ function test_me($title,$expect,$text1,$text2,$cost1=0,$cost2=0,$cost3=0) {
 
     return 1;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $n=0;
 
 $n += test_me("equal"      , 0, "12345", "12345");

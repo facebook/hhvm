@@ -10,7 +10,7 @@
  * 2. $array_arg is a reference to another array
  * 3. $array_arg is passed by reference
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing rsort() : variation ***\n";
 
 $value1 = 100;

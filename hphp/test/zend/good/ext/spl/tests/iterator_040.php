@@ -7,7 +7,7 @@ class MyRecursiveFilterIterator extends RecursiveFilterIterator
         return true;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $ar = array(1, array(21, 22), 3);
 $it = new RecursiveArrayIterator($ar);
 $it = new MyRecursiveFilterIterator($it);

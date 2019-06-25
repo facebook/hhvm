@@ -4,7 +4,7 @@
  * Description: Format a number with grouped thousands
  * Source code: ext/standard/string.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing number_format() : basic functionality ***\n";
 
 $values = array(1234.5678,

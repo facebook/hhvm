@@ -7,7 +7,7 @@
 /*
  * Pass different strings to ctype_alnum to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_alnum() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C"); 

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $csr = "-----BEGIN CERTIFICATE-----
 MIIEKzCCAxOgAwIBAgICAtUwDQYJKoZIhvcNAQEFBQAwgewxFjAUBgNVBC0DDQBT
 UFI5NjEyMTdOSzkxETAPBgNVBAcTCENveW9hY+FuMQswCQYDVQQIEwJERjELMAkG

@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $filename = dirname(__FILE__)."/ftruncate.dat";
 
 file_put_contents($filename, "some test data inside");

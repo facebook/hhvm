@@ -5,7 +5,7 @@
 */
 
 /* Test copy() function: Trying to create copy of links */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
 echo "*** Testing copy() with symlink and hardlink ***\n";

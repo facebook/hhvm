@@ -10,7 +10,7 @@ class testClass {
       return "testClass";
    }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fpassthru() : usage variations ***\n";
 error_reporting(E_ALL & ~E_NOTICE);
 

@@ -22,7 +22,7 @@ class C5 extends C4 {
 }
 interface I1 {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "T1:\n";
 var_dump(class_uses('T1'));
 $rt1 = new ReflectionClass('T1');

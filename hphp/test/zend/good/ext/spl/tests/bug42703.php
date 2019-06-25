@@ -16,7 +16,7 @@ class BlaIterator implements Iterator
 
     public function key() { }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $it = new BlaIterator();
 $itit = new IteratorIterator($it);
 

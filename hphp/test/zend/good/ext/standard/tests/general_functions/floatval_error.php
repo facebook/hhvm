@@ -2,7 +2,7 @@
 /* Prototype: float floatval( mixed $var );
  * Description: Returns the float value of var.
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing floatval() and doubleval() : error conditions ***\n";
 
 

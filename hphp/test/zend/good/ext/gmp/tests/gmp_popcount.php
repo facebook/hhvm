@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(gmp_popcount(-1));
 var_dump(gmp_popcount(0));
 var_dump(gmp_popcount(12123));

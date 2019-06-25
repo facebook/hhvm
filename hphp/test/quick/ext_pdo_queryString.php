@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $tmp_sqllite = tempnam('/tmp', 'vmpdotest');
 $source = "sqlite:$tmp_sqllite";
 $dbh = new PDO($source);

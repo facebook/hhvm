@@ -7,7 +7,7 @@
 /*
  * Pass an unknown encoding to iconv_substr() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing iconv_substr() : error conditions ***\n";
 
 $str = 'Hello, world';

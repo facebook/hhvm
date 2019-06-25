@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 date_default_timezone_set('Europe/Berlin');
 $from = new DateTime();
 $from->setTime(0, 0, 0);

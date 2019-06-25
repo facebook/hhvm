@@ -3,7 +3,7 @@
  * Description: Return array with key <-> value flipped 
  * Source code: ext/standard/array.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_flip() : error conditions ***\n";
 
 // Zero arguments

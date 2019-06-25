@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $small = imagecreatetruecolor(10, 10);
 $c1 = imagecolorallocatealpha($small, 255,0,0,50);
 imagecolortransparent($small, 0);

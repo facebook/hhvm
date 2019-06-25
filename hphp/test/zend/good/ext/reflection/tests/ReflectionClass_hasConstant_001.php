@@ -6,7 +6,7 @@ class C {
 class D extends C {
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $rc = new ReflectionClass("C");
 echo "Check existing constant: ";
 var_dump($rc->hasConstant("myConst"));

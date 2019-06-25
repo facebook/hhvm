@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $a = new stdClass();
 
 $array = array(array('z',$a),array('q','s'));

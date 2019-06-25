@@ -1,7 +1,7 @@
 <?hh
 
 class B { public function __wakeup() { var_dump('a'); } }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $serialized_strs = array(
   'O:1:"B":0:{}',
   'V:1:"B":0:{}',

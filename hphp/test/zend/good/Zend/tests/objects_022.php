@@ -17,7 +17,7 @@ class foo extends bar {
         var_dump($obj);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $foo = new foo;
 $foo->testFoo(new foo);
 $foo->testBar(new bar);

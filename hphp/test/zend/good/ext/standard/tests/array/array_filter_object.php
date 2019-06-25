@@ -71,7 +71,7 @@ function always_false($input)
 {
   return false;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_filter() : object functionality ***\n";
 
 // 'input' array containing objects as elements

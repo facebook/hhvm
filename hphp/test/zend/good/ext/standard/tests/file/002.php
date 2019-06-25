@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $data = <<<EOD
 blah blah blah blah blah blah blah
 blah blah blah blah blah blah blah

@@ -36,7 +36,7 @@ class ChildClass extends ParentClass
     return $n;
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_map() : class methods as callback function ***\n";
 
 $arr1 = array(1, 5, 7);

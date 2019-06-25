@@ -13,7 +13,7 @@ class bar implements baz {
     use foo;
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 new bar;
 print "OK\n";
 }

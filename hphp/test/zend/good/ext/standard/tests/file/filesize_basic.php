@@ -5,7 +5,7 @@
  *              (and generates an error of level E_WARNING) in case of an error.
  */
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing size of files and directories with filesize() ***\n"; 
 
 $file_path = dirname(__FILE__);

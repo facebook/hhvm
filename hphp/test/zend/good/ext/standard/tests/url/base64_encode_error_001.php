@@ -4,7 +4,7 @@
  * Source code: ext/standard/base64.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing base64_encode() : error conditions - wrong number of args ***\n";
 
 // Zero arguments

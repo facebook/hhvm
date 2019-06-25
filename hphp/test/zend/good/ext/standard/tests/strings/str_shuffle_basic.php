@@ -7,7 +7,7 @@
 /*
  * Testing str_shuffle() : basic functionality
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing str_shuffle() : basic functionality ***\n";
 
 // Initialize all required variables

@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = '';
 var_dump(str_word_count(""));
 var_dump(str_word_count("", -1));

@@ -7,7 +7,7 @@
 /*
  * Unset first element of an array and test behaviour of reset()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing reset() : usage variations ***\n";
 
 $array = array('a', 'b', 'c');

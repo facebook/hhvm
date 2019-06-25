@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $array = array();
 $newstring = "";
 $string = str_repeat('This is a teststring.', 50);

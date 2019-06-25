@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 date_default_timezone_set('Europe/Oslo');
 echo strtotime("2005-06-18 22:15:44"), "\n";
 

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $json = '{"largenum":123456789012345678901234567890}';
 $x = json_decode($json);
 var_dump($x->largenum);

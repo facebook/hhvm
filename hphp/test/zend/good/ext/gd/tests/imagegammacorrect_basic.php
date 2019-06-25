@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $image = imagecreatetruecolor(150, 150);
 
 $grey = imagecolorallocate($image,6,6,6);

@@ -7,7 +7,7 @@
 /*
  * Check position of internal array pointer after calling array_slice()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_slice() : usage variations ***\n";
 
 $input = array ('one' => 'un', 'two' => 'deux', 23 => 'twenty-three', 'zero');

@@ -8,7 +8,7 @@
 /*
  * Test array_diff with less than the expected number of arguments 
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff() : error conditions ***\n";
 // Zero arguments
 echo "\n-- Testing array_diff() function with zero arguments --\n";

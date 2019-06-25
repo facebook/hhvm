@@ -6,7 +6,7 @@ function gen() {
     // trigger a generator
     yield;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $generator = gen();
 var_dump($generator instanceof Generator);
 }

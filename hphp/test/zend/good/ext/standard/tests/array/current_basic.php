@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of current()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing current() : basic functionality ***\n";
 
 $array = array ('zero', 'one', 'two', 'three' => 3);

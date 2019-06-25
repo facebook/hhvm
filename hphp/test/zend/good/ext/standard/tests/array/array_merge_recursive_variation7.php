@@ -8,7 +8,7 @@
  * Testing the functionality of array_merge_recursive() by passing
  * array having reference variables.
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_merge_recursive() : array with reference variables for \$arr1 argument ***\n";
 
 $value1 = 10;

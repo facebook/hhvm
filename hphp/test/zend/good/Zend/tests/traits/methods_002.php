@@ -16,7 +16,7 @@ class bar {
     use foo;
     use baz;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o = new bar;
 var_dump(clone $o);
 }

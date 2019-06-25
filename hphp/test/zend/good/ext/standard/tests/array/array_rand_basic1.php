@@ -7,7 +7,7 @@
 /*
  * Test array_rand() when array with default keys is passed to 'input' argument
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_rand() : array with default keys ***\n";
 
 

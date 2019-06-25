@@ -11,7 +11,7 @@ class count_class implements Countable {
     return 3;
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing basic functionality of count() function ***\n";
 print "-- Testing NULL --\n";
 $arr = NULL;

@@ -27,7 +27,7 @@ class D extends A {
                 echo __METHOD__ . "\r\n";
         }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new A();
 $b = new B();
 $c = new C();

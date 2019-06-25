@@ -43,7 +43,7 @@ class a implements IteratorAggregate {
         return new ai();
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $array = new a();
 
 foreach ($array as $property => $value) {

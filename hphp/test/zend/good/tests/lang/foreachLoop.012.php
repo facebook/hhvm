@@ -29,7 +29,7 @@ function withRefValue($elements, $transform) {
     var_dump($a);
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "\nPopping elements off end of an unreferenced array";
 $transform = 'array_pop(&$a);';
 withRefValue(1, $transform);

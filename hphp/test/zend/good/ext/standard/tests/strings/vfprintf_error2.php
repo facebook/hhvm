@@ -6,7 +6,7 @@
  */
 
 // Open handle
-<<__EntryPoint>> function main() { $file = 'vfprintf_error2.phpt.txt';
+<<__EntryPoint>> function main(): void { $file = 'vfprintf_error2.phpt.txt';
 $fp = fopen( $file, "a+" );
 
 echo "\n-- Testing vfprintf() function with less than expected no. of arguments --\n";

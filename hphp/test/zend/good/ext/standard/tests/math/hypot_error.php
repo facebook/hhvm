@@ -3,7 +3,7 @@
  * Description: Calculate the length of the hypotenuse of a right-angle triangle.
  * Source code: ext/standard/math.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing hypot() : error conditions ***\n";
 
 echo "\n-- Testing hypot() function with less than expected no. of arguments --\n";

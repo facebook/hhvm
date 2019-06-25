@@ -6,7 +6,7 @@
 
 /* Test copy() function: Trying to create copy of source file 
      into different destination dir paths given in various notations */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing copy() function: copying data file across directories ***\n";
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $base_dir = $file_path."/copy_variation16";

@@ -7,7 +7,7 @@
 /*
  * test ucwords() with different string prepared using heredoc
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ucwords() : usage variations ***\n";
 
 // Null here doc string

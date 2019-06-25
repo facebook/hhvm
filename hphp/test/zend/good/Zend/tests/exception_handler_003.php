@@ -10,7 +10,7 @@ class test {
         var_dump(get_class($e)." thrown!");
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new test;
 $a->foo();
 throw new Exception();

@@ -53,7 +53,7 @@ function try_unserialize($val) {
   }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
   roundtrip(dict[]);
   roundtrip(dict[1 => 'a', 2 => 'b', 3 => 'c']);
   roundtrip(dict['a' => 1, 'b' => 2, 'c' => 3]);

@@ -4,7 +4,7 @@
  *              when the value of number is close to zero.
  * Source code: ext/standard/math.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing expm1() : error conditions ***\n";
 
 echo "\n-- Testing expm1() function with less than expected no. of arguments --\n";

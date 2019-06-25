@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(filter_var("qwertyu123456dfghj", FILTER_SANITIZE_NUMBER_INT));
 var_dump(filter_var("asd123123.asd123.23", FILTER_SANITIZE_NUMBER_INT));
 var_dump(filter_var("123,23", FILTER_SANITIZE_NUMBER_INT));

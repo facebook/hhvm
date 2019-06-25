@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $ctx = stream_context_create();
 var_dump($ctx);
 var_dump(stream_context_get_params($ctx));

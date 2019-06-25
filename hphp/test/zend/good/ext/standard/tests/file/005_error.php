@@ -16,7 +16,7 @@
    Description: Attempts to set the access and modification times of the file
      named in the filename parameter to the value given in time.
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing error conditions ***\n";
 
 echo "\n-- Testing with  Non-existing files --";

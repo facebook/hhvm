@@ -4,7 +4,7 @@
  * Source code: ext/mbstring/php_mbregex.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_ereg_replace() : error conditions ***\n";
 
 //Test mb_ereg_replace with one more than the expected number of arguments

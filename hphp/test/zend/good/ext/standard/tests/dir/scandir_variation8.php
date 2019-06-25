@@ -8,7 +8,7 @@
  * Pass a directory containing files with different types of names to test how scandir()
  * reads them
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing scandir() : usage variations ***\n";
 
 $dir_path = dirname(__FILE__) . "/scandir_variation8/";

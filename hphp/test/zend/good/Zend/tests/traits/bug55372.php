@@ -16,7 +16,7 @@ trait testTrait {
 class foo {
     use testTrait;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $x = new foo;
 $x->testMethod();
 }

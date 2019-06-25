@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 var_dump("9223372036854775807" == "9223372036854775808");
 var_dump("-9223372036854775808" == "-9223372036854775809");
 var_dump("0x7fffffffffffffff" == "9223372036854775808");

@@ -15,7 +15,7 @@ class classA
     return "abs";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing abs() : usage variations ***\n";
 
 //get an unset variable

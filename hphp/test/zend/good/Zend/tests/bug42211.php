@@ -12,7 +12,7 @@ class B extends A {
     static protected $protectedBar = "ok";
     static private $privateBar = "fail";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new A();
 $a->foo();
 $b = new B();

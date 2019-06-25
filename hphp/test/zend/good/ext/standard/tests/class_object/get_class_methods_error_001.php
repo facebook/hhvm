@@ -8,7 +8,7 @@
 /*
  * Test wrong number of arguments.
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing get_class_methods() : error conditions ***\n";
 
 // Zero arguments

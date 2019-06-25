@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo date("m/d/Y H:i:s T", -2145888000)."\n";
 
 echo strtotime("Jan 1 1902")."\n";

@@ -40,7 +40,7 @@ class derived extends base
     print_r($this);
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $t = new derived;
 $t->test();
 unset($t);

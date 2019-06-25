@@ -12,7 +12,7 @@ class Node {
 }
 
 const MAX = 16;
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 for ($n = 0; $n < 20; $n++) {
     $top = new Node();
     for ($i=0 ; $i<MAX ; $i++) {

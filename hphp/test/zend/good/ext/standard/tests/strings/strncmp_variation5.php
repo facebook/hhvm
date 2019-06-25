@@ -12,7 +12,7 @@ class sample  {
   return "object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Test strncmp() function: by supplying all types for 'len' ***\n";
 
 /* definition of required variables */

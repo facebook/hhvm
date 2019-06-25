@@ -3,7 +3,7 @@
  * Description: Wraps buffer to selected number of characters using string break char
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing wordwrap() : error conditions ***\n";
 
 // Zero argument

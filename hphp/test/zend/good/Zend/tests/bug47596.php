@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 echo "ok\n";
 // comment comment comment comment comment comment comment comment comment
 // comment comment comment comment comment comment comment comment comment

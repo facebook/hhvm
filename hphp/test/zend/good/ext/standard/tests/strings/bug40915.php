@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $str = (binary)"a\000z";
 
 var_dump(addslashes($str));

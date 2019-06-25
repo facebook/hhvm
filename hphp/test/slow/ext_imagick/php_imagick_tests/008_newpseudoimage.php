@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $im = new Imagick();
 $im->newPseudoImage(100, 100, "XC:red");
 var_dump($im->getImageGeometry());

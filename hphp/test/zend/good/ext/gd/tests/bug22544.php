@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $dest = dirname(realpath(__FILE__)) . '/bug22544.png';
 @unlink($dest);
 $image = imageCreateTruecolor(640, 100);

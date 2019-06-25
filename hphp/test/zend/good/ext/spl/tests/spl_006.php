@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $it = new AppendIterator();
 $it->append(new ArrayIterator(array(1,2)));
 $it->append(new ArrayIterator(array(2,3)));

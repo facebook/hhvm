@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "Load document\n";
 $doc = new DOMDocument;
 $doc->load(dirname(__FILE__)."/book.xml");

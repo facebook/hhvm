@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 echo addcslashes("", "")."\n";
 echo addcslashes("", "burp")."\n";
 echo addcslashes("kaboemkara!", "")."\n";

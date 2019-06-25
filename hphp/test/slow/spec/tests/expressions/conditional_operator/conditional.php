@@ -7,7 +7,7 @@
 */
 
 function f($a) { echo "inside f($a)\n"; return 0;}
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 error_reporting(-1);
 
 // check for even integer values by inspecting the low-order bit

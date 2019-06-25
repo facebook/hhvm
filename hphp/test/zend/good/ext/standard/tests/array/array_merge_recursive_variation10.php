@@ -8,7 +8,7 @@
  * Testing the functionality of array_merge_recursive() by passing 
  * two dimensional arrays for $arr1 argument.
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_merge_recursive() : two dimensional array for \$arr1 argument ***\n";
 
 // initialize the 2-d array

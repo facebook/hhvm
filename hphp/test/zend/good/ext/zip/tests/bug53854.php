@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(ZipArchive::CM_DEFAULT);
 var_dump(ZipArchive::CM_STORE);
 var_dump(ZipArchive::CM_SHRINK);

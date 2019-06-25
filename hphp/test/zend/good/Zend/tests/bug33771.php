@@ -11,7 +11,7 @@ function make_exception_and_change_err_reporting()
     throw new Exception();
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 error_reporting(E_ALL | E_STRICT);
 
 var_dump(error_reporting());

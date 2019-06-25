@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $path = dirname(__FILE__) . "/bug32160.txt";
 var_dump(copy($path, $path));
 chdir(dirname(__FILE__));

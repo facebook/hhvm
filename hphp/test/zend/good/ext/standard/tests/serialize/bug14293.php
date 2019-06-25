@@ -12,7 +12,7 @@ class t
         return array('a','b');
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $t = new t();
 $data = serialize($t);
 echo "$data\n";

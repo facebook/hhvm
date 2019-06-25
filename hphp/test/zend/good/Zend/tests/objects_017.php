@@ -7,6 +7,6 @@ class foo {
 function test() {
     return new foo;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 test()->test = 2;
 }

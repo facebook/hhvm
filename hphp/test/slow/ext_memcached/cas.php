@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $memc = new Memcached();
 $memc->addServer('localhost', '11211');
 

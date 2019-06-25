@@ -11,7 +11,7 @@ function error()
     $a = func_get_args();
     var_dump($a);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 blah (new StdClass);
 echo "ALIVE!\n";
 }

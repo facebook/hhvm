@@ -7,7 +7,7 @@
 /*
  * Test how array_change_key_case() converts keys in multi-dimensional arrays
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_change_key_case() : usage variations ***\n";
 
 $input = array('English' => array('one' => 1, 'two' => 2, 'three' => 3),

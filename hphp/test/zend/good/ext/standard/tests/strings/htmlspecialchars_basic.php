@@ -3,7 +3,7 @@
  * Description: Convert special characters to HTML entities
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing htmlspecialchars() : basic functionality ***\n";
 
 $s1 = "abc<>\"&\n";

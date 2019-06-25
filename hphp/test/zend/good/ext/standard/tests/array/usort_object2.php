@@ -56,7 +56,7 @@ class ChildClass extends AbstractClass
     $this->child_value = $value;
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing usort() : object functionality ***\n";
 
 // Testing uasort with StaticClass objects as elements of 'array_arg'

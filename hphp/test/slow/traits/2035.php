@@ -21,7 +21,7 @@ trait TestTraitIndirect {
 class Indirect {
   use TestTraitIndirect;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo Direct::test()."\n";
 echo IndirectInheritance::test()."\n";
 echo Indirect::test()."\n";

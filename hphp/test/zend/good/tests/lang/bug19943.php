@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $ar = array();
 for ($count = 0; $count < 10; $count++) {
     $ar[$count]        = "$count";

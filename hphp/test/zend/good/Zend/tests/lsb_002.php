@@ -31,7 +31,7 @@ class ChildClass1 extends TestClass {
 }
 
 class ChildClass2 extends TestClass {}
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $testClass = new TestClass();
 $childClass1 = new ChildClass1();
 $childClass2 = new ChildClass2();

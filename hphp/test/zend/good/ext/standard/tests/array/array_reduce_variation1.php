@@ -13,7 +13,7 @@ function oneArg($v) {
 function threeArgs($v, $w, $x) {
   return $v + $w + $x;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_reduce() : variation ***\n";
 
 $array = array(1);

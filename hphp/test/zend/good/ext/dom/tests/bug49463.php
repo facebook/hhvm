@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $doc = new DOMDocument('1.0', 'utf-8');
 $root = $doc->createElementNS('http://purl.org/rss/1.0/','rdf:RDF');
 $doc->appendChild($root);

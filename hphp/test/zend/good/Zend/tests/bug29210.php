@@ -60,7 +60,7 @@ class foo extends test_class {
      }
    }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $object = new test_class;
 $object->test();
 if (is_callable(array($object,'test_func1'))) {

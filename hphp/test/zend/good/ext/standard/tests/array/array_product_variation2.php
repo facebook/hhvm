@@ -4,7 +4,7 @@
  * Source code: ext/standard/array.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_product() : variations ***\n";
 
 echo "\n-- Testing array_product() function with a keyed array array --\n";

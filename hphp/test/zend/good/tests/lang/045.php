@@ -10,7 +10,7 @@ function plop() {
     }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 set_time_limit(1);
 register_shutdown_function("plop");
 

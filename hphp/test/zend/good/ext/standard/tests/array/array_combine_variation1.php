@@ -18,7 +18,7 @@ class classA
     return "Class A object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_combine() : Passing non-array values to \$keys argument ***\n";
 
 // Initialise $values argument

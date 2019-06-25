@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $mc = new Memcached();
 var_dump(Memcached::OPT_HASH_WITH_PREFIX_KEY);
 var_dump($mc->getOption(Memcached::OPT_HASH_WITH_PREFIX_KEY));

@@ -25,7 +25,7 @@ class B extends A {
         echo "forty two\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new A;
 $closure = $a->getClosure();
 $closure();

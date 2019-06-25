@@ -7,7 +7,7 @@ class myHeap extends SplHeap
         throw new Exception('');
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $heap = new myHeap();
 var_dump($heap->current());
 }

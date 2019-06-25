@@ -4,7 +4,7 @@
  *                 user supplied callback function
  * Source code: ext/standard/array.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff_uassoc() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)

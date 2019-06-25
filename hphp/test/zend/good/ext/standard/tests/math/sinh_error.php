@@ -3,7 +3,7 @@
  * proto float sinh(float number)
  * Function is implemented in ext/standard/math.c
 */ 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $arg_0 = 1.0;
 $extra_arg = 1;
 

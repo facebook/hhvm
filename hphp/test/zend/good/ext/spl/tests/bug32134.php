@@ -24,7 +24,7 @@ class myArray extends ArrayIterator
     }
 
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $myArray = new myArray();
 
 $myArray->offsetSet('one', 'one');

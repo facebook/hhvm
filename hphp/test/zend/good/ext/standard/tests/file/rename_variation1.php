@@ -1,7 +1,7 @@
 <?hh
 
 /* creating directory */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 // rename dirs across directories
 echo "\n*** Testing rename() : renaming directory across directories ***\n";

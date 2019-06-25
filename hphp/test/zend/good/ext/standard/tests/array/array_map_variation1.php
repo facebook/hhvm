@@ -8,7 +8,7 @@
 function cb1 ($a) {return array ($a);};
 function cb2 ($a,$b) {return array ($a,$b);};
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_map() : string keys ***\n";
 
 $arr = array("stringkey" => "value");

@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $sxe = simplexml_load_string('<root><node1>1</node1></root>');
 
 $nodes = $sxe->xpath("/root/node2/@test");

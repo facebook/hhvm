@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $korean = "\xED\x95\x9C" . "\xEA\xB5\xAD" . "\xEB\xA7\x90";
 
 $x = new Spoofchecker();

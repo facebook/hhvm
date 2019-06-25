@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $file = dirname(__FILE__) . '/foo.html';
 file_put_contents($file, 'text 0<div class="tested">text 1</div>');
 $handle = fopen($file, 'r');

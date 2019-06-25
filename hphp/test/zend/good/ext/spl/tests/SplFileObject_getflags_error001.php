@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 file_put_contents('SplFileObject_getflags_error001.csv', 'eerste;tweede;derde');
 
 

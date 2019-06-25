@@ -6,7 +6,7 @@ function foo($arg) {
 function bar() {
     throw new Exception("test");
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 error_reporting(E_ALL);
 
 try {

@@ -1,3 +1,3 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 echo bcsqrt("0");
 }

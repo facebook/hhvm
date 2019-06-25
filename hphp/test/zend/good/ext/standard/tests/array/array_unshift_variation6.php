@@ -9,7 +9,7 @@
  * arrays and also sub-arrays within the two-dimensional array for $array argument.
  * The $var argument passed is a fixed value
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_unshift() : two dimensional arrays for \$array argument ***\n";
 
 // initializing $var argument

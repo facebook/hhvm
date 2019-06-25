@@ -4,7 +4,7 @@
  * Keys are used to do more restrictive check 
  * Source code: ext/standard/array.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_intersect_assoc() : error conditions ***\n";
 
 // Zero arguments

@@ -7,4 +7,4 @@ class A {
   public function __construct(static $a) {}
 }
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

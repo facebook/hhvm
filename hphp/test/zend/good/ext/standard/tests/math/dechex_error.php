@@ -3,7 +3,7 @@
  * Description: Returns a string containing a hexadecimal representation of the given number  argument.
  * Source code: ext/standard/math.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing dechex() : error conditions ***\n";
 
 echo "\nIncorrect number of arguments\n"; 

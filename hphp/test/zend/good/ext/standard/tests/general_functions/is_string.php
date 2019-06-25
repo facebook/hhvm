@@ -2,7 +2,7 @@
 /* Prototype: bool is_string ( mixed $var );
  * Description: Finds whether the given variable is a string
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing is_string() with valid string values ***\n";
 // different valid strings 
 

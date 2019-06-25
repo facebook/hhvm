@@ -15,7 +15,7 @@ class classA
         return "HELLO";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_upper() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");

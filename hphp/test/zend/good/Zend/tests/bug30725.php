@@ -7,7 +7,7 @@ class Test implements IteratorAggregate
         throw new Exception();
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 try
 {
     $it = new Test;

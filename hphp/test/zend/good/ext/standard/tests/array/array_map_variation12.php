@@ -7,7 +7,7 @@
 /*
  * Test array_map() by passing buit-in function as callback function
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_map() : built-in function ***\n";
 
 $array1 = array(1, 2, 3);

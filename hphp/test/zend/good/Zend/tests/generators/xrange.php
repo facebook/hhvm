@@ -5,7 +5,7 @@ function xrange($start, $end, $step = 1) {
         yield $i;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 foreach (xrange(10, 20, 2) as $i) {
     var_dump($i);
 }

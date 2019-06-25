@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of rsort()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing rsort() : basic functionality ***\n";
 
 // associative array containing unsorted string values

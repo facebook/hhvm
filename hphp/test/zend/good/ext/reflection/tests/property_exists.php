@@ -51,7 +51,7 @@ class C extends B
         }
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $oA = new A;
 $oA->e = 6;
 

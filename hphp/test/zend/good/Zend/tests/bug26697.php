@@ -6,7 +6,7 @@ function __autoload($name)
     var_dump(class_exists('NotExistingClass'));
     echo __METHOD__ . "($name), done\n";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(class_exists('NotExistingClass'));
 
 echo "===DONE===\n";

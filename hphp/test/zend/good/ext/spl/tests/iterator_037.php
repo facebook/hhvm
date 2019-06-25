@@ -48,7 +48,7 @@ class MyArrayIterator extends ArrayIterator
         return $this->key() . ':' . $this->current();
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $ar = new MyArrayIterator(array(1, 2, 3));
 
 test($ar, CachingIterator::CALL_TOSTRING);

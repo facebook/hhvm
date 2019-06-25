@@ -7,7 +7,7 @@
 /*
 * Testing array_sum() with associative array as 'input' argument
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_sum() : with associative array ***\n";
 
 // array with numeric keys

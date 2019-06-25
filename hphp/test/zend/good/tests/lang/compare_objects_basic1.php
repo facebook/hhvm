@@ -18,7 +18,7 @@ class class5 extends class3{
     private $eee;
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "Simple test for standard compare object handler\n";
 
 // Define a bunch of objects all of which will use standard compare object handler

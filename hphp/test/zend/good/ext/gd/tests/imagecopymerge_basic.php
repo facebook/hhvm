@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $des = imagecreate(120, 120);
 $src = imagecreate(100, 100);
 

@@ -12,7 +12,7 @@ class second extends first {
     }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $t = new first();
 $t->show();
 

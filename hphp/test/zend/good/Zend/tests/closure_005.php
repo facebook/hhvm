@@ -29,7 +29,7 @@ class A {
         echo $this->x."\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new A(3);
 $incer = $a->getIncer(2);
 $printer = $a->getPrinter();

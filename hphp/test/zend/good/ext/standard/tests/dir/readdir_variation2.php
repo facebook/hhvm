@@ -10,7 +10,7 @@
 function mysort($a,$b) {
     return strlen($a) > strlen($b) ? 1 : -1;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing readdir() : usage variations ***\n";
 
 $path = dirname(__FILE__) . '/readdir_variation2';

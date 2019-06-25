@@ -16,7 +16,7 @@ function even($input)
 {
   return ($input % 2 == 0);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_filter() : basic functionality ***\n";
 
 

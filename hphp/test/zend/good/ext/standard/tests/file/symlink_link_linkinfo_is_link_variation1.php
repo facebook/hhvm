@@ -20,7 +20,7 @@ class object_temp {
   }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 // creating temp directory which will contain temp file and links created
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $dirname = "$file_path/symlink_link_linkinfo_is_link_variation1/test/home";

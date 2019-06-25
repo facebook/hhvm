@@ -2,7 +2,7 @@
 /* Prototype: mixed pathinfo ( string $path [, int $options] );
    Description: Returns information about a file path
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing basic functions of pathinfo() ***\n";
 
 $file_path = dirname(__FILE__);

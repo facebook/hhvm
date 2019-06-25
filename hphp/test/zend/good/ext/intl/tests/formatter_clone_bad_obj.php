@@ -3,7 +3,7 @@
 class A extends NumberFormatter {
     function __construct() {}
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new A;
 try {
     $b = clone $a;

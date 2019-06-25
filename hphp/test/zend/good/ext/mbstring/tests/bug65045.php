@@ -1,6 +1,6 @@
 <?hh
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 mb_internal_encoding('UTF-8');
 $str = "\xF0\xA4\xAD".  "\xF0\xA4\xAD\xA2"."\xF0\xA4\xAD\xA2";
 $expected = "\xEF\xBF\xBD"."\xF0\xA4\xAD\xA2"."\xF0\xA4\xAD\xA2";

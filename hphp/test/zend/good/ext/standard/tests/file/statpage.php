@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(getlastmod());
 var_dump(getmyinode());
 var_dump(getmyuid());

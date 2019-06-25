@@ -24,7 +24,7 @@ function test2()
         );
         print_r($arr);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 test();
 test2();
 }

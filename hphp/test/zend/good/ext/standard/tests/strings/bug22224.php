@@ -7,7 +7,7 @@ class foo
     }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new foo();
 
 $arr = array(0=>$a, 1=>$a);

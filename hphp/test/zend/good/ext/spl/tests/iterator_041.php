@@ -77,7 +77,7 @@ class MyArrayIterator extends ArrayIterator
         }
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 MyArrayIterator::test('iterator_to_array');
 MyArrayIterator::test('iterator_count', array(3 => 6));
 

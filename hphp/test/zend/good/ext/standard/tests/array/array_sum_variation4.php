@@ -7,7 +7,7 @@
 /*
 * Checking array_sum() with integer and float array containing duplicate values
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_sum() : array with duplicate values ***\n";
 
 // integer array with duplicate values

@@ -3,7 +3,7 @@
  * proto array array_splice(array input, int offset [, int length [, array replacement]])
  * Function is implemented in ext/standard/array.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_splice() basic operations ***\n";
 echo "test truncation \n";
 $input = array("red", "green", "blue", "yellow");

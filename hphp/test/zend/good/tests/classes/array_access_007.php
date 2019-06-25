@@ -31,7 +31,7 @@ class OverloadedArray implements ArrayAccess {
         var_dump($this->realArray);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new OverloadedArray;
 $a[] = 1;
 $a[1] = 2;

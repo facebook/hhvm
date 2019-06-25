@@ -2,7 +2,7 @@
 /* Prototype:  string tempnam ( string $dir, string $prefix );
    Description: Create file with unique file name.
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing tempnam() error conditions ***\n";
 $file_path = dirname(__FILE__);
 

@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $urls = array();
 $urls[] = "data://text/plain,foo\r\nbar\r\n";
 $urls[] = "data://text/plain,\r\nfoo\r\nbar\r\n";

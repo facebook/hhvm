@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 ob_start();
 ReflectionExtension::export("reflection", true);
 $test = ob_get_clean();

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $i = 1;
 $lambda = function () use ($i) {
     return ++$i;

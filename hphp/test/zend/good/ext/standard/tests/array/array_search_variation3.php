@@ -11,7 +11,7 @@ class array_search_check {
     echo "Public function\n";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sub-arrays with array_search() ***\n";
 $sub_array = array (
   "one",

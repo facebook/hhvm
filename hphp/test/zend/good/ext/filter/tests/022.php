@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(filter_var("a@b.c", FILTER_SANITIZE_EMAIL));
 var_dump(filter_var("a[!@#$%^&*()@a@#$%^&*(.com@#$%^&*(", FILTER_SANITIZE_EMAIL));
 var_dump(filter_var("white space here \ \ \" som more", FILTER_SANITIZE_EMAIL));

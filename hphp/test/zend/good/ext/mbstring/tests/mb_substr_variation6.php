@@ -7,7 +7,7 @@
 /*
  * Test how mb_substr() behaves when passed a range of integers as $start argument
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_substr() : usage variations ***\n";
 
 mb_internal_encoding('UTF-8');

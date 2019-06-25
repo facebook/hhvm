@@ -67,7 +67,7 @@ class Test
 }
 
 // verifying public property
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o = new Test;
 echo $o->publicProperty;
 echo "\n";

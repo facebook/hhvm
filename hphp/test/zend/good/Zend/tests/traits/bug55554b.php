@@ -18,6 +18,6 @@ class OverridingIsSilent1 {
         echo "OverridingIsSilent1 __construct\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o = new OverridingIsSilent1;
 }

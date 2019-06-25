@@ -12,7 +12,7 @@ class BlaMore implements Bla
         echo "Hello\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $r = new ReflectionClass('BlaMore');
 
 var_dump(count($r->getMethods()));

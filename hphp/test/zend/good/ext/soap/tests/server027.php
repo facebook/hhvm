@@ -8,7 +8,7 @@ class Foo {
     return $this->str;
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $foo = new Foo();
 $server = new SoapServer(null,array('uri'=>"http://testuri.org"));
 $server->setObject($foo);

@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $xmlstr = <<<XML
 <?xml version='1.0' standalone='yes'?>
 <movies>

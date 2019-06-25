@@ -15,7 +15,7 @@ function TestFunc3($classname)
 {
     echo __METHOD__ . "($classname)\n";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 spl_autoload_register("TestFunc1");
 spl_autoload_register("TestFunc2");
 spl_autoload_register("TestFunc3");

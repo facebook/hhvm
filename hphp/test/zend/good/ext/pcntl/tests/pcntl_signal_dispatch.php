@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 pcntl_signal(SIGTERM, function ($signo) { echo "Signal handler called!\n"; });
 
 echo "Start!\n";

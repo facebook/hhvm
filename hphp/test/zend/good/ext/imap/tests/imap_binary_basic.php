@@ -3,7 +3,7 @@
  * Description: Convert an 8bit string to a base64 string.
  * Source code: ext/imap/php_imap.c
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing imap_binary() : basic functionality ***\n";
 
 echo "Encode as short string\n";

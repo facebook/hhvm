@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 for ($i = 0;  $i < 100 ; $i ++) {
     try {
         break;

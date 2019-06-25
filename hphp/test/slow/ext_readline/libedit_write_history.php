@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $name = tempnam('/tmp', 'readline.tmp');
 
 readline_add_history('foo');

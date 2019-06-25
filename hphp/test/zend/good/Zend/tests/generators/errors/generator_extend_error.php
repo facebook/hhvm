@@ -2,4 +2,4 @@
 
 class ExtendedGenerator extends Generator { }
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

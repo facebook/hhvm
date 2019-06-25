@@ -6,7 +6,7 @@
 
 /*
  * test wordwrap by passing different values for width argument */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing wordwrap() : usage variations ***\n";
 // initialize all required variables
 $str = 'testing wordwrap function';

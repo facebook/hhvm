@@ -8,7 +8,7 @@
  * Pass different integers to ctype_alnum() to test which character codes are considered
  * valid alphanumeric characters
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_alnum() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");

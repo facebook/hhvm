@@ -5,7 +5,7 @@ function test($magick) {
     printf("[%s] %sx%s.%s\n", $k, $v->width, $v->height, $v->format);
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $img = varray[
   'magick:logo',
   __DIR__.'/facebook.png',

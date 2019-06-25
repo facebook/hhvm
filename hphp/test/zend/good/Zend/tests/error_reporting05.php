@@ -8,7 +8,7 @@ class test {
         return $undef_value;
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 error_reporting(E_ALL);
 
 $test = new test;

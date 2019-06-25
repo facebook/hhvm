@@ -10,7 +10,7 @@ function test_splice ($replacement)
     var_dump (array_splice (&$input_array,2,0,$replacement));
     var_dump ($input_array);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 test_splice (2);
 
 test_splice (2.1);

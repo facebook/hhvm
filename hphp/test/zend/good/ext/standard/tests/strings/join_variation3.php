@@ -8,7 +8,7 @@
 /*
  * test join() by giving different pieces values 
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing join() : usage variations ***\n";
 
 $pieces_arrays = array (

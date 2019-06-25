@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 error_reporting(E_ALL);
 $str = "Hello friend, you're
     looking          good today!";

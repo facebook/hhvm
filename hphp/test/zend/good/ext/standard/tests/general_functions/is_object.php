@@ -64,7 +64,7 @@ class myClass
     $this->proected_var = new foo();
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing is_object() with valid objects ***\n";
 
 // create a object of each class defined above

@@ -19,7 +19,7 @@ class MyHelloWorld {
   }
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o= myHelloWorld::getInstance(1);
 $o= myHelloWorld::getInstance(1);
 $o= myHelloWorld::getInstance(2);

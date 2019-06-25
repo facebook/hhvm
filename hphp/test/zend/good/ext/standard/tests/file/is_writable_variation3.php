@@ -6,7 +6,7 @@
 */
 
 /* test is_writable() & is_writeable() with invalid arguments */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing is_writable(): usage variations ***\n";
 
 echo "\n*** Testing is_writable() with invalid filenames ***\n";

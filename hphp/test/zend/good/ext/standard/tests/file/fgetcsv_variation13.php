@@ -5,7 +5,7 @@
 */
 
 /* Testing fgetcsv() to read a line from a file which doesn't have any CSV field */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fgetcsv() : reading the line which is without csv fields ***\n";
 
 

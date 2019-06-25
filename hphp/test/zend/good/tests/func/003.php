@@ -62,7 +62,7 @@ function andi($i, $j)
 }
 
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 a();
 b("blah");
 a();

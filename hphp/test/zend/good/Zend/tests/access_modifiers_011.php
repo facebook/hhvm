@@ -21,7 +21,7 @@ class A {
         return $this->$func($args);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new A();
 echo $a->var1,"\n";
 echo $a->var2,"\n";

@@ -8,7 +8,7 @@
  * Pass array_merge arrays with string keys to test behaviour.
  * $arr2 has a duplicate key to $arr1
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_merge() : usage variations ***\n";
 
 //string keys

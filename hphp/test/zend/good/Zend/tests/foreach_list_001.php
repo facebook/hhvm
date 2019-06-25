@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 foreach(array(array(1,2), array(3,4)) as list($a, $b)) {
     var_dump($a . $b);
 }

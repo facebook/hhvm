@@ -9,7 +9,7 @@
 * Testing the behavior of array_intersect_assoc() by passing different arrays for the arguments.
 * Function is tested by passing associative array as well as array with default keys.
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_intersect_assoc() : basic functionality ***\n";
 
 // array with default keys

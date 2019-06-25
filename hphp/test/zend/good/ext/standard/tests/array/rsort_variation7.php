@@ -7,7 +7,7 @@
 /*
  * Pass rsort() arrays of boolean values to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing rsort() : variation ***\n";
 
 // bool value array

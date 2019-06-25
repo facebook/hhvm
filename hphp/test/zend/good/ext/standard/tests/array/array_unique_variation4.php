@@ -16,7 +16,7 @@ class classA
      return "Class A object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_unique() : assoc. array with diff. values to \$input argument ***\n";
 
 // get an unset variable

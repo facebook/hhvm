@@ -15,7 +15,7 @@ class test extends PDO
         print $str ."\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $test = new test('sqlite::memory:');
 $test->quote('foo');
 $test->isProtected();

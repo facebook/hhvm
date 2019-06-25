@@ -4,7 +4,7 @@
 */
 
 /* Passing an existing file as $prefix for tempnam() fn */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $file_path = dirname(__FILE__);
 
 echo "*** Test tempnam() function: by passing an existing filename as prefix ***\n";

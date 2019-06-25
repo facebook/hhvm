@@ -16,7 +16,7 @@ class sample
   return "object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing vfprintf() : with unexpected values for format argument ***\n";
 
 // initialising the required variables

@@ -25,7 +25,7 @@ function newChar() {
     return 'j';
 }
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "\n\nOrder with array assignment:\n";
 $a = array();
 $a[f()] = g();

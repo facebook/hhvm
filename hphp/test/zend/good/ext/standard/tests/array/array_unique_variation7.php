@@ -7,7 +7,7 @@
 /*
  * Testing the functionality of array_unique() by passing an array having binary values.
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_unique() : array with binary data for \$input argument ***\n";
 
 // array with binary values

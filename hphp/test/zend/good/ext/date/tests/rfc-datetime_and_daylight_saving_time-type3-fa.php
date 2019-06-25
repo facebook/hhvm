@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 date_default_timezone_set('America/New_York');
 $date_format = 'Y-m-d H:i:s T e';
 $interval_format = 'P%dDT%hH';

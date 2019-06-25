@@ -5,7 +5,7 @@
 */
 
 /* Test strncasecmp() with various lengths */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Test strncasecmp() function: with different lengths ***\n";
 /* definitions of required variables */
 $str1 = "Hello, World\n";

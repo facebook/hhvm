@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 apc_store('foo', array("foo"));
 $a = apc_fetch('foo');
 var_dump($a);

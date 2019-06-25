@@ -7,7 +7,7 @@
 /*
  * Pass an incorrect number of arguments to mb_substr_count() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_substr_count() : error conditions ***\n";
 
 

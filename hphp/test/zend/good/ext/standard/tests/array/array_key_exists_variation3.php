@@ -9,7 +9,7 @@
  * Pass floats as $key argument, then cast float values
  * to integers and pass as $key argument
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_key_exists() : usage variations ***\n";
 
 $keys = array(1.2345678900E-10, 1.00000000000001, 1.99999999999999);

@@ -8,7 +8,7 @@
 class classA
 {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing decbin() : usage variations ***\n";
 //get an unset variable
 $unset_var = 10;

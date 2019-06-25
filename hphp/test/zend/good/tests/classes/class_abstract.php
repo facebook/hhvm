@@ -8,7 +8,7 @@ abstract class base {
 
 class derived extends base {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $t = new derived();
 $t->show();
 

@@ -4,7 +4,7 @@
  * Description: Split a string by string.
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing explode() : error conditions ***\n";
 
 echo "\n-- Testing explode() function with no arguments --\n";

@@ -6,7 +6,7 @@ class C extends ArrayObject {
       var_dump($c->x);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $c = new C(array('x'=>'public'));
 
 $c->setFlags(ArrayObject::ARRAY_AS_PROPS);

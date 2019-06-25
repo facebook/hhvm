@@ -2,7 +2,7 @@
 /*
  *  proto int preg_match(string pattern, string subject [, array subpatterns [, int flags [, int offset]]])
  * Function is implemented in ext/pcre/php_pcre.c */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $string = 'Hello, world. [*], this is \ a string';
 var_dump(preg_match('/^[hH]ello,\s/', $string, &$match1)); //finds "Hello, "
 var_dump($match1);

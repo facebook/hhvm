@@ -16,7 +16,7 @@ class classA
     return "Class A object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing imap_fetch_overview() : usage variations ***\n";
 
 // Initialise function arguments not being substituted

@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(preg_replace('{{\D+}}', 'x', '{abcd}'));
 var_dump(preg_replace('{{\D+}}', 'ddd', 'abcd'));
 

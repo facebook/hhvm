@@ -2,7 +2,7 @@
 class Test {
     static function foo() {}
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 var_dump(is_callable("\\\\"));
 var_dump(is_callable("\\"));
 var_dump(is_callable("x\\"));

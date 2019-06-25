@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $args = array(
   "curve_name" => "secp384r1",
   "private_key_type" => OPENSSL_KEYTYPE_EC,

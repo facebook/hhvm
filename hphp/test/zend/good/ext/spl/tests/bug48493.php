@@ -2,7 +2,7 @@
 function autoload1() {}
 
 function autoload2() {}
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 spl_autoload_register('autoload2');
 spl_autoload_register('autoload1', true, true);
 var_dump(spl_autoload_functions());

@@ -4,7 +4,7 @@
  * Source code: ext/date/php_date.c
  * Alias to functions:
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing date_sunset() : usage variation ***\n";
 
 //Timezones with required data for date_sunrise

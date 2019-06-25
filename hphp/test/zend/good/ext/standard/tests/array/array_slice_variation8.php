@@ -9,7 +9,7 @@
  * 1. a two-dimensional array as $input argument
  * 2. a sub-array as $input argument
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_slice() : usage variations ***\n";
 
 $input = array ('zero', 'one', array('zero', 'un', 'deux'), 9 => 'nine');

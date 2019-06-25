@@ -15,7 +15,7 @@ class foo extends bar {
         var_dump(get_parent_class());
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $a = new foo;
 $a->foo();
 }

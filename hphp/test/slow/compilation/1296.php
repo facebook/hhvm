@@ -4,4 +4,4 @@ function test($className) {
 $x = new ReflectionClass($className);
 return $x->newInstance()->loadAll();
  }
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

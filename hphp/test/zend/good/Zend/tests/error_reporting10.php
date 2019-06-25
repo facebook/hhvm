@@ -7,7 +7,7 @@ function make_exception()
     error_reporting(0);
     throw new Exception();
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 error_reporting(E_ALL);
 
 try {

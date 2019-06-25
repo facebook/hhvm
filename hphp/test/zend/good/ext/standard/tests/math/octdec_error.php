@@ -8,7 +8,7 @@
 class classA
 {
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing octdec() :  error conditions ***\n";
 
 echo "\n-- Incorrect number of arguments --\n";

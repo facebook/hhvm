@@ -3,7 +3,7 @@
  * Description: Parses the string into variables
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "\nTest string with badly formed strings\n";
 $str = "arr[1=sid&arr[4][2=fred";
 var_dump(parse_str($str, &$res));

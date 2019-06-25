@@ -11,7 +11,7 @@ class Test {
         echo __METHOD__ . "()\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o = new Test;
 $f = $o->func;
 $f();

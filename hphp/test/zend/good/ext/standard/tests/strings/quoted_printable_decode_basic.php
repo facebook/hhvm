@@ -3,7 +3,7 @@
  * Description: Convert a quoted-printable string to an 8 bit string
  * Source code: ext/standard/string.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing quoted_printable_decode() : basic functionality ***\n";
 
 $str = "=FAwow-factor=C1=d0=D5=DD=C5=CE=CE=D9=C5=0A=

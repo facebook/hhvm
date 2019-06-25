@@ -8,7 +8,7 @@
  * Pass a directory handle pointing to a directory that contains
  * files with different file names to test how readdir() reads them
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing readdir() : usage variations ***\n";
 
 $dir_path = dirname(__FILE__) . "/readdir_variation4/";

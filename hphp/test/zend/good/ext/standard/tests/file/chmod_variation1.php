@@ -1,7 +1,7 @@
 <?hh
 
 const PERMISSIONS_MASK = 0777;
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $test_dir = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $dirname = $test_dir . "/" . basename(__FILE__, ".php") . "testdir";
 mkdir($dirname);

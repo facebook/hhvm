@@ -4,7 +4,7 @@
  * Description: Decode a uuencoded string
  * Source code: ext/standard/uuencode.c
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing convert_uudecode() : basic functionality ***\n";
 
 // array with different values for $string

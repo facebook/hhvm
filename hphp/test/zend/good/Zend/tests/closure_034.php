@@ -1,7 +1,7 @@
 <?hh
 
 class C { public $a; }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $c = new C();
 $c->a = function () use($c) {};
 var_dump($c->a);

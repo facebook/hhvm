@@ -4,7 +4,7 @@
  * Description: Returns the type of the file. Possible values are fifo, char,
    dir, block, link, file, and unknown.
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing filetype() with files and dirs ***\n";
 
 print( filetype(__FILE__) )."\n";

@@ -6,4 +6,4 @@ abstract class bar {
 class foo extends bar {
 }
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

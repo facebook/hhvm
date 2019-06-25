@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $tmp = tmpfile();
 fwrite($tmp, b'test');
 fseek($tmp, 0, SEEK_SET);

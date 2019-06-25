@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $i = 75636;
 $s1 = "this is a string";
 $s2 = "876222numeric";

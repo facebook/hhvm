@@ -2,7 +2,7 @@
 /* Prototype:  string stristr  ( string $haystack  , mixed $needle  [, bool $before_needle  ] )
    Description: Case-insensitive strstr().
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing stristr() : basic functionality ***\n";
 
 var_dump( stristr("Test string", "teSt") );

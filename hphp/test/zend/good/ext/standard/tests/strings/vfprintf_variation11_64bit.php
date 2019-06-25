@@ -8,7 +8,7 @@
  * Test vfprintf() when different octal formats and octal values are passed to
  * the '$format' and '$args' arguments of the function
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing vfprintf() : octal formats with octal values ***\n";
 
 // defining array of octal formats

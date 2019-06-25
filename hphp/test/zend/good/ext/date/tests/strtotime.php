@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 date_default_timezone_set('Europe/Oslo');
 $d = array();
 $d[] = strtotime("2005-07-14 22:30:41");

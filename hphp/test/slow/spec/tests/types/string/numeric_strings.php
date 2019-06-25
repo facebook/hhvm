@@ -5,7 +5,7 @@
    | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
    +-------------------------------------------------------------+
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 error_reporting(-1);
 
 var_dump(setlocale(LC_ALL, 0));

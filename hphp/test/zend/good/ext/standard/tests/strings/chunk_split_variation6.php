@@ -9,7 +9,7 @@
 * passing different single quoted strings as 'str' argument to the function
 * 'chunklen' is set to 7 and 'ending' is '):('
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing chunk_split() : with different single quoted 'str' ***\n";
 
 //Initializing variables

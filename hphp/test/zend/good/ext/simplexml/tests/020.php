@@ -1,5 +1,5 @@
 <?hh
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $doc = simplexml_load_string('<root><name attr="foo">bar</name></root>');
 print $doc->name["attr"];
 print "\n";

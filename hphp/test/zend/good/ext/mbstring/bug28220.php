@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $coderange = array(
     range(0x0000, 0x1fff),
     range(0xff60, 0xff9f)

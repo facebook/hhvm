@@ -1,7 +1,7 @@
 <?hh
 
 namespace foo;
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $x = function (\stdclass $x = NULL) {
     \var_dump($x);
 };

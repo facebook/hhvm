@@ -23,6 +23,6 @@ class testClass2 extends testClass {
         }
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 new testClass2;
 }

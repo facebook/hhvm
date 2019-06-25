@@ -7,7 +7,7 @@
 /*
  * testing whether strip_tags() is binary safe or not
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strip_tags() : usage variations ***\n";
 
 //various string inputs

@@ -18,7 +18,7 @@ class test
     return "object";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing shuffle() : with unexpected values for 'array_arg' argument ***\n";
 
 

@@ -27,7 +27,7 @@ function f2($x=namespace\foo::C) {
 function f3(namespace\foo $x) {
     return "ok\n";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo namespace\C;
 echo namespace\foo();
 echo namespace\foo::C;

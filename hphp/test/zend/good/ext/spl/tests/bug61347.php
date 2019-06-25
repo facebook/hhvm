@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $a = array('b' => NULL, 37 => NULL);
 var_dump(isset($a['b'])); //false
 

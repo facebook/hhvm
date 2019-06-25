@@ -5,7 +5,7 @@ class obj extends SplFixedArray{
         var_dump($offset);
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $obj = new obj;
 
 $obj[]=2;

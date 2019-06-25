@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $dirname = 'DirectoryIterator_getOwner_basic';
 mkdir($dirname);
 $dir = new DirectoryIterator($dirname);

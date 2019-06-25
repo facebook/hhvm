@@ -8,7 +8,7 @@
 /*
  * Test how current() behaves with muti-dimensional and recursive arrays
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing current() : usage variations ***\n";
 
 echo "\n-- Two Dimensional Array --\n";

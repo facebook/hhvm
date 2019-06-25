@@ -7,7 +7,7 @@
 /*
  * Pass incorrect number of arguments to usort() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing usort() : error conditions ***\n";
 
 //Test usort with one more than the expected number of arguments

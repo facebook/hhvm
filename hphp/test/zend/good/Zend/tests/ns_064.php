@@ -19,7 +19,7 @@ class foo {
 }
 
 use test\foo as stdClass;
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $x = new stdClass;
 $x->a = 1;
 $x->b->c = 1;

@@ -28,7 +28,7 @@ class C extends B
 
     // Should also include inherited properties from B.
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "\nStatic properties:\n";
 var_dump(X::$sa_x, B::$sa_b, C::$sa_b, C::$sa_c_parent, C::$sa_c_self);
 

@@ -7,7 +7,7 @@
 /*
  * Pass an unknown encoding to mb_substr() to test behaviour
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_substr() : error conditions ***\n";
 
 $str = 'Hello, world';

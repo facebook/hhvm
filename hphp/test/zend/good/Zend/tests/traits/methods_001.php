@@ -21,7 +21,7 @@ trait foo {
 class bar {
     use foo;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $o = new bar;
 echo $o, PHP_EOL;
 $o->xyz;

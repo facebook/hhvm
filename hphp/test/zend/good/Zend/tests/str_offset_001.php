@@ -2,7 +2,7 @@
 function foo($x) {
     var_dump($x);
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $str = "abc";
 var_dump($str[-1]);
 var_dump($str[0]);

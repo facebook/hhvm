@@ -9,7 +9,7 @@ class Hello {
       echo "Hello\n";
   }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing is_resource() : basic functionality ***\n";
 
 

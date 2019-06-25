@@ -1,6 +1,6 @@
 <?hh
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Test by calling method or function with incorrect numbers of arguments ***\n";
 
 $fd = 'foo';

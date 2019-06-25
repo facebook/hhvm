@@ -23,7 +23,7 @@ class test {
 function x() {
     return new test;
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 x()
     ->a
         ->b()

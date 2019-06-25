@@ -9,7 +9,7 @@
  * Testing addslashes() with strings containing characters that can be prefixed with backslash 
  * by the function
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing addslashes() : basic functionality ***\n";
 
 // Initialize all required variables

@@ -16,7 +16,7 @@ class chld extends par {
     }
 };
 
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $obj = new chld();
 $obj->displayHim();
 }

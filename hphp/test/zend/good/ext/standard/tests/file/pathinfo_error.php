@@ -2,7 +2,7 @@
 /* Prototype: mixed pathinfo ( string $path [, int $options] );
    Description: Returns information about a file path
 */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing pathinfo() for error conditions ***\n";
 /* unexpected no. of arguments */
 try { var_dump( pathinfo() );  /* args < expected */ } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

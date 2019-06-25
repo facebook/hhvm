@@ -10,7 +10,7 @@ class Test {
 function foo() {
     echo __FUNCTION__,"\n";
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 \call_user_func(__NAMESPACE__."\\foo");
 \call_user_func(__NAMESPACE__."\\test::foo");
 }

@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of mb_strrpos()
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_strrpos() : basic ***\n";
 
 mb_internal_encoding('UTF-8');

@@ -7,4 +7,4 @@ class D implements I {
   public function __construct(array $x) {}
 }
 
-<<__EntryPoint>> function main() {}
+<<__EntryPoint>> function main(): void {}

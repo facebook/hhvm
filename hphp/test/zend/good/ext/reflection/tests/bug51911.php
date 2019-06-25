@@ -4,7 +4,7 @@ class Foo {
    const X = 1;
    public function x($x = array(1)) {}
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $clazz = new ReflectionClass('Foo');
 $method = $clazz->getMethod('x');
 foreach ($method->getParameters() as $param) {

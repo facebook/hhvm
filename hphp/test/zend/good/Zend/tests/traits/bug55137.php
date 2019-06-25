@@ -12,7 +12,7 @@ class B {
       A::bar as public baz;
    }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 B::foo();
 B::baz();
 }

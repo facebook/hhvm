@@ -3,7 +3,7 @@
  * Prototype: int fileinode ( string $filename );
  * Description: Returns the inode number of the file, or FALSE in case of an error.
  */
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 echo "*** Testing error conditions of fileinode() ***";
 
 /* Non-existing file or dir */

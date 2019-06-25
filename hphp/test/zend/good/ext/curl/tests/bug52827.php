@@ -1,4 +1,4 @@
-<?hh <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main(): void {
 $s = fopen('php://temp/maxmemory=1024','wb+');
 
 /* force conversion of inner stream to STDIO.

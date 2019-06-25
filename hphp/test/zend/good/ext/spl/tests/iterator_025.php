@@ -12,7 +12,7 @@ class MyRecursiveIteratorIterator extends RecursiveIteratorIterator
         echo __METHOD__ . "()\n";
     }
 }
-<<__EntryPoint>> function main() {
+<<__EntryPoint>> function main(): void {
 $ar = array(1, 2, array(31, 32, array(331)), 4);
 
 $it = new MyRecursiveIteratorIterator(new ArrayObject($ar, 0, "RecursiveArrayIterator"));

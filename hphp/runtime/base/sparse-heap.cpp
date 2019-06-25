@@ -41,8 +41,21 @@ void SparseHeap::reset() {
     });
   }
 #endif
-  auto const do_free = [this] (void* ptr, size_t size) {
-    local_sized_free(ptr, size);
+  auto const do_free =
+    [this] (void* ptr, size_t size) {
+      if (RuntimeOption::EvalBigAllocUseLocalArena) {
+        local_sized_free(ptr, size);
+      } else {
+#ifdef USE_JEMALLOC
+#if JEMALLOC_VERSION_MAJOR >= 4
+        sdallocx(ptr, size, 0);
+#else
+        dallocx(ptr, 0);
+#endif
+#else
+        free(ptr);
+#endif
+      }
   };
   TaggedSlabList pooledSlabs;
   void* pooledSlabTail = nullptr;
@@ -96,22 +109,22 @@ HeapObject* SparseHeap::allocSlab(MemoryUsageStats& stats) {
     }
   }
 #ifdef USE_JEMALLOC
-  auto const flags = local_arena_flags |  MALLOCX_ALIGN(kSlabAlign);
-  void* slab = mallocx(kSlabSize, flags);
-  auto usable = sallocx(slab, flags);
+  auto const flags = MALLOCX_ALIGN(kSlabAlign) |
+    (RuntimeOption::EvalBigAllocUseLocalArena ? local_arena_flags : 0);
+  auto slab = mallocx(kSlabSize, flags);
 #else
   auto slab = safe_aligned_alloc(kSlabAlign, kSlabSize);
-  auto usable = kSlabSize;
 #endif
   m_bigs.insert((HeapObject*)slab, kSlabSize);
-  stats.malloc_cap += usable;
+  stats.malloc_cap += kSlabSize;
   stats.peakCap = std::max(stats.peakCap, stats.capacity());
   return finish(slab);
 }
 
 void* SparseHeap::allocBig(size_t bytes, bool zero, MemoryUsageStats& stats) {
 #ifdef USE_JEMALLOC
-  int flags = local_arena_flags | (zero ? MALLOCX_ZERO : 0);
+  int flags = (zero ? MALLOCX_ZERO : 0) |
+    (RuntimeOption::EvalBigAllocUseLocalArena ? local_arena_flags : 0);
   auto n = static_cast<HeapObject*>(mallocx(bytes, flags));
   auto cap = sallocx(n, flags);
 #else
@@ -143,8 +156,17 @@ void SparseHeap::freeBig(void* ptr, MemoryUsageStats& stats) {
   stats.mm_freed += cap;
   stats.malloc_cap -= cap;
 #ifdef USE_JEMALLOC
-  assertx(nallocx(cap, local_arena_flags) == sallocx(ptr, local_arena_flags));
-  local_sized_free(ptr, cap);
+  if (RuntimeOption::EvalBigAllocUseLocalArena) {
+    assertx(nallocx(cap, local_arena_flags) == sallocx(ptr, local_arena_flags));
+    local_sized_free(ptr, cap);
+  } else {
+    assertx(nallocx(cap, 0) == sallocx(ptr, 0));
+#if JEMALLOC_VERSION_MAJOR >= 4
+    sdallocx(ptr, cap, 0);
+#else
+    dallocx(ptr, 0);
+#endif
+  }
 #else
   free(ptr);
 #endif
@@ -155,10 +177,12 @@ void* SparseHeap::resizeBig(void* ptr, size_t new_size,
   auto old = static_cast<HeapObject*>(ptr);
   auto old_cap = m_bigs.get(old);
 #ifdef USE_JEMALLOC
+  auto const flags =
+    (RuntimeOption::EvalBigAllocUseLocalArena ? local_arena_flags : 0);
   auto const newNode = static_cast<HeapObject*>(
-    rallocx(ptr, new_size, local_arena_flags)
+    rallocx(ptr, new_size, flags)
   );
-  auto new_cap = sallocx(newNode, local_arena_flags);
+  auto new_cap = sallocx(newNode, flags);
 #else
   auto const newNode = static_cast<HeapObject*>(
     safe_realloc(ptr, new_size)

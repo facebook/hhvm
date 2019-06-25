@@ -725,7 +725,7 @@ struct json_parser {
     String key;
     Variant val;
   };
-  folly::fbvector<json_state, LocalAllocator<json_state>> stack;
+  folly::fbvector<json_state> stack;
   // check_non_safepoint_surprise() above will not trigger gc
   TYPE_SCAN_IGNORE_FIELD(stack);
   int top;
@@ -751,12 +751,12 @@ struct json_parser {
         SimpleParser::BufferBytesForLength(length) :
         new_cap * 2;
       if (tl_buffer.raw) {
-        local_free(tl_buffer.raw);
+        json_free(tl_buffer.raw);
         tl_buffer.raw = nullptr;
       }
       sb_cap = 0;
       if (!tl_heap->preAllocOOM(bufSize)) {
-        tl_buffer.raw = (char*)local_malloc(bufSize);
+        tl_buffer.raw = (char*)json_malloc(bufSize);
         if (!tl_buffer.raw) tl_heap->forceOOM();
       }
       check_non_safepoint_surprise();
@@ -772,12 +772,27 @@ struct json_parser {
   }
   void flushSb() {
     if (tl_buffer.raw) {
-      local_free(tl_buffer.raw);
+      json_free(tl_buffer.raw);
       tl_buffer.raw = nullptr;
     }
     sb_cap = 0;
     sb_buf.setBuf(nullptr, 0);
     sb_key.setBuf(nullptr, 0);
+  }
+ private:
+  static void* json_malloc(size_t size) {
+    if (RuntimeOption::EvalJsonParserUseLocalArena) {
+      return local_malloc(size);
+    } else {
+      return malloc(size);
+    }
+  }
+  static void json_free(void* ptr) {
+    if (RuntimeOption::EvalJsonParserUseLocalArena) {
+      return local_free(ptr);
+    } else {
+      return free(ptr);
+    }
   }
 };
 

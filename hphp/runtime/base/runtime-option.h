@@ -911,6 +911,9 @@ struct RuntimeOption {
   F(uint32_t, NumReservedSlabs,        0)                               \
   F(uint32_t, Num1GPagesForA0,         0)                               \
   F(uint32_t, Num2MPagesForA0,         0)                               \
+  F(bool, BigAllocUseLocalArena,       true)                            \
+  F(bool, JsonParserUseLocalArena,     true)                            \
+  F(bool, XmlParserUseLocalArena,      true)                            \
   F(bool, LowStaticArrays,             true)                            \
   F(int64_t, HeapPurgeWindowSize,      5 * 1000000)                     \
   F(uint64_t, HeapPurgeThreshold,      128 * 1024 * 1024)               \

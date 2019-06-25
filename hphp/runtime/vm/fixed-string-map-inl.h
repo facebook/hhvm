@@ -57,7 +57,7 @@ void FixedStringMap<V,CaseSensitive,E>::init(int num, uint32_t numExtraBytes) {
   while (kLoadScale * num >= (kLoadScale - 1) * capac) {
     capac *= 2;
   }
-  TRACE_MOD(Trace::runtime, 1, "FixedStringMap::init: %d -> %d\n", num, capac);
+  TRACE_MOD(Trace::runtime, 4, "FixedStringMap::init: %d -> %d\n", num, capac);
   assertx(!m_table);
   auto const allocSize = capac * sizeof(Elm) + numExtraBytes;
   auto ptr = vm_malloc(allocSize);

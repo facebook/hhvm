@@ -575,13 +575,13 @@ function HH\\idx<Tk as arraykey, Tv>(
   ?int $index
 ): ?int";
       addendum = [
-        "\n\
+        "\
                     Index into the given KeyedContainer using the provided key.\n\
                     \n\
                     If the key doesn't exist, the key is `null`, or the collection is `null`,\n\
                     return the provided default value instead, or `null` if no default value was\n\
                     provided. If the key is `null`, the default value will be returned even if\n\
-                    `null` is a valid key in the container.\n";
+                    `null` is a valid key in the container.";
         "Return type: `?int`"
       ];
       pos = pos_at (3, 3) (3, 5);

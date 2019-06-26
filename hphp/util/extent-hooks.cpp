@@ -41,6 +41,16 @@ extent_purge(extent_hooks_t* /*extent_hooks*/, void* addr, size_t size,
   return madvise((char*)addr + offset, length, MADV_DONTNEED);
 }
 
+static bool
+extent_purge_lazy(extent_hooks_t* /*extent_hooks*/, void* addr, size_t size,
+                  size_t offset, size_t length, unsigned /*arena_ind*/) {
+#ifdef MADV_FREE
+  return madvise((char*)addr + offset, length, MADV_FREE);
+#else
+  return madvise((char*)addr + offset, length, MADV_DONTNEED);
+#endif
+}
+
 static bool extent_split(extent_hooks_t* /*extent_hooks*/, void* /*addr*/,
                          size_t /*size*/, size_t /*sizea*/, size_t /*sizeb*/,
                          bool /*comitted*/, unsigned /*arena_ind*/) {
@@ -59,8 +69,8 @@ extent_hooks_t MultiRangeExtentAllocator::s_hooks {
   nullptr,                              // destroy
   extent_commit,
   nullptr,                              // decommit
-  extent_purge,                         // purge_lazy
-  nullptr,                              // purge_forced
+  extent_purge_lazy,                    // purge_lazy
+  extent_purge,                         // purge_forced
   extent_split,
   extent_merge
 };
@@ -115,12 +125,12 @@ extent_alloc(extent_hooks_t* extent_hooks, void* addr,
 
 extent_hooks_t RangeFallbackExtentAllocator::s_hooks {
   RangeFallbackExtentAllocator::extent_alloc,
-  RangeFallbackExtentAllocator::extent_dalloc,
+  nullptr,                              // dalloc, always fail with opt_retain
   RangeFallbackExtentAllocator::extent_destroy,
   RangeFallbackExtentAllocator::extent_commit,
-  RangeFallbackExtentAllocator::extent_decommit,
+  nullptr,                              // decommit, no need with vm_overcommit
+  RangeFallbackExtentAllocator::extent_purge_lazy,
   RangeFallbackExtentAllocator::extent_purge,
-  nullptr,                              // purge_forced
   extent_split,                         // always split
   extent_merge                          // always merge
 };
@@ -144,15 +154,6 @@ extent_alloc(extent_hooks_t* extent_hooks, void* addr,
                                zero, commit, arena_ind);
 }
 
-bool RangeFallbackExtentAllocator::
-extent_dalloc(extent_hooks_t* extent_hooks, void* addr, size_t size,
-              bool committed, unsigned arena_ind) {
-  auto extAlloc = GetByArenaId<RangeFallbackExtentAllocator>(arena_ind);
-  if (extAlloc->inRange(addr)) return true;
-  auto fallback_hooks = extAlloc->m_fallback_hooks;
-  return fallback_hooks->dalloc(extent_hooks, addr, size, committed, arena_ind);
-}
-
 void RangeFallbackExtentAllocator::
 extent_destroy(extent_hooks_t* extent_hooks, void* addr, size_t size,
                bool committed, unsigned arena_ind) {
@@ -174,13 +175,14 @@ extent_commit(extent_hooks_t* extent_hooks, void* addr, size_t size,
 }
 
 bool RangeFallbackExtentAllocator::
-extent_decommit(extent_hooks_t* extent_hooks, void* addr, size_t size,
-                size_t offset, size_t length, unsigned arena_ind) {
+extent_purge_lazy(extent_hooks_t* extent_hooks, void* addr, size_t size,
+                  size_t offset, size_t length, unsigned arena_ind) {
   auto extAlloc = GetByArenaId<RangeFallbackExtentAllocator>(arena_ind);
-  if (extAlloc->inRange(addr)) return true; // never decommit the fixed range
+  if (extAlloc->inRange(addr)) return true; // never purge
   auto fallback_hooks = extAlloc->m_fallback_hooks;
-  return fallback_hooks->decommit(extent_hooks, addr, size, offset,
-                                  length, arena_ind);
+  auto fallback_purge = fallback_hooks->purge_lazy;
+  if (!fallback_purge) return true;
+  return fallback_purge(extent_hooks, addr, size, offset, length, arena_ind);
 }
 
 bool RangeFallbackExtentAllocator::
@@ -189,9 +191,9 @@ extent_purge(extent_hooks_t* extent_hooks, void* addr, size_t size,
   auto extAlloc = GetByArenaId<RangeFallbackExtentAllocator>(arena_ind);
   if (extAlloc->inRange(addr)) return true; // never purge
   auto fallback_hooks = extAlloc->m_fallback_hooks;
-  if (fallback_hooks->purge_lazy == nullptr) return true;
-  return fallback_hooks->purge_lazy(extent_hooks, addr, size, offset,
-                                    length, arena_ind);
+  auto fallback_purge = fallback_hooks->purge_forced;
+  if (!fallback_purge) return true;
+  return fallback_purge(extent_hooks, addr, size, offset, length, arena_ind);
 }
 
 }}

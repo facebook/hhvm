@@ -138,14 +138,39 @@ struct VariantControllerImpl {
     }
   }
   static MapType createMap(ArrayInit&& map) {
-    return map.toArray();
+    auto array = map.toArray();
+    switch (HackArraysMode) {
+      case VariantControllerHackArraysMode::ON:
+        return array.toDict();
+      case VariantControllerHackArraysMode::OFF:
+        return array;
+      case VariantControllerHackArraysMode::MIGRATORY:
+        return RuntimeOption::EvalHackArrDVArrs
+          ? array.toDict()
+          : array.toDArray();
+    }
+    not_reached(); // not sure why I need this here and not in createMap()
   }
   static ArrayInit reserveMap(size_t n) {
     ArrayInit res(n, ArrayInit::Map{}, CheckAllocation{});
     return res;
   }
   static MapType getStaticEmptyMap() {
-    return MapType(staticEmptyArray());
+    ArrayData* empty;
+    switch (HackArraysMode) {
+      case VariantControllerHackArraysMode::ON:
+        empty = staticEmptyDictArray();
+        break;
+      case VariantControllerHackArraysMode::OFF:
+        empty = staticEmptyArray();
+        break;
+      case VariantControllerHackArraysMode::MIGRATORY:
+        empty = RuntimeOption::EvalHackArrDVArrs
+          ? staticEmptyDictArray()
+          : staticEmptyDArray();
+        break;
+    }
+    return MapType(empty);
   }
   static HPHP::serialize::Type mapKeyType(const Variant& k) {
     return type(k);

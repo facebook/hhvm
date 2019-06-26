@@ -58,7 +58,7 @@ val unimplemented_feature : Pos.t -> string -> unit
 val experimental_feature : Pos.t -> string -> unit
 
 val fixme_format : Pos.t -> unit
-val unexpected_eof : Pos.t -> unit
+
 val missing_field : Pos.t -> Pos.t -> string -> unit
 val violated_constraint :
   Pos.t -> (Pos.t * string) -> (Pos.t * string) list -> (Pos.t * string) list -> unit
@@ -67,14 +67,9 @@ val explain_constraint :
   use_pos:Pos.t -> definition_pos:Pos.t -> param_name:string -> error -> unit
 val explain_where_constraint : use_pos:Pos.t -> definition_pos:Pos.t -> error -> unit
 val explain_tconst_where_constraint : use_pos:Pos.t -> definition_pos:Pos.t -> error -> unit
-val explain_type_constant : (Pos.t * string) list -> error -> unit
 val unexpected_arrow : Pos.t -> string -> unit
 val missing_arrow : Pos.t -> string -> unit
 val disallowed_xhp_type : Pos.t -> string -> unit
-val overflow : Pos.t -> unit
-val unterminated_comment : Pos.t -> unit
-val unterminated_xhp_comment : Pos.t -> unit
-val name_already_bound : string -> Pos.t -> Pos.t -> unit
 val name_is_reserved : string -> Pos.t -> unit
 val dollardollar_unused : Pos.t -> unit
 val assigning_to_const : Pos.t -> unit
@@ -85,7 +80,6 @@ val method_name_already_bound : Pos.t -> string -> unit
 val error_name_already_bound : string -> string -> Pos.t -> Pos.t -> unit
 val error_class_attribute_already_bound : string -> string -> Pos.t -> Pos.t -> unit
 val unbound_name : Pos.t -> string -> [< `cls | `func | `const] -> unit
-val different_scope : Pos.t -> string -> Pos.t -> unit
 val undefined : in_rx_scope:bool -> Pos.t -> string -> unit
 val this_reserved : Pos.t -> unit
 val start_with_T : Pos.t -> unit
@@ -133,7 +127,6 @@ val unexpected_ty_in_tast : Pos.t -> actual_ty:string -> expected_ty:string -> u
 val uninstantiable_class : Pos.t -> Pos.t -> string -> (Pos.t * string) list -> unit
 val abstract_const_usage : Pos.t -> Pos.t -> string -> unit
 val add_a_typehint : Pos.t -> unit
-val local_const : Pos.t -> unit
 val illegal_constant : Pos.t -> unit
 val parsing_error : Pos.t * string -> unit
 val format_string : Pos.t -> string -> string -> Pos.t -> string -> string -> unit
@@ -172,7 +165,6 @@ val static_outside_class : Pos.t -> unit
 val self_outside_class : Pos.t -> unit
 val new_inconsistent_construct : Pos.t -> Pos.t * string -> [< `static | `classname] -> unit
 val pair_arity : Pos.t -> unit
-val tuple_arity : Pos.t -> int -> Pos.t -> int -> unit
 val undefined_parent : Pos.t -> unit
 val parent_outside_class : Pos.t -> unit
 val parent_abstract_call : string -> Pos.t -> Pos.t -> unit
@@ -237,7 +229,6 @@ val cyclic_typedef : Pos.t -> unit
 val type_arity_mismatch : Pos.t -> string -> Pos.t -> string -> unit
 val this_final : Pos.t * string -> Pos.t -> error -> unit
 val exact_class_final : Pos.t * string -> Pos.t -> error -> unit
-val tuple_arity_mismatch : Pos.t -> string -> Pos.t -> string -> unit
 val fun_arity_mismatch : Pos.t -> Pos.t -> unit
 val discarded_awaitable : Pos.t -> Pos.t -> unit
 val unify_error : (Pos.t * string) list -> (Pos.t * string) list -> unit
@@ -348,7 +339,6 @@ val interface_with_partial_typeconst : Pos.t -> unit
 val multiple_xhp_category : Pos.t -> unit
 val not_abstract_without_typeconst : Pos.t * string -> unit
 val typeconst_depends_on_external_tparam : Pos.t -> Pos.t -> string -> unit
-val typeconst_assigned_tparam : Pos.t -> string -> unit
 val invalid_type_access_root : Pos.t * string -> unit
 val duplicate_user_attribute : Pos.t * string -> Pos.t -> unit
 val unbound_attribute_name : Pos.t -> string -> unit
@@ -356,12 +346,9 @@ val attribute_too_many_arguments : Pos.t -> string -> int -> unit
 val attribute_too_few_arguments : Pos.t -> string -> int -> unit
 val attribute_param_type : Pos.t -> string -> unit
 val deprecated_use : Pos.t -> Pos.t -> string -> unit
-val abstract_with_typeconst : Pos.t * string -> unit
 val cannot_declare_constant : [< `enum | `trait | `record] -> Pos.t -> Pos.t * string -> unit
 val ambiguous_inheritance : Pos.t -> string -> string -> error -> unit
 val cyclic_typeconst : Pos.t -> string list -> unit
-val explain_contravariance : Pos.t -> string -> error -> unit
-val explain_invariance : Pos.t -> string -> string -> error -> unit
 val abstract_concrete_override : Pos.t -> Pos.t -> [< `method_ | `typeconst | `constant] -> unit
 val local_variable_modified_and_used : Pos.t -> Pos.t list -> unit
 val local_variable_modified_twice : Pos.t -> Pos.t list -> unit
@@ -371,7 +358,6 @@ val invalid_classname : Pos.t -> unit
 val illegal_type_structure : Pos.t -> string -> unit
 val illegal_typeconst_direct_access : Pos.t -> unit
 val override_no_default_typeconst : Pos.t -> Pos.t -> unit
-val class_property_only_static_literal : Pos.t -> unit
 val reference_expr : Pos.t -> unit
 val unification_cycle : Pos.t -> string -> unit
 val eq_incompatible_types : Pos.t -> (Pos.t * string) list -> (Pos.t * string) list -> unit
@@ -385,7 +371,6 @@ val invalid_new_disposable : Pos.t -> unit
 val invalid_disposable_hint : Pos.t -> string -> unit
 val invalid_disposable_return_hint : Pos.t -> string -> unit
 val invalid_return_disposable : Pos.t -> unit
-val unsupported_feature : Pos.t -> string -> unit
 val invalid_switch_case_value_type : Pos.t -> string -> string -> unit
 val to_json : Pos.absolute error_ -> Hh_json.json
 val to_string : ?indent:bool -> Pos.absolute error_ -> string
@@ -410,7 +395,6 @@ val ignore_ : (unit -> 'a) -> 'a
 val try_when : (unit -> 'a) -> when_:(unit -> bool) -> do_:(error -> unit) -> 'a
 val has_no_errors : (unit -> 'a) -> bool
 val currently_has_errors : unit -> bool
-val must_error : (unit -> unit) -> (unit -> unit) -> unit
 val to_absolute : error -> Pos.absolute error_
 val to_absolute_for_test : error -> Pos.absolute error_
 
@@ -433,9 +417,6 @@ val fold_errors_in :
 val get_failed_files : t -> phase -> Relative_path.Set.t
 val sort : error list -> error list
 val get_applied_fixmes : t -> applied_fixme list
-val darray_not_supported : Pos.t -> unit
-val varray_not_supported : Pos.t -> unit
-val nonnull_not_supported : Pos.t -> unit
 val too_few_type_arguments : Pos.t -> unit
 val required_field_is_optional : Pos.t -> Pos.t -> string -> unit
 val array_get_with_optional_field : Pos.t -> Pos.t -> string -> unit
@@ -444,11 +425,9 @@ val goto_label_undefined : Pos.t -> string -> unit
 val goto_label_defined_in_finally : Pos.t -> unit
 val goto_invoked_in_finally : Pos.t -> unit
 val method_needs_visibility : Pos.t -> unit
-val dynamic_class_property_name_in_strict_mode : Pos.t -> unit
 val dynamic_class_name_in_strict_mode : Pos.t -> unit
 val reading_from_append : Pos.t -> unit
 val const_attribute_prohibited : Pos.t -> string -> unit
-val varray_or_darray_not_supported : Pos.t -> unit
 val unknown_field_disallowed_in_shape : Pos.t -> Pos.t -> string -> unit
 val nullable_cast : Pos.t -> string -> Pos.t -> unit
 val non_call_argument_in_suspend : Pos.t -> (Pos.t * string) list -> unit
@@ -462,14 +441,11 @@ val ppl_meth_pointer : Pos.t -> string -> unit
 val coroutine_outside_experimental : Pos.t -> unit
 val return_disposable_mismatch : bool -> Pos.t -> Pos.t -> unit
 val fun_reactivity_mismatch : Pos.t -> string -> Pos.t -> string -> unit
-val inconsistent_unset : Pos.t -> unit
 val reassign_mutable_var : in_collection:bool -> Pos.t -> unit
 val mutable_call_on_immutable : Pos.t -> Pos.t -> Pos.t option -> unit
 val mutable_argument_mismatch : Pos.t -> Pos.t -> unit
 val invalid_mutable_return_result : Pos.t -> Pos.t -> string -> unit
 val mutable_return_result_mismatch : bool -> Pos.t -> Pos.t -> unit
-val mutable_params_outside_of_sync : Pos.t -> Pos.t -> string -> string -> unit
-val mutable_async_method : Pos.t -> unit
 val mutable_attribute_on_function : Pos.t -> unit
 val mutable_methods_must_be_reactive : Pos.t -> string -> unit
 val mutable_return_annotated_decls_must_be_reactive : string -> Pos.t -> string -> unit
@@ -505,7 +481,6 @@ val inout_argument_bad_type : Pos.t -> (Pos.t * string) list -> unit
 val nonreactive_call_from_shallow : Pos.t -> Pos.t -> string -> Pos.t option -> unit
 val illegal_destructor : Pos.t -> unit
 val rx_enabled_in_non_rx_context : Pos.t -> unit
-val rx_enabled_in_lambdas : Pos.t -> unit
 val ambiguous_lambda : Pos.t -> (Pos.t * string) list -> unit
 val ellipsis_strict_mode : require:[< `Param_name | `Type | `Type_and_param_name] -> Pos.t -> unit
 val untyped_lambda_strict_mode : Pos.t -> unit
@@ -516,11 +491,9 @@ val multiple_conditionally_reactive_annotations : Pos.t -> string -> unit
 val conditionally_reactive_annotation_invalid_arguments : is_method:bool -> Pos.t -> unit
 val echo_in_reactive_context : Pos.t -> unit
 val superglobal_in_reactive_context : Pos.t -> string -> unit
-val static_in_reactive_context : Pos.t -> string -> unit
 val rx_is_enabled_invalid_location : Pos.t -> unit
 val wrong_expression_kind_attribute :
   string -> Pos.t -> string -> Pos.t -> string -> string -> unit
-val attribute_class_no_constructor_args : Pos.t -> Pos.t -> unit
 val cannot_return_borrowed_value_as_immutable : Pos.t -> Pos.t -> unit
 val decl_override_missing_hint : Pos.t -> unit
 val let_var_immutability_violation : Pos.t -> string -> unit
@@ -533,8 +506,6 @@ val classname_const_instanceof : string -> Pos.t -> unit
 val byref_on_construct : Pos.t -> unit
 val byref_dynamic_call : Pos.t -> unit
 val reference_in_strict_mode : Pos.t -> unit
-val anon_use_capture_by_ref : Pos.t -> unit
-val no_tparams_on_type_consts : Pos.t -> unit
 val pu_duplication : Pos.t -> string -> string -> unit
 val invalid_type_for_atmost_rx_as_rxfunc_parameter : Pos.t -> string -> unit
 val missing_annotation_for_atmost_rx_as_rxfunc_parameter : Pos.t -> unit
@@ -557,7 +528,6 @@ val invalid_arraykey : Pos.t -> Pos.t * string -> Pos.t * string -> unit
 val invalid_arraykey_constraint : Pos.t -> string -> unit
 val invalid_argument_type_for_condition_in_rx :
   is_receiver:bool -> Pos.t -> Pos.t -> Pos.t -> string -> string -> unit
-val invalid_function_type_for_condition_in_rx : Pos.t -> Pos.t -> Pos.t -> string -> string -> unit
 val callsite_reactivity_mismatch : Pos.t -> Pos.t -> string -> Pos.t option -> string -> unit
 val rx_parameter_condition_mismatch : string -> Pos.t -> Pos.t -> unit
 val maybe_mutable_attribute_on_function : Pos.t -> unit
@@ -574,8 +544,6 @@ val reference_in_rx : Pos.t -> unit
 val reassign_mutable_this : in_collection:bool -> is_maybe_mutable:bool -> Pos.t -> unit
 val mutable_expression_as_multiple_mutable_arguments : Pos.t -> string -> Pos.t -> string -> unit
 val invalid_unset_target_rx : Pos.t -> unit
-val misplaced_rx_of_scope : Pos.t -> unit
-val rx_of_scope_and_explicit_rx : Pos.t -> unit
 val lateinit_with_default : Pos.t -> unit
 val bad_lateinit_override : bool -> Pos.t -> Pos.t -> unit
 val bad_xhp_attr_required_override : string -> string -> Pos.t -> Pos.t -> unit
@@ -592,8 +560,6 @@ val new_static_class_reified : Pos.t -> unit
 val consistent_construct_reified : Pos.t -> unit
 val new_without_newable: Pos.t -> string -> unit
 val reified_tparam_variadic: Pos.t -> unit
-val ignored_result_of_freeze : Pos.t -> unit
-val ignored_result_of_move : Pos.t -> unit
 val mutably_owned_argument_mismatch : arg_is_owned_local:bool -> Pos.t -> Pos.t -> unit
 val rx_move_invalid_location : Pos.t -> unit
 val inconsistent_mutability : Pos.t -> string -> (Pos.t * string) option -> unit

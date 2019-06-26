@@ -453,7 +453,7 @@ let add_lower_bound ?union env name ty =
 (* Add type parameters to environment, initially with no bounds.
  * Existing type parameters with the same name will be overridden. *)
 let add_generic_parameters env tparaml =
-  let add_empty_bounds tpenv { tp_name = (_, name); tp_reified = reified; tp_user_attributes; _ } =
+  let add_empty_bounds tpenv { Typing_defs.tp_name = (_, name); tp_reified = reified; tp_user_attributes; _ } =
     let enforceable = Attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes in
     let newable = Attributes.mem SN.UserAttributes.uaNewable tp_user_attributes in
     SMap.add name {lower_bounds = empty_bounds;

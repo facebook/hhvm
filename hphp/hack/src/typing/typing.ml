@@ -6130,6 +6130,13 @@ and string2 env idl =
  * to check that the arguments provided are consistent with the constraints on
  * the type parameters. *)
 and check_implements_tparaml (env: Env.env) ht =
+  (* Pessimize `extends C<int> to extends C<~int>` for erased generics so that the lower bound of
+   * dynamic is respected *)
+  let ht =
+    match ht with
+    | _, Tapply ((_, x), _) when not (Env.is_typedef x || Env.is_enum env x) ->
+      Typing_enforceability.pessimize_type env ht
+    | _ -> ht in
   let _r, (p, c), paraml = TUtils.unwrap_class_type ht in
   let class_ = Env.get_class_dep env c in
   match class_ with
@@ -6142,6 +6149,7 @@ and check_implements_tparaml (env: Env.env) ht =
       if size1 <> size2 then Errors.class_arity p (Cls.pos class_) c size1;
       let subst = Inst.make_subst (Cls.tparams class_) paraml in
       iter2_shortest begin fun t ty ->
+        let t = Typing_enforceability.pessimize_tparam_constraints env t in
         let ty_pos = Reason.to_pos (fst ty) in
         List.iter t.tp_constraints begin fun (ck, cstr) ->
           (* Constraint might contain uses of generic type parameters *)

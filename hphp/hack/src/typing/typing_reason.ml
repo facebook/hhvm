@@ -96,6 +96,7 @@ type t =
   | Rcstr_on_generics of Pos.t * Nast.sid
   | Rlambda_param    of Pos.t * t
   | Rshape of Pos.t * string
+  | Renforceable     of Pos.t
 
 and arg_position =
   | Aonly
@@ -309,6 +310,8 @@ let rec to_string prefix r =
   | Rlambda_param (_, r_orig) ->
     to_string prefix r_orig
   | Rshape (p, fun_name) -> [(p, prefix ^ " because " ^ fun_name ^ " expects a shape")]
+  | Renforceable p ->
+    [(p, prefix ^ " because it is an unenforceable type")]
 
 and to_pos = function
   | Rnone     -> Pos.none
@@ -393,6 +396,7 @@ and to_pos = function
   | Rcstr_on_generics (p, _) -> p
   | Rlambda_param (p, _) -> p
   | Rshape (p, _) -> p
+  | Renforceable p -> p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -506,6 +510,7 @@ match r with
   | Rcstr_on_generics _ -> "Rcstr_on_generics"
   | Rlambda_param _ -> "Rlambda_param"
   | Rshape _ -> "Rshape"
+  | Renforceable _ -> "Renforceable"
 
 let pp fmt r =
   Format.pp_print_string fmt @@ to_constructor_string r

@@ -486,12 +486,12 @@ and localize_hint ~ety_env env hint =
  * where ck is as, super or =
  *)
 let localize_generic_parameters_with_bounds
-    ~ety_env (env:Env.env) (tparams:Nast.tparam list) =
+    ~ety_env (env:Env.env) (tparams:decl tparam list) =
   let env = Env.add_generic_parameters env tparams in
-  let localize_bound env ({ Nast.tp_name = (pos,name); tp_constraints = cstrl; _ }: Nast.tparam) =
+  let localize_bound env ({ tp_name = (pos,name); tp_constraints = cstrl; _ }: decl tparam) =
     let tparam_ty = (Reason.Rwitness pos, Tabstract(AKgeneric name, None)) in
-    List.map_env env cstrl (fun env (ck, h) ->
-      let env, ty = localize env (Decl_hint.hint env.Env.decl_env h) ~ety_env in
+    List.map_env env cstrl (fun env (ck, cstr) ->
+      let env, ty = localize env cstr ~ety_env in
       env, (tparam_ty, ck, ty)) in
   let env, cstrss = List.map_env env tparams localize_bound in
   env, List.concat cstrss
@@ -520,5 +520,41 @@ let sub_type_decl env ty1 ty2 =
   let env, ty1 = localize_with_self env ty1 in
   let env, ty2 = localize_with_self env ty2 in
   ignore (TUtils.sub_type env ty1 ty2)
+
+(*****************************************************************************
+ * External API
+ *****************************************************************************)
+
+let localize_with_self env ty =
+ let ty = Typing_enforceability.pessimize_type env ty in
+ localize_with_self env ty
+
+let localize ~ety_env env ty =
+  let ty = Typing_enforceability.pessimize_type env ty in
+  localize ~ety_env env ty
+
+let localize_ft ?instantiation ~ety_env env ft =
+  (* TODO: Pessimize the instantiation *)
+  let ft = Typing_enforceability.pessimize_fun_type env ft in
+  localize_ft ?instantiation ~ety_env env ft
+
+let localize_generic_parameters_with_bounds
+    ~ety_env (env:Env.env) (tparams:Nast.tparam list) =
+  let tparams: decl tparam list = List.map ~f:(fun t ->
+    let cstrl = List.map t.Nast.tp_constraints (fun (ck, cstr) ->
+      let cstr = Decl_hint.hint env.Env.decl_env cstr in
+      (ck, cstr)) in
+    let tparam = {
+      Typing_defs.tp_variance = t.Nast.tp_variance;
+      tp_name = t.Nast.tp_name;
+      tp_constraints = cstrl;
+      tp_reified = t.Nast.tp_reified;
+      tp_user_attributes = t.Nast.tp_user_attributes;
+    } in
+    Typing_enforceability.pessimize_tparam_constraints env tparam
+  ) tparams in
+  localize_generic_parameters_with_bounds ~ety_env env tparams
+
+(* TODO(T46211387) make the rest of the API pessimize *)
 
 let () = TUtils.localize_with_self_ref := localize_with_self

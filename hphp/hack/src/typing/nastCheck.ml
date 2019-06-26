@@ -454,6 +454,8 @@ and check_happly unchecked_tparams env h =
                  * stored in the class_type since it may lead to infinite
                  * recursion
                  *)
+
+                let tc_tparams = List.map tc_tparams ~f:(Typing_enforceability.pessimize_tparam_constraints env) in
                 let ety_env =
                   { (Phase.env_with_self env) with
                     substs = Subst.make tc_tparams tyl;

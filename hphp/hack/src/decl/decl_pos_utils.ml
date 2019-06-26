@@ -111,6 +111,7 @@ let rec reason = function
   | Rcstr_on_generics (p, sid) -> Rcstr_on_generics (pos p, string_id sid)
   | Rlambda_param (p, r) -> Rlambda_param (pos p, reason r)
   | Rshape (p, fun_name) -> Rshape (pos p, fun_name)
+  | Renforceable p -> Renforceable (pos p)
 
 let rec ty (p, x) =
   reason p, ty_ x

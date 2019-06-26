@@ -810,8 +810,8 @@ struct RuntimeOption {
   F(bool, HHIRRefcountOpts,            true)                            \
   F(bool, HHIREnableGenTimeInlining,   true)                            \
   F(uint32_t, HHIRInliningCostFactorMain, 100)                          \
-  F(uint32_t, HHIRInliningCostFactorCold, 100)                          \
-  F(uint32_t, HHIRInliningCostFactorFrozen, 100)                        \
+  F(uint32_t, HHIRInliningCostFactorCold, 32)                           \
+  F(uint32_t, HHIRInliningCostFactorFrozen, 10)                         \
   F(uint32_t, HHIRInliningVasmCostLimit, 17500)                         \
   F(uint32_t, HHIRInliningMinVasmCostLimit, 10000)                      \
   F(uint32_t, HHIRInliningMaxVasmCostLimit, 40000)                      \

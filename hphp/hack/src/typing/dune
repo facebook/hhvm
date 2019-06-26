@@ -3,6 +3,7 @@
   (wrapped false)
   (modules
     coverage_level_defs
+    deferred_decl
     pp_type
     typing_defs
     typing_reason)
@@ -13,6 +14,7 @@
     ide_rpc_api_types
     nast
     pos
+    relative_path
     utils_core)
   (preprocess (pps ppx_deriving.std)))
 
@@ -218,7 +220,8 @@
     heap_global_storage
     procs_bucket
     server_monitor
-    typing))
+    typing
+    typing_defs))
 
 (library
   (name typed_syntax_transforms)

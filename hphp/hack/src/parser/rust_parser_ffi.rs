@@ -163,7 +163,7 @@ caml_raise!(rust_parse_mode, |ocaml_source_text|, <l>, {
 
 macro_rules! scan_trivia {
     ($name:ident) => {
-        caml_raise!($name, |ocaml_source_text, opts, offset|, <l>, {
+        caml_raise!($name, |ocaml_source_text, offset|, <l>, {
             let relative_path = block_field(&ocaml_source_text, 0);
             let file_path = str_field(&relative_path, 1);
             let content = str_field(&ocaml_source_text, 2);

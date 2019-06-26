@@ -37,7 +37,6 @@ module Function : sig
   (* Used to add suffixes for memoized functions *)
   val add_suffix : t -> string -> t
   val elaborate_id : Namespace_env.env -> Ast.id -> t
-  val elaborate_id_with_builtins : Namespace_env.env -> Ast.id -> t
 end
 
 module Prop : sig

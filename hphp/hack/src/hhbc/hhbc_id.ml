@@ -11,17 +11,9 @@ open Core_kernel
 
 module SU = Hhbc_string_utils
 
-let elaborate_id ns kind id =
-  let was_renamed, fully_qualified_id =
-    Namespaces.elaborate_id_impl ns kind (snd id) in
-  let stripped_fully_qualified_id = SU.strip_global_ns fully_qualified_id in
-  let clean_id = SU.strip_ns fully_qualified_id in
-  let need_fallback =
-    stripped_fully_qualified_id <> clean_id &&
-    (String.contains stripped_fully_qualified_id '\\') &&
-    not (String.contains (snd id) '\\')
-  in
-  was_renamed, stripped_fully_qualified_id, if need_fallback then Some clean_id else None
+let elaborate_id ns kind (_, id) =
+  let was_renamed, fq_id = Namespaces.elaborate_id_impl ns kind id in
+  was_renamed, SU.strip_global_ns fq_id
 
 (* Class identifier, with namespace qualification if not global, but without
  * initial backslash.
@@ -40,7 +32,7 @@ module Class = struct
       else ns in
     let mangled_name = SU.Xhp.mangle n in
     let stripped_mangled_name = SU.strip_global_ns mangled_name in
-    let was_renamed, id, _ =
+    let was_renamed, id =
       elaborate_id ns Namespaces.ElaborateClass (fst id, mangled_name) in
     if was_renamed || mangled_name.[0] = '\\'
     then id
@@ -72,40 +64,12 @@ end
 module Function = struct
   type t = string
 
-  let has_hh_prefix s =
-    let s = String.lowercase s in
-    String_utils.string_starts_with s "hh\\"
-
-  let is_hh_builtin s =
-    let s = if has_hh_prefix s then String_utils.lstrip s "hh\\" else s in
-    SMap.mem s Namespaces.autoimport_funcs
-
   let from_raw_string s = s
   let to_raw_string s = s
   let add_suffix s suffix = s ^ suffix
-
-  let elaborate_id_with_builtins ns id =
-    let _, fq_id, backoff_id = elaborate_id ns Namespaces.ElaborateFun id in
-    match backoff_id with
-      (* OK we are in a namespace so let's look at the backoff ID and see if
-       * it's an HH\ or top-level function with implicit namespace.
-       *)
-    | Some id ->
-      if SMap.mem id Namespaces.autoimport_funcs
-      then SU.prefix_namespace "HH" id
-      else fq_id
-      (* Likewise for top-level, with no namespace *)
-    | None ->
-      if is_hh_builtin fq_id
-      then
-        if has_hh_prefix fq_id
-        then fq_id
-        else SU.prefix_namespace "HH" fq_id
-      else fq_id
-
-    let elaborate_id ns id =
-      let _, fq_id, _ = elaborate_id ns Namespaces.ElaborateFun id in
-      fq_id
+  let elaborate_id ns id =
+    let _, fq_id = elaborate_id ns Namespaces.ElaborateFun id in
+    fq_id
 end
 
 module Const = struct
@@ -115,7 +79,7 @@ module Const = struct
   let from_raw_string s = s
   let to_raw_string s = s
   let elaborate_id ns id =
-    let _, fq_id, _ = elaborate_id ns Namespaces.ElaborateConst id in
+    let _, fq_id = elaborate_id ns Namespaces.ElaborateConst id in
     fq_id
 
 end

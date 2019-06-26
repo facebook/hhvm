@@ -3216,7 +3216,7 @@ and emit_call_lhs_and_fcall
 
   | A.Id (_, s as id) ->
     let fq_id =
-      Hhbc_id.Function.elaborate_id_with_builtins (Emit_env.get_namespace env) id in
+      Hhbc_id.Function.elaborate_id (Emit_env.get_namespace env) id in
     let fq_id =
       let flags, num_args, _, _, _ = fcall_args in
       match SU.strip_global_ns s with
@@ -3286,7 +3286,7 @@ and emit_name_string env e =
 and emit_special_function env pos annot id (args : A.expr list) (uargs : A.expr list) default =
   let nargs = List.length args + List.length uargs in
   let fq_id =
-    Hhbc_id.Function.elaborate_id_with_builtins (Emit_env.get_namespace env) (Pos.none, id) in
+    Hhbc_id.Function.elaborate_id (Emit_env.get_namespace env) (Pos.none, id) in
   (* Make sure that we do not treat a special function that is aliased as not
    * aliased *)
   let lower_fq_name =

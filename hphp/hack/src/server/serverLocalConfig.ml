@@ -83,6 +83,9 @@ type t = {
   (* Look up class members lazily from shallow declarations instead of eagerly
      computing folded declarations representing the entire class type. *)
   shallow_class_decl : bool;
+  (* If set, defers class declarations after N lazy declarations; if not set,
+    always lazily declares classes not already in cache. *)
+  defer_class_declaration_threshold : int option;
   (* Enables the reverse naming table to fall back to SQLite for queries. *)
   enable_naming_table_fallback : bool;
   (* Selects a search provider for autocomplete and symbol search *)
@@ -142,6 +145,7 @@ let default = {
   idle_gc_slice = 0;
   basic_autocomplete_only = false;
   shallow_class_decl = false;
+  defer_class_declaration_threshold = None;
   enable_naming_table_fallback = false;
   symbolindex_search_provider = "TrieIndex";
   symbolindex_quiet = false;
@@ -280,6 +284,8 @@ let load_ fn ~silent overrides =
       ~default:default.basic_autocomplete_only config in
   let shallow_class_decl = bool_if_version "shallow_class_decl"
       ~default:default.shallow_class_decl config in
+  let defer_class_declaration_threshold =
+    int_opt "defer_class_declaration_threshold" config in
   let enable_naming_table_fallback = bool_if_version "enable_naming_table_fallback"
       ~default:default.enable_naming_table_fallback config in
   let symbolindex_search_provider = string_ "symbolindex_search_provider"
@@ -337,6 +343,7 @@ let load_ fn ~silent overrides =
     idle_gc_slice;
     basic_autocomplete_only;
     shallow_class_decl;
+    defer_class_declaration_threshold;
     enable_naming_table_fallback;
     symbolindex_search_provider;
     symbolindex_quiet;

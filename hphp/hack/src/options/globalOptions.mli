@@ -55,6 +55,8 @@ type t = {
  (* Whether to treat Tany as  Tdynamic *)
  tco_dynamic_view : bool;
 
+ tco_defer_class_declaration_threshold : int option;
+
   (*
    * Flag to disallow subtyping of untyped arrays and tuples (both ways)
   *)
@@ -244,6 +246,7 @@ val make :
   ?tco_experimental_features: SSet.t ->
   ?tco_migration_flags: SSet.t ->
   ?tco_dynamic_view: bool ->
+  ?tco_defer_class_declaration_threshold: int ->
   ?tco_disallow_array_as_tuple: bool ->
   ?po_auto_namespace_map: (string * string) list ->
   ?tco_disallow_ambiguous_lambda: bool ->
@@ -288,6 +291,7 @@ val tco_safe_vector_array : t -> bool
 val tco_experimental_feature_enabled : t -> SSet.elt -> bool
 val tco_migration_flag_enabled : t -> SSet.elt -> bool
 val tco_dynamic_view : t -> bool
+val tco_defer_class_declaration_threshold : t -> int option
 val tco_disallow_array_as_tuple : t -> bool
 val po_auto_namespace_map : t -> (string * string) list
 val po_deregister_php_stdlib : t -> bool

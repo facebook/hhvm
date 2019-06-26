@@ -13,6 +13,7 @@ type t = {
   tco_experimental_features : SSet.t;
   tco_migration_flags : SSet.t;
   tco_dynamic_view : bool;
+  tco_defer_class_declaration_threshold : int option;
   tco_disallow_array_as_tuple : bool;
   po_auto_namespace_map : (string * string) list;
   po_codegen : bool;
@@ -194,6 +195,7 @@ let default = {
  tco_experimental_features = tco_experimental_all;
  tco_migration_flags = SSet.empty;
  tco_dynamic_view = false;
+ tco_defer_class_declaration_threshold = None;
  tco_disallow_array_as_tuple = false;
  po_auto_namespace_map = [];
  po_codegen = false;
@@ -251,6 +253,7 @@ let make
   ?(tco_experimental_features = default.tco_experimental_features)
   ?(tco_migration_flags = default.tco_migration_flags)
   ?(tco_dynamic_view = default.tco_dynamic_view)
+  ?tco_defer_class_declaration_threshold
   ?(tco_disallow_array_as_tuple = default.tco_disallow_array_as_tuple)
   ?(po_auto_namespace_map = default.po_auto_namespace_map)
   ?(tco_disallow_ambiguous_lambda = default.tco_disallow_ambiguous_lambda)
@@ -294,6 +297,7 @@ let make
   tco_experimental_features;
   tco_migration_flags;
   tco_dynamic_view;
+  tco_defer_class_declaration_threshold;
   tco_disallow_array_as_tuple;
   po_auto_namespace_map;
   po_codegen = false;
@@ -346,6 +350,10 @@ let tco_migration_flag_enabled t s =
   SSet.mem s t.tco_migration_flags
 let tco_dynamic_view t =
   t.tco_dynamic_view
+
+let tco_defer_class_declaration_threshold t =
+  t.tco_defer_class_declaration_threshold
+
 let tco_disallow_array_as_tuple t =
   t.tco_disallow_array_as_tuple
 let po_auto_namespace_map t = t.po_auto_namespace_map

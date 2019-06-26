@@ -11,6 +11,7 @@ type t = GlobalOptions.t [@@deriving show]
 let safe_array = GlobalOptions.tco_safe_array
 let safe_vector_array = GlobalOptions.tco_safe_vector_array
 let disallow_ambiguous_lambda = GlobalOptions.tco_disallow_ambiguous_lambda
+let defer_class_declaration_threshold = GlobalOptions.tco_defer_class_declaration_threshold
 let disallow_array_typehint = GlobalOptions.tco_disallow_array_typehint
 let disallow_array_literal = GlobalOptions.tco_disallow_array_literal
 let language_feature_logging = GlobalOptions.tco_language_feature_logging

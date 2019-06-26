@@ -130,7 +130,7 @@ struct VariantControllerImpl {
       case VariantControllerHackArraysMode::ON:
         return empty_dict_array();
       case VariantControllerHackArraysMode::OFF:
-        return empty_array();
+        return empty_darray();
       case VariantControllerHackArraysMode::MIGRATORY:
         return RuntimeOption::EvalHackArrDVArrs
           ? empty_dict_array()
@@ -138,16 +138,14 @@ struct VariantControllerImpl {
     }
   }
   static MapType createMap(ArrayInit&& map) {
-    auto array = map.toArray();
+    auto arrayData = map.toArray().detach();
     switch (HackArraysMode) {
       case VariantControllerHackArraysMode::ON:
-        return array.toDict();
+        return Array::attach(arrayData->toDict(false));
       case VariantControllerHackArraysMode::OFF:
-        return array;
+        return Array::attach(arrayData->toDArray(false));
       case VariantControllerHackArraysMode::MIGRATORY:
-        return RuntimeOption::EvalHackArrDVArrs
-          ? array.toDict()
-          : array.toDArray();
+        return Array::attach(arrayData->toDArray(false));
     }
     not_reached(); // not sure why I need this here and not in createMap()
   }
@@ -162,7 +160,7 @@ struct VariantControllerImpl {
         empty = staticEmptyDictArray();
         break;
       case VariantControllerHackArraysMode::OFF:
-        empty = staticEmptyArray();
+        empty = staticEmptyDArray();
         break;
       case VariantControllerHackArraysMode::MIGRATORY:
         empty = RuntimeOption::EvalHackArrDVArrs
@@ -211,7 +209,7 @@ struct VariantControllerImpl {
       case VariantControllerHackArraysMode::ON:
         return empty_vec_array();
       case VariantControllerHackArraysMode::OFF:
-        return empty_array();
+        return empty_darray();
       case VariantControllerHackArraysMode::MIGRATORY:
         return RuntimeOption::EvalHackArrDVArrs
           ? empty_vec_array()

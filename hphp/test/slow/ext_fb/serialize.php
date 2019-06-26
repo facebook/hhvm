@@ -17,7 +17,9 @@ var_dump($ret);
 
 echo("\n*** array serialize-and-unserialize ***\n");
 $ret = null;
-var_dump(fb_unserialize(fb_serialize(array("test")), &$ret));
+$unserialized = fb_unserialize(fb_serialize(array("test")), &$ret);
+var_dump($unserialized);
+var_dump(is_darray($unserialized));
 var_dump($ret);
 $ret = null;
 

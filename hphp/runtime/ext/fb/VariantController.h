@@ -77,14 +77,14 @@ struct VariantControllerImpl {
         return HPHP::serialize::Type::MAP;
       case KindOfPersistentDict:
       case KindOfDict: {
-        if (HackArraysMode != VariantControllerHackArraysMode::OFF) {
+        if (HackArraysMode == VariantControllerHackArraysMode::ON) {
           return HPHP::serialize::Type::MAP;
         }
         throw HPHP::serialize::HackArraySerializeError{};
       }
       case KindOfPersistentVec:
       case KindOfVec: {
-        if (HackArraysMode != VariantControllerHackArraysMode::OFF) {
+        if (HackArraysMode == VariantControllerHackArraysMode::ON) {
           return HPHP::serialize::Type::LIST;
         }
         throw HPHP::serialize::HackArraySerializeError{};

@@ -1056,7 +1056,7 @@ struct Index::IndexData {
     CompactVector<Type>
   > closureUseVars;
 
-  bool useClassDependencies;
+  bool useClassDependencies{};
   DepMap dependencyMap;
 
   /*

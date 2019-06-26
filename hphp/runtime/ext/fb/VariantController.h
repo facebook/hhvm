@@ -94,11 +94,8 @@ struct VariantControllerImpl {
         throw HPHP::serialize::KeysetSerializeError{};
 
       case KindOfClsMeth:
-        if (RuntimeOption::EvalHackArrDVArrs) {
-          if (HackArraysMode == VariantControllerHackArraysMode::ON) {
-            return HPHP::serialize::Type::LIST;
-          }
-          throw HPHP::serialize::HackArraySerializeError{};
+        if (HackArraysMode == VariantControllerHackArraysMode::MIGRATORY) {
+          return HPHP::serialize::Type::LIST;
         } else {
           return HPHP::serialize::Type::MAP;
         }

@@ -40,7 +40,7 @@ class FramePointer {
             m_exitDummyContext = true;
           }
         } else {
-          m_fp = g_context->getFrameAtDepth(frameDepth);
+          m_fp = g_context->getFrameAtDepthForDebuggerUnsafe(frameDepth);
         }
     }
 
@@ -344,6 +344,7 @@ void CompletionsCommand::addVariableCompletions(
 
   // If there is a $this, add it.
   if (
+    !fp->isInlined() &&
     fp->func() != nullptr &&
     fp->func()->cls() != nullptr &&
     fp->hasThis()) {

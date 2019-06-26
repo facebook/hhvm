@@ -289,9 +289,8 @@ inline Cell ExecutionContext::lookupClsCns(const StringData* cls,
   return lookupClsCns(NamedEntity::get(cls), cls, cns);
 }
 
-inline VarEnv* ExecutionContext::hasVarEnv(int frame) {
-  auto const fp = getFrameAtDepth(frame);
-  if (fp && (fp->func()->attrs() & AttrMayUseVV)) {
+inline VarEnv* ExecutionContext::getVarEnv(const ActRec* fp) {
+  if (fp && !fp->isInlined() && (fp->func()->attrs() & AttrMayUseVV)) {
     if (fp->hasVarEnv()) return fp->getVarEnv();
   }
   return nullptr;

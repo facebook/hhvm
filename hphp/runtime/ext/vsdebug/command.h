@@ -580,7 +580,6 @@ public:
 private:
 
   FrameObject* getFrameObject(DebuggerSession* session);
-  static VarEnv* varEnvForFrame(FrameObject *frame);
   unsigned int m_frameId;
   bool m_returnHhvmSerialization;
   FrameObject* m_frameObj {nullptr};

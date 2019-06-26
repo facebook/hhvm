@@ -170,7 +170,9 @@ bool EvaluateCommand::executeImpl(
   if (evalContext == "repl") {
     // Note that the execution code, if it succeeded, should have created
     // a varenv at the frame already.
-    VarEnv *env = varEnvForFrame(frameObj);
+    const auto fp =
+      g_context->getFrameAtDepthForDebuggerUnsafe(frameObj->m_frameDepth);
+    VarEnv* env = g_context->getVarEnv(fp);
 
     if (env == nullptr) {
       env = g_context->m_globalVarEnv;
@@ -263,25 +265,6 @@ std::string EvaluateCommand::prepareEvalExpression(const std::string& expr) {
   }
 
   return "<?hh " + expression + ";";
-}
-
-VarEnv* EvaluateCommand::varEnvForFrame(FrameObject *frame)
-{
-  VMRegAnchor _;
-
-  auto fp = vmfp();
-  if (fp) {
-    if (fp->skipFrame()) fp = g_context->getPrevVMStateSkipFrame(fp);
-    for (int frameNum = frame->m_frameDepth; frameNum > 0; --frameNum) {
-      auto prevFp = g_context->getPrevVMStateSkipFrame(fp);
-      if (!prevFp) {
-        return nullptr;
-      }
-      fp = prevFp;
-    }
-  }
-
-  return fp ? fp->getVarEnv() : nullptr;
 }
 
 

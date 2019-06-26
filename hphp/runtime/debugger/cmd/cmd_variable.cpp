@@ -254,8 +254,9 @@ bool CmdVariable::onServer(DebuggerProxy &proxy) {
     m_variables = g_context->m_globalVarEnv->getDefinedVariables();
     m_global = true;
   } else {
-    m_variables = g_context->getLocalDefinedVariables(m_frame);
-    m_global = g_context->hasVarEnv(m_frame) == g_context->m_globalVarEnv;
+    m_variables = g_context->getLocalDefinedVariablesDebugger(m_frame);
+    const auto fp = g_context->getFrameAtDepthForDebuggerUnsafe(m_frame);
+    m_global = g_context->getVarEnv(fp) == g_context->m_globalVarEnv;
     auto oThis = g_context->getThis();
     if (nullptr != oThis) {
       TypedValue tvThis;

@@ -228,6 +228,7 @@ Class* GetCallerClassSkipBuiltins();
 Class* GetCallerClassSkipCPPBuiltins();
 c_ResumableWaitHandle* GetResumedWaitHandle();
 Array GetCallerInfo();
+ActRec* GetFrameForDebuggerUnsafe(int frameDepth);
 
 } // HPHP
 

@@ -75,7 +75,7 @@ bool InfoCommand::executeImpl(
   if (requestedObject.empty()) {
     // If no object is requested, we return info about this thread's current
     // stop location.
-    auto const frame = g_context->getFrameAtDepth(0);
+    auto const frame = g_context->getFrameAtDepthForDebuggerUnsafe(0);
     if (frame == nullptr) {
       throw DebuggerCommandException(
         "No object specified and the target thread is not stopped in a frame"

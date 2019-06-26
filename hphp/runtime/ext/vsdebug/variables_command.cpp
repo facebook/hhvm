@@ -389,10 +389,11 @@ int VariablesCommand::addLocals(
   int count = 0;
 
   const int frameDepth = scope->m_frameDepth;
-  auto const fp = g_context->getFrameAtDepth(frameDepth);
+  auto const fp = g_context->getFrameAtDepthForDebuggerUnsafe(frameDepth);
 
   // If the frame at the specified depth has a $this, include it.
   if (fp != nullptr &&
+      !fp->isInlined() &&
       fp->func() != nullptr &&
       fp->func()->cls() != nullptr &&
       fp->hasThis()) {

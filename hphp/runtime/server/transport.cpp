@@ -749,7 +749,7 @@ void LogException(const char* msg) {
 
 StringHolder Transport::compressResponse(
     const char* data, int size, bool last) {
-  StringHolder response(data, size);
+  StringHolder response(data, size, FreeType::NoFree);
   auto compressedResponse = getCompressor().compressResponse(data, size, last);
   if (compressedResponse.data() != nullptr) {
     response = std::move(compressedResponse);
@@ -848,7 +848,7 @@ void Transport::sendRawInternal(const char *data, int size,
   // HTTP header handling
   if (!m_headerSent) {
     prepareHeaders(precompressed, chunked, response,
-                   StringHolder(data, size));
+                   StringHolder(data, size, FreeType::NoFree));
     m_headerSent = true;
   }
 

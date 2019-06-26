@@ -17,40 +17,48 @@
 #ifndef incl_HPHP_STRING_HOLDER_H_
 #define incl_HPHP_STRING_HOLDER_H_
 
-#include <folly/io/IOBuf.h>
+#include <stdint.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+/**
+ * For now, use this for StringHolder, instead of something like
+ * std::default_delete.
+ */
+enum struct FreeType {
+  NoFree,
+  Free,
+  LocalFree,
+};
+
 /*
  * String holder class for storing a reference to a string that is not
- * owned by us. The string may be either a (char *, len) pair, or
- * folly::IOBuf.
- *
- * If it is a (char*, len) pair, the char* is not freed on destruction.
+ * owned by us. The type indicates whether/how to deallocate the string upon
+ * destruction.
  */
 struct StringHolder {
-
-  enum Type { StrFree, StrNoFree, IOBuf };
-
-  explicit StringHolder(const char* data, uint32_t len, bool free = false);
-  StringHolder(StringHolder&&);
+  StringHolder()
+    : m_data(nullptr), m_len(0), m_type(FreeType::NoFree) {}
+  StringHolder(const char* data, uint32_t len, FreeType t)
+    : m_data(data), m_len(len), m_type(t) {}
+  StringHolder(StringHolder&& o) noexcept
+    : m_data(o.m_data), m_len(o.m_len), m_type(o.m_type) {
+    o.m_data = nullptr;
+  }
 
   ~StringHolder();
 
-  StringHolder& operator=(StringHolder&&);
+  StringHolder& operator=(StringHolder&&) noexcept;
 
-  /* Set data source */
-  void set(folly::IOBuf *output);
+  uint32_t size() const { return m_len; }
 
-  uint32_t size() const;
-  const char* data() const;
+  const char* data() const { return m_data; }
 
 private:
   const char* m_data;
   uint32_t m_len;
-  Type m_type;
-  std::unique_ptr<folly::IOBuf> m_output;
+  FreeType m_type;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

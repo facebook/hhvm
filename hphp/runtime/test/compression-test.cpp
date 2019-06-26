@@ -690,7 +690,8 @@ TEST_F(ResponseCompressorTest, testManagerCompress) {
   EXPECT_CALL(mock, isEnabled()).WillRepeatedly(Return(true));
   EXPECT_CALL(mock, isAccepted()).WillRepeatedly(Return(true));
   EXPECT_CALL(mock, compressResponse(kResponse.data(), kResponse.size(), true))
-      .WillOnce(InvokeWithoutArgs([]() { return StringHolder("foo", 3); }));
+    .WillOnce(InvokeWithoutArgs([]() {
+      return StringHolder("foo", 3, FreeType::NoFree); }));
   EXPECT_CALL(mock, isCompressed()).WillRepeatedly(Return(true));
   EXPECT_CALL(mock, encodingName()).WillRepeatedly(Return(encoding));
 
@@ -755,7 +756,8 @@ TEST_F(ResponseCompressorTest, testManagerCompressFallbackNotAccepted) {
   EXPECT_CALL(mock2, isAccepted()).WillRepeatedly(Return(true));
 
   EXPECT_CALL(mock2, compressResponse(kResponse.data(), kResponse.size(), true))
-      .WillOnce(InvokeWithoutArgs([]() { return StringHolder("foo", 3); }));
+    .WillOnce(InvokeWithoutArgs([]() {
+      return StringHolder("foo", 3, FreeType::NoFree); }));
 
   EXPECT_CALL(mock2, isCompressed()).WillRepeatedly(Return(true));
   EXPECT_CALL(mock2, encodingName()).WillRepeatedly(Return("bar"));
@@ -786,7 +788,8 @@ TEST_F(ResponseCompressorTest, testManagerCompressFallbackNotEnabled) {
   EXPECT_CALL(mock2, isAccepted()).WillRepeatedly(Return(true));
 
   EXPECT_CALL(mock2, compressResponse(kResponse.data(), kResponse.size(), true))
-      .WillOnce(InvokeWithoutArgs([]() { return StringHolder("foo", 3); }));
+    .WillOnce(InvokeWithoutArgs([]() {
+      return StringHolder("foo", 3, FreeType::NoFree); }));
 
   EXPECT_CALL(mock2, isCompressed()).WillRepeatedly(Return(true));
   EXPECT_CALL(mock2, encodingName()).WillRepeatedly(Return("bar"));
@@ -822,9 +825,10 @@ TEST_F(ResponseCompressorTest, testManagerCompressFallbackFirstFailed) {
   EXPECT_CALL(mock2, encodingName()).WillRepeatedly(Return(encoding2));
 
   EXPECT_CALL(mock1, compressResponse(kResponse.data(), kResponse.size(), true))
-      .WillOnce(InvokeWithoutArgs([]() { return StringHolder(nullptr, 0); }));
+    .WillOnce(InvokeWithoutArgs([]() { return StringHolder{}; }));
   EXPECT_CALL(mock2, compressResponse(kResponse.data(), kResponse.size(), true))
-      .WillOnce(InvokeWithoutArgs([]() { return StringHolder("foo", 3); }));
+    .WillOnce(InvokeWithoutArgs([]() {
+      return StringHolder("foo", 3, FreeType::NoFree); }));
 
   EXPECT_CALL(mock2, isCompressed()).WillRepeatedly(Return(true));
 
@@ -850,9 +854,8 @@ TEST_F(ResponseCompressorTest, testManagerCompressChunked) {
   EXPECT_CALL(mock, isEnabled()).WillOnce(Return(true));
   EXPECT_CALL(mock, isAccepted()).WillOnce(Return(true));
   EXPECT_CALL(mock, compressResponse(_, _, _))
-      .WillRepeatedly(InvokeWithoutArgs([]() {
-          return StringHolder("foo", 3);
-      }));
+    .WillRepeatedly(InvokeWithoutArgs([]() {
+      return StringHolder("foo", 3, FreeType::NoFree);}));
   EXPECT_CALL(mock, isCompressed()).WillRepeatedly(Return(true));
   EXPECT_CALL(mock, encodingName()).WillRepeatedly(Return(encoding));
 
@@ -885,11 +888,10 @@ TEST_F(ResponseCompressorTest,
   EXPECT_CALL(mock2, isAccepted()).WillRepeatedly(Return(true));
 
   EXPECT_CALL(mock1, compressResponse(_, _, _))
-      .WillOnce(InvokeWithoutArgs([]() { return StringHolder(nullptr, 0); }));
+    .WillOnce(InvokeWithoutArgs([]() { return StringHolder{}; }));
   EXPECT_CALL(mock2, compressResponse(_, _, _))
-      .WillRepeatedly(InvokeWithoutArgs([]() {
-          return StringHolder("foo", 3);
-      }));
+    .WillRepeatedly(InvokeWithoutArgs([]() {
+      return StringHolder("foo", 3, FreeType::NoFree); }));
 
   EXPECT_CALL(mock2, isCompressed()).WillRepeatedly(Return(true));
   EXPECT_CALL(mock2, encodingName()).WillRepeatedly(Return("bar"));
@@ -921,12 +923,12 @@ TEST_F(ResponseCompressorTest, testManagerCompressChunkedFailSecondChunk) {
   EXPECT_CALL(mock1, encodingName()).WillRepeatedly(Return("bar"));
 
   EXPECT_CALL(mock1, compressResponse(_, _, _))
-      .WillOnce(InvokeWithoutArgs([]() { return StringHolder("foo", 3); }))
-      .WillOnce(InvokeWithoutArgs([]() { return StringHolder(nullptr, 0); }));
+    .WillOnce(InvokeWithoutArgs([]() {
+      return StringHolder("foo", 3, FreeType::NoFree); }))
+    .WillOnce(InvokeWithoutArgs([]() { return StringHolder{}; }));
   EXPECT_CALL(mock2, compressResponse(_, _, _))
-      .WillRepeatedly(InvokeWithoutArgs([]() {
-          return StringHolder("bar", 3);
-      }));
+    .WillRepeatedly(InvokeWithoutArgs([]() {
+      return StringHolder("bar", 3, FreeType::NoFree); }));
 
   auto compressed1 = manager->compressResponse(kResponse.data(), 100, false);
   EXPECT_NE(compressed1.data(), nullptr);
@@ -959,7 +961,8 @@ TEST_F(ResponseCompressorTest, testGetResponseHeadersCompressed) {
   EXPECT_CALL(mock, isAccepted()).WillRepeatedly(Return(true));
 
   EXPECT_CALL(mock, compressResponse(kResponse.data(), kResponse.size(), true))
-      .WillOnce(InvokeWithoutArgs([]() { return StringHolder("foo", 3); }));
+    .WillOnce(InvokeWithoutArgs([]() {
+      return StringHolder("foo", 3, FreeType::NoFree); }));
   auto compressed = manager->compressResponse(
       kResponse.data(), kResponse.size(), true);
 
@@ -988,7 +991,8 @@ TEST_F(ResponseCompressorTest, testGetResponseHeadersCompressedNoVary) {
   EXPECT_CALL(mock, isAccepted()).WillRepeatedly(Return(true));
 
   EXPECT_CALL(mock, compressResponse(kResponse.data(), kResponse.size(), true))
-      .WillOnce(InvokeWithoutArgs([]() { return StringHolder("foo", 3); }));
+    .WillOnce(InvokeWithoutArgs([]() {
+      return StringHolder("foo", 3, FreeType::NoFree); }));
   auto compressed = manager->compressResponse(
       kResponse.data(), kResponse.size(), true);
 

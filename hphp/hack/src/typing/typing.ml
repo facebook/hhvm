@@ -1894,7 +1894,7 @@ and expr_
         | (r, Tfun ft) ->
           begin
             let env, ft = Phase.(localize_ft
-              ~instantiation:Phase.{ use_name = strip_ns (snd meth); use_pos = p; explicit_tparams = [] }
+              ~instantiation:Phase.{ use_name = strip_ns (snd meth); use_pos = p; explicit_targs = [] }
               ~ety_env env ft) in
             let ty = r, Tfun ft in
             check_deprecated p ft;
@@ -2376,7 +2376,7 @@ and expr_
       let ety_env =
         { (Phase.env_with_self env) with from_class = Some CIstatic } in
       let env, declared_ft =
-        Phase.(localize_ft ~instantiation: {use_name="lambda"; use_pos=p; explicit_tparams=[]}
+        Phase.(localize_ft ~instantiation: {use_name="lambda"; use_pos=p; explicit_targs=[]}
         ~ety_env env declared_ft) in
       List.iter idl (check_escaping_var env);
       (* Ensure lambda arity is not Fellipsis in strict mode *)
@@ -3975,7 +3975,7 @@ and call_parent_construct pos env el uel =
         let fty = { fty with ft_params = params; ft_ret = ret } in
         let ety_env = Phase.env_with_self env in
         let env, fty = Phase.(localize_ft
-          ~instantiation:{ use_pos=p; use_name="idx"; explicit_tparams=[]}
+          ~instantiation:{ use_pos=p; use_name="idx"; explicit_targs=[]}
           ~ety_env env fty) in
         let tfun = Reason.Rwitness fty.ft_pos, Tfun fty in
         let env, (tel, _tuel, ty) = call ~expected p env tfun ~fty_decl:None el [] in
@@ -4231,9 +4231,10 @@ and fun_type_of_id env x tal =
   | None -> let env, _, ty = unbound_name env x in env, ty, None
   | Some decl_fty ->
       let ety_env = Phase.env_with_self env in
+      let tal = List.map ~f:(Decl_hint.hint env.Env.decl_env) tal in
       let env, fty =
         Phase.(localize_ft
-          ~instantiation: { use_name = strip_ns (snd x); use_pos = fst x; explicit_tparams = tal }
+          ~instantiation: { use_name = strip_ns (snd x); use_pos = fst x; explicit_targs = tal }
           ~ety_env env decl_fty) in
       env, (Reason.Rwitness fty.ft_pos, Tfun fty), Some decl_fty
 
@@ -4361,8 +4362,10 @@ and class_get_ ~is_method ~is_const ~this_ty ?(explicit_tparams=[])
               begin match decl_method_ with
                 (* We special case Tfun here to allow passing in explicit tparams to localize_ft. *)
                 | r, Tfun ft ->
+                  let explicit_targs = List.map explicit_tparams
+                    ~f:(Decl_hint.hint env.Env.decl_env) in
                   let env, ft =
-                    Phase.(localize_ft ~instantiation: { use_name=strip_ns mid; use_pos=p; explicit_tparams }
+                    Phase.(localize_ft ~instantiation: { use_name=strip_ns mid; use_pos=p; explicit_targs }
                       ~ety_env env ft)
                   in env, (r, Tfun ft)
                 | _ ->
@@ -4527,7 +4530,7 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
           (* the return type of __call can depend on the class params or be this *)
           let ety_env = mk_ety_env r class_info x exact paraml in
           let env, ft = Phase.(localize_ft
-            ~instantiation:{use_pos=id_pos; use_name=strip_ns id_str; explicit_tparams=[]}
+            ~instantiation:{use_pos=id_pos; use_name=strip_ns id_str; explicit_targs=[]}
             ~ety_env env ft) in
 
           let arity_pos = match ft.ft_params with
@@ -4570,8 +4573,9 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
             | (r, Tfun ft) ->
               (* We special case function types here to be able to pass explicit type
                * parameters. *)
+              let explicit_targs = List.map ~f:(Decl_hint.hint env.Env.decl_env) explicit_tparams in
               let env, ft =
-                Phase.(localize_ft ~instantiation:{ use_name=strip_ns id_str; use_pos=id_pos; explicit_tparams }
+                Phase.(localize_ft ~instantiation:{ use_name=strip_ns id_str; use_pos=id_pos; explicit_targs }
                   ~ety_env env ft) in
               env, (r, Tfun ft)
             | _ ->

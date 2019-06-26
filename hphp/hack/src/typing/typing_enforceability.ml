@@ -68,19 +68,7 @@ let rec pessimize_type env ?(trust_awaitable=false) (ty: decl ty) =
   | r, Tapply ((p, cid), targs) ->
     let targs = match Env.get_class env cid with
     | Some cls ->
-      let open List in
-      let new_targs = map2 targs (Cls.tparams cls) ~f:(fun targ tparam ->
-        (* Trust reified type arguments *)
-        if tparam.tp_reified = Nast.Reified
-        then targ
-        else pessimize_wrap env targ
-      ) in
-      begin match new_targs with
-      | Or_unequal_lengths.Ok new_targs ->
-        new_targs
-      | Or_unequal_lengths.Unequal_lengths ->
-        targs
-      end
+      pessimize_targs env targs (Cls.tparams cls)
     | None ->
       targs in
     r, Tapply ((p, cid), targs)
@@ -97,6 +85,21 @@ let rec pessimize_type env ?(trust_awaitable=false) (ty: decl ty) =
     ) fields_map in
     wrap_like (r, Tshape (fields_known, fields_map))
 
+and pessimize_targs env targs tparams =
+  if not (TypecheckerOptions.pessimize_types (Env.get_tcopt env)) then targs else
+  let open List in
+  let new_targs = map2 targs tparams ~f:(fun targ tparam ->
+    (* Trust reified type arguments *)
+    if tparam.tp_reified = Nast.Reified
+    then targ
+    else pessimize_wrap env targ
+  ) in
+  match new_targs with
+  | Or_unequal_lengths.Ok new_targs ->
+    new_targs
+  | Or_unequal_lengths.Unequal_lengths ->
+    targs
+
 and pessimize_wrap env ty =
   let ty = pessimize_type env ty in
   match ty with
@@ -105,31 +108,8 @@ and pessimize_wrap env ty =
   | _, Tapply ((_, x), []) when x = Naming_special_names.Typehints.wildcard -> ty
   | _ -> wrap_like ty
 
-and pessimize_fun_type env (ft: decl fun_type) =
-  (* TODO: It may be necessary to pessimize ft_arity, ft_tparams, and ft_where_constraints *)
-  let {
-    ft_params;
-    ft_ret;
-    ft_fun_kind;
-    _
-  } = ft in
-  (* The runtime will enforce the inner type of an Awaitable in the return of an
-   * async function *)
-  let trust_awaitable = match ft_fun_kind with
-  | Ast.FAsync | Ast.FAsyncGenerator -> true
-  | _ -> false in
-  let ft_ret = pessimize_type env ~trust_awaitable ft_ret in
-  let ft_params = List.map ft_params ~f:(fun param ->
-    let ty = pessimize_type env param.fp_type in
-    { param with fp_type = ty }
-  ) in
-  { ft with
-    ft_params;
-    ft_ret;
-  }
-
 (* For erased generics with constraints, add super dynamic and make the as constraints like types *)
-let pessimize_tparam_constraints env (t: decl tparam) =
+and pessimize_tparam_constraints env (t: decl tparam) =
   if not (TypecheckerOptions.pessimize_types (Env.get_tcopt env)) then t else
   match t.tp_reified with
   | Nast.Reified -> t
@@ -145,3 +125,30 @@ let pessimize_tparam_constraints env (t: decl tparam) =
     let tp_constraints =
       (Ast.Constraint_super, dyn) :: tp_constraints in
     { t with tp_constraints }
+
+and pessimize_fun_type env (ft: decl fun_type) =
+  (* TODO: It may be necessary to pessimize ft_arity and ft_where_constraints *)
+  let {
+    ft_params;
+    ft_ret;
+    ft_fun_kind;
+    ft_tparams;
+    _
+  } = ft in
+  (* The runtime will enforce the inner type of an Awaitable in the return of an
+   * async function *)
+  let trust_awaitable = match ft_fun_kind with
+  | Ast.FAsync | Ast.FAsyncGenerator -> true
+  | _ -> false in
+  let ft_ret = pessimize_type env ~trust_awaitable ft_ret in
+  let ft_params = List.map ft_params ~f:(fun param ->
+    let ty = pessimize_type env param.fp_type in
+    { param with fp_type = ty }
+  ) in
+  let ft_tparams = Tuple.T2.map_fst ft_tparams
+    ~f:(List.map ~f:(pessimize_tparam_constraints env)) in
+  { ft with
+    ft_params;
+    ft_ret;
+    ft_tparams;
+  }

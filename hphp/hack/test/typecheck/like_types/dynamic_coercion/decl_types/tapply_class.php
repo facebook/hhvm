@@ -18,3 +18,19 @@ function erased(): E<int> {
 function reified(): R<int> {
   return dyn(); // ok
 }
+
+function erased_dynamic(): E<dynamic> {
+  return dyn(); // ok
+}
+
+function reified_dynamic(): R<dynamic> /* currently banned */ {
+  return dyn(); // ok
+}
+
+function erased_like(): E<~int> {
+  return dyn(); // ok
+}
+
+function reified_like(): R<~int> {
+  return dyn(); // ok
+}

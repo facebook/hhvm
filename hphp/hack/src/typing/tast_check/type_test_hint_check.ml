@@ -100,7 +100,28 @@ let visitor = object(this)
     update acc @@ Invalid (r, "a union")
   method! on_tobject acc r = update acc @@ Invalid (r, "the object type")
   method! on_tclass acc r cls _ tyl =
-    this#check_class_targs acc r (snd cls) tyl
+    match Env.get_class acc.env (snd cls) with
+    | Some tc ->
+      let tparams = Cls.tparams tc in
+      begin match tyl with
+      | [] -> acc (* this case should really be handled by the fold2,
+        but we still allow class hints without args in certain places *)
+      | targs ->
+        let open List.Or_unequal_lengths in
+        begin match List.fold2 ~init:acc targs tparams ~f:(fun acc targ tparam ->
+          if this#is_wildcard targ
+          then acc
+          else
+            match tparam.tp_reified with
+            | Nast.Erased -> update acc @@ Invalid (r, "a type with an erased generic type argument")
+            | Nast.SoftReified -> update acc @@ Invalid (r, "a type with a soft reified type argument")
+            | Nast.Reified -> this#on_type acc targ
+        ) with
+        | Ok new_acc -> new_acc
+        | Unequal_lengths -> acc (* arity error elsewhere *)
+        end
+      end
+    | None -> acc
   method! on_tapply acc r (_, name) tyl =
     if tyl <> [] && Typing_env.is_typedef name
     then update acc @@ Invalid (r, "a type with generics, because generics are erased at runtime")

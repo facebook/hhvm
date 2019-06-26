@@ -2564,7 +2564,7 @@ void invoke_prelude_script(
     [currentDir] (const String& f) {
       auto const w = Stream::getWrapperFromURI(f, nullptr, false);
       if (w->access(f, R_OK) == 0) {
-        require(f, true, currentDir, true);
+        include_impl_invoke(f, true, currentDir, true);
         return true;
       }
       return false;

@@ -42,6 +42,11 @@ val wrap_awaitable:
   Ast_defs.pos ->
   Typing_defs.locl Typing_defs.ty -> Typing_defs.locl Typing_defs.ty
 
+val make_return_type:
+  (Env.env -> Typing_defs.decl Typing_defs.ty -> Env.env * Typing_defs.locl Typing_defs.ty) ->
+  Env.env ->
+  Typing_defs.decl Typing_defs.ty -> Env.env * Typing_defs.locl Typing_defs.ty
+
 (** For async functions, strip Awaitable<_> from the return type *)
 val strip_awaitable:
   Ast_defs.fun_kind ->

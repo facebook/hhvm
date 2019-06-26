@@ -532,12 +532,13 @@ and fun_def tcopt f : Tast.fun_def option =
   let env =
     Phase.localize_where_constraints ~ety_env env f.f_where_constraints in
   let decl_ty = Option.map ~f:(Decl_hint.hint env.Env.decl_env) f.f_ret in
+  let env = Env.set_fn_kind env f.f_fun_kind in
   let env, locl_ty =
     match decl_ty with
     | None ->
       env, (Reason.Rwitness pos, Typing_utils.tany env)
     | Some ty ->
-      Phase.localize_with_self env ty in
+      Typing_return.make_return_type Phase.localize_with_self env ty in
   let return = Typing_return.make_info f.f_fun_kind f.f_user_attributes env
     ~is_explicit:(Option.is_some f.f_ret) locl_ty decl_ty in
   let env, param_tys =
@@ -606,7 +607,6 @@ and fun_ ?(abstract=false) env return pos named_body f_kind =
   Env.with_env env begin fun env ->
     debug_last_pos := pos;
     let env = Env.set_return env return in
-    let env = Env.set_fn_kind env f_kind in
     let env, tb = block env named_body.fb_ast in
     Typing_sequencing.sequence_check_block named_body.fb_ast;
     let { Typing_env_return_info.return_type = ret; _} = Env.get_return env in
@@ -2895,7 +2895,7 @@ and anon_make tenv p f ft idl is_anon =
             let ety_env =
               { (Phase.env_with_self env) with
                 from_class = Some CIstatic } in
-            Phase.localize ~ety_env env ret in
+            Typing_return.make_return_type (Phase.localize ~ety_env) env ret in
         let env = Env.set_return env
           (Typing_return.make_info f.f_fun_kind [] env
             ~is_explicit:(Option.is_some ret_ty)
@@ -6725,6 +6725,7 @@ and method_def env m =
       else env in
   let env = Env.clear_params env in
   let decl_ty = Option.map ~f:(Decl_hint.hint env.Env.decl_env) m.m_ret in
+  let env = Env.set_fn_kind env m.m_fun_kind in
   let env, locl_ty = match decl_ty with
     | None ->
       env, Typing_return.make_default_return env m.m_name
@@ -6735,7 +6736,7 @@ and method_def env m =
       let ety_env =
         { (Phase.env_with_self env) with
           from_class = Some CIstatic } in
-      Phase.localize ~ety_env env ret in
+      Typing_return.make_return_type (Phase.localize ~ety_env) env ret in
   let return = Typing_return.make_info m.m_fun_kind m.m_user_attributes env
     ~is_explicit:(Option.is_some m.m_ret) locl_ty decl_ty in
   let env, param_tys =

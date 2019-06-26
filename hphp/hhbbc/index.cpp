@@ -1758,6 +1758,23 @@ void add_system_constants_to_index(IndexData& index) {
 
 //////////////////////////////////////////////////////////////////////
 
+struct ClassInfoData {
+  // Map from name to classes that directly use that name (as parent,
+  // interface or trait).
+  hphp_hash_map<SString,
+                CompactVector<const php::Class*>,
+                string_data_hash,
+                string_data_isame>     classUsers;
+  // Map from php::Class to number of dependencies, used in
+  // conjunction with classUsers above.
+  hphp_hash_map<const php::Class*, uint32_t> classDepCounts;
+
+  uint32_t cqFront{};
+  uint32_t cqBack{};
+  std::vector<const php::Class*> classQueue;
+  bool hasPseudoCycles{};
+};
+
 // We want const qualifiers on various index data structures for php
 // object pointers, but during index creation time we need to
 // manipulate some of their attributes (changing the representation).
@@ -1775,6 +1792,8 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
 
   for (auto& c : unit.classes) {
     auto const attrsToRemove =
+      AttrUnique |
+      AttrPersistent |
       AttrNoOverride |
       AttrNoOverrideMagicGet |
       AttrNoOverrideMagicSet |
@@ -1782,11 +1801,31 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
       AttrNoOverrideMagicUnset;
     attribute_setter(c->attrs, false, attrsToRemove);
 
-    if (c->attrs & AttrEnum) {
-      index.enums.insert({c->name, c.get()});
+    // Manually set closure classes to be unique to maintain invariance.
+    if (is_closure(*c)) {
+      attrSetter(c->attrs, true, AttrUnique);
     }
 
-    index.classes.insert({c->name, c.get()});
+    if (c->attrs & AttrEnum) {
+      index.enums.emplace(c->name, c.get());
+    }
+
+    /*
+     * A class can be defined with the same name as a builtin in the
+     * repo. Any such attempts will fatal at runtime, so we can safely
+     * ignore any such definitions. This ensures that names referring
+     * to builtins are always fully resolvable.
+     */
+    auto const classes = find_range(index.classes, c->name);
+    if (classes.begin() != classes.end()) {
+      if (c->attrs & AttrBuiltin) {
+        index.classes.erase(classes.begin(), classes.end());
+      } else if (classes.begin()->second->attrs & AttrBuiltin) {
+        assertx(std::next(classes.begin()) == classes.end());
+        continue;
+      }
+    }
+    index.classes.emplace(c->name, c.get());
 
     for (auto& m : c->methods) {
       attribute_setter(m->attrs, false, AttrNoOverride);
@@ -1875,62 +1914,41 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
 }
 
 struct NamingEnv {
-  NamingEnv(php::Program* program, IndexData& index) :
-      program{program}, index{index} {}
+  NamingEnv(php::Program* program, IndexData& index, ClassInfoData& cid) :
+      program{program}, index{index}, cid{cid} {}
 
   struct Define;
-  struct Seen;
 
   ClassInfo* try_lookup(SString name) const {
+    auto const range = index.classInfo.equal_range(name);
+    // We're resolving in topological order; we shouldn't be here
+    // unless we know there's at least one resolution of this class.
+    assertx(range.first != range.second);
+    // Common case will be exactly one resolution. Lets avoid the
+    // copy_range, and iteration for that case.
+    if (std::next(range.first) == range.second) {
+      return range.first->second;
+    }
     auto const it = names.find(name);
-    return it == end(names) ? nullptr : it->second;
+    if (it != end(names)) return it->second;
+    return nullptr;
   }
 
   ClassInfo* lookup(SString name) const {
-    auto ret = try_lookup(name);
-    always_assert(ret && "NamingEnv::lookup failed unexpectedly");
+    auto const ret = try_lookup(name);
+    assertx(ret);
     return ret;
-  }
-
-  // Return true when the name has been seen before.
-  // This is intended only for checking circular dependencies in
-  // pre-resolution time.
-  bool seen(SString name) const {
-    return names.count(name);
   }
 
   php::Program*                              program;
   IndexData&                                 index;
+  ClassInfoData&                             cid;
+  std::unordered_multimap<
+    const php::Class*,
+    ClassInfo*,
+    pointer_hash<php::Class>>                resolved;
 private:
   ISStringToOne<ClassInfo>                   names;
-};
-
-struct NamingEnv::Seen {
-
-  // Add to the seen set.
-  explicit Seen(NamingEnv& env, SString name): env(env), name(name) {
-    ITRACE(3, "visiting {}\n", name);
-    assert(!env.seen(name));
-
-    // A name can not be simultaneously in "defined" and "visiting" state.
-    // When one reaches the "define" case, it is already preresolved, and thus
-    // it has been removed from the "visiting" set since we've done visiting it.
-    env.names[name] = nullptr;
-  }
-
-  // Remove from the seen set when going out-of-scope
-  ~Seen() {
-    env.names.erase(name);
-  }
-
-  // Prevent copying
-  Seen(const Seen&)            = delete;
-  Seen& operator=(const Seen&) = delete;
-
-private:
-  Trace::Indent indent;
-  NamingEnv& env;
-  SString name;
 };
 
 struct NamingEnv::Define {
@@ -2171,6 +2189,8 @@ void rename_closure(NamingEnv& env, php::Class* cls) {
   env.index.classes.emplace(newName, cls);
 }
 
+void preresolve(NamingEnv& env, const php::Class* cls);
+
 void flatten_traits(NamingEnv& env, ClassInfo* cinfo) {
   for (auto t : cinfo->usedTraits) {
     if (t->usedTraits.size() && !(t->cls->attrs & AttrNoExpandTrait)) {
@@ -2276,6 +2296,7 @@ void flatten_traits(NamingEnv& env, ClassInfo* cinfo) {
         classClosures.push_back(clo);
 
         cls->unit->classes[ent.second.second] = std::move(ent.second.first);
+        preresolve(env, clo);
       }
     }
   }
@@ -2311,17 +2332,11 @@ void resolve_combinations(NamingEnv& env,
 
   auto resolve_one = [&] (SString name) {
     if (env.try_lookup(name)) return true;
-    auto any = false;
-    for (auto& kv : copy_range(env.index.classInfo, name)) {
+    auto const range = copy_range(env.index.classInfo, name);
+    assertx(range.size() > 1);
+    for (auto& kv : range) {
       NamingEnv::Define def{env, name, kv.second, cls};
       resolve_combinations(env, cls);
-      any = true;
-    }
-    if (!any) {
-      ITRACE(2,
-             "Resolve combinations failed for `{}' because "
-             "there were no resolutions of `{}'\n",
-             cls->name, name);
     }
     return false;
   };
@@ -2392,64 +2407,62 @@ void resolve_combinations(NamingEnv& env,
     }
   }
   cinfo->baseList.shrink_to_fit();
+  env.resolved.emplace(cls, cinfo.get());
   env.index.classInfo.emplace(cls->name, cinfo.get());
   env.index.allClassInfos.push_back(std::move(cinfo));
 }
 
-void preresolve(NamingEnv& env, SString clsName) {
-  if (env.index.classInfo.count(clsName)) return;
+void preresolve(NamingEnv& env, const php::Class* cls) {
+  assertx(!env.resolved.count(cls));
 
-  ITRACE(2, "preresolve: {}\n", clsName);
-  if (env.seen(clsName)) {
-    ITRACE(3, "Circular inheritance detected: {}\n", clsName);
-    return;
-  }
-  NamingEnv::Seen seen(env, clsName);
+  ITRACE(2, "preresolve: {}:{}\n", cls->name, (void*)cls);
   {
     Trace::Indent indent;
-    auto process_one = [&] (const php::Class* cls) {
+    if (debug) {
       if (cls->parentName) {
-        preresolve(env, cls->parentName);
+        assertx(env.index.classInfo.count(cls->parentName));
       }
-      for (auto& i : cls->interfaceNames) {
-        preresolve(env, i);
+      for (DEBUG_ONLY auto& i : cls->interfaceNames) {
+        assertx(env.index.classInfo.count(i));
       }
-      for (auto& t : cls->usedTraitNames) {
-        preresolve(env, t);
+      for (DEBUG_ONLY auto& t : cls->usedTraitNames) {
+        assertx(env.index.classInfo.count(t));
       }
-      resolve_combinations(env, cls);
-    };
-    auto const classRange = find_range(env.index.classes, clsName);
-    [&] {
-      if (begin(classRange) == end(classRange)) {
-        return;
-      }
-      if (std::next(begin(classRange)) == end(classRange)) {
-        return process_one(begin(classRange)->second);
-      }
-      for (auto& kv : classRange) {
-        if (is_systemlib_part(*kv.second->unit)) {
-          return process_one(kv.second);
-        }
-      }
-      for (auto& kv : classRange) {
-        process_one(kv.second);
-      }
-    }();
+    }
+    resolve_combinations(env, cls);
   }
 
-  ITRACE(3, "preresolve: {} ({} resolutions)\n",
-         clsName, env.index.classInfo.count(clsName));
+  ITRACE(3, "preresolve: {}:{} ({} resolutions)\n",
+         cls->name, (void*)cls, env.resolved.count(cls));
 
-  if (options.FlattenTraits) {
-    auto const range = find_range(env.index.classInfo, clsName);
-    if (begin(range) != end(range) && std::next(begin(range)) == end(range)) {
+  auto const range = find_range(env.resolved, cls);
+  if (begin(range) != end(range)) {
+    auto const& users = env.cid.classUsers[cls->name];
+    for (auto const cu : users) {
+      auto const it = env.cid.classDepCounts.find(cu);
+      if (it == env.cid.classDepCounts.end()) {
+        assertx(env.cid.hasPseudoCycles);
+        continue;
+      }
+      auto& depCount = it->second;
+      assertx(depCount);
+      if (!--depCount) {
+        env.cid.classDepCounts.erase(it);
+        ITRACE(5, "  enqueue: {}:{}\n", cu->name, (void*)cu);
+        env.cid.classQueue[env.cid.cqBack++] = cu;
+      } else {
+        ITRACE(6, "  depcount: {}:{} = {}\n", cu->name, (void*)cu, depCount);
+      }
+    }
+    if (options.FlattenTraits &&
+        !(cls->attrs & AttrNoExpandTrait) &&
+        !cls->usedTraitNames.empty() &&
+        std::next(begin(range)) == end(range) &&
+        env.index.classes.count(cls->name) == 1) {
       Trace::Indent indent;
       auto const cinfo = begin(range)->second;
-      if (!(cinfo->cls->attrs & AttrNoExpandTrait) &&
-          !cinfo->usedTraits.empty()) {
-        flatten_traits(env, cinfo);
-      }
+      assertx(!cinfo->usedTraits.empty());
+      flatten_traits(env, cinfo);
     }
   }
 }
@@ -3460,30 +3473,104 @@ Index::Index(php::Program* program,
     rebuild_exception->class_aliases.clear();
   }
 
-  for (auto& u : program->units) {
-    add_unit_to_index(*m_data, *u);
+  {
+    trace_time trace_add_units("add units to index");
+    for (auto& u : program->units) {
+      add_unit_to_index(*m_data, *u);
+    }
+  }
+
+  ClassInfoData cid;
+  {
+    trace_time build_class_info_data("build classinfo data");
+    for (auto const &elm : m_data->classes) {
+      auto const c = elm.second;
+      auto const addUser = [&] (SString cName) {
+        cid.classUsers[cName].push_back(c);
+        auto const count = m_data->classes.count(cName);
+        cid.classDepCounts[c] += count ? count : 1;
+      };
+      if (c->parentName) {
+        addUser(c->parentName);
+      }
+      for (auto& i : c->interfaceNames) {
+        addUser(i);
+      }
+      for (auto& t : c->usedTraitNames) {
+        addUser(t);
+      }
+      if (!cid.classDepCounts.count(c)) {
+        FTRACE(5, "Adding no-dep class {}:{} to classQueue\n",
+               c->name, (void*)c);
+        // make sure that closure is first, because we end up calling
+        // preresolve directly on closures created by trait
+        // flattening, which assumes all dependencies are satisfied.
+        if (cid.classQueue.size() && c->name == s_Closure.get()) {
+          cid.classQueue.push_back(cid.classQueue[0]);
+          cid.classQueue[0] = c;
+        } else {
+          cid.classQueue.push_back(c);
+        }
+      } else {
+        FTRACE(6, "Class {}:{} has {} deps\n",
+               c->name, (void*)c, cid.classDepCounts[c]);
+      }
+    }
+
+    cid.cqBack = cid.classQueue.size();
+    cid.classQueue.resize(m_data->classes.size());
   }
 
   {
-    NamingEnv env{program, *m_data};
-    for (auto& u : program->units) {
-      Trace::Bump bumper{Trace::hhbbc, kSystemLibBump, is_systemlib_part(*u)};
-      // iterate by index, because preresolve can add closures to the
-      // end of u->classes via flatten_traits (which need to be
-      // visited after they're added).
-      for (size_t idx = 0; idx < u->classes.size(); idx++) {
-        auto const c = u->classes[idx].get();
-        // Classes with no possible resolutions won't get visited in the
-        // mark_persistent pass; make sure everything starts off with
-        // the attributes clear.
-        attrSetter(c->attrs, false, AttrUnique | AttrPersistent);
+    trace_time preresolve_classes("preresolve classes");
 
-        // Manually set closure classes to be unique to maintain invariance.
-        if (is_closure(*c)) {
-          attrSetter(c->attrs, true, AttrUnique);
-        }
-        preresolve(env, c->name);
+    auto canResolve = [&] (const php::Class* cls) {
+      if (cls->parentName && !m_data->classInfo.count(cls->parentName)) {
+        return false;
       }
+      for (auto& i : cls->interfaceNames) {
+        if (!m_data->classInfo.count(i)) return false;
+      }
+      for (auto& t : cls->usedTraitNames) {
+        if (!m_data->classInfo.count(t)) return false;
+      }
+      return true;
+    };
+
+    NamingEnv env{program, *m_data, cid};
+    while (true) {
+      auto const ix = cid.cqFront++;
+      if (ix == cid.cqBack) {
+        // we've consumed everything where all dependencies are
+        // satisfied. There may still be some pseudo-cycles that can
+        // be broken though.
+        //
+        // eg if A extends B and B' extends A', we'll resolve B and
+        // A', and then end up here, since both A and B' still have
+        // one dependency. But both A and B' can be resolved at this
+        // point
+        for (auto it = cid.classDepCounts.begin();
+             it != cid.classDepCounts.end();
+            ) {
+          if (canResolve(it->first)) {
+            FTRACE(2, "Breaking pseudo-cycle for class {}:{}\n",
+                   it->first->name, (void*)it->first);
+            cid.classQueue[cid.cqBack++] = it->first;
+            it = cid.classDepCounts.erase(it);
+            cid.hasPseudoCycles = true;
+          } else {
+            ++it;
+          }
+        }
+        if (ix == cid.cqBack) {
+          break;
+        }
+      }
+      auto const c = cid.classQueue[ix];
+      Trace::Bump bumper{
+        Trace::hhbbc_index, kSystemLibBump, is_systemlib_part(*c->unit)
+      };
+      preresolve(env, c);
     }
   }
 

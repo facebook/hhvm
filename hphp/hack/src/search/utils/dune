@@ -4,5 +4,6 @@
   (libraries
     ast
     file_info
-    pos)
+    pos
+    sqlite3)
   (preprocess (pps ppx_deriving.std)))

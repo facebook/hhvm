@@ -1343,30 +1343,24 @@ tv_rval ObjectData::getPropIgnoreLateInit(const Class* ctx,
   return lookup.val && lookup.accessible ? lookup.val : nullptr;
 }
 
-tv_lval ObjectData::vGetPropIgnoreAccessibility(const StringData* key) {
-  auto const lookup = getPropImpl<true, true, true>(nullptr, key);
+tv_rval ObjectData::getPropIgnoreAccessibility(const StringData* key) {
+  auto const lookup = getPropImpl<false, true, true>(nullptr, key);
   auto prop = lookup.val;
-  if (UNLIKELY(lookup.isConst)) throwBindConstProp(lookup.slot);
-  if (prop) {
-    if (type(prop) != KindOfUninit) {
-      boxingTypeHint(lookup.prop);
-      tvBoxIfNeeded(prop);
+  if (!prop) return nullptr;
+  if (lookup.prop && type(prop) == KindOfUninit &&
+      (lookup.prop->attrs & AttrLateInit)) {
+
+    if (lookup.prop->attrs & AttrLateInitSoft) {
+      raise_soft_late_init_prop(lookup.prop->cls, key, false);
+      tvDup(
+        *g_context->getSoftLateInitDefault().asTypedValue(),
+        prop
+      );
       return prop;
-    } else if (lookup.prop && (lookup.prop->attrs & AttrLateInit)) {
-      if (lookup.prop->attrs & AttrLateInitSoft) {
-        raise_soft_late_init_prop(lookup.prop->cls, key, false);
-        tvDup(
-          *g_context->getSoftLateInitDefault().asTypedValue(),
-          prop
-        );
-        boxingTypeHint(lookup.prop);
-        tvBoxIfNeeded(prop);
-        return prop;
-      }
-      throw_late_init_prop(lookup.prop->cls, key, false);
     }
+    throw_late_init_prop(lookup.prop->cls, key, false);
   }
-  return tv_lval{};
+  return prop;
 }
 
 //////////////////////////////////////////////////////////////////////

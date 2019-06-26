@@ -477,8 +477,8 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   // KindOfUninit.
   tv_rval getPropIgnoreLateInit(const Class* ctx,
                                 const StringData* key) const;
-  // don't use vGetPropIgnoreAccessibility in new code
-  tv_lval vGetPropIgnoreAccessibility(const StringData*);
+  // don't use getPropIgnoreAccessibility in new code
+  tv_rval getPropIgnoreAccessibility(const StringData*);
 
  private:
   struct PropLookup {

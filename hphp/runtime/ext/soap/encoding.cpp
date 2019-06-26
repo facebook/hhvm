@@ -30,6 +30,7 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/vm/native-data.h"
 
 namespace HPHP {
@@ -651,6 +652,13 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, const Variant& data, int s
   return node;
 }
 
+xmlNodePtr master_to_xml(encodePtr encode, tv_rval data, int style,
+                         xmlNodePtr parent) {
+  assertx(data);
+  auto var = data.tv();
+  return master_to_xml_int(encode, tvAsCVarRef(&var), style, parent, true);
+}
+
 xmlNodePtr master_to_xml(encodePtr encode, const Variant& data, int style,
                          xmlNodePtr parent) {
   return master_to_xml_int(encode, data, style, parent, true);
@@ -1199,32 +1207,18 @@ static xmlNodePtr to_xml_null(encodeType* /*type*/, const Variant& /*data*/,
   return ret;
 }
 
-static bool get_zval_property(Variant &object, const char* name,
-                              Variant *ret = nullptr) {
+namespace {
+tv_rval get_rval_property(const Variant &object, const char* name) {
   String sname(name);
   if (object.isObject()) {
     Object obj = object.toObject();
-    auto const prop = obj->vGetPropIgnoreAccessibility(sname.get());
-    if (!prop) return false;
-    if (ret) {
-      tvBoxIfNeeded(prop);
-      tvBind(prop.tv(), *ret->asTypedValue());
-    }
-    return true;
+    return obj->getPropIgnoreAccessibility(sname.get());
+  } else if (object.isArray()) {
+    auto const& arr = object.toCArrRef();
+    if (arr.exists(sname)) return arr.rvalAt(sname);
   }
-  if (object.isArray()) {
-    Array arr = object.toArray();
-    if (!arr.exists(sname)) {
-      return false;
-    }
-    if (ret) {
-      auto const lval = object.toArrRef().lvalAt(sname);
-      tvBoxIfNeeded(lval);
-      tvBind(lval.tv(), *ret->asTypedValue());
-    }
-    return true;
-  }
-  return false;
+  return tv_rval {};
+}
 }
 
 const StaticString
@@ -1235,7 +1229,8 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
   const char* name = nullptr;
   Variant any;
   while (node != nullptr) {
-    if (!get_zval_property(ret, (const char *)node->name)) {
+    auto prop = get_rval_property(ret, (const char *)node->name);
+    if (!prop || type(prop) == KindOfUninit) {
       Variant val = master_to_zval(get_conversion(XSD_ANYXML), node);
 
       if (!any.isNull() && !any.isArray()) {
@@ -1414,15 +1409,15 @@ static void model_to_zval_object(Variant &ret, sdlContentModelPtr model,
 }
 
 /* Struct encode/decode */
-static Variant to_zval_object_ex(encodeType* type, xmlNodePtr data,
+static Variant to_zval_object_ex(encodeType* etype, xmlNodePtr data,
                                  const char *pce) {
   USE_SOAP_GLOBAL;
   const char *ce = "stdClass";
   String clsname;
   if (pce) {
     ce = pce;
-  } else if (!SOAP_GLOBAL(classmap).empty() && !type->type_str.empty()) {
-    String type_str(type->type_str);
+  } else if (!SOAP_GLOBAL(classmap).empty() && !etype->type_str.empty()) {
+    String type_str(etype->type_str);
     if (SOAP_GLOBAL(classmap).exists(type_str)) {
       clsname = SOAP_GLOBAL(classmap)[type_str].toString();
       ce = clsname.data();
@@ -1431,11 +1426,11 @@ static Variant to_zval_object_ex(encodeType* type, xmlNodePtr data,
 
   Variant ret;
   bool redo_any = false;
-  sdlType *sdlType = type->sdl_type;
+  sdlType *sdlType = etype->sdl_type;
   sdl *sdl = SOAP_GLOBAL(sdl);
   if (sdlType) {
     if (sdlType->kind == XSD_TYPEKIND_RESTRICTION &&
-        sdlType->encode && type != &sdlType->encode->details) {
+        sdlType->encode && etype != &sdlType->encode->details) {
       encodePtr enc = sdlType->encode;
       while (enc && enc->details.sdl_type &&
              enc->details.sdl_type->kind != XSD_TYPEKIND_SIMPLE &&
@@ -1459,7 +1454,7 @@ static Variant to_zval_object_ex(encodeType* type, xmlNodePtr data,
       }
     } else if (sdlType->kind == XSD_TYPEKIND_EXTENSION &&
                sdlType->encode &&
-               type != &sdlType->encode->details) {
+               etype != &sdlType->encode->details) {
       encodeType &details = sdlType->encode->details;
       if (details.sdl_type &&
           details.sdl_type->kind != XSD_TYPEKIND_SIMPLE &&
@@ -1486,7 +1481,8 @@ static Variant to_zval_object_ex(encodeType* type, xmlNodePtr data,
         if (soap_check_xml_ref(ret, data)) {
           return ret;
         }
-        redo_any = get_zval_property(ret, "any");
+        auto any_prop = get_rval_property(ret, "any");
+        redo_any = any_prop && any_prop.type() != KindOfUninit;
       } else {
         if (soap_check_xml_ref(ret, data)) {
           return ret;
@@ -1557,27 +1553,38 @@ static Variant to_zval_object_ex(encodeType* type, xmlNodePtr data,
     while (trav != nullptr) {
       if (trav->type == XML_ELEMENT_NODE) {
         Variant tmpVal = master_to_zval(encodePtr(), trav);
-        Variant prop;
-        if (!get_zval_property(ret, (char*)trav->name, &prop)) {
-          if (!trav->next || !get_node(trav->next, (char*)trav->name)) {
-            ret.toObject()->o_set(
-              String((char*)trav->name, CopyString), tmpVal);
+        auto const propName = (char*)trav->name;
+        // $prop = $ret->{$propName}
+        auto prop = get_rval_property(ret, propName);
+        if (!prop.is_set() || prop.type() == KindOfUninit) {
+          if (!trav->next || !get_node(trav->next, propName)) {
+            ret.toObject()->o_set(String(propName, CopyString), tmpVal);
           } else {
-            Array arr = Array::Create();
+            VArrayInit arr{1};
             arr.append(tmpVal);
-            ret.toObject()->o_set(String((char*)trav->name, CopyString), arr);
+            ret.toObject()->o_set(
+              String(propName, CopyString),
+              arr.toVariant()
+            );
           }
         } else {
-          /* Property already exist - make array */
-          if (!prop.isArray()) {
+          if (!isArrayType(prop.type())) {
             /* Convert into array */
-            Array arr = Array::Create();
-            arr.append(prop);
-            ret.toObject()->o_set(String((char*)trav->name, CopyString), arr);
-            prop = arr;
+            Array arr;
+            arr.append(prop.tv());
+            arr.append(tmpVal);
+            ret.toObject()->o_set(String(propName, CopyString), arr);
+          } else {
+            /* Append to existing array */
+            assertx(isArrayType(type(prop)));
+            auto oldArr = val(prop).parr;
+            auto arr = Array::attach(oldArr);
+            arr.append(tmpVal);
+            auto newArr = arr.detach();
+            if (newArr != oldArr) {
+              val(prop.as_lval()).parr = newArr;
+            }
           }
-          /* Add array element */
-          prop.toArrRef().append(tmpVal);
         }
       }
       trav = trav->next;
@@ -1597,18 +1604,19 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model,
     xmlNodePtr property;
     encodePtr enc;
 
-    Variant data;
-    bool propExists =
-      get_zval_property(object, model->u_element->name.c_str(), &data);
-    if (propExists && data.isNull() && !model->u_element->nillable &&
-        model->min_occurs > 0 && !strict) {
-      return 0;
-    }
+    auto data = get_rval_property(object, model->u_element->name.c_str());
+    bool propExists = data && data.type() != KindOfUninit;
     if (propExists) {
+      if (data.type() == KindOfNull &&
+          !model->u_element->nillable && model->min_occurs > 0 && !strict) {
+        return 0;
+      }
+      assertx(data);
       enc = model->u_element->encode;
       if ((model->max_occurs == -1 || model->max_occurs > 1) &&
-          data.isArray() && data.toArray()->isVectorData()) {
-        for (ArrayIter iter(data.toArray()); iter; ++iter) {
+          isArrayType(data.type()) &&
+          data.val().parr->isVectorData()) {
+        for (ArrayIter iter(data.val().parr); iter; ++iter) {
           Variant val = iter.second();
           if (val.isNull() && model->u_element->nillable) {
             property = xmlNewNode(nullptr, BAD_CAST("BOGUS"));
@@ -1636,11 +1644,11 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model,
           }
         }
       } else {
-        if (data.isNull() && model->u_element->nillable) {
+        if (data.type() == KindOfNull && model->u_element->nillable) {
           property = xmlNewNode(nullptr, BAD_CAST("BOGUS"));
           xmlAddChild(node, property);
           set_xsi_nil(property);
-        } else if (data.isNull() && model->min_occurs == 0) {
+        } else if (data.type() == KindOfNull && model->min_occurs == 0) {
           return 1;
         } else {
           property = master_to_xml(enc, data, style, node);
@@ -1689,12 +1697,13 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model,
   case XSD_CONTENT_ANY: {
     encodePtr enc;
 
-    Variant data;
-    if (get_zval_property(object, "any", &data)) {
+    auto data = get_rval_property(object, "any");
+    if (data && data.type() != KindOfUninit) {
       enc = get_conversion(XSD_ANYXML);
       if ((model->max_occurs == -1 || model->max_occurs > 1) &&
-          data.isArray() && data.toArray()->isVectorData()) {
-        for (ArrayIter iter(data.toArray()); iter; ++iter) {
+          isArrayType(data.type()) &&
+          data.val().parr->isVectorData()) {
+        for (ArrayIter iter(data.val().parr); iter; ++iter) {
           master_to_xml(enc, iter.second(), style, node);
         }
       } else {
@@ -1801,9 +1810,9 @@ xmlNodePtr to_xml_object(encodeType* type, const Variant& data_, int style,
         enc = enc->details.sdl_type->encode;
       }
       if (enc) {
-        Variant tmp;
-        if (get_zval_property(data, "_", &tmp)) {
-          xmlParam = master_to_xml(enc, tmp, style, parent);
+        auto tmp = get_rval_property(data, "_");
+        if (tmp && tmp.type() != KindOfUninit) {
+          xmlParam = master_to_xml(enc, std::move(tmp), style, parent);
         } else if (prop.isNull()) {
           xmlParam = master_to_xml(enc, data, style, parent);
         } else {
@@ -1823,9 +1832,10 @@ xmlNodePtr to_xml_object(encodeType* type, const Variant& data_, int style,
         xmlParam = master_to_xml_int(sdlType->encode, data, style,
                                      parent, false);
       } else {
-        Variant tmp;
-        if (get_zval_property(data, "_", &tmp)) {
-          xmlParam = master_to_xml(sdlType->encode, tmp, style, parent);
+        auto tmp = get_rval_property(data, "_");
+        if (tmp && tmp.type() != KindOfUninit) {
+          xmlParam = master_to_xml(sdlType->encode, std::move(tmp), style,
+                                   parent);
         } else if (prop.isNull()) {
           xmlParam = master_to_xml(sdlType->encode, data, style, parent);
         } else {
@@ -1868,14 +1878,12 @@ xmlNodePtr to_xml_object(encodeType* type, const Variant& data_, int style,
         model_to_xml_object(xmlParam, sdlType->model, data, style, 1);
       }
       if (!sdlType->attributes.empty()) {
-        for (sdlAttributeMap::const_iterator iter =
-               sdlType->attributes.begin(); iter != sdlType->attributes.end();
-             ++iter) {
-          sdlAttributePtr attr = iter->second;
+        for (auto const& iter : sdlType->attributes) {
+          sdlAttributePtr attr = iter.second;
           if (!attr->name.empty()) {
-            Variant zattr;
-            if (get_zval_property(data, attr->name.c_str(), &zattr)) {
-              xmlNodePtr dummy = master_to_xml(attr->encode, zattr,
+            auto rattr = get_rval_property(data, attr->name.c_str());
+            if (rattr && rattr.type() != KindOfUninit) {
+              xmlNodePtr dummy = master_to_xml(attr->encode, std::move(rattr),
                                                SOAP_LITERAL, xmlParam);
               if (dummy->children && dummy->children->content) {
                 if (!attr->fixed.empty() &&

@@ -139,6 +139,7 @@
   (modules
     nastCheck
     nastInitCheck
+    SymbolInfoJsonBuilder
     typing
     typing_alias
     typing_array_access

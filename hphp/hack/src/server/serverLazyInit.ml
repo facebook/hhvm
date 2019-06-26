@@ -470,7 +470,7 @@ let write_symbol_info_init
         | Some info -> (path, info)::acc
   end in
   let results  = parallel_recheck genv env file_tuples in
-  Typing_symbol_info_writer.write_json results out_file;
+  Typing_symbol_info_writer.write_json env.tcopt results out_file;
   env, t
 
 (* If we fail to load a saved state, fall back to typechecking everything *)

@@ -948,11 +948,9 @@ inline tv_lval ElemDObject(TypedValue& tvRef, tv_lval base,
  *
  * Returned pointer is not yet unboxed.  (I.e. it cannot point into a RefData.)
  */
-template<MOpMode mode, bool reffy, KeyType keyType = KeyType::Any,
-         bool copyProv>
+template<MOpMode mode, KeyType keyType = KeyType::Any, bool copyProv>
 tv_lval ElemD(TypedValue& tvRef, tv_lval base,
               key_type<keyType> key, const MInstrPropState* pState) {
-  static_assert(!reffy, "references are dead");
   assertx(mode == MOpMode::Define);
 
   base = base.unboxed();
@@ -995,7 +993,6 @@ tv_lval ElemD(TypedValue& tvRef, tv_lval base,
     case KindOfClsMeth:
       throw_cannot_write_for_clsmeth();
     case KindOfRecord:
-      assertx(!reffy);
       return ElemDRecord<keyType>(base, key);
     case KindOfRef:
       break;

@@ -466,8 +466,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   [[noreturn]] NEVER_INLINE
   void throwMutateConstProp(Slot prop) const;
-  [[noreturn]] NEVER_INLINE
-  void throwBindConstProp(Slot prop) const;
 
  public:
   // never box the lval returned from getPropLval; use propB instead

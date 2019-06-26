@@ -90,17 +90,6 @@ void verifyTypeHint(const Class* thisCls,
 }
 
 ALWAYS_INLINE
-void boxingTypeHint(const Class::Prop* prop) {
-  if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
-  if (!prop || prop->typeConstraint.isMixedResolved()) return;
-  raise_property_typehint_binding_error(
-    prop->cls,
-    prop->name,
-    prop->typeConstraint.isSoft()
-  );
-}
-
-ALWAYS_INLINE
 void unsetTypeHint(const Class::Prop* prop) {
   if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
   if (!prop || prop->typeConstraint.isMixedResolved()) return;
@@ -1242,14 +1231,6 @@ Object ObjectData::FromArray(ArrayData* properties) {
 NEVER_INLINE
 void ObjectData::throwMutateConstProp(Slot prop) const {
   throw_cannot_modify_const_prop(
-    getClassName().data(),
-    m_cls->declProperties()[prop].name->data()
-  );
-}
-
-NEVER_INLINE
-void ObjectData::throwBindConstProp(Slot prop) const {
-  throw_cannot_bind_const_prop(
     getClassName().data(),
     m_cls->declProperties()[prop].name->data()
   );

@@ -3558,11 +3558,11 @@ void elemDispatch(MOpMode mode, TypedValue key) {
         return Elem<MOpMode::InOut>(mstate.tvRef, b, key);
       case MOpMode::Define:
         if (RuntimeOption::EvalArrayProvenance) {
-          return ElemD<MOpMode::Define, false, KeyType::Any, true>(
+          return ElemD<MOpMode::Define, KeyType::Any, true>(
             mstate.tvRef, b, key, &mstate.propState
           );
         } else {
-          return ElemD<MOpMode::Define, false, KeyType::Any, false>(
+          return ElemD<MOpMode::Define, KeyType::Any, false>(
             mstate.tvRef, b, key, &mstate.propState
           );
         }

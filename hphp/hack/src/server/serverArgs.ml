@@ -40,6 +40,7 @@ type options = {
   watchman_debug_logging: bool;
   with_saved_state: saved_state_target option;
   allow_non_opt_build : bool;
+  write_symbol_info: string option;
 }
 
 (*****************************************************************************)
@@ -125,6 +126,7 @@ module Messages = struct
   let with_saved_state = " init with the given saved state instead of fetching it." ^
                         " Expects a JSON string specified as" ^
                         saved_state_json_descr
+  let write_symbol_info = " write symbol info to json files"
 end
 
 let print_json_version () =
@@ -278,6 +280,7 @@ let parse_options () =
   let watchman_debug_logging = ref false in
   let with_saved_state = ref None in
   let allow_non_opt_build = ref false in
+  let write_symbol_info = ref None in
 
   let set_ai = fun s -> ai_mode := Some (Ai_options.prepare ~server:true s) in
   let set_max_procs = fun n -> max_procs := Some n in
@@ -286,6 +289,7 @@ let parse_options () =
   let set_save_naming = fun s -> save_naming := Some s in
   let set_wait = fun fd -> waiting_client := Some (Handle.wrap_handle fd) in
   let set_with_saved_state = fun s -> with_saved_state := Some s in
+  let set_write_symbol_info = fun s -> write_symbol_info := Some s in
   let set_from = fun s -> from := s in
 
   let options = [
@@ -329,6 +333,7 @@ let parse_options () =
       "--waiting-client", Arg.Int set_wait, Messages.waiting_client;
       "--watchman-debug-logging", Arg.Set watchman_debug_logging, Messages.watchman_debug_logging;
       "--with-mini-state", Arg.String set_with_saved_state, Messages.with_saved_state;
+      "--write-symbol-info", Arg.String set_write_symbol_info, Messages.write_symbol_info;
       "-d", Arg.Set should_detach, Messages.daemon;
       "-s", Arg.String set_save_state, Messages.save_state;
     ] in
@@ -339,8 +344,8 @@ let parse_options () =
     else print_endline Build_id.build_id_ohai;
     exit 0
   end;
-  (* --json and --save both imply check *)
-  let check_mode = !check_mode || !json_mode || !save <> None; in
+  (* --json, --save, and --write-symbol-info all imply check *)
+  let check_mode = !write_symbol_info <> None || !check_mode || !json_mode || !save <> None; in
   if check_mode && !waiting_client <> None then begin
     Printf.eprintf "--check is incompatible with wait modes!\n";
     Exit_status.(exit Input_error)
@@ -396,6 +401,7 @@ let parse_options () =
     watchman_debug_logging = !watchman_debug_logging;
     with_saved_state;
     allow_non_opt_build = !allow_non_opt_build;
+    write_symbol_info = !write_symbol_info;
   }
 
 (* useful in testing code *)
@@ -425,6 +431,7 @@ let default_options ~root = {
   watchman_debug_logging = false;
   with_saved_state = None;
   allow_non_opt_build = false;
+  write_symbol_info = None;
 }
 
 (*****************************************************************************)
@@ -456,6 +463,7 @@ let waiting_client options = options.waiting_client
 let watchman_debug_logging options = options.watchman_debug_logging
 let with_saved_state options = options.with_saved_state
 let allow_non_opt_build options = options.allow_non_opt_build
+let write_symbol_info options = options.write_symbol_info
 
 (*****************************************************************************)
 (* Setters *)
@@ -506,6 +514,7 @@ let to_string
     watchman_debug_logging;
     with_saved_state;
     allow_non_opt_build;
+    write_symbol_info;
   } =
     let ai_mode_str = match ai_mode with
       | None -> "<>"
@@ -531,6 +540,9 @@ let to_string
     let max_procs_str = match max_procs with
       | None -> "<>"
       | Some n -> string_of_int n in
+    let write_symbol_info_str = match write_symbol_info with
+      | None -> "<>"
+      | Some s -> s in
     let config_str = Printf.sprintf "[%s]"
       (String.concat ~sep:", " @@ List.map ~f:(fun (key, value) -> Printf.sprintf "%s=%s" key value) config)
     in
@@ -561,5 +573,6 @@ let to_string
         "watchman_debug_logging: "; string_of_bool watchman_debug_logging; ", ";
         "with_saved_state: "; saved_state_str; ", ";
         "allow_non_opt_build: "; string_of_bool allow_non_opt_build; ", ";
+        "write_symbol_info: "; write_symbol_info_str; ", ";
       "})"
     ] |> String.concat ~sep:"")

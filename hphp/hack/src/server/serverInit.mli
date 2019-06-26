@@ -20,6 +20,7 @@ type init_approach =
   | Full_init
   | Parse_only_init
   | Saved_state_init of load_state_approach
+  | Write_symbol_info
 
 (* Saves the state that is used by init below and returns the number of
   edges added to the saved state dependency table. *)

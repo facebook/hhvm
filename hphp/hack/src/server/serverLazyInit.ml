@@ -19,6 +19,7 @@
      Full Parsing -> Naming -> Full Typecheck (with lazy decl)
 *)
 
+module Hack_bucket = Bucket
 open Core_kernel
 open Result.Export
 open Reordered_argument_collections
@@ -29,6 +30,7 @@ open ServerInitCommon
 open ServerInitTypes
 open String_utils
 
+module Bucket = Hack_bucket
 module DepSet = Typing_deps.DepSet
 module Dep = Typing_deps.Dep
 module SLC = ServerLocalConfig
@@ -423,6 +425,53 @@ let index_and_parse
   (* full init - too many files to trace all of them *)
   let trace = false in
   parsing ~lazy_parse genv env ~get_next t ~trace
+
+let recheck_job
+    (env: ServerEnv.env)
+    (tast: (Relative_path.t * Tast.program) list)
+    (progress: (Relative_path.t * FileInfo.t) list)
+  : (Relative_path.t * Tast.program) list =
+  tast @ (ServerIdeUtils.recheck env.tcopt progress)
+
+let parallel_recheck
+    (genv: ServerEnv.genv)
+    (env: ServerEnv.env)
+    (file_tuples: (Relative_path.t * FileInfo.t) list)
+  : (Relative_path.t * Tast.program) list =
+  let workers = genv.workers in
+  let num_workers = (match workers with Some w -> List.length w | None -> 1) in
+
+  MultiWorker.call
+    genv.workers
+    ~job:(recheck_job env)
+    ~merge:(@)
+    ~next:(Bucket.make ~num_workers:num_workers file_tuples)
+    ~neutral:[]
+
+let write_symbol_info_init
+    (genv: ServerEnv.genv)
+    (env: ServerEnv.env)
+  : ServerEnv.env * float =
+  let out_file = match ServerArgs.write_symbol_info genv.options with
+    | None -> failwith "No write file specified for --write-symbol-info"
+    | Some s -> s
+  in
+  let env, t = index_and_parse "write symbol info initialization" genv env in
+  let t = update_files genv env.naming_table t in
+  let env, t = naming env t in
+  let fast = Naming_table.to_fast env.naming_table in
+  let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing  in
+  let fast = Relative_path.Set.fold failed_parsing
+      ~f:(fun x m -> Relative_path.Map.remove m x) ~init:fast in
+  let file_tuples =
+    Relative_path.Map.fold fast ~init:[] ~f:begin fun path _ acc ->
+      match Naming_table.get_file_info env.naming_table path with
+        | None -> acc
+        | Some info -> (path, info)::acc
+  end in
+  let results  = parallel_recheck genv env file_tuples in
+  Typing_symbol_info_writer.write_json results out_file;
+  env, t
 
 (* If we fail to load a saved state, fall back to typechecking everything *)
 let full_init

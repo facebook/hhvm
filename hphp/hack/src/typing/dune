@@ -160,6 +160,7 @@
     typing_sequencing
     typing_shapes
     typing_structure
+    typing_symbol_info_writer
     typing_try
     typing_variance)
   (libraries

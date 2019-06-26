@@ -159,6 +159,9 @@ let init
       ServerEagerInit.init genv lazy_lev env,
       Load_state_declined "Saved-state requested, but overridden by eager init",
       false
+    | _, Write_symbol_info ->
+      ServerLazyInit.write_symbol_info_init genv env,
+      Load_state_declined "Write Symobl info state", false
 
   in
   if skip_post_init then env, init_result else

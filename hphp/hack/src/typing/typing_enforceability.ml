@@ -102,6 +102,7 @@ and pessimize_wrap env ty =
   match ty with
   | _, Tlike _ -> ty
   | _, Tgeneric x when Env.get_reified env x <> Nast.Reified -> ty
+  | _, Tapply ((_, x), []) when x = Naming_special_names.Typehints.wildcard -> ty
   | _ -> wrap_like ty
 
 and pessimize_fun_type env (ft: decl fun_type) =

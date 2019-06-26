@@ -225,9 +225,17 @@ and localize_tparams ~ety_env env pos tyl tparams =
   let (env, _), tyl = List.map2_env (env, ety_env) tyl tparams (localize_tparam pos) in
   env, tyl
 
-and localize_tparam pos (env, ety_env) ty { tp_name = (_, name); tp_constraints = cstrl; tp_reified = reified; tp_user_attributes; _ } =
+and localize_tparam pos (env, ety_env) ty tparam =
   match ty with
     | r, Tapply ((_, x), _argl) when x = SN.Typehints.wildcard ->
+      let tparam = Typing_enforceability.pessimize_tparam_constraints env tparam in
+      let {
+        tp_name = (_, name);
+        tp_constraints = cstrl;
+        tp_reified = reified;
+        tp_user_attributes;
+        _
+      } = tparam in
       let enforceable = Attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes in
       let newable = Attributes.mem SN.UserAttributes.uaNewable tp_user_attributes in
       let env, new_name = Env.add_fresh_generic_parameter env name ~reified ~enforceable ~newable in

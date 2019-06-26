@@ -5974,7 +5974,9 @@ and isexpr_generate_fresh_tparams env class_info reason hint_tyl =
   let pad_len = tparams_len - (List.length hint_tyl) in
   let hint_tyl =
     List.map hint_tyl (fun x -> Some x) @ (List.init pad_len (fun _ -> None)) in
-  let replace_wildcard env hint_ty ({ tp_name = (_, tparam_name); tp_reified = reified; tp_user_attributes; _ } as tp) =
+  let replace_wildcard env hint_ty tp =
+    let tp = Typing_enforceability.pessimize_tparam_constraints env tp in
+    let { tp_name = (_, tparam_name); tp_reified = reified; tp_user_attributes; _ } = tp in
     let enforceable = Attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes in
     let newable = Attributes.mem SN.UserAttributes.uaNewable tp_user_attributes in
     match hint_ty with
@@ -6000,22 +6002,25 @@ and safely_refine_class_type
    * with fresh type parameters *)
   let obj_ty = (fst obj_ty, Tclass (class_name, Nonexact, tyl_fresh)) in
 
+  let tparams = List.map (Cls.tparams class_info)
+    ~f:(Typing_enforceability.pessimize_tparam_constraints env) in
   (* Add in constraints as assumptions on those type parameters *)
   let ety_env = {
     type_expansions = [];
-    substs = Subst.make (Cls.tparams class_info) tyl_fresh;
+    substs = Subst.make tparams tyl_fresh;
     this_ty = obj_ty; (* In case `this` appears in constraints *)
     from_class = None;
     validate_dty = None;
   } in
   let add_bounds env (t, ty_fresh) =
+      let t = Typing_enforceability.pessimize_tparam_constraints env t in
       List.fold_left t.tp_constraints ~init:env ~f:begin fun env (ck, ty) ->
         (* Substitute fresh type parameters for
          * original formals in constraint *)
         let env, ty = Phase.localize ~ety_env env ty in
         SubType.add_constraint p env ck ty_fresh ty end in
   let env =
-    List.fold_left (List.zip_exn (Cls.tparams class_info) tyl_fresh)
+    List.fold_left (List.zip_exn tparams tyl_fresh)
       ~f:add_bounds ~init:env in
 
   (* Finally, if we have a class-test on something with static classish type,

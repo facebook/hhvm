@@ -58,6 +58,7 @@ type t = {
   option_notice_on_byref_argument_typehint_violation : bool;
   option_log_array_provenance             : bool;
   option_use_rust_parser                  : bool;
+  option_enable_constant_visibility_modifiers : bool;
 }
 
 let default = {
@@ -109,6 +110,7 @@ let default = {
   option_notice_on_byref_argument_typehint_violation = false;
   option_log_array_provenance = false;
   option_use_rust_parser = false;
+  option_enable_constant_visibility_modifiers = false;
 }
 
 let constant_folding o = o.option_constant_folding
@@ -157,6 +159,7 @@ let enable_pocket_universes o = o.option_enable_pocket_universes
 let notice_on_byref_argument_typehint_violation o = o.option_notice_on_byref_argument_typehint_violation
 let log_array_provenance o = o.option_log_array_provenance
 let use_rust_parser o = o.option_use_rust_parser
+let enable_constant_visibility_modifiers o = o.option_enable_constant_visibility_modifiers
 let to_string o =
   let dynamic_invokes =
     String.concat ~sep:", " (SSet.elements (dynamic_invoke_functions o)) in
@@ -207,6 +210,7 @@ let to_string o =
     ; Printf.sprintf "notice_on_byref_argument_typehint_violation: %B" @@ notice_on_byref_argument_typehint_violation o
     ; Printf.sprintf "log_array_provenance: %B" @@ log_array_provenance o
     ; Printf.sprintf "use_rust_parser: %B" @@ use_rust_parser o
+    ; Printf.sprintf "enable_constant_visibility_modifiers: %B" @@ enable_constant_visibility_modifiers o
     ]
 
 let as_bool s =
@@ -314,6 +318,8 @@ let set_option options name value =
     { options with option_notice_on_byref_argument_typehint_violation = as_bool value }
   | "hhvm.log_array_provenance" ->
     { options with option_log_array_provenance = as_bool value }
+  | "hhvm.lang.enable_constant_visibility_modifiers" ->
+    { options with option_enable_constant_visibility_modifiers = as_bool value }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -462,6 +468,8 @@ let value_setters = [
      fun opts v -> { opts with option_log_array_provenance = (v > 0) });
   (set_value "hhvm.hack.lang.hack_compiler_use_rust_parser" get_value_from_config_int @@
      fun opts v -> { opts with option_use_rust_parser = (v > 0) });
+  (set_value "hhvm.hack.lang.enable_constant_visibility_modifiers" get_value_from_config_int @@
+    fun opts v -> { opts with option_enable_constant_visibility_modifiers = (v = 1) });
 ]
 
 let extract_config_options_from_json ~init config_json =

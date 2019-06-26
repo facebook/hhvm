@@ -228,6 +228,8 @@ type t = {
     dependencies as opposed to file level dependencies *)
  tico_invalidate_smart : bool;
 
+ (* Enable constants to have visibility modifiers *)
+ po_enable_constant_visibility_modifiers : bool;
 } [@@deriving show]
 
 val make :
@@ -277,6 +279,7 @@ val make :
   ?tco_disallow_invalid_arraykey_constraint: bool ->
   ?tico_invalidate_files: bool ->
   ?tico_invalidate_smart: bool ->
+  ?po_enable_constant_visibility_modifiers: bool ->
   unit ->
   t
 
@@ -351,3 +354,4 @@ val tco_disallow_unresolved_type_variables : t -> bool
 val tco_disallow_invalid_arraykey_constraint : t -> bool
 val tico_invalidate_files : t -> bool
 val tico_invalidate_smart : t -> bool
+val po_enable_constant_visibility_modifiers : t -> bool

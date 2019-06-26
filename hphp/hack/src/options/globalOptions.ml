@@ -55,6 +55,7 @@ type t = {
   tco_disallow_invalid_arraykey_constraint : bool;
   tico_invalidate_files : bool;
   tico_invalidate_smart : bool;
+  po_enable_constant_visibility_modifiers : bool;
 } [@@deriving show]
 
 let tco_experimental_instanceof = "instanceof"
@@ -235,6 +236,7 @@ let default = {
  tco_disallow_invalid_arraykey_constraint = false;
  tico_invalidate_files = false;
  tico_invalidate_smart = false;
+ po_enable_constant_visibility_modifiers = false;
 }
 
 let make
@@ -284,6 +286,7 @@ let make
   ?(tco_disallow_invalid_arraykey_constraint = default.tco_disallow_invalid_arraykey_constraint)
   ?(tico_invalidate_files = default.tico_invalidate_files)
   ?(tico_invalidate_smart = default.tico_invalidate_smart)
+  ?(po_enable_constant_visibility_modifiers = default.po_enable_constant_visibility_modifiers)
   ()
 = {
   tco_safe_array;
@@ -333,6 +336,7 @@ let make
   tco_disallow_invalid_arraykey_constraint;
   tico_invalidate_files;
   tico_invalidate_smart;
+  po_enable_constant_visibility_modifiers;
 }
 let tco_safe_array t = t.tco_safe_array
 let tco_safe_vector_array t = t.tco_safe_vector_array
@@ -390,6 +394,8 @@ let tco_ignore_collection_expr_type_arguments t = t.tco_ignore_collection_expr_t
 let tco_check_xhp_attribute t = t.tco_check_xhp_attribute
 
 let tco_disallow_unresolved_type_variables t = t.tco_disallow_unresolved_type_variables
+
+let po_enable_constant_visibility_modifiers t = t.po_enable_constant_visibility_modifiers
 
 let setup_pocket_universes env enabled =
   let exp_features = env.tco_experimental_features in

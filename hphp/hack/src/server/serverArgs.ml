@@ -1,6 +1,5 @@
 (**
- * Copyright (c) 2015, Facebook, Inc.
- * All rights reserved.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
@@ -8,7 +7,12 @@
  *)
 
 open Core_kernel
-include ServerArgs_sig.Types
+
+include Cli_args
+
+type saved_state_target =
+  | Informant_induced_saved_state_target of ServerMonitorUtils.target_saved_state
+  | Saved_state_target_info of saved_state_target_info
 
 (*****************************************************************************)
 (* The options from the command line *)
@@ -71,42 +75,7 @@ module Messages = struct
   let log_inference_constraints = " (for hh debugging purpose only) log type" ^
     " inference constraints into external logger (e.g. Scuba)"
   let max_procs = " max numbers of workers"
-  let save_state_spec_json_descr =
-{|A JSON specification of how and what to save, e.g.:
-  {
-    "files_to_check": [
-      "/some/path/prefix1",
-      {
-        "from_prefix_incl": "/from/path/prefix1",
-        "to_prefix_excl": "/to/path/prefix1"
-      },
-      {
-        "from_prefix_incl": "/from/path/prefix2",
-        "to_prefix_excl": "/to/path/prefix2"
-      },
-      {
-        "from_prefix_incl": "/from/path/only"
-      },
-      {
-        "to_prefix_excl": "/to/path/only"
-      }
-    ],
-    "filename": "/some/dir/some_filename",
-    "gen_with_errors": true
-  }
-|}
-  let saved_state_json_descr =
-    "Either\n" ^
-    "   { \"data_dump\" : <saved_state_target json> }\n" ^
-    "or\n" ^
-    "   { \"from_file\" : <path to file containing saved_state_target json }\n" ^
-    "where saved_state_target JSON looks like:\n" ^
-    "   {\n" ^
-    "      \"state\": <saved state filename>,\n" ^
-    "      \"corresponding_base_revision\" : <SVN rev #>,\n" ^
-    "      \"deptable\": <dependency table filename>,\n" ^
-    "      \"changes\": [array of files changed since that saved state]\n" ^
-    "   }"
+
   let no_load = " don't load from a saved state"
   let prechecked = " override value of \"prechecked_files\" flag from hh.conf"
   let profile_log = " enable profile logging"
@@ -115,16 +84,15 @@ module Messages = struct
                         " used after being written to disk (default: false)"
   let save_state = " save server state to file"
   let save_naming = " save naming table to file"
-  let save_with_spec = " save server state given a JSON spec" ^
-                        " Expects a JSON string specified as" ^
+  let save_with_spec = " save server state given a JSON spec:\n" ^
                         save_state_spec_json_descr
   let waiting_client= " send message to fd/handle when server has begun" ^
                       " starting and again when it's done starting"
   let watchman_debug_logging =
     " Enable debug logging on Watchman client. This is very noisy"
 
-  let with_saved_state = " init with the given saved state instead of fetching it." ^
-                        " Expects a JSON string specified as" ^
+  let with_saved_state = " Init with the given saved state instead of fetching it.\n" ^
+                        "Expects a JSON string specified as: " ^
                         saved_state_json_descr
   let write_symbol_info = " write symbol info to json files"
 end
@@ -135,120 +103,6 @@ let print_json_version () =
 (*****************************************************************************)
 (* The main entry point *)
 (*****************************************************************************)
-let get_path (key: string) json_obj : Relative_path.t option =
-  let value = Hh_json.Access.get_string key json_obj in
-  match value with
-  | Ok ((value: string), _keytrace) -> Some (Relative_path.from_root value)
-  | Error _ -> None
-
-let get_spec (spec_json: Hh_json.json) : files_to_check_spec =
-  try
-    Prefix (Hh_json.get_string_exn spec_json |> Relative_path.from_root)
-  with _ ->
-    let from_prefix_incl = get_path "from_prefix_incl" (spec_json, []) in
-    let to_prefix_excl = get_path "to_prefix_excl" (spec_json, []) in
-    Range {
-      from_prefix_incl;
-      to_prefix_excl;
-    }
-
-let parse_save_state_json ((json: Hh_json.json), _keytrace) =
-  let open Hh_json.Access in
-  let files_to_check = Option.value
-    ~default:[]
-    (Hh_json.(get_field_opt (get_array "files_to_check")) json) in
-  let files_to_check = List.map files_to_check ~f:get_spec in
-  let json = return json in
-  json >>= get_string "filename" >>= fun (filename, _filename_keytrace) ->
-  json >>= get_bool "gen_with_errors" >>= fun (gen_with_errors, _gen_with_errors_keytrace) ->
-  return {
-    files_to_check;
-    filename;
-    gen_with_errors;
-  }
-
-let verify_save_with_spec (v: string option) : save_state_spec_info option =
-  match v with
-  | None -> None
-  | Some blob ->
-    let open Hh_json.Access in
-    let json = Hh_json.json_of_string blob in
-    let json = return json in
-    let parsed_spec_result = json >>= parse_save_state_json in
-    match parsed_spec_result with
-    | Ok ((parsed_spec: save_state_spec_info), _keytrace) ->
-      Hh_logger.log "Parsed save state spec, everything's good";
-      Some parsed_spec
-    | Error spec_failure ->
-      let message = access_failure_to_string spec_failure in
-      Hh_logger.log "parsing optional arg --save-with-spec failed:\n%s" message;
-      Hh_logger.log "See input: %s" blob;
-      raise (Arg.Bad ("--save-with-spec " ^ message))
-
-let parse_saved_state_json (json, _keytrace) =
-  let array_to_path_list = List.map
-    ~f:(fun file -> Hh_json.get_string_exn file |> Relative_path.from_root) in
-  let prechecked_changes = (Hh_json.(get_field_opt (Access.get_array "prechecked_changes")) json) in
-  let prechecked_changes = Option.value ~default:[] prechecked_changes in
-  let json = Hh_json.Access.return json in
-  let open Hh_json.Access in
-  json >>= get_string "state" >>= fun (state, _state_keytrace) ->
-  json >>= get_string "corresponding_base_revision"
-    >>= fun (for_base_rev, _for_base_rev_keytrace) ->
-  json >>= get_string "deptable" >>= fun (deptable, _deptable_keytrace) ->
-  json >>= get_array "changes" >>= fun (changes, _) ->
-    let prechecked_changes = array_to_path_list prechecked_changes in
-    let changes = array_to_path_list changes in
-    return (Saved_state_target_info {
-      saved_state_fn = state;
-      corresponding_base_revision = for_base_rev;
-      deptable_fn = deptable;
-      prechecked_changes;
-      changes;
-    })
-
-let verify_with_saved_state (v: string option) : saved_state_target option =
-  match v with
-  | None -> None
-  | Some blob ->
-    let json = Hh_json.json_of_string blob in
-    let json = Hh_json.Access.return json in
-    let open Hh_json.Access in
-    let data_dump_parse_result =
-      json
-        >>= get_obj "data_dump"
-        >>= parse_saved_state_json
-    in
-    let from_file_parse_result =
-      json
-        >>= get_string "from_file"
-        >>= fun (filename, _filename_keytrace) ->
-        let contents = Sys_utils.cat filename in
-        let json = Hh_json.json_of_string contents in
-        (Hh_json.Access.return json)
-          >>= parse_saved_state_json
-    in
-    match
-      (Result.ok_fst data_dump_parse_result),
-      (Result.ok_fst from_file_parse_result) with
-    | (`Fst (parsed_data_dump, _)), (`Fst (_parsed_from_file, _)) ->
-      Hh_logger.log "Warning - %s"
-        ("Parsed saved state target from both JSON blob data dump" ^
-        " and from contents of file.");
-      Hh_logger.log "Preferring data dump result";
-      Some parsed_data_dump
-    | (`Fst (parsed_data_dump, _)), (`Snd _) ->
-      Some parsed_data_dump
-    | (`Snd _), (`Fst (parsed_from_file, _)) ->
-      Some parsed_from_file
-    | (`Snd data_dump_failure), (`Snd from_file_failure) ->
-      Hh_logger.log "parsing optional arg with_saved_state failed:\n%s\n%s"
-        (Printf.sprintf "  data_dump failure:%s"
-              (access_failure_to_string data_dump_failure))
-        (Printf.sprintf "  from_file failure:%s"
-              (access_failure_to_string from_file_failure));
-      Hh_logger.log "See input: %s" blob;
-      raise (Arg.Bad "--with-mini-state")
 
 let parse_options () =
   let ai_mode = ref None in
@@ -350,8 +204,17 @@ let parse_options () =
     Printf.eprintf "--check is incompatible with wait modes!\n";
     Exit_status.(exit Input_error)
   end;
-  let save_with_spec = verify_save_with_spec !save_with_spec in
-  let with_saved_state = verify_with_saved_state !with_saved_state in
+  let save_with_spec =
+    match get_save_state_spec !save_with_spec with
+    | Ok spec -> spec
+    | Error message -> raise (Arg.Bad message)
+  in
+  let with_saved_state =
+    match get_saved_state_spec !with_saved_state with
+    | Ok (Some spec) -> Some (Saved_state_target_info spec)
+    | Ok None -> None
+    | Error message -> raise (Arg.Bad message)
+  in
   (match !root with
   | "" ->
       Printf.eprintf "You must specify a root directory!\n";

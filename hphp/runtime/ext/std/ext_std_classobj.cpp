@@ -97,14 +97,9 @@ bool HHVM_FUNCTION(enum_exists, const String& enum_name,
 Variant HHVM_FUNCTION(get_class_methods, const Variant& class_or_object) {
   auto const cls = get_cls(class_or_object);
   if (!cls) return init_null();
-  VMRegAnchor _;
 
   auto retVal = Array::attach(PackedArray::MakeReserve(cls->numMethods()));
-  Class::getMethodNames(
-    cls,
-    arGetContextClassFromBuiltin(vmfp()),
-    retVal
-  );
+  Class::getMethodNames(cls, GetCallerClassSkipBuiltins(), retVal);
   return Variant::attach(HHVM_FN(array_values)(retVal)).toArray();
 }
 

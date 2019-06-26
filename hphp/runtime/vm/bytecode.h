@@ -267,15 +267,7 @@ void frame_free_locals_no_hook(ActRec* fp);
     return val_;                                                        \
   }())
 
-template <bool crossBuiltin> Class* arGetContextClassImpl(const ActRec* ar);
-template <> Class* arGetContextClassImpl<true>(const ActRec* ar);
-template <> Class* arGetContextClassImpl<false>(const ActRec* ar);
-inline Class* arGetContextClass(const ActRec* ar) {
-  return arGetContextClassImpl<false>(ar);
-}
-inline Class* arGetContextClassFromBuiltin(const ActRec* ar) {
-  return arGetContextClassImpl<true>(ar);
-}
+Class* arGetContextClass(const ActRec* ar);
 
 ///////////////////////////////////////////////////////////////////////////////
 

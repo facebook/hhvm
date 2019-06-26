@@ -152,30 +152,9 @@ using jit::TCA;
 #define OPTBLD_FLT_INLINE   INLINE_FLATTEN
 #endif
 
-template <>
-Class* arGetContextClassImpl<false>(const ActRec* ar) {
+Class* arGetContextClass(const ActRec* ar) {
   if (ar == nullptr) {
     return nullptr;
-  }
-  return ar->m_func->cls();
-}
-
-template <>
-Class* arGetContextClassImpl<true>(const ActRec* ar) {
-  if (ar == nullptr) {
-    return nullptr;
-  }
-  if (ar->m_func->isPseudoMain() || ar->m_func->isBuiltin()) {
-    // Pseudomains inherit the context of their caller
-    auto const context = g_context.getNoCheck();
-    ar = context->getPrevVMState(ar);
-    while (ar != nullptr &&
-             (ar->m_func->isPseudoMain() || ar->m_func->isBuiltin())) {
-      ar = context->getPrevVMState(ar);
-    }
-    if (ar == nullptr) {
-      return nullptr;
-    }
   }
   return ar->m_func->cls();
 }

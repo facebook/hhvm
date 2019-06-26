@@ -29,7 +29,7 @@ struct Array;
 /* Utility for representing full type information in the runtime. */
 namespace TypeStructure {
 
-constexpr uint8_t kMaxResolvedKind = 29;
+constexpr uint8_t kMaxResolvedKind = 30;
 
 // These values are exposed to the user in
 // hphp/runtime/ext/reflection/ext_reflection-TypeInfo.php
@@ -71,6 +71,7 @@ enum class Kind : uint8_t {
 
   T_null = 28,
   T_nothing = 29,
+  T_dynamic = 30,
   // Make sure to update kMaxResolvedKind if you add a new kind here
 
   /* The following kinds needs class/alias resolution, and

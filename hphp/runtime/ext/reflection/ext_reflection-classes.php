@@ -1349,6 +1349,7 @@ namespace HH {
     OF_VARRAY_OR_DARRAY = 26;
     OF_NULL = 28;
     OF_NOTHING = 29;
+    OF_DYNAMIC = 30;
     OF_UNRESOLVED = 101; // for type aliases only
   }
 

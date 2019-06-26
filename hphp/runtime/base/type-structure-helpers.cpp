@@ -229,6 +229,7 @@ bool typeStructureIsType(
     case TypeStructure::Kind::T_nothing:
     case TypeStructure::Kind::T_noreturn:
     case TypeStructure::Kind::T_mixed:
+    case TypeStructure::Kind::T_dynamic:
     case TypeStructure::Kind::T_nonnull:
     case TypeStructure::Kind::T_dict:
     case TypeStructure::Kind::T_vec:
@@ -690,6 +691,7 @@ bool checkTypeStructureMatchesCellImpl(
       result = false;
       break;
     case TypeStructure::Kind::T_mixed:
+    case TypeStructure::Kind::T_dynamic:
       return true;
     case TypeStructure::Kind::T_nonnull:
       result = !isNullType(type);
@@ -964,6 +966,7 @@ bool errorOnIsAsExpressionInvalidTypes(const Array& ts, bool dryrun,
     case TypeStructure::Kind::T_nothing:
     case TypeStructure::Kind::T_noreturn:
     case TypeStructure::Kind::T_mixed:
+    case TypeStructure::Kind::T_dynamic:
     case TypeStructure::Kind::T_unresolved:
     case TypeStructure::Kind::T_typeaccess:
     case TypeStructure::Kind::T_nonnull:
@@ -1046,6 +1049,7 @@ bool typeStructureCouldBeNonStatic(const Array& ts) {
     case TypeStructure::Kind::T_nothing:
     case TypeStructure::Kind::T_noreturn:
     case TypeStructure::Kind::T_mixed:
+    case TypeStructure::Kind::T_dynamic:
     case TypeStructure::Kind::T_typevar:
     case TypeStructure::Kind::T_enum:
     case TypeStructure::Kind::T_nonnull:

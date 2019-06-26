@@ -1120,7 +1120,9 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_void:        return primitive(TNull);
     case TypeStructure::Kind::T_keyset:      return primitive(TKeyset);
     case TypeStructure::Kind::T_nonnull:     return primitive(TNull, true);
-    case TypeStructure::Kind::T_mixed:       return success();
+    case TypeStructure::Kind::T_mixed:
+    case TypeStructure::Kind::T_dynamic:
+      return success();
     case TypeStructure::Kind::T_num:         return unionOf(TInt, TDbl);
     case TypeStructure::Kind::T_arraykey:    return unionOf(TInt, TStr);
     case TypeStructure::Kind::T_vec_or_dict:

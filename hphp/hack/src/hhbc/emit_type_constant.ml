@@ -51,6 +51,7 @@ let get_kind_num ~tparams p =
   | "hh\\arraylike" -> 27
   | "hh\\null" -> 28
   | "hh\\nothing" -> 29
+  | "hh\\dynamic" -> 30
   | "typeaccess" -> 102
   | _ when String.length p > 4 && String.sub p 0 4 = "xhp_" -> 103
   | "reifiedtype" -> 104
@@ -64,7 +65,7 @@ and is_prim = function
   | "HH\\num" | "HH\\noreturn"
   | "HH\\arraykey" | "HH\\mixed"
   | "HH\\nonnull" | "HH\\null"
-  | "HH\\nothing" -> true
+  | "HH\\nothing" | "HH\\dynamic" -> true
   | _ -> false
 
 and is_resolved_classname = function

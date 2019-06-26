@@ -567,6 +567,7 @@ resolveTSStatically(ISS& env, SArray ts, const php::Class* declaringCls,
     case TypeStructure::Kind::T_nothing:
     case TypeStructure::Kind::T_noreturn:
     case TypeStructure::Kind::T_mixed:
+    case TypeStructure::Kind::T_dynamic:
     case TypeStructure::Kind::T_nonnull:
     case TypeStructure::Kind::T_resource:
       return finish(ts);
@@ -3128,6 +3129,7 @@ void isAsTypeStructImpl(ISS& env, SArray inputTS) {
     case TypeStructure::Kind::T_noreturn:
       return result(TFalse);
     case TypeStructure::Kind::T_mixed:
+    case TypeStructure::Kind::T_dynamic:
       return result(TTrue);
     case TypeStructure::Kind::T_nonnull:
       if (is_definitely_null) return result(TFalse);
@@ -3211,6 +3213,7 @@ bool canReduceToDontResolve(SArray ts) {
     case TypeStructure::Kind::T_nothing:
     case TypeStructure::Kind::T_noreturn:
     case TypeStructure::Kind::T_mixed:
+    case TypeStructure::Kind::T_dynamic:
     case TypeStructure::Kind::T_nonnull:
     case TypeStructure::Kind::T_resource:
     // Following ones don't reify, so no need to check the generics

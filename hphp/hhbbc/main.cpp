@@ -136,6 +136,10 @@ void parse_options(int argc, char** argv) {
     ("parallel-num-threads",
       po::value(&parallel::num_threads)->default_value(defaultThreadCount),
       "Number of threads to use for parallelism")
+    ("parallel-final-threads",
+      po::value(&parallel::final_threads)->default_value(
+        parallel::final_threads),
+      "Number of threads to use for the final pass")
     ("parallel-work-size",
       po::value(&parallel::work_chunk)->default_value(120),
       "Work unit size for parallelism")

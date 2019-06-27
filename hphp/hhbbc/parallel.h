@@ -43,6 +43,7 @@ namespace parallel {
  * how much parallelism is used.
  */
 extern size_t num_threads;
+extern size_t final_threads;
 extern size_t work_chunk;
 
 //////////////////////////////////////////////////////////////////////

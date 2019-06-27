@@ -74,7 +74,7 @@ let go workers query type_ (sienv: SearchUtils.si_env)
       let class_ =
 
         (* Switch between old behavior and new *)
-        match SymbolIndex.get_search_provider () with
+        match sienv.SearchUtils.sie_provider with
         | SearchUtils.TrieIndex ->
           SymbolIndex.query_for_symbol_search ~fuzzy workers class_name_query type_
           |> List.find ~f:begin fun result ->
@@ -104,7 +104,7 @@ let go workers query type_ (sienv: SearchUtils.si_env)
     | _  ->
 
       (* Switch between old behavior and new *)
-      match SymbolIndex.get_search_provider () with
+      match sienv.SearchUtils.sie_provider with
       | SearchUtils.TrieIndex ->
         let temp_results = SymbolIndex.query_for_symbol_search ~fuzzy workers query type_ in
         List.map temp_results SearchUtils.to_absolute

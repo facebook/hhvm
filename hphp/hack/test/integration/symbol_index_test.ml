@@ -79,7 +79,7 @@ let assert_autocomplete
   end;
 ;;
 
-let run_index_builder (harness: Test_harness.t): unit =
+let run_index_builder (harness: Test_harness.t): si_env =
   Relative_path.set_path_prefix Relative_path.Root harness.repo_dir;
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make "/tmp");
   let repo_path = Path.to_string harness.repo_dir in
@@ -100,22 +100,19 @@ let run_index_builder (harness: Test_harness.t): unit =
 
   (* Scan the repo folder and produce answers in sqlite *)
   IndexBuilder.go ctxt None;
-  SymbolIndex.set_search_provider
+  let sienv = SymbolIndex.initialize
     ~quiet:false
     ~provider_name:"SqliteIndex"
     ~namespace_map:[]
     ~savedstate_file_opt:file_opt
-    ~workers:None;
+    ~workers:None in
   Hh_logger.log "Built Sqlite database [%s]" fn;
+  sienv
 ;;
 
 let test_sqlite_plus_local (harness: Test_harness.t): bool =
-  run_index_builder harness;
-  let sienv = ref {
-    lss_fileinfos = Relative_path.Map.empty;
-    lss_filenames = Relative_path.Map.empty;
-    lss_tombstones = Tombstone_set.empty;
-  } in
+  let sienv = ref SearchUtils.default_si_env in
+  sienv := run_index_builder harness;
 
   (* Find one of each major type *)
   assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv;
@@ -183,12 +180,8 @@ let test_sqlite_plus_local (harness: Test_harness.t): bool =
 (* Test the ability of the index builder to capture a variety of
  * names and kinds correctly *)
 let test_builder_names (harness: Test_harness.t): bool =
-  run_index_builder harness;
-  let sienv = ref {
-    lss_fileinfos = Relative_path.Map.empty;
-    lss_filenames = Relative_path.Map.empty;
-    lss_tombstones = Tombstone_set.empty;
-  } in
+  let sienv = ref SearchUtils.default_si_env in
+  sienv := run_index_builder harness;
 
   (* Assert that we can capture all kinds of symbols *)
   assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv;
@@ -290,7 +283,6 @@ let test_namespace_map (harness: Test_harness.t): bool =
 
 (* Rapid unit tests to verify docblocks are found and correct *)
 let test_docblock_finder (harness: Test_harness.t): bool =
-  run_index_builder harness;
   let env = ServerEnvBuild.make_env ServerConfig.default_config in
   let handle = SharedMem.init ~num_workers:0 GlobalConfig.default_sharedmem_config in
   ignore (handle: SharedMem.handle);

@@ -255,8 +255,9 @@ let parsing genv env to_check ~stop_at_errors =
     SearchUtils.TypeChecker;
   (* During integration tests, we want to pretend that search is run
     synchronously *)
+  let sie = env.local_symbol_table in
   if SearchServiceRunner.should_run_completely genv
-      (SymbolIndex.get_search_provider ())
+    !sie.SearchUtils.sie_provider
   then
     SearchServiceRunner.run_completely genv env.local_symbol_table;
 

@@ -484,14 +484,14 @@ let parse_options () =
 
   (* Configure symbol index settings *)
   let namespace_map = GlobalOptions.po_auto_namespace_map tcopt in
-  SymbolIndex.set_search_provider
+  let sienv = SymbolIndex.initialize
     ~quiet:true
     ~provider_name:!search_provider
     ~namespace_map
     ~savedstate_file_opt:!symbolindex_file
-    ~workers:None;
+    ~workers:None in
 
-  { files = fns;
+  ({ files = fns;
     mode = !mode;
     no_builtins = !no_builtins;
     max_errors = !max_errors;
@@ -499,7 +499,7 @@ let parse_options () =
     tcopt;
     batch_mode = !batch_mode;
     out_extension = !out_extension;
-  }
+  }, sienv)
 
 (* This allows one to fake having multiple files in one file. This
  * is used only in unit test files.
@@ -1281,10 +1281,5 @@ let () =
        expected one (i.e. in given file without CRLF). *)
     Out_channel.set_binary_mode stdout true
   );
-  let options = parse_options () in
-  let env = {
-    SearchUtils.lss_fileinfos = Relative_path.Map.empty;
-    SearchUtils.lss_filenames = Relative_path.Map.empty;
-    SearchUtils.lss_tombstones = SearchUtils.Tombstone_set.empty;
-  } in
-  Unix.handle_unix_error main_hack options env
+  let (options, sienv) = parse_options () in
+  Unix.handle_unix_error main_hack options sienv

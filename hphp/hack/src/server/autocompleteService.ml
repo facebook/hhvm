@@ -817,7 +817,7 @@ let find_global_results
   : unit =
 
   (* Select the provider to use for symbol autocomplete *)
-  match SymbolIndex.get_search_provider () with
+  match sienv.sie_provider with
 
   (* Legacy provider should match previous behavior *)
   | TrieIndex ->

@@ -54,7 +54,7 @@ let remove_file
     ~(sienv: si_env)
     ~(path: Relative_path.t): si_env =
   let tombstone = get_tombstone path in
-  {
+  { sienv with
     lss_fileinfos =
       Relative_path.Map.remove sienv.lss_fileinfos path;
     lss_filenames =

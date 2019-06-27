@@ -12,13 +12,12 @@ val fuzzy_search_enabled : unit -> bool
 val set_fuzzy_search_enabled : bool -> unit
 
 (* Get or set the currently selected search provider *)
-val get_search_provider: unit -> SearchUtils.search_provider
-val set_search_provider:
+val initialize:
   quiet:bool ->
   provider_name:string ->
   namespace_map:(string * string) list ->
   savedstate_file_opt:string option ->
-  workers:MultiWorker.worker list option -> unit
+  workers:MultiWorker.worker list option -> SearchUtils.si_env
 
 (* Log diagnostics for usage of autocomplete and symbol search *)
 val log_symbol_index_search:

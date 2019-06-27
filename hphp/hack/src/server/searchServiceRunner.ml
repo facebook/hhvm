@@ -66,10 +66,10 @@ module SearchServiceRunner = struct
    * false if we should run small chunks every few seconds *)
   let should_run_completely
       (genv: ServerEnv.genv)
-      (search_provider: SearchUtils.search_provider): bool =
+      (provider: SearchUtils.search_provider): bool =
 
     (* If we are using a non-trie provider, no need to use chunks *)
-    if search_provider <> SearchUtils.TrieIndex then begin
+    if provider <> SearchUtils.TrieIndex then begin
       true
     end else begin
       if (chunk_size genv) = 0 && (ServerArgs.ai_mode genv.options) = None then begin

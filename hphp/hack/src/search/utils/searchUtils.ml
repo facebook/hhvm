@@ -260,9 +260,18 @@ end
 
 (* Context information for the current symbol index *)
 type si_env = {
+  sie_provider: search_provider;
 
   (* LocalSearchService *)
   lss_fileinfos: FileInfo.t Relative_path.Map.t;
   lss_filenames: FileInfo.names Relative_path.Map.t;
   lss_tombstones: Tombstone_set.t;
+}
+
+(* Default provider with no functionality *)
+let default_si_env = {
+  sie_provider = NoIndex;
+  lss_fileinfos = Relative_path.Map.empty;
+  lss_filenames = Relative_path.Map.empty;
+  lss_tombstones = Tombstone_set.empty;
 }

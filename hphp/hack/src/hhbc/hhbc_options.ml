@@ -44,6 +44,7 @@ type t = {
   option_hhjs_unique_filenames            : bool;
   option_hhjs_babel_transform             : string;
   option_hhjs_node_modules                : SSet.t;
+  option_hhjs_setlocs                     : bool;
   option_phpism_disallow_execution_operator: bool;
   option_phpism_disable_nontoplevel_declarations : bool;
   option_phpism_disable_static_closures : bool;
@@ -96,6 +97,7 @@ let default = {
   option_hhjs_unique_filenames = true;
   option_hhjs_babel_transform = "";
   option_hhjs_node_modules = SSet.empty;
+  option_hhjs_setlocs = false;
   option_phpism_disallow_execution_operator = false;
   option_phpism_disable_nontoplevel_declarations = false;
   option_phpism_disable_static_closures = false;
@@ -145,6 +147,7 @@ let hhjs_no_babel o = o.option_hhjs_no_babel
 let hhjs_unique_filenames o = o.option_hhjs_unique_filenames
 let hhjs_babel_transform o = o.option_hhjs_babel_transform
 let hhjs_node_modules o = o.option_hhjs_node_modules
+let hhjs_setlocs o = o.option_hhjs_setlocs
 let phpism_disallow_execution_operator o = o.option_phpism_disallow_execution_operator
 let phpism_disable_nontoplevel_declarations o = o.option_phpism_disable_nontoplevel_declarations
 let phpism_disable_static_closures o = o.option_phpism_disable_static_closures
@@ -195,6 +198,7 @@ let to_string o =
     ; Printf.sprintf "enable_perf_logging: %B" @@ enable_perf_logging o
     ; Printf.sprintf "enable_intrinsics_extension: %B" @@ enable_intrinsics_extension o
     ; Printf.sprintf "enable_hhjs: %B" @@ enable_hhjs o
+    ; Printf.sprintf "hhjs_setlocs: %B" @@ hhjs_setlocs o
     ; Printf.sprintf "phpism_disallow_execution_operator %B" @@ phpism_disallow_execution_operator o
     ; Printf.sprintf "phpism_disable_nontoplevel_declarations %B"
       @@ phpism_disable_nontoplevel_declarations o
@@ -292,6 +296,8 @@ let set_option options name value =
     | None -> SSet.empty
     in
     { options with option_hhjs_node_modules = hhjs_node_modules }
+  | "eval.hhjssetlocs" ->
+    { options with option_hhjs_setlocs = as_bool value }
   | "hack.lang.phpism.disallowexecutionoperator" ->
     { options with option_phpism_disallow_execution_operator = as_bool value }
   | "hack.lang.phpism.disablenontopleveldeclarations" ->
@@ -446,6 +452,8 @@ let value_setters = [
      fun opts v -> { opts with option_hhjs_babel_transform = v });
   (set_value "hhvm.hhjs_node_modules" get_hhjs_node_modules_from_config_string @@
     fun opts v -> { opts with option_hhjs_node_modules = v });
+  (set_value "hhvm.hhjs_set_locs" get_value_from_config_int @@
+    fun opts v -> { opts with option_hhjs_setlocs = (v = 1) });
   (set_value "hhvm.hack.lang.phpism.disallow_execution_operator" get_value_from_config_int @@
      fun opts v -> { opts with option_phpism_disallow_execution_operator = (v = 1) });
   (set_value "hhvm.hack.lang.phpism.disable_nontoplevel_declarations" get_value_from_config_int @@

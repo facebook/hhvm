@@ -185,7 +185,7 @@ let find_matching_symbols
           ~query_text
           ~max_results
           ~context in
-        LocalSearchService.extract_dead_results ~env ~results:r
+        LocalSearchService.extract_dead_results ~sienv ~results:r
       | NoIndex ->
         []
       | SqliteIndex ->

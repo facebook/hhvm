@@ -3590,6 +3590,13 @@ let class_property_visibility_errors env node errors =
     errors
   | _ -> errors
 
+let class_property_abstract_errors node errors =
+  match syntax node with
+  | PropertyDeclaration _ ->
+    if methodish_contains_abstract node then
+      make_error_from_node node SyntaxError.error2058 :: errors
+    else errors
+  | _ -> errors
 
 let mixed_namespace_errors _env node parents namespace_type errors =
   match syntax node with
@@ -3981,6 +3988,7 @@ let find_syntax_errors env =
       | PropertyDeclaration _ ->
         let errors = class_property_visibility_errors env node errors in
         let errors = class_reified_param_errors env node errors in
+        let errors = class_property_abstract_errors node errors in
         trait_require_clauses, names, errors
       | EnumDeclaration _ ->
         let errors = enum_decl_errors node errors in

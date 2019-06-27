@@ -1137,7 +1137,7 @@ module WithExpressionAndStatementAndTypeParser
 
 
   and parse_methodish_or_property parser attribute_spec =
-    let (parser, modifiers, contains_abstract) = parse_modifiers parser in
+    let (parser, modifiers, _ ) = parse_modifiers parser in
     (* ERROR RECOVERY: match against two tokens, because if one token is
      * in error but the next isn't, then it's likely that the user is
      * simply still typing. Throw an error on what's being typed, then eat
@@ -1150,8 +1150,7 @@ module WithExpressionAndStatementAndTypeParser
     | (Async | Coroutine | Function) , _ ->
       parse_methodish parser attribute_spec modifiers
     | LeftParen, _ ->
-      parse_property_declaration
-        parser attribute_spec modifiers ~contains_abstract
+      parse_property_declaration parser attribute_spec modifiers
     (* We encountered one unexpected token, but the next still indicates that
      * we should be parsing a methodish. Throw an error, process the token
      * as an extra, and keep going. *)
@@ -1164,8 +1163,7 @@ module WithExpressionAndStatementAndTypeParser
       parse_methodish parser attribute_spec modifiers
     (* Otherwise, continue parsing as a property (which might be a lambda). *)
     | ( _ , _ ) ->
-      parse_property_declaration
-        parser attribute_spec modifiers ~contains_abstract
+      parse_property_declaration parser attribute_spec modifiers
 
   and parse_trait_use_precedence_item parser name =
     let (parser, keyword) = assert_token parser Insteadof in
@@ -1277,8 +1275,7 @@ module WithExpressionAndStatementAndTypeParser
       let (parser, semi) = require_semicolon parser in
       Make.trait_use parser use_token trait_name_list semi
 
-  and parse_property_declaration
-    ?(contains_abstract=false) parser attribute_spec modifiers =
+  and parse_property_declaration parser attribute_spec modifiers =
     (* SPEC:
         property-declaration:
           attribute-spec-opt  property-modifier  type-specifier
@@ -1302,11 +1299,6 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, result) =
       Make.property_declaration
         parser attribute_spec modifiers prop_type decls semi
-    in
-    (* TODO: Move this to Full_fidelity_parser_errors. *)
-    let parser =
-      if contains_abstract then with_error parser SyntaxError.error2058
-      else parser
     in
     (parser, result)
 

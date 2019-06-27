@@ -33,7 +33,7 @@ let run
   ~(pos:File_content.position)
   ~(tcopt:TypecheckerOptions.t)
   ~(basic_only:bool)
-  ~(env:SearchUtils.local_tracking_env)
+  ~(env:SearchUtils.si_env)
   : AutocompleteTypes.complete_autocomplete_result list =
   if local_variable_valid_in_context context stub ||
      should_complete_function context ||

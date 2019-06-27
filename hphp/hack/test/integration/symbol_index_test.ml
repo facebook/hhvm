@@ -52,7 +52,7 @@ let assert_autocomplete
     ~(query_text: string)
     ~(kind: si_kind)
     ~(expected: int)
-    ~(env: local_tracking_env ref): unit =
+    ~(env: si_env ref): unit =
 
   (* Search for the symbol *)
   let results = SymbolIndex.find_matching_symbols
@@ -112,9 +112,9 @@ let run_index_builder (harness: Test_harness.t): unit =
 let test_sqlite_plus_local (harness: Test_harness.t): bool =
   run_index_builder harness;
   let env = ref {
-    lte_fileinfos = Relative_path.Map.empty;
-    lte_filenames = Relative_path.Map.empty;
-    lte_tombstones = Tombstone_set.empty;
+    lss_fileinfos = Relative_path.Map.empty;
+    lss_filenames = Relative_path.Map.empty;
+    lss_tombstones = Tombstone_set.empty;
   } in
 
   (* Find one of each major type *)
@@ -185,9 +185,9 @@ let test_sqlite_plus_local (harness: Test_harness.t): bool =
 let test_builder_names (harness: Test_harness.t): bool =
   run_index_builder harness;
   let env = ref {
-    lte_fileinfos = Relative_path.Map.empty;
-    lte_filenames = Relative_path.Map.empty;
-    lte_tombstones = Tombstone_set.empty;
+    lss_fileinfos = Relative_path.Map.empty;
+    lss_filenames = Relative_path.Map.empty;
+    lss_tombstones = Tombstone_set.empty;
   } in
 
   (* Assert that we can capture all kinds of symbols *)

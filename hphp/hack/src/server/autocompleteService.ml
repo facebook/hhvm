@@ -813,7 +813,7 @@ let find_global_results
   ~(content_classes: Reordered_argument_collections.SSet.t)
   ~(autocomplete_context: AutocompleteTypes.legacy_autocomplete_context)
   ~(basic_only: bool)
-  ~(env: SearchUtils.local_tracking_env)
+  ~(env: SearchUtils.si_env)
   : unit =
 
   (* Select the provider to use for symbol autocomplete *)
@@ -873,7 +873,7 @@ let go
     ~(content_classes: Reordered_argument_collections.SSet.t)
     ~(autocomplete_context: AutocompleteTypes.legacy_autocomplete_context)
     ~(basic_only: bool)
-    ~(env: SearchUtils.local_tracking_env)
+    ~(env: SearchUtils.si_env)
     tast
   =
   reset ();

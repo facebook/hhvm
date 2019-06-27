@@ -61,7 +61,7 @@ let result_to_json res =
 
 let re_colon_colon = Str.regexp "::"
 
-let go workers query type_ (env: SearchUtils.local_tracking_env)
+let go workers query type_ (env: SearchUtils.si_env)
   : SearchUtils.result =
   let max_results = 100 in
   let start_time = Unix.gettimeofday () in

@@ -19,7 +19,7 @@ include ServerInitTypes
 let run_search
     (genv: ServerEnv.genv)
     (t: float)
-    (env: SearchUtils.local_tracking_env ref): unit =
+    (env: SearchUtils.si_env ref): unit =
   if SearchServiceRunner.should_run_completely genv
     (SymbolIndex.get_search_provider ())
   then begin

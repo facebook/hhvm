@@ -11,9 +11,9 @@ open SearchUtils
 open Reordered_argument_collections
 
 (* How many locally changed files are in this env? *)
-let count_local_fileinfos (env: local_tracking_env): int =
-  (Relative_path.Map.cardinal env.lte_fileinfos
-   + Relative_path.Map.cardinal env.lte_filenames)
+let count_local_fileinfos (env: si_env): int =
+  (Relative_path.Map.cardinal env.lss_fileinfos
+   + Relative_path.Map.cardinal env.lss_filenames)
 ;;
 
 (* Determine a tombstone for a file path *)
@@ -27,41 +27,41 @@ let get_tombstone (path: Relative_path.t): int64 =
 let update_file
     (path: Relative_path.t)
     (info: SearchUtils.info)
-    (env: local_tracking_env): local_tracking_env =
+    (env: si_env): si_env =
   let tombstone = get_tombstone path in
   match info with
   | Full fileinfo_t ->
     {
-      lte_fileinfos =
-        Relative_path.Map.add env.lte_fileinfos
+      lss_fileinfos =
+        Relative_path.Map.add env.lss_fileinfos
           ~key:path ~data:fileinfo_t;
-      lte_filenames = env.lte_filenames;
-      lte_tombstones =
-        Tombstone_set.add env.lte_tombstones tombstone;
+      lss_filenames = env.lss_filenames;
+      lss_tombstones =
+        Tombstone_set.add env.lss_tombstones tombstone;
     }
   | Fast fileinfo_names ->
     {
-      lte_fileinfos = env.lte_fileinfos;
-      lte_filenames =
-        Relative_path.Map.add env.lte_filenames
+      lss_fileinfos = env.lss_fileinfos;
+      lss_filenames =
+        Relative_path.Map.add env.lss_filenames
           ~key:path ~data:fileinfo_names;
-      lte_tombstones =
-        Tombstone_set.add env.lte_tombstones tombstone;
+      lss_tombstones =
+        Tombstone_set.add env.lss_tombstones tombstone;
     }
 ;;
 
 (* Remove files from local when they are deleted *)
 let remove_file
     (path: Relative_path.t)
-    (env: local_tracking_env): local_tracking_env =
+    (env: si_env): si_env =
   let tombstone = get_tombstone path in
   {
-    lte_fileinfos =
-      Relative_path.Map.remove env.lte_fileinfos path;
-    lte_filenames =
-      Relative_path.Map.remove env.lte_filenames path;
-    lte_tombstones =
-      Tombstone_set.add env.lte_tombstones tombstone;
+    lss_fileinfos =
+      Relative_path.Map.remove env.lss_fileinfos path;
+    lss_filenames =
+      Relative_path.Map.remove env.lss_filenames path;
+    lss_tombstones =
+      Tombstone_set.add env.lss_tombstones tombstone;
   }
 ;;
 
@@ -75,7 +75,7 @@ let search_local_symbols
     ~(query_text: string)
     ~(max_results: int)
     ~(kind_filter: si_kind option)
-    ~(env: local_tracking_env): si_results =
+    ~(env: si_env): si_results =
 
   (* case insensitive search, must include namespace, escaped for regex *)
   let query_text_regex_case_insensitive =
@@ -139,7 +139,7 @@ let search_local_symbols
   in
 
   try
-    let acc = Relative_path.Map.fold env.lte_fileinfos
+    let acc = Relative_path.Map.fold env.lss_fileinfos
         ~init:[]
         ~f:(fun path info acc ->
             acc
@@ -148,7 +148,7 @@ let search_local_symbols
             |> check_id_tuple_list_using_kind_filter info.FileInfo.typedefs SI_Typedef path
             |> check_id_tuple_list_using_kind_filter info.FileInfo.consts SI_GlobalConstant path
           ) in
-    let acc = Relative_path.Map.fold env.lte_filenames
+    let acc = Relative_path.Map.fold env.lss_filenames
         ~init:acc
         ~f:(fun path names acc ->
             acc
@@ -163,10 +163,10 @@ let search_local_symbols
 
 (* Filter the results to extract any dead objects *)
 let extract_dead_results
-    ~(env: SearchUtils.local_tracking_env)
+    ~(env: SearchUtils.si_env)
     ~(results: SearchUtils.si_results): si_results =
   List.filter results ~f:(fun r ->
-    let is_valid_result = not (Tombstone_set.mem env.lte_tombstones r.si_filehash) in
+    let is_valid_result = not (Tombstone_set.mem env.lss_tombstones r.si_filehash) in
     is_valid_result
   )
 ;;

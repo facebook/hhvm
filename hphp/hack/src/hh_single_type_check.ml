@@ -789,7 +789,7 @@ let typecheck_tasts tasts tcopt (filename:Relative_path.t) =
 
 let handle_mode
   mode filenames tcopt popt builtins files_contents files_info parse_errors
-  max_errors error_format batch_mode out_extension (env: SearchUtils.local_tracking_env) =
+  max_errors error_format batch_mode out_extension (env: SearchUtils.si_env) =
   let expect_single_file () : Relative_path.t =
     match filenames with
     | [x] -> x
@@ -1195,7 +1195,7 @@ let decl_and_run_mode
   }
   (popt: TypecheckerOptions.t)
   (hhi_root: Path.t)
-  (env: SearchUtils.local_tracking_env): unit =
+  (env: SearchUtils.si_env): unit =
   if mode = Dump_deps then Typing_deps.debug_trace := true;
   Ident.track_names := true;
   let builtins =
@@ -1239,7 +1239,7 @@ let decl_and_run_mode
     (Errors.get_error_list errors) max_errors error_format batch_mode out_extension
     env
 
-let main_hack ({files; mode; tcopt; _} as opts) (env: SearchUtils.local_tracking_env): unit =
+let main_hack ({files; mode; tcopt; _} as opts) (env: SearchUtils.si_env): unit =
   (* TODO: We should have a per file config *)
   Sys_utils.signal Sys.sigusr1
     (Sys.Signal_handle Typing.debug_print_last_pos);
@@ -1283,8 +1283,8 @@ let () =
   );
   let options = parse_options () in
   let env = {
-    SearchUtils.lte_fileinfos = Relative_path.Map.empty;
-    SearchUtils.lte_filenames = Relative_path.Map.empty;
-    SearchUtils.lte_tombstones = SearchUtils.Tombstone_set.empty;
+    SearchUtils.lss_fileinfos = Relative_path.Map.empty;
+    SearchUtils.lss_filenames = Relative_path.Map.empty;
+    SearchUtils.lss_tombstones = SearchUtils.Tombstone_set.empty;
   } in
   Unix.handle_unix_error main_hack options env

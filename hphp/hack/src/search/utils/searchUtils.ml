@@ -258,9 +258,11 @@ module Tombstone_set = struct
   include Reordered_argument_set(Set.Make(Tombstone))
 end
 
-(* Represents files changed on disk *)
-type local_tracking_env = {
-  lte_fileinfos: FileInfo.t Relative_path.Map.t;
-  lte_filenames: FileInfo.names Relative_path.Map.t;
-  lte_tombstones: Tombstone_set.t;
+(* Context information for the current symbol index *)
+type si_env = {
+
+  (* LocalSearchService *)
+  lss_fileinfos: FileInfo.t Relative_path.Map.t;
+  lss_filenames: FileInfo.names Relative_path.Map.t;
+  lss_tombstones: Tombstone_set.t;
 }

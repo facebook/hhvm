@@ -141,7 +141,7 @@ let find_matching_symbols
     ~(max_results: int)
     ~(context: autocomplete_type option)
     ~(kind_filter: si_kind option)
-    ~(env: SearchUtils.local_tracking_env): si_results =
+    ~(env: SearchUtils.si_env): si_results =
   let provider = get_search_provider () in
 
   (* Will be used in a future diff, but let's avoid the warning for now *)
@@ -258,7 +258,7 @@ let query_for_autocomplete
 let update_files
     (worker_list_opt: MultiWorker.worker list option)
     (paths: (Relative_path.t * info * file_source) list)
-    (env: SearchUtils.local_tracking_env ref): unit =
+    (env: SearchUtils.si_env ref): unit =
   match get_search_provider () with
   | CustomIndex
   | NoIndex
@@ -277,7 +277,7 @@ let update_files
  *)
 let remove_files
     (paths: Relative_path.Set.t)
-    (env: SearchUtils.local_tracking_env ref): unit =
+    (env: SearchUtils.si_env ref): unit =
   match get_search_provider () with
   | CustomIndex
   | NoIndex

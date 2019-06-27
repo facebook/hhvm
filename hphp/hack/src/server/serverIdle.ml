@@ -101,7 +101,7 @@ let exit_if_unused() =
 (*****************************************************************************)
 let init
     (genv: ServerEnv.genv)
-    (env: SearchUtils.local_tracking_env ref)
+    (env: SearchUtils.si_env ref)
     (root: Path.t): unit =
   let jobs = [
     (* I'm not sure explicitly invoking the Gc here is necessary, but

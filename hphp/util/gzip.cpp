@@ -17,6 +17,7 @@
 
 #include "hphp/util/gzip.h"
 
+#include "hphp/util/alloc.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/logger.h"
 
@@ -25,6 +26,22 @@
 #define GZIP_FOOTER_LENGTH 8
 
 namespace HPHP {
+
+bool GzipCompressor::s_useLocalArena = false;
+
+namespace {
+
+void* local_zalloc(void* /* opaque */, unsigned items, unsigned size) {
+  auto const bytes = static_cast<size_t>(items) *  size;
+  if (bytes == 0) return nullptr;
+  return local_malloc(bytes);
+}
+
+void local_zfree(void* /* opaque */, void* p) {
+  if (p) local_free(p);
+}
+
+}
 
 static const int gz_magic[2] = {0x1f, 0x8b}; /* gzip magic header */
 ///////////////////////////////////////////////////////////////////////////////
@@ -175,8 +192,13 @@ GzipCompressor::GzipCompressor(int level, int encoding_mode, bool header)
     throw Exception("encoding mode must be FORCE_GZIP or FORCE_DEFLATE");
   }
 
-  m_stream.zalloc = Z_NULL;
-  m_stream.zfree = Z_NULL;
+  if (s_useLocalArena) {
+    m_stream.zalloc = local_zalloc;
+    m_stream.zfree = local_zfree;
+  } else {
+    m_stream.zalloc = Z_NULL;
+    m_stream.zfree = Z_NULL;
+  }
   m_stream.opaque = Z_NULL;
   m_stream.total_in = 0;
   m_stream.next_in = Z_NULL;
@@ -219,9 +241,14 @@ char *GzipCompressor::compress(const char *data, int &len, bool trailer) {
 
   m_stream.avail_out = m_stream.avail_in +
     (m_stream.avail_in / PHP_ZLIB_MODIFIER) + 15 + 1; /* room for \0 */
-  char *s2 = (char *)malloc
-    (m_stream.avail_out + GZIP_HEADER_LENGTH +
-     ((trailer && m_encoding == CODING_GZIP) ? GZIP_FOOTER_LENGTH : 0));
+  char *s2;
+  auto const allocSize = m_stream.avail_out + GZIP_HEADER_LENGTH +
+    ((trailer && m_encoding == CODING_GZIP) ? GZIP_FOOTER_LENGTH : 0);
+  if (s_useLocalArena) {
+    s2 = (char *)local_malloc(allocSize);
+  } else {
+    s2 = (char *)malloc(allocSize);
+  }
 
   /* add gzip file header */
   bool header = m_header;
@@ -267,8 +294,11 @@ char *GzipCompressor::compress(const char *data, int &len, bool trailer) {
     }
     return s2;
   }
-
-  free(s2);
+  if (s_useLocalArena) {
+    local_free(s2);
+  } else {
+    free(s2);
+  }
   Logger::Error("%s", zError(status));
   return nullptr;
 }

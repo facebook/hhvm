@@ -45,7 +45,10 @@ struct GzipCompressor {
    */
   char *compress(const char *data, int &len, bool trailer);
 
-private:
+ public:
+  static bool s_useLocalArena;
+
+ private:
   int m_encoding;
   bool m_header;
   z_stream m_stream;

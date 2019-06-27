@@ -217,7 +217,9 @@ StringHolder GzipResponseCompressor::compressResponse(
     Logger::Error("Unable to compress response: len=%d", len);
     return StringHolder{};
   }
-  return StringHolder(compressedData, len, FreeType::Free);
+  auto const freeType = GzipCompressor::s_useLocalArena ? FreeType::LocalFree
+                                                        : FreeType::Free;
+  return StringHolder(compressedData, len, freeType);
 }
 
 /***************

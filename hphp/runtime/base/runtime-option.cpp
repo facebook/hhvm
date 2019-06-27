@@ -49,6 +49,7 @@
 #include "hphp/util/cpuid.h"
 #include "hphp/util/current-executable.h"
 #include "hphp/util/file-cache.h"
+#include "hphp/util/gzip.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/hdf.h"
 #include "hphp/util/hphp-config.h"
@@ -2060,6 +2061,8 @@ void RuntimeOption::Load(
                  "Server.GzipCompressionLevel", 3);
     Config::Bind(GzipMaxCompressionLevel, ini, config,
                  "Server.GzipMaxCompressionLevel", 9);
+    Config::Bind(GzipCompressor::s_useLocalArena, ini, config,
+                 "Server.GzipUseLocalArena", GzipCompressor::s_useLocalArena);
     Config::Bind(EnableKeepAlive, ini, config, "Server.EnableKeepAlive", true);
     Config::Bind(ExposeHPHP, ini, config, "Server.ExposeHPHP", true);
     Config::Bind(ExposeXFBServer, ini, config, "Server.ExposeXFBServer", false);

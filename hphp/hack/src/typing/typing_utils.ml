@@ -333,6 +333,11 @@ let reactivity_to_string env r =
 let uerror env r1 ty1 r2 ty2 =
   let ty1 = Typing_print.with_blank_tyvars (fun () -> Typing_print.full_strip_ns env (r1,ty1)) in
   let ty2 = Typing_print.with_blank_tyvars (fun () -> Typing_print.full_strip_ns env (r2,ty2)) in
+  let ty1, ty2 =
+    if String.equal ty1 ty2 then
+      "exactly the type " ^ ty1, "the nonexact type " ^ ty2
+    else ty1, ty2
+  in
   let left = Reason.to_string ("Expected " ^ ty1) r1 in
   let right = Reason.to_string ("But got " ^ ty2) r2 in
   match (r1, r2) with

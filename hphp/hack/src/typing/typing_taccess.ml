@@ -48,7 +48,7 @@ type env = {
 
 let empty_env env ety_env = {
   tenv = env;
-  ety_env = ety_env;
+  ety_env;
   trail = [];
   dep_tys = [];
   gen_seen = TySet.empty;
@@ -130,7 +130,21 @@ and referenced_typeconsts env ety_env r (root, ids) =
 and expand env ~as_tyvar_with_cnstr root id =
   let expand env ty = expand env ~as_tyvar_with_cnstr ty id in
   let tenv, (root_reason, root_ty as root) = Env.expand_type env.tenv root in
-  let env = { env with tenv = tenv } in
+  (* The type constant itself may contain a 'this' type so we need to
+   * change the this_ty in the environment to be the root as an
+   * expression dependent type.
+   *)
+  let update_this_ty env =
+    let this_ty = match root with
+    | _ when env.dep_tys <> [] -> env.ety_env.this_ty
+    (* Legacy behaviour is to preserve exactness only on `this`
+     * and not through `this::T` *)
+    | r, Tclass (cid, _, tyl) -> r, Tclass (cid, Nonexact, tyl)
+    | _ -> root
+    in
+    { env with ety_env = { env.ety_env with this_ty } }
+  in
+  let env = update_this_ty { env with tenv } in
   let apply_dep_tys env tyl = List.map_env env tyl
     begin fun prev_env ty ->
       let env, ty = expand env ty in
@@ -145,12 +159,9 @@ and expand env ~as_tyvar_with_cnstr root id =
   | Tany | Terr -> env, root
   | Tabstract (AKdependent (`cls _), Some ty)
   | Tabstract (AKnewtype (_, _), Some ty) -> expand env ty
-  | Tclass ((class_pos, class_name), _, tyl) ->
-    (* Legacy behaviour is to preserve exactness only on `this`
-     * and not through `this::T` *)
+  | Tclass ((class_pos, class_name), _, _) ->
     create_root_from_type_constant
       env class_pos class_name
-      (root_reason, Tclass ((class_pos, class_name), Nonexact, tyl))
       id ~as_tyvar_with_cnstr
   | Tabstract (AKgeneric s, _) ->
     let dep_ty = generic_to_dep_ty s in
@@ -158,7 +169,8 @@ and expand env ~as_tyvar_with_cnstr root id =
       { env with
         dep_tys = (root_reason, dep_ty)::env.dep_tys;
         gen_seen = TySet.add root env.gen_seen;
-        } in
+      }
+    in
     let upper_bounds = Env.get_upper_bounds env.tenv s in
     (* Ignore upper bounds that are equal to ones we've seen, to avoid
       an infinite loop
@@ -201,7 +213,9 @@ and expand env ~as_tyvar_with_cnstr root id =
   | Tabstract (AKdependent dep_ty, Some ty) ->
     let env =
       { env with
-        dep_tys = (root_reason, (dep_ty, []))::env.dep_tys } in
+        dep_tys = (root_reason, (dep_ty, []))::env.dep_tys;
+      }
+    in
     expand env ty
   | Tunion tyl ->
     let env, tyl = apply_dep_tys env tyl in
@@ -234,7 +248,7 @@ and generic_to_dep_ty s =
  * otherwise we choose the constraint type. If there is no constraint type then
  * we choose the assigned type.
  *)
-and create_root_from_type_constant env class_pos class_name root_ty
+and create_root_from_type_constant env class_pos class_name
   (pos, tconst) ~as_tyvar_with_cnstr =
   let env, typeconst =
     get_typeconst env class_pos class_name pos tconst ~as_tyvar_with_cnstr
@@ -242,15 +256,8 @@ and create_root_from_type_constant env class_pos class_name root_ty
     let env =
       { env with
         trail = (ExprDepTy.to_string (`cls class_name, [tconst]))::env.trail } in
-    (* The type constant itself may contain a 'this' type so we need to
-     * change the this_ty in the environment to be the root as an
-     * expression dependent type.
-     *)
-    let tenv, new_this = ExprDepTy.apply env.tenv env.dep_tys root_ty in
-    let env = { env with tenv } in
     let ety_env =
       { env.ety_env with
-        this_ty = new_this;
         from_class = None; } in
     begin
       match typeconst with
@@ -278,13 +285,13 @@ and create_root_from_type_constant env class_pos class_name root_ty
       | _ ->
           let tenv, ty =
             if as_tyvar_with_cnstr then
-              let tenv, tvar = Env.fresh_invariant_type_var tenv pos in
+              let tenv, tvar = Env.fresh_invariant_type_var env.tenv pos in
               Log.log_new_tvar_for_tconst_access tenv pos tvar class_name tconst;
               tenv, tvar
             else
               let reason = Reason.Rwitness (fst typeconst.ttc_name) in
               let ty = (reason, Tabstract (AKgeneric (class_name^"::"^tconst), None)) in
-              tenv, ty in
+              env.tenv, ty in
           let dep_tys =
             List.map env.dep_tys (fun (r, (d, s)) -> r, (d, s @ [tconst])) in
           { env with dep_tys; tenv }, ty

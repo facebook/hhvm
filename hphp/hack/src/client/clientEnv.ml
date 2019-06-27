@@ -77,10 +77,9 @@ type client_check_env = {
   prechecked : bool option;
   profile_log: bool;
   replace_state_after_saving: bool;
-  retries: int;
   root: Path.t;
   sort_results: bool;
-  timeout: float option;
+  deadline: float option;
   watchman_debug_logging: bool;
   allow_non_opt_build : bool;
 }

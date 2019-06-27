@@ -1809,8 +1809,7 @@ let rec connect_client
       autostart;
       force_dormant_start = false;
       watchman_debug_logging = false; (* If you want this, start the server manually in terminal. *)
-      retries = Some 3; (* each retry takes up to 1 second *)
-      expiry = None; (* we can limit retries by time as well as by count *)
+      deadline = Some (Unix.time() +. 3.); (* limit to 3 seconds *)
       no_load = false; (* only relevant when autostart=true *)
       log_inference_constraints = false; (* irrelevant *)
       profile_log = false; (* irrelevant *)

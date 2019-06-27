@@ -5897,41 +5897,59 @@ void Index::freeze() {
   m_data->ever_frozen = true;
 }
 
-template<typename T>
-void clobber(T& t) {
-  if (debug) {
-    char*p = (char*)&t;
-    for (auto i = sizeof(t); i--; ) p[i] ^= 0xa5;
+/*
+ * Note that these functions run in separate threads, and
+ * intentionally don't bump Trace::hhbbc_time. If you want to see
+ * these times, set TRACE=hhbbc_time:1
+ */
+#define CLEAR(x)                                \
+  {                                             \
+    trace_time _{"Clearing " #x};               \
+    (x).clear();                                \
   }
+
+void Index::cleanup_for_final() {
+  trace_time _{"cleanup_for_final"};
+  CLEAR(m_data->dependencyMap);
 }
 
-#define CLEAR(x)                                \
-  (x).clear();                                  \
-  clobber(x);                                   \
-  SCOPE_EXIT { clobber(x); };
 
-void Index::cleanup_for_emit(folly::Baton<>* done) {
-  CLEAR(m_data->classes);
-  CLEAR(m_data->methods);
-  CLEAR(m_data->method_ref_params_by_name);
-  CLEAR(m_data->funcs);
-  CLEAR(m_data->typeAliases);
-  CLEAR(m_data->classAliases);
+void Index::cleanup_post_emit() {
+  trace_time _{"cleanup_post_emit"};
+  {
+    trace_time t{"Reset allClassInfos"};
+    parallel::for_each(m_data->allClassInfos, [] (auto& u) { u.reset(); });
+  }
+  std::vector<std::function<void()>> clearers;
+  #define CLEAR_PARALLEL(x) clearers.push_back([&] CLEAR(x));
+  CLEAR_PARALLEL(m_data->classes);
+  CLEAR_PARALLEL(m_data->methods);
+  CLEAR_PARALLEL(m_data->method_ref_params_by_name);
+  CLEAR_PARALLEL(m_data->funcs);
+  CLEAR_PARALLEL(m_data->typeAliases);
+  CLEAR_PARALLEL(m_data->enums);
+  CLEAR_PARALLEL(m_data->constants);
+  CLEAR_PARALLEL(m_data->records);
+  CLEAR_PARALLEL(m_data->classAliases);
 
-  CLEAR(m_data->classClosureMap);
-  CLEAR(m_data->classExtraMethodMap);
+  CLEAR_PARALLEL(m_data->classClosureMap);
+  CLEAR_PARALLEL(m_data->classExtraMethodMap);
 
-  /*
-   * allClassInfos, is what's keeping the ClassInfos alive, and Type's
-   * can still have references to them. In addition, we can still use
-   * classInfos from lookup_public_static, so we can't clear either
-   * member here.
-   */
+  CLEAR_PARALLEL(m_data->allClassInfos);
+  CLEAR_PARALLEL(m_data->classInfo);
+  CLEAR_PARALLEL(m_data->funcInfo);
 
-  CLEAR(m_data->dependencyMap);
-  CLEAR(m_data->foldableReturnTypeMap);
+  CLEAR_PARALLEL(m_data->privatePropInfo);
+  CLEAR_PARALLEL(m_data->privateStaticPropInfo);
+  CLEAR_PARALLEL(m_data->unknownClassSProps);
+  CLEAR_PARALLEL(m_data->publicSPropMutations);
+  CLEAR_PARALLEL(m_data->ifaceSlotMap);
+  CLEAR_PARALLEL(m_data->closureUseVars);
 
-  if (done) done->wait();
+  CLEAR_PARALLEL(m_data->foldableReturnTypeMap);
+  CLEAR_PARALLEL(m_data->contextualReturnTypes);
+
+  parallel::for_each(clearers, [] (const std::function<void()>& f) { f(); });
 }
 
 void Index::thaw() {

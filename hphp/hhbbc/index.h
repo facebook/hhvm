@@ -461,10 +461,17 @@ struct Index {
   void thaw();
 
   /*
-   * Throw away data structures that won't be needed during the emit
-   * stage (or beyond).
+   * Throw away data structures that won't be needed during or after
+   * the final pass. Currently the dependency map, which can take a
+   * long time to destroy.
    */
-  void cleanup_for_emit(folly::Baton<>* done);
+  void cleanup_for_final();
+
+  /*
+   * Throw away data structures that won't be needed after the emit
+   * stage.
+   */
+  void cleanup_post_emit();
 
   /*
    * The Index contains a Builder for an ArrayTypeTable.

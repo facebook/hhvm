@@ -789,7 +789,7 @@ let typecheck_tasts tasts tcopt (filename:Relative_path.t) =
 
 let handle_mode
   mode filenames tcopt popt builtins files_contents files_info parse_errors
-  max_errors error_format batch_mode out_extension (env: SearchUtils.si_env) =
+  max_errors error_format batch_mode out_extension (sienv: SearchUtils.si_env) =
   let expect_single_file () : Relative_path.t =
     match filenames with
     | [x] -> x
@@ -813,7 +813,7 @@ let handle_mode
 
       let result = ServerAutoComplete.auto_complete_at_position
         ~tcopt ~pos ~is_manually_invoked ~delimit_on_namespaces:false ~file_content:file
-        ~basic_only:false ~env
+        ~basic_only:false ~sienv
       in
       List.iter ~f: begin fun r ->
         let open AutocompleteTypes in
@@ -839,7 +839,7 @@ let handle_mode
             FfpAutocompleteService.auto_complete tcopt file_text position
             ~filter_by_token:true
             ~basic_only:false
-            ~env
+            ~sienv
           in
           match result with
           | [] -> Printf.printf "No result found\n"
@@ -1195,7 +1195,7 @@ let decl_and_run_mode
   }
   (popt: TypecheckerOptions.t)
   (hhi_root: Path.t)
-  (env: SearchUtils.si_env): unit =
+  (sienv: SearchUtils.si_env): unit =
   if mode = Dump_deps then Typing_deps.debug_trace := true;
   Ident.track_names := true;
   let builtins =
@@ -1237,9 +1237,9 @@ let decl_and_run_mode
 
   handle_mode mode files tcopt popt builtins files_contents files_info
     (Errors.get_error_list errors) max_errors error_format batch_mode out_extension
-    env
+    sienv
 
-let main_hack ({files; mode; tcopt; _} as opts) (env: SearchUtils.si_env): unit =
+let main_hack ({files; mode; tcopt; _} as opts) (sienv: SearchUtils.si_env): unit =
   (* TODO: We should have a per file config *)
   Sys_utils.signal Sys.sigusr1
     (Sys.Signal_handle Typing.debug_print_last_pos);
@@ -1266,7 +1266,7 @@ let main_hack ({files; mode; tcopt; _} as opts) (env: SearchUtils.si_env): unit 
       | _ -> die "Ai mode does not support multiple files"
       end
     | _ ->
-      decl_and_run_mode opts tcopt hhi_root env;
+      decl_and_run_mode opts tcopt hhi_root sienv;
     TypingLogger.flush_buffers ()
   )
 

@@ -19,12 +19,12 @@ include ServerInitTypes
 let run_search
     (genv: ServerEnv.genv)
     (t: float)
-    (env: SearchUtils.si_env ref): unit =
+    (sienv: SearchUtils.si_env ref): unit =
   if SearchServiceRunner.should_run_completely genv
     (SymbolIndex.get_search_provider ())
   then begin
     (* The duration is already logged by SearchServiceRunner *)
-    SearchServiceRunner.run_completely genv env;
+    SearchServiceRunner.run_completely genv sienv;
     HackEventLogger.update_search_end t
   end
   else ()

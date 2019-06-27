@@ -89,7 +89,7 @@ let set_search_provider
 
 (* Log information about calls to the symbol index service *)
 let log_symbol_index_search
-    ~(env: si_env)
+    ~(sienv: si_env)
     ~(query_text: string)
     ~(max_results: int)
     ~(results: int)
@@ -97,7 +97,7 @@ let log_symbol_index_search
     ~(start_time: float)
     ~(context: autocomplete_type option)
     ~(caller: string): unit =
-  let _ = env in
+  let _ = sienv in
 
   (* In quiet mode we don't log anything to either scuba or console *)
   if !in_quiet_mode then begin
@@ -139,7 +139,7 @@ let log_symbol_index_search
  * - Goal is to route ALL searches through one function for consistency
  *)
 let find_matching_symbols
-    ~(env: si_env)
+    ~(sienv: si_env)
     ~(query_text: string)
     ~(max_results: int)
     ~(context: autocomplete_type option)
@@ -175,7 +175,7 @@ let find_matching_symbols
           ~query_text
           ~max_results
           ~kind_filter
-          ~env;
+          ~sienv;
     in
 
     (* Next search globals *)
@@ -190,7 +190,7 @@ let find_matching_symbols
         []
       | SqliteIndex ->
         let r = SqliteSearchService.sqlite_search query_text max_results context in
-        LocalSearchService.extract_dead_results ~env ~results:r
+        LocalSearchService.extract_dead_results ~sienv ~results:r
       | TrieIndex ->
         HackSearchService.index_search query_text max_results kind_filter
     in
@@ -255,7 +255,7 @@ let query_for_autocomplete
  * this information should capture it here.
  *)
 let update_files
-    ~(env: si_env ref)
+    ~(sienv: si_env ref)
     ~(workers: MultiWorker.worker list option)
     ~(paths: (Relative_path.t * info * file_source) list): unit =
   match get_search_provider () with
@@ -264,7 +264,7 @@ let update_files
   | SqliteIndex ->
     List.iter paths ~f:(fun (path, info, detector) ->
       if detector = SearchUtils.TypeChecker then
-        env := LocalSearchService.update_file path info !env;
+        sienv := LocalSearchService.update_file ~sienv:!sienv ~path ~info;
     );
   | TrieIndex ->
     HackSearchService.update_from_typechecker workers paths
@@ -275,14 +275,14 @@ let update_files
  * Any local caches should be cleared of values for this file.
  *)
 let remove_files
-    ~(env: SearchUtils.si_env ref)
+    ~(sienv: SearchUtils.si_env ref)
     ~(paths: Relative_path.Set.t): unit =
   match get_search_provider () with
   | CustomIndex
   | NoIndex
   | SqliteIndex ->
     Relative_path.Set.iter paths ~f:(fun path ->
-        env := LocalSearchService.remove_file path !env;
+        sienv := LocalSearchService.remove_file ~sienv:!sienv ~path;
       );
   | TrieIndex ->
     HackSearchService.MasterApi.clear_shared_memory paths

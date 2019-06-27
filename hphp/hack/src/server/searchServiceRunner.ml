@@ -20,7 +20,7 @@ module SearchServiceRunner = struct
   let queue = Queue.create ()
 
   (* Pops the first num_files from the queue *)
-  let update_search genv num_files (env: SearchUtils.si_env ref) =
+  let update_search genv num_files (sienv: SearchUtils.si_env ref) =
     let t = Unix.gettimeofday() in
     let rec iter acc n =
       if n <= 0 || Queue.is_empty queue then acc
@@ -29,7 +29,7 @@ module SearchServiceRunner = struct
         iter (x::acc) (n-1) in
     let fast = iter [] num_files in
 
-    SymbolIndex.update_files ~env ~workers:genv.workers ~paths:fast;
+    SymbolIndex.update_files ~sienv ~workers:genv.workers ~paths:fast;
 
     if (List.length fast > 0) then begin
       let str =
@@ -43,16 +43,16 @@ module SearchServiceRunner = struct
     end
 
   (* Completely clears the queue *)
-  let run_completely genv (env: SearchUtils.si_env ref)=
-    update_search genv (Queue.length queue) env
+  let run_completely genv (sienv: SearchUtils.si_env ref)=
+    update_search genv (Queue.length queue) sienv
 
-  let run genv (env: SearchUtils.si_env ref) () =
+  let run genv (sienv: SearchUtils.si_env ref) () =
     if ServerArgs.ai_mode genv.options = None then begin
       let size = if chunk_size genv = 0
         then Queue.length queue
         else chunk_size genv
       in
-      update_search genv size env
+      update_search genv size sienv
     end
     else ()
 

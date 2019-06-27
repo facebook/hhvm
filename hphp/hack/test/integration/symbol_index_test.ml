@@ -52,15 +52,15 @@ let assert_autocomplete
     ~(query_text: string)
     ~(kind: si_kind)
     ~(expected: int)
-    ~(env: si_env ref): unit =
+    ~(sienv: si_env ref): unit =
 
   (* Search for the symbol *)
   let results = SymbolIndex.find_matching_symbols
+    ~sienv:!sienv
     ~query_text
     ~max_results:100
     ~kind_filter:(Some kind)
-    ~context:None
-    ~env:!env in
+    ~context:None in
 
   (* Verify correct number of results *)
   IA.assert_equals
@@ -111,17 +111,17 @@ let run_index_builder (harness: Test_harness.t): unit =
 
 let test_sqlite_plus_local (harness: Test_harness.t): bool =
   run_index_builder harness;
-  let env = ref {
+  let sienv = ref {
     lss_fileinfos = Relative_path.Map.empty;
     lss_filenames = Relative_path.Map.empty;
     lss_tombstones = Tombstone_set.empty;
   } in
 
   (* Find one of each major type *)
-  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~env;
-  assert_autocomplete ~query_text:"NoBigTrait" ~kind:SI_Trait ~expected:1 ~env;
-  assert_autocomplete ~query_text:"some_long_function_name" ~kind:SI_Function ~expected:1 ~env;
-  assert_autocomplete ~query_text:"ClassToBeIdentified" ~kind:SI_Class ~expected:1 ~env;
+  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv;
+  assert_autocomplete ~query_text:"NoBigTrait" ~kind:SI_Trait ~expected:1 ~sienv;
+  assert_autocomplete ~query_text:"some_long_function_name" ~kind:SI_Function ~expected:1 ~sienv;
+  assert_autocomplete ~query_text:"ClassToBeIdentified" ~kind:SI_Class ~expected:1 ~sienv;
   Hh_logger.log "First pass complete";
 
   (* Now, let's remove a few files and try again - assertions should change *)
@@ -130,14 +130,14 @@ let test_sqlite_plus_local (harness: Test_harness.t): bool =
   let s = Relative_path.Set.empty in
   let s = Relative_path.Set.add s bar1path in
   let s = Relative_path.Set.add s foo3path in
-  SymbolIndex.remove_files ~env:env ~paths:s;
+  SymbolIndex.remove_files ~sienv:sienv ~paths:s;
   Hh_logger.log "Removed files";
 
   (* Two of these have been removed! *)
-  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~env;
-  assert_autocomplete ~query_text:"NoBigTrait" ~kind:SI_Trait ~expected:0 ~env;
-  assert_autocomplete ~query_text:"some_long_function_name" ~kind:SI_Function ~expected:0 ~env;
-  assert_autocomplete ~query_text:"ClassToBeIdentified" ~kind:SI_Class ~expected:1 ~env;
+  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv;
+  assert_autocomplete ~query_text:"NoBigTrait" ~kind:SI_Trait ~expected:0 ~sienv;
+  assert_autocomplete ~query_text:"some_long_function_name" ~kind:SI_Function ~expected:0 ~sienv;
+  assert_autocomplete ~query_text:"ClassToBeIdentified" ~kind:SI_Class ~expected:1 ~sienv;
   Hh_logger.log "Second pass complete";
 
   (* Add the files back! *)
@@ -165,15 +165,15 @@ let test_sqlite_plus_local (harness: Test_harness.t): bool =
   } in
   let changelist = (bar1path, Full bar1fileinfo, TypeChecker)
     :: [(foo3path, Full foo3fileinfo, TypeChecker)] in
-  SymbolIndex.update_files ~env ~workers:None ~paths:changelist;
-  let n = LocalSearchService.count_local_fileinfos !env in
+  SymbolIndex.update_files ~sienv ~workers:None ~paths:changelist;
+  let n = LocalSearchService.count_local_fileinfos !sienv in
   Hh_logger.log "Added back; local search service now contains %d files" n;
 
   (* Find one of each major type *)
-  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~env;
-  assert_autocomplete ~query_text:"NoBigTrait" ~kind:SI_Class ~expected:1 ~env;
-  assert_autocomplete ~query_text:"some_long_function_name" ~kind:SI_Function ~expected:1 ~env;
-  assert_autocomplete ~query_text:"ClassToBeIdentified" ~kind:SI_Class ~expected:1 ~env;
+  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv;
+  assert_autocomplete ~query_text:"NoBigTrait" ~kind:SI_Class ~expected:1 ~sienv;
+  assert_autocomplete ~query_text:"some_long_function_name" ~kind:SI_Function ~expected:1 ~sienv;
+  assert_autocomplete ~query_text:"ClassToBeIdentified" ~kind:SI_Class ~expected:1 ~sienv;
   Hh_logger.log "Third pass complete";
 
   (* If we got here, all is well *)
@@ -184,24 +184,25 @@ let test_sqlite_plus_local (harness: Test_harness.t): bool =
  * names and kinds correctly *)
 let test_builder_names (harness: Test_harness.t): bool =
   run_index_builder harness;
-  let env = ref {
+  let sienv = ref {
     lss_fileinfos = Relative_path.Map.empty;
     lss_filenames = Relative_path.Map.empty;
     lss_tombstones = Tombstone_set.empty;
   } in
 
   (* Assert that we can capture all kinds of symbols *)
-  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~env;
-  assert_autocomplete ~query_text:"NoBigTrait" ~kind:SI_Trait ~expected:1 ~env;
-  assert_autocomplete ~query_text:"some_long_function_name" ~kind:SI_Function ~expected:1 ~env;
-  assert_autocomplete ~query_text:"ClassToBeIdentified" ~kind:SI_Class ~expected:1 ~env;
-  assert_autocomplete ~query_text:"CONST_SOME_COOL_VALUE" ~kind:SI_GlobalConstant ~expected:1 ~env;
-  assert_autocomplete ~query_text:"IMyFooInterface" ~kind:SI_Interface ~expected:1 ~env;
-  assert_autocomplete ~query_text:"SomeTypeAlias" ~kind:SI_Typedef ~expected:1 ~env;
-  assert_autocomplete ~query_text:"FbidMapField" ~kind:SI_Enum ~expected:1 ~env;
+  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv;
+  assert_autocomplete ~query_text:"NoBigTrait" ~kind:SI_Trait ~expected:1 ~sienv;
+  assert_autocomplete ~query_text:"some_long_function_name" ~kind:SI_Function ~expected:1 ~sienv;
+  assert_autocomplete ~query_text:"ClassToBeIdentified" ~kind:SI_Class ~expected:1 ~sienv;
+  assert_autocomplete ~query_text:"CONST_SOME_COOL_VALUE" ~kind:SI_GlobalConstant
+    ~expected:1 ~sienv;
+  assert_autocomplete ~query_text:"IMyFooInterface" ~kind:SI_Interface ~expected:1 ~sienv;
+  assert_autocomplete ~query_text:"SomeTypeAlias" ~kind:SI_Typedef ~expected:1 ~sienv;
+  assert_autocomplete ~query_text:"FbidMapField" ~kind:SI_Enum ~expected:1 ~sienv;
 
   (* XHP is considered a class at the moment - this may change *)
-  assert_autocomplete ~query_text:":xhp:helloworld" ~kind:SI_Class ~expected:1 ~env;
+  assert_autocomplete ~query_text:":xhp:helloworld" ~kind:SI_Class ~expected:1 ~sienv;
 
   (* All good *)
   true

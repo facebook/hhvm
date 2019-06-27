@@ -17,7 +17,7 @@ let get_results
     ~(delimit_on_namespaces:bool)
     ~(autocomplete_context: AutocompleteTypes.legacy_autocomplete_context)
     ~(basic_only:bool)
-    ~(env:SearchUtils.si_env)
+    ~(sienv:SearchUtils.si_env)
     (_:Relative_path.t)
     (file_info:FileInfo.t)
     (tast:Tast.program)
@@ -32,19 +32,20 @@ let get_results
     ~content_classes
     ~autocomplete_context
     ~basic_only
-    ~env
+    ~sienv
 
 let auto_complete
     ~(tcopt:TypecheckerOptions.t)
     ~(delimit_on_namespaces:bool)
     ~(autocomplete_context: AutocompleteTypes.legacy_autocomplete_context)
     ~(basic_only:bool)
-    ~(env:SearchUtils.si_env)
+    ~(sienv:SearchUtils.si_env)
     (content:string)
   : AutocompleteTypes.complete_autocomplete_result list Utils.With_complete_flag.t =
   let result =
     ServerIdeUtils.declare_and_check content
-      ~f:(get_results ~tcopt ~delimit_on_namespaces ~autocomplete_context ~basic_only ~env) tcopt in
+      ~f:(get_results ~tcopt ~delimit_on_namespaces ~autocomplete_context
+        ~basic_only ~sienv) tcopt in
   result
 
 let context_xhp_classname_regex = Str.regexp ".*<[a-zA-Z_0-9:]*$"
@@ -100,11 +101,11 @@ let auto_complete_at_position
   ~(file_content:string)
   ~(pos:File_content.position)
   ~(tcopt:TypecheckerOptions.t)
-  ~(env:SearchUtils.si_env)
+  ~(sienv:SearchUtils.si_env)
   : AutocompleteTypes.complete_autocomplete_result list Utils.With_complete_flag.t=
   let open File_content in
   (* TODO: Avoid doing the "AUTO332" thing by modifying autocomplete service to accept a position *)
   let autocomplete_context = get_autocomplete_context file_content pos ~is_manually_invoked in
   let edits = [{range = Some {st = pos; ed = pos}; text = "AUTO332"}] in
   let content = File_content.edit_file_unsafe file_content edits in
-  auto_complete ~tcopt ~delimit_on_namespaces ~autocomplete_context ~basic_only ~env content
+  auto_complete ~tcopt ~delimit_on_namespaces ~autocomplete_context ~basic_only ~sienv content

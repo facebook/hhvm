@@ -85,7 +85,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           ~delimit_on_namespaces:false
           ~autocomplete_context
           ~basic_only
-          ~env:(!(env.ServerEnv.local_symbol_table))
+          ~sienv:(!(env.ServerEnv.local_symbol_table))
           content in
         env, result.With_complete_flag.value
     | IDENTIFY_FUNCTION (file_input, line, char) ->
@@ -193,7 +193,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let basic_only = genv.local_config.ServerLocalConfig.basic_autocomplete_only in
         let results = ServerAutoComplete.auto_complete_at_position
           ~delimit_on_namespaces ~is_manually_invoked ~file_content ~basic_only ~pos
-          ~tcopt:env.tcopt ~env:!(env.ServerEnv.local_symbol_table)
+          ~tcopt:env.tcopt ~sienv:!(env.ServerEnv.local_symbol_table)
         in
         let completions = results.value in
         let is_complete = results.is_complete in
@@ -206,7 +206,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let basic_only = genv.local_config.ServerLocalConfig.basic_autocomplete_only in
         let result =
           FfpAutocompleteService.auto_complete env.tcopt content pos
-            ~basic_only ~filter_by_token:false ~env:!(env.ServerEnv.local_symbol_table)
+            ~basic_only ~filter_by_token:false ~sienv:!(env.ServerEnv.local_symbol_table)
         in
         env, { AutocompleteTypes.completions = result; char_at_pos; is_complete = true; }
     | DISCONNECT ->

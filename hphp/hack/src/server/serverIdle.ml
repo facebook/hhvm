@@ -101,7 +101,7 @@ let exit_if_unused() =
 (*****************************************************************************)
 let init
     (genv: ServerEnv.genv)
-    (env: SearchUtils.si_env ref)
+    (sienv: SearchUtils.si_env ref)
     (root: Path.t): unit =
   let jobs = [
     (* I'm not sure explicitly invoking the Gc here is necessary, but
@@ -110,7 +110,7 @@ let init
     Periodical.one_hour *. 3., EventLogger.log_gc_stats;
     Periodical.always   , (fun () -> SharedMem.collect `aggressive);
     Periodical.always   , EventLogger.flush;
-    Periodical.always   , SearchServiceRunner.run genv env;
+    Periodical.always   , SearchServiceRunner.run genv sienv;
     Periodical.one_day  , exit_if_unused;
     Periodical.one_day  , Hhi.touch;
     (* try_touch wraps Unix.lutimes, which doesn't open/close any fds, so we

@@ -49,6 +49,21 @@ extern size_t work_chunk;
 
 namespace detail {
 
+template<class Items>
+auto size_info(Items&& items) {
+  auto const size = items.size();
+  if (!size) return std::make_tuple(size, size, size);
+  // If work_chunk is too big to use all the threads, reduce it. Round
+  // down to avoid reducing num_threads in the next step.
+  auto const chunk = std::min(
+    std::max(size_t{1}, size / num_threads), work_chunk
+  );
+  // If we still don't have enough chunks to use all the threads,
+  // reduce the number of threads
+  auto const threads = std::min((size + chunk - 1) / chunk, num_threads);
+  return std::make_tuple(size, threads, chunk);
+}
+
 template<class Func, class Item>
 auto caller(const Func& func, Item&& item, size_t worker) ->
   decltype(func(std::forward<Item>(item), worker)) {
@@ -73,17 +88,21 @@ template<class Func, class Items>
 void for_each(Items&& inputs, Func func) {
   std::atomic<bool> failed{false};
   std::atomic<size_t> index{0};
-  auto const size = inputs.size();
+  auto const info = detail::size_info(inputs);
+  auto const size = std::get<0>(info);
+  if (!size) return;
+  auto const threads = std::get<1>(info);
+  auto const chunk = std::get<2>(info);
 
   std::vector<std::thread> workers;
-  for (auto worker = size_t{0}; worker < num_threads; ++worker) {
+  for (auto worker = size_t{0}; worker < threads; ++worker) {
     workers.push_back(std::thread([&, worker] {
       try {
         HphpSessionAndThread _{Treadmill::SessionKind::HHBBC};
 
         for (;;) {
-          auto start = index.fetch_add(work_chunk);
-          auto const stop = std::min(start + work_chunk, size);
+          auto start = index.fetch_add(chunk);
+          auto const stop = std::min(start + chunk, size);
           if (start >= stop) break;
           for (auto i = start; i != stop; ++i) {
             detail::caller(func,
@@ -118,21 +137,27 @@ void for_each(Items&& inputs, Func func) {
  */
 template<class Func, class Items>
 auto map(Items&& inputs, Func func) -> std::vector<decltype(func(inputs[0]))> {
-  std::vector<decltype(func(inputs[0]))> retVec(inputs.size());
+  auto const info = detail::size_info(inputs);
+  auto const size = std::get<0>(info);
+  std::vector<decltype(func(inputs[0]))> retVec(size);
+  if (!size) return retVec;
+  auto const threads = std::get<1>(info);
+  auto const chunk = std::get<2>(info);
+
   auto const retMem = &retVec[0];
 
   std::atomic<bool> failed{false};
   std::atomic<size_t> index{0};
 
   std::vector<std::thread> workers;
-  for (auto worker = size_t{0}; worker < num_threads; ++worker) {
+  for (auto worker = size_t{0}; worker < threads; ++worker) {
     workers.push_back(std::thread([&] {
       try {
         HphpSessionAndThread _{Treadmill::SessionKind::HHBBC};
 
         for (;;) {
-          auto start = index.fetch_add(work_chunk);
-          auto const stop = std::min(start + work_chunk, inputs.size());
+          auto start = index.fetch_add(chunk);
+          auto const stop = std::min(start + chunk, inputs.size());
           if (start >= stop) break;
 
           std::transform(

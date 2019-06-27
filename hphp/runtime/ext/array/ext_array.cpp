@@ -1741,9 +1741,9 @@ static void containerKeysToSetHelper(const req::ptr<c_Set>& st,
                                      const Variant& container) {
   Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
-  bool isKey = isArrayLikeType(container.toCell()->m_type);
+  bool convertIntLikeStrs = !isArrayLikeType(container.toCell()->m_type);
   for (ArrayIter iter(container); iter; ++iter) {
-    addToSetHelper(st, *iter.first().toCell(), strTv, !isKey);
+    addToSetHelper(st, *iter.first().toCell(), strTv, convertIntLikeStrs);
   }
 }
 
@@ -1838,13 +1838,13 @@ TypedValue HHVM_FUNCTION(array_diff,
   // we convert int-like strings to integers.
   Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
-  bool isKey = isArrayLikeType(c1.m_type);
+  bool convertIntLikeStrs = !isArrayLikeType(c1.m_type);
   for (ArrayIter iter(container1); iter; ++iter) {
     auto const c = tvToCell(iter.secondValPlus());
     if (checkSetHelper(st, c, strTv, true)) continue;
-    const auto key = isKey
-      ? *iter.first().asTypedValue()
-      : ret.convertKey<IntishCast::Cast>(iter.first());
+    auto const key = convertIntLikeStrs
+      ? ret.convertKey<IntishCast::Cast>(iter.first())
+      : *iter.first().asTypedValue();
     ret.setWithRef(key, iter.secondValPlus(), true);
   }
   return tvReturn(std::move(ret));
@@ -1892,14 +1892,14 @@ TypedValue HHVM_FUNCTION(array_diff_key,
   // int-like strings to integers.
   Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
-  bool isKey = isArrayLikeType(c1.m_type);
+  bool convertIntLikeStrs = !isArrayLikeType(c1.m_type);
   for (ArrayIter iter(container1); iter; ++iter) {
     auto key = iter.first();
     const auto& c = *key.toCell();
-    if (checkSetHelper(st, c, strTv, !isKey)) continue;
-    const auto arrkey = isKey
-      ? c
-      : ret.convertKey<IntishCast::Cast>(key);
+    if (checkSetHelper(st, c, strTv, convertIntLikeStrs)) continue;
+    const auto arrkey = convertIntLikeStrs
+      ? ret.convertKey<IntishCast::Cast>(key)
+      : c;
     ret.setWithRef(arrkey, iter.secondValPlus(), true);
   }
   return tvReturn(std::move(ret));
@@ -2145,7 +2145,7 @@ static void containerKeysIntersectHelper(const req::ptr<c_Set>& st,
   Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   TypedValue intOneTv = make_tv<KindOfInt64>(1);
-  bool isKey = isArrayLikeType(containers[0].m_type);
+  bool convertIntLikeStrs = !isArrayLikeType(containers[0].m_type);
   for (ArrayIter iter(tvAsCVarRef(&containers[0])); iter; ++iter) {
     auto key = iter.first();
     const auto& c = *key.toCell();
@@ -2153,14 +2153,14 @@ static void containerKeysIntersectHelper(const req::ptr<c_Set>& st,
     // to the map. If a key (after various conversions) occurs more than
     // once in the container, we'll simply overwrite the old entry and
     // that's fine.
-    addToIntersectMapHelper(mp, c, &intOneTv, strTv, !isKey);
+    addToIntersectMapHelper(mp, c, &intOneTv, strTv, convertIntLikeStrs);
   }
   for (int pos = 1; pos < count; ++pos) {
-    isKey = isArrayLikeType(containers[pos].m_type);
+    convertIntLikeStrs = !isArrayLikeType(containers[pos].m_type);
     for (ArrayIter iter(tvAsCVarRef(&containers[pos])); iter; ++iter) {
       auto key = iter.first();
       const auto& c = *key.toCell();
-      updateIntersectMapHelper(mp, c, pos, strTv, !isKey);
+      updateIntersectMapHelper(mp, c, pos, strTv, convertIntLikeStrs);
     }
   }
   for (ArrayIter iter(mp.get()); iter; ++iter) {
@@ -2246,13 +2246,13 @@ TypedValue HHVM_FUNCTION(array_intersect,
   // convert int-like strings to integers.
   Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
-  bool isKey = isArrayLikeType(c1.m_type);
+  bool convertIntLikeStrs = !isArrayLikeType(c1.m_type);
   for (ArrayIter iter(container1); iter; ++iter) {
     auto const c = tvToCell(iter.secondValPlus());
     if (!checkSetHelper(st, c, strTv, true)) continue;
-    const auto key = isKey
-      ? iter.first()
-      : Variant::wrap(ret.convertKey<IntishCast::Cast>(iter.first()));
+    const auto key = convertIntLikeStrs
+      ? Variant::wrap(ret.convertKey<IntishCast::Cast>(iter.first()))
+      : iter.first();
     ret.setWithRef(key, iter.secondValPlus(), true);
   }
   return tvReturn(std::move(ret));
@@ -2307,14 +2307,14 @@ TypedValue HHVM_FUNCTION(array_intersect_key,
   // convert int-like strings to integers.
   Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
-  bool isKey = isArrayLikeType(c1.m_type);
+  bool convertIntLikeStrs = !isArrayLikeType(c1.m_type);
   for (ArrayIter iter(container1); iter; ++iter) {
     auto key = iter.first();
     const auto& c = *key.toCell();
-    if (!checkSetHelper(st, c, strTv, !isKey)) continue;
-    auto arrkey = isKey
-      ? key
-      : Variant::wrap(ret.convertKey<IntishCast::Cast>(key));
+    if (!checkSetHelper(st, c, strTv, convertIntLikeStrs)) continue;
+    auto arrkey = convertIntLikeStrs
+      ? Variant::wrap(ret.convertKey<IntishCast::Cast>(key))
+      : key;
     ret.setWithRef(arrkey, iter.secondValPlus(), true);
   }
   return tvReturn(std::move(ret));

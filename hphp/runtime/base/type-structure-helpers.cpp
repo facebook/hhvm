@@ -618,6 +618,9 @@ bool checkTypeStructureMatchesCellImpl(
         }
       }
       result = isDictOrShapeType(type);
+      if (result && UNLIKELY(RuntimeOption::EvalLogArrayProvenance)) {
+        raise_array_serialization_notice("is_dict", data.parr);
+      }
       break;
     case TypeStructure::Kind::T_vec:
       if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
@@ -637,6 +640,9 @@ bool checkTypeStructureMatchesCellImpl(
         break;
       }
       result = isVecType(type);
+      if (result && UNLIKELY(RuntimeOption::EvalLogArrayProvenance)) {
+        raise_array_serialization_notice("is_vec", data.parr);
+      }
       break;
     case TypeStructure::Kind::T_keyset:
       result = isKeysetType(type);
@@ -654,6 +660,10 @@ bool checkTypeStructureMatchesCellImpl(
         break;
       }
       result = isVecType(type) || isDictOrShapeType(type);
+      if (result && UNLIKELY(RuntimeOption::EvalLogArrayProvenance)) {
+        raise_array_serialization_notice(isVecType(type) ? "is_vec" : "is_dict",
+                                         data.parr);
+      }
       break;
     case TypeStructure::Kind::T_arraylike:
       if (isClsMethType(type)) {

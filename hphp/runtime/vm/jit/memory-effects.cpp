@@ -2046,6 +2046,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Clone:
   case ThrowArrayIndexException:
   case ThrowArrayKeyException:
+  case RaiseArraySerializeNotice:
   case RaiseUninitLoc:
   case RaiseUndefProp:
   case RaiseMissingArg:

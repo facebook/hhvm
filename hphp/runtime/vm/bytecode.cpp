@@ -4103,7 +4103,7 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
       return false;
     }
     return is_array(val);
-  case IsTypeOp::Vec:
+  case IsTypeOp::Vec: {
     if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
       if (isArrayType(val->m_type)) {
         if (val->m_data.parr->isVArray()) {
@@ -4112,8 +4112,13 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
         return false;
       }
     }
-    return is_vec(val);
-  case IsTypeOp::Dict:
+    auto const ret = is_vec(val);
+    if (ret && UNLIKELY(RuntimeOption::EvalLogArrayProvenance)) {
+      raise_array_serialization_notice("is_vec", val->m_data.parr);
+    }
+    return ret;
+  }
+  case IsTypeOp::Dict: {
     if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
       if (isArrayOrShapeType(val->m_type)) {
         if (val->m_data.parr->isDArray()) {
@@ -4122,7 +4127,12 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
         return false;
       }
     }
-    return is_dict(val);
+    auto const ret = is_dict(val);
+    if (ret && UNLIKELY(RuntimeOption::EvalLogArrayProvenance)) {
+      raise_array_serialization_notice("is_dict", val->m_data.parr);
+    }
+    return ret;
+  }
   case IsTypeOp::Keyset: return is_keyset(val);
   case IsTypeOp::Obj:    return is_object(val);
   case IsTypeOp::Str:    return is_string(val);

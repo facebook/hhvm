@@ -9,43 +9,8 @@
 
 open Hh_core
 open ServerEnv
-open Utils
 
 type file_info = Relative_path.t * FileInfo.names
-
-(* Return all the files that we need to typecheck *)
-let make_next_files
-    ~(indexer: unit -> string list)
-    ~(extra_roots: Path.t list) : Relative_path.t list Bucket.next =
-  let next_files_root = compose
-    (List.map ~f:(Relative_path.(create Root)))
-    indexer in
-  let hhi_root = Hhi.get_hhi_root () in
-  let hhi_filter = FindUtils.is_php in
-  let next_files_hhi = compose
-    (List.map ~f:(Relative_path.(create Hhi)))
-    (Find.make_next_files
-       ~name:"hhi" ~filter:hhi_filter hhi_root) in
-  let rec concat_next_files l () =
-    begin match l with
-    | [] -> []
-    | hd::tl -> begin match hd () with
-      | [] -> concat_next_files tl ()
-      | x -> x
-      end
-    end
-  in
-  let next_files_extra = List.map extra_roots
-    (fun root -> compose
-      (List.map ~f:Relative_path.create_detect_prefix)
-      (Find.make_next_files
-        ~filter:FindUtils.file_filter
-        root)
-    ) |> concat_next_files
-  in
-  fun () ->
-    let next = concat_next_files [next_files_hhi; next_files_extra; next_files_root] () in
-    Bucket.of_list next
 
 let is_check_mode (options: ServerArgs.options) : bool =
   ServerArgs.check_mode options &&
@@ -56,7 +21,7 @@ let is_check_mode (options: ServerArgs.options) : bool =
 let indexing (genv: ServerEnv.genv) : Relative_path.t list Bucket.next * float =
   ServerProgress.send_progress_to_monitor "indexing";
   let t = Unix.gettimeofday () in
-  let get_next = make_next_files
+  let get_next = ServerFiles.make_next
     ~indexer:(genv.indexer FindUtils.file_filter)
     ~extra_roots:(ServerConfig.extra_paths genv.config) in
   HackEventLogger.indexing_end t;

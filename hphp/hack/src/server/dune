@@ -48,9 +48,13 @@
     serverUtils)
   (libraries
     core_kernel
+    find
     decl
+    hhi
     global_config
+    procs_bucket
     procs_procs
+    relative_path
     server_monitor
     sys_utils
     utils_core

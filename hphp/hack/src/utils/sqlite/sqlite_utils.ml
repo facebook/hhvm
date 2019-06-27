@@ -17,9 +17,10 @@ let check_rc (rc: Sqlite3.Rc.t): unit =
 
 (* Gather a database and prepared statement into a tuple *)
 let prepare_or_reset_statement
-    (db: Sqlite3.db)
+    (db_opt_ref: Sqlite3.db option ref)
     (stmt_ref: Sqlite3.stmt option ref)
     (sql_command_text: string): Sqlite3.stmt =
+  let db = Option.value_exn !db_opt_ref in
   let stmt = match !stmt_ref with
     | Some s ->
       Sqlite3.reset s |> check_rc;

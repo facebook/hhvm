@@ -262,18 +262,36 @@ end
 type si_env = {
   sie_provider: search_provider;
   sie_quiet_mode: bool;
+  sie_fuzzy_search_mode: bool ref;
 
   (* LocalSearchService *)
   lss_fileinfos: FileInfo.t Relative_path.Map.t;
   lss_filenames: FileInfo.names Relative_path.Map.t;
   lss_tombstones: Tombstone_set.t;
+
+  (* SqliteSearchService *)
+  sql_symbolindex_db: Sqlite3.db option ref;
+  sql_select_symbols_stmt: Sqlite3.stmt option ref;
+  sql_select_symbols_by_kind_stmt: Sqlite3.stmt option ref;
+  sql_select_acid_stmt: Sqlite3.stmt option ref;
+  sql_select_acnew_stmt: Sqlite3.stmt option ref;
+  sql_select_actype_stmt: Sqlite3.stmt option ref;
+  sql_select_namespaces_stmt: Sqlite3.stmt option ref;
 }
 
 (* Default provider with no functionality *)
 let default_si_env = {
   sie_provider = NoIndex;
   sie_quiet_mode = false;
+  sie_fuzzy_search_mode = ref false;
   lss_fileinfos = Relative_path.Map.empty;
   lss_filenames = Relative_path.Map.empty;
   lss_tombstones = Tombstone_set.empty;
+  sql_symbolindex_db = ref None;
+  sql_select_symbols_stmt = ref None;
+  sql_select_symbols_by_kind_stmt = ref None;
+  sql_select_acid_stmt = ref None;
+  sql_select_acnew_stmt = ref None;
+  sql_select_actype_stmt = ref None;
+  sql_select_namespaces_stmt = ref None;
 }

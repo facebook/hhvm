@@ -29,16 +29,20 @@ let initialize
   } in
 
   (* Basic initialization *)
-  let () = match sienv.sie_provider with
-    | SqliteIndex -> SqliteSearchService.initialize workers savedstate_file_opt;
-    | CustomIndex -> CustomSearchService.initialize ()
+  let sienv = match sienv.sie_provider with
+    | SqliteIndex ->
+      SqliteSearchService.initialize ~sienv ~workers ~savedstate_file_opt
+    | CustomIndex ->
+      CustomSearchService.initialize ();
+      sienv
     | NoIndex
-    | TrieIndex -> ()
+    | TrieIndex ->
+      sienv
   in
 
   (* Fetch namespaces from provider-specific query *)
   let namespace_list = match sienv.sie_provider with
-    | SqliteIndex -> SqliteSearchService.fetch_namespaces ()
+    | SqliteIndex -> SqliteSearchService.fetch_namespaces ~sienv
     | CustomIndex -> CustomSearchService.fetch_namespaces ()
     | NoIndex
     | TrieIndex -> []
@@ -162,7 +166,8 @@ let find_matching_symbols
       | NoIndex ->
         []
       | SqliteIndex ->
-        let r = SqliteSearchService.sqlite_search query_text max_results context in
+        let r = SqliteSearchService.sqlite_search
+          ~sienv ~query_text ~max_results ~context in
         LocalSearchService.extract_dead_results ~sienv ~results:r
       | TrieIndex ->
         HackSearchService.index_search query_text max_results kind_filter

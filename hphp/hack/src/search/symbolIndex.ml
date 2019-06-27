@@ -89,6 +89,7 @@ let set_search_provider
 
 (* Log information about calls to the symbol index service *)
 let log_symbol_index_search
+    ~(env: si_env)
     ~(query_text: string)
     ~(max_results: int)
     ~(results: int)
@@ -96,6 +97,7 @@ let log_symbol_index_search
     ~(start_time: float)
     ~(context: autocomplete_type option)
     ~(caller: string): unit =
+  let _ = env in
 
   (* In quiet mode we don't log anything to either scuba or console *)
   if !in_quiet_mode then begin
@@ -137,15 +139,12 @@ let log_symbol_index_search
  * - Goal is to route ALL searches through one function for consistency
  *)
 let find_matching_symbols
+    ~(env: si_env)
     ~(query_text: string)
     ~(max_results: int)
     ~(context: autocomplete_type option)
-    ~(kind_filter: si_kind option)
-    ~(env: SearchUtils.si_env): si_results =
+    ~(kind_filter: si_kind option): si_results =
   let provider = get_search_provider () in
-
-  (* Will be used in a future diff, but let's avoid the warning for now *)
-  let _ = context in
 
   (*
    * Nuclide often sends this exact request to verify that HH is working.
@@ -256,9 +255,9 @@ let query_for_autocomplete
  * this information should capture it here.
  *)
 let update_files
-    (worker_list_opt: MultiWorker.worker list option)
-    (paths: (Relative_path.t * info * file_source) list)
-    (env: SearchUtils.si_env ref): unit =
+    ~(env: si_env ref)
+    ~(workers: MultiWorker.worker list option)
+    ~(paths: (Relative_path.t * info * file_source) list): unit =
   match get_search_provider () with
   | CustomIndex
   | NoIndex
@@ -268,7 +267,7 @@ let update_files
         env := LocalSearchService.update_file path info !env;
     );
   | TrieIndex ->
-    HackSearchService.update_from_typechecker worker_list_opt paths
+    HackSearchService.update_from_typechecker workers paths
 ;;
 
 (*
@@ -276,8 +275,8 @@ let update_files
  * Any local caches should be cleared of values for this file.
  *)
 let remove_files
-    (paths: Relative_path.Set.t)
-    (env: SearchUtils.si_env ref): unit =
+    ~(env: SearchUtils.si_env ref)
+    ~(paths: Relative_path.Set.t): unit =
   match get_search_provider () with
   | CustomIndex
   | NoIndex

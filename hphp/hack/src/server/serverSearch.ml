@@ -119,6 +119,7 @@ let go workers query type_ (env: SearchUtils.si_env)
         AutocompleteService.add_position_to_results temp_results
   in
   SymbolIndex.log_symbol_index_search
+    ~env
     ~start_time
     ~query_text:query
     ~max_results

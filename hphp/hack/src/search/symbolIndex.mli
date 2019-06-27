@@ -22,6 +22,7 @@ val set_search_provider:
 
 (* Log diagnostics for usage of autocomplete and symbol search *)
 val log_symbol_index_search:
+  env:SearchUtils.si_env ->
   query_text:string ->
   max_results:int ->
   results:int ->
@@ -32,12 +33,12 @@ val log_symbol_index_search:
 
 (* This is the proper search function everyone should use *)
 val find_matching_symbols :
-    query_text:string ->
-    max_results:int ->
-    context:SearchUtils.autocomplete_type option ->
-    kind_filter:SearchUtils.si_kind option ->
-    env:SearchUtils.si_env ->
-    SearchUtils.si_results
+  env:SearchUtils.si_env ->
+  query_text:string ->
+  max_results:int ->
+  context:SearchUtils.autocomplete_type option ->
+  kind_filter:SearchUtils.si_kind option ->
+  SearchUtils.si_results
 
 (* Legacy query interface for "Symbol Search", depends on multiworker *)
 val query_for_symbol_search :
@@ -60,15 +61,15 @@ val query_for_autocomplete :
 
 (* Notify the search service that certain files have been updated locally *)
 val update_files :
-  MultiWorker.worker list option ->
-  (Relative_path.t * SearchUtils.info * SearchUtils.file_source) list ->
-  SearchUtils.si_env ref ->
+  env:SearchUtils.si_env ref ->
+  workers:MultiWorker.worker list option ->
+  paths:(Relative_path.t * SearchUtils.info * SearchUtils.file_source) list ->
   unit
 
 (* Notify the search service that certain files have been removed locally *)
 val remove_files :
-  Relative_path.Set.t ->
-  SearchUtils.si_env ref ->
+  env:SearchUtils.si_env ref ->
+  paths:Relative_path.Set.t ->
   unit
 
 (* Identify the position of an item *)

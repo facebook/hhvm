@@ -29,7 +29,7 @@ module SearchServiceRunner = struct
         iter (x::acc) (n-1) in
     let fast = iter [] num_files in
 
-    SymbolIndex.update_files genv.workers fast env;
+    SymbolIndex.update_files ~env ~workers:genv.workers ~paths:fast;
 
     if (List.length fast > 0) then begin
       let str =

@@ -244,7 +244,7 @@ let parsing genv env to_check ~stop_at_errors =
   Ast_provider.remove_batch ide_files;
   Fixme_provider.remove_batch ide_files;
 
-  SymbolIndex.remove_files to_check env.local_symbol_table;
+  SymbolIndex.remove_files ~env:env.local_symbol_table ~paths:to_check;
   SharedMem.collect `gentle;
   let get_next = MultiWorker.next
     genv.workers (Relative_path.Set.elements disk_files) in

@@ -130,7 +130,7 @@ let test_sqlite_plus_local (harness: Test_harness.t): bool =
   let s = Relative_path.Set.empty in
   let s = Relative_path.Set.add s bar1path in
   let s = Relative_path.Set.add s foo3path in
-  SymbolIndex.remove_files s env;
+  SymbolIndex.remove_files ~env:env ~paths:s;
   Hh_logger.log "Removed files";
 
   (* Two of these have been removed! *)
@@ -165,7 +165,7 @@ let test_sqlite_plus_local (harness: Test_harness.t): bool =
   } in
   let changelist = (bar1path, Full bar1fileinfo, TypeChecker)
     :: [(foo3path, Full foo3fileinfo, TypeChecker)] in
-  SymbolIndex.update_files None changelist env;
+  SymbolIndex.update_files ~env ~workers:None ~paths:changelist;
   let n = LocalSearchService.count_local_fileinfos !env in
   Hh_logger.log "Added back; local search service now contains %d files" n;
 

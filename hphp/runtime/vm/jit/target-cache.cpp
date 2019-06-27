@@ -250,15 +250,15 @@ void smashImmediate(TCA movAddr, const Class* cls, uintptr_t funcVal) {
   //     do it if the Class* or Func* might be freed.
   //
   //   - The call must not be magic or static.  The code path in
-  //     handleSlowPath currently assumes we've ruled this out.
+  //     handleStaticCall currently assumes we've ruled this out.
   //
   // It's ok to store into the inline cache even if there are low bits
   // set in mce->m_key.  In that case we'll always just miss the in-TC
-  // fast path.  We still need to clear the bit so handleSlowPath can
+  // fast path.  We still need to clear the bit so handleStaticCall can
   // tell it was smashed, though.
   //
   // If the situation is not cacheable, we just put a value into the
-  // immediate that will cause it to always call out to handleSlowPath.
+  // immediate that will cause it to always call out to handleStaticCall.
   assertx(cls && funcVal);
   auto const clsVal = reinterpret_cast<uintptr_t>(cls);
   bool const cacheable =
@@ -279,8 +279,14 @@ void smashImmediate(TCA movAddr, const Class* cls, uintptr_t funcVal) {
 }
 
 EXTERNALLY_VISIBLE uintptr_t
-handleSlowPath(const Class* cls, const StringData* name, const Class* ctx,
-               rds::Handle mceHandle, uintptr_t mcePrime) {
+handleDynamicCall(const Class* cls, const StringData* name, const Class* ctx) {
+  // Perform lookup without any caching.
+  return lookup(cls, name, ctx);
+}
+
+EXTERNALLY_VISIBLE uintptr_t
+handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
+                 rds::Handle mceHandle, uintptr_t mcePrime) {
   assertx(name->isStatic());
   assertx(cls);
   auto& mce = rds::handleToRef<Entry, rds::Mode::Normal>(mceHandle);

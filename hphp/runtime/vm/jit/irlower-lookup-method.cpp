@@ -63,7 +63,7 @@ TRACE_SET_MOD(irlower);
  * On our first time through this codepath in the TC, we "prime" this cache
  * (which holds across /all/ requests) by smashing the mov immediate to hold
  * a Func* in the upper 32 bits, and a Class* in the lower 32 bits.  This is
- * not always possible (see MethodCache::handleSlowPath() for details), in
+ * not always possible (see MethodCache::handleStaticCall() for details), in
  * which case we smash an immediate with some low bits set, so that we always
  * miss on the inline cache when comparing against our live Class*.
  *
@@ -120,7 +120,21 @@ void cgLdFuncMFunc(IRLS& env, const IRInstruction* inst) {
   v << decq{cls, dst, v.makeReg()};
 }
 
-void cgLdObjMethod(IRLS& env, const IRInstruction* inst) {
+void cgLdObjMethodD(IRLS& env, const IRInstruction* inst) {
+  assertx(inst->taken() && inst->taken()->isCatch()); // must have catch block
+  using namespace MethodCache;
+
+  auto const target = CallSpec::direct(MethodCache::handleDynamicCall);
+  auto const args = argGroup(env, inst)
+    .ssa(0 /* cls */)
+    .ssa(1 /* methodName */)
+    .immPtr(inst->marker().func()->cls());
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
+}
+
+void cgLdObjMethodS(IRLS& env, const IRInstruction* inst) {
   assertx(inst->taken() && inst->taken()->isCatch()); // must have catch block
   using namespace MethodCache;
 
@@ -132,7 +146,7 @@ void cgLdObjMethod(IRLS& env, const IRInstruction* inst) {
                    inst->marker().func()->fullName()->slice());
   }
 
-  auto const target = CallSpec::direct(MethodCache::handleSlowPath);
+  auto const target = CallSpec::direct(MethodCache::handleStaticCall);
   auto const args = argGroup(env, inst)
     .ssa(0 /* cls */)
     .immPtr(inst->extra<FuncNameData>()->name)

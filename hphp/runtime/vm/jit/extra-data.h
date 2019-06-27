@@ -1643,7 +1643,7 @@ X(CheckSubClsCns,               LdSubClsCnsData);
 X(ProfileSubClsCns,             ProfileSubClsCnsData);
 X(LdFuncCached,                 FuncNameData);
 X(LookupFuncCached,             FuncNameData);
-X(LdObjMethod,                  FuncNameData);
+X(LdObjMethodS,                 FuncNameData);
 X(RaiseMissingArg,              FuncArgData);
 X(RaiseTooManyArg,              FuncArgData);
 X(ThrowParamRefMismatch,        ParamData);

@@ -410,10 +410,6 @@ void interpOne(IRGS& env,
 
 #define INTERP interpOne(env, *env.currentNormalizedInstruction);
 
-void emitFPushObjMethod(IRGS& env, uint32_t, ObjMethodOp, const ImmVector&) {
-  INTERP
-}
-
 void emitExit(IRGS& env)                      { INTERP }
 void emitFatal(IRGS& env, FatalOp)            { INTERP }
 void emitSetOpG(IRGS& env, SetOpOp)           { INTERP }

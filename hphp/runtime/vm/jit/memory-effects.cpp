@@ -1957,7 +1957,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdObjClass:
   case LdRecDesc:
   case LdObjInvoke:
-  case LdObjMethod:
+  case LdObjMethodD:
+  case LdObjMethodS:
   case LdStrLen:
   case StringIsset:
   case LdSwitchDblIndex:

@@ -479,7 +479,8 @@ bool canDCE(IRInstruction* inst) {
   case LdClsPropAddrOrRaise:
   case LdInitRDSAddr:
   case LdInitPropAddr:
-  case LdObjMethod:
+  case LdObjMethodD:
+  case LdObjMethodS:
   case LdObjInvoke:
   case LdArrFuncCtx:
   case LdFunc:

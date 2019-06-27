@@ -34,6 +34,7 @@ type shallow_prop = {
   sp_needs_init  : bool;
   sp_type        : decl ty option;
   sp_visibility  : Aast.visibility;
+  sp_fixme_codes : ISet.t;
 } [@@deriving show]
 
 type shallow_method = {
@@ -45,6 +46,7 @@ type shallow_method = {
   sm_reactivity : Decl_defs.method_reactivity option;
   sm_type       : decl fun_type;
   sm_visibility : Aast.visibility;
+  sm_fixme_codes: ISet.t;
 } [@@deriving show]
 
 type shallow_method_redeclaration = {
@@ -56,6 +58,7 @@ type shallow_method_redeclaration = {
   smr_visibility : Aast.visibility;
   smr_trait      : Aast.hint;
   smr_method     : Aast.pstring;
+  smr_fixme_codes: ISet.t;
 } [@@deriving show]
 
 type shallow_class = {

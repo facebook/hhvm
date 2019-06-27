@@ -732,12 +732,6 @@ let get_enum_constraint env x =
     | None -> None
     | Some e -> e.te_constraint
 
-let add_wclass env x =
-  let dep = Dep.Class x in
-  Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
-  ()
-
-
 let env_with_mut env local_mutability =
   { env with lenv = { env.lenv with local_mutability } }
 

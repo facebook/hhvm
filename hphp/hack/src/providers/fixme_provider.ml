@@ -123,13 +123,19 @@ let get_unused_fixmes ~codes ~applied_fixmes ~fold ~files_info  =
  * that code won't be able to add errors.
  *)
 (*****************************************************************************)
+let get_fixmes_for_pos pos =
+  let filename = Pos.filename pos in
+  let line, _, _ = Pos.info_pos pos in
+  get_fixmes filename |> Option.value ~default:IMap.empty
+    |> IMap.get line  |> Option.value ~default:IMap.empty
+
+let get_fixme_codes_for_pos pos =
+  get_fixmes_for_pos pos |> IMap.keys |> ISet.of_list
+
 let () =
   Errors.get_hh_fixme_pos := begin fun err_pos err_code ->
-    let filename = Pos.filename err_pos in
-    let err_line, _, _ = Pos.info_pos err_pos in
-    get_fixmes filename
-    |> Option.value_map ~f:(IMap.get err_line) ~default:None
-    |> Option.value_map ~f:(IMap.get err_code) ~default:None
+    get_fixmes_for_pos err_pos
+    |> IMap.get err_code
     end;
   Errors.is_hh_fixme := fun err_pos err_code ->
     Option.is_some (!Errors.get_hh_fixme_pos err_pos err_code)

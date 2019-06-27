@@ -602,6 +602,7 @@ and build_constructor class_ method_ =
     elt_visibility = vis;
     elt_origin = class_name;
     elt_reactivity = None;
+    elt_fixme_codes = method_.sm_fixme_codes;
   } in
   Decl_heap.Constructors.add class_name ft;
   Some cstr
@@ -655,6 +656,7 @@ and prop_decl c acc sp =
     elt_visibility = vis;
     elt_origin = (snd c.sc_name);
     elt_reactivity = None;
+    elt_fixme_codes = sp.sp_fixme_codes;
   } in
   Decl_heap.Props.add (elt.elt_origin, sp_name) ty;
   let acc = SMap.add sp_name elt acc in
@@ -680,6 +682,7 @@ and static_prop_decl c acc sp =
     elt_visibility = vis;
     elt_origin = (snd c.sc_name);
     elt_reactivity = None;
+    elt_fixme_codes = sp.sp_fixme_codes;
   } in
   Decl_heap.StaticProps.add (elt.elt_origin, sp_name) ty;
   let acc = SMap.add sp_name elt acc in
@@ -770,6 +773,7 @@ and method_redecl_acc c acc m =
     elt_visibility = vis;
     elt_origin = snd (c.sc_name);
     elt_reactivity = None;
+    elt_fixme_codes = m.smr_fixme_codes;
   } in
   let add_meth = if m.smr_static
     then Decl_heap.StaticMethods.add
@@ -818,6 +822,7 @@ and method_decl_acc ~is_static c (acc, condition_types) m  =
     elt_visibility = vis;
     elt_origin = snd (c.sc_name);
     elt_reactivity = m.sm_reactivity;
+    elt_fixme_codes = m.sm_fixme_codes;
   } in
   let add_meth = if is_static
     then Decl_heap.StaticMethods.add

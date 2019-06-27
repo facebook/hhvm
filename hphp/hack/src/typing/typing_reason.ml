@@ -68,7 +68,8 @@ type t =
   | Rinout_param     of Pos.t
   | Rinstantiate     of t * string * t
   | Rarray_filter    of Pos.t * t
-  | Rtype_access     of t * string list * t
+  | Rtypeconst       of t * (Pos.t * string) * string * t
+  | Rtype_access     of t * (t * string) list
   | Rexpr_dep_type   of t * Pos.t * expr_dep_type_reason
   | Rnullsafe_op     of Pos.t (* ?-> operator is used *)
   | Rtconst_no_cstr  of Nast.sid
@@ -247,14 +248,27 @@ let rec to_string prefix r =
       [(p, "array_filter converts KeyedContainer<Tk, Tv> to \
       array<Tk, Tv>, and Container<Tv> to array<arraykey, Tv>. \
       Single argument calls additionally remove nullability from Tv.")]
-  | Rtype_access (r_orig, expansions, r_expanded) ->
-      let expand_prefix =
-        if List.length expansions = 1 then
-          "  resulting from expanding the type constant "
-        else
-          "  resulting from expanding a type constant as follows:\n    " in
-      (to_string prefix r_orig) @
-      (to_string (expand_prefix^String.concat ~sep:" -> " expansions) r_expanded)
+  | Rtypeconst (Rnone, (pos, tconst), ty_str, r_root) ->
+    let prefix = if prefix = "" then "" else prefix^"\n  " in
+    [pos, sprintf "%sby accessing the type constant '%s'" prefix tconst] @
+    (to_string ("on " ^ ty_str) r_root)
+  | Rtypeconst (r_orig, (pos, tconst), ty_str, r_root) ->
+    (to_string prefix r_orig) @
+    [pos, sprintf "  resulting from accessing the type constant '%s'" tconst] @
+    (to_string ("  on " ^ ty_str) r_root)
+  | Rtype_access (Rtypeconst(Rnone, _, _, _), (r, _)::l) ->
+    to_string prefix (Rtype_access (r, l))
+  | Rtype_access (Rtypeconst(r, _, _, _), x) ->
+    to_string prefix (Rtype_access (r, x))
+  | Rtype_access (Rtype_access (r, expand2), expand1) ->
+    to_string prefix (Rtype_access (r, expand1 @ expand2))
+  | Rtype_access (r, []) -> to_string prefix r
+  | Rtype_access (r, (r_hd, tconst)::tail) ->
+    (to_string prefix r) @
+    (to_string ("  resulting from expanding the type constant " ^ tconst) r_hd) @
+    List.concat_map tail ~f:(fun (r, s) ->
+      to_string ("  then expanding the type constant " ^ s) r
+    )
   | Rexpr_dep_type (r, p, e) ->
       (to_string prefix r) @ [p, "  "^expr_dep_type_reason_string e]
   | Rtconst_no_cstr (_, n) ->
@@ -361,8 +375,10 @@ and to_pos = function
   | Runpack_param p -> p
   | Rinout_param p -> p
   | Rinstantiate (_, _, r) -> to_pos r
+  | Rtypeconst (Rnone, (p, _), _, _)
   | Rarray_filter (p, _) -> p
-  | Rtype_access (r, _, _) -> to_pos r
+  | Rtypeconst (r, _, _, _)
+  | Rtype_access (r, _) -> to_pos r
   | Rexpr_dep_type (r, _, _) -> to_pos r
   | Rnullsafe_op p -> p
   | Rtconst_no_cstr (p, _) -> p
@@ -475,6 +491,7 @@ match r with
   | Rinout_param _ -> "Rinout_param"
   | Rinstantiate _ -> "Rinstantiate"
   | Rarray_filter _ -> "Rarray_filter"
+  | Rtypeconst _ -> "Rtypeconst"
   | Rtype_access _ -> "Rtype_access"
   | Rexpr_dep_type _ -> "Rexpr_dep_type"
   | Rnullsafe_op _ -> "Rnullsafe_op"

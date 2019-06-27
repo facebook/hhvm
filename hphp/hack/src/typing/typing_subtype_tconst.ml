@@ -9,7 +9,7 @@ of v) *)
 let make_type_const_equal env tconstty ty tconstid ~as_tyvar_with_cnstr =
   let ety_env = Phase.env_with_self env in
   let env, tytconst =
-    Utils.expand_typeconst ety_env env ~as_tyvar_with_cnstr (fst ty) ty tconstid in
+    Utils.expand_typeconst ety_env env ~as_tyvar_with_cnstr ty tconstid in
   let env = Utils.sub_type env tytconst tconstty in
   let env = Utils.sub_type env tconstty tytconst in
   env

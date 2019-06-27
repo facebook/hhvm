@@ -212,14 +212,31 @@ let rec localize ~ety_env env (dty: decl ty) =
       let env, tyl = List.map_env env tyl (localize ~ety_env) in
       env, (r, Ttuple tyl)
   | r, Taccess (root_ty, ids) ->
-      let pos = Reason.to_pos @@ fst root_ty in
-      let mk_r (p, _) = match ids with
-        | [_] -> r
-        | _ -> Reason.Rwitness (Pos.btw pos p) in
       let env, root_ty = localize ~ety_env env root_ty in
-      List.fold ids ~init:(env, root_ty) ~f:begin fun (env, root_ty) id ->
-        TUtils.expand_typeconst ety_env env (mk_r id) root_ty id
-      end
+      let env, (expansion_reason, ty) =
+        List.fold ids ~init:(env, root_ty) ~f:begin fun (env, root_ty) id ->
+          TUtils.expand_typeconst ety_env env root_ty id
+        end
+      in
+      (* Elaborate reason with information about expression dependent types and
+       * the original location of the Taccess type
+       *)
+      let elaborate_reason expand_reason =
+        (* First convert into a string of root_ty::ID1::ID2::IDn *)
+        let taccess_string = String.concat ~sep:"::"
+          (Typing_print.full_strip_ns env root_ty:: List.map ~f:snd ids)
+        in
+        (* If the root is an expression dependent type, change the primary
+         * reason to be for the full Taccess type to preserve the position where
+         * the expression dependent type was derived from.
+         *)
+        let reason = match fst root_ty with
+        | Reason.Rexpr_dep_type (_, p, e) -> Reason.Rexpr_dep_type (r, p, e)
+        | _ -> r
+        in
+        Reason.Rtype_access (expand_reason, [reason, taccess_string])
+      in
+      env, (elaborate_reason expansion_reason, ty)
   | r, Tshape (fields_known, tym) ->
       let env, tym = ShapeFieldMap.map_env (localize ~ety_env) env tym in
       env, (r, Tshape (fields_known, tym))

@@ -64,19 +64,19 @@ module ExprDepTy = struct
       | N.CIexpr (p, _) ->
           let ereason, dep = new_() in
           p, ereason, dep in
-    (Reason.Rexpr_dep_type (reason, pos, expr_dep_reason), (dep, []))
+    (Reason.Rexpr_dep_type (reason, pos, expr_dep_reason), dep)
 
   (* Takes the given list of dependent types and applies it to the given
    * locl ty to create a new locl ty
    *)
-  let apply env dep_tys ty =
+  let apply env dep_tys ids ty =
     let apply_single env ~dep_tys ty =
       List.fold_left dep_tys ~f:begin fun (env, ty) (r, dep_ty) ->
-          match dep_ty, ty with
+          match dep_ty, ids, ty with
           (* Always represent exact types without an access path as Tclass(_,Exact,_) *)
-        | (`cls _, []), (_, Tclass (c, _, tyl)) ->
+        | `cls n, [], (_, Tclass (c, _, tyl)) when n = snd c ->
           env, (r, Tclass (c, Exact, tyl))
-        | (dep_ty, []), _ ->
+        | dep_ty, [], _ ->
           env, (r, Tabstract (AKdependent dep_ty, Some ty))
         | _ ->
           begin match ty with
@@ -100,7 +100,7 @@ module ExprDepTy = struct
             not (Typing_set.is_empty (Env.get_equal_bounds env s)) ->
             (env, ty)
             | _ ->
-             let ty_name = to_string dep_ty in
+             let ty_name = to_string (dep_ty, ids) in
              let new_ty = (r, Tabstract(AKgeneric ty_name, None)) in
               let env = Env.add_upper_bound_global env ty_name ty in
               (env, new_ty)
@@ -197,7 +197,7 @@ module ExprDepTy = struct
   (****************************************************************************)
   let make env cid cid_ty =
     if should_apply env cid_ty then
-      apply env [from_cid env (fst cid_ty) cid] cid_ty
+      apply env [from_cid env (fst cid_ty) cid] [] cid_ty
     else
       env, cid_ty
 end

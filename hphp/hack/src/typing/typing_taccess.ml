@@ -40,7 +40,7 @@ type env = {
    * be expression dependent so this list will be set to empty. However, if it
    * is the constrained type then the final type will also be a dependent type.
    *)
-  dep_tys : (Reason.t * (dependent_type * string list)) list;
+  dep_tys : (Reason.t * dependent_type) list;
 
   (* A list of generics we've seen while expanding. *)
   gen_seen : TySet.t;
@@ -80,7 +80,7 @@ and expand_with_env_ ety_env env ~as_tyvar_with_cnstr reason root id =
     Reason.Rtype_access(reason, trail, r) in
   let ty = reason_func root_r, root_ty in
   let deps = List.map env.dep_tys (fun (x, y) -> reason_func x, y) in
-  let tenv, ty = ExprDepTy.apply env.tenv deps ty in
+  let tenv, ty = ExprDepTy.apply env.tenv deps [snd id] ty in
   let tenv, ty =
     (* if type constant has type this::ID and method has associated condition type ROOTCOND_TY
        for the receiver - check if condition type has type constant at the same path.
@@ -152,7 +152,7 @@ and expand env ~as_tyvar_with_cnstr root id =
         the current environment's dependent types. Otherwise,
         we throw away type access information.
       *)
-      let tenv, ty = ExprDepTy.apply env.tenv env.dep_tys ty in
+      let tenv, ty = ExprDepTy.apply env.tenv env.dep_tys [snd id] ty in
       { prev_env with tenv }, ty
     end in
   match root_ty with
@@ -164,7 +164,7 @@ and expand env ~as_tyvar_with_cnstr root id =
       env class_pos class_name
       id ~as_tyvar_with_cnstr
   | Tabstract (AKgeneric s, _) ->
-    let dep_ty = generic_to_dep_ty s in
+    let dep_ty = `cls s in
     let env =
       { env with
         dep_tys = (root_reason, dep_ty)::env.dep_tys;
@@ -191,7 +191,7 @@ and expand env ~as_tyvar_with_cnstr root id =
             the current environment's dependent types. Otherwise,
             we throw away type access information.
           *)
-          let tenv, ty = ExprDepTy.apply env.tenv env.dep_tys ty in
+          let tenv, ty = ExprDepTy.apply env.tenv env.dep_tys [snd id] ty in
           { prev_env with tenv }, ty::tys, errors
         with
           NoTypeConst error -> prev_env, tys, error::errors
@@ -213,7 +213,7 @@ and expand env ~as_tyvar_with_cnstr root id =
   | Tabstract (AKdependent dep_ty, Some ty) ->
     let env =
       { env with
-        dep_tys = (root_reason, (dep_ty, []))::env.dep_tys;
+        dep_tys = (root_reason, dep_ty)::env.dep_tys;
       }
     in
     expand env ty
@@ -234,12 +234,6 @@ and expand env ~as_tyvar_with_cnstr root id =
       Errors.non_object_member tconst (Reason.to_pos root_reason) ty pos
     )
 
-and generic_to_dep_ty s =
-  let regexp = Str.regexp "::" in
-  let res = Str.split regexp s in
-  match res with
-  | name::tys -> `cls name, tys
-  | [] -> `cls s, []
 (* The function takes a "step" forward in the expansion. We look up the type
  * constant associated with the given class_name and create a new root type.
  * A type constant has both a constraint type and assigned type. Which one we
@@ -255,7 +249,8 @@ and create_root_from_type_constant env class_pos class_name
   in
     let env =
       { env with
-        trail = (ExprDepTy.to_string (`cls class_name, [tconst]))::env.trail } in
+        trail = (class_name^"::"^tconst)::env.trail } in
+
     let ety_env =
       { env.ety_env with
         from_class = None; } in
@@ -267,13 +262,7 @@ and create_root_from_type_constant env class_pos class_name
           { env with dep_tys = []; tenv = tenv }, ty
       | {ttc_constraint = Some cstr; _} ->
           let tenv, cstr = Phase.localize ~ety_env env.tenv cstr in
-          let dep_ty = Reason.Rwitness (fst typeconst.ttc_name),
-                       (`cls class_name, [tconst]) in
-          (* Append the name of the expanded type constant to each dependent
-           * type.
-           *)
-          let dep_tys =
-            List.map env.dep_tys (fun (r, (d, s)) -> r, (d, s @ [tconst])) in
+          let dep_ty = Reason.Rwitness (fst typeconst.ttc_name), `cls class_name in
           let tenv, ty =
             if as_tyvar_with_cnstr then
               let tenv, tvar = Env.fresh_invariant_type_var tenv pos in
@@ -281,7 +270,7 @@ and create_root_from_type_constant env class_pos class_name
               let tenv = Typing_utils.sub_type tenv tvar cstr in
               tenv, tvar
             else tenv, cstr in
-          { env with dep_tys = dep_ty::dep_tys; tenv }, ty
+          { env with dep_tys = dep_ty::env.dep_tys; tenv }, ty
       | _ ->
           let tenv, ty =
             if as_tyvar_with_cnstr then
@@ -292,9 +281,7 @@ and create_root_from_type_constant env class_pos class_name
               let reason = Reason.Rwitness (fst typeconst.ttc_name) in
               let ty = (reason, Tabstract (AKgeneric (class_name^"::"^tconst), None)) in
               env.tenv, ty in
-          let dep_tys =
-            List.map env.dep_tys (fun (r, (d, s)) -> r, (d, s @ [tconst])) in
-          { env with dep_tys; tenv }, ty
+          { env with tenv }, ty
     end
 
 (* Looks up the type constant within the given class. This also checks for

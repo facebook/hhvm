@@ -273,7 +273,7 @@ fn from_text(text: &str, opts: ExtractAsJsonOpts) -> Option<Facts> {
     };
     let text = SourceText::make(&opts.filename, text.as_bytes());
     let mut parser = FactsParser::make(&text, env);
-    let root = parser.parse_script();
+    let root = parser.parse_script(None);
 
     // report errors only if result of parsing is non-empty *)
     if parser.sc_state().0 && !parser.errors().is_empty() {

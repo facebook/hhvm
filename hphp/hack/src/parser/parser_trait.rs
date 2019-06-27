@@ -9,6 +9,7 @@ use crate::lexable_trivia::LexableTrivia;
 use crate::lexer::{self, Lexer};
 use crate::parser_env::ParserEnv;
 use crate::smart_constructors::{NodeType, SmartConstructors};
+use crate::stack_limit::StackLimit;
 use crate::syntax_error::{self as Errors, Error, SyntaxError};
 use crate::token_kind::TokenKind;
 
@@ -52,13 +53,15 @@ impl ExpectedTokens {
 pub struct Context<T> {
     pub expected: Vec<ExpectedTokens>,
     pub skipped_tokens: Vec<T>,
+    stack_limit: Option<std::rc::Rc<StackLimit>>,
 }
 
 impl<T> Context<T> {
-    pub fn empty() -> Self {
+    pub fn empty(stack_limit: Option<std::rc::Rc<StackLimit>>) -> Self {
         Self {
             expected: vec![],
             skipped_tokens: vec![],
+            stack_limit,
         }
     }
 
@@ -1326,6 +1329,21 @@ where
             // TODO: Kill PHPism; no semicolon required right before ?>
             TokenKind::QuestionGreaterThan => S!(make_missing, self, self.pos()),
             _ => self.require_token(TokenKind::Semicolon, Errors::error1010),
+        }
+    }
+
+    fn set_stack_limit(&mut self, shared: std::rc::Rc<StackLimit>) {
+        self.context_mut().stack_limit = Some(shared.clone());
+    }
+
+    fn check_stack_limit(&mut self) {
+        if self
+            .context()
+            .stack_limit
+            .as_ref()
+            .map_or(false, |limit| limit.check_exceeded())
+        {
+            self.lexer_mut().skip_to_end();
         }
     }
 }

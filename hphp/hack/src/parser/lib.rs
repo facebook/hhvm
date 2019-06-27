@@ -25,6 +25,7 @@ pub mod operator;
 mod operator_generated;
 pub mod parser;
 pub mod parser_env;
+pub mod stack_limit;
 
 pub mod coroutine_smart_constructors;
 mod coroutine_smart_constructors_generated;

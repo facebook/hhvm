@@ -160,6 +160,11 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         self.offset = self.offset + i
     }
 
+    pub fn skip_to_end(&mut self) {
+        let length = self.source.length();
+        self.with_start_offset(length, length)
+    }
+
     fn is_experimental_mode(&self) -> bool {
         self.is_experimental_mode
     }

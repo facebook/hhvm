@@ -71,6 +71,10 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static constexpr auto NvTryGetInt = &NvGetInt;
   static tv_rval NvGetStr(const ArrayData*, const StringData*);
   static constexpr auto NvTryGetStr = &NvGetStr;
+  static ssize_t NvGetIntPos(const ArrayData*, int64_t k);
+  static constexpr auto NvGetIntPosVec = &NvGetIntPos;
+  static ssize_t NvGetStrPos(const ArrayData*, const StringData* k);
+  static constexpr auto NvGetStrPosVec = &NvGetStrPos;
   static tv_rval RvalInt(const ArrayData* ad, int64_t k) {
     assertx(ad->isPacked());
     return NvGetInt(ad, k);

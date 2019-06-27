@@ -645,6 +645,16 @@ PackedArray::NvGetStr(const ArrayData* ad, const StringData* /*s*/) {
   return nullptr;
 }
 
+ssize_t PackedArray::NvGetIntPos(const ArrayData* ad, int64_t k) {
+  assertx(checkInvariants(ad));
+  return LIKELY(size_t(k) < ad->m_size) ? k : ad->m_size;
+}
+
+ssize_t PackedArray::NvGetStrPos(const ArrayData* ad, const StringData* k) {
+  assertx(checkInvariants(ad));
+  return ad->m_size;
+}
+
 tv_rval PackedArray::NvTryGetIntVec(const ArrayData* ad, int64_t k) {
   assertx(checkInvariants(ad));
   assertx(ad->isVecArray());

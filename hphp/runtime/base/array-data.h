@@ -446,6 +446,16 @@ public:
   TypedValue at(Cell k) const;
 
   /*
+   * Get the internal position for element with key `k', if it exists.
+   * If the key is not present then these return the canonical invalid position
+   * (i.e. iter_end()).
+   * The returned values can be passed to atPos or nvGetKey (if they're not the
+   * canonical invalid position).
+   */
+  ssize_t nvGetIntPos(int64_t k) const;
+  ssize_t nvGetStrPos(const StringData* k) const;
+
+  /*
    * Get the value or key for the element at raw position `pos'.
    *
    * @requires: `pos' refers to a valid array element.
@@ -907,6 +917,8 @@ struct ArrayFunctions {
   tv_rval (*nvTryGetInt[NK])(const ArrayData*, int64_t k);
   tv_rval (*nvGetStr[NK])(const ArrayData*, const StringData* k);
   tv_rval (*nvTryGetStr[NK])(const ArrayData*, const StringData* k);
+  ssize_t (*nvGetIntPos[NK])(const ArrayData*, int64_t k);
+  ssize_t (*nvGetStrPos[NK])(const ArrayData*, const StringData* k);
   Cell (*nvGetKey[NK])(const ArrayData*, ssize_t pos);
   ArrayData* (*setInt[NK])(ArrayData*, int64_t k, Cell v);
   ArrayData* (*setIntInPlace[NK])(ArrayData*, int64_t k, Cell v);

@@ -416,6 +416,8 @@ public:
   static tv_rval NvTryGetStrDict(const ArrayData*,
                                             const StringData*);
   static constexpr auto NvGetStrDict = &NvGetStr;
+  static constexpr auto NvGetIntPosDict = &NvGetIntPos;
+  static constexpr auto NvGetStrPosDict = &NvGetStrPos;
   static tv_rval RvalIntDict(const ArrayData* ad, int64_t k) {
     assertx(ad->isDictOrShape());
     return NvGetIntDict(ad, k);
@@ -513,6 +515,8 @@ public:
   static tv_rval NvTryGetStrShape(const ArrayData*,
                                   const StringData*);
   static constexpr auto NvGetStrShape = &NvGetStr;
+  static constexpr auto NvGetIntPosShape = &NvGetIntPos;
+  static constexpr auto NvGetStrPosShape = &NvGetStrPos;
   static tv_rval RvalIntShape(const ArrayData* ad, int64_t k) {
     assertx(ad->isShape());
     return NvGetIntShape(ad, k);

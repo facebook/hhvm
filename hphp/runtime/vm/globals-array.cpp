@@ -141,6 +141,14 @@ tv_rval GlobalsArray::NvGetInt(const ArrayData* ad, int64_t k) {
   return asGlobals(ad)->m_tab->lookup(String(k).get());
 }
 
+ssize_t GlobalsArray::NvGetStrPos(const ArrayData* ad, const StringData* k) {
+  return asGlobals(ad)->m_tab->lookupPos(k);
+}
+
+ssize_t GlobalsArray::NvGetIntPos(const ArrayData* ad, int64_t k) {
+  return asGlobals(ad)->m_tab->lookupPos(String(k).get());
+}
+
 arr_lval GlobalsArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
   return LvalStr(ad, String(k).get(), copy);
 }

@@ -1192,19 +1192,29 @@ let completion_kind_to_si_kind
 
 exception NoLocationFound
 
+let docblock_to_markdown
+    (raw_docblock: DocblockService.result): markedString list option =
+  match raw_docblock with
+  | [] -> None
+  | docblock ->
+    Some (Core_kernel.List.fold docblock ~init:[] ~f:(fun acc elt ->
+      match elt with
+      | DocblockService.Markdown txt -> (MarkedString txt) :: acc
+      | DocblockService.HackSnippet txt -> (MarkedCode ("hack", txt)) :: acc
+      | DocblockService.XhpSnippet txt -> (MarkedCode ("html", txt)) :: acc
+    ))
+;;
+
 let do_completionItemResolve
   (conn: server_conn)
   (ref_unblocked_time: float ref)
   (params: CompletionItemResolve.params)
 : CompletionItemResolve.result Lwt.t =
 
-  (* We have to get the filename, line, and column either from JSON or a service *)
-  let%lwt documentation = try
-
-    (* First try fetching data from json *)
+  (* First try fetching position data from json *)
+  let%lwt raw_docblock = try
     match params.Completion.data with
-    | None ->
-      raise NoLocationFound
+    | None -> raise NoLocationFound
     | Some _ as data ->
       let filename = Jget.string_exn data "filename" in
       let line = Jget.int_exn data "line" in
@@ -1218,24 +1228,21 @@ let do_completionItemResolve
       let command = ServerCommandTypes.DOCBLOCK_AT
         (filename, line, column, base_class)
       in
-      let%lwt contents = rpc conn ref_unblocked_time command in
-      Lwt.return contents
+      let%lwt raw_docblock = rpc conn ref_unblocked_time command in
+      Lwt.return raw_docblock
 
-  (* Let's instead locate the symbol using a service *)
+  (* If that failed, fetch docblock using just the symbol name *)
   with _ ->
-
-    (* Extract information from the request json *)
     let symbolname = params.Completion.label in
     let raw_kind = params.Completion.kind in
     let kind = completion_kind_to_si_kind raw_kind in
-
-    (* Fetch docblock for a specific symbol rather than a location *)
     let command = ServerCommandTypes.DOCBLOCK_FOR_SYMBOL (symbolname, kind) in
-    let%lwt result = rpc conn ref_unblocked_time command in
-    Lwt.return result
+    let%lwt raw_docblock = rpc conn ref_unblocked_time command in
+    Lwt.return raw_docblock
   in
 
-  (* Here's your docblock *)
+  (* Convert to markdown and return *)
+  let documentation = docblock_to_markdown raw_docblock in
   Lwt.return
   {
     params with

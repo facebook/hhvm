@@ -7,6 +7,29 @@ module Args = Test_harness_common_args
 module SA = Asserter.String_asserter
 module IA = Asserter.Int_asserter
 
+let rec assert_docblock_markdown
+    (expected: DocblockService.result)
+    (actual: DocblockService.result): unit =
+  let open DocblockService in
+  match (expected, actual) with
+  | [], [] -> ()
+  | [], _ -> failwith "Expected end of list";
+  | _, [] -> failwith "Expected markdown item";
+  | (exp_hd :: exp_list), (act_hd :: act_list) ->
+    let () =
+      match (exp_hd, act_hd) with
+      | (Markdown exp_txt, Markdown act_txt) ->
+        SA.assert_equals exp_txt act_txt "Markdown text should match"
+      | (XhpSnippet exp_txt, XhpSnippet act_txt) ->
+        SA.assert_equals exp_txt act_txt "XhpSnippet should match"
+      | (HackSnippet exp_txt, HackSnippet act_txt) ->
+        SA.assert_equals exp_txt act_txt "HackSnippet should match"
+      | _ ->
+        failwith "Type of item does not match";
+    in
+    assert_docblock_markdown exp_list act_list
+;;
+
 let assert_ns_matches
   (expected_ns: string)
   (actual: SearchUtils.si_results): unit =
@@ -278,8 +301,9 @@ let test_docblock_finder (harness: Test_harness.t): bool =
     ~env ~filename:(root_prefix ^ "/bar_1.php") ~line:6 ~column:7
     ~base_class_name:(Some "NoBigTrait") ~basic_only:false
   in
-  SA.assert_option_equals (Some "This is a docblock for NoBigTrait")
-    docblock "Should find docblock";
+  assert_docblock_markdown
+    [DocblockService.Markdown "This is a docblock for NoBigTrait"]
+    docblock;
   true
 ;;
 

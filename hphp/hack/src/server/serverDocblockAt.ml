@@ -100,24 +100,24 @@ let fallback class_name member_name =
   |> render_ancestor_docblocks
 
 (* Attempt to clean obvious cruft from a docblock *)
-let clean_docblock (docblock: string): string =
-  (String.strip docblock)
+let clean_comments (raw_comments: string): string =
+  (String.strip raw_comments)
 
 (* Fetch a definition *)
-let go_def
+let go_comments_for_symbol
     ~(def: 'a SymbolDefinition.t)
     ~(base_class_name: string option)
     ~(file: ServerCommandTypes.file_input)
-    ~(basic_only: bool) =
+    ~(basic_only: bool): string option =
   match def.SymbolDefinition.docblock with
-  | Some db -> Some (clean_docblock db)
+  | Some db -> Some (clean_comments db)
   | None ->
     let ffps_opt = ServerSymbolDefinition.get_definition_cst_node file def in
     match ffps_opt with
     | None -> None
     | Some ffps ->
       match Docblock_finder.get_docblock ffps with
-      | Some db -> Some (clean_docblock db)
+      | Some db -> Some (clean_comments db)
       | None ->
         match def.SymbolDefinition.kind, base_class_name with
         | SymbolDefinition.Method, Some base_class_name when not basic_only ->
@@ -173,21 +173,23 @@ let go_docblock_at
   let ServerEnv.{ tcopt; _ } = env in
   let contents_opt = File_provider.get_contents relpath in
   match contents_opt with
-  | None -> None
+  | None -> []
   | Some contents ->
     let definitions =
       ServerIdentifyFunction.go contents line column tcopt
       |> List.filter_map ~f:(fun (_, def) -> def)
     in
     match List.hd definitions with
-    | None -> None
+    | None -> []
     | Some def ->
-      let result = go_def
+      match go_comments_for_symbol
         ~base_class_name
         ~file:(ServerCommandTypes.FileName filename)
         ~basic_only
-        ~def in
-      result
+        ~def with
+      | None -> []
+      | Some "" -> []
+      | Some comments -> [DocblockService.Markdown comments]
 
 (* Locate a symbol and return its docblock, no extra steps *)
 let go_docblock_for_symbol
@@ -195,7 +197,7 @@ let go_docblock_for_symbol
     ~(symbol: string)
     ~(kind: SearchUtils.si_kind): DocblockService.result =
   match go_locate_symbol ~env ~symbol ~kind with
-  | None -> None
+  | None -> []
   | Some location ->
     let open DocblockService in
     go_docblock_at

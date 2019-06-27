@@ -14,9 +14,6 @@ open SearchUtils
 let fuzzy_search_enabled () = !HackSearchService.fuzzy
 let set_fuzzy_search_enabled x = HackSearchService.fuzzy := x
 
-(* If we are debugging locally, avoid logging anything - it makes tests fail *)
-let in_quiet_mode = ref false
-
 (* Set the currently selected search provider *)
 let initialize
     ~(quiet: bool)
@@ -28,8 +25,8 @@ let initialize
   (* Create the object *)
   let sienv = { SearchUtils.default_si_env with
     sie_provider = SearchUtils.provider_of_string provider_name;
+    sie_quiet_mode = quiet;
   } in
-  in_quiet_mode := quiet;
 
   (* Basic initialization *)
   let () = match sienv.sie_provider with
@@ -57,7 +54,7 @@ let initialize
   );
 
   (* Here's the initialized environment *)
-  if not !in_quiet_mode then begin
+  if not sienv.sie_quiet_mode then begin
     Hh_logger.log "Search provider set to [%s] based on configuration value [%s]"
       (SearchUtils.descriptive_name_of_provider sienv.sie_provider)
       provider_name;
@@ -77,7 +74,7 @@ let log_symbol_index_search
     ~(caller: string): unit =
 
   (* In quiet mode we don't log anything to either scuba or console *)
-  if !in_quiet_mode then begin
+  if sienv.sie_quiet_mode then begin
     ()
   end else begin
 

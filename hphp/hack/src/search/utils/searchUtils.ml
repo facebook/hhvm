@@ -261,6 +261,7 @@ end
 (* Context information for the current symbol index *)
 type si_env = {
   sie_provider: search_provider;
+  sie_quiet_mode: bool;
 
   (* LocalSearchService *)
   lss_fileinfos: FileInfo.t Relative_path.Map.t;
@@ -271,6 +272,7 @@ type si_env = {
 (* Default provider with no functionality *)
 let default_si_env = {
   sie_provider = NoIndex;
+  sie_quiet_mode = false;
   lss_fileinfos = Relative_path.Map.empty;
   lss_filenames = Relative_path.Map.empty;
   lss_tombstones = Tombstone_set.empty;

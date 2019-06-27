@@ -163,7 +163,6 @@ class SoapClient {
     varray<mixed> $args,
     darray $options = darray[],
     mixed $input_headers = null,
-    mixed &$output_headers = null
   ): mixed;
 
   public function __call(mixed $name, mixed $args): mixed {
@@ -175,7 +174,6 @@ class SoapClient {
     varray<mixed> $args,
     darray $options = darray[],
     mixed $input_headers = null,
-    mixed &$output_headers = null,
   ): mixed {
     $args = self::cleanArrays($args, array());
     $ret = $this->soapcallImpl(
@@ -183,7 +181,6 @@ class SoapClient {
       varray($args),
       $options,
       $input_headers,
-      &$output_headers,
     );
     return self::cleanArrays($ret, darray[]);
   }

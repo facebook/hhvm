@@ -109,7 +109,7 @@ class SoapServer {
 class SoapClient {
   public function __construct($wsdl, $options = null);
   public function __call($name, $args);
-  public function __soapcall(string $name, $args, $options = null, $input_headers = null, &$output_headers = null);
+  public function __soapcall(string $name, $args, $options = null, $input_headers = null);
   public function __getlastrequest();
   public function __getlastresponse();
   public function __getlastrequestheaders();

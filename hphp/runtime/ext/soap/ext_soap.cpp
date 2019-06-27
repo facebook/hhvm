@@ -2552,8 +2552,7 @@ Variant HHVM_METHOD(SoapClient, soapcallImpl,
                     const String& name,
                     const Array& args,
                     const Array& options = null_array,
-                    const Variant& input_headers = uninit_variant,
-                    VRefParam output_headers_ref = init_null()) {
+                    const Variant& input_headers = uninit_variant) {
   SuppressHACRefBindNotices shacn;
   auto* data = Native::data<SoapClient>(this_);
   SoapClientScope ss(this_);
@@ -2592,9 +2591,6 @@ Variant HHVM_METHOD(SoapClient, soapcallImpl,
   }
 
   Array output_headers;
-  SCOPE_EXIT {
-    output_headers_ref.assignIfRef(output_headers);
-  };
 
   if (data->m_trace) {
     data->m_last_request.unset();

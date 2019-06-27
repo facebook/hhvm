@@ -1850,59 +1850,235 @@ TypedValue HHVM_FUNCTION(array_diff,
   return tvReturn(std::move(ret));
 }
 
+namespace {
+
+template <typename T>
+ALWAYS_INLINE
+bool array_diff_intersect_key_inputs_ok(const Cell& c1, const Cell& c2,
+                                        const ArrayData* args,
+                                        const char* fname,
+                                        T callback) {
+  if (isClsMethType(c1.m_type) || isClsMethType(c2.m_type)) {
+    raiseIsClsMethWarning(fname, isClsMethType(c1.m_type) ? 1 : 2);
+    return false;
+  }
+  if (!isContainer(c1) || !isContainer(c2)) {
+    raise_warning("%s() expects parameter %d to be an array or collection",
+                  fname, isContainer(c1) ? 2 : 1);
+    return false;
+  }
+  callback(getContainerSize(c2));
+
+  bool ok = true;
+  IterateKVNoInc(args, [&](Cell k, TypedValue v) {
+    assertx(k.m_type == KindOfInt64);
+    if (isClsMethType(v.m_type)) {
+      raiseIsClsMethWarning(fname, k.m_data.num + 3);
+      ok = false;
+      return true;
+    }
+    if (!isContainer(v)) {
+      raise_warning("%s() expects parameter %ld to be an array or collection",
+                    fname, k.m_data.num + 3);
+      ok = false;
+      return true;
+    }
+    callback(getContainerSize(v));
+    return false;
+  });
+
+  return ok;
+}
+
+template <bool diff, bool coerceThis, bool coerceAd, typename SI, typename SS>
+ALWAYS_INLINE
+void array_diff_intersect_key_check_arr(ArrayData* ad, Cell k, TypedValue v,
+                                        SI setInt, SS setStr) {
+  if (k.m_type == KindOfInt64) {
+    if (ad->exists(k.m_data.num)) {
+      if (!diff) setInt(k.m_data.num, v);
+      return;
+    }
+    if (coerceAd) {
+      // Also need to check if ad has a key that will coerce to this int value.
+      auto s = String::attach(buildStringData(k.m_data.num));
+      if (ad->exists(s.get())) {
+        if (!diff) setInt(k.m_data.num, v);
+        return;
+      }
+    }
+    if (diff) setInt(k.m_data.num, v);
+    return;
+  }
+
+  if (coerceThis) {
+    int64_t n;
+    if (k.m_data.pstr->isStrictlyInteger(n)) {
+      if (ad->exists(n)) {
+        if (!diff) setInt(n, v);
+        return;
+      }
+      if (coerceAd) {
+        // Also need to check if ad has a key that will coerce to this int
+        // value (as did this key).
+        if (ad->exists(k.m_data.pstr)) {
+          if (!diff) setInt(n, v);
+          return;
+        }
+      }
+      if (diff) setInt(n, v);
+      return;
+    }
+  } else if (coerceAd) {
+    // We're coercing keys from ad, but not this. If this string key
+    // isStrictlyInteger it can never match a key from ad after that key
+    // is coerced.
+    int64_t n;
+    if (k.m_data.pstr->isStrictlyInteger(n)) {
+      if (diff) setStr(k.m_data.pstr, v);
+      return;
+    }
+  }
+
+  if (ad->exists(k.m_data.pstr)) {
+    if (!diff) setStr(k.m_data.pstr, v);
+  } else {
+    if (diff) setStr(k.m_data.pstr, v);
+  }
+}
+
+template <bool diff, bool coerceThis, typename SI, typename SS>
+ALWAYS_INLINE
+void array_diff_intersect_key_check_pair(Cell k, TypedValue v, SI setInt,
+                                         SS setStr) {
+  if (k.m_type == KindOfInt64) {
+    if (k.m_data.num == 0 || k.m_data.num == 1) {
+      if (!diff) setInt(k.m_data.num, v);
+    } else {
+      if (diff) setInt(k.m_data.num, v);
+    }
+    return;
+  }
+
+  if (coerceThis) {
+    int64_t n;
+    if (k.m_data.pstr->isStrictlyInteger(n)) {
+      if (n == 0 || n == 1) {
+        if (!diff) setInt(n, v);
+      } else {
+        if (diff) setInt(n, v);
+      }
+      return;
+    }
+  }
+
+  if (diff) setStr(k.m_data.pstr, v);
+}
+
+}
+
 TypedValue HHVM_FUNCTION(array_diff_key,
                          const Variant& container1,
                          const Variant& container2,
                          const Array& args /* = null array */) {
-  ARRAY_DIFF_PRELUDE()
-  // If we're only dealing with two containers and if they are both arrays,
-  // we can avoid creating an intermediate Set
-  if (!moreThanTwo &&
-      isArrayLikeType(c1.m_type) &&
-      isArrayLikeType(c2.m_type)) {
-    auto ad2 = c2.m_data.parr;
-    for (ArrayIter iter(container1); iter; ++iter) {
-      auto key = iter.first();
-      const auto& c = *key.toCell();
-      if (c.m_type == KindOfInt64) {
-        if (ad2->exists(c.m_data.num)) continue;
+  const auto& c1 = *container1.toCell();
+  const auto& c2 = *container2.toCell();
+
+  size_t largestSize = 0;
+  auto check_cb = [&] (size_t s) {
+    if (s > largestSize) largestSize = s;
+  };
+  if (!array_diff_intersect_key_inputs_ok(c1, c2, args.get(), "array_diff_key",
+                                          check_cb)) {
+    return make_tv<KindOfNull>();
+  }
+  if (getContainerSize(c1) == 0) {
+    return make_tv<KindOfPersistentArray>(staticEmptyArray());
+  }
+  if (largestSize == 0) {
+    if (isArrayLikeType(c1.m_type)) {
+      return tvReturn(container1);
+    } else {
+      return tvReturn(container1.toArray<IntishCast::Cast>());
+    }
+  }
+
+  auto diff_step = [](TypedValue left, TypedValue right) {
+    auto leftSize = getContainerSize(left);
+    // If we have more than 2 args, the left input could end up empty
+    if (leftSize == 0) return empty_array();
+
+    ArrayInit ret(leftSize, ArrayInit::Map{});
+    auto setInt = [&](int64_t k, TypedValue v) { ret.setWithRef(k, v); };
+    auto setStr = [&](StringData* k, TypedValue v) { ret.setWithRef(k, v); };
+
+    auto iterate_left_with = [&](auto test_key) {
+      IterateKV(
+        left,
+        [](ArrayData*) { return false; },
+        test_key,
+        [](ObjectData*) {}
+      );
+    };
+
+    // rightAd will be the backing ArrayData for right, or nullptr if right
+    // is a Pair
+    auto rightAd = [&](){
+      if (isArrayLikeType(type(right))) return right.m_data.parr;
+      return collections::asArray(right.m_data.pobj);
+    }();
+
+    // For historical reasons, we coerce intish string keys only when they
+    // came from a hack collection. We also need to do the lookup in the right
+    // array differently if right was a Pair (and so rightAd is nullptr)
+    if (!rightAd) {
+      if (isArrayLikeType(type(left))) {
+        iterate_left_with([&](Cell k, TypedValue v) {
+          array_diff_intersect_key_check_pair<true, false>(
+            k, v, setInt, setStr);
+        });
       } else {
-        assertx(isStringType(c.m_type));
-        // this call to ArrayData::exists(const StringData*) doesn't intish cast
-        if (ad2->exists(c.m_data.pstr)) continue;
+        iterate_left_with([&](Cell k, TypedValue v) {
+          array_diff_intersect_key_check_pair<true, true>(
+            k, v, setInt, setStr);
+        });
       }
-      ret.setWithRef(key, iter.secondValPlus(), true);
+    } else {
+      if (isArrayLikeType(type(left))) {
+        if (isArrayLikeType(type(right))) {
+          iterate_left_with([&](Cell k, TypedValue v) {
+            array_diff_intersect_key_check_arr<true, false, false>(
+              rightAd, k, v, setInt, setStr);
+          });
+        } else {
+          iterate_left_with([&](Cell k, TypedValue v) {
+            array_diff_intersect_key_check_arr<true, false, true>(
+              rightAd, k, v, setInt, setStr);
+          });
+        }
+      } else {
+        if (isArrayLikeType(type(right))) {
+          iterate_left_with([&](Cell k, TypedValue v) {
+            array_diff_intersect_key_check_arr<true, true, false>(
+              rightAd, k, v, setInt, setStr);
+          });
+        } else {
+          iterate_left_with([&](Cell k, TypedValue v) {
+            array_diff_intersect_key_check_arr<true, true, true>(
+              rightAd, k, v, setInt, setStr);
+          });
+        }
+      }
     }
-    return tvReturn(std::move(ret));
-  }
-  // Put all of the keys from all the containers (except container1) into a
-  // Set. All types aside from integer and string will be cast to string, and
-  // we also convert int-like strings to integers.
-  auto st = req::make<c_Set>();
-  st->reserve(largestSize);
-  containerKeysToSetHelper(st, container2);
-  if (UNLIKELY(moreThanTwo)) {
-    for (ArrayIter argvIter(args); argvIter; ++argvIter) {
-      containerKeysToSetHelper(st, VarNR(argvIter.secondVal()));
-    }
-  }
-  // Loop over container1, only copying over key/value pairs where the key is
-  // not present in the Set. When checking if a key is present in the Set, any
-  // key that is not an integer or string is cast to a string, and we convert
-  // int-like strings to integers.
-  Variant strHolder(empty_string_variant());
-  TypedValue* strTv = strHolder.asTypedValue();
-  bool convertIntLikeStrs = !isArrayLikeType(c1.m_type);
-  for (ArrayIter iter(container1); iter; ++iter) {
-    auto key = iter.first();
-    const auto& c = *key.toCell();
-    if (checkSetHelper(st, c, strTv, convertIntLikeStrs)) continue;
-    const auto arrkey = convertIntLikeStrs
-      ? ret.convertKey<IntishCast::Cast>(key)
-      : c;
-    ret.setWithRef(arrkey, iter.secondValPlus(), true);
-  }
-  return tvReturn(std::move(ret));
+
+    return ret.toArray();
+  };
+
+  auto ret = diff_step(c1, c2);
+  IterateVNoInc(args.get(), [&](TypedValue v) {
+    ret = diff_step(make_tv<KindOfArray>(ret.get()), v);
+  });
+  return make_tv<KindOfArray>(ret.detach());
 }
 
 #undef ARRAY_DIFF_PRELUDE
@@ -2262,62 +2438,97 @@ TypedValue HHVM_FUNCTION(array_intersect_key,
                          const Variant& container1,
                          const Variant& container2,
                          const Array& args /* = null array */) {
-  ARRAY_INTERSECT_PRELUDE()
-  // If we're only dealing with two containers and if they are both arrays,
-  // we can avoid creating an intermediate Set
-  if (!moreThanTwo &&
-      isArrayLikeType(c1.m_type) &&
-      isArrayLikeType(c2.m_type)) {
-    auto ad2 = c2.m_data.parr;
-    for (ArrayIter iter(container1); iter; ++iter) {
-      auto key = iter.first();
-      const auto& c = *key.toCell();
-      if (c.m_type == KindOfInt64) {
-        if (!ad2->exists(c.m_data.num)) continue;
+  const auto& c1 = *container1.toCell();
+  const auto& c2 = *container2.toCell();
+
+  bool empty_arg = false;
+  auto check_cb = [&] (size_t s) {
+    if (s == 0) empty_arg = true;
+  };
+  if (!array_diff_intersect_key_inputs_ok(c1, c2, args.get(),
+                                          "array_intersect_key", check_cb)) {
+    return make_tv<KindOfNull>();
+  }
+  if ((getContainerSize(c1) == 0) || empty_arg) {
+    return make_tv<KindOfPersistentArray>(staticEmptyArray());
+  }
+
+  auto intersect_step = [](TypedValue left, TypedValue right) {
+    auto leftSize = getContainerSize(left);
+    // If we have more than 2 args, the left input could end up empty
+    if (leftSize == 0) return empty_array();
+
+    ArrayInit ret(leftSize, ArrayInit::Map{});
+    auto setInt = [&](int64_t k, TypedValue v) { ret.setWithRef(k, v); };
+    auto setStr = [&](StringData* k, TypedValue v) { ret.setWithRef(k, v); };
+
+    auto iterate_left_with = [&](auto test_key) {
+      IterateKV(
+        left,
+        [](ArrayData*) { return false; },
+        test_key,
+        [](ObjectData*) {}
+      );
+    };
+
+    // rightAd will be the backing ArrayData for right, or nullptr if right
+    // is a Pair
+    auto rightAd = [&](){
+      if (isArrayLikeType(type(right))) return right.m_data.parr;
+      return collections::asArray(right.m_data.pobj);
+    }();
+
+    // For historical reasons, we coerce intish string keys only when they
+    // came from a hack collection. We also need to do the lookup in the right
+    // array differently if right was a Pair (and so rightAd is nullptr)
+    if (!rightAd) {
+      if (isArrayLikeType(type(left))) {
+        iterate_left_with([&](Cell k, TypedValue v) {
+          array_diff_intersect_key_check_pair<false, false>(
+            k, v, setInt, setStr);
+        });
       } else {
-        assertx(isStringType(c.m_type));
-        // this call to ArrayData::exists(const StringData*) doesn't intish cast
-        if (!ad2->exists(c.m_data.pstr)) continue;
+        iterate_left_with([&](Cell k, TypedValue v) {
+          array_diff_intersect_key_check_pair<false, true>(
+            k, v, setInt, setStr);
+        });
       }
-      /* This never intish casted */
-      ret.setWithRef(key, iter.secondValPlus(), true);
+    } else {
+      if (isArrayLikeType(type(left))) {
+        if (isArrayLikeType(type(right))) {
+          iterate_left_with([&](Cell k, TypedValue v) {
+            array_diff_intersect_key_check_arr<false, false, false>(
+              rightAd, k, v, setInt, setStr);
+          });
+        } else {
+          iterate_left_with([&](Cell k, TypedValue v) {
+            array_diff_intersect_key_check_arr<false, false, true>(
+              rightAd, k, v, setInt, setStr);
+          });
+        }
+      } else {
+        if (isArrayLikeType(type(right))) {
+          iterate_left_with([&](Cell k, TypedValue v) {
+            array_diff_intersect_key_check_arr<false, true, false>(
+              rightAd, k, v, setInt, setStr);
+          });
+        } else {
+          iterate_left_with([&](Cell k, TypedValue v) {
+            array_diff_intersect_key_check_arr<false, true, true>(
+              rightAd, k, v, setInt, setStr);
+          });
+        }
+      }
     }
-    return tvReturn(std::move(ret));
-  }
-  // Build up a Set containing the keys that are present in all the containers
-  // (except container1)
-  auto st = req::make<c_Set>();
-  if (LIKELY(!moreThanTwo)) {
-    // There is only one container (not counting container1) so we can just
-    // call containerKeysToSetHelper() to build the Set.
-    containerKeysToSetHelper(st, container2);
-  } else {
-    // We're dealing with three or more containers. Copy all of the containers
-    // (except the first) into a TypedValue array.
-    int count = args.size() + 1;
-    TypedValue* containers =
-      makeContainerListHelper(container2, args, count, smallestPos);
-    SCOPE_EXIT { req::free(containers); };
-    // Build a Set of the keys that were present in all of the containers
-    containerKeysIntersectHelper(st, containers, count);
-  }
-  // Loop over container1, only copying over key/value pairs where the key
-  // is present in the Set. When checking if a key is present in the Set,
-  // any value that is not an integer or string is cast to a string, and we
-  // convert int-like strings to integers.
-  Variant strHolder(empty_string_variant());
-  TypedValue* strTv = strHolder.asTypedValue();
-  bool convertIntLikeStrs = !isArrayLikeType(c1.m_type);
-  for (ArrayIter iter(container1); iter; ++iter) {
-    auto key = iter.first();
-    const auto& c = *key.toCell();
-    if (!checkSetHelper(st, c, strTv, convertIntLikeStrs)) continue;
-    auto arrkey = convertIntLikeStrs
-      ? Variant::wrap(ret.convertKey<IntishCast::Cast>(key))
-      : key;
-    ret.setWithRef(arrkey, iter.secondValPlus(), true);
-  }
-  return tvReturn(std::move(ret));
+
+    return ret.toArray();
+  };
+
+  auto ret = intersect_step(c1, c2);
+  IterateVNoInc(args.get(), [&](TypedValue v) {
+    ret = intersect_step(make_tv<KindOfArray>(ret.get()), v);
+  });
+  return make_tv<KindOfArray>(ret.detach());
 }
 
 #undef ARRAY_INTERSECT_PRELUDE

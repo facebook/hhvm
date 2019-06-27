@@ -212,8 +212,14 @@ let rec localize ~ety_env env (dty: decl ty) =
       let env, tyl = List.map_env env tyl (localize ~ety_env) in
       env, (r, Ttuple tyl)
   | r, Taccess (root_ty, ids) ->
+      let pos = Reason.to_pos @@ fst root_ty in
+      let mk_r (p, _) = match ids with
+        | [_] -> r
+        | _ -> Reason.Rwitness (Pos.btw pos p) in
       let env, root_ty = localize ~ety_env env root_ty in
-      TUtils.expand_typeconst ety_env env r root_ty ids
+      List.fold ids ~init:(env, root_ty) ~f:begin fun (env, root_ty) id ->
+        TUtils.expand_typeconst ety_env env (mk_r id) root_ty id
+      end
   | r, Tshape (fields_known, tym) ->
       let env, tym = ShapeFieldMap.map_env (localize ~ety_env) env tym in
       env, (r, Tshape (fields_known, tym))

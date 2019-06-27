@@ -32,7 +32,7 @@ type env = {
   (* A trail of all the type constants we have expanded. Used primarily for
    * error reporting
    *)
-  trail : (dependent_type * string list) list;
+  trail : string list;
 
   (* A list of dependent we have encountered while expanding a type constant.
    * After expanding a type constant we can choose either the assigned type or
@@ -41,19 +41,16 @@ type env = {
    * is the constrained type then the final type will also be a dependent type.
    *)
   dep_tys : (Reason.t * (dependent_type * string list)) list;
-  (* The remaining type constants we need to expand *)
-  ids : Nast.sid list;
 
   (* A list of generics we've seen while expanding. *)
   gen_seen : TySet.t;
 }
 
-let empty_env env ety_env ids = {
+let empty_env env ety_env = {
   tenv = env;
   ety_env = ety_env;
   trail = [];
   dep_tys = [];
-  ids = ids;
   gen_seen = TySet.empty;
 }
 
@@ -61,20 +58,20 @@ let empty_env env ety_env ids = {
 If as_tyvar_with_cnstr is set, then return a fresh type variable which has
 the same constraints as type constant T in A. Otherwise, return an
 AKGeneric("A::T"). *)
-let rec expand_with_env ety_env env ?(as_tyvar_with_cnstr = false) reason root ids =
+let rec expand_with_env ety_env env ?(as_tyvar_with_cnstr = false) reason root id =
   let tenv, _, ty =
-    expand_with_env_ ety_env env ~as_tyvar_with_cnstr reason root ids in
+    expand_with_env_ ety_env env ~as_tyvar_with_cnstr reason root id in
   tenv, ty
 
-and expand_with_env_ ety_env env ~as_tyvar_with_cnstr reason root ids =
-  let env = empty_env env ety_env ids in
+and expand_with_env_ ety_env env ~as_tyvar_with_cnstr reason root id =
+  let env = empty_env env ety_env in
   let env, (root_r, root_ty) =
-    try expand env ~as_tyvar_with_cnstr root
+    try expand env ~as_tyvar_with_cnstr root id
     with NoTypeConst error ->
       error ();
       env, (reason, Typing_utils.terr env.tenv)
   in
-  let trail = List.rev_map env.trail (compose strip_ns ExprDepTy.to_string) in
+  let trail = List.rev_map env.trail strip_ns in
   let reason_func r =
     let r = match r with
       | Reason.Rexpr_dep_type (_, p, e) ->
@@ -88,13 +85,13 @@ and expand_with_env_ ety_env env ~as_tyvar_with_cnstr reason root ids =
     (* if type constant has type this::ID and method has associated condition type ROOTCOND_TY
        for the receiver - check if condition type has type constant at the same path.
        If yes - attach a condition type ROOTCOND_TY::ID to a result type *)
-       begin match root, ids, TR.condition_type_from_reactivity (Env.env_reactivity tenv) with
+       begin match root, id, TR.condition_type_from_reactivity (Env.env_reactivity tenv) with
        | (_, Tabstract (AKdependent (`this), _)),
-         [_, id],
+         (_, tconst),
          Some cond_ty ->
          begin match CT.try_get_class_for_condition_type tenv cond_ty with
-         | Some (_, cls) when Cls.has_typeconst cls id ->
-          let cond_ty = (Reason.none, Taccess (cond_ty, ids)) in
+         | Some (_, cls) when Cls.has_typeconst cls tconst ->
+          let cond_ty = (reason, Taccess (cond_ty, [id])) in
           Option.value (TR.try_substitute_type_with_condition tenv cond_ty ty)
             ~default:(tenv, ty)
          | _ ->  tenv, ty
@@ -119,7 +116,7 @@ and referenced_typeconsts env ety_env r (root, ids) =
         end
       | _ -> acc
     end in
-    expand_with_env ety_env env ~as_tyvar_with_cnstr:false r root [pos, tconst], acc
+    expand_with_env ety_env env ~as_tyvar_with_cnstr:false r root (pos, tconst), acc
   end
   |> snd
 
@@ -130,8 +127,8 @@ and referenced_typeconsts env ety_env r (root, ids) =
  * We also need to track what expansions have already taken place to make sure
  * we do not recurse infinitely.
  *)
-and expand env ~as_tyvar_with_cnstr root =
-  let expand = expand ~as_tyvar_with_cnstr in
+and expand env ~as_tyvar_with_cnstr root id =
+  let expand env ty = expand env ~as_tyvar_with_cnstr ty id in
   let tenv, (root_reason, root_ty as root) = Env.expand_type env.tenv root in
   let env = { env with tenv = tenv } in
   let apply_dep_tys env tyl = List.map_env env tyl
@@ -144,91 +141,86 @@ and expand env ~as_tyvar_with_cnstr root =
       let tenv, ty = ExprDepTy.apply env.tenv env.dep_tys ty in
       { prev_env with tenv }, ty
     end in
-  match env.ids with
-  | [] ->
-      env, root
-  | head::tail -> begin match root_ty with
-      | Tany | Terr -> env, root
-      | Tabstract (AKdependent (`cls _), Some ty)
-      | Tabstract (AKnewtype (_, _), Some ty) -> expand env ty
-      | Tclass ((class_pos, class_name), _, tyl) ->
-          (* Legacy behaviour is to preserve exactness only on `this`
-           * and not through `this::T` *)
-          let env, ty =
-            create_root_from_type_constant
-              env class_pos class_name
-              (root_reason, Tclass ((class_pos, class_name), Nonexact, tyl))
-              head ~as_tyvar_with_cnstr in
-          expand { env with ids = tail } ty
-      | Tabstract (AKgeneric s, _) ->
-        let dep_ty = generic_to_dep_ty s in
-        let env =
-          { env with
-            dep_tys = (root_reason, dep_ty)::env.dep_tys;
-            gen_seen = TySet.add root env.gen_seen;
-            } in
-        let upper_bounds = Env.get_upper_bounds env.tenv s in
-        (* Ignore upper bounds that are equal to ones we've seen, to avoid
-          an infinite loop
+  match root_ty with
+  | Tany | Terr -> env, root
+  | Tabstract (AKdependent (`cls _), Some ty)
+  | Tabstract (AKnewtype (_, _), Some ty) -> expand env ty
+  | Tclass ((class_pos, class_name), _, tyl) ->
+    (* Legacy behaviour is to preserve exactness only on `this`
+     * and not through `this::T` *)
+    create_root_from_type_constant
+      env class_pos class_name
+      (root_reason, Tclass ((class_pos, class_name), Nonexact, tyl))
+      id ~as_tyvar_with_cnstr
+  | Tabstract (AKgeneric s, _) ->
+    let dep_ty = generic_to_dep_ty s in
+    let env =
+      { env with
+        dep_tys = (root_reason, dep_ty)::env.dep_tys;
+        gen_seen = TySet.add root env.gen_seen;
+        } in
+    let upper_bounds = Env.get_upper_bounds env.tenv s in
+    (* Ignore upper bounds that are equal to ones we've seen, to avoid
+      an infinite loop
 
-          let upper_bounds = upper_bounds - env.gen_seen
-        *)
-        let upper_bounds = TySet.diff upper_bounds env.gen_seen in
-        (* We will attempt to look up the type constant for each upper bound.
-          If at least one reports a type then we ignore the errors of any other
-          failed look ups.
-        *)
-        let env, tyl, errors =
-          List.fold ~init:(env, [], []) (TySet.elements upper_bounds)
-            ~f:begin fun (prev_env, tys, errors) ty ->
-            try
-              let env, ty = expand env ty in
-              (* If ty here involves a type access, we have to use
-                the current environment's dependent types. Otherwise,
-                we throw away type access information.
-              *)
-              let tenv, ty = ExprDepTy.apply env.tenv env.dep_tys ty in
-              { prev_env with tenv }, ty::tys, errors
-            with
-              NoTypeConst error -> prev_env, tys, error::errors
-        end in
-        begin match tyl with
-        | [] ->
-          raise_error begin match List.hd errors with
-          | Some error -> error
-          | None ->
-            let pos, tconst = head in
-            let ty = Typing_print.error env.tenv root in
-            (fun () ->
-              Errors.non_object_member tconst (Reason.to_pos root_reason) ty pos
-            )
-          end
-        | ty::_ ->
-          { env with dep_tys = [] }, ty
-        end
-      | Tabstract (AKdependent dep_ty, Some ty) ->
-          let env =
-            { env with
-              dep_tys = (root_reason, (dep_ty, []))::env.dep_tys } in
-          expand env ty
-      | Tunion tyl ->
-          let env, tyl = apply_dep_tys env tyl in
-          { env with dep_tys = [] } , (root_reason, Tunion tyl)
-      | Tintersection tyl ->
-          let env, tyl = apply_dep_tys env tyl in
-          { env with dep_tys = [] } , (root_reason, Tintersection tyl)
-      | Tvar n ->
-          let tenv, ty = Typing_subtype_tconst.get_tyvar_type_const env.tenv n head in
-          expand { env with ids = tail; tenv } ty
-      | Tanon _ | Tobject | Tnonnull | Tprim _ | Tshape _ | Ttuple _
-      | Tarraykind _ | Tfun _ | Tabstract (_, _)  | Tdynamic | Toption _ ->
-          let pos, tconst = head in
-          let ty = Typing_print.error env.tenv root in
-          raise_error (fun () ->
-            Errors.non_object_member tconst (Reason.to_pos root_reason) ty pos
-          )
-     end
- and generic_to_dep_ty s =
+      let upper_bounds = upper_bounds - env.gen_seen
+    *)
+    let upper_bounds = TySet.diff upper_bounds env.gen_seen in
+    (* We will attempt to look up the type constant for each upper bound.
+      If at least one reports a type then we ignore the errors of any other
+      failed look ups.
+    *)
+    let env, tyl, errors =
+      List.fold ~init:(env, [], []) (TySet.elements upper_bounds)
+        ~f:begin fun (prev_env, tys, errors) ty ->
+        try
+          let env, ty = expand env ty in
+          (* If ty here involves a type access, we have to use
+            the current environment's dependent types. Otherwise,
+            we throw away type access information.
+          *)
+          let tenv, ty = ExprDepTy.apply env.tenv env.dep_tys ty in
+          { prev_env with tenv }, ty::tys, errors
+        with
+          NoTypeConst error -> prev_env, tys, error::errors
+    end in
+    begin match tyl with
+    | [] ->
+      raise_error begin match List.hd errors with
+      | Some error -> error
+      | None ->
+        let pos, tconst = id in
+        let ty = Typing_print.error env.tenv root in
+        (fun () ->
+          Errors.non_object_member tconst (Reason.to_pos root_reason) ty pos
+        )
+      end
+    | ty::_ ->
+      { env with dep_tys = [] }, ty
+    end
+  | Tabstract (AKdependent dep_ty, Some ty) ->
+    let env =
+      { env with
+        dep_tys = (root_reason, (dep_ty, []))::env.dep_tys } in
+    expand env ty
+  | Tunion tyl ->
+    let env, tyl = apply_dep_tys env tyl in
+    { env with dep_tys = [] } , (root_reason, Tunion tyl)
+  | Tintersection tyl ->
+    let env, tyl = apply_dep_tys env tyl in
+    { env with dep_tys = [] } , (root_reason, Tintersection tyl)
+  | Tvar n ->
+    let tenv, ty = Typing_subtype_tconst.get_tyvar_type_const env.tenv n id in
+    { env with tenv }, ty
+  | Tanon _ | Tobject | Tnonnull | Tprim _ | Tshape _ | Ttuple _
+  | Tarraykind _ | Tfun _ | Tabstract (_, _)  | Tdynamic | Toption _ ->
+    let pos, tconst = id in
+    let ty = Typing_print.error env.tenv root in
+    raise_error (fun () ->
+      Errors.non_object_member tconst (Reason.to_pos root_reason) ty pos
+    )
+
+and generic_to_dep_ty s =
   let regexp = Str.regexp "::" in
   let res = Str.split regexp s in
   match res with
@@ -249,7 +241,7 @@ and create_root_from_type_constant env class_pos class_name root_ty
   in
     let env =
       { env with
-        trail = (`cls class_name, List.map env.ids snd)::env.trail } in
+        trail = (ExprDepTy.to_string (`cls class_name, [tconst]))::env.trail } in
     (* The type constant itself may contain a 'this' type so we need to
      * change the this_ty in the environment to be the root as an
      * expression dependent type.
@@ -317,7 +309,7 @@ and get_typeconst env class_pos class_name pos tconst ~as_tyvar_with_cnstr =
    * with the remaining ids that we need to expand. If we encounter the same
    * class name + ids that means we have entered a cycle.
    *)
-  let cur_tconst = `cls class_name, List.map env.ids snd in
+  let cur_tconst = `cls class_name, [tconst] in
   let seen = ExprDepTy.to_string cur_tconst in
   let type_expansions = (pos, seen)::env.ety_env.type_expansions in
   if List.mem ~equal:(=) (List.map env.ety_env.type_expansions snd) seen then

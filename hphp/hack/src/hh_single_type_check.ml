@@ -962,14 +962,15 @@ let handle_mode
     end;
   | Identify_symbol (line, column) ->
     let path = expect_single_file () in
-    let ast = Ast_provider.get_ast path in
+    let file_input =
+      ServerCommandTypes.FileName (Relative_path.to_absolute path) in
     let (ctx, entry) = ServerIdeContext.update
       ~tcopt
       ~ctx:ServerIdeContext.empty
       ~path
-      ~ast
+      ~file_input
     in
-    let result = ServerIdentifyFunction.go_ctx
+    let result = ServerIdentifyFunction.go_ctx_absolute
       ~ctx
       ~entry
       ~line
@@ -1060,9 +1061,6 @@ let handle_mode
     let filename = expect_single_file () in
     let naming_table = Naming_table.create files_info in
     Naming_table.iter naming_table Typing_deps.update_file;
-    Relative_path.set_path_prefix Relative_path.Root (Path.make "/");
-    Relative_path.set_path_prefix Relative_path.Hhi (Path.make "hhi");
-    Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
     let genv = ServerEnvBuild.default_genv in
     let env = {(ServerEnvBuild.make_env genv.ServerEnv.config) with
       ServerEnv.naming_table;
@@ -1251,6 +1249,8 @@ let main_hack ({files; mode; tcopt; _} as opts) (sienv: SearchUtils.si_env): uni
   Tempfile.with_tempdir (fun hhi_root ->
     Hhi.set_hhi_root_for_unit_test hhi_root;
     Relative_path.set_path_prefix Relative_path.Root (Path.make "/");
+    Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
+    Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
     GlobalParserOptions.set tcopt;
     GlobalNamingOptions.set tcopt;
     match mode with

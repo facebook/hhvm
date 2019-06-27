@@ -120,5 +120,57 @@ let go env (file, line, char) ~basic_only =
   | identities ->
     identities
     |> filter_class_and_constructor
-    |> List.map ~f:(make_hover_info env_and_ty file ~basic_only)
+    |> List.map ~f:(fun (occurrence, def_opt) ->
+      let file = match def_opt with
+        | Some def ->
+          let pos = def.SymbolDefinition.pos in
+          let filename = Pos.filename pos in
+          if filename <> ServerIdeUtils.path
+          then
+            ServerCommandTypes.FileName (Relative_path.to_absolute filename)
+          else
+            file
+        | None ->
+          file
+      in
+      make_hover_info env_and_ty file (occurrence, def_opt) ~basic_only
+    ) |> List.remove_consecutive_duplicates ~equal:(=)
+
+let go_ctx
+    ~(ctx: ServerIdeContext.t)
+    ~(entry: ServerIdeContext.entry)
+    ~(line: int)
+    ~(char: int)
+    ~(basic_only: bool)
+    : HoverService.result =
+  let tast = ServerIdeContext.get_tast entry in
+  let identities =
+    ServerIdentifyFunction.go_ctx
+      ~ctx
+      ~entry
+      ~line
+      ~char in
+  let env_and_ty = ServerInferType.type_at_pos tast line char
+    |> Option.map ~f:(fun (env, ty) -> (env, Tast_expand.expand_ty env ty)) in
+  (* There are legitimate cases where we expect to have no identities returned,
+     so just format the type. *)
+  match identities with
+  | [] ->
+    begin match env_and_ty with
+    | Some (env, ty) ->
+      [{ snippet = Tast_env.print_ty env ty; addendum = []; pos = None }]
+    | None -> []
+    end
+  | identities ->
+    identities
+    |> filter_class_and_constructor
+    |> List.map ~f:(fun (occurrence, def_opt) ->
+      let path = def_opt
+        |> Option.map ~f:(fun def -> def.SymbolDefinition.pos)
+        |> Option.map ~f:Pos.filename
+        |> Option.value ~default:(ServerIdeContext.get_path entry)
+      in
+      let file_input = ServerIdeContext.get_file_input ~ctx ~path in
+      make_hover_info env_and_ty file_input (occurrence, def_opt) ~basic_only
+    )
     |> List.remove_consecutive_duplicates ~equal:(=)

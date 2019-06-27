@@ -6,16 +6,26 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
- module Lsp_autocomplete = struct
-   type request = {
-     filename: string;
-     line: int;
-     column: int;
-     delimit_on_namespaces: bool;
-     is_manually_invoked: bool;
-   }
-   type result = AutocompleteTypes.ide_result
- end
+
+module Hover_param = struct
+  type t = {
+    file_path: Path.t;
+    file_input: ServerCommandTypes.file_input;
+    line: int;
+    char: int;
+  }
+end
+
+module Lsp_autocomplete = struct
+  type request = {
+    filename: string;
+    line: int;
+    column: int;
+    delimit_on_namespaces: bool;
+    is_manually_invoked: bool;
+  }
+  type result = AutocompleteTypes.ide_result
+end
 
 (* GADT for request/response types. See [ServerCommandTypes] for a discussion on
 using GADTs in this way. *)
@@ -24,7 +34,7 @@ type _ t =
   | Shutdown: unit -> unit t
   | File_changed: Path.t -> unit t
   | Hover:
-    (ServerCommandTypes.file_input * int * int) ->
+    Hover_param.t ->
     HoverService.result t
   | Completion:
     Lsp_autocomplete.request ->

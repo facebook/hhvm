@@ -27,6 +27,12 @@ val find_gconst_in_file_nast :
 val get_ast : ?full:bool -> Relative_path.t -> Ast.program
 val get_nast : ?full:bool -> Relative_path.t -> Nast.program
 
+val parse_file_input :
+  ?full:bool ->
+  Relative_path.t ->
+  ServerCommandTypes.file_input ->
+  Full_fidelity_ast.result
+
 val local_changes_push_stack : unit -> unit
 val local_changes_pop_stack : unit -> unit
 val local_changes_commit_batch : Relative_path.Set.t -> unit

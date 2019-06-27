@@ -112,7 +112,7 @@ let go_comments_for_symbol
   match def.SymbolDefinition.docblock with
   | Some db -> Some (clean_comments db)
   | None ->
-    let ffps_opt = ServerSymbolDefinition.get_definition_cst_node file def in
+    let ffps_opt = ServerSymbolDefinition.get_definition_cst_node_from_file_input file def in
     match ffps_opt with
     | None -> None
     | Some ffps ->

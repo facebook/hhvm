@@ -30,34 +30,31 @@ module LocalParserCache = SharedMem.LocalCache (Relative_path.S) (struct
     let description = "ParserLocal"
   end)
 
-let parse_no_cache ~full file_name =
-  let fn = Relative_path.to_absolute file_name in
+let parse_file_input
+    ?(full = false)
+    (file_name: Relative_path.t)
+    (file_input: ServerCommandTypes.file_input)
+    : Full_fidelity_ast.result =
   let popt = GlobalParserOptions.get () in
-  let f contents =
-    let contents = if (FindUtils.file_filter fn) then contents else "" in
-    let source = Full_fidelity_source_text.make file_name contents in
-    match Full_fidelity_parser.parse_mode ~rust:(ParserOptions.rust popt) source with
-    | None
-    | Some FileInfo.Mphp -> []
-    | Some _ ->
-      (Full_fidelity_ast.defensive_program
-        ~quick:(not full)
-        popt
-        file_name
-        contents
-      ).Parser_return.ast
+  let parser_env = Full_fidelity_ast.make_env
+    ~quick_mode:(not full)
+    ~keep_errors:false
+    ~parser_options:popt
+    file_name
   in
-  let ast = Option.value_map
-    ~default:[]
-    ~f
-    (File_provider.get_contents file_name) in
+  let result =
+    let source = ServerCommandTypesUtils.source_tree_of_file_input file_input in
+    Full_fidelity_ast.from_text
+      parser_env
+      source
+  in
   let ast =
     if (Relative_path.prefix file_name = Relative_path.Hhi)
     && ParserOptions.deregister_php_stdlib popt
-    then Ast_utils.deregister_ignored_attributes ast
-    else ast
+    then Ast_utils.deregister_ignored_attributes result.Full_fidelity_ast.ast
+    else result.Full_fidelity_ast.ast
   in
-  ast
+  { result with Full_fidelity_ast.ast }
 
 
 let get_from_local_cache ~full file_name =
@@ -169,7 +166,11 @@ let get_ast ?(full = false) file_name =
       | Some (defs, _) -> defs
     end
   | Provider_config.Local_memory _ ->
-    parse_no_cache ~full file_name
+    let result =
+      parse_file_input ~full file_name
+        (ServerCommandTypes.FileName (Relative_path.to_absolute file_name))
+    in
+    result.Full_fidelity_ast.ast
 
 let get_nast ?(full = false) file_name =
   let ast = get_ast ~full file_name in

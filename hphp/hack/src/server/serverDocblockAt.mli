@@ -9,7 +9,7 @@
 
 (** Returns the documentation comments for the given symbol or expression. *)
 val go_comments_for_symbol :
-  def:Relative_path.t SymbolDefinition.t ->
+  def:'a SymbolDefinition.t ->
   base_class_name: string option ->
   file: ServerCommandTypes.file_input ->
   basic_only: bool ->

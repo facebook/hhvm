@@ -907,10 +907,12 @@ let do_hover_local
     (ide_service: ClientIdeService.t)
     (params: Hover.params)
   : Hover.result Lwt.t =
-  let (file, line, column) = lsp_file_position_to_hack params in
+  let (file_path, line, column) = lsp_file_position_to_hack params in
   let%lwt infos = ClientIdeService.hover
     ide_service
-    (ServerCommandTypes.FileName file, line, column)
+    ~file_input:(ServerCommandTypes.LabelledFileName file_path)
+    ~line
+    ~char:column
   in
   match infos with
   | Ok infos ->

@@ -11,7 +11,7 @@ open Hh_core
 open ServerEnv
 open Utils
 
-type file_info = Typing_check_service.file
+type file_info = Relative_path.t * FileInfo.names
 
 (* Return all the files that we need to typecheck *)
 let make_next_files

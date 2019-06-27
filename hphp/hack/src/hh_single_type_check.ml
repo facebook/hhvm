@@ -1245,12 +1245,8 @@ let main_hack ({files; mode; tcopt; _} as opts) (sienv: SearchUtils.si_env): uni
     (Sys.Signal_handle Typing.debug_print_last_pos);
   EventLogger.init ~exit_on_parent_exit EventLogger.Event_logger_fake 0.0;
 
-  (* For now, we initialize shared memory because many operations write into
-  shared memory as a side-effect, and disabling shared memory will cause those
-  operations to fail. *)
   let (_handle: SharedMem.handle) =
     SharedMem.init ~num_workers:0 GlobalConfig.default_sharedmem_config in
-  Provider_config.set_local_memory_backend ~max_size_in_words:1_000_000;
 
   Tempfile.with_tempdir (fun hhi_root ->
     Hhi.set_hhi_root_for_unit_test hhi_root;

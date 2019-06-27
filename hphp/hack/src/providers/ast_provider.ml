@@ -30,6 +30,36 @@ module LocalParserCache = SharedMem.LocalCache (Relative_path.S) (struct
     let description = "ParserLocal"
   end)
 
+let parse_no_cache ~full file_name =
+  let fn = Relative_path.to_absolute file_name in
+  let popt = GlobalParserOptions.get () in
+  let f contents =
+    let contents = if (FindUtils.file_filter fn) then contents else "" in
+    let source = Full_fidelity_source_text.make file_name contents in
+    match Full_fidelity_parser.parse_mode ~rust:(ParserOptions.rust popt) source with
+    | None
+    | Some FileInfo.Mphp -> []
+    | Some _ ->
+      (Full_fidelity_ast.defensive_program
+        ~quick:(not full)
+        popt
+        file_name
+        contents
+      ).Parser_return.ast
+  in
+  let ast = Option.value_map
+    ~default:[]
+    ~f
+    (File_provider.get_contents file_name) in
+  let ast =
+    if (Relative_path.prefix file_name = Relative_path.Hhi)
+    && ParserOptions.deregister_php_stdlib popt
+    then Ast_utils.deregister_ignored_attributes ast
+    else ast
+  in
+  ast
+
+
 let get_from_local_cache ~full file_name =
   let fn = Relative_path.to_absolute file_name in
   match LocalParserCache.get file_name with
@@ -124,17 +154,22 @@ let get_gconst defs name =
    if the file does not exist
 *)
 let get_ast ?(full = false) file_name =
-  match ParserHeap.get file_name with
-    | None ->
-      let ast = get_from_local_cache ~full file_name in
-      (* Only store decl asts *)
-      if not full then
-      ParserHeap.add file_name (ast, Decl);
-      ast
-    | Some (_, Decl) when full ->
-      let ast = get_from_local_cache ~full file_name in
-      ast
-    | Some (defs, _) -> defs
+  match Provider_config.get_backend () with
+  | Provider_config.Shared_memory ->
+    begin match ParserHeap.get file_name with
+      | None ->
+        let ast = get_from_local_cache ~full file_name in
+        (* Only store decl asts *)
+        if not full then
+        ParserHeap.add file_name (ast, Decl);
+        ast
+      | Some (_, Decl) when full ->
+        let ast = get_from_local_cache ~full file_name in
+        ast
+      | Some (defs, _) -> defs
+    end
+  | Provider_config.Local_memory _ ->
+    parse_no_cache ~full file_name
 
 let get_nast ?(full = false) file_name =
   let ast = get_ast ~full file_name in

@@ -124,12 +124,6 @@
     relative_path))
 
 (library
-  (name string)
-  (wrapped false)
-  (modules string_utils)
-  (libraries str))
-
-(library
   (name stack_utils)
   (wrapped false)
   (modules

@@ -148,14 +148,6 @@
     pos))
 
 (library
-  (name file_content)
-  (wrapped false)
-  (modules
-    file_content)
-  (libraries
-    utils_core))
-
-(library
   (name http_lite)
   (wrapped false)
   (modules

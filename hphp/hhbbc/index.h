@@ -254,6 +254,12 @@ struct Class {
   bool mightCareAboutDynConstructs() const;
 
   /*
+   * Whether this class (or clases derived from it) could have const props.
+   */
+  bool couldHaveConstProp() const;
+  bool derivedCouldHaveConstProp() const;
+
+  /*
    * Returns the Class that is the first common ancestor between 'this' and 'o'.
    * If there is no common ancestor folly::none is returned
    */

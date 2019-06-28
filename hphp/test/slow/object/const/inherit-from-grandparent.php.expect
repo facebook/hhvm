@@ -1,0 +1,54 @@
+-- at constructor entry --
+object(E) (4) {
+  ["ev"]=>
+  vec(1) {
+    int(3)
+  }
+  ["di"]=>
+  int(2)
+  ["ci"]=>
+  int(0)
+  ["cv"]=>
+  vec(1) {
+    int(1)
+  }
+}
+-- after constructor completes --
+object(E) (4) {
+  ["ev"]=>
+  vec(2) {
+    int(3)
+    int(7)
+  }
+  ["di"]=>
+  int(6)
+  ["ci"]=>
+  int(4)
+  ["cv"]=>
+  vec(2) {
+    int(1)
+    int(5)
+  }
+}
+Cannot modify const property ci of class E after construction
+Cannot modify const property cv of class E after construction
+-- at the end --
+object(E) (5) {
+  ["ev"]=>
+  vec(3) {
+    int(3)
+    int(7)
+    int(9)
+  }
+  ["di"]=>
+  int(8)
+  ["ci"]=>
+  int(4)
+  ["cv"]=>
+  vec(2) {
+    int(1)
+    int(5)
+  }
+  ["lol"]=>
+  string(4) "whut"
+}

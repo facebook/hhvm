@@ -4441,9 +4441,27 @@ void in(ISS& env, const bc::FCallCtor& op) {
 }
 
 void in(ISS& env, const bc::LockObj& op) {
-  auto const t = popC(env);
-  if (t.subtypeOf(BObj)) nothrow(env);
-  push(env, t);
+  auto const t = topC(env);
+  auto bail = [&]() {
+    discard(env, 1);
+    return push(env, t);
+  };
+  if (!t.subtypeOf(BObj)) return bail();
+  if (!is_specialized_obj(t)) {
+    nothrow(env);
+    return bail();
+  }
+  auto const dobj = dobj_of(t);
+  switch (dobj.type) {
+    case DObj::Exact:
+      if (!dobj.cls.couldHaveConstProp()) return reduce(env);
+      break;
+    case DObj::Sub:
+      if (!dobj.cls.derivedCouldHaveConstProp()) return reduce(env);
+      break;
+  }
+  nothrow(env);
+  return bail();
 }
 
 void in(ISS& env, const bc::FCall& op) {

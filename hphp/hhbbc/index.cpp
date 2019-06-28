@@ -560,6 +560,16 @@ struct ClassInfo {
   bool hasBadInitialPropValues{true};
 
   /*
+   * Track if this class has any const props (including inherited ones).
+   */
+  bool hasConstProp{false};
+
+  /*
+   * Track if any derived classes (including this one) have any const props.
+   */
+  bool derivedHasConstProp{false};
+
+  /*
    * Flags about the existence of various magic methods, or whether
    * any derived classes may have those methods.  The non-derived
    * flags imply the derived flags, even if the class is final, so you
@@ -749,6 +759,20 @@ bool Class::mightCareAboutDynConstructs() const {
     );
   }
   return false;
+}
+
+bool Class::couldHaveConstProp() const {
+  return val.match(
+    [] (SString) { return true; },
+    [] (ClassInfo* cinfo) { return cinfo->hasConstProp; }
+  );
+}
+
+bool Class::derivedCouldHaveConstProp() const {
+  return val.match(
+    [] (SString) { return true; },
+    [] (ClassInfo* cinfo) { return cinfo->derivedHasConstProp; }
+  );
 }
 
 folly::Optional<Class> Class::commonAncestor(const Class& o) const {
@@ -2192,14 +2216,17 @@ void rename_closure(NamingEnv& env, php::Class* cls) {
 void preresolve(NamingEnv& env, const php::Class* cls);
 
 void flatten_traits(NamingEnv& env, ClassInfo* cinfo) {
+  bool hasConstProp = false;
   for (auto t : cinfo->usedTraits) {
     if (t->usedTraits.size() && !(t->cls->attrs & AttrNoExpandTrait)) {
       ITRACE(5, "Not flattening {} because of {}\n",
              cinfo->cls->name, t->cls->name);
       return;
     }
+    if (t->cls->attrs & AttrHasConstProps) hasConstProp = true;
   }
   auto const cls = const_cast<php::Class*>(cinfo->cls);
+  if (hasConstProp) cls->attrs |= AttrHasConstProps;
   std::vector<MethTabEntryPair*> methodsToAdd;
   for (auto& ent : cinfo->methods) {
     if (!ent.second.topLevel || ent.second.func->cls == cinfo->cls) {
@@ -2965,6 +2992,28 @@ void find_mocked_classes(IndexData& index) {
   }
 }
 
+void mark_const_props(IndexData& index) {
+  for (auto& cinfo : index.allClassInfos) {
+    auto const hasConstProp = [&]() {
+      if (cinfo->cls->attrs & AttrHasConstProps) return true;
+      if (cinfo->parent && cinfo->parent->hasConstProp) return true;
+      if (!(cinfo->cls->attrs & AttrNoExpandTrait)) {
+        for (auto t : cinfo->usedTraits) {
+          if (t->cls->attrs & AttrHasConstProps) return true;
+        }
+      }
+      return false;
+    }();
+    if (hasConstProp) {
+      cinfo->hasConstProp = true;
+      for (auto c = cinfo.get(); c; c = c->parent) {
+        if (c->derivedHasConstProp) break;
+        c->derivedHasConstProp = true;
+      }
+    }
+  }
+}
+
 void mark_no_override_classes(IndexData& index) {
   for (auto& cinfo : index.allClassInfos) {
     // We cleared all the NoOverride flags while building the
@@ -3622,6 +3671,7 @@ Index::Index(php::Program* program,
   mark_no_override_methods(*m_data);    // uses AttrUnique
   find_magic_methods(*m_data);          // uses the subclass lists
   find_mocked_classes(*m_data);
+  mark_const_props(*m_data);
   auto const logging = Trace::moduleEnabledRelease(Trace::hhbbc_time, 1);
   m_data->compute_iface_vtables = std::thread([&] {
       HphpSessionAndThread _{Treadmill::SessionKind::HHBBC};

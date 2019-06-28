@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/string-holder.h"
+#include "hphp/util/string-holder.h"
 
 #include "hphp/util/alloc.h"
 

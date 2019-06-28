@@ -16,10 +16,6 @@ abstract final class LangEngineAssignexecutionorder002 {
 list($a,,$b) = $f;
 echo "A=$a B=$b\n";
 
-
-// Warning: Cannot use a scalar value as an array in %s on line %d
-$c[$c=1] = 1;
-
 // i++ evaluated first, so $d[0] is 10
 $d = array(0,10);
 $i = 0;

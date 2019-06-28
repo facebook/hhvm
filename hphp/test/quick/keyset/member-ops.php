@@ -37,14 +37,12 @@ function base_unset($ks, $k) {
 
 function base($ks) {
   echo "======= base_elem_warn =============================\n";
-  base_elem_warn($ks, 1);
   base_elem_warn($ks, 3);
   base_elem_warn($ks, '1');
   base_elem_warn($ks, 'foo');
   base_elem_warn($ks, true);
 
   echo "======= base_elem ==================================\n";
-  base_elem($ks, 1);
   base_elem($ks, 3);
   base_elem($ks, '1');
   base_elem($ks, 'foo');
@@ -135,14 +133,12 @@ function dim_unset($a, $k) {
 
 function dim($a) {
   echo "======= dim_elem_warn ==============================\n";
-  dim_elem_warn($a, 1);
   dim_elem_warn($a, 3);
   dim_elem_warn($a, '1');
   dim_elem_warn($a, 'foo');
   dim_elem_warn($a, true);
 
   echo "======= dim_elem ===================================\n";
-  dim_elem($a, 1);
   dim_elem($a, 3);
   dim_elem($a, '1');
   dim_elem($a, 'foo');

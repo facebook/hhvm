@@ -16,11 +16,6 @@ list($a, $b) = $a;
 var_dump($a);
 var_dump($b);
 
-$b = [1, 2];
-list($a, $b) = $b;
-var_dump($a);
-var_dump($b);
-
 $e = array(0,0);
 $f = 0;
 $g1 = array(10,11);

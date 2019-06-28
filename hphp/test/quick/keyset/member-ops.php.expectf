@@ -1,15 +1,9 @@
 ======= base_elem_warn =============================
-
-Warning: Cannot use a scalar value as an array in %s on line %d
-NULL
 Exception: "Out of bounds keyset access: invalid index 3"
 string(1) "1"
 Exception: "Out of bounds keyset access: invalid index "foo""
 Exception: "Invalid keyset key: expected a key of type int or string, bool given"
 ======= base_elem ==================================
-
-Warning: Cannot use a scalar value as an array in %s on line %d
-string(7) "MISSING"
 string(7) "MISSING"
 string(1) "1"
 string(7) "MISSING"
@@ -93,17 +87,11 @@ keyset(3) {
   string(1) "1"
 }
 ======= dim_elem_warn ==============================
-
-Warning: Cannot use a scalar value as an array in %s on line %d
-NULL
 Exception: "Out of bounds keyset access: invalid index 3"
 string(1) "1"
 Exception: "Out of bounds keyset access: invalid index "foo""
 Exception: "Invalid keyset key: expected a key of type int or string, bool given"
 ======= dim_elem ===================================
-
-Warning: Cannot use a scalar value as an array in %s on line %d
-string(7) "MISSING"
 string(7) "MISSING"
 string(1) "1"
 string(7) "MISSING"

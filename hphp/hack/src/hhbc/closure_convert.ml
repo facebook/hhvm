@@ -1079,6 +1079,11 @@ and convert_lambda env st p fd use_vars_opt =
             else env_with_lambda env fd in
   let st, block, function_state = convert_function_like_body env st fd.f_body in
   let st = { st with closure_cnt_per_fun = st.closure_cnt_per_fun + 1 } in
+  let st = List.filter_map ~f:(fun p -> p.param_hint) fd.f_params
+    |> convert_hints env st |> fst in
+  let st = match fd.f_ret with
+    | None -> st
+    | Some h -> fst @@ convert_hint env st h in
   let current_generics = ULS.items st.captured_generics in
   let fresh_lid name: Aast.lid = (Pos.none, Local_id.make_scoped name) in
   let lid_name (lid: Aast.lid): string = Local_id.get_name (snd lid) in

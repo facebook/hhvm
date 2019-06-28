@@ -27,6 +27,16 @@ module Lsp_autocomplete = struct
   type result = AutocompleteTypes.ide_result
 end
 
+module Go_to_definition = struct
+  type request = {
+    file_path: Path.t;
+    file_input: ServerCommandTypes.file_input;
+    line: int;
+    char: int;
+  }
+  type result = ServerCommandTypes.Go_to_definition.result
+end
+
 (* GADT for request/response types. See [ServerCommandTypes] for a discussion on
 using GADTs in this way. *)
 type _ t =
@@ -39,3 +49,6 @@ type _ t =
   | Completion:
     Lsp_autocomplete.request ->
     Lsp_autocomplete.result t
+  | Go_to_definition:
+    Go_to_definition.request ->
+    Go_to_definition.result t

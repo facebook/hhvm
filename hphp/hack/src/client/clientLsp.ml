@@ -960,6 +960,28 @@ let do_definition
       ~default_path:filename
   end)
 
+let do_definition_local
+    (ide_service: ClientIdeService.t)
+    (params: Definition.params)
+    : Definition.result Lwt.t =
+  let (file, line, char) = lsp_file_position_to_hack params in
+  let%lwt results = ClientIdeService.go_to_definition
+    ide_service
+    ~file_input:(ServerCommandTypes.LabelledFileName file)
+    ~line
+    ~char
+  in
+  match results with
+  | Ok results ->
+    let results = List.map results ~f:begin fun (_occurrence, definition) ->
+      hack_symbol_definition_to_lsp_identifier_location
+        definition
+        ~default_path:file
+    end in
+    Lwt.return results
+  | Error error_message ->
+    failwith (Printf.sprintf "Local go-to-definition failed: %s" error_message)
+
 let make_ide_completion_response
   (result:AutocompleteTypes.ide_result)
   (filename:string)
@@ -2517,6 +2539,16 @@ let handle_event
     let%lwt () = cancel_if_stale client c short_timeout in
     let%lwt result = parse_definition c.params
       |> do_definition conn ref_unblocked_time editor_open_files
+    in
+   result |> print_definition |> Jsonrpc.respond to_stdout c;
+   Lwt.return_unit
+
+  | _, Client_message c
+    when env.use_serverless_ide
+      && c.method_ = "textDocument/definition" ->
+    let%lwt () = cancel_if_stale client c short_timeout in
+    let%lwt result = parse_definition c.params
+      |> do_definition_local ide_service
     in
    result |> print_definition |> Jsonrpc.respond to_stdout c;
    Lwt.return_unit

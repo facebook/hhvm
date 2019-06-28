@@ -28,3 +28,5 @@ class SomeOtherOtherClass {
 class SomeOtherOtherOtherClass {
   use SomeTrait;
 }
+
+<<__EntryPoint>> function main(): void {}

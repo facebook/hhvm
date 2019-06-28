@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_GZIP_H_
 #define incl_HPHP_GZIP_H_
 
+#include "hphp/util/string-holder.h"
 #include <zlib.h>
 
 // encoding_mode
@@ -43,7 +44,7 @@ struct GzipCompressor {
   /**
    * Compress one chunk a time.
    */
-  char *compress(const char *data, int &len, bool trailer);
+  StringHolder compress(const char *data, int &len, bool trailer);
 
  public:
   static bool s_useLocalArena;

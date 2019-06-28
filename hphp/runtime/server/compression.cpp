@@ -211,15 +211,13 @@ StringHolder GzipResponseCompressor::compressResponse(
     // userland. Return null but don't log an error.
     return StringHolder{};
   }
-  const char *compressedData = compressor->compress(data, len, last);
+  auto compressedData = compressor->compress(data, len, last);
   if (!compressedData) {
     m_compressor.reset();
     Logger::Error("Unable to compress response: len=%d", len);
     return StringHolder{};
   }
-  auto const freeType = GzipCompressor::s_useLocalArena ? FreeType::LocalFree
-                                                        : FreeType::Free;
-  return StringHolder(compressedData, len, freeType);
+  return compressedData;
 }
 
 /***************

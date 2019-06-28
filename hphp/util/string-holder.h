@@ -18,6 +18,7 @@
 #define incl_HPHP_STRING_HOLDER_H_
 
 #include <stdint.h>
+#include <cstddef>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,7 +39,8 @@ enum struct FreeType {
  * destruction.
  */
 struct StringHolder {
-  StringHolder()
+  /* implicit */
+  StringHolder(std::nullptr_t = nullptr)
     : m_data(nullptr), m_len(0), m_type(FreeType::NoFree) {}
   StringHolder(const char* data, uint32_t len, FreeType t)
     : m_data(data), m_len(len), m_type(t) {}
@@ -46,14 +48,18 @@ struct StringHolder {
     : m_data(o.m_data), m_len(o.m_len), m_type(o.m_type) {
     o.m_data = nullptr;
   }
+  StringHolder(const StringHolder&) = delete;
 
   ~StringHolder();
 
   StringHolder& operator=(StringHolder&&) noexcept;
+  StringHolder& operator=(const StringHolder&) = delete;
 
   uint32_t size() const { return m_len; }
 
   const char* data() const { return m_data; }
+
+  operator bool() const { return data() != nullptr; }
 
 private:
   const char* m_data;

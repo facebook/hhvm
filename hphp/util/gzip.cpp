@@ -231,7 +231,8 @@ GzipCompressor::~GzipCompressor() {
   }
 }
 
-char *GzipCompressor::compress(const char *data, int &len, bool trailer) {
+StringHolder
+GzipCompressor::compress(const char *data, int &len, bool trailer) {
   // middle chunks should never be zero size
   assert(len || trailer);
 
@@ -292,7 +293,8 @@ char *GzipCompressor::compress(const char *data, int &len, bool trailer) {
     } else {
       s2[len] = '\0';
     }
-    return s2;
+    return StringHolder(s2, len, s_useLocalArena ? FreeType::LocalFree
+                                                 : FreeType::Free);
   }
   if (s_useLocalArena) {
     local_free(s2);

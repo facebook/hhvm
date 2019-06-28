@@ -80,32 +80,34 @@ let rec intersect env ~r ty1 ty2 =
   if Utils.is_sub_type_for_union env ty2 non_ty1 then env, MkType.nothing r else
   let (env, ty1) = decompose_atomic env ty1 in
   let (env, ty2) = decompose_atomic env ty2 in
-  match ty1, ty2 with
-  | (_, Tintersection tyl1), (_, Tintersection tyl2) ->
-    intersect_lists env r tyl1 tyl2
-  | (_, Tintersection tyl), ty | ty, (_, Tintersection tyl) ->
-    intersect_lists env r [ty] tyl
-  | (r1, Tunion tyl1), (r2, Tunion tyl2) ->
-    (* Factorize common types, for example
-       (A | B) & (A | C) = A | (B & C)
-    and
-       (A | B | C1 | D1) & (A | B | C2 | D2) = A | B | ((C1 | D1) & (C2 | D2))
-    *)
-    let tys1 = TySet.of_list tyl1 in
-    let tys2 = TySet.of_list tyl2 in
-    let common_tys = TySet.inter tys1 tys2 in
-    let tys1' = TySet.diff tys1 common_tys in
-    let tys2' = TySet.diff tys2 common_tys in
-    let tyl1' = TySet.elements tys1' in
-    let tyl2' = TySet.elements tys2' in
-    let common_tyl = TySet.elements common_tys in
-    let env, not_common_tyl = intersect_unions env r (r1, tyl1') (r2, tyl2') in
-    env, MkType.union r (common_tyl @ not_common_tyl)
-  | (r_union, Tunion tyl), ty | ty, (r_union, Tunion tyl) ->
-    let env, inter_tyl = intersect_ty_union env r ty (r_union, tyl) in
-    env, MkType.union r inter_tyl
-  | _ ->
-    env, (r, Tintersection [ty1; ty2])
+  let env, inter_ty = match ty1, ty2 with
+    | (_, Tintersection tyl1), (_, Tintersection tyl2) ->
+      intersect_lists env r tyl1 tyl2
+    | (_, Tintersection tyl), ty | ty, (_, Tintersection tyl) ->
+      intersect_lists env r [ty] tyl
+    | (r1, Tunion tyl1), (r2, Tunion tyl2) ->
+      (* Factorize common types, for example
+         (A | B) & (A | C) = A | (B & C)
+      and
+         (A | B | C1 | D1) & (A | B | C2 | D2) = A | B | ((C1 | D1) & (C2 | D2))
+      *)
+      let tys1 = TySet.of_list tyl1 in
+      let tys2 = TySet.of_list tyl2 in
+      let common_tys = TySet.inter tys1 tys2 in
+      let tys1' = TySet.diff tys1 common_tys in
+      let tys2' = TySet.diff tys2 common_tys in
+      let tyl1' = TySet.elements tys1' in
+      let tyl2' = TySet.elements tys2' in
+      let common_tyl = TySet.elements common_tys in
+      let env, not_common_tyl = intersect_unions env r (r1, tyl1') (r2, tyl2') in
+      env, MkType.union r (common_tyl @ not_common_tyl)
+    | (r_union, Tunion tyl), ty | ty, (r_union, Tunion tyl) ->
+      let env, inter_tyl = intersect_ty_union env r ty (r_union, tyl) in
+      env, MkType.union r inter_tyl
+    | _ ->
+      env, (r, Tintersection [ty1; ty2]) in
+  Typing_log.log_intersection ~level:2 env r ty1 ty2 ~inter_ty;
+  env, inter_ty
 
 and intersect_lists env r tyl1 tyl2 =
   let rec intersect_lists env tyl1 tyl2 acc_tyl =
@@ -169,3 +171,8 @@ and intersect_ty_union env r ty1 (r_union, tyl2) =
 
 let intersect_list env r tyl =
   List.fold_left_env env tyl ~init:(MkType.mixed r) ~f:(intersect ~r)
+
+let intersect env ~r ty1 ty2 =
+  let env, inter_ty = intersect env ~r ty1 ty2 in
+  Typing_log.log_intersection ~level:1 env r ty1 ty2 ~inter_ty;
+  env, inter_ty

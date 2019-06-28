@@ -511,16 +511,6 @@ and class_decl c =
     dc_decl_errors = None;
     dc_condition_types = condition_types;
   } in
-  if Ast_defs.Cnormal = c.sc_kind then
-    begin
-      SMap.iter (
-        method_check_trait_overrides ~is_static:false c
-      ) m;
-      SMap.iter (
-        method_check_trait_overrides ~is_static:true c
-      ) sm;
-    end
-  else ();
   SMap.iter begin fun x _ ->
     Typing_deps.add_idep class_dep (Dep.Class x)
   end impl;
@@ -739,7 +729,7 @@ and typeconst_fold c ((typeconsts, consts) as acc) stc =
     let typeconsts = SMap.add (snd stc.stc_name) tc typeconsts in
     typeconsts, consts
 
-and method_check_override c m acc  =
+and method_check_override c m acc =
   let pos, id = m.sm_name in
   let _, class_id = c.sc_name in
   let override = m.sm_override in
@@ -831,49 +821,6 @@ and method_decl_acc ~is_static c (acc, condition_types) m  =
   add_meth (elt.elt_origin, id) ft;
   let acc = SMap.add id elt acc in
   acc, condition_types
-
-and method_check_trait_overrides ~is_static c id meth =
-  if meth.elt_override then begin
-    let pos = method_pos ~is_static meth.elt_origin id in
-    Errors.override_per_trait c.sc_name id pos
-  end
-
-(* For the most part the declaration phase does not care about the position of
- * methods. There are a few places that do mainly for error reporting. There
- * are cases when the method has not been added to the Decl_heap yet, in which
- * case we fallback to retrieving the position from the parsing AST.
- *)
-and method_pos ~is_static class_id meth  =
-  let get_meth = if is_static then
-      Decl_heap.StaticMethods.get
-    else
-    Decl_heap.Methods.get in
-  match get_meth (class_id, meth) with
-  | Some { ft_pos; _ } -> ft_pos
-  | None ->
-    try
-      match Naming_table.Types.get_pos class_id with
-      | Some (pos, Naming_table.TClass) ->
-        let fn = FileInfo.get_pos_filename pos in
-        begin match Ast_provider.find_class_in_file_nast fn class_id with
-          | None -> raise Caml.Not_found
-          | Some cls ->
-
-
-
-
-
-            let { c_methods; _ } = cls in
-            let m_opt = List.find c_methods ~f:(fun m -> (snd m.m_name) = meth && m.m_static) in
-            begin match m_opt with
-            | Some { m_name = (pos, _); _ } -> pos
-            | _ -> raise Caml.Not_found
-            end
-        end
-      | _ -> raise Caml.Not_found
-    with
-    | Caml.Not_found -> Pos.none
-
 
 (*****************************************************************************)
 (* Dealing with typedefs *)

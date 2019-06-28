@@ -6284,6 +6284,30 @@ and class_def_ env c tc =
       | Ast.Cenum -> SN.AttributeKinds.enum
       | _ -> SN.AttributeKinds.cls in
     Typing_attributes.check_def env new_object kind c.c_user_attributes in
+    if c.c_kind = Ast.Cnormal && not (shallow_decl_enabled ()) then begin
+      (* This check is only for eager mode. The same check is performed
+       * for shallow mode in Typing_inheritance *)
+      let method_pos ~is_static class_id meth_id =
+        let get_meth = if is_static then
+          Decl_heap.StaticMethods.get
+        else
+          Decl_heap.Methods.get in
+        match get_meth (class_id, meth_id) with
+        | Some { ft_pos; _ } -> ft_pos
+        | None -> Pos.none
+      in
+      let check_override ~is_static (id, ce) =
+        (* `ce_override` is set in Decl when we determine that an
+         * override_per_trait error needs emit. This emission is deferred
+         * until Typing to ensure that this method has been added to
+         * Decl_heap *)
+        if ce.ce_override then
+          let pos = method_pos ~is_static ce.ce_origin id in
+          Errors.override_per_trait c.c_name id pos
+      in
+      Sequence.iter (Cls.methods tc) (check_override ~is_static:false);
+      Sequence.iter (Cls.smethods tc) (check_override ~is_static:true);
+    end;
   let env =
     { env with Env.inside_ppl_class =
         Attributes.mem SN.UserAttributes.uaProbabilisticModel c.c_user_attributes

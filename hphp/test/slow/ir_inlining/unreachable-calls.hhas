@@ -41,8 +41,7 @@
   CGetL $x
   CGetL $x
   CGetL $x
-  FPushObjMethodD 5 "foobaz" NullThrows
-  FCall <> 5 1 "" - "Cls1" "foobaz"
+  FCallObjMethodD <> 5 1 "" - "Cls1" NullThrows "foobaz"
   Jmp end
 
 cls2:
@@ -55,8 +54,7 @@ cls2:
   CGetL $x
   CGetL $x
   CGetL $x
-  FPushObjMethodD 5 "foobaz" NullThrows
-  FCall <> 5 1 "" - "Cls2" "foobaz"
+  FCallObjMethodD <> 5 1 "" - "Cls2" NullThrows "foobaz"
   Jmp end
 
 end:

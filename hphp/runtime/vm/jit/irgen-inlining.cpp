@@ -252,7 +252,7 @@ void beginInlining(IRGS& env,
         }
       } else {
         if (target->attrs() & AttrRequiresThis ||
-            isFPushObjMethod(writeArOpc) ||
+            isFCallObjMethod(writeArOpc) ||
             ty <= TObj) {
           ty &= thisTypeFromFunc(target);
         }

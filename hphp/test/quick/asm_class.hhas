@@ -68,8 +68,7 @@
     This
     NullUninit
     NullUninit
-    FPushObjMethodD 0 "prot_method" NullThrows
-    FCall <> 0 1 "" - "" ""
+    FCallObjMethodD <> 0 1 "" - "" NullThrows "prot_method"
     PopC
 
     Null
@@ -154,15 +153,13 @@
   CGetL $obj
   NullUninit
   NullUninit
-  FPushObjMethodD 0 "print_funk" NullThrows
-  FCall <> 0 1 "" - "" ""
+  FCallObjMethodD <> 0 1 "" - "" NullThrows "print_funk"
   PopC
 
   CGetL $obj
   NullUninit
   NullUninit
-  FPushObjMethodD 0 "print_defaulted" NullThrows
-  FCall <> 0 1 "" - "" ""
+  FCallObjMethodD <> 0 1 "" - "" NullThrows "print_defaulted"
   PopC
 
   True
@@ -206,29 +203,25 @@
   CGetL $derived
   NullUninit
   NullUninit
-  FPushObjMethodD 0 "some_junk" NullThrows
-  FCall <> 0 1 "" - "" ""
+  FCallObjMethodD <> 0 1 "" - "" NullThrows "some_junk"
   PopC
 
   CGetL $base
   NullUninit
   NullUninit
-  FPushObjMethodD 0 "overriden" NullThrows
-  FCall <> 0 1 "" - "" ""
+  FCallObjMethodD <> 0 1 "" - "" NullThrows "overriden"
   PopC
 
   CGetL $derived
   NullUninit
   NullUninit
-  FPushObjMethodD 0 "overriden" NullThrows
-  FCall <> 0 1 "" - "" ""
+  FCallObjMethodD <> 0 1 "" - "" NullThrows "overriden"
   PopC
 
   CGetL $derived
   NullUninit
   NullUninit
-  FPushObjMethodD 0 "abs_method" NullThrows
-  FCall <> 0 1 "" - "" ""
+  FCallObjMethodD <> 0 1 "" - "" NullThrows "abs_method"
   PopC
 
   NullUninit

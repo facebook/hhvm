@@ -167,8 +167,7 @@ resume:  .try {
            PushL $ex
            NullUninit
            NullUninit
-           FPushObjMethodD 0 "getMessage" NullThrows
-           FCall <> 0 1 "" - "" ""
+           FCallObjMethodD <> 0 1 "" - "" NullThrows "getMessage"
            Concat
            String "\n"
            Concat

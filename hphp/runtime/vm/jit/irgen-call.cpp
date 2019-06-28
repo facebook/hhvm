@@ -265,12 +265,12 @@ void callKnown(IRGS& env, const Func* callee, const FCallArgs& fca) {
   return callRegular(env, callee, fca, false /* unlikely */);
 }
 
-void callUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
-                 bool unlikely) {
+void callUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca, bool unlikely,
+                 bool noAsyncEagerReturn) {
   assertx(!callee->hasConstVal() || env.formingRegion);
   if (fca.hasUnpack()) return callUnpack(env, nullptr, fca, unlikely);
 
-  if (fca.asyncEagerOffset == kInvalidOffset) {
+  if (noAsyncEagerReturn || fca.asyncEagerOffset == kInvalidOffset) {
     return callRegular(env, nullptr, fca, unlikely);
   }
 
@@ -447,7 +447,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     // FCall to specialize using this information, we may infer narrower type
     // for the return value, erroneously preventing the region from breaking
     // on unknown type.
-    callUnknown(env, cns(env, callee), fca, false);
+    callUnknown(env, cns(env, callee), fca, false, false);
   }
 }
 
@@ -469,7 +469,7 @@ void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  callUnknown(env, callee, fca, unlikely);
+  callUnknown(env, callee, fca, unlikely, invName != nullptr /* no AER */);
 }
 
 void prepareAndCallProfiled(IRGS& env, SSATmp* callee, const FCallArgs& fca,
@@ -491,18 +491,22 @@ void prepareAndCallProfiled(IRGS& env, SSATmp* callee, const FCallArgs& fca,
 
 //////////////////////////////////////////////////////////////////////
 
-// Pushing for object method when we don't know the Func* statically.
+// Calling object method when we don't know the Func* statically.
 template<class TProfile>
-void fpushObjMethodUnknown(
+void fcallObjMethodUnknown(
   IRGS& env,
+  const FCallArgs& fca,
   SSATmp* obj,
   SSATmp* methodName,
-  uint32_t numParams,
   bool dynamic,
   SSATmp* ts,
-  TProfile profileMethod
+  TProfile profileMethod,
+  bool noCallProfiling
 ) {
   implIncStat(env, Stats::ObjMethod_cached);
+
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
 
   auto const magicCallBlock = defBlock(env, Block::Hint::Unlikely);
   auto const doneBlock = defBlock(env, Block::Hint::Likely);
@@ -543,17 +547,21 @@ void fpushObjMethodUnknown(
   }
 
   // prepare to do a regular (non-magic) call
-  prepareToCallUnknown(env, funcWoM, obj, numParams, nullptr, dynamic, ts);
   profileMethod(funcWoM);
+  if (noCallProfiling) {
+    prepareAndCallUnknown(env, funcWoM, fca, obj, nullptr, dynamic, ts, true);
+  } else {
+    prepareAndCallProfiled(env, funcWoM, fca, obj, dynamic, ts);
+  }
   gen(env, Jmp, doneBlock);
 
-  // prepare to do a magic call
+  // prepare to do a magic call (no profiling, as inlining is not supported)
   env.irb->appendBlock(magicCallBlock);
   auto const funcM = gen(env, AssertType, TFuncM, funcMM);
   auto const funcWM = gen(env, LdFuncMFunc, funcM);
-  prepareToCallUnknown(env, funcWM, obj, numParams, methodName, dynamic, ts);
   profileMethod(funcWM);
-  gen(env, Jmp, doneBlock);
+  prepareAndCallUnknown(env, funcWM, fca, obj, methodName, dynamic, ts, true);
+  assertx(env.irb->curBlock()->back().isTerminal());
 
   // done
   env.irb->appendBlock(doneBlock);
@@ -599,7 +607,7 @@ SSATmp* lookupObjMethodNonExactFunc(IRGS& env, SSATmp* obj,
   return func;
 }
 
-const StaticString methProfileKey{ "MethProfile-FPushObjMethod" };
+const StaticString methProfileKey{ "MethProfile-FCallObjMethod" };
 
 inline SSATmp* ldCtxForClsMethod(IRGS& env,
                                  const Func* callee,
@@ -673,19 +681,19 @@ inline SSATmp* ldCtxForClsMethod(IRGS& env,
 }
 
 template<class Fn>
-void optimizeProfiledPushObjMethod(IRGS& env,
+void optimizeProfiledCallObjMethod(IRGS& env,
+                                   const FCallArgs& fca,
                                    SSATmp* objOrCls,
                                    bool knownIfaceFunc,
                                    const StringData* methodName,
-                                   uint32_t numParams,
                                    bool dynamic,
-                                   Fn emitFPush) {
+                                   Fn emitFCall) {
   always_assert(objOrCls->type().subtypeOfAny(TObj, TCls));
   auto const isStaticCall = objOrCls->type() <= TCls;
   auto profile = TargetProfile<MethProfile>(env.context, env.irb->curMarker(),
                                             methProfileKey.get());
   if (!profile.optimizing()) {
-    emitFPush(&profile);
+    emitFCall(&profile);
     return;
   }
 
@@ -707,7 +715,11 @@ void optimizeProfiledPushObjMethod(IRGS& env,
     hint(env, Block::Hint::Unlikely);
     IRUnit::Hinter h(env.irb->unit(), Block::Hint::Unlikely);
 
-    emitFPush();
+    // Current marker's SP points to the wrong place after the hot path.
+    updateMarker(env);
+    env.irb->exceptionStackBoundary();
+
+    emitFCall(nullptr, true /* no call profiling */);
     gen(env, Jmp, makeExit(env, nextBcOff(env)));
   };
 
@@ -726,9 +738,9 @@ void optimizeProfiledPushObjMethod(IRGS& env,
           auto const refined = gen(env, CheckType, ty, sideExit, objOrCls);
           env.irb->constrainValue(refined, GuardConstraint(uniqueClass));
           auto const ctx = getCtx(uniqueMeth, refined, uniqueClass);
-          prepareToCallKnown(env, uniqueMeth, ctx, numParams,
-                             isMagic ? methodName : nullptr,
-                             dynamic, nullptr);
+          prepareAndCallKnown(env, uniqueMeth, fca, ctx,
+                              isMagic ? methodName : nullptr,
+                              dynamic, nullptr);
         },
         fallback
       );
@@ -736,7 +748,7 @@ void optimizeProfiledPushObjMethod(IRGS& env,
     }
 
     if (isMagic) {
-      emitFPush();
+      emitFCall();
       return;
     }
 
@@ -759,8 +771,8 @@ void optimizeProfiledPushObjMethod(IRGS& env,
         auto const same = gen(env, EqFunc, meth, cns(env, uniqueMeth));
         gen(env, JmpZero, sideExit, same);
         auto const ctx = getCtx(uniqueMeth, objOrCls, nullptr);
-        prepareToCallKnown(env, uniqueMeth, ctx, numParams, nullptr, dynamic,
-                           nullptr);
+        prepareAndCallKnown(env, uniqueMeth, fca, ctx, nullptr, dynamic,
+                            nullptr);
       },
       fallback
     );
@@ -769,7 +781,7 @@ void optimizeProfiledPushObjMethod(IRGS& env,
 
   if (auto const baseMeth = data.baseMeth()) {
     if (!baseMeth->name()->isame(methodName)) {
-      emitFPush();
+      emitFCall();
       return;
     }
 
@@ -786,8 +798,7 @@ void optimizeProfiledPushObjMethod(IRGS& env,
         auto const negSlot = cns(env, -(baseMeth->methodSlot() + 1));
         auto const meth = gen(env, LdClsMethod, cls, negSlot);
         auto const ctx = getCtx(baseMeth, objOrCls, nullptr);
-        prepareToCallUnknown(env, meth, ctx, numParams, nullptr, dynamic,
-                             nullptr);
+        prepareAndCallProfiled(env, meth, fca, ctx, dynamic, nullptr);
       },
       fallback
     );
@@ -797,13 +808,13 @@ void optimizeProfiledPushObjMethod(IRGS& env,
   // If we know the object implements a known interface that defines the called
   // method, the other cases below are not worth the extra checks they insert.
   if (knownIfaceFunc) {
-    emitFPush();
+    emitFCall();
     return;
   }
 
   if (auto const intfMeth = data.interfaceMeth()) {
     if (!intfMeth->name()->isame(methodName)) {
-      emitFPush();
+      emitFCall();
       return;
     }
 
@@ -821,23 +832,19 @@ void optimizeProfiledPushObjMethod(IRGS& env,
         auto const imData = IfaceMethodData{vtableSlot, intfMeth->methodSlot()};
         auto const meth = gen(env, LdIfaceMethod, imData, cls);
         auto const ctx = getCtx(intfMeth, objOrCls, nullptr);
-        prepareToCallUnknown(env, meth, ctx, numParams, nullptr, dynamic,
-                             nullptr);
+        prepareAndCallProfiled(env, meth, fca, ctx, dynamic, nullptr);
       },
       fallback
     );
     return;
   }
 
-  emitFPush();
+  emitFCall();
 }
 
-void fpushObjMethod(IRGS& env,
-                    SSATmp* obj,
-                    SSATmp* methodName,
-                    uint32_t numArgs,
-                    bool dynamic,
-                    SSATmp* tsList) {
+void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
+                       const StringData* clsHint, SSATmp* methodName,
+                       bool dynamic, SSATmp* tsList) {
   assertx(obj->isA(TObj));
   assertx(methodName->isA(TStr));
 
@@ -850,6 +857,16 @@ void fpushObjMethod(IRGS& env,
     };
 
     if (!methodName->hasConstVal()) return notFound;
+
+    if (!clsHint->empty()) {
+      auto const cls = Unit::lookupUniqueClassInContext(clsHint, curClass(env));
+      if (cls) {
+        assertx(!isInterface(cls));
+        obj = gen(env, AssertType, Type::SubObj(cls), obj);
+        return lookupImmutableObjMethod(cls, methodName->strVal(), curFunc(env),
+                                        true);
+      }
+    }
 
     if (auto cls = obj->type().clsSpec().cls()) {
       if (!env.irb->constrainValue(obj, GuardConstraint(cls).setWeak())) {
@@ -872,17 +889,16 @@ void fpushObjMethod(IRGS& env,
   switch (lookup.type) {
     case ImmutableObjMethodLookup::Type::MagicFunc:
       lookupObjMethodExactFunc(env, obj, lookup.func);
-      prepareToCallKnown(env, lookup.func, obj, numArgs, methodName->strVal(),
-                         dynamic, tsList);
+      prepareAndCallKnown(env, lookup.func, fca, obj, methodName->strVal(),
+                          dynamic, tsList);
       return;
     case ImmutableObjMethodLookup::Type::Func:
       lookupObjMethodExactFunc(env, obj, lookup.func);
-      prepareToCallKnown(env, lookup.func, obj, numArgs, nullptr, dynamic,
-                         tsList);
+      prepareAndCallKnown(env, lookup.func, fca, obj, nullptr, dynamic, tsList);
       return;
     case ImmutableObjMethodLookup::Type::Class: {
       auto const func = lookupObjMethodNonExactFunc(env, obj, lookup.func);
-      prepareToCallUnknown(env, func, obj, numArgs, nullptr, dynamic, tsList);
+      prepareAndCallProfiled(env, func, fca, obj, dynamic, tsList);
       return;
     }
     case ImmutableObjMethodLookup::Type::NotFound:
@@ -892,7 +908,8 @@ void fpushObjMethod(IRGS& env,
       break;
   }
 
-  auto const emitFPush = [&] (TargetProfile<MethProfile>* profile = nullptr) {
+  auto const emitFCall = [&] (TargetProfile<MethProfile>* profile = nullptr,
+                              bool noCallProfiling = false) {
     auto const profileMethod = [&] (SSATmp* callee) {
       if (!profile || !profile->profiling()) return;
       auto const cls = gen(env, LdObjClass, obj);
@@ -900,27 +917,32 @@ void fpushObjMethod(IRGS& env,
       gen(env, ProfileMethod, pctData, cls, callee);
     };
 
+
     if (knownIfaceFunc == nullptr) {
-      fpushObjMethodUnknown(env, obj, methodName, numArgs, dynamic, tsList,
-                            profileMethod);
+      fcallObjMethodUnknown(env, fca, obj, methodName, dynamic, tsList,
+                            profileMethod, noCallProfiling);
     } else {
       auto const func = lookupObjMethodInterfaceFunc(env, obj, knownIfaceFunc);
-      prepareToCallUnknown(env, func, obj, numArgs, nullptr, dynamic, tsList);
       profileMethod(func);
+      if (noCallProfiling) {
+        prepareAndCallUnknown(env, func, fca, obj, nullptr, dynamic, tsList,
+                              true);
+      } else {
+        prepareAndCallProfiled(env, func, fca, obj, dynamic, tsList);
+      }
     }
   };
 
   // If the method has reified generics, we can't burn the value in the JIT
   if (!RuntimeOption::RepoAuthoritative || !methodName->hasConstVal() ||
       tsList) {
-    return emitFPush();
+    return emitFCall();
   }
 
   // If we don't know anything about the object's class, or all we know is an
   // interface that it implements, then enable PGO.
-  optimizeProfiledPushObjMethod(env, obj, knownIfaceFunc != nullptr,
-                                methodName->strVal(), numArgs, dynamic,
-                                emitFPush);
+  optimizeProfiledCallObjMethod(env, fca, obj, knownIfaceFunc != nullptr,
+                                methodName->strVal(), dynamic, emitFCall);
 }
 
 void fpushFuncObj(IRGS& env, uint32_t numParams) {
@@ -1270,27 +1292,30 @@ void emitResolveFunc(IRGS& env, const StringData* name) {
 
 namespace {
 
-void implFPushObjMethod(IRGS& env,
-                        uint32_t numParams,
-                        SSATmp* methodName,
-                        ObjMethodOp subop,
-                        bool dynamic,
-                        SSATmp* tsList,
-                        bool extraInput) {
+void fcallObjMethod(IRGS& env, const FCallArgs& fca, const StringData* clsHint,
+                     ObjMethodOp subop, SSATmp* methodName, bool dynamic,
+                     SSATmp* tsList, bool extraInput) {
   assertx(methodName->isA(TStr));
-  auto const objPos = static_cast<int32_t>(numParams + (extraInput ? 3 : 2));
-  auto const obj = topC(env, BCSPRelOffset{objPos});
+  auto const objPos = fca.numArgsInclUnpack() + (extraInput ? 3 : 2);
+  auto const obj = topC(env, BCSPRelOffset { static_cast<int32_t>(objPos) });
 
   if (obj->type() <= TObj) {
     if (extraInput) popC(env);
-    fpushObjMethod(env, obj, methodName, numParams, dynamic, tsList);
+    fcallObjMethodObj(env, fca, obj, clsHint, methodName, dynamic, tsList);
     return;
   }
 
+  // null?->method(...), pop extra stack input, all arguments and two uninits,
+  // the null "object" and all uninits for inout returns, then push null.
   if (obj->type() <= TInitNull && subop == ObjMethodOp::NullSafe) {
-    if (extraInput) popC(env);
-    prepareToCallKnown(env, SystemLib::s_nullFunc, nullptr, numParams, nullptr,
-                       false, tsList);
+    if (extraInput) popDecRef(env, DataTypeGeneric);
+    if (fca.hasUnpack()) popDecRef(env, DataTypeGeneric);
+    for (uint32_t i = 0; i < fca.numArgs; ++i) popDecRef(env, DataTypeGeneric);
+    popU(env);
+    popU(env);
+    popDecRef(env, DataTypeGeneric);
+    for (uint32_t i = 0; i < fca.numRets - 1; ++i) popU(env);
+    push(env, cns(env, TInitNull));
     return;
   }
 
@@ -1299,31 +1324,25 @@ void implFPushObjMethod(IRGS& env,
 
 } // namespace
 
-void emitFPushObjMethod(IRGS& env,
-                        uint32_t numParams,
-                        ObjMethodOp subop,
-                        const ImmVector& v) {
+void emitFCallObjMethod(IRGS& env, FCallArgs fca, const StringData* clsHint,
+                        ObjMethodOp subop, const ImmVector& v) {
   auto const methodName = topC(env);
   if (v.size() != 0 || !methodName->isA(TStr)) return interpOne(env);
-  implFPushObjMethod(env, numParams, methodName, subop, true, nullptr, true);
+  fcallObjMethod(env, fca, clsHint, subop, methodName, true, nullptr, true);
 }
 
-void emitFPushObjMethodD(IRGS& env,
-                         uint32_t numParams,
-                         const StringData* methodName,
-                         ObjMethodOp subop) {
-  implFPushObjMethod(env, numParams, cns(env, methodName), subop, false,
-                     nullptr, false);
+void emitFCallObjMethodD(IRGS& env, FCallArgs fca, const StringData* clsHint,
+                         ObjMethodOp subop, const StringData* methodName) {
+  fcallObjMethod(env, fca, clsHint, subop, cns(env, methodName), false,
+                 nullptr, false);
 }
 
 
-void emitFPushObjMethodRD(IRGS& env,
-                         uint32_t numParams,
-                         const StringData* methodName,
-                         ObjMethodOp subop) {
+void emitFCallObjMethodRD(IRGS& env, FCallArgs fca, const StringData* clsHint,
+                          ObjMethodOp subop, const StringData* methodName) {
   auto const tsList = topC(env);
-  implFPushObjMethod(env, numParams, cns(env, methodName), subop, false,
-                     tsList, true);
+  fcallObjMethod(env, fca, clsHint, subop, cns(env, methodName), false, tsList,
+                 true);
 }
 
 namespace {
@@ -1889,7 +1908,7 @@ void emitFCall(IRGS& env, FCallArgs fca, const StringData*, const StringData*) {
 
   auto const doCallUnknown = [&] (bool unlikely) {
     emitCallerReffinessChecksUnknown(env, callee, fca);
-    callUnknown(env, callee, fca, unlikely);
+    callUnknown(env, callee, fca, unlikely, false);
   };
 
   callProfiledFunc(env, callee, doCallKnown, doCallUnknown);

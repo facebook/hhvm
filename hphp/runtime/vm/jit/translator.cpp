@@ -287,12 +287,12 @@ static const struct {
   { OpFPushFuncD,  {None,             FStack,       OutFDesc        }},
   { OpFPushFuncRD, {Stack1,           FStack,       OutFDesc        }},
   { OpFCallCtor,   {None,             StackN,       OutUnknown      }},
-  { OpFPushObjMethod,
-                   {Stack1,           FStack,       OutFDesc        }},
-  { OpFPushObjMethodD,
-                   {None,             FStack,       OutFDesc        }},
-  { OpFPushObjMethodRD,
-                   {Stack1,           FStack,       OutFDesc        }},
+  { OpFCallObjMethod,
+                   {Stack1,           StackN,       OutUnknown      }},
+  { OpFCallObjMethodD,
+                   {None,             StackN,       OutUnknown      }},
+  { OpFCallObjMethodRD,
+                   {Stack1,           StackN,       OutUnknown      }},
   { OpFPushClsMethod,
                    {Stack1,           FStack,       OutFDesc        }},
   { OpFPushClsMethodS,
@@ -503,9 +503,6 @@ int64_t getStackPopped(PC pc) {
     case Op::FPushFunc:
     case Op::FPushFuncD:
     case Op::FPushFuncRD:
-    case Op::FPushObjMethod:
-    case Op::FPushObjMethodD:
-    case Op::FPushObjMethodRD:
     case Op::FPushClsMethod:
     case Op::FPushClsMethodS:
     case Op::FPushClsMethodSD:
@@ -514,7 +511,10 @@ int64_t getStackPopped(PC pc) {
     case Op::FPushClsMethodRD:
       return getImm(pc, 0).u_IVA + countOperands(getInstrInfo(op).in) + 3;
 
-    case Op::FCallCtor: {
+    case Op::FCallCtor:
+    case Op::FCallObjMethod:
+    case Op::FCallObjMethodD:
+    case Op::FCallObjMethodRD: {
       auto const fca = getImm(pc, 0).u_FCA;
       auto const nin = countOperands(getInstrInfo(op).in);
       return nin + fca.numArgsInclUnpack() + kNumActRecCells - 1 + fca.numRets;
@@ -566,9 +566,6 @@ int64_t getStackPushed(PC pc) {
     case Op::FPushFunc:
     case Op::FPushFuncD:
     case Op::FPushFuncRD:
-    case Op::FPushObjMethod:
-    case Op::FPushObjMethodD:
-    case Op::FPushObjMethodRD:
     case Op::FPushClsMethod:
     case Op::FPushClsMethodS:
     case Op::FPushClsMethodSD:
@@ -578,6 +575,9 @@ int64_t getStackPushed(PC pc) {
       return getImm(pc, 0).u_IVA + kNumActRecCells;
     case Op::FCall:
     case Op::FCallCtor:
+    case Op::FCallObjMethod:
+    case Op::FCallObjMethodD:
+    case Op::FCallObjMethodRD:
       return getImm(pc, 0).u_FCA.numRets;
     default:
       break;
@@ -776,9 +776,9 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
     stackOff -= numArgs + 2;
     switch (ni.op()) {
       case Op::FCallCtor:
-      case Op::FPushObjMethod:
-      case Op::FPushObjMethodD:
-      case Op::FPushObjMethodRD:
+      case Op::FCallObjMethod:
+      case Op::FCallObjMethodD:
+      case Op::FCallObjMethodRD:
         inputs.emplace_back(Location::Stack { stackOff-- });
         break;
       default:
@@ -978,8 +978,8 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::FPushFunc:
   case Op::FPushFuncD:
   case Op::FPushFuncRD:
-  case Op::FPushObjMethodD:
-  case Op::FPushObjMethodRD:
+  case Op::FCallObjMethodD:
+  case Op::FCallObjMethodRD:
   case Op::ResolveFunc:
   case Op::ResolveClsMethod:
   case Op::ResolveObjMethod:
@@ -1091,7 +1091,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::IncDecG:
   case Op::IncDecS:
   case Op::UnsetG:
-  case Op::FPushObjMethod:
+  case Op::FCallObjMethod:
   case Op::Incl:
   case Op::InclOnce:
   case Op::Req:

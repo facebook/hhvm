@@ -10,17 +10,17 @@ class C1 {
 function main1() {
   $obj = new C1;
 
-  // FPushObjMethodD
+  // FCallObjMethodD
   $obj->__call("a", "b", "c", "d");
   $obj->foo("a", "b", "c", "d");
 
-  // FPushObjMethod
+  // FCallObjMethod
   $fn = '__call';
   $obj->$fn("a", "b", "c", "d");
   $fn = 'foo';
   $obj->$fn("a", "b", "c", "d");
 }
- 
+
 main1();
 
 class C2 {
@@ -73,11 +73,11 @@ class C3 extends B3 {
 function main3() {
   $obj = new C3;
 
-  // FPushObjMethodD
+  // FCallObjMethodD
   $obj->__call("a", "b", "c", "d");
   $obj->foo("a", "b", "c", "d");
 
-  // FPushObjMethod
+  // FCallObjMethod
   $fn = '__call';
   $obj->$fn("a", "b", "c", "d");
   $fn = 'foo';

@@ -131,8 +131,7 @@ stuff:
   CGetL $obj
   NullUninit
   NullUninit
-  FPushObjMethodD 0 "returns_int" NullThrows
-  FCall <> 0 1 "" - "" ""
+  FCallObjMethodD <> 0 1 "" - "" NullThrows "returns_int"
   AssertRATStk 0 Int
   Int 0
   Add

@@ -22,16 +22,14 @@
    FCallCtor <> 0 1 "" - ""
    PopC
    LockObj
-  FPushObjMethodD 1 "main" NullThrows
-  FCall <> 1 1 "" - "" ""
+  FCallObjMethodD <> 1 1 "" - "" NullThrows "main"
   PopC
 
   CGetL $object
   NullUninit
   NullUninit
    Null
-  FPushObjMethodD 1 "main" NullThrows
-  FCall <> 1 1 "" - "" ""
+  FCallObjMethodD <> 1 1 "" - "" NullThrows "main"
   PopC
 
   Int 1

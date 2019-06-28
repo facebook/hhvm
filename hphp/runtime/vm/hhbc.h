@@ -643,12 +643,12 @@ constexpr uint32_t kMaxConcatN = 4;
   O(FPushFuncD,      TWO(IVA,SA),      FPUSH(0, 0),     FPUSH,      PF) \
   O(FPushFuncRD,     TWO(IVA,SA),      FPUSH(1, 0),     FPUSH,      PF) \
   O(FCallCtor,       TWO(FCA,SA),      FCALL(0, 1),     FCALL,      CF) \
-  O(FPushObjMethod,  THREE(IVA,OA(ObjMethodOp),I32LA),                  \
-                                       FPUSH(1, 1),     FPUSH,      PF) \
-  O(FPushObjMethodD, THREE(IVA,SA,OA(ObjMethodOp)),                     \
-                                       FPUSH(0, 1),     FPUSH,      PF) \
-  O(FPushObjMethodRD,THREE(IVA,SA,OA(ObjMethodOp)),                     \
-                                       FPUSH(1, 1),     FPUSH,      PF) \
+  O(FCallObjMethod,  FOUR(FCA,SA,OA(ObjMethodOp),I32LA),                \
+                                       FCALL(1, 1),     FCALL,      CF) \
+  O(FCallObjMethodD, FOUR(FCA,SA,OA(ObjMethodOp),SA),                   \
+                                       FCALL(0, 1),     FCALL,      CF) \
+  O(FCallObjMethodRD,FOUR(FCA,SA,OA(ObjMethodOp),SA),                   \
+                                       FCALL(1, 1),     FCALL,      CF) \
   O(FPushClsMethod,  THREE(IVA,CAR,I32LA),                              \
                                        FPUSH(1, 0),     FPUSH,      PF) \
   O(FPushClsMethodS, THREE(IVA,OA(SpecialClsRef),I32LA),                \
@@ -1009,9 +1009,17 @@ constexpr bool isJmp(Op opcode) {
     opcode == Op::JmpNZ;
 }
 
+constexpr bool isFCallObjMethod(Op opcode) {
+  return
+    opcode == OpFCallObjMethod ||
+    opcode == OpFCallObjMethodD ||
+    opcode == OpFCallObjMethodRD;
+}
+
 constexpr bool isNewFCall(Op opcode) {
   return
-    opcode == OpFCallCtor;
+    opcode == OpFCallCtor ||
+    isFCallObjMethod(opcode);
 }
 
 constexpr bool isLegacyFPush(Op opcode) {
@@ -1030,13 +1038,6 @@ constexpr bool isFPushClsMethod(Op opcode) {
     opcode == OpFPushClsMethodSRD ||
     opcode == OpFPushClsMethodRD ||
     opcode == OpFPushClsMethodD;
-}
-
-constexpr bool isFPushObjMethod(Op opcode) {
-  return
-    opcode == OpFPushObjMethod ||
-    opcode == OpFPushObjMethodRD ||
-    opcode == OpFPushObjMethodD;
 }
 
 constexpr bool isFPushFunc(Op opcode) {

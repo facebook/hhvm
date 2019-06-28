@@ -789,9 +789,6 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::FPushFunc:
   case Op::FPushFuncD:
   case Op::FPushFuncRD:
-  case Op::FPushObjMethod:
-  case Op::FPushObjMethodD:
-  case Op::FPushObjMethodRD:
   case Op::FPushClsMethod:
   case Op::FPushClsMethodRD:
   case Op::FPushClsMethodS:
@@ -809,7 +806,10 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     while (idx < numPops) m_tmp_sig[idx++] = CV;
     return m_tmp_sig;
   }
-  case Op::FCallCtor: {  // FCA..., FCALL, FCALL
+  case Op::FCallCtor:
+  case Op::FCallObjMethod:
+  case Op::FCallObjMethodD:
+  case Op::FCallObjMethodRD: {  // FCA..., FCALL, FCALL
     auto const fca = getImm(pc, 0).u_FCA;
     auto const numPops = instrNumPops(pc);
     assertx(fca.numRets != 0);
@@ -1792,18 +1792,18 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::FPushFunc:
     case Op::FPushFuncD:
     case Op::FPushFuncRD:
-    case Op::FPushObjMethod:
-    case Op::FPushObjMethodD:
-    case Op::FPushObjMethodRD:
     case Op::FPushClsMethod:
     case Op::FPushClsMethodD:
     case Op::FPushClsMethodRD:
     case Op::FPushClsMethodS:
     case Op::FPushClsMethodSD:
     case Op::FPushClsMethodSRD:
-    case Op::FCallCtor:
     case Op::FCall:
     case Op::FCallBuiltin:
+    case Op::FCallCtor:
+    case Op::FCallObjMethod:
+    case Op::FCallObjMethodD:
+    case Op::FCallObjMethodRD:
     case Op::NativeImpl:
     case Op::NewObj:
     case Op::NewObjD:

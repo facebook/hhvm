@@ -85,8 +85,7 @@
   CGetL $obj
   NullUninit
   NullUninit
-  FPushObjMethodD 0 "frob" NullThrows
-  FCall <> 0 1 "" - "" ""
+  FCallObjMethodD <> 0 1 "" - "" NullThrows "frob"
   PopC
 
   NewObjD "AliasFrob"
@@ -102,8 +101,7 @@
   CGetL $obj
   NullUninit
   NullUninit
-  FPushObjMethodD 0 "heh" NullThrows
-  FCall <> 0 1 "" - "" ""
+  FCallObjMethodD <> 0 1 "" - "" NullThrows "heh"
   PopC
 
   NewObjD "Publicize"
@@ -119,8 +117,7 @@
   CGetL $obj
   NullUninit
   NullUninit
-  FPushObjMethodD 0 "foo" NullThrows
-  FCall <> 0 1 "" - "" ""
+  FCallObjMethodD <> 0 1 "" - "" NullThrows "foo"
   PopC
 
   NewObjD "Resolution"
@@ -136,15 +133,13 @@
   CGetL $obj
   NullUninit
   NullUninit
-  FPushObjMethodD 0 "frob" NullThrows
-  FCall <> 0 1 "" - "" ""
+  FCallObjMethodD <> 0 1 "" - "" NullThrows "frob"
   PopC
 
   CGetL $obj
   NullUninit
   NullUninit
-  FPushObjMethodD 0 "yo" NullThrows
-  FCall <> 0 1 "" - "" ""
+  FCallObjMethodD <> 0 1 "" - "" NullThrows "yo"
   PopC
 
   Int 1

@@ -841,13 +841,6 @@ bool MixedArray::ExistsStr(const ArrayData* ad, const StringData* k) {
 // Append/insert/update.
 
 ALWAYS_INLINE
-MixedArray* MixedArray::initRef(TypedValue& tv, tv_lval v) {
-  tvBoxIfNeeded(v);
-  refDup(v.tv(), tv);
-  return this;
-}
-
-ALWAYS_INLINE
 MixedArray* MixedArray::initWithRef(TypedValue& tv, TypedValue v) {
   tvWriteNull(tv);
   tvAsVariant(&tv).setWithRef(v);

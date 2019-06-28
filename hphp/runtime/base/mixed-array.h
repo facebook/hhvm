@@ -471,9 +471,6 @@ public:
   static constexpr auto CopyStaticDict = &CopyStatic;
   static constexpr auto AppendDict = &Append;
   static constexpr auto AppendInPlaceDict = &AppendInPlace;
-  static arr_lval LvalIntRefDict(ArrayData*, int64_t, bool);
-  static arr_lval LvalStrRefDict(ArrayData*, StringData*, bool);
-  static arr_lval LvalNewRefDict(ArrayData*, bool);
   static ArrayData* SetWithRefIntDict(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetWithRefIntInPlaceDict(ArrayData*, int64_t, TypedValue);
   static ArrayData* SetWithRefStrDict(ArrayData*, StringData* k, TypedValue v);
@@ -570,9 +567,6 @@ public:
   static constexpr auto CopyStaticShape = &CopyStatic;
   static constexpr auto AppendShape = &Append;
   static constexpr auto AppendInPlaceShape = &AppendInPlace;
-  static arr_lval LvalIntRefShape(ArrayData*, int64_t, bool);
-  static arr_lval LvalStrRefShape(ArrayData*, StringData*, bool);
-  static arr_lval LvalNewRefShape(ArrayData*, bool);
   static ArrayData* SetWithRefIntShape(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetWithRefIntInPlaceShape(ArrayData*, int64_t k,
                                               TypedValue v);
@@ -790,7 +784,6 @@ private:
 
   bool hasIntishKeys() const;
 
-  MixedArray* initRef(TypedValue& tv, tv_lval v);
   MixedArray* initWithRef(TypedValue& tv, TypedValue v);
   MixedArray* initWithRef(TypedValue& tv, const Variant& v);
   MixedArray* moveVal(TypedValue& tv, TypedValue v);

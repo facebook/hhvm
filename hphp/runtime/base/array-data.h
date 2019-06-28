@@ -412,7 +412,6 @@ public:
    * details).
    */
   arr_lval lvalNew(bool copy);
-  arr_lval lvalNewRef(bool copy);
 
   /*
    * Get an rval for the element at key `k'.

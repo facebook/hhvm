@@ -1,12 +1,39 @@
 array(3) {
   ["%s"]=>
   array(7) {
+    ["constants"]=>
+    array(5) {
+      [0]=>
+      string(3) "CO0"
+      [1]=>
+      string(3) "CO1"
+      [2]=>
+      string(3) "CO2"
+      [3]=>
+      string(3) "CO3"
+      [4]=>
+      string(3) "CO4"
+    }
+    ["functions"]=>
+    array(1) {
+      [0]=>
+      string(2) "f1"
+    }
     ["md5sum0"]=>
     int(7912239445824932007)
     ["md5sum1"]=>
     int(-1763850095915877527)
     ["sha1sum"]=>
     string(40) "54477e30df72b872cefa7332938e9807b0d20907"
+    ["typeAliases"]=>
+    array(3) {
+      [0]=>
+      string(3) "TA0"
+      [1]=>
+      string(3) "TA1"
+      [2]=>
+      string(3) "TA2"
+    }
     ["types"]=>
     array(10) {
       [0]=>
@@ -35,12 +62,6 @@ array(3) {
       }
       [2]=>
       array(4) {
-        ["name"]=>
-        string(3) "CL2"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(5) {
           [0]=>
@@ -54,6 +75,12 @@ array(3) {
           [4]=>
           string(3) "TR1"
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(3) "CL2"
       }
       [3]=>
       array(4) {
@@ -101,12 +128,6 @@ array(3) {
       }
       [6]=>
       array(5) {
-        ["name"]=>
-        string(2) "I2"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(2) {
           [0]=>
@@ -114,6 +135,12 @@ array(3) {
           [1]=>
           string(2) "I1"
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(2) "I2"
         ["requireExtends"]=>
         array(1) {
           [0]=>
@@ -122,48 +149,42 @@ array(3) {
       }
       [7]=>
       array(6) {
-        ["name"]=>
-        string(3) "TR0"
-        ["kindOf"]=>
-        string(5) "trait"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(0) {
         }
-        ["requireImplements"]=>
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(3) "TR0"
+        ["requireExtends"]=>
         array(0) {
         }
-        ["requireExtends"]=>
+        ["requireImplements"]=>
         array(0) {
         }
       }
       [8]=>
       array(6) {
-        ["name"]=>
-        string(3) "TR1"
-        ["kindOf"]=>
-        string(5) "trait"
+        ["baseTypes"]=>
+        array(0) {
+        }
         ["flags"]=>
         int(1)
-        ["baseTypes"]=>
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(3) "TR1"
+        ["requireExtends"]=>
         array(0) {
         }
         ["requireImplements"]=>
         array(0) {
         }
-        ["requireExtends"]=>
-        array(0) {
-        }
       }
       [9]=>
       array(6) {
-        ["name"]=>
-        string(3) "TR2"
-        ["kindOf"]=>
-        string(5) "trait"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(4) {
           [0]=>
@@ -175,54 +196,60 @@ array(3) {
           [3]=>
           string(3) "TR1"
         }
-        ["requireImplements"]=>
-        array(1) {
-          [0]=>
-          string(2) "I2"
-        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(3) "TR2"
         ["requireExtends"]=>
         array(1) {
           [0]=>
           string(3) "CL1"
         }
+        ["requireImplements"]=>
+        array(1) {
+          [0]=>
+          string(2) "I2"
+        }
       }
-    }
-    ["functions"]=>
-    array(1) {
-      [0]=>
-      string(2) "f1"
-    }
-    ["constants"]=>
-    array(5) {
-      [0]=>
-      string(3) "CO0"
-      [1]=>
-      string(3) "CO1"
-      [2]=>
-      string(3) "CO2"
-      [3]=>
-      string(3) "CO3"
-      [4]=>
-      string(3) "CO4"
-    }
-    ["typeAliases"]=>
-    array(3) {
-      [0]=>
-      string(3) "TA0"
-      [1]=>
-      string(3) "TA1"
-      [2]=>
-      string(3) "TA2"
     }
   }
   ["%s"]=>
   array(7) {
+    ["constants"]=>
+    array(5) {
+      [0]=>
+      string(6) "NS\CO0"
+      [1]=>
+      string(6) "NS\CO1"
+      [2]=>
+      string(6) "NS\CO2"
+      [3]=>
+      string(6) "NS\CO3"
+      [4]=>
+      string(6) "NS\CO4"
+    }
+    ["functions"]=>
+    array(1) {
+      [0]=>
+      string(5) "NS\f1"
+    }
     ["md5sum0"]=>
     int(-6524520287888746400)
     ["md5sum1"]=>
     int(-2442148009797625650)
     ["sha1sum"]=>
     string(40) "b30219c72207318aa9190a36a0877adbd769e071"
+    ["typeAliases"]=>
+    array(3) {
+      [0]=>
+      string(6) "NS\TA0"
+      [1]=>
+      string(6) "NS\TA1"
+      [2]=>
+      string(6) "NS\TA2"
+    }
     ["types"]=>
     array(10) {
       [0]=>
@@ -251,12 +278,6 @@ array(3) {
       }
       [2]=>
       array(4) {
-        ["name"]=>
-        string(6) "NS\CL2"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(5) {
           [0]=>
@@ -270,6 +291,12 @@ array(3) {
           [4]=>
           string(6) "NS\TR1"
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(6) "NS\CL2"
       }
       [3]=>
       array(4) {
@@ -287,42 +314,36 @@ array(3) {
       }
       [4]=>
       array(5) {
-        ["name"]=>
-        string(5) "NS\I0"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(0) {
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(5) "NS\I0"
         ["requireExtends"]=>
         array(0) {
         }
       }
       [5]=>
       array(5) {
-        ["name"]=>
-        string(5) "NS\I1"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(0) {
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(5) "NS\I1"
         ["requireExtends"]=>
         array(0) {
         }
       }
       [6]=>
       array(5) {
-        ["name"]=>
-        string(5) "NS\I2"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(2) {
           [0]=>
@@ -330,6 +351,12 @@ array(3) {
           [1]=>
           string(5) "NS\I1"
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(5) "NS\I2"
         ["requireExtends"]=>
         array(1) {
           [0]=>
@@ -338,48 +365,42 @@ array(3) {
       }
       [7]=>
       array(6) {
-        ["name"]=>
-        string(6) "NS\TR0"
-        ["kindOf"]=>
-        string(5) "trait"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(0) {
         }
-        ["requireImplements"]=>
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(6) "NS\TR0"
+        ["requireExtends"]=>
         array(0) {
         }
-        ["requireExtends"]=>
+        ["requireImplements"]=>
         array(0) {
         }
       }
       [8]=>
       array(6) {
-        ["name"]=>
-        string(6) "NS\TR1"
-        ["kindOf"]=>
-        string(5) "trait"
+        ["baseTypes"]=>
+        array(0) {
+        }
         ["flags"]=>
         int(1)
-        ["baseTypes"]=>
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(6) "NS\TR1"
+        ["requireExtends"]=>
         array(0) {
         }
         ["requireImplements"]=>
         array(0) {
         }
-        ["requireExtends"]=>
-        array(0) {
-        }
       }
       [9]=>
       array(6) {
-        ["name"]=>
-        string(6) "NS\TR2"
-        ["kindOf"]=>
-        string(5) "trait"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(4) {
           [0]=>
@@ -391,54 +412,60 @@ array(3) {
           [3]=>
           string(6) "NS\TR1"
         }
-        ["requireImplements"]=>
-        array(1) {
-          [0]=>
-          string(5) "NS\I2"
-        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(6) "NS\TR2"
         ["requireExtends"]=>
         array(1) {
           [0]=>
           string(6) "NS\CL1"
         }
+        ["requireImplements"]=>
+        array(1) {
+          [0]=>
+          string(5) "NS\I2"
+        }
       }
-    }
-    ["functions"]=>
-    array(1) {
-      [0]=>
-      string(5) "NS\f1"
-    }
-    ["constants"]=>
-    array(5) {
-      [0]=>
-      string(6) "NS\CO0"
-      [1]=>
-      string(6) "NS\CO1"
-      [2]=>
-      string(6) "NS\CO2"
-      [3]=>
-      string(6) "NS\CO3"
-      [4]=>
-      string(6) "NS\CO4"
-    }
-    ["typeAliases"]=>
-    array(3) {
-      [0]=>
-      string(6) "NS\TA0"
-      [1]=>
-      string(6) "NS\TA1"
-      [2]=>
-      string(6) "NS\TA2"
     }
   }
   ["%s"]=>
   array(7) {
+    ["constants"]=>
+    array(5) {
+      [0]=>
+      string(9) "NS\NS\CO0"
+      [1]=>
+      string(9) "NS\NS\CO1"
+      [2]=>
+      string(9) "NS\NS\CO2"
+      [3]=>
+      string(9) "NS\NS\CO3"
+      [4]=>
+      string(9) "NS\NS\CO4"
+    }
+    ["functions"]=>
+    array(1) {
+      [0]=>
+      string(8) "NS\NS\f1"
+    }
     ["md5sum0"]=>
     int(4326157067570146936)
     ["md5sum1"]=>
     int(-5546976242100887183)
     ["sha1sum"]=>
     string(40) "2b6ee62e181d96cce033bf30224429e66c3e5211"
+    ["typeAliases"]=>
+    array(3) {
+      [0]=>
+      string(9) "NS\NS\TA0"
+      [1]=>
+      string(9) "NS\NS\TA1"
+      [2]=>
+      string(9) "NS\NS\TA2"
+    }
     ["types"]=>
     array(10) {
       [0]=>
@@ -467,12 +494,6 @@ array(3) {
       }
       [2]=>
       array(4) {
-        ["name"]=>
-        string(9) "NS\NS\CL2"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(5) {
           [0]=>
@@ -486,6 +507,12 @@ array(3) {
           [4]=>
           string(9) "NS\NS\TR1"
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(9) "NS\NS\CL2"
       }
       [3]=>
       array(4) {
@@ -503,42 +530,36 @@ array(3) {
       }
       [4]=>
       array(5) {
-        ["name"]=>
-        string(8) "NS\NS\I0"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(0) {
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(8) "NS\NS\I0"
         ["requireExtends"]=>
         array(0) {
         }
       }
       [5]=>
       array(5) {
-        ["name"]=>
-        string(8) "NS\NS\I1"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(0) {
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(8) "NS\NS\I1"
         ["requireExtends"]=>
         array(0) {
         }
       }
       [6]=>
       array(5) {
-        ["name"]=>
-        string(8) "NS\NS\I2"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(2) {
           [0]=>
@@ -546,6 +567,12 @@ array(3) {
           [1]=>
           string(8) "NS\NS\I1"
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(8) "NS\NS\I2"
         ["requireExtends"]=>
         array(1) {
           [0]=>
@@ -554,48 +581,42 @@ array(3) {
       }
       [7]=>
       array(6) {
-        ["name"]=>
-        string(9) "NS\NS\TR0"
-        ["kindOf"]=>
-        string(5) "trait"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(0) {
         }
-        ["requireImplements"]=>
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(9) "NS\NS\TR0"
+        ["requireExtends"]=>
         array(0) {
         }
-        ["requireExtends"]=>
+        ["requireImplements"]=>
         array(0) {
         }
       }
       [8]=>
       array(6) {
-        ["name"]=>
-        string(9) "NS\NS\TR1"
-        ["kindOf"]=>
-        string(5) "trait"
+        ["baseTypes"]=>
+        array(0) {
+        }
         ["flags"]=>
         int(1)
-        ["baseTypes"]=>
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(9) "NS\NS\TR1"
+        ["requireExtends"]=>
         array(0) {
         }
         ["requireImplements"]=>
         array(0) {
         }
-        ["requireExtends"]=>
-        array(0) {
-        }
       }
       [9]=>
       array(6) {
-        ["name"]=>
-        string(9) "NS\NS\TR2"
-        ["kindOf"]=>
-        string(5) "trait"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(4) {
           [0]=>
@@ -607,44 +628,23 @@ array(3) {
           [3]=>
           string(9) "NS\NS\TR1"
         }
-        ["requireImplements"]=>
-        array(1) {
-          [0]=>
-          string(8) "NS\NS\I2"
-        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(9) "NS\NS\TR2"
         ["requireExtends"]=>
         array(1) {
           [0]=>
           string(9) "NS\NS\CL1"
         }
+        ["requireImplements"]=>
+        array(1) {
+          [0]=>
+          string(8) "NS\NS\I2"
+        }
       }
-    }
-    ["functions"]=>
-    array(1) {
-      [0]=>
-      string(8) "NS\NS\f1"
-    }
-    ["constants"]=>
-    array(5) {
-      [0]=>
-      string(9) "NS\NS\CO0"
-      [1]=>
-      string(9) "NS\NS\CO1"
-      [2]=>
-      string(9) "NS\NS\CO2"
-      [3]=>
-      string(9) "NS\NS\CO3"
-      [4]=>
-      string(9) "NS\NS\CO4"
-    }
-    ["typeAliases"]=>
-    array(3) {
-      [0]=>
-      string(9) "NS\NS\TA0"
-      [1]=>
-      string(9) "NS\NS\TA1"
-      [2]=>
-      string(9) "NS\NS\TA2"
     }
   }
 }
@@ -654,7 +654,7 @@ array(3) {
   NULL
   ["garbage_filename"]=>
   NULL
-  ["/tmp"]=>
+  ["%s"]=>
   NULL
 }
 PASSED erroneous files test

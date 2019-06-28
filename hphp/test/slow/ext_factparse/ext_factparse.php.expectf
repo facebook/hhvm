@@ -1,12 +1,45 @@
 array(3) {
   ["%s"]=>
   array(7) {
+    ["constants"]=>
+    array(6) {
+      [0]=>
+      string(3) "CO0"
+      [1]=>
+      string(3) "CO1"
+      [2]=>
+      string(3) "CO2"
+      [3]=>
+      string(3) "CO3"
+      [4]=>
+      string(3) "CO4"
+      [5]=>
+      string(3) "CO5"
+    }
+    ["functions"]=>
+    array(3) {
+      [0]=>
+      string(2) "f1"
+      [1]=>
+      string(2) "f2"
+      [2]=>
+      string(2) "f6"
+    }
     ["md5sum0"]=>
     int(8523258480369755085)
     ["md5sum1"]=>
     int(8861313298414969065)
     ["sha1sum"]=>
     string(40) "a3c68301964a73d9b97c16ea0b2972ebb700d66d"
+    ["typeAliases"]=>
+    array(3) {
+      [0]=>
+      string(3) "TA0"
+      [1]=>
+      string(3) "TA1"
+      [2]=>
+      string(3) "TA2"
+    }
     ["types"]=>
     array(10) {
       [0]=>
@@ -35,12 +68,6 @@ array(3) {
       }
       [2]=>
       array(4) {
-        ["name"]=>
-        string(3) "CL2"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(5) {
           [0]=>
@@ -54,6 +81,12 @@ array(3) {
           [4]=>
           string(3) "TR1"
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(3) "CL2"
       }
       [3]=>
       array(4) {
@@ -101,12 +134,6 @@ array(3) {
       }
       [6]=>
       array(5) {
-        ["name"]=>
-        string(2) "I2"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(2) {
           [0]=>
@@ -114,6 +141,12 @@ array(3) {
           [1]=>
           string(2) "I1"
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(2) "I2"
         ["requireExtends"]=>
         array(1) {
           [0]=>
@@ -122,48 +155,42 @@ array(3) {
       }
       [7]=>
       array(6) {
-        ["name"]=>
-        string(3) "TR0"
-        ["kindOf"]=>
-        string(5) "trait"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(0) {
         }
-        ["requireImplements"]=>
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(3) "TR0"
+        ["requireExtends"]=>
         array(0) {
         }
-        ["requireExtends"]=>
+        ["requireImplements"]=>
         array(0) {
         }
       }
       [8]=>
       array(6) {
-        ["name"]=>
-        string(3) "TR1"
-        ["kindOf"]=>
-        string(5) "trait"
+        ["baseTypes"]=>
+        array(0) {
+        }
         ["flags"]=>
         int(1)
-        ["baseTypes"]=>
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(3) "TR1"
+        ["requireExtends"]=>
         array(0) {
         }
         ["requireImplements"]=>
         array(0) {
         }
-        ["requireExtends"]=>
-        array(0) {
-        }
       }
       [9]=>
       array(6) {
-        ["name"]=>
-        string(3) "TR2"
-        ["kindOf"]=>
-        string(5) "trait"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(4) {
           [0]=>
@@ -175,60 +202,66 @@ array(3) {
           [3]=>
           string(3) "TR1"
         }
-        ["requireImplements"]=>
-        array(1) {
-          [0]=>
-          string(2) "I2"
-        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(3) "TR2"
         ["requireExtends"]=>
         array(1) {
           [0]=>
           string(3) "CL1"
         }
+        ["requireImplements"]=>
+        array(1) {
+          [0]=>
+          string(2) "I2"
+        }
       }
-    }
-    ["functions"]=>
-    array(3) {
-      [0]=>
-      string(2) "f1"
-      [1]=>
-      string(2) "f2"
-      [2]=>
-      string(2) "f6"
-    }
-    ["constants"]=>
-    array(6) {
-      [0]=>
-      string(3) "CO0"
-      [1]=>
-      string(3) "CO1"
-      [2]=>
-      string(3) "CO2"
-      [3]=>
-      string(3) "CO3"
-      [4]=>
-      string(3) "CO4"
-      [5]=>
-      string(3) "CO5"
-    }
-    ["typeAliases"]=>
-    array(3) {
-      [0]=>
-      string(3) "TA0"
-      [1]=>
-      string(3) "TA1"
-      [2]=>
-      string(3) "TA2"
     }
   }
   ["%s"]=>
   array(7) {
+    ["constants"]=>
+    array(6) {
+      [0]=>
+      string(6) "NS\CO0"
+      [1]=>
+      string(6) "NS\CO1"
+      [2]=>
+      string(6) "NS\CO2"
+      [3]=>
+      string(6) "NS\CO3"
+      [4]=>
+      string(6) "NS\CO4"
+      [5]=>
+      string(6) "NS\CO5"
+    }
+    ["functions"]=>
+    array(3) {
+      [0]=>
+      string(5) "NS\f1"
+      [1]=>
+      string(5) "NS\f2"
+      [2]=>
+      string(5) "NS\f6"
+    }
     ["md5sum0"]=>
     int(8338225809124797478)
     ["md5sum1"]=>
     int(8251336372971510891)
     ["sha1sum"]=>
     string(40) "e15118c634a9347ed302e02784612b8aeec70b68"
+    ["typeAliases"]=>
+    array(3) {
+      [0]=>
+      string(6) "NS\TA0"
+      [1]=>
+      string(6) "NS\TA1"
+      [2]=>
+      string(6) "NS\TA2"
+    }
     ["types"]=>
     array(10) {
       [0]=>
@@ -257,12 +290,6 @@ array(3) {
       }
       [2]=>
       array(4) {
-        ["name"]=>
-        string(6) "NS\CL2"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(5) {
           [0]=>
@@ -276,6 +303,12 @@ array(3) {
           [4]=>
           string(6) "NS\TR1"
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(6) "NS\CL2"
       }
       [3]=>
       array(4) {
@@ -293,42 +326,36 @@ array(3) {
       }
       [4]=>
       array(5) {
-        ["name"]=>
-        string(5) "NS\I0"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(0) {
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(5) "NS\I0"
         ["requireExtends"]=>
         array(0) {
         }
       }
       [5]=>
       array(5) {
-        ["name"]=>
-        string(5) "NS\I1"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(0) {
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(5) "NS\I1"
         ["requireExtends"]=>
         array(0) {
         }
       }
       [6]=>
       array(5) {
-        ["name"]=>
-        string(5) "NS\I2"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(2) {
           [0]=>
@@ -336,6 +363,12 @@ array(3) {
           [1]=>
           string(5) "NS\I1"
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(5) "NS\I2"
         ["requireExtends"]=>
         array(1) {
           [0]=>
@@ -344,48 +377,42 @@ array(3) {
       }
       [7]=>
       array(6) {
-        ["name"]=>
-        string(6) "NS\TR0"
-        ["kindOf"]=>
-        string(5) "trait"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(0) {
         }
-        ["requireImplements"]=>
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(6) "NS\TR0"
+        ["requireExtends"]=>
         array(0) {
         }
-        ["requireExtends"]=>
+        ["requireImplements"]=>
         array(0) {
         }
       }
       [8]=>
       array(6) {
-        ["name"]=>
-        string(6) "NS\TR1"
-        ["kindOf"]=>
-        string(5) "trait"
+        ["baseTypes"]=>
+        array(0) {
+        }
         ["flags"]=>
         int(1)
-        ["baseTypes"]=>
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(6) "NS\TR1"
+        ["requireExtends"]=>
         array(0) {
         }
         ["requireImplements"]=>
         array(0) {
         }
-        ["requireExtends"]=>
-        array(0) {
-        }
       }
       [9]=>
       array(6) {
-        ["name"]=>
-        string(6) "NS\TR2"
-        ["kindOf"]=>
-        string(5) "trait"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(4) {
           [0]=>
@@ -397,60 +424,66 @@ array(3) {
           [3]=>
           string(6) "NS\TR1"
         }
-        ["requireImplements"]=>
-        array(1) {
-          [0]=>
-          string(5) "NS\I2"
-        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(6) "NS\TR2"
         ["requireExtends"]=>
         array(1) {
           [0]=>
           string(6) "NS\CL1"
         }
+        ["requireImplements"]=>
+        array(1) {
+          [0]=>
+          string(5) "NS\I2"
+        }
       }
-    }
-    ["functions"]=>
-    array(3) {
-      [0]=>
-      string(5) "NS\f1"
-      [1]=>
-      string(5) "NS\f2"
-      [2]=>
-      string(5) "NS\f6"
-    }
-    ["constants"]=>
-    array(6) {
-      [0]=>
-      string(6) "NS\CO0"
-      [1]=>
-      string(6) "NS\CO1"
-      [2]=>
-      string(6) "NS\CO2"
-      [3]=>
-      string(6) "NS\CO3"
-      [4]=>
-      string(6) "NS\CO4"
-      [5]=>
-      string(6) "NS\CO5"
-    }
-    ["typeAliases"]=>
-    array(3) {
-      [0]=>
-      string(6) "NS\TA0"
-      [1]=>
-      string(6) "NS\TA1"
-      [2]=>
-      string(6) "NS\TA2"
     }
   }
   ["%s"]=>
   array(7) {
+    ["constants"]=>
+    array(6) {
+      [0]=>
+      string(9) "NS\NS\CO0"
+      [1]=>
+      string(9) "NS\NS\CO1"
+      [2]=>
+      string(9) "NS\NS\CO2"
+      [3]=>
+      string(9) "NS\NS\CO3"
+      [4]=>
+      string(9) "NS\NS\CO4"
+      [5]=>
+      string(9) "NS\NS\CO5"
+    }
+    ["functions"]=>
+    array(3) {
+      [0]=>
+      string(8) "NS\NS\f1"
+      [1]=>
+      string(8) "NS\NS\f2"
+      [2]=>
+      string(8) "NS\NS\f6"
+    }
     ["md5sum0"]=>
     int(968617526429768497)
     ["md5sum1"]=>
     int(7198650992565850965)
     ["sha1sum"]=>
     string(40) "aaf49eaafcc05da8f6c1d3998bee1b59128e0a94"
+    ["typeAliases"]=>
+    array(3) {
+      [0]=>
+      string(9) "NS\NS\TA0"
+      [1]=>
+      string(9) "NS\NS\TA1"
+      [2]=>
+      string(9) "NS\NS\TA2"
+    }
     ["types"]=>
     array(10) {
       [0]=>
@@ -479,12 +512,6 @@ array(3) {
       }
       [2]=>
       array(4) {
-        ["name"]=>
-        string(9) "NS\NS\CL2"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(5) {
           [0]=>
@@ -498,6 +525,12 @@ array(3) {
           [4]=>
           string(9) "NS\NS\TR1"
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(9) "NS\NS\CL2"
       }
       [3]=>
       array(4) {
@@ -515,42 +548,36 @@ array(3) {
       }
       [4]=>
       array(5) {
-        ["name"]=>
-        string(8) "NS\NS\I0"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(0) {
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(8) "NS\NS\I0"
         ["requireExtends"]=>
         array(0) {
         }
       }
       [5]=>
       array(5) {
-        ["name"]=>
-        string(8) "NS\NS\I1"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(0) {
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(8) "NS\NS\I1"
         ["requireExtends"]=>
         array(0) {
         }
       }
       [6]=>
       array(5) {
-        ["name"]=>
-        string(8) "NS\NS\I2"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(2) {
           [0]=>
@@ -558,6 +585,12 @@ array(3) {
           [1]=>
           string(8) "NS\NS\I1"
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(8) "NS\NS\I2"
         ["requireExtends"]=>
         array(1) {
           [0]=>
@@ -566,48 +599,42 @@ array(3) {
       }
       [7]=>
       array(6) {
-        ["name"]=>
-        string(9) "NS\NS\TR0"
-        ["kindOf"]=>
-        string(5) "trait"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(0) {
         }
-        ["requireImplements"]=>
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(9) "NS\NS\TR0"
+        ["requireExtends"]=>
         array(0) {
         }
-        ["requireExtends"]=>
+        ["requireImplements"]=>
         array(0) {
         }
       }
       [8]=>
       array(6) {
-        ["name"]=>
-        string(9) "NS\NS\TR1"
-        ["kindOf"]=>
-        string(5) "trait"
+        ["baseTypes"]=>
+        array(0) {
+        }
         ["flags"]=>
         int(1)
-        ["baseTypes"]=>
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(9) "NS\NS\TR1"
+        ["requireExtends"]=>
         array(0) {
         }
         ["requireImplements"]=>
         array(0) {
         }
-        ["requireExtends"]=>
-        array(0) {
-        }
       }
       [9]=>
       array(6) {
-        ["name"]=>
-        string(9) "NS\NS\TR2"
-        ["kindOf"]=>
-        string(5) "trait"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(4) {
           [0]=>
@@ -619,50 +646,23 @@ array(3) {
           [3]=>
           string(9) "NS\NS\TR1"
         }
-        ["requireImplements"]=>
-        array(1) {
-          [0]=>
-          string(8) "NS\NS\I2"
-        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(9) "NS\NS\TR2"
         ["requireExtends"]=>
         array(1) {
           [0]=>
           string(9) "NS\NS\CL1"
         }
+        ["requireImplements"]=>
+        array(1) {
+          [0]=>
+          string(8) "NS\NS\I2"
+        }
       }
-    }
-    ["functions"]=>
-    array(3) {
-      [0]=>
-      string(8) "NS\NS\f1"
-      [1]=>
-      string(8) "NS\NS\f2"
-      [2]=>
-      string(8) "NS\NS\f6"
-    }
-    ["constants"]=>
-    array(6) {
-      [0]=>
-      string(9) "NS\NS\CO0"
-      [1]=>
-      string(9) "NS\NS\CO1"
-      [2]=>
-      string(9) "NS\NS\CO2"
-      [3]=>
-      string(9) "NS\NS\CO3"
-      [4]=>
-      string(9) "NS\NS\CO4"
-      [5]=>
-      string(9) "NS\NS\CO5"
-    }
-    ["typeAliases"]=>
-    array(3) {
-      [0]=>
-      string(9) "NS\NS\TA0"
-      [1]=>
-      string(9) "NS\NS\TA1"
-      [2]=>
-      string(9) "NS\NS\TA2"
     }
   }
 }
@@ -672,7 +672,7 @@ array(3) {
   NULL
   ["garbage_filename"]=>
   NULL
-  ["/tmp"]=>
+  ["%s"]=>
   NULL
 }
 PASSED erroneous files test

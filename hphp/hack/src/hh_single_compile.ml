@@ -430,6 +430,7 @@ let do_compile filename compiler_options popt fail_or_ast debug_time =
   hhas
 
 let extract_facts ?pretty ~filename ~source_root text =
+  let () = ignore @@ pretty in
   let json_facts = match Hackc_parse_delegator.extract_facts filename source_root with
     | Some result -> Some result
     | None ->
@@ -439,7 +440,10 @@ let extract_facts ?pretty ~filename ~source_root text =
         ~filename ~text
   in
   (* return empty string if file has syntax errors *)
-  Option.value_map ~default:"" ~f:(Hh_json.json_to_string ?pretty) json_facts
+  Option.value_map
+    ~default:""
+    ~f:(Hh_json.json_to_multiline ~sort_keys:true)
+    json_facts
   |> fun x -> [x]
 
 let parse_hh_file filename body =

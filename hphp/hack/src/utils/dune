@@ -160,22 +160,6 @@
   (c_flags (:standard -I%{env:CMAKE_SOURCE_DIR=xxx})))
 
 (library
-  (name lsp)
-  (wrapped false)
-  (modules
-    lsp
-    lsp_fmt
-    lsp_helpers)
-  (libraries
-    file_content
-    file_url
-    hh_json
-    jsonrpc
-    utils_core)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)))
-
-(library
   (name server_load_flag)
   (wrapped false)
   (modules

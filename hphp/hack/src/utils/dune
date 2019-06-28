@@ -147,15 +147,6 @@
     naming_special_names
     pos))
 
-(library
-  (name http_lite)
-  (wrapped false)
-  (modules
-    http_lite)
-  (libraries
-    buffered_line_reader
-    utils_core))
-
 (copy_files config/build-id.c)
 
 (library

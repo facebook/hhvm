@@ -156,14 +156,6 @@
     buffered_line_reader
     utils_core))
 
-(library
-  (name file_url)
-  (wrapped false)
-  (modules
-    file_url)
-  (libraries
-    utils_core))
-
 (copy_files config/build-id.c)
 
 (library

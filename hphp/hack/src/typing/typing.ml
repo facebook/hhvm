@@ -4970,7 +4970,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
           let env, tyl = List.map_env env tyl resolve_ety in
           env, (r, Tunion tyl)
         | r, Tintersection tyl ->
-          let env, tyl = List.map_env env tyl resolve_ety in
+          let env, tyl = TUtils.run_on_intersection env tyl ~f:resolve_ety in
           Inter.intersect_list env r tyl
         | _, Tdynamic as ty -> env, ty
         | _, (Tany | Tprim Tstring | Tabstract (_, None) | Tobject)

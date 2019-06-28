@@ -258,6 +258,19 @@ module Tombstone_set = struct
   include Reordered_argument_set(Set.Make(Tombstone))
 end
 
+(* Information about one leaf in the namespace tree *)
+type nss_node = {
+
+  (* The name of just this leaf *)
+  nss_name: string;
+
+  (* The full name including all parent trunks above this leaf *)
+  nss_full_namespace: string;
+
+  (* A hashtable of all leaf elements below this branch *)
+  nss_children: (string, nss_node) Hashtbl.t;
+}
+
 (* Context information for the current symbol index *)
 type si_env = {
   sie_provider: search_provider;
@@ -277,6 +290,9 @@ type si_env = {
   sql_select_acnew_stmt: Sqlite3.stmt option ref;
   sql_select_actype_stmt: Sqlite3.stmt option ref;
   sql_select_namespaces_stmt: Sqlite3.stmt option ref;
+
+  (* NamespaceSearchService *)
+  nss_root_namespace: nss_node;
 }
 
 (* Default provider with no functionality *)
@@ -294,4 +310,9 @@ let default_si_env = {
   sql_select_acnew_stmt = ref None;
   sql_select_actype_stmt = ref None;
   sql_select_namespaces_stmt = ref None;
+  nss_root_namespace = {
+    nss_name = "\\";
+    nss_full_namespace = "\\";
+    nss_children = Hashtbl.create 0;
+  };
 }

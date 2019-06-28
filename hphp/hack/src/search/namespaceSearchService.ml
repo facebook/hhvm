@@ -8,30 +8,12 @@
 *)
 open SearchUtils
 
-(* Information about one leaf in the namespace tree *)
-type nss_node = {
-
-  (* The name of just this leaf *)
-  nss_name: string;
-
-  (* The full name including all parent trunks above this leaf *)
-  nss_full_namespace: string;
-
-  (* A hashtable of all leaf elements below this branch *)
-  nss_children: (string, nss_node) Hashtbl.t;
-}
-
-(* This is the root namespace *)
-let root_namespace = {
-    nss_name = "\\";
-    nss_full_namespace = "\\";
-    nss_children = Hashtbl.create 0;
-  }
-
 (* Register a namespace *)
-let register_namespace (namespace: string): unit =
+let register_namespace
+    ~(sienv: si_env)
+    ~(namespace: string): unit =
   let elem_list = String.split_on_char '\\' namespace in
-  let _ = Core_kernel.List.fold elem_list ~init:root_namespace
+  let _ = Core_kernel.List.fold elem_list ~init:sienv.nss_root_namespace
     ~f:(fun current_node leaf_name ->
 
     (* Ignore extra backslashes *)
@@ -59,15 +41,17 @@ let register_namespace (namespace: string): unit =
   ()
 
 (* Find the namespace that matches this prefix *)
-let find_exact_match (namespace: string): nss_node =
+let find_exact_match
+    ~(sienv: si_env)
+    ~(namespace: string): nss_node =
 
   (* If we're at the root namespace the answer is easy *)
   if namespace = "" || namespace = "\\" then begin
-    root_namespace
+    sienv.nss_root_namespace
   end else begin
     let elem_list = String.split_on_char '\\'
       (String.lowercase_ascii namespace) in
-    Core_kernel.List.fold elem_list ~init:root_namespace
+    Core_kernel.List.fold elem_list ~init:sienv.nss_root_namespace
       ~f:(fun current_node leaf_name ->
 
       (* Check to see if this leaf exists within the current node *)
@@ -90,7 +74,9 @@ let get_matches_for_node (node: nss_node): si_results =
   ) node.nss_children []
 
 (* Find all namespaces that match this prefix *)
-let find_matching_namespaces (query_text: string): si_results =
+let find_matching_namespaces
+    ~(sienv: si_env)
+    ~(query_text: string): si_results =
 
   (* Trivial case *)
   if query_text = "" then begin
@@ -98,13 +84,13 @@ let find_matching_namespaces (query_text: string): si_results =
 
   (* Special case - just give root namespace only *)
   end else if query_text = "\\" then begin
-    get_matches_for_node root_namespace
+    get_matches_for_node sienv.nss_root_namespace
 
   (* Normal case, search for matches *)
   end else begin
     let elem_list = String.split_on_char '\\'
       (String.lowercase_ascii query_text) in
-    let current_node = ref root_namespace in
+    let current_node = ref sienv.nss_root_namespace in
     let reached_end = ref false in
     let matches = ref [] in
     Core_kernel.List.iter elem_list ~f:(fun leaf_name ->
@@ -146,24 +132,27 @@ let find_matching_namespaces (query_text: string): si_results =
  * The alias will share the hashtbl of its target, so future namespaces
  * should appear in both places.
  *)
-let register_alias (alias: string) (target_ns: string): unit =
+let register_alias
+    ~(sienv: si_env)
+    ~(alias: string)
+    ~(target: string): unit =
   try
 
     (* First find the target and make sure there's only one *)
-    register_namespace target_ns;
-    let target = find_exact_match target_ns in
+    register_namespace ~sienv ~namespace:target;
+    let target_node = find_exact_match ~sienv ~namespace:target in
 
     (* Now assert that the alias cannot have a backslash in it *)
     let (source_ns, name) = Utils.split_ns_from_name alias in
-    let source = find_exact_match source_ns in
+    let source = find_exact_match ~sienv ~namespace:source_ns in
 
     (* Register this alias at the root *)
     let new_node = {
       nss_name = name;
-      nss_full_namespace = target.nss_full_namespace;
-      nss_children = target.nss_children;
+      nss_full_namespace = target_node.nss_full_namespace;
+      nss_children = target_node.nss_children;
     } in
     Hashtbl.add source.nss_children (String.lowercase_ascii name) new_node;
   with Not_found ->
     Hh_logger.log "Unable to register namespace map for [%s] -> [%s]"
-      alias target_ns;
+      alias target;

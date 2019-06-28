@@ -50,11 +50,11 @@ let initialize
 
   (* Register all namespaces *)
   List.iter namespace_list
-    ~f:(fun ns -> NamespaceSearchService.register_namespace ns);
+    ~f:(fun namespace -> NamespaceSearchService.register_namespace ~sienv ~namespace);
 
   (* Add namespace aliases from the .hhconfig file *)
   List.iter namespace_map ~f:(fun (alias, target) ->
-    NamespaceSearchService.register_alias alias target
+    NamespaceSearchService.register_alias ~sienv ~alias ~target
   );
 
   (* Here's the initialized environment *)
@@ -137,7 +137,7 @@ let find_matching_symbols
 
     (* Potential namespace matches always show up first *)
     let namespace_results = NamespaceSearchService.find_matching_namespaces
-    query_text in
+      ~sienv ~query_text in
 
     (* The local index captures symbols in files that have been changed on disk.
      * Search it first for matches, then search global and add any elements
@@ -166,9 +166,9 @@ let find_matching_symbols
       | NoIndex ->
         []
       | SqliteIndex ->
-        let r = SqliteSearchService.sqlite_search
+        let results = SqliteSearchService.sqlite_search
           ~sienv ~query_text ~max_results ~context in
-        LocalSearchService.extract_dead_results ~sienv ~results:r
+        LocalSearchService.extract_dead_results ~sienv ~results
       | TrieIndex ->
         HackSearchService.index_search query_text max_results kind_filter
     in

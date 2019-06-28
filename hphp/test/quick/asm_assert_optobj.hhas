@@ -8,6 +8,7 @@
   NullUninit
   FCallCtor <> 0 1 "" - ""
   PopC
+  LockObj
   SetL $object
   PopC
 
@@ -20,6 +21,7 @@
    NullUninit
    FCallCtor <> 0 1 "" - ""
    PopC
+   LockObj
   FPushObjMethodD 1 "main" NullThrows
   FCall <> 1 1 "" - "" ""
   PopC

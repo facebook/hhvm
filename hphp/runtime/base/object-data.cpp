@@ -1169,13 +1169,13 @@ ObjectData* ObjectData::newInstanceRawSmall(Class* cls, size_t size,
   assertx(size <= kMaxSmallSize);
   assertx(!cls->hasMemoSlots());
   auto mem = tl_heap->mallocSmallIndexSize(index, size);
-  return new (NotNull{}, mem) ObjectData(cls, InitRaw{}, DefaultAttrs);
+  return new (NotNull{}, mem) ObjectData(cls, InitRaw{}, IsBeingConstructed);
 }
 
 ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
   assertx(!cls->hasMemoSlots());
   auto mem = tl_heap->mallocBigSize(size);
-  return new (NotNull{}, mem) ObjectData(cls, InitRaw{}, DefaultAttrs);
+  return new (NotNull{}, mem) ObjectData(cls, InitRaw{}, IsBeingConstructed);
 }
 
 // called from jit code
@@ -1190,7 +1190,7 @@ ObjectData* ObjectData::newInstanceRawMemoSmall(Class* cls,
   auto mem = tl_heap->mallocSmallIndexSize(index, size);
   new (NotNull{}, mem) MemoNode(objoff);
   return new (NotNull{}, reinterpret_cast<char*>(mem) + objoff)
-    ObjectData(cls, InitRaw{}, DefaultAttrs);
+    ObjectData(cls, InitRaw{}, IsBeingConstructed);
 }
 
 ObjectData* ObjectData::newInstanceRawMemoBig(Class* cls,
@@ -1202,7 +1202,7 @@ ObjectData* ObjectData::newInstanceRawMemoBig(Class* cls,
   auto mem = tl_heap->mallocBigSize(size);
   new (NotNull{}, mem) MemoNode(objoff);
   return new (NotNull{}, reinterpret_cast<char*>(mem) + objoff)
-    ObjectData(cls, InitRaw{}, DefaultAttrs);
+    ObjectData(cls, InitRaw{}, IsBeingConstructed);
 }
 
 // Note: the normal object destruction path does not actually call this

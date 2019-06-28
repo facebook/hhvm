@@ -1788,7 +1788,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::IterBreak:
       return true;
 
-    // function calling
+    // function calling and object construction
     case Op::FPushFunc:
     case Op::FPushFuncD:
     case Op::FPushFuncRD:
@@ -1809,6 +1809,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::NewObjD:
     case Op::NewObjRD:
     case Op::NewObjS:
+    case Op::LockObj:
     case Op::ResolveFunc:
     case Op::ResolveObjMethod:
     case Op::ResolveClsMethod:

@@ -494,6 +494,7 @@ bool canDCE(IRInstruction* inst) {
   case InitSProps:
   case InitObjProps:
   case InitObjMemoSlots:
+  case LockObj:
   case DebugBacktrace:
   case DebugBacktraceFast:
   case InitThrowableFileAndLine:

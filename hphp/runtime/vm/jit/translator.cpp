@@ -275,6 +275,7 @@ static const struct {
   { OpNewObjD,     {None,             Stack1,       OutObject       }},
   { OpNewObjRD,    {Stack1,           Stack1,       OutObject       }},
   { OpNewObjS,     {None,             Stack1,       OutObject       }},
+  { OpLockObj,     {Stack1,           Stack1,       OutSameAsInput1 }},
 
   /*
    * FPush* and FCall are special. Like the Ret* instructions, their
@@ -1073,6 +1074,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::MemoSetEager:
   case Op::RetM:
   case Op::Select:
+  case Op::LockObj:
     return false;
 
   // These are instructions that are always interp-one'd, or are always no-ops.

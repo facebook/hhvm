@@ -11,6 +11,7 @@
   String "foo"
   FCallCtor <> 1 1 "" - ""
   PopC
+  LockObj
   SetL $x
   PopC
   CGetL $x

@@ -12,6 +12,7 @@
   String "foo"
   FCallCtor <> 1 1 "" - ""
   PopC
+  LockObj
   PopC
 
   DefCls 0
@@ -22,6 +23,7 @@
   String "foo"
   FCallCtor <> 1 1 "" - ""
   PopC
+  LockObj
   PopC
 
   DefCls 0
@@ -32,6 +34,7 @@
   String "foo"
   FCallCtor <> 1 1 "" - ""
   PopC
+  LockObj
   PopC
 
   DefCls 0
@@ -42,6 +45,7 @@
   String "foo"
   FCallCtor <> 1 1 "" - ""
   PopC
+  LockObj
   PopC
 
   DefCls 0
@@ -52,6 +56,7 @@
   String "foo"
   FCallCtor <> 1 1 "" - ""
   PopC
+  LockObj
   PopC
 
   Int 1

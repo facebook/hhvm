@@ -1216,6 +1216,12 @@ void emitFCallCtor(IRGS& env, FCallArgs fca, const StringData* clsHint) {
   prepareAndCallProfiled(env, callee, fca, obj, false, nullptr);
 }
 
+void emitLockObj(IRGS& env) {
+  auto obj = topC(env);
+  if (!obj->isA(TObj)) PUNT(LockObj-NonObj);
+  gen(env, LockObj, obj);
+}
+
 void emitFPushFunc(IRGS& env, uint32_t numParams, const ImmVector& v) {
   if (v.size() != 0) PUNT(InOut-FPushFunc);
   auto const callee = topC(env);

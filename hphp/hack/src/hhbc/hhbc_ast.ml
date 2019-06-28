@@ -493,6 +493,7 @@ type instruct_misc =
   | MemoGetEager of Label.t * Label.t * (local_id * int) option
   | MemoSet of (local_id * int) option
   | MemoSetEager of (local_id * int) option
+  | LockObj
 
 type gen_creation_execution =
   | CreateCont

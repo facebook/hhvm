@@ -217,6 +217,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
    * the ref-count yourself. Whenever possible, prefer using the Object class
    * instead, which takes care of this for you.
    */
+  template <bool Unlocked = false>
   static ObjectData* newInstance(Class*);
 
   /*
@@ -224,6 +225,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
    * If the class has reified generics, the second arg must be an array of
    * type structures representing the reified types.
    */
+  template <bool Unlocked = false>
   static ObjectData* newInstanceReified(Class*, ArrayData*);
 
   /*
@@ -244,8 +246,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
    *
    * The initial ref-count will be set to one.
    */
-  static const uint8_t DefaultAttrs = NoAttrs;
-
   static ObjectData* newInstanceRawSmall(Class*, size_t size, size_t index);
   static ObjectData* newInstanceRawBig(Class*, size_t size);
 
@@ -284,6 +284,8 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   // Is this an object for which construction has not finished yet?
   bool isBeingConstructed() const;
+  // Clear the IsBeingConstructed bit to indicate that construction is done.
+  void lockObject();
 
   // Set if we might re-enter while some of the properties contain
   // garbage, eg after calling newInstanceNoPropInit, and before

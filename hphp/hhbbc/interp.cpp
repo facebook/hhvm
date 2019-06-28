@@ -3662,6 +3662,7 @@ bool fcallOptimizeChecks(
           bc::String { err },
           bc::FCallCtor { FCallArgs(1), staticEmptyString() },
           bc::PopC {},
+          bc::LockObj {},
           bc::Throw {}
         );
         return true;
@@ -4437,6 +4438,12 @@ void in(ISS& env, const bc::FCallCtor& op) {
   }
 
   fcallKnownImpl(env, op.fca, *rfunc, obj, false /* nullsafe */, updateFCA);
+}
+
+void in(ISS& env, const bc::LockObj& op) {
+  auto const t = popC(env);
+  if (t.subtypeOf(BObj)) nothrow(env);
+  push(env, t);
 }
 
 void in(ISS& env, const bc::FCall& op) {

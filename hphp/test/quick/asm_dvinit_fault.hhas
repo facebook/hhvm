@@ -45,6 +45,7 @@ dv_init2:
       NullUninit
       FCallCtor <> 0 1 "" - ""
       PopC
+      LockObj
       Throw
     } .catch {
       Int 4321

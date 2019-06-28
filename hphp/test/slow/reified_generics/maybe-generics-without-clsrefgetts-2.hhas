@@ -44,6 +44,7 @@ L1:
   NullUninit
   FCallCtor <> 0 1 "" - ""
   PopC
+  LockObj
   RetC
 }
 

@@ -888,6 +888,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LIterInitK:
   case LIterNext:
   case LIterNextK:
+  case LockObj:
   case LookupClsRDS:
   case LookupSPropSlot:
   case Lshr:

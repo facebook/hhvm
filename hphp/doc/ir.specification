@@ -1637,6 +1637,10 @@ To string conversions:
 
   Call the custom instance constructor of a Closure.
 
+| LockObj, ND, S(Obj), NF
+
+  Clear the IsBeingConstructed flag on the object.
+
 | NewArray, D(Arr), C(Int), PRc
 
   Allocate a new array with the expected capacity S0.

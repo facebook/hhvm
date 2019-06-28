@@ -141,6 +141,7 @@
   NullUninit
   FCallCtor <> 0 1 "" - ""
   PopC
+  LockObj
   SetL $obj
   PopC
 
@@ -177,6 +178,7 @@
   NullUninit
   FCallCtor <> 0 1 "" - ""
   PopC
+  LockObj
   SetL $base
   PopC
 
@@ -197,6 +199,7 @@
   NullUninit
   FCallCtor <> 0 1 "" - ""
   PopC
+  LockObj
   SetL $derived
   PopC
 

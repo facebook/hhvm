@@ -5310,8 +5310,8 @@ namespace {
 ObjectData* newObjImpl(Class* cls, ArrayData* reified_types) {
   // Replace input with uninitialized instance.
   auto this_ = reified_types
-    ? ObjectData::newInstanceReified(cls, reified_types)
-    : ObjectData::newInstance(cls);
+    ? ObjectData::newInstanceReified<true>(cls, reified_types)
+    : ObjectData::newInstance<true>(cls);
   TRACE(2, "NewObj: just new'ed an instance of class %s: %p\n",
         cls->name()->data(), this_);
   return this_;
@@ -5390,6 +5390,12 @@ OPTBLD_INLINE void iopFCallCtor(PC origpc, PC& pc, FCallArgs fca,
 
   doFCall(ar, fca.numArgs, fca.hasUnpack());
   pc = vmpc();
+}
+
+OPTBLD_INLINE void iopLockObj() {
+  auto c1 = vmStack().topC();
+  if (!tvIsObject(*c1)) raise_error("LockObj: expected an object");
+  c1->m_data.pobj->lockObject();
 }
 
 namespace {

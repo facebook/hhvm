@@ -881,7 +881,8 @@ and emit_new env pos (cid : A.class_id) (targs : Aast.targ list) (args : A.expr 
     instr_uargs;
     emit_pos pos;
     instr_fcallctor (get_fcall_args args uargs None);
-    instr_popc
+    instr_popc;
+    instr_lockobj
   ],
   empty
 

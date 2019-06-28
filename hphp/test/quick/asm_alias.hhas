@@ -30,6 +30,7 @@
   NullUninit
   FCallCtor <> 0 1 "" - ""
   PopC
+  LockObj
   SetL $x
   PopC
 

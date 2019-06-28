@@ -73,6 +73,7 @@ end:
   NullUninit
   FCallCtor <> 0 1 "" - ""
   PopC
+  LockObj
   SetL $obj
   PopC
   NullUninit
@@ -92,6 +93,7 @@ cls2:
   NullUninit
   FCallCtor <> 0 1 "" - ""
   PopC
+  LockObj
   SetL $obj
   PopC
   NullUninit

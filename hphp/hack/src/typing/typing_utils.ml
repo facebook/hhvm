@@ -95,6 +95,11 @@ type diff = locl ty -> locl ty -> locl ty
 let (diff_ref : diff ref) = ref not_implemented
 let diff x = !diff_ref x
 
+type approx = ApproxUp | ApproxDown
+type non = Env.env -> Reason.t -> locl ty -> approx:approx -> (Env.env * locl ty)
+let (non_ref : non ref) = ref not_implemented
+let non x = !non_ref x
+
 type simplify_intersections = Env.env ->
   ?on_tyvar:(Env.env -> Reason.t -> int -> Env.env * locl ty) -> locl ty -> Env.env * locl ty
 let (simplify_intersections_ref : simplify_intersections ref) = ref not_implemented

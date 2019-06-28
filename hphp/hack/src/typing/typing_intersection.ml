@@ -29,7 +29,7 @@ let non env r ty ~approx =
   let non_ty = match snd ty with
     | Tprim Nast.Tnull -> (r, Tnonnull)
     | Tnonnull -> (r, Tprim Nast.Tnull)
-    | _ -> if approx = `up then MkType.mixed r else MkType.nothing r in
+    | _ -> if approx = Utils.ApproxUp then MkType.mixed r else MkType.nothing r in
   env, non_ty
 
 (** Decompose types as union of "atomic" elements.
@@ -81,9 +81,9 @@ let rec intersect env ~r ty1 ty2 =
   let (env, ty2) = Env.expand_type env ty2 in
   if Utils.is_sub_type_for_union env ty1 ty2 then env, ty1 else
   if Utils.is_sub_type_for_union env ty2 ty1 then env, ty2 else
-  let env, non_ty2 = non env Reason.none ty2 ~approx:`down in
+  let env, non_ty2 = non env Reason.none ty2 Utils.ApproxDown in
   if Utils.is_sub_type_for_union env ty1 non_ty2 then env, MkType.nothing r else
-  let env, non_ty1 = non env Reason.none ty1 ~approx:`down in
+  let env, non_ty1 = non env Reason.none ty1 Utils.ApproxDown in
   if Utils.is_sub_type_for_union env ty2 non_ty1 then env, MkType.nothing r else
   let (env, ty1) = decompose_atomic env ty1 in
   let (env, ty2) = decompose_atomic env ty2 in
@@ -254,4 +254,5 @@ let intersect env ~r ty1 ty2 =
   Typing_log.log_intersection ~level:1 env r ty1 ty2 ~inter_ty;
   env, inter_ty
 
+let () = Utils.non_ref := non
 let () = Utils.simplify_intersections_ref := simplify_intersections

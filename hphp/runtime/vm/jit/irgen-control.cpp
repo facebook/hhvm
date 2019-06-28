@@ -24,6 +24,7 @@
 
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/jit/irgen-interpone.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 
@@ -318,7 +319,7 @@ void emitThrow(IRGS& env) {
     srcTy.maybe(Type::SubObj(SystemLib::s_ErrorClass));
   if (!stackEmpty || offset == InvalidAbsoluteOffset || !maybeThrowable ||
       !(srcTy <= TObj)) {
-    return interpOne(env, *env.currentNormalizedInstruction);
+    return interpOne(env);
   }
 
   if (srcTy <= Type::SubObj(SystemLib::s_ThrowableClass)) {

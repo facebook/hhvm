@@ -30,7 +30,7 @@ struct IRGS;
 
 //////////////////////////////////////////////////////////////////////
 
-void interpOne(IRGS&, const NormalizedInstruction&);
+void interpOne(IRGS&);
 void interpOne(IRGS&, int popped);
 void interpOne(IRGS&, Type t, int popped);
 void interpOne(IRGS&, folly::Optional<Type>, int popped, int pushed,

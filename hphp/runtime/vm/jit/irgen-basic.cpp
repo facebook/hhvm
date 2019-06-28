@@ -42,7 +42,7 @@ const StaticString s_new_instance_of_not_string(
 void emitClsRefGetC(IRGS& env, uint32_t slot) {
   auto const name = topC(env);
   if (!name->type().subtypeOfAny(TObj, TStr)) {
-    interpOne(env, *env.currentNormalizedInstruction);
+    interpOne(env);
     return;
   }
   popC(env);
@@ -92,7 +92,7 @@ void emitClsRefGetTS(IRGS& env, uint32_t slot) {
     [&] {
       // Has reified generics
       hint(env, Block::Hint::Unlikely);
-      interpOne(env, *env.currentNormalizedInstruction);
+      interpOne(env);
     },
     // taken
     [&] {
@@ -314,7 +314,7 @@ void emitLateBoundCls(IRGS& env, uint32_t slot) {
   auto const clss = curClass(env);
   if (!clss) {
     // no static context class, so this will raise an error
-    interpOne(env, *env.currentNormalizedInstruction);
+    interpOne(env);
     return;
   }
   auto const ctx = ldCtx(env);
@@ -324,7 +324,7 @@ void emitLateBoundCls(IRGS& env, uint32_t slot) {
 void emitSelf(IRGS& env, uint32_t slot) {
   auto const clss = curClass(env);
   if (clss == nullptr) {
-    interpOne(env, *env.currentNormalizedInstruction);
+    interpOne(env);
   } else {
     putClsRef(env, slot, cns(env, clss));
   }
@@ -333,7 +333,7 @@ void emitSelf(IRGS& env, uint32_t slot) {
 void emitParent(IRGS& env, uint32_t slot) {
   auto const clss = curClass(env);
   if (clss == nullptr || clss->parent() == nullptr) {
-    interpOne(env, *env.currentNormalizedInstruction);
+    interpOne(env);
   } else {
     putClsRef(env, slot, cns(env, clss->parent()));
   }

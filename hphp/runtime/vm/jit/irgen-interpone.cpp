@@ -336,35 +336,36 @@ interpClsRefSlots(IRGS& /*env*/, const NormalizedInstruction& inst) {
 
 }
 
-void interpOne(IRGS& env, const NormalizedInstruction& inst) {
+void interpOne(IRGS& env) {
   folly::Optional<Type> checkTypeType;
-  auto stackType = interpOutputType(env, inst, checkTypeType);
-  auto popped = getStackPopped(inst.pc());
-  auto pushed = getStackPushed(inst.pc());
+  auto const inst = env.currentNormalizedInstruction;
+  auto stackType = interpOutputType(env, *inst, checkTypeType);
+  auto popped = getStackPopped(inst->pc());
+  auto pushed = getStackPushed(inst->pc());
   FTRACE(1, "emitting InterpOne for {}, result = {}, popped {}, pushed {}\n",
-         inst.toString(),
+         inst->toString(),
          stackType.hasValue() ? stackType->toString() : "<none>",
          popped, pushed);
 
   InterpOneData idata { spOffBCFromIRSP(env) };
-  auto locals = interpOutputLocals(env, inst, idata.smashesAllLocals,
+  auto locals = interpOutputLocals(env, *inst, idata.smashesAllLocals,
     stackType);
   idata.nChangedLocals = locals.size();
   idata.changedLocals = locals.data();
 
-  auto slots = interpClsRefSlots(env, inst);
+  auto slots = interpClsRefSlots(env, *inst);
   idata.nChangedClsRefSlots = slots.size();
   idata.changedClsRefSlots = slots.data();
 
   interpOne(env, stackType, popped, pushed, idata);
   if (checkTypeType) {
-    auto const out = getInstrInfo(inst.op()).out;
+    auto const out = getInstrInfo(inst->op()).out;
     auto const checkIdx = BCSPRelOffset{
       (out & InstrFlags::StackIns1) ? 1 : 0
     }.to<FPInvOffset>(env.irb->fs().bcSPOff());
 
     checkType(env, Location::Stack { checkIdx }, *checkTypeType,
-              inst.nextSk().offset(), true /* outerOnly */);
+              inst->nextSk().offset(), true /* outerOnly */);
   }
 }
 
@@ -408,36 +409,34 @@ void interpOne(IRGS& env,
  * translated here.
  */
 
-#define INTERP interpOne(env, *env.currentNormalizedInstruction);
-
-void emitExit(IRGS& env)                      { INTERP }
-void emitFatal(IRGS& env, FatalOp)            { INTERP }
-void emitSetOpG(IRGS& env, SetOpOp)           { INTERP }
-void emitSetOpS(IRGS& env, SetOpOp, uint32_t) { INTERP }
-void emitIncDecG(IRGS& env, IncDecOp)         { INTERP }
-void emitUnsetG(IRGS& env)                    { INTERP }
-void emitIncl(IRGS& env)                      { INTERP }
-void emitInclOnce(IRGS& env)                  { INTERP }
-void emitReq(IRGS& env)                       { INTERP }
-void emitReqDoc(IRGS& env)                    { INTERP }
-void emitReqOnce(IRGS& env)                   { INTERP }
-void emitEval(IRGS& env)                      { INTERP }
-void emitDefTypeAlias(IRGS& env, uint32_t)    { INTERP }
-void emitDefCns(IRGS& env, const StringData*) { INTERP }
-void emitDefCls(IRGS& env, uint32_t)          { INTERP }
-void emitDefRecord(IRGS& env, uint32_t)       { INTERP }
+void emitExit(IRGS& env)                      { interpOne(env); }
+void emitFatal(IRGS& env, FatalOp)            { interpOne(env); }
+void emitSetOpG(IRGS& env, SetOpOp)           { interpOne(env); }
+void emitSetOpS(IRGS& env, SetOpOp, uint32_t) { interpOne(env); }
+void emitIncDecG(IRGS& env, IncDecOp)         { interpOne(env); }
+void emitUnsetG(IRGS& env)                    { interpOne(env); }
+void emitIncl(IRGS& env)                      { interpOne(env); }
+void emitInclOnce(IRGS& env)                  { interpOne(env); }
+void emitReq(IRGS& env)                       { interpOne(env); }
+void emitReqDoc(IRGS& env)                    { interpOne(env); }
+void emitReqOnce(IRGS& env)                   { interpOne(env); }
+void emitEval(IRGS& env)                      { interpOne(env); }
+void emitDefTypeAlias(IRGS& env, uint32_t)    { interpOne(env); }
+void emitDefCns(IRGS& env, const StringData*) { interpOne(env); }
+void emitDefCls(IRGS& env, uint32_t)          { interpOne(env); }
+void emitDefRecord(IRGS& env, uint32_t)       { interpOne(env); }
 void emitAliasCls(IRGS& env,
                   const StringData*,
-                  const StringData*)          { INTERP }
-void emitChainFaults(IRGS& env)               { INTERP }
-void emitContGetReturn(IRGS& env)             { INTERP }
+                  const StringData*)          { interpOne(env); }
+void emitChainFaults(IRGS& env)               { interpOne(env); }
+void emitContGetReturn(IRGS& env)             { interpOne(env); }
 void emitContAssignDelegate(IRGS& env, int32_t)
-                                              { INTERP }
-void emitContEnterDelegate(IRGS& env)         { INTERP }
+                                              { interpOne(env); }
+void emitContEnterDelegate(IRGS& env)         { interpOne(env); }
 void emitYieldFromDelegate(IRGS& env, int32_t, int32_t)
-                                              { INTERP }
+                                              { interpOne(env); }
 void emitContUnsetDelegate(IRGS& env, CudOp, int32_t)
-                                              { INTERP }
+                                              { interpOne(env); }
 
 //////////////////////////////////////////////////////////////////////
 

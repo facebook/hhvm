@@ -34,6 +34,7 @@
 #include "hphp/runtime/vm/jit/irgen-create.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen-types.h"
 
 namespace HPHP { namespace jit { namespace irgen {
@@ -1274,23 +1275,26 @@ void implFPushObjMethod(IRGS& env,
                         SSATmp* methodName,
                         ObjMethodOp subop,
                         bool dynamic,
-                        SSATmp* tsList) {
+                        SSATmp* tsList,
+                        bool extraInput) {
   assertx(methodName->isA(TStr));
-  auto const objPos = static_cast<int32_t>(numParams + 2);
+  auto const objPos = static_cast<int32_t>(numParams + (extraInput ? 3 : 2));
   auto const obj = topC(env, BCSPRelOffset{objPos});
 
   if (obj->type() <= TObj) {
+    if (extraInput) popC(env);
     fpushObjMethod(env, obj, methodName, numParams, dynamic, tsList);
     return;
   }
 
   if (obj->type() <= TInitNull && subop == ObjMethodOp::NullSafe) {
+    if (extraInput) popC(env);
     prepareToCallKnown(env, SystemLib::s_nullFunc, nullptr, numParams, nullptr,
                        false, tsList);
     return;
   }
 
-  PUNT(FPushObjMethod-nonObj);
+  interpOne(env);
 }
 
 } // namespace
@@ -1299,10 +1303,9 @@ void emitFPushObjMethod(IRGS& env,
                         uint32_t numParams,
                         ObjMethodOp subop,
                         const ImmVector& v) {
-  if (v.size() != 0) PUNT(FPushObjMethod-InOut);
-  auto const methodName = popC(env);
-  if (!methodName->isA(TStr)) PUNT(FPushObjMethod-nonStr);
-  implFPushObjMethod(env, numParams, methodName, subop, true, nullptr);
+  auto const methodName = topC(env);
+  if (v.size() != 0 || !methodName->isA(TStr)) return interpOne(env);
+  implFPushObjMethod(env, numParams, methodName, subop, true, nullptr, true);
 }
 
 void emitFPushObjMethodD(IRGS& env,
@@ -1310,7 +1313,7 @@ void emitFPushObjMethodD(IRGS& env,
                          const StringData* methodName,
                          ObjMethodOp subop) {
   implFPushObjMethod(env, numParams, cns(env, methodName), subop, false,
-                     nullptr);
+                     nullptr, false);
 }
 
 
@@ -1318,9 +1321,9 @@ void emitFPushObjMethodRD(IRGS& env,
                          uint32_t numParams,
                          const StringData* methodName,
                          ObjMethodOp subop) {
-  auto const tsList = popC(env);
+  auto const tsList = topC(env);
   implFPushObjMethod(env, numParams, cns(env, methodName), subop, false,
-                     tsList);
+                     tsList, true);
 }
 
 namespace {

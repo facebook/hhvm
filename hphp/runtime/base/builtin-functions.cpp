@@ -732,14 +732,6 @@ void throw_missing_this(const Func* f) {
   SystemLib::throwBadMethodCallExceptionObject(msg);
 }
 
-void NEVER_INLINE raise_null_object_prop() {
-  raise_notice("Trying to get property of non-object");
-}
-
-void NEVER_INLINE throw_null_get_object_prop() {
-  raise_error("Trying to get property of non-object");
-}
-
 void NEVER_INLINE throw_invalid_property_name(const String& name) {
   if (!name.size()) {
     raise_error("Cannot access empty property");

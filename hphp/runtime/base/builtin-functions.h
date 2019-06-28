@@ -52,8 +52,6 @@ String concat4(const String& s1, const String& s2, const String& s3,
 [[noreturn]] void NEVER_INLINE throw_missing_this(const Func* f);
 [[noreturn]] void NEVER_INLINE throw_has_this_need_static(const Func* f);
 void NEVER_INLINE throw_invalid_property_name(const String& name);
-void NEVER_INLINE throw_null_get_object_prop();
-void NEVER_INLINE raise_null_object_prop();
 
 [[noreturn]]
 void throw_exception(const Object& e);

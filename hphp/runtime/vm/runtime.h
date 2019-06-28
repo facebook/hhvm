@@ -155,15 +155,6 @@ frame_free_locals_inl(ActRec* fp, int numLocals, TypedValue* rv) {
 }
 
 void ALWAYS_INLINE
-frame_free_inl(ActRec* fp, TypedValue* rv) { // For frames with no locals
-  assertx(0 == fp->m_func->numLocals());
-  assertx(fp->m_varEnv == nullptr);
-  assertx(fp->hasThis());
-  decRefObj(fp->getThis());
-  EventHook::FunctionReturn(fp, *rv);
-}
-
-void ALWAYS_INLINE
 frame_free_locals_unwind(ActRec* fp, int numLocals, ObjectData* phpException) {
   fp->setLocalsDecRefd();
   frame_free_locals_inl_no_hook(fp, numLocals);

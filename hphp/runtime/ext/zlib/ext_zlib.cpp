@@ -654,10 +654,6 @@ struct ZlibExtension final : Extension {
     HHVM_FE(gzgetss);
     HHVM_FE(gzpassthru);
     HHVM_FE(gzwrite);
-#ifdef HAVE_QUICKLZ
-    HHVM_FE(qlzcompress);
-    HHVM_FE(qlzuncompress);
-#endif
     HHVM_FE(nzcompress);
     HHVM_FE(nzuncompress);
 
@@ -685,9 +681,6 @@ struct ZlibExtension final : Extension {
       s_SystemLib_ChunkedGunzipper.get());
 
     loadSystemlib();
-#ifdef HAVE_QUICKLZ
-    loadSystemlib("zlib-qlz");
-#endif
   }
 } s_zlib_extension;
 ///////////////////////////////////////////////////////////////////////////////

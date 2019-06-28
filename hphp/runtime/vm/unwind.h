@@ -86,15 +86,6 @@ struct VMSwitchMode : BaseException {
 };
 
 /*
- * Thrown for stack overflow in a jitted prologue.
- */
-struct VMStackOverflow : BaseException {
-  const char* what() const noexcept override {
-    return "VMStackOverflow";
-  }
-};
-
-/*
  * Same as VMSwitchMode, except for use from a builtin---the frame for
  * the builtin function should be unwound before resuming the VM.
  */

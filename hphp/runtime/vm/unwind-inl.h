@@ -66,33 +66,6 @@ inline void exception_handler(Action action) {
     return;
   }
 
-  catch (VMStackOverflow&) {
-    checkVMRegState();
-    ITRACE_MOD(Trace::unwind, 1, "unwind: VMStackOverflow\n");
-    auto const fp = vmfp();
-    auto const reenter = fp == vmFirstAR();
-    if (!reenter) {
-      /*
-       * vmfp() is actually a pre-live ActRec, so rejig things so that
-       * it looks like the exception was thrown when we were just
-       * about to do the call. See handleStackOverflow for more
-       * details.
-       */
-      auto const outer = fp->m_sfp;
-      auto const off = outer->func()->base() + fp->m_callOff;
-      vmpc() = outer->func()->unit()->at(off);
-      assertx(hasFCallEffects(peek_op(vmpc())));
-      vmfp() = outer;
-      assertx(vmsp() == reinterpret_cast<Cell*>(fp) - fp->numArgs());
-    } else {
-      vmsp() = reinterpret_cast<Cell*>(fp + 1);
-    }
-    auto fatal = new FatalErrorException("Stack overflow");
-    if (reenter) fatal->throwException();
-    unwindCpp(fatal);
-    not_reached();
-  }
-
   catch (Exception& e) {
     checkVMRegState();
     ITRACE_MOD(Trace::unwind, 1, "unwind: Exception: {}\n", e.what());

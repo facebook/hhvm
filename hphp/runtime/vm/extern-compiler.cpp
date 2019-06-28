@@ -202,8 +202,8 @@ struct PipeLogger : public folly::AsyncReader::ReadCallback {
       m_eventBase = std::make_unique<folly::EventBase>();
 
       m_thread = std::make_unique<std::thread>([this]() {
-	  m_eventBase->loopForever();
-	});
+          m_eventBase->loopForever();
+        });
 
       m_eventBase->waitUntilRunning();
     }
@@ -220,12 +220,12 @@ struct PipeLogger : public folly::AsyncReader::ReadCallback {
       // Destroying the AsyncPipeReader closes the fd.
       auto* reader = m_reader.release();
       m_eventBase->runInEventBaseThreadAndWait([reader]() {
-	  reader->destroy();
-	});
+          reader->destroy();
+        });
 
       if (m_thread->joinable()) {
-	m_eventBase->terminateLoopSoon();
-	m_thread->join();
+        m_eventBase->terminateLoopSoon();
+        m_thread->join();
       }
       m_eventBase.reset();
       m_thread.reset();
@@ -255,9 +255,9 @@ struct PipeLogger : public folly::AsyncReader::ReadCallback {
     const char* s = start;
     while (s != tail) {
       if (*s == '\n') {
-	std::string line = std::string(s, s - start);
-	Logger::FError("[external compiler {}]: {}", m_pid, line);
-	start = s + 1;
+        std::string line = std::string(s, s - start);
+        Logger::FError("[external compiler {}]: {}", m_pid, line);
+        start = s + 1;
       }
       s++;
     }

@@ -7,6 +7,8 @@
  *
  *)
 
+open Core_kernel
+open Hh_core
 open Typing_defs
 
 module Env = Typing_env
@@ -42,7 +44,32 @@ let decompose_atomic env ty =
   let tyl = TySet.elements (TySet.of_list tyl) in
   env, MkType.union (fst ty) tyl
 
-let rec intersect env r ty1 ty2 =
+(** Number of '&' symbols in an intersection representation. E.g. for (A & B),
+returns 1, for A, returns 0. *)
+let number_of_inter_symbols ty =
+  let rec n_inter tyl n =
+    match tyl with
+    | [] -> n
+    | ty :: tyl ->
+      begin match snd ty with
+      | Tintersection tyl' -> n_inter (tyl' @ tyl) (List.length tyl' - 1 + n)
+      | Tunion tyl' -> n_inter (tyl' @ tyl) n
+      | Toption ty -> n_inter (ty :: tyl) n
+      | _ -> n_inter tyl n
+      end in
+  n_inter [ty] 0
+
+let collapses ty1 ty2 ~inter_ty =
+  let n_inter_inter = number_of_inter_symbols inter_ty and
+      n_inter1      = number_of_inter_symbols ty1 and
+      n_inter2      = number_of_inter_symbols ty2 in
+  n_inter_inter <= n_inter1 + n_inter2
+
+(** Computes the intersection (greatest lower bound) of two types.
+For the intersection of unions, attempt to simplify by using the distributivity
+of intersection over union. Uses the the `collapses` test function to make sure
+the resulting type is no greater in size than the trivial `Tintersection [ty1; ty2]`. *)
+let rec intersect env ~r ty1 ty2 =
   let (env, ty1) = Env.expand_type env ty1 in
   let (env, ty2) = Env.expand_type env ty2 in
   if Utils.is_sub_type_for_union env ty1 ty2 then env, ty1 else
@@ -58,6 +85,25 @@ let rec intersect env r ty1 ty2 =
     intersect_lists env r tyl1 tyl2
   | (_, Tintersection tyl), ty | ty, (_, Tintersection tyl) ->
     intersect_lists env r [ty] tyl
+  | (r1, Tunion tyl1), (r2, Tunion tyl2) ->
+    (* Factorize common types, for example
+       (A | B) & (A | C) = A | (B & C)
+    and
+       (A | B | C1 | D1) & (A | B | C2 | D2) = A | B | ((C1 | D1) & (C2 | D2))
+    *)
+    let tys1 = TySet.of_list tyl1 in
+    let tys2 = TySet.of_list tyl2 in
+    let common_tys = TySet.inter tys1 tys2 in
+    let tys1' = TySet.diff tys1 common_tys in
+    let tys2' = TySet.diff tys2 common_tys in
+    let tyl1' = TySet.elements tys1' in
+    let tyl2' = TySet.elements tys2' in
+    let common_tyl = TySet.elements common_tys in
+    let env, not_common_tyl = intersect_unions env r (r1, tyl1') (r2, tyl2') in
+    env, MkType.union r (common_tyl @ not_common_tyl)
+  | (r_union, Tunion tyl), ty | ty, (r_union, Tunion tyl) ->
+    let env, inter_tyl = intersect_ty_union env r ty (r_union, tyl) in
+    env, MkType.union r inter_tyl
   | _ ->
     env, (r, Tintersection [ty1; ty2])
 
@@ -90,6 +136,36 @@ and try_intersect env r ty1 ty2 =
   | Tintersection _ -> env, None
   | _ -> env, Some ty
 
+and intersect_unions env r (r1, tyl1) (r2, tyl2) =
+  (* The order matters. (A | B | C) & (A | B) gets simplified to (A | B)
+  while (A | B) & (A | B | C) would become A | B | ((A | B) & C), so we
+  put the longest union first as a heuristic. *)
+  let (r1, tyl1), (r2, tyl2) = if List.length tyl1 >= List.length tyl2
+    then (r1, tyl1), (r2, tyl2) else (r2, tyl2), (r1, tyl1) in
+  let union_ty1 = MkType.union r1 tyl1 in
+  intersect_ty_union env r union_ty1 (r2, tyl2)
+
+(** For (A1 | .. | An) & B, compute each of the A1 & B, .. , An & B.
+Keep those which collapse (see `collapses` function) with B
+and leave the others unchanged.
+So if I is the set of indices i such that Ai collapses with B,
+and J the set of indices such that this is not the case,
+the result would be
+  (|_{i in I} (Ai & B)) | (B & (|_{j in J} Aj))
+*)
+and intersect_ty_union env r ty1 (r_union, tyl2) =
+  let env, inter_tyl = List.map_env env tyl2 ~f:(fun env ty2 -> intersect env r ty1 ty2) in
+  let zipped = List.zip_exn tyl2 inter_tyl in
+  let (collapsed, not_collapsed) = List.partition_tf zipped
+    ~f:(fun (ty2, inter_ty) -> collapses ty1 ty2 ~inter_ty) in
+  let collapsed = List.map collapsed ~f:snd in
+  let not_collapsed = match not_collapsed with
+    | [] -> []
+    | [(_ty2,  inter_ty)] -> [inter_ty]
+    | _ ->
+      let not_collapsed = List.map not_collapsed ~f:fst in
+      [MkType.intersection r [ty1; (MkType.union r_union not_collapsed)]] in
+  env, not_collapsed @ collapsed
+
 let intersect_list env r tyl =
-  (* TODO T44713456 dummy implementation for now. *)
-  env, (r, Tintersection tyl)
+  List.fold_left_env env tyl ~init:(MkType.mixed r) ~f:(intersect ~r)

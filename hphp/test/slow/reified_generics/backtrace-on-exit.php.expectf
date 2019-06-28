@@ -93,7 +93,7 @@ array(3) {
     ["class"]=>
     string(1) "C"
     ["type"]=>
-    string(2) "::"
+    string(2) "->"
     ["args"]=>
     array(0) {
     }

@@ -442,14 +442,10 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
           clsname += mangleReifiedGenericsName(reified_generics);
         }
         frame.set(s_class, clsname);
-        if (!isReturning && fp->hasThis()) {
-          if (btArgs.m_withThis) {
-            frame.set(s_object, Object(fp->getThis()));
-          }
-          frame.set(s_type, s_arrow);
-        } else {
-          frame.set(s_type, s_double_colon);
+        if (!isReturning && fp->hasThis() && btArgs.m_withThis) {
+          frame.set(s_object, Object(fp->getThis()));
         }
+        frame.set(s_type, fp->func()->isStatic() ? s_double_colon : s_arrow);
       }
     }
 

@@ -46,9 +46,23 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, ServerInferTypeBatch.go genv.workers positions env
     | TYPED_AST (filename) ->
         env, ServerTypedAst.go env filename
-    | IDE_HOVER (fn, line, char) ->
+    | IDE_HOVER (path, line, char) ->
+        let relative_path = Relative_path.create_detect_prefix path in
+        let (ctx, entry) = ServerIdeContext.update
+          ~tcopt:env.ServerEnv.tcopt
+          ~ctx:ServerIdeContext.empty
+          ~path:relative_path
+          ~file_input:(ServerCommandTypes.FileName path)
+        in
         let basic_only = genv.local_config.ServerLocalConfig.basic_autocomplete_only in
-        env, ServerHover.go env (fn, line, char) ~basic_only
+        let result  = ServerHover.go_ctx
+          ~ctx
+          ~entry
+          ~line
+          ~char
+          ~basic_only
+        in
+        env, result
     | DOCBLOCK_AT (filename, line, column, base_class_name) ->
         let basic_only = genv.local_config.ServerLocalConfig.basic_autocomplete_only in
         let r = ServerDocblockAt.go_docblock_at

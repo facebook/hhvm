@@ -10,26 +10,6 @@
 open Core_kernel
 open HoverService
 
-let symbols_at (file, line, char) tcopt =
-  let contents = match file with
-    | ServerCommandTypes.FileName file_name ->
-      let relative_path = Relative_path.(create Root file_name) in
-      File_provider.get_contents relative_path
-    | ServerCommandTypes.FileContent content -> Some content
-  in
-  match contents with
-  | None -> []
-  | Some contents -> ServerIdentifyFunction.go contents line char tcopt
-
-let type_at (file, line, char) tcopt naming_table =
-  let tcopt = {
-    tcopt with
-    GlobalOptions.tco_dynamic_view = ServerDynamicView.dynamic_view_on ();
-  } in
-  let _, tast = ServerIdeUtils.check_file_input tcopt naming_table file in
-  let env_ty_opt = ServerInferType.type_at_pos tast line char in
-  Option.map env_ty_opt ~f:(fun (env, ty) -> env, Tast_expand.expand_ty env ty)
-
 (** When we get a Class occurrence and a Method occurrence, that means that the
 user is hovering over an invocation of the constructor, and would therefore only
 want to see information about the constructor, rather than getting both the
@@ -102,39 +82,6 @@ let make_hover_info env_and_ty file (occurrence, def_opt) ~basic_only =
   ]
   in
   HoverService.{ snippet; addendum; pos = Some occurrence.SymbolOccurrence.pos }
-
-let go env (file, line, char) ~basic_only =
-  let position = (file, line, char) in
-  let ServerEnv.{ tcopt; naming_table; _ } = env in
-  let identities = symbols_at position tcopt in
-  let env_and_ty = type_at position tcopt naming_table in
-  (* There are legitimate cases where we expect to have no identities returned,
-     so just format the type. *)
-  match identities with
-  | [] ->
-    begin match env_and_ty with
-    | Some (env, ty) ->
-      [{ snippet = Tast_env.print_ty env ty; addendum = []; pos = None }]
-    | None -> []
-    end
-  | identities ->
-    identities
-    |> filter_class_and_constructor
-    |> List.map ~f:(fun (occurrence, def_opt) ->
-      let file = match def_opt with
-        | Some def ->
-          let pos = def.SymbolDefinition.pos in
-          let filename = Pos.filename pos in
-          if filename <> ServerIdeUtils.path
-          then
-            ServerCommandTypes.FileName (Relative_path.to_absolute filename)
-          else
-            file
-        | None ->
-          file
-      in
-      make_hover_info env_and_ty file (occurrence, def_opt) ~basic_only
-    ) |> List.remove_consecutive_duplicates ~equal:(=)
 
 let go_ctx
     ~(ctx: ServerIdeContext.t)

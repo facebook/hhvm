@@ -899,7 +899,7 @@ let do_hover
     (params: Hover.params)
   : Hover.result Lwt.t =
   let (file, line, column) = lsp_file_position_to_hack params in
-  let command = ServerCommandTypes.IDE_HOVER (ServerCommandTypes.FileName file, line, column) in
+  let command = ServerCommandTypes.IDE_HOVER (file, line, column) in
   let%lwt infos = rpc conn ref_unblocked_time command in
   Lwt.return (do_hover_common infos)
 

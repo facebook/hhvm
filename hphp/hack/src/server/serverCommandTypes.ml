@@ -205,8 +205,7 @@ type _ t =
       InferAtPosService.result t
   | INFER_TYPE_BATCH : (string * int * int * (int * int) option) list * bool -> string list t
   | TYPED_AST : string -> string t
-  | IDE_HOVER : file_input * int * int ->
-      HoverService.result t
+  | IDE_HOVER : string * int * int -> HoverService.result t
   | LOCATE_SYMBOL : (string * SearchUtils.si_kind) -> (string * int * int * string option) option t
   | DOCBLOCK_AT : (string * int * int * string option) -> DocblockService.result t
   | DOCBLOCK_FOR_SYMBOL: (string * SearchUtils.si_kind) -> DocblockService.result t

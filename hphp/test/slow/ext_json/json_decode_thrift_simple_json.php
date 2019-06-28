@@ -11,6 +11,11 @@ function test_cases(): dict<string, shape(
       'json' => 'asdf',
       'simple_json' => 'asdf',
     ),
+    'infinity sign' => shape(
+      'val' => "\u{221e}",
+      'json' => "\u{221e}",
+      'simple_json' => "\u{221e}",
+    ),
     'degree sign (JSON encoding)' => shape(
       'val' => '\u00b0',
       'json' => "\u{00b0}",

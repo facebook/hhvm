@@ -1004,16 +1004,6 @@ void utf16_to_utf8(UncheckedBuffer &buf, unsigned short utf16) {
   return utf16_to_utf8_tail(buf, utf16);
 }
 
-ALWAYS_INLINE
-void decode_escaped_bytes(UncheckedBuffer &buf, unsigned short bytes,
-                          bool is_tsimplejson) {
-  if (UNLIKELY(is_tsimplejson)) {
-    buf.append((char)bytes);
-  } else {
-    utf16_to_utf8(buf, bytes);
-  }
-}
-
 StaticString s__empty_("_empty_");
 
 static void object_set(Variant &var,
@@ -1529,7 +1519,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
         if (/*<fb>*/(/*</fb>*/s == 3/*<fb>*/ || s == 30)/*</fb>*/ &&
             state != 8) {
           if (state != 4) {
-            decode_escaped_bytes(*buf, b, is_tsimplejson);
+            utf16_to_utf8(*buf, b);
           } else {
             switch (b) {
             case 'b': buf->append('\b'); break;
@@ -1538,7 +1528,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             case 'f': buf->append('\f'); break;
             case 'r': buf->append('\r'); break;
             default:
-              decode_escaped_bytes(*buf, b, is_tsimplejson);
+              utf16_to_utf8(*buf, b);
               break;
             }
           }
@@ -1565,7 +1555,11 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           escaped_bytes += dehexchar(b) << 4;
         } else if (s == 3 && state == 8) {
           escaped_bytes += dehexchar(b);
-          decode_escaped_bytes(*buf, escaped_bytes, is_tsimplejson);
+          if (UNLIKELY(is_tsimplejson)) {
+            buf->append((char)escaped_bytes);
+          } else {
+            utf16_to_utf8(*buf, escaped_bytes);
+          }
         }
       } else if ((type == kInvalidDataType || type == KindOfNull) &&
                  (c == S_DIG || c == S_ZER)) {
@@ -1590,7 +1584,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
       } else if (type == kInvalidDataType && state == 19 && s == 9) {
         type = KindOfNull;
       } else if (type != KindOfString && c > S_WSP) {
-        decode_escaped_bytes(*buf, b, is_tsimplejson);
+        utf16_to_utf8(*buf, b);
       }
 
       state = s;

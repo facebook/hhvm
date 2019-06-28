@@ -178,7 +178,7 @@ LocalRange decodeLocalRange(const unsigned char*&);
 
 void encodeFCallArgsBase(UnitEmitter&, const FCallArgsBase&, const uint8_t*,
                          bool hasAsyncEagerOffset);
-FCallArgs decodeFCallArgs(PC&);
+FCallArgs decodeFCallArgs(Op, PC&);
 
 template<typename T>
 void encodeFCallArgs(UnitEmitter& ue, const FCallArgsBase& fca,

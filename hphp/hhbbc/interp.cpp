@@ -3672,7 +3672,8 @@ bool fcallOptimizeChecks(
     if (match) {
       // Optimize away the runtime reffiness check.
       reduce(env, fcallWithFCA(FCallArgs(
-        fca.flags, fca.numArgs, fca.numRets, nullptr, fca.asyncEagerTarget)));
+        fca.flags, fca.numArgs, fca.numRets, nullptr, fca.asyncEagerTarget,
+        fca.constructNoConst)));
       return true;
     }
   }

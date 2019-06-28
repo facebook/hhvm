@@ -385,7 +385,7 @@ void populate_block(ParseUnitState& puState,
     auto pc = ue.bc() + fpi->m_fpiEndOff;
     auto const op = decode_op(pc);
     if (!isLegacyFCall(op)) return false;
-    return decodeFCallArgs(pc).hasUnpack();
+    return decodeFCallArgs(op, pc).hasUnpack();
   };
 
 #define IMM_BLA(n)     auto targets = decode_switch(opPC);
@@ -431,23 +431,23 @@ void populate_block(ParseUnitState& puState,
                                        <= func.locals.size());           \
                          return LocalRange { range.first, range.count }; \
                        }();
-#define IMM_FCA(n)     auto fca = [&] {                                   \
-                         auto const fca = decodeFCallArgs(pc);            \
-                         auto const numBytes = (fca.numArgs + 7) / 8;     \
-                         auto byRefs = fca.enforceReffiness()             \
-                           ? std::make_unique<uint8_t[]>(numBytes)        \
-                           : nullptr;                                     \
-                         if (byRefs) {                                    \
-                           memcpy(byRefs.get(), fca.byRefs, numBytes);    \
-                         }                                                \
-                         auto const aeOffset = fca.asyncEagerOffset;      \
-                         auto const aeTarget = aeOffset != kInvalidOffset \
-                           ? findBlock(opPC + aeOffset - ue.bc())         \
-                           : NoBlockId;                                   \
-                         assertx(aeTarget == NoBlockId || next == past);  \
-                         return FCallArgs(fca.flags, fca.numArgs,         \
-                                          fca.numRets, std::move(byRefs), \
-                                          aeTarget);                      \
+#define IMM_FCA(n)     auto fca = [&] {                                      \
+                         auto const fca = decodeFCallArgs(op, pc);           \
+                         auto const numBytes = (fca.numArgs + 7) / 8;        \
+                         auto byRefs = fca.enforceReffiness()                \
+                           ? std::make_unique<uint8_t[]>(numBytes)           \
+                           : nullptr;                                        \
+                         if (byRefs) {                                       \
+                           memcpy(byRefs.get(), fca.byRefs, numBytes);       \
+                         }                                                   \
+                         auto const aeOffset = fca.asyncEagerOffset;         \
+                         auto const aeTarget = aeOffset != kInvalidOffset    \
+                           ? findBlock(opPC + aeOffset - ue.bc())            \
+                           : NoBlockId;                                      \
+                         assertx(aeTarget == NoBlockId || next == past);     \
+                         return FCallArgs(fca.flags, fca.numArgs,            \
+                                          fca.numRets, std::move(byRefs),    \
+                                          aeTarget, fca.constructNoConst);   \
                        }();
 
 #define IMM_NA
@@ -541,7 +541,7 @@ void populate_block(ParseUnitState& puState,
     auto const srcLocIx = puState.srcLocs.emplace(
       srcLoc, puState.srcLocs.size()).first->second;
 
-    auto const op = decode_op(pc);
+    auto op = decode_op(pc);
     switch (op) { OPCODES }
 
     if (next == past) {

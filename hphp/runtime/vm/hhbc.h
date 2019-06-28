@@ -65,7 +65,8 @@ struct FCallArgsBase {
     None                     = 0,
     // Unpack remaining arguments from a varray passed by ...$args.
     HasUnpack                = (1 << 0),
-    // Callee is known to support async eager return.
+    // Op is not FCallCtor and callee is known to support async eager return.
+    // In the encoded form, this bit is re-used to encode constructNoConst
     SupportsAsyncEagerReturn = (1 << 1),
     // HHBC-only: is the number of returns provided? false => 1
     HasInOut                 = (1 << 2),
@@ -83,9 +84,12 @@ struct FCallArgsBase {
   // The first (lowest) bit of numArgs.
   static constexpr uint8_t kFirstNumArgsBit = 5;
 
-  explicit FCallArgsBase(Flags flags, uint32_t numArgs, uint32_t numRets)
-    : numArgs(numArgs), numRets(numRets), flags(flags) {
+  explicit FCallArgsBase(Flags flags, uint32_t numArgs, uint32_t numRets,
+                         bool constructNoConst)
+    : numArgs(numArgs), numRets(numRets), flags(flags)
+      , constructNoConst(constructNoConst) {
     assertx(!(flags & ~kInternalFlags));
+    assertx(!(supportsAsyncEagerReturn() && constructNoConst));
   }
   bool hasUnpack() const { return flags & Flags::HasUnpack; }
   uint32_t numArgsInclUnpack() const { return numArgs + (hasUnpack() ? 1 : 0); }
@@ -95,12 +99,14 @@ struct FCallArgsBase {
   uint32_t numArgs;
   uint32_t numRets;
   Flags flags;
+  bool constructNoConst;
 };
 
 struct FCallArgs : FCallArgsBase {
   explicit FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
-                     const uint8_t* byRefs, Offset asyncEagerOffset)
-    : FCallArgsBase(flags, numArgs, numRets)
+                     const uint8_t* byRefs, Offset asyncEagerOffset,
+                     bool constructNoConst)
+    : FCallArgsBase(flags, numArgs, numRets, constructNoConst)
     , asyncEagerOffset(asyncEagerOffset)
     , byRefs(byRefs) {
     assertx(IMPLIES(byRefs != nullptr, numArgs != 0));

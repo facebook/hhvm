@@ -632,7 +632,7 @@ bool FuncChecker::checkImmLAR(PC& pc, PC const instr) {
 }
 
 bool FuncChecker::checkImmFCA(PC& pc, PC const instr) {
-  auto fca = decodeFCallArgs(pc);
+  auto fca = decodeFCallArgs(peek_op(instr), pc);
   if (fca.numRets == 0) {
     ferror("FCall at {} must return at least one value\n", offset(instr));
     return false;

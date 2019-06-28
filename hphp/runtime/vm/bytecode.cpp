@@ -6803,7 +6803,7 @@ struct litstr_id {
 #define DECODE_OA(ty) decode<ty>(pc)
 #define DECODE_KA decode_member_key(pc, liveUnit())
 #define DECODE_LAR decodeLocalRange(pc)
-#define DECODE_FCA decodeFCallArgs(pc)
+#define DECODE_FCA decodeFCallArgs(op, pc)
 #define DECODE_BLA decode_imm_array<Offset>(pc)
 #define DECODE_SLA decode_imm_array<StrVecItem>(pc)
 #define DECODE_ILA decode_iter_table(pc)

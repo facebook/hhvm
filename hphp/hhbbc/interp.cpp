@@ -4408,12 +4408,35 @@ void in(ISS& env, const bc::NewObj& op) {
   push(env, toobj(cls));
 }
 
+namespace {
+
+bool objMightHaveConstProps(const Type& t) {
+  assertx(t.subtypeOf(BObj));
+  assertx(is_specialized_obj(t));
+  auto const dobj = dobj_of(t);
+  switch (dobj.type) {
+    case DObj::Exact:
+      return dobj.cls.couldHaveConstProp();
+    case DObj::Sub:
+      return dobj.cls.derivedCouldHaveConstProp();
+  }
+  not_reached();
+}
+
+}
+
 void in(ISS& env, const bc::FCallCtor& op) {
   auto const obj = topC(env, op.fca.numArgsInclUnpack() + 2);
   assertx(op.fca.numRets == 1);
 
   if (!is_specialized_obj(obj)) {
     return fcallUnknownImpl(env, op.fca);
+  }
+
+  if (!op.fca.constructNoConst && !objMightHaveConstProps(obj)) {
+    auto newFca = folly::copy(op.fca);
+    newFca.constructNoConst = true;
+    return reduce(env, bc::FCallCtor { std::move(newFca), op.str2 });
   }
 
   auto const dobj = dobj_of(obj);
@@ -4448,21 +4471,11 @@ void in(ISS& env, const bc::LockObj& op) {
     return push(env, t);
   };
   if (!t.subtypeOf(BObj)) return bail();
-  if (!is_specialized_obj(t)) {
+  if (!is_specialized_obj(t) || objMightHaveConstProps(t)) {
     nothrow(env);
     return bail();
   }
-  auto const dobj = dobj_of(t);
-  switch (dobj.type) {
-    case DObj::Exact:
-      if (!dobj.cls.couldHaveConstProp()) return reduce(env);
-      break;
-    case DObj::Sub:
-      if (!dobj.cls.derivedCouldHaveConstProp()) return reduce(env);
-      break;
-  }
-  nothrow(env);
-  return bail();
+  reduce(env);
 }
 
 void in(ISS& env, const bc::FCall& op) {

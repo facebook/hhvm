@@ -100,10 +100,10 @@ let rec intersect env ~r ty1 ty2 =
       let tyl2' = TySet.elements tys2' in
       let common_tyl = TySet.elements common_tys in
       let env, not_common_tyl = intersect_unions env r (r1, tyl1') (r2, tyl2') in
-      env, MkType.union r (common_tyl @ not_common_tyl)
+      Utils.fold_union env r (common_tyl @ not_common_tyl)
     | (r_union, Tunion tyl), ty | ty, (r_union, Tunion tyl) ->
       let env, inter_tyl = intersect_ty_union env r ty (r_union, tyl) in
-      env, MkType.union r inter_tyl
+      Utils.fold_union env r inter_tyl
     | _ ->
       env, (r, Tintersection [ty1; ty2]) in
   Typing_log.log_intersection ~level:2 env r ty1 ty2 ~inter_ty;
@@ -172,7 +172,42 @@ and intersect_ty_union env r ty1 (r_union, tyl2) =
 let intersect_list env r tyl =
   List.fold_left_env env tyl ~init:(MkType.mixed r) ~f:(intersect ~r)
 
+
+let normalize_intersection env ?on_tyvar tyl =
+  let orr r_opt r = Some (Option.value r_opt ~default:r) in
+  let rec normalize_intersection env r tyl tys_acc =
+    match tyl with
+    | [] -> env, r, tys_acc
+    | ty :: tyl ->
+      let env, ty = Env.expand_type env ty in
+      let proceed env ty =
+        normalize_intersection env r tyl (TySet.add ty tys_acc) in
+      begin match ty, on_tyvar with
+      | (r', Tvar v), Some on_tyvar ->
+        let env, ty' = on_tyvar env r' v in
+        if ty_equal ty ty' then proceed env ty else
+        normalize_intersection env r (ty' :: tyl) tys_acc
+      | (r', Tintersection tyl'), _ ->
+        normalize_intersection env (orr r r') (tyl' @ tyl) tys_acc
+      | (_, Tunion _), _ ->
+        let env, ty = Utils.simplify_unions env ty ?on_tyvar in
+        begin match ty with
+        | (_, Tunion _) -> proceed env ty
+        | _ -> normalize_intersection env r (ty :: tyl) tys_acc
+        end
+      | _ ->
+        proceed env ty
+      end in
+  normalize_intersection env None tyl TySet.empty
+
+let simplify_intersections env ?on_tyvar (r, _ as ty) =
+  let env, r', tys = normalize_intersection env [ty] ?on_tyvar in
+  let r = Option.value r' ~default:r in
+  intersect_list env r (TySet.elements tys)
+
 let intersect env ~r ty1 ty2 =
   let env, inter_ty = intersect env ~r ty1 ty2 in
   Typing_log.log_intersection ~level:1 env r ty1 ty2 ~inter_ty;
   env, inter_ty
+
+let () = Utils.simplify_intersections_ref := simplify_intersections

@@ -26,7 +26,7 @@ let with_context
   let make_then_revert_local_changes f () =
     Utils.with_context
       ~enter:ServerIdeUtils.make_local_changes
-      ~exit:ServerIdeUtils.make_local_changes
+      ~exit:ServerIdeUtils.revert_local_changes
       ~do_:f
   in
   let (_errors, result) =

@@ -180,6 +180,10 @@ module Ide_refactor_type = struct
   }
 end
 
+module Go_to_definition = struct
+  type result = (string SymbolOccurrence.t * string SymbolDefinition.t) list
+end
+
 type file_input =
   | FileName of string
   | FileContent of string
@@ -265,6 +269,7 @@ type _ t =
   | FILE_DEPENDENCIES : string list -> string list t
   | IDENTIFY_TYPES : file_input * int * int -> (Pos.absolute * string) list t
   | EXTRACT_STANDALONE : string -> string list t
+  | GO_TO_DEFINITION : labelled_file * int * int -> Go_to_definition.result t
 
 
 let is_disconnect_rpc : type a. a t -> bool = function

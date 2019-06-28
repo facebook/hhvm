@@ -286,3 +286,13 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, ServerTypeDefinition.go env (filename, line, char)
     | EXTRACT_STANDALONE name ->
         env, ServerExtractStandalone.go env.tcopt name
+    | GO_TO_DEFINITION (labelled_file, line, char) ->
+        let (path, file_input) =
+          ServerCommandTypesUtils.extract_labelled_file labelled_file in
+        let (ctx, entry) = ServerIdeContext.update
+          ~tcopt:env.ServerEnv.tcopt
+          ~ctx:ServerIdeContext.empty
+          ~path
+          ~file_input
+        in
+        env, ServerGoToDefinition.go_ctx ~ctx ~entry ~line ~char

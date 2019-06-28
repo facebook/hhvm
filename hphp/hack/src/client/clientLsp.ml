@@ -932,69 +932,32 @@ let do_typeDefinition (conn: server_conn) (ref_unblocked_time: float ref) (param
       ~default_path:file
   end)
 
-let do_definition (conn: server_conn) (ref_unblocked_time: float ref) (params: Definition.params)
+let do_definition
+  (conn: server_conn)
+  (ref_unblocked_time: float ref)
+  (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
+  (params: Definition.params)
   : Definition.result Lwt.t =
-  let (file, line, column) = lsp_file_position_to_hack params in
-  let command =
-    ServerCommandTypes.(IDENTIFY_FUNCTION (FileName file, line, column)) in
-  let%lwt results = rpc conn ref_unblocked_time command in
-  let results = List.filter_map results ~f:Utils.unwrap_snd in
-  (* What's it like when we return multiple definitions? For instance, if you ask *)
-  (* for the definition of "new C()" then we've now got the definition of the     *)
-  (* class "\C" and also of the constructor "\\C::__construct". I think that      *)
-  (* users would be happier to only have the definition of the constructor, so    *)
-  (* as to jump straight to it without the fuss of clicking to select which one.  *)
-  (* That indeed is what Typescript does -- it only gives the constructor.        *)
-  (* (VSCode displays multiple definitions with a peek view of them all;          *)
-  (* Atom displays them with a small popup showing just title+file+line of each). *)
-  (* There's one subtlety. If you declare a base class "B" with a constructor,    *)
-  (* and a derived class "C" without a constructor, and click on "new C()", then  *)
-  (* Typescript and VS Code will pop up a little window with both options. This   *)
-  (* seems like a reasonable compromise, so Hack should do the same.              *)
-  let cls = List.fold results ~init:`None ~f:begin fun class_opt (occ, _) ->
-    match class_opt, SymbolOccurrence.enclosing_class occ with
-    | `None, Some c -> `Single c
-    | `Single c, Some c2 when c = c2 -> `Single c
-    | `Single _, Some _ ->
-      (* Symbol occurrences for methods/properties that only exist in a base
-         class still have the derived class as their enclosing class, even
-         though it doesn't explicitly override that member. Because of that, if
-         we hit this case then we know that we're dealing with a union type. In
-         that case, it's not really possible to do the rest of this filtration,
-         since it would have to be decided on a per-class basis. *)
-      `Multiple
-    | class_opt, _ -> class_opt
-  end in
-  let filtered_results = match cls with
-    | `None
-    | `Multiple -> results
-    | `Single _ ->
-      let open SymbolOccurrence in
-      let explicitly_defined = List.fold results ~init:[] ~f:begin fun acc (occ, def) ->
-        let cls = get_class_name occ in
-        match cls with
-        | None -> acc
-        | Some cls ->
-          if String_utils.string_starts_with def.SymbolDefinition.full_name (Utils.strip_ns cls)
-          then (occ, def) :: acc
-          else acc
-      end |> List.rev in
-      let is_result_constructor (occ, _) = is_constructor occ in
-      let has_explicit_constructor = List.exists explicitly_defined ~f:is_result_constructor in
-      let has_constructor = List.exists results ~f:is_result_constructor in
-      let has_class = List.exists results ~f:(fun (occ, _) -> is_class occ) in
-      (* If we have a constructor but it's derived, then we'd like to show both
-         the class and the constructor. If the constructor is explicitly
-         defined, though, we'd like to filter the class out and only show the
-         constructor. *)
-      if has_constructor && has_class && has_explicit_constructor
-      then List.filter results ~f:is_result_constructor
-      else results
+  let (filename, line, column) = lsp_file_position_to_hack params in
+  let uri =
+    params.TextDocumentPositionParams.textDocument.TextDocumentIdentifier.uri in
+  let labelled_file =
+    match SMap.get uri editor_open_files with
+    | Some document ->
+      ServerCommandTypes.(LabelledFileContent {
+        filename;
+        content = document.TextDocumentItem.text;
+      })
+    | None ->
+      ServerCommandTypes.(LabelledFileName filename)
   in
-  Lwt.return (List.map filtered_results ~f:begin fun (_occurrence, definition) ->
+  let command =
+    ServerCommandTypes.GO_TO_DEFINITION (labelled_file, line, column) in
+  let%lwt results = rpc conn ref_unblocked_time command in
+  Lwt.return (List.map results ~f:begin fun (_occurrence, definition) ->
     hack_symbol_definition_to_lsp_identifier_location
       definition
-      ~default_path:file
+      ~default_path:filename
   end)
 
 let make_ide_completion_response
@@ -2549,10 +2512,11 @@ let handle_event
     Lwt.return_unit
 
   (* textDocument/definition request *)
-  | Main_loop menv, Client_message c when c.method_ = "textDocument/definition" ->
+  | Main_loop { conn; editor_open_files; _ }, Client_message c
+    when c.method_ = "textDocument/definition" ->
     let%lwt () = cancel_if_stale client c short_timeout in
     let%lwt result = parse_definition c.params
-      |> do_definition menv.conn ref_unblocked_time
+      |> do_definition conn ref_unblocked_time editor_open_files
     in
    result |> print_definition |> Jsonrpc.respond to_stdout c;
    Lwt.return_unit

@@ -14,9 +14,16 @@ open Typing_defs
 module Env = Typing_env
 module MkType = Typing_make_type
 module Reason = Typing_reason
+module SM = Nast.ShapeMap
 module TySet = Typing_set
 module Utils = Typing_utils
 
+exception Nothing
+
+(** Computes the negation of a type when it is known, which is currently the case
+for null, nonnull, mixed, nothing, otherwise approximate up or down according to
+`approx` parameter: If approx is `ApproxUp`, return mixed, else if it is `ApproxDown`,
+return nothing. *)
 let non env r ty ~approx =
   let (env, ty) = Env.expand_type env ty in
   let non_ty = match snd ty with
@@ -80,34 +87,71 @@ let rec intersect env ~r ty1 ty2 =
   if Utils.is_sub_type_for_union env ty2 non_ty1 then env, MkType.nothing r else
   let (env, ty1) = decompose_atomic env ty1 in
   let (env, ty2) = decompose_atomic env ty2 in
-  let env, inter_ty = match ty1, ty2 with
-    | (_, Tintersection tyl1), (_, Tintersection tyl2) ->
-      intersect_lists env r tyl1 tyl2
-    | (_, Tintersection tyl), ty | ty, (_, Tintersection tyl) ->
-      intersect_lists env r [ty] tyl
-    | (r1, Tunion tyl1), (r2, Tunion tyl2) ->
-      (* Factorize common types, for example
-         (A | B) & (A | C) = A | (B & C)
-      and
-         (A | B | C1 | D1) & (A | B | C2 | D2) = A | B | ((C1 | D1) & (C2 | D2))
-      *)
-      let tys1 = TySet.of_list tyl1 in
-      let tys2 = TySet.of_list tyl2 in
-      let common_tys = TySet.inter tys1 tys2 in
-      let tys1' = TySet.diff tys1 common_tys in
-      let tys2' = TySet.diff tys2 common_tys in
-      let tyl1' = TySet.elements tys1' in
-      let tyl2' = TySet.elements tys2' in
-      let common_tyl = TySet.elements common_tys in
-      let env, not_common_tyl = intersect_unions env r (r1, tyl1') (r2, tyl2') in
-      Utils.fold_union env r (common_tyl @ not_common_tyl)
-    | (r_union, Tunion tyl), ty | ty, (r_union, Tunion tyl) ->
-      let env, inter_tyl = intersect_ty_union env r ty (r_union, tyl) in
-      Utils.fold_union env r inter_tyl
-    | _ ->
-      env, (r, Tintersection [ty1; ty2]) in
+  let env, inter_ty = try match ty1, ty2 with
+      | (_, Tshape (sfk1, fdm1)), (_, Tshape (sfk2, fdm2)) ->
+        let env, sfk, fdm = intersect_shapes env r (sfk1, fdm1) (sfk2, fdm2) in
+        env, (r, Tshape (sfk, fdm))
+      | (_, Tintersection tyl1), (_, Tintersection tyl2) ->
+        intersect_lists env r tyl1 tyl2
+      | (_, Tintersection tyl), ty | ty, (_, Tintersection tyl) ->
+        intersect_lists env r [ty] tyl
+      | (r1, Tunion tyl1), (r2, Tunion tyl2) ->
+        (* Factorize common types, for example
+           (A | B) & (A | C) = A | (B & C)
+        and
+           (A | B | C1 | D1) & (A | B | C2 | D2) = A | B | ((C1 | D1) & (C2 | D2))
+        *)
+        let tys1 = TySet.of_list tyl1 in
+        let tys2 = TySet.of_list tyl2 in
+        let common_tys = TySet.inter tys1 tys2 in
+        let tys1' = TySet.diff tys1 common_tys in
+        let tys2' = TySet.diff tys2 common_tys in
+        let tyl1' = TySet.elements tys1' in
+        let tyl2' = TySet.elements tys2' in
+        let common_tyl = TySet.elements common_tys in
+        let env, not_common_tyl = intersect_unions env r (r1, tyl1') (r2, tyl2') in
+        Utils.fold_union env r (common_tyl @ not_common_tyl)
+      | (r_union, Tunion tyl), ty | ty, (r_union, Tunion tyl) ->
+        let env, inter_tyl = intersect_ty_union env r ty (r_union, tyl) in
+        Utils.fold_union env r inter_tyl
+      | _ ->
+        env, (r, Tintersection [ty1; ty2])
+    with Nothing -> env, MkType.nothing r in
   Typing_log.log_intersection ~level:2 env r ty1 ty2 ~inter_ty;
   env, inter_ty
+
+and intersect_shapes env r (sfk1, fdm1) (sfk2, fdm2) =
+  let env, fdm = SM.merge_env env fdm1 fdm2
+    ~combine:(fun env sfn sft1 sft2 ->
+      match (sfk1, sft1), (sfk2, sft2) with
+      | (_, None), (_, None)
+      | (_, Some { sft_optional = true; _ }), (FieldsFullyKnown, None)
+      | (FieldsFullyKnown, None), (_, Some { sft_optional = true; _ }) ->
+        env, None
+      | (_, Some { sft_optional = true; _ }), (FieldsPartiallyKnown unset, None)
+      | (FieldsPartiallyKnown unset, None), (_, Some { sft_optional = true; _ })
+        when SM.has_key sfn unset ->
+        env, None
+      | (_, Some { sft_optional = false; _ }), (FieldsFullyKnown, None)
+      | (FieldsFullyKnown, None), (_, Some { sft_optional = false; _ }) ->
+        raise Nothing
+      | (_, Some { sft_optional = false; _ }), (FieldsPartiallyKnown unset, None)
+      | (FieldsPartiallyKnown unset, None), (_, Some { sft_optional = false; _ })
+        when SM.has_key sfn unset ->
+        raise Nothing
+      | (_, Some sft), (FieldsPartiallyKnown _, None)
+      | (FieldsPartiallyKnown _, None), (_, Some sft) ->
+        env, Some sft
+      | (_, Some { sft_optional = opt1; sft_ty = ty1 }),
+        (_, Some { sft_optional = opt2; sft_ty = ty2 }) ->
+        let opt = opt1 && opt2 in
+        let env, ty = intersect env r ty1 ty2 in
+        env, Some { sft_optional = opt; sft_ty = ty }) in
+  let sfk = match sfk1, sfk2 with
+    | FieldsPartiallyKnown unset1, FieldsPartiallyKnown unset2 ->
+      FieldsPartiallyKnown (SM.union unset1 unset2)
+    | _ -> FieldsFullyKnown in
+  env, sfk, fdm
 
 and intersect_lists env r tyl1 tyl2 =
   let rec intersect_lists env tyl1 tyl2 acc_tyl =

@@ -2722,12 +2722,12 @@ let expand_type_and_solve env ~description_of_expected p ty =
     ~on_tyvar:(fun env r v ->
       let env = always_solve_tyvar ~freshen:true env r v in
       Env.expand_var env r v) in
-    match ty, ety with
-    | (r, Tvar v), (_, Tunion []) when Env.get_tyvar_appears_invariantly env v ->
-      Errors.unknown_type description_of_expected p (Reason.to_string "It is unknown" r);
-      let env = Env.set_tyvar_eager_solve_fail env v in
-      env, (Reason.Rsolve_fail p, TUtils.terr env)
-    | _ -> env', ety
+  match ty, ety with
+  | (r, Tvar v), (_, Tunion []) when Env.get_tyvar_appears_invariantly env v ->
+    Errors.unknown_type description_of_expected p (Reason.to_string "It is unknown" r);
+    let env = Env.set_tyvar_eager_solve_fail env v in
+    env, (Reason.Rsolve_fail p, TUtils.terr env)
+  | _ -> env', ety
 
 let expand_type_and_solve_eq env ty =
   Typing_utils.simplify_unions env ty

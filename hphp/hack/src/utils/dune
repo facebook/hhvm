@@ -156,21 +156,6 @@
     utils_core))
 
 (library
-  (name jsonrpc)
-  (wrapped false)
-  (modules
-    jsonrpc)
-  (libraries
-    buffered_line_reader
-    hh_json
-    http_lite
-    marshal_tools
-    marshal_tools_lwt
-    sys_utils)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)))
-
-(library
   (name http_lite)
   (wrapped false)
   (modules

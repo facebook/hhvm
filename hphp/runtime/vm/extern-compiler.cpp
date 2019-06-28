@@ -218,9 +218,8 @@ struct PipeLogger : public folly::AsyncReader::ReadCallback {
   void stop() {
     if (m_reader) {
       // Destroying the AsyncPipeReader closes the fd.
-      auto* reader = m_reader.release();
-      m_eventBase->runInEventBaseThreadAndWait([reader]() {
-          reader->destroy();
+      m_eventBase->runInEventBaseThreadAndWait([this]() {
+          m_reader.reset();
         });
 
       if (m_thread->joinable()) {

@@ -166,12 +166,6 @@
     serverLoadFlag))
 
 (library
-  (name opaque_digest)
-  (wrapped false)
-  (modules
-    opaqueDigest))
-
-(library
   (name lwt_utils)
   (wrapped false)
   (modules

@@ -12,6 +12,7 @@ open Common
 open Typing_defs
 open Typing_dependent_type
 
+module Inter = Typing_intersection
 module Reason = Typing_reason
 module Env = Typing_env
 module Log = Typing_log
@@ -140,16 +141,14 @@ and expand env ~as_tyvar_with_cnstr root id =
   let env = update_this_ty { env with tenv } in
   let make_reason env r = make_reason env r id root in
   let env = { env with tenv = tenv } in
-  let apply_dep_tys env tyl = List.map_env env tyl
-    begin fun prev_env ty ->
-      let env, ty = expand env ty in
-      (* If ty here involves a type access, we have to use
-        the current environment's dependent types. Otherwise,
-        we throw away type access information.
-      *)
-      let tenv, ty = ExprDepTy.apply env.tenv env.dep_tys [snd id] ty in
-      { prev_env with tenv }, ty
-    end in
+  let expand_and_apply_dep env ty =
+    let env, ty = expand env ty in
+    (* If ty here involves a type access, we have to use
+      the current environment's dependent types. Otherwise,
+      we throw away type access information.
+    *)
+    let tenv, ty = ExprDepTy.apply env.tenv env.dep_tys [snd id] ty in
+    { env with tenv }, ty in
   match root_ty with
   | Tany | Terr -> env, root
   | Tabstract (AKdependent (`cls _), Some ty)
@@ -213,11 +212,12 @@ and expand env ~as_tyvar_with_cnstr root id =
     in
     expand env ty
   | Tunion tyl ->
-    let env, tyl = apply_dep_tys env tyl in
+    let env, tyl = List.map_env env tyl ~f:expand_and_apply_dep in
     { env with dep_tys = [] } , (make_reason tenv Reason.Rnone, Tunion tyl)
   | Tintersection tyl ->
-    let env, tyl = apply_dep_tys env tyl in
-    { env with dep_tys = [] } , (make_reason tenv Reason.Rnone, Tintersection tyl)
+    let env, tyl = Typing_utils.run_on_intersection env tyl ~f:expand_and_apply_dep in
+    let tenv, ty = Inter.intersect_list env.tenv root_reason tyl in
+    { env with dep_tys = []; tenv } , ty
   | Tvar n ->
     let tenv, ty = Typing_subtype_tconst.get_tyvar_type_const env.tenv n id in
     { env with tenv }, ty

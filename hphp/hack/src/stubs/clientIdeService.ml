@@ -11,3 +11,5 @@ let completion () _ =
   Lwt.return_error "Serverless IDE not available in open-source build"
 let go_to_definition () ~file_input:_ ~line:_ ~char:_ =
   Lwt.return_error "Serverless IDE not available in open-source build"
+let resolve () _ =
+  Lwt.return_error "Serverless IDE not available in open-source build"

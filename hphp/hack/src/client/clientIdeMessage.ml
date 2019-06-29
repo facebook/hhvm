@@ -43,6 +43,15 @@ module Go_to_definition = struct
   type result = ServerCommandTypes.Go_to_definition.result
 end
 
+(* Handles "completionItem/resolve" LSP messages *)
+module Lsp_docblock = struct
+  type request = {
+    symbol: string;
+    kind: SearchUtils.si_kind;
+  }
+  type result = DocblockService.result
+end
+
 (* GADT for request/response types. See [ServerCommandTypes] for a discussion on
    using GADTs in this way. *)
 type _ t =
@@ -58,3 +67,6 @@ type _ t =
   | Go_to_definition:
     Go_to_definition.request ->
     Go_to_definition.result t
+  | Resolve:
+    Lsp_docblock.request ->
+    Lsp_docblock.result t

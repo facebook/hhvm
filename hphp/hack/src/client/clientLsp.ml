@@ -1249,6 +1249,41 @@ let do_completionItemResolve
     Completion.documentation = documentation;
   }
 
+(*
+ * Note that resolve does not depend on having previously executed completion in
+ * the same process.  The LSP resolve request takes, as input, a single item
+ * produced by any previously executed completion request.  So it's okay for
+ * one process to respond to another, because they'll both know the answers
+ * to the same symbol requests.
+ *
+ * And it's totally okay to mix and match requests to serverless IDE and
+ * hh_server.
+ *)
+let do_resolve_local
+    (ide_service: ClientIdeService.t)
+    (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
+    (params: CompletionItemResolve.params)
+    : CompletionItemResolve.result Lwt.t =
+  let _ = editor_open_files in
+  let symbolname = params.Completion.label in
+  let raw_kind = params.Completion.kind in
+  let kind = completion_kind_to_si_kind raw_kind in
+  let request = { ClientIdeMessage.Lsp_docblock.
+    symbol = symbolname;
+    kind = kind;
+  } in
+  let%lwt result = ClientIdeService.resolve ide_service request in
+  match result with
+  | Ok raw_docblock ->
+    let documentation = docblock_to_markdown raw_docblock in
+    Lwt.return
+    {
+      params with
+      Completion.documentation = documentation;
+    }
+  | Error error_message ->
+    failwith (Printf.sprintf "Local resolve failed: %s" error_message)
+
 let do_workspaceSymbol
     (conn: server_conn)
     (ref_unblocked_time: float ref)
@@ -2459,6 +2494,20 @@ let handle_event
       |> do_completion_local ide_service editor_open_files
     in
     result |> print_completion |> Jsonrpc.respond to_stdout c;
+    Lwt.return_unit
+
+  (* Resolve documentation for a symbol: "Autocomplete Docblock!" *)
+  | (In_init { In_init_env.editor_open_files; _ } | Lost_server { Lost_env.editor_open_files; _ }), Client_message c
+    when env.use_serverless_ide
+      && c.method_ = "completionItem/resolve" ->
+    let%lwt () = cancel_if_stale client c short_timeout in
+    let%lwt result =
+      parse_completionItem c.params
+      |> do_resolve_local ide_service editor_open_files
+    in
+    result
+    |> print_completionItem
+    |> Jsonrpc.respond to_stdout c;
     Lwt.return_unit
 
   (* any request/notification if we're not yet ready *)

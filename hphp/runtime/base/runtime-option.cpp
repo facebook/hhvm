@@ -2039,6 +2039,9 @@ void RuntimeOption::Load(
 
     Config::Bind(ServerNextProtocols, ini, config, "Server.SSLNextProtocols");
     Config::Bind(ServerEnableH2C, ini, config, "Server.EnableH2C");
+    extern bool g_brotliUseLocalArena;
+    Config::Bind(g_brotliUseLocalArena, ini, config,
+                 "Server.BrotliUseLocalArena", g_brotliUseLocalArena);
     Config::Bind(BrotliCompressionEnabled, ini, config,
                  "Server.BrotliCompressionEnabled", -1);
     Config::Bind(BrotliChunkedCompressionEnabled, ini, config,

@@ -288,13 +288,13 @@ StringHolder BrotliResponseCompressor::compressResponse(
     return StringHolder{};
   }
   size_t size = len;
-  const char *compressedData = HPHP::compressBrotli(compressor, data, size, last);
+  auto compressedData = HPHP::compressBrotli(compressor, data, size, last);
   if (!compressedData) {
     m_compressor.reset();
     Logger::Error("Unable to compress response to brotli: len=%d", len);
     return StringHolder{};
   }
-  return StringHolder(compressedData, size, FreeType::Free);
+  return compressedData;
 }
 
 /*************

@@ -57,6 +57,11 @@ struct StringHolder {
 
   uint32_t size() const { return m_len; }
 
+  // The length is not the size of the buffer, but the useful size of it. For
+  // example, we could allocate a big buffer, but only uses part of it. The
+  // capacity of the buffer isn't stored here.
+  void shrinkTo(uint32_t newLen);
+
   const char* data() const { return m_data; }
 
   operator bool() const { return data() != nullptr; }

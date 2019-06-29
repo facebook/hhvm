@@ -22,6 +22,14 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void StringHolder::shrinkTo(uint32_t newLen) {
+  assert(newLen <= m_len);
+  if (newLen < m_len) {
+    // We can potentially purge the extra pages, if memory is a concern.
+    m_len = newLen;
+  }
+}
+
 StringHolder::~StringHolder() {
   if (!m_data) return;
   if (m_type == FreeType::LocalFree) {

@@ -15,6 +15,7 @@
 */
 
 #include "hphp/util/brotli.h"
+#include "hphp/util/alloc.h"
 #include <dec/decode.h>
 #include <enc/encode.h>
 #include <folly/ScopeGuard.h>
@@ -73,8 +74,7 @@ TEST(BrotliTest, Chunks) {
     bool last = ++i == chunks.size();
 
     auto compressed = compressBrotli(&compressor, chunk.data(), size, last);
-    EXPECT_TRUE(compressed != nullptr);
-    SCOPE_EXIT { free((void*)compressed); };
+    EXPECT_TRUE(compressed.data() != nullptr);
 
     size_t decompressedBufferSize = chunk.size();
     auto decompressedBuffer = new uint8_t[decompressedBufferSize];
@@ -83,7 +83,7 @@ TEST(BrotliTest, Chunks) {
     uint8_t* decompressedPos = decompressedBuffer;
     size_t decompressedAvailable = decompressedBufferSize;
 
-    const uint8_t* compressedPos = (const uint8_t*)compressed;
+    const uint8_t* compressedPos = (const uint8_t*)compressed.data();
     BrotliDecompressBufferStreaming(&size,
                                     &compressedPos,
                                     0,

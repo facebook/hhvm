@@ -65,6 +65,11 @@ void TargetGraph::setSamples(TargetId id, uint32_t samples) {
   targets[id].samples = samples;
 }
 
+uint32_t TargetGraph::getSamples(TargetId id) {
+  assertx(id < targets.size());
+  return targets[id].samples;
+}
+
 const Arc& TargetGraph::incArcWeight(TargetId src, TargetId dst, double w) {
   auto res = arcs.emplace(src, dst, w);
   if (!res.second) {

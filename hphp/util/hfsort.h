@@ -70,6 +70,7 @@ struct Target {
 struct TargetGraph {
   TargetId addTarget(uint32_t size, uint32_t samples = 0);
   void setSamples(TargetId id, uint32_t samples);
+  uint32_t getSamples(TargetId id);
   const Arc& incArcWeight(TargetId src, TargetId dst, double w = 1.0);
   void normalizeArcWeights();
 

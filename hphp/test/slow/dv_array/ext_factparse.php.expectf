@@ -38,27 +38,27 @@ array(3) {
     array(10) {
       [0]=>
       array(4) {
-        ["name"]=>
-        string(3) "CL0"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(0)
         ["baseTypes"]=>
         array(0) {
         }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(3) "CL0"
       }
       [1]=>
       array(4) {
-        ["name"]=>
-        string(3) "CL1"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(0)
         ["baseTypes"]=>
         array(0) {
         }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(3) "CL1"
       }
       [2]=>
       array(4) {
@@ -84,44 +84,44 @@ array(3) {
       }
       [3]=>
       array(4) {
-        ["name"]=>
-        string(2) "E0"
-        ["kindOf"]=>
-        string(4) "enum"
-        ["flags"]=>
-        int(2)
         ["baseTypes"]=>
         array(1) {
           [0]=>
           string(14) "HH\BuiltinEnum"
         }
+        ["flags"]=>
+        int(2)
+        ["kindOf"]=>
+        string(4) "enum"
+        ["name"]=>
+        string(2) "E0"
       }
       [4]=>
       array(5) {
-        ["name"]=>
-        string(2) "I0"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(0) {
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(2) "I0"
         ["requireExtends"]=>
         array(0) {
         }
       }
       [5]=>
       array(5) {
-        ["name"]=>
-        string(2) "I1"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         array(0) {
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(2) "I1"
         ["requireExtends"]=>
         array(0) {
         }
@@ -254,27 +254,27 @@ array(3) {
     array(10) {
       [0]=>
       array(4) {
-        ["name"]=>
-        string(6) "NS\CL0"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(0)
         ["baseTypes"]=>
         array(0) {
         }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(6) "NS\CL0"
       }
       [1]=>
       array(4) {
-        ["name"]=>
-        string(6) "NS\CL1"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(0)
         ["baseTypes"]=>
         array(0) {
         }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(6) "NS\CL1"
       }
       [2]=>
       array(4) {
@@ -300,17 +300,17 @@ array(3) {
       }
       [3]=>
       array(4) {
-        ["name"]=>
-        string(5) "NS\E0"
-        ["kindOf"]=>
-        string(4) "enum"
-        ["flags"]=>
-        int(2)
         ["baseTypes"]=>
         array(1) {
           [0]=>
           string(14) "HH\BuiltinEnum"
         }
+        ["flags"]=>
+        int(2)
+        ["kindOf"]=>
+        string(4) "enum"
+        ["name"]=>
+        string(5) "NS\E0"
       }
       [4]=>
       array(5) {
@@ -470,27 +470,27 @@ array(3) {
     array(10) {
       [0]=>
       array(4) {
-        ["name"]=>
-        string(9) "NS\NS\CL0"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(0)
         ["baseTypes"]=>
         array(0) {
         }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(9) "NS\NS\CL0"
       }
       [1]=>
       array(4) {
-        ["name"]=>
-        string(9) "NS\NS\CL1"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(0)
         ["baseTypes"]=>
         array(0) {
         }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(9) "NS\NS\CL1"
       }
       [2]=>
       array(4) {
@@ -516,17 +516,17 @@ array(3) {
       }
       [3]=>
       array(4) {
-        ["name"]=>
-        string(8) "NS\NS\E0"
-        ["kindOf"]=>
-        string(4) "enum"
-        ["flags"]=>
-        int(2)
         ["baseTypes"]=>
         array(1) {
           [0]=>
           string(14) "HH\BuiltinEnum"
         }
+        ["flags"]=>
+        int(2)
+        ["kindOf"]=>
+        string(4) "enum"
+        ["name"]=>
+        string(8) "NS\NS\E0"
       }
       [4]=>
       array(5) {

@@ -28,26 +28,26 @@ dict(3) {
     ["types"]=>
     vec(10) {
       dict(4) {
+        ["baseTypes"]=>
+        vec(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(5) "class"
         ["name"]=>
         string(3) "CL0"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(0)
-        ["baseTypes"]=>
-        vec(0) {
-        }
       }
       dict(4) {
-        ["name"]=>
-        string(3) "CL1"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(0)
         ["baseTypes"]=>
         vec(0) {
         }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(3) "CL1"
       }
       dict(4) {
         ["baseTypes"]=>
@@ -66,41 +66,41 @@ dict(3) {
         string(3) "CL2"
       }
       dict(4) {
-        ["name"]=>
-        string(2) "E0"
-        ["kindOf"]=>
-        string(4) "enum"
-        ["flags"]=>
-        int(2)
         ["baseTypes"]=>
         vec(1) {
           string(14) "HH\BuiltinEnum"
         }
+        ["flags"]=>
+        int(2)
+        ["kindOf"]=>
+        string(4) "enum"
+        ["name"]=>
+        string(2) "E0"
       }
       dict(5) {
-        ["name"]=>
-        string(2) "I0"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         vec(0) {
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(2) "I0"
         ["requireExtends"]=>
         vec(0) {
         }
       }
       dict(5) {
-        ["name"]=>
-        string(2) "I1"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         vec(0) {
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(2) "I1"
         ["requireExtends"]=>
         vec(0) {
         }
@@ -210,26 +210,26 @@ dict(3) {
     ["types"]=>
     vec(10) {
       dict(4) {
+        ["baseTypes"]=>
+        vec(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(5) "class"
         ["name"]=>
         string(6) "NS\CL0"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(0)
-        ["baseTypes"]=>
-        vec(0) {
-        }
       }
       dict(4) {
-        ["name"]=>
-        string(6) "NS\CL1"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(0)
         ["baseTypes"]=>
         vec(0) {
         }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(6) "NS\CL1"
       }
       dict(4) {
         ["baseTypes"]=>
@@ -248,16 +248,16 @@ dict(3) {
         string(6) "NS\CL2"
       }
       dict(4) {
-        ["name"]=>
-        string(5) "NS\E0"
-        ["kindOf"]=>
-        string(4) "enum"
-        ["flags"]=>
-        int(2)
         ["baseTypes"]=>
         vec(1) {
           string(14) "HH\BuiltinEnum"
         }
+        ["flags"]=>
+        int(2)
+        ["kindOf"]=>
+        string(4) "enum"
+        ["name"]=>
+        string(5) "NS\E0"
       }
       dict(5) {
         ["baseTypes"]=>
@@ -392,26 +392,26 @@ dict(3) {
     ["types"]=>
     vec(10) {
       dict(4) {
+        ["baseTypes"]=>
+        vec(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(5) "class"
         ["name"]=>
         string(9) "NS\NS\CL0"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(0)
-        ["baseTypes"]=>
-        vec(0) {
-        }
       }
       dict(4) {
-        ["name"]=>
-        string(9) "NS\NS\CL1"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(0)
         ["baseTypes"]=>
         vec(0) {
         }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(9) "NS\NS\CL1"
       }
       dict(4) {
         ["baseTypes"]=>
@@ -430,16 +430,16 @@ dict(3) {
         string(9) "NS\NS\CL2"
       }
       dict(4) {
-        ["name"]=>
-        string(8) "NS\NS\E0"
-        ["kindOf"]=>
-        string(4) "enum"
-        ["flags"]=>
-        int(2)
         ["baseTypes"]=>
         vec(1) {
           string(14) "HH\BuiltinEnum"
         }
+        ["flags"]=>
+        int(2)
+        ["kindOf"]=>
+        string(4) "enum"
+        ["name"]=>
+        string(8) "NS\NS\E0"
       }
       dict(5) {
         ["baseTypes"]=>

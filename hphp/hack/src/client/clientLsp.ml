@@ -1263,10 +1263,8 @@ let do_completionItemResolve
  *)
 let do_resolve_local
     (ide_service: ClientIdeService.t)
-    (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
     (params: CompletionItemResolve.params)
     : CompletionItemResolve.result Lwt.t =
-  let _ = editor_open_files in
   let symbolname = params.Completion.label in
   let raw_kind = params.Completion.kind in
   let kind = completion_kind_to_si_kind raw_kind in
@@ -2499,13 +2497,13 @@ let handle_event
     Lwt.return_unit
 
   (* Resolve documentation for a symbol: "Autocomplete Docblock!" *)
-  | (In_init { In_init_env.editor_open_files; _ } | Lost_server { Lost_env.editor_open_files; _ }), Client_message c
+  | (In_init _ | Lost_server _), Client_message c
     when env.use_serverless_ide
       && c.method_ = "completionItem/resolve" ->
     let%lwt () = cancel_if_stale client c short_timeout in
     let%lwt result =
       parse_completionItem c.params
-      |> do_resolve_local ide_service editor_open_files
+      |> do_resolve_local ide_service
     in
     result
     |> print_completionItem

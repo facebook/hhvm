@@ -276,6 +276,7 @@ type si_env = {
   sie_provider: search_provider;
   sie_quiet_mode: bool;
   sie_fuzzy_search_mode: bool ref;
+  sie_log_timings: bool;
 
   (* LocalSearchService *)
   lss_fileinfos: FileInfo.t Relative_path.Map.t;
@@ -300,9 +301,14 @@ let default_si_env = {
   sie_provider = NoIndex;
   sie_quiet_mode = false;
   sie_fuzzy_search_mode = ref false;
+  sie_log_timings = false;
+
+  (* LocalSearchService *)
   lss_fileinfos = Relative_path.Map.empty;
   lss_filenames = Relative_path.Map.empty;
   lss_tombstones = Tombstone_set.empty;
+
+  (* SqliteSearchService *)
   sql_symbolindex_db = ref None;
   sql_select_symbols_stmt = ref None;
   sql_select_symbols_by_kind_stmt = ref None;
@@ -310,6 +316,8 @@ let default_si_env = {
   sql_select_acnew_stmt = ref None;
   sql_select_actype_stmt = ref None;
   sql_select_namespaces_stmt = ref None;
+
+  (* NamespaceSearchService *)
   nss_root_namespace = {
     nss_name = "\\";
     nss_full_namespace = "\\";

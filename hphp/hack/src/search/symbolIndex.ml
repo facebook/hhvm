@@ -98,6 +98,10 @@ let log_symbol_index_search
     let search_provider = descriptive_name_of_provider sienv.sie_provider in
 
     (* Send information to remote logging system *)
+    if sienv.sie_log_timings then begin
+      Hh_logger.log "[symbolindex] Search [%s] for [%s] [%s] found %d results in [%0.3f]"
+        search_provider query_text actype_str results duration;
+    end;
     HackEventLogger.search_symbol_index
       ~query_text
       ~max_results

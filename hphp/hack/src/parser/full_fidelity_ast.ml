@@ -2522,7 +2522,7 @@ and pClassElt : class_elt list parser = fun node env ->
   let doc_comment_opt = extract_docblock node in
   let pClassElt_ = function
   | ConstDeclaration
-    { const_abstract; const_type_specifier; const_declarators; _ } ->
+    { const_type_specifier; const_declarators; _ } ->
       let ty = mpOptional pHint const_type_specifier env in
       let res =
         couldMap const_declarators env ~f:begin function
@@ -2531,7 +2531,7 @@ and pClassElt : class_elt list parser = fun node env ->
             ; _ } -> fun env ->
               ( pos_name constant_declarator_name env
               (* TODO: Parse error when const is abstract and has inits *)
-              , if is_missing const_abstract
+              , if not (is_abstract node)
                 then mpOptional pSimpleInitializer constant_declarator_initializer env
                 else None
               )

@@ -878,15 +878,13 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc require_semicolon in
          acc
       | ConstDeclaration {
-        const_visibility;
-        const_abstract;
+        const_modifiers;
         const_keyword;
         const_type_specifier;
         const_declarators;
         const_semicolon;
       } ->
-         let acc = f acc const_visibility in
-         let acc = f acc const_abstract in
+         let acc = f acc const_modifiers in
          let acc = f acc const_keyword in
          let acc = f acc const_type_specifier in
          let acc = f acc const_declarators in
@@ -2728,15 +2726,13 @@ module WithToken(Token: TokenType) = struct
         require_semicolon;
       ]
       | ConstDeclaration {
-        const_visibility;
-        const_abstract;
+        const_modifiers;
         const_keyword;
         const_type_specifier;
         const_declarators;
         const_semicolon;
       } -> [
-        const_visibility;
-        const_abstract;
+        const_modifiers;
         const_keyword;
         const_type_specifier;
         const_declarators;
@@ -4579,15 +4575,13 @@ module WithToken(Token: TokenType) = struct
         "require_semicolon";
       ]
       | ConstDeclaration {
-        const_visibility;
-        const_abstract;
+        const_modifiers;
         const_keyword;
         const_type_specifier;
         const_declarators;
         const_semicolon;
       } -> [
-        "const_visibility";
-        "const_abstract";
+        "const_modifiers";
         "const_keyword";
         "const_type_specifier";
         "const_declarators";
@@ -6520,16 +6514,14 @@ module WithToken(Token: TokenType) = struct
           require_semicolon;
         }
       | (SyntaxKind.ConstDeclaration, [
-          const_visibility;
-          const_abstract;
+          const_modifiers;
           const_keyword;
           const_type_specifier;
           const_declarators;
           const_semicolon;
         ]) ->
         ConstDeclaration {
-          const_visibility;
-          const_abstract;
+          const_modifiers;
           const_keyword;
           const_type_specifier;
           const_declarators;
@@ -8686,16 +8678,14 @@ module WithToken(Token: TokenType) = struct
         make syntax value
 
       let make_const_declaration
-        const_visibility
-        const_abstract
+        const_modifiers
         const_keyword
         const_type_specifier
         const_declarators
         const_semicolon
       =
         let syntax = ConstDeclaration {
-          const_visibility;
-          const_abstract;
+          const_modifiers;
           const_keyword;
           const_type_specifier;
           const_declarators;

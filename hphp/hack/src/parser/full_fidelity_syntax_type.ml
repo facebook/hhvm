@@ -353,8 +353,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; require_semicolon                                  : t
     }
   | ConstDeclaration                  of
-    { const_visibility                                   : t
-    ; const_abstract                                     : t
+    { const_modifiers                                    : t
     ; const_keyword                                      : t
     ; const_type_specifier                               : t
     ; const_declarators                                  : t
@@ -1650,8 +1649,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; require_semicolon: Token.t value
     }
   and const_declaration =
-    { const_visibility: Token.t option value
-    ; const_abstract: Token.t option value
+    { const_modifiers: Token.t listesque value
     ; const_keyword: Token.t value
     ; const_type_specifier: specifier option value
     ; const_declarators: constant_declarator listesque value

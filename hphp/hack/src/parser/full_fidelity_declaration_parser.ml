@@ -724,29 +724,25 @@ module WithExpressionAndStatementAndTypeParser
         let kind2 = peek_token_kind ~lookahead:2 parser in
         match kind1, kind2 with
         | Type, Semicolon ->
-          let (parser, missing') = Make.missing parser (pos parser) in
           let (parser, const) = assert_token parser Const in
-          parse_const_declaration parser missing missing' const
+          parse_const_declaration parser missing const
         | Type, _ when kind2 <> Equal ->
           let (parser, missing') = Make.missing parser (pos parser) in
           let (parser, const) = assert_token parser Const in
           parse_type_const_declaration parser missing missing' const
         | _, _ ->
-          let (parser, missing') = Make.missing parser (pos parser) in
           let (parser, const) = assert_token parser Const in
-          parse_const_declaration parser missing missing' const
+          parse_const_declaration parser missing const
       end
     | Abstract -> parse_methodish_or_const_or_type_const parser
     | Public
     | Protected
     | Private ->
-      let (parser1, visibility) = next_token parser in
+      let (parser1, modifiers, _ ) = parse_modifiers parser in
       let next_kind = peek_token_kind parser1 in
       if next_kind = Const then
-        let (parser, visibility) = Make.token parser1 visibility in
-        let (parser, missing) = Make.missing parser (pos parser) in
-        let (parser, const) = assert_token parser Const in
-        parse_const_declaration parser visibility missing const
+        let (parser, const) = assert_token parser1 Const in
+        parse_const_declaration parser modifiers const
       else
         let (parser, missing) = Make.missing parser (pos parser) in
         parse_methodish_or_property parser missing
@@ -1325,7 +1321,7 @@ module WithExpressionAndStatementAndTypeParser
     constant-initializer:
       =  const-expression
   *)
-  and parse_const_declaration parser visibility abstr const =
+  and parse_const_declaration parser modifiers const =
     let (parser, type_spec) =
       if is_type_in_const parser then
         parse_type_specifier parser
@@ -1338,8 +1334,7 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, semi) = require_semicolon parser in
     Make.const_declaration
       parser
-      visibility
-      abstr
+      modifiers
       const
       type_spec
       const_list
@@ -1788,20 +1783,18 @@ module WithExpressionAndStatementAndTypeParser
       let kind2 = peek_token_kind ~lookahead:3 parser in
       match kind1, kind2 with
       | Type, Semicolon ->
-        let (parser, missing) = Make.missing parser (pos parser) in
-        let (parser, abstr) = assert_token parser Abstract in
+        let (parser, modifiers, _ ) = parse_modifiers parser in
         let (parser, const) = assert_token parser Const in
-        parse_const_declaration parser missing abstr const
+        parse_const_declaration parser modifiers const
       | Type, _ when kind2 <> Equal ->
         let (parser, attributes) = Make.missing parser (pos parser) in
         let (parser, abstr) = assert_token parser Abstract in
         let (parser, const) = assert_token parser Const in
         parse_type_const_declaration parser attributes abstr const
       | _, _ ->
-        let (parser, missing) = Make.missing parser (pos parser) in
-        let (parser, abstr) = assert_token parser Abstract in
+        let (parser, modifiers, _ ) = parse_modifiers parser in
         let (parser, const) = assert_token parser Const in
-        parse_const_declaration parser missing abstr const
+        parse_const_declaration parser modifiers const
     else
       let (parser, missing) = Make.missing parser (pos parser) in
       let (parser, modifiers, _) = parse_modifiers parser in
@@ -1955,9 +1948,8 @@ module WithExpressionAndStatementAndTypeParser
       | Const ->
         let pos = pos parser in
         let (parser, missing1) = Make.missing parser1 pos in
-        let (parser, missing2) = Make.missing parser pos in
         let (parser, token) = Make.token parser token in
-        parse_const_declaration parser missing1 missing2 token
+        parse_const_declaration parser missing1 token
       | _ ->
         with_statement_parser parser StatementParser.parse_statement
         (* TODO: What if it's not a legal statement? Do we still make progress

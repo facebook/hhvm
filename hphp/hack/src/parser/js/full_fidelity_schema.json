@@ -799,8 +799,7 @@
       "description" : "const_declaration",
       "prefix" : "const",
       "fields" : [
-        { "field_name" : "visibility" },
-        { "field_name" : "abstract" },
+        { "field_name" : "modifiers" },
         { "field_name" : "keyword" },
         { "field_name" : "type_specifier" },
         { "field_name" : "declarators" },

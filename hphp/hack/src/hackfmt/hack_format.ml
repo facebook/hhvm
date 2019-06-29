@@ -706,15 +706,13 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       Newline;
     ]
   | Syntax.ConstDeclaration {
-      const_visibility = _; (* not supported in Hack *)
-      const_abstract = abstr;
+      const_modifiers = modifiers;
       const_keyword = kw;
       const_type_specifier = const_type;
       const_declarators = declarators;
       const_semicolon = semi } ->
     Concat [
-      t env abstr;
-      when_present abstr space;
+      handle_possible_list env ~after_each:(fun _ -> Space) modifiers;
       t env kw;
       when_present const_type space;
       t env const_type;

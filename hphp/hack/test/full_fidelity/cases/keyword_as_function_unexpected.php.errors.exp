@@ -211,7 +211,6 @@
 (104,11)-(104,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (104,12)-(104,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (104,13)-(105,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(105,1)-(119,8) Access type for interface method must be omitted
 (105,10)-(105,10) A name is expected here.
 (105,11)-(105,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (105,12)-(105,12) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.

@@ -6805,40 +6805,27 @@ class RequireClause extends EditableSyntax
 class ConstDeclaration extends EditableSyntax
 {
   constructor(
-    visibility,
-    abstract,
+    modifiers,
     keyword,
     type_specifier,
     declarators,
     semicolon)
   {
     super('const_declaration', {
-      visibility: visibility,
-      abstract: abstract,
+      modifiers: modifiers,
       keyword: keyword,
       type_specifier: type_specifier,
       declarators: declarators,
       semicolon: semicolon });
   }
-  get visibility() { return this.children.visibility; }
-  get abstract() { return this.children.abstract; }
+  get modifiers() { return this.children.modifiers; }
   get keyword() { return this.children.keyword; }
   get type_specifier() { return this.children.type_specifier; }
   get declarators() { return this.children.declarators; }
   get semicolon() { return this.children.semicolon; }
-  with_visibility(visibility){
+  with_modifiers(modifiers){
     return new ConstDeclaration(
-      visibility,
-      this.abstract,
-      this.keyword,
-      this.type_specifier,
-      this.declarators,
-      this.semicolon);
-  }
-  with_abstract(abstract){
-    return new ConstDeclaration(
-      this.visibility,
-      abstract,
+      modifiers,
       this.keyword,
       this.type_specifier,
       this.declarators,
@@ -6846,8 +6833,7 @@ class ConstDeclaration extends EditableSyntax
   }
   with_keyword(keyword){
     return new ConstDeclaration(
-      this.visibility,
-      this.abstract,
+      this.modifiers,
       keyword,
       this.type_specifier,
       this.declarators,
@@ -6855,8 +6841,7 @@ class ConstDeclaration extends EditableSyntax
   }
   with_type_specifier(type_specifier){
     return new ConstDeclaration(
-      this.visibility,
-      this.abstract,
+      this.modifiers,
       this.keyword,
       type_specifier,
       this.declarators,
@@ -6864,8 +6849,7 @@ class ConstDeclaration extends EditableSyntax
   }
   with_declarators(declarators){
     return new ConstDeclaration(
-      this.visibility,
-      this.abstract,
+      this.modifiers,
       this.keyword,
       this.type_specifier,
       declarators,
@@ -6873,8 +6857,7 @@ class ConstDeclaration extends EditableSyntax
   }
   with_semicolon(semicolon){
     return new ConstDeclaration(
-      this.visibility,
-      this.abstract,
+      this.modifiers,
       this.keyword,
       this.type_specifier,
       this.declarators,
@@ -6886,15 +6869,13 @@ class ConstDeclaration extends EditableSyntax
       parents = [];
     let new_parents = parents.slice();
     new_parents.push(this);
-    var visibility = this.visibility.rewrite(rewriter, new_parents);
-    var abstract = this.abstract.rewrite(rewriter, new_parents);
+    var modifiers = this.modifiers.rewrite(rewriter, new_parents);
     var keyword = this.keyword.rewrite(rewriter, new_parents);
     var type_specifier = this.type_specifier.rewrite(rewriter, new_parents);
     var declarators = this.declarators.rewrite(rewriter, new_parents);
     var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
-      visibility === this.visibility &&
-      abstract === this.abstract &&
+      modifiers === this.modifiers &&
       keyword === this.keyword &&
       type_specifier === this.type_specifier &&
       declarators === this.declarators &&
@@ -6905,8 +6886,7 @@ class ConstDeclaration extends EditableSyntax
     else
     {
       return rewriter(new ConstDeclaration(
-        visibility,
-        abstract,
+        modifiers,
         keyword,
         type_specifier,
         declarators,
@@ -6915,12 +6895,9 @@ class ConstDeclaration extends EditableSyntax
   }
   static from_json(json, position, source)
   {
-    let visibility = EditableSyntax.from_json(
-      json.const_visibility, position, source);
-    position += visibility.width;
-    let abstract = EditableSyntax.from_json(
-      json.const_abstract, position, source);
-    position += abstract.width;
+    let modifiers = EditableSyntax.from_json(
+      json.const_modifiers, position, source);
+    position += modifiers.width;
     let keyword = EditableSyntax.from_json(
       json.const_keyword, position, source);
     position += keyword.width;
@@ -6934,8 +6911,7 @@ class ConstDeclaration extends EditableSyntax
       json.const_semicolon, position, source);
     position += semicolon.width;
     return new ConstDeclaration(
-        visibility,
-        abstract,
+        modifiers,
         keyword,
         type_specifier,
         declarators,
@@ -6945,8 +6921,7 @@ class ConstDeclaration extends EditableSyntax
   {
     if (ConstDeclaration._children_keys == null)
       ConstDeclaration._children_keys = [
-        'visibility',
-        'abstract',
+        'modifiers',
         'keyword',
         'type_specifier',
         'declarators',

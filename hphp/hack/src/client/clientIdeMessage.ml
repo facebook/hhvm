@@ -16,11 +16,17 @@ module Hover_param = struct
   }
 end
 
+(* Handles "textDocument/completion" LSP messages *)
 module Lsp_autocomplete = struct
   type request = {
     filename: string;
     line: int;
     column: int;
+
+    (* Contents of the file reflecting unsaved changes in the IDE *)
+    file_content: string;
+
+    (* TODO: Remove this variable everywhere *)
     delimit_on_namespaces: bool;
     is_manually_invoked: bool;
   }
@@ -38,7 +44,7 @@ module Go_to_definition = struct
 end
 
 (* GADT for request/response types. See [ServerCommandTypes] for a discussion on
-using GADTs in this way. *)
+   using GADTs in this way. *)
 type _ t =
   | Initialize_from_saved_state: Path.t -> unit t
   | Shutdown: unit -> unit t

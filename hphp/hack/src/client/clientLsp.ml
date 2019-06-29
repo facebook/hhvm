@@ -1137,12 +1137,24 @@ let do_completion_legacy
 
 let do_completion_local
     (ide_service: ClientIdeService.t)
+    (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
     (params: Completion.params)
   : Completion.result Lwt.t =
   let open Completion in
   let open TextDocumentIdentifier in
+
+  (* Retrieve the file contents *)
   let pos = lsp_position_to_ide params.loc.TextDocumentPositionParams.position in
   let filename = lsp_uri_to_path params.loc.TextDocumentPositionParams.textDocument.uri in
+  let lsp_doc_opt = SMap.get
+    params.loc.TextDocumentPositionParams.textDocument.uri
+    editor_open_files in
+  let lsp_doc = match lsp_doc_opt with
+  | None -> failwith (Printf.sprintf "Cannot find LSP document [%s]" filename)
+  | Some doc -> doc
+  in
+
+  (* Other parameters *)
   let is_manually_invoked = match params.context with
     | None -> false
     | Some c -> c.triggerKind = Invoked
@@ -1151,6 +1163,7 @@ let do_completion_local
   (* this is what I want to fix *)
   let request = { ClientIdeMessage.Lsp_autocomplete.
     filename;
+    file_content = lsp_doc.Lsp.TextDocumentItem.text;
     line = pos.Ide_api_types.line;
     column = pos.Ide_api_types.column;
     delimit_on_namespaces = true;
@@ -2437,6 +2450,17 @@ let handle_event
   | Pre_init, Client_message _c ->
     raise (Error.ServerNotInitialized "Server not yet initialized")
 
+  (* Text document completion: "AutoComplete!" *)
+  | (In_init { In_init_env.editor_open_files; _ } | Lost_server { Lost_env.editor_open_files; _ }), Client_message c
+    when env.use_serverless_ide
+      && c.method_ = "textDocument/completion" ->
+    let%lwt () = cancel_if_stale client c short_timeout in
+    let%lwt result = parse_completion c.params
+      |> do_completion_local ide_service editor_open_files
+    in
+    result |> print_completion |> Jsonrpc.respond to_stdout c;
+    Lwt.return_unit
+
   (* any request/notification if we're not yet ready *)
   | In_init ienv, Client_message c ->
     let open In_init_env in
@@ -2560,16 +2584,6 @@ let handle_event
     let%lwt () = cancel_if_stale client c short_timeout in
     let%lwt result = parse_completion c.params
       |> do_completion menv.conn ref_unblocked_time
-    in
-    result |> print_completion |> Jsonrpc.respond to_stdout c;
-    Lwt.return_unit
-
-  | _, Client_message c
-    when env.use_serverless_ide
-      && c.method_ = "textDocument/completion" ->
-    let%lwt () = cancel_if_stale client c short_timeout in
-    let%lwt result = parse_completion c.params
-      |> do_completion_local ide_service
     in
     result |> print_completion |> Jsonrpc.respond to_stdout c;
     Lwt.return_unit

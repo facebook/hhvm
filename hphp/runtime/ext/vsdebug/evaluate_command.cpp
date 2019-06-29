@@ -171,7 +171,7 @@ bool EvaluateCommand::executeImpl(
     // Note that the execution code, if it succeeded, should have created
     // a varenv at the frame already.
     const auto fp =
-      g_context->getFrameAtDepthForDebuggerUnsafe(frameObj->m_frameDepth);
+      g_context->getFrameAtDepthForDebuggerUnsafe(frameDepth);
     VarEnv* env = g_context->getVarEnv(fp);
 
     if (env == nullptr) {

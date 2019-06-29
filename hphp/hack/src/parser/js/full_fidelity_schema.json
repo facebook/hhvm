@@ -819,7 +819,7 @@
       "prefix" : "type_const",
       "fields" : [
         { "field_name" : "attribute_spec" },
-        { "field_name" : "abstract" },
+        { "field_name" : "modifiers" },
         { "field_name" : "keyword" },
         { "field_name" : "type_keyword" },
         { "field_name" : "name" },

@@ -365,7 +365,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   | TypeConstDeclaration              of
     { type_const_attribute_spec                          : t
-    ; type_const_abstract                                : t
+    ; type_const_modifiers                               : t
     ; type_const_keyword                                 : t
     ; type_const_type_keyword                            : t
     ; type_const_name                                    : t
@@ -1661,7 +1661,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and type_const_declaration =
     { type_const_attribute_spec: attribute_specification option value
-    ; type_const_abstract: Token.t option value
+    ; type_const_modifiers: Token.t listesque value
     ; type_const_keyword: Token.t value
     ; type_const_type_keyword: Token.t value
     ; type_const_name: Token.t value

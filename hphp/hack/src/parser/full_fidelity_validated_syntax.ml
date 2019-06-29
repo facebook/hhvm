@@ -1383,7 +1383,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; type_const_name = validate_token x.type_const_name
     ; type_const_type_keyword = validate_token x.type_const_type_keyword
     ; type_const_keyword = validate_token x.type_const_keyword
-    ; type_const_abstract = validate_option_with (validate_token) x.type_const_abstract
+    ; type_const_modifiers = validate_list_with (validate_token) x.type_const_modifiers
     ; type_const_attribute_spec = validate_option_with (validate_attribute_specification) x.type_const_attribute_spec
     }
   | s -> validation_fail (Some SyntaxKind.TypeConstDeclaration) s
@@ -1391,7 +1391,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { Syntax.syntax =
       Syntax.TypeConstDeclaration
       { type_const_attribute_spec = invalidate_option_with (invalidate_attribute_specification) x.type_const_attribute_spec
-      ; type_const_abstract = invalidate_option_with (invalidate_token) x.type_const_abstract
+      ; type_const_modifiers = invalidate_list_with (invalidate_token) x.type_const_modifiers
       ; type_const_keyword = invalidate_token x.type_const_keyword
       ; type_const_type_keyword = invalidate_token x.type_const_type_keyword
       ; type_const_name = invalidate_token x.type_const_name

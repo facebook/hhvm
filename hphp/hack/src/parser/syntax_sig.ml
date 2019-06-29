@@ -252,7 +252,7 @@ module type Syntax_S = sig
     }
   | TypeConstDeclaration              of
     { type_const_attribute_spec                          : t
-    ; type_const_abstract                                : t
+    ; type_const_modifiers                               : t
     ; type_const_keyword                                 : t
     ; type_const_type_keyword                            : t
     ; type_const_name                                    : t

@@ -738,7 +738,7 @@ module WithExpressionAndStatementAndTypeParser
     | Public
     | Protected
     | Private ->
-      let (parser1, modifiers, _ ) = parse_modifiers parser in
+      let (parser1, modifiers) = parse_modifiers parser in
       let next_kind = peek_token_kind parser1 in
       if next_kind = Const then
         let (parser, const) = assert_token parser1 Const in
@@ -1116,24 +1116,20 @@ module WithExpressionAndStatementAndTypeParser
    * a modifier. Having this function prevents "private abstract const type T".
    * See also, parse_methodish_or_const_or_type_const *)
   and parse_methodish_or_property_or_type_constant parser attribute_spec =
-    let (parser1, _, contains_abstract) = parse_modifiers parser in
+    let (parser1, modifiers) = parse_modifiers parser in
     let current_token_kind = peek_token_kind parser1 in
     let next_token = peek_token ~lookahead:1 parser1 in
     let next_token_kind = Token.kind next_token in
     match current_token_kind, next_token_kind with
     | Const, Type ->
-      let (parser, abstr) =
-        if contains_abstract
-        then assert_token parser Abstract
-        else Make.missing parser (pos parser) in
-      let (parser, const) = assert_token parser Const in
-      parse_type_const_declaration parser attribute_spec abstr const
+      let (parser, const) = assert_token parser1 Const in
+      parse_type_const_declaration parser attribute_spec modifiers const
     | _ ->
       parse_methodish_or_property parser attribute_spec
 
 
   and parse_methodish_or_property parser attribute_spec =
-    let (parser, modifiers, _ ) = parse_modifiers parser in
+    let (parser, modifiers) = parse_modifiers parser in
     (* ERROR RECOVERY: match against two tokens, because if one token is
      * in error but the next isn't, then it's likely that the user is
      * simply still typing. Throw an error on what's being typed, then eat
@@ -1173,7 +1169,7 @@ module WithExpressionAndStatementAndTypeParser
   and parse_trait_use_alias_item parser aliasing_name =
     let (parser, keyword) =
       require_token parser As SyntaxError.expected_as_or_insteadof in
-    let (parser, visibility, _) = parse_modifiers parser in
+    let (parser, visibility) = parse_modifiers parser in
     let (parser, aliased_name) = parse_qualified_name_type_opt parser in
     Make.trait_use_alias_item parser aliasing_name keyword visibility
       aliased_name
@@ -1384,7 +1380,7 @@ module WithExpressionAndStatementAndTypeParser
     CONSIDER: We could detect this error in a post-parse pass; it is entirely
     syntactic.  Consider moving the error detection out of the type checker.
   *)
-  and parse_type_const_declaration parser attributes abstr const =
+  and parse_type_const_declaration parser attributes modifiers const =
     let (parser, type_token) = assert_token parser Type in
     let (parser, name) = require_name_allow_non_reserved parser in
     let (parser, generic_type_parameter_list) =
@@ -1404,7 +1400,7 @@ module WithExpressionAndStatementAndTypeParser
     Make.type_const_declaration
       parser
       attributes
-      abstr
+      modifiers
       const
       type_token
       name
@@ -1634,7 +1630,7 @@ module WithExpressionAndStatementAndTypeParser
     | _ -> Make.missing parser (pos parser)
 
   and parse_function_declaration parser attribute_specification =
-    let (parser, modifiers, _) = parse_modifiers parser in
+    let (parser, modifiers) = parse_modifiers parser in
     let (parser, header) =
       parse_function_declaration_header parser ~is_methodish:false modifiers in
     let (parser, body) = parse_compound_statement parser in
@@ -1783,21 +1779,21 @@ module WithExpressionAndStatementAndTypeParser
       let kind2 = peek_token_kind ~lookahead:3 parser in
       match kind1, kind2 with
       | Type, Semicolon ->
-        let (parser, modifiers, _ ) = parse_modifiers parser in
+        let (parser, modifiers) = parse_modifiers parser in
         let (parser, const) = assert_token parser Const in
         parse_const_declaration parser modifiers const
       | Type, _ when kind2 <> Equal ->
         let (parser, attributes) = Make.missing parser (pos parser) in
-        let (parser, abstr) = assert_token parser Abstract in
+        let (parser, modifiers) = parse_modifiers parser in
         let (parser, const) = assert_token parser Const in
-        parse_type_const_declaration parser attributes abstr const
+        parse_type_const_declaration parser attributes modifiers const
       | _, _ ->
-        let (parser, modifiers, _ ) = parse_modifiers parser in
+        let (parser, modifiers) = parse_modifiers parser in
         let (parser, const) = assert_token parser Const in
         parse_const_declaration parser modifiers const
     else
       let (parser, missing) = Make.missing parser (pos parser) in
-      let (parser, modifiers, _) = parse_modifiers parser in
+      let (parser, modifiers) = parse_modifiers parser in
       parse_methodish parser missing modifiers
 
   and parse_methodish parser attribute_spec modifiers =
@@ -1850,9 +1846,8 @@ module WithExpressionAndStatementAndTypeParser
       | _ -> (parser, List.rev acc)
     in
     let (parser, items) = aux parser [] in
-    let contains_abstract = List.exists ~f:SC.is_abstract items in
     let (parser, items_list) = make_list parser items in
-    (parser, items_list, contains_abstract)
+    (parser, items_list)
 
   and parse_enum_or_classish_or_function_declaration parser =
     (* An enum, type alias, function, interface, trait or class may all

@@ -722,7 +722,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
     ]
   | Syntax.TypeConstDeclaration {
       type_const_attribute_spec = attr;
-      type_const_abstract = abs;
+      type_const_modifiers = modifiers;
       type_const_keyword = kw;
       type_const_type_keyword = type_kw ;
       type_const_name = name;
@@ -734,7 +734,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
     Concat [
       t env attr;
       when_present attr newline;
-      t env abs;
+      handle_possible_list env ~after_each:(fun _ -> Space) modifiers;
       Space;
       t env kw;
       Space;

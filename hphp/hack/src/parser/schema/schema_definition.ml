@@ -514,7 +514,7 @@ let schema : schema_node list =
     ; aggregates  = [ ClassBodyDeclaration ]
     ; fields =
       [ "attribute_spec", ZeroOrOne (Just "AttributeSpecification")
-      ; "abstract", ZeroOrOne Token
+      ; "modifiers", ZeroOrMore Token
       ; "keyword", Token
       ; "type_keyword", Token
       ; "name", Token

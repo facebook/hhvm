@@ -899,7 +899,7 @@ module WithToken(Token: TokenType) = struct
          acc
       | TypeConstDeclaration {
         type_const_attribute_spec;
-        type_const_abstract;
+        type_const_modifiers;
         type_const_keyword;
         type_const_type_keyword;
         type_const_name;
@@ -910,7 +910,7 @@ module WithToken(Token: TokenType) = struct
         type_const_semicolon;
       } ->
          let acc = f acc type_const_attribute_spec in
-         let acc = f acc type_const_abstract in
+         let acc = f acc type_const_modifiers in
          let acc = f acc type_const_keyword in
          let acc = f acc type_const_type_keyword in
          let acc = f acc type_const_name in
@@ -2747,7 +2747,7 @@ module WithToken(Token: TokenType) = struct
       ]
       | TypeConstDeclaration {
         type_const_attribute_spec;
-        type_const_abstract;
+        type_const_modifiers;
         type_const_keyword;
         type_const_type_keyword;
         type_const_name;
@@ -2758,7 +2758,7 @@ module WithToken(Token: TokenType) = struct
         type_const_semicolon;
       } -> [
         type_const_attribute_spec;
-        type_const_abstract;
+        type_const_modifiers;
         type_const_keyword;
         type_const_type_keyword;
         type_const_name;
@@ -4596,7 +4596,7 @@ module WithToken(Token: TokenType) = struct
       ]
       | TypeConstDeclaration {
         type_const_attribute_spec;
-        type_const_abstract;
+        type_const_modifiers;
         type_const_keyword;
         type_const_type_keyword;
         type_const_name;
@@ -4607,7 +4607,7 @@ module WithToken(Token: TokenType) = struct
         type_const_semicolon;
       } -> [
         "type_const_attribute_spec";
-        "type_const_abstract";
+        "type_const_modifiers";
         "type_const_keyword";
         "type_const_type_keyword";
         "type_const_name";
@@ -6537,7 +6537,7 @@ module WithToken(Token: TokenType) = struct
         }
       | (SyntaxKind.TypeConstDeclaration, [
           type_const_attribute_spec;
-          type_const_abstract;
+          type_const_modifiers;
           type_const_keyword;
           type_const_type_keyword;
           type_const_name;
@@ -6549,7 +6549,7 @@ module WithToken(Token: TokenType) = struct
         ]) ->
         TypeConstDeclaration {
           type_const_attribute_spec;
-          type_const_abstract;
+          type_const_modifiers;
           type_const_keyword;
           type_const_type_keyword;
           type_const_name;
@@ -8707,7 +8707,7 @@ module WithToken(Token: TokenType) = struct
 
       let make_type_const_declaration
         type_const_attribute_spec
-        type_const_abstract
+        type_const_modifiers
         type_const_keyword
         type_const_type_keyword
         type_const_name
@@ -8719,7 +8719,7 @@ module WithToken(Token: TokenType) = struct
       =
         let syntax = TypeConstDeclaration {
           type_const_attribute_spec;
-          type_const_abstract;
+          type_const_modifiers;
           type_const_keyword;
           type_const_type_keyword;
           type_const_name;

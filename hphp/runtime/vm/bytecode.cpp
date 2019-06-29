@@ -2680,13 +2680,9 @@ OPTBLD_INLINE void iopClone() {
   if (tv->m_type != KindOfObject) {
     raise_error("clone called on non-object");
   }
-  ObjectData* obj = tv->m_data.pobj;
-  const Class* class_ UNUSED = obj->getVMClass();
-  ObjectData* newobj = obj->clone();
+  auto newobj = tv->m_data.pobj->clone();
   vmStack().popTV();
-  vmStack().pushNull();
-  tv->m_type = KindOfObject;
-  tv->m_data.pobj = newobj;
+  vmStack().pushObjectNoRc(newobj);
 }
 
 OPTBLD_INLINE void iopExit() {

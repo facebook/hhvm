@@ -286,6 +286,8 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   bool isBeingConstructed() const;
   // Clear the IsBeingConstructed bit to indicate that construction is done.
   void lockObject();
+  // Temporarily set the IsBeingConstructed bit
+  void unlockObject();
 
   // Set if we might re-enter while some of the properties contain
   // garbage, eg after calling newInstanceNoPropInit, and before

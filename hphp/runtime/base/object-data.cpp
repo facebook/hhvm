@@ -922,6 +922,8 @@ ObjectData* ObjectData::clone() {
     assertx(!isCppBuiltin());
     auto const method = clone->m_cls->lookupMethod(s_clone.get());
     assertx(method);
+    clone->unlockObject();
+    SCOPE_EXIT { clone->lockObject(); };
     g_context->invokeMethodV(clone.get(), method, InvokeArgs{}, false);
   }
   return clone.detach();

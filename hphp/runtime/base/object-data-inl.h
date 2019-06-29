@@ -266,6 +266,10 @@ inline void ObjectData::lockObject() {
   m_aux16 &= ~IsBeingConstructed;
 }
 
+inline void ObjectData::unlockObject() {
+   m_aux16 |= IsBeingConstructed;
+}
+
 inline bool ObjectData::hasUninitProps() const {
   return getAttribute(HasUninitProps);
 }

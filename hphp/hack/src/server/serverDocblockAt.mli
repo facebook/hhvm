@@ -21,8 +21,7 @@ val go_docblock_at :
   filename:string ->
   line:int ->
   column:int ->
-  base_class_name:string option ->
-  basic_only: bool ->
+  kind:SearchUtils.si_kind ->
   DocblockService.result
 
 (** Returns the location of a symbol, which can be used to call go_docblock_at *)

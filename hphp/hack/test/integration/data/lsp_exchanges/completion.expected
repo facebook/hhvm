@@ -955,7 +955,7 @@
       "itemType": "bool",
       "documentation": {
         "kind": "markdown",
-        "value": "Returns whether or not the value is defined as a constant."
+        "value": "BuiltinEnum contains the utility methods provided by enums.\nUnder the hood, an enum Foo will extend BuiltinEnum<Foo>.\n\nHHVM provides a native implementation for this class. The PHP class\ndefinition below is not actually used at run time; it is simply\nprovided for the typechecker and for developer reference."
       },
       "insertTextFormat": 1,
       "textEdit": {

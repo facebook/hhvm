@@ -1211,6 +1211,10 @@ let do_completionItemResolve
   (params: CompletionItemResolve.params)
 : CompletionItemResolve.result Lwt.t =
 
+  (* No matter what, we need the kind *)
+  let raw_kind = params.Completion.kind in
+  let kind = completion_kind_to_si_kind raw_kind in
+
   (* First try fetching position data from json *)
   let%lwt raw_docblock = try
     match params.Completion.data with
@@ -1226,7 +1230,7 @@ let do_completionItemResolve
 
       (* Okay let's get a docblock for this specific location *)
       let command = ServerCommandTypes.DOCBLOCK_AT
-        (filename, line, column, base_class)
+        (filename, line, column, base_class, kind)
       in
       let%lwt raw_docblock = rpc conn ref_unblocked_time command in
       Lwt.return raw_docblock
@@ -1234,8 +1238,6 @@ let do_completionItemResolve
   (* If that failed, fetch docblock using just the symbol name *)
   with _ ->
     let symbolname = params.Completion.label in
-    let raw_kind = params.Completion.kind in
-    let kind = completion_kind_to_si_kind raw_kind in
     let command = ServerCommandTypes.DOCBLOCK_FOR_SYMBOL (symbolname, kind) in
     let%lwt raw_docblock = rpc conn ref_unblocked_time command in
     Lwt.return raw_docblock

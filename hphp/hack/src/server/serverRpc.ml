@@ -63,10 +63,10 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           ~basic_only
         in
         env, result
-    | DOCBLOCK_AT (filename, line, column, base_class_name) ->
-        let basic_only = genv.local_config.ServerLocalConfig.basic_autocomplete_only in
+    | DOCBLOCK_AT (filename, line, column, base_class_name, kind) ->
+        let _ = base_class_name in
         let r = ServerDocblockAt.go_docblock_at
-          ~env ~filename ~line ~column ~base_class_name ~basic_only in
+          ~env ~filename ~line ~column ~kind in
         env, r
     | DOCBLOCK_FOR_SYMBOL (symbol, kind) ->
         let r = ServerDocblockAt.go_docblock_for_symbol ~env ~symbol ~kind in

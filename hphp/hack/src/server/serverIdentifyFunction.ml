@@ -51,12 +51,14 @@ let rec take_best_suggestions l = match l with
     located in the passed in content buffer. *)
 let go content line char (tcopt : TypecheckerOptions.t) =
   get_occurrence_and_map tcopt content line char ~f:(fun path _ symbols ->
-  let symbols = take_best_suggestions (List.sort by_nesting symbols) in
-  let ast = Ast_provider.get_ast path in
-    List.map symbols ~f:(fun x ->
+    let symbols = take_best_suggestions (List.sort by_nesting symbols) in
+    let ast = Ast_provider.get_ast path in
+    let result = List.map symbols ~f:(fun x ->
       let symbol_definition = ServerSymbolDefinition.go ast x in
       x, symbol_definition)
-      )
+    in
+    result
+  )
 
 (** NOTE: the paths of any positions within any returned `SymbolOccurrence` or
     `SymbolDefinition` objects will be the empty string (`""`) if the symbol is

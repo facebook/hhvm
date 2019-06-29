@@ -292,8 +292,8 @@ let test_docblock_finder (harness: Test_harness.t): bool =
   (* Search for docblocks for various items *)
   let root_prefix = Path.to_string harness.repo_dir in
   let docblock = ServerDocblockAt.go_docblock_at
-    ~env ~filename:(root_prefix ^ "/bar_1.php") ~line:6 ~column:7
-    ~base_class_name:(Some "NoBigTrait") ~basic_only:false
+    ~env ~filename:(root_prefix ^ "/bar_1.php")
+    ~line:6 ~column:7 ~kind:SI_Trait
   in
   assert_docblock_markdown
     [DocblockService.Markdown "This is a docblock for NoBigTrait"]

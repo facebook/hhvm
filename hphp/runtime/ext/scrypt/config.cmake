@@ -1,4 +1,4 @@
-HHVM_DEFINE_EXTENSION("scrypt"
+HHVM_DEFINE_EXTENSION("scrypt" IMPLICIT
   SOURCES
     ext_scrypt.cpp
     crypto/crypto_scrypt.cpp
@@ -8,4 +8,6 @@ HHVM_DEFINE_EXTENSION("scrypt"
     crypto/params.h
   SYSTEMLIB
     ext_scrypt.php
+  DEPENDS
+    "libsodium 1.0.9"
 )

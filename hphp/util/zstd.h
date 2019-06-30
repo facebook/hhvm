@@ -20,10 +20,9 @@
 #include <cstddef>
 #include <memory>
 
-#include <folly/Memory.h>
-
 #include <zstd.h>
 
+#include "hphp/util/string-holder.h"
 #include "hphp/util/compression-ctx-pool.h"
 
 namespace HPHP {
@@ -33,9 +32,7 @@ struct ZstdCompressor {
  public:
   explicit ZstdCompressor(int compression_level);
 
-  const char* compress(const void* data,
-                       size_t& len,
-                       bool last);
+  StringHolder compress(const void* data, size_t& len, bool last);
 
  private:
   static void zstd_cctx_deleter(ZSTD_CCtx* ctx);
@@ -53,6 +50,9 @@ struct ZstdCompressor {
 
   static ContextPool::Ref make_zstd_cctx(bool last);
 
+ public:
+  static bool s_useLocalArena;
+ private:
   int compression_level_;
   ContextPool::Ref ctx_;
 };

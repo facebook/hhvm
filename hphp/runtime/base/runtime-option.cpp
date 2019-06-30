@@ -62,6 +62,7 @@
 #include "hphp/util/service-data.h"
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/text-util.h"
+#include "hphp/util/zstd.h"
 #include "hphp/zend/zend-string.h"
 
 #include <cstdint>
@@ -2054,6 +2055,8 @@ void RuntimeOption::Load(
                  "Server.BrotliCompressionQuality", 6);
     Config::Bind(ZstdCompressionEnabled, ini, config,
                  "Server.ZstdCompressionEnabled", -1);
+    Config::Bind(ZstdCompressor::s_useLocalArena, ini, config,
+                 "Server.ZstdUseLocalArena", ZstdCompressor::s_useLocalArena);
     Config::Bind(ZstdCompressionLevel, ini, config,
                  "Server.ZstdCompressionLevel", 3);
     Config::Bind(GzipCompressionLevel, ini, config,

@@ -339,13 +339,12 @@ StringHolder ZstdResponseCompressor::compressResponse(
     return StringHolder{};
   }
   size_t size = len;
-  const char *compressedData = compressor->compress(data, size, last);
+  auto compressedData = compressor->compress(data, size, last);
   if (!compressedData) {
     m_compressor.reset();
     Logger::Error("Unable to compress response to zstd: len=%d", len);
-    return StringHolder{};
   }
-  return StringHolder(compressedData, size, FreeType::Free);
+  return compressedData;
 }
 
 /**************

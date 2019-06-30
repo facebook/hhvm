@@ -2880,6 +2880,14 @@ let log_prop env =
   then Typing_log.log_prop 1 env.Env.function_pos
     "There are remaining unsolved constraints!" env prop
 
+(* Currently, simplify_subtype doesn't look at bounds on type variables.
+ * Let's at least notice when these bounds imply an equality.
+ *)
+let is_sub_type env ty1 ty2 =
+  let env, ty1 = expand_type_and_solve_eq env ty1 in
+  let env, ty2 = expand_type_and_solve_eq env ty2 in
+  is_sub_type env ty1 ty2
+
 (*****************************************************************************)
 (* Exporting *)
 (*****************************************************************************)

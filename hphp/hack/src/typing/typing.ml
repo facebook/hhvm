@@ -4488,6 +4488,7 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
 
     | Some class_info when not is_method
         && not (Env.is_strict env)
+        && not (Partial.should_check_error (Env.get_mode env) 4053)
         && (Cls.name class_info) = SN.Classes.cStdClass ->
       default ()
 

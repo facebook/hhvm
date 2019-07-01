@@ -16,9 +16,10 @@ let set_fuzzy_search_enabled x = HackSearchService.fuzzy := x
 
 (* Set the currently selected search provider *)
 let initialize
-    ~(quiet: bool)
-    ~(provider_name: string)
+    ~(globalrev_opt: int option)
     ~(namespace_map: (string * string) list)
+    ~(provider_name: string)
+    ~(quiet: bool)
     ~(savedstate_file_opt: string option)
     ~(workers: MultiWorker.worker list option): si_env =
 
@@ -33,7 +34,7 @@ let initialize
     | SqliteIndex ->
       SqliteSearchService.initialize ~sienv ~workers ~savedstate_file_opt
     | CustomIndex ->
-      CustomSearchService.initialize ();
+      CustomSearchService.initialize ~globalrev_opt;
       sienv
     | NoIndex
     | TrieIndex ->

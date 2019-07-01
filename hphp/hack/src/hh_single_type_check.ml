@@ -485,9 +485,10 @@ let parse_options () =
   (* Configure symbol index settings *)
   let namespace_map = GlobalOptions.po_auto_namespace_map tcopt in
   let sienv = SymbolIndex.initialize
-    ~quiet:true
-    ~provider_name:!search_provider
+    ~globalrev_opt:None
     ~namespace_map
+    ~provider_name:!search_provider
+    ~quiet:true
     ~savedstate_file_opt:!symbolindex_file
     ~workers:None in
 

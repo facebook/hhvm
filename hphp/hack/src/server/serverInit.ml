@@ -170,9 +170,10 @@ let init
   (* Configure symbol index settings *)
   let namespace_map = GlobalOptions.po_auto_namespace_map env.tcopt in
   env.local_symbol_table := (SymbolIndex.initialize
-      ~quiet:genv.local_config.ServerLocalConfig.symbolindex_quiet
-      ~provider_name:genv.local_config.ServerLocalConfig.symbolindex_search_provider
+      ~globalrev_opt:None
       ~namespace_map
+      ~provider_name:genv.local_config.ServerLocalConfig.symbolindex_search_provider
+      ~quiet:genv.local_config.ServerLocalConfig.symbolindex_quiet
       ~savedstate_file_opt:genv.local_config.ServerLocalConfig.symbolindex_file
       ~workers:genv.workers);
   run_search genv t env.ServerEnv.local_symbol_table;

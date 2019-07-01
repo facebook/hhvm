@@ -13,9 +13,10 @@ val set_fuzzy_search_enabled : bool -> unit
 
 (* Get or set the currently selected search provider *)
 val initialize:
-  quiet:bool ->
-  provider_name:string ->
+  globalrev_opt:int option ->
   namespace_map:(string * string) list ->
+  provider_name:string ->
+  quiet:bool ->
   savedstate_file_opt:string option ->
   workers:MultiWorker.worker list option -> SearchUtils.si_env
 

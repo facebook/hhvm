@@ -101,9 +101,10 @@ let run_index_builder (harness: Test_harness.t): si_env =
   (* Scan the repo folder and produce answers in sqlite *)
   IndexBuilder.go ctxt None;
   let sienv = SymbolIndex.initialize
-    ~quiet:false
-    ~provider_name:"SqliteIndex"
+    ~globalrev_opt:None
     ~namespace_map:[]
+    ~provider_name:"SqliteIndex"
+    ~quiet:false
     ~savedstate_file_opt:file_opt
     ~workers:None in
   Hh_logger.log "Built Sqlite database [%s]" fn;

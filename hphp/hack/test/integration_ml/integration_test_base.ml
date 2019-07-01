@@ -87,9 +87,10 @@ let setup_server ?custom_config ?(hhi_files = []) ()  =
 
   (* Initialize symbol index *)
   let sienv = SymbolIndex.initialize
-    ~quiet:false
-    ~provider_name:"TrieIndex"
+    ~globalrev_opt:None
     ~namespace_map:[]
+    ~provider_name:"TrieIndex"
+    ~quiet:false
     ~savedstate_file_opt:None
     ~workers:None
   in

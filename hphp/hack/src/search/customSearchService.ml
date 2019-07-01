@@ -4,7 +4,9 @@
  *)
 
 (* Put any initialization code necessary here *)
-let initialize (): unit =
+let initialize
+    ~(globalrev_opt: int option): unit =
+  let _ = globalrev_opt in
   ()
 
 (* If you have a way of listing namespaces, put it here *)

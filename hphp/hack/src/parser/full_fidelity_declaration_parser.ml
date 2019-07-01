@@ -717,35 +717,12 @@ module WithExpressionAndStatementAndTypeParser
     | Children -> parse_xhp_children_declaration parser
     | Category -> parse_xhp_category_declaration parser
     | Use -> parse_trait_use parser
-    | Const ->
-      begin
-        let (parser, missing) = Make.missing parser (pos parser) in
-        let kind1 = peek_token_kind ~lookahead:1 parser in
-        let kind2 = peek_token_kind ~lookahead:2 parser in
-        match kind1, kind2 with
-        | Type, Semicolon ->
-          let (parser, const) = assert_token parser Const in
-          parse_const_declaration parser missing const
-        | Type, _ when kind2 <> Equal ->
-          let (parser, missing') = Make.missing parser (pos parser) in
-          let (parser, const) = assert_token parser Const in
-          parse_type_const_declaration parser missing missing' const
-        | _, _ ->
-          let (parser, const) = assert_token parser Const in
-          parse_const_declaration parser missing const
-      end
-    | Abstract -> parse_methodish_or_const_or_type_const parser
+    | Const
+    | Abstract
     | Public
     | Protected
     | Private ->
-      let (parser1, modifiers) = parse_modifiers parser in
-      let next_kind = peek_token_kind parser1 in
-      if next_kind = Const then
-        let (parser, const) = assert_token parser1 Const in
-        parse_const_declaration parser modifiers const
-      else
-        let (parser, missing) = Make.missing parser (pos parser) in
-        parse_methodish_or_property parser missing
+        parse_methodish_or_property_or_const_or_type_const parser
     | Enum -> parse_class_enum parser
     | Final -> begin
         match peek_token_kind ~lookahead:1 parser with
@@ -1111,10 +1088,13 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, semi) = require_semicolon parser in
     Make.require_clause parser req req_kind name semi
 
-  (* This duplicates work from parse_methodish_or_property, but this function is only
-   * invoked after an attribute spec, while parse_methodish_or_property is called after
-   * a modifier. Having this function prevents "private abstract const type T".
-   * See also, parse_methodish_or_const_or_type_const *)
+  (* This duplicates work from parse_methodish_or_const_or_type_const,
+   * but this function is only invoked after an attribute spec, while
+   * parse_methodish_or_const_or_type_const is called after a modifier.
+   * Having this function prevents constants from having attributes as
+   * this cannot be checked in parser_errors as there is no field in constant
+   * declaration to store 'attributes'.
+   *)
   and parse_methodish_or_property_or_type_constant parser attribute_spec =
     let (parser1, modifiers) = parse_modifiers parser in
     let current_token_kind = peek_token_kind parser1 in
@@ -1127,6 +1107,29 @@ module WithExpressionAndStatementAndTypeParser
     | _ ->
       parse_methodish_or_property parser attribute_spec
 
+  (* Parses modifiers and passes them into the parse methods for the
+  respective class body element.
+  *)
+  and parse_methodish_or_property_or_const_or_type_const parser =
+    let (parser1, modifiers) = parse_modifiers parser in
+    let kind0 = peek_token_kind ~lookahead:0 parser1 in
+    let kind1 = peek_token_kind ~lookahead:1 parser1 in
+    let kind2 = peek_token_kind ~lookahead:2 parser1 in
+    match kind0, kind1, kind2 with
+    | Const, Type, Semicolon ->
+      let (parser, const) = assert_token parser1 Const in
+      parse_const_declaration parser modifiers const
+    | Const, Type, _ when kind2 <> Equal ->
+      let (parser, attributes) = Make.missing parser (pos parser) in
+      let (parser, modifiers) = parse_modifiers parser in
+      let (parser, const) = assert_token parser Const in
+      parse_type_const_declaration parser attributes modifiers const
+    | Const, _, _ ->
+      let (parser, const) = assert_token parser1 Const in
+      parse_const_declaration parser modifiers const
+    | _ ->
+      let (parser, missing) = Make.missing parser (pos parser) in
+      parse_methodish_or_property parser missing
 
   and parse_methodish_or_property parser attribute_spec =
     let (parser, modifiers) = parse_modifiers parser in
@@ -1773,29 +1776,6 @@ module WithExpressionAndStatementAndTypeParser
         abstract
         final
    *)
-  and parse_methodish_or_const_or_type_const parser =
-    if peek_token_kind ~lookahead:1 parser = Const then
-      let kind1 = peek_token_kind ~lookahead:2 parser in
-      let kind2 = peek_token_kind ~lookahead:3 parser in
-      match kind1, kind2 with
-      | Type, Semicolon ->
-        let (parser, modifiers) = parse_modifiers parser in
-        let (parser, const) = assert_token parser Const in
-        parse_const_declaration parser modifiers const
-      | Type, _ when kind2 <> Equal ->
-        let (parser, attributes) = Make.missing parser (pos parser) in
-        let (parser, modifiers) = parse_modifiers parser in
-        let (parser, const) = assert_token parser Const in
-        parse_type_const_declaration parser attributes modifiers const
-      | _, _ ->
-        let (parser, modifiers) = parse_modifiers parser in
-        let (parser, const) = assert_token parser Const in
-        parse_const_declaration parser modifiers const
-    else
-      let (parser, missing) = Make.missing parser (pos parser) in
-      let (parser, modifiers) = parse_modifiers parser in
-      parse_methodish parser missing modifiers
-
   and parse_methodish parser attribute_spec modifiers =
     let (parser, header) =
       parse_function_declaration_header parser modifiers ~is_methodish:true in

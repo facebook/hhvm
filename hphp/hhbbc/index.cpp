@@ -4821,6 +4821,10 @@ Index::supports_async_eager_return(res::Func rfunc) const {
     });
 }
 
+bool Index::is_effect_free(const php::Func* func) const {
+  return func_info(*m_data, func)->effectFree;
+}
+
 bool Index::is_effect_free(res::Func rfunc) const {
   return match<bool>(
     rfunc.val,

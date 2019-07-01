@@ -419,9 +419,10 @@ folly::Optional<Type> parentClsExact(ISS& env) {
 //////////////////////////////////////////////////////////////////////
 // fpi
 
-bool canFold(ISS& env, const res::Func& rfunc, int32_t nArgs,
+bool canFold(ISS& env, const php::Func* func, int32_t nArgs,
              Type context, bool maybeDynamic) {
-  if (!options.ConstantFoldBuiltins ||
+  if (!func ||
+      !options.ConstantFoldBuiltins ||
       !will_reduce(env) ||
       any(env.collect.opts & CollectionOpts::Speculating) ||
       (!env.collect.propagate_constants &&
@@ -429,8 +430,9 @@ bool canFold(ISS& env, const res::Func& rfunc, int32_t nArgs,
     return false;
   }
 
-  auto const func = rfunc.exactFunc();
-  if (!func) return false;
+  if (env.collect.unfoldableFuncs.count(std::make_pair(func, env.bid))) {
+    return false;
+  }
   if (maybeDynamic && (
       (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls &&
        (func->attrs & AttrBuiltin)) ||
@@ -471,7 +473,7 @@ bool canFold(ISS& env, const res::Func& rfunc, int32_t nArgs,
 
   // The function has no args. Check if it's effect free and returns
   // a literal.
-  if (env.index.is_effect_free(rfunc) &&
+  if (env.index.is_effect_free(func) &&
       is_scalar(env.index.lookup_return_type_raw(func))) {
     return true;
   }
@@ -504,26 +506,15 @@ bool canFold(ISS& env, const res::Func& rfunc, int32_t nArgs,
  * returns the foldable flag as a convenience.
  */
 bool fpiPush(ISS& env, ActRec ar, int32_t nArgs, bool maybeDynamic) {
-  auto foldable = [&] {
-    if (nArgs < 0 ||
-        ar.kind == FPIKind::Builtin ||
-        !ar.func) {
-      return false;
-    }
-    if (!canFold(env, *ar.func, nArgs, ar.context, maybeDynamic)) return false;
-
-    auto const func = ar.func->exactFunc();
-    if (env.collect.unfoldableFuncs.count(std::make_pair(func, env.bid))) {
-      return false;
-    }
-
-    return true;
-  }();
-  ar.foldable = foldable;
+  ar.foldable =
+    nArgs >= 0 &&
+    ar.kind != FPIKind::Builtin &&
+    ar.func &&
+    canFold(env, ar.func->exactFunc(), nArgs, ar.context, maybeDynamic);
   ar.pushBlk = env.bid;
   FTRACE(2, "    fpi+: {} {}\n", env.state.fpiStack.size(), show(ar));
   env.state.fpiStack.push_back(std::move(ar));
-  return foldable;
+  return ar.foldable;
 }
 
 void fpiPushNoFold(ISS& env, ActRec ar) {

@@ -3708,19 +3708,22 @@ bool fcallTryFold(
   ClsRefSlotId clsRefSlot,
   const ActRec* legacyAR = nullptr
 ) {
-  auto const foldableFunc = [&] () -> const php::Func* {
-    if (!options.ConstantFoldBuiltins) return nullptr;
-    if (fca.hasUnpack() || fca.numRets != 1) return nullptr;
-    auto const exFunc = func.exactFunc();
-    if (legacyAR) {
-      assertx(!legacyAR->foldable || exFunc);
-      return legacyAR->foldable ? exFunc : nullptr;
-    }
-    return canFold(env, func, fca.numArgs, context, maybeDynamic)
-      ? exFunc : nullptr;
-  }();
+  auto const foldableFunc = func.exactFunc();
+  if (!foldableFunc) {
+    assertx(!legacyAR || !legacyAR->foldable);
+    return false;
+  }
 
-  if (foldableFunc) {
+  if (legacyAR) {
+    if (!legacyAR->foldable) return false;
+  } else if (!canFold(env, foldableFunc, fca.numArgs, context, maybeDynamic)) {
+    return false;
+  }
+
+  auto tried_lookup = false;
+  if (options.ConstantFoldBuiltins &&
+      !fca.hasUnpack() &&
+      fca.numRets == 1) {
     auto ty = [&] () {
       if (foldableFunc->attrs & AttrBuiltin &&
           foldableFunc->attrs & AttrIsFoldable) {
@@ -3740,9 +3743,11 @@ bool fcallTryFold(
         args[argNum] = isScalar ? scalarize(arg) : arg;
       }
 
+      tried_lookup = true;
       return env.index.lookup_foldable_return_type(
         env.ctx, foldableFunc, context, std::move(args));
     }();
+
     if (auto v = tv(ty)) {
       BytecodeVec repl;
       if (clsRefSlot != NoClsRefSlotId) {
@@ -3765,7 +3770,8 @@ bool fcallTryFold(
     }
   }
 
-  if (legacyAR && legacyAR->foldable) {
+  if (legacyAR) {
+    assertx(legacyAR->foldable);
     assertx(numExtraInputs == 0);
     assertx(clsRefSlot == NoClsRefSlotId);
     fpiNotFoldable(env);
@@ -3775,6 +3781,9 @@ bool fcallTryFold(
     return true;
   }
 
+  if (tried_lookup) {
+    env.collect.unfoldableFuncs.emplace(foldableFunc, env.bid);
+  }
   return false;
 }
 

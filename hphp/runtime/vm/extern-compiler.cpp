@@ -32,7 +32,6 @@
 #include <folly/io/async/EventBase.h>
 #include <folly/io/async/AsyncPipe.h>
 #include <folly/io/async/AsyncSocketException.h>
-#include <folly/net/NetworkSocket.h>
 #include <folly/json.h>
 #include <folly/FileUtil.h>
 
@@ -208,10 +207,7 @@ struct PipeLogger : public folly::AsyncReader::ReadCallback {
       m_eventBase->waitUntilRunning();
     }
 
-    m_reader = folly::AsyncPipeReader::newReader(
-      m_eventBase.get(),
-      folly::NetworkSocket::fromFd(fd)
-    );
+    m_reader = folly::AsyncPipeReader::newReader(m_eventBase.get(), fd);
     m_reader->setReadCB(this);
   }
 

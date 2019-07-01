@@ -35,6 +35,7 @@
     nast
     parser
     relative_path
+    server_command_types
     utils_find))
 
 (library

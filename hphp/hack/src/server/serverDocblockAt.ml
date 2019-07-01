@@ -100,24 +100,50 @@ let fallback class_name member_name =
   |> render_ancestor_docblocks
 
 (* Attempt to clean obvious cruft from a docblock *)
-let clean_docblock (docblock: string): string =
-  (String.strip docblock)
+let clean_comments (raw_comments: string): string =
+  (String.strip raw_comments)
+
+(* This is a faster version of "go_comments_for_symbol" because it already knows
+   the position *)
+let go_comments_for_position
+    ~(line: int)
+    ~(column: int)
+    ~(path: Relative_path.t)
+    ~(filename: string)
+    ~(contents: string)
+    ~(kind: SymbolDefinition.kind): string option =
+  let source_text = Full_fidelity_source_text.make path contents in
+  let lp = { Lexing.
+    pos_fname = filename;
+    pos_lnum = line;
+    pos_cnum = column;
+    pos_bol = 0;
+  } in
+  let pos = Pos.make_from_lexing_pos filename lp lp in
+  let ffps_opt = ServerSymbolDefinition.get_definition_cst_node_from_pos kind source_text pos in
+  match ffps_opt with
+  | None -> None
+  | Some ffps ->
+    match Docblock_finder.get_docblock ffps with
+    | Some db -> Some (clean_comments db)
+    | None -> None
+;;
 
 (* Fetch a definition *)
-let go_def
+let go_comments_for_symbol
     ~(def: 'a SymbolDefinition.t)
     ~(base_class_name: string option)
     ~(file: ServerCommandTypes.file_input)
-    ~(basic_only: bool) =
+    ~(basic_only: bool): string option =
   match def.SymbolDefinition.docblock with
-  | Some db -> Some (clean_docblock db)
+  | Some db -> Some (clean_comments db)
   | None ->
-    let ffps_opt = ServerSymbolDefinition.get_definition_cst_node file def in
+    let ffps_opt = ServerSymbolDefinition.get_definition_cst_node_from_file_input file def in
     match ffps_opt with
     | None -> None
     | Some ffps ->
       match Docblock_finder.get_docblock ffps with
-      | Some db -> Some (clean_docblock db)
+      | Some db -> Some (clean_comments db)
       | None ->
         match def.SymbolDefinition.kind, base_class_name with
         | SymbolDefinition.Method, Some base_class_name when not basic_only ->
@@ -137,8 +163,8 @@ let go_locate_symbol
   (* Look up this class name *)
   match SymbolIndex.get_position_for_symbol symbol kind with
   | None -> None
-  | Some (relpath, line, column) ->
-    let filename = Relative_path.to_absolute relpath in
+  | Some (path, line, column) ->
+    let filename = Relative_path.to_absolute path in
 
     (* Determine base class properly *)
     let base_class_name = if kind = SearchUtils.SI_Class then begin
@@ -159,49 +185,76 @@ let go_locate_symbol
       dbs_base_class = base_class_name;
     }
 
+let symboldefinition_kind_from_si_kind
+    (kind: SearchUtils.si_kind): SymbolDefinition.kind =
+  match kind with
+  | SearchUtils.SI_Class -> SymbolDefinition.Class
+  | SearchUtils.SI_Interface -> SymbolDefinition.Interface
+  | SearchUtils.SI_Enum -> SymbolDefinition.Enum
+  | SearchUtils.SI_Trait -> SymbolDefinition.Trait
+  | SearchUtils.SI_Unknown -> SymbolDefinition.Class
+  | SearchUtils.SI_Mixed -> SymbolDefinition.LocalVar
+  | SearchUtils.SI_Function -> SymbolDefinition.Function
+  | SearchUtils.SI_Typedef -> SymbolDefinition.Typedef
+  | SearchUtils.SI_GlobalConstant -> SymbolDefinition.Const
+  | SearchUtils.SI_XHP -> SymbolDefinition.Class
+  | SearchUtils.SI_Namespace ->
+    failwith "Cannot look up a namespace"
+
 (* Given a location, find best doc block *)
 let go_docblock_at
-  ~(env: ServerEnv.env)
-  ~(filename: string)
-  ~(line: int)
-  ~(column: int)
-  ~(base_class_name: string option)
-  ~(basic_only: bool): DocblockService.result =
-  let relpath = Relative_path.create_detect_prefix filename in
+    ~(env: ServerEnv.env)
+    ~(filename: string)
+    ~(line: int)
+    ~(column: int)
+    ~(kind: SearchUtils.si_kind): DocblockService.result =
+  let _ = env in
+
+  (* Convert relative path and kind *)
+  let path = Relative_path.create_detect_prefix filename in
+  let def_kind = symboldefinition_kind_from_si_kind kind in
 
   (* Okay, now that we know its position, let's gather a docblock *)
-  let ServerEnv.{ tcopt; _ } = env in
-  let contents_opt = File_provider.get_contents relpath in
+  let contents_opt = File_provider.get_contents path in
   match contents_opt with
-  | None -> None
+  | None -> []
   | Some contents ->
-    let definitions =
-      ServerIdentifyFunction.go contents line column tcopt
-      |> List.filter_map ~f:(fun (_, def) -> def)
-    in
-    match List.hd definitions with
-    | None -> None
-    | Some def ->
-      let result = go_def
-        ~base_class_name
-        ~file:(ServerCommandTypes.FileName filename)
-        ~basic_only
-        ~def in
-      result
+    match go_comments_for_position
+      ~line
+      ~column
+      ~path
+      ~filename
+      ~contents
+      ~kind:def_kind with
+    | None -> []
+    | Some "" -> []
+    | Some comments -> [DocblockService.Markdown comments]
+
 
 (* Locate a symbol and return its docblock, no extra steps *)
 let go_docblock_for_symbol
     ~(env: ServerEnv.env)
     ~(symbol: string)
     ~(kind: SearchUtils.si_kind): DocblockService.result =
-  match go_locate_symbol ~env ~symbol ~kind with
-  | None -> None
-  | Some location ->
-    let open DocblockService in
-    go_docblock_at
-      ~env
-      ~filename:location.dbs_filename
-      ~line:location.dbs_line
-      ~column:location.dbs_column
-      ~base_class_name:location.dbs_base_class
-      ~basic_only:false
+
+  (* Shortcut for namespaces, since they don't have locations *)
+  if kind = SearchUtils.SI_Namespace then begin
+    let namespace_declaration = Printf.sprintf "namespace %s;" symbol in
+    [ (DocblockService.HackSnippet namespace_declaration) ]
+  end else begin
+    match go_locate_symbol ~env ~symbol ~kind with
+    | None ->
+      let msg = Printf.sprintf
+        "The symbol %s (%s) has been added recently. To use this symbol, please rebase."
+        symbol (SearchUtils.show_si_kind kind)
+      in
+      [ (DocblockService.Markdown msg) ]
+    | Some location ->
+      let open DocblockService in
+      go_docblock_at
+        ~env
+        ~filename:location.dbs_filename
+        ~line:location.dbs_line
+        ~column:location.dbs_column
+        ~kind
+  end

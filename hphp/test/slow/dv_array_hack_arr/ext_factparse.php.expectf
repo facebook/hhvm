@@ -1,171 +1,6 @@
 dict(3) {
   ["%s"]=>
   dict(7) {
-    ["md5sum0"]=>
-    int(7912239445824932007)
-    ["md5sum1"]=>
-    int(-1763850095915877527)
-    ["sha1sum"]=>
-    string(40) "54477e30df72b872cefa7332938e9807b0d20907"
-    ["types"]=>
-    vec(10) {
-      dict(4) {
-        ["name"]=>
-        string(3) "CL0"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(0)
-        ["baseTypes"]=>
-        vec(0) {
-        }
-      }
-      dict(4) {
-        ["name"]=>
-        string(3) "CL1"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(0)
-        ["baseTypes"]=>
-        vec(0) {
-        }
-      }
-      dict(4) {
-        ["name"]=>
-        string(3) "CL2"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(1)
-        ["baseTypes"]=>
-        vec(5) {
-          string(3) "CL0"
-          string(2) "I0"
-          string(2) "I1"
-          string(3) "TR0"
-          string(3) "TR1"
-        }
-      }
-      dict(4) {
-        ["name"]=>
-        string(2) "E0"
-        ["kindOf"]=>
-        string(4) "enum"
-        ["flags"]=>
-        int(2)
-        ["baseTypes"]=>
-        vec(1) {
-          string(14) "HH\BuiltinEnum"
-        }
-      }
-      dict(5) {
-        ["name"]=>
-        string(2) "I0"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
-        ["baseTypes"]=>
-        vec(0) {
-        }
-        ["requireExtends"]=>
-        vec(0) {
-        }
-      }
-      dict(5) {
-        ["name"]=>
-        string(2) "I1"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
-        ["baseTypes"]=>
-        vec(0) {
-        }
-        ["requireExtends"]=>
-        vec(0) {
-        }
-      }
-      dict(5) {
-        ["name"]=>
-        string(2) "I2"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
-        ["baseTypes"]=>
-        vec(2) {
-          string(2) "I0"
-          string(2) "I1"
-        }
-        ["requireExtends"]=>
-        vec(1) {
-          string(3) "CL1"
-        }
-      }
-      dict(6) {
-        ["name"]=>
-        string(3) "TR0"
-        ["kindOf"]=>
-        string(5) "trait"
-        ["flags"]=>
-        int(1)
-        ["baseTypes"]=>
-        vec(0) {
-        }
-        ["requireImplements"]=>
-        vec(0) {
-        }
-        ["requireExtends"]=>
-        vec(0) {
-        }
-      }
-      dict(6) {
-        ["name"]=>
-        string(3) "TR1"
-        ["kindOf"]=>
-        string(5) "trait"
-        ["flags"]=>
-        int(1)
-        ["baseTypes"]=>
-        vec(0) {
-        }
-        ["requireImplements"]=>
-        vec(0) {
-        }
-        ["requireExtends"]=>
-        vec(0) {
-        }
-      }
-      dict(6) {
-        ["name"]=>
-        string(3) "TR2"
-        ["kindOf"]=>
-        string(5) "trait"
-        ["flags"]=>
-        int(1)
-        ["baseTypes"]=>
-        vec(4) {
-          string(2) "I0"
-          string(2) "I1"
-          string(3) "TR0"
-          string(3) "TR1"
-        }
-        ["requireImplements"]=>
-        vec(1) {
-          string(2) "I2"
-        }
-        ["requireExtends"]=>
-        vec(1) {
-          string(3) "CL1"
-        }
-      }
-    }
-    ["functions"]=>
-    vec(1) {
-      string(2) "f1"
-    }
     ["constants"]=>
     vec(5) {
       string(3) "CO0"
@@ -174,180 +9,180 @@ dict(3) {
       string(3) "CO3"
       string(3) "CO4"
     }
+    ["functions"]=>
+    vec(1) {
+      string(2) "f1"
+    }
+    ["md5sum0"]=>
+    int(7912239445824932007)
+    ["md5sum1"]=>
+    int(-1763850095915877527)
+    ["sha1sum"]=>
+    string(40) "54477e30df72b872cefa7332938e9807b0d20907"
     ["typeAliases"]=>
     vec(3) {
       string(3) "TA0"
       string(3) "TA1"
       string(3) "TA2"
     }
-  }
-  ["%s"]=>
-  dict(7) {
-    ["md5sum0"]=>
-    int(-6524520287888746400)
-    ["md5sum1"]=>
-    int(-2442148009797625650)
-    ["sha1sum"]=>
-    string(40) "b30219c72207318aa9190a36a0877adbd769e071"
     ["types"]=>
     vec(10) {
       dict(4) {
-        ["name"]=>
-        string(6) "NS\CL0"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(0)
         ["baseTypes"]=>
         vec(0) {
         }
-      }
-      dict(4) {
-        ["name"]=>
-        string(6) "NS\CL1"
-        ["kindOf"]=>
-        string(5) "class"
         ["flags"]=>
         int(0)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(3) "CL0"
+      }
+      dict(4) {
         ["baseTypes"]=>
         vec(0) {
         }
-      }
-      dict(4) {
-        ["name"]=>
-        string(6) "NS\CL2"
+        ["flags"]=>
+        int(0)
         ["kindOf"]=>
         string(5) "class"
-        ["flags"]=>
-        int(1)
+        ["name"]=>
+        string(3) "CL1"
+      }
+      dict(4) {
         ["baseTypes"]=>
         vec(5) {
-          string(6) "NS\CL0"
-          string(5) "NS\I0"
-          string(5) "NS\I1"
-          string(6) "NS\TR0"
-          string(6) "NS\TR1"
+          string(3) "CL0"
+          string(2) "I0"
+          string(2) "I1"
+          string(3) "TR0"
+          string(3) "TR1"
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(3) "CL2"
       }
       dict(4) {
-        ["name"]=>
-        string(5) "NS\E0"
-        ["kindOf"]=>
-        string(4) "enum"
-        ["flags"]=>
-        int(2)
         ["baseTypes"]=>
         vec(1) {
           string(14) "HH\BuiltinEnum"
         }
+        ["flags"]=>
+        int(2)
+        ["kindOf"]=>
+        string(4) "enum"
+        ["name"]=>
+        string(2) "E0"
       }
       dict(5) {
-        ["name"]=>
-        string(5) "NS\I0"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         vec(0) {
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(2) "I0"
         ["requireExtends"]=>
         vec(0) {
         }
       }
       dict(5) {
-        ["name"]=>
-        string(5) "NS\I1"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         vec(0) {
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(2) "I1"
         ["requireExtends"]=>
         vec(0) {
         }
       }
       dict(5) {
-        ["name"]=>
-        string(5) "NS\I2"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         vec(2) {
-          string(5) "NS\I0"
-          string(5) "NS\I1"
+          string(2) "I0"
+          string(2) "I1"
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(2) "I2"
         ["requireExtends"]=>
         vec(1) {
-          string(6) "NS\CL1"
+          string(3) "CL1"
         }
       }
       dict(6) {
-        ["name"]=>
-        string(6) "NS\TR0"
-        ["kindOf"]=>
-        string(5) "trait"
+        ["baseTypes"]=>
+        vec(0) {
+        }
         ["flags"]=>
         int(1)
-        ["baseTypes"]=>
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(3) "TR0"
+        ["requireExtends"]=>
         vec(0) {
         }
         ["requireImplements"]=>
         vec(0) {
         }
-        ["requireExtends"]=>
-        vec(0) {
-        }
       }
       dict(6) {
-        ["name"]=>
-        string(6) "NS\TR1"
-        ["kindOf"]=>
-        string(5) "trait"
+        ["baseTypes"]=>
+        vec(0) {
+        }
         ["flags"]=>
         int(1)
-        ["baseTypes"]=>
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(3) "TR1"
+        ["requireExtends"]=>
         vec(0) {
         }
         ["requireImplements"]=>
         vec(0) {
         }
-        ["requireExtends"]=>
-        vec(0) {
-        }
       }
       dict(6) {
-        ["name"]=>
-        string(6) "NS\TR2"
-        ["kindOf"]=>
-        string(5) "trait"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         vec(4) {
-          string(5) "NS\I0"
-          string(5) "NS\I1"
-          string(6) "NS\TR0"
-          string(6) "NS\TR1"
+          string(2) "I0"
+          string(2) "I1"
+          string(3) "TR0"
+          string(3) "TR1"
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(3) "TR2"
+        ["requireExtends"]=>
+        vec(1) {
+          string(3) "CL1"
         }
         ["requireImplements"]=>
         vec(1) {
-          string(5) "NS\I2"
-        }
-        ["requireExtends"]=>
-        vec(1) {
-          string(6) "NS\CL1"
+          string(2) "I2"
         }
       }
     }
-    ["functions"]=>
-    vec(1) {
-      string(5) "NS\f1"
-    }
+  }
+  ["%s"]=>
+  dict(7) {
     ["constants"]=>
     vec(5) {
       string(6) "NS\CO0"
@@ -356,180 +191,180 @@ dict(3) {
       string(6) "NS\CO3"
       string(6) "NS\CO4"
     }
+    ["functions"]=>
+    vec(1) {
+      string(5) "NS\f1"
+    }
+    ["md5sum0"]=>
+    int(-6524520287888746400)
+    ["md5sum1"]=>
+    int(-2442148009797625650)
+    ["sha1sum"]=>
+    string(40) "b30219c72207318aa9190a36a0877adbd769e071"
     ["typeAliases"]=>
     vec(3) {
       string(6) "NS\TA0"
       string(6) "NS\TA1"
       string(6) "NS\TA2"
     }
-  }
-  ["%s"]=>
-  dict(7) {
-    ["md5sum0"]=>
-    int(4326157067570146936)
-    ["md5sum1"]=>
-    int(-5546976242100887183)
-    ["sha1sum"]=>
-    string(40) "2b6ee62e181d96cce033bf30224429e66c3e5211"
     ["types"]=>
     vec(10) {
       dict(4) {
-        ["name"]=>
-        string(9) "NS\NS\CL0"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(0)
         ["baseTypes"]=>
         vec(0) {
         }
-      }
-      dict(4) {
-        ["name"]=>
-        string(9) "NS\NS\CL1"
-        ["kindOf"]=>
-        string(5) "class"
         ["flags"]=>
         int(0)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(6) "NS\CL0"
+      }
+      dict(4) {
         ["baseTypes"]=>
         vec(0) {
         }
-      }
-      dict(4) {
-        ["name"]=>
-        string(9) "NS\NS\CL2"
+        ["flags"]=>
+        int(0)
         ["kindOf"]=>
         string(5) "class"
-        ["flags"]=>
-        int(1)
+        ["name"]=>
+        string(6) "NS\CL1"
+      }
+      dict(4) {
         ["baseTypes"]=>
         vec(5) {
-          string(9) "NS\NS\CL0"
-          string(8) "NS\NS\I0"
-          string(8) "NS\NS\I1"
-          string(9) "NS\NS\TR0"
-          string(9) "NS\NS\TR1"
+          string(6) "NS\CL0"
+          string(5) "NS\I0"
+          string(5) "NS\I1"
+          string(6) "NS\TR0"
+          string(6) "NS\TR1"
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(6) "NS\CL2"
       }
       dict(4) {
-        ["name"]=>
-        string(8) "NS\NS\E0"
-        ["kindOf"]=>
-        string(4) "enum"
-        ["flags"]=>
-        int(2)
         ["baseTypes"]=>
         vec(1) {
           string(14) "HH\BuiltinEnum"
         }
+        ["flags"]=>
+        int(2)
+        ["kindOf"]=>
+        string(4) "enum"
+        ["name"]=>
+        string(5) "NS\E0"
       }
       dict(5) {
-        ["name"]=>
-        string(8) "NS\NS\I0"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         vec(0) {
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(5) "NS\I0"
         ["requireExtends"]=>
         vec(0) {
         }
       }
       dict(5) {
-        ["name"]=>
-        string(8) "NS\NS\I1"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         vec(0) {
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(5) "NS\I1"
         ["requireExtends"]=>
         vec(0) {
         }
       }
       dict(5) {
-        ["name"]=>
-        string(8) "NS\NS\I2"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         vec(2) {
-          string(8) "NS\NS\I0"
-          string(8) "NS\NS\I1"
+          string(5) "NS\I0"
+          string(5) "NS\I1"
         }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(5) "NS\I2"
         ["requireExtends"]=>
         vec(1) {
-          string(9) "NS\NS\CL1"
+          string(6) "NS\CL1"
         }
       }
       dict(6) {
-        ["name"]=>
-        string(9) "NS\NS\TR0"
-        ["kindOf"]=>
-        string(5) "trait"
+        ["baseTypes"]=>
+        vec(0) {
+        }
         ["flags"]=>
         int(1)
-        ["baseTypes"]=>
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(6) "NS\TR0"
+        ["requireExtends"]=>
         vec(0) {
         }
         ["requireImplements"]=>
         vec(0) {
         }
-        ["requireExtends"]=>
-        vec(0) {
-        }
       }
       dict(6) {
-        ["name"]=>
-        string(9) "NS\NS\TR1"
-        ["kindOf"]=>
-        string(5) "trait"
+        ["baseTypes"]=>
+        vec(0) {
+        }
         ["flags"]=>
         int(1)
-        ["baseTypes"]=>
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(6) "NS\TR1"
+        ["requireExtends"]=>
         vec(0) {
         }
         ["requireImplements"]=>
         vec(0) {
         }
-        ["requireExtends"]=>
-        vec(0) {
-        }
       }
       dict(6) {
-        ["name"]=>
-        string(9) "NS\NS\TR2"
-        ["kindOf"]=>
-        string(5) "trait"
-        ["flags"]=>
-        int(1)
         ["baseTypes"]=>
         vec(4) {
-          string(8) "NS\NS\I0"
-          string(8) "NS\NS\I1"
-          string(9) "NS\NS\TR0"
-          string(9) "NS\NS\TR1"
+          string(5) "NS\I0"
+          string(5) "NS\I1"
+          string(6) "NS\TR0"
+          string(6) "NS\TR1"
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(6) "NS\TR2"
+        ["requireExtends"]=>
+        vec(1) {
+          string(6) "NS\CL1"
         }
         ["requireImplements"]=>
         vec(1) {
-          string(8) "NS\NS\I2"
-        }
-        ["requireExtends"]=>
-        vec(1) {
-          string(9) "NS\NS\CL1"
+          string(5) "NS\I2"
         }
       }
     }
-    ["functions"]=>
-    vec(1) {
-      string(8) "NS\NS\f1"
-    }
+  }
+  ["%s"]=>
+  dict(7) {
     ["constants"]=>
     vec(5) {
       string(9) "NS\NS\CO0"
@@ -538,11 +373,176 @@ dict(3) {
       string(9) "NS\NS\CO3"
       string(9) "NS\NS\CO4"
     }
+    ["functions"]=>
+    vec(1) {
+      string(8) "NS\NS\f1"
+    }
+    ["md5sum0"]=>
+    int(4326157067570146936)
+    ["md5sum1"]=>
+    int(-5546976242100887183)
+    ["sha1sum"]=>
+    string(40) "2b6ee62e181d96cce033bf30224429e66c3e5211"
     ["typeAliases"]=>
     vec(3) {
       string(9) "NS\NS\TA0"
       string(9) "NS\NS\TA1"
       string(9) "NS\NS\TA2"
+    }
+    ["types"]=>
+    vec(10) {
+      dict(4) {
+        ["baseTypes"]=>
+        vec(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(9) "NS\NS\CL0"
+      }
+      dict(4) {
+        ["baseTypes"]=>
+        vec(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(9) "NS\NS\CL1"
+      }
+      dict(4) {
+        ["baseTypes"]=>
+        vec(5) {
+          string(9) "NS\NS\CL0"
+          string(8) "NS\NS\I0"
+          string(8) "NS\NS\I1"
+          string(9) "NS\NS\TR0"
+          string(9) "NS\NS\TR1"
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(9) "NS\NS\CL2"
+      }
+      dict(4) {
+        ["baseTypes"]=>
+        vec(1) {
+          string(14) "HH\BuiltinEnum"
+        }
+        ["flags"]=>
+        int(2)
+        ["kindOf"]=>
+        string(4) "enum"
+        ["name"]=>
+        string(8) "NS\NS\E0"
+      }
+      dict(5) {
+        ["baseTypes"]=>
+        vec(0) {
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(8) "NS\NS\I0"
+        ["requireExtends"]=>
+        vec(0) {
+        }
+      }
+      dict(5) {
+        ["baseTypes"]=>
+        vec(0) {
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(8) "NS\NS\I1"
+        ["requireExtends"]=>
+        vec(0) {
+        }
+      }
+      dict(5) {
+        ["baseTypes"]=>
+        vec(2) {
+          string(8) "NS\NS\I0"
+          string(8) "NS\NS\I1"
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(8) "NS\NS\I2"
+        ["requireExtends"]=>
+        vec(1) {
+          string(9) "NS\NS\CL1"
+        }
+      }
+      dict(6) {
+        ["baseTypes"]=>
+        vec(0) {
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(9) "NS\NS\TR0"
+        ["requireExtends"]=>
+        vec(0) {
+        }
+        ["requireImplements"]=>
+        vec(0) {
+        }
+      }
+      dict(6) {
+        ["baseTypes"]=>
+        vec(0) {
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(9) "NS\NS\TR1"
+        ["requireExtends"]=>
+        vec(0) {
+        }
+        ["requireImplements"]=>
+        vec(0) {
+        }
+      }
+      dict(6) {
+        ["baseTypes"]=>
+        vec(4) {
+          string(8) "NS\NS\I0"
+          string(8) "NS\NS\I1"
+          string(9) "NS\NS\TR0"
+          string(9) "NS\NS\TR1"
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(9) "NS\NS\TR2"
+        ["requireExtends"]=>
+        vec(1) {
+          string(9) "NS\NS\CL1"
+        }
+        ["requireImplements"]=>
+        vec(1) {
+          string(8) "NS\NS\I2"
+        }
+      }
     }
   }
 }
@@ -552,7 +552,7 @@ dict(3) {
   NULL
   ["garbage_filename"]=>
   NULL
-  ["/tmp"]=>
+  ["%s"]=>
   NULL
 }
 PASSED erroneous files test

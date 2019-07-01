@@ -3,8 +3,11 @@
 function foo<T as dynamic>(dynamic $x, @dynamic $z) : ?dynamic {
   return "anything";
 }
+
 type Something = dynamic;
 newtype Foo = dynamic;
+
+function bar(Something $x, Foo $y): void {}
 
 class C {
   static vec<dynamic> $z;
@@ -13,7 +16,9 @@ class C {
 }
 function test() : void {
   foo(5, "string");
-  foo(new C(), 5);
+  foo(new C(), false);
+  bar(5, "string");
+  bar(new C(), false);
 }
 
 

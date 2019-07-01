@@ -1,36 +1,3 @@
-(copy_files ../../scripts/get_build_id_gen.c)
-
-(library
-  (name utils_core)
-  (wrapped false)
-  (modules
-    build_id
-    hh_core
-    exit_status
-    hh_logger
-    exception
-    local_id
-    measure
-    prim_defs
-    random_id
-    stats
-    utils)
-  (c_names
-    get_build_id
-    get_build_id_gen)
-  (c_flags (:standard
-    -I%{env:CMAKE_SOURCE_DIR=xxx}
-    (:include config/build-id-opt)
-    (:include config/build-timestamp-opt)))
-  (libraries
-    string
-    imported_core
-    hh_json
-    str
-    unix)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)))
-
 ; splitted utils:utils
 (library
   (name trie)
@@ -124,12 +91,6 @@
     relative_path))
 
 (library
-  (name string)
-  (wrapped false)
-  (modules string_utils)
-  (libraries str))
-
-(library
   (name stack_utils)
   (wrapped false)
   (modules
@@ -153,85 +114,7 @@
     naming_special_names
     pos))
 
-(library
-  (name file_content)
-  (wrapped false)
-  (modules
-    file_content)
-  (libraries
-    utils_core))
-
-(library
-  (name marshal_tools)
-  (wrapped false)
-  (modules
-    marshal_tools)
-  (libraries
-    sys_utils))
-
-(library
-  (name marshal_tools_lwt)
-  (wrapped false)
-  (modules
-    marshal_tools_lwt)
-  (libraries
-    marshal_tools
-    lwt
-    lwt.unix
-    lwt_log))
-
-(library
-  (name buffered_line_reader)
-  (wrapped false)
-  (modules
-    buffered_line_reader
-    buffered_line_reader_sig)
-  (libraries
-    utils_core))
-
-(library
-  (name buffered_line_reader_lwt)
-  (wrapped false)
-  (modules
-    buffered_line_reader_lwt)
-  (libraries
-    buffered_line_reader
-    lwt
-    lwt.unix))
-
-(library
-  (name jsonrpc)
-  (wrapped false)
-  (modules
-    jsonrpc)
-  (libraries
-    buffered_line_reader
-    hh_json
-    http_lite
-    marshal_tools
-    marshal_tools_lwt
-    sys_utils)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)))
-
-(library
-  (name http_lite)
-  (wrapped false)
-  (modules
-    http_lite)
-  (libraries
-    buffered_line_reader
-    utils_core))
-
-(library
-  (name file_url)
-  (wrapped false)
-  (modules
-    file_url)
-  (libraries
-    utils_core))
-
-(copy_files config/build-id.c)
+(copy_files core/config/build-id.c)
 
 (library
   (name compiler_id)
@@ -244,32 +127,10 @@
   (c_flags (:standard -I%{env:CMAKE_SOURCE_DIR=xxx})))
 
 (library
-  (name lsp)
-  (wrapped false)
-  (modules
-    lsp
-    lsp_fmt
-    lsp_helpers)
-  (libraries
-    file_content
-    file_url
-    hh_json
-    jsonrpc
-    utils_core)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)))
-
-(library
   (name server_load_flag)
   (wrapped false)
   (modules
     serverLoadFlag))
-
-(library
-  (name opaque_digest)
-  (wrapped false)
-  (modules
-    opaqueDigest))
 
 (library
   (name lwt_utils)

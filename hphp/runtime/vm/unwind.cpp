@@ -313,6 +313,24 @@ void chainFaultObjects(ObjectData* top, ObjectData* prev) {
   tvMoveIgnoreRef(make_tv<KindOfObject>(prev), prevLval);
 }
 
+namespace {
+
+ALWAYS_INLINE void lockObjectWhileUnwinding(PC pc, Stack& stack) {
+  auto const op = decode_op(pc);
+  if (LIKELY(op != OpFCallCtor)) return;
+  auto fca = decodeFCallArgs(op, pc);
+  if (fca.constructNoConst) return;
+
+  // We just unwound from a constructor that was called from a new expression
+  // (as opposed to via e.g. parent::__construct()). The object being
+  // constructed is on the top of the stack, and needs to be locked.
+  auto const obj = stack.top();
+  assertx(isObjectType(obj->m_type));
+  obj->m_data.pobj->lockObject();
+}
+
+}
+
 /*
  * Unwinding proceeds as follows:
  *
@@ -359,6 +377,7 @@ void unwindPhp(ObjectData* phpException) {
 
     if (fromTearDownFrame) {
       fromTearDownFrame = false;
+      lockObjectWhileUnwinding(pc, stack);
       discardStackTemps(fp, stack, func->unit()->offsetOf(skipCall(pc)));
     } else {
       discardStackTemps(fp, stack, raiseOffset);
@@ -448,7 +467,10 @@ void unwindCpp(Exception* exception) {
     // Discard the frame
     DEBUG_ONLY auto const phpException = tearDownFrame(fp, stack, pc, nullptr);
     assertx(phpException == nullptr);
-    if (fp) pc = skipCall(pc);
+    if (fp) {
+      lockObjectWhileUnwinding(pc, stack);
+      pc = skipCall(pc);
+    }
   } while (fp);
 
   // Propagate the C++ exception to the outer VM nesting

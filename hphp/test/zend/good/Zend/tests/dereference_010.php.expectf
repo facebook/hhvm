@@ -1,8 +1,0 @@
-
-Warning: Cannot use a scalar value as an array in %s/dereference_010.php on line 10
-NULL
-
-Warning: Cannot use a scalar value as an array in %s/dereference_010.php on line 11
-NULL
-
-Fatal error: Object does not implement ArrayAccess in %s/dereference_010.php on line 17

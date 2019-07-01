@@ -65,7 +65,8 @@ struct FCallArgsBase {
     None                     = 0,
     // Unpack remaining arguments from a varray passed by ...$args.
     HasUnpack                = (1 << 0),
-    // Callee is known to support async eager return.
+    // Op is not FCallCtor and callee is known to support async eager return.
+    // In the encoded form, this bit is re-used to encode constructNoConst
     SupportsAsyncEagerReturn = (1 << 1),
     // HHBC-only: is the number of returns provided? false => 1
     HasInOut                 = (1 << 2),
@@ -83,9 +84,12 @@ struct FCallArgsBase {
   // The first (lowest) bit of numArgs.
   static constexpr uint8_t kFirstNumArgsBit = 5;
 
-  explicit FCallArgsBase(Flags flags, uint32_t numArgs, uint32_t numRets)
-    : numArgs(numArgs), numRets(numRets), flags(flags) {
+  explicit FCallArgsBase(Flags flags, uint32_t numArgs, uint32_t numRets,
+                         bool constructNoConst)
+    : numArgs(numArgs), numRets(numRets), flags(flags)
+      , constructNoConst(constructNoConst) {
     assertx(!(flags & ~kInternalFlags));
+    assertx(!(supportsAsyncEagerReturn() && constructNoConst));
   }
   bool hasUnpack() const { return flags & Flags::HasUnpack; }
   uint32_t numArgsInclUnpack() const { return numArgs + (hasUnpack() ? 1 : 0); }
@@ -95,12 +99,14 @@ struct FCallArgsBase {
   uint32_t numArgs;
   uint32_t numRets;
   Flags flags;
+  bool constructNoConst;
 };
 
 struct FCallArgs : FCallArgsBase {
   explicit FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
-                     const uint8_t* byRefs, Offset asyncEagerOffset)
-    : FCallArgsBase(flags, numArgs, numRets)
+                     const uint8_t* byRefs, Offset asyncEagerOffset,
+                     bool constructNoConst)
+    : FCallArgsBase(flags, numArgs, numRets, constructNoConst)
     , asyncEagerOffset(asyncEagerOffset)
     , byRefs(byRefs) {
     assertx(IMPLIES(byRefs != nullptr, numArgs != 0));
@@ -632,16 +638,17 @@ constexpr uint32_t kMaxConcatN = 4;
   O(NewObjRD,        ONE(SA),          ONE(CV),         ONE(CV),    NF) \
   O(NewObjS,         ONE(OA(SpecialClsRef)),                            \
                                        NOV,             ONE(CV),    NF) \
+  O(LockObj,         NA,               ONE(CV),         ONE(CV),    NF) \
   O(FPushFunc,       TWO(IVA,I32LA),   FPUSH(1, 0),     FPUSH,      PF) \
   O(FPushFuncD,      TWO(IVA,SA),      FPUSH(0, 0),     FPUSH,      PF) \
   O(FPushFuncRD,     TWO(IVA,SA),      FPUSH(1, 0),     FPUSH,      PF) \
   O(FCallCtor,       TWO(FCA,SA),      FCALL(0, 1),     FCALL,      CF) \
-  O(FPushObjMethod,  THREE(IVA,OA(ObjMethodOp),I32LA),                  \
-                                       FPUSH(1, 1),     FPUSH,      PF) \
-  O(FPushObjMethodD, THREE(IVA,SA,OA(ObjMethodOp)),                     \
-                                       FPUSH(0, 1),     FPUSH,      PF) \
-  O(FPushObjMethodRD,THREE(IVA,SA,OA(ObjMethodOp)),                     \
-                                       FPUSH(1, 1),     FPUSH,      PF) \
+  O(FCallObjMethod,  FOUR(FCA,SA,OA(ObjMethodOp),I32LA),                \
+                                       FCALL(1, 1),     FCALL,      CF) \
+  O(FCallObjMethodD, FOUR(FCA,SA,OA(ObjMethodOp),SA),                   \
+                                       FCALL(0, 1),     FCALL,      CF) \
+  O(FCallObjMethodRD,FOUR(FCA,SA,OA(ObjMethodOp),SA),                   \
+                                       FCALL(1, 1),     FCALL,      CF) \
   O(FPushClsMethod,  THREE(IVA,CAR,I32LA),                              \
                                        FPUSH(1, 0),     FPUSH,      PF) \
   O(FPushClsMethodS, THREE(IVA,OA(SpecialClsRef),I32LA),                \
@@ -1002,9 +1009,17 @@ constexpr bool isJmp(Op opcode) {
     opcode == Op::JmpNZ;
 }
 
+constexpr bool isFCallObjMethod(Op opcode) {
+  return
+    opcode == OpFCallObjMethod ||
+    opcode == OpFCallObjMethodD ||
+    opcode == OpFCallObjMethodRD;
+}
+
 constexpr bool isNewFCall(Op opcode) {
   return
-    opcode == OpFCallCtor;
+    opcode == OpFCallCtor ||
+    isFCallObjMethod(opcode);
 }
 
 constexpr bool isLegacyFPush(Op opcode) {
@@ -1023,13 +1038,6 @@ constexpr bool isFPushClsMethod(Op opcode) {
     opcode == OpFPushClsMethodSRD ||
     opcode == OpFPushClsMethodRD ||
     opcode == OpFPushClsMethodD;
-}
-
-constexpr bool isFPushObjMethod(Op opcode) {
-  return
-    opcode == OpFPushObjMethod ||
-    opcode == OpFPushObjMethodRD ||
-    opcode == OpFPushObjMethodD;
 }
 
 constexpr bool isFPushFunc(Op opcode) {

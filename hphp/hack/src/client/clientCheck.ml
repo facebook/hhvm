@@ -77,8 +77,7 @@ let connect ?(use_priority_pipe=false) args =
     from = args.from;
     autostart = args.autostart;
     force_dormant_start = args.force_dormant_start;
-    retries = Some args.retries;
-    expiry = args.timeout;
+    deadline = args.deadline;
     no_load = args.no_load;
     watchman_debug_logging = args.watchman_debug_logging;
     log_inference_constraints = args.log_inference_constraints;

@@ -29,6 +29,7 @@
     CGetL $msg
     FCallCtor <> 1 1 "" - ""
     PopC
+    LockObj
     Throw
   } .catch {
     String "throw_stuff's exception handler ...\n"
@@ -92,6 +93,7 @@ make_one:    NewObjD "One"
              NullUninit
              FCallCtor <> 0 1 "" - ""
              PopC
+             LockObj
              Throw
 make_two:    NewObjD "Two"
              Dup
@@ -99,6 +101,7 @@ make_two:    NewObjD "Two"
              NullUninit
              FCallCtor <> 0 1 "" - ""
              PopC
+             LockObj
              Throw
 make_three:  NewObjD "Three"
              Dup
@@ -107,6 +110,7 @@ make_three:  NewObjD "Three"
              String "third exception from throw_various"
              FCallCtor <> 1 1 "" - ""
              PopC
+             LockObj
              Throw
            } .catch {
              Dup
@@ -163,8 +167,7 @@ resume:  .try {
            PushL $ex
            NullUninit
            NullUninit
-           FPushObjMethodD 0 "getMessage" NullThrows
-           FCall <> 0 1 "" - "" ""
+           FCallObjMethodD <> 0 1 "" - "" NullThrows "getMessage"
            Concat
            String "\n"
            Concat

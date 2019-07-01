@@ -165,10 +165,22 @@ bool SetVariableCommand::setLocalVariable(
   ScopeObject* scope,
   folly::dynamic* result
 ) {
-  VMRegAnchor regAnchor;
+  VMRegAnchor _regAnchor;
 
-  const auto fp = g_context->getFrameAtDepth(scope->m_frameDepth);
-  const auto func = fp->m_func;
+  const auto fp =
+    g_context->getFrameAtDepthForDebuggerUnsafe(scope->m_frameDepth);
+  if (fp == nullptr ||
+      fp->isInlined() ||
+      fp->skipFrame()) {
+    // Can't set variable in a frame with no context.
+    return false;
+  }
+
+  const auto func = fp->func();
+  if (func == nullptr) {
+    return false;
+  }
+
   const auto localCount = func->numNamedLocals();
 
   for (Id id = 0; id < localCount; id++) {

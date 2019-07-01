@@ -82,7 +82,7 @@ type method_instantiation =
 {
   use_pos: Pos.t;
   use_name: string;
-  explicit_tparams: Nast.hint list;
+  explicit_targs: decl ty list;
 }
 
 let env_with_self env =
@@ -179,7 +179,7 @@ let rec localize ~ety_env env (dty: decl ty) =
       env, lty
   | r, Tfun ft ->
       let env, ft = localize_ft ~ety_env
-        ~instantiation:{ use_pos = ft.ft_pos; use_name = "function"; explicit_tparams = []; } env ft in
+        ~instantiation:{ use_pos = ft.ft_pos; use_name = "function"; explicit_targs = []; } env ft in
       env, (r, Tfun ft)
   | r, Tapply ((_, x), argl) when Env.is_typedef x ->
       let env, argl = List.map_env env argl (localize ~ety_env) in
@@ -213,7 +213,30 @@ let rec localize ~ety_env env (dty: decl ty) =
       env, (r, Ttuple tyl)
   | r, Taccess (root_ty, ids) ->
       let env, root_ty = localize ~ety_env env root_ty in
-      TUtils.expand_typeconst ety_env env r root_ty ids
+      let env, (expansion_reason, ty) =
+        List.fold ids ~init:(env, root_ty) ~f:begin fun (env, root_ty) id ->
+          TUtils.expand_typeconst ety_env env root_ty id
+        end
+      in
+      (* Elaborate reason with information about expression dependent types and
+       * the original location of the Taccess type
+       *)
+      let elaborate_reason expand_reason =
+        (* First convert into a string of root_ty::ID1::ID2::IDn *)
+        let taccess_string = String.concat ~sep:"::"
+          (Typing_print.full_strip_ns env root_ty:: List.map ~f:snd ids)
+        in
+        (* If the root is an expression dependent type, change the primary
+         * reason to be for the full Taccess type to preserve the position where
+         * the expression dependent type was derived from.
+         *)
+        let reason = match fst root_ty with
+        | Reason.Rexpr_dep_type (_, p, e) -> Reason.Rexpr_dep_type (r, p, e)
+        | _ -> r
+        in
+        Reason.Rtype_access (expand_reason, [reason, taccess_string])
+      in
+      env, (elaborate_reason expansion_reason, ty)
   | r, Tshape (fields_known, tym) ->
       let env, tym = ShapeFieldMap.map_env (localize ~ety_env) env tym in
       env, (r, Tshape (fields_known, tym))
@@ -225,9 +248,17 @@ and localize_tparams ~ety_env env pos tyl tparams =
   let (env, _), tyl = List.map2_env (env, ety_env) tyl tparams (localize_tparam pos) in
   env, tyl
 
-and localize_tparam pos (env, ety_env) ty { tp_name = (_, name); tp_constraints = cstrl; tp_reified = reified; tp_user_attributes; _ } =
+and localize_tparam pos (env, ety_env) ty tparam =
   match ty with
     | r, Tapply ((_, x), _argl) when x = SN.Typehints.wildcard ->
+      let tparam = Typing_enforceability.pessimize_tparam_constraints env tparam in
+      let {
+        tp_name = (_, name);
+        tp_constraints = cstrl;
+        tp_reified = reified;
+        tp_user_attributes;
+        _
+      } = tparam in
       let enforceable = Attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes in
       let newable = Attributes.mem SN.UserAttributes.uaNewable tp_user_attributes in
       let env, new_name = Env.add_fresh_generic_parameter env name ~reified ~enforceable ~newable in
@@ -276,7 +307,7 @@ and localize_ft ?(instantiation) ~ety_env env ft =
   let env, substs =
     let (tparams, _) = ft.ft_tparams in
     match instantiation with
-    | Some { explicit_tparams; use_name; use_pos } ->
+    | Some { explicit_targs; use_name; use_pos } ->
       let default () =
         List.map_env env tparams (fun env tparam ->
           let reason =
@@ -285,20 +316,20 @@ and localize_ft ?(instantiation) ~ety_env env ft =
           Typing_log.log_tparam_instantiation env use_pos tparam tvar;
           env, tvar) in
       let env, tvarl =
-        if List.is_empty explicit_tparams
+        if List.is_empty explicit_targs
         then default ()
-        else if List.length explicit_tparams <> List.length tparams
+        else if List.length explicit_targs <> List.length tparams
         then begin
           Errors.expected_tparam ~definition_pos:ft.ft_pos ~use_pos (List.length tparams);
           default ()
         end
         else
-          let type_argument env hint =
-            match hint with
-            | (pos, Nast.Happly ((_, id), [])) when id = SN.Typehints.wildcard ->
-              Env.fresh_type env pos
-            | _ -> localize_hint_with_self env hint in
-          List.map_env env explicit_tparams type_argument
+          let type_argument env decl_ty =
+            match decl_ty with
+            | (r, Tapply ((_, id), [])) when id = SN.Typehints.wildcard ->
+              Env.fresh_type env (Reason.to_pos r)
+            | _ -> localize_with_self env decl_ty in
+          List.map_env env explicit_targs type_argument
       in
       let ft_subst = Subst.make tparams tvarl in
       env, SMap.union ft_subst ety_env.substs
@@ -486,12 +517,12 @@ and localize_hint ~ety_env env hint =
  * where ck is as, super or =
  *)
 let localize_generic_parameters_with_bounds
-    ~ety_env (env:Env.env) (tparams:Nast.tparam list) =
+    ~ety_env (env:Env.env) (tparams:decl tparam list) =
   let env = Env.add_generic_parameters env tparams in
-  let localize_bound env ({ Nast.tp_name = (pos,name); tp_constraints = cstrl; _ }: Nast.tparam) =
+  let localize_bound env ({ tp_name = (pos,name); tp_constraints = cstrl; _ }: decl tparam) =
     let tparam_ty = (Reason.Rwitness pos, Tabstract(AKgeneric name, None)) in
-    List.map_env env cstrl (fun env (ck, h) ->
-      let env, ty = localize env (Decl_hint.hint env.Env.decl_env h) ~ety_env in
+    List.map_env env cstrl (fun env (ck, cstr) ->
+      let env, ty = localize env cstr ~ety_env in
       env, (tparam_ty, ck, ty)) in
   let env, cstrss = List.map_env env tparams localize_bound in
   env, List.concat cstrss
@@ -520,5 +551,48 @@ let sub_type_decl env ty1 ty2 =
   let env, ty1 = localize_with_self env ty1 in
   let env, ty2 = localize_with_self env ty2 in
   ignore (TUtils.sub_type env ty1 ty2)
+
+(*****************************************************************************
+ * External API
+ *****************************************************************************)
+
+let localize_with_self env ty =
+ let ty = Typing_enforceability.pessimize_type env ty in
+ localize_with_self env ty
+
+let localize ~ety_env env ty =
+  let ty = Typing_enforceability.pessimize_type env ty in
+  localize ~ety_env env ty
+
+let localize_ft ?instantiation ~ety_env env ft =
+  let ft = Typing_enforceability.pessimize_fun_type env ft in
+  let instantiation = Option.map instantiation ~f:(fun i ->
+    let explicit_targs = Typing_enforceability.pessimize_targs env
+      i.explicit_targs (fst ft.ft_tparams) in
+    { i with explicit_targs }
+  ) in
+  localize_ft ?instantiation ~ety_env env ft
+
+let localize_generic_parameters_with_bounds
+    ~ety_env (env:Env.env) (tparams:Nast.tparam list) =
+  let tparams: decl tparam list = List.map ~f:(fun t ->
+    let cstrl = List.map t.Nast.tp_constraints (fun (ck, cstr) ->
+      let cstr = Decl_hint.hint env.Env.decl_env cstr in
+      (ck, cstr)) in
+    let tparam = {
+      Typing_defs.tp_variance = t.Nast.tp_variance;
+      tp_name = t.Nast.tp_name;
+      tp_constraints = cstrl;
+      tp_reified = t.Nast.tp_reified;
+      tp_user_attributes = t.Nast.tp_user_attributes;
+    } in
+    Typing_enforceability.pessimize_tparam_constraints env tparam
+  ) tparams in
+  localize_generic_parameters_with_bounds ~ety_env env tparams
+
+let check_tparams_constraints ~use_pos ~ety_env env tparams =
+  let tparams = List.map ~f:(Typing_enforceability.pessimize_tparam_constraints env) tparams in
+  check_tparams_constraints ~use_pos ~ety_env env tparams
+(* TODO(T46211387) make the rest of the API pessimize *)
 
 let () = TUtils.localize_with_self_ref := localize_with_self

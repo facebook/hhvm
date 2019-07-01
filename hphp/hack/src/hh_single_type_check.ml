@@ -484,14 +484,14 @@ let parse_options () =
 
   (* Configure symbol index settings *)
   let namespace_map = GlobalOptions.po_auto_namespace_map tcopt in
-  SymbolIndex.set_search_provider
+  let sienv = SymbolIndex.initialize
     ~quiet:true
     ~provider_name:!search_provider
     ~namespace_map
     ~savedstate_file_opt:!symbolindex_file
-    ~workers:None;
+    ~workers:None in
 
-  { files = fns;
+  ({ files = fns;
     mode = !mode;
     no_builtins = !no_builtins;
     max_errors = !max_errors;
@@ -499,7 +499,7 @@ let parse_options () =
     tcopt;
     batch_mode = !batch_mode;
     out_extension = !out_extension;
-  }
+  }, sienv)
 
 (* This allows one to fake having multiple files in one file. This
  * is used only in unit test files.
@@ -789,7 +789,7 @@ let typecheck_tasts tasts tcopt (filename:Relative_path.t) =
 
 let handle_mode
   mode filenames tcopt popt builtins files_contents files_info parse_errors
-  max_errors error_format batch_mode out_extension (env: SearchUtils.local_tracking_env) =
+  max_errors error_format batch_mode out_extension (sienv: SearchUtils.si_env) =
   let expect_single_file () : Relative_path.t =
     match filenames with
     | [x] -> x
@@ -813,7 +813,7 @@ let handle_mode
 
       let result = ServerAutoComplete.auto_complete_at_position
         ~tcopt ~pos ~is_manually_invoked ~delimit_on_namespaces:false ~file_content:file
-        ~basic_only:false ~env
+        ~basic_only:false ~sienv
       in
       List.iter ~f: begin fun r ->
         let open AutocompleteTypes in
@@ -839,7 +839,7 @@ let handle_mode
             FfpAutocompleteService.auto_complete tcopt file_text position
             ~filter_by_token:true
             ~basic_only:false
-            ~env
+            ~sienv
           in
           match result with
           | [] -> Printf.printf "No result found\n"
@@ -962,14 +962,15 @@ let handle_mode
     end;
   | Identify_symbol (line, column) ->
     let path = expect_single_file () in
-    let ast = Ast_provider.get_ast path in
+    let file_input =
+      ServerCommandTypes.FileName (Relative_path.to_absolute path) in
     let (ctx, entry) = ServerIdeContext.update
       ~tcopt
       ~ctx:ServerIdeContext.empty
       ~path
-      ~ast
+      ~file_input
     in
-    let result = ServerIdentifyFunction.go_ctx
+    let result = ServerIdentifyFunction.go_ctx_absolute
       ~ctx
       ~entry
       ~line
@@ -1060,9 +1061,6 @@ let handle_mode
     let filename = expect_single_file () in
     let naming_table = Naming_table.create files_info in
     Naming_table.iter naming_table Typing_deps.update_file;
-    Relative_path.set_path_prefix Relative_path.Root (Path.make "/");
-    Relative_path.set_path_prefix Relative_path.Hhi (Path.make "hhi");
-    Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
     let genv = ServerEnvBuild.default_genv in
     let env = {(ServerEnvBuild.make_env genv.ServerEnv.config) with
       ServerEnv.naming_table;
@@ -1195,7 +1193,7 @@ let decl_and_run_mode
   }
   (popt: TypecheckerOptions.t)
   (hhi_root: Path.t)
-  (env: SearchUtils.local_tracking_env): unit =
+  (sienv: SearchUtils.si_env): unit =
   if mode = Dump_deps then Typing_deps.debug_trace := true;
   Ident.track_names := true;
   let builtins =
@@ -1237,24 +1235,22 @@ let decl_and_run_mode
 
   handle_mode mode files tcopt popt builtins files_contents files_info
     (Errors.get_error_list errors) max_errors error_format batch_mode out_extension
-    env
+    sienv
 
-let main_hack ({files; mode; tcopt; _} as opts) (env: SearchUtils.local_tracking_env): unit =
+let main_hack ({files; mode; tcopt; _} as opts) (sienv: SearchUtils.si_env): unit =
   (* TODO: We should have a per file config *)
   Sys_utils.signal Sys.sigusr1
     (Sys.Signal_handle Typing.debug_print_last_pos);
   EventLogger.init ~exit_on_parent_exit EventLogger.Event_logger_fake 0.0;
 
-  (* For now, we initialize shared memory because many operations write into
-  shared memory as a side-effect, and disabling shared memory will cause those
-  operations to fail. *)
   let (_handle: SharedMem.handle) =
     SharedMem.init ~num_workers:0 GlobalConfig.default_sharedmem_config in
-  Provider_config.set_local_memory_backend ~max_size_in_words:1_000_000;
 
   Tempfile.with_tempdir (fun hhi_root ->
     Hhi.set_hhi_root_for_unit_test hhi_root;
     Relative_path.set_path_prefix Relative_path.Root (Path.make "/");
+    Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
+    Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
     GlobalParserOptions.set tcopt;
     GlobalNamingOptions.set tcopt;
     match mode with
@@ -1266,7 +1262,7 @@ let main_hack ({files; mode; tcopt; _} as opts) (env: SearchUtils.local_tracking
       | _ -> die "Ai mode does not support multiple files"
       end
     | _ ->
-      decl_and_run_mode opts tcopt hhi_root env;
+      decl_and_run_mode opts tcopt hhi_root sienv;
     TypingLogger.flush_buffers ()
   )
 
@@ -1281,10 +1277,5 @@ let () =
        expected one (i.e. in given file without CRLF). *)
     Out_channel.set_binary_mode stdout true
   );
-  let options = parse_options () in
-  let env = {
-    SearchUtils.lte_fileinfos = Relative_path.Map.empty;
-    SearchUtils.lte_filenames = Relative_path.Map.empty;
-    SearchUtils.lte_tombstones = SearchUtils.Tombstone_set.empty;
-  } in
-  Unix.handle_unix_error main_hack options env
+  let (options, sienv) = parse_options () in
+  Unix.handle_unix_error main_hack options sienv

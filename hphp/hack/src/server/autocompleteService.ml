@@ -813,11 +813,11 @@ let find_global_results
   ~(content_classes: Reordered_argument_collections.SSet.t)
   ~(autocomplete_context: AutocompleteTypes.legacy_autocomplete_context)
   ~(basic_only: bool)
-  ~(env: SearchUtils.local_tracking_env)
+  ~(sienv: SearchUtils.si_env)
   : unit =
 
   (* Select the provider to use for symbol autocomplete *)
-  match SymbolIndex.get_search_provider () with
+  match sienv.sie_provider with
 
   (* Legacy provider should match previous behavior *)
   | TrieIndex ->
@@ -842,11 +842,11 @@ let find_global_results
     let query_text = Utils.strip_ns query_text in
     let absolute_none = Pos.none |> Pos.to_absolute in
     let results = SymbolIndex.find_matching_symbols
+      ~sienv
       ~query_text
       ~max_results
       ~kind_filter:!kind_filter
       ~context:completion_type
-      ~env
     in
     List.iter results ~f:(fun r ->
       let open SearchUtils in
@@ -873,7 +873,7 @@ let go
     ~(content_classes: Reordered_argument_collections.SSet.t)
     ~(autocomplete_context: AutocompleteTypes.legacy_autocomplete_context)
     ~(basic_only: bool)
-    ~(env: SearchUtils.local_tracking_env)
+    ~(sienv: SearchUtils.si_env)
     tast
   =
   reset ();
@@ -898,7 +898,7 @@ let go
         ~content_funs
         ~content_classes
         ~basic_only
-        ~env;
+        ~sienv;
     end;
 
     if completion_type = Some Acprop then compute_complete_local tast;
@@ -926,6 +926,7 @@ let go
       value = !autocomplete_results |> List.filter ~f:filter_results |> List.map ~f:resolve;
     } in
     SymbolIndex.log_symbol_index_search
+      ~sienv
       ~start_time
       ~query_text:!auto_complete_for_global
       ~max_results

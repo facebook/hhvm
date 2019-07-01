@@ -52,15 +52,6 @@ let test_init_common ?(hhi_files = []) () =
     did_init := true;
   end;
 
-  (* Configure symbol index settings - not sure if integration tests have a namespace map? *)
-  let namespace_map = [] in
-  SymbolIndex.set_search_provider
-    ~quiet:true
-    ~provider_name:!genv.ServerEnv.local_config.ServerLocalConfig.symbolindex_search_provider
-    ~namespace_map
-    ~savedstate_file_opt:!genv.ServerEnv.local_config.ServerLocalConfig.symbolindex_file
-    ~workers:None;
-
   Printexc.record_backtrace true;
   EventLogger.init EventLogger.Event_logger_fake 0.0;
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);
@@ -93,7 +84,21 @@ let setup_server ?custom_config ?(hhi_files = []) ()  =
   let hhi_set = Relative_path.Set.of_list hhi_file_list in
   GlobalParserOptions.set result.ServerEnv.popt;
   GlobalNamingOptions.set result.ServerEnv.tcopt;
-  { result with ServerEnv.disk_needs_parsing = hhi_set }
+
+  (* Initialize symbol index *)
+  let sienv = SymbolIndex.initialize
+    ~quiet:false
+    ~provider_name:"TrieIndex"
+    ~namespace_map:[]
+    ~savedstate_file_opt:None
+    ~workers:None
+  in
+
+  (* Return environment *)
+  { result with
+    ServerEnv.disk_needs_parsing = hhi_set;
+    ServerEnv.local_symbol_table = ref sienv;
+  }
 
 
 let default_loop_input = {

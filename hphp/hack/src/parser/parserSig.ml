@@ -84,7 +84,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val trait_use_conflict_resolution : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val trait_use : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val require_clause : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val const_declaration : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val const_declaration : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val constant_declarator : t -> SC.r -> SC.r -> t * SC.r
         val type_const_declaration : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val decorated_expression : t -> SC.r -> SC.r -> t * SC.r

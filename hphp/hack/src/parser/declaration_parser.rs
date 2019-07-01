@@ -2032,10 +2032,6 @@ where
                 self.continue_from(parser1);
                 self.parse_enum_declaration(attribute_specification)
             }
-            TokenKind::RecordDec => {
-                self.continue_from(parser1);
-                self.parse_record_declaration(attribute_specification)
-            }
             TokenKind::Type | TokenKind::Newtype => {
                 self.continue_from(parser1);
 
@@ -2375,11 +2371,17 @@ where
             TokenKind::Use => self.parse_namespace_use_declaration(),
             TokenKind::Trait
             | TokenKind::Interface
-            | TokenKind::Abstract
-            | TokenKind::Final
             | TokenKind::Class => {
                 let missing = S!(make_missing, self, self.pos());
                 self.parse_classish_declaration(missing)
+            }
+            TokenKind::Abstract
+            | TokenKind::Final => {
+                let missing = S!(make_missing, self, self.pos());
+                match parser1.peek_token_kind() {
+                    TokenKind::RecordDec => self.parse_record_declaration(missing),
+                    _ => self.parse_classish_declaration(missing),
+                }
             }
             TokenKind::Async | TokenKind::Coroutine | TokenKind::Function => self
                 .with_statement_parser(&|p: &mut StatementParser<'a, S, T>| {

@@ -198,7 +198,7 @@ void emitClsCns(IRGS& env, const StringData* cnsNameStr, uint32_t clsRefSlot) {
         }
       }
     }
-    interpOne(env, *env.currentNormalizedInstruction);
+    interpOne(env);
     return;
   }
   auto const cls = clsTy.clsSpec().cls();
@@ -216,7 +216,7 @@ void emitClsCns(IRGS& env, const StringData* cnsNameStr, uint32_t clsRefSlot) {
       clsCnsHelper(env, gen(env, LdSubClsCns, data, clsTmp), clsRefSlot);
       return;
     }
-    interpOne(env, *env.currentNormalizedInstruction);
+    interpOne(env);
   }
 }
 

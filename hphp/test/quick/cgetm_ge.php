@@ -20,18 +20,16 @@ class ary implements ArrayAccess {
 function init() {
   $GLOBALS['gArray'] = array(1, 2, 'bob', 'cat');
   $GLOBALS['gObj'] = new ary(4);
-  $GLOBALS['gInt'] = 24;
   $GLOBALS['gStr'] = '01234567890';
 }
 
 function main() {
   var_dump($GLOBALS['gArray'][2]);
   var_dump($GLOBALS['gObj'][6]);
-  var_dump($GLOBALS['gInt'][1]);
   var_dump($GLOBALS['gStr'][3]);
 
-  $idx = array(2, 6, 1, 3);
-  foreach (array('gArray', 'gObj', 'gInt', 'gStr') as $dyn) {
+  $idx = array(2, 6, 3);
+  foreach (array('gArray', 'gObj', 'gStr') as $dyn) {
     var_dump($GLOBALS[$dyn][array_shift(&$idx)]);
   }
 }

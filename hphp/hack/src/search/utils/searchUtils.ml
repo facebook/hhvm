@@ -258,9 +258,69 @@ module Tombstone_set = struct
   include Reordered_argument_set(Set.Make(Tombstone))
 end
 
-(* Represents files changed on disk *)
-type local_tracking_env = {
-  lte_fileinfos: FileInfo.t Relative_path.Map.t;
-  lte_filenames: FileInfo.names Relative_path.Map.t;
-  lte_tombstones: Tombstone_set.t;
+(* Information about one leaf in the namespace tree *)
+type nss_node = {
+
+  (* The name of just this leaf *)
+  nss_name: string;
+
+  (* The full name including all parent trunks above this leaf *)
+  nss_full_namespace: string;
+
+  (* A hashtable of all leaf elements below this branch *)
+  nss_children: (string, nss_node) Hashtbl.t;
+}
+
+(* Context information for the current symbol index *)
+type si_env = {
+  sie_provider: search_provider;
+  sie_quiet_mode: bool;
+  sie_fuzzy_search_mode: bool ref;
+  sie_log_timings: bool;
+
+  (* LocalSearchService *)
+  lss_fileinfos: FileInfo.t Relative_path.Map.t;
+  lss_filenames: FileInfo.names Relative_path.Map.t;
+  lss_tombstones: Tombstone_set.t;
+
+  (* SqliteSearchService *)
+  sql_symbolindex_db: Sqlite3.db option ref;
+  sql_select_symbols_stmt: Sqlite3.stmt option ref;
+  sql_select_symbols_by_kind_stmt: Sqlite3.stmt option ref;
+  sql_select_acid_stmt: Sqlite3.stmt option ref;
+  sql_select_acnew_stmt: Sqlite3.stmt option ref;
+  sql_select_actype_stmt: Sqlite3.stmt option ref;
+  sql_select_namespaces_stmt: Sqlite3.stmt option ref;
+
+  (* NamespaceSearchService *)
+  nss_root_namespace: nss_node;
+}
+
+(* Default provider with no functionality *)
+let default_si_env = {
+  sie_provider = NoIndex;
+  sie_quiet_mode = false;
+  sie_fuzzy_search_mode = ref false;
+  sie_log_timings = false;
+
+  (* LocalSearchService *)
+  lss_fileinfos = Relative_path.Map.empty;
+  lss_filenames = Relative_path.Map.empty;
+  lss_tombstones = Tombstone_set.empty;
+
+  (* SqliteSearchService *)
+  sql_symbolindex_db = ref None;
+  sql_select_symbols_stmt = ref None;
+  sql_select_symbols_by_kind_stmt = ref None;
+  sql_select_acid_stmt = ref None;
+  sql_select_acnew_stmt = ref None;
+  sql_select_actype_stmt = ref None;
+  sql_select_namespaces_stmt = ref None;
+
+  (* NamespaceSearchService *)
+  nss_root_namespace = {
+    nss_name = "\\";
+    nss_full_namespace = "\\";
+    nss_children = Hashtbl.create 0;
+  };
 }

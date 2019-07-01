@@ -447,7 +447,7 @@ inline tv_lval nm(tv_lval base,                            \
                   key_type<keyType> key,                   \
                   TypedValue& tvRef,                       \
                   const MInstrPropState* pState) {         \
-  return ElemD<MOpMode::Define, false, keyType, copyProv>( \
+  return ElemD<MOpMode::Define, keyType, copyProv>( \
     tvRef, base, key, pState                               \
   );                                                       \
 }

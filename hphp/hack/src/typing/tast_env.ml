@@ -111,7 +111,7 @@ let referenced_typeconsts env root ids =
   let root = hint_to_ty env root in
   let ety_env = {(Typing_phase.env_with_self env) with
                   Typing_defs.from_class = Some Nast.CIstatic} in
-  Typing_taccess.referenced_typeconsts env ety_env (fst root) (root, ids)
+  Typing_taccess.referenced_typeconsts env ety_env (root, ids)
 
 let empty tcopt = Typing_env.empty tcopt Relative_path.default ~droot:None
 

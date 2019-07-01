@@ -163,11 +163,14 @@ let check_consistent_fields x l =
   List.for_all l (compare_field_kinds x)
 
 let unbound_name env (pos, name) =
+  let strictish = Partial.should_check_error (Env.get_mode env) 4107 in
   match Env.get_mode env with
   | FileInfo.Mstrict | FileInfo.Mexperimental ->
     (Errors.unbound_name_typing pos name;
-    expr_error env pos (Reason.Rwitness pos))
-
+      expr_error env pos (Reason.Rwitness pos))
+  | FileInfo.Mpartial when strictish ->
+    (Errors.unbound_name_typing pos name;
+      expr_error env pos (Reason.Rwitness pos))
   | FileInfo.Mdecl | FileInfo.Mpartial | FileInfo.Mphp ->
     expr_any env pos (Reason.Rwitness pos)
 
@@ -532,12 +535,13 @@ and fun_def tcopt f : Tast.fun_def option =
   let env =
     Phase.localize_where_constraints ~ety_env env f.f_where_constraints in
   let decl_ty = Option.map ~f:(Decl_hint.hint env.Env.decl_env) f.f_ret in
+  let env = Env.set_fn_kind env f.f_fun_kind in
   let env, locl_ty =
     match decl_ty with
     | None ->
       env, (Reason.Rwitness pos, Typing_utils.tany env)
     | Some ty ->
-      Phase.localize_with_self env ty in
+      Typing_return.make_return_type Phase.localize_with_self env ty in
   let return = Typing_return.make_info f.f_fun_kind f.f_user_attributes env
     ~is_explicit:(Option.is_some f.f_ret) locl_ty decl_ty in
   let env, param_tys =
@@ -606,7 +610,6 @@ and fun_ ?(abstract=false) env return pos named_body f_kind =
   Env.with_env env begin fun env ->
     debug_last_pos := pos;
     let env = Env.set_return env return in
-    let env = Env.set_fn_kind env f_kind in
     let env, tb = block env named_body.fb_ast in
     Typing_sequencing.sequence_check_block named_body.fb_ast;
     let { Typing_env_return_info.return_type = ret; _} = Env.get_return env in
@@ -1894,7 +1897,7 @@ and expr_
         | (r, Tfun ft) ->
           begin
             let env, ft = Phase.(localize_ft
-              ~instantiation:Phase.{ use_name = strip_ns (snd meth); use_pos = p; explicit_tparams = [] }
+              ~instantiation:Phase.{ use_name = strip_ns (snd meth); use_pos = p; explicit_targs = [] }
               ~ety_env env ft) in
             let ty = r, Tfun ft in
             check_deprecated p ft;
@@ -2376,7 +2379,7 @@ and expr_
       let ety_env =
         { (Phase.env_with_self env) with from_class = Some CIstatic } in
       let env, declared_ft =
-        Phase.(localize_ft ~instantiation: {use_name="lambda"; use_pos=p; explicit_tparams=[]}
+        Phase.(localize_ft ~instantiation: {use_name="lambda"; use_pos=p; explicit_targs=[]}
         ~ety_env env declared_ft) in
       List.iter idl (check_escaping_var env);
       (* Ensure lambda arity is not Fellipsis in strict mode *)
@@ -2895,7 +2898,7 @@ and anon_make tenv p f ft idl is_anon =
             let ety_env =
               { (Phase.env_with_self env) with
                 from_class = Some CIstatic } in
-            Phase.localize ~ety_env env ret in
+            Typing_return.make_return_type (Phase.localize ~ety_env) env ret in
         let env = Env.set_return env
           (Typing_return.make_info f.f_fun_kind [] env
             ~is_explicit:(Option.is_some ret_ty)
@@ -3975,7 +3978,7 @@ and call_parent_construct pos env el uel =
         let fty = { fty with ft_params = params; ft_ret = ret } in
         let ety_env = Phase.env_with_self env in
         let env, fty = Phase.(localize_ft
-          ~instantiation:{ use_pos=p; use_name="idx"; explicit_tparams=[]}
+          ~instantiation:{ use_pos=p; use_name="idx"; explicit_targs=[]}
           ~ety_env env fty) in
         let tfun = Reason.Rwitness fty.ft_pos, Tfun fty in
         let env, (tel, _tuel, ty) = call ~expected p env tfun ~fty_decl:None el [] in
@@ -4231,9 +4234,10 @@ and fun_type_of_id env x tal =
   | None -> let env, _, ty = unbound_name env x in env, ty, None
   | Some decl_fty ->
       let ety_env = Phase.env_with_self env in
+      let tal = List.map ~f:(Decl_hint.hint env.Env.decl_env) tal in
       let env, fty =
         Phase.(localize_ft
-          ~instantiation: { use_name = strip_ns (snd x); use_pos = fst x; explicit_tparams = tal }
+          ~instantiation: { use_name = strip_ns (snd x); use_pos = fst x; explicit_targs = tal }
           ~ety_env env decl_fty) in
       env, (Reason.Rwitness fty.ft_pos, Tfun fty), Some decl_fty
 
@@ -4361,8 +4365,10 @@ and class_get_ ~is_method ~is_const ~this_ty ?(explicit_tparams=[])
               begin match decl_method_ with
                 (* We special case Tfun here to allow passing in explicit tparams to localize_ft. *)
                 | r, Tfun ft ->
+                  let explicit_targs = List.map explicit_tparams
+                    ~f:(Decl_hint.hint env.Env.decl_env) in
                   let env, ft =
-                    Phase.(localize_ft ~instantiation: { use_name=strip_ns mid; use_pos=p; explicit_tparams }
+                    Phase.(localize_ft ~instantiation: { use_name=strip_ns mid; use_pos=p; explicit_targs }
                       ~ety_env env ft)
                   in env, (r, Tfun ft)
                 | _ ->
@@ -4527,7 +4533,7 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
           (* the return type of __call can depend on the class params or be this *)
           let ety_env = mk_ety_env r class_info x exact paraml in
           let env, ft = Phase.(localize_ft
-            ~instantiation:{use_pos=id_pos; use_name=strip_ns id_str; explicit_tparams=[]}
+            ~instantiation:{use_pos=id_pos; use_name=strip_ns id_str; explicit_targs=[]}
             ~ety_env env ft) in
 
           let arity_pos = match ft.ft_params with
@@ -4570,8 +4576,9 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
             | (r, Tfun ft) ->
               (* We special case function types here to be able to pass explicit type
                * parameters. *)
+              let explicit_targs = List.map ~f:(Decl_hint.hint env.Env.decl_env) explicit_tparams in
               let env, ft =
-                Phase.(localize_ft ~instantiation:{ use_name=strip_ns id_str; use_pos=id_pos; explicit_tparams }
+                Phase.(localize_ft ~instantiation:{ use_name=strip_ns id_str; use_pos=id_pos; explicit_targs }
                   ~ety_env env ft) in
               env, (r, Tfun ft)
             | _ ->
@@ -4966,7 +4973,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
           let env, tyl = List.map_env env tyl resolve_ety in
           env, (r, Tunion tyl)
         | r, Tintersection tyl ->
-          let env, tyl = List.map_env env tyl resolve_ety in
+          let env, tyl = TUtils.run_on_intersection env tyl ~f:resolve_ety in
           Inter.intersect_list env r tyl
         | _, Tdynamic as ty -> env, ty
         | _, (Tany | Tprim Tstring | Tabstract (_, None) | Tobject)
@@ -5974,7 +5981,9 @@ and isexpr_generate_fresh_tparams env class_info reason hint_tyl =
   let pad_len = tparams_len - (List.length hint_tyl) in
   let hint_tyl =
     List.map hint_tyl (fun x -> Some x) @ (List.init pad_len (fun _ -> None)) in
-  let replace_wildcard env hint_ty ({ tp_name = (_, tparam_name); tp_reified = reified; tp_user_attributes; _ } as tp) =
+  let replace_wildcard env hint_ty tp =
+    let tp = Typing_enforceability.pessimize_tparam_constraints env tp in
+    let { tp_name = (_, tparam_name); tp_reified = reified; tp_user_attributes; _ } = tp in
     let enforceable = Attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes in
     let newable = Attributes.mem SN.UserAttributes.uaNewable tp_user_attributes in
     match hint_ty with
@@ -6000,22 +6009,25 @@ and safely_refine_class_type
    * with fresh type parameters *)
   let obj_ty = (fst obj_ty, Tclass (class_name, Nonexact, tyl_fresh)) in
 
+  let tparams = List.map (Cls.tparams class_info)
+    ~f:(Typing_enforceability.pessimize_tparam_constraints env) in
   (* Add in constraints as assumptions on those type parameters *)
   let ety_env = {
     type_expansions = [];
-    substs = Subst.make (Cls.tparams class_info) tyl_fresh;
+    substs = Subst.make tparams tyl_fresh;
     this_ty = obj_ty; (* In case `this` appears in constraints *)
     from_class = None;
     validate_dty = None;
   } in
   let add_bounds env (t, ty_fresh) =
+      let t = Typing_enforceability.pessimize_tparam_constraints env t in
       List.fold_left t.tp_constraints ~init:env ~f:begin fun env (ck, ty) ->
         (* Substitute fresh type parameters for
          * original formals in constraint *)
         let env, ty = Phase.localize ~ety_env env ty in
         SubType.add_constraint p env ck ty_fresh ty end in
   let env =
-    List.fold_left (List.zip_exn (Cls.tparams class_info) tyl_fresh)
+    List.fold_left (List.zip_exn tparams tyl_fresh)
       ~f:add_bounds ~init:env in
 
   (* Finally, if we have a class-test on something with static classish type,
@@ -6130,6 +6142,13 @@ and string2 env idl =
  * to check that the arguments provided are consistent with the constraints on
  * the type parameters. *)
 and check_implements_tparaml (env: Env.env) ht =
+  (* Pessimize `extends C<int> to extends C<~int>` for erased generics so that the lower bound of
+   * dynamic is respected *)
+  let ht =
+    match ht with
+    | _, Tapply ((_, x), _) when not (Env.is_typedef x || Env.is_enum env x) ->
+      Typing_enforceability.pessimize_type env ht
+    | _ -> ht in
   let _r, (p, c), paraml = TUtils.unwrap_class_type ht in
   let class_ = Env.get_class_dep env c in
   match class_ with
@@ -6142,6 +6161,7 @@ and check_implements_tparaml (env: Env.env) ht =
       if size1 <> size2 then Errors.class_arity p (Cls.pos class_) c size1;
       let subst = Inst.make_subst (Cls.tparams class_) paraml in
       iter2_shortest begin fun t ty ->
+        let t = Typing_enforceability.pessimize_tparam_constraints env t in
         let ty_pos = Reason.to_pos (fst ty) in
         List.iter t.tp_constraints begin fun (ck, cstr) ->
           (* Constraint might contain uses of generic type parameters *)
@@ -6267,6 +6287,30 @@ and class_def_ env c tc =
       | Ast.Cenum -> SN.AttributeKinds.enum
       | _ -> SN.AttributeKinds.cls in
     Typing_attributes.check_def env new_object kind c.c_user_attributes in
+    if c.c_kind = Ast.Cnormal && not (shallow_decl_enabled ()) then begin
+      (* This check is only for eager mode. The same check is performed
+       * for shallow mode in Typing_inheritance *)
+      let method_pos ~is_static class_id meth_id =
+        let get_meth = if is_static then
+          Decl_heap.StaticMethods.get
+        else
+          Decl_heap.Methods.get in
+        match get_meth (class_id, meth_id) with
+        | Some { ft_pos; _ } -> ft_pos
+        | None -> Pos.none
+      in
+      let check_override ~is_static (id, ce) =
+        (* `ce_override` is set in Decl when we determine that an
+         * override_per_trait error needs emit. This emission is deferred
+         * until Typing to ensure that this method has been added to
+         * Decl_heap *)
+        if ce.ce_override then
+          let pos = method_pos ~is_static ce.ce_origin id in
+          Errors.override_per_trait c.c_name id pos
+      in
+      Sequence.iter (Cls.methods tc) (check_override ~is_static:false);
+      Sequence.iter (Cls.smethods tc) (check_override ~is_static:true);
+    end;
   let env =
     { env with Env.inside_ppl_class =
         Attributes.mem SN.UserAttributes.uaProbabilisticModel c.c_user_attributes
@@ -6717,6 +6761,7 @@ and method_def env m =
       else env in
   let env = Env.clear_params env in
   let decl_ty = Option.map ~f:(Decl_hint.hint env.Env.decl_env) m.m_ret in
+  let env = Env.set_fn_kind env m.m_fun_kind in
   let env, locl_ty = match decl_ty with
     | None ->
       env, Typing_return.make_default_return env m.m_name
@@ -6727,7 +6772,7 @@ and method_def env m =
       let ety_env =
         { (Phase.env_with_self env) with
           from_class = Some CIstatic } in
-      Phase.localize ~ety_env env ret in
+      Typing_return.make_return_type (Phase.localize ~ety_env) env ret in
   let return = Typing_return.make_info m.m_fun_kind m.m_user_attributes env
     ~is_explicit:(Option.is_some m.m_ret) locl_ty decl_ty in
   let env, param_tys =

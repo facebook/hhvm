@@ -554,8 +554,7 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
   // Inlined calls normally skip the function enter and exit events. If we
   // side exit in an inlined callee, we short-circuit here in order to skip
   // exit events that could unbalance the call stack.
-  if (RuntimeOption::EvalJit &&
-      ((jit::TCA) ar->m_savedRip == jit::tc::ustubs().retInlHelper)) {
+  if (RuntimeOption::EvalJit && ar->isInlined()) {
     return;
   }
 

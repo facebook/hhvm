@@ -252,9 +252,5 @@ let make_env config =
     diag_subscribe = None;
     recent_recheck_loop_stats = empty_recheck_loop_stats;
     last_recheck_info = None;
-    local_symbol_table = ref {
-      SearchUtils.lte_fileinfos = Relative_path.Map.empty;
-      SearchUtils.lte_filenames = Relative_path.Map.empty;
-      SearchUtils.lte_tombstones = SearchUtils.Tombstone_set.empty;
-    };
+    local_symbol_table = ref SearchUtils.default_si_env;
   }

@@ -494,7 +494,10 @@
       "detail": "function(): :ab:cd:alpha",
       "inlineDetail": "()",
       "itemType": ":ab:cd:alpha",
-      "documentation": ":ab:cd:alpha docblock",
+      "documentation": {
+        "kind": "markdown",
+        "value": ":ab:cd:alpha docblock"
+      },
       "insertText": ":ab:cd:alpha",
       "insertTextFormat": 1,
       "data": {
@@ -671,7 +674,10 @@
       "detail": "function(): void",
       "inlineDetail": "()",
       "itemType": "void",
-      "documentation": "test_function docblock.",
+      "documentation": {
+        "kind": "markdown",
+        "value": "test_function docblock."
+      },
       "insertText": "test_function",
       "insertTextFormat": 1,
       "data": {
@@ -947,7 +953,10 @@
       "detail": "function(mixed $value): bool",
       "inlineDetail": "(mixed $value)",
       "itemType": "bool",
-      "documentation": "Returns whether or not the value is defined as a constant.",
+      "documentation": {
+        "kind": "markdown",
+        "value": "BuiltinEnum contains the utility methods provided by enums.\nUnder the hood, an enum Foo will extend BuiltinEnum<Foo>.\n\nHHVM provides a native implementation for this class. The PHP class\ndefinition below is not actually used at run time; it is simply\nprovided for the typechecker and for developer reference."
+      },
       "insertTextFormat": 1,
       "textEdit": {
         "range": {

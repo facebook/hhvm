@@ -2564,7 +2564,7 @@ void invoke_prelude_script(
     [currentDir] (const String& f) {
       auto const w = Stream::getWrapperFromURI(f, nullptr, false);
       if (w->access(f, R_OK) == 0) {
-        require(f, true, currentDir, true);
+        include_impl_invoke(f, true, currentDir, true);
         return true;
       }
       return false;
@@ -2577,7 +2577,8 @@ static bool hphp_warmup(ExecutionContext *context,
                         const std::string &reqInitFunc,
                         const std::string &reqInitDoc,
                         const std::string &prelude,
-                        bool &error) {
+                        bool &error,
+                        bool runEntryPoint) {
   bool ret = true;
   error = false;
   std::string errorMsg;
@@ -2591,7 +2592,7 @@ static bool hphp_warmup(ExecutionContext *context,
     }
 
     if (!reqInitDoc.empty()) {
-      include_impl_invoke(reqInitDoc, true);
+      include_impl_invoke(reqInitDoc, true, "", runEntryPoint);
     }
     if (!reqInitFunc.empty()) {
       invoke(reqInitFunc.c_str(), Array());
@@ -2677,7 +2678,8 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
   if (isServer) {
     oldCwd = context->getCwd();
   }
-  if (!hphp_warmup(context, cmd, reqInitFunc, reqInitDoc, prelude, error)) {
+  if (!hphp_warmup(context, cmd, reqInitFunc, reqInitDoc, prelude, error,
+                   func)) {
     if (isServer) context->setCwd(oldCwd);
     return false;
   }

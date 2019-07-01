@@ -23,7 +23,7 @@
                      (missing 0 ())))
                    (missing 0 ())))))
                (() >> 2 ((end_of_line 1)))))
-             (((whitespace 2)) abstract 8 ((whitespace 1)))
+             (list 8 ((((whitespace 2)) abstract 8 ((whitespace 1)))))
              (() const 5 ((whitespace 1))) (() type 4 ((whitespace 1)))
              (() name 1 ((whitespace 1))) (missing 0 ())
              (type_constraint 6
@@ -32,7 +32,8 @@
              (missing 0 ()) (missing 0 ()) (() ";" 1 ((end_of_line 1)))))
            (type_const_declaration 30
             ((missing 0 ())
-             (((end_of_line 1) (whitespace 2)) abstract 8 ((whitespace 1)))
+             (list 8
+              ((((end_of_line 1) (whitespace 2)) abstract 8 ((whitespace 1)))))
              (() const 5 ((whitespace 1))) (() type 4 ((whitespace 1)))
              (() name 2 ((whitespace 1))) (missing 0 ())
              (type_constraint 6

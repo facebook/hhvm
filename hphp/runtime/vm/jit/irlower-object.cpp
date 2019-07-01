@@ -208,6 +208,13 @@ void cgInitObjProps(IRLS& env, const IRInstruction* inst) {
   }
 }
 
+void cgLockObj(IRLS& env, const IRInstruction* inst) {
+  auto const obj = srcLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  auto const mask = ~static_cast<int8_t>(ObjectData::IsBeingConstructed);
+  v << andbim{mask, obj[HeaderAuxOffset], v.makeReg()};
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

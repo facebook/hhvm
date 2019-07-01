@@ -350,7 +350,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #define IMM_VSA    print_stringvec();
 #define IMM_KA     out.fmt(" {}", print_mk(decode_member_key(pc, finfo.unit)));
 #define IMM_LAR    out.fmt(" {}", show(decodeLocalRange(pc)));
-#define IMM_FCA    out.fmt(" {}", print_fca(decodeFCallArgs(pc)));
+#define IMM_FCA    out.fmt(" {}", print_fca(decodeFCallArgs(thisOpcode, pc)));
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x
@@ -361,11 +361,13 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 
   out.indent();
 #define O(opcode, imms, ...)                              \
-  case Op::opcode:                                        \
+  case Op::opcode: {                                      \
+    UNUSED auto const thisOpcode = Op::opcode;            \
     pc += encoded_op_size(Op::opcode);                    \
     out.fmt("{}", #opcode);                               \
     IMM_##imms                                            \
-    break;
+    break;                                                \
+  }
   switch (peek_op(pc)) { OPCODES }
 #undef O
 

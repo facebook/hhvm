@@ -209,15 +209,15 @@ StringHolder GzipResponseCompressor::compressResponse(
     // We just decided not to use this compressor. This doesn't necessarily
     // imply an error: gzip could have simply been disabled by the request
     // userland. Return null but don't log an error.
-    return StringHolder(nullptr, 0);
+    return StringHolder{};
   }
-  const char *compressedData = compressor->compress(data, len, last);
+  auto compressedData = compressor->compress(data, len, last);
   if (!compressedData) {
     m_compressor.reset();
     Logger::Error("Unable to compress response: len=%d", len);
-    return StringHolder(nullptr, 0);
+    return StringHolder{};
   }
-  return StringHolder(compressedData, len, true);
+  return compressedData;
 }
 
 /***************
@@ -285,16 +285,16 @@ StringHolder BrotliResponseCompressor::compressResponse(
     // We just decided not to use this compressor. This doesn't necessarily
     // imply an error: brotli could have simply been disabled by the request
     // userland. Return null but don't log an error.
-    return StringHolder(nullptr, 0);
+    return StringHolder{};
   }
   size_t size = len;
-  const char *compressedData = HPHP::compressBrotli(compressor, data, size, last);
+  auto compressedData = HPHP::compressBrotli(compressor, data, size, last);
   if (!compressedData) {
     m_compressor.reset();
     Logger::Error("Unable to compress response to brotli: len=%d", len);
-    return StringHolder(nullptr, 0);
+    return StringHolder{};
   }
-  return StringHolder(compressedData, size, true);
+  return compressedData;
 }
 
 /*************
@@ -336,16 +336,15 @@ StringHolder ZstdResponseCompressor::compressResponse(
     // We just decided not to use this compressor. This doesn't necessarily
     // imply an error: zstd could have simply been disabled by the request
     // userland. Return null but don't log an error.
-    return StringHolder(nullptr, 0);
+    return StringHolder{};
   }
   size_t size = len;
-  const char *compressedData = compressor->compress(data, size, last);
+  auto compressedData = compressor->compress(data, size, last);
   if (!compressedData) {
     m_compressor.reset();
     Logger::Error("Unable to compress response to zstd: len=%d", len);
-    return StringHolder(nullptr, 0);
   }
-  return StringHolder(compressedData, size, true);
+  return compressedData;
 }
 
 /**************
@@ -445,7 +444,7 @@ StringHolder ResponseCompressorManager::compressResponse(
     const char *data, int len, bool last) {
   auto first = m_compressionDecision == CompressionDecision::NotDecidedYet;
   m_chunkedEncoding |= !last;
-  StringHolder response(nullptr, 0);
+  StringHolder response{};
   if (first) {
     m_compressionDecision = CompressionDecision::Decided;
     // Select first impl that:
@@ -506,7 +505,7 @@ StringHolder ResponseCompressorManager::compressResponse(
     // If we still have freedom to decide, not compressing will produce a
     // better outcome. Do that.
     m_selectedImpl = nullptr;
-    response = StringHolder(nullptr, 0);
+    response = StringHolder{};
   }
 
   if (first) {

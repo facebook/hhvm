@@ -10,7 +10,6 @@
 open Core_kernel
 open ClientCommand
 open ClientEnv
-open Utils
 
 (** Arg specs shared across more than 1 arg parser. *)
 module Common_argspecs = struct
@@ -37,12 +36,6 @@ module Common_argspecs = struct
   let prechecked value_ref =
     "--prechecked", Arg.Unit (fun () -> value_ref := Some true),
     " override value of \"prechecked_files\" flag from hh.conf"
-
-  let retries value_ref =
-    ("--retries",
-      Arg.Set_int value_ref,
-      spf (" set the number of retries for connecting to server. " ^^
-        "Roughly 1 retry per second (default: %d)") !value_ref;)
 
   let watchman_debug_logging value_ref =
     ("--watchman-debug-logging",
@@ -107,7 +100,6 @@ let parse_check_args cmd =
   let refactor_before = ref "" in
   let refactor_mode = ref "" in
   let replace_state_after_saving = ref false in
-  let retries = ref 1300 in
   let sort_results = ref false in
   let timeout = ref None in
   let version = ref false in
@@ -258,9 +250,8 @@ let parse_check_args cmd =
     "--from-emacs", Arg.Unit (set_from "emacs"),
       " (deprecated) equivalent to --from emacs";
     "--from-vim",
-      Arg.Unit (fun () -> from := "vim"; retries := 0),
-      " (deprecated) equivalent to \
-       --from vim --retries 0";
+      Arg.Unit (fun () -> from := "vim"),
+      " (deprecated) equivalent to --from vim";
     "--full-fidelity-schema",
       Arg.Unit (set_mode MODE_FULL_FIDELITY_SCHEMA), "";
     "--gen-hot-classes-file",
@@ -441,10 +432,12 @@ let parse_check_args cmd =
     "--retrieve-checkpoint",
       Arg.String (fun x -> set_mode (MODE_RETRIEVE_CHECKPOINT x) ()),
       "";
+    "--retries",
+      Arg.Int (fun n -> timeout := Some (float_of_int (max 5 n))),
+      " (deprecated) same as --timeout";
     "--retry-if-init",
       Arg.Bool (fun _ -> ()),
       " (deprecated and ignored)";
-    Common_argspecs.retries retries;
     "--save-state",
       Arg.String (fun x -> set_mode (MODE_SAVE_STATE x) ()),
       (" (mode) Save a saved state to the given file." ^
@@ -477,7 +470,7 @@ let parse_check_args cmd =
       Arg.Unit (set_mode MODE_STATUS),
       " (mode) show a human readable list of errors (default)";
     "--timeout",
-      Arg.Float (fun x -> timeout := Some (Unix.time() +. x)),
+      Arg.Float (fun x -> timeout := Some (max 5. x)),
       " set the timeout in seconds (default: no timeout)";
     "--type-at-pos",
       Arg.String (fun x -> set_mode (MODE_TYPE_AT_POS x) ()),
@@ -581,10 +574,9 @@ let parse_check_args cmd =
     prechecked = !prechecked;
     profile_log = !profile_log;
     replace_state_after_saving = !replace_state_after_saving;
-    retries = !retries;
     root = root;
     sort_results = !sort_results;
-    timeout = !timeout;
+    deadline = Option.map ~f:(fun t -> Unix.time() +. t) !timeout;
     watchman_debug_logging = !watchman_debug_logging;
     allow_non_opt_build = !allow_non_opt_build;
   }

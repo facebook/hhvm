@@ -159,15 +159,6 @@ void ringbufferMsg(IRGS&, Trace::RingBufferType, const StringData*,
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * For handling PUNT-based interpOnes.  When we PUNT, an exception is thrown
- * and the whole region is retried, with a bit set to interp the instruction
- * that failed.
- */
-void interpOne(IRGS&, const NormalizedInstruction&);
-
-///////////////////////////////////////////////////////////////////////////////
-
-/*
  * Before translating/processing each bytecode instruction, the driver
  * of the irgen module calls this function to move to the next
  * bytecode instruction (`newSk') to translate.

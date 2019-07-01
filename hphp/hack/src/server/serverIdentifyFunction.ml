@@ -51,12 +51,14 @@ let rec take_best_suggestions l = match l with
     located in the passed in content buffer. *)
 let go content line char (tcopt : TypecheckerOptions.t) =
   get_occurrence_and_map tcopt content line char ~f:(fun path _ symbols ->
-  let symbols = take_best_suggestions (List.sort by_nesting symbols) in
-  let ast = Ast_provider.get_ast path in
-    List.map symbols ~f:(fun x ->
+    let symbols = take_best_suggestions (List.sort by_nesting symbols) in
+    let ast = Ast_provider.get_ast path in
+    let result = List.map symbols ~f:(fun x ->
       let symbol_definition = ServerSymbolDefinition.go ast x in
       x, symbol_definition)
-      )
+    in
+    result
+  )
 
 (** NOTE: the paths of any positions within any returned `SymbolOccurrence` or
     `SymbolDefinition` objects will be the empty string (`""`) if the symbol is
@@ -76,10 +78,26 @@ let go_ctx
     let tast = ServerIdeContext.get_tast entry in
     let symbols = IdentifySymbolService.go tast line char in
     let symbols = take_best_suggestions (List.sort by_nesting symbols) in
-    List.map symbols ~f:(fun x ->
-      let symbol_occurrence = SymbolOccurrence.to_absolute x in
-      let symbol_definition = ServerSymbolDefinition.go ast x
-        |> Option.map ~f:SymbolDefinition.to_absolute in
-      (symbol_occurrence, symbol_definition)
+    List.map symbols ~f:(fun symbol ->
+      let symbol_definition = ServerSymbolDefinition.go ast symbol in
+      (symbol, symbol_definition)
     )
   )
+
+let go_ctx_absolute
+    ~(ctx : ServerIdeContext.t)
+    ~(entry : ServerIdeContext.entry)
+    ~(line : int)
+    ~(char : int)
+    : (string SymbolOccurrence.t *
+       string SymbolDefinition.t option) list =
+  go_ctx
+    ~ctx
+    ~entry
+    ~line
+    ~char
+    |> List.map ~f:(fun (occurrence, definition) ->
+      let occurrence = SymbolOccurrence.to_absolute occurrence in
+      let definition = Option.map ~f:SymbolDefinition.to_absolute definition in
+      (occurrence, definition)
+    )

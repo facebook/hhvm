@@ -2,8 +2,6 @@
 
 function varray_cases() {
   return vec[
-    tuple(vec[1, 2, 3], varray[1, 2, 3]),
-    tuple(vec[], varray[]),
     tuple(varray[1, 2, 3], varray[1, 2, 3]),
     tuple(varray[], varray[]),
   ];
@@ -11,9 +9,6 @@ function varray_cases() {
 
 function darray_cases() {
   return vec[
-    tuple(dict['foo' => 1, 'bar' => 3], darray['foo' => 1, 'bar' => 3]),
-    tuple(dict[0 => 1, 1 => 2], darray[0 => 1, 1 => 2]),
-    tuple(dict[], darray[]),
     tuple(darray['foo' => 1, 'bar' => 3], darray['foo' => 1, 'bar' => 3]),
     tuple(darray[0 => 1, 1 => 2], darray[0 => 1, 1 => 2]),
     tuple(darray[], darray[]),

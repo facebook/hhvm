@@ -176,9 +176,14 @@ let rec find_sketchy_types env acc ty =
         | Cnormal | Cabstract | Ctrait | Cenum | Crecord -> acc
     end
 
-  | Tunion tyl
-  | Tintersection tyl ->
+  | Tunion tyl ->
     List.fold tyl ~init:acc ~f:(find_sketchy_types env)
+  | Tintersection tyl ->
+    (* If one of the types in tyl does not have any sketchy type, then it's ok. *)
+    let sketchy_tys = List.map tyl ~f:(find_sketchy_types env []) in
+    let sketchy_tys = if List.exists sketchy_tys ~f:(List.is_empty) then [] else
+      List.fold sketchy_tys ~init:[] ~f:(@) in
+    sketchy_tys @ acc
   | Tabstract _ ->
     let env, tyl = Env.get_concrete_supertypes env ty in
     List.fold tyl ~init:acc ~f:(find_sketchy_types env)

@@ -4,3 +4,5 @@ class C {
   <<__Rx, __RxShallow>>
   public function f(): void {}
 }
+
+<<__EntryPoint>> function main(): void {}

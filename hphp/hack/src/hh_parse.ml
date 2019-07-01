@@ -66,6 +66,7 @@ module FullFidelityParseArgs = struct
     disable_lval_as_an_expression : bool;
     pocket_universes : bool;
     rust : bool;
+    enable_constant_visibility_modifiers: bool;
   }
 
   let make
@@ -95,6 +96,7 @@ module FullFidelityParseArgs = struct
     disable_lval_as_an_expression
     pocket_universes
     rust
+    enable_constant_visibility_modifiers
     = {
     full_fidelity_json;
     full_fidelity_dot;
@@ -122,6 +124,7 @@ module FullFidelityParseArgs = struct
     disable_lval_as_an_expression;
     pocket_universes;
     rust;
+    enable_constant_visibility_modifiers;
   }
 
   let parse_args () =
@@ -167,6 +170,7 @@ module FullFidelityParseArgs = struct
     let files = ref [] in
     let push_file file = files := file :: !files in
     let rust = ref false in
+    let enable_constant_visibility_modifiers = ref false in
     let options =  [
       (* modes *)
       "--full-fidelity-json",
@@ -276,6 +280,9 @@ No errors are filtered out.";
       "--rust",
         Arg.Set rust,
         "Use the parser written in Rust instead of OCaml one";
+      "--enable-constant-visibility-modifiers",
+        Arg.Set enable_constant_visibility_modifiers,
+        "Require constants to have visibility modifiers";
       ] in
     Arg.parse options push_file usage;
     let modes = [
@@ -318,6 +325,7 @@ No errors are filtered out.";
       !disable_lval_as_an_expression
       !pocket_universes
       !rust
+      !enable_constant_visibility_modifiers
 end
 
 open FullFidelityParseArgs
@@ -335,6 +343,8 @@ let handle_existing_file args filename =
   let popt = ParserOptions.setup_pocket_universes popt
     (args.pocket_universes) in
   let popt = ParserOptions.with_rust popt args.rust in
+  let popt = ParserOptions.with_enable_constant_visibility_modifiers popt
+    (args.enable_constant_visibility_modifiers) in
 
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in

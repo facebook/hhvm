@@ -443,10 +443,14 @@ public:
    */
   const Func* getPrevFunc(const ActRec*);
 
-  ActRec* getFrameAtDepth(int frame = 0);
-  VarEnv* hasVarEnv(int frame = 0);
+  /*
+   * Returns the call frame at the specified depth, intended only
+   * for use by the debugger. Use in other contexts may not be safe.
+   */
+  ActRec* getFrameAtDepthForDebuggerUnsafe(int frame = 0);
+  VarEnv* getVarEnv(const ActRec* fp);
   void setVar(StringData* name, tv_rval v);
-  Array getLocalDefinedVariables(int frame);
+  Array getLocalDefinedVariablesDebugger(int frame);
   Variant getEvaledArg(const StringData* val,
                        const String& namespacedName,
                        const Unit* funcUnit);

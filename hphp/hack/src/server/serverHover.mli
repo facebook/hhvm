@@ -9,8 +9,10 @@
 
 (** Returns detailed information about the symbol or expression at the given
     location. *)
-val go :
-  ServerEnv.env ->
-  (ServerCommandTypes.file_input * int * int) ->
+val go_ctx :
+  ctx:ServerIdeContext.t ->
+  entry:ServerIdeContext.entry ->
+  line:int ->
+  char:int ->
   basic_only:bool ->
   HoverService.result

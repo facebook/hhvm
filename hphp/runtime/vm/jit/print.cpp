@@ -478,8 +478,10 @@ void print(std::ostream& os, const Block* block, TransKind kind,
         // added by the relocator, e.g. adding nops.  This check will
         // determine if the gap belongs to another instruction or not.
         // If it doesn't belong to any other instruction then print it.
+        auto const offset = asmInfo->instRangesForArea(currArea).offset;
         if (!asmInfo->instRangeExists(currArea,
-                                      TcaRange(lastEnd, instRange.begin()))) {
+                                      TcaRange(lastEnd - offset,
+                                               instRange.begin() - offset))) {
           disasmRange(os, kind, lastEnd, instRange.begin());
         } else {
           os << "\n";

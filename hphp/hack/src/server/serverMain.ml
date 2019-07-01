@@ -826,6 +826,8 @@ let resolve_init_approach genv: ServerInit.init_approach * string =
     ServerInit.Full_init, "Server_args_no_load"
   else if ServerArgs.save_filename genv.options <> None then
     ServerInit.Full_init, "Server_args_saving_state"
+  else if ServerArgs.write_symbol_info genv.options <> None then
+    ServerInit.Write_symbol_info, "Server_args_writing_symbol_info"
   else
     match
       (genv.local_config.ServerLocalConfig.load_state_natively),
@@ -864,6 +866,9 @@ let program_init genv =
         | ServerInit.Load_state_failed err -> env, "state_load_failed", Some err, None
         | ServerInit.Load_state_declined reason -> env, "state_load_declined", Some reason, None
       end
+    | ServerInit.Write_symbol_info ->
+      let env, _  = ServerInit.init ~init_approach genv in
+      env, "fresh", None, None
   in
   let env = { env with
     init_env = { env.init_env with

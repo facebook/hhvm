@@ -217,6 +217,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
    * the ref-count yourself. Whenever possible, prefer using the Object class
    * instead, which takes care of this for you.
    */
+  template <bool Unlocked = false>
   static ObjectData* newInstance(Class*);
 
   /*
@@ -224,6 +225,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
    * If the class has reified generics, the second arg must be an array of
    * type structures representing the reified types.
    */
+  template <bool Unlocked = false>
   static ObjectData* newInstanceReified(Class*, ArrayData*);
 
   /*
@@ -244,8 +246,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
    *
    * The initial ref-count will be set to one.
    */
-  static const uint8_t DefaultAttrs = NoAttrs;
-
   static ObjectData* newInstanceRawSmall(Class*, size_t size, size_t index);
   static ObjectData* newInstanceRawBig(Class*, size_t size);
 
@@ -284,6 +284,10 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   // Is this an object for which construction has not finished yet?
   bool isBeingConstructed() const;
+  // Clear the IsBeingConstructed bit to indicate that construction is done.
+  void lockObject();
+  // Temporarily set the IsBeingConstructed bit
+  void unlockObject();
 
   // Set if we might re-enter while some of the properties contain
   // garbage, eg after calling newInstanceNoPropInit, and before
@@ -466,8 +470,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   [[noreturn]] NEVER_INLINE
   void throwMutateConstProp(Slot prop) const;
-  [[noreturn]] NEVER_INLINE
-  void throwBindConstProp(Slot prop) const;
 
  public:
   // never box the lval returned from getPropLval; use propB instead
@@ -477,8 +479,8 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   // KindOfUninit.
   tv_rval getPropIgnoreLateInit(const Class* ctx,
                                 const StringData* key) const;
-  // don't use vGetPropIgnoreAccessibility in new code
-  tv_lval vGetPropIgnoreAccessibility(const StringData*);
+  // don't use getPropIgnoreAccessibility in new code
+  tv_rval getPropIgnoreAccessibility(const StringData*);
 
  private:
   struct PropLookup {

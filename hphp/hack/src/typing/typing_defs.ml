@@ -427,6 +427,11 @@ and class_elt = {
   ce_abstract    : bool;
   ce_final       : bool;
   ce_xhp_attr    : xhp_attr option;
+  (* This field has different meanings in shallow mode and eager mode:
+   * In shallow mode, true if this method has attribute __Override.
+   * In eager mode, true if this method is originally defined in a trait,
+   * AND has the override attribute, AND the trait does not inherit any
+   * other method of that name. *)
   ce_override    : bool;
   (* true if this static property has attribute __LSB *)
   ce_lsb         : bool;

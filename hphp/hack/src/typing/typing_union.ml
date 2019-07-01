@@ -377,22 +377,29 @@ and union_reason r1 r2 =
       if (Reason.compare r1 r2) <= 0 then r1
       else r2
 
-let normalize_union env ?(on_tyvar = fun env r v -> env, (r, Tvar v)) tyl =
+let normalize_union env ?on_tyvar tyl =
   let orr r_opt r = Some (Option.value r_opt ~default:r) in
   let rec normalize_union env tyl r_null r_union =
     match tyl with
     | [] -> env, r_null, r_union, TySet.empty
     | ty :: tyl ->
       let ty = Typing_expand.fully_expand env ty in
-      let env, r_null, r_union, tys' = match ty with
-        | (r, Tvar v) ->
+      let proceed env ty = env, r_null, r_union, TySet.singleton ty in
+      let env, r_null, r_union, tys' = match ty, on_tyvar with
+        | (r, Tvar v), Some on_tyvar ->
           let env, ty' = on_tyvar env r v in
-          if ty_equal ty ty' then env, r_null, r_union, TySet.singleton ty' else
+          if ty_equal ty ty' then proceed env ty' else
           normalize_union env [ty'] r_null r_union
-        | (r, Tprim Nast.Tnull) -> normalize_union env [] (orr r_null r) r_union
-        | (r, Toption ty) -> normalize_union env [ty] (orr r_null r) r_union
-        | (r, Tunion tyl') -> normalize_union env tyl' r_null (orr r_union r)
-        | ty -> env, r_null, r_union, TySet.singleton ty in
+        | (r, Tprim Nast.Tnull), _ -> normalize_union env [] (orr r_null r) r_union
+        | (r, Toption ty), _ -> normalize_union env [ty] (orr r_null r) r_union
+        | (r, Tunion tyl'), _ -> normalize_union env tyl' r_null (orr r_union r)
+        | (_, Tintersection _), Some on_tyvar ->
+          let env, ty = Utils.simplify_intersections env ty ~on_tyvar in
+          begin match ty with
+          | (_, Tintersection _) -> proceed env ty
+          | _ -> normalize_union env [ty] r_null r_union
+          end
+        | ty, _ -> proceed env ty in
       let env, r_null, r_union, tys = normalize_union env tyl r_null r_union in
       env, r_null,  r_union, TySet.union tys' tys in
   normalize_union env tyl None None
@@ -419,6 +426,9 @@ let union_list env r tyl =
   let env, tyl = union_list_2_by_2 env (TySet.elements tys) in
   env, make_union r tyl r_null ~discard_singletons:true
 
+let fold_union env r tyl =
+  List.fold_left_env env tyl ~init:(MakeType.nothing r) ~f:union
+
 let simplify_unions env ?on_tyvar (r, _ as ty) =
   let env, r_null, r_union, tys = normalize_union env [ty] ?on_tyvar in
   let env, tyl = union_list_2_by_2 env (TySet.elements tys) in
@@ -444,5 +454,6 @@ let rec diff ty1 ty2 =
 
 let () = Typing_utils.union_ref := union
 let () = Typing_utils.union_list_ref := union_list
+let () = Typing_utils.fold_union_ref := fold_union
 let () = Typing_utils.simplify_unions_ref := simplify_unions
 let () = Typing_utils.diff_ref := diff

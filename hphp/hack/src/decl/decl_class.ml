@@ -41,7 +41,8 @@ let element_to_class_elt ce_type {
   elt_lateinit = ce_lateinit;
   elt_origin = ce_origin;
   elt_visibility = ce_visibility;
-  elt_reactivity = _
+  elt_reactivity = _;
+  elt_fixme_codes = _;
 } =
   {
     ce_final;

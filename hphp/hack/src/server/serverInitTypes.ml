@@ -26,6 +26,7 @@ type init_approach =
   | Full_init
   | Parse_only_init
   | Saved_state_init of load_state_approach
+  | Write_symbol_info
 
 (** Docs are in .mli *)
 type init_result =

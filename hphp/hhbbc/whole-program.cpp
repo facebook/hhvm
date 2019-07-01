@@ -609,6 +609,7 @@ void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
     freeFuncMem(unit.pseudomain.get());
   };
 
+  std::thread cleanup_pre;
   if (!options.NoOptimizations) {
     while (true) {
       try {
@@ -628,8 +629,12 @@ void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
         continue;
       }
     }
+    cleanup_pre = std::thread([&] { index->cleanup_for_final(); });
     index->mark_persistent_classes_and_functions(*program);
     index->join_iface_vtable_thread();
+    if (parallel::num_threads > parallel::final_threads) {
+      parallel::num_threads = parallel::final_threads;
+    }
     final_pass(*index, *program, stats, emitUnit);
   } else {
     debug_dump_program(*index, *program);
@@ -643,17 +648,23 @@ void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
     );
   }
 
+  auto const logging = Trace::moduleEnabledRelease(Trace::hhbbc_time, 1);
   // running cleanup_for_emit can take a while... start it as early as
   // possible, and run in its own thread.
-  folly::Baton<> done;
-  auto cleanup_thread = std::thread([&] { index->cleanup_for_emit(&done); });
+  auto cleanup_post = std::thread([&] {
+      auto const enable =
+        logging && !Trace::moduleEnabledRelease(Trace::hhbbc_time, 1);
+      Trace::BumpRelease bumper(Trace::hhbbc_time, -1, enable);
+      index->cleanup_post_emit();
+    }
+  );
 
   print_stats(stats);
 
   arrTable = std::move(index->array_table_builder());
-  done.post();
-  cleanup_thread.join();
   ueq.push(nullptr);
+  cleanup_pre.join();
+  cleanup_post.join();
 }
 
 //////////////////////////////////////////////////////////////////////

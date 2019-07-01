@@ -2,7 +2,5 @@ File "constructor_error.php", line 14, characters 26-27:
 Invalid argument (Typing[4110])
 File "constructor_error.php", line 8, characters 39-45:
 Expected this::T
-File "constructor_error.php", line 14, characters 19-24:
-  resulting from expanding the type constant X::T
 File "constructor_error.php", line 14, characters 26-27:
 But got string

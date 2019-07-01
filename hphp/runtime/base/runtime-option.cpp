@@ -49,6 +49,7 @@
 #include "hphp/util/cpuid.h"
 #include "hphp/util/current-executable.h"
 #include "hphp/util/file-cache.h"
+#include "hphp/util/gzip.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/hdf.h"
 #include "hphp/util/hphp-config.h"
@@ -61,6 +62,7 @@
 #include "hphp/util/service-data.h"
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/text-util.h"
+#include "hphp/util/zstd.h"
 #include "hphp/zend/zend-string.h"
 
 #include <cstdint>
@@ -802,7 +804,6 @@ int64_t RuntimeOption::HeapHighWaterMark = 1024;
 uint64_t RuntimeOption::DisableCallUserFunc = 0;
 uint64_t RuntimeOption::DisableCallUserFuncArray = 0;
 uint64_t RuntimeOption::DisableParseStrSingleArg = 0;
-uint64_t RuntimeOption::DisableDefine = 2;
 uint64_t RuntimeOption::DisableAssert = 0;
 bool RuntimeOption::DisallowExecutionOperator = true;
 bool RuntimeOption::DisableReservedVariables = true;
@@ -1583,9 +1584,6 @@ void RuntimeOption::Load(
     Config::Bind(DisallowExecutionOperator, ini, config,
                  "Hack.Lang.Phpism.DisallowExecutionOperator",
                  DisallowExecutionOperator);
-    Config::Bind(DisableDefine, ini, config,
-                 "Hack.Lang.Phpism.DisableDefine",
-                 DisableDefine);
     Config::Bind(DisableAssert, ini, config,
                  "Hack.Lang.Phpism.DisableAssert",
                  DisableAssert);
@@ -2042,6 +2040,9 @@ void RuntimeOption::Load(
 
     Config::Bind(ServerNextProtocols, ini, config, "Server.SSLNextProtocols");
     Config::Bind(ServerEnableH2C, ini, config, "Server.EnableH2C");
+    extern bool g_brotliUseLocalArena;
+    Config::Bind(g_brotliUseLocalArena, ini, config,
+                 "Server.BrotliUseLocalArena", g_brotliUseLocalArena);
     Config::Bind(BrotliCompressionEnabled, ini, config,
                  "Server.BrotliCompressionEnabled", -1);
     Config::Bind(BrotliChunkedCompressionEnabled, ini, config,
@@ -2054,12 +2055,16 @@ void RuntimeOption::Load(
                  "Server.BrotliCompressionQuality", 6);
     Config::Bind(ZstdCompressionEnabled, ini, config,
                  "Server.ZstdCompressionEnabled", -1);
+    Config::Bind(ZstdCompressor::s_useLocalArena, ini, config,
+                 "Server.ZstdUseLocalArena", ZstdCompressor::s_useLocalArena);
     Config::Bind(ZstdCompressionLevel, ini, config,
                  "Server.ZstdCompressionLevel", 3);
     Config::Bind(GzipCompressionLevel, ini, config,
                  "Server.GzipCompressionLevel", 3);
     Config::Bind(GzipMaxCompressionLevel, ini, config,
                  "Server.GzipMaxCompressionLevel", 9);
+    Config::Bind(GzipCompressor::s_useLocalArena, ini, config,
+                 "Server.GzipUseLocalArena", GzipCompressor::s_useLocalArena);
     Config::Bind(EnableKeepAlive, ini, config, "Server.EnableKeepAlive", true);
     Config::Bind(ExposeHPHP, ini, config, "Server.ExposeHPHP", true);
     Config::Bind(ExposeXFBServer, ini, config, "Server.ExposeXFBServer", false);

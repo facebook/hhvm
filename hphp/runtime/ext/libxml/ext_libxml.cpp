@@ -854,10 +854,12 @@ char* local_strdup(const char* str) {
 
 void processInitLibXML() {
   // Use request-local allocator functions.
-  xmlMemSetup(checked_local_free,
-              checked_local_malloc,
-              checked_local_realloc,
-              local_strdup);
+  if (RuntimeOption::EvalXmlParserUseLocalArena) {
+    xmlMemSetup(checked_local_free,
+                checked_local_malloc,
+                checked_local_realloc,
+                local_strdup);
+  }
   xmlInitParser();
 }
 

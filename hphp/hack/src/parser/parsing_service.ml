@@ -151,8 +151,15 @@ let log_parsing_results fast =
 (*****************************************************************************)
 (* Main entry points *)
 (*****************************************************************************)
-
-let go ?(quick = false) ?(show_all_errors = false) workers files_set ~get_next popt ~trace =
+let go
+    ?(quick = false)
+    ?(show_all_errors = false)
+    (workers: MultiWorker.worker list option)
+    (files_set: Relative_path.Set.t)
+    ~(get_next: Relative_path.t list MultiWorker.Hh_bucket.next)
+    (popt: ParserOptions.t)
+    ~(trace: bool)
+    : (FileInfo.t Relative_path.Map.t * Errors.t * Relative_path.Set.t) =
   let acc = parse_parallel ~quick ~show_all_errors workers get_next popt in
   let fast, errorl, failed_parsing =
     Relative_path.Set.fold files_set ~init:acc ~f:(

@@ -1,5 +1,0 @@
-Notice: Hack Array Compat: Promoting null to array in %s/record-emptyish-promo.php on line 7
-array(1) {
-  [3]=>
-  string(3) "abc"
-}

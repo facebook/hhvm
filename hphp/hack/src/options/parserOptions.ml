@@ -27,6 +27,11 @@ let setup_pocket_universes = GlobalOptions.setup_pocket_universes
 let with_rust po b = { po with GlobalOptions.po_rust = b }
 let rust = GlobalOptions.po_rust
 
+let enable_constant_visibility_modifiers = GlobalOptions.po_enable_constant_visibility_modifiers
+
+let with_enable_constant_visibility_modifiers po b =
+  { po with GlobalOptions.po_enable_constant_visibility_modifiers = b }
+
 let make
   ~auto_namespace_map
   ~codegen
@@ -36,6 +41,7 @@ let make
   ~disable_lval_as_an_expression
   ~disable_instanceof
   ~rust
+  ~enable_constant_visibility_modifiers
 = GlobalOptions.{
   default with
   po_auto_namespace_map = auto_namespace_map;
@@ -46,4 +52,5 @@ let make
   po_disable_lval_as_an_expression = disable_lval_as_an_expression;
   po_disable_instanceof = disable_instanceof;
   po_rust = rust;
+  po_enable_constant_visibility_modifiers = enable_constant_visibility_modifiers;
 }

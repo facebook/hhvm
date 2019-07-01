@@ -60,6 +60,7 @@ let debug_describe_t : type a. a t -> string = function
   | FILE_DEPENDENCIES        _ -> "FILE_DEPENDENCIES"
   | IDENTIFY_TYPES           _ -> "IDENTIFY_TYPES"
   | EXTRACT_STANDALONE     _ -> "EXTRACT_STANDALONE"
+  | GO_TO_DEFINITION         _ -> "GO_TO_DEFINITION"
 
 let debug_describe_cmd : type a. a command -> string = function
   | Rpc rpc -> debug_describe_t rpc
@@ -71,3 +72,14 @@ let source_tree_of_file_input file_input =
     Full_fidelity_source_text.from_file (Relative_path.create_detect_prefix filename)
   | ServerCommandTypes.FileContent content ->
     Full_fidelity_source_text.make Relative_path.default content
+
+let extract_labelled_file
+    (labelled_file: ServerCommandTypes.labelled_file)
+    : (Relative_path.t * ServerCommandTypes.file_input) =
+  match labelled_file with
+  | ServerCommandTypes.LabelledFileName filename ->
+    let path = Relative_path.create_detect_prefix filename in
+    (path, (ServerCommandTypes.FileName filename))
+  | ServerCommandTypes.LabelledFileContent { filename; content } ->
+    let path = Relative_path.create_detect_prefix filename in
+    (path, (ServerCommandTypes.FileContent content))

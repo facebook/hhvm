@@ -553,9 +553,17 @@ SSATmp* isDVArrayImpl(IRGS& env, SSATmp* val, IsTypeOp op) {
     }
   );
 }
+namespace {
+
+StaticString s_isDict("is_dict");
+StaticString s_isVec("is_vec");
+
+}
+
 
 SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
-  if (!RuntimeOption::EvalHackArrCompatIsVecDictNotices) {
+  if (!RuntimeOption::EvalHackArrCompatIsVecDictNotices &&
+      !RuntimeOption::EvalLogArrayProvenance) {
     return cond(
       env,
       [&] (Block* taken) {
@@ -575,7 +583,18 @@ SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
     );
   }
 
+  auto const provLogging = [&]{
+    if (!RuntimeOption::EvalLogArrayProvenance) return;
+    gen(
+      env,
+      RaiseArraySerializeNotice,
+      cns(env, s_isVec.get()),
+      src
+    );
+  };
+
   auto const varrCheck = [&]{
+    if (!RuntimeOption::EvalHackArrCompatIsVecDictNotices) return;
     cond(
       env,
       [&](Block* taken) { return gen(env, CheckType, TArr, taken, src); },
@@ -600,7 +619,7 @@ SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
   return cond(
     env,
     [&](Block* taken) { gen(env, CheckType, TVec, taken, src); },
-    [&]{ return cns(env, true); },
+    [&]{ provLogging(); return cns(env, true); },
     [&]{
       varrCheck();
       return cond(
@@ -614,6 +633,7 @@ SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
               gen(env, RaiseNotice, cns(env,
                 makeStaticString(Strings::CLSMETH_COMPAT_IS_VEC)));
             }
+            provLogging();
             return cns(env, true);
           }
           return cns(env, false);
@@ -663,7 +683,8 @@ SSATmp* isStrImpl(IRGS& env, SSATmp* src) {
 }
 
 SSATmp* isDictImpl(IRGS& env, SSATmp* src) {
-  if (!RuntimeOption::EvalHackArrCompatIsVecDictNotices) {
+  if (!RuntimeOption::EvalHackArrCompatIsVecDictNotices &&
+      !RuntimeOption::EvalLogArrayProvenance) {
     if (RuntimeOption::EvalHackArrDVArrs) {
       return cond(
         env,
@@ -698,16 +719,27 @@ SSATmp* isDictImpl(IRGS& env, SSATmp* src) {
     );
   };
 
+  auto const provLogging = [&] {
+    if (RuntimeOption::EvalLogArrayProvenance) {
+      gen(
+        env,
+        RaiseArraySerializeNotice,
+        cns(env, s_isDict.get()),
+        src
+      );
+    }
+  };
+
   return cond(
     env,
     [&](Block* taken) { gen(env, CheckType, TDict, taken, src); },
-    [&]{ return cns(env, true); },
+    [&]{ provLogging(); return cns(env, true); },
     [&]{
       if (RuntimeOption::EvalHackArrDVArrs) {
         return cond(
           env,
           [&](Block* taken) { gen(env, CheckType, TShape, taken, src); },
-          [&]{ return cns(env, true); },
+          [&]{ provLogging(); return cns(env, true); },
           [&]{ darrCheck(); return cns(env, false); }
         );
       } else {
@@ -1120,9 +1152,24 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_void:        return primitive(TNull);
     case TypeStructure::Kind::T_keyset:      return primitive(TKeyset);
     case TypeStructure::Kind::T_nonnull:     return primitive(TNull, true);
-    case TypeStructure::Kind::T_mixed:       return success();
+    case TypeStructure::Kind::T_mixed:
+    case TypeStructure::Kind::T_dynamic:
+      return success();
     case TypeStructure::Kind::T_num:         return unionOf(TInt, TDbl);
     case TypeStructure::Kind::T_arraykey:    return unionOf(TInt, TStr);
+    case TypeStructure::Kind::T_arraylike:
+      if (t->type().maybe(TClsMeth)) {
+        if (t->isA(TClsMeth)) {
+          if (RuntimeOption::EvalIsVecNotices) {
+            gen(env, RaiseNotice,
+              cns(env, makeStaticString(Strings::CLSMETH_COMPAT_IS_ANY_ARR)));
+          }
+          return success();
+        } else {
+          PUNT(TypeStructC-MaybeClsMeth);
+        }
+      }
+      return unionOf(TArr, TVec, TDict, TKeyset);
     case TypeStructure::Kind::T_vec_or_dict:
       if (t->type().maybe(TClsMeth)) {
         if (t->isA(TClsMeth)) {
@@ -1139,27 +1186,34 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
           PUNT(TypeStructC-MaybeClsMeth);
         }
       }
-      return unionOf(TVec, TDict);
-    case TypeStructure::Kind::T_arraylike:
-      if (t->type().maybe(TClsMeth)) {
-        if (t->isA(TClsMeth)) {
-          if (RuntimeOption::EvalIsVecNotices) {
-            gen(env, RaiseNotice,
-              cns(env, makeStaticString(Strings::CLSMETH_COMPAT_IS_ANY_ARR)));
-          }
-          return success();
-        } else {
-          PUNT(TypeStructC-MaybeClsMeth);
-        }
-      }
-      return unionOf(TArr, TVec, TDict, TKeyset);
+      // fallthrough
     case TypeStructure::Kind::T_dict:
     case TypeStructure::Kind::T_vec: {
       popC(env); // pop the ts that's on the stack
       auto const c = popC(env);
-      auto const res = kind == TypeStructure::Kind::T_dict
-        ? isDictImpl(env, c)
-        : isVecImpl(env, c);
+      auto const res = [&]{
+        if (kind == TypeStructure::Kind::T_dict) {
+          return isDictImpl(env, c);
+        } else if (kind == TypeStructure::Kind::T_vec) {
+          return isVecImpl(env, c);
+        } else if (kind == TypeStructure::Kind::T_vec_or_dict) {
+          return cond(
+            env,
+            [&](Block* taken) {
+              auto vec = isVecImpl(env, c);
+              gen(env, JmpZero, taken, vec);
+            },
+            [&] {
+              return cns(env, true);
+            },
+            [&] {
+              return isDictImpl(env, c);
+            }
+          );
+        } else {
+          not_reached();
+        }
+      }();
       push(env, is_nullable_ts ? check_nullable(env, res, c) : res);
       return true;
     }

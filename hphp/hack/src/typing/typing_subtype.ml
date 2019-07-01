@@ -205,6 +205,17 @@ let anyfy env r ty =
     end in
   anyfyer#go ty
 
+let find_type_with_exact_negation env tyl =
+  let rec find env tyl acc_tyl =
+    match tyl with
+    | [] -> env, None, acc_tyl
+    | ty :: tyl' ->
+      let env, non_ty = TUtils.non env (fst ty) ty TUtils.ApproxDown in
+      let nothing = MakeType.nothing Reason.none in
+      if ty_equal non_ty nothing then find env tyl' (ty :: acc_tyl) else
+      env, Some non_ty, tyl' @ acc_tyl in
+  find env tyl []
+
 (* Process the constraint proposition *)
 let rec process_simplify_subtype_result prop =
   match prop with
@@ -932,6 +943,14 @@ and simplify_subtype
     List.fold_left tyl ~init:(env, TL.valid) ~f:(fun res ty_sub ->
       res &&& simplify_subtype ~seen_generic_params ty_sub ty_super)
 
+  (* t <: (t1 & ... & tn)
+   *   if and only if
+   * t <: t1 /\  ... /\ t <: tn
+   *)
+  | _, Tintersection tyl ->
+    List.fold_left tyl ~init:(env, TL.valid) ~f:(fun res ty_super ->
+      res &&& simplify_subtype ~seen_generic_params ~this_ty ty_sub ty_super)
+
   (* We want to treat nullable as a union with the same rule as above.
    * This is only needed for Tvar on right; other cases are dealt with specially as
    * derived rules.
@@ -946,6 +965,27 @@ and simplify_subtype
 
   | Tvar _, _ | _, Tvar _ ->
     default ()
+
+  (* A & B <: C iif A <: C | !B *)
+  | Tintersection tyl, _
+    when let _, non_ty_opt, _ = find_type_with_exact_negation env tyl in
+    Option.is_some non_ty_opt ->
+    let env, non_ty_opt, tyl' = find_type_with_exact_negation env tyl in
+    let non_ty = Option.value_exn non_ty_opt in
+    let env, ty_super' = TUtils.union env ty_super non_ty in
+    let ty_sub' = MakeType.intersection (fst ety_sub) tyl' in
+    simplify_subtype ~seen_generic_params ty_sub' ty_super' env
+
+  (* A <: ?B iif A & nonnull <: B
+  Only apply if B is a type variable or an intersection, to avoid oscillating
+  forever between this case and the previous one.*)
+  | _, Toption ty_super'
+    when let _, (_, ety_super') = Env.expand_type env ty_super' in
+    match ety_super' with
+    | Tintersection _ | Tvar _ -> true
+    | _ -> false ->
+    let env, ty_sub' = let r = fst ety_super in Inter.intersect env r ety_sub (MakeType.nonnull r) in
+    simplify_subtype ~seen_generic_params ty_sub' ty_super' env
 
   (* If subtype and supertype are the same generic parameter, we're done *)
   | Tabstract (AKgeneric name_sub, _), Tabstract (AKgeneric name_super, _)
@@ -1014,6 +1054,13 @@ and simplify_subtype
         ||| try_each tys
     in
       try_each tyl env
+
+  (* It's sound to reduce t1 & t2 <: t to (t1 <: t) || (t2 <: t), but
+   * not complete.
+   *)
+  | Tintersection tyl, _ ->
+    List.fold_left tyl ~init:(env, TL.invalid ~fail) ~f:(fun res ty_sub ->
+      res ||| simplify_subtype ~seen_generic_params ~this_ty ty_sub ty_super)
 
   | Tany, Tany ->
     valid ()
@@ -1099,20 +1146,6 @@ and simplify_subtype
 
   | _, Tabstract (AKgeneric name_super, _) ->
     simplify_subtype_generic_super ty_sub name_super env
-
-  (* It's sound to reduce t1 & t2 <: t to (t1 <: t) || (t2 <: t), but
-   * not complete.
-   *)
-  | Tintersection tyl, _ ->
-    List.fold_left tyl ~init:(env, TL.invalid ~fail) ~f:(fun res ty_sub ->
-      res ||| simplify_subtype ~seen_generic_params ty_sub ty_super)
-  (* t <: (t1 & ... & tn)
-   *   if and only if
-   * t <: t1 /\  ... /\ t <: tn
-   *)
-  | _, Tintersection tyl ->
-    List.fold_left tyl ~init:(env, TL.valid) ~f:(fun res ty_super ->
-      res &&& simplify_subtype ~seen_generic_params ty_sub ty_super)
 
 and simplify_subtype_variance
   ~(seen_generic_params : SSet.t option)
@@ -2722,12 +2755,12 @@ let expand_type_and_solve env ~description_of_expected p ty =
     ~on_tyvar:(fun env r v ->
       let env = always_solve_tyvar ~freshen:true env r v in
       Env.expand_var env r v) in
-    match ty, ety with
-    | (r, Tvar v), (_, Tunion []) when Env.get_tyvar_appears_invariantly env v ->
-      Errors.unknown_type description_of_expected p (Reason.to_string "It is unknown" r);
-      let env = Env.set_tyvar_eager_solve_fail env v in
-      env, (Reason.Rsolve_fail p, TUtils.terr env)
-    | _ -> env', ety
+  match ty, ety with
+  | (r, Tvar v), (_, Tunion []) when Env.get_tyvar_appears_invariantly env v ->
+    Errors.unknown_type description_of_expected p (Reason.to_string "It is unknown" r);
+    let env = Env.set_tyvar_eager_solve_fail env v in
+    env, (Reason.Rsolve_fail p, TUtils.terr env)
+  | _ -> env', ety
 
 let expand_type_and_solve_eq env ty =
   Typing_utils.simplify_unions env ty
@@ -2846,6 +2879,14 @@ let log_prop env =
     not (TL.is_valid prop)
   then Typing_log.log_prop 1 env.Env.function_pos
     "There are remaining unsolved constraints!" env prop
+
+(* Currently, simplify_subtype doesn't look at bounds on type variables.
+ * Let's at least notice when these bounds imply an equality.
+ *)
+let is_sub_type env ty1 ty2 =
+  let env, ty1 = expand_type_and_solve_eq env ty1 in
+  let env, ty2 = expand_type_and_solve_eq env ty2 in
+  is_sub_type env ty1 ty2
 
 (*****************************************************************************)
 (* Exporting *)

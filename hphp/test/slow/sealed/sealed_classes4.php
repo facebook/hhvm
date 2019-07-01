@@ -6,3 +6,5 @@ interface SomeSealedInterface {}
 interface SomeOtherInterface extends SomeSealedInterface {}
 
 interface SomeOtherOtherInterface extends SomeSealedInterface {}
+
+<<__EntryPoint>> function main(): void {}

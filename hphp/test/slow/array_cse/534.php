@@ -5,7 +5,6 @@ function f(array $a = null, $e) {
     $a[$e] ??= array();
     $a[$e]['foo'] = 30;
     try { $x = $a[$e]['baz']; } catch (Exception $e) { echo $e->getMessage()."\n"; $x = null; }
-    $a[$e]['bar'] = 50;
   } else {
     $a[$e] = 30;
     try { $x = $a[$e]; } catch (Exception $e) { echo $e->getMessage()."\n"; $x = null; }

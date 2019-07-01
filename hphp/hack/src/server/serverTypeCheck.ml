@@ -244,7 +244,7 @@ let parsing genv env to_check ~stop_at_errors =
   Ast_provider.remove_batch ide_files;
   Fixme_provider.remove_batch ide_files;
 
-  SymbolIndex.remove_files to_check env.local_symbol_table;
+  SymbolIndex.remove_files ~sienv:env.local_symbol_table ~paths:to_check;
   SharedMem.collect `gentle;
   let get_next = MultiWorker.next
     genv.workers (Relative_path.Set.elements disk_files) in
@@ -255,8 +255,9 @@ let parsing genv env to_check ~stop_at_errors =
     SearchUtils.TypeChecker;
   (* During integration tests, we want to pretend that search is run
     synchronously *)
+  let sie = env.local_symbol_table in
   if SearchServiceRunner.should_run_completely genv
-      (SymbolIndex.get_search_provider ())
+    !sie.SearchUtils.sie_provider
   then
     SearchServiceRunner.run_completely genv env.local_symbol_table;
 
@@ -784,7 +785,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     else Relative_path.Set.empty in
     let interrupt = get_interrupt_config genv env in
     let memory_cap = genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb in
-    let (fnl: Typing_check_service.file list) = Relative_path.Map.elements fast in
+    let fnl = Relative_path.Map.elements fast in
     let errorl', env , cancelled = Typing_check_service.go_with_interrupt
       genv.workers env.tcopt dynamic_view_files fnl ~interrupt ~memory_cap in
     (* Add new things that need to be rechecked *)

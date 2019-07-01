@@ -7,3 +7,5 @@ class A {
 class B extends A {
     <<__LSB>> protected static string $x;
 }
+
+<<__EntryPoint>> function main(): void {}

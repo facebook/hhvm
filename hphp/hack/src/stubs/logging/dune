@@ -1,11 +1,4 @@
 (library
-  (name logging_common_stubs)
-  (wrapped false)
-  (modules 
-    eventLogger
-    scuba))
-
-(library
   (name logging_stubs)
   (wrapped false)
   (modules

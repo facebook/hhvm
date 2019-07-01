@@ -252,7 +252,7 @@ void beginInlining(IRGS& env,
         }
       } else {
         if (target->attrs() & AttrRequiresThis ||
-            isFPushObjMethod(writeArOpc) ||
+            isFCallObjMethod(writeArOpc) ||
             ty <= TObj) {
           ty &= thisTypeFromFunc(target);
         }
@@ -428,7 +428,8 @@ void conjureBeginInlining(IRGS& env,
   beginInlining(
     env,
     func,
-    FCallArgs { FCallArgs::Flags::None, numParams, 1, nullptr, kInvalidOffset },
+    FCallArgs(FCallArgs::Flags::None, numParams, 1, nullptr, kInvalidOffset,
+              false),
     ctx,
     ctx ? ctx->type() : TCtx,
     env.context.callerFPushOp,

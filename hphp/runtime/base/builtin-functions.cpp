@@ -732,14 +732,6 @@ void throw_missing_this(const Func* f) {
   SystemLib::throwBadMethodCallExceptionObject(msg);
 }
 
-void NEVER_INLINE raise_null_object_prop() {
-  raise_notice("Trying to get property of non-object");
-}
-
-void NEVER_INLINE throw_null_get_object_prop() {
-  raise_error("Trying to get property of non-object");
-}
-
 void NEVER_INLINE throw_invalid_property_name(const String& name) {
   if (!name.size()) {
     raise_error("Cannot access empty property");
@@ -849,16 +841,6 @@ void throw_cannot_modify_const_prop(const char* className,
 {
   auto msg = folly::sformat(
     "Cannot modify const property {} of class {} after construction",
-    propName, className
-  );
-  SystemLib::throwInvalidOperationExceptionObject(msg);
-}
-
-void throw_cannot_bind_const_prop(const char* className,
-                                      const char* propName)
-{
-  auto msg = folly::sformat(
-    "Cannot bind const property {} of class {}",
     propName, className
   );
   SystemLib::throwInvalidOperationExceptionObject(msg);

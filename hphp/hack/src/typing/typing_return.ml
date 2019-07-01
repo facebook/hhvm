@@ -86,6 +86,16 @@ let wrap_awaitable env p rty =
     | Ast.FAsync ->
       MakeType.awaitable (Reason.Rret_fun_kind (p, Ast.FAsync)) rty
 
+
+let make_return_type localize env (ty: decl ty) =
+  match Env.get_fn_kind env, ty with
+  | Ast.FAsync, (r, Tapply ((_, class_name), [inner_ty]))
+    when class_name = Naming_special_names.Classes.cAwaitable ->
+    let env, ty = localize env inner_ty in
+    env, wrap_awaitable env (Reason.to_pos r) ty
+  | _ ->
+    localize env ty
+
 let force_awaitable env p ty =
   let fun_kind = Env.get_fn_kind env in
   match Env.expand_type env ty with

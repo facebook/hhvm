@@ -447,14 +447,6 @@ let string_of_call instruction =
     sep ["FPushFuncD"; string_of_int n; string_of_function_id id]
   | FPushFuncRD (n, id) ->
     sep ["FPushFuncRD"; string_of_int n; string_of_function_id id]
-  | FPushObjMethod (n, nf, pl) ->
-    sep ["FPushObjMethod"; string_of_int n; string_of_null_flavor nf; string_of_param_locations pl]
-  | FPushObjMethodD (n, id, nf) ->
-    sep ["FPushObjMethodD";
-      string_of_int n; string_of_method_id id; string_of_null_flavor nf]
-  | FPushObjMethodRD (n, id, nf) ->
-    sep ["FPushObjMethodRD";
-      string_of_int n; string_of_method_id id; string_of_null_flavor nf]
   | FPushClsMethod (n, id, pl) ->
     sep ["FPushClsMethod"; string_of_int n; string_of_classref id; string_of_param_locations pl]
   | FPushClsMethodD (n, id, cid) ->
@@ -492,7 +484,22 @@ let string_of_call instruction =
   | FCallBuiltin (n1, n2, id) ->
     sep ["FCallBuiltin"; string_of_int n1; string_of_int n2; SU.quote_string id]
   | FCallCtor fcall_args ->
-      sep ["FCallCtor"; string_of_fcall_args fcall_args; "\"\""]
+    sep ["FCallCtor"; string_of_fcall_args fcall_args; "\"\""]
+  | FCallObjMethod (fcall_args, nf, pl) ->
+    sep [
+      "FCallObjMethod"; string_of_fcall_args fcall_args; "\"\"";
+      string_of_null_flavor nf; string_of_param_locations pl
+    ]
+  | FCallObjMethodD (fcall_args, nf, id) ->
+    sep [
+      "FCallObjMethodD"; string_of_fcall_args fcall_args; "\"\"";
+      string_of_null_flavor nf; string_of_method_id id
+    ]
+  | FCallObjMethodRD (fcall_args, nf, id) ->
+    sep [
+      "FCallObjMethodRD"; string_of_fcall_args fcall_args; "\"\"";
+      string_of_null_flavor nf; string_of_method_id id
+    ]
 
 let string_of_barethis_op i =
   match i with
@@ -565,6 +572,7 @@ let string_of_misc instruction =
       sep ["AssertRATStk"; string_of_int n; s]
     | NativeImpl -> "NativeImpl"
     | BreakTraceHint -> "BreakTraceHint"
+    | LockObj -> "LockObj"
 
 let iterator_instruction_name_prefix instruction =
   let iterator_instruction_name =

@@ -725,7 +725,7 @@ struct json_parser {
     String key;
     Variant val;
   };
-  folly::fbvector<json_state, LocalAllocator<json_state>> stack;
+  folly::fbvector<json_state> stack;
   // check_non_safepoint_surprise() above will not trigger gc
   TYPE_SCAN_IGNORE_FIELD(stack);
   int top;
@@ -751,12 +751,12 @@ struct json_parser {
         SimpleParser::BufferBytesForLength(length) :
         new_cap * 2;
       if (tl_buffer.raw) {
-        local_free(tl_buffer.raw);
+        json_free(tl_buffer.raw);
         tl_buffer.raw = nullptr;
       }
       sb_cap = 0;
       if (!tl_heap->preAllocOOM(bufSize)) {
-        tl_buffer.raw = (char*)local_malloc(bufSize);
+        tl_buffer.raw = (char*)json_malloc(bufSize);
         if (!tl_buffer.raw) tl_heap->forceOOM();
       }
       check_non_safepoint_surprise();
@@ -772,12 +772,27 @@ struct json_parser {
   }
   void flushSb() {
     if (tl_buffer.raw) {
-      local_free(tl_buffer.raw);
+      json_free(tl_buffer.raw);
       tl_buffer.raw = nullptr;
     }
     sb_cap = 0;
     sb_buf.setBuf(nullptr, 0);
     sb_key.setBuf(nullptr, 0);
+  }
+ private:
+  static void* json_malloc(size_t size) {
+    if (RuntimeOption::EvalJsonParserUseLocalArena) {
+      return local_malloc(size);
+    } else {
+      return malloc(size);
+    }
+  }
+  static void json_free(void* ptr) {
+    if (RuntimeOption::EvalJsonParserUseLocalArena) {
+      return local_free(ptr);
+    } else {
+      return free(ptr);
+    }
   }
 };
 
@@ -987,16 +1002,6 @@ void utf16_to_utf8(UncheckedBuffer &buf, unsigned short utf16) {
     return;
   }
   return utf16_to_utf8_tail(buf, utf16);
-}
-
-ALWAYS_INLINE
-void decode_escaped_bytes(UncheckedBuffer &buf, unsigned short bytes,
-                          bool is_tsimplejson) {
-  if (UNLIKELY(is_tsimplejson)) {
-    buf.append((char)bytes);
-  } else {
-    utf16_to_utf8(buf, bytes);
-  }
 }
 
 StaticString s__empty_("_empty_");
@@ -1514,7 +1519,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
         if (/*<fb>*/(/*</fb>*/s == 3/*<fb>*/ || s == 30)/*</fb>*/ &&
             state != 8) {
           if (state != 4) {
-            decode_escaped_bytes(*buf, b, is_tsimplejson);
+            utf16_to_utf8(*buf, b);
           } else {
             switch (b) {
             case 'b': buf->append('\b'); break;
@@ -1523,7 +1528,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             case 'f': buf->append('\f'); break;
             case 'r': buf->append('\r'); break;
             default:
-              decode_escaped_bytes(*buf, b, is_tsimplejson);
+              utf16_to_utf8(*buf, b);
               break;
             }
           }
@@ -1550,7 +1555,11 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           escaped_bytes += dehexchar(b) << 4;
         } else if (s == 3 && state == 8) {
           escaped_bytes += dehexchar(b);
-          decode_escaped_bytes(*buf, escaped_bytes, is_tsimplejson);
+          if (UNLIKELY(is_tsimplejson)) {
+            buf->append((char)escaped_bytes);
+          } else {
+            utf16_to_utf8(*buf, escaped_bytes);
+          }
         }
       } else if ((type == kInvalidDataType || type == KindOfNull) &&
                  (c == S_DIG || c == S_ZER)) {
@@ -1575,7 +1584,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
       } else if (type == kInvalidDataType && state == 19 && s == 9) {
         type = KindOfNull;
       } else if (type != KindOfString && c > S_WSP) {
-        decode_escaped_bytes(*buf, b, is_tsimplejson);
+        utf16_to_utf8(*buf, b);
       }
 
       state = s;

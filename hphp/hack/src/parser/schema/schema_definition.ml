@@ -488,8 +488,7 @@ let schema : schema_node list =
     ; prefix      = "const"
     ; aggregates  = [ ClassBodyDeclaration; TopLevelDeclaration ]
     ; fields =
-      [ "visibility", ZeroOrOne Token
-      ; "abstract", ZeroOrOne Token
+      [ "modifiers", ZeroOrMore Token
       ; "keyword", Token
       ; "type_specifier", ZeroOrOne (Aggregate Specifier)
       ; "declarators", ZeroOrMore (Just "ConstantDeclarator")
@@ -515,7 +514,7 @@ let schema : schema_node list =
     ; aggregates  = [ ClassBodyDeclaration ]
     ; fields =
       [ "attribute_spec", ZeroOrOne (Just "AttributeSpecification")
-      ; "abstract", ZeroOrOne Token
+      ; "modifiers", ZeroOrMore Token
       ; "keyword", Token
       ; "type_keyword", Token
       ; "name", Token

@@ -112,7 +112,7 @@ std::string show(const IRGS& irgs) {
                        stackDepth).str());
   assertx(spOffset <= curFunc(irgs)->maxStackCells());
 
-  for (auto i = 0; i < spOffset; ) {
+  for (auto i = 0; i < stackDepth; ) {
     if (checkFpi()) {
       i += kNumActRecCells;
       continue;

@@ -44,6 +44,7 @@ type t = {
   option_hhjs_unique_filenames            : bool;
   option_hhjs_babel_transform             : string;
   option_hhjs_node_modules                : SSet.t;
+  option_hhjs_setlocs                     : bool;
   option_phpism_disallow_execution_operator: bool;
   option_phpism_disable_nontoplevel_declarations : bool;
   option_phpism_disable_static_closures : bool;
@@ -58,6 +59,7 @@ type t = {
   option_notice_on_byref_argument_typehint_violation : bool;
   option_log_array_provenance             : bool;
   option_use_rust_parser                  : bool;
+  option_enable_constant_visibility_modifiers : bool;
 }
 
 let default = {
@@ -95,6 +97,7 @@ let default = {
   option_hhjs_unique_filenames = true;
   option_hhjs_babel_transform = "";
   option_hhjs_node_modules = SSet.empty;
+  option_hhjs_setlocs = false;
   option_phpism_disallow_execution_operator = false;
   option_phpism_disable_nontoplevel_declarations = false;
   option_phpism_disable_static_closures = false;
@@ -109,6 +112,7 @@ let default = {
   option_notice_on_byref_argument_typehint_violation = false;
   option_log_array_provenance = false;
   option_use_rust_parser = false;
+  option_enable_constant_visibility_modifiers = false;
 }
 
 let constant_folding o = o.option_constant_folding
@@ -143,6 +147,7 @@ let hhjs_no_babel o = o.option_hhjs_no_babel
 let hhjs_unique_filenames o = o.option_hhjs_unique_filenames
 let hhjs_babel_transform o = o.option_hhjs_babel_transform
 let hhjs_node_modules o = o.option_hhjs_node_modules
+let hhjs_setlocs o = o.option_hhjs_setlocs
 let phpism_disallow_execution_operator o = o.option_phpism_disallow_execution_operator
 let phpism_disable_nontoplevel_declarations o = o.option_phpism_disable_nontoplevel_declarations
 let phpism_disable_static_closures o = o.option_phpism_disable_static_closures
@@ -157,6 +162,7 @@ let enable_pocket_universes o = o.option_enable_pocket_universes
 let notice_on_byref_argument_typehint_violation o = o.option_notice_on_byref_argument_typehint_violation
 let log_array_provenance o = o.option_log_array_provenance
 let use_rust_parser o = o.option_use_rust_parser
+let enable_constant_visibility_modifiers o = o.option_enable_constant_visibility_modifiers
 let to_string o =
   let dynamic_invokes =
     String.concat ~sep:", " (SSet.elements (dynamic_invoke_functions o)) in
@@ -192,6 +198,7 @@ let to_string o =
     ; Printf.sprintf "enable_perf_logging: %B" @@ enable_perf_logging o
     ; Printf.sprintf "enable_intrinsics_extension: %B" @@ enable_intrinsics_extension o
     ; Printf.sprintf "enable_hhjs: %B" @@ enable_hhjs o
+    ; Printf.sprintf "hhjs_setlocs: %B" @@ hhjs_setlocs o
     ; Printf.sprintf "phpism_disallow_execution_operator %B" @@ phpism_disallow_execution_operator o
     ; Printf.sprintf "phpism_disable_nontoplevel_declarations %B"
       @@ phpism_disable_nontoplevel_declarations o
@@ -207,6 +214,7 @@ let to_string o =
     ; Printf.sprintf "notice_on_byref_argument_typehint_violation: %B" @@ notice_on_byref_argument_typehint_violation o
     ; Printf.sprintf "log_array_provenance: %B" @@ log_array_provenance o
     ; Printf.sprintf "use_rust_parser: %B" @@ use_rust_parser o
+    ; Printf.sprintf "enable_constant_visibility_modifiers: %B" @@ enable_constant_visibility_modifiers o
     ]
 
 let as_bool s =
@@ -288,6 +296,8 @@ let set_option options name value =
     | None -> SSet.empty
     in
     { options with option_hhjs_node_modules = hhjs_node_modules }
+  | "eval.hhjssetlocs" ->
+    { options with option_hhjs_setlocs = as_bool value }
   | "hack.lang.phpism.disallowexecutionoperator" ->
     { options with option_phpism_disallow_execution_operator = as_bool value }
   | "hack.lang.phpism.disablenontopleveldeclarations" ->
@@ -314,6 +324,8 @@ let set_option options name value =
     { options with option_notice_on_byref_argument_typehint_violation = as_bool value }
   | "hhvm.log_array_provenance" ->
     { options with option_log_array_provenance = as_bool value }
+  | "hhvm.lang.enable_constant_visibility_modifiers" ->
+    { options with option_enable_constant_visibility_modifiers = as_bool value }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -440,6 +452,8 @@ let value_setters = [
      fun opts v -> { opts with option_hhjs_babel_transform = v });
   (set_value "hhvm.hhjs_node_modules" get_hhjs_node_modules_from_config_string @@
     fun opts v -> { opts with option_hhjs_node_modules = v });
+  (set_value "hhvm.hhjs_set_locs" get_value_from_config_int @@
+    fun opts v -> { opts with option_hhjs_setlocs = (v = 1) });
   (set_value "hhvm.hack.lang.phpism.disallow_execution_operator" get_value_from_config_int @@
      fun opts v -> { opts with option_phpism_disallow_execution_operator = (v = 1) });
   (set_value "hhvm.hack.lang.phpism.disable_nontoplevel_declarations" get_value_from_config_int @@
@@ -462,6 +476,8 @@ let value_setters = [
      fun opts v -> { opts with option_log_array_provenance = (v > 0) });
   (set_value "hhvm.hack.lang.hack_compiler_use_rust_parser" get_value_from_config_int @@
      fun opts v -> { opts with option_use_rust_parser = (v > 0) });
+  (set_value "hhvm.hack.lang.enable_constant_visibility_modifiers" get_value_from_config_int @@
+    fun opts v -> { opts with option_enable_constant_visibility_modifiers = (v = 1) });
 ]
 
 let extract_config_options_from_json ~init config_json =

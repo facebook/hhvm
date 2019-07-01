@@ -161,8 +161,7 @@
         ((() { 1 ((end_of_line 1)))
          (list 2148
           ((const_declaration 37
-            ((missing 0 ()) (missing 0 ())
-             (((whitespace 2)) const 5 ((whitespace 1)))
+            ((missing 0 ()) (((whitespace 2)) const 5 ((whitespace 1)))
              (simple_type_specifier 6 ((() string 6 ((whitespace 1)))))
              (list 23
               ((list_item 23
@@ -174,8 +173,7 @@
                  (missing 0 ())))))
              (() ";" 1 ((end_of_line 1)))))
            (const_declaration 37
-            ((missing 0 ()) (missing 0 ())
-             (((whitespace 2)) const 5 ((whitespace 1)))
+            ((missing 0 ()) (((whitespace 2)) const 5 ((whitespace 1)))
              (simple_type_specifier 6 ((() string 6 ((whitespace 1)))))
              (list 23
               ((list_item 23
@@ -187,8 +185,7 @@
                  (missing 0 ())))))
              (() ";" 1 ((end_of_line 1)))))
            (const_declaration 37
-            ((missing 0 ()) (missing 0 ())
-             (((whitespace 2)) const 5 ((whitespace 1)))
+            ((missing 0 ()) (((whitespace 2)) const 5 ((whitespace 1)))
              (simple_type_specifier 6 ((() string 6 ((whitespace 1)))))
              (list 23
               ((list_item 23
@@ -200,8 +197,7 @@
                  (missing 0 ())))))
              (() ";" 1 ((end_of_line 1)))))
            (const_declaration 37
-            ((missing 0 ()) (missing 0 ())
-             (((whitespace 2)) const 5 ((whitespace 1)))
+            ((missing 0 ()) (((whitespace 2)) const 5 ((whitespace 1)))
              (simple_type_specifier 6 ((() string 6 ((whitespace 1)))))
              (list 23
               ((list_item 23
@@ -213,8 +209,7 @@
                  (missing 0 ())))))
              (() ";" 1 ((end_of_line 1)))))
            (const_declaration 37
-            ((missing 0 ()) (missing 0 ())
-             (((whitespace 2)) const 5 ((whitespace 1)))
+            ((missing 0 ()) (((whitespace 2)) const 5 ((whitespace 1)))
              (simple_type_specifier 6 ((() string 6 ((whitespace 1)))))
              (list 23
               ((list_item 23
@@ -226,8 +221,7 @@
                  (missing 0 ())))))
              (() ";" 1 ((end_of_line 1)))))
            (const_declaration 37
-            ((missing 0 ()) (missing 0 ())
-             (((whitespace 2)) const 5 ((whitespace 1)))
+            ((missing 0 ()) (((whitespace 2)) const 5 ((whitespace 1)))
              (simple_type_specifier 6 ((() string 6 ((whitespace 1)))))
              (list 23
               ((list_item 23
@@ -239,8 +233,7 @@
                  (missing 0 ())))))
              (() ";" 1 ((end_of_line 1)))))
            (const_declaration 37
-            ((missing 0 ()) (missing 0 ())
-             (((whitespace 2)) const 5 ((whitespace 1)))
+            ((missing 0 ()) (((whitespace 2)) const 5 ((whitespace 1)))
              (simple_type_specifier 6 ((() string 6 ((whitespace 1)))))
              (list 23
               ((list_item 23
@@ -252,8 +245,7 @@
                  (missing 0 ())))))
              (() ";" 1 ((end_of_line 1)))))
            (const_declaration 37
-            ((missing 0 ()) (missing 0 ())
-             (((whitespace 2)) const 5 ((whitespace 1)))
+            ((missing 0 ()) (((whitespace 2)) const 5 ((whitespace 1)))
              (simple_type_specifier 6 ((() string 6 ((whitespace 1)))))
              (list 23
               ((list_item 23
@@ -265,8 +257,7 @@
                  (missing 0 ())))))
              (() ";" 1 ((end_of_line 1)))))
            (const_declaration 37
-            ((missing 0 ()) (missing 0 ())
-             (((whitespace 2)) const 5 ((whitespace 1)))
+            ((missing 0 ()) (((whitespace 2)) const 5 ((whitespace 1)))
              (simple_type_specifier 6 ((() string 6 ((whitespace 1)))))
              (list 23
               ((list_item 23
@@ -278,8 +269,7 @@
                  (missing 0 ())))))
              (() ";" 1 ((end_of_line 1)))))
            (const_declaration 39
-            ((missing 0 ()) (missing 0 ())
-             (((whitespace 2)) const 5 ((whitespace 1)))
+            ((missing 0 ()) (((whitespace 2)) const 5 ((whitespace 1)))
              (simple_type_specifier 6 ((() string 6 ((whitespace 1)))))
              (list 25
               ((list_item 25
@@ -291,8 +281,7 @@
                  (missing 0 ())))))
              (() ";" 1 ((end_of_line 1)))))
            (const_declaration 39
-            ((missing 0 ()) (missing 0 ())
-             (((whitespace 2)) const 5 ((whitespace 1)))
+            ((missing 0 ()) (((whitespace 2)) const 5 ((whitespace 1)))
              (simple_type_specifier 6 ((() string 6 ((whitespace 1)))))
              (list 25
               ((list_item 25

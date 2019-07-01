@@ -27,6 +27,6 @@ let is_function_interceptable namespace ast_fun =
     (jit_enable_rename_function !compiler_options)) ||
     (not (SSet.is_empty difs) &&
       let fq_id =
-        Hhbc_id.Function.elaborate_id_with_builtins namespace ast_fun.Ast.f_name in
+        Hhbc_id.Function.elaborate_id namespace ast_fun.Ast.f_name in
       let name = String.lowercase (Hhbc_id.Function.to_raw_string fq_id) in
       SSet.mem name difs))

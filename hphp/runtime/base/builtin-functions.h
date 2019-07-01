@@ -52,8 +52,6 @@ String concat4(const String& s1, const String& s2, const String& s3,
 [[noreturn]] void NEVER_INLINE throw_missing_this(const Func* f);
 [[noreturn]] void NEVER_INLINE throw_has_this_need_static(const Func* f);
 void NEVER_INLINE throw_invalid_property_name(const String& name);
-void NEVER_INLINE throw_null_get_object_prop();
-void NEVER_INLINE raise_null_object_prop();
 
 [[noreturn]]
 void throw_exception(const Object& e);
@@ -253,8 +251,6 @@ void throw_instance_method_fatal(const char *name);
 [[noreturn]] void throw_object_forbids_dynamic_props(const char* className);
 [[noreturn]] void throw_cannot_modify_const_prop(const char* className,
                                                  const char* propName);
-[[noreturn]] void throw_cannot_bind_const_prop(const char* className,
-                                               const char* propName);
 [[noreturn]] void throw_late_init_prop(const Class* cls,
                                        const StringData* propName,
                                        bool isSProp);

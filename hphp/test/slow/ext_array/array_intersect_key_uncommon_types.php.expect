@@ -1,0 +1,28 @@
+== empty array ==
+array(0) {
+}
+array(0) {
+}
+== APC local array ==
+bool(true)
+array(2) {
+  [1]=>
+  int(2)
+  ["1"]=>
+  string(1) "2"
+}
+array(2) {
+  [1]=>
+  int(2)
+  ["1"]=>
+  string(1) "2"
+}
+== GLOBALS array ==
+array(1) {
+  ["array_intersect_key_uncommon_types.php"]=>
+  string(3) "lol"
+}
+array(1) {
+  ["array_intersect_key_uncommon_types.php"]=>
+  bool(true)
+}

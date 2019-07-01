@@ -62,8 +62,6 @@ $i = 0;
 var_dump(($i . '') . ++$i);
 f(&$a, 'test');
 var_dump(($a . 'x') . foo($a = ''));
-$a = array(2);
-var_dump($a[$a = 0]);
 $a = new stdclass;
 $a->foo = 42;
 var_dump($a->{

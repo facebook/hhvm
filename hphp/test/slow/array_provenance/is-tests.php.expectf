@@ -1,0 +1,62 @@
+---- is vec_or_dict ----
+
+Notice: Observing vec in is_vec from %s/is-tests.php:29 in %s/is-tests.php on line 32
+bool(true)
+
+Notice: Observing dict in is_dict from %s/is-tests.php:30 in %s/is-tests.php on line 33
+bool(true)
+---- as vec_or_dict ----
+
+Notice: Observing vec in is_vec from %s/is-tests.php:29 in %s/is-tests.php on line 21
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+
+Notice: Observing dict in is_dict from %s/is-tests.php:30 in %s/is-tests.php on line 21
+dict(2) {
+  [4]=>
+  int(5)
+  [5]=>
+  int(6)
+}
+---- is vec ----
+
+Notice: Observing vec in is_vec from %s/is-tests.php:29 in %s/is-tests.php on line 38
+bool(true)
+bool(false)
+---- as vec ----
+
+Notice: Observing vec in is_vec from %s/is-tests.php:29 in %s/is-tests.php on line 13
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+string(6) "failed"
+---- is dict ----
+bool(false)
+
+Notice: Observing dict in is_dict from %s/is-tests.php:30 in %s/is-tests.php on line 45
+bool(true)
+---- as dict ----
+string(6) "failed"
+
+Notice: Observing dict in is_dict from %s/is-tests.php:30 in %s/is-tests.php on line 5
+dict(2) {
+  [4]=>
+  int(5)
+  [5]=>
+  int(6)
+}
+---- is_vec ----
+
+Notice: Observing vec in is_vec from %s/is-tests.php:29 in %s/is-tests.php on line 50
+bool(true)
+bool(false)
+---- is_dict ----
+bool(false)
+
+Notice: Observing dict in is_dict from %s/is-tests.php:30 in %s/is-tests.php on line 54
+bool(true)

@@ -77,14 +77,14 @@ struct VariantControllerImpl {
         return HPHP::serialize::Type::MAP;
       case KindOfPersistentDict:
       case KindOfDict: {
-        if (HackArraysMode != VariantControllerHackArraysMode::OFF) {
+        if (HackArraysMode == VariantControllerHackArraysMode::ON) {
           return HPHP::serialize::Type::MAP;
         }
         throw HPHP::serialize::HackArraySerializeError{};
       }
       case KindOfPersistentVec:
       case KindOfVec: {
-        if (HackArraysMode != VariantControllerHackArraysMode::OFF) {
+        if (HackArraysMode == VariantControllerHackArraysMode::ON) {
           return HPHP::serialize::Type::LIST;
         }
         throw HPHP::serialize::HackArraySerializeError{};
@@ -94,11 +94,8 @@ struct VariantControllerImpl {
         throw HPHP::serialize::KeysetSerializeError{};
 
       case KindOfClsMeth:
-        if (RuntimeOption::EvalHackArrDVArrs) {
-          if (HackArraysMode == VariantControllerHackArraysMode::ON) {
-            return HPHP::serialize::Type::LIST;
-          }
-          throw HPHP::serialize::HackArraySerializeError{};
+        if (HackArraysMode == VariantControllerHackArraysMode::MIGRATORY) {
+          return HPHP::serialize::Type::LIST;
         } else {
           return HPHP::serialize::Type::MAP;
         }
@@ -133,7 +130,7 @@ struct VariantControllerImpl {
       case VariantControllerHackArraysMode::ON:
         return empty_dict_array();
       case VariantControllerHackArraysMode::OFF:
-        return empty_array();
+        return empty_darray();
       case VariantControllerHackArraysMode::MIGRATORY:
         return RuntimeOption::EvalHackArrDVArrs
           ? empty_dict_array()
@@ -141,14 +138,37 @@ struct VariantControllerImpl {
     }
   }
   static MapType createMap(ArrayInit&& map) {
-    return map.toArray();
+    auto arrayData = map.toArray().detach();
+    switch (HackArraysMode) {
+      case VariantControllerHackArraysMode::ON:
+        return Array::attach(arrayData->toDict(false));
+      case VariantControllerHackArraysMode::OFF:
+        return Array::attach(arrayData->toDArray(false));
+      case VariantControllerHackArraysMode::MIGRATORY:
+        return Array::attach(arrayData->toDArray(false));
+    }
+    not_reached(); // not sure why I need this here and not in createMap()
   }
   static ArrayInit reserveMap(size_t n) {
     ArrayInit res(n, ArrayInit::Map{}, CheckAllocation{});
     return res;
   }
   static MapType getStaticEmptyMap() {
-    return MapType(staticEmptyArray());
+    ArrayData* empty;
+    switch (HackArraysMode) {
+      case VariantControllerHackArraysMode::ON:
+        empty = staticEmptyDictArray();
+        break;
+      case VariantControllerHackArraysMode::OFF:
+        empty = staticEmptyDArray();
+        break;
+      case VariantControllerHackArraysMode::MIGRATORY:
+        empty = RuntimeOption::EvalHackArrDVArrs
+          ? staticEmptyDictArray()
+          : staticEmptyDArray();
+        break;
+    }
+    return MapType(empty);
   }
   static HPHP::serialize::Type mapKeyType(const Variant& k) {
     return type(k);
@@ -189,7 +209,7 @@ struct VariantControllerImpl {
       case VariantControllerHackArraysMode::ON:
         return empty_vec_array();
       case VariantControllerHackArraysMode::OFF:
-        return empty_array();
+        return empty_darray();
       case VariantControllerHackArraysMode::MIGRATORY:
         return RuntimeOption::EvalHackArrDVArrs
           ? empty_vec_array()

@@ -6,3 +6,5 @@ class SomeSealedClass {}
 class SomeOtherClass extends SomeSealedClass {}
 
 class SomeOtherOtherClass extends SomeSealedClass {}
+
+<<__EntryPoint>> function main(): void {}

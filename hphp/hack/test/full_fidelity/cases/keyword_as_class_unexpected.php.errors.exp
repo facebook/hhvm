@@ -198,7 +198,6 @@
 (104,5)-(104,5) An expression is expected here.
 (104,5)-(104,5) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new ()'?
 (104,5)-(104,5) Unexpected node on right hand side of new or instanceof: missing
-(104,5)-(120,3) Access type for interface method must be omitted
 (104,14)-(104,14) A name is expected here.
 (104,15)-(104,15) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (104,16)-(104,16) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.

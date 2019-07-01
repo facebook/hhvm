@@ -67,6 +67,7 @@
     Concat
     FCallCtor <> 1 1 "0" - ""
     PopC
+    LockObj
     Throw
     Null
     RetC
@@ -98,6 +99,7 @@
     Concat
     FCallCtor <> 1 1 "0" - ""
     PopC
+    LockObj
     Throw
     Null
     RetC
@@ -129,6 +131,7 @@
     Concat
     FCallCtor <> 1 1 "0" - ""
     PopC
+    LockObj
     Throw
     Null
     RetC

@@ -37,9 +37,9 @@ module Parsing = struct
   type t =
   | FixmeFormat [@value 1001]
   | ParsingError
-  | UnexpectedEof
-  | UnterminatedComment
-  | UnterminatedXhpComment
+  | UnexpectedEofDEPRECATED
+  | UnterminatedCommentDEPRECATED
+  | UnterminatedXhpCommentDEPRECATED
   | CallTimePassByReferenceDEPRECATED
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@ deriving enum, show { with_path = false } ]
@@ -54,7 +54,7 @@ module Naming                               = struct
   | PrimitiveInvalidAlias
   | CyclicConstraintDEPRECATED
   | DidYouMeanNaming
-  | DifferentScope
+  | DifferentScopeDEPRECATED
   | DisallowedXhpType
   | DoubleInsteadOfFloatDEPRECATED
   | DynamicClassDEPRECATED
@@ -66,7 +66,7 @@ module Naming                               = struct
   | GenArrayRecArityDEPRECATED
   | GenArrayVaRecArityDEPRECATED
   | GenaArityDEPRECATED
-  | GenericClassVar
+  | GenericClassVarDEPRECATED
   | GenvaArity
   | IllegalClass
   | IllegalClassMeth
@@ -78,7 +78,7 @@ module Naming                               = struct
   | IntegerInsteadOfIntDEPRECATED
   | InvalidReqExtends
   | InvalidReqImplements
-  | LocalConst
+  | LocalConstDEPRECATED
   | LowercaseThis
   | MethodNameAlreadyBound
   | MissingArrow
@@ -95,7 +95,7 @@ module Naming                               = struct
   | ThisHintOutsideClass
   | ThisReserved
   | TparamWithTparam
-  | TypedefConstraint
+  | TypedefConstraintDEPRECATED
   | UnboundName
   | Undefined
   | UnexpectedArrow
@@ -123,7 +123,7 @@ module Naming                               = struct
   | GotoLabelUndefined
   | GotoLabelDefinedInFinally
   | GotoInvokedInFinally
-  | DynamicClassPropertyNameInStrictMode
+  | DynamicClassPropertyNameInStrictModeDEPRECATED
   | ThisAsLexicalVariable
   | DynamicClassNameInStrictMode
   | XhpOptionalRequiredAttr
@@ -136,18 +136,18 @@ module Naming                               = struct
   | MethodNeedsVisibility
   | ReferenceInStrictMode
   | ReferenceInRx
-  | DeclareStatement
-  | MisplacedRxOfScope
-  | RxOfScopeAndExplicitRx
-  | UnsupportedFeature
+  | DeclareStatementDEPRECATED
+  | MisplacedRxOfScopeDEPRECATED
+  | RxOfScopeAndExplicitRxDEPRECATED
+  | UnsupportedFeatureDEPRECATED
   | TraitInterfaceConstructorPromoDEPRECATED
   | NonstaticPropertyWithLSB
-  | ReferenceInAnonUseClause
+  | ReferenceInAnonUseClauseDEPRECATED
   | RxMoveInvalidLocation
   | MisplacedMutabilityHint
   | MutabilityHintInNonRx
   | InvalidReturnMutableHint
-  | NoTparamsOnTypeConsts
+  | NoTparamsOnTypeConstsDEPRECATED
   | PocketUniversesDuplication
   | UnsupportedTraitUseAs
   | UnsupportedInsteadOf
@@ -186,8 +186,8 @@ module NastCheck                            = struct
   | IllegalFunctionName
   | NotAbstractWithoutTypeconst
   | TypeconstDependsOnExternalTparam
-  | TypeconstAssignedTparam
-  | AbstractWithTypeconst
+  | TypeconstAssignedTparamDEPRECATED
+  | AbstractWithTypeconstDEPRECATED
   | ConstructorRequired
   | InterfaceWithPartialTypeconst
   | MultipleXhpCategory
@@ -204,13 +204,13 @@ module NastCheck                            = struct
   | InoutParamsSpecial
   | InoutParamsMixByref
   | InoutParamsMemoize
-  | InoutParamsRetByRef
+  | InoutParamsRetByRefDEPRECATED
   | ReadingFromAppend
   | ConstAttributeProhibited
   | RetiredError3049DEPRECATED
   | InoutArgumentBadExpr
-  | MutableParamsOutsideOfSync
-  | MutableAsyncMethod
+  | MutableParamsOutsideOfSyncDEPRECATED
+  | MutableAsyncMethodDEPRECATED
   | MutableMethodsMustBeReactive
   | MutableAttributeOnFunction
   | MutableReturnAnnotatedDeclsMustBeReactive
@@ -224,7 +224,7 @@ module NastCheck                            = struct
   | MaybeRxInvalidLocation
   | NoOnlyrxIfRxfuncForRxIfArgs
   | CoroutineInConstructor
-  | IllegalReturnByRef
+  | IllegalReturnByRefDEPRECATED
   | IllegalByRefExpr
   | VariadicByRefParam
   | MaybeMutableAttributeOnFunction
@@ -313,7 +313,7 @@ module Typing                               = struct
   | OptionReturnOnlyTypehint
   | ObjectString
   | OptionMixed
-  | Overflow
+  | OverflowDEPRECATED
   | OverrideFinal
   | OverridePerTrait
   | PairArity
@@ -338,11 +338,11 @@ module Typing                               = struct
   | StaticDynamic
   | StaticOverflowDEPRECATED
   | RetiredError4093DEPRECATED
-  | ThisInStatic
+  | ThisInStaticDEPRECATED
   | ThisVarOutsideClass
   | TraitFinal
-  | TupleArity
-  | TupleArityMismatch
+  | TupleArityDEPRECATED
+  | TupleArityMismatchDEPRECATED
   | TupleIndexTooLargeDEPRECATED
   | TupleSyntax
   | TypeArityMismatch
@@ -378,7 +378,7 @@ module Typing                               = struct
   | CyclicTypeconst
   | NullsafePropertyWriteContext
   | NoreturnUsage
-  | ThisLvalue
+  | ThisLvalueDEPRECATED
   | UnsetNonidxInStrict
   | InvalidShapeFieldNameEmpty
   | InvalidShapeFieldNameNumberDEPRECATED
@@ -443,7 +443,7 @@ module Typing                               = struct
   | AssigningToConst
   | SelfConstParentNot
   | ParentConstSelfNot
-  | PartiallyValidIsAsExpressionHint
+  | PartiallyValidIsAsExpressionHintDEPRECATED
   | NonreactiveFunctionCall
   | NonreactiveIndexing
   | ObjSetReactive
@@ -453,7 +453,7 @@ module Typing                               = struct
   | InvalidDisposableReturnHint
   | ReturnDisposableMismatch
   | InoutArgumentBadType
-  | InconsistentUnset
+  | InconsistentUnsetDEPRECATED
   | ReassignMutableVar
   | InvalidFreezeTarget
   | InvalidFreezeUse
@@ -465,7 +465,7 @@ module Typing                               = struct
   | NonreactiveCallFromShallow
   | EnumTypeTypedefNonnull
   | RxEnabledInNonRxContext
-  | RxEnabledInLambdas
+  | RxEnabledInLambdasDEPRECATED
   | AmbiguousLambda
   | EllipsisStrictMode
   | UntypedLambdaStrictMode
@@ -473,10 +473,10 @@ module Typing                               = struct
   | EchoInReactiveContext
   | SuperglobalInReactiveContext
   | StaticPropertyInReactiveContext
-  | StaticInReactiveContext
-  | GlobalInReactiveContext
+  | StaticInReactiveContextDEPRECATED
+  | GlobalInReactiveContextDEPRECATED
   | WrongExpressionKindAttribute
-  | AttributeClassNoConstructorArgs
+  | AttributeClassNoConstructorArgsDEPRECATED
   | InvalidTypeForOnlyrxIfRxfuncParameter
   | MissingAnnotationForOnlyrxIfRxfuncParameter
   | CannotReturnBorrowedValueAsImmutable
@@ -510,7 +510,7 @@ module Typing                               = struct
   | MutabilityMismatch
   | InvalidPPLCall
   | InvalidPPLStaticCall
-  | TypeTestInLambda
+  | TypeTestInLambdaDEPRECATED
   | InvalidTraversableInRx
   | ReassignMutableThis
   | MutableExpressionAsMultipleMutableArguments
@@ -533,8 +533,8 @@ module Typing                               = struct
   | MoveInNonreactiveContext
   | InvalidMoveUse
   | InvalidMoveTarget
-  | IgnoredResultOfFreeze
-  | IgnoredResultOfMove
+  | IgnoredResultOfFreezeDEPRECATED
+  | IgnoredResultOfMoveDEPRECATED
   | UnexpectedTy
   | UnserializableType
   | InconsistentMutability

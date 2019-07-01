@@ -92,6 +92,7 @@ struct RepoOptions {
   E(bool,           HHJSUniqueFilenames,            true)             \
   E(std::string,    HHJSBabelTransform,                               \
                                          hhjsBabelTransformDefault()) \
+  E(bool,           HHJSSetLocs,                    false)            \
   E(std::string,    HHJSNodeModules,                "")               \
   E(bool,           EmitFuncPointers,               true)             \
   E(bool,           EmitInstMethPointers,           EmitFuncPointers) \
@@ -553,10 +554,6 @@ struct RuntimeOption {
   // valid values are 0 => enabled (default)
   // 1 => warning, 2 => error
   static uint64_t DisableConstant;
-  // Disables PHP's define() function
-  // valid values are 0 => enabled (default)
-  // 1 => warning, 2 => error
-  static uint64_t DisableDefine;
   // Disables PHP's assert() function
   // valid values are 0 => enabled (default)
   // 1 => warning, 2 => error
@@ -810,8 +807,8 @@ struct RuntimeOption {
   F(bool, HHIRRefcountOpts,            true)                            \
   F(bool, HHIREnableGenTimeInlining,   true)                            \
   F(uint32_t, HHIRInliningCostFactorMain, 100)                          \
-  F(uint32_t, HHIRInliningCostFactorCold, 100)                          \
-  F(uint32_t, HHIRInliningCostFactorFrozen, 100)                        \
+  F(uint32_t, HHIRInliningCostFactorCold, 32)                           \
+  F(uint32_t, HHIRInliningCostFactorFrozen, 10)                         \
   F(uint32_t, HHIRInliningVasmCostLimit, 17500)                         \
   F(uint32_t, HHIRInliningMinVasmCostLimit, 10000)                      \
   F(uint32_t, HHIRInliningMaxVasmCostLimit, 40000)                      \
@@ -911,6 +908,9 @@ struct RuntimeOption {
   F(uint32_t, NumReservedSlabs,        0)                               \
   F(uint32_t, Num1GPagesForA0,         0)                               \
   F(uint32_t, Num2MPagesForA0,         0)                               \
+  F(bool, BigAllocUseLocalArena,       true)                            \
+  F(bool, JsonParserUseLocalArena,     true)                            \
+  F(bool, XmlParserUseLocalArena,      true)                            \
   F(bool, LowStaticArrays,             true)                            \
   F(int64_t, HeapPurgeWindowSize,      5 * 1000000)                     \
   F(uint64_t, HeapPurgeThreshold,      128 * 1024 * 1024)               \

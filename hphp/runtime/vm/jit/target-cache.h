@@ -120,11 +120,15 @@ struct Entry {
   uintptr_t m_value;
 };
 
-uintptr_t handleSlowPath(const Class* cls,
-                         const StringData* name,
-                         const Class* ctx,
-                         rds::Handle mce_handle,
-                         uintptr_t mcePrime);
+uintptr_t handleDynamicCall(const Class* cls,
+                            const StringData* name,
+                            const Class* ctx);
+
+uintptr_t handleStaticCall(const Class* cls,
+                           const StringData* name,
+                           const Class* ctx,
+                           rds::Handle mce_handle,
+                           uintptr_t mcePrime);
 
 } // namespace MethodCache
 

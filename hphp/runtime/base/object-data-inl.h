@@ -89,6 +89,7 @@ ObjectData* ObjectData::newInstanceImpl(Class* cls, Init objConstruct) {
   return obj;
 }
 
+template <bool Unlocked>
 inline ObjectData* ObjectData::newInstance(Class* cls) {
   assertx(cls);
   if (UNLIKELY(cls->attrs() &
@@ -100,7 +101,8 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
                 "the reified generics");
   }
   auto obj = ObjectData::newInstanceImpl(cls, [&](void* mem) {
-    return new (NotNull{}, mem) ObjectData(cls);
+    return new (NotNull{}, mem)
+      ObjectData(cls, Unlocked ? IsBeingConstructed : NoAttrs);
   });
   if (UNLIKELY(cls->needsInitThrowable())) {
     // may incref obj
@@ -113,6 +115,7 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
   return obj;
 }
 
+template <bool Unlocked>
 inline ObjectData* ObjectData::newInstanceReified(Class* cls,
                                                   ArrayData* reifiedTypes) {
   assertx(cls);
@@ -125,7 +128,8 @@ inline ObjectData* ObjectData::newInstanceReified(Class* cls,
     checkClassReifiedGenericMismatch(cls, reifiedTypes);
   }
   auto obj = ObjectData::newInstanceImpl(cls, [&](void* mem) {
-    return new (NotNull{}, mem) ObjectData(cls);
+    return new (NotNull{}, mem)
+      ObjectData(cls, Unlocked ? IsBeingConstructed : NoAttrs);
   });
   if (UNLIKELY(cls->needsInitThrowable())) {
     // may incref obj
@@ -255,7 +259,15 @@ inline bool ObjectData::instanceof(const Class* c) const {
 }
 
 inline bool ObjectData::isBeingConstructed() const {
-  return getAttribute(Attribute::IsBeingConstructed);
+  return getAttribute(IsBeingConstructed);
+}
+
+inline void ObjectData::lockObject() {
+  m_aux16 &= ~IsBeingConstructed;
+}
+
+inline void ObjectData::unlockObject() {
+   m_aux16 |= IsBeingConstructed;
 }
 
 inline bool ObjectData::hasUninitProps() const {

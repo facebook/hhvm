@@ -50,43 +50,22 @@ bool checkCalleeStackOverflow(const ActRec* calleeAR) {
 }
 
 void handleStackOverflow(ActRec* calleeAR) {
-  /*
-   * First synchronize registers.
-   *
-   * We can't finish setting up the prologue here, so there is no
-   * "correct" vm state. However, we need to mark the registers clean
-   * because sync_regstate in unwind-itanium.cpp doesn't know how to
-   * clean them.
-   *
-   * So the best we can do is to set vmfp() to the ActRec of the
-   * function that was just called, vmpc() to the start of the
-   * function, and vmsp() to the last parameter pushed(), and then
-   * throw a special exception so the unwinder knows what to do.
-   *
-   * Since we want to raise the exception as if it were raised in the
-   * caller, its tempting to set things up to calleeAR->sfp(), but
-   * there are two problems: this could be the first frame in a VM
-   * re-entry, and our caller might be inlined.
-   *
-   * In the first case, setting vmfp() to a frame in a prior vm
-   * invocation will confuse things, and in the latter, our caller's
-   * frame might not be linked into the call chain until we run the
-   * catch trace corresponding to this call.
-   *
-   * We can solve both problems by throwing a special exception here,
-   * and dealing with it after unwinding the whole vm entry.
-   */
+  // We didn't finish setting up the prologue, so let the unwinder know that
+  // locals are already freed so it doesn't try to decref the garbage. Do not
+  // bother decrefing numArgs, as we are going to fail the request anyway.
+  calleeAR->setLocalsDecRefd();
+
+  // sync_regstate in unwind-itanium.cpp doesn't have enough context to properly
+  // sync registers, so do it here. Sync them to correspond to the state on
+  // function entry. This is not really true, but it's good enough for unwinder.
   auto& unsafeRegs = vmRegsUnsafe();
   unsafeRegs.fp = calleeAR;
+  unsafeRegs.pc = calleeAR->func()->getEntry();
   unsafeRegs.stack.top() =
-    reinterpret_cast<Cell*>(calleeAR) - calleeAR->numArgs();
-  auto const func_base = calleeAR->func()->base();
-  // this isn't really true, but VMStackOverflow will fix it for us.
-  unsafeRegs.pc = calleeAR->func()->unit()->at(func_base);
+    reinterpret_cast<Cell*>(calleeAR) - calleeAR->func()->numSlotsInFrame();
   tl_regState = VMRegState::CLEAN;
 
-  calleeAR->setVarEnv(nullptr);
-  throw VMStackOverflow{};
+  throw FatalErrorException("Stack overflow");
 }
 
 void handlePossibleStackOverflow(ActRec* calleeAR) {

@@ -9,7 +9,7 @@ function f($x) {
     var_dump($x);
     try {
       var_dump($x[0]);
-      var_dump($x[0][1]);
+      if (is_array($x[0])) var_dump($x[0][1]);
     } catch (Exception $e) { echo $e->getMessage()."\n"; }
   }
   if (is_array($x) && $x) {
@@ -19,7 +19,6 @@ function f($x) {
 
 <<__EntryPoint>>
 function main_1853() {
-f(null);
 f(array());
 f(array(0, 1));
 f(array(array(1 => 1)));

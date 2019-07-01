@@ -7,13 +7,13 @@
  *
  *)
 
-(** Returns the docblock for the given symbol or expression. *)
-val go_def :
-  def:Relative_path.t SymbolDefinition.t ->
+(** Returns the documentation comments for the given symbol or expression. *)
+val go_comments_for_symbol :
+  def:'a SymbolDefinition.t ->
   base_class_name: string option ->
   file: ServerCommandTypes.file_input ->
   basic_only: bool ->
-  DocblockService.result
+  string option
 
 (** Returns the docblock most appropriate to this position *)
 val go_docblock_at :
@@ -21,8 +21,7 @@ val go_docblock_at :
   filename:string ->
   line:int ->
   column:int ->
-  base_class_name:string option ->
-  basic_only: bool ->
+  kind:SearchUtils.si_kind ->
   DocblockService.result
 
 (** Returns the location of a symbol, which can be used to call go_docblock_at *)

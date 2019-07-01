@@ -10,6 +10,7 @@ array(1) {
   string(4) "test"
 }
 bool(true)
+bool(true)
 
 * array with flag on serialize and unserialize *
 dict(1) {

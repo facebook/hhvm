@@ -17,18 +17,19 @@
 #ifndef incl_HPHP_HTTP_SERVER_TRANSPORT_H_
 #define incl_HPHP_HTTP_SERVER_TRANSPORT_H_
 
+#include "hphp/runtime/base/debuggable.h"
+#include "hphp/runtime/base/request-tracing.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/type-string.h"
+#include "hphp/util/functional.h"
+#include "hphp/util/gzip.h"
+#include "hphp/util/string-holder.h"
+
 #include <list>
 #include <string>
 #include <unordered_map>
 #include <utility>
-
-#include "hphp/util/functional.h"
-#include "hphp/util/gzip.h"
-#include "hphp/runtime/base/debuggable.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/request-tracing.h"
-#include "hphp/runtime/base/string-holder.h"
-#include "hphp/runtime/base/type-string.h"
+#include <vector>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

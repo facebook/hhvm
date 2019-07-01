@@ -90,17 +90,6 @@ void verifyTypeHint(const Class* thisCls,
 }
 
 ALWAYS_INLINE
-void boxingTypeHint(const Class::Prop* prop) {
-  if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
-  if (!prop || prop->typeConstraint.isMixedResolved()) return;
-  raise_property_typehint_binding_error(
-    prop->cls,
-    prop->name,
-    prop->typeConstraint.isSoft()
-  );
-}
-
-ALWAYS_INLINE
 void unsetTypeHint(const Class::Prop* prop) {
   if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
   if (!prop || prop->typeConstraint.isMixedResolved()) return;
@@ -933,6 +922,8 @@ ObjectData* ObjectData::clone() {
     assertx(!isCppBuiltin());
     auto const method = clone->m_cls->lookupMethod(s_clone.get());
     assertx(method);
+    clone->unlockObject();
+    SCOPE_EXIT { clone->lockObject(); };
     g_context->invokeMethodV(clone.get(), method, InvokeArgs{}, false);
   }
   return clone.detach();
@@ -1180,13 +1171,13 @@ ObjectData* ObjectData::newInstanceRawSmall(Class* cls, size_t size,
   assertx(size <= kMaxSmallSize);
   assertx(!cls->hasMemoSlots());
   auto mem = tl_heap->mallocSmallIndexSize(index, size);
-  return new (NotNull{}, mem) ObjectData(cls, InitRaw{}, DefaultAttrs);
+  return new (NotNull{}, mem) ObjectData(cls, InitRaw{}, IsBeingConstructed);
 }
 
 ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
   assertx(!cls->hasMemoSlots());
   auto mem = tl_heap->mallocBigSize(size);
-  return new (NotNull{}, mem) ObjectData(cls, InitRaw{}, DefaultAttrs);
+  return new (NotNull{}, mem) ObjectData(cls, InitRaw{}, IsBeingConstructed);
 }
 
 // called from jit code
@@ -1201,7 +1192,7 @@ ObjectData* ObjectData::newInstanceRawMemoSmall(Class* cls,
   auto mem = tl_heap->mallocSmallIndexSize(index, size);
   new (NotNull{}, mem) MemoNode(objoff);
   return new (NotNull{}, reinterpret_cast<char*>(mem) + objoff)
-    ObjectData(cls, InitRaw{}, DefaultAttrs);
+    ObjectData(cls, InitRaw{}, IsBeingConstructed);
 }
 
 ObjectData* ObjectData::newInstanceRawMemoBig(Class* cls,
@@ -1213,7 +1204,7 @@ ObjectData* ObjectData::newInstanceRawMemoBig(Class* cls,
   auto mem = tl_heap->mallocBigSize(size);
   new (NotNull{}, mem) MemoNode(objoff);
   return new (NotNull{}, reinterpret_cast<char*>(mem) + objoff)
-    ObjectData(cls, InitRaw{}, DefaultAttrs);
+    ObjectData(cls, InitRaw{}, IsBeingConstructed);
 }
 
 // Note: the normal object destruction path does not actually call this
@@ -1242,14 +1233,6 @@ Object ObjectData::FromArray(ArrayData* properties) {
 NEVER_INLINE
 void ObjectData::throwMutateConstProp(Slot prop) const {
   throw_cannot_modify_const_prop(
-    getClassName().data(),
-    m_cls->declProperties()[prop].name->data()
-  );
-}
-
-NEVER_INLINE
-void ObjectData::throwBindConstProp(Slot prop) const {
-  throw_cannot_bind_const_prop(
     getClassName().data(),
     m_cls->declProperties()[prop].name->data()
   );
@@ -1343,30 +1326,24 @@ tv_rval ObjectData::getPropIgnoreLateInit(const Class* ctx,
   return lookup.val && lookup.accessible ? lookup.val : nullptr;
 }
 
-tv_lval ObjectData::vGetPropIgnoreAccessibility(const StringData* key) {
-  auto const lookup = getPropImpl<true, true, true>(nullptr, key);
+tv_rval ObjectData::getPropIgnoreAccessibility(const StringData* key) {
+  auto const lookup = getPropImpl<false, true, true>(nullptr, key);
   auto prop = lookup.val;
-  if (UNLIKELY(lookup.isConst)) throwBindConstProp(lookup.slot);
-  if (prop) {
-    if (type(prop) != KindOfUninit) {
-      boxingTypeHint(lookup.prop);
-      tvBoxIfNeeded(prop);
+  if (!prop) return nullptr;
+  if (lookup.prop && type(prop) == KindOfUninit &&
+      (lookup.prop->attrs & AttrLateInit)) {
+
+    if (lookup.prop->attrs & AttrLateInitSoft) {
+      raise_soft_late_init_prop(lookup.prop->cls, key, false);
+      tvDup(
+        *g_context->getSoftLateInitDefault().asTypedValue(),
+        prop
+      );
       return prop;
-    } else if (lookup.prop && (lookup.prop->attrs & AttrLateInit)) {
-      if (lookup.prop->attrs & AttrLateInitSoft) {
-        raise_soft_late_init_prop(lookup.prop->cls, key, false);
-        tvDup(
-          *g_context->getSoftLateInitDefault().asTypedValue(),
-          prop
-        );
-        boxingTypeHint(lookup.prop);
-        tvBoxIfNeeded(prop);
-        return prop;
-      }
-      throw_late_init_prop(lookup.prop->cls, key, false);
     }
+    throw_late_init_prop(lookup.prop->cls, key, false);
   }
-  return tv_lval{};
+  return prop;
 }
 
 //////////////////////////////////////////////////////////////////////

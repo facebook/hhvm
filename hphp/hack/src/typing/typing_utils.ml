@@ -66,8 +66,8 @@ let (expand_type_and_solve_ref: expand_type_and_solve_type ref) = ref not_implem
 let expand_type_and_solve env ~description_of_expected = !expand_type_and_solve_ref env ~description_of_expected
 
 type expand_typeconst =
-  expand_env -> Env.env -> ?as_tyvar_with_cnstr:bool -> Reason.t -> locl ty ->
-  Nast.sid list -> Env.env * locl ty
+  expand_env -> Env.env -> ?as_tyvar_with_cnstr:bool -> locl ty ->
+  Nast.sid -> Env.env * locl ty
 let (expand_typeconst_ref: expand_typeconst ref) = ref not_implemented
 let expand_typeconst x = !expand_typeconst_ref x
 
@@ -78,6 +78,10 @@ let union x = !union_ref x
 type union_list = Env.env -> Reason.t -> locl ty list -> (Env.env * locl ty)
 let (union_list_ref : union_list ref) = ref not_implemented
 let union_list x = !union_list_ref x
+
+type fold_union = Env.env -> Reason.t -> locl ty list -> Env.env * locl ty
+let (fold_union_ref : fold_union ref) = ref not_implemented
+let fold_union x = !fold_union_ref x
 
 type simplify_unions =
   Env.env ->
@@ -90,6 +94,16 @@ let simplify_unions x = !simplify_unions_ref x
 type diff = locl ty -> locl ty -> locl ty
 let (diff_ref : diff ref) = ref not_implemented
 let diff x = !diff_ref x
+
+type approx = ApproxUp | ApproxDown
+type non = Env.env -> Reason.t -> locl ty -> approx:approx -> (Env.env * locl ty)
+let (non_ref : non ref) = ref not_implemented
+let non x = !non_ref x
+
+type simplify_intersections = Env.env ->
+  ?on_tyvar:(Env.env -> Reason.t -> int -> Env.env * locl ty) -> locl ty -> Env.env * locl ty
+let (simplify_intersections_ref : simplify_intersections ref) = ref not_implemented
+let simplify_intersections x = !simplify_intersections_ref x
 
 type localize_with_self = Env.env -> decl ty -> Env.env * locl ty
 let (localize_with_self_ref : localize_with_self ref) = ref not_implemented
@@ -333,6 +347,11 @@ let reactivity_to_string env r =
 let uerror env r1 ty1 r2 ty2 =
   let ty1 = Typing_print.with_blank_tyvars (fun () -> Typing_print.full_strip_ns env (r1,ty1)) in
   let ty2 = Typing_print.with_blank_tyvars (fun () -> Typing_print.full_strip_ns env (r2,ty2)) in
+  let ty1, ty2 =
+    if String.equal ty1 ty2 then
+      "exactly the type " ^ ty1, "the nonexact type " ^ ty2
+    else ty1, ty2
+  in
   let left = Reason.to_string ("Expected " ^ ty1) r1 in
   let right = Reason.to_string ("But got " ^ ty2) r2 in
   match (r1, r2) with

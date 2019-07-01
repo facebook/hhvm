@@ -1,0 +1,112 @@
+-- left pair
+dict(3) {
+  ["0"]=>
+  string(1) "x"
+  ["1"]=>
+  string(1) "y"
+  ["2"]=>
+  string(1) "z"
+}
+array(0) {
+}
+-- left pair
+dict(3) {
+  [0]=>
+  string(1) "x"
+  [1]=>
+  string(1) "y"
+  [2]=>
+  string(1) "z"
+}
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+}
+-- left pair
+object(HH\Map) (3) {
+  ["0"]=>
+  string(1) "x"
+  ["1"]=>
+  string(1) "y"
+  ["2"]=>
+  string(1) "z"
+}
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+}
+-- left pair
+object(HH\Map) (3) {
+  [0]=>
+  string(1) "x"
+  [1]=>
+  string(1) "y"
+  [2]=>
+  string(1) "z"
+}
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+}
+-- right pair
+dict(3) {
+  ["0"]=>
+  string(1) "x"
+  ["1"]=>
+  string(1) "y"
+  ["2"]=>
+  string(1) "z"
+}
+array(0) {
+}
+-- right pair
+dict(3) {
+  [0]=>
+  string(1) "x"
+  [1]=>
+  string(1) "y"
+  [2]=>
+  string(1) "z"
+}
+array(2) {
+  [0]=>
+  string(1) "x"
+  [1]=>
+  string(1) "y"
+}
+-- right pair
+object(HH\Map) (3) {
+  ["0"]=>
+  string(1) "x"
+  ["1"]=>
+  string(1) "y"
+  ["2"]=>
+  string(1) "z"
+}
+array(2) {
+  [0]=>
+  string(1) "x"
+  [1]=>
+  string(1) "y"
+}
+-- right pair
+object(HH\Map) (3) {
+  [0]=>
+  string(1) "x"
+  [1]=>
+  string(1) "y"
+  [2]=>
+  string(1) "z"
+}
+array(2) {
+  [0]=>
+  string(1) "x"
+  [1]=>
+  string(1) "y"
+}

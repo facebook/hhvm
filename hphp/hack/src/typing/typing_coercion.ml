@@ -13,18 +13,41 @@ open Typing_defs
 module Env     = Typing_env
 module SubType = Typing_subtype
 
-
 let validator =
   let open Type_test_hint_check in
-  object(_this)
+  object(this)
     inherit [validation_state] Type_visitor.type_visitor as _super
 
     method! on_tthis acc r = update acc @@ Invalid (r, "the this type")
     method! on_tapply acc r (_, name) tyl =
       (* TODO(T45690473): follow type aliases in the `type` case and allow enforceable targets *)
-      if Typing_env.is_typedef name || Typing_env.is_enum (Env.tast_env_as_typing_env acc.env) name
-      then update acc @@ Invalid (r, "a typedef or enum")
-      else visitor#check_class_targs acc r name tyl
+      let not_class = Typing_env.is_typedef name ||
+        Typing_env.is_enum (Env.tast_env_as_typing_env acc.env) name in
+      if not_class then update acc @@ Invalid (r, "a typedef or enum") else
+
+      match Env.get_class acc.env name with
+      | Some tc ->
+        let tparams = Cls.tparams tc in
+        begin match tyl with
+        | [] -> acc (* A class without type arguments is enforceable *)
+        | targs ->
+          let open List.Or_unequal_lengths in
+          begin match List.fold2 ~init:acc targs tparams ~f:(fun acc targ tparam ->
+            match targ with
+            | _, Tdynamic (* We accept the inner type being dynamic regardless of reification *)
+            | _, Tlike _ ->
+              acc
+            | _ ->
+              match tparam.tp_reified with
+              | Nast.Erased -> update acc @@ Invalid (r, "a type with an erased generic type argument")
+              | Nast.SoftReified -> update acc @@ Invalid (r, "a type with a soft reified type argument")
+              | Nast.Reified -> this#on_type acc targ
+          ) with
+          | Ok new_acc -> new_acc
+          | Unequal_lengths -> acc (* arity error elsewhere *)
+          end
+        end
+      | None -> acc
     method! on_tgeneric acc r name = visitor#check_generic acc r name
     method! on_taccess acc r _ = update acc @@ Invalid (r, "a type const")
     method! on_tarray acc r ty1_opt ty2_opt =

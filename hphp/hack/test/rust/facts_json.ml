@@ -23,7 +23,7 @@ let () =
       ~filename:(!file_path |> Relative_path.create Relative_path.Dummy)
       ~text
     with
-    | Some(hh_json) -> Hh_json.json_to_string hh_json
+    | Some(hh_json) -> Hh_json.json_to_multiline ~sort_keys:true hh_json
     | None -> "{}"
   in
   Printf.printf "%s\n" json;

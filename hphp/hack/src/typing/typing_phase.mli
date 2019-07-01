@@ -10,7 +10,7 @@ type method_instantiation =
 {
   use_pos: Pos.t;
   use_name: string;
-  explicit_tparams: Nast.hint list;
+  explicit_targs: decl ty list;
 }
 
 type env = expand_env

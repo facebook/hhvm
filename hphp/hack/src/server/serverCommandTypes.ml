@@ -180,6 +180,10 @@ module Ide_refactor_type = struct
   }
 end
 
+module Go_to_definition = struct
+  type result = (string SymbolOccurrence.t * string SymbolDefinition.t) list
+end
+
 type file_input =
   | FileName of string
   | FileContent of string
@@ -205,10 +209,10 @@ type _ t =
       InferAtPosService.result t
   | INFER_TYPE_BATCH : (string * int * int * (int * int) option) list * bool -> string list t
   | TYPED_AST : string -> string t
-  | IDE_HOVER : file_input * int * int ->
-      HoverService.result t
+  | IDE_HOVER : string * int * int -> HoverService.result t
   | LOCATE_SYMBOL : (string * SearchUtils.si_kind) -> (string * int * int * string option) option t
-  | DOCBLOCK_AT : (string * int * int * string option) -> DocblockService.result t
+  | DOCBLOCK_AT : (string * int * int * string option * SearchUtils.si_kind) ->
+      DocblockService.result t
   | DOCBLOCK_FOR_SYMBOL: (string * SearchUtils.si_kind) -> DocblockService.result t
   | IDE_SIGNATURE_HELP : (file_input * int * int) -> Lsp.SignatureHelp.result t
   | COVERAGE_LEVELS : file_input -> Coverage_level_defs.result t
@@ -266,6 +270,7 @@ type _ t =
   | FILE_DEPENDENCIES : string list -> string list t
   | IDENTIFY_TYPES : file_input * int * int -> (Pos.absolute * string) list t
   | EXTRACT_STANDALONE : string -> string list t
+  | GO_TO_DEFINITION : labelled_file * int * int -> Go_to_definition.result t
 
 
 let is_disconnect_rpc : type a. a t -> bool = function

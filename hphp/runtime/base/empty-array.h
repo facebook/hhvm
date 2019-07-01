@@ -60,6 +60,14 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   }
   static constexpr auto NvTryGetStr = &NvGetStr;
 
+  static ssize_t NvGetIntPos(const ArrayData* ad, int64_t) {
+    return ArrayCommon::ReturnInvalidIndex(ad);
+  }
+
+  static ssize_t NvGetStrPos(const ArrayData* ad, const StringData*) {
+    return ArrayCommon::ReturnInvalidIndex(ad);
+  }
+
   static tv_rval RvalInt(const ArrayData* ad, int64_t k) {
     return NvGetInt(ad, k);
   }

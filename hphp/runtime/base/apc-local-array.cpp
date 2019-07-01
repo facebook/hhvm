@@ -266,6 +266,18 @@ tv_rval APCLocalArray::NvGetStr(const ArrayData* ad,
   return GetValueRef(a, index);
 }
 
+ssize_t APCLocalArray::NvGetIntPos(const ArrayData* ad, int64_t k) {
+  auto a = asApcArray(ad);
+  auto index = a->getIndex(k);
+  return (index == -1) ? a->m_size : index;
+}
+
+ssize_t APCLocalArray::NvGetStrPos(const ArrayData* ad, const StringData* k) {
+  auto a = asApcArray(ad);
+  auto index = a->getIndex(k);
+  return (index == -1) ? a->m_size : index;
+}
+
 Cell APCLocalArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   auto a = asApcArray(ad);
   Variant k = a->m_arr->getKey(pos);

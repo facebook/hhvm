@@ -589,7 +589,7 @@
            (error 5 ((() clone 5 ()))) (error 1 ((() "(" 1 ())))
            (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
            (const_declaration 5
-            ((missing 0 ()) (missing 0 ()) (() const 5 ()) (missing 0 ())
+            ((missing 0 ()) (() const 5 ()) (missing 0 ())
              (list 0
               ((list_item 0
                 ((constant_declarator 0 ((missing 0 ()) (missing 0 ())))

@@ -430,6 +430,7 @@ let do_compile filename compiler_options popt fail_or_ast debug_time =
   hhas
 
 let extract_facts ?pretty ~filename ~source_root text =
+  let () = ignore @@ pretty in
   let json_facts = match Hackc_parse_delegator.extract_facts filename source_root with
     | Some result -> Some result
     | None ->
@@ -439,7 +440,10 @@ let extract_facts ?pretty ~filename ~source_root text =
         ~filename ~text
   in
   (* return empty string if file has syntax errors *)
-  Option.value_map ~default:"" ~f:(Hh_json.json_to_string ?pretty) json_facts
+  Option.value_map
+    ~default:""
+    ~f:(Hh_json.json_to_multiline ~sort_keys:true)
+    json_facts
   |> fun x -> [x]
 
 let parse_hh_file filename body =
@@ -464,6 +468,7 @@ let make_popt () =
     ~disable_static_closures:(phpism_disable_static_closures co)
     ~disable_lval_as_an_expression:(disable_lval_as_an_expression co)
     ~disable_instanceof:(phpism_disable_instanceof co)
+    ~enable_constant_visibility_modifiers:(enable_constant_visibility_modifiers co)
     ~rust:(use_rust_parser co)
 
 let process_single_source_unit compiler_options

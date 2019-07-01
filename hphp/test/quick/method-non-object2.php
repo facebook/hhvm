@@ -1,5 +1,5 @@
 <?hh
-// Method call on non-object using FPushObjMethod
+// Method call on non-object using FCallObjMethod
 $foo = 12;
 $func = "bar";
 $foo->$func();

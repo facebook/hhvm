@@ -1958,7 +1958,8 @@ and pFunctionBody : block parser = fun node env ->
     then [ Pos.none, Noop ]
     else block
   | _ ->
-    [lift_awaits_in_statement env Pos.none (fun () ->
+    let pos = pPos node env in
+    [lift_awaits_in_statement env pos (fun () ->
       let p, r = pExpr node env in
       p, Return (Some (p, r))
     )])
@@ -2522,7 +2523,7 @@ and pClassElt : class_elt list parser = fun node env ->
   let doc_comment_opt = extract_docblock node in
   let pClassElt_ = function
   | ConstDeclaration
-    { const_abstract; const_type_specifier; const_declarators; _ } ->
+    { const_type_specifier; const_declarators; _ } ->
       let ty = mpOptional pHint const_type_specifier env in
       let res =
         couldMap const_declarators env ~f:begin function
@@ -2531,7 +2532,7 @@ and pClassElt : class_elt list parser = fun node env ->
             ; _ } -> fun env ->
               ( pos_name constant_declarator_name env
               (* TODO: Parse error when const is abstract and has inits *)
-              , if is_missing const_abstract
+              , if not (is_abstract node)
                 then mpOptional pSimpleInitializer constant_declarator_initializer env
                 else None
               )
@@ -2547,7 +2548,7 @@ and pClassElt : class_elt list parser = fun node env ->
     aux [] [] res
   | TypeConstDeclaration
     { type_const_attribute_spec
-    ; type_const_abstract
+    ; type_const_modifiers
     ; type_const_name
     ; type_const_type_parameters
     ; type_const_type_constraint
@@ -2555,9 +2556,11 @@ and pClassElt : class_elt list parser = fun node env ->
     ; _ } ->
       if not @@ is_missing (type_const_type_parameters)
       then raise_parsing_error env (`Node node) SyntaxError.tparams_in_tconst;
+      let modifiers = pKinds (fun _ -> ()) type_const_modifiers env in
+      let abstract = List.mem modifiers Abstract ~equal:(=) in
       [ TypeConst
         { tconst_user_attributes = pUserAttributes env type_const_attribute_spec
-        ; tconst_abstract   = not (is_missing type_const_abstract)
+        ; tconst_abstract   = abstract
         ; tconst_name       = pos_name type_const_name env
         ; tconst_constraint = mpOptional pTConstraintTy type_const_type_constraint env
         ; tconst_type       = mpOptional pHint type_const_type_specifier env

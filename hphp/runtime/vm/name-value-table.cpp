@@ -176,6 +176,11 @@ TypedValue* NameValueTable::lookupAdd(const StringData* name) {
   return tv;
 }
 
+ssize_t NameValueTable::lookupPos(const StringData* name) {
+  Elm* e = findElm(name);
+  return e ? e - m_table : (m_tabMask + 1);
+}
+
 void NameValueTable::reserve(size_t desiredSize) {
   /*
    * Reserve space for size * 4 / 3 because we limit our max load

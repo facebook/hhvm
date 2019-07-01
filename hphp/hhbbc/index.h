@@ -254,6 +254,12 @@ struct Class {
   bool mightCareAboutDynConstructs() const;
 
   /*
+   * Whether this class (or clases derived from it) could have const props.
+   */
+  bool couldHaveConstProp() const;
+  bool derivedCouldHaveConstProp() const;
+
+  /*
    * Returns the Class that is the first common ancestor between 'this' and 'o'.
    * If there is no common ancestor folly::none is returned
    */
@@ -461,10 +467,17 @@ struct Index {
   void thaw();
 
   /*
-   * Throw away data structures that won't be needed during the emit
-   * stage (or beyond).
+   * Throw away data structures that won't be needed during or after
+   * the final pass. Currently the dependency map, which can take a
+   * long time to destroy.
    */
-  void cleanup_for_emit(folly::Baton<>* done);
+  void cleanup_for_final();
+
+  /*
+   * Throw away data structures that won't be needed after the emit
+   * stage.
+   */
+  void cleanup_post_emit();
 
   /*
    * The Index contains a Builder for an ArrayTypeTable.
@@ -990,9 +1003,10 @@ struct Index {
   folly::Optional<bool> supports_async_eager_return(res::Func rfunc) const;
 
   /*
-   * Return true if the resolved function is effect free.
+   * Return true if the function is effect free.
    */
   bool is_effect_free(res::Func rfunc) const;
+  bool is_effect_free(const php::Func* func) const;
 
   /*
    * Return true if there are any interceptable functions

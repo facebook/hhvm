@@ -69,7 +69,7 @@ void verify_return_type(Type ret, const CallDest& dest, F fail) {
     // rather than making all users of StringData* suboptimal.
     if (ret <= TStr && dest.valueType <= TNullptr) return;
 
-    // LdObjMethod returns uintptr_t that is a TFuncMM.
+    // LdObjMethod{D,S} return uintptr_t that is a TFuncMM.
     if (ret <= TInt && dest.valueType <= TFuncMM) return;
   }
 
@@ -123,7 +123,7 @@ bool CallSpec::verifySignature(const CallDest& dest,
       if (param <= TCls && args[argi].maybe(TNullptr)) continue;
       // Similarly for ArrayData|NullPtr
       if (param <= TArrLike && args[argi].maybe(TNullptr)) continue;
-      // LdObjMethod takes a TSmashable as uintptr_t.
+      // LdObjMethod{D,S} takes a TSmashable as uintptr_t.
       if (param <= TInt && args[argi] <= TSmashable) continue;
       fail(
         "Incompatible type {} for {} parameter {}", args[argi], param, parami

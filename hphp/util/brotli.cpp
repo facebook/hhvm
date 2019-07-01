@@ -15,8 +15,9 @@
 */
 
 #include "hphp/util/brotli.h"
+
+#include "hphp/util/alloc.h"
 #include <enc/encode.h>
-#include <folly/ScopeGuard.h>
 
 // The version of brotli we are using does implement these helper
 // methods that we need. However the methods are not declared in
@@ -33,7 +34,9 @@ using namespace brotli;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-const char* compressBrotli(BrotliCompressor* compressor,
+bool g_brotliUseLocalArena = false;
+
+StringHolder compressBrotli(BrotliCompressor* compressor,
                            const void* data,
                            size_t& len,
                            bool last) {
@@ -45,11 +48,20 @@ const char* compressBrotli(BrotliCompressor* compressor,
   // We should also allow 6 extra bytes for an empty meta-block at
   // the end of each chunk to force "flush".
   size_t availableBytes = len + 30;
-  auto available = (char *)malloc(availableBytes);
-  auto deleter = folly::makeGuard([&] { free(available); });
+
+  StringHolder available;
+  if (g_brotliUseLocalArena) {
+    available = StringHolder((char*)local_malloc(availableBytes),
+                             availableBytes,
+                             FreeType::LocalFree);
+  } else {
+    available = StringHolder((char*)malloc(availableBytes),
+                             availableBytes,
+                             FreeType::Free);
+  }
 
   BrotliMemIn in(data, len);
-  BrotliMemOut out(available, availableBytes);
+  BrotliMemOut out((void*)available.data(), availableBytes);
   bool finalBlock = false;
   while (!finalBlock) {
     auto inBytes = CopyOneBlockToRingBuffer(&in, compressor);
@@ -57,9 +69,9 @@ const char* compressBrotli(BrotliCompressor* compressor,
     size_t outBytes = 0;
     uint8_t* output = nullptr;
     if (!compressor->WriteBrotliData(last && finalBlock,
-                                             /* force_flush */ finalBlock,
-                                             &outBytes,
-                                             &output)) {
+                                     /* force_flush */ finalBlock,
+                                     &outBytes,
+                                     &output)) {
       return nullptr;
     }
 
@@ -81,8 +93,8 @@ const char* compressBrotli(BrotliCompressor* compressor,
     }
   }
 
-  deleter.dismiss();
   len = out.position();
+  available.shrinkTo(len);
 
   return available;
 }

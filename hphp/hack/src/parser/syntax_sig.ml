@@ -240,8 +240,7 @@ module type Syntax_S = sig
     ; require_semicolon                                  : t
     }
   | ConstDeclaration                  of
-    { const_visibility                                   : t
-    ; const_abstract                                     : t
+    { const_modifiers                                    : t
     ; const_keyword                                      : t
     ; const_type_specifier                               : t
     ; const_declarators                                  : t
@@ -253,7 +252,7 @@ module type Syntax_S = sig
     }
   | TypeConstDeclaration              of
     { type_const_attribute_spec                          : t
-    ; type_const_abstract                                : t
+    ; type_const_modifiers                               : t
     ; type_const_keyword                                 : t
     ; type_const_type_keyword                            : t
     ; type_const_name                                    : t
@@ -1107,7 +1106,7 @@ module type Syntax_S = sig
   val make_trait_use_conflict_resolution : t -> t -> t -> t -> t -> t
   val make_trait_use : t -> t -> t -> t
   val make_require_clause : t -> t -> t -> t -> t
-  val make_const_declaration : t -> t -> t -> t -> t -> t -> t
+  val make_const_declaration : t -> t -> t -> t -> t -> t
   val make_constant_declarator : t -> t -> t
   val make_type_const_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_decorated_expression : t -> t -> t

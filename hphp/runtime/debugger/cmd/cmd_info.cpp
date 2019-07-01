@@ -327,7 +327,7 @@ bool CmdInfo::onServer(DebuggerProxy &proxy) {
       Logger::Error("Caught unknown exception, auto-complete lists incomplete");
     }
 
-    Array variables = g_context->getLocalDefinedVariables(0);
+    Array variables = g_context->getLocalDefinedVariablesDebugger(0);
     variables += CmdVariable::GetGlobalVariables();
     auto& vars = m_acLiveLists->get(DebuggerClient::AutoCompleteVariables);
     vars.reserve(variables.size());

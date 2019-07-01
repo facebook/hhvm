@@ -313,13 +313,13 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
    */
   MixedPHPArrayInitBase& setWithRef(int64_t name, TypedValue tv) {
     this->performOp([&]{
-      return MixedArray::SetWithRefInt(this->m_arr, name, tv, false);
+      return MixedArray::SetWithRefInt(this->m_arr, name, tv);
     });
     return *this;
   }
   MixedPHPArrayInitBase& setWithRef(const String& name, TypedValue tv) {
     this->performOp([&]{
-      return MixedArray::SetWithRefStr(this->m_arr, name.get(), tv, false);
+      return MixedArray::SetWithRefStr(this->m_arr, name.get(), tv);
     });
     return *this;
   }

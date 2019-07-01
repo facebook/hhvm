@@ -378,9 +378,6 @@ type instruct_call =
   | FPushFunc of num_params * param_locations
   | FPushFuncD of num_params * function_id
   | FPushFuncRD of num_params * function_id
-  | FPushObjMethod of num_params * Ast.og_null_flavor * param_locations
-  | FPushObjMethodD of num_params * method_id * Ast.og_null_flavor
-  | FPushObjMethodRD of num_params * method_id * Ast.og_null_flavor
   | FPushClsMethod of num_params * classref_id * param_locations
   | FPushClsMethodD of num_params * method_id * class_id
   | FPushClsMethodRD of num_params * method_id * class_id
@@ -394,6 +391,9 @@ type instruct_call =
   | FCall of fcall_args
   | FCallBuiltin of num_params * num_params * string
   | FCallCtor of fcall_args
+  | FCallObjMethod of fcall_args * Ast.og_null_flavor * param_locations
+  | FCallObjMethodD of fcall_args * Ast.og_null_flavor * method_id
+  | FCallObjMethodRD of fcall_args * Ast.og_null_flavor * method_id
 
 type instruct_base =
   | BaseGC of stack_index * MemberOpMode.t
@@ -493,6 +493,7 @@ type instruct_misc =
   | MemoGetEager of Label.t * Label.t * (local_id * int) option
   | MemoSet of (local_id * int) option
   | MemoSetEager of (local_id * int) option
+  | LockObj
 
 type gen_creation_execution =
   | CreateCont

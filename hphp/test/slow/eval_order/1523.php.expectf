@@ -12,10 +12,7 @@ string(2) "11"
 string(2) "01"
 string(8) "testxfoo"
 
-Warning: Cannot use a scalar value as an array in %s/test/slow/eval_order/1523.php on line 66
-NULL
-
-Notice: Cannot access property on non-object in %s/test/slow/eval_order/1523.php on line 70
+Notice: Cannot access property on non-object in %s/test/slow/eval_order/1523.php on line 68
 NULL
 string(3) "foo"
 object(stdClass) (1) {

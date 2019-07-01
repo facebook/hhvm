@@ -1,3 +1,4 @@
+-- at constructor entry --
 object(C) (2) {
   ["cv"]=>
   object(HH\Vector) (1) {
@@ -12,15 +13,14 @@ object(C) (2) {
     }
   }
 }
-Cannot modify const property cv of class C after construction
-Cannot modify const property cvv of class C after construction
+-- after constructor completes --
 object(C) (2) {
   ["cv"]=>
   object(HH\Vector) (2) {
     [0]=>
     int(0)
     [1]=>
-    int(3)
+    int(2)
   }
   ["cvv"]=>
   vec(1) {
@@ -28,7 +28,32 @@ object(C) (2) {
       [0]=>
       int(1)
       [1]=>
-      int(5)
+      int(3)
+    }
+  }
+}
+Cannot modify const property cv of class C after construction
+Cannot modify const property cvv of class C after construction
+-- at the end --
+object(C) (2) {
+  ["cv"]=>
+  object(HH\Vector) (3) {
+    [0]=>
+    int(0)
+    [1]=>
+    int(2)
+    [2]=>
+    int(5)
+  }
+  ["cvv"]=>
+  vec(1) {
+    object(HH\Vector) (3) {
+      [0]=>
+      int(1)
+      [1]=>
+      int(3)
+      [2]=>
+      int(7)
     }
   }
 }

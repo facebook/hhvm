@@ -13,8 +13,8 @@
         ((() { 1 ((end_of_line 1)))
          (list 304
           ((const_declaration 22
-            ((missing 0 ()) (missing 0 ())
-             (((whitespace 2)) const 5 ((whitespace 1))) (missing 0 ())
+            ((missing 0 ()) (((whitespace 2)) const 5 ((whitespace 1)))
+             (missing 0 ())
              (list 15
               ((list_item 15
                 ((constant_declarator 15
@@ -25,8 +25,7 @@
                  (missing 0 ())))))
              (() ";" 1 ((end_of_line 1)))))
            (const_declaration 27
-            ((missing 0 ()) (missing 0 ())
-             (((whitespace 2)) const 5 ((whitespace 1)))
+            ((missing 0 ()) (((whitespace 2)) const 5 ((whitespace 1)))
              (simple_type_specifier 6 ((() string 6 ((whitespace 1)))))
              (list 13
               ((list_item 13
@@ -38,8 +37,7 @@
                  (missing 0 ())))))
              (() ";" 1 ((end_of_line 1)))))
            (const_declaration 49
-            ((missing 0 ()) (missing 0 ())
-             (((whitespace 2)) const 5 ((whitespace 1)))
+            ((missing 0 ()) (((whitespace 2)) const 5 ((whitespace 1)))
              (generic_type_specifier 20
               ((() name 12 ())
                (type_arguments 8
@@ -59,7 +57,7 @@
                  (missing 0 ())))))
              (() ";" 1 ((end_of_line 1)))))
            (const_declaration 61
-            ((((whitespace 2)) public 6 ((whitespace 1))) (missing 0 ())
+            ((list 6 ((((whitespace 2)) public 6 ((whitespace 1)))))
              (() const 5 ((whitespace 1)))
              (simple_type_specifier 6 ((() string 6 ((whitespace 1)))))
              (list 40
@@ -72,7 +70,7 @@
                  (missing 0 ())))))
              (() ";" 1 ((end_of_line 1)))))
            (const_declaration 67
-            ((((whitespace 2)) protected 9 ((whitespace 1))) (missing 0 ())
+            ((list 9 ((((whitespace 2)) protected 9 ((whitespace 1)))))
              (() const 5 ((whitespace 1)))
              (simple_type_specifier 6 ((() string 6 ((whitespace 1)))))
              (list 43
@@ -85,7 +83,7 @@
                  (missing 0 ())))))
              (() ";" 1 ((end_of_line 1)))))
            (const_declaration 63
-            ((((whitespace 2)) private 7 ((whitespace 1))) (missing 0 ())
+            ((list 7 ((((whitespace 2)) private 7 ((whitespace 1)))))
              (() const 5 ((whitespace 1)))
              (simple_type_specifier 6 ((() string 6 ((whitespace 1)))))
              (list 41

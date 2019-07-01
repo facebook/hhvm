@@ -1253,6 +1253,10 @@ void emitInterpReq(Vout& v, SrcKey sk, FPInvOffset spOff) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+// see T39604764: inlining-specific issue that might also affect GCC
+#ifdef __clang__
+NEVER_INLINE
+#endif
 void enterTCImpl(TCA start, ActRec* stashedAR) {
   // We have to force C++ to spill anything that might be in a callee-saved
   // register (aside from rvmfp()), since enterTCHelper does not save them.

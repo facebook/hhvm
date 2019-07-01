@@ -479,7 +479,8 @@ bool canDCE(IRInstruction* inst) {
   case LdClsPropAddrOrRaise:
   case LdInitRDSAddr:
   case LdInitPropAddr:
-  case LdObjMethod:
+  case LdObjMethodD:
+  case LdObjMethodS:
   case LdObjInvoke:
   case LdArrFuncCtx:
   case LdFunc:
@@ -493,6 +494,7 @@ bool canDCE(IRInstruction* inst) {
   case InitSProps:
   case InitObjProps:
   case InitObjMemoSlots:
+  case LockObj:
   case DebugBacktrace:
   case DebugBacktraceFast:
   case InitThrowableFileAndLine:
@@ -562,6 +564,7 @@ bool canDCE(IRInstruction* inst) {
   case RaiseNotice:
   case ThrowArrayIndexException:
   case ThrowArrayKeyException:
+  case RaiseArraySerializeNotice:
   case RaiseHackArrCompatNotice:
   case RaiseForbiddenDynCall:
   case RaiseForbiddenDynConstruct:

@@ -353,11 +353,11 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
 
-  let make_const_declaration p0 p1 p2 p3 p4 p5 stack =
+  let make_const_declaration p0 p1 p2 p3 p4 stack =
     match stack with
-    | a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
-      let () = verify ~stack [p0; p1; p2; p3; p4; p5] [a0; a1; a2; a3; a4; a5] "const_declaration" in
-      let node = Syntax.make_const_declaration p0 p1 p2 p3 p4 p5 in
+    | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
+      let () = verify ~stack [p0; p1; p2; p3; p4] [a0; a1; a2; a3; a4] "const_declaration" in
+      let node = Syntax.make_const_declaration p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
 

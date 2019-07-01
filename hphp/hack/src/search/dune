@@ -15,4 +15,5 @@
     procs_procs
     pos
     search_utils
+    sqlite3
     trie))

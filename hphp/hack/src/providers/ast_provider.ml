@@ -30,6 +30,33 @@ module LocalParserCache = SharedMem.LocalCache (Relative_path.S) (struct
     let description = "ParserLocal"
   end)
 
+let parse_file_input
+    ?(full = false)
+    (file_name: Relative_path.t)
+    (file_input: ServerCommandTypes.file_input)
+    : Full_fidelity_ast.result =
+  let popt = GlobalParserOptions.get () in
+  let parser_env = Full_fidelity_ast.make_env
+    ~quick_mode:(not full)
+    ~keep_errors:false
+    ~parser_options:popt
+    file_name
+  in
+  let result =
+    let source = ServerCommandTypesUtils.source_tree_of_file_input file_input in
+    Full_fidelity_ast.from_text
+      parser_env
+      source
+  in
+  let ast =
+    if (Relative_path.prefix file_name = Relative_path.Hhi)
+    && ParserOptions.deregister_php_stdlib popt
+    then Ast_utils.deregister_ignored_attributes result.Full_fidelity_ast.ast
+    else result.Full_fidelity_ast.ast
+  in
+  { result with Full_fidelity_ast.ast }
+
+
 let get_from_local_cache ~full file_name =
   let fn = Relative_path.to_absolute file_name in
   match LocalParserCache.get file_name with
@@ -124,17 +151,26 @@ let get_gconst defs name =
    if the file does not exist
 *)
 let get_ast ?(full = false) file_name =
-  match ParserHeap.get file_name with
-    | None ->
-      let ast = get_from_local_cache ~full file_name in
-      (* Only store decl asts *)
-      if not full then
-      ParserHeap.add file_name (ast, Decl);
-      ast
-    | Some (_, Decl) when full ->
-      let ast = get_from_local_cache ~full file_name in
-      ast
-    | Some (defs, _) -> defs
+  match Provider_config.get_backend () with
+  | Provider_config.Shared_memory ->
+    begin match ParserHeap.get file_name with
+      | None ->
+        let ast = get_from_local_cache ~full file_name in
+        (* Only store decl asts *)
+        if not full then
+        ParserHeap.add file_name (ast, Decl);
+        ast
+      | Some (_, Decl) when full ->
+        let ast = get_from_local_cache ~full file_name in
+        ast
+      | Some (defs, _) -> defs
+    end
+  | Provider_config.Local_memory _ ->
+    let result =
+      parse_file_input ~full file_name
+        (ServerCommandTypes.FileName (Relative_path.to_absolute file_name))
+    in
+    result.Full_fidelity_ast.ast
 
 let get_nast ?(full = false) file_name =
   let ast = get_ast ~full file_name in

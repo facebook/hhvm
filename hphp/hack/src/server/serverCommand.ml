@@ -87,6 +87,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | FILE_DEPENDENCIES _ -> true
   | IDENTIFY_TYPES _ -> false
   | EXTRACT_STANDALONE _ -> false
+  | GO_TO_DEFINITION _ -> false
 
 let command_needs_full_check = function
   | Rpc x -> rpc_command_needs_full_check x

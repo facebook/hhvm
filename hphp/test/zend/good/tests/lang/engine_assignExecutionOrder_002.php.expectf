@@ -1,6 +1,4 @@
 A=hello B=bye
-
-Warning: Cannot use a scalar value as an array in %s/engine_assignExecutionOrder_002.php on line 21
 array(2) {
   [0]=>
   int(10)

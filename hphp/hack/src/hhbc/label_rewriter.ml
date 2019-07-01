@@ -38,6 +38,9 @@ let get_regular_labels instr =
   | IIterator (LIterNextK (_, _, l, _, _))
   | IIterator (IterBreak (l, _))
   | ICall (FCall ((_, _, _, _, Some l)))
+  | ICall (FCallObjMethod ((_, _, _, _, Some l), _, _))
+  | ICall (FCallObjMethodD ((_, _, _, _, Some l), _, _))
+  | ICall (FCallObjMethodRD ((_, _, _, _, Some l), _, _))
   | IGenDelegation (YieldFromDelegate (_, l))
   | IMisc (MemoGet (l, _))
   | IContFlow (Jmp l | JmpNS l | JmpZ l | JmpNZ l) -> [l]
@@ -99,6 +102,12 @@ let relabel_instr instr relabel =
     IGenDelegation (YieldFromDelegate (i, relabel l))
   | ICall (FCall ((fl, na, nr, br, Some l))) ->
     ICall (FCall ((fl, na, nr, br, Some (relabel l))))
+  | ICall (FCallObjMethod ((fl, na, nr, br, Some l), f, p)) ->
+    ICall (FCallObjMethod ((fl, na, nr, br, Some (relabel l)), f, p))
+  | ICall (FCallObjMethodD ((fl, na, nr, br, Some l), f, m)) ->
+    ICall (FCallObjMethodD ((fl, na, nr, br, Some (relabel l)), f, m))
+  | ICall (FCallObjMethodRD ((fl, na, nr, br, Some l), f, m)) ->
+    ICall (FCallObjMethodRD ((fl, na, nr, br, Some (relabel l)), f, m))
   | IContFlow (Jmp l)   -> IContFlow (Jmp (relabel l))
   | IContFlow (JmpNS l) -> IContFlow (JmpNS (relabel l))
   | IContFlow (JmpZ l)  -> IContFlow (JmpZ (relabel l))

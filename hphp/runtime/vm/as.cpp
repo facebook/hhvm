@@ -1389,8 +1389,10 @@ LocalRange read_local_range(AsmState& as) {
   return LocalRange{uint32_t(firstLoc), count};
 }
 
-FCallArgs::Flags read_fcall_flags(AsmState& as) {
+std::pair<FCallArgs::Flags, bool>
+read_fcall_flags(AsmState& as, Op thisOpcode) {
   uint8_t flags = 0;
+  bool constructNoConst = false;
 
   as.in.skipSpaceTab();
   as.in.expect('<');
@@ -1398,15 +1400,27 @@ FCallArgs::Flags read_fcall_flags(AsmState& as) {
   std::string flag;
   while (as.in.readword(flag)) {
     if (flag == "SupportsAER") {
-      flags |= FCallArgs::SupportsAsyncEagerReturn;
-      continue;
+      if (thisOpcode == Op::FCallCtor) {
+        as.error("FCall flag SupportsAER is not valid for FCallCtor");
+      } else {
+        flags |= FCallArgs::SupportsAsyncEagerReturn;
+        continue;
+      }
+    }
+    if (flag == "NoConst") {
+      if (thisOpcode == Op::FCallCtor) {
+        constructNoConst = true;
+        continue;
+      } else {
+        as.error("FCall flag NoConst is only valid for FCallCtor");
+      }
     }
     if (flag == "Unpack") { flags |= FCallArgs::HasUnpack; continue; }
     as.error("unrecognized FCall flag `" + flag + "'");
   }
   as.in.expectWs('>');
 
-  return static_cast<FCallArgs::Flags>(flags);
+  return std::make_pair(static_cast<FCallArgs::Flags>(flags), constructNoConst);
 }
 
 // Read a vector of booleans formatted as a quoted string of '0' and '1'.
@@ -1433,14 +1447,16 @@ std::unique_ptr<uint8_t[]> read_by_refs(AsmState& as, uint32_t numArgs) {
 }
 
 std::tuple<FCallArgsBase, std::unique_ptr<uint8_t[]>, std::string>
-read_fcall_args(AsmState& as) {
-  auto const flags = read_fcall_flags(as);
+read_fcall_args(AsmState& as, Op thisOpcode) {
+  FCallArgs::Flags flags;
+  bool constructNoConst;
+  std::tie(flags, constructNoConst) = read_fcall_flags(as, thisOpcode);
   auto const numArgs = read_opcode_arg<uint32_t>(as);
   auto const numRets = read_opcode_arg<uint32_t>(as);
   auto byRefs = read_by_refs(as, numArgs);
   auto asyncEagerLabel = read_opcode_arg<std::string>(as);
   return std::make_tuple(
-    FCallArgsBase(flags, numArgs, numRets),
+    FCallArgsBase(flags, numArgs, numRets, constructNoConst),
     std::move(byRefs),
     std::move(asyncEagerLabel)
   );
@@ -1494,7 +1510,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define IMM_OA(ty) as.ue->emitByte(read_subop<ty>(as));
 #define IMM_LAR    encodeLocalRange(*as.ue, read_local_range(as))
 #define IMM_FCA do {                                                \
-    auto const fca = read_fcall_args(as);                           \
+    auto const fca = read_fcall_args(as, thisOpcode);               \
     encodeFCallArgs(                                                \
       *as.ue, std::get<0>(fca), std::get<1>(fca).get(),             \
       std::get<2>(fca) != "-",                                      \
@@ -1593,7 +1609,8 @@ std::map<std::string,ParserFunc> opcode_parsers;
 
 #define O(name, imm, pop, push, flags)                                 \
   void parse_opcode_##name(AsmState& as) {                             \
-    UNUSED auto immFCA = FCallArgsBase(FCallArgsBase::None, -1, -1);   \
+    UNUSED auto immFCA = FCallArgsBase(FCallArgsBase::None, -1, -1,    \
+                                       false);                         \
     UNUSED uint32_t immIVA[kMaxHhbcImms];                              \
     UNUSED auto const thisOpcode = Op::name;                           \
     UNUSED const Offset curOpcodeOff = as.ue->bcPos();                 \

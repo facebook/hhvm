@@ -337,7 +337,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     }
 
     if (btArgs.m_skipInlined && RuntimeOption::EvalJit) {
-      while (fp && (jit::TCA)fp->m_savedRip == jit::tc::ustubs().retInlHelper) {
+      while (fp && fp->isInlined()) {
         fp = getPrevActRec(ctx, fp, &pc, visitedWHs);
       }
       if (!fp) return bt;
@@ -442,14 +442,10 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
           clsname += mangleReifiedGenericsName(reified_generics);
         }
         frame.set(s_class, clsname);
-        if (!isReturning && fp->hasThis()) {
-          if (btArgs.m_withThis) {
-            frame.set(s_object, Object(fp->getThis()));
-          }
-          frame.set(s_type, s_arrow);
-        } else {
-          frame.set(s_type, s_double_colon);
+        if (!isReturning && fp->hasThis() && btArgs.m_withThis) {
+          frame.set(s_object, Object(fp->getThis()));
         }
+        frame.set(s_type, fp->func()->isStatic() ? s_double_colon : s_arrow);
       }
     }
 
@@ -586,6 +582,22 @@ static void walkStack(L func, bool skipTop = false) {
   for (; fp != nullptr; fp = getPrevActRec(ctx, fp, &prevPc, visitedWHs)) {
     if (ArrayData::call_helper(func, fp, prevPc)) return;
   }
+}
+
+ActRec* GetFrameForDebuggerUnsafe(int frameDepth) {
+  ActRec* ret = nullptr;
+  walkStack([&] (ActRec* fp, Offset) {
+    if (frameDepth == 0) {
+      if (fp && !fp->localsDecRefd()) {
+        ret = fp;
+      }
+      return true;
+    }
+
+    frameDepth--;
+    return false;
+  });
+  return ret;
 }
 
 const Func* GetCallerFunc() {

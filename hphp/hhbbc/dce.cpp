@@ -1732,9 +1732,9 @@ void dce(Env& env, const bc::FCallCtor& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FPushFunc& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FPushFuncD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FPushFuncRD& op) { no_dce(env, op); }
-void dce(Env& env, const bc::FPushObjMethod& op) { no_dce(env, op); }
-void dce(Env& env, const bc::FPushObjMethodD& op) { no_dce(env, op); }
-void dce(Env& env, const bc::FPushObjMethodRD& op) { no_dce(env, op); }
+void dce(Env& env, const bc::FCallObjMethod& op) { no_dce(env, op); }
+void dce(Env& env, const bc::FCallObjMethodD& op) { no_dce(env, op); }
+void dce(Env& env, const bc::FCallObjMethodRD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::GetMemoKeyL& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IncDecG& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IncDecS& op) { no_dce(env, op); }
@@ -1772,6 +1772,7 @@ void dce(Env& env, const bc::NewObj& op) { no_dce(env, op); }
 void dce(Env& env, const bc::NewObjD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::NewObjRD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::NewObjS& op) { no_dce(env, op); }
+void dce(Env& env, const bc::LockObj& op) { no_dce(env, op); }
 void dce(Env& env, const bc::NewRecord& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Nop& op) { no_dce(env, op); }
 void dce(Env& env, const bc::OODeclExists& op) { no_dce(env, op); }

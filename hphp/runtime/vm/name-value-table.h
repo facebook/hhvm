@@ -153,6 +153,11 @@ struct NameValueTable {
    */
   TypedValue* lookupAdd(const StringData* name);
 
+  /*
+   * Lookup a name, returning it's position, or the canonical invalid position.
+   */
+  ssize_t lookupPos(const StringData* name);
+
 private:
   // Dummy DT for named locals; keep out of conflict with actual DataTypes in
   // base/datatype.h.

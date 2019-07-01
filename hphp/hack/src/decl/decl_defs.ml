@@ -182,4 +182,6 @@ and element = {
 
   elt_origin : string;
   elt_visibility : visibility;
+
+  elt_fixme_codes : ISet.t;
 }

@@ -323,6 +323,21 @@ void cgRaiseStrToClassNotice(IRLS& env, const IRInstruction* inst) {
   );
 }
 
+void raiseArraySerializeImpl(const StringData* source, const ArrayData* ad) {
+  raise_array_serialization_notice(source->data(), ad);
+}
+
+void cgRaiseArraySerializeNotice(IRLS& env, const IRInstruction* inst) {
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(raiseArraySerializeImpl),
+    callDest(env, inst),
+    SyncOptions::Sync,
+    argGroup(env, inst).ssa(0).ssa(1)
+  );
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

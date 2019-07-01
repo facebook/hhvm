@@ -98,6 +98,7 @@ const std::string
   s_nothing("nothing"),
   s_noreturn("noreturn"),
   s_mixed("mixed"),
+  s_dynamic("dynamic"),
   s_nonnull("nonnull"),
   s_array("array"),
   s_darray("HH\\darray"),
@@ -295,6 +296,9 @@ std::string fullName(const Array& arr, bool forDisplay) {
       break;
     case TypeStructure::Kind::T_mixed:
       name += forDisplay ? s_mixed : s_hh + s_mixed;
+      break;
+    case TypeStructure::Kind::T_dynamic:
+      name += forDisplay ? s_dynamic : s_hh + s_dynamic;
       break;
     case TypeStructure::Kind::T_nonnull:
       name += forDisplay ? s_nonnull : s_hh + s_nonnull;
@@ -998,6 +1002,7 @@ bool TypeStructure::isValidResolvedTypeStructure(const Array& arr) {
     case TypeStructure::Kind::T_nothing:
     case TypeStructure::Kind::T_noreturn:
     case TypeStructure::Kind::T_mixed:
+    case TypeStructure::Kind::T_dynamic:
     case TypeStructure::Kind::T_nonnull:
       return true;
     case TypeStructure::Kind::T_fun: {

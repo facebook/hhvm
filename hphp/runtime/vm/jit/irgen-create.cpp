@@ -571,7 +571,7 @@ void emitAddElemC(IRGS& env) {
 void emitAddNewElemC(IRGS& env) {
   auto const arrType = topC(env, BCSPRelOffset{1})->type();
   if (!arrType.subtypeOfAny(TArr, TKeyset, TVec)) {
-    return interpOne(env, *env.currentNormalizedInstruction);
+    return interpOne(env);
   }
   auto const val = popC(env, DataTypeCountness);
   auto const arr = popC(env);
@@ -642,7 +642,7 @@ void emitCheckReifiedGenericMismatch(IRGS& env) {
   auto const cls = curClass(env);
   if (!cls) {
     // no static context class, so this will raise an error
-    interpOne(env, *env.currentNormalizedInstruction);
+    interpOne(env);
     return;
   }
   auto const reified_generics = popC(env);

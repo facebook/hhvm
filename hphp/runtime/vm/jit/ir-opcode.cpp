@@ -440,7 +440,8 @@ bool opcodeMayRaise(Opcode opc) {
   case LdFunc:
   case LdFuncCached:
   case LdRecDescCached:
-  case LdObjMethod:
+  case LdObjMethodD:
+  case LdObjMethodS:
   case LdSSwitchDestSlow:
   case LdSwitchObjIndex:
   case LookupClsMethod:
@@ -475,6 +476,7 @@ bool opcodeMayRaise(Opcode opc) {
   case PropQ:
   case PropTypeRedefineCheck:
   case PropX:
+  case RaiseArraySerializeNotice:
   case RaiseError:
   case RaiseErrorOnInvalidIsAsExpressionType:
   case RaiseForbiddenDynCall:
@@ -886,6 +888,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LIterInitK:
   case LIterNext:
   case LIterNextK:
+  case LockObj:
   case LookupClsRDS:
   case LookupSPropSlot:
   case Lshr:

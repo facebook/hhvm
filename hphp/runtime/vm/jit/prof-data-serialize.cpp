@@ -450,6 +450,7 @@ bool write_type_alias(ProfDataSerializer& ser, const TypeAliasReq* td) {
         case TypeStructure::Kind::T_arraylike:
         case TypeStructure::Kind::T_nonnull:
         case TypeStructure::Kind::T_mixed:
+        case TypeStructure::Kind::T_dynamic:
           break;
 
         case TypeStructure::Kind::T_fun:

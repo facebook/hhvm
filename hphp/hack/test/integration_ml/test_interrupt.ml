@@ -47,7 +47,7 @@ let test () =
 
   (* Run the recheck *)
   let interrupt = MultiThreadedCall.no_interrupt () in
-  let (fnl: Typing_check_service.file list) = Relative_path.Map.elements fast in
+  let fnl = Relative_path.Map.elements fast in
   let errors, (), cancelled = Typing_check_service.go_with_interrupt
     workers options Relative_path.Set.empty fnl ~interrupt ~memory_cap:None in
 

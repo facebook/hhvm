@@ -72,9 +72,6 @@ namespace Stats {
   /* stub reuse stats */ \
   STAT(Astub_New) \
   STAT(Astub_Reused) \
-  /* ObjectData construction */ \
-  STAT(ObjectData_new_dtor_yes) \
-  STAT(ObjectData_new_dtor_no) \
   STAT(ObjMethod_total) \
   STAT(ObjMethod_known) \
   STAT(ObjMethod_methodslot) \

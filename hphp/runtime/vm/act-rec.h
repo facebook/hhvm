@@ -183,6 +183,11 @@ struct ActRec {
    */
   bool skipFrame() const;
 
+  /*
+   * Whether this frame is inlined.
+   */
+  bool isInlined() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // NumArgs / Flags.
 

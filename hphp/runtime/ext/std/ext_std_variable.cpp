@@ -141,7 +141,11 @@ bool HHVM_FUNCTION(HH_is_vec, const Variant& v) {
       return false;
     }
   }
-  return is_vec(v.asTypedValue());
+  auto const ret =  is_vec(v.asTypedValue());
+  if (ret && UNLIKELY(RuntimeOption::EvalLogArrayProvenance)) {
+    raise_array_serialization_notice("is_vec", v.asCArrRef().get());
+  }
+  return ret;
 }
 
 bool HHVM_FUNCTION(HH_is_dict, const Variant& v) {
@@ -154,7 +158,11 @@ bool HHVM_FUNCTION(HH_is_dict, const Variant& v) {
       return false;
     }
   }
-  return is_dict(v.asTypedValue());
+  auto const ret = is_dict(v.asTypedValue());
+  if (ret && UNLIKELY(RuntimeOption::EvalLogArrayProvenance)) {
+    raise_array_serialization_notice("is_dict", v.asCArrRef().get());
+  }
+  return ret;
 }
 
 bool HHVM_FUNCTION(HH_is_keyset, const Variant& v) {

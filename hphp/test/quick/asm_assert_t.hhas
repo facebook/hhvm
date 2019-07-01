@@ -17,6 +17,7 @@
   NullUninit
   FCallCtor <> 0 1 "" - ""
   PopC
+  LockObj
   SetL $x
   PopC
 
@@ -26,6 +27,7 @@
   NullUninit
   FCallCtor <> 0 1 "" - ""
   PopC
+  LockObj
   SetL $y
   PopC
 
@@ -88,6 +90,8 @@
   AssertRATStk 1 Obj=Bar
   PopC
   AssertRATStk 0 Obj=Bar
+  LockObj
+  AssertRATStk 0 Obj=Bar
   RetC
 }
 
@@ -120,14 +124,14 @@ stuff:
   NullUninit
   FCallCtor <> 0 1 "" - ""
   PopC
+  LockObj
   SetL $obj
   PopC
 
   CGetL $obj
   NullUninit
   NullUninit
-  FPushObjMethodD 0 "returns_int" NullThrows
-  FCall <> 0 1 "" - "" ""
+  FCallObjMethodD <> 0 1 "" - "" NullThrows "returns_int"
   AssertRATStk 0 Int
   Int 0
   Add

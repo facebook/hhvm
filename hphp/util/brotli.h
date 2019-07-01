@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_UTIL_BROTLI_HELPERS_H_
 #define incl_HPHP_UTIL_BROTLI_HELPERS_H_
 
+#include "hphp/util/string-holder.h"
+
 #include <cstddef>
 
 #include <enc/encode.h>
@@ -24,10 +26,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-const char* compressBrotli(brotli::BrotliCompressor* compressor,
-                           const void* data,
-                           size_t& len,
-                           bool last);
+StringHolder compressBrotli(brotli::BrotliCompressor* compressor,
+                            const void* data,
+                            size_t& len,
+                            bool last);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

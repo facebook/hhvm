@@ -165,6 +165,7 @@ let instr_newobj id op = instr (ICall (NewObj (id, op)))
 let instr_newobjd id = instr (ICall (NewObjD id))
 let instr_newobjrd id = instr (ICall (NewObjRD id))
 let instr_newobjs scref = instr (ICall (NewObjS scref))
+let instr_lockobj = instr (IMisc LockObj)
 let instr_clone = instr (IOp Clone)
 let instr_new_record id keys = instr (ILitConst (NewRecord (id, keys)))
 let instr_newstructarray keys = instr (ILitConst (NewStructArray keys))
@@ -211,18 +212,12 @@ let instr_fcallfuncrd fcall_args id = gather [
   instr (ICall (FCall (fcall_args)))
 ]
 let instr_fcallctor fcall_args = instr (ICall (FCallCtor (fcall_args)))
-let instr_fcallobjmethod fcall_args flavor pl = gather [
-  instr (ICall (FPushObjMethod ((num_args_of fcall_args), flavor, pl)));
-  instr (ICall (FCall (fcall_args)))
-]
-let instr_fcallobjmethodd fcall_args method_ flavor = gather [
-  instr (ICall (FPushObjMethodD ((num_args_of fcall_args), method_, flavor)));
-  instr (ICall (FCall (fcall_args)))
-]
-let instr_fcallobjmethodrd fcall_args method_ flavor = gather [
-  instr (ICall (FPushObjMethodRD ((num_args_of fcall_args), method_, flavor)));
-  instr (ICall (FCall (fcall_args)))
-]
+let instr_fcallobjmethod fcall_args flavor pl =
+  instr (ICall (FCallObjMethod (fcall_args, flavor, pl)))
+let instr_fcallobjmethodd fcall_args method_ flavor =
+  instr (ICall (FCallObjMethodD (fcall_args, flavor, method_)))
+let instr_fcallobjmethodrd fcall_args method_ flavor =
+  instr (ICall (FCallObjMethodRD (fcall_args, flavor, method_)))
 let instr_fcallclsmethodd fcall_args method_name class_name = gather [
   instr (ICall (
     FPushClsMethodD ((num_args_of fcall_args), method_name, class_name)));

@@ -46,13 +46,27 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, ServerInferTypeBatch.go genv.workers positions env
     | TYPED_AST (filename) ->
         env, ServerTypedAst.go env filename
-    | IDE_HOVER (fn, line, char) ->
+    | IDE_HOVER (path, line, char) ->
+        let relative_path = Relative_path.create_detect_prefix path in
+        let (ctx, entry) = ServerIdeContext.update
+          ~tcopt:env.ServerEnv.tcopt
+          ~ctx:ServerIdeContext.empty
+          ~path:relative_path
+          ~file_input:(ServerCommandTypes.FileName path)
+        in
         let basic_only = genv.local_config.ServerLocalConfig.basic_autocomplete_only in
-        env, ServerHover.go env (fn, line, char) ~basic_only
-    | DOCBLOCK_AT (filename, line, column, base_class_name) ->
-        let basic_only = genv.local_config.ServerLocalConfig.basic_autocomplete_only in
+        let result  = ServerHover.go_ctx
+          ~ctx
+          ~entry
+          ~line
+          ~char
+          ~basic_only
+        in
+        env, result
+    | DOCBLOCK_AT (filename, line, column, base_class_name, kind) ->
+        let _ = base_class_name in
         let r = ServerDocblockAt.go_docblock_at
-          ~env ~filename ~line ~column ~base_class_name ~basic_only in
+          ~env ~filename ~line ~column ~kind in
         env, r
     | DOCBLOCK_FOR_SYMBOL (symbol, kind) ->
         let r = ServerDocblockAt.go_docblock_for_symbol ~env ~symbol ~kind in
@@ -85,7 +99,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           ~delimit_on_namespaces:false
           ~autocomplete_context
           ~basic_only
-          ~env:(!(env.ServerEnv.local_symbol_table))
+          ~sienv:(!(env.ServerEnv.local_symbol_table))
           content in
         env, result.With_complete_flag.value
     | IDENTIFY_FUNCTION (file_input, line, char) ->
@@ -193,7 +207,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let basic_only = genv.local_config.ServerLocalConfig.basic_autocomplete_only in
         let results = ServerAutoComplete.auto_complete_at_position
           ~delimit_on_namespaces ~is_manually_invoked ~file_content ~basic_only ~pos
-          ~tcopt:env.tcopt ~env:!(env.ServerEnv.local_symbol_table)
+          ~tcopt:env.tcopt ~sienv:!(env.ServerEnv.local_symbol_table)
         in
         let completions = results.value in
         let is_complete = results.is_complete in
@@ -206,7 +220,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let basic_only = genv.local_config.ServerLocalConfig.basic_autocomplete_only in
         let result =
           FfpAutocompleteService.auto_complete env.tcopt content pos
-            ~basic_only ~filter_by_token:false ~env:!(env.ServerEnv.local_symbol_table)
+            ~basic_only ~filter_by_token:false ~sienv:!(env.ServerEnv.local_symbol_table)
         in
         env, { AutocompleteTypes.completions = result; char_at_pos; is_complete = true; }
     | DISCONNECT ->
@@ -272,3 +286,13 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, ServerTypeDefinition.go env (filename, line, char)
     | EXTRACT_STANDALONE name ->
         env, ServerExtractStandalone.go env.tcopt name
+    | GO_TO_DEFINITION (labelled_file, line, char) ->
+        let (path, file_input) =
+          ServerCommandTypesUtils.extract_labelled_file labelled_file in
+        let (ctx, entry) = ServerIdeContext.update
+          ~tcopt:env.ServerEnv.tcopt
+          ~ctx:ServerIdeContext.empty
+          ~path
+          ~file_input
+        in
+        env, ServerGoToDefinition.go_ctx ~ctx ~entry ~line ~char

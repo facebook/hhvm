@@ -123,7 +123,7 @@
 ;         "//hphp/hack/src/errors:errors",
 ;         "//hphp/hack/src/naming:naming",
 ;         "//hphp/hack/src/server:server_env",
-;         "//hphp/hack/src/utils:core",
+;         "//hphp/hack/src/utils/core:core",
 ;         "//hphp/hack/src/utils:relative_path",
 ;         "//hphp/hack/src/utils/collections:collections",
 ;
@@ -145,7 +145,7 @@
 ;         "//hphp/hack/src/server:server_services",
 ;         "//hphp/hack/src/typing:typing",
 ;         "//hphp/hack/src/typing:typing_ast",
-;         "//hphp/hack/src/utils:core",
+;         "//hphp/hack/src/utils/core:core",
 ;         "//hphp/hack/src/utils/collections:collections",
 
 (alias
@@ -192,7 +192,7 @@
 ;         "//hphp/hack/src/server:server_services",
 ;         "//hphp/hack/src/typing:typing",
 ;         "//hphp/hack/src/typing:typing_ast",
-;         "//hphp/hack/src/utils:core",
+;         "//hphp/hack/src/utils/core:core",
 ;         "//hphp/hack/src/utils/collections:collections",
 
 (alias
@@ -218,7 +218,7 @@
 ;         "//hphp/hack/src/decl:decl",
 ;         "//hphp/hack/src/errors:errors",
 ;         "//hphp/hack/src/server:server_env",
-;         "//hphp/hack/src/utils:core",
+;         "//hphp/hack/src/utils/core:core",
 ;         "//hphp/hack/src/utils/collections:collections",
 
 (alias
@@ -247,7 +247,7 @@
 ;         "//hphp/hack/src/server:server_env",
 ;         "//hphp/hack/src/server:server_services",
 ;         "//hphp/hack/src/typing:typing_check_service",
-;         "//hphp/hack/src/utils:core",
+;         "//hphp/hack/src/utils/core:core",
 ;         "//hphp/hack/src/utils:relative_path",
 ;         "//hphp/hack/src/utils/collections:collections",
 
@@ -270,7 +270,7 @@
 ;         "//hphp/hack/src/server:server_env",
 ;         "//hphp/hack/src/server:server_services",
 ;         "//hphp/hack/src/typing:typing_check_service",
-;         "//hphp/hack/src/utils:core",
+;         "//hphp/hack/src/utils/core:core",
 ;         "//hphp/hack/src/utils:relative_path",
 ;         "//hphp/hack/src/utils/collections:collections",
 
@@ -292,7 +292,7 @@
 ;         "//hphp/hack/src/server:server_extras",
 ;         "//hphp/hack/src/server:server_services",
 ;         "//hphp/hack/src/typing:typing_check_service",
-;         "//hphp/hack/src/utils:core",
+;         "//hphp/hack/src/utils/core:core",
 ;         "//hphp/hack/src/utils:relative_path",
 ;         "//hphp/hack/src/utils/collections:collections",
 

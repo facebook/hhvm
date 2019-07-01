@@ -7,14 +7,10 @@
  *
  *)
 
-type autoimport_ns
-
 type elaborate_kind =
   | ElaborateFun
   | ElaborateClass
   | ElaborateConst
-
-val autoimport_funcs : autoimport_ns SMap.t
 
 val elaborate_id : Namespace_env.env ->
                    elaborate_kind ->

@@ -139,9 +139,6 @@ struct RangeFallbackExtentAllocator : RangeState {
   static void*
   extent_alloc(extent_hooks_t* extent_hooks, void* addr, size_t size,
                size_t alignment, bool* zero, bool* commit, unsigned arena_ind);
-  static bool
-  extent_dalloc(extent_hooks_t* extent_hooks, void* addr, size_t size,
-                bool committed, unsigned arena_ind);
   static void
   extent_destroy(extent_hooks_t* extent_hooks, void* addr, size_t size,
                  bool committed, unsigned arena_ind);
@@ -149,8 +146,8 @@ struct RangeFallbackExtentAllocator : RangeState {
   extent_commit(extent_hooks_t* extent_hooks, void* addr, size_t size,
                 size_t offset, size_t length, unsigned arena_ind);
   static bool
-  extent_decommit(extent_hooks_t* extent_hooks, void* addr, size_t size,
-                  size_t offset, size_t length, unsigned arena_ind);
+  extent_purge_lazy(extent_hooks_t* extent_hooks, void* addr, size_t size,
+                    size_t offset, size_t length, unsigned arena_ind);
   static bool
   extent_purge(extent_hooks_t* extent_hooks, void* addr, size_t size,
                size_t offset, size_t length, unsigned arena_ind);

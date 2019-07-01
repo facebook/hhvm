@@ -130,6 +130,7 @@ let prop env cv =
     sp_needs_init = Option.is_none cv.cv_expr;
     sp_type = ty;
     sp_visibility = cv.cv_visibility;
+    sp_fixme_codes = Fixme_provider.get_fixme_codes_for_pos cv_pos;
   }
 
 and static_prop env c cv =
@@ -159,6 +160,7 @@ and static_prop env c cv =
     sp_needs_init = Option.is_none cv.cv_expr;
     sp_type = ty;
     sp_visibility = cv.cv_visibility;
+    sp_fixme_codes = Fixme_provider.get_fixme_codes_for_pos cv_pos;
   }
 
 let method_type env m =
@@ -275,6 +277,7 @@ let method_ env c m =
     sm_reactivity = reactivity;
     sm_type = ft;
     sm_visibility = m.m_visibility;
+    sm_fixme_codes = Fixme_provider.get_fixme_codes_for_pos ft.ft_pos;
   }
 
 let method_redeclaration env m =
@@ -288,6 +291,7 @@ let method_redeclaration env m =
     smr_visibility = m.mt_visibility;
     smr_trait = m.mt_trait;
     smr_method = m.mt_method;
+    smr_fixme_codes = Fixme_provider.get_fixme_codes_for_pos ft.ft_pos;
   }
 
 let enum_type hint e =

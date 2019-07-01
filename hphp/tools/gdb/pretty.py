@@ -366,7 +366,7 @@ class ArrayDataPrinter(object):
             pelm = data.cast(T('HPHP::TypedValue').pointer())
             return self._packed_iterator(pelm, pelm + self.val['m_size'])
         if self.kind == self._kind('Mixed') or self.kind == self._kind('Dict'):
-            pelm = data.cast(T('HPHP::MixedArray::Elm').pointer())
+            pelm = data.cast(T('HPHP::MixedArrayElm').pointer())
             return self._mixed_iterator(pelm, pelm + self.val['m_used'])
         if self.kind == self._kind('Keyset'):
             pelm = data.cast(T('HPHP::SetArrayElm').pointer())

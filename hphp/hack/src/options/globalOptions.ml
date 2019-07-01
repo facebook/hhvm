@@ -13,6 +13,7 @@ type t = {
   tco_experimental_features : SSet.t;
   tco_migration_flags : SSet.t;
   tco_dynamic_view : bool;
+  tco_defer_class_declaration_threshold : int option;
   tco_disallow_array_as_tuple : bool;
   po_auto_namespace_map : (string * string) list;
   po_codegen : bool;
@@ -55,6 +56,7 @@ type t = {
   tco_disallow_invalid_arraykey_constraint : bool;
   tico_invalidate_files : bool;
   tico_invalidate_smart : bool;
+  po_enable_constant_visibility_modifiers : bool;
 } [@@deriving show]
 
 let tco_experimental_instanceof = "instanceof"
@@ -193,6 +195,7 @@ let default = {
  tco_experimental_features = tco_experimental_all;
  tco_migration_flags = SSet.empty;
  tco_dynamic_view = false;
+ tco_defer_class_declaration_threshold = None;
  tco_disallow_array_as_tuple = false;
  po_auto_namespace_map = [];
  po_codegen = false;
@@ -235,6 +238,7 @@ let default = {
  tco_disallow_invalid_arraykey_constraint = false;
  tico_invalidate_files = false;
  tico_invalidate_smart = false;
+ po_enable_constant_visibility_modifiers = false;
 }
 
 let make
@@ -249,6 +253,7 @@ let make
   ?(tco_experimental_features = default.tco_experimental_features)
   ?(tco_migration_flags = default.tco_migration_flags)
   ?(tco_dynamic_view = default.tco_dynamic_view)
+  ?tco_defer_class_declaration_threshold
   ?(tco_disallow_array_as_tuple = default.tco_disallow_array_as_tuple)
   ?(po_auto_namespace_map = default.po_auto_namespace_map)
   ?(tco_disallow_ambiguous_lambda = default.tco_disallow_ambiguous_lambda)
@@ -284,6 +289,7 @@ let make
   ?(tco_disallow_invalid_arraykey_constraint = default.tco_disallow_invalid_arraykey_constraint)
   ?(tico_invalidate_files = default.tico_invalidate_files)
   ?(tico_invalidate_smart = default.tico_invalidate_smart)
+  ?(po_enable_constant_visibility_modifiers = default.po_enable_constant_visibility_modifiers)
   ()
 = {
   tco_safe_array;
@@ -291,6 +297,7 @@ let make
   tco_experimental_features;
   tco_migration_flags;
   tco_dynamic_view;
+  tco_defer_class_declaration_threshold;
   tco_disallow_array_as_tuple;
   po_auto_namespace_map;
   po_codegen = false;
@@ -333,6 +340,7 @@ let make
   tco_disallow_invalid_arraykey_constraint;
   tico_invalidate_files;
   tico_invalidate_smart;
+  po_enable_constant_visibility_modifiers;
 }
 let tco_safe_array t = t.tco_safe_array
 let tco_safe_vector_array t = t.tco_safe_vector_array
@@ -342,6 +350,10 @@ let tco_migration_flag_enabled t s =
   SSet.mem s t.tco_migration_flags
 let tco_dynamic_view t =
   t.tco_dynamic_view
+
+let tco_defer_class_declaration_threshold t =
+  t.tco_defer_class_declaration_threshold
+
 let tco_disallow_array_as_tuple t =
   t.tco_disallow_array_as_tuple
 let po_auto_namespace_map t = t.po_auto_namespace_map
@@ -390,6 +402,8 @@ let tco_ignore_collection_expr_type_arguments t = t.tco_ignore_collection_expr_t
 let tco_check_xhp_attribute t = t.tco_check_xhp_attribute
 
 let tco_disallow_unresolved_type_variables t = t.tco_disallow_unresolved_type_variables
+
+let po_enable_constant_visibility_modifiers t = t.po_enable_constant_visibility_modifiers
 
 let setup_pocket_universes env enabled =
   let exp_features = env.tco_experimental_features in

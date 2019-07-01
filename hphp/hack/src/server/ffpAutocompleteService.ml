@@ -47,7 +47,7 @@ let auto_complete
   (pos:File_content.position)
   ~(basic_only:bool)
   ~(filter_by_token:bool)
-  ~(env: SearchUtils.local_tracking_env): result =
+  ~(sienv: SearchUtils.si_env): result =
   let open File_content in
   (* The part of the line from the far left end to the point where the caret is. *)
   let new_file_content = handle_empty_autocomplete pos file_content in
@@ -96,7 +96,7 @@ let auto_complete
     |> List.map ~f:(make_keyword_completion replace_pos)
   in
   let type_based_completions =
-    FfpAutocompleteTypeCheck.run ~context ~file_content ~stub ~pos ~tcopt ~basic_only ~env
+    FfpAutocompleteTypeCheck.run ~context ~file_content ~stub ~pos ~tcopt ~basic_only ~sienv
   in
   let global_completions =
     FfpAutocompleteGlobals.get_globals context stub positioned_tree replace_pos

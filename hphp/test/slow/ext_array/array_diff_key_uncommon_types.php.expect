@@ -1,0 +1,19 @@
+== empty array ==
+dict(2) {
+  [1]=>
+  int(2)
+  ["1"]=>
+  string(1) "2"
+}
+array(0) {
+}
+== APC local array ==
+bool(true)
+array(0) {
+}
+array(0) {
+}
+== GLOBALS array ==
+bool(true)
+array(0) {
+}

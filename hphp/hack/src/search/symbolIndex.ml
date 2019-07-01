@@ -14,38 +14,35 @@ open SearchUtils
 let fuzzy_search_enabled () = !HackSearchService.fuzzy
 let set_fuzzy_search_enabled x = HackSearchService.fuzzy := x
 
-(* Keep track of current search provider in a global *)
-let current_search_provider = ref None
-
-(* If we are debugging locally, avoid logging anything - it makes tests fail *)
-let in_quiet_mode = ref false
-
-(* Fetch the currently selected search provider *)
-let get_search_provider (): SearchUtils.search_provider =
-  match !current_search_provider with
-  | Some provider ->
-    provider
-  | None -> failwith "Attempted to fetch search provider, but it is not yet set.";
-;;
-
-(* If a provider requires initialization, put it here *)
-let initialize_provider
-    ~(provider: SearchUtils.search_provider)
-    ~(savedstate_file_opt: string option)
+(* Set the currently selected search provider *)
+let initialize
+    ~(quiet: bool)
+    ~(provider_name: string)
     ~(namespace_map: (string * string) list)
-    ~(workers: MultiWorker.worker list option): unit =
+    ~(savedstate_file_opt: string option)
+    ~(workers: MultiWorker.worker list option): si_env =
+
+  (* Create the object *)
+  let sienv = { SearchUtils.default_si_env with
+    sie_provider = SearchUtils.provider_of_string provider_name;
+    sie_quiet_mode = quiet;
+  } in
 
   (* Basic initialization *)
-  let () = match provider with
-    | SqliteIndex -> SqliteSearchService.initialize workers savedstate_file_opt;
-    | CustomIndex -> CustomSearchService.initialize ()
+  let sienv = match sienv.sie_provider with
+    | SqliteIndex ->
+      SqliteSearchService.initialize ~sienv ~workers ~savedstate_file_opt
+    | CustomIndex ->
+      CustomSearchService.initialize ();
+      sienv
     | NoIndex
-    | TrieIndex -> ()
+    | TrieIndex ->
+      sienv
   in
 
   (* Fetch namespaces from provider-specific query *)
-  let namespace_list = match provider with
-    | SqliteIndex -> SqliteSearchService.fetch_namespaces ()
+  let namespace_list = match sienv.sie_provider with
+    | SqliteIndex -> SqliteSearchService.fetch_namespaces ~sienv
     | CustomIndex -> CustomSearchService.fetch_namespaces ()
     | NoIndex
     | TrieIndex -> []
@@ -53,42 +50,25 @@ let initialize_provider
 
   (* Register all namespaces *)
   List.iter namespace_list
-    ~f:(fun ns -> NamespaceSearchService.register_namespace ns);
+    ~f:(fun namespace -> NamespaceSearchService.register_namespace ~sienv ~namespace);
 
   (* Add namespace aliases from the .hhconfig file *)
   List.iter namespace_map ~f:(fun (alias, target) ->
-    NamespaceSearchService.register_alias alias target
+    NamespaceSearchService.register_alias ~sienv ~alias ~target
   );
-;;
 
-(* Set the currently selected search provider *)
-let set_search_provider
-    ~(quiet: bool)
-    ~(provider_name: string)
-    ~(namespace_map: (string * string) list)
-    ~(savedstate_file_opt: string option)
-    ~(workers: MultiWorker.worker list option): unit =
-  let provider = SearchUtils.provider_of_string provider_name in
-  match !current_search_provider with
-  | None ->
-    in_quiet_mode := quiet;
-    current_search_provider := Some provider;
-    initialize_provider ~provider ~savedstate_file_opt ~workers ~namespace_map;
-    if not !in_quiet_mode then begin
-      Hh_logger.log "Search provider set to [%s] based on configuration value [%s]"
-        (SearchUtils.descriptive_name_of_provider provider)
-        provider_name;
-    end;
-  | Some existing_provider ->
-
-    (* We don't yet support changing providers on the fly *)
-    if existing_provider <> provider then begin
-      failwith "We do not currently support switching providers after launch";
-    end;
+  (* Here's the initialized environment *)
+  if not sienv.sie_quiet_mode then begin
+    Hh_logger.log "Search provider set to [%s] based on configuration value [%s]"
+      (SearchUtils.descriptive_name_of_provider sienv.sie_provider)
+      provider_name;
+  end;
+  sienv
 ;;
 
 (* Log information about calls to the symbol index service *)
 let log_symbol_index_search
+    ~(sienv: si_env)
     ~(query_text: string)
     ~(max_results: int)
     ~(results: int)
@@ -98,7 +78,7 @@ let log_symbol_index_search
     ~(caller: string): unit =
 
   (* In quiet mode we don't log anything to either scuba or console *)
-  if !in_quiet_mode then begin
+  if sienv.sie_quiet_mode then begin
     ()
   end else begin
 
@@ -115,9 +95,13 @@ let log_symbol_index_search
       | None -> "None"
       | Some actype -> show_autocomplete_type actype
     in
-    let search_provider = descriptive_name_of_provider (get_search_provider ()) in
+    let search_provider = descriptive_name_of_provider sienv.sie_provider in
 
     (* Send information to remote logging system *)
+    if sienv.sie_log_timings then begin
+      Hh_logger.log "[symbolindex] Search [%s] for [%s] [%s] found %d results in [%0.3f]"
+        search_provider query_text actype_str results duration;
+    end;
     HackEventLogger.search_symbol_index
       ~query_text
       ~max_results
@@ -137,15 +121,11 @@ let log_symbol_index_search
  * - Goal is to route ALL searches through one function for consistency
  *)
 let find_matching_symbols
+    ~(sienv: si_env)
     ~(query_text: string)
     ~(max_results: int)
     ~(context: autocomplete_type option)
-    ~(kind_filter: si_kind option)
-    ~(env: SearchUtils.local_tracking_env): si_results =
-  let provider = get_search_provider () in
-
-  (* Will be used in a future diff, but let's avoid the warning for now *)
-  let _ = context in
+    ~(kind_filter: si_kind option): si_results =
 
   (*
    * Nuclide often sends this exact request to verify that HH is working.
@@ -161,12 +141,12 @@ let find_matching_symbols
 
     (* Potential namespace matches always show up first *)
     let namespace_results = NamespaceSearchService.find_matching_namespaces
-    query_text in
+      ~sienv ~query_text in
 
     (* The local index captures symbols in files that have been changed on disk.
      * Search it first for matches, then search global and add any elements
      * that we haven't seen before *)
-    let local_results = match provider with
+    let local_results = match sienv.sie_provider with
       | NoIndex
       | TrieIndex ->
         []
@@ -176,22 +156,23 @@ let find_matching_symbols
           ~query_text
           ~max_results
           ~kind_filter
-          ~env;
+          ~sienv;
     in
 
     (* Next search globals *)
-    let global_results = match provider with
+    let global_results = match sienv.sie_provider with
       | CustomIndex ->
         let r = CustomSearchService.search_symbols
           ~query_text
           ~max_results
           ~context in
-        LocalSearchService.extract_dead_results ~env ~results:r
+        LocalSearchService.extract_dead_results ~sienv ~results:r
       | NoIndex ->
         []
       | SqliteIndex ->
-        let r = SqliteSearchService.sqlite_search query_text max_results context in
-        LocalSearchService.extract_dead_results ~env ~results:r
+        let results = SqliteSearchService.sqlite_search
+          ~sienv ~query_text ~max_results ~context in
+        LocalSearchService.extract_dead_results ~sienv ~results
       | TrieIndex ->
         HackSearchService.index_search query_text max_results kind_filter
     in
@@ -256,19 +237,19 @@ let query_for_autocomplete
  * this information should capture it here.
  *)
 let update_files
-    (worker_list_opt: MultiWorker.worker list option)
-    (paths: (Relative_path.t * info * file_source) list)
-    (env: SearchUtils.local_tracking_env ref): unit =
-  match get_search_provider () with
+    ~(sienv: si_env ref)
+    ~(workers: MultiWorker.worker list option)
+    ~(paths: (Relative_path.t * info * file_source) list): unit =
+  match !sienv.sie_provider with
   | CustomIndex
   | NoIndex
   | SqliteIndex ->
     List.iter paths ~f:(fun (path, info, detector) ->
       if detector = SearchUtils.TypeChecker then
-        env := LocalSearchService.update_file path info !env;
+        sienv := LocalSearchService.update_file ~sienv:!sienv ~path ~info;
     );
   | TrieIndex ->
-    HackSearchService.update_from_typechecker worker_list_opt paths
+    HackSearchService.update_from_typechecker workers paths
 ;;
 
 (*
@@ -276,14 +257,14 @@ let update_files
  * Any local caches should be cleared of values for this file.
  *)
 let remove_files
-    (paths: Relative_path.Set.t)
-    (env: SearchUtils.local_tracking_env ref): unit =
-  match get_search_provider () with
+    ~(sienv: SearchUtils.si_env ref)
+    ~(paths: Relative_path.Set.t): unit =
+  match !sienv.sie_provider with
   | CustomIndex
   | NoIndex
   | SqliteIndex ->
     Relative_path.Set.iter paths ~f:(fun path ->
-        env := LocalSearchService.remove_file path !env;
+        sienv := LocalSearchService.remove_file ~sienv:!sienv ~path;
       );
   | TrieIndex ->
     HackSearchService.MasterApi.clear_shared_memory paths

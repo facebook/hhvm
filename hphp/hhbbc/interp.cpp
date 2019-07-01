@@ -567,6 +567,7 @@ resolveTSStatically(ISS& env, SArray ts, const php::Class* declaringCls,
     case TypeStructure::Kind::T_nothing:
     case TypeStructure::Kind::T_noreturn:
     case TypeStructure::Kind::T_mixed:
+    case TypeStructure::Kind::T_dynamic:
     case TypeStructure::Kind::T_nonnull:
     case TypeStructure::Kind::T_resource:
       return finish(ts);
@@ -2665,13 +2666,12 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
           bc::CGetL { op.loc1 },
           bc::NullUninit {},
           bc::NullUninit {},
-          bc::FPushObjMethodD {
-            0,
-            s_getInstanceKey.get(),
+          bc::FCallObjMethodD {
+            FCallArgs(0),
+            staticEmptyString(),
             ObjMethodOp::NullThrows,
-            false
+            s_getInstanceKey.get()
           },
-          bc::FCall { FCallArgs(0), staticEmptyString(), staticEmptyString() },
           bc::CastString {}
         );
       }
@@ -2689,13 +2689,12 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
           bc::CGetL { op.loc1 },
           bc::NullUninit {},
           bc::NullUninit {},
-          bc::FPushObjMethodD {
-            0,
-            s_getInstanceKey.get(),
+          bc::FCallObjMethodD {
+            FCallArgs(0),
+            staticEmptyString(),
             ObjMethodOp::NullSafe,
-            false
+            s_getInstanceKey.get()
           },
-          bc::FCall { FCallArgs(0), staticEmptyString(), staticEmptyString() },
           bc::CastString {},
           bc::Int { 0 },
           bc::IsTypeL { op.loc1, IsTypeOp::Null },
@@ -3128,6 +3127,7 @@ void isAsTypeStructImpl(ISS& env, SArray inputTS) {
     case TypeStructure::Kind::T_noreturn:
       return result(TFalse);
     case TypeStructure::Kind::T_mixed:
+    case TypeStructure::Kind::T_dynamic:
       return result(TTrue);
     case TypeStructure::Kind::T_nonnull:
       if (is_definitely_null) return result(TFalse);
@@ -3211,6 +3211,7 @@ bool canReduceToDontResolve(SArray ts) {
     case TypeStructure::Kind::T_nothing:
     case TypeStructure::Kind::T_noreturn:
     case TypeStructure::Kind::T_mixed:
+    case TypeStructure::Kind::T_dynamic:
     case TypeStructure::Kind::T_nonnull:
     case TypeStructure::Kind::T_resource:
     // Following ones don't reify, so no need to check the generics
@@ -3659,6 +3660,7 @@ bool fcallOptimizeChecks(
           bc::String { err },
           bc::FCallCtor { FCallArgs(1), staticEmptyString() },
           bc::PopC {},
+          bc::LockObj {},
           bc::Throw {}
         );
         return true;
@@ -3668,7 +3670,8 @@ bool fcallOptimizeChecks(
     if (match) {
       // Optimize away the runtime reffiness check.
       reduce(env, fcallWithFCA(FCallArgs(
-        fca.flags, fca.numArgs, fca.numRets, nullptr, fca.asyncEagerTarget)));
+        fca.flags, fca.numArgs, fca.numRets, nullptr, fca.asyncEagerTarget,
+        fca.constructNoConst)));
       return true;
     }
   }
@@ -3701,21 +3704,26 @@ bool fcallTryFold(
   const res::Func& func,
   Type context,
   bool maybeDynamic,
+  uint32_t numExtraInputs,
+  ClsRefSlotId clsRefSlot,
   const ActRec* legacyAR = nullptr
 ) {
-  auto const foldableFunc = [&] () -> const php::Func* {
-    if (!options.ConstantFoldBuiltins) return nullptr;
-    if (fca.hasUnpack() || fca.numRets != 1) return nullptr;
-    auto const exFunc = func.exactFunc();
-    if (legacyAR) {
-      assertx(!legacyAR->foldable || exFunc);
-      return legacyAR->foldable ? exFunc : nullptr;
-    }
-    return canFold(env, func, fca.numArgs, context, maybeDynamic)
-      ? exFunc : nullptr;
-  }();
+  auto const foldableFunc = func.exactFunc();
+  if (!foldableFunc) {
+    assertx(!legacyAR || !legacyAR->foldable);
+    return false;
+  }
 
-  if (foldableFunc) {
+  if (legacyAR) {
+    if (!legacyAR->foldable) return false;
+  } else if (!canFold(env, foldableFunc, fca.numArgs, context, maybeDynamic)) {
+    return false;
+  }
+
+  auto tried_lookup = false;
+  if (options.ConstantFoldBuiltins &&
+      !fca.hasUnpack() &&
+      fca.numRets == 1) {
     auto ty = [&] () {
       if (foldableFunc->attrs & AttrBuiltin &&
           foldableFunc->attrs & AttrIsFoldable) {
@@ -3735,17 +3743,24 @@ bool fcallTryFold(
         args[argNum] = isScalar ? scalarize(arg) : arg;
       }
 
+      tried_lookup = true;
       return env.index.lookup_foldable_return_type(
         env.ctx, foldableFunc, context, std::move(args));
     }();
+
     if (auto v = tv(ty)) {
-      BytecodeVec repl { fca.numArgs, bc::PopC {} };
+      BytecodeVec repl;
+      if (clsRefSlot != NoClsRefSlotId) {
+        repl.push_back(bc::DiscardClsRef { clsRefSlot });
+      }
+      for (uint32_t i = 0; i < numExtraInputs; ++i) repl.push_back(bc::PopC {});
+      for (uint32_t i = 0; i < fca.numArgs; ++i) repl.push_back(bc::PopC {});
       repl.push_back(bc::PopU {});
       repl.push_back(bc::PopU {});
-      if (topT(env, fca.numArgs + 2).subtypeOf(TInitCell)) {
+      if (topT(env, fca.numArgs + 2 + numExtraInputs).subtypeOf(TInitCell)) {
         repl.push_back(bc::PopC {});
       } else {
-        assertx(topT(env, fca.numArgs + 2).subtypeOf(TUninit));
+        assertx(topT(env, fca.numArgs + 2 + numExtraInputs).subtypeOf(TUninit));
         repl.push_back(bc::PopU {});
       }
       repl.push_back(gen_constant(*v));
@@ -3755,7 +3770,10 @@ bool fcallTryFold(
     }
   }
 
-  if (legacyAR && legacyAR->foldable) {
+  if (legacyAR) {
+    assertx(legacyAR->foldable);
+    assertx(numExtraInputs == 0);
+    assertx(clsRefSlot == NoClsRefSlotId);
     fpiNotFoldable(env);
     fpiPop(env);
     discard(env, fca.numArgsInclUnpack());
@@ -3763,6 +3781,9 @@ bool fcallTryFold(
     return true;
   }
 
+  if (tried_lookup) {
+    env.collect.unfoldableFuncs.emplace(foldableFunc, env.bid);
+  }
   return false;
 }
 
@@ -3821,6 +3842,8 @@ void fcallKnownImpl(
   const res::Func& func,
   Type context,
   bool nullsafe,
+  uint32_t numExtraInputs,
+  ClsRefSlotId clsRefSlot,
   FCallWithFCA fcallWithFCA,
   bool legacy = false
 ) {
@@ -3868,6 +3891,8 @@ void fcallKnownImpl(
     }
   }
 
+  if (clsRefSlot != NoClsRefSlotId) takeClsRefSlot(env, clsRefSlot);
+  for (auto i = uint32_t{0}; i < numExtraInputs; ++i) popC(env);
   if (fca.hasUnpack()) popC(env);
   for (auto i = uint32_t{0}; i < fca.numArgs; ++i) popCV(env);
   if (legacy) {
@@ -4005,71 +4030,42 @@ void in(ISS& env, const bc::ResolveClsMethod& op) {
 
 namespace {
 
-const StaticString s_nullFunc { "__SystemLib\\__86null" };
+void fcallObjMethodNullsafe(ISS& env, const FCallArgs& fca, bool extraInput) {
+  BytecodeVec repl;
+  if (extraInput) repl.push_back(bc::PopC {});
+  if (fca.hasUnpack()) repl.push_back(bc::PopC {});
+  for (uint32_t i = 0; i < fca.numArgs; ++i) {
+    if (topC(env, repl.size()).subtypeOf(BRef)) {
+      repl.push_back(bc::PopV {});
+    } else {
+      assertx(topC(env, repl.size()).subtypeOf(BInitCell));
+      repl.push_back(bc::PopC {});
+    }
+  }
+  repl.push_back(bc::PopU {});
+  repl.push_back(bc::PopU {});
+  repl.push_back(bc::PopC {});
+  for (uint32_t i = 0; i < fca.numRets - 1; ++i) {
+    repl.push_back(bc::PopU {});
+  }
+  repl.push_back(bc::Null {});
 
-template <typename Op>
-void fpushObjMethodImpl(ISS& env, const Op& op, ObjMethodOp subop,
-                        SString methName, bool dynamic, bool extraInput) {
-  auto const nullThrows = subop == ObjMethodOp::NullThrows;
-  auto const inputPos = op.arg1 + 2 + (extraInput ? 1 : 0);
+  reduce(env, std::move(repl));
+}
+
+template <typename Op, class UpdateBC>
+void fcallObjMethodImpl(ISS& env, const Op& op, SString methName, bool dynamic,
+                        bool extraInput, UpdateBC updateBC) {
+  auto const nullThrows = op.subop3 == ObjMethodOp::NullThrows;
+  auto const inputPos = op.fca.numArgsInclUnpack() + (extraInput ? 3 : 2);
   auto const input = topC(env, inputPos);
   auto const location = topStkEquiv(env, inputPos);
   auto const mayCallMethod = input.couldBe(BObj);
-  auto const mayCallNullsafe = !nullThrows && input.couldBe(BNull);
+  auto const mayUseNullsafe = !nullThrows && input.couldBe(BNull);
   auto const mayThrowNonObj = !input.subtypeOf(nullThrows ? BObj : BOptObj);
 
-  if (!mayCallMethod && !mayCallNullsafe) {
-    if (extraInput) popC(env);
-    // This FPush may only throw, make sure it's not optimized away.
-    discardAR(env, op.arg1);
-    fpiPushNoFold(env, ActRec { FPIKind::ObjMeth, TBottom });
-    return unreachable(env);
-  }
-
-  /* TODO: optimize the whole call to Null once FPush+FCall is merged
-  if (!mayCallMethod && !mayThrowNonObj) {
-    // Null input, this may only call the nullsafe helper, so do that.
-    // TODO: rflavor has different stack input
-    return reduce(
-      env,
-      bc::PopU {}, bc::PopU {}, bc::PopC {},
-      bc::NullUninit {}, bc::NullUninit {}, bc::NullUninit {},
-      bc::FPushFuncD { op.arg1, s_nullFunc.get(), op.has_unpack }
-    );
-  }
-  */
-
-  auto const ar = [&] {
-    assertx(mayCallMethod);
-    auto const kind = mayCallNullsafe ? FPIKind::ObjMethNS : FPIKind::ObjMeth;
-    auto const ctxTy = intersection_of(input, TObj);
-    auto const clsTy = objcls(ctxTy);
-    auto const rcls = is_specialized_cls(clsTy)
-      ? folly::Optional<res::Class>(dcls_of(clsTy).cls)
-      : folly::none;
-    auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
-    return ActRec { kind, ctxTy, rcls, rfunc };
-  };
-
-  if (!mayCallMethod) {
-    // Calls nullsafe helper, but can't fold as we may still throw.
-    assertx(mayCallNullsafe /*&& mayThrowNonObj*/);
-    auto const rfunc = env.index.resolve_func(env.ctx, s_nullFunc.get());
-    assertx(rfunc.exactFunc());
-    fpiPushNoFold(env, ActRec { FPIKind::Func, TBottom, folly::none, rfunc });
-  } else if (mayCallNullsafe || mayThrowNonObj) {
-    // Can't optimize away as FCall may push null instead of the folded value
-    // or FCall may throw.
-    fpiPushNoFold(env, ar());
-  } else if (fpiPush(env, ar(), op.arg1, dynamic)) {
-    if (extraInput) return reduce(env, bc::PopC {});
-    return reduce(env);
-  }
-
-  if (extraInput) popC(env);
-  discardAR(env, op.arg1);
-
-  if (location != NoLocalId) {
+  auto const refineLoc = [&] {
+    if (location == NoLocalId) return;
     if (!refineLocation(env, location, [&] (Type t) {
       if (nullThrows) return intersection_of(t, TObj);
       if (!t.couldBe(BUninit)) return intersection_of(t, TOptObj);
@@ -4078,56 +4074,110 @@ void fpushObjMethodImpl(ISS& env, const Op& op, ObjMethodOp subop,
     })) {
       unreachable(env);
     }
+  };
+
+  auto const unknown = [&] {
+    if (extraInput) popC(env);
+    fcallUnknownImpl(env, op.fca);
+    refineLoc();
+  };
+
+  if (!mayCallMethod && !mayUseNullsafe) {
+    // This FCallObjMethodD may only throw, make sure it's not optimized away.
+    unknown();
+    unreachable(env);
+    return;
   }
+
+  if (!mayCallMethod && !mayThrowNonObj) {
+    // Null input, this may only return null, so do that.
+    return fcallObjMethodNullsafe(env, op.fca, extraInput);
+  }
+
+  if (!mayCallMethod) {
+    // May only return null, but can't fold as we may still throw.
+    assertx(mayUseNullsafe && mayThrowNonObj);
+    return unknown();
+  }
+
+  auto const ctxTy = intersection_of(input, TObj);
+  auto const clsTy = objcls(ctxTy);
+  auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
+
+  auto const canFold = !mayUseNullsafe && !mayThrowNonObj;
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC) ||
+      (canFold && fcallTryFold(env, op.fca, rfunc, ctxTy, dynamic,
+                               extraInput ? 1 : 0, NoClsRefSlotId))) {
+    return;
+  }
+
+  if (rfunc.exactFunc() && rfunc.cantBeMagicCall() && op.str2->empty()) {
+    return reduce(env, updateBC(op.fca, rfunc.exactFunc()->cls->name));
+  }
+
+  fcallKnownImpl(env, op.fca, rfunc, ctxTy, mayUseNullsafe, extraInput ? 1 : 0,
+                 NoClsRefSlotId, updateBC);
+  refineLoc();
 }
 
 } // namespace
 
-void in(ISS& env, const bc::FPushObjMethodD& op) {
-  fpushObjMethodImpl(env, op, op.subop3, op.str2, false, false);
+void in(ISS& env, const bc::FCallObjMethodD& op) {
+  auto const updateBC = [&] (FCallArgs fca, SString clsHint = nullptr) {
+    if (!clsHint) clsHint = op.str2;
+    return bc::FCallObjMethodD { std::move(fca), clsHint, op.subop3, op.str4 };
+  };
+  fcallObjMethodImpl(env, op, op.str4, false, false, updateBC);
 }
 
-void in(ISS& env, const bc::FPushObjMethodRD& op) {
+void in(ISS& env, const bc::FCallObjMethodRD& op) {
   auto const tsList = topC(env);
   if (!tsList.couldBe(RuntimeOption::EvalHackArrDVArrs ? BVec : BVArr)) {
     return unreachable(env);
   }
 
-  auto const input = topC(env, op.arg1 + 3);
+  auto const input = topC(env, op.fca.numArgsInclUnpack() + 3);
   auto const clsTy = objcls(intersection_of(input, TObj));
-  auto const rfunc = env.index.resolve_method(env.ctx, clsTy, op.str2);
+  auto const rfunc = env.index.resolve_method(env.ctx, clsTy, op.str4);
   if (!rfunc.couldHaveReifiedGenerics()) {
     return reduce(
       env,
       bc::PopC {},
-      bc::FPushObjMethodD { op.arg1, op.str2, op.subop3, op.has_unpack  }
+      bc::FCallObjMethodD { op.fca, op.str2, op.subop3, op.str4 }
     );
   }
 
-  fpushObjMethodImpl(env, op, op.subop3, op.str2, false, true);
+  auto const updateBC = [&] (FCallArgs fca, SString clsHint = nullptr) {
+    if (!clsHint) clsHint = op.str2;
+    return bc::FCallObjMethodRD { std::move(fca), clsHint, op.subop3, op.str4 };
+  };
+  fcallObjMethodImpl(env, op, op.str4, false, true, updateBC);
 }
 
-void in(ISS& env, const bc::FPushObjMethod& op) {
+void in(ISS& env, const bc::FCallObjMethod& op) {
   auto const methName = getNameFromType(topC(env));
   if (!methName || op.argv.size() != 0) {
     popC(env);
-    discardAR(env, op.arg1);
-    fpiPushNoFold(env, ActRec { FPIKind::ObjMeth, TObj });
+    fcallUnknownImpl(env, op.fca);
     return;
   }
 
-  auto const input = topC(env, op.arg1 + 3);
+  auto const input = topC(env, op.fca.numArgsInclUnpack() + 3);
   auto const clsTy = objcls(intersection_of(input, TObj));
   auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
   if (!rfunc.mightCareAboutDynCalls()) {
     return reduce(
       env,
       bc::PopC {},
-      bc::FPushObjMethodD { op.arg1, methName, op.subop2, op.has_unpack }
+      bc::FCallObjMethodD { op.fca, op.str2, op.subop3, methName }
     );
   }
 
-  fpushObjMethodImpl(env, op, op.subop2, methName, true, true);
+  auto const updateBC = [&] (FCallArgs fca, SString clsHint = nullptr) {
+    if (!clsHint) clsHint = op.str2;
+    return bc::FCallObjMethod { std::move(fca), clsHint, op.subop3, op.argv };
+  };
+  fcallObjMethodImpl(env, op, methName, true, true, updateBC);
 }
 
 namespace {
@@ -4403,12 +4453,35 @@ void in(ISS& env, const bc::NewObj& op) {
   push(env, toobj(cls));
 }
 
+namespace {
+
+bool objMightHaveConstProps(const Type& t) {
+  assertx(t.subtypeOf(BObj));
+  assertx(is_specialized_obj(t));
+  auto const dobj = dobj_of(t);
+  switch (dobj.type) {
+    case DObj::Exact:
+      return dobj.cls.couldHaveConstProp();
+    case DObj::Sub:
+      return dobj.cls.derivedCouldHaveConstProp();
+  }
+  not_reached();
+}
+
+}
+
 void in(ISS& env, const bc::FCallCtor& op) {
   auto const obj = topC(env, op.fca.numArgsInclUnpack() + 2);
   assertx(op.fca.numRets == 1);
 
   if (!is_specialized_obj(obj)) {
     return fcallUnknownImpl(env, op.fca);
+  }
+
+  if (!op.fca.constructNoConst && !objMightHaveConstProps(obj)) {
+    auto newFca = folly::copy(op.fca);
+    newFca.constructNoConst = true;
+    return reduce(env, bc::FCallCtor { std::move(newFca), op.str2 });
   }
 
   auto const dobj = dobj_of(obj);
@@ -4424,7 +4497,8 @@ void in(ISS& env, const bc::FCallCtor& op) {
 
   auto const canFold = obj.subtypeOf(BObj);
   if (fcallOptimizeChecks(env, op.fca, *rfunc, updateFCA) ||
-      (canFold && fcallTryFold(env, op.fca, *rfunc, obj, false/* dynamic */))) {
+      (canFold && fcallTryFold(env, op.fca, *rfunc, obj, false /* dynamic */, 0,
+                               NoClsRefSlotId))) {
     return;
   }
 
@@ -4433,7 +4507,22 @@ void in(ISS& env, const bc::FCallCtor& op) {
     return reduce(env, bc::FCallCtor { op.fca, rfunc->exactFunc()->cls->name });
   }
 
-  fcallKnownImpl(env, op.fca, *rfunc, obj, false /* nullsafe */, updateFCA);
+  fcallKnownImpl(env, op.fca, *rfunc, obj, false /* nullsafe */, 0,
+                 NoClsRefSlotId, updateFCA);
+}
+
+void in(ISS& env, const bc::LockObj& op) {
+  auto const t = topC(env);
+  auto bail = [&]() {
+    discard(env, 1);
+    return push(env, t);
+  };
+  if (!t.subtypeOf(BObj)) return bail();
+  if (!is_specialized_obj(t) || objMightHaveConstProps(t)) {
+    nothrow(env);
+    return bail();
+  }
+  reduce(env);
 }
 
 void in(ISS& env, const bc::FCall& op) {
@@ -4445,7 +4534,8 @@ void in(ISS& env, const bc::FCall& op) {
     };
 
     if (fcallOptimizeChecks(env, fca, *ar.func, updateFCA, &ar) ||
-        fcallTryFold(env, fca, *ar.func, ar.context, false /* unused */, &ar)) {
+        fcallTryFold(env, fca, *ar.func, ar.context, false /* unused */, 0,
+                     NoClsRefSlotId, &ar)) {
       return;
     }
 
@@ -4461,15 +4551,14 @@ void in(ISS& env, const bc::FCall& op) {
         return reduce(env, bc::FCall {
           fca, staticEmptyString(), ar.func->name() });
       }
-      fcallKnownImpl(env, fca, *ar.func, ar.context, false /* nullsafe */,
-                     updateFCA, true /* legacy */);
+      fcallKnownImpl(env, fca, *ar.func, ar.context, false /* nullsafe */, 0,
+                     NoClsRefSlotId, updateFCA, true /* legacy */);
       return;
     case FPIKind::Builtin:
       assertx(fca.numRets == 1);
       finish_builtin(env, ar.func->exactFunc(), fca.numArgs, fca.hasUnpack());
       fpiPop(env);
       return;
-    case FPIKind::ObjMeth:
     case FPIKind::ClsMeth:
       assertx(op.str2->empty() == op.str3->empty());
       if (ar.cls.hasValue() && ar.func->cantBeMagicCall() &&
@@ -4480,12 +4569,8 @@ void in(ISS& env, const bc::FCall& op) {
       }
       // If we didn't return a reduce above, we still can compute a
       // partially-known FCall effect with our res::Func.
-      fcallKnownImpl(env, fca, *ar.func, ar.context, false /* nullsafe */,
-                     updateFCA, true /* legacy */);
-      return;
-    case FPIKind::ObjMethNS:
-      fcallKnownImpl(env, fca, *ar.func, ar.context, true /* nullsafe */,
-                     updateFCA, true /* legacy */);
+      fcallKnownImpl(env, fca, *ar.func, ar.context, false /* nullsafe */, 0,
+                     NoClsRefSlotId, updateFCA, true /* legacy */);
       return;
     }
   }

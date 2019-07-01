@@ -41,6 +41,7 @@ let method_redeclaration_to_shallow_method smr =
     smr_visibility = sm_visibility;
     smr_trait = _;
     smr_method = _;
+    smr_fixme_codes = sm_fixme_codes;
   } = smr in
   {
     sm_abstract;
@@ -51,6 +52,7 @@ let method_redeclaration_to_shallow_method smr =
     sm_reactivity = None;
     sm_type;
     sm_visibility;
+    sm_fixme_codes;
   }
 
 let redecl_list_to_method_seq redecls =
@@ -75,6 +77,7 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
     sm_reactivity = _;
     sm_type;
     sm_visibility;
+    sm_fixme_codes = _;
   } = meth in
   let visibility = base_visibility mro.mro_name sm_visibility in
   let ty = lazy begin
@@ -114,6 +117,7 @@ let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
     sp_needs_init = _;
     sp_type;
     sp_visibility;
+    sp_fixme_codes = _;
   } = prop in
   let visibility = base_visibility mro.mro_name sp_visibility in
   let ty = lazy begin

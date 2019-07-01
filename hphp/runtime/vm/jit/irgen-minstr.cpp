@@ -2091,7 +2091,7 @@ void emitBaseC(IRGS& env, uint32_t idx, MOpMode mode) {
 }
 
 void emitBaseH(IRGS& env) {
-  if (!curClass(env)) return interpOne(env, *env.currentNormalizedInstruction);
+  if (!curClass(env)) return interpOne(env);
 
   initTvRefs(env);
   auto base = ldThis(env);

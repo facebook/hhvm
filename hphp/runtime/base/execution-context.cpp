@@ -37,6 +37,7 @@
 #include "hphp/runtime/base/apc-gc-manager.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/sweepable.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/externals.h"
@@ -1206,29 +1207,9 @@ int ExecutionContext::getLine() {
 
 const StaticString s___call("__call");
 
-ActRec* ExecutionContext::getFrameAtDepth(int frame) {
-  VMRegAnchor _;
-  auto fp = vmfp();
-  if (UNLIKELY(!fp)) return nullptr;
-  auto pc = fp->func()->unit()->offsetOf(vmpc());
-  while (frame > 0) {
-    fp = getPrevVMState(fp, &pc);
-    if (UNLIKELY(!fp)) return nullptr;
-    if (UNLIKELY(fp->skipFrame())) continue;
-    --frame;
-  }
-  while (fp->skipFrame()) {
-    fp = getPrevVMState(fp, &pc);
-    if (UNLIKELY(!fp)) return nullptr;
-  }
-  if (UNLIKELY(fp->localsDecRefd())) return nullptr;
-  auto const curOp = fp->func()->unit()->getOp(pc);
-  if (UNLIKELY(curOp == Op::RetC || curOp == Op::RetCSuspended ||
-               curOp == Op::RetM || curOp == Op::CreateCont ||
-               curOp == Op::Await)) {
-    return nullptr;
-  }
-  assertx(!fp->magicDispatch());
+ActRec* ExecutionContext::getFrameAtDepthForDebuggerUnsafe(int frame) {
+  auto fp = GetFrameForDebuggerUnsafe(frame);
+  assertx(!fp || !fp->magicDispatch());
   return fp;
 }
 
@@ -1240,13 +1221,8 @@ void ExecutionContext::setVar(StringData* name, tv_rval v) {
   if (fp) fp->getVarEnv()->set(name, v);
 }
 
-Array ExecutionContext::getLocalDefinedVariables(int frame) {
-  VMRegAnchor _;
-  ActRec *fp = vmfp();
-  for (; frame > 0; --frame) {
-    if (!fp) break;
-    fp = getPrevVMState(fp);
-  }
+Array ExecutionContext::getLocalDefinedVariablesDebugger(int frame) {
+  const auto fp = getFrameAtDepthForDebuggerUnsafe(frame);
   return getDefinedVariables(fp);
 }
 
@@ -2163,22 +2139,16 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
 
   VMRegAnchor _;
 
-  auto fp = vmfp();
-  if (fp) {
-    if (fp->skipFrame()) fp = getPrevVMStateSkipFrame(fp);
-    for (; frame > 0; --frame) {
-      auto prevFp = getPrevVMStateSkipFrame(fp);
-      if (!prevFp) {
-        // To be safe in case we failed to get prevFp. This would mean we've
-        // been asked to eval in a frame which is beyond the top of the stack.
-        // This suggests the debugger client has made an error.
-        break;
-      }
-      fp = prevFp;
-    }
-    if (!fp->hasVarEnv()) {
-      fp->setVarEnv(VarEnv::createLocal(fp));
-    }
+  auto fp = getFrameAtDepthForDebuggerUnsafe(frame);
+
+  // Continue walking up the stack until we find a frame that can have
+  // a variable environment context attached to it, or we run out out frames.
+  while (fp && (fp->skipFrame() || fp->isInlined())) {
+    fp = getPrevVMStateSkipFrame(fp);
+  }
+
+  if (fp && !fp->hasVarEnv()) {
+    fp->setVarEnv(VarEnv::createLocal(fp));
   }
   ObjectData *this_ = nullptr;
   // NB: the ActRec and function within the AR may have different classes. The

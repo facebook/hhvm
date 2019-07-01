@@ -55,7 +55,10 @@ AnalysisResult::~AnalysisResult() {
 
 void AnalysisResult::finish() {
   if (m_finish) {
-    auto f = std::move(m_finish);
+    // std::move leaves a std::function in a valid, but
+    // unspecified state. Don't try to replace this with a std::move
+    decltype(m_finish) f;
+    f.swap(m_finish);
     f(shared_from_this());
   }
 }

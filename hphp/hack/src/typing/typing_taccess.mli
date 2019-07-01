@@ -14,6 +14,5 @@ open Typing_defs
 val referenced_typeconsts:
   Typing_env.env ->
   expand_env ->
-  Typing_reason.t ->
   taccess_type ->
   (string * string * Pos.t) list

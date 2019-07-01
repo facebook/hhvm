@@ -54,6 +54,7 @@
   NullUninit
   FCallCtor <> 0 1 "" - ""
   PopC
+  LockObj
   FPushFuncD 1 "use_class"
   FCall <> 1 1 "" - "" ""
   PopC

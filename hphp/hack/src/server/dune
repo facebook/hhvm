@@ -10,6 +10,7 @@
   (libraries
     ai
     build_options
+    cli_args
     config_state_loader
     diagnostic_subscription
     errors
@@ -47,9 +48,13 @@
     serverUtils)
   (libraries
     core_kernel
+    find
     decl
+    hhi
     global_config
+    procs_bucket
     procs_procs
+    relative_path
     server_monitor
     sys_utils
     utils_core
@@ -67,7 +72,6 @@
     serverCommandTypes
     serverCommandTypesUtils
     serverCoverageMetricTypes
-    ServerExtractStandalone
     serverFormatTypes
     serverHighlightRefsTypes
     serverLintTypes
@@ -75,16 +79,16 @@
     serverRageTypes
     serverRefactorTypes)
   (libraries
-    coverage_level
+    full_fidelity
     hh_json
     ide_rpc_api_types
-    utils_lint
     lsp
     lwt
     pos
-    search
-    typing
-    typing_check)
+    search_utils
+    symbol
+    typing_defs
+    utils_lint)
   (preprocess
     (pps lwt_ppx)))
 
@@ -136,11 +140,15 @@
     decl
     heap_shared_mem
     parser
+    search
     server_command_types
     server_env
     sys_utils
+    tast_check
     typechecker_options
     typed_positioned_syntax
+    typing
+    typing_check
     typing_deps
     utils_core))
 
@@ -161,10 +169,12 @@
     serverDynamicView
     serverEnvBuild
     serverError
+    serverExtractStandalone
     serverFileDependencies
     serverFileSync
     serverFindRefs
     serverFormat
+    serverGoToDefinition
     serverHighlightRefs
     serverHotClasses
     serverHotClassesDescription

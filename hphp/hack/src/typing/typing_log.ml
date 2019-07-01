@@ -532,6 +532,14 @@ let log_new_tvar_for_tconst_access env p tvar class_name tconst =
     class_name tconst in
   log_new_tvar env p tvar message
 
+let log_intersection ~level env r ty1 ty2 ~inter_ty =
+  log_with_level env "inter" level (fun () ->
+    log_types (Reason.to_pos r) env
+      [ Log_head ("Intersecting",
+        [ Log_type ("ty1", ty1);
+          Log_type ("ty2", ty2);
+          Log_type ("intersection", inter_ty) ]) ])
+
 let increment_feature_count env s =
   if GlobalOptions.tco_language_feature_logging (Env.get_tcopt env)
   then Measure.sample s 1.0

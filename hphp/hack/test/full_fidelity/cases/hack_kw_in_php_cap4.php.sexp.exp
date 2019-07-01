@@ -5,8 +5,8 @@
        (markup_suffix 5 ((() <? 2 ()) (() name 3 ((end_of_line 1)))))
        (missing 0 ())))
      (const_declaration 16
-      ((missing 0 ()) (missing 0 ())
-       (((end_of_line 1)) const 5 ((whitespace 1))) (missing 0 ())
+      ((missing 0 ()) (((end_of_line 1)) const 5 ((whitespace 1)))
+       (missing 0 ())
        (list 9
         ((list_item 9
           ((constant_declarator 9
@@ -17,8 +17,7 @@
            (missing 0 ())))))
        (() ";" 1 ((end_of_line 1)))))
      (const_declaration 16
-      ((missing 0 ()) (missing 0 ()) (() const 5 ((whitespace 1)))
-       (missing 0 ())
+      ((missing 0 ()) (() const 5 ((whitespace 1))) (missing 0 ())
        (list 9
         ((list_item 9
           ((constant_declarator 9

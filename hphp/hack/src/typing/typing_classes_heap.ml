@@ -40,6 +40,9 @@ let make_lazy_class_type class_name sc =
 let shallow_decl_enabled () =
   TypecheckerOptions.shallow_class_decl (GlobalNamingOptions.get ())
 
+let defer_threshold () =
+  TypecheckerOptions.defer_class_declaration_threshold (GlobalNamingOptions.get ())
+
 module Classes = struct
   module Cache = SharedMem.LocalCache (StringKey) (struct
     type t = class_type_variant
@@ -61,9 +64,13 @@ module Classes = struct
           | Some dc -> dc
           | None ->
             match Naming_table.Types.get_pos class_name with
-            | Some (_, Naming_table.TTypedef) | None -> raise Exit
+            | Some (_, Naming_table.TTypedef)
+            | None -> raise Exit
             | Some (pos, Naming_table.TClass) ->
               let file = FileInfo.get_pos_filename pos in
+              Option.iter
+                (defer_threshold ())
+                ~f:(fun threshold -> Deferred_decl.should_defer ~d:file ~threshold);
               let class_type = Errors.run_in_decl_mode file
                 (fun () -> Decl.declare_class_in_file file class_name) in
               match class_type with
@@ -92,7 +99,9 @@ module Classes = struct
         Cache.add class_name class_type_variant;
         Some class_type_variant
       (* If we raise Exit, then the class does not exist. *)
-      with Exit -> None
+      with
+      | Deferred_decl.Defer d -> Deferred_decl.add ~d; None
+      | Exit -> None
 
   let find_unsafe key =
     match get key with

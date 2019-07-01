@@ -587,6 +587,9 @@ void arenas_thread_flush() {
   if (high_arena_tcache != -1) {
     mallctlWrite<int, true>("tcache.flush", high_arena_tcache);
   }
+  if (local_arena_tcache != -1) {
+    mallctlWrite<int, true>("tcache.flush", local_arena_tcache);
+  }
 }
 
 void arenas_thread_exit() {

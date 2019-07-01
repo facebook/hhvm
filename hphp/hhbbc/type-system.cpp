@@ -3194,6 +3194,7 @@ folly::Optional<Type> type_of_type_structure(SArray ts) {
     case TypeStructure::Kind::T_nothing:
     case TypeStructure::Kind::T_noreturn:
     case TypeStructure::Kind::T_mixed:
+    case TypeStructure::Kind::T_dynamic:
     case TypeStructure::Kind::T_nonnull:
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:

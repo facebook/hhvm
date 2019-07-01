@@ -7,11 +7,12 @@
   NullUninit
   NullUninit
   FCallCtor <> 0 1 "" - ""
+  PopC
+  LockObj
 
   CheckProp "foo"
   InitProp "bar" NonStatic
 
-  PopC
   RetC
 }
 

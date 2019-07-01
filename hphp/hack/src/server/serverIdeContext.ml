@@ -9,6 +9,8 @@
 open Core_kernel
 
 type entry = {
+  file_input: ServerCommandTypes.file_input;
+  path: Relative_path.t;
   ast: Ast.program;
   tast: Tast.program;
 }
@@ -24,7 +26,7 @@ let with_context
   let make_then_revert_local_changes f () =
     Utils.with_context
       ~enter:ServerIdeUtils.make_local_changes
-      ~exit:ServerIdeUtils.make_local_changes
+      ~exit:ServerIdeUtils.revert_local_changes
       ~do_:f
   in
   let (_errors, result) =
@@ -66,19 +68,39 @@ let update
     ~(tcopt: TypecheckerOptions.t)
     ~(ctx: t)
     ~(path: Relative_path.t)
-    ~(ast: Ast.program)
+    ~(file_input: ServerCommandTypes.file_input)
     : (t * entry) =
+  let { Full_fidelity_ast.ast; _ } = Ast_provider.parse_file_input
+    ~full:true
+    path
+    file_input
+  in
   Ast_provider.provide_ast_hint path ast Ast_provider.Full;
   let tast = with_context ~ctx ~f:(fun () ->
     let nast = Naming.program (Ast_to_nast.convert ast) in
     Typing.nast_to_tast tcopt nast
   ) in
   let entry = {
+    path;
+    file_input;
     ast;
     tast;
   } in
   let ctx = Relative_path.Map.add ctx path entry in
   (ctx, entry)
+
+let get_file_input
+    ~(ctx: t)
+    ~(path: Relative_path.t)
+    : ServerCommandTypes.file_input =
+  match Relative_path.Map.get ctx path with
+  | Some { file_input; _ } ->
+    file_input
+  | None ->
+    ServerCommandTypes.FileName (Relative_path.to_absolute path)
+
+let get_path ~(entry: entry): Relative_path.t =
+  entry.path
 
 let get_ast ~(entry: entry): Ast.program =
   entry.ast

@@ -520,7 +520,6 @@ let add_error error =
 (* Whether we've found at least one error *)
 let currently_has_errors () = get_current_list !error_map <> []
 
-module Temporary = Error_codes.Temporary
 module Parsing = Error_codes.Parsing
 module Naming = Error_codes.Naming
 module NastCheck = Error_codes.NastCheck
@@ -754,40 +753,12 @@ let experimental_feature pos msg =
   add 0 pos ("Cannot use experimental feature: " ^ msg)
 
 (*****************************************************************************)
-(* Temporary errors. *)
-(*****************************************************************************)
-
-let darray_not_supported pos =
-  add Temporary.darray_not_supported pos "darray is not supported."
-
-let varray_not_supported pos =
-  add Temporary.varray_not_supported pos "varray is not supported."
-
-let varray_or_darray_not_supported pos =
-  add
-    Temporary.varray_or_darray_not_supported
-    pos
-    "varray_or_darray is not supported."
-
-let nonnull_not_supported pos =
-  add Temporary.nonnull_not_supported pos "nonnull is not supported."
-
-(*****************************************************************************)
 (* Parsing errors. *)
 (*****************************************************************************)
 
 let fixme_format pos =
   add (Parsing.err_code Parsing.FixmeFormat) pos
     "HH_FIXME wrong format, expected '/* HH_FIXME[ERROR_NUMBER] */'"
-
-let unexpected_eof pos =
-  add (Parsing.err_code Parsing.UnexpectedEof) pos "Unexpected end of file"
-
-let unterminated_comment pos =
-  add (Parsing.err_code Parsing.UnterminatedComment) pos "unterminated comment"
-
-let unterminated_xhp_comment pos =
-  add (Parsing.err_code Parsing.UnterminatedXhpComment) pos "unterminated xhp comment"
 
 let parsing_error (p, msg) =
   add (Parsing.err_code Parsing.ParsingError) p msg
@@ -827,13 +798,6 @@ let disallowed_xhp_type pos name =
   add (Naming.err_code Naming.DisallowedXhpType) pos (
   name^" is not a valid type. Use :xhp or XHPChild."
  )
-
-let name_already_bound name pos1 pos2 =
-  let name = Utils.strip_ns name in
-  add_list (Naming.err_code Naming.NameAlreadyBound) [
-    pos1, "Name already bound: "^name;
-    pos2, "Previous definition is here"
-]
 
 let name_is_reserved name pos =
   let name = Utils.strip_all_ns name in
@@ -896,12 +860,6 @@ let unbound_name pos name kind =
   add (Naming.err_code Naming.UnboundName) pos
     ("Unbound name: "^(strip_ns name)^" ("^kind_str^")")
 
-let different_scope pos var_name pos' =
-  add_list (Naming.err_code Naming.DifferentScope) [
-  pos, ("The variable "^ var_name ^" is defined");
-  pos', ("But in a different scope")
-]
-
 let rx_move_invalid_location pos =
   add (Naming.err_code Naming.RxMoveInvalidLocation) pos
     "Rx\\move is only allowed in argument position or as right hand side of the assignment."
@@ -962,14 +920,6 @@ let duplicate_user_attribute (pos, name) existing_attr_pos =
     existing_attr_pos, name^" was already used here";
   ]
 
-let misplaced_rx_of_scope pos =
-  add (Naming.err_code Naming.MisplacedRxOfScope) pos (
-    "<<__RxOfScope>> attribute is only allowed on lambdas."
-  )
-let rx_of_scope_and_explicit_rx pos =
-  add (Naming.err_code Naming.RxOfScopeAndExplicitRx) pos (
-    "<<__RxOfScope>> attribute cannot be used with explicit reactivity annotations."
-  )
 let unbound_attribute_name pos name =
   let reason = if (string_starts_with name "__")
     then "starts with __ but is not a standard attribute"
@@ -1152,10 +1102,6 @@ let add_a_typehint pos =
   add (Naming.err_code Naming.AddATypehint) pos
     "Please add a type hint"
 
-let local_const var_pos =
-  add (Naming.err_code Naming.LocalConst) var_pos
-    "You cannot use a local variable in a constant definition"
-
 let illegal_constant pos =
   add (Naming.err_code Naming.IllegalConstant) pos
     "Illegal constant value"
@@ -1202,9 +1148,6 @@ let goto_label_defined_in_finally pos =
     pos
     "It is illegal to define a goto label within a finally block."
 
-let unsupported_feature pos name =
-  add (Naming.err_code Naming.UnsupportedFeature) pos (name ^ " is not supported in Hack.")
-
 let goto_invoked_in_finally pos =
   add (Naming.err_code Naming.GotoInvokedInFinally)
     pos
@@ -1213,11 +1156,6 @@ let goto_invoked_in_finally pos =
 let method_needs_visibility pos =
   add (Naming.err_code Naming.MethodNeedsVisibility)
     pos ("Methods need to be marked public, private, or protected.")
-
-let dynamic_class_property_name_in_strict_mode pos =
-  add (Naming.err_code Naming.DynamicClassPropertyNameInStrictMode)
-    pos
-    "Cannot use dynamic class property name in strict mode"
 
 let dynamic_class_name_in_strict_mode pos =
   add (Naming.err_code Naming.DynamicClassNameInStrictMode)
@@ -1263,16 +1201,6 @@ let invalid_mutability_in_return_type_hint pos =
   add (Naming.err_code Naming.InvalidReturnMutableHint) pos
     "OwnedMutable is the only mutability related hint allowed in return type annotation \
     for reactive function types."
-
-let anon_use_capture_by_ref pos =
-  add (Naming.err_code Naming.ReferenceInAnonUseClause) pos (
-    "Capturing variables by PHP reference is no longer supported on anonymous "^
-    "functions. If the variable is a value type, store it on an object "^
-    "instead or refactor your code to avoid using a closure.")
-
-let no_tparams_on_type_consts pos =
-  add (Naming.err_code Naming.NoTparamsOnTypeConsts) pos
-    "Type parameters are not allowed on class type constants"
 
 let pu_duplication pos name kind =
   add (Naming.err_code Naming.PocketUniversesDuplication) pos
@@ -1354,20 +1282,12 @@ let not_abstract_without_typeconst (p, _) =
     ("This type constant is not declared as abstract, it must have"^
      " an assigned type")
 
-let abstract_with_typeconst (p, _) =
-  add (NastCheck.err_code NastCheck.AbstractWithTypeconst) p
-    ("This type constant is declared as abstract, it cannot be assigned a type")
-
 let typeconst_depends_on_external_tparam pos ext_pos ext_name =
   add_list (NastCheck.err_code NastCheck.TypeconstDependsOnExternalTparam) [
     pos, ("A type constant can only use type parameters declared in its own"^
       " type parameter list");
     ext_pos, (ext_name ^ " was declared as a type parameter here");
   ]
-
-let typeconst_assigned_tparam pos tp_name =
-  add (NastCheck.err_code NastCheck.TypeconstAssignedTparam) pos
-    (tp_name ^" is a type parameter. It cannot be assigned to a type constant")
 
 let interface_with_partial_typeconst tconst_pos =
   add (NastCheck.err_code NastCheck.InterfaceWithPartialTypeconst) tconst_pos
@@ -1495,18 +1415,6 @@ let inout_params_outside_of_sync pos =
   add (NastCheck.err_code NastCheck.InoutParamsOutsideOfSync) pos (
     "Inout parameters cannot be defined on async functions, "^
     "generators or coroutines."
-  )
-
-let mutable_params_outside_of_sync pos fpos name fname =
-  add_list (NastCheck.err_code NastCheck.MutableParamsOutsideOfSync) [
-    pos, "Mutable parameters are not allowed on async functions";
-    pos, "This parameter "^ (strip_ns name) ^" is marked mutable.";
-    fpos, "The function "^ (strip_ns fname) ^" is marked async.";
-  ]
-
-let mutable_async_method pos =
-  add (NastCheck.err_code NastCheck.MutableAsyncMethod) pos (
-    "Mutable methods must be synchronous. Try removing the async tag from the function."
   )
 
 let mutable_attribute_on_function pos =
@@ -1870,13 +1778,6 @@ let explain_tconst_where_constraint ~use_pos ~definition_pos (error: error) =
      "This method's where constraints contain a generic type access"] @ msgl
   end
 
-let explain_type_constant reason_msgl (error: error) =
-  let code, msgl = (get_code error), (to_list error) in
-  add_list code (msgl @ reason_msgl)
-
-let overflow p =
-  add (Typing.err_code Typing.Overflow) p "Value is too large"
-
 let format_string pos snippet s class_pos fname class_suggest =
   add_list (Typing.err_code Typing.FormatString) [
   (pos, "I don't understand the format string " ^ snippet ^ " in " ^ s);
@@ -2104,11 +2005,6 @@ let new_inconsistent_construct new_pos (cpos, cname) kind =
 
 let pair_arity pos =
   add (Typing.err_code Typing.PairArity) pos "A pair has exactly 2 elements"
-
-let tuple_arity pos2 size2 pos1 size1 =
-  add_list (Typing.err_code Typing.TupleArity) [
-  pos2, "This tuple has "^ string_of_int size2^" elements";
-  pos1, string_of_int size1 ^ " were expected"]
 
 let undefined_parent pos =
   add (Typing.err_code Typing.UndefinedParent) pos
@@ -2460,12 +2356,6 @@ let exact_class_final id pos2 (error: error) =
   let code, msgl = (get_code error), (to_list error) in
   add_list code (msgl @ [(fst id, message1); (pos2, message2)])
 
-let tuple_arity_mismatch pos1 n1 pos2 n2 =
-  add_list (Typing.err_code Typing.TupleArityMismatch) [
-  pos1, "This tuple has "^n1^" elements";
-  pos2, "This one has "^n2^" elements"
-]
-
 let fun_arity_mismatch pos1 pos2 =
   add_list (Typing.err_code Typing.FunArityMismatch) [
   pos1, "Number of arguments doesn't match";
@@ -2480,10 +2370,6 @@ let fun_reactivity_mismatch pos1 kind1 pos2 kind2 =
       pos1, f kind1;
       pos2, f kind2
     ]
-
-let inconsistent_unset pos1 =
-  add (Typing.err_code Typing.InconsistentUnset) pos1
-  ("This variable is unset (via Rx\\freeze or Rx\\move) in one scope but not the other")
 
 let inconsistent_mutability pos1 mut1 p2_opt =
   match p2_opt with
@@ -2666,18 +2552,6 @@ let callsite_reactivity_mismatch f_pos def_pos callee_reactivity cause_pos_opt c
   ] @ Option.value_map cause_pos_opt ~default:[] ~f:(fun cause_pos ->
     [cause_pos, "Reactivity of this argument was used as reactivity of the callee."]
   ))
-let invalid_function_type_for_condition_in_rx
-  f_pos def_pos arg_pos actual_reactivity expected_reactivity =
-  let arg_msg =
-    "Argument type is must be " ^ expected_reactivity ^ " function, " ^
-    actual_reactivity ^ " given." in
-  add_list (Typing.err_code Typing.InvalidConditionallyReactiveCall) [
-    f_pos, "Cannot invoke conditionally reactive function in reactive context, \
-    because at least one reactivity condition is not met.";
-    arg_pos, arg_msg;
-    def_pos, "This is the function declaration";
-  ]
-
 
 let invalid_argument_of_rx_mutable_function pos =
   add (Typing.err_code Typing.InvalidArgumentOfRxMutableFunction) pos (
@@ -2722,17 +2596,6 @@ let new_without_newable pos name =
 let reified_tparam_variadic pos =
   add (Typing.err_code Typing.NewWithoutNewable) pos
     ("A function or method that has a reified type parameter cannot take reified arguments")
-
-let ignored_result_of_freeze pos =
-  add (Typing.err_code Typing.IgnoredResultOfFreeze) pos
-  ("Result of freeze operation is unused. Note that freeze unsets local variable \
-    that was passed as an argument so it won't be accessible after calling freeze.")
-
-let ignored_result_of_move pos =
-  add (Typing.err_code Typing.IgnoredResultOfMove) pos
-  ("Result of move operation is unused. Note that move unsets local variable \
-    that was passed as an argument so it won't be accessible after calling move.")
-
 
 let invalid_freeze_target pos1 var_pos var_mutability_str =
   add_list (Typing.err_code Typing.InvalidFreezeTarget)
@@ -3260,18 +3123,6 @@ let multiple_concrete_defs child_pos parent_pos child_origin parent_origin name 
     child_pos, "Redeclare " ^ name ^ " in " ^ class_ ^ " with a compatible signature.";
   ]
 
-let explain_contravariance pos c_name error =
-  let message = "Considering that this type argument is contravariant "^
-                "with respect to " ^ strip_ns c_name in
-  let code, msgl = (get_code error), (to_list error) in
-  add_list code (msgl @ [pos, message])
-
-let explain_invariance pos c_name suggestion error =
-  let message = "Considering that this type argument is invariant "^
-                  "with respect to " ^ strip_ns c_name ^ suggestion in
-  let code, msgl = (get_code error), (to_list error) in
-  add_list code (msgl @ [pos, message])
-
 let local_variable_modified_and_used pos_modified pos_used_l =
   let used_msg p = p, "And accessed here" in
   add_list (Typing.err_code Typing.LocalVariableModifedAndUsed)
@@ -3316,11 +3167,6 @@ let override_no_default_typeconst pos_child pos_parent =
     pos_child, "This abstract type constant does not have a default type";
     pos_parent, "It cannot override an abstract type constant that has a default type"
   ]
-
-let class_property_only_static_literal pos =
-  let msg =
-    "Initialization of class property must be a static literal expression." in
-  add (Typing.err_code Typing.ClassPropertyOnlyStaticLiteralDEPRECATED) pos msg
 
 let reference_expr pos =
   let msg = "References are only allowed as function call arguments" in
@@ -3394,11 +3240,6 @@ let rx_enabled_in_non_rx_context pos =
     "\\HH\\Rx\\IS_ENABLED can only be used in reactive functions."
   )
 
-let rx_enabled_in_lambdas pos =
-  add (Typing.err_code Typing.RxEnabledInLambdas) pos (
-    "\\HH\\Rx\\IS_ENABLED cannot be used inside lambdas."
-  )
-
 let rx_parameter_condition_mismatch cond pos def_pos =
   add_list (Typing.err_code Typing.RxParameterConditionMismatch) [
     pos, "This parameter does not satisfy "^ cond ^ " condition defined on \
@@ -3454,15 +3295,6 @@ let wrong_expression_kind_attribute expr_kind pos attr attr_class_pos attr_class
     attr_class_pos, msg2
   ]
 
-let attribute_class_no_constructor_args pos def_pos =
-  let msg =
-    "The class associated with this attribute has no constructor. " ^
-    "Please add a constructor to use arguments with this attribute." in
-  add_list (Typing.err_code Typing.AttributeClassNoConstructorArgs) [
-      pos, msg;
-      def_pos, "The attribute's class is defined here."
-  ]
-
 let cannot_return_borrowed_value_as_immutable fun_pos value_pos =
   add_list (Typing.err_code Typing.CannotReturnBorrowedValueAsImmutable) [
     fun_pos, "Values returned from reactive function by default are treated \
@@ -3510,11 +3342,6 @@ let superglobal_in_reactive_context pos name =
 let static_property_in_reactive_context pos =
   add (Typing.err_code Typing.StaticPropertyInReactiveContext) pos (
     "Static property cannot be used in a reactive context."
-  )
-
-let static_in_reactive_context pos name =
-  add (Typing.err_code Typing.StaticInReactiveContext) pos (
-    "Static " ^ name ^ " cannot be used in a reactive context."
   )
 
 let returns_void_to_rx_function_as_non_expression_statement pos fpos =
@@ -3731,10 +3558,3 @@ let try_when f ~when_ ~do_ =
     else add_error error;
     result
   end
-
-(* Runs the first function that is expected to produce an error. If it doesn't
- * then we run the second function we are given
- *)
-let must_error f error_fun =
-  let had_no_errors = try_with_error (fun () -> f(); true) (fun _ -> false) in
-  if had_no_errors then error_fun();

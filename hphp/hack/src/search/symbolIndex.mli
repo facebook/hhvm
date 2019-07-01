@@ -12,16 +12,16 @@ val fuzzy_search_enabled : unit -> bool
 val set_fuzzy_search_enabled : bool -> unit
 
 (* Get or set the currently selected search provider *)
-val get_search_provider: unit -> SearchUtils.search_provider
-val set_search_provider:
+val initialize:
   quiet:bool ->
   provider_name:string ->
   namespace_map:(string * string) list ->
   savedstate_file_opt:string option ->
-  workers:MultiWorker.worker list option -> unit
+  workers:MultiWorker.worker list option -> SearchUtils.si_env
 
 (* Log diagnostics for usage of autocomplete and symbol search *)
 val log_symbol_index_search:
+  sienv:SearchUtils.si_env ->
   query_text:string ->
   max_results:int ->
   results:int ->
@@ -32,12 +32,12 @@ val log_symbol_index_search:
 
 (* This is the proper search function everyone should use *)
 val find_matching_symbols :
-    query_text:string ->
-    max_results:int ->
-    context:SearchUtils.autocomplete_type option ->
-    kind_filter:SearchUtils.si_kind option ->
-    env:SearchUtils.local_tracking_env ->
-    SearchUtils.si_results
+  sienv:SearchUtils.si_env ->
+  query_text:string ->
+  max_results:int ->
+  context:SearchUtils.autocomplete_type option ->
+  kind_filter:SearchUtils.si_kind option ->
+  SearchUtils.si_results
 
 (* Legacy query interface for "Symbol Search", depends on multiworker *)
 val query_for_symbol_search :
@@ -60,15 +60,15 @@ val query_for_autocomplete :
 
 (* Notify the search service that certain files have been updated locally *)
 val update_files :
-  MultiWorker.worker list option ->
-  (Relative_path.t * SearchUtils.info * SearchUtils.file_source) list ->
-  SearchUtils.local_tracking_env ref ->
+  sienv:SearchUtils.si_env ref ->
+  workers:MultiWorker.worker list option ->
+  paths:(Relative_path.t * SearchUtils.info * SearchUtils.file_source) list ->
   unit
 
 (* Notify the search service that certain files have been removed locally *)
 val remove_files :
-  Relative_path.Set.t ->
-  SearchUtils.local_tracking_env ref ->
+  sienv:SearchUtils.si_env ref ->
+  paths:Relative_path.Set.t ->
   unit
 
 (* Identify the position of an item *)

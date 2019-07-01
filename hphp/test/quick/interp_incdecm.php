@@ -11,5 +11,8 @@ function case3($x) {
   $x[]++;
   var_dump($x);
 }
-case3(true);   // warning, not an array
-case3("asdasd"); // fatal
+try {
+  case3("asdasd"); // fatal
+} catch(Exception $e) {
+  print "\nFatal error: " . $e->getMessage();
+}

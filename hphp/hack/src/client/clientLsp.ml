@@ -899,7 +899,7 @@ let do_hover
     (params: Hover.params)
   : Hover.result Lwt.t =
   let (file, line, column) = lsp_file_position_to_hack params in
-  let command = ServerCommandTypes.IDE_HOVER (ServerCommandTypes.FileName file, line, column) in
+  let command = ServerCommandTypes.IDE_HOVER (file, line, column) in
   let%lwt infos = rpc conn ref_unblocked_time command in
   Lwt.return (do_hover_common infos)
 
@@ -907,10 +907,12 @@ let do_hover_local
     (ide_service: ClientIdeService.t)
     (params: Hover.params)
   : Hover.result Lwt.t =
-  let (file, line, column) = lsp_file_position_to_hack params in
+  let (file_path, line, column) = lsp_file_position_to_hack params in
   let%lwt infos = ClientIdeService.hover
     ide_service
-    (ServerCommandTypes.FileName file, line, column)
+    ~file_input:(ServerCommandTypes.LabelledFileName file_path)
+    ~line
+    ~char:column
   in
   match infos with
   | Ok infos ->
@@ -930,70 +932,55 @@ let do_typeDefinition (conn: server_conn) (ref_unblocked_time: float ref) (param
       ~default_path:file
   end)
 
-let do_definition (conn: server_conn) (ref_unblocked_time: float ref) (params: Definition.params)
+let do_definition
+  (conn: server_conn)
+  (ref_unblocked_time: float ref)
+  (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
+  (params: Definition.params)
   : Definition.result Lwt.t =
-  let (file, line, column) = lsp_file_position_to_hack params in
-  let command =
-    ServerCommandTypes.(IDENTIFY_FUNCTION (FileName file, line, column)) in
-  let%lwt results = rpc conn ref_unblocked_time command in
-  let results = List.filter_map results ~f:Utils.unwrap_snd in
-  (* What's it like when we return multiple definitions? For instance, if you ask *)
-  (* for the definition of "new C()" then we've now got the definition of the     *)
-  (* class "\C" and also of the constructor "\\C::__construct". I think that      *)
-  (* users would be happier to only have the definition of the constructor, so    *)
-  (* as to jump straight to it without the fuss of clicking to select which one.  *)
-  (* That indeed is what Typescript does -- it only gives the constructor.        *)
-  (* (VSCode displays multiple definitions with a peek view of them all;          *)
-  (* Atom displays them with a small popup showing just title+file+line of each). *)
-  (* There's one subtlety. If you declare a base class "B" with a constructor,    *)
-  (* and a derived class "C" without a constructor, and click on "new C()", then  *)
-  (* Typescript and VS Code will pop up a little window with both options. This   *)
-  (* seems like a reasonable compromise, so Hack should do the same.              *)
-  let cls = List.fold results ~init:`None ~f:begin fun class_opt (occ, _) ->
-    match class_opt, SymbolOccurrence.enclosing_class occ with
-    | `None, Some c -> `Single c
-    | `Single c, Some c2 when c = c2 -> `Single c
-    | `Single _, Some _ ->
-      (* Symbol occurrences for methods/properties that only exist in a base
-         class still have the derived class as their enclosing class, even
-         though it doesn't explicitly override that member. Because of that, if
-         we hit this case then we know that we're dealing with a union type. In
-         that case, it's not really possible to do the rest of this filtration,
-         since it would have to be decided on a per-class basis. *)
-      `Multiple
-    | class_opt, _ -> class_opt
-  end in
-  let filtered_results = match cls with
-    | `None
-    | `Multiple -> results
-    | `Single _ ->
-      let open SymbolOccurrence in
-      let explicitly_defined = List.fold results ~init:[] ~f:begin fun acc (occ, def) ->
-        let cls = get_class_name occ in
-        match cls with
-        | None -> acc
-        | Some cls ->
-          if String_utils.string_starts_with def.SymbolDefinition.full_name (Utils.strip_ns cls)
-          then (occ, def) :: acc
-          else acc
-      end |> List.rev in
-      let is_result_constructor (occ, _) = is_constructor occ in
-      let has_explicit_constructor = List.exists explicitly_defined ~f:is_result_constructor in
-      let has_constructor = List.exists results ~f:is_result_constructor in
-      let has_class = List.exists results ~f:(fun (occ, _) -> is_class occ) in
-      (* If we have a constructor but it's derived, then we'd like to show both
-         the class and the constructor. If the constructor is explicitly
-         defined, though, we'd like to filter the class out and only show the
-         constructor. *)
-      if has_constructor && has_class && has_explicit_constructor
-      then List.filter results ~f:is_result_constructor
-      else results
+  let (filename, line, column) = lsp_file_position_to_hack params in
+  let uri =
+    params.TextDocumentPositionParams.textDocument.TextDocumentIdentifier.uri in
+  let labelled_file =
+    match SMap.get uri editor_open_files with
+    | Some document ->
+      ServerCommandTypes.(LabelledFileContent {
+        filename;
+        content = document.TextDocumentItem.text;
+      })
+    | None ->
+      ServerCommandTypes.(LabelledFileName filename)
   in
-  Lwt.return (List.map filtered_results ~f:begin fun (_occurrence, definition) ->
+  let command =
+    ServerCommandTypes.GO_TO_DEFINITION (labelled_file, line, column) in
+  let%lwt results = rpc conn ref_unblocked_time command in
+  Lwt.return (List.map results ~f:begin fun (_occurrence, definition) ->
     hack_symbol_definition_to_lsp_identifier_location
       definition
-      ~default_path:file
+      ~default_path:filename
   end)
+
+let do_definition_local
+    (ide_service: ClientIdeService.t)
+    (params: Definition.params)
+    : Definition.result Lwt.t =
+  let (file, line, char) = lsp_file_position_to_hack params in
+  let%lwt results = ClientIdeService.go_to_definition
+    ide_service
+    ~file_input:(ServerCommandTypes.LabelledFileName file)
+    ~line
+    ~char
+  in
+  match results with
+  | Ok results ->
+    let results = List.map results ~f:begin fun (_occurrence, definition) ->
+      hack_symbol_definition_to_lsp_identifier_location
+        definition
+        ~default_path:file
+    end in
+    Lwt.return results
+  | Error error_message ->
+    failwith (Printf.sprintf "Local go-to-definition failed: %s" error_message)
 
 let make_ide_completion_response
   (result:AutocompleteTypes.ide_result)
@@ -1150,12 +1137,24 @@ let do_completion_legacy
 
 let do_completion_local
     (ide_service: ClientIdeService.t)
+    (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
     (params: Completion.params)
   : Completion.result Lwt.t =
   let open Completion in
   let open TextDocumentIdentifier in
+
+  (* Retrieve the file contents *)
   let pos = lsp_position_to_ide params.loc.TextDocumentPositionParams.position in
   let filename = lsp_uri_to_path params.loc.TextDocumentPositionParams.textDocument.uri in
+  let lsp_doc_opt = SMap.get
+    params.loc.TextDocumentPositionParams.textDocument.uri
+    editor_open_files in
+  let lsp_doc = match lsp_doc_opt with
+  | None -> failwith (Printf.sprintf "Cannot find LSP document [%s]" filename)
+  | Some doc -> doc
+  in
+
+  (* Other parameters *)
   let is_manually_invoked = match params.context with
     | None -> false
     | Some c -> c.triggerKind = Invoked
@@ -1164,6 +1163,7 @@ let do_completion_local
   (* this is what I want to fix *)
   let request = { ClientIdeMessage.Lsp_autocomplete.
     filename;
+    file_content = lsp_doc.Lsp.TextDocumentItem.text;
     line = pos.Ide_api_types.line;
     column = pos.Ide_api_types.column;
     delimit_on_namespaces = true;
@@ -1192,19 +1192,33 @@ let completion_kind_to_si_kind
 
 exception NoLocationFound
 
+let docblock_to_markdown
+    (raw_docblock: DocblockService.result): markedString list option =
+  match raw_docblock with
+  | [] -> None
+  | docblock ->
+    Some (Core_kernel.List.fold docblock ~init:[] ~f:(fun acc elt ->
+      match elt with
+      | DocblockService.Markdown txt -> (MarkedString txt) :: acc
+      | DocblockService.HackSnippet txt -> (MarkedCode ("hack", txt)) :: acc
+      | DocblockService.XhpSnippet txt -> (MarkedCode ("html", txt)) :: acc
+    ))
+;;
+
 let do_completionItemResolve
   (conn: server_conn)
   (ref_unblocked_time: float ref)
   (params: CompletionItemResolve.params)
 : CompletionItemResolve.result Lwt.t =
 
-  (* We have to get the filename, line, and column either from JSON or a service *)
-  let%lwt documentation = try
+  (* No matter what, we need the kind *)
+  let raw_kind = params.Completion.kind in
+  let kind = completion_kind_to_si_kind raw_kind in
 
-    (* First try fetching data from json *)
+  (* First try fetching position data from json *)
+  let%lwt raw_docblock = try
     match params.Completion.data with
-    | None ->
-      raise NoLocationFound
+    | None -> raise NoLocationFound
     | Some _ as data ->
       let filename = Jget.string_exn data "filename" in
       let line = Jget.int_exn data "line" in
@@ -1216,31 +1230,59 @@ let do_completionItemResolve
 
       (* Okay let's get a docblock for this specific location *)
       let command = ServerCommandTypes.DOCBLOCK_AT
-        (filename, line, column, base_class)
+        (filename, line, column, base_class, kind)
       in
-      let%lwt contents = rpc conn ref_unblocked_time command in
-      Lwt.return contents
+      let%lwt raw_docblock = rpc conn ref_unblocked_time command in
+      Lwt.return raw_docblock
 
-  (* Let's instead locate the symbol using a service *)
+  (* If that failed, fetch docblock using just the symbol name *)
   with _ ->
-
-    (* Extract information from the request json *)
     let symbolname = params.Completion.label in
-    let raw_kind = params.Completion.kind in
-    let kind = completion_kind_to_si_kind raw_kind in
-
-    (* Fetch docblock for a specific symbol rather than a location *)
     let command = ServerCommandTypes.DOCBLOCK_FOR_SYMBOL (symbolname, kind) in
-    let%lwt result = rpc conn ref_unblocked_time command in
-    Lwt.return result
+    let%lwt raw_docblock = rpc conn ref_unblocked_time command in
+    Lwt.return raw_docblock
   in
 
-  (* Here's your docblock *)
+  (* Convert to markdown and return *)
+  let documentation = docblock_to_markdown raw_docblock in
   Lwt.return
   {
     params with
     Completion.documentation = documentation;
   }
+
+(*
+ * Note that resolve does not depend on having previously executed completion in
+ * the same process.  The LSP resolve request takes, as input, a single item
+ * produced by any previously executed completion request.  So it's okay for
+ * one process to respond to another, because they'll both know the answers
+ * to the same symbol requests.
+ *
+ * And it's totally okay to mix and match requests to serverless IDE and
+ * hh_server.
+ *)
+let do_resolve_local
+    (ide_service: ClientIdeService.t)
+    (params: CompletionItemResolve.params)
+    : CompletionItemResolve.result Lwt.t =
+  let symbolname = params.Completion.label in
+  let raw_kind = params.Completion.kind in
+  let kind = completion_kind_to_si_kind raw_kind in
+  let request = { ClientIdeMessage.Lsp_docblock.
+    symbol = symbolname;
+    kind = kind;
+  } in
+  let%lwt result = ClientIdeService.resolve ide_service request in
+  match result with
+  | Ok raw_docblock ->
+    let documentation = docblock_to_markdown raw_docblock in
+    Lwt.return
+    {
+      params with
+      Completion.documentation = documentation;
+    }
+  | Error error_message ->
+    failwith (Printf.sprintf "Local resolve failed: %s" error_message)
 
 let do_workspaceSymbol
     (conn: server_conn)
@@ -1802,8 +1844,7 @@ let rec connect_client
       autostart;
       force_dormant_start = false;
       watchman_debug_logging = false; (* If you want this, start the server manually in terminal. *)
-      retries = Some 3; (* each retry takes up to 1 second *)
-      expiry = None; (* we can limit retries by time as well as by count *)
+      deadline = Some (Unix.time() +. 3.); (* limit to 3 seconds *)
       no_load = false; (* only relevant when autostart=true *)
       log_inference_constraints = false; (* irrelevant *)
       profile_log = false; (* irrelevant *)
@@ -2444,6 +2485,31 @@ let handle_event
   | Pre_init, Client_message _c ->
     raise (Error.ServerNotInitialized "Server not yet initialized")
 
+  (* Text document completion: "AutoComplete!" *)
+  | (In_init { In_init_env.editor_open_files; _ } | Lost_server { Lost_env.editor_open_files; _ }), Client_message c
+    when env.use_serverless_ide
+      && c.method_ = "textDocument/completion" ->
+    let%lwt () = cancel_if_stale client c short_timeout in
+    let%lwt result = parse_completion c.params
+      |> do_completion_local ide_service editor_open_files
+    in
+    result |> print_completion |> Jsonrpc.respond to_stdout c;
+    Lwt.return_unit
+
+  (* Resolve documentation for a symbol: "Autocomplete Docblock!" *)
+  | (In_init _ | Lost_server _), Client_message c
+    when env.use_serverless_ide
+      && c.method_ = "completionItem/resolve" ->
+    let%lwt () = cancel_if_stale client c short_timeout in
+    let%lwt result =
+      parse_completionItem c.params
+      |> do_resolve_local ide_service
+    in
+    result
+    |> print_completionItem
+    |> Jsonrpc.respond to_stdout c;
+    Lwt.return_unit
+
   (* any request/notification if we're not yet ready *)
   | In_init ienv, Client_message c ->
     let open In_init_env in
@@ -2541,10 +2607,21 @@ let handle_event
     Lwt.return_unit
 
   (* textDocument/definition request *)
-  | Main_loop menv, Client_message c when c.method_ = "textDocument/definition" ->
+  | Main_loop { conn; editor_open_files; _ }, Client_message c
+    when c.method_ = "textDocument/definition" ->
     let%lwt () = cancel_if_stale client c short_timeout in
     let%lwt result = parse_definition c.params
-      |> do_definition menv.conn ref_unblocked_time
+      |> do_definition conn ref_unblocked_time editor_open_files
+    in
+   result |> print_definition |> Jsonrpc.respond to_stdout c;
+   Lwt.return_unit
+
+  | _, Client_message c
+    when env.use_serverless_ide
+      && c.method_ = "textDocument/definition" ->
+    let%lwt () = cancel_if_stale client c short_timeout in
+    let%lwt result = parse_definition c.params
+      |> do_definition_local ide_service
     in
    result |> print_definition |> Jsonrpc.respond to_stdout c;
    Lwt.return_unit
@@ -2556,16 +2633,6 @@ let handle_event
     let%lwt () = cancel_if_stale client c short_timeout in
     let%lwt result = parse_completion c.params
       |> do_completion menv.conn ref_unblocked_time
-    in
-    result |> print_completion |> Jsonrpc.respond to_stdout c;
-    Lwt.return_unit
-
-  | _, Client_message c
-    when env.use_serverless_ide
-      && c.method_ = "textDocument/completion" ->
-    let%lwt () = cancel_if_stale client c short_timeout in
-    let%lwt result = parse_completion c.params
-      |> do_completion_local ide_service
     in
     result |> print_completion |> Jsonrpc.respond to_stdout c;
     Lwt.return_unit

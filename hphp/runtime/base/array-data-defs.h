@@ -153,6 +153,14 @@ inline tv_rval ArrayData::rvalStrict(const StringData* k) const {
   return g_array_funcs.nvTryGetStr[kind()](this, k);
 }
 
+inline ssize_t ArrayData::nvGetIntPos(int64_t k) const {
+  return g_array_funcs.nvGetIntPos[kind()](this, k);
+}
+
+inline ssize_t ArrayData::nvGetStrPos(const StringData* k) const {
+  return g_array_funcs.nvGetStrPos[kind()](this, k);
+}
+
 inline tv_rval ArrayData::rvalPos(ssize_t pos) const {
   return g_array_funcs.nvGetPos[kind()](this, pos);
 }

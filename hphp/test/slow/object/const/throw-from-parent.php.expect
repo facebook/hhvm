@@ -1,0 +1,70 @@
+-- at parent constructor entry --
+object(D) (4) {
+  ["di"]=>
+  int(4)
+  ["dv"]=>
+  vec(1) {
+    int(5)
+  }
+  ["ci"]=>
+  int(0)
+  ["cv"]=>
+  vec(1) {
+    int(1)
+  }
+}
+-- in child constructor after parent::__construct --
+object(D) (4) {
+  ["di"]=>
+  int(4)
+  ["dv"]=>
+  vec(1) {
+    int(5)
+  }
+  ["ci"]=>
+  int(2)
+  ["cv"]=>
+  vec(2) {
+    int(1)
+    int(3)
+  }
+}
+-- after constructor completes --
+object(D) (4) {
+  ["di"]=>
+  int(6)
+  ["dv"]=>
+  vec(2) {
+    int(5)
+    int(7)
+  }
+  ["ci"]=>
+  int(2)
+  ["cv"]=>
+  vec(2) {
+    int(1)
+    int(3)
+  }
+}
+Cannot modify const property ci of class D after construction
+Cannot modify const property di of class D after construction
+Cannot modify const property cv of class D after construction
+Cannot modify const property dv of class D after construction
+Class D does not allow use of dynamic (non-declared) properties
+-- at the end --
+object(D) (4) {
+  ["di"]=>
+  int(6)
+  ["dv"]=>
+  vec(2) {
+    int(5)
+    int(7)
+  }
+  ["ci"]=>
+  int(2)
+  ["cv"]=>
+  vec(2) {
+    int(1)
+    int(3)
+  }
+}

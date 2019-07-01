@@ -431,6 +431,8 @@ let get_modifiers_of_declaration node =
     Some (modifiers_of_function_decl_header_exn header)
   | PropertyDeclaration { property_modifiers; _} ->
     Some (property_modifiers)
+  | ConstDeclaration { const_modifiers; _ } ->
+    Some (const_modifiers)
   | _ -> None
 
 (* tests whether the methodish contains a modifier that satisfies [p] *)
@@ -456,6 +458,9 @@ let methodish_contains_private node =
 
 let is_visibility x =
   is_public x || is_private x || is_protected x
+
+let methodish_contains_visibility node =
+  methodish_modifier_contains_helper is_visibility node
 
 let contains_async_not_last mods =
   let mod_list = syntax_to_list_no_separators mods in
@@ -1038,7 +1043,7 @@ let extract_callconv_node node =
 (* Given a node, checks if it is a abstract ConstDeclaration *)
 let is_abstract_const declaration =
   match syntax declaration with
-  | ConstDeclaration x -> not (is_missing x.const_abstract)
+  | ConstDeclaration _ -> methodish_contains_abstract declaration
   | _ -> false
 
 (* Given a ConstDeclarator node, test whether it is abstract, but has an
@@ -1057,7 +1062,7 @@ let constant_abstract_with_initializer init context =
 (* Given a node, checks if it is a concrete ConstDeclaration *)
 let is_concrete_const declaration =
   match syntax declaration with
-  | ConstDeclaration x -> is_missing x.const_abstract
+  | ConstDeclaration _ -> not (methodish_contains_abstract declaration)
   | _ -> false
 
 (* Given a ConstDeclarator node, test whether it is concrete, but has no
@@ -1867,7 +1872,6 @@ let parameter_errors env node namespace_name names errors =
     params_errors env params namespace_name names errors
   | DecoratedExpression _ -> names, decoration_errors node errors
   | _ -> names, errors
-
 
 let redeclaration_errors env node parents namespace_name names errors =
   match syntax node with
@@ -2960,6 +2964,11 @@ let reified_parameter_errors node errors =
           type_parameters_parameters errors
   | _ -> errors
 
+let is_method_declaration (node : Syntax.t) : bool =
+  match syntax node with
+  | MethodishDeclaration _ -> true
+  | _ -> false
+
 let class_reified_param_errors env node errors =
   match syntax node with
   | ClassishDeclaration cd ->
@@ -3126,19 +3135,20 @@ let classish_errors env node namespace_name names errors =
     let name = text cd.classish_name in
     let errors =
       match syntax cd.classish_body with
-      | ClassishBody {classish_body_elements = methods; _} ->
-        let methods = syntax_to_list_no_separators methods in
+      | ClassishBody {classish_body_elements = class_body_elts; _} ->
+        let class_body_elts = syntax_to_list_no_separators class_body_elts in
+        let class_body_methods = List.filter class_body_elts is_method_declaration in
         let declared_name_str =
           Option.value ~default:"" (Syntax.extract_text cd.classish_name) in
         let full_name = combine_names namespace_name declared_name_str in
         let errors, _, _ =
-          List.fold methods
+          List.fold class_body_elts
             ~f:(check_repeated_properties_tconst_const full_name)
             ~init:(errors, SSet.empty, SSet.empty) in
         let has_abstract_fn =
-          List.exists methods ~f:methodish_contains_abstract in
+          List.exists class_body_methods ~f:methodish_contains_abstract in
         let has_private_method =
-          List.exists methods
+          List.exists class_body_methods
             ~f:(methodish_modifier_contains_helper is_private) in
         let errors =
           if has_abstract_fn &&
@@ -3153,8 +3163,8 @@ let classish_errors env node namespace_name names errors =
           then make_error_from_node node
             SyntaxError.interface_has_private_method :: errors
           else errors in
-        let errors = duplicate_xhp_category_errors methods errors in
-        let errors = duplicate_xhp_children_errors methods errors in
+        let errors = duplicate_xhp_category_errors class_body_elts errors in
+        let errors = duplicate_xhp_children_errors class_body_elts errors in
         errors
       | _ -> errors in
     let names, errors =
@@ -3172,8 +3182,8 @@ let class_element_errors env node errors =
   match syntax node with
   | ConstDeclaration _ when is_inside_trait env.context ->
     make_error_from_node node SyntaxError.const_in_trait :: errors
-  | ConstDeclaration { const_visibility; _ }
-    when not (is_missing const_visibility) && is_typechecker env ->
+  | ConstDeclaration _
+    when methodish_contains_visibility node && is_typechecker env ->
       make_error_from_node node SyntaxError.const_visibility :: errors
   | _ -> errors
 
@@ -3590,6 +3600,13 @@ let class_property_visibility_errors env node errors =
     errors
   | _ -> errors
 
+let class_property_abstract_errors node errors =
+  match syntax node with
+  | PropertyDeclaration _ ->
+    if methodish_contains_abstract node then
+      make_error_from_node node SyntaxError.error2058 :: errors
+    else errors
+  | _ -> errors
 
 let mixed_namespace_errors _env node parents namespace_type errors =
   match syntax node with
@@ -3981,6 +3998,7 @@ let find_syntax_errors env =
       | PropertyDeclaration _ ->
         let errors = class_property_visibility_errors env node errors in
         let errors = class_reified_param_errors env node errors in
+        let errors = class_property_abstract_errors node errors in
         trait_require_clauses, names, errors
       | EnumDeclaration _ ->
         let errors = enum_decl_errors node errors in

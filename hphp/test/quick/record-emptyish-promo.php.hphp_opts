@@ -1,3 +1,0 @@
--vRuntime.Eval.HackRecords=true
--vRuntime.Eval.HackArrCompatNotices=1 
--vRuntime.Eval.HackArrCompatCheckFalseyPromote=1 

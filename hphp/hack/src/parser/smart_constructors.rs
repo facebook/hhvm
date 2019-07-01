@@ -24,6 +24,7 @@ macro_rules! S {
         // Invariant: sc_state is None only during this macro call, so unwrap calls don't panic
         let sc_state0 = std::mem::replace(&mut *($parser.sc_state_mut()), None).unwrap();
         let (sc_state, result) = S::$f(sc_state0, $($rs),+);
+        $parser.check_stack_limit();
         *($parser.sc_state_mut()) = Some(sc_state);
         result
     }}

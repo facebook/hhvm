@@ -38,8 +38,7 @@
     PushL _1
     NullUninit
     NullUninit
-    FPushObjMethodD 0 "getMessage" NullThrows
-    FCall <> 0 1 "" - "" ""
+    FCallObjMethodD <> 0 1 "" - "" NullThrows "getMessage"
     Concat
     String "\n"
     Concat
@@ -58,6 +57,7 @@
     String "hi"
   FCallCtor <> 1 1 "" - ""
   PopC
+  LockObj
   Throw
 }
 
@@ -91,6 +91,7 @@
     CGetL $id
   FCallCtor <> 1 1 "" - ""
   PopC
+  LockObj
   RetC
 }
 

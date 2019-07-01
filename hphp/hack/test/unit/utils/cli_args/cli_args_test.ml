@@ -35,6 +35,19 @@ let spec_input = {|
 }
 |}
 
+let expected_spec_json =
+{|{
+  "gen_with_errors":true,
+  "files_to_check":[
+    "/some/path/prefix1",
+    {"from_prefix_incl":"/from/path/prefix1","to_prefix_excl":"/to/path/prefix1"},
+    {"from_prefix_incl":"/from/path/prefix2","to_prefix_excl":"/to/path/prefix2"},
+    {"from_prefix_incl":"/from/path/only"},
+    {"to_prefix_excl":"/to/path/only"}
+  ],
+  "filename":"/some/dir/some_filename"
+}|}
+
 let compare_paths (expected: Relative_path.t) (actual: Relative_path.t): unit =
   String_asserter.assert_equals
     (Relative_path.suffix expected)
@@ -126,8 +139,40 @@ let test_save_state_spec () : bool =
     true
   | Ok None | Error _ -> false
 
+let test_save_state_spec_json (): bool =
+  let spec_json = get_save_state_spec_json {
+      files_to_check = [
+        Prefix (Relative_path.from_root "/some/path/prefix1");
+        Range {
+          from_prefix_incl = Some (Relative_path.from_root "/from/path/prefix1");
+          to_prefix_excl = Some (Relative_path.from_root "/to/path/prefix1");
+        };
+        Range {
+          from_prefix_incl = Some (Relative_path.from_root "/from/path/prefix2");
+          to_prefix_excl = Some (Relative_path.from_root "/to/path/prefix2");
+        };
+        Range {
+          from_prefix_incl = Some (Relative_path.from_root "/from/path/only");
+          to_prefix_excl = None;
+        };
+        Range {
+          from_prefix_incl = None;
+          to_prefix_excl = Some (Relative_path.from_root "/to/path/only");
+        }
+      ];
+      filename = "/some/dir/some_filename";
+      gen_with_errors = true;
+    }
+  in
+  String_asserter.assert_equals
+    expected_spec_json
+    spec_json
+    "The output should match the expected";
+  true
+
 let tests = [
   ("Test save state spec", test_save_state_spec);
+  ("Test save state spec JSON", test_save_state_spec_json);
 ]
 
 let () =

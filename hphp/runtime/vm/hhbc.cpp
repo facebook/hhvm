@@ -96,7 +96,7 @@ bool argTypeIsVector(ArgType type) {
     type == BLA || type == SLA || type == VSA || type == I32LA;
 }
 
-int immSize(ArgType type, PC immPC) {
+int immSize(Op op, ArgType type, PC immPC) {
   auto pc = immPC;
   static const int8_t argTypeToSizes[] = {
 #define ARGTYPE(nm, type) sizeof(type),
@@ -135,7 +135,7 @@ int immSize(ArgType type, PC immPC) {
   }
 
   if (type == FCA) {
-    decodeFCallArgs(pc);
+    decodeFCallArgs(op, pc);
     return pc - immPC;
   }
 
@@ -193,7 +193,7 @@ ArgUnion getImm(const PC origPC, int idx, const Unit* unit) {
   int cursor = 0;
   for (cursor = 0; cursor < idx; cursor++) {
     // Advance over this immediate.
-    pc += immSize(immType(op, cursor), pc);
+    pc += immSize(op, immType(op, cursor), pc);
   }
   always_assert(cursor == idx);
   auto const type = immType(op, idx);
@@ -206,12 +206,12 @@ ArgUnion getImm(const PC origPC, int idx, const Unit* unit) {
   } else if (type == LAR) {
     retval.u_LAR = decodeLocalRange(pc);
   } else if (type == FCA) {
-    retval.u_FCA = decodeFCallArgs(pc);
+    retval.u_FCA = decodeFCallArgs(op, pc);
   } else if (type == RATA) {
     assertx(unit != nullptr);
     retval.u_RATA = decodeRAT(unit, pc);
   } else if (!argTypeIsVector(type)) {
-    memcpy(&retval.bytes, pc, immSize(type, pc));
+    memcpy(&retval.bytes, pc, immSize(op, type, pc));
   }
   always_assert(numImmediates(op) > idx);
   return retval;
@@ -227,7 +227,7 @@ ArgUnion* getImmPtr(const PC origPC, int idx) {
   assertx(immType(op, idx) != CAW);
   assertx(immType(op, idx) != RATA);
   for (int i = 0; i < idx; i++) {
-    pc += immSize(immType(op, i), pc);
+    pc += immSize(op, immType(op, i), pc);
   }
   return (ArgUnion*)pc;
 }
@@ -244,7 +244,7 @@ int instrLen(const PC origPC) {
   auto op = decode_op(pc);
   int nImm = numImmediates(op);
   for (int i = 0; i < nImm; i++) {
-    pc += immSize(immType(op, i), pc);
+    pc += immSize(op, immType(op, i), pc);
   }
   return pc - origPC;
 }
@@ -317,7 +317,7 @@ OffsetList instrJumpOffsets(const PC origPC) {
 
   OffsetList targets;
   if (hasFCallEffects(op)) {
-    auto const offset = decodeFCallArgs(pc).asyncEagerOffset;
+    auto const offset = decodeFCallArgs(op, pc).asyncEagerOffset;
     if (offset != kInvalidOffset) targets.emplace_back(offset);
     return targets;
   }
@@ -836,7 +836,7 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
 #define H_KA (out += ' ', out += show(decode_member_key(it, u)))
 #define H_LAR (out += ' ', out += show(decodeLocalRange(it)))
 #define H_FCA do {                                               \
-  auto const fca = decodeFCallArgs(it);                          \
+  auto const fca = decodeFCallArgs(thisOpcode, it);              \
   auto const aeOffset = fca.asyncEagerOffset != kInvalidOffset   \
     ? showOffset(fca.asyncEagerOffset)                           \
     : "-";                                                       \
@@ -844,12 +844,13 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
   out += show(fca, fca.byRefs, aeOffset);                        \
 } while (false)
 
-#define O(name, imm, push, pop, flags)    \
-  case Op##name: {                        \
-    out += #name;                         \
-    UNUSED unsigned immIdx = 0;           \
-    imm;                                  \
-    break;                                \
+#define O(name, imm, push, pop, flags)       \
+  case Op##name: {                           \
+    out += #name;                            \
+    UNUSED auto const thisOpcode = Op##name; \
+    UNUSED unsigned immIdx = 0;              \
+    imm;                                     \
+    break;                                   \
   }
 OPCODES
 #undef O
@@ -1210,6 +1211,7 @@ std::string show(const FCallArgsBase& fca, const uint8_t* byRefsRaw,
   std::vector<std::string> flags;
   if (fca.hasUnpack()) flags.push_back("Unpack");
   if (fca.supportsAsyncEagerReturn()) flags.push_back("SupportsAER");
+  if (fca.constructNoConst) flags.push_back("NoConst");
   return folly::sformat(
     "<{}> {} {} {} {}",
     folly::join(' ', flags), fca.numArgs, fca.numRets, byRefs, asyncEagerLabel

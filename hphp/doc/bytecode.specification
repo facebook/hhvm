@@ -1850,7 +1850,8 @@ NewObjS <mode>                             []  ->  [C:Obj]
   the specified mode.
 
   This instruction pushes a default-initialized object onto the stack. The
-  initialization will complete by running a constructor with FCallCtor.
+  initialization will complete by running a constructor with FCallCtor, and
+  clearing the IsBeingConstructed flag using LockObj.
 
   If HasGenerics is passed to NewObj, this indicates that the data at cls-ref
   slot's reified generics portion is valid.
@@ -1859,6 +1860,10 @@ NewObjS <mode>                             []  ->  [C:Obj]
   generics.
 
   NewObjRD's $1 contains a list of reified generics.
+
+LockObj                                    [C:Obj] -> [C:Obj]
+
+  Clears the IsBeingConstructed flag on the object, leaving it on the stack.
 
 FPush* opcodes
 --------------
@@ -1901,41 +1906,6 @@ FPushFuncD <num params> <litstr id>    [U U U C|V..C|V]  ->  [C|V..C|V]
 
   If x is not a string, object, array, or func, this instruction throws a fatal
   error.
-
-FPushObjMethod <num params> <nullsafe>
-  [C U U C|V..C|V C]  ->  [C|V..C|V]
-FPushObjMethodD <num params> <litstr id> <nullsafe>
-  [C U U C|V..C|V]  ->  [C|V..C|V]
-FPushObjMethodRD <num params> <litstr id> <nullsafe>
-  [C U U C|V..C|V C]  ->  [C|V..C|V]
-
-  FPI push object-based method. First, these instructions load values into x
-  and y as given by the following table:
-
-    instruction           x                   y
-    -------------------+-------------------+-----
-      FPushObjMethod   | $(num params + 4) | $1
-      FPushObjMethodD  | $(num params + 3) | %2
-      FPushObjMethodRD | $(num params + 4) | %2
-
-  If x is not an object and nullsafe != ObjMethodOp::NullThrows, or if y is not
-  a string, this instruction throws a fatal error. Next, this instruction
-  checks if object x has an accessible method named y. If it does, this
-  instruction pushes a new entry on the FPI stack, initializing it with the
-  number of parameters being passed (given by %1) and a reference to the FPI
-  structure for the method named y from object x.
-
-  If object x does not have an accessible method named y, this instruction
-  checks if object x has a __call method. If a __call method is found, this
-  instruction pushes a new entry on the FPI stack, initializing it with the
-  number of parameters being passed (given by %1) and a reference to the FPI
-  structure for the __call from object x, and stores the original name y in the
-  FPI stack entry.
-
-  If object x does not have an accessible method named y and it does not have a
-  __call method, this instruction throws a fatal error.
-
-  FPushObjMethodRD's $1 contains a list of reified generics.
 
 FPushClsMethod   <num params> <class-ref slot>
   [U U U C|V..C|V C]  ->  [C|V..C|V]
@@ -2047,6 +2017,40 @@ FCall <fca> <class name> <func name>  [C|V..C|V]  ->  [C..C]
     empty     | empty     | unknown
     empty     | non-empty | function %3
     non-empty | non-empty | method %2::%3
+
+FCallObjMethod <fca> <class hint> <nullsafe>
+  [C U U C|V..C|V C]  ->  [C..C]
+FCallObjMethodD <fca> <class hint> <nullsafe> <litstr id>
+  [C U U C|V..C|V]  ->  [C..C]
+FCallObjMethodRD <fca> <class hint> <nullsafe> <litstr id>
+  [C U U C|V..C|V C]  ->  [C..C]
+
+  Call an instance method. First, these instructions load values into x
+  and y as given by the following table:
+
+    instruction        x                              y
+    -----------------+------------------------------+-----
+    FCallObjMethod   | $(num args + has unpack + 4) | $1
+    FCallObjMethodD  | $(num args + has unpack + 3) | %3
+    FCallObjMethodRD | $(num args + has unpack + 4) | %3
+
+  If x is not an object and nullsafe != ObjMethodOp::NullThrows, or if y is not
+  a string, this instruction throws a fatal error. Next, this instruction checks
+  if object x has an accessible method named y. If it does, this instruction
+  calls that method.
+
+  If object x does not have an accessible method named y, this instruction
+  checks if object x has a __call method. If a __call method is found, this
+  instruction packs arguments into a varray z and calls the __call method with
+  two arguments -- string y and varray z.
+
+  If object x does not have an accessible method named y and it does not have a
+  __call method, this instruction throws a fatal error.
+
+  The string in %2 provides a static analysis hint. If it is non-empty, it is
+  the class name with the implementation of method y that will be called.
+
+  FCallObjMethodRD's $1 contains a list of reified generics.
 
 FCallCtor <fca> <class hint>  [C:Obj U U C|V..C|V]  ->  [C]
 
@@ -3872,7 +3876,7 @@ short-circuit semantics correctly. All Jmp* instructions used to implement
 "and" and "or" operators will be forward jumps.
 
 5) The new expression
-The new expression is implemented by using the NewObj* and FCallCtor
+The new expression is implemented by using the NewObj*, FCallCtor, and LockObj
 instructions.
 
 6) The ternary operator (?:)

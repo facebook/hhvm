@@ -79,13 +79,12 @@ TEST(ZstdTest, Chunks) {
     bool last = ++i == chunks.size();
 
     auto compressed = compressor.compress(chunk.data(), size, last);
-    EXPECT_TRUE(compressed != nullptr);
-    SCOPE_EXIT { free((void*)compressed); };
+    EXPECT_TRUE(compressed.data() != nullptr);
 
     size_t decompressedBufferSize = chunk.size();
     auto decompressedBuffer = std::make_unique<char[]>(decompressedBufferSize);
 
-    ZSTD_inBuffer inBuf = { compressed, size, 0 };
+    ZSTD_inBuffer inBuf = { compressed.data(), size, 0 };
     ZSTD_outBuffer outBuf = {
         decompressedBuffer.get(), decompressedBufferSize, 0 };
 
@@ -108,16 +107,15 @@ TEST(ZstdTest, ContextReuseSingleShot) {
     auto len = kTestInput.size();
     auto out = compressor.compress(kTestInput.data(), len, true);
 
-    EXPECT_NE(out, nullptr);
+    EXPECT_NE(out.data(), nullptr);
     EXPECT_NE(len, 0);
 
-    auto compressed = std::string{out, len};
+    auto compressed = std::string{out.data(), len};
     auto uncompressed = codec->uncompress(compressed);
 
     EXPECT_EQ(uncompressed, kTestInput);
 
     len1 = len;
-    free(const_cast<char *>(out));
   }
 
   {
@@ -125,16 +123,15 @@ TEST(ZstdTest, ContextReuseSingleShot) {
     auto len = kTestInput.size();
     auto out = compressor.compress(kTestInput.data(), len, true);
 
-    EXPECT_NE(out, nullptr);
+    EXPECT_NE(out.data(), nullptr);
     EXPECT_NE(len, 0);
 
-    auto compressed = std::string{out, len};
+    auto compressed = std::string{out.data(), len};
     auto uncompressed = codec->uncompress(compressed);
 
     EXPECT_EQ(uncompressed, kTestInput);
 
     len2 = len;
-    free(const_cast<char *>(out));
   }
 
   EXPECT_LT(len2, len1);
@@ -155,22 +152,20 @@ TEST(ZstdTest, ContextReuseStreamed) {
 
     auto out1 = compressor.compress(data1, len1, false);
 
-    EXPECT_NE(out1, nullptr);
+    EXPECT_NE(out1.data(), nullptr);
     EXPECT_NE(len1, 0);
-    auto compressed = std::string{out1, len1};
+    auto compressed = std::string{out1.data(), len1};
 
     auto out2 = compressor.compress(data2, len2, true);
-    EXPECT_NE(out2, nullptr);
+    EXPECT_NE(out2.data(), nullptr);
     EXPECT_NE(len2, 0);
-    compressed += std::string{out2, len2};
+    compressed += std::string{out2.data(), len2};
 
     auto uncompressed = codec->uncompress(compressed);
 
     EXPECT_EQ(uncompressed, kTestInput);
 
     full_len1 = compressed.size();
-    free(const_cast<char *>(out1));
-    free(const_cast<char *>(out2));
   }
 
   {
@@ -182,22 +177,20 @@ TEST(ZstdTest, ContextReuseStreamed) {
 
     auto out1 = compressor.compress(data1, len1, false);
 
-    EXPECT_NE(out1, nullptr);
+    EXPECT_NE(out1.data(), nullptr);
     EXPECT_NE(len1, 0);
-    auto compressed = std::string{out1, len1};
+    auto compressed = std::string{out1.data(), len1};
 
     auto out2 = compressor.compress(data2, len2, true);
-    EXPECT_NE(out2, nullptr);
+    EXPECT_NE(out2.data(), nullptr);
     EXPECT_NE(len2, 0);
-    compressed += std::string{out2, len2};
+    compressed += std::string{out2.data(), len2};
 
     auto uncompressed = codec->uncompress(compressed);
 
     EXPECT_EQ(uncompressed, kTestInput);
 
     full_len2 = compressed.size();
-    free(const_cast<char *>(out1));
-    free(const_cast<char *>(out2));
   }
 
   EXPECT_LT(full_len2, full_len1);

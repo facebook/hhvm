@@ -910,12 +910,13 @@ private:
 
 struct MonitorThread final {
   explicit MonitorThread(int client);
-  ~MonitorThread() {
+  void detach() {
     if (m_monitor.joinable()) {
       write(m_wpipe, "stop", 5);
       m_monitor.join();
     }
   }
+  ~MonitorThread() { detach(); }
 
 private:
   int m_wpipe{-1};
@@ -1033,11 +1034,12 @@ void CLIWorker::doJob(int client) {
 
     int ret = 255;
     init_command_line_session(args.size(), buf.get());
+
     CliStdoutHook stdout_hook(cli_out.fd);
     CliLoggerHook logging_hook(cli_err.fd);
 
     {
-      SCOPE_EXIT {
+      auto const finish = [&] {
         execute_command_line_end(xhprofFlags, true, args[0].c_str());
         envArr.detach();
         tl_env = nullptr;
@@ -1051,6 +1053,7 @@ void CLIWorker::doJob(int client) {
                           ret, ex.what());
         }
       };
+      auto guard = folly::makeGuard(finish);
 
       auto ini = init_ini_settings(iniSettings);
 
@@ -1116,6 +1119,8 @@ void CLIWorker::doJob(int client) {
         return lv.toString().toCppString();
       }();
 
+      ini.detach();
+
       bool error;
       std::string errorMsg;
       auto const invoke_result = hphp_invoke(
@@ -1136,6 +1141,9 @@ void CLIWorker::doJob(int client) {
       if (invoke_result) {
         ret = *rl_exit_code;
       }
+      monitor.detach();
+      guard.dismiss();
+      finish();
       FTRACE(2, "CLIWorker::doJob({}): waiting for monitor...\n", client);
     }
   } catch (const Exception& ex) {

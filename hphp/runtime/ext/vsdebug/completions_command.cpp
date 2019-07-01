@@ -40,7 +40,7 @@ class FramePointer {
             m_exitDummyContext = true;
           }
         } else {
-          m_fp = g_context->getFrameAtDepth(frameDepth);
+          m_fp = g_context->getFrameAtDepthForDebuggerUnsafe(frameDepth);
         }
     }
 
@@ -344,6 +344,7 @@ void CompletionsCommand::addVariableCompletions(
 
   // If there is a $this, add it.
   if (
+    !fp->isInlined() &&
     fp->func() != nullptr &&
     fp->func()->cls() != nullptr &&
     fp->hasThis()) {
@@ -478,8 +479,13 @@ void CompletionsCommand::addClassConstantCompletions(
   // Add constants of this class. Note that here and in methods, we get
   // everything from this class and its ancestors
   for (Slot i = 0; i < cls->numConstants(); i++) {
-    const std::string& name = cls->constants()[i].name->toCppString();
-    addIfMatch(name, context.matchPrefix, CompletionTypeValue, targets);
+    auto const &clsConst = cls->constants()[i];
+    // constants() includes type constants and abstract constants, neither of
+    // which are particularly useful for debugger completion
+    if (!(clsConst.isType() || clsConst.isAbstract())) {
+      const std::string& name = clsConst.name->toCppString();
+      addIfMatch(name, context.matchPrefix, CompletionTypeValue, targets);
+    }
   }
 
   // Add static methods of this class.

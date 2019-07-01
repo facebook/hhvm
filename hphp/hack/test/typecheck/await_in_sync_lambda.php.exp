@@ -1,0 +1,2 @@
+File "await_in_sync_lambda.php--file2.php", line 9, characters 15-25:
+await can only be used inside async functions (NastCheck[3003])

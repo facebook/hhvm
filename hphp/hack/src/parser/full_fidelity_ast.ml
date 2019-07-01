@@ -1958,7 +1958,8 @@ and pFunctionBody : block parser = fun node env ->
     then [ Pos.none, Noop ]
     else block
   | _ ->
-    [lift_awaits_in_statement env Pos.none (fun () ->
+    let pos = pPos node env in
+    [lift_awaits_in_statement env pos (fun () ->
       let p, r = pExpr node env in
       p, Return (Some (p, r))
     )])

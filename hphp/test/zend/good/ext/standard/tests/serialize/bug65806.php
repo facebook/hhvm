@@ -30,10 +30,23 @@ class myList {
     }
     public function __wakeup()
     {
-		$this->_obj = unserialize($this->_serialized);
-	}
+        $this->_obj = unserialize($this->_serialized);
+    }
 }
 
+
+function check(myObjC $obj) {
+
+    if (!is_object($obj->attrC)) {
+        return 'failed (myObjC::attrC => ' . var_export($obj->attrC, true) . ')';
+    }
+    if (!is_object($obj->attrD)) {
+        return 'failed (myObjC::attrD => ' . var_export($obj->attrD, true) . ')';
+    }
+    return 'successful';
+}
+
+<<__EntryPoint>> function main(): void {
 echo "SCRIPT START" . PHP_EOL;
 
 $objA = new myObjA();
@@ -58,14 +71,4 @@ echo "finish serialize/unserialize" . PHP_EOL;
 echo 'check ' . check($newList->get()) . PHP_EOL;
 
 echo "SCRIPT END" . PHP_EOL ;
-
-function check(myObjC $obj) {
-
-    if (!is_object($obj->attrC)) {
-        return 'failed (myObjC::attrC => ' . var_export($obj->attrC, true) . ')';
-    }
-    if (!is_object($obj->attrD)) {
-        return 'failed (myObjC::attrD => ' . var_export($obj->attrD, true) . ')';
-    }
-    return 'successful';
 }

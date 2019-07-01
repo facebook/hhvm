@@ -10,6 +10,11 @@
  * Alias to functions:
  */
 
+// candidate safe idiom for determining whether data is serialized
+function isSerialized($str) {
+    return ($str == serialize(false) || @unserialize($str) !== false);
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing unserialize() error/boolean distinction ***\n";
 
 $garbage = "obvious non-serialized data";
@@ -25,13 +30,9 @@ var_dump($deserialized_false);
 
 echo "unserialize error and deserialized false are identical? " . (bool) ($deserialized_false == $deserialized_garbage) . "\n";
 
-// candidate safe idiom for determining whether data is serialized
-function isSerialized($str) {
-    return ($str == serialize(false) || @unserialize($str) !== false);
-}
-
 // Test unserialize error idiom
 var_dump(isSerialized($garbage));
 var_dump(isSerialized($serialized_false));
 
 echo "Done";
+}

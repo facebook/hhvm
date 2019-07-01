@@ -50,10 +50,12 @@ class object_class
   private function foo3() {
   }
 }
+
 /* class with no member */
 class no_member_class {
  // no members
 }
+
 /* class with member as object of other class */
 class contains_object_class
 {
@@ -70,6 +72,11 @@ class contains_object_class
    }
 }
 
+abstract final class ZendGoodExtStandardTestsGeneralFunctionsIsCallableBasic2 {
+  public static $loop_counter;
+}
+
+<<__EntryPoint>> function main(): void {
 echo "\n*** Testing is_callable() on objects ***\n";
 /* objects of different classes */
 $obj = new contains_object_class;
@@ -120,7 +127,5 @@ foreach($objects as $object) {
   ZendGoodExtStandardTestsGeneralFunctionsIsCallableBasic2::$loop_counter++;
 }
 
-abstract final class ZendGoodExtStandardTestsGeneralFunctionsIsCallableBasic2 {
-  public static $loop_counter;
-}
 echo "===DONE===\n";
+}

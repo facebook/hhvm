@@ -5,13 +5,14 @@
  * Alias to functions:
  */
 
-echo "*** Testing method_exists() : variation ***\n";
-
 class caseSensitivityTest {
-	public function myMethod() {}
+    public function myMethod() {}
 }
+<<__EntryPoint>> function main(): void {
+echo "*** Testing method_exists() : variation ***\n";
 
 var_dump(method_exists(new casesensitivitytest, 'myMetHOD'));
 var_dump(method_exists('casesensiTivitytest', 'myMetHOD'));
 
 echo "Done";
+}

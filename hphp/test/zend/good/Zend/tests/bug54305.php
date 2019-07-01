@@ -5,5 +5,7 @@ class TestClass {
 }
 abstract class AbstractClass {
 }
+<<__EntryPoint>> function main(): void {
 $methodWithArgs = new ReflectionMethod('TestClass', 'methodWithArgs');
 echo $methodWithArgs++;
+}

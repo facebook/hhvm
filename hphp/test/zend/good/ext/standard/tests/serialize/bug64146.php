@@ -1,7 +1,5 @@
 <?hh
 
-echo "Test\n";
-
 class A
 {
     public $a = array();
@@ -42,9 +40,12 @@ class C
         $this->c = $c;
     }
 }
+<<__EntryPoint>> function main(): void {
+echo "Test\n";
 
 $a = unserialize(serialize(new A()));
 
 print $a->a[0]->b->c . "\n";
 print $a->a[1]->b->c . "\n";
 echo "Done";
+}

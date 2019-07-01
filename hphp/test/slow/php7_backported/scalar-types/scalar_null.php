@@ -1,7 +1,7 @@
 <?hh
 
 require 'fix_exceptions.inc';
-
+<<__EntryPoint>> function main(): void {
 $functions = [
     'int' => function (int $i) { return $i; },
     'float' => function (float $f) { return $f; },
@@ -23,3 +23,4 @@ foreach ($functions as $type => $function) {
 }
 
 echo PHP_EOL . "Done";
+}

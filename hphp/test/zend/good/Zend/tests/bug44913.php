@@ -7,5 +7,7 @@ function something() {
                 return;
         }
 }
+<<__EntryPoint>> function main(): void {
 something();
 echo "ok\n";
+}

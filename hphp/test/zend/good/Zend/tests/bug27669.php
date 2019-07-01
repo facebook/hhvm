@@ -1,13 +1,14 @@
 <?hh
-    error_reporting(E_ALL & !E_STRICT);
 
-    class A {
-        static function hello() {
-            echo "Hello World\n";
-        }
-    }
-    $y = ['hello'];
-    A::$y[0]();
+class A {
+  static function hello(): void {
+    echo "Hello World\n";
+  }
+}
+
 <<__EntryPoint>> function main(): void {
-echo "===DONE===\n";
+  error_reporting(E_ALL & ~E_STRICT);
+  $y = ['hello'];
+  A::$y[0]();
+  echo "===DONE===\n";
 }

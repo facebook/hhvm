@@ -2,6 +2,12 @@
 
 require 'fix_exceptions.inc';
 
+class Stringable {
+    public function __toString() {
+        return "foobar";
+    }
+}
+<<__EntryPoint>> function main(): void {
 $errnames = [
     E_NOTICE => 'E_NOTICE',
     E_WARNING => 'E_WARNING',
@@ -13,12 +19,6 @@ $functions = [
     'string' => function (string $s) { return $s; },
     'bool' => function (bool $b) { return $b; }
 ];
-
-class Stringable {
-    public function __toString() {
-        return "foobar";
-    }
-}
 
 $values = [
     1,
@@ -52,3 +52,4 @@ foreach ($functions as $type => $function) {
     }
 }
 echo PHP_EOL . "Done";
+}

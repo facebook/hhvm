@@ -1,3 +1,3 @@
 <?hh
 namespace Foo;
-echo namespace\bar."\n";
+<<__EntryPoint>> function main(): void { echo namespace\bar."\n"; }

@@ -1,19 +1,13 @@
 <?hh
-
 require 'fix_exceptions.inc';
-
+class Stringable { public function __toString() { return "foobar"; } }
+<<__EntryPoint>> function main(): void {
 $functions = [
     'int' => function ($i): int { return $i; },
     'float' => function ($f): float { return $f; },
     'string' => function ($s): string { return $s; },
     'bool' => function ($b): bool { return $b; }
 ];
-
-class Stringable {
-    public function __toString() {
-        return "foobar";
-    }
-}
 
 $values = [
     1,
@@ -48,3 +42,4 @@ foreach ($functions as $type => $function) {
 }
 
 echo PHP_EOL . "Done";
+}

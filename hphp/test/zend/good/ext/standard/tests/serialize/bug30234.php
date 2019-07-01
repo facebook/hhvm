@@ -2,10 +2,10 @@
 
 function __autoload($class_name)
 {
-	require_once(dirname(__FILE__) . '/' . strtolower($class_name) . '.p5c');
-	echo __FUNCTION__ . '(' . $class_name . ")\n";
+    require_once(dirname(__FILE__) . '/' . strtolower($class_name) . '.p5c');
+    echo __FUNCTION__ . '(' . $class_name . ")\n";
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(interface_exists('autoload_interface', false));
 var_dump(class_exists('autoload_implements', false));
 
@@ -19,3 +19,4 @@ var_dump(interface_exists('autoload_interface', false));
 var_dump(class_exists('autoload_implements', false));
 
 echo "===DONE===\n";
+}

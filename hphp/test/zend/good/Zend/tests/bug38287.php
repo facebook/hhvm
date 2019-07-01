@@ -1,10 +1,4 @@
 <?hh
-error_reporting(0);
-
-something::do_something();
-
-// $not_there is really NULL
-var_dump($not_there);
 
 class something {
 
@@ -22,4 +16,13 @@ class something {
     self::get_object()->vars[]=3;
     var_dump(self::get_object()->vars);
   }
+}
+
+<<__EntryPoint>> function main(): void {
+error_reporting(0);
+
+something::do_something();
+
+// $not_there is really NULL
+var_dump($not_there);
 }

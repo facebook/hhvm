@@ -1209,6 +1209,7 @@ and convert_stmt (env : env) (st : state) (p, stmt_): _ * stmt =
       let st, opt_e = convert_opt_expr env st opt_e in
       st, Return (opt_e)
     | Awaitall (el, b) ->
+       check_if_in_async_context env;
        let st, el = List.map_env st el (convert_snd_expr env) in
        let st, b = convert_block env st b in
        st, Awaitall (el, b)

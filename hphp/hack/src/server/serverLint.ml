@@ -19,7 +19,7 @@ let output_json oc el =
   let res =
     Hh_json.JSON_Object [
         "errors", Hh_json.JSON_Array errors_json;
-        "version", Hh_json.JSON_String Build_id.build_id_ohai;
+        "version", Hh_json.JSON_String Hh_version.version;
     ] in
   Out_channel.output_string oc (Hh_json.json_to_string res);
   Out_channel.flush stderr

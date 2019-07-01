@@ -40,7 +40,7 @@ let get_error_list_json
     [
       "passed", Hh_json.JSON_Bool did_pass;
       "errors", Hh_json.JSON_Array error_list;
-      "version", Build_id.build_version_json;
+      "version", Hh_version.version_json;
     ]
   in
   let properties = match save_state_result with

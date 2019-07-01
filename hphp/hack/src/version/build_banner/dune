@@ -1,0 +1,21 @@
+(library
+  (name build_banner)
+  (wrapped false)
+  (c_names
+    build_banner_stubs)
+  (c_flags (:standard
+    -I%{env:CMAKE_SOURCE_DIR=xxx}
+    (:include build-id-opt))))
+
+(rule
+  (targets build-id build-id.c)
+  (deps (universe))
+  (action
+    (progn
+      (write-file generate-build-id.sh "INSTALL_DIR=$PWD FBCODE_DIR=%{env:CMAKE_SOURCE_DIR=xxx} %{env:CMAKE_SOURCE_DIR=yyy}/hphp/tools/generate-build-id.sh IGNORED IGNORED hackc hphp/hack/src")
+      (system "chmod +x generate-build-id.sh && ./generate-build-id.sh"))))
+
+(rule
+  (targets build-id-opt)
+  (action
+    (write-file build-id-opt -DHH_BUILD_BANNER=%{read:build-id})))

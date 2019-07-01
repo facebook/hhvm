@@ -916,7 +916,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   in
   let handle = SharedMem.init ~num_workers (ServerConfig.sharedmem_config config) in
   let init_id = Random_id.short_string () in
-  Hh_logger.log "Version: %s" Build_id.build_id_ohai;
+  Hh_logger.log "Version: %s" Hh_version.version;
   Hh_logger.log "Hostname: %s" (Unix.gethostname ());
   let root = ServerArgs.root options in
   ServerDynamicView.toggle := ServerArgs.dynamic_view options;

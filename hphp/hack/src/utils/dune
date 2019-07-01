@@ -114,18 +114,6 @@
     naming_special_names
     pos))
 
-(copy_files core/config/build-id.c)
-
-(library
-  (name compiler_id)
-  (wrapped false)
-  (modules
-    compiler_id)
-  (c_names
-    compiler_id_impl
-    build-id)
-  (c_flags (:standard -I%{env:CMAKE_SOURCE_DIR=xxx})))
-
 (library
   (name server_load_flag)
   (wrapped false)

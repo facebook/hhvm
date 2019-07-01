@@ -98,7 +98,7 @@ module Messages = struct
 end
 
 let print_json_version () =
-  print_endline @@ Hh_json.json_to_string Build_id.build_version_json
+  print_endline @@ Hh_json.json_to_string Hh_version.version_json
 
 (*****************************************************************************)
 (* The main entry point *)
@@ -195,7 +195,7 @@ let parse_options () =
   Arg.parse options (fun s -> root := s) usage;
   if !version then begin
     if !json_mode then print_json_version ()
-    else print_endline Build_id.build_id_ohai;
+    else print_endline Hh_version.version;
     exit 0
   end;
   (* --json, --save, and --write-symbol-info all imply check *)

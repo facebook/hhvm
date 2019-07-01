@@ -23,7 +23,8 @@
     server_monitor
     typechecker_options
     utils_core
-    utils_www_root))
+    utils_www_root
+    version))
 
 (library
   (name diagnostic_subscription)
@@ -218,6 +219,7 @@
     typed_syntax_transforms
     typing
     utils_core
+    version
     watchman_utils
     (select serverHotClassesDescription.ml from
     (facebook signed_source_fb -> facebook/serverHotClassesDescription.ml)

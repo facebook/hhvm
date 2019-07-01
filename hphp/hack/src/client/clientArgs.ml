@@ -517,7 +517,7 @@ let parse_check_args cmd =
 
   if !version then begin
     if !output_json then ServerArgs.print_json_version ()
-    else print_endline Build_id.build_id_ohai;
+    else print_endline Hh_version.version;
     exit 0;
   end;
 

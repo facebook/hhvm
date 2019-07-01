@@ -787,11 +787,73 @@ void transformUses(OptimizeContext& ctx, InstructionSet& uses, bool& reflow) {
   }
 }
 
+/*
+ * Calculate the stack pointer offset corresponding to the given frame pointer.
+ *
+ * Normally this is straight-forward, but if the parent is DefLabel,
+ * we may have do a recursive walk.
+ */
+int32_t findSPOffset(const IRUnit& unit,
+                     const SSATmp* fp,
+                     jit::flat_set<const IRInstruction*>* visited = nullptr) {
+  assertx(fp->isA(TFramePtr));
+  auto const inst = fp->inst();
+
+  if (inst->is(DefInlineFP)) {
+    return inst->extra<DefInlineFP>()->spOffset.offset;
+  }
+  if (inst->is(DefFP)) {
+    return unit.mainSP()->inst()->extra<DefSP>()->offset.offset;
+  }
+
+  assertx(inst->is(DefLabel));
+
+  // We shouldn't be generating self-referential DefLabels for
+  // FramePtrs, so fail loudly if we ever encounter one.
+  jit::flat_set<const IRInstruction*> newVisited;
+  if (!visited) visited = &newVisited;
+  auto const newDefLabel = visited->insert(inst).second;
+  always_assert(newDefLabel);
+
+  auto const dests = inst->dsts();
+  auto const destIdx =
+    std::find(dests.begin(), dests.end(), fp) - dests.begin();
+  assertx(destIdx >= 0 && destIdx < inst->numDsts());
+
+  // Right now all inputs to the DefLabel should ultimately have the
+  // same offset. So, just recurse down an arbitrary source and use
+  // the offset from that. In debug builds, we'll visit all the
+  // sources and assert that the offsets are all the same.
+  auto first = true;
+  int32_t spOff;
+  inst->block()->forEachSrc(
+    destIdx,
+    [&] (const IRInstruction*, const SSATmp* tmp) {
+      if (first) {
+        spOff = findSPOffset(unit, tmp, visited);
+        first = false;
+        return;
+      }
+      if (!debug) return;
+      auto const off = findSPOffset(unit, tmp, visited);
+      always_assert(off == spOff);
+    }
+  );
+
+  assertx(!first);
+  return spOff;
+}
+
 void adjustBCMarkers(OptimizeContext& ctx) {
   auto fp  = ctx.deadFp;
   auto def = fp->inst();
   auto parentFp = def->src(1);
-  auto parent   = parentFp->inst();
+
+  auto const spAdjust = [&] {
+    assertx(def->is(DefInlineFP));
+    auto const curSpOff = def->extra<DefInlineFP>()->spOffset.offset;
+    return findSPOffset(*ctx.unit, parentFp) - curSpOff;
+  }();
 
   /*
    * We're going to pretend this instruction occured in the caller, so
@@ -801,16 +863,6 @@ void adjustBCMarkers(OptimizeContext& ctx) {
    * marker to eagerly sync vmpc().
    */
   auto const callSK = findCallSK(*def);
-  auto const curSpOff = def->extra<DefInlineFP>()->spOffset.offset;
-  int32_t spAdjust;
-  if (parent->is(DefInlineFP)) {
-    auto parentSpOff = parent->extra<DefInlineFP>()->spOffset.offset;
-    spAdjust = parentSpOff - curSpOff;
-  } else {
-    assertx(parent->is(DefFP));
-    auto spOff = ctx.unit->mainSP()->inst()->extra<DefSP>()->offset.offset;
-    spAdjust = spOff - curSpOff;
-  }
 
   // We need to fix up the main trace-- if a function can reenter we need to be
   // sure that we've adjusted its BC marker so that it doesn't stomp on the

@@ -163,11 +163,14 @@ let check_consistent_fields x l =
   List.for_all l (compare_field_kinds x)
 
 let unbound_name env (pos, name) =
+  let strictish = Partial.should_check_error (Env.get_mode env) 4107 in
   match Env.get_mode env with
   | FileInfo.Mstrict | FileInfo.Mexperimental ->
     (Errors.unbound_name_typing pos name;
-    expr_error env pos (Reason.Rwitness pos))
-
+      expr_error env pos (Reason.Rwitness pos))
+  | FileInfo.Mpartial when strictish ->
+    (Errors.unbound_name_typing pos name;
+      expr_error env pos (Reason.Rwitness pos))
   | FileInfo.Mdecl | FileInfo.Mpartial | FileInfo.Mphp ->
     expr_any env pos (Reason.Rwitness pos)
 

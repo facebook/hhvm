@@ -19,16 +19,6 @@
   (preprocess (pps ppx_deriving.std)))
 
 (library
-  (name typing_heap_defs)
-  (wrapped false)
-  (modules
-    typing_heap_defs)
-  (libraries
-    decl
-    pos
-    collections))
-
-(library
   (name typing_heap)
   (wrapped false)
   (modules
@@ -38,8 +28,7 @@
   (libraries
     core_kernel
     decl
-    typing_defs
-    typing_heap_defs))
+    typing_defs))
 
 (library
   (name tast)

@@ -8,7 +8,6 @@
  *)
 
 module Class = Typing_classes_heap.Api
-module LSTable = Lazy_string_table
 
 type fun_key = string
 type class_key = string
@@ -45,68 +44,6 @@ let get_fun (fun_name: fun_key): fun_decl option =
     let result: fun_decl option = Obj.obj result in
     result
 
-let shallow_decl_enabled () =
-  TypecheckerOptions.shallow_class_decl (GlobalNamingOptions.get ())
-
-let make_lazy_class_type class_name sc =
-  let Decl_ancestors.{
-    ancestors;
-    parents_and_traits;
-    members_fully_known;
-    req_ancestor_names;
-    all_requirements;
-  } = Decl_ancestors.make class_name in
-  let get_ancestor = LSTable.get ancestors in
-  let inherited_members = Decl_inheritance.make class_name get_ancestor in
-  { Typing_heap_defs.
-    sc;
-    ih = inherited_members;
-    ancestors;
-    parents_and_traits;
-    members_fully_known;
-    req_ancestor_names;
-    all_requirements;
-  }
-
-let get_class_decl (class_name: class_key): class_decl option  =
-  try
-    let get_eager_class_type class_name =
-      Decl_class.to_class_type @@
-      match Naming_table.Types.get_pos class_name with
-      | Some (_, Naming_table.TTypedef) | None -> raise Exit
-      | Some (pos, Naming_table.TClass) ->
-        let file = FileInfo.get_pos_filename pos in
-        let class_type = Errors.run_in_decl_mode file
-          (fun () -> Decl.declare_class_in_file file class_name) in
-        match class_type with
-        | Some class_type -> class_type
-        | None -> failwith (
-            "No class returned for get_eager_class_type on " ^ class_name
-          )
-    in
-    (* We don't want to fetch the shallow_class if shallow_class_decl is not
-       enabled--this would frequently involve a re-parse, which would result
-       in a huge perf penalty. We also want to avoid computing the folded
-       decl of the class and all its ancestors when shallow_class_decl is
-       enabled. We maintain these invariants in this module by only ever
-       constructing [Eager] or [Lazy] classes, depending on whether
-       shallow_class_decl is enabled. *)
-    let class_type_variant =
-      if shallow_decl_enabled ()
-      then
-        match Shallow_classes_heap.get class_name with
-        | None -> raise Exit
-        | Some sc ->
-          let lazy_class_type = make_lazy_class_type class_name sc in
-          Typing_heap_defs.Lazy lazy_class_type
-      else
-        let class_type = get_eager_class_type class_name in
-        Typing_heap_defs.Eager class_type
-    in
-    Some class_type_variant
-  (* If we raise Exit, then the class does not exist. *)
-  with Exit -> None
-
 let get_class (class_name: class_key): class_decl option =
   match Provider_config.get_backend () with
   | Provider_config.Shared_memory ->
@@ -117,7 +54,8 @@ let get_class (class_name: class_key): class_decl option =
         decl_cache
         ~key:(Provider_config.Class_decl class_name)
         ~default:(fun () ->
-          let result: class_decl option = get_class_decl class_name in
+          let result: class_decl option =
+            Typing_classes_heap.compute_class_decl_no_cache class_name in
           Obj.repr result
         )
     in

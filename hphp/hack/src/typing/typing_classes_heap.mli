@@ -12,7 +12,7 @@ open Typing_defs
 
 module Classes : sig
   type key = StringKey.t
-  type t = Typing_heap_defs.class_type_variant
+  type t
 
   val get : key -> t option
   val mem : key -> bool
@@ -94,3 +94,6 @@ module Api : sig
       To be used only when {!ServerLocalConfig.shallow_class_decl} is enabled.
       Raises [Failure] if used when shallow_class_decl is not enabled. *)
 end
+
+val compute_class_decl_no_cache : string -> Classes.t option
+(** Implementation detail, do not use. For use in [Decl_provider] only. *)

@@ -11,11 +11,24 @@ open Core_kernel
 open Decl_inheritance
 open Shallow_decl_defs
 open Typing_defs
-open Typing_heap_defs
 
 module Attrs = Attributes
 module LSTable = Lazy_string_table
 module SN = Naming_special_names
+
+type lazy_class_type = {
+  sc: shallow_class;
+  ih: inherited_members;
+  ancestors: decl ty LSTable.t;
+  parents_and_traits: unit LSTable.t;
+  members_fully_known: bool Lazy.t;
+  req_ancestor_names: unit LSTable.t;
+  all_requirements: (Pos.t * decl ty) list Lazy.t;
+}
+
+type class_type_variant =
+  | Lazy of lazy_class_type
+  | Eager of class_type
 
 let make_lazy_class_type class_name sc =
   let Decl_ancestors.{
@@ -53,55 +66,63 @@ module Classes = struct
   type key = StringKey.t
   type t = class_type_variant
 
+  let compute_class_decl ~(use_cache: bool) (class_name: string): t option =
+    try
+      let get_eager_class_type class_name =
+        Decl_class.to_class_type @@
+        let cached =
+          if use_cache
+          then Decl_heap.Classes.get class_name
+          else None
+        in
+        match cached with
+        | Some dc -> dc
+        | None ->
+          match Naming_table.Types.get_pos class_name with
+          | Some (_, Naming_table.TTypedef)
+          | None -> raise Exit
+          | Some (pos, Naming_table.TClass) ->
+            let file = FileInfo.get_pos_filename pos in
+            Option.iter
+              (defer_threshold ())
+              ~f:(fun threshold -> Deferred_decl.should_defer ~d:file ~threshold);
+            let class_type = Errors.run_in_decl_mode file
+              (fun () -> Decl.declare_class_in_file file class_name) in
+            match class_type with
+            | Some class_type -> class_type
+            | None -> failwith (
+                "No class returned for get_eager_class_type on " ^ class_name
+              )
+      in
+      (* We don't want to fetch the shallow_class if shallow_class_decl is not
+         enabled--this would frequently involve a re-parse, which would result
+         in a huge perf penalty. We also want to avoid computing the folded
+         decl of the class and all its ancestors when shallow_class_decl is
+         enabled. We maintain these invariants in this module by only ever
+         constructing [Eager] or [Lazy] classes, depending on whether
+         shallow_class_decl is enabled. *)
+      let class_type_variant =
+        if shallow_decl_enabled ()
+        then
+          match Shallow_classes_heap.get class_name with
+          | None -> raise Exit
+          | Some sc ->
+            Lazy (make_lazy_class_type class_name sc)
+        else
+          Eager (get_eager_class_type class_name)
+      in
+      if use_cache
+      then Cache.add class_name class_type_variant;
+      Some class_type_variant
+    (* If we raise Exit, then the class does not exist. *)
+    with
+    | Deferred_decl.Defer d -> Deferred_decl.add ~d; None
+    | Exit -> None
+
   let get class_name =
     match Cache.get class_name with
     | Some t -> Some t
-    | None ->
-      try
-        let get_eager_class_type class_name =
-          Decl_class.to_class_type @@
-          match Decl_heap.Classes.get class_name with
-          | Some dc -> dc
-          | None ->
-            match Naming_table.Types.get_pos class_name with
-            | Some (_, Naming_table.TTypedef)
-            | None -> raise Exit
-            | Some (pos, Naming_table.TClass) ->
-              let file = FileInfo.get_pos_filename pos in
-              Option.iter
-                (defer_threshold ())
-                ~f:(fun threshold -> Deferred_decl.should_defer ~d:file ~threshold);
-              let class_type = Errors.run_in_decl_mode file
-                (fun () -> Decl.declare_class_in_file file class_name) in
-              match class_type with
-              | Some class_type -> class_type
-              | None -> failwith (
-                  "No class returned for get_eager_class_type on " ^ class_name
-                )
-        in
-        (* We don't want to fetch the shallow_class if shallow_class_decl is not
-           enabled--this would frequently involve a re-parse, which would result
-           in a huge perf penalty. We also want to avoid computing the folded
-           decl of the class and all its ancestors when shallow_class_decl is
-           enabled. We maintain these invariants in this module by only ever
-           constructing [Eager] or [Lazy] classes, depending on whether
-           shallow_class_decl is enabled. *)
-        let class_type_variant =
-          if shallow_decl_enabled ()
-          then
-            match Shallow_classes_heap.get class_name with
-            | None -> raise Exit
-            | Some sc ->
-              Lazy (make_lazy_class_type class_name sc)
-          else
-            Eager (get_eager_class_type class_name)
-        in
-        Cache.add class_name class_type_variant;
-        Some class_type_variant
-      (* If we raise Exit, then the class does not exist. *)
-      with
-      | Deferred_decl.Defer d -> Deferred_decl.add ~d; None
-      | Exit -> None
+    | None -> compute_class_decl ~use_cache:true class_name
 
   let find_unsafe key =
     match get key with
@@ -396,3 +417,5 @@ module Api = struct
     | Lazy lc -> lc.sc
     | Eager _ -> failwith "shallow_class_decl is disabled"
 end
+
+let compute_class_decl_no_cache = Classes.compute_class_decl ~use_cache:false

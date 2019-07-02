@@ -167,14 +167,15 @@ let go_locate_symbol
     let filename = Relative_path.to_absolute path in
 
     (* Determine base class properly *)
-    let base_class_name = if kind = SearchUtils.SI_Class then begin
-      let ns_name = Utils.add_ns symbol in
-      match Decl_provider.get_class ns_name with
-      | None -> None
-      | Some class_info -> Some (Cls.name class_info)
-
-    (* Anything other than a class doesn't have an ancestor *)
-    end else None
+    let base_class_name = match kind with
+      | SearchUtils.SI_Class
+      | SearchUtils.SI_Enum
+      | SearchUtils.SI_Function
+      | SearchUtils.SI_GlobalConstant
+      | SearchUtils.SI_Interface
+      | SearchUtils.SI_Trait
+      | SearchUtils.SI_Typedef -> Some (Utils.add_ns symbol)
+      | _ -> None
     in
 
     (* Here are the results *)

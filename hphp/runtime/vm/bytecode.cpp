@@ -2575,7 +2575,7 @@ ArrayData* resolveAndVerifyTypeStructureHelper(
   Class* calledCls = nullptr;
   auto const v = *values;
   isValidTSType(v, true);
-  if (typeStructureCouldBeNonStatic(ArrNR(v.m_data.parr))) {
+  if (typeStructureCouldBeNonStatic(v.m_data.parr)) {
     auto const frame = vmfp();
     if (frame && frame->func()) {
       declaringCls = frame->func()->cls();

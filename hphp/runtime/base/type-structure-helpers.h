@@ -97,7 +97,7 @@ bool errorOnIsAsExpressionInvalidTypes(const Array& ts, bool dryrun,
  * Returns whether the type structure may not be able to be resolved statically,
  * i.e. if it contains `this` references.
  */
-bool typeStructureCouldBeNonStatic(const Array& ts);
+bool typeStructureCouldBeNonStatic(const ArrayData* ts);
 
 /*
  * Checks whether the type of the given cell matches the type structure.

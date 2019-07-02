@@ -1332,7 +1332,7 @@ SSATmp* handleIsResolutionAndCommonOpts(
   if (op == TypeStructResolveOp::Resolve && (partial || invalidType)) {
     shouldDecRef = true;
     return resolveTypeStructImpl(
-      env, typeStructureCouldBeNonStatic(ArrNR(ts)), true, 1, true);
+      env, typeStructureCouldBeNonStatic(ts), true, 1, true);
   }
   popC(env);
   auto const result = cns(env, maybe_resolved);

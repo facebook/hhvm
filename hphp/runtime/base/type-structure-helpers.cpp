@@ -1025,9 +1025,8 @@ bool errorOnIsAsExpressionInvalidTypes(const Array& ts, bool dryrun,
  * Returns whether the type structure may not be able to be resolved statically,
  * i.e. if it contains `this` references.
  */
-bool typeStructureCouldBeNonStatic(const Array& ts) {
-  assertx(ts.exists(s_kind));
-  switch (static_cast<TypeStructure::Kind>(ts[s_kind].toInt64Val())) {
+bool typeStructureCouldBeNonStatic(const ArrayData* ts) {
+  switch (get_ts_kind(ts)) {
     case TypeStructure::Kind::T_tuple:
     case TypeStructure::Kind::T_fun:
     case TypeStructure::Kind::T_array:
@@ -1047,7 +1046,7 @@ bool typeStructureCouldBeNonStatic(const Array& ts) {
     case TypeStructure::Kind::T_reifiedtype:
       return true;
     case TypeStructure::Kind::T_unresolved: {
-      if (get_ts_classname(ts.get())->isame(s_hh_this.get())) return true;
+      if (get_ts_classname(ts)->isame(s_hh_this.get())) return true;
       bool genericsCouldBeNonStatic = false;
       auto const generics = ts->rval(s_generic_types.get());
       if (generics.is_set()) {
@@ -1057,7 +1056,7 @@ bool typeStructureCouldBeNonStatic(const Array& ts) {
           [&](TypedValue v) {
             assertx(isArrayLikeType(v.m_type));
             genericsCouldBeNonStatic |=
-              typeStructureCouldBeNonStatic(ArrNR(v.m_data.parr));
+              typeStructureCouldBeNonStatic(v.m_data.parr);
             // If at least one generic could be non-static, short circuit
             return genericsCouldBeNonStatic;
           }

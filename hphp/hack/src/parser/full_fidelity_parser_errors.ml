@@ -1837,7 +1837,7 @@ let parameter_errors env node namespace_name names errors =
           else errors in
         let errors =
           if is_in_construct_method env.context then
-          make_error_from_node ~error_type:SyntaxError.RuntimeError
+          make_error_from_node
             node SyntaxError.inout_param_in_construct :: errors
           else errors in
         let inMemoize = first_parent_function_attributes_contains
@@ -1857,6 +1857,9 @@ let parameter_errors env node namespace_name names errors =
         make_error_from_node node SyntaxError.variadic_reference :: errors
       else if is_variadic_reference p.parameter_name then
         make_error_from_node node SyntaxError.reference_variadic :: errors
+      else if is_reference_expression p.parameter_name &&
+              is_in_construct_method env.context then
+        make_error_from_node node SyntaxError.reference_param_in_construct :: errors
       else errors in
     names, errors
   | FunctionDeclarationHeader { function_parameter_list = params; _ }
@@ -2036,20 +2039,22 @@ let is_in_unyieldable_magic_method context =
     end
 
 let function_call_argument_errors ~in_constructor_call node errors =
-  match syntax node with
+  let result = match syntax node with
   | PrefixUnaryExpression
     { prefix_unary_operator = { syntax = Token token; _ }
     ; prefix_unary_operand
-    } when Token.kind token = TokenKind.Ampersand &&
-      SN.Superglobals.is_superglobal @@ text prefix_unary_operand ->
-        make_error_from_node node SyntaxError.error2078 :: errors
+    } when Token.kind token = TokenKind.Ampersand ->
+      if SN.Superglobals.is_superglobal @@ text prefix_unary_operand then
+        Some SyntaxError.error2078
+      else if in_constructor_call then
+        Some SyntaxError.reference_param_in_construct
+      else None
   | DecoratedExpression
     { decorated_expression_decorator = { syntax = Token token ; _ }
     ; decorated_expression_expression = expression
     } when Token.kind token = TokenKind.Inout ->
-      let result =
         if in_constructor_call then Some SyntaxError.inout_param_in_construct else
-        match syntax expression with
+        begin match syntax expression with
         | BinaryExpression _ ->
           Some SyntaxError.fun_arg_inout_set
         | QualifiedName _ ->
@@ -2071,12 +2076,11 @@ let function_call_argument_errors ~in_constructor_call node errors =
           when SN.Superglobals.is_superglobal @@ text subscript_receiver ->
             Some SyntaxError.fun_arg_inout_containers
         | _ -> None
-      in
-      begin match result with
-      | None -> errors
-      | Some e -> make_error_from_node node e :: errors
-      end
-  | _ -> errors
+        end
+  | _ -> None in
+  match result with
+  | None -> errors
+  | Some e -> make_error_from_node node e :: errors
 
 let function_call_on_xhp_name_errors env node errors =
   match syntax node with

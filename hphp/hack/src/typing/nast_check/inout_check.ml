@@ -23,8 +23,6 @@ let check_param _env params p user_attributes f_type name =
       if SSet.mem name SN.Members.as_set then Errors.inout_params_special pos;
       Option.iter byref ~f:(fun p ->
         Errors.inout_params_mix_byref pos p.param_pos)
-    | None when param.param_is_reference && name = SN.Members.__construct ->
-      Errors.byref_on_construct param.param_pos
     | None -> ()
   end;
   let inout = List.find params (fun x -> x.param_callconv = Some Ast.Pinout) in

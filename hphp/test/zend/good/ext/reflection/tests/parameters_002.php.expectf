@@ -85,7 +85,7 @@ isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
 ===2===
 getName: string(3) "ref"
-isPassedByReference: bool(true)
+isPassedByReference: bool(false)
 getClass: NULL
 getDeclaringClass: test
 isArray: bool(false)

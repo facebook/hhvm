@@ -209,6 +209,7 @@ val reference_not_allowed_on_key : string
 val reference_not_allowed_on_value : string
 val reference_not_allowed_on_element : string
 val yield_outside_function : string
+val reference_param_in_construct : string
 val coloncolonclass_on_dynamic : string
 val enum_elem_name_is_class : string
 val expected_as_or_insteadof : string

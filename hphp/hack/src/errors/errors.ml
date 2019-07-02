@@ -1532,10 +1532,6 @@ let variadic_byref_param pos =
   add (NastCheck.err_code NastCheck.VariadicByRefParam) pos
     "Variadic parameters should not be taken by reference"
 
-let byref_on_construct pos =
-  add (NastCheck.err_code NastCheck.ByRefParamOnConstruct) pos
-    "Constructors cannot take parameters by reference"
-
 let byref_dynamic_call pos =
   add (NastCheck.err_code NastCheck.ByRefDynamicCall) pos
     "Arguments can not be passed by reference to dynamic function calls"

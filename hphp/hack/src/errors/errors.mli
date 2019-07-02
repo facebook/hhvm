@@ -503,7 +503,6 @@ val coroutine_in_constructor : Pos.t -> unit
 val illegal_by_ref_expr : Pos.t -> string -> string -> unit
 val variadic_byref_param : Pos.t -> unit
 val classname_const_instanceof : string -> Pos.t -> unit
-val byref_on_construct : Pos.t -> unit
 val byref_dynamic_call : Pos.t -> unit
 val reference_in_strict_mode : Pos.t -> unit
 val pu_duplication : Pos.t -> string -> string -> unit

@@ -7,7 +7,7 @@ class Chickpea {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   ob_start(function($str) {
     return new Chickpea();
   });
@@ -18,5 +18,3 @@ function main() {
 
   echo "DON'T PRINT ME!";
 }
-
-main();

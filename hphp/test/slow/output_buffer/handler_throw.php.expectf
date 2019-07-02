@@ -1,6 +1,7 @@
 garbanzo beans
 Fatal error: Uncaught exception 'Exception' with message 'chickpeas' in %s:%d
 Stack trace:
-#0 %s): Closure$main()
-%A#%d %s(%d): main()
-#%d {main}
+#0 (): Closure$main()
+#1 %s/handler_throw.php(11): ob_end_flush()
+#2 (): main()
+#3 {main}

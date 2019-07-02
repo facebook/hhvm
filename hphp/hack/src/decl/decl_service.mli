@@ -24,3 +24,4 @@ type lazy_decl_result = Errors.t
 val go: MultiWorker.worker list option -> bucket_size:int ->
   Naming_table.fast -> result
 val merge_lazy_decl: lazy_decl_result -> lazy_decl_result -> lazy_decl_result
+val decl_file: lazy_decl_result -> Relative_path.t -> lazy_decl_result

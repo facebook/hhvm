@@ -16,12 +16,16 @@ module Bucket = Hack_bucket
 The type checking service receives a list of files and their symbols as input and
 distributes the work to worker processes.
 
-A worker process's input is a bucket of files. At the end of its work,
+A worker process's input is a subset of files. At the end of its work,
 it returns back to master the following progress report:
   - completed: a list of computations it completed
   - remaining: a list of computations which it didn't end up performing. For example,
     it may not have been able to get through the whole list of computations because
     it exceeded its worker memory cap
+  - deferred: a list of computations which were discovered to be necessary to be
+    performed before some of the computations in the input subset
+
+The deferred list needs further explanation, so read on.
 
 ####
 
@@ -45,12 +49,39 @@ it works poorly: if a particular file that is getting type checked requires a la
 of symbols which have not yet been declared, the unlucky worker ends up serially declaring
 all the files that contain those symbols. In some cases, we observe type checking times on
 the order of minutes for a single file.
+
+Therefore, to account for the fact that we don't have the overall eager declaration phase
+in some initialization scenarios, the decl heap module is now capable of refusing to declare
+a file and instead adding the file to a list of deferments.
+
+The type checker worker is then able to return that list and the file which was being type
+checked when deferments occured back to the master process. The master process is then
+able to distribute the declaration of the files and the (re)checking of the original
+file to all of its workers, thus achieving parallelism and better type checking times overall.
+
+The deferment of declarations is adjustable: it works by using a threshold value that dictates
+the maximum number of lazy declarations allowed per file. If the threshold is not set, then
+there is no limit, and no declarations would be deferred. If the threshold is set at 1,
+then all declarations would be deferred.
+
+The idea behind deferring declarations is similar to the 2nd of the 4 build systems considered in
+the following paper (Make, Excel's calc engine, Shake, and Bazel):
+    https://www.microsoft.com/en-us/research/uploads/prod/2018/03/build-systems-final.pdf
+
+The paper refers to this approach as "restarting", and further suggests that recording and reusing
+the chain of jobs could be used to minimize the number of restarts.
  *)
 
-type file_computation = Relative_path.t * FileInfo.names
+type computation_kind =
+| Check of FileInfo.names
+| Declare
+
+type file_computation = Relative_path.t * computation_kind
+
 type progress = {
   completed: file_computation list;
   remaining: file_computation list;
+  deferred: file_computation list;
 }
 
 (*****************************************************************************)
@@ -112,7 +143,13 @@ let check_const opts fn x =
     Tast_check.def opts def;
     Some def
 
-let process_file dynamic_view_files opts errors (fn, file_infos) =
+let process_file
+    dynamic_view_files
+    opts
+    errors
+    (fn, file_infos)
+    : (Errors.t * file_computation list) =
+  Deferred_decl.reset ();
   let opts = {
       opts with
       GlobalOptions.tco_dynamic_view = Relative_path.Set.mem dynamic_view_files fn;
@@ -128,13 +165,18 @@ let process_file dynamic_view_files opts errors (fn, file_infos) =
     ignore(check_const opts fn name) in
   try
     let errors', () = Errors.do_with_context fn Errors.Typing
-        begin fun () ->
+    begin fun () ->
       SSet.iter (ignore_type_fun opts fn) n_funs;
       SSet.iter (ignore_type_class opts fn) n_classes;
       SSet.iter (ignore_check_typedef opts fn) n_types;
       SSet.iter (ignore_check_const opts fn) n_consts;
     end in
-    Errors.merge errors' errors
+
+    let deferred_files = Deferred_decl.get ~f:(fun d -> d, Declare) in
+    let result = match deferred_files with
+    | [] -> Errors.merge errors' errors, []
+    | _ -> errors, (List.concat [ deferred_files; [ (fn, Check file_infos) ] ])
+    in result
   with e ->
     let stack = Caml.Printexc.get_raw_backtrace () in
     let () = prerr_endline ("Exception on file " ^ (Relative_path.S.to_string fn)) in
@@ -160,10 +202,17 @@ let process_files dynamic_view_files opts errors progress ~memory_cap =
   let rec process_or_exit errors progress =
     match progress.remaining with
     | fn :: fns ->
-      let errors = process_file errors fn in
+      let (errors, deferred) = match fn with
+      | path, Check info ->
+        process_file errors (path, info)
+      | path, Declare ->
+        let errors = Decl_service.decl_file errors path in
+        (errors, [])
+      in
       let progress = {
         completed = fn :: progress.completed;
         remaining = fns;
+        deferred = List.concat [ deferred; progress.deferred ];
       } in
       (* Use [quick_stat] instead of [stat] in order to avoid walking the major
          heap on each call, and just check the major heap because the minor
@@ -189,7 +238,12 @@ let process_files dynamic_view_files opts errors progress ~memory_cap =
   File_provider.local_changes_pop_stack ();
   result
 
-let load_and_process_files dynamic_view_files errors progress ~memory_cap =
+let load_and_process_files
+    dynamic_view_files
+    errors
+    progress
+    ~(memory_cap: int option)
+    : Errors.t * progress =
   let opts = TypeCheckStore.load() in
   process_files dynamic_view_files opts errors progress ~memory_cap
 
@@ -202,16 +256,46 @@ let load_and_process_files dynamic_view_files errors progress ~memory_cap =
     We don't really care about which files are left unchecked since we use
     (gasp) mutation to track that, so combine the errors but always return an
     empty list for the list of unchecked files. *)
-let merge files_to_process files_initial_count files_in_progress
-    files_checked_count (errors, results) acc =
+let merge
+    (files_to_process: file_computation list ref)
+    (files_initial_count: int)
+    (files_in_progress: file_computation Hash_set.t)
+    (files_checked_count: int ref)
+    ((errors: Errors.t), (results: progress))
+    (acc: Errors.t)
+    : Errors.t =
   files_to_process := results.remaining @ !files_to_process;
+
+  (* Let's also prepend the deferred files! *)
+  files_to_process := results.deferred @ !files_to_process;
+
   List.iter ~f:(Hash_set.Poly.remove files_in_progress) results.completed;
-  files_checked_count := (List.length results.completed) + !files_checked_count;
+
+  (* Let's re-add the deferred files here! *)
+  List.iter ~f:(Hash_set.Poly.add files_in_progress) results.deferred;
+  let is_check file =
+    match file with
+    | _, Check _ -> true
+    | _ -> false
+  in
+  let deferred_check_count = List.count
+    ~f:is_check
+    results.deferred
+  in
+  let completed_check_count = List.count
+    ~f:is_check
+    results.completed
+  in
+  files_checked_count := !files_checked_count + completed_check_count - deferred_check_count;
   ServerProgress.send_percentage_progress_to_monitor
     "typechecking" !files_checked_count files_initial_count "files";
   Decl_service.merge_lazy_decl errors acc
 
-let next workers ~files_initial_count files_to_process files_in_progress =
+let next
+    workers
+    ~files_initial_count
+    (files_to_process: file_computation list ref)
+    files_in_progress =
   let max_size = Bucket.max_size () in
   let num_workers = (match workers with Some w -> List.length w | None -> 1) in
   let bucket_size = Bucket.calculate_bucket_size
@@ -230,7 +314,7 @@ let next workers ~files_initial_count files_to_process files_in_progress =
          writing OCaml or anything. *)
       files_to_process := remaining_files;
       List.iter ~f:(Hash_set.Poly.add files_in_progress) current_bucket;
-      Bucket.Job { completed = []; remaining = current_bucket }
+      Bucket.Job { completed = []; remaining = current_bucket; deferred = []; }
 
 let on_cancelled next files_to_process files_in_progress =
   fun () ->
@@ -245,7 +329,14 @@ let on_cancelled next files_to_process files_in_progress =
     in
     add_next []
 
-let process_in_parallel dynamic_view_files workers opts fnl ~interrupt ~memory_cap =
+let process_in_parallel
+    (dynamic_view_files: Relative_path.Set.t)
+    (workers: MultiWorker.worker list option)
+    (opts: TypecheckerOptions.t)
+    (fnl: file_computation list)
+    ~interrupt
+    ~(memory_cap: int option)
+    : Errors.t * 'a * file_computation list =
   TypeCheckStore.store opts;
   let files_to_process = ref fnl in
   let files_in_progress = Hash_set.Poly.create () in
@@ -307,15 +398,22 @@ module Mocking =
 ))
 
 let go_with_interrupt workers opts dynamic_view_files fnl ~interrupt ~memory_cap =
+  let fnl = List.map fnl ~f:(fun (path, names) -> path, Check names) in
   Mocking.with_test_mocking fnl @@ fun fnl ->
     if List.length fnl < 10
     then
-      let progress = { completed = []; remaining = fnl } in
+      let progress = { completed = []; remaining = fnl; deferred = []; } in
       let (errors, _) = process_files dynamic_view_files opts neutral progress ~memory_cap:None in
       errors, interrupt.MultiThreadedCall.env, []
     else process_in_parallel dynamic_view_files workers opts fnl ~interrupt ~memory_cap
 
-let go workers opts dynamic_view_files fnl ~memory_cap =
+let go
+    (workers: MultiWorker.worker list option)
+    (opts: TypecheckerOptions.t)
+    (dynamic_view_files: Relative_path.Set.t)
+    (fnl: (Relative_path.t * FileInfo.names) list)
+    ~memory_cap
+    : Errors.t =
   let interrupt = MultiThreadedCall.no_interrupt () in
   let res, (), cancelled =
     go_with_interrupt workers opts dynamic_view_files fnl ~interrupt ~memory_cap in

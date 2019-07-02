@@ -8,4 +8,7 @@
     server_load_flag
     (select coroutine_errors.ml from
     (facebook -> facebook/coroutine_errors.ml)
-    (-> ../stubs/coroutine_errors.ml))))
+    (-> ../stubs/coroutine_errors.ml))
+    (select badpos_sentinel.ml from
+    (facebook -> facebook/badpos_sentinel.ml)
+    (-> ../stubs/badpos_sentinel.ml))))

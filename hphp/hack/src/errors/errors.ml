@@ -110,7 +110,6 @@ let (error_map : error files_t ref) = ref Relative_path.Map.empty
 let accumulate_errors = ref false
 (* Some filename when declaring *)
 let in_lazy_decl = ref None
-let badpos_sentinel = "PRIMARY ERROR POSITION IS NOT IN CURRENT FILE: please fix"
 
 let try_with_result f1 f2 =
   let error_map_copy = !error_map in
@@ -132,7 +131,9 @@ let try_with_result f1 f2 =
   | Some (code,l) ->
    (* Remove bad position sentinel if present: we might be about to add a new primary
     * error position*)
-   let l = match l with (_, msg) :: l when msg = badpos_sentinel -> l | _ -> l in
+   let l = match l with
+     | (_, msg) :: l when msg = Badpos_sentinel.message -> l
+     | _ -> l in
    f2 result (code,l)
 
 let do_ f =
@@ -587,7 +588,7 @@ let check_pos_msg pos_msg_l =
   let pos = fst (List.hd_exn pos_msg_l) in
   let current_file = fst !current_context in
   if current_file <> Relative_path.default && Pos.filename pos <> current_file
-  then (pos, badpos_sentinel) :: pos_msg_l
+  then (Pos.make_from current_file, Badpos_sentinel.message) :: pos_msg_l
   else pos_msg_l
 
 let rec add_applied_fixme code pos =

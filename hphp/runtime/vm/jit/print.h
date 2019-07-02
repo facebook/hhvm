@@ -110,7 +110,11 @@ inline std::ostream& operator<<(std::ostream& os, GuardConstraint gc) {
 
 std::string banner(const char* caption);
 
-void disasmRange(std::ostream& os, TransKind kind, TCA begin, TCA end);
+void disasmRange(std::ostream& os,
+                 TransKind kind,
+                 TCA begin,
+                 TCA end,
+                 bool useColor = false);
 
 inline void disasmRange(std::ostream& os, TransKind kind, TcaRange r) {
   return disasmRange(os, kind, r.begin(), r.end());

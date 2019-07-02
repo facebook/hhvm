@@ -264,7 +264,7 @@ dynamic getTCRange(const AreaIndex area,
                    const TransKind kind,
                    const TcaRange& range) {
   std::ostringstream disasmStr;
-  disasmRange(disasmStr, kind, range.begin(), range.end());
+  disasmRange(disasmStr, kind, range);
   auto const startStr = folly::sformat("{}", static_cast<void*>(range.begin()));
   auto const endStr = folly::sformat("{}", static_cast<void*>(range.end()));
   return dynamic::object("area", areaAsString(area))
@@ -585,23 +585,28 @@ void print(const SSATmp* tmp) {
 ///////////////////////////////////////////////////////////////////////////////
 // Block.
 
-void disasmRange(std::ostream& os, TransKind kind, TCA begin, TCA end) {
+void disasmRange(std::ostream& os,
+                 TransKind kind,
+                 TCA begin,
+                 TCA end,
+                 bool useColor) {
   assertx(begin <= end);
+  int const indent = kIndent + 4;
   bool const printEncoding = dumpIREnabled(kind, kAsmEncodingLevel);
+  char const* colorStr = useColor ? color(ANSI_COLOR_BROWN) : "";
 
   switch (arch()) {
     case Arch::X64: {
-      Disasm disasm(Disasm::Options().indent(kIndent + 4)
+      Disasm disasm(Disasm::Options().indent(indent)
                     .printEncoding(printEncoding)
-                    .color(color(ANSI_COLOR_BROWN)));
+                    .color(colorStr));
       disasm.disasm(os, begin, end);
       return;
     }
 
     case Arch::ARM: {
       vixl::Decoder dec;
-      vixl::PrintDisassembler disasm(os, kIndent + 4, printEncoding,
-                                     color(ANSI_COLOR_BROWN));
+      vixl::PrintDisassembler disasm(os, indent, printEncoding, colorStr);
       disasm.setShouldDereferencePCRelativeLiterals(true);
       dec.AppendVisitor(&disasm);
       for (; begin < end; begin += vixl::kInstructionSize) {
@@ -611,8 +616,7 @@ void disasmRange(std::ostream& os, TransKind kind, TCA begin, TCA end) {
     }
 
     case Arch::PPC64: {
-      ppc64_asm::Disassembler disasm(printEncoding, true, kIndent + 4,
-                                     color(ANSI_COLOR_BROWN));
+      ppc64_asm::Disassembler disasm(printEncoding, true, indent, colorStr);
       for (; begin < end; begin += ppc64_asm::instr_size_in_bytes) {
         disasm.disassembly(os, begin);
       }
@@ -820,12 +824,12 @@ void print(std::ostream& os, const Block* block, TransKind kind,
         if (!asmInfo->instRangeExists(currArea,
                                       TcaRange(lastEnd - offset,
                                                instRange.begin() - offset))) {
-          disasmRange(os, kind, lastEnd, instRange.begin());
+          disasmRange(os, kind, lastEnd, instRange.begin(), true);
         } else {
           os << "\n";
         }
       }
-      disasmRange(os, kind, instRange.begin(), instRange.end());
+      disasmRange(os, kind, instRange.begin(), instRange.end(), true);
       lastRange[(int)currArea] = instRange;
     }
     os << "\n";

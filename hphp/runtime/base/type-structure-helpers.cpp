@@ -1043,10 +1043,28 @@ bool typeStructureCouldBeNonStatic(const Array& ts) {
     case TypeStructure::Kind::T_keyset:
     case TypeStructure::Kind::T_vec_or_dict:
     case TypeStructure::Kind::T_arraylike:
-    case TypeStructure::Kind::T_unresolved:
     case TypeStructure::Kind::T_typeaccess:
     case TypeStructure::Kind::T_reifiedtype:
       return true;
+    case TypeStructure::Kind::T_unresolved: {
+      if (get_ts_classname(ts.get())->isame(s_hh_this.get())) return true;
+      bool genericsCouldBeNonStatic = false;
+      auto const generics = ts->rval(s_generic_types.get());
+      if (generics.is_set()) {
+        assertx(isArrayLikeType(generics.type()));
+        IterateV(
+          generics.val().parr,
+          [&](TypedValue v) {
+            assertx(isArrayLikeType(v.m_type));
+            genericsCouldBeNonStatic |=
+              typeStructureCouldBeNonStatic(ArrNR(v.m_data.parr));
+            // If at least one generic could be non-static, short circuit
+            return genericsCouldBeNonStatic;
+          }
+        );
+      }
+      return genericsCouldBeNonStatic;
+    }
     case TypeStructure::Kind::T_null:
     case TypeStructure::Kind::T_void:
     case TypeStructure::Kind::T_int:

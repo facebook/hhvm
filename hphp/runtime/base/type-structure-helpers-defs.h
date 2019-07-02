@@ -37,6 +37,7 @@ const StaticString s_is_cls_cns("is_cls_cns");
 const StaticString s_access_list("access_list");
 const StaticString s_root_name("root_name");
 const StaticString s_alias("alias");
+const StaticString s_hh_this("HH\\this");
 
 ///////////////////////////////////////////////////////////////////////////////
 

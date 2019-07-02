@@ -992,6 +992,32 @@ void emitIsLateBoundCls(IRGS& env) {
 
 namespace {
 
+template<typename F>
+SSATmp* resolveTypeStructureAndCacheInRDS(
+  IRGS& env,
+  F resolveTypeStruct,
+  bool typeStructureCouldBeNonStatic
+) {
+  if (typeStructureCouldBeNonStatic) return resolveTypeStruct();
+  auto const handle = RDSHandleData { rds::alloc<ArrayData*>().handle() };
+  auto const ptrType = RuntimeOption::EvalHackArrDVArrs
+    ? TPtrToOtherDict
+    : TPtrToOtherArr;
+  auto const addr = gen(env, LdRDSAddr, handle, ptrType);
+  ifThen(
+    env,
+    [&] (Block* taken) {
+      gen(env, CheckRDSInitialized, taken, handle);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, StMem, addr, resolveTypeStruct());
+      gen(env, MarkRDSInitialized, handle);
+    }
+  );
+  return gen(env, LdMem, RuntimeOption::EvalHackArrDVArrs ? TDict : TArr, addr);
+}
+
 SSATmp* resolveTypeStructImpl(
   IRGS& env,
   bool typeStructureCouldBeNonStatic,
@@ -1004,18 +1030,24 @@ SSATmp* resolveTypeStructImpl(
     declaringCls && typeStructureCouldBeNonStatic
       ? gen(env, LdClsCtx, ldCtx(env))
       : cns(env, nullptr);
-  auto const result = gen(
+  auto const result = resolveTypeStructureAndCacheInRDS(
     env,
-    ResolveTypeStruct,
-    ResolveTypeStructData {
-      declaringCls,
-      suppress,
-      spOffBCFromIRSP(env),
-      static_cast<uint32_t>(n),
-      isOrAsOp
+    [&] {
+      return gen(
+        env,
+        ResolveTypeStruct,
+        ResolveTypeStructData {
+          declaringCls,
+          suppress,
+          spOffBCFromIRSP(env),
+          static_cast<uint32_t>(n),
+          isOrAsOp
+        },
+        sp(env),
+        calledCls
+      );
     },
-    sp(env),
-    calledCls
+    typeStructureCouldBeNonStatic
   );
   popC(env);
   discard(env, n - 1);

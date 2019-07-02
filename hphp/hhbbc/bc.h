@@ -151,7 +151,7 @@ inline bool operator==(const FCallArgs& a, const FCallArgs& b) {
 
   return
     a.flags == b.flags && a.numArgs == b.numArgs && a.numRets == b.numRets &&
-    eq(a.byRefs.get(), b.byRefs.get(), (a.numArgs + 7 / 8)) &&
+    eq(a.byRefs.get(), b.byRefs.get(), (a.numArgs + 7) / 8) &&
     a.asyncEagerTarget == b.asyncEagerTarget &&
     a.constructNoConst == b.constructNoConst;
 }
@@ -236,7 +236,7 @@ struct hasher_impl {
     hash = HPHP::hash_int64_pair(hash, fca.flags);
     if (fca.byRefs) {
       auto const br = reinterpret_cast<char*>(fca.byRefs.get());
-      auto const hash_br = hash_string_cs(br, (fca.numArgs + 7 / 8));
+      auto const hash_br = hash_string_cs(br, (fca.numArgs + 7) / 8);
       hash = HPHP::hash_int64_pair(hash, hash_br);
     }
     hash = HPHP::hash_int64_pair(hash, fca.asyncEagerTarget);

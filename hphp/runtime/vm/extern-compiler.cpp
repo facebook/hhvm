@@ -207,7 +207,7 @@ struct PipeLogger : public folly::AsyncReader::ReadCallback {
       m_eventBase->waitUntilRunning();
     }
 
-#ifdef FACEBOOK 
+#ifdef FACEBOOK
     m_reader = folly::AsyncPipeReader::newReader(
       m_eventBase.get(),
       folly::NetworkSocket::fromFd(fd)

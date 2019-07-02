@@ -74,6 +74,14 @@ val check_tparams_constraints:
   Env.env ->
   decl tparam list ->
   Env.env
+val check_where_constraints:
+  in_class:bool ->
+  use_pos:Pos.t ->
+  ety_env:expand_env ->
+  definition_pos:Pos.t ->
+  Env.env ->
+  decl where_constraint list ->
+  Env.env
 val decl:
   decl ty ->
   phase_ty

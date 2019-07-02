@@ -5006,7 +5006,12 @@ and call_construct p env class_ params el uel cid =
     from_class = Some cid;
     validate_dty = None;
   } in
-  let env = Phase.check_tparams_constraints ~use_pos:p ~ety_env env (Cls.tparams class_) in
+  let env = Phase.check_tparams_constraints ~use_pos:p ~ety_env env
+    (Cls.tparams class_)
+  in
+  let env = Phase.check_where_constraints ~in_class:true ~use_pos:p
+    ~definition_pos:(Cls.pos class_) ~ety_env env (Cls.where_constraints class_)
+  in
   if (Cls.is_xhp class_) then env, tcid, [], [], (Reason.Rnone, TUtils.tany env) else
   let cstr = Env.get_construct env class_ in
   let mode = Env.get_mode env in
@@ -6324,6 +6329,11 @@ and class_def_ env c tc =
     Phase.localize_generic_parameters_with_bounds env c.c_tparams.c_tparam_list
       ~ety_env:(Phase.env_with_self env) in
   let env = add_constraints (fst c.c_name) env constraints in
+  let env = Phase.localize_where_constraints ~ety_env:(Phase.env_with_self env)
+    env c.c_where_constraints in
+  let env = Phase.check_where_constraints ~in_class:true
+        ~use_pos:pc ~definition_pos:pc ~ety_env:(Phase.env_with_self env)
+        env (Cls.where_constraints tc) in
   Typing_variance.class_ (Env.get_tcopt env) (snd c.c_name) tc impl;
   List.iter impl (check_implements_tparaml env);
   check_parents_sealed env c tc;
@@ -6419,7 +6429,7 @@ and class_def_ env c tc =
     T.c_xhp_category = c.c_xhp_category;
     T.c_reqs = c.c_reqs;
     T.c_implements = c.c_implements;
-    T.c_where_constraints = [];
+    T.c_where_constraints = c.c_where_constraints;
     T.c_consts = typed_consts;
     T.c_typeconsts = typed_typeconsts;
     T.c_vars = typed_static_vars @ typed_vars;

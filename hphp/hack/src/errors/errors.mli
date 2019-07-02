@@ -65,7 +65,7 @@ val violated_constraint :
 val method_variance : Pos.t -> unit
 val explain_constraint :
   use_pos:Pos.t -> definition_pos:Pos.t -> param_name:string -> error -> unit
-val explain_where_constraint : use_pos:Pos.t -> definition_pos:Pos.t -> error -> unit
+val explain_where_constraint : in_class:bool -> use_pos:Pos.t -> definition_pos:Pos.t -> error -> unit
 val explain_tconst_where_constraint : use_pos:Pos.t -> definition_pos:Pos.t -> error -> unit
 val unexpected_arrow : Pos.t -> string -> unit
 val missing_arrow : Pos.t -> string -> unit

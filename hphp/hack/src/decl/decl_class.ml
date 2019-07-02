@@ -73,7 +73,7 @@ let to_class_type {
   dc_name;
   dc_pos;
   dc_tparams;
-  dc_where_constraints = _;
+  dc_where_constraints;
   dc_substs;
   dc_consts;
   dc_typeconsts;
@@ -129,6 +129,7 @@ let to_class_type {
     tc_name = dc_name;
     tc_pos = dc_pos;
     tc_tparams = dc_tparams;
+    tc_where_constraints = dc_where_constraints;
     tc_consts = dc_consts;
     tc_typeconsts = dc_typeconsts;
     tc_props = map_elements Decl_heap.Props.find_unsafe dc_props ;

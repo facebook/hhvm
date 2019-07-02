@@ -193,6 +193,11 @@ module Api = struct
     | Lazy lc -> lc.sc.sc_tparams
     | Eager c -> c.tc_tparams
 
+  let where_constraints t =
+    match t with
+    | Lazy lc -> lc.sc.sc_where_constraints
+    | Eager c -> c.tc_where_constraints
+
   let construct t =
     match t with
     | Lazy lc -> Lazy.force lc.ih.construct

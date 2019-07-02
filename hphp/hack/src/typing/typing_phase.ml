@@ -406,8 +406,9 @@ and localize_ft ?(instantiation) ~ety_env env ft =
     match instantiation with
     | Some { use_pos; _ } ->
       let env = check_tparams_constraints ~use_pos ~ety_env env (fst ft.ft_tparams) in
-      let env = check_where_constraints ~use_pos ~definition_pos:ft.ft_pos ~ety_env env
-                  ft.ft_where_constraints in
+      let env = check_where_constraints ~in_class:false
+        ~use_pos ~definition_pos:ft.ft_pos ~ety_env env ft.ft_where_constraints
+      in
       env
     | None -> env in
 
@@ -463,7 +464,7 @@ and check_tparams_constraints ~use_pos ~ety_env env tparams =
     end in
   List.fold_left tparams ~init:env ~f:check_tparam_constraints
 
-and check_where_constraints ~use_pos ~ety_env ~definition_pos env cstrl =
+and check_where_constraints ~in_class ~use_pos ~ety_env ~definition_pos env cstrl =
   List.fold_left cstrl ~init:env ~f:begin fun env (ty1, ck, ty2) ->
       let contains_type_access =
         match ty1, ty2 with
@@ -484,6 +485,7 @@ and check_where_constraints ~use_pos ~ety_env ~definition_pos env cstrl =
       let env, ty1 = localize ~ety_env env ty1 in
       let env, ty2 = localize ~ety_env env ty2 in
       TGenConstraint.add_check_where_constraint_todo
+        ~in_class
         env
         ~use_pos
         ~definition_pos

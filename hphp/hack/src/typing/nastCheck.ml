@@ -373,6 +373,10 @@ and func env f named_body =
 and tparam env t =
   List.iter t.tp_constraints (fun (_, h) -> hint env h)
 
+and where_constr env (h1, _, h2) =
+  hint env h1;
+  hint env h2
+
 and hint env (p, h) =
   hint_ env p h
 
@@ -441,10 +445,10 @@ and check_happly unchecked_tparams env h =
   let subst = Inst.make_subst unchecked_tparams tyl in
   let decl_ty = Inst.instantiate subst decl_ty in
   match decl_ty with
-  | _, Tapply (_, tyl) when tyl <> [] ->
+  | _, Tapply ((p,_), _) ->
       let env, locl_ty = Phase.localize_with_self env decl_ty in
       begin match TUtils.get_base_type env locl_ty with
-        | _, Tclass (cls, _, tyl) ->
+        | _, (Tclass (cls, _, tyl)) ->
           (match Env.get_class env (snd cls) with
             | Some cls ->
                 let tc_tparams = Cls.tparams cls in
@@ -472,7 +476,11 @@ and check_happly unchecked_tparams env h =
                           Reason.explain_generic_constraint (fst h) r x l;
                           env
                         ))
-                end tc_tparams tyl
+                end tc_tparams tyl;
+                ignore(
+                  Phase.check_where_constraints ~in_class:true
+                  ~use_pos:p ~definition_pos:(Cls.pos cls) ~ety_env env
+                  (Cls.where_constraints cls))
             | _ -> ()
             )
         | _ -> ()
@@ -493,6 +501,10 @@ and class_ tenv c =
                tenv c.c_tparams.c_tparam_list
                ~ety_env:(Phase.env_with_self tenv) in
   let tenv = add_constraints (fst c.c_name) tenv constraints in
+  (* When where clauses are present, we need instantiate those type
+   * parameters before checking base class *)
+  let tenv = Phase.localize_where_constraints
+      ~ety_env:(Phase.env_with_self tenv) tenv c.c_where_constraints in
   let env = { env with tenv = Env.set_mode tenv c.c_mode } in
   let c_constructor, c_statics, c_methods = split_methods c in
   let c_static_vars, c_vars = split_vars c in
@@ -501,6 +513,7 @@ and class_ tenv c =
     maybe method_ env c_constructor;
   end;
   List.iter c.c_tparams.c_tparam_list (tparam env);
+  List.iter c.c_where_constraints (where_constr env);
   List.iter c.c_extends (hint env);
   List.iter c.c_implements (hint env);
   List.iter c.c_consts (class_const env);

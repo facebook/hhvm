@@ -1758,12 +1758,15 @@ let explain_constraint ~use_pos ~definition_pos ~param_name (error : error) =
      definition_pos, "'" ^ name ^ "' is a constrained type parameter"] @ msgl
   end
 
-let explain_where_constraint ~use_pos ~definition_pos (error : error) =
+let explain_where_constraint ~in_class ~use_pos ~definition_pos (error : error) =
+  let callsite_ty = if in_class then "class" else "method" in
+  let definition_head =
+    Printf.sprintf "This is the %s with 'where' type constraints" callsite_ty in
   let inst_msg = "A 'where' type constraint is violated here" in
   let code, msgl = (get_code error), (to_list error) in
   add_list code begin
     [use_pos, inst_msg;
-     definition_pos, "This is the method with 'where' type constraints"] @ msgl
+     definition_pos, definition_head] @ msgl
   end
 
 let explain_tconst_where_constraint ~use_pos ~definition_pos (error: error) =

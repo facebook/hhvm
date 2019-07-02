@@ -504,6 +504,7 @@ and class_type = {
   tc_name                : string ;
   tc_pos                 : Pos.t ;
   tc_tparams             : decl tparam list ;
+  tc_where_constraints   : decl where_constraint list;
   tc_consts              : class_const SMap.t;
   tc_typeconsts          : typeconst_type SMap.t;
   tc_props               : class_elt SMap.t;

@@ -53,13 +53,13 @@ let add_check_constraint_todo (env:Env.env) ~use_pos (pos,name) ck cstr_ty ty =
        env
       )
 
-let add_check_where_constraint_todo (env:Env.env) ~use_pos ~definition_pos ck cstr_ty ty =
+let add_check_where_constraint_todo ~in_class (env:Env.env) ~use_pos ~definition_pos ck cstr_ty ty =
     Errors.try_
       (fun () ->
         check_constraint env ck ty ~cstr_ty)
       (fun l ->
-       Errors.explain_where_constraint ~use_pos ~definition_pos l;
-       env
+        Errors.explain_where_constraint ~in_class ~use_pos ~definition_pos l;
+        env
       )
 
 (*

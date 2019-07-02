@@ -10,7 +10,6 @@
 open Core_kernel
 open Common
 open Typing_defs
-open Typing_dependent_type
 
 module Inter = Typing_intersection
 module Reason = Typing_reason
@@ -29,15 +28,7 @@ let raise_error error = raise_notrace @@ NoTypeConst error
 type env = {
   tenv : Env.env;
   ety_env : Phase.env;
-
-  (* A list of dependent we have encountered while expanding a type constant.
-   * After expanding a type constant we can choose either the assigned type or
-   * the constrained type. If we choose the assigned type, the result will not
-   * be expression dependent so this list will be set to empty. However, if it
-   * is the constrained type then the final type will also be a dependent type.
-   *)
-  dep_tys : (Reason.t * dependent_type) list;
-
+  choose_assigned_type : bool;
   (* A list of generics we've seen while expanding. *)
   gen_seen : TySet.t;
 }
@@ -45,7 +36,7 @@ type env = {
 let empty_env env ety_env = {
   tenv = env;
   ety_env;
-  dep_tys = [];
+  choose_assigned_type = true;
   gen_seen = TySet.empty;
 }
 
@@ -74,7 +65,7 @@ and expand_with_env_ ety_env env ~as_tyvar_with_cnstr root id =
       error ();
       env, (make_reason env.tenv Reason.Rnone id root, Typing_utils.terr env.tenv)
   in
-  let tenv, ty = ExprDepTy.apply env.tenv env.dep_tys [snd id] ty in
+  let tenv = env.tenv in
   let tenv, ty =
     (* if type constant has type this::ID and method has associated condition type ROOTCOND_TY
        for the receiver - check if condition type has type constant at the same path.
@@ -130,7 +121,7 @@ and expand env ~as_tyvar_with_cnstr root id =
    *)
   let update_this_ty env =
     let this_ty = match root with
-    | _ when env.dep_tys <> [] -> env.ety_env.this_ty
+    | _ when not env.choose_assigned_type -> env.ety_env.this_ty
     (* Legacy behaviour is to preserve exactness only on `this`
      * and not through `this::T` *)
     | r, Tclass (cid, _, tyl) -> r, Tclass (cid, Nonexact, tyl)
@@ -140,15 +131,34 @@ and expand env ~as_tyvar_with_cnstr root id =
   in
   let env = update_this_ty { env with tenv } in
   let make_reason env r = make_reason env r id root in
-  let env = { env with tenv = tenv } in
-  let expand_and_apply_dep env ty =
-    let env, ty = expand env ty in
-    (* If ty here involves a type access, we have to use
-      the current environment's dependent types. Otherwise,
-      we throw away type access information.
+  let make_ty env name = function
+    | ty when env.choose_assigned_type -> env, ty
+    (* If the generic in question is exactly equal to something, the
+    expression dependent type collapses to that given type, since
+    all constraints of the expression dependent type will get
+    transferred to the lower type. *)
+    (* For example, if we have the following
+      abstract class Box {
+        abstract const type T;
+      }
+      class IntBox { const type T = int; }
+      function addFiveToValue<T1 as Box>(T1 $x) : int where T1::T = int {
+          return $x->get() + 5;
+      }
+      Here, $x->get() has type expr#1::T as T1::T as Box::T.
+      But T1::T is exactly equal to int, so $x->get() no longer needs
+      to be expression dependent. Thus, $x->get() typechecks.
     *)
-    let tenv, ty = ExprDepTy.apply env.tenv env.dep_tys [snd id] ty in
-    { env with tenv }, ty in
+    | (_, Tabstract (AKgeneric s, _)) as ty when
+      not (Typing_set.is_empty (Env.get_equal_bounds env.tenv s)) ->
+      (env, ty)
+    | ty ->
+      let ty_name = name^"::"^snd id in
+      let new_ty = (make_reason env.tenv Reason.Rnone, Tabstract(AKgeneric ty_name, None)) in
+      let tenv = Env.add_upper_bound_global env.tenv ty_name ty in
+      ({ env with tenv }, new_ty)
+  in
+  let env = { env with tenv = tenv } in
   match root_ty with
   | Tany | Terr -> env, root
   | Tabstract (AKdependent (`cls _), Some ty)
@@ -158,10 +168,9 @@ and expand env ~as_tyvar_with_cnstr root id =
       env root class_pos class_name
       id ~as_tyvar_with_cnstr
   | Tabstract (AKgeneric s, _) ->
-    let dep_ty = `cls s in
     let env =
       { env with
-        dep_tys = (make_reason tenv Reason.Rnone, dep_ty)::env.dep_tys;
+        choose_assigned_type = false;
         gen_seen = TySet.add root env.gen_seen;
       }
     in
@@ -185,8 +194,8 @@ and expand env ~as_tyvar_with_cnstr root id =
             the current environment's dependent types. Otherwise,
             we throw away type access information.
           *)
-          let tenv, ty = ExprDepTy.apply env.tenv env.dep_tys [snd id] ty in
-          { prev_env with tenv }, ty::tys, errors
+          let env, ty = make_ty env s ty in
+          { prev_env with tenv = env.tenv }, (env.choose_assigned_type, ty)::tys, errors
         with
           NoTypeConst error -> prev_env, tys, error::errors
     end in
@@ -201,23 +210,23 @@ and expand env ~as_tyvar_with_cnstr root id =
           Errors.non_object_member tconst (Reason.to_pos root_reason) ty pos
         )
       end
-    | ty::_ ->
-      { env with dep_tys = [] }, ty
+    | (choose_assigned_type, ty)::_ ->
+      { env with choose_assigned_type }, ty
     end
   | Tabstract (AKdependent dep_ty, Some ty) ->
     let env =
       { env with
-        dep_tys = (make_reason tenv Reason.Rnone, dep_ty)::env.dep_tys;
-      }
-    in
-    expand env ty
+        choose_assigned_type = false;
+      } in
+    let env, ty = expand env ty in
+    make_ty env (AbstractKind.to_string (AKdependent dep_ty)) ty
   | Tunion tyl ->
-    let env, tyl = List.map_env env tyl ~f:expand_and_apply_dep in
-    { env with dep_tys = [] } , (make_reason tenv Reason.Rnone, Tunion tyl)
+    let env, tyl = List.map_env env tyl ~f:expand in
+    env, (make_reason tenv Reason.Rnone, Tunion tyl)
   | Tintersection tyl ->
-    let env, tyl = Typing_utils.run_on_intersection env tyl ~f:expand_and_apply_dep in
-    let tenv, ty = Inter.intersect_list env.tenv root_reason tyl in
-    { env with dep_tys = []; tenv } , ty
+    let env, tyl = Typing_utils.run_on_intersection env tyl ~f:expand in
+    let tenv, ty = Inter.intersect_list env.tenv (make_reason tenv Reason.Rnone) tyl in
+    { env with tenv }, ty
   | Tvar n ->
     let tenv, ty = Typing_subtype_tconst.get_tyvar_type_const env.tenv n id in
     { env with tenv }, ty
@@ -242,30 +251,42 @@ and create_root_from_type_constant env root class_pos class_name
   let env, typeconst =
     get_typeconst env class_pos class_name pos tconst ~as_tyvar_with_cnstr
   in
+  let ty_name = class_name^"::"^tconst in
   let ety_env =
     { env.ety_env with
       from_class = None; } in
+  (* Check for cycles. We do this by combining the name of the current class
+   * with the remaining ids that we need to expand. If we encounter the same
+   * class name + ids that means we have entered a cycle.
+   *)
+  let type_expansions = (pos, ty_name)::ety_env.type_expansions in
+  if List.mem ~equal:(=) (List.map ety_env.type_expansions snd) ty_name then
+    begin
+      let seen = List.rev_map type_expansions snd in
+      raise_error (fun () -> Errors.cyclic_typeconst (fst typeconst.ttc_name) seen)
+    end;
+  let ety_env = { ety_env with type_expansions } in
   let make_reason ?(root = ety_env.this_ty) env r = make_reason env r (pos, tconst) root in
   match typeconst with
   | { ttc_type = Some ty; _ }
-      when typeconst.ttc_constraint = None || env.dep_tys = [] ->
+      when typeconst.ttc_constraint = None || env.choose_assigned_type ->
       let tenv, (r, ty) = Phase.localize ~ety_env env.tenv ty in
-      { env with dep_tys = []; tenv = tenv },
+      { env with choose_assigned_type = true; tenv },
       (make_reason tenv r ~root, ty)
   | {ttc_constraint = Some cstr; _} ->
       let tenv, cstr = Phase.localize ~ety_env env.tenv cstr in
-      let dep_ty =
-        make_reason tenv (Reason.Rwitness (fst typeconst.ttc_name)),
-        `cls class_name
-      in
+      let reason = make_reason tenv (Reason.Rwitness (fst typeconst.ttc_name)) in
       let tenv, ty =
         if as_tyvar_with_cnstr then
           let tenv, tvar = Env.fresh_invariant_type_var tenv pos in
           Log.log_new_tvar_for_tconst_access tenv pos tvar class_name tconst;
           let tenv = Typing_utils.sub_type tenv tvar cstr in
           tenv, tvar
-        else tenv, cstr in
-      { env with dep_tys = dep_ty::env.dep_tys; tenv }, ty
+        else
+          let ty = reason, Tabstract (AKgeneric ty_name, None) in
+          let tenv = Env.add_upper_bound_global tenv ty_name cstr in
+          tenv, ty in
+      { env with tenv }, ty
   | _ ->
       let tenv, (r, ty) =
         if as_tyvar_with_cnstr then
@@ -274,7 +295,7 @@ and create_root_from_type_constant env root class_pos class_name
           tenv, tvar
         else
           let reason = Reason.Rwitness (fst typeconst.ttc_name) in
-          let ty = (reason, Tabstract (AKgeneric (class_name^"::"^tconst), None)) in
+          let ty = (reason, Tabstract (AKgeneric (ty_name), None)) in
           env.tenv, ty in
       { env with tenv },
       (make_reason tenv r, ty)
@@ -294,24 +315,11 @@ and get_typeconst env class_pos class_name pos tconst ~as_tyvar_with_cnstr =
             Errors.smember_not_found
               `class_typeconst pos ((Cls.pos class_), class_name) tconst `no_hint)
     | Some tc -> tc in
-  (* Check for cycles. We do this by combining the name of the current class
-   * with the remaining ids that we need to expand. If we encounter the same
-   * class name + ids that means we have entered a cycle.
-   *)
-  let cur_tconst = `cls class_name, [tconst] in
-  let seen = ExprDepTy.to_string cur_tconst in
-  let type_expansions = (pos, seen)::env.ety_env.type_expansions in
-  if List.mem ~equal:(=) (List.map env.ety_env.type_expansions snd) seen then
-    begin
-      let seen = List.rev_map type_expansions snd in
-      raise_error (fun () -> Errors.cyclic_typeconst (fst typeconst.ttc_name) seen)
-    end;
   (* If the class is final then we do not need to create dependent types
    * because the type constant cannot be overridden by a child class
    *)
   { env with
-    ety_env = { env.ety_env with type_expansions };
-    dep_tys = if (Cls.final class_) then []  else env.dep_tys;
+    choose_assigned_type = env.choose_assigned_type || (Cls.final class_);
   },
   typeconst
 

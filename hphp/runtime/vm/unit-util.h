@@ -134,6 +134,16 @@ inline bool isReifiedName(const StringData* name) {
           != std::string::npos;
 }
 
+inline bool isMangledReifiedGenericInClosure(const StringData* name) {
+  // mangled name is of the form
+  // __captured$reifiedgeneric$class$ or __captured$reifiedgeneric$function$
+  // so it must be longer than 32 characters
+  return name->size() > 32 &&
+         folly::qfind(name->slice(),
+                      folly::StringPiece("__captured$reifiedgeneric$"))
+          != std::string::npos;
+}
+
 inline folly::StringPiece stripClsOrFnNameFromReifiedName(
   const folly::StringPiece name
 ) {

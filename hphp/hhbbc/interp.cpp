@@ -5129,7 +5129,7 @@ void in(ISS& env, const bc::VerifyParamTypeTS& op) {
   // TODO(T31677864): We are being extremely pessimistic here, relax it
   if (!env.ctx.func->isReified &&
       (!env.ctx.cls || !env.ctx.cls->hasReifiedGenerics) &&
-      !env.index.could_have_reified_type(constraint)) {
+      !env.index.could_have_reified_type(env.ctx, constraint)) {
     return reduce(env, bc::PopC {}, bc::VerifyParamType { op.loc1 });
   }
 
@@ -5289,7 +5289,7 @@ void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
   // TODO(T31677864): We are being extremely pessimistic here, relax it
   if (!env.ctx.func->isReified &&
       (!env.ctx.cls || !env.ctx.cls->hasReifiedGenerics) &&
-      !env.index.could_have_reified_type(constraint)) {
+      !env.index.could_have_reified_type(env.ctx, constraint)) {
     return reduce(env, bc::PopC {}, bc::VerifyRetTypeC {});
   }
   if (auto const inputTS = tv(a)) {

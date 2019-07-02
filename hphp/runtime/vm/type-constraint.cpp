@@ -1407,9 +1407,22 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
 bool tcCouldBeReified(const Func* func, uint32_t paramId) {
   auto const& tc = paramId == TypeConstraint::ReturnId
     ? func->returnTypeConstraint() : func->params()[paramId].typeConstraint;
+  auto const isReifiedGenericInClosure = [&] {
+    if (!func->isClosureBody()) return false;
+    auto const lNames = func->localNames();
+    auto const nParams = func->numParams();
+    auto const nDeclaredProps = func->baseCls()->numDeclProperties();
+    assertx(nParams + 1 + nDeclaredProps <= func->numNamedLocals());
+    // Skip over params and 0Closure
+    for (int i = nParams + 1; i < nParams + 1 + nDeclaredProps; ++i) {
+      if (isMangledReifiedGenericInClosure(lNames[i])) return true;
+    }
+    return false;
+  };
   return tc.isTypeVar() &&
          (func->hasReifiedGenerics() ||
-         (func->cls() && func->cls()->hasReifiedGenerics()));
+          (func->cls() && func->cls()->hasReifiedGenerics()) ||
+          isReifiedGenericInClosure());
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -4783,7 +4783,18 @@ bool Index::satisfies_constraint(Context ctx, const Type& t,
   return false;
 }
 
-bool Index::could_have_reified_type(const TypeConstraint& tc) const {
+bool Index::could_have_reified_type(Context ctx,
+                                    const TypeConstraint& tc) const {
+  if (ctx.func->isClosureBody) {
+    for (auto i = ctx.func->params.size() + 1;
+         i < ctx.func->locals.size();
+         ++i) {
+      auto const name = ctx.func->locals[i].name;
+      if (!name) return false; // named locals do not appear after unnamed local
+      if (isMangledReifiedGenericInClosure(name)) return true;
+    }
+    return false;
+  }
   if (!tc.isObject()) return false;
   auto const name = tc.typeName();
   auto const resolved = resolve_type_name_internal(name);

@@ -61,8 +61,6 @@ namespace HPHP {
 // MacOS: /var/tmp
 const StaticString s_DEFAULT_TEMP_DIR(P_tmpdir);
 
-const StaticString s_ZEND_VERSION("2.4.99");
-
 const int64_t k_ASSERT_ACTIVE      = 1;
 const int64_t k_ASSERT_BAIL        = 3;
 const int64_t k_ASSERT_WARNING     = 4;
@@ -988,10 +986,6 @@ String HHVM_FUNCTION(sys_get_temp_dir) {
 #endif
 }
 
-static String HHVM_FUNCTION(zend_version) {
-  return s_ZEND_VERSION;
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1242,7 +1236,6 @@ void StandardExtension::initOptions() {
   HHVM_FE(putenv);
   HHVM_FE(set_time_limit);
   HHVM_FE(sys_get_temp_dir);
-  HHVM_FE(zend_version);
   HHVM_FE(version_compare);
 
   HHVM_RC_INT(INFO_GENERAL, 1 << 0);

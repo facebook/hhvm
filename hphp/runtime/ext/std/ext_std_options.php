@@ -350,12 +350,6 @@ function version_compare(string $version1,
                          string $version2,
                          string $sop = ""): mixed;
 
-/* Returns a string containing the version of the currently running Zend
- * Engine.
- */
-<<__Native>>
-function zend_version(): string;
-
 } // root namespace
 
 namespace __SystemLib {
@@ -464,7 +458,6 @@ namespace __SystemLib {
         'Compiler ID' => \HHVM_COMPILER_ID,
         'Repo Schema' => \HHVM_REPO_SCHEMA,
         'PHP Version' => \phpversion(),
-        'Zend Version' => \zend_version(),
         'uname' => \php_uname());
 
       $this->appendChildren($this->body, $this->table('Version', $data));

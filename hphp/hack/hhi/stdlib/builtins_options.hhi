@@ -123,9 +123,3 @@ function gc_collect_cycles();
 function gc_mem_caches();
 <<__PHPStdLib>>
 function gc_check_heap();
-<<__PHPStdLib>>
-function zend_logo_guid();
-<<__PHPStdLib>>
-function zend_thread_id();
-<<__PHPStdLib>>
-function zend_version();

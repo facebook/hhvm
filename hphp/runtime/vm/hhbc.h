@@ -490,6 +490,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(NullUninit,      NA,               NOV,             ONE(UV),    NF) \
   O(True,            NA,               NOV,             ONE(CV),    NF) \
   O(False,           NA,               NOV,             ONE(CV),    NF) \
+  O(FuncCred,        NA,               NOV,             ONE(CV),    NF) \
   O(Int,             ONE(I64A),        NOV,             ONE(CV),    NF) \
   O(Double,          ONE(DA),          NOV,             ONE(CV),    NF) \
   O(String,          ONE(SA),          NOV,             ONE(CV),    NF) \

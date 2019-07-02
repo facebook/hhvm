@@ -1170,6 +1170,8 @@ void in(ISS& env, const bc::File&)   { effect_free(env); push(env, TSStr); }
 void in(ISS& env, const bc::Dir&)    { effect_free(env); push(env, TSStr); }
 void in(ISS& env, const bc::Method&) { effect_free(env); push(env, TSStr); }
 
+void in(ISS& env, const bc::FuncCred&) { effect_free(env); push(env, TObj); }
+
 void in(ISS& env, const bc::ClsRefName& op) {
   auto ty = peekClsRefSlot(env, op.slot);
   if (is_specialized_cls(ty)) {

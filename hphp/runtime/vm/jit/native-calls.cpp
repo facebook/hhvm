@@ -43,6 +43,7 @@
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/collections/ext_collections.h"
+#include "hphp/runtime/ext/functioncredential/ext_functioncredential.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 
 #include "hphp/util/abi-cxx.h"
@@ -250,6 +251,8 @@ static CallMap s_callMap {
     {Clone,              &ObjectData::clone, DSSA, SSync, {{SSA, 0}}},
     {NewPair,            collections::allocPair, DSSA, SNone,
                            {{TV, 0}, {TV, 1}}},
+    {FuncCred,           &FunctionCredential::newInstance, DSSA, SNone,
+                           {{SSA, 0}}},
     {AllocObj,           ObjectData::newInstance<true>, DSSA, SSync,
                            {{SSA, 0}}},
     {AllocObjReified,    ObjectData::newInstanceReified<true>, DSSA, SSync,

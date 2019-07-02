@@ -727,6 +727,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ExtendsClass:
   case FinishMemberOp:
   case Floor:
+  case FuncCred:
   case FuncGuard:
   case FuncHasAttr:
   case FwdCtxStaticCall:

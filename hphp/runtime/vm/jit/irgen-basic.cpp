@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/strings.h"
 
+#include "hphp/runtime/ext/functioncredential/ext_functioncredential.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
@@ -626,6 +627,9 @@ void emitFile(IRGS& env)   { push(env, cns(env, curUnit(env)->filepath())); }
 void emitMethod(IRGS& env) { push(env, cns(env, curFunc(env)->fullName())); }
 void emitDup(IRGS& env)    { pushIncRef(env, topC(env)); }
 
+void emitFuncCred(IRGS& env) {
+  push(env, gen(env, FuncCred, cns(env, curFunc(env))));
+}
 //////////////////////////////////////////////////////////////////////
 
 void emitArray(IRGS& env, const ArrayData* x) {

@@ -1649,6 +1649,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::File:
     case Op::Dir:
     case Op::Method:
+    case Op::FuncCred:
       return true;
 
     // basic operations

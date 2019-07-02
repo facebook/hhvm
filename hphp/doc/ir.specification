@@ -1749,6 +1749,10 @@ To string conversions:
 
   Allocate a new ClsMethDataRef.
 
+| FuncCred, DAllocObj, S(Func), PRc
+
+  Allocate a new FunctionCredential
+
 9. Call & Return
 
 | SpillFrame<offset,numArgs>,

@@ -1072,6 +1072,10 @@ Method  []  ->  [C:Static Str]
   Push string. File pushes __FILE__ onto the stack, Dir pushes __DIR__ onto
   the stack, and Method pushes __METHOD__.
 
+FuncCred []  -> [Object]
+  Push object holding information about current executing function
+  onto the stack
+
 ClsRefName <class-ref slot>  [] ->  [C:Static Str]
 
   Push the name of the class in %1 as a string.

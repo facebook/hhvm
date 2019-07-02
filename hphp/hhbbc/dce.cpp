@@ -1087,6 +1087,7 @@ void dce(Env& env, const bc::Null&)          { pushRemovable(env); }
 void dce(Env& env, const bc::NullUninit&)    { pushRemovable(env); }
 void dce(Env& env, const bc::File&)          { pushRemovable(env); }
 void dce(Env& env, const bc::Dir&)           { pushRemovable(env); }
+void dce(Env& env, const bc::FuncCred&)      { pushRemovable(env); }
 void dce(Env& env, const bc::NewArray&)      { pushRemovable(env); }
 void dce(Env& env, const bc::NewCol&)        { pushRemovable(env); }
 void dce(Env& env, const bc::CheckProp&)     { pushRemovable(env); }

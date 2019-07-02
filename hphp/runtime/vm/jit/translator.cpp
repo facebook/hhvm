@@ -139,6 +139,7 @@ static const struct {
   { OpDir,         {None,             Stack1,       OutString       }},
   { OpMethod,      {None,             Stack1,       OutString       }},
   { OpClsRefName,  {None,             Stack1,       OutString       }},
+  { OpFuncCred,    {None,             Stack1,       OutObject       }},
 
   /*** 3. Operator instructions ***/
 
@@ -985,6 +986,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::ResolveObjMethod:
   case Op::False:
   case Op::File:
+  case Op::FuncCred:
   case Op::GetMemoKeyL:
   case Op::Idx:
   case Op::InitThisLoc:

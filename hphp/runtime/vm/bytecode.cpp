@@ -100,6 +100,7 @@
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/event-hook.h"
+#include "hphp/runtime/ext/functioncredential/ext_functioncredential.h"
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/hh-utils.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
@@ -1957,6 +1958,11 @@ OPTBLD_INLINE void iopDir() {
 OPTBLD_INLINE void iopMethod() {
   auto s = vmfp()->m_func->fullName();
   vmStack().pushStaticString(s);
+}
+
+OPTBLD_INLINE void iopFuncCred() {
+  vmStack().pushObjectNoRc(
+    FunctionCredential::newInstance(vmfp()->m_func));
 }
 
 OPTBLD_INLINE void iopClsRefName(clsref_slot slot) {

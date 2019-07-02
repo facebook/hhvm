@@ -1687,7 +1687,6 @@ void dce(Env& env, const bc::BaseL& op) { no_dce(env, op); }
 void dce(Env& env, const bc::BreakTraceHint& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CGetCUNop& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CGetG& op) { no_dce(env, op); }
-void dce(Env& env, const bc::CGetQuietG& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CGetS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ChainFaults& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CheckReifiedGenericMismatch& op) {

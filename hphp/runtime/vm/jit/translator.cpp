@@ -238,7 +238,6 @@ static const struct {
   { OpCUGetL,      {Local,            Stack1,       OutCInputL      }},
   { OpPushL,       {Local,            Stack1|Local, OutCInputL      }},
   { OpCGetG,       {Stack1,           Stack1,       OutUnknown      }},
-  { OpCGetQuietG,  {Stack1,           Stack1,       OutUnknown      }},
   { OpCGetS,       {Stack1,           Stack1,       OutUnknown      }},
   { OpVGetL,       {Local,            Stack1|Local, OutVInputL      }},
   { OpClsRefGetC,  {Stack1,           None,         OutNone         }},
@@ -928,7 +927,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::BareThis:
   case Op::BitNot:
   case Op::CGetG:
-  case Op::CGetQuietG:
   case Op::CGetL:
   case Op::CGetQuietL:
   case Op::CGetL2:

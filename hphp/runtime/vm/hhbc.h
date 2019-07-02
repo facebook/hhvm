@@ -596,7 +596,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(CGetL2,          ONE(LA),          ONE(CV),         TWO(CV,CV), NF) \
   O(PushL,           ONE(LA),          NOV,             ONE(CV),    NF) \
   O(CGetG,           NA,               ONE(CV),         ONE(CV),    NF) \
-  O(CGetQuietG,      NA,               ONE(CV),         ONE(CV),    NF) \
   O(CGetS,           ONE(CAR),         ONE(CV),         ONE(CV),    NF) \
   O(VGetL,           ONE(LA),          NOV,             ONE(VV),    NF) \
   O(ClsRefGetC,      ONE(CAW),         ONE(CV),         NOV,        NF) \

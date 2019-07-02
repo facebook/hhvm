@@ -2211,7 +2211,7 @@ and emit_quiet_expr ?(null_coalesce_assignment=false) (env : Emit_env.t) pos (ex
       emit_pos name_pos;
       instr_string (SU.Locals.strip_dollar (Local_id.get_name name));
       emit_pos pos;
-      instr (IGet CGetQuietG)
+      instr (IGet CGetG)
     ], None
   | A.Lvar ((_, name)) when not (is_local_this env name) ->
     instr_cgetquietl (get_local env (pos, (Local_id.get_name name))), None
@@ -2219,7 +2219,7 @@ and emit_quiet_expr ?(null_coalesce_assignment=false) (env : Emit_env.t) pos (ex
     gather [
       emit_expr env e;
       emit_pos pos;
-      instr (IGet CGetQuietG)
+      instr (IGet CGetG)
     ], None
   | A.Array_get(base_expr, opt_elem_expr) ->
     emit_array_get ~null_coalesce_assignment
@@ -3276,7 +3276,7 @@ and get_call_builtin_func_info lower_fq_id =
   | "hh\\varray" -> Some (1, IOp (if hack_arr_dv_arrs () then CastVec else CastVArray))
   | "hh\\darray" -> Some (1, IOp (if hack_arr_dv_arrs () then CastDict else CastDArray))
   | "hh\\global_empty" -> Some (1, IIsset EmptyG)
-  | "hh\\global_get" -> Some (1, IGet CGetQuietG)
+  | "hh\\global_get" -> Some (1, IGet CGetG)
   | "hh\\global_isset" -> Some (1, IIsset IssetG)
   | _ -> None
 

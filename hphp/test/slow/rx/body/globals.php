@@ -3,7 +3,7 @@
 <<__Rx>>
 function test() {
   $x = $GLOBALS['_GET'];            // CGetG
-  $x = $GLOBALS['WAT'] ?? false;    // CGetQuietG
+  $x = $GLOBALS['WAT'] ?? false;    // CGetG
   $x = isset($GLOBALS['WAT']);      // IssetG
   $x = !($GLOBALS['WAT'] ?? false);      // EmptyG
 

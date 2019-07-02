@@ -1,10 +1,10 @@
 Verification Error (unit %s/test/slow/rx/body/globals.php func test): globals are forbidden in Rx functions: CGetG
 
-Verification Error (unit %s/test/slow/rx/body/globals.php func test): globals are forbidden in Rx functions: CGetQuietG
+Verification Error (unit %s/test/slow/rx/body/globals.php func test): globals are forbidden in Rx functions: CGetG
 
 Verification Error (unit %s/test/slow/rx/body/globals.php func test): globals are forbidden in Rx functions: IssetG
 
-Verification Error (unit %s/test/slow/rx/body/globals.php func test): globals are forbidden in Rx functions: CGetQuietG
+Verification Error (unit %s/test/slow/rx/body/globals.php func test): globals are forbidden in Rx functions: CGetG
 
 Verification Error (unit %s/test/slow/rx/body/globals.php func test): globals are forbidden in Rx functions: SetG
 

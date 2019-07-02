@@ -165,7 +165,6 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
     (fun () -> IOp Hhbc_ast.Exit);
     (fun () -> IGet (CGetL2 (random_local ())));
     (fun () -> IGet CGetG);
-    (fun () -> IGet CGetQuietG);
     (*(fun () -> IIsset IssetC);*)
     (fun () -> IIsset IssetG);
     (fun () -> IIsset EmptyG);

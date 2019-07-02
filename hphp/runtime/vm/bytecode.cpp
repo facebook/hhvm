@@ -3361,27 +3361,19 @@ OPTBLD_INLINE void iopPushL(local_var locVal) {
   locVal->m_type = KindOfUninit;
 }
 
-OPTBLD_INLINE void cgetg_body(bool warn) {
+OPTBLD_INLINE void iopCGetG() {
   StringData* name;
   TypedValue* to = vmStack().topTV();
   TypedValue* fr = nullptr;
   lookup_gbl(vmfp(), name, to, fr);
   SCOPE_EXIT { decRefStr(name); };
-  if (fr == nullptr) {
-    tvDecRefGen(to);
-    tvWriteNull(*to);
-  } else if (fr->m_type == KindOfUninit) {
-    if (warn) raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
-    tvDecRefGen(to);
+  tvDecRefGen(to);
+  if (fr == nullptr || fr->m_type == KindOfUninit) {
     tvWriteNull(*to);
   } else {
-    tvDecRefGen(to);
     cgetl_inner_body(fr, to);
   }
 }
-
-OPTBLD_INLINE void iopCGetG() { cgetg_body(true); }
-OPTBLD_INLINE void iopCGetQuietG() { cgetg_body(false); }
 
 struct SpropState {
   SpropState(Stack&, clsref_slot slot, bool ignoreLateInit);
@@ -4036,16 +4028,12 @@ OPTBLD_INLINE void iopMemoSetEager(LocalRange keys) {
   memoSetImpl(keys, val);
 }
 
-static inline void vgetl_body(TypedValue* fr, TypedValue* to) {
+OPTBLD_INLINE void iopVGetL(local_var fr) {
+  Ref* to = vmStack().allocV();
   if (!isRefType(fr->m_type)) {
     tvBox(*fr);
   }
   refDup(*fr, *to);
-}
-
-OPTBLD_INLINE void iopVGetL(local_var fr) {
-  Ref* to = vmStack().allocV();
-  vgetl_body(fr.ptr, to);
 }
 
 OPTBLD_INLINE void iopIssetG() {

@@ -288,7 +288,6 @@ type instruct_get =
   | CUGetL of local_id
   | PushL of local_id
   | CGetG
-  | CGetQuietG
   | CGetS of classref_id
   | VGetL of local_id
   | ClsRefGetC of classref_id

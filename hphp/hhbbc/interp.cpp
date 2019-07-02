@@ -2358,7 +2358,6 @@ void in(ISS& env, const bc::CGetL2& op) {
 }
 
 void in(ISS& env, const bc::CGetG&) { popC(env); push(env, TInitCell); }
-void in(ISS& env, const bc::CGetQuietG&) { popC(env); push(env, TInitCell); }
 
 void in(ISS& env, const bc::CGetS& op) {
   auto const tcls  = takeClsRefSlot(env, op.slot);

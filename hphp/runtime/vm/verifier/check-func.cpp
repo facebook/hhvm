@@ -1956,7 +1956,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
       cur->afterDim = false;
       // fallthrough
     case Op::CGetG:
-    case Op::CGetQuietG:
     case Op::IssetG:
     case Op::EmptyG:
     case Op::SetG:

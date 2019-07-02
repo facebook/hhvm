@@ -1526,15 +1526,6 @@ CGetG    [C]  ->  [C]
   stack as a cell.
 
   If there is not a global variable defined named x, this instruction pushes
-  null onto the stack and raises a warning.
-
-CGetQuietG    [C]  ->  [C]
-
-  Get global as cell. This instruction first computes x = (string)$1. Next,
-  this instruction reads the global variable named x pushes its value onto the
-  stack as a cell.
-
-  If there is not a global variable defined named x, this instruction pushes
   null onto the stack.
 
 CGetS <class-ref slot>    [C]  ->  [C]

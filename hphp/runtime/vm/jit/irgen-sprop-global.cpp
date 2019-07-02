@@ -314,20 +314,8 @@ void emitIncDecS(IRGS& env, IncDecOp subop, uint32_t slot) {
 //////////////////////////////////////////////////////////////////////
 
 void emitCGetG(IRGS& env) {
-  auto const exit = makeExitSlow(env);
   auto const name = topC(env);
   if (!name->isA(TStr)) PUNT(CGetG-NonStrName);
-  auto const ptr = gen(env, LdGblAddr, exit, name);
-  destroyName(env, name);
-  pushIncRef(
-    env,
-    gen(env, LdMem, TCell, gen(env, UnboxPtr, ptr))
-  );
-}
-
-void emitCGetQuietG(IRGS& env) {
-  auto const name = topC(env);
-  if (!name->isA(TStr)) PUNT(CGetQuietG-NonStrName);
 
   auto ret = cond(
     env,

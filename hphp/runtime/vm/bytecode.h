@@ -850,7 +850,7 @@ visitStackElems(const ActRec* const fp,
       }
 
       if (cursor == reinterpret_cast<TypedValue*>(ar)) {
-        arFun(ar, fe->m_fpushOff);
+        arFun(ar);
         cursor += kNumActRecCells;
       }
 

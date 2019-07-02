@@ -972,7 +972,7 @@ static void toStringFrame(std::ostream& os, const ActRec* fp,
   std::vector<std::string> stackElems;
   visitStackElems(
     fp, ftop, offset,
-    [&](const ActRec* ar, Offset) {
+    [&](const ActRec* ar) {
       stackElems.push_back(
         folly::format("{{func:{}}}", ar->m_func->fullName()->data()).str()
       );

@@ -63,7 +63,7 @@ void discardStackTemps(const ActRec* const fp,
 
   visitStackElems(
     fp, stack.top(), bcOffset,
-    [&] (ActRec* ar, Offset) {
+    [&] (ActRec* ar) {
       assertx(ar == reinterpret_cast<ActRec*>(stack.top()));
       ITRACE(2, "  unwind pop AR : {}\n",
              implicit_cast<void*>(stack.top()));

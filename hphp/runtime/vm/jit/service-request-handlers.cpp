@@ -76,7 +76,7 @@ RegionContext getContext(SrcKey sk) {
   int32_t stackOff = 0;
   visitStackElems(
     fp, sp, ctx.bcOffset,
-    [&] (const ActRec* ar, Offset) {
+    [&] (const ActRec* ar) {
       stackOff += kNumActRecCells;
     },
     [&] (const TypedValue* tv) {

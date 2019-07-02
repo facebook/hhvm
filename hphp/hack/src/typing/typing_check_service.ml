@@ -1,6 +1,5 @@
 (**
- * Copyright (c) 2015, Facebook, Inc.
- * All rights reserved.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
@@ -11,10 +10,47 @@ module Hack_bucket = Bucket
 open Core_kernel
 module Bucket = Hack_bucket
 
-type file = Relative_path.t * FileInfo.names
+(*
+####
+
+The type checking service receives a list of files and their symbols as input and
+distributes the work to worker processes.
+
+A worker process's input is a bucket of files. At the end of its work,
+it returns back to master the following progress report:
+  - completed: a list of computations it completed
+  - remaining: a list of computations which it didn't end up performing. For example,
+    it may not have been able to get through the whole list of computations because
+    it exceeded its worker memory cap
+
+####
+
+The normal computation kind for the type checking service is to type check all symbols in a file.
+The type checker would always be able to find a given symbol it needs to perform this job
+if all the declarations were computed for all the files in the repo before type checking begins.
+
+However, such eager declaration does not occur in the following scenarios:
+  - When the server initialization strategy is Lazy: not having a declaration phase was
+      the original meaning of lazy init
+  - If the server initialized from a saved state: most decls would not be available because
+      saved states only consist of one or more of the following: naming table, dependency
+      graph, errors, and hot decls (a small subset of all possible decls)
+
+The decl heap module, when asked for a decl that is not yet in memory, can declare the decl's
+file lazily. Declaring a file means parsing the file and extracting the symbols declared in it,
+hence the term 'decl'.
+
+This lazy declaration strategy works reasonably well for most cases, but there's a case where
+it works poorly: if a particular file that is getting type checked requires a large number
+of symbols which have not yet been declared, the unlucky worker ends up serially declaring
+all the files that contain those symbols. In some cases, we observe type checking times on
+the order of minutes for a single file.
+ *)
+
+type file_computation = Relative_path.t * FileInfo.names
 type progress = {
-  checked_files: file list;
-  unchecked_files: file list;
+  completed: file_computation list;
+  remaining: file_computation list;
 }
 
 (*****************************************************************************)
@@ -76,7 +112,7 @@ let check_const opts fn x =
     Tast_check.def opts def;
     Some def
 
-let check_file dynamic_view_files opts errors (fn, file_infos) =
+let process_file dynamic_view_files opts errors (fn, file_infos) =
   let opts = {
       opts with
       GlobalOptions.tco_dynamic_view = Relative_path.Set.mem dynamic_view_files fn;
@@ -104,30 +140,30 @@ let check_file dynamic_view_files opts errors (fn, file_infos) =
     let () = prerr_endline ("Exception on file " ^ (Relative_path.S.to_string fn)) in
     Caml.Printexc.raise_with_backtrace e stack
 
-let check_files dynamic_view_files opts errors progress ~memory_cap =
+let process_files dynamic_view_files opts errors progress ~memory_cap =
   SharedMem.invalidate_caches();
   File_provider.local_changes_push_stack ();
   Ast_provider.local_changes_push_stack ();
-  let check_file =
+  let process_file =
     if !Utils.profile
     then (fun acc fn ->
       let t = Sys.time () in
-      let result = check_file dynamic_view_files opts acc fn in
+      let result = process_file dynamic_view_files opts acc fn in
       let t' = Sys.time () in
       let duration = t' -. t in
       let filepath = Relative_path.suffix (fst fn) in
       TypingLogger.TypingTimes.log duration filepath;
       !Utils.log (Printf.sprintf "%f %s [type-check]" duration filepath);
       result)
-    else check_file dynamic_view_files opts
+    else process_file dynamic_view_files opts
   in
-  let rec check_or_exit errors progress =
-    match progress.unchecked_files with
+  let rec process_or_exit errors progress =
+    match progress.remaining with
     | fn :: fns ->
-      let errors = check_file errors fn in
+      let errors = process_file errors fn in
       let progress = {
-        checked_files = fn :: progress.checked_files;
-        unchecked_files = fns;
+        completed = fn :: progress.completed;
+        remaining = fns;
       } in
       (* Use [quick_stat] instead of [stat] in order to avoid walking the major
          heap on each call, and just check the major heap because the minor
@@ -144,18 +180,18 @@ let check_files dynamic_view_files opts errors progress ~memory_cap =
             true
           else false
       in
-      if should_exit then (errors, progress) else check_or_exit errors progress
+      if should_exit then (errors, progress) else process_or_exit errors progress
     | [] -> errors, progress
   in
-  let result = check_or_exit errors progress in
+  let result = process_or_exit errors progress in
   TypingLogger.flush_buffers ();
   Ast_provider.local_changes_pop_stack ();
   File_provider.local_changes_pop_stack ();
   result
 
-let load_and_check_files dynamic_view_files errors progress ~memory_cap =
+let load_and_process_files dynamic_view_files errors progress ~memory_cap =
   let opts = TypeCheckStore.load() in
-  check_files dynamic_view_files opts errors progress ~memory_cap
+  process_files dynamic_view_files opts errors progress ~memory_cap
 
 (*****************************************************************************)
 (* Let's go! That's where the action is *)
@@ -166,37 +202,41 @@ let load_and_check_files dynamic_view_files errors progress ~memory_cap =
     We don't really care about which files are left unchecked since we use
     (gasp) mutation to track that, so combine the errors but always return an
     empty list for the list of unchecked files. *)
-let merge files_to_check files_to_check_count files_in_progress
+let merge files_to_process files_initial_count files_in_progress
     files_checked_count (errors, results) acc =
-  files_to_check := results.unchecked_files @ !files_to_check;
-  List.iter ~f:(Hash_set.Poly.remove files_in_progress) results.checked_files;
-  files_checked_count := (List.length results.checked_files) + !files_checked_count;
+  files_to_process := results.remaining @ !files_to_process;
+  List.iter ~f:(Hash_set.Poly.remove files_in_progress) results.completed;
+  files_checked_count := (List.length results.completed) + !files_checked_count;
   ServerProgress.send_percentage_progress_to_monitor
-    "typechecking" !files_checked_count files_to_check_count "files";
+    "typechecking" !files_checked_count files_initial_count "files";
   Decl_service.merge_lazy_decl errors acc
 
-let next workers ~num_jobs files_to_check files_in_progress =
+let next workers ~files_initial_count files_to_process files_in_progress =
   let max_size = Bucket.max_size () in
   let num_workers = (match workers with Some w -> List.length w | None -> 1) in
-  let bucket_size = Bucket.calculate_bucket_size ~num_jobs ~num_workers ~max_size in
+  let bucket_size = Bucket.calculate_bucket_size
+    ~num_jobs:files_initial_count
+    ~num_workers
+    ~max_size
+  in
   fun () ->
-    match !files_to_check with
+    match !files_to_process with
     | [] when Hash_set.Poly.is_empty files_in_progress -> Bucket.Done
     | [] -> Bucket.Wait
     | jobs ->
-      let unchecked_files, remaining_jobs = List.split_n jobs bucket_size in
+      let current_bucket, remaining_files = List.split_n jobs bucket_size in
 
       (* Update our shared mutable state, because hey: it's not like we're
          writing OCaml or anything. *)
-      files_to_check := remaining_jobs;
-      List.iter ~f:(Hash_set.Poly.add files_in_progress) unchecked_files;
-      Bucket.Job { checked_files = []; unchecked_files }
+      files_to_process := remaining_files;
+      List.iter ~f:(Hash_set.Poly.add files_in_progress) current_bucket;
+      Bucket.Job { completed = []; remaining = current_bucket }
 
-let on_cancelled next files_to_check files_in_progress =
+let on_cancelled next files_to_process files_in_progress =
   fun () ->
-    (* The size of [files_to_check] is bounded only by repo size, but
+    (* The size of [files_to_process] is bounded only by repo size, but
       [files_in_progress] is capped at [(worker count) * (max bucket size)]. *)
-    files_to_check := (Hash_set.Poly.to_list files_in_progress) @ !files_to_check;
+    files_to_process := (Hash_set.Poly.to_list files_in_progress) @ !files_to_process;
     let rec add_next acc =
       match next () with
       | Bucket.Job j -> add_next (j :: acc)
@@ -205,27 +245,27 @@ let on_cancelled next files_to_check files_in_progress =
     in
     add_next []
 
-let parallel_check dynamic_view_files workers opts fnl ~interrupt ~memory_cap =
+let process_in_parallel dynamic_view_files workers opts fnl ~interrupt ~memory_cap =
   TypeCheckStore.store opts;
-  let files_to_check = ref fnl in
+  let files_to_process = ref fnl in
   let files_in_progress = Hash_set.Poly.create () in
-  let files_checked_count = ref 0 in
-  let num_jobs = List.length fnl in
+  let files_processed_count = ref 0 in
+  let files_initial_count = List.length fnl in
   ServerProgress.send_percentage_progress_to_monitor
-    "typechecking" 0 num_jobs "files";
-  let next = next ~num_jobs workers files_to_check files_in_progress in
+    "typechecking" 0 files_initial_count "files";
+  let next = next ~files_initial_count workers files_to_process files_in_progress in
   let errors, env, cancelled =
     MultiWorker.call_with_interrupt
       workers
-      ~job:(load_and_check_files dynamic_view_files ~memory_cap)
+      ~job:(load_and_process_files dynamic_view_files ~memory_cap)
       ~neutral
-      ~merge:(merge files_to_check num_jobs files_in_progress files_checked_count)
+      ~merge:(merge files_to_process files_initial_count files_in_progress files_processed_count)
       ~next
-      ~on_cancelled:(on_cancelled next files_to_check files_in_progress)
+      ~on_cancelled:(on_cancelled next files_to_process files_in_progress)
       ~interrupt
   in
   TypeCheckStore.clear();
-  errors, env, List.concat (cancelled |> List.map ~f:(fun progress -> progress.unchecked_files))
+  errors, env, List.concat (cancelled |> List.map ~f:(fun progress -> progress.remaining))
 
 type 'a job = Relative_path.t * 'a
 type ('a, 'b, 'c) job_result = 'b * 'c * 'a job list
@@ -270,10 +310,10 @@ let go_with_interrupt workers opts dynamic_view_files fnl ~interrupt ~memory_cap
   Mocking.with_test_mocking fnl @@ fun fnl ->
     if List.length fnl < 10
     then
-      let progress = { checked_files = []; unchecked_files = fnl } in
-      let (errors, _) = check_files dynamic_view_files opts neutral progress ~memory_cap:None in
+      let progress = { completed = []; remaining = fnl } in
+      let (errors, _) = process_files dynamic_view_files opts neutral progress ~memory_cap:None in
       errors, interrupt.MultiThreadedCall.env, []
-    else parallel_check dynamic_view_files workers opts fnl ~interrupt ~memory_cap
+    else process_in_parallel dynamic_view_files workers opts fnl ~interrupt ~memory_cap
 
 let go workers opts dynamic_view_files fnl ~memory_cap =
   let interrupt = MultiThreadedCall.no_interrupt () in

@@ -18,13 +18,8 @@ function test_normal() {
   unset($GLOBALS[__FUNCTION__]);
 }
 
-function test_idx() {
-  var_dump(HH\global_get_safe(__FUNCTION__) is null);
-  $GLOBALS[__FUNCTION__] = __FILE__;
-  var_dump(HH\global_get_safe(__FUNCTION__) === __FILE__);
-}
-
 function test_get() {
+  var_dump(HH\global_get(__FUNCTION__) is null);
   $GLOBALS[__FUNCTION__] = __FILE__;
   var_dump(HH\global_get(__FUNCTION__) === __FILE__);
 }
@@ -44,12 +39,6 @@ function test_unset() {
   var_dump(idx($GLOBALS, __FUNCTION__) === __FILE__);
   HH\global_unset(__FUNCTION__);
   var_dump(idx($GLOBALS, __FUNCTION__) is null);
-}
-
-function test_get_safe() {
-  var_dump((HH\global_get_safe(__FUNCTION__) ?? 'unset') === 'unset');
-  $GLOBALS[__FUNCTION__] = __FILE__;
-  var_dump((HH\global_get_safe(__FUNCTION__) ?? 'unset') === __FILE__);
 }
 
 function test_global_keys() {
@@ -73,7 +62,6 @@ function main() {
   test_get();
   test_set();
   test_bogus_args();
-  test_get_safe();
   test_unset();
   test_global_keys();
   test_global_key_exists();

@@ -42,7 +42,8 @@ void optimize_func(const Index&, FuncAnalysis&&, bool isFinal);
 
 void update_bytecode(
     php::Func* func,
-    CompactVector<std::pair<BlockId, BlockUpdateInfo>>&& blockUpdates);
+    CompactVector<std::pair<BlockId, BlockUpdateInfo>>&& blockUpdates,
+    FuncAnalysis* = nullptr);
 
 /*
  * Optimize property type hints for a particular class.

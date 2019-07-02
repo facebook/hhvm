@@ -919,7 +919,7 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
     CollectionOpts{}, &ainfo
   );
 
-  update_bytecode(ainfo.ctx.func, std::move(ainfo.blockUpdates));
+  update_bytecode(ainfo.ctx.func, std::move(ainfo.blockUpdates), &ainfo);
   optimize_iterators(index, ainfo, *collect);
 
   do {
@@ -946,7 +946,7 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
        * anything else.
        */
       ainfo = analyze_func(index, ainfo.ctx, CollectionOpts{});
-      update_bytecode(ainfo.ctx.func, std::move(ainfo.blockUpdates));
+      update_bytecode(ainfo.ctx.func, std::move(ainfo.blockUpdates), &ainfo);
       collect.emplace(
         index, ainfo.ctx, nullptr,
         CollectionOpts{}, &ainfo
@@ -1072,7 +1072,8 @@ void optimize_func(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
 
 void update_bytecode(
     php::Func* func,
-    CompactVector<std::pair<BlockId, BlockUpdateInfo>>&& blockUpdates) {
+    CompactVector<std::pair<BlockId, BlockUpdateInfo>>&& blockUpdates,
+    FuncAnalysis* ainfo) {
 
   for (auto& ent : blockUpdates) {
     auto blk = func->blocks[ent.first].mutate();
@@ -1096,7 +1097,12 @@ void update_bytecode(
     }
     auto fatal_block = NoBlockId;
     auto fatal = [&] {
-      if (fatal_block == NoBlockId) fatal_block = make_fatal_block(func, blk);
+      if (fatal_block == NoBlockId) {
+        fatal_block = make_fatal_block(func, blk);
+        if (ainfo) {
+          sync_ainfo(fatal_block, *ainfo, {});
+        }
+      }
       return fatal_block;
     };
     blk->fallthrough = ent.second.fallthrough;

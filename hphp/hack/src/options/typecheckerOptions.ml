@@ -84,3 +84,4 @@ let disable_partially_abstract_typeconsts = GlobalOptions.tco_disable_partially_
 let check_xhp_attribute = GlobalOptions.tco_check_xhp_attribute
 let disallow_unresolved_type_variables = GlobalOptions.tco_disallow_unresolved_type_variables
 let disallow_invalid_arraykey_constraint = GlobalOptions.tco_disallow_invalid_arraykey_constraint
+let enable_constant_visibility_modifiers = GlobalOptions.po_enable_constant_visibility_modifiers

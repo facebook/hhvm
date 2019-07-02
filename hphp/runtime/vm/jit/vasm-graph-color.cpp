@@ -72,13 +72,15 @@ namespace HPHP { namespace jit {
  *
  * - Colors are assigned. Now that spills and reloads have been inserted, its
  *   guaranteed that every Vreg will always have at least one color available
- *   for it. Walk the unit and assign a free color for every Vreg.
+ *   for it. Walk the unit and assign registers for every Vreg using a
+ *   heuristic to try to minimize copies. A Vreg can be in different physical
+ *   registers at different points in the unit. Spill slots are assigned
+ *   using a separate algorithm.
  *
- * - Lower out of SSA. Modify the instructions to take the assigned physical
- *   registers. Lower phis into register and spill slot moves. Optimize away
- *   no-op copies. Assign stack pointer adjustments as necessary for spill
- *   slots. At this point the unit no longer has any Vregs and is fully register
- *   allocated.
+ * - Lower out of SSA. Lower phis into register and spill slot moves. Optimize
+ *   away no-op copies. Assign stack pointer adjustments as necessary for spill
+ *   slots. At this point the unit no longer has any virtual registers and is
+ *   fully register allocated.
  *
  * See the comments for each pass for more detailed information.
  *
@@ -134,8 +136,12 @@ using Color = boost::variant<None, PhysReg, SpillSlot, SpillSlotWide>;
 // information is concentrated in this one data-structure.
 struct RegInfo {
   RegClass regClass = RegClass::Any;
-  // Color assigned to this Vreg
+  // Color assigned to this Vreg at this particular moment (during
+  // coloring, Vregs can be assigned different colors at different
+  // points in the unit). Spills will always keep the same color.
   Color color;
+  // Index into the penalty vector table
+  size_t penaltyIdx = 0;
   // Can this Vreg be potentially rematerialized (instead of reloaded) by this
   // instruction?
   folly::Optional<Vinstr> remat;
@@ -144,6 +150,7 @@ struct RegInfo {
 using BlockVector = jit::vector<Vlabel>;
 using WeightMap = jit::fast_map<Vreg, uint64_t>;
 using PhiWeightVector = jit::vector<folly::Optional<uint64_t>>;
+using PenaltyVector = PhysReg::Map<int64_t>;
 
 // Information about each inferred loop. A loop is represented by its header
 // block.
@@ -206,8 +213,15 @@ struct State {
   // this vector is never used.
   jit::vector<CachedOperands> cachedOperands;
 
+  // Calculate penalty vectors. Different Vregs may share the same
+  // penalty vector.
+  jit::vector<PenaltyVector> penalties;
+
   // Vreg state
   jit::vector<folly::Optional<RegInfo>> regInfo;
+
+  // Pre-calculated mapping of spill Vregs to spill slots
+  jit::fast_map<Vreg, Color> spillColors;
 
   // The number of non-wide and wide spill slots allocated. This determines how
   // much space to reserve in the stack.
@@ -283,11 +297,23 @@ std::string show(const PhiWeightVector& v) {
   );
 }
 
+std::string show(const PenaltyVector& v) {
+  std::string out;
+  auto first = true;
+  for (auto const r : v) {
+    if (!first) out += ", ";
+    first = false;
+    out += folly::sformat("{}: {}", show(r), v[r]);
+  }
+  return folly::sformat("[{}]", out);
+}
+
 std::string show(const Vunit& unit, const RegInfo& info) {
   return folly::sformat(
-    "Class: {:10}, Color: {:6}, Mat: ({})",
+    "Class: {:10}, Color: {:6}, Penalty: {:3}, Mat: ({})",
     show(info.regClass),
     show(info.color),
+    info.penaltyIdx,
     info.remat ? show(unit, *info.remat) : "-"
   );
 }
@@ -324,6 +350,7 @@ std::string show(const State& state) {
     "Num Spill Slots:      {}\n"
     "Num Wide Spill Slots: {}\n"
     "RPO:                  {}\n"
+    "Spill Colors:         {}\n"
     "Reg Info:\n{}"
     "Live In:\n{}"
     "Live Out:\n{}"
@@ -331,7 +358,8 @@ std::string show(const State& state) {
     "Block To Loop:\n{}"
     "Spill Weights In:\n{}"
     "Spill Weights Out:\n{}"
-    "Phi Weights:\n{}",
+    "Phi Weights:\n{}"
+    "Penalties:\n{}",
     show(state.gpUnreserved),
     show(state.simdUnreserved),
     show(state.reservedRegs),
@@ -339,6 +367,17 @@ std::string show(const State& state) {
     state.numSpillSlots,
     state.numWideSpillSlots,
     show(state.rpo),
+    [&]{
+      using namespace folly::gen;
+      return folly::sformat(
+        "{{{}}}",
+        from(state.spillColors)
+        | map([] (std::pair<Vreg, Color> p) {
+            return folly::sformat("{}: {}", show(p.first), show(p.second));
+          })
+        | unsplit<std::string>(", ")
+      );
+    }(),
     [&]{
       std::string str;
       for (size_t i = 0; i < state.regInfo.size(); ++i) {
@@ -378,7 +417,15 @@ std::string show(const State& state) {
     }(),
     dumpBlockInfo(state.spillWeightsIn),
     dumpBlockInfo(state.spillWeightsOut),
-    dumpBlockInfo(state.spillPhiWeights)
+    dumpBlockInfo(state.spillPhiWeights),
+    [&]{
+      std::string str;
+      for (size_t i = 1; i < state.penalties.size(); ++i) {
+        auto const& v = state.penalties[i];
+        str += folly::sformat("  {:3} -> {}\n", i, show(v));
+      }
+      return str;
+    }()
   );
 }
 
@@ -443,6 +490,20 @@ RegClass reg_class(const State& state, Vreg r) {
     case PhysReg::SF:   return RegClass::SF;
   }
   always_assert(false);
+}
+
+// Retrieve the assigned color and reg-class for this Vreg. This works
+// for physical registers as well (their color will always be
+// themselves).
+struct RegColorInfo {
+  Color color;
+  RegClass regClass;
+};
+
+RegColorInfo reg_color_info(const State& state, Vreg r) {
+  if (r.isPhys()) return { r.physReg(), reg_class(state, r) };
+  auto const& info = reg_info(state, r);
+  return { info.color, info.regClass };
 }
 
 // Is this reg-class a spill?
@@ -4662,68 +4723,846 @@ void insert_spills(State& state) {
 // Coloring
 
 /*
- * As already mentioned, now that the spiller has lowered the register pressure
- * everywhere to below the number of physical registers, the unit should be
- * trivially colorable. To color the unit, all we have to do is visit the blocks
- * in any dominance preserving order (we use RPO) and choose a free color for
- * each Vreg that the instruction defines. Its guaranteed that they'll always be
- * a free color, regardless of previous choices. Thus coloring can be
- * accomplished in a single linear pass. Once a Vreg becomes dead, its color is
+ * As already mentioned, now that the spiller has lowered the register
+ * pressure everywhere to below the number of physical registers, the
+ * unit is guaranteed to be colorable.
+ *
+ * For instructions which do not write to physical registers, the
+ * coloring is easy. Simply assign the defs the next available
+ * physical registers. Once a Vreg becomes dead, the register is
  * released.
  *
- * This isn't quite true for instructions which write to physical registers.
- * The instruction might require a certain physical register to be free to write
- * to, but we might have already assigned that physical register to a Vreg.
- * Handling this is intertwined with the new color optimization heuristic, and
- * thus is deferred until the next diff. Likewise, assigning spill slots is
- * deferred.
+ * For instructions which do write to physical registers, it is more
+ * complex, however. An instruction could write to a physical register
+ * which has already been assigned to a Vreg which is live across the
+ * instruction. This means we need to migrate that Vreg to a new
+ * (free) physical register (inserting a copy). For this reason, a
+ * Vreg can potentially be assigned different physical registers at
+ * different points in the unit.
  *
- * This logic only works if each RegClass can only select from non-overlapping
- * sets of physical registers. If there's overlapping pools of physical
- * registers, it introduces additional constraints which the colorer cannot
- * satisfy. Namely, assume that RegClass::AnyNarrow choose from both GP and SIMD
- * registers. We want to color a particular register with RegClass::Any, so we
- * select a GP register (as opposed to a SIMD). It happens to be the last GP
- * register. Later on, we attempt to color a RegClass::GP register, but we can't
- * because there's none free. If instead we had selected a SIMD earlier, it
- * would have been colorable. In other words, having overlapping physical
- * register pools means you no longer have a free choice for colors. So, we have
- * to restrict RegClass::AnyNarrow to a single register pool, namely GP.
+ * Spill slots are assigned to spill in a different manner using
+ * global analysis. The "coloring" just looks up the already assigned
+ * slot. Spills never change their color once assigned.
  *
- * We select the free colors arbitrarily. Note that while the algorithm
- * guarantees the unit is colorable regardless of choice, it does not guarantee
- * the choices will result in a good coloring. Indeed, most colorings are pretty
- * bad.
+ * While technically the colorer has the freedom to choose arbitrary
+ * physical registers for Vregs, in practice most colorings are
+ * terrible. They leave a lot of copies, and because of the
+ * aforementioned physical def constraints, causes a lot of
+ * shuffling. We use a heuristic using "penalty vectors" to try to
+ * find a good coloring on the fly.
+ *
+ * Once a physical register has been assigned to a Vreg at a
+ * particular instruction, the instruction will be rewritten to
+ * operate on that physical register directly. This is easier because,
+ * as mentioned above, a Vreg can be in different physical registers
+ * at different points, and therefore we avoid having a complicated
+ * per-instruction mapping. It is also more efficient to do the
+ * rewriting as we color, instead of a separate pass. Spills are
+ * rewritten separately.
  */
 
+// Return "weight" of a block, an approximation of how many times it will be
+// executed. The higher the weight of a block, the more profitable it is to
+// remove copies in it.
+int64_t block_weight(const State& state, Vlabel b) {
+  auto const base = [&] () -> int64_t {
+    // Only trust the block weight if we're in an optimized block, and
+    // the entry block has a non-zero weight.
+    if (!state.unit.context ||
+        (state.unit.context->kind != TransKind::Optimize &&
+         state.unit.context->kind != TransKind::OptPrologue) ||
+        state.unit.blocks[state.unit.entry].weight == 0) {
+      switch (state.unit.blocks[b].area_idx) {
+        case AreaIndex::Main:   return 1000;
+        case AreaIndex::Cold:   return 5;
+        case AreaIndex::Frozen: return 1;
+      }
+      always_assert(false);
+    }
+    return state.unit.blocks[b].weight;
+  }();
+  // Force the weight to always be greater than 0. To minimize
+  // distortions in the proportionality between blocks, multiply the
+  // actual value by 100.
+  return std::max<int64_t>(base * 100, 1);
+}
+
+/*
+ * Spill Coloring:
+ *
+ * We use a global analysis to assign spills to slots. This generates
+ * very good results, but is potentially expensive. However it is not
+ * an issue in practice because units tend to have a very small number
+ * of spills.
+ *
+ * First we generate spill affinities. Two spills have an affinity
+ * with each other if they do not interfere and have a copy between
+ * them. The weight of the affinity is the block weight of the copy.
+ *
+ * We build up chunks from the affinities. Initially each spill is
+ * assigned its own chunk. We then walk the affinities (sorted by
+ * descending weight), and try to merge together the two spills'
+ * chunks. We merge the chunks if all the spills in the merged chunk
+ * don't interfere with each other (and have a compatible reg-class).
+ *
+ * Once we've built up the chunks this way, each chunk corresponds to
+ * a single slot. Since every spill in the chunk doesn't interfere with
+ * any other, they can be assigned the same slot. Indeed, since
+ * they'll (tend to) share affinities, its profitable for them to
+ * share the same slot.
+ *
+ * These assignments are stored away, where the colorer will look them
+ * up while walking the unit.
+ */
+
+struct SpillAffinity {
+  Vreg r1;
+  Vreg r2;
+  size_t weight;
+};
+
+void assign_spill_colors(State& state,
+                         const VregSet& spills,
+                         const jit::fast_map<Vreg, VregSet>& interferences,
+                         jit::vector<SpillAffinity> affinities) {
+  assertx(spills.any());
+
+  // Sort affinities by weight. Spills with higher weighted affinities
+  // are more profitable to put into the same chunk (where they'll be
+  // assigned the same slot).
+  std::sort(
+    affinities.begin(),
+    affinities.end(),
+    [&] (const SpillAffinity& a1, const SpillAffinity& a2) {
+      if (a1.weight != a2.weight) return a1.weight > a2.weight;
+      if (a1.r1 != a2.r1) return a1.r1 < a2.r1;
+      return a1.r2 < a2.r2;
+    }
+  );
+
+  // Set of active chunks.
+  jit::vector<VregSet> chunks;
+  // Map a chunk to its canonical representation.
+  jit::vector<size_t> chunkMappings;
+  // Mapping of a spill to the chunk its currently assigned to.
+  jit::fast_map<Vreg, size_t> spillToChunk;
+
+  // Assign each spill its own chunk. Every chunk maps to itself.
+  for (auto const r : spills) {
+    spillToChunk[r] = chunks.size();
+    chunks.emplace_back(r);
+    chunkMappings.emplace_back(chunkMappings.size());
+  }
+
+  // Canonicalize a chunk index to the index of the chunk its been
+  // merged with. This can update the mappings as it goes (to shorten
+  // lookup chains).
+  auto const canonicalize = [&] (size_t chunk) {
+    auto const impl = [&] (size_t chunk, auto const& self) {
+      auto& chunk2 = chunkMappings[chunk];
+      if (chunk == chunk2) return chunk;
+      assertx(chunk2 < chunk);
+      chunk2 = self(chunk2, self);
+      return chunk2;
+    };
+    return impl(chunk, impl);
+  };
+
+  // Map a spill to the chunk it currently occupies.
+  auto const lookup = [&] (Vreg r) {
+    auto const it = spillToChunk.find(r);
+    assertx(it != spillToChunk.end());
+    auto const chunk = canonicalize(it->second);
+    it->second = chunk;
+    return chunk;
+  };
+
+  // Merge two chunks together
+  auto const combine = [&] (size_t chunk1, size_t chunk2) {
+    // Find their canonical forms
+    chunk1 = canonicalize(chunk1);
+    chunk2 = canonicalize(chunk2);
+    assertx(chunk1 != chunk2);
+    // Merge the one with the higher index into the lesser. Move the
+    // contents of the source into the dest, empty the source, and
+    // update the mappings so that the source now canonicalizes to the
+    // dest.
+    if (chunk1 > chunk2) std::swap(chunk1, chunk2);
+    chunks[chunk1] |= chunks[chunk2];
+    chunks[chunk2].reset();
+    chunkMappings[chunk2] = chunk1;
+    return chunk1;
+  };
+
+  // Check if any Vreg in c1 interferes with any Vreg in c2. This is a
+  // naive N^2 check, but its fine for the small number of spills we
+  // encounter.
+  auto const interferes = [&] (const VregSet& c1, const VregSet& c2) {
+    // We only need to check the first reg as all registers in the
+    // chunk must have the same reg class.
+    assertx(!c1.empty());
+    assertx(!c2.empty());
+    if (reg_info(state, *c1.begin()).regClass !=
+        reg_info(state, *c2.begin()).regClass) {
+      return true;
+    }
+
+    for (auto const r1 : c1) {
+      auto const it = interferences.find(r1);
+      if (it == interferences.end()) continue;
+      for (auto const r2 : c2) {
+        if (it->second[r2]) return true;
+      }
+    }
+
+    return false;
+  };
+
+  // Loop over the affinities (which have been sorted by
+  // weight). Attempt to merge non-interfering chunks.
+  for (auto const& affinity : affinities) {
+    auto const r1 = affinity.r1;
+    auto const r2 = affinity.r2;
+    auto const chunk1 = lookup(r1);
+    auto const chunk2 = lookup(r2);
+    if (chunk1 == chunk2) continue;
+    if (interferes(chunks[chunk1], chunks[chunk2])) continue;
+    combine(chunk1, chunk2);
+  }
+
+  // We can still have non-interfering chunks which do not share any
+  // affinities. Attempt to merge these which just minimizes the total
+  // number of slots needed.
+  for (size_t i = 0; i < chunks.size(); ++i) {
+    if (chunks[i].none()) continue;
+    for (size_t j = i+1; j < chunks.size(); ++j) {
+      if (chunks[j].none()) continue;
+      if (interferes(chunks[i], chunks[j])) continue;
+      combine(i, j);
+    }
+  }
+
+  assertx(state.numSpillSlots == 0);
+  assertx(state.numWideSpillSlots == 0);
+
+  // Now assign an unique slot for each remaining non-empty chunk.
+  for (auto const& chunk : chunks) {
+    if (chunk.none()) continue;
+
+    folly::Optional<bool> isWide;
+    for (auto const r : chunk) {
+      auto const& info = reg_info(state, r);
+      assertx(is_spill(info.regClass));
+      assertx(!isWide || *isWide == (info.regClass == RegClass::SpillWide));
+      isWide = info.regClass == RegClass::SpillWide;
+
+      assertx(state.spillColors.find(r) == state.spillColors.end());
+      auto const color = *isWide
+        ? Color { SpillSlotWide { state.numWideSpillSlots } }
+        : Color { SpillSlot { state.numSpillSlots } };
+      auto const DEBUG_ONLY result = state.spillColors.emplace(r, color);
+      assertx(result.second);
+    }
+
+    if (*isWide) {
+      ++state.numWideSpillSlots;
+    } else {
+      ++state.numSpillSlots;
+    }
+  }
+
+  // Make sure the spill slot count is round (for alignment).
+  if ((state.numSpillSlots % 2) == 1) ++state.numSpillSlots;
+}
+
+/*
+ * Penalty Vectors:
+ *
+ * When assigning physical registers for Vregs, we want to choose a
+ * register which will minimize total copies in the unit. However this
+ * requires forward looking information. The colorer works an
+ * instruction at a time and doesn't necessarily know how the Vreg
+ * will be used. Penalty vectors are used to represent this
+ * information.
+ *
+ * The vectors are a map of physical registers to penalty weights,
+ * where the weight is the number of (dynamic) copies we'll have to
+ * pay if you assign the Vreg that physical register. When assigning a
+ * Vreg a physical register, we want to assign it the physical
+ * register with the lowest weight.
+ *
+ * Two things affect the penalty vector for a Vreg:
+ *
+ * - If any physical register is used as a def in an instruction while
+ *   the Vreg is alive. This induces a penalty on that physical
+ *   register, since if the Vreg is assigned that register, we'll be
+ *   forced to emit a copy to a different register. The penalty is the
+ *   block weight where the instruction is.
+ *
+ * - If the Vreg is a hinted use of an instruction with a physical
+ *   register def. This induces a penalty on every register *except*
+ *   that physical register. This is because if we assign the Vreg any
+ *   register except the def, we won't be able to satisfy the hint
+ *   (this includes copy instructions).
+ *
+ * In addition, we want to satisfy as many hints as possible, even if
+ * a physical register is not involved. If two Vregs are connected
+ * with a hint, and do not interfere (if they interfere the hint can
+ * never be satisfied so we ignore it), we merge their penalty vectors
+ * together and have them share the same vector. Therefore both Vregs
+ * will tend to be assigned the same register and we'll likely satisfy
+ * the hint.
+ *
+ * So, we build up initial penalty vectors for all Vregs using the
+ * above criteria. We iterate over the unit backwards, assessing
+ * penalties, and merging hinted Vregs.
+ *
+ * While coloring, we remove penalties as we process
+ * instructions. That is, once we process an instruction with one of
+ * the above cases, we undo its effect on the penalty vector. The idea
+ * being, we've already colored that instruction and therefore it
+ * shouldn't influence any future decisions. This means that once
+ * we're done coloring, all penalty vectors should contain zeros.
+ *
+ * Note that the penalty vector doesn't reflect a hint from a physical
+ * register use to a non-physical register def (just the
+ * opposite). That is dealt with by the colorer directly.
+ *
+ * For phis, its possible to color the destination of the phi before
+ * one of the sources. In that case, we modify the penalty vector on
+ * the fly like the first case above. This helps ensure the phi
+ * sources will be colored like the def.
+ */
+
+// Calculate penalty vectors for all (non-spill) Vregs (and calculate
+// spill colors as well).
+void calculate_penalties(State& state) {
+  auto& unit = state.unit;
+
+  // A penalty index of zero means not set, so have a dummy initial
+  // entry.
+  state.penalties.emplace_back();
+
+  // While merging penalty vectors, every Vreg will have a "canonical"
+  // Vreg. The canonical Vreg will point at the penalty vector that
+  // the original Vreg should use. This allows for fast merging.
+  jit::vector<Vreg> mappings;
+  mappings.resize(unit.next_vr);
+
+  auto const canonicalize = [&] (Vreg r) {
+    auto const impl = [&] (Vreg r, auto const& self) {
+      auto& r2 = mappings[r];
+      if (!r2.isValid() || r == r2) return r;
+      assertx(r2 < r);
+      r2 = self(r2, self);
+      return r2;
+    };
+    return impl(r, impl);
+  };
+
+  jit::vector<SpillAffinity> spillAffinities;
+
+  // Mark that two Vregs are connected by a hint (with the given
+  // weight). If the Vregs are spills, this records a spill
+  // affinity. Otherwise it attempts to merge their penalty vectors
+  // together and marks them as shared.
+  auto const unify = [&] (Vreg use, Vreg def, size_t weight) {
+    if (use == def) return;
+    if (use.isPhys() || is_ignored(state, def)) return;
+
+    // Hints with incompatible reg-classes can never be satisfies, so
+    // ignore them.
+    auto const cls1 = reg_class(state, use);
+    auto const cls2 = reg_class(state, def);
+    if (!compatible_reg_classes(cls1, cls2)) return;
+
+    // Specialize case, the hint def is a physical register. We don't
+    // unify with physical registers (they don't have penalty
+    // vectors), but we can modify the use's penalty vector to bias
+    // toward this physical register.
+    if (def.isPhys()) {
+      // Get the canonical penalty vector
+      auto const canon = canonicalize(use);
+      auto& info = reg_info(state, canon);
+      if (!info.penaltyIdx) {
+        info.penaltyIdx = state.penalties.size();
+        state.penalties.emplace_back();
+      }
+      // Assess a penalty for any register, except for the def.
+      auto& v = state.penalties[info.penaltyIdx];
+      auto const phys = def.physReg();
+      for (auto const r : v) {
+        if (r != phys) v[r] += weight;
+      }
+      return;
+    }
+
+    // Spills. Just record the affinity.
+    if (is_spill(cls1)) {
+      assertx(cls1 == cls2);
+      spillAffinities.emplace_back(SpillAffinity{use, def, weight});
+      return;
+    }
+
+    // Attempt to merge their penalty vectors
+    use = canonicalize(use);
+    def = canonicalize(def);
+    // Already merged
+    if (use == def) return;
+
+    // We merge the penalty vector for the higher Vreg into the lesser
+    // Vreg.
+    auto const src = (use < def) ? def : use;
+    auto const dst = (use < def) ? use : def;
+    mappings[src] = dst;
+
+    // The source penalty vector hasn't been allocated yet, so nothing
+    // to merge.
+    auto const srcIdx = reg_info(state, src).penaltyIdx;
+    if (!srcIdx) return;
+
+    // The dest penalty vector hasn't been allocated yet, so do so
+    // now.
+    auto& dstInfo = reg_info(state, dst);
+    if (!dstInfo.penaltyIdx) {
+      dstInfo.penaltyIdx = state.penalties.size();
+      state.penalties.emplace_back();
+    }
+
+    // Merge the penalty vectors, zeroing out the source vector.
+    auto& srcPenalties = state.penalties[srcIdx];
+    auto& dstPenalties = state.penalties[dstInfo.penaltyIdx];
+    for (auto const r : srcPenalties) {
+      dstPenalties[r] += srcPenalties[r];
+      srcPenalties[r] = 0;
+    }
+  };
+
+  jit::fast_map<Vreg, VregSet> spillInterferences;
+  VregSet spills;
+  VregSet nonSpills;
+
+  // Build up penalty vectors and spill information
+  for (auto const b : boost::adaptors::reverse(state.rpo)) {
+    auto& block = unit.blocks[b];
+    auto const weight = block_weight(state, b);
+
+    // Deal with phijmps specially, since they do not have hinted
+    // operands, but we want to treat them as such with the phidef.
+    if (block.code.back().op == Vinstr::phijmp) {
+      auto const& phijmp = block.code.back().phijmp_;
+      for (auto const succ : succs(block)) {
+        auto const& succBlock = unit.blocks[succ];
+        assertx(succBlock.code.front().op == Vinstr::phidef);
+        auto const& phidef = succBlock.code.front().phidef_;
+        auto const& liveIn = state.liveIn[succ];
+        auto const& uses = unit.tuples[phijmp.uses];
+        auto const& defs = unit.tuples[phidef.defs];
+        assertx(uses.size() == defs.size());
+        for (size_t i = 0; i < uses.size(); ++i) {
+          if (liveIn[uses[i]]) continue;
+          unify(uses[i], defs[i], weight);
+        }
+      }
+    }
+
+    // We need liveness information to know which hints are
+    // unsatisfiable, so walk backwards modifying it on the fly.
+    auto live = state.liveOut[b];
+
+    for (auto& inst : boost::adaptors::reverse(block.code)) {
+      // Attempt to unify hinted src/dest pairs. Each hinted src can
+      // be used only once (more than one is not satisfiable), so
+      // ignore multiples.
+      VregSet hints;
+      auto const processDef = [&] (Vreg r, Vreg hint) {
+        if (!r.isPhys() && is_colorable_reg(reg_class(state, r))) {
+          nonSpills.add(r);
+        }
+        if (!hint.isValid() || live[hint] || hints[hint]) return;
+        hints.add(hint);
+        unify(hint, r, weight);
+      };
+      visitDefsWithHints(unit, inst, processDef);
+
+      auto const& defs = defs_set_cached(state, inst);
+
+      // If we don't have spills and there's no physical registers in
+      // the defs, we can skip the below logic since the penalty
+      // vectors can't change. We only have to update the liveness
+      // information.
+      if (state.spilled || defs.containsPhys()) {
+        // Add defs and acrosses to the live set, since we need to
+        // know which Vregs interfer.
+        live |= defs;
+        live |= acrosses_set_cached(state, inst);
+
+        for (auto const defReg : defs) {
+          // If a physical register is defined, assess a penalty for
+          // it to any live Vreg penalty vectors.
+          if (defReg.isPhys()) {
+            auto const phys = defReg.physReg();
+            for (auto const liveReg : live) {
+              if (liveReg.isPhys() || defs[liveReg]) continue;
+              if (!is_colorable_reg(reg_class(state, liveReg))) continue;
+
+              // Assess a penalty for the def physical register since
+              // any Vreg with that register at this point will need
+              // to be moved.
+              auto const canon = canonicalize(liveReg);
+              auto& info = reg_info(state, canon);
+              if (!info.penaltyIdx) {
+                info.penaltyIdx = state.penalties.size();
+                state.penalties.emplace_back();
+              }
+              state.penalties[info.penaltyIdx][phys] += weight;
+            }
+            continue;
+          }
+
+          // If the def is a spill, remember it, and mark any other
+          // live spills as interfering with it.
+          auto const& info = reg_info(state, defReg);
+          if (!is_spill(info.regClass)) continue;
+
+          spills.add(defReg);
+          for (auto const liveReg : live) {
+            if (defReg == liveReg) continue;
+            auto const cls = reg_class(state, liveReg);
+            if (info.regClass != cls) continue;
+            spillInterferences[defReg].add(liveReg);
+            spillInterferences[liveReg].add(defReg);
+          }
+        }
+      }
+
+      // This is sufficient for liveness if we don't have physical
+      // register defs.
+      live -= defs;
+      live |= uses_set_cached(state, inst);
+    }
+
+    // Assert that our liveness information matches what liveness
+    // analysis calculated originally.
+    assertx(
+      [&] {
+        for (auto const r : state.liveIn[b]) always_assert(live[r]);
+        for (auto const r : live) {
+          if (state.liveIn[b][r]) continue;
+          always_assert(!r.isPhys());
+          always_assert(reg_info(state, r).regClass == RegClass::SF);
+        }
+        return true;
+      }()
+    );
+  }
+
+  // Update the penalty vector index for each Vreg to point directly
+  // at its penalty vector, rather than going through its canonical
+  // mapping. Make sure every non-spill Vreg has a penalty vector
+  // assigned. If they don't have one at this point, it means there's
+  // no penalties, so give them a default one. Keep track of the
+  // highest penalty vector index seen, so we can discard unused ones.
+  size_t maxPenaltyIdx = 0;
+  for (auto const r : nonSpills) {
+    auto& info = reg_info(state, r);
+    auto const canon = canonicalize(r);
+    info.penaltyIdx = reg_info(state, canon).penaltyIdx;
+    if (!info.penaltyIdx) {
+      info.penaltyIdx = state.penalties.size();
+      state.penalties.emplace_back();
+    }
+    maxPenaltyIdx = std::max(maxPenaltyIdx, info.penaltyIdx);
+  }
+  state.penalties.resize(maxPenaltyIdx + 1);
+
+  // If we found any spills, used the interference and affinity
+  // information to calculate slots for them.
+  if (spills.any()) {
+    assertx(state.spilled);
+    assign_spill_colors(
+      state,
+      spills,
+      spillInterferences,
+      std::move(spillAffinities)
+    );
+  }
+}
+
+// The unit can be colored in any order thats dominance preserving
+// (this includes RPO). However, we can get better coloring by walking
+// the CFG in an order that prioritizes higher weight blocks. This
+// function calculates such a block order.
+BlockVector calculate_block_color_order(const State& state) {
+  // With 1 or 2 block units, the visit order is fixed, so the result
+  // will always be the same as RPO.
+  if (state.rpo.size() <= 2) return state.rpo;
+
+  // Build up traces for each block. The trace for a block is its own
+  // weight plus the maximum of the traces of its predecessors. It
+  // reflects the maximum possible execution count to get to this
+  // block.
+  jit::vector<size_t> trace;
+  trace.resize(state.unit.blocks.size());
+
+  for (auto const b : state.rpo) {
+    size_t t = 0;
+    for (auto const pred : state.preds[b]) t = std::max(t, trace[pred]);
+    trace[b] = t + block_weight(state, b);
+    assertx(trace[b] > 0);
+  }
+
+  // Sort the blocks by trace. Bigger traces first. Use RPO order to
+  // break ties.
+  auto blocks = state.rpo;
+  std::sort(
+    blocks.begin(),
+    blocks.end(),
+    [&] (Vlabel a, Vlabel b) {
+      if (trace[a] != trace[b]) return trace[a] > trace[b];
+      return state.rpoOrder[a] < state.rpoOrder[b];
+    }
+  );
+
+  /*
+   * Now use the traces to find a good block ordering. We want to
+   * color the blocks with the higher traces first (they'll be
+   * executed most often). However, since we need to preserve
+   * dominance order, we cannot color a block until we've colored at
+   * least one of its predecessors.
+   *
+   * So, select the unprocessed block with the highest trace. Select
+   * the block's predecessor with the highest weight (if any) and
+   * recurse. Once the recursion returns, mark the current block as
+   * processed and add it to the order. Repeat this until no
+   * unprocessed blocks remain.
+   *
+   * NB: In RPO order if the unit has no loops, all predecessors for a
+   * block will be ordered before that block. This is *not* the case
+   * for this ordering.
+   */
+  BlockVector order;
+  boost::dynamic_bitset<> processed;
+  order.reserve(blocks.size());
+  processed.resize(state.unit.blocks.size());
+
+  auto const addTrace = [&] (Vlabel b, auto const& self) {
+    if (processed[b]) return;
+    size_t bestTrace = 0;
+    Vlabel bestPred;
+    for (auto const pred : state.preds[b]) {
+      if (state.rpoOrder[pred] >= state.rpoOrder[b]) continue;
+      if (bestTrace >= trace[pred]) continue;
+      bestTrace = trace[pred];
+      bestPred = pred;
+    }
+    if (bestPred.isValid()) self(bestPred, self);
+    order.emplace_back(b);
+    processed[b] = true;
+  };
+  for (auto const b : blocks) addTrace(b, addTrace);
+
+  return order;
+}
+
 // FreeRegs is responsible for tracking which physical registers are free and
-// assigning them. It only deals with physical registers and not spill slots.
+// assigning them.
 
 struct FreeRegs {
-  explicit FreeRegs(const State& state)
+  explicit FreeRegs(State& state)
     : state{&state}
-    , gp{state.gpUnreserved}
-    , simd{state.simdUnreserved} {}
+    , regs{state.gpUnreserved | state.simdUnreserved} {}
 
-  // Choose (with no particular heuristics) a free physical register appropriate
-  // for the given register class and return it as a color (or None if there's
-  // none available). This merely chooses the register, and does not mark it as
-  // taken.
-  Color choose(RegClass cls) const {
-    switch (cls) {
-      case RegClass::GP:
-      case RegClass::AnyNarrow: {
-        auto const r = gp.choose();
-        return r == InvalidReg ? None{} : Color{r};
+  // Choose an appropriate coloring for the given Vreg. This merely
+  // chooses the color, and does not mark it as taken or modify any
+  // other internal state. If the Vreg represents a spill, it will be
+  // chosen from the pre-computed spill colors. Otherwise, a physical
+  // register is chosen to try to maximize satisfied hints.
+  //
+  // For the register case, the heuristic may decide to migrate a
+  // (already taken) physical register to a different (free) physical
+  // register. In that case, the "moveDest" field of the coloring will
+  // be set to the new physical register. One can use assignedTo() on
+  // the returned color to get the source physical register.
+  //
+  // "moveWeight" is a lambda, which given two physical registers,
+  // returns the estimated weight of moving between them.
+  //
+  // If the given Vreg is a physical register, that physical register
+  // will always be chosen, if available. Otherwise the function will
+  // consider moving the old Vreg from that physical register.
+
+  struct Coloring {
+    Coloring(PhysReg r) : color{r} {}
+    Coloring(Color c) : color{c} {}
+    Coloring(PhysReg r, PhysReg m) : color{r}, moveDest{m} {}
+    Color color;
+    PhysReg moveDest = InvalidReg;
+  };
+
+  template <typename W>
+  Coloring choose(Vreg r, W&& moveWeight) const {
+    // Find best physical register for a Vreg, choosing from the set
+    // of registers in "mask".
+    auto const findBest = [&] (RegSet mask) -> Coloring {
+      struct PhysWeight {
+        PhysReg reg;
+        int64_t weight;
+      };
+      struct PhysWeightArray {
+        std::array<PhysWeight, PhysReg::kMaxRegs> pairs;
+        size_t size = 0;
+      };
+
+      // Build a list of candidate physical registers from
+      // 'candidates', sorted by their weight ascending (calculated by
+      // "calc").
+      auto const buildPhysWeights = [this] (Vreg seed,
+                                            RegSet candidates,
+                                            auto&& calc) {
+        PhysWeightArray weights;
+        // Build the weights
+        candidates.forEach(
+          [&] (PhysReg r) {
+            weights.pairs[weights.size++] = PhysWeight{r, calc(r)};
+          }
+        );
+        // And sort them. Physical registers with lower weights are
+        // always preferred. With equal weight, we prefer available
+        // registers over unavailable ones. Finally, to break any
+        // remaining ties, we hash the associated Vreg and the
+        // physical register to come up with a pseudo-random
+        // order. This helps avoid pathologies caused by lots of
+        // physical registers with the same weight.
+        std::sort(
+          weights.pairs.begin(), weights.pairs.begin() + weights.size,
+          [&] (const PhysWeight& p1, const PhysWeight& p2) {
+            if (p1.weight != p2.weight) return p1.weight < p2.weight;
+            auto const avail1 = regs.contains(p1.reg);
+            auto const avail2 = regs.contains(p2.reg);
+            if (avail1 != avail2) return avail1 > avail2;
+
+            auto const perturb1 = hash_int64_pair(seed, Vreg{p1.reg});
+            auto const perturb2 = hash_int64_pair(seed, Vreg{p2.reg});
+            if (perturb1 != perturb2) return perturb1 < perturb2;
+
+            return Vreg{p1.reg} < Vreg{p2.reg};
+          }
+        );
+        return weights;
+      };
+
+      auto const weights = [&] {
+        // If the Vreg is a physical register, there's only one
+        // candidate (itself) the weight is irrelevant here.
+        if (r.isPhys()) {
+          PhysWeightArray weights;
+          weights.pairs[0] = PhysWeight{r.physReg(), 0};
+          weights.size = 1;
+          return weights;
+        }
+
+        // Otherwise build up the full list, using the penalty vectors
+        // to order them.
+        auto const& info = reg_info(*state, r);
+        assertx(info.penaltyIdx > 0 &&
+                info.penaltyIdx < state->penalties.size());
+        auto const& penalties = state->penalties[info.penaltyIdx];
+        return buildPhysWeights(
+          r, mask, [&] (PhysReg r) { return penalties[r]; }
+        );
+      }();
+
+      // Examine each candidate starting from the best.
+      for (size_t i = 0; i < weights.size; ++i) {
+        auto const current = weights.pairs[i].reg;
+        auto const weight = weights.pairs[i].weight;
+
+        // This candidate is available, just use it.
+        if (regs.contains(current)) return current;
+
+        // Otherwise, if we don't want moves here, try the next
+        // one. If this is the last candidate, we're done since the
+        // heuristic looks at the next possible candidate.
+        if (i+1 == weights.size && !r.isPhys()) continue;
+
+        // We support moves, so see if its profitable to generate one.
+        auto const assignedTo = occupied[current];
+        assertx(assignedTo.isValid());
+        // Can never move physical registers
+        if (assignedTo.isPhys()) continue;
+
+        // Get the penalty vector of the Vreg which might be moved.
+        auto const& movePenalties = [&] {
+          auto const idx = reg_info(*state, assignedTo).penaltyIdx;
+          assertx(idx > 0 && idx < state->penalties.size());
+          return state->penalties[idx];
+        }();
+
+        // Build a candidate list to move the Vreg to. We only support
+        // moving to a free physical register.
+        auto const moveWeights = buildPhysWeights(
+          assignedTo, mask & regs,
+          [&] (PhysReg r) { return movePenalties[r]; }
+        );
+
+        // No free physical register to move to, this candidate is
+        // done.
+        if (!moveWeights.size) continue;
+
+        // If we're trying to select for a physical register, we
+        // *have* to move. So just go with the best one, regardless of
+        // its weights.
+        if (r.isPhys()) {
+          assertx(current == r.physReg());
+          return {current, moveWeights.pairs[0].reg};
+        }
+
+        // Otherwise check if the penalty for the move is less than
+        // the win from moving it. Get the delta between the weight
+        // for the current candidate and the next best one. The
+        // penalty for the move is the difference between the moved
+        // Vreg's current register to its new one, plus the weight of
+        // the move itself. If the penalty for the move is less than
+        // the candidate's penalty delta, this is an overall win and
+        // we should do it.
+        auto const nextWeight = weights.pairs[i+1].weight;
+        auto const moveWin = nextWeight - weight;
+        auto const movePenalty =
+          (moveWeights.pairs[0].weight - movePenalties[current]) +
+          moveWeight(current, moveWeights.pairs[0].reg);
+        if (moveWin > movePenalty) {
+          return {current, moveWeights.pairs[0].reg};
+        }
       }
+
+      return InvalidReg;
+    };
+
+    // Lookup the pre-computed spill slot for a spill. This never
+    // changes.
+    auto const findSlot = [&] {
+      auto const it = state->spillColors.find(r);
+      assertx(it != state->spillColors.end());
+      return it->second;
+    };
+
+    switch (reg_class(*state, r)) {
+      case RegClass::GP:
+      case RegClass::AnyNarrow: return findBest(state->gpUnreserved);
       case RegClass::SIMD:
-      case RegClass::SIMDWide: {
-        auto const r = simd.choose();
-        return r == InvalidReg ? None{} : Color{r};
+      case RegClass::SIMDWide: return findBest(state->simdUnreserved);
+      case RegClass::Spill: {
+        auto const c = findSlot();
+        assertx(is_color_spill_slot(c));
+        return c;
+      }
+      case RegClass::SpillWide: {
+        auto const c = findSlot();
+        assertx(is_color_spill_slot_wide(c));
+        return c;
       }
       case RegClass::Any:
-      case RegClass::Spill:
-      case RegClass::SpillWide:
       case RegClass::SF:
         break;
     }
@@ -4732,23 +5571,26 @@ struct FreeRegs {
 
   // Mark the given physical register as taken. The register should not already
   // be reserved. The RegClass should be appropriate for that register.
-  void reserve(PhysReg r, RegClass cls) {
+  void reserve(Vreg r, Color c, RegClass cls) {
     switch (cls) {
       case RegClass::GP:
-      case RegClass::AnyNarrow: {
-        assertx(gp.contains(r));
-        gp -= r;
-        return;
-      }
+      case RegClass::AnyNarrow:
       case RegClass::SIMD:
       case RegClass::SIMDWide: {
-        assertx(simd.contains(r));
-        simd -= r;
+        auto const reg = color_reg(c);
+        assertx(regs.contains(reg));
+        assertx(!occupied[reg].isValid());
+        regs -= reg;
+        occupied[reg] = r;
         return;
       }
-      case RegClass::Any:
       case RegClass::Spill:
+        assertx(is_color_spill_slot(c));
+        return;
       case RegClass::SpillWide:
+        assertx(is_color_spill_slot_wide(c));
+        return;
+      case RegClass::Any:
       case RegClass::SF:
         break;
     }
@@ -4758,82 +5600,95 @@ struct FreeRegs {
   // Mark the given physical register as available. The register should be
   // already marked as taken. The RegClass should be appropriate for that
   // register.
-  void release(PhysReg r, RegClass cls) {
-    switch (cls) {
-      case RegClass::GP:
-      case RegClass::AnyNarrow: {
-        assertx(!gp.contains(r));
-        gp |= r;
-        return;
-      }
-      case RegClass::SIMD:
-      case RegClass::SIMDWide: {
-        assertx(!simd.contains(r));
-        simd |= r;
-        return;
-      }
-      case RegClass::Any:
-      case RegClass::Spill:
-      case RegClass::SpillWide:
-      case RegClass::SF:
-        break;
-    }
-    always_assert(false);
-  }
-
-  // Mark all physical registers as available.
-  void releaseAll() {
-    gp = state->gpUnreserved;
-    simd = state->simdUnreserved;
-  }
-
-  // Return false if any physical registers are taken.
-  bool allAvailable() const {
-    return
-      gp == state->gpUnreserved &&
-      simd == state->simdUnreserved;
-  }
-
-  // Check if the given physical register (with appropriate RegClass) is taken.
-  bool available(PhysReg r, RegClass cls) const {
+  void release(Color c, RegClass cls) {
     switch (cls) {
       case RegClass::GP:
       case RegClass::AnyNarrow:
-        return gp.contains(r);
       case RegClass::SIMD:
-      case RegClass::SIMDWide:
-        return simd.contains(r);
-      case RegClass::Any:
+      case RegClass::SIMDWide: {
+        auto const r = color_reg(c);
+        assertx(!regs.contains(r));
+        assertx(occupied[r].isValid());
+        regs |= r;
+        occupied[r] = Vreg{};
+        return;
+      }
       case RegClass::Spill:
+        assertx(is_color_spill_slot(c));
+        return;
       case RegClass::SpillWide:
+        assertx(is_color_spill_slot_wide(c));
+        return;
+      case RegClass::Any:
       case RegClass::SF:
         break;
     }
     always_assert(false);
   }
 
-  // Set operations:
-
-  FreeRegs operator-(const FreeRegs& other) const {
-    assertx(state == other.state);
-    auto temp = *this;
-    temp.gp -= other.gp;
-    temp.simd -= other.simd;
-    return temp;
+  // Check if the given physical register (with appropriate RegClass) is taken.
+  bool available(Color c, RegClass cls) const {
+    switch (cls) {
+      case RegClass::GP:
+      case RegClass::AnyNarrow:
+      case RegClass::SIMD:
+      case RegClass::SIMDWide:
+        return regs.contains(color_reg(c));
+      case RegClass::Spill:
+        assertx(is_color_spill_slot(c));
+        return true;
+      case RegClass::SpillWide:
+        assertx(is_color_spill_slot_wide(c));
+        return true;
+      case RegClass::Any:
+      case RegClass::SF:
+        break;
+    }
+    always_assert(false);
   }
 
-  FreeRegs operator&(const FreeRegs& other) const {
-    assertx(state == other.state);
-    auto temp = *this;
-    temp.gp &= other.gp;
-    temp.simd &= other.simd;
-    return temp;
+  // Express a move between two physical registers. The destination
+  // should not be assigned a Vreg, while the source should be. The
+  // Vreg will now be assigned the destination register.
+  void move(PhysReg src, PhysReg dst) {
+    assertx(src != dst);
+    assertx(!regs.contains(src));
+    assertx(regs.contains(dst));
+    auto const v = occupied[src];
+    assertx(v.isValid());
+    assertx(!occupied[dst].isValid());
+    occupied[dst] = v;
+    occupied[src] = Vreg{};
+    regs -= dst;
+    regs |= src;
   }
 
+  // Return all Vregs which are currently assigned a physical register
+  // (so ignoring spills).
+  VregSet live() const {
+    VregSet out;
+    for (auto const r : occupied) {
+      if (!occupied[r].isValid()) continue;
+      assertx(!regs.contains(r));
+      out.add(occupied[r]);
+    }
+    return out;
+  }
+
+  // Return the Vreg that a physical register is currently assigned
+  // to. The physical register should be currently used.
+  Vreg assignedTo(PhysReg r) const {
+     assertx(!regs.contains(r));
+     assertx(occupied[r].isValid());
+     return occupied[r];
+  }
+
+  // Return physical registers not currently allocated.
+  const RegSet& freeRegs() const { return regs; }
 private:
-  const State* state;
-  RegSet gp;
-  RegSet simd;
+  State* state;
+  RegSet regs;
+  PhysReg::Map<Vreg> occupied;
 };
 
 // Helper function to assert that a Color is not None (which means we couldn't
@@ -4846,97 +5701,1088 @@ void assert_found_color(Vreg r, Color c) {
   );
 }
 
-// Release the allocated colors from any Vregs (from the given candidate set)
-// which are dead at the given position.
-void release_dead_regs(State& state, FreeRegs& free,
+// Release the allocated colors from any Vregs (from the given
+// candidate set) which are dead at the given position, or in the
+// optional kills set. If "released" is provided, then fill it with
+// the physical registers freed.
+void release_dead_regs(State& state,
+                       FreeRegs& free,
                        const VregSet& candidates,
-                       Vlabel block, size_t instIdx) {
+                       const VregSet* kills,
+                       Vlabel block,
+                       size_t instIdx,
+                       RegSet* released = nullptr) {
   for (auto const r : candidates) {
-    if (r.isPhys()) continue;
-    auto const& info = reg_info(state, r);
+    auto const info = reg_color_info(state, r);
     if (!is_colorable(info.regClass)) continue;
     // Since we walk the unit in a dominance preserving order, every Vreg
     // defined at this point should have a color assigned.
     assertx(!is_color_none(info.color));
-    auto const reg = color_reg(info.color);
-    assertx(!free.available(reg, info.regClass));
-    if (live_in_at(state, r, block, instIdx + 1)) continue;
-    free.release(reg, info.regClass);
+    assertx(is_spill(info.regClass) ||
+            !free.available(info.color, info.regClass));
+    if (live_in_at(state, r, block, instIdx + 1) &&
+        (!kills || !r.isPhys() || !(*kills)[r])) {
+      continue;
+    }
+    if (released && is_color_reg(info.color)) {
+      *released |= color_reg(info.color);
+    }
+    free.release(info.color, info.regClass);
+    if (debug && !is_spill(info.regClass) && !r.isPhys()) {
+      // In debug builds set the color back to None so we'll catch
+      // errors more quickly.
+      reg_info(state, r).color = Color{};
+    }
   }
 }
 
-// Color the defs of the given instruction (which is unconstrained) at the given
-// position.
-void color_unconstrained(State& state, FreeRegs& free,
-                         Vinstr& inst, Vlabel block,
-                         size_t instIdx) {
+// Whether two physical registers can be exchanged with a single
+// instruction.
+bool can_single_swap(PhysReg r1, PhysReg r2) {
+  switch (arch()) {
+    case Arch::X64:   return r1.isGP() && r2.isGP();
+    case Arch::ARM:   return false;
+    case Arch::PPC64: return false;
+  }
+  always_assert(false);
+}
+
+// Run the coloring logic for a single instruction. Returns the number
+// of instructions added.
+size_t color_inst(State& state,
+                  FreeRegs& free,
+                  Vinstr& inst,
+                  Vlabel block,
+                  size_t instIdx,
+                  const boost::dynamic_bitset<>& processed,
+                  const jit::vector<boost::dynamic_bitset<>>& phiAdjustments) {
   auto const& acrosses = acrosses_set_cached(state, inst);
   auto const& uses = uses_set_cached(state, inst) - acrosses;
   auto const& defs = defs_set_cached(state, inst);
 
-  assertx(!defs.containsPhys());
+  // Phidefs should be done as part of block initialization.
+  assertx(inst.op != Vinstr::phidef);
 
-  // Make sure the uses of the instruction are all colored already (which should
-  // be the case because we walk the unit in dominance preserving order).
-  if (debug) {
-    auto const checkColored = [&] (Vreg r) {
-      auto const& info = reg_info(state, r);
-      if (!is_colorable(info.regClass)) return;
-      always_assert(!is_color_none(info.color));
-    };
-    std::for_each(uses.begin(), uses.end(), checkColored);
-    std::for_each(acrosses.begin(), acrosses.end(), checkColored);
+  auto& unit = state.unit;
+
+  auto const weight = block_weight(state, block);
+
+  // If this is a phijmp, we're at the end of the block. If our
+  // successor (there should only be one) is already processed, it
+  // means we've biased the penalty vectors for the phijmp sources (to
+  // try to make their assignments match the ones in the
+  // successor). Since we're done with this block, we need to undo
+  // those penalty vector adjustments now. We use the phi adjustment
+  // metadata to know which ones to undo (its hard to determine
+  // otherwise).
+  if (inst.op == Vinstr::phijmp) {
+    assertx(defs.none());
+    assertx(instIdx == unit.blocks[block].code.size() - 1);
+    auto const successors = succs(unit.blocks[block]);
+    assertx(successors.size() == 1);
+    auto const successor = successors[0];
+    if (processed[successor]) {
+      auto const& phidef = unit.blocks[successor].code.front();
+      assertx(phidef.op == Vinstr::phidef);
+      auto const& uses = unit.tuples[inst.phijmp_.uses];
+      auto const& defs = unit.tuples[phidef.phidef_.defs];
+      assertx(uses.size() == defs.size());
+
+      auto const& adjustments = phiAdjustments[block];
+      assertx(adjustments.empty() || adjustments.size() == uses.size());
+
+      // If adjustments[i] is true, we it means we adjusted the
+      // penalty vector for the Vreg at uses[i] by the weight of this
+      // block towards defs[i]. Undo this.
+      for (size_t i = 0; i < adjustments.size(); ++i) {
+        if (!adjustments[i]) continue;
+        assertx(!is_ignored(state, defs[i]));
+        assertx(!is_ignored(state, uses[i]));
+        assertx(defs[i].isPhys());
+        assertx(!uses[i].isPhys());
+
+        auto& info = reg_info(state, uses[i]);
+        assertx(is_colorable_reg(info.regClass));
+        auto const idx = info.penaltyIdx;
+        assertx(idx > 0 && idx < state.penalties.size());
+        auto& v = state.penalties[idx];
+
+        auto const phys = defs[i].physReg();
+        for (auto const r : v) {
+          if (r != phys) {
+            assertx(v[r] >= weight);
+            v[r] -= weight;
+          }
+        }
+      }
+    }
+  }
+  // For a phijmp, most of the below logic will be skipped (because it
+  // has no defs).
+
+  // If this instruction has a hint from Vreg sources to physical
+  // registers, we'll have incorporated this fact into the penalty
+  // vectors of those Vregs (bias it towards that physical
+  // register). We want to undo these adjustments, but we have to do
+  // it after selection below. Record the adjustments to be undone
+  // afterwards.
+  struct Adjustment {
+    Adjustment(PenaltyVector* p, PhysReg s) : penalties{p}, skip{s} {}
+    PenaltyVector* penalties;
+    PhysReg skip;
+  };
+  jit::vector<Adjustment> penaltyAdjustments;
+  if (defs.containsPhys()) {
+    VregSet hints;
+    visitDefsWithHints(
+      unit, inst,
+      [&] (Vreg def, Vreg hint) {
+        // This matches the logic for biasing or not when we processed
+        // the phidef.
+        if (!hint.isValid() || !def.isPhys() || hint.isPhys() || hints[hint]) {
+          return;
+        }
+        hints.add(hint);
+
+        auto const& info = reg_info(state, hint);
+        if (!is_colorable_reg(info.regClass)) return;
+
+        auto const cls1 = reg_class(state, hint);
+        auto const cls2 = reg_class(state, def);
+        if (!compatible_reg_classes(cls1, cls2)) return;
+
+        if (acrosses[hint] || live_in_at(state, hint, block, instIdx + 1)) {
+          return;
+        }
+
+        auto const idx = info.penaltyIdx;
+        assertx(idx > 0 && idx < state.penalties.size());
+        penaltyAdjustments.emplace_back(&state.penalties[idx], def.physReg());
+      }
+    );
   }
 
-  // First release any colors held by now dead uses. This doesn't include
-  // acrosses, which we removed from the uses set above.
-  release_dead_regs(state, free, uses, block, instIdx);
+  // Rewrite the sources of this instruction to become the physical
+  // registers the Vregs are already assigned to. Record the physical
+  // registers corresponding to "across" Vregs.
+  RegSet acrossPhys;
+  visitRegsMutable(
+    unit,
+    inst,
+    [&] (Vreg r) -> Vreg {
+      if (r.isPhys()) return r;
+      auto const& info = reg_info(state, r);
+      if (is_spill(info.regClass)) return r;
+      if (info.regClass == RegClass::SF) return state.abi.sf.choose();
+      auto const c = color_reg(info.color);
+      assertx(c != state.scratch);
+      if (acrosses[r]) acrossPhys |= c;
+      return c;
+    },
+    [] (Vreg r) { return r; }
+  );
 
+  // Release any colors held by now dead uses. This doesn't include
+  // acrosses, which we removed from the uses set. Record those
+  // physical registers which were released.
+  RegSet usesNowDead;
+  release_dead_regs(state, free, uses, &defs, block, instIdx, &usesNowDead);
+
+  // Snapshot the free physical registers before we begin coloring.
+  auto const freeRegsBeforeDefs = free.freeRegs();
+
+  // The sources (and thus all the hints) of this instruction have
+  // been rewritten to be physical registers. If the corresponding def
+  // is not a physical register, we want to bias that def's penalty
+  // vector towards the hinted source (to satisfy the hint). Do that
+  // here, and record the adjustment to be undone afterwards.
+  visitDefsWithHints(
+    unit, inst,
+    [&] (Vreg def, Vreg hint) {
+      if (!hint.isValid() || !hint.isPhys() || def.isPhys()) return;
+
+      // If the hint isn't free at the def, its not satisfiable.
+      auto const phys = hint.physReg();
+      if (!freeRegsBeforeDefs.contains(phys)) return;
+
+      auto const& info = reg_info(state, def);
+      if (!is_colorable_reg(info.regClass)) return;
+
+      assertx(info.penaltyIdx > 0 && info.penaltyIdx < state.penalties.size());
+      auto& v = state.penalties[info.penaltyIdx];
+      for (auto const r : v) {
+        if (r != phys) v[r] += weight;
+      }
+      penaltyAdjustments.emplace_back(&v, phys);
+    }
+  );
+
+  // Perform the actual physical register selection. For Vregs
+  // representing non-physical registers, we try to find the best
+  // physical register for it, possibly moving another Vreg. For Vregs
+  // representing physical registers, we don't have any choice in the
+  // matter, but we still might have to migrate a Vreg out of the
+  // desired physical register.
+  VregList copySrcs;
+  VregList copyDsts;
   for (auto const r : defs) {
-    auto& info = reg_info(state, r);
-    // This Vreg is being defined here, so it better not have a color already.
-    if (!is_colorable(info.regClass)) continue;
-    assertx(is_color_none(info.color));
-    // Pick a color, assert we found something (which we always should) and
-    // then reserve it.
-    info.color = free.choose(info.regClass);
-    assert_found_color(r, info.color);
-    free.reserve(color_reg(info.color), info.regClass);
+    auto const cls = reg_class(state, r);
+    if (!is_colorable(cls)) continue;
+
+    auto info = r.isPhys() ? nullptr : &reg_info(state, r);
+
+    // This Vreg is being defined here, so it better not have a
+    // color already.
+    assertx(!info || is_color_none(info->color));
+
+    // Pick a color, assert we found something (which we always
+    // should), handle any possible moves, and then reserve it. If the
+    // Vreg is a physical register, it will always return itself, but
+    // will move a Vreg if it resides in the destination.
+    auto const coloring = free.choose(
+      r,
+      [&] (Vreg from, Vreg to) -> int64_t {
+        // Move weight calculation. This matches the logic below for
+        // determining whether a copy is actually needed.
+        if (freeRegsBeforeDefs.contains(from)) return 0;
+        auto const it = std::find(copySrcs.begin(), copySrcs.end(), from);
+        if (it != copySrcs.end()) return 0;
+        if (!usesNowDead.contains(to)) return weight;
+        // If we can't emit a swap, assume it will take three
+        // instructions.
+        return can_single_swap(from, to) ? weight : (weight * 3);
+      }
+    );
+    assert_found_color(r, coloring.color);
+
+    // Some other Vreg has to be moved to make way for this physical
+    // register.
+    if (coloring.moveDest != InvalidReg) {
+      // Update metadata to track the move.
+      auto const movedFrom = color_reg(coloring.color);
+      auto const vreg = free.assignedTo(movedFrom);
+      free.move(movedFrom, coloring.moveDest);
+      reg_info(state, vreg).color = coloring.moveDest;
+
+      // Add to the copy list so we'll generate a copy before this
+      // instruction. If the copy source is a destination of another
+      // copy, just update the original copy. If the copy source is
+      // dead when the instruction executes, no copy is actually
+      // needed. Finally, if the copy source is already being moved to
+      // another register, no copy is needed (its already being
+      // saved).
+      std::replace(
+        copyDsts.begin(), copyDsts.end(), movedFrom, coloring.moveDest
+      );
+      if (!freeRegsBeforeDefs.contains(movedFrom)) {
+        if (std::find(copySrcs.begin(), copySrcs.end(), movedFrom) ==
+            copySrcs.end()) {
+          copySrcs.emplace_back(movedFrom);
+          copyDsts.emplace_back(coloring.moveDest);
+        }
+      }
+    }
+
+    if (info) info->color = coloring.color;
+    free.reserve(r, coloring.color, cls);
+  }
+
+  // Undo all the penalty adjustments we did before coloring.
+  for (auto const p : penaltyAdjustments) {
+    auto& v = *p.penalties;
+    for (auto const r : v) {
+      if (r == p.skip) continue;
+      assertx(v[r] >= weight);
+      v[r] -= weight;
+    }
+  }
+
+  // Rewrite the sources and the defs of this instruction to take into
+  // account the physical register selections and any moves we need to
+  // generate.
+  visitRegsMutable(
+    unit,
+    inst,
+    [&] (Vreg r) -> Vreg {
+      assertx(r.isPhys() || is_spill(reg_class(state, r)));
+      if (inst.op == Vinstr::copy || inst.op == Vinstr::copyargs) {
+        // If the current instruction is a copy, we'll fold the new
+        // copies into it below, so nothing needs to be changed.
+        return r;
+      }
+      if (r.isPhys()) {
+        // Rewrite already colored source to take into account moves
+        // we need to generate.
+        auto const phys = r.physReg();
+        assertx(copySrcs.size() == copyDsts.size());
+        for (size_t i = 0; i < copyDsts.size(); ++i) {
+          if (!usesNowDead.contains(copyDsts[i]) &&
+              !acrossPhys.contains(copySrcs[i])) {
+            // If the copy destination isn't used by the instruction,
+            // and the copy source isn't across, then the source and
+            // destination will contain the same value when the
+            // instruction executes, so we don't actually have to
+            // change anything.
+            continue;
+          }
+          // Otherwise rewrite as appropriate. We need to check both
+          // copySrcs and copyDsts because we might be swapping them
+          // and both can appear as uses in the current instruction.
+          if (copyDsts[i] == phys) return copySrcs[i];
+          if (copySrcs[i] == phys) return copyDsts[i];
+        }
+      }
+      return r;
+    },
+    [&] (Vreg r) -> Vreg {
+      if (r.isPhys()) return r;
+      auto const& info = reg_info(state, r);
+      if (is_spill(info.regClass)) return r;
+      if (info.regClass == RegClass::SF) return state.abi.sf.choose();
+      auto const c = color_reg(info.color);
+      assertx(c != state.scratch);
+      return c;
+    }
+  );
+  invalidate_cached_operands(inst);
+
+  // If this instruction defined any physical registers, we'll have
+  // incorporated this information into the initial penalty vectors
+  // for any live Vreg. Since this instruction is now processed, we
+  // want to undo this adjustment.
+  if (defs.containsPhys()) {
+    for (auto const r : free.live()) {
+      // VregSet always provides the physical registers first, so if
+      // we see a non-physical Vreg, we've seen all the physical
+      // registers.
+      if (r.isPhys()) continue;
+      if (!is_colorable_reg(reg_class(state, r))) continue;
+      auto const idx = reg_info(state, r).penaltyIdx;
+      assertx(idx > 0 && idx < state.penalties.size());
+      auto& v = state.penalties[idx];
+      for (auto const d : defs) {
+        if (!d.isPhys()) break;
+        auto const phys = d.physReg();
+        assertx(v[phys] >= weight);
+        v[phys] -= weight;
+      }
+    }
   }
 
   // Release any now dead defs or acrosses.
-  release_dead_regs(state, free, acrosses, block, instIdx);
-  release_dead_regs(state, free, defs, block, instIdx);
+  release_dead_regs(state, free, acrosses, nullptr, block, instIdx);
+  release_dead_regs(state, free, defs, nullptr, block, instIdx);
+
+  assertx(copySrcs.size() == copyDsts.size());
+  if (copySrcs.empty()) return 0;
+
+  // Emit any needed copies:
+
+  // Special case. If the previous instruction to this one defines the
+  // copy source, we possibly just modify it to write to the copy
+  // destination instead.
+  if (instIdx > 0) {
+    auto& last = unit.blocks[block].code[instIdx - 1];
+    // Rewriting phidefs is tricky because of the penalty vector
+    // biasing, so skip for now.
+    if (last.op != Vinstr::phidef) {
+      auto const& lastDefs = defs_set_cached(state, last);
+      auto const& lastAcrosses = acrosses_set_cached(state, last);
+      size_t copyIdx = 0;
+      for (size_t i = 0; i < copySrcs.size(); ++i) {
+        // We can safely perform this optimization if the destination
+        // is not used by the current instruction (can't clobber
+        // otherwise), if the source is actually defined by the
+        // previous instruction, if the destination isn't also defined
+        // by the previous instruction, and if the destination isn't
+        // an across operand for the previous instruction.
+        if (!usesNowDead.contains(copyDsts[i]) &&
+            lastDefs[copySrcs[i]] &&
+            !lastDefs[copyDsts[i]] &&
+            !lastAcrosses[copyDsts[i]]) {
+          // Rewrite the previous instruction to write to the
+          // destination.
+          visitRegsMutable(
+            unit, last,
+            [&] (Vreg r) { return r; },
+            [&] (Vreg r) -> Vreg {
+              return (copySrcs[i] == r) ? copyDsts[i] : r;
+            }
+          );
+          // And rewrite the current instruction to take the
+          // destination as the source.
+          visitRegsMutable(
+            unit, inst,
+            [&] (Vreg r) { return (copySrcs[i] == r) ? copyDsts[i] : r; },
+            [&] (Vreg r) { return r; }
+          );
+        } else {
+          // Otherwise, no rewrite, keep this pair in the list.
+          copySrcs[copyIdx] = copySrcs[i];
+          copyDsts[copyIdx] = copyDsts[i];
+          ++copyIdx;
+        }
+      }
+      // Did we shrink the copy list (and hence changed something)?
+      if (copyIdx < copySrcs.size()) {
+        invalidate_cached_operands(last);
+        invalidate_cached_operands(inst);
+      }
+      // If we eliminated all copies, we're done
+      if (copyIdx == 0) return 0;
+      copySrcs.resize(copyIdx);
+      copyDsts.resize(copyIdx);
+    }
+  }
+
+  // More special cases: If this instruction is a copy, or copyargs,
+  // we can fold the copies into the current instruction (this works
+  // because copyargs is a parallel copy).
+  if (inst.op == Vinstr::copy) {
+    copySrcs.emplace_back(inst.copy_.s);
+    copyDsts.emplace_back(inst.copy_.d);
+    inst.op = Vinstr::copyargs;
+    inst.copyargs_.s = unit.makeTuple(std::move(copySrcs));
+    inst.copyargs_.d = unit.makeTuple(std::move(copyDsts));
+    invalidate_cached_operands(inst);
+    return 0;
+  } else if (inst.op == Vinstr::copyargs) {
+    auto& srcs = unit.tuples[inst.copyargs_.s];
+    auto& dsts = unit.tuples[inst.copyargs_.d];
+    for (size_t i = 0; i < copySrcs.size(); ++i) {
+      srcs.emplace_back(copySrcs[i]);
+      dsts.emplace_back(copyDsts[i]);
+    }
+    invalidate_cached_operands(inst);
+    return 0;
+  }
+
+  // If the destination of the copy is used as a source of this
+  // instruction, we can't just emit a copy overwriting it before the
+  // instruction. Instead we swap the source and destination. This is
+  // fine because the destination is guaranteed to be dead before the
+  // instruction writes to its defs. We do this by inserting an
+  // opposite order of the copy in the list, which the phi lowering
+  // logic will turn into a swap.
+  auto const origSize = copySrcs.size();
+  for (size_t i = 0; i < origSize; ++i) {
+    if (!usesNowDead.contains(copyDsts[i])) continue;
+    auto const src = copySrcs[i];
+    auto const dst = copyDsts[i];
+    copySrcs.emplace_back(dst);
+    copyDsts.emplace_back(src);
+  }
+
+  // Emit the copies
+  vmodify(
+    unit, block, instIdx,
+    [&] (Vout& v) {
+      if (copySrcs.size() == 1) {
+        v << copy{copySrcs[0], copyDsts[0]};
+      } else {
+        v << copyargs{
+          unit.makeTuple(std::move(copySrcs)),
+          unit.makeTuple(std::move(copyDsts))
+        };
+      }
+      return 0;
+    }
+  );
+
+  return 1;
+}
+
+// Flat mapping of Vreg to a physical register its been assigned
+// to. This is used to record Vreg to physical register assignments at
+// block entry/exit. The block will have an entry for each
+// live-in/live-out Vreg (in that order), except for Vregs
+// representing physical registers. Registers will always be present
+// in ascending order.
+using AssignmentVector = jit::vector<std::pair<Vreg, PhysReg>>;
+
+// Initialize the initial set of Vreg to physical register assignments
+// for a block, taking into account predecessors. If the block has one
+// predecessor, we just copy over the assignments from that. If it has
+// multiple predecessors, we invoke the register selection logic, but
+// biasing (via the penalty vectors) towards assignments which match
+// the predecessors. In extreme cases, we may choose a register that
+// none of the predecessors selected. This all means the block can
+// have register assignments which don't match their predecessors or
+// successors, but that will be resolved afterwards.
+size_t color_block_initialize(
+    State& state,
+    FreeRegs& free,
+    Vlabel b,
+    const jit::vector<AssignmentVector>& assignments,
+    const boost::dynamic_bitset<>& processed,
+    jit::vector<boost::dynamic_bitset<>>& phiAdjustments
+) {
+  auto const reserve = [&] (Vreg r, PhysReg phys) {
+    auto const cls = reg_class(state, phys);
+    always_assert(free.available(phys, cls));
+    free.reserve(r, phys, cls);
+    if (r.isPhys()) return;
+    auto& info = reg_info(state, r);
+    assertx(is_color_none(info.color));
+    info.color = phys;
+  };
+
+  auto const& preds = state.preds[b];
+  if (preds.empty()) {
+    assertx(b == state.unit.entry);
+    assertx(state.liveIn[b].allPhys());
+    for (auto const r : state.liveIn[b]) reserve(r, r.physReg());
+    return 0;
+  }
+
+  if (preds.size() == 1) {
+    // If this block has exactly one predecessor, it must already be
+    // processed (dominance preserving order guarantees this). We can
+    // simply use the same assignments the predecessor used for Vregs.
+    assertx(processed[preds[0]]);
+
+    auto const& predOut = assignments[preds[0]];
+    size_t predOutIdx = 0;
+    for (auto const r : state.liveIn[b]) {
+      auto const cls = reg_class(state, r);
+      if (!is_colorable_reg(cls)) continue;
+
+      if (r.isPhys()) {
+        reserve(r, r.physReg());
+        continue;
+      }
+
+      // The predecessor can have a Vreg which is live-out (and thus
+      // in the assignment vector), but isn't live-in to this
+      // block. Skip over such Vregs. This is only possible if the
+      // predecessor has multiple successors.
+      assertx(predOutIdx < predOut.size());
+      while (r != predOut[predOutIdx].first) {
+        ++predOutIdx;
+        assertx(predOutIdx < predOut.size());
+      }
+
+      reserve(r, predOut[predOutIdx].second);
+    }
+
+    // If the block doesn't begin with a phidef, we're done.
+    auto& inst = state.unit.blocks[b].code.front();
+    if (inst.op != Vinstr::phidef) return 0;
+
+    auto const phijmp = state.unit.blocks[preds[0]].code.back();
+    assertx(phijmp.op == Vinstr::phijmp);
+    auto const& uses = state.unit.tuples[phijmp.phijmp_.uses];
+    auto& defs = state.unit.tuples[inst.phidef_.defs];
+    assertx(uses.size() == defs.size());
+
+    // The uses of the associated phijmp should already be colored, so
+    // just use that to initialize the phidef defs.
+    auto const& defsSet = defs_set_cached(state, inst);
+    for (size_t i = 0; i < uses.size(); ++i) {
+      if (is_ignored(state, defs[i])) {
+        assertx(is_ignored(state, uses[i]));
+        continue;
+      }
+      assertx(!defs[i].isPhys());
+      auto const& info = reg_info(state, defs[i]);
+      if (is_spill(info.regClass)) continue;
+      if (info.regClass == RegClass::SF) {
+        defs[i] = state.abi.sf.choose();
+        continue;
+      }
+      // Rewrite the instruction to take the physical registers.
+      assertx(uses[i].isPhys());
+      auto const phys = uses[i].physReg();
+      assertx(phys != state.scratch);
+      reserve(defs[i], phys);
+      defs[i] = phys;
+    }
+    invalidate_cached_operands(inst);
+    // The phidef can define registers which are immediately dead, so
+    // release those here.
+    release_dead_regs(state, free, defsSet, nullptr, b, 0);
+  }
+
+  // Since we've split critical edges, if we have multiple
+  // predecessors, all those predecessors must have one successor
+  // (this block), and therefore the live-out information should
+  // always match the live-in.
+  if (debug) {
+    for (auto const pred : preds) {
+      always_assert(state.liveOut[pred] == state.liveIn[b]);
+    }
+  }
+
+  // We have multiple predecessors. The different predecessors might
+  // have different Vreg to physical register assignments. So, instead
+  // of just taking it from one predecessor or another, instead we
+  // invoke the full "choose" logic for each Vreg, which will attempt
+  // to chose the physical register which is optimal (according to
+  // penalty vectors). However, we bias the penalty vectors by what
+  // the predecessors have already chosen, to reflect that certain
+  // choices will avoid copies on the edge. Since these biases are
+  // only for this one instruction, we need to undo the adjustments
+  // after selection.
+
+  struct Adjustment {
+    Adjustment(PenaltyVector* p, PhysReg s, int64_t a)
+      : penalties{p}, skip{s}, amount{a} {}
+    PenaltyVector* penalties;
+    PhysReg skip;
+    int64_t amount;
+  };
+  jit::vector<Adjustment> penaltyAdjustments;
+
+  size_t assignmentIdx = 0;
+  for (auto const r : state.liveIn[b]) {
+    if (r.isPhys()) continue;
+
+    auto& info = reg_info(state, r);
+    if (!is_colorable_reg(info.regClass)) continue;
+
+    assertx(info.penaltyIdx > 0 && info.penaltyIdx < state.penalties.size());
+    auto& penalties = state.penalties[info.penaltyIdx];
+
+    // Bias the penalty vector for this Vreg by what processed
+    // predecessors have already selected for it. Record the
+    // adjustment so we can undo it.
+    for (auto const pred : preds) {
+      if (!processed[pred]) continue;
+
+      auto const& predAssignment = assignments[pred];
+      assertx(assignmentIdx < predAssignment.size());
+      assertx(predAssignment[assignmentIdx].first == r);
+
+      // The copy will be done on the predecessor, so that's the
+      // weight to use.
+      auto const weight = block_weight(state, pred);
+
+      for (auto const phys : penalties) {
+        if (phys == predAssignment[assignmentIdx].second) continue;
+        penalties[phys] += weight;
+      }
+      penaltyAdjustments.emplace_back(
+        &penalties,
+        predAssignment[assignmentIdx].second,
+        weight
+      );
+    }
+
+    ++assignmentIdx;
+  }
+
+  // Same as above, but for a phidef/phijmp pair, if any.
+  auto& phidef = state.unit.blocks[b].code.front();
+  if (phidef.op == Vinstr::phidef) {
+    auto const& defs = state.unit.tuples[phidef.phidef_.defs];
+    for (size_t i = 0; i < defs.size(); ++i) {
+      if (is_ignored(state, defs[i])) continue;
+      assertx(!defs[i].isPhys());
+      auto& info = reg_info(state, defs[i]);
+      if (!is_colorable_reg(info.regClass)) continue;
+
+      assertx(info.penaltyIdx > 0 && info.penaltyIdx < state.penalties.size());
+      auto& penalties = state.penalties[info.penaltyIdx];
+
+      for (auto const pred : preds) {
+        auto const phijmp = state.unit.blocks[pred].code.back();
+        assertx(phijmp.op == Vinstr::phijmp);
+        auto const& uses = state.unit.tuples[phijmp.phijmp_.uses];
+        assertx(uses.size() == defs.size());
+
+        if (!processed[pred]) continue;
+
+        assertx(uses[i].isPhys());
+        assertx(!is_ignored(state, uses[i]));
+        auto const physUse = uses[i].physReg();
+        auto const weight = block_weight(state, pred);
+        for (auto const phys : penalties) {
+          if (phys == physUse) continue;
+          penalties[phys] += weight;
+        }
+        penaltyAdjustments.emplace_back(&penalties, physUse, weight);
+      }
+    }
+  }
+
+  // Now that we've biased things appropriately, do the actual
+  // selection.
+  for (auto const r : state.liveIn[b]) {
+    // NB: Physical register always come before virtual ones in a
+    // VregSet, so we'll reserve all the physical registers first.
+    if (r.isPhys()) {
+      reserve(r, r.physReg());
+      continue;
+    }
+
+    auto& info = reg_info(state, r);
+    if (!is_colorable_reg(info.regClass)) continue;
+
+    // Choose a physical register for this Vreg. "Moving" here is
+    // free, because it just results in a change to a previous
+    // assignment.
+    auto const coloring = free.choose(r, [] (Vreg, Vreg) { return 0; });
+    assert_found_color(r, coloring.color);
+
+    auto const selected = color_reg(coloring.color);
+    if (coloring.moveDest != InvalidReg) {
+      auto const vreg = free.assignedTo(selected);
+      free.move(selected, coloring.moveDest);
+      reg_info(state, vreg).color = coloring.moveDest;
+    }
+
+    reserve(r, selected);
+  }
+
+  // Do the same, but for phidef/phijmp pair if any.
+  if (phidef.op == Vinstr::phidef) {
+    auto const& defs = state.unit.tuples[phidef.phidef_.defs];
+    for (size_t i = 0; i < defs.size(); ++i) {
+      if (is_ignored(state, defs[i])) continue;
+      assertx(!defs[i].isPhys());
+      auto& info = reg_info(state, defs[i]);
+      if (!is_colorable(info.regClass)) continue;
+      assertx(is_color_none(info.color));
+
+      auto const coloring = free.choose(defs[i], [] (Vreg, Vreg) { return 0; });
+      assert_found_color(defs[i], coloring.color);
+      info.color = coloring.color;
+
+      if (coloring.moveDest != InvalidReg) {
+        auto const selected = color_reg(info.color);
+        auto const vreg = free.assignedTo(selected);
+        free.move(selected, coloring.moveDest);
+        reg_info(state, vreg).color = coloring.moveDest;
+      }
+
+      // We don't use reserve() here because defs[i] might be a spill.
+      free.reserve(defs[i], info.color, info.regClass);
+    }
+  }
+
+  // Now that we've selected registers for all the Vregs, we need to
+  // bias any unprocessed predecessors. That is, we want to make it
+  // more likely that when coloring the predecessor, we select
+  // registers for the same Vregs there, that match our selections
+  // here. This will eliminate any necessary copies between the
+  // blocks. Assess a penalty for each Vreg to every physical register
+  // which isn't the one we selected. The weight of the penalty is the
+  // weight of the predecessor. These adjustments will be undone when
+  // the predecessor is colored.
+  for (auto const r : state.liveIn[b]) {
+    if (r.isPhys()) continue;
+
+    auto& info = reg_info(state, r);
+    if (!is_colorable_reg(info.regClass)) continue;
+
+    auto const selection = color_reg(info.color);
+    for (auto const pred : preds) {
+      if (processed[pred]) continue;
+
+      assertx(info.penaltyIdx > 0 && info.penaltyIdx < state.penalties.size());
+      auto& penalties = state.penalties[info.penaltyIdx];
+
+      auto const weight = block_weight(state, pred);
+      for (auto const phys : penalties) {
+        if (phys == selection) continue;
+        penalties[phys] += weight;
+      }
+    }
+  }
+
+  // Same idea as above, but for phijmp/phidef pairs. We need to
+  // record which operands were adjusted, as its difficult to
+  // determine after the fact.
+  if (phidef.op == Vinstr::phidef) {
+    auto const& defs = state.unit.tuples[phidef.phidef_.defs];
+    for (size_t i = 0; i < defs.size(); ++i) {
+      if (is_ignored(state, defs[i])) continue;
+      assertx(!defs[i].isPhys());
+      auto& info = reg_info(state, defs[i]);
+      if (!is_colorable_reg(info.regClass)) continue;
+
+      auto const physDef = color_reg(info.color);
+      for (auto const pred : preds) {
+        if (processed[pred]) continue;
+        auto const& phijmp = state.unit.blocks[pred].code.back();
+        auto const& uses = state.unit.tuples[phijmp.phijmp_.uses];
+        assertx(uses.size() == defs.size());
+        assertx(!is_ignored(state, uses[i]));
+
+        auto& adjustments = phiAdjustments[pred];
+        assertx(adjustments.empty() || adjustments.size() == uses.size());
+        if (adjustments.empty()) adjustments.resize(uses.size());
+
+        auto const penaltyIdx = reg_info(state, uses[i]).penaltyIdx;
+        assertx(penaltyIdx > 0 && penaltyIdx < state.penalties.size());
+        // If the source and dest don't have the same penalty vector,
+        // there's no benefit to assigning them the same physical
+        // register (they probably interfere anyways), so skip the
+        // adjustment.
+        if (penaltyIdx != info.penaltyIdx) continue;
+
+        adjustments[i] = true;
+
+        auto& v = state.penalties[penaltyIdx];
+        auto const weight = block_weight(state, pred);
+        for (auto const r : v) {
+          if (r != physDef) v[r] += weight;
+        }
+      }
+    }
+  }
+
+  // Undo the penalty vector adjustments we did early before the
+  // selections were made.
+  for (auto const p : penaltyAdjustments) {
+    auto& penalties = *p.penalties;
+    for (auto const r : penalties) {
+      if (r == p.skip) continue;
+      assertx(penalties[r] >= p.amount);
+      penalties[r] -= p.amount;
+    }
+  }
+
+  // Rewrite the phidef (if present) to take the physical registers
+  // selected for it.
+  if (phidef.op == Vinstr::phidef) {
+    // Capture this before rewriting the operands.
+    auto const& defsSet = defs_set_cached(state, phidef);
+    auto& defs = state.unit.tuples[phidef.phidef_.defs];
+    for (size_t i = 0; i < defs.size(); ++i) {
+      if (is_ignored(state, defs[i])) continue;
+      assertx(!defs[i].isPhys());
+      auto const& info = reg_info(state, defs[i]);
+      if (is_spill(info.regClass)) continue;
+      if (info.regClass == RegClass::SF) {
+        defs[i] = state.abi.sf.choose();
+        continue;
+      }
+      defs[i] = color_reg(info.color);
+      assertx(defs[i] != state.scratch);
+    }
+    invalidate_cached_operands(phidef);
+    // The phidef can define registers which are immediately dead, so
+    // release those here.
+    release_dead_regs(state, free, defsSet, nullptr, b, 0);
+    return 1;
+  }
+
+  return 0;
 }
 
 void assign_colors(State& state) {
+  // Calculate (initial) penalty vectors and find a good coloring
+  // order.
+  calculate_penalties(state);
+  auto const order = calculate_block_color_order(state);
+
   auto& unit = state.unit;
 
-  // Walk the unit in RPO order. This is dominance preserving, so we'll always
-  // encounter a Vreg's def before any of its usages. This means we can color in
-  // a single pass over the unit.
-  for (auto const b : state.rpo) {
-    // Start with all physical registers being available.
-    FreeRegs free{state};
+  // Vreg to physical register assignments to the entry and exit of
+  // blocks. Used to initialize assignments when starting a block, and
+  // for resolving mismatches between blocks.
+  jit::vector<AssignmentVector> assignmentsIn;
+  jit::vector<AssignmentVector> assignmentsOut;
+  assignmentsIn.resize(unit.blocks.size());
+  assignmentsOut.resize(unit.blocks.size());
 
-    // Then reserve all the registers already assigned to live-in Vregs.
-    for (auto const r : state.liveIn[b]) {
+  // When we color a phidef, not all of the phijmp blocks may have
+  // been colored already. We adjust the penalty vectors for those
+  // uncolored phijmp sources to express a preference for the phidef
+  // def assigned registers. However, not all Vregs may be adjusted
+  // (because interference may mean we don't try to satisfy the
+  // hint). Its difficult to back out what got adjusted and what
+  // didn't, so explicitly encode it in this data-structure. The
+  // vector is keyed by block, and each bit in the bitset represents
+  // an index into the phijmp source.
+  jit::vector<boost::dynamic_bitset<>> phiAdjustments;
+  phiAdjustments.resize(unit.blocks.size());
+
+  // Populate register assignments from a set of live Vregs.
+  auto const liveToAssignment = [&] (const VregSet& live,
+                                     AssignmentVector& assignment) {
+    assignment.reserve(live.size());
+    for (auto const r : live) {
+      if (r.isPhys()) continue;
       auto const& info = reg_info(state, r);
-      if (!is_colorable(info.regClass)) continue;
+      if (!is_colorable_reg(info.regClass)) continue;
       assertx(!is_color_none(info.color));
-      auto const reg = color_reg(info.color);
-      always_assert(free.available(reg, info.regClass));
-      free.reserve(reg, info.regClass);
+      assignment.emplace_back(r, color_reg(info.color));
+    }
+  };
+
+  boost::dynamic_bitset<> processed(state.unit.blocks.size());
+
+  // Since the block order is dominance preserving, we'll always encouter a
+  // Vreg's def before any of its usages. This means we can color in a single
+  // pass over the unit.
+  for (auto const b : order) {
+    assertx(!processed[b]);
+
+    // Initialize the initial assignments according to the information
+    // from predecessors and phidefs.
+    FreeRegs free{state};
+    auto const startIdx = color_block_initialize(
+      state, free, b, assignmentsOut,
+      processed, phiAdjustments
+    );
+
+    // Record the initial assignment for mismatch resolution. This is
+    // only necessary if the block has multiple predecessors (if
+    // there's only one predecessor, it must be already processed and
+    // there can be no mismatches).
+    if (state.preds[b].size() > 1) {
+      liveToAssignment(state.liveIn[b], assignmentsIn[b]);
+    } else if (state.preds[b].size() > 0) {
+      assertx(processed[state.preds[b][0]]);
     }
 
-    auto& block = unit.blocks[b];
-    for (size_t i = 0; i < block.code.size(); ++i) {
-      auto& inst = block.code[i];
-      if (defs_set_cached(state, inst).containsPhys()) {
-        // Implemented in next diff
-        always_assert(false);
+    // Walk the instructions, running the coloring logic on them.
+    for (size_t i = startIdx; i < unit.blocks[b].code.size(); ++i) {
+      auto& inst = unit.blocks[b].code[i];
+      // Make sure the uses of the instruction are all colored already (which
+      // should be the case because we walk the unit in dominance preserving
+      // order).
+      if (debug) {
+        for (auto const r : uses_set_cached(state, inst)) {
+          if (r.isPhys()) continue;
+          auto const& info = reg_info(state, r);
+          if (!is_colorable(info.regClass)) continue;
+          always_assert(!is_color_none(info.color));
+        };
+      }
+
+      i += color_inst(state, free, inst, b, i, processed, phiAdjustments);
+    }
+
+    auto const successors = succs(unit.blocks[b]);
+    if (!successors.empty()) {
+      // If this block has one successor, but that successor is
+      // already processed, it means that successor has multiple
+      // predecessors (because we split critical edges), and one of
+      // them has a higher weight than us.  When the predecessor was
+      // colored, we modified the penalty vectors for live-in Vregs to
+      // reflect a preference for whatever they were colored to. Since
+      // we've now processed this block, we must now undo these
+      // preferences.
+      if (successors.size() == 1 && processed[successors[0]]) {
+        auto const weight = block_weight(state, b);
+
+        for (auto const& assignment : assignmentsIn[successors[0]]) {
+          auto& info = reg_info(state, assignment.first);
+          assertx(is_colorable_reg(info.regClass));
+
+          auto const penaltyIdx = info.penaltyIdx;
+          assertx(penaltyIdx > 0 && penaltyIdx < state.penalties.size());
+          auto& v = state.penalties[penaltyIdx];
+
+          // Undo the preference (really a penalty for everything else
+          // except one Vreg).
+          for (auto const r : v) {
+            if (r != assignment.second) {
+              assertx(v[r] >= weight);
+              v[r] -= weight;
+            }
+          }
+        }
+      }
+
+      // Record assignments at the end of the block for mismatch
+      // resolution.
+      liveToAssignment(state.liveOut[b], assignmentsOut[b]);
+    }
+
+    processed[b] = true;
+
+    // Clear color information from the Vregs in debug builds, to
+    // catch uses before assignment.
+    if (debug) {
+      for (auto const r : state.liveOut[b]) {
+        if (r.isPhys()) continue;
+        auto& info = reg_info(state, r);
+        if (!is_spill(info.regClass)) info.color = Color{};
+      }
+    }
+  }
+
+  // At this point all penalties should be zero, as we should have
+  // undone every assessment as we colored the unit.
+  if (debug) {
+    for (auto const& v : state.penalties) {
+      for (auto const r : v) always_assert(v[r] == 0);
+    }
+  }
+
+  // Now compare the assignment information between predecessors and
+  // successors and look for mismatches. This means the blocks made
+  // different coloring decisions. If so, we need to insert phis
+  // between the blocks to make everything consistent.
+  for (auto const b : state.rpo) {
+    // If a block only has one predecessor, it should always be
+    // consistent, so we can skip.
+    auto const& preds = state.preds[b];
+    if (preds.size() <= 1) continue;
+
+    // Since we've split critical edges, a block with multiple
+    // predecessors should have the same live-in Vregs as all the
+    // predecessors' live-out.
+    if (debug) {
+      for (auto const pred : preds) {
+        always_assert(state.liveOut[pred] == state.liveIn[b]);
+      }
+    }
+
+    auto const& in = assignmentsIn[b];
+
+    VregSet conflicts;
+    for (size_t i = 0; i < in.size(); ++i) {
+      assertx(!in[i].first.isPhys());
+      auto const virt = in[i].first;
+      auto const phys = in[i].second;
+      for (auto const pred : preds) {
+        assertx(assignmentsOut[pred].size() == in.size());
+        assertx(assignmentsOut[pred][i].first == virt);
+        if (assignmentsOut[pred][i].second != phys) conflicts.add(virt);
+      }
+    }
+    // Hopefully the common case
+    if (conflicts.none()) continue;
+
+    // Either create a new phidef/phijmp or expand an existing one.
+    auto const addToPhiDef = [&] (PhysReg reg) {
+      auto& first = unit.blocks[b].code.front();
+      if (first.op == Vinstr::phidef) {
+        unit.tuples[first.phidef_.defs].push_back(reg);
+        invalidate_cached_operands(first);
       } else {
-        color_unconstrained(state, free, inst, b, i);
+        vmodify(
+          unit, b, 0,
+          [&] (Vout& v) { v << phidef{unit.makeTuple({reg})}; return 0; }
+        );
+      }
+    };
+
+    auto const addToPhiJmp = [&] (Vlabel pred, PhysReg reg) {
+      auto& last = unit.blocks[pred].code.back();
+      if (last.op == Vinstr::phijmp) {
+        unit.tuples[last.phijmp_.uses].push_back(reg);
+      } else {
+        assertx(last.op == Vinstr::jmp);
+        auto const jmp = last.jmp_;
+        assertx(jmp.target == b);
+        last.op = Vinstr::phijmp;
+        last.phijmp_ = phijmp{jmp.target, unit.makeTuple({reg})};
+      }
+      invalidate_cached_operands(last);
+    };
+
+    // Resolve the mismatches with phis
+    for (size_t i = 0; i < in.size(); ++i) {
+      if (!conflicts[in[i].first]) continue;
+      addToPhiDef(in[i].second);
+      for (auto const pred : preds) {
+        addToPhiJmp(pred, assignmentsOut[pred][i].second);
       }
     }
   }
@@ -6069,21 +7915,97 @@ void lower_spills(State& state) {
 void lower_ssa(State& state) {
   auto& unit = state.unit;
 
-  // First pass: rewrite instructions to take the physical registers
-  // the Vregs have been colored to.
+  /*
+   * First pass:
+   *
+   * Suppose we have:
+   *
+   * B1: phijmp R1 -> B4
+   * B2: phijmp R1 -> B4
+   * B3: phijmp R1 -> B4
+   * B4: phidef R2
+   *
+   * Rewrite this to:
+   *
+   * .....
+   * B4: phidef R1
+   *     copy R1 -> R2
+   *
+   * That is, if a phi has all the same register at the phijmps, but a
+   * different register at the phidef, then change the phidef to the
+   * register at the phijmps, and then copy to the actual dest. This
+   * lets us make the phi trivial, and emit a single copy at the
+   * def. Otherwise we'll emit a copy at every jmp, which increases
+   * code size.
+   */
   for (auto const b : state.rpo) {
-    for (auto& inst : unit.blocks[b].code) {
-      auto const rewrite = [&] (Vreg r) -> Vreg {
-        if (r.isPhys()) return r;
-        auto const& info = reg_info(state, r);
-        if (is_spill(info.regClass)) return r;
-        if (info.regClass == RegClass::SF) return state.abi.sf.choose();
-        auto const c = color_reg(info.color);
-        assertx(c != state.scratch);
-        return c;
-      };
-      visitRegsMutable(unit, inst, rewrite, rewrite);
+    auto const& preds = state.preds[b];
+    // Not an issue if we only have a single pred
+    if (preds.size() < 2) continue;
+
+    auto& phidef = unit.blocks[b].code.front();
+    if (phidef.op != Vinstr::phidef) continue;
+
+    auto& defs = unit.tuples[phidef.phidef_.defs];
+
+    VregList copySrcs;
+    VregList copyDsts;
+    for (size_t i = 0; i < defs.size(); ++i) {
+      // Any Vreg which isn't a physical register at this point should
+      // be a spill.
+      if (!defs[i].isPhys()) continue;
+
+      // Iterate over the phijmps, looking for the same register.
+      PhysReg same;
+      for (auto const pred : preds) {
+        auto const& phijmp = unit.blocks[pred].code.back();
+        assertx(phijmp.op == Vinstr::phijmp);
+        auto const& uses = unit.tuples[phijmp.phijmp_.uses];
+        assertx(uses.size() == defs.size());
+
+        assertx(uses[i].isPhys());
+        if (uses[i] == defs[i]) {
+          same = InvalidReg;
+          break;
+        }
+
+        auto const phys = uses[i].physReg();
+        if (same == InvalidReg) {
+          same = phys;
+        } else if (same != phys) {
+          same = InvalidReg;
+          break;
+        }
+      }
+
+      if (same == InvalidReg) continue;
+      // This optimization is invalid if the def writes to the same
+      // register the jmps use.
+      if (defs_set_cached(state, phidef)[same]) continue;
+
+      copySrcs.emplace_back(same);
+      copyDsts.emplace_back(defs[i]);
+      defs[i] = same;
+      invalidate_cached_operands(phidef);
     }
+
+    assertx(copySrcs.size() == copyDsts.size());
+    if (copySrcs.size() == 0) continue;
+
+    vmodify(
+      unit, b, 1,
+      [&] (Vout& v) {
+        if (copySrcs.size() == 1) {
+          v << copy{copySrcs[0], copyDsts[0]};
+        } else {
+          v << copyargs{
+            unit.makeTuple(std::move(copySrcs)),
+            unit.makeTuple(std::move(copyDsts))
+          };
+        }
+        return 0;
+      }
+    );
   }
 
   // Second pass: lower copy-ish instructions (including phis) to copy and copy2

@@ -6,10 +6,11 @@
       c_extends = []; c_uses = []; c_use_as_alias = [];
       c_insteadof_alias = []; c_method_redeclarations = [];
       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
-      c_implements = []; c_consts = []; c_typeconsts = []; c_vars = [];
-      c_methods = []; c_attributes = []; c_xhp_children = [];
-      c_xhp_attrs = []; c_namespace = <opaque>; c_user_attributes = [];
-      c_file_attributes = []; c_enum = None; c_pu_enums = [];
+      c_implements = []; c_where_constraints = []; c_consts = [];
+      c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
+      c_xhp_children = []; c_xhp_attrs = []; c_namespace = <opaque>;
+      c_user_attributes = []; c_file_attributes = []; c_enum = None;
+      c_pu_enums = [];
       c_doc_comment =
       (Some "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */")
       });

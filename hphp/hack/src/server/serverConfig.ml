@@ -308,6 +308,7 @@ let load config_filename options =
     ?tco_disallow_invalid_arraykey_constraint:(bool_opt "disallow_invalid_arraykey_constraint" config)
     ?tico_invalidate_files:(bool_opt "tico_invalidate_files" config)
     ?tico_invalidate_smart:(bool_opt "tico_invalidate_smart" config)
+    ?po_enable_class_level_where_clauses:(bool_opt "class_level_where_clauses" config)
     ()
   in
   Errors.ignored_fixme_codes :=

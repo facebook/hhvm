@@ -6,7 +6,7 @@
       c_extends = []; c_uses = []; c_use_as_alias = [];
       c_insteadof_alias = []; c_method_redeclarations = [];
       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
-      c_implements = [];
+      c_implements = []; c_where_constraints = [];
       c_consts =
       [(None, ([5:9-12], "FOO"),
         (Some (([5:15-8:4], dict<string, int>),

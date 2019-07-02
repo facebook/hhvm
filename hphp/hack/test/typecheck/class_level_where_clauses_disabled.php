@@ -9,4 +9,4 @@
  *
  */
 
-class A <T> where T as num {}
+class Base <T> where T = int {}

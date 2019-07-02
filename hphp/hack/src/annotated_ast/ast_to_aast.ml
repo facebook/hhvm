@@ -743,6 +743,7 @@ struct
         c_xhp_category          = body.c_xhp_category;
         c_reqs                  = body.c_reqs;
         c_implements            = on_list on_hint c.c_implements;
+        c_where_constraints     = on_list on_constr c.c_where_constraints;
         c_consts                = body.c_consts;
         c_typeconsts            = body.c_typeconsts;
         c_vars                  = body.c_vars;

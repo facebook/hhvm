@@ -469,6 +469,7 @@ let make_popt () =
     ~disable_lval_as_an_expression:(disable_lval_as_an_expression co)
     ~disable_instanceof:(phpism_disable_instanceof co)
     ~enable_constant_visibility_modifiers:(enable_constant_visibility_modifiers co)
+    ~enable_class_level_where_clauses:(enable_class_level_where_clauses co)
     ~rust:(use_rust_parser co)
 
 let process_single_source_unit compiler_options

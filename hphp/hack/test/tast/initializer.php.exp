@@ -6,11 +6,11 @@
       c_extends = []; c_uses = []; c_use_as_alias = [];
       c_insteadof_alias = []; c_method_redeclarations = [];
       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
-      c_implements = []; c_consts = []; c_typeconsts = []; c_vars = [];
-      c_methods = []; c_attributes = []; c_xhp_children = [];
-      c_xhp_attrs = []; c_namespace = <opaque>; c_user_attributes = [];
-      c_file_attributes = []; c_enum = None; c_pu_enums = [];
-      c_doc_comment = None });
+      c_implements = []; c_where_constraints = []; c_consts = [];
+      c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
+      c_xhp_children = []; c_xhp_attrs = []; c_namespace = <opaque>;
+      c_user_attributes = []; c_file_attributes = []; c_enum = None;
+      c_pu_enums = []; c_doc_comment = None });
   (Class
      { c_span = [5:1-11]; c_annotation = (); c_mode = <opaque>;
        c_final = false; c_is_xhp = false; c_kind = Cnormal;
@@ -19,11 +19,11 @@
        c_extends = []; c_uses = []; c_use_as_alias = [];
        c_insteadof_alias = []; c_method_redeclarations = [];
        c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
-       c_implements = []; c_consts = []; c_typeconsts = []; c_vars = [];
-       c_methods = []; c_attributes = []; c_xhp_children = [];
-       c_xhp_attrs = []; c_namespace = <opaque>; c_user_attributes = [];
-       c_file_attributes = []; c_enum = None; c_pu_enums = [];
-       c_doc_comment = None });
+       c_implements = []; c_where_constraints = []; c_consts = [];
+       c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
+       c_xhp_children = []; c_xhp_attrs = []; c_namespace = <opaque>;
+       c_user_attributes = []; c_file_attributes = []; c_enum = None;
+       c_pu_enums = []; c_doc_comment = None });
   (Class
      { c_span = [7:1-13:2]; c_annotation = (); c_mode = <opaque>;
        c_final = true; c_is_xhp = false; c_kind = Cabstract;
@@ -32,7 +32,8 @@
        c_extends = []; c_uses = []; c_use_as_alias = [];
        c_insteadof_alias = []; c_method_redeclarations = [];
        c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
-       c_implements = []; c_consts = []; c_typeconsts = [];
+       c_implements = []; c_where_constraints = []; c_consts = [];
+       c_typeconsts = [];
        c_vars =
        [{ cv_final = false; cv_xhp_attr = None; cv_visibility = Private;
           cv_type = None; cv_id = ([8:18-20], "d");

@@ -514,6 +514,7 @@ let make_closure ~class_num
     c_xhp_category = None;
     c_reqs = [];
     c_implements = [];
+    c_where_constraints = [];
     c_consts = [];
     c_typeconsts = [];
     c_vars = cvl;

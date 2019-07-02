@@ -68,6 +68,7 @@ type shallow_class = {
   sc_kind            : Ast_defs.class_kind;
   sc_name            : Aast.sid;
   sc_tparams         : decl tparam list;
+  sc_where_constraints  : decl where_constraint list;
   sc_extends         : decl ty list;
   sc_uses            : decl ty list;
   sc_method_redeclarations : shallow_method_redeclaration list;

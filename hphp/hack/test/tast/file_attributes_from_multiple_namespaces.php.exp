@@ -8,9 +8,9 @@
       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
       c_implements =
       [([7:24-41], (Happly (([7:24-41], "\\HH\\FileAttribute"), [])))];
-      c_consts = []; c_typeconsts = []; c_vars = []; c_methods = [];
-      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
-      c_namespace = <opaque>; c_user_attributes = [];
+      c_where_constraints = []; c_consts = []; c_typeconsts = [];
+      c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];
+      c_xhp_attrs = []; c_namespace = <opaque>; c_user_attributes = [];
       c_file_attributes =
       [{ fa_user_attributes =
          [{ ua_name = ([5:9-14], "\\A\\AttrA"); ua_params = [] }];
@@ -30,9 +30,9 @@
        c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
        c_implements =
        [([13:24-41], (Happly (([13:24-41], "\\HH\\FileAttribute"), [])))];
-       c_consts = []; c_typeconsts = []; c_vars = []; c_methods = [];
-       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
-       c_namespace = <opaque>; c_user_attributes = [];
+       c_where_constraints = []; c_consts = []; c_typeconsts = [];
+       c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];
+       c_xhp_attrs = []; c_namespace = <opaque>; c_user_attributes = [];
        c_file_attributes =
        [{ fa_user_attributes =
           [{ ua_name = ([5:9-14], "\\A\\AttrA"); ua_params = [] }];

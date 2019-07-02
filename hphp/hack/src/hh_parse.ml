@@ -67,6 +67,7 @@ module FullFidelityParseArgs = struct
     pocket_universes : bool;
     rust : bool;
     enable_constant_visibility_modifiers: bool;
+    enable_class_level_where_clauses : bool;
   }
 
   let make
@@ -97,6 +98,7 @@ module FullFidelityParseArgs = struct
     pocket_universes
     rust
     enable_constant_visibility_modifiers
+    enable_class_level_where_clauses
     = {
     full_fidelity_json;
     full_fidelity_dot;
@@ -125,6 +127,7 @@ module FullFidelityParseArgs = struct
     pocket_universes;
     rust;
     enable_constant_visibility_modifiers;
+    enable_class_level_where_clauses;
   }
 
   let parse_args () =
@@ -171,6 +174,7 @@ module FullFidelityParseArgs = struct
     let push_file file = files := file :: !files in
     let rust = ref false in
     let enable_constant_visibility_modifiers = ref false in
+    let enable_class_level_where_clauses = ref false in
     let options =  [
       (* modes *)
       "--full-fidelity-json",
@@ -283,6 +287,9 @@ No errors are filtered out.";
       "--enable-constant-visibility-modifiers",
         Arg.Set enable_constant_visibility_modifiers,
         "Require constants to have visibility modifiers";
+      "--enable-class-level-where-clauses",
+        Arg.Set enable_class_level_where_clauses,
+        "Enables support for class-level where clauses";
       ] in
     Arg.parse options push_file usage;
     let modes = [
@@ -326,6 +333,7 @@ No errors are filtered out.";
       !pocket_universes
       !rust
       !enable_constant_visibility_modifiers
+      !enable_class_level_where_clauses
 end
 
 open FullFidelityParseArgs
@@ -345,6 +353,9 @@ let handle_existing_file args filename =
   let popt = ParserOptions.with_rust popt args.rust in
   let popt = ParserOptions.with_enable_constant_visibility_modifiers popt
     (args.enable_constant_visibility_modifiers) in
+  let popt = { popt with
+    GlobalOptions.po_enable_class_level_where_clauses = args.enable_class_level_where_clauses}
+  in
 
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in

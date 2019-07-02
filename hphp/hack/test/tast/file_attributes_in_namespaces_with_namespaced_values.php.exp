@@ -8,7 +8,7 @@
       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
       c_implements =
       [([4:42-59], (Happly (([4:42-59], "\\HH\\FileAttribute"), [])))];
-      c_consts = []; c_typeconsts = [];
+      c_where_constraints = []; c_consts = []; c_typeconsts = [];
       c_vars =
       [{ cv_final = false; cv_xhp_attr = None; cv_visibility = Public;
          cv_type = (Some ([5:40-46], (Hprim Tstring)));
@@ -70,7 +70,7 @@
        c_extends = []; c_uses = []; c_use_as_alias = [];
        c_insteadof_alias = []; c_method_redeclarations = [];
        c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
-       c_implements = [];
+       c_implements = []; c_where_constraints = [];
        c_consts =
        [((Some ([9:11-17], (Hprim Tstring))), ([9:18-32], "MY_CLASS_CONST"),
          (Some (([9:35-57], string), (String "my class const value"))))];
@@ -99,9 +99,10 @@
        c_extends = []; c_uses = []; c_use_as_alias = [];
        c_insteadof_alias = []; c_method_redeclarations = [];
        c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
-       c_implements = []; c_consts = []; c_typeconsts = []; c_vars = [];
-       c_methods = []; c_attributes = []; c_xhp_children = [];
-       c_xhp_attrs = []; c_namespace = <opaque>; c_user_attributes = [];
+       c_implements = []; c_where_constraints = []; c_consts = [];
+       c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
+       c_xhp_children = []; c_xhp_attrs = []; c_namespace = <opaque>;
+       c_user_attributes = [];
        c_file_attributes =
        [{ fa_user_attributes =
           [{ ua_name = ([12:11-32], "\\A\\MyStringFileAttribute");

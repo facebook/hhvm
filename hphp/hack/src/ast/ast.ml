@@ -127,6 +127,7 @@ and class_ = {
   c_tparams: tparam list;
   c_extends: hint list;
   c_implements: hint list;
+  c_where_constraints: (hint * constraint_kind * hint) list;
   c_body: class_elt list;
   c_namespace: nsenv;
   c_enum: enum_ option;

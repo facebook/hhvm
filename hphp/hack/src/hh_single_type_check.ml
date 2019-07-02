@@ -208,6 +208,7 @@ let parse_options () =
   let symbolindex_file = ref None in
   let check_xhp_attribute = ref false in
   let disallow_invalid_arraykey_constraint = ref None in
+  let enable_class_level_where_clauses = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -432,6 +433,9 @@ let parse_options () =
     "--symbolindex-file",
       Arg.String (fun str -> symbolindex_file := Some str),
       "Load the symbol index from this file";
+    "--enable-class-level-where-clauses",
+      Arg.Set enable_class_level_where_clauses,
+      "Enables support for class-level where clauses";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -468,6 +472,7 @@ let parse_options () =
     ~tco_disable_partially_abstract_typeconsts:(!disable_partially_abstract_typeconsts)
     ~log_levels:(!log_levels)
     ~po_rust:!rust
+    ~po_enable_class_level_where_clauses:!enable_class_level_where_clauses
     ()
   in
   let tcopt = {

@@ -60,6 +60,7 @@ type t = {
   option_log_array_provenance             : bool;
   option_use_rust_parser                  : bool;
   option_enable_constant_visibility_modifiers : bool;
+  option_enable_class_level_where_clauses : bool;
 }
 
 let default = {
@@ -113,6 +114,7 @@ let default = {
   option_log_array_provenance = false;
   option_use_rust_parser = false;
   option_enable_constant_visibility_modifiers = false;
+  option_enable_class_level_where_clauses = false;
 }
 
 let constant_folding o = o.option_constant_folding
@@ -163,6 +165,8 @@ let notice_on_byref_argument_typehint_violation o = o.option_notice_on_byref_arg
 let log_array_provenance o = o.option_log_array_provenance
 let use_rust_parser o = o.option_use_rust_parser
 let enable_constant_visibility_modifiers o = o.option_enable_constant_visibility_modifiers
+let enable_class_level_where_clauses o = o.option_enable_class_level_where_clauses
+
 let to_string o =
   let dynamic_invokes =
     String.concat ~sep:", " (SSet.elements (dynamic_invoke_functions o)) in
@@ -215,6 +219,7 @@ let to_string o =
     ; Printf.sprintf "log_array_provenance: %B" @@ log_array_provenance o
     ; Printf.sprintf "use_rust_parser: %B" @@ use_rust_parser o
     ; Printf.sprintf "enable_constant_visibility_modifiers: %B" @@ enable_constant_visibility_modifiers o
+    ; Printf.sprintf "enable_class_level_where_clauses: %B" @@ enable_class_level_where_clauses o
     ]
 
 let as_bool s =
@@ -326,6 +331,8 @@ let set_option options name value =
     { options with option_log_array_provenance = as_bool value }
   | "hhvm.lang.enable_constant_visibility_modifiers" ->
     { options with option_enable_constant_visibility_modifiers = as_bool value }
+  | "hhvm.lang.enable_class_level_where_clauses" ->
+    { options with option_enable_class_level_where_clauses = as_bool value }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -478,6 +485,8 @@ let value_setters = [
      fun opts v -> { opts with option_use_rust_parser = (v > 0) });
   (set_value "hhvm.hack.lang.enable_constant_visibility_modifiers" get_value_from_config_int @@
     fun opts v -> { opts with option_enable_constant_visibility_modifiers = (v = 1) });
+  (set_value "hhvm.hack.lang.enable_class_level_where_clauses" get_value_from_config_int @@
+    fun opts v -> { opts with option_enable_class_level_where_clauses = (v = 1) });
 ]
 
 let extract_config_options_from_json ~init config_json =

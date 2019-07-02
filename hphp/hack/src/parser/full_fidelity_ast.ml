@@ -2965,13 +2965,11 @@ and pDef : def list parser = fun node env ->
     ; classish_type_parameters = tparaml
     ; classish_extends_list    = exts
     ; classish_implements_list = impls
-    ; classish_where_clause
+    ; classish_where_clause    = where_clause
     ; classish_body            =
       { syntax = ClassishBody { classish_body_elements = elts; _ }; _ }
     ; _ } ->
       let env = non_tls env in
-      if not (is_missing classish_where_clause) then
-        raise_parsing_error env (`Node node) "Class-level where clauses not supported";
       let c_mode = mode_annotation env.fi_mode in
       let c_user_attributes = pUserAttributes env attr in
       let c_file_attributes = [] in
@@ -2990,6 +2988,41 @@ and pDef : def list parser = fun node env ->
         | (_, Happly (_, hl)) :: _ -> not @@ List.is_empty hl
         | _ -> false);
       let c_implements = couldMap ~f:pHint impls env in
+      (* This is copied from pFunHdr. TODO: Make it a
+       * helper function *)
+      let c_where_constraints =
+        match syntax where_clause with
+        | Missing -> []
+        | WhereClause { where_clause_constraints; _ } ->
+          if not (ParserOptions.enable_class_level_where_clauses
+              env.parser_options)
+          then
+            raise_parsing_error env (`Node node)
+              "Class-level where clauses are disabled";
+          let rec f node =
+            match syntax node with
+            | ListItem { list_item; _ } -> f list_item
+            | WhereConstraint
+              { where_constraint_left_type
+              ; where_constraint_operator
+              ; where_constraint_right_type
+              } ->
+                let l = pHint where_constraint_left_type env in
+                let o =
+                  match syntax where_constraint_operator with
+                  | Token token when Token.kind token = TK.Equal ->
+                    Constraint_eq
+                  | Token token when Token.kind token = TK.As -> Constraint_as
+                  | Token token when Token.kind token = TK.Super -> Constraint_super
+                  | _ -> missing_syntax "constraint operator" where_constraint_operator env
+                in
+                let r = pHint where_constraint_right_type env in
+                (l,o,r)
+            | _ -> missing_syntax "where constraint" node env
+          in
+          List.map ~f (syntax_node_to_list where_clause_constraints)
+        | _ -> missing_syntax "classish declaration constraints" node env
+      in
       let c_body =
         let rec aux acc ns =
           match ns with
@@ -3024,6 +3057,7 @@ and pDef : def list parser = fun node env ->
       ; c_tparams
       ; c_extends
       ; c_implements
+      ; c_where_constraints
       ; c_body
       ; c_namespace
       ; c_enum
@@ -3102,6 +3136,7 @@ and pDef : def list parser = fun node env ->
       ; c_tparams         = []
       ; c_extends         = []
       ; c_implements      = []
+      ; c_where_constraints   = []
       ; c_body            = couldMap enums env ~f:pEnumerator
       ; c_namespace       = Namespace_env.empty env.parser_options
       ; c_span            = pPos node env
@@ -3148,6 +3183,7 @@ and pDef : def list parser = fun node env ->
       ; c_tparams         = []
       ; c_extends         = couldMap ~f:pHint exts env
       ; c_implements      = []
+      ; c_where_constraints   = []
       ; c_body            = couldMap fields env ~f:pFields
       ; c_namespace       = Namespace_env.empty env.parser_options
       ; c_span            = pPos node env

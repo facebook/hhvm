@@ -73,6 +73,7 @@ let to_class_type {
   dc_name;
   dc_pos;
   dc_tparams;
+  dc_where_constraints = _;
   dc_substs;
   dc_consts;
   dc_typeconsts;
@@ -99,7 +100,6 @@ let to_class_type {
     end in
     element_to_class_elt ty elt
   end elts in
-
   let ft_to_ty ft = Reason.Rwitness ft.ft_pos, Tfun ft in
   let ft_map_elements find elts =
     map_elements (fun x -> find x |> ft_to_ty) elts in

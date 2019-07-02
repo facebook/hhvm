@@ -1060,6 +1060,7 @@ module Make (GetLocals : GetLocals) = struct
   let rec class_ c =
     let constraints = make_constraints c.Aast.c_tparams.Aast.c_tparam_list in
     let env = Env.make_class_env constraints c in
+    let where_constraints = type_where_constraints env c.Aast.c_where_constraints in
     (* Checking for a code smell *)
     List.iter c.Aast.c_tparams.Aast.c_tparam_list check_constraint;
     let name = Env.type_name env c.Aast.c_name ~allow_typedef:false ~allow_generics:false in
@@ -1161,6 +1162,7 @@ module Make (GetLocals : GetLocals) = struct
       N.c_xhp_category          = c.Aast.c_xhp_category;
       N.c_reqs                  = req_extends @ req_implements;
       N.c_implements            = implements;
+      N.c_where_constraints     = where_constraints;
       N.c_consts                = consts;
       N.c_typeconsts            = typeconsts;
       N.c_vars                  = sprops @ props;

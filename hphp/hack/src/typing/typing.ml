@@ -6419,6 +6419,7 @@ and class_def_ env c tc =
     T.c_xhp_category = c.c_xhp_category;
     T.c_reqs = c.c_reqs;
     T.c_implements = c.c_implements;
+    T.c_where_constraints = [];
     T.c_consts = typed_consts;
     T.c_typeconsts = typed_typeconsts;
     T.c_vars = typed_static_vars @ typed_vars;

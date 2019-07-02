@@ -242,6 +242,7 @@ let rec ty (p, x) =
         requirement                                                   ;
       dc_req_ancestors_extends = dc.dc_req_ancestors_extends          ;
       dc_tparams               = List.map dc.dc_tparams type_param    ;
+      dc_where_constraints     = List.map dc.dc_where_constraints where_constraint;
       dc_substs                = SMap.map begin fun ({ sc_subst; _ } as sc) ->
         {sc with sc_subst = SMap.map ty sc_subst}
       end dc.dc_substs;

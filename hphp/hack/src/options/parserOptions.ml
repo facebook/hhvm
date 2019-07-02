@@ -17,6 +17,7 @@ let default = GlobalOptions.default
 let disable_nontoplevel_declarations = GlobalOptions.po_disable_nontoplevel_declarations
 let disable_static_closures = GlobalOptions.po_disable_static_closures
 let disable_instanceof = GlobalOptions.po_disable_instanceof
+
 let with_codegen po b =
   { po with GlobalOptions.po_codegen = b }
 let with_disable_lval_as_an_expression po b =
@@ -28,6 +29,8 @@ let with_rust po b = { po with GlobalOptions.po_rust = b }
 let rust = GlobalOptions.po_rust
 
 let enable_constant_visibility_modifiers = GlobalOptions.po_enable_constant_visibility_modifiers
+
+let enable_class_level_where_clauses = GlobalOptions.po_enable_class_level_where_clauses
 
 let with_enable_constant_visibility_modifiers po b =
   { po with GlobalOptions.po_enable_constant_visibility_modifiers = b }
@@ -42,6 +45,7 @@ let make
   ~disable_instanceof
   ~rust
   ~enable_constant_visibility_modifiers
+  ~enable_class_level_where_clauses
 = GlobalOptions.{
   default with
   po_auto_namespace_map = auto_namespace_map;
@@ -53,4 +57,5 @@ let make
   po_disable_instanceof = disable_instanceof;
   po_rust = rust;
   po_enable_constant_visibility_modifiers = enable_constant_visibility_modifiers;
+  po_enable_class_level_where_clauses = enable_class_level_where_clauses;
 }

@@ -8,7 +8,8 @@
       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
       c_implements =
       [([3:22-43], (Happly (([3:22-43], "\\HH\\TypeAliasAttribute"), [])))];
-      c_consts = []; c_typeconsts = []; c_vars = [];
+      c_where_constraints = []; c_consts = []; c_typeconsts = [];
+      c_vars = [];
       c_methods =
       [{ m_span = [3:46-87]; m_annotation = (); m_final = false;
          m_abstract = false; m_static = false; m_visibility = Public;
@@ -41,9 +42,9 @@
        c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
        c_implements =
        [([4:22-43], (Happly (([4:22-43], "\\HH\\TypeAliasAttribute"), [])))];
-       c_consts = []; c_typeconsts = []; c_vars = []; c_methods = [];
-       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
-       c_namespace = <opaque>; c_user_attributes = [];
+       c_where_constraints = []; c_consts = []; c_typeconsts = [];
+       c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];
+       c_xhp_attrs = []; c_namespace = <opaque>; c_user_attributes = [];
        c_file_attributes = []; c_enum = None; c_pu_enums = [];
        c_doc_comment = None });
   (Class
@@ -56,9 +57,9 @@
        c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
        c_implements =
        [([5:34-55], (Happly (([5:34-55], "\\HH\\TypeAliasAttribute"), [])))];
-       c_consts = []; c_typeconsts = []; c_vars = []; c_methods = [];
-       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
-       c_namespace = <opaque>; c_user_attributes = [];
+       c_where_constraints = []; c_consts = []; c_typeconsts = [];
+       c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];
+       c_xhp_attrs = []; c_namespace = <opaque>; c_user_attributes = [];
        c_file_attributes = []; c_enum = None; c_pu_enums = [];
        c_doc_comment = None });
   (Typedef

@@ -6,7 +6,7 @@
       c_extends = []; c_uses = []; c_use_as_alias = [];
       c_insteadof_alias = []; c_method_redeclarations = [];
       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
-      c_implements = []; c_consts = [];
+      c_implements = []; c_where_constraints = []; c_consts = [];
       c_typeconsts =
       [{ c_tconst_abstract = (TCAbstract None);
          c_tconst_name = ([4:23-25], "Ta"); c_tconst_constraint = None;

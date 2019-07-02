@@ -304,6 +304,7 @@ struct
     T.c_xhp_category = c.S.c_xhp_category;
     T.c_reqs = c.S.c_reqs;
     T.c_implements = c.S.c_implements;
+    T.c_where_constraints = c.S.c_where_constraints;
     T.c_consts = List.map c.S.c_consts (map_class_const menv);
     T.c_typeconsts = List.map c.S.c_typeconsts (map_class_typeconst menv);
     T.c_vars = List.map c.S.c_vars (map_class_var menv);

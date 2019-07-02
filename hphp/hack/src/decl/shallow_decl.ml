@@ -323,6 +323,8 @@ let class_ env c =
     let _, (_, class_name), _ = Decl_utils.unwrap_class_type ty in
     Decl_env.add_constructor_dependency env class_name
   in
+  let where_constraints =
+    List.map c.c_where_constraints (where_constraint env) in
   List.iter ~f:add_cstr_dep sc_extends;
   List.iter ~f:add_cstr_dep sc_uses;
   List.iter ~f:add_cstr_dep sc_req_extends;
@@ -334,6 +336,7 @@ let class_ env c =
     sc_kind = c.c_kind;
     sc_name = c.c_name;
     sc_tparams = List.map c.c_tparams.c_tparam_list (type_param env);
+    sc_where_constraints = where_constraints;
     sc_extends;
     sc_uses;
     sc_method_redeclarations =

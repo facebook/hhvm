@@ -232,6 +232,11 @@ type t = {
 
  (* Enable constants to have visibility modifiers *)
  po_enable_constant_visibility_modifiers : bool;
+
+(* Enable class-level where clauses, i.e.
+   class base<T> where T = int {} *)
+ po_enable_class_level_where_clauses : bool;
+
 } [@@deriving show]
 
 val make :
@@ -283,6 +288,7 @@ val make :
   ?tico_invalidate_files: bool ->
   ?tico_invalidate_smart: bool ->
   ?po_enable_constant_visibility_modifiers: bool ->
+  ?po_enable_class_level_where_clauses: bool ->
   unit ->
   t
 
@@ -359,3 +365,4 @@ val tco_disallow_invalid_arraykey_constraint : t -> bool
 val tico_invalidate_files : t -> bool
 val tico_invalidate_smart : t -> bool
 val po_enable_constant_visibility_modifiers : t -> bool
+val po_enable_class_level_where_clauses : t -> bool

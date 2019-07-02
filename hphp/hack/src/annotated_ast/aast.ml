@@ -324,6 +324,7 @@ and class_ = {
   c_xhp_category   : (pos * pstring list) option;
   c_reqs           : (hint * is_extends) list;
   c_implements     : hint list        ;
+  c_where_constraints : where_constraint list;
   c_consts         : class_const list ;
   c_typeconsts     : class_typeconst list;
   c_vars           : class_var list   ;

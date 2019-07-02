@@ -811,6 +811,7 @@ uint64_t RuntimeOption::DisableConstant = 0;
 bool RuntimeOption::DisableNontoplevelDeclarations = false;
 bool RuntimeOption::DisableStaticClosures = false;
 bool RuntimeOption::DisableInstanceof = false;
+bool RuntimeOption::EnableClassLevelWhereClauses = false;
 
 #ifdef HHVM_DYNAMIC_EXTENSION_DIR
 std::string RuntimeOption::ExtensionDir = HHVM_DYNAMIC_EXTENSION_DIR;
@@ -1890,6 +1891,9 @@ void RuntimeOption::Load(
                  LookForTypechecker);
     Config::Bind(EnablePocketUniverses, ini, config,
                  "Hack.Lang.EnablePocketUniverses",
+                 false);
+    Config::Bind(EnableClassLevelWhereClauses, ini, config,
+                 "Hack.Lang.EnableClassLevelWhereClauses",
                  false);
   }
   {

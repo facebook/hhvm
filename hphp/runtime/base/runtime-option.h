@@ -567,6 +567,9 @@ struct RuntimeOption {
   // Disables the `instanceof` operator
   // true => error, false => default behaviour
   static bool DisableInstanceof;
+  // Enables the class-level where constraints
+  // true => allow the feature, false => disable the feature
+  static bool EnableClassLevelWhereClauses;
 
   // Disables the setting of reserved variable php_errorsmg
   // true => error, false => php_errormsg can be set

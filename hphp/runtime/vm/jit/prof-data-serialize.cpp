@@ -389,6 +389,8 @@ bool write_type_alias_or_class(ProfDataSerializer& ser, const NamedEntity* ne) {
   if (!ne) return false;
   if (auto const cls = ne->clsList()) {
     if (!(cls->attrs() & AttrUnique)) return false;
+    auto const filepath = cls->preClass()->unit()->filepath();
+    if (!filepath || filepath->empty()) return false;
     if (!cls->wasSerialized()) write_class(ser, cls);
     return true;
   }

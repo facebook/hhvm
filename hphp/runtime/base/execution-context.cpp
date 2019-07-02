@@ -2012,6 +2012,7 @@ Variant ExecutionContext::getEvaledArg(const StringData* val,
       key + s_semicolon;
   }
   Unit* unit = compileEvalString(code.get());
+  unit->setInterpretOnly();
   assertx(unit != nullptr);
   // Default arg values are not currently allowed to depend on class context.
   auto v = Variant::attach(

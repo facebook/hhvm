@@ -159,6 +159,7 @@ namespace Trace {
       TM(perf_mem_event) \
       TM(pgo)           \
       TM(printir)       \
+      TM(printir_json)  \
       TM(prof_branch)   \
       TM(prof_array)    \
       TM(rat)           \

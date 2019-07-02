@@ -16,6 +16,9 @@
 
 #include "hphp/runtime/vm/jit/print.h"
 
+#include <folly/dynamic.h>
+#include <folly/json.h>
+
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -24,6 +27,7 @@
 #include "hphp/util/abi-cxx.h"
 #include "hphp/util/arch.h"
 #include "hphp/util/disasm.h"
+#include "hphp/util/struct-log.h"
 #include "hphp/util/text-color.h"
 #include "hphp/util/text-util.h"
 
@@ -120,6 +124,342 @@ struct InstAreaRange {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+
+}
+
+static constexpr auto kIndent = 4;
+
+namespace get_json {
+using folly::dynamic;
+
+dynamic getSSATmp(const SSATmp* tmp) {
+  return dynamic::object("id", tmp->id())
+                        ("type", tmp->type().toString());
+}
+
+dynamic getLabel(const Block* block) {
+  dynamic id = block->id();
+
+  return dynamic::object("id", id)
+                        ("isCatch", block->isCatch())
+                        ("hint", blockHintName(block->hint()));
+}
+
+
+dynamic getOpcode(const IRInstruction* inst,
+                  const GuardConstraints* constraints) {
+  const dynamic typeParam = inst->hasTypeParam() ?
+                            inst->typeParam().toString() :
+                            dynamic(nullptr);
+  const dynamic extra = inst->hasExtra() ?
+                        showExtra(inst->op(), inst->rawExtra()) :
+                        dynamic(nullptr);
+
+  const bool isGuard = constraints &&
+                       !inst->isTransient() &&
+                       isGuardOp(inst->op());
+  dynamic guard;
+  if (isGuard) {
+    auto const it = constraints->guards.find(inst);
+    guard = (it == constraints->guards.end() ?
+             "unused" :
+             it->second.toString());
+  } else {
+    guard = dynamic(nullptr);
+  }
+
+  return dynamic::object("opcodeName", opcodeName(inst->op()))
+                        ("typeParam", typeParam)
+                        ("extra", extra)
+                        ("guard", guard);
+}
+
+dynamic getSrcs(const IRInstruction* inst) {
+  if (inst->op() == IncStat) {
+    return dynamic::object("counterName",
+                           Stats::g_counterNames[inst->src(0)->intVal()]);
+  }
+  dynamic srcs = dynamic::array;
+  for (uint32_t i = 0, n = inst->numSrcs(); i < n; i++) {
+    srcs.push_back(getSSATmp(inst->src(i)));
+  }
+  return srcs;
+}
+
+dynamic getDsts(const IRInstruction* inst) {
+  dynamic dsts = dynamic::array;
+  for (uint32_t i = 0, n = inst->numDsts(); i < n; i++) {
+    dsts.push_back(getSSATmp(inst->dst(i)));
+  }
+  return dsts;
+}
+
+dynamic getIRInstruction(const IRInstruction& inst,
+                         const GuardConstraints* guards) {
+  dynamic result = dynamic::object;
+  dynamic markerObj = dynamic::object;
+  std::ostringstream mStr;
+  std::ostringstream funcStr;
+  auto const& newMarker = inst.marker();
+  if (!newMarker.hasFunc()) {
+    markerObj = dynamic(nullptr);
+  } else {
+    auto func = newMarker.func();
+    func->prettyPrint(mStr, Func::PrintOpts().noFpi());
+    mStr << std::string(kIndent, ' ')
+         << newMarker.show()
+         << '\n';
+
+    auto const bcOffset = newMarker.bcOff();
+    // TODO(T46690139)
+    func->unit()->prettyPrint(
+      mStr, Unit::PrintOpts()
+      .range(bcOffset, bcOffset+1)
+      .noLineNumbers()
+      .noFuncs()
+      .indent(0));
+    std::vector<std::string> vec;
+    folly::split('\n', mStr.str(), vec);
+    for (auto const& s : vec) {
+      if (s.empty()) continue;
+      funcStr << s << '\n';
+    }
+    markerObj["raw"] = funcStr.str();
+  }
+  result["marker"] = markerObj;
+
+  dynamic phiPseudoInstrs = dynamic::array;
+  if (inst.op() == DefLabel) {
+    // print phi pseudo-instructions
+    for (unsigned i = 0, n = inst.numDsts(); i < n; ++i) {
+      dynamic phiPseudoInstr = dynamic::object;
+      phiPseudoInstr["dst"] = getSSATmp(inst.dst(i));
+
+      dynamic srcs = dynamic::array;
+      inst.block()->forEachSrc(i, [&](IRInstruction* jmp, SSATmp*) {
+          srcs.push_back(dynamic::object("src", getSSATmp(jmp->src(i)))
+                                        ("label", getLabel(jmp->block())));
+        });
+      phiPseudoInstr["srcs"] = srcs;
+
+      phiPseudoInstrs.push_back(phiPseudoInstr);
+    }
+  }
+  result["phiPseudoInstrs"] = phiPseudoInstrs;
+
+  const dynamic id = inst.isTransient() ? dynamic(nullptr) : inst.id();
+
+  const Block* taken = inst.taken();
+  const dynamic takenObj = taken ? getLabel(taken) : dynamic(nullptr);
+
+  result.update(dynamic::merge(getOpcode(&inst, guards),
+                               dynamic::object("id", id)
+                                              ("taken", takenObj)
+                                              ("srcs", getSrcs(&inst))
+                                              ("dsts", getDsts(&inst))));
+  return result;
+}
+
+dynamic getTCRange(const AreaIndex area,
+                   const TransKind kind,
+                   const TcaRange& range) {
+  std::ostringstream disasmStr;
+  disasmRange(disasmStr, kind, range.begin(), range.end());
+  auto const startStr = folly::sformat("{}", static_cast<void*>(range.begin()));
+  auto const endStr = folly::sformat("{}", static_cast<void*>(range.end()));
+  return dynamic::object("area", areaAsString(area))
+                        ("start", startStr)
+                        ("end", endStr)
+                        ("disasm", disasmStr.str());
+}
+
+dynamic getBlock(const Block* block,
+                 const TransKind kind,
+                 const AsmInfo* asmInfo,
+                 const GuardConstraints* guards) {
+  dynamic result = dynamic::object;
+
+  result["label"] = getLabel(block);
+  result["profCount"] = block->profCount();
+
+  dynamic predIds = dynamic::array;
+
+  auto const& preds = block->preds();
+  if (!preds.empty()) {
+    for (auto const& edge : preds) {
+      predIds.push_back(edge.from()->id());
+    }
+  }
+  result["preds"] = predIds;
+  result["next"] = block->next() ? getLabel(block->next()) : dynamic(nullptr);
+  result["instrs"] = dynamic::array;
+
+  if (block->empty()) return result;
+
+  if (asmInfo) {
+    std::vector<const IRInstruction*> instrs;
+    std::vector<InstAreaRange> instRanges;
+    std::array<TcaRange, kNumAreas> lastRange;
+    size_t instIdx = 0;
+
+    // Collect all the instruction ranges for the current block and sort
+    // them.  Entries will be sorted by instruction index, area then machine
+    // code pc.  This reflects the order in which code will be printed.
+    // IR instructions with no associated assembly will still get entries
+    // in the instRanges vector so they will be printed too (they just get
+    // an empty machine code range).
+    for (auto it = block->begin(); it != block->end(); ++it, ++instIdx) {
+      const auto& inst = *it;
+      const size_t lastInstRangesSize = instRanges.size();
+      instrs.push_back(&inst);  // Map back to IRInstruction from index.
+
+      for (auto i = 0; i < kNumAreas; ++i) {
+        const auto instArea = static_cast<AreaIndex>(i);
+        auto const& areaRanges = asmInfo->instRangesForArea(instArea);
+        auto const& rngs = areaRanges[inst];
+        for (auto itr = rngs.first; itr != rngs.second; ++itr) {
+          auto const range = TcaRange(itr->second.start() + areaRanges.offset,
+                                      itr->second.end() + areaRanges.offset);
+          instRanges.push_back(InstAreaRange(instIdx, instArea, range));
+          lastRange[(int)instArea] = range;
+        }
+      }
+
+      // Add an entry for IRInstructions that have no associated machine
+      // code.  Use the end address of the last instruction range to assign
+      // an empty range to this element.
+      if (instRanges.size() == lastInstRangesSize) {
+        instRanges.push_back(
+          InstAreaRange(instIdx,
+                        AreaIndex::Main,
+                        TcaRange(lastRange[(int)AreaIndex::Main].end(),
+                                 lastRange[(int)AreaIndex::Main].end())));
+      }
+    }
+
+    std::sort(instRanges.begin(), instRanges.end());
+
+    const IRInstruction* lastInst = nullptr;
+    AreaIndex lastArea = AreaIndex::Main;
+    bool printArea = false;
+
+    dynamic currInstrObj = (dynamic) nullptr;
+
+    for (auto itr = instRanges.begin(); itr != instRanges.end(); ++itr) {
+      auto const currInstIdx = itr->m_instIdx;
+      auto const currInst = instrs[currInstIdx];
+      auto const currArea = itr->m_area;
+      auto const instRange = itr->m_instRange;
+      if (lastInst != currInst) {
+        if (!currInstrObj.isNull()) {
+          result["instrs"].push_back(currInstrObj);
+        }
+        currInstrObj = dynamic::merge(getIRInstruction(*currInst, guards),
+                                      dynamic::object("tc_ranges",
+                                                      dynamic::array));
+        printArea = true;
+        lastInst = currInst;
+        lastRange[(int)currArea] = TcaRange(nullptr,nullptr);
+      }
+      if (printArea || currArea != lastArea) {
+        lastArea = currArea;
+        printArea = false;
+        lastRange[(int)currArea] = TcaRange(nullptr,nullptr);
+      }
+
+      const auto lastEnd = lastRange[(int)currArea].end();
+
+      if (lastEnd && lastEnd != instRange.begin()) {
+        // There may be gaps between instruction ranges that have been
+        // added by the relocator, e.g. adding nops.  This check will
+        // determine if the gap belongs to another instruction or not.
+        // If it doesn't belong to any other instruction then print it.
+        auto const offset = asmInfo->instRangesForArea(currArea).offset;
+        auto const gapRange = TcaRange(lastEnd - offset,
+                                       instRange.begin() - offset);
+        if (!asmInfo->instRangeExists(currArea, gapRange)) {
+          currInstrObj["tc_ranges"].push_back(getTCRange(currArea,
+                                                         kind,
+                                                         gapRange));
+        }
+      }
+      currInstrObj["tc_ranges"].push_back(getTCRange(currArea,
+                                                     kind,
+                                                     instRange));
+      lastRange[(int)currArea] = instRange;
+    }
+    if (!currInstrObj.isNull()) {
+      result["instrs"].push_back(currInstrObj);
+    }
+  } else {
+    for (auto it = block->begin(); it != block->end(); ++it) {
+      result["instrs"].push_back(getIRInstruction(*it, guards));
+    }
+  }
+
+  return result;
+}
+
+dynamic getOpcodeStats(const BlockList& blocks) {
+  std::array<uint32_t, kNumOpcodes> counts;
+
+  for (auto const block : blocks) {
+    for (auto const& inst : *block) ++counts[static_cast<size_t>(inst.op())];
+  }
+
+  dynamic result = dynamic::object;
+  for (unsigned i = 0; i < kNumOpcodes; ++i) {
+    if (counts[i] == 0) continue;
+    auto const op = safe_cast<Opcode>(i);
+    result[opcodeName(op)] = counts[i];
+  }
+  return result;
+}
+
+dynamic getUnit(const IRUnit& unit,
+                const AsmInfo* asmInfo,
+                const GuardConstraints* guards) {
+  dynamic result = dynamic::object;
+
+  auto const kind = unit.context().kind;
+
+  result["transKind"] = show(kind);
+  if (kind == TransKind::Optimize) {
+    result["optIndex"] =  unit.context().optIndex;
+  }
+
+  auto blocks = rpoSortCfg(unit);
+  // Partition into main, cold and frozen, without changing relative order.
+  auto const cold = std::stable_partition(blocks.begin(), blocks.end(),
+    [&] (Block* b) {
+      return b->hint() == Block::Hint::Neither ||
+             b->hint() == Block::Hint::Likely;
+    }
+  );
+  auto const frozen = std::stable_partition(cold, blocks.end(),
+    [&] (Block* b) { return b->hint() == Block::Hint::Unlikely; }
+  );
+
+  result["opcodeStats"] = getOpcodeStats(blocks);
+
+  dynamic blockObjs = dynamic::array;
+
+  AreaIndex currArea = AreaIndex::Main;
+  for (auto it = blocks.begin(); it != blocks.end(); ++it) {
+    if (it == cold) {
+      currArea = AreaIndex::Cold;
+    }
+    if (it == frozen) {
+      currArea = AreaIndex::Frozen;
+    }
+
+    blockObjs.push_back(dynamic::merge(
+                          getBlock(*it, kind, asmInfo, guards),
+                          dynamic::object("area", areaAsString(currArea))));
+  }
+  result["blocks"] = blockObjs;
+  return result;
+}
 
 }
 
@@ -244,8 +584,6 @@ void print(const SSATmp* tmp) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Block.
-
-static constexpr auto kIndent = 4;
 
 void disasmRange(std::ostream& os, TransKind kind, TCA begin, TCA end) {
   assertx(begin <= end);
@@ -669,10 +1007,14 @@ void printUnit(int level, const IRUnit& unit, const char* caption,
                const GuardConstraints* guards, Annotations* annotations) {
   if (dumpIREnabled(unit.context().kind, level)) {
     std::ostringstream str;
-    str << banner(caption);
-    print(str, unit, ai, guards);
-    str << banner("");
     if (HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir, level)) {
+      str << banner(caption);
+      print(str, unit, ai, guards);
+      str << banner("");
+      HPHP::Trace::traceRelease("%s\n", str.str().c_str());
+    }
+    if (HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir_json, level)) {
+      str << folly::toJson(get_json::getUnit(unit, ai, guards));
       HPHP::Trace::traceRelease("%s\n", str.str().c_str());
     }
     if (annotations && RuntimeOption::EvalDumpIR >= level) {
@@ -683,7 +1025,8 @@ void printUnit(int level, const IRUnit& unit, const char* caption,
 
 bool dumpIREnabled(TransKind kind, int level /* = 1 */) {
   return HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir, level) ||
-    (RuntimeOption::EvalDumpIR >= level && mcgen::dumpTCAnnotation(kind));
+         HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir_json, level) ||
+         (RuntimeOption::EvalDumpIR >= level && mcgen::dumpTCAnnotation(kind));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -48,3 +48,6 @@ val get_ast: entry:entry -> Ast.program
 
 val get_tast: entry:entry -> Tast.program
 (** Get the typed AST associated with the given [entry]. *)
+
+val get_fileinfo: entry:entry -> FileInfo.t
+(** Get the FileInfo.t associated with the given [entry]. *)

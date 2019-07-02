@@ -109,3 +109,45 @@ let auto_complete_at_position
   let edits = [{range = Some {st = pos; ed = pos}; text = "AUTO332"}] in
   let content = File_content.edit_file_unsafe file_content edits in
   auto_complete ~tcopt ~delimit_on_namespaces ~autocomplete_context ~basic_only ~sienv content
+
+(* Simplified entry point for serverless IDE *)
+let auto_complete_at_position_ctx
+    ~(line: int)
+    ~(column: int)
+    ~(file_content: string)
+    ~(path: Relative_path.t)
+    ~(tcopt: TypecheckerOptions.t)
+    ~(sienv: SearchUtils.si_env)
+    ~(is_manually_invoked: bool)
+    : AutocompleteTypes.complete_autocomplete_result list Utils.With_complete_flag.t =
+  let open File_content in
+
+  (* TODO: We don't actually want to do this AUTO332 nonsense.
+     Ripe for a refactor and move to FFP autocomplete *)
+  let pos = { line; column; } in
+  let edits = [{range = Some {st = pos; ed = pos}; text = "AUTO332"}] in
+  let content = File_content.edit_file_unsafe file_content edits in
+
+  (* Assemble the server IDE context *)
+  let (_, entry) = ServerIdeContext.update
+    ~tcopt
+    ~ctx:ServerIdeContext.empty
+    ~path
+    ~file_input:(ServerCommandTypes.FileContent content)
+  in
+
+  (* Use the server env and the param to contact autocomplete service *)
+  let tast = ServerIdeContext.get_tast entry in
+  let fileinfo = ServerIdeContext.get_fileinfo entry in
+  let autocomplete_context =
+    get_autocomplete_context content pos ~is_manually_invoked in
+  AutocompleteService.go
+    ~tcopt
+    ~delimit_on_namespaces:true
+    ~content_funs:((Core_kernel.List.map fileinfo.FileInfo.funs ~f:snd) |> SSet.of_list)
+    ~content_classes:((Core_kernel.List.map fileinfo.FileInfo.classes ~f:snd) |> SSet.of_list)
+    ~autocomplete_context
+    ~basic_only:false
+    ~sienv
+    tast
+;;

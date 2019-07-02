@@ -814,6 +814,7 @@ static int yylex(YYSTYPE* token, HPHP::Location* loc, Parser* _p) {
 %token T_UNRESOLVED_OP
 %token T_WHERE
 
+%token T_FUNC_CRED_C
 %%
 
 start:
@@ -2810,6 +2811,7 @@ xhp_bareword:
   | T_SHAPE                            { $$ = $1;}
   | T_USING                            { $$ = $1;}
   | T_INOUT                            { $$ = $1;}
+  | T_FUNC_CRED_C                      { $$ = $1;}
 ;
 
 simple_function_call:
@@ -2896,6 +2898,7 @@ common_scalar:
   | T_TRAIT_C                          { _p->onScalar($$, T_TRAIT_C,  $1);}
   | T_METHOD_C                         { _p->onScalar($$, T_METHOD_C, $1);}
   | T_FUNC_C                           { _p->onScalar($$, T_FUNC_C,   $1);}
+  | T_FUNC_CRED_C                      { _p->onScalar($$, T_FUNC_CRED_C, 1);}
   | T_NS_C                             { _p->onScalar($$, T_NS_C,  $1);}
   | T_COMPILER_HALT_OFFSET             { _p->onScalar($$, T_COMPILER_HALT_OFFSET, $1);}
   | T_START_HEREDOC

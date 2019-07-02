@@ -1146,6 +1146,7 @@ and emit_id (env : Emit_env.t) (id: Aast.sid) =
   | "__DIR__" -> instr (ILitConst Dir)
   | "__CLASS__" -> gather [instr_self; instr_clsrefname]
   | "__METHOD__" -> instr (ILitConst Method)
+  | "__FUNCTION_CREDENTIAL__" -> instr (ILitConst FuncCred)
   | "__LINE__" ->
     (* If the expression goes on multi lines, we return the last line *)
     let _, line, _, _ = Pos.info_pos_extended p in

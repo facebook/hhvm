@@ -132,6 +132,7 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
     (fun () -> ILitConst File);
     (fun () -> ILitConst Dir);
     (fun () -> ILitConst Method);
+    (fun () -> ILitConst FuncCred);
     (fun () -> IGet (CGetL (random_local ())));
     (fun () -> IGet (CGetQuietL (random_local ())));
     (fun () -> IGet (CUGetL (random_local ())));

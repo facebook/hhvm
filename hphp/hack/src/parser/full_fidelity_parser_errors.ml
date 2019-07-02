@@ -3396,9 +3396,15 @@ let namespace_use_declaration_errors
 
 
 let rec check_constant_expression errors node =
+(* __FUNTION_CREDENTIAL__ emits an object,
+  so it cannot be used in a constant expression*)
+  let not_function_credential token =
+    let to_upper = String.uppercase (Token.text token) in
+    (String.compare to_upper "__FUNCTION_CREDENTIAL__") <> 0
+  in
   let is_namey token =
     match Token.kind token with
-    TokenKind.Name -> true
+    TokenKind.Name -> not_function_credential token
     | _ -> false
   in
   let is_good_scope_resolution_name node =

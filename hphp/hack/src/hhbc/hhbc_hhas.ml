@@ -119,6 +119,7 @@ let string_of_lit_const instruction =
       sep ["ClsCnsD"; string_of_const_id cnsid; string_of_class_id cid]
     | File -> "File"
     | Dir -> "Dir"
+    | FuncCred -> "FuncCred"
     | NullUninit -> "NullUninit"
     | Method -> "Method"
     | NewArray n -> sep ["NewArray"; string_of_int n]

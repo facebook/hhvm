@@ -367,10 +367,12 @@ module PseudoConsts = struct
   let g__METHOD__    = "\\__METHOD__"
   let g__NAMESPACE__ = "\\__NAMESPACE__"
   let g__COMPILER_FRONTEND__ = "\\__COMPILER_FRONTEND__"
+  let g__FUNCTION_CREDENTIAL__ = "\\__FUNCTION_CREDENTIAL__"
 
   let all_pseudo_consts = [
     g__LINE__; g__CLASS__; g__TRAIT__; g__FILE__; g__DIR__;
-    g__FUNCTION__; g__METHOD__; g__NAMESPACE__; g__COMPILER_FRONTEND__
+    g__FUNCTION__; g__METHOD__; g__NAMESPACE__; g__COMPILER_FRONTEND__;
+    g__FUNCTION_CREDENTIAL__
   ]
   let is_pseudo_const =
     let h = HashSet.create 23 in

@@ -784,6 +784,8 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
   _scanner->setToken(yytext, yyleng, "hhvm", 4);
   return T_CONSTANT_ENCAPSED_STRING;
 }
+<ST_IN_SCRIPTING>"__FUNCTION_CREDENTIAL__" { RETTOKEN(T_FUNC_CRED_C); }
+
 
 <INITIAL>"#!"[^\n]*"\n" {
         SETTOKEN(T_HASHBANG);

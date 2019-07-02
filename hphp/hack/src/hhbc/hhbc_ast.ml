@@ -198,6 +198,7 @@ type instruct_lit_const =
   | File
   | Dir
   | Method
+  | FuncCred
 
 type instruct_operator =
   | Concat

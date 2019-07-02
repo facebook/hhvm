@@ -34,11 +34,19 @@ let extract_object_declaration obj =
   Typing_deps.Dep.to_string obj
 
 let collect_dependencies tcopt func =
-  Typing_deps.collect_dependencies := true;
-  Typing_deps.dependencies_of := Utils.strip_ns func;
+  let dependencies = HashSet.create 0 in
+  let add_dependency root obj =
+    let name_from_variant v =
+      match String.split_on_chars ~on:[' '] (Typing_deps.Dep.to_string v) with
+      | _::object_name::_ -> object_name
+      | _ -> "" in
+    let root_name = name_from_variant root in
+    if root_name = (Utils.strip_ns func) then
+    HashSet.add dependencies obj in
+  Typing_deps.add_dependency_callback "add_dependency" add_dependency;
   let filename = get_filename func in
   let _ : Tast.def option = Typing_check_service.type_fun tcopt filename func in
-  HashSet.fold (fun el l -> (extract_object_declaration el) :: l) Typing_deps.dependencies []
+  HashSet.fold (fun el l -> (extract_object_declaration el) :: l) dependencies []
 
 
 let go tcopt function_name =

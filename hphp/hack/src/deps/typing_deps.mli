@@ -38,14 +38,7 @@ end
 
 val trace : bool ref
 
-(* TODO: instead of exposing these refs, implement corresponding functions
-   on the caller side and provide a hook here *)
-val debug_trace : bool ref
-val dump_debug_deps : unit -> unit
-
-val collect_dependencies : bool ref
-val dependencies_of : string ref
-val dependencies : Dep.variant HashSet.t
+val add_dependency_callback : string -> (Dep.variant -> Dep.variant -> unit) -> unit
 
 (* returns the previous value of the flag *)
 val allow_dependency_table_reads: bool -> bool

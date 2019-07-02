@@ -131,76 +131,16 @@ let get_ideps x =
 
 let trace = ref true
 
-(* When debug_trace is enabled, in addition to actually recording the
-   dependencies in shared memory, we build a non-hashed representation of the
-   dependency graph for printing. *)
-let debug_trace = ref false
-let dbg_deps = Hashtbl.create 0
+let dependency_callbacks = Caml.Hashtbl.create 0
 
-let collect_dependencies = ref false
-let dependencies_of = ref ""
-let dependencies = HashSet.create 0
+let add_dependency_callback cb_name cb =
+  Caml.Hashtbl.replace dependency_callbacks cb_name cb
 
 let add_idep root obj =
   if root = obj then () else begin
-    if !collect_dependencies then begin
-      let name_from_variant v =
-        match String.split_on_char ' ' (Dep.to_string v) with
-        | _::object_name::_ -> object_name
-        | _ -> "" in
-      let root_name = name_from_variant root in
-      if root_name = !dependencies_of then HashSet.add dependencies obj;
-    end;
+    Caml.Hashtbl.iter (fun _ f -> f root obj) dependency_callbacks;
     if !trace then Graph.add (Dep.make obj) (Dep.make root);
-    if !debug_trace then
-      let root = Dep.to_string root in
-      let obj = Dep.to_string obj in
-      match Hashtbl.find_opt dbg_deps obj with
-      | Some set -> HashSet.add set root
-      | None ->
-        let set = HashSet.create 1 in
-        HashSet.add set root;
-        Hashtbl.replace dbg_deps obj set;
   end
-
-let sort_debug_deps deps =
-  Hashtbl.fold (fun obj set acc -> (obj,set)::acc) deps []
-  |> List.sort ~cmp:(fun (a, _) (b, _) -> String.compare a b)
-  |> List.map ~f:begin fun (obj, roots) ->
-    let roots =
-      HashSet.fold List.cons roots []
-      |> List.sort ~cmp:String.compare
-    in
-    obj, roots
-  end
-
-let pp_debug_deps fmt entries =
-  Format.fprintf fmt "@[<v>";
-  ignore @@ List.fold_left entries ~init:false ~f:begin fun sep (obj, roots) ->
-    if sep then Format.fprintf fmt "@;";
-    Format.fprintf fmt "%s -> " obj;
-    Format.fprintf fmt "@[<hv>";
-    ignore @@ List.fold_left roots ~init:false ~f:begin fun sep root ->
-      if sep then Format.fprintf fmt ",@ ";
-      Format.pp_print_string fmt root;
-      true
-    end;
-    Format.fprintf fmt "@]";
-    true
-  end;
-  Format.fprintf fmt "@]"
-
-let show_debug_deps = Format.asprintf "%a" pp_debug_deps
-
-(* Note: this prints dependency graph edges in the same direction as the mapping
-   which is actually stored in the shared memory table. The line "X -> Y" can be
-   read, "X is used by Y", or "X is a dependency of Y", or "when X changes, Y
-   must be rechecked". *)
-let dump_debug_deps () =
-  dbg_deps
-  |> sort_debug_deps
-  |> show_debug_deps
-  |> Printf.printf "%s\n"
 
 (*****************************************************************************)
 (* Module keeping track which files contain the toplevel definitions. *)

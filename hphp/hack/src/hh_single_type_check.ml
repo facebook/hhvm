@@ -788,9 +788,49 @@ let typecheck_tasts tasts tcopt (filename:Relative_path.t) =
   let typecheck_tast tast = Errors.get_error_list (Tast_typecheck.check env tast) in
   List.concat_map tasts ~f:typecheck_tast
 
+
+let pp_debug_deps fmt entries =
+  Format.fprintf fmt "@[<v>";
+  ignore @@ List.fold_left entries ~init:false ~f:begin fun sep (obj, roots) ->
+    if sep then Format.fprintf fmt "@;";
+    Format.fprintf fmt "%s -> " obj;
+    Format.fprintf fmt "@[<hv>";
+    ignore @@ List.fold_left roots ~init:false ~f:begin fun sep root ->
+      if sep then Format.fprintf fmt ",@ ";
+      Format.pp_print_string fmt root;
+      true
+    end;
+    Format.fprintf fmt "@]";
+    true
+  end;
+  Format.fprintf fmt "@]"
+
+let show_debug_deps = Format.asprintf "%a" pp_debug_deps
+
+let sort_debug_deps deps =
+  Caml.Hashtbl.fold (fun obj set acc -> (obj,set)::acc) deps []
+  |> List.sort ~compare:(fun (a, _) (b, _) -> String.compare a b)
+  |> List.map ~f:begin fun (obj, roots) ->
+    let roots =
+      HashSet.fold List.cons roots []
+      |> List.sort ~compare:String.compare
+    in
+    obj, roots
+  end
+
+(* Note: this prints dependency graph edges in the same direction as the mapping
+   which is actually stored in the shared memory table. The line "X -> Y" can be
+   read, "X is used by Y", or "X is a dependency of Y", or "when X changes, Y
+   must be rechecked". *)
+let dump_debug_deps dbg_deps =
+  dbg_deps
+  |> sort_debug_deps
+  |> show_debug_deps
+  |> Printf.printf "%s\n"
+
 let handle_mode
   mode filenames tcopt popt builtins files_contents files_info parse_errors
-  max_errors error_format batch_mode out_extension (sienv: SearchUtils.si_env) =
+  max_errors error_format batch_mode out_extension dbg_deps (sienv: SearchUtils.si_env) =
   let expect_single_file () : Relative_path.t =
     match filenames with
     | [x] -> x
@@ -931,9 +971,8 @@ let handle_mode
       ~init:files_info
     in
     Relative_path.Map.iter files_info begin fun fn fileinfo ->
-      ignore @@ Typing_check_utils.check_defs tcopt fn fileinfo
-    end;
-    Typing_deps.dump_debug_deps ()
+      ignore @@ Typing_check_utils.check_defs tcopt fn fileinfo end;
+    if Caml.Hashtbl.length dbg_deps > 0 then dump_debug_deps dbg_deps
 
   | Dump_inheritance ->
     let open ServerCommandTypes.Method_jumps in
@@ -1195,7 +1234,6 @@ let decl_and_run_mode
   (popt: TypecheckerOptions.t)
   (hhi_root: Path.t)
   (sienv: SearchUtils.si_env): unit =
-  if mode = Dump_deps then Typing_deps.debug_trace := true;
   Ident.track_names := true;
   let builtins =
     if no_builtins
@@ -1231,12 +1269,28 @@ let decl_and_run_mode
   in
   (* Don't declare all the filenames in batch_errors mode *)
   let to_decl = if batch_mode then builtins else files_contents_with_builtins in
+  let dbg_deps = Caml.Hashtbl.create 0 in
+  if mode = Dump_deps then begin
+    (* In addition to actually recording the dependencies in shared memory,
+     we build a non-hashed respresentation of the dependency graph
+     for printing. *)
+    let get_debug_trace root obj =
+       let root = Typing_deps.Dep.to_string root in
+       let obj = Typing_deps.Dep.to_string obj in
+       match Caml.Hashtbl.find_opt dbg_deps obj with
+       | Some set -> HashSet.add set root
+       | None ->
+         let set = HashSet.create 1 in
+         HashSet.add set root;
+         Caml.Hashtbl.replace dbg_deps obj set in
+    Typing_deps.add_dependency_callback "get_debug_trace" get_debug_trace
+    end;
   let errors, files_info =
     parse_name_and_decl popt to_decl in
 
   handle_mode mode files tcopt popt builtins files_contents files_info
     (Errors.get_error_list errors) max_errors error_format batch_mode out_extension
-    sienv
+    dbg_deps sienv
 
 let main_hack ({files; mode; tcopt; _} as opts) (sienv: SearchUtils.si_env): unit =
   (* TODO: We should have a per file config *)

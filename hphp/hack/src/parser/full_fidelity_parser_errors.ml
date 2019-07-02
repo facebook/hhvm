@@ -456,6 +456,9 @@ let methodish_contains_static node =
 let methodish_contains_private node =
   methodish_modifier_contains_helper is_private node
 
+let methodish_contains_protected node =
+  methodish_modifier_contains_helper is_protected node
+
 let is_visibility x =
   is_public x || is_private x || is_protected x
 
@@ -899,6 +902,11 @@ let is_inside_interface context =
  * trait. *)
 let is_inside_trait context =
   Option.is_some (first_parent_classish_node TokenKind.Trait context)
+
+let non_public_const_inside_interface context node =
+  is_inside_interface context &&
+  ( methodish_contains_private node ||
+    methodish_contains_protected node )
 
 (* Returns the 'async'-annotation syntax node from the methodish_declaration
  * node. The returned node may have syntax kind 'Missing', but it will only be
@@ -3182,15 +3190,46 @@ let classish_errors env node namespace_name names errors =
     names, errors
   | _ -> names, errors
 
-let class_element_errors env node errors =
-  match syntax node with
-  | ConstDeclaration _ when is_inside_trait env.context ->
-    make_error_from_node node SyntaxError.const_in_trait :: errors
-  | ConstDeclaration _
-    when methodish_contains_visibility node && is_typechecker env ->
-      make_error_from_node node SyntaxError.const_visibility :: errors
-  | _ -> errors
-
+  (* Checks for visibility modifiers on class constants *)
+  let class_constant_visibility_errors env node errors =
+    match syntax node with
+    | ConstDeclaration { const_modifiers; _ } ->
+      let has_abstract = methodish_contains_abstract node in
+      let has_private = methodish_contains_private node in
+      let errors =
+        if is_inside_trait env.context then
+           make_error_from_node node SyntaxError.const_in_trait :: errors
+        else errors
+      in
+      let errors =
+        multiple_modifiers_errors
+          const_modifiers
+          SyntaxError.const_has_duplicate_modifiers errors
+      in
+      if not (methodish_contains_visibility node) then
+        errors
+      else
+        if not(ParserOptions.enable_constant_visibility_modifiers env.parser_options) then
+          if is_typechecker env then
+            make_error_from_node node SyntaxError.const_visibility :: errors
+          else errors
+        else
+          let errors =
+            if non_public_const_inside_interface env.context node then
+              make_error_from_node node
+                SyntaxError.non_public_const_in_interface :: errors
+            else errors in
+          let errors =
+            if has_abstract && has_private then
+              make_error_from_node node SyntaxError.const_abstract_private :: errors
+            else errors in
+          let errors =
+            multiple_visibility_errors
+              const_modifiers
+              SyntaxError.const_has_multiple_visibilities errors
+          in
+          errors
+      | _ -> errors
 
 let alias_errors env node namespace_name names errors =
   match syntax node with
@@ -3983,7 +4022,7 @@ let find_syntax_errors env =
         trait_require_clauses, names, errors
       | ConstDeclaration _ ->
         let errors =
-          class_element_errors env node errors in
+          class_constant_visibility_errors env node errors in
         trait_require_clauses, names, errors
       | AliasDeclaration _ ->
         let names, errors = alias_errors env node namespace_name names errors in

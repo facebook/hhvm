@@ -725,3 +725,13 @@ let pocket_universe_invalid_field =
 
 let type_keyword =
     "The 'type' keyword is expected here."
+
+let non_public_const_in_interface =
+"Constants inside of interfaces must have 'public' visibility."
+
+let const_abstract_private = "Cannot declare abstract constants private."
+
+let const_has_multiple_visibilities =
+  "A constant cannot have multiple visibility modifiers."
+
+let const_has_duplicate_modifiers = "A constant cannot have duplicate modifiers."

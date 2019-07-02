@@ -364,3 +364,7 @@ val pocket_universe_final_expected : string
 val pocket_universe_enum_expected : string
 val pocket_universe_invalid_field : string
 val type_keyword : string
+val non_public_const_in_interface : string
+val const_abstract_private : string
+val const_has_multiple_visibilities : string
+val const_has_duplicate_modifiers : string

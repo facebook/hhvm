@@ -1504,6 +1504,7 @@ module Make (GetLocals : GetLocals) = struct
     ; c_tconst_constraint = constr
     ; c_tconst_type = type_
     ; c_tconst_user_attributes = attrs
+    ; c_tconst_span = t.Aast.c_tconst_span
     }
 
   and method_ genv m =

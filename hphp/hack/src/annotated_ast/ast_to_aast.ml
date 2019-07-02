@@ -533,6 +533,7 @@ struct
       c_tconst_constraint = optional on_hint tc.tconst_constraint;
       c_tconst_type = optional on_hint tconst_type;
       c_tconst_user_attributes = on_list on_user_attribute tc.tconst_user_attributes;
+      c_tconst_span = tc.tconst_span;
     }
 
   and on_class_var

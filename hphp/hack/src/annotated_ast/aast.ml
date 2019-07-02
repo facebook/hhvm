@@ -381,6 +381,7 @@ and class_typeconst = {
   c_tconst_constraint : hint option;
   c_tconst_type : hint option;
   c_tconst_user_attributes : user_attribute list;
+  c_tconst_span : pos;
 }
 
 and xhp_attr_info = {

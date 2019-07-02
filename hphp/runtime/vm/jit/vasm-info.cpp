@@ -396,12 +396,6 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::popm:
     case Vinstr::popp:
     case Vinstr::poppm:
-    case Vinstr::pseudojmp:
-    case Vinstr::pseudocall:
-    case Vinstr::pseudojcc:
-    case Vinstr::pseudodiv:
-    case Vinstr::pseudocallphp:
-    case Vinstr::pseudoshift:
     case Vinstr::push:
     case Vinstr::pushf:
     case Vinstr::pushframe:

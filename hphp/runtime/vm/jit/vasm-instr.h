@@ -92,12 +92,6 @@ struct Vunit;
   O(pushframe, Inone, Un, Dn)\
   O(popframe, Inone, Un, Dn)\
   O(recordstack, Inone, Un, Dn)\
-  O(pseudojmp, Inone, U(uses) U(uses64) UA(across), D(defs))\
-  O(pseudocall, Inone, U(uses) U(uses64) UA(across), D(defs))\
-  O(pseudojcc, Inone, U(uses) U(sf) UA(across), D(defs))\
-  O(pseudodiv, Inone, U(uses) U(uses64) UA(across), D(defs) D(sf))\
-  O(pseudocallphp, Inone, U(uses) U(uses64) UA(across), D(defs))\
-  O(pseudoshift, Inone, UH(s,d) U(uses) UA(across), DH(d,s) D(defs) D(sf))\
   O(spill, Inone, U(s), D(d))\
   O(reload, Inone, U(s), D(d))\
   O(ssaalias, Inone, U(s), D(d))\
@@ -560,22 +554,6 @@ struct phijmp { Vlabel target; Vtuple uses; };
  */
 struct conjure { Vreg c; };
 struct conjureuse { Vreg c; };
-
-/*
- * "Pseudo" instructions used by the graph-color register
- * allocator. These are used as stand-ins for instructions which have
- * RegSet uses or defs, or implicit register effects. These make those
- * physical register dependencies explicit as Vregs, which allow them
- * to be rewritten into SSA form and manipulated like any other
- * instruction. Once register allocation is done, they are converted
- * back into their original instructions.
- */
-struct pseudojmp { Vtuple defs; Vtuple uses; Vtuple uses64; Vtuple across; };
-struct pseudocall { Vtuple defs; Vtuple uses; Vtuple uses64; Vtuple across; };
-struct pseudojcc { Vtuple defs; Vtuple uses; Vtuple across; VregSF sf; };
-struct pseudodiv { Vtuple defs; Vtuple uses; Vtuple uses64; Vtuple across; VregSF sf; };
-struct pseudocallphp { Vtuple defs; Vtuple uses; Vtuple uses64; Vtuple across; Vlabel targets[2]; };
-struct pseudoshift { Vreg64 d; Vreg64 s; Vtuple defs; Vtuple uses; Vtuple across; VregSF sf; };
 
 /*
  * Pseudo-instructions used to represent where Vregs are moved to/from

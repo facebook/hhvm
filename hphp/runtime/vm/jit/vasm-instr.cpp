@@ -129,12 +129,6 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::pushframe:
     case Vinstr::popframe:
     case Vinstr::recordstack:
-    case Vinstr::pseudojmp:
-    case Vinstr::pseudocall:
-    case Vinstr::pseudojcc:
-    case Vinstr::pseudodiv:
-    case Vinstr::pseudocallphp:
-    case Vinstr::pseudoshift:
     case Vinstr::spill:
     case Vinstr::reload:
     case Vinstr::ssaalias:

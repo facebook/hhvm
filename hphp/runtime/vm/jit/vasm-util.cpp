@@ -631,6 +631,7 @@ struct SSAConverter {
   }
 
   void operator()() {
+    if (targets.none()) return;
     assertx(!hasCriticalEdge());
     firstPass();
     secondPass();

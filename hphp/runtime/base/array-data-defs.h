@@ -46,11 +46,6 @@ inline ArrayData* ArrayData::Create(const Variant& name, const Variant& value) {
   return Create(*name.asTypedValue(), *value.asTypedValue());
 }
 
-inline ArrayData* ArrayData::CreateWithRef(const Variant& name,
-                                           TypedValue value) {
-  return CreateWithRef(*name.asTypedValue(), value);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // ArrayFunction dispatch.
 

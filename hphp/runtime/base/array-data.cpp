@@ -827,14 +827,6 @@ ArrayData* ArrayData::Create(TypedValue name, TypedValue value) {
   return init.create();
 }
 
-ArrayData* ArrayData::CreateWithRef(TypedValue name, TypedValue value) {
-  if (debug) assertForCreate(name);
-
-  ArrayInit init(1, ArrayInit::Map{});
-  init.setWithRef(name, value);
-  return init.create();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 ArrayData* ArrayData::toShapeInPlaceIfCompatible() {

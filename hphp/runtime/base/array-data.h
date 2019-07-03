@@ -168,13 +168,6 @@ public:
   static ArrayData* Create(const Variant& name, const Variant& value);
 
   /*
-   * Like Create(name, value), but preserves reffiness unless `value' is
-   * singly-referenced.
-   */
-  static ArrayData* CreateWithRef(TypedValue name, TypedValue value);
-  static ArrayData* CreateWithRef(const Variant& name, TypedValue value);
-
-  /*
    * Make a copy of the array.
    *
    * copy() makes a normal request-allocated ArrayData, whereas copyStatic()

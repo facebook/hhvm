@@ -634,7 +634,9 @@ void Array::setImpl(const T& key, TypedValue v) {
 template<typename T> ALWAYS_INLINE
 void Array::setWithRefImpl(const T& key, TypedValue v) {
   if (!m_arr) {
-    m_arr = Ptr::attach(ArrayData::CreateWithRef(key, v));
+    ArrayInit init(1, ArrayInit::Map{});
+    init.setWithRef(key, v);
+    m_arr = Ptr::attach(init.create());
   } else {
     auto const escalated = m_arr->setWithRef(key, v);
     if (escalated != m_arr) m_arr = Ptr::attach(escalated);

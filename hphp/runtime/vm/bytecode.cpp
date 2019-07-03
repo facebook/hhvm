@@ -5635,15 +5635,15 @@ OPTBLD_INLINE void inclOp(PC origpc, PC& pc, InclOpFlags flags,
       String absPath = curUnitFilePath() + '/';
       absPath += path;
       return lookupUnit(absPath.get(), "", &initial,
-                        Native::s_noNativeFuncs);
+                        Native::s_noNativeFuncs, false);
     }
     if (flags & InclOpFlags::DocRoot) {
       return lookupUnit(
         SourceRootInfo::RelativeToPhpRoot(path).get(), "", &initial,
-        Native::s_noNativeFuncs);
+        Native::s_noNativeFuncs, false);
     }
     return lookupUnit(path.get(), curUnitFilePath().c_str(), &initial,
-                      Native::s_noNativeFuncs);
+                      Native::s_noNativeFuncs, false);
   }();
 
   vmStack().popC();

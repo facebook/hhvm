@@ -80,7 +80,7 @@ bool HHVM_FUNCTION(autoload_set_paths,
 
 bool HHVM_FUNCTION(could_include, const String& file) {
   return lookupUnit(file.get(), "", nullptr /* initial_opt */,
-                    Native::s_noNativeFuncs) != nullptr;
+                    Native::s_noNativeFuncs, false) != nullptr;
 }
 
 namespace {

@@ -1977,7 +1977,7 @@ static int execute_program_impl(int argc, char** argv) {
     try {
       auto const unit = lookupUnit(
         makeStaticString(po.lint.c_str()), "", nullptr,
-        Native::s_noNativeFuncs);
+        Native::s_noNativeFuncs, false);
       if (unit == nullptr) {
         throw FileOpenException(po.lint);
       }

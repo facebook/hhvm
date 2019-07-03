@@ -456,7 +456,8 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
                                OptLog& ent,
                                const Native::FuncTable& nativeFuncs,
                                const RepoOptions& options,
-                               FileLoadFlags& flags) {
+                               FileLoadFlags& flags,
+                               bool alreadyRealpath) {
   LogTimer loadTime("load_ms", ent);
   if (strstr(requestedPath->data(), "://") != nullptr) {
     // URL-based units are not currently cached in memory, but the Repo still
@@ -479,7 +480,7 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
     );
 
   auto const rpath = [&] () -> const StringData* {
-    if (RuntimeOption::CheckSymLink) {
+    if (RuntimeOption::CheckSymLink && !alreadyRealpath) {
       std::string rp = StatCache::realpath(path->data());
       if (rp.size() != 0) {
         if (rp.size() != path->size() ||
@@ -590,7 +591,8 @@ CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
                                  const struct stat* statInfo,
                                  OptLog& ent,
                                  const Native::FuncTable& nativeFuncs,
-                                 FileLoadFlags& flags) {
+                                 FileLoadFlags& flags,
+                                 bool alreadyRealpath) {
   auto const& options = RepoOptions::forFile(requestedPath->data());
   if (!g_context.isNull() && strncmp(requestedPath->data(), "/:", 2)) {
     g_context->onLoadWithOptions(requestedPath->data(), options);
@@ -603,7 +605,7 @@ CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
       auto const cachedUnit = acc->second.cachedUnit.copy();
       if (!isChanged(cachedUnit, statInfo, options)) {
         auto const cu = cachedUnit->cu;
-        if (!cu.unit || !RuntimeOption::CheckSymLink ||
+        if (!cu.unit || !RuntimeOption::CheckSymLink || alreadyRealpath ||
             !strcmp(StatCache::realpath(requestedPath->data()).c_str(),
                     cu.unit->filepath()->data())) {
           if (ent) ent->setStr("type", "cache_hit_readlock");
@@ -614,7 +616,7 @@ CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
     }
   }
   return loadUnitNonRepoAuth(requestedPath, statInfo, ent, nativeFuncs,
-    options, flags);
+    options, flags, alreadyRealpath);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -776,11 +778,12 @@ CachedUnit checkoutFile(
   const struct stat& statInfo,
   OptLog& ent,
   const Native::FuncTable& nativeFuncs,
-  FileLoadFlags& flags
+  FileLoadFlags& flags,
+  bool alreadyRealpath
 ) {
   return RuntimeOption::RepoAuthoritative
     ? lookupUnitRepoAuth(path, nativeFuncs)
-    : lookupUnitNonRepoAuth(path, &statInfo, ent, nativeFuncs, flags);
+    : lookupUnitNonRepoAuth(path, &statInfo, ent, nativeFuncs, flags, alreadyRealpath);
 }
 
 const std::string mangleUnitPHP7Options() {
@@ -893,7 +896,7 @@ Unit* checkPhpUnits(Unit* unit) {
 }
 
 Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt,
-                 const Native::FuncTable& nativeFuncs) {
+                 const Native::FuncTable& nativeFuncs, bool alreadyRealpath) {
   bool init;
   bool& initial = initial_opt ? *initial_opt : init;
   initial = true;
@@ -937,7 +940,7 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt,
   FileLoadFlags flags = FileLoadFlags::kHitMem;
 
   // This file hasn't been included yet, so we need to parse the file
-  auto const cunit = checkoutFile(spath.get(), s, ent, nativeFuncs, flags);
+  auto const cunit = checkoutFile(spath.get(), s, ent, nativeFuncs, flags, alreadyRealpath);
   if (cunit.unit && initial_opt) {
     // if initial_opt is not set, this shouldn't be recorded as a
     // per request fetch of the file.
@@ -973,7 +976,7 @@ Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable& nativeFuncs) {
   }
   OptLog ent;
   FileLoadFlags flags;
-  return lookupUnitNonRepoAuth(path, nullptr, ent, nativeFuncs, flags).unit;
+  return lookupUnitNonRepoAuth(path, nullptr, ent, nativeFuncs, flags, true).unit;
 }
 
 //////////////////////////////////////////////////////////////////////

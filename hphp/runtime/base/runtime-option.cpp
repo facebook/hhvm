@@ -487,6 +487,7 @@ bool RuntimeOption::EnableShortTags = true;
 bool RuntimeOption::EnableXHP = true;
 bool RuntimeOption::EnableIntrinsicsExtension = false;
 bool RuntimeOption::CheckSymLink = true;
+bool RuntimeOption::TrustAutoloaderPath = false;
 bool RuntimeOption::EnableArgsInBacktraces = true;
 bool RuntimeOption::EnableZendIniCompat = true;
 bool RuntimeOption::TimeoutsUseWallTime = true;
@@ -1723,6 +1724,7 @@ void RuntimeOption::Load(
                  "Eval.ProfDataTTLHours", ProfDataTTLHours);
 
     Config::Bind(CheckSymLink, ini, config, "Eval.CheckSymLink", true);
+    Config::Bind(TrustAutoloaderPath, ini, config, "Eval.TrustAutoloaderPath", false);
 
 #define F(type, name, defaultVal) \
     Config::Bind(Eval ## name, ini, config, "Eval."#name, defaultVal);

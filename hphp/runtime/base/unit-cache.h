@@ -61,7 +61,7 @@ struct FuncTable;
  * fatal errors.
  */
 Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt,
-                 const Native::FuncTable&);
+                 const Native::FuncTable&, bool alreadyRealpath);
 
 /*
  * As above, but for system units.

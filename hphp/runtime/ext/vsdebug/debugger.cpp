@@ -1574,7 +1574,7 @@ void Debugger::tryInstallBreakpoints(DebuggerRequestInfo* ri) {
         // to force a pre-load and compile of the unit and place the bp.
         HPHP::String unitPath(bp->m_path.c_str());
         const auto compilationUnit = lookupUnit(unitPath.get(), "", nullptr,
-                                                Native::s_noNativeFuncs);
+                                                Native::s_noNativeFuncs, false);
 
         if (compilationUnit != nullptr) {
           ri->m_breakpointInfo->m_loadedUnits[bp->m_path] = compilationUnit;

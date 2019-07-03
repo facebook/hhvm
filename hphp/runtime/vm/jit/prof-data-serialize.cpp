@@ -1105,7 +1105,7 @@ Unit* read_unit(ProfDataDeserializer& ser) {
       if (filepath->data()[0] == '/' && filepath->data()[1] == ':') {
         return lookupSyslibUnit(filepath, nativeFuncs);
       }
-      return lookupUnit(filepath, "", nullptr, nativeFuncs);
+      return lookupUnit(filepath, "", nullptr, nativeFuncs, false);
     }
   );
 }

@@ -505,6 +505,7 @@ struct RuntimeOption {
   static bool EnableXHP;
   static bool EnableIntrinsicsExtension;
   static bool CheckSymLink;
+  static bool TrustAutoloaderPath;
   static bool EnableArgsInBacktraces;
   static bool EnableZendIniCompat;
   static bool TimeoutsUseWallTime;

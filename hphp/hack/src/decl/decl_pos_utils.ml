@@ -209,6 +209,7 @@ let rec ty (p, x) =
       ttc_type = ty_opt tc.ttc_type;
       ttc_origin = tc.ttc_origin;
       ttc_enforceable = Tuple.T2.map_fst ~f:pos tc.ttc_enforceable;
+      ttc_visibility = tc.ttc_visibility
     }
 
   and user_attribute ua =

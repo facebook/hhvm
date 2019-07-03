@@ -24,6 +24,7 @@ type shallow_typeconst = {
   stc_name        : Aast.sid;
   stc_type        : decl ty option;
   stc_enforceable : Pos.t * bool;
+  stc_visibility  : Aast.visibility;
 } [@@deriving show]
 
 type shallow_prop = {

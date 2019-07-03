@@ -87,6 +87,7 @@ let typeconst env c tc =
         stc_constraint = constr;
         stc_type = ty;
         stc_enforceable = enforceable;
+        stc_visibility = tc.c_tconst_visibility
       }
 let make_xhp_attr cv = Option.map cv.cv_xhp_attr (fun xai -> {
   xa_tag = (match xai.xai_tag with

@@ -223,11 +223,13 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
     stc_name = ttc_name;
     stc_type;
     stc_enforceable = ttc_enforceable;
+    stc_visibility;
   } = stc in
   let constraint_ =
     if child_class = mro.mro_name then stc_constraint else
     Option.map stc_constraint (Decl_instantiate.instantiate subst)
   in
+  let ttc_visibility = base_visibility mro.mro_name stc_visibility in
   let ty =
     if child_class = mro.mro_name then stc_type else
     Option.map stc_type (Decl_instantiate.instantiate subst) in
@@ -244,6 +246,7 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
       ttc_type = Some default;
       ttc_origin = mro.mro_name;
       ttc_enforceable;
+      ttc_visibility;
     }
   | _ ->
     {
@@ -253,5 +256,6 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
       ttc_type = ty;
       ttc_origin = mro.mro_name;
       ttc_enforceable;
+      ttc_visibility;
     } in
   snd ttc_name, typeconst

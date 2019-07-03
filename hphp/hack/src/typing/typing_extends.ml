@@ -51,7 +51,7 @@ let check_partially_known_method_params = false
 let check_partially_known_method_visibility = true
 
 (* Rules for visibility *)
-let check_visibility parent_vis c_vis parent_type c_type =
+let check_visibility parent_vis c_vis parent_pos pos =
   match parent_vis, c_vis with
   | Vprivate _   , _ ->
     (* The only time this case should come into play is when the
@@ -61,10 +61,6 @@ let check_visibility parent_vis c_vis parent_type c_type =
   | Vprotected _ , Vprotected _
   | Vprotected _ , Vpublic       -> ()
   | _ ->
-    let (parent_pos, _) = parent_type in
-    let (elt_pos, _) = c_type in
-    let parent_pos = Reason.to_pos parent_pos in
-    let pos = Reason.to_pos elt_pos in
     let parent_vis = TUtils.string_of_visibility parent_vis in
     let vis = TUtils.string_of_visibility c_vis in
     Errors.visibility_extends vis pos parent_pos parent_vis
@@ -72,9 +68,20 @@ let check_visibility parent_vis c_vis parent_type c_type =
 let check_class_elt_visibility parent_class_elt class_elt =
   let parent_vis = parent_class_elt.ce_visibility in
   let c_vis = class_elt.ce_visibility in
-  let lazy parent_type = parent_class_elt.ce_type in
-  let lazy c_type = class_elt.ce_type in
-  check_visibility parent_vis c_vis parent_type c_type
+  let lazy (parent_pos, _) = parent_class_elt.ce_type in
+  let lazy (elt_pos, _) = class_elt.ce_type in
+  let parent_pos = Reason.to_pos parent_pos in
+  let pos = Reason.to_pos elt_pos in
+  check_visibility parent_vis c_vis parent_pos pos
+
+let check_constant_visibility parent_class_const class_const =
+  let (parent_pos, _) = parent_class_const.cc_type in
+  let (elt_pos, _) = class_const.cc_type in
+  let parent_pos = Reason.to_pos parent_pos in
+  let pos = Reason.to_pos elt_pos in
+  let parent_vis = parent_class_const.cc_visibility in
+  let vis = class_const.cc_visibility in
+  check_visibility parent_vis vis parent_pos pos
 
 (* Check that all the required members are implemented *)
 let check_members_implemented check_private parent_reason reason
@@ -322,8 +329,7 @@ let check_const_override env
       && not class_const.cc_abstract
       && not parent_class_const.cc_abstract
     | _ -> false in
-  check_visibility parent_class_const.cc_visibility class_const.cc_visibility
-    parent_class_const.cc_type class_const.cc_type;
+  check_constant_visibility parent_class_const class_const;
   if check_params then
     if member_not_unique then
       Errors.multiple_concrete_defs class_const.cc_pos parent_class_const.cc_pos
@@ -571,6 +577,8 @@ let check_typeconsts env parent_class class_ =
   Sequence.iter ptypeconsts begin fun (tconst_name, parent_tconst) ->
     match Cls.get_typeconst class_ tconst_name with
       | Some tconst ->
+          check_visibility parent_tconst.ttc_visibility tconst.ttc_visibility
+            (fst parent_tconst.ttc_name) (fst tconst.ttc_name);
           check_ambiguous_inheritance tconst_check parent_tconst tconst
             (fst tconst.ttc_name) class_ tconst.ttc_origin
       | None ->

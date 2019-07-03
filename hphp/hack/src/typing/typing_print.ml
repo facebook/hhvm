@@ -1458,6 +1458,7 @@ module PrintClass = struct
     ttc_type = tc_type;
     ttc_origin = origin;
     ttc_enforceable = (_, enforceable);
+    ttc_visibility = _;
   } =
     let name = snd tc_name in
     let ty x = Full.to_string_decl tcopt x in

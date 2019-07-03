@@ -6508,6 +6508,7 @@ and typeconst_abstract_kind = function
 
 and typeconst_def env {
   c_tconst_abstract;
+  c_tconst_visibility;
   c_tconst_name = (pos, _) as id;
   c_tconst_constraint;
   c_tconst_type = hint;
@@ -6532,6 +6533,7 @@ and typeconst_def env {
   env,
   {
     T.c_tconst_abstract = typeconst_abstract_kind c_tconst_abstract;
+    T.c_tconst_visibility = c_tconst_visibility;
     T.c_tconst_name = id;
     T.c_tconst_constraint = c_tconst_constraint;
     T.c_tconst_type = hint;

@@ -497,8 +497,10 @@ struct
     | CA_enum sl -> Aast.CA_enum (sl)
 
   and on_class_typeconst (tc: Ast.typeconst) : Aast.class_typeconst =
+    let vis = get_visibility_from_kinds tc.tconst_kinds in
+    let has_abstract = mem tc.tconst_kinds Abstract in
     let tconst_type, abstract_kind =
-      match tc.tconst_abstract, tc.tconst_constraint, tc.tconst_type with
+      match has_abstract, tc.tconst_constraint, tc.tconst_type with
       (* const type T;
        * const type T as int; *)
       | false, _, None ->
@@ -524,6 +526,7 @@ struct
     Aast.{
       c_tconst_abstract = abstract_kind;
       c_tconst_name = tc.tconst_name;
+      c_tconst_visibility = vis;
       c_tconst_constraint = optional on_hint tc.tconst_constraint;
       c_tconst_type = optional on_hint tconst_type;
       c_tconst_user_attributes = on_list on_user_attribute tc.tconst_user_attributes;

@@ -368,6 +368,7 @@ struct
     T.c_tconst_type = tc.S.c_tconst_type;
     T.c_tconst_user_attributes = List.map tc.S.c_tconst_user_attributes (map_user_attribute menv);
     T.c_tconst_span = tc.S.c_tconst_span;
+    T.c_tconst_visibility = tc.S.c_tconst_visibility;
   }
 
   and map_xhp_info = function

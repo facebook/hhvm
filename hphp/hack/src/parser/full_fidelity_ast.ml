@@ -2561,10 +2561,9 @@ and pClassElt : class_elt list parser = fun node env ->
       if not @@ is_missing (type_const_type_parameters)
       then raise_parsing_error env (`Node node) SyntaxError.tparams_in_tconst;
       let modifiers = pKinds (fun _ -> ()) type_const_modifiers env in
-      let abstract = List.mem modifiers Abstract ~equal:(=) in
       [ TypeConst
         { tconst_user_attributes = pUserAttributes env type_const_attribute_spec
-        ; tconst_abstract   = abstract
+        ; tconst_kinds      = modifiers
         ; tconst_name       = pos_name type_const_name env
         ; tconst_constraint = mpOptional pTConstraintTy type_const_type_constraint env
         ; tconst_type       = mpOptional pHint type_const_type_specifier env

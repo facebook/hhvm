@@ -294,7 +294,7 @@ and method_trait_resolution = {
 
 and typeconst = {
   tconst_user_attributes: user_attribute list;
-  tconst_abstract: bool;
+  tconst_kinds: kind list;
   tconst_name: id;
   tconst_constraint: hint option;
   tconst_type: hint option;

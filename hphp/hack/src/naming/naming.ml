@@ -1506,6 +1506,7 @@ module Make (GetLocals : GetLocals) = struct
     | _ -> () end;
     N.
     { c_tconst_abstract = abstract
+    ; c_tconst_visibility = t.Aast.c_tconst_visibility
     ; c_tconst_name = t.Aast.c_tconst_name
     ; c_tconst_constraint = constr
     ; c_tconst_type = type_

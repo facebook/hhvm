@@ -90,6 +90,7 @@ let summarize_typeconst class_name t =
   let kind = Typeconst in
   let id = get_symbol_id kind (Some class_name) name in
   let full_name = get_full_name (Some class_name) name in
+  let modifiers = modifiers_of_ast_kinds t.Ast.tconst_kinds in
   {
     kind;
     name;
@@ -97,7 +98,7 @@ let summarize_typeconst class_name t =
     id;
     pos;
     span = t.Ast.tconst_span;
-    modifiers = if t.Ast.tconst_abstract then [Abstract] else [];
+    modifiers;
     children = None;
     params = None;
     docblock = None;

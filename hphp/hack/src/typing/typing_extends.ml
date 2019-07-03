@@ -51,8 +51,8 @@ let check_partially_known_method_params = false
 let check_partially_known_method_visibility = true
 
 (* Rules for visibility *)
-let check_visibility parent_class_elt class_elt =
-  match parent_class_elt.ce_visibility, class_elt.ce_visibility with
+let check_visibility parent_vis c_vis parent_type c_type =
+  match parent_vis, c_vis with
   | Vprivate _   , _ ->
     (* The only time this case should come into play is when the
      * parent_class_elt comes from a trait *)
@@ -61,13 +61,20 @@ let check_visibility parent_class_elt class_elt =
   | Vprotected _ , Vprotected _
   | Vprotected _ , Vpublic       -> ()
   | _ ->
-    let lazy (parent_pos, _) = parent_class_elt.ce_type in
-    let lazy (elt_pos, _) = class_elt.ce_type in
+    let (parent_pos, _) = parent_type in
+    let (elt_pos, _) = c_type in
     let parent_pos = Reason.to_pos parent_pos in
     let pos = Reason.to_pos elt_pos in
-    let parent_vis = TUtils.string_of_visibility parent_class_elt.ce_visibility in
-    let vis = TUtils.string_of_visibility class_elt.ce_visibility in
+    let parent_vis = TUtils.string_of_visibility parent_vis in
+    let vis = TUtils.string_of_visibility c_vis in
     Errors.visibility_extends vis pos parent_pos parent_vis
+
+let check_class_elt_visibility parent_class_elt class_elt =
+  let parent_vis = parent_class_elt.ce_visibility in
+  let c_vis = class_elt.ce_visibility in
+  let lazy parent_type = parent_class_elt.ce_type in
+  let lazy c_type = class_elt.ce_type in
+  check_visibility parent_vis c_vis parent_type c_type
 
 (* Check that all the required members are implemented *)
 let check_members_implemented check_private parent_reason reason
@@ -237,7 +244,7 @@ let check_override env ~check_member_unique member_name mem_source ?(ignore_fun_
   check_xhp_attr_required env parent_class_elt class_elt;
   let class_known, check_params = should_check_params parent_class class_ in
   let check_vis = class_known || check_partially_known_method_visibility in
-  if check_vis then check_visibility parent_class_elt class_elt else ();
+  if check_vis then check_class_elt_visibility parent_class_elt class_elt else ();
   let lazy fty_child = class_elt.ce_type in
   let pos = Reason.to_pos (fst fty_child) in
   if class_elt.ce_const <> parent_class_elt.ce_const then (
@@ -315,7 +322,8 @@ let check_const_override env
       && not class_const.cc_abstract
       && not parent_class_const.cc_abstract
     | _ -> false in
-
+  check_visibility parent_class_const.cc_visibility class_const.cc_visibility
+    parent_class_const.cc_type class_const.cc_type;
   if check_params then
     if member_not_unique then
       Errors.multiple_concrete_defs class_const.cc_pos parent_class_const.cc_pos
@@ -480,7 +488,7 @@ let check_constructors env (parent_class, parent_ty) (class_, class_ty) psubst s
     | Some parent_cstr, _ when parent_cstr.ce_synthesized -> ()
     | Some parent_cstr, Some child_cstr ->
       check_final_method `FromMethod parent_cstr child_cstr;
-      check_visibility parent_cstr child_cstr
+      check_class_elt_visibility parent_cstr child_cstr
     | _, _ -> ()
   )
 

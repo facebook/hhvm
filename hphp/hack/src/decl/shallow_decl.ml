@@ -18,7 +18,8 @@ open Typing_defs
 module Attrs = Attributes
 module Partial = Partial_provider
 
-let class_const env c (h, name, e) =
+let class_const env c cc =
+  let { cc_id = name; cc_type = h; cc_expr = e; cc_visibility = v } = cc in
   let pos = fst name in
   match c.c_kind with
   | Ast_defs.Ctrait ->
@@ -55,6 +56,7 @@ let class_const env c (h, name, e) =
       scc_expr = e;
       scc_name = name;
       scc_type = ty;
+      scc_visibility = v;
     }
 
 let typeconst_abstract_kind env = function

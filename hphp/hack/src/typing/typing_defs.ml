@@ -456,6 +456,7 @@ and class_const = {
   cc_abstract    : bool;
   cc_pos         : Pos.t;
   cc_type        : decl ty;
+  cc_visibility  : visibility;
   cc_expr        : Nast.expr option;
   (* identifies the class from which this const originates *)
   cc_origin      : string;

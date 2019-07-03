@@ -8,15 +8,17 @@
       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
       c_implements = []; c_where_constraints = [];
       c_consts =
-      [(None, ([5:9-12], "FOO"),
-        (Some (([5:15-8:4], dict<string, int>),
-               (KeyValCollection (<kvc_kind>, None,
-                  [((([6:5-8], string), (String "a")),
-                    (([6:12-13], int), (Int "1")));
-                    ((([7:5-8], string), (String "b")),
-                     (([7:12-13], int), (Int "2")))
-                    ]
-                  )))))
+      [{ cc_visibility = Public; cc_type = None; cc_id = ([5:9-12], "FOO");
+         cc_expr =
+         (Some (([5:15-8:4], dict<string, int>),
+                (KeyValCollection (<kvc_kind>, None,
+                   [((([6:5-8], string), (String "a")),
+                     (([6:12-13], int), (Int "1")));
+                     ((([7:5-8], string), (String "b")),
+                      (([7:12-13], int), (Int "2")))
+                     ]
+                   ))))
+         }
         ];
       c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
       c_xhp_children = []; c_xhp_attrs = []; c_namespace = <opaque>;

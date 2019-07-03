@@ -155,7 +155,11 @@ let from_class_elt_classvars
   List.map ~f:mapping_aux ast_class.A.c_vars
 
 let from_class_elt_constants env class_ =
-  let map_aux (h, id, e) = from_constant env (h, id, e) in
+  let map_aux (c : A.class_const) =
+    let h = c.A.cc_type in
+    let name = c.A.cc_id in
+    let e = c.A.cc_expr in
+    from_constant env (h, name, e) in
   List.map ~f:map_aux class_.A.c_consts
 
 let from_class_elt_requirements class_ =

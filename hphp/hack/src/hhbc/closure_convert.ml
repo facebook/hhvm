@@ -1460,13 +1460,9 @@ and convert_class (env : env) (st : state) (cd : class_) =
       c_xhp_attrs;
     }
 
-and convert_class_elt_const (env : env) st c =
-  let hint, sid, expr = c in
-  match expr with
-  | None -> st, c
-  | Some expr ->
-     let st, expr = convert_expr env st expr in
-     st, (hint, sid, Some expr)
+and convert_class_elt_const (env : env) st cc =
+  let st, cc_expr = convert_opt_expr env st cc.cc_expr in
+  st, { cc with cc_expr }
 
 and convert_class_elt_classvar (env : env) st cv =
   let st, cv_expr = convert_opt_expr env st cv.cv_expr in

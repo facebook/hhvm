@@ -2523,29 +2523,33 @@ and pClassElt : class_elt list parser = fun node env ->
   let doc_comment_opt = extract_docblock node in
   let pClassElt_ = function
   | ConstDeclaration
-    { const_type_specifier; const_declarators; _ } ->
-      let ty = mpOptional pHint const_type_specifier env in
-      let res =
-        couldMap const_declarators env ~f:begin function
-          | { syntax = ConstantDeclarator
-              { constant_declarator_name; constant_declarator_initializer }
-            ; _ } -> fun env ->
-              ( pos_name constant_declarator_name env
-              (* TODO: Parse error when const is abstract and has inits *)
-              , if not (is_abstract node)
-                then mpOptional pSimpleInitializer constant_declarator_initializer env
-                else None
-              )
-          | node -> missing_syntax "constant declarator" node env
-        end
-    in
-    let rec aux absts concrs = function
-    | (id, None  ) :: xs -> aux (AbsConst (ty, id) :: absts) concrs xs
-    | (id, Some x) :: xs -> aux absts ((id, x) :: concrs) xs
-    | [] when concrs = [] -> List.rev absts
-    | [] -> Const (ty, List.rev concrs) :: List.rev absts
-    in
-    aux [] [] res
+    { const_type_specifier; const_declarators; const_modifiers; _ } ->
+    let modifiers = pKinds (fun _ -> ()) const_modifiers env in
+    let vis =
+      let rec find_vis_from_kind_list lst=
+        match lst  with
+        | [] -> Public
+        | x :: _ when List.mem [Private; Public; Protected] x ~equal:(=) -> x
+        | _ :: xs -> find_vis_from_kind_list xs
+      in
+      find_vis_from_kind_list modifiers in
+      [ Const
+        { cc_visibility = vis
+        ; cc_hint = mpOptional pHint const_type_specifier env
+        ; cc_names = couldMap const_declarators env ~f:begin function
+            | { syntax = ConstantDeclarator
+                { constant_declarator_name; constant_declarator_initializer }
+              ; _ } -> fun env ->
+                ( pos_name constant_declarator_name env
+                (* TODO: Parse error when const is abstract and has inits *)
+                , if not (is_abstract node)
+                  then mpOptional pSimpleInitializer constant_declarator_initializer env
+                  else None
+                )
+            | node -> missing_syntax "constant declarator" node env
+          end
+        }
+      ]
   | TypeConstDeclaration
     { type_const_attribute_spec
     ; type_const_modifiers
@@ -3122,7 +3126,7 @@ and pDef : def list parser = fun node env ->
       let pEnumerator node =
         match syntax node with
         | Enumerator { enumerator_name = name; enumerator_value = value; _ } ->
-          fun env -> Const (None, [pos_name name env, pExpr value env])
+          fun env -> Const {cc_hint = None; cc_visibility = Public; cc_names = [pos_name name env, Some (pExpr value env)]}
         | _ -> missing_syntax "enumerator" node
       in
       [ Class

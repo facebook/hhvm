@@ -136,7 +136,6 @@ class type ['a] ast_visitor_type = object
 
   (* traversal for top-level parts of the AST *)
   (* may not be exactly what you want for all implementations*)
-  method on_absConst: 'a -> hint option -> id -> 'a
   method on_attributes: 'a -> class_attr list -> 'a
   method on_class_: 'a -> class_ -> 'a
   method on_class_elt: 'a -> class_elt -> 'a
@@ -149,7 +148,7 @@ class type ['a] ast_visitor_type = object
   method on_methodTraitResolution: 'a -> method_trait_resolution -> 'a
   method on_classVars:
     'a -> class_vars_ -> 'a
-  method on_const: 'a -> hint option -> (id * expr) list -> 'a
+  method on_const: 'a -> class_consts_ -> 'a
   method on_constant: 'a -> gconst -> 'a
   method on_def: 'a -> def -> 'a
   method on_fun_: 'a -> fun_ -> 'a
@@ -755,8 +754,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     acc
 
   method on_class_elt acc = function
-    | Const (hopt, iel) -> this#on_const acc hopt iel
-    | AbsConst (h, a) -> this#on_absConst acc h a
+    | Const cc -> this#on_const acc cc
     | Attributes cl -> this#on_attributes acc cl
     | TypeConst t -> this#on_typeConst acc t
     | ClassUse h -> this#on_classUse acc h
@@ -775,22 +773,17 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     | Method m -> this#on_method_ acc m
     | ClassEnum (_, id, fields) -> this#on_class_enum_ acc id fields
 
-  method on_const acc h_opt consts =
-    let acc = match h_opt with
-      | Some h -> this#on_hint acc h
-      | None -> acc in
-    let acc = List.fold_left (fun acc (id, expr) ->
-      let acc = this#on_id acc id in
-      let acc = this#on_expr acc expr in
-      acc
-    ) acc consts in
-    acc
-  method on_absConst acc h_opt id =
-    let acc = match h_opt with
-      | Some h -> this#on_hint acc h
-      | None -> acc in
+  method on_const acc cc =
+  let acc = match cc.cc_hint with
+    | Some h -> this#on_hint acc h
+    | None -> acc in
+  let acc = List.fold_left (fun acc (id, opt_expr) ->
     let acc = this#on_id acc id in
-    acc
+    match opt_expr with
+    | Some expr -> this#on_expr acc expr
+    | None -> acc
+  ) acc cc.cc_names in
+  acc
   method on_attributes acc _ = acc
   method on_typeConst acc t =
     let acc = this#on_id acc t.tconst_name in

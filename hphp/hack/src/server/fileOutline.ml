@@ -10,6 +10,7 @@
 open Core_kernel
 open Reordered_argument_collections
 open SymbolDefinition
+
 module Parser = Full_fidelity_ast
 
 let modifiers_of_ast_kinds l =
@@ -51,8 +52,14 @@ let maybe_summarize_property class_name ~skip kinds var =
   let _, (_, name), _ = var in
   if SSet.mem skip name then [] else [summarize_property class_name kinds var]
 
-let summarize_const class_name ((pos, name), (expr_pos, _)) =
-  let span = (Pos.btw pos expr_pos) in
+let summarize_const class_name ((pos, name), eopt ) =
+  let span, modifiers =
+  begin
+  match eopt with
+  | Some e -> ((Pos.btw pos (fst e))  , [])
+  | None -> (pos, [Abstract])
+  end
+  in
   let kind = Const in
   let id = get_symbol_id kind (Some class_name) name in
   let full_name = get_full_name (Some class_name) name in
@@ -63,25 +70,7 @@ let summarize_const class_name ((pos, name), (expr_pos, _)) =
     id;
     pos;
     span;
-    modifiers = [];
-    children = None;
-    params = None;
-    docblock = None;
-    reactivity_attributes = [];
-  }
-
-let summarize_abs_const class_name (pos, name) =
-  let kind = Const in
-  let id = get_symbol_id kind (Some class_name) name in
-  let full_name = get_full_name (Some class_name) name in
-  {
-    kind;
-    name;
-    full_name;
-    id;
-    pos = pos;
-    span = pos;
-    modifiers = [Abstract];
+    modifiers;
     children = None;
     params = None;
     docblock = None;
@@ -221,8 +210,7 @@ let summarize_class class_ ~no_children =
             ~f:(maybe_summarize_property class_name ~skip:implicit_props kinds)
       | Ast.XhpAttr (_, var, _, _) ->
           maybe_summarize_property class_name ~skip:implicit_props [] var
-      | Ast.Const (_, cl) -> List.map cl ~f:(summarize_const class_name)
-      | Ast.AbsConst (_, id) -> [summarize_abs_const class_name id]
+      | Ast.Const c -> List.map c.Ast.cc_names ~f:(summarize_const class_name)
       | Ast.TypeConst t -> [summarize_typeconst class_name t]
       | _ -> []
       end)

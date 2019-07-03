@@ -92,9 +92,9 @@ let process_class class_ =
       process_member c_name prop.Tast.cv_id
         ~is_declaration:true ~is_method:false ~is_const:false
   end in
-  let acc = List.fold class_.Tast.c_consts ~init:acc ~f:begin fun acc (_, const_id, _) ->
+  let acc = List.fold class_.Tast.c_consts ~init:acc ~f:begin fun acc const ->
     Result_set.union acc @@
-      process_member c_name const_id
+      process_member c_name const.Tast.cc_id
         ~is_declaration:true ~is_method:false ~is_const:true
   end in
   let acc = List.fold class_.Tast.c_typeconsts ~init:acc ~f:begin fun acc typeconst ->

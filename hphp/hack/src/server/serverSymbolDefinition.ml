@@ -77,22 +77,14 @@ let get_member_def (x : class_element) =
     Some (FileOutline.summarize_property member_origin kinds p)
   | Class_const ->
     let consts = List.concat_map c.Ast.c_body begin function
-      | Ast.Const (_, consts) ->
+      | Ast.Const {Ast.cc_names = consts; _ } ->
         List.map consts begin fun (((_, name), _) as const) ->
           (const, name)
         end
       | _ -> []
     end in
-    let res = List.find consts (fun c -> snd c = member_name) >>= fun c ->
-      Some (FileOutline.summarize_const member_origin (fst c))
-    in
-    if Option.is_some res then res else
-    let abs_consts = List.concat_map c.Ast.c_body begin function
-      | Ast.AbsConst (_, id) -> [id]
-      | _ -> []
-    end in
-    List.find abs_consts (fun c -> snd c = member_name) >>= fun c ->
-      Some (FileOutline.summarize_abs_const member_origin c)
+    List.find consts (fun c -> snd c = member_name) >>= fun c ->
+    Some (FileOutline.summarize_const member_origin (fst c))
   | Typeconst ->
     let tconsts = List.filter_map c.Ast.c_body begin function
       | Ast.TypeConst t -> Some t

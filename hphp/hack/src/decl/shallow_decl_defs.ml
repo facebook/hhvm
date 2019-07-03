@@ -11,10 +11,11 @@ open Typing_defs
 open Pp_type
 
 type shallow_class_const = {
-  scc_abstract : bool;
-  scc_expr     : Nast.expr option;
-  scc_name     : Aast.sid;
-  scc_type     : decl ty;
+  scc_abstract   : bool;
+  scc_expr       : Nast.expr option;
+  scc_name       : Aast.sid;
+  scc_type       : decl ty;
+  scc_visibility : Aast.visibility;
 } [@@deriving show]
 
 type shallow_typeconst = {

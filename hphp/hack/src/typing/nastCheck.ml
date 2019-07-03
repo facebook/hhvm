@@ -523,9 +523,9 @@ and class_ tenv c =
   List.iter c_statics (method_ env);
   List.iter c_methods (method_ env);
 
-and class_const env (h, _, e) =
-  maybe hint env h;
-  maybe expr env e;
+and class_const env cc =
+  maybe hint env cc.cc_type;
+  maybe expr env cc.cc_expr;
   ()
 
 and typeconst (env, _) tconst =

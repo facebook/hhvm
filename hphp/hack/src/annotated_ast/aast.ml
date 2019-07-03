@@ -363,7 +363,12 @@ and ca_type =
   | CA_enum of string list
 
 (* expr = None indicates an abstract const *)
-and class_const = hint option * sid * expr option
+and class_const = {
+  cc_visibility: visibility;
+  cc_type: hint option;
+  cc_id: sid;
+  cc_expr: expr option;
+}
 
 and typeconst_abstract_kind =
   | TCAbstract of hint option (* default *)

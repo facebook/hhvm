@@ -149,14 +149,8 @@ struct
     | Attributes attrs ->
       let attrs = on_list_append_acc body.c_attributes on_class_attr attrs in
       { body with c_attributes = attrs; }
-    | Const (hopt, el) ->
-      let hopt = optional on_hint hopt in
-      let consts = on_list_append_acc body.c_consts (fun (id, e) ->
-        (hopt, id, Some (on_expr e))
-      ) el in
-      { body with c_consts = consts; }
-    | AbsConst (hopt, id) ->
-      let consts = (optional on_hint hopt, id, None) :: body.c_consts in
+    | Const ccs ->
+      let consts = on_class_consts_with_acc body.c_consts ccs in
       { body with c_consts = consts; }
     | ClassUse h  ->
       let hints = on_hint h :: body.c_uses in
@@ -536,20 +530,23 @@ struct
       c_tconst_span = tc.tconst_span;
     }
 
+  and get_visibility_from_kinds kinds =
+   List.fold_left
+    ~f:begin
+      fun acc k ->
+        match k with
+        | Private -> Aast.Private
+        | Public -> Aast.Public
+        | Protected -> Aast.Protected
+        | _ -> acc
+    end
+    ~init:Aast.Public
+    kinds
+
   and on_class_var
     xhp_info h attrs kinds variadic doc_com (_, id, eopt) : Aast.class_var =
     let cv_final = mem kinds Final in
-    let cv_visibility = List.fold_left
-      ~f:begin
-        fun acc k ->
-          match k with
-          | Private -> Aast.Private
-          | Public -> Aast.Public
-          | Protected -> Aast.Protected
-          | _ -> acc
-      end
-      ~init:Aast.Public
-      kinds in
+    let cv_visibility = get_visibility_from_kinds kinds in
     let cv_is_static = mem kinds Static in
     Aast.{
       cv_final;
@@ -585,6 +582,26 @@ struct
       let acc = cv :: acc in
       on_list_append_acc acc (with_dc_name None) rest
     | [] -> acc
+
+  and on_class_const hint kind (id, eopt) : Aast.class_const =
+    let vis = match kind with
+      | Private -> Aast.Private
+      | Protected -> Aast.Protected
+      | _ -> Aast.Public in
+    Aast.{
+      cc_visibility = vis;
+      cc_type = hint;
+      cc_id = id;
+      cc_expr = optional on_expr eopt;
+    }
+
+  and on_class_consts_with_acc acc ccs =
+    let with_name =
+      on_class_const
+        (optional on_hint ccs.cc_hint)
+        ccs.cc_visibility
+    in
+    on_list_append_acc acc with_name ccs.cc_names
 
   and on_xhp_attr (p, b, el) = (p, b, on_list on_expr el)
 

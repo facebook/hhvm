@@ -1474,11 +1474,15 @@ module Make (GetLocals : GetLocals) = struct
     then expr env e
     else fst e, N.Any
 
-  and class_const env (h, x, eo) =
-    Env.bind_class_const env x;
-    let h = Option.map h (hint env) in
-    let eo = Option.map eo (constant_expr env) in
-    h, x, eo
+  and class_const env cc =
+    Env.bind_class_const env cc.Aast.cc_id;
+    let h = Option.map cc.Aast.cc_type (hint env) in
+    let e = Option.map (cc.Aast.cc_expr) (constant_expr env) in
+    { N.cc_visibility = cc.Aast.cc_visibility
+    ; N.cc_type = h
+    ; N.cc_id = cc.Aast.cc_id
+    ; N.cc_expr = e
+    }
 
   and typeconst env t =
     (* We use the same namespace as constants within the class so we cannot have

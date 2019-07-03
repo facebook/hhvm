@@ -153,14 +153,17 @@ let shallow_const_to_class_const child_class mro subst const =
     scc_expr = cc_expr;
     scc_name;
     scc_type;
+    scc_visibility;
   } = const in
   let ty =
     let ty = scc_type in
     if child_class = mro.mro_name then ty else
     Decl_instantiate.instantiate subst ty
   in
+  let visibility = base_visibility mro.mro_name scc_visibility in
   snd scc_name, {
     cc_synthesized = mro.mro_synthesized;
+    cc_visibility = visibility;
     cc_abstract;
     cc_pos = fst scc_name;
     cc_type = ty;
@@ -182,6 +185,7 @@ let classname_const class_id =
     cc_type = classname_ty;
     cc_expr = None;
     cc_origin = name;
+    cc_visibility = Vpublic;
   }
 
 (** Each concrete type constant [const type <sometype> T] implicitly defines a
@@ -203,6 +207,7 @@ let typeconst_structure mro class_name stc =
     | TCConcrete ->
       false in
   snd stc.stc_name, {
+    cc_visibility  = Vpublic;
     cc_abstract    = abstract;
     cc_pos         = pos;
     cc_synthesized = true;

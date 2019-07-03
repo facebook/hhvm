@@ -346,8 +346,13 @@ struct
 
   and map_xhp_attr_enum menv (p, b, el) = (p, b, List.map el (map_expr menv))
 
-  and map_class_const menv (h, id, e) =
-    (h, id, Option.map e (map_expr menv))
+  and map_class_const menv cc =
+  {
+    T.cc_visibility = cc.S.cc_visibility;
+    T.cc_id = cc.S.cc_id;
+    T.cc_type = cc.S.cc_type;
+    T.cc_expr = Option.map cc.S.cc_expr (map_expr menv);
+  }
 
   and map_typeconst_abstract_kind ak =
     match ak with

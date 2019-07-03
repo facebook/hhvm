@@ -602,6 +602,7 @@ and class_const_fold c acc scc =
   let c_name = (snd c.sc_name) in
   let cc = {
     cc_synthesized = false;
+    cc_visibility = visibility (snd c.sc_name) scc.scc_visibility;
     cc_abstract = scc.scc_abstract;
     cc_pos = fst scc.scc_name;
     cc_type = scc.scc_type;
@@ -620,6 +621,7 @@ and class_class_decl class_id =
     reason, Tapply ((pos, SN.Classes.cClassname), [reason, Tthis]) in
   {
     cc_abstract    = false;
+    cc_visibility  = Vpublic;
     cc_pos         = pos;
     cc_synthesized = true;
     cc_type        = classname_ty;
@@ -696,6 +698,7 @@ and typeconst_structure c stc =
   | _ -> false in
   {
     cc_abstract    = abstract;
+    cc_visibility  = Vpublic;
     cc_pos         = pos;
     cc_synthesized = true;
     cc_type        = ts_ty;

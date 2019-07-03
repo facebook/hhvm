@@ -6539,7 +6539,8 @@ and typeconst_def env {
     T.c_tconst_span = c_tconst_span;
   }
 
-and class_const_def env (h, id, e) =
+and class_const_def env cc =
+  let {cc_type = h; cc_id = id; cc_expr = e; _ } = cc in
   let env, ty, opt_expected =
     match h with
     | None ->
@@ -6549,13 +6550,21 @@ and class_const_def env (h, id, e) =
       let env, ty = Phase.localize_hint_with_self env h in
       env, ty, Some (ExpectedTy.make (fst id) Reason.URhint ty)
   in
-  match e with
-    | Some e ->
-      let env, te, ty' = expr ?expected:opt_expected env e in
-      let env = Type.coerce_type (fst id) Reason.URhint env ty' ty in
-      env, ((h, id, Some te), ty')
-    | None ->
-      env, ((h, id, None), ty)
+  let env, eopt, ty =
+    match e with
+      | Some e ->
+        let env, te, ty' = expr ?expected:opt_expected env e in
+        let env = Type.coerce_type (fst id) Reason.URhint env ty' ty in
+        env, Some te, ty'
+      | None ->
+        env, None, ty
+  in
+    env, ({
+      T.cc_visibility = cc.cc_visibility;
+      T.cc_type = cc.cc_type;
+      T.cc_id = cc.cc_id;
+      T.cc_expr = eopt
+    }, ty)
 
 and class_constr_def env constructor =
   let env = { env with Env.inside_constructor = true } in

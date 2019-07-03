@@ -150,8 +150,7 @@ and xhp_attr_tag =
   | LateInit
 
 and class_elt =
-  | Const of hint option * (id * expr) list
-  | AbsConst of hint option * id
+  | Const of class_consts_
   | Attributes of class_attr list
   | TypeConst of typeconst
   | ClassUse of hint
@@ -255,6 +254,14 @@ and class_vars_ = {
   cv_names: class_var list;
   cv_doc_comment: string option;
   cv_user_attributes: user_attribute list;
+}
+
+and class_const = id * expr option
+
+and class_consts_ = {
+  cc_visibility: kind;
+  cc_hint: hint option;
+  cc_names: class_const list;
 }
 
 and method_ = {

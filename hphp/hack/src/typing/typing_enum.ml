@@ -71,7 +71,8 @@ let check_valid_array_key_type f_fail ~allow_any:allow_any env p t =
   Option.iter err (fun f -> f ());
   env
 
-let enum_check_const ty_exp env (_, (p, _), _) t =
+let enum_check_const ty_exp env cc t =
+  let p = fst cc.cc_id in
   (* Constants need to be subtypes of the enum type *)
   let env = Typing_ops.sub_type p Reason.URenum env t ty_exp in
   (* Make sure the underlying type of the constant is an int

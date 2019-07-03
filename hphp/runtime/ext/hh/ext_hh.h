@@ -22,9 +22,6 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-bool HHVM_FUNCTION(autoload_set_paths,
-                   const Variant& map,
-                   const String& root);
 bool HHVM_FUNCTION(could_include, const String& file);
 TypedValue HHVM_FUNCTION(serialize_memoize_param, TypedValue param);
 void HHVM_FUNCTION(set_frame_metadata, const Variant& metadata);

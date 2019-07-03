@@ -1046,6 +1046,8 @@ static int start_server(const std::string &username, int xhprof) {
 
   set_execution_mode("server");
 
+  InitFiniNode::ServerPostPageIn();
+
 #if !defined(SKIP_USER_CHANGE)
   if (!username.empty()) {
     if (Logger::UseCronolog) {

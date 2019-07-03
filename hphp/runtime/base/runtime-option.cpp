@@ -2637,5 +2637,9 @@ void RuntimeOption::Load(
   RepoOptions::setDefaults(config, ini);
 }
 
+const std::string& getLastSeenRepoConfigPath() {
+  return *s_lastSeenRepoConfig;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

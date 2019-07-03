@@ -72,22 +72,22 @@ UserAutoloadMap UserAutoloadMap::fromFullMap(const Array& fullMap,
 }
 
 folly::Optional<String> UserAutoloadMap::getTypeFile(
-  const String& typeName) const {
+  const String& typeName) {
   return getFileFromMap(m_typeFile, typeName);
 }
 
 folly::Optional<String> UserAutoloadMap::getFunctionFile(
-  const String& funcName) const {
+  const String& funcName) {
   return getFileFromMap(m_functionFile, funcName);
 }
 
 folly::Optional<String> UserAutoloadMap::getConstantFile(
-  const String& constName) const {
+  const String& constName) {
   return getFileFromMap(m_constantFile, constName);
 }
 
 folly::Optional<String> UserAutoloadMap::getTypeAliasFile(
-  const String& typeAliasName) const {
+  const String& typeAliasName) {
   return getFileFromMap(m_typeAliasFile, typeAliasName);
 }
 

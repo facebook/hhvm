@@ -48,6 +48,9 @@ struct InitFiniNode {
       ProcessInitConcurrent, // after PreInit, concurrently with Init and others
       ProcessExit,           // after Init and InitConcurrent
       ServerPreInit,
+      // After pagein (so we can create threads), but before changing our unix
+      // userid
+      ServerPostPageIn,
       ServerInit,
       WarmupConcurrent,      // concurrent with OS file cache warmup, optional
       ServerExit,
@@ -79,6 +82,7 @@ struct InitFiniNode {
   static void ProcessInitConcurrentWaitForEnd();
   static void ProcessFini()    { iterate(When::ProcessExit);    }
   static void ServerPreInit()  { iterate(When::ServerPreInit);  }
+  static void ServerPostPageIn()  { iterate(When::ServerPostPageIn);  }
   static void ServerInit()     { iterate(When::ServerInit);     }
   static void WarmupConcurrentStart(uint32_t maxWorkers);
   static void WarmupConcurrentWaitForEnd(); // No-op if not started.

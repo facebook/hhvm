@@ -46,7 +46,7 @@ def run_test(hh_single_parse, file):
     expected = get_expected(file)
     try:
         ffp_result = run_hh_single_parse(hh_single_parse, file)
-    except subprocess.CalledProcessError as e:
+    except subprocess.CalledProcessError:
         return True
     if ffp_result != expected:
         print("%s expected %d blocks, FFP gives %d blocks"

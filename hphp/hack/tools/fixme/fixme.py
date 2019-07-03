@@ -98,7 +98,7 @@ def main(args):
     fixmes = build_fixmes(raw_json_obj)
     failures = 0
 
-    for path, patches in fixmes.iteritems():
+    for path, patches in fixmes.items():
         try:
             patch(path, patches, explanation)
         except ParseException:

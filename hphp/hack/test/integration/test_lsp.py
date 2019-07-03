@@ -16,7 +16,7 @@ from lspcommand import LspCommandProcessor, Transcript
 class LspTestDriver(common_tests.CommonTestDriver):
     def write_load_config(self, use_saved_state=False):
         # Will use the .hhconfig already in the repo directory
-        # As for hh.conf, we'll write it explictly each test.
+        # As for hh.conf, we'll write it explicitly each test.
         # Note that hh.conf uses lower-case...
         use_saved_state = "true" if use_saved_state else "false"
         with open(os.path.join(self.repo_dir, 'hh.conf'), 'w') as f:

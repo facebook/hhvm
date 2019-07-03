@@ -6,8 +6,8 @@
  *
  *)
 
-open Typing_defs
 open Core_kernel
+open Typing_defs
 
 exception FunctionNotFound
 exception UnexpectedDependency
@@ -51,6 +51,24 @@ let extract_object_declaration obj =
 
 let list objects = String.concat (Sequence.to_list objects) ~sep:", "
 
+(* TODO: generics *)
+let name_from_hint hint = match hint with
+  | (_, Ast.Happly((_, s), _)) -> s
+  | _ -> raise UnexpectedDependency
+
+let list_direct_ancestors cls =
+  let cls_pos = Decl_provider.Class.pos cls in
+  let cls_name = Decl_provider.Class.name cls in
+  let filename = Pos.filename cls_pos in
+  let ast_class = value_exn (Ast_provider.find_class_in_file filename cls_name) DependencyNotFound in
+  let get_unqualified_class_name hint = strip_namespace @@ name_from_hint hint in
+  let list_types hints = String.concat ~sep:", " @@ List.map hints get_unqualified_class_name in
+  let open Ast in
+  let extends = list_types ast_class.c_extends in
+  let implements = list_types ast_class.c_implements in
+  let prefix_if_nonempty prefix s = if s = "" then "" else prefix ^ s in
+  (prefix_if_nonempty "extends " extends) ^ (prefix_if_nonempty " implements " implements)
+
 let get_class_declaration cls =
   let open Decl_provider in
   let cls = match get_class cls with
@@ -64,20 +82,9 @@ let get_class_declaration cls =
   | Ast_defs.Cenum -> "enum"
   | Ast_defs.Crecord -> "record" in
   let name = strip_namespace (Class.name cls) in
-  let get_class_kind class_name = Class.kind @@ value_exn (get_class class_name) DependencyNotFound in
-  (* TODO: only print direct ancestors. Class.all_ancestor_names return all *)
-  let extends = Sequence.filter_map (Class.all_ancestor_names cls)
-      ~f:(fun c -> if ((get_class_kind c) = Ast_defs.Cabstract ||
-                       (get_class_kind c) = Ast_defs.Cnormal)
-                   then Some (strip_namespace c)
-                   else None) in
-  let extends = if Sequence.is_empty extends then "" else "extends " ^ (list extends) in
-  let implements = Sequence.filter_map (Class.all_ancestor_names cls)
-      ~f:(fun c -> if ((get_class_kind c) = Ast_defs.Cinterface) then Some (strip_namespace c) else None) in
-  let implements = if Sequence.is_empty implements then "" else "implements " ^ (list implements) in
   (* TODO: traits, enums, records *)
   (* TODO: auto-indent *)
-  kind^" "^name^" "^extends^" "^implements
+  kind^" "^name^" "^(list_direct_ancestors cls)
 
 (* TODO: namespaces; mind that cls might start with \ at this point, remove if needed *)
 let construct_class_declaration cls fields acc =

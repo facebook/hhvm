@@ -308,6 +308,10 @@ struct ProxygenTransport final
     m_bodyLengthPastLimit = maxBuffer;
   }
 
+  folly::SocketAddress getClientAddress() {
+    return m_clientAddress;
+  }
+
  private:
   bool bufferRequest() const;
 

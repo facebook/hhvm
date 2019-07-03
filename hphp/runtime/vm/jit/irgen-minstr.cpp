@@ -229,7 +229,7 @@ bool prop_ignores_tvref(IRGS& env, SSATmp* base, const SSATmp* key) {
     auto const keyStr = key->strVal();
     auto const ctx = curClass(env);
     auto const lookup = cls->getDeclPropIndex(ctx, keyStr);
-    if (lookup.slot != kInvalidSlot) {
+    if (lookup.slot != kInvalidSlot && lookup.accessible) {
       isDeclared = true;
       auto const& prop = cls->declProperties()[lookup.slot];
       propClass = prop.cls;

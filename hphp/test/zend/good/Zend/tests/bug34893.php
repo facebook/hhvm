@@ -1,22 +1,23 @@
 <?hh
 class A {
-	private $p;
-	function __get($name){
-		return $this->$name;
-	}
-	function __set($name, $value) {
-		$this->$name = $value;
-	}
+    private $p;
+    function __get($name){
+        return $this->$name;
+    }
+    function __set($name, $value) {
+        $this->$name = $value;
+    }
 }
 class B {
-	private $t;
-	function __get($name){
-		return $this->$name;
-	}
-	function __set($name, $value) {
-		$this->$name = $value;
-	}
+    private $t;
+    function __get($name){
+        return $this->$name;
+    }
+    function __set($name, $value) {
+        $this->$name = $value;
+    }
 }
+<<__EntryPoint>> function main(): void {
 $a = new A;
 $b = new B;
 $a->p = $b;
@@ -25,3 +26,4 @@ $b->t = "foo";
 echo $a->p->t;
 $a->p->t = "bar";
 echo $a->p->t;
+}

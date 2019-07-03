@@ -512,9 +512,9 @@ val return_void_to_rx_mismatch : pos1_has_attribute:bool -> Pos.t -> Pos.t -> un
 val returns_void_to_rx_function_as_non_expression_statement : Pos.t -> Pos.t -> unit
 val non_awaited_awaitable_in_rx : Pos.t -> unit
 val shapes_key_exists_always_true : Pos.t -> string -> Pos.t -> unit
-val shapes_key_exists_always_false : Pos.t -> string -> Pos.t -> [< `Undefined | `Unset] -> unit
+val shapes_key_exists_always_false : Pos.t -> string -> Pos.t -> [< `Undefined | `Nothing of (Pos.t * string) list] -> unit
 val shapes_method_access_with_non_existent_field :
-  Pos.t -> string -> Pos.t -> string -> [< `Undefined | `Unset] -> unit
+  Pos.t -> string -> Pos.t -> string -> [< `Undefined | `Nothing of (Pos.t * string) list] -> unit
 val ambiguous_object_access :
   Pos.t -> string -> Pos.t -> string -> Pos.t -> string -> string -> unit
 val invalid_truthiness_test : Pos.t -> string -> unit

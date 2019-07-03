@@ -1,0 +1,6 @@
+File "key_exists_optional_nothing.php", line 5, characters 7-32:
+This Shapes::keyExists() check is always false (Typing[4250])
+File "key_exists_optional_nothing.php", line 4, characters 15-36:
+The type of the field 'a' in this shape doesn't allow any values
+File "key_exists_optional_nothing.php", line 4, characters 29-35:
+It is nothing

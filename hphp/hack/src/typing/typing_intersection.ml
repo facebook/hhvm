@@ -122,22 +122,14 @@ let rec intersect env ~r ty1 ty2 =
 
 and intersect_shapes env r (sfk1, fdm1) (sfk2, fdm2) =
   let env, fdm = SM.merge_env env fdm1 fdm2
-    ~combine:(fun env sfn sft1 sft2 ->
+    ~combine:(fun env _sfn sft1 sft2 ->
       match (sfk1, sft1), (sfk2, sft2) with
       | (_, None), (_, None)
       | (_, Some { sft_optional = true; _ }), (FieldsFullyKnown, None)
       | (FieldsFullyKnown, None), (_, Some { sft_optional = true; _ }) ->
         env, None
-      | (_, Some { sft_optional = true; _ }), (FieldsPartiallyKnown unset, None)
-      | (FieldsPartiallyKnown unset, None), (_, Some { sft_optional = true; _ })
-        when SM.has_key sfn unset ->
-        env, None
       | (_, Some { sft_optional = false; _ }), (FieldsFullyKnown, None)
       | (FieldsFullyKnown, None), (_, Some { sft_optional = false; _ }) ->
-        raise Nothing
-      | (_, Some { sft_optional = false; _ }), (FieldsPartiallyKnown unset, None)
-      | (FieldsPartiallyKnown unset, None), (_, Some { sft_optional = false; _ })
-        when SM.has_key sfn unset ->
         raise Nothing
       | (_, Some sft), (FieldsPartiallyKnown _, None)
       | (FieldsPartiallyKnown _, None), (_, Some sft) ->
@@ -148,8 +140,8 @@ and intersect_shapes env r (sfk1, fdm1) (sfk2, fdm2) =
         let env, ty = intersect env r ty1 ty2 in
         env, Some { sft_optional = opt; sft_ty = ty }) in
   let sfk = match sfk1, sfk2 with
-    | FieldsPartiallyKnown unset1, FieldsPartiallyKnown unset2 ->
-      FieldsPartiallyKnown (SM.union unset1 unset2)
+    | FieldsPartiallyKnown _, FieldsPartiallyKnown _ ->
+      FieldsPartiallyKnown SM.empty
     | _ -> FieldsFullyKnown in
   env, sfk, fdm
 

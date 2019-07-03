@@ -104,6 +104,9 @@ let get_newable = Typing_env.get_newable
 let assert_subtype p reason env ty_have ty_expect =
   Typing_ops.sub_type p reason env ty_have ty_expect
 
+let is_sub_type env ty_sub ty_super =
+  Typing_subtype.is_sub_type env ty_sub ty_super
+
 let can_subtype env ty_sub ty_super =
   Typing_subtype.can_sub_type env ty_sub ty_super
 

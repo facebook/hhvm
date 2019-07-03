@@ -19,26 +19,26 @@ let shapes_key_exists env shape field_name =
   let _, shape = Tast_env.expand_type env shape in
   match shape with
   | r, Tshape (fields_known, fields) ->
-    begin match fields_known with
-    | FieldsFullyKnown ->
-      begin match ShapeMap.get field_name fields with
-      | None -> `DoesNotExist (Reason.to_pos r, `Undefined)
-      | Some {sft_optional; sft_ty} ->
-        if sft_optional
-        then `Unknown
-        else `DoesExist (Reason.to_pos (fst sft_ty))
+    begin match ShapeMap.get field_name fields with
+    | None ->
+      begin match fields_known with
+      | FieldsFullyKnown ->
+        `DoesNotExist (Reason.to_pos r, `Undefined)
+      | FieldsPartiallyKnown _ ->
+        `Unknown
       end
-    | FieldsPartiallyKnown unset_fields ->
-      if ShapeMap.mem field_name unset_fields
-      then `DoesNotExist (Reason.to_pos r, `Unset)
+    | Some {sft_optional; sft_ty} ->
+      if not sft_optional
+      then `DoesExist (Reason.to_pos (fst sft_ty))
       else
-        begin match ShapeMap.get field_name fields with
-        | None -> `Unknown
-        | Some {sft_optional; sft_ty} ->
-          if sft_optional
-          then `Unknown
-          else `DoesExist (Reason.to_pos (fst sft_ty))
-        end
+        let nothing = Typing_make_type.nothing Reason.Rnone in
+        if Tast_env.is_sub_type env sft_ty nothing
+        then
+          `DoesNotExist (
+            Reason.to_pos r,
+            `Nothing (Reason.to_string "It is nothing" (fst sft_ty))
+          )
+        else `Unknown
     end
   | _ -> `Unknown
 

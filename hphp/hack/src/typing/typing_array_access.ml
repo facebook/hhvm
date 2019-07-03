@@ -725,12 +725,8 @@ let rec assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
     begin match TUtils.shape_field_name env key with
     | None -> error
     | Some field ->
-      let fields_known' = match fields_known with
-        | FieldsFullyKnown -> FieldsFullyKnown
-        | FieldsPartiallyKnown unset ->
-          FieldsPartiallyKnown (ShapeMap.remove field unset) in
       let fdm' = ShapeMap.add field {sft_optional = false; sft_ty = ty2} fdm in
-      env, ((fst ety1, Tshape (fields_known', fdm')), ty2)
+      env, ((fst ety1, Tshape (fields_known, fdm')), ty2)
     end
   | Tobject ->
     if Partial.should_check_error (Env.get_mode env) 4005

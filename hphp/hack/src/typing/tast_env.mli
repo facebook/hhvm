@@ -176,6 +176,10 @@ val assert_subtype: Pos.t -> Typing_reason.ureason -> env -> Tast.ty -> Tast.ty 
     variables in both types (if any), with {!env} reflecting the new state of
     these type variables. Produce an error if they cannot be subtypes. *)
 
+val is_sub_type: env -> Tast.ty -> Tast.ty -> bool
+(** Return {true} when the first type is a subtype of the second type
+    regardless of the values of unbound type variables in both types (if any). *)
+
 val can_subtype: env -> Tast.ty -> Tast.ty -> bool
 (** Return {true} when the first type can be considered a subtype of the second
     type after resolving unbound type variables in both types (if any). *)

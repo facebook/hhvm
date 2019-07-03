@@ -50,20 +50,16 @@ let rec refine_shape field_name pos env shape =
       | None -> env, shape
       | Some {sft_ty; _} -> refine_shape_field_type sft_ty
       end
-    | FieldsPartiallyKnown unset_fields ->
-      (* Open shape *)
-      if ShapeMap.mem field_name unset_fields
-      then env, shape
-      else
-        let refined_sft_ty = match ShapeMap.get field_name fields with
-          | None ->
-            let printable_field_name =
-              TUtils.get_printable_shape_field_name field_name in
-            let sft_ty_r = Reason.Rmissing_optional_field
-              (Reason.to_pos shape_r, printable_field_name) in
-            MakeType.mixed sft_ty_r
-          | Some {sft_ty; _} -> sft_ty in
-        refine_shape_field_type refined_sft_ty
+    | FieldsPartiallyKnown _ ->
+      let refined_sft_ty = match ShapeMap.get field_name fields with
+        | None ->
+          let printable_field_name =
+            TUtils.get_printable_shape_field_name field_name in
+          let sft_ty_r = Reason.Rmissing_optional_field
+            (Reason.to_pos shape_r, printable_field_name) in
+          MakeType.mixed sft_ty_r
+        | Some {sft_ty; _} -> sft_ty in
+      refine_shape_field_type refined_sft_ty
     end
   | r, Tunion tyl ->
     let env, tyl = List.map_env env tyl (refine_shape field_name pos) in
@@ -82,12 +78,13 @@ let rec shrink_shape ~seen_tyvars pos field_name env shape =
   match shape with
   | _, Tshape (fields_known, fields) ->
       (* remember that we have unset this field *)
-      let fields_known = match fields_known with
+      let fields = match fields_known with
         | FieldsFullyKnown ->
-            FieldsFullyKnown
-        | FieldsPartiallyKnown unset_fields ->
-            FieldsPartiallyKnown (ShapeMap.add field_name pos unset_fields) in
-      let fields = ShapeMap.remove field_name fields in
+          ShapeMap.remove field_name fields
+        | FieldsPartiallyKnown _ ->
+          let printable_name = TUtils.get_printable_shape_field_name field_name in
+          let nothing = MakeType.nothing (Reason.Runset_field (pos, printable_name)) in
+          ShapeMap.add field_name {sft_ty = nothing; sft_optional = true} fields in
       let result = Reason.Rwitness pos, Tshape (fields_known, fields) in
       env, result
   | _, Tunion tyl ->
@@ -128,10 +125,6 @@ let shapes_idx_not_null env shape_ty (p, field) =
           }
         end in
       let ftm = ShapeMap.add field field_type ftm in
-      let fieldsknown = match fieldsknown with
-        | FieldsFullyKnown -> FieldsFullyKnown
-        | FieldsPartiallyKnown unsetfields ->
-          FieldsPartiallyKnown (ShapeMap.remove field unsetfields) in
       env, (r, Tshape (fieldsknown, ftm))
     | _ -> (* This should be an error, but it is already raised when
       typechecking the call to Shapes::idx *)

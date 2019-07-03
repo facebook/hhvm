@@ -375,22 +375,7 @@ module Full = struct
         | FieldsFullyKnown -> fields
         | FieldsPartiallyKnown _ -> fields @ [text "..."]
       in
-      Concat [
-        list "shape(" id fields ")";
-        match fields_known with
-        | FieldsFullyKnown -> Nothing
-        | FieldsPartiallyKnown unset_fields ->
-          match Nast.ShapeMap.elements unset_fields with
-          | [] -> Nothing
-          | _ -> Concat [
-              text "(unset fields:";
-              Space;
-              Concat (List.map (Nast.ShapeMap.ordered_keys unset_fields) begin fun k ->
-                Concat [to_doc (Env.get_shape_field_name k); Space]
-              end);
-              text ")"
-            ]
-      ]
+        list "shape(" id fields ")"
 
   and prim x =
     match x with

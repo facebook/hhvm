@@ -329,19 +329,12 @@ and union_shapes env (fields_known1, fdm1, r1) (fields_known2, fdm2, r2) =
         | (_, Some { sft_ty; _ }, _), (fields_known_other, None, r)
         | (fields_known_other, None, r), (_, Some { sft_ty; _ }, _) ->
           let fields_known = begin match fields_known with
-            | FieldsPartiallyKnown unset_fields ->
-              FieldsPartiallyKnown (Nast.ShapeMap.remove k unset_fields)
+            | FieldsPartiallyKnown _ ->
+              FieldsPartiallyKnown Nast.ShapeMap.empty
             | FieldsFullyKnown -> FieldsFullyKnown end in
           let sft_ty = match fields_known_other with
             | FieldsFullyKnown ->
               sft_ty
-            | FieldsPartiallyKnown l when Nast.ShapeMap.has_key k l ->
-              sft_ty
-            (* If the fields are partially known in the shape not containing
-             * the key k, this shape may actually contain this key, so after
-             * unioning, we only know that the key is (optionally) present but
-             * can say nothing about its type. Therefore we assign the top
-             * type. *)
             | FieldsPartiallyKnown _ ->
               let r = Reason.Rmissing_optional_field (
                 Reason.to_pos r,
@@ -359,15 +352,7 @@ and union_shapes env (fields_known1, fdm1, r1) (fields_known2, fdm2, r2) =
 and union_fields_known fields_known1 fields_known2 =
   match fields_known1, fields_known2 with
   | FieldsFullyKnown, FieldsFullyKnown -> FieldsFullyKnown
-  | FieldsFullyKnown, FieldsPartiallyKnown l
-  | FieldsPartiallyKnown l, FieldsFullyKnown -> FieldsPartiallyKnown l
-  | FieldsPartiallyKnown unset_fields1, FieldsPartiallyKnown unset_fields2 ->
-    (* intersect sets of unset fields *)
-    let unset_fields = Nast.ShapeMap.merge (fun _k posopt1 posopt2 ->
-      match posopt1, posopt2 with
-      | Some p, Some _ -> Some p
-      | _ -> None) unset_fields1 unset_fields2 in
-    FieldsPartiallyKnown unset_fields
+  | _ -> FieldsPartiallyKnown Nast.ShapeMap.empty
 
 (* TODO: add a new reason with positions of merge point and possibly merged
  * envs.*)

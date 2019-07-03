@@ -1,6 +1,6 @@
 File "shape30.php", line 11, characters 3-20:
-Invalid assignment (Typing[4166])
+Invalid assignment (Typing[4110])
 File "shape30.php", line 10, characters 17-31:
-The field 'y' is not defined in this shape type, and this shape type does not allow unknown fields.
-File "shape30.php", line 10, characters 17-31:
-The field 'y' is set in the shape.
+Expected nothing because the field 'y' is not defined in this shape type, and this shape type does not allow unknown fields
+File "shape30.php", line 11, characters 16-20:
+But got string

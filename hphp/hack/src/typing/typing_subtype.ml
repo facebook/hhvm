@@ -25,6 +25,8 @@ module Cls = Decl_provider.Class
 module TySet = Typing_set
 module MakeType = Typing_make_type
 module Partial = Partial_provider
+module ShapeMap = Nast.ShapeMap
+module ShapeSet = Ast_defs.ShapeSet
 
 type reactivity_extra_info = {
   method_info: ((* method_name *) string * (* is_static *) bool) option;
@@ -544,39 +546,59 @@ and simplify_subtype
     invalid ()
   | Tshape (fields_known_sub, fdm_sub), Tshape (fields_known_super, fdm_super) ->
     let r_sub, r_super = fst ety_sub, fst ety_super in
-      (**
-       * shape_field_type A <: shape_field_type B iff:
-       *   1. A is no more optional than B
-       *   2. A's type <: B.type
-       *)
-      let on_common_field
-          (env, acc) name
-          { sft_optional = optional_super; sft_ty = ty_super }
-          { sft_optional = optional_sub; sft_ty = ty_sub } =
-        match optional_super, optional_sub with
-          | true, _ | false, false ->
-            (env, acc) &&& simplify_subtype ~seen_generic_params ~this_ty ty_sub ty_super
-          | false, true ->
-            (env, acc) |> with_error (fun () -> Errors.required_field_is_optional
+    (**
+     * shape_field_type A <: shape_field_type B iff:
+     *   1. A is no more optional than B
+     *   2. A's type <: B.type
+     *)
+    let simplify_subtype_shape_field name res sft_sub sft_super =
+      match sft_sub.sft_optional, sft_super.sft_optional with
+      | _, true | false, false ->
+        res &&& simplify_subtype ~seen_generic_params ~this_ty sft_sub.sft_ty sft_super.sft_ty
+      | true, false ->
+        res |> with_error (fun () ->
+          let printable_name = TUtils.get_printable_shape_field_name name in
+          match fst sft_sub.sft_ty with
+          | Reason.Rmissing_required_field _ ->
+            Errors.missing_field
               (Reason.to_pos r_sub)
               (Reason.to_pos r_super)
-              (Env.get_shape_field_name name)) in
-      let on_missing_omittable_optional_field res _ _ = res in
-      let on_missing_non_omittable_optional_field
-          res name { sft_ty = ty_super; _ } =
-        let r = Reason.Rmissing_optional_field (
-          Reason.to_pos r_sub,
-          TUtils.get_printable_shape_field_name name
-        ) in
-        res &&& simplify_subtype ~seen_generic_params ~this_ty (MakeType.mixed r) ty_super in
-      TUtils.apply_shape
-        ~on_common_field
-        ~on_missing_omittable_optional_field
-        ~on_missing_non_omittable_optional_field
-        ~on_error:(fun _ f -> invalid_with f)
+              printable_name
+          | _ ->
+            Errors.required_field_is_optional
+              (Reason.to_pos r_sub)
+              (Reason.to_pos r_super)
+              printable_name) in
+    let lookup_shape_field_type name r fields_known fdm =
+      match ShapeMap.get name fdm with
+      | Some sft -> sft
+      | None ->
+        let printable_name = TUtils.get_printable_shape_field_name name in
+        let sft_ty = match fields_known with
+          | FieldsFullyKnown ->
+            MakeType.nothing (Reason.Rmissing_required_field (Reason.to_pos r, printable_name));
+          | FieldsPartiallyKnown unset_fields ->
+            begin match ShapeMap.get name unset_fields with
+            | Some p ->
+              MakeType.nothing (Reason.Runset_field (p, printable_name))
+            | None ->
+              MakeType.mixed (Reason.Rmissing_optional_field (Reason.to_pos r, printable_name))
+            end in
+        {sft_ty; sft_optional = true} in
+    begin match fields_known_sub, fields_known_super with
+    | FieldsPartiallyKnown _, FieldsFullyKnown ->
+      invalid_with (fun () ->
+        Errors.shape_fields_unknown
+          (Reason.to_pos r_sub)
+          (Reason.to_pos r_super))
+    | _, _ ->
+      ShapeSet.fold
+        (fun name res -> simplify_subtype_shape_field name res
+          (lookup_shape_field_type name r_sub fields_known_sub fdm_sub)
+          (lookup_shape_field_type name r_super fields_known_super fdm_super))
+        (ShapeSet.of_list (ShapeMap.keys fdm_sub @ ShapeMap.keys fdm_super))
         (env, TL.valid)
-        (r_super, fields_known_super, fdm_super)
-        (r_sub, fields_known_sub, fdm_sub)
+    end
   | Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tshape _ ->
     let this_ty = Option.first_some this_ty (Some ety_sub) in
     simplify_subtype ~seen_generic_params ~this_ty ty ty_super env

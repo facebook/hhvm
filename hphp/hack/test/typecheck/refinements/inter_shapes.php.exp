@@ -25,8 +25,8 @@ File "inter_shapes.php", line 28, characters 20-20:
 File "inter_shapes.php", line 20, characters 13-13:
 But got shape('d' => int)
 File "inter_shapes.php", line 24, characters 15-16:
-Invalid argument (Typing[4057])
+Invalid argument (Typing[4163])
 File "inter_shapes.php", line 23, characters 13-13:
-The field 'a' is missing
+The field 'a' is optional
 File "inter_shapes.php", line 28, characters 20-20:
-The field 'a' is defined
+The field 'a' is defined as required

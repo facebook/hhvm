@@ -1695,17 +1695,6 @@ let missing_field pos1 pos2 name =
     (pos1, "The field '"^name^"' is missing")::
     [pos2, "The field '"^name^"' is defined"])
 
-let unknown_field_disallowed_in_shape pos1 pos2 name =
-  add_list
-    (Typing.err_code Typing.UnknownFieldDisallowedInShape)
-    [
-      pos1,
-      "The field '" ^ name ^ "' is not defined in this shape type, and \
-      this shape type does not allow unknown fields.";
-      pos2,
-      "The field '" ^ name ^ "' is set in the shape.";
-    ]
-
 let shape_fields_unknown pos1 pos2 =
   add_list (Typing.err_code Typing.ShapeFieldsUnknown)
     [
@@ -1715,13 +1704,6 @@ let shape_fields_unknown pos1 pos2 =
       pos2,
       "It is incompatible with a shape that does not allow unknown fields.";
     ]
-
-let shape_field_unset pos1 pos2 name =
-  add_list (Typing.err_code Typing.ShapeFieldUnset) (
-    [(pos1, "The field '"^name^"' was unset here");
-     (pos2, "The field '"^name^"' might be present in this shape because of " ^
-            "structural subtyping")]
-  )
 
 let invalid_shape_remove_key p =
   add (Typing.err_code Typing.InvalidShapeRemoveKey) p

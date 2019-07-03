@@ -85,7 +85,9 @@ type t =
   | Rdynamic_prop    of Pos.t
   | Rdynamic_call    of Pos.t
   | Ridx_dict        of Pos.t
+  | Rmissing_required_field of Pos.t * string
   | Rmissing_optional_field of Pos.t * string
+  | Runset_field of Pos.t * string
   | Rcontravariant_generic of t * string
   | Rinvariant_generic of t * string
   | Rregex           of Pos.t
@@ -300,8 +302,13 @@ let rec to_string prefix r =
     [(p, prefix ^ ", the result of calling a dynamic type as a function")]
   | Ridx_dict _ -> [(p, prefix ^
     " because only array keys can be used to index into a Map, dict, darray, Set, or keyset")]
+  | Rmissing_required_field (p, name) ->
+    [(p, prefix ^ " because the field '" ^ name ^ "' is not defined in this shape type, " ^
+           "and this shape type does not allow unknown fields")]
   | Rmissing_optional_field (p, name) ->
     [(p, prefix ^ " because the field '" ^ name ^ "' may be set to any type in this shape")]
+  | Runset_field (p, name) ->
+    [(p, prefix ^ " because the field '" ^ name ^ "' was unset here")]
   | Rcontravariant_generic (r_orig, class_name) ->
     (to_string prefix r_orig) @
     [(p, "Considering that this type argument is contravariant with respect to " ^ class_name)]
@@ -394,7 +401,9 @@ and to_pos = function
   | Rdynamic_prop p -> p
   | Rdynamic_call p -> p
   | Ridx_dict p -> p
+  | Rmissing_required_field (p, _) -> p
   | Rmissing_optional_field (p, _) -> p
+  | Runset_field (p, _) -> p
   | Rcontravariant_generic (r, _) -> to_pos r
   | Rinvariant_generic (r, _) -> to_pos r
   | Rregex p -> p
@@ -508,7 +517,9 @@ match r with
   | Rdynamic_prop _ -> "Rdynamic_prop"
   | Rdynamic_call _ -> "Rdynamic_call"
   | Ridx_dict _ -> "Ridx_dict"
+  | Rmissing_required_field _ -> "Rmissing_required_field"
   | Rmissing_optional_field _ -> "Rmissing_optional_field"
+  | Runset_field _ -> "Runset_field"
   | Rcontravariant_generic _ -> "Rcontravariant_generic"
   | Rinvariant_generic _ -> "Rinvariant_generic"
   | Rregex _ -> "Rregex"

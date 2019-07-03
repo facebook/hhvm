@@ -325,7 +325,6 @@ val shape_field_class_mismatch : Pos.t -> Pos.t -> string -> string -> unit
 val shape_field_type_mismatch : Pos.t -> Pos.t -> string -> string -> unit
 val shape_fields_unknown : Pos.t -> Pos.t -> unit
 val invalid_shape_remove_key : Pos.t -> unit
-val shape_field_unset : Pos.t -> Pos.t -> string -> unit
 val using_internal_class : Pos.t -> string -> unit
 val nullsafe_not_needed : Pos.t -> (Pos.t * string) list -> unit
 val trivial_strict_eq : Pos.t -> string -> (Pos.t * string) list
@@ -428,7 +427,6 @@ val method_needs_visibility : Pos.t -> unit
 val dynamic_class_name_in_strict_mode : Pos.t -> unit
 val reading_from_append : Pos.t -> unit
 val const_attribute_prohibited : Pos.t -> string -> unit
-val unknown_field_disallowed_in_shape : Pos.t -> Pos.t -> string -> unit
 val nullable_cast : Pos.t -> string -> Pos.t -> unit
 val non_call_argument_in_suspend : Pos.t -> (Pos.t * string) list -> unit
 val non_coroutine_call_in_suspend : Pos.t -> (Pos.t * string) list -> unit

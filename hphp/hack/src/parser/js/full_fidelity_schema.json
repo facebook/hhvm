@@ -2004,6 +2004,14 @@
         { "field_name" : "at" },
         { "field_name" : "type" }
       ] },
+    { "kind_name" : "AttributizedSpecifier",
+      "type_name" : "attributized_specifier",
+      "description" : "attributized_specifier",
+      "prefix" : "attributized_specifier",
+      "fields" : [
+        { "field_name" : "attribute_spec" },
+        { "field_name" : "type" }
+      ] },
     { "kind_name" : "ReifiedTypeArgument",
       "type_name" : "reified_type_argument",
       "description" : "reified_type_argument",

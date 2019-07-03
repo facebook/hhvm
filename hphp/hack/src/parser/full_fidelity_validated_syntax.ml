@@ -1108,7 +1108,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_function_declaration_header : function_declaration_header validator = function
   | { Syntax.syntax = Syntax.FunctionDeclarationHeader x; value = v } -> v,
     { function_where_clause = validate_option_with (validate_where_clause) x.function_where_clause
-    ; function_type = validate_option_with (validate_specifier) x.function_type
+    ; function_type = validate_option_with (validate_attributized_specifier) x.function_type
     ; function_colon = validate_option_with (validate_token) x.function_colon
     ; function_right_paren = validate_token x.function_right_paren
     ; function_parameter_list = validate_list_with (validate_option_with (validate_parameter)) x.function_parameter_list
@@ -1130,7 +1130,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; function_parameter_list = invalidate_list_with (invalidate_option_with (invalidate_parameter)) x.function_parameter_list
       ; function_right_paren = invalidate_token x.function_right_paren
       ; function_colon = invalidate_option_with (invalidate_token) x.function_colon
-      ; function_type = invalidate_option_with (invalidate_specifier) x.function_type
+      ; function_type = invalidate_option_with (invalidate_attributized_specifier) x.function_type
       ; function_where_clause = invalidate_option_with (invalidate_where_clause) x.function_where_clause
       }
     ; Syntax.value = v
@@ -3515,6 +3515,20 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       }
     ; Syntax.value = v
     }
+  and validate_attributized_specifier : attributized_specifier validator = function
+  | { Syntax.syntax = Syntax.AttributizedSpecifier x; value = v } -> v,
+    { attributized_specifier_type = validate_specifier x.attributized_specifier_type
+    ; attributized_specifier_attribute_spec = validate_option_with (validate_attribute_specification) x.attributized_specifier_attribute_spec
+    }
+  | s -> validation_fail (Some SyntaxKind.AttributizedSpecifier) s
+  and invalidate_attributized_specifier : attributized_specifier invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.AttributizedSpecifier
+      { attributized_specifier_attribute_spec = invalidate_option_with (invalidate_attribute_specification) x.attributized_specifier_attribute_spec
+      ; attributized_specifier_type = invalidate_specifier x.attributized_specifier_type
+      }
+    ; Syntax.value = v
+    }
   and validate_reified_type_argument : reified_type_argument validator = function
   | { Syntax.syntax = Syntax.ReifiedTypeArgument x; value = v } -> v,
     { reified_type_argument_type = validate_specifier x.reified_type_argument_type
@@ -3532,7 +3546,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_type_arguments : type_arguments validator = function
   | { Syntax.syntax = Syntax.TypeArguments x; value = v } -> v,
     { type_arguments_right_angle = validate_token x.type_arguments_right_angle
-    ; type_arguments_types = validate_list_with (validate_specifier) x.type_arguments_types
+    ; type_arguments_types = validate_list_with (validate_attributized_specifier) x.type_arguments_types
     ; type_arguments_left_angle = validate_token x.type_arguments_left_angle
     }
   | s -> validation_fail (Some SyntaxKind.TypeArguments) s
@@ -3540,7 +3554,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { Syntax.syntax =
       Syntax.TypeArguments
       { type_arguments_left_angle = invalidate_token x.type_arguments_left_angle
-      ; type_arguments_types = invalidate_list_with (invalidate_specifier) x.type_arguments_types
+      ; type_arguments_types = invalidate_list_with (invalidate_attributized_specifier) x.type_arguments_types
       ; type_arguments_right_angle = invalidate_token x.type_arguments_right_angle
       }
     ; Syntax.value = v

@@ -845,6 +845,35 @@ let check_valid_reified_hint env node h =
     end in
   reified_hint_visitor#on_hint env h
 
+type fun_hdr =
+  { fh_suspension_kind : suspension_kind
+  ; fh_name            : pstring
+  ; fh_constrs         : (hint * constraint_kind * hint) list
+  ; fh_type_parameters : tparam list
+  ; fh_parameters      : fun_param list
+  ; fh_return_type     : hint option
+  ; fh_param_modifiers : fun_param list
+  }
+
+let empty_fun_hdr =
+  { fh_suspension_kind = SKSync
+  ; fh_name            = Pos.none, "<ANONYMOUS>"
+  ; fh_constrs         = []
+  ; fh_type_parameters = []
+  ; fh_parameters      = []
+  ; fh_return_type     = None
+  ; fh_param_modifiers = []
+  }
+
+let check_intrinsic_type_arg_varity env node ty =
+  match ty with
+  | [tk;tv] -> Some (CollectionTKV (tk, tv))
+  | [tv] -> Some (CollectionTV tv)
+  | [] -> None
+  | _ -> raise_parsing_error env (`Node node)
+    SyntaxError.collection_intrinsic_many_typeargs;
+    None
+
 let rec pHint : hint parser = fun node env ->
   let rec pHint_ : hint_ parser = fun node env ->
     match syntax node with
@@ -961,6 +990,18 @@ let rec pHint : hint parser = fun node env ->
       , hd_variadic_hint variadic_hints
       , pHint closure_return_type env
       )
+    | AttributizedSpecifier {
+        attributized_specifier_attribute_spec = attr_spec;
+        attributized_specifier_type = attr_type;
+      } ->
+      begin
+        let attrs = pUserAttributes env attr_spec in
+        let hint = pHint attr_type env in
+        if List.exists attrs ~f:(fun { ua_name = (_, s); _ } -> s <> "__Soft") then
+          raise_parsing_error env (`Node node) SyntaxError.only_soft_allowed;
+        let (_, hint_) = soften_hint attrs hint in
+        hint_
+      end
     | TypeConstant { type_constant_left_type; type_constant_right_type; _ } ->
       let child = pos_name type_constant_right_type env in
       (match pHint_ type_constant_left_type env with
@@ -977,43 +1018,13 @@ let rec pHint : hint parser = fun node env ->
   check_valid_reified_hint env node hint;
   hint
 
-let expand_type_args env ty or_else =
+and expand_type_args env ty or_else =
   match syntax ty with
   | TypeArguments { type_arguments_types; _ } ->
     couldMap ~f:pHint type_arguments_types env
   | _ -> or_else ()
 
-type fun_hdr =
-  { fh_suspension_kind : suspension_kind
-  ; fh_name            : pstring
-  ; fh_constrs         : (hint * constraint_kind * hint) list
-  ; fh_type_parameters : tparam list
-  ; fh_parameters      : fun_param list
-  ; fh_return_type     : hint option
-  ; fh_param_modifiers : fun_param list
-  }
-
-let empty_fun_hdr =
-  { fh_suspension_kind = SKSync
-  ; fh_name            = Pos.none, "<ANONYMOUS>"
-  ; fh_constrs         = []
-  ; fh_type_parameters = []
-  ; fh_parameters      = []
-  ; fh_return_type     = None
-  ; fh_param_modifiers = []
-  }
-
-let check_intrinsic_type_arg_varity env node ty =
-  match ty with
-  | [tk;tv] -> Some (CollectionTKV (tk, tv))
-  | [tv] -> Some (CollectionTV tv)
-  | [] -> None
-  | _ -> raise_parsing_error env (`Node node)
-    SyntaxError.collection_intrinsic_many_typeargs;
-    None
-
-
-let rec pSimpleInitializer node env =
+and pSimpleInitializer node env =
   match syntax node with
   | SimpleInitializer { simple_initializer_value; _ } ->
     pExpr simple_initializer_value env
@@ -1067,14 +1078,18 @@ and pFunParam : fun_param parser = fun node env ->
           end
       | _ -> false, false, parameter_name
     in
-    { param_hint            = mpOptional pHint parameter_type env
-    ; param_is_reference    = is_reference
-    ; param_is_variadic     = is_variadic
-    ; param_id              = pos_name name env
-    ; param_expr            = pFunParamDefaultValue parameter_default_value env
-    ; param_user_attributes = pUserAttributes env parameter_attribute
-    ; param_callconv        =
-      mpOptional pParamKind parameter_call_convention env
+    let param_user_attributes = pUserAttributes env parameter_attribute in
+    let param_hint =
+      mpOptional pHint parameter_type env
+      |> Option.map ~f:(soften_hint param_user_attributes)
+    in
+    { param_hint
+    ; param_user_attributes
+    ; param_is_reference = is_reference
+    ; param_is_variadic  = is_variadic
+    ; param_id           = pos_name name env
+    ; param_expr         = pFunParamDefaultValue parameter_default_value env
+    ; param_callconv     = mpOptional pParamKind parameter_call_convention env
     (* implicit field via constructor parameter.
      * This is always None except for constructors and the modifier
      * can be only Public or Protected or Private.
@@ -1101,7 +1116,9 @@ and pUserAttribute : user_attribute list parser = fun node env ->
           let ua_name = pos_name constructor_call_type env in
           let name = String.lowercase (snd ua_name) in
           if name = "__reified" || name = "__hasreifiedparent" then
-            raise_parsing_error env (`Node node) SyntaxError.reified_attribute;
+            raise_parsing_error env (`Node node) SyntaxError.reified_attribute
+          else if name = "__soft" && List.length (as_list constructor_call_argument_list) > 0 then
+            raise_parsing_error env (`Node node) SyntaxError.soft_no_arguments;
           let ua_params = couldMap constructor_call_argument_list env
             ~f:(fun p ->
               begin match syntax p with
@@ -1117,9 +1134,14 @@ and pUserAttribute : user_attribute list parser = fun node env ->
       | node -> missing_syntax "attribute" node
     end
   | _ -> missing_syntax "attribute specification" node env
-
 and pUserAttributes env attrs =
   List.concat @@ couldMap ~f:pUserAttribute attrs env
+
+
+and soften_hint attrs ((pos, _) as hint) =
+  let should_soften = List.exists attrs ~f:(fun { ua_name = (_, s); _ } -> s = "__Soft") in
+  if should_soften then (pos, Hsoft hint) else hint
+
 and pAField : afield parser = fun node env ->
   match syntax node with
   | ElementInitializer { element_key; element_value; _ } ->
@@ -2560,13 +2582,18 @@ and pClassElt : class_elt list parser = fun node env ->
     ; _ } ->
       if not @@ is_missing (type_const_type_parameters)
       then raise_parsing_error env (`Node node) SyntaxError.tparams_in_tconst;
-      let modifiers = pKinds (fun _ -> ()) type_const_modifiers env in
+      let tconst_user_attributes = pUserAttributes env type_const_attribute_spec in
+      let tconst_type =
+        mpOptional pHint type_const_type_specifier env
+        |> Option.map ~f:(soften_hint tconst_user_attributes)
+      in
+      let tconst_kinds = pKinds (fun _ -> ()) type_const_modifiers env in
       [ TypeConst
-        { tconst_user_attributes = pUserAttributes env type_const_attribute_spec
-        ; tconst_kinds      = modifiers
+        { tconst_user_attributes
+        ; tconst_kinds
+        ; tconst_type
         ; tconst_name       = pos_name type_const_name env
         ; tconst_constraint = mpOptional pTConstraintTy type_const_type_constraint env
-        ; tconst_type       = mpOptional pHint type_const_type_specifier env
         ; tconst_span       = pPos node env
         }
       ]
@@ -2587,10 +2614,15 @@ and pClassElt : class_elt list parser = fun node env ->
         then raise_parsing_error env (`Node node) SyntaxError.final_property;
         if typecheck && is_var node
         then raise_parsing_error env (`Node node) SyntaxError.var_property in
-
+      let cv_user_attributes = pUserAttributes env property_attribute_spec in
+      let cv_hint =
+        mpOptional pHint property_type env
+        |> Option.map ~f:(soften_hint cv_user_attributes)
+      in
       [ ClassVars
-        { cv_kinds = pKinds check_modifier property_modifiers env
-        ; cv_hint = mpOptional pHint property_type env
+        { cv_user_attributes
+        ; cv_hint
+        ; cv_kinds = pKinds check_modifier property_modifiers env
         ; cv_is_promoted_variadic = false
         ; cv_names = couldMap property_declarators env ~f:begin fun node env ->
           match syntax node with
@@ -2607,8 +2639,6 @@ and pClassElt : class_elt list parser = fun node env ->
           | _ -> missing_syntax "property declarator" node env
           end
         ; cv_doc_comment = if env.quick_mode then None else doc_comment_opt
-        ; cv_user_attributes = List.concat @@
-          couldMap ~f:pUserAttribute property_attribute_spec env
         }
       ]
   | MethodishDeclaration

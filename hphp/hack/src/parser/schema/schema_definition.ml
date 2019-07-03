@@ -331,7 +331,7 @@ let schema : schema_node list =
       ; "parameter_list", ZeroOrMore (ZeroOrOne (Aggregate Parameter))
       ; "right_paren", Token
       ; "colon", ZeroOrOne Token
-      ; "type", ZeroOrOne (Aggregate Specifier)
+      ; "type", ZeroOrOne (Just "AttributizedSpecifier")
       ; "where_clause", ZeroOrOne (Just "WhereClause")
       ]
     }
@@ -2059,6 +2059,17 @@ let schema : schema_node list =
       ; "type", Aggregate Specifier
       ]
     }
+  ; { kind_name   = "AttributizedSpecifier"
+    ; type_name   = "attributized_specifier"
+    ; func_name   = "attributized_specifier"
+    ; description = "attributized_specifier"
+    ; prefix      = "attributized_specifier"
+    ; aggregates  = []
+    ; fields =
+      [ "attribute_spec", ZeroOrOne (Just "AttributeSpecification")
+      ; "type", Aggregate Specifier
+      ]
+    }
   ; { kind_name   = "ReifiedTypeArgument"
     ; type_name   = "reified_type_argument"
     ; func_name   = "reified_type_argument"
@@ -2078,7 +2089,7 @@ let schema : schema_node list =
     ; aggregates  = []
     ; fields =
       [ "left_angle", Token
-      ; "types", ZeroOrMore (Aggregate Specifier)
+      ; "types", ZeroOrMore (Just "AttributizedSpecifier")
       ; "right_angle", Token
       ]
     }

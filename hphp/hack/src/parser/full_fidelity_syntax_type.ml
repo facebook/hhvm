@@ -1074,6 +1074,10 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { soft_at                                            : t
     ; soft_type                                          : t
     }
+  | AttributizedSpecifier             of
+    { attributized_specifier_attribute_spec              : t
+    ; attributized_specifier_type                        : t
+    }
   | ReifiedTypeArgument               of
     { reified_type_argument_reified                      : t
     ; reified_type_argument_type                         : t
@@ -1576,7 +1580,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; function_parameter_list: (parameter option) listesque value
     ; function_right_paren: Token.t value
     ; function_colon: Token.t option value
-    ; function_type: specifier option value
+    ; function_type: attributized_specifier option value
     ; function_where_clause: where_clause option value
     }
   and where_clause =
@@ -2370,13 +2374,17 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { soft_at: Token.t value
     ; soft_type: specifier value
     }
+  and attributized_specifier =
+    { attributized_specifier_attribute_spec: attribute_specification option value
+    ; attributized_specifier_type: specifier value
+    }
   and reified_type_argument =
     { reified_type_argument_reified: Token.t value
     ; reified_type_argument_type: specifier value
     }
   and type_arguments =
     { type_arguments_left_angle: Token.t value
-    ; type_arguments_types: specifier listesque value
+    ; type_arguments_types: attributized_specifier listesque value
     ; type_arguments_right_angle: Token.t value
     }
   and type_parameters =

@@ -1,0 +1,5 @@
+(4,10)-(4,12) A type specifier is expected here.
+(4,12)-(4,12) A variable name is expected here.
+(4,18)-(4,18) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(4,21)-(4,21) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(4,21)-(4,27) Property declarations require a visibility modifier such as public, private or protected.

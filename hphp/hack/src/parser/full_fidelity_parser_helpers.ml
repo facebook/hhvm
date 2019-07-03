@@ -612,18 +612,28 @@ module WithParser(Parser : Parser_S) = struct
    * when the parser is at the <<<, it will scan the entire file looking for an
    * ending to the heredoc, which could quickly get bad if there are many such
    * declarations in a file. *)
-  let peek_next_partial_token_is_left_angle parser =
+  let peek_next_partial_token_is_triple_left_angle parser =
     let lexer = lexer parser in
     let lexer, _ = Lexer.scan_leading_php_trivia lexer in
-    let c = Lexer.peek_char lexer 0 in
-    c = '<'
+    let tparam_open = Lexer.peek_char lexer 0 in
+    let attr1 = Lexer.peek_char lexer 1 in
+    let attr2 = Lexer.peek_char lexer 2 in
+    tparam_open = '<' && attr1 = '<' && attr2 = '<'
+
+  (* Type parameter/argument lists begin with < and can have attributes immediately
+   * afterwards, so this peeks a token kind at the beginning of such a list. *)
+  let peek_token_kind_with_possible_attributized_type_list parser =
+    if peek_next_partial_token_is_triple_left_angle parser then
+      TokenKind.LessThan
+    else
+      peek_token_kind parser
 
   (* In the case of attributes on generics, one could write
-   * function f<<<__Attr>> reify T, ...>
+   * function f<<<__Attr>> reify T, ...> or Awaitable<<<__Soft>> int>
    * The triple left angle is currently lexed as a HeredocStringLiteral,
    * but we can get around this by manually advancing the lexer one token
    * and returning a LeftAngle. Then, the next token will be a LeftAngleLeftAngle *)
-  let assert_left_angle_in_type_param_list_with_possible_attribute parser =
+  let assert_left_angle_in_type_list_with_possible_attribute parser =
     let lexer = lexer parser in
     let tparam_open = Lexer.peek_char lexer 0 in
     let attr1 = Lexer.peek_char lexer 1 in

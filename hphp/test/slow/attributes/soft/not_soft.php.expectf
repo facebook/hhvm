@@ -1,0 +1,1 @@
+Fatal error: Only the __Soft attribute is allowed here. in %s/hphp/test/slow/attributes/soft/not_soft.php on line 3

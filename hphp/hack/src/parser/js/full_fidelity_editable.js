@@ -394,6 +394,8 @@ class EditableSyntax
       return LikeTypeSpecifier.from_json(json, position, source);
     case 'soft_type_specifier':
       return SoftTypeSpecifier.from_json(json, position, source);
+    case 'attributized_specifier':
+      return AttributizedSpecifier.from_json(json, position, source);
     case 'reified_type_argument':
       return ReifiedTypeArgument.from_json(json, position, source);
     case 'type_arguments':
@@ -19704,6 +19706,70 @@ class SoftTypeSpecifier extends EditableSyntax
     return SoftTypeSpecifier._children_keys;
   }
 }
+class AttributizedSpecifier extends EditableSyntax
+{
+  constructor(
+    attribute_spec,
+    type)
+  {
+    super('attributized_specifier', {
+      attribute_spec: attribute_spec,
+      type: type });
+  }
+  get attribute_spec() { return this.children.attribute_spec; }
+  get type() { return this.children.type; }
+  with_attribute_spec(attribute_spec){
+    return new AttributizedSpecifier(
+      attribute_spec,
+      this.type);
+  }
+  with_type(type){
+    return new AttributizedSpecifier(
+      this.attribute_spec,
+      type);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var attribute_spec = this.attribute_spec.rewrite(rewriter, new_parents);
+    var type = this.type.rewrite(rewriter, new_parents);
+    if (
+      attribute_spec === this.attribute_spec &&
+      type === this.type)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new AttributizedSpecifier(
+        attribute_spec,
+        type), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let attribute_spec = EditableSyntax.from_json(
+      json.attributized_specifier_attribute_spec, position, source);
+    position += attribute_spec.width;
+    let type = EditableSyntax.from_json(
+      json.attributized_specifier_type, position, source);
+    position += type.width;
+    return new AttributizedSpecifier(
+        attribute_spec,
+        type);
+  }
+  get children_keys()
+  {
+    if (AttributizedSpecifier._children_keys == null)
+      AttributizedSpecifier._children_keys = [
+        'attribute_spec',
+        'type'];
+    return AttributizedSpecifier._children_keys;
+  }
+}
 class ReifiedTypeArgument extends EditableSyntax
 {
   constructor(
@@ -21392,6 +21458,7 @@ exports.GenericTypeSpecifier = GenericTypeSpecifier;
 exports.NullableTypeSpecifier = NullableTypeSpecifier;
 exports.LikeTypeSpecifier = LikeTypeSpecifier;
 exports.SoftTypeSpecifier = SoftTypeSpecifier;
+exports.AttributizedSpecifier = AttributizedSpecifier;
 exports.ReifiedTypeArgument = ReifiedTypeArgument;
 exports.TypeArguments = TypeArguments;
 exports.TypeParameters = TypeParameters;

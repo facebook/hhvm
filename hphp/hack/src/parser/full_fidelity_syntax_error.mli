@@ -368,3 +368,5 @@ val non_public_const_in_interface : string
 val const_abstract_private : string
 val const_has_multiple_visibilities : string
 val const_has_duplicate_modifiers : string
+val only_soft_allowed : string
+val soft_no_arguments : string

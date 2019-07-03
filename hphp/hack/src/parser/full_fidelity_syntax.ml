@@ -217,6 +217,7 @@ module WithToken(Token: TokenType) = struct
       | NullableTypeSpecifier             _ -> SyntaxKind.NullableTypeSpecifier
       | LikeTypeSpecifier                 _ -> SyntaxKind.LikeTypeSpecifier
       | SoftTypeSpecifier                 _ -> SyntaxKind.SoftTypeSpecifier
+      | AttributizedSpecifier             _ -> SyntaxKind.AttributizedSpecifier
       | ReifiedTypeArgument               _ -> SyntaxKind.ReifiedTypeArgument
       | TypeArguments                     _ -> SyntaxKind.TypeArguments
       | TypeParameters                    _ -> SyntaxKind.TypeParameters
@@ -402,6 +403,7 @@ module WithToken(Token: TokenType) = struct
     let is_nullable_type_specifier              = has_kind SyntaxKind.NullableTypeSpecifier
     let is_like_type_specifier                  = has_kind SyntaxKind.LikeTypeSpecifier
     let is_soft_type_specifier                  = has_kind SyntaxKind.SoftTypeSpecifier
+    let is_attributized_specifier               = has_kind SyntaxKind.AttributizedSpecifier
     let is_reified_type_argument                = has_kind SyntaxKind.ReifiedTypeArgument
     let is_type_arguments                       = has_kind SyntaxKind.TypeArguments
     let is_type_parameters                      = has_kind SyntaxKind.TypeParameters
@@ -2198,6 +2200,13 @@ module WithToken(Token: TokenType) = struct
       } ->
          let acc = f acc soft_at in
          let acc = f acc soft_type in
+         acc
+      | AttributizedSpecifier {
+        attributized_specifier_attribute_spec;
+        attributized_specifier_type;
+      } ->
+         let acc = f acc attributized_specifier_attribute_spec in
+         let acc = f acc attributized_specifier_type in
          acc
       | ReifiedTypeArgument {
         reified_type_argument_reified;
@@ -4047,6 +4056,13 @@ module WithToken(Token: TokenType) = struct
         soft_at;
         soft_type;
       ]
+      | AttributizedSpecifier {
+        attributized_specifier_attribute_spec;
+        attributized_specifier_type;
+      } -> [
+        attributized_specifier_attribute_spec;
+        attributized_specifier_type;
+      ]
       | ReifiedTypeArgument {
         reified_type_argument_reified;
         reified_type_argument_type;
@@ -5895,6 +5911,13 @@ module WithToken(Token: TokenType) = struct
       } -> [
         "soft_at";
         "soft_type";
+      ]
+      | AttributizedSpecifier {
+        attributized_specifier_attribute_spec;
+        attributized_specifier_type;
+      } -> [
+        "attributized_specifier_attribute_spec";
+        "attributized_specifier_type";
       ]
       | ReifiedTypeArgument {
         reified_type_argument_reified;
@@ -7956,6 +7979,14 @@ module WithToken(Token: TokenType) = struct
         SoftTypeSpecifier {
           soft_at;
           soft_type;
+        }
+      | (SyntaxKind.AttributizedSpecifier, [
+          attributized_specifier_attribute_spec;
+          attributized_specifier_type;
+        ]) ->
+        AttributizedSpecifier {
+          attributized_specifier_attribute_spec;
+          attributized_specifier_type;
         }
       | (SyntaxKind.ReifiedTypeArgument, [
           reified_type_argument_reified;
@@ -10483,6 +10514,17 @@ module WithToken(Token: TokenType) = struct
         let syntax = SoftTypeSpecifier {
           soft_at;
           soft_type;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_attributized_specifier
+        attributized_specifier_attribute_spec
+        attributized_specifier_type
+      =
+        let syntax = AttributizedSpecifier {
+          attributized_specifier_attribute_spec;
+          attributized_specifier_type;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

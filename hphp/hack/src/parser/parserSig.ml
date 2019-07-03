@@ -206,6 +206,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val nullable_type_specifier : t -> SC.r -> SC.r -> t * SC.r
         val like_type_specifier : t -> SC.r -> SC.r -> t * SC.r
         val soft_type_specifier : t -> SC.r -> SC.r -> t * SC.r
+        val attributized_specifier : t -> SC.r -> SC.r -> t * SC.r
         val reified_type_argument : t -> SC.r -> SC.r -> t * SC.r
         val type_arguments : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val type_parameters : t -> SC.r -> SC.r -> SC.r -> t * SC.r

@@ -84,16 +84,16 @@ module WithExpressionAndStatementAndTypeParser
     let parser = { env; lexer; errors; context; sc_state } in
     (parser, node)
 
-  let parse_possible_generic_specifier parser =
-    with_type_parser parser TypeParser.parse_possible_generic_specifier
-
-  let parse_type_specifier ?(allow_var=false) parser =
-    with_type_parser parser (TypeParser.parse_type_specifier ~allow_var)
+  let parse_type_specifier ?(allow_var=false) ?(allow_attr=true) parser =
+    with_type_parser parser (TypeParser.parse_type_specifier ~allow_var ~allow_attr)
 
   let parse_simple_type_or_type_constant parser =
-    with_type_parser parser (TypeParser.parse_simple_type_or_type_constant)
+    with_type_parser parser TypeParser.parse_simple_type_or_type_constant
 
-  let parse_type_constraint_opt parser =
+  let parse_simple_type_or_generic parser =
+    with_type_parser parser TypeParser.parse_simple_type_or_generic
+
+   let parse_type_constraint_opt parser =
     with_type_parser parser TypeParser.parse_type_constraint_opt
 
   let with_statement_parser
@@ -1039,8 +1039,7 @@ module WithExpressionAndStatementAndTypeParser
        argument list; if we don't have a name, give an error. *)
     match peek_token_kind parser with
     | Backslash
-    | Name ->
-      parse_possible_generic_specifier parser
+    | Name -> parse_simple_type_or_generic parser
     | _ -> require_qualified_name parser
 
   and parse_qualified_name_type_opt parser =
@@ -1049,7 +1048,7 @@ module WithExpressionAndStatementAndTypeParser
     match peek_token_kind parser with
     | Backslash
     | Construct
-    | Name -> parse_possible_generic_specifier parser
+    | Name -> parse_simple_type_or_generic parser
     | _ -> Make.missing parser (pos parser)
 
   and parse_require_clause parser =
@@ -1082,7 +1081,7 @@ module WithExpressionAndStatementAndTypeParser
     in
     let (parser, name) =
       if is_next_xhp_class_name parser
-      then parse_possible_generic_specifier parser
+      then parse_simple_type_or_generic parser
       else parse_qualified_name_type parser
     in
     let (parser, semi) = require_semicolon parser in
@@ -1284,7 +1283,7 @@ module WithExpressionAndStatementAndTypeParser
       strict mode. We give an error in a later pass. *)
     let (parser, prop_type) = match peek_token_kind parser with
       | Variable -> Make.missing parser (pos parser)
-      | _ -> parse_type_specifier parser
+      | _ -> parse_type_specifier parser ~allow_attr:false
     in
     let (parser, decls) =
       parse_comma_list parser Semicolon SyntaxError.error1008
@@ -1460,11 +1459,9 @@ module WithExpressionAndStatementAndTypeParser
       Make.missing parser (pos parser)
 
   and parse_generic_type_parameter_list_opt parser =
-    if peek_next_partial_token_is_left_angle parser
-    then
-      with_type_parser parser TypeParser.parse_generic_type_parameter_list
-    else
-      Make.missing parser (pos parser)
+    match peek_token_kind_with_possible_attributized_type_list parser with
+    | LessThan -> with_type_parser parser TypeParser.parse_generic_type_parameter_list
+    | _ -> Make.missing parser (pos parser)
 
   and parse_return_type_hint_opt parser =
     let (parser1, colon_token) = next_token parser in
@@ -1555,7 +1552,7 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, type_specifier) =
       match Token.kind token with
         | Variable | DotDotDot | Ampersand -> Make.missing parser (pos parser)
-        | _ -> parse_type_specifier parser
+        | _ -> parse_type_specifier parser ~allow_attr:false
     in
     let (parser, name) = parse_decorated_variable_opt parser in
     let (parser, default) = parse_simple_initializer_opt parser in

@@ -93,9 +93,7 @@ module WithStatementAndDeclAndTypeParser
   let parse_generic_type_arguments parser =
     with_type_parser parser
       (fun p ->
-        let (p, items, no_arg_is_missing) =
-          TypeParser.parse_generic_type_argument_list p
-        in
+        let (p, items, no_arg_is_missing) = TypeParser.parse_generic_type_argument_list p in
         (p, (items, no_arg_is_missing))
       )
 
@@ -182,7 +180,7 @@ module WithStatementAndDeclAndTypeParser
 
   and parse_term parser =
     let (parser1, token) = next_xhp_class_name_or_other_token parser in
-    match (Token.kind token) with
+    match Token.kind token with
     | DecimalLiteral
     | OctalLiteral
     | HexadecimalLiteral
@@ -214,25 +212,35 @@ module WithStatementAndDeclAndTypeParser
         scan_remaining_qualified_name parser token
       in
       let (parser1, str_maybe) = next_token_no_trailing parser in
-      begin match Token.kind str_maybe with
-      | SingleQuotedStringLiteral | NowdocStringLiteral
-      | HeredocStringLiteral | HeredocStringLiteralHead ->
-        (* Treat as an attempt to prefix a non-double-quoted string *)
-        let parser = with_error parser SyntaxError.prefixed_invalid_string_kind in
-        parse_name_or_collection_literal_expression parser qualified_name
-      | DoubleQuotedStringLiteral ->
-        (* This name prefixes a double-quoted string *)
-        let (parser, str) = Make.token parser1 str_maybe in
-        let (parser, str) = Make.literal_expression parser str in
-        Make.prefixed_string_expression parser qualified_name str
-      | DoubleQuotedStringLiteralHead ->
-        (* This name prefixes a double-quoted string containing embedded expressions *)
-        let (parser, str) = parse_double_quoted_like_string
-          parser1 str_maybe Lexer.Literal_double_quoted in
-        Make.prefixed_string_expression parser qualified_name str
-      | _ ->
-        (* Not a prefixed string or an attempt at one *)
-        parse_name_or_collection_literal_expression parser qualified_name
+      begin
+        match Token.kind str_maybe with
+        | SingleQuotedStringLiteral | NowdocStringLiteral
+        (* for now, try generic type argument list with attributes before resorting to bad prefix *)
+        | HeredocStringLiteral ->
+          begin
+            match try_parse_specified_function_call parser qualified_name with
+            | Some r -> r
+            | None ->
+              let parser = with_error parser SyntaxError.prefixed_invalid_string_kind in
+              parse_name_or_collection_literal_expression parser qualified_name
+          end
+        | HeredocStringLiteralHead ->
+          (* Treat as an attempt to prefix a non-double-quoted string *)
+          let parser = with_error parser SyntaxError.prefixed_invalid_string_kind in
+          parse_name_or_collection_literal_expression parser qualified_name
+        | DoubleQuotedStringLiteral ->
+          (* This name prefixes a double-quoted string *)
+          let (parser, str) = Make.token parser1 str_maybe in
+          let (parser, str) = Make.literal_expression parser str in
+          Make.prefixed_string_expression parser qualified_name str
+        | DoubleQuotedStringLiteralHead ->
+          (* This name prefixes a double-quoted string containing embedded expressions *)
+          let (parser, str) = parse_double_quoted_like_string
+              parser1 str_maybe Lexer.Literal_double_quoted in
+          Make.prefixed_string_expression parser qualified_name str
+        | _ ->
+          (* Not a prefixed string or an attempt at one *)
+          parse_name_or_collection_literal_expression parser qualified_name
       end
     | Backslash ->
       let (parser, qualified_name) =
@@ -850,28 +858,28 @@ module WithStatementAndDeclAndTypeParser
 
   and try_parse_specified_function_call parser term =
     if not (can_term_take_type_args term) then None else
-    let (parser1, (type_arguments, no_arg_is_missing)) =
-      parse_generic_type_arguments parser
-    in
-    if not no_arg_is_missing || parser.errors <> parser1.errors then None
-    else
-      let parser, result =
-        begin match peek_token_kind parser1 with
-        | ColonColon ->
-          (* handle a<type-args>::... case *)
-          let (parser, type_specifier) =
-            Make.generic_type_specifier parser1 term type_arguments
+      match peek_token_kind_with_possible_attributized_type_list parser with
+      | LessThan ->
+        let (parser1, (type_arguments, no_arg_is_missing)) = parse_generic_type_arguments parser in
+        if not no_arg_is_missing || parser.errors <> parser1.errors then None else
+          let (parser, result) =
+            match peek_token_kind parser1 with
+            | ColonColon ->
+              (* handle a<type-args>::... case *)
+              let (parser, type_specifier) =
+                Make.generic_type_specifier parser1 term type_arguments
+              in
+              parse_scope_resolution_expression parser type_specifier
+            | _ ->
+              let (parser, left, args, right) = parse_expression_list_opt parser1 in
+              Make.function_call_expression
+                parser
+                term
+                type_arguments
+                left args right
           in
-          parse_scope_resolution_expression parser type_specifier
-        | _ ->
-          let (parser, left, args, right) = parse_expression_list_opt parser1 in
-          Make.function_call_expression
-            parser
-            term
-            type_arguments
-            left args right
-        end in
-      Some (parse_remaining_expression parser result)
+          Some (parse_remaining_expression parser result)
+      | _ -> None
 
   (* Checks if given expression is a PHP variable.
   per PHP grammar:
@@ -893,36 +901,42 @@ module WithStatementAndDeclAndTypeParser
    prefix of assignment
    - Prefix_less_than - is the start of a specified function call f<T>(...)
    *)
-  and check_if_should_override_normal_precedence parser left_term operator left_precedence
-  =
+  and check_if_should_override_normal_precedence parser left_term operator left_precedence =
     (*
       We need to override the precedence of the < operator in the case where it
       is the start of a specified function call.
     *)
-    let maybe_prefix = if operator = LessThan then
-      match try_parse_specified_function_call parser left_term with
-      | Some r -> Some (Prefix_less_than r)
-      | None -> None
-    else None in
+    let maybe_prefix =
+      match peek_token_kind_with_possible_attributized_type_list parser with
+      | LessThan ->
+        begin
+          match try_parse_specified_function_call parser left_term with
+          | Some r -> Some (Prefix_less_than r)
+          | None -> None
+        end
+      | _ -> None
+    in
     match maybe_prefix with
     | Some r -> r
     | None ->
-
-    (* in PHP precedence of assignment in expression is bumped up to
-       recognize cases like !$x = ... or $a == $b || $c = ...
-       which should be parsed as !($x = ...) and $a == $b || ($c = ...)
-    *)
-    if left_precedence >= Operator.precedence_for_assignment_in_expressions then
-      Prefix_none
-    else match operator with
-    | Equal when SC.is_list_expression left_term -> Prefix_assignment
-    | Equal | PlusEqual | MinusEqual | StarEqual | SlashEqual |
-      StarStarEqual | DotEqual | PercentEqual | AmpersandEqual |
-      BarEqual | CaratEqual | LessThanLessThanEqual |
-      GreaterThanGreaterThanEqual | QuestionQuestionEqual
-      when can_be_used_as_lvalue left_term ->
-      Prefix_assignment
-    | _ -> Prefix_none
+      (* in PHP precedence of assignment in expression is bumped up to
+         recognize cases like !$x = ... or $a == $b || $c = ...
+         which should be parsed as !($x = ...) and $a == $b || ($c = ...)
+      *)
+      if left_precedence >= Operator.precedence_for_assignment_in_expressions then
+        Prefix_none
+      else
+        begin
+          match operator with
+          | Equal when SC.is_list_expression left_term -> Prefix_assignment
+          | Equal | PlusEqual | MinusEqual | StarEqual | SlashEqual |
+            StarStarEqual | DotEqual | PercentEqual | AmpersandEqual |
+            BarEqual | CaratEqual | LessThanLessThanEqual |
+            GreaterThanGreaterThanEqual | QuestionQuestionEqual
+            when can_be_used_as_lvalue left_term ->
+            Prefix_assignment
+          | _ -> Prefix_none
+        end
 
   and can_term_take_type_args term =
     SC.is_name term
@@ -1170,8 +1184,9 @@ module WithStatementAndDeclAndTypeParser
         let (parser, start_token) = Make.token parser start_token in
         scan_remaining_qualified_name parser start_token
     in
-    match peek_token_kind parser with
-    | LeftParen | LessThan -> Some (parser, name)
+    match peek_token_kind_with_possible_attributized_type_list parser with
+    | LeftParen
+    | LessThan -> Some (parser, name)
     | _ -> None
 
   and parse_designator parser =
@@ -1191,44 +1206,35 @@ module WithStatementAndDeclAndTypeParser
     TODO: This will need to be fixed to allow situations where the qualified name
       is also a non-reserved token.
     *)
-    let default parser =
-      parse_expression_with_operator_precedence parser Operator.NewOperator in
+    let default parser = parse_expression_with_operator_precedence parser Operator.NewOperator in
     let (parser1, token) = next_token parser in
     match Token.kind token with
     | Parent
     | Self ->
-      begin match peek_token_kind parser1 with
-      | LeftParen -> Make.token parser1 token
-      | LessThan ->
-        let (parser1, (type_arguments, no_arg_is_missing)) =
-          parse_generic_type_arguments parser1
-        in
-        if no_arg_is_missing && parser.errors = parser1.errors
-        then
-          let (parser, token) = Make.token parser1 token in
-          let (parser, type_specifier) =
+      begin
+        match peek_token_kind_with_possible_attributized_type_list parser1 with
+        | LeftParen -> Make.token parser1 token
+        | LessThan ->
+          let (parser, (type_arguments, no_arg_is_missing)) = parse_generic_type_arguments parser1 in
+          if no_arg_is_missing && parser.errors = parser1.errors then
+            let (parser, token) = Make.token parser token in
             Make.generic_type_specifier parser token type_arguments
-          in
-          parser, type_specifier
-        else
-          default parser
-      | _ ->
-        default parser
+          else
+            default parser
+        | _ -> default parser
       end
-    | Static when peek_token_kind parser1 = LeftParen ->
-      Make.token parser1 token
+    | Static when peek_token_kind parser1 = LeftParen -> Make.token parser1 token
     | Name
     | Backslash ->
-      begin match parse_start_of_type_specifier parser1 token with
-      | Some (parser, name) ->
-        (* We want to parse new C() and new C<int>() as types, but
-        new C::$x() as an expression. *)
-        with_type_parser parser (TypeParser.parse_remaining_type_specifier name)
-      | None ->
-        default parser
+      begin
+        match parse_start_of_type_specifier parser1 token with
+        | Some (parser, name) ->
+          (* We want to parse new C() and new C<int>() as types, but
+             new C::$x() as an expression. *)
+          with_type_parser parser (TypeParser.parse_remaining_type_specifier name)
+        | None -> default parser
       end
-    | _ ->
-      default parser
+    | _ -> default parser
       (* TODO: We need to verify in a later pass that the expression is a
       scope resolution (that does not end in class!), a member selection,
       a name, a variable, a property, or an array subscript expression. *)
@@ -1254,9 +1260,9 @@ module WithStatementAndDeclAndTypeParser
      * Update the spec to say that the argument expression list is required. *)
     let (parser, designator) = parse_designator parser in
     let (parser, left, args, right) =
-      if peek_token_kind parser = LeftParen then
-        parse_expression_list_opt parser
-      else
+      match peek_token_kind parser with
+      | LeftParen -> parse_expression_list_opt parser
+      | _ ->
         let (parser, missing1) = Make.missing parser (pos parser) in
         let (parser, missing2) = Make.missing parser (pos parser) in
         let (parser, missing3) = Make.missing parser (pos parser) in
@@ -1269,7 +1275,7 @@ module WithStatementAndDeclAndTypeParser
       function-call-expression:
         postfix-expression  (  argument-expression-list-opt  )
     *)
-    let parser, type_arguments = Make.missing parser (pos parser) in
+    let (parser, type_arguments) = Make.missing parser (pos parser) in
     let (parser, result) = with_as_expressions parser ~enabled:true (fun parser ->
       let (parser, left, args, right) = parse_expression_list_opt parser in
         Make.function_call_expression parser receiver type_arguments left args right) in
@@ -1807,30 +1813,26 @@ module WithStatementAndDeclAndTypeParser
       alternative
 
   and parse_name_or_collection_literal_expression parser name =
-    match peek_token_kind parser with
+    match peek_token_kind_with_possible_attributized_type_list parser with
     | LeftBrace ->
       let (parser, name) = Make.simple_type_specifier parser name in
       parse_collection_literal_expression parser name
     | LessThan ->
-      let (parser1, (type_arguments, no_arg_is_missing)) =
-        parse_generic_type_arguments parser
-      in
+      let (parser1, (type_arguments, no_arg_is_missing)) = parse_generic_type_arguments parser in
       if no_arg_is_missing
       && parser.errors = parser1.errors
       && peek_token_kind parser1 = LeftBrace
       then
-        let (parser, name) =
-          Make.generic_type_specifier parser1 name type_arguments
-        in
+        let (parser, name) = Make.generic_type_specifier parser1 name type_arguments in
         parse_collection_literal_expression parser name
       else
         (parser, name)
     | LeftBracket ->
-        if peek_token_kind ~lookahead:2 parser = EqualGreaterThan
-        then
-          parse_record_creation_expression parser name
-        else
-          (parser, name)
+      if peek_token_kind ~lookahead:2 parser = EqualGreaterThan
+      then
+        parse_record_creation_expression parser name
+      else
+        (parser, name)
     | _ -> (parser, name)
 
   and parse_record_creation_expression parser name =
@@ -1969,11 +1971,11 @@ module WithStatementAndDeclAndTypeParser
       make_intrinsic_function =
     let (parser1, keyword) = assert_token parser keyword_token in
     let (parser1, explicit_type) =
-      match peek_token_kind parser1 with
+      match peek_token_kind_with_possible_attributized_type_list parser1 with
       | LessThan ->
         let (parser1, (type_arguments, _)) = parse_generic_type_arguments parser1 in
         (* skip no_arg_is_missing check since there must only be 1 or 2 type arguments*)
-        parser1, type_arguments
+        (parser1, type_arguments)
       | _ -> Make.missing parser1 (pos parser1)
     in
     let (parser1, left_bracket) = optional_token parser1 LeftBracket in

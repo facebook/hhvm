@@ -193,6 +193,7 @@ module type SmartConstructors_S = sig
   val make_nullable_type_specifier : r -> r -> t -> t * r
   val make_like_type_specifier : r -> r -> t -> t * r
   val make_soft_type_specifier : r -> r -> t -> t * r
+  val make_attributized_specifier : r -> r -> t -> t * r
   val make_reified_type_argument : r -> r -> t -> t * r
   val make_type_arguments : r -> r -> r -> t -> t * r
   val make_type_parameters : r -> r -> r -> t -> t * r
@@ -379,6 +380,7 @@ end) = struct
     let nullable_type_specifier parser arg0 arg1 = call parser (SCI.make_nullable_type_specifier arg0 arg1)
     let like_type_specifier parser arg0 arg1 = call parser (SCI.make_like_type_specifier arg0 arg1)
     let soft_type_specifier parser arg0 arg1 = call parser (SCI.make_soft_type_specifier arg0 arg1)
+    let attributized_specifier parser arg0 arg1 = call parser (SCI.make_attributized_specifier arg0 arg1)
     let reified_type_argument parser arg0 arg1 = call parser (SCI.make_reified_type_argument arg0 arg1)
     let type_arguments parser arg0 arg1 arg2 = call parser (SCI.make_type_arguments arg0 arg1 arg2)
     let type_parameters parser arg0 arg1 arg2 = call parser (SCI.make_type_parameters arg0 arg1 arg2)

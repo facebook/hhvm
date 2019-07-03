@@ -961,6 +961,10 @@ module type Syntax_S = sig
     { soft_at                                            : t
     ; soft_type                                          : t
     }
+  | AttributizedSpecifier             of
+    { attributized_specifier_attribute_spec              : t
+    ; attributized_specifier_type                        : t
+    }
   | ReifiedTypeArgument               of
     { reified_type_argument_reified                      : t
     ; reified_type_argument_type                         : t
@@ -1228,6 +1232,7 @@ module type Syntax_S = sig
   val make_nullable_type_specifier : t -> t -> t
   val make_like_type_specifier : t -> t -> t
   val make_soft_type_specifier : t -> t -> t
+  val make_attributized_specifier : t -> t -> t
   val make_reified_type_argument : t -> t -> t
   val make_type_arguments : t -> t -> t -> t
   val make_type_parameters : t -> t -> t -> t
@@ -1405,6 +1410,7 @@ module type Syntax_S = sig
   val is_nullable_type_specifier : t -> bool
   val is_like_type_specifier : t -> bool
   val is_soft_type_specifier : t -> bool
+  val is_attributized_specifier : t -> bool
   val is_reified_type_argument : t -> bool
   val is_type_arguments : t -> bool
   val is_type_parameters : t -> bool

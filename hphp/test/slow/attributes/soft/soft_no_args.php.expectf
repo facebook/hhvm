@@ -1,0 +1,1 @@
+Fatal error: The __Soft attribute does not take arguments. in %s/hphp/test/slow/attributes/soft/soft_no_args.php on line 3

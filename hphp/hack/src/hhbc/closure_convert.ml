@@ -840,11 +840,9 @@ let rec convert_expr env st (p, expr_ as expr) =
                 Emit_fatal.raise_fatal_parse
                   pc "Class must be a Class or string type" in
             convert_meth_caller_to_func_ptr env st p pc cls pf fname
-          | ((Lvar _, _) | (_, Lvar _)) ->
-             (* If class and func are not literal,
-              * fallback to create __SystemLib\MethCallerHelper *)
-             st, (p, Call(ct, e, targs, el2, []))
-          | _ -> Emit_fatal.raise_fatal_parse pc "Invalid Class or Func type"
+          | _ ->
+            (* For other cases, fallback to create __SystemLib\MethCallerHelper *)
+            st, (p, Call(ct, e, targs, el2, []))
         )
   | Call (ct, ((_, Class_get ((_, CIexpr (_, Id (_, cid))), _) |
                (_, Class_const ((_, CIexpr (_, Id (_, cid))), _))) as e), targs, el2, el3)

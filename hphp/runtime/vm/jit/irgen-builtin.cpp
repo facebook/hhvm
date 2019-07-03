@@ -926,8 +926,10 @@ SSATmp* meth_caller_get_name(IRGS& env, SSATmp *value) {
       ptrdiff_t off = ObjectData::sizeForNProps(
         isGetCls ? s_cls_idx : s_meth_idx);
       auto const prop = gen(
-        env, LdPropAddr, ByteOffsetData{off}, TUncounted.lval(Ptr::Prop), obj);
-      return gen(env, LdMem, TStr, prop);
+        env, LdPropAddr, ByteOffsetData{off}, TStr.lval(Ptr::Prop), obj);
+      auto const ret = gen(env, LdMem, TStr, prop);
+      gen(env, IncRef, ret);
+      return ret;
     };
 
     auto const mcCls = Unit::lookupClass(s_meth_caller_cls.get());

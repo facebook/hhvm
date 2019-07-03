@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/backtrace.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -399,8 +400,12 @@ String getMethCallerClsOrMethNameHelper(const char* fn, TypedValue v) {
           RuntimeOption::EvalNoticeOnMethCallerHelperUse) {
         raise_notice("MethCallerHelper is used on %s()", fn);
       }
-      return String::attach(
-        val(obj->propRvalAtOffset(isGetClass ? s_cls_idx : s_meth_idx)).pstr);
+      auto const tv = obj->propRvalAtOffset(
+        isGetClass ? s_cls_idx : s_meth_idx).tv();
+      if (isRefcountedType(type(tv))) {
+        tvIncRefGen(tv);
+      }
+      return String::attach(val(tv).pstr);
     }
   }
   raise_error("Argument 1 passed to %s() must be a MethCaller", fn);

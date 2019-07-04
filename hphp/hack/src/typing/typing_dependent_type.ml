@@ -160,9 +160,15 @@ module ExprDepTy = struct
    * More specific details are explained inline
    *)
   (****************************************************************************)
-  let make env cid cid_ty =
-    if should_apply env cid_ty then
-      apply env (from_cid env (fst cid_ty) cid) cid_ty
-    else
-      env, cid_ty
+  let rec make env ~cid cid_ty =
+    let env, cid_ty = Env.expand_type env cid_ty in
+    match cid_ty with
+    | r, Tintersection tyl ->
+      let env, tyl = List.fold_map tyl ~init:env ~f:(make ~cid) in
+      env, (r, Tintersection tyl)
+    | _ ->
+      if should_apply env cid_ty then
+        apply env (from_cid env (fst cid_ty) cid) cid_ty
+      else
+        env, cid_ty
 end

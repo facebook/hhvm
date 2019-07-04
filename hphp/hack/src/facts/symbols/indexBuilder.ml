@@ -65,9 +65,9 @@ let parse_file
       | Some facts ->
 
         (* Identify all classes in the file *)
-        let class_keys = InvSMap.keys facts.types in
+        let class_keys = SMap.keys facts.types in
         let classes_mapped = List.map class_keys ~f:(fun key -> begin
-          let info_opt = InvSMap.get key facts.types in
+          let info_opt = SMap.get key facts.types in
           let (kind, is_abstract, is_final) = get_details_from_info info_opt in
           {
             sif_name = key;

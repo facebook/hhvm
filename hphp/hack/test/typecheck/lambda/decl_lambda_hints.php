@@ -9,7 +9,7 @@
  *
  */
 
-function f(): void {
+function f(): mixed {
   return (array<int> $a) ==> {
     // This statement will not parse in Hack, but we should not raise an error
     // in decl mode.

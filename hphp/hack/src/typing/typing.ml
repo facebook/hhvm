@@ -5424,39 +5424,57 @@ and call_untyped_unpack env uel = match uel with
 and bad_call env p ty =
   Errors.bad_call p (Typing_print.error env ty)
 
-(* to be used to throw typing error if failing to satisfy subtype relation *)
-and enforce_sub_ty env p ty1 ty2 =
-  let env = Type.sub_type p Reason.URnone env ty1 ty2 in
-  Env.expand_type env ty1
+(* Checking of numeric operands for arithmetic operators:
+ *    (1) Check if it's dynamic
+ *    (2) If not, enforce that it's a subtype of num
+ *    (3) Solve to float if it's a type variable with float as lower bound
+ *)
+and check_dynamic_or_enforce_num env p t r =
+  if TUtils.is_dynamic env t
+  then env, true
+  else
+    let env = Type.sub_type p Reason.URnone env t (MakeType.num r) in
+    let widen_for_arithmetic env ty =
+      match ty with
+      | _, Tprim Tfloat -> env, Some ty
+      | _ -> env, None in
+    let default = MakeType.num (Reason.Rarith p) in
+    let env, _ = SubType.expand_type_and_narrow env ~default
+      ~description_of_expected:"a number" widen_for_arithmetic p t in
+    env, false
 
-(* throws typing error if neither t <: ty nor t <: dynamic, and adds appropriate
- * constraint to env otherwise *)
-and check_type ty p env t =
-  let is_ty = SubType.is_sub_type_LEGACY_DEPRECATED env t ty in
-  let is_dynamic = SubType.is_sub_type_LEGACY_DEPRECATED env t (MakeType.dynamic (fst ty)) in
-  match is_ty, is_dynamic with
-  | false, true -> enforce_sub_ty env p t (MakeType.dynamic (fst ty))
-  | _ -> enforce_sub_ty env p t ty
+(* Checking of numeric operands for arithmetic operators that work only
+ * on integers:
+ *   (1) Check if it's dynamic
+ *   (2) If not, enforce that it's a subtype of int
+ *)
+and check_dynamic_or_enforce_int env p t r =
+  (* First check if it's dynamic *)
+  if TUtils.is_dynamic env t
+  then env, true
+  (* Next make sure that it's a subtype of int *)
+  else Type.sub_type p Reason.URnone env t (MakeType.int r), false
 
-(* does check_type with num and then gives back normalized type and env *)
-and check_num env p t r =
-  let env2, t2 = check_type (MakeType.num r) p env t in
-  let r2 = fst t2 in
-  env2, if SubType.is_sub_type_LEGACY_DEPRECATED env2 t (MakeType.int r2)
-    then MakeType.int r2
-    else if SubType.is_sub_type_LEGACY_DEPRECATED env2 t (MakeType.float r2)
-    then MakeType.float r2
-    else if SubType.is_sub_type_LEGACY_DEPRECATED env2 t (MakeType.num r2)
-    then MakeType.num r2
-    else MakeType.dynamic r2
+(* Secondary check of numeric operand for arithmetic operators. We've
+ * already enforced num and tried to infer a float. Now let's
+ * solve to int if it's a type variable with int as lower bound, or
+ * solve to int if it's a type variable with no lower bounds.
+ *)
+and expand_type_and_narrow_to_int env p ty =
+    (* Now narrow for type variables *)
+    let widen_for_arithmetic env ty =
+      match ty with
+      | _, Tprim Tint -> env, Some ty
+      | _ -> env, None in
+    let default = MakeType.int (Reason.Rarith p) in
+    SubType.expand_type_and_narrow env ~default
+      ~description_of_expected:"a number" widen_for_arithmetic p ty
 
-(* does check_type with int and then gives back normalized type and env *)
-and check_int env p t r =
-  let env2, t2 = check_type (MakeType.int r) p env t in
-  let r2 = fst t2 in
-  env2, if SubType.is_sub_type_LEGACY_DEPRECATED env2 t (MakeType.int r2)
-    then MakeType.int r2
-    else MakeType.dynamic r2
+and is_float env t = SubType.is_sub_type env t (MakeType.float Reason.Rnone)
+
+and is_int env t = SubType.is_sub_type env t (MakeType.int Reason.Rnone)
+
+and is_super_num env t = SubType.is_sub_type_for_union env (MakeType.num Reason.Rnone) t
 
 and unop ~is_func_arg ~array_ref_ctx p env uop te ty =
   let make_result env te result_ty =
@@ -5472,13 +5490,14 @@ and unop ~is_func_arg ~array_ref_ctx p env uop te ty =
   | Ast.Utild ->
       if is_any ty
       then make_result env te ty
-      else (* args isn't any or a variant thereof so can actually do stuff *)
-      let env, t = check_int env p ty (Reason.Rbitwise p) in
-      begin
-        match snd t with
-        | Tdynamic -> make_result env te (MakeType.dynamic (Reason.Rbitwise_dynamic p))
-        | _ -> make_result env te (MakeType.int (Reason.Rbitwise_ret p))
-      end
+      else
+      (* args isn't any or a variant thereof so can actually do stuff *)
+      let env, is_dynamic = check_dynamic_or_enforce_int env p ty (Reason.Rbitwise p) in
+      let result_ty =
+        if is_dynamic
+        then MakeType.dynamic (Reason.Rbitwise_dynamic p)
+        else MakeType.int (Reason.Rbitwise_ret p) in
+      make_result env te result_ty
   | Ast.Uincr
   | Ast.Upincr
   | Ast.Updecr
@@ -5494,36 +5513,35 @@ and unop ~is_func_arg ~array_ref_ctx p env uop te ty =
         if is_any ty
         then make_result env te ty
         else (* args isn't any or a variant thereof so can actually do stuff *)
-        let env, t = check_num env p ty (Reason.Rarith p) in
+        let env, is_dynamic = check_dynamic_or_enforce_num env p ty (Reason.Rarith p) in
         let env =
-          if Env.env_local_reactive env then
-          Typing_mutability.handle_assignment_mutability env te (Some (snd te))
-          else env
-        in
-        match snd t with
-        | Tprim Tfloat ->
-          make_result env te (MakeType.float (Reason.Rarith_ret_float (p, fst t, Reason.Aonly)))
-        | Tprim Tnum ->
-          make_result env te (MakeType.num (Reason.Rarith_ret_num (p, fst t, Reason.Aonly)))
-        | Tprim Tint -> make_result env te (MakeType.int (Reason.Rarith_ret_int p))
-        | Tdynamic -> make_result env te (MakeType.dynamic (Reason.Rincdec_dynamic p))
-        | _ ->  make_result env te (MakeType.num (Reason.Rarith_ret p))
+          if Env.env_local_reactive env
+          then Typing_mutability.handle_assignment_mutability env te (Some (snd te))
+          else env in
+        let result_ty =
+          if is_dynamic
+          then MakeType.dynamic (Reason.Rincdec_dynamic p)
+          else if is_float env ty
+          then MakeType.float (Reason.Rarith_ret_float (p, fst ty, Reason.Aonly))
+          else if is_int env ty
+          then MakeType.int (Reason.Rarith_ret_int p)
+          else MakeType.num (Reason.Rarith_ret_num (p, fst ty, Reason.Aonly)) in
+        make_result env te result_ty
       end
   | Ast.Uplus
   | Ast.Uminus ->
       if is_any ty
       then make_result env te ty
       else (* args isn't any or a variant thereof so can actually do stuff *)
-      let env, t = check_num env p ty (Reason.Rarith p) in
-      begin
-        match snd t with
-        | Tprim Tfloat ->
-          make_result env te (MakeType.float (Reason.Rarith_ret_float (p, fst t, Reason.Aonly)))
-        | Tprim Tnum ->
-          make_result env te (MakeType.num (Reason.Rarith_ret_num (p, fst t, Reason.Aonly)))
-        | Tprim Tint -> make_result env te (MakeType.int (Reason.Rarith_ret_int p))
-        | _ -> make_result env te (MakeType.num (Reason.Rarith_ret p))
-      end
+      let env, _ = check_dynamic_or_enforce_num env p ty (Reason.Rarith p) in
+      let env, ty = expand_type_and_narrow_to_int env p ty in
+      let result_ty =
+        if is_float env ty
+        then MakeType.float (Reason.Rarith_ret_float (p, fst ty, Reason.Aonly))
+        else if is_int env ty
+        then MakeType.int (Reason.Rarith_ret_int p)
+        else MakeType.num (Reason.Rarith_ret_num (p, fst ty, Reason.Aonly)) in
+      make_result env te result_ty
   | Ast.Uref ->
       if Env.env_local_reactive env
          && not (TypecheckerOptions.unsafe_rx (Env.get_tcopt env))
@@ -5558,79 +5576,85 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
     env, T.make_typed_expr p ty (T.Binop (bop, te1, te2)), ty in
   let is_any = TUtils.is_any env in
   let contains_any = (is_any ty1) || (is_any ty2) in
+
   match bop with
-  | Ast.Plus when not contains_any ->
-    let env, t1 = check_num env p ty1 (Reason.Rarith p1) in
-    let env, t2 = check_num env p ty2 (Reason.Rarith p2) in
-    (* postcondition: t1 and t2 are dynamic or subtypes of num and
-      annotated as such, or we are e.g. HH_FIXMEing *)
-    begin
-      match snd t1, snd t2 with
-      | Tprim Tint, Tprim Tint -> make_result env te1 te2 (MakeType.int (Reason.Rarith_ret_int p))
-      | Tprim Tfloat, _ ->
-        make_result env te1 te2 (MakeType.float (Reason.Rarith_ret_float (p, fst t1, Reason.Afirst)))
-      | _, Tprim Tfloat ->
-        make_result env te1 te2 (MakeType.float (Reason.Rarith_ret_float (p, fst t2, Reason.Asecond)))
-      | Tprim Tnum, _ ->
-        make_result env te1 te2 (MakeType.num (Reason.Rarith_ret_num (p, fst t1, Reason.Afirst)))
-      | _, Tprim Tnum ->
-        make_result env te1 te2 (MakeType.num (Reason.Rarith_ret_num (p, fst t2, Reason.Asecond)))
-      | Tdynamic, Tdynamic -> make_result env te1 te2 (MakeType.dynamic (Reason.Rsum_dynamic p))
-      | _ -> make_result env te1 te2 (MakeType.num (Reason.Rarith_ret p))
-    end
-  | Ast.Minus | Ast.Star when not contains_any ->
-    let env, t1 = check_num env p ty1 (Reason.Rarith p1) in
-    let env, t2 = check_num env p ty2 (Reason.Rarith p2) in
-    (* postcondition: t1 and t2 are dynamic or subtypes of num and
-      annotated as such, or we are e.g. HH_FIXMEing *)
-    begin
-      match snd t1, snd t2 with
-      | Tprim Tint, Tprim Tint -> make_result env te1 te2 (MakeType.int (Reason.Rarith_ret_int p))
-      | Tprim Tfloat, _ ->
-        make_result env te1 te2 (MakeType.float (Reason.Rarith_ret_float (p, fst t1, Reason.Afirst)))
-      | _, Tprim Tfloat ->
-        make_result env te1 te2 (MakeType.float (Reason.Rarith_ret_float (p, fst t2, Reason.Asecond)))
-      | Tprim Tnum, _ ->
-        make_result env te1 te2 (MakeType.num (Reason.Rarith_ret_num (p, fst t1, Reason.Afirst)))
-      | _, Tprim Tnum ->
-        make_result env te1 te2 (MakeType.num (Reason.Rarith_ret_num (p, fst t2, Reason.Asecond)))
-      | _ -> make_result env te1 te2 (MakeType.num (Reason.Rarith_ret p))
-    end
+    (* Type of addition, subtraction and multiplication is essentially
+     *    (int,int):int
+     *  & (float,num):float
+     *  & (num,float):float
+     *  & (num,num):num
+     *)
+  | Ast.Plus | Ast.Minus | Ast.Star when not contains_any ->
+    let env, is_dynamic1 = check_dynamic_or_enforce_num env p ty1 (Reason.Rarith p1) in
+    let env, is_dynamic2 = check_dynamic_or_enforce_num env p ty2 (Reason.Rarith p2) in
+    (* TODO: extend this behaviour to other operators. Consider producing dynamic
+     * result if *either* operand is dynamic
+     *)
+    if is_dynamic1 && is_dynamic2 && bop = Ast.Plus
+    then make_result env te1 te2 (MakeType.dynamic (Reason.Rsum_dynamic p))
+    else
+    (* If either argument is a float then return float *)
+    if is_float env ty1
+    then make_result env te1 te2 (MakeType.float (Reason.Rarith_ret_float (p, fst ty1, Reason.Afirst)))
+    else
+    if is_float env ty2
+    then make_result env te1 te2 (MakeType.float (Reason.Rarith_ret_float (p, fst ty2, Reason.Asecond)))
+    (* If both arguments are ints then return int *)
+    else
+    if is_int env ty1 && is_int env ty2
+    then make_result env te1 te2 (MakeType.int (Reason.Rarith_ret_int p))
+    else
+    (* We already know that ty1 and ty2 are subtypes of num.
+     * If either is *exactly* num then type of whole expression must be num.
+     * We do this now to avoid unnnecessarily resolving type variables to int below.
+     *)
+    if is_super_num env ty1
+    then make_result env te1 te2 (MakeType.num (Reason.Rarith_ret_num (p, fst ty1, Reason.Afirst)))
+    else
+    if is_super_num env ty2
+    then make_result env te1 te2 (MakeType.num (Reason.Rarith_ret_num (p, fst ty2, Reason.Asecond)))
+    else
+    (* Otherwise try narrowing any type variable, with default int *)
+    let env, ty1 = expand_type_and_narrow_to_int env p ty1 in
+    let env, ty2 = expand_type_and_narrow_to_int env p ty2 in
+    if is_int env ty1 && is_int env ty2
+    then make_result env te1 te2 (MakeType.int (Reason.Rarith_ret_int p))
+    else make_result env te1 te2 (MakeType.num (Reason.Rarith_ret p))
+
+    (* Type of division and exponentiation is essentially
+     *    (float,num):float
+     *  & (num,float):float
+     *  & (num,num):num
+     *)
   | Ast.Slash | Ast.Starstar when not contains_any ->
-    let env, t1 = check_num env p ty1 (Reason.Rarith p1) in
-    let env, t2 = check_num env p ty2 (Reason.Rarith p2) in
-    (* postcondition: t1 and t2 are dynamic or subtypes of num and
-      annotated as such, or we are e.g. HH_FIXMEing *)
-    let r = match bop with
-      | Ast.Slash -> Reason.Rret_div p
-      | _ -> Reason.Rarith_ret p in
-    begin
-      match snd t1, snd t2 with
-      | Tprim Tfloat, _ ->
-        make_result env te1 te2 (MakeType.float (Reason.Rarith_ret_float (p, fst t1, Reason.Afirst)))
-      | _, Tprim Tfloat ->
-        make_result env te1 te2 (MakeType.float (Reason.Rarith_ret_float (p, fst t2, Reason.Asecond)))
-      | _ -> make_result env te1 te2 (MakeType.num r)
-    end
+    let env, is_dynamic1 = check_dynamic_or_enforce_num env p ty1 (Reason.Rarith p1) in
+    let env, is_dynamic2 = check_dynamic_or_enforce_num env p ty2 (Reason.Rarith p2) in
+    let result_ty =
+      if is_dynamic1 && is_dynamic2
+      then MakeType.dynamic (Reason.Rsum_dynamic p)
+      else if is_float env ty1
+      then MakeType.float (Reason.Rarith_ret_float (p, fst ty1, Reason.Afirst))
+      else if is_float env ty2
+      then MakeType.float (Reason.Rarith_ret_float (p, fst ty2, Reason.Asecond))
+      else match bop with
+        | Ast.Slash -> MakeType.num (Reason.Rret_div p)
+        | _ -> MakeType.num (Reason.Rarith_ret p) in
+      make_result env te1 te2 result_ty
   | Ast.Percent | Ast.Ltlt | Ast.Gtgt when not contains_any ->
-    let env, _ = check_int env p ty1 (Reason.Rarith p1) in
-    let env, _ = check_int env p ty2 (Reason.Rarith p2) in
-    (* postcondition: t1 and t2 are dynamic or int and
-      annotated as such, or we are e.g. HH_FIXMEing *)
+    let env, _ = check_dynamic_or_enforce_int env p ty1 (Reason.Rarith p1) in
+    let env, _ = check_dynamic_or_enforce_int env p ty2 (Reason.Rarith p2) in
     let r = match bop with
       | Ast.Percent -> Reason.Rarith_ret_int p
       | _ -> Reason.Rbitwise_ret p in
     make_result env te1 te2 (MakeType.int r)
   | Ast.Xor | Ast.Amp | Ast.Bar when not contains_any ->
-    let env, t1 = check_int env p ty1 (Reason.Rbitwise p1) in
-    let env, t2 = check_int env p ty2 (Reason.Rbitwise p2) in
-    (* postcondition: t1 and t2 are dynamic or int and
-      annotated as such, or we are e.g. HH_FIXMEing *)
-    begin
-      match snd t1, snd t2 with
-      | Tdynamic, Tdynamic -> make_result env te1 te2 (MakeType.dynamic (Reason.Rbitwise_dynamic p))
-      | _ -> make_result env te1 te2 (MakeType.int (Reason.Rbitwise_ret p))
-    end
+    let env, is_dynamic1 = check_dynamic_or_enforce_int env p ty1 (Reason.Rbitwise p1) in
+    let env, is_dynamic2 = check_dynamic_or_enforce_int env p ty2 (Reason.Rbitwise p2) in
+    let result_ty =
+      if is_dynamic1 && is_dynamic2
+      then MakeType.dynamic (Reason.Rbitwise_dynamic p)
+      else MakeType.int (Reason.Rbitwise_ret p) in
+    make_result env te1 te2 result_ty
   | Ast.Eqeq  | Ast.Diff | Ast.Eqeqeq | Ast.Diff2 ->
       make_result env te1 te2 (MakeType.bool (Reason.Rcomp p))
   | Ast.Lt | Ast.Lte | Ast.Gt | Ast.Gte | Ast.Cmp ->

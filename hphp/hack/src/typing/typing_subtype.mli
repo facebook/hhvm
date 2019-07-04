@@ -124,6 +124,7 @@ val expand_type_and_solve :
 
 val expand_type_and_narrow :
   Env.env ->
+  ?default:locl ty ->
   description_of_expected:string ->
   (Env.env -> locl ty -> Env.env * locl ty option) ->
   Pos.t ->

@@ -2838,8 +2838,11 @@ let is_nothing env ty =
  * But in general, narrowing is a useful technique for delaying the complete
  * solving of a constraint whilst supporting checking of operations such as
  * member access and array indexing.
+ *
+ * The optional `default` parameter is used to solve a type variable
+ * if `widen_concrete_type` does not produce a result.
  *)
-let expand_type_and_narrow env ~description_of_expected widen_concrete_type p ty =
+let expand_type_and_narrow env ?default ~description_of_expected widen_concrete_type p ty =
   let env, ty = expand_type_and_solve_eq env ty in
   (* Deconstruct the type into union elements (if it's a union). For variables,
    * take the lower bounds. If there are no variables, then we have a concrete
@@ -2860,6 +2863,10 @@ let expand_type_and_narrow env ~description_of_expected widen_concrete_type p ty
   then Typing_utils.simplify_unions env ty
   else
     let env, widened_ty = widen env widen_concrete_type concretized_ty in
+    let widened_ty =
+      match is_nothing env widened_ty, default with
+      | true, Some t -> t
+      | _ -> widened_ty in
     (* We really don't want to just guess `nothing` if none of the types can be widened *)
     if is_nothing env widened_ty
     (* Default behaviour is currently to force solve *)
@@ -2870,6 +2877,9 @@ let expand_type_and_narrow env ~description_of_expected widen_concrete_type p ty
           let env = sub_type env ty widened_ty in
           env, widened_ty)
         (fun _ ->
+          if Option.is_some default
+          then env, widened_ty
+          else
           expand_type_and_solve env ~description_of_expected p ty)
 
 (* Solve type variables on top of stack, without losing completeness (by using

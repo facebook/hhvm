@@ -237,9 +237,9 @@ let rec localize ~ety_env env (dty: decl ty) =
         Reason.Rtype_access (expand_reason, [reason, taccess_string])
       in
       env, (elaborate_reason expansion_reason, ty)
-  | r, Tshape (fields_known, tym) ->
+  | r, Tshape (shape_kind, tym) ->
       let env, tym = ShapeFieldMap.map_env (localize ~ety_env) env tym in
-      env, (r, Tshape (fields_known, tym))
+      env, (r, Tshape (shape_kind, tym))
 
 and localize_tparams ~ety_env env pos tyl tparams =
   let length = min (List.length tyl) (List.length tparams) in

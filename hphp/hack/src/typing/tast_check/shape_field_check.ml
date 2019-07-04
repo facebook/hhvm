@@ -18,13 +18,13 @@ module SN = Naming_special_names
 let shapes_key_exists env shape field_name =
   let _, shape = Tast_env.expand_type env shape in
   match shape with
-  | r, Tshape (fields_known, fields) ->
+  | r, Tshape (shape_kind, fields) ->
     begin match ShapeMap.get field_name fields with
     | None ->
-      begin match fields_known with
-      | FieldsFullyKnown ->
+      begin match shape_kind with
+      | Closed_shape ->
         `DoesNotExist (Reason.to_pos r, `Undefined)
-      | FieldsPartiallyKnown _ ->
+      | Open_shape ->
         `Unknown
       end
     | Some {sft_optional; sft_ty} ->

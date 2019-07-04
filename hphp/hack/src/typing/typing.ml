@@ -2618,7 +2618,7 @@ and expr_
       (* Fields are fully known, because this shape is constructed
        * using shape keyword and we know exactly what fields are set. *)
       make_result env p (T.Shape (List.map ~f:(fun (k,(te,_)) -> (k, te)) tfdm))
-        (Reason.Rwitness p, Tshape (FieldsFullyKnown, fdm))
+        (Reason.Rwitness p, Tshape (Closed_shape, fdm))
 
   | PU_atom _ -> failwith "TODO(T36532263): Pocket Universes"
   | PU_identifier _ -> failwith "TODO(T36532263): Pocket Universes"

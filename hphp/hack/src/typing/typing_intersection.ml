@@ -88,9 +88,9 @@ let rec intersect env ~r ty1 ty2 =
   let (env, ty1) = decompose_atomic env ty1 in
   let (env, ty2) = decompose_atomic env ty2 in
   let env, inter_ty = try match ty1, ty2 with
-      | (_, Tshape (sfk1, fdm1)), (_, Tshape (sfk2, fdm2)) ->
-        let env, sfk, fdm = intersect_shapes env r (sfk1, fdm1) (sfk2, fdm2) in
-        env, (r, Tshape (sfk, fdm))
+      | (_, Tshape (shape_kind1, fdm1)), (_, Tshape (shape_kind2, fdm2)) ->
+        let env, shape_kind, fdm = intersect_shapes env r (shape_kind1, fdm1) (shape_kind2, fdm2) in
+        env, (r, Tshape (shape_kind, fdm))
       | (_, Tintersection tyl1), (_, Tintersection tyl2) ->
         intersect_lists env r tyl1 tyl2
       | (_, Tintersection tyl), ty | ty, (_, Tintersection tyl) ->
@@ -120,30 +120,29 @@ let rec intersect env ~r ty1 ty2 =
   Typing_log.log_intersection ~level:2 env r ty1 ty2 ~inter_ty;
   env, inter_ty
 
-and intersect_shapes env r (sfk1, fdm1) (sfk2, fdm2) =
+and intersect_shapes env r (shape_kind1, fdm1) (shape_kind2, fdm2) =
   let env, fdm = SM.merge_env env fdm1 fdm2
     ~combine:(fun env _sfn sft1 sft2 ->
-      match (sfk1, sft1), (sfk2, sft2) with
+      match (shape_kind1, sft1), (shape_kind2, sft2) with
       | (_, None), (_, None)
-      | (_, Some { sft_optional = true; _ }), (FieldsFullyKnown, None)
-      | (FieldsFullyKnown, None), (_, Some { sft_optional = true; _ }) ->
+      | (_, Some { sft_optional = true; _ }), (Closed_shape, None)
+      | (Closed_shape, None), (_, Some { sft_optional = true; _ }) ->
         env, None
-      | (_, Some { sft_optional = false; _ }), (FieldsFullyKnown, None)
-      | (FieldsFullyKnown, None), (_, Some { sft_optional = false; _ }) ->
+      | (_, Some { sft_optional = false; _ }), (Closed_shape, None)
+      | (Closed_shape, None), (_, Some { sft_optional = false; _ }) ->
         raise Nothing
-      | (_, Some sft), (FieldsPartiallyKnown _, None)
-      | (FieldsPartiallyKnown _, None), (_, Some sft) ->
+      | (_, Some sft), (Open_shape, None)
+      | (Open_shape, None), (_, Some sft) ->
         env, Some sft
       | (_, Some { sft_optional = opt1; sft_ty = ty1 }),
         (_, Some { sft_optional = opt2; sft_ty = ty2 }) ->
         let opt = opt1 && opt2 in
         let env, ty = intersect env r ty1 ty2 in
         env, Some { sft_optional = opt; sft_ty = ty }) in
-  let sfk = match sfk1, sfk2 with
-    | FieldsPartiallyKnown _, FieldsPartiallyKnown _ ->
-      FieldsPartiallyKnown SM.empty
-    | _ -> FieldsFullyKnown in
-  env, sfk, fdm
+  let shape_kind = match shape_kind1, shape_kind2 with
+    | Open_shape, Open_shape -> Open_shape
+    | _ -> Closed_shape in
+  env, shape_kind, fdm
 
 and intersect_lists env r tyl1 tyl2 =
   let rec intersect_lists env tyl1 tyl2 acc_tyl =

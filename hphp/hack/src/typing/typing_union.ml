@@ -120,8 +120,8 @@ and union_ env ty1 ty2 r =
       env, (r, Ttuple tyl)
     else
       raise Dont_unify
-  | (r1, Tshape (fk1, fdm1)), (r2, Tshape (fk2, fdm2)) ->
-    let env, ty = union_shapes env (fk1, fdm1, r1) (fk2, fdm2, r2) in
+  | (r1, Tshape (shape_kind1, fdm1)), (r2, Tshape (shape_kind2, fdm2)) ->
+    let env, ty = union_shapes env (shape_kind1, fdm1, r1) (shape_kind2, fdm2, r2) in
     env, (r, ty)
   | (_, Tfun ft1), (_, Tfun ft2) ->
     let env, ft = union_funs env ft1 ft2 in
@@ -316,43 +316,39 @@ and union_tconstraints env tcstr1 tcstr2 =
     env, Some ty
   | _ -> env, None
 
-and union_shapes env (fields_known1, fdm1, r1) (fields_known2, fdm2, r2) =
-  let fields_known = union_fields_known fields_known1 fields_known2 in
-  let (env, fields_known), fdm =
-    Nast.ShapeMap.merge_env (env, fields_known) fdm1 fdm2 ~combine:
-      (fun (env, fields_known) k fieldopt1 fieldopt2 ->
+and union_shapes env (shape_kind1, fdm1, r1) (shape_kind2, fdm2, r2) =
+  let shape_kind = union_shape_kind shape_kind1 shape_kind2 in
+  let (env, shape_kind), fdm =
+    Nast.ShapeMap.merge_env (env, shape_kind) fdm1 fdm2 ~combine:
+      (fun (env, shape_kind) k fieldopt1 fieldopt2 ->
         match
-          (fields_known1, fieldopt1, r1),
-          (fields_known2, fieldopt2, r2) with
-        | (_, None, _), (_, None, _) -> (env, fields_known), None
+          (shape_kind1, fieldopt1, r1),
+          (shape_kind2, fieldopt2, r2) with
+        | (_, None, _), (_, None, _) -> (env, shape_kind), None
         (* key is present on one side but not the other *)
-        | (_, Some { sft_ty; _ }, _), (fields_known_other, None, r)
-        | (fields_known_other, None, r), (_, Some { sft_ty; _ }, _) ->
-          let fields_known = begin match fields_known with
-            | FieldsPartiallyKnown _ ->
-              FieldsPartiallyKnown Nast.ShapeMap.empty
-            | FieldsFullyKnown -> FieldsFullyKnown end in
-          let sft_ty = match fields_known_other with
-            | FieldsFullyKnown ->
+        | (_, Some { sft_ty; _ }, _), (shape_kind_other, None, r)
+        | (shape_kind_other, None, r), (_, Some { sft_ty; _ }, _) ->
+          let sft_ty = match shape_kind_other with
+            | Closed_shape ->
               sft_ty
-            | FieldsPartiallyKnown _ ->
+            | Open_shape ->
               let r = Reason.Rmissing_optional_field (
                 Reason.to_pos r,
                 Utils.get_printable_shape_field_name k) in
               (MakeType.mixed r) in
-          (env, fields_known), Some { sft_optional = true; sft_ty }
+          (env, shape_kind), Some { sft_optional = true; sft_ty }
         (* key is present on both sides *)
         | (_, Some { sft_optional = optional1; sft_ty = ty1 }, _),
           (_, Some { sft_optional = optional2; sft_ty = ty2 }, _) ->
           let sft_optional = optional1 || optional2 in
           let env, sft_ty = union env ty1 ty2 in
-          (env, fields_known), Some { sft_optional; sft_ty }) in
-    env, Tshape (fields_known, fdm)
+          (env, shape_kind), Some { sft_optional; sft_ty }) in
+    env, Tshape (shape_kind, fdm)
 
-and union_fields_known fields_known1 fields_known2 =
-  match fields_known1, fields_known2 with
-  | FieldsFullyKnown, FieldsFullyKnown -> FieldsFullyKnown
-  | _ -> FieldsPartiallyKnown Nast.ShapeMap.empty
+and union_shape_kind shape_kind1 shape_kind2 =
+  match shape_kind1, shape_kind2 with
+  | Closed_shape, Closed_shape -> Closed_shape
+  | _ -> Open_shape
 
 (* TODO: add a new reason with positions of merge point and possibly merged
  * envs.*)

@@ -67,7 +67,7 @@ let type_match p s =
     ~init:ShapeMap.empty keys in
   (* Any Regex\Match will contain the entire matched substring at key 0 *)
   let shape_map = ShapeMap.add (SFlit_int (p, "0")) sft shape_map in
-  Reason.Rregex p, Tshape (FieldsFullyKnown, shape_map)
+  Reason.Rregex p, Tshape (Closed_shape, shape_map)
 
 let check_global_options s =
   String.iter ~f:(fun c ->

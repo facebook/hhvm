@@ -55,12 +55,12 @@ end = struct
         (String.concat ~sep:", " params) (print_ty_exn ft.ft_ret)
     | Ttuple tyl ->
       "(" ^ print_tyl_exn tyl ^ ")"
-    | Tshape (fields_known, fdm) ->
+    | Tshape (shape_kind, fdm) ->
       let fields =
         List.map (Nast.ShapeMap.elements fdm) ~f:print_shape_field_exn in
-      let fields = match fields_known with
-        | FieldsFullyKnown -> fields
-        | FieldsPartiallyKnown _ -> fields @ ["..."] in
+      let fields = match shape_kind with
+        | Closed_shape -> fields
+        | Open_shape -> fields @ ["..."] in
       Printf.sprintf "shape(%s)" (String.concat ~sep:", " fields)
     | Tabstract (AKnewtype (name, []), _) -> Utils.strip_ns name
     | Tabstract (AKnewtype (name, tyl), _) ->

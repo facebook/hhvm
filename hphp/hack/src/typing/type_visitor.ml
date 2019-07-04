@@ -38,7 +38,7 @@ class type ['a] type_visitor_type = object
   method on_tshape :
     'a
       -> Reason.t
-      -> shape_fields_known
+      -> shape_kind
       -> 'b shape_field_type Nast.ShapeMap.t
       -> 'a
   method on_taccess : 'a -> Reason.t -> taccess_type -> 'a
@@ -93,7 +93,7 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
   method on_tunion acc _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
   method on_tintersection acc _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
   method on_tobject acc _ = acc
-  method on_tshape: type a. _ -> Reason.t -> shape_fields_known
+  method on_tshape: type a. _ -> Reason.t -> shape_kind
     -> a shape_field_type Nast.ShapeMap.t -> _ =
     fun acc _ _ fdm ->
     let f _ { sft_ty; _ } acc = this#on_type acc sft_ty in
@@ -142,7 +142,7 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
     | Tunion tyl -> this#on_tunion acc r tyl
     | Tintersection tyl -> this#on_tintersection acc r tyl
     | Tobject -> this#on_tobject acc r
-    | Tshape (fields_known, fdm) -> this#on_tshape acc r fields_known fdm
+    | Tshape (shape_kind, fdm) -> this#on_tshape acc r shape_kind fdm
     | Tclass (cls, exact, tyl) -> this#on_tclass acc r cls exact tyl
     | Tarraykind akind -> this#on_tarraykind acc r akind
 end

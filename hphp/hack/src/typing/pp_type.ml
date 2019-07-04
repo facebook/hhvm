@@ -143,7 +143,7 @@ and pp_ty_ : type a. Format.formatter -> a ty_ -> unit = fun fmt ty ->
     Format.fprintf fmt "@])"
   | Tshape (a0,a1) ->
     Format.fprintf fmt "(@[<2>Tshape (@,";
-    pp_shape_fields_known fmt a0;
+    pp_shape_kind fmt a0;
     Format.fprintf fmt ",@ ";
     Nast.ShapeMap.pp pp_shape_field_type fmt a1;
     Format.fprintf fmt "@,))@]"
@@ -315,17 +315,14 @@ fun fmt (a0,a1) ->
 and show_taccess_type : taccess_type -> string = fun x ->
   Format.asprintf "%a" pp_taccess_type x
 
-and pp_shape_fields_known : Format.formatter -> shape_fields_known -> unit =
-fun fmt sfk ->
-  match sfk with
-  | FieldsFullyKnown -> Format.pp_print_string fmt "FieldsFullyKnown"
-  | FieldsPartiallyKnown a0 ->
-    Format.fprintf fmt "(@[<2>FieldsPartiallyKnown@ ";
-    Nast.ShapeMap.pp Pos.pp fmt a0;
-    Format.fprintf fmt "@])"
+and pp_shape_kind : Format.formatter -> shape_kind -> unit =
+fun fmt sk ->
+  match sk with
+  | Closed_shape -> Format.pp_print_string fmt "Closed_shape"
+  | Open_shape -> Format.pp_print_string fmt "Open_shape"
 
-and show_shape_fields_known : shape_fields_known -> string = fun x ->
-  Format.asprintf "%a" pp_shape_fields_known x
+and show_shape_kind : shape_kind -> string = fun x ->
+  Format.asprintf "%a" pp_shape_kind x
 
 and pp_reactivity : Format.formatter -> reactivity -> unit = fun fmt r ->
   match r with

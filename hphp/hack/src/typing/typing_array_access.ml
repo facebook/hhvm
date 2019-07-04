@@ -107,10 +107,9 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
         env, None
       | _ ->
         let env, element_ty = Env.fresh_invariant_type_var env expr_pos in
-        let fields_known = FieldsPartiallyKnown ShapeMap.empty in
         let upper_fdm = ShapeMap.add field
           {sft_optional = lhs_of_null_coalesce; sft_ty = element_ty} ShapeMap.empty in
-        let upper_shape_ty = (r, Tshape (fields_known, upper_fdm)) in
+        let upper_shape_ty = (r, Tshape (Open_shape, upper_fdm)) in
         env, Some upper_shape_ty
     end
   | _ ->
@@ -381,10 +380,10 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
       if Partial.should_check_error (Env.get_mode env) 4005
       then error_array env expr_pos ety1
       else env, (Reason.Rwitness expr_pos, TUtils.tany env)
-  | Tabstract (AKnewtype (ts, [ty]), Some (r, Tshape (fk, fields)))
+  | Tabstract (AKnewtype (ts, [ty]), Some (r, Tshape (shape_kind, fields)))
         when ts = SN.FB.cTypeStructure ->
       let env, fields = Typing_structure.transform_shapemap env array_pos ty fields in
-      let ty = r, Tshape (fk, fields) in
+      let ty = r, Tshape (shape_kind, fields) in
       array_get ~array_pos ~expr_pos ~lhs_of_null_coalesce is_lvalue env ty e2 ty2
   | Tabstract _ ->
     let resl =
@@ -721,12 +720,12 @@ let rec assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
        with _ -> fail Reason.index_tuple)
     | _ -> fail Reason.URtuple_access
     end
-  | Tshape (fields_known, fdm) ->
+  | Tshape (shape_kind, fdm) ->
     begin match TUtils.shape_field_name env key with
     | None -> error
     | Some field ->
       let fdm' = ShapeMap.add field {sft_optional = false; sft_ty = ty2} fdm in
-      env, ((fst ety1, Tshape (fields_known, fdm')), ty2)
+      env, ((fst ety1, Tshape (shape_kind, fdm')), ty2)
     end
   | Tobject ->
     if Partial.should_check_error (Env.get_mode env) 4005

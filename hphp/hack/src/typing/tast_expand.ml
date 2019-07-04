@@ -41,8 +41,8 @@ let expand_ty ?pos env ty =
       | (p, Tfun ft) -> (p, Tfun (exp_fun_type ft))
       | (p, Tabstract (ak, tyopt)) ->
         (p, Tabstract (exp_abstract_kind ak, Option.map tyopt exp_ty))
-      | (p, Tshape (fk, fields)) ->
-        (p, Tshape (fk, Nast.ShapeMap.map exp_sft fields))
+      | (p, Tshape (shape_kind, fields)) ->
+        (p, Tshape (shape_kind, Nast.ShapeMap.map exp_sft fields))
       | (p, Tarraykind ak) ->
         (p, Tarraykind (exp_array_kind ak))
       | (p, Tvar v) -> (match pos with

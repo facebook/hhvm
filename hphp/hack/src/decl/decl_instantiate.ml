@@ -98,9 +98,9 @@ and instantiate_ subst x =
   | Tapply (x, tyl) ->
       let tyl = List.map tyl (instantiate subst) in
       Tapply (x, tyl)
-  | Tshape (fields_known, fdm) ->
+  | Tshape (shape_kind, fdm) ->
       let fdm = ShapeFieldMap.map (instantiate subst) fdm in
-      Tshape (fields_known, fdm)
+      Tshape (shape_kind, fdm)
 
 let instantiate_ce subst ({ ce_type = x; _ } as ce) =
   { ce with ce_type = lazy (instantiate subst (Lazy.force x)) }

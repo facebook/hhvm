@@ -130,20 +130,13 @@ let rec strip_ty : type a. a ty -> a ty = fun ty ->
         ft_returns_void_to_rx = false;
       }
 
-    | Tshape (shape_fields_known, shape_fields) ->
-      let shape_fields_known = match shape_fields_known with
-        | FieldsFullyKnown -> FieldsFullyKnown
-        | FieldsPartiallyKnown _fields ->
-          (* Dummy value; the partially-known fields aren't currently
-          serialized. *)
-          FieldsPartiallyKnown (Nast.ShapeMap.empty)
-      in
+    | Tshape (shape_kind, shape_fields) ->
       let strip_field { sft_optional; sft_ty } =
         let sft_ty = strip_ty sft_ty in
         { sft_optional; sft_ty }
       in
       let shape_fields = Nast.ShapeMap.map strip_field shape_fields in
-      Tshape (shape_fields_known, shape_fields)
+      Tshape (shape_kind, shape_fields)
   in
   (reason, ty)
 

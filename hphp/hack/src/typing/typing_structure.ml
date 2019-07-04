@@ -84,9 +84,9 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
         | SFlit_str (_, "return_type"), _, (r, Tfun funty) ->
             let env, ty = make_ts env funty.ft_ret in
             env, acc_field_with_type (r, Ttuple [ty])
-        | SFlit_str (_, "fields"), _, (r, Tshape (fk, fields)) ->
+        | SFlit_str (_, "fields"), _, (r, Tshape (shape_kind, fields)) ->
             let env, fields = ShapeFieldMap.map_env make_ts env fields in
-            env, acc_field_with_type (r, Tshape (fk, fields))
+            env, acc_field_with_type (r, Tshape (shape_kind, fields))
         (* For generics we cannot specialize the generic_types field. Consider:
          *
          *  class C<T> {}

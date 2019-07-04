@@ -544,7 +544,7 @@ and simplify_subtype
      Tabstract (AKenum _, _) | Tanon _ | Tobject | Tclass _ | Tarraykind _),
     Tshape _ ->
     invalid ()
-  | Tshape (fields_known_sub, fdm_sub), Tshape (fields_known_super, fdm_super) ->
+  | Tshape (shape_kind_sub, fdm_sub), Tshape (shape_kind_super, fdm_super) ->
     let r_sub, r_super = fst ety_sub, fst ety_super in
     (**
      * shape_field_type A <: shape_field_type B iff:
@@ -569,24 +569,19 @@ and simplify_subtype
               (Reason.to_pos r_sub)
               (Reason.to_pos r_super)
               printable_name) in
-    let lookup_shape_field_type name r fields_known fdm =
+    let lookup_shape_field_type name r shape_kind fdm =
       match ShapeMap.get name fdm with
       | Some sft -> sft
       | None ->
         let printable_name = TUtils.get_printable_shape_field_name name in
-        let sft_ty = match fields_known with
-          | FieldsFullyKnown ->
-            MakeType.nothing (Reason.Rmissing_required_field (Reason.to_pos r, printable_name));
-          | FieldsPartiallyKnown unset_fields ->
-            begin match ShapeMap.get name unset_fields with
-            | Some p ->
-              MakeType.nothing (Reason.Runset_field (p, printable_name))
-            | None ->
-              MakeType.mixed (Reason.Rmissing_optional_field (Reason.to_pos r, printable_name))
-            end in
+        let sft_ty = match shape_kind with
+          | Closed_shape ->
+            MakeType.nothing (Reason.Rmissing_required_field (Reason.to_pos r, printable_name))
+          | Open_shape ->
+            MakeType.mixed (Reason.Rmissing_optional_field (Reason.to_pos r, printable_name)) in
         {sft_ty; sft_optional = true} in
-    begin match fields_known_sub, fields_known_super with
-    | FieldsPartiallyKnown _, FieldsFullyKnown ->
+    begin match shape_kind_sub, shape_kind_super with
+    | Open_shape, Closed_shape ->
       invalid_with (fun () ->
         Errors.shape_fields_unknown
           (Reason.to_pos r_sub)
@@ -594,8 +589,8 @@ and simplify_subtype
     | _, _ ->
       ShapeSet.fold
         (fun name res -> simplify_subtype_shape_field name res
-          (lookup_shape_field_type name r_sub fields_known_sub fdm_sub)
-          (lookup_shape_field_type name r_super fields_known_super fdm_super))
+          (lookup_shape_field_type name r_sub shape_kind_sub fdm_sub)
+          (lookup_shape_field_type name r_super shape_kind_super fdm_super))
         (ShapeSet.of_list (ShapeMap.keys fdm_sub @ ShapeMap.keys fdm_super))
         (env, TL.valid)
     end
@@ -2333,9 +2328,9 @@ let rec freshen_inside_ty env ((r, ty_) as ty) =
     let env, tyl = List.map_env env tyl freshen_ty in
     env, (r, Ttuple tyl)
     (* Shape data is covariant *)
-  | Tshape (known, fdm) ->
+  | Tshape (shape_kind, fdm) ->
     let env, fdm = ShapeFieldMap.map_env freshen_ty env fdm in
-    env, (r, Tshape (known, fdm))
+    env, (r, Tshape (shape_kind, fdm))
     (* Functions are covariant in return type, contravariant in parameter types *)
   | Tfun ft ->
     let env, ft_ret = freshen_ty env ft.ft_ret in
@@ -2640,8 +2635,8 @@ let ty_equal_shallow ty1 ty2 =
     fty1.ft_reactive = fty2.ft_reactive &&
     fty1.ft_return_disposable = fty2.ft_return_disposable &&
     fty1.ft_mutability = fty2.ft_mutability
-  | Tshape (known1, fdm1), Tshape (known2, fdm2) ->
-    known1 = known2 &&
+  | Tshape (shape_kind1, fdm1), Tshape (shape_kind2, fdm2) ->
+    shape_kind1 = shape_kind2 &&
     List.compare (fun (k1,v1) (k2,v2) ->
       match Ast.ShapeField.compare k1 k2 with
       | 0 -> compare v1.sft_optional v2.sft_optional

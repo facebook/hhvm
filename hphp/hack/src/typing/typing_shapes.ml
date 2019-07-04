@@ -21,12 +21,12 @@ module MakeType     = Typing_make_type
 
 let widen_for_refine_shape ~expr_pos field_name env ty =
   match ty with
-  | r, Tshape (fields_known, fields) ->
+  | r, Tshape (shape_kind, fields) ->
     begin match ShapeMap.get field_name fields with
     | None ->
       let env, element_ty = Env.fresh_invariant_type_var env expr_pos in
       let sft = {sft_optional = true; sft_ty = element_ty} in
-      env, Some (r, Tshape (fields_known, ShapeMap.add field_name sft fields))
+      env, Some (r, Tshape (shape_kind, ShapeMap.add field_name sft fields))
     | Some _ ->
       env, Some ty
     end
@@ -38,19 +38,18 @@ let rec refine_shape field_name pos env shape =
     Typing_subtype.expand_type_and_narrow ~description_of_expected:"a shape" env
       (widen_for_refine_shape ~expr_pos:pos field_name) pos shape in
   match shape with
-  | shape_r, Tshape (fields_known, fields) ->
+  | shape_r, Tshape (shape_kind, fields) ->
     let refine_shape_field_type refined_sft_ty =
       let refined_sft = {sft_optional = false; sft_ty = refined_sft_ty} in
       let refined_fields = ShapeMap.add field_name refined_sft fields in
-      env, (shape_r, Tshape (fields_known, refined_fields)) in
-    begin match fields_known with
-    | FieldsFullyKnown ->
-      (* Closed shape *)
+      env, (shape_r, Tshape (shape_kind, refined_fields)) in
+    begin match shape_kind with
+    | Closed_shape ->
       begin match ShapeMap.get field_name fields with
       | None -> env, shape
       | Some {sft_ty; _} -> refine_shape_field_type sft_ty
       end
-    | FieldsPartiallyKnown _ ->
+    | Open_shape ->
       let refined_sft_ty = match ShapeMap.get field_name fields with
         | None ->
           let printable_field_name =
@@ -76,16 +75,15 @@ let rec shrink_shape ~seen_tyvars pos field_name env shape =
   let env, shape =
     Typing_subtype.expand_type_and_solve ~description_of_expected:"a shape" env pos shape in
   match shape with
-  | _, Tshape (fields_known, fields) ->
-      (* remember that we have unset this field *)
-      let fields = match fields_known with
-        | FieldsFullyKnown ->
+  | _, Tshape (shape_kind, fields) ->
+      let fields = match shape_kind with
+        | Closed_shape ->
           ShapeMap.remove field_name fields
-        | FieldsPartiallyKnown _ ->
+        | Open_shape ->
           let printable_name = TUtils.get_printable_shape_field_name field_name in
           let nothing = MakeType.nothing (Reason.Runset_field (pos, printable_name)) in
           ShapeMap.add field_name {sft_ty = nothing; sft_optional = true} fields in
-      let result = Reason.Rwitness pos, Tshape (fields_known, fields) in
+      let result = Reason.Rwitness pos, Tshape (shape_kind, fields) in
       env, result
   | _, Tunion tyl ->
       let env, tyl =
@@ -112,7 +110,7 @@ let shapes_idx_not_null env shape_ty (p, field) =
     Typing_subtype.expand_type_and_narrow ~description_of_expected:"a shape" env
       (widen_for_refine_shape ~expr_pos:p field) p (r, shape_ty) in
     begin match shape_ty with
-    | Tshape (fieldsknown, ftm) ->
+    | Tshape (shape_kind, ftm) ->
       let env, field_type =
         begin match ShapeMap.find_opt field ftm with
         | Some { sft_ty; _ } ->
@@ -125,7 +123,7 @@ let shapes_idx_not_null env shape_ty (p, field) =
           }
         end in
       let ftm = ShapeMap.add field field_type ftm in
-      env, (r, Tshape (fieldsknown, ftm))
+      env, (r, Tshape (shape_kind, ftm))
     | _ -> (* This should be an error, but it is already raised when
       typechecking the call to Shapes::idx *)
       env, (r, shape_ty)
@@ -139,7 +137,7 @@ let experiment_enabled env experiment =
 let make_idx_fake_super_shape shape_pos fun_name field_name field_ty =
   Reason.Rshape (shape_pos, fun_name),
   Tshape
-    (FieldsPartiallyKnown Nast.ShapeMap.empty,
+    (Open_shape,
      Nast.ShapeMap.singleton field_name field_ty)
 
 (* Is a given field required in a given shape?
@@ -247,9 +245,9 @@ let to_collection env shape_ty res return_type =
     inherit! Type_mapper.tunion_type_mapper
     inherit! Type_mapper.tvar_expanding_type_mapper
 
-    method! on_tshape env _r fields_known fdm =
-      match fields_known with
-      | FieldsFullyKnown ->
+    method! on_tshape env _r shape_kind fdm =
+      match shape_kind with
+      | Closed_shape ->
         let keys = ShapeMap.keys fdm in
         let env, keys = List.map_env env keys begin fun env key ->
           match key with
@@ -270,7 +268,7 @@ let to_collection env shape_ty res return_type =
         let values = List.map ~f:(fun { sft_ty; _ } -> sft_ty) values in
         let env, value = Typing_arrays.union_values env values in
         env, return_type (fst res) key value
-      | FieldsPartiallyKnown _ ->
+      | Open_shape ->
         env, res
 
     method! on_type env (r, ty) = match ty with

@@ -351,7 +351,7 @@ module Full = struct
     | Tintersection [] -> text "mixed"
     | Tintersection tyl -> delimited_list (Space ^^ text "&" ^^ Space) "(" k tyl ")"
     | Tobject -> text "object"
-    | Tshape (fields_known, fdm) ->
+    | Tshape (shape_kind, fdm) ->
       let fields =
         let f_field (shape_map_key, { sft_optional; sft_ty }) =
         let key_delim =
@@ -371,9 +371,9 @@ module Full = struct
         shape_map fdm f_field
       in
       let fields =
-        match fields_known with
-        | FieldsFullyKnown -> fields
-        | FieldsPartiallyKnown _ -> fields @ [text "..."]
+        match shape_kind with
+        | Closed_shape -> fields
+        | Open_shape -> fields @ [text "..."]
       in
         list "shape(" id fields ")"
 
@@ -815,13 +815,11 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
     obj @@ kind "class" @ name cid @ args tys
   | Tobject ->
     obj @@ kind "object"
-  | Tshape (fields_known, fl) ->
+  | Tshape (shape_kind, fl) ->
     let fields_known =
-      match fields_known with
-      | FieldsFullyKnown -> true
-      | FieldsPartiallyKnown _ ->
-        (* TODO: maybe don't drop the partially-known fields? *)
-        false
+      match shape_kind with
+      | Closed_shape -> true
+      | Open_shape -> false
     in
     obj @@
       kind "shape" @
@@ -1204,10 +1202,10 @@ let to_locl_ty
       else
         get_bool "fields_known" (json, keytrace)
           >>= fun (fields_known, _fields_known_keytrace) ->
-        let fields_known =
+        let shape_kind =
           if fields_known
-          then FieldsFullyKnown
-          else FieldsPartiallyKnown Nast.ShapeMap.empty
+          then Closed_shape
+          else Open_shape
         in
         let fields = List.fold
           fields
@@ -1216,7 +1214,7 @@ let to_locl_ty
             Nast.ShapeMap.add k v shape_map
           )
         in
-        ty (Tshape (fields_known, fields))
+        ty (Tshape (shape_kind, fields))
 
     | "union" ->
       get_array "args" (json, keytrace) >>= fun (args, keytrace) ->

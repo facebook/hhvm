@@ -135,16 +135,10 @@ let rec ty (p, x) =
     | Tapply (sid, xl)     -> Tapply (string_id sid, List.map xl ty)
     | Taccess (root_ty, ids) ->
         Taccess (ty root_ty, List.map ids string_id)
-    | Tshape (fields_known, fdm) ->
-        Tshape (shape_fields_known fields_known,
-          ShapeFieldMap.map_and_rekey fdm shape_field_name ty)
+    | Tshape (shape_kind, fdm) ->
+        Tshape (shape_kind, ShapeFieldMap.map_and_rekey fdm shape_field_name ty)
 
   and ty_opt x = Option.map x ty
-
-  and shape_fields_known = function
-    | FieldsFullyKnown -> FieldsFullyKnown
-    | FieldsPartiallyKnown m ->
-      FieldsPartiallyKnown (ShapeMap.map_and_rekey m shape_field_name pos)
 
   and shape_field_name = function
     | Ast_defs.SFlit_int s -> Ast_defs.SFlit_int (string_id s)

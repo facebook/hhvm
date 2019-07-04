@@ -77,13 +77,13 @@ let rec pessimize_type env ?(trust_awaitable=false) (ty: decl ty) =
     wrap_like (r, Ttuple tyl)
   | _, Taccess _ ->
     wrap_like ty
-  | r, Tshape (fields_known, fields_map) ->
+  | r, Tshape (shape_kind, fields_map) ->
     let fields_map = Nast.ShapeMap.map (fun shape_field_ty ->
       let { sft_ty; _ } = shape_field_ty in
       let sft_ty = pessimize_wrap env sft_ty in
       { shape_field_ty with sft_ty }
     ) fields_map in
-    wrap_like (r, Tshape (fields_known, fields_map))
+    wrap_like (r, Tshape (shape_kind, fields_map))
 
 and pessimize_targs env targs tparams =
   if not (TypecheckerOptions.pessimize_types (Env.get_tcopt env)) then targs else

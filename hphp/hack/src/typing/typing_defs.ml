@@ -151,7 +151,7 @@ and _ ty_ =
    * known arms.
    *)
   | Tshape
-    : shape_fields_known * ('phase shape_field_type Nast.ShapeMap.t)
+    : shape_kind * ('phase shape_field_type Nast.ShapeMap.t)
       -> 'phase ty_
 
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
@@ -293,35 +293,9 @@ and dependent_type =
 
 and taccess_type = decl ty * Nast.sid list
 
-(* Local shape constructed using "shape" keyword has all the fields
- * known:
- *
- *   $s = shape('x' => 4, 'y' => 4);
- *
- * It has fields 'x' and 'y' and definitely no other fields. On the other
- * hand, shape types that come from typehints may (due to structural
- * subtyping of shapes) have some other, unlisted fields:
- *
- *   type s = shape('x' => int);
- *
- *   function f(s $s) {
- *   }
- *
- *   f(shape('x' => 4, 'y' => 5));
- *
- * The call to f is valid because of structural subtyping - shapes are
- * permitted to "forget" fields. But the 'y' field still exists at runtime,
- * and we cannot say inside the body of $f that we know that 'x' is the only
- * field. This is relevant when deciding if it's safe to omit optional fields
- * - if shape fields are not fully known, even optional fields have to be
- * explicitly set/unset.
- *
- * We also track in additional map of FieldsPartiallyKnown names of fields
- * that are known to not exist (because they were explicitly unset).
- *)
-and shape_fields_known =
-  | FieldsFullyKnown
-  | FieldsPartiallyKnown of Pos.t Nast.ShapeMap.t
+and shape_kind =
+  | Closed_shape
+  | Open_shape
 
 (* represents reactivity of function
    - None corresponds to non-reactive function
@@ -764,8 +738,8 @@ let rec ty_compare ?(normalize_lists = false) ty1 ty2 =
         end
       | Tarraykind ak1, Tarraykind ak2 ->
         array_kind_compare ak1 ak2
-      | Tshape (known1, fields1), Tshape (known2, fields2) ->
-        begin match shape_fields_known_compare known1 known2 with
+      | Tshape (shape_kind1, fields1), Tshape (shape_kind2, fields2) ->
+        begin match shape_kind_compare shape_kind1 shape_kind2 with
         | 0 ->
           List.compare (fun (k1,v1) (k2,v2) ->
             match Ast_defs.ShapeField.compare k1 k2 with
@@ -781,14 +755,11 @@ let rec ty_compare ?(normalize_lists = false) ty1 ty2 =
       | _ ->
         ty_con_ordinal ty1 - ty_con_ordinal ty2
 
-    and shape_fields_known_compare sfk1 sfk2 =
-      match sfk1, sfk2 with
-      | FieldsFullyKnown, FieldsFullyKnown -> 0
-      | FieldsFullyKnown, FieldsPartiallyKnown _ -> -1
-      | FieldsPartiallyKnown _, FieldsFullyKnown -> 1
-      | FieldsPartiallyKnown f1, FieldsPartiallyKnown f2 ->
-        List.compare Ast_defs.ShapeField.compare
-          (Nast.ShapeMap.keys f1) (Nast.ShapeMap.keys f2)
+    and shape_kind_compare sk1 sk2 =
+      match sk1, sk2 with
+      | Closed_shape, Closed_shape | Open_shape, Open_shape -> 0
+      | Closed_shape, Open_shape -> -1
+      | Open_shape, Closed_shape -> 1
 
     and shape_field_type_compare sft1 sft2 =
       match ty_compare sft1.sft_ty sft2.sft_ty with

@@ -54,7 +54,7 @@ class type type_mapper_type = object
   method on_tshape :
     env
       -> Reason.t
-      -> shape_fields_known
+      -> shape_kind
       -> locl shape_field_type Nast.ShapeMap.t
       -> result
 
@@ -90,7 +90,7 @@ class shallow_type_mapper: type_mapper_type = object(this)
   method on_tabstract env r ak opt_ty = env, (r, Tabstract (ak, opt_ty))
   method on_tclass env r x e tyl = env, (r, Tclass (x, e, tyl))
   method on_tobject env r = env, (r, Tobject)
-  method on_tshape env r fields_known fdm = env, (r, Tshape (fields_known, fdm))
+  method on_tshape env r shape_kind fdm = env, (r, Tshape (shape_kind, fdm))
 
   method on_type env (r, ty) = match ty with
     | Tvar n -> this#on_tvar env r n
@@ -116,7 +116,7 @@ class shallow_type_mapper: type_mapper_type = object(this)
     | Tclass (x, e, tyl) -> this#on_tclass env r x e tyl
     | Tdynamic -> this#on_tdynamic env r
     | Tobject -> this#on_tobject env r
-    | Tshape (fields_known, fdm) -> this#on_tshape env r fields_known fdm
+    | Tshape (shape_kind, fdm) -> this#on_tshape env r shape_kind fdm
 end
 
 (* Mixin class - adding it to shallow type mapper creates a mapper that
@@ -201,9 +201,9 @@ class deep_type_mapper = object(this)
   method! on_tclass env r x e tyl =
     let env, tyl = List.map_env env tyl this#on_type in
     env, (r, Tclass (x, e, tyl))
-  method! on_tshape env r fields_known fdm =
+  method! on_tshape env r shape_kind fdm =
     let env, fdm = ShapeFieldMap.map_env this#on_type env fdm in
-    env, (r, Tshape (fields_known, fdm))
+    env, (r, Tshape (shape_kind, fdm))
 
   method private on_opt_type env x = match x with
     | None -> env, None

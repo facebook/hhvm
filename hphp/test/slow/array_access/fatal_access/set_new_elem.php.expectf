@@ -1,0 +1,4 @@
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'Cannot use a scalar value as an array' in %s/set_new_elem.php:5
+Stack trace:
+#0 (): main()
+#1 {main}

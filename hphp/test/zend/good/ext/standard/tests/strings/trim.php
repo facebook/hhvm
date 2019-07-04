@@ -1,5 +1,5 @@
 <?hh
-
+<<__EntryPoint>> function main(): void {
 $tests = <<<TESTS
 'ABC' ===  trim('ABC')
 'ABC' === ltrim('ABC')
@@ -19,4 +19,4 @@ $tests = <<<TESTS
 TESTS;
 
 include(dirname(__FILE__) . '/../../../../tests/quicktester.inc');
-
+}

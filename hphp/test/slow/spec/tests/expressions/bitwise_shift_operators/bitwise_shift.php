@@ -7,7 +7,7 @@
 */
 
 require 'bitwise_shift_helper.inc';
-
+<<__EntryPoint>> function main(): void {
 error_reporting(-1);
 
 $i32 = 1 << 31; // if this is negative, we have a 32-bit int
@@ -45,4 +45,5 @@ for ($i = -129; $i <= 129; ++$i)
         $r = $NumBitsPerInt - (-$i % $NumBitsPerInt);
         echo "$i, ".$r."\n";
     }
+}
 }

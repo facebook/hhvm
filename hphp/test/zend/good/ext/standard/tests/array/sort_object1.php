@@ -8,8 +8,6 @@
  * testing sort() by providing integer/string object arrays with flag values are defualt, SORT_REGULAR
 */
 
-echo "*** Testing sort() : object functionality ***\n";
-
 // class declaration for integer objects
 class for_integer_sort
 {
@@ -28,7 +26,7 @@ class for_string_sort
   // initializing object member value
   function __construct($value){
     $this->class_value = $value;
-   }
+  }
 
   // return string value
   function __tostring() {
@@ -36,6 +34,8 @@ class for_string_sort
   }
 
 }
+<<__EntryPoint>> function main(): void {
+echo "*** Testing sort() : object functionality ***\n";
 
 // array of integer objects
 $unsorted_int_obj = array(
@@ -77,3 +77,4 @@ var_dump(sort(&$temp_array, SORT_REGULAR) );
 var_dump($temp_array);
 
 echo "Done\n";
+}

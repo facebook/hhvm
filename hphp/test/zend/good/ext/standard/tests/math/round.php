@@ -1,5 +1,5 @@
-<?hh // $Id$
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $long_max = PHP_INT_MAX;
 $long_min =  'PHP_INT_MIN';
 
@@ -27,3 +27,4 @@ $tests = <<<TESTS
 TESTS;
 
 include(dirname(__FILE__) . '/../../../../tests/quicktester.inc');
+}

@@ -1,7 +1,5 @@
 <?hh
 
-require_once 'nowdoc.inc';
-
 class e {
 
     const E = <<<'THISMUSTNOTERROR'

@@ -8,8 +8,6 @@
  * Pass natcasesort() an array of objects to test how it re-orders them
  */
 
-echo "*** Testing natcasesort() : object functionality ***\n";
-
 // class declaration for string objects
 class for_string_natcasesort
 {
@@ -17,7 +15,7 @@ class for_string_natcasesort
   // initializing object member value
   function __construct($value){
     $this->class_value = $value;
-   }
+  }
 
   // return string value
   function __tostring() {
@@ -26,6 +24,8 @@ class for_string_natcasesort
 
 }
 
+<<__EntryPoint>> function main(): void {
+echo "*** Testing natcasesort() : object functionality ***\n";
 
 
 // array of string objects
@@ -44,3 +44,4 @@ var_dump(natcasesort(&$unsorted_str_obj) );
 var_dump($unsorted_str_obj);
 
 echo "Done";
+}

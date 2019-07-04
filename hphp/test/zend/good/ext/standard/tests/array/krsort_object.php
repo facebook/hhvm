@@ -9,8 +9,6 @@
  *  2.SORT_REGULAR - compare items normally
 */
 
-echo "*** Testing krsort() : object functionality ***\n";
-
 // class declaration for integer objects
 class MyInteger
 {
@@ -28,7 +26,7 @@ class MyString
   // initializing object member value
   function __construct($value){
     $this->class_value = $value;
-   }
+  }
 
   // return string value
   function __tostring() {
@@ -36,6 +34,8 @@ class MyString
   }
 
 }
+<<__EntryPoint>> function main(): void {
+echo "*** Testing krsort() : object functionality ***\n";
 
 // array of integer objects with different key values
 $unsorted_int_obj = array (
@@ -77,3 +77,4 @@ var_dump(krsort(&$temp_array, SORT_REGULAR) );
 var_dump($temp_array);
 
 echo "Done\n";
+}

@@ -1,4 +1,4 @@
-<?hh 
+<?hh
 <<__EntryPoint>> function main(): void {
 $a = <<<A
 	A;

@@ -1,8 +1,9 @@
-<?hh // $Id$
+<?hh
+<<__EntryPoint>> function main(): void {
 $long_max = is_int(5000000000)? (double)9223372036854775807 : (double)0x7FFFFFFF;
 $long_min = -$long_max - 1;
 printf("%d,%d,%d,%d\n",is_float($long_min  ),is_float($long_max  ),
-					   is_int($long_min-1),is_int($long_max+1));
+                       is_int($long_min-1),is_int($long_max+1));
 
 $tests = <<<TESTS
  1   === abs(-1)
@@ -15,3 +16,4 @@ $tests = <<<TESTS
 TESTS;
 
 include(dirname(__FILE__) . '/../../../../tests/quicktester.inc');
+}

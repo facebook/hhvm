@@ -1,7 +1,6 @@
 <?hh
 
-require_once 'nowdoc.inc';
-
+<<__EntryPoint>> function main(): void {
 $x = <<<'ENDOFNOWDOC'
 This is a nowdoc test.
 NOTREALLYEND;
@@ -11,4 +10,4 @@ ENDOFNOWDOCWILLBESOON
 Now let's finish it
 ENDOFNOWDOC;
 print "{$x}\n";
-
+}

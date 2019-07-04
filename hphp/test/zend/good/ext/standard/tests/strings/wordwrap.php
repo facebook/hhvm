@@ -1,5 +1,5 @@
 <?hh
-
+<<__EntryPoint>> function main(): void {
 $tests = <<<TESTS
 "12345 12345 12345 12345" === wordwrap("12345 12345 12345 12345")
 "12345 12345\\n1234567890\\n1234567890" === wordwrap("12345 12345 1234567890 1234567890",12)
@@ -29,3 +29,4 @@ FALSE === @wordwrap(chr(0), 0, "")
 TESTS;
 
 include(dirname(__FILE__) . '/../../../../tests/quicktester.inc');
+}

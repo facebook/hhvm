@@ -1,4 +1,5 @@
-<?hh <<__EntryPoint>> function main(): void {
+<?hh
+<<__EntryPoint>> function main(): void {
 $test = "foo";
 $var = prefix<<<"MYLABEL"
 test: $test

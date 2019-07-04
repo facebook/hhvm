@@ -5,8 +5,7 @@
  * Source Code: ext/standard/array.c
 */
 
-/* Test array_search() with different possible needle values */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_search() with different needle values ***\n";
 $arrays = array (
   array(0),
@@ -16,7 +15,7 @@ $arrays = array (
   array(TRUE, FALSE),
   array("", array()),
   array("abcd\x00abcd\x00abcd"),
-  array("abcd\tabcd\nabcd\rabcd\0abcdefghij") 
+  array("abcd\tabcd\nabcd\rabcd\0abcdefghij")
 );
 
 $array_compare = array (
@@ -46,13 +45,14 @@ foreach($arrays as $array) {
   foreach($array_compare as $compare) {
     echo "-- Iteration $counter --\n";
     //strict option OFF
-    var_dump(array_search($compare,$array));  
+    var_dump(array_search($compare,$array));
     //strict option ON
-    var_dump(array_search($compare,$array,TRUE));  
+    var_dump(array_search($compare,$array,TRUE));
     //strict option OFF
-    var_dump(array_search($compare,$array,FALSE));  
+    var_dump(array_search($compare,$array,FALSE));
     $counter++;
- }
+  }
 }
-		
+
 echo "Done\n";
+}

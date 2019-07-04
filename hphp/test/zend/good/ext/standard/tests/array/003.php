@@ -1,5 +1,4 @@
 <?hh
-require(dirname(__FILE__) . '/data.inc');
 
 function cmp ($a, $b) {
     is_array ($a)
@@ -8,6 +7,9 @@ function cmp ($a, $b) {
         && ($b = array_sum ($b));
     return strcmp ((string)$a, (string)$b);
 }
+
+<<__EntryPoint>> function main(): void {
+require(dirname(__FILE__) . '/data.inc');
 
 echo " -- Testing uasort() -- \n";
 uasort (&$data, 'cmp');
@@ -21,3 +23,4 @@ var_dump ($data);
 echo "\n -- Testing usort() -- \n";
 usort (&$data, 'cmp');
 var_dump ($data);
+}

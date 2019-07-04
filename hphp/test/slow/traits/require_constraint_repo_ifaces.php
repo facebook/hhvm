@@ -11,9 +11,9 @@ class C2 extends Super {
   use ChildRequiresT;
 }
 
+<<__EntryPoint>>
 function main() {
   $c1 = new C1();
   $c2 = new C2();
   echo 'Done', "\n";
 }
-main();

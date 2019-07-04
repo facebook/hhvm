@@ -11,8 +11,6 @@
  * 2. SORT_REGULAR - compare items normally
 */
 
-echo "*** Testing asort() : object functionality ***\n";
-
 // class declaration for integer objects
 class for_integer_asort
 {
@@ -31,7 +29,7 @@ class for_string_asort
   // initializing object member value
   function __construct($value){
     $this->class_value = $value;
-   }
+  }
 
   // return string value
   function __tostring() {
@@ -39,6 +37,8 @@ class for_string_asort
   }
 
 }
+<<__EntryPoint>> function main(): void {
+echo "*** Testing asort() : object functionality ***\n";
 
 // array of integer objects
 $unsorted_int_obj = array (
@@ -80,3 +80,4 @@ var_dump(asort(&$temp_array, SORT_REGULAR) );
 var_dump($temp_array);
 
 echo "Done\n";
+}

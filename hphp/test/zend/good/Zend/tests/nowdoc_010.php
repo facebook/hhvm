@@ -1,8 +1,7 @@
 <?hh
 
-require_once 'nowdoc.inc';
+<<__EntryPoint>> function main(): void {
 $fooledYou = '';
-
 print <<<'ENDOFNOWDOC'
 {$fooledYou}ENDOFNOWDOC{$fooledYou}
 ENDOFNOWDOC{$fooledYou}
@@ -18,4 +17,4 @@ ENDOFNOWDOC{$fooledYou}
 ENDOFNOWDOC;
 
 print "{$x}";
-
+}

@@ -20,6 +20,7 @@ function serde($x) {
   }
 }
 
+<<__EntryPoint>>
 function test() {
   serde(@new TestStruct1());
   serde(@new TestStruct2());
@@ -29,4 +30,3 @@ function test() {
   serde(@new TestStruct6());
   serde(@new TestStruct7());
 }
-test();

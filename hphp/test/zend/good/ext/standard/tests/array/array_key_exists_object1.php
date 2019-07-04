@@ -1,6 +1,6 @@
 <?hh
 /* Prototype  : bool array_key_exists(mixed $key, array $search)
- * Description: Checks if the given key or index exists in the array 
+ * Description: Checks if the given key or index exists in the array
  * Source code: ext/standard/array.c
  * Alias to functions: key_exists
  */
@@ -9,21 +9,21 @@
  * Test basic functionality of array_key_exists() with objects
  */
 
-echo "*** Testing array_key_exists() : object functionality ***\n";
-
 class myClass {
-	var $var1;
-	var $var2;
-	var $var3;
-	
-	function __construct($a, $b, $c = null) {
-		$this->var1 = $a;
-		$this->var2 = $b;
-		if (!is_null($c)) {
-			$this->var3 = $c;
-		}
- 	}
+    var $var1;
+    var $var2;
+    var $var3;
+
+    function __construct($a, $b, $c = null) {
+        $this->var1 = $a;
+        $this->var2 = $b;
+        if (!is_null($c)) {
+            $this->var3 = $c;
+        }
+    }
 }
+<<__EntryPoint>> function main(): void {
+echo "*** Testing array_key_exists() : object functionality ***\n";
 
 echo "\n-- Do not assign a value to \$class1->var3 --\n";
 $class1 = new myClass ('a', 'b');
@@ -42,3 +42,4 @@ echo "\$class2:\n";
 var_dump($class2);
 
 echo "Done";
+}

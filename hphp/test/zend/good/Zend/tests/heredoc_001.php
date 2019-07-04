@@ -1,7 +1,6 @@
 <?hh
 
-require_once 'nowdoc.inc';
-
+<<__EntryPoint>> function main(): void {
 print <<<ENDOFHEREDOC
 This is a heredoc test.
 
@@ -13,4 +12,4 @@ This is another heredoc test.
 ENDOFHEREDOC;
 
 print "{$x}";
-
+}

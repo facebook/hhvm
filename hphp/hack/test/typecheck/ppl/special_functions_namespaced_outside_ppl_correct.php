@@ -23,12 +23,6 @@ class Infer {
   public function sample_model(int $s): int {
     return 0;
   }
-  public function sampleiid(int $s): int {
-    return 0;
-  }
-  public function observeiid(int $s): int {
-    return 0;
-  }
 }
 
 function sample(vec<string> $k): void {}
@@ -36,8 +30,6 @@ function observe(vec<string> $k): void {}
 function condition(vec<string> $k): void {}
 function factor(vec<string> $k): void {}
 function sample_model(vec<string> $k): void {}
-function sampleiid(vec<string> $k): void {}
-function observeiid(vec<string> $k): void {}
 
 //// PPL.php
 <?hh // strict
@@ -49,8 +41,6 @@ function observe(string $k): void {}
 function condition(string $k): void {}
 function factor(string $k): void {}
 function sample_model(string $k): void {}
-function sampleiid(string $k): void {}
-function observeiid(string $k): void {}
 
 class MyClass {
   public function test(): void {
@@ -59,15 +49,11 @@ class MyClass {
     observe("hi");
     condition("hi");
     sample_model("hi");
-    sampleiid("hi");
-    observeiid("hi");
 
     \sample(vec[]);
     \factor(vec[]);
     \observe(vec[]);
     \condition(vec[]);
     \sample_model(vec[]);
-    \sampleiid(vec[]);
-    \observeiid(vec[]);
   }
 }

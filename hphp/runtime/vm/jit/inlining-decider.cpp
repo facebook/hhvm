@@ -80,7 +80,7 @@ bool traceRefusal(SrcKey callerSk, const Func* callee, std::string why,
       bcStrn << bcOff;
       return bcStrn.str();
     } ();
-    inlLog.setStr("BC off", bcStr);
+    inlLog.setStr("bc_off", bcStr);
     inlLog.setStr("caller", caller->fullName()->data());
     inlLog.setStr("callee", calleeName);
     inlLog.setStr("reason", why);

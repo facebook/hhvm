@@ -757,22 +757,22 @@ void HttpServer::LogShutdownStats() {
   for (size_t i = 0; i < ShutdownStats.size(); ++i) {
     const auto& stat = ShutdownStats[i];
     auto const eventName = stat.eventName();
-    entry.setInt(folly::sformat("{}.rss", eventName), stat.rss);
-    entry.setInt(folly::sformat("{}.free", eventName),
+    entry.setInt(folly::sformat("{}_rss", eventName), stat.rss);
+    entry.setInt(folly::sformat("{}_free", eventName),
                  stat.memUsage.freeMb);
-    entry.setInt(folly::sformat("{}.cached", eventName),
+    entry.setInt(folly::sformat("{}_cached", eventName),
                  stat.memUsage.cachedMb);
-    entry.setInt(folly::sformat("{}.buffers", eventName),
+    entry.setInt(folly::sformat("{}_buffers", eventName),
                  stat.memUsage.buffersMb);
     // Log the difference since last event, if available
     if (i > 0) {
       const auto& last = ShutdownStats[i - 1];
       auto const lastEvent = last.eventName();
-      entry.setInt(folly::sformat("{}.duration", lastEvent),
+      entry.setInt(folly::sformat("{}_duration", lastEvent),
                    stat.time - last.time);
-      entry.setInt(folly::sformat("{}.requests", lastEvent),
+      entry.setInt(folly::sformat("{}_requests", lastEvent),
                    stat.requestsServed - last.requestsServed);
-      entry.setInt(folly::sformat("{}.rss.delta", lastEvent),
+      entry.setInt(folly::sformat("{}_rss_delta", lastEvent),
                    stat.rss - last.rss);
     }
   }

@@ -4345,7 +4345,9 @@ and class_get_ ~is_method ~is_const ~this_ty ?(explicit_tparams=[])
           | None ->
             smember_not_found p ~is_const ~is_method class_ mid;
             k (env, (Reason.Rnone, Typing_utils.terr env), None, None)
-          | Some { cc_type; cc_abstract; cc_pos; _ } ->
+          | Some { cc_type; cc_abstract; cc_pos; cc_visibility; _ } ->
+            let p_vis = Reason.to_pos (fst cc_type) in
+            TVis.check_class_access p env (p_vis, cc_visibility, false) cid class_;
             let env, cc_locl_type = Phase.localize ~ety_env env cc_type in
             let cc_abstract_info =
               if cc_abstract

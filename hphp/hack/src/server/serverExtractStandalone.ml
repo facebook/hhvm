@@ -9,10 +9,14 @@
 open Core_kernel
 open Typing_defs
 
+module SourceText = Full_fidelity_source_text
+module Syntax = Full_fidelity_positioned_syntax
+module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(Syntax)
+module SyntaxError = Full_fidelity_syntax_error
+
 exception FunctionNotFound
 exception UnexpectedDependency
 exception DependencyNotFound
-exception LazyClass
 
 let value_exn opt ex = match opt with
 | Some s -> s
@@ -46,7 +50,7 @@ let extract_object_declaration obj =
     let declaration = match String.index body '{' with
     | Some index -> String.sub body 0 index
     | None -> body in
-    declaration ^ "{\n  throw new Exception();\n}"
+    declaration ^ "{throw new Exception();}"
   | _ -> to_string obj
 
 let list objects = String.concat (Sequence.to_list objects) ~sep:", "
@@ -69,6 +73,25 @@ let list_direct_ancestors cls =
   let prefix_if_nonempty prefix s = if s = "" then "" else prefix ^ s in
   (prefix_if_nonempty "extends " extends) ^ (prefix_if_nonempty " implements " implements)
 
+let print_error source_text error =
+  let text = SyntaxError.to_positioned_string
+    error (SourceText.offset_to_position source_text) in
+  Hh_logger.log "%s\n" text
+
+let tree_from_string s =
+  let source_text = SourceText.make Relative_path.default s in
+  let mode = Full_fidelity_parser.parse_mode ~rust:false source_text in
+  let env = Full_fidelity_parser_env.make ?mode () in
+  let tree = SyntaxTree.make ~env source_text in
+  if List.is_empty (SyntaxTree.all_errors tree) then tree
+  else
+    (List.iter (SyntaxTree.all_errors tree) (print_error source_text);
+    raise Hackfmt_error.InvalidSyntax)
+
+let format text =
+  try Libhackfmt.format_tree (tree_from_string text)
+  with Hackfmt_error.InvalidSyntax -> text
+
 let get_class_declaration cls =
   let open Decl_provider in
   let cls = match get_class cls with
@@ -83,7 +106,6 @@ let get_class_declaration cls =
   | Ast_defs.Crecord -> "record" in
   let name = strip_namespace (Class.name cls) in
   (* TODO: traits, enums, records *)
-  (* TODO: auto-indent *)
   kind^" "^name^" "^(list_direct_ancestors cls)
 
 (* TODO: namespaces; mind that cls might start with \ at this point, remove if needed *)
@@ -94,7 +116,7 @@ let construct_class_declaration cls fields acc =
   | AllMembers _ | Extends _ -> raise UnexpectedDependency
   | _ -> extract_object_declaration f in
   let body = HashSet.fold (fun f accum -> accum^"\n"^(process_field f)) fields "" in
-  (decl^" {\n"^body^"\n}") :: acc
+  (format (decl^" {"^body^"}")) :: acc
 
 (* TODO: Tfun? Any other cases? *)
 let add_dep ty deps = match ty with
@@ -158,8 +180,9 @@ let collect_dependencies tcopt func =
   | AllMembers _ -> raise UnexpectedDependency
   | _ -> HashSet.add globals obj in
   HashSet.iter group_by_class dependencies;
-  let code = HashSet.fold (fun el l -> extract_object_declaration el :: l) globals [] in
-  Caml.Hashtbl.fold construct_class_declaration classes code
+  let global_code = HashSet.fold (fun el l -> extract_object_declaration el :: l) globals [] in
+  let code = Caml.Hashtbl.fold construct_class_declaration classes global_code in
+  List.map code format
 
 
 let go tcopt function_name =

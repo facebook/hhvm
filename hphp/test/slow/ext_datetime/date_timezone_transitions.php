@@ -5,7 +5,9 @@
 function main_date_timezone_transitions() {
 $timezone = new DateTimeZone("Europe/London");
 $transitions = $timezone->getTransitions(1000000, 999999999);
+var_dump(is_varray($transitions));
 var_dump($transitions[0]);
+var_dump(is_darray($transitions[0]));
 var_dump($transitions[3]);
 var_dump($transitions[count($transitions)-1]);
 

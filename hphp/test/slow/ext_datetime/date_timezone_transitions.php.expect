@@ -1,3 +1,4 @@
+bool(true)
 array(5) {
   ["ts"]=>
   int(1000000)
@@ -10,6 +11,7 @@ array(5) {
   ["abbr"]=>
   string(3) "BST"
 }
+bool(true)
 array(5) {
   ["ts"]=>
   int(89172000)

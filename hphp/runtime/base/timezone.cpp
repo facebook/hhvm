@@ -381,7 +381,7 @@ bool TimeZone::dst(int64_t timestamp) const {
 
 Array TimeZone::transitions(int64_t timestamp_begin, /* = k_PHP_INT_MIN */
                             int64_t timestamp_end /* = k_PHP_INT_MAX */) const {
-  Array ret;
+  Array ret = Array::CreateVArray();
 
   if (m_tztype == TIMELIB_ZONETYPE_ABBR) {
     // PHP 5.5+ just returns `false` here, but we're probably depending on
@@ -400,7 +400,7 @@ Array TimeZone::transitions(int64_t timestamp_begin, /* = k_PHP_INT_MIN */
   }
 
   if (!m_tzi) {
-    return ret;
+    return null_array;
   }
 
   uint32_t timecnt;
@@ -422,7 +422,7 @@ Array TimeZone::transitions(int64_t timestamp_begin, /* = k_PHP_INT_MIN */
     int index = m_tzi->trans ? m_tzi->trans_idx[lastBefore] : 0;
     ttinfo &offset = m_tzi->type[index];
     const char *abbr = m_tzi->timezone_abbr + offset.abbr_idx;
-    ret.append(make_map_array(
+    ret.append(make_darray(
       s_ts, timestamp_begin,
       s_time, dt->toString(DateTime::DateFormat::ISO8601),
       s_offset, offset.offset,
@@ -440,7 +440,7 @@ Array TimeZone::transitions(int64_t timestamp_begin, /* = k_PHP_INT_MIN */
       ttinfo &offset = m_tzi->type[index];
       const char *abbr = m_tzi->timezone_abbr + offset.abbr_idx;
 
-      ret.append(make_map_array(
+      ret.append(make_darray(
         s_ts, timestamp,
         s_time, dt->toString(DateTime::DateFormat::ISO8601),
         s_offset, offset.offset,
@@ -448,6 +448,9 @@ Array TimeZone::transitions(int64_t timestamp_begin, /* = k_PHP_INT_MIN */
         s_abbr, String(abbr, CopyString)
       ));
     }
+  }
+  if (ret.empty()) {
+    return null_array;
   }
   return ret;
 }

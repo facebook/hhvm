@@ -616,8 +616,6 @@ struct RuntimeOption {
   F(uint64_t, JitMatureSize,           125 << 20)                       \
   F(bool, JitMatureAfterWarmup,        true)                            \
   F(double, JitMaturityExponent,       1.)                              \
-  F(double, LogLoadedUnitsRate,        0.0)                             \
-  F(string, LogLoadedUnitsBaseDir,     "{PHP_ROOT}")                    \
   F(bool, JitTimer,                    kJitTimerDefault)                \
   F(int, JitConcurrently,              1)                               \
   F(int, JitThreads,                   4)                               \

@@ -141,10 +141,6 @@ std::string get_systemlib(std::string* hhas = nullptr,
 // Helper function for stats tracking with exceptions.
 void bump_counter_and_rethrow(bool isPsp);
 
-
-// Log the first time a unit is loaded
-void log_loaded_unit(const Unit* u);
-
 struct HphpSession {
   explicit HphpSession(Treadmill::SessionKind sk) {
     hphp_session_init(sk);

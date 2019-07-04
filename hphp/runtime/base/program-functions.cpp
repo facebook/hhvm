@@ -2724,68 +2724,12 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
   return ret;
 }
 
-namespace {
-
-THREAD_LOCAL(std::vector<const Unit*>, tl_loaded_units);
-
-const char* basename(const char* path) {
-  for (size_t i = strlen(path); i > 0; --i) {
-    if (path[i - 1] == '/') return &path[i];
-  }
-  return path;
-}
-
-std::string logPath(std::string prefix, std::string path) {
-  if (path.compare(0, prefix.size(), prefix) == 0) {
-    return path.substr(prefix.size());
-  }
-  return path;
-}
-
-void flushLoadedUnitLogs() {
-  if (tl_loaded_units.isNull()) return;
-  auto const prefix = [&] {
-    auto const& s = RuntimeOption::EvalLogLoadedUnitsBaseDir;
-    if (s.empty() || s.front() != '{' || s.back() != '}') return s;
-    auto const arr = php_global(s__SERVER);
-    String key{makeStaticString(s.substr(1, s.size() - 2))};
-    if (!arr.isArray() || !arr.toCArrRef().exists(key)) return s;
-    auto const val = arr.toArray()[key];
-    return val.isString() ? val.toCStrRef().get()->toCppString() : s;
-  }();
-  std::vector<folly::Future<folly::Unit>> futures;
-  for (auto u : *tl_loaded_units) {
-    StructuredLogEntry ent;
-    auto const path = logPath(prefix, u->filepath()->toCppString());
-    auto const sha1 = u->sha1().toString();
-    ent.setStr("filename", basename(u->filepath()->data()));
-    ent.setStr("filepath", path);
-    ent.setStr("sha1", sha1);
-    ent.force_init = true;
-    ent.ratelim.emplace(
-      "hhvm_loaded_files", path, RuntimeOption::EvalLogLoadedUnitsRate, futures
-    );
-    StructuredLog::log("hhvm_loaded_files", ent);
-  }
-  tl_loaded_units.destroy();
-  folly::collectAll(futures).wait();
-}
-
-}
-
-void log_loaded_unit(const Unit* u) {
-  tl_loaded_units->emplace_back(u);
-}
-
 void hphp_context_exit() {
   // Run shutdown handlers. This may cause user code to run.
   g_thread_safe_locale_handler->reset();
 
   auto const context = g_context.getNoCheck();
   context->onRequestShutdown();
-
-  // Log any loaded units
-  flushLoadedUnitLogs();
 
   // Extensions could have shutdown handlers
   ExtensionRegistry::requestShutdown();

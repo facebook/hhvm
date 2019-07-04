@@ -1568,13 +1568,6 @@ void Unit::initialMerge() {
     data_map::register_start(this);
   }
 
-  if (RuntimeOption::EvalLogLoadedUnitsRate > 0.0) {
-    auto const is_system = FileUtil::isSystemName(m_filepath->slice());
-    if (!is_system && !isEvalName(m_filepath)) {
-      log_loaded_unit(this);
-    }
-  }
-
   int state = 0;
   bool needsCompact = false;
   m_mergeState.store(MergeState::Merging, std::memory_order_relaxed);

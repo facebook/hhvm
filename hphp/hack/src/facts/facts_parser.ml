@@ -88,7 +88,7 @@ let flags_from_modifiers modifiers =
 
 let add_or_update_classish_declaration types name kind flags base_types
     require_extends require_implements =
-  match SMap.get name types with
+  match InvSMap.get name types with
   | Some old_tf ->
     let tf =
       if old_tf.kind <> kind then { old_tf with kind = TKMixed }
@@ -101,41 +101,41 @@ let add_or_update_classish_declaration types name kind flags base_types
       if tf.flags = flags then tf
       else combine_flags tf flags in
     let tf =
-      if SSet.is_empty base_types
+      if InvSSet.is_empty base_types
       then tf
       else {
         tf with base_types =
-                  SSet.union base_types tf.base_types } in
+                  InvSSet.union base_types tf.base_types } in
     let tf =
-      if SSet.is_empty require_extends
+      if InvSSet.is_empty require_extends
       then tf
       else {
         tf with require_extends =
-                  SSet.union require_extends tf.require_extends } in
+                  InvSSet.union require_extends tf.require_extends } in
     let tf =
-      if SSet.is_empty require_implements
+      if InvSSet.is_empty require_implements
       then tf
       else {
         tf with require_implements =
-                  SSet.union require_implements tf.require_implements } in
+                  InvSSet.union require_implements tf.require_implements } in
 
     if phys_equal tf old_tf then types
-    else SMap.add name tf types
+    else InvSMap.add name tf types
 
   | None ->
     let base_types =
       if kind = TKEnum
-      then SSet.add "HH\\BuiltinEnum" base_types
+      then InvSSet.add "HH\\BuiltinEnum" base_types
       else base_types in
     let tf =
       { base_types; flags; kind; require_extends; require_implements } in
-    SMap.add name tf types
+    InvSMap.add name tf types
 
 let typenames_from_list ns init l =
   let open FSC in
   let aux s n =
     match qualified_name ns n with
-    | Some n -> SSet.add n s
+    | Some n -> InvSSet.add n s
     | None -> s in
   match l with
   | List l -> List.fold_left l ~init ~f:aux
@@ -160,12 +160,12 @@ let type_info_from_class_body facts ns check_require body =
     match n with
     | RequireExtendsClause name when check_require ->
       begin match qualified_name ns name with
-        | Some name -> SSet.add name extends, implements, trait_uses, constants
+        | Some name -> InvSSet.add name extends, implements, trait_uses, constants
         | None -> acc
       end
     | RequireImplementsClause name when check_require ->
       begin match qualified_name ns name with
-        | Some name -> extends, SSet.add name implements, trait_uses, constants
+        | Some name -> extends, InvSSet.add name implements, trait_uses, constants
         | None -> acc
       end
     | TraitUseClause uses ->
@@ -176,7 +176,7 @@ let type_info_from_class_body facts ns check_require body =
       let constants = defines_from_method_body constants body in
       extends, implements, trait_uses, constants
     | _ -> acc in
-  let init = SSet.empty, SSet.empty, SSet.empty, facts.constants in
+  let init = InvSSet.empty, InvSSet.empty, InvSSet.empty, facts.constants in
   let extends, implements, trait_uses, constants =
     match body with
     | List l -> List.fold_left l ~init ~f:aux
@@ -225,7 +225,7 @@ let rec collect (ns, facts as acc) n =
       | Some name ->
         let types =
           add_or_update_classish_declaration facts.types name
-            TKEnum flags_final SSet.empty SSet.empty SSet.empty in
+            TKEnum flags_final InvSSet.empty InvSSet.empty InvSSet.empty in
         let facts =
           if phys_equal types facts.types
           then facts

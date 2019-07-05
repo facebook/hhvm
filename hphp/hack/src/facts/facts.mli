@@ -7,6 +7,10 @@
  *
  *)
 
+module InvStringKey : Map.OrderedType with type t = string
+module InvSMap : MyMap.S with type key = InvStringKey.t
+module InvSSet : Caml.Set.S with type elt = InvStringKey.t
+
 type type_kind =
   | TKClass
   | TKInterface
@@ -16,15 +20,15 @@ type type_kind =
   | TKMixed
 
 type type_facts = {
-  base_types: SSet.t;
+  base_types: InvSSet.t;
   kind: type_kind;
   flags: int;
-  require_extends: SSet.t;
-  require_implements: SSet.t;
+  require_extends: InvSSet.t;
+  require_implements: InvSSet.t;
 }
 
 type facts = {
-  types: type_facts SMap.t;
+  types: type_facts InvSMap.t;
   functions: string list;
   constants: string list;
   type_aliases: string list;

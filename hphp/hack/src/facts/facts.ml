@@ -11,6 +11,14 @@ open Core_kernel
 
 module J = Hh_json
 
+module InvStringKey = struct
+  type t = string
+  let compare (x: t) (y: t) = Pervasives.compare y x
+end
+
+module InvSMap = MyMap.Make(InvStringKey)
+module InvSSet = Caml.Set.Make(InvStringKey)
+
 type type_kind =
   | TKClass
   | TKInterface
@@ -28,22 +36,22 @@ let type_kind_to_string = function
   | TKMixed -> "mixed"
 
 type type_facts = {
-  base_types: SSet.t;
+  base_types: InvSSet.t;
   kind: type_kind;
   flags: int;
-  require_extends: SSet.t;
-  require_implements: SSet.t;
+  require_extends: InvSSet.t;
+  require_implements: InvSSet.t;
 }
 
 type facts = {
-  types: type_facts SMap.t;
+  types: type_facts InvSMap.t;
   functions: string list;
   constants: string list;
   type_aliases: string list;
 }
 
 let empty = {
-  types = SMap.empty;
+  types = InvSMap.empty;
   functions = [];
   constants = [];
   type_aliases = [];
@@ -59,10 +67,10 @@ let hex_number_to_json s =
   J.JSON_Number number
 
 let add_member ~include_empty name values members =
-  if SSet.is_empty values && not include_empty
+  if InvSSet.is_empty values && not include_empty
   then members
   else
-    let elements = SSet.fold (fun el acc -> J.JSON_String el :: acc ) values [] in
+    let elements = InvSSet.fold (fun el acc -> J.JSON_String el :: acc ) values [] in
     (name, J.JSON_Array elements) :: members
 
 let list_to_json_array l =
@@ -92,7 +100,7 @@ let facts_to_json ~md5 ~sha1 facts =
   let sha1sum = ("sha1sum", J.JSON_String sha1) in
   let type_facts_json =
     let elements =
-      SMap.fold (fun name v acc -> (type_facts_to_json name v) :: acc)
+      InvSMap.fold (fun name v acc -> (type_facts_to_json name v) :: acc)
         facts.types [] in
     "types", J.JSON_Array elements in
   let functions_json =

@@ -1,4 +1,2 @@
-File "let_lambda_hof.php", line 5, characters 38-39:
-Was expecting a function value but type is unknown (Typing[4297])
-File "let_lambda_hof.php", line 5, characters 21-22:
-It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter
+File "let_lambda_hof.php", line 5, characters 29-47:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

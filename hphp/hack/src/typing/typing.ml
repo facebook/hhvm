@@ -2508,16 +2508,25 @@ and expr_
             if TypecheckerOptions.new_inference_lambda (Env.get_tcopt env)
             then begin
               Typing_log.increment_feature_count env FL.Lambda.fresh_tyvar_params;
-              let freshen_untyped_param env ft_param =
-                match snd ft_param.fp_type with
-                | Tany ->
-                  let env, ty = Env.fresh_invariant_type_var env ft_param.fp_pos in
-                  env, { ft_param with fp_type = ty }
-                | _ ->
-                  env, ft_param in
-              let env, ft_params = List.map_env env declared_ft.ft_params freshen_untyped_param in
-              let declared_ft = { declared_ft with ft_params } in
-              check_body_under_known_params env declared_ft
+              let freshen_ftype env ft =
+                let freshen_untyped_param env ft_param =
+                  match snd ft_param.fp_type with
+                  | Tany ->
+                    let env, ty = Env.fresh_type env ft_param.fp_pos in
+                    env, { ft_param with fp_type = ty }
+                  | _ ->
+                    env, ft_param in
+                let env, ft_params = List.map_env env ft.ft_params freshen_untyped_param in
+                let env, ft_ret =
+                  match snd ft.ft_ret with
+                  | Tany ->
+                    Env.fresh_type env ft.ft_pos
+                  | _ ->
+                    env, ft.ft_ret in
+                env, { ft with ft_params; ft_ret } in
+              let env, declared_ft = freshen_ftype env declared_ft in
+              let env = Env.set_tyvar_variance env (Reason.Rnone, Tfun declared_ft) in
+              check_body_under_known_params env ~ret_ty:declared_ft.ft_ret declared_ft
             end
             (* Legacy lambda inference *)
             else begin

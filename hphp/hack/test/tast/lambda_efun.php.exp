@@ -15,7 +15,7 @@
               (([15:3-22], (function(int $z): int)),
                (Binop ((Eq None),
                   (([15:3-5], (function(int $z): int)), (Lvar ([15:3-5], $x))),
-                  (([15:8-22], (function(int $z): _)),
+                  (([15:8-22], (function(int $z): int)),
                    (Lfun (
                       { f_span = [15:8-22]; f_annotation = ();
                         f_mode = <opaque>; f_ret = None;
@@ -63,7 +63,7 @@
               (([18:3-20:4], (function(int $z): int)),
                (Binop ((Eq None),
                   (([18:3-5], (function(int $z): int)), (Lvar ([18:3-5], $x))),
-                  (([18:8-20:4], (function(int $z): _)),
+                  (([18:8-20:4], (function(int $z): int)),
                    (Efun (
                       { f_span = [18:8-20:4]; f_annotation = ();
                         f_mode = <opaque>; f_ret = None;
@@ -112,7 +112,7 @@
                (Binop ((Eq None),
                   (([23:3-5], (function(int $a, int $b): int)),
                    (Lvar ([23:3-5], $x))),
-                  (([23:8-28], (function(int $a, int $b): _)),
+                  (([23:8-28], (function(int $a, int $b): int)),
                    (Lfun (
                       { f_span = [23:8-28]; f_annotation = ();
                         f_mode = <opaque>; f_ret = None;

@@ -2773,7 +2773,9 @@ let expand_type_and_solve env ~description_of_expected p ty =
       let env = always_solve_tyvar ~freshen:true env r v in
       Env.expand_var env r v) in
   match ty, ety with
-  | (r, Tvar v), (_, Tunion []) when Env.get_tyvar_appears_invariantly env v ->
+  | (r, Tvar v), (_, Tunion [])
+  when Env.get_tyvar_appears_invariantly env v
+    || TypecheckerOptions.new_inference_lambda (Env.get_tcopt env) ->
     Errors.unknown_type description_of_expected p (Reason.to_string "It is unknown" r);
     let env = Env.set_tyvar_eager_solve_fail env v in
     env, (Reason.Rsolve_fail p, TUtils.terr env)
@@ -2886,6 +2888,7 @@ let expand_type_and_narrow env ?default ~description_of_expected widen_concrete_
  * their variance), and pop variables off the stack
  *)
 let close_tyvars_and_solve env =
+  Env.log_env_change "close_tyvars_and_solve" env @@
   let tyvars = Env.get_current_tyvars env in
   let env = Env.close_tyvars env in
   List.fold_left tyvars ~init:env

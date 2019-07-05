@@ -9,7 +9,6 @@ function test(bool $b): void {
     },
     array('test'),
   );
-  hh_show($arr);
   foreach ($arr as $x) {
     if ($x) {
     }

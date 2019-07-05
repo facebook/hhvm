@@ -1,5 +1,7 @@
 <?hh //strict
 
+function checkExpected((function(mixed):arraykey) $f):void { }
+
 function test(bool $b): void {
   if ($b) {
     $f = $x ==> 3;
@@ -7,5 +9,5 @@ function test(bool $b): void {
     $f = $y ==> 'aa';
   }
 
-  hh_show($f);
+  checkExpected($f);
 }

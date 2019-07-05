@@ -1270,8 +1270,6 @@ public:
 };
 static_assert(sizeof(RuntimeOption) == 1, "no instance variables");
 
-const std::string& getLastSeenRepoConfigPath();
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

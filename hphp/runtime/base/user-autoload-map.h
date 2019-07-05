@@ -67,13 +67,13 @@ struct UserAutoloadMap : AutoloadMap {
                                      String root);
 
   virtual folly::Optional<String> getTypeFile(
-      const String& typeName) override;
+      const String& typeName) const override;
   virtual folly::Optional<String> getFunctionFile(
-      const String& functionName) override;
+      const String& functionName) const override;
   virtual folly::Optional<String> getConstantFile(
-      const String& constantName) override;
+      const String& constantName) const override;
   virtual folly::Optional<String> getTypeAliasFile(
-      const String& typeAliasName) override;
+      const String& typeAliasName) const override;
 
   virtual bool canHandleFailure() const override {
     return !m_failFunc.isNull();

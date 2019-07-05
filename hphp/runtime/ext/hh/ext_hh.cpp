@@ -20,8 +20,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <folly/json.h>
-
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/container-functions.h"
@@ -30,7 +28,6 @@
 #include "hphp/runtime/base/request-tracing.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/unit-cache.h"
-#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"

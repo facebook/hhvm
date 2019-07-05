@@ -100,4 +100,3 @@ HPHP::high_arena_tcache # Only needed in lowptr builds.
 HPHP::s_bigint_data # hphp/zend/ is also used by Hack Native
 HPHP::s_bigint_data_guard # hphp/zend/ is also used by Hack Native
 HPHP::(anonymous namespace)::s_localCounters
-HPHP::WatchmanAutoload::t_adb

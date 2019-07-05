@@ -54,7 +54,7 @@ struct AutoloadMap {
    * Block until the AutoloadMap is up-to-date. Return true on success and
    * false on failure.
    */
-  virtual bool sync() {
+  virtual bool sync(folly::dynamic) {
     return true;
   }
 
@@ -66,7 +66,7 @@ struct AutoloadMap {
    * one place.
    */
   folly::Optional<String> getFile(KindOf kind,
-                                  const String& typeName) {
+                                  const String& typeName) const {
     switch (kind) {
       case AutoloadMap::KindOf::Type:
         return getTypeFile(typeName);
@@ -84,13 +84,13 @@ struct AutoloadMap {
    * Map symbols to files
    */
   virtual folly::Optional<String> getTypeFile(
-      const String& typeName) = 0;
+      const String& typeName) const = 0;
   virtual folly::Optional<String> getFunctionFile(
-      const String& functionName) = 0;
+      const String& functionName) const = 0;
   virtual folly::Optional<String> getConstantFile(
-      const String& constantName) = 0;
+      const String& constantName) const = 0;
   virtual folly::Optional<String> getTypeAliasFile(
-      const String& typeAliasName) = 0;
+      const String& typeAliasName) const = 0;
 
   virtual bool canHandleFailure() const = 0;
   virtual Result handleFailure(KindOf kind, const String& className,

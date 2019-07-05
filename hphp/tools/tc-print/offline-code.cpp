@@ -117,12 +117,14 @@ TCA OfflineCode::getTransJmpTargets(const TransRec *transRec,
   return aFallThru;
 }
 
-void OfflineCode::printDisasm(TCA startAddr, uint32_t len,
-                                 const vector<TransBCMapping>& bcMap,
-                                 const PerfEventsMap<TCA>& perfEvents,
-                                 bool hostOpcodes) {
+void OfflineCode::printDisasm(std::ostream& os,
+                              TCA startAddr,
+                              uint32_t len,
+                              const vector<TransBCMapping>& bcMap,
+                              const PerfEventsMap<TCA>& perfEvents,
+                              bool hostOpcodes) {
   TCRegion tcr = findTCRegionContaining(startAddr);
-  disasm(tcRegions[tcr].file, tcRegions[tcr].baseAddr, startAddr, len,
+  disasm(os, tcRegions[tcr].file, tcRegions[tcr].baseAddr, startAddr, len,
          perfEvents, BCMappingInfo(tcr, bcMap), true, hostOpcodes);
 }
 
@@ -173,7 +175,8 @@ string OfflineCode::getSymbolName(TCA addr) {
   return sym;
 }
 
-size_t OfflineCode::printBCMapping(BCMappingInfo bcMappingInfo,
+size_t OfflineCode::printBCMapping(std::ostream& os,
+                                   BCMappingInfo bcMappingInfo,
                                    size_t currBC,
                                    TCA ip) {
 
@@ -229,14 +232,16 @@ size_t OfflineCode::printBCMapping(BCMappingInfo bcMappingInfo,
         "<<< couldn't find unit {} to print bytecode at offset {} >>>\n",
         curr.sha1, curr.bcStart);
     }
-    g_logger->printLine(lineInfo.str());
+    os << lineInfo.str();
     currBC++;
   }
 
   return currBC;
 }
 
-void OfflineCode::printEventStats(TCA address, uint32_t instrLen,
+void OfflineCode::printEventStats(std::ostream& os,
+                                  TCA address,
+                                  uint32_t instrLen,
                                   const PerfEventsMap<TCA>& perfEvents) {
   for (size_t i = getFirstEventType(); i < getNumEventTypes(); i++) {
     PerfEventType event = static_cast<PerfEventType>(i);
@@ -249,7 +254,7 @@ void OfflineCode::printEventStats(TCA address, uint32_t instrLen,
                                eventTypeToSmallCaption(event),
                                eventCount).str();
     }
-    std::cout << folly::format("{:<10} ", eventStr);
+    os << folly::format("{:<10} ", eventStr);
   }
 }
 

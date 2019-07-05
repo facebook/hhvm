@@ -77,7 +77,8 @@ struct OfflineCode {
     closeFiles();
   }
 
-  void printDisasm(TCA startAddr,
+  void printDisasm(std::ostream&,
+                   TCA startAddr,
                    uint32_t len,
                    const std::vector<TransBCMapping>& bcMap,
                    const PerfEventsMap<TCA>& perfEvents,
@@ -120,7 +121,8 @@ private:
 
   bool tcRegionContains(TCRegion tcr, TCA addr) const;
 
-  void disasm(FILE*  file,
+  void disasm(std::ostream&,
+              FILE*  file,
               TCA    fileStartAddr,
               TCA    codeStartAddr,
               uint64_t codeLen,
@@ -137,9 +139,13 @@ private:
 
   std::string getSymbolName(TCA addr);
 
-  size_t printBCMapping(BCMappingInfo bcMappingInfo, size_t currBC, TCA ip);
+  size_t printBCMapping(std::ostream&,
+                        BCMappingInfo bcMappingInfo,
+                        size_t currBC,
+                        TCA ip);
 
-  void printEventStats(TCA address,
+  void printEventStats(std::ostream&,
+                       TCA address,
                        uint32_t instrLen,
                        const PerfEventsMap<TCA>& perfEvents);
 };

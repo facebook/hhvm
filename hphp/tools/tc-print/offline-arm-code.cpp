@@ -91,7 +91,8 @@ TCA OfflineCode::collectJmpTargets(FILE *file,
 }
 
 
-void OfflineCode::disasm(FILE* file,
+void OfflineCode::disasm(const ostream& os,
+                         FILE* file,
                          TCA fileStartAddr,
                          TCA codeStartAddr,
                          uint64_t codeLen,
@@ -136,12 +137,13 @@ void OfflineCode::disasm(FILE* file,
   for (frontier = code, ip = codeStartAddr; frontier < code + codeLen; ) {
     dec.Decode(frontier);
 
-    currBC = printBCMapping(bcMappingInfo, currBC, (TCA)ip);
-    if (printAddr) g_logger->printAsm("%14p: ", ip);
+    currBC = printBCMapping(os, bcMappingInfo, currBC, (TCA)ip);
+    if (printAddr) os << folly::format("{:>#14x}: ", ip);
 
     if (printBinary) {
-      g_logger->printAsm("%08" PRIx32, *reinterpret_cast<int32_t*>(frontier));
-      g_logger->printAsm("%10s", "");
+      os << folly::format("{:08" PRIx32 "}",
+                          *reinterpret_cast<int32_t*>(frontier));
+      os << string(10, ' ');
     }
 
     // Shadow potential call destinations based on fixed sequence.
@@ -172,12 +174,12 @@ void OfflineCode::disasm(FILE* file,
     }
 
     if (! perfEvents.empty()) {
-      printEventStats((TCA)ip, kInstructionSize, perfEvents);
+      printEventStats(os, (TCA)ip, kInstructionSize, perfEvents);
     } else {
-      g_logger->printAsm("%48s", "");
+      os << string(48, ' ');
     }
 
-    g_logger->printAsm("%s%s\n", codeStr, callDest.c_str());
+    os << folly::format("{}{}\n", codeStr, callDest);
 
     frontier += kInstructionSize;
     ip += kInstructionSize;

@@ -502,6 +502,17 @@ void loadProfData() {
   }
 }
 
+const char* getDisasm(OfflineCode* code,
+                      TCA startAddr,
+                      uint32_t len,
+                      const std::vector<TransBCMapping>& bcMap,
+                      const PerfEventsMap<TCA>& perfEvents,
+                      bool hostOpcodes) {
+  std::ostringstream os;
+  code->printDisasm(os, startAddr, len, bcMap, perfEvents, hostOpcodes);
+  return os.str().c_str();
+}
+
 // Prints the metadata, bytecode, and disassembly for the given translation
 void printTrans(TransID transId) {
   always_assert(transId < NTRANS);
@@ -542,24 +553,36 @@ void printTrans(TransID transId) {
 
   g_logger->printGeneric("----------\n%s: main\n----------\n",
                          transCode->getArchName());
-  transCode->printDisasm(tRec->aStart, tRec->aLen, tRec->bcMapping,
-                         tcaPerfEvents, hostOpcodes);
+  g_logger->printAsm("%s", getDisasm(transCode,
+                                     tRec->aStart,
+                                     tRec->aLen,
+                                     tRec->bcMapping,
+                                     tcaPerfEvents,
+                                     hostOpcodes));
 
   g_logger->printGeneric("----------\n%s: cold\n----------\n",
                          transCode->getArchName());
   // Sometimes acoldStart is the same as afrozenStart.  Avoid printing the code
   // twice in such cases.
   if (tRec->acoldStart != tRec->afrozenStart) {
-    transCode->printDisasm(tRec->acoldStart, tRec->acoldLen, tRec->bcMapping,
-                           tcaPerfEvents, hostOpcodes);
+    g_logger->printAsm("%s", getDisasm(transCode,
+                                       tRec->acoldStart,
+                                       tRec->acoldLen,
+                                       tRec->bcMapping,
+                                       tcaPerfEvents,
+                                       hostOpcodes));
   }
 
   g_logger->printGeneric("----------\n%s: frozen\n----------\n",
                          transCode->getArchName());
-  transCode->printDisasm(tRec->afrozenStart, tRec->afrozenLen, tRec->bcMapping,
-                         tcaPerfEvents, hostOpcodes);
-
+  g_logger->printAsm("%s", getDisasm(transCode,
+                                     tRec->afrozenStart,
+                                     tRec->afrozenLen,
+                                     tRec->bcMapping,
+                                     tcaPerfEvents,
+                                     hostOpcodes));
   g_logger->printGeneric("----------\n");
+
 }
 
 
@@ -807,27 +830,30 @@ void printTopBytecodes(const OfflineTransData* tdata,
 
     g_logger->printGeneric("----------\n%s: main\n----------\n",
                            olCode->getArchName());
-    olCode->printDisasm(tfrag.aStart,
-                        tfrag.aLen,
-                        trec->bcMapping,
-                        samples,
-                        hostOpcodes);
+    g_logger->printAsm("%s", getDisasm(olCode,
+                                       tfrag.aStart,
+                                      tfrag.aLen,
+                                      trec->bcMapping,
+                                      samples,
+                                      hostOpcodes));
 
     g_logger->printGeneric("----------\n%s: cold\n----------\n",
                            olCode->getArchName());
-    olCode->printDisasm(tfrag.acoldStart,
-                        tfrag.acoldLen,
-                        trec->bcMapping,
-                        samples,
-                        hostOpcodes);
+    g_logger->printAsm("%s", getDisasm(olCode,
+                                       tfrag.acoldStart,
+                                       tfrag.acoldLen,
+                                       trec->bcMapping,
+                                       samples,
+                                       hostOpcodes));
 
     g_logger->printGeneric("----------\n%s: frozen\n----------\n",
                            olCode->getArchName());
-    olCode->printDisasm(tfrag.afrozenStart,
-                        tfrag.afrozenLen,
-                        trec->bcMapping,
-                        samples,
-                        hostOpcodes);
+    g_logger->printAsm("%s", getDisasm(olCode,
+                                       tfrag.afrozenStart,
+                                       tfrag.afrozenLen,
+                                       trec->bcMapping,
+                                       samples,
+                                       hostOpcodes));
   }
 }
 

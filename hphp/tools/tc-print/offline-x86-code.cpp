@@ -116,14 +116,15 @@ TCA OfflineCode::collectJmpTargets(FILE  *file,
 // by fileStartAddr, for the address range given by
 // [codeStartAddr, codeStartAddr + codeLen)
 
-void OfflineCode::disasm(FILE* file,
-                            TCA   fileStartAddr,
-                            TCA   codeStartAddr,
-                            uint64_t codeLen,
-                            const PerfEventsMap<TCA>& perfEvents,
-                            BCMappingInfo bcMappingInfo,
-                            bool printAddr,
-                            bool printBinary) {
+void OfflineCode::disasm(std::ostream& os,
+                         FILE* file,
+                         TCA   fileStartAddr,
+                         TCA   codeStartAddr,
+                         uint64_t codeLen,
+                         const PerfEventsMap<TCA>& perfEvents,
+                         BCMappingInfo bcMappingInfo,
+                         bool printAddr,
+                         bool printBinary) {
 
   char codeStr[MAX_INSTR_ASM_LEN];
   xed_uint8_t* code = (xed_uint8_t*) alloca(codeLen);
@@ -167,19 +168,20 @@ void OfflineCode::disasm(FILE* file,
     }
 
     // Annotate the x86 with its bytecode.
-    currBC = printBCMapping(bcMappingInfo, currBC, (TCA)ip);
+    currBC = printBCMapping(os, bcMappingInfo, currBC, (TCA)ip);
 
-    if (printAddr) g_logger->printAsm("%14p: ", ip);
-
+    if (printAddr) {
+      os << folly::format("{:>#14x}: ", reinterpret_cast<uintptr_t>(ip));
+    }
     uint32_t instrLen = xed_decoded_inst_get_length(&xedd);
 
     if (printBinary) {
       uint32_t i;
       for (i=0; i < instrLen; i++) {
-        g_logger->printAsm("%02X", frontier[i]);
+        os << folly::format("{:02X}", frontier[i]);
       }
       for (; i < 16; i++) {
-        g_logger->printAsm("  ");
+        os << "  ";
       }
     }
 
@@ -228,11 +230,11 @@ void OfflineCode::disasm(FILE* file,
     }
 
     if (!perfEvents.empty()) {
-      printEventStats((TCA)ip, instrLen, perfEvents);
+      printEventStats(os, (TCA)ip, instrLen, perfEvents);
     } else {
-      g_logger->printAsm("%48s", "");
+      os << string(48, ' ');
     }
-    g_logger->printAsm("%s%s\n", codeStr, callDest.c_str());
+    os << folly::format("{}{}\n", codeStr, callDest);
 
     frontier += instrLen;
     ip       += instrLen;

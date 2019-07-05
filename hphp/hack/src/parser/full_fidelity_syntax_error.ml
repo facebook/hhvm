@@ -741,3 +741,6 @@ let only_soft_allowed =
 
 let soft_no_arguments =
   "The __Soft attribute does not take arguments."
+
+let no_legacy_soft_typehints =
+  "The @ syntax for soft typehints is not allowed. Use the __Soft attribute instead."

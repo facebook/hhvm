@@ -35,6 +35,11 @@ let enable_class_level_where_clauses = GlobalOptions.po_enable_class_level_where
 let with_enable_constant_visibility_modifiers po b =
   { po with GlobalOptions.po_enable_constant_visibility_modifiers = b }
 
+let disable_legacy_soft_typehints = GlobalOptions.po_disable_legacy_soft_typehints
+
+let with_disable_legacy_soft_typehints po b =
+  { po with GlobalOptions.po_disable_legacy_soft_typehints = b }
+
 let make
   ~auto_namespace_map
   ~codegen
@@ -46,6 +51,7 @@ let make
   ~rust
   ~enable_constant_visibility_modifiers
   ~enable_class_level_where_clauses
+  ~disable_legacy_soft_typehints
 = GlobalOptions.{
   default with
   po_auto_namespace_map = auto_namespace_map;
@@ -58,4 +64,5 @@ let make
   po_rust = rust;
   po_enable_constant_visibility_modifiers = enable_constant_visibility_modifiers;
   po_enable_class_level_where_clauses = enable_class_level_where_clauses;
+  po_disable_legacy_soft_typehints = disable_legacy_soft_typehints;
 }

@@ -58,6 +58,7 @@ type t = {
   tico_invalidate_smart : bool;
   po_enable_constant_visibility_modifiers : bool;
   po_enable_class_level_where_clauses : bool;
+  po_disable_legacy_soft_typehints : bool;
 } [@@deriving show]
 
 let tco_experimental_instanceof = "instanceof"
@@ -241,6 +242,7 @@ let default = {
  tico_invalidate_smart = false;
  po_enable_constant_visibility_modifiers = false;
  po_enable_class_level_where_clauses = false;
+ po_disable_legacy_soft_typehints = false;
 }
 
 let make
@@ -293,6 +295,7 @@ let make
   ?(tico_invalidate_smart = default.tico_invalidate_smart)
   ?(po_enable_constant_visibility_modifiers = default.po_enable_constant_visibility_modifiers)
   ?(po_enable_class_level_where_clauses = default.po_enable_class_level_where_clauses)
+  ?(po_disable_legacy_soft_typehints = default.po_disable_legacy_soft_typehints)
   ()
 = {
   tco_safe_array;
@@ -345,6 +348,7 @@ let make
   tico_invalidate_smart;
   po_enable_constant_visibility_modifiers;
   po_enable_class_level_where_clauses;
+  po_disable_legacy_soft_typehints;
 }
 let tco_safe_array t = t.tco_safe_array
 let tco_safe_vector_array t = t.tco_safe_vector_array
@@ -410,6 +414,8 @@ let tco_disallow_unresolved_type_variables t = t.tco_disallow_unresolved_type_va
 let po_enable_constant_visibility_modifiers t = t.po_enable_constant_visibility_modifiers
 
 let po_enable_class_level_where_clauses t = t.po_enable_class_level_where_clauses
+
+let po_disable_legacy_soft_typehints t = t.po_disable_legacy_soft_typehints
 
 let setup_pocket_universes env enabled =
   let exp_features = env.tco_experimental_features in

@@ -471,6 +471,7 @@ let make_popt () =
     ~enable_constant_visibility_modifiers:(enable_constant_visibility_modifiers co)
     ~enable_class_level_where_clauses:(enable_class_level_where_clauses co)
     ~rust:(use_rust_parser co)
+    ~disable_legacy_soft_typehints:(disable_legacy_soft_typehints co)
 
 let process_single_source_unit compiler_options
   handle_output handle_exception filename source_text source_root =

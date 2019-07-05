@@ -3557,6 +3557,8 @@ let parse_text
         ~disable_nontoplevel_declarations:
           (GlobalOptions.po_disable_nontoplevel_declarations env.parser_options)
         ~rust:(GlobalOptions.po_rust env.parser_options)
+        ~disable_legacy_soft_typehints:
+          (GlobalOptions.po_disable_legacy_soft_typehints env.parser_options)
         ?mode
         ()
     in

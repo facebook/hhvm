@@ -210,6 +210,7 @@ let parse_options () =
   let disallow_invalid_arraykey_constraint = ref None in
   let enable_class_level_where_clauses = ref false in
   let enable_constant_visibility_modifiers = ref false in
+  let disable_legacy_soft_typehints = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -440,6 +441,9 @@ let parse_options () =
     "--enable-constant-visibility-modifiers",
       Arg.Set enable_constant_visibility_modifiers,
       "Enable constant visibility modifiers";
+    "--disable-legacy-soft-typehints",
+      Arg.Set disable_legacy_soft_typehints,
+      "Disables the legacy @ syntax for soft typehints (use __Soft instead)"
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -478,6 +482,7 @@ let parse_options () =
     ~po_rust:!rust
     ~po_enable_class_level_where_clauses:!enable_class_level_where_clauses
     ~po_enable_constant_visibility_modifiers:!enable_constant_visibility_modifiers
+    ~po_disable_legacy_soft_typehints:!disable_legacy_soft_typehints
     ()
   in
   let tcopt = {

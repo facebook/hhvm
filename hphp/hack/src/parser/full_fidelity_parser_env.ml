@@ -16,6 +16,7 @@ type t = {
   mode: FileInfo.mode option;
   stats: Stats_container.t option;
   rust : bool;
+  disable_legacy_soft_typehints : bool;
 } [@@deriving show]
 
 let default = {
@@ -27,6 +28,7 @@ let default = {
   rust = false;
   mode = None;
   stats = None;
+  disable_legacy_soft_typehints = false;
 }
 
 let make
@@ -38,6 +40,7 @@ let make
   ?mode
   ?stats
   ?(rust = default.rust)
+  ?(disable_legacy_soft_typehints = default.disable_legacy_soft_typehints)
   () = {
     hhvm_compat_mode;
     php5_compat_mode;
@@ -47,6 +50,7 @@ let make
     mode;
     stats;
     rust;
+    disable_legacy_soft_typehints;
   }
 
 let hhvm_compat_mode e = e.hhvm_compat_mode
@@ -59,3 +63,4 @@ let stats e = e.stats
 let is_experimental_mode e = e.mode = Some FileInfo.Mexperimental
 let is_strict e = e.mode = Some FileInfo.Mstrict
 let rust e = e.rust
+let disable_legacy_soft_typehints e = e.disable_legacy_soft_typehints

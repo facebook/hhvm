@@ -68,6 +68,7 @@ module FullFidelityParseArgs = struct
     rust : bool;
     enable_constant_visibility_modifiers: bool;
     enable_class_level_where_clauses : bool;
+    disable_legacy_soft_typehints : bool;
   }
 
   let make
@@ -99,6 +100,7 @@ module FullFidelityParseArgs = struct
     rust
     enable_constant_visibility_modifiers
     enable_class_level_where_clauses
+    disable_legacy_soft_typehints
     = {
     full_fidelity_json;
     full_fidelity_dot;
@@ -128,6 +130,7 @@ module FullFidelityParseArgs = struct
     rust;
     enable_constant_visibility_modifiers;
     enable_class_level_where_clauses;
+    disable_legacy_soft_typehints;
   }
 
   let parse_args () =
@@ -175,6 +178,7 @@ module FullFidelityParseArgs = struct
     let rust = ref false in
     let enable_constant_visibility_modifiers = ref false in
     let enable_class_level_where_clauses = ref false in
+    let disable_legacy_soft_typehints = ref false in
     let options =  [
       (* modes *)
       "--full-fidelity-json",
@@ -290,6 +294,9 @@ No errors are filtered out.";
       "--enable-class-level-where-clauses",
         Arg.Set enable_class_level_where_clauses,
         "Enables support for class-level where clauses";
+      "--disable-legacy-soft-typehints",
+        Arg.Set disable_legacy_soft_typehints,
+        "Disables the legacy @ syntax for soft typehints (use __Soft instead)";
       ] in
     Arg.parse options push_file usage;
     let modes = [
@@ -334,6 +341,7 @@ No errors are filtered out.";
       !rust
       !enable_constant_visibility_modifiers
       !enable_class_level_where_clauses
+      !disable_legacy_soft_typehints
 end
 
 open FullFidelityParseArgs
@@ -356,6 +364,8 @@ let handle_existing_file args filename =
   let popt = { popt with
     GlobalOptions.po_enable_class_level_where_clauses = args.enable_class_level_where_clauses}
   in
+  let popt = ParserOptions.with_disable_legacy_soft_typehints popt
+    args.disable_legacy_soft_typehints in
 
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in
@@ -364,6 +374,7 @@ let handle_existing_file args filename =
   let env = Full_fidelity_parser_env.make
     ~disable_lval_as_an_expression:args.disable_lval_as_an_expression
     ~rust:args.rust
+    ~disable_legacy_soft_typehints:args.disable_legacy_soft_typehints
     ?mode () in
   let syntax_tree = SyntaxTree.make ~env source_text in
   let editable = SyntaxTransforms.editable_from_positioned syntax_tree in

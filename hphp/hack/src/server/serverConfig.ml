@@ -310,6 +310,7 @@ let load config_filename options =
     ?tico_invalidate_smart:(bool_opt "tico_invalidate_smart" config)
     ?po_enable_class_level_where_clauses:(bool_opt "class_level_where_clauses" config)
     ?po_enable_constant_visibility_modifiers:(bool_opt "enable_constant_visibility_modifiers" config)
+    ?po_disable_legacy_soft_typehints:(bool_opt "disable_legacy_soft_typehints" config)
     ()
   in
   Errors.ignored_fixme_codes :=

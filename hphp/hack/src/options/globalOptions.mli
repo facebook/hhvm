@@ -233,9 +233,12 @@ type t = {
  (* Enable constants to have visibility modifiers *)
  po_enable_constant_visibility_modifiers : bool;
 
-(* Enable class-level where clauses, i.e.
-   class base<T> where T = int {} *)
+ (* Enable class-level where clauses, i.e.
+    class base<T> where T = int {} *)
  po_enable_class_level_where_clauses : bool;
+
+ (* Disable legacy soft typehint syntax (@int) and only allow the __Soft attribute. *)
+ po_disable_legacy_soft_typehints : bool;
 
 } [@@deriving show]
 
@@ -289,6 +292,7 @@ val make :
   ?tico_invalidate_smart: bool ->
   ?po_enable_constant_visibility_modifiers: bool ->
   ?po_enable_class_level_where_clauses: bool ->
+  ?po_disable_legacy_soft_typehints: bool ->
   unit ->
   t
 
@@ -366,3 +370,4 @@ val tico_invalidate_files : t -> bool
 val tico_invalidate_smart : t -> bool
 val po_enable_constant_visibility_modifiers : t -> bool
 val po_enable_class_level_where_clauses : t -> bool
+val po_disable_legacy_soft_typehints : t -> bool

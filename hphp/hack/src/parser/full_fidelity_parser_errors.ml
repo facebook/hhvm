@@ -3902,6 +3902,12 @@ let is_invalid_hack_mode env errors =
   else
     errors
 
+let disabled_legacy_soft_typehint_errors env node errors =
+  match syntax node with
+  | SoftTypeSpecifier _ when ParserOptions.disable_legacy_soft_typehints env.parser_options ->
+    make_error_from_node node SyntaxError.no_legacy_soft_typehints :: errors
+  | _ -> errors
+
 let find_syntax_errors env =
   let has_rx_attr_mutable_hack attrs =
     attribute_first_reactivity_annotation attrs
@@ -4073,6 +4079,9 @@ let find_syntax_errors env =
 
       | XHPClassAttribute { xhp_attribute_decl_initializer = init; _ } ->
         let errors = check_constant_expression errors init in
+        trait_require_clauses, names, errors
+      | SoftTypeSpecifier _ ->
+        let errors = disabled_legacy_soft_typehint_errors env node errors in
         trait_require_clauses, names, errors
       | _ -> trait_require_clauses, names, errors in
 

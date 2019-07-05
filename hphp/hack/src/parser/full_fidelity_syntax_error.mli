@@ -370,3 +370,4 @@ val const_has_multiple_visibilities : string
 val const_has_duplicate_modifiers : string
 val only_soft_allowed : string
 val soft_no_arguments : string
+val no_legacy_soft_typehints : string

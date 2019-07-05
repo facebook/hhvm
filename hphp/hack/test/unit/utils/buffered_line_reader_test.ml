@@ -46,7 +46,7 @@ let test_mixed_read () =
     let _ = Unix.write fd_out (msg7 ^ "\n") 0 (String.length msg7 + 1) in
     Unix.close fd_out;
     exit 0
-  | pid ->
+  | _pid ->
     Unix.close fd_out;
     let reader = Buffered_line_reader.create fd_in in
     assert_equals msg1 (get_next_line reader) "msg1";

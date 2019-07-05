@@ -301,7 +301,7 @@ let test_access_3_keys_one_object_wrong_type_middle () =
       (access_failure_to_string access_failure)
       "Not the access failure we expected";
     true
-  | Ok (v, _) ->
+  | Ok (_, _) ->
     Printf.eprintf "Expected failure, but successfully traversed json.\n";
     false
 

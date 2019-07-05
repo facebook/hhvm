@@ -146,14 +146,14 @@ let test_ignore_hh_version () =
     print_endline "Should not have been able to load this deptable with hh version checking.";
     exit 1
   with
-  | e ->
+  | _ ->
     let _ : int = load_dep_table_sqlite deptable_name true in
     List.iter
       (List.append data data_empty)
       ~f:(fun (key, values) -> expect_equals_list key (get_sqlite key) values);
     Sys.remove deptable_name
 
-let tests handle =
+let tests () =
   let test_list = [
     "test_in_memory", test_deps_in_memory;
     "test_sql", test_deptable_sql;

@@ -13,7 +13,7 @@ let make_worker ?call_wrapper heap_handle =
     ~heap_handle
 
 let rec wait_until_ready handle =
-  let { WorkerController.readys; waiters; ready_fds = _ } = WorkerController.select [handle] [] in
+  let { WorkerController.readys; waiters = _; ready_fds = _ } = WorkerController.select [handle] [] in
   match readys with
   | [] -> wait_until_ready handle
   | ready :: _ ->
@@ -42,7 +42,7 @@ let test_wrapped_worker_with_custom_exit heap_handle () =
   | [] ->
     Printf.eprintf "Failed to create workers";
     false
-  | worker :: workers ->
+  | worker :: _ ->
     try call_and_verify_result worker
     (fun () -> raise (Failure "oops")) () "dummy" with
     | WorkerController.Worker_failed (_, WorkerController.Worker_quit(Unix.WEXITED i)) ->
@@ -54,7 +54,7 @@ let test_worker_uncaught_exception_exits_with_2 heap_handle () =
   | [] ->
     Printf.eprintf "Failed to create workers";
     false
-  | worker :: workers ->
+  | worker :: _ ->
     try call_and_verify_result worker (fun () -> raise (Failure "oops"))
     () "dummy" with
     | WorkerController.Worker_failed (_, WorkerController.Worker_quit(Unix.WEXITED i)) ->
@@ -66,7 +66,7 @@ let test_simple_worker_spawn heap_handle () =
   | [] ->
     Printf.eprintf "Failed to create workers";
     false
-  | worker :: workers ->
+  | worker :: _ ->
     call_and_verify_result worker (fun () -> "hello") () "hello"
 
 let make_tests handle = [

@@ -18,7 +18,7 @@ let test_basic_with_timeout () =
   Timeout.with_timeout
     ~timeout:1
     ~on_timeout:(fun _ -> true)
-    ~do_:begin fun timeout ->
+    ~do_:begin fun _timeout ->
       let _ = Unix.select [] [] [] 2.0 in
       false
     end
@@ -27,7 +27,7 @@ let test_basic_nested_no_timeout () =
   Timeout.with_timeout
     ~timeout:1
     ~on_timeout:(fun _ -> false)
-    ~do_:begin fun timeout ->
+    ~do_:begin fun _timeout ->
       Timeout.with_timeout
         ~timeout:1
         ~on_timeout:(fun _ -> false)
@@ -38,11 +38,11 @@ let test_basic_nested_inner_timeout () =
   Timeout.with_timeout
     ~timeout:3
     ~on_timeout:(fun _ -> false)
-    ~do_:begin fun timeout ->
+    ~do_:begin fun _timeout ->
       Timeout.with_timeout
         ~timeout:1
         ~on_timeout:(fun _ -> true)
-        ~do_:begin fun timeout ->
+        ~do_:begin fun _timeout ->
           let _ = Unix.select [] [] [] 2.0 in
           false
         end
@@ -52,11 +52,11 @@ let test_basic_nested_outer_timeout () =
   Timeout.with_timeout
     ~timeout:1
     ~on_timeout:(fun _ -> true)
-    ~do_:begin fun timeout ->
+    ~do_:begin fun _timeout ->
       Timeout.with_timeout
         ~timeout:3
         ~on_timeout:(fun _ -> false)
-        ~do_:begin fun timeout ->
+        ~do_:begin fun _timeout ->
           let _ = Unix.select [] [] [] 2.0 in
           false
         end

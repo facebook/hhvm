@@ -294,7 +294,7 @@ let test_heapsize_decrease () =
   ()
 
 
-let tests handle =
+let tests () =
   let list = [
     "test_ops", test_ops;
     "test_hashtbl_full_hh_add", test_hashtbl_full_hh_add;

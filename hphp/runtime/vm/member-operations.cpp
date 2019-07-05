@@ -230,11 +230,6 @@ void throw_cannot_unset_for_clsmeth() {
     "Cannot use unset with clsmeth");
 }
 
-void throw_cannot_use_scalar_val_as_array() {
-  SystemLib::throwInvalidOperationExceptionObject(
-    Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-}
-
 void throw_inout_undefined_index(TypedValue tv) {
   if (tv.m_type == KindOfInt64) {
     throwArrayIndexException(tv.m_data.num, true);

@@ -48,8 +48,6 @@ auto constexpr THIS_OUTSIDE_CLASS =
   "Cannot use 'this' outside of a class";
 auto constexpr CANNOT_USE_SCALAR_AS_ARRAY =
   "Cannot use a scalar value as an array";
-auto constexpr CANNOT_USE_EMPTY_STR_AS_ARRAY =
-  "Cannot use an empty string as an array";
 auto constexpr CREATING_DEFAULT_OBJECT =
   "Creating default object from empty value";
 auto constexpr SET_PROP_NON_OBJECT =

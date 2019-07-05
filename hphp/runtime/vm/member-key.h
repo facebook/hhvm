@@ -76,10 +76,6 @@ constexpr bool mcodeIsElem(MemberCode mcode) {
   return mcode == MEC || mcode == MEL || mcode == MET || mcode == MEI;
 }
 
-constexpr bool mcodeIsNewElem(MemberCode mcode) {
-  return mcode == MW;
-}
-
 /*
  * Lookup key for a member operation: combination of a MemberCode and local id,
  * stack offset, int64, or literal string.

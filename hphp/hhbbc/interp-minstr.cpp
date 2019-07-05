@@ -596,26 +596,6 @@ void promoteBaseElemD(ISS& env) {
   ty = loosen_arrays(ty);
 }
 
-bool promoteBaseElemDOrBail(ISS& env) {
-  auto& ty = env.collect.mInstrState.base.type;
-  if (mustBeArrLike(ty)) return false;
-
-  // If the base type is ArrLike, mark it fatal.
-  if (!ty.couldBe(BObj | BArr | BVec | BDict | BKeyset | BClsMeth | BRecord)) {
-    unreachable(env);
-    return true;
-  }
-
-  /*
-   * If the base still could be some kind of array (but isn't an array sub-type
-   * which would be handled outside this routine), we need to give up on any
-   * better information here (or track the effects, but we're not doing that
-   * yet).
-   */
-  ty = loosen_arrays(ty);
-  return false;
-}
-
 void promoteBaseNewElem(ISS& env) {
   promoteBaseElemD(env);
   // Technically we don't need to do TStr case.
@@ -976,7 +956,7 @@ void miElem(ISS& env, MOpMode mode, Type key, LocalId keyLoc) {
   if (isDefine) {
     handleInThisElemD(env);
     handleInPublicStaticElemD(env);
-    promoteBaseElemDOrBail(env);
+    promoteBaseElemD(env);
   }
 
   if (auto ty = array_do_elem(env, mode == MOpMode::None, key)) {
@@ -1009,7 +989,7 @@ void miElem(ISS& env, MOpMode mode, Type key, LocalId keyLoc) {
 void miNewElem(ISS& env) {
   handleInThisNewElem(env);
   handleInPublicStaticNewElem(env);
-  promoteBaseElemDOrBail(env);
+  promoteBaseNewElem(env);
 
   if (auto kty = array_do_newelem(env, TInitNull)) {
     extendArrChain(env,
@@ -1066,10 +1046,10 @@ void miFinalSetProp(ISS& env, int32_t nDiscard, const Type& key) {
   auto const name = mStringKey(key);
   auto const t1 = unctx(popC(env));
 
-  auto const finish = [&](const Type& ty) {
+  auto const finish = [&](Type ty) {
     endBase(env);
     discard(env, nDiscard);
-    push(env, ty);
+    push(env, std::move(ty));
   };
 
   handleInThisPropD(env, false);
@@ -1237,28 +1217,29 @@ void miFinalSetElem(ISS& env,
   handleInThisElemD(env);
   handleInPublicStaticElemD(env);
 
-  auto const finish = [&](const Type& ty) {
+  auto const finish = [&](Type ty) {
     endBase(env, true, keyLoc);
     discard(env, nDiscard);
-    push(env, ty);
+    push(env, std::move(ty));
   };
 
   // Note: we must handle the string-related cases before doing the
   // general handleBaseElemD, since operates on strings as if this
   // was an intermediate ElemD.
-   auto& ty = env.collect.mInstrState.base.type;
-  if (ty.subtypeOf(sempty())) {
-    unreachable(env);
-    return finish(TBottom);
+  if (env.collect.mInstrState.base.type.subtypeOf(sempty())) {
+    env.collect.mInstrState.base.type = some_aempty();
   } else {
+    auto& ty = env.collect.mInstrState.base.type;
     if (ty.couldBe(BStr)) {
       // Note here that a string type stays a string (with a changed character,
       // and loss of staticness), unless it was the empty string, where it
       // becomes an array.  Do it conservatively for now:
-      ty =  loosen_staticness(loosen_values(std::move(ty)));
-    } else {
-      if (promoteBaseElemDOrBail(env)) return finish(TBottom);
+      ty = union_of(
+        loosen_staticness(loosen_values(std::move(ty))),
+        some_aempty()
+      );
     }
+    if (!ty.subtypeOf(BStr)) promoteBaseElemD(env);
   }
 
   /*
@@ -1299,16 +1280,9 @@ void miFinalSetOpElem(ISS& env, int32_t nDiscard,
                       SetOpOp subop, const Type& key,
                       LocalId keyLoc) {
   auto const rhsTy = popC(env);
-  auto const finish = [&](const Type& ty) {
-    endBase(env, true, keyLoc);
-    discard(env, nDiscard);
-    push(env, ty);
-  };
-
   handleInThisElemD(env);
   handleInPublicStaticElemD(env);
-  if (promoteBaseElemDOrBail(env)) return finish(TBottom);
-
+  promoteBaseElemD(env);
   auto const lhsTy = [&] {
     if (auto ty = array_do_elem(env, false, key)) {
       if (env.state.unreachable) return TBottom;
@@ -1319,21 +1293,17 @@ void miFinalSetOpElem(ISS& env, int32_t nDiscard,
   }();
   auto const resultTy = typeSetOp(subop, lhsTy, rhsTy);
   pessimisticFinalElemD(env, key, resultTy);
-  finish(resultTy);
+  endBase(env, true, keyLoc);
+  discard(env, nDiscard);
+  push(env, resultTy);
 }
 
 void miFinalIncDecElem(ISS& env, int32_t nDiscard,
                        IncDecOp subop, const Type& key,
                        LocalId keyLoc) {
-  auto const finish = [&](const Type& ty) {
-    endBase(env, true, keyLoc);
-    discard(env, nDiscard);
-    push(env, ty);
-  };
   handleInThisElemD(env);
   handleInPublicStaticElemD(env);
-  if (promoteBaseElemDOrBail(env)) return finish(TBottom);
-
+  promoteBaseElemD(env);
   auto const postTy = [&] {
     if (auto ty = array_do_elem(env, false, key)) {
       if (env.state.unreachable) return TBottom;
@@ -1344,7 +1314,9 @@ void miFinalIncDecElem(ISS& env, int32_t nDiscard,
   }();
   auto const preTy = typeIncDec(subop, postTy);
   pessimisticFinalElemD(env, key, preTy);
-  finish(isPre(subop) ? preTy : postTy);
+  endBase(env, true, keyLoc);
+  discard(env, nDiscard);
+  push(env, isPre(subop) ? preTy : postTy);
 }
 
 void miFinalUnsetElem(ISS& env, int32_t nDiscard, const Type&) {
@@ -1371,15 +1343,16 @@ void pessimisticFinalNewElem(ISS& env, const Type& type) {
 
 void miFinalSetNewElem(ISS& env, int32_t nDiscard) {
   auto const t1 = popC(env);
+
   handleInThisNewElem(env);
   handleInPublicStaticNewElem(env);
+  promoteBaseNewElem(env);
 
-  auto const finish = [&](const Type& ty) {
+  auto const finish = [&](Type ty) {
     endBase(env);
     discard(env, nDiscard);
-    push(env, ty);
+    push(env, std::move(ty));
   };
-  if (promoteBaseElemDOrBail(env)) return finish(TBottom);
 
   if (array_do_newelem(env, t1)) {
     return finish(t1);
@@ -1396,33 +1369,23 @@ void miFinalSetNewElem(ISS& env, int32_t nDiscard) {
 
 void miFinalSetOpNewElem(ISS& env, int32_t nDiscard) {
   popC(env);
-  auto const finish = [&](const Type& ty) {
-    endBase(env);
-    discard(env, nDiscard);
-    push(env, ty);
-  };
-
   handleInThisNewElem(env);
   handleInPublicStaticNewElem(env);
-  if (promoteBaseElemDOrBail(env)) return finish(TBottom);
-
+  promoteBaseNewElem(env);
   pessimisticFinalNewElem(env, TInitCell);
-  finish(TInitCell);
+  endBase(env);
+  discard(env, nDiscard);
+  push(env, TInitCell);
 }
 
 void miFinalIncDecNewElem(ISS& env, int32_t nDiscard) {
-  auto const finish = [&](const Type& ty) {
-    endBase(env);
-    discard(env, nDiscard);
-    push(env, ty);
-  };
-
   handleInThisNewElem(env);
   handleInPublicStaticNewElem(env);
-  if (promoteBaseElemDOrBail(env)) return finish(TBottom);
-
+  promoteBaseNewElem(env);
   pessimisticFinalNewElem(env, TInitCell);
-  finish(TInitCell);
+  endBase(env);
+  discard(env, nDiscard);
+  push(env, TInitCell);
 }
 
 }

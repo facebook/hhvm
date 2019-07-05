@@ -344,11 +344,6 @@ bool baseMightPromote(const SSATmp* base) {
     ty.maybe(Type::cns(staticEmptyString()));
 }
 
-bool baseMaybeArrLikeOrObj(const Type& ty) {
-  return ty.maybe(TObj) || ty.maybe(TArr) || ty.maybe(TVec) ||
-        ty.maybe(TDict) || ty.maybe(TKeyset) || ty.maybe(TClsMeth);
-}
-
 SSATmp* propStatePtrDimProp(IRGS& env) {
   return (RuntimeOption::EvalCheckPropTypeHints <= 0)
     ? cns(env, TNullptr)
@@ -2108,21 +2103,7 @@ void emitBaseH(IRGS& env) {
   // promote
 }
 
-namespace {
-const StaticString s_CANNOT_USE_SCALAR_VAL_AS_ARRAY(
-  Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-}
-
 void emitDim(IRGS& env, MOpMode mode, MemberKey mk) {
-  if (mcodeIsNewElem(mk.mcode)) {
-    auto const baseType = predictedBaseType(env);
-    if (!baseMaybeArrLikeOrObj(baseType)) {
-      gen(env, ThrowInvalidOperation,
-        cns(env, s_CANNOT_USE_SCALAR_VAL_AS_ARRAY.get()));
-      return;
-    }
-    PUNT(DimNewElem);
-  }
   // Eagerly mark us as not needing ratchets.  If the intermediate operation
   // ends up calling misLea(), this will be set to true.
   env.irb->fs().setNeedRatchet(false);
@@ -2132,8 +2113,12 @@ void emitDim(IRGS& env, MOpMode mode, MemberKey mk) {
     if (mcodeIsProp(mk.mcode)) {
       return propImpl(env, mode, key, mk.mcode == MQT);
     }
-    assertx(mcodeIsElem(mk.mcode));
-    return elemImpl(env, mode, key);
+    if (mcodeIsElem(mk.mcode)) {
+      auto const base = elemImpl(env, mode, key);
+      setEmptyMIPropState(env, base, mode);
+      return base;
+    }
+    PUNT(DimNewElem);
   }();
 
   newBase = ratchetRefs(env, newBase);
@@ -2215,16 +2200,13 @@ void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
 
 void emitSetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
   auto const baseType = predictedBaseType(env);
-  if (mcodeIsNewElem(mk.mcode) && !baseMaybeArrLikeOrObj(baseType)) {
-    gen(env, ThrowInvalidOperation,
-      cns(env, s_CANNOT_USE_SCALAR_VAL_AS_ARRAY.get()));
-    return;
+  if (baseType <= TClsMeth) {
+    PUNT(SetM_is_ClsMeth);
   }
-  if (baseType <= TClsMeth) PUNT(SetM_is_ClsMeth);
 
   auto const key = memberKey(env, mk);
   auto const result =
-    mcodeIsNewElem(mk.mcode) ? setNewElemImpl(env) :
+    mk.mcode == MW        ? setNewElemImpl(env) :
     mcodeIsElem(mk.mcode) ? setElemImpl(env, key) :
                             setPropImpl(env, key);
 
@@ -2246,32 +2228,24 @@ void emitSetRangeM(IRGS& env, uint32_t nDiscard, SetRangeOp op, uint32_t size) {
 }
 
 void emitIncDecM(IRGS& env, uint32_t nDiscard, IncDecOp incDec, MemberKey mk) {
-  if (mcodeIsNewElem(mk.mcode)) {
-    auto const baseType = predictedBaseType(env);
-    if (!baseMaybeArrLikeOrObj(baseType)) {
-      gen(env, ThrowInvalidOperation,
-        cns(env, s_CANNOT_USE_SCALAR_VAL_AS_ARRAY.get()));
-      return;
-    }
-    PUNT(IncDecNewElem);
-  }
-
   auto key = memberKey(env, mk);
 
   auto const result = [&] {
     if (mcodeIsProp(mk.mcode)) {
       return emitIncDecProp(env, incDec, extractBaseIfObj(env), key);
     }
-    assertx(mcodeIsElem(mk.mcode));
-    auto const base = ldMBase(env);
-    return gen(
-      env,
-      IncDecElem,
-      IncDecData{incDec},
-      base,
-      key,
-      propStatePtrElem(env, base)
-    );
+    if (mcodeIsElem(mk.mcode)) {
+      auto const base = ldMBase(env);
+      return gen(
+        env,
+        IncDecElem,
+        IncDecData{incDec},
+        base,
+        key,
+        propStatePtrElem(env, base)
+      );
+    }
+    PUNT(IncDecNewElem);
   }();
 
   mFinalImpl(env, nDiscard, result);
@@ -2426,15 +2400,6 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
 }
 
 void emitSetOpM(IRGS& env, uint32_t nDiscard, SetOpOp op, MemberKey mk) {
-  if (mcodeIsNewElem(mk.mcode)) {
-    auto const baseType = predictedBaseType(env);
-    if (!baseMaybeArrLikeOrObj(baseType)) {
-      gen(env, ThrowInvalidOperation,
-        cns(env, s_CANNOT_USE_SCALAR_VAL_AS_ARRAY.get()));
-      return;
-    }
-    PUNT(SetOpNewElem);
-  }
   auto key = memberKey(env, mk);
   auto rhs = topC(env);
 
@@ -2446,17 +2411,19 @@ void emitSetOpM(IRGS& env, uint32_t nDiscard, SetOpOp op, MemberKey mk) {
     if (mcodeIsProp(mk.mcode)) {
       return setOpPropImpl(env, op, extractBaseIfObj(env), key, rhs, finish);
     }
-    assertx(mcodeIsElem(mk.mcode));
-    auto const base = ldMBase(env);
-    return gen(
-      env,
-      SetOpElem,
-      SetOpData{op},
-      base,
-      key,
-      rhs,
-      propStatePtrElem(env, base)
-    );
+    if (mcodeIsElem(mk.mcode)) {
+      auto const base = ldMBase(env);
+      return gen(
+        env,
+        SetOpElem,
+        SetOpData{op},
+        base,
+        key,
+        rhs,
+        propStatePtrElem(env, base)
+      );
+    }
+    PUNT(SetOpNewElem);
   }();
 
   finish(result);

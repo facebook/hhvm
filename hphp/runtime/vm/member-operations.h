@@ -166,13 +166,51 @@ inline ObjectData* instanceFromTv(tv_rval tv) {
 [[noreturn]] void throw_cannot_use_newelem_for_lval_read_record();
 [[noreturn]] void throw_cannot_write_for_clsmeth();
 [[noreturn]] void throw_cannot_unset_for_clsmeth();
-[[noreturn]] void throw_cannot_use_scalar_val_as_array();
 
 [[noreturn]] void unknownBaseType(DataType);
 
 [[noreturn]] void throw_inout_undefined_index(TypedValue);
 [[noreturn]] void throw_inout_undefined_index(int64_t i);
 [[noreturn]] void throw_inout_undefined_index(const StringData* sd);
+
+namespace detail {
+
+ALWAYS_INLINE void checkPromotion(tv_rval base, const MInstrPropState* pState) {
+  if (RuntimeOption::EvalCheckPropTypeHints > 0) {
+    assertx(pState != nullptr);
+    auto const cls = pState->getClass();
+    if (UNLIKELY(cls != nullptr)) {
+      auto const slot = pState->getSlot();
+      auto const tv = make_tv<KindOfArray>(staticEmptyArray());
+      if (pState->isStatic()) {
+        assertx(slot < cls->numStaticProperties());
+        auto const& sprop = cls->staticProperties()[slot];
+        auto const& tc = sprop.typeConstraint;
+        if (tc.isCheckable()) {
+          tc.verifyStaticProperty(&tv, cls, sprop.cls, sprop.name);
+        }
+      } else {
+        assertx(slot < cls->numDeclProperties());
+        auto const& prop = cls->declProperties()[slot];
+        auto const& tc = prop.typeConstraint;
+        if (tc.isCheckable()) tc.verifyProperty(&tv, cls, prop.cls, prop.name);
+      }
+    }
+  }
+
+  auto const falseyPromote = checkHACFalseyPromote();
+  auto const stringPromote = checkHACEmptyStringPromote();
+
+  if (UNLIKELY(falseyPromote) && tvIsNull(base)) {
+    raise_hac_falsey_promote_notice("Promoting null to array");
+  } else if (UNLIKELY(falseyPromote) && tvIsBool(base)) {
+    raise_hac_falsey_promote_notice("Promoting false to array");
+  } else if (UNLIKELY(stringPromote) && tvIsString(base)) {
+    raise_hac_empty_string_promote_notice("Promoting empty string to array");
+  }
+}
+
+}
 
 /**
  * Elem when base is Null
@@ -395,6 +433,21 @@ inline tv_rval ElemClsMeth(
   return tv_rval{ &tvRef };
 }
 
+/**
+ * Elem when base is an Int64, Double, or Resource.
+ */
+inline tv_rval ElemScalar() {
+  raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
+  return ElemEmptyish();
+}
+
+/**
+ * Elem when base is a Boolean
+ */
+inline tv_rval ElemBoolean(tv_rval base) {
+  return base.val().num ? ElemScalar() : ElemEmptyish();
+}
+
 inline int64_t ElemStringPre(int64_t key) {
   return key;
 }
@@ -484,24 +537,13 @@ NEVER_INLINE tv_rval ElemSlow(TypedValue& tvRef,
   switch (base.type()) {
     case KindOfUninit:
     case KindOfNull:
-      if (RuntimeOption::EvalNoticeOnSetElemOnScalarVal &&
-        (mode == MOpMode::Warn)) {
-        raise_notice("Cannot use null as array");
-      }
       return ElemEmptyish();
     case KindOfBoolean:
-      if (base.val().num) {
-        throw_cannot_use_scalar_val_as_array();
-      }
-      if (RuntimeOption::EvalNoticeOnSetElemOnScalarVal &&
-        (mode == MOpMode::Warn)) {
-        raise_notice("Cannot use false as array");
-      }
-      return ElemEmptyish();
+      return ElemBoolean(base);
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
-      throw_cannot_use_scalar_val_as_array();
+      return ElemScalar();
     case KindOfFunc:
       return ElemString<mode, keyType>(
         tvRef, funcToStringHelper(base.val().pfunc), key
@@ -803,6 +845,61 @@ inline tv_lval ElemDKeyset(tv_lval base, key_type<keyType> key) {
 }
 
 /**
+ * ElemD when base is Null
+ */
+template<MOpMode mode, KeyType keyType>
+inline tv_lval ElemDEmptyish(tv_lval base,
+                             key_type<keyType> key,
+                             const MInstrPropState* pState) {
+  detail::checkPromotion(base, pState);
+  auto scratchKey = initScratchKey(key);
+
+  tvMove(make_tv<KindOfArray>(ArrayData::Create()), base);
+
+  auto const result = asArrRef(base).lvalAt(cellAsCVarRef(scratchKey));
+  if (mode == MOpMode::Warn) {
+    throwArrayKeyException(tvAsCVarRef(&scratchKey).toString().get(), false);
+  }
+  return result;
+}
+
+/**
+ * ElemD when base is an Int64, Double, Resource, Func, or Class.
+ */
+inline tv_lval ElemDScalar(TypedValue& tvRef) {
+  raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
+  tvWriteNull(tvRef);
+  return tv_lval(&tvRef);
+}
+
+/**
+ * ElemD when base is a Boolean
+ */
+template<MOpMode mode, KeyType keyType>
+inline tv_lval ElemDBoolean(TypedValue& tvRef,
+                            tv_lval base,
+                            key_type<keyType> key,
+                            const MInstrPropState* pState) {
+  return base.val().num
+    ? ElemDScalar(tvRef)
+    : ElemDEmptyish<mode, keyType>(base, key, pState);
+}
+
+/**
+ * ElemD when base is a String
+ */
+template<MOpMode mode, KeyType keyType>
+inline tv_lval ElemDString(tv_lval base,
+                           key_type<keyType> key,
+                           const MInstrPropState* pState) {
+  if (base.val().pstr->size() == 0) {
+    return ElemDEmptyish<mode, keyType>(base, key, pState);
+  }
+  raise_error("Operator not supported for strings");
+  return tv_lval(nullptr);
+}
+
+/**
  * ElemD when base is a Record
  */
 template <KeyType keyType>
@@ -813,7 +910,6 @@ inline tv_lval ElemDRecord(tv_lval base, key_type<keyType> key) {
   auto const fieldName = tvCastToString(initScratchKey(key));
   return recData->fieldLval(fieldName.get());
 }
-
 /**
  * ElemD when base is an Object
  */
@@ -863,15 +959,18 @@ tv_lval ElemD(TypedValue& tvRef, tv_lval base,
   switch (base.type()) {
     case KindOfUninit:
     case KindOfNull:
+      return ElemDEmptyish<mode, keyType>(base, key, pState);
     case KindOfBoolean:
+      return ElemDBoolean<mode, keyType>(tvRef, base, key, pState);
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
     case KindOfFunc:
     case KindOfClass:
+      return ElemDScalar(tvRef);
     case KindOfPersistentString:
     case KindOfString:
-      throw_cannot_use_scalar_val_as_array();
+      return ElemDString<mode, keyType>(base, key, pState);
     case KindOfPersistentVec:
     case KindOfVec:
       return ElemDVec<keyType, copyProv>(base, key);
@@ -1164,6 +1263,48 @@ tv_lval ElemU(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
 }
 
 /**
+ * NewElem when base is Null
+ */
+inline tv_lval NewElemEmptyish(tv_lval base, const MInstrPropState* pState) {
+  detail::checkPromotion(base, pState);
+  tvMove(make_tv<KindOfArray>(ArrayData::Create()), base);
+  return asArrRef(base).lvalAt();
+}
+
+/**
+ * NewElem when base is not a valid type (a number, true boolean,
+ * non-empty string, etc.)
+ */
+inline tv_lval NewElemInvalid(TypedValue& tvRef) {
+  raise_warning("Cannot use a scalar value as an array");
+  tvWriteNull(tvRef);
+  return tv_lval(&tvRef);
+}
+
+/**
+ * NewElem when base is a Boolean
+ */
+inline tv_lval NewElemBoolean(TypedValue& tvRef,
+                              tv_lval base,
+                              const MInstrPropState* pState) {
+  return val(base).num
+    ? NewElemInvalid(tvRef)
+    : NewElemEmptyish(base, pState);
+}
+
+/**
+ * NewElem when base is a String
+ */
+inline tv_lval NewElemString(TypedValue& tvRef,
+                             tv_lval base,
+                             const MInstrPropState* pState) {
+  if (val(base).pstr->size() == 0) {
+    return NewElemEmptyish(base, pState);
+  }
+  return NewElemInvalid(tvRef);
+}
+
+/**
  * NewElem when base is an Array
  */
 inline tv_lval NewElemArray(tv_lval base) {
@@ -1196,15 +1337,18 @@ inline tv_lval NewElem(TypedValue& tvRef,
   switch (base.type()) {
     case KindOfUninit:
     case KindOfNull:
+      return NewElemEmptyish(base, pState);
     case KindOfBoolean:
+      return NewElemBoolean(tvRef, base, pState);
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
     case KindOfFunc:
     case KindOfClass:
+      return NewElemInvalid(tvRef);
     case KindOfPersistentString:
     case KindOfString:
-      throw_cannot_use_scalar_val_as_array();
+      return NewElemString(tvRef, base, pState);
     case KindOfPersistentVec:
     case KindOfVec:
       throw_cannot_use_newelem_for_lval_read_vec();
@@ -1236,6 +1380,44 @@ inline tv_lval NewElem(TypedValue& tvRef,
 }
 
 /**
+ * SetElem when base is Null
+ */
+template <KeyType keyType>
+inline void SetElemEmptyish(tv_lval base, key_type<keyType> key,
+                            Cell* value, const MInstrPropState* pState) {
+  detail::checkPromotion(base, pState);
+  auto const& scratchKey = initScratchKey(key);
+  cellMove(make_tv<KindOfArray>(staticEmptyArray()), base);
+  asArrRef(base).set(tvAsCVarRef(&scratchKey), tvAsCVarRef(value));
+}
+
+/**
+ * SetElem when base is an Int64, Double, Resource, Func, or Class.
+ */
+template <bool setResult>
+inline void SetElemScalar(Cell* value) {
+  raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
+  if (!setResult) {
+    throw InvalidSetMException(make_tv<KindOfNull>());
+  }
+  tvDecRefGen(value);
+  tvWriteNull(*value);
+}
+
+/**
+ * SetElem when base is a Boolean
+ */
+template <bool setResult, KeyType keyType>
+inline void SetElemBoolean(tv_lval base, key_type<keyType> key,
+                           Cell* value, const MInstrPropState* pState) {
+  if (val(base).num) {
+    SetElemScalar<setResult>(value);
+  } else {
+    SetElemEmptyish<keyType>(base, key, value, pState);
+  }
+}
+
+/**
  * Convert a key to integer for SetElem
  */
 template<KeyType keyType>
@@ -1256,8 +1438,12 @@ inline StringData* SetElemString(tv_lval base, key_type<keyType> key,
                                  Cell* value, const MInstrPropState* pState) {
   auto const baseLen = val(base).pstr->size();
   if (baseLen == 0) {
-    SystemLib::throwInvalidOperationExceptionObject(
-      Strings::CANNOT_USE_EMPTY_STR_AS_ARRAY);
+    SetElemEmptyish<keyType>(base, key, value, pState);
+    if (!setResult) {
+      tvIncRefGen(*value);
+      throw InvalidSetMException(*value);
+    }
+    return nullptr;
   }
 
   // Convert key to string offset.
@@ -1589,14 +1775,18 @@ StringData* SetElemSlow(tv_lval base,
   switch (type(base)) {
     case KindOfUninit:
     case KindOfNull:
+      SetElemEmptyish<keyType>(base, key, value, pState);
+      return nullptr;
     case KindOfBoolean:
+      SetElemBoolean<setResult, keyType>(base, key, value, pState);
+      return nullptr;
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
     case KindOfFunc:
     case KindOfClass:
-      throw_cannot_use_scalar_val_as_array();
-
+      SetElemScalar<setResult>(value);
+      return nullptr;
     case KindOfPersistentString:
     case KindOfString:
       return SetElemString<setResult, keyType>(base, key, value, pState);
@@ -1664,6 +1854,59 @@ template<bool reverse>
 void SetRange(
   tv_lval base, int64_t offset, TypedValue src, int64_t count, int64_t size
 );
+
+/**
+ * SetNewElem when base is Null
+ */
+inline void SetNewElemEmptyish(tv_lval base,
+                               Cell* value,
+                               const MInstrPropState* pState) {
+  detail::checkPromotion(base, pState);
+  Array a = Array::Create();
+  a.append(cellAsCVarRef(*value));
+  cellMove(make_tv<KindOfArray>(a.detach()), base);
+}
+
+/**
+ * SetNewElem when base is Int64, Double, Resource, Func or Class
+ */
+template <bool setResult>
+inline void SetNewElemScalar(Cell* value) {
+  raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
+  if (!setResult) {
+    throw InvalidSetMException(make_tv<KindOfNull>());
+  }
+  tvDecRefGen(value);
+  tvWriteNull(*value);
+}
+
+/**
+ * SetNewElem when base is a Boolean
+ */
+template <bool setResult>
+inline void SetNewElemBoolean(tv_lval base,
+                              Cell* value,
+                              const MInstrPropState* pState) {
+  if (val(base).num) {
+    SetNewElemScalar<setResult>(value);
+  } else {
+    SetNewElemEmptyish(base, value, pState);
+  }
+}
+
+/**
+ * SetNewElem when base is a String
+ */
+inline void SetNewElemString(tv_lval base,
+                             Cell* value,
+                             const MInstrPropState* pState) {
+  int baseLen = val(base).pstr->size();
+  if (baseLen == 0) {
+    SetNewElemEmptyish(base, value, pState);
+  } else {
+    raise_error("[] operator not supported for strings");
+  }
+}
 
 /**
  * SetNewElem when base is an Array
@@ -1760,16 +2003,18 @@ inline void SetNewElem(tv_lval base,
   switch (type(base)) {
     case KindOfUninit:
     case KindOfNull:
+      return SetNewElemEmptyish(base, value, pState);
     case KindOfBoolean:
+      return SetNewElemBoolean<setResult>(base, value, pState);
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
     case KindOfFunc:
     case KindOfClass:
+      return SetNewElemScalar<setResult>(value);
     case KindOfPersistentString:
     case KindOfString:
-      throw_cannot_use_scalar_val_as_array();
-
+      return SetNewElemString(base, value, pState);
     case KindOfPersistentVec:
     case KindOfVec:
       return SetNewElemVec<copyProv>(base, value);
@@ -1801,6 +2046,31 @@ inline void SetNewElem(tv_lval base,
 }
 
 /**
+ * SetOpElem when base is Null
+ */
+inline tv_lval SetOpElemEmptyish(SetOpOp op, tv_lval base,
+                                 TypedValue key, Cell* rhs,
+                                 const MInstrPropState* pState) {
+  assertx(cellIsPlausible(*base));
+
+  detail::checkPromotion(base, pState);
+
+  cellMove(make_tv<KindOfArray>(staticEmptyArray()), base);
+  auto const lval = asArrRef(base).lvalAt(tvAsCVarRef(&key));
+  setopBody(lval, op, rhs);
+  return lval;
+}
+
+/**
+ * SetOpElem when base is Int64, Double, Resource, Func, or Class
+ */
+inline tv_lval SetOpElemScalar(TypedValue& tvRef) {
+  raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
+  tvWriteNull(tvRef);
+  return &tvRef;
+}
+
+/**
  * $result = ($base[$x] <op>= $y)
  */
 inline tv_lval SetOpElem(TypedValue& tvRef,
@@ -1813,15 +2083,28 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
   switch (type(base)) {
     case KindOfUninit:
     case KindOfNull:
+      return SetOpElemEmptyish(op, base, key, rhs, pState);
+
     case KindOfBoolean:
+      if (val(base).num) {
+        return SetOpElemScalar(tvRef);
+      }
+      return SetOpElemEmptyish(op, base, key, rhs, pState);
+
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
     case KindOfFunc:
     case KindOfClass:
+      return SetOpElemScalar(tvRef);
+
     case KindOfPersistentString:
     case KindOfString:
-      throw_cannot_use_scalar_val_as_array();
+      if (val(base).pstr->size() != 0) {
+        raise_error("Cannot use assign-op operators with overloaded "
+          "objects nor string offsets");
+      }
+      return SetOpElemEmptyish(op, base, key, rhs, pState);
 
     case KindOfPersistentVec:
     case KindOfVec: {
@@ -1917,6 +2200,19 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
   unknownBaseType(type(base));
 }
 
+inline tv_lval SetOpNewElemEmptyish(SetOpOp op, tv_lval base, Cell* rhs,
+                                    const MInstrPropState* pState) {
+  detail::checkPromotion(base, pState);
+  cellMove(make_tv<KindOfArray>(staticEmptyArray()), base);
+  auto result = asArrRef(base).lvalAt();
+  setopBody(tvToCell(result), op, rhs);
+  return result;
+}
+inline tv_lval SetOpNewElemScalar(TypedValue& tvRef) {
+  raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
+  tvWriteNull(tvRef);
+  return &tvRef;
+}
 inline tv_lval SetOpNewElem(TypedValue& tvRef,
                             SetOpOp op, tv_lval base,
                             Cell* rhs, const MInstrPropState* pState) {
@@ -1926,15 +2222,27 @@ inline tv_lval SetOpNewElem(TypedValue& tvRef,
   switch (type(base)) {
     case KindOfUninit:
     case KindOfNull:
+      return SetOpNewElemEmptyish(op, base, rhs, pState);
+
     case KindOfBoolean:
+      if (val(base).num) {
+        return SetOpNewElemScalar(tvRef);
+      }
+      return SetOpNewElemEmptyish(op, base, rhs, pState);
+
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
     case KindOfFunc:
     case KindOfClass:
+      return SetOpNewElemScalar(tvRef);
+
     case KindOfPersistentString:
     case KindOfString:
-      throw_cannot_use_scalar_val_as_array();
+      if (val(base).pstr->size() != 0) {
+        raise_error("[] operator not supported for strings");
+      }
+      return SetOpNewElemEmptyish(op, base, rhs, pState);
 
     case KindOfPersistentVec:
     case KindOfVec:
@@ -2025,6 +2333,25 @@ inline Cell IncDecBody(IncDecOp op, tv_lval fr) {
   }
 }
 
+inline Cell IncDecElemEmptyish(
+  IncDecOp op,
+  tv_lval base,
+  TypedValue key,
+  const MInstrPropState* pState
+) {
+  detail::checkPromotion(base, pState);
+
+  cellMove(make_tv<KindOfArray>(staticEmptyArray()), base);
+  auto const lval = asArrRef(base).lvalAt(tvAsCVarRef(&key));
+  assertx(type(lval) == KindOfNull);
+  return IncDecBody(op, lval);
+}
+
+inline Cell IncDecElemScalar() {
+  raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
+  return make_tv<KindOfNull>();
+}
+
 inline Cell IncDecElem(
   IncDecOp op,
   tv_lval base,
@@ -2037,15 +2364,28 @@ inline Cell IncDecElem(
   switch (type(base)) {
     case KindOfUninit:
     case KindOfNull:
+      return IncDecElemEmptyish(op, base, key, pState);
+
     case KindOfBoolean:
+      if (val(base).num) {
+        return IncDecElemScalar();
+      }
+      return IncDecElemEmptyish(op, base, key, pState);
+
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
     case KindOfFunc:
     case KindOfClass:
+      return IncDecElemScalar();
+
     case KindOfPersistentString:
     case KindOfString:
-      throw_cannot_use_scalar_val_as_array();
+      if (val(base).pstr->size() != 0) {
+        raise_error("Cannot increment/decrement overloaded objects "
+          "nor string offsets");
+      }
+      return IncDecElemEmptyish(op, base, key, pState);
 
     case KindOfPersistentVec:
     case KindOfVec: {
@@ -2134,6 +2474,23 @@ inline Cell IncDecElem(
   unknownBaseType(type(base));
 }
 
+inline Cell IncDecNewElemEmptyish(
+  IncDecOp op,
+  tv_lval base,
+  const MInstrPropState* pState
+) {
+  detail::checkPromotion(base, pState);
+  cellMove(make_tv<KindOfArray>(staticEmptyArray()), base);
+  auto result = asArrRef(base).lvalAt();
+  assertx(type(result) == KindOfNull);
+  return IncDecBody(op, result);
+}
+
+inline Cell IncDecNewElemScalar() {
+  raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
+  return make_tv<KindOfNull>();
+}
+
 inline Cell IncDecNewElem(
   TypedValue& tvRef,
   IncDecOp op,
@@ -2146,15 +2503,27 @@ inline Cell IncDecNewElem(
   switch (type(base)) {
     case KindOfUninit:
     case KindOfNull:
+      return IncDecNewElemEmptyish(op, base, pState);
+
     case KindOfBoolean:
+      if (val(base).num) {
+        return IncDecNewElemScalar();
+      }
+      return IncDecNewElemEmptyish(op, base, pState);
+
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
     case KindOfFunc:
     case KindOfClass:
+      return IncDecNewElemScalar();
+
     case KindOfPersistentString:
     case KindOfString:
-      throw_cannot_use_scalar_val_as_array();
+      if (val(base).pstr->size() != 0) {
+        raise_error("[] operator not supported for strings");
+      }
+      return IncDecNewElemEmptyish(op, base, pState);
 
     case KindOfPersistentVec:
     case KindOfVec:

@@ -46,9 +46,6 @@ let is_lsb = function
 (*****************************************************************************)
 
 let use_parent_for_known = false
-let check_partially_known_method_returns = true
-let check_partially_known_method_params = false
-let check_partially_known_method_visibility = true
 
 (* Rules for visibility *)
 let check_visibility parent_vis c_vis parent_pos pos =
@@ -154,11 +151,8 @@ let check_ambiguous_inheritance f parent child pos class_ origin =
         Errors.ambiguous_inheritance pos (Cls.name class_) origin error)
 
 let should_check_params parent_class class_ =
-  let class_known =
-    if use_parent_for_known then (Cls.members_fully_known parent_class)
-    else (Cls.members_fully_known class_) in
-  let check_params = class_known || check_partially_known_method_params in
-  class_known, check_params
+  if use_parent_for_known then (Cls.members_fully_known parent_class)
+  else (Cls.members_fully_known class_)
 
 let check_final_method member_source parent_class_elt class_elt =
   (* we only check for final overrides on methods, not properties *)
@@ -249,9 +243,8 @@ let check_override env ~check_member_unique member_name mem_source ?(ignore_fun_
   check_lsb_overrides mem_source member_name parent_class_elt class_elt;
   check_lateinit parent_class_elt class_elt;
   check_xhp_attr_required env parent_class_elt class_elt;
-  let class_known, check_params = should_check_params parent_class class_ in
-  let check_vis = class_known || check_partially_known_method_visibility in
-  if check_vis then check_class_elt_visibility parent_class_elt class_elt else ();
+  let check_params = should_check_params parent_class class_ in
+  check_class_elt_visibility parent_class_elt class_elt;
   let lazy fty_child = class_elt.ce_type in
   let pos = Reason.to_pos (fst fty_child) in
   if class_elt.ce_const <> parent_class_elt.ce_const then (
@@ -272,8 +265,7 @@ let check_override env ~check_member_unique member_name mem_source ?(ignore_fun_
             parent_class_ty = Some (DeclTy parent_ty)
            })
           ~check_return:(
-          (not ignore_fun_return) &&
-          (class_known || check_partially_known_method_returns)
+          (not ignore_fun_return)
         ) in
       let check (r1, ft1) (r2, ft2) () =
         if check_member_unique then
@@ -308,7 +300,7 @@ let check_override env ~check_member_unique member_name mem_source ?(ignore_fun_
 
 let check_const_override env
     const_name parent_class class_ parent_class_const class_const =
-  let _class_known, check_params = should_check_params parent_class class_ in
+  let check_params = should_check_params parent_class class_ in
   let member_not_unique =
     (* Similar to should_check_member_unique, we check if there are multiple
       concrete implementations of class constants with no override.

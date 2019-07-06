@@ -51,6 +51,7 @@ const StaticString
   s_frame_ptr("frame_ptr"),
   s_parent_frame_ptr("parent_frame_ptr"),
   s_this_ptr("this_ptr"),
+  s_this_obj("this_obj"),
   s_enter("enter"),
   s_exit("exit"),
   s_suspend("suspend"),
@@ -156,9 +157,14 @@ void addFramePointers(const ActRec* ar, Array& frameinfo, bool isEnter) {
   }
 
   if (isEnter) {
-    auto this_ptr = ar->func()->cls() && ar->hasThis() ?
-      intptr_t(ar->getThis()) : 0;
-    frameinfo.set(s_this_ptr, Variant(this_ptr));
+    auto this_ = ar->func()->cls() && ar->hasThis() ?
+      ar->getThis() : nullptr;
+    frameinfo.set(s_this_ptr, Variant(intptr_t(this_)));
+
+    if ((g_context->m_setprofileFlags & EventHook::ProfileThisObject) != 0
+        && !RuntimeOption::SetProfileNullThisObject && this_) {
+      frameinfo.set(s_this_obj, Variant(this_));
+    }
   }
 
   frameinfo.set(s_frame_ptr, Variant(intptr_t(ar)));

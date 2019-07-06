@@ -1266,6 +1266,8 @@ public:
   static double XenonPeriodSeconds;
   static uint32_t XenonRequestFreq;
   static bool XenonForceAlwaysOn;
+
+  static bool SetProfileNullThisObject;
 };
 static_assert(sizeof(RuntimeOption) == 1, "no instance variables");
 

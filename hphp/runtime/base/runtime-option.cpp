@@ -1112,6 +1112,8 @@ uint32_t RuntimeOption::XenonRequestFreq = 1;
 bool RuntimeOption::XenonForceAlwaysOn = false;
 bool RuntimeOption::TrackPerUnitMemory = false;
 
+bool RuntimeOption::SetProfileNullThisObject = true;
+
 std::map<std::string, std::string> RuntimeOption::CustomSettings;
 
 #ifdef NDEBUG
@@ -2464,6 +2466,11 @@ void RuntimeOption::Load(
     Config::Bind(XenonPeriodSeconds, ini, config, "Xenon.Period", 0.0);
     Config::Bind(XenonRequestFreq, ini, config, "Xenon.RequestFreq", 1);
     Config::Bind(XenonForceAlwaysOn, ini, config, "Xenon.ForceAlwaysOn", false);
+  }
+  {
+    // Profiling
+    Config::Bind(SetProfileNullThisObject, ini, config,
+                 "SetProfile.NullThisObject", true);
   }
   {
     // We directly read zend.assertions here, so that we can get its INI value

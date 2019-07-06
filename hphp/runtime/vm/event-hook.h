@@ -52,6 +52,9 @@ struct EventHook {
     ProfileFramePointers = 4,
     ProfileConstructors = 8,
     ProfileResumeAware = 16,
+    /* This flag enables access to $this when profiling instance methods. It
+     * is used for internal profiling tools. It *may break* in the future. */
+    ProfileThisObject = 32,
   };
 
 

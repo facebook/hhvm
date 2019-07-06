@@ -1,5 +1,15 @@
 <?hh
 
+class SetProfileSimpleObject {
+  public int $mine = 4;
+
+  public function test() {
+  }
+
+  public static function testStatic() {
+  }
+}
+
 function fb_setprofile_callback3($event, $name, $info) {
   echo "fb_setprofile_callback3 event=", $event, " name=", $name, " info=", $info, "\n";
 }
@@ -8,6 +18,13 @@ function fb_setprofile_callback2($event, $name) {
 }
 function fb_setprofile_callback1($event) {
   echo "fb_setprofile_callback1 event=", $event, "\n";
+}
+function fb_setprofile_this($event, $name, $info) {
+  if ($event === "enter") {
+    $is_null = idx($info, "this_obj") === null ? 0 : 1;
+    echo "fb_setprofile_this this_obj=", $is_null, "\n";
+    echo "fb_setprofile_this mine=", idx($info, "this_obj")?->mine, "\n";
+  }
 }
 
 
@@ -35,4 +52,16 @@ fb_setprofile(
 );
 $hash = hash_init('sha1');
 echo("hash="); var_dump($hash);
+
+fb_setprofile(null);
+fb_setprofile(
+  "fb_setprofile_this",
+  SETPROFILE_FLAGS_DEFAULT | SETPROFILE_FLAGS_FRAME_PTRS |
+    SETPROFILE_FLAGS_THIS_OBJECT__MAY_BREAK,
+  vec['SetProfileSimpleObject::test', 'SetProfileSimpleObject::testStatic']
+);
+$obj = new SetProfileSimpleObject();
+$obj->test();
+SetProfileSimpleObject::testStatic();
+echo "test done\n";
 }

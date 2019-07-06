@@ -1,1 +1,1 @@
--vEval.EnableCallBuiltin=false
+-vEval.EnableCallBuiltin=false -vSetProfile.NullThisObject=false

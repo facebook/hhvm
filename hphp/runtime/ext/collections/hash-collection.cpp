@@ -11,7 +11,7 @@ namespace HPHP {
 // HashCollection
 
 HashCollection::HashCollection(Class* cls, HeaderKind kind, uint32_t cap)
-  : ObjectData(cls, NoInit{}, collections::objectFlags, kind)
+  : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
   , m_unusedAndSize(0)
   , m_arr(cap == 0 ? staticEmptyDictArrayAsMixed() :
           MixedArray::asMixed(MixedArray::MakeReserveDict(cap)))

@@ -39,8 +39,6 @@ extern const StaticString
     return req::make<c_##name>().detach();                  \
   }
 
-constexpr ObjectData::Attribute objectFlags = ObjectData::NoAttrs;
-
 /**
  * The "materialization" methods have the form "to[CollectionName]()" and
  * allow us to get an instance of a collection type from another.

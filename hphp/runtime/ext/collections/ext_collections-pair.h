@@ -28,7 +28,7 @@ struct c_Pair : ObjectData {
 
   c_Pair() = delete;
   explicit c_Pair(const TypedValue& e0, const TypedValue& e1)
-    : ObjectData(c_Pair::classof(), NoInit{}, collections::objectFlags,
+    : ObjectData(c_Pair::classof(), NoInit{}, ObjectData::NoAttrs,
                  HeaderKind::Pair)
     , m_size(2)
   {
@@ -37,7 +37,7 @@ struct c_Pair : ObjectData {
   }
   enum class NoIncRef {};
   explicit c_Pair(const TypedValue& e0, const TypedValue& e1, NoIncRef)
-    : ObjectData(c_Pair::classof(), NoInit{}, collections::objectFlags,
+    : ObjectData(c_Pair::classof(), NoInit{}, ObjectData::NoAttrs,
                  HeaderKind::Pair)
     , m_size(2)
   {

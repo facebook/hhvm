@@ -17,12 +17,12 @@ ALWAYS_INLINE MixedArray* staticEmptyDictArrayAsMixed() {
 // Common base class for BaseMap/BaseSet collections
 struct HashCollection : ObjectData {
   explicit HashCollection(Class* cls, HeaderKind kind)
-    : ObjectData(cls, NoInit{}, collections::objectFlags, kind)
+    : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
     , m_unusedAndSize(0)
     , m_arr(staticEmptyDictArrayAsMixed())
   {}
   explicit HashCollection(Class* cls, HeaderKind kind, ArrayData* arr)
-    : ObjectData(cls, NoInit{}, collections::objectFlags, kind)
+    : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
     , m_unusedAndSize(arr->m_size)
     , m_arr(MixedArray::asMixed(arr))
   {}

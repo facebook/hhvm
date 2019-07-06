@@ -507,20 +507,6 @@ std::unique_ptr<php::Program> parse_program(Container units) {
   return ret;
 }
 
-template<typename F>
-void make_unit_emitters(
-  const Index& index,
-  const php::Program& program,
-  F outFunc) {
-  trace_time trace("make_unit_emitters");
-  return parallel::for_each(
-    program.units,
-    [&] (const std::unique_ptr<php::Unit>& unit) {
-      outFunc(emit_unit(index, *unit));
-    }
-  );
-}
-
 //////////////////////////////////////////////////////////////////////
 
 }

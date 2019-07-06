@@ -160,8 +160,8 @@ where S: SmartConstructors<'a, State> {
     fn make_require_clause(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State, Self::R) {
         compose(SyntaxKind::RequireClause, S::make_require_clause(st, arg0.1, arg1.1, arg2.1, arg3.1))
     }
-    fn make_const_declaration(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R) -> (State, Self::R) {
-        compose(SyntaxKind::ConstDeclaration, S::make_const_declaration(st, arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1))
+    fn make_const_declaration(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> (State, Self::R) {
+        compose(SyntaxKind::ConstDeclaration, S::make_const_declaration(st, arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))
     }
     fn make_constant_declarator(st: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R) {
         compose(SyntaxKind::ConstantDeclarator, S::make_constant_declarator(st, arg0.1, arg1.1))

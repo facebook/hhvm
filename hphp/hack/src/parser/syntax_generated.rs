@@ -408,10 +408,9 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_const_declaration(const_visibility: Self, const_abstract: Self, const_keyword: Self, const_type_specifier: Self, const_declarators: Self, const_semicolon: Self) -> Self {
+    fn make_const_declaration(const_modifiers: Self, const_keyword: Self, const_type_specifier: Self, const_declarators: Self, const_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::ConstDeclaration(Box::new(ConstDeclarationChildren {
-            const_visibility,
-            const_abstract,
+            const_modifiers,
             const_keyword,
             const_type_specifier,
             const_declarators,
@@ -430,10 +429,10 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_type_const_declaration(type_const_attribute_spec: Self, type_const_abstract: Self, type_const_keyword: Self, type_const_type_keyword: Self, type_const_name: Self, type_const_type_parameters: Self, type_const_type_constraint: Self, type_const_equal: Self, type_const_type_specifier: Self, type_const_semicolon: Self) -> Self {
+    fn make_type_const_declaration(type_const_attribute_spec: Self, type_const_modifiers: Self, type_const_keyword: Self, type_const_type_keyword: Self, type_const_name: Self, type_const_type_parameters: Self, type_const_type_constraint: Self, type_const_equal: Self, type_const_type_specifier: Self, type_const_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::TypeConstDeclaration(Box::new(TypeConstDeclarationChildren {
             type_const_attribute_spec,
-            type_const_abstract,
+            type_const_modifiers,
             type_const_keyword,
             type_const_type_keyword,
             type_const_name,
@@ -2145,8 +2144,7 @@ where
                 acc
             },
             SyntaxVariant::ConstDeclaration(x) => {
-                let acc = f(&x.const_visibility, acc);
-                let acc = f(&x.const_abstract, acc);
+                let acc = f(&x.const_modifiers, acc);
                 let acc = f(&x.const_keyword, acc);
                 let acc = f(&x.const_type_specifier, acc);
                 let acc = f(&x.const_declarators, acc);
@@ -2160,7 +2158,7 @@ where
             },
             SyntaxVariant::TypeConstDeclaration(x) => {
                 let acc = f(&x.type_const_attribute_spec, acc);
-                let acc = f(&x.type_const_abstract, acc);
+                let acc = f(&x.type_const_modifiers, acc);
                 let acc = f(&x.type_const_keyword, acc);
                 let acc = f(&x.type_const_type_keyword, acc);
                 let acc = f(&x.type_const_name, acc);
@@ -3542,8 +3540,7 @@ pub struct RequireClauseChildren<T, V> {
 
 #[derive(Debug, Clone)]
 pub struct ConstDeclarationChildren<T, V> {
-    pub const_visibility: Syntax<T, V>,
-    pub const_abstract: Syntax<T, V>,
+    pub const_modifiers: Syntax<T, V>,
     pub const_keyword: Syntax<T, V>,
     pub const_type_specifier: Syntax<T, V>,
     pub const_declarators: Syntax<T, V>,
@@ -3559,7 +3556,7 @@ pub struct ConstantDeclaratorChildren<T, V> {
 #[derive(Debug, Clone)]
 pub struct TypeConstDeclarationChildren<T, V> {
     pub type_const_attribute_spec: Syntax<T, V>,
-    pub type_const_abstract: Syntax<T, V>,
+    pub type_const_modifiers: Syntax<T, V>,
     pub type_const_keyword: Syntax<T, V>,
     pub type_const_type_keyword: Syntax<T, V>,
     pub type_const_name: Syntax<T, V>,

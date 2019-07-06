@@ -190,8 +190,8 @@ impl<'a> SmartConstructors<'a, NoState> for MinimalSmartConstructors {
         <Self as SyntaxSmartConstructors<'a, MinimalSyntax, NoState>>::make_require_clause(s, arg0, arg1, arg2, arg3)
     }
 
-    fn make_const_declaration(s: NoState, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R) -> (NoState, Self::R) {
-        <Self as SyntaxSmartConstructors<'a, MinimalSyntax, NoState>>::make_const_declaration(s, arg0, arg1, arg2, arg3, arg4, arg5)
+    fn make_const_declaration(s: NoState, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> (NoState, Self::R) {
+        <Self as SyntaxSmartConstructors<'a, MinimalSyntax, NoState>>::make_const_declaration(s, arg0, arg1, arg2, arg3, arg4)
     }
 
     fn make_constant_declarator(s: NoState, arg0: Self::R, arg1: Self::R) -> (NoState, Self::R) {

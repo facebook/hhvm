@@ -226,9 +226,9 @@ where
         (s, Self::R::make_require_clause(arg0, arg1, arg2, arg3))
     }
 
-    fn make_const_declaration(s: State::T, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R) -> (State::T, Self::R) {
-        let s = State::next(s, vec![&arg0, &arg1, &arg2, &arg3, &arg4, &arg5]);
-        (s, Self::R::make_const_declaration(arg0, arg1, arg2, arg3, arg4, arg5))
+    fn make_const_declaration(s: State::T, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> (State::T, Self::R) {
+        let s = State::next(s, vec![&arg0, &arg1, &arg2, &arg3, &arg4]);
+        (s, Self::R::make_const_declaration(arg0, arg1, arg2, arg3, arg4))
     }
 
     fn make_constant_declarator(s: State::T, arg0 : Self::R, arg1 : Self::R) -> (State::T, Self::R) {

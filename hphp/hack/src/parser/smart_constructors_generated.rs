@@ -64,7 +64,7 @@ pub trait SmartConstructors<'a, State> {
     fn make_trait_use_conflict_resolution(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> (State, Self::R);
     fn make_trait_use(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R);
     fn make_require_clause(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State, Self::R);
-    fn make_const_declaration(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R) -> (State, Self::R);
+    fn make_const_declaration(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> (State, Self::R);
     fn make_constant_declarator(st: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R);
     fn make_type_const_declaration(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R, arg8 : Self::R, arg9 : Self::R) -> (State, Self::R);
     fn make_decorated_expression(st: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R);

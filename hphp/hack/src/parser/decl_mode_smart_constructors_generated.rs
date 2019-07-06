@@ -195,8 +195,8 @@ where
         <Self as SyntaxSmartConstructors<'a, Self::R, State<Self::R>>>::make_require_clause(s, arg0, arg1, arg2, arg3)
     }
 
-    fn make_const_declaration(s: Vec<bool>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R) -> (Vec<bool>, Self::R) {
-        <Self as SyntaxSmartConstructors<'a, Self::R, State<Self::R>>>::make_const_declaration(s, arg0, arg1, arg2, arg3, arg4, arg5)
+    fn make_const_declaration(s: Vec<bool>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> (Vec<bool>, Self::R) {
+        <Self as SyntaxSmartConstructors<'a, Self::R, State<Self::R>>>::make_const_declaration(s, arg0, arg1, arg2, arg3, arg4)
     }
 
     fn make_constant_declarator(s: Vec<bool>, arg0: Self::R, arg1: Self::R) -> (Vec<bool>, Self::R) {

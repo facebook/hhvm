@@ -56,9 +56,9 @@ pub trait SyntaxType: SyntaxTypeBase
     fn make_trait_use_conflict_resolution(trait_use_conflict_resolution_keyword: Self, trait_use_conflict_resolution_names: Self, trait_use_conflict_resolution_left_brace: Self, trait_use_conflict_resolution_clauses: Self, trait_use_conflict_resolution_right_brace: Self) -> Self;
     fn make_trait_use(trait_use_keyword: Self, trait_use_names: Self, trait_use_semicolon: Self) -> Self;
     fn make_require_clause(require_keyword: Self, require_kind: Self, require_name: Self, require_semicolon: Self) -> Self;
-    fn make_const_declaration(const_visibility: Self, const_abstract: Self, const_keyword: Self, const_type_specifier: Self, const_declarators: Self, const_semicolon: Self) -> Self;
+    fn make_const_declaration(const_modifiers: Self, const_keyword: Self, const_type_specifier: Self, const_declarators: Self, const_semicolon: Self) -> Self;
     fn make_constant_declarator(constant_declarator_name: Self, constant_declarator_initializer: Self) -> Self;
-    fn make_type_const_declaration(type_const_attribute_spec: Self, type_const_abstract: Self, type_const_keyword: Self, type_const_type_keyword: Self, type_const_name: Self, type_const_type_parameters: Self, type_const_type_constraint: Self, type_const_equal: Self, type_const_type_specifier: Self, type_const_semicolon: Self) -> Self;
+    fn make_type_const_declaration(type_const_attribute_spec: Self, type_const_modifiers: Self, type_const_keyword: Self, type_const_type_keyword: Self, type_const_name: Self, type_const_type_parameters: Self, type_const_type_constraint: Self, type_const_equal: Self, type_const_type_specifier: Self, type_const_semicolon: Self) -> Self;
     fn make_decorated_expression(decorated_expression_decorator: Self, decorated_expression_expression: Self) -> Self;
     fn make_parameter_declaration(parameter_attribute: Self, parameter_visibility: Self, parameter_call_convention: Self, parameter_type: Self, parameter_name: Self, parameter_default_value: Self) -> Self;
     fn make_variadic_parameter(variadic_parameter_call_convention: Self, variadic_parameter_type: Self, variadic_parameter_ellipsis: Self) -> Self;

@@ -1114,25 +1114,23 @@ where
         S!(make_require_clause, self, req, req_kind, name, semi)
     }
 
-    // This duplicates work from parse_methodish_or_property, but this function is only
-    // invoked after an attribute spec, while parse_methodish_or_property is called after
-    // a modifier. Having this function prevents "private abstract const type T".
-    // See also, parse_methodish_or_const_or_type_const
+    // This duplicates work from parse_methodish_or_const_or_type_const,
+    // but this function is only invoked after an attribute spec, while
+    // parse_methodish_or_const_or_type_const is called after a modifier.
+    // Having this function prevents constants from having attributes as
+    // this cannot be checked in parser_errors as there is no field in constant
+    // declaration to store 'attributes'.
     fn parse_methodish_or_property_or_type_constant(&mut self, attribute_spec: S::R) -> S::R {
         let mut parser1 = self.clone();
-        let (_, contains_abstract) = parser1.parse_modifiers();
+        let modifiers = parser1.parse_modifiers();
         let current_token_kind = parser1.peek_token_kind();
         let next_token = parser1.peek_token_with_lookahead(1);
         let next_token_kind = next_token.kind();
         match (current_token_kind, next_token_kind) {
             (TokenKind::Const, TokenKind::Type) => {
-                let abstr = if contains_abstract {
-                    self.assert_token(TokenKind::Abstract)
-                } else {
-                    S!(make_missing, self, self.pos())
-                };
+                self.continue_from(parser1);
                 let const_ = self.assert_token(TokenKind::Const);
-                self.parse_type_const_declaration(attribute_spec, abstr, const_)
+                self.parse_type_const_declaration(attribute_spec, modifiers, const_)
             }
             _ => self.parse_methodish_or_property(attribute_spec),
         }
@@ -1143,7 +1141,7 @@ where
     }
 
     fn parse_methodish_or_property(&mut self, attribute_spec: S::R) -> S::R {
-        let (modifiers, contains_abstract) = self.parse_modifiers();
+        let modifiers = self.parse_modifiers();
         // ERROR RECOVERY: match against two tokens, because if one token is
         // in error but the next isn't, then it's likely that the user is
         // simply still typing. Throw an error on what's being typed, then eat
@@ -1156,9 +1154,7 @@ where
             (TokenKind::Async, _) | (TokenKind::Coroutine, _) | (TokenKind::Function, _) => {
                 self.parse_methodish(attribute_spec, modifiers)
             }
-            (TokenKind::LeftParen, _) => {
-                self.parse_property_declaration(attribute_spec, modifiers, contains_abstract)
-            }
+            (TokenKind::LeftParen, _) => self.parse_property_declaration(attribute_spec, modifiers),
 
             // We encountered one unexpected token, but the next still indicates that
             // we should be parsing a methodish. Throw an error, process the token
@@ -1171,7 +1167,7 @@ where
                 self.parse_methodish(attribute_spec, modifiers)
             }
             // Otherwise, continue parsing as a property (which might be a lambda).
-            (_, _) => self.parse_property_declaration(attribute_spec, modifiers, contains_abstract),
+            _ => self.parse_property_declaration(attribute_spec, modifiers),
         }
     }
 
@@ -1189,14 +1185,14 @@ where
 
     fn parse_trait_use_alias_item(&mut self, aliasing_name: S::R) -> S::R {
         let keyword = self.require_token(TokenKind::As, Errors::expected_as_or_insteadof);
-        let (visibility, _) = self.parse_modifiers();
+        let modifiers = self.parse_modifiers();
         let aliased_name = self.parse_qualified_name_type_opt();
         S!(
             make_trait_use_alias_item,
             self,
             aliasing_name,
             keyword,
-            visibility,
+            modifiers,
             aliased_name
         )
     }
@@ -1305,12 +1301,7 @@ where
         }
     }
 
-    fn parse_property_declaration(
-        &mut self,
-        attribute_spec: S::R,
-        modifiers: S::R,
-        contains_abstract: bool,
-    ) -> S::R {
+    fn parse_property_declaration(&mut self, attribute_spec: S::R, modifiers: S::R) -> S::R {
         // SPEC:
         // property-declaration:
         //   attribute-spec-opt  property-modifier  type-specifier
@@ -1340,10 +1331,6 @@ where
             decls,
             semi
         );
-        // TODO: Move this to Full_fidelity_parser_errors.
-        if contains_abstract {
-            self.with_error(Errors::error2058);
-        };
         result
     }
 
@@ -1376,7 +1363,7 @@ where
     //   name  constant-initializer_opt
     // constant-initializer:
     //   =  const-expression
-    fn parse_const_declaration(&mut self, visibility: S::R, abstr: S::R, const_: S::R) -> S::R {
+    fn parse_const_declaration(&mut self, modifiers: S::R, const_: S::R) -> S::R {
         let type_spec = if self.is_type_in_const() {
             self.parse_type_specifier(/* allow_var = */ false)
         } else {
@@ -1391,8 +1378,7 @@ where
         S!(
             make_const_declaration,
             self,
-            visibility,
-            abstr,
+            modifiers,
             const_,
             type_spec,
             const_list,
@@ -1441,7 +1427,7 @@ where
     fn parse_type_const_declaration(
         &mut self,
         attributes: S::R,
-        abstr: S::R,
+        modifiers: S::R,
         const_: S::R,
     ) -> S::R {
         let type_token = self.assert_token(TokenKind::Type);
@@ -1462,7 +1448,7 @@ where
             make_type_const_declaration,
             self,
             attributes,
-            abstr,
+            modifiers,
             const_,
             type_token,
             name,
@@ -1714,7 +1700,7 @@ where
     }
 
     pub fn parse_function_declaration(&mut self, attribute_specification: S::R) -> S::R {
-        let (modifiers, _) = self.parse_modifiers();
+        let modifiers = self.parse_modifiers();
         let header =
             self.parse_function_declaration_header(modifiers, /* is_methodish =*/ false);
         let body = self.parse_compound_statement();
@@ -1873,6 +1859,38 @@ where
         })
     }
 
+    // Parses modifiers and passes them into the parse methods for the
+    // respective class body element.
+    fn parse_methodish_or_property_or_const_or_type_const(&mut self) -> S::R {
+        let mut parser1 = self.clone();
+        let modifiers = parser1.parse_modifiers();
+        let kind0 = parser1.peek_token_kind_with_lookahead(0);
+        let kind1 = parser1.peek_token_kind_with_lookahead(1);
+        let kind2 = parser1.peek_token_kind_with_lookahead(2);
+        match (kind0, kind1, kind2) {
+            (TokenKind::Const, TokenKind::Type, TokenKind::Semicolon) => {
+                self.continue_from(parser1);
+                let const_ = self.assert_token(TokenKind::Const);
+                self.parse_const_declaration(modifiers, const_)
+            }
+            (TokenKind::Const, TokenKind::Type, _) if kind2 != TokenKind::Equal => {
+                let attributes = S!(make_missing, self, self.pos());
+                let modifiers = self.parse_modifiers();
+                let const_ = self.assert_token(TokenKind::Const);
+                self.parse_type_const_declaration(attributes, modifiers, const_)
+            }
+            (TokenKind::Const, _, _) => {
+                self.continue_from(parser1);
+                let const_ = self.assert_token(TokenKind::Const);
+                self.parse_const_declaration(modifiers, const_)
+            }
+            _ => {
+                let missing = S!(make_missing, self, self.pos());
+                self.parse_methodish_or_property(missing)
+            }
+        }
+    }
+
     // SPEC
     // method-declaration:
     //   attribute-spec-opt method-modifiers function-definition
@@ -1885,37 +1903,6 @@ where
     //   static
     //   abstract
     //   final
-    fn parse_methodish_or_const_or_type_const(&mut self) -> S::R {
-        if self.peek_token_kind_with_lookahead(1) == TokenKind::Const {
-            let kind1 = self.peek_token_kind_with_lookahead(2);
-            let kind2 = self.peek_token_kind_with_lookahead(3);
-            match (kind1, kind2) {
-                (TokenKind::Type, TokenKind::Semicolon) => {
-                    let missing = S!(make_missing, self, self.pos());
-                    let abstr = self.assert_token(TokenKind::Abstract);
-                    let const_ = self.assert_token(TokenKind::Const);
-                    self.parse_const_declaration(missing, abstr, const_)
-                }
-                (TokenKind::Type, _) if kind2 != TokenKind::Equal => {
-                    let attributes = S!(make_missing, self, self.pos());
-                    let abstr = self.assert_token(TokenKind::Abstract);
-                    let const_ = self.assert_token(TokenKind::Const);
-                    self.parse_type_const_declaration(attributes, abstr, const_)
-                }
-                (_, _) => {
-                    let missing = S!(make_missing, self, self.pos());
-                    let abstr = self.assert_token(TokenKind::Abstract);
-                    let const_ = self.assert_token(TokenKind::Const);
-                    self.parse_const_declaration(missing, abstr, const_)
-                }
-            }
-        } else {
-            let missing = S!(make_missing, self, self.pos());
-            let (modifiers, _) = self.parse_modifiers();
-            self.parse_methodish(missing, modifiers)
-        }
-    }
-
     fn parse_methodish(&mut self, attribute_spec: S::R, modifiers: S::R) -> S::R {
         let header =
             self.parse_function_declaration_header(modifiers, /* is_methodish:*/ true);
@@ -1994,7 +1981,7 @@ where
             }
         }
     }
-    fn parse_modifiers(&mut self) -> (S::R, bool) {
+    fn parse_modifiers(&mut self) -> S::R {
         let mut items = vec![];
         loop {
             let token_kind = self.peek_token_kind();
@@ -2014,9 +2001,7 @@ where
                 _ => break,
             }
         }
-        let contains_abstract = items.iter().any(|x: &S::R| x.is_abstract());
-        let items_list = S!(make_list, self, Box::new(items), self.pos());
-        (items_list, contains_abstract)
+        S!(make_list, self, Box::new(items), self.pos())
     }
 
     fn parse_enum_or_classish_or_function_declaration(&mut self) -> S::R {
@@ -2133,44 +2118,11 @@ where
             TokenKind::Children => self.parse_xhp_children_declaration(),
             TokenKind::Category => self.parse_xhp_category_declaration(),
             TokenKind::Use => self.parse_trait_use(),
-            TokenKind::Const => {
-                let missing = S!(make_missing, self, self.pos());
-                let kind1 = self.peek_token_kind_with_lookahead(1);
-                let kind2 = self.peek_token_kind_with_lookahead(2);
-                match (kind1, kind2) {
-                    (TokenKind::Type, TokenKind::Semicolon) => {
-                        let missing1 = S!(make_missing, self, self.pos());
-                        let const_ = self.assert_token(TokenKind::Const);
-                        self.parse_const_declaration(missing, missing1, const_)
-                    }
-                    (TokenKind::Type, _) if kind2 != TokenKind::Equal => {
-                        let missing1 = S!(make_missing, self, self.pos());
-                        let const_ = self.assert_token(TokenKind::Const);
-                        self.parse_type_const_declaration(missing, missing1, const_)
-                    }
-                    (_, _) => {
-                        let missing1 = S!(make_missing, self, self.pos());
-                        let const_ = self.assert_token(TokenKind::Const);
-                        self.parse_const_declaration(missing, missing1, const_)
-                    }
-                }
-            }
-            TokenKind::Abstract => self.parse_methodish_or_const_or_type_const(),
-            TokenKind::Public | TokenKind::Protected | TokenKind::Private => {
-                let mut parser1 = self.clone();
-                let visibility = parser1.next_token();
-                let next_kind = parser1.peek_token_kind();
-                if next_kind == TokenKind::Const {
-                    self.continue_from(parser1);
-                    let visibility = S!(make_token, self, visibility);
-                    let missing = S!(make_missing, self, self.pos());
-                    let const_ = self.assert_token(TokenKind::Const);
-                    self.parse_const_declaration(visibility, missing, const_)
-                } else {
-                    let missing = S!(make_missing, self, self.pos());
-                    self.parse_methodish_or_property(missing)
-                }
-            }
+            TokenKind::Const
+            | TokenKind::Abstract
+            | TokenKind::Public
+            | TokenKind::Protected
+            | TokenKind::Private => self.parse_methodish_or_property_or_const_or_type_const(),
             TokenKind::Enum => self.parse_class_enum(false),
             TokenKind::Final => {
                 match self.peek_token_kind_with_lookahead(1) {
@@ -2210,7 +2162,7 @@ where
                 // so as to give an error later.
                 let missing = S!(make_missing, self, self.pos());
                 let var = self.assert_token(TokenKind::Var);
-                self.parse_property_declaration(missing, var, false)
+                self.parse_property_declaration(missing, var)
             }
             kind if self.expects(kind) => S!(make_missing, self, self.pos()),
             _ => {
@@ -2220,7 +2172,7 @@ where
                 let mut parser1 = self.clone();
                 let missing1 = S!(make_missing, parser1, self.pos());
                 let missing2 = S!(make_missing, parser1, self.pos());
-                let property = parser1.parse_property_declaration(missing1, missing2, false);
+                let property = parser1.parse_property_declaration(missing1, missing2);
                 if self.errors.len() == parser1.errors.len() {
                     self.continue_from(parser1);
                     property
@@ -2369,14 +2321,11 @@ where
             }
             TokenKind::Namespace => self.parse_namespace_declaration(),
             TokenKind::Use => self.parse_namespace_use_declaration(),
-            TokenKind::Trait
-            | TokenKind::Interface
-            | TokenKind::Class => {
+            TokenKind::Trait | TokenKind::Interface | TokenKind::Class => {
                 let missing = S!(make_missing, self, self.pos());
                 self.parse_classish_declaration(missing)
             }
-            TokenKind::Abstract
-            | TokenKind::Final => {
+            TokenKind::Abstract | TokenKind::Final => {
                 let missing = S!(make_missing, self, self.pos());
                 match parser1.peek_token_kind() {
                     TokenKind::RecordDec => self.parse_record_declaration(missing),
@@ -2399,10 +2348,9 @@ where
             // TODO figure out what global const differs from class const
             TokenKind::Const => {
                 let missing1 = S!(make_missing, parser1, self.pos());
-                let missing2 = S!(make_missing, parser1, self.pos());
                 self.continue_from(parser1);
                 let token = S!(make_token, self, token);
-                self.parse_const_declaration(missing1, missing2, token)
+                self.parse_const_declaration(missing1, token)
             }
             // TODO: What if it's not a legal statement? Do we still make progress here?
             _ => {

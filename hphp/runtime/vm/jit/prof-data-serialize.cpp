@@ -421,7 +421,9 @@ bool write_type_alias(ProfDataSerializer& ser, const TypeAliasReq* td) {
     if (ta.name == name) {
       auto const kind = get_ts_kind(ta.typeStructure.get());
       switch (kind) {
-        case TypeStructure::Kind::T_unresolved: {
+        case TypeStructure::Kind::T_unresolved:
+        case TypeStructure::Kind::T_xhp:
+        {
           auto const clsname = get_ts_classname(ta.typeStructure.get());
           if (!write_type_alias_or_class(ser,
                                          NamedEntity::get(clsname, false))) {
@@ -441,7 +443,10 @@ bool write_type_alias(ProfDataSerializer& ser, const TypeAliasReq* td) {
         case TypeStructure::Kind::T_nothing:
         case TypeStructure::Kind::T_noreturn:
         case TypeStructure::Kind::T_tuple:
+        case TypeStructure::Kind::T_fun:
         case TypeStructure::Kind::T_array:
+        case TypeStructure::Kind::T_typevar:
+        case TypeStructure::Kind::T_shape:
         case TypeStructure::Kind::T_darray:
         case TypeStructure::Kind::T_varray:
         case TypeStructure::Kind::T_varray_or_darray:
@@ -451,26 +456,12 @@ bool write_type_alias(ProfDataSerializer& ser, const TypeAliasReq* td) {
         case TypeStructure::Kind::T_vec_or_dict:
         case TypeStructure::Kind::T_arraylike:
         case TypeStructure::Kind::T_nonnull:
-        case TypeStructure::Kind::T_mixed:
         case TypeStructure::Kind::T_dynamic:
+        case TypeStructure::Kind::T_typeaccess:
+        case TypeStructure::Kind::T_mixed:
           break;
 
-        case TypeStructure::Kind::T_fun:
-        case TypeStructure::Kind::T_typevar:
-        case TypeStructure::Kind::T_shape:
-        case TypeStructure::Kind::T_typeaccess:
-        case TypeStructure::Kind::T_xhp:
-        case TypeStructure::Kind::T_reifiedtype: {
-          Logger::Warning("jit_serialize: TypedAlias %s of Kind %d skipped",
-                          name->data(), (int)kind);
-          static auto missedTypeAliasCounter = ServiceData::createTimeSeries(
-            "jit.serialize.skipped_type_aliases",
-            {ServiceData::StatsType::COUNT}
-          );
-          missedTypeAliasCounter->addValue(1);
-          return false;
-        }
-
+        case TypeStructure::Kind::T_reifiedtype:
         case TypeStructure::Kind::T_class:
         case TypeStructure::Kind::T_interface:
         case TypeStructure::Kind::T_trait:

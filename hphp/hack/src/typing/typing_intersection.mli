@@ -16,3 +16,5 @@ module Utils = Typing_utils
 val non : Env.env -> Reason.t -> locl ty -> approx:Utils.approx-> Env.env * locl ty
 val intersect : Env.env -> r:Reason.t -> locl ty -> locl ty -> Env.env * locl ty
 val intersect_list : Env.env -> Reason.t -> locl ty list -> Env.env * locl ty
+val simplify_intersections : Env.env -> ?on_tyvar:(Env.env -> Reason.t -> int -> Env.env * locl ty)
+  -> locl ty -> Env.env * locl ty

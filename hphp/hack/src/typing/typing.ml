@@ -1382,7 +1382,13 @@ and expr_
   ~check_defined
   env (p, e) =
   let env = Env.open_tyvars env p in
-  (fun (env, te, ty) -> SubType.close_tyvars_and_solve env, te, ty) @@
+  (fun (env, te, ty) ->
+    let env = SubType.close_tyvars_and_solve env in
+    (* Solving type variables may leave intersections and unions unsimplified. *)
+    (* TODO: possible improvement:
+    simplify all intersections in type, not just at top-level. *)
+    let env, ty = Inter.simplify_intersections env ty in
+    env, te, ty) @@
   let expr = expr ~check_defined in
   let exprs = exprs ~check_defined in
   let raw_expr = raw_expr ~check_defined in
@@ -5401,7 +5407,7 @@ and call ~(expected: ExpectedTy.t option) ?method_call_info pos env fty ~fty_dec
 and call_param env param opt_dparam ((pos, _ as e), arg_ty) ~is_variadic =
   param_modes ~is_variadic param e;
 
-  (* When checking params the type 'x' may be expression dependent. Since
+  (* When checking params, the type 'x' may be expression dependent. Since
    * we store the expression id in the local env for Lvar, we want to apply
    * it in this case.
    *)

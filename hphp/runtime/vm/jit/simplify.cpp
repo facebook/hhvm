@@ -1824,15 +1824,21 @@ SSATmp* simplifyInstanceOfIface(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyInstanceOfIfaceVtable(State& env, const IRInstruction* inst) {
-  auto const src0 = inst->src(0);
+  if (!inst->extra<InstanceOfIfaceVtable>()->canOptimize) return nullptr;
+  auto const cls = inst->src(0);
   auto const iface = inst->extra<InstanceOfIfaceVtable>()->cls;
+  if (cls->type().clsSpec() &&
+      cls->type().clsSpec().cls()->classof(iface)) {
+    return cns(env, true);
+  }
+
   const bool useInstanceBits = InstanceBits::initted() ||
                                env.unit.context().kind == TransKind::Optimize;
   if (useInstanceBits) {
     InstanceBits::init();
     auto const ifaceName = iface->name();
     if (InstanceBits::lookup(ifaceName) != 0) {
-      return gen(env, InstanceOfBitmask, src0, cns(env, ifaceName));
+      return gen(env, InstanceOfBitmask, cls, cns(env, ifaceName));
     }
   }
   return nullptr;

@@ -215,6 +215,33 @@ struct ExtendsClassData : IRExtraData {
 };
 
 /*
+ * InstanceOfIfaceVtable.
+ */
+struct InstanceOfIfaceVtableData : IRExtraData {
+  InstanceOfIfaceVtableData(const Class* cls, bool canOptimize)
+      : cls(cls), canOptimize(canOptimize)
+  {
+    assertx(cls != nullptr);
+  }
+
+  std::string show() const {
+    return folly::sformat("{}{}",
+                          cls->name(), canOptimize ? ":canOptimize" : "");
+  }
+
+  bool equals(const InstanceOfIfaceVtableData& o) const {
+    return cls == o.cls && canOptimize == o.canOptimize;
+  }
+
+  size_t hash() const {
+    return pointer_hash<Class>()(cls) ^ (canOptimize ? -1 : 0);
+  }
+
+  const Class* cls;
+  bool canOptimize;
+};
+
+/*
  * Class with method name.
  */
 struct ClsMethodData : IRExtraData {
@@ -1596,7 +1623,7 @@ X(InitSProps,                   ClassData);
 X(NewInstanceRaw,               ClassData);
 X(InitObjProps,                 ClassData);
 X(InitObjMemoSlots,             ClassData);
-X(InstanceOfIfaceVtable,        ClassData);
+X(InstanceOfIfaceVtable,        InstanceOfIfaceVtableData);
 X(ResolveTypeStruct,            ResolveTypeStructData);
 X(ExtendsClass,                 ExtendsClassData);
 X(SpillFrame,                   ActRecInfo);

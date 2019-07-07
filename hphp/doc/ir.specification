@@ -853,10 +853,13 @@ To string conversions:
   S1 must be a unique interface. This should only be used in repo-authoritative
   mode.
 
-| InstanceOfIfaceVtable<iface>, D(Bool), S(Cls), NF
+| InstanceOfIfaceVtable<iface,canOptimize>, D(Bool), S(Cls), NF
 
   Faster path for interface checks. Sets D based on whether S0 implements
-  iface, which must be a unique interface with an assigned vtable slot.
+  iface, which must be a unique interface with an assigned vtable slot.  In
+  some circumstances, this instruction is ensuring the presence of the
+  vtableVec; in those cases, canOptimize is false to avoid eliminating the
+  guard.
 
 | ExtendsClass<cls,strictLikely>, D(Bool), S(Cls), NF
 
@@ -874,7 +877,7 @@ To string conversions:
   fast instance check bitvector (see class.h).
 
 | InstanceOfRecDesc, D(Bool), S(RecDesc) S(RecDesc), NF
-  
+
   Sets D to true if S0 is a descendant of the record in S1, false otherwise.
 
 | InterfaceSupportsArr,        D(Bool), S(Str), NF

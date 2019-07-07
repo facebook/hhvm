@@ -132,7 +132,10 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
   if (isInterface(knownCls)) {
     auto const slot = knownCls->preClass()->ifaceVtableSlot();
     if (slot != kInvalidSlot && RuntimeOption::RepoAuthoritative) {
-      return gen(env, InstanceOfIfaceVtable, ClassData{knownCls}, objClass);
+      return gen(env,
+                 InstanceOfIfaceVtable,
+                 InstanceOfIfaceVtableData{knownCls, true},
+                 objClass);
     }
 
     return gen(env, InstanceOfIface, objClass, ssaClassName);

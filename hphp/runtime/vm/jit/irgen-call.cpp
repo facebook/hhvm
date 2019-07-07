@@ -818,6 +818,12 @@ void optimizeProfiledCallObjMethod(IRGS& env,
       return;
     }
 
+    auto const vtableSlot = intfMeth->cls()->preClass()->ifaceVtableSlot();
+    if (vtableSlot == kInvalidSlot) {
+      emitFCall();
+      return;
+    }
+
     // The method was defined in a common interface, so check for that and use
     // LdIfaceMethod.
     ifThen(
@@ -825,10 +831,11 @@ void optimizeProfiledCallObjMethod(IRGS& env,
       [&] (Block* sideExit) {
         auto const cls = isStaticCall
           ? objOrCls : gen(env, LdObjClass, objOrCls);
-        auto const cData = ClassData{intfMeth->cls()};
+        auto const cData = InstanceOfIfaceVtableData{
+          intfMeth->cls(), !isStaticCall
+        };
         auto const flag = gen(env, InstanceOfIfaceVtable, cData, cls);
         gen(env, JmpZero, sideExit, flag);
-        auto const vtableSlot = intfMeth->cls()->preClass()->ifaceVtableSlot();
         auto const imData = IfaceMethodData{vtableSlot, intfMeth->methodSlot()};
         auto const meth = gen(env, LdIfaceMethod, imData, cls);
         auto const ctx = getCtx(intfMeth, objOrCls, nullptr);
@@ -1687,6 +1694,12 @@ void optimizeProfiledPushClsMethod(IRGS& env,
       return;
     }
 
+    auto const vtableSlot = intfMeth->cls()->preClass()->ifaceVtableSlot();
+    if (vtableSlot == kInvalidSlot) {
+      emitFPush();
+      return;
+    }
+
     // The method was defined in a common interface, so check for that and use
     // LdIfaceMethod.
     ifThen(
@@ -1694,10 +1707,11 @@ void optimizeProfiledPushClsMethod(IRGS& env,
       [&] (Block* sideExit) {
         auto const cls = isStaticCall
           ? objOrCls : gen(env, LdObjClass, objOrCls);
-        auto const cData = ClassData{intfMeth->cls()};
+        auto const cData = InstanceOfIfaceVtableData{
+          intfMeth->cls(), !isStaticCall
+        };
         auto const flag = gen(env, InstanceOfIfaceVtable, cData, cls);
         gen(env, JmpZero, sideExit, flag);
-        auto const vtableSlot = intfMeth->cls()->preClass()->ifaceVtableSlot();
         auto const imData = IfaceMethodData{vtableSlot, intfMeth->methodSlot()};
         auto const meth = gen(env, LdIfaceMethod, imData, cls);
         auto const ctx = getCtx(intfMeth, objOrCls, nullptr);

@@ -66,7 +66,11 @@ val union_lenv_list :
   Typing_env.env ->
   Typing_env.local_env ->
   Typing_env.local_env list -> Typing_env.env
-
+val union_envs :
+  Typing_env.env ->
+  Typing_env.env ->
+  Typing_env.env ->
+  Typing_env.env
 (* When entering control flow structures, some
  * preexisting continuations must be stashed away and then restored
  * on exiting those control flow structures.

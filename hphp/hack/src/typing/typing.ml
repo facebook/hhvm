@@ -5836,15 +5836,37 @@ and condition ?lhs_of_null_coalesce env tparamet
       if not tparamet
       then Env.set_env_reactive env Nonreactive
       else env
+  (* Conjunction of conditions. Matches the two following forms:
+      if (cond1 && cond2)
+      if (!(cond1 || cond2))
+  *)
   | T.Binop ((Ast.Ampamp | Ast.Barbar) as bop, e1, e2)
     when tparamet = (bop = Ast.Ampamp) ->
       let env = condition env tparamet e1 in
       (* This is necessary in case there is an assignment in e2
        * We essentially redo what has been undone in the
-       * `Binop (AMpamp|BArbar)` case of `expr` *)
+       * `Binop (Ampamp|Barbar)` case of `expr` *)
       let env, _, _ = expr env (Tast.to_nast_expr e2) in
       let env = condition env tparamet e2 in
       env
+  (* Disjunction of conditions. Matches the two following forms:
+      if (cond1 || cond2)
+      if (!(cond1 && cond2))
+  *)
+  | T.Binop ((Ast.Ampamp | Ast.Barbar) as bop, e1, e2)
+    when tparamet = (bop = Ast.Barbar) ->
+      (* Either cond1 is true and we don't know anything about cond2... *)
+      let env1 = condition env tparamet e1 in
+
+      (* ... Or cond1 is false and therefore cond2 must be true *)
+      let env2 = condition env (not tparamet) e1 in
+      (* Similarly to the conjunction case, there might be an assignment in
+      cond2 which we must account for. Again we redo what has been undone in
+      the `Binop (Ampamp|Barbar)` case of `expr`*)
+      let env2, _, _ = expr env2 (Tast.to_nast_expr e2) in
+      let env2 = condition env2 tparamet e2 in
+
+      LEnv.union_envs env env1 env2
   | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_array ->
       is_array env `PHPArray p f lv

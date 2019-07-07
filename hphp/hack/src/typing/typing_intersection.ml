@@ -88,6 +88,9 @@ let rec intersect env ~r ty1 ty2 =
   let (env, ty1) = decompose_atomic env ty1 in
   let (env, ty2) = decompose_atomic env ty2 in
   let env, inter_ty = try match ty1, ty2 with
+      | (_, Ttuple tyl1), (_, Ttuple tyl2) when List.length tyl1 = List.length tyl2 ->
+        let env, inter_tyl = List.map2_env env tyl1 tyl2 ~f:(intersect ~r) in
+        env, (r, Ttuple inter_tyl)
       | (_, Tshape (shape_kind1, fdm1)), (_, Tshape (shape_kind2, fdm2)) ->
         let env, shape_kind, fdm = intersect_shapes env r (shape_kind1, fdm1) (shape_kind2, fdm2) in
         env, (r, Tshape (shape_kind, fdm))

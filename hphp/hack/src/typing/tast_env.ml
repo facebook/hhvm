@@ -94,9 +94,6 @@ let is_fresh_generic_parameter = Typing_env.is_fresh_generic_parameter
 
 let simplify_unions env ty = Typing_union.simplify_unions env ty
 
-let is_untyped env ty =
-  Typing_utils.is_any env ty || Typing_utils.is_dynamic env ty
-
 let get_reified = Typing_env.get_reified
 let get_enforceable = Typing_env.get_enforceable
 let get_newable = Typing_env.get_newable
@@ -109,6 +106,9 @@ let is_sub_type env ty_sub ty_super =
 
 let can_subtype env ty_sub ty_super =
   Typing_subtype.can_sub_type env ty_sub ty_super
+
+let is_sub_type_for_union env ty_sub ty_super =
+  Typing_subtype.is_sub_type_for_union env ty_sub ty_super
 
 let referenced_typeconsts env root ids =
   let root = hint_to_ty env root in

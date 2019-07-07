@@ -1,26 +1,8 @@
-File "inter_obj_get.php", line 19, characters 5-12:
-Too few arguments (required 1 but got 0) (Typing[4104])
-File "inter_obj_get.php", line 10, characters 19-20:
-Definition is here
-File "inter_obj_get.php", line 23, characters 20-21:
+File "inter_obj_get.php", line 26, characters 17-18:
 Invalid argument (Typing[4110])
-File "inter_obj_get.php", line 23, characters 12-17:
-Expected string
-File "inter_obj_get.php", line 30, characters 20-20:
-  via this generic T
-File "inter_obj_get.php", line 11, characters 31-33:
-But got int
-File "inter_obj_get.php", line 24, characters 17-18:
-Invalid argument (Typing[4110])
-File "inter_obj_get.php", line 11, characters 22-24:
+File "inter_obj_get.php", line 26, characters 12-14:
 Expected int
-File "inter_obj_get.php", line 24, characters 17-18:
-But got string
-File "inter_obj_get.php", line 25, characters 20-21:
-Invalid argument (Typing[4110])
-File "inter_obj_get.php", line 25, characters 12-17:
-Expected string
 File "inter_obj_get.php", line 30, characters 20-20:
   via this generic T
-File "inter_obj_get.php", line 11, characters 31-33:
-But got int
+File "inter_obj_get.php", line 6, characters 36-41:
+But got string

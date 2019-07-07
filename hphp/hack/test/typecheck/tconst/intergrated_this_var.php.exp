@@ -1,10 +1,5 @@
 File "intergrated_this_var.php", line 11, characters 5-18:
   this as C
 File "intergrated_this_var.php", line 17, characters 5-18:
-  this as I
-File "intergrated_this_var.php", line 18, characters 12-16:
-Invalid return type (Typing[4110])
-File "intergrated_this_var.php", line 5, characters 7-7:
-Expected C
-File "intergrated_this_var.php", line 18, characters 12-16:
-But got I
+  this as (this as C & I)
+No errors

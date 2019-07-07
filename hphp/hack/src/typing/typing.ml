@@ -2345,9 +2345,8 @@ and expr_
     let refine_type env lpos lty rty =
       let reason = Reason.Ras lpos in
       let env, rty = Env.expand_type env rty in
-      if snd rty <> Tdynamic && SubType.is_sub_type_LEGACY_DEPRECATED env lty rty
-      then env, lty
-      else safely_refine_type env p reason lpos lty rty
+      let env, rty = class_for_refinement env p reason lpos lty rty in
+      Inter.intersect env reason lty rty
     in
     let env, te, expr_ty = expr env e in
     let env = might_throw env in
@@ -5935,56 +5934,48 @@ and condition ?lhs_of_null_coalesce env tparamet
       let env, x_ty = resolve_obj env obj_ty in
       set_local env ivar x_ty
   | T.Is (ivar, h) when is_instance_var (T.to_nast_expr ivar) ->
-    (* Stash env so we don't return an updated one if we don't refine *)
-    let env' = env in
     let ety_env = { (Phase.env_with_self env) with from_class = Some CIstatic; } in
     let env, hint_ty = Phase.localize_hint ~ety_env env h in
     let env, hint_ty = Env.expand_type env hint_ty in
-    let reason = Reason.Ris p in
-    let refine_type hint_ty =
+    let reason = Reason.Ris (fst h) in
+    let refine_type env hint_ty =
       let ivar_pos, ivar_ty = fst ivar in
       let env, ivar = get_instance_var env (T.to_nast_expr ivar) in
-      let env, hint_ty =
-        if snd hint_ty <> Tdynamic && SubType.is_sub_type_LEGACY_DEPRECATED env ivar_ty hint_ty
-        then env, ivar_ty
-        else safely_refine_type env p reason ivar_pos ivar_ty hint_ty in
-      set_local env ivar hint_ty
+      let env, hint_ty = class_for_refinement env p reason ivar_pos ivar_ty hint_ty in
+      let env, refined_ty = Inter.intersect env reason ivar_ty hint_ty in
+      set_local env ivar refined_ty
     in
-    begin match snd hint_ty with
-    | _ when tparamet -> refine_type hint_ty
-    | Tprim Nast.Tnull -> refine_type (reason, Tnonnull)
-    | _ -> env'
-    end
+    let env, hint_ty = if not tparamet then Inter.non env reason hint_ty ~approx:TUtils.ApproxUp
+      else env, hint_ty in
+    refine_type env hint_ty
   | _ -> env
 
-and safely_refine_type env p reason ivar_pos ivar_ty hint_ty =
+(** Transform a hint like `A<_>` to a localized type like `A<T#1>` *)
+and class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
   match snd ivar_ty, snd hint_ty with
-    | _, Tclass ((_, cid) as _c, _, tyl) ->
-      begin match Env.get_class env cid with
-        | Some class_info ->
-          let env, tparams_with_new_names, tyl_fresh =
-            isexpr_generate_fresh_tparams env class_info reason tyl in
-          safely_refine_class_type
-            env p _c class_info ivar_ty hint_ty reason tparams_with_new_names
-            tyl_fresh
-        | None ->
-          env, (Reason.Rwitness ivar_pos, Tobject)
-      end
-    | Ttuple ivar_tyl, Ttuple hint_tyl
-      when (List.length ivar_tyl) = (List.length hint_tyl) ->
-      let env, tyl =
-        List.map2_env env ivar_tyl hint_tyl begin fun env ivar_ty hint_ty ->
-          safely_refine_type env p reason ivar_pos ivar_ty hint_ty
-        end
-      in
-      env, (reason, Ttuple tyl)
-    | _, Tnonnull ->
-      TUtils.non_null env p ivar_ty
-    | _, (Tany | Tprim _ | Toption _ | Ttuple _
+  | _, Tclass ((_, cid) as _c, _, tyl) ->
+    begin match Env.get_class env cid with
+      | Some class_info ->
+        let env, tparams_with_new_names, tyl_fresh =
+          isexpr_generate_fresh_tparams env class_info reason tyl in
+        safely_refine_class_type
+          env p _c class_info ivar_ty hint_ty reason tparams_with_new_names
+          tyl_fresh
+      | None ->
+        env, (Reason.Rwitness ivar_pos, Tobject)
+    end
+  | Ttuple ivar_tyl, Ttuple hint_tyl
+    when (List.length ivar_tyl) = (List.length hint_tyl) ->
+    let env, tyl =
+      List.map2_env env ivar_tyl hint_tyl begin fun env ivar_ty hint_ty ->
+        class_for_refinement env p reason ivar_pos ivar_ty hint_ty
+      end in
+    env, (reason, Ttuple tyl)
+  | _, (Tany | Tprim _ | Toption _ | Ttuple _ | Tnonnull
         | Tshape _ | Tvar _ | Tabstract _ | Tarraykind _ | Tanon _
         | Tunion _ | Tintersection _ | Tobject | Terr | Tfun _  | Tdynamic) ->
-      (* TODO(kunalm) Implement the type refinement for each type *)
-      env, hint_ty
+    (* TODO(kunalm) Implement for each type *)
+    env, hint_ty
 
 and safe_instanceof env p class_name class_info ivar_pos ivar_ty obj_ty =
   (* Generate fresh names consisting of formal type parameter name

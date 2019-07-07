@@ -1,26 +1,8 @@
-File "inter_class_get.php", line 20, characters 5-13:
-Too many arguments (expected 0 but got 1) (Typing[4105])
-File "inter_class_get.php", line 6, characters 26-27:
-Definition is here
-File "inter_class_get.php", line 23, characters 20-21:
+File "inter_class_get.php", line 26, characters 17-18:
 Invalid argument (Typing[4110])
-File "inter_class_get.php", line 23, characters 12-17:
-Expected string
-File "inter_class_get.php", line 30, characters 20-20:
-  via this generic T
-File "inter_class_get.php", line 7, characters 38-40:
-But got int
-File "inter_class_get.php", line 24, characters 17-18:
-Invalid argument (Typing[4110])
-File "inter_class_get.php", line 7, characters 29-31:
+File "inter_class_get.php", line 26, characters 12-14:
 Expected int
-File "inter_class_get.php", line 24, characters 17-18:
-But got string
-File "inter_class_get.php", line 25, characters 20-21:
-Invalid argument (Typing[4110])
-File "inter_class_get.php", line 25, characters 12-17:
-Expected string
 File "inter_class_get.php", line 30, characters 20-20:
   via this generic T
-File "inter_class_get.php", line 7, characters 38-40:
-But got int
+File "inter_class_get.php", line 13, characters 43-48:
+But got string

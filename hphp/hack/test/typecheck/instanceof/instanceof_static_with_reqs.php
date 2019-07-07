@@ -20,7 +20,7 @@ abstract class BaseField<T> {
       // This illustrates a limitation of the typechecker:
       // - intersection of this<BaseField> and INeedsFoo
       invariant(
-        $field is INeedsFoo,
+        $field is INeedsFoo<_>,
         'The context arg was provided, but the field doesn\'t support one',
       );
       hh_show($field);
@@ -33,8 +33,6 @@ abstract class BaseField<T> {
 }
 
 interface INeedsFoo<T> {
-  require extends Base;
-
   public function setFoo(T $arg): this;
 }
 

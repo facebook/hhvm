@@ -1,8 +1,1 @@
-File "inter_enum.php", line 23, characters 12-15:
-Switching on enum F but using constant from E (Typing[4023])
-File "inter_enum.php", line 26, characters 12-15:
-Switching on enum F but using constant from E (Typing[4023])
-File "inter_enum.php", line 22, characters 13-14:
-Switch statement nonexhaustive; the following cases are missing: D, C (Typing[4019])
-File "inter_enum.php", line 9, characters 6-6:
-Enum declared here
+No errors

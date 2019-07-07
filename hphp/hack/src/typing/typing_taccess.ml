@@ -246,10 +246,10 @@ and expand env ~as_tyvar_with_cnstr root id =
  * otherwise we choose the constraint type. If there is no constraint type then
  * we choose the assigned type.
  *)
-and create_root_from_type_constant env root class_pos class_name
-  (pos, tconst) ~as_tyvar_with_cnstr =
+and create_root_from_type_constant env (root_ty_r, _ as root) class_pos class_name
+  (tconst_pos, tconst) ~as_tyvar_with_cnstr =
   let env, typeconst =
-    get_typeconst env class_pos class_name pos tconst ~as_tyvar_with_cnstr
+    get_typeconst env class_pos class_name (Reason.to_pos root_ty_r) tconst ~as_tyvar_with_cnstr
   in
   let ty_name = class_name^"::"^tconst in
   let ety_env =
@@ -259,14 +259,14 @@ and create_root_from_type_constant env root class_pos class_name
    * with the remaining ids that we need to expand. If we encounter the same
    * class name + ids that means we have entered a cycle.
    *)
-  let type_expansions = (pos, ty_name)::ety_env.type_expansions in
+  let type_expansions = (tconst_pos, ty_name)::ety_env.type_expansions in
   if List.mem ~equal:(=) (List.map ety_env.type_expansions snd) ty_name then
     begin
       let seen = List.rev_map type_expansions snd in
       raise_error (fun () -> Errors.cyclic_typeconst (fst typeconst.ttc_name) seen)
     end;
   let ety_env = { ety_env with type_expansions } in
-  let make_reason ?(root = ety_env.this_ty) env r = make_reason env r (pos, tconst) root in
+  let make_reason ?(root = ety_env.this_ty) env r = make_reason env r (tconst_pos, tconst) root in
   match typeconst with
   | { ttc_type = Some ty; _ }
       when typeconst.ttc_constraint = None || env.choose_assigned_type ->
@@ -278,8 +278,8 @@ and create_root_from_type_constant env root class_pos class_name
       let reason = make_reason tenv (Reason.Rwitness (fst typeconst.ttc_name)) in
       let tenv, ty =
         if as_tyvar_with_cnstr then
-          let tenv, tvar = Env.fresh_invariant_type_var tenv pos in
-          Log.log_new_tvar_for_tconst_access tenv pos tvar class_name tconst;
+          let tenv, tvar = Env.fresh_invariant_type_var tenv tconst_pos in
+          Log.log_new_tvar_for_tconst_access tenv tconst_pos tvar class_name tconst;
           let tenv = Typing_utils.sub_type tenv tvar cstr in
           tenv, tvar
         else
@@ -290,8 +290,8 @@ and create_root_from_type_constant env root class_pos class_name
   | _ ->
       let tenv, (r, ty) =
         if as_tyvar_with_cnstr then
-          let tenv, tvar = Env.fresh_invariant_type_var env.tenv pos in
-          Log.log_new_tvar_for_tconst_access tenv pos tvar class_name tconst;
+          let tenv, tvar = Env.fresh_invariant_type_var env.tenv tconst_pos in
+          Log.log_new_tvar_for_tconst_access tenv tconst_pos tvar class_name tconst;
           tenv, tvar
         else
           let reason = Reason.Rwitness (fst typeconst.ttc_name) in

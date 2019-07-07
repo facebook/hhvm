@@ -167,10 +167,6 @@ val is_fresh_generic_parameter: string -> bool
     as part of an `instanceof`, `is`, or `as` expression (instead of being
     explicitly declared in code by the user). *)
 
-val is_untyped: env -> Tast.ty -> bool
-(** Return {true} when the given type is {Tany}, {Tdynamic}, etc. See:
-    {Typing_utils.is_any} and {Typing_utils.is_dynamic}. *)
-
 val assert_subtype: Pos.t -> Typing_reason.ureason -> env -> Tast.ty -> Tast.ty -> env
 (** Assert that one type is a subtype of another, resolving unbound type
     variables in both types (if any), with {!env} reflecting the new state of
@@ -183,6 +179,11 @@ val is_sub_type: env -> Tast.ty -> Tast.ty -> bool
 val can_subtype: env -> Tast.ty -> Tast.ty -> bool
 (** Return {true} when the first type can be considered a subtype of the second
     type after resolving unbound type variables in both types (if any). *)
+
+val is_sub_type_for_union: env -> Tast.ty -> Tast.ty -> bool
+(** Return {true} when the first type is a subtype of the second type. There is
+    no type T such that for all T', T <: T' and T' <: T (which is the case for Tany
+    and Terr in `can_subtype`) *)
 
 val simplify_unions: env -> Tast.ty -> env * Tast.ty
 (** Simplify unions in a type. *)

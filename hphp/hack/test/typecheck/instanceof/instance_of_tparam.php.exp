@@ -2,5 +2,5 @@ File "instance_of_tparam.php", line 14, characters 12-13:
 Invalid return type (Typing[4110])
 File "instance_of_tparam.php", line 12, characters 40-45:
 Expected string
-File "instance_of_tparam.php", line 13, characters 7-34:
+File "instance_of_tparam.php", line 13, characters 13-34:
 But got Tk#1 from this is expression test

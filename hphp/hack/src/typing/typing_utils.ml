@@ -136,6 +136,10 @@ let is_mixed env ty =
   let mixed = MakeType.mixed Reason.Rnone in
   is_sub_type_for_union env mixed ty
 
+let is_nothing env ty =
+  let nothing = MakeType.nothing Reason.Rnone in
+  is_sub_type_for_union env ty nothing
+
 let is_stringish env ty =
   let stringish = MakeType.class_type Reason.Rnone SN.Classes.cStringish [] in
   is_sub_type env ty stringish
@@ -253,7 +257,8 @@ let run_on_intersection :
 (*****************************************************************************)
 let is_dynamic env ty =
   let dynamic = MakeType.dynamic Reason.Rnone in
-  is_sub_type_for_union env dynamic ty && not (is_mixed env ty)
+  (is_sub_type_for_union env dynamic ty && not (is_mixed env ty)) ||
+  (is_sub_type_for_union env ty dynamic && not (is_nothing env ty))
 
 let is_hack_collection env ty =
   is_sub_type env ty

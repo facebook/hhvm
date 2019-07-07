@@ -80,6 +80,7 @@ val method_name_already_bound : Pos.t -> string -> unit
 val error_name_already_bound : string -> string -> Pos.t -> Pos.t -> unit
 val error_class_attribute_already_bound : string -> string -> Pos.t -> Pos.t -> unit
 val unbound_name : Pos.t -> string -> [< `cls | `func | `const] -> unit
+val invalid_fun_pointer : Pos.t -> string -> unit
 val undefined : in_rx_scope:bool -> Pos.t -> string -> unit
 val this_reserved : Pos.t -> unit
 val start_with_T : Pos.t -> unit

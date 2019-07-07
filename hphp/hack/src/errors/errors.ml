@@ -861,6 +861,10 @@ let unbound_name pos name kind =
   add (Naming.err_code Naming.UnboundName) pos
     ("Unbound name: "^(strip_ns name)^" ("^kind_str^")")
 
+let invalid_fun_pointer pos name =
+  add (Naming.err_code Naming.InvalidFunPointer) pos
+    ("Unbound global function: '"^(strip_ns name)^"' is not a valid name for fun()")
+
 let rx_move_invalid_location pos =
   add (Naming.err_code Naming.RxMoveInvalidLocation) pos
     "Rx\\move is only allowed in argument position or as right hand side of the assignment."

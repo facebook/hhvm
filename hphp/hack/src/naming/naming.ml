@@ -114,6 +114,7 @@ module Env : sig
   val global_const : genv * lenv -> Ast_defs.id -> Ast_defs.id
   val type_name : genv * lenv -> Ast_defs.id -> allow_typedef:bool -> allow_generics:bool -> Ast_defs.id
   val fun_id : genv * lenv -> Ast_defs.id -> Ast_defs.id
+  val fun_id_special : genv * lenv -> Ast_defs.id -> Ast_defs.id
   val bind_class_const : genv * lenv -> Ast_defs.id -> unit
   val goto_label : genv * lenv -> string -> Pos.t option
   val new_goto_label : genv * lenv -> Aast.pstring -> unit
@@ -488,6 +489,12 @@ end = struct
       GEnv.fun_pos
       GEnv.fun_canon_name
       x
+
+  let fun_id_special (genv, _) x =
+    let (p, name) as x = NS.elaborate_id genv.namespace NS.ElaborateFun x in
+    match Naming_table.Funs.get_pos name with
+    | Some _ -> x
+    | None -> Errors.invalid_fun_pointer p name; x
 
   let bind_class_member tbl (p, x) =
     try
@@ -2121,7 +2128,7 @@ module Make (GetLocals : GetLocals) = struct
           | [p, Aast.String x] ->
             (* Functions referenced by fun() are always fully-qualified *)
             let x = if x <> "" && x.[0] <> '\\' then "\\" ^ x else x in
-            N.Fun_id (Env.fun_id env (p, x))
+            N.Fun_id (Env.fun_id_special env (p, x))
           | [p, _] -> Errors.illegal_fun p; N.Any
           | _ -> Errors.naming_too_many_arguments p; N.Any
         end

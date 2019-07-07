@@ -156,6 +156,7 @@ PocketUniversesDuplication = 2101
 UnsupportedTraitUseAs = 2102
 UnsupportedInsteadOf = 2103
 InvalidTraitUseAsVisibility = 2104
+InvalidFunPointer = 2105
 
 NastCheck Errors:
 AbstractBody = 3001

@@ -1,5 +1,5 @@
 <?hh // strict
 
 function test(): void {
-  unbound_global;
+  unbound_func();
 }

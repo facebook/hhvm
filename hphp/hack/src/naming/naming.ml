@@ -443,11 +443,9 @@ end = struct
       (get_pos : string -> FileInfo.pos option)
       (get_full_pos : string -> Pos.t option)
       get_canon x =
-    let get_name x = get_name genv get_pos x in
     let canonicalize = canonicalize genv get_pos get_full_pos get_canon in
     let fq_x = NS.elaborate_id genv.namespace NS.ElaborateFun x in
-    let fq_x = canonicalize fq_x `func in
-    get_name fq_x
+    canonicalize fq_x `func
 
   let global_const (genv, _env) x =
     let fq_x = NS.elaborate_id genv.namespace NS.ElaborateConst x in

@@ -448,7 +448,6 @@ class CommonTests(BarebonesTests):
         self.check_cmd(
             [
                 "{root}foo_1.php:4:20,20: Unbound name: g (a global function) (Naming[2049])",
-                "{root}foo_1.php:4:20,20: Unbound name: g (a global constant) (Naming[2049])",
             ]
         )
 
@@ -471,7 +470,6 @@ class CommonTests(BarebonesTests):
         self.check_cmd(
             [
                 "{root}foo_1.php:4:20,20: Unbound name: g (a global function) (Naming[2049])",
-                "{root}foo_1.php:4:20,20: Unbound name: g (a global constant) (Naming[2049])",
             ]
         )
 

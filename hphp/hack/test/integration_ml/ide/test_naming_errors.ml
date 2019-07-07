@@ -39,17 +39,11 @@ File \"/bar_expects_int.php\", line 4, characters 10-12:
 Unbound name: foo (a global function) (Naming[2049])
 
 File \"/bar_expects_int.php\", line 4, characters 10-12:
-Unbound name: foo (a global constant) (Naming[2049])
-
-File \"/bar_expects_int.php\", line 4, characters 10-12:
 Unbound name (typing): foo (Typing[4107])
 
 /bar_expects_string.php:
 File \"/bar_expects_string.php\", line 4, characters 10-12:
 Unbound name: foo (a global function) (Naming[2049])
-
-File \"/bar_expects_string.php\", line 4, characters 10-12:
-Unbound name: foo (a global constant) (Naming[2049])
 
 File \"/bar_expects_string.php\", line 4, characters 10-12:
 Unbound name (typing): foo (Typing[4107])

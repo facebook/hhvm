@@ -5066,8 +5066,9 @@ OPTBLD_INLINE void iopResolveClsMethod() {
       raise_error("Failure to resolve class name \'%s\'",
         val(cls).pstr->data());
     } else {
-      raise_error("Failure to resolve method name \'%s\'",
-        val(func).pstr->data());
+      raise_error(
+        "Failure to resolve method name \'%s::%s\'",
+        decoded_func.first->name()->data(), val(func).pstr->data());
     }
   }
   if (invName) {

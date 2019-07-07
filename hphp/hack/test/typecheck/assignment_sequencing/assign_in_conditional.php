@@ -6,7 +6,7 @@ function takes_int_makes_string(int $x): string {
 function expect_string(string $x): void {}
 
 function test(int $x): void {
-  if ($x = takes_int_makes_string($x)) {
+  if (($x = takes_int_makes_string($x)) === "") {
     expect_string($x);
   }
   expect_string($x);

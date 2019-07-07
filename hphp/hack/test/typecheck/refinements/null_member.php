@@ -7,7 +7,7 @@ class Test {
 
   public function test1(): void {
     if ($this->a === null) {
-      expect_nullable_int($this->a); // error
+      expect_nullable_int($this->a);
       expect_nullable_A($this->a);
     } else {
       expect_A($this->a);
@@ -19,7 +19,7 @@ class Test {
     if ($this->a !== null) {
       expect_A($this->a);
     } else {
-      expect_nullable_int($this->a); // error
+      expect_nullable_int($this->a);
       expect_nullable_A($this->a);
     }
     expect_nullable_A($this->a);

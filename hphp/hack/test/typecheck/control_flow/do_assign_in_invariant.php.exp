@@ -165,20 +165,10 @@ Invalid argument (Typing[4110])
 File "do_assign_in_invariant.php", line 32, characters 20-21:
 Expected CE
 File "do_assign_in_invariant.php", line 33, characters 54-55:
-But got ?<expr#1>
-File "do_assign_in_invariant.php", line 91, characters 15-16:
-Invalid argument (Typing[4110])
-File "do_assign_in_invariant.php", line 20, characters 22-23:
-Expected ?C
-File "do_assign_in_invariant.php", line 33, characters 54-55:
-But got <expr#1>
-File "do_assign_in_invariant.php", line 91, characters 15-16:
-  where '<expr#1>' is a reference to this expression
+But got ?C
 File "do_assign_in_invariant.php", line 92, characters 15-16:
 Invalid argument (Typing[4110])
-File "do_assign_in_invariant.php", line 21, characters 22-23:
-Expected ?E
-File "do_assign_in_invariant.php", line 33, characters 54-55:
-But got <expr#1>
-File "do_assign_in_invariant.php", line 92, characters 15-16:
-  where '<expr#1>' is a reference to this expression
+File "do_assign_in_invariant.php", line 21, characters 23-23:
+Expected E
+File "do_assign_in_invariant.php", line 79, characters 14-14:
+But got C

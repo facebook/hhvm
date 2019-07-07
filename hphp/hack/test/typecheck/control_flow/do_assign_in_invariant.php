@@ -88,6 +88,6 @@ function test2(bool $b): void {
   // $x is C | ?E
   expect_CEopt($x);
   expect_CE($x); // error
-  expect_Copt($x); // error
+  expect_Copt($x);
   expect_Eopt($x); // error
 }

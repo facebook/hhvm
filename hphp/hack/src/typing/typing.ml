@@ -5780,7 +5780,9 @@ and condition_nullity ~nonnull (env: Env.env) te =
   | (p, _), _ ->
     let refine env ty = if nonnull
       then TUtils.non_null env p ty
-      else env, ty in
+      else
+        let r = Reason.Rwitness (Reason.to_pos (fst ty)) in
+        Inter.intersect env r ty (MakeType.null r) in
     refine_lvalue_type env te ~refine
 
 and condition_isset env = function

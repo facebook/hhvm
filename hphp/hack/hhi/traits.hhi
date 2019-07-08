@@ -251,7 +251,7 @@ trait LazyKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
 
   public function slice(int $start, int $len): KeyedIterable<Tk, Tv>;
 
-  public function concat<Tu super Tv>(Traversable<Tu> $traversable): Iterable<Tv>;
+  public function concat<Tu super Tv>(Traversable<Tu> $traversable): Iterable<Tu>;
 
   public function firstValue(): ?Tv;
 

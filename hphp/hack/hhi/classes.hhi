@@ -144,26 +144,26 @@ abstract class ResumableWaitHandle<+T> extends WaitableWaitHandle<T> {
 
 final class AwaitAllWaitHandle extends WaitableWaitHandle<void> {
   <<__PHPStdLib>>
-  public static function fromArray<T>(
-    array<Awaitable<T>> $deps
+  public static function fromArray(
+    array<Awaitable<mixed>> $deps
   ): Awaitable<void>;
-  public static function fromVArray<T>(
-    varray<Awaitable<T>> $deps
+  public static function fromVArray(
+    varray<Awaitable<mixed>> $deps
   ): Awaitable<void>;
-  public static function fromDArray<Tk as arraykey, Tv>(
-    darray<Tk, Awaitable<Tv>> $deps
+  public static function fromDArray(
+    darray<arraykey, Awaitable<mixed>> $deps
   ): Awaitable<void>;
-  public static function fromDict<Tk as arraykey, Tv>(
-    dict<Tk, Awaitable<Tv>> $deps
+  public static function fromDict(
+    dict<arraykey, Awaitable<mixed>> $deps
   ): Awaitable<void>;
-  public static function fromMap<Tk as arraykey, Tv>(
-    ConstMap<Tk, Awaitable<Tv>> $deps
+  public static function fromMap(
+    ConstMap<arraykey, Awaitable<mixed>> $deps
   ): Awaitable<void>;
-  public static function fromVec<T>(
-    vec<Awaitable<T>> $deps
+  public static function fromVec(
+    vec<Awaitable<mixed>> $deps
   ): Awaitable<void>;
-  public static function fromVector<T>(
-    ConstVector<Awaitable<T>> $deps
+  public static function fromVector(
+    ConstVector<Awaitable<mixed>> $deps
   ): Awaitable<void>;
   public static function setOnCreateCallback(
     ?(function(AwaitAllWaitHandle, Vector<mixed>): void) $callback

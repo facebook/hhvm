@@ -112,7 +112,7 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    * @guide /hack/generics/constraints
    */
   <<__Rx, __MaybeMutable>>
-  public function containsKey<Tu super int>(Tu $k): bool;
+  public function containsKey(mixed $k): bool;
 
   /**
    * Returns an `array` containing the values from the current `ImmVector`.
@@ -164,7 +164,7 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    * @guide /hack/generics/constraints
    */
   <<__Rx, __MaybeMutable>>
-  public function linearSearch<Tu super Tv>(Tu $search_value): int;
+  public function linearSearch(mixed $search_value): int;
 
   /**
    * Creates an `ImmVector` from the given `Traversable`, or an empty
@@ -588,7 +588,7 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function concat<Tu super Tv>(
     <<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable
-  ): ImmVector<Tv>;
+  ): ImmVector<Tu>;
 
   /**
    * Returns the first value in the current `ImmVector`.

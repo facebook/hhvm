@@ -114,7 +114,7 @@ interface ConstSetAccess<+Tm as arraykey> {
    * @return - `true` if the value is in the current `Set`; `false` otherwise.
    */
   <<__Rx, __MaybeMutable>>
-  public function contains<Tu super Tm>(Tu $m): bool;
+  public function contains(mixed $m): bool;
 }
 
 /**
@@ -187,7 +187,7 @@ interface ConstIndexAccess<Tk, +Tv> {
    * @guide /hack/generics/constraints
    */
   <<__Rx, __MaybeMutable>>
-  public function containsKey<Tu super Tk>(Tu $k): bool;
+  public function containsKey(mixed $k): bool;
 }
 
 /**
@@ -556,7 +556,7 @@ interface ConstVector<+Tv> extends ConstCollection<Tv>,
    * @guide /hack/generics/constraints
    */
   <<__Rx, __MaybeMutable>>
-  public function linearSearch<Tu super Tv>(Tu $search_value): int;
+  public function linearSearch(mixed $search_value): int;
 
   <<__Rx, __MaybeMutable>> /* HH_FIXME[0002] */
   public function toVArray(): varray<Tv>;
@@ -835,7 +835,7 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
    * @guide /hack/generics/constraints
    */
   <<__Rx, __MaybeMutable>>
-  public function linearSearch<Tu super Tv>(Tu $search_value): int;
+  public function linearSearch(mixed $search_value): int;
 
   <<__Rx, __MaybeMutable>> /* HH_FIXME[0002] */
   public function toVArray(): varray<Tv>;

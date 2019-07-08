@@ -547,7 +547,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @guide /hack/generics/constraints
    */
   <<__Rx, __MaybeMutable>>
-  public function containsKey<Tu super int>(Tu $k): bool;
+  public function containsKey(mixed $k): bool;
 
   /**
    * Appends a value to the end of the current `Vector`, assigning it the next
@@ -602,8 +602,8 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - Returns itself.
    */
   <<__Rx, __Mutable, __ReturnsVoidToRx>>
-  public function addAllKeysOf<Tv2>(
-    ?KeyedContainer<Tv,Tv2> $container,
+  public function addAllKeysOf(
+    ?KeyedContainer<Tv,mixed> $container,
   ): Vector<Tv> where Tv as arraykey;
 
   /**
@@ -728,7 +728,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @guide /hack/generics/constraints
    */
   <<__Rx, __MaybeMutable>>
-  public function linearSearch<Tu super Tv>(Tu $search_value): int;
+  public function linearSearch(mixed $search_value): int;
 
   /**
    * Shuffles the values of the current `Vector` randomly in place.
@@ -746,7 +746,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - A `Vector` with the values from the provided `array`.
    */
   <<__Deprecated('Use `new Vector($arr)` instead.')>>
-  public static function fromArray<T as arraykey>(darray<T, Tv> $arr): Vector<Tv>;
+  public static function fromArray(darray<arraykey, Tv> $arr): Vector<Tv>;
 
   /**
    * Creates a `Vector` from the given `Traversable`, or an empty `Vector` if
@@ -777,8 +777,8 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - A `Vector` built from the keys of the specified container.
    */
   <<__Rx, __MutableReturn>>
-  public static function fromKeysOf<Tk as arraykey,Tv2>(
-    ?KeyedContainer<Tk,Tv2> $container
+  public static function fromKeysOf<Tk as arraykey>(
+    ?KeyedContainer<Tk,mixed> $container
   ): Vector<Tk>;
 
   /**

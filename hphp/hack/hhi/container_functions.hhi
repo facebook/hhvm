@@ -17,7 +17,7 @@
 namespace {
 
 <<__PHPStdLib, __Rx>>
-function array_key_exists<Tk as arraykey, Tv>(mixed $key, <<__MaybeMutable>> ?KeyedContainer<Tk, Tv> $search): bool;
+function array_key_exists(mixed $key, <<__MaybeMutable>> ?KeyedContainer<arraykey, mixed> $search): bool;
 
 <<__PHPStdLib, __Rx>>
 function array_sum/*<T>*/(/*Container<T>*/ $input)/*: num*/;
@@ -25,26 +25,26 @@ function array_sum/*<T>*/(/*Container<T>*/ $input)/*: num*/;
 function array_product/*<T>*/(/*Container<T>*/ $input)/*: num*/;
 
 <<__PHPStdLib>>
-function sort<Tv, T as Container<Tv>>(inout T $arg, int $sort_flags = SORT_REGULAR): bool;
+function sort(inout Container<mixed> $arg, int $sort_flags = SORT_REGULAR): bool;
 <<__PHPStdLib>>
-function rsort<Tv, T as Container<Tv>>(inout T $arg, int $sort_flags = SORT_REGULAR): bool;
+function rsort(inout Container<mixed> $arg, int $sort_flags = SORT_REGULAR): bool;
 <<__PHPStdLib>>
-function asort<Tk as arraykey, Tv, T as KeyedContainer<Tk, Tv>>(inout T $arg, int $sort_flags = SORT_REGULAR): bool;
+function asort(inout KeyedContainer<arraykey,mixed> $arg, int $sort_flags = SORT_REGULAR): bool;
 <<__PHPStdLib>>
-function arsort<Tk as arraykey, Tv, T as KeyedContainer<Tk, Tv>>(inout T $arg, int $sort_flags = SORT_REGULAR): bool;
+function arsort(inout KeyedContainer<arraykey,mixed> $arg, int $sort_flags = SORT_REGULAR): bool;
 <<__PHPStdLib>>
-function ksort<Tk as arraykey, Tv, T as KeyedContainer<Tk, Tv>>(inout T $arg, int $sort_flags = SORT_REGULAR): bool;
+function ksort(inout KeyedContainer<arraykey,mixed> $arg, int $sort_flags = SORT_REGULAR): bool;
 <<__PHPStdLib>>
-function krsort<Tk as arraykey, Tv, T as KeyedContainer<Tk, Tv>>(inout T $arg, int $sort_flags = SORT_REGULAR): bool;
+function krsort(inout KeyedContainer<arraykey,mixed> $arg, int $sort_flags = SORT_REGULAR): bool;
 // $c is a callable of type (function(Tv,Tv): bool)
 <<__PHPStdLib>>
-function usort<Tv, T as Container<Tv>>(inout T $arg, mixed $c): bool;
+function usort(inout KeyedContainer<arraykey,mixed> $arg, mixed $c): bool;
 // $c is a callable of type (function(Tv,Tv): bool)
 <<__PHPStdLib>>
-function uasort<Tk as arraykey, Tv, T as KeyedContainer<Tk, Tv>>(inout T $arg, mixed $c): bool;
+function uasort(inout KeyedContainer<arraykey,mixed> $arg, mixed $c): bool;
 // $c is a callable of type (function(Tk,Tk): bool)
 <<__PHPStdLib>>
-function uksort<Tk as arraykey, Tv, T as KeyedContainer<Tk, Tv>>(inout T $arg, mixed $c): bool;
+function uksort(inout KeyedContainer<arraykey,mixed> $arg, mixed $c): bool;
 
 }
 

@@ -76,7 +76,7 @@ final class ImmSet<+Tv as arraykey> implements ConstSet<Tv> {
    *           `false` otherwise.
    */
   <<__Rx, __MaybeMutable>>
-  public function contains<Tu super Tv>(Tu $k): bool;
+  public function contains(mixed $k): bool;
 
   /**
    * Returns an `array` containing the values from the current `ImmSet`.
@@ -164,8 +164,8 @@ final class ImmSet<+Tv as arraykey> implements ConstSet<Tv> {
    * @return - An `ImmSet` built from the keys of the specified container.
    */
   <<__Rx>>
-  public static function fromKeysOf<Tk as arraykey, Tv2>(
-    ?KeyedContainer<Tk,Tv2> $container
+  public static function fromKeysOf<Tk as arraykey>(
+    ?KeyedContainer<Tk,mixed> $container
   ): ImmSet<Tk>;
 
   /**

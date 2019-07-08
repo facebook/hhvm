@@ -58,10 +58,10 @@ function array_combine($keys, $values);
 <<__PHPStdLib, __Rx>>
 function array_count_values($input);
 <<__PHPStdLib, __Rx>>
-function array_column<Tk as arraykey, Tv>(
-  array<array<Tk, Tv>> $array,
-  ?Tk $column_key,
-  ?Tk $index_key = null,
+function array_column(
+  array<array<arraykey, mixed>> $array,
+  ?arraykey $column_key,
+  ?arraykey $index_key = null,
 ): array;
 <<__PHPStdLib, __Rx>>
 function array_fill_keys($keys, $value);
@@ -85,8 +85,8 @@ function array_flip($trans);
 <<__PHPStdLib, __Rx>>
 function key_exists($key, $search);
 <<__PHPStdLib, __Rx>>
-function array_keys<Tk as arraykey, Tv>(
-  KeyedContainer<Tk, Tv> $input,
+function array_keys<Tk as arraykey>(
+  KeyedContainer<Tk, mixed> $input,
 ): varray<Tk>;
 /**
  * array_map signature is rewritten based on the arity of the call:

@@ -518,7 +518,7 @@ final class Set<Tv as arraykey> implements MutableSet<Tv> {
    *           `false` otherwise.
    */
   <<__Rx, __MaybeMutable>>
-  public function contains<Tu super Tv>(Tu $v): bool;
+  public function contains(mixed $v): bool;
 
   /**
    * Add the value to the current `Set`.
@@ -563,8 +563,8 @@ final class Set<Tv as arraykey> implements MutableSet<Tv> {
    * @return - Returns itself.
    */
   <<__Rx, __Mutable, __ReturnsVoidToRx>>
-  public function addAllKeysOf<Tv2>(
-    ?KeyedContainer<Tv,Tv2> $container,
+  public function addAllKeysOf(
+    ?KeyedContainer<Tv,mixed> $container,
   ): Set<Tv>;
 
   /**
@@ -626,7 +626,7 @@ final class Set<Tv as arraykey> implements MutableSet<Tv> {
    * @return - A `Set` with the values from the provided `array`.
    */
   <<__Deprecated('Use `new Set($arr)` instead.')>>
-  public static function fromArray<T as arraykey>(darray<T, Tv> $arr): Set<Tv>;
+  public static function fromArray(darray<arraykey, Tv> $arr): Set<Tv>;
 
   /**
    * Returns a `Set` containing all the values from the specified `array`(s).
@@ -663,8 +663,8 @@ final class Set<Tv as arraykey> implements MutableSet<Tv> {
    * @return - A `Set` built from the keys of the specified container.
    */
   <<__Rx, __MutableReturn>>
-  public static function fromKeysOf<Tk as arraykey, Tv2>(
-    ?KeyedContainer<Tk,Tv2> $container,
+  public static function fromKeysOf<Tk as arraykey>(
+    ?KeyedContainer<Tk,mixed> $container,
   ): Set<Tk>;
 
   /**

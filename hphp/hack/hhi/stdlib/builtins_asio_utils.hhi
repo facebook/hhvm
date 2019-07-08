@@ -102,8 +102,8 @@ function vmk<Tk, Tv, Tr>(
   (function (Tk, Tv): Awaitable<Tr>) $callable,
 ): Awaitable<Vector<Tr>>;
 
-function vf<Tk, T>(
-  KeyedTraversable<Tk, T> $inputs,
+function vf<T>(
+  KeyedTraversable<mixed, T> $inputs,
   (function (T): Awaitable<bool>) $callable,
 ): Awaitable<Vector<T>> {}
 
@@ -126,8 +126,8 @@ function vmkw<Tk, Tv, Tr>(
   (function (Tk, Tv): Awaitable<Tr>) $callable,
 ): Awaitable<Vector<ResultOrExceptionWrapper<Tr>>> {}
 
-function vfw<Tk,T>(
-  KeyedTraversable<Tk, T> $inputs,
+function vfw<T>(
+  KeyedTraversable<mixed, T> $inputs,
   (function (T): Awaitable<bool>) $callable,
 ): Awaitable<Vector<ResultOrExceptionWrapper<T>>> {}
 

@@ -494,7 +494,7 @@ final class ImmMap<Tk as arraykey, +Tv> implements ConstMap<Tk, Tv> {
    * @guide /hack/generics/constraints
    */
   <<__Rx, __MaybeMutable>>
-  public function contains<Tu super Tk>(Tu $k): bool;
+  public function contains(mixed $k): bool;
 
   /**
    * Determines if the specified key is in the current `ImmMap`.
@@ -509,7 +509,7 @@ final class ImmMap<Tk as arraykey, +Tv> implements ConstMap<Tk, Tv> {
    * @guide /hack/generics/constraints
    */
   <<__Rx, __MaybeMutable>>
-  public function containsKey<Tu super Tk>(Tu $k): bool;
+  public function containsKey(mixed $k): bool;
 
   /**
    * Returns a new `ImmMap` with the keys that are in the current `ImmMap`, but
@@ -521,8 +521,8 @@ final class ImmMap<Tk as arraykey, +Tv> implements ConstMap<Tk, Tv> {
    *           current `ImmMap` that are not in the `KeyedTraversable`.
    */
   <<__Rx, __AtMostRxAsArgs, __MaybeMutable>>
-  public function differenceByKey<Tu super Tk, Tw>(
-    <<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> KeyedTraversable<Tu, Tw> $traversable
+  public function differenceByKey(
+    <<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> KeyedTraversable<mixed, mixed> $traversable
   ): ImmMap<Tk, Tv>;
 
   /**

@@ -372,8 +372,8 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    * @guide /hack/generics/constraints
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function concat<Tu super mixed>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
-    ImmVector<Tu>;
+  public function concat(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<mixed> $traversable):
+    ImmVector<mixed>;
 
   /**
    * Returns the first value in the current `Pair`.
@@ -424,7 +424,7 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    * @guide /hack/generics/constraints
    */
   <<__Rx, __MaybeMutable>>
-  public function linearSearch<Tu super mixed>(Tu $search_value): int;
+  public function linearSearch(mixed $search_value): int;
 
   /**
    * Returns `false`; a `Pair` cannot be empty.
@@ -497,7 +497,7 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    *           0 or 1.
    */
   <<__Rx, __MaybeMutable>>
-  public function containsKey<Tu super int>(Tu $k): bool;
+  public function containsKey(mixed $k): bool;
 
   /**
    * Returns an iterator that points to beginning of the current `Pair`.

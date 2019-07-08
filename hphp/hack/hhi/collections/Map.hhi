@@ -540,7 +540,7 @@ final class Map<Tk as arraykey, Tv> implements MutableMap<Tk, Tv> {
    * @guide /hack/generics/constraints
    */
   <<__Rx, __MaybeMutable>>
-  public function contains<Tu super Tk>(Tu $k): bool;
+  public function contains(mixed $k): bool;
 
   /**
    * Determines if the specified key is in the current `Map`.
@@ -555,7 +555,7 @@ final class Map<Tk as arraykey, Tv> implements MutableMap<Tk, Tv> {
    * @guide /hack/generics/constraints
    */
   <<__Rx, __MaybeMutable>>
-  public function containsKey<Tu super Tk>(Tu $k): bool;
+  public function containsKey(mixed $k): bool;
 
   /**
    * Add a key/value pair to the end of the current `Map`.

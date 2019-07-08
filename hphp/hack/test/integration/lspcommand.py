@@ -1,7 +1,8 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+import contextlib
+import subprocess
+import uuid
 from typing import (
     Any,
     Callable,
@@ -13,9 +14,7 @@ from typing import (
     Type,
     TypeVar,
 )
-import contextlib
-import subprocess
-import uuid
+
 from hh_paths import hh_client
 from jsonrpc_stream import JsonRpcStreamReader, JsonRpcStreamWriter
 
@@ -181,7 +180,9 @@ class LspCommandProcessor:
     def _transcript_id(self, sent: Optional[Json], received: Optional[Json]) -> str:
         assert sent is not None or received is not None
 
-        def make_id(json: Json, is_client_request: bool, idgen: Callable[[], str]) -> str:
+        def make_id(
+            json: Json, is_client_request: bool, idgen: Callable[[], str]
+        ) -> str:
             if LspCommandProcessor._has_id(json):
                 if is_client_request:
                     return LspCommandProcessor._client_request_id(json)
@@ -192,10 +193,14 @@ class LspCommandProcessor:
 
         if sent:
             is_client_request = LspCommandProcessor._is_request(sent)
-            return make_id(sent, is_client_request, LspCommandProcessor._client_notify_id)
+            return make_id(
+                sent, is_client_request, LspCommandProcessor._client_notify_id
+            )
         elif received:
             is_client_request = not LspCommandProcessor._is_request(received)
-            return make_id(received, is_client_request, LspCommandProcessor._server_notify_id)
+            return make_id(
+                received, is_client_request, LspCommandProcessor._server_notify_id
+            )
         else:
             raise Exception("This should have failed up above in the assert")
 

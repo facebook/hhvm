@@ -42,7 +42,7 @@ def make_error(
 
 
 def end_of_file(line) -> bool:
-    return line == '' or line == '\n'
+    return line == "" or line == "\n"
 
 
 def parse_errors(output_file_name: str):
@@ -53,7 +53,7 @@ def parse_errors(output_file_name: str):
             try:
                 return parse_error(output_file, False)
             except ParseException as ex:
-                raise ParseException(f'at file {output_file_name}: {ex}')
+                raise ParseException(f"at file {output_file_name}: {ex}")
 
 
 def same_error(line: str, multiple_error_file: bool):
@@ -95,7 +95,7 @@ position_regex = r'^\s*File "(.*)", line (\d+), characters (\d+)-(\d+):(\[\d+\])
 def parse_position(line: str):
     match = re.match(position_regex, line)
     if match is None:
-        raise ParseException(f'Could not parse position line: {line}')
+        raise ParseException(f"Could not parse position line: {line}")
     file = match.group(1)
     lineNum = int(match.group(2))
     startCol = int(match.group(3))
@@ -105,12 +105,12 @@ def parse_position(line: str):
 
 def parse_message_and_code(file, line: str):
     message_chunks = []
-    message_and_code_regex = r'^\s*(.*) \((.*)\[(\d+)\]\)\n'
+    message_and_code_regex = r"^\s*(.*) \((.*)\[(\d+)\]\)\n"
     match = re.match(message_and_code_regex, line)
     while match is None:
-        match = re.match(r'^\s*(.*)\n', line)
+        match = re.match(r"^\s*(.*)\n", line)
         if match is None:
-            raise ParseException(f'Could not parse message line: {line}')
+            raise ParseException(f"Could not parse message line: {line}")
         message_line = match.group(1)
         message_chunks.append(message_line)
         line = file.readline()
@@ -125,11 +125,11 @@ def parse_message_and_code(file, line: str):
 
 def parse_message(file, line: str):
     message_chunks = []
-    message_regex = r'^\s*(.*)\n'
+    message_regex = r"^\s*(.*)\n"
 
     match = re.match(message_regex, line)
     if match is None:
-        raise ParseException(f'Could not parse message line: {line}')
+        raise ParseException(f"Could not parse message line: {line}")
     message_line = match.group(1)
     message_chunks.append(message_line)
 
@@ -138,7 +138,7 @@ def parse_message(file, line: str):
     while match is None and not end_of_file(line):
         match = re.match(message_regex, line)
         if match is None:
-            raise ParseException(f'Could not parse message line: {line}')
+            raise ParseException(f"Could not parse message line: {line}")
         message_line = match.group(1)
         message_chunks.append(message_line)
 
@@ -149,7 +149,7 @@ def parse_message(file, line: str):
 
 
 def starts_with_space(s: str):
-    return re.match(r'^\s', s) is not None
+    return re.match(r"^\s", s) is not None
 
 
 def sprint_error(error: Error):
@@ -160,8 +160,10 @@ def sprint_error(error: Error):
     message = error.message.message
     type = error.code.type
     code = error.code.code
-    out = [f"\033[91m{file}:{line}:{startCol},{endCol}:\033[0m "
-        f"{message} ({type}[{code}])\n"]
+    out = [
+        f"\033[91m{file}:{line}:{startCol},{endCol}:\033[0m "
+        f"{message} ({type}[{code}])\n"
+    ]
 
     for reason in error.reason:
         file = reason.position.fileName
@@ -169,13 +171,13 @@ def sprint_error(error: Error):
         startCol = reason.position.startColumn
         endCol = reason.position.endColumn
         message = reason.message
-        out.append(f'  \033[91m{file}:{line}:{startCol},{endCol}:\033[0m {message}\n')
+        out.append(f"  \033[91m{file}:{line}:{startCol},{endCol}:\033[0m {message}\n")
     return "".join(out)
 
 
 def sprint_errors(errors: List[Error]):
     if not errors:
-        return 'No errors\n'
+        return "No errors\n"
     out = []
     for error in errors:
         out.append(sprint_error(error))

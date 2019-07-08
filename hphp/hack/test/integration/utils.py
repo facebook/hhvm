@@ -1,16 +1,16 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import os
 import re
 import signal
 import subprocess
 import sys
 
+
 def touch(fn):
-    with open(fn, 'a'):
+    with open(fn, "a"):
         os.utime(fn, None)
+
 
 def write_files(files, dir_path):
     """
@@ -20,8 +20,9 @@ def write_files(files, dir_path):
     """
     for fn, content in files.items():
         path = os.path.join(dir_path, fn)
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             f.write(content)
+
 
 def ensure_output_contains(f, s, timeout=20):
     """
@@ -29,15 +30,17 @@ def ensure_output_contains(f, s, timeout=20):
     process hangs
     """
     lines = []
+
     def handler(signo, frame):
-        raise AssertionError('Failed to find %s in the following output: %s' %
-                (s, ''.join(lines)))
+        raise AssertionError(
+            "Failed to find %s in the following output: %s" % (s, "".join(lines))
+        )
 
     try:
         signal.signal(signal.SIGALRM, handler)
         signal.alarm(timeout)
         while True:
-            line = f.readline().decode('utf-8')
+            line = f.readline().decode("utf-8")
             if s in line:
                 return
             lines.append(line)

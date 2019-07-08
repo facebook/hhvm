@@ -1,7 +1,5 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import json
 import os
 import shutil
@@ -13,7 +11,7 @@ import common_tests
 
 class MergeDriverTests(common_tests.CommonTestDriver, unittest.TestCase):
 
-    template_repo = 'hphp/hack/test/integration/data/repo_with_merge_driver'
+    template_repo = "hphp/hack/test/integration/data/repo_with_merge_driver"
 
     @classmethod
     def setUpClass(cls):
@@ -24,7 +22,7 @@ class MergeDriverTests(common_tests.CommonTestDriver, unittest.TestCase):
         super().tearDownClass()
 
     def write_local_conf(self, watchman_subscribe=True):
-        with open(os.path.join(self.repo_dir, 'hh.conf'), 'w') as f:
+        with open(os.path.join(self.repo_dir, "hh.conf"), "w") as f:
             watchman_subscribe_str = "watchman_subscribe_v2 = "
             if watchman_subscribe:
                 watchman_subscribe_str += "true"
@@ -53,10 +51,9 @@ use_dummy_informant = false
     # the HH_TMPDIR.
     def write_merge_driver(self):
         test_env_json = json.dumps(self.test_env)
-        with open(os.path.join(
-                self.repo_dir,
-                'scripts',
-                'mergedriver_test_env.json'), 'w') as f:
+        with open(
+            os.path.join(self.repo_dir, "scripts", "mergedriver_test_env.json"), "w"
+        ) as f:
             f.write(test_env_json)
 
     def setUp(self) -> None:
@@ -67,7 +64,7 @@ use_dummy_informant = false
         pass
 
     def write_hgrc(self):
-        with open(os.path.join(self.repo_dir, '.hg', 'hgrc'), 'w') as f:
+        with open(os.path.join(self.repo_dir, ".hg", "hgrc"), "w") as f:
             f.write(
                 r"""
 [extensions]
@@ -80,23 +77,20 @@ mergedriver = python:scripts/mergedriver.py
 
     def check_call(self, cmd, timeout=None):
         subprocess.check_call(
-            cmd,
-            cwd=self.repo_dir,
-            env=self.test_env,
-            timeout=timeout,
+            cmd, cwd=self.repo_dir, env=self.test_env, timeout=timeout
         )
 
     def init_hg_repo(self):
-        cmd = ['hg', 'init']
+        cmd = ["hg", "init"]
         self.check_call(cmd)
-        cmd = ['hg', 'add']
+        cmd = ["hg", "add"]
         self.check_call(cmd)
-        cmd = ['hg', 'commit', '-m', 'starting']
+        cmd = ["hg", "commit", "-m", "starting"]
         self.check_call(cmd)
         self.write_hgrc()
 
     def hg_commit(self, msg):
-        cmd = ['hg', 'commit', '-m', msg]
+        cmd = ["hg", "commit", "-m", msg]
         self.check_call(cmd)
 
     foo_1_start = """\
@@ -119,8 +113,8 @@ function returns_string() {
 """
 
     def write_foo_1_and_commit(self, content, commit_msg):
-        foo_1_path = os.path.join(self.repo_dir, 'foo_1.php')
-        with open(foo_1_path, 'w') as f:
+        foo_1_path = os.path.join(self.repo_dir, "foo_1.php")
+        with open(foo_1_path, "w") as f:
             f.write(content)
         self.hg_commit(commit_msg)
 
@@ -130,15 +124,17 @@ function returns_string() {
         self.init_hg_repo()
         self.write_foo_1_and_commit(self.foo_1_start, "starting")
         self.write_foo_1_and_commit(
-            self.foo_1_start + self.foo_1_first_append, "first append")
+            self.foo_1_start + self.foo_1_first_append, "first append"
+        )
         self.write_foo_1_and_commit(
             self.foo_1_start + self.foo_1_first_append + self.foo_1_second_append,
-            "second append")
+            "second append",
+        )
         # Start a Hack server before triggering the mergedriver
-        self.check_cmd(['No errors!'])
+        self.check_cmd(["No errors!"])
         # Backing out the first append will trigger 3-way merge logic, firing
         # the merge driver, which calls Hack build
-        cmd = ['hg', 'backout', '.^', '--no-commit']
+        cmd = ["hg", "backout", ".^", "--no-commit"]
         self.check_call(cmd, timeout=20)
 
     # Hack is launched by the merge driver. Test setup is same as before, except
@@ -148,13 +144,15 @@ function returns_string() {
         self.init_hg_repo()
         self.write_foo_1_and_commit(self.foo_1_start, "starting")
         self.write_foo_1_and_commit(
-            self.foo_1_start + self.foo_1_first_append, "first append")
+            self.foo_1_start + self.foo_1_first_append, "first append"
+        )
         self.write_foo_1_and_commit(
             self.foo_1_start + self.foo_1_first_append + self.foo_1_second_append,
-            "second append")
+            "second append",
+        )
         # Backing out the first append will trigger 3-way merge logic, firing
         # the merge driver, which calls Hack build
-        cmd = ['hg', 'backout', '.^', '--no-commit']
+        cmd = ["hg", "backout", ".^", "--no-commit"]
         # Settling inside the server is allotted up to 3 minutes.
         # Give it another 30 seconds for startup time.
         self.check_call(cmd, timeout=210)

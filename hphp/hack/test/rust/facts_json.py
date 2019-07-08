@@ -6,51 +6,71 @@
 # LICENSE file in the "hack" directory of this source tree.;
 
 import argparse
-from difflib import unified_diff
-from glob import glob, iglob
 import json
 import os
 import re
 import shlex
 import subprocess
 import sys
+from difflib import unified_diff
+from glob import glob, iglob
 from typing import Iterable, List
 
 from libfb.py.fbcode_root import get_fbcode_dir
+
 
 HACK_TEST_DIR_DEFAULT = os.path.join(get_fbcode_dir(), "hphp/hack/test")
 
 
 def parse_args():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--dir', default=HACK_TEST_DIR_DEFAULT,
-        help="root directory containing Hack files to be tested")
-    ap.add_argument('--file', '-f', action='append',
-        help="test specific file only (may be repeated)")
-    ap.add_argument('--keep-going', action='store_true',
-        help="do not stop after the first failure (consider with --no-diff)")
-    ap.add_argument('--no-diff', dest='diff', action='store_false',
-        help="do not show diff of OCaml vs Rust output, respectively")
-    ap.add_argument('--show-ok', action='store_true', help="show passing tests")
-    ap.add_argument('--skip-re', default=r"|".join([
-        r"keyword_autocomplete/function_parameter\.php",
-        r"namespace_infinite_loop1\.php",
-        # TODO: remove lines below when HHBC mangling logic for XHP names
-        r".*xhp.*\.php",
-        r"typecheck/(wrong_fixme_format|extra_scope|attr_children)\.php",
-        r"typecheck/(string_expressions12|hh_fixme1[23]|generic_attr2)\.php",
-        r"(test_mutable_return5(_7)?|bad_inout_use_lvalue7)\.php",
-        r"(lint/ui_namespace_bad|doesnt_record_any_map_extraction)\.php",
-        r"(fileresponse|D2172778|full_analysis/zack_repro).php",
-        r"((href|style)_attrib|notification_renderer)\.php",
-        r"(userinput_to_img_src_attr|signed_uri|receiver_sinks|.*linkshim)\.php",
-        r"processed_data/display_.*\.php",
-        r"lsp_exchanges/completion_extras\.php",
-        r"(basic_nested_tag|XScheduleAsyncController)\.php",
-        r"ast_to_nast/classvar_properties.php",
-        r"ffp/tests/(extra_scope|decl_alias)\.php",
-    ]))
-    ap.add_argument('passthrough_args', nargs='*')
+    ap.add_argument(
+        "--dir",
+        default=HACK_TEST_DIR_DEFAULT,
+        help="root directory containing Hack files to be tested",
+    )
+    ap.add_argument(
+        "--file",
+        "-f",
+        action="append",
+        help="test specific file only (may be repeated)",
+    )
+    ap.add_argument(
+        "--keep-going",
+        action="store_true",
+        help="do not stop after the first failure (consider with --no-diff)",
+    )
+    ap.add_argument(
+        "--no-diff",
+        dest="diff",
+        action="store_false",
+        help="do not show diff of OCaml vs Rust output, respectively",
+    )
+    ap.add_argument("--show-ok", action="store_true", help="show passing tests")
+    ap.add_argument(
+        "--skip-re",
+        default=r"|".join(
+            [
+                r"keyword_autocomplete/function_parameter\.php",
+                r"namespace_infinite_loop1\.php",
+                # TODO: remove lines below when HHBC mangling logic for XHP names
+                r".*xhp.*\.php",
+                r"typecheck/(wrong_fixme_format|extra_scope|attr_children)\.php",
+                r"typecheck/(string_expressions12|hh_fixme1[23]|generic_attr2)\.php",
+                r"(test_mutable_return5(_7)?|bad_inout_use_lvalue7)\.php",
+                r"(lint/ui_namespace_bad|doesnt_record_any_map_extraction)\.php",
+                r"(fileresponse|D2172778|full_analysis/zack_repro).php",
+                r"((href|style)_attrib|notification_renderer)\.php",
+                r"(userinput_to_img_src_attr|signed_uri|receiver_sinks|.*linkshim)\.php",
+                r"processed_data/display_.*\.php",
+                r"lsp_exchanges/completion_extras\.php",
+                r"(basic_nested_tag|XScheduleAsyncController)\.php",
+                r"ast_to_nast/classvar_properties.php",
+                r"ffp/tests/(extra_scope|decl_alias)\.php",
+            ]
+        ),
+    )
+    ap.add_argument("passthrough_args", nargs="*")
     return ap.parse_args()
 
 
@@ -62,11 +82,10 @@ def find_hack_files(root: str, skip_re) -> Iterable[str]:
 
 
 def locate_binary_under_test(suffix) -> str:
-    path = glob(
-        get_fbcode_dir() + "/buck-out/**/hphp/hack/test/rust/" + suffix)
-    assert len(path) < 2, \
-        "Found {} binaries (try `buck clean` with suffix {}".format(
-            len(path), suffix)
+    path = glob(get_fbcode_dir() + "/buck-out/**/hphp/hack/test/rust/" + suffix)
+    assert len(path) < 2, "Found {} binaries (try `buck clean` with suffix {}".format(
+        len(path), suffix
+    )
     return path[0]
 
 
@@ -81,12 +100,12 @@ def test_all(paths: Iterable[str], args: List[str], on_failure, on_success):
     for path in paths:
         total += 1
         caml_output = binary_output_as_pretty_json(
-            "facts_json_ocaml/facts_json_ocaml.opt",
-            path)
+            "facts_json_ocaml/facts_json_ocaml.opt", path
+        )
         rust_output = binary_output_as_pretty_json(
-            "facts_json_rust#binary/facts_json_rust",
-            path)
-        ok = (rust_output == caml_output)
+            "facts_json_rust#binary/facts_json_rust", path
+        )
+        ok = rust_output == caml_output
         if ok:
             correct += 1
 
@@ -98,7 +117,7 @@ def test_all(paths: Iterable[str], args: List[str], on_failure, on_success):
             on_success(path)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     args = parse_args()
 
     def on_failed(caml_output, rust_output):

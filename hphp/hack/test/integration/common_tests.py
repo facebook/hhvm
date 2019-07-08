@@ -10,8 +10,8 @@ import sys
 import tempfile
 import time
 import unittest
-
 from typing import Optional, Union
+
 from hh_paths import hh_client, hh_merge_deps, hh_server
 
 
@@ -447,7 +447,7 @@ class CommonTests(BarebonesTests):
 
         self.check_cmd(
             [
-                "{root}foo_1.php:4:20,20: Unbound name: g (a global function) (Naming[2049])",
+                "{root}foo_1.php:4:20,20: Unbound name: g (a global function) (Naming[2049])"
             ]
         )
 
@@ -469,7 +469,7 @@ class CommonTests(BarebonesTests):
         )
         self.check_cmd(
             [
-                "{root}foo_1.php:4:20,20: Unbound name: g (a global function) (Naming[2049])",
+                "{root}foo_1.php:4:20,20: Unbound name: g (a global function) (Naming[2049])"
             ]
         )
 

@@ -16,40 +16,42 @@
 #   this location, and so it won't actually silence the error and can be fixed
 #   manually.
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-from collections import defaultdict
 import json
 import re
 import sys
 import textwrap
+from collections import defaultdict
+
 
 class ParseException(Exception):
     pass
 
+
 def build_fixmes(raw_json_obj):
     fixmes = defaultdict(lambda: defaultdict(set))
-    for error in raw_json_obj['errors']:
-        main_message = error['message'][0]
+    for error in raw_json_obj["errors"]:
+        main_message = error["message"][0]
 
-        path = main_message['path']
-        line = main_message['line'] - 1  # Hack is 1-indexed, py lists 0-indexed
-        code = main_message['code']
+        path = main_message["path"]
+        line = main_message["line"] - 1  # Hack is 1-indexed, py lists 0-indexed
+        code = main_message["code"]
 
         fixmes[path][line].add(code)
 
     return fixmes
 
+
 WHITESPACE_PATTERN = re.compile(r"\s*")
+
 
 def is_parse_error(code):
     return code >= 1000 and code < 2000
 
+
 def patch(path, patches, explanation):
-    with open(path, 'r') as f:
+    with open(path, "r") as f:
         file_lines = f.readlines()
 
     # Insert fixme lines bottom up, so that changes don't change line numbers
@@ -81,8 +83,9 @@ def patch(path, patches, explanation):
                         full_line = "%s   %s\n" % (whitespace, fixme_line)
                     file_lines.insert(line, full_line)
 
-    with open(path, 'w') as f:
+    with open(path, "w") as f:
         f.writelines(file_lines)
+
 
 def main(args):
     if len(args) != 3:
@@ -91,7 +94,7 @@ def main(args):
 
     explanation = args[2]
 
-    with open(args[1], 'r') as f:
+    with open(args[1], "r") as f:
         raw_data = f.read()
 
     raw_json_obj = json.loads(raw_data)
@@ -103,11 +106,12 @@ def main(args):
             patch(path, patches, explanation)
         except ParseException:
             failures += 1
-            print('Not patching %s as it has parse errors' % path)
+            print("Not patching %s as it has parse errors" % path)
 
-    print('Patched %d files with HH_FIXME' % (len(fixmes) - failures))
+    print("Patched %d files with HH_FIXME" % (len(fixmes) - failures))
 
     return 0
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     sys.exit(main(sys.argv))

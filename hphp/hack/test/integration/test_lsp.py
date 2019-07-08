@@ -1,15 +1,14 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-from typing import Any, Iterable, Mapping
-import common_tests
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import copy
 import json
 import os
+import re
 import unittest
 import urllib.parse
-import re
+from typing import Any, Iterable, Mapping
+
+import common_tests
 from lspcommand import LspCommandProcessor, Transcript
 
 
@@ -19,8 +18,9 @@ class LspTestDriver(common_tests.CommonTestDriver):
         # As for hh.conf, we'll write it explicitly each test.
         # Note that hh.conf uses lower-case...
         use_saved_state = "true" if use_saved_state else "false"
-        with open(os.path.join(self.repo_dir, 'hh.conf'), 'w') as f:
-            f.write("""
+        with open(os.path.join(self.repo_dir, "hh.conf"), "w") as f:
+            f.write(
+                """
 use_watchman = true
 watchman_subscribe_v2 = true
 interrupt_on_watchman = true
@@ -32,7 +32,10 @@ require_mini_state = {use_saved_state}
 lazy_decl = {use_saved_state}
 lazy_parse = {use_saved_state}
 lazy_init2 = {use_saved_state}
-""".format(use_saved_state=use_saved_state))
+""".format(
+                    use_saved_state=use_saved_state
+                )
+            )
 
     def assertEqualString(self, first, second, msg=None):
         pass
@@ -130,7 +133,11 @@ class TestLsp(LspTestDriver, unittest.TestCase):
             if received is None:
                 continue
             method = received.get("method") or ""
-            if method in ["window/progress", "window/actionRequired", "window/showStatus"]:
+            if method in [
+                "window/progress",
+                "window/actionRequired",
+                "window/showStatus",
+            ]:
                 continue
             yield received
 
@@ -171,10 +178,7 @@ class TestLsp(LspTestDriver, unittest.TestCase):
             self.assertEqual(observed_items[i], expected_items[i])
 
     def throw_on_skip(self, transcript: Transcript):
-        failure_messages = [
-            "Server busy",
-            "timed out",
-        ]
+        failure_messages = ["Server busy", "timed out"]
         for entry in transcript.values():
             received = entry.received
             if received is None:

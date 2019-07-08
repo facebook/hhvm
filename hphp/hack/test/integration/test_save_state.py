@@ -495,12 +495,7 @@ class ReverseNamingTableSavedStateTests(
         saved_conn = sqlite3.connect(saved_state_db)
         naming_conn = sqlite3.connect(naming_db)
 
-        tables = [
-            "NAMING_CONSTS",
-            "NAMING_FILE_INFO",
-            "NAMING_FUNS",
-            "NAMING_TYPES"
-        ]
+        tables = ["NAMING_CONSTS", "NAMING_FILE_INFO", "NAMING_FUNS", "NAMING_TYPES"]
         for table in tables:
             sqlite = "SELECT * FROM " + table
             saved_entries = saved_conn.execute(sqlite).fetchall()

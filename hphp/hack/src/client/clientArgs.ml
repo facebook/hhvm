@@ -43,7 +43,7 @@ module Common_argspecs = struct
       " Enable debug logging on Watchman client. This is very noisy")
 
   let allow_non_opt_build value_ref =
-    ("--allow-non_opt-build",
+    ("--allow-non-opt-build",
       Arg.Set value_ref,
       " Override build mode check triggered by warn_on_non_opt_build .hhconfig option")
 end
@@ -148,13 +148,14 @@ let parse_check_args cmd =
     | _ -> failwith "No other keywords should make it here"
   in
   let options = [
-    (* modes - please keep sorted in the alphabetical order *)
+    (* Please keep these sorted in the alphabetical order *)
     "--ai",
       Arg.String (fun s -> ai_mode :=
          Some (ignore (Ai_options.prepare ~server:true s); s)),
-      " run AI module with provided options\n";
+      " run AI module with provided options";
     "--ai-query", Arg.String (fun x -> set_mode (MODE_AI_QUERY x) ()),
       (* Send an AI query *) "";
+    Common_argspecs.allow_non_opt_build allow_non_opt_build;
     "--auto-complete",
       Arg.Unit (set_mode MODE_AUTO_COMPLETE),
       " (mode) auto-completes the text on stdin";
@@ -213,9 +214,6 @@ let parse_check_args cmd =
     "--dynamic-view",
       Arg.Set dynamic_view,
       " Replace occurrences of untyped code with dynamic";
-    "--extract-standalone",
-      Arg.String (fun name -> set_mode (MODE_EXTRACT_STANDALONE name) ()),
-      " extract a given function / method together with its dependencies as a standalone file";
     "--error-format",
       Arg.String (fun s ->
           match s with
@@ -223,6 +221,9 @@ let parse_check_args cmd =
           | "context" -> error_format := Errors.Context
           | _ -> print_string "Warning: unrecognized error format.\n"),
       "<raw|context> Error formatting style";
+    "--extract-standalone",
+      Arg.String (fun name -> set_mode (MODE_EXTRACT_STANDALONE name) ()),
+      " extract a given function / method together with its dependencies as a standalone file";
     "--file-dependents",
       Arg.Unit (fun () ->
         let () = prechecked := Some false in
@@ -254,6 +255,26 @@ let parse_check_args cmd =
       " (deprecated) equivalent to --from vim";
     "--full-fidelity-schema",
       Arg.Unit (set_mode MODE_FULL_FIDELITY_SCHEMA), "";
+    "--fun-deps-at-pos-batch",
+      Arg.Rest begin fun position ->
+        mode := match !mode with
+          | None -> Some (MODE_FUN_DEPS_AT_POS_BATCH [position])
+          | Some (MODE_FUN_DEPS_AT_POS_BATCH positions) ->
+            Some (MODE_FUN_DEPS_AT_POS_BATCH (position::positions))
+          | _ -> raise (Arg.Bad "only a single mode should be specified")
+        end,
+      " (mode) for each entry in input list get list of function dependencies \
+        [file:line:character list]";
+    "--fun-is-locallable-at-pos-batch",
+      Arg.Rest begin fun position ->
+        mode := match !mode with
+          | None -> Some (MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH [position])
+          | Some (MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH positions) ->
+            Some (MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH (position::positions))
+          | _ -> raise (Arg.Bad "only a single mode should be specified")
+        end,
+      " (mode) for each entry in input list checks if function at position can be \
+        made RxLocal [file:line:character list]";
     "--gen-hot-classes-file",
       Arg.Tuple ([
         Arg.Int (fun x -> hot_classes_threshold := x);
@@ -288,9 +309,6 @@ let parse_check_args cmd =
     "--ignore-hh-version",
       Arg.Set ignore_hh_version,
       " ignore hh_version check when loading saved states (default: false)";
-    "--saved-state-ignore-hhconfig",
-      Arg.Set saved_state_ignore_hhconfig,
-      " ignore hhconfig hash when loading saved states (default: false)";
     "--in-memory-dep-table-size",
       Arg.Unit (set_mode MODE_IN_MEMORY_DEP_TABLE_SIZE),
       " number of entries in the in-memory dependency table";
@@ -368,13 +386,13 @@ let parse_check_args cmd =
       " inference constraints into external logger (e.g. Scuba)";
     "--logname",
       Arg.Set logname,
-      " (mode) show log filename and exit\n";
+      " (mode) show log filename and exit";
     "--max-errors",
       Arg.Int (fun num_errors -> max_errors := Some num_errors),
         " Maximum number of errors to display";
     "--monitor-logname",
       Arg.Set monitor_logname,
-      " (mode) show monitor log filename and exit\n";
+      " (mode) show monitor log filename and exit";
     "--no-load",
       Arg.Set no_load,
       " start from a fresh state";
@@ -410,6 +428,23 @@ let parse_check_args cmd =
         Arg.Unit (set_mode (MODE_REMOVE_DEAD_FIXMES [])),
       " (mode) remove dead HH_FIXME for any error code < 5000 " ^
       "(first do hh_client restart --no-load)";
+    "--replace-state-after-saving",
+      Arg.Set replace_state_after_saving,
+      " if combined with --save-mini, causes the saved state" ^
+      " to replace the program state; otherwise, the state files are not" ^
+      " used after being written to disk (default: false)";
+    "--retries",
+      Arg.Int (fun n -> timeout := Some (float_of_int (max 5 n))),
+      " (deprecated) same as --timeout";
+    (* Retrieve changed files since input checkpoint.
+     * Output is separated by newline.
+     * Exit code will be non-zero if no checkpoint is found *)
+    "--retrieve-checkpoint",
+      Arg.String (fun x -> set_mode (MODE_RETRIEVE_CHECKPOINT x) ()),
+      "";
+    "--retry-if-init",
+      Arg.Bool (fun _ -> ()),
+      " (deprecated and ignored)";
     "--rewrite-lambda-parameters",
        Arg.Rest begin fun fn ->
          mode := match !mode with
@@ -421,27 +456,13 @@ let parse_check_args cmd =
          end,
       " (mode) rewrite lambdas in the files from the given list" ^
       " with suggested parameter types";
-    "--replace-state-after-saving",
-      Arg.Set replace_state_after_saving,
-      " if combined with --save-mini, causes the saved state" ^
-      " to replace the program state; otherwise, the state files are not" ^
-      " used after being written to disk (default: false)";
-    (* Retrieve changed files since input checkpoint.
-     * Output is separated by newline.
-     * Exit code will be non-zero if no checkpoint is found *)
-    "--retrieve-checkpoint",
-      Arg.String (fun x -> set_mode (MODE_RETRIEVE_CHECKPOINT x) ()),
-      "";
-    "--retries",
-      Arg.Int (fun n -> timeout := Some (float_of_int (max 5 n))),
-      " (deprecated) same as --timeout";
-    "--retry-if-init",
-      Arg.Bool (fun _ -> ()),
-      " (deprecated and ignored)";
     "--save-state",
       Arg.String (fun x -> set_mode (MODE_SAVE_STATE x) ()),
       (" (mode) Save a saved state to the given file." ^
       " Returns number of edges dumped from memory to the database.");
+    "--saved-state-ignore-hhconfig",
+      Arg.Set saved_state_ignore_hhconfig,
+      " ignore hhconfig hash when loading saved states (default: false)";
     "--search",
       Arg.String (fun x -> set_mode (MODE_SEARCH (x, "")) ()),
       " (mode) fuzzy search symbol definitions";
@@ -484,34 +505,14 @@ let parse_check_args cmd =
           | _ -> raise (Arg.Bad "only a single mode should be specified")
         end,
       " (mode) show types at multiple positions [file:line:character list]";
-    "--fun-deps-at-pos-batch",
-      Arg.Rest begin fun position ->
-        mode := match !mode with
-          | None -> Some (MODE_FUN_DEPS_AT_POS_BATCH [position])
-          | Some (MODE_FUN_DEPS_AT_POS_BATCH positions) ->
-            Some (MODE_FUN_DEPS_AT_POS_BATCH (position::positions))
-          | _ -> raise (Arg.Bad "only a single mode should be specified")
-        end,
-      " (mode) for each entry in input list get list of function dependencies \
-        [file:line:character list]";
-    "--fun-is-locallable-at-pos-batch",
-      Arg.Rest begin fun position ->
-        mode := match !mode with
-          | None -> Some (MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH [position])
-          | Some (MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH positions) ->
-            Some (MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH (position::positions))
-          | _ -> raise (Arg.Bad "only a single mode should be specified")
-        end,
-      " (mode) for each entry in input list checks if function at position can be \
-        made RxLocal [file:line:character list]";
     "--typed-full-fidelity-json",
       Arg.String (fun filename -> set_mode (MODE_TYPED_FULL_FIDELITY_PARSE filename) ()),
       " (mode) show full fidelity parse tree with types. Implies --json.";
     "--version",
       Arg.Set version,
-      " (mode) show version and exit\n";
+      " (mode) show version and exit";
     Common_argspecs.watchman_debug_logging watchman_debug_logging;
-    Common_argspecs.allow_non_opt_build allow_non_opt_build;
+    (* Please keep these sorted in the alphabetical order *)
   ] in
   let args = parse_without_command options usage "check" in
 
@@ -603,27 +604,29 @@ let parse_start_env command =
     "WARNING: --wait is deprecated, does nothing, and will be going away \
      soon!\n%!" in
   let options = [
-    "--wait", Arg.Unit wait_deprecation_msg,
-    " this flag is deprecated and does nothing!";
-    "--no-load", Arg.Set no_load,
-    " start from a fresh state";
-    Common_argspecs.watchman_debug_logging watchman_debug_logging;
-    Common_argspecs.from from;
-    "--profile-log", Arg.Set profile_log,
-    " enable profile logging";
-    "--log-inference-constraints", Arg.Set log_inference_constraints,
-      "  (for hh debugging purpose only) log type" ^
-      " inference constraints into external logger (e.g. Scuba)";
+    (* Please keep these sorted in the alphabetical order *)
     "--ai", Arg.String (fun x -> ai_mode := Some x),
-    "  run ai with options ";
+      " run ai with options ";
+    Common_argspecs.allow_non_opt_build allow_non_opt_build;
+    Common_argspecs.config config;
+    Common_argspecs.from from;
     "--ignore-hh-version", Arg.Set ignore_hh_version,
       " ignore hh_version check when loading saved states (default: false)";
+    "--log-inference-constraints", Arg.Set log_inference_constraints,
+      " (for hh debugging purpose only) log type" ^
+      " inference constraints into external logger (e.g. Scuba)";
+    "--no-load", Arg.Set no_load,
+      " start from a fresh state";
+    Common_argspecs.no_prechecked prechecked;
+    Common_argspecs.prechecked prechecked;
+    "--profile-log", Arg.Set profile_log,
+      " enable profile logging";
     "--saved-state-ignore-hhconfig", Arg.Set saved_state_ignore_hhconfig,
       " ignore hhconfig hash when loading saved states (default: false)";
-    Common_argspecs.prechecked prechecked;
-    Common_argspecs.no_prechecked prechecked;
-    Common_argspecs.config config;
-    Common_argspecs.allow_non_opt_build allow_non_opt_build;
+    "--wait", Arg.Unit wait_deprecation_msg,
+      " this flag is deprecated and does nothing!";
+    Common_argspecs.watchman_debug_logging watchman_debug_logging;
+    (* Please keep these sorted in the alphabetical order *)
   ] in
   let args = parse_without_command options usage command in
   let root =
@@ -688,19 +691,20 @@ let parse_lsp_args () =
     Sys.argv.(0) in
   let from = ref "" in
   let use_ffp_autocomplete = ref false in
-  let noop_enhanced_hover  = ref false in
   let use_serverless_ide = ref false in
   let options = [
-    Common_argspecs.from from;
+    (* Please keep these sorted in the alphabetical order *)
+    "--enhanced-hover",
+    Arg.Unit (fun () -> ()),
+    " [legacy] no-op";
     "--ffp-autocomplete",
     Arg.Set use_ffp_autocomplete,
     " [experimental] use the full-fidelity parser based autocomplete ";
-    "--enhanced-hover",
-    Arg.Set noop_enhanced_hover,
-    " [legacy] no-op";
+    Common_argspecs.from from;
     "--serverless-ide",
     Arg.Set use_serverless_ide,
     " [experimental] provide IDE services from hh_client instead of hh_server";
+    (* Please keep these sorted in the alphabetical order *)
   ] in
   let args = parse_without_command options usage "lsp" in
   match args with

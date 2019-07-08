@@ -44,8 +44,7 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
       (* We want to try to avoid easy double nullables here, so we handle Toption
        * with some special logic. *)
       let env, ty = extract_inner env ty in
-      let env, ty = TUtils.non_null env p ty in
-      env, (r, Toption ty)
+      TUtils.union env (MakeType.null r) ty
     | _, Tintersection tyl ->
       let env, rtyl = List.fold_map ~init:env tyl ~f:extract_inner in
       env, (r, Tintersection rtyl)

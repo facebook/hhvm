@@ -242,7 +242,7 @@ type si_capture =
 
 (* Which system notified us of a file changed? *)
 type file_source =
-  | SavedState
+  | Init
   | TypeChecker
 
 (* Keep track of file hash tombstones *)

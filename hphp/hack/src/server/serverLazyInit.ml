@@ -216,7 +216,7 @@ let update_search (genv: ServerEnv.genv) (naming_table: Naming_table.t) (t: floa
           SearchServiceRunner.internal_ssr_update
             fn
             (SearchUtils.Fast names)
-            SearchUtils.SavedState;
+            SearchUtils.Init;
         );
     HackEventLogger.update_search_end t;
     Hh_logger.log_duration "Loading search indices" t
@@ -480,8 +480,7 @@ let full_init
   : ServerEnv.env * float =
   let env, t = index_and_parse "full initialization" genv env in
   if not (ServerArgs.check_mode genv.options) then
-    SearchServiceRunner.update_fileinfo_map env.naming_table
-      SearchUtils.SavedState;
+    SearchServiceRunner.update_fileinfo_map env.naming_table SearchUtils.Init;
   let t = update_files genv env.naming_table t in
   let env, t = naming env t in
   let fast = Naming_table.to_fast env.naming_table in

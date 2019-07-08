@@ -1306,20 +1306,14 @@ and eif env ~(expected: ExpectedTy.t option) p c e1 e2 =
         let env, te1, ty1 = expr ?expected env e1 in
         env, Some te1, ty1
     in
-  let fake1 = Env.get_fake_members env in
+  let lenv1 = env.Env.lenv in
+
   let env = { env with Env.lenv = parent_lenv } in
   let env = condition env false tc in
   let env, te2, ty2 = expr ?expected env e2 in
-  let fake2 = Env.get_fake_members env in
-  let fake_members = Fake.join fake1 fake2 in
-  (* we restore the locals to their parent state so as not to leak the
-   * effects of the `condition` calls above *)
-  let env = { env with Env.lenv = parent_lenv } in
-  let env = Env.FakeMembers.update_fake_members env fake_members in
-  (* This is a shortened form of what we do in Typing_lenv.union_lenvs. The
-   * latter takes local environments as arguments, but our types here
-   * aren't assigned to local variables in an environment *)
-  (* TODO: Omit if expected type is present and checked in calls to expr *)
+  let lenv2 = env.Env.lenv in
+
+  let env = LEnv.union_lenvs env parent_lenv lenv1 lenv2 in
   let env, ty = Union.union env ty1 ty2 in
   make_result env p (T.Eif(tc, te1, te2)) ty
 

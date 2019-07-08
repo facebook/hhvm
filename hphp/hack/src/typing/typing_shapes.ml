@@ -53,7 +53,7 @@ let refine_shape field_name pos env shape =
  *)
 (*****************************************************************************)
 
-let rec shrink_shape ~seen_tyvars pos field_name env shape =
+let rec shrink_shape pos field_name env shape =
   let env, shape =
     Typing_subtype.expand_type_and_solve ~description_of_expected:"a shape" env pos shape in
   match shape with
@@ -69,7 +69,7 @@ let rec shrink_shape ~seen_tyvars pos field_name env shape =
       env, result
   | _, Tunion tyl ->
       let env, tyl =
-        List.map_env env tyl (shrink_shape ~seen_tyvars pos field_name) in
+        List.map_env env tyl (shrink_shape pos field_name) in
       let result = Reason.Rwitness pos, Tunion tyl in
       env, result
   | x ->
@@ -219,7 +219,7 @@ let remove_key p env shape_ty field  =
    | None ->
      env, (Reason.Rwitness (fst field), TUtils.tany env)
    | Some field_name ->
-     shrink_shape ~seen_tyvars:IMap.empty p field_name env shape_ty
+     shrink_shape p field_name env shape_ty
 
 let to_collection env shape_ty res return_type =
   let mapper = object

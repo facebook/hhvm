@@ -33,37 +33,19 @@ let widen_for_refine_shape ~expr_pos field_name env ty =
   | _ ->
     env, None
 
-let rec refine_shape field_name pos env shape =
+let refine_shape field_name pos env shape =
   let env, shape =
     Typing_subtype.expand_type_and_narrow ~description_of_expected:"a shape" env
       (widen_for_refine_shape ~expr_pos:pos field_name) pos shape in
-  match shape with
-  | shape_r, Tshape (shape_kind, fields) ->
-    let refine_shape_field_type refined_sft_ty =
-      let refined_sft = {sft_optional = false; sft_ty = refined_sft_ty} in
-      let refined_fields = ShapeMap.add field_name refined_sft fields in
-      env, (shape_r, Tshape (shape_kind, refined_fields)) in
-    begin match shape_kind with
-    | Closed_shape ->
-      begin match ShapeMap.get field_name fields with
-      | None -> env, shape
-      | Some {sft_ty; _} -> refine_shape_field_type sft_ty
-      end
-    | Open_shape ->
-      let refined_sft_ty = match ShapeMap.get field_name fields with
-        | None ->
-          let printable_field_name =
-            TUtils.get_printable_shape_field_name field_name in
-          let sft_ty_r = Reason.Rmissing_optional_field
-            (Reason.to_pos shape_r, printable_field_name) in
-          MakeType.mixed sft_ty_r
-        | Some {sft_ty; _} -> sft_ty in
-      refine_shape_field_type refined_sft_ty
-    end
-  | r, Tunion tyl ->
-    let env, tyl = List.map_env env tyl (refine_shape field_name pos) in
-    env, (r, Tunion tyl)
-  | _ -> env, shape
+  let sft_ty =
+    MakeType.mixed
+      (Reason.Rmissing_optional_field
+         (Reason.to_pos (fst shape),
+          TUtils.get_printable_shape_field_name field_name)) in
+  let sft = {sft_optional = false; sft_ty} in
+  Typing_intersection.intersect env (Reason.Rwitness pos)
+    shape
+    (Reason.Rnone, Tshape (Open_shape, ShapeMap.singleton field_name sft))
 
 (*****************************************************************************)
 (* Remove a field from all the shapes found in a given type.

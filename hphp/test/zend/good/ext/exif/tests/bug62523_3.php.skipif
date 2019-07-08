@@ -1,2 +1,2 @@
 <?hh
-extension_loaded("exif") or die("skip need exif");
+extension_loaded("exif") || die("skip need exif");

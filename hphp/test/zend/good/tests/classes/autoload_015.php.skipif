@@ -1,1 +1,1 @@
-<?hh extension_loaded('reflection') or die('skip');
+<?hh extension_loaded('reflection') || die('skip');

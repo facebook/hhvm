@@ -1,1 +1,1 @@
-<?hh extension_loaded('iconv') or die('skip iconv extension is not available');
+<?hh extension_loaded('iconv') || die('skip iconv extension is not available');

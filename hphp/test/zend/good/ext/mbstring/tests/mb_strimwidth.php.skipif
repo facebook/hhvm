@@ -1,1 +1,1 @@
-<?hh extension_loaded('mbstring') or die('skip mbstring not available');
+<?hh extension_loaded('mbstring') || die('skip mbstring not available');

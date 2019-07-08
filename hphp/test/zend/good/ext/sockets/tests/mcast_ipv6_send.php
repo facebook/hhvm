@@ -1,7 +1,7 @@
 <?hh <<__EntryPoint>> function main(): void {
 $domain = AF_INET6;
 $level = IPPROTO_IPV6;
-$s = socket_create($domain, SOCK_DGRAM, SOL_UDP) or die("err");
+$s = socket_create($domain, SOCK_DGRAM, SOL_UDP) || die("err");
 
 echo "Setting IPV6_MULTICAST_TTL\n";
 $r = socket_set_option($s, $level, IPV6_MULTICAST_HOPS, 9);

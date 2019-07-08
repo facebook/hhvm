@@ -20,14 +20,14 @@ print  strlen($ascii) . "\n";
 // EUC-JP
 echo "== EUC-JP ==\n";
 print  mb_strlen($euc_jp,'EUC-JP') . "\n";
-mb_internal_encoding('EUC-JP') or print("mb_internal_encoding() failed\n");
+mb_internal_encoding('EUC-JP') || print("mb_internal_encoding() failed\n");
 print  strlen($euc_jp) . "\n";
 
 // SJIS
 echo "== SJIS ==\n";
 $sjis = mb_convert_encoding($euc_jp, 'SJIS','EUC-JP');
 print  mb_strlen($sjis,'SJIS') . "\n";
-mb_internal_encoding('SJIS') or print("mb_internal_encoding() failed\n");
+mb_internal_encoding('SJIS') || print("mb_internal_encoding() failed\n");
 print  strlen($sjis) . "\n";
 
 // JIS
@@ -35,7 +35,7 @@ print  strlen($sjis) . "\n";
 echo "== JIS ==\n";
 $jis = mb_convert_encoding($euc_jp, 'JIS','EUC-JP');
 print  mb_strlen($jis,'JIS') . "\n";
-mb_internal_encoding('JIS')  or print("mb_internal_encoding() failed\n");
+mb_internal_encoding('JIS') || print("mb_internal_encoding() failed\n");
 print  strlen($jis) . "\n"; 
 
 // UTF-8
@@ -43,7 +43,7 @@ print  strlen($jis) . "\n";
 echo "== UTF-8 ==\n";
 $utf8 = mb_convert_encoding($euc_jp, 'UTF-8','EUC-JP');
 print  mb_strlen($utf8,'UTF-8') . "\n";
-mb_internal_encoding('UTF-8')  or print("mb_internal_encoding() failed\n");
+mb_internal_encoding('UTF-8') || print("mb_internal_encoding() failed\n");
 print  strlen($utf8) . "\n";  
 
 

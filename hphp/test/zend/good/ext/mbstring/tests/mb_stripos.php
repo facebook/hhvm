@@ -10,7 +10,7 @@ include_once('common.inc');
 $euc_jp = b'0123この文字列は日本語です。EUC-JPを使っています。0123日本語は面倒臭い。';
 
 // EUC-JP - With encoding parameter
-mb_internal_encoding('UTF-8') or print("mb_internal_encoding() failed\n");
+mb_internal_encoding('UTF-8') || print("mb_internal_encoding() failed\n");
 
 echo  "== POSITIVE OFFSET ==\n";
 print  mb_stripos($euc_jp,b'日本語', 0, 'EUC-JP') . "\n";
@@ -67,7 +67,7 @@ $r = mb_stripos($euc_jp, b"\n",     0, 'EUC-JP');
 
 // EUC-JP - No encoding parameter
 echo "== NO ENCODING PARAMETER ==\n";
-mb_internal_encoding('EUC-JP')  or print("mb_internal_encoding() failed\n");
+mb_internal_encoding('EUC-JP') || print("mb_internal_encoding() failed\n");
 
 print  mb_stripos($euc_jp,b'日本語', 0) . "\n";
 print  mb_stripos($euc_jp, b'0', 0) . "\n";
@@ -81,7 +81,7 @@ $r = mb_stripos($euc_jp,b"\n", 0);
 
 // EUC-JP - No offset and encoding parameter
 echo "== NO OFFSET AND ENCODING PARAMETER ==\n";
-mb_internal_encoding('EUC-JP')  or print("mb_internal_encoding() failed\n");
+mb_internal_encoding('EUC-JP') || print("mb_internal_encoding() failed\n");
 
 print  mb_stripos($euc_jp,b'日本語') . "\n";
 print  mb_stripos($euc_jp, b'0') . "\n";

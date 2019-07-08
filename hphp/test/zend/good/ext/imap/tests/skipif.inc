@@ -1,5 +1,5 @@
 <?hh
-extension_loaded('imap') or die('skip imap extension not available in this build');
+extension_loaded('imap') || die('skip imap extension not available in this build');
  
 // Change these to make tests run successfully
 $mailbox  = '{localhost/norsh}';

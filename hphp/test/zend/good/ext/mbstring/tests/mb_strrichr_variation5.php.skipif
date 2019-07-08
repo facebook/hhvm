@@ -1,3 +1,3 @@
 <?hh
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_strrichr') or die("skip mb_strrichr() is not available in this build");
+extension_loaded('mbstring') || die('skip');
+function_exists('mb_strrichr') || die("skip mb_strrichr() is not available in this build");

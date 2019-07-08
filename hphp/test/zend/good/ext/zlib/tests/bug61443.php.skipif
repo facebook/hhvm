@@ -1,2 +1,2 @@
 <?hh
-extension_loaded("zlib") or die("skip");
+extension_loaded("zlib") || die("skip");

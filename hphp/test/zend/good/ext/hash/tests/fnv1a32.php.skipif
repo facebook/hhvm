@@ -1,4 +1,4 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-extension_loaded('hash') or die ('Skip - hash extension not available');
+extension_loaded('hash') || die ('Skip - hash extension not available');
 }

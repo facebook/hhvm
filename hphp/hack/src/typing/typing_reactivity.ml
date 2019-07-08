@@ -266,16 +266,20 @@ let disallow_atmost_rx_as_rxfunc_on_non_functions env param param_ty =
   then begin
     if param.Nast.param_hint = None
     then Errors.missing_annotation_for_atmost_rx_as_rxfunc_parameter param.Nast.param_pos
-    else match TU.non_null env param.Nast.param_pos param_ty with
-    (* if parameter has <<__AtMostRxAsFunc>> annotation then:
-       - parameter should be typed as function or a like function *)
-    | _, (_, Tunion [(_, Tfun _); (_, Tdynamic)])
-    | _, (_, Tunion [(_, Tdynamic); (_, Tfun _)])
-    | _, (_, Tfun _) -> ()
-    | _ ->
-      Errors.invalid_type_for_atmost_rx_as_rxfunc_parameter
-        (Reason.to_pos (fst param_ty))
-        (Typing_print.full env param_ty)
+    else
+      let rec err_if_not_fun ty =
+        match snd ty with
+        (* if parameter has <<__AtMostRxAsFunc>> annotation then:
+           - parameter should be typed as function or a like function *)
+        | Tfun _ -> ()
+        | Tunion [ty; (_, Tdynamic)]
+        | Tunion [(_, Tdynamic); ty]
+        | Toption ty -> err_if_not_fun ty
+        | _ ->
+          Errors.invalid_type_for_atmost_rx_as_rxfunc_parameter
+            (Reason.to_pos (fst param_ty))
+            (Typing_print.full env param_ty) in
+      err_if_not_fun param_ty
   end
 
 (* generate a name that uniquely identifies pair target_type * condition_type *)

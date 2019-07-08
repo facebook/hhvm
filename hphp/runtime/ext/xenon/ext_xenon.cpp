@@ -206,6 +206,7 @@ void Xenon::start(uint64_t msec) {
     timer_create(CLOCK_REALTIME, &sev, &m_timerid);
 
     sync_signal(SIGPROF, onXenonTimer);
+    signal(SIGPROF, SIG_IGN);
 
     itimerspec ts={};
     ts.it_value.tv_sec = fSec;

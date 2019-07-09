@@ -290,8 +290,13 @@ let load_ fn ~silent overrides =
     int_opt "defer_class_declaration_threshold" config in
   let naming_sqlite_path =
     string_opt "naming_sqlite_path" config in
-  let enable_naming_table_fallback = bool_if_version "enable_naming_table_fallback"
-      ~default:default.enable_naming_table_fallback config in
+  let enable_naming_table_fallback = match naming_sqlite_path with
+    | Some _ -> true
+    | None ->
+      bool_if_version "enable_naming_table_fallback"
+        ~default:default.enable_naming_table_fallback config
+  in
+
   let symbolindex_search_provider = string_ "symbolindex_search_provider"
       ~default:default.symbolindex_search_provider config in
   let symbolindex_quiet = bool_ "symbolindex_quiet"

@@ -105,10 +105,9 @@ let download_and_load_state_exn
       ~ignore_hh_version
       ~fail_if_missing;
     let load_decls = genv.local_config.SLC.load_decls_from_saved_state in
-    let naming_table_fallback_path =
-      if genv.ServerEnv.local_config.SLC.enable_naming_table_fallback
-      then Some result.State_loader.deptable_fn
-      else genv.ServerEnv.local_config.SLC.naming_sqlite_path
+    let naming_table_fallback_path = get_naming_table_fallback_path
+      genv
+      (Some result.State_loader.deptable_fn)
     in
     let (old_naming_table, old_errors) = SaveStateService.load_saved_state
       result.State_loader.saved_state_fn
@@ -159,11 +158,7 @@ let use_precomputed_state_exn
   let changes = Relative_path.set_of_list changes in
   let prechecked_changes = Relative_path.set_of_list prechecked_changes in
   let load_decls = genv.local_config.SLC.load_decls_from_saved_state in
-  let naming_table_fallback_path =
-    if genv.ServerEnv.local_config.SLC.enable_naming_table_fallback
-    then Some deptable_fn
-    else genv.ServerEnv.local_config.SLC.naming_sqlite_path
-  in
+  let naming_table_fallback_path = get_naming_table_fallback_path genv (Some deptable_fn) in
   let (old_naming_table, old_errors) =
     SaveStateService.load_saved_state saved_state_fn ~naming_table_fallback_path ~load_decls
   in

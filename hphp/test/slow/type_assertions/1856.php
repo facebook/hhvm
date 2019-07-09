@@ -10,10 +10,10 @@ class X1 extends X {
   public $x = 'baz';
 }
 function f($x) {
-  if ($x instanceof X && isset($x->x)) {
+  if ($x is X && isset($x->x)) {
     var_dump($x->x);
   }
-  if ($x instanceof Y && isset($x->y)) {
+  if ($x is Y && isset($x->y)) {
     var_dump($x->y);
   }
   if (is_a($x, 'X1')) {

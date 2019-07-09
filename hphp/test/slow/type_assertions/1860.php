@@ -16,13 +16,13 @@ if (get()) {
 class Y extends X {
 }
 function f($x) {
-  if ($x instanceof Base) {
+  if ($x is Base) {
     $x->f();
   }
-  if ($x instanceof X) {
+  if ($x is X) {
     $x->f();
   }
-  if ($x instanceof Y) {
+  if ($x is Y) {
     $x->f();
   }
 }

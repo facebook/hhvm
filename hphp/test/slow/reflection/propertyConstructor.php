@@ -35,5 +35,5 @@ try {
 var_dump($gotException);
 
 $b = new ReflectionProperty($a, 'x');
-var_dump($b instanceof ReflectionProperty);
+var_dump($b is ReflectionProperty);
 }

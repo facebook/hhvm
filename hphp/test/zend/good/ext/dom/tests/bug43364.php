@@ -3,7 +3,7 @@ function loopElements($nodes)
 {
     $count = 0;
     foreach($nodes as $node) {
-        if($node instanceof DOMElement) {
+        if($node is DOMElement) {
             $count++;
             if($node->childNodes->length > 0) {
                 $count += loopElements($node->childNodes);

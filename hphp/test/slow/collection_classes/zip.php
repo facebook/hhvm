@@ -20,7 +20,7 @@ function test($name, $a, $b) {
   echo get_class($got) . "\n";
   foreach ($got as $k => $p) {
     echo "$k => ";
-    if ($p instanceof Pair) {
+    if ($p is Pair) {
       echo "Pair {{$p[0]} => {$p[1]}}\n";
     } else {
       echo "ERROR\n";

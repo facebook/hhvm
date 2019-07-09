@@ -1,7 +1,7 @@
 <?hh <<__EntryPoint>> function main(): void {
 $date = date_create('asdfasdf');
 
-if ($date instanceof DateTime) {
+if ($date is DateTime) {
     echo "this is wrong, should be bool";
 }
 

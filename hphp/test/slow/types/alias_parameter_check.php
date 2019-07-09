@@ -9,10 +9,7 @@ type Foo = Base;
 class Bar implements Base {}
 
 function doit(Foo $x) {
-  # instanceof type_alias isn't actually supported by Hack; this should return
-  # false despite your intuition.  It's needed to create instance bits, which
-  # are also used for the parameter type check.
-  var_dump($x instanceof Foo);
+  var_dump($x is Foo);
 }
 
 function main() {

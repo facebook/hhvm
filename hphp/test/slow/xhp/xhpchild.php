@@ -3,13 +3,13 @@
 class :div implements XHPChild {}
 
 function f1(?XHPChild $x): void {
-  echo (int)($x instanceof XHPChild), ", ";
+  echo (int)($x is XHPChild), ", ";
   var_dump($x);
   echo "\n";
 }
 
 function f2(XHPChild $x): void {
-  echo (int)($x instanceof XHPChild), ", ";
+  echo (int)($x is XHPChild), ", ";
   var_dump($x);
   echo "\n";
 }

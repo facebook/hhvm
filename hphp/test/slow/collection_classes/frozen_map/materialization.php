@@ -30,37 +30,37 @@ function main() {
 
   echo "\ntoVector...\n";
   $res = $fm->toVector();
-  var_dump($res instanceof Vector);
+  var_dump($res is Vector);
   show_iter($res);
 
   echo "\ntoImmVector...\n";
   $res = $fm->toImmVector();
-  var_dump($res instanceof ImmVector);
+  var_dump($res is ImmVector);
   show_iter($res);
 
   echo "\ntoMap...\n";
   $res = $fm->toMap();
-  var_dump($res instanceof Map);
+  var_dump($res is Map);
   show_iter($res);
 
   echo "\ntoImmMap...\n";
   $res = $fm->toImmMap();
-  var_dump($res instanceof ImmMap);
+  var_dump($res is ImmMap);
   show_iter($res);
 
   echo "\ntoSet...\n";
   $res = $fm->toSet();
-  var_dump($res instanceof Set);
+  var_dump($res is Set);
   show_iter($res);
 
   echo "\ntoImmSet...\n";
   $res = $fm->toImmSet();
-  var_dump($res instanceof ImmSet);
+  var_dump($res is ImmSet);
   show_iter($res);
 
   echo "\ntoMap...\n";
   $res = $fm->toMap();
-  var_dump($res instanceof Map &&
+  var_dump($res is Map &&
            $res == Map { "a" => 10, "b" => 30, 10 => 42 });
 
   // TODO: add toImmMap() once it exists.

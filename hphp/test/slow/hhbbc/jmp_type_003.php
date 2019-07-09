@@ -15,7 +15,7 @@ function main(Blah $x = null) {
     echo count($k) . "\n";
   }
   if (is_object($x)) {
-    var_dump($x instanceof Blah);
+    var_dump($x is Blah);
   } else {
     var_dump(is_null($x));
   }

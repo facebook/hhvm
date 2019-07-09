@@ -1,5 +1,5 @@
 resource(1) of type (stream)
-bool(false)
+bool(true)
 object(Foo) (0) {
 }
 bool(false)

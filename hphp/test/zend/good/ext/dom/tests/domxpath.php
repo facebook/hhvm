@@ -35,7 +35,7 @@ var_dump($count);
 
 $xpathdoc = $xpath->document;
 
-var_dump($xpathdoc instanceof DOMDocument);
+var_dump($xpathdoc is DOMDocument);
 
 $root = $dom->documentElement;
 $root->appendChild($dom->createElementNS("urn::default", "testnode", '3'));

@@ -6,5 +6,5 @@ function __autoload($name)
 }
 <<__EntryPoint>> function main(): void {
 $a = new stdClass;
-var_dump($a instanceof UndefC);
+var_dump($a is UndefC);
 }

@@ -4,7 +4,7 @@ class A {
   public $a;
   function foo() {
     $this->bar();
-    if ($this instanceof B) {
+    if ($this is B) {
       $this->b = 1;
     }
     $this->a = 1;

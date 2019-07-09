@@ -20,7 +20,7 @@ async function main() {
   $x = await $obj->genthings();
 
   var_dump($obj->get());
-  while ($x instanceof Closure) {
+  while ($x is Closure) {
     $x = $x();
     var_dump($obj->get());
   }

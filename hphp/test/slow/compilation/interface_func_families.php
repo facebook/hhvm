@@ -18,7 +18,7 @@ function x(X $x) : X {
 
 function g(X $x, int $i) {
   $x = x($x);
-  if ($x instanceof I) {
+  if ($x is I) {
     return $x->foo($i);
   }
   return ~42;

@@ -24,11 +24,11 @@ function ifoo(IFoo $x) {
 }
 function main() {
   $arr = array();
-  var_dump($arr instanceof Traversable);
-  var_dump($arr instanceof KeyedTraversable);
-  var_dump($arr instanceof Container);
-  var_dump($arr instanceof KeyedContainer);
-  var_dump($arr instanceof IFoo);
+  var_dump($arr is Traversable);
+  var_dump($arr is KeyedTraversable);
+  var_dump($arr is Container);
+  var_dump($arr is KeyedContainer);
+  var_dump($arr is IFoo);
   trav($arr);
   ktrav($arr);
   cont($arr);

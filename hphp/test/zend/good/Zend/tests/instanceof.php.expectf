@@ -1,2 +1,3 @@
+AUTOLOAD 'B'
 bool(false)
 bool(true)

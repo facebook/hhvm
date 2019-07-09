@@ -30,9 +30,9 @@ try {
 }
 
 $b = new ReflectionMethod($instance, 'method');
-var_dump($b instanceof ReflectionMethod);
+var_dump($b is ReflectionMethod);
 $b = new ReflectionMethod('Foo', 'method');
-var_dump($b instanceof ReflectionMethod);
+var_dump($b is ReflectionMethod);
 
 // Look for method 'method' in class 'Foo'
 var_dump((new ReflectionMethod('Foo', 'method'))->getName());

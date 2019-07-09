@@ -32,5 +32,5 @@ class C {
   $x = (Vector<Vector<int>> $v = Vector {Vector {1, 2}, Vector {3, 4}},
         string $x, (function(int):bool) $f):
          Vector<Vector<int>> ==> $v;
-  var_dump($x instanceof Closure);
+  var_dump($x is Closure);
 }

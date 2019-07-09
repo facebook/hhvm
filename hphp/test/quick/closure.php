@@ -15,7 +15,7 @@ function main() {
     funk($arg, $dv);
   };
 
-  if (!($c instanceof Closure)) {
+  if (!($c is Closure)) {
     echo "Closure isn't instanceof closure!\n";
   }
   if (!is_callable($c)) {

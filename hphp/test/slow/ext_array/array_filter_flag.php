@@ -31,7 +31,7 @@ array_filter($a, $v ==> {
 // --------------------------------
 
 $m = Map {'x' => 10, 'y' => 20};
-var_dump($m instanceof KeyedTraversable);
+var_dump($m is KeyedTraversable);
 
 array_filter($m, ($v, $k) ==> {
   var_dump($k);

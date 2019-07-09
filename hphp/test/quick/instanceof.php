@@ -22,8 +22,8 @@ class Fancy implements Iface {
   $a = new Bob();
 
   // instanceof constant
-  var_dump($a instanceof Bob);
-  var_dump($a instanceof Loblaw);
+  var_dump($a is Bob);
+  var_dump($a is Loblaw);
 
   // instanceof string variable
   $bob = "Bob";
@@ -38,9 +38,9 @@ class Fancy implements Iface {
   var_dump($a instanceof $loblaw);
 
   $b = new Base();
-  var_dump($b instanceof BaseOne);
+  var_dump($b is BaseOne);
 
   // Follow the interface hierarchy up
   $f = new Fancy();
-  var_dump($f instanceof BaseTwo);
+  var_dump($f is BaseTwo);
 }

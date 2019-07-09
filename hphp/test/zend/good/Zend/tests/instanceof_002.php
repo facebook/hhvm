@@ -16,11 +16,11 @@ class bar extends foo implements IFoo {
 
 <<__EntryPoint>>
 function main() {
-  var_dump(new foo instanceof Base);
-  var_dump(new foo instanceof ITest);
-  var_dump(new foo instanceof IFoo);
+  var_dump(new foo is Base);
+  var_dump(new foo is ITest);
+  var_dump(new foo is IFoo);
 
-  var_dump(new bar instanceof Base);
-  var_dump(new bar instanceof ITest);
-  var_dump(new bar instanceof IFoo);
+  var_dump(new bar is Base);
+  var_dump(new bar is ITest);
+  var_dump(new bar is IFoo);
 }

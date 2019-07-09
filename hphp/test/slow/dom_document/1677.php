@@ -13,7 +13,7 @@ function rerender($html, $frag = false) {
     return helper($body);
   }
   function helper($element) {
-    if ($element instanceof DOMText) {
+    if ($element is DOMText) {
       return htmlspecialchars($element->nodeValue);
     }
  else {
@@ -21,7 +21,7 @@ function rerender($html, $frag = false) {
       foreach ($element->childNodes as $child) {
         $body .= helper($child);
       }
-      if ($element instanceof DOMElement) {
+      if ($element is DOMElement) {
         $attrs = array();
         foreach ($element->attributes as $attr) {
           $attrs[] = htmlspecialchars($attr->name) . '="' .             htmlspecialchars($attr->value) . '"';

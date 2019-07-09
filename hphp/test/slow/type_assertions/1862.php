@@ -6,7 +6,7 @@ class X {
     echo 'X';
   }
   function foo() {
-    if ($this instanceof Y) {
+    if ($this is Y) {
       $this->bar();
       $this->baz();
       var_dump($this->propX);
@@ -31,19 +31,19 @@ class A1 {
     return 0;
   }
   function doStuff() {
-    if ($this instanceof D1) {
+    if ($this is D1) {
       var_dump($this->d1prop);
       var_dump($this->d1method());
     }
- else if ($this instanceof C1) {
+ else if ($this is C1) {
       var_dump($this->c1prop);
       var_dump($this->c1method());
     }
- else if ($this instanceof B1) {
+ else if ($this is B1) {
       var_dump($this->b1prop);
       var_dump($this->b1method());
     }
- else if ($this instanceof A1) {
+ else if ($this is A1) {
       var_dump($this->a1prop);
       var_dump($this->a1method());
     }

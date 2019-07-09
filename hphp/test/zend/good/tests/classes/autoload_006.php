@@ -11,7 +11,7 @@ var_dump(class_exists('autoload_implements', false));
 
 $o = new Autoload_Implements;
 var_dump($o);
-var_dump($o instanceof autoload_interface);
+var_dump($o is autoload_interface);
 unset($o);
 
 var_dump(interface_exists('autoload_interface', false));

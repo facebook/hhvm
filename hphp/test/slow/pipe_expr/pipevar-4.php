@@ -5,7 +5,7 @@ class Wrapper {
 }
 
 function beep($x) {
-  if ($x instanceof Wrapper) {
+  if ($x is Wrapper) {
     var_dump("beep: <Wrapper>");
   } else if (is_array($x)) {
     var_dump("beep: <array>");

@@ -7,5 +7,5 @@ function __autoload($name) {
 class A {
 }
 $a = new A;
-var_dump($a instanceof B);
-var_dump($a instanceof A);
+var_dump($a is B);
+var_dump($a is A);

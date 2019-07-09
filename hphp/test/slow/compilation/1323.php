@@ -7,7 +7,7 @@ class Y {
 class X {
   function foo() {
     $x = $this;
-    if ($this instanceof y) {
+    if ($this is y) {
       $this->bar();
     }
     return $x;

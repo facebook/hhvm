@@ -8,7 +8,7 @@ $dom->loadXML('<a><b><c /></b></a>');
 $remove = array();
 foreach ($dom->getElementsByTagName('b') as $data) {
   foreach ($data->childNodes as $element) {
-    if ($element instanceof DOMElement) {
+    if ($element is DOMElement) {
       $remove[] = $element;
     }
   }

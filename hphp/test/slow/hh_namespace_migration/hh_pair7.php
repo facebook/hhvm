@@ -14,7 +14,7 @@ namespace Test {
 
   function foo() {
     $custom_set = new Pair();
-    \var_dump($custom_set instanceof \HH\Pair); // False
+    \var_dump($custom_set is \HH\Pair); // False
   }
 
 }
@@ -23,7 +23,7 @@ namespace {
 
   function bar() {
     $builtin_set = Pair {1, 2};
-    \var_dump($builtin_set instanceof HH\Pair); // True
+    \var_dump($builtin_set is HH\Pair); // True
   }
 
   <<__EntryPoint>> function main(): void {

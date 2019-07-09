@@ -8,7 +8,7 @@ class BasicSingleton
     }
 
     public static function singleton() {
-        if (!(self::$instance instanceof BasicSingleton)) {
+        if (!(self::$instance is BasicSingleton)) {
             $c = __CLASS__;
             self::$instance = new $c;
         }

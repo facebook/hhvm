@@ -14,7 +14,7 @@ class test
 function check_params_decl_func($r, $f)
 {
     $c = $r->$f();
-    echo $f . ': ' . ($c ? ($c instanceof ReflectionMethod ? $c->class . '::' : '') . $c->name : 'NULL') . "()\n";
+    echo $f . ': ' . ($c ? ($c is ReflectionMethod ? $c->class . '::' : '') . $c->name : 'NULL') . "()\n";
 }
 
 function check_params_decl_class($r, $f)
@@ -32,7 +32,7 @@ function check_params_func($r, $f)
 
 function check_params($r)
 {
-    echo "#####" . ($r instanceof ReflectionMethod ? $r->class . '::' : '') . $r->name . "()#####\n";
+    echo "#####" . ($r is ReflectionMethod ? $r->class . '::' : '') . $r->name . "()#####\n";
     $i = 0;
     foreach($r->getParameters() as $p)
     {

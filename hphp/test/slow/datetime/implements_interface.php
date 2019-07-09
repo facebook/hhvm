@@ -1,7 +1,7 @@
 <?hh
 
 function main() {
-  var_dump((new DateTime()) instanceof DateTimeInterface);
+  var_dump((new DateTime()) is DateTimeInterface);
 }
 
 <<__EntryPoint>>

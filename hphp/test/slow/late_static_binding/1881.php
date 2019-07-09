@@ -5,7 +5,7 @@ class A {
  return new static;
  }
   static function g($o) {
- return $o instanceof static;
+ return $o is this;
  }
 }
 class B extends A {

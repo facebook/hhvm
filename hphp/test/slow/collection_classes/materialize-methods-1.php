@@ -28,7 +28,7 @@ function main() {
   };
   foreach ($x as $v) {
     dump_unordered($v->toVector());
-    if (!($v instanceof Set)) {
+    if (!($v is Set)) {
       dump_unordered($v->toMap());
     }
     dump_unordered($v->toSet());

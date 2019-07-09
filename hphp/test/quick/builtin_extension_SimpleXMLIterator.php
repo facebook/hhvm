@@ -18,10 +18,10 @@ function testInitialize() {
 function testMeta() {
   $s = new SimpleXMLIterator(basicXML());
   echo "SimpleXMLIterator is a SimpleXMLElement: ";
-  var_export($s instanceof SimpleXMLElement);echo "\n";
+  var_export($s is SimpleXMLElement);echo "\n";
 
   echo "SimpleXMLIterator is a RecursiveIterator: ";
-  var_export($s instanceof RecursiveIterator);echo "\n";
+  var_export($s is RecursiveIterator);echo "\n";
 }
 
 function testGetBasicProperty() {

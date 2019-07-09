@@ -31,7 +31,7 @@ class ArrayAccessImpl implements ArrayAccess {
   public function offsetExists($index) {
     echo ("EXISTS: $index\n");
     if(isset($this->data[$index])) {
-        if($this->data[$index] instanceof ArrayAccessImpl) {
+        if($this->data[$index] is ArrayAccessImpl) {
             if(count($this->data[$index]->data)>0)                return true;
             else                return false;
         }
@@ -67,7 +67,7 @@ class ArrayAccessImpl2 extends ArrayAccessImpl {
   public function offsetExists($index) {
     echo ("EXISTS2: $index\n");
     if(isset($this->data[$index])) {
-        if($this->data[$index] instanceof ArrayAccessImpl) {
+        if($this->data[$index] is ArrayAccessImpl) {
             if(count($this->data[$index]->data)>0)                return true;
             else                return false;
         }

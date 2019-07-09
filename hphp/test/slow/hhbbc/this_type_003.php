@@ -7,7 +7,7 @@ class X {
   }
   function getY() : Y {
     $n = $this;
-    while (!($n instanceof Y)) $n = $this->getP();
+    while (!($n is Y)) $n = $this->getP();
     return $n;
   }
 }

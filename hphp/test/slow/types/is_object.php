@@ -4,7 +4,7 @@
 function main() {
   $a = unserialize('O:14:"BogusTestClass":0:{}');
   var_dump(is_object($a));
-  var_dump($a instanceof __PHP_Incomplete_Class);
+  var_dump($a is __PHP_Incomplete_Class);
 
   $a = unserialize('O:8:"IGNOREME":0:{}'); // __PHP_Incomplete_Class
   var_dump(is_object($a));

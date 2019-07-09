@@ -51,31 +51,31 @@ function test_is_a($a, $interfaces) {
   var_dump(is_resource($a));
 
   echo "instanceof Traversable: ";
-  var_dump($a instanceof Traversable);
+  var_dump($a is Traversable);
 
   echo "instanceof KeyedTraversable: ";
-  var_dump($a instanceof KeyedTraversable);
+  var_dump($a is KeyedTraversable);
 
   echo "instanceof Container: ";
-  var_dump($a instanceof Container);
+  var_dump($a is Container);
 
   echo "instanceof KeyedContainer: ";
-  var_dump($a instanceof KeyedContainer);
+  var_dump($a is KeyedContainer);
 
   echo "instanceof XHPChild: ";
-  var_dump($a instanceof XHPChild);
+  var_dump($a is XHPChild);
 
   echo "instanceof ArrayAccess: ";
-  var_dump($a instanceof ArrayAccess);
+  var_dump($a is ArrayAccess);
 
   echo "instanceof Vector: ";
-  var_dump($a instanceof Vector);
+  var_dump($a is Vector);
 
   echo "instanceof Map: ";
-  var_dump($a instanceof Map);
+  var_dump($a is Map);
 
   echo "instanceof Foo: ";
-  var_dump($a instanceof Foo);
+  var_dump($a is Foo);
 
   foreach ($interfaces as $i) {
     echo "instanceof (string) " . $i . ": ";

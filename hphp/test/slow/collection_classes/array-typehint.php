@@ -13,20 +13,20 @@ function handler($errno, $errmsg) {
 
 function helper($x) {
   var_dump($x);
-  if ($x instanceof Map) {
+  if ($x is Map) {
     $x['z'] = 4;
     var_dump($x);
-  } else if (is_array($x) || $x instanceof Collection) {
+  } else if (is_array($x) || $x is Collection) {
     $x[] = 4;
     var_dump($x);
   }
 }
 function helper_ref(&$x) {
   var_dump($x);
-  if ($x instanceof Map) {
+  if ($x is Map) {
     $x['z'] = 4;
     var_dump($x);
-  } else if (is_array($x) || $x instanceof Collection) {
+  } else if (is_array($x) || $x is Collection) {
     $x[] = 4;
     var_dump($x);
   }
@@ -55,7 +55,7 @@ function main() {
     for ($i = 1; $i <= 8; ++$i) {
       $fn = 'f' . $i;
       echo "$fn:\n";
-      $x = ($c instanceof Collection) ? clone $c : $c;
+      $x = ($c is Collection) ? clone $c : $c;
       try {
         $i <= 4 ? $fn($x) : $fn(&$x);
       } catch (Exception $e) {

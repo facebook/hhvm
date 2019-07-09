@@ -9,6 +9,6 @@ if (true) {
 class child1 extends base {
 }
 $obj = new child1;
-echo ($obj instanceof Exception) ? "Passed
+echo ($obj is Exception) ? "Passed
 " : "Failed
 ";

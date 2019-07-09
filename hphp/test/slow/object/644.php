@@ -18,8 +18,8 @@ var_dump($obj1);
 var_dump($obj2->a);
 var_dump($obj2);
 var_dump($obj3);
-var_dump($obj1 instanceof A);
-var_dump($obj3 instanceof A);
-var_dump($obj1 instanceof B);
-var_dump($obj3 instanceof B);
+var_dump($obj1 is A);
+var_dump($obj3 is A);
+var_dump($obj1 is B);
+var_dump($obj3 is B);
 }

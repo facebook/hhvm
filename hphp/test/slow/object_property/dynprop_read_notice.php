@@ -39,7 +39,7 @@ function test($thing) {
 
   // TODO: ReflectionClass constructor fatals on instances of
   // __PHP_Incomplete_Class
-  if (!$thing instanceof __PHP_Incomplete_Class) {
+  if (!$thing is __PHP_Incomplete_Class) {
     echo "== ReflectionClass::getProperties ==\n";
     $rc = new ReflectionClass($thing);
     $discard = $rc->getProperties();

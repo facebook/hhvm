@@ -8,5 +8,5 @@ function gen() {
 }
 <<__EntryPoint>> function main(): void {
 $generator = gen();
-var_dump($generator instanceof Generator);
+var_dump($generator is Generator);
 }

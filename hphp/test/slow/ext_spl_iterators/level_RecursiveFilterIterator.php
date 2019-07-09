@@ -4,7 +4,7 @@
 class TestingFilterIterator extends RecursiveFilterIterator {
     public function accept()
     {
-        return !($this->current() instanceof StdClass);
+        return !($this->current() is StdClass);
     }
 }
 

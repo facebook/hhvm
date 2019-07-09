@@ -2,16 +2,16 @@
 
 function instance_of_test(array $x) {
   echo '==================== ', __FUNCTION__,' ====================', "\n";
-  var_dump($x instanceof \HH\Traversable);
-  var_dump($x instanceof Traversable); // autoimported
-  var_dump($x instanceof \HH\Container);
-  var_dump($x instanceof Container);   // autoimported
-  var_dump($x instanceof XHPChild);
-  var_dump($x instanceof Stringish);
-  var_dump($x instanceof \HH\KeyedTraversable);
-  var_dump($x instanceof KeyedTraversable); // autoimported
-  var_dump($x instanceof \HH\KeyedContainer);
-  var_dump($x instanceof KeyedContainer);   // autoimported
+  var_dump($x is \HH\Traversable);
+  var_dump($x is Traversable); // autoimported
+  var_dump($x is \HH\Container);
+  var_dump($x is Container);   // autoimported
+  var_dump($x is XHPChild);
+  var_dump($x is Stringish);
+  var_dump($x is \HH\KeyedTraversable);
+  var_dump($x is KeyedTraversable); // autoimported
+  var_dump($x is \HH\KeyedContainer);
+  var_dump($x is KeyedContainer);   // autoimported
 }
 
 function type_hint_container(\HH\KeyedContainer $x) {
@@ -26,8 +26,8 @@ function type_hint_traversable(\HH\KeyedTraversable $x) {
 
 function type_hint_stringish(Stringish $x) {
   echo '==================== ', __FUNCTION__,' ====================', "\n";
-  var_dump($x instanceof Stringish);
-  var_dump($x instanceof XHPChild);
+  var_dump($x is Stringish);
+  var_dump($x is XHPChild);
   var_dump(is_string($x));
 }
 

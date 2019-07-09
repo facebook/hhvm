@@ -151,8 +151,10 @@ finish_class() {
   cls->allocExtraData();
   assertx(!cls->m_extra->m_nativeDataInfo);
   assertx(!cls->m_extra->m_instanceCtor);
+  assertx(!cls->m_extra->m_instanceCtorUnlocked);
   assertx(!cls->m_extra->m_instanceDtor);
   cls->m_extra.raw()->m_instanceCtor = asioInstanceCtor;
+  cls->m_extra.raw()->m_instanceCtorUnlocked = asioInstanceCtor;
   cls->m_extra.raw()->m_instanceDtor = T::instanceDtor;
   cls->m_release = T::instanceDtor;
 }

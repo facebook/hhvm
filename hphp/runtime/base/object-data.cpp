@@ -878,7 +878,7 @@ ObjectData* ObjectData::clone() {
   Object clone;
   auto const nProps = m_cls->numDeclProperties();
   if (hasNativeData()) {
-    assertx(m_cls->instanceCtor() == Native::nativeDataInstanceCtor);
+    assertx(m_cls->instanceDtor() == Native::nativeDataInstanceDtor);
     clone = Object::attach(
       Native::nativeDataInstanceCopyCtor(this, m_cls, nProps)
     );

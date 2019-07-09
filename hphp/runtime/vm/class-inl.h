@@ -210,8 +210,9 @@ inline bool Class::isBuiltin() const {
   return attrs() & AttrBuiltin;
 }
 
+template <bool Unlocked>
 inline BuiltinCtorFunction Class::instanceCtor() const {
-  return m_extra->m_instanceCtor;
+  return Unlocked ? m_extra->m_instanceCtorUnlocked : m_extra->m_instanceCtor;
 }
 
 inline BuiltinDtorFunction Class::instanceDtor() const {

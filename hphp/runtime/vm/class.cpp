@@ -1576,6 +1576,8 @@ void Class::setParent() {
   if (m_parent.get() && m_parent->m_extra->m_instanceCtor) {
     allocExtraData();
     m_extra.raw()->m_instanceCtor = m_parent->m_extra->m_instanceCtor;
+    m_extra.raw()->m_instanceCtorUnlocked =
+      m_parent->m_extra->m_instanceCtorUnlocked;
     m_extra.raw()->m_instanceDtor = m_parent->m_extra->m_instanceDtor;
     assertx(m_parent->m_release == m_parent->m_extra->m_instanceDtor);
     m_release = m_parent->m_extra->m_instanceDtor;
@@ -3516,7 +3518,9 @@ void Class::setNativeDataInfo() {
     if (auto ndi = cls->preClass()->nativeDataInfo()) {
       allocExtraData();
       m_extra.raw()->m_nativeDataInfo = ndi;
-      m_extra.raw()->m_instanceCtor = Native::nativeDataInstanceCtor;
+      m_extra.raw()->m_instanceCtor = Native::nativeDataInstanceCtor<false>;
+      m_extra.raw()->m_instanceCtorUnlocked =
+        Native::nativeDataInstanceCtor<true>;
       m_extra.raw()->m_instanceDtor = Native::nativeDataInstanceDtor;
       m_release = Native::nativeDataInstanceDtor;
       m_RTAttrs |= ndi->rt_attrs;

@@ -203,7 +203,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   void setWeakRefed() { setAttribute(IsWeakRefed); }
 
  private:
-  template <typename Init>
+  template <bool Unlocked, typename Init>
   static ObjectData* newInstanceImpl(Class*, Init);
 
   void setReifiedGenerics(Class*, ArrayData*);

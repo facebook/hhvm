@@ -103,7 +103,8 @@ void cgConstructInstance(IRLS& env, const IRInstruction* inst) {
   auto const cls = inst->extra<ConstructInstance>()->cls;
 
   auto const args = argGroup(env, inst).immPtr(cls);
-  cgCallHelper(vmain(env), env, CallSpec::direct(cls->instanceCtor().get()),
+  cgCallHelper(vmain(env), env,
+               CallSpec::direct(cls->instanceCtor<true>().get()),
                callDest(dst), SyncOptions::Sync, args);
 }
 

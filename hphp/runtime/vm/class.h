@@ -566,6 +566,7 @@ public:
    *
    * instanceCtor() returns true iff the class is a C++ extension class.
    */
+  template <bool Unlocked = false>
   BuiltinCtorFunction instanceCtor() const;
   BuiltinDtorFunction instanceDtor() const;
 
@@ -1273,6 +1274,7 @@ private:
      * Builtin-specific data.
      */
     BuiltinCtorFunction m_instanceCtor{nullptr};
+    BuiltinCtorFunction m_instanceCtorUnlocked{nullptr};
     BuiltinDtorFunction m_instanceDtor{nullptr};
 
     /*

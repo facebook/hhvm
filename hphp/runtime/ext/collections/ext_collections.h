@@ -92,11 +92,13 @@ struct CollectionsExtension : Extension {
     assertx(cls->isCollectionClass());
     assertx(cls->attrs() & AttrFinal);
     assertx(!cls->getNativeDataInfo());
-    assertx(!cls->instanceCtor());
+    assertx(!cls->instanceCtor<false>());
+    assertx(!cls->instanceCtor<true>());
     assertx(!cls->instanceDtor());
     assertx(!cls->hasMemoSlots());
     cls->allocExtraData();
     cls->m_extra.raw()->m_instanceCtor = T::instanceCtor;
+    cls->m_extra.raw()->m_instanceCtorUnlocked = T::instanceCtor;
     cls->m_extra.raw()->m_instanceDtor = T::instanceDtor;
     cls->m_release = T::instanceDtor;
     cls->initRTAttributes(

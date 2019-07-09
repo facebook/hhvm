@@ -264,6 +264,7 @@ inline const ObjectData* obj(const NativeNode* node) {
   return obj;
 }
 
+template <bool Unlocked>
 ObjectData* nativeDataInstanceCtor(Class* cls);
 ObjectData* nativeDataInstanceCopyCtor(ObjectData *src, Class* cls,
                                        size_t nProps);

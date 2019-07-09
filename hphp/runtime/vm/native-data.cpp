@@ -111,6 +111,7 @@ NativeDataInfo* getNativeDataInfo(const StringData* name) {
  * sizeof(NativeData) (NativeDataInfo.sz) bytes for the custom struct.
  * NativeNode is a link in the NativeData sweep list for this ND block
  */
+template <bool Unlocked>
 ObjectData* nativeDataInstanceCtor(Class* cls) {
   auto const ndi = cls->getNativeDataInfo();
   assertx(ndi);
@@ -124,8 +125,11 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
   node->obj_offset = nativeDataSize;
   assertx(type_scan::isKnownType(ndi->tyindex));
   node->initHeader_32_16(HeaderKind::NativeData, 0, ndi->tyindex);
+  auto const flags = Unlocked
+    ? ObjectData::IsBeingConstructed
+    : ObjectData::NoAttrs;
   auto obj = new (reinterpret_cast<char*>(node) + nativeDataSize)
-    ObjectData(cls, 0, HeaderKind::NativeObject);
+    ObjectData(cls, flags, HeaderKind::NativeObject);
   assertx(obj->hasExactlyOneRef());
 
   if (UNLIKELY(cls->hasMemoSlots())) {
@@ -140,6 +144,9 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
   }
   return obj;
 }
+
+template ObjectData* nativeDataInstanceCtor<false>(Class*);
+template ObjectData* nativeDataInstanceCtor<true>(Class*);
 
 ObjectData* nativeDataInstanceCopyCtor(ObjectData* src, Class* cls,
                                        size_t nProps) {

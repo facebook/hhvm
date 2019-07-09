@@ -208,10 +208,11 @@ void StandardExtension::initClosure() {
   assertx(c_Closure::cls_Closure);
   assertx(!c_Closure::cls_Closure->hasMemoSlots());
   c_Closure::cls_Closure->allocExtraData();
-  c_Closure::cls_Closure->m_extra.raw()->m_instanceCtor =
+  auto& extraData = *c_Closure::cls_Closure->m_extra.raw();
+  extraData.m_instanceCtor = extraData.m_instanceCtorUnlocked =
     RuntimeOption::RepoAuthoritative
       ? closureInstanceCtorRepoAuth : closureInstanceCtor;
-  c_Closure::cls_Closure->m_extra.raw()->m_instanceDtor = closureInstanceDtor;
+  extraData.m_instanceDtor = closureInstanceDtor;
   c_Closure::cls_Closure->m_release = closureInstanceDtor;
 }
 

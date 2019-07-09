@@ -1,0 +1,56 @@
+-- at constructor entry --
+object(C) (4) {
+  ["ci"]=>
+  int(0)
+  ["cv"]=>
+  vec(1) {
+    int(1)
+  }
+  ["i"]=>
+  int(2)
+  ["v"]=>
+  vec(1) {
+    int(3)
+  }
+}
+-- after constructor completes --
+object(C) (4) {
+  ["ci"]=>
+  int(4)
+  ["cv"]=>
+  vec(2) {
+    int(1)
+    int(5)
+  }
+  ["i"]=>
+  int(6)
+  ["v"]=>
+  vec(2) {
+    int(3)
+    int(7)
+  }
+}
+Cannot modify const property ci of class C after construction
+Cannot modify const property cv of class C after construction
+-- test behavior of inherited-from native class --
+string(8) "hi there"
+-- at the end --
+object(C) (5) {
+  ["ci"]=>
+  int(4)
+  ["cv"]=>
+  vec(2) {
+    int(1)
+    int(5)
+  }
+  ["i"]=>
+  int(8)
+  ["v"]=>
+  vec(3) {
+    int(3)
+    int(7)
+    int(9)
+  }
+  ["lol"]=>
+  string(4) "whut"
+}

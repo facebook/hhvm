@@ -56,12 +56,12 @@ inline size_t ObjectData::heapSize() const {
   return sizeForNProps(m_cls->numDeclProperties());
 }
 
-template <typename Init>
+template <bool Unlocked, typename Init>
 ALWAYS_INLINE
 ObjectData* ObjectData::newInstanceImpl(Class* cls, Init objConstruct) {
   if (cls->needInitialization()) cls->initialize();
 
-  if (auto const ctor = cls->instanceCtor()) {
+  if (auto const ctor = cls->instanceCtor<Unlocked>()) {
     auto obj = ctor(cls);
     assertx(obj->checkCount());
     assertx(obj->hasInstanceDtor());
@@ -100,7 +100,7 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
     raise_error("Cannot create a new instance of a reified class without "
                 "the reified generics");
   }
-  auto obj = ObjectData::newInstanceImpl(cls, [&](void* mem) {
+  auto obj = ObjectData::newInstanceImpl<Unlocked>(cls, [&](void* mem) {
     return new (NotNull{}, mem)
       ObjectData(cls, Unlocked ? IsBeingConstructed : NoAttrs);
   });
@@ -127,7 +127,7 @@ inline ObjectData* ObjectData::newInstanceReified(Class* cls,
     assertx(reifiedTypes);
     checkClassReifiedGenericMismatch(cls, reifiedTypes);
   }
-  auto obj = ObjectData::newInstanceImpl(cls, [&](void* mem) {
+  auto obj = ObjectData::newInstanceImpl<Unlocked>(cls, [&](void* mem) {
     return new (NotNull{}, mem)
       ObjectData(cls, Unlocked ? IsBeingConstructed : NoAttrs);
   });
@@ -149,7 +149,7 @@ inline ObjectData* ObjectData::newInstanceReified(Class* cls,
 inline ObjectData* ObjectData::newInstanceNoPropInit(Class* cls) {
   assertx(!(cls->attrs() &
             (AttrAbstract | AttrInterface | AttrTrait | AttrEnum)));
-  return ObjectData::newInstanceImpl(cls, [&](void* mem) {
+  return ObjectData::newInstanceImpl<false>(cls, [&](void* mem) {
     return new (NotNull{}, mem) ObjectData(cls, InitRaw{}, ObjectData::NoAttrs);
   });
 }

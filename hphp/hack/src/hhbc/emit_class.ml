@@ -95,21 +95,20 @@ let from_extends ~namespace ~is_enum _tparams extends =
 let from_implements ~namespace implements =
   List.map implements (Emit_type_hint.hint_to_class ~namespace)
 
-let from_constant env (_hint, name, const_init) =
-  (* The type hint is omitted. *)
-  let constant_name = snd name in
-  match const_init with
-  | None -> Hhas_constant.make constant_name None None
-  | Some init ->
-    let constant_value, initializer_instrs =
+let from_constant env visibility (_, name) expr =
+  let value, init_instrs =
+    match expr with
+    | None -> None, None
+    | Some init ->
       match Ast_constant_folder.expr_to_opt_typed_value
         (Emit_env.get_namespace env) init with
       | Some v ->
         Some v, None
       | None ->
         Some Typed_value.Uninit,
-        Some (Emit_expression.emit_expr env init) in
-    Hhas_constant.make constant_name constant_value initializer_instrs
+        Some (Emit_expression.emit_expr env init)
+  in
+  Hhas_constant.make name value visibility init_instrs
 
 let from_type_constant namespace tc =
   let type_constant_name = snd tc.A.c_tconst_name in
@@ -150,10 +149,12 @@ let from_class_elt_classvars
 
 let from_class_elt_constants env class_ =
   let map_aux (c : A.class_const) =
-    let h = c.A.cc_type in
-    let name = c.A.cc_id in
-    let e = c.A.cc_expr in
-    from_constant env (h, name, e) in
+    from_constant
+      env
+      c.A.cc_visibility
+      c.A.cc_id
+      c.A.cc_expr
+  in
   List.map ~f:map_aux class_.A.c_consts
 
 let from_class_elt_requirements class_ =

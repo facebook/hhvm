@@ -5,6 +5,6 @@ Linearization for class \A:
 Linearization for class \T:
 [\T(copy_private_members), \A<mixed>(requirement), \I<mixed>(synthesized, consts_only)]
 Linearization for class \B:
-[\B, \T(copy_private_members), \A<int>, \I<int>(consts_only), \A<mixed>(requirement), \I<mixed>(synthesized, consts_only)]
+[\B, \T(copy_private_members), \A<int>, \I<int>(consts_only), \A<mixed>(requirement)]
 Linearization for class \C:
-[\C, \B, \T, \A<int>, \I<int>(consts_only), \A<mixed>(requirement), \I<mixed>(synthesized, consts_only)]
+[\C, \B, \T, \A<int>, \I<int>(consts_only)]

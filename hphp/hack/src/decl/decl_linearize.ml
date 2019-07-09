@@ -202,6 +202,22 @@ let rec ancestor_linearization
         mro_required_at = Option.map c.mro_required_at ~f:(fun _ -> use_pos);
       }
     end in
+    let rest =
+      (* Don't aggregate requirements applied to ancestors. We have already
+         verified that the ancestor extends and implements the required classes
+         and interfaces, so there is no need to do so for the child. *)
+      let ancestor_checks_requirements =
+        Shallow_classes_heap.get class_name
+        |> Option.value_map ~default:false ~f:begin fun c ->
+          match c.sc_kind with
+          | Ast_defs.(Cnormal | Cabstract) -> true
+          | Ast_defs.(Ctrait | Cinterface | Cenum | Crecord) -> false
+        end
+      in
+      if not ancestor_checks_requirements
+      then rest
+      else Sequence.map rest ~f:(fun mro -> { mro with mro_required_at = None })
+    in
     class_name, Sequence.append (Sequence.singleton c) rest
 
 (* Linearize a class declaration given its shallow declaration *)
@@ -264,20 +280,18 @@ and linearize (env : env) (c : shallow_class) : linearization =
         traits c;
       ]
   in
-  let child_class_abstract =
-    Shallow_classes_heap.get mro_name |>
-    Option.value_map ~default:false ~f:(fun sc -> sc.sc_kind = Ast_defs.Cabstract) in
   Sequence.unfold_step
     ~init:(Child child, ancestors, [], [])
-    ~f:(next_state env mro_name child_class_abstract)
+    ~f:(next_state env mro_name c.sc_kind)
   |> Sequence.memoize
 
 and next_state
     (env : env)
     (class_name : string)
-    (child_class_abstract: bool)
+    (child_class_kind: Ast_defs.class_kind)
     (state, ancestors, acc, synths) =
   let open Sequence.Step in
+  let child_class_abstract = child_class_kind = Ast_defs.Cabstract in
   match state, ancestors with
   | Child child, _ -> Yield (child, (Next_ancestor, ancestors, child::acc, synths))
   | Next_ancestor, ancestor::ancestors ->
@@ -327,9 +341,18 @@ and next_state
           if next.mro_synthesized
           then
             let synths =
-              if List.exists synths ~f:(mro_elements_equal next)
-              then synths
-              else next::synths
+              match next.mro_required_at, child_class_kind with
+              (* Always aggregate synthesized ancestors for traits and
+                 interfaces (necessary for typechecking) *)
+              | _, Ast_defs.(Ctrait | Cinterface)
+              (* Otherwise, keep them only if they represent a requirement that
+                 we will need to validate later. *)
+              | Some _, Ast_defs.(Cnormal | Cabstract | Cenum | Crecord) ->
+                if List.exists synths ~f:(mro_elements_equal next)
+                then synths
+                else next::synths
+              | None, _ ->
+                synths
             in
             None, synths
           else

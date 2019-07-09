@@ -1345,11 +1345,14 @@ private:
     std::atomic<Attr> m_attrs;
   };
 
+public:
 #ifdef USE_LOWPTR
   using low_storage_t = uint32_t;
 #else
   using low_storage_t = uintptr_t;
 #endif
+
+private:
   /*
    * Lowptr wrapper around std::atomic<Union> for Class* or StringData*
    */

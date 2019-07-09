@@ -204,7 +204,7 @@ void cgLdMethCallerName(IRLS& env, const IRInstruction* inst) {
   auto const off = isCls ?
     Func::methCallerClsNameOff() : Func::methCallerMethNameOff();
   auto const tmp = v.makeReg();
-  v << loadzlq{func[off], tmp};
+  emitLdLowPtr(v, func[off], tmp, sizeof(Func::low_storage_t));
   v << decq{tmp, dst, v.makeReg()};
 }
 

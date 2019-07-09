@@ -77,12 +77,12 @@ module Done_or_retry = struct
    * (the reason for retrying is a one time event that is resolved during first call).
    * If this ends up throwing, it's a bug in hh_server. *)
   let rec call ~(f:unit -> 'a t Lwt.t) ~(depth:int) : 'a Lwt.t =
-    let%lwt () =
-      if depth = 2
-      then Lwt.fail Two_retries_in_a_row
-      else Lwt.return_unit
-    in
-    match%lwt f () with
+    let open Lwt.Infix in
+    (if depth = 2
+    then Lwt.fail Two_retries_in_a_row
+    else Lwt.return_unit) >>= fun () ->
+    f () >>= fun result ->
+    match result with
     | Done x -> Lwt.return x
     | Retry -> call ~f ~depth:(depth+1)
 
@@ -187,10 +187,12 @@ end
 type file_input =
   | FileName of string
   | FileContent of string
+  [@@deriving show]
 
 type labelled_file =
   | LabelledFileName of string
   | LabelledFileContent of { filename: string; content: string }
+  [@@deriving show]
 
 type lint_stdin_input = { filename: string; contents: string }
 

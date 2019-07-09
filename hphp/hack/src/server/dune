@@ -90,8 +90,7 @@
     symbol
     typing_defs
     utils_lint)
-  (preprocess
-    (pps lwt_ppx)))
+    )
 
 (library
   (name server_client_provider)

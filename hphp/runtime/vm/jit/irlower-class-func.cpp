@@ -190,8 +190,7 @@ void cgLdFuncName(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const func = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
-
-  v << loadzlq{func[Func::nameOff()], dst};
+  emitLdLowPtr(v, func[Func::nameOff()], dst, sizeof(LowStringPtr));
 }
 
 void cgLdMethCallerName(IRLS& env, const IRInstruction* inst) {

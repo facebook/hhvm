@@ -139,6 +139,16 @@ let no_trait_reuse_enabled env =
     env.decl_env.Decl_env.decl_tcopt
     TypecheckerOptions.experimental_no_trait_reuse
 
+let is_requirement (source : source_type) =
+  match source with
+  | ReqImpl | ReqExtends -> true
+  | Child | Parent | Trait | XHPAttr | Interface -> false
+
+let is_interface (source : source_type) =
+  match source with
+  | Interface | ReqImpl -> true
+  | Child | Parent | Trait | XHPAttr | ReqExtends -> false
+
 let rec ancestor_linearization
     (env : env)
     (child_class_abstract : bool)
@@ -148,27 +158,13 @@ let rec ancestor_linearization
   Decl_env.add_extends_dependency env.decl_env class_name;
   let lin = get_linearization env class_name in
   let lin = Sequence.map lin ~f:begin fun c ->
-    let is_synthesized = function
-      | ReqImpl | ReqExtends -> true
-      | Child | Parent | Trait | XHPAttr | Interface -> false
-    in
-    let is_interface = function
-      | Interface | ReqImpl -> true
-      | Child | Parent | Trait | XHPAttr | ReqExtends -> false
-    in
-    let mro_required_at =
-      if is_synthesized source
-      then Some use_pos
-      else Option.map c.mro_required_at ~f:(fun _ -> use_pos)
-    in
-    let mro_synthesized = c.mro_synthesized || is_synthesized source in
+    let mro_synthesized = c.mro_synthesized || is_requirement source in
     let mro_xhp_attrs_only = c.mro_xhp_attrs_only || source = XHPAttr in
     let mro_consts_only = c.mro_consts_only || is_interface source in
     let mro_copy_private_members = c.mro_copy_private_members && source = Trait in
     let mro_passthrough_abstract_typeconst = c.mro_passthrough_abstract_typeconst &&
       child_class_abstract in
     { c with
-      mro_required_at;
       mro_trait_reuse = Option.map c.mro_trait_reuse ~f:(Fn.const class_name);
       mro_synthesized;
       mro_xhp_attrs_only;
@@ -180,22 +176,30 @@ let rec ancestor_linearization
   match Sequence.next lin with
   | None -> class_name, Sequence.empty
   | Some (c, rest) ->
-    (* Fill in the type arguments applied to the ancestor and the position where
-       it was included into the linearization of the child class. *)
     let c = { c with
+      (* Fill in the type arguments applied to the ancestor and the position
+         where it was included into the linearization of the child class. *)
       mro_type_args = type_args;
       mro_use_pos = use_pos;
       mro_ty_pos = ty_pos;
+      (* If this is the mro_element representing an ancestor which directly
+         appeared in a require extends clause, tag it as a requirement. *)
+      mro_required_at = if is_requirement source then Some use_pos else None;
     } in
-    (* Instantiate its linearization with those type arguments. *)
     let tparams =
       Shallow_classes_heap.get class_name
       |> Option.value_map ~default:[] ~f:(fun c -> c.sc_tparams)
     in
     let subst = Decl_subst.make tparams type_args in
     let rest = Sequence.map rest ~f:begin fun c ->
-      { c with mro_type_args =
-        List.map c.mro_type_args ~f:(Decl_instantiate.instantiate subst)
+      { c with
+        (* Instantiate the remainder of this ancestor's linearization with the
+           type arguments applied to it. *)
+        mro_type_args =
+          List.map c.mro_type_args ~f:(Decl_instantiate.instantiate subst);
+        (* Update positions of requirements in the remainder of the
+           linearization to reflect their immediate provenance as well. *)
+        mro_required_at = Option.map c.mro_required_at ~f:(fun _ -> use_pos);
       }
     end in
     class_name, Sequence.append (Sequence.singleton c) rest

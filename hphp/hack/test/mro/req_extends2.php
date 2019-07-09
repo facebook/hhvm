@@ -1,6 +1,10 @@
 <?hh // strict
 
-class A<+T> {
+interface I<+T> {
+  public function get(): T;
+}
+
+class A<+T> implements I<T> {
   public function get(): T {
     // UNSAFE
   }

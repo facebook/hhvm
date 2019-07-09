@@ -1210,7 +1210,9 @@ let handle_mode
           let targs = if targs = [] then "" else "<"^(String.concat ~sep:"," targs)^">" in
           let open Decl_defs in
           let modifiers =
-            [ if mro.mro_synthesized    then Some "synthesized"    else None
+            [ if Option.is_some mro.mro_required_at
+              then Some "requirement"
+              else if mro.mro_synthesized then Some "synthesized" else None
             ; if mro.mro_xhp_attrs_only then Some "xhp_attrs_only" else None
             ; if mro.mro_consts_only    then Some "consts_only"    else None
             ; if mro.mro_copy_private_members then Some "copy_private_members" else None

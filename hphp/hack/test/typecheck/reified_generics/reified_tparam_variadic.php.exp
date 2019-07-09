@@ -1,8 +1,1 @@
-File "reified_tparam_variadic.php", line 4, characters 10-10:
-A function or method that has a reified type parameter cannot take reified arguments (Typing[4309])
-File "reified_tparam_variadic.php", line 5, characters 10-10:
-A function or method that has a reified type parameter cannot take reified arguments (Typing[4309])
-File "reified_tparam_variadic.php", line 8, characters 19-19:
-A function or method that has a reified type parameter cannot take reified arguments (Typing[4309])
-File "reified_tparam_variadic.php", line 9, characters 19-19:
-A function or method that has a reified type parameter cannot take reified arguments (Typing[4309])
+No errors

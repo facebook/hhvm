@@ -561,7 +561,7 @@ module Typing                               = struct
   | MethodVariance
   | MissingXhpRequiredAttr
   | BadXhpAttrRequiredOverride
-  | ReifiedTparamVariadic
+  | ReifiedTparamVariadicDEPRECATED
   | UnresolvedTypeVariable
   | InvalidSubString
   | InvalidArrayKeyConstraint

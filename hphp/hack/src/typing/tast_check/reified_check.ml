@@ -192,16 +192,4 @@ let handler = object
       | _ -> () end
     | None -> ()
 
-  method! at_fun_ _ { f_name = (pos, _); f_tparams; f_variadic; _ } =
-    if List.exists f_tparams ~f:(fun tparam -> tparam.tp_reified <> Erased) &&
-       f_variadic <> FVnonVariadic
-    then Errors.reified_tparam_variadic pos
-
-  method! at_method_ _ { m_name = (pos, _); m_tparams; m_variadic; _ } =
-    if List.exists m_tparams ~f:(fun tparam -> tparam.tp_reified <> Erased) &&
-       m_variadic <> FVnonVariadic
-    then Errors.reified_tparam_variadic pos
-
-
-
 end

@@ -407,7 +407,7 @@ module Typing                               = struct
   | InstanceofAlwaysFalseDEPRECATED
   | InstanceofAlwaysTrueDEPRECATED
   | AmbiguousMember
-  | InstanceofGenericClassname
+  | InstanceofGenericClassnameDEPRECATED
   | RequiredFieldIsOptional
   | FinalProperty
   | ArrayGetWithOptionalField

@@ -155,9 +155,6 @@ type t = {
   *)
  tco_disallow_invalid_arraykey : bool;
 
- (* Turn off type refinement via the `instanceof` operator. *)
- tco_disable_instanceof_refinement : bool;
-
  (*
   * Produces an error if an arguments is passed by reference to dynamically
   * called function [e.g. $foo(&$bar)].
@@ -269,7 +266,6 @@ val make :
   ?tco_new_inference_lambda: bool ->
   ?tco_timeout: int ->
   ?tco_disallow_invalid_arraykey: bool ->
-  ?tco_disable_instanceof_refinement: bool ->
   ?tco_disallow_byref_dynamic_calls: bool ->
   ?po_disable_instanceof: bool ->
   ?ignored_fixme_codes: ISet.t ->
@@ -323,7 +319,6 @@ val tco_disallow_stringish_magic : t -> bool
 val tco_new_inference_lambda : t -> bool
 val tco_timeout : t -> int
 val tco_disallow_invalid_arraykey : t -> bool
-val tco_disable_instanceof_refinement : t -> bool
 val tco_disallow_byref_dynamic_calls : t -> bool
 val po_disable_instanceof : t -> bool
 val default : t

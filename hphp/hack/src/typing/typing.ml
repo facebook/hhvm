@@ -39,7 +39,6 @@ module Subst        = Decl_subst
 module ExprDepTy    = Typing_dependent_type.ExprDepTy
 module TCO          = TypecheckerOptions
 module EnvFromDef   = Typing_env_from_def.EnvFromDef(Nast.Annotations)
-module TySet        = Typing_set
 module C            = Typing_continuations
 module CMap         = C.Map
 module Try          = Typing_try
@@ -5790,9 +5789,6 @@ and condition_isset env = function
 and condition ?lhs_of_null_coalesce env tparamet
     ((p, ty as pty), e as te: Tast.expr) =
   let condition = condition ?lhs_of_null_coalesce in
-  let enable_instanceof_refinement =
-    not (TypecheckerOptions.disable_instanceof_refinement (Env.get_tcopt env))
-  in
   match e with
   | T.True
   | T.Expr_list [] when not tparamet ->
@@ -5876,87 +5872,6 @@ and condition ?lhs_of_null_coalesce env tparamet
       key_exists env p shape field
   | T.Unop (Ast.Unot, e) ->
       condition env (not tparamet) e
-  | T.InstanceOf (ivar, (_, cid))
-    when enable_instanceof_refinement && tparamet && is_instance_var (T.to_nast_expr ivar) ->
-      let ivar = T.to_nast_expr ivar in
-      (* Check the expession and determine its static type *)
-      let env, _te, x_ty = raw_expr env ivar in
-
-      (* What is the local variable bound to the expression? *)
-      let env, ((ivar_pos, _) as ivar) = get_instance_var env ivar in
-
-      (* The position p here is not really correct... it's the position
-       * of the instanceof expression, not the class id. But we don't store
-       * position data for the latter. *)
-      let env, _te, obj_ty = static_class_id ~check_constraints:false p env []
-        (T.to_nast_class_id_ cid) in
-
-      let safe_instanceof_enabled =
-        TypecheckerOptions.experimental_feature_enabled
-          (Env.get_tcopt env) TypecheckerOptions.experimental_instanceof in
-      let rec resolve_obj env obj_ty =
-        (* Expand so that we don't modify x. Also, solve under new-inference
-         * if it's a type variable *)
-        let env, obj_ty = SubType.expand_type_and_solve
-          ~description_of_expected:"a value" env ivar_pos obj_ty in
-        match obj_ty with
-        (* If it's a generic that's expression dependent, we need to
-          look at all of its upper bounds and create an unresolved type to
-          represent all of the possible types.
-        *)
-        | r, Tabstract (AKgeneric s, _) when AbstractKind.is_generic_dep_ty s ->
-          let upper_bounds = TySet.elements (Env.get_upper_bounds env s) in
-          let env, tyl = List.map_env env upper_bounds resolve_obj in
-          env, (r, Tunion tyl)
-        | _, Tabstract (AKgeneric name, _) ->
-          if safe_instanceof_enabled
-          then Errors.instanceof_generic_classname p name;
-          env, obj_ty
-        | _, Tabstract (AKdependent (`this), Some (_, Tclass _)) ->
-          env, obj_ty
-        | _, Tabstract ((AKdependent _ | AKnewtype _), Some ty) ->
-          resolve_obj env ty
-        | _, Tclass ((_, cid as _c), _, tyl) ->
-          begin match Env.get_class env cid with
-            (* Why would this happen? *)
-            | None ->
-              env, (Reason.Rwitness ivar_pos, Tobject)
-
-            | Some class_info ->
-              if SubType.is_sub_type_LEGACY_DEPRECATED env x_ty obj_ty
-              then
-                (* If the right side of the `instanceof` object is
-                 * a super type of what we already knew. In this case,
-                 * since we already have a more specialized object, we
-                 * don't touch the original object. Check out the unit
-                 * test srecko.php if this is unclear.
-                 *
-                 * Note that if x_ty is Typing_utils.tany env, no amount of subtype
-                 * checking will be able to specify it
-                 * further. This is arguably desirable to maintain
-                 * the invariant that removing annotations gets rid
-                 * of typing errors in partial mode (See also
-                 * t3216948).  *)
-                env, x_ty
-              else
-              if tyl = [] || safe_instanceof_enabled
-              then safe_instanceof env p _c class_info ivar_pos x_ty obj_ty
-              else env, obj_ty
-          end
-        | r, Tunion tyl ->
-          let env, tyl = List.map_env env tyl resolve_obj in
-          env, (r, Tunion tyl)
-        | r, Tintersection tyl ->
-          let env, tyl = List.map_env env tyl resolve_obj in
-          Inter.intersect_list env r tyl
-        | _, (Terr | Tany | Tnonnull| Tarraykind _ | Tprim _ | Tvar _
-            | Tfun _ | Tabstract ((AKenum _ | AKnewtype _ | AKdependent _), _)
-            | Ttuple _ | Tanon (_, _) | Toption _ | Tobject | Tshape _
-            | Tdynamic) ->
-          env, (Reason.Rwitness ivar_pos, Tobject)
-      in
-      let env, x_ty = resolve_obj env obj_ty in
-      set_local env ivar x_ty
   | T.Is (ivar, h) when is_instance_var (T.to_nast_expr ivar) ->
     let ety_env = { (Phase.env_with_self env) with from_class = Some CIstatic; } in
     let env, hint_ty = Phase.localize_hint ~ety_env env h in
@@ -5981,7 +5896,7 @@ and class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
     begin match Env.get_class env cid with
       | Some class_info ->
         let env, tparams_with_new_names, tyl_fresh =
-          isexpr_generate_fresh_tparams env class_info reason tyl in
+          generate_fresh_tparams env class_info reason tyl in
         safely_refine_class_type
           env p _c class_info ivar_ty hint_ty reason tparams_with_new_names
           tyl_fresh
@@ -5998,40 +5913,13 @@ and class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
   | _, (Tany | Tprim _ | Toption _ | Ttuple _ | Tnonnull
         | Tshape _ | Tvar _ | Tabstract _ | Tarraykind _ | Tanon _
         | Tunion _ | Tintersection _ | Tobject | Terr | Tfun _  | Tdynamic) ->
-    (* TODO(kunalm) Implement for each type *)
     env, hint_ty
-
-and safe_instanceof env p class_name class_info ivar_pos ivar_ty obj_ty =
-  (* Generate fresh names consisting of formal type parameter name
-   * with unique suffix *)
-  let env, (tparams_with_new_names : (decl tparam * string) option list) =
-    List.map_env env (Cls.tparams class_info)
-      (fun env ({tp_name = (_, name); tp_reified = reified; tp_user_attributes; _ } as tp) ->
-        let enforceable = Attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes in
-        let newable = Attributes.mem SN.UserAttributes.uaNewable tp_user_attributes in
-        let env, name = Env.add_fresh_generic_parameter env name ~reified ~enforceable ~newable in
-        env, Some (tp, name)) in
-  let new_names = List.map
-    ~f:(fun x -> snd @@ Option.value_exn x)
-    tparams_with_new_names in
-  let s =
-      snd class_name ^ "<" ^
-      String.concat ~sep:"," new_names
-      ^ ">" in
-  let reason = Reason.Rinstanceof (ivar_pos, s) in
-  let tyl_fresh = List.map
-      ~f:(fun new_name -> (reason, Tabstract (AKgeneric new_name, None)))
-      new_names in
-  let env, obj_ty =
-    safely_refine_class_type
-      env p class_name class_info ivar_ty obj_ty reason tparams_with_new_names tyl_fresh in
-  env, obj_ty
 
 (** If we are dealing with a refinement like
       $x is MyClass<A, B>
     then class_info is the class info of MyClass and hint_tyl corresponds
     to A, B. *)
-and isexpr_generate_fresh_tparams env class_info reason hint_tyl =
+and generate_fresh_tparams env class_info reason hint_tyl =
   let tparams_len = List.length (Cls.tparams class_info) in
   let hint_tyl = List.take hint_tyl tparams_len in
   let pad_len = tparams_len - (List.length hint_tyl) in

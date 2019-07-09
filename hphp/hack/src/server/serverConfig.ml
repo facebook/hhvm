@@ -284,7 +284,6 @@ let load config_filename options =
     ?tco_new_inference_lambda:(bool_opt "new_inference_lambda" config)
     ?tco_timeout:(int_opt "timeout" config)
     ?tco_disallow_invalid_arraykey:(bool_opt "disallow_invalid_arraykey" config)
-    ?tco_disable_instanceof_refinement:(bool_opt "disable_instanceof_refinement" config)
     ?tco_disallow_byref_dynamic_calls:(bool_opt "disallow_byref_dynamic_calls" config)
     ?po_disable_instanceof:(bool_opt "disable_instanceof" config)
     ?po_disable_lval_as_an_expression:(bool_opt "disable_lval_as_an_expression" config)

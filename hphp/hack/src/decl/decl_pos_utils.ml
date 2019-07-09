@@ -85,7 +85,6 @@ let rec reason = function
   | Rused_as_map p           -> Rused_as_map (pos p)
   | Rused_as_shape p         -> Rused_as_shape (pos p)
   | Rpredicated (p, f)       -> Rpredicated (pos p, f)
-  | Rinstanceof (p, f)       -> Rinstanceof (pos p, f)
   | Ris p                    -> Ris (pos p)
   | Ras p                    -> Ras (pos p)
   | Rfinal_property p        -> Rfinal_property (pos p)

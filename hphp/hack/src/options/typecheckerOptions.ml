@@ -22,7 +22,6 @@ let migration_flag_enabled =
   GlobalOptions.tco_migration_flag_enabled
 let log_inference_constraints = GlobalOptions.tco_log_inference_constraints
 let default = GlobalOptions.default
-let experimental_instanceof = GlobalOptions.tco_experimental_instanceof
 let experimental_isarray = GlobalOptions.tco_experimental_isarray
 let experimental_goto = GlobalOptions.tco_experimental_goto
 let experimental_disable_shape_and_tuple_arrays =
@@ -70,7 +69,6 @@ let disallow_stringish_magic = GlobalOptions.tco_disallow_stringish_magic
 let new_inference_lambda = GlobalOptions.tco_new_inference_lambda
 let timeout = GlobalOptions.tco_timeout
 let disallow_invalid_arraykey = GlobalOptions.tco_disallow_invalid_arraykey
-let disable_instanceof_refinement = GlobalOptions.tco_disable_instanceof_refinement
 let disallow_byref_dynamic_calls = GlobalOptions.tco_disallow_byref_dynamic_calls
 let log_levels = GlobalOptions.log_levels
 let typecheck_xhp_cvars = GlobalOptions.tco_typecheck_xhp_cvars

@@ -362,7 +362,6 @@ val reference_expr : Pos.t -> unit
 val unification_cycle : Pos.t -> string -> unit
 val eq_incompatible_types : Pos.t -> (Pos.t * string) list -> (Pos.t * string) list -> unit
 val comparison_invalid_types : Pos.t -> (Pos.t * string) list -> (Pos.t * string) list -> unit
-val instanceof_generic_classname : Pos.t -> string -> unit
 val final_property : Pos.t -> unit
 val pass_by_ref_annotation_missing : Pos.t -> Pos.t -> unit
 val reffiness_invariant : Pos.t -> Pos.t -> [< `normal | `inout] -> unit

@@ -595,7 +595,7 @@ final class C extends Base {}
 function bounded_generic_fun<T as Base>(T $x): void {
   $x;
 //^5:3
-  if ($x instanceof C) {
+  if ($x is C) {
 //    ^7:7
     $x;
 //  ^9:5
@@ -617,12 +617,12 @@ let bounded_generic_fun_cases = [
     pos = pos_at (7, 7) (7, 8);
   }];
   ("bounded_generic_fun.php", 9, 5), [{
-    snippet = "C";
+    snippet = "(T & C)\nwhere T as Base";
     addendum = [];
     pos = pos_at (9, 5) (9, 6);
   }];
   ("bounded_generic_fun.php", 12, 3), [{
-    snippet = "(T | C)\nwhere T as Base";
+    snippet = "T\nwhere T as Base";
     addendum = [];
     pos = pos_at (12, 3) (12, 4);
   }];

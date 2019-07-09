@@ -2736,12 +2736,6 @@ let abstract_concrete_override pos parent_pos kind =
     parent_pos, "Previously defined here"
   ])
 
-let instanceof_generic_classname pos name =
-  add (Typing.err_code Typing.InstanceofGenericClassname) pos
-    ("'instanceof' cannot be used on 'classname<" ^ name ^ ">' because '" ^
-    name ^ "' may be instantiated with a type such as \
-     'C<int>' that cannot be checked at runtime")
-
 let required_field_is_optional pos1 pos2 name =
   add_list (Typing.err_code Typing.RequiredFieldIsOptional)
     [

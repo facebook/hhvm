@@ -76,7 +76,6 @@ type t =
   | Rused_as_map     of Pos.t
   | Rused_as_shape   of Pos.t
   | Rpredicated      of Pos.t * string
-  | Rinstanceof      of Pos.t * string
   | Ris              of Pos.t
   | Ras              of Pos.t
   | Rfinal_property  of Pos.t
@@ -280,8 +279,6 @@ let rec to_string prefix r =
       [(p, prefix ^ " because it is used as shape-like array here")]
   | Rpredicated (p, f) ->
       [(p, prefix ^ " from the argument to this "^ f ^" test")]
-  | Rinstanceof (p,s) ->
-      [(p, prefix ^ " from this instanceof test matching " ^ s)]
   | Ris p ->
     [(p, prefix ^ " from this is expression test")]
   | Ras p ->
@@ -392,7 +389,6 @@ and to_pos = function
   | Rused_as_map p -> p
   | Rused_as_shape p -> p
   | Rpredicated (p, _) -> p
-  | Rinstanceof (p, _) -> p
   | Ris p -> p
   | Ras p -> p
   | Rvarray_or_darray_key p
@@ -508,7 +504,6 @@ match r with
   | Rused_as_map _ -> "Rused_as_map"
   | Rused_as_shape _ -> "Rused_as_shape"
   | Rpredicated _ -> "Rpredicated"
-  | Rinstanceof _ -> "Rinstanceof"
   | Ris _ -> "Ris"
   | Ras _ -> "Ras"
   | Rfinal_property _ -> "Rfinal_property"

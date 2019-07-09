@@ -867,10 +867,16 @@ let save_incremental naming_table db_name =
 
 
 let from_saved saved =
-  Unbacked (Relative_path.Map.fold saved ~init:Relative_path.Map.empty ~f:(fun fn saved acc ->
-    let file_info = FileInfo.from_saved fn saved in
-    Relative_path.Map.add acc fn file_info
-  ))
+  Hh_logger.log "Loading naming table from marshalled blob...";
+  let t = Unix.gettimeofday () in
+  let naming_table =
+    Unbacked (Relative_path.Map.fold saved ~init:Relative_path.Map.empty ~f:(fun fn saved acc ->
+      let file_info = FileInfo.from_saved fn saved in
+      Relative_path.Map.add acc fn file_info
+    ))
+  in
+  let _t = Hh_logger.log_duration "Loaded naming table from blob" t in
+  naming_table
 
 let to_saved a =
   match a with
@@ -1215,8 +1221,11 @@ let create a =
   Unbacked a
 
 let load_from_sqlite ~update_reverse_entries db_path =
+  Hh_logger.log "Loading naming table from SQLite...";
+  let t = Unix.gettimeofday () in
   Sqlite.set_db_path db_path;
   let local_changes = Sqlite.get_local_changes () in
+  let t = Hh_logger.log_duration "Loaded local naming table changes" t in
   if update_reverse_entries then begin
     Relative_path.Map.iter local_changes ~f:begin fun path delta ->
       begin match Sqlite.get_file_info path with
@@ -1235,7 +1244,9 @@ let load_from_sqlite ~update_reverse_entries db_path =
         List.iter (fun (pos, name) -> Consts.add name pos) fi.FileInfo.consts;
       | Deleted -> ()
       end
-    end
+    end;
+    let _t = Hh_logger.log_duration "Updated reverse naming table entries" t in
+    ()
   end;
   Backed local_changes
 

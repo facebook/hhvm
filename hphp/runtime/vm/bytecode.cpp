@@ -5978,9 +5978,8 @@ OPTBLD_INLINE void iopCreateCl(uint32_t numArgs, uint32_t clsIx) {
 
   auto const cls = c->rescope(const_cast<Class*>(func->cls()));
   assertx(!cls->needInitialization());
-  auto const ctor = cls->instanceCtor();
-  assertx(ctor);
-  auto obj = ctor(cls);
+  auto obj = RuntimeOption::RepoAuthoritative
+    ? createClosureRepoAuth(cls) : createClosure(cls);
   c_Closure::fromObject(obj)->init(numArgs, vmfp(), vmStack().top());
   vmStack().ndiscard(numArgs);
   vmStack().pushObjectNoRc(obj);

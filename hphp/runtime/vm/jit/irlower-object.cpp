@@ -113,7 +113,9 @@ void cgConstructClosure(IRLS& env, const IRInstruction* inst) {
   auto const cls = inst->extra<ConstructClosure>()->cls;
 
   auto const args = argGroup(env, inst).immPtr(cls);
-  cgCallHelper(vmain(env), env, CallSpec::direct(cls->instanceCtor().get()),
+  cgCallHelper(vmain(env), env,
+               CallSpec::direct(RuntimeOption::RepoAuthoritative
+                 ? createClosureRepoAuth : createClosure),
                callDest(dst), SyncOptions::None, args);
 }
 

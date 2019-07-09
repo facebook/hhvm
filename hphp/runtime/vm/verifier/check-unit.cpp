@@ -209,6 +209,7 @@ bool UnitChecker::checkClosure(const PreClassEmitter* cls){
    - Classish cannot be both final and sealed
 */
 const StaticString s___Sealed("__Sealed");
+const StaticString s_Closure("Closure");
 bool UnitChecker::checkPreClasses() {
   bool ok = true;
 
@@ -217,7 +218,7 @@ bool UnitChecker::checkPreClasses() {
     auto classAttrs = preclass->attrs();
 
     // Closures don't need constructors
-    if (preclass->parentName()->toCppString() == std::string("Closure")) {
+    if (preclass->parentName()->isame(s_Closure.get())) {
       ok &= checkClosure(preclass);
     }
 

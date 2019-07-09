@@ -64,9 +64,6 @@ struct c_Closure final : ObjectData {
     return reinterpret_cast<c_Closure*>(obj);
   }
 
-  /* closureInstanceCtor() skips this constructor call in debug mode.
-   * Update that method if this assumption changes.
-   */
   explicit c_Closure(Class* cls)
     : ObjectData(cls, 0, HeaderKind::Closure) {
     // hdr()->ctx must be initialized by init() or the TC.
@@ -160,6 +157,9 @@ private:
   static Class* cls_Closure;
   static void setAllocators(Class* cls);
 };
+
+ObjectData* createClosureRepoAuth(Class* cls);
+ObjectData* createClosure(Class* cls);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

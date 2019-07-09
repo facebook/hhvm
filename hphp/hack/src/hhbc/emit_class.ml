@@ -403,9 +403,11 @@ let emit_class (ast_class, hoisted) =
                     tparams
                     ast_class.A.c_extends in
          match base with
-         | Some cls when Hhbc_id.Class.to_raw_string cls = "Closure" &&
-                         not is_closure_class ->
-            Emit_fatal.raise_fatal_runtime (fst ast_class.A.c_name) "Class cannot extend Closure"
+         | Some cls when
+             String.lowercase (Hhbc_id.Class.to_raw_string cls) = "closure" &&
+             not is_closure_class ->
+           Emit_fatal.raise_fatal_runtime (fst ast_class.A.c_name)
+             "Class cannot extend Closure"
          | _ -> base
   in
   let implements =

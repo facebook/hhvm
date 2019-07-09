@@ -127,9 +127,7 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// Minified versions of nativeDataInstanceCtor/Dtor
-
-static ObjectData* closureInstanceCtorRepoAuth(Class* cls) {
+ObjectData* createClosureRepoAuth(Class* cls) {
   assertx(!(cls->attrs() & (AttrAbstract|AttrInterface|AttrTrait|AttrEnum)));
   assertx(!cls->needInitialization());
   assertx(cls->parent() == c_Closure::classof() || cls == c_Closure::classof());
@@ -141,15 +139,7 @@ static ObjectData* closureInstanceCtorRepoAuth(Class* cls) {
   return obj;
 }
 
-// should never be called
-ATTRIBUTE_USED ATTRIBUTE_UNUSED EXTERNALLY_VISIBLE
-static void closuseInstanceReference(void) {
-  // ensure c_Closure and ClosureHdr ptrs are scanned inside other types
-  (void)type_scan::getIndexForMalloc<c_Closure>();
-  (void)type_scan::getIndexForMalloc<ClosureHdr>();
-}
-
-static ObjectData* closureInstanceCtor(Class* cls) {
+ObjectData* createClosure(Class* cls) {
   /*
    * We call Unit::defClosure while jitting, so its not allowed to
    * mark the class as cached unless its persistent. Do it here
@@ -158,12 +148,24 @@ static ObjectData* closureInstanceCtor(Class* cls) {
   if (!rds::isHandleInit(cls->classHandle())) {
     cls->preClass()->namedEntity()->clsList()->setCached();
   }
-  return closureInstanceCtorRepoAuth(cls);
+  return createClosureRepoAuth(cls);
+}
+
+static ObjectData* closureInstanceCtor(Class* cls) {
+  raise_error("Can't create a Closure directly");
+}
+
+// should never be called
+ATTRIBUTE_USED ATTRIBUTE_UNUSED EXTERNALLY_VISIBLE
+static void closuseInstanceReference(void) {
+  // ensure c_Closure and ClosureHdr ptrs are scanned inside other types
+  (void)type_scan::getIndexForMalloc<c_Closure>();
+  (void)type_scan::getIndexForMalloc<ClosureHdr>();
 }
 
 ObjectData* c_Closure::clone() {
   auto const cls = getVMClass();
-  auto ret = c_Closure::fromObject(closureInstanceCtorRepoAuth(cls));
+  auto ret = c_Closure::fromObject(createClosureRepoAuth(cls));
 
   ret->hdr()->ctx = hdr()->ctx;
   if (auto t = getThis()) {
@@ -210,8 +212,7 @@ void StandardExtension::initClosure() {
   c_Closure::cls_Closure->allocExtraData();
   auto& extraData = *c_Closure::cls_Closure->m_extra.raw();
   extraData.m_instanceCtor = extraData.m_instanceCtorUnlocked =
-    RuntimeOption::RepoAuthoritative
-      ? closureInstanceCtorRepoAuth : closureInstanceCtor;
+    closureInstanceCtor;
   extraData.m_instanceDtor = closureInstanceDtor;
   c_Closure::cls_Closure->m_release = closureInstanceDtor;
 }

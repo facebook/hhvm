@@ -1,0 +1,12 @@
+object(Closure$test;%d) (1) {
+  ["static"]=>
+  array(1) {
+    ["x"]=>
+    dict(1) {
+      ["a"]=>
+      string(1) "b"
+    }
+  }
+}
+
+Fatal error: Can't create a Closure directly in %s/new_closure_without_constructor.php on line 10

@@ -3,12 +3,7 @@
 
 /* Used as the base class for all closures
  */
-<<__NativeData("Closure")>>
 class Closure {
-
-  public final function __construct() {
-    trigger_error("Can't create a Closure directly", E_ERROR);
-  }
 
   /* @param mixed $name
    * @return mixed

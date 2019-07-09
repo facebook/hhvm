@@ -1030,9 +1030,13 @@ and simplify_subtype
    (* Likewise, reduce nullable on left to a union *)
   | Toption ty, Tunion _ ->
     let r = fst ty_sub in
-    env |>
-    simplify_subtype ~seen_generic_params ~this_ty (MakeType.null r) ty_super &&&
-    simplify_subtype ~seen_generic_params ~this_ty ty ty_super
+    let env, p1 =
+      simplify_subtype ~seen_generic_params ~this_ty (MakeType.null r) ty_super env in
+    if TL.is_unsat p1
+    then invalid ()
+    else
+      let env, p2 = simplify_subtype ~seen_generic_params ~this_ty ty ty_super env in
+      env, TL.conj p1 p2
 
   | Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tunion [] ->
     simplify_subtype ~seen_generic_params ~this_ty ty ty_super env

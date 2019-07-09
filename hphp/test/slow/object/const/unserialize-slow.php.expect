@@ -1,0 +1,13 @@
+object(C) (2) {
+  ["i"]=>
+  int(1)
+  ["j"]=>
+  int(2)
+}
+Cannot modify const property i of class C after construction
+object(C) (2) {
+  ["i"]=>
+  int(1)
+  ["j"]=>
+  int(2)
+}

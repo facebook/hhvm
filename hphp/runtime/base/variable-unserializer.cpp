@@ -644,6 +644,8 @@ void VariableUnserializer::unserializeRemainingProps(
   int remainingProps,
   Variant& serializedNativeData,
   bool& hasSerializedNativeData) {
+  obj->unlockObject();
+  SCOPE_EXIT { obj->lockObject(); };
   while (remainingProps > 0) {
     /*
       use the number of properties remaining as an estimate for

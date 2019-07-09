@@ -2131,6 +2131,8 @@ Variant ObjectData::invokeToDebugDisplay() {
 }
 
 Variant ObjectData::invokeWakeup() {
+  unlockObject();
+  SCOPE_EXIT { lockObject(); };
   return InvokeSimple(this, s___wakeup);
 }
 

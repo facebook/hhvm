@@ -168,6 +168,17 @@ let should_mutate () = Random.float 1.0 < !mut_prob
 
 let mutate_bool b = if should_mutate() then not b else b
 
+let mutate_visibility v =
+  if should_mutate () then
+    let second_choice = (Random.int 2 = 1) in
+    Aast.(
+      match v with
+      | Public -> if second_choice then Private else Protected
+      | Private -> if second_choice then Public else Protected
+      | Protected -> if second_choice then Public else Private
+    )
+  else v
+
 let mutate_hoisted h =
   if should_mutate () then
     match h with
@@ -636,9 +647,7 @@ let mutate_metadata (input : HP.t)  =
     let mutate_method_data (m : Hhas_method.t) : Hhas_method.t =
       Hhas_method.make
         (m |> Hhas_method.attributes        |> delete_map mutate_attribute)
-        (m |> Hhas_method.is_protected      |> mutate_bool)
-        (m |> Hhas_method.is_public         |> mutate_bool)
-        (m |> Hhas_method.is_private        |> mutate_bool)
+        (m |> Hhas_method.visibility        |> mutate_visibility)
         (m |> Hhas_method.is_static         |> mutate_bool)
         (m |> Hhas_method.is_final          |> mutate_bool)
         (m |> Hhas_method.is_abstract       |> mutate_bool)
@@ -658,9 +667,7 @@ let mutate_metadata (input : HP.t)  =
     let mutate_property (prop : Hhas_property.t) : Hhas_property.t =
       Hhas_property.make
         (prop |> Hhas_property.attributes)
-        (prop |> Hhas_property.is_private         |> mutate_bool)
-        (prop |> Hhas_property.is_protected       |> mutate_bool)
-        (prop |> Hhas_property.is_public          |> mutate_bool)
+        (prop |> Hhas_property.visibility         |> mutate_visibility)
         (prop |> Hhas_property.is_static          |> mutate_bool)
         (prop |> Hhas_property.is_deep_init       |> mutate_bool)
         (prop |> Hhas_property.is_const           |> mutate_bool)

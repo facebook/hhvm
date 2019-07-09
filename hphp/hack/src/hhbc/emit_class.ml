@@ -36,16 +36,12 @@ let add_symbol_refs
   end
 
 let make_86method
-  ~name ~params ~is_static ~is_private ~is_abstract ~span ~is_protected instrs =
-  if is_private && is_protected
-  then failwith "Invalid visibility modifier combination";
+  ~name ~params ~is_static ~visibility ~is_abstract ~span instrs =
   let method_attributes = [] in
   (* TODO: move this. We just know that there are no iterators in 86methods *)
   Iterator.reset_iterator ();
   let method_is_final = false in
-  let method_is_private = is_private in
-  let method_is_protected = is_protected in
-  let method_is_public = not is_private && not is_protected in
+  let method_visibility = visibility in
   let method_return_type = None in
   let method_decl_vars = [] in
   let method_is_async = false in
@@ -71,9 +67,7 @@ let make_86method
     method_env in
   Hhas_method.make
     method_attributes
-    method_is_protected
-    method_is_public
-    method_is_private
+    method_visibility
     is_static
     method_is_final
     is_abstract
@@ -295,8 +289,7 @@ let emit_reified_init_method env ast_class =
       ~name:SU.Reified.reified_init_method_name
       ~params
       ~is_static:false
-      ~is_private:false
-      ~is_protected:true
+      ~visibility:Aast.Protected
       ~is_abstract:false
       ~span:(Hhas_pos.pos_to_span ast_class.A.c_span)
       instrs]
@@ -467,8 +460,7 @@ let emit_class (ast_class, hoisted) =
         ~name:name
         ~params:[]
         ~is_static:true
-        ~is_private:true
-        ~is_protected:false
+        ~visibility:Aast.Private
         ~is_abstract:false
         ~span:class_span
         instrs]
@@ -523,8 +515,7 @@ let emit_class (ast_class, hoisted) =
         ~name:"86cinit"
         ~params
         ~is_static:true
-        ~is_private:true
-        ~is_protected:false
+        ~visibility:Aast.Private
         ~is_abstract:class_is_interface
         ~span:class_span
         instrs] in

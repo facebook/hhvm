@@ -1484,9 +1484,7 @@ let method_attributes (m : Hhas_method.t) =
   let attrs = if Hhas_method.is_abstract m then "abstract" :: attrs else attrs in
   let attrs = if Hhas_method.is_final m then "final" :: attrs else attrs in
   let attrs = if Hhas_method.is_static m then "static" :: attrs else attrs in
-  let attrs = if Hhas_method.is_public m then "public" :: attrs else attrs in
-  let attrs = if Hhas_method.is_protected m then "protected" :: attrs else attrs in
-  let attrs = if Hhas_method.is_private m then "private" :: attrs else attrs in
+  let attrs = Aast.string_of_visibility (Hhas_method.visibility m) :: attrs in
   let attrs = if Hhas_method.is_interceptable m then "interceptable" :: attrs else attrs in
   let attrs = match Rx.rx_level_to_attr_string (Hhas_method.rx_level m) with
     | Some s -> s :: attrs
@@ -1607,9 +1605,7 @@ let property_attributes p =
   let attrs = if P.is_deep_init p then "deep_init" :: attrs else attrs in
   let attrs = if P.is_lsb p then "lsb" :: attrs else attrs in
   let attrs = if P.is_static p then "static" :: attrs else attrs in
-  let attrs = if P.is_public p then "public" :: attrs else attrs in
-  let attrs = if P.is_protected p then "protected" :: attrs else attrs in
-  let attrs = if P.is_private p then "private" :: attrs else attrs in
+  let attrs = Aast.string_of_visibility (P.visibility p) :: attrs in
   let text = String.concat ~sep:" " attrs in
   let text = if text = "" then "" else "[" ^ text ^ "] " in
   text

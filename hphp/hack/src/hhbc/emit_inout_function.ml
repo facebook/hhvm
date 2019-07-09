@@ -193,10 +193,7 @@ let emit_wrapper_method
   let method_is_static = not is_closure && ast_method.T.m_static in
   let method_attributes = Emit_attribute.from_asts
     (Emit_env.get_namespace env) ast_method.T.m_user_attributes in
-  let method_is_private = ast_method.T.m_visibility = Aast.Private in
-  let method_is_protected = ast_method.T.m_visibility = Aast.Protected in
-  let method_is_public =
-    ast_method.T.m_visibility = Aast.Public in
+  let method_visibility = ast_method.T.m_visibility in
   let return_type_info =
     Emit_body.emit_return_type_info
       ~scope ~skipawaitable:false ~namespace ast_method.T.m_ret in
@@ -232,9 +229,7 @@ let emit_wrapper_method
       namespace ast_class original_id in
   Hhas_method.make
     method_attributes
-    method_is_protected
-    method_is_public
-    method_is_private
+    method_visibility
     method_is_static
     method_is_final
     method_is_abstract

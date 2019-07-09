@@ -123,9 +123,8 @@ let from_ast
   let is_lsb = Hhas_attribute.has_lsb attributes in
   let is_late_init = Hhas_attribute.has_late_init attributes in
   let is_soft_late_init = Hhas_attribute.has_soft_late_init attributes in
+  let visibility = cv_visibility in
   let is_private = cv_visibility = Aast.Private in
-  let is_protected = cv_visibility = Aast.Protected in
-  let is_public = cv_visibility = Aast.Public in
   if not is_static && class_.T.c_final && class_.T.c_kind = Ast.Cabstract
   then Emit_fatal.raise_fatal_parse pos
     ("Class " ^ Utils.strip_ns (snd class_.T.c_name)
@@ -208,9 +207,7 @@ let from_ast
             epilog]) in
   Hhas_property.make
     attributes
-    is_private
-    is_protected
-    is_public
+    visibility
     is_static
     is_deep_init
     is_const

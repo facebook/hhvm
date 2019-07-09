@@ -81,18 +81,11 @@ let from_ast_wrapper privatize make_name ast_class ast_method =
   let method_is_abstract =
     ast_class.T.c_kind = Ast.Cinterface || ast_method.T.m_abstract in
   let method_is_static = ast_method.T.m_static in
-  let method_is_private =
-    not is_native_opcode_impl &&
-      (privatize || ast_method.T.m_visibility = Aast.Private) in
-  let method_is_protected =
-    not is_native_opcode_impl &&
-      not privatize &&
-      ast_method.T.m_visibility = Aast.Protected in
-  let method_is_public =
-    is_native_opcode_impl ||
-    (not privatize && (
-    ast_method.T.m_visibility = Aast.Public ||
-    (not method_is_private && not method_is_protected))) in
+  let method_visibility =
+    if is_native_opcode_impl then Aast.Public
+    else if privatize then Aast.Private
+    else ast_method.T.m_visibility
+  in
   let is_memoize =
     Emit_attribute.ast_any_is_memoize ast_method.T.m_user_attributes in
   let deprecation_info =
@@ -215,9 +208,7 @@ let from_ast_wrapper privatize make_name ast_class ast_method =
   let normal_function =
     Hhas_method.make
       method_attributes
-      method_is_protected
-      method_is_public
-      method_is_private
+      method_visibility
       method_is_static
       method_is_final
       method_is_abstract

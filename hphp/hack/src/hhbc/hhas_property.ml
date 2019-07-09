@@ -9,9 +9,7 @@
 
 type t = {
   property_attributes   : Hhas_attribute.t list;
-  property_is_private   : bool;
-  property_is_protected : bool;
-  property_is_public    : bool;
+  property_visibility   : Aast.visibility;
   property_is_static    : bool;
   property_is_deep_init : bool;
   property_is_const     : bool;
@@ -31,9 +29,7 @@ type t = {
 
 let make
   property_attributes
-  property_is_private
-  property_is_protected
-  property_is_public
+  property_visibility
   property_is_static
   property_is_deep_init
   property_is_const
@@ -50,9 +46,7 @@ let make
   property_type_info
   property_doc_comment = {
     property_attributes;
-    property_is_private;
-    property_is_protected;
-    property_is_public;
+    property_visibility;
     property_is_static;
     property_is_deep_init;
     property_is_const;
@@ -72,9 +66,10 @@ let make
 
 let name hhas_property = hhas_property.property_name
 let attributes hhas_property = hhas_property.property_attributes
-let is_private hhas_property = hhas_property.property_is_private
-let is_protected hhas_property = hhas_property.property_is_protected
-let is_public hhas_property = hhas_property.property_is_public
+let is_private hhas_property = hhas_property.property_visibility = Aast.Private
+let is_protected hhas_property = hhas_property.property_visibility = Aast.Protected
+let is_public hhas_property = hhas_property.property_visibility = Aast.Public
+let visibility hhas_property = hhas_property.property_visibility
 let is_static hhas_property = hhas_property.property_is_static
 let is_deep_init hhas_property = hhas_property.property_is_deep_init
 let initial_value hhas_property = hhas_property.property_initial_value

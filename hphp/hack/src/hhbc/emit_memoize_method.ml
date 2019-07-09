@@ -384,9 +384,7 @@ let emit_memoize_wrapper_body env memoize_info ast_method
 let make_memoize_wrapper_method env info ast_class ast_method =
   (* This is cut-and-paste from emit_method above, with special casing for
    * wrappers *)
-  let method_is_private = ast_method.T.m_visibility = Aast.Private in
-  let method_is_protected = ast_method.T.m_visibility = Aast.Protected in
-  let method_is_public = ast_method.T.m_visibility = Aast.Public in
+  let method_visibility = ast_method.T.m_visibility in
   let (_, original_name) = ast_method.T.m_name in
   let ret =
     if original_name = Naming_special_names.Members.__construct
@@ -425,9 +423,7 @@ let make_memoize_wrapper_method env info ast_class ast_method =
     ~namespace scope deprecation_info ast_method.T.m_params ret method_is_async is_reified in
   Hhas_method.make
     method_attributes
-    method_is_protected
-    method_is_public
-    method_is_private
+    method_visibility
     ast_method.T.m_static
     ast_method.T.m_final
     ast_method.T.m_abstract

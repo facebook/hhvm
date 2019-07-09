@@ -621,7 +621,17 @@ bool MimePart::parse(const char *buf, int bufsize) {
     if (len < bufsize && buf[len] == '\n') {
       ++len;
       m_parsedata.workbuf += String(buf, len, CopyString);
-      ProcessLine(req::ptr<MimePart>(this), m_parsedata.workbuf);
+      if (!ProcessLine(req::ptr<MimePart>(this), m_parsedata.workbuf)) {
+        /*
+         * Code ported from php pecl
+         * ProcessLine() only returns FAILURE in case the count of children
+         * have exceeded MAXPARTS and doing so at the very begining, without doing any work.
+         * It'd do this for all of the following lines, since the exceeded state won't change.
+         * As no additional work have been done since the last ProcessLine() call,
+         * it is safe to break the loop now not caring about the rest of the code.
+         */
+        return false;
+      }
       m_parsedata.workbuf.clear();
     } else {
       m_parsedata.workbuf += String(buf, len, CopyString);

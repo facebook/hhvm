@@ -273,6 +273,7 @@ let load config_filename options =
     ?tco_disallow_array_typehint:(bool_opt "disallow_array_typehint" config)
     ?tco_disallow_array_literal:(bool_opt "disallow_array_literal" config)
     ?tco_defer_class_declaration_threshold:(local_config.ServerLocalConfig.defer_class_declaration_threshold)
+    ?so_naming_sqlite_path:(local_config.ServerLocalConfig.naming_sqlite_path)
     ?tco_language_feature_logging:(bool_opt "language_feature_logging" config)
     ?tco_unsafe_rx:(bool_opt "unsafe_rx" config)
     ?tco_disallow_implicit_returns_in_non_void_functions:

@@ -108,7 +108,7 @@ let download_and_load_state_exn
     let naming_table_fallback_path =
       if genv.ServerEnv.local_config.SLC.enable_naming_table_fallback
       then Some result.State_loader.deptable_fn
-      else None
+      else genv.ServerEnv.local_config.SLC.naming_sqlite_path
     in
     let (old_naming_table, old_errors) = SaveStateService.load_saved_state
       result.State_loader.saved_state_fn
@@ -162,7 +162,7 @@ let use_precomputed_state_exn
   let naming_table_fallback_path =
     if genv.ServerEnv.local_config.SLC.enable_naming_table_fallback
     then Some deptable_fn
-    else None
+    else genv.ServerEnv.local_config.SLC.naming_sqlite_path
   in
   let (old_naming_table, old_errors) =
     SaveStateService.load_saved_state saved_state_fn ~naming_table_fallback_path ~load_decls

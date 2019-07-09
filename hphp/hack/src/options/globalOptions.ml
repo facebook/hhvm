@@ -14,6 +14,7 @@ type t = {
   tco_migration_flags : SSet.t;
   tco_dynamic_view : bool;
   tco_defer_class_declaration_threshold : int option;
+  so_naming_sqlite_path : string option;
   tco_disallow_array_as_tuple : bool;
   po_auto_namespace_map : (string * string) list;
   po_codegen : bool;
@@ -197,6 +198,7 @@ let default = {
  tco_migration_flags = SSet.empty;
  tco_dynamic_view = false;
  tco_defer_class_declaration_threshold = None;
+ so_naming_sqlite_path = None;
  tco_disallow_array_as_tuple = false;
  po_auto_namespace_map = [];
  po_codegen = false;
@@ -256,6 +258,7 @@ let make
   ?(tco_migration_flags = default.tco_migration_flags)
   ?(tco_dynamic_view = default.tco_dynamic_view)
   ?tco_defer_class_declaration_threshold
+  ?so_naming_sqlite_path
   ?(tco_disallow_array_as_tuple = default.tco_disallow_array_as_tuple)
   ?(po_auto_namespace_map = default.po_auto_namespace_map)
   ?(tco_disallow_ambiguous_lambda = default.tco_disallow_ambiguous_lambda)
@@ -301,6 +304,7 @@ let make
   tco_migration_flags;
   tco_dynamic_view;
   tco_defer_class_declaration_threshold;
+  so_naming_sqlite_path;
   tco_disallow_array_as_tuple;
   po_auto_namespace_map;
   po_codegen = false;
@@ -357,7 +361,8 @@ let tco_dynamic_view t =
 
 let tco_defer_class_declaration_threshold t =
   t.tco_defer_class_declaration_threshold
-
+let so_naming_sqlite_path t =
+  t.so_naming_sqlite_path
 let tco_disallow_array_as_tuple t =
   t.tco_disallow_array_as_tuple
 let po_auto_namespace_map t = t.po_auto_namespace_map

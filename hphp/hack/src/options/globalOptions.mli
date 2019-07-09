@@ -7,6 +7,12 @@
  *
  *)
 
+(* Naming conventions in this file:
+  - tco_<feature/flag/setting> - type checker option
+  - po_<feature/flag/setting> - parser option
+  - so_<feature/flag/setting> - server option
+*)
+
 type t = {
  (**
   * Enforces array subtyping relationships.
@@ -55,11 +61,14 @@ type t = {
  (* Whether to treat Tany as  Tdynamic *)
  tco_dynamic_view : bool;
 
+ (* If set, defers class declarations after N lazy declarations; if not set,
+   always lazily declares classes not already in cache. *)
  tco_defer_class_declaration_threshold : int option;
 
-  (*
-   * Flag to disallow subtyping of untyped arrays and tuples (both ways)
-  *)
+ (* Enables the reverse naming table to fall back to SQLite for queries. *)
+ so_naming_sqlite_path : string option;
+
+ (* Flag to disallow subtyping of untyped arrays and tuples (both ways) *)
  tco_disallow_array_as_tuple : bool;
 
  (* Namespace aliasing map *)
@@ -252,6 +261,7 @@ val make :
   ?tco_migration_flags: SSet.t ->
   ?tco_dynamic_view: bool ->
   ?tco_defer_class_declaration_threshold: int ->
+  ?so_naming_sqlite_path: string ->
   ?tco_disallow_array_as_tuple: bool ->
   ?po_auto_namespace_map: (string * string) list ->
   ?tco_disallow_ambiguous_lambda: bool ->
@@ -298,6 +308,7 @@ val tco_experimental_feature_enabled : t -> SSet.elt -> bool
 val tco_migration_flag_enabled : t -> SSet.elt -> bool
 val tco_dynamic_view : t -> bool
 val tco_defer_class_declaration_threshold : t -> int option
+val so_naming_sqlite_path : t -> string option
 val tco_disallow_array_as_tuple : t -> bool
 val po_auto_namespace_map : t -> (string * string) list
 val po_deregister_php_stdlib : t -> bool

@@ -449,6 +449,7 @@ bool Package::parseImpl(const std::string* fileName) {
 
   auto const& options = RepoOptions::forFile(fullPath.data());
   auto const sha1 = SHA1{mangleUnitSha1(string_sha1(content),
+                                        *fileName,
                                         options)};
   if (RuntimeOption::RepoLocalPath.size() &&
       RuntimeOption::RepoLocalMode != "--" &&

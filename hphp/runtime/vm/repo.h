@@ -102,7 +102,8 @@ struct Repo : RepoProxy {
 
   static void setCliFile(const std::string& cliFile);
 
-  std::unique_ptr<Unit> loadUnit(const std::string& name, const SHA1& sha1,
+  std::unique_ptr<Unit> loadUnit(const folly::StringPiece name,
+                                 const SHA1& sha1,
                                  const Native::FuncTable&);
   void forgetUnit(const std::string& path);
   RepoStatus findFile(const char* path, const std::string& root, SHA1& sha1);

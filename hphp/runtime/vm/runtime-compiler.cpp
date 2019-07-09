@@ -48,11 +48,10 @@ Unit* compile_string(const char* s,
                      const Native::FuncTable& nativeFuncs,
                      const RepoOptions& options,
                      bool forDebuggerEval) {
+  auto const name = fname ? fname : "";
   auto const sha1 = SHA1{
-    mangleUnitSha1(string_sha1(folly::StringPiece{s, sz}), options)};
-  if (auto u = Repo::get().loadUnit(
-        fname ? fname : "",
-        sha1, nativeFuncs).release()) {
+    mangleUnitSha1(string_sha1(folly::StringPiece{s, sz}), name, options)};
+  if (auto u = Repo::get().loadUnit(name, sha1, nativeFuncs).release()) {
     return u;
   }
   // NB: fname needs to be long-lived if generating a bytecode repo because it

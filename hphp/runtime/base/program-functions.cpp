@@ -1792,7 +1792,7 @@ static int execute_program_impl(int argc, char** argv) {
 
     auto const str = contents.str();
     auto const sha1 = SHA1{
-      mangleUnitSha1(string_sha1(str), RepoOptions::defaults())
+      mangleUnitSha1(string_sha1(str), file, RepoOptions::defaults())
     };
 
     compilers_start();

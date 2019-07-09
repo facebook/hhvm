@@ -528,9 +528,9 @@ struct UnitRepoProxy : public RepoProxy {
   explicit UnitRepoProxy(Repo& repo);
   ~UnitRepoProxy();
   void createSchema(int repoId, RepoTxn& txn); // throws(RepoExc)
-  std::unique_ptr<Unit> load(const std::string& name, const SHA1& sha1,
+  std::unique_ptr<Unit> load(const folly::StringPiece name, const SHA1& sha1,
                              const Native::FuncTable&);
-  std::unique_ptr<UnitEmitter> loadEmitter(const std::string& name,
+  std::unique_ptr<UnitEmitter> loadEmitter(const folly::StringPiece name,
                                            const SHA1& sha1,
                                            const Native::FuncTable&);
 

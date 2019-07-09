@@ -313,11 +313,10 @@ void Repo::saveGlobalData(GlobalData newData) {
   txn.commit();
 }
 
-std::unique_ptr<Unit> Repo::loadUnit(const std::string& name, const SHA1& sha1,
+std::unique_ptr<Unit> Repo::loadUnit(const folly::StringPiece name,
+                                     const SHA1& sha1,
                                      const Native::FuncTable& nativeFuncs) {
-  if (m_dbc == nullptr) {
-    return nullptr;
-  }
+  if (m_dbc == nullptr) return nullptr;
   return m_urp.load(name, sha1, nativeFuncs);
 }
 

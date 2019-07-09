@@ -330,7 +330,8 @@ CachedUnit createUnitFromString(const char* path,
                                 const RepoOptions& options,
                                 FileLoadFlags& flags,
                                 copy_ptr<CachedUnitWithFree> orig = {}) {
-  auto const sha1 = SHA1{mangleUnitSha1(string_sha1(contents.slice()),
+  folly::StringPiece path_sp = path;
+  auto const sha1 = SHA1{mangleUnitSha1(string_sha1(contents.slice()), path_sp,
                                         options)};
   if (orig && orig->cu.unit && sha1 == orig->cu.unit->sha1()) return orig->cu;
   auto const check = [&] (Unit* unit) {
@@ -343,7 +344,7 @@ CachedUnit createUnitFromString(const char* path,
     return CachedUnit { unit, rds::allocBit() };
   };
   // Try the repo; if it's not already there, invoke the compiler.
-  if (auto unit = Repo::get().loadUnit(path, sha1, nativeFuncs)) {
+  if (auto unit = Repo::get().loadUnit(path_sp, sha1, nativeFuncs)) {
     flags = FileLoadFlags::kHitDisk;
     return check(unit.release());
   }
@@ -796,6 +797,13 @@ const std::string mangleUnitPHP7Options() {
   return s;
 }
 
+char mangleAllowHhas(const folly::StringPiece fileName) {
+  if (!RuntimeOption::EvalAllowHhas) return '0'; // dont allow
+  auto const len = fileName.size();
+  if (len >= 5 && fileName.subpiece(len - 5) == ".hhas") return '1';
+  return '2'; // not hhas
+}
+
 //////////////////////////////////////////////////////////////////////
 
 } // end empty namespace
@@ -803,6 +811,7 @@ const std::string mangleUnitPHP7Options() {
 //////////////////////////////////////////////////////////////////////
 
 std::string mangleUnitSha1(const std::string& fileSha1,
+                           const folly::StringPiece fileName,
                            const RepoOptions& opts) {
   std::string t = fileSha1 + '\0'
     + (RuntimeOption::EnableClassLevelWhereClauses ? '1' : '0')
@@ -810,7 +819,6 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::EnablePocketUniverses ? '1' : '0')
     + (RuntimeOption::EvalGenerateDocComments ? '1' : '0')
     + (RuntimeOption::EnableXHP ? '1' : '0')
-    + (RuntimeOption::EvalAllowHhas ? '1' : '0')
     + (RuntimeOption::EvalEmitSwitch ? '1' : '0')
     + (RuntimeOption::EvalEnableCallBuiltin ? '1' : '0')
     + (RuntimeOption::EvalHackArrCompatNotices ? '1' : '0')
@@ -845,6 +853,7 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::EvalArrayProvenance ? '1' : '0')
     + std::to_string(RuntimeOption::EvalAssemblerMaxScalarSize)
     + opts.cacheKeyRaw()
+    + mangleAllowHhas(fileName)
     + mangleUnitPHP7Options()
     + hackc_version();
   return string_sha1(t);

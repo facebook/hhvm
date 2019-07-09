@@ -925,7 +925,7 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
 }
 
 std::unique_ptr<UnitEmitter> UnitRepoProxy::loadEmitter(
-    const std::string& name,
+    const folly::StringPiece name,
     const SHA1& sha1,
     const Native::FuncTable& nativeFuncs) {
   // We set useGlobalIds to false as a placeholder; it will be set
@@ -943,7 +943,7 @@ std::unique_ptr<UnitEmitter> UnitRepoProxy::loadEmitter(
   }
   if (repoId < 0) {
     TRACE(3, "No repo contains '%s' (0x%s)\n",
-             name.c_str(), sha1.toString().c_str());
+             name.data(), sha1.toString().c_str());
     return nullptr;
   }
   try {
@@ -958,18 +958,18 @@ std::unique_ptr<UnitEmitter> UnitRepoProxy::loadEmitter(
   } catch (RepoExc& re) {
     TRACE(0,
           "Repo error loading '%s' (0x%s) from '%s': %s\n",
-          name.c_str(), sha1.toString().c_str(),
+          name.data(), sha1.toString().c_str(),
           m_repo.repoName(repoId).c_str(), re.msg().c_str());
     return nullptr;
   }
   TRACE(3, "Repo loaded '%s' (0x%s) from '%s'\n",
-           name.c_str(), sha1.toString().c_str(),
+           name.data(), sha1.toString().c_str(),
            m_repo.repoName(repoId).c_str());
   return ue;
 }
 
 std::unique_ptr<Unit>
-UnitRepoProxy::load(const std::string& name, const SHA1& sha1,
+UnitRepoProxy::load(const folly::StringPiece name, const SHA1& sha1,
                     const Native::FuncTable& nativeFuncs) {
   auto ue = loadEmitter(name, sha1, nativeFuncs);
   if (!ue) return nullptr;

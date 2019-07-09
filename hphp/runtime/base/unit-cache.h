@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_UNIT_CACHE_H_
 #define incl_HPHP_UNIT_CACHE_H_
 
+#include <folly/String.h>
 #include <string>
 #include <vector>
 
@@ -72,7 +73,9 @@ Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable&);
  * Mangle a file's sha1sum with runtime options that affect the Unit output.
  * The parser and this module need to agree on how this is done.
  */
-std::string mangleUnitSha1(const std::string& fileSha1, const RepoOptions&);
+std::string mangleUnitSha1(const std::string& fileSha1,
+                           const folly::StringPiece fileName,
+                           const RepoOptions&);
 
 /*
  * Return the number of php files that are currently loaded in this process.

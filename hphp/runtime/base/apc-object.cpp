@@ -320,25 +320,30 @@ Object APCObject::createObjectSlow() const {
   }
   Object obj{const_cast<Class*>(klass)};
 
-  auto prop = props();
-  auto const propEnd = prop + m_propCount;
-  for (; prop != propEnd; ++prop) {
-    auto const key = prop->name;
+  {
+    obj->unlockObject();
+    SCOPE_EXIT { obj->lockObject(); };
 
-    const Class* ctx = nullptr;
-    if (prop->ctx.isNull()) {
-      ctx = klass;
-    } else {
-      if (auto const cls = prop->ctx.left()) {
-        ctx = cls;
+    auto prop = props();
+    auto const propEnd = prop + m_propCount;
+    for (; prop != propEnd; ++prop) {
+      auto const key = prop->name;
+
+      const Class* ctx = nullptr;
+      if (prop->ctx.isNull()) {
+        ctx = klass;
       } else {
-        ctx = Unit::lookupClass(prop->ctx.right());
-        if (!ctx) continue;
+        if (auto const cls = prop->ctx.left()) {
+          ctx = cls;
+        } else {
+          ctx = Unit::lookupClass(prop->ctx.right());
+          if (!ctx) continue;
+        }
       }
-    }
 
-    auto val = prop->val ? prop->val->toLocal() : init_null();
-    obj->setProp(const_cast<Class*>(ctx), key, *val.toCell());
+      auto val = prop->val ? prop->val->toLocal() : init_null();
+      obj->setProp(const_cast<Class*>(ctx), key, *val.toCell());
+    }
   }
 
   obj->invokeWakeup();

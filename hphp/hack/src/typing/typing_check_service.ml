@@ -311,7 +311,7 @@ let merge
   files_checked_count := !files_checked_count + completed_check_count - deferred_check_count;
   ServerProgress.send_percentage_progress_to_monitor
     "typechecking" !files_checked_count files_initial_count "files";
-  Decl_service.merge_lazy_decl errors acc
+  Errors.merge errors acc
 
 let next
     (workers: MultiWorker.worker list option)

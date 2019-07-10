@@ -159,7 +159,7 @@ let type_check
     let logstring = Printf.sprintf "Type-check %d files" count in
     Hh_logger.log "Begin %s" logstring;
 
-    let (errorl: Decl_service.lazy_decl_result) =
+    let (errorl: Errors.t) =
       let memory_cap = genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb in
       Typing_check_service.go
         genv.workers

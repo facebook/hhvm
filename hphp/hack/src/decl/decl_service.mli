@@ -9,19 +9,8 @@
 
 
 (*****************************************************************************)
-(* Module declaring the types in parallel *)
-(*****************************************************************************)
-
-(* The result expected from the service *)
-type result = Errors.t
-
-(* Used for lazy typechecking *)
-type lazy_decl_result = Errors.t
-
-(*****************************************************************************)
 (* Starts the process *)
 (*****************************************************************************)
 val go: MultiWorker.worker list option -> bucket_size:int ->
-  Naming_table.fast -> result
-val merge_lazy_decl: lazy_decl_result -> lazy_decl_result -> lazy_decl_result
-val decl_file: lazy_decl_result -> Relative_path.t -> lazy_decl_result
+  Naming_table.fast -> Errors.t
+val decl_file: Errors.t -> Relative_path.t -> Errors.t

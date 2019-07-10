@@ -15,16 +15,6 @@
 open Core_kernel
 open Utils
 
-(* The result expected from the service *)
-type result = Errors.t
-
-(* Used for lazy typechecking *)
-type lazy_decl_result = Errors.t
-
-(*****************************************************************************)
-(* Synchronizes the typing environment with the cache *)
-(*****************************************************************************)
-
 (*****************************************************************************)
 (* The job that will be run on the workers *)
 (*****************************************************************************)
@@ -42,16 +32,6 @@ let decl_files errors fnl =
   List.fold_left fnl ~f:decl_file ~init:errors
 
 (*****************************************************************************)
-(* Merges the results (used by the master) *)
-(*****************************************************************************)
-
-let merge_decl errors1 errors2 =
-  Errors.merge errors1 errors2
-
-let merge_lazy_decl errors1 errors2 =
-  Errors.merge errors1 errors2
-
-(*****************************************************************************)
 (* Let's go! That's where the action is *)
 (*****************************************************************************)
 
@@ -65,7 +45,7 @@ let go (workers:MultiWorker.worker list option) ~bucket_size fast =
       workers
       ~job:decl_files
       ~neutral
-      ~merge:merge_decl
+      ~merge:Errors.merge
       ~next:(MultiWorker.next ~max_size:bucket_size workers fast_l)
   in
   result

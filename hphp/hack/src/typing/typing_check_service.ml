@@ -98,7 +98,11 @@ let neutral = Errors.empty
 (* The job that will be run on the workers *)
 (*****************************************************************************)
 
-let type_fun opts fn x =
+let type_fun
+    (opts: TypecheckerOptions.t)
+    (fn: Relative_path.t)
+    (x: string)
+    : Tast.def option =
   match Ast_provider.find_fun_in_file ~full:true fn x with
   | Some f ->
     let fun_ = Naming.fun_ (Ast_to_nast.on_fun f) in
@@ -109,7 +113,11 @@ let type_fun opts fn x =
     def_opt
   | None -> None
 
-let type_class opts fn x =
+let type_class
+    (opts: TypecheckerOptions.t)
+    (fn: Relative_path.t)
+    (x: string)
+    : Tast.def option =
   match Ast_provider.find_class_in_file ~full:true fn x with
   | Some cls ->
     let class_ = Naming.class_ (Ast_to_nast.on_class cls) in
@@ -122,7 +130,11 @@ let type_class opts fn x =
     def_opt
   | None -> None
 
-let check_typedef opts fn x =
+let check_typedef
+    (opts: TypecheckerOptions.t)
+    (fn: Relative_path.t)
+    (x: Decl_provider.typedef_key)
+    : Tast.def option =
   match Ast_provider.find_typedef_in_file ~full:true fn x with
   | Some t ->
     let typedef = Naming.typedef (Ast_to_nast.on_typedef t) in
@@ -134,7 +146,11 @@ let check_typedef opts fn x =
     Some def
   | None -> None
 
-let check_const opts fn x =
+let check_const
+    (opts: TypecheckerOptions.t)
+    (fn: Relative_path.t)
+    (x: string)
+    : Tast.def option =
   match Ast_provider.find_gconst_in_file ~full:true fn x with
   | None -> None
   | Some cst ->
@@ -144,10 +160,10 @@ let check_const opts fn x =
     Some def
 
 let process_file
-    dynamic_view_files
-    opts
-    errors
-    (fn, file_infos)
+    (dynamic_view_files: Relative_path.Set.t)
+    (opts: GlobalOptions.t)
+    (errors: Errors.t)
+    ((fn: Relative_path.Set.elt), (file_infos: FileInfo.names))
     : (Errors.t * file_computation list) =
   Deferred_decl.reset ();
   let opts = {
@@ -182,7 +198,13 @@ let process_file
     let () = prerr_endline ("Exception on file " ^ (Relative_path.S.to_string fn)) in
     Caml.Printexc.raise_with_backtrace e stack
 
-let process_files dynamic_view_files opts errors progress ~memory_cap =
+let process_files
+    (dynamic_view_files: Relative_path.Set.t)
+    (opts: GlobalOptions.t)
+    (errors: Errors.t)
+    (progress: progress)
+    ~(memory_cap: int option)
+    : Errors.t * progress =
   SharedMem.invalidate_caches();
   File_provider.local_changes_push_stack ();
   Ast_provider.local_changes_push_stack ();
@@ -239,9 +261,9 @@ let process_files dynamic_view_files opts errors progress ~memory_cap =
   result
 
 let load_and_process_files
-    dynamic_view_files
-    errors
-    progress
+    (dynamic_view_files: Relative_path.Set.t)
+    (errors: Errors.t)
+    (progress: progress)
     ~(memory_cap: int option)
     : Errors.t * progress =
   let opts = TypeCheckStore.load() in
@@ -292,10 +314,10 @@ let merge
   Decl_service.merge_lazy_decl errors acc
 
 let next
-    workers
-    ~files_initial_count
+    (workers: MultiWorker.worker list option)
+    ~(files_initial_count: int)
     (files_to_process: file_computation list ref)
-    files_in_progress =
+    (files_in_progress: file_computation Hash_set.Poly.t) =
   let max_size = Bucket.max_size () in
   let num_workers = (match workers with Some w -> List.length w | None -> 1) in
   let bucket_size = Bucket.calculate_bucket_size
@@ -316,7 +338,11 @@ let next
       List.iter ~f:(Hash_set.Poly.add files_in_progress) current_bucket;
       Bucket.Job { completed = []; remaining = current_bucket; deferred = []; }
 
-let on_cancelled next files_to_process files_in_progress =
+let on_cancelled
+  (next: (unit -> 'a Bucket.bucket))
+  (files_to_process: 'b Hash_set.Poly.elt list ref)
+  (files_in_progress:'b Hash_set.Poly.t)
+  : unit -> 'a list =
   fun () ->
     (* The size of [files_to_process] is bounded only by repo size, but
       [files_in_progress] is capped at [(worker count) * (max bucket size)]. *)
@@ -334,7 +360,7 @@ let process_in_parallel
     (workers: MultiWorker.worker list option)
     (opts: TypecheckerOptions.t)
     (fnl: file_computation list)
-    ~interrupt
+    ~(interrupt: 'a MultiWorker.interrupt_config)
     ~(memory_cap: int option)
     : Errors.t * 'a * file_computation list =
   TypeCheckStore.store opts;
@@ -376,7 +402,6 @@ module NoMocking = struct
 end
 
 module TestMocking = struct
-
   let cancelled = ref Relative_path.Set.empty
   let set_is_cancelled x =
     cancelled := Relative_path.Set.add !cancelled x
@@ -397,7 +422,14 @@ module Mocking =
   else (module NoMocking : Mocking_sig)
 ))
 
-let go_with_interrupt workers opts dynamic_view_files fnl ~interrupt ~memory_cap =
+let go_with_interrupt
+    (workers: MultiWorker.worker list option)
+    (opts: TypecheckerOptions.t)
+    (dynamic_view_files: Relative_path.Set.t)
+    (fnl: (Relative_path.t * FileInfo.names) list)
+    ~(interrupt: 'a MultiWorker.interrupt_config)
+    ~(memory_cap: int option)
+    : (computation_kind, Errors.t, 'a) job_result =
   let fnl = List.map fnl ~f:(fun (path, names) -> path, Check names) in
   Mocking.with_test_mocking fnl @@ fun fnl ->
     if List.length fnl < 10

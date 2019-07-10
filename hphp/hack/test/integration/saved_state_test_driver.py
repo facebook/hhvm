@@ -47,8 +47,8 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
     saved_state_dir: str
 
     @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
+    def setUpClass(cls, template_repo: str) -> None:
+        super().setUpClass(template_repo)
         # we create the state in a different dir from the one we run our tests
         # on, to verify that the saved state does not depend on any absolute
         # paths
@@ -303,7 +303,7 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
         self,
         expected_output: Optional[List[str]],
         stdin: Optional[str] = None,
-        options: Optional[str] = None,
+        options: Optional[List[str]] = None,
         assert_loaded_saved_state: bool = True,
     ) -> str:
         result = super(SavedStateTestDriver, self).check_cmd(

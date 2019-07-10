@@ -1,19 +1,23 @@
 #! /usr/bin/env python3
+# pyre-strict
 
 import os
-from typing import Optional
+
+from common_tests import CommonTestDriver
+from test_case import TestCase
 
 
-class HierarchyTests(object):
+class HierarchyTests(TestCase[CommonTestDriver]):
+    @classmethod
+    def get_template_repo(cls) -> str:
+        return "hphp/hack/test/integration/data/hierarchy"
 
-    template_repo: Optional[str] = "hphp/hack/test/integration/data/hierarchy"
-
-    def test_inheritance(self):
+    def test_inheritance(self) -> None:
         """
         Test --inheritance-ancestors and --inheritance-children
         """
-        self.start_hh_server()
-        self.check_cmd(
+        self.test_driver.start_hh_server()
+        self.test_driver.check_cmd(
             [
                 'File "{root}foo.php", line 3, characters 7-9: Foo',
                 '    inherited by File "{root}bar.php", line 3, characters 7-9: Bar',
@@ -26,7 +30,7 @@ class HierarchyTests(object):
             ],
             options=["--inheritance-children", "Foo"],
         )
-        self.check_cmd(
+        self.test_driver.check_cmd(
             [
                 'File "{root}baz.php", line 3, characters 7-9: Baz',
                 '    inherited from File "{root}foo.php", line 3, characters 7-9: Foo',
@@ -38,9 +42,9 @@ class HierarchyTests(object):
             options=["--inheritance-ancestors", "Baz"],
         )
 
-    def test_inheritance_filter(self):
-        self.start_hh_server()
-        self.check_cmd(
+    def test_inheritance_filter(self) -> None:
+        self.test_driver.start_hh_server()
+        self.test_driver.check_cmd(
             [
                 'File "{root}filter.php", line 15, characters 7-12: Filter',
                 '    inherited from File "{root}filter.php", line 3, characters 7-13: CFilter',
@@ -49,7 +53,7 @@ class HierarchyTests(object):
             ],
             options=["--inheritance-ancestor-classes", "Filter"],
         )
-        self.check_cmd(
+        self.test_driver.check_cmd(
             [
                 'File "{root}filter.php", line 15, characters 7-12: Filter',
                 '    inherited from File "{root}filter.php", line 7, characters 11-17: IFilter',
@@ -58,7 +62,7 @@ class HierarchyTests(object):
             ],
             options=["--inheritance-ancestor-interfaces", "Filter"],
         )
-        self.check_cmd(
+        self.test_driver.check_cmd(
             [
                 'File "{root}filter.php", line 15, characters 7-12: Filter',
                 '    inherited from File "{root}filter.php", line 11, characters 7-13: TFilter',
@@ -68,8 +72,8 @@ class HierarchyTests(object):
             options=["--inheritance-ancestor-traits", "Filter"],
         )
 
-    def test_method_signature_change(self):
-        with open(os.path.join(self.repo_dir, "qux.php"), "w") as f:
+    def test_method_signature_change(self) -> None:
+        with open(os.path.join(self.test_driver.repo_dir, "qux.php"), "w") as f:
             f.write(
                 """<?hh //partial
 class Qux {
@@ -80,10 +84,10 @@ class Qux {
 }
 """
             )
-        self.start_hh_server(changed_files=["qux.php"])
-        self.check_cmd(["No errors!"])
-        debug_sub = self.subscribe_debug()
-        with open(os.path.join(self.repo_dir, "foo.php"), "w") as f:
+        self.test_driver.start_hh_server(changed_files=["qux.php"])
+        self.test_driver.check_cmd(["No errors!"])
+        debug_sub = self.test_driver.subscribe_debug()
+        with open(os.path.join(self.test_driver.repo_dir, "foo.php"), "w") as f:
             f.write(
                 """<?hh //partial
 class Foo {

@@ -12,6 +12,7 @@ from typing import Iterable, List, Mapping, Tuple
 
 import common_tests
 from lspcommand import LspCommandProcessor, Transcript
+from test_case import TestCase
 from utils import Json, JsonObject
 
 
@@ -41,12 +42,17 @@ lazy_init2 = {use_saved_state}
             )
 
 
-class TestLsp(LspTestDriver, unittest.TestCase):
+class TestLsp(TestCase[LspTestDriver]):
+    @classmethod
+    def get_test_driver(cls) -> LspTestDriver:
+        return LspTestDriver()
 
-    template_repo = "hphp/hack/test/integration/data/lsp_exchanges/"
+    @classmethod
+    def get_template_repo(cls) -> str:
+        return "hphp/hack/test/integration/data/lsp_exchanges/"
 
     def repo_file(self, file: str) -> str:
-        return os.path.join(self.repo_dir, file)
+        return os.path.join(self.test_driver.repo_dir, file)
 
     def read_repo_file(self, file: str) -> str:
         with open(self.repo_file(file), "r") as f:
@@ -85,7 +91,7 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         return (test, expected)
 
     def write_observed(self, test_name: str, observed_transcript: Json) -> None:
-        file = os.path.join(self.template_repo, test_name + ".observed.log")
+        file = os.path.join(self.test_driver.template_repo, test_name + ".observed.log")
         text = json.dumps(
             list(self.get_important_received_items(observed_transcript)), indent=2
         )
@@ -154,8 +160,8 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         self, test_name: str, test: Json, expected: Json, wait_for_server: bool
     ) -> None:
         if wait_for_server:  # wait until hh_server is ready before starting lsp
-            self.run_check()
-        with LspCommandProcessor.create(self.test_env) as lsp:
+            self.test_driver.run_check()
+        with LspCommandProcessor.create(self.test_driver.test_env) as lsp:
             observed_transcript = lsp.communicate(test)
 
         self.write_observed(test_name, observed_transcript)
@@ -195,9 +201,9 @@ class TestLsp(LspTestDriver, unittest.TestCase):
 
     def prepare_environment(self) -> None:
         self.maxDiff = None
-        self.write_load_config()
-        self.start_hh_server()
-        (output, err, _) = self.run_check()
+        self.test_driver.write_load_config()
+        self.test_driver.start_hh_server()
+        (output, err, _) = self.test_driver.run_check()
         if "Error: Ran out of retries" in err:
             raise unittest.SkipTest("Hack server could not be launched")
         self.assertEqual(output.strip(), "No errors!")
@@ -215,7 +221,7 @@ class TestLsp(LspTestDriver, unittest.TestCase):
 
     def setup_php_file(self, test_php: str) -> Mapping[str, str]:
         # We want the path to the builtins directory. This is best we can do.
-        (output, err, retcode) = self.run_check(
+        (output, err, retcode) = self.test_driver.run_check(
             options=["--identify-function", "2:21", "--json"],
             stdin="<?hh // partial\nfunction f():void {PHP_EOL;}\n",
         )
@@ -223,7 +229,7 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         constants_path = json.loads(output)[0]["definition_pos"]["filename"]
         return {
             "hhi_path": re.sub("/constants.hhi$", "", constants_path),
-            "root_path": self.repo_dir,
+            "root_path": self.test_driver.repo_dir,
             "php_file_uri": self.repo_file_uri(test_php),
             "php_file": self.read_repo_file(test_php),
             # Sometimes Windows happens.
@@ -233,7 +239,9 @@ class TestLsp(LspTestDriver, unittest.TestCase):
     def test_init_shutdown(self) -> None:
         self.prepare_environment()
 
-        self.load_and_run("initialize_shutdown", {"root_path": self.repo_dir})
+        self.load_and_run(
+            "initialize_shutdown", {"root_path": self.test_driver.repo_dir}
+        )
 
     def test_completion(self) -> None:
         self.prepare_environment()
@@ -273,7 +281,7 @@ class TestLsp(LspTestDriver, unittest.TestCase):
     def test_formatting(self) -> None:
 
         # This test will fail if hackfmt can't be found
-        if not self.run_hackfmt_check():
+        if not self.test_driver.run_hackfmt_check():
             raise unittest.SkipTest("Hackfmt can't be found. Skipping.")
 
         self.prepare_environment()
@@ -283,7 +291,7 @@ class TestLsp(LspTestDriver, unittest.TestCase):
     def test_ontypeformatting(self) -> None:
 
         # This test will fail if hackfmt can't be found
-        if not self.run_hackfmt_check():
+        if not self.test_driver.run_hackfmt_check():
             raise unittest.SkipTest("Hackfmt can't be found. Skipping.")
 
         self.prepare_environment()
@@ -326,5 +334,5 @@ class TestLsp(LspTestDriver, unittest.TestCase):
     def test_non_blocking(self) -> None:
         self.prepare_environment()
         variables = self.setup_php_file("non_blocking.php")
-        self.start_hh_loop_forever_assert_timeout()
+        self.test_driver.start_hh_loop_forever_assert_timeout()
         self.load_and_run("non_blocking", variables, wait_for_server=False)

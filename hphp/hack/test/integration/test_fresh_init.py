@@ -1,27 +1,32 @@
+# pyre-strict
+
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
 import time
 import unittest
+from typing import List, Optional
 
 import common_tests
 from hh_paths import hh_client
 
 
 class FreshInitTestDriver(common_tests.CommonTestDriver):
-    def write_load_config(self, use_saved_state=False):
+    def write_load_config(self, use_saved_state: bool = False) -> None:
         # Fresh init tests don't care about which files changed, so we can
         # just use the default .hhconfig in the template repo
         pass
 
     def check_cmd(
         self,
-        expected_output,
-        stdin=None,
-        options=(),
-        retries=30,
-        assert_loaded_saved_state=False,
-    ):
+        expected_output: Optional[List[str]],
+        stdin: Optional[str] = None,
+        options: Optional[List[str]] = None,
+        retries: int = 30,
+        assert_loaded_saved_state: bool = False,
+    ) -> str:
+        if options is None:
+            options = []
         time.sleep(2)  # wait for Hack to catch up with file system changes
 
         root = self.repo_dir + os.path.sep
@@ -56,15 +61,21 @@ class FreshInitTestDriver(common_tests.CommonTestDriver):
             )
         return err
 
-    def assertEqualString(self, first, second, msg=None):
+    def assertEqualString(
+        self, first: str, second: str, msg: Optional[str] = None
+    ) -> None:
         root = self.repo_dir + os.path.sep
         second = second.format(root=root)
         self.assertEqual(first, second, msg)
 
 
-class TestFreshInit(common_tests.CommonTests, FreshInitTestDriver, unittest.TestCase):
-    def test_remove_dead_fixmes(self):
-        with open(os.path.join(self.repo_dir, "foo_4.php"), "w") as f:
+class TestFreshInit(common_tests.CommonTests):
+    @classmethod
+    def get_test_driver(cls) -> common_tests.CommonTestDriver:
+        return common_tests.CommonTestDriver()
+
+    def test_remove_dead_fixmes(self) -> None:
+        with open(os.path.join(self.test_driver.repo_dir, "foo_4.php"), "w") as f:
             f.write(
                 """<?hh // strict
                 function foo(?string $s): void {
@@ -84,10 +95,14 @@ class TestFreshInit(common_tests.CommonTests, FreshInitTestDriver, unittest.Test
             """
             )
 
-        self.start_hh_server(changed_files=["foo_4.php"], args=["--no-load"])
-        self.check_cmd(expected_output=None, options=["--remove-dead-fixmes"])
+        self.test_driver.start_hh_server(
+            changed_files=["foo_4.php"], args=["--no-load"]
+        )
+        self.test_driver.check_cmd(
+            expected_output=None, options=["--remove-dead-fixmes"]
+        )
 
-        with open(os.path.join(self.repo_dir, "foo_4.php")) as f:
+        with open(os.path.join(self.test_driver.repo_dir, "foo_4.php")) as f:
             out = f.read()
             self.assertEqual(
                 out,

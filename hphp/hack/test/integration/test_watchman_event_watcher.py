@@ -93,7 +93,7 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        super().setUpClass()
+        super().setUpClass(cls.template_repo)
 
     @classmethod
     def tearDownClass(cls):

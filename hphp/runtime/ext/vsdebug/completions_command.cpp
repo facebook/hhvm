@@ -549,9 +549,10 @@ void CompletionsCommand::addFuncConstantCompletions(
   SuggestionContext& context,
   folly::dynamic& targets
 ) {
-  auto systemFuncs = Unit::getSystemFunctions();
-  auto userFuncs = Unit::getUserFunctions();
-  auto consts = lookupDefinedConstants();
+  auto const systemFuncs = Unit::getSystemFunctions();
+  auto const userFuncs = Unit::getUserFunctions();
+  auto const consts = lookupDefinedConstants();
+  auto const classes = Unit::getClassesInfo();
 
   for (ArrayIter iter(systemFuncs); iter; ++iter) {
     const std::string& name = iter.second().toString().toCppString();
@@ -566,6 +567,11 @@ void CompletionsCommand::addFuncConstantCompletions(
   for (ArrayIter iter(consts); iter; ++iter) {
     const std::string& name = iter.first().toString().toCppString();
     addIfMatch(name, context.matchPrefix, CompletionTypeFn, targets);
+  }
+
+  for (ArrayIter iter(classes); iter; ++iter) {
+    const std::string& name = iter.second().toString().toCppString();
+    addIfMatch(name, context.matchPrefix, CompletionTypeClass, targets);
   }
 
   // Add PHP keywords.

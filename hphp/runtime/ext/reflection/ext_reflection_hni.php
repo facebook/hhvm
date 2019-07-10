@@ -844,7 +844,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    */
   public function invoke($obj, ...$args): mixed {
     $this->validateInvokeParameters($obj, $args);
-    if ($this->isStatic()) {
+    if ($this->isStaticInPrologue()) {
       // Docs says to pass null, but Zend completely ignores the argument
       $obj = null;
     }
@@ -867,7 +867,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    */
   public function invokeArgs($obj, $args): mixed {
     $this->validateInvokeParameters($obj, $args);
-    if ($this->isStatic()) {
+    if ($this->isStaticInPrologue()) {
       $obj = null;
     }
     return hphp_invoke_method($obj, $this->originalClass, $this->getName(),
@@ -885,7 +885,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
       );
     }
 
-    if (!$this->isStatic()) {
+    if (!$this->isStaticInPrologue()) {
       if (!$obj) {
         $name = $this->originalClass.'::'.$this->getName();
         throw new ReflectionException(
@@ -958,6 +958,9 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
   <<__Native, __Rx, __MaybeMutable>>
   public function isStatic(): bool;
 
+  <<__Native, __Rx, __MaybeMutable>>
+  private function isStaticInPrologue(): bool;
+
   /**
    * ( excerpt from
    * http://php.net/manual/en/reflectionmethod.isconstructor.php )
@@ -1018,7 +1021,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    * @return    mixed   Returns Closure. Returns NULL in case of an error.
    */
   public function getClosure($object = null): ?Closure {
-    if ($this->isStatic()) {
+    if ($this->isStaticInPrologue()) {
       $object = null;
     } else {
       if (!$object) {

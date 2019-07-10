@@ -905,6 +905,11 @@ static bool HHVM_METHOD(ReflectionMethod, isStatic) {
   return func->attrs() & AttrStatic;
 }
 
+static bool HHVM_METHOD(ReflectionMethod, isStaticInPrologue) {
+  auto const func = ReflectionFuncHandle::GetFuncFor(this_);
+  return func->isStaticInPrologue();
+}
+
 static bool HHVM_METHOD(ReflectionMethod, isConstructor) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
   return isConstructor(func);
@@ -2054,6 +2059,7 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionMethod, isProtected);
     HHVM_ME(ReflectionMethod, isPrivate);
     HHVM_ME(ReflectionMethod, isStatic);
+    HHVM_ME(ReflectionMethod, isStaticInPrologue);
     HHVM_ME(ReflectionMethod, isConstructor);
     HHVM_ME(ReflectionMethod, getModifiers);
     HHVM_ME(ReflectionMethod, getPrototypeClassname);

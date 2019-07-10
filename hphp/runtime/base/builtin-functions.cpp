@@ -677,7 +677,7 @@ Variant invoke_static_method(const String& s, const String& method,
     return uninit_null();
   }
   const HPHP::Func* f = class_->lookupMethod(method.get());
-  if (f == nullptr || !(f->attrs() & AttrStatic) ||
+  if (f == nullptr || !f->isStaticInPrologue() ||
     (!isContainer(params) && !params.isNull())) {
     o_invoke_failed(s.data(), method.data(), fatal);
     return uninit_null();

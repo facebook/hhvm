@@ -41,6 +41,7 @@ type type_facts = {
   flags: int;
   require_extends: InvSSet.t;
   require_implements: InvSSet.t;
+  attributes: string list InvSMap.t;
 }
 
 type facts = {
@@ -66,7 +67,7 @@ let hex_number_to_json s =
     |> Int64.to_string in
   J.JSON_Number number
 
-let add_member ~include_empty name values members =
+let add_set_member ~include_empty name values members =
   if InvSSet.is_empty values && not include_empty
   then members
   else
@@ -78,16 +79,29 @@ let list_to_json_array l =
     List.fold_left l ~init:[] ~f:(fun acc el -> J.JSON_String el :: acc) in
   J.JSON_Array elements
 
+let map_to_json_object m =
+  let foo = InvSMap.fold (fun name v acc -> (name, list_to_json_array v) :: acc)
+    m [] in
+  J.JSON_Object foo
+
+let add_map_member name values members =
+  if InvSMap.is_empty values
+  then members
+  else
+    let elements = (map_to_json_object values) in
+    (name, elements) :: members
+
 let type_facts_to_json name tf =
   let members =
-    add_member ~include_empty:(tf.kind = TKInterface || tf.kind = TKTrait)
+    add_set_member ~include_empty:(tf.kind = TKInterface || tf.kind = TKTrait)
       "requireExtends" tf.require_extends []
-    |> add_member ~include_empty:(tf.kind = TKTrait)
+    |> add_set_member ~include_empty:(tf.kind = TKTrait)
       "requireImplements" tf.require_implements
-    |> add_member ~include_empty:true "baseTypes" tf.base_types in
+    |> add_map_member "attributes" tf.attributes
+    |> add_set_member ~include_empty:true "baseTypes" tf.base_types in
   let members =
-    ("name", J.JSON_String name)::
-    ("kindOf", J.JSON_String (type_kind_to_string tf.kind))::
+    ("name", J.JSON_String name) ::
+    ("kindOf", J.JSON_String (type_kind_to_string tf.kind)) ::
     ("flags", J.JSON_Number (string_of_int tf.flags)) ::
     members in
   J.JSON_Object members

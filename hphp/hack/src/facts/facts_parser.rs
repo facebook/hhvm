@@ -121,6 +121,7 @@ fn defines_from_method_body(constants: Vec<String>, body: Node) -> Vec<String> {
 fn type_info_from_class_body(
     namespace: &str,
     check_require: bool,
+    attributes: Node,
     body: Node,
     facts: &mut Facts,
     type_facts: &mut TypeFacts,
@@ -152,6 +153,75 @@ fn type_info_from_class_body(
         let facts_constants = std::mem::replace(&mut facts.constants, vec![]);
         facts.constants = nodes.into_iter().fold(facts_constants, aux);
     }
+    type_facts.attributes = match attributes {
+        Node::List(nodes) => {
+            nodes
+                .into_iter()
+                .fold(ClassAttributes::new(), |mut attributes, node| match node {
+                    Node::ListItem(box item) => {
+                        let attribute_values_aux = |attribute_node| match attribute_node {
+                            Node::Name(name) => {
+                                let mut attribute_values = Vec::new();
+                                attribute_values.push(String::from_utf8_lossy(&name).to_string());
+                                attribute_values
+                            }
+                            Node::String(name) => {
+                                let mut attribute_values = Vec::new();
+                                attribute_values.push(String::from_utf8_lossy(&name).to_string());
+                                attribute_values
+                            }
+                            Node::List(nodes) => {
+                                nodes
+                                    .into_iter()
+                                    .fold(Vec::new(), |mut attribute_values, node| match node {
+                                        Node::Name(name) => {
+                                            attribute_values
+                                                .push(String::from_utf8_lossy(&name).to_string());
+                                            attribute_values
+                                        }
+                                        Node::String(name) => {
+                                            attribute_values
+                                                .push(String::from_utf8_lossy(&name).to_string());
+                                            attribute_values
+                                        }
+                                        Node::ScopeResolutionExpression(box (
+                                            Node::Name(name),
+                                            Node::Class,
+                                        )) => {
+                                            attribute_values.push(format!(
+                                                "{}::class",
+                                                String::from_utf8_lossy(&name).to_string()
+                                            ));
+                                            attribute_values
+                                        }
+                                        _ => attribute_values,
+                                    })
+                            }
+                            _ => Vec::new(),
+                        };
+                        match &(item.0) {
+                            Node::Name(name) => {
+                                attributes.insert(
+                                    String::from_utf8_lossy(name).to_string(),
+                                    attribute_values_aux(item.1),
+                                );
+                                attributes
+                            }
+                            Node::String(name) => {
+                                attributes.insert(
+                                    String::from_utf8_lossy(name).to_string(),
+                                    attribute_values_aux(item.1),
+                                );
+                                attributes
+                            }
+                            _ => attributes,
+                        }
+                    }
+                    _ => attributes,
+                })
+        }
+        _ => ClassAttributes::new(),
+    }
 }
 
 fn class_decl_into_facts(decl: ClassDeclChildren, namespace: &str, mut facts: &mut Facts) {
@@ -169,6 +239,7 @@ fn class_decl_into_facts(decl: ClassDeclChildren, namespace: &str, mut facts: &m
         let mut decl_facts = TypeFacts {
             kind,
             flags,
+            attributes: ClassAttributes::new(),
             base_types: StringSet::new(),
             require_extends: StringSet::new(),
             require_implements: StringSet::new(),
@@ -176,6 +247,7 @@ fn class_decl_into_facts(decl: ClassDeclChildren, namespace: &str, mut facts: &m
         type_info_from_class_body(
             namespace,
             check_require,
+            decl.attributes,
             decl.body,
             &mut facts,
             &mut decl_facts,
@@ -197,6 +269,7 @@ fn add_or_update_classish_decl(name: String, mut delta: TypeFacts, types: &mut T
             tf.flags = Flag::MultipleDeclarations.set(tf.flags);
             tf.flags = Flag::combine(tf.flags, delta.flags);
             tf.base_types.append(&mut delta.base_types);
+            tf.attributes.append(&mut delta.attributes);
             tf.require_extends.append(&mut delta.require_extends);
             tf.require_implements.append(&mut delta.require_implements);
         })
@@ -220,6 +293,7 @@ fn collect(mut acc: CollectAcc, node: Node) -> CollectAcc {
                 let enum_facts = TypeFacts {
                     flags: Flag::Final as isize,
                     kind: TypeKind::Enum,
+                    attributes: ClassAttributes::new(),
                     base_types: StringSet::new(),
                     require_extends: StringSet::new(),
                     require_implements: StringSet::new(),

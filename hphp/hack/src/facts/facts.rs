@@ -24,6 +24,7 @@ pub enum TypeKind {
 }
 
 pub type StringSet = BTreeSet<String>;
+pub type ClassAttributes = BTreeMap<String, Vec<String>>;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -31,6 +32,7 @@ pub struct TypeFacts {
     pub base_types: StringSet,
     #[serde(rename = "kindOf")]
     pub kind: TypeKind,
+    pub attributes: ClassAttributes,
     pub flags: isize,
     pub require_extends: StringSet,
     pub require_implements: StringSet,
@@ -110,7 +112,10 @@ fn types_to_json<S: Serializer>(types_by_name: &TypeFactsByName, s: S) -> Result
             m.insert("name".to_owned(), json!(name));
         });
 
-        // possibly skip non-empty require*, depending on the kind
+        // possibly skip non-empty attributes/require*, depending on the kind
+        if types.skip_attributes() {
+            types_json.as_object_mut().map(|m| m.remove("attributes"));
+        }
         if types.skip_require_extends() {
             types_json
                 .as_object_mut()
@@ -138,6 +143,9 @@ impl TypeFacts {
             TypeKind::Trait => false,
             _ => self.require_implements.is_empty(),
         }
+    }
+    fn skip_attributes(&self) -> bool {
+        self.attributes.is_empty()
     }
 }
 
@@ -207,6 +215,7 @@ mod tests {
                 String::from("include_empty_both_when_trait_kind"),
                 TypeFacts {
                     kind: TypeKind::Trait,
+                    attributes: ClassAttributes::new(),
                     require_extends: StringSet::new(),
                     require_implements: StringSet::new(),
                     base_types,
@@ -218,6 +227,7 @@ mod tests {
                 String::from("include_empty_neither_when_class_kind"),
                 TypeFacts {
                     kind: TypeKind::Class,
+                    attributes: ClassAttributes::new(),
                     require_extends: StringSet::new(),
                     require_implements: StringSet::new(),
                     base_types: StringSet::new(),
@@ -229,6 +239,7 @@ mod tests {
                 String::from("include_empty_req_extends_when_interface_kind"),
                 TypeFacts {
                     kind: TypeKind::Interface,
+                    attributes: ClassAttributes::new(),
                     require_extends: StringSet::new(),
                     require_implements: StringSet::new(),
                     base_types: StringSet::new(),
@@ -240,6 +251,16 @@ mod tests {
                 String::from("include_nonempty_always"),
                 TypeFacts {
                     kind: TypeKind::Unknown,
+                    attributes: {
+                        let mut map = ClassAttributes::new();
+                        map.insert("A".into(), {
+                            let mut set = Vec::new();
+                            set.push("'B'".into());
+                            set
+                        });
+                        map.insert("C".into(), Vec::new());
+                        map
+                    },
                     require_extends: {
                         let mut set = StringSet::new();
                         set.insert("extends1".into());
@@ -303,6 +324,12 @@ mod tests {
       "requireExtends": []
     },
     {
+      "attributes": {
+        "A": [
+          "'B'"
+        ],
+        "C": []
+      },
       "baseTypes": [],
       "flags": 9,
       "kindOf": "unknown",

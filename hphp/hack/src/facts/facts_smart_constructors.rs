@@ -40,6 +40,7 @@ pub enum Node {
     Final,
     Static,
     QualifiedName(Vec<Node>),
+    ScopeResolutionExpression(Box<(Node, Node)>),
     // declarations
     ClassDecl(Box<ClassDeclChildren>),
     FunctionDecl(Box<Node>),
@@ -60,6 +61,7 @@ pub struct ClassDeclChildren {
     pub modifiers: Node,
     pub kind: Node,
     pub name: Node,
+    pub attributes: Node,
     pub extends: Node,
     pub implements: Node,
     pub constrs: Node,
@@ -130,6 +132,8 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
         let kind = token.kind();
         let result = match kind {
             TokenKind::Name => Node::Name(token_text()),
+            TokenKind::DecimalLiteral => Node::String(token_text()),
+            TokenKind::SingleQuotedStringLiteral => Node::String(token_text()),
             TokenKind::DoubleQuotedStringLiteral => Node::String(token_text()),
             TokenKind::XHPClassName => Node::XhpName(token_text()),
             TokenKind::Backslash => Node::Backslash,
@@ -420,7 +424,7 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
 
     fn make_classish_declaration(
         st: HasScriptContent<'a>,
-        _attributes: Self::R,
+        attributes: Self::R,
         modifiers: Self::R,
         keyword: Self::R,
         name: Self::R,
@@ -440,6 +444,7 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
                     modifiers,
                     kind: keyword,
                     name,
+                    attributes,
                     extends,
                     implements,
                     constrs,
@@ -456,5 +461,44 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
         _right_brace: Self::R,
     ) -> (HasScriptContent<'a>, Self::R) {
         (st, elements)
+    }
+
+    fn make_attribute_specification(
+        st: HasScriptContent<'a>,
+        _left_double_angle: Self::R,
+        attributes: Self::R,
+        _right_double_angle: Self::R,
+    ) -> (HasScriptContent<'a>, Self::R) {
+        (st, attributes)
+    }
+
+    fn make_constructor_call(
+        st: HasScriptContent<'a>,
+        class_type: Self::R,
+        _left_paren: Self::R,
+        argument_list: Self::R,
+        _right_paren: Self::R,
+    ) -> (HasScriptContent<'a>, Self::R) {
+        (st, Node::ListItem(Box::new((class_type, argument_list))))
+    }
+
+    fn make_decorated_expression(
+        st: HasScriptContent<'a>,
+        _decorator: Self::R,
+        expression: Self::R,
+    ) -> (HasScriptContent<'a>, Self::R) {
+        (st, expression)
+    }
+
+    fn make_scope_resolution_expression(
+        st: HasScriptContent<'a>,
+        qualifier: Self::R,
+        _operator: Self::R,
+        name: Self::R,
+    ) -> (HasScriptContent<'a>, Self::R) {
+        (
+            st,
+            Node::ScopeResolutionExpression(Box::new((qualifier, name))),
+        )
     }
 }

@@ -37,9 +37,11 @@ type node =
   | Final
   | Static
   | QualifiedName of node list
+  | ScopeResolutionExpression of node * node
   (* declarations *)
   | ClassDecl of {
       modifiers: node;
+      attributes: node;
       kind: node;
       name: node;
       extends: node;
@@ -110,6 +112,7 @@ module SC = struct
     let result =
       match Token.kind token with
       | TK.Name -> Name (fun () -> Token.text token)
+      | TK.DecimalLiteral -> String (fun () -> Token.text token)
       | TK.SingleQuotedStringLiteral
       | TK.DoubleQuotedStringLiteral -> String (fun () -> Token.text token)
       | TK.XHPClassName -> XhpName (fun () -> Token.text token)
@@ -211,12 +214,25 @@ module SC = struct
     if body = Ignored then st, Ignored
     else st, MethodDecl body
 
-  let make_classish_declaration _attributes modifiers keyword name _type_parameters
+  let make_classish_declaration attributes modifiers keyword name _type_parameters
     _extends_keyword extends _implements_keyword implements constrs body st =
     if name = Ignored then st, Ignored
-    else st, ClassDecl { modifiers; kind = keyword; name; extends; implements; constrs; body }
+    else st, ClassDecl { modifiers; attributes; kind = keyword; name; extends
+      ; implements; constrs; body }
 
   let make_classish_body _left_brace elements _right_brace st =
     st, elements
+
+  let make_attribute_specification _left_double_angle attributes _right_double_angle st =
+    st, attributes
+
+  let make_constructor_call class_type _left_paren argument_list _right_paren st =
+    st, ListItem (class_type, argument_list)
+
+  let make_decorated_expression _decorator expression st =
+    st, expression
+
+  let make_scope_resolution_expression qualifier _operator name st =
+    st, ScopeResolutionExpression (qualifier, name)
 
 end

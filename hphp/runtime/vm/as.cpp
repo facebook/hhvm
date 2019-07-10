@@ -3433,7 +3433,7 @@ void parse_alias(AsmState& as) {
     record.typeStructure = ArrNR(ArrayData::GetScalarArray(std::move(ts)));
   }
   auto aliasId = as.ue->addTypeAlias(record);
-  as.ue->pushMergeableTypeAlias(Unit::MergeKind::TypeAlias, aliasId);
+  as.ue->pushMergeableTypeAlias(aliasId);
 
   as.in.expectWs(';');
 }

@@ -92,6 +92,8 @@ struct EmitUnitState {
   std::vector<PceInfo> pceInfo;
   std::vector<FeInfo>  feInfo;
   std::vector<Id>      typeAliasInfo;
+
+  std::unordered_set<Id> processedTypeAlias;
 };
 
 /*
@@ -433,10 +435,12 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
         ue.pushMergeableDef(kind, bc.DefCns.str1, *top);
         return;
       }
-      case Op::DefTypeAlias:
-        ue.pushMergeableTypeAlias(Unit::MergeKind::TypeAlias,
-                                  bc.DefTypeAlias.arg1);
+      case Op::DefTypeAlias: {
+        auto tid = bc.DefTypeAlias.arg1;
+        ue.pushMergeableTypeAlias(tid);
+        euState.processedTypeAlias.insert(tid);
         return;
+      }
 
       case Op::Null:   tos = TInitNull; return;
       case Op::True:   tos = TTrue; return;
@@ -1557,9 +1561,12 @@ void emit_class(EmitUnitState& state,
   pce->setEnumBaseTy(cls.enumBaseTy);
 }
 
-void emit_typealias(UnitEmitter& ue, const php::TypeAlias& alias) {
+void emit_typealias(UnitEmitter& ue, const php::TypeAlias& alias,
+                    const EmitUnitState& state) {
   auto const id = ue.addTypeAlias(alias);
-  ue.pushMergeableTypeAlias(HPHP::Unit::MergeKind::TypeAlias, id);
+  if (state.processedTypeAlias.find(id) == state.processedTypeAlias.end()) {
+    ue.pushMergeableTypeAlias(id);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1640,7 +1647,7 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
   } while (pceId < state.pceInfo.size());
 
   for (auto tid : state.typeAliasInfo) {
-    emit_typealias(*ue, *unit.typeAliases[tid]);
+    emit_typealias(*ue, *unit.typeAliases[tid], state);
   }
 
   for (size_t id = 0; id < unit.records.size(); ++id) {

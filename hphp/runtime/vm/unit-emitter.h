@@ -374,8 +374,8 @@ struct UnitEmitter {
   /*
    * Add a TypeAlias to the UnitEmitter's list of mergeables.
    */
-  void pushMergeableTypeAlias(Unit::MergeKind kind, const Id id);
-  void insertMergeableTypeAlias(int ix, Unit::MergeKind kind, const Id id);
+  void pushMergeableTypeAlias(const Id id);
+  void insertMergeableTypeAlias(int ix, const Id id);
 
   /////////////////////////////////////////////////////////////////////////////
   // Bytecode emit.

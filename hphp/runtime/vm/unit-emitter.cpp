@@ -432,16 +432,15 @@ void UnitEmitter::insertMergeableDef(int ix, Unit::MergeKind kind,
   m_allClassesHoistable = false;
 }
 
-void UnitEmitter::pushMergeableTypeAlias(Unit::MergeKind kind, const Id id) {
-  m_mergeableStmts.push_back(std::make_pair(kind, id));
+void UnitEmitter::pushMergeableTypeAlias(const Id id) {
+  m_mergeableStmts.push_back(std::make_pair(Unit::MergeKind::TypeAlias, id));
   m_allClassesHoistable = false;
 }
 
-void UnitEmitter::insertMergeableTypeAlias(int ix, Unit::MergeKind kind,
-                                           const Id id) {
+void UnitEmitter::insertMergeableTypeAlias(int ix, const Id id) {
   assertx(size_t(ix) <= m_mergeableStmts.size());
   m_mergeableStmts.insert(m_mergeableStmts.begin() + ix,
-                          std::make_pair(kind, id));
+                          std::make_pair(Unit::MergeKind::TypeAlias, id));
   m_allClassesHoistable = false;
 }
 
@@ -1290,7 +1289,7 @@ void UnitRepoProxy::GetUnitMergeablesStmt
       }
       switch (k) {
         case MergeKind::TypeAlias:
-          ue.insertMergeableTypeAlias(mergeableIx, k, mergeableId);
+          ue.insertMergeableTypeAlias(mergeableIx, mergeableId);
           break;
         case MergeKind::ReqDoc:
           ue.insertMergeableInclude(mergeableIx, k, mergeableId);

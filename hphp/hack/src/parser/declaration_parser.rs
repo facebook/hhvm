@@ -152,12 +152,10 @@ where
         res
     }
 
-    fn parse_possible_generic_specifier(&mut self) -> S::R {
-        self.with_type_parser(&|x: &mut TypeParser<'a, S, T>| x.parse_possible_generic_specifier())
-    }
-
-    fn parse_type_specifier(&mut self, allow_var: bool) -> S::R {
-        self.with_type_parser(&|p: &mut TypeParser<'a, S, T>| p.parse_type_specifier(allow_var))
+    fn parse_type_specifier(&mut self, allow_var: bool, allow_attr: bool) -> S::R {
+        self.with_type_parser(&|p: &mut TypeParser<'a, S, T>| {
+            p.parse_type_specifier(allow_var, allow_attr)
+        })
     }
 
     fn with_statement_parser<U>(&mut self, f: &dyn Fn(&mut StatementParser<'a, S, T>) -> U) -> U
@@ -180,6 +178,10 @@ where
         self.with_type_parser(&|x: &mut TypeParser<'a, S, T>| {
             x.parse_simple_type_or_type_constant()
         })
+    }
+
+    fn parse_simple_type_or_generic(&mut self) -> S::R {
+        self.with_type_parser(&|p: &mut TypeParser<'a, S, T>| p.parse_simple_type_or_generic())
     }
 
     fn with_expression_parser<U>(&mut self, f: &dyn Fn(&mut ExpressionParser<'a, S, T>) -> U) -> U
@@ -234,7 +236,8 @@ where
         let enum_ = self.assert_token(TokenKind::Enum);
         let name = self.require_name();
         let colon = self.require_colon();
-        let base = self.parse_type_specifier(false /* allow_var */);
+        let base =
+            self.parse_type_specifier(false /* allow_var */, true /* allow_attr */);
         let enum_type = self.parse_type_constraint_opt();
         let (left_brace, enumerators, right_brace) =
             self.parse_braced_list(&|x: &mut Self| x.parse_enumerator_list_opt());
@@ -263,7 +266,7 @@ where
         //    = expression
         let name = self.require_name_allow_non_reserved();
         let colon = self.require_colon();
-        let field_type = self.parse_type_specifier(false);
+        let field_type = self.parse_type_specifier(false, true);
         let init = self.parse_simple_initializer_opt();
         let comma = self.require_comma();
         S!(
@@ -659,7 +662,8 @@ where
             | TokenKind::Namespace
             | TokenKind::Name
             | TokenKind::XHPClassName => {
-                let item = self.parse_type_specifier(false /* allow_var */);
+                let item = self
+                    .parse_type_specifier(false /* allow_var */, true /* allow_attr */);
                 let comma = self.optional_token(TokenKind::Comma);
                 let is_missing = comma.is_missing();
                 let list_item = S!(make_list_item, self, item, comma);
@@ -944,7 +948,7 @@ where
                     right_brace
                 )
             }
-            _ => self.parse_type_specifier(true),
+            _ => self.parse_type_specifier(true, true),
         }
     }
 
@@ -1058,7 +1062,7 @@ where
         // Here we're parsing a name followed by an optional generic type
         // argument list; if we don't have a name, give an error.
         match self.peek_token_kind() {
-            TokenKind::Backslash | TokenKind::Name => self.parse_possible_generic_specifier(),
+            TokenKind::Backslash | TokenKind::Name => self.parse_simple_type_or_generic(),
             _ => self.require_qualified_name(),
         }
     }
@@ -1068,7 +1072,7 @@ where
         // argument list; if we don't have a name, give an error.
         match self.peek_token_kind() {
             TokenKind::Backslash | TokenKind::Construct | TokenKind::Name => {
-                self.parse_possible_generic_specifier()
+                self.parse_simple_type_or_generic()
             }
             _ => S!(make_missing, self, self.pos()),
         }
@@ -1106,7 +1110,7 @@ where
             }
         };
         let name = if self.is_next_xhp_class_name() {
-            self.parse_possible_generic_specifier()
+            self.parse_simple_type_or_generic()
         } else {
             self.parse_qualified_name_type()
         };
@@ -1315,14 +1319,14 @@ where
         // strict mode. We give an error in a later pass.
         let prop_type = match self.peek_token_kind() {
             TokenKind::Variable => S!(make_missing, self, self.pos()),
-            _ => self.parse_type_specifier(false /* allow_var*/),
+            _ => self.parse_type_specifier(false /* allow_var */, false /* allow_attr */),
         };
         let decls =
             self.parse_comma_list(TokenKind::Semicolon, Errors::error1008, &|x: &mut Self| {
                 x.parse_property_declarator()
             });
         let semi = self.require_semicolon();
-        let result = S!(
+        S!(
             make_property_declaration,
             self,
             attribute_spec,
@@ -1330,8 +1334,7 @@ where
             prop_type,
             decls,
             semi
-        );
-        result
+        )
     }
 
     fn parse_property_declarator(&mut self) -> S::R {
@@ -1347,7 +1350,7 @@ where
 
     fn is_type_in_const(&self) -> bool {
         let mut parser1 = self.clone();
-        let _ = parser1.parse_type_specifier(false);
+        let _ = parser1.parse_type_specifier(false, true);
         let _ = parser1.require_name_allow_all_keywords();
         self.errors.len() == parser1.errors.len()
     }
@@ -1365,7 +1368,7 @@ where
     //   =  const-expression
     fn parse_const_declaration(&mut self, modifiers: S::R, const_: S::R) -> S::R {
         let type_spec = if self.is_type_in_const() {
-            self.parse_type_specifier(/* allow_var = */ false)
+            self.parse_type_specifier(/* allow_var = */ false, /* allow_attr = */ false)
         } else {
             S!(make_missing, self, self.pos())
         };
@@ -1436,7 +1439,8 @@ where
         let type_constraint = self.parse_type_constraint_opt();
         let (equal_token, type_specifier) = if self.peek_token_kind() == TokenKind::Equal {
             let equal_token = self.assert_token(TokenKind::Equal);
-            let type_spec = self.parse_type_specifier(/* allow_var = */ false);
+            let type_spec = self
+                .parse_type_specifier(/* allow_var = */ false, /* allow_attr = */ true);
             (equal_token, type_spec)
         } else {
             let missing1 = S!(make_missing, self, self.pos());
@@ -1609,7 +1613,9 @@ where
             TokenKind::Variable | TokenKind::DotDotDot | TokenKind::Ampersand => {
                 S!(make_missing, self, self.pos())
             }
-            _ => self.parse_type_specifier(/* allow_var = */ false),
+            _ => {
+                self.parse_type_specifier(/* allow_var = */ false, /* allow_attr */ false)
+            }
         };
         let name = self.parse_decorated_variable_opt();
         let default = self.parse_simple_initializer_opt();
@@ -1740,9 +1746,11 @@ where
         // (This work is tracked by spec issue 100.)
         // constraint:
         //   type-specifier  constraint-operator  type-specifier
-        let left = self.parse_type_specifier(/* allow_var = */ false);
+        let left =
+            self.parse_type_specifier(/* allow_var = */ false, /* allow_attr = */ true);
         let op = self.parse_constraint_operator();
-        let right = self.parse_type_specifier(/* allow_var = */ false);
+        let right =
+            self.parse_type_specifier(/* allow_var = */ false, /* allow_attr = */ true);
         S!(make_where_constraint, self, left, op, right)
     }
 
@@ -2190,19 +2198,16 @@ where
     }
 
     fn parse_generic_type_parameter_list_opt(&mut self) -> S::R {
-        if self.peek_next_partial_token_is_left_angle() {
-            self.parse_generic_type_parameter_list()
-        } else {
-            S!(make_missing, self, self.pos())
+        match self.peek_token_kind_with_possible_attributized_type_list() {
+            TokenKind::LessThan => self.with_type_parser(&|p: &mut TypeParser<'a, S, T>| {
+                p.parse_generic_type_parameter_list()
+            }),
+            _ => S!(make_missing, self, self.pos()),
         }
     }
 
     fn parse_type_constraint_opt(&mut self) -> S::R {
         self.with_type_parser(&|p: &mut TypeParser<'a, S, T>| p.parse_type_constraint_opt())
-    }
-
-    fn parse_generic_type_parameter_list(&mut self) -> S::R {
-        self.with_type_parser(&|p: &mut TypeParser<'a, S, T>| p.parse_generic_type_parameter_list())
     }
 
     fn parse_alias_declaration(&mut self, attr: S::R) -> S::R {
@@ -2221,7 +2226,7 @@ where
         let generic = self.parse_generic_type_parameter_list_opt();
         let constr = self.parse_type_constraint_opt();
         let equal = self.require_equal();
-        let ty = self.parse_type_specifier(false /* allow_var */);
+        let ty = self.parse_type_specifier(false /* allow_var */, true /* allow_attr */);
         let semi = self.require_semicolon();
         S!(
             make_alias_declaration,
@@ -2372,7 +2377,7 @@ where
                 let typ = self.require_token(TokenKind::Type, Errors::type_keyword);
                 let tyname = self.require_name();
                 let equal = self.require_equal();
-                let ty = self.parse_type_specifier(false);
+                let ty = self.parse_type_specifier(false, true);
                 S!(
                     make_pocket_mapping_type_declaration,
                     self,
@@ -2460,7 +2465,7 @@ where
                         )
                     }
                     _ => {
-                        let ty = self.parse_type_specifier(false);
+                        let ty = self.parse_type_specifier(false, true);
                         let name = self.require_name();
                         let semi = self.require_semicolon();
                         S!(

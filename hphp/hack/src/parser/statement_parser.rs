@@ -147,7 +147,7 @@ where
     }
 
     fn parse_type_specifier(&mut self) -> S::R {
-        self.with_type_parser(&|x: &mut TypeParser<'a, S, T>| x.parse_type_specifier(false))
+        self.with_type_parser(&|x: &mut TypeParser<'a, S, T>| x.parse_type_specifier(false, true))
     }
 
     fn with_expression_parser<U>(&mut self, f: &dyn Fn(&mut ExpressionParser<'a, S, T>) -> U) -> U {

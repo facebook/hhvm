@@ -186,6 +186,7 @@ pub trait SmartConstructors<'a, State> {
     fn make_nullable_type_specifier(st: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R);
     fn make_like_type_specifier(st: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R);
     fn make_soft_type_specifier(st: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R);
+    fn make_attributized_specifier(st: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R);
     fn make_reified_type_argument(st: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R);
     fn make_type_arguments(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R);
     fn make_type_parameters(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R);

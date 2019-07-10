@@ -1740,6 +1740,15 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_attributized_specifier(attributized_specifier_attribute_spec: Self, attributized_specifier_type: Self) -> Self {
+        let syntax = SyntaxVariant::AttributizedSpecifier(Box::new(AttributizedSpecifierChildren {
+            attributized_specifier_attribute_spec,
+            attributized_specifier_type,
+        }));
+        let value = V::from_syntax(&syntax);
+        Self::make(syntax, value)
+    }
+
     fn make_reified_type_argument(reified_type_argument_reified: Self, reified_type_argument_type: Self) -> Self {
         let syntax = SyntaxVariant::ReifiedTypeArgument(Box::new(ReifiedTypeArgumentChildren {
             reified_type_argument_reified,
@@ -2987,6 +2996,11 @@ where
                 let acc = f(&x.soft_type, acc);
                 acc
             },
+            SyntaxVariant::AttributizedSpecifier(x) => {
+                let acc = f(&x.attributized_specifier_attribute_spec, acc);
+                let acc = f(&x.attributized_specifier_type, acc);
+                acc
+            },
             SyntaxVariant::ReifiedTypeArgument(x) => {
                 let acc = f(&x.reified_type_argument_reified, acc);
                 let acc = f(&x.reified_type_argument_type, acc);
@@ -3242,6 +3256,7 @@ where
             SyntaxVariant::NullableTypeSpecifier {..} => SyntaxKind::NullableTypeSpecifier,
             SyntaxVariant::LikeTypeSpecifier {..} => SyntaxKind::LikeTypeSpecifier,
             SyntaxVariant::SoftTypeSpecifier {..} => SyntaxKind::SoftTypeSpecifier,
+            SyntaxVariant::AttributizedSpecifier {..} => SyntaxKind::AttributizedSpecifier,
             SyntaxVariant::ReifiedTypeArgument {..} => SyntaxKind::ReifiedTypeArgument,
             SyntaxVariant::TypeArguments {..} => SyntaxKind::TypeArguments,
             SyntaxVariant::TypeParameters {..} => SyntaxKind::TypeParameters,
@@ -4505,6 +4520,12 @@ pub struct SoftTypeSpecifierChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+pub struct AttributizedSpecifierChildren<T, V> {
+    pub attributized_specifier_attribute_spec: Syntax<T, V>,
+    pub attributized_specifier_type: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
 pub struct ReifiedTypeArgumentChildren<T, V> {
     pub reified_type_argument_reified: Syntax<T, V>,
     pub reified_type_argument_type: Syntax<T, V>,
@@ -4770,6 +4791,7 @@ pub enum SyntaxVariant<T, V> {
     NullableTypeSpecifier(Box<NullableTypeSpecifierChildren<T, V>>),
     LikeTypeSpecifier(Box<LikeTypeSpecifierChildren<T, V>>),
     SoftTypeSpecifier(Box<SoftTypeSpecifierChildren<T, V>>),
+    AttributizedSpecifier(Box<AttributizedSpecifierChildren<T, V>>),
     ReifiedTypeArgument(Box<ReifiedTypeArgumentChildren<T, V>>),
     TypeArguments(Box<TypeArgumentsChildren<T, V>>),
     TypeParameters(Box<TypeParametersChildren<T, V>>),

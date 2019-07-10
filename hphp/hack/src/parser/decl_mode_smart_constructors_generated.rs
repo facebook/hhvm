@@ -683,6 +683,10 @@ where
         <Self as SyntaxSmartConstructors<'a, Self::R, State<Self::R>>>::make_soft_type_specifier(s, arg0, arg1)
     }
 
+    fn make_attributized_specifier(s: Vec<bool>, arg0: Self::R, arg1: Self::R) -> (Vec<bool>, Self::R) {
+        <Self as SyntaxSmartConstructors<'a, Self::R, State<Self::R>>>::make_attributized_specifier(s, arg0, arg1)
+    }
+
     fn make_reified_type_argument(s: Vec<bool>, arg0: Self::R, arg1: Self::R) -> (Vec<bool>, Self::R) {
         <Self as SyntaxSmartConstructors<'a, Self::R, State<Self::R>>>::make_reified_type_argument(s, arg0, arg1)
     }

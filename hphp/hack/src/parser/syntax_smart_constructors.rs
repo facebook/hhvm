@@ -836,6 +836,11 @@ where
         (s, Self::R::make_soft_type_specifier(arg0, arg1))
     }
 
+    fn make_attributized_specifier(s: State::T, arg0 : Self::R, arg1 : Self::R) -> (State::T, Self::R) {
+        let s = State::next(s, vec![&arg0, &arg1]);
+        (s, Self::R::make_attributized_specifier(arg0, arg1))
+    }
+
     fn make_reified_type_argument(s: State::T, arg0 : Self::R, arg1 : Self::R) -> (State::T, Self::R) {
         let s = State::next(s, vec![&arg0, &arg1]);
         (s, Self::R::make_reified_type_argument(arg0, arg1))

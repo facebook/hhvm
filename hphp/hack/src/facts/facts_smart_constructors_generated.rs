@@ -678,6 +678,10 @@ impl<'a> SmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstructors 
         <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_soft_type_specifier(s, arg0, arg1)
     }
 
+    fn make_attributized_specifier(s: HasScriptContent<'a>, arg0: Self::R, arg1: Self::R) -> (HasScriptContent<'a>, Self::R) {
+        <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_attributized_specifier(s, arg0, arg1)
+    }
+
     fn make_reified_type_argument(s: HasScriptContent<'a>, arg0: Self::R, arg1: Self::R) -> (HasScriptContent<'a>, Self::R) {
         <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_reified_type_argument(s, arg0, arg1)
     }

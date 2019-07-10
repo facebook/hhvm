@@ -355,7 +355,20 @@ where
                 let str_maybe = parser1.next_token_no_trailing();
                 match str_maybe.kind() {
                     | TokenKind::SingleQuotedStringLiteral | TokenKind::NowdocStringLiteral
-                    | TokenKind::HeredocStringLiteral | TokenKind::HeredocStringLiteralHead => {
+                    // for now, try generic type argument list with attributes before resorting to bad prefix
+                    | TokenKind::HeredocStringLiteral => {
+                        match self.try_parse_specified_function_call(&qualified_name) {
+                            Some((type_arguments, p)) => {
+                                self.continue_from(p);
+                                self.do_parse_specified_function_call(qualified_name, type_arguments)
+                            }
+                            _ => {
+                                self.with_error(Errors::prefixed_invalid_string_kind );
+                                self.parse_name_or_collection_literal_expression(qualified_name)
+                            }
+                        }
+                    }
+                    | TokenKind::HeredocStringLiteralHead => {
                         // Treat as an attempt to prefix a non-double-quoted string
                         self.with_error(Errors::prefixed_invalid_string_kind );
                         self.parse_name_or_collection_literal_expression(qualified_name)
@@ -1137,6 +1150,9 @@ where
         if !Self::can_term_take_type_args(term) {
             return None;
         }
+        if self.peek_token_kind_with_possible_attributized_type_list() != TokenKind::LessThan {
+            return None;
+        }
         let mut parser1 = self.clone();
         let (type_arguments, no_arg_is_missing) = parser1.parse_generic_type_arguments();
         if no_arg_is_missing && self.errors.len() == parser1.errors.len() {
@@ -1193,14 +1209,15 @@ where
     ) -> BinaryExpressionPrefixKind<(S::R, Self)> {
         // We need to override the precedence of the < operator in the case where it
         // is the start of a specified function call.
-        let maybe_prefix = if operator == TokenKind::LessThan {
-            match self.try_parse_specified_function_call(left_term) {
-                Some(r) => Some(BinaryExpressionPrefixKind::PrefixLessThan(r)),
-                None => None,
-            }
-        } else {
-            None
-        };
+        let maybe_prefix =
+            if self.peek_token_kind_with_possible_attributized_type_list() == TokenKind::LessThan {
+                match self.try_parse_specified_function_call(left_term) {
+                    Some(r) => Some(BinaryExpressionPrefixKind::PrefixLessThan(r)),
+                    None => None,
+                }
+            } else {
+                None
+            };
         match maybe_prefix {
             Some(r) => r,
             None => {
@@ -1505,7 +1522,7 @@ where
             let start_token = S!(make_token, self, start_token);
             self.scan_remaining_qualified_name(start_token)
         };
-        match self.peek_token_kind() {
+        match self.peek_token_kind_with_possible_attributized_type_list() {
             TokenKind::LeftParen | TokenKind::LessThan => Some(name),
             _ => None,
         }
@@ -1532,26 +1549,28 @@ where
         let mut parser1 = self.clone();
         let token = parser1.next_token();
         match token.kind() {
-            TokenKind::Parent | TokenKind::SelfToken => match parser1.peek_token_kind() {
-                TokenKind::LeftParen => {
-                    self.continue_from(parser1);
-                    S!(make_token, self, token)
-                }
-                TokenKind::LessThan => {
-                    let (type_arguments, no_arg_is_missing) =
-                        parser1.parse_generic_type_arguments();
-                    if no_arg_is_missing && self.errors.len() == parser1.errors.len() {
+            TokenKind::Parent | TokenKind::SelfToken => {
+                match parser1.peek_token_kind_with_possible_attributized_type_list() {
+                    TokenKind::LeftParen => {
                         self.continue_from(parser1);
-                        let token = S!(make_token, self, token);
-                        let type_specifier =
-                            S!(make_generic_type_specifier, self, token, type_arguments);
-                        type_specifier
-                    } else {
-                        default(self)
+                        S!(make_token, self, token)
                     }
+                    TokenKind::LessThan => {
+                        let (type_arguments, no_arg_is_missing) =
+                            parser1.parse_generic_type_arguments();
+                        if no_arg_is_missing && self.errors.len() == parser1.errors.len() {
+                            self.continue_from(parser1);
+                            let token = S!(make_token, self, token);
+                            let type_specifier =
+                                S!(make_generic_type_specifier, self, token, type_arguments);
+                            type_specifier
+                        } else {
+                            default(self)
+                        }
+                    }
+                    _ => default(self),
                 }
-                _ => default(self),
-            },
+            }
             TokenKind::Static if parser1.peek_token_kind() == TokenKind::LeftParen => {
                 self.continue_from(parser1);
                 S!(make_token, self, token)
@@ -2041,8 +2060,8 @@ where
         kw: TokenKind,
     ) -> S::R {
         let op = self.assert_token(kw);
-        let right =
-            self.with_type_parser(&|p: &mut TypeParser<'a, S, T>| p.parse_type_specifier(false));
+        let right = self
+            .with_type_parser(&|p: &mut TypeParser<'a, S, T>| p.parse_type_specifier(false, true));
         let result = f(self, left, op, right);
         self.parse_remaining_expression(result)
     }
@@ -2254,7 +2273,7 @@ where
     }
 
     fn parse_name_or_collection_literal_expression(&mut self, name: S::R) -> S::R {
-        match self.peek_token_kind() {
+        match self.peek_token_kind_with_possible_attributized_type_list() {
             TokenKind::LeftBrace => {
                 let name = S!(make_simple_type_specifier, self, name);
                 self.parse_collection_literal_expression(name)
@@ -2423,7 +2442,7 @@ where
     ) -> S::R {
         let mut parser1 = self.clone();
         let keyword = parser1.assert_token(keyword_token);
-        let explicit_type = match parser1.peek_token_kind() {
+        let explicit_type = match parser1.peek_token_kind_with_possible_attributized_type_list() {
             TokenKind::LessThan => {
                 let (type_arguments, _) = parser1.parse_generic_type_arguments();
                 // skip no_arg_is_missing check since there must only be 1 or 2 type arguments

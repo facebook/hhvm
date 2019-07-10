@@ -229,19 +229,31 @@ where
     // when the parser is at the <<<, it will scan the entire file looking for an
     // ending to the heredoc, which could quickly get bad if there are many such
     // declarations in a file.
-    fn peek_next_partial_token_is_left_angle(&self) -> bool {
+    fn peek_next_partial_token_is_triple_left_angle(&self) -> bool {
         let mut lexer = self.lexer().clone();
         lexer.scan_leading_php_trivia();
-        let c = lexer.peek_char(0);
-        c == '<'
+        let tparam_open = lexer.peek_char(0);
+        let attr1 = lexer.peek_char(1);
+        let attr2 = lexer.peek_char(2);
+        tparam_open == '<' && attr1 == '<' && attr2 == '<'
+    }
+
+    // Type parameter/argument lists begin with < and can have attributes immediately
+    // afterwards, so this peeks a token kind at the beginning of such a list. *)
+    fn peek_token_kind_with_possible_attributized_type_list(&self) -> TokenKind {
+        if self.peek_next_partial_token_is_triple_left_angle() {
+            TokenKind::LessThan
+        } else {
+            self.peek_token_kind()
+        }
     }
 
     // In the case of attributes on generics, one could write
-    // function f<<<__Attr>> reify T, ...>
+    // function f<<<__Attr>> reify T, ...> or Awaitable<<<__Soft>> int>
     // The triple left angle is currently lexed as a HeredocStringLiteral,
     // but we can get around this by manually advancing the lexer one token
     // and returning a LeftAngle. Then, the next token will be a LeftAngleLeftAngle
-    fn assert_left_angle_in_type_param_list_with_possible_attribute(&mut self) -> S::R {
+    fn assert_left_angle_in_type_list_with_possible_attribute(&mut self) -> S::R {
         let parser1 = self.clone();
         let lexer = self.lexer_mut();
         let tparam_open = lexer.peek_char(0);

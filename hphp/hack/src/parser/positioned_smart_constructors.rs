@@ -685,6 +685,10 @@ impl<'a, State: StateType<'a, PositionedSyntax>> SmartConstructors<'a, State::T>
         <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_soft_type_specifier(s, arg0, arg1)
     }
 
+    fn make_attributized_specifier(s: State::T, arg0: Self::R, arg1: Self::R) -> (State::T, Self::R) {
+        <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_attributized_specifier(s, arg0, arg1)
+    }
+
     fn make_reified_type_argument(s: State::T, arg0: Self::R, arg1: Self::R) -> (State::T, Self::R) {
         <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_reified_type_argument(s, arg0, arg1)
     }

@@ -1296,6 +1296,14 @@ pub trait FlattenSmartConstructors<'a, State>
         }
     }
 
+    fn make_attributized_specifier(s: State, arg0: Self::R, arg1: Self::R) -> (State, Self::R) {
+        if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
+          (s, Self::zero())
+        } else {
+          (s, Self::flatten(vec!(arg0, arg1)))
+        }
+    }
+
     fn make_reified_type_argument(s: State, arg0: Self::R, arg1: Self::R) -> (State, Self::R) {
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           (s, Self::zero())

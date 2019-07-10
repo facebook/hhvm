@@ -178,6 +178,7 @@ pub trait SyntaxType: SyntaxTypeBase
     fn make_nullable_type_specifier(nullable_question: Self, nullable_type: Self) -> Self;
     fn make_like_type_specifier(like_tilde: Self, like_type: Self) -> Self;
     fn make_soft_type_specifier(soft_at: Self, soft_type: Self) -> Self;
+    fn make_attributized_specifier(attributized_specifier_attribute_spec: Self, attributized_specifier_type: Self) -> Self;
     fn make_reified_type_argument(reified_type_argument_reified: Self, reified_type_argument_type: Self) -> Self;
     fn make_type_arguments(type_arguments_left_angle: Self, type_arguments_types: Self, type_arguments_right_angle: Self) -> Self;
     fn make_type_parameters(type_parameters_left_angle: Self, type_parameters_parameters: Self, type_parameters_right_angle: Self) -> Self;

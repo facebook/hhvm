@@ -678,6 +678,10 @@ impl<'a> SmartConstructors<'a, NoState> for MinimalSmartConstructors {
         <Self as SyntaxSmartConstructors<'a, MinimalSyntax, NoState>>::make_soft_type_specifier(s, arg0, arg1)
     }
 
+    fn make_attributized_specifier(s: NoState, arg0: Self::R, arg1: Self::R) -> (NoState, Self::R) {
+        <Self as SyntaxSmartConstructors<'a, MinimalSyntax, NoState>>::make_attributized_specifier(s, arg0, arg1)
+    }
+
     fn make_reified_type_argument(s: NoState, arg0: Self::R, arg1: Self::R) -> (NoState, Self::R) {
         <Self as SyntaxSmartConstructors<'a, MinimalSyntax, NoState>>::make_reified_type_argument(s, arg0, arg1)
     }

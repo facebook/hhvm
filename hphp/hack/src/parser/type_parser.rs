@@ -170,7 +170,7 @@ where
     }
 
     // TODO: What about something like for::for? Is that a legal type constant?
-    pub fn parse_type_specifier(&mut self, allow_var: bool) -> S::R {
+    pub fn parse_type_specifier(&mut self, allow_var: bool, allow_attr: bool) -> S::R {
         // Strictly speaking, "mixed" is a nullable type specifier. We parse it as
         // a simple type specifier here.
         let mut parser1 = self.clone();
@@ -216,7 +216,7 @@ where
             | TokenKind::SelfToken
             | TokenKind::Parent => self.parse_simple_type_or_type_constant(),
             | TokenKind::Category
-            | TokenKind::XHPClassName => self.parse_possible_generic_specifier_or_type_const(),
+            | TokenKind::XHPClassName => self.parse_simple_type_or_type_constant_or_generic(),
             | TokenKind::Array => self.parse_array_type_specifier(),
             | TokenKind::Darray => self.parse_darray_type_specifier(),
             | TokenKind::Varray => self.parse_varray_type_specifier(),
@@ -229,6 +229,7 @@ where
             | TokenKind::Question => self.parse_nullable_type_specifier(),
             | TokenKind::Tilde => self.parse_like_type_specifier(),
             | TokenKind::At => self.parse_soft_type_specifier(),
+            | TokenKind::LessThanLessThan if allow_attr => self.parse_attributized_specifier(),
             | TokenKind::Classname => self.parse_classname_type_specifier(),
             | _ => {
                 self.with_error_on_whole_token(Errors::error1007);
@@ -268,9 +269,19 @@ where
         }
     }
 
+    fn parse_remaining_generic(&mut self, name: S::R) -> S::R {
+        let (arguments, _) = self.parse_generic_type_argument_list();
+        S!(make_generic_type_specifier, self, name, arguments)
+    }
+
     pub fn parse_simple_type_or_type_constant(&mut self) -> S::R {
         let name = self.next_xhp_class_name_or_other();
         self.parse_remaining_simple_type_or_type_constant(name)
+    }
+
+    pub fn parse_simple_type_or_generic(&mut self) -> S::R {
+        let name = self.next_xhp_class_name_or_other();
+        self.parse_remaining_simple_type_or_generic(name)
     }
 
     fn parse_remaining_simple_type_or_type_constant(&mut self, name: S::R) -> S::R {
@@ -291,40 +302,15 @@ where
     }
 
     fn parse_remaining_simple_type_or_type_constant_or_generic(&mut self, name: S::R) -> S::R {
-        match self.peek_token_kind() {
-            TokenKind::LessThan => {
-                self.parse_remaining_possible_generic_specifier_or_type_const(name)
-            }
+        match self.peek_token_kind_with_possible_attributized_type_list() {
+            TokenKind::LessThan => self.parse_remaining_generic(name),
             _ => self.parse_remaining_simple_type_or_type_constant(name),
         }
     }
 
-    fn parse_possible_generic_specifier_or_type_const(&mut self) -> S::R {
-        let name = self.next_xhp_class_name_or_other();
-        self.parse_remaining_possible_generic_specifier_or_type_const(name)
-    }
-
-    fn parse_remaining_possible_generic_specifier_or_type_const(&mut self, name: S::R) -> S::R {
-        match self.peek_token_kind() {
-            TokenKind::LessThan => {
-                let (arguments, _) = self.parse_generic_type_argument_list();
-                S!(make_generic_type_specifier, self, name, arguments)
-            }
-            TokenKind::ColonColon => self.parse_remaining_type_constant(name),
-            _ => S!(make_simple_type_specifier, self, name),
-        }
-    }
-
-    // SPEC
-    // class-interface-trait-specifier:
-    //   qualified-name generic-type-argument-listopt
-    pub fn parse_possible_generic_specifier(&mut self) -> S::R {
-        let name = self.next_xhp_class_name_or_other();
-        match self.peek_token_kind() {
-            TokenKind::LessThan => {
-                let (arguments, _) = self.parse_generic_type_argument_list();
-                S!(make_generic_type_specifier, self, name, arguments)
-            }
+    fn parse_remaining_simple_type_or_generic(&mut self, name: S::R) -> S::R {
+        match self.peek_token_kind_with_possible_attributized_type_list() {
+            TokenKind::LessThan => self.parse_remaining_generic(name),
             _ => S!(make_simple_type_specifier, self, name),
         }
     }
@@ -349,7 +335,7 @@ where
             TokenKind::As | TokenKind::Super | TokenKind::From => {
                 self.continue_from(parser1);
                 let constraint_token = S!(make_token, self, token);
-                let matched_type = self.parse_type_specifier(false);
+                let matched_type = self.parse_type_specifier(false, true);
                 let type_constraint =
                     S!(make_type_constraint, self, constraint_token, matched_type);
                 Some(type_constraint)
@@ -408,7 +394,7 @@ where
     //
 
     pub fn parse_generic_type_parameter_list(&mut self) -> S::R {
-        let left = self.assert_left_angle_in_type_param_list_with_possible_attribute();
+        let left = self.assert_left_angle_in_type_list_with_possible_attribute();
         let (params, _) = self.parse_comma_list_allow_trailing(
             TokenKind::GreaterThan,
             Errors::error1007,
@@ -429,7 +415,7 @@ where
         //   type-specifiers  ,  type-specifier
         let (items, _) =
             self.parse_comma_list_allow_trailing(close_kind, Errors::error1007, &|x: &mut Self| {
-                x.parse_type_specifier(false)
+                x.parse_type_specifier(false, true)
             });
         items
     }
@@ -496,7 +482,7 @@ where
             }
             _ => {
                 let callconv = self.parse_call_convention_opt();
-                let ts = self.parse_type_specifier(false);
+                let ts = self.parse_type_specifier(false, true);
                 match self.peek_token_kind() {
                     TokenKind::DotDotDot => {
                         let token = self.next_token();
@@ -513,10 +499,10 @@ where
         if self.peek_token_kind() == TokenKind::Reify {
             let token = self.next_token();
             let reified_kw = S!(make_token, self, token);
-            let type_argument = self.parse_type_specifier(false);
+            let type_argument = self.parse_type_specifier(false, true);
             S!(make_reified_type_argument, self, reified_kw, type_argument)
         } else {
-            self.parse_type_specifier(false)
+            self.parse_type_specifier(false, true)
         }
     }
 
@@ -539,25 +525,27 @@ where
         //
         // For now, we extend the specification to allow return types, not just
         // ordinary types.
-        let open_angle = self.fetch_token();
+        let open_angle = self.assert_left_angle_in_type_list_with_possible_attribute();
         let (args, no_arg_is_missing) = self.parse_comma_list_allow_trailing(
             TokenKind::GreaterThan,
             Errors::error1007,
             &|x: &mut Self| x.parse_optionally_reified_type(),
         );
-        if self.peek_token_kind() == TokenKind::GreaterThan {
-            let close_angle = self.next_token();
-            let close_angle = S!(make_token, self, close_angle);
-            let result = S!(make_type_arguments, self, open_angle, args, close_angle);
-            (result, no_arg_is_missing)
-        } else {
-            // ERROR RECOVERY: Don't eat the token that is in the place of the
-            // missing > or ,.  TokenKind::Assume that it is the > that is missing and
-            // try to parse whatever is coming after the type.
-            self.with_error(Errors::error1014);
-            let missing = S!(make_missing, self, self.pos());
-            let result = S!(make_type_arguments, self, open_angle, args, missing);
-            (result, no_arg_is_missing)
+        match self.peek_token_kind() {
+            TokenKind::GreaterThan => {
+                let close_angle = self.assert_token(TokenKind::GreaterThan);
+                let result = S!(make_type_arguments, self, open_angle, args, close_angle);
+                (result, no_arg_is_missing)
+            }
+            _ => {
+                // ERROR RECOVERY: Don't eat the token that is in the place of the
+                // missing > or ,.  TokenKind::Assume that it is the > that is missing and
+                // try to parse whatever is coming after the type.
+                self.with_error(Errors::error1014);
+                let missing = S!(make_missing, self, self.pos());
+                let result = S!(make_type_arguments, self, open_angle, args, missing);
+                (result, no_arg_is_missing)
+            }
         }
     }
 
@@ -571,13 +559,13 @@ where
         // type argument: array<type, >
         // so now it is not really comma-separated list
         let array_token = self.assert_token(TokenKind::Array);
-        if self.peek_token_kind() != TokenKind::LessThan {
+        if self.peek_token_kind_with_possible_attributized_type_list() != TokenKind::LessThan {
             S!(make_simple_type_specifier, self, array_token)
         } else {
-            let left_angle = self.assert_token(TokenKind::LessThan);
+            let left_angle = self.assert_left_angle_in_type_list_with_possible_attribute();
             // ERROR RECOVERY: We could improve error recovery by detecting
             // array<,  and marking the key type as missing.
-            let key_type = self.parse_type_specifier(false);
+            let key_type = self.parse_type_specifier(false, true);
             let kind = self.peek_token_kind();
             if kind == TokenKind::GreaterThan {
                 let right_angle = self.fetch_token();
@@ -595,7 +583,7 @@ where
                 let value_type = if next_token_kind == TokenKind::GreaterThan {
                     S!(make_missing, self, self.pos())
                 } else {
-                    self.parse_type_specifier(false)
+                    self.parse_type_specifier(false, true)
                 };
                 let right_angle = self.require_right_angle();
                 S!(
@@ -626,13 +614,13 @@ where
     fn parse_darray_type_specifier(&mut self) -> S::R {
         // darray<type, type>
         let array_token = self.assert_token(TokenKind::Darray);
-        if self.peek_token_kind() != TokenKind::LessThan {
+        if self.peek_token_kind_with_possible_attributized_type_list() != TokenKind::LessThan {
             S!(make_simple_type_specifier, self, array_token)
         } else {
-            let left_angle = self.assert_token(TokenKind::LessThan);
-            let key_type = self.parse_type_specifier(false);
+            let left_angle = self.assert_left_angle_in_type_list_with_possible_attribute();
+            let key_type = self.parse_type_specifier(false, true);
             let comma = self.require_comma();
-            let value_type = self.parse_type_specifier(false);
+            let value_type = self.parse_type_specifier(false, true);
             let optional_comma = self.optional_token(TokenKind::Comma);
             let right_angle = self.require_right_angle();
             S!(
@@ -652,11 +640,11 @@ where
     fn parse_varray_type_specifier(&mut self) -> S::R {
         // varray<type>
         let array_token = self.assert_token(TokenKind::Varray);
-        if self.peek_token_kind() != TokenKind::LessThan {
+        if self.peek_token_kind_with_possible_attributized_type_list() != TokenKind::LessThan {
             S!(make_simple_type_specifier, self, array_token)
         } else {
-            let left_angle = self.assert_token(TokenKind::LessThan);
-            let value_type = self.parse_type_specifier(false);
+            let left_angle = self.assert_left_angle_in_type_list_with_possible_attribute();
+            let value_type = self.parse_type_specifier(false, true);
             let optional_comma = self.optional_token(TokenKind::Comma);
             let right_angle = self.fetch_token();
             S!(
@@ -679,11 +667,11 @@ where
         // this a simple type.  TODO: Should this be an error at parse time? what
         // about at type checking time?
         let keyword = self.assert_token(TokenKind::Vec);
-        if self.peek_token_kind() != TokenKind::LessThan {
+        if self.peek_token_kind_with_possible_attributized_type_list() != TokenKind::LessThan {
             S!(make_simple_type_specifier, self, keyword)
         } else {
-            let left = self.require_left_angle();
-            let t = self.parse_type_specifier(false);
+            let left = self.assert_left_angle_in_type_list_with_possible_attribute();
+            let t = self.parse_type_specifier(false, true);
             let optional_comma = self.optional_token(TokenKind::Comma);
             let right = self.require_right_angle();
             S!(
@@ -706,11 +694,11 @@ where
         // this a simple type.  TODO: Should this be an error at parse time? what
         // about at type checking time?
         let keyword = self.assert_token(TokenKind::Keyset);
-        if self.peek_token_kind() != TokenKind::LessThan {
+        if self.peek_token_kind_with_possible_attributized_type_list() != TokenKind::LessThan {
             S!(make_simple_type_specifier, self, keyword)
         } else {
-            let left = self.require_left_angle();
-            let t = self.parse_type_specifier(false);
+            let left = self.assert_left_angle_in_type_list_with_possible_attribute();
+            let t = self.parse_type_specifier(false, true);
             let comma = self.optional_token(TokenKind::Comma);
             let right = self.require_right_angle();
             S!(
@@ -729,7 +717,11 @@ where
         // tuple < type-specifier-list >
         // TODO: Add this to the specification
         let keyword = self.assert_token(TokenKind::Tuple);
-        let left_angle = self.require_left_angle();
+        let left_angle = if self.peek_next_partial_token_is_triple_left_angle() {
+            self.assert_left_angle_in_type_list_with_possible_attribute()
+        } else {
+            self.require_left_angle()
+        };
         let args = self.parse_type_list(TokenKind::GreaterThan);
         let mut parser1 = self.clone();
         let right_angle = parser1.next_token();
@@ -775,12 +767,12 @@ where
         // a simple type.  TODO: Should this be an error at parse time?  what
         // about at type checking time?
         let keyword = self.assert_token(TokenKind::Dict);
-        if self.peek_token_kind() != TokenKind::LessThan {
+        if self.peek_token_kind_with_possible_attributized_type_list() != TokenKind::LessThan {
             S!(make_simple_type_specifier, self, keyword)
         } else {
             // TODO: This allows "noreturn" as a type argument. Should we
             // disallow that at parse time?
-            let left = self.require_left_angle();
+            let left = self.assert_left_angle_in_type_list_with_possible_attribute();
             let (arguments, _) = self.parse_comma_list_allow_trailing(
                 TokenKind::GreaterThan,
                 Errors::error1007,
@@ -839,7 +831,7 @@ where
             (pts, irp)
         };
         let col = self.require_colon();
-        let ret = self.parse_type_specifier(false);
+        let ret = self.parse_type_specifier(false, true);
         let orp = self.require_right_paren();
         S!(
             make_closure_type_specifier,
@@ -897,7 +889,7 @@ where
         // Note that it is perfectly legal to have trivia between the ? and the
         // underlying type.
         let question = self.assert_token(TokenKind::Question);
-        let nullable_type = self.parse_type_specifier(false);
+        let nullable_type = self.parse_type_specifier(false, true);
         S!(make_nullable_type_specifier, self, question, nullable_type)
     }
 
@@ -909,7 +901,7 @@ where
         // Note that it is perfectly legal to have trivia between the ~ and the
         // underlying type.
         let tilde = self.assert_token(TokenKind::Tilde);
-        let like_type = self.parse_type_specifier(false);
+        let like_type = self.parse_type_specifier(false, true);
         S!(make_like_type_specifier, self, tilde, like_type)
     }
 
@@ -924,8 +916,24 @@ where
         //
         // Note that it is legal for trivia to come between the @ and the type.
         let soft_at = self.assert_token(TokenKind::At);
-        let soft_type = self.parse_type_specifier(false);
+        let soft_type = self.parse_type_specifier(false, true);
         S!(make_soft_type_specifier, self, soft_at, soft_type)
+    }
+
+    fn parse_attributized_specifier(&mut self) -> S::R {
+        // SPEC
+        // attributized-specifier:
+        // attribute-specification-opt type-specifier
+        let attribute_spec_opt = self.with_decl_parser(&|x: &mut DeclarationParser<'a, S, T>| {
+            x.parse_attribute_specification_opt()
+        });
+        let attributized_type = self.parse_type_specifier(false, true);
+        S!(
+            make_attributized_specifier,
+            self,
+            attribute_spec_opt,
+            attributized_type
+        )
     }
 
     fn parse_classname_type_specifier(&mut self) -> S::R {
@@ -946,7 +954,7 @@ where
         match self.peek_token_kind() {
             TokenKind::LessThan => {
                 let left_angle = self.require_left_angle();
-                let classname_type = self.parse_type_specifier(false);
+                let classname_type = self.parse_type_specifier(false, true);
                 let optional_comma = self.optional_token(TokenKind::Comma);
                 let right_angle = self.require_right_angle();
                 S!(
@@ -999,7 +1007,7 @@ where
         };
         let name = self.parse_expression();
         let arrow = self.require_arrow();
-        let field_type = self.parse_type_specifier(false);
+        let field_type = self.parse_type_specifier(false, true);
         S!(
             make_field_specifier,
             self,
@@ -1057,7 +1065,7 @@ where
         if self.peek_token_kind() == TokenKind::As {
             let constraint_as = self.next_token();
             let constraint_as = S!(make_token, self, constraint_as);
-            let constraint_type = self.parse_type_specifier(false);
+            let constraint_type = self.parse_type_specifier(false, true);
             S!(make_type_constraint, self, constraint_as, constraint_type)
         } else {
             S!(make_missing, self, self.pos())
@@ -1069,7 +1077,7 @@ where
             let token = self.next_token();
             S!(make_token, self, token)
         } else {
-            self.parse_type_specifier(false)
+            self.parse_type_specifier(false, true)
         }
     }
 }

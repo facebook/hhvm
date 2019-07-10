@@ -229,7 +229,6 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
     RuntimeOption::EnableIntrinsicsExtension =
       s_globalData.EnableIntrinsicsExtension;
     HHBBC::options.ElideAutoloadInvokes     = s_globalData.ElideAutoloadInvokes;
-    RuntimeOption::EvalUseHHBBC             = s_globalData.UsedHHBBC;
     RuntimeOption::PHP7_Builtins            = s_globalData.PHP7_Builtins;
     RuntimeOption::PHP7_IntSemantics        = s_globalData.PHP7_IntSemantics;
     RuntimeOption::PHP7_NoHexNumerics       = s_globalData.PHP7_NoHexNumerics;

@@ -354,7 +354,6 @@ void write_global_data(
     );
 
   auto gd                        = Repo::GlobalData{};
-  gd.UsedHHBBC                   = true;
   gd.Signature                   = nanos.count();
   gd.ThisTypeHintLevel           = RuntimeOption::EvalThisTypeHintLevel;
   gd.HardReturnTypeHints         = RuntimeOption::EvalCheckReturnTypeHints >= 3;

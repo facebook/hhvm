@@ -32,11 +32,6 @@ struct Repo::GlobalData {
   GlobalData() {}
 
   /*
-   * Indicates whether a repo was compiled using HHBBC.
-   */
-  bool UsedHHBBC = false;
-
-  /*
    * Copy of InitialNamedEntityTableSize for hhbbc to use.
    */
   uint32_t InitialNamedEntityTableSize = 0;
@@ -195,8 +190,7 @@ struct Repo::GlobalData {
   std::vector<std::pair<std::string,Cell>> ConstantFunctions;
 
   template<class SerDe> void serde(SerDe& sd) {
-    sd(UsedHHBBC)
-      (InitialNamedEntityTableSize)
+    sd(InitialNamedEntityTableSize)
       (InitialStaticStringTableSize)
       (ThisTypeHintLevel)
       (HardReturnTypeHints)

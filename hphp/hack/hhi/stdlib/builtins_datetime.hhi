@@ -8,17 +8,17 @@
  *
  */
 
-const DATE_ATOM    = "Y-m-d\\TH:i:sP";
-const DATE_COOKIE  = "l, d-M-y H:i:s T";
-const DATE_ISO8601 = "Y-m-d\\TH:i:sO";
-const DATE_RFC1036 = "D, d M y H:i:s O";
-const DATE_RFC1123 = "D, d M Y H:i:s O";
-const DATE_RFC2822 = "D, d M Y H:i:s O";
-const DATE_RFC3339 = "Y-m-d\\TH:i:sP";
-const DATE_RFC822  = "D, d M y H:i:s O";
-const DATE_RFC850  = "l, d-M-y H:i:s T";
-const DATE_RSS     = "D, d M Y H:i:s O";
-const DATE_W3C     = "Y-m-d\\TH:i:sP";
+const DATE_ATOM    = "";
+const DATE_COOKIE  = "";
+const DATE_ISO8601 = "";
+const DATE_RFC1036 = "";
+const DATE_RFC1123 = "";
+const DATE_RFC2822 = "";
+const DATE_RFC3339 = "";
+const DATE_RFC822  = "";
+const DATE_RFC850  = "";
+const DATE_RSS     = "";
+const DATE_W3C     = "";
 
 const DAY_1 = 131079;
 const DAY_2 = 131080;

@@ -419,7 +419,8 @@ end = struct
   (* Function used to name a local variable *)
   let lvar (genv, env) (p, x) =
     let p, ident =
-      if SN.Superglobals.is_superglobal x && genv.in_mode = FileInfo.Mpartial
+      if (SN.Superglobals.globals = x || SN.Superglobals.is_superglobal x) &&
+        genv.in_mode = FileInfo.Mpartial
       then p, Local_id.make_unscoped x
       else
         let lcl = SMap.get x !(env.locals) in

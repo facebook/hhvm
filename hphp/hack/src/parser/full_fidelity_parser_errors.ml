@@ -2052,7 +2052,8 @@ let function_call_argument_errors ~in_constructor_call node errors =
     { prefix_unary_operator = { syntax = Token token; _ }
     ; prefix_unary_operand
     } when Token.kind token = TokenKind.Ampersand ->
-      if SN.Superglobals.is_superglobal @@ text prefix_unary_operand then
+      if SN.Superglobals.is_superglobal @@ text prefix_unary_operand
+        || (text prefix_unary_operand) = SN.Superglobals.globals then
         Some SyntaxError.error2078
       else if in_constructor_call then
         Some SyntaxError.reference_param_in_construct
@@ -2081,8 +2082,9 @@ let function_call_argument_errors ~in_constructor_call node errors =
               ; _
             }; _ } -> Some SyntaxError.fun_arg_invalid_arg
         | SubscriptExpression { subscript_receiver; _ }
-          when SN.Superglobals.is_superglobal @@ text subscript_receiver ->
-            Some SyntaxError.fun_arg_inout_containers
+          when SN.Superglobals.is_superglobal @@ text subscript_receiver
+            || (text subscript_receiver) = SN.Superglobals.globals ->
+          Some SyntaxError.fun_arg_inout_containers
         | _ -> None
         end
   | _ -> None in
@@ -3412,7 +3414,8 @@ let is_global_in_const_decl init =
   | SimpleInitializer { simple_initializer_value; _ } ->
     begin match syntax simple_initializer_value with
     | VariableExpression { variable_expression } ->
-      SN.Superglobals.is_superglobal @@ text variable_expression
+      (SN.Superglobals.is_superglobal @@ text variable_expression)
+      || (text variable_expression) = SN.Superglobals.globals
     | _ -> false
     end
   | _ -> false

@@ -231,6 +231,7 @@ let add_var env st var =
   (* Also don't add the pipe variable and superglobals *)
   else if not (should_capture_var env var)
   || var = Naming_special_names.SpecialIdents.dollardollar
+  || Naming_special_names.Superglobals.globals = var
   || Naming_special_names.Superglobals.is_superglobal var
   then st
   else { st with captured_vars = ULS.add st.captured_vars var }

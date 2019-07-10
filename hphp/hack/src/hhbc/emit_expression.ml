@@ -486,7 +486,7 @@ and get_local env (pos, (str : string)): Hhbc_ast.local_id =
 and emit_local ~notice ~need_ref env (lid: Aast.lid) =
   let (pos, id) = lid in
   let str = Local_id.get_name id in
-  if SN.Superglobals.is_superglobal str then
+  if SN.Superglobals.globals = str || SN.Superglobals.is_superglobal str then
     if need_ref then
       Emit_fatal.raise_fatal_parse pos
         "Superglobals may not be taken by reference."
@@ -513,6 +513,7 @@ and emit_first_expr env (expr : A.expr) =
   match snd expr with
   | A.Lvar (pos, id)
     when not ((is_local_this env id) && not (Emit_env.get_needs_local_this env)
+              || (Local_id.get_name id) = SN.Superglobals.globals
               || SN.Superglobals.is_superglobal (Local_id.get_name id)) ->
      instr_cgetl2 (get_local env (pos, (Local_id.get_name id))), true
   | _ ->
@@ -1236,7 +1237,9 @@ and emit_call_isset_expr env outer_pos (expr : A.expr) =
     emit_class_get env QueryOp.Isset cid id
   | A.Obj_get (expr, prop, nullflavor) ->
     fst (emit_obj_get env pos QueryOp.Isset expr prop nullflavor)
-  | A.Lvar (_, n) when SN.Superglobals.is_superglobal (Local_id.get_name n) ->
+  | A.Lvar (_, n)
+    when SN.Superglobals.is_superglobal (Local_id.get_name n)
+      || (Local_id.get_name n) = SN.Superglobals.globals ->
     gather [
       emit_pos outer_pos;
       instr_string @@ SU.Locals.strip_dollar (Local_id.get_name n);
@@ -1277,7 +1280,9 @@ and emit_call_empty_expr env outer_pos (annot, expr_ as expr) =
     emit_class_get env QueryOp.Empty cid id
   | A.Obj_get (expr, prop, nullflavor) ->
     fst (emit_obj_get env pos QueryOp.Empty expr prop nullflavor)
-  | A.Lvar(_, id) when SN.Superglobals.is_superglobal (Local_id.get_name id) ->
+  | A.Lvar(_, id)
+    when SN.Superglobals.is_superglobal (Local_id.get_name id)
+      || (Local_id.get_name id) = SN.Superglobals.globals ->
     gather [
       instr_string @@ SU.Locals.strip_dollar (Local_id.get_name id);
       emit_pos outer_pos;
@@ -2627,7 +2632,9 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
           instrs_begin; instrs_end; setup_instrs; stack_size }
    in
    match expr_ with
-   | A.Lvar (name_pos, x) when SN.Superglobals.is_superglobal (Local_id.get_name x) ->
+   | A.Lvar (name_pos, x)
+     when SN.Superglobals.is_superglobal (Local_id.get_name x)
+       || (Local_id.get_name x) = SN.Superglobals.globals ->
      emit_default
        (emit_pos_then name_pos @@ instr_string (SU.Locals.strip_dollar (Local_id.get_name x)))
        empty
@@ -3470,7 +3477,8 @@ and emit_special_function env pos annot id (args : A.expr list) (uargs : A.expr 
         emit_is env pos h
       ])
     | [(_, A.Lvar (_, arg_str as arg_id))], Some i, _
-      when SN.Superglobals.is_superglobal (Local_id.get_name arg_str) ->
+      when SN.Superglobals.is_superglobal (Local_id.get_name arg_str)
+        || (Local_id.get_name arg_str) = SN.Superglobals.globals ->
       Some (gather [
         emit_local ~notice:NoNotice ~need_ref:false env arg_id;
         emit_pos pos;
@@ -3769,7 +3777,9 @@ and emit_lval_op_nonlist_steps ?(null_coalesce_assignment=false)
   | LValOp.IncDec _ -> { env with Emit_env.env_allows_array_append = true }
   | _ -> env in
   match expr_ with
-  | A.Lvar (name_pos, id) when SN.Superglobals.is_superglobal (Local_id.get_name id) ->
+  | A.Lvar (name_pos, id)
+    when SN.Superglobals.is_superglobal (Local_id.get_name id)
+      || (Local_id.get_name id) = SN.Superglobals.globals ->
     emit_pos_then name_pos @@ instr_string @@ SU.Locals.strip_dollar (Local_id.get_name id),
     rhs_instrs,
     emit_final_global_op outer_pos op

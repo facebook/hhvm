@@ -29,7 +29,8 @@ let handler = object
     | Binop ((Ast.Eq None), e1, e2) ->
       begin match e1, e2 with
       | (_, (Lvar (_, x))), (_, Unop (Ast.Uref, _))
-       when Local_id.to_string x |> SN.Superglobals.is_superglobal ->
+        when Local_id.to_string x |> SN.Superglobals.is_superglobal
+          || SN.Superglobals.globals = Local_id.to_string x ->
         Errors.illegal_by_ref_expr pos ("Superglobal " ^ Local_id.to_string x) "bound"
       | _ -> ()
       end;

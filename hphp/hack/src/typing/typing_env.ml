@@ -910,7 +910,7 @@ let local_is_mutable ~include_borrowed env id =
 let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx =
   let not_found_is_ok x =
     let xstr = LID.to_string x in
-    SG.is_superglobal xstr && not (is_strict env) ||
+    (xstr = SG.globals || SG.is_superglobal xstr) && not (is_strict env) ||
     Fake.is_valid ctx.LEnvC.fake_members x in
   let error_if_pos_provided posopt =
     match posopt with

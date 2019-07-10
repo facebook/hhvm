@@ -430,14 +430,13 @@ end
 module Superglobals = struct
   let globals = "$GLOBALS"
 
-  let all_superglobals =
-    [globals ; "$_SERVER"; "$_GET"; "$_POST"; "$_FILES";
-     "$_COOKIE"; "$_REQUEST"; "$_ENV"
-    ]
-
   let is_superglobal =
-    let h = HashSet.create 23 in
-    List.iter all_superglobals (HashSet.add h);
+    let superglobals =
+      ["$_SERVER"; "$_GET"; "$_POST"; "$_FILES";
+       "$_COOKIE"; "$_REQUEST"; "$_ENV"
+      ] in
+    let h = HashSet.create (List.length superglobals) in
+    List.iter superglobals (HashSet.add h);
     fun x -> HashSet.mem h x
 end
 

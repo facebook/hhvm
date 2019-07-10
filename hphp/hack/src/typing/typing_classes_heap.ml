@@ -302,6 +302,35 @@ module Api = struct
     | Lazy lc -> LSTable.to_seq lc.parents_and_traits |> Sequence.map ~f:fst
     | Eager c -> Sequence.of_list (SSet.elements c.tc_extends)
 
+  (* get upper bounds on `this` from the where constraints as well as
+   * requirements *)
+  let upper_bounds_on_this t =
+    let all_ancestor_reqs = Sequence.map ~f: ( fun req ->
+      snd req
+    ) (all_ancestor_reqs t) in
+    List.filter_map ~f:(fun c ->
+      match c with
+      | (_, Typing_defs.Tthis), Ast.Constraint_as, ty
+      | (_, Typing_defs.Tthis), Ast.Constraint_eq, ty
+      | ty, Ast.Constraint_eq, (_, Typing_defs.Tthis)
+      | ty, Ast.Constraint_super, (_, Typing_defs.Tthis) ->
+        Some ty
+      | _ -> None) (where_constraints t)
+    |> Sequence.of_list
+    |> Sequence.append all_ancestor_reqs
+
+  (* get lower bounds on `this` from the where constraints *)
+  let lower_bounds_on_this t =
+    List.filter_map ~f:(fun c ->
+      match c with
+      | (_, Typing_defs.Tthis), Ast.Constraint_super, ty
+      | (_, Typing_defs.Tthis), Ast.Constraint_eq, ty
+      | ty, Ast.Constraint_eq, (_, Typing_defs.Tthis)
+      | ty, Ast.Constraint_as, (_, Typing_defs.Tthis) ->
+        Some(ty)
+      | _ -> None) (where_constraints t)
+    |> Sequence.of_list
+
   let is_disposable_class_name class_name =
     class_name = SN.Classes.cIDisposable ||
     class_name = SN.Classes.cIAsyncDisposable

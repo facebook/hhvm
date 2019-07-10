@@ -363,6 +363,13 @@ and simplify_subtype
         try_bounds (Typing_set.elements (Env.get_lower_bounds env name_super)) |>
         if_unsat invalid
      end in
+  let has_lower_bounds id =
+    let class_def = Env.get_class env id in
+    match class_def with
+      | Some class_ty ->
+        not (Sequence.is_empty (Cls.lower_bounds_on_this class_ty))
+      | None -> false
+  in
 
   match snd ety_sub, snd ety_super with
   | Tvar var_sub, Tvar var_super when var_sub = var_super -> valid ()
@@ -635,8 +642,47 @@ and simplify_subtype
      * But we need to take care with contravariant classes, since we can't
      * statically guarantee their runtime type.
      *)
-    simplify_subtype ~seen_generic_params ~this_ty ty_sub ty env
+      simplify_subtype ~seen_generic_params ~this_ty ty_sub ty env
 
+  | Tclass _,
+    Tabstract (AKdependent `this, Some (_, Tclass ((_, x), _, tyl_super)))
+    when has_lower_bounds x ->
+    let class_def = Env.get_class env x in
+    begin match class_def with
+      | Some class_ty ->
+        let p_super = fst ety_super in
+        let tyl_super =
+          if List.is_empty tyl_super &&
+            not (Partial.should_check_error (Env.get_mode env) 4029)
+          then List.map (Cls.tparams class_ty) (fun _ -> (p_super, Tany))
+          else tyl_super in
+        if List.length (Cls.tparams class_ty) <> List.length tyl_super
+        then
+          invalid_with (fun () ->
+          Errors.expected_tparam ~definition_pos:(Cls.pos class_ty)
+            ~use_pos:(Reason.to_pos p_super) (List.length (Cls.tparams class_ty)))
+        else
+          let ety_env =
+          {
+            type_expansions = [];
+            substs = Subst.make (Cls.tparams class_ty) tyl_super;
+            this_ty = Option.value this_ty ~default:ty_super;
+            from_class = None;
+            validate_dty = None;
+          } in
+          let lower_bounds_super = Cls.lower_bounds_on_this class_ty in
+          let rec try_constraints lower_bounds_super env =
+            match Sequence.next lower_bounds_super with
+            | None -> invalid_env env
+            | Some (ty_super, lower_bounds_super) ->
+              let env, ty_super = Phase.localize ~ety_env env ty_super in
+              env |>
+              simplify_subtype ~seen_generic_params ~this_ty
+                ty_sub ty_super
+              ||| try_constraints lower_bounds_super in
+          try_constraints lower_bounds_super env
+      | None -> invalid ()
+    end
   (* Primitives and other concrete types cannot be subtypes of dependent types *)
   | (Tnonnull | Tdynamic | Tprim _ | Tfun _ | Ttuple _ | Tshape _ |
      Tabstract (AKenum _, None) | Tanon _ | Tclass _ | Tobject | Tarraykind _),
@@ -798,25 +844,25 @@ and simplify_subtype
               simplify_subtype ~seen_generic_params ~this_ty up_obj ty_super env
             | None ->
               if Cls.kind class_sub = Ast.Ctrait || Cls.kind class_sub = Ast.Cinterface then
-              let rec try_reqs reqs env =
-                match Sequence.next reqs with
+              let rec try_upper_bounds_on_this up_objs env =
+                match Sequence.next up_objs with
                 | None ->
                   (* It's crucial that we don't lose updates to global_tpenv in env that were
                    * introduced by PHase.localize. TODO: avoid this requirement *)
                   invalid_env env
 
-                | Some ((_, req_type), reqs) ->
+                | Some (ub_obj_typ, up_objs) ->
 
                 (* a trait is never the runtime type, but it can be used
-                 * as a constraint if it has requirements for its using
-                 * classes *)
-                  let env, req_type = Phase.localize ~ety_env env req_type in
+                 * as a constraint if it has requirements or where constraints
+                 * for its using classes *)
+                  let env, ub_obj_typ = Phase.localize ~ety_env env ub_obj_typ in
                   env |>
                   simplify_subtype ~seen_generic_params ~this_ty
-                    (p_sub, snd req_type) ty_super
-                  ||| try_reqs reqs
+                    (p_sub, snd ub_obj_typ) ty_super
+                  ||| try_upper_bounds_on_this up_objs
               in
-                try_reqs (Cls.all_ancestor_reqs class_sub) env
+              try_upper_bounds_on_this (Cls.upper_bounds_on_this class_sub) env
               else invalid ()
       end
   | Tabstract ((AKnewtype _), Some ty), Tclass _ ->

@@ -1,28 +1,28 @@
+# pyre-strict
+
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import json
 import os
 import shutil
 import subprocess
-import unittest
+from typing import List, Optional
 
-import common_tests
+from common_tests import CommonTestDriver
+from test_case import TestCase
 
 
-class MergeDriverTests(common_tests.CommonTestDriver, unittest.TestCase):
-
-    template_repo = "hphp/hack/test/integration/data/repo_with_merge_driver"
+class MergeDriverTests(TestCase[CommonTestDriver]):
+    @classmethod
+    def get_test_driver(cls) -> CommonTestDriver:
+        return CommonTestDriver()
 
     @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
+    def get_template_repo(cls) -> str:
+        return "hphp/hack/test/integration/data/repo_with_merge_driver"
 
-    @classmethod
-    def tearDownClass(cls):
-        super().tearDownClass()
-
-    def write_local_conf(self, watchman_subscribe=True):
-        with open(os.path.join(self.repo_dir, "hh.conf"), "w") as f:
+    def write_local_conf(self, watchman_subscribe: bool = True) -> None:
+        with open(os.path.join(self.test_driver.repo_dir, "hh.conf"), "w") as f:
             watchman_subscribe_str = "watchman_subscribe_v2 = "
             if watchman_subscribe:
                 watchman_subscribe_str += "true"
@@ -49,22 +49,25 @@ use_dummy_informant = false
     # it's the same hh_server as the one launched within this
     # python test), we need to dump out test_env which includes
     # the HH_TMPDIR.
-    def write_merge_driver(self):
-        test_env_json = json.dumps(self.test_env)
+    def write_merge_driver(self) -> None:
+        test_env_json = json.dumps(self.test_driver.test_env)
         with open(
-            os.path.join(self.repo_dir, "scripts", "mergedriver_test_env.json"), "w"
+            os.path.join(
+                self.test_driver.repo_dir, "scripts", "mergedriver_test_env.json"
+            ),
+            "w",
         ) as f:
             f.write(test_env_json)
 
     def setUp(self) -> None:
-        shutil.copytree(self.template_repo, self.repo_dir)
+        shutil.copytree(self.test_driver.template_repo, self.test_driver.repo_dir)
         self.write_merge_driver()
 
     def tearDown(self) -> None:
         pass
 
-    def write_hgrc(self):
-        with open(os.path.join(self.repo_dir, ".hg", "hgrc"), "w") as f:
+    def write_hgrc(self) -> None:
+        with open(os.path.join(self.test_driver.repo_dir, ".hg", "hgrc"), "w") as f:
             f.write(
                 r"""
 [extensions]
@@ -75,12 +78,20 @@ mergedriver = python:scripts/mergedriver.py
 """
             )
 
-    def check_call(self, cmd, timeout=None):
-        subprocess.check_call(
-            cmd, cwd=self.repo_dir, env=self.test_env, timeout=timeout
-        )
+    def check_call(self, cmd: List[str], timeout: Optional[float] = None) -> None:
+        if timeout is None:
+            subprocess.check_call(
+                cmd, cwd=self.test_driver.repo_dir, env=self.test_driver.test_env
+            )
+        else:
+            subprocess.check_call(
+                cmd,
+                cwd=self.test_driver.repo_dir,
+                env=self.test_driver.test_env,
+                timeout=timeout,
+            )
 
-    def init_hg_repo(self):
+    def init_hg_repo(self) -> None:
         cmd = ["hg", "init"]
         self.check_call(cmd)
         cmd = ["hg", "add"]
@@ -89,7 +100,7 @@ mergedriver = python:scripts/mergedriver.py
         self.check_call(cmd)
         self.write_hgrc()
 
-    def hg_commit(self, msg):
+    def hg_commit(self, msg: str) -> None:
         cmd = ["hg", "commit", "-m", msg]
         self.check_call(cmd)
 
@@ -112,14 +123,14 @@ function returns_string() {
 }
 """
 
-    def write_foo_1_and_commit(self, content, commit_msg):
-        foo_1_path = os.path.join(self.repo_dir, "foo_1.php")
+    def write_foo_1_and_commit(self, content: str, commit_msg: str) -> None:
+        foo_1_path = os.path.join(self.test_driver.repo_dir, "foo_1.php")
         with open(foo_1_path, "w") as f:
             f.write(content)
         self.hg_commit(commit_msg)
 
     # Merge driver runs Hack build, hack server is already running
-    def test_mergedriver_finishes_quickly_hack_already_running(self):
+    def test_mergedriver_finishes_quickly_hack_already_running(self) -> None:
         self.write_local_conf()
         self.init_hg_repo()
         self.write_foo_1_and_commit(self.foo_1_start, "starting")
@@ -131,7 +142,7 @@ function returns_string() {
             "second append",
         )
         # Start a Hack server before triggering the mergedriver
-        self.check_cmd(["No errors!"])
+        self.test_driver.check_cmd(["No errors!"])
         # Backing out the first append will trigger 3-way merge logic, firing
         # the merge driver, which calls Hack build
         cmd = ["hg", "backout", ".^", "--no-commit"]
@@ -139,7 +150,7 @@ function returns_string() {
 
     # Hack is launched by the merge driver. Test setup is same as before, except
     # we don't start a Hack server.
-    def test_mergedriver_finishes_quickly_hack_not_running(self):
+    def test_mergedriver_finishes_quickly_hack_not_running(self) -> None:
         self.write_local_conf(watchman_subscribe=True)
         self.init_hg_repo()
         self.write_foo_1_and_commit(self.foo_1_start, "starting")

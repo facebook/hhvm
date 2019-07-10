@@ -10,7 +10,7 @@ import sys
 import tempfile
 import time
 import unittest
-from typing import Optional, Union
+from typing import Mapping, Optional, Union
 
 from hh_paths import hh_client, hh_merge_deps, hh_server
 
@@ -22,6 +22,7 @@ class CommonTestDriver(unittest.TestCase):
     # test.
     template_repo: str
     repo_dir: str
+    test_env: Mapping[str, str]
 
     @classmethod
     def setUpClass(cls):

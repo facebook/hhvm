@@ -1,10 +1,12 @@
+# pyre-strict
+
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import contextlib
 import subprocess
 import uuid
 from typing import (
-    Any,
+    BinaryIO,
     Callable,
     Iterator,
     Mapping,
@@ -17,9 +19,7 @@ from typing import (
 
 from hh_paths import hh_client
 from jsonrpc_stream import JsonRpcStreamReader, JsonRpcStreamWriter
-
-
-Json = Mapping[str, Any]
+from utils import Json
 
 
 class TranscriptEntry(NamedTuple):
@@ -28,11 +28,10 @@ class TranscriptEntry(NamedTuple):
 
 
 Transcript = Mapping[str, TranscriptEntry]
+U = TypeVar("U", bound="LspCommandProcessor")
 
 
 class LspCommandProcessor:
-    U = TypeVar("U", bound="LspCommandProcessor")
-
     def __init__(
         self,
         proc: subprocess.Popen,
@@ -54,8 +53,10 @@ class LspCommandProcessor:
             env=env,
         )
         try:
-            reader = JsonRpcStreamReader(proc.stdout)
-            writer = JsonRpcStreamWriter(proc.stdin)
+            stdout: BinaryIO = proc.stdout  # pyre-ignore
+            stdin: BinaryIO = proc.stdin  # pyre-ignore
+            reader = JsonRpcStreamReader(stdout)
+            writer = JsonRpcStreamWriter(stdin)
             yield cls(proc, reader, writer)
         finally:
             proc.stdin.close()
@@ -208,7 +209,7 @@ class LspCommandProcessor:
         return [c for c in commands if LspCommandProcessor._has_id(c)]
 
     def _try_read_logged(self, timeout_seconds: float) -> Optional[Json]:
-        response = self.reader.try_read(timeout_seconds)
+        response = self.reader.read(timeout_seconds)
         return response
 
     @staticmethod

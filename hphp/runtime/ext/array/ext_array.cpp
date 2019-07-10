@@ -1769,58 +1769,57 @@ static inline bool checkIsClsMethAndRaise(
   return false;
 }
 
-#define ARRAY_DIFF_PRELUDE() \
-  /* Check to make sure all inputs are containers */ \
-  const auto& c1 = *container1.toCell(); \
-  const auto& c2 = *container2.toCell(); \
-  if (isClsMethType(c1.m_type) || isClsMethType(c2.m_type)) {                \
-    raiseIsClsMethWarning(__FUNCTION__+2, isClsMethType(c1.m_type) ? 1 : 2); \
-    return make_tv<KindOfNull>();                                            \
-  }                                                                          \
-  if (UNLIKELY(!isContainer(c1) || !isContainer(c2))) { \
-    raise_warning("%s() expects parameter %d to be an array or collection", \
-                  __FUNCTION__+2, /* remove the "f_" prefix */ \
-                  isContainer(c1) ? 2 : 1); \
-    return make_tv<KindOfNull>(); \
-  } \
-  bool moreThanTwo = !args.empty(); \
-  size_t largestSize = getContainerSize(c2); \
-  if (UNLIKELY(moreThanTwo)) { \
-    int pos = 3; \
-    for (ArrayIter argvIter(args); argvIter; ++argvIter, ++pos) { \
-      auto const c = tvToCell(argvIter.secondVal()); \
-      if (!isContainer(c)) { \
-        raise_warning("%s() expects parameter %d to be an array or collection",\
-                      __FUNCTION__+2, /* remove the "f_" prefix */ \
-                      pos); \
-        return make_tv<KindOfNull>(); \
-      } \
-      size_t sz = getContainerSize(c); \
-      if (sz > largestSize) { \
-        largestSize = sz; \
-      } \
-    } \
-  } \
-  /* If container1 is empty, we can stop here and return the empty array */ \
-  if (!getContainerSize(c1)) { \
-    return make_tv<KindOfPersistentArray>(staticEmptyArray()); \
-  } \
-  /* If all of the containers (except container1) are empty, we can just \
-     return container1 (converting it to an array if needed) */ \
-  if (!largestSize) { \
-    if (isArrayLikeType(c1.m_type)) { \
-      return tvReturn(container1); \
-    } else { \
-      return tvReturn(container1.toArray<IntishCast::Cast>());  \
-    } \
-  } \
-  Array ret = Array::Create();
-
 TypedValue HHVM_FUNCTION(array_diff,
                          const Variant& container1,
                          const Variant& container2,
                          const Array& args /* = null array */) {
-  ARRAY_DIFF_PRELUDE()
+
+  /* Check to make sure all inputs are containers */
+  const auto& c1 = *container1.toCell();
+  const auto& c2 = *container2.toCell();
+  if (isClsMethType(c1.m_type) || isClsMethType(c2.m_type)) {
+    raiseIsClsMethWarning(__FUNCTION__+2, isClsMethType(c1.m_type) ? 1 : 2);
+    return make_tv<KindOfNull>();
+  }
+  if (UNLIKELY(!isContainer(c1) || !isContainer(c2))) {
+    raise_warning("%s() expects parameter %d to be an array or collection",
+                  __FUNCTION__+2, /* remove the "f_" prefix */
+                  isContainer(c1) ? 2 : 1);
+    return make_tv<KindOfNull>();
+  }
+  bool moreThanTwo = !args.empty();
+  size_t largestSize = getContainerSize(c2);
+  if (UNLIKELY(moreThanTwo)) {
+    int pos = 3;
+    for (ArrayIter argvIter(args); argvIter; ++argvIter, ++pos) {
+      auto const c = tvToCell(argvIter.secondVal());
+      if (!isContainer(c)) {
+        raise_warning("%s() expects parameter %d to be an array or collection",
+                      __FUNCTION__+2, /* remove the "f_" prefix */
+                      pos);
+        return make_tv<KindOfNull>();
+      }
+      size_t sz = getContainerSize(c);
+      if (sz > largestSize) {
+        largestSize = sz;
+      }
+    }
+  }
+  /* If container1 is empty, we can stop here and return the empty array */
+  if (!getContainerSize(c1)) {
+    return make_tv<KindOfPersistentArray>(staticEmptyArray());
+  }
+  /* If all of the containers (except container1) are empty, we can just
+     return container1 (converting it to an array if needed) */
+  if (!largestSize) {
+    if (isArrayLikeType(c1.m_type)) {
+      return tvReturn(container1);
+    } else {
+      return tvReturn(container1.toArray<IntishCast::Cast>());
+    }
+  }
+  Array ret = Array::Create();
+
   // Put all of the values from all the containers (except container1 into a
   // Set. All types aside from integer and string will be cast to string, and
   // we also convert int-like strings to integers.
@@ -2106,8 +2105,6 @@ TypedValue HHVM_FUNCTION(array_diff_key,
   return make_tv<KindOfArray>(ret.detach());
 }
 
-#undef ARRAY_DIFF_PRELUDE
-
 TypedValue HHVM_FUNCTION(array_udiff,
                          const Variant& array1,
                          const Variant& array2,
@@ -2376,54 +2373,53 @@ static void containerKeysIntersectHelper(const req::ptr<c_Set>& st,
   }
 }
 
-#define ARRAY_INTERSECT_PRELUDE() \
-  /* Check to make sure all inputs are containers */ \
-  const auto& c1 = *container1.toCell(); \
-  const auto& c2 = *container2.toCell(); \
-  if (isClsMethType(c1.m_type) || isClsMethType(c2.m_type)) {                \
-    raiseIsClsMethWarning(__FUNCTION__+2, isClsMethType(c1.m_type) ? 1 : 2); \
-    return make_tv<KindOfNull>();                                            \
-  }                                                                          \
-  if (!isContainer(c1) || !isContainer(c2)) { \
-    raise_warning("%s() expects parameter %d to be an array or collection", \
-                  __FUNCTION__+2, /* remove the "f_" prefix */ \
-                  isContainer(c1) ? 2 : 1); \
-    return make_tv<KindOfNull>(); \
-  } \
-  bool moreThanTwo = !args.empty(); \
-  /* Keep track of which input container was the smallest (excluding \
-     container1) */ \
-  int smallestPos = 0; \
-  size_t smallestSize = getContainerSize(c2); \
-  if (UNLIKELY(moreThanTwo)) { \
-    int pos = 1; \
-    for (ArrayIter argvIter(args); argvIter; ++argvIter, ++pos) { \
-      auto const c = tvToCell(argvIter.secondVal()); \
-      if (!isContainer(c)) { \
-        raise_warning("%s() expects parameter %d to be an array or collection",\
-                      __FUNCTION__+2, /* remove the "f_" prefix */ \
-                      pos+2); \
-        return make_tv<KindOfNull>(); \
-      } \
-      size_t sz = getContainerSize(c); \
-      if (sz < smallestSize) { \
-        smallestSize = sz; \
-        smallestPos = pos; \
-      } \
-    } \
-  } \
-  /* If any of the containers were empty, we can stop here and return the \
-     empty array */ \
-  if (!getContainerSize(c1) || !smallestSize) { \
-    return make_tv<KindOfPersistentArray>(staticEmptyArray()); \
-  } \
-  Array ret = Array::Create();
-
 TypedValue HHVM_FUNCTION(array_intersect,
                          const Variant& container1,
                          const Variant& container2,
                          const Array& args /* = null array */) {
-  ARRAY_INTERSECT_PRELUDE()
+
+  /* Check to make sure all inputs are containers */
+  const auto& c1 = *container1.toCell();
+  const auto& c2 = *container2.toCell();
+  if (isClsMethType(c1.m_type) || isClsMethType(c2.m_type)) {
+    raiseIsClsMethWarning(__FUNCTION__+2, isClsMethType(c1.m_type) ? 1 : 2);
+    return make_tv<KindOfNull>();
+  }
+  if (!isContainer(c1) || !isContainer(c2)) {
+    raise_warning("%s() expects parameter %d to be an array or collection",
+                  __FUNCTION__+2, /* remove the "f_" prefix */
+                  isContainer(c1) ? 2 : 1);
+    return make_tv<KindOfNull>();
+  }
+  bool moreThanTwo = !args.empty();
+  /* Keep track of which input container was the smallest (excluding
+     container1) */
+  int smallestPos = 0;
+  size_t smallestSize = getContainerSize(c2);
+  if (UNLIKELY(moreThanTwo)) {
+    int pos = 1;
+    for (ArrayIter argvIter(args); argvIter; ++argvIter, ++pos) {
+      auto const c = tvToCell(argvIter.secondVal());
+      if (!isContainer(c)) {
+        raise_warning("%s() expects parameter %d to be an array or collection",
+                      __FUNCTION__+2, /* remove the "f_" prefix */
+                      pos+2);
+        return make_tv<KindOfNull>();
+      }
+      size_t sz = getContainerSize(c);
+      if (sz < smallestSize) {
+        smallestSize = sz;
+        smallestPos = pos;
+      }
+    }
+  }
+  /* If any of the containers were empty, we can stop here and return the
+     empty array */
+  if (!getContainerSize(c1) || !smallestSize) {
+    return make_tv<KindOfPersistentArray>(staticEmptyArray());
+  }
+
+  Array ret = Array::Create();
   // Build up a Set containing the values that are present in all the
   // containers (except container1)
   auto st = req::make<c_Set>();
@@ -2655,8 +2651,6 @@ TypedValue HHVM_FUNCTION(array_intersect_key,
   });
   return make_tv<KindOfArray>(ret.detach());
 }
-
-#undef ARRAY_INTERSECT_PRELUDE
 
 TypedValue HHVM_FUNCTION(array_uintersect,
                          const Variant& array1,

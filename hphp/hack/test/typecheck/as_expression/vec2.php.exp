@@ -3,13 +3,13 @@ Invalid argument (Typing[4110])
 File "vec2.php", line 23, characters 26-31:
 Expected string
 File "vec2.php", line 13, characters 15-25:
-But got T#2 from this "as" assertion
+But got mixed from this "as" assertion
 File "vec2.php", line 16, characters 15-35:
 Invalid argument (Typing[4110])
 File "vec2.php", line 23, characters 26-31:
 Expected string
 File "vec2.php", line 16, characters 15-25:
-But got T#4 from this "as" assertion
+But got mixed from this "as" assertion
 File "vec2.php", line 12, characters 30-32:
 The type vec expects 1 type parameter(s) (Typing[4101])
 File "vec2.php", line 13, characters 30-32:

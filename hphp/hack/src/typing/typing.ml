@@ -5993,14 +5993,14 @@ and safely_refine_class_type
    * We take a simple approach:
    *    For a fresh type parameter T#1, if
    *      - There is an eqality constraint T#1 = t,
-   *      - T#1 is covariant, and T#1 has only one upper bound t
-   *      - T#1 is contravariant, and t <: T#1 has only one lower bount t,
+   *      - T#1 is covariant, and T# has upper bound t (or mixed if absent)
+   *      - T#1 is contravariant, and T#1 has lower bound t (or nothing if absent)
    *    then replace T#1 with t.
-   * This is done in Env.simplify_tpenv
+   * This is done in Type_parameter_env_ops.simplify_tpenv
    *)
-  let tparam_names = List.filter_map tparams_with_new_names
-    ~f:(Option.map ~f:(fun (tp, name) -> (name, tp.tp_variance))) in
-  let env, tparam_substs = Env.simplify_tpenv env tparam_names reason in
+  let env, tparam_substs =
+    Type_parameter_env_ops.simplify_tpenv env
+      (List.zip_exn tparams_with_new_names tyl_fresh) reason in
   let tyl_fresh = List.map2_exn tyl_fresh tparams_with_new_names
     ~f:(fun orig_ty tparam_opt ->
       match tparam_opt with

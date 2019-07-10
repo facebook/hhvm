@@ -110,6 +110,7 @@ val is_local_defined : env -> Local_id.t -> bool
 val get_local_check_defined : env -> Nast.lid -> locl ty
 val set_local_expr_id : env -> Local_id.t -> Typing_local_types.expression_id -> env
 val get_local_expr_id : env -> Local_id.t -> Typing_local_types.expression_id option
+val get_tpenv : env -> tpenv
 val get_tpenv_lower_bounds : tpenv -> string -> tparam_bounds
 val get_tpenv_upper_bounds : tpenv -> string -> tparam_bounds
 val get_tpenv_reified: tpenv -> string -> Nast.reify_kind
@@ -132,12 +133,6 @@ val add_upper_bound_global : env -> string -> locl ty -> env
 val env_with_tpenv : env -> tpenv -> env
 val env_with_mut : env -> Typing_mutability_env.mutability_env -> env
 val get_env_mutability : env -> Typing_mutability_env.mutability_env
-(** Given a list of type parameter names, attempt to simplify away those
-type parameters by looking for a type to which they are equal in the tpenv.
-If such a type exists, remove the type parameter from the tpenv.
-Returns a set of substitutions mapping each type parameter name to the type
-to which it is equal if found, otherwise to itself. *)
-val simplify_tpenv : env -> (string * Ast.variance) list -> Reason.t -> env * locl ty SMap.t
 val env_with_global_tpenv : env -> tpenv -> env
 val add_generic_parameters : env -> decl tparam list -> env
 val get_generic_parameters : env -> string list

@@ -132,6 +132,7 @@
     nastCheck
     nastInitCheck
     SymbolInfoJsonBuilder
+    type_parameter_env_ops
     typing
     typing_alias
     typing_array_access

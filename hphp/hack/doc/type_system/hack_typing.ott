@@ -541,6 +541,55 @@ Other properties are consequences of these rules. For example, commutativity
 follows by applying all three.
 }}
 
+{{ com \subsection{Intersection} }}
+
+{{ com
+Hack has intersection types, though at the moment there is no syntax for them.
+In general, they are n-ary, but it's easier to present in binary form.
+}}
+
+{{ com
+Any intersection type can be widened to one of its components. (Intersections are lower bounds.)
+}}
+
+------------------ :: intersect_lower1
+G |- t1 & t2 <: t1
+
+------------------ :: intersect_lower2
+G |- t1 & t2 <: t1
+
+{{ com
+The next rule states that intersection is the \emph{greatest} lower bound.
+}}
+
+G |- t <: t1
+G |- t <: t2
+------------------ :: intersect_greatest
+G |- t <: t1 & t2
+
+{{ com
+Other properties are consequences of these rules. For example, commutativity
+follows by applying all three.
+}}
+
+{{ com
+Intersection distributes over union. One direction of this is the rule below; the other direction is a consequence of other rules.
+Distributivity of union over intersection is also derivable.
+}}
+
+-------------------------------------------- :: intersect_distr_union
+G |- t1 & (t2 | t3) <: (t1 & t2) | (t1 & t3)
+
+{{ com
+Intersection interacts with function types according to the following rules.
+}}
+
+-------------------------------------------------------------------------------------------------------------- :: intersect_distr_function
+G |- (function(t1 , .. , tn) : t) & (function(u1 , .. , un) : u) <: function(t1|u1 , .. , tn | un) : (t & u)
+
+-------------------------------------------------------------------------------------------------------------- :: intersect_distr_variadic_function
+G |- (function(t1 , .. , tn, t vardots) : t) & (function(u1 , .. , un , u vardots) : u) <: function(t1|u1 , .. , tn | un , t0|u0 vardots) : (t & u)
+
 {{ com \subsection{Nullable types} }}
 
 {{ com

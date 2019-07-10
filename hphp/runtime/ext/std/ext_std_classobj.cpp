@@ -402,10 +402,8 @@ String getMethCallerClsOrMethNameHelper(const char* fn, TypedValue v) {
       }
       auto const tv = obj->propRvalAtOffset(
         isGetClass ? s_cls_idx : s_meth_idx).tv();
-      if (isRefcountedType(type(tv))) {
-        tvIncRefGen(tv);
-      }
-      return String::attach(val(tv).pstr);
+      assertx(isStringType(type(tv)));
+      return String(val(tv).pstr);
     }
   }
   raise_error("Argument 1 passed to %s() must be a MethCaller", fn);

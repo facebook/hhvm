@@ -624,7 +624,7 @@ inline SSATmp* ldCtxForClsMethod(IRGS& env,
     return callCtx;
   };
 
-  if (callee->isStatic()) return callCtx;
+  if (callee->isStaticInPrologue()) return callCtx;
   if (!hasThis(env)) {
     return gen_missing_this();
   }
@@ -704,7 +704,7 @@ void optimizeProfiledCallObjMethod(IRGS& env,
       return ldCtxForClsMethod(env, callee, ctx,
                                cls ? cls : callee->cls(), cls != nullptr);
     }
-    if (!callee->isStatic()) return ctx;
+    if (!callee->isStaticInPrologue()) return ctx;
     assertx(ctx->type() <= TObj);
     auto ret = cls ? cns(env, cls) : gen(env, LdObjClass, ctx);
     decRef(env, ctx);
@@ -1583,7 +1583,7 @@ void optimizeProfiledPushClsMethod(IRGS& env,
       return ldCtxForClsMethod(env, callee, ctx,
                                cls ? cls : callee->cls(), cls != nullptr);
     }
-    if (!callee->isStatic()) return ctx;
+    if (!callee->isStaticInPrologue()) return ctx;
     assertx(ctx->type() <= TObj);
     auto ret = cls ? cns(env, cls) : gen(env, LdObjClass, ctx);
     decRef(env, ctx);

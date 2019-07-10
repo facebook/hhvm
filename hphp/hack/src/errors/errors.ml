@@ -3354,6 +3354,11 @@ let shapes_method_access_with_non_existent_field pos1 name pos2 method_name reas
     (pos1, "You are calling Shapes::" ^ method_name ^ "() on a field known to not exist") ::
     shape_field_non_existence_reason pos2 name reason
 
+let shape_access_with_non_existent_field pos1 name pos2 reason =
+  add_list (Typing.err_code Typing.ShapeAccessWithNonExistentField) @@
+    (pos1, "You are accessing a field known to not exist") ::
+    shape_field_non_existence_reason pos2 name reason
+
 let ambiguous_object_access pos name self_pos vis subclass_pos class_self class_subclass =
   let class_self = Utils.strip_ns class_self in
   let class_subclass = Utils.strip_ns class_subclass in

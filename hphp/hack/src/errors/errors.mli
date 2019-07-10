@@ -515,6 +515,8 @@ val shapes_key_exists_always_true : Pos.t -> string -> Pos.t -> unit
 val shapes_key_exists_always_false : Pos.t -> string -> Pos.t -> [< `Undefined | `Nothing of (Pos.t * string) list] -> unit
 val shapes_method_access_with_non_existent_field :
   Pos.t -> string -> Pos.t -> string -> [< `Undefined | `Nothing of (Pos.t * string) list] -> unit
+val shape_access_with_non_existent_field :
+  Pos.t -> string -> Pos.t -> [< `Undefined | `Nothing of (Pos.t * string) list] -> unit
 val ambiguous_object_access :
   Pos.t -> string -> Pos.t -> string -> Pos.t -> string -> string -> unit
 val invalid_truthiness_test : Pos.t -> string -> unit

@@ -1,0 +1,4 @@
+File "shape_access_with_non_existent_field.php", line 5, characters 3-17:
+You are accessing a field known to not exist (Typing[4321])
+File "shape_access_with_non_existent_field.php", line 4, characters 15-21:
+The field 'f' is not defined in this shape

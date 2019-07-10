@@ -560,4 +560,5 @@ UnresolvedTypeVariable = 4317
 InvalidSubString = 4318
 InvalidArrayKeyConstraint = 4319
 OverrideNoDefaultTypeconst = 4320
+ShapeAccessWithNonExistentField = 4321
   |}]

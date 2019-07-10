@@ -1,1 +1,4 @@
-No errors
+File "shape_nullsafe.php", line 23, characters 9-21:
+You are accessing a field known to not exist (Typing[4321])
+File "shape_nullsafe.php", line 11, characters 3-8:
+The field 'x' is not defined in this shape

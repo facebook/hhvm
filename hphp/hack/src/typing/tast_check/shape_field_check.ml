@@ -58,11 +58,16 @@ let shapes_method_access_with_non_existent_field pos1 env method_name ((_, shape
     Errors.shapes_method_access_with_non_existent_field pos1 (snd field_name) pos2 method_name reason
   | `Unknown -> ()
 
+let shape_access_with_non_existent_field pos1 env ((_, shape), _) field_name =
+  match shapes_key_exists env shape (SFlit_str field_name) with
+  | `DoesNotExist (pos2, reason) ->
+    Errors.shape_access_with_non_existent_field pos1 (snd field_name) pos2 reason
+  | `DoesExist _ | `Unknown -> ()
+
 let handler = object
   inherit Tast_visitor.handler_base
 
-  method! at_expr env =
-    function
+  method! at_expr env = function
     | (p, _), Call (Aast.Cnormal, (_, Class_const ((_, CI (_, class_name)), (_, method_name))), _, [shape; (pos, _), String field_name], [])
       when
         class_name = SN.Shapes.cShapes &&
@@ -74,5 +79,7 @@ let handler = object
         class_name = SN.Shapes.cShapes &&
         (method_name = SN.Shapes.idx || method_name = SN.Shapes.at) ->
       shapes_method_access_with_non_existent_field p env method_name shape (pos, field_name)
+    | (p, _), Binop (Ast.QuestionQuestion, (_, Array_get (shape, Some ((pos, _), String field_name))), _) ->
+      shape_access_with_non_existent_field p env shape (pos, field_name)
     | _ -> ()
 end

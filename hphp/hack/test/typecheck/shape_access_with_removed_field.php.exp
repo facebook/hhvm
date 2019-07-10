@@ -1,0 +1,6 @@
+File "shape_access_with_removed_field.php", line 6, characters 3-17:
+You are accessing a field known to not exist (Typing[4321])
+File "shape_access_with_removed_field.php", line 5, characters 3-34:
+The type of the field 'f' in this shape doesn't allow any values
+File "shape_access_with_removed_field.php", line 5, characters 3-34:
+It is nothing because the field 'f' was unset here

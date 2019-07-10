@@ -195,7 +195,7 @@ pub trait SyntaxType: SyntaxTypeBase
 
 
     fn fold_over_children<'a, U>(
-        f: &Fn(&'a Self, U) -> U,
+        f: &dyn Fn(&'a Self, U) -> U,
         acc: U,
         syntax: &'a SyntaxVariant<Self::Token, Self::Value>,
     ) -> U;

@@ -136,7 +136,7 @@ where
     S: SmartConstructors<'a, T>,
     S::R: NodeType,
 {
-    fn with_type_parser<U>(&mut self, f: &Fn(&mut TypeParser<'a, S, T>) -> U) -> U
+    fn with_type_parser<U>(&mut self, f: &dyn Fn(&mut TypeParser<'a, S, T>) -> U) -> U
     where
         T: Clone,
     {
@@ -160,7 +160,7 @@ where
         self.with_type_parser(&|p: &mut TypeParser<'a, S, T>| p.parse_type_specifier(allow_var))
     }
 
-    fn with_statement_parser<U>(&mut self, f: &Fn(&mut StatementParser<'a, S, T>) -> U) -> U
+    fn with_statement_parser<U>(&mut self, f: &dyn Fn(&mut StatementParser<'a, S, T>) -> U) -> U
     where
         T: Clone,
     {
@@ -182,7 +182,7 @@ where
         })
     }
 
-    fn with_expression_parser<U>(&mut self, f: &Fn(&mut ExpressionParser<'a, S, T>) -> U) -> U
+    fn with_expression_parser<U>(&mut self, f: &dyn Fn(&mut ExpressionParser<'a, S, T>) -> U) -> U
     where
         T: Clone,
     {
@@ -1278,7 +1278,7 @@ where
     // trait-name-list:
     //   qualified-name  generic-type-parameter-listopt
     //   trait-name-list  ,  qualified-name  generic-type-parameter-listopt
-    fn parse_trait_name_list(&mut self, predicate: &Fn(TokenKind) -> bool) -> S::R {
+    fn parse_trait_name_list(&mut self, predicate: &dyn Fn(TokenKind) -> bool) -> S::R {
         let (items, _) = self.parse_separated_list_predicate(
             TokenKind::Comma,
             SeparatedListKind::NoTrailing,

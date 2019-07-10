@@ -521,7 +521,7 @@ where
     V: SyntaxValueType<T>,
 {
 SYNTAX_CONSTRUCTORS    fn fold_over_children<'a, U>(
-        f: &Fn(&'a Self, U) -> U,
+        f: &dyn Fn(&'a Self, U) -> U,
         acc: U,
         syntax: &'a SyntaxVariant<T, V>,
     ) -> U {
@@ -616,7 +616,7 @@ pub trait SyntaxType: SyntaxTypeBase
 SYNTAX_CONSTRUCTORS
 
     fn fold_over_children<'a, U>(
-        f: &Fn(&'a Self, U) -> U,
+        f: &dyn Fn(&'a Self, U) -> U,
         acc: U,
         syntax: &'a SyntaxVariant<Self::Token, Self::Value>,
     ) -> U;

@@ -133,7 +133,7 @@ where
     S: SmartConstructors<'a, T>,
     S::R: NodeType,
 {
-    fn with_type_parser<U>(&mut self, f: &Fn(&mut TypeParser<'a, S, T>) -> U) -> U {
+    fn with_type_parser<U>(&mut self, f: &dyn Fn(&mut TypeParser<'a, S, T>) -> U) -> U {
         let mut type_parser: TypeParser<S, T> = TypeParser::make(
             self.lexer.clone(),
             self.env.clone(),
@@ -150,7 +150,7 @@ where
         self.with_type_parser(&|x: &mut TypeParser<'a, S, T>| x.parse_type_specifier(false))
     }
 
-    fn with_expression_parser<U>(&mut self, f: &Fn(&mut ExpressionParser<'a, S, T>) -> U) -> U {
+    fn with_expression_parser<U>(&mut self, f: &dyn Fn(&mut ExpressionParser<'a, S, T>) -> U) -> U {
         let mut expression_parser: ExpressionParser<S, T> = ExpressionParser::make(
             self.lexer.clone(),
             self.env.clone(),
@@ -163,7 +163,7 @@ where
         res
     }
 
-    fn with_decl_parser<U>(&mut self, f: &Fn(&mut DeclarationParser<'a, S, T>) -> U) -> U {
+    fn with_decl_parser<U>(&mut self, f: &dyn Fn(&mut DeclarationParser<'a, S, T>) -> U) -> U {
         let mut decl_parser: DeclarationParser<S, T> = DeclarationParser::make(
             self.lexer.clone(),
             self.env.clone(),

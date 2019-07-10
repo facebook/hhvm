@@ -1886,7 +1886,7 @@ where
     }
 
     fn fold_over_children<'a, U>(
-        f: &Fn(&'a Self, U) -> U,
+        f: &dyn Fn(&'a Self, U) -> U,
         acc: U,
         syntax: &'a SyntaxVariant<T, V>,
     ) -> U {

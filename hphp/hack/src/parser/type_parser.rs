@@ -134,7 +134,7 @@ where
     S: SmartConstructors<'a, T>,
     S::R: NodeType,
 {
-    fn with_expression_parser<U>(&mut self, f: &Fn(&mut ExpressionParser<'a, S, T>) -> U) -> U {
+    fn with_expression_parser<U>(&mut self, f: &dyn Fn(&mut ExpressionParser<'a, S, T>) -> U) -> U {
         let mut lexer = self.lexer.clone();
         lexer.set_in_type(false);
         let mut expression_parser: ExpressionParser<S, T> = ExpressionParser::make(
@@ -153,7 +153,7 @@ where
         self.with_expression_parser(&|p: &mut ExpressionParser<'a, S, T>| p.parse_expression())
     }
 
-    fn with_decl_parser<U>(&mut self, f: &Fn(&mut DeclarationParser<'a, S, T>) -> U) -> U {
+    fn with_decl_parser<U>(&mut self, f: &dyn Fn(&mut DeclarationParser<'a, S, T>) -> U) -> U {
         let mut lexer = self.lexer.clone();
         lexer.set_in_type(false);
 

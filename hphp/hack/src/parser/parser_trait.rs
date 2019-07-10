@@ -163,7 +163,7 @@ where
 
     fn next_token_with_tokenizer(
         &mut self,
-        tokenizer: &Fn(&mut Lexer<S::Token>) -> S::Token,
+        tokenizer: &dyn Fn(&mut Lexer<S::Token>) -> S::Token,
     ) -> S::Token {
         let token = tokenizer(self.lexer_mut());
         if !self.skipped_tokens().is_empty() {
@@ -294,7 +294,7 @@ where
     fn assert_token_with_tokenizer(
         &mut self,
         kind: TokenKind,
-        tokenizer: &Fn(&mut Lexer<S::Token>) -> S::Token,
+        tokenizer: &dyn Fn(&mut Lexer<S::Token>) -> S::Token,
     ) -> S::R {
         let token = self.next_token_with_tokenizer(tokenizer);
         if token.kind() != kind {
@@ -464,7 +464,7 @@ where
         }
     }
 
-    fn parse_alternate_if_block(&mut self, parse_item: &Fn(&mut Self) -> S::R) -> S::R {
+    fn parse_alternate_if_block(&mut self, parse_item: &dyn Fn(&mut Self) -> S::R) -> S::R {
         let mut parser1 = self.clone();
         let block = parser1.parse_list_while(parse_item, &|x: &Self| match x.peek_token_kind() {
             TokenKind::Elseif | TokenKind::Else | TokenKind::Endif => false,
@@ -487,7 +487,7 @@ where
         allow_trailing: SeparatedListKind,
         close_kind: TokenKind,
         error: Error,
-        parse_item: &Fn(&mut Self) -> S::R,
+        parse_item: &dyn Fn(&mut Self) -> S::R,
     ) -> (S::R, bool) {
         self.parse_separated_list_predicate(
             separator_kind,
@@ -692,7 +692,7 @@ where
         &mut self,
         close_predicate: TokenKind,
         error: Error,
-        parse_item: &Fn(&mut Self) -> S::R,
+        parse_item: &dyn Fn(&mut Self) -> S::R,
     ) -> (S::R, bool) {
         self.parse_separated_list(
             TokenKind::Comma,
@@ -707,9 +707,9 @@ where
         &mut self,
         separator_kind: TokenKind,
         list_kind: SeparatedListKind,
-        close_predicate: &Fn(TokenKind) -> bool,
+        close_predicate: &dyn Fn(TokenKind) -> bool,
         error: Error,
-        parse_item: &Fn(&mut Self) -> S::R,
+        parse_item: &dyn Fn(&mut Self) -> S::R,
     ) -> (S::R, bool) {
         let mut items = vec![];
 
@@ -799,7 +799,7 @@ where
         (item_list, no_arg_is_missing)
     }
 
-    fn parse_list_until_none(&mut self, parse_item: &Fn(&mut Self) -> Option<S::R>) -> S::R {
+    fn parse_list_until_none(&mut self, parse_item: &dyn Fn(&mut Self) -> Option<S::R>) -> S::R {
         let mut acc = vec![];
         loop {
             let maybe_item = parse_item(self);
@@ -824,9 +824,9 @@ where
         &mut self,
         separator_kind: TokenKind,
         allow_trailing: SeparatedListKind,
-        close_predicate: &Fn(TokenKind) -> bool,
+        close_predicate: &dyn Fn(TokenKind) -> bool,
         error: Error,
-        parse_item: &Fn(&mut Self) -> S::R,
+        parse_item: &dyn Fn(&mut Self) -> S::R,
     ) -> S::R {
         let kind = self.peek_token_kind();
         if close_predicate(kind) {
@@ -861,7 +861,7 @@ where
         allow_trailing: SeparatedListKind,
         close_kind: TokenKind,
         error: Error,
-        parse_item: &Fn(&mut Self) -> S::R,
+        parse_item: &dyn Fn(&mut Self) -> S::R,
     ) -> S::R {
         self.parse_separated_list_opt_predicate(
             separator_kind,
@@ -876,7 +876,7 @@ where
         &mut self,
         close_kind: TokenKind,
         error: Error,
-        parse_item: &Fn(&mut Self) -> S::R,
+        parse_item: &dyn Fn(&mut Self) -> S::R,
     ) -> S::R {
         self.parse_separated_list_opt(
             TokenKind::Comma,
@@ -891,7 +891,7 @@ where
         &mut self,
         close_kind: TokenKind,
         error: Error,
-        parse_item: &Fn(&mut Self) -> S::R,
+        parse_item: &dyn Fn(&mut Self) -> S::R,
     ) -> S::R {
         self.parse_separated_list_opt(
             TokenKind::Comma,
@@ -906,7 +906,7 @@ where
         &mut self,
         close_kind: TokenKind,
         error: Error,
-        parse_item: &Fn(&mut Self) -> S::R,
+        parse_item: &dyn Fn(&mut Self) -> S::R,
     ) -> S::R {
         self.parse_separated_list_opt(
             TokenKind::Comma,
@@ -919,9 +919,9 @@ where
 
     fn parse_comma_list_opt_allow_trailing_predicate(
         &mut self,
-        close_kind: &Fn(TokenKind) -> bool,
+        close_kind: &dyn Fn(TokenKind) -> bool,
         error: Error,
-        parse_item: &Fn(&mut Self) -> S::R,
+        parse_item: &dyn Fn(&mut Self) -> S::R,
     ) -> S::R {
         self.parse_separated_list_opt_predicate(
             TokenKind::Comma,
@@ -936,7 +936,7 @@ where
         &mut self,
         close_kind: TokenKind,
         error: Error,
-        parse_item: &Fn(&mut Self) -> S::R,
+        parse_item: &dyn Fn(&mut Self) -> S::R,
     ) -> S::R {
         let (items, _) = self.parse_separated_list(
             TokenKind::Comma,
@@ -954,7 +954,7 @@ where
         left_error: Error,
         right_kind: TokenKind,
         right_error: Error,
-        parse_items: &Fn(&mut Self) -> S::R,
+        parse_items: &dyn Fn(&mut Self) -> S::R,
     ) -> (S::R, S::R, S::R) {
         let left = self.require_token(left_kind, left_error);
         let items = parse_items(self);
@@ -962,7 +962,7 @@ where
         (left, items, right)
     }
 
-    fn parse_braced_list(&mut self, parse_items: &Fn(&mut Self) -> S::R) -> (S::R, S::R, S::R) {
+    fn parse_braced_list(&mut self, parse_items: &dyn Fn(&mut Self) -> S::R) -> (S::R, S::R, S::R) {
         self.parse_delimited_list(
             TokenKind::LeftBrace,
             Errors::error1034,
@@ -974,7 +974,7 @@ where
 
     fn parse_parenthesized_list(
         &mut self,
-        parse_items: &Fn(&mut Self) -> S::R,
+        parse_items: &dyn Fn(&mut Self) -> S::R,
     ) -> (S::R, S::R, S::R) {
         self.parse_delimited_list(
             TokenKind::LeftParen,
@@ -987,7 +987,7 @@ where
 
     fn parse_parenthesized_comma_list(
         &mut self,
-        parse_item: &Fn(&mut Self) -> S::R,
+        parse_item: &dyn Fn(&mut Self) -> S::R,
     ) -> (S::R, S::R, S::R) {
         let parse_items =
             |x: &mut Self| x.parse_comma_list(TokenKind::RightParen, Errors::error1011, parse_item);
@@ -997,7 +997,7 @@ where
 
     fn parse_parenthesized_comma_list_opt_allow_trailing(
         &mut self,
-        parse_item: &Fn(&mut Self) -> S::R,
+        parse_item: &dyn Fn(&mut Self) -> S::R,
     ) -> (S::R, S::R, S::R) {
         let parse_items = |x: &mut Self| {
             x.parse_comma_list_opt_allow_trailing(
@@ -1012,7 +1012,7 @@ where
 
     fn parse_parenthesized_comma_list_opt_items_opt(
         &mut self,
-        parse_item: &Fn(&mut Self) -> S::R,
+        parse_item: &dyn Fn(&mut Self) -> S::R,
     ) -> (S::R, S::R, S::R) {
         let parse_items = |x: &mut Self| {
             x.parse_comma_list_opt_items_opt(TokenKind::RightParen, Errors::error1011, parse_item)
@@ -1023,7 +1023,7 @@ where
 
     fn parse_braced_comma_list_opt_allow_trailing(
         &mut self,
-        parse_item: &Fn(&mut Self) -> S::R,
+        parse_item: &dyn Fn(&mut Self) -> S::R,
     ) -> (S::R, S::R, S::R) {
         let parse_items = |parser: &mut Self| {
             parser.parse_comma_list_opt_allow_trailing(
@@ -1035,7 +1035,10 @@ where
         self.parse_braced_list(&parse_items)
     }
 
-    fn parse_bracketted_list(&mut self, parse_items: &Fn(&mut Self) -> S::R) -> (S::R, S::R, S::R) {
+    fn parse_bracketted_list(
+        &mut self,
+        parse_items: &dyn Fn(&mut Self) -> S::R,
+    ) -> (S::R, S::R, S::R) {
         self.parse_delimited_list(
             TokenKind::LeftBracket,
             Errors::error1026,
@@ -1047,7 +1050,7 @@ where
 
     fn parse_bracketted_comma_list_opt_allow_trailing(
         &mut self,
-        parse_item: &Fn(&mut Self) -> S::R,
+        parse_item: &dyn Fn(&mut Self) -> S::R,
     ) -> (S::R, S::R, S::R) {
         let parse_items = |x: &mut Self| {
             x.parse_comma_list_opt_allow_trailing(
@@ -1061,7 +1064,7 @@ where
 
     fn parse_double_angled_list(
         &mut self,
-        parse_items: &Fn(&mut Self) -> S::R,
+        parse_items: &dyn Fn(&mut Self) -> S::R,
     ) -> (S::R, S::R, S::R) {
         self.parse_delimited_list(
             TokenKind::LessThanLessThan,
@@ -1074,7 +1077,7 @@ where
 
     fn parse_double_angled_comma_list_allow_trailing(
         &mut self,
-        parse_item: &Fn(&mut Self) -> S::R,
+        parse_item: &dyn Fn(&mut Self) -> S::R,
     ) -> (S::R, S::R, S::R) {
         let parse_items = |x: &mut Self| {
             let (items, _) = x.parse_comma_list_allow_trailing(
@@ -1095,8 +1098,8 @@ where
     // Parse with parse_item while a condition is met.
     fn parse_list_while(
         &mut self,
-        parse_item: &Fn(&mut Self) -> S::R,
-        predicate: &Fn(&Self) -> bool,
+        parse_item: &dyn Fn(&mut Self) -> S::R,
+        predicate: &dyn Fn(&Self) -> bool,
     ) -> S::R {
         let mut items = vec![];
         loop {
@@ -1131,7 +1134,7 @@ where
 
     fn parse_terminated_list(
         &mut self,
-        parse_item: &Fn(&mut Self) -> S::R,
+        parse_item: &dyn Fn(&mut Self) -> S::R,
         terminator: TokenKind,
     ) -> S::R {
         let predicate = |x: &Self| x.peek_token_kind() != terminator;

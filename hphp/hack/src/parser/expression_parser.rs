@@ -159,7 +159,7 @@ where
         self.allow_as_expressions
     }
 
-    pub fn with_as_expressions<U>(&mut self, enabled: bool, f: &Fn(&mut Self) -> U) -> U {
+    pub fn with_as_expressions<U>(&mut self, enabled: bool, f: &dyn Fn(&mut Self) -> U) -> U {
         let old_enabled = self.allow_as_expressions();
         self.allow_as_expressions = enabled;
         let r = f(self);
@@ -167,7 +167,7 @@ where
         r
     }
 
-    fn with_type_parser<U>(&mut self, f: &Fn(&mut TypeParser<'a, S, T>) -> U) -> U
+    fn with_type_parser<U>(&mut self, f: &dyn Fn(&mut TypeParser<'a, S, T>) -> U) -> U
     where
         T: Clone,
     {
@@ -200,7 +200,7 @@ where
         self.with_type_parser(&|x| x.parse_generic_type_argument_list())
     }
 
-    fn with_decl_parser<U>(&mut self, f: &Fn(&mut DeclarationParser<'a, S, T>) -> U) -> U
+    fn with_decl_parser<U>(&mut self, f: &dyn Fn(&mut DeclarationParser<'a, S, T>) -> U) -> U
     where
         T: Clone,
     {
@@ -216,7 +216,7 @@ where
         res
     }
 
-    fn with_statement_parser<U>(&mut self, f: &Fn(&mut StatementParser<'a, S, T>) -> U) -> U
+    fn with_statement_parser<U>(&mut self, f: &dyn Fn(&mut StatementParser<'a, S, T>) -> U) -> U
     where
         T: Clone,
     {
@@ -2036,7 +2036,7 @@ where
 
     fn parse_is_as_helper(
         &mut self,
-        f: &Fn(&mut Self, S::R, S::R, S::R) -> S::R,
+        f: &dyn Fn(&mut Self, S::R, S::R, S::R) -> S::R,
         left: S::R,
         kw: TokenKind,
     ) -> S::R {
@@ -2418,8 +2418,8 @@ where
     fn parse_bracketed_collection_intrinsic_expression(
         &mut self,
         keyword_token: TokenKind,
-        parse_element_function: &Fn(&mut Self) -> S::R,
-        make_intrinsic_function: &Fn(&mut Self, S::R, S::R, S::R, S::R, S::R) -> S::R,
+        parse_element_function: &dyn Fn(&mut Self) -> S::R,
+        make_intrinsic_function: &dyn Fn(&mut Self, S::R, S::R, S::R, S::R, S::R) -> S::R,
     ) -> S::R {
         let mut parser1 = self.clone();
         let keyword = parser1.assert_token(keyword_token);

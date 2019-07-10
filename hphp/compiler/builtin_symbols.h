@@ -17,34 +17,19 @@
 #ifndef incl_HPHP_BUILTIN_SYMBOLS_H_
 #define incl_HPHP_BUILTIN_SYMBOLS_H_
 
-#include "hphp/util/hash-set.h"
-
 #include <memory>
-#include <set>
-#include <string>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct AnalysisResult;
 using AnalysisResultPtr = std::shared_ptr<AnalysisResult>;
+struct UnitEmitter;
 
 struct BuiltinSymbols {
   static AnalysisResultPtr s_systemAr;
 
-  /**
-   * Testing whether a variable is a PHP superglobal.
-   */
-  static bool IsSuperGlobal(const std::string &name);
-
-  static void LoadSuperGlobals();
-
-  static const char *const GlobalNames[];
-  static int NumGlobalNames();
-private:
-  static hphp_string_set s_superGlobals;
-
-  static std::set<std::string> s_declaredDynamic;
+  static void RecordSystemlibFile(std::unique_ptr<UnitEmitter>&&);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

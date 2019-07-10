@@ -27,7 +27,6 @@
 #include <utility>
 #include <vector>
 
-#include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/package.h"
 #include "hphp/runtime/base/program-functions.h"

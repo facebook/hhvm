@@ -533,9 +533,6 @@ int process(const CompilerOptions &po) {
 
   hhbcTargetInit(po, ar);
 
-  // one time initialization
-  BuiltinSymbols::LoadSuperGlobals();
-
   bool processInitRan = false;
   SCOPE_EXIT {
     if (processInitRan) {

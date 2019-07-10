@@ -308,7 +308,6 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const SHA1& sha1,
     // Do initialization when code is null; see above.
     Option::RecordErrors = false;
     Option::WholeProgram = false;
-    BuiltinSymbols::LoadSuperGlobals();
     TypeConstraint tc;
     return nullptr;
   }

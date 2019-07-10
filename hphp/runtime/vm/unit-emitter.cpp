@@ -16,9 +16,7 @@
 
 #include "hphp/runtime/vm/unit-emitter.h"
 
-#include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/builtin_symbols.h"
-#include "hphp/compiler/option.h"
 #include "hphp/parser/location.h"
 #include "hphp/system/systemlib.h"
 
@@ -1004,7 +1002,7 @@ UnitRepoProxy::load(const folly::StringPiece name, const SHA1& sha1,
   if (BuiltinSymbols::s_systemAr) {
     assertx(ue->m_filepath->data()[0] == '/' &&
             ue->m_filepath->data()[1] == ':');
-    BuiltinSymbols::s_systemAr->addHhasFile(std::move(ue));
+    BuiltinSymbols::RecordSystemlibFile(std::move(ue));
   }
   FTRACE(1, "Creating unit {} for `{}`\n", unit.get(), name);
   return unit;

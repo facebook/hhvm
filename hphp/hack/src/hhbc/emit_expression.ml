@@ -3282,7 +3282,6 @@ and get_call_builtin_func_info lower_fq_id =
   | "hh\\dict" -> Some (1, IOp CastDict)
   | "hh\\varray" -> Some (1, IOp (if hack_arr_dv_arrs () then CastVec else CastVArray))
   | "hh\\darray" -> Some (1, IOp (if hack_arr_dv_arrs () then CastDict else CastDArray))
-  | "hh\\global_empty" -> Some (1, IIsset EmptyG)
   | "hh\\global_get" -> Some (1, IGet CGetG)
   | "hh\\global_isset" -> Some (1, IIsset IssetG)
   | _ -> None

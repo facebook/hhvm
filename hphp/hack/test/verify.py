@@ -433,7 +433,7 @@ def list_test_files(root: str, disabled_ext: str, test_ext: str) -> List[str]:
         # so ignore those.
         return []
     else:
-        raise Exception("Could not find test file or directory at %s" % args.test_path)
+        raise Exception("Could not find test file or directory at %s" % root)
 
 
 def get_content_(file_path: str, ext: str) -> str:

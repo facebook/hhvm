@@ -197,6 +197,24 @@ let to_ty_string (item: si_item): string =
   | SI_GlobalConstant -> "constant"
   | SI_XHP -> "XHP class"
   | SI_Namespace -> "namespace"
+
+(* Sigh, yet another string to enum conversion *)
+let string_to_kind (type_: string): si_kind option =
+  match type_ with
+  | "class" -> Some SI_Class
+  | "interface" -> Some SI_Interface
+  | "enum" -> Some SI_Enum
+  | "trait" -> Some SI_Trait
+  | "unknown" -> Some SI_Unknown
+  | "mixed" -> Some SI_Mixed
+  | "function" -> Some SI_Function
+  (* Compatibility with strings used by Hack Search Service as well as ty_string *)
+  | "typedef" | "type alias" -> Some SI_Typedef
+  | "constant" -> Some SI_GlobalConstant
+  | "xhp" -> Some SI_XHP
+  | "namespace" -> Some SI_Namespace
+  | _ -> None
+
 (* More complete representation of a symbol index item *)
 type si_fullitem = {
   sif_name: string;

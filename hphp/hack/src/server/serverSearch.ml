@@ -65,11 +65,16 @@ let go workers query type_ (sienv: SearchUtils.si_env)
   : SearchUtils.result =
   let max_results = 100 in
   let start_time = Unix.gettimeofday () in
+  let kind_filter = SearchUtils.string_to_kind type_ in
   let fuzzy = SymbolIndex.fuzzy_search_enabled () in
   let results =
     (* If query contains "::", search class methods instead of top level definitions *)
     match Str.split_delim re_colon_colon query with
     | [class_name_query; method_query] ->
+
+      (* Fixup the kind filter *)
+      let kind_filter = Some SearchUtils.SI_Class in
+
       (* Get the class with the most similar name to `class_name_query` *)
       let class_ =
 
@@ -87,7 +92,7 @@ let go workers query type_ (sienv: SearchUtils.si_env)
           SymbolIndex.find_matching_symbols
             ~query_text:class_name_query
             ~max_results:1
-            ~kind_filter:(Some SearchUtils.SI_Class)
+            ~kind_filter
             ~context:None
             ~sienv
           |> List.hd
@@ -112,7 +117,7 @@ let go workers query type_ (sienv: SearchUtils.si_env)
         let temp_results = SymbolIndex.find_matching_symbols
           ~query_text:query
           ~max_results
-          ~kind_filter:None
+          ~kind_filter
           ~context:None
           ~sienv
         in
@@ -123,7 +128,7 @@ let go workers query type_ (sienv: SearchUtils.si_env)
     ~start_time
     ~query_text:query
     ~max_results
-    ~kind_filter:None
+    ~kind_filter
     ~results:(List.length results)
     ~context:None
     ~caller:"ServerSearch.go";

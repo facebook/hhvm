@@ -164,15 +164,13 @@ let find_matching_symbols
     let global_results = match sienv.sie_provider with
       | CustomIndex ->
         let r = CustomSearchService.search_symbols
-          ~query_text
-          ~max_results
-          ~context in
+          ~query_text ~max_results ~context  ~kind_filter in
         LocalSearchService.extract_dead_results ~sienv ~results:r
       | NoIndex ->
         []
       | SqliteIndex ->
         let results = SqliteSearchService.sqlite_search
-          ~sienv ~query_text ~max_results ~context in
+          ~sienv ~query_text ~max_results ~context ~kind_filter in
         LocalSearchService.extract_dead_results ~sienv ~results
       | TrieIndex ->
         HackSearchService.index_search query_text max_results kind_filter

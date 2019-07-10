@@ -159,13 +159,16 @@ let sqlite_search
     ~(sienv: si_env)
     ~(query_text: string)
     ~(max_results: int)
-    ~(context: autocomplete_type option): si_results =
-  match context with
-  | Some Acid -> search_acid ~sienv ~query_text ~max_results
-  | Some Acnew -> search_acnew ~sienv ~query_text ~max_results
-  | Some Actype -> search_actype ~sienv ~query_text ~max_results
-  | Some Actrait_only -> search_symbols_by_kind
+    ~(context: autocomplete_type option)
+    ~(kind_filter: SearchUtils.si_kind option): si_results =
+  match context, kind_filter with
+  | Some Acid, _ -> search_acid ~sienv ~query_text ~max_results
+  | Some Acnew, _ -> search_acnew ~sienv ~query_text ~max_results
+  | Some Actype, _ -> search_actype ~sienv ~query_text ~max_results
+  | Some Actrait_only, _ -> search_symbols_by_kind
     ~sienv ~query_text ~max_results ~kind_filter:SI_Trait
+  | None, Some kind -> search_symbols_by_kind
+    ~sienv ~query_text ~max_results ~kind_filter:kind
   | _ -> search_all_symbols ~sienv ~query_text ~max_results
 
 (* Fetch all known namespaces from the database *)

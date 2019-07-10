@@ -475,6 +475,9 @@ void CompletionsCommand::addClassConstantCompletions(
 ) {
   HPHP::String classStr(context.matchContext.c_str());
   Class* cls = Unit::loadClass(classStr.get());
+  if (cls == nullptr) {
+    return;
+  }
 
   // Add constants of this class. Note that here and in methods, we get
   // everything from this class and its ancestors

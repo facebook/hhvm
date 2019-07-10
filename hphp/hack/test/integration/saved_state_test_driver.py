@@ -1,3 +1,5 @@
+# pyre-strict
+
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import json
@@ -5,13 +7,17 @@ import os
 import shlex
 import shutil
 import tempfile
-from typing import Any, List, NamedTuple, Optional
+from typing import Iterable, List, Mapping, NamedTuple, Optional, TextIO, TypeVar, Union
 
 import common_tests
 from hh_paths import hh_client, hh_merge_deps, hh_server
 
 
-def write_echo_json(f, obj):
+T = TypeVar("T")
+ChangedFile = Union[str, Mapping[str, str]]
+
+
+def write_echo_json(f: TextIO, obj: T) -> None:
     f.write("echo %s\n" % shlex.quote(json.dumps(obj)))
 
 
@@ -41,7 +47,7 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
     saved_state_dir: str
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         super().setUpClass()
         # we create the state in a different dir from the one we run our tests
         # on, to verify that the saved state does not depend on any absolute
@@ -54,12 +60,12 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
         shutil.rmtree(init_dir)
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         super().tearDownClass()
         shutil.rmtree(cls.saved_state_dir)
 
     @classmethod
-    def saved_state_path(cls):
+    def saved_state_path(cls) -> str:
         return os.path.join(cls.saved_state_dir, "foo")
 
     @classmethod
@@ -161,7 +167,7 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
         self.start_hh_server(args=["--check", "--save-naming", saved_state_path])
         return saved_state_path
 
-    def write_local_conf(self):
+    def write_local_conf(self) -> None:
         with open(os.path.join(self.repo_dir, "hh.conf"), "w") as f:
             f.write(
                 r"""
@@ -175,7 +181,7 @@ lazy_init2 = true
 """
             )
 
-    def write_hhconfig(self):
+    def write_hhconfig(self) -> None:
         with open(os.path.join(self.repo_dir, ".hhconfig"), "w") as f:
             f.write(
                 r"""
@@ -185,7 +191,7 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
 """
             )
 
-    def write_watchman_config(self):
+    def write_watchman_config(self) -> None:
         with open(os.path.join(self.repo_dir, ".watchmanconfig"), "w") as f:
             f.write("{}")
 
@@ -216,7 +222,7 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
 
     def save_partial(
         self,
-        files_to_check: Optional[List[Any]] = None,
+        files_to_check: Optional[Iterable[ChangedFile]] = None,
         filename: Optional[str] = None,
         gen_with_errors: bool = True,
         init_dir: Optional[str] = None,
@@ -253,7 +259,12 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
 
         return SaveStateResult(path=saved_state_path, returned_values=result)
 
-    def start_hh_server(self, changed_files=None, saved_state_path=None, args=None):
+    def start_hh_server(
+        self,
+        changed_files: Optional[Iterable[ChangedFile]] = None,
+        saved_state_path: Optional[str] = None,
+        args: Optional[List[str]] = None,
+    ) -> None:
         if changed_files is None:
             changed_files = []
 
@@ -291,10 +302,10 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
     def check_cmd(
         self,
         expected_output: Optional[List[str]],
-        stdin=None,
-        options=None,
-        assert_loaded_saved_state=True,
-    ):
+        stdin: Optional[str] = None,
+        options: Optional[str] = None,
+        assert_loaded_saved_state: bool = True,
+    ) -> str:
         result = super(SavedStateTestDriver, self).check_cmd(
             expected_output, stdin, options
         )
@@ -311,7 +322,9 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
             )
         return result
 
-    def assertEqualString(self, first, second, msg=None):
+    def assertEqualString(
+        self, first: str, second: str, msg: Optional[str] = None
+    ) -> None:
         root = self.repo_dir + os.path.sep
         second = second.format(root=root)
         self.assertEqual(first, second, msg)
@@ -321,7 +334,7 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
 # directly instead of over RPC via hh_client
 class SavedStateClassicTestDriver(SavedStateTestDriver):
     @classmethod
-    def save_command(cls, init_dir):
+    def save_command(cls, init_dir: str) -> None:
         stdout, stderr, retcode = cls.proc_call(
             [
                 hh_server,

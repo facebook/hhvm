@@ -1,3 +1,5 @@
+# pyre-strict
+
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import json
@@ -7,7 +9,7 @@ import sqlite3
 import stat
 import time
 import unittest
-from typing import IO, Optional
+from typing import Optional, TextIO
 
 import common_tests
 import hierarchy_tests
@@ -19,7 +21,7 @@ from saved_state_test_driver import (
 )
 
 
-def write_echo_json(f: IO, obj: object) -> None:
+def write_echo_json(f: TextIO, obj: object) -> None:
     f.write("echo %s\n" % shlex.quote(json.dumps(obj)))
 
 
@@ -73,9 +75,13 @@ class SavedStateHierarchyTests(
 
 
 class SavedStateTests(SavedStateTestDriver, unittest.TestCase):
-    template_repo: Optional[str] = "hphp/hack/test/integration/data/simple_repo"
-    bin_dir: Optional[str]
+    template_repo = "hphp/hack/test/integration/data/simple_repo"
+    bin_dir: Optional[str] = None
     assert_naming_table_rows = False
+
+    def get_bin_dir(self) -> str:
+        assert self.bin_dir is not None
+        return self.bin_dir
 
     def test_hhconfig_change(self) -> None:
         """
@@ -123,8 +129,7 @@ watchman_init_timeout = 1
 """
             )
 
-        assert self.bin_dir is not None
-        with open(os.path.join(self.bin_dir, "watchman"), "w") as f:
+        with open(os.path.join(self.get_bin_dir(), "watchman"), "w") as f:
             f.write(r"""sleep 2""")
             os.fchmod(f.fileno(), stat.S_IRWXU)
 

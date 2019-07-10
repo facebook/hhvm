@@ -182,6 +182,14 @@ inline void bitvec_set(uint64_t* bits, size_t index) {
 #endif
 }
 
+inline void bitvec_clear(uint64_t* bits, size_t index) {
+#if defined(__x86_64__)
+  asm ("btr %1,%0" : "+m"(*bits) : "r"(index));
+#else
+  bits[index / 64] &= ~(1ull << (index % 64));
+#endif
+}
+
 inline bool bitvec_test(const uint64_t* bits, size_t index) {
 #if defined(__x86_64__)
   bool b;

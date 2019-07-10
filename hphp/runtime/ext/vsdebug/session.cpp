@@ -83,7 +83,7 @@ void DebuggerSession::invokeDummyStartupDocument() {
 
   if (m_displayStartupMsg) {
     m_debugger->sendUserMessage(
-      "Preparing your Hack/PHP console. Please wait...",
+      "Preparing your Hack console. Please wait...",
       DebugTransport::OutputLevelWarning
     );
   }

@@ -1,0 +1,2 @@
+
+Fatal error: Don't use $this in a static method, use static:: instead in %s/bad-this-closure-2.php on line 5

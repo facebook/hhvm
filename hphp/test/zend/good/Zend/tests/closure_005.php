@@ -19,11 +19,11 @@ class A {
         };
     }
 
-    function getError() {
-        return static function() {
-            echo $this->x."\n";
-        };
-    }
+
+
+
+
+
 
     function printX() {
         echo $this->x."\n";
@@ -33,7 +33,7 @@ class A {
 $a = new A(3);
 $incer = $a->getIncer(2);
 $printer = $a->getPrinter();
-$error = $a->getError();
+
 
 $a->printX();
 $printer();
@@ -51,7 +51,7 @@ $printer();
 
 unset($printer);
 
-$error();
+
 
 echo "Done\n";
 }

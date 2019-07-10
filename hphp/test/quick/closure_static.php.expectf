@@ -2,9 +2,6 @@ object(A) (1) {
   ["c":"A":private]=>
   int(1)
 }
-
-Notice: Undefined variable: this in %s on line 13
-NULL
 c::$a
 static c::$a
 array(3) {

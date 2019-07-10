@@ -9,6 +9,7 @@
 
 module SN = Naming_special_names
 module SyntaxError = Full_fidelity_syntax_error
+module CK = Core_kernel
 
 open Ast
 
@@ -134,13 +135,17 @@ let check_program program =
         active_classish = Some class_;
       } class_
 
+    method! on_fun_ ctx fd =
+      super#on_fun_ { ctx with
+        active_methodish_kind = if fd.f_static
+          then CK.Option.map ~f:(fun lst -> Static::lst) ctx.active_methodish_kind
+          else ctx.active_methodish_kind;
+        in_callable = true
+      } fd
+
     method! on_expr ctx e = this#plus
       (super#on_expr ctx e)
       (this#reduce (fun r -> r#at_expr ctx e))
-
-    method! on_fun_ ctx =
-      super#on_fun_
-        { ctx with in_callable = true }
 
     method! on_Lvar ctx lvar = this#plus
       (super#on_Lvar ctx lvar)

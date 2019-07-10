@@ -9,10 +9,10 @@ class A {
     };
     $a();
 
-    $a = static function () {
-      var_dump($this);
-    };
-    $a();
+
+
+
+
   }
 
   static function c() {

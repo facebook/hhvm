@@ -1004,7 +1004,7 @@ and stmt_ env pos st =
       | None -> env, None, None
       in
     let env, t_rhs, rhs_ty = expr env rhs in
-    let env, _ = match hint_ty with
+    let env = match hint_ty with
       | Some ty ->
         let env = check_expected_ty "Let" env rhs_ty expected in
         set_valid_rvalue p env x ty
@@ -1189,17 +1189,17 @@ and bind_as_expr env loop_ty p ty1 ty2 aexpr =
       env, T.Await_as_v(p, te)
     | As_kv ((p, ImmutableVar ((_, k) as id)), ev)
     | As_kv ((p, Lvar ((_, k) as id)), ev) ->
-      let env, ty1' = set_valid_rvalue p env k ty1 in
+      let env = set_valid_rvalue p env k ty1 in
       let env, te, _ = assign p env ev ty2 in
-      let tk = T.make_typed_expr p ty1' (T.Lvar id) in
+      let tk = T.make_typed_expr p ty1 (T.Lvar id) in
       let env = check_reassigned_mutable env tk in
       let env = check_reassigned_mutable env te in
       env, T.As_kv(tk, te)
     | Await_as_kv (p, (p1, ImmutableVar ((_, k) as id)), ev)
     | Await_as_kv (p, (p1, Lvar ((_, k) as id)), ev) ->
-      let env, ty1' = set_valid_rvalue p env k ty1 in
+      let env = set_valid_rvalue p env k ty1 in
       let env, te, _ = assign p env ev ty2 in
-      let tk = T.make_typed_expr p1 ty1' (T.Lvar id) in
+      let tk = T.make_typed_expr p1 ty1 (T.Lvar id) in
       let env = check_reassigned_mutable env tk in
       let env = check_reassigned_mutable env te in
       env, T.Await_as_kv(p, tk, te)
@@ -3237,8 +3237,7 @@ and set_valid_rvalue p env x ty =
   (* We are assigning a new value to the local variable, so we need to
    * generate a new expression id
    *)
-  let env = Env.set_local_expr_id env x (Ident.tmp()) in
-  env, ty
+  Env.set_local_expr_id env x (Ident.tmp())
 
 (* Deal with assignment of a value of type ty2 to lvalue e1 *)
 and assign p env e1 ty2 : _ * T.expr * T.ty =
@@ -3247,8 +3246,8 @@ and assign p env e1 ty2 : _ * T.expr * T.ty =
 and assign_ p ur env e1 ty2 =
   match e1 with
   | (_, Lvar ((_, x) as id)) ->
-    let env, ty1 = set_valid_rvalue p env x ty2 in
-    make_result env (fst e1) (T.Lvar id) ty1
+    let env = set_valid_rvalue p env x ty2 in
+    make_result env (fst e1) (T.Lvar id) ty2
   | (_, Lplaceholder id) ->
     let placeholder_ty = MakeType.void (Reason.Rplaceholder p) in
     make_result env (fst e1) (T.Lplaceholder id) placeholder_ty
@@ -3384,12 +3383,12 @@ and assign_ p ur env e1 ty2 =
       begin match obj with
       | _, This ->
          let env, local = Env.FakeMembers.make env obj member_name in
-         let env, ty = set_valid_rvalue p env local ty2 in
-         env, te1, ty
+         let env = set_valid_rvalue p env local ty2 in
+         env, te1, ty2
       | _, Lvar _ ->
           let env, local = Env.FakeMembers.make env obj member_name in
-          let env, ty = set_valid_rvalue p env local ty2 in
-          env, te1, ty
+          let env= set_valid_rvalue p env local ty2 in
+          env, te1, ty2
       | _ -> env, te1, ty2
       end
   | _, Obj_get _ ->
@@ -3416,8 +3415,8 @@ and assign_ p ur env e1 ty2 =
       let env, _, _ =
         class_get ~is_method:false ~is_const:false env cty (pos_member, y) x k in
       let env, local = Env.FakeMembers.make_static env x y in
-      let env, ty3 = set_valid_rvalue p env local ty2 in
-      env, te1, ty3
+      let env = set_valid_rvalue p env local ty2 in
+      env, te1, ty2
   | pos, Array_get (e1, None) ->
     let env, te1, ty1 = update_array_type pos env e1 None `lvalue in
     let env, (ty1', _ty2') =
@@ -4049,7 +4048,7 @@ and call_parent_construct pos env el uel =
               let env, _te, shape_ty = expr ~is_func_arg:true env shape in
               let env, shape_ty =
                 Typing_shapes.remove_key p env shape_ty field in
-              let env, _ = set_valid_rvalue p env lvar shape_ty in
+              let env = set_valid_rvalue p env lvar shape_ty in
               env, res
             | _ ->
               Errors.invalid_shape_remove_key (fst shape);
@@ -6927,7 +6926,7 @@ and update_array_type ?lhs_of_null_coalesce p env e1 e2 valkind  =
         | (_, Lvar (_, x)) ->
           (* type_mapper has updated the type in ty1 typevars, but we
              need to update the local variable type too *)
-          let env, ty1 = set_valid_rvalue p env x ty1 in
+          let env = set_valid_rvalue p env x ty1 in
           env, te1, ty1
         | _ -> env, te1, ty1
       end

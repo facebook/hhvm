@@ -205,8 +205,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   Config::Bind(HHBBC::options.HardConstProp, ini, config,
                "HardConstProp", HHBBC::options.HardConstProp);
-  Config::Bind(HHBBC::options.ElideAutoloadInvokes, ini, config,
-               "ElideAutoloadInvokes", HHBBC::options.ElideAutoloadInvokes);
 
   Config::Bind(APCProfile, ini, config, "APCProfile");
 

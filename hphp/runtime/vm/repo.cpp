@@ -20,7 +20,6 @@
 #include <folly/Format.h>
 #include <folly/Singleton.h>
 
-#include "hphp/hhbbc/options.h"
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/server/xbox-server.h"
@@ -228,7 +227,6 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
     RuntimeOption::EvalPromoteEmptyObject    = s_globalData.PromoteEmptyObject;
     RuntimeOption::EnableIntrinsicsExtension =
       s_globalData.EnableIntrinsicsExtension;
-    HHBBC::options.ElideAutoloadInvokes     = s_globalData.ElideAutoloadInvokes;
     RuntimeOption::PHP7_Builtins            = s_globalData.PHP7_Builtins;
     RuntimeOption::PHP7_IntSemantics        = s_globalData.PHP7_IntSemantics;
     RuntimeOption::PHP7_NoHexNumerics       = s_globalData.PHP7_NoHexNumerics;

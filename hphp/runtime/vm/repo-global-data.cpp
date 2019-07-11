@@ -31,7 +31,6 @@ std::string show(const Repo::GlobalData& gd) {
   SHOW(CheckPropTypeHints);
   SHOW(ThisTypeHintLevel);
   SHOW(HardPrivatePropInference);
-  SHOW(ElideAutoloadInvokes);
   SHOW(PHP7_IntSemantics);
   SHOW(PHP7_NoHexNumerics);
   SHOW(PHP7_Builtins);

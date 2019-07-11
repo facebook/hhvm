@@ -226,13 +226,6 @@ struct Options {
   bool HardPrivatePropInference = true;
 
   /*
-   * If true, we'll perform optimizations which can remove invocations of the
-   * autoloader, if it can be proven the invocation would not find a viable
-   * function.
-   */
-  bool ElideAutoloadInvokes = true;
-
-  /*
    * Whether to flatten trait methods and properties into the classes
    * that use them.
    */

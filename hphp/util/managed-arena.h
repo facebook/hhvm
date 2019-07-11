@@ -134,10 +134,14 @@ inline HighArena* highArena() {
   return nullptr;
 }
 
+using PreMappedArena = alloc::ManagedArena<alloc::RangeFallbackExtentAllocator>;
+
+extern PreMappedArena* g_arena0;
+extern std::vector<PreMappedArena*> g_local_arenas; // keyed by numa node id
+
 }
 
 using DefaultArena = alloc::ManagedArena<alloc::DefaultExtentAllocator>;
-using PreMappedArena = alloc::ManagedArena<alloc::RangeFallbackExtentAllocator>;
 
 /*
  * Make sure we have at least `count` extra arenas, with the same number of

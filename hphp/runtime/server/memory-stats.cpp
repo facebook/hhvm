@@ -55,8 +55,17 @@ void MemoryStats::ReportMemory(std::string& output, Writer::Format format) {
   // Subtract unused size in hugetlb arenas
 #if USE_JEMALLOC_EXTENT_HOOKS
   size_t unused = 0;
-  if (auto a = alloc::lowArena()) unused += a->unusedSize();
-  if (auto a = alloc::highArena()) unused += a->unusedSize();
+  // Various arenas where range of hugetlb pages can be reserved but only
+  // partially used.
+  unused += alloc::getRange(alloc::AddrRangeClass::VeryLow).retained();
+  unused += alloc::getRange(alloc::AddrRangeClass::Low).retained();
+  unused += alloc::getRange(alloc::AddrRangeClass::Uncounted).retained();
+  if (alloc::g_arena0) {
+    unused += alloc::g_arena0->retained();
+  }
+  for (auto const arena : alloc::g_local_arenas) {
+    unused += arena->retained();
+  }
   procStatus.registerUnused(unused >> 10); // convert to kB
 #endif
   w->beginObject("Memory");

@@ -433,6 +433,7 @@ void setup_arena0(PageSpec s) {
                                false,
                                numa_node_set, 0);
   a0->setLowMapper(mapper);
+  g_arena0 = a0;
 }
 
 // Set up extra arenas for use in non-VM threads, when we have short bursts of
@@ -609,10 +610,8 @@ void arenas_thread_exit() {
 
 #endif // USE_JEMALLOC_EXTENT_HOOKS
 
-std::vector<unsigned> s_req_heap_arenas; // keyed by numa node id
 std::vector<SlabManager*> s_slab_managers;
 void setup_local_arenas(PageSpec spec, unsigned slabs) {
-  s_req_heap_arenas.reserve(num_numa_nodes());
   s_slab_managers.reserve(num_numa_nodes());
   slabs /= num_numa_nodes();
 
@@ -639,7 +638,7 @@ void setup_local_arenas(PageSpec spec, unsigned slabs) {
     spec.n1GPages * size1g + spec.n2MPages * size2m;
   if (reserveSize == 0) return;
 
-  s_req_heap_arenas.resize(num_numa_nodes(), 0);
+  g_local_arenas.resize(num_numa_nodes(), 0);
   for (unsigned i = 0; i < num_numa_nodes(); ++i) {
     static_assert(kLocalArenaMinAddr % size1g == 0, "");
     auto const desiredBase = kLocalArenaMinAddr + i * kLocalArenaSizeLimit;
@@ -678,14 +677,20 @@ void setup_local_arenas(PageSpec spec, unsigned slabs) {
     }
     if (totalSlabSize == reserveSize) continue;
     arena->setLowMapper(mapper);
-    s_req_heap_arenas[i] = arena->id();
+    g_local_arenas[i] = arena;
   }
 #endif
 }
 
 unsigned get_local_arena(uint32_t node) {
-  if (node >= s_req_heap_arenas.size()) return 0;
-  return s_req_heap_arenas[node];
+#if USE_JEMALLOC_EXTENT_HOOKS
+  if (node >= g_local_arenas.size()) return 0;
+  auto const arena = g_local_arenas[node];
+  if (arena == nullptr) return 0;
+  return arena->id();
+#else
+  return 0;
+#endif
 }
 
 SlabManager* get_local_slab_manager(uint32_t node) {

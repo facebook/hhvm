@@ -34,6 +34,8 @@ RangeArenaStorage g_coldArena{};
 RangeArenaStorage g_lowColdArena{};
 RangeStateStorage g_ranges[3];
 ArenaArray g_arenas;
+PreMappedArena* g_arena0;               // arena 0, if we end up injecting pages
+std::vector<PreMappedArena*> g_local_arenas; // keyed by numa node id
 
 NEVER_INLINE RangeState& getRange(AddrRangeClass index) {
   auto result = reinterpret_cast<RangeState*>(g_ranges + index);

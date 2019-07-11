@@ -101,6 +101,21 @@ struct alignas(64) RangeState {
     return lowUsed() + highUsed();
   }
 
+  size_t retained() const {             // mapped but not yet used
+    size_t ret = 0;
+    auto const lu = low_use.load(std::memory_order_acquire);
+    auto const lm = low_map.load(std::memory_order_acquire);
+    if (lm >= lu) {
+      ret += lm - lu;
+    }
+    auto const hu = high_use.load(std::memory_order_acquire);
+    auto const hm = high_map.load(std::memory_order_acquire);
+    if (hu >= hm) {
+      ret += hu - hm;
+    }
+    return ret;
+  }
+
   size_t lowMapped() const {
     auto const mapped = low_map.load(std::memory_order_acquire);
     return mapped - low();

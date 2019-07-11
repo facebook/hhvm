@@ -198,10 +198,12 @@ let naming_with_fast (fast: FileInfo.names Relative_path.Map.t) (t: float) : flo
  *)
 let update_search (genv: ServerEnv.genv) (naming_table: Naming_table.t) (t: float) : float =
   (* Don't update search index when in check mode *)
-  (* We can't use is_check_mode here because we want to
-     skip this step even while saving saved states.
-  *)
-  if ServerArgs.check_mode genv.options then t else
+  let provider_name = genv.local_config.ServerLocalConfig.symbolindex_search_provider in
+  let index_needs_updates = SymbolIndex.init_needs_search_updates ~provider_name in
+  let check_mode = ServerArgs.check_mode genv.options in
+  if not check_mode && index_needs_updates then
+  begin
+    Hh_logger.log "Load search indices...";
     (* Filter out non php files *)
     let naming_table = Naming_table.filter naming_table
         ~f:(fun s _ -> FindUtils.path_filter s) in
@@ -214,7 +216,15 @@ let update_search (genv: ServerEnv.genv) (naming_table: Naming_table.t) (t: floa
             SearchUtils.Init;
         );
     HackEventLogger.update_search_end t;
-    Hh_logger.log_duration "Loading search indices" t
+    Hh_logger.log_duration "Loaded search indices" t
+  end else
+  begin
+    Hh_logger.log
+      "Skipped loading search indices (check mode: %B, index provider: %s)"
+      check_mode
+      provider_name;
+    t
+  end
 
 (* Prechecked files are gated with a flag and not supported in AI/check/saving
  * of saved state modes. *)

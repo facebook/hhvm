@@ -153,7 +153,7 @@ void usage() {
     "when printing the top helpers (implies -i). The lower the percentage,"
     " the more helpers that will show up.\n"
     #ifdef FACEBOOK
-    "   -x               : log translations to database"
+    "    -x              : log translations to database\n"
     #endif
     "    -h              : prints help message\n",
     kListKeyword,

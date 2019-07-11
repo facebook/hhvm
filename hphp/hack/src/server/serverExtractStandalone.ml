@@ -187,7 +187,8 @@ let collect_dependencies tcopt func =
 
 let go tcopt function_name =
   try
+    let header = "<?hh\n" in
     let function_text = extract_function_body function_name in
     let dependencies = collect_dependencies tcopt function_name in
-    dependencies @ [function_text]
+    header :: dependencies @ [function_text]
   with FunctionNotFound -> ["Function not found!"]

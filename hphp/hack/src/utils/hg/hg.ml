@@ -17,11 +17,16 @@ module Hg_actual = struct
     | Hg_rev hash -> hash
     | Global_rev rev -> Printf.sprintf "r%d" rev
 
-let exec_hg args =
-  (** Disable user aliases or configs. *)
+let exec_hg ?(plain = true) args =
+  let env = match plain with
+    | true ->
+      (** Disable user aliases or configs. *)
+      Process_types.Augment ["HGPLAIN=1"]
+    | false -> Process_types.Default
+  in
   Process.exec
     "hg"
-    ~env:(Process_types.Augment ["HGPLAIN=1"])
+    ~env
     args
 
 (** Given a list of files and their revisions, saves the files to the output
@@ -79,6 +84,18 @@ let get_closest_global_ancestor rev repo =
     | Ok _ -> r1 | _ -> r2
   in
   Future.(merge q1 (merge q2 q3 take_first) take_first)
+
+  let current_mergebase_hg_rev repo =
+    (* "bottom^" does not work in plain mode *)
+    let process = exec_hg ~plain:false
+      [ "id"; "--debug"; "-i"; "--rev"; "bottom^"; "--cwd"; repo; ]
+    in
+    Future.make process @@ fun result ->
+      let result = String.trim result in
+      if String.length result < 1 then
+        raise Malformed_result
+      else
+        result
 
   (** Get the hg revision hash of the current working copy in the repo dir.
    *
@@ -226,6 +243,7 @@ module Hg_mock = struct
   module Mocking = struct
     let current_working_copy_hg_rev = ref @@ Future.of_value ("", false)
     let current_working_copy_base_rev = ref @@ Future.of_value 0
+    let current_mergebase_hg_rev = ref @@ Future.of_value ""
     let closest_global_ancestor = Hashtbl.create 10
     let files_changed_since_rev = Hashtbl.create 10
     let files_changed_since_rev_to_rev = Hashtbl.create 10
@@ -252,6 +270,7 @@ module Hg_mock = struct
       Hashtbl.reset files_changed_since_rev_to_rev
   end
 
+  let current_mergebase_hg_rev _ = !Mocking.current_mergebase_hg_rev
   let current_working_copy_hg_rev _ = !Mocking.current_working_copy_hg_rev
   let current_working_copy_base_rev _ = !Mocking.current_working_copy_base_rev
   let get_closest_global_ancestor hg_rev _ =

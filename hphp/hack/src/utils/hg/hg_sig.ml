@@ -32,6 +32,8 @@ module type S = sig
     repo:string ->
     unit Future.t
 
+  val current_mergebase_hg_rev : string -> hg_rev Future.t
+
   val current_working_copy_hg_rev : string ->
     (** bool indicates if there are working copy changes. *)
     (hg_rev * bool) Future.t

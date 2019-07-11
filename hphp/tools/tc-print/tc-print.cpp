@@ -25,7 +25,10 @@
 #include <sstream>
 
 #include <folly/Format.h>
+#include <folly/dynamic.h>
 #include <folly/Singleton.h>
+
+#include "hphp/util/build-info.h"
 
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/base/preg.h"
@@ -52,6 +55,7 @@ std::string     configFile;
 std::string     profFileName;
 uint32_t        nTopTrans       = 0;
 uint32_t        nTopFuncs       = 0;
+bool            useJSON         = false;
 bool            creationOrder   = false;
 bool            transCFG        = false;
 bool            collectBCStats  = false;
@@ -152,6 +156,9 @@ void usage() {
     "    -v <PERCENTAGE> : sets the minimum percentage to <PERCENTAGE> "
     "when printing the top helpers (implies -i). The lower the percentage,"
     " the more helpers that will show up.\n"
+    "    -j              : outputs tc-dump in JSON format (not compatible with "
+    "some other flags).\n"
+    // TODO(elijahrivera) - investigate compatibility with other flags
     #ifdef FACEBOOK
     "    -x              : log translations to database\n"
     #endif
@@ -182,7 +189,7 @@ void parseOptions(int argc, char *argv[]) {
   int c;
   opterr = 0;
   char* sortByArg = nullptr;
-  while ((c = getopt (argc, argv, "hc:Dd:f:g:ip:st:u:S:T:o:e:E:bB:v:k:a:A:n:x"))
+  while ((c = getopt(argc, argv, "hc:Dd:f:g:ip:st:u:S:T:o:e:E:bB:v:k:a:A:n:jx"))
          != -1) {
     switch (c) {
       case 'A':
@@ -309,6 +316,9 @@ void parseOptions(int argc, char *argv[]) {
         }
       case 'o':
         hostOpcodes = true;
+        break;
+      case 'j':
+        useJSON = true;
         break;
       #ifdef FACEBOOK
       case 'x':
@@ -511,6 +521,141 @@ const char* getDisasm(OfflineCode* code,
   std::ostringstream os;
   code->printDisasm(os, startAddr, len, bcMap, perfEvents, hostOpcodes);
   return os.str().c_str();
+}
+
+namespace get_json {
+
+using folly::dynamic;
+
+std::string show(TCA tca) {
+  return folly::sformat("{}", static_cast<void*>(tca));
+}
+
+dynamic getTransRec(const TransRec* tRec,
+                    const PerfEventsMap<TransID>& transPerfEvents) {
+  auto const guards = dynamic(tRec->guards.begin(), tRec->guards.end());
+
+  const dynamic src = dynamic::object("sha1", tRec->sha1.toString())
+                                     ("funcId", tRec->src.funcID())
+                                     ("funcName", tRec->funcName)
+                                     ("resumeMode", static_cast<int32_t>
+                                                      (tRec->src.resumeMode()))
+                                     ("hasThis", tRec->src.hasThis())
+                                     ("prologue", tRec->src.prologue())
+                                     ("bsStartOffset", tRec->src.offset())
+                                     ("guards", guards);
+
+  const dynamic result = dynamic::object("id", tRec->id)
+                                        ("src", src)
+                                        ("kind", show(tRec->kind))
+                                        ("hasLoop", tRec->hasLoop)
+                                        ("aStart", show(tRec->aStart))
+                                        ("aLen", tRec->aLen)
+                                        ("coldStart", show(tRec->acoldStart))
+                                        ("coldLen", tRec->acoldLen)
+                                        ("frozenStart",
+                                         show(tRec->afrozenStart))
+                                        ("frozenLen", tRec->afrozenLen);
+
+  // TODO(elijahrivera) - JSON annotations go here (follow-up diff)
+
+  return result;
+}
+
+dynamic getEvents(const PerfEventsMap<TransID>& transPerfEvents,
+                  const TransID transId) {
+  dynamic eventObjs = dynamic::array;
+  auto const events = transPerfEvents.getAllEvents(transId);
+
+  for (size_t i = 0; i < PerfEventType::MAX_NUM_EVENT_TYPES; i++) {
+    if (events[i]) {
+      auto const perfType = static_cast<PerfEventType>(i);
+      auto const typeStr = eventTypeToCommandLineArgument(perfType);
+      eventObjs.push_back(dynamic::object("type", typeStr)
+                                         ("event", events[i]));
+    }
+  }
+
+  return eventObjs;
+}
+
+dynamic getTrans(TransID transId) {
+  always_assert(transId < NTRANS);
+
+  auto const* tRec = TREC(transId);
+  if (!tRec->isValid()) return dynamic();
+
+  auto const transRec = getTransRec(tRec, transPerfEvents);
+  auto const transEvents = getEvents(transPerfEvents, transId);
+
+  dynamic blocks = dynamic::array;
+  for (auto const& block : tRec->blocks) {
+    std::stringstream byteInfo; // TODO(elijahrivera) - translate to actual data
+
+    auto const unit = g_repo->getUnit(block.sha1);
+    if (unit) {
+      auto const newFunc = unit->getFunc(block.bcStart);
+      always_assert(newFunc);
+      newFunc->prettyPrint(byteInfo, HPHP::Func::PrintOpts().noFpi()
+                                                            .noMetadata());
+      unit->prettyPrint(byteInfo, HPHP::Unit::PrintOpts().range(block.bcStart,
+                                                                block.bcPast)
+                                                         .noFuncs());
+    }
+
+    blocks.push_back(dynamic::object("sha1", block.sha1.toString())
+                                    ("start", block.bcStart)
+                                    ("end", block.bcPast)
+                                    ("unit", unit ?
+                                             byteInfo.str() :
+                                             dynamic()));
+  }
+
+  const dynamic mainDisasm = tRec->aLen ?
+                             getDisasm(transCode,
+                                       tRec->aStart,
+                                       tRec->aLen,
+                                       tRec->bcMapping,
+                                       tcaPerfEvents,
+                                       hostOpcodes) :
+                             dynamic();
+  const dynamic coldDisasm = tRec->acoldLen ?
+                             getDisasm(transCode,
+                                       tRec->acoldStart,
+                                       tRec->acoldLen,
+                                       tRec->bcMapping,
+                                       tcaPerfEvents,
+                                       hostOpcodes) :
+                             dynamic();
+  const dynamic frozenDisasm = tRec -> afrozenLen ?
+                               getDisasm(transCode,
+                                         tRec->afrozenStart,
+                                         tRec->afrozenLen,
+                                         tRec->bcMapping,
+                                         tcaPerfEvents,
+                                         hostOpcodes) :
+                               dynamic();
+  const dynamic disasmObj = dynamic::object("main", mainDisasm)
+                                           ("cold", coldDisasm)
+                                           ("frozen", frozenDisasm);
+
+  return dynamic::object("transRec", transRec)
+                        ("blocks", blocks)
+                        ("archName", dynamic(transCode->getArchName()))
+                        ("disasm", disasmObj)
+                        ("events", transEvents);
+}
+
+dynamic getTC() {
+  dynamic translations = dynamic::array;
+  for (uint32_t t = 0; t < NTRANS; t++) {
+    translations.push_back(getTrans(t));
+  }
+
+  return dynamic::object("configFile", configFile)
+                        ("repoSchema", repoSchemaId().begin())
+                        ("translations", translations);
+}
 }
 
 // Prints the metadata, bytecode, and disassembly for the given translation
@@ -885,7 +1030,7 @@ int main(int argc, char *argv[]) {
                               g_transData->getProfBase(),
                               g_transData->getColdBase(),
                               g_transData->getFrozenBase());
-  g_repo = new RepoWrapper(g_transData->getRepoSchema(), configFile);
+  g_repo = new RepoWrapper(g_transData->getRepoSchema(), configFile, !useJSON);
 
   loadProfData();
 
@@ -924,6 +1069,8 @@ int main(int argc, char *argv[]) {
                       tcaPerfEvents,
                       sortBy,
                       filterByOpcode);
+  } else if (useJSON) {
+    std::cout << get_json::getTC() << std::endl;
   } else {
     // Print all translations in original order, filtered by unit if desired.
     for (uint32_t t = 0; t < NTRANS; t++) {

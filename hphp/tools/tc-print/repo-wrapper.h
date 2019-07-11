@@ -35,7 +35,9 @@ private:
   RepoWrapper& operator=(RepoWrapper other);
 
 public:
-  RepoWrapper(const char* repoSchema, const std::string& configFile);
+  RepoWrapper(const char* repoSchema,
+              const std::string& configFile,
+              const bool shouldPrint = true);
   ~RepoWrapper();
 
   void addUnit(Unit* u);

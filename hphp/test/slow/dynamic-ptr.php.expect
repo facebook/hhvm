@@ -1,0 +1,9 @@
+dyn
+no_dyn
+Cls::static_dyn
+Cls::static_no_dyn
+Cls::inst_dyn
+Cls::inst_no_dyn
+Caught: Unable to find function bad_func_name
+Caught: Unable to method Cls::bad_meth_name
+Caught: Unable to find class BadClassName

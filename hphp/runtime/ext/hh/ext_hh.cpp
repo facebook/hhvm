@@ -600,6 +600,57 @@ Array HHVM_FUNCTION(get_compiled_units, int64_t kind) {
   return init.toArray();
 }
 
+TypedValue HHVM_FUNCTION(dynamic_fun, StringArg fun) {
+  auto const func = Unit::loadFunc(fun.get());
+  if (!func) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      folly::sformat("Unable to find function {}", fun.get()->data())
+    );
+  }
+  if (!func->isDynamicallyCallable()) {
+    auto const level = RuntimeOption::EvalDynamicFunLevel;
+    if (level == 2) {
+      SystemLib::throwInvalidArgumentExceptionObject(
+        folly::sformat("Function {} not marked dynamic", fun.get()->data())
+      );
+    }
+    if (level == 1) {
+      raise_warning("Function %s not marked dynamic", fun.get()->data());
+    }
+  }
+  return tvReturn(func);
+}
+
+TypedValue HHVM_FUNCTION(dynamic_class_meth, StringArg cls, StringArg meth) {
+  auto const c = Unit::loadClass(cls.get());
+  if (!c) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      folly::sformat("Unable to find class {}", cls.get()->data())
+    );
+  }
+  auto const func = c->lookupMethod(meth.get());
+  if (!func) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      folly::sformat("Unable to method {}::{}",
+                     cls.get()->data(), meth.get()->data())
+    );
+  }
+  if (!func->isDynamicallyCallable()) {
+    auto const level = RuntimeOption::EvalDynamicClsMethLevel;
+    if (level == 2) {
+      SystemLib::throwInvalidArgumentExceptionObject(
+        folly::sformat("Method {}::{} not marked dynamic",
+                       cls.get()->data(), meth.get()->data())
+      );
+    }
+    if (level == 1) {
+      raise_warning("Method %s::%s not marked dynamic",
+                    cls.get()->data(), meth.get()->data());
+    }
+  }
+  return tvReturn(ClsMethDataRef::create(c, func));
+}
+
 }
 
 static struct HHExtension final : Extension {
@@ -629,6 +680,8 @@ static struct HHExtension final : Extension {
                   HHVM_FN(request_event_stats));
     HHVM_NAMED_FE(HH\\rqtrace\\process_event_stats,
                   HHVM_FN(process_event_stats));
+    HHVM_NAMED_FE(HH\\dynamic_fun, HHVM_FN(dynamic_fun));
+    HHVM_NAMED_FE(HH\\dynamic_class_meth, HHVM_FN(dynamic_class_meth));
     loadSystemlib();
   }
 } s_hh_extension;

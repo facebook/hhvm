@@ -70,12 +70,12 @@ struct IdSet {
       // Other set has just a single block, so we can avoid allocating
       // memory.
       m_cap = 1;
-      m_base = begin * kBlockSize;
+      m_base = begin * kBlockSize + o.m_base;
       m_bits = o.m_bitsptr[begin];
     } else {
       // Otherwise we need to allocate and copy.
       m_cap = end - begin;
-      m_base = begin * kBlockSize;
+      m_base = begin * kBlockSize + o.m_base;
       m_bitsptr = (uint64_t*)malloc(m_cap * sizeof(uint64_t));
       for (size_t i = begin; i < end; ++i) {
         m_bitsptr[i - begin] = o.m_bitsptr[i];
@@ -261,7 +261,9 @@ private:
     if (min >= m_base && max <= (m_cap * kBlockSize + m_base)) return bits();
 
     // Calculate the new base and capacity
-    auto const base = std::min<uint32_t>(min - (min % kBlockSize), m_base);
+    auto const roundedMin = min - (min % kBlockSize);
+    auto const base =
+      (m_cap > 0) ? std::min<uint32_t>(roundedMin, m_base) : roundedMin;
     auto const newMax = std::max<uint32_t>(max, m_cap * kBlockSize + m_base);
     auto const cap =
       ((newMax + kBlockSize - 1) / kBlockSize) - (base / kBlockSize);

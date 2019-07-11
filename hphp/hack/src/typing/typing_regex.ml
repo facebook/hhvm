@@ -75,14 +75,40 @@ let check_global_options s =
     | 'i' | 'm' | 's' | 'x' | 'A' | 'D' | 'S' | 'U' | 'X' | 'u' -> ()
     | _ -> raise Invalid_global_option) s
 
-let rec find_delimiter s desired from_i =
-  match String.index_from s from_i desired with
-  | Some i ->
-    if i <> 0 && s.[i - 1] = '\\'
-    then find_delimiter s desired (i + 1)
-    else Some i
-  | None -> None
+let complement c =
+  match c with
+  | '(' -> ')'
+  | '{' -> '}'
+  | '<' -> '>'
+  | '[' -> ']'
+  | _ -> c
 
+(* Takes in delimiter-stripped string, checks brace-like delimiters *)
+let check_balanced_delimiters s delim =
+  let length = String.length s in
+  let delim_closed = complement delim in
+  let rec check_acc d i =
+    if d < 0 then
+      raise Missing_delimiter
+    else if i < length then
+      let d2, i2 =
+        match s.[i] with
+        | x when x = delim -> d + 1, i + 1
+        | x when x = delim_closed -> d - 1, i + 1
+        (* Skip escape characters *)
+        |'\\' -> d, i + 2
+        | _   -> d, i + 1
+      in
+      check_acc d2 i2
+    else if d > 0 then
+      raise Missing_delimiter
+    else s
+  in
+  check_acc 0 0
+
+(* Takes in regex string and strips outer delimiters, checks and strips
+   nested brace-like delimiters.
+*)
 let check_and_strip_delimiters s =
   (*  Non-alphanumeric, non-whitespace, non-backslash characters are delimiter-eligible *)
   let delimiter = Str.regexp "[^a-zA-Z0-9\t\n\r\x0b\x0c \\]" in
@@ -91,18 +117,15 @@ let check_and_strip_delimiters s =
   let first = s.[0] in
   if Str.string_match delimiter (String.make 1 first) 0
   then begin
-    let desired =
-      match first with
-      | '(' -> ')'
-      | '[' -> ']'
-      | '{' -> '}'
-      | '<' -> '>'
-      | _ -> first
-    in
-    match find_delimiter (String.sub s 1 (length - 1)) desired 0 with
-    | Some i -> (* i is 0-indexed from the second character in s *)
-      check_global_options (String.sub s (i + 2) ((length - 2) - i));
-      String.sub s 1 i
+    let closed_delim = complement first in
+    let no_first_delim = (String.sub s 1 (length - 1)) in
+    match String.rindex_from no_first_delim (length - 2) closed_delim with
+    | Some i ->
+      check_global_options (String.sub s (i + 2) (length - i - 2));
+      let stripped_string = (String.sub s 1 i) in
+      if (closed_delim <> first) then
+        check_balanced_delimiters stripped_string first
+      else stripped_string
     | None -> raise Missing_delimiter
   end else raise Missing_delimiter
 

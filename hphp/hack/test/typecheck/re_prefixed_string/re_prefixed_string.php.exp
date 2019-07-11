@@ -40,11 +40,7 @@ File "re_prefixed_string.php", line 53, characters 14-21:
 Bad regex pattern; Missing delimiter(s). (Typing[4275])
 File "re_prefixed_string.php", line 63, characters 13-23:
 Bad regex pattern; Invalid global option(s). (Typing[4275])
-File "re_prefixed_string.php", line 64, characters 13-30:
-Bad regex pattern; Invalid global option(s). (Typing[4275])
-File "re_prefixed_string.php", line 71, characters 13-62:
-Bad regex pattern; Invalid global option(s). (Typing[4275])
 File "re_prefixed_string.php", line 72, characters 13-68:
-Bad regex pattern; missing ) [52]. (Typing[4275])
+Bad regex pattern; Missing delimiter(s). (Typing[4275])
 File "re_prefixed_string.php", line 76, characters 14-15:
 Bad regex pattern; This pattern is empty. (Typing[4275])

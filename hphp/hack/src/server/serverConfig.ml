@@ -311,6 +311,7 @@ let load config_filename options =
     ?po_enable_class_level_where_clauses:(bool_opt "class_level_where_clauses" config)
     ?po_enable_constant_visibility_modifiers:(bool_opt "enable_constant_visibility_modifiers" config)
     ?po_disable_legacy_soft_typehints:(bool_opt "disable_legacy_soft_typehints" config)
+    ?tco_use_lru_workers:(Some local_config.ServerLocalConfig.use_lru_workers)
     ()
   in
   Errors.ignored_fixme_codes :=

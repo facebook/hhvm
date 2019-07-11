@@ -246,6 +246,9 @@ type t = {
   (* Disable legacy soft typehint syntax (@int) and only allow the __Soft attribute. *)
   po_disable_legacy_soft_typehints : bool;
 
+  (* Use shared_lru workers instead of MultiWorker workers *)
+  tco_use_lru_workers : bool;
+
 } [@@deriving show]
 
 val make :
@@ -299,6 +302,7 @@ val make :
   ?po_enable_constant_visibility_modifiers: bool ->
   ?po_enable_class_level_where_clauses: bool ->
   ?po_disable_legacy_soft_typehints: bool ->
+  ?tco_use_lru_workers : bool ->
   unit ->
   t
 
@@ -377,3 +381,4 @@ val tico_invalidate_smart : t -> bool
 val po_enable_constant_visibility_modifiers : t -> bool
 val po_enable_class_level_where_clauses : t -> bool
 val po_disable_legacy_soft_typehints : t -> bool
+val tco_use_lru_workers : t -> bool

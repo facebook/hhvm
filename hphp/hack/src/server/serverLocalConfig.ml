@@ -93,6 +93,8 @@ type t = {
   symbolindex_file : string option;
   (* Use rust parser *)
   rust : bool;
+  (* Use shared_lru workers *)
+  use_lru_workers : bool;
 }
 
 let default = {
@@ -150,6 +152,7 @@ let default = {
   symbolindex_quiet = false;
   symbolindex_file = None;
   rust = false;
+  use_lru_workers = false;
 }
 
 let path =
@@ -299,6 +302,8 @@ let load_ fn ~silent overrides =
   let symbolindex_file = string_opt "symbolindex_file" config in
   let rust = bool_if_version "rust"
       ~default:default.rust config in
+  let use_lru_workers = bool_if_version "use_lru_workers"
+      ~default:default.use_lru_workers config in
   {
     use_watchman;
     watchman_init_timeout;
@@ -353,6 +358,7 @@ let load_ fn ~silent overrides =
     symbolindex_quiet;
     symbolindex_file;
     rust;
+    use_lru_workers;
   }
 
 let load ~silent config_overrides =

@@ -25,11 +25,11 @@ let filter_class_and_constructor results =
   then List.filter results ~f:result_is_constructor
   else results
 
-let make_hover_doc_block ~basic_only file occurrence def_opt =
+let make_hover_doc_block file occurrence def_opt =
   match def_opt with
   | Some def ->
     let base_class_name = SymbolOccurrence.enclosing_class occurrence in
-    ServerDocblockAt.go_comments_for_symbol ~def ~base_class_name ~file ~basic_only
+    ServerDocblockAt.go_comments_for_symbol ~def ~base_class_name ~file
     |> Option.to_list
   | None -> []
 
@@ -54,7 +54,7 @@ let make_hover_full_name env_and_ty occurrence def_opt =
     [Printf.sprintf "Full name: `%s`" (Utils.strip_ns name)]
   | _ -> []
 
-let make_hover_info env_and_ty file (occurrence, def_opt) ~basic_only =
+let make_hover_info env_and_ty file (occurrence, def_opt) =
   let open SymbolOccurrence in
   let open Typing_defs in
   let snippet = match occurrence, env_and_ty with
@@ -76,7 +76,7 @@ let make_hover_info env_and_ty file (occurrence, def_opt) ~basic_only =
     | occurrence, Some (env, ty) -> Tast_env.print_ty_with_identity env ty occurrence def_opt
   in
   let addendum = List.concat [
-    make_hover_doc_block file occurrence def_opt ~basic_only;
+    make_hover_doc_block file occurrence def_opt;
     make_hover_return_type env_and_ty occurrence;
     make_hover_full_name env_and_ty occurrence def_opt;
   ]
@@ -88,7 +88,6 @@ let go_ctx
     ~(entry: ServerIdeContext.entry)
     ~(line: int)
     ~(char: int)
-    ~(basic_only: bool)
     : HoverService.result =
   let tast = ServerIdeContext.get_tast entry in
   let identities =
@@ -118,6 +117,6 @@ let go_ctx
         |> Option.value ~default:(ServerIdeContext.get_path entry)
       in
       let file_input = ServerIdeContext.get_file_input ~ctx ~path in
-      make_hover_info env_and_ty file_input (occurrence, def_opt) ~basic_only
+      make_hover_info env_and_ty file_input (occurrence, def_opt)
     )
     |> List.remove_consecutive_duplicates ~equal:(=)

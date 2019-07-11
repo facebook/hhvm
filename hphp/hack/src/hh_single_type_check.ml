@@ -869,7 +869,7 @@ let handle_mode
 
       let result = ServerAutoComplete.auto_complete_at_position
         ~tcopt ~pos ~is_manually_invoked ~delimit_on_namespaces:false ~file_content:file
-        ~basic_only:false ~sienv
+        ~sienv
       in
       List.iter ~f: begin fun r ->
         let open AutocompleteTypes in
@@ -894,7 +894,6 @@ let handle_mode
           let result =
             FfpAutocompleteService.auto_complete tcopt file_text position
             ~filter_by_token:true
-            ~basic_only:false
             ~sienv
           in
           match result with

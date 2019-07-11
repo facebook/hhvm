@@ -133,8 +133,7 @@ let go_comments_for_position
 let go_comments_for_symbol
     ~(def: 'a SymbolDefinition.t)
     ~(base_class_name: string option)
-    ~(file: ServerCommandTypes.file_input)
-    ~(basic_only: bool): string option =
+    ~(file: ServerCommandTypes.file_input): string option =
   match def.SymbolDefinition.docblock with
   | Some db -> Some (clean_comments db)
   | None ->
@@ -146,7 +145,7 @@ let go_comments_for_symbol
       | Some db -> Some (clean_comments db)
       | None ->
         match def.SymbolDefinition.kind, base_class_name with
-        | SymbolDefinition.Method, Some base_class_name when not basic_only ->
+        | SymbolDefinition.Method, Some base_class_name ->
           fallback base_class_name def.SymbolDefinition.name
         | _ -> None
 ;;

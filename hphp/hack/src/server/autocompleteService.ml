@@ -293,7 +293,6 @@ let compute_complete_global
   ~(autocomplete_context: AutocompleteTypes.legacy_autocomplete_context)
   ~(content_funs: Reordered_argument_collections.SSet.t)
   ~(content_classes: Reordered_argument_collections.SSet.t)
-  ~(basic_only: bool)
   : unit =
   let completion_type = !argument_global_type in
   let gname = Utils.strip_ns !auto_complete_for_global in
@@ -349,15 +348,6 @@ let compute_complete_global
     let on_class name ~seen =
       if SSet.mem seen name then None else
       if not (does_fully_qualified_name_match_prefix name) then None else
-      if basic_only then begin
-        incr result_count;
-        let ty =
-          Typing_reason.Rnone,
-          Typing_defs.Tany in
-        Some (get_partial_result
-          (string_to_replace_prefix name)
-          (Phase.decl ty) Class_kind None)
-      end else begin
         let target = Decl_provider.get_class name in
         let target_kind = Option.map target ~f:(fun c -> (Cls.kind c)) in
         if not (should_complete_class completion_type target_kind) then None else
@@ -384,7 +374,6 @@ let compute_complete_global
               Typing_defs.Tapply (((Cls.pos c), name), []) in
             get_partial_result (string_to_replace_prefix name) (Phase.decl ty) kind None
         )
-      end
     in
 
     let on_function name ~seen =
@@ -392,17 +381,11 @@ let compute_complete_global
       if SSet.mem seen name then None else
       if not (should_complete_fun completion_type) then None else
       if not (does_fully_qualified_name_match_prefix name) then None else
-      if basic_only then begin
+      Option.map (Decl_provider.get_fun name) ~f:(fun fun_ ->
         incr result_count;
-        let ty = Typing_reason.Rnone, Typing_defs.Tany in
-        Some (get_partial_result (string_to_replace_prefix name) (Phase.decl ty) Function_kind None)
-      end else begin
-        Option.map (Decl_provider.get_fun name) ~f:(fun fun_ ->
-          incr result_count;
-          let ty = Typing_reason.Rwitness fun_.Typing_defs.ft_pos, Typing_defs.Tfun fun_ in
-          get_partial_result (string_to_replace_prefix name) (Phase.decl ty) Function_kind None
-        )
-      end
+        let ty = Typing_reason.Rwitness fun_.Typing_defs.ft_pos, Typing_defs.Tfun fun_ in
+        get_partial_result (string_to_replace_prefix name) (Phase.decl ty) Function_kind None
+      )
     in
 
     let on_namespace name : autocomplete_result option =
@@ -812,7 +795,6 @@ let find_global_results
   ~(content_funs: Reordered_argument_collections.SSet.t)
   ~(content_classes: Reordered_argument_collections.SSet.t)
   ~(autocomplete_context: AutocompleteTypes.legacy_autocomplete_context)
-  ~(basic_only: bool)
   ~(sienv: SearchUtils.si_env)
   : unit =
 
@@ -826,8 +808,7 @@ let find_global_results
       ~delimit_on_namespaces
       ~autocomplete_context
       ~content_funs
-      ~content_classes
-      ~basic_only;
+      ~content_classes;
 
   (* The new simpler providers *)
   | _ ->
@@ -872,7 +853,6 @@ let go
     ~(content_funs: Reordered_argument_collections.SSet.t)
     ~(content_classes: Reordered_argument_collections.SSet.t)
     ~(autocomplete_context: AutocompleteTypes.legacy_autocomplete_context)
-    ~(basic_only: bool)
     ~(sienv: SearchUtils.si_env)
     tast
   =
@@ -897,7 +877,6 @@ let go
         ~autocomplete_context
         ~content_funs
         ~content_classes
-        ~basic_only
         ~sienv;
     end;
 

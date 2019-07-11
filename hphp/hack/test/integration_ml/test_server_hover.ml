@@ -960,7 +960,6 @@ let test () =
         ~entry
         ~line
         ~char:col
-        ~basic_only:false
       in
       let expected = list_to_string expectedHover in
       let actual = list_to_string hover in

@@ -78,8 +78,6 @@ type t = {
   load_decls_from_saved_state : bool;
   (* Size of Gc.major_slice to be performed when server is idle. 0 to disable *)
   idle_gc_slice : int;
-  (* Global name autocomplete will be missing some features to improve performance *)
-  basic_autocomplete_only : bool;
   (* Look up class members lazily from shallow declarations instead of eagerly
      computing folded declarations representing the entire class type. *)
   shallow_class_decl : bool;
@@ -144,7 +142,6 @@ let default = {
   store_decls_in_saved_state = false;
   load_decls_from_saved_state = false;
   idle_gc_slice = 0;
-  basic_autocomplete_only = false;
   shallow_class_decl = false;
   defer_class_declaration_threshold = None;
   naming_sqlite_path = None;
@@ -282,8 +279,6 @@ let load_ fn ~silent overrides =
       ~default:default.ide_tast_cache config in
   let idle_gc_slice = int_ "idle_gc_slice"
       ~default:default.idle_gc_slice config in
-  let basic_autocomplete_only = bool_if_version "basic_autocomplete_only"
-      ~default:default.basic_autocomplete_only config in
   let shallow_class_decl = bool_if_version "shallow_class_decl"
       ~default:default.shallow_class_decl config in
   let defer_class_declaration_threshold =
@@ -350,7 +345,6 @@ let load_ fn ~silent overrides =
     store_decls_in_saved_state;
     load_decls_from_saved_state;
     idle_gc_slice;
-    basic_autocomplete_only;
     shallow_class_decl;
     defer_class_declaration_threshold;
     naming_sqlite_path;

@@ -45,7 +45,6 @@ let auto_complete
   (tcopt:TypecheckerOptions.t)
   (file_content:string)
   (pos:File_content.position)
-  ~(basic_only:bool)
   ~(filter_by_token:bool)
   ~(sienv: SearchUtils.si_env): result =
   let open File_content in
@@ -96,7 +95,7 @@ let auto_complete
     |> List.map ~f:(make_keyword_completion replace_pos)
   in
   let type_based_completions =
-    FfpAutocompleteTypeCheck.run ~context ~file_content ~stub ~pos ~tcopt ~basic_only ~sienv
+    FfpAutocompleteTypeCheck.run ~context ~file_content ~stub ~pos ~tcopt ~sienv
   in
   let global_completions =
     FfpAutocompleteGlobals.get_globals context stub positioned_tree replace_pos

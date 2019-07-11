@@ -32,7 +32,6 @@ let run
   ~(stub:string)
   ~(pos:File_content.position)
   ~(tcopt:TypecheckerOptions.t)
-  ~(basic_only:bool)
   ~(sienv:SearchUtils.si_env)
   : AutocompleteTypes.complete_autocomplete_result list =
   if local_variable_valid_in_context context stub ||
@@ -41,7 +40,7 @@ let run
   then
     let ac_results = ServerAutoComplete.auto_complete_at_position
       ~is_manually_invoked:false ~delimit_on_namespaces:true ~file_content ~pos ~tcopt
-      ~basic_only ~sienv
+      ~sienv
     in
     let open Utils.With_complete_flag in
     ac_results.value

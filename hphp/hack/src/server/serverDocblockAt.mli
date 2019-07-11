@@ -12,7 +12,6 @@ val go_comments_for_symbol :
   def:'a SymbolDefinition.t ->
   base_class_name: string option ->
   file: ServerCommandTypes.file_input ->
-  basic_only: bool ->
   string option
 
 (** Returns the docblock most appropriate to this position *)

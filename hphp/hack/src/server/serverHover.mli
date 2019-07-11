@@ -14,5 +14,4 @@ val go_ctx :
   entry:ServerIdeContext.entry ->
   line:int ->
   char:int ->
-  basic_only:bool ->
   HoverService.result

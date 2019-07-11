@@ -18,8 +18,11 @@
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
+#include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/vm-regs.h"
+
+#include <algorithm>
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -552,30 +555,31 @@ void CompletionsCommand::addFuncConstantCompletions(
   SuggestionContext& context,
   folly::dynamic& targets
 ) {
-  auto const systemFuncs = Unit::getSystemFunctions();
-  auto const userFuncs = Unit::getUserFunctions();
+  NamedEntity::foreach_cached_func([&](Func* func) {
+    if (func->isGenerated()) return; //continue
+    auto name = func->name()->toCppString();
+    // Unit::getFunctions returns all lowercase names, lowercase here too.
+    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+    addIfMatch(name, context.matchPrefix, CompletionTypeFn, targets);
+  });
+
   auto const consts = lookupDefinedConstants();
-  auto const classes = Unit::getClassesInfo();
+  IterateKVNoInc(consts.get(), [&] (Cell k, TypedValue) {
+    auto const& name = String::attach(cellCastToStringData(k));
+    addIfMatch(
+      name.toCppString(),
+      context.matchPrefix,
+      CompletionTypeFn,
+      targets
+    );
+  });
 
-  for (ArrayIter iter(systemFuncs); iter; ++iter) {
-    const std::string& name = iter.second().toString().toCppString();
-    addIfMatch(name, context.matchPrefix, CompletionTypeFn, targets);
-  }
-
-  for (ArrayIter iter(userFuncs); iter; ++iter) {
-    const std::string& name = iter.second().toString().toCppString();
-    addIfMatch(name, context.matchPrefix, CompletionTypeFn, targets);
-  }
-
-  for (ArrayIter iter(consts); iter; ++iter) {
-    const std::string& name = iter.first().toString().toCppString();
-    addIfMatch(name, context.matchPrefix, CompletionTypeFn, targets);
-  }
-
-  for (ArrayIter iter(classes); iter; ++iter) {
-    const std::string& name = iter.second().toString().toCppString();
-    addIfMatch(name, context.matchPrefix, CompletionTypeClass, targets);
-  }
+  NamedEntity::foreach_cached_class([&](Class* c) {
+    if (!(c->attrs() & (AttrInterface | AttrTrait))) {
+      auto const& name = c->name()->toCppString();
+      addIfMatch(name, context.matchPrefix, CompletionTypeClass, targets);
+    }
+  });
 
   // Add PHP keywords.
   static const char* suggestionKeywords[] = {

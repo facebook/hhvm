@@ -14,237 +14,237 @@
 *)
 
 type t = {
- (**
-  * Enforces array subtyping relationships.
-  *
-  * There are a few kinds of arrays in Hack:
-  *   1. array: This is a type parameter-less array, that behaves like a PHP
-  *      array, but may be used in place of the arrays listed below.
-  *   2. array<T>: This is a vector-like array. It may be implemented with a
-  *      compact representation. Keys are integer indices. Values are of type T.
-  *   3. array<Tk, Tv>: This is a dictionary-like array. It is generally
-  *      implemented as a hash table. Keys are of type Tk. Values are of type
-  *      Tv.
-  *
-  * Unfortunately, there is no consistent subtyping relationship between these
-  * types:
-  *   1. An array<T> may be provided where an array is required.
-  *   2. An array may be provided where an array<T> is required.
-  *   3. An array<Tk, Tv> may be provided where an array is required.
-  *   4. An array may be provided where an array<Tk, Tv> is required.
-  *
-  * This option enforces a stricter subtyping relationship within these types.
-  * In particular, when enabled, points 2. and 4. from the above list become
-  * typing errors.
-  *)
- tco_safe_array : bool;
+  (**
+   * Enforces array subtyping relationships.
+   *
+   * There are a few kinds of arrays in Hack:
+   *   1. array: This is a type parameter-less array, that behaves like a PHP
+   *      array, but may be used in place of the arrays listed below.
+   *   2. array<T>: This is a vector-like array. It may be implemented with a
+   *      compact representation. Keys are integer indices. Values are of type T.
+   *   3. array<Tk, Tv>: This is a dictionary-like array. It is generally
+   *      implemented as a hash table. Keys are of type Tk. Values are of type
+   *      Tv.
+   *
+   * Unfortunately, there is no consistent subtyping relationship between these
+   * types:
+   *   1. An array<T> may be provided where an array is required.
+   *   2. An array may be provided where an array<T> is required.
+   *   3. An array<Tk, Tv> may be provided where an array is required.
+   *   4. An array may be provided where an array<Tk, Tv> is required.
+   *
+   * This option enforces a stricter subtyping relationship within these types.
+   * In particular, when enabled, points 2. and 4. from the above list become
+   * typing errors.
+   *)
+  tco_safe_array : bool;
 
- (**
-  * Enforces that a vector-like array may not be used where a hashtable-like
-  * array is required.
-  *
-  * When disabled, Hack assumes the following:
-  *
-  *   array<T> <: array<int, T>
-  *
-  * When enabled, there is no subtyping relationship between array<T> and
-  * array<int, T>.
-  *)
- tco_safe_vector_array : bool;
+  (**
+   * Enforces that a vector-like array may not be used where a hashtable-like
+   * array is required.
+   *
+   * When disabled, Hack assumes the following:
+   *
+   *   array<T> <: array<int, T>
+   *
+   * When enabled, there is no subtyping relationship between array<T> and
+   * array<int, T>.
+   *)
+  tco_safe_vector_array : bool;
 
- (* Set of experimental features, in lowercase. *)
- tco_experimental_features : SSet.t;
+  (* Set of experimental features, in lowercase. *)
+  tco_experimental_features : SSet.t;
 
- (* Set of opt-in migration behavior flags, in lowercase. *)
- tco_migration_flags : SSet.t;
+  (* Set of opt-in migration behavior flags, in lowercase. *)
+  tco_migration_flags : SSet.t;
 
- (* Whether to treat Tany as  Tdynamic *)
- tco_dynamic_view : bool;
+  (* Whether to treat Tany as  Tdynamic *)
+  tco_dynamic_view : bool;
 
- (* If set, defers class declarations after N lazy declarations; if not set,
-   always lazily declares classes not already in cache. *)
- tco_defer_class_declaration_threshold : int option;
+  (* If set, defers class declarations after N lazy declarations; if not set,
+    always lazily declares classes not already in cache. *)
+  tco_defer_class_declaration_threshold : int option;
 
- (* Enables the reverse naming table to fall back to SQLite for queries. *)
- so_naming_sqlite_path : string option;
+  (* Enables the reverse naming table to fall back to SQLite for queries. *)
+  so_naming_sqlite_path : string option;
 
- (* Flag to disallow subtyping of untyped arrays and tuples (both ways) *)
- tco_disallow_array_as_tuple : bool;
+  (* Flag to disallow subtyping of untyped arrays and tuples (both ways) *)
+  tco_disallow_array_as_tuple : bool;
 
- (* Namespace aliasing map *)
- po_auto_namespace_map : (string * string) list;
+  (* Namespace aliasing map *)
+  po_auto_namespace_map : (string * string) list;
 
- (* Are we emitting bytecode? *)
- po_codegen : bool;
+  (* Are we emitting bytecode? *)
+  po_codegen : bool;
 
- (* Flag for disabling functions in HHI files with the __PHPStdLib attribute *)
- po_deregister_php_stdlib : bool;
+  (* Flag for disabling functions in HHI files with the __PHPStdLib attribute *)
+  po_deregister_php_stdlib : bool;
 
- (* Flag to disable the backticks execution operator *)
- po_disallow_execution_operator : bool;
+  (* Flag to disable the backticks execution operator *)
+  po_disallow_execution_operator : bool;
 
- (* Flag to disable PHP's non-top-level declarations *)
- po_disable_nontoplevel_declarations : bool;
+  (* Flag to disable PHP's non-top-level declarations *)
+  po_disable_nontoplevel_declarations : bool;
 
- (* Flag to disable PHP's static closures *)
- po_disable_static_closures : bool;
+  (* Flag to disable PHP's static closures *)
+  po_disable_static_closures : bool;
 
- (* Flag to enable PHP's `goto` operator *)
- po_allow_goto: bool;
+  (* Flag to enable PHP's `goto` operator *)
+  po_allow_goto: bool;
 
- (** Print types of size bigger than 1000 after performing a type union. *)
- tco_log_inference_constraints : bool;
+  (** Print types of size bigger than 1000 after performing a type union. *)
+  tco_log_inference_constraints : bool;
 
- (*
-  * Flag to disallow any lambda that has to be checked using the legacy
-  * per-use technique
-  *)
- tco_disallow_ambiguous_lambda : bool;
+  (*
+   * Flag to disallow any lambda that has to be checked using the legacy
+   * per-use technique
+   *)
+  tco_disallow_ambiguous_lambda : bool;
 
- (*
-  * Flag to disallow array typehints
-  *)
- tco_disallow_array_typehint: bool;
+  (*
+   * Flag to disallow array typehints
+   *)
+  tco_disallow_array_typehint: bool;
 
- (*
-  * Flag to disallow array literal expressions
-  *)
- tco_disallow_array_literal: bool;
+  (*
+   * Flag to disallow array literal expressions
+   *)
+  tco_disallow_array_literal: bool;
 
- (*
-  * Flag to enable logging of statistics regarding use of language features.
-  * Currently used for lambdas.
-  *)
- tco_language_feature_logging : bool;
+  (*
+   * Flag to enable logging of statistics regarding use of language features.
+   * Currently used for lambdas.
+   *)
+  tco_language_feature_logging : bool;
 
- (*
-  * Flag to disable enforcement of requirements for reactive Hack.
-  *
-  * Currently defaults to true as Reactive Hack is experimental and
-  * undocumented; the HSL is compatible with it, but we don't want to
-  * raise errors that can't be fully understood without knowledge of
-  * undocumented features.
-  *)
- tco_unsafe_rx : bool;
+  (*
+   * Flag to disable enforcement of requirements for reactive Hack.
+   *
+   * Currently defaults to true as Reactive Hack is experimental and
+   * undocumented; the HSL is compatible with it, but we don't want to
+   * raise errors that can't be fully understood without knowledge of
+   * undocumented features.
+   *)
+  tco_unsafe_rx : bool;
 
- (*
-  * Flag to disallow implicit and expressionless returns in non-void functions.
-  *)
- tco_disallow_implicit_returns_in_non_void_functions: bool;
+  (*
+   * Flag to disallow implicit and expressionless returns in non-void functions.
+   *)
+  tco_disallow_implicit_returns_in_non_void_functions: bool;
 
- (*
-  * Flag to disable unsetting on varray / varray_or_darray.
-  *)
- tco_disallow_unset_on_varray : bool;
+  (*
+   * Flag to disable unsetting on varray / varray_or_darray.
+   *)
+  tco_disallow_unset_on_varray : bool;
 
- (*
-  * When enabled, mismatches between the types of the scrutinee and case value
-  * of a switch expression are reported as type errors.
-  *)
- tco_disallow_scrutinee_case_value_type_mismatch: bool;
+  (*
+   * When enabled, mismatches between the types of the scrutinee and case value
+   * of a switch expression are reported as type errors.
+   *)
+  tco_disallow_scrutinee_case_value_type_mismatch: bool;
 
- (*
-  * Flag to disallow (string) casting non-Stringish values
-  *)
- tco_disallow_stringish_magic : bool;
+  (*
+   * Flag to disallow (string) casting non-Stringish values
+   *)
+  tco_disallow_stringish_magic : bool;
 
- (*
-  * Constraint-based type inference for lambdas
-  *)
- tco_new_inference_lambda : bool;
+  (*
+   * Constraint-based type inference for lambdas
+   *)
+  tco_new_inference_lambda : bool;
 
- (*
-  * If non-zero, give up type checking a class or function after this many seconds
-  *)
- tco_timeout : int;
+  (*
+   * If non-zero, give up type checking a class or function after this many seconds
+   *)
+  tco_timeout : int;
 
- (*
-  * Flag to disallow using values that get casted to array keys at runtime;
-  * like bools, floats, or null; as array keys.
-  *)
- tco_disallow_invalid_arraykey : bool;
+  (*
+   * Flag to disallow using values that get casted to array keys at runtime;
+   * like bools, floats, or null; as array keys.
+   *)
+  tco_disallow_invalid_arraykey : bool;
 
- (*
-  * Produces an error if an arguments is passed by reference to dynamically
-  * called function [e.g. $foo(&$bar)].
-  *)
- tco_disallow_byref_dynamic_calls : bool;
+  (*
+   * Produces an error if an arguments is passed by reference to dynamically
+   * called function [e.g. $foo(&$bar)].
+   *)
+  tco_disallow_byref_dynamic_calls : bool;
 
- (* Make usage of the `instanceof` operator a parse error. *)
- po_disable_instanceof : bool;
+  (* Make usage of the `instanceof` operator a parse error. *)
+  po_disable_instanceof : bool;
 
- (* Error codes for which we do not allow HH_FIXMEs *)
- ignored_fixme_codes : ISet.t;
+  (* Error codes for which we do not allow HH_FIXMEs *)
+  ignored_fixme_codes : ISet.t;
 
- (*
-  * Regular expression controlling which HH_FIXMEs are to be ignored by the
-  * parser.
-  *)
- ignored_fixme_regex : string option;
+  (*
+   * Regular expression controlling which HH_FIXMEs are to be ignored by the
+   * parser.
+   *)
+  ignored_fixme_regex : string option;
 
- (* Initial hh_log_level settings *)
- log_levels : int SMap.t;
+  (* Initial hh_log_level settings *)
+  log_levels : int SMap.t;
 
- (* Flag to disable using lvals as expressions. *)
- po_disable_lval_as_an_expression : bool;
+  (* Flag to disable using lvals as expressions. *)
+  po_disable_lval_as_an_expression : bool;
 
- (* Flag to typecheck xhp code *)
- tco_typecheck_xhp_cvars : bool;
+  (* Flag to typecheck xhp code *)
+  tco_typecheck_xhp_cvars : bool;
 
- (* Flag to ignore the string in vec<string>[...] *)
- tco_ignore_collection_expr_type_arguments : bool;
+  (* Flag to ignore the string in vec<string>[...] *)
+  tco_ignore_collection_expr_type_arguments : bool;
 
- (* Look up class members lazily from shallow declarations instead of eagerly
-    computing folded declarations representing the entire class type. *)
- tco_shallow_class_decl : bool;
+  (* Look up class members lazily from shallow declarations instead of eagerly
+     computing folded declarations representing the entire class type. *)
+  tco_shallow_class_decl : bool;
 
- (* Use Rust parser *)
- po_rust : bool;
+  (* Use Rust parser *)
+  po_rust : bool;
 
- (* Enables deeper like types features *)
- tco_like_types : bool;
+  (* Enables deeper like types features *)
+  tco_like_types : bool;
 
- (* This tells the type checker to rewrite unenforceable as like types
-    i.e. vec<string> => vec<~string> *)
- tco_pessimize_types : bool;
+  (* This tells the type checker to rewrite unenforceable as like types
+     i.e. vec<string> => vec<~string> *)
+  tco_pessimize_types : bool;
 
- (* Enables coercion from dynamic and like types to enforceable types
-    i.e. dynamic ~> int, ~string ~> string *)
- tco_coercion_from_dynamic : bool;
+  (* Enables coercion from dynamic and like types to enforceable types
+     i.e. dynamic ~> int, ~string ~> string *)
+  tco_coercion_from_dynamic : bool;
 
- (* Treat partially abstract typeconsts like concrete typeconsts, disable overriding type *)
- tco_disable_partially_abstract_typeconsts : bool;
+  (* Treat partially abstract typeconsts like concrete typeconsts, disable overriding type *)
+  tco_disable_partially_abstract_typeconsts : bool;
 
- (* Set of codes to be treated as if they were in strict mode files *)
- error_codes_treated_strictly : ISet.t;
+  (* Set of codes to be treated as if they were in strict mode files *)
+  error_codes_treated_strictly : ISet.t;
 
- (* static check xhp required attribute *)
- tco_check_xhp_attribute : bool;
+  (* static check xhp required attribute *)
+  tco_check_xhp_attribute : bool;
 
- (*
-  * Flag to produce an error whenever the TAST contains unresolved type variables
-  *)
- tco_disallow_unresolved_type_variables : bool;
+  (*
+   * Flag to produce an error whenever the TAST contains unresolved type variables
+   *)
+  tco_disallow_unresolved_type_variables : bool;
 
- (* Disallow using non-string, non-int types as array key type constraints. *)
- tco_disallow_invalid_arraykey_constraint : bool;
+  (* Disallow using non-string, non-int types as array key type constraints. *)
+  tco_disallow_invalid_arraykey_constraint : bool;
 
- (* This tells the type checker to try to invalidate files in HHVM's hhbc cache *)
- tico_invalidate_files : bool;
+  (* This tells the type checker to try to invalidate files in HHVM's hhbc cache *)
+  tico_invalidate_files : bool;
 
- (* When invalidating files, the type checker will use hh_server's calculated
-    dependencies as opposed to file level dependencies *)
- tico_invalidate_smart : bool;
+  (* When invalidating files, the type checker will use hh_server's calculated
+     dependencies as opposed to file level dependencies *)
+  tico_invalidate_smart : bool;
 
- (* Enable constants to have visibility modifiers *)
- po_enable_constant_visibility_modifiers : bool;
+  (* Enable constants to have visibility modifiers *)
+  po_enable_constant_visibility_modifiers : bool;
 
- (* Enable class-level where clauses, i.e.
-    class base<T> where T = int {} *)
- po_enable_class_level_where_clauses : bool;
+  (* Enable class-level where clauses, i.e.
+     class base<T> where T = int {} *)
+  po_enable_class_level_where_clauses : bool;
 
- (* Disable legacy soft typehint syntax (@int) and only allow the __Soft attribute. *)
- po_disable_legacy_soft_typehints : bool;
+  (* Disable legacy soft typehint syntax (@int) and only allow the __Soft attribute. *)
+  po_disable_legacy_soft_typehints : bool;
 
 } [@@deriving show]
 

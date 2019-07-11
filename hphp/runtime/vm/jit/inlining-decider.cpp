@@ -139,8 +139,7 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee,
   if (callee->isMethod() && callee->cls() == Generator::getClass()) {
     return refuse("generator member function");
   }
-  if (!RuntimeOption::EvalHHIRInliningIgnoreHints &&
-      callee->userAttributes().count(s_NeverInline.get())) {
+  if (callee->userAttributes().count(s_NeverInline.get())) {
     return refuse("callee marked __NEVER_INLINE");
   }
 

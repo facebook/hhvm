@@ -342,12 +342,25 @@ bool typeStructureIsType(
       // Only true if the typevar is a wildcard
       return type->exists(s_name.get()) &&
         get_ts_name(type)->equal(s_wildcard.get());
+    case TypeStructure::Kind::T_fun:
+      // TODO(T46022709): Handle variadic args
+      return typeStructureIsType(
+        get_ts_return_type(input),
+        get_ts_return_type(type),
+        warn,
+        strict
+      ) && typeStructureIsTypeList(
+        get_ts_param_types(input),
+        get_ts_param_types(type),
+        nullptr,
+        warn,
+        strict
+      );
     case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_darray:
     case TypeStructure::Kind::T_varray:
     case TypeStructure::Kind::T_varray_or_darray:
     case TypeStructure::Kind::T_typeaccess:
-    case TypeStructure::Kind::T_fun:
     case TypeStructure::Kind::T_trait:
     case TypeStructure::Kind::T_reifiedtype:
     case TypeStructure::Kind::T_unresolved:

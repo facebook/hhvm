@@ -1,0 +1,4 @@
+ok
+ok
+
+Catchable fatal error: Argument 1 passed to c() must be an instance of C<(function (?string): int)>, C<(function(int):string)> given in %s on line 9

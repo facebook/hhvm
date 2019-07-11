@@ -1,0 +1,1 @@
+Catchable fatal error: Argument 1 passed to c() must be an instance of C<(function (int): int)>, C<(function():int)> given in %s on line 10

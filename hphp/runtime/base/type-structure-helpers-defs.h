@@ -22,6 +22,8 @@ namespace HPHP {
 
 const StaticString s_allows_unknown_fields("allows_unknown_fields");
 const StaticString s_elem_types("elem_types");
+const StaticString s_param_types("param_types");
+const StaticString s_return_type("return_type");
 const StaticString s_fields("fields");
 const StaticString s_kind("kind");
 const StaticString s_value("value");
@@ -89,6 +91,14 @@ ALWAYS_INLINE const bool does_ts_shape_allow_unknown_fields(
 
 ALWAYS_INLINE const ArrayData* get_ts_elem_types(const ArrayData* ts) {
   return detail::get_ts_array(ts, s_elem_types);
+}
+
+ALWAYS_INLINE const ArrayData* get_ts_param_types(const ArrayData* ts) {
+  return detail::get_ts_array(ts, s_param_types);
+}
+
+ALWAYS_INLINE const ArrayData* get_ts_return_type(const ArrayData* ts) {
+  return detail::get_ts_array(ts, s_return_type);
 }
 
 ALWAYS_INLINE const ArrayData* get_ts_fields(const ArrayData* ts) {

@@ -671,12 +671,24 @@ resolveTSStatically(ISS& env, SArray ts, const php::Class* declaringCls,
       if (!typeCnsVal) return nullptr;
       return finish(addModifiers(typeCnsVal));
     }
+    case TypeStructure::Kind::T_fun: {
+      // TODO(T46022709): Handle variadic args
+      auto rreturn = resolveTSStatically(env, get_ts_return_type(ts),
+                                         declaringCls, checkArrays);
+      if (!rreturn) return nullptr;
+      auto rparams = resolveTSListStatically(env, get_ts_param_types(ts),
+                                             declaringCls, checkArrays);
+      if (!rparams) return nullptr;
+      auto const result = const_cast<ArrayData*>(ts)
+        ->set(s_return_type.get(), Variant(rreturn))
+        ->set(s_param_types.get(), Variant(rparams));
+      return finish(result);
+    }
     case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_darray:
     case TypeStructure::Kind::T_varray:
     case TypeStructure::Kind::T_varray_or_darray:
     case TypeStructure::Kind::T_reifiedtype:
-    case TypeStructure::Kind::T_fun:
     case TypeStructure::Kind::T_trait:
       return nullptr;
   }
@@ -3199,6 +3211,8 @@ void isAsTypeStructImpl(ISS& env, SArray inputTS) {
   not_reached();
 }
 
+bool canReduceToDontResolveList(SArray tsList);
+
 bool canReduceToDontResolve(SArray ts) {
   switch (get_ts_kind(ts)) {
     case TypeStructure::Kind::T_int:
@@ -3230,19 +3244,8 @@ bool canReduceToDontResolve(SArray ts) {
       // If it has generics but all of them are wildcards, then we can reduce
       // Otherwise, we can't.
       return isTSAllWildcards(ts);
-    case TypeStructure::Kind::T_tuple: {
-      auto result = true;
-      IterateV(
-        get_ts_elem_types(ts),
-        [&](TypedValue v) {
-          assertx(isArrayLikeType(v.m_type));
-          result &= canReduceToDontResolve(v.m_data.parr);
-           // when result is false, we can short circuit
-          return !result;
-        }
-      );
-      return result;
-    }
+    case TypeStructure::Kind::T_tuple:
+      return canReduceToDontResolveList(get_ts_elem_types(ts));
     case TypeStructure::Kind::T_shape: {
       auto result = true;
       IterateV(
@@ -3261,6 +3264,10 @@ bool canReduceToDontResolve(SArray ts) {
       );
       return result;
     }
+    case TypeStructure::Kind::T_fun:
+      // TODO(T46022709): Handle variadic args
+      return canReduceToDontResolve(get_ts_return_type(ts))
+        && canReduceToDontResolveList(get_ts_param_types(ts));
     // Following needs to be resolved
     case TypeStructure::Kind::T_unresolved:
     case TypeStructure::Kind::T_typeaccess:
@@ -3272,12 +3279,25 @@ bool canReduceToDontResolve(SArray ts) {
     case TypeStructure::Kind::T_varray:
     case TypeStructure::Kind::T_varray_or_darray:
     case TypeStructure::Kind::T_reifiedtype:
-    case TypeStructure::Kind::T_fun:
     case TypeStructure::Kind::T_typevar:
     case TypeStructure::Kind::T_trait:
       return false;
   }
   not_reached();
+}
+
+bool canReduceToDontResolveList(SArray tsList) {
+  auto result = true;
+  IterateV(
+    tsList,
+    [&](TypedValue v) {
+      assertx(isArrayLikeType(v.m_type));
+      result &= canReduceToDontResolve(v.m_data.parr);
+       // when result is false, we can short circuit
+      return !result;
+    }
+  );
+  return result;
 }
 
 } // namespace

@@ -27,51 +27,62 @@ impl Operator {
         // TODO: endif
         // TODO: variable operator $
         match self {
-            | IncludeOperator | IncludeOnceOperator | RequireOperator
-            | RequireOnceOperator => 1,
-            | PrintOperator => 5,
-            | AssignmentOperator | AdditionAssignmentOperator
-            | SubtractionAssignmentOperator | MultiplicationAssignmentOperator
-            | DivisionAssignmentOperator | ExponentiationAssignmentOperator
-            | RemainderAssignmentOperator | ConcatenationAssignmentOperator
+            IncludeOperator | IncludeOnceOperator | RequireOperator | RequireOnceOperator => 1,
+            PrintOperator => 5,
+            AssignmentOperator
+            | AdditionAssignmentOperator
+            | SubtractionAssignmentOperator
+            | MultiplicationAssignmentOperator
+            | DivisionAssignmentOperator
+            | ExponentiationAssignmentOperator
+            | RemainderAssignmentOperator
+            | ConcatenationAssignmentOperator
             | AndAssignmentOperator
-            | OrAssignmentOperator | ExclusiveOrAssignmentOperator
-            | LeftShiftAssignmentOperator | RightShiftAssignmentOperator
-            | CoalesceAssignmentOperator
-                => 6,
-            | PipeOperator => 7,
-            | ConditionalQuestionOperator | ConditionalColonOperator
+            | OrAssignmentOperator
+            | ExclusiveOrAssignmentOperator
+            | LeftShiftAssignmentOperator
+            | RightShiftAssignmentOperator
+            | CoalesceAssignmentOperator => 6,
+            PipeOperator => 7,
+            ConditionalQuestionOperator
+            | ConditionalColonOperator
             | DegenerateConditionalOperator => 8,
-            | CoalesceOperator => 9,
-            | LogicalOrOperator => 10,
-            | LogicalAndOperator => 11,
-            | OrOperator => 12,
-            | ExclusiveOrOperator => 13,
-            | AndOperator => 14,
-            | EqualOperator | StrictEqualOperator
-            | PhpNotEqualOperator | NotEqualOperator | StrictNotEqualOperator => 15,
-            | SpaceshipOperator | LessThanOperator | LessThanOrEqualOperator
-            | GreaterThanOperator | GreaterThanOrEqualOperator => 16,
-            | LeftShiftOperator | RightShiftOperator => 17,
-            | AdditionOperator | SubtractionOperator | ConcatenationOperator => 18,
-            | MultiplicationOperator | DivisionOperator | RemainderOperator | SuspendOperator => 19,
-            | LogicalNotOperator| NotOperator
-            | UnaryPlusOperator | UnaryMinusOperator => 20,
-            | InstanceofOperator | IsOperator | AsOperator | NullableAsOperator => 21,
-            | CastOperator
+            CoalesceOperator => 9,
+            LogicalOrOperator => 10,
+            LogicalAndOperator => 11,
+            OrOperator => 12,
+            ExclusiveOrOperator => 13,
+            AndOperator => 14,
+            EqualOperator
+            | StrictEqualOperator
+            | PhpNotEqualOperator
+            | NotEqualOperator
+            | StrictNotEqualOperator => 15,
+            SpaceshipOperator
+            | LessThanOperator
+            | LessThanOrEqualOperator
+            | GreaterThanOperator
+            | GreaterThanOrEqualOperator => 16,
+            LeftShiftOperator | RightShiftOperator => 17,
+            AdditionOperator | SubtractionOperator | ConcatenationOperator => 18,
+            MultiplicationOperator | DivisionOperator | RemainderOperator | SuspendOperator => 19,
+            LogicalNotOperator | NotOperator | UnaryPlusOperator | UnaryMinusOperator => 20,
+            InstanceofOperator | IsOperator | AsOperator | NullableAsOperator => 21,
+            CastOperator
             | ErrorControlOperator
-            | PrefixIncrementOperator | PrefixDecrementOperator
+            | PrefixIncrementOperator
+            | PrefixDecrementOperator
             | ExponentOperator => 22,
-            | PostfixIncrementOperator | PostfixDecrementOperator | AwaitOperator => 23,
-            | CloneOperator => 24,
+            PostfixIncrementOperator | PostfixDecrementOperator | AwaitOperator => 23,
+            CloneOperator => 24,
             // value 25 is reserved for assignment that appear in expressions
-            | ReferenceOperator => 26,
-            | FunctionCallOperator => 27,
-            | NewOperator => 28,
-            | MemberSelectionOperator | NullSafeMemberSelectionOperator => 29,
-            | IndexingOperator => 30,
-            | ScopeResolutionOperator => 31,
-            | DollarOperator => 32,
+            ReferenceOperator => 26,
+            FunctionCallOperator => 27,
+            NewOperator => 28,
+            MemberSelectionOperator | NullSafeMemberSelectionOperator => 29,
+            IndexingOperator => 30,
+            ScopeResolutionOperator => 31,
+            DollarOperator => 32,
         }
     }
 

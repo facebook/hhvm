@@ -208,7 +208,7 @@ let process_files
   SharedMem.invalidate_caches();
   File_provider.local_changes_push_stack ();
   Ast_provider.local_changes_push_stack ();
-  let process_file =
+  let process_file_wrapper =
     if !Utils.profile
     then (fun acc fn ->
       let t = Sys.time () in
@@ -226,7 +226,7 @@ let process_files
     | fn :: fns ->
       let (errors, deferred) = match fn with
       | path, Check info ->
-        process_file errors (path, info)
+        process_file_wrapper errors (path, info)
       | path, Declare ->
         let errors = Decl_service.decl_file errors path in
         (errors, [])

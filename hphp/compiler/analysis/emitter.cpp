@@ -20,7 +20,6 @@
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/option.h"
 #include "hphp/hhbbc/hhbbc.h"
-#include "hphp/hhbbc/parallel.h"
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/program-functions.h"

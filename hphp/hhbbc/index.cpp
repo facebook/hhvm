@@ -58,6 +58,7 @@
 #include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/func-util.h"
+#include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/options-util.h"
 #include "hphp/hhbbc/parallel.h"
 #include "hphp/hhbbc/analyze.h"

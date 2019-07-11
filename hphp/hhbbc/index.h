@@ -34,7 +34,6 @@
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/type-constraint.h"
 
-#include "hphp/hhbbc/hhbbc.h"
 #include "hphp/hhbbc/misc.h"
 
 namespace HPHP { namespace HHBBC {

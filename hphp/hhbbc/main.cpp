@@ -44,6 +44,7 @@
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/hhbbc/misc.h"
+#include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/stats.h"
 #include "hphp/hhbbc/parallel.h"
 

@@ -28,7 +28,7 @@
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/vm/repo.h"
 
-#include "hphp/hhbbc/hhbbc.h"
+#include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/type-system.h"
 
 namespace HPHP { namespace HHBBC {

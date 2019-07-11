@@ -203,8 +203,9 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
     RuntimeOption::EvalCheckReturnTypeHints = HardReturnTypeHints ? 3 : 2;
   }
 
-  Config::Bind(HHBBC::options.HardConstProp, ini, config,
-               "HardConstProp", HHBBC::options.HardConstProp);
+  static bool HardConstProp = true;
+  Config::Bind(HardConstProp, ini, config, "HardConstProp", HardConstProp);
+  HHBBC::hard_constprop(HardConstProp);
 
   Config::Bind(APCProfile, ini, config, "APCProfile");
 

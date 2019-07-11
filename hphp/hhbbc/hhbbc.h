@@ -23,15 +23,29 @@
 #include <string>
 #include <utility>
 
-#include "hphp/hhbbc/options.h"
-
 #include "hphp/runtime/base/repo-auth-type-array.h"
 
+#include "hphp/util/hash-map.h"
+#include "hphp/util/hash-set.h"
+#include "hphp/util/hash.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/synchronizable.h"
 
-namespace HPHP { struct UnitEmitter; }
-namespace HPHP { namespace HHBBC {
+namespace HPHP {
+
+struct UnitEmitter;
+
+enum class Op : uint16_t;
+struct OpHash {
+  size_t operator()(Op op) const {
+    return hash_int64(static_cast<uint16_t>(op));
+  }
+};
+
+namespace HHBBC {
+
+using MethodMap = hphp_fast_string_imap<hphp_fast_string_iset>;
+using OpcodeSet = hphp_fast_set<Op,OpHash>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -48,6 +62,10 @@ MethodMap make_method_map(SinglePassReadableRange&);
 
 template<class SinglePassReadableRange>
 OpcodeSet make_bytecode_map(SinglePassReadableRange& bcs);
+
+//////////////////////////////////////////////////////////////////////
+
+void hard_constprop(bool);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -33,6 +33,7 @@
 #include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/optimize.h"
+#include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/parallel.h"
 #include "hphp/hhbbc/parse.h"
 #include "hphp/hhbbc/representation.h"
@@ -546,6 +547,10 @@ void UnitEmitterQueue::fetch(std::vector<std::unique_ptr<UnitEmitter>>& ues) {
 void UnitEmitterQueue::reset() {
   m_ues.clear();
   m_done.store(false, std::memory_order_relaxed);
+}
+
+void hard_constprop(bool f) {
+  options.HardConstProp = f;
 }
 
 //////////////////////////////////////////////////////////////////////

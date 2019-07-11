@@ -15,6 +15,7 @@
 */
 #include "hphp/hhbbc/options-util.h"
 
+#include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/unit-util.h"
 

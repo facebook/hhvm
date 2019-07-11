@@ -228,7 +228,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
                                           const RequestURI &r,
                                           const SourceRootInfo &sri) {
   auto const vhost = VirtualHost::GetCurrent();
-  auto const& emptyArr = empty_array();
+  auto const& emptyArr = empty_darray();
   for (auto const& key : s_arraysToClear) {
     php_global_set(key, emptyArr);
   }
@@ -248,7 +248,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   }
 
 #define X(name)                                       \
-  auto name##arr = empty_array();                     \
+  auto name##arr = empty_darray();                    \
   SCOPE_EXIT { php_global_set(s__##name, name##arr); };
 
   X(ENV)
@@ -317,8 +317,8 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
 
   if (!postPopulated && shouldSetHttpRawPostData) {
     // Always try to populate $HTTP_RAW_POST_DATA if not populated
-    auto dummyPost = empty_array();
-    auto dummyFiles = empty_array();
+    auto dummyPost = empty_darray();
+    auto dummyFiles = empty_darray();
     PreparePostVariables(dummyPost, HTTP_RAW_POST_DATA,
                          dummyFiles, transport, r);
   }
@@ -745,7 +745,7 @@ static void CopyPathInfo(Array& server,
                                            empty_string_variant_ref);
   server.set(s_QUERY_STRING, r.queryString());
 
-  server.set(s_argv, make_packed_array(r.queryString()));
+  server.set(s_argv, make_varray(r.queryString()));
   server.set(s_argc, 1);
 }
 

@@ -249,7 +249,7 @@ void DebuggerSession::runDummy() {
   if (!m_sandboxUser.empty()) {
     SourceRootInfo sourceRootInfo(m_sandboxUser, m_sandboxName);
     auto server = php_global_exchange(s__SERVER, init_null());
-    forceToArray(server);
+    forceToDArray(server);
     Array arr = server.toArrRef();
     server.unset();
     php_global_set(

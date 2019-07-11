@@ -258,9 +258,12 @@ static void process_cmd_arguments(int argc, char **argv) {
   php_global_set(s_argv, argvArray.toArray());
 }
 
-static void process_env_variables(Array& variables, char** envp,
-                           std::map<std::string, std::string>& envVariables) {
-  for (auto& kv : envVariables) {
+static void process_env_variables(
+  Array& variables,
+  char** envp,
+  const std::map<std::string, std::string>& envVariables
+) {
+  for (auto const& kv : envVariables) {
     String idx(kv.first);
     auto const arrkey = variables.convertKey<IntishCast::Cast>(idx);
     String str(kv.second);
@@ -683,15 +686,17 @@ void init_command_line_session(int argc, char** argv) {
 }
 
 void
-init_command_line_globals(int argc, char** argv, char** envp,
-                          int xhprof,
-                          std::map<std::string, std::string>& serverVariables,
-                          std::map<std::string, std::string>& envVariables) {
+init_command_line_globals(
+  int argc, char** argv, char** envp,
+  int xhprof,
+  const std::map<std::string, std::string>& serverVariables,
+  const std::map<std::string, std::string>& envVariables
+) {
   auto& variablesOrder = RID().getVariablesOrder();
 
   if (variablesOrder.find('e') != std::string::npos ||
       variablesOrder.find('E') != std::string::npos) {
-    Array envArr(Array::Create());
+    auto envArr = Array::CreateDArray();
     process_env_variables(envArr, envp, envVariables);
     envArr.set(s_HPHP, 1);
     envArr.set(s_HHVM, 1);
@@ -709,14 +714,14 @@ init_command_line_globals(int argc, char** argv, char** envp,
       envArr.set(s_HHVM_ARCH, "ppc64");
       break;
     }
-    php_global_set(s__ENV, envArr);
+    php_global_set(s__ENV, std::move(envArr));
   }
 
   process_cmd_arguments(argc, argv);
 
   if (variablesOrder.find('s') != std::string::npos ||
       variablesOrder.find('S') != std::string::npos) {
-    Array serverArr(Array::Create());
+    auto serverArr = Array::CreateDArray();
     process_env_variables(serverArr, envp, envVariables);
     time_t now;
     struct timeval tp = {0};
@@ -751,15 +756,15 @@ init_command_line_globals(int argc, char** argv, char** envp,
       serverArr.set(s_HOSTNAME, String(hostname, CopyString));
     }
 
-    for (auto& kv : serverVariables) {
-      serverArr.set(String(kv.first.c_str()), String(kv.second.c_str()));
+    for (auto const& kv : serverVariables) {
+      serverArr.set(String{kv.first}, String{kv.second});
     }
 
-    php_global_set(s__SERVER, serverArr);
+    php_global_set(s__SERVER, std::move(serverArr));
   }
 
   if (xhprof) {
-    HHVM_FN(xhprof_enable)(xhprof, uninit_null().toArray());
+    HHVM_FN(xhprof_enable)(xhprof, null_array);
   }
 
   if (RuntimeOption::RequestTimeoutSeconds) {

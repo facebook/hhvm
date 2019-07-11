@@ -29,8 +29,6 @@
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/transport.h"
 
-using std::map;
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -216,12 +214,10 @@ void SourceRootInfo::handleError(Transport *t) {
 
 Array SourceRootInfo::setServerVariables(Array server) const {
   if (!sandboxOn()) return server;
-  for (auto it = RuntimeOption::SandboxServerVariables.begin();
-       it != RuntimeOption::SandboxServerVariables.end();
-       ++it) {
-    String idx(it->first);
+  for (auto const& it : RuntimeOption::SandboxServerVariables) {
+    String idx(it.first);
     const auto arrkey = server.convertKey<IntishCast::Cast>(idx);
-    String str(parseSandboxServerVariable(it->second));
+    String str(parseSandboxServerVariable(it.second));
     server.set(arrkey, make_tv<KindOfString>(str.get()), true);
   }
 

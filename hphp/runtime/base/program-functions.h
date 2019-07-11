@@ -46,11 +46,13 @@ void execute_command_line_begin(int argc, char **argv, int xhprof);
 void execute_command_line_end(int xhprof, bool coverage, const char *program);
 
 void init_command_line_session(int arc, char** argv);
-void
-init_command_line_globals(int argc, char** argv, char** envp,
-                          int xhprof,
-                          std::map<std::string, std::string>& serverVariables,
-                          std::map<std::string, std::string>& envVariables);
+void init_command_line_globals(
+  int argc, char** argv, char** envp,
+  int xhprof,
+  const std::map<std::string, std::string>& serverVariables,
+  const std::map<std::string, std::string>& envVariables
+);
+
 /**
  * Setting up environment variables.
  */

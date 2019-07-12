@@ -17,12 +17,16 @@
 
 #include <algorithm>
 
+#include <folly/experimental/io/FsUtil.h>
+
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-util.h"
@@ -106,16 +110,38 @@ bool vm_decode_handler(const Variant& function, DecodedHandlerPtr& handler) {
 
 IMPLEMENT_REQUEST_LOCAL(AutoloadHandler, AutoloadHandler::s_instance);
 
+static AutoloadMapFactory* s_mapFactory = nullptr;
+
+AutoloadMapFactory* AutoloadMapFactory::getInstance() {
+  return s_mapFactory;
+}
+
+void AutoloadMapFactory::setInstance(AutoloadMapFactory* instance) {
+  s_mapFactory = instance;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void AutoloadHandler::requestInit() {
   assertx(!m_map);
+  assertx(!m_req_map);
   assertx(m_loading.get() == nullptr);
   m_spl_stack_inited = false;
   new (&m_handlers) req::deque<HandlerBundle>();
   m_handlers_valid = true;
+
+  auto* factory = AutoloadMapFactory::getInstance();
+  if (factory) {
+    auto* map = getAutoloadMapFromFactory(*factory);
+    if (map && map->sync()) {
+      m_map = map;
+    }
+  }
 }
 
 void AutoloadHandler::requestShutdown() {
   m_map = nullptr;
+  m_req_map = nullptr;
   m_loading.reset();
   m_handlers_valid = false;
   // m_spl_stack_inited will be re-initialized by the next requestInit
@@ -123,8 +149,9 @@ void AutoloadHandler::requestShutdown() {
 }
 
 bool AutoloadHandler::setMap(const Array& map, String root) {
-  m_map = req::make_unique<UserAutoloadMap>(
+  m_req_map = req::make_unique<UserAutoloadMap>(
       UserAutoloadMap::fromFullMap(map, std::move(root)));
+  m_map = m_req_map.get();
   return true;
 }
 
@@ -289,6 +316,7 @@ AutoloadHandler::loadFromMap(const String& clsName,
                              AutoloadMap::KindOf kind,
                              bool toLower,
                              const T &checkExists) {
+  assertx(m_map);
   while (true) {
     Variant err{Variant::NullInit()};
     AutoloadMap::Result res = loadFromMapImpl(clsName, kind, toLower,
@@ -306,6 +334,28 @@ AutoloadHandler::loadFromMap(const String& clsName,
     }
     return res;
   }
+}
+
+AutoloadMap* AutoloadHandler::getAutoloadMapFromFactory(
+    AutoloadMapFactory& factory) const {
+
+  if (g_context.isNull()) {
+    return nullptr;
+  }
+
+  auto* repoOptions = g_context->getRepoOptionsForRequest();
+  if (!repoOptions) {
+    return nullptr;
+  }
+
+  auto repoRoot = folly::fs::canonical(repoOptions->path()).parent_path();
+
+  auto queryExprStr = repoOptions->autoloadQuery();
+  if (queryExprStr.empty()) {
+    return nullptr;
+  }
+
+  return factory.getForRoot(queryExprStr, std::move(repoRoot));
 }
 
 bool AutoloadHandler::autoloadFunc(StringData* name) {
@@ -640,7 +690,6 @@ void AutoloadHandler::removeAllHandlers() {
   m_spl_stack_inited = false;
   m_handlers.clear();
 }
-
 
 //////////////////////////////////////////////////////////////////////
 

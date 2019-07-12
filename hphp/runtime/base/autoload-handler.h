@@ -19,6 +19,8 @@
 #include <memory>
 #include <utility>
 
+#include <folly/experimental/io/FsUtil.h>
+
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/req-deque.h"
@@ -33,6 +35,8 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 bool is_valid_class_name(folly::StringPiece className);
+
+struct AutoloadMapFactory;
 
 struct AutoloadHandler final : RequestEventHandler {
   struct DecodedHandler {
@@ -188,7 +192,12 @@ private:
   static String getSignature(const Variant& handler);
 
 private:
-  req::unique_ptr<UserAutoloadMap> m_map;
+  AutoloadMap* getAutoloadMapFromFactory(AutoloadMapFactory& factory) const;
+
+  // m_map points to either the request-scoped userland AutoloadMap or
+  // a statically-scoped native AutoloadMap
+  AutoloadMap* m_map = nullptr;
+  req::unique_ptr<UserAutoloadMap> m_req_map;
   bool m_spl_stack_inited{false};
   union {
     req::deque<HandlerBundle> m_handlers;
@@ -201,6 +210,25 @@ private:
 };
 
 //////////////////////////////////////////////////////////////////////
+
+/**
+ * Set this inside of an extension's moduleLoad() to provide an
+ * implementation for a native AutoloadMap.
+ */
+struct AutoloadMapFactory {
+
+  static AutoloadMapFactory* getInstance();
+  static void setInstance(AutoloadMapFactory* instance);
+
+  virtual ~AutoloadMapFactory() = default;
+
+  /**
+   * Return an AutoloadMap corresponding to the given root. If one
+   * doesn't exist yet, create it.
+   */
+  virtual AutoloadMap* getForRoot(const std::string& queryExprStr,
+                                  const folly::fs::path& root) = 0;
+};
 
 }
 

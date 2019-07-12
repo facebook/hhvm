@@ -45,8 +45,6 @@ let experimental_coroutines =
 let experimental_disallow_static_memoized =
   GlobalOptions.tco_experimental_disallow_static_memoized
 let experimental_no_trait_reuse = GlobalOptions.tco_experimental_no_trait_reuse
-let experimental_reified_generics =
-  GlobalOptions.tco_experimental_reified_generics
 let experimental_type_param_shadowing =
   GlobalOptions.tco_experimental_type_param_shadowing
 let experimental_trait_method_redeclarations =

@@ -1299,20 +1299,9 @@ module Make (GetLocals : GetLocals) = struct
     in
     List.rev ret
 
-  and type_param ~forbid_this env t =
-    let (genv, _) = env in
-    begin match t.Aast.tp_reified with
-    | Aast.Erased -> ()
-    | Aast.SoftReified
-    | Aast.Reified ->
-      if not (TypecheckerOptions.experimental_feature_enabled genv.tcopt
-        TypecheckerOptions.experimental_reified_generics)
-      then
-        Errors.experimental_feature (fst t.Aast.tp_name) "reified generics" end;
-
+  and type_param ~forbid_this (genv, _ as env) t =
     begin
-      if (TypecheckerOptions.experimental_feature_enabled
-        (fst env).tcopt
+      if (TypecheckerOptions.experimental_feature_enabled genv.tcopt
         TypecheckerOptions.experimental_type_param_shadowing)
       then
         (* Treat type params as inline class declarations that don't go into the naming heap *)
@@ -1328,7 +1317,6 @@ module Make (GetLocals : GetLocals) = struct
             Errors.error_name_already_bound name canonical pos def_pos
           | None -> ()
     end;
-
     {
       N.tp_variance = t.Aast.tp_variance;
       tp_name = t.Aast.tp_name;

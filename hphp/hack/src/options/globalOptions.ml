@@ -124,11 +124,6 @@ let tco_experimental_coroutines =
 let tco_experimental_no_trait_reuse = "no_trait_reuse"
 
 (**
- * Enable reified generics
- *)
-let tco_experimental_reified_generics = "reified_generics"
-
-(**
  * Prevent type param names from shadowing class names
  *)
 let tco_experimental_type_param_shadowing = "type_param_shadowing"
@@ -179,7 +174,6 @@ let tco_experimental_all =
      tco_experimental_coroutines;
      tco_experimental_disallow_static_memoized;
      tco_experimental_no_trait_reuse;
-     tco_experimental_reified_generics;
      tco_experimental_trait_method_redeclarations;
      tco_experimental_type_const_attributes;
      tco_experimental_decl_linearization;

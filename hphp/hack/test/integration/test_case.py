@@ -2,7 +2,7 @@
 
 import abc
 import unittest
-from typing import Generic, TypeVar
+from typing import Generic, Optional, TypeVar
 
 
 class TestDriver(abc.ABC, unittest.TestCase):
@@ -28,21 +28,22 @@ class TestDriver(abc.ABC, unittest.TestCase):
 T = TypeVar("T", bound=TestDriver)
 
 
-class TestCase(abc.ABC, unittest.TestCase, Generic[T]):
+class TestCase(unittest.TestCase, Generic[T]):
     @classmethod
     def get_template_repo(cls) -> str:
         return "hphp/hack/test/integration/data/simple_repo"
 
     @classmethod
-    @abc.abstractmethod
     def get_test_driver(cls) -> T:
         raise NotImplementedError()
 
-    _test_driver: T
+    _test_driver: Optional[T] = None
 
     @property
     def test_driver(self) -> T:
-        return self._test_driver
+        test_driver = self._test_driver
+        assert test_driver is not None
+        return test_driver
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -51,7 +52,9 @@ class TestCase(abc.ABC, unittest.TestCase, Generic[T]):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        cls._test_driver.tearDownClass()
+        test_driver = cls._test_driver
+        assert test_driver is not None
+        test_driver.tearDownClass()
 
     def setUp(self) -> None:
         self.test_driver.setUp()

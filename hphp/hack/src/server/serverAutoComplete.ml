@@ -14,7 +14,6 @@
 
 let get_results
     ~(tcopt:TypecheckerOptions.t)
-    ~(delimit_on_namespaces:bool)
     ~(autocomplete_context: AutocompleteTypes.legacy_autocomplete_context)
     ~(sienv:SearchUtils.si_env)
     (_:Relative_path.t)
@@ -26,7 +25,6 @@ let get_results
   } = FileInfo.simplify file_info in
   AutocompleteService.go tast
     ~tcopt
-    ~delimit_on_namespaces
     ~content_funs
     ~content_classes
     ~autocomplete_context
@@ -34,14 +32,13 @@ let get_results
 
 let auto_complete
     ~(tcopt:TypecheckerOptions.t)
-    ~(delimit_on_namespaces:bool)
     ~(autocomplete_context: AutocompleteTypes.legacy_autocomplete_context)
     ~(sienv:SearchUtils.si_env)
     (content:string)
   : AutocompleteTypes.complete_autocomplete_result list Utils.With_complete_flag.t =
   let result =
     ServerIdeUtils.declare_and_check content
-      ~f:(get_results ~tcopt ~delimit_on_namespaces ~autocomplete_context
+      ~f:(get_results ~tcopt ~autocomplete_context
         ~sienv) tcopt in
   result
 
@@ -92,7 +89,6 @@ let get_autocomplete_context
   }
 
 let auto_complete_at_position
-  ~(delimit_on_namespaces:bool)
   ~(is_manually_invoked:bool)
   ~(file_content:string)
   ~(pos:File_content.position)
@@ -104,7 +100,7 @@ let auto_complete_at_position
   let autocomplete_context = get_autocomplete_context file_content pos ~is_manually_invoked in
   let edits = [{range = Some {st = pos; ed = pos}; text = "AUTO332"}] in
   let content = File_content.edit_file_unsafe file_content edits in
-  auto_complete ~tcopt ~delimit_on_namespaces ~autocomplete_context ~sienv content
+  auto_complete ~tcopt ~autocomplete_context ~sienv content
 
 (* Simplified entry point for serverless IDE *)
 let auto_complete_at_position_ctx
@@ -139,7 +135,6 @@ let auto_complete_at_position_ctx
     get_autocomplete_context content pos ~is_manually_invoked in
   AutocompleteService.go
     ~tcopt
-    ~delimit_on_namespaces:true
     ~content_funs:((Core_kernel.List.map fileinfo.FileInfo.funs ~f:snd) |> SSet.of_list)
     ~content_classes:((Core_kernel.List.map fileinfo.FileInfo.classes ~f:snd) |> SSet.of_list)
     ~autocomplete_context

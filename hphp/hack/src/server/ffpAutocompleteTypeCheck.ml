@@ -39,7 +39,7 @@ let run
      is_complete_class_member context
   then
     let ac_results = ServerAutoComplete.auto_complete_at_position
-      ~is_manually_invoked:false ~delimit_on_namespaces:true ~file_content ~pos ~tcopt
+      ~is_manually_invoked:false ~file_content ~pos ~tcopt
       ~sienv
     in
     let open Utils.With_complete_flag in

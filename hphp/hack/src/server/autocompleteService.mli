@@ -17,7 +17,6 @@ val autocomplete_result_to_json :
 
 val go :
   tcopt:TypecheckerOptions.t ->
-  delimit_on_namespaces:bool ->
   content_funs:Reordered_argument_collections.SSet.t ->
   content_classes:Reordered_argument_collections.SSet.t ->
   autocomplete_context: AutocompleteTypes.legacy_autocomplete_context ->

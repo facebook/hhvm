@@ -1129,9 +1129,8 @@ let do_completion_legacy
     | None -> false
     | Some c -> c.triggerKind = Invoked
   in
-  let delimit_on_namespaces = true in
   let command = ServerCommandTypes.IDE_AUTOCOMPLETE
-    (filename, pos, delimit_on_namespaces, is_manually_invoked) in
+    (filename, pos, is_manually_invoked) in
   let%lwt result = rpc conn ref_unblocked_time command in
   make_ide_completion_response result filename
 
@@ -1166,7 +1165,6 @@ let do_completion_local
     file_content = lsp_doc.Lsp.TextDocumentItem.text;
     line = pos.Ide_api_types.line;
     column = pos.Ide_api_types.column;
-    delimit_on_namespaces = true;
     is_manually_invoked;
   } in
   let%lwt result = ClientIdeService.completion ide_service request in

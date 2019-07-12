@@ -993,7 +993,7 @@
       "isIncomplete": false,
       "items": [
         {
-          "label": "test_func",
+          "label": "TestNS\\test_func",
           "kind": 3,
           "detail": "function(): void",
           "inlineDetail": "()",
@@ -1010,7 +1010,7 @@
                 "character": 7
               }
             },
-            "newText": "test_func"
+            "newText": "TestNS\\test_func"
           },
           "data": {
             "filename": "${root_path}${path_sep}completion_extras_namespace.php",

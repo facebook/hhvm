@@ -868,7 +868,7 @@ let handle_mode
       let is_manually_invoked = mode = Autocomplete_manually_invoked in
 
       let result = ServerAutoComplete.auto_complete_at_position
-        ~tcopt ~pos ~is_manually_invoked ~delimit_on_namespaces:false ~file_content:file
+        ~tcopt ~pos ~is_manually_invoked ~file_content:file
         ~sienv
       in
       List.iter ~f: begin fun r ->

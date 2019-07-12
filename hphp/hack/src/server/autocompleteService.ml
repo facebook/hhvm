@@ -57,7 +57,7 @@ let is_auto_complete x =
   then matches_auto_complete_suffix x
   else false
 
-let get_replace_pos_exn ~delimit_on_namespaces =
+let get_replace_pos_exn () =
   match !autocomplete_identifier with
   | None -> failwith "No autocomplete position was set."
   | Some (pos, text) ->
@@ -66,12 +66,11 @@ let get_replace_pos_exn ~delimit_on_namespaces =
     else
     let open Ide_api_types in
     let range = pos_to_range pos in
-    let st = if delimit_on_namespaces
-      then match String.rindex text '\\' with
-        | Some index ->
-          { range.st with column = range.st.column + index }
-        | None -> range.st
-      else range.st in
+    let st = match String.rindex text '\\' with
+      | Some index ->
+        { range.st with column = range.st.column + index }
+      | None -> range.st
+    in
     let ed = { range.ed with column = range.ed.column - suffix_len } in
     { st; ed }
 
@@ -272,14 +271,8 @@ let search_funs_and_classes input ~limit ~on_class ~on_function =
 (* possible identifier autocompletions at the autocomplete position (which   *)
 (* is stored in a global mutable reference). The results are stored in the   *)
 (* global mutable reference 'autocomplete_results'.                          *)
-(* This function has two modes of dealing with namespaces...                 *)
-(*     delimit_on_namespaces=true   delimit_on_namespaces=false              *)
-(*      St| =>               Str                          Str\compare, ...   *)
-(*  Str\\c| =>               compare                      Str\compare        *)
-(* Essentially, 'delimit_on_namespaces=true' means that autocomplete treats  *)
-(* namespaces as first class entities; 'false' means that it treats them     *)
-(* purely as part of long identifier names where the symbol '\\' is not      *)
-(* really any different from the symbol '_' for example.                     *)
+(*                                                                           *)
+(* We treat namespaces as first-class entities in all cases.                 *)
 (*                                                                           *)
 (* XHP note:                                                                 *)
 (* This function is also called for "<foo|", with gname="foo".               *)
@@ -289,7 +282,6 @@ let search_funs_and_classes input ~limit ~on_class ~on_function =
 (* from the user's prefix, and stripping the leading ":" when we emit.       *)
 let compute_complete_global
   ~(tcopt: TypecheckerOptions.t)
-  ~(delimit_on_namespaces: bool)
   ~(autocomplete_context: AutocompleteTypes.legacy_autocomplete_context)
   ~(content_funs: Reordered_argument_collections.SSet.t)
   ~(content_classes: Reordered_argument_collections.SSet.t)
@@ -319,28 +311,15 @@ let compute_complete_global
 
     let does_fully_qualified_name_match_prefix name =
       let stripped_name = strip_ns name in
-      if delimit_on_namespaces then
-        (* name must match gname, and have no additional namespace slashes, e.g. *)
-        (* name="Str\\co" gname="S" -> false *)
-        (* name="Str\\co" gname="Str\\co" -> true *)
-        string_starts_with stripped_name gname &&
-          not (String.contains stripped_name ~pos:(String.length gname) '\\')
-      else
-        string_starts_with stripped_name gname
+      (* name must match gname, and have no additional namespace slashes, e.g. *)
+      (* name="Str\\co" gname="S" -> false *)
+      (* name="Str\\co" gname="Str\\co" -> true *)
+      string_starts_with stripped_name gname &&
+        not (String.contains stripped_name ~pos:(String.length gname) '\\')
     in
 
     let string_to_replace_prefix name =
-      let stripped_name = strip_ns name in
-      if delimit_on_namespaces then
-        (* returns the part of 'name' after its rightmost slash *)
-        try
-          let len = String.length stripped_name in
-          let i = (String.rindex_exn stripped_name '\\') + 1 in
-          String.sub stripped_name i (len - i)
-        with _ ->
-          stripped_name
-      else
-        stripped_name
+      Utils.strip_ns name
     in
 
     let result_count = ref 0 in
@@ -392,11 +371,10 @@ let compute_complete_global
       (* name will have the form "Str" or "HH\\Lib\\Str" *)
       (* Our autocomplete will show up in the list as "Str". *)
       if autocomplete_context.is_xhp_classname then None else
-      if not delimit_on_namespaces then None else
       if not (does_fully_qualified_name_match_prefix name) then None else
       Some (Complete {
         res_pos = Pos.none |> Pos.to_absolute;
-        res_replace_pos = get_replace_pos_exn ~delimit_on_namespaces;
+        res_replace_pos = get_replace_pos_exn ();
         res_base_class = None;
         res_ty = "namespace";
         res_name = string_to_replace_prefix name;
@@ -480,7 +458,6 @@ let resolve_ty
     (env: Tast_env.t)
     (autocomplete_context: legacy_autocomplete_context)
     (x: partial_autocomplete_result)
-    ~(delimit_on_namespaces: bool)
   : complete_autocomplete_result =
   let env, ty = match x.ty with
     | DeclTy ty -> Tast_env.localize_with_self env ty
@@ -543,7 +520,7 @@ let resolve_ty
   in
   {
     res_pos         = (fst ty) |> Typing_reason.to_pos |> Pos.to_absolute;
-    res_replace_pos = get_replace_pos_exn ~delimit_on_namespaces;
+    res_replace_pos = get_replace_pos_exn ();
     res_base_class  = x.base_class;
     res_ty          = desc_string;
     res_name        = name;
@@ -791,7 +768,6 @@ let find_global_results
   ~(max_results: int)
   ~(completion_type: SearchUtils.autocomplete_type option)
   ~(tcopt: TypecheckerOptions.t)
-  ~(delimit_on_namespaces: bool)
   ~(content_funs: Reordered_argument_collections.SSet.t)
   ~(content_classes: Reordered_argument_collections.SSet.t)
   ~(autocomplete_context: AutocompleteTypes.legacy_autocomplete_context)
@@ -805,7 +781,6 @@ let find_global_results
   | TrieIndex ->
     compute_complete_global
       ~tcopt
-      ~delimit_on_namespaces
       ~autocomplete_context
       ~content_funs
       ~content_classes;
@@ -817,7 +792,7 @@ let find_global_results
     | Some Actrait_only -> Some SI_Trait
     | _ -> None);
     let query_text = strip_suffix !auto_complete_for_global in
-    let replace_pos = get_replace_pos_exn ~delimit_on_namespaces in
+    let replace_pos = get_replace_pos_exn () in
 
     (* TODO: This needs to be replaced with REAL namespace processing *)
     let query_text = Utils.strip_ns query_text in
@@ -849,7 +824,6 @@ let find_global_results
 (* Main entry point for autocomplete *)
 let go
     ~(tcopt: TypecheckerOptions.t)
-    ~(delimit_on_namespaces: bool)
     ~(content_funs: Reordered_argument_collections.SSet.t)
     ~(content_classes: Reordered_argument_collections.SSet.t)
     ~(autocomplete_context: AutocompleteTypes.legacy_autocomplete_context)
@@ -873,7 +847,6 @@ let go
         ~max_results
         ~completion_type
         ~tcopt
-        ~delimit_on_namespaces
         ~autocomplete_context
         ~content_funs
         ~content_classes
@@ -897,7 +870,7 @@ let go
     in
     let resolve (result: autocomplete_result) : complete_autocomplete_result =
       match result with
-      | Partial res -> resolve_ty tast_env autocomplete_context res ~delimit_on_namespaces
+      | Partial res -> resolve_ty tast_env autocomplete_context res
       | Complete res -> res
     in
     let results = {

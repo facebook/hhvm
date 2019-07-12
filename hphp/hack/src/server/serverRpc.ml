@@ -92,7 +92,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         } in (* feature not implemented here; it only works for LSP *)
         let result = ServerAutoComplete.auto_complete
           ~tcopt:env.tcopt
-          ~delimit_on_namespaces:false
           ~autocomplete_context
           ~sienv:(!(env.ServerEnv.local_symbol_table))
           content in
@@ -193,14 +192,14 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let predeclare = genv.local_config.ServerLocalConfig.predeclare_ide in
         let edits = List.map edits ~f:Ide_api_types.ide_text_edit_to_fc in
         ServerFileSync.edit_file ~predeclare env path edits, ()
-    | IDE_AUTOCOMPLETE (path, pos, delimit_on_namespaces, is_manually_invoked) ->
+    | IDE_AUTOCOMPLETE (path, pos, is_manually_invoked) ->
         let open With_complete_flag in
         let pos = pos |> Ide_api_types.ide_pos_to_fc in
         let file_content = ServerFileSync.get_file_content (ServerCommandTypes.FileName path) in
         let offset = File_content.get_offset file_content pos in (* will raise if out of bounds *)
         let char_at_pos = File_content.get_char file_content offset in
         let results = ServerAutoComplete.auto_complete_at_position
-          ~delimit_on_namespaces ~is_manually_invoked ~file_content ~pos
+          ~is_manually_invoked ~file_content ~pos
           ~tcopt:env.tcopt ~sienv:!(env.ServerEnv.local_symbol_table)
         in
         let completions = results.value in

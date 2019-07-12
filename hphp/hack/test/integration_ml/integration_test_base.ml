@@ -329,11 +329,10 @@ let autocomplete env contents =
   }
 
 let ide_autocomplete env (path, line, column) =
-  let delimit_on_namespaces = false in
   let is_manually_invoked = false in
   run_loop_once env { default_loop_input with
     persistent_client_request = Some (Request (IDE_AUTOCOMPLETE
-      (root ^ path, Ide_api_types.{line; column}, delimit_on_namespaces, is_manually_invoked)
+      (root ^ path, Ide_api_types.{line; column}, is_manually_invoked)
     ))
   }
 

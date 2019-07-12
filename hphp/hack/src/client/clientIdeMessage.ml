@@ -25,9 +25,6 @@ module Lsp_autocomplete = struct
 
     (* Contents of the file reflecting unsaved changes in the IDE *)
     file_content: string;
-
-    (* TODO: Remove this variable everywhere *)
-    delimit_on_namespaces: bool;
     is_manually_invoked: bool;
   }
   type result = AutocompleteTypes.ide_result

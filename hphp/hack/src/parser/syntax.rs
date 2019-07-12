@@ -37,7 +37,7 @@ pub trait SyntaxTypeBase {
 
     fn make_missing(offset: usize) -> Self;
     fn make_token(arg: Self::Token) -> Self;
-    fn make_list(arg: Box<Vec<Self>>, offset: usize) -> Self
+    fn make_list(arg: Vec<Self>, offset: usize) -> Self
     where
         Self: Sized;
 
@@ -73,7 +73,7 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_list(arg: Box<Vec<Self>>, offset: usize) -> Self {
+    fn make_list(arg: Vec<Self>, offset: usize) -> Self {
         // An empty list is represented by Missing; everything else is a
         // SyntaxList, even if the list has only one item.
         if arg.is_empty() {
@@ -87,7 +87,7 @@ where
 
     fn any<F: FnMut(&Self) -> bool>(&self, mut f: F) -> bool {
         match &self.syntax {
-            SyntaxVariant::SyntaxList(box nodes) => nodes.iter().any(f),
+            SyntaxVariant::SyntaxList(nodes) => nodes.iter().any(f),
             SyntaxVariant::Missing => false,
             _ => f(&self),
         }
@@ -96,7 +96,7 @@ where
     fn fold_list<U, F: FnMut(U, &Self) -> U>(&self, init: U, mut f: F) -> U {
         use SyntaxVariant::*;
         match &self.syntax {
-            SyntaxList(box nodes) => nodes.iter().fold(init, |init, node| match &node.syntax {
+            SyntaxList(nodes) => nodes.iter().fold(init, |init, node| match &node.syntax {
                 ListItem(box li) => f(init, &li.list_item),
                 Missing => init,
                 _ => f(init, &node),

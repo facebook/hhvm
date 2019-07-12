@@ -48,7 +48,7 @@ where
 
     fn make_list(
         s: Bool<'src>,
-        lst: Box<Vec<Self::R>>,
+        lst: Vec<Self::R>,
         offset: usize,
     ) -> (Bool<'src>, Self::R) {
         <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_list(s, lst, offset)

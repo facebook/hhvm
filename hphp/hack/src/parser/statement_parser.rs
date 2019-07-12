@@ -756,7 +756,7 @@ where
             match token.kind() {
                 TokenKind::Semicolon if parser1.peek_token_kind() == TokenKind::RightBrace => {
                     self.continue_from(parser1);
-                    S!(make_list, self, Box::new(vec![]), self.pos())
+                    S!(make_list, self, vec![], self.pos())
                 }
                 _ => {
                     self.parse_terminated_list(&|x| x.parse_switch_section(), TokenKind::RightBrace)

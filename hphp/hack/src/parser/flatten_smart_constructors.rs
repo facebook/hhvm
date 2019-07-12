@@ -36,7 +36,7 @@ pub trait FlattenSmartConstructors<'src, State>
         (s, Self::zero())
     }
 
-    fn make_list(s: State, _: Box<Vec<Self::R>>, _: usize) -> (State, Self::R) {
+    fn make_list(s: State, _: Vec<Self::R>, _: usize) -> (State, Self::R) {
         (s, Self::zero())
     }
 

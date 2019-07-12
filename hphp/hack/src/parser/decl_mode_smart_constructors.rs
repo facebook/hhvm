@@ -174,7 +174,7 @@ where
             let stmts = if saw_yield {
                 let token = Token::make(TokenKind::Yield, 0, 0, vec![], vec![]);
                 let yield_ = Syntax::<Token, Value>::make_token(token);
-                Syntax::make_list(Box::new(vec![yield_]), 0)
+                Syntax::make_list(vec![yield_], 0)
             } else {
                 Syntax::make_missing(0)
             };

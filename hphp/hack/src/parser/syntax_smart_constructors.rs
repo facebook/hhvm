@@ -38,7 +38,7 @@ where
         (State::next(s, vec![]), Self::R::make_token(arg))
     }
 
-    fn make_list(s: State::T, items: Box<Vec<Self::R>>, offset: usize) -> (State::T, Self::R) {
+    fn make_list(s: State::T, items: Vec<Self::R>, offset: usize) -> (State::T, Self::R) {
         if items.is_empty() {
             <Self as SyntaxSmartConstructors<'src, S, State>>::make_missing(s, offset)
         } else {

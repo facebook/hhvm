@@ -614,7 +614,7 @@ where
                     let token = S!(make_token, self, token);
                     acc.push(token);
                 }
-                _ => return S!(make_list, self, Box::new(acc), self.pos()),
+                _ => return S!(make_list, self, acc, self.pos()),
             }
         }
     }
@@ -722,7 +722,7 @@ where
                 break;
             }
         }
-        S!(make_list, self, Box::new(items), self.pos())
+        S!(make_list, self, items, self.pos())
     }
 
     fn parse_extends_opt(&mut self) -> (S::R, S::R) {
@@ -2009,7 +2009,7 @@ where
                 _ => break,
             }
         }
-        S!(make_list, self, Box::new(items), self.pos())
+        S!(make_list, self, items, self.pos())
     }
 
     fn parse_enum_or_classish_or_function_declaration(&mut self) -> S::R {
@@ -2540,7 +2540,7 @@ where
                 _ => declarations.push(self.parse_declaration()),
             }
         }
-        let declarations = S!(make_list, self, Box::new(declarations), self.pos());
+        let declarations = S!(make_list, self, declarations, self.pos());
         let result = S!(make_script, self, declarations);
         assert_eq!(self.peek_token_kind(), TokenKind::EndOfFile);
         result

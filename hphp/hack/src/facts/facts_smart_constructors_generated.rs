@@ -44,7 +44,7 @@ impl<'src> SmartConstructors<'src, HasScriptContent<'src>> for FactsSmartConstru
 
     fn make_list(
         s: HasScriptContent<'src>,
-        items: Box<Vec<Self::R>>,
+        items: Vec<Self::R>,
         offset: usize,
     ) -> (HasScriptContent<'src>, Self::R) {
         <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_list(s, items, offset)

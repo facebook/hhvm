@@ -4633,7 +4633,7 @@ pub struct PocketMappingTypeDeclarationChildren<T, V> {
 pub enum SyntaxVariant<T, V> {
     Token(Box<T>),
     Missing,
-    SyntaxList(Box<Vec<Syntax<T, V>>>),
+    SyntaxList(Vec<Syntax<T, V>>),
     EndOfFile(Box<EndOfFileChildren<T, V>>),
     Script(Box<ScriptChildren<T, V>>),
     QualifiedName(Box<QualifiedNameChildren<T, V>>),

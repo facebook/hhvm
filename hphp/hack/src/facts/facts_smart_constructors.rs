@@ -164,10 +164,9 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
 
     fn make_list(
         st: HasScriptContent<'a>,
-        items: Box<Vec<Self::R>>,
+        items: Vec<Self::R>,
         _: usize,
     ) -> (HasScriptContent<'a>, Self::R) {
-        let items = *items;
         let result = if !items.is_empty()
             && !items.iter().all(|r| match r {
                 Node::Ignored => true,

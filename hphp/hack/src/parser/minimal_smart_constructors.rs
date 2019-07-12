@@ -44,7 +44,7 @@ impl<'src> SmartConstructors<'src, NoState> for MinimalSmartConstructors {
 
     fn make_list(
         s: NoState,
-        lst: Box<Vec<Self::R>>,
+        lst: Vec<Self::R>,
         offset: usize,
     ) -> (NoState, Self::R) {
         <Self as SyntaxSmartConstructors<'src, MinimalSyntax, NoState>>::make_list(s, lst, offset)

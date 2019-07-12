@@ -51,7 +51,7 @@ impl<'src, State: StateType<'src, PositionedSyntax>> SmartConstructors<'src, Sta
 
     fn make_list(
         s: State::T,
-        lst: Box<Vec<Self::R>>,
+        lst: Vec<Self::R>,
         offset: usize,
     ) -> (State::T, Self::R) {
         <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_list(s, lst, offset)

@@ -46,13 +46,13 @@ where S: SmartConstructors<'src, State> {
         compose(SyntaxKind::Missing, S::make_missing(st, p))
     }
 
-    fn make_list(st: State, items: Box<Vec<Self::R>>, p: usize) -> (State, Self::R) {
+    fn make_list(st: State, items: Vec<Self::R>, p: usize) -> (State, Self::R) {
         let kind = if items.is_empty() {
             SyntaxKind::Missing
         } else {
             SyntaxKind::SyntaxList
         };
-        compose(kind, S::make_list(st, Box::new(items.into_iter().map(|x| x.1).collect()), p))
+        compose(kind, S::make_list(st, items.into_iter().map(|x| x.1).collect(), p))
     }
 
     fn make_end_of_file(st: State, arg0 : Self::R) -> (State, Self::R) {

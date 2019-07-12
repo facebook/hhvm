@@ -405,7 +405,7 @@ where
         if parts.len() == 0 {
             (name_token_opt.unwrap(), is_backslash)
         } else {
-            let list_node = S!(make_list, self, Box::new(parts), self.pos());
+            let list_node = S!(make_list, self, parts, self.pos());
             let name = S!(make_qualified_name, self, list_node);
             (name, is_backslash)
         }
@@ -415,7 +415,7 @@ where
         let head = S!(make_list_item, self, missing, backslash);
         let parts = vec![head];
         let (parts, _, is_backslash) = self.scan_qualified_name_worker(None, parts, false);
-        let list_node = S!(make_list, self, Box::new(parts), self.pos());
+        let list_node = S!(make_list, self, parts, self.pos());
         let name = S!(make_qualified_name, self, list_node);
         (name, is_backslash)
     }
@@ -486,7 +486,7 @@ where
             let empty1 = S!(make_missing, self, self.pos());
             let empty2 = S!(make_missing, self, self.pos());
             let es = S!(make_expression_statement, self, empty1, empty2);
-            S!(make_list, self, Box::new(vec![es]), self.pos())
+            S!(make_list, self, vec![es], self.pos())
         } else {
             self.continue_from(parser1);
             block
@@ -807,7 +807,7 @@ where
             }
         }
         let no_arg_is_missing = items.iter().all(|x| !x.is_missing());
-        let item_list = S!(make_list, self, Box::new(items), self.pos());
+        let item_list = S!(make_list, self, items, self.pos());
         (item_list, no_arg_is_missing)
     }
 
@@ -829,7 +829,7 @@ where
                 }
             }
         }
-        S!(make_list, self, Box::new(acc), self.pos())
+        S!(make_list, self, acc, self.pos())
     }
 
     fn parse_separated_list_opt_predicate(
@@ -1141,7 +1141,7 @@ where
                 items.push(result)
             }
         }
-        S!(make_list, self, Box::new(items), self.pos())
+        S!(make_list, self, items, self.pos())
     }
 
     fn parse_terminated_list(

@@ -49,7 +49,7 @@ where
 
     fn make_list(
         s: Vec<bool>,
-        items: Box<Vec<Self::R>>,
+        items: Vec<Self::R>,
         offset: usize,
     ) -> (Vec<bool>, Self::R) {
         <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_list(s, items, offset)

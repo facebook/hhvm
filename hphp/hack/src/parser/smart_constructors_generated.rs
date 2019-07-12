@@ -28,7 +28,7 @@ pub trait SmartConstructors<'src, State> {
 
     fn make_missing(st: State, offset : usize) -> (State, Self::R);
     fn make_token(st: State, arg0: Self::Token) -> (State, Self::R);
-    fn make_list(st: State, arg0: Box<Vec<Self::R>>, offset: usize) -> (State, Self::R);
+    fn make_list(st: State, arg0: Vec<Self::R>, offset: usize) -> (State, Self::R);
     fn make_end_of_file(st: State, arg0 : Self::R) -> (State, Self::R);
     fn make_script(st: State, arg0 : Self::R) -> (State, Self::R);
     fn make_qualified_name(st: State, arg0 : Self::R) -> (State, Self::R);

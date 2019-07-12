@@ -1082,7 +1082,7 @@ where
         let results = if acc.len() == 1 {
             acc.pop().unwrap()
         } else {
-            S!(make_list, self, Box::new(acc), self.pos())
+            S!(make_list, self, acc, self.pos())
         };
         S!(make_literal_expression, self, results)
     }

@@ -553,7 +553,7 @@ SYNTAX_CHILDREN
 pub enum SyntaxVariant<T, V> {
     Token(Box<T>),
     Missing,
-    SyntaxList(Box<Vec<Syntax<T, V>>>),
+    SyntaxList(Vec<Syntax<T, V>>),
 SYNTAX_VARIANT}
 "
   let full_fidelity_syntax = Full_fidelity_schema.make_template_file
@@ -834,7 +834,7 @@ pub trait SmartConstructors<'src, State> {
 
     fn make_missing(st: State, offset : usize) -> (State, Self::R);
     fn make_token(st: State, arg0: Self::Token) -> (State, Self::R);
-    fn make_list(st: State, arg0: Box<Vec<Self::R>>, offset: usize) -> (State, Self::R);
+    fn make_list(st: State, arg0: Vec<Self::R>, offset: usize) -> (State, Self::R);
 MAKE_METHODS
 }
 "
@@ -887,7 +887,7 @@ impl<'src> SmartConstructors<'src, NoState> for MinimalSmartConstructors {
 
     fn make_list(
         s: NoState,
-        lst: Box<Vec<Self::R>>,
+        lst: Vec<Self::R>,
         offset: usize,
     ) -> (NoState, Self::R) {
         <Self as SyntaxSmartConstructors<'src, MinimalSyntax, NoState>>::make_list(s, lst, offset)
@@ -951,7 +951,7 @@ impl<'src, State: StateType<'src, PositionedSyntax>> SmartConstructors<'src, Sta
 
     fn make_list(
         s: State::T,
-        lst: Box<Vec<Self::R>>,
+        lst: Vec<Self::R>,
         offset: usize,
     ) -> (State::T, Self::R) {
         <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_list(s, lst, offset)
@@ -1012,7 +1012,7 @@ where
 
     fn make_list(
         s: Bool<'src>,
-        lst: Box<Vec<Self::R>>,
+        lst: Vec<Self::R>,
         offset: usize,
     ) -> (Bool<'src>, Self::R) {
         <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_list(s, lst, offset)
@@ -1310,7 +1310,7 @@ where
         (State::next(s, vec![]), Self::R::make_token(arg))
     }
 
-    fn make_list(s: State::T, items: Box<Vec<Self::R>>, offset: usize) -> (State::T, Self::R) {
+    fn make_list(s: State::T, items: Vec<Self::R>, offset: usize) -> (State::T, Self::R) {
         if items.is_empty() {
             <Self as SyntaxSmartConstructors<'src, S, State>>::make_missing(s, offset)
         } else {
@@ -1380,7 +1380,7 @@ where
 
     fn make_list(
         s: Vec<bool>,
-        items: Box<Vec<Self::R>>,
+        items: Vec<Self::R>,
         offset: usize,
     ) -> (Vec<bool>, Self::R) {
         <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_list(s, items, offset)
@@ -1483,7 +1483,7 @@ pub trait FlattenSmartConstructors<'src, State>
         (s, Self::zero())
     }
 
-    fn make_list(s: State, _: Box<Vec<Self::R>>, _: usize) -> (State, Self::R) {
+    fn make_list(s: State, _: Vec<Self::R>, _: usize) -> (State, Self::R) {
         (s, Self::zero())
     }
 
@@ -1538,7 +1538,7 @@ impl<'src> SmartConstructors<'src, HasScriptContent<'src>> for FactsSmartConstru
 
     fn make_list(
         s: HasScriptContent<'src>,
-        items: Box<Vec<Self::R>>,
+        items: Vec<Self::R>,
         offset: usize,
     ) -> (HasScriptContent<'src>, Self::R) {
         <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_list(s, items, offset)
@@ -1698,13 +1698,13 @@ where S: SmartConstructors<'src, State> {
         compose(SyntaxKind::Missing, S::make_missing(st, p))
     }
 
-    fn make_list(st: State, items: Box<Vec<Self::R>>, p: usize) -> (State, Self::R) {
+    fn make_list(st: State, items: Vec<Self::R>, p: usize) -> (State, Self::R) {
         let kind = if items.is_empty() {
             SyntaxKind::Missing
         } else {
             SyntaxKind::SyntaxList
         };
-        compose(kind, S::make_list(st, Box::new(items.into_iter().map(|x| x.1).collect()), p))
+        compose(kind, S::make_list(st, items.into_iter().map(|x| x.1).collect(), p))
     }
 
 CONSTRUCTOR_METHODS

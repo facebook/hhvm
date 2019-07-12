@@ -3390,58 +3390,6 @@ let bad_xhp_attr_required_override parent_tag child_tag parent_pos child_pos =
     parent_pos, "The attribute is " ^ parent_tag ^ ", which is stricter than " ^ child_tag;
   ]
 
-let invalid_truthiness_test pos ty =
-  add (Typing.err_code Typing.InvalidTruthinessTest) pos @@
-    Printf.sprintf
-      "Invalid condition: a value of type %s will always be truthy" ty
-
-let invalid_truthiness_test_falsy pos ty =
-  add (Typing.err_code Typing.InvalidTruthinessTest) pos @@
-    Printf.sprintf
-      "Invalid condition: a value of type %s will always be falsy" ty
-
-let sketchy_truthiness_test pos ty truthiness =
-  add (Typing.err_code Typing.SketchyTruthinessTest) pos @@
-    match truthiness with
-    | `String ->
-      Printf.sprintf
-        "Sketchy condition: testing the truthiness of %s may not behave as expected.\n\
-        The values '' and '0' are both considered falsy. \
-        To check for emptiness, use Str\\is_empty."
-        ty
-    | `Arraykey ->
-      Printf.sprintf
-        "Sketchy condition: testing the truthiness of %s may not behave as expected.\n\
-        The values 0, '', and '0' are all considered falsy. \
-        Test for them explicitly."
-        ty
-    | `Stringish ->
-      Printf.sprintf
-        "Sketchy condition: testing the truthiness of a %s may not behave as expected.\n\
-        The values '' and '0' are both considered falsy, \
-        but objects will be truthy even if their __toString returns '' or '0'.\n\
-        To check for emptiness, convert to a string and use Str\\is_empty."
-        ty
-    | `XHPChild ->
-      Printf.sprintf
-        "Sketchy condition: testing the truthiness of an %s may not behave as expected.\n\
-        The values '' and '0' are both considered falsy, \
-        but objects (including XHP elements) will be truthy \
-        even if their __toString returns '' or '0'."
-        ty
-    | `Traversable ->
-      (* We have a truthiness test on a value with an interface type which is a
-         subtype of Traversable, but not a subtype of Container.
-         Since the runtime value may be a falsy-when-empty Container or an
-         always-truthy Iterable/Generator, we forbid the test. *)
-      Printf.sprintf
-        "Sketchy condition: a value of type %s may be truthy even when empty.\n\
-        Hack collections and arrays are falsy when empty, but user-defined \
-        Traversables will always be truthy, even when empty.\n\
-        If you would like to only allow containers which are falsy \
-        when empty, use the Container or KeyedContainer interfaces."
-        ty
-
 let invalid_switch_case_value_type case_value_p case_value_ty scrutinee_ty =
   add (Typing.err_code Typing.InvalidSwitchCaseValueType) case_value_p @@
     Printf.sprintf

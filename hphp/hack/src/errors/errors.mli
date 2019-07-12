@@ -519,9 +519,6 @@ val shape_access_with_non_existent_field :
   Pos.t -> string -> Pos.t -> [< `Undefined | `Nothing of (Pos.t * string) list] -> unit
 val ambiguous_object_access :
   Pos.t -> string -> Pos.t -> string -> Pos.t -> string -> string -> unit
-val invalid_truthiness_test : Pos.t -> string -> unit
-val invalid_truthiness_test_falsy : Pos.t -> string -> unit
-val sketchy_truthiness_test : Pos.t -> string -> [< `String | `Arraykey | `Stringish | `XHPChild | `Traversable ] -> unit
 val unserializable_type : Pos.t -> string -> unit
 val invalid_arraykey : Pos.t -> Pos.t * string -> Pos.t * string -> unit
 val invalid_arraykey_constraint : Pos.t -> string -> unit

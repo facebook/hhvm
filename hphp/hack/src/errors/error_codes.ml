@@ -518,10 +518,10 @@ module Typing                               = struct
   | InvalidUnsetTargetInRx
   | CoroutineOutsideExperimental
   | PPLMethPointer
-  | InvalidTruthinessTest
+  | InvalidTruthinessTestDEPRECATED
   | RePrefixedNonString
   | BadRegexPattern
-  | SketchyTruthinessTest
+  | SketchyTruthinessTestDEPRECATED
   | LateInitWithDefault
   | OverrideMemoizeLSB
   | ClassVarTypeGenericParam

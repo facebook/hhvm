@@ -75,6 +75,14 @@ template<typename T>
 Vptr emitTLSAddr(Vout& v, TLSDatum<T> datum);
 
 /*
+ * Like emitTLSAddr, but turns the address into a Vreg. You cannot necessarily
+ * just use a lea on the output of emitTLSAddr because of potential segment
+ * register issues.
+ */
+template<typename T>
+Vreg emitTLSLea(Vout& v, TLSDatum<T> datum);
+
+/*
  * Load the value of the ThreadLocalNoCheck `datum' into `d'.
  */
 template<typename T>

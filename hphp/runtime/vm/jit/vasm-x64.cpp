@@ -139,8 +139,8 @@ struct Vgen {
   void emit(const addlim& i);
   void emit(addq i) { commuteSF(i); a.addq(i.s0, i.d); }
   void emit(addqi i) { binary(i); a.addq(i.s0, i.d); }
-  void emit(const addqmr& i) { binary(i); a.addq(i.m, i.d); }
-  void emit(const addqrm& i) { a.addq(i.s1, i.m); }
+  void emit(const addqmr& i);
+  void emit(const addqrm& i);
   void emit(const addqim& i);
   void emit(addsd i) { commute(i); a.addsd(i.s0, i.d); }
   void emit(const cloadq& i);
@@ -151,8 +151,8 @@ struct Vgen {
   void emit(const cmovq& i) { emit_cmov(i); }
   void emit(const cmpb& i) { a.cmpb(i.s0, i.s1); }
   void emit(const cmpbi& i) { a.cmpb(i.s0, i.s1); }
-  void emit(const cmpbim& i) { a.cmpb(i.s0, i.s1); }
-  void emit(const cmpbm& i) { a.cmpb(i.s0, i.s1); }
+  void emit(const cmpbim& i) { a.prefix(i.s1.mr()).cmpb(i.s0, i.s1); }
+  void emit(const cmpbm& i) { a.prefix(i.s1.mr()).cmpb(i.s0, i.s1); }
   void emit(const cmpw& i) { a.cmpw(i.s0, i.s1); }
   void emit(const cmpwi& i) { a.cmpw(i.s0, i.s1); }
   void emit(const cmpwim& i) { a.cmpw(i.s0, i.s1); }
@@ -609,6 +609,8 @@ void Vgen<X64Asm>::emit(const load& i) {
 
 template<class X64Asm>
 void Vgen<X64Asm>::emit(const store& i) {
+  auto const mref = i.d.mr();
+  a.prefix(mref);
   if (i.s.isGP()) {
     a.storeq(i.s, i.d);
   } else {
@@ -784,6 +786,19 @@ template<class X64Asm>
 void Vgen<X64Asm>::emit(const addlim& i) {
   auto mref = i.m.mr();
   a.prefix(mref).addl(i.s0, mref);
+}
+
+template<typename X64Asm>
+void Vgen<X64Asm>::emit(const addqmr& i) {
+  binary(i);
+  auto const mref = i.m.mr();
+  a.prefix(mref).addq(mref, i.d);
+}
+
+template<typename X64Asm>
+void Vgen<X64Asm>::emit(const addqrm& i) {
+  auto const mref = i.m.mr();
+  a.prefix(mref).addq(i.s1, mref);
 }
 
 template<class X64Asm>

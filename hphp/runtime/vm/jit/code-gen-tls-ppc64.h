@@ -40,6 +40,13 @@ Vptr emitTLSAddr(Vout& /*v*/, TLSDatum<T> datum) {
   return rthreadptr()[vaddr];
 }
 
+template<typename T>
+Vreg emitTLSLea(Vout& v, TLSDatum<T> datum) {
+  auto const b = v.makeReg();
+  v << lea{detail::emitTLSAddr(v, datum), b};
+  return b;
+}
+
 }}}}
 
 #endif

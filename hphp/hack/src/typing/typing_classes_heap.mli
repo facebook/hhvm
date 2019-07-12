@@ -41,7 +41,9 @@ module Api : sig
   val tparams               : t -> decl tparam list
   val where_constraints     : t -> decl where_constraint list
   val upper_bounds_on_this  : t -> decl ty Sequence.t
+  val upper_bounds_on_this_from_constraints  : t -> decl ty Sequence.t
   val lower_bounds_on_this  : t -> decl ty Sequence.t
+  val lower_bounds_on_this_from_constraints  : t -> decl ty Sequence.t
   val construct             : t -> class_elt option * consistent_kind
   val enum_type             : t -> enum_type option
   val sealed_whitelist      : t -> SSet.t option

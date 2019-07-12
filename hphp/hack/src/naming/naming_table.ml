@@ -174,6 +174,7 @@ type save_result = {
 let empty_save_result = { rows_deleted = 0; files_added = 0; symbols_added = 0; }
 
 module Sqlite : sig
+  val get_db_path : unit -> string option
   val set_db_path : string -> unit
   val is_connected : unit -> bool
   val save_file_infos : string -> FileInfo.t Relative_path.Map.t -> save_result
@@ -547,6 +548,7 @@ end = struct
 
 
   module Database_handle : sig
+    val get_db_path : unit -> string option
     val set_db_path : string -> unit
     val is_connected : unit -> bool
     val get_db : unit -> Sqlite3.db option
@@ -571,6 +573,9 @@ end = struct
         Some db
 
     let db = ref (lazy (open_db ()))
+
+    let get_db_path (): string option =
+      Shared_db_settings.get "database_path"
 
     let set_db_path path =
       Shared_db_settings.remove_batch (SSet.singleton "database_path");
@@ -623,6 +628,7 @@ end = struct
     in
     symbols_inserted
 
+  let get_db_path = Database_handle.get_db_path
   let set_db_path = Database_handle.set_db_path
   let is_connected = Database_handle.is_connected
 
@@ -1250,6 +1256,13 @@ let load_from_sqlite ~update_reverse_entries db_path =
   end;
   Backed local_changes
 
+let get_reverse_naming_fallback_path (): string option =
+  Sqlite.get_db_path ()
+
+let get_forward_naming_fallback_path a: string option =
+  match a with
+  | Unbacked _ -> None
+  | Backed _ -> Sqlite.get_db_path ()
 
 (*****************************************************************************)
 (* Testing functions *)

@@ -94,13 +94,13 @@ let run_naming_table_test f =
       (Naming_table.save unbacked_naming_table db_name)
       "Expected to add eight rows (four files and four symbols)";
     let backed_naming_table = Naming_table.load_from_sqlite ~update_reverse_entries:false db_name in
-    f ~unbacked_naming_table ~backed_naming_table;
+    f ~unbacked_naming_table ~backed_naming_table ~db_name;
     true
   end
 
 
 let test_get_pos () =
-  run_naming_table_test begin fun ~unbacked_naming_table:_ ~backed_naming_table:_ ->
+  run_naming_table_test begin fun ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_->
     Types_pos_asserter.assert_option_equals
       (Some (
         FileInfo.File (FileInfo.Class, Relative_path.from_root "foo.php"),
@@ -124,7 +124,7 @@ let test_get_pos () =
 end
 
 let test_get_canon_name () =
-  run_naming_table_test begin fun ~unbacked_naming_table:_ ~backed_naming_table:_ ->
+  run_naming_table_test begin fun ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
     (* Since we're parsing but not naming, the canon heap must fall back to the
        files on disk, which is the situation we'd be in when loading from a
        saved state. *)
@@ -143,7 +143,7 @@ let test_get_canon_name () =
 end
 
 let test_remove () =
-  run_naming_table_test begin fun ~unbacked_naming_table ~backed_naming_table ->
+  run_naming_table_test begin fun ~unbacked_naming_table ~backed_naming_table ~db_name:_ ->
     let foo_path = Relative_path.from_root "foo.php" in
     assert (Naming_table.get_file_info unbacked_naming_table foo_path |> Option.is_some);
     let unbacked_naming_table = Naming_table.remove unbacked_naming_table foo_path in
@@ -154,9 +154,23 @@ let test_remove () =
     assert (Naming_table.get_file_info backed_naming_table foo_path |> Option.is_none)
   end
 
+let test_get_sqlite_paths () =
+  run_naming_table_test begin fun ~unbacked_naming_table:_ ~backed_naming_table ~db_name ->
+    Asserter.String_asserter.assert_option_equals
+      (Some db_name)
+      (Naming_table.get_reverse_naming_fallback_path ())
+      "get_reverse_naming_fallback_path should return the expected value";
+
+    Asserter.String_asserter.assert_option_equals
+      (Some db_name)
+      (Naming_table.get_forward_naming_fallback_path backed_naming_table)
+      "get_forward_naming_fallback_path should return the expected value"
+end
+
 let () =
   Unit_test.run_all [
     ("test_get_pos", test_get_pos);
     ("test_get_canon_name", test_get_canon_name);
     ("test_remove", test_remove);
+    ("test_get_sqlite_paths", test_get_sqlite_paths);
   ]

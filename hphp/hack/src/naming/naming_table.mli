@@ -45,6 +45,13 @@ val save_incremental : t -> string -> unit
 val create : FileInfo.t Relative_path.Map.t -> t
 val load_from_sqlite : update_reverse_entries:bool -> string -> t
 
+(* The path to the table's SQLite database mapping filenames to symbol names, if any *)
+val get_forward_naming_fallback_path : t -> string option
+
+(* The path to the table's SQLite database mapping symbol names to filenames, if any.
+    Analogous to SharedMem.loaded_dep_table_filename *)
+val get_reverse_naming_fallback_path : unit -> string option
+
 (* Converting between different types of forward naming tables. *)
 val from_saved : saved_state_info -> t
 val to_saved : t -> saved_state_info

@@ -63,7 +63,7 @@ struct LexerCache<Token>(LexerPreSnapshot, Token, LexerPostSnapshot);
 
 #[derive(Debug, Clone)]
 pub struct Lexer<'a, Token: LexableToken> {
-    source: &'a SourceText<'a>,
+    source: SourceText<'a>,
     start: usize,
     offset: usize,
     errors: Vec<SyntaxError>,
@@ -104,9 +104,9 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         }
     }
 
-    pub fn make_at(source: &'a SourceText<'a>, is_experimental_mode: bool, offset: usize) -> Self {
+    pub fn make_at(source: &SourceText<'a>, is_experimental_mode: bool, offset: usize) -> Self {
         Self {
-            source,
+            source: *source,
             start: offset,
             offset,
             errors: vec![],
@@ -116,7 +116,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         }
     }
 
-    pub fn make(source: &'a SourceText<'a>, is_experimental_mode: bool) -> Self {
+    pub fn make(source: &SourceText<'a>, is_experimental_mode: bool) -> Self {
         Self::make_at(source, is_experimental_mode, 0)
     }
 
@@ -174,7 +174,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     }
 
     pub fn source(&self) -> &SourceText<'a> {
-        self.source
+        &self.source
     }
 
     fn source_text_string(&self) -> &[u8] {

@@ -35,7 +35,6 @@ type t = {
   option_include_search_paths             : string list;
   option_include_roots                    : string SMap.t;
   option_enable_perf_logging              : bool;
-  option_enable_reified_generics          : bool;
   option_enable_intrinsics_extension      : bool;
   option_enable_hhjs                      : bool;
   option_dump_hhjs                        : bool;
@@ -90,7 +89,6 @@ let default = {
   option_include_search_paths = [];
   option_include_roots = SMap.empty;
   option_enable_perf_logging = false;
-  option_enable_reified_generics = true;
   option_enable_intrinsics_extension = false;
   option_enable_hhjs = false;
   option_dump_hhjs = false;
@@ -142,7 +140,6 @@ let doc_root o = o.option_doc_root
 let include_search_paths o = o.option_include_search_paths
 let include_roots o = o.option_include_roots
 let enable_perf_logging o = o.option_enable_perf_logging
-let enable_reified_generics o = o.option_enable_reified_generics
 let enable_intrinsics_extension o = o.option_enable_intrinsics_extension
 let enable_hhjs o = o.option_enable_hhjs
 let dump_hhjs o = o.option_dump_hhjs
@@ -279,8 +276,6 @@ let set_option options name value =
     { options with option_php7_int_semantics = as_bool value }
   | "hack.lang.enablecoroutines" ->
     { options with option_enable_coroutines = as_bool value }
-  | "hack.lang.enablereifiedgenerics" ->
-    { options with option_enable_reified_generics = as_bool value }
   | "hack.lang.hacksperimental" ->
     { options with option_hacksperimental = as_bool value }
   | "eval.logexterncompilerperf" ->
@@ -433,8 +428,6 @@ let value_setters = [
     fun opts v -> { opts with option_enable_coroutines = (v = 1) });
   (set_value "hhvm.hack.lang.hacksperimental" get_value_from_config_int @@
     fun opts v -> { opts with option_hacksperimental = (v = 1) });
-  (set_value "hhvm.hack.lang.enable_reified_generics" get_value_from_config_int @@
-    fun opts v -> { opts with option_enable_reified_generics = (v = 1) });
   (set_value "hhvm.hack.lang.disable_lval_as_an_expression" get_value_from_config_int @@
     fun opts v -> { opts with option_disable_lval_as_an_expression = (v = 1) });
   (set_value "hhvm.hack.lang.enable_pocket_universes" get_value_from_config_int @@

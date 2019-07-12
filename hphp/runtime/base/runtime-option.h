@@ -83,7 +83,6 @@ struct RepoOptions {
   P(bool,           LTRAssign,                      s_PHP7_master)    \
   H(bool,           EnableCoroutines,               true)             \
   H(bool,           Hacksperimental,                false)            \
-  H(bool,           EnableReifiedGenerics,          true)             \
   H(bool,           DisableLvalAsAnExpression,      false)            \
   H(bool,           HackCompilerUseRustParser,      false)            \
   E(bool,           CreateInOutWrapperFunctions,    true)             \

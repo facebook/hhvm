@@ -278,10 +278,6 @@ let hack_arr_dv_arrs () =
 let php7_ltr_assign () =
   Hhbc_options.php7_ltr_assign !Hhbc_options.compiler_options
 
-let reified_generics () =
-  Hhbc_options.enable_reified_generics !Hhbc_options.compiler_options ||
-  Emit_env.is_systemlib ()
-
 (* Strict binary operations; assumes that operands are already on stack *)
 let from_binop op =
   match op with
@@ -2908,9 +2904,6 @@ and emit_reified_arg env ~isas pos (hint : Aast.hint) =
   end in
   visitor#on_hint () hint;
   let count, targ_map = !acc in
-  if count > 0 && not @@ reified_generics ()
-  then Emit_fatal.raise_fatal_parse Pos.none "Reified generics are not allowed"
-  else
   match snd hint with
   | Aast.Happly ((_, name), []) when SMap.mem name current_targs ->
     emit_reified_type env pos name, false

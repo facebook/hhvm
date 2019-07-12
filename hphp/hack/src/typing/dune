@@ -211,6 +211,7 @@
     heap_global_storage
     procs_bucket
     server_monitor
+    shared_lru_stubs
     typing
     typing_defs))
 

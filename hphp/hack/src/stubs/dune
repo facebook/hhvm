@@ -72,3 +72,9 @@
   (modules
     rust_parser_ffi
     rust_lazy_trivia_ffi))
+
+(library
+  (name shared_lru_stubs)
+  (wrapped false)
+  (modules
+    shared_lru))

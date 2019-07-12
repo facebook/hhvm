@@ -1065,7 +1065,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     Hh_logger.log "Total: %f\n%!" (t -. start_t);
 
     (* INVALIDATE FILES (EXPERIMENTAL TYPES IN CODEGEN) **********************)
-    ServerInvalidateUnits.go genv env fast fast_parsed naming_table;
+    ServerInvalidateUnits.go genv fast fast_parsed naming_table;
 
     let env =
       CheckKind.get_env_after_typing env errors needs_phase2_redecl

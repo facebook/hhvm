@@ -245,13 +245,6 @@ type t = {
   (* Disallow using non-string, non-int types as array key type constraints. *)
   tco_disallow_invalid_arraykey_constraint : bool;
 
-  (* This tells the type checker to try to invalidate files in HHVM's hhbc cache *)
-  tico_invalidate_files : bool;
-
-  (* When invalidating files, the type checker will use hh_server's calculated
-     dependencies as opposed to file level dependencies *)
-  tico_invalidate_smart : bool;
-
   (* Enable constants to have visibility modifiers *)
   po_enable_constant_visibility_modifiers : bool;
 
@@ -318,8 +311,6 @@ val make :
   ?tco_check_xhp_attribute: bool ->
   ?tco_disallow_unresolved_type_variables: bool ->
   ?tco_disallow_invalid_arraykey_constraint: bool ->
-  ?tico_invalidate_files: bool ->
-  ?tico_invalidate_smart: bool ->
   ?po_enable_constant_visibility_modifiers: bool ->
   ?po_enable_class_level_where_clauses: bool ->
   ?po_disable_legacy_soft_typehints: bool ->
@@ -402,8 +393,6 @@ val error_codes_treated_strictly : t -> ISet.t
 val tco_check_xhp_attribute : t -> bool
 val tco_disallow_unresolved_type_variables : t -> bool
 val tco_disallow_invalid_arraykey_constraint : t -> bool
-val tico_invalidate_files : t -> bool
-val tico_invalidate_smart : t -> bool
 val po_enable_constant_visibility_modifiers : t -> bool
 val po_enable_class_level_where_clauses : t -> bool
 val po_disable_legacy_soft_typehints : t -> bool

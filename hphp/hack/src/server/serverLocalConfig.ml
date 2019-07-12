@@ -102,6 +102,9 @@ type t = {
   symbolindex_search_provider : string;
   symbolindex_quiet : bool;
   symbolindex_file : string option;
+  (* Allows hh_server to invalidate units in hhvm based on local changes *)
+  tico_invalidate_files : bool;
+  tico_invalidate_smart : bool; (* Use finer grain hh_server dependencies *)
   (* Use rust parser *)
   rust : bool;
   (* Use shared_lru workers *)
@@ -167,6 +170,8 @@ let default = {
   symbolindex_search_provider = "TrieIndex";
   symbolindex_quiet = false;
   symbolindex_file = None;
+  tico_invalidate_files = false;
+  tico_invalidate_smart = false;
   rust = false;
   use_lru_workers = false;
 }
@@ -328,6 +333,10 @@ let load_ fn ~silent overrides =
   let symbolindex_quiet = bool_ "symbolindex_quiet"
       ~default:default.symbolindex_quiet config in
   let symbolindex_file = string_opt "symbolindex_file" config in
+  let tico_invalidate_files = bool_ "tico_invalidate_files"
+    ~default:default.tico_invalidate_files config in
+  let tico_invalidate_smart = bool_ "tico_invalidate_smart"
+    ~default:default.tico_invalidate_smart config in
   let rust = bool_if_version "rust"
       ~default:default.rust config in
   let use_lru_workers = bool_if_version "use_lru_workers"
@@ -390,6 +399,8 @@ let load_ fn ~silent overrides =
     symbolindex_search_provider;
     symbolindex_quiet;
     symbolindex_file;
+    tico_invalidate_files;
+    tico_invalidate_smart;
     rust;
     use_lru_workers;
   }

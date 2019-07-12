@@ -29,12 +29,12 @@ use crate::syntax_kind::SyntaxKind;
 pub struct WithKind<S> {
     phantom_s: std::marker::PhantomData<S>,
 }
-impl<'a, S, State> SmartConstructors<'a, State> for WithKind<S>
-where S: SmartConstructors<'a, State> {
+impl<'src, S, State> SmartConstructors<'src, State> for WithKind<S>
+where S: SmartConstructors<'src, State> {
     type Token = S::Token;
     type R = (SyntaxKind, S::R);
 
-    fn initial_state<'b: 'a>(env: &ParserEnv, src: &'b SourceText<'b>) -> State {
+    fn initial_state(env: &ParserEnv, src: &SourceText<'src>) -> State {
         S::initial_state(env, src)
     }
 

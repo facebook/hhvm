@@ -6,7 +6,7 @@
 
 pub const INVALID: char = '\x00';
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct SourceText<'a> {
     // All the indices in existing implementation are byte based, instead of unicode
     // char boundary based. This is bad experience for non-ASCII source files, but don't want to

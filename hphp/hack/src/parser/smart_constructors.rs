@@ -30,17 +30,17 @@ macro_rules! S {
     }}
 }
 
-pub trait StateType<'a, R> {
+pub trait StateType<'src, R> {
     type T;
-    fn initial<'b: 'a>(env: &ParserEnv, source_text: &'b SourceText<'b>) -> Self::T;
+    fn initial(env: &ParserEnv, source_text: &SourceText<'src>) -> Self::T;
     fn next(t: Self::T, inputs: Vec<&R>) -> Self::T;
 }
 
 #[derive(Clone)]
 pub struct NoState; // zero-overhead placeholder when there is no state
-impl<'a, R> StateType<'a, R> for NoState {
+impl<'src, R> StateType<'src, R> for NoState {
     type T = NoState;
-    fn initial<'b: 'a>(_env: &ParserEnv, _: &'b SourceText<'b>) -> Self::T {
+    fn initial(_env: &ParserEnv, _: &SourceText<'src>) -> Self::T {
         NoState {}
     }
     fn next(t: Self::T, _inputs: Vec<&R>) -> Self::T {

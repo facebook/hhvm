@@ -826,11 +826,11 @@ use crate::lexable_token::LexableToken;
 use crate::parser_env::ParserEnv;
 use crate::source_text::SourceText;
 
-pub trait SmartConstructors<'a, State> {
+pub trait SmartConstructors<'src, State> {
     type Token: LexableToken;
     type R;
 
-    fn initial_state<'b: 'a>(env: &ParserEnv, src: &'b SourceText<'b>) -> State;
+    fn initial_state(env: &ParserEnv, src: &SourceText<'src>) -> State;
 
     fn make_missing(st: State, offset : usize) -> (State, Self::R);
     fn make_token(st: State, arg0: Self::Token) -> (State, Self::R);
@@ -854,7 +854,7 @@ module GenerateFFRustMinimalSmartConstructors = struct
     let fwd_args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
     let fwd_args = String.concat ~sep:", " fwd_args in
     sprintf "    fn make_%s(s: NoState, %s) -> (NoState, Self::R) {
-        <Self as SyntaxSmartConstructors<'a, MinimalSyntax, NoState>>::make_%s(s, %s)
+        <Self as SyntaxSmartConstructors<'src, MinimalSyntax, NoState>>::make_%s(s, %s)
     }\n\n"
       x.type_name args x.type_name fwd_args
 
@@ -867,22 +867,22 @@ use crate::source_text::SourceText;
 use crate::syntax_smart_constructors::SyntaxSmartConstructors;
 
 pub struct MinimalSmartConstructors;
-impl<'a> SyntaxSmartConstructors<'a, MinimalSyntax, NoState>
+impl<'src> SyntaxSmartConstructors<'src, MinimalSyntax, NoState>
     for MinimalSmartConstructors {}
-impl<'a> SmartConstructors<'a, NoState> for MinimalSmartConstructors {
+impl<'src> SmartConstructors<'src, NoState> for MinimalSmartConstructors {
     type Token = MinimalToken;
     type R = MinimalSyntax;
 
-    fn initial_state<'b: 'a>(env: &ParserEnv, src: &'b SourceText<'b>) -> NoState {
-        <Self as SyntaxSmartConstructors<'a, MinimalSyntax, NoState>>::initial_state(env, src)
+    fn initial_state(env: &ParserEnv, src: &SourceText<'src>) -> NoState {
+        <Self as SyntaxSmartConstructors<'src, MinimalSyntax, NoState>>::initial_state(env, src)
     }
 
     fn make_missing(s: NoState, offset: usize) -> (NoState, Self::R) {
-       <Self as SyntaxSmartConstructors<'a, MinimalSyntax, NoState>>::make_missing(s, offset)
+       <Self as SyntaxSmartConstructors<'src, MinimalSyntax, NoState>>::make_missing(s, offset)
     }
 
     fn make_token(s: NoState, offset: Self::Token) -> (NoState, Self::R) {
-       <Self as SyntaxSmartConstructors<'a, MinimalSyntax, NoState>>::make_token(s, offset)
+       <Self as SyntaxSmartConstructors<'src, MinimalSyntax, NoState>>::make_token(s, offset)
     }
 
     fn make_list(
@@ -890,7 +890,7 @@ impl<'a> SmartConstructors<'a, NoState> for MinimalSmartConstructors {
         lst: Box<Vec<Self::R>>,
         offset: usize,
     ) -> (NoState, Self::R) {
-        <Self as SyntaxSmartConstructors<'a, MinimalSyntax, NoState>>::make_list(s, lst, offset)
+        <Self as SyntaxSmartConstructors<'src, MinimalSyntax, NoState>>::make_list(s, lst, offset)
     }
 
 CONSTRUCTOR_METHODS}
@@ -911,7 +911,7 @@ module GenerateFFRustPositionedSmartConstructors = struct
     let fwd_args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
     let fwd_args = String.concat ~sep:", " fwd_args in
     sprintf "    fn make_%s(s: State::T, %s) -> (State::T, Self::R) {
-        <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_%s(s, %s)
+        <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_%s(s, %s)
     }\n\n"
       x.type_name args x.type_name fwd_args
 
@@ -927,26 +927,26 @@ pub struct PositionedSmartConstructors<State = NoState> {
     phantom_state: std::marker::PhantomData<State>,
 }
 
-impl<'a, State: StateType<'a, PositionedSyntax>>
-SyntaxSmartConstructors<'a, PositionedSyntax, State>
+impl<'src, State: StateType<'src, PositionedSyntax>>
+SyntaxSmartConstructors<'src, PositionedSyntax, State>
     for PositionedSmartConstructors<State> {}
 
-impl<'a, State: StateType<'a, PositionedSyntax>> SmartConstructors<'a, State::T>
+impl<'src, State: StateType<'src, PositionedSyntax>> SmartConstructors<'src, State::T>
     for PositionedSmartConstructors<State>
 {
     type Token = PositionedToken;
     type R = PositionedSyntax;
 
-    fn initial_state<'b: 'a>(env: &ParserEnv, src: &'b SourceText<'b>) -> State::T {
-        <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::initial_state(env, src)
+    fn initial_state(env: &ParserEnv, src: &SourceText<'src>) -> State::T {
+        <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::initial_state(env, src)
     }
 
     fn make_missing(s: State::T, offset: usize) -> (State::T, Self::R) {
-       <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_missing(s, offset)
+       <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_missing(s, offset)
     }
 
     fn make_token(s: State::T, offset: Self::Token) -> (State::T, Self::R) {
-       <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_token(s, offset)
+       <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_token(s, offset)
     }
 
     fn make_list(
@@ -954,7 +954,7 @@ impl<'a, State: StateType<'a, PositionedSyntax>> SmartConstructors<'a, State::T>
         lst: Box<Vec<Self::R>>,
         offset: usize,
     ) -> (State::T, Self::R) {
-        <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_list(s, lst, offset)
+        <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_list(s, lst, offset)
     }
 
 CONSTRUCTOR_METHODS}
@@ -974,7 +974,7 @@ module GenerateFFRustCoroutineSmartConstructors = struct
     let args = String.concat ~sep:", " args in
     let fwd_args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
     let fwd_args = String.concat ~sep:", " fwd_args in
-    sprintf "    fn make_%s(s: Bool<'a>, %s) -> (Bool<'a>, Self::R) {
+    sprintf "    fn make_%s(s: Bool<'src>, %s) -> (Bool<'src>, Self::R) {
         <Self as SyntaxSmartConstructors<Self::R, State<Self::R>>>::make_%s(s, %s)
     }\n\n"
       x.type_name args x.type_name fwd_args
@@ -988,7 +988,7 @@ use crate::source_text::SourceText;
 use crate::syntax::*;
 use crate::syntax_smart_constructors::SyntaxSmartConstructors;
 
-impl<'a, S, Token, Value> SmartConstructors<'a, Bool<'a>>
+impl<'src, S, Token, Value> SmartConstructors<'src, Bool<'src>>
     for CoroutineSmartConstructors<S>
 where
     Token: LexableToken,
@@ -998,24 +998,24 @@ where
     type Token = Token;
     type R = S;
 
-    fn initial_state<'b: 'a>(env: &ParserEnv, src: &'b SourceText<'b>) -> Bool<'a> {
-        <Self as SyntaxSmartConstructors<'a, Self::R, State<Self::R>>>::initial_state(env, src)
+    fn initial_state(env: &ParserEnv, src: &SourceText<'src>) -> Bool<'src> {
+        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::initial_state(env, src)
     }
 
-    fn make_missing(s: Bool<'a>, offset: usize) -> (Bool<'a>, Self::R) {
-       <Self as SyntaxSmartConstructors<'a, Self::R, State<Self::R>>>::make_missing(s, offset)
+    fn make_missing(s: Bool<'src>, offset: usize) -> (Bool<'src>, Self::R) {
+       <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_missing(s, offset)
     }
 
-    fn make_token(s: Bool<'a>, offset: Self::Token) -> (Bool<'a>, Self::R) {
-       <Self as SyntaxSmartConstructors<'a, Self::R, State<Self::R>>>::make_token(s, offset)
+    fn make_token(s: Bool<'src>, offset: Self::Token) -> (Bool<'src>, Self::R) {
+       <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_token(s, offset)
     }
 
     fn make_list(
-        s: Bool<'a>,
+        s: Bool<'src>,
         lst: Box<Vec<Self::R>>,
         offset: usize,
-    ) -> (Bool<'a>, Self::R) {
-        <Self as SyntaxSmartConstructors<'a, Self::R, State<Self::R>>>::make_list(s, lst, offset)
+    ) -> (Bool<'src>, Self::R) {
+        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_list(s, lst, offset)
     }
 
 CONSTRUCTOR_METHODS}
@@ -1293,12 +1293,12 @@ use crate::smart_constructors::{NoState, SmartConstructors, StateType};
 use crate::source_text::SourceText;
 use crate::syntax::*;
 
-pub trait SyntaxSmartConstructors<'a, S: SyntaxType, State = NoState>:
-    SmartConstructors<'a, State::T, R=S, Token=S::Token>
+pub trait SyntaxSmartConstructors<'src, S: SyntaxType, State = NoState>:
+    SmartConstructors<'src, State::T, R=S, Token=S::Token>
 where
-    State: StateType<'a, S>,
+    State: StateType<'src, S>,
 {
-    fn initial_state<'b: 'a>(env: &ParserEnv, src: &'b SourceText<'b>) -> State::T {
+    fn initial_state(env: &ParserEnv, src: &SourceText<'src>) -> State::T {
         State::initial(env, src)
     }
 
@@ -1312,7 +1312,7 @@ where
 
     fn make_list(s: State::T, items: Box<Vec<Self::R>>, offset: usize) -> (State::T, Self::R) {
         if items.is_empty() {
-            <Self as SyntaxSmartConstructors<'a, S, State>>::make_missing(s, offset)
+            <Self as SyntaxSmartConstructors<'src, S, State>>::make_missing(s, offset)
         } else {
             let mut item_refs = Vec::with_capacity((*items).len());
             for item in items.iter() {
@@ -1342,7 +1342,7 @@ module GenerateFFRustDeclModeSmartConstructors = struct
     let fwd_args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
     let fwd_args = String.concat ~sep:", " fwd_args in
     sprintf "    fn make_%s(s: Vec<bool>, %s) -> (Vec<bool>, Self::R) {
-        <Self as SyntaxSmartConstructors<'a, Self::R, State<Self::R>>>::make_%s(s, %s)
+        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_%s(s, %s)
     }\n\n"
       x.type_name args x.type_name fwd_args
 
@@ -1356,8 +1356,8 @@ use crate::syntax::Syntax;
 use crate::syntax_smart_constructors::SyntaxSmartConstructors;
 use crate::syntax::SyntaxValueType;
 
-impl<'a, Token, Value>
-SmartConstructors<'a, <State<Syntax<Token, Value>> as StateType<'a, Syntax<Token, Value>>>::T>
+impl<'src, Token, Value>
+SmartConstructors<'src, <State<Syntax<Token, Value>> as StateType<'src, Syntax<Token, Value>>>::T>
     for DeclModeSmartConstructors<Token, Value>
 where
     Token: LexableToken,
@@ -1366,16 +1366,16 @@ where
     type Token = Token;
     type R = Syntax<Token, Value>;
 
-    fn initial_state<'b: 'a>(env: &ParserEnv, src: &'b SourceText<'b>) -> Vec<bool> {
-        <Self as SyntaxSmartConstructors<'a, Self::R, State<Self::R>>>::initial_state(env, src)
+    fn initial_state(env: &ParserEnv, src: &SourceText<'src>) -> Vec<bool> {
+        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::initial_state(env, src)
     }
 
     fn make_missing(s: Vec<bool>, o: usize) -> (Vec<bool>, Self::R) {
-        <Self as SyntaxSmartConstructors<'a, Self::R, State<Self::R>>>::make_missing(s, o)
+        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_missing(s, o)
     }
 
     fn make_token(s: Vec<bool>, token: Self::Token) -> (Vec<bool>, Self::R) {
-        <Self as SyntaxSmartConstructors<'a, Self::R, State<Self::R>>>::make_token(s, token)
+        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_token(s, token)
     }
 
     fn make_list(
@@ -1383,7 +1383,7 @@ where
         items: Box<Vec<Self::R>>,
         offset: usize,
     ) -> (Vec<bool>, Self::R) {
-        <Self as SyntaxSmartConstructors<'a, Self::R, State<Self::R>>>::make_list(s, items, offset)
+        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_list(s, items, offset)
     }
 
 CONSTRUCTOR_METHODS}
@@ -1472,8 +1472,8 @@ pub trait FlattenOp {
     fn flatten(lst: Vec<Self::S>) -> Self::S;
 }
 
-pub trait FlattenSmartConstructors<'a, State>
-: SmartConstructors<'a, State> + FlattenOp<S=<Self as SmartConstructors<'a, State>>::R>
+pub trait FlattenSmartConstructors<'src, State>
+: SmartConstructors<'src, State> + FlattenOp<S=<Self as SmartConstructors<'src, State>>::R>
 {
     fn make_missing(s: State, _: usize) -> (State, Self::R) {
        (s, Self::zero())
@@ -1504,8 +1504,8 @@ module GenerateRustFactsSmartConstructors = struct
     let args = String.concat ~sep:", " args in
     let fwd_args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
     let fwd_args = String.concat ~sep:", " fwd_args in
-    sprintf "    fn make_%s(s: HasScriptContent<'a>, %s) -> (HasScriptContent<'a>, Self::R) {
-        <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_%s(s, %s)
+    sprintf "    fn make_%s(s: HasScriptContent<'src>, %s) -> (HasScriptContent<'src>, Self::R) {
+        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_%s(s, %s)
     }\n\n"
       x.type_name args x.type_name fwd_args
 
@@ -1520,28 +1520,28 @@ use parser::positioned_token::PositionedToken;
 use crate::facts_smart_constructors::*;
 
 pub struct FactsSmartConstructors;
-impl<'a> SmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstructors {
+impl<'src> SmartConstructors<'src, HasScriptContent<'src>> for FactsSmartConstructors {
     type Token = PositionedToken;
     type R = Node;
 
-    fn initial_state<'b: 'a>(_: &ParserEnv, src: &'b SourceText<'b>) -> HasScriptContent<'a> {
-        (false, src)
+    fn initial_state(_: &ParserEnv, src: &SourceText<'src>) -> HasScriptContent<'src> {
+        (false, *src)
     }
 
-    fn make_missing(s: HasScriptContent<'a>, offset: usize) -> (HasScriptContent<'a>, Self::R) {
-        <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_missing(s, offset)
+    fn make_missing(s: HasScriptContent<'src>, offset: usize) -> (HasScriptContent<'src>, Self::R) {
+        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_missing(s, offset)
     }
 
-    fn make_token(s: HasScriptContent<'a>, token: Self::Token) -> (HasScriptContent<'a>, Self::R) {
-        <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_token(s, token)
+    fn make_token(s: HasScriptContent<'src>, token: Self::Token) -> (HasScriptContent<'src>, Self::R) {
+        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_token(s, token)
     }
 
     fn make_list(
-        s: HasScriptContent<'a>,
+        s: HasScriptContent<'src>,
         items: Box<Vec<Self::R>>,
         offset: usize,
-    ) -> (HasScriptContent<'a>, Self::R) {
-        <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_list(s, items, offset)
+    ) -> (HasScriptContent<'src>, Self::R) {
+        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_list(s, items, offset)
     }
 
 CONSTRUCTOR_METHODS}
@@ -1681,12 +1681,12 @@ use crate::syntax_kind::SyntaxKind;
 pub struct WithKind<S> {
     phantom_s: std::marker::PhantomData<S>,
 }
-impl<'a, S, State> SmartConstructors<'a, State> for WithKind<S>
-where S: SmartConstructors<'a, State> {
+impl<'src, S, State> SmartConstructors<'src, State> for WithKind<S>
+where S: SmartConstructors<'src, State> {
     type Token = S::Token;
     type R = (SyntaxKind, S::R);
 
-    fn initial_state<'b: 'a>(env: &ParserEnv, src: &'b SourceText<'b>) -> State {
+    fn initial_state(env: &ParserEnv, src: &SourceText<'src>) -> State {
         S::initial_state(env, src)
     }
 

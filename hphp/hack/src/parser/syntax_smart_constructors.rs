@@ -21,12 +21,12 @@ use crate::smart_constructors::{NoState, SmartConstructors, StateType};
 use crate::source_text::SourceText;
 use crate::syntax::*;
 
-pub trait SyntaxSmartConstructors<'a, S: SyntaxType, State = NoState>:
-    SmartConstructors<'a, State::T, R=S, Token=S::Token>
+pub trait SyntaxSmartConstructors<'src, S: SyntaxType, State = NoState>:
+    SmartConstructors<'src, State::T, R=S, Token=S::Token>
 where
-    State: StateType<'a, S>,
+    State: StateType<'src, S>,
 {
-    fn initial_state<'b: 'a>(env: &ParserEnv, src: &'b SourceText<'b>) -> State::T {
+    fn initial_state(env: &ParserEnv, src: &SourceText<'src>) -> State::T {
         State::initial(env, src)
     }
 
@@ -40,7 +40,7 @@ where
 
     fn make_list(s: State::T, items: Box<Vec<Self::R>>, offset: usize) -> (State::T, Self::R) {
         if items.is_empty() {
-            <Self as SyntaxSmartConstructors<'a, S, State>>::make_missing(s, offset)
+            <Self as SyntaxSmartConstructors<'src, S, State>>::make_missing(s, offset)
         } else {
             let mut item_refs = Vec::with_capacity((*items).len());
             for item in items.iter() {

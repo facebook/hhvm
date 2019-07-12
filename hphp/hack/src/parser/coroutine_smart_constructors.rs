@@ -25,15 +25,15 @@ pub struct State<S> {
     phantom_s: PhantomData<S>,
 }
 
-pub type Bool<'a> = (bool, &'a SourceText<'a>);
+pub type Bool<'src> = (bool, SourceText<'src>);
 
-impl<'a, S> StateType<'a, S> for State<S> {
-    type T = Bool<'a>;
-    fn initial<'b: 'a>(env0: &ParserEnv, src: &'b SourceText<'b>) -> Bool<'a> {
+impl<'src, S> StateType<'src, S> for State<S> {
+    type T = Bool<'src>;
+    fn initial(env0: &ParserEnv, src: &SourceText<'src>) -> Bool<'src> {
         ENV_LOCAL.with(|env| env.replace(env0.clone()));
-        (false, src)
+        (false, *src)
     }
-    fn next(t: Bool<'a>, _inputs: Vec<&S>) -> Bool<'a> {
+    fn next(t: Bool<'src>, _inputs: Vec<&S>) -> Bool<'src> {
         t
     }
 }

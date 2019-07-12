@@ -359,7 +359,7 @@ impl ToOcaml for NoState {
 
 /// Blanket implementation for states of Smart Constructors that need to access SourceText;
 /// such SC by convention wrap their state into a pair (State, &SourceText).
-impl<'a, T> ToOcaml for (T, &'a SourceText<'a>)
+impl<'a, T> ToOcaml for (T, SourceText<'a>)
 where
     T: ToOcaml,
 {

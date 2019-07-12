@@ -25,8 +25,8 @@ pub trait FlattenOp {
     fn flatten(lst: Vec<Self::S>) -> Self::S;
 }
 
-pub trait FlattenSmartConstructors<'a, State>
-: SmartConstructors<'a, State> + FlattenOp<S=<Self as SmartConstructors<'a, State>>::R>
+pub trait FlattenSmartConstructors<'src, State>
+: SmartConstructors<'src, State> + FlattenOp<S=<Self as SmartConstructors<'src, State>>::R>
 {
     fn make_missing(s: State, _: usize) -> (State, Self::R) {
        (s, Self::zero())

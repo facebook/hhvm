@@ -17,9 +17,9 @@ use crate::token_kind::TokenKind;
 pub struct State<S> {
     phantom_s: std::marker::PhantomData<S>,
 }
-impl<'a, S> StateType<'a, S> for State<S> {
+impl<'src, S> StateType<'src, S> for State<S> {
     type T = Vec<bool>;
-    fn initial<'b: 'a>(_: &ParserEnv, _: &'b SourceText<'b>) -> Self::T {
+    fn initial(_: &ParserEnv, _: &SourceText<'src>) -> Self::T {
         vec![]
     }
     fn next(mut st: Self::T, inputs: Vec<&S>) -> Self::T {

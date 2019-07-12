@@ -107,7 +107,7 @@ inline void ActRec::setHasReifiedGenerics() {
 }
 
 inline void ActRec::setResumed() {
-  assertx((flags() & ~(AsyncEagerRet | DynamicCall))
+  assertx((flags() & ~(AsyncEagerRet | DynamicCall | HasReifiedGenerics))
          == Flags::None);
   m_numArgsAndFlags = encodeNumArgsAndFlags(
     numArgs(),
@@ -116,10 +116,11 @@ inline void ActRec::setResumed() {
 }
 
 inline void ActRec::setAsyncEagerReturn() {
-  assertx((flags() & ~DynamicCall) == Flags::None);
+  assertx((flags() & ~(DynamicCall | HasReifiedGenerics)) == Flags::None);
   m_numArgsAndFlags = encodeNumArgsAndFlags(
     numArgs(),
-    static_cast<Flags>(AsyncEagerRet | (flags() & DynamicCall))
+    static_cast<Flags>(AsyncEagerRet |
+                       (flags() & (DynamicCall | HasReifiedGenerics)))
   );
 }
 

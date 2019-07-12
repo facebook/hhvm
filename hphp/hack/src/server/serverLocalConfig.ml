@@ -84,6 +84,17 @@ type t = {
   (* If set, defers class declarations after N lazy declarations; if not set,
     always lazily declares classes not already in cache. *)
   defer_class_declaration_threshold : int option;
+  (* If set, distributes type checking to remote workers if the number of files to
+    type check exceeds the threshold. If not set, then always checks everything locally. *)
+  remote_type_check_threshold : int option;
+  (* If set, uses the key to fetch type checking jobs *)
+  remote_worker_key : string option;
+  (* If set, uses the check ID when logging events in the context of remove init/work *)
+  remote_check_id : string option;
+  (* Indicates the size of the job below which Eden should be used by the remote worker *)
+  remote_worker_eden_checkout_threshold : int;
+  (* Dictates the number of remote type checking workers *)
+  num_remote_workers : int;
   (* Enables the reverse naming table to fall back to SQLite for queries. *)
   naming_sqlite_path : string option;
   enable_naming_table_fallback : bool;
@@ -146,6 +157,11 @@ let default = {
   idle_gc_slice = 0;
   shallow_class_decl = false;
   defer_class_declaration_threshold = None;
+  remote_type_check_threshold = None;
+  remote_worker_key = None;
+  remote_check_id = None;
+  num_remote_workers = 4;
+  remote_worker_eden_checkout_threshold = 10000;
   naming_sqlite_path = None;
   enable_naming_table_fallback = false;
   symbolindex_search_provider = "TrieIndex";
@@ -286,6 +302,19 @@ let load_ fn ~silent overrides =
       ~default:default.shallow_class_decl config in
   let defer_class_declaration_threshold =
     int_opt "defer_class_declaration_threshold" config in
+  let remote_type_check_threshold =
+    int_opt "remote_type_check_threshold" config in
+  let remote_worker_key =
+    string_opt "remote_worker_key" config in
+  let remote_check_id =
+    string_opt "remote_check_id" config in
+  let num_remote_workers = int_ "num_remote_workers"
+    ~default:default.num_remote_workers config in
+  let remote_worker_eden_checkout_threshold = int_
+    "remote_worker_eden_checkout_threshold"
+    ~default:default.remote_worker_eden_checkout_threshold
+    config
+  in
   let naming_sqlite_path =
     string_opt "naming_sqlite_path" config in
   let enable_naming_table_fallback = match naming_sqlite_path with
@@ -294,7 +323,6 @@ let load_ fn ~silent overrides =
       bool_if_version "enable_naming_table_fallback"
         ~default:default.enable_naming_table_fallback config
   in
-
   let symbolindex_search_provider = string_ "symbolindex_search_provider"
       ~default:default.symbolindex_search_provider config in
   let symbolindex_quiet = bool_ "symbolindex_quiet"
@@ -352,6 +380,11 @@ let load_ fn ~silent overrides =
     idle_gc_slice;
     shallow_class_decl;
     defer_class_declaration_threshold;
+    remote_worker_eden_checkout_threshold;
+    remote_type_check_threshold;
+    remote_worker_key;
+    remote_check_id;
+    num_remote_workers;
     naming_sqlite_path;
     enable_naming_table_fallback;
     symbolindex_search_provider;

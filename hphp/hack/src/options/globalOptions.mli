@@ -65,6 +65,22 @@ type t = {
     always lazily declares classes not already in cache. *)
   tco_defer_class_declaration_threshold : int option;
 
+  (* If set, distributes type checking to remote workers if the number of files to
+   type check exceeds the threshold. If not set, then always checks everything locally. *)
+  tco_remote_type_check_threshold : int option;
+
+  (* If set, uses the key to fetch type checking jobs *)
+  tco_remote_worker_key : string option;
+
+  (* If set, uses the check ID when logging events in the context of remove init/work *)
+  tco_remote_check_id : string option;
+
+  (* Dictates the number of remote type checking workers *)
+  tco_num_remote_workers : int;
+
+  (* Above this threshold of files to check, the remote type checking worker will not use Eden *)
+  so_remote_worker_eden_checkout_threshold : int;
+
   (* Enables the reverse naming table to fall back to SQLite for queries. *)
   so_naming_sqlite_path : string option;
 
@@ -264,6 +280,11 @@ val make :
   ?tco_migration_flags: SSet.t ->
   ?tco_dynamic_view: bool ->
   ?tco_defer_class_declaration_threshold: int ->
+  ?tco_remote_type_check_threshold: int ->
+  ?tco_remote_worker_key: string ->
+  ?tco_remote_check_id: string ->
+  ?tco_num_remote_workers: int ->
+  ?so_remote_worker_eden_checkout_threshold: int ->
   ?so_naming_sqlite_path: string ->
   ?tco_disallow_array_as_tuple: bool ->
   ?po_auto_namespace_map: (string * string) list ->
@@ -312,6 +333,11 @@ val tco_experimental_feature_enabled : t -> SSet.elt -> bool
 val tco_migration_flag_enabled : t -> SSet.elt -> bool
 val tco_dynamic_view : t -> bool
 val tco_defer_class_declaration_threshold : t -> int option
+val tco_remote_type_check_threshold : t -> int option
+val tco_remote_worker_key : t -> string option
+val tco_remote_check_id : t -> string option
+val tco_num_remote_workers : t -> int
+val so_remote_worker_eden_checkout_threshold : t -> int
 val so_naming_sqlite_path : t -> string option
 val tco_disallow_array_as_tuple : t -> bool
 val po_auto_namespace_map : t -> (string * string) list

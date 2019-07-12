@@ -216,7 +216,7 @@ size_t OfflineCode::printBCMapping(std::ostream& os,
     }
 
     always_assert(tcaStart <= tcaStop);
-    if (tcaStart >= ip && tcaStart < tcaStop) break;
+    if (tcaStart <= ip && ip < tcaStop) break;
   }
 
   if (currBC < mappingSize && tcaStart == ip) {
@@ -233,7 +233,6 @@ size_t OfflineCode::printBCMapping(std::ostream& os,
         curr.sha1, curr.bcStart);
     }
     os << lineInfo.str();
-    currBC++;
   }
 
   return currBC;

@@ -40,6 +40,7 @@ module type S = sig
   val json_mode: options -> bool
   val load_state_canary: options -> bool
   val log_inference_constraints: options -> bool
+  val lru_cache_directory: options -> string option
   val max_procs: options -> int option
   val no_load: options -> bool
   val prechecked: options -> bool option

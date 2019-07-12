@@ -98,12 +98,17 @@ struct RepoOptions {
   E(bool,           EmitInstMethPointers,           EmitFuncPointers) \
   /**/
 
+#define AUTOLOADFLAGS() \
+  N(std::string,    Query,                                        "") \
+  /**/
+
   std::string path() const { return m_path; }
   std::string cacheKeyRaw() const;
   std::string cacheKeySha1() const;
   std::string toJSON() const;
   folly::dynamic toDynamic() const;
   struct stat stat() const { return m_stat; }
+  std::string autoloadQuery() const noexcept { return Query; }
 
   bool operator==(const RepoOptions& o) const;
 
@@ -124,6 +129,7 @@ private:
 #define H(t, n, ...) t n;
 #define E(t, n, ...) t n;
 PARSERFLAGS()
+AUTOLOADFLAGS()
 #undef N
 #undef P
 #undef H

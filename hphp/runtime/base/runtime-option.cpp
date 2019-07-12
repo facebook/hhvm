@@ -356,7 +356,8 @@ std::string RepoOptions::cacheKeyRaw() const {
 #define P(_, n, ...) + mangleForKey(n)
 #define H(_, n, ...) + mangleForKey(n)
 #define E(_, n, ...) + mangleForKey(n)
-PARSERFLAGS();
+PARSERFLAGS()
+AUTOLOADFLAGS();
 #undef N
 #undef P
 #undef H
@@ -388,7 +389,8 @@ folly::dynamic RepoOptions::toDynamic() const {
 #define P(_, n, ...) OUT("PHP7." #n, n)
 #define H(_, n, ...) OUT("Hack.Lang." #n, n)
 #define E(_, n, ...) OUT("Eval." #n, n)
-PARSERFLAGS();
+PARSERFLAGS()
+AUTOLOADFLAGS();
 #undef N
 #undef P
 #undef H
@@ -404,7 +406,8 @@ bool RepoOptions::operator==(const RepoOptions& o) const {
 #define P(_, n, ...) if (n != o.n) return false;
 #define H(_, n, ...) if (n != o.n) return false;
 #define E(_, n, ...) if (n != o.n) return false;
-PARSERFLAGS();
+PARSERFLAGS()
+AUTOLOADFLAGS();
 #undef N
 #undef P
 #undef H
@@ -436,13 +439,26 @@ void RepoOptions::filterNamespaces() {
 
 RepoOptions::RepoOptions(const char* file) : m_path(file) {
   always_assert(s_init);
-  Hdf config = (Hdf{file})["Parser"];
+  Hdf config{file};
+  Hdf parserConfig = config["Parser"];
 
-#define N(_, n, ...) hdfExtract(config, #n, n, s_defaults.n);
-#define P(_, n, ...) hdfExtract(config, "PHP7." #n, n, s_defaults.n);
-#define H(_, n, ...) hdfExtract(config, "Hack.Lang." #n, n, s_defaults.n);
-#define E(_, n, ...) hdfExtract(config, "Eval." #n, n, s_defaults.n);
+#define N(_, n, ...) hdfExtract(parserConfig, #n, n, s_defaults.n);
+#define P(_, n, ...) hdfExtract(parserConfig, "PHP7." #n, n, s_defaults.n);
+#define H(_, n, ...) hdfExtract(parserConfig, "Hack.Lang." #n, n, s_defaults.n);
+#define E(_, n, ...) hdfExtract(parserConfig, "Eval." #n, n, s_defaults.n);
 PARSERFLAGS();
+#undef N
+#undef P
+#undef H
+#undef E
+
+  Hdf autoloadConfig = config["Autoload"];
+#define N(_, n, ...) hdfExtract(autoloadConfig, #n, n, s_defaults.n);
+#define P(_, n, ...) hdfExtract(autoloadConfig, "PHP7." #n, n, s_defaults.n);
+#define H(_, n, ...) hdfExtract(autoloadConfig, "Hack.Lang." #n, n, \
+                                s_defaults.n);
+#define E(_, n, ...) hdfExtract(autoloadConfig, "Eval." #n, n, s_defaults.n);
+AUTOLOADFLAGS();
 #undef N
 #undef P
 #undef H
@@ -457,6 +473,7 @@ void RepoOptions::initDefaults(const Hdf& hdf, const IniSettingMap& ini) {
 #define H(_, n, dv) Config::Bind(n, ini, hdf, "Hack.Lang." #n, dv);
 #define E(_, n, dv) Config::Bind(n, ini, hdf, "Eval." #n, dv);
 PARSERFLAGS()
+AUTOLOADFLAGS()
 #undef N
 #undef P
 #undef H

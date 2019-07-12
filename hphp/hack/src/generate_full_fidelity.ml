@@ -1710,9 +1710,8 @@ where S: SmartConstructors<'src, State> {
 CONSTRUCTOR_METHODS
 }
 
-// TODO: will this always be inlined? If not, rewrite as macro
-fn compose<St, R>(kind: SyntaxKind, st_r: (St, R)) -> (St, (SyntaxKind, R)) {
-    let (st, r) = st_r;
+#[inline(always)]
+fn compose<St, R>(kind: SyntaxKind, (st, r): (St, R)) -> (St, (SyntaxKind, R)) {
     (st, (kind, r))
 }
 "

@@ -41,23 +41,23 @@ type recheck_info = {
 (*****************************************************************************)
 
 type genv = {
-    options          : ServerArgs.options;
-    config           : ServerConfig.t;
-    local_config     : ServerLocalConfig.t;
-    workers          : MultiWorker.worker list option;
+    options                : ServerArgs.options;
+    config                 : ServerConfig.t;
+    local_config           : ServerLocalConfig.t;
+    workers                : MultiWorker.worker list option;
     (* Returns the list of files under .hhconfig, subject to a filter *)
-    indexer          : (string -> bool) -> (unit -> string list);
+    indexer                : (string -> bool) -> (unit -> string list);
     (* Each time this is called, it should return the files that have changed
      * since the last invocation *)
-    notifier_async   : unit -> ServerNotifierTypes.notifier_changes;
+    notifier_async         : unit -> ServerNotifierTypes.notifier_changes;
     (* If this FD is readable, next call to notifier_async () should read
      * something from it. *)
-    notifier_async_reader : unit -> Buffered_line_reader.t option;
-    notifier         : unit -> SSet.t;
+    notifier_async_reader  : unit -> Buffered_line_reader.t option;
+    notifier               : unit -> SSet.t;
     (* If daemons are spawned as part of the init process, wait for them here
      * e.g. wait until dfindlib is ready (in the case that watchman is absent) *)
-    wait_until_ready : unit -> unit;
-    mutable debug_channels   : (Timeout.in_channel * out_channel) option;
+    wait_until_ready       : unit -> unit;
+    mutable debug_channels : (Timeout.in_channel * out_channel) option;
   }
 
 (*****************************************************************************)

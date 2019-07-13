@@ -230,17 +230,17 @@ let make_genv options config local_config workers =
 
 (* useful in testing code *)
 let default_genv =
-  { options          = ServerArgs.default_options "";
-    config           = ServerConfig.default_config;
-    local_config     = ServerLocalConfig.default;
-    workers          = None;
-    indexer          = (fun _ -> fun () -> []);
-    notifier_async   = (fun () ->
+  { options               = ServerArgs.default_options "";
+    config                = ServerConfig.default_config;
+    local_config          = ServerLocalConfig.default;
+    workers               = None;
+    indexer               = (fun _ -> fun () -> []);
+    notifier_async        = (fun () ->
       ServerNotifierTypes.Notifier_synchronous_changes SSet.empty);
     notifier_async_reader = (fun () -> None);
-    notifier         = (fun () -> SSet.empty);
-    wait_until_ready = (fun () -> ());
-    debug_channels   = None;
+    notifier              = (fun () -> SSet.empty);
+    wait_until_ready      = (fun () -> ());
+    debug_channels        = None;
   }
 
 let make_env config =

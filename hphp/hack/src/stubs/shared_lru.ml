@@ -6,4 +6,8 @@
  *
  *)
 
-let run _ _ _ _ _ = failwith "not implemented"
+type host_env = unit
+
+let init _ _ = failwith "not implemented"
+
+let run _ _ _ _ = failwith "not implemented"

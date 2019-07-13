@@ -21,6 +21,7 @@
     server_client_provider
     server_command_types
     server_monitor
+    shared_lru_stubs
     typechecker_options
     utils_core
     utils_www_root
@@ -213,6 +214,7 @@
     search
     server_env
     server_services
+    shared_lru_stubs
     sys_utils
     typed_positioned_syntax
     typed_syntax_transforms

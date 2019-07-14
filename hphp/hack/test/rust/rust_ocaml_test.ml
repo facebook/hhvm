@@ -316,11 +316,14 @@ let () =
   in
   let ocaml_env = make_env () in
   let rust_env = make_env ~rust:true () in
-  begin match args.parser with
-    | MINIMAL -> MinimalTest.test_batch args ~ocaml_env ~rust_env  files
-    | POSITIONED -> PositionedTest.test_batch args ~ocaml_env ~rust_env  files
-    | COROUTINE -> CoroutineTest.test_batch args ~ocaml_env ~rust_env files
-    | DECL_MODE -> DeclModeTest.test_batch args ~ocaml_env ~rust_env files
-  end;
-  let _ = Hh_logger.log_duration "Done:" t  in
+  let f = match args.parser with
+    | MINIMAL -> MinimalTest.test_batch args ~ocaml_env ~rust_env
+    | POSITIONED -> PositionedTest.test_batch args ~ocaml_env ~rust_env
+    | COROUTINE -> CoroutineTest.test_batch args ~ocaml_env ~rust_env
+    | DECL_MODE -> DeclModeTest.test_batch args ~ocaml_env ~rust_env
+  in
+  let (user, runs, _mem) = Profile.profile_longer_than (fun () -> f files) 0. in
+  ignore (Hh_logger.log_duration "Done:" t);
+  ignore (Hh_logger.log "User:: %f" user);
+  ignore (Hh_logger.log "Runs:: %d" runs);
   ()

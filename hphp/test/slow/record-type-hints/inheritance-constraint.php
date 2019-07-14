@@ -15,8 +15,9 @@ class C {
 final record A {
   f: Base,
 }
-
+<<__EntryPoint>> function main(): void {
 $a = A['f'=>new Derived()];
 \var_dump($a['f']->x);
 
 $b = A['f'=>new C()];
+}

@@ -5,3 +5,5 @@ function main() {
   using ($x);
   foo:
 }
+
+<<__EntryPoint>> function main_entry(): void {}

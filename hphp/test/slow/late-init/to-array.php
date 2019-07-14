@@ -46,7 +46,8 @@ function run_test($func) {
     echo $e->getMessage() . "\n";
   }
 }
-
+<<__EntryPoint>> function main(): void {
 run_test('test_cast');
 run_test('test_iter');
 run_test('test_obj_prop_array');
+}

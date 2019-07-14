@@ -18,6 +18,8 @@ function main() {
   $w = $o->fakeprop; // Exercise the translator's CGetM <H P>
   echo "Returning from main\n";
 }
+<<__EntryPoint>> function main_entry(): void {
 echo "Starting\n";
 main();
 echo "Done\n";
+}

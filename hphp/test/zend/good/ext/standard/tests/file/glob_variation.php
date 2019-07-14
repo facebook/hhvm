@@ -2,7 +2,7 @@
 /* Prototype: array glob ( string $pattern [, int $flags] );
    Description: Find pathnames matching a pattern
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing glob() : usage variations ***\n";
 
 $file_path = dirname(__FILE__);
@@ -73,3 +73,4 @@ $file_path = dirname(__FILE__);
 rmdir("$file_path/glob_variation/wonder1/wonder2");
 rmdir("$file_path/glob_variation/wonder1/");
 rmdir("$file_path/glob_variation/");
+}

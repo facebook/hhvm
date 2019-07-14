@@ -26,5 +26,7 @@ function main() {
   \var_dump($ti->implementsInterface('N\Iface'));
   \var_dump($ni->implementsInterface('Iface'));
 }
+<<__EntryPoint>> function main_entry(): void {
 main();
+}
 }

@@ -4,5 +4,6 @@
 class A {
   <<__SoftLateInit>> public $x1 = 123;
 }
-
+<<__EntryPoint>> function main(): void {
 new A();
+}

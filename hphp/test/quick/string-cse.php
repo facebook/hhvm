@@ -21,6 +21,8 @@ function main() {
   c::doit(0, 'hello');
   c::dump();
 }
+<<__EntryPoint>> function main_entry(): void {
 echo "Calling main\n";
 main();
 echo "Done\n";
+}

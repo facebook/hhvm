@@ -1,39 +1,5 @@
 <?hh
 
-// There must be APC support for keysets (and dicts, vecs).
-//
-echo "apc_add: ";
-var_dump(apc_add('foo', keyset[1, 2, 3]));
-echo "apc_fetch: ";
-var_dump(apc_fetch('foo'));
-
-// All the functions below must see keysets (and dicts, vecs)
-// as arrays and return an array.
-//
-echo "array_change_key_case: ";
-var_dump(array_change_key_case(keyset["FOO", "Bar"]));
-echo "array_chunk 1: ";
-var_dump(array_chunk(keyset[1, 2, 3], 2));
-echo "array_chunk 2: ";
-var_dump(array_chunk(keyset[1, 2, 3], 2, true /* preserve keys */));
-echo "array_column 1: ";
-var_dump(array_column(
-  array(
-    'a' => array('foo' => 'bar1', 'baz' => 'qux1'),
-    'b' => keyset['foo', 'baz'],
-  ),
-  'foo',
-));
-echo "array_column 2: ";
-var_dump(array_column(
-  array(
-    'a' => array('foo' => 'bar1', 'baz' => 'qux1'),
-    'b' => keyset['foo', 'baz'],
-  ),
-  'foo',
-  'baz',
-));
-
 function nocase($a, $b) {
   $la = strtolower((string)$a);
   $lb = strtolower((string)$b);
@@ -176,6 +142,40 @@ function with_keyset($k1) {
   var_dump($k);
 
 }
+<<__EntryPoint>> function main(): void {
+// There must be APC support for keysets (and dicts, vecs).
+//
+echo "apc_add: ";
+var_dump(apc_add('foo', keyset[1, 2, 3]));
+echo "apc_fetch: ";
+var_dump(apc_fetch('foo'));
+
+// All the functions below must see keysets (and dicts, vecs)
+// as arrays and return an array.
+//
+echo "array_change_key_case: ";
+var_dump(array_change_key_case(keyset["FOO", "Bar"]));
+echo "array_chunk 1: ";
+var_dump(array_chunk(keyset[1, 2, 3], 2));
+echo "array_chunk 2: ";
+var_dump(array_chunk(keyset[1, 2, 3], 2, true /* preserve keys */));
+echo "array_column 1: ";
+var_dump(array_column(
+  array(
+    'a' => array('foo' => 'bar1', 'baz' => 'qux1'),
+    'b' => keyset['foo', 'baz'],
+  ),
+  'foo',
+));
+echo "array_column 2: ";
+var_dump(array_column(
+  array(
+    'a' => array('foo' => 'bar1', 'baz' => 'qux1'),
+    'b' => keyset['foo', 'baz'],
+  ),
+  'foo',
+  'baz',
+));
 
 with_keyset(keyset['q', 'u', 'e', 'n', 't', 'i', 'n']);
 with_keyset(keyset[5, 7, 8, 10]);
@@ -210,3 +210,4 @@ var_dump(array_fill(10, 2, 42));
 // Sorting functions.
 //
 // TODO
+}

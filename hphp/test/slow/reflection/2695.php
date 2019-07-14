@@ -126,9 +126,10 @@ function test_function_reflector() {
   $closure_reflector = new ReflectionFunction($closure);
   \var_dump($closure_reflector->getName());
 }
-
+<<__EntryPoint>> function main(): void {
 test_class_reflector();
 test_method_reflector();
 test_function_reflector();
 
+}
 }

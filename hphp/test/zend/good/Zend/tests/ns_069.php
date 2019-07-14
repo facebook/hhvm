@@ -9,7 +9,8 @@ class Test {
     \var_dump((binary)__NAMESPACE__);
   }
 }
-
+<<__EntryPoint>> function main(): void {
 Test::f();
 
 echo "===DONE===\n";
+}

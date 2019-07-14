@@ -23,5 +23,6 @@ async function main() {
   $r2 = await $b;
   var_dump($r1, $r2);
 }
-
+<<__EntryPoint>> function main_entry(): void {
 for ($i = 0; $i < 10; $i++) HH\Asio\join(main());
+}

@@ -7,8 +7,10 @@ class C2 {
     return $a0++;
   }
 }
+<<__EntryPoint>> function main(): void {
 $x = 0;
 $c = new C2;
 $c(&$x);
 var_dump($x);
  // $x = 1
+}

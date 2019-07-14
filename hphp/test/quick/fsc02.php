@@ -17,5 +17,7 @@ class C extends B {
     $f();
   }
 }
+<<__EntryPoint>> function main(): void {
 $obj = new C;
 $obj->g();
+}

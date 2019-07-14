@@ -13,5 +13,6 @@ function reflect(): void {
   $attribute_value = $attribute->s;
   var_dump($attribute_value);
 }
-
+<<__EntryPoint>> function main(): void {
 echo reflect();
+}

@@ -38,5 +38,7 @@ function main() {
   Bar::set(() ==> 123);
   Bar::dump();
 }
+<<__EntryPoint>> function main_entry(): void {
 main();
 main();
+}

@@ -5,3 +5,5 @@ class X {
     return function() { return $this; };
   }
 }
+
+<<__EntryPoint>> function main(): void {}

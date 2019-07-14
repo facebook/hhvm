@@ -1,5 +1,4 @@
 <?hh
-error_reporting(E_ALL);
 
 function __autoload($s) { echo "[load $s]"; }
 interface I {}
@@ -8,9 +7,10 @@ class B extends A { }
 class C implements I { }
 class D extends C { }
 class E extends B implements I { }
-
 class UnexpectedSerializedClass extends Exception {}
-function main() {
+
+<<__EntryPoint>> function main(): void {
+  error_reporting(E_ALL);
   $v = serialize(array(new A, new B, new C, new D, new E));
   $run = $opts ==> {
     try {

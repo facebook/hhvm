@@ -15,7 +15,7 @@ final record Bar {
 final record Baz {
   z: int,
 }
-
+<<__EntryPoint>> function main(): void {
 $a = vec[Foo['x' => vec[10]], Foo['x' => vec[42]]];
 $a[1]['x'] = vec[50];
 var_dump($a[1]['x'][0]);
@@ -38,3 +38,4 @@ $baz = Baz['z' => 10];
 $baz['z']++;
 $baz['z'] -=2;
 var_dump($baz['z']);
+}

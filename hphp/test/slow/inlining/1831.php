@@ -9,3 +9,5 @@ function f($a, $b, $c) {
 function g($a, $b, $c) {
   return f($a++, $b++ + $a++, $c);
 }
+
+<<__EntryPoint>> function main(): void {}

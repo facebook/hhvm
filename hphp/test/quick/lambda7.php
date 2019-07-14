@@ -20,9 +20,6 @@ function mappers() {
     $x ==> $x->get()
   );
 }
-mappers();
-
-echo "---\n";
 
 function filters() {
   $dump = ($ar,$fn) ==> {
@@ -33,7 +30,6 @@ function filters() {
   $dump(array("a", "b", "ac", "k"), $x ==> $x[0] == "a");
   $dump(array("asd", new box(123)), $x ==> is_string($x));
 }
-filters();
 
 function collection() {
   $blah = Vector {
@@ -52,4 +48,13 @@ function collection() {
          ->filter($x ==> $x % 2 == 0)
   );
 }
+
+<<__EntryPoint>> function main(): void {
+mappers();
+
+echo "---\n";
+
+filters();
+
 collection();
+}

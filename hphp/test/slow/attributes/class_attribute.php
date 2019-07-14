@@ -42,5 +42,6 @@ function reflect(): void {
   $rc = new ReflectionClass("X");
   $ac = $rc->getAttributeClass(Cat::class);
 }
-
+<<__EntryPoint>> function main(): void {
 echo reflect();
+}

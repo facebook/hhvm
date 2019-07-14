@@ -42,5 +42,7 @@ function main() {
 
   dictnest(dict[1 => dict[2 => 3]]);
 }
+<<__EntryPoint>> function main_entry(): void {
 main();
+}
 }

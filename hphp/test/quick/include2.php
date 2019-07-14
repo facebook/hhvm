@@ -1,5 +1,6 @@
 <?hh
 function f() {}
+<<__EntryPoint>> function main(): void {
 $x = 12;
 @f();
 $y = 34;
@@ -16,3 +17,4 @@ $t = @include_once 'include2_doesnt_exist.inc';
 var_dump($t);
 $t = include_once 'include2.2.inc';
 var_dump($t);
+}

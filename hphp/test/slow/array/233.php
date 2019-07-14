@@ -20,6 +20,7 @@ function pop_stack(){
     PushStackStatics::$stack = $stack;
   }
 }
+<<__EntryPoint>> function main(): void {
 push_stack();
 pop_stack();
 pop_stack();
@@ -29,3 +30,4 @@ pop_stack();
 push_stack();
 $info = array(count(PushStackStatics::$stack), PushStackStatics::$stack[count(PushStackStatics::$stack)-1], PushStackStatics::$stack);
 var_dump($info);
+}

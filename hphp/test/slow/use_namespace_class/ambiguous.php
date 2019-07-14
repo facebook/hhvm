@@ -17,8 +17,9 @@ namespace foo {
 namespace {
 
 use foo\bar;
-
+<<__EntryPoint>> function main(): void {
 bar\baz();
 new bar();
 
+}
 }

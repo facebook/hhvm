@@ -1,7 +1,5 @@
 <?hh
 
-error_reporting(-1);
-
 class Point
 {
     private $x;
@@ -51,6 +49,12 @@ class Point
         unset($this->dynamicProperties[$name]);
     }
 }
+
+class X
+{
+}
+<<__EntryPoint>> function main(): void {
+error_reporting(-1);
 
 $p = new Point(5, 9);
 
@@ -134,10 +138,6 @@ var_dump(isset($p->color));
 
 echo "----------------------\n";
 
-class X
-{
-}
-
 ///*
 $p->thing = new X;  // set dynamic property to an instance having a destructor
 $v = $p->thing;
@@ -149,3 +149,4 @@ var_dump($v);
 //*/
 
 // at program termination, the destructor for the dynamic property is called
+}

@@ -27,8 +27,10 @@ class D implements ArrayAccess {
     public function offsetExists($k) { return isset($this->arr[$k]); }
     public function offsetUnset($k) { unset($this->arr[$k]); }
 }
+<<__EntryPoint>> function main(): void {
 $x = new C;
 $x->arr[0] = new D(11, 22);
 $x->arr[1] = new D(33, 44);
 D::$a = D::$b = D::$c = D::$d = 0;
 foreach (array($x) as list(list(D::$a,D::$b),list(D::$c,D::$d))) {}
+}

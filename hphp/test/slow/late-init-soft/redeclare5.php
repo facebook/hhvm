@@ -8,5 +8,6 @@ class A {
 class B extends A {
   <<__SoftLateInit>> public $x;
 }
-
+<<__EntryPoint>> function main(): void {
 new B();
+}

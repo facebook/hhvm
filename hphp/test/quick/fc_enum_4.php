@@ -15,10 +15,11 @@ enum Bar : Foo as int {
 function test(@Bar $x): void {
   var_dump($x);
 }
-
+<<__EntryPoint>> function main(): void {
 // These should be fine
 test(Bar::FOO);
 test(Bar::BAR);
 // These should fail
 test("hello");
 test(10.0);
+}

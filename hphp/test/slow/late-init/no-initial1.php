@@ -4,5 +4,6 @@
 class A {
   <<__LateInit>> public $x1 = 123;
 }
-
+<<__EntryPoint>> function main(): void {
 new A();
+}

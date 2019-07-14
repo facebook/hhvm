@@ -12,5 +12,6 @@ function get_attributes(): void {
   $rc = new ReflectionClass("Class2");
   var_dump($rc->getMethods()[0]->getAttributes()["Attribute"]);
 }
-
+<<__EntryPoint>> function main(): void {
 echo get_attributes();
+}

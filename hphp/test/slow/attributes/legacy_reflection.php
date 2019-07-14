@@ -16,7 +16,7 @@ class Lion {
 
 <<Eagle(7)>>
 class Zebra extends Lion {}
-
+<<__EntryPoint>> function main(): void {
 $rf = new \ReflectionFunction("Animal\\f");
 \var_dump($rf->getAttributes());
 \var_dump($rf->getAttribute("Dog"));
@@ -34,3 +34,4 @@ $rp = $rc->getProperties()[0];
 \var_dump($rp->getAttribute("Baboon"));
 $rcc = new \ReflectionClass("Animal\\Zebra");
 \var_dump($rc->getAttributesRecursive());
+}

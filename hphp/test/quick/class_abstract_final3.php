@@ -28,6 +28,7 @@ abstract final class Utils extends C {
     echo __METHOD__, "\n";
   }
 }
-
+<<__EntryPoint>> function main_entry(): void {
 main();
 echo 'Done', "\n";
+}

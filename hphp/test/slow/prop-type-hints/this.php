@@ -9,7 +9,7 @@ class A {
 class B extends A {}
 class C extends B {}
 <<__MockClass>> class D extends C {}
-
+<<__EntryPoint>> function main(): void {
 (new A())->test(new A());
 (new A())->test(new B());
 (new A())->test(new C());
@@ -24,3 +24,4 @@ class C extends B {}
 (new C())->test(new B());
 (new C())->test(new C());
 (new C())->test(new D());
+}

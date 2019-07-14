@@ -1,15 +1,17 @@
 <?hh
 
 class Test1 {
-	static function test() {
-		var_dump(is_callable(static::class."::ok"));
-		var_dump(is_callable(array(static::class,"ok")));
-	}
+    static function test() {
+        var_dump(is_callable(static::class."::ok"));
+        var_dump(is_callable(array(static::class,"ok")));
+    }
 }
 
 class Test2 extends Test1 {
-	static function ok() {
-	}
+    static function ok() {
+    }
 }
+<<__EntryPoint>> function main(): void {
 Test1::test();
 Test2::test();
+}

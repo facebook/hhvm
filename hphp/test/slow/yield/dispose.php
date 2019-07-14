@@ -5,3 +5,5 @@ class foo {
     yield foo();
   }
 }
+
+<<__EntryPoint>> function main(): void {}

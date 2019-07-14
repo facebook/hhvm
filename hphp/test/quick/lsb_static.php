@@ -17,7 +17,7 @@ class B extends A {
 
 class C extends B {
 }
-
+<<__EntryPoint>> function main(): void {
 A::foo("A");
 B::foo("B");
 C::foo("C");
@@ -27,3 +27,4 @@ B::foo("");
 C::foo("");
 
 B::bar();
+}

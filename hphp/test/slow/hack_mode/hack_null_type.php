@@ -16,6 +16,7 @@ class C {
 function test(): void {
   foo(null, null);
 }
-
+<<__EntryPoint>> function main(): void {
 test();
 var_dump("done");
+}

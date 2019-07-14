@@ -13,5 +13,7 @@ class D extends C {
     echo "D::foo\n";
   }
 }
+<<__EntryPoint>> function main(): void {
 $obj = new D;
 $obj->test();
+}

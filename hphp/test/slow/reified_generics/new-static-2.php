@@ -5,5 +5,6 @@ class C<reify Ta, reify Tb> {
     new static();
   }
 }
-
+<<__EntryPoint>> function main(): void {
 C::f();
+}

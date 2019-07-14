@@ -53,6 +53,7 @@ function main() {
   echo 'ReflectionClass::isInstantiable', ' => ';
   var_dump($rc->isInstantiable());
 }
-
+<<__EntryPoint>> function main_entry(): void {
 main();
 echo 'Done', "\n";
+}

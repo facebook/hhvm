@@ -9,10 +9,11 @@ type Foo = Bar;
 function test(@Foo $x): void {
   var_dump($x);
 }
-
+<<__EntryPoint>> function main(): void {
 // Should be fine
 test(Bar::FOO);
 // Should produce warning
 test("uh");
 // Should produce warning
 test(1.0);
+}

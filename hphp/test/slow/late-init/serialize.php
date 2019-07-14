@@ -88,10 +88,11 @@ function unserialize_test($s) {
     echo $e->getMessage() . "\n";
   }
 }
-
+<<__EntryPoint>> function main(): void {
 run_serialize_tests(new A());
 run_serialize_tests(new B());
 run_serialize_tests(new C());
 
 unserialize_test('O:1:"A":3:{s:1:"x";i:123;s:1:"y";i:777;s:1:"z";s:3:"abc";}');
 unserialize_test('O:1:"A":2:{s:1:"x";i:123;s:1:"z";s:3:"abc";}');
+}

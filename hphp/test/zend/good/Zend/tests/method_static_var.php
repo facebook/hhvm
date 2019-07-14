@@ -8,7 +8,7 @@ class Foo {
   var_dump(++static::$i);
  }
 }
-
+<<__EntryPoint>> function main(): void {
 foo::test();
 new Foo;
 foo::test();
@@ -18,3 +18,4 @@ foo::test();
  */
 Bar::test();
 Bar::test();
+}

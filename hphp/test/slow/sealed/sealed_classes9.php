@@ -8,3 +8,5 @@ class SomeclassWithConstant {
 // that other kinds of resolution expressions still fail.
 <<__Sealed(SomeclassWithConstant::CONSTANT)>>
 class SomeSealedClass {}
+
+<<__EntryPoint>> function main(): void {}

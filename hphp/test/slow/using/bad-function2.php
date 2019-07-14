@@ -5,3 +5,5 @@ function main($x) {
     using $y;
   }
 }
+
+<<__EntryPoint>> function main_entry(): void {}

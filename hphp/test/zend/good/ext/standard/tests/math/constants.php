@@ -1,4 +1,5 @@
 <?hh
+<<__EntryPoint>> function main(): void {
 $constants = array(
     "M_E",
     "M_LOG2E",
@@ -20,4 +21,5 @@ $constants = array(
 );
 foreach($constants as $constant) {
     printf("%-10s: %s\n", $constant, constant($constant));
+}
 }

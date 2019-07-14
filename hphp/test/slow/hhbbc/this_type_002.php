@@ -48,6 +48,7 @@ final class B extends D {
     return $this;
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $b = new D();
 $b->h();
+}

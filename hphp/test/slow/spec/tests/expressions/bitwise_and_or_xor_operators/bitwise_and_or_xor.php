@@ -5,7 +5,7 @@
    | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
    +-------------------------------------------------------------+
 */
-
+<<__EntryPoint>> function main(): void {
 error_reporting(-1);
 
 // check for even integer values by inspecting the low-order bit
@@ -42,4 +42,5 @@ foreach ($scalarValueList as $v)
     printf("%b & 123 = %b\n", $v, $v & 123);
     printf("%b | 123 = %b\n", $v, $v | 123);
     printf("%b ^ 123 = %b\n", $v, $v ^ 123);
+}
 }

@@ -27,7 +27,7 @@ class B extends A {
         var_dump(A::$x . " " . B::$x);
     }
 }
-
+<<__EntryPoint>> function main(): void {
 A::afunc();
 B::afunc();
 B::bfunc();
@@ -36,3 +36,4 @@ A::apeek();
 B::bpeek();
 
 var_dump(B::$x);
+}

@@ -15,8 +15,9 @@ function foo(int $x): Foo {
     return Bar['f' => 1];
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $a = foo(1);
 var_dump($a['f']);
 $a = foo(-1);
 var_dump($a['f']);
+}

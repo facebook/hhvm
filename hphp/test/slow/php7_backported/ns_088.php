@@ -9,3 +9,5 @@ namespace Fiz\Biz\Buz {
         }
     };
 }
+
+<<__EntryPoint>> function main(): void {}

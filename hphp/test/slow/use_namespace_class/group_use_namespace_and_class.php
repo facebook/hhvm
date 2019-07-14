@@ -24,9 +24,10 @@ namespace {
 
 use namespace foo\{bar, baz};
 use type foo\{bar, baz};
-
+<<__EntryPoint>> function main(): void {
 bar\baz();
 new bar();
 new baz();
 
+}
 }

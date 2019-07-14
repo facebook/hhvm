@@ -20,7 +20,7 @@ class B extends A {
 
 class C extends B {
 }
-
+<<__EntryPoint>> function main(): void {
 A::dump();
 B::dump();
 C::dump();
@@ -28,3 +28,4 @@ C::dump();
 A::dump();
 B::dump();
 C::dump();
+}

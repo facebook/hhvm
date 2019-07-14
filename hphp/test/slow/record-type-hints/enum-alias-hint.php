@@ -11,10 +11,11 @@ type Alias = Enum;
 final record A {
   x: Alias,
 }
-
+<<__EntryPoint>> function main(): void {
 $a = A['x' => Enum::V2];
 var_dump($a['x']);
 $a['x'] = 'val2';
 var_dump($a['x']);
 $a['x'] = 1;
 var_dump($a['x']);
+}

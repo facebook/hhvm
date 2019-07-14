@@ -84,9 +84,10 @@ function main($a, $b, inout $c, $d, $e) {
 
   return $x + $y + $z;
 }
-
+<<__EntryPoint>> function main_entry(): void {
 $a = 3;
 main(1, 2, inout $a, 4, 5, 6);
 \var_dump(Cls::inout, Derp::foo);
 echo "Done.\n";
+}
 }

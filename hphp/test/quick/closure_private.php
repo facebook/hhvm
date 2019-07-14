@@ -54,9 +54,11 @@ class A {
   }
 
 }
+<<__EntryPoint>> function main(): void {
 $a = new A;
 var_dump($a->testPublic());
 var_dump($a->testUse());
 var_dump($a->testParam());
 var_dump($a->testParamAndClosure());
 var_dump($a->testNotByRef());
+}

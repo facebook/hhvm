@@ -25,8 +25,10 @@ class TestParent {
         echo __CLASS__."\n";
     }
 }
+<<__EntryPoint>> function main(): void {
 $o = new TestChild;
 $o->test();
 $o->a = "b";
 echo $o->a;
 echo "==DONE==";
+}

@@ -8,7 +8,7 @@
 trait MyTrait {}
 interface I {}
 class MyClass {}
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing get_declared_traits() : basic functionality ***\n";
 
 // Zero arguments
@@ -16,9 +16,9 @@ echo "\n-- Testing get_declared_traits() function with Zero arguments --\n";
 var_dump(get_declared_traits());
 
 foreach (get_declared_traits() as $trait) {
-	if (!trait_exists($trait)) {
-		echo "Error: $trait is not a valid trait.\n";
-	}
+    if (!trait_exists($trait)) {
+        echo "Error: $trait is not a valid trait.\n";
+    }
 }
 
 echo "\n-- Ensure trait is listed --\n";
@@ -32,3 +32,4 @@ var_dump(in_array( 'MyClass', get_declared_traits()));
 
 
 echo "Done";
+}

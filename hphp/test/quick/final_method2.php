@@ -12,5 +12,7 @@ trait T {
 class Bar extends Foo {
   use T;
 }
+<<__EntryPoint>> function main(): void {
 $bar = new Bar();
 echo $bar->f()."\n";
+}

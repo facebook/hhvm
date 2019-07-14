@@ -7,7 +7,7 @@ class Yeah {
     <<Data>> string $s,
     <<Data>> private ?Point $p) {}
 }
-
+<<__EntryPoint>> function main(): void {
 $p = new Yeah(10, 10, 'f', null);
 var_dump($p->x . ', ' . $p->y);
-
+}

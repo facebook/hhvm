@@ -26,10 +26,12 @@ class Fiz {
 } /* Foo */
 
 namespace {
+<<__EntryPoint>> function main(): void {
 $biz = new Foo\Biz();
 $baz = new Foo\Bar\Baz();
 $fiz = new Foo\Fiz();
 $biz->wat();
 $baz->wat();
 $fiz->wat();
+}
 }

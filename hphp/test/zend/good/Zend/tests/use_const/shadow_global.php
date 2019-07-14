@@ -11,7 +11,8 @@ namespace {
 
 namespace {
     use const foo\bar;
+    <<__EntryPoint>> function main(): void {
     var_dump(bar);
     echo "Done\n";
+    }
 }
-

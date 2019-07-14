@@ -11,7 +11,8 @@ namespace {
 
 namespace {
     use function foo\bar;
+    <<__EntryPoint>> function main(): void {
     var_dump(bar());
     echo "Done\n";
+    }
 }
-

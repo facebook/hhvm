@@ -9,7 +9,6 @@ namespace Foo\Bar {
     const BAR = 2;
 }
 namespace Fiz\Biz\Buz {
-
     use function Foo\Bar\{
         fiz,
         biz,
@@ -28,6 +27,7 @@ namespace Fiz\Biz\Buz {
     function buz(){ echo __FUNCTION__,"\n"; }
     const FOO = 100;
 
+    <<__EntryPoint>> function main(): void {
     echo "==== MIXED ====\n";
     new A();
     new B();
@@ -43,4 +43,5 @@ namespace Fiz\Biz\Buz {
     biz();
     boz();
     A();
+    }
 }

@@ -20,6 +20,7 @@ namespace Baz {
     use function \Foo\Bar\{fn_a, fn_b, fn_c};
     use const \Foo\Bar\{CONST_A, CONST_B, CONST_C};
 
+    <<__EntryPoint>> function main(): void {
     \var_dump(ClassA::class);
     \var_dump(ClassB::class);
     \var_dump(ClassC::class);
@@ -31,4 +32,5 @@ namespace Baz {
     \var_dump(CONST_C);
 
     echo "\nDone\n";
+    }
 }

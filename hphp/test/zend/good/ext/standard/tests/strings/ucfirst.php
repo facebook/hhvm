@@ -1,6 +1,6 @@
 <?hh
+class mystring { function __toString() { return "hello, world"; } }
 /* Make a string's first character uppercase */
-
 echo "#### Basic and Various operations ####\n";
 $str_array = array(
 		    "testing ucfirst.",
@@ -49,15 +49,10 @@ $str_arr = array("hello", "?world", "!$%**()%**[][[[&@#~!", array());
 try { var_dump( ucfirst($str_arr) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n--- Testing objects ---\n";
-/* we get "Catchable fatal error: saying Object of class could not be converted
-        to string" by default when an object is passed instead of string:
-The error can be  avoided by choosing the __toString magix method as follows: */
+// we get "Catchable fatal error: saying Object of class could not be converted
+// to string" by default when an object is passed instead of string:
+// The error can be  avoided by choosing the __toString magix method as follows:
 
-class mystring {
-  function __toString() {
-    return "hello, world";
-  }
-}
 $obj_string = new mystring;
 
 var_dump(ucfirst("$obj_string"));
@@ -96,6 +91,11 @@ echo "\n--- Testing a heredoc null string ---\n";
 $str = <<<EOD
 EOD;
 var_dump(ucfirst($str));
+
+
+
+
+
 
 
 echo "\n--- Testing simple and complex syntax strings ---\n";

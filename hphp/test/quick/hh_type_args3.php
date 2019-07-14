@@ -14,10 +14,10 @@ class Foo<a,b,c> {
     // this should fail
   }
 }
-function test6<foo>(foo $x) : garbage {
-}
-function test7<foo>(string $x) {
-}
+function test6<foo>(foo $x) : garbage { }
+function test7<foo>(string $x) { }
+
+<<__EntryPoint>> function main(): void {
 Foo::test1('foo');
 Foo::test2('foo');
 Foo::test3('foo');
@@ -26,3 +26,4 @@ Foo::test5('foo');
 test6('foo');
 test7('foo');
 echo "failed";
+}

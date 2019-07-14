@@ -8,7 +8,7 @@ namespace Foo\Bar {
 }
 
 namespace {
-  function main() {
+  <<__EntryPoint>> function main():void {
     $rc = new ReflectionClass("Foo\\Bar\\A");
     \var_dump($rc->isInterface());
     \var_dump($rc->getMethod('set')->getParameters()[0]->getDefaultValue());
@@ -21,5 +21,4 @@ namespace {
     \var_dump($rc->getParameters()[0]->getDefaultValueConstantName());
     Foo\Bar\foo();
   }
-  main();
 }

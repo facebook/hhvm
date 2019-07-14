@@ -11,6 +11,8 @@ namespace MyNS {
 namespace {
   use type \MyNS\Foo;
   use namespace \MyNS as FooNS;
+  <<__EntryPoint>> function main(): void {
   new Foo();
   new FooNS\Foo();
+  }
 }

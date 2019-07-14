@@ -14,6 +14,8 @@ namespace MyNS\Derp {
 
 namespace {
   use namespace MyNS\{Herp, Derp};
-  Herp\do_stuff();
-  Derp\do_stuff();
+  <<__EntryPoint>> function main(): void {
+    Herp\do_stuff();
+    Derp\do_stuff();
+  }
 }

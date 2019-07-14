@@ -1,8 +1,8 @@
 <?hh
-function foo() {
-	try {
+<<__EntryPoint>> function foo(): void {
+    try {
     } finally {
 test:
     }
-	goto test;
+    goto test;
 }

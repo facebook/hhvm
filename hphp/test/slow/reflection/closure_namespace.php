@@ -14,7 +14,7 @@ namespace Foo\Bar {
 namespace Foo {
   const BAZ = 1;
 
-  function main() {
+  <<__EntryPoint>> function main(): void {
     \var_dump(BAZ);
     \var_dump(Bar\BAZ);
 
@@ -34,6 +34,4 @@ namespace Foo {
     \var_dump($rp->getDefaultValueText());
     \var_dump($rp->getDefaultValueConstantName()); // returning NULL for closures
   }
-
-  main();
 }

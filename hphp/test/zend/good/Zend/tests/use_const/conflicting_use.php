@@ -10,6 +10,7 @@ namespace bar {
 
 namespace {
     use const foo\baz, bar\baz;
+    <<__EntryPoint>> function main(): void {
     echo "Done\n";
+    }
 }
-

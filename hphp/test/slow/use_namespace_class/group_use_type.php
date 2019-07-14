@@ -40,8 +40,11 @@ namespace {
     Herp,
     Derp,
   };
-  new Foo();
-  new Bar();
-  new Herp();
-  new Derp();
+
+  <<__EntryPoint>> function main(): void {
+    new Foo();
+    new Bar();
+    new Herp();
+    new Derp();
+  }
 }

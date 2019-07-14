@@ -15,7 +15,7 @@ namespace Foo\Bar {
 }
 
 namespace {
-  function main() {
+  <<__EntryPoint>> function main(): void {
     echo "reflection:\n";
     $rc = (new \ReflectionClass("Foo\\Derived"))->getMethod('set');
     \var_dump($rc->getParameters()[0]->getDefaultValue());
@@ -24,5 +24,4 @@ namespace {
     echo "call:\n";
     (new Foo\Derived())->set();
   }
-  main();
 }

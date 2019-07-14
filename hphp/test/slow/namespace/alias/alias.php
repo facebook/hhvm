@@ -5,9 +5,7 @@ namespace ABC\QRS\XYZ {
 }
 
 namespace {
-  function main() {
+  <<__EntryPoint>> function main(): void {
     ALIAS\foo();
   }
-
-  main();
 }

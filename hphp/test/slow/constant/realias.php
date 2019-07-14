@@ -12,5 +12,7 @@ namespace {
   use const foo\bar\baz;
   use const other\baz;
 
-  \var_dump(baz);
+  <<__EntryPoint>> function main(): void {
+    \var_dump(baz);
+  }
 }

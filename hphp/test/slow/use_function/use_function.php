@@ -39,7 +39,9 @@ namespace test_as {
   use function fizz\baz as fizzbaz;
   use function baz\baz as bazbaz;
 
-  \var_dump(foobar());
-  \var_dump(fizzbaz());
-  \var_dump(bazbaz());
+  <<__EntryPoint>> function main(): void {
+    \var_dump(foobar());
+    \var_dump(fizzbaz());
+    \var_dump(bazbaz());
+  }
 }

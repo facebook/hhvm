@@ -41,6 +41,8 @@ namespace {
     \var_dump($rh->getAttributeClass(C::class)->i); // 5
   }
 
+<<__EntryPoint>> function main(): void {
   echo reflect();
   echo X\Y\reflect();
+}
 }

@@ -9,9 +9,7 @@ namespace Foo\Dict {
 namespace {
   use Foo\Dict;
 
-  function main(): void {
+  <<__EntryPoint>> function main(): void {
     Dict\herp(dict[1 => 'foo', 42 => 'bar']);
   }
-
-  main();
 }

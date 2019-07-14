@@ -32,6 +32,7 @@ namespace Foo\Bar {
 namespace {
     use Bee\Bop as Moo,
         Foo\Bar\One;
+    <<__EntryPoint>> function main(): void {
     echo "Top\n";
     \var_dump(One::class); // resolve from use
     \var_dump(Boo::class); // resolve in global namespace
@@ -45,4 +46,5 @@ namespace {
     Foo\Bar\Three::run(); // resolve runtime lookups with inheritance
     echo "Compile Check\n";
     Foo\Bar\Three::checkCompileTime();
+    }
 }

@@ -15,9 +15,11 @@ namespace {
   use const const_case\lower;
   use const const_case\UPPER;
 
+  <<__EntryPoint>> function main(): void {
   \var_dump(lower);
   \var_dump(LOWER);
 
   \var_dump(upper);
   \var_dump(UPPER);
+}
 }

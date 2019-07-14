@@ -18,6 +18,7 @@ namespace Fiz\Biz\Buz {
     function bar(){echo __FUNCTION__,"\n";}
     const BAR = 100;
 
+    <<__EntryPoint>> function main(): void {
     new A;
     new B;
     new AC;
@@ -29,4 +30,5 @@ namespace Fiz\Biz\Buz {
     \var_dump(FOO);
     \var_dump(BOZ);
     \var_dump(BAR);
+    }
 }

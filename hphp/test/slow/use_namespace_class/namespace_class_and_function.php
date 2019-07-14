@@ -25,12 +25,10 @@ namespace {
   use function Bar\Derp;
   use namespace Baz as Derp;
 
-  function main(): void {
+  <<__EntryPoint>> function main(): void {
     // This is a test, but it still makes me cry :'(
     new Derp(123); // \Foo\Derp
     Derp('123'); // \Bar\Derp
     Derp\Derp(1.23); // \Baz\Derp
   }
-
-  main();
 }

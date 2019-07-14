@@ -5,9 +5,8 @@ namespace A {
 }
 
 namespace C {
-  function main() {
+  <<__EntryPoint>> function main(): void {
     $name = '\\\\A\f';
     \var_dump($name());
   }
-  main();
 }

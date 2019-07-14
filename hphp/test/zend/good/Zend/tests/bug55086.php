@@ -19,11 +19,13 @@ namespace N2 {
             T1::hello as foo;
         }
     }
+    <<__EntryPoint>> function main(): void {
     $a = new A;
     echo $a->hello(), \PHP_EOL;
     echo $a->foo(), \PHP_EOL;
     try {
     } catch(namespace \Foo $e)
     {
+    }
     }
 }

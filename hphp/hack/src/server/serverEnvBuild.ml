@@ -51,7 +51,7 @@ type changes_mode =
 | Dfind_mode
 | Watchman_mode of Watchman.env
 
-let make_genv options config local_config workers =
+let make_genv options config local_config workers lru_host_env =
   let root = ServerArgs.root options in
   let check_mode   = ServerArgs.check_mode options in
   Typing_deps.trace :=
@@ -226,6 +226,7 @@ let make_genv options config local_config workers =
     notifier;
     wait_until_ready;
     debug_channels = None;
+    lru_host_env;
   }
 
 (* useful in testing code *)
@@ -241,6 +242,7 @@ let default_genv =
     notifier              = (fun () -> SSet.empty);
     wait_until_ready      = (fun () -> ());
     debug_channels        = None;
+    lru_host_env          = None;
   }
 
 let make_env config =

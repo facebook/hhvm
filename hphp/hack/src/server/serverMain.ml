@@ -915,6 +915,13 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
     num_workers options local_config |> Ai.modify_worker_count
   in
   let handle = SharedMem.init ~num_workers (ServerConfig.sharedmem_config config) in
+  let lru_cache_directory = ServerArgs.lru_cache_directory options in
+  let lru_host_env =
+    match lru_cache_directory with
+    | Some cache_dir_path ->
+      Some (Shared_lru.init ~num_workers ~cache_dir_path)
+    | None -> None
+  in
   let init_id = Random_id.short_string () in
   Hh_logger.log "Version: %s" Hh_version.version;
   Hh_logger.log "Hostname: %s" (Unix.gethostname ());
@@ -1010,6 +1017,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
     config
     local_config
     workers
+    lru_host_env
   in
   genv, init_id
 

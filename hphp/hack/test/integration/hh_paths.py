@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 hh_server = "hh_server"
 hh_client = "hh_client"
+hh_single_type_check = "hh_single_type_check"
 hh_merge_deps = "hh_merge_deps"
 recorder_cat = "recorder_cat"
 turntable_bin = "turntable_bin"

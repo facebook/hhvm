@@ -24,34 +24,62 @@ pub enum SeparatedListKind {
 // so trying to keep it small.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum ExpectedTokens {
-    Classish,
-    Semicolon,
-    RightParen,
-    Visibility,
+    Classish = 0b0001,
+    Semicolon = 0b0010,
+    RightParen = 0b0100,
+    Visibility = 0b1000,
 }
+const ET_COUNT: u32 = 4;
+const ET_MASK: ETMask = (1 << ET_COUNT) - 1;
+type ETMask = u16; // mask of bits in first ET_COUNT bits
 
 impl ExpectedTokens {
-    pub fn contains(&self, token: TokenKind) -> bool {
-        match self {
-            ExpectedTokens::Classish => {
-                token == TokenKind::Class
-                    || token == TokenKind::Trait
-                    || token == TokenKind::Interface
-            }
-            ExpectedTokens::Semicolon => token == TokenKind::Semicolon,
-            ExpectedTokens::RightParen => token == TokenKind::RightParen,
-            ExpectedTokens::Visibility => {
-                token == TokenKind::Public
-                    || token == TokenKind::Protected
-                    || token == TokenKind::Private
-            }
+    pub fn contains(mask: ETMask, token: TokenKind) -> bool {
+        use ExpectedTokens::*;
+        let bit: ETMask = match token {
+            TokenKind::Class | TokenKind::Trait | TokenKind::Interface => Classish as ETMask,
+            TokenKind::Semicolon => Semicolon as ETMask,
+            TokenKind::RightParen => RightParen as ETMask,
+            TokenKind::Public | TokenKind::Protected | TokenKind::Private => Visibility as ETMask,
+            _ => 0 as ETMask,
+        };
+        (bit & mask) != 0
+    }
+
+    fn from(bit: ETMask) -> ExpectedTokens {
+        // debug_assert!((bit & (!bit+1)) == bit, "unexpected multiple set bits in {:#b}");
+        use ExpectedTokens::*;
+        match bit {
+            0b0001 => Classish,
+            0b0010 => Semicolon,
+            0b0100 => RightParen,
+            _ => Visibility,
         }
     }
 }
 
 #[derive(Debug, Clone)]
+pub struct ExpectedTokenVec(Vec<ETMask>);
+impl ExpectedTokenVec {
+    fn push(&mut self, et: ExpectedTokens) {
+        let last_mask = *self.0.last().unwrap_or(&0) & ET_MASK;
+        let bit = et as ETMask;
+        self.0.push(bit | last_mask | (bit << ET_COUNT));
+    }
+    fn pop(&mut self) -> Option<ExpectedTokens> {
+        self.0.pop().map(|x| ExpectedTokens::from(x >> ET_COUNT))
+    }
+    fn last_mask(&self) -> ETMask {
+        self.0.last().map_or(0, |x| x >> ET_COUNT)
+    }
+    fn any_mask(&self) -> ETMask {
+        self.0.last().map_or(0, |x| x & ET_MASK)
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct Context<T> {
-    pub expected: Vec<ExpectedTokens>,
+    pub expected: ExpectedTokenVec,
     pub skipped_tokens: Vec<T>,
     stack_limit: Option<std::rc::Rc<StackLimit>>,
 }
@@ -59,7 +87,7 @@ pub struct Context<T> {
 impl<T> Context<T> {
     pub fn empty(stack_limit: Option<std::rc::Rc<StackLimit>>) -> Self {
         Self {
-            expected: vec![],
+            expected: ExpectedTokenVec(vec![]),
             skipped_tokens: vec![],
             stack_limit,
         }
@@ -75,13 +103,11 @@ impl<T> Context<T> {
     }
 
     fn expects(&self, token_kind: TokenKind) -> bool {
-        self.expected.iter().any(|x| x.contains(token_kind))
+        ExpectedTokens::contains(self.expected.any_mask(), token_kind)
     }
 
     fn expects_here(&self, token_kind: TokenKind) -> bool {
-        self.expected
-            .last()
-            .map_or_else(|| false, |x| x.contains(token_kind))
+        ExpectedTokens::contains(self.expected.last_mask(), token_kind)
     }
 }
 

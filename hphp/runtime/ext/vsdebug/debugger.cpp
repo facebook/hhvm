@@ -1841,6 +1841,12 @@ void Debugger::onFunctionDefined(
   for (auto it = unresolvedBps.begin(); it != unresolvedBps.end(); ) {
     const int bpId = *it;
     const Breakpoint* bp = bpMgr->getBreakpointById(bpId);
+    if (bp == nullptr) {
+        // Breakpoint has been removed by the client.
+        it = unresolvedBps.erase(it);
+        continue;
+    }
+
     if (bp->m_type == BreakpointType::Function && funcName == bp->m_function) {
         // Found a matching function!
         phpAddBreakPointFuncEntry(func);
@@ -1983,6 +1989,9 @@ void Debugger::onBreakpointHit(
   for (auto it = bps.begin(); it != bps.end(); it++) {
     const int bpId = *it;
     Breakpoint* bp = bpMgr->getBreakpointById(bpId);
+    if (bp == nullptr) {
+      continue;
+    }
 
     const auto resolvedLocation = bpMgr->bpResolvedInfoForFile(bp, filePath);
     bool lineInRange = line >= resolvedLocation.m_startLine &&
@@ -2036,7 +2045,7 @@ void Debugger::onBreakpointHit(
     const auto bpIds = bpMgr->getBreakpointIdsForPath(filePath);
     for (auto it = bpIds.begin(); it != bpIds.end(); it++) {
       Breakpoint* bp = bpMgr->getBreakpointById(*it);
-      if (bp->m_line == line) {
+      if (bp != nullptr && bp->m_line == line) {
         realBp = true;
         break;
       }

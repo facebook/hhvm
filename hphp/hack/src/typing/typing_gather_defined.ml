@@ -35,8 +35,9 @@ open Core_kernel
 open Nast
 
 module C = Typing_continuations
-module LEnv = Typing_lenv
 module LEnvC = Typing_per_cont_env
+module LEnv = Typing_lenv
+module EnvOps = Typing_per_cont_ops
 module Reason = Typing_reason
 module Utils = Typing_utils
 
@@ -61,7 +62,7 @@ module LocalIdsPerCont = struct
   let empty = C.Map.empty
 
   let union env l1 l2 =
-    let _env, locals = LEnvC.union_by_cont env LEnv.union l1 l2 in
+    let _env, locals = EnvOps.union_by_cont env LEnv.union l1 l2 in
     locals
 
   let union_list env ml =

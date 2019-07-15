@@ -19,6 +19,62 @@ let single_upper_bound env r ul =
 let single_lower_bound env r ll =
   Typing_union.union_list env r (TySet.elements ll)
 
+(*
+ * Merge two type parameter environments. Given tpenv1 and tpenv2 we want
+ * to compute a "merged" environment tpenv such that
+ *     tpenv1 |- tpenv
+ * and tpenv2 |- tpenv
+ *
+ * If a type parameter is defined only on one input, we do not include it in tpenv.
+ * If it appears in both, supposing we have
+ *     l1 <: T <: u1 in tpenv1
+ * and l2 <: T <: u2 in tpenv2
+ * with multiple lower bounds reduced to a union, and multiple upper bounds
+ * reduced to an intersection, then the resulting tpenv will have
+ *     l1&l2 <: T <: u1|u2
+ *)
+let join_lower_bounds env l1 l2 =
+  (* Special case: subset inclusion. Return subset
+   * (e.g. if t|u <: T or t <: T then t <: T ) *)
+  if TySet.subset l1 l2
+  then env, l1
+  else
+  if TySet.subset l2 l1
+  then env, l2
+  else
+    (* Convert upper bounds to equivalent union *)
+    let env, union1 = single_lower_bound env Reason.Rnone l1 in
+    let env, union2 = single_lower_bound env Reason.Rnone l2 in
+    let env, new_lower = Typing_intersection.intersect env Reason.Rnone union1 union2 in
+    env, TySet.singleton new_lower
+
+let join_upper_bounds env u1 u2 =
+  (* Special case: subset inclusion. Return subset
+   * (e.g. if T <: t & u, or T <: t, then T <: t) *)
+  if TySet.subset u1 u2
+  then env, u1
+  else
+  if TySet.subset u2 u1
+  then env, u2
+  else
+    (* Convert upper bounds to equivalent intersection *)
+    let env, inter1 = single_upper_bound env Reason.Rnone u1 in
+    let env, inter2 = single_upper_bound env Reason.Rnone u2 in
+    let env, new_upper = Typing_union.union env inter1 inter2 in
+    env, TySet.singleton new_upper
+
+let join env tpenv1 tpenv2 =
+    SMap.merge_env env tpenv1 tpenv2 ~combine:(fun env _tparam info1 info2 ->
+      match info1, info2 with
+      | Some (TP.{ lower_bounds = l1; upper_bounds = u1; _ } as info1),
+        Some TP.{ lower_bounds = l2; upper_bounds = u2; _ } ->
+        let env, lower_bounds = join_lower_bounds env l1 l2 in
+        let env, upper_bounds = join_upper_bounds env u1 u2 in
+        env, Some (TP.{ info1 with lower_bounds; upper_bounds; })
+      | Some info, _ -> env, Some info
+      | _, Some info -> env, Some info
+      | _, _ -> env, None)
+
 let remove_upper_bound tpenv tparam bound =
   match SMap.get tparam tpenv with
   | None -> tpenv
@@ -59,7 +115,6 @@ let get_tpenv_equal_bounds env name =
   let lower = Env.get_tpenv_lower_bounds env name in
   let upper = Env.get_tpenv_upper_bounds env name in
   TySet.inter lower upper
-
 
 (** Given a list of type parameter names, attempt to simplify away those
 type parameters by looking for a type to which they are equal in the tpenv.

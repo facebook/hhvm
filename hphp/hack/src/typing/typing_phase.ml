@@ -380,7 +380,7 @@ and localize_ft ?(instantiation) ~ety_env env ft =
   in
 
   (* Grab and store the old tpenvs *)
-  let old_tpenv = env.Env.lenv.Env.tpenv in
+  let old_tpenv = Env.get_tpenv env in
   let old_global_tpenv = env.Env.global_tpenv in
 
   (* Always localize tparams so they are available for later Tast check *)

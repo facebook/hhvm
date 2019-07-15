@@ -8,7 +8,6 @@
  *)
 
  open Typing_defs
- open Type_parameter_env
  module TySet = Typing_set
  module type S = sig
 
@@ -19,14 +18,6 @@
    local_reactive : reactivity;
    (* Local variables that were assigned in a `using` clause *)
    local_using_vars   : Local_id.Set.t;
-   (* Type parameter environment
-    * Lower and upper bounds on generic type parameters and abstract types
-    * For constraints of the form Tu <: Tv where both Tu and Tv are type
-    * parameters, we store an upper bound for Tu and a lower bound for Tv.
-    * Contrasting with tenv and subst, bounds are *assumptions* for type
-    * inference, not conclusions.
-    *)
-   tpenv              : tpenv;
  }
 
  type tyvar_info = {
@@ -55,7 +46,7 @@
    inside_constructor: bool;
    inside_ppl_class: bool;
    (* A set of constraints that are global to a given method *)
-   global_tpenv : tpenv ;
+   global_tpenv : Type_parameter_env.t;
    subtype_prop : Typing_logic.subtype_prop;
    log_levels : int SMap.t;
    tvenv : tvenv;

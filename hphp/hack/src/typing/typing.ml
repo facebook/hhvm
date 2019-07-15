@@ -562,7 +562,7 @@ and fun_def tcopt f : Tast.fun_def option =
         Errors.ellipsis_strict_mode ~require:`Type_and_param_name pos;
       env, T.FVellipsis p
     | FVnonVariadic -> env, T.FVnonVariadic in
-  let local_tpenv = env.Env.lenv.Env.tpenv in
+  let local_tpenv = Env.get_tpenv env in
   let env, tb = fun_ env return pos nb f.f_fun_kind in
   (* restore original reactivity *)
   let env = Env.set_env_reactive env reactive in
@@ -2793,11 +2793,13 @@ and stash_conts_for_anon env p is_anon captured f =
     then Env.get_locals env captured
     else (Env.next_cont_exn env).Typing_per_cont_env.local_types in
   let initial_fakes = Fake.forget (Env.get_fake_members env) (Fake.Blame_lambda p) in
+  let tpenv = Env.get_tpenv env in
   let env, (tfun, result) = Typing_lenv.stash_and_do env C.all (
     fun env ->
       let env = Env.reinitialize_locals env in
       let env = Env.set_locals env initial_locals in
       let env = Env.set_fake_members env initial_fakes in
+      let env = Env.env_with_tpenv env tpenv in
       let env, tfun, result = f env in
       env, (tfun, result)) in
   env, tfun, result
@@ -2910,7 +2912,7 @@ and anon_make tenv p f ft idl is_anon =
           (Typing_return.make_info f.f_fun_kind [] env
             ~is_explicit:(Option.is_some ret_ty)
             hret decl_ty) in
-        let local_tpenv = env.Env.lenv.Env.tpenv in
+        let local_tpenv = Env.get_tpenv env in
         let env, tb = block env nb.fb_ast in
         let implicit_return = LEnv.has_next env in
         let env =
@@ -6380,7 +6382,7 @@ and class_def_ env c tc =
   Typing_subtype.log_prop env;
   {
     T.c_span = c.c_span;
-    T.c_annotation = Env.save env.Env.lenv.Env.tpenv env;
+    T.c_annotation = Env.save (Env.get_tpenv env) env;
     T.c_mode = c.c_mode;
     T.c_final = c.c_final;
     T.c_is_xhp = c.c_is_xhp;
@@ -6787,7 +6789,7 @@ and method_def env m =
     | FVellipsis p -> env, T.FVellipsis p
     | FVnonVariadic -> env, T.FVnonVariadic in
   let nb = Nast.assert_named_body m.m_body in
-  let local_tpenv = env.Env.lenv.Env.tpenv in
+  let local_tpenv = Env.get_tpenv env in
   let env, tb =
     fun_ ~abstract:m.m_abstract env return pos nb m.m_fun_kind in
   (* restore original method reactivity  *)
@@ -6882,7 +6884,7 @@ and typedef_def tcopt typedef  =
   let env, user_attributes =
     List.map_env env typedef.t_user_attributes user_attribute in
   {
-    T.t_annotation = Env.save env.Env.lenv.Env.tpenv env;
+    T.t_annotation = Env.save (Env.get_tpenv env) env;
     T.t_name = typedef.t_name;
     T.t_mode = typedef.t_mode;
     T.t_vis = typedef.t_vis;
@@ -6912,7 +6914,7 @@ and gconst_def tcopt cst =
       let env, te, _value_type = expr env value in
       te, env
   in
-  { T.cst_annotation = Env.save env.Env.lenv.Env.tpenv env;
+  { T.cst_annotation = Env.save (Env.get_tpenv env) env;
     T.cst_mode = cst.cst_mode;
     T.cst_name = cst.cst_name;
     T.cst_type = cst.cst_type;

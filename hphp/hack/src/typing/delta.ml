@@ -11,6 +11,7 @@ open Core_kernel
 
 module C = Typing_continuations
 module Cont = Typing_per_cont_env
+module LEnvOps = Typing_per_cont_ops
 module Env = Typing_env
 module LEnv = Typing_lenv
 module Reason = Typing_reason
@@ -80,7 +81,7 @@ let union env delta1 delta2 =
     let env, (ty, eid) = LEnv.union env local1 local2 in
     let env, ty = Env.expand_type env ty in
     env, (ty, eid) in
-  let _env, delta = Cont.union_by_cont env union delta1 delta2 in
+  let _env, delta = LEnvOps.union_by_cont env union delta1 delta2 in
   delta
 
 (**

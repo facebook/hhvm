@@ -1,0 +1,6 @@
+File "is_in_loop.php", line 12, characters 10-16:
+Invalid return type (Typing[4110])
+File "is_in_loop.php", line 8, characters 50-50:
+Expected T
+File "is_in_loop.php", line 12, characters 14-14:
+But got B

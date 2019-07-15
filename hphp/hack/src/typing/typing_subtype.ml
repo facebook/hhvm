@@ -2132,7 +2132,7 @@ let subtype_method
     Phase.env_with_self env in
   let env, ft_super_no_tvars = Phase.localize_ft ~ety_env env ft_super in
   let env, ft_sub_no_tvars = Phase.localize_ft ~ety_env env ft_sub in
-  let old_tpenv = env.Env.lenv.Env.tpenv in
+  let old_tpenv = Env.get_tpenv env in
 
   (* We check constraint entailment and contravariant parameter/covariant result
    * subtyping in the context of the ft_super constraints. But we'd better

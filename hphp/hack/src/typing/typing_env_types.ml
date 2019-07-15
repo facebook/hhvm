@@ -32,14 +32,6 @@ type local_env = {
   local_reactive : reactivity;
   (* Local variables that were assigned in a `using` clause *)
   local_using_vars   : local_id_set_t;
-  (* Type parameter environment
-   * Lower and upper bounds on generic type parameters and abstract types
-   * For constraints of the form Tu <: Tv where both Tu and Tv are type
-   * parameters, we store an upper bound for Tu and a lower bound for Tv.
-   * Contrasting with tenv and subst, bounds are *assumptions* for type
-   * inference, not conclusions.
-   *)
-  tpenv              : tpenv;
 }
 
 let show_env _ = "<env>"

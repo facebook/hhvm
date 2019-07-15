@@ -20,3 +20,9 @@ val simplify_tpenv :
   (('a tparam * string) option * locl ty) list ->
   Typing_reason.t ->
   Env.env * locl ty SMap.t
+
+val join :
+  Env.env ->
+  Type_parameter_env.t ->
+  Type_parameter_env.t ->
+  Env.env * Type_parameter_env.t

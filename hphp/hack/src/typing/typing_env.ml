@@ -177,6 +177,10 @@ let get_shape_field_name_pos = function
   | Ast.SFlit_str (p, _)
   | Ast.SFclass_const ((p, _), _) -> p
 
+let next_cont_opt env = LEnvC.get_cont_option C.Next env.lenv.per_cont_env
+
+let next_cont_exn env = LEnvC.get_cont_exn C.Next env.lenv.per_cont_env
+
 let get_tpenv_lower_bounds tpenv name =
 match SMap.get name tpenv with
 | None -> empty_bounds
@@ -204,7 +208,9 @@ match SMap.get name tpenv with
 | Some {newable; _} -> newable
 
 let get_tpenv env =
-  env.lenv.tpenv
+  match next_cont_opt env with
+  | None -> Type_parameter_env.empty
+  | Some entry -> entry.Typing_per_cont_env.tpenv
 
 let get_lower_bounds env name =
   let tpenv = get_tpenv env in
@@ -285,7 +291,10 @@ let add_lower_bound_ tpenv name ty =
     SMap.add name { tp with lower_bounds = ty++tp.lower_bounds } tpenv
 
 let env_with_tpenv env tpenv =
-  { env with lenv = { env.lenv with tpenv = tpenv } }
+  { env with lenv =
+    { env.lenv with per_cont_env =
+      Typing_per_cont_env.(update_cont_entry C.Next env.lenv.per_cont_env
+      (fun entry -> { entry with tpenv = tpenv })) } }
 
 let env_with_global_tpenv env global_tpenv =
   { env with global_tpenv }
@@ -524,13 +533,11 @@ let env_with_locals env locals =
   }
 
 (* This is used whenever we start checking a method. Retain tpenv from the class type parameters *)
-
 let reinitialize_locals env =
-  env_with_locals env LEnvC.initial_locals
+  env_with_locals env LEnvC.(initial_locals { empty_entry with tpenv = get_tpenv env })
 
 let initial_local tpenv local_reactive = {
-  tpenv = tpenv;
-  per_cont_env = LEnvC.initial_locals;
+  per_cont_env = LEnvC.(initial_locals { empty_entry with tpenv = tpenv });
   local_using_vars = LID.Set.empty;
   local_mutability = LID.Map.empty;
   local_reactive = local_reactive;
@@ -857,10 +864,6 @@ let set_local_ env x ty =
   let per_cont_env = LEnvC.add_to_cont C.Next x ty env.lenv.per_cont_env in
   { env with lenv = { env.lenv with per_cont_env } }
 
-let next_cont_opt env = LEnvC.get_cont_option C.Next env.lenv.per_cont_env
-
-let next_cont_exn env = LEnvC.get_cont_exn C.Next env.lenv.per_cont_env
-
 (* We maintain 2 states for a local: the type
  * that the local currently has, and an expression_id generated from
  * the last assignment to this local.
@@ -886,14 +889,14 @@ let set_using_var env x =
     env.lenv with local_using_vars = LID.Set.add x env.lenv.local_using_vars } }
 
 let unset_local env local =
-  let {per_cont_env; local_using_vars; tpenv; local_mutability;
+  let {per_cont_env; local_using_vars; local_mutability;
     local_reactive; } = env.lenv in
   let per_cont_env = LEnvC.remove_from_cont C.Next local per_cont_env in
   let local_using_vars = LID.Set.remove local local_using_vars in
   let local_mutability = LID.Map.remove local local_mutability in
   let env = { env with
     lenv = {per_cont_env; local_using_vars;
-            tpenv; local_mutability; local_reactive} }
+            local_mutability; local_reactive} }
   in
   env
 

@@ -12,6 +12,7 @@ module Env = Typing_env
 open Typing_env
 module C = Typing_continuations
 module LEnvC = Typing_per_cont_env
+module LEnvOps = Typing_per_cont_ops
 module Union = Typing_union
 
 (*****************************************************************************)
@@ -52,13 +53,13 @@ let replace_cont env cont ctxopt =
 let restore_conts_from env fromlocals conts =
   let local_types = get_all_locals env in
   let local_types =
-    LEnvC.restore_conts_from local_types ~from:fromlocals conts in
+    LEnvOps.restore_conts_from local_types ~from:fromlocals conts in
   Env.env_with_locals env local_types
 
 let restore_and_merge_conts_from env fromlocals conts =
   let local_types = get_all_locals env in
   let env, local_types =
-    LEnvC.restore_and_merge_conts_from env union local_types ~from:fromlocals
+    LEnvOps.restore_and_merge_conts_from env union local_types ~from:fromlocals
     conts in
   Env.env_with_locals env local_types
 
@@ -66,7 +67,7 @@ let restore_and_merge_conts_from env fromlocals conts =
 * continuation with the result. *)
 let update_next_from_conts env cont_list =
   let local_types = get_all_locals env in
-  let env, local_types = LEnvC.update_next_from_conts env union local_types
+  let env, local_types = LEnvOps.update_next_from_conts env union local_types
     cont_list in
   Env.env_with_locals env local_types
 
@@ -74,22 +75,22 @@ let update_next_from_conts env cont_list =
 * the next continuation *)
 let save_and_merge_next_in_cont env cont =
   let local_types = get_all_locals env in
-  let env, local_types = LEnvC.save_and_merge_next_in_cont env union
+  let env, local_types = LEnvOps.save_and_merge_next_in_cont env union
     local_types cont in
   Env.env_with_locals env local_types
 
 let move_and_merge_next_in_cont env cont =
   let local_types = get_all_locals env in
-  let env, local_types = LEnvC.move_and_merge_next_in_cont env union
+  let env, local_types = LEnvOps.move_and_merge_next_in_cont env union
     local_types cont in
   Env.env_with_locals env local_types
 
-let union_contextopts = LEnvC.union_opts union
+let union_contextopts = LEnvOps.union_opts union
 
 let union_by_cont env lenv1 lenv2 =
   let locals1 = lenv1.per_cont_env in
   let locals2 = lenv2.per_cont_env in
-  let env, locals = LEnvC.union_by_cont env union locals1 locals2 in
+  let env, locals = LEnvOps.union_by_cont env union locals1 locals2 in
   Env.env_with_locals env locals
 
 let join_fake lenv1 lenv2 =
@@ -117,14 +118,12 @@ let merge_reactivity parent_lenv lenv1 lenv2 =
 let union_lenvs_ env parent_lenv lenv1 lenv2 =
   let fake_members = join_fake lenv1 lenv2 in
   let local_using_vars = parent_lenv.local_using_vars in
-  let tpenv = env.lenv.tpenv in
   let local_mutability = Typing_mutability_env.intersect_mutability
     parent_lenv.local_mutability lenv1.local_mutability lenv2.local_mutability in
   let local_reactive = merge_reactivity parent_lenv lenv1 lenv2 in
   let env = union_by_cont env lenv1 lenv2 in
   let lenv = { env.Env.lenv with
     local_using_vars;
-    tpenv;
     local_mutability;
     local_reactive;
   } in

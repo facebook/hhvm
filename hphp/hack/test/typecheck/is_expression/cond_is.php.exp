@@ -1,0 +1,6 @@
+File "cond_is.php", line 14, characters 10-16:
+Invalid return type (Typing[4110])
+File "cond_is.php", line 8, characters 44-44:
+Expected T
+File "cond_is.php", line 14, characters 14-14:
+But got B

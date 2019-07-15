@@ -8,6 +8,6 @@
 
 type host_env = unit
 
-let init _ _ = failwith "not implemented"
+let init ~cache_dir_path:_ ~num_workers:_ = failwith "not implemented"
 
-let run _ _ _ _ = failwith "not implemented"
+let run ~host_env:_ ~job:_ ~reduce:_ ~inputs:_ = failwith "not implemented"

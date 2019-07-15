@@ -378,7 +378,7 @@ let add_generic_parameters env tparaml =
     (List.fold_left tparaml ~f:add_empty_bounds ~init:(get_tpenv env))
 
 let is_generic_parameter env name =
-  SMap.mem name (get_tpenv env)
+  SMap.mem name (get_tpenv env) || SSet.mem name env.fresh_typarams
 
 let get_generic_parameters env =
   SMap.keys (SMap.union (get_tpenv env) env.global_tpenv)
@@ -476,6 +476,7 @@ let add_fresh_generic_parameter env prefix ~reified ~enforceable ~newable =
     let name = Printf.sprintf "%s#%d" prefix i in
     if is_generic_parameter env name then iterate (i+1) else name in
   let name = iterate 1 in
+  let env = { env with fresh_typarams = SSet.add name env.fresh_typarams } in
   let env =
     env_with_tpenv env
       (SMap.add name {lower_bounds = empty_bounds;
@@ -539,6 +540,7 @@ let empty tcopt file ~droot = {
   function_pos = Pos.none;
   tenv    = IMap.empty;
   subst   = IMap.empty;
+  fresh_typarams = SSet.empty;
   lenv    = initial_local SMap.empty Nonreactive;
   in_loop = false;
   in_try  = false;

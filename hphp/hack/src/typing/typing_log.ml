@@ -416,6 +416,7 @@ let env_as_value env =
     function_pos;
     tenv;
     subst;
+    fresh_typarams;
     lenv;
     genv;
     decl_env = _;
@@ -437,6 +438,7 @@ let env_as_value env =
     "tvenv", tvenv_as_value env tvenv;
     "tenv", tenv_as_value env tenv;
     "subst", subst_as_value subst;
+    "fresh_typarams", Set fresh_typarams;
     "tyvars_stack", tyvars_stack_as_value tyvars_stack;
     "lenv", lenv_as_value env lenv;
     "genv", genv_as_value env genv;

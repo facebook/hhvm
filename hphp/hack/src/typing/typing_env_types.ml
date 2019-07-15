@@ -87,6 +87,7 @@ type env = {
   function_pos: Pos.t;
   tenv    : locl_ty IMap.t ;
   subst   : int IMap.t ;
+  fresh_typarams : SSet.t;
   lenv    : local_env  ;
   genv    : genv       ;
   decl_env: Decl_env.env;

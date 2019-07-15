@@ -1,0 +1,1 @@
+Catchable fatal error: Property 'C::f' declared as type Baz, Foo assigned in %s/record-alias-prop-error.php on line 21

@@ -112,6 +112,16 @@ void VerifyRetTypeFail(int32_t id, TypedValue* value);
 void VerifyReifiedLocalTypeImpl(int32_t, ArrayData*);
 void VerifyReifiedReturnTypeImpl(TypedValue, ArrayData*);
 
+void VerifyParamRecDescImpl(const RecordDesc* rec,
+                            const RecordDesc* constraint,
+                            const TypeConstraint* expected,
+                            int param);
+void VerifyRetRecDescImpl(int32_t id,
+                          const RecordDesc* rec,
+                          const RecordDesc* constraint,
+                          const TypeConstraint* expected,
+                          TypedValue val);
+
 void raise_error_sd(const StringData* sd);
 
 TypedValue arrayIdxI(ArrayData*, int64_t, TypedValue);

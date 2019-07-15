@@ -501,7 +501,10 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
       case AnnotAction::Fail: return false;
       case AnnotAction::CallableCheck:
         return !ForProp && (Assert || is_callable(cellAsCVarRef(*val)));
-      case AnnotAction::ObjectCheck: break;
+      case AnnotAction::ObjectCheck:
+        assertx(td->type == AnnotType::Object);
+        c = td->klass;
+        break;
       case AnnotAction::VArrayCheck:
         assertx(tvIsArrayOrShape(val));
         return Assert || val.val().parr->isVArray();
@@ -522,14 +525,14 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
       case AnnotAction::ClsMethCheck:
         return false;
       case AnnotAction::RecordCheck:
-        // TODO (T41179180): Support record type aliases
-        return false;
+        assertx(result == AnnotAction::RecordCheck);
+        rec = td->rec;
+        break;
     }
-    assertx(result == AnnotAction::ObjectCheck);
-    assertx(td->type == AnnotType::Object);
-    // Fall through to the check below, since this could be a type
-    // alias to an enum type
-    c = td->klass;
+    assertx (result == AnnotAction::ObjectCheck ||
+             result == AnnotAction::RecordCheck);
+    // Fall through to the check below, since this could be a type alias to
+    // an enum type or a record
   }
 
   if (rec) {
@@ -553,9 +556,42 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
   return false;
 }
 
-template <bool Assert>
-bool TypeConstraint::checkTypeAliasObjImpl(const Class* cls) const {
-  assertx(isObject() && m_namedEntity && m_typeName);
+namespace {
+template <typename T>
+bool isValid(const TypeConstraint*);
+template <>
+bool isValid<Class>(const TypeConstraint* tc) { return tc->isObject(); }
+template <>
+bool isValid<RecordDesc>(const TypeConstraint* tc) { return tc->isRecord(); }
+
+template <typename T>
+bool isInstanceOf(const T*, const TypeAliasReq*);
+template<>
+bool isInstanceOf<Class>(const Class* type, const TypeAliasReq* td) {
+  return td->type == AnnotType::Object && td->klass &&
+    type->classof(td->klass);
+}
+template<>
+bool isInstanceOf<RecordDesc>(const RecordDesc* type, const TypeAliasReq* td) {
+  return td->type == AnnotType::Record && td->rec &&
+    type->recordDescOf(td->rec);
+}
+
+template<typename T>
+bool methodExists(const T*);
+template<>
+bool methodExists<Class>(const Class* cls) {
+  return cls->lookupMethod(s___invoke.get()) != nullptr;
+}
+template<> bool methodExists<RecordDesc>(const RecordDesc*) {
+  assertx(false);
+  return false;
+}
+} // end anonymous namespace
+
+template <typename T, bool Assert>
+bool TypeConstraint::checkTypeAliasImpl(const T* type) const {
+  assertx(isValid<T>(this) && m_namedEntity && m_typeName);
 
   // Look up the type alias (autoloading if necessary)
   // and fail if we can't find it
@@ -571,13 +607,12 @@ bool TypeConstraint::checkTypeAliasObjImpl(const Class* cls) const {
   // is compatible
   switch (getAnnotMetaType(td->type)) {
     case AnnotMetaType::Precise:
-      return td->type == AnnotType::Object && td->klass &&
-        cls->classof(td->klass);
+      return isInstanceOf(type, td);
     case AnnotMetaType::Mixed:
     case AnnotMetaType::Nonnull:
       return true;
     case AnnotMetaType::Callable:
-      return cls->lookupMethod(s___invoke.get()) != nullptr;
+      return methodExists(type);
     case AnnotMetaType::Nothing:
     case AnnotMetaType::NoReturn:
     case AnnotMetaType::Number:
@@ -598,8 +633,9 @@ bool TypeConstraint::checkTypeAliasObjImpl(const Class* cls) const {
   not_reached();
 }
 
-template bool TypeConstraint::checkTypeAliasObjImpl<false>(const Class*) const;
-template bool TypeConstraint::checkTypeAliasObjImpl<true>(const Class*) const;
+template
+bool TypeConstraint::checkTypeAliasImpl<RecordDesc, false>(
+    const RecordDesc*) const;
 
 template <TypeConstraint::CheckMode Mode>
 bool TypeConstraint::checkImpl(tv_rval val,
@@ -704,7 +740,7 @@ bool TypeConstraint::checkImpl(tv_rval val,
       return true;
     }
     return isObject() && !isPasses &&
-      checkTypeAliasObjImpl<isAssert>(val.val().pobj->getVMClass());
+      checkTypeAliasImpl<Class, isAssert>(val.val().pobj->getVMClass());
   }
 
   auto const result = annotCompat(val.type(), m_type, m_typeName);

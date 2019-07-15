@@ -123,6 +123,8 @@ bool CallSpec::verifySignature(const CallDest& dest,
       if (param <= TCls && args[argi].maybe(TNullptr)) continue;
       // Similarly for ArrayData|NullPtr
       if (param <= TArrLike && args[argi].maybe(TNullptr)) continue;
+      // Similarly for RecDesc|NullPtr
+      if (param <= TRecDesc && args[argi].maybe(TNullptr)) continue;
       // LdObjMethod{D,S} takes a TSmashable as uintptr_t.
       if (param <= TInt && args[argi] <= TSmashable) continue;
       fail(

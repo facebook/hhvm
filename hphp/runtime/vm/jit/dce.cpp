@@ -461,6 +461,7 @@ bool canDCE(IRInstruction* inst) {
   case LdClsTypeCns:
   case LdClsTypeCnsClsName:
   case LdRecDescCached:
+  case LdRecDescCachedSafe:
   case LdCns:
   case LookupCnsE:
   case LdClsCns:
@@ -553,6 +554,9 @@ bool canDCE(IRInstruction* inst) {
   case VerifyPropCls:
   case VerifyPropFail:
   case VerifyPropFailHard:
+  case VerifyParamRecDesc:
+  case VerifyRetRecDesc:
+  case VerifyPropRecDesc:
   case RaiseHackArrParamNotice:
   case RaiseHackArrPropNotice:
   case RaiseUninitLoc:

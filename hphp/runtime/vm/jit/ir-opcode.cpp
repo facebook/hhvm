@@ -548,6 +548,9 @@ bool opcodeMayRaise(Opcode opc) {
   case VerifyRetCls:
   case VerifyRetFail:
   case VerifyRetFailHard:
+  case VerifyParamRecDesc:
+  case VerifyRetRecDesc:
+  case VerifyPropRecDesc:
     return true;
 
   case AbsDbl:
@@ -814,6 +817,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdClosure:
   case LdClosureCtx:
   case LdClsCachedSafe:
+  case LdRecDescCachedSafe:
   case LdClsCctx:
   case LdClsCns:
   case LdClsCnsVecLen:

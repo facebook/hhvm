@@ -73,7 +73,8 @@ inline TypeAliasReq TypeAliasReq::From(Unit* unit, TypeAliasReq req,
 inline bool TypeAliasReq::same(const TypeAliasReq& req) const {
   return (invalid && req.invalid) ||
          (type == AnnotType::Mixed && req.type == AnnotType::Mixed) ||
-         (type == req.type && nullable == req.nullable && klass == req.klass);
+         (type == req.type && nullable == req.nullable &&
+          klass == req.klass && rec == req.rec);
 }
 
 inline bool operator==(const TypeAliasReq& l,

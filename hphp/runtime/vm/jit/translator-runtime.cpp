@@ -442,6 +442,33 @@ static bool VerifyTypeSlowImpl(const Class* cls,
   return expected->checkTypeAliasObj(cls);
 }
 
+ALWAYS_INLINE
+static bool verifyRecDescImpl(const RecordDesc* rec,
+                              const RecordDesc* constraint,
+                              const TypeConstraint* tc) {
+  if (constraint) return rec->recordDescOf(constraint);
+  return tc->checkTypeAliasRecord(rec);
+}
+
+void VerifyParamRecDescImpl(const RecordDesc* rec,
+                            const RecordDesc* constraint,
+                            const TypeConstraint* tc,
+                            int param) {
+  if (UNLIKELY(!verifyRecDescImpl(rec, constraint, tc))) {
+    VerifyParamTypeFail(param);
+  }
+}
+
+void VerifyRetRecDescImpl(int32_t id,
+                          const RecordDesc* rec,
+                          const RecordDesc* constraint,
+                          const TypeConstraint* tc,
+                          TypedValue tv) {
+  if (UNLIKELY(!verifyRecDescImpl(rec, constraint, tc))) {
+    VerifyRetTypeFail(id, &tv);
+  }
+}
+
 void VerifyParamTypeSlow(const Class* cls,
                          const Class* constraint,
                          const TypeConstraint* expected,

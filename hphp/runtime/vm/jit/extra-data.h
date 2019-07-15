@@ -838,6 +838,26 @@ struct RetCtrlData : IRExtraData {
 };
 
 /*
+ * Name of a record
+ */
+struct RecNameData : IRExtraData {
+  explicit RecNameData(const StringData* name)
+    : recName(name)
+  {}
+
+  std::string show() const {
+    return folly::to<std::string>(recName->data());
+  }
+
+  size_t hash() const { return recName->hash(); }
+  bool equals(const RecNameData& o) const {
+    return recName == o.recName;
+  }
+
+  const StringData* recName;
+};
+
+/*
  * Name of a class constant in a known class
  */
 struct ClsCnsName : IRExtraData {
@@ -1786,12 +1806,15 @@ X(Unreachable,                  AssertReason);
 X(EndBlock,                     AssertReason);
 X(VerifyRetCallable,            ParamData);
 X(VerifyRetCls,                 ParamData);
+X(VerifyRetRecDesc,             ParamData);
 X(VerifyRetFail,                ParamData);
 X(VerifyRetFailHard,            ParamData);
 X(VerifyReifiedLocalType,       ParamData);
 X(EndCatch,                     EndCatchData);
 X(FuncHasAttr,                  AttrData);
 X(LdMethCallerName,             MethCallerData);
+X(LdRecDescCached,              RecNameData);
+X(LdRecDescCachedSafe,          RecNameData);
 
 #undef X
 

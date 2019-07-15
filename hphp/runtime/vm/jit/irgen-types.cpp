@@ -74,6 +74,21 @@ SSATmp* ldClassSafe(IRGS& env, const StringData* className,
   );
 }
 
+SSATmp* ldRecDescSafe(IRGS& env, const StringData* recName) {
+  return cond(
+    env,
+    [&] (Block* taken) {
+      return gen(env, LdRecDescCachedSafe, RecNameData{recName}, taken);
+    },
+    [&] (SSATmp* rec) { // next
+      return rec;
+    },
+    [&] { // taken
+      return cns(env, nullptr);
+    }
+  );
+}
+
 /*
  * Returns a Bool value indicating if src (which must be <= TObj) is an
  * instance of the class given in className, or nullptr if we don't have an
@@ -164,6 +179,8 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
  * - Callable:  Emit code to verify that the given value is callable.
  * - VerifyCls: Emit code to verify that the given value is an instance of the
  *              given Class.
+ * - VerifyRecordDesc: Emit code to verify that the given value is an instance
+ *              of the given record.
  * - Giveup:    Called when the type check cannot be resolved statically. Either
  *              PUNT or call a runtime helper to do the check.
  *
@@ -179,6 +196,7 @@ template <typename GetVal,
           typename HackArr,
           typename Callable,
           typename VerifyCls,
+          typename VerifyRecordDesc,
           typename Giveup>
 void verifyTypeImpl(IRGS& env,
                     const TypeConstraint& tc,
@@ -193,6 +211,7 @@ void verifyTypeImpl(IRGS& env,
                     HackArr hackArr,
                     Callable callable,
                     VerifyCls verifyCls,
+                    VerifyRecordDesc verifyRecDesc,
                     Giveup giveup) {
   if (!tc.isCheckable() || (RuntimeOption::EvalThisTypeHintLevel == 0
                             && !propCls && tc.isThis())) {
@@ -332,18 +351,8 @@ void verifyTypeImpl(IRGS& env,
       return;
     case AnnotAction::RecordCheck:
       assertx(valType <= TRecord);
-      auto const tcRec = gen(env, LdRecDescCached, cns(env, tc.typeName()));
-      auto const valRec = gen(env, LdRecDesc, val);
-      ifThen(
-        env,
-        [&] (Block* taken) {
-          gen(env, JmpZero, taken, gen(env, InstanceOfRecDesc, valRec, tcRec));
-        },
-        [&] {
-          hint(env, Block::Hint::Unlikely);
-          genFail();
-        }
-      );
+      auto const checkRecDesc = ldRecDescSafe(env, tc.typeName());
+      verifyRecDesc(gen(env, LdRecDesc, val), checkRecDesc, val);
       return;
   }
   assertx(result == AnnotAction::ObjectCheck);
@@ -1515,6 +1524,18 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
         val
       );
     },
+    [&] (SSATmp* valRecDesc, SSATmp* checkRec, SSATmp* val) {
+      // Record/type-alias check
+      gen(
+        env,
+        VerifyRetRecDesc,
+        ParamData { id },
+        valRecDesc,
+        checkRec,
+        cns(env, uintptr_t(&tc)),
+        val
+      );
+    },
     [] { // Giveup
       PUNT(VerifyReturnType);
     }
@@ -1592,6 +1613,17 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
         cns(env, id)
       );
     },
+    [&] (SSATmp* valRecDesc, SSATmp* checkRec, SSATmp*) {
+      // Record/type-alias check
+      gen(
+        env,
+        VerifyParamRecDesc,
+        valRecDesc,
+        checkRec,
+        cns(env, uintptr_t(&tc)),
+        cns(env, id)
+      );
+    },
     [] { // Giveup
       PUNT(VerifyParamType);
     }
@@ -1664,6 +1696,17 @@ void verifyPropType(IRGS& env,
         cns(env, slot),
         checkCls,
         v,
+        cns(env, isSProp)
+      );
+    },
+    [&] (SSATmp*, SSATmp* checkRec, SSATmp* val) { // Record/type-alias check
+      gen(
+        env,
+        VerifyPropRecDesc,
+        cls,
+        cns(env, slot),
+        checkRec,
+        val,
         cns(env, isSProp)
       );
     },

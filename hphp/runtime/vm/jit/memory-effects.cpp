@@ -814,6 +814,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VerifyParamCallable:
   case VerifyParamCls:
   case VerifyParamFailHard:
+  case VerifyParamRecDesc:
     return may_load_store(AUnknown, AHeapAny);
   // VerifyParamFail might coerce the parameter to the desired type rather than
   // throwing.
@@ -836,6 +837,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VerifyRetCallable:
   case VerifyRetCls:
   case VerifyReifiedReturnType:
+  case VerifyRetRecDesc:
     return may_load_store(AHeapAny, AHeapAny);
 
   case VerifyRetFail:
@@ -846,6 +848,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VerifyPropFail:
   case VerifyPropFailHard:
   case VerifyProp:
+  case VerifyPropRecDesc:
     return may_load_store(AHeapAny, AHeapAny);
 
   case CallUnpack:
@@ -1941,6 +1944,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdContField:
   case LdContResumeAddr:
   case LdClsCachedSafe:
+  case LdRecDescCachedSafe:
   case LdClsInitData:
   case UnwindCheckSideExit:
   case LdCns:

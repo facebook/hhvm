@@ -1,0 +1,1 @@
+--ffile=hphp/test/quick/record-alias.inc --ffile=hphp/test/quick/record-alias2.inc -vRuntime.Eval.HackRecords=true

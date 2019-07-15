@@ -1,0 +1,1 @@
+Catchable fatal error: Argument 1 passed to myfunc() must be an instance of Baz, Foo given in %s/record-alias-param-error.php on line 20

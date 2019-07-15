@@ -148,7 +148,7 @@ constexpr const char* errorString<RecordDesc>() {
 
 template<class T>
 const T* lookupKnownType(rds::Handle cache_handle,
-                              const StringData* name) {
+                         const StringData* name) {
   assertx(rds::isNormalHandle(cache_handle));
   // The caller should already have checked.
   assertx(!rds::isHandleInit(cache_handle));
@@ -270,11 +270,12 @@ void cgLdClsCached(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgLdRecDescCached(IRLS& env, const IRInstruction* inst) {
-  auto const name = inst->src(0)->strVal();
+  auto const extra = inst->extra<LdRecDescCached>();
 
-  implLdCached<RecordDesc>(env, inst, name, [&] (Vout& v, rds::Handle ch) {
+  implLdCached<RecordDesc>(env, inst, extra->recName,
+                           [&] (Vout& v, rds::Handle ch) {
     auto const ptr = v.makeReg();
-    auto const args = argGroup(env, inst).imm(ch).ssa(0);
+    auto const args = argGroup(env, inst).imm(ch).immPtr(extra->recName);
     cgCallHelper(v, env, CallSpec::direct(lookupKnownType<RecordDesc>),
                  callDest(ptr), SyncOptions::Sync, args);
     return ptr;
@@ -296,6 +297,11 @@ void cgLookupFuncCached(IRLS& env, const IRInstruction* inst) {
 void cgLdClsCachedSafe(IRLS& env, const IRInstruction* inst) {
   auto const name = inst->src(0)->strVal();
   implLdCachedSafe<Class>(env, inst, name);
+}
+
+void cgLdRecDescCachedSafe(IRLS& env, const IRInstruction* inst) {
+  auto const name = inst->extra<LdRecDescCachedSafe>()->recName;
+  implLdCachedSafe<RecordDesc>(env, inst, name);
 }
 
 IMPL_OPCODE_CALL(LookupClsRDS)

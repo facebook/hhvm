@@ -403,7 +403,11 @@ struct TypeConstraint {
   bool alwaysPasses(DataType dt) const;
 
   bool checkTypeAliasObj(const Class* cls) const {
-    return checkTypeAliasObjImpl<false>(cls);
+    return checkTypeAliasImpl<Class, false>(cls);
+  }
+
+  bool checkTypeAliasRecord(const RecordDesc* rec) const {
+    return checkTypeAliasImpl<RecordDesc, false>(rec);
   }
 
   // NB: Can throw if the check fails.
@@ -456,8 +460,8 @@ private:
   template <bool, bool>
   bool checkNamedTypeNonObj(tv_rval val) const;
 
-  template <bool>
-  bool checkTypeAliasObjImpl(const Class* cls) const;
+  template <typename T, bool>
+  bool checkTypeAliasImpl(const T* type) const;
 
   void verifyFail(const Func* func, TypedValue* tv, int id,
                   bool useStrictTypes) const;

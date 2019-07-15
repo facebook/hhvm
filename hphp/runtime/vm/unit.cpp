@@ -1321,6 +1321,21 @@ bool Unit::defNativeConstantCallback(const StringData* cnsName,
 
 namespace {
 
+TypeAliasReq typeAliasFromRecordDesc(Unit* unit, const TypeAlias* thisType,
+                                     RecordDesc* rec) {
+  assertx(unit);
+  TypeAliasReq req;
+  req.unit = unit;
+  req.name = thisType->name;
+  req.nullable = thisType->nullable;
+  req.type = AnnotType::Record;
+  req.rec = rec;
+  req.userAttrs = thisType->userAttrs;
+  assertx(thisType->typeStructure.isDictOrDArray());
+  req.typeStructure = thisType->typeStructure;
+  return req;
+}
+
 TypeAliasReq typeAliasFromClass(Unit* unit, const TypeAlias* thisType,
                                 Class *klass) {
   assertx(unit);
@@ -1386,6 +1401,10 @@ TypeAliasReq resolveTypeAlias(Unit* unit, const TypeAlias* thisType) {
     return TypeAliasReq::From(unit, *targetTd, *thisType);
   }
 
+  if (auto rec = Unit::lookupRecordDesc(targetNE)) {
+    return typeAliasFromRecordDesc(unit, thisType, rec);
+  }
+
   if (AutoloadHandler::s_instance->autoloadNamedType(
         StrNR(const_cast<StringData*>(typeName))
       )) {
@@ -1395,7 +1414,9 @@ TypeAliasReq resolveTypeAlias(Unit* unit, const TypeAlias* thisType) {
     if (auto targetTd = targetNE->getCachedTypeAlias()) {
       return TypeAliasReq::From(unit, *targetTd, *thisType);
     }
-    // TODO (T41179180): Support record type aliases
+    if (auto rec = Unit::lookupRecordDesc(targetNE)) {
+      return typeAliasFromRecordDesc(unit, thisType, rec);
+    }
   }
 
   return TypeAliasReq::Invalid(unit);

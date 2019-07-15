@@ -42,24 +42,42 @@ TRACE_SET_MOD(irlower);
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
+template<typename T>
+constexpr Type getType();
+template<>
+constexpr Type getType<Class>() { return TCls; }
+template<>
+constexpr Type getType<RecordDesc>() { return TRecDesc; }
 
-void implVerifyCls(IRLS& env, const IRInstruction* inst) {
-  auto const cls = inst->src(0);
+template<typename T>
+const T* constVal(SSATmp*);
+template<>
+const Class* constVal<Class>(SSATmp* cls) { return cls->clsVal(); }
+// Records do not have constant value yet. This will never be called.
+template<>
+const RecordDesc* constVal<RecordDesc>(SSATmp*) {
+  always_assert(false);
+  return nullptr;
+}
+
+template<typename T>
+void implVerifyType(IRLS& env, const IRInstruction* inst) {
+  auto const type = inst->src(0);
   auto const constraint = inst->src(1);
   auto& v = vmain(env);
 
-  if (cls->hasConstVal() && constraint->hasConstVal(TCls)) {
-    if (cls->clsVal() != constraint->clsVal()) {
+  if (type->hasConstVal() && constraint->hasConstVal(getType<T>())) {
+    if (constVal<T>(type) != constVal<T>(constraint)) {
       cgCallNative(v, env, inst);
     }
     return;
   }
 
-  auto const rcls = srcLoc(env, inst, 0).reg();
+  auto const rtype = srcLoc(env, inst, 0).reg();
   auto const rconstraint = srcLoc(env, inst, 1).reg();
   auto const sf = v.makeReg();
 
-  v << cmpq{rconstraint, rcls, sf};
+  v << cmpq{rconstraint, rtype, sf};
 
   // The native call for this instruction is the slow path that does proper
   // subtype checking.  The comparisons above are just to short-circuit the
@@ -79,10 +97,17 @@ IMPL_OPCODE_CALL(VerifyReifiedLocalType)
 IMPL_OPCODE_CALL(VerifyReifiedReturnType)
 
 void cgVerifyParamCls(IRLS& env, const IRInstruction* inst) {
-  implVerifyCls(env, inst);
+  implVerifyType<Class>(env, inst);
 }
 void cgVerifyRetCls(IRLS& env, const IRInstruction* inst) {
-  implVerifyCls(env, inst);
+  implVerifyType<Class>(env, inst);
+}
+
+void cgVerifyParamRecDesc(IRLS& env, const IRInstruction* inst) {
+  implVerifyType<RecordDesc>(env, inst);
+}
+void cgVerifyRetRecDesc(IRLS& env, const IRInstruction* inst) {
+  implVerifyType<RecordDesc>(env, inst);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -116,6 +141,41 @@ static void verifyStaticPropFailImpl(const Class* objCls, Cell val, Slot slot) {
     true
   );
 }
+
+static void verifyPropRecDescImpl(const Class* objCls,
+                                  const RecordDesc* constraint,
+                                  RecordData* val,
+                                  Slot slot) {
+  assertx(slot < objCls->numDeclProperties());
+  auto const& tc = objCls->declProperties()[slot].typeConstraint;
+  assertx(tc.isRecord());
+  auto const success = [&]{
+    auto const valRec = val->record();
+    if (LIKELY(constraint != nullptr)) return valRec->recordDescOf(constraint);
+    return tc.checkTypeAliasRecord(valRec);
+  }();
+  if (!success) {
+    verifyPropFailImpl(objCls, make_tv<KindOfRecord>(val), slot);
+  }
+}
+
+static void verifyStaticPropRecDescImpl(const Class* objCls,
+                                        const RecordDesc* constraint,
+                                        RecordData* val,
+                                        Slot slot) {
+  assertx(slot < objCls->numStaticProperties());
+  auto const& tc = objCls->staticProperties()[slot].typeConstraint;
+  assertx(tc.isRecord());
+  auto const success = [&]{
+    auto const valRec = val->record();
+    if (LIKELY(constraint != nullptr)) return valRec->recordDescOf(constraint);
+    return tc.checkTypeAliasRecord(valRec);
+  }();
+  if (!success) {
+    verifyStaticPropFailImpl(objCls, make_tv<KindOfRecord>(val), slot);
+  }
+}
+
 
 static void verifyPropClsImpl(const Class* objCls,
                               const Class* constraint,
@@ -210,6 +270,22 @@ void cgVerifyPropCls(IRLS& env, const IRInstruction* inst) {
   );
 }
 
+void cgVerifyPropRecDesc(IRLS& env, const IRInstruction* inst) {
+  cgCallHelper(
+    vmain(env),
+    env,
+    inst->src(4)->boolVal()
+      ? CallSpec::direct(verifyStaticPropRecDescImpl)
+      : CallSpec::direct(verifyPropRecDescImpl),
+    kVoidDest,
+    SyncOptions::Sync,
+    argGroup(env, inst)
+      .ssa(0)
+      .ssa(2)
+      .ssa(3)
+      .ssa(1)
+  );
+}
 void cgVerifyProp(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(
     vmain(env),

@@ -49,12 +49,6 @@
 
 namespace HPHP {
 
-const VarNR null_varNR;
-const VarNR true_varNR(true);
-const VarNR false_varNR(false);
-const VarNR INF_varNR(std::numeric_limits<double>::infinity());
-const VarNR NEGINF_varNR(std::numeric_limits<double>::infinity());
-const VarNR NAN_varNR(std::numeric_limits<double>::quiet_NaN());
 const Variant empty_string_variant_ref(staticEmptyString(),
                                        Variant::PersistentStrInit{});
 

@@ -225,30 +225,30 @@ static Attr attrs_from_modifiers(int php_modifier, bool cls) {
 static void set_attrs(Array& ret, int modifiers) {
   if (modifiers & 0x100) {
     ret.set(s_access, VarNR(s_public).tv());
-    ret.set(s_accessible, true_varNR.tv());
+    ret.set(s_accessible, make_tv<KindOfBoolean>(true));
   } else if (modifiers & 0x200) {
     ret.set(s_access, VarNR(s_protected).tv());
-    ret.set(s_accessible, false_varNR.tv());
+    ret.set(s_accessible, make_tv<KindOfBoolean>(false));
   } else if (modifiers & 0x400) {
     ret.set(s_access, VarNR(s_private).tv());
-    ret.set(s_accessible, false_varNR.tv());
+    ret.set(s_accessible, make_tv<KindOfBoolean>(false));
   } else {
     assertx(false);
   }
   ret.set(s_modifiers, make_tv<KindOfInt64>(modifiers));
   if (modifiers & 0x1) {
-    ret.set(s_static, true_varNR.tv());
+    ret.set(s_static, make_tv<KindOfBoolean>(true));
   }
   if (modifiers & 0x44) {
-    ret.set(s_final, true_varNR.tv());
+    ret.set(s_final, make_tv<KindOfBoolean>(true));
   }
   if (modifiers & 0x22) {
-    ret.set(s_abstract, true_varNR.tv());
+    ret.set(s_abstract, make_tv<KindOfBoolean>(true));
   }
 }
 
 static void set_empty_doc_comment(Array& ret) {
-  ret.set(s_doc, false_varNR.tv());
+  ret.set(s_doc, make_tv<KindOfBoolean>(false));
 }
 
 static void set_doc_comment(Array& ret,
@@ -268,7 +268,7 @@ static void set_instance_prop_info(Array& ret,
                                    const Class::Prop* prop,
                                    const Variant& default_val) {
   ret.set(s_name, make_tv<KindOfPersistentString>(prop->name));
-  ret.set(s_default, true_varNR.tv());
+  ret.set(s_default, make_tv<KindOfBoolean>(true));
   ret.set(s_defaultValue, default_val);
   set_attrs(ret, get_modifiers(prop->attrs, false, true) & ~0x66);
   ret.set(s_class, make_tv<KindOfPersistentString>(prop->cls->name()));
@@ -278,7 +278,7 @@ static void set_instance_prop_info(Array& ret,
   if (user_type && user_type->size()) {
     ret.set(s_type, make_tv<KindOfPersistentString>(user_type));
   } else {
-    ret.set(s_type, false_varNR.tv());
+    ret.set(s_type, make_tv<KindOfBoolean>(false));
   }
 }
 
@@ -290,12 +290,12 @@ static void set_dyn_prop_info(
   set_attrs(ret, get_modifiers(AttrPublic, false, true) & ~0x66);
   ret.set(s_class, make_tv<KindOfPersistentString>(className));
   set_empty_doc_comment(ret);
-  ret.set(s_type, false_varNR.tv());
+  ret.set(s_type, make_tv<KindOfBoolean>(false));
 }
 
 static void set_static_prop_info(Array &ret, const Class::SProp* prop) {
   ret.set(s_name, make_tv<KindOfPersistentString>(prop->name));
-  ret.set(s_default, true_varNR.tv());
+  ret.set(s_default, make_tv<KindOfBoolean>(true));
   ret.set(s_defaultValue, prop->val);
   set_attrs(ret, get_modifiers(prop->attrs, false, true) & ~0x66);
   ret.set(s_class, make_tv<KindOfPersistentString>(prop->cls->name()));
@@ -304,7 +304,7 @@ static void set_static_prop_info(Array &ret, const Class::SProp* prop) {
   if (user_type && user_type->size()) {
     ret.set(s_type, make_tv<KindOfPersistentString>(user_type));
   } else {
-    ret.set(s_type, false_varNR.tv());
+    ret.set(s_type, make_tv<KindOfBoolean>(false));
   }
 }
 
@@ -729,9 +729,9 @@ static Array get_function_param_info(const Func* func) {
        fpi.typeConstraint.underlyingDataType() != KindOfObject
       )
     ) {
-      param.set(s_type_hint_builtin, true_varNR.tv());
+      param.set(s_type_hint_builtin, make_tv<KindOfBoolean>(true));
     } else {
-      param.set(s_type_hint_builtin, false_varNR.tv());
+      param.set(s_type_hint_builtin, make_tv<KindOfBoolean>(false));
     }
     param.set(s_function, make_tv<KindOfPersistentString>(func->name()));
     if (func->preClass()) {
@@ -744,10 +744,10 @@ static Array get_function_param_info(const Func* func) {
       );
     }
     if (!nonExtendedConstraint || fpi.typeConstraint.isNullable()) {
-      param.set(s_nullable, true_varNR.tv());
-      param.set(s_type_hint_nullable, true_varNR.tv());
+      param.set(s_nullable, make_tv<KindOfBoolean>(true));
+      param.set(s_type_hint_nullable, make_tv<KindOfBoolean>(true));
     } else {
-      param.set(s_type_hint_nullable, false_varNR.tv());
+      param.set(s_type_hint_nullable, make_tv<KindOfBoolean>(false));
     }
 
     if (fpi.phpCode) {
@@ -757,13 +757,13 @@ static Array get_function_param_info(const Func* func) {
     }
 
     if (func->byRef(i)) {
-      param.set(s_ref, true_varNR.tv());
+      param.set(s_ref, make_tv<KindOfBoolean>(true));
     }
     if ((func->isInOutWrapper() && func->byRef(i)) || fpi.inout) {
-      param.set(s_inout, true_varNR.tv());
+      param.set(s_inout, make_tv<KindOfBoolean>(true));
     }
     if (fpi.isVariadic()) {
-      param.set(s_is_variadic, true_varNR.tv());
+      param.set(s_is_variadic, make_tv<KindOfBoolean>(true));
     }
     {
       Array userAttrs = Array::Create();
@@ -815,9 +815,9 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getRetTypeInfo) {
     auto const func = ReflectionFuncHandle::GetFuncFor(this_);
     auto retType = func->returnTypeConstraint();
     if (retType.isNullable()) {
-      retTypeInfo.set(s_type_hint_nullable, true_varNR.tv());
+      retTypeInfo.set(s_type_hint_nullable, make_tv<KindOfBoolean>(true));
     } else {
-      retTypeInfo.set(s_type_hint_nullable, false_varNR.tv());
+      retTypeInfo.set(s_type_hint_nullable, make_tv<KindOfBoolean>(false));
     }
 
     if (
@@ -826,14 +826,14 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getRetTypeInfo) {
        retType.underlyingDataType() != KindOfObject
       )
     ) {
-      retTypeInfo.set(s_type_hint_builtin, true_varNR.tv());
+      retTypeInfo.set(s_type_hint_builtin, make_tv<KindOfBoolean>(true));
     } else {
-      retTypeInfo.set(s_type_hint_builtin, false_varNR.tv());
+      retTypeInfo.set(s_type_hint_builtin, make_tv<KindOfBoolean>(false));
     }
   } else {
     name = staticEmptyString();
-    retTypeInfo.set(s_type_hint_nullable, false_varNR.tv());
-    retTypeInfo.set(s_type_hint_builtin, false_varNR.tv());
+    retTypeInfo.set(s_type_hint_nullable, make_tv<KindOfBoolean>(false));
+    retTypeInfo.set(s_type_hint_builtin, make_tv<KindOfBoolean>(false));
   }
   retTypeInfo.set(s_type_hint, name);
   return retTypeInfo;
@@ -2191,7 +2191,7 @@ static void set_debugger_return_type_constraint(Array &ret, const StringData* re
     assertx(!retType->isRefCounted());
     ret.set(s_return_type, make_tv<KindOfPersistentString>(retType));
   } else {
-    ret.set(s_return_type, false_varNR.tv());
+    ret.set(s_return_type, make_tv<KindOfBoolean>(false));
   }
 }
 
@@ -2220,7 +2220,7 @@ static void set_debugger_reflection_function_info(Array& ret,
                                                   const Func* func) {
   // return type
   if (func->isBuiltin()) {
-    ret.set(s_internal, true_varNR.tv());
+    ret.set(s_internal, make_tv<KindOfBoolean>(true));
   }
   set_debugger_return_type_constraint(ret, func->returnUserType());
 
@@ -2244,7 +2244,7 @@ static void set_debugger_reflection_method_info(Array& ret, const Func* func,
   set_attrs(ret, get_modifiers(func->attrs(), false, false));
 
   if (isConstructor(func)) {
-    ret.set(s_constructor, true_varNR.tv());
+    ret.set(s_constructor, make_tv<KindOfBoolean>(true));
   }
 
   // If Func* is from a PreClass, it doesn't know about base classes etc.
@@ -2321,19 +2321,19 @@ Array get_class_info(const String& name) {
   // attributes
   {
     if (cls->attrs() & AttrBuiltin) {
-      ret.set(s_internal,  true_varNR.tv());
+      ret.set(s_internal,  make_tv<KindOfBoolean>(true));
     }
     if (cls->attrs() & AttrFinal) {
-      ret.set(s_final,     true_varNR.tv());
+      ret.set(s_final,     make_tv<KindOfBoolean>(true));
     }
     if (cls->attrs() & AttrAbstract) {
-      ret.set(s_abstract,  true_varNR.tv());
+      ret.set(s_abstract,  make_tv<KindOfBoolean>(true));
     }
     if (cls->attrs() & AttrInterface) {
-      ret.set(s_interface, true_varNR.tv());
+      ret.set(s_interface, make_tv<KindOfBoolean>(true));
     }
     if (cls->attrs() & AttrTrait) {
-      ret.set(s_trait,     true_varNR.tv());
+      ret.set(s_trait,     make_tv<KindOfBoolean>(true));
     }
     ret.set(s_modifiers, make_tv<KindOfInt64>(
       get_modifiers(cls->attrs(), true, false))
@@ -2343,7 +2343,7 @@ Array get_class_info(const String& name) {
         !(cls->attrs() & AttrAbstract) &&
         !(cls->attrs() & AttrInterface) &&
         !(cls->attrs() & AttrTrait)) {
-      ret.set(s_instantiable, true_varNR.tv());
+      ret.set(s_instantiable, make_tv<KindOfBoolean>(true));
     }
   }
 

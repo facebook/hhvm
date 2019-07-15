@@ -27,17 +27,10 @@ struct String;
 struct StaticString;
 struct Array;
 struct Variant;
-struct VarNR;
 
 #define uninit_variant    tvAsCVarRef(&immutable_uninit_base)
 #define init_null_variant tvAsCVarRef(&immutable_null_base)
 
-extern const VarNR null_varNR;
-extern const VarNR true_varNR;
-extern const VarNR false_varNR;
-extern const VarNR INF_varNR;
-extern const VarNR NEGINF_varNR;
-extern const VarNR NAN_varNR;
 extern const String null_string;
 extern const Array null_array;
 extern const StaticString array_string; // String("Array")

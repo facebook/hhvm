@@ -568,7 +568,7 @@ Array resolveShape(TSEnv& env,
     auto value = resolveTS(env, valueArr, typeCns, typeCnsCls, generics);
 
     if (wrapper.exists(s_optional_shape_field)) {
-      value.set(s_optional_shape_field, true_varNR.tv());
+      value.set(s_optional_shape_field, make_tv<KindOfBoolean>(true));
     }
 
     newfields.set(key, Variant(value));
@@ -601,7 +601,7 @@ bool resolveClass(TSEnv& env,
 
   ret.set(s_kind, Variant(static_cast<uint8_t>(resolvedKind)));
   ret.set(s_classname, Variant(makeStaticString(cls->name())));
-  if (clsName.same(s_this)) ret.set(s_exact, true_varNR.tv());
+  if (clsName.same(s_this)) ret.set(s_exact, make_tv<KindOfBoolean>(true));
 
   return true;
 }
@@ -619,9 +619,9 @@ Array resolveGenerics(TSEnv& env,
  * Copy modifiers, i.e. whether the type is nullable, soft, or a like-type.
  */
 void copyTypeModifiers(const Array& from, Array& to) {
-  if (from.exists(s_like))     to.set(s_like, true_varNR.tv());
-  if (from.exists(s_nullable)) to.set(s_nullable, true_varNR.tv());
-  if (from.exists(s_soft))     to.set(s_soft, true_varNR.tv());
+  if (from.exists(s_like))     to.set(s_like, make_tv<KindOfBoolean>(true));
+  if (from.exists(s_nullable)) to.set(s_nullable, make_tv<KindOfBoolean>(true));
+  if (from.exists(s_soft))     to.set(s_soft, make_tv<KindOfBoolean>(true));
 }
 
 Array resolveTS(TSEnv& env,
@@ -638,7 +638,7 @@ Array resolveTS(TSEnv& env,
   newarr.set(s_kind, Variant(static_cast<uint8_t>(kind)));
 
   if (arr.exists(s_allows_unknown_fields)) {
-    newarr.set(s_allows_unknown_fields, true_varNR.tv());
+    newarr.set(s_allows_unknown_fields, make_tv<KindOfBoolean>(true));
   }
 
   switch (kind) {

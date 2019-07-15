@@ -540,13 +540,13 @@ resolveTSStatically(ISS& env, SArray ts, const php::Class* declaringCls,
   auto const addModifiers = [&](ArrayData* result) {
     auto a = Array::attach(result);
     if (is_ts_like(ts) && !is_ts_like(a.get())) {
-      a.set(s_like, true_varNR.tv());
+      a.set(s_like, make_tv<KindOfBoolean>(true));
     }
     if (is_ts_nullable(ts) && !is_ts_nullable(a.get())) {
-      a.set(s_nullable, true_varNR.tv());
+      a.set(s_nullable, make_tv<KindOfBoolean>(true));
     }
     if (is_ts_soft(ts) && !is_ts_soft(a.get())) {
-      a.set(s_soft, true_varNR.tv());
+      a.set(s_soft, make_tv<KindOfBoolean>(true));
     }
     return a.detach();
   };

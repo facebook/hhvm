@@ -744,3 +744,6 @@ let soft_no_arguments =
 
 let no_legacy_soft_typehints =
   "The @ syntax for soft typehints is not allowed. Use the __Soft attribute instead."
+
+let static_const =
+  "Cannot declare constants static."

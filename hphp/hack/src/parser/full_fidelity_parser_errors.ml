@@ -3192,8 +3192,8 @@ let classish_errors env node namespace_name names errors =
     names, errors
   | _ -> names, errors
 
-  (* Checks for visibility modifiers on class constants *)
-  let class_constant_visibility_errors env node errors =
+  (* Checks for modifiers on class constants *)
+  let class_constant_modifier_errors env node errors =
     match syntax node with
     | ConstDeclaration { const_modifiers; _ } ->
       let has_abstract = methodish_contains_abstract node in
@@ -3207,6 +3207,11 @@ let classish_errors env node namespace_name names errors =
         multiple_modifiers_errors
           const_modifiers
           SyntaxError.const_has_duplicate_modifiers errors
+      in
+      let errors =
+        if methodish_contains_static node then
+          make_error_from_node node SyntaxError.static_const :: errors
+        else errors
       in
       if not (methodish_contains_visibility node) then
         errors
@@ -4031,7 +4036,7 @@ let find_syntax_errors env =
         trait_require_clauses, names, errors
       | ConstDeclaration _ ->
         let errors =
-          class_constant_visibility_errors env node errors in
+          class_constant_modifier_errors env node errors in
         trait_require_clauses, names, errors
       | AliasDeclaration _ ->
         let names, errors = alias_errors env node namespace_name names errors in

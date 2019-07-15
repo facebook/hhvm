@@ -721,7 +721,8 @@ module WithExpressionAndStatementAndTypeParser
     | Abstract
     | Public
     | Protected
-    | Private ->
+    | Private
+    | Static ->
         parse_methodish_or_property_or_const_or_type_const parser
     | Enum -> parse_class_enum parser
     | Final -> begin
@@ -733,7 +734,6 @@ module WithExpressionAndStatementAndTypeParser
           parse_methodish_or_property_or_type_constant parser attr
       end
     | Async
-    | Static
     | LessThanLessThan ->
       (* Parse methods, constructors, destructors, properties, or type constants. *)
       let (parser, attr) = parse_attribute_specification_opt parser in

@@ -227,8 +227,14 @@ namespace HH\ReifiedGenerics {
   /**
    * Returns the type structure representation of the reified type
    */
-  function getType<reify T>(): mixed {
+  function getTypeStructure<reify T>(): mixed {
     return ${'0ReifiedGenerics'}[0];
+  }
+
+  // Old API for getTypeStructure
+  // TODO(T46695073): Kill after next HHVM release
+  function getType<reify T>(): mixed {
+    return getTypeStructure<T>();
   }
 
   /**

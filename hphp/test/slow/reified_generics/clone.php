@@ -2,7 +2,7 @@
 
 class C<reify T> {
   function f() {
-    var_dump(HH\ReifiedGenerics\getType<T>());
+    var_dump(HH\ReifiedGenerics\getTypeStructure<T>());
   }
 }
 <<__EntryPoint>> function main(): void {

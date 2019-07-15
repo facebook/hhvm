@@ -34,8 +34,6 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define LV(v) tv_lval{v.asTypedValue()}
-
 /*
  * Flag indicating whether an array allocation should be pre-checked for OOM.
  */
@@ -1127,8 +1125,6 @@ Array make_keyset_array(Vals&&... vals) {
   make_array_detail::keyset_impl(init, std::forward<Vals>(vals)...);
   return init.toArray();
 }
-
-#undef LV
 
 ///////////////////////////////////////////////////////////////////////////////
 

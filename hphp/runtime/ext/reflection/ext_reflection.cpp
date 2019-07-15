@@ -651,14 +651,14 @@ static Variant HHVM_METHOD(ReflectionFunctionAbstract, getEndLine) {
   return func->line2();
 }
 
-static Variant HHVM_METHOD(ReflectionFunctionAbstract, getDocComment) {
+static TypedValue HHVM_METHOD(ReflectionFunctionAbstract, getDocComment) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
   auto const comment = func->docComment();
   if (comment == nullptr || comment->empty()) {
-    return false_varNR;
+    return make_tv<KindOfBoolean>(false);
   } else {
-    auto ret = const_cast<StringData*>(comment);
-    return VarNR(ret);
+    assertx(!comment->isRefCounted());
+    return make_tv<KindOfPersistentString>(const_cast<StringData*>(comment));
   }
 }
 
@@ -1111,17 +1111,19 @@ static int HHVM_METHOD(ReflectionClass, getModifiers) {
   return get_modifiers(cls->attrs(), true, false);
 }
 
-static Variant HHVM_METHOD(ReflectionClass, getFileName) {
+static TypedValue HHVM_METHOD(ReflectionClass, getFileName) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   if (cls->attrs() & AttrBuiltin) {
-    return false_varNR;
+    return make_tv<KindOfBoolean>(false);
   }
   auto file = cls->preClass()->unit()->filepath()->data();
   if (!file) { file = ""; }
   if (file[0] != '/') {
-    return String(RuntimeOption::SourceRoot + file);
+    String path(RuntimeOption::SourceRoot + file);
+    return make_tv<KindOfString>(path.detach());
   } else {
-    return String(file);
+    String path(file);
+    return make_tv<KindOfString>(path.detach());
   }
 }
 
@@ -1141,15 +1143,15 @@ static Variant HHVM_METHOD(ReflectionClass, getEndLine) {
   return cls->preClass()->line2();
 }
 
-static Variant HHVM_METHOD(ReflectionClass, getDocComment) {
+static TypedValue HHVM_METHOD(ReflectionClass, getDocComment) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   auto const pcls = cls->preClass();
   auto const comment = pcls->docComment();
   if (comment == nullptr || comment->empty()) {
-    return false_varNR;
+    return make_tv<KindOfBoolean>(false);
   } else {
-    auto ret = const_cast<StringData*>(comment);
-    return VarNR(ret);
+    assertx(!comment->isRefCounted());
+    return make_tv<KindOfPersistentString>(const_cast<StringData*>(comment));
   }
 }
 
@@ -1350,10 +1352,12 @@ static bool HHVM_METHOD(ReflectionClass, hasConstant, const String& name) {
   return cls->hasConstant(name.get());
 }
 
-static Variant HHVM_METHOD(ReflectionClass, getConstant, const String& name) {
+static TypedValue HHVM_METHOD(ReflectionClass, getConstant, const String& name) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   auto value = cls->clsCnsGet(name.get());
-  return (value.m_type == KindOfUninit) ? false_varNR : cellAsCVarRef(value);
+  if (value.m_type == KindOfUninit) return make_tv<KindOfBoolean>(false);
+  tvIncRefGen(value);
+  return value;
 }
 
 static

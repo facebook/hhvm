@@ -25,26 +25,26 @@ function array_sum/*<T>*/(/*Container<T>*/ $input)/*: num*/;
 function array_product/*<T>*/(/*Container<T>*/ $input)/*: num*/;
 
 <<__PHPStdLib>>
-function sort(inout Container<mixed> $arg, int $sort_flags = SORT_REGULAR): bool;
+function sort<T as Container<mixed>>(inout T $arg, int $sort_flags = SORT_REGULAR): bool;
 <<__PHPStdLib>>
-function rsort(inout Container<mixed> $arg, int $sort_flags = SORT_REGULAR): bool;
+function rsort<T as Container<mixed>>(inout T $arg, int $sort_flags = SORT_REGULAR): bool;
 <<__PHPStdLib>>
-function asort(inout KeyedContainer<arraykey,mixed> $arg, int $sort_flags = SORT_REGULAR): bool;
+function asort<T as KeyedContainer<arraykey, mixed>>(inout T $arg, int $sort_flags = SORT_REGULAR): bool;
 <<__PHPStdLib>>
-function arsort(inout KeyedContainer<arraykey,mixed> $arg, int $sort_flags = SORT_REGULAR): bool;
+function arsort<T as KeyedContainer<arraykey, mixed>>(inout T $arg, int $sort_flags = SORT_REGULAR): bool;
 <<__PHPStdLib>>
-function ksort(inout KeyedContainer<arraykey,mixed> $arg, int $sort_flags = SORT_REGULAR): bool;
+function ksort<T as KeyedContainer<arraykey, mixed>>(inout T $arg, int $sort_flags = SORT_REGULAR): bool;
 <<__PHPStdLib>>
-function krsort(inout KeyedContainer<arraykey,mixed> $arg, int $sort_flags = SORT_REGULAR): bool;
+function krsort<T as KeyedContainer<arraykey, mixed>>(inout T $arg, int $sort_flags = SORT_REGULAR): bool;
 // $c is a callable of type (function(Tv,Tv): bool)
 <<__PHPStdLib>>
-function usort(inout KeyedContainer<arraykey,mixed> $arg, mixed $c): bool;
+function usort<T as KeyedContainer<arraykey, mixed>>(inout T $arg, mixed $c): bool;
 // $c is a callable of type (function(Tv,Tv): bool)
 <<__PHPStdLib>>
-function uasort(inout KeyedContainer<arraykey,mixed> $arg, mixed $c): bool;
+function uasort<T as KeyedContainer<arraykey, mixed>>(inout T $arg, mixed $c): bool;
 // $c is a callable of type (function(Tk,Tk): bool)
 <<__PHPStdLib>>
-function uksort(inout KeyedContainer<arraykey,mixed> $arg, mixed $c): bool;
+function uksort<T as KeyedContainer<arraykey, mixed>>(inout T $arg, mixed $c): bool;
 
 }
 

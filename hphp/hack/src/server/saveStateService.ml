@@ -251,14 +251,12 @@ let save_state
       { env with ServerEnv.naming_table; }, result
     end else env, result
   | Some old_table_filename ->
-    (** If server is running from a loaded saved state, it's in-memory
+    (** If server is running from a loaded saved state, its in-memory
      * tracked depdnencies are incomplete - most of the actual dependencies
      * are in the SQL table. We need to copy that file and update it with
      * the in-memory edges. *)
     let t = Unix.gettimeofday () in
-    let content = RealDisk.cat old_table_filename in
-    let () = RealDisk.mkdir_p (Filename.dirname output_filename) in
-    let () = RealDisk.write_file ~file:db_name ~contents:content in
+    FileUtil.cp [ old_table_filename ] db_name;
     let _ : float = Hh_logger.log_duration "Made disk copy of loaded saved state. Took" t in
     update_save_state
       ~enable_naming_table_fallback

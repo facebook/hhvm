@@ -85,6 +85,7 @@ opam install \
   core_kernel.v0.11.1 \
   dtoa.0.3.1 \
   dune.1.10.0 \
+  fileutils.0.5.3 \
   lwt.4.1.0 \
   lwt_log.1.1.0 \
   lwt_ppx.1.2.1 \

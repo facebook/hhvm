@@ -139,6 +139,7 @@
   (libraries
     ast
     decl
+    fileutils
     heap_shared_mem
     parser
     search

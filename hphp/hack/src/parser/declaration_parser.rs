@@ -2130,7 +2130,8 @@ where
             | TokenKind::Abstract
             | TokenKind::Public
             | TokenKind::Protected
-            | TokenKind::Private => self.parse_methodish_or_property_or_const_or_type_const(),
+            | TokenKind::Private
+            | TokenKind::Static => self.parse_methodish_or_property_or_const_or_type_const(),
             TokenKind::Enum => self.parse_class_enum(false),
             TokenKind::Final => {
                 match self.peek_token_kind_with_lookahead(1) {
@@ -2143,7 +2144,7 @@ where
                     }
                 }
             }
-            TokenKind::Async | TokenKind::Static | TokenKind::LessThanLessThan => {
+            TokenKind::Async | TokenKind::LessThanLessThan => {
                 // Parse methods, constructors, destructors, properties, or type constants.
                 let attr = self.parse_attribute_specification_opt();
                 self.parse_methodish_or_property_or_type_constant(attr)

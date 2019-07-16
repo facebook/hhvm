@@ -189,18 +189,28 @@ struct Pipe final {
     if (pipe2(fds, flags) == -1) throwErrno("unable to open pipe");
   }
   ~Pipe() {
-    if (fds[0] != -1) close(fds[0]);
-    if (fds[1] != -1) close(fds[1]);
+    close();
   }
+
   FILE* detach(const char* mode) {
     auto ret = fdopen(fds[*mode == 'r' ? 0 : 1], mode);
     if (!ret) throwErrno("unable to fdopen pipe");
-    close(fds[*mode == 'r' ? 1 : 0]);
+    ::close(fds[*mode == 'r' ? 1 : 0]);
     fds[0] = fds[1] = -1;
     return ret;
   }
   int remoteIn() const { return fds[0]; }
   int remoteOut() const { return fds[1]; }
+  void close() {
+    if (fds[0] != -1) {
+      ::close(fds[0]);
+      fds[0] = -1;
+    }
+    if (fds[1] != -1) {
+      ::close(fds[1]);
+      fds[1] = -1;
+    }
+  }
   int fds[2];
 };
 
@@ -208,12 +218,12 @@ std::string readline(FILE* f);
 
 struct LogThread {
   LogThread(int pid, FILE* file)
-    : m_pid(pid), m_file(file), m_signalPipe(std::make_unique<Pipe>(true))
+    : m_pid(pid), m_file(file), m_signalPipe(true)
   {
     m_thread = std::make_unique<std::thread>([&]() {
         int ret = 0;
         auto pid = m_pid;
-        auto signalFD = m_signalPipe->remoteIn();
+        auto signalFD = m_signalPipe.remoteIn();
         try {
           pollfd pfd[] = {
             {fileno(m_file), POLLIN, 0},
@@ -249,13 +259,12 @@ struct LogThread {
   void stop() {
     if (m_thread && m_thread->joinable()) {
       SCOPE_EXIT {
-        m_signalPipe.reset();
+        m_signalPipe.close();
       };
 
       // Signal thread to exit.
-      write(m_signalPipe->remoteOut(), "X", 1);
+      write(m_signalPipe.remoteOut(), "X", 1);
       m_thread->join();
-      m_signalPipe.reset();
     }
 
     m_pid = kInvalidPid;
@@ -265,7 +274,7 @@ struct LogThread {
 private:
   int m_pid;
   FILE* m_file;
-  std::unique_ptr<Pipe> m_signalPipe;
+  Pipe m_signalPipe;
   std::unique_ptr<std::thread> m_thread;
 };
 

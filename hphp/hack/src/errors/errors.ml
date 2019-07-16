@@ -547,6 +547,8 @@ end
 let error_codes_treated_strictly = ref (ISet.of_list [])
 let is_strict_code code = ISet.mem code !error_codes_treated_strictly
 
+let use_new_type_errors = ref false
+
 let default_ignored_fixme_codes = ISet.of_list [
   Typing.err_code Typing.InvalidIsAsExpressionHint;
   Typing.err_code Typing.InvalidEnforceableTypeArgument;

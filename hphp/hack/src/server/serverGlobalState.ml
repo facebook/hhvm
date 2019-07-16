@@ -16,6 +16,7 @@ type t = {
     profile_log : bool;
     fixme_codes : ISet.t;
     strict_codes : ISet.t;
+    use_new_type_errors : bool;
     paths_to_ignore : Str.regexp list;
     no_load : bool;
     logging_init : unit -> unit;
@@ -30,6 +31,7 @@ let save ~logging_init = {
     profile_log = !Utils.profile;
     fixme_codes = !Errors.ignored_fixme_codes;
     strict_codes = !Errors.error_codes_treated_strictly;
+    use_new_type_errors = !Errors.use_new_type_errors;
     paths_to_ignore = FilesToIgnore.get_paths_to_ignore ();
     no_load = ServerLoadFlag.get_no_load ();
     logging_init;
@@ -44,6 +46,7 @@ let restore state =
   Utils.profile := state.profile_log;
   Errors.ignored_fixme_codes := state.fixme_codes;
   Errors.error_codes_treated_strictly := state.strict_codes;
+  Errors.use_new_type_errors := state.use_new_type_errors;
   FilesToIgnore.set_paths_to_ignore state.paths_to_ignore;
   ServerLoadFlag.set_no_load state.no_load;
   Errors.set_allow_errors_in_default_path false;
@@ -58,6 +61,7 @@ let to_string state =
   let profile_log = if state.profile_log then "true" else "false" in
   let fixme_codes = ISet.to_string state.fixme_codes in
   let strict_codes = ISet.to_string state.strict_codes in
+  let use_new_type_errors = if state.use_new_type_errors then "true" else "false" in
   (* OCaml regexps cannot be re-serialized to strings *)
   let paths_to_ignore = "(...)" in
   [
@@ -69,6 +73,7 @@ let to_string state =
     ("profile_log", profile_log);
     ("fixme_codes", fixme_codes);
     ("strict_codes", strict_codes);
+    ("use_new_type_errors", use_new_type_errors);
     ("paths_to_ignore", paths_to_ignore);
   ]
     |> List.map (fun (x, y) -> Printf.sprintf "%s : %s" x y)

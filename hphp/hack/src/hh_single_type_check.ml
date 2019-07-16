@@ -210,6 +210,7 @@ let parse_options () =
   let enable_class_level_where_clauses = ref false in
   let enable_constant_visibility_modifiers = ref false in
   let disable_legacy_soft_typehints = ref false in
+  let use_new_type_errors = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -439,7 +440,10 @@ let parse_options () =
       "Enable constant visibility modifiers";
     "--disable-legacy-soft-typehints",
       Arg.Set disable_legacy_soft_typehints,
-      "Disables the legacy @ syntax for soft typehints (use __Soft instead)"
+      "Disables the legacy @ syntax for soft typehints (use __Soft instead)";
+    "--use-new-type-errors",
+      Arg.Set use_new_type_errors,
+      "Splits off some categories of type errors into new error codes";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -479,6 +483,7 @@ let parse_options () =
     ~po_enable_class_level_where_clauses:!enable_class_level_where_clauses
     ~po_enable_constant_visibility_modifiers:!enable_constant_visibility_modifiers
     ~po_disable_legacy_soft_typehints:!disable_legacy_soft_typehints
+    ~use_new_type_errors:!use_new_type_errors
     ()
   in
   let tcopt = {
@@ -500,6 +505,8 @@ let parse_options () =
     ~quiet:true
     ~savedstate_file_opt:!symbolindex_file
     ~workers:None in
+
+  Errors.use_new_type_errors := !use_new_type_errors;
 
   ({ files = fns;
     mode = !mode;

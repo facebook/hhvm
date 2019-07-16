@@ -38,6 +38,8 @@ val default_ignored_fixme_codes : ISet.t
 val ignored_fixme_codes : ISet.t ref
 (* Error codes that should be treated strictly, regardless of their file mode. *)
 val error_codes_treated_strictly : ISet.t ref
+(* Flag that causes certain typing errors to be reported with different codes. *)
+val use_new_type_errors : bool ref
 val is_strict_code : int -> bool
 
 val set_allow_errors_in_default_path : bool -> unit

@@ -315,12 +315,15 @@ let load config_filename options =
     ?po_enable_constant_visibility_modifiers:(bool_opt "enable_constant_visibility_modifiers" config)
     ?po_disable_legacy_soft_typehints:(bool_opt "disable_legacy_soft_typehints" config)
     ?tco_use_lru_workers:(Some local_config.ServerLocalConfig.use_lru_workers)
+    ?use_new_type_errors:(bool_opt "use_new_type_errors" config)
     ()
   in
   Errors.ignored_fixme_codes :=
     (GlobalOptions.ignored_fixme_codes global_opts);
   Errors.error_codes_treated_strictly :=
     (GlobalOptions.error_codes_treated_strictly global_opts);
+  Errors.use_new_type_errors :=
+    (GlobalOptions.use_new_type_errors global_opts);
   {
     version = version;
     load_script_timeout = load_script_timeout;

@@ -32,6 +32,8 @@
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/native-prop-handler.h"
 
+#include "hphp/runtime/server/source-root-info.h"
+
 #include "hphp/runtime/ext/debugger/ext_debugger.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
@@ -621,18 +623,19 @@ void Reflection::ThrowReflectionExceptionObject(const Variant& message) {
 
 const StaticString s_ReflectionFuncHandle("ReflectionFuncHandle");
 
-static Variant HHVM_METHOD(ReflectionFunctionAbstract, getFileName) {
+static TypedValue HHVM_METHOD(ReflectionFunctionAbstract, getFileName) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
   if (func->isBuiltin()) {
-    return false;
+    return make_tv<KindOfBoolean>(false);
   }
-  auto file = func->unit()->filepath()->data();
-  if (!file) { file = ""; }
-  if (file[0] != '/') {
-    return String(RuntimeOption::SourceRoot + file);
-  } else {
-    return String(file);
+  auto file = func->unit()->filepath();
+  if (!file) file = staticEmptyString();
+  if (file->data()[0] != '/') {
+    auto path = SourceRootInfo::RelativeToPhpRoot(StrNR(file));
+    return make_tv<KindOfString>(path.detach());
   }
+  assertx(!file->isRefCounted());
+  return make_tv<KindOfPersistentString>(file);
 }
 
 static Variant HHVM_METHOD(ReflectionFunctionAbstract, getStartLine) {
@@ -1116,15 +1119,14 @@ static TypedValue HHVM_METHOD(ReflectionClass, getFileName) {
   if (cls->attrs() & AttrBuiltin) {
     return make_tv<KindOfBoolean>(false);
   }
-  auto file = cls->preClass()->unit()->filepath()->data();
-  if (!file) { file = ""; }
-  if (file[0] != '/') {
-    String path(RuntimeOption::SourceRoot + file);
-    return make_tv<KindOfString>(path.detach());
-  } else {
-    String path(file);
+  auto file = cls->preClass()->unit()->filepath();
+  if (!file) file = staticEmptyString();
+  if (file->data()[0] != '/') {
+    auto path = SourceRootInfo::RelativeToPhpRoot(StrNR(file));
     return make_tv<KindOfString>(path.detach());
   }
+  assertx(!file->isRefCounted());
+  return make_tv<KindOfPersistentString>(file);
 }
 
 static Variant HHVM_METHOD(ReflectionClass, getStartLine) {
@@ -2015,13 +2017,12 @@ static Array HHVM_METHOD(ReflectionTypeAlias, getAttributesNamespaced) {
 static String HHVM_METHOD(ReflectionTypeAlias, getFileName) {
   auto const req = ReflectionTypeAliasHandle::GetTypeAliasReqFor(this_);
   assertx(req);
-  auto file = req->unit->filepath()->data();
-  if (!file) { file = ""; }
-  if (file[0] != '/') {
-    return String(RuntimeOption::SourceRoot + file);
-  } else {
-    return String(file);
+  auto file = req->unit->filepath();
+  if (!file) file = staticEmptyString();
+  if (file->data()[0] != '/') {
+    return SourceRootInfo::RelativeToPhpRoot(StrNR(file));
   }
+  return String::attach(const_cast<StringData*>(file));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2173,17 +2174,21 @@ struct ReflectionExtension final : Extension {
 
 namespace DebuggerReflection {
 
-static bool set_debugger_source_info(Array &ret, const char *file, int line1,
-                                     int line2) {
-  if (!file) file = "";
-  if (file[0] != '/') {
-    ret.set(s_file, String(RuntimeOption::SourceRoot + file));
+namespace {
+
+void set_debugger_source_info(Array &ret, const StringData* file, int line1,
+                              int line2) {
+  if (!file) file = staticEmptyString();
+  if (file->data()[0] != '/') {
+    ret.set(s_file, SourceRootInfo::RelativeToPhpRoot(StrNR(file)));
   } else {
-    ret.set(s_file, file);
+    assertx(!file->isRefCounted());
+    ret.set(s_file, make_tv<KindOfPersistentString>(file));
   }
   ret.set(s_line1, make_tv<KindOfInt64>(line1));
   ret.set(s_line2, make_tv<KindOfInt64>(line2));
-  return file && *file;
+}
+
 }
 
 static void set_debugger_return_type_constraint(Array &ret, const StringData* retType) {
@@ -2260,7 +2265,7 @@ static void set_debugger_reflection_method_info(Array& ret, const Func* func,
   ret.set(s_class,
           make_tv<KindOfPersistentString>(resolved_func->implCls()->name()));
   set_debugger_reflection_function_info(ret, resolved_func);
-  set_debugger_source_info(ret, func->unit()->filepath()->data(),
+  set_debugger_source_info(ret, func->unit()->filepath(),
                            func->line1(), func->line2());
   set_debugger_reflection_method_prototype_info(ret, resolved_func);
 }
@@ -2274,7 +2279,7 @@ Array get_function_info(const String& name) {
 
   // setting parameters and static variables
   set_debugger_reflection_function_info(ret, func);
-  set_debugger_source_info(ret, func->unit()->filepath()->data(),
+  set_debugger_source_info(ret, func->unit()->filepath(),
                            func->line1(), func->line2());
   return ret;
 }
@@ -2449,7 +2454,7 @@ Array get_class_info(const String& name) {
 
   { // source info
     const PreClass* pcls = cls->preClass();
-    set_debugger_source_info(ret, pcls->unit()->filepath()->data(),
+    set_debugger_source_info(ret, pcls->unit()->filepath(),
                              pcls->line1(), pcls->line2());
     set_doc_comment(ret, pcls->docComment(), pcls->isBuiltin());
   }

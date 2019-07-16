@@ -92,7 +92,7 @@ opam install \
   ocp-indent.1.7.0 \
   pcre.7.3.4 \
   ppx_deriving.4.2.1 \
-  ppx_gen_rec.1.0.0 \
+  ppx_gen_rec.1.1.0 \
   sedlex.1.99.4 \
   sqlite3.4.4.1 \
   uchar.0.0.2 \

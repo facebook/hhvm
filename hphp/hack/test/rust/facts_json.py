@@ -49,26 +49,8 @@ def parse_args():
     ap.add_argument("--show-ok", action="store_true", help="show passing tests")
     ap.add_argument(
         "--skip-re",
-        default=r"|".join(
-            [
-                r"keyword_autocomplete/function_parameter\.php",
-                r"namespace_infinite_loop1\.php",
-                # TODO: remove lines below when HHBC mangling logic for XHP names
-                r".*xhp.*\.php",
-                r"typecheck/(wrong_fixme_format|extra_scope|attr_children)\.php",
-                r"typecheck/(string_expressions12|hh_fixme1[23]|generic_attr2)\.php",
-                r"(test_mutable_return5(_7)?|bad_inout_use_lvalue7)\.php",
-                r"(lint/ui_namespace_bad|doesnt_record_any_map_extraction)\.php",
-                r"(fileresponse|D2172778|full_analysis/zack_repro).php",
-                r"((href|style)_attrib|notification_renderer)\.php",
-                r"(userinput_to_img_src_attr|signed_uri|receiver_sinks|.*linkshim)\.php",
-                r"processed_data/display_.*\.php",
-                r"lsp_exchanges/completion_extras\.php",
-                r"(basic_nested_tag|XScheduleAsyncController)\.php",
-                r"ast_to_nast/classvar_properties.php",
-                r"ffp/tests/(extra_scope|decl_alias)\.php",
-            ]
-        ),
+        default=r"^$",
+        help="Skip input files matching this PERL-style Regular Expression",
     )
     ap.add_argument("passthrough_args", nargs="*")
     return ap.parse_args()
@@ -83,7 +65,7 @@ def find_hack_files(root: str, skip_re) -> Iterable[str]:
 
 def locate_binary_under_test(suffix) -> str:
     path = glob(get_fbcode_dir() + "/buck-out/**/hphp/hack/test/rust/" + suffix)
-    assert len(path) < 2, "Found {} binaries (try `buck clean` with suffix {}".format(
+    assert len(path) == 1, "Found {} binaries (try `buck clean`) with suffix {}".format(
         len(path), suffix
     )
     return path[0]
@@ -94,7 +76,7 @@ def test_all(paths: Iterable[str], args: List[str], on_failure, on_success):
         cmd = [locate_binary_under_test(suffix)] + args + ["--file-path", path]
         print("RUN: " + " ".join(map(shlex.quote, cmd)))
         obj = json.loads(subprocess.check_output(cmd))
-        return json.dumps(obj, sort_keys=True, indent=2).split("\n")
+        return json.dumps(obj, sort_keys=False, indent=2).split("\n")
 
     correct, total = 0, 0
     for path in paths:

@@ -26,10 +26,42 @@ pub fn extract_as_json(text: &str, opts: ExtractAsJsonOpts) -> Option<String> {
     from_text(text, opts).map(|facts| facts.to_json(text))
 }
 
+pub fn without_xhp_mangling<T>(f: impl FnOnce() -> T) -> T {
+    MANGLE_XHP_MODE.with(|cur| {
+        let old = cur.replace(false);
+        let ret = f();
+        cur.set(old); // use old instead of true to support nested calls in the same thread
+        ret
+    })
+}
+
 // implementation details
 
+use std::cell::Cell;
 use std::string::String;
 use Node::*; // Ensure String doesn't refer to Node::String
+
+thread_local!(static MANGLE_XHP_MODE: Cell<bool> = Cell::new(true));
+
+// TODO(leoo) move to hhbc_utils::Xhp::mangle_id​ once HHBC is ported
+fn mangle_xhp_id(mut name: String) -> String {
+    fn ignore_id(name: &str) -> bool {
+        name.starts_with("class@anonymous") || name.starts_with("Closure$")
+    }
+
+    fn is_xhp(name: &str) -> bool {
+        name.chars().next().map_or(false, |c| c == ':')
+    }
+
+    if !ignore_id(&name) && MANGLE_XHP_MODE.with(|x| x.get()) {
+        if is_xhp(&name) {
+            name.replace_range(..1, "xhp_")
+        }
+        name.replace(":", "__").replace("-", "_")
+    } else {
+        name
+    }
+}
 
 fn qualified_name(namespace: &str, name: Node) -> Option<String> {
     fn qualified_name_from_parts(namespace: &str, parts: Vec<Node>) -> Option<String> {
@@ -66,7 +98,7 @@ fn qualified_name(namespace: &str, name: Node) -> Option<String> {
         XhpName(name) => {
             // xhp names are always unqualified
             let name = String::from_utf8_lossy(&name).to_string();
-            Some(name) // TODO(leoo): need to port Hhbc_utils.Xhp.mangle_id
+            Some(mangle_xhp_id(name))
         }
         Node::QualifiedName(parts) => qualified_name_from_parts(namespace, parts),
         _ => None,
@@ -354,5 +386,37 @@ fn from_text(text: &str, opts: ExtractAsJsonOpts) -> Option<Facts> {
         None
     } else {
         Some(collect(("".to_owned(), Facts::default()), root).1)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn xhp_mangling() {
+        assert_eq!(mangle_xhp_id(":foo".into()), String::from("xhp_foo"));
+        assert_eq!(mangle_xhp_id("with-dash".into()), String::from("with_dash"));
+        assert_eq!(
+            mangle_xhp_id("test:colon".into()),
+            String::from("test__colon")
+        );
+        assert_eq!(
+            mangle_xhp_id(":a:all-in-one:example".into()),
+            String::from("xhp_a__all_in_one__example")
+        );
+    }
+
+    #[test]
+    fn xhp_mangling_control_allows_nesting() {
+        let name = String::from(":no:mangling");
+        without_xhp_mangling(|| {
+            assert_eq!(mangle_xhp_id(name.clone()), name);
+            without_xhp_mangling(|| {
+                assert_eq!(mangle_xhp_id(name.clone()), name);
+            });
+            assert_eq!(mangle_xhp_id(name.clone()), name);
+        });
+        assert_ne!(mangle_xhp_id(name.clone()), name);
     }
 }

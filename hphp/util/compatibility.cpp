@@ -83,8 +83,8 @@ int pipe2(int pipefd[2], int flags) {
   }
 
   if (flags & O_NONBLOCK) {
-    if (fcntl(pipefd[0], F_SETFD, O_NONBLOCK) == -1 ||
-        fcntl(pipefd[1], F_SETFD, O_NONBLOCK) == -1) {
+    if (fcntl(pipefd[0], F_SETFL, O_NONBLOCK) == -1 ||
+        fcntl(pipefd[1], F_SETFL, O_NONBLOCK) == -1) {
       close(pipefd[0]);
       close(pipefd[1]);
       return -1;

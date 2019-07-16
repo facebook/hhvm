@@ -1886,12 +1886,10 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         scanner: impl Fn(&mut Self) -> Option<Token::Trivia>,
     ) -> Vec<Token::Trivia> {
         let mut acc = vec![];
-        loop {
-            match scanner(self) {
-                None => return acc,
-                Some(t) => acc.push(t),
-            }
+        while let Some(t) = scanner(self) {
+            acc.push(t)
         }
+        acc
     }
 
     pub fn scan_leading_php_trivia(&mut self) -> Vec<Token::Trivia> {

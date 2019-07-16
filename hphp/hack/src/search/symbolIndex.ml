@@ -142,6 +142,7 @@ let find_matching_symbols
       si_name = "Yes_hh_server_is_alive";
       si_kind = SI_Unknown;
       si_filehash = 0L;
+      si_fullname = "";
     }]
   end else begin
 

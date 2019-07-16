@@ -378,6 +378,7 @@ let compute_complete_global
         res_base_class = None;
         res_ty = "namespace";
         res_name = string_to_replace_prefix name;
+        res_fullname = string_to_replace_prefix name;
         res_kind = Namespace_kind;
         func_details = None;
       })
@@ -524,6 +525,7 @@ let resolve_ty
     res_base_class  = x.base_class;
     res_ty          = desc_string;
     res_name        = name;
+    res_fullname    = name;
     res_kind        = x.kind_;
     func_details    = func_details;
   }
@@ -814,6 +816,7 @@ let find_global_results
         res_base_class  = None;
         res_ty          = (to_ty_string r);
         res_name        = r.si_name;
+        res_fullname    = r.si_fullname;
         res_kind        = (get_autocomplete_kind r);
         func_details    = None;
       } in

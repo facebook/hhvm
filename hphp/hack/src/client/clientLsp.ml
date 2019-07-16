@@ -1076,6 +1076,16 @@ let make_ide_completion_response
         | None -> Hh_json.JSON_Null
       in
       Some (Hh_json.JSON_Object [
+
+        (* Fullname is needed for namespaces.  We often trim namespaces to make
+         * the results more readable, such as showing "ad__breaks" instead of
+         * "Thrift\Packages\cf\ad__breaks".
+         *)
+        "fullname", Hh_json.JSON_String completion.res_fullname;
+
+        (* Filename/line/char/base_class are used to handle class methods.
+         * We could unify this with fullname in the future.
+         *)
         "filename", Hh_json.JSON_String filename;
         "line", Hh_json.int_ line;
         "char", Hh_json.int_ start;
@@ -1218,20 +1228,35 @@ let do_completionItemResolve
     match params.Completion.data with
     | None -> raise NoLocationFound
     | Some _ as data ->
+
+      (* Some docblocks are for class methods.  Class methods need to know
+       * file/line/column/base_class to find the docblock. *)
       let filename = Jget.string_exn data "filename" in
       let line = Jget.int_exn data "line" in
       let column = Jget.int_exn data "char" in
       let base_class = Jget.string_opt data "base_class" in
 
-      (* Some JSON messages will contain zeroes indicating location not known *)
-      if (line = 0 && column = 0) then raise NoLocationFound;
+      (* If not found ... *)
+      if (line = 0 && column = 0) then begin
 
-      (* Okay let's get a docblock for this specific location *)
-      let command = ServerCommandTypes.DOCBLOCK_AT
-        (filename, line, column, base_class, kind)
-      in
-      let%lwt raw_docblock = rpc conn ref_unblocked_time command in
-      Lwt.return raw_docblock
+        (* For global symbols such as functions, classes, enums, etc, we
+         * need to know the full name INCLUDING all namespaces.  Once
+         * we know that, we can look up its file/line/column. *)
+        let fullname = Jget.string_exn data "fullname" in
+        if fullname = "" then raise NoLocationFound;
+        let fullname = Utils.add_ns fullname in
+        let command = ServerCommandTypes.DOCBLOCK_FOR_SYMBOL (fullname, kind) in
+        let%lwt raw_docblock = rpc conn ref_unblocked_time command in
+        Lwt.return raw_docblock
+      end else begin
+
+        (* Okay let's get a docblock for this specific location *)
+        let command = ServerCommandTypes.DOCBLOCK_AT
+          (filename, line, column, base_class, kind)
+        in
+        let%lwt raw_docblock = rpc conn ref_unblocked_time command in
+        Lwt.return raw_docblock
+      end
 
   (* If that failed, fetch docblock using just the symbol name *)
   with _ ->

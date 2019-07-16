@@ -68,6 +68,7 @@ let make_class_completion (context:context) (replace_pos:Ide_api_types.range) (n
       res_base_class = None;
       res_ty = "class";
       res_name = name;
+      res_fullname = name;
       res_kind = Class_kind;
       func_details = None;
     })
@@ -82,6 +83,7 @@ let make_interface_completion (context:context) (replace_pos:Ide_api_types.range
       res_base_class = None;
       res_ty = "interface";
       res_name = name;
+      res_fullname = name;
       res_kind = Interface_kind;
       func_details = None;
     })
@@ -96,6 +98,7 @@ let make_trait_completion (context:context) (replace_pos:Ide_api_types.range) (n
       res_base_class = None;
       res_ty = "trait";
       res_name = name;
+      res_fullname = name;
       res_kind = Trait_kind;
       func_details = None;
     })

@@ -92,6 +92,7 @@ let read_si_results (stmt: Sqlite3.stmt): si_results =
       si_name = name;
       si_kind = kind;
       si_filehash = filehash;
+      si_fullname = name;
     } :: !results;
   done;
   !results

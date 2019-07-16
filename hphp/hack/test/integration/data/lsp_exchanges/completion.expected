@@ -80,6 +80,7 @@
             "newText": "ab:cd:alpha"
           },
           "data": {
+            "fullname": "ab:cd:alpha",
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 9,
             "char": 13,
@@ -106,6 +107,7 @@
             "newText": "ab:cd:text"
           },
           "data": {
+            "fullname": "ab:cd:text",
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 4,
             "char": 13,
@@ -141,6 +143,7 @@
             "newText": "ab:cd:alpha"
           },
           "data": {
+            "fullname": "ab:cd:alpha",
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 9,
             "char": 13,
@@ -167,6 +170,7 @@
             "newText": "ab:cd:text"
           },
           "data": {
+            "fullname": "ab:cd:text",
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 4,
             "char": 13,
@@ -202,6 +206,7 @@
             "newText": "ab:cd:alpha"
           },
           "data": {
+            "fullname": "ab:cd:alpha",
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 9,
             "char": 13,
@@ -228,6 +233,7 @@
             "newText": "ab:cd:text"
           },
           "data": {
+            "fullname": "ab:cd:text",
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 4,
             "char": 13,
@@ -263,6 +269,7 @@
             "newText": "width"
           },
           "data": {
+            "fullname": "width",
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 5,
             "char": 27,
@@ -289,6 +296,7 @@
             "newText": "color"
           },
           "data": {
+            "fullname": "color",
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 5,
             "char": 13,
@@ -324,6 +332,7 @@
             "newText": "width"
           },
           "data": {
+            "fullname": "width",
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 5,
             "char": 27,
@@ -350,6 +359,7 @@
             "newText": "color"
           },
           "data": {
+            "fullname": "color",
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 5,
             "char": 13,
@@ -386,6 +396,7 @@
             "newText": ":ab:cd:alpha"
           },
           "data": {
+            "fullname": ":ab:cd:alpha",
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 9,
             "char": 13,
@@ -413,6 +424,7 @@
             "newText": ":ab:cd:text"
           },
           "data": {
+            "fullname": ":ab:cd:text",
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 4,
             "char": 13,
@@ -449,6 +461,7 @@
             "newText": ":ab:cd:alpha"
           },
           "data": {
+            "fullname": ":ab:cd:alpha",
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 9,
             "char": 13,
@@ -476,6 +489,7 @@
             "newText": ":ab:cd:text"
           },
           "data": {
+            "fullname": ":ab:cd:text",
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 4,
             "char": 13,
@@ -533,6 +547,7 @@
             "newText": ":width"
           },
           "data": {
+            "fullname": ":width",
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 5,
             "char": 27,
@@ -559,6 +574,7 @@
             "newText": ":color"
           },
           "data": {
+            "fullname": ":color",
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 5,
             "char": 13,
@@ -594,6 +610,7 @@
             "newText": ":width"
           },
           "data": {
+            "fullname": ":width",
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 5,
             "char": 27,
@@ -620,6 +637,7 @@
             "newText": ":color"
           },
           "data": {
+            "fullname": ":color",
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 5,
             "char": 13,
@@ -656,6 +674,7 @@
             "newText": "test_function"
           },
           "data": {
+            "fullname": "test_function",
             "filename": "${root_path}${path_sep}completion.php",
             "line": 8,
             "char": 10,
@@ -721,6 +740,7 @@
             "newText": "class"
           },
           "data": {
+            "fullname": "class",
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 13,
             "char": 6,
@@ -747,6 +767,7 @@
             "newText": "Bard"
           },
           "data": {
+            "fullname": "Bard",
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 13,
             "char": 12,
@@ -773,6 +794,7 @@
             "newText": "Alonso"
           },
           "data": {
+            "fullname": "Alonso",
             "filename": "${root_path}${path_sep}completion_extras.php",
             "line": 13,
             "char": 12,
@@ -800,6 +822,7 @@
             "newText": "isValid"
           },
           "data": {
+            "fullname": "isValid",
             "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
             "line": 49,
             "char": 32,
@@ -827,6 +850,7 @@
             "newText": "getValues"
           },
           "data": {
+            "fullname": "getValues",
             "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
             "line": 34,
             "char": 32,
@@ -854,6 +878,7 @@
             "newText": "getNames"
           },
           "data": {
+            "fullname": "getNames",
             "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
             "line": 43,
             "char": 32,
@@ -881,6 +906,7 @@
             "newText": "coerce"
           },
           "data": {
+            "fullname": "coerce",
             "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
             "line": 56,
             "char": 32,
@@ -908,6 +934,7 @@
             "newText": "assertAll"
           },
           "data": {
+            "fullname": "assertAll",
             "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
             "line": 70,
             "char": 32,
@@ -935,6 +962,7 @@
             "newText": "assert"
           },
           "data": {
+            "fullname": "assert",
             "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
             "line": 63,
             "char": 32,
@@ -1013,6 +1041,7 @@
             "newText": "TestNS\\test_func"
           },
           "data": {
+            "fullname": "TestNS\\test_func",
             "filename": "${root_path}${path_sep}completion_extras_namespace.php",
             "line": 5,
             "char": 10,
@@ -1049,6 +1078,7 @@
             "newText": "interfaceDocBlockMethod"
           },
           "data": {
+            "fullname": "interfaceDocBlockMethod",
             "filename": "${root_path}${path_sep}completion.php",
             "line": 18,
             "char": 19,

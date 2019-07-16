@@ -70,6 +70,7 @@ let get_matches_for_node (node: nss_node): si_results =
       si_name = value.nss_name;
       si_kind = SI_Namespace;
       si_filehash = 0L;
+      si_fullname = value.nss_name;
     } :: acc
   ) node.nss_children []
 
@@ -115,6 +116,7 @@ let find_matching_namespaces
                     si_name = node.nss_name;
                     si_kind = SI_Namespace;
                     si_filehash = 0L;
+                    si_fullname = node.nss_name;
                   } :: !matches;
                 end
               ) !current_node.nss_children;

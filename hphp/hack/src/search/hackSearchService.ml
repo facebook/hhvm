@@ -273,6 +273,7 @@ let index_search
                 si_kind = kind;
                 si_name = name;
                 si_filehash = 0L;
+                si_fullname = name;
               }
             end else begin
               None

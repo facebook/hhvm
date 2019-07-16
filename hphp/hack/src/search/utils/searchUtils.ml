@@ -181,6 +181,7 @@ type si_item = {
   si_name: string;
   si_kind: si_kind;
   si_filehash: int64;
+  si_fullname: string;
 }
 
 (* Determine the best "ty" string for an item *)

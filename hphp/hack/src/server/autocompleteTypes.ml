@@ -44,6 +44,7 @@ type complete_autocomplete_result = {
     res_base_class  : string option;
     res_ty          : string;
     res_name        : string;
+    res_fullname    : string;
     res_kind        : autocomplete_kind;
     func_details    : func_details_result option;
   }

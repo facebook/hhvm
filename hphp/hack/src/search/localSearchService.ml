@@ -102,6 +102,7 @@ let search_local_symbols
         | SI_Class, Some SI_Interface -> SI_Interface
         | _ -> kind);
         si_filehash = (get_tombstone path);
+        si_fullname = symbol;
       } :: acc in
       if (List.length acc_new) >= max_results then
         raise (BreakOutOfScan acc_new)

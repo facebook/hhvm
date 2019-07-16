@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/check.h"
+#include "hphp/runtime/vm/jit/id-set.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/mutation.h"
@@ -1058,7 +1059,9 @@ void rewriteToParentFrameImpl(IRUnit& /*unit*/, IRInstruction& inst, F dead) {
   assertx(inst.is(LdClsRefCls, LdClsRefTS, StClsRefCls, StClsRefTS,
                   KillClsRefCls, KillClsRefTS));
 
-  auto fp = chaseFpTmp(inst.src(0));
+  // NB: We don't DCE DefLabels (yet), so we shouldn't get here if the
+  // frame pointer has come from one. That leaves only DefInlineFP.
+  auto fp = inst.src(0);
   assertx(fp->inst()->is(DefInlineFP));
 
   // Figure out the FPInvOffset of the stack pointer from the outermost frame
@@ -1097,12 +1100,18 @@ void rewriteToParentFrameImpl(IRUnit& /*unit*/, IRInstruction& inst, F dead) {
   // the outermost frame pointer, or if we find an inlined frame which is not
   // dead. This will be the frame pointer we rewrite the instruction to.
   do {
-    fp = chaseFpTmp(fp->inst()->src(1));
-  } while (!fp->inst()->is(DefFP) && dead(fp->inst()));
+    fp = fp->inst()->src(1);
+  } while (fp->inst()->is(DefInlineFP) && dead(fp->inst()));
+  assertx(!dead(fp->inst()));
+
+  // fp could be pointing at a DefLabel now. If necessary,
+  // canonicalize it to one of the DefLabel sources (an arbitrary one)
+  // so we can retrieve func and offsets properly.
+  auto const canon = chaseFpTmp(fp);
 
   // We can't rewrite clsref slots when the parent function was resumed as its
   // frame will no longer be on the stack.
-  assertx(fp->inst()->marker().resumeMode() == ResumeMode::None);
+  assertx(canon->inst()->marker().resumeMode() == ResumeMode::None);
 
   // Calculate the new offset (in bytes) that should be used to calculate the
   // new slot. Take the difference between the original frame pointer offset and
@@ -1131,9 +1140,9 @@ void rewriteToParentFrameImpl(IRUnit& /*unit*/, IRInstruction& inst, F dead) {
    */
 
   auto const newOffset =
-    cellsToBytes(origFpOffset - getFpOffsetFromTop(fp))
+    cellsToBytes(origFpOffset - getFpOffsetFromTop(canon))
     - frame_clsref_offset(origFunc, slot)
-    + frame_clsref_offset(getFunc(fp), 0);
+    + frame_clsref_offset(getFunc(canon), 0);
   assertx((newOffset % sizeof(cls_ref)) == 0);
   // Now that we have the new offset in bytes, convert it to an actual slot
   // number.
@@ -1145,8 +1154,8 @@ void rewriteToParentFrameImpl(IRUnit& /*unit*/, IRInstruction& inst, F dead) {
       cellsToBytes(origFpOffset.offset)
       - frame_clsref_offset(origFunc, slot);
     DEBUG_ONLY auto const newOffset =
-      cellsToBytes(getFpOffsetFromTop(fp).offset)
-      - frame_clsref_offset(getFunc(fp), newSlot);
+      cellsToBytes(getFpOffsetFromTop(canon).offset)
+      - frame_clsref_offset(getFunc(canon), newSlot);
     assertx(origOffset == newOffset);
   }
 
@@ -1331,13 +1340,13 @@ void optimizeActRecs(const BlockList& blocks,
 
 IRInstruction* resolveFpDefLabelImpl(
   const SSATmp* fp,
-  jit::flat_set<const IRInstruction*>& visited
+  IdSet<SSATmp>& visited
 ) {
   auto const inst = fp->inst();
   assertx(inst->is(DefLabel));
 
   // We already examined this, avoid loops.
-  if (visited.count(inst)) return nullptr;
+  if (visited[fp]) return nullptr;
 
   auto const dests = inst->dsts();
   auto const destIdx =
@@ -1359,7 +1368,7 @@ IRInstruction* resolveFpDefLabelImpl(
 
   // Otherwise we need to recursively look at the linked Phis, avoiding visiting
   // this Phi again.
-  visited.insert(inst);
+  visited.add(fp);
   inst->block()->forEachSrc(
     destIdx,
     [&] (const IRInstruction*, const SSATmp* tmp) {
@@ -1525,8 +1534,10 @@ void optimizeCatchBlocks(const BlockList& blocks,
 } // anonymous namespace
 
 IRInstruction* resolveFpDefLabel(const SSATmp* fp) {
-  jit::flat_set<const IRInstruction*> visited;
-  return resolveFpDefLabelImpl(fp, visited);
+  IdSet<SSATmp> visited;
+  auto const fpInst = resolveFpDefLabelImpl(fp, visited);
+  assertx(fpInst);
+  return fpInst;
 }
 
 void convertToStackInst(IRUnit& unit, IRInstruction& inst) {

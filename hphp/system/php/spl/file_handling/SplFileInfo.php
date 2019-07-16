@@ -330,7 +330,15 @@ class SplFileInfo {
    * @return     mixed   Returns the target of the filesystem link.
    */
   public function getLinkTarget() {
-    $link = @readlink($this->getPathname());
+    $old = error_reporting();
+    try {
+      error_reporting(0);
+      $link = readlink($this->getPathname());
+    } finally {
+      if (error_reporting() === 0) {
+        error_reporting($old);
+      }
+    }
     if ($link === false) {
       throw new Exception(
         'Unable to read link '.$this->getPathname()

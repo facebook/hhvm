@@ -347,7 +347,15 @@ class SplObjectStorage
    * @return     mixed   No value is returned.
    */
   public function unserialize($serialized) {
-    $arr = @unserialize($serialized);
+    $old = error_reporting();
+    try {
+      error_reporting(0);
+      $arr = unserialize($serialized);
+    } finally {
+      if (error_reporting() === 0) {
+        error_reporting($old);
+      }
+    }
 
     // check for error while unserializing.
     // we need to differentiate serialized(false) and false returned because of

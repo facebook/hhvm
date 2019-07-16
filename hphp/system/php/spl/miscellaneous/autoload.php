@@ -19,7 +19,15 @@ function spl_autoload(string $class, ?string $extensions = null) {
   );
   foreach ($extensions as $ext) {
     $filename = $normalized.$ext;
-    @include($filename);
+    $old = error_reporting();
+    try {
+      error_reporting(0);
+      include($filename);
+    } finally {
+      if (error_reporting() === 0) {
+        error_reporting($old);
+      }
+    }
     if (class_exists($class)) {
       return;
     }

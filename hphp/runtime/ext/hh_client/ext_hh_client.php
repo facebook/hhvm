@@ -211,8 +211,16 @@ function typecheck(string $client_name = 'hh_client'): TypecheckResult {
   // error (no cached time or the stamp doesn't exist). The latter will also
   // emit a warning, which we don't care about, so suppress it.
   $cached_time = \apc_fetch(CacheKeys::TIME_CACHE_KEY);
-  $time = (int)@\filemtime('/tmp/hh_server/stamp');
-
+  $old = \error_reporting();
+  try {
+    \error_reporting(0);
+    $file_time = \filemtime('/tmp/hh_server/stamp');
+  } finally {
+    if (\error_reporting() === 0) {
+      \error_reporting($old);
+    }
+  }
+  $time = (int)$file_time;
   // If we actually have something in cache, and the times match, use it. Note
   // that we still don't care if the stamp file actually exists -- we just treat
   // that as "time 0" (cast bool to int); it will stay zero as long as the file

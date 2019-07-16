@@ -64,7 +64,16 @@ class SplFileObject extends SplFileInfo
     }
     parent::__construct($filename);
     $this->filename = $filename;
-    $this->rsrc = @fopen($filename, $open_mode, $use_include_path, $context);
+    $old = error_reporting();
+    try {
+      error_reporting(0);
+      $rsrc = fopen($filename, $open_mode, $use_include_path, $context);
+    } finally {
+      if (error_reporting() === 0) {
+        error_reporting($old);
+      }
+    }
+    $this->rsrc = $rsrc;
     if (false === $this->rsrc) {
       throw new RuntimeException(
         __METHOD__.

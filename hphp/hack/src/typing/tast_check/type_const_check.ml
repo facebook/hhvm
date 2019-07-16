@@ -75,16 +75,13 @@ let php_array_visitor = object(this)
       end
 end
 
-let disallow_php_arrays_impl env attr_pos kind root_ty =
+let validate_type env root_ty emit_err =
   let should_suppress = ref false in
   let validate env ety_env ty =
     let state = php_array_visitor#on_type {env; ety_env; validity = Valid} ty in
     match state.validity with
       | Invalid (r, msg) ->
-        if not !should_suppress then
-          Errors.disallow_php_arrays_attr
-            kind (Reason.to_pos @@ fst root_ty) attr_pos (Reason.to_pos r) msg
-            ;
+        if not !should_suppress then emit_err (Reason.to_pos r) msg;
         should_suppress := true
       | Valid -> ()
   in
@@ -99,8 +96,13 @@ let disallow_php_arrays_impl env attr_pos kind root_ty =
   validate env ety_env root_ty
 
 let disallow_php_arrays env tc pos =
-  let check_php_arrays kind ty =
-    Option.iter ty (disallow_php_arrays_impl env pos kind)
+  let check_php_arrays kind ty_opt =
+    match ty_opt with
+    | Some ty ->
+      let ty_pos = Reason.to_pos (fst ty) in
+      let emit_err = Errors.disallow_php_arrays_attr kind ty_pos pos in
+      validate_type env ty emit_err
+    | None -> ()
   in
   check_php_arrays "type" tc.ttc_type;
   check_php_arrays "constraint" tc.ttc_constraint;

@@ -63,7 +63,8 @@ let verify_targ_valid env tparam targ =
   | Nast.Reified
   | Nast.SoftReified ->
     let p, _h = targ in
-    begin match Env.hint_to_ty env targ with
+    let ty = Env.hint_to_ty env targ in
+    begin match ty with
     | _, Tapply ((pw, h), [])
       when h = Naming_special_names.Typehints.wildcard && not (Env.get_allow_wildcards env) ->
       Errors.invalid_reified_argument tparam.tp_name pw "a wildcard"
@@ -90,7 +91,10 @@ let verify_targ_valid env tparam targ =
     | _, Tthis ->
       Errors.invalid_reified_argument tparam.tp_name p "the late static bound this type"
     | _, Taccess _ ->
-      Errors.invalid_reified_argument tparam.tp_name p "a type constant"
+      let emit_err =
+        Errors.invalid_reified_argument_disallow_php_arrays tparam.tp_name p
+      in
+      Type_const_check.validate_type env ty emit_err
     | _, Tprim _
     | _, Toption _
     | _, Tshape _

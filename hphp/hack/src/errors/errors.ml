@@ -2571,6 +2571,13 @@ let invalid_reified_argument (def_pos, def_name) arg_pos arg_kind =
     def_pos, def_name ^ " is reified"
   ]
 
+let invalid_reified_argument_disallow_php_arrays (def_pos, def_name) arg_pos ty_pos ty_msg =
+  add_list (Typing.err_code Typing.InvalidReifiedArgument) [
+    arg_pos, "PHP arrays cannot be used as a reified type argument";
+    ty_pos, String.capitalize ty_msg;
+    def_pos, def_name ^ " is reified"
+  ]
+
 let new_static_class_reified pos =
   add (Typing.err_code Typing.NewStaticClassReified) pos
     "Cannot call new static because the current class has reified generics"

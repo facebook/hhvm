@@ -5,7 +5,6 @@ class C<reify T> {}
 class X {
   <<__Enforceable>>
   const type Enf = int;
-
   const type NotEnf = int;
 
   const type X2 = C<this::Enf>;

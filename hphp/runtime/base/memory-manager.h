@@ -719,8 +719,8 @@ struct MemoryManager {
   /*
    * Heap iterator methods.  `fn' takes a HeapObject* argument.
    *
-   * initFree(): prepare to iterate by initializing free block headers,
-   *             initializing dead space past m_front, and sorting slabs.
+   * initFree(): prepare to iterate by initializing free block headers
+   *             and initializing dead space past m_front
    * reinitFree(): like initFree() but only update the freelists.
    * iterate(): Raw iterator loop over every HeapObject in the heap.
    *            Skips Holes and Slab headers. Clients can call this directly

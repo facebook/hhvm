@@ -308,7 +308,7 @@ inline int64_t cpu_ns() {
 NEVER_INLINE void Collector::init() {
   auto const t0 = cpu_ns();
   SCOPE_EXIT { init_ns_ = cpu_ns() - t0; };
-  tl_heap->initFree(); // calls HeapImpl::sort(), required below
+  tl_heap->initFree();
   initfree_ns_ = cpu_ns() - t0;
 
   slabs_range_ = heap_.slab_range();

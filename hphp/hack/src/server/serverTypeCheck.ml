@@ -786,8 +786,18 @@ end = functor(CheckKind:CheckKindType) -> struct
     let interrupt = get_interrupt_config genv env in
     let memory_cap = genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb in
     let fnl = Relative_path.Map.elements fast in
-    let errorl', env , cancelled = Typing_check_service.go_with_interrupt
-      genv.workers env.tcopt dynamic_view_files fnl ~interrupt ~memory_cap in
+    let errorl', env , cancelled = match genv.lru_host_env with
+      | Some (lru_host_env) ->
+        Typing_lru_check_service.go_with_interrupt
+          lru_host_env
+          env.tcopt
+          dynamic_view_files
+          fnl
+          ~interrupt
+      | None ->
+        Typing_check_service.go_with_interrupt
+          genv.workers env.tcopt dynamic_view_files fnl ~interrupt ~memory_cap
+    in
     (* Add new things that need to be rechecked *)
     let needs_recheck =
       Relative_path.Set.union env.needs_recheck lazy_check_later in

@@ -161,12 +161,20 @@ let type_check
 
     let (errorl: Errors.t) =
       let memory_cap = genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb in
-      Typing_check_service.go
-        genv.workers
-        env.tcopt
-        Relative_path.Set.empty
-        files_to_check
-        ~memory_cap
+      match genv.lru_host_env with
+      | Some (lru_host_env) ->
+        Typing_lru_check_service.go
+          lru_host_env
+          env.tcopt
+          Relative_path.Set.empty
+          files_to_check
+      | None ->
+        Typing_check_service.go
+          genv.workers
+          env.tcopt
+          Relative_path.Set.empty
+          files_to_check
+          ~memory_cap
     in
     let hs = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" hs;

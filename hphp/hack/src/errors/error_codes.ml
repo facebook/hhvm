@@ -239,6 +239,7 @@ module NastCheck                            = struct
   | ByRefParamOnConstruct
   | ByRefDynamicCall
   | ByRefProperty
+  | ByRefCall
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@ deriving enum, show { with_path = false } ]
   let err_code = to_enum

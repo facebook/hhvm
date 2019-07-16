@@ -42,6 +42,7 @@ type t = {
   tco_timeout : int;
   tco_disallow_invalid_arraykey : bool;
   tco_disallow_byref_dynamic_calls : bool;
+  tco_disallow_byref_calls : bool;
   po_disable_instanceof : bool;
   ignored_fixme_codes : ISet.t;
   ignored_fixme_regex : string option;
@@ -225,6 +226,7 @@ let default = {
  tco_timeout = 0;
  tco_disallow_invalid_arraykey = false;
  tco_disallow_byref_dynamic_calls = false;
+ tco_disallow_byref_calls = false;
  po_disable_instanceof = false;
  ignored_fixme_codes = Errors.default_ignored_fixme_codes;
  ignored_fixme_regex = None;
@@ -283,6 +285,7 @@ let make
   ?(tco_timeout = default.tco_timeout)
   ?(tco_disallow_invalid_arraykey = default.tco_disallow_invalid_arraykey)
   ?(tco_disallow_byref_dynamic_calls = default.tco_disallow_byref_dynamic_calls)
+  ?(tco_disallow_byref_calls = default.tco_disallow_byref_calls)
   ?(po_disable_instanceof = default.po_disable_instanceof)
   ?(ignored_fixme_codes = default.ignored_fixme_codes)
   ?ignored_fixme_regex
@@ -343,6 +346,7 @@ let make
   tco_timeout;
   tco_disallow_invalid_arraykey;
   tco_disallow_byref_dynamic_calls;
+  tco_disallow_byref_calls;
   po_disable_instanceof;
   log_levels;
   po_disable_lval_as_an_expression;
@@ -413,6 +417,7 @@ let tco_timeout t = t.tco_timeout
 let tco_disallow_invalid_arraykey t = t.tco_disallow_invalid_arraykey
 let tco_disallow_invalid_arraykey_constraint t = t.tco_disallow_invalid_arraykey_constraint
 let tco_disallow_byref_dynamic_calls t = t.tco_disallow_byref_dynamic_calls
+let tco_disallow_byref_calls t = t.tco_disallow_byref_calls
 let po_disable_instanceof t = t.po_disable_instanceof
 let ignored_fixme_codes t = t.ignored_fixme_codes
 let ignored_fixme_regex t = t.ignored_fixme_regex

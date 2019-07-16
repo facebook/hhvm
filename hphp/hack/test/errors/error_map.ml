@@ -238,6 +238,7 @@ ClassnameConstInstanceOf = 3076
 ByRefParamOnConstruct = 3077
 ByRefDynamicCall = 3078
 ByRefProperty = 3079
+ByRefCall = 3080
 
 Typing Errors:
 AbstractClassFinalDEPRECATED = 4001

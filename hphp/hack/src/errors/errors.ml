@@ -1541,6 +1541,10 @@ let byref_dynamic_call pos =
   add (NastCheck.err_code NastCheck.ByRefDynamicCall) pos
     "Arguments can not be passed by reference to dynamic function calls"
 
+let byref_call pos =
+  add (NastCheck.err_code NastCheck.ByRefCall) pos
+    "Arguments can not be passed by reference"
+
 let classname_const_instanceof class_name pos =
   add (NastCheck.err_code NastCheck.ClassnameConstInstanceOf) pos
     (class_name^"::class is redundant in an instanceof, just write '"^class_name^"'.")

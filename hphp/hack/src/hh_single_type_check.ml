@@ -194,6 +194,7 @@ let parse_options () =
   let ignore_collection_expr_type_arguments = ref (Some false) in
   let allow_ref_param_on_constructor = ref (Some false) in
   let disallow_byref_dynamic_calls = ref (Some false) in
+  let disallow_byref_calls = ref (Some false) in
   let set_bool x () = x := Some true in
   let pocket_universes = ref false in
   let shallow_class_decl = ref false in
@@ -404,6 +405,10 @@ let parse_options () =
       Arg.Unit (set_bool disallow_byref_dynamic_calls),
       "Disallow passing arguments by reference to dynamically called functions \
        [e.g. $foo(&$bar)]";
+    "--disallow-byref-calls",
+      Arg.Unit (set_bool disallow_byref_calls),
+      "Disallow passing arguments by reference in any form \
+       [e.g. foo(&$bar)]";
     "--pocket-universes",
       Arg.Set pocket_universes,
       "Enables support for Pocket Universes";
@@ -471,6 +476,7 @@ let parse_options () =
     ?tco_typecheck_xhp_cvars:(!typecheck_xhp_cvars)
     ?tco_ignore_collection_expr_type_arguments:(!ignore_collection_expr_type_arguments)
     ?tco_disallow_byref_dynamic_calls:(!disallow_byref_dynamic_calls)
+    ?tco_disallow_byref_calls:(!disallow_byref_calls)
     ?tco_disallow_invalid_arraykey_constraint:(!disallow_invalid_arraykey_constraint)
     ~tco_check_xhp_attribute:(!check_xhp_attribute)
     ~tco_shallow_class_decl:(!shallow_class_decl)

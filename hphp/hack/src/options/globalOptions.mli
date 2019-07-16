@@ -186,6 +186,12 @@ type t = {
    *)
   tco_disallow_byref_dynamic_calls : bool;
 
+  (*
+   * Produces an error if an arguments is passed by reference in any form
+   * [e.g. foo(&$bar)].
+   *)
+  tco_disallow_byref_calls : bool;
+
   (* Make usage of the `instanceof` operator a parse error. *)
   po_disable_instanceof : bool;
 
@@ -297,6 +303,7 @@ val make :
   ?tco_timeout: int ->
   ?tco_disallow_invalid_arraykey: bool ->
   ?tco_disallow_byref_dynamic_calls: bool ->
+  ?tco_disallow_byref_calls: bool ->
   ?po_disable_instanceof: bool ->
   ?ignored_fixme_codes: ISet.t ->
   ?ignored_fixme_regex: string ->
@@ -356,6 +363,7 @@ val tco_new_inference_lambda : t -> bool
 val tco_timeout : t -> int
 val tco_disallow_invalid_arraykey : t -> bool
 val tco_disallow_byref_dynamic_calls : t -> bool
+val tco_disallow_byref_calls : t -> bool
 val po_disable_instanceof : t -> bool
 val default : t
 val tco_experimental_instanceof : string

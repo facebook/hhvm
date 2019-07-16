@@ -291,6 +291,7 @@ let load config_filename options =
     ?tco_timeout:(int_opt "timeout" config)
     ?tco_disallow_invalid_arraykey:(bool_opt "disallow_invalid_arraykey" config)
     ?tco_disallow_byref_dynamic_calls:(bool_opt "disallow_byref_dynamic_calls" config)
+    ?tco_disallow_byref_calls:(bool_opt "disallow_byref_calls" config)
     ?po_disable_instanceof:(bool_opt "disable_instanceof" config)
     ?po_disable_lval_as_an_expression:(bool_opt "disable_lval_as_an_expression" config)
     ?tco_typecheck_xhp_cvars:(bool_opt "typecheck_xhp_cvars" config)

@@ -48,6 +48,8 @@ let is_dynamic_call func_expr =
 let check_call_expr env func_expr func_args =
   List.iter func_args begin fun (arg_pos, arg) ->
     match arg with
+    | Unop (Ast.Uref, _) when TypecheckerOptions.disallow_byref_calls env.tcopt ->
+        Errors.byref_call arg_pos
     | Unop (Ast.Uref, (_, (Class_get _ | Obj_get _))) ->
         Errors.byref_on_property arg_pos
     | Unop (Ast.Uref, _) when is_dynamic_call func_expr ->

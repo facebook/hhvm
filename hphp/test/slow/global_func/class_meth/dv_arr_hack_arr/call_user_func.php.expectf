@@ -1,0 +1,8 @@
+resource(4) of type (XboxTask)
+resource(4) of type (XboxTask)
+resource(4) of type (XboxTask)
+resource(4) of type (XboxTask)
+bool(true)
+int(4)
+string(8) "shutdown"
+string(8) "postSend"

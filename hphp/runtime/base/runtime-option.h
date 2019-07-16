@@ -1062,7 +1062,7 @@ struct RuntimeOption {
   /* Raise warning when class pointers are used as strings. */          \
   F(bool, RaiseClassConversionWarning, false)                           \
   F(bool, EmitClsMethPointers, false)                                   \
-  /* true to skip type refinement for ClsMeth type at HHBBC. */         \
+  /* false to skip type refinement for ClsMeth type at HHBBC. */        \
   F(bool, IsCompatibleClsMethType, false)                               \
   /* Raise warning when ClsMethDataRef is used as varray/vec. */        \
   F(bool, RaiseClsMethConversionWarning, false)                         \

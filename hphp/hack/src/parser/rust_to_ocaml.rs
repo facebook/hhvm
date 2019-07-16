@@ -183,12 +183,22 @@ where
             }
             _ => {
                 let tag = self.kind().ocaml_tag() as u8;
-                let children: Vec<Value> = self
-                    .children()
-                    .iter()
-                    .map(|x| x.to_ocaml(context))
-                    .collect();
-                caml_block(tag, &children)
+                // This could be much more readable by constructing a vector of children and
+                // passing it to caml_block, but the cost of this intermediate vector allocation is
+                // too big
+                let n = Self::fold_over_children(&|_, n| n + 1, 0, &self.syntax);
+                let result = ocamlpool_reserve_block(tag, n);
+                // Similarly, fold_over_children() avoids intermediate allocation done by children()
+                Self::fold_over_children(
+                    &|field, i| {
+                        let field = field.to_ocaml(context);
+                        memory::store_field(result, i, field);
+                        i + 1
+                    },
+                    0,
+                    &self.syntax,
+                );
+                result
             }
         };
         caml_tuple(&[syntax, value])

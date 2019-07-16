@@ -1,0 +1,6 @@
+File "str_interp_space.php", line 5, characters 10-13:
+The dollar sign ('$') cannot be used as a unary operator (Parsing[1002])
+File "str_interp_space.php", line 5, characters 10-10:
+Variable Variables are not legal (Parsing[1002])
+File "str_interp_space.php", line 6, characters 10-15:
+The ${x} syntax is disallowed in Hack. Use {$x} instead. (Parsing[1002])

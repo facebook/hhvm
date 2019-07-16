@@ -1170,6 +1170,8 @@ and pString2: expr_location -> node list -> env -> expr list =
     (* in PHP "${x}" in strings is treated as if it was written "$x",
        here we recognize pattern: Dollar; EmbeddedBracedExpression { QName (Token.Name) }
        produced by FFP and lower it into Lvar.
+       We are looking to remove "${x}" syntax in Hack in favor of "{$x}".
+       Currently this is a parser option.
     *)
     match l with
     | [] -> List.rev acc
@@ -1178,6 +1180,8 @@ and pString2: expr_location -> node list -> env -> expr list =
           embedded_braced_expression_expression = e; _ }; _
         } as expr_with_braces)::
       tl when Token.kind token = TK.Dollar ->
+        if (ParserOptions.disable_outside_dollar_str_interp env.parser_options) then
+          raise_parsing_error env (`Node expr_with_braces) SyntaxError.outside_dollar_str_interp;
         let e =
           begin match convert_name_to_lvar loc env e with
           | Some e -> e

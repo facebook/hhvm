@@ -372,3 +372,4 @@ val only_soft_allowed : string
 val soft_no_arguments : string
 val no_legacy_soft_typehints : string
 val static_const : string
+val outside_dollar_str_interp : string

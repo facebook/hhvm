@@ -747,3 +747,6 @@ let no_legacy_soft_typehints =
 
 let static_const =
   "Cannot declare constants static."
+
+let outside_dollar_str_interp =
+  "The ${x} syntax is disallowed in Hack. Use {$x} instead."

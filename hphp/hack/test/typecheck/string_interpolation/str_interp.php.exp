@@ -1,0 +1,2 @@
+File "str_interp.php", line 5, characters 10-14:
+The ${x} syntax is disallowed in Hack. Use {$x} instead. (Parsing[1002])

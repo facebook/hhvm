@@ -715,14 +715,20 @@ and typeconst_fold c ((typeconsts, consts) as acc) stc =
     let ts = typeconst_structure c stc in
     let consts = SMap.add name ts consts in
     let vis = visibility (snd c.sc_name) stc.stc_visibility in
+    let ptc_opt = SMap.get name typeconsts in
     let enforceable =
       (* Without the positions, this is a simple OR, but this way allows us to
        * report the position of the <<__Enforceable>> attribute to the user *)
       if snd stc.stc_enforceable
       then stc.stc_enforceable
-      else match SMap.get name typeconsts with
+      else match ptc_opt with
         | Some ptc -> ptc.ttc_enforceable
         | None -> Pos.none, false in
+    let disallow_php_arrays =
+      if stc.stc_disallow_php_arrays <> None
+      then stc.stc_disallow_php_arrays
+      else Option.bind ptc_opt (fun ptc -> ptc.ttc_disallow_php_arrays)
+    in
     let tc = {
       ttc_abstract = stc.stc_abstract;
       ttc_name = stc.stc_name;
@@ -731,6 +737,7 @@ and typeconst_fold c ((typeconsts, consts) as acc) stc =
       ttc_origin = c_name;
       ttc_enforceable = enforceable;
       ttc_visibility = vis;
+      ttc_disallow_php_arrays = disallow_php_arrays;
     } in
     let typeconsts = SMap.add (snd stc.stc_name) tc typeconsts in
     typeconsts, consts

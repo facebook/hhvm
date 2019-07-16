@@ -224,6 +224,7 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
     stc_type;
     stc_enforceable = ttc_enforceable;
     stc_visibility;
+    stc_disallow_php_arrays = ttc_disallow_php_arrays;
   } = stc in
   let constraint_ =
     if child_class = mro.mro_name then stc_constraint else
@@ -247,6 +248,7 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
       ttc_origin = mro.mro_name;
       ttc_enforceable;
       ttc_visibility;
+      ttc_disallow_php_arrays;
     }
   | _ ->
     {
@@ -257,5 +259,6 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
       ttc_origin = mro.mro_name;
       ttc_enforceable;
       ttc_visibility;
+      ttc_disallow_php_arrays;
     } in
   snd ttc_name, typeconst

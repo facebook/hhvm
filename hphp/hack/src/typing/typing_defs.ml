@@ -512,6 +512,7 @@ and typeconst_type = {
   ttc_type        : decl ty option;
   ttc_origin      : string;
   ttc_enforceable : Pos.t * bool;
+  ttc_disallow_php_arrays : Pos.t option;
 }
 
 and enum_type = {

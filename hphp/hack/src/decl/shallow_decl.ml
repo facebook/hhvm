@@ -77,17 +77,23 @@ let typeconst env c tc =
   | Ast_defs.Cinterface | Ast_defs.Cabstract | Ast_defs.Cnormal ->
       let constr = Option.map tc.c_tconst_constraint (Decl_hint.hint env) in
       let ty = Option.map tc.c_tconst_type (Decl_hint.hint env) in
+      let attributes = tc.c_tconst_user_attributes in
       let enforceable =
-        match Attrs.find SN.UserAttributes.uaEnforceable tc.c_tconst_user_attributes with
+        match Attrs.find SN.UserAttributes.uaEnforceable attributes with
         | Some { ua_name = (pos, _); _ } -> pos, true
         | None -> Pos.none, false in
+      let disallow_php_arrays =
+        match Attrs.find SN.UserAttributes.uaDisallowPHPArrays attributes with
+        | Some { ua_name = (pos, _); _ } -> Some pos
+        | None -> None in
       Some {
         stc_abstract = typeconst_abstract_kind env tc.c_tconst_abstract;
         stc_name = tc.c_tconst_name;
         stc_constraint = constr;
         stc_type = ty;
         stc_enforceable = enforceable;
-        stc_visibility = tc.c_tconst_visibility
+        stc_visibility = tc.c_tconst_visibility;
+        stc_disallow_php_arrays = disallow_php_arrays;
       }
 let make_xhp_attr cv = Option.map cv.cv_xhp_attr (fun xai -> {
   xa_tag = (match xai.xai_tag with

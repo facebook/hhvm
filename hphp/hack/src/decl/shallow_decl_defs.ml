@@ -25,6 +25,7 @@ type shallow_typeconst = {
   stc_type        : decl ty option;
   stc_enforceable : Pos.t * bool;
   stc_visibility  : Aast.visibility;
+  stc_disallow_php_arrays : Pos.t option;
 } [@@deriving show]
 
 type shallow_prop = {

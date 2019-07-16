@@ -2644,7 +2644,10 @@ OPTBLD_INLINE void iopCombineAndResolveTypeStruct(uint32_t n) {
 
 OPTBLD_INLINE void iopRecordReifiedGeneric() {
   auto const tsList = vmStack().topC();
-  assertx(tvIsVecOrVArray(tsList));
+  if (RuntimeOption::EvalHackArrDVArrs ?
+      !tvIsVec(tsList) : !tvIsArray(tsList)) {
+    raise_error("Invalid type-structure list in RecordReifiedGeneric");
+  }
   // recordReifiedGenericsAndGetTSList decrefs the tsList
   auto const result =
     jit::recordReifiedGenericsAndGetTSList(tsList->m_data.parr);
@@ -2658,7 +2661,10 @@ OPTBLD_INLINE void iopRecordReifiedGeneric() {
 
 OPTBLD_INLINE void iopReifiedName(const StringData* name) {
   auto const tsList = vmStack().topC();
-  assertx(tvIsVecOrVArray(tsList));
+  if (RuntimeOption::EvalHackArrDVArrs ?
+      !tvIsVec(tsList) : !tvIsArray(tsList)) {
+    raise_error("Invalid type-structure list in ReifiedName");
+  }
   // recordReifiedGenericsAndGetName decrefs the tsList
   auto const result = jit::recordReifiedGenericsAndGetName(tsList->m_data.parr);
   auto const mangledName = mangleReifiedName(name, result);
@@ -2670,7 +2676,10 @@ OPTBLD_INLINE void iopCheckReifiedGenericMismatch() {
   Class* cls = arGetContextClass(vmfp());
   if (!cls) raise_error("No class scope is active");
   auto const c = vmStack().topC();
-  assertx(tvIsVecOrVArray(c));
+  if (RuntimeOption::EvalHackArrDVArrs ?
+      !tvIsVec(c) : !tvIsArray(c)) {
+    raise_error("Invalid type-structure list in CheckReifiedGenericMismatch");
+  }
   checkClassReifiedGenericMismatch(cls, c->m_data.parr);
   vmStack().popC();
 }

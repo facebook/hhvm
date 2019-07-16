@@ -3389,20 +3389,18 @@ void in(ISS& env, const bc::CombineAndResolveTypeStruct& op) {
 void in(ISS& env, const bc::RecordReifiedGeneric& op) {
   // TODO(T31677864): implement real optimizations
   auto const t = popC(env);
-  if (!t.couldBe(RuntimeOption::EvalHackArrDVArrs ? BVec : BVArr)) {
-    return unreachable(env);
-  }
-  nothrow(env);
+  auto const required = RuntimeOption::EvalHackArrDVArrs ? BVec : BVArr;
+  if (!t.couldBe(required)) return unreachable(env);
+  if (t.subtypeOf(required)) nothrow(env);
   push(env, RuntimeOption::EvalHackArrDVArrs ? TSVec : TSVArr);
 }
 
 void in(ISS& env, const bc::ReifiedName& op) {
   // TODO(T31677864): implement real optimizations
   auto const t = popC(env);
-  if (!t.couldBe(RuntimeOption::EvalHackArrDVArrs ? BVec : BVArr)) {
-    return unreachable(env);
-  }
-  nothrow(env);
+  auto const required = RuntimeOption::EvalHackArrDVArrs ? BVec : BVArr;
+  if (!t.couldBe(required)) return unreachable(env);
+  if (t.subtypeOf(required)) nothrow(env);
   return push(env, rname(op.str1));
 }
 

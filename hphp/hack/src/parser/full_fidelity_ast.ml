@@ -955,16 +955,19 @@ let rec pHint : hint parser = fun node env ->
         closure_parameter_list;
         closure_return_type;
         closure_coroutine; _} ->
-      let make_variadic_hint variadic_type =
-        if is_missing variadic_type
-        then Hvariadic (None)
-        else Hvariadic (Some (pHint variadic_type env))
+      let make_variadic_hint x variadic_type =
+        if is_missing variadic_type then begin
+          if is_typechecker env then
+            raise_parsing_error env (`Node x) "Cannot use ... without a typehint";
+          Hvariadic (None)
+        end else
+          Hvariadic (Some (pHint variadic_type env))
       in
       let (param_list, variadic_hints) =
         List.partition_map ~f:(fun x ->
           match syntax x with
           | VariadicParameter { variadic_parameter_type = vtype; _ } ->
-            `Snd (make_variadic_hint vtype)
+            `Snd (make_variadic_hint x vtype)
           | _ -> `Fst (mpClosureParameter pHint x env))
         (as_list closure_parameter_list)
       in

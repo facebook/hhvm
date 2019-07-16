@@ -28,16 +28,4 @@ function test4(): void {
   bar(function(...): void {});
 }
 
-function test5(): (function(...): int) {
-  return (...$args) ==> 4;
-}
-
-class A {
-  public function test6(): (function(...): int) {
-    return (...$args) ==> 4;
-  }
-}
-
-function test7((function(...): void) $fn): void {}
-
-function test8(...): void {}
+function test5(...): void {}

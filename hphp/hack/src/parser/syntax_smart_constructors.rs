@@ -42,10 +42,7 @@ where
         if items.is_empty() {
             <Self as SyntaxSmartConstructors<'src, S, State>>::make_missing(s, offset)
         } else {
-            let mut item_refs = Vec::with_capacity((*items).len());
-            for item in items.iter() {
-                item_refs.push(item);
-            }
+            let item_refs: Vec<_> = items.iter().collect();
             let s = State::next(s, item_refs);
             (s, Self::R::make_list(items, offset))
         }

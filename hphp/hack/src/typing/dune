@@ -201,6 +201,7 @@
   (wrapped false)
   (modules
     typing_check_service
+    typing_lru_check_service
     typing_check_utils)
   (libraries
     core_kernel

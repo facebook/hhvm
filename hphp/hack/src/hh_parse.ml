@@ -69,6 +69,7 @@ module FullFidelityParseArgs = struct
     enable_constant_visibility_modifiers: bool;
     enable_class_level_where_clauses : bool;
     disable_legacy_soft_typehints : bool;
+    disable_outside_dollar_str_interp : bool;
   }
 
   let make
@@ -101,6 +102,7 @@ module FullFidelityParseArgs = struct
     enable_constant_visibility_modifiers
     enable_class_level_where_clauses
     disable_legacy_soft_typehints
+    disable_outside_dollar_str_interp
     = {
     full_fidelity_json;
     full_fidelity_dot;
@@ -131,6 +133,7 @@ module FullFidelityParseArgs = struct
     enable_constant_visibility_modifiers;
     enable_class_level_where_clauses;
     disable_legacy_soft_typehints;
+    disable_outside_dollar_str_interp;
   }
 
   let parse_args () =
@@ -179,6 +182,7 @@ module FullFidelityParseArgs = struct
     let enable_constant_visibility_modifiers = ref false in
     let enable_class_level_where_clauses = ref false in
     let disable_legacy_soft_typehints = ref false in
+    let disable_outside_dollar_str_interp = ref false in
     let options =  [
       (* modes *)
       "--full-fidelity-json",
@@ -297,6 +301,9 @@ No errors are filtered out.";
       "--disable-legacy-soft-typehints",
         Arg.Set disable_legacy_soft_typehints,
         "Disables the legacy @ syntax for soft typehints (use __Soft instead)";
+      "--disable-outside-dollar-str-interp",
+        Arg.Set disable_outside_dollar_str_interp,
+        "Disables ${x} syntax for string interpolation (use {$x} instead)";
       ] in
     Arg.parse options push_file usage;
     let modes = [
@@ -342,6 +349,7 @@ No errors are filtered out.";
       !enable_constant_visibility_modifiers
       !enable_class_level_where_clauses
       !disable_legacy_soft_typehints
+      !disable_outside_dollar_str_interp
 end
 
 open FullFidelityParseArgs
@@ -366,6 +374,8 @@ let handle_existing_file args filename =
   in
   let popt = ParserOptions.with_disable_legacy_soft_typehints popt
     args.disable_legacy_soft_typehints in
+  let popt = ParserOptions.with_disable_outside_dollar_str_interp popt
+    args.disable_outside_dollar_str_interp in
 
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in

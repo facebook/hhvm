@@ -17,6 +17,7 @@ let default = GlobalOptions.default
 let disable_nontoplevel_declarations = GlobalOptions.po_disable_nontoplevel_declarations
 let disable_static_closures = GlobalOptions.po_disable_static_closures
 let disable_instanceof = GlobalOptions.po_disable_instanceof
+let disable_outside_dollar_str_interp = GlobalOptions.po_disable_outside_dollar_str_interp
 
 let with_codegen po b =
   { po with GlobalOptions.po_codegen = b }
@@ -40,6 +41,9 @@ let disable_legacy_soft_typehints = GlobalOptions.po_disable_legacy_soft_typehin
 let with_disable_legacy_soft_typehints po b =
   { po with GlobalOptions.po_disable_legacy_soft_typehints = b }
 
+let with_disable_outside_dollar_str_interp po b =
+  { po with GlobalOptions.po_disable_outside_dollar_str_interp = b }
+
 let make
   ~auto_namespace_map
   ~codegen
@@ -52,6 +56,7 @@ let make
   ~enable_constant_visibility_modifiers
   ~enable_class_level_where_clauses
   ~disable_legacy_soft_typehints
+  ~disable_outside_dollar_str_interp
 = GlobalOptions.{
   default with
   po_auto_namespace_map = auto_namespace_map;
@@ -65,4 +70,5 @@ let make
   po_enable_constant_visibility_modifiers = enable_constant_visibility_modifiers;
   po_enable_class_level_where_clauses = enable_class_level_where_clauses;
   po_disable_legacy_soft_typehints = disable_legacy_soft_typehints;
+  po_disable_outside_dollar_str_interp = disable_outside_dollar_str_interp;
 }

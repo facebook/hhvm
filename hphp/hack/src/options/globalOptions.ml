@@ -65,6 +65,7 @@ type t = {
   po_disable_legacy_soft_typehints : bool;
   tco_use_lru_workers: bool;
   use_new_type_errors: bool;
+  po_disable_outside_dollar_str_interp : bool;
 } [@@deriving show]
 
 let tco_experimental_instanceof = "instanceof"
@@ -249,6 +250,7 @@ let default = {
  po_disable_legacy_soft_typehints = false;
  tco_use_lru_workers = true;
  use_new_type_errors = false;
+ po_disable_outside_dollar_str_interp = false;
 }
 
 let make
@@ -308,6 +310,7 @@ let make
   ?(po_disable_legacy_soft_typehints = default.po_disable_legacy_soft_typehints)
   ?(tco_use_lru_workers = default.tco_use_lru_workers)
   ?(use_new_type_errors = default.use_new_type_errors)
+  ?(po_disable_outside_dollar_str_interp = default.po_disable_outside_dollar_str_interp)
   ()
 = {
   tco_safe_array;
@@ -366,7 +369,8 @@ let make
   po_enable_class_level_where_clauses;
   po_disable_legacy_soft_typehints;
   tco_use_lru_workers;
-  use_new_type_errors
+  use_new_type_errors;
+  po_disable_outside_dollar_str_interp;
 }
 let tco_safe_array t = t.tco_safe_array
 let tco_safe_vector_array t = t.tco_safe_vector_array
@@ -447,6 +451,8 @@ let po_disable_legacy_soft_typehints t = t.po_disable_legacy_soft_typehints
 let tco_use_lru_workers t = t.tco_use_lru_workers
 
 let use_new_type_errors t = t.use_new_type_errors
+
+let po_disable_outside_dollar_str_interp t = t.po_disable_outside_dollar_str_interp
 
 let setup_pocket_universes env enabled =
   let exp_features = env.tco_experimental_features in

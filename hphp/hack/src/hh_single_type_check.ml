@@ -212,6 +212,7 @@ let parse_options () =
   let enable_constant_visibility_modifiers = ref false in
   let disable_legacy_soft_typehints = ref false in
   let use_new_type_errors = ref false in
+  let disable_outside_dollar_str_interp = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -449,6 +450,9 @@ let parse_options () =
     "--use-new-type-errors",
       Arg.Set use_new_type_errors,
       "Splits off some categories of type errors into new error codes";
+    "--disable-outside-dollar-str-interp",
+      Arg.Set disable_outside_dollar_str_interp,
+      "Disables ${x} syntax for string interpolation (use {$x} instead)";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -490,6 +494,7 @@ let parse_options () =
     ~po_enable_constant_visibility_modifiers:!enable_constant_visibility_modifiers
     ~po_disable_legacy_soft_typehints:!disable_legacy_soft_typehints
     ~use_new_type_errors:!use_new_type_errors
+    ~po_disable_outside_dollar_str_interp:!disable_outside_dollar_str_interp
     ()
   in
   let tcopt = {

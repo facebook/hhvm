@@ -285,7 +285,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
 
     // Lexing
 
-    fn skip_while_to_offset(&self, p: &dyn Fn(char) -> bool) -> usize {
+    fn skip_while_to_offset(&self, p: impl Fn(char) -> bool) -> usize {
         let n = self.source.length();
         let mut i = self.offset();
         while i < n && p(self.peek(i)) {
@@ -295,11 +295,11 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     }
 
     // advance offset as long as the predicate is true
-    fn skip_while(&mut self, p: &dyn Fn(char) -> bool) {
+    fn skip_while(&mut self, p: impl Fn(char) -> bool) {
         self.with_offset(self.skip_while_to_offset(p))
     }
 
-    fn str_skip_while(s: &[u8], mut i: usize, p: &dyn Fn(char) -> bool) -> usize {
+    fn str_skip_while(s: &[u8], mut i: usize, p: impl Fn(char) -> bool) -> usize {
         let n = s.len();
         loop {
             if i < n && p(s[i] as char) {
@@ -379,7 +379,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         TokenKind::Variable
     }
 
-    fn scan_with_underscores(&mut self, accepted_char: &dyn Fn(char) -> bool) {
+    fn scan_with_underscores(&mut self, accepted_char: impl Fn(char) -> bool) {
         let n = self.source.length();
         let peek_def = |i| if i < n { self.peek(i) } else { INVALID };
         let mut i = self.offset();
@@ -1883,7 +1883,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     //   always a leading trivia.
     fn scan_leading_trivia(
         &mut self,
-        scanner: &dyn Fn(&mut Self) -> Option<Token::Trivia>,
+        scanner: impl Fn(&mut Self) -> Option<Token::Trivia>,
     ) -> Vec<Token::Trivia> {
         let mut acc = vec![];
         loop {
@@ -1904,7 +1904,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
 
     fn scan_trailing_trivia(
         &mut self,
-        scanner: &dyn Fn(&mut Self) -> Option<Token::Trivia>,
+        scanner: impl Fn(&mut Self) -> Option<Token::Trivia>,
     ) -> Vec<Token::Trivia> {
         let mut acc = vec![];
         loop {
@@ -2004,7 +2004,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
 
     fn scan_token_and_leading_trivia(
         &mut self,
-        scanner: &dyn Fn(&mut Self) -> TokenKind,
+        scanner: impl Fn(&mut Self) -> TokenKind,
         as_name: KwSet,
     ) -> (TokenKind, usize, Vec<Token::Trivia>) {
         // Get past the leading trivia
@@ -2023,7 +2023,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
 
     fn scan_token_and_trivia(
         &mut self,
-        scanner: &dyn Fn(&mut Self) -> TokenKind,
+        scanner: &impl Fn(&mut Self) -> TokenKind,
         as_name: KwSet,
     ) -> Token {
         let token_start = self.offset;
@@ -2044,7 +2044,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         Token::make(kind, token_start, w, leading, trailing)
     }
 
-    fn scan_assert_progress(&mut self, tokenizer: &dyn Fn(&mut Self) -> Token) -> Token {
+    fn scan_assert_progress(&mut self, tokenizer: impl Fn(&mut Self) -> Token) -> Token {
         let original_remaining = self.remaining();
         let token = tokenizer(self);
         let new_remaining = self.remaining();
@@ -2061,24 +2061,24 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
 
     fn scan_next_token(
         &mut self,
-        scanner: &dyn Fn(&mut Self) -> TokenKind,
+        scanner: impl Fn(&mut Self) -> TokenKind,
         as_name: KwSet,
     ) -> Token {
-        let tokenizer = |x: &mut Self| x.scan_token_and_trivia(scanner, as_name);
+        let tokenizer = |x: &mut Self| x.scan_token_and_trivia(&scanner, as_name);
         self.scan_assert_progress(&tokenizer)
     }
 
-    fn scan_next_token_as_name(&mut self, scanner: &dyn Fn(&mut Self) -> TokenKind) -> Token {
+    fn scan_next_token_as_name(&mut self, scanner: impl Fn(&mut Self) -> TokenKind) -> Token {
         self.scan_next_token(scanner, KwSet::AllKeywords)
     }
 
-    fn scan_next_token_as_keyword(&mut self, scanner: &dyn Fn(&mut Self) -> TokenKind) -> Token {
+    fn scan_next_token_as_keyword(&mut self, scanner: impl Fn(&mut Self) -> TokenKind) -> Token {
         self.scan_next_token(scanner, KwSet::NoKeywords)
     }
 
     fn scan_next_token_nonreserved_as_name(
         &mut self,
-        scanner: &dyn Fn(&mut Self) -> TokenKind,
+        scanner: impl Fn(&mut Self) -> TokenKind,
     ) -> Token {
         self.scan_next_token(scanner, KwSet::NonReservedKeywords)
     }

@@ -186,6 +186,10 @@ let get_concrete_supertypes env ty =
     | ty::tyl ->
       let env, ty = Env.expand_type env ty in
       match snd ty with
+      (* Enums with arraykey upper bound are treated as "abstract" *)
+      | Tabstract (AKenum _, Some (_, Tprim Nast.Tarraykey)) ->
+        iter seen env acc tyl
+
       (* Don't expand enums or newtype; just return the type itself *)
       | Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), Some ty) ->
         iter seen env (TySet.add ty acc) tyl
@@ -294,6 +298,7 @@ let rec get_base_type env ty =
       then ty else get_base_type env ty
     | [] -> ty
     end
+  | Tabstract (AKenum _, Some (_, Tprim N.Tarraykey)) -> ty
   | Tabstract _ ->
     begin match get_concrete_supertypes env ty with
     (* If the type is exactly equal, we don't want to recurse *)

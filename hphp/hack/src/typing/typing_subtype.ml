@@ -378,12 +378,12 @@ and simplify_subtype
    * In the case when no upper bound is specified in source code,
    * an implicit upper bound mixed = ?nonnull is added.
    *)
-  | Tabstract ((AKnewtype _ | AKdependent _), None), _
-  | _, Tabstract ((AKnewtype _ | AKdependent _), None) -> assert false
+  | Tabstract ((AKnewtype _ | AKdependent _ | AKenum _), None), _
+  | _, Tabstract ((AKnewtype _ | AKdependent _ | AKenum _), None) -> assert false
 
   | (Tprim Nast.(Tint | Tbool | Tfloat | Tstring | Tresource | Tnum |
                  Tarraykey | Tnoreturn) |
-     Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tabstract (AKenum _, _) |
+     Tnonnull | Tfun _ | Ttuple _ | Tshape _ |
      Tanon _ | Tobject | Tclass _ | Tarraykind _),
     Tnonnull ->
     valid ()
@@ -391,7 +391,7 @@ and simplify_subtype
     Tnonnull ->
     invalid ()
 
-  | Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tnonnull ->
+  | Tabstract ((AKnewtype _ | AKdependent _ | AKenum _), Some ty), Tnonnull ->
     simplify_subtype ~seen_generic_params ~this_ty ty ty_super env
 
   | Tdynamic, Tdynamic ->
@@ -479,10 +479,8 @@ and simplify_subtype
   | Tprim (Nast.Tint | Nast.Tstring), Tprim Nast.Tarraykey -> valid ()
   | Tprim p1, Tprim p2 ->
     if p1 = p2 then valid () else invalid ()
-  | Tabstract ((AKenum _), _), Tprim Nast.Tarraykey ->
-    valid ()
   | (Tnonnull | Tdynamic | Tfun _ | Ttuple _ | Tshape _ | Tanon _ |
-     Tabstract (AKenum _, None) | Tobject | Tclass _ | Tarraykind _),
+     Tobject | Tclass _ | Tarraykind _),
     Tprim _ ->
     invalid ()
   | Toption _,
@@ -606,7 +604,7 @@ and simplify_subtype
     simplify_subtype ~seen_generic_params ~this_ty ty ty_super env
 
   | (Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tshape _ |
-     Tabstract (AKenum _, None) | Tanon _ | Tobject | Tclass _ | Tarraykind _),
+     Tanon _ | Tobject | Tclass _ | Tarraykind _),
     Tabstract (AKnewtype _, _) ->
     invalid ()
   | Tabstract (AKnewtype (name_sub, tyl_sub), _),
@@ -631,7 +629,6 @@ and simplify_subtype
      Tanon _ | Tobject | Tclass _ | Tarraykind _),
     Tabstract (AKenum _, _) ->
     invalid ()
-  | Tabstract (AKenum _, None), Tabstract (AKenum _, _) -> invalid ()
   | Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), Some ty), Tabstract (AKenum _, _) ->
     simplify_subtype ~seen_generic_params ~this_ty ty ty_super env
 
@@ -685,7 +682,7 @@ and simplify_subtype
     end
   (* Primitives and other concrete types cannot be subtypes of dependent types *)
   | (Tnonnull | Tdynamic | Tprim _ | Tfun _ | Ttuple _ | Tshape _ |
-     Tabstract (AKenum _, None) | Tanon _ | Tclass _ | Tobject | Tarraykind _),
+     Tanon _ | Tclass _ | Tobject | Tarraykind _),
     Tabstract (AKdependent expr_dep, tyopt) ->
     (* If the bound is the same class try and show more explanation of the error *)
     begin match snd ty_sub, tyopt with
@@ -730,10 +727,9 @@ and simplify_subtype
     env |>
     simplify_subtype ~seen_generic_params ~this_ty ty_sub ty_super' &&&
     simplify_subtype ~seen_generic_params ~this_ty ty_super' ty_sub
-  | Tabstract (AKenum enum_name, None), Tclass ((_, class_name), exact, _) ->
-    if (enum_name = class_name || class_name = SN.Classes.cXHPChild) && exact = Nonexact
-    then valid ()
-    else invalid ()
+  | Tabstract (AKenum enum_name, _), Tclass ((_, class_name), Nonexact, _)
+    when (enum_name = class_name || class_name = SN.Classes.cXHPChild) ->
+    valid ()
   | Tabstract (AKenum enum_name, Some ty), Tclass ((_, class_name), exact, _) ->
     if enum_name = class_name && exact = Nonexact
     then valid ()

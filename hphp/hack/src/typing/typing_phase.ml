@@ -11,7 +11,6 @@ open Core_kernel
 open Common
 open Typing_defs
 open Typing_dependent_type
-open Utils
 
 module Env = Typing_env
 module TUtils = Typing_utils
@@ -193,8 +192,11 @@ let rec localize ~ety_env env (dty: decl ty) =
         let type_expansions = (p, x) :: ety_env.type_expansions in
         let ety_env = {ety_env with type_expansions} in
         let env, cstr =
-          opt (localize ~ety_env) env (Env.get_enum_constraint env x) in
-        env, (r, Tabstract (AKenum x, cstr))
+          match Env.get_enum_constraint env x with
+          (* If not specified, default bound is arraykey *)
+          | None -> env, MakeType.arraykey (Reason.Rimplicit_upper_bound (p, "arraykey"))
+          | Some ty -> localize ~ety_env env ty in
+        env, (r, Tabstract (AKenum x, Some cstr))
       end
   | r, Tapply ((_, cid) as cls, tyl) ->
       let env, tyl =

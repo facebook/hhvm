@@ -258,7 +258,7 @@ module Full = struct
       | Exact when !debug_mode -> Concat [text "exact"; Space; d]
       | _ -> d
       end
-    | Tabstract (AKnewtype (s, []), _) -> to_doc s
+    | Tabstract ((AKnewtype (s, []) | AKenum s), _) -> to_doc s
     | Tabstract (AKnewtype (s, tyl), _) -> to_doc s ^^ list "<" k tyl ">"
     | Tabstract (ak, cstr) ->
       let cstr_info = if !debug_mode then
@@ -788,8 +788,8 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
     obj @@ kind "generic" @ is_array false @ name s
   | Tabstract (AKgeneric s, opt_ty) ->
     obj @@ kind "generic" @ is_array true @ name s @ as_type opt_ty
-  | Tabstract (AKenum s, opt_ty) ->
-    obj @@ kind "enum" @ name s @ as_type opt_ty
+  | Tabstract (AKenum s, _) ->
+    obj @@ kind "enum" @ name s
   | Tabstract (AKnewtype (s, tys), opt_ty) ->
     obj @@ kind "newtype" @ name s @ args tys @ as_type opt_ty
   | Tabstract (AKdependent (`cls c), opt_ty) ->

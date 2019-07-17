@@ -2224,10 +2224,10 @@ void flatten_traits(NamingEnv& env, ClassInfo* cinfo) {
              cinfo->cls->name, t->cls->name);
       return;
     }
-    if (t->cls->attrs & AttrHasConstProps) hasConstProp = true;
+    if (t->cls->hasConstProp) hasConstProp = true;
   }
   auto const cls = const_cast<php::Class*>(cinfo->cls);
-  if (hasConstProp) cls->attrs |= AttrHasConstProps;
+  if (hasConstProp) cls->hasConstProp = true;
   std::vector<MethTabEntryPair*> methodsToAdd;
   for (auto& ent : cinfo->methods) {
     if (!ent.second.topLevel || ent.second.func->cls == cinfo->cls) {
@@ -2996,11 +2996,11 @@ void find_mocked_classes(IndexData& index) {
 void mark_const_props(IndexData& index) {
   for (auto& cinfo : index.allClassInfos) {
     auto const hasConstProp = [&]() {
-      if (cinfo->cls->attrs & AttrHasConstProps) return true;
+      if (cinfo->cls->hasConstProp) return true;
       if (cinfo->parent && cinfo->parent->hasConstProp) return true;
       if (!(cinfo->cls->attrs & AttrNoExpandTrait)) {
         for (auto t : cinfo->usedTraits) {
-          if (t->cls->attrs & AttrHasConstProps) return true;
+          if (t->cls->hasConstProp) return true;
         }
       }
       return false;

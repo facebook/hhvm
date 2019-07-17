@@ -556,6 +556,10 @@ struct Class : ClassBase {
    * This is a reified class.
    */
   bool hasReifiedGenerics : 1;
+  /*
+   * This class has at least one const instance property.
+   */
+  bool hasConstProp : 1;
 };
 
 //////////////////////////////////////////////////////////////////////

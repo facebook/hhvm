@@ -964,6 +964,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
   ret->id                 = pce.id();
   ret->hasReifiedGenerics = ret->userAttributes.find(s___Reified.get()) !=
                             ret->userAttributes.end();
+  ret->hasConstProp       = false;
 
   for (auto& iface : pce.interfaces()) {
     ret->interfaceNames.push_back(iface);
@@ -991,6 +992,9 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
         prop.val()
       }
     );
+    if ((prop.attrs() & (AttrStatic | AttrIsConst)) == AttrIsConst) {
+      ret->hasConstProp = true;
+    }
   }
 
   auto& constMap = pce.constMap();

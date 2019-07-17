@@ -317,6 +317,49 @@ void coerceFCallArgs(TypedValue* args,
       continue;
     }
 
+    if (isFuncType(args[-i].m_type) && isStringType(*targetType)) {
+      args[-i].m_data.pstr = const_cast<StringData*>(
+        args[-i].m_data.pfunc->name()
+      );
+      args[-i].m_type = KindOfPersistentString;
+      if (RuntimeOption::EvalStringHintNotices) {
+        raise_notice("Implicit Func to string conversion for type-hint");
+      }
+      continue;
+    }
+    if (isClassType(args[-i].m_type) && isStringType(*targetType)) {
+      args[-i].m_data.pstr = const_cast<StringData*>(
+        args[-i].m_data.pclass->name()
+      );
+      args[-i].m_type = KindOfPersistentString;
+      if (RuntimeOption::EvalStringHintNotices) {
+        raise_notice("Implicit Class to string conversion for type-hint");
+      }
+      continue;
+    }
+    if (isClsMethType(args[-i].m_type)) {
+      auto raise = [&] {
+        if (RuntimeOption::EvalVecHintNotices) {
+          raise_clsmeth_compat_type_hint(
+            func, tc.displayName(func->cls()), i);
+        }
+      };
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        if (isVecType(*targetType)) {
+          tvCastToVecInPlace(&args[-i]);
+          raise();
+          continue;
+        }
+      } else {
+        if (isArrayType(*targetType)) {
+          tvCastToVArrayInPlace(&args[-i]);
+          raise();
+          continue;
+        }
+      }
+    }
+
+
     auto msg = param_type_error_message(
       func->displayName()->data(),
       i+1,

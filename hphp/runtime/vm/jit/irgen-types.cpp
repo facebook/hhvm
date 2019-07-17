@@ -1423,8 +1423,6 @@ void emitCombineAndResolveTypeStruct(IRGS& env, uint32_t n) {
   push(env, resolveTypeStructImpl(env, true, false, n, false));
 }
 
-namespace {
-
 void raiseClsmethCompatTypeHint(
   IRGS& env, int32_t id, const Func* func, const TypeConstraint& tc) {
   auto name = tc.displayName(func->cls());
@@ -1440,6 +1438,8 @@ void raiseClsmethCompatTypeHint(
         id + 1, func->fullDisplayName(), name))));
   }
 }
+
+namespace {
 
 void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
                        bool onlyCheckNullability) {

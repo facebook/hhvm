@@ -1,0 +1,11 @@
+Warning: Implicit Func to string conversion for type-hint
+string(1) "t"
+Warning: Implicit Class to string conversion for type-hint
+class(X)
+Warning: class_meth Compat: Argument 1 passed to __hhvm_intrinsics\dummy_varray_builtin() must be of type HH\varray, clsmeth given
+array(2) {
+  [0]=>
+  class(X)
+  [1]=>
+  function(X::y)
+}

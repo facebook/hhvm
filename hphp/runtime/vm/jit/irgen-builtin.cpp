@@ -1387,6 +1387,80 @@ SSATmp* realize_param(IRGS& env,
   return realize();
 }
 
+template<class U, class F>
+SSATmp* maybeCoerceValue(
+  IRGS& env,
+  SSATmp* val,
+  Type target,
+  uint32_t id,
+  const Func* func,
+  U update,
+  F fail
+) {
+  auto bail = [&] { fail(); return cns(env, TBottom); };
+  if (target <= TStr) {
+    if (!val->type().maybe(TFunc|TCls)) return bail();
+
+    auto castW = [&] (SSATmp* val, bool isCls){
+      if (RuntimeOption::EvalStringHintNotices) {
+        gen(
+          env,
+          RaiseNotice,
+          cns(
+            env,
+            makeStaticString(
+              isCls ? "Implicit Class to string conversion for type-hint"
+                    : "Implicit Func to string conversion for type-hint"
+            )
+          )
+        );
+      }
+      return update(val);
+    };
+
+    return cond(
+      env,
+      [&] (Block* f) { return gen(env, CheckType, TFunc, f, val); },
+      [&] (SSATmp* fval) { return castW(gen(env, LdFuncName, fval), false); },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        return cond(
+          env,
+          [&] (Block* f) { return gen(env, CheckType, TCls, f, val); },
+          [&] (SSATmp* cval) { return castW(gen(env, LdClsName, cval), true); },
+          [&] {
+            hint(env, Block::Hint::Unlikely);
+            return bail();
+          }
+        );
+      }
+    );
+  }
+
+  if (target <= (RuntimeOption::EvalHackArrDVArrs ? TVec : TArr)) {
+    if (!val->type().maybe(TClsMeth)) return bail();
+    return cond(
+      env,
+      [&] (Block* f) { return gen(env, CheckType, TClsMeth, f, val); },
+      [&] (SSATmp* methVal) {
+        if (RuntimeOption::EvalVecHintNotices) {
+          raiseClsmethCompatTypeHint(
+            env, id, func, func->params()[id].typeConstraint);
+        }
+        auto const ret = update(convertClsMethToVec(env, methVal));
+        decRef(env, methVal);
+        return ret;
+      },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        return bail();
+      }
+    );
+  }
+
+  return bail();
+}
+
 /*
  * Prepare the actual arguments to the CallBuiltin instruction, by converting a
  * ParamPrep into a vector of SSATmps to pass to CallBuiltin.  If any of the
@@ -1465,9 +1539,22 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
           }
           auto val = gen(env, LdMem, TCell, param.value);
           assertx(ty.isKnownDataType());
-          gen(env, ThrowParameterWrongType,
-              FuncArgTypeData { callee, paramIdx + 1, ty.toDataType() },
-              maker.makeUnusualCatch(), val);
+          maybeCoerceValue(
+            env,
+            val,
+            ty,
+            paramIdx,
+            callee,
+            [&] (SSATmp* val) {
+              gen(env, StLoc, LocalId{paramIdx}, fp(env), val);
+              return val;
+            },
+            [&] {
+              gen(env, ThrowParameterWrongType,
+                  FuncArgTypeData { callee, paramIdx + 1, ty.toDataType() },
+                  maker.makeUnusualCatch(), val);
+            }
+          );
           return nullptr;
         },
         [&] {
@@ -1499,10 +1586,19 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
           hint(env, Block::Hint::Unlikely);
           if (param.isOutputArg) return cns(env, TNullptr);
           assert(ty.isKnownDataType());
-          gen(env, ThrowParameterWrongType,
-              FuncArgTypeData { callee, paramIdx + 1, ty.toDataType() },
-              maker.makeUnusualCatch(), oldVal);
-          return cns(env, TInitNull);
+          return maybeCoerceValue(
+            env,
+            param.value,
+            ty,
+            paramIdx,
+            callee,
+            [&] (SSATmp* val) { return val; },
+            [&] {
+              gen(env, ThrowParameterWrongType,
+                  FuncArgTypeData { callee, paramIdx + 1, ty.toDataType() },
+                  maker.makeUnusualCatch(), oldVal);
+            }
+          );
         },
         [&] {
           /*
@@ -1557,12 +1653,26 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
       [&] (const Type& ty) -> SSATmp* {
         always_assert(ty.isKnownDataType());
         hint(env, Block::Hint::Unlikely);
-        auto const tv = gen(env, LdStk, TCell,
-                            IRSPRelOffsetData{ offsetFromIRSP(env, offset) },
-                            sp(env));
-        gen(env, ThrowParameterWrongType,
-            FuncArgTypeData { callee, paramIdx + 1, ty.toDataType() },
-            maker.makeUnusualCatch(), tv);
+        auto const off = IRSPRelOffsetData{ offsetFromIRSP(env, offset) };
+        auto const tv = gen(env, LdStk, TCell, off, sp(env));
+
+        maybeCoerceValue(
+          env,
+          tv,
+          ty,
+          paramIdx,
+          callee,
+          [&] (SSATmp* val) {
+            gen(env, StStk, off, sp(env), val);
+            env.irb->exceptionStackBoundary();
+            return val;
+          },
+          [&] {
+            gen(env, ThrowParameterWrongType,
+                FuncArgTypeData { callee, paramIdx + 1, ty.toDataType() },
+                maker.makeUnusualCatch(), tv);
+          }
+        );
         return nullptr;
       },
       [&] {

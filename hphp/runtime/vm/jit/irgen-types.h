@@ -25,6 +25,7 @@ namespace HPHP {
 struct RepoAuthType;
 struct StringData;
 struct TypeConstraint;
+struct Func;
 
 namespace jit {
 
@@ -45,6 +46,8 @@ void verifyPropType(IRGS& env,
                     SSATmp* name,
                     bool isSProp);
 
+void raiseClsmethCompatTypeHint(
+  IRGS& env, int32_t id, const Func* func, const TypeConstraint& tc);
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* implInstanceOfD(IRGS& env, SSATmp* src, const StringData* className);

@@ -648,8 +648,7 @@ void HHVM_FUNCTION(parse_str,
 
 /////////////////////////////////////////////////////////////////////////////
 
-Variant HHVM_FUNCTION(hhvm_intrinsics_create_class_pointer,
-                     const String& name) {
+Variant HHVM_FUNCTION(hhvm_intrinsics_create_class_pointer, StringArg name) {
   auto const cls = Unit::loadClass(name.get());
   return cls ? Variant{cls} : init_null();
 }

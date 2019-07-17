@@ -30,13 +30,17 @@ let get_decls
 let write_json
   (tcopt: TypecheckerOptions.t)
   (tast_lst: (Relative_path.t * Tast.program) list)
-  (filename_prefix: string)
+  (file_dir: string)
   : unit =
 
   let decls = get_decls tast_lst in
-  let json_data = SymbolInfoJsonBuilder.build_json tcopt decls in
-  let filename = filename_prefix ^ ".json" in
-  let channel = Out_channel.create ~fail_if_exists:true filename in
+  let json_chunks = SymbolInfoJsonBuilder.build_json tcopt decls in
+  Sys_utils.mkdir_p file_dir;
 
-  Out_channel.output_string channel (json_to_string ~pretty:true json_data);
-  Out_channel.close channel
+  List.iteri json_chunks ~f:(fun idx json ->
+    let filename = Printf.sprintf "%s/%s_chunk_%d.json" file_dir file_dir idx in
+    let json = JSON_Array([json]) in
+    let channel = Out_channel.create ~fail_if_exists:true filename in
+    Out_channel.output_string channel (json_to_string ~pretty:true json);
+    Out_channel.close channel
+  );

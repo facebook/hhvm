@@ -458,7 +458,7 @@ let write_symbol_info_init
     (env: ServerEnv.env)
   : ServerEnv.env * float =
   let out_file = match ServerArgs.write_symbol_info genv.options with
-    | None -> failwith "No write file specified for --write-symbol-info"
+    | None -> failwith "No write directory specified for --write-symbol-info"
     | Some s -> s
   in
   let env, t = index_and_parse "write symbol info initialization" genv env in

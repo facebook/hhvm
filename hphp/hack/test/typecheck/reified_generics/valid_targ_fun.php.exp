@@ -1,4 +1,4 @@
-File "valid_targ_fun.php", line 6, characters 13-52:
-This is a function type with variadic args, it cannot be used as a reified type argument (Typing[4305])
+File "valid_targ_fun.php", line 5, characters 13-33:
+This is a function type, it cannot be used as a reified type argument (Typing[4305])
 File "valid_targ_fun.php", line 3, characters 15-15:
 T is reified

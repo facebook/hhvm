@@ -4363,11 +4363,35 @@ and class_get_ ~is_method ~is_const ~this_ty ?(explicit_tparams=[])
               else None in
             k (env, cc_locl_type, Some cc_type, cc_abstract_info)
         end else begin
+          let get_smember_from_constraints env class_info =
+            let upper_bounds =
+              Sequence.to_list (Cls.upper_bounds_on_this_from_constraints class_info)
+            in
+            if upper_bounds <> [] then begin
+              let env, upper_bounds = List.map_env env upper_bounds
+                ~f:(fun env up -> Phase.localize ~ety_env env up) in
+              let env, inter_ty =
+                Inter.intersect_list env (Reason.Rwitness p) upper_bounds
+              in
+              class_get_ ~is_method ~is_const ~this_ty ~explicit_tparams ~incl_tc
+                env cid inter_ty (p, mid) (fun x -> x) end
+            else begin
+              smember_not_found p ~is_const ~is_method class_ mid;
+              env, (Reason.Rnone, Typing_utils.terr env), None, None
+            end
+          in
           let smethod = Env.get_static_member is_method env class_ mid in
           match smethod with
           | None ->
-            smember_not_found p ~is_const ~is_method class_ mid;
-            k (env, (Reason.Rnone, Typing_utils.terr env), None, None)
+            k(Errors.try_
+              (fun () ->
+                get_smember_from_constraints env class_
+              )
+              (fun _ ->
+                smember_not_found p ~is_const ~is_method class_ mid;
+                env, (Reason.Rnone, Typing_utils.terr env), None, None
+              ))
+
           | Some { ce_visibility = vis; ce_lsb = lsb; ce_type = lazy decl_method_; _ } ->
             let p_vis = Reason.to_pos (fst decl_method_) in
             TVis.check_class_access p env (p_vis, vis, lsb) cid class_;
@@ -4384,6 +4408,12 @@ and class_get_ ~is_method ~is_const ~this_ty ?(explicit_tparams=[])
                 | _ ->
                   Phase.localize ~ety_env env decl_method_
               end in
+            let env, ty, _, _ = Errors.try_
+              (fun () -> get_smember_from_constraints env class_)
+              (fun _ ->
+                env, MakeType.mixed Reason.Rnone, None, None
+              ) in
+            let env, method_ = Inter.intersect env (Reason.Rwitness p) method_ ty in
             k (env, method_, Some decl_method_, None)
         end
       )

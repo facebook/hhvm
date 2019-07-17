@@ -137,8 +137,8 @@ module CheckFunctionBody = struct
     | AFvalue e -> expr f_type env e
     | AFkvalue (e1, e2) -> expr2 f_type env (e1, e2)
 
-  and expr f_type env (p, e) =
-    expr_ p f_type env e
+  and expr f_type env (_, e) =
+    expr_ f_type env e
 
   and expr_allow_await_list f_type env ((_, exp) as e) =
     match exp with
@@ -147,7 +147,7 @@ module CheckFunctionBody = struct
     | _ ->
       expr_allow_await f_type env e
 
-  and expr_allow_await ?(is_rhs=false) f_type env (p, exp) = match f_type, exp with
+  and expr_allow_await ?(is_rhs=false) f_type env (_, exp) = match f_type, exp with
     | Ast.FAsync, Await e
     | Ast.FAsyncGenerator, Await e -> expr f_type env e; ()
     | Ast.FAsync, Binop (Ast.Eq None, e1, (_, Await e))
@@ -155,7 +155,7 @@ module CheckFunctionBody = struct
       expr f_type env e1;
       expr f_type env e;
       ()
-    | _ -> expr_ p f_type env exp; ()
+    | _ -> expr_ f_type env exp; ()
 
   and expr_allow_rx_move orelse f_type env  exp  =
     match exp with
@@ -185,7 +185,7 @@ module CheckFunctionBody = struct
     expr f_type env e2;
     ()
 
-  and expr_ p f_type env exp = match f_type, exp with
+  and expr_ f_type env exp = match f_type, exp with
     | _, Collection _
     | _, Import _
     | _, Omitted
@@ -286,10 +286,8 @@ module CheckFunctionBody = struct
         ()
     | _, Efun _ -> ()
     | _, Lfun _ -> ()
-
     | _, PU_atom _ -> ()
     | _, PU_identifier _ -> ()
-
     | Ast.FGenerator, Yield_break
     | Ast.FAsyncGenerator, Yield_break -> ()
     | Ast.FGenerator, Yield af
@@ -299,12 +297,7 @@ module CheckFunctionBody = struct
     (* Should never happen -- presence of yield should make us FGenerator or
      * FAsyncGenerator. *)
     | (Ast.FSync | Ast.FAsync), (Yield _ | Yield_from _ | Yield_break) -> assert false
-
-    | (Ast.FGenerator | Ast.FSync | Ast.FCoroutine), Await _ -> ()
-
-    | Ast.FAsync, Await _
-    | Ast.FAsyncGenerator, Await _ -> Errors.await_not_allowed p
-
+    | _, Await _
     | Ast.FCoroutine, (Yield _ | Yield_break | Yield_from _ | Suspend _)
     | (Ast.FSync | Ast.FAsync | Ast.FGenerator | Ast.FAsyncGenerator), Suspend _ -> ()
     | _, Special_func func ->
@@ -324,7 +317,6 @@ module CheckFunctionBody = struct
     | _, Shape fdm ->
         List.iter ~f:(fun (_, v) -> expr f_type env v) fdm;
         ()
-
 end
 
 let is_some_reactivity_attribute { ua_name = (_, name); _ } =

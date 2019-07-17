@@ -1335,10 +1335,6 @@ let interface_use_trait p =
   add (NastCheck.err_code NastCheck.InterfaceUsesTrait) p
     "Interfaces cannot use traits"
 
-let await_not_allowed p =
-  add (NastCheck.err_code NastCheck.AwaitNotAllowed) p
-    "await is only permitted as a statement, expression in a return statement \
-      or as a right hand side in top level assignment."
 
 let await_in_coroutine p =
   add (NastCheck.err_code NastCheck.AwaitInCoroutine) p

@@ -193,7 +193,7 @@ module NastCheck                            = struct
   | InterfaceWithPartialTypeconst
   | MultipleXhpCategory
   | OptionalShapeFieldsNotSupportedDEPRECATED
-  | AwaitNotAllowed
+  | AwaitNotAllowedDEPRECATED
   | AsyncInInterfaceDEPRECATED
   | AwaitInCoroutine
   | YieldInCoroutine

@@ -85,6 +85,14 @@ struct c_Closure final : ObjectData {
    */
   void init(int numArgs, ActRec* ar, TypedValue* sp);
 
+  /*
+   * Initialization function used by the interpreter. The JIT inlines these
+   * operations in the TC.
+   *
+   * Returns the number of cells copied to the stack.
+   */
+  static int initActRecFromClosure(ActRec* ar, TypedValue* sp);
+
   /////////////////////////////////////////////////////////////////////////////
 
   /*
@@ -96,17 +104,6 @@ struct c_Closure final : ObjectData {
    * The Class scope the closure was defined in.
    */
   Class* getScope() { return getInvokeFunc()->cls(); }
-
-  /*
-   * Use variables.
-   *
-   * Returns obj->propVecForWrite()
-   * but with runtime generalized checks replaced with assertions
-   *
-   * NB: Closure properties can't have type-hints, so no checking is necessary
-   * for writes.
-   */
-  Cell* getUseVars() { return propVecForWrite(); }
 
   int32_t getNumUseVars() const {
     return getVMClass()->numDeclProperties();

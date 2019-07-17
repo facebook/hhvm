@@ -316,10 +316,6 @@ inline bool Class::forbidsDynamicProps() const {
   return attrs() & AttrForbidDynamicProps;
 }
 
-inline bool Class::hasConstProps() const {
-  return attrs() & AttrHasConstProps;
-}
-
 inline bool Class::serialize() const {
   if (m_serialized) return false;
   m_serialized = true;

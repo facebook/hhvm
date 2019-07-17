@@ -417,7 +417,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   // to these properties, they are responsible for validating the values with
   // any type-hints on the properties. Likewise the caller is responsible for
   // enforcing AttrLateInit.
-  TypedValue* propVecForWrite();
   TypedValue* propVecForConstruct();
   const TypedValue* propVec() const;
 

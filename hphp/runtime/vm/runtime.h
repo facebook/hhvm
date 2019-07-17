@@ -175,9 +175,6 @@ frame_free_args(TypedValue* args, int count) {
   for (auto i = count; i--; ) tvDecRefGen(*(args - i));
 }
 
-// returns the number of things it put on sp
-int init_closure(ActRec* ar, TypedValue* sp);
-
 int64_t zero_error_level();
 void restore_error_level(int64_t oldLevel);
 

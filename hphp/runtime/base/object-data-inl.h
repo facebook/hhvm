@@ -360,13 +360,6 @@ inline const Func* ObjectData::methodNamed(const StringData* sd) const {
 
 [[noreturn]] void throw_cannot_modify_const_object(const char* className);
 
-inline TypedValue* ObjectData::propVecForWrite() {
-  if (UNLIKELY(m_cls->hasConstProps()) && !isBeingConstructed()) {
-    throw_cannot_modify_const_object(getClassName().data());
-  }
-  return const_cast<TypedValue*>(propVec());
-}
-
 inline TypedValue* ObjectData::propVecForConstruct() {
   return const_cast<TypedValue*>(propVec());
 }

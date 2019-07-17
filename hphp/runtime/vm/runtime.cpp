@@ -173,41 +173,6 @@ StringData* concat_s4(StringData* v1, StringData* v2,
   return ret;
 }
 
-int init_closure(ActRec* ar, TypedValue* sp) {
-  auto closure = c_Closure::fromObject(ar->getThis());
-
-  // Put in the correct context
-  ar->m_func = closure->getInvokeFunc();
-
-  if (ar->func()->cls()) {
-    // Swap in the $this or late bound class or null if it is ony from a plain
-    // function or pseudomain
-    ar->setThisOrClass(closure->getThisOrClass());
-
-    if (ar->hasThis()) {
-      ar->getThis()->incRefCount();
-    }
-  } else {
-    ar->trashThis();
-  }
-
-  // The closure is the first local.
-  // Similar to tvWriteObject() but we don't incref because it used to be $this
-  // and now it is a local, so they cancel out
-  TypedValue* firstLocal = --sp;
-  firstLocal->m_type = KindOfObject;
-  firstLocal->m_data.pobj = closure;
-
-  // Copy in all the use vars
-  Cell* prop = closure->getUseVars();
-  int n = closure->getNumUseVars();
-  for (int i = 0; i < n; i++) {
-    cellDup(*prop++, *--sp);
-  }
-
-  return n + 1;
-}
-
 void raiseWarning(const StringData* sd) {
   raise_warning("%s", sd->data());
 }

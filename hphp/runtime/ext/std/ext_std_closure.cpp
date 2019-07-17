@@ -17,10 +17,12 @@
 
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 
-#include "hphp/runtime/ext/std/ext_std.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+
+#include "hphp/runtime/ext/std/ext_std.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,19 +43,17 @@ static Array HHVM_METHOD(Closure, __debugInfo) {
   Array ret = Array::CreateDArray();
 
   // Serialize 'use' parameters.
-  if (auto useVars = closure->getUseVars()) {
-    Array use = Array::CreateDArray();
+  auto cls = this_->getVMClass();
+  if (auto nProps = cls->numDeclProperties()) {
+    DArrayInit useVars(nProps);
 
-    auto cls = this_->getVMClass();
-    auto propsInfo = cls->declProperties();
-    auto nProps = cls->numDeclProperties();
+    auto propsInfos = cls->declProperties();
+    auto props = closure->propVec();
     for (size_t i = 0; i < nProps; ++i) {
-      use.set(Variant(StrNR(propsInfo[i].name)), useVars[i]);
+      useVars.set(StrNR(propsInfos[i].name), props[i]);
     }
 
-    if (!use.empty()) {
-      ret.set(s_static, use);
-    }
+    ret.set(s_static, make_tv<KindOfArray>(useVars.toArray().get()));
   }
 
   auto const func = closure->getInvokeFunc();
@@ -118,11 +118,43 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
   }
 
   auto beforeCurUseVar = sp + numArgs;
-  auto curProperty = getUseVars();
-  int i = 0;
-  for (; i < numArgs; i++) {
-    cellCopy(*--beforeCurUseVar, *curProperty++);
+  auto curProperty = propVecForConstruct();
+  while (beforeCurUseVar != sp) cellCopy(*--beforeCurUseVar, *curProperty++);
+}
+
+int c_Closure::initActRecFromClosure(ActRec* ar, TypedValue* sp) {
+  auto closure = c_Closure::fromObject(ar->getThis());
+
+  // Put in the correct context
+  ar->m_func = closure->getInvokeFunc();
+
+  if (ar->func()->cls()) {
+    // Swap in the $this or late bound class or null if it is from a plain
+    // function or pseudomain
+    ar->setThisOrClass(closure->getThisOrClass());
+
+    if (ar->hasThis()) {
+      ar->getThis()->incRefCount();
+    }
+  } else {
+    ar->trashThis();
   }
+
+  // The closure is the first local.
+  // Similar to tvWriteObject() but we don't incref because it used to be $this
+  // and now it is a local, so they cancel out
+  TypedValue* firstLocal = --sp;
+  firstLocal->m_type = KindOfObject;
+  firstLocal->m_data.pobj = closure;
+
+  // Copy in all the use vars
+  auto prop = closure->propVec();
+  int n = closure->getNumUseVars();
+  for (int i = 0; i < n; i++) {
+    cellDup(*prop++, *--sp);
+  }
+
+  return n + 1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -172,13 +204,10 @@ ObjectData* c_Closure::clone() {
     t->incRefCount();
   }
 
-  auto src  = getUseVars();
-  auto dest = ret->getUseVars();
-  auto const nProps = cls->numDeclProperties();
-  auto const stop = src + nProps;
-  for (; src != stop; ++src, ++dest) {
-    cellDup(*src, *dest);
-  }
+  auto src  = propVec();
+  auto dest = ret->propVecForConstruct();
+  auto const stop = src + cls->numDeclProperties();
+  while (src != stop) cellDup(*src++, *dest++);
 
   return ret;
 }
@@ -187,16 +216,16 @@ static void closureInstanceDtor(ObjectData* obj, const Class* cls) {
   if (UNLIKELY(obj->getAttribute(ObjectData::IsWeakRefed))) {
     WeakRefData::invalidateWeakRef((uintptr_t)obj);
   }
-  auto const nProps = size_t{cls->numDeclProperties()};
-  auto prop = c_Closure::fromObject(obj)->getUseVars();
-  auto const stop = prop + nProps;
+
   auto closure = c_Closure::fromObject(obj);
-  if (auto t = closure->getThis()) {
-    decRefObj(t);
-  }
-  for (; prop != stop; ++prop) {
-    tvDecRefGen(prop);
-  }
+  if (auto t = closure->getThis()) decRefObj(t);
+
+  // We're destructing, not constructing, but we're unconditionally allowed to
+  // write just the same.
+  auto prop = closure->propVecForConstruct();
+  auto const stop = prop + cls->numDeclProperties();
+  while (prop != stop) tvDecRefGen(prop++);
+
   auto hdr = closure->hdr();
   tl_heap->objFree(hdr, hdr->size());
 }

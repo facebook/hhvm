@@ -703,11 +703,6 @@ public:
   bool forbidsDynamicProps() const;
 
   /*
-   * Whether this class has any const properties.
-   */
-  bool hasConstProps() const;
-
-  /*
    * Return true, and set the m_serialized flag, iff this Class hasn't
    * been serialized yet (see prof-data-serialize.cpp).
    *

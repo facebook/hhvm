@@ -1558,8 +1558,8 @@ static void prepareFuncEntry(ActRec *ar, StackArgsState stk) {
 
   int nlocals = func->numParams();
   if (UNLIKELY(func->isClosureBody())) {
-    int nuse = init_closure(ar, stack.top());
-    // init_closure doesn't move stack
+    int nuse = c_Closure::initActRecFromClosure(ar, stack.top());
+    // initActRecFromClosure doesn't move stack
     stack.nalloc(nuse);
     nlocals += nuse;
     func = ar->m_func;

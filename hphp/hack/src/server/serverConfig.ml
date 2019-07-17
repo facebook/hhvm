@@ -318,6 +318,7 @@ let load config_filename options =
     ?tco_use_lru_workers:(Some local_config.ServerLocalConfig.use_lru_workers)
     ?use_new_type_errors:(bool_opt "use_new_type_errors" config)
     ?po_disable_outside_dollar_str_interp:(bool_opt "disable_outside_dollar_str_interp" config)
+    ?disable_linter_fixmes:(bool_opt "disable_linter_fixmes" config)
     ()
   in
   Errors.ignored_fixme_codes :=
@@ -326,6 +327,8 @@ let load config_filename options =
     (GlobalOptions.error_codes_treated_strictly global_opts);
   Errors.use_new_type_errors :=
     (GlobalOptions.use_new_type_errors global_opts);
+  Errors.disable_linter_fixmes :=
+    (GlobalOptions.disable_linter_fixmes global_opts);
   {
     version = version;
     load_script_timeout = load_script_timeout;

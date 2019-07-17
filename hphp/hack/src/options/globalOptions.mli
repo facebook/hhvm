@@ -270,6 +270,9 @@ type t = {
   (* Disable ${x} syntax for string interpolation in Hack and only allow {$x} *)
   po_disable_outside_dollar_str_interp : bool;
 
+  (* Force 5000s to be @lint-ignored rather than fixme'd *)
+  disable_linter_fixmes : bool;
+
 } [@@deriving show]
 
 val make :
@@ -330,6 +333,7 @@ val make :
   ?tco_use_lru_workers : bool ->
   ?use_new_type_errors : bool ->
   ?po_disable_outside_dollar_str_interp: bool ->
+  ?disable_linter_fixmes : bool ->
   unit ->
   t
 
@@ -414,3 +418,4 @@ val po_disable_legacy_soft_typehints : t -> bool
 val tco_use_lru_workers : t -> bool
 val use_new_type_errors : t -> bool
 val po_disable_outside_dollar_str_interp : t -> bool
+val disable_linter_fixmes : t -> bool

@@ -40,6 +40,8 @@ val ignored_fixme_codes : ISet.t ref
 val error_codes_treated_strictly : ISet.t ref
 (* Flag that causes certain typing errors to be reported with different codes. *)
 val use_new_type_errors : bool ref
+(* Flag that causes 5000-5999 to be unable to be suppressed with a FIXME *)
+val disable_linter_fixmes : bool ref
 val is_strict_code : int -> bool
 
 val set_allow_errors_in_default_path : bool -> unit

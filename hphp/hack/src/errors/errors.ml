@@ -548,6 +548,7 @@ let error_codes_treated_strictly = ref (ISet.of_list [])
 let is_strict_code code = ISet.mem code !error_codes_treated_strictly
 
 let use_new_type_errors = ref false
+let disable_linter_fixmes = ref false
 
 let default_ignored_fixme_codes = ISet.of_list [
   Typing.err_code Typing.InvalidIsAsExpressionHint;
@@ -565,7 +566,8 @@ let ignored_fixme_codes = ref default_ignored_fixme_codes
 
 let set_allow_errors_in_default_path x = allow_errors_in_default_path := x
 
-let is_ignored_code code = ISet.mem code !ignored_fixme_codes
+let is_ignored_code code = ISet.mem code !ignored_fixme_codes ||
+  (!disable_linter_fixmes && (code / 1000) = 5)
 
 let is_ignored_fixme code = is_ignored_code code
 
@@ -576,9 +578,18 @@ let (get_hh_fixme_pos: (Pos.t -> error_code -> Pos.t option) ref) =
 let add_ignored_fixme_code_error pos code =
   if !is_hh_fixme pos code && is_ignored_code code then
     let pos = Option.value (!get_hh_fixme_pos pos code) ~default:pos in
-    add_error (make_error code
-      [pos,
-       Printf.sprintf "You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress error %d" code])
+    if (code / 1000) = 5
+    then
+      add_error (make_error code
+        [pos,
+        Printf.sprintf
+          "You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress error %d.\
+           Please use @lint-ignore."
+          code])
+    else
+      add_error (make_error code
+        [pos,
+        Printf.sprintf "You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress error %d" code])
 
 (*****************************************************************************)
 (* Errors accumulator. *)

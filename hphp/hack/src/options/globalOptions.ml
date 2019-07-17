@@ -66,6 +66,7 @@ type t = {
   tco_use_lru_workers: bool;
   use_new_type_errors: bool;
   po_disable_outside_dollar_str_interp : bool;
+  disable_linter_fixmes: bool;
 } [@@deriving show]
 
 let tco_experimental_instanceof = "instanceof"
@@ -251,6 +252,7 @@ let default = {
  tco_use_lru_workers = true;
  use_new_type_errors = false;
  po_disable_outside_dollar_str_interp = false;
+ disable_linter_fixmes = false;
 }
 
 let make
@@ -311,6 +313,7 @@ let make
   ?(tco_use_lru_workers = default.tco_use_lru_workers)
   ?(use_new_type_errors = default.use_new_type_errors)
   ?(po_disable_outside_dollar_str_interp = default.po_disable_outside_dollar_str_interp)
+  ?(disable_linter_fixmes = default.disable_linter_fixmes)
   ()
 = {
   tco_safe_array;
@@ -371,6 +374,7 @@ let make
   tco_use_lru_workers;
   use_new_type_errors;
   po_disable_outside_dollar_str_interp;
+  disable_linter_fixmes;
 }
 let tco_safe_array t = t.tco_safe_array
 let tco_safe_vector_array t = t.tco_safe_vector_array
@@ -453,6 +457,7 @@ let tco_use_lru_workers t = t.tco_use_lru_workers
 let use_new_type_errors t = t.use_new_type_errors
 
 let po_disable_outside_dollar_str_interp t = t.po_disable_outside_dollar_str_interp
+let disable_linter_fixmes t = t.disable_linter_fixmes
 
 let setup_pocket_universes env enabled =
   let exp_features = env.tco_experimental_features in

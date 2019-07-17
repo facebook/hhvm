@@ -213,6 +213,7 @@ let parse_options () =
   let disable_legacy_soft_typehints = ref false in
   let use_new_type_errors = ref false in
   let disable_outside_dollar_str_interp = ref false in
+  let disable_linter_fixmes = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -453,6 +454,9 @@ let parse_options () =
     "--disable-outside-dollar-str-interp",
       Arg.Set disable_outside_dollar_str_interp,
       "Disables ${x} syntax for string interpolation (use {$x} instead)";
+    "--disable-linter-fixmes",
+      Arg.Set disable_linter_fixmes,
+      "Disables HH_FIXME and HH_IGNORE_ERROR for 5000-5999 error codes";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -495,6 +499,7 @@ let parse_options () =
     ~po_disable_legacy_soft_typehints:!disable_legacy_soft_typehints
     ~use_new_type_errors:!use_new_type_errors
     ~po_disable_outside_dollar_str_interp:!disable_outside_dollar_str_interp
+    ~disable_linter_fixmes:!disable_linter_fixmes
     ()
   in
   let tcopt = {
@@ -518,6 +523,7 @@ let parse_options () =
     ~workers:None in
 
   Errors.use_new_type_errors := !use_new_type_errors;
+  Errors.disable_linter_fixmes := !disable_linter_fixmes;
 
   ({ files = fns;
     mode = !mode;

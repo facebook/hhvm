@@ -181,6 +181,103 @@ struct CompilerOptions {
 
 constexpr int kInvalidPid = -1;
 
+struct Pipe final {
+  explicit Pipe(bool nonblocking = false) {
+    int flags = O_CLOEXEC;
+    if (nonblocking) flags |= O_NONBLOCK;
+
+    if (pipe2(fds, flags) == -1) throwErrno("unable to open pipe");
+  }
+  ~Pipe() {
+    close();
+  }
+
+  FILE* detach(const char* mode) {
+    auto ret = fdopen(fds[*mode == 'r' ? 0 : 1], mode);
+    if (!ret) throwErrno("unable to fdopen pipe");
+    ::close(fds[*mode == 'r' ? 1 : 0]);
+    fds[0] = fds[1] = -1;
+    return ret;
+  }
+  int remoteIn() const { return fds[0]; }
+  int remoteOut() const { return fds[1]; }
+  void close() {
+    if (fds[0] != -1) {
+      ::close(fds[0]);
+      fds[0] = -1;
+    }
+    if (fds[1] != -1) {
+      ::close(fds[1]);
+      fds[1] = -1;
+    }
+  }
+  int fds[2];
+};
+
+std::string readline(FILE* f);
+
+struct LogThread {
+  LogThread(int pid, FILE* file)
+    : m_pid(pid), m_file(file), m_signalPipe(true)
+  {
+    m_thread = std::make_unique<std::thread>([&]() {
+        int ret = 0;
+        auto pid = m_pid;
+        auto signalFD = m_signalPipe.remoteIn();
+        try {
+          pollfd pfd[] = {
+            {fileno(m_file), POLLIN, 0},
+            {signalFD, POLLIN, 0 },
+          };
+          while ((ret = poll(pfd, 2, -1)) != -1) {
+            if (ret == 0) continue;
+            if (pfd[0].revents & (POLLHUP | POLLNVAL | POLLERR) ||
+                pfd[1].revents) {
+              throw std::runtime_error("hangup");
+            }
+            if (pfd[0].revents) {
+              const auto line = readline(m_file);
+              Logger::FError("[external compiler {}]: {}", pid, line);
+            }
+          }
+        } catch (const std::exception& exc) {
+          // The stderr output messes with expected test output, which
+          // presumably come from non-server runs.
+          if (RuntimeOption::ServerMode) {
+            Logger::FVerbose(
+              "Ceasing to log stderr from external compiler ({}): {}",
+              pid,
+              exc.what());
+          }
+        }
+      });
+  }
+  ~LogThread() {
+      stop();
+  }
+
+  void stop() {
+    if (m_thread && m_thread->joinable()) {
+      SCOPE_EXIT {
+        m_signalPipe.close();
+      };
+
+      // Signal thread to exit.
+      write(m_signalPipe.remoteOut(), "X", 1);
+      m_thread->join();
+    }
+
+    m_pid = kInvalidPid;
+    m_file = nullptr;
+  }
+
+private:
+  int m_pid;
+  FILE* m_file;
+  Pipe m_signalPipe;
+  std::unique_ptr<std::thread> m_thread;
+};
+
 struct ExternCompiler {
   explicit ExternCompiler(const CompilerOptions& options)
       : m_options(options)
@@ -363,7 +460,7 @@ private:
   std::string m_version;
 
   FILE* m_err{nullptr};
-  std::unique_ptr<std::thread> m_logStderrThread;
+  std::unique_ptr<LogThread> m_logStderrThread;
 
   unsigned m_compilations{0};
   const CompilerOptions& m_options;
@@ -677,11 +774,12 @@ std::string ExternCompiler::readResult(StructuredLogEntry* log) const {
 
 void ExternCompiler::stopLogStderrThread() {
   SCOPE_EXIT { m_err = nullptr; };
+
   if (m_err) {
     fclose(m_err);   // need to unblock getline()
   }
-  if (m_logStderrThread && m_logStderrThread->joinable()) {
-    m_logStderrThread->join();
+  if (m_logStderrThread) {
+    m_logStderrThread->stop();
   }
 }
 
@@ -890,26 +988,6 @@ void ExternCompiler::stop() {
   }
 }
 
-struct Pipe final {
-  Pipe() {
-    if (pipe2(fds, O_CLOEXEC) == -1) throwErrno("unable to open pipe");
-  }
-  ~Pipe() {
-    if (fds[0] != -1) close(fds[0]);
-    if (fds[1] != -1) close(fds[1]);
-  }
-  FILE* detach(const char* mode) {
-    auto ret = fdopen(fds[*mode == 'r' ? 0 : 1], mode);
-    if (!ret) throwErrno("unable to fdopen pipe");
-    close(fds[*mode == 'r' ? 1 : 0]);
-    fds[0] = fds[1] = -1;
-    return ret;
-  }
-  int remoteIn() const { return fds[0]; }
-  int remoteOut() const { return fds[1]; }
-  int fds[2];
-};
-
 void ExternCompiler::start() {
   if (m_pid != kInvalidPid) return;
 
@@ -946,32 +1024,7 @@ void ExternCompiler::start() {
   m_out = out.detach("r");
   m_err = err.detach("r");
 
-  m_logStderrThread = std::make_unique<std::thread>([&]() {
-      int ret = 0;
-      auto pid = m_pid;
-      try {
-        pollfd pfd[] = {{fileno(m_err), POLLIN, 0}};
-        while ((ret = poll(pfd, 1, -1)) != -1) {
-          if (ret == 0) continue;
-          if (pfd[0].revents & (POLLHUP | POLLNVAL | POLLERR)) {
-            throw std::runtime_error("hangup");
-          }
-          if (pfd[0].revents) {
-            const auto line = readline(m_err);
-            Logger::FError("[external compiler {}]: {}", pid, line);
-          }
-        }
-      } catch (const std::exception& exc) {
-        // The stderr output messes with expected test output, which presumably
-        // come from non-server runs.
-        if (RuntimeOption::ServerMode) {
-          Logger::FVerbose(
-            "Ceasing to log stderr from external compiler ({}): {}",
-            pid,
-            exc.what());
-        }
-      }
-    });
+  m_logStderrThread = std::make_unique<LogThread>(m_pid, m_err);
 
   // Here we expect the very first communication from the external compiler
   // process to be a single line of JSON representing the compiler version.

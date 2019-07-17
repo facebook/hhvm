@@ -123,6 +123,21 @@ struct InstAreaRange {
   TcaRange m_instRange;
 };
 
+bool dumpPrettyIR(int level) {
+  return HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir, level) ||
+         (RuntimeOption::EvalDumpIR >= level);
+}
+
+bool dumpJsonIR(int level) {
+  return HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir_json, level) ||
+         (RuntimeOption::EvalDumpIRJson >= level);
+}
+
+bool dumpRuntimeIR(int level) {
+  return RuntimeOption::EvalDumpIR >= level ||
+         RuntimeOption::EvalDumpIRJson >= level;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }
@@ -1011,17 +1026,20 @@ void printUnit(int level, const IRUnit& unit, const char* caption,
                const GuardConstraints* guards, Annotations* annotations) {
   if (dumpIREnabled(unit.context().kind, level)) {
     std::ostringstream str;
-    if (HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir, level)) {
+    if (dumpPrettyIR(level)) {
       str << banner(caption);
       print(str, unit, ai, guards);
       str << banner("");
-      HPHP::Trace::traceRelease("%s\n", str.str().c_str());
+      if (HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir, level)) {
+        HPHP::Trace::traceRelease("%s\n", str.str().c_str());
+      }
+    } else if (dumpJsonIR(level)) {
+      str << get_json::getUnit(unit, ai, guards);
+      if (HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir_json, level)) {
+        HPHP::Trace::traceRelease("%s\n", str.str().c_str());
+      }
     }
-    if (HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir_json, level)) {
-      str << folly::toJson(get_json::getUnit(unit, ai, guards));
-      HPHP::Trace::traceRelease("%s\n", str.str().c_str());
-    }
-    if (annotations && RuntimeOption::EvalDumpIR >= level) {
+    if (annotations && dumpRuntimeIR(level)) {
       annotations->emplace_back(caption, str.str());
     }
   }
@@ -1030,7 +1048,8 @@ void printUnit(int level, const IRUnit& unit, const char* caption,
 bool dumpIREnabled(TransKind kind, int level /* = 1 */) {
   return HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir, level) ||
          HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir_json, level) ||
-         (RuntimeOption::EvalDumpIR >= level && mcgen::dumpTCAnnotation(kind));
+         (dumpRuntimeIR(level) &&
+          mcgen::dumpTCAnnotation(kind));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -898,6 +898,7 @@ struct RuntimeOption {
   F(string, DumpTCPath,                "/tmp")                          \
   F(bool, DumpTCAnchors,               false)                           \
   F(uint32_t, DumpIR,                  0)                               \
+  F(uint32_t, DumpIRJson,             0)                               \
   F(bool, DumpTCAnnotationsForAllTrans,debug)                           \
   /* DumpInlDecision 0=none ; 1=refuses ; 2=refuses+accepts */          \
   F(uint32_t, DumpInlDecision,         0)                               \

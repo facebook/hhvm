@@ -196,7 +196,7 @@ let rec localize ~ety_env env (dty: decl ty) =
           (* If not specified, default bound is arraykey *)
           | None -> env, MakeType.arraykey (Reason.Rimplicit_upper_bound (p, "arraykey"))
           | Some ty -> localize ~ety_env env ty in
-        env, (r, Tabstract (AKenum x, Some cstr))
+        env, (r, Tabstract (AKnewtype (x, []), Some cstr))
       end
   | r, Tapply ((_, cid) as cls, tyl) ->
       let env, tyl =

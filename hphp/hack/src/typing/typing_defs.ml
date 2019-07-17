@@ -251,10 +251,10 @@ and array_kind =
  * dependent type
  *)
 and abstract_kind =
-    (* newtype foo<T1, T2> ... *)
+    (* newtype foo<T1, T2> ...
+     * or
+     * enum foo ... *)
   | AKnewtype of string * locl ty list
-    (* enum foo ... *)
-  | AKenum of string
     (* <T super C> ; None if 'as' constrained *)
   | AKgeneric of string
     (* see dependent_type *)
@@ -596,7 +596,6 @@ module AbstractKind = struct
   let to_string = function
     | AKnewtype (name, _) -> name
     | AKgeneric name -> name
-    | AKenum name -> Utils.strip_ns name
     | AKdependent dt ->
        let dt =
          match dt with
@@ -688,9 +687,8 @@ let array_kind_con_ordinal ak =
 let abstract_kind_con_ordinal ak =
   match ak with
   | AKnewtype _ -> 0
-  | AKenum _ -> 1
-  | AKgeneric _ -> 2
-  | AKdependent _ -> 3
+  | AKgeneric _ -> 1
+  | AKdependent _ -> 2
 
 (* Compare two types syntactically, ignoring reason information and other
  * small differences that do not affect type inference behaviour. This
@@ -835,8 +833,7 @@ and abstract_kind_compare ?(normalize_lists = false) t1 t2 =
     | 0 -> tyl_compare ~sort:false tyl tyl2
     | n -> n
     end
-  | AKgeneric id1, AKgeneric id2
-  | AKenum id1, AKenum id2 ->
+  | AKgeneric id1, AKgeneric id2 ->
     String.compare id1 id2
   | AKdependent d1, AKdependent d2 ->
     compare d1 d2

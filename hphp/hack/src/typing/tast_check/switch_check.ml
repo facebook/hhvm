@@ -63,7 +63,7 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
         (List.length tyl> 1 && List.exists tyl ~f:begin fun cur_ty ->
         let _, (_, cur_ty) = Env.expand_type env cur_ty in
         match cur_ty with
-          | Tabstract (AKenum _, _) -> true
+          | Tabstract (AKnewtype (cid, _), _) -> Env.is_enum env cid
           | _ -> false
       end) in
       List.fold_left tyl ~init:env ~f:begin fun env ty ->
@@ -72,7 +72,7 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
     | Tintersection tyl ->
       fst @@ Typing_utils.run_on_intersection env tyl ~f:(fun env ty ->
         check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved, ())
-    | Tabstract (AKenum id, _) ->
+    | Tabstract (AKnewtype (id, _), _) when Env.is_enum env id ->
       let dep = Typing_deps.Dep.AllMembers id in
       let decl_env = Env.get_decl_env env in
       Option.iter decl_env.Decl_env.droot

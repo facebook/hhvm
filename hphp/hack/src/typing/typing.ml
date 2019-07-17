@@ -1105,7 +1105,7 @@ and case_list parent_locals ty env switch_pos cl =
       then Env.expand_type env ty
       else SubType.expand_type_and_solve env ~description_of_expected:"a value" switch_pos ty in
     let is_enum = match snd ty with
-      | Tabstract (AKenum _, _) -> true
+      | Tabstract (AKnewtype (cid, _), _) -> Env.is_enum env cid
       | _ -> false in
     (* If there is no default case and this is not a switch on enum (since
      * exhaustiveness is garanteed elsewhere on enums),
@@ -5061,7 +5061,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
 
         | (_, (Tany | Tnonnull | Tarraykind _ | Toption _
                  | Tprim _ | Tfun _ | Ttuple _
-                 | Tabstract ((AKenum _ | AKdependent _ | AKnewtype _), _)
+                 | Tabstract ((AKdependent _ | AKnewtype _), _)
                  | Tanon (_, _) | Tobject | Tshape _)) as ty
           ->
           Errors.expected_class ~suffix:(", but got "^Typing_print.error env ty) p;

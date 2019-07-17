@@ -55,7 +55,7 @@ let check_valid_array_key_type f_fail ~allow_any:allow_any env p t =
     match t' with
     | Tprim (Tint | Tstring) -> env, None
     (* Enums have to be valid array keys *)
-    | Tabstract (AKenum _, _) -> env, None
+    | Tabstract (AKnewtype (id, _), _) when Typing_env.is_enum env id -> env, None
     | Terr | Tany when allow_any -> env, None
     | Tintersection tyl ->
       (* Ok if at least one element of the intersection is ok. *)
@@ -112,7 +112,7 @@ let enum_class_check env tc consts const_types =
           | Tnonnull -> ()
           | Tprim Tint | Tprim Tstring | Tprim Tarraykey -> ()
           (* Allow enums in terms of other enums *)
-          | Tabstract (AKenum _, _) -> ()
+          | Tabstract (AKnewtype (id, _), _) when Typing_env.is_enum env id -> ()
           (* Don't tell anyone, but we allow type params too, since there are
            * Enum subclasses that need to do that *)
           | Tabstract (AKgeneric _, _) -> ()

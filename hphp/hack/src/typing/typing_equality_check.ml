@@ -50,10 +50,11 @@ let rec assert_nontrivial p bop env ty1 ty2 =
   match ty1, ty2 with
   (* Disallow `===` on distinct abstract enum types. *)
   (* Future: consider putting this in typed lint not type checking *)
-  | (_, Tabstract (AKenum e1, Some (_, Tprim N.Tarraykey))),
-    (_, Tabstract (AKenum e2, Some (_, Tprim N.Tarraykey))) ->
-    if e1=e2 then ()
-    else eq_incompatible_types env p ety1 ety2
+  | (_, Tabstract (AKnewtype (e1, _), Some (_, Tprim N.Tarraykey))),
+    (_, Tabstract (AKnewtype (e2, _), Some (_, Tprim N.Tarraykey)))
+    when Env.is_enum env e1 && Env.is_enum env e2 ->
+     if e1=e2 then ()
+     else eq_incompatible_types env p ety1 ety2
   | _ ->
   match ety1, ety2 with
   | (_, Tprim N.Tnum),               (_, Tprim (N.Tint | N.Tfloat))

@@ -247,6 +247,7 @@ val is_xhp_child : env -> Pos.t -> Tast.ty -> bool
 (** Verify that an XHP body expression is legal. *)
 
 val get_enum : env -> string -> Decl_provider.class_decl option
+val is_enum : env -> string -> bool
 val env_reactivity: env -> Typing_defs.reactivity
 val function_is_mutable: env -> Tast.type_param_mutability option
 val local_is_mutable: include_borrowed: bool -> env -> Local_id.t -> bool

@@ -116,7 +116,6 @@ module ExprDepTy = struct
     | Toption ty
     | Tabstract (
         ( AKnewtype _
-        | AKenum _
         ), Some ty) ->
         should_apply env ty
     | Tabstract (AKdependent _, Some _) ->

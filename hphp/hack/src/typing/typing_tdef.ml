@@ -79,7 +79,7 @@ let expand_typedef ety_env env r x argl =
  * of where the typedefs come from. *)
 let rec force_expand_typedef ~ety_env env (t : locl ty) =
   match t with
-  | r, Tabstract (AKnewtype (x, argl), _) ->
+  | r, Tabstract (AKnewtype (x, argl), _) when not (Env.is_enum env x) ->
      let env, (ety_env, ty) =
        expand_typedef_ ~force_expand:true ety_env env r x argl in
      force_expand_typedef ~ety_env env ty

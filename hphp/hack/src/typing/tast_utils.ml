@@ -26,7 +26,7 @@ let rec type_non_nullable env ty =
   | _, (Tprim Nast.(Tint | Tbool | Tfloat | Tstring | Tresource | Tnum
                     | Tarraykey | Tnoreturn)
         | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject
-        | Tclass _ | Tarraykind _ | Tabstract (AKenum _, _)) -> true
+        | Tclass _ | Tarraykind _) -> true
   | _, Tabstract (_, Some ty) when type_non_nullable env ty -> true
   | _, Tunion tyl when not (List.is_empty tyl) ->
     List.for_all tyl (type_non_nullable env)
@@ -86,9 +86,10 @@ let rec truthiness env ty =
   | Tany | Terr | Tdynamic | Tvar _ -> Unknown
 
   | Tnonnull
-  | Tabstract (AKenum _, _)
   | Tarraykind _
   | Toption _ -> Possibly_falsy
+  | Tabstract(AKnewtype (id, _), _) when Env.is_enum env id ->
+    Possibly_falsy
 
   | Tclass ((_, cid), _, _) ->
     if cid = SN.Classes.cStringish then Possibly_falsy else

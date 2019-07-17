@@ -86,7 +86,7 @@ let visitor = object(this)
 
   method! on_tabstract acc r ak _ty_opt =
     match ak with
-    | AKenum _ -> acc
+    | AKnewtype (cid, _) when Env.is_enum acc.env cid -> acc
     | AKdependent (`this) -> acc
     | AKgeneric name when Env.is_fresh_generic_parameter name  ||
                           AbstractKind.is_generic_dep_ty name -> acc

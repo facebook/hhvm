@@ -378,8 +378,8 @@ and simplify_subtype
    * In the case when no upper bound is specified in source code,
    * an implicit upper bound mixed = ?nonnull is added.
    *)
-  | Tabstract ((AKnewtype _ | AKdependent _ | AKenum _), None), _
-  | _, Tabstract ((AKnewtype _ | AKdependent _ | AKenum _), None) -> assert false
+  | Tabstract ((AKnewtype _ | AKdependent _), None), _
+  | _, Tabstract ((AKnewtype _ | AKdependent _), None) -> assert false
 
   | (Tprim Nast.(Tint | Tbool | Tfloat | Tstring | Tresource | Tnum |
                  Tarraykey | Tnoreturn) |
@@ -391,13 +391,13 @@ and simplify_subtype
     Tnonnull ->
     invalid ()
 
-  | Tabstract ((AKnewtype _ | AKdependent _ | AKenum _), Some ty), Tnonnull ->
+  | Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tnonnull ->
     simplify_subtype ~seen_generic_params ~this_ty ty ty_super env
 
   | Tdynamic, Tdynamic ->
     valid ()
   | (Tnonnull | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tshape _ |
-     Tabstract (AKenum _, _) | Tanon _ | Tobject | Tclass _ | Tarraykind _),
+     Tanon _ | Tobject | Tclass _ | Tarraykind _),
     Tdynamic ->
     invalid ()
   | Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tdynamic ->
@@ -434,7 +434,7 @@ and simplify_subtype
   | (Tprim Nast.(Tint | Tbool | Tfloat | Tstring | Tresource | Tnum |
                  Tarraykey | Tnoreturn) |
      Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject |
-     Tclass _ | Tarraykind _ | Tabstract (AKenum _, _) | Tany),
+     Tclass _ | Tarraykind _ | Tany),
     Toption ty_super' ->
     simplify_subtype ~seen_generic_params ~this_ty ty_sub ty_super' env
   | Tabstract (AKnewtype (name_sub, _), _),
@@ -489,11 +489,11 @@ and simplify_subtype
     invalid ()
   | Toption ty_sub', Tprim Nast.Tnull ->
     simplify_subtype ~seen_generic_params ~this_ty ty_sub' ty_super env
-  | Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), Some ty), Tprim _ ->
+  | Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tprim _ ->
     simplify_subtype ~seen_generic_params ~this_ty ty ty_super env
 
   | (Tnonnull | Tdynamic | Toption _ | Tprim _ | Ttuple _ | Tshape _ |
-     Tabstract (AKenum _, _) | Tobject | Tclass _ | Tarraykind _), Tfun _ ->
+     Tobject | Tclass _ | Tarraykind _), Tfun _ ->
     invalid ()
   | Tfun ft_sub, Tfun ft_super ->
     let r_sub, r_super = fst ety_sub, fst ety_super in
@@ -530,7 +530,7 @@ and simplify_subtype
     simplify_subtype ~seen_generic_params ~this_ty ty ty_super env
 
   | (Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Tshape _ |
-     Tabstract (AKenum _, _) | Tanon _ | Tobject | Tclass _ | Tarraykind _),
+     Tanon _ | Tobject | Tclass _ | Tarraykind _),
     Ttuple _ ->
     invalid ()
   (* (t1,...,tn) <: (u1,...,un) iff t1<:u1, ... , tn <: un *)
@@ -546,7 +546,7 @@ and simplify_subtype
     simplify_subtype ~seen_generic_params ~this_ty ty ty_super env
 
   | (Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _ |
-     Tabstract (AKenum _, _) | Tanon _ | Tobject | Tclass _ | Tarraykind _),
+     Tanon _ | Tobject | Tclass _ | Tarraykind _),
     Tshape _ ->
     invalid ()
   | Tshape (shape_kind_sub, fdm_sub), Tshape (shape_kind_super, fdm_super) ->
@@ -603,10 +603,16 @@ and simplify_subtype
     let this_ty = Option.first_some this_ty (Some ety_sub) in
     simplify_subtype ~seen_generic_params ~this_ty ty ty_super env
 
+  | Tclass ((_, class_name), _, _), Tabstract (AKnewtype (enum_name, _), _)
+    when Env.is_enum env enum_name && enum_name = class_name -> valid ()
+
   | (Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tshape _ |
      Tanon _ | Tobject | Tclass _ | Tarraykind _),
     Tabstract (AKnewtype _, _) ->
     invalid ()
+
+  | Tabstract (AKnewtype (e_sub, _), _), Tabstract (AKnewtype (e_super, _), _)
+    when Env.is_enum env e_sub && Env.is_enum env e_super && e_sub = e_super -> valid ()
   | Tabstract (AKnewtype (name_sub, tyl_sub), _),
     Tabstract (AKnewtype (name_super, tyl_super), _)
     when name_super = name_sub ->
@@ -618,19 +624,9 @@ and simplify_subtype
         | None ->
           invalid ()
       end
-  | Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), Some ty), Tabstract (AKnewtype _, _) ->
+  | Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tabstract (AKnewtype _, _) ->
     simplify_subtype ~seen_generic_params ~this_ty ty ty_super env
 
-  | Tabstract (AKenum e_sub, _), Tabstract (AKenum e_super, _)
-    when e_sub = e_super -> valid ()
-  | Tclass ((_, class_name), _, _), Tabstract (AKenum enum_name, _)
-    when enum_name = class_name -> valid ()
-  | (Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tshape _ |
-     Tanon _ | Tobject | Tclass _ | Tarraykind _),
-    Tabstract (AKenum _, _) ->
-    invalid ()
-  | Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), Some ty), Tabstract (AKenum _, _) ->
-    simplify_subtype ~seen_generic_params ~this_ty ty ty_super env
 
   | _, Tabstract (AKdependent _, Some (_, Tclass ((_, x), _, _) as ty))
     when is_final_and_not_contravariant env x ->
@@ -697,13 +693,13 @@ and simplify_subtype
     | _ -> invalid ()
     end
 
-  | Tabstract ((AKnewtype _ | AKenum _), Some ty), Tabstract (AKdependent _, _) ->
+  | Tabstract (AKnewtype _, Some ty), Tabstract (AKdependent _, _) ->
     simplify_subtype ~seen_generic_params ~this_ty ty ty_super env
   | Toption _, Tabstract (AKdependent _, Some _) ->
     invalid ()
 
   | (Tnonnull | Tdynamic | Toption _ | Tprim _ | Ttuple _ | Tshape _ |
-     Tabstract (AKenum _, _) | Tobject | Tclass _ | Tarraykind _),
+     Tobject | Tclass _ | Tarraykind _),
     Tanon _ ->
     invalid ()
   | Tanon (_, id1), Tanon (_, id2) -> if id1 = id2 then valid () else invalid ()
@@ -716,21 +712,22 @@ and simplify_subtype
   (* Any class type is a subtype of object *)
   | Tclass _, Tobject -> valid ()
   | (Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tshape _ |
-     Tabstract (AKenum _, _) | Tanon _ | Tarraykind _),
+     Tanon _ | Tarraykind _),
     Tobject ->
     invalid ()
   | Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tobject ->
     simplify_subtype ~seen_generic_params ~this_ty ty ty_super env
 
-  | Tabstract (AKenum _, _), Tclass ((_, class_name), _, [ty_super'])
-    when class_name = SN.Classes.cHH_BuiltinEnum ->
+  | Tabstract (AKnewtype (cid, _), _), Tclass ((_, class_name), _, [ty_super'])
+    when Env.is_enum env cid && class_name = SN.Classes.cHH_BuiltinEnum ->
     env |>
     simplify_subtype ~seen_generic_params ~this_ty ty_sub ty_super' &&&
     simplify_subtype ~seen_generic_params ~this_ty ty_super' ty_sub
-  | Tabstract (AKenum enum_name, _), Tclass ((_, class_name), Nonexact, _)
-    when (enum_name = class_name || class_name = SN.Classes.cXHPChild) ->
+  | Tabstract (AKnewtype (enum_name, _), _), Tclass ((_, class_name), Nonexact, _)
+    when (Env.is_enum env enum_name && enum_name = class_name || class_name = SN.Classes.cXHPChild) ->
     valid ()
-  | Tabstract (AKenum enum_name, Some ty), Tclass ((_, class_name), exact, _) ->
+  | Tabstract (AKnewtype (enum_name, _), Some ty), Tclass ((_, class_name), exact, _)
+    when Env.is_enum env enum_name ->
     if enum_name = class_name && exact = Nonexact
     then valid ()
     else simplify_subtype ~seen_generic_params ~this_ty ty ty_super env
@@ -930,7 +927,7 @@ and simplify_subtype
     then invalid ()
     else valid ()
   | (Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _ |
-     Tshape _ | Tabstract (AKenum _, _) | Tanon _ | Tobject | Tclass _),
+     Tshape _ | Tanon _ | Tobject | Tclass _),
     Tarraykind _ ->
     invalid ()
   | Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tarraykind _ ->
@@ -1086,7 +1083,7 @@ and simplify_subtype
   | Tabstract (AKgeneric name_sub, opt_sub_cstr), Tunion [] ->
     simplify_subtype_generic_sub name_sub opt_sub_cstr ty_super env
   | (Tnonnull | Tdynamic | Tprim _ | Tfun _ | Ttuple _ | Tshape _ |
-     Tanon _ | Tobject | Tclass _ | Tarraykind _ | Tabstract (AKenum _, _)),
+     Tanon _ | Tobject | Tclass _ | Tarraykind _),
     Tunion [] ->
     invalid ()
 

@@ -196,6 +196,8 @@ let is_xhp_child = Typing_xhp.is_xhp_child
 
 let get_enum = Typing_env.get_enum
 
+let is_enum = Typing_env.is_enum
+
 let env_reactivity = Typing_env.env_reactivity
 
 let function_is_mutable = Typing_env.function_is_mutable

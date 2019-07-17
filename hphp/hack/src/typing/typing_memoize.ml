@@ -25,28 +25,26 @@ let check_param : Env.env -> Nast.fun_param -> unit =
   let rec check_memoizable: Env.env -> locl ty -> unit =
     fun env ty ->
     let env, ty = Env.expand_type env ty in
+    let ety_env = Typing_phase.env_with_self env in
+    let env, ty, _ =
+      Typing_tdef.force_expand_typedef ~ety_env env ty in
     match ty with
     | _, (Tprim (Tnull | Tarraykey | Tbool | Tint | Tfloat | Tstring | Tnum)
-         | Tnonnull | Tany | Terr | Tabstract (AKenum _, _) | Tdynamic) ->
+         | Tnonnull | Tany | Terr | Tdynamic) ->
        ()
     | _, Tprim (Tvoid | Tresource | Tnoreturn) -> error ty
     | _, Toption ty -> check_memoizable env ty
     | _, Ttuple tyl -> List.iter tyl (check_memoizable env)
-    | _, Tabstract (AKnewtype (_, _), _) ->
-      let env, t', _ =
-        let ety_env = Typing_phase.env_with_self env in
-        Typing_tdef.force_expand_typedef ~ety_env env ty in
-      check_memoizable env t'
     (* Just accept all generic types for now. Stricter check_memoizables to come later. *)
     | _, Tabstract (AKgeneric _, _) ->
       ()
     (* For parameter type 'this::TID' defined by 'type const TID as Bar' check_memoizables
-     * Bar recursively.
+     * Bar recursively. Also enums represented using AKnewtype.
      *)
-    | _, Tabstract (AKdependent _, Some ty) -> check_memoizable env ty
-    (* Allow unconstrined dependent type `abstract type const TID` just as we
+    | _, Tabstract ((AKnewtype _ | AKdependent _), Some ty) -> check_memoizable env ty
+    (* Allow unconstrained dependent type `abstract type const TID` just as we
      * allow unconstrained generics. *)
-    | _, Tabstract (AKdependent _, None) -> ()
+    | _, Tabstract (_, None) -> ()
     (* Handling Tunion and Tintersection case here for completeness, even though it
      * shouldn't be possible to have an unresolved type when check_memoizableing
      * the method declaration. No corresponding test case for this.

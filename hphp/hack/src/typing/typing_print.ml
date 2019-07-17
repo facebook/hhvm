@@ -71,7 +71,7 @@ module Suggest = struct
     | Tapply ((_, cid), [x]) -> (Utils.strip_ns cid)^"<"^type_ x^">"
     | Tapply ((_, cid), l)   -> (Utils.strip_ns cid)^"<"^list l^">"
     | Tclass ((_, cid), _, []) -> Utils.strip_ns cid
-    | Tabstract ((AKnewtype (cid, []) | AKenum cid), _) -> Utils.strip_ns cid
+    | Tabstract (AKnewtype (cid, []), _) -> Utils.strip_ns cid
     | Tclass ((_, cid), _, [x]) -> (Utils.strip_ns cid)^"<"^type_ x^">"
     | Tabstract (AKnewtype (cid, [x]), _) ->
         (Utils.strip_ns cid)^"<"^type_ x^">"
@@ -258,7 +258,7 @@ module Full = struct
       | Exact when !debug_mode -> Concat [text "exact"; Space; d]
       | _ -> d
       end
-    | Tabstract ((AKnewtype (s, []) | AKenum s), _) -> to_doc s
+    | Tabstract (AKnewtype (s, []), _) -> to_doc s
     | Tabstract (AKnewtype (s, tyl), _) -> to_doc s ^^ list "<" k tyl ">"
     | Tabstract (ak, cstr) ->
       let cstr_info = if !debug_mode then
@@ -649,8 +649,7 @@ module ErrorString = struct
   and abstract env ak cstr =
     let x = strip_ns @@ AbstractKind.to_string ak in
     match ak, cstr with
-    | AKnewtype (_, tyl), _ -> "an object of type " ^ x ^ inst env tyl
-    | AKenum _, _ -> "a value of "^x
+    | AKnewtype (_, tyl), _ -> "a value of type " ^ x ^ inst env tyl
     | AKgeneric s, _ when AbstractKind.is_generic_dep_ty s ->
       "the expression dependent type "^s
     | AKgeneric _, _ -> "a value of generic type "^x
@@ -788,8 +787,8 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
     obj @@ kind "generic" @ is_array false @ name s
   | Tabstract (AKgeneric s, opt_ty) ->
     obj @@ kind "generic" @ is_array true @ name s @ as_type opt_ty
-  | Tabstract (AKenum s, _) ->
-    obj @@ kind "enum" @ name s
+  | Tabstract (AKnewtype (s, _), opt_ty) when Typing_env.is_enum env s ->
+    obj @@ kind "enum" @ name s @ as_type opt_ty
   | Tabstract (AKnewtype (s, tys), opt_ty) ->
     obj @@ kind "newtype" @ name s @ args tys @ as_type opt_ty
   | Tabstract (AKdependent (`cls c), opt_ty) ->
@@ -942,7 +941,7 @@ let to_locl_ty
     | "enum" ->
       get_string "name" (json, keytrace) >>= fun (name, _name_keytrace) ->
       aux_as json ~keytrace >>= fun as_opt ->
-      ty (Tabstract (AKenum name, as_opt))
+      ty (Tabstract (AKnewtype (name, []), as_opt))
 
     | "newtype" ->
       get_string "name" (json, keytrace) >>= fun (name, name_keytrace) ->

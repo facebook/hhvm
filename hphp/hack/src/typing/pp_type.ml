@@ -261,10 +261,6 @@ and pp_abstract_kind : Format.formatter -> abstract_kind -> unit = fun fmt ak ->
         a1);
     Format.fprintf fmt "@,]@]";
     Format.fprintf fmt "@,))@]"
-  | AKenum a0 ->
-    Format.fprintf fmt "(@[<2>AKenum@ ";
-    Format.fprintf fmt "%S" a0;
-    Format.fprintf fmt "@])"
   | AKgeneric a0 ->
     Format.fprintf fmt "(@[<2>AKgeneric@ ";
     Format.fprintf fmt "%S" a0;

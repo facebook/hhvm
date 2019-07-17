@@ -76,7 +76,6 @@ let rec strip_ty : type a. a ty -> a ty = fun ty ->
       let abstract_kind = match abstract_kind with
         | AKnewtype (name, tparams) ->
           AKnewtype (name, strip_tyl tparams)
-        | AKenum _
         | AKgeneric _
         | AKdependent _ -> abstract_kind
       in

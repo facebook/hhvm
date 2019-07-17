@@ -42,7 +42,6 @@ end = struct
       raise Non_denotable
     | Tnonnull -> "nonnull"
     | Tdynamic -> "dynamic"
-    | Tabstract (AKenum name, _) -> Utils.strip_ns name
     | Toption (_, Tnonnull) -> "mixed"
     | Toption ty -> "?" ^ print_ty_exn ty
     | Tfun ft ->

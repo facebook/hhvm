@@ -97,7 +97,7 @@ let expand_ty ?pos env ty =
   and exp_abstract_kind ak =
     match ak with
     | AKnewtype(n, tyl) -> AKnewtype(n, exp_tys tyl)
-    | AKenum _ | AKgeneric _ | AKdependent _ -> ak
+    | AKgeneric _ | AKdependent _ -> ak
 
   and exp_tparam t =
   { t with

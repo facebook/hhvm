@@ -41,10 +41,6 @@ let rec is_stringish env ty =
   | Toption ty' -> is_stringish env ty'
   | Tunion tyl -> List.for_all ~f:(is_stringish env) tyl
   | Tintersection tyl -> List.exists ~f:(is_stringish env) tyl
-  | Tabstract (AKenum _, _) ->
-    (* Enums are either ints or strings, and so can always be used in a
-     * stringish context *)
-    true
   | Tabstract _ ->
     let env, tyl = Env.get_concrete_supertypes env ty in
     List.for_all ~f:(is_stringish env) tyl

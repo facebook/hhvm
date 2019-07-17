@@ -137,12 +137,11 @@ where
 
     pub fn leading_token(&self) -> Option<&T> {
         match self.get_token() {
-            Some(token) => return Some(token),
+            Some(token) => Some(token),
             None => {
                 for node in self.children() {
-                    match node.leading_token() {
-                        Some(token) => return Some(token),
-                        None => {}
+                    if let Some(token) = node.leading_token() {
+                        return Some(token);
                     }
                 }
                 None
@@ -152,12 +151,11 @@ where
 
     pub fn trailing_token(&self) -> Option<&T> {
         match self.get_token() {
-            Some(token) => return Some(token),
+            Some(token) => Some(token),
             None => {
                 for node in self.children().iter().rev() {
-                    match node.trailing_token() {
-                        Some(token) => return Some(token),
-                        None => {}
+                    if let Some(token) = node.trailing_token() {
+                        return Some(token);
                     }
                 }
                 None

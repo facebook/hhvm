@@ -45,7 +45,7 @@ impl TriviaKind {
         }
     }
 
-    pub fn ocaml_tag(&self) -> u8 {
+    pub fn ocaml_tag(self) -> u8 {
         match self {
             TriviaKind::WhiteSpace => 0,
             TriviaKind::EndOfLine => 1,

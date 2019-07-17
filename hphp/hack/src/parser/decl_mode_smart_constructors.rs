@@ -28,7 +28,7 @@ impl<'src, S> StateType<'src, S> for State<S> {
         } else {
             std::mem::replace(&mut st, vec![])
         };
-        let res = st_todo.into_iter().fold(false, |b1, b2| b1 || b2);
+        let res = st_todo.into_iter().any(|b2| b2);
         st.push(res);
         st
     }

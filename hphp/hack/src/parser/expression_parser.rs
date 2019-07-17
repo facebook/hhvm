@@ -63,7 +63,7 @@ where
             errors: self.errors.clone(),
             sc_state: self.sc_state.clone(),
             precedence: self.precedence,
-            _phantom: self._phantom.clone(),
+            _phantom: self._phantom,
             allow_as_expressions: self.allow_as_expressions,
         }
     }
@@ -871,12 +871,11 @@ where
             }
         };
 
-        let put_opt = |parser: &mut Self, head: Option<S::Token>, acc: &mut Vec<S::R>| match head {
-            Some(h) => {
+        let put_opt = |parser: &mut Self, head: Option<S::Token>, acc: &mut Vec<S::R>| {
+            if let Some(h) = head {
                 let token = S!(make_token, parser, h);
                 acc.push(token)
             }
-            None => {}
         };
 
         let parse_embedded_expression = |parser: &mut Self, token: S::Token| {

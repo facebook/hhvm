@@ -379,7 +379,7 @@ impl SyntaxKind {
         }
     }
 
-    pub fn ocaml_tag(&self) -> u8 {
+    pub fn ocaml_tag(self) -> u8 {
         match self {
             SyntaxKind::Missing => 0,
             SyntaxKind::Token(_) => 0,

@@ -48,7 +48,7 @@ impl<'a> SourceText<'a> {
         let len = self.length();
 
         if start >= len {
-            "".as_bytes()
+            b""
         } else if start + length > len {
             &self.text()[start..]
         } else {

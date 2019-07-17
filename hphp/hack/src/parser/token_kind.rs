@@ -653,7 +653,7 @@ impl TokenKind {
         }
     }
 
-    pub fn ocaml_tag(&self) -> u8 {
+    pub fn ocaml_tag(self) -> u8 {
         match self {
             TokenKind::EndOfFile => 0,
             TokenKind::Abstract => 1,

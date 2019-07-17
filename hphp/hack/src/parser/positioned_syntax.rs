@@ -113,7 +113,7 @@ impl SyntaxValueType<PositionedToken> for PositionedValue {
                 _ => {
                     // in progress, stepped on missing node -
                     // record it as last and move on
-                    ((first, first_not_zero, last_not_zero, Some(node)))
+                    (first, first_not_zero, last_not_zero, Some(node))
                 }
             }
         };

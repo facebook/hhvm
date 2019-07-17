@@ -47,7 +47,7 @@ where
             context: self.context.clone(),
             errors: self.errors.clone(),
             sc_state: self.sc_state.clone(),
-            _phantom: self._phantom.clone(),
+            _phantom: self._phantom,
         }
     }
 }
@@ -200,7 +200,7 @@ where
         res
     }
 
-    fn parse_expression<'b>(&mut self) -> S::R {
+    fn parse_expression(&mut self) -> S::R {
         self.with_expression_parser(&|p: &mut ExpressionParser<'a, S, T>| p.parse_expression())
     }
 
@@ -291,10 +291,8 @@ where
     fn parse_record_declaration(&mut self, attrs: S::R) -> S::R {
         // record-declaration:
         //   (abstract|final) record name { record-list }
-        let modifier = self.require_token_one_of(
-            &vec![TokenKind::Abstract, TokenKind::Final],
-            Errors::error1037,
-        );
+        let modifier =
+            self.require_token_one_of(&[TokenKind::Abstract, TokenKind::Final], Errors::error1037);
         let record = self.assert_token(TokenKind::RecordDec);
         let name = self.require_name();
         let (record_extends, record_extends_list) = self.parse_extends_opt();
@@ -1206,10 +1204,8 @@ where
         let name = if self.peek_token_kind() == TokenKind::ColonColon {
             // scope resolution expression case
             let cc_token = self.require_coloncolon();
-            let name = self.require_token_one_of(
-                &vec![TokenKind::Name, TokenKind::Construct],
-                Errors::error1004,
-            );
+            let name = self
+                .require_token_one_of(&[TokenKind::Name, TokenKind::Construct], Errors::error1004);
             S!(
                 make_scope_resolution_expression,
                 self,
@@ -1861,7 +1857,7 @@ where
         }
     }
 
-    fn parse_attribute<'b>(&mut self) -> S::R {
+    fn parse_attribute(&mut self) -> S::R {
         self.with_expression_parser(&|p: &mut ExpressionParser<'a, S, T>| {
             p.parse_constructor_call()
         })
@@ -1947,7 +1943,7 @@ where
                 let qualifier = self.parse_qualified_name_type();
                 let cc_token = self.require_coloncolon();
                 let name = self.require_token_one_of(
-                    &vec![TokenKind::Name, TokenKind::Construct],
+                    &[TokenKind::Name, TokenKind::Construct],
                     Errors::error1004,
                 );
                 let name = S!(
@@ -2527,7 +2523,9 @@ where
         // TODO(kasper): no_markup for ".hack" files
         let header = self.parse_leading_markup_section();
         let mut declarations = vec![];
-        header.map(|x| declarations.push(x));
+        if let Some(x) = header {
+            declarations.push(x)
+        };
         loop {
             let token_kind = self.peek_token_kind();
             match token_kind {

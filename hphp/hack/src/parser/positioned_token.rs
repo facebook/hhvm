@@ -147,7 +147,7 @@ impl Hash for PositionedToken {
 
 impl PartialEq for PositionedToken {
     fn eq(&self, other: &Self) -> bool {
-        return Rc::ptr_eq(&(*self).0, &(*other).0);
+        Rc::ptr_eq(&(*self).0, &(*other).0)
     }
 }
 impl Eq for PositionedToken {}

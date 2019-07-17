@@ -10,7 +10,7 @@ use crate::token_kind::TokenKind;
 use std::cell::RefCell;
 use std::marker::PhantomData;
 
-const PPL_MACRO_STR: &'static str = "__PPL";
+const PPL_MACRO_STR: &str = "__PPL";
 
 // Note: In OCaml, module State is first-class and can refer to heap-allocated data.  However,
 // and these references leak into the CoroutineSmartConstructors module.  Translating this
@@ -181,7 +181,7 @@ impl<'a, S: SyntaxType> SyntaxSmartConstructors<'a, S, State<S>> for CoroutineSm
                             .value
                             .text_range()
                             .map(|range| &st.1.text()[range.0..range.1]);
-                        text.map_or(false, |t| &String::from_utf8_lossy(t) == PPL_MACRO_STR)
+                        text.map_or(false, |t| String::from_utf8_lossy(t) == PPL_MACRO_STR)
                     } else {
                         false
                     }

@@ -309,7 +309,7 @@ where
                 return lexer.peek_next_token();
             }
             let _ = lexer.next_token();
-            i = i + 1
+            i += 1
         }
     }
 
@@ -428,7 +428,7 @@ where
     fn scan_remaining_qualified_name_extended(&mut self, name_token: S::R) -> (S::R, bool) {
         let (parts, name_token_opt, is_backslash) =
             self.scan_qualified_name_worker(Some(name_token), vec![], false);
-        if parts.len() == 0 {
+        if parts.is_empty() {
             (name_token_opt.unwrap(), is_backslash)
         } else {
             let list_node = S!(make_list, self, parts, self.pos());
@@ -1153,17 +1153,15 @@ where
             if result.is_missing() {
                 items.push(result);
                 break;
-            } else
-            // INFINITE LOOP PREVENTION: If parse_item does not actually make
-            // progress, just bail
-            if lexer_before.start() == self.lexer().start()
+            } else if lexer_before.start() == self.lexer().start()
                 && lexer_before.offset() == self.lexer().offset()
             {
+                // INFINITE LOOP PREVENTION: If parse_item does not actually make
+                // progress, just bail
                 items.push(result);
                 break;
-            } else
-            // Or if nothing's wrong, continue.
-            {
+            } else {
+                // Or if nothing's wrong, continue.
                 items.push(result)
             }
         }
@@ -1209,7 +1207,7 @@ where
     // Compare the text of the token we have in hand to the text of the
     // anticipated kind. Note: this automatically returns false for any
     // TokenKinds of length 1.
-    fn is_misspelled_kind<'b>(kind: TokenKind, token_str: &'b str) -> bool {
+    fn is_misspelled_kind(kind: TokenKind, token_str: &str) -> bool {
         let tokenkind_str = kind.to_string().as_bytes();
         let token_str = token_str.as_bytes();
         if tokenkind_str.len() <= 1 {

@@ -44,7 +44,7 @@ where
             context: self.context.clone(),
             errors: self.errors.clone(),
             sc_state: self.sc_state.clone(),
-            _phantom: self._phantom.clone(),
+            _phantom: self._phantom,
         }
     }
 }

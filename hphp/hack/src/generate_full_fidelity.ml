@@ -2161,7 +2161,7 @@ impl TriviaKind {
 TO_STRING        }
     }
 
-    pub fn ocaml_tag(&self) -> u8 {
+    pub fn ocaml_tag(self) -> u8 {
         match self {
 OCAML_TAG        }
     }
@@ -2250,7 +2250,7 @@ impl SyntaxKind {
 TO_STRING        }
     }
 
-    pub fn ocaml_tag(&self) -> u8 {
+    pub fn ocaml_tag(self) -> u8 {
         match self {
             SyntaxKind::Missing => 0,
             SyntaxKind::Token(_) => 0,
@@ -3116,7 +3116,7 @@ FROM_STRING_GIVEN_TEXT            _ => None,
         }
     }
 
-    pub fn ocaml_tag(&self) -> u8 {
+    pub fn ocaml_tag(self) -> u8 {
         match self {
 OCAML_TAG_NO_TEXTOCAML_TAG_GIVEN_TEXTOCAML_TAG_VARIABLE_TEXT        }
     }

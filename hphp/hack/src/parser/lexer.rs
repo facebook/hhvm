@@ -157,7 +157,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     }
 
     pub fn advance(&mut self, i: usize) {
-        self.offset = self.offset + i
+        self.offset += i
     }
 
     pub fn skip_to_end(&mut self) {
@@ -289,7 +289,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         let n = self.source.length();
         let mut i = self.offset();
         while i < n && p(self.peek(i)) {
-            i = i + 1;
+            i += 1;
         }
         i
     }
@@ -303,7 +303,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         let n = s.len();
         loop {
             if i < n && p(s[i] as char) {
-                i = i + 1
+                i += 1
             } else {
                 return i;
             }
@@ -338,7 +338,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         };
         let mut i = self.offset();
         while !(should_stop(i)) {
-            i = i + 1
+            i += 1
         }
         self.with_offset(i)
     }
@@ -386,9 +386,9 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         while i < n {
             let ch = self.peek(i);
             if accepted_char(ch) {
-                i = i + 1
+                i += 1
             } else if ch == ' ' && accepted_char(peek_def(i + 1)) {
-                i = i + 2;
+                i += 2;
             } else {
                 break;
             }
@@ -606,11 +606,11 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                 match ch {
                     INVALID => {
                         has_error0006 = true;
-                        i = 1 + i
+                        i += 1
                     }
-                    '\\' => i = 2 + i,
+                    '\\' => i += 2,
                     '\'' => break (1 + i),
-                    _ => i = 1 + i,
+                    _ => i += 1,
                 }
             }
         };
@@ -779,7 +779,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
 
     fn get_tail_token_kind(&self, literal_kind: &StringLiteralKind) -> TokenKind {
         match literal_kind {
-            StringLiteralKind::LiteralHeredoc { heredoc: _ } => TokenKind::HeredocStringLiteralTail,
+            StringLiteralKind::LiteralHeredoc { .. } => TokenKind::HeredocStringLiteralTail,
             StringLiteralKind::LiteralDoubleQuoted => TokenKind::DoubleQuotedStringLiteralTail,
         }
     }
@@ -798,7 +798,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     fn scan_string_literal_in_progress(&mut self, literal_kind: &StringLiteralKind) -> TokenKind {
         let (is_heredoc, name): (bool, &[u8]) = match literal_kind {
             StringLiteralKind::LiteralHeredoc { heredoc } => (true, &heredoc),
-            _ => (false, "".as_bytes()),
+            _ => (false, b""),
         };
         let start_char = '"';
         let ch0 = self.peek_char(0);
@@ -967,11 +967,10 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
             let start_offset = self.offset();
             self.advance(1);
             self.skip_name_end();
-            let name = self.source.sub(start_offset, self.offset() - start_offset);
-            name
+            self.source.sub(start_offset, self.offset() - start_offset)
         } else {
             self.with_error(Errors::error0008);
-            "".as_bytes()
+            b""
         }
     }
 
@@ -1119,7 +1118,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                     self.advance(offset + 1);
                     return TokenKind::XHPStringLiteral;
                 }
-                _ => offset = offset + 1,
+                _ => offset += 1,
             }
         }
     }
@@ -1193,7 +1192,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                     return self.with_error(Errors::error0014);
                 }
                 ('-', '-', '>') => return self.advance((offset + 3) as usize),
-                _ => offset = offset + 1,
+                _ => offset += 1,
             }
         }
     }
@@ -1262,7 +1261,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                             self.advance(offset);
                             break;
                         }
-                        _ => offset = offset + 1,
+                        _ => offset += 1,
                     }
                 }
                 TokenKind::XHPBody
@@ -1743,7 +1742,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         self.skip_to_end_of_line_or_end_tag();
         let w = self.width();
         let remainder = self.offset - lexer_ws.offset;
-        if remainder >= 11 && lexer_ws.peek_string(11) == "FALLTHROUGH".as_bytes() {
+        if remainder >= 11 && lexer_ws.peek_string(11) == b"FALLTHROUGH" {
             Token::Trivia::make_fallthrough(self.source(), self.start, w)
         } else {
             Token::Trivia::make_single_line_comment(self.source(), self.start, w)
@@ -1766,7 +1765,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
             } else if ch0 == '*' && (self.peek_char(offset + 1)) == '/' {
                 return self.advance(offset + 2);
             } else {
-                offset = offset + 1
+                offset += 1
             }
         }
     }
@@ -1790,9 +1789,9 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         let lexer_ws = self.clone();
         self.skip_to_end_of_delimited_comment();
         let w = self.width();
-        if lexer_ws.match_string("HH_FIXME".as_bytes()) {
+        if lexer_ws.match_string(b"HH_FIXME") {
             Token::Trivia::make_fix_me(self.source(), self.start, w)
-        } else if lexer_ws.match_string("HH_IGNORE_ERROR".as_bytes()) {
+        } else if lexer_ws.match_string(b"HH_IGNORE_ERROR") {
             Token::Trivia::make_ignore_error(self.source(), self.start, w)
         } else {
             Token::Trivia::make_delimited_comment(self.source(), self.start, w)
@@ -2118,7 +2117,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                     self.start = (cache.2).start;
                     self.offset = (cache.2).offset;
                     self.in_type = (cache.2).in_type;
-                    if (cache.2).errors.len() != 0 {
+                    if !(cache.2).errors.is_empty() {
                         self.errors.append(&mut (cache.2).errors.clone());
                     }
                     return cache.1.clone();

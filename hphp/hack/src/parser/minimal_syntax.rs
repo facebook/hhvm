@@ -29,7 +29,7 @@ impl SyntaxValueType<MinimalToken> for MinimalValue {
         let mut full_width = 0;
         for node in nodes {
             let w = node.value.full_width;
-            full_width = full_width + w
+            full_width += w
         }
         Self { full_width }
     }

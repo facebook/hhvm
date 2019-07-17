@@ -4735,11 +4735,14 @@ OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
   if (c1->m_type == KindOfFunc) {
     const Func* func = c1->m_data.pfunc;
     assertx(func != nullptr);
+    if (func->cls()) {
+      raise_error(Strings::CALL_ILLFORMED_FUNC);
+    }
     ArrayData* reifiedGenerics = nullptr;
 
     // Handle inout name mangling
     if (UNLIKELY(n)) {
-      auto const func_name = c1->m_data.pfunc->fullDisplayName();
+      auto const func_name = func->fullDisplayName();
       auto const v = Variant::attach(appendSuffix(func_name));
       ObjectData* thiz = nullptr;
       Class* cls = nullptr;

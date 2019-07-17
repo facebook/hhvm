@@ -1262,6 +1262,22 @@ void emitFPushFunc(IRGS& env, uint32_t numParams, const ImmVector& v) {
   }
   if (callee->isA(TFunc)) {
     popC(env);
+    ifElse(
+      env,
+      [&] (Block* taken) {
+        gen(env, CheckNonNull, taken, gen(env, LdFuncCls, callee));
+        auto const attr = AttrData {static_cast<int32_t>(AttrIsMethCaller)};
+        gen(env, JmpNZero, taken, gen(env, FuncHasAttr, attr, callee));
+      },
+      [&] { // next, attrs & IsMethCaller == 0 && Func has Cls
+        hint(env, Block::Hint::Unlikely);
+        gen(
+          env,
+          RaiseError,
+          cns(env, makeStaticString(Strings::CALL_ILLFORMED_FUNC))
+        );
+      }
+    );
     prepareToCallUnknown(env, callee, nullptr, numParams, nullptr, false,
                          nullptr);
     return;

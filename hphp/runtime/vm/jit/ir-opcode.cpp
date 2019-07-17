@@ -841,6 +841,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdContResumeAddr:
   case LdCtx:
   case LdElem:
+  case LdFuncCls:
   case LdFuncFromClsMeth:
   case LdFuncMFunc:
   case LdFuncNumParams:

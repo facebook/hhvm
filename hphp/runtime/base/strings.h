@@ -125,6 +125,9 @@ auto constexpr NEW_STATIC_ON_REIFIED_CLASS =
   "Cannot call new static since class %s has reified generics";
 auto constexpr RECORD_NOT_SUPPORTED =
   "Records are not supported here";
+auto constexpr CALL_ILLFORMED_FUNC =
+  "calling an ill-formed function pointer without resolved "
+  "class/object pointer";
 
 auto constexpr CLSMETH_COMPAT_IS_ARR = "is_array() called on clsmeth";
 auto constexpr CLSMETH_COMPAT_IS_VEC = "is_vec() called on clsmeth";

@@ -1148,6 +1148,10 @@ struct Func final {
   OFF(methCallerMethName)
 #undef OFF
 
+  static constexpr ptrdiff_t clsOff() {
+    return offsetof(Func, m_u);
+  }
+
   static constexpr ptrdiff_t methCallerClsNameOff() {
     return offsetof(Func, m_u);
   }

@@ -1958,6 +1958,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case FwdCtxStaticCall:
   case ProfileArrayKind:
   case ProfileSwitchDest:
+  case LdFuncCls:
   case LdFuncNumParams:
   case LdFuncName:
   case LdGblAddr:

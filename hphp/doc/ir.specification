@@ -180,7 +180,7 @@ loaded, using a separate CheckRefInner instruction.
 
   Also note that many types are not supported as the typeParam right now.
 
-| CheckNullptr, ND, S(StaticStr,Nullptr), B
+| CheckNullptr, ND, S(StaticStr,Nullptr,Cls), B
 
   If S0 is not a null pointer, branch to block B. This is used to check the
   return value of a native helper that returns a potentially null StringData*.
@@ -1546,6 +1546,10 @@ To string conversions:
 | LdMethCallerName<isCls>, D(StaticStr), S(Func), NF
 
   Loads the meth_caller cls or func name.
+
+| LdFuncCls, D(Cls|Nullptr), S(Func), NF
+
+  Loads the Class* of S0.
 
 | LdStrLen, D(Int), S(Str), NF
 

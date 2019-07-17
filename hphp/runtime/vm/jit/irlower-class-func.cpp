@@ -207,6 +207,13 @@ void cgLdMethCallerName(IRLS& env, const IRInstruction* inst) {
   v << decq{tmp, dst, v.makeReg()};
 }
 
+void cgLdFuncCls(IRLS& env, const IRInstruction* inst) {
+  auto const func = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  emitLdLowPtr(v, func[Func::clsOff()], dst, sizeof(Func::low_storage_t));
+}
+
 void cgFuncHasAttr(IRLS& env, const IRInstruction* inst) {
   auto const func = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();

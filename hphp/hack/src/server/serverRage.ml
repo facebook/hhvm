@@ -23,4 +23,6 @@ let go (_genv: ServerEnv.genv) (env: ServerEnv.env) : ServerRageTypes.result =
          data;
        } end
   in
-  ide_files_different_from_disk
+  let data = Printf.sprintf "hh_server pid=%d ppid=%d" (Unix.getpid ()) (Unix.getppid ())
+  in
+  { title = None; data; } :: ide_files_different_from_disk

@@ -79,15 +79,13 @@ let verify_targ_valid env tparam targ =
       | Nast.Erased -> Errors.invalid_reified_argument tparam.tp_name p "not reified"
       | Nast.SoftReified -> Errors.invalid_reified_argument tparam.tp_name p "soft reified"
       | Nast.Reified -> () end
-    | _, Tdynamic ->
-      Errors.invalid_reified_argument tparam.tp_name p "dynamic"
     | _, Tarray _
     | _, Tdarray _
     | _, Tvarray _
     | _, Tvarray_or_darray _ ->
       Errors.invalid_reified_argument tparam.tp_name p "an array"
-    | _, Tfun _ ->
-      Errors.invalid_reified_argument tparam.tp_name p "a function type"
+    | _, Tfun { ft_arity = (Fvariadic _ | Fellipsis _); _ } ->
+      Errors.invalid_reified_argument tparam.tp_name p "a function type with variadic args"
     | _, Tthis ->
       Errors.invalid_reified_argument tparam.tp_name p "the late static bound this type"
     | _, Taccess _ ->
@@ -95,6 +93,8 @@ let verify_targ_valid env tparam targ =
         Errors.invalid_reified_argument_disallow_php_arrays tparam.tp_name p
       in
       Type_const_check.validate_type env ty emit_err
+    | _, Tdynamic
+    | _, Tfun _
     | _, Tprim _
     | _, Toption _
     | _, Tshape _

@@ -150,7 +150,8 @@ module UserAttributes = struct
   let uaProvenanceSkipFrame      = "__ProvenanceSkipFrame"
   let uaDynamicallyCallable      = "__DynamicallyCallable"
   let uaDynamicallyConstructible = "__DynamicallyConstructible"
-  let uaDisallowPHPArrays   = "__DisallowPHPArrays"
+  let uaDisallowPHPArrays        = "__DisallowPHPArrays"
+  let uaNeverInline              = "__NEVER_INLINE"
 
   let as_set = List.fold_right ~f:SSet.add ~init:SSet.empty
     [
@@ -192,6 +193,7 @@ module UserAttributes = struct
       uaDynamicallyCallable;
       uaDynamicallyConstructible;
       uaDisallowPHPArrays;
+      uaNeverInline;
     ]
 end
 

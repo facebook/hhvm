@@ -65,7 +65,7 @@ int dprintf(int fd, const char *format, ...) {
 }
 
 int pipe2(int pipefd[2], int flags) {
-  if (flags & ~O_CLOEXEC) {
+  if (flags & ~(O_CLOEXEC | O_NONBLOCK)) {
     always_assert(!"Unknown flag passed to pipe2 compatibility layer");
   }
 
@@ -76,6 +76,15 @@ int pipe2(int pipefd[2], int flags) {
   if (flags & O_CLOEXEC) {
     if (fcntl(pipefd[0], F_SETFD, FD_CLOEXEC) == -1 ||
         fcntl(pipefd[1], F_SETFD, FD_CLOEXEC) == -1) {
+      close(pipefd[0]);
+      close(pipefd[1]);
+      return -1;
+    }
+  }
+
+  if (flags & O_NONBLOCK) {
+    if (fcntl(pipefd[0], F_SETFL, O_NONBLOCK) == -1 ||
+        fcntl(pipefd[1], F_SETFL, O_NONBLOCK) == -1) {
       close(pipefd[0]);
       close(pipefd[1]);
       return -1;

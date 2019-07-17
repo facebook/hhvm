@@ -186,8 +186,6 @@ let json_of_symbol tcopt decl_type json_fun pos id elem json_data_progress =
   ]) in
   glean_json Symbol json_facts progress
 
-let chunks_of lst = List.chunks_of lst 100
-
 let build_json tcopt decls =
   let json_data_progress =
     List.fold decls.typedefs ~init:default_json ~f:begin fun acc td ->
@@ -215,21 +213,19 @@ let build_json tcopt decls =
     end in
   (* breaking facts into chunks to reduce file size during upload *)
   let preds_and_records = [
-    "hack.symbol.2", chunks_of json_data_progress.symbol;
-    "hack.functionParameter.1", chunks_of json_data_progress.parameter;
-    "hack.filename.1", chunks_of json_data_progress.filename;
-    "hack.functionDeclaration.1", chunks_of json_data_progress.functionDeclaration;
-    "hack.classDeclaration.1", chunks_of json_data_progress.classDeclaration;
-    "hack.typedefDeclaration.1", chunks_of json_data_progress.typedefDeclaration;
-    "hack.gconstDeclaration.1", chunks_of json_data_progress.gconstDeclaration  ]
+    "hack.symbol.2", json_data_progress.symbol;
+    "hack.functionParameter.1", json_data_progress.parameter;
+    "hack.filename.1", json_data_progress.filename;
+    "hack.functionDeclaration.1", json_data_progress.functionDeclaration;
+    "hack.classDeclaration.1", json_data_progress.classDeclaration;
+    "hack.typedefDeclaration.1", json_data_progress.typedefDeclaration;
+    "hack.gconstDeclaration.1", json_data_progress.gconstDeclaration  ]
   in
   let json_array =
-    List.fold preds_and_records ~init:[] ~f:begin fun acc (pred, json_lst_chunk) ->
-      List.fold json_lst_chunk ~init:acc ~f:begin fun chunk_acc json_lst ->
-        JSON_Object([
-          "predicate", JSON_String(pred);
-          "facts", JSON_Array(json_lst);
-        ])::chunk_acc
-      end
+    List.fold preds_and_records ~init:[] ~f:begin fun acc (pred, json_lst) ->
+      JSON_Object([
+        "predicate", JSON_String(pred);
+        "facts", JSON_Array(json_lst);
+      ])::acc
     end
   in json_array

@@ -257,6 +257,7 @@
     parent
     server
     state_loader
+    typing_symbol_info
     watchman_client)
   (preprocess
     (pps lwt_ppx)))

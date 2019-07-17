@@ -133,7 +133,6 @@
   (modules
     nastCheck
     nastInitCheck
-    SymbolInfoJsonBuilder
     typing
     typing_alias
     typing_array_access
@@ -155,7 +154,6 @@
     typing_sequencing
     typing_shapes
     typing_structure
-    typing_symbol_info_writer
     typing_try
     typing_variance)
   (libraries
@@ -237,4 +235,17 @@
     core_kernel
     tast
     typing
+    utils_core))
+
+(library
+  (name typing_symbol_info)
+  (wrapped false)
+  (modules
+    typing_symbol_info_writer
+    typing_symbol_json_builder)
+  (libraries
+    typing
+    typing_ast
+    procs_procs
+    server_services
     utils_core))

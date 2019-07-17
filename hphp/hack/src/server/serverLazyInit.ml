@@ -19,7 +19,6 @@
      Full Parsing -> Naming -> Full Typecheck (with lazy decl)
 *)
 
-module Hack_bucket = Bucket
 open Core_kernel
 open Result.Export
 open Reordered_argument_collections
@@ -30,7 +29,6 @@ open ServerInitCommon
 open ServerInitTypes
 open String_utils
 
-module Bucket = Hack_bucket
 module DepSet = Typing_deps.DepSet
 module Dep = Typing_deps.Dep
 module SLC = ServerLocalConfig
@@ -431,33 +429,11 @@ let index_and_parse
   let trace = false in
   parsing ~lazy_parse genv env ~get_next t ~trace
 
-let recheck_job
-    (env: ServerEnv.env)
-    (tast: (Relative_path.t * Tast.program) list)
-    (progress: (Relative_path.t * FileInfo.t) list)
-  : (Relative_path.t * Tast.program) list =
-  tast @ (ServerIdeUtils.recheck env.tcopt progress)
-
-let parallel_recheck
-    (genv: ServerEnv.genv)
-    (env: ServerEnv.env)
-    (file_tuples: (Relative_path.t * FileInfo.t) list)
-  : (Relative_path.t * Tast.program) list =
-  let workers = genv.workers in
-  let num_workers = (match workers with Some w -> List.length w | None -> 1) in
-
-  MultiWorker.call
-    genv.workers
-    ~job:(recheck_job env)
-    ~merge:(@)
-    ~next:(Bucket.make ~num_workers:num_workers file_tuples)
-    ~neutral:[]
-
 let write_symbol_info_init
     (genv: ServerEnv.genv)
     (env: ServerEnv.env)
   : ServerEnv.env * float =
-  let out_file = match ServerArgs.write_symbol_info genv.options with
+  let out_dir = match ServerArgs.write_symbol_info genv.options with
     | None -> failwith "No write directory specified for --write-symbol-info"
     | Some s -> s
   in
@@ -474,8 +450,22 @@ let write_symbol_info_init
         | None -> acc
         | Some info -> (path, info)::acc
   end in
-  let results  = parallel_recheck genv env file_tuples in
-  Typing_symbol_info_writer.write_json env.tcopt results out_file;
+
+  (* ensuring we are writing to fresh files *)
+  let dir_exists =
+    try Sys.is_directory out_dir
+    with _ -> false
+  in
+
+  if dir_exists then failwith "JSON Write Directory Exists"
+  else Sys_utils.mkdir_p out_dir;
+
+  Typing_symbol_info_writer.go
+    genv.workers
+    env.tcopt
+    out_dir
+    file_tuples;
+
   env, t
 
 (* If we fail to load a saved state, fall back to typechecking everything *)

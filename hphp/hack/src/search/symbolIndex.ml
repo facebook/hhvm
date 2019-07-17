@@ -147,8 +147,13 @@ let find_matching_symbols
   end else begin
 
     (* Potential namespace matches always show up first *)
-    let namespace_results = NamespaceSearchService.find_matching_namespaces
-      ~sienv ~query_text in
+    let namespace_results =
+      if (context <> Some Ac_no_namespace) then
+        NamespaceSearchService.find_matching_namespaces
+          ~sienv ~query_text
+      else
+        []
+    in
 
     (* The local index captures symbols in files that have been changed on disk.
      * Search it first for matches, then search global and add any elements
@@ -317,10 +322,10 @@ let get_position_for_symbol
 let absolute_none = Pos.none |> Pos.to_absolute
 
 (* Shortcut to use the above method to get an absolute pos *)
-let get_pos_for_item (item: si_item): Pos.absolute =
+let get_pos_for_item_opt (item: si_item): Pos.absolute option =
   let result = get_position_for_symbol item.si_name item.si_kind in
   match result with
-  | None -> absolute_none
+  | None -> None
   | Some (relpath, line, col) ->
     let symbol_len = String.length item.si_name in
     let pos = Pos.make_from_lnum_bol_cnum
@@ -328,4 +333,13 @@ let get_pos_for_item (item: si_item): Pos.absolute =
       ~pos_start:(line, 1, col)
       ~pos_end:(line, 1, (col + symbol_len))
     in
-    Pos.to_absolute pos
+    Some (Pos.to_absolute pos)
+;;
+
+(* Shortcut to use the above method to get an absolute pos *)
+let get_pos_for_item (item: si_item): Pos.absolute =
+  let result = get_pos_for_item_opt item in
+  match result with
+  | None -> absolute_none
+  | Some pos -> pos
+;;

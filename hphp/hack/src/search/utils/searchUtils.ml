@@ -25,6 +25,7 @@ type autocomplete_type =
   | Acprop
   | Acshape_key
   | Actrait_only
+  | Ac_no_namespace (* used for symbol search *)
 [@@deriving show]
 
 (* Convert a string to a provider *)

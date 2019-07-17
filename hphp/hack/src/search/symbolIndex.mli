@@ -81,7 +81,12 @@ val get_position_for_symbol:
   SearchUtils.si_kind ->
   (Relative_path.t * int * int) option
 
-(* Take an item and produce a position *)
+(* Take an item and produce a position, or none if it cannot be found *)
+val get_pos_for_item_opt:
+  SearchUtils.si_item ->
+  Pos.absolute option
+
+(* Take an item and produce a position, or a fake one if it cannot be found *)
 val get_pos_for_item:
   SearchUtils.si_item ->
   Pos.absolute

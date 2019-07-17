@@ -67,6 +67,7 @@ let go workers query type_ (sienv: SearchUtils.si_env)
   let start_time = Unix.gettimeofday () in
   let kind_filter = SearchUtils.string_to_kind type_ in
   let fuzzy = SymbolIndex.fuzzy_search_enabled () in
+  let context = Some SearchUtils.Ac_no_namespace in
   let results =
     (* If query contains "::", search class methods instead of top level definitions *)
     match Str.split_delim re_colon_colon query with
@@ -93,7 +94,7 @@ let go workers query type_ (sienv: SearchUtils.si_env)
             ~query_text:class_name_query
             ~max_results:1
             ~kind_filter
-            ~context:None
+            ~context
             ~sienv
           |> List.hd
           |> Option.map ~f:(fun r -> r.SearchUtils.si_name)
@@ -118,7 +119,7 @@ let go workers query type_ (sienv: SearchUtils.si_env)
           ~query_text:query
           ~max_results
           ~kind_filter
-          ~context:None
+          ~context
           ~sienv
         in
         AutocompleteService.add_position_to_results temp_results
@@ -130,6 +131,6 @@ let go workers query type_ (sienv: SearchUtils.si_env)
     ~max_results
     ~kind_filter
     ~results:(List.length results)
-    ~context:None
+    ~context
     ~caller:"ServerSearch.go";
   results

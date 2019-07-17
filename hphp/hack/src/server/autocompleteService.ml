@@ -32,12 +32,15 @@ let autocomplete_identifier: (Pos.t * string) option ref = ref None
 let add_position_to_results (raw_results: SearchUtils.si_results): SearchUtils.result =
   let open SearchUtils in
 
-  List.map raw_results ~f:(fun r ->
-    {
-      name = r.si_name;
-      pos = (SymbolIndex.get_pos_for_item r);
-      result_type = (kind_to_result r.si_kind);
-    }
+  List.filter_map raw_results ~f:(fun r ->
+    match SymbolIndex.get_pos_for_item_opt r with
+    | Some pos -> Some
+      {
+        name = r.si_name;
+        pos;
+        result_type = (kind_to_result r.si_kind);
+      }
+    | None -> None
   )
 
 let (argument_global_type: autocomplete_type option ref) = ref None

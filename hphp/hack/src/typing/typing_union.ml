@@ -374,8 +374,8 @@ let normalize_union env ?on_tyvar tyl =
         | (r, Tprim Nast.Tnull), _ -> normalize_union env [] (orr r_null r) r_union
         | (r, Toption ty), _ -> normalize_union env [ty] (orr r_null r) r_union
         | (r, Tunion tyl'), _ -> normalize_union env tyl' r_null (orr r_union r)
-        | (_, Tintersection _), Some on_tyvar ->
-          let env, ty = Utils.simplify_intersections env ty ~on_tyvar in
+        | (_, Tintersection _), _ ->
+          let env, ty = Utils.simplify_intersections env ty ?on_tyvar in
           begin match ty with
           | (_, Tintersection _) -> proceed env ty
           | _ -> normalize_union env [ty] r_null r_union

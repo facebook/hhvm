@@ -1,0 +1,1 @@
+Fatal error: Interfaces, traits and enums may not be declared __Const in %s/not_on_interface.php on line 3

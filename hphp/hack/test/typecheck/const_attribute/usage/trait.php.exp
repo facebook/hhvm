@@ -1,0 +1,2 @@
+File "trait.php", line 3, characters 1-21:
+Interfaces, traits and enums may not be declared __Const (Parsing[1002])

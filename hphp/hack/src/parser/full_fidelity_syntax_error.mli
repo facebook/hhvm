@@ -373,3 +373,6 @@ val soft_no_arguments : string
 val no_legacy_soft_typehints : string
 val static_const : string
 val outside_dollar_str_interp : string
+val no_const_interfaces_traits_enums : string
+val no_const_late_init_props : string
+val no_const_static_props : string

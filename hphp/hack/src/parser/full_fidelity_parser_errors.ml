@@ -3031,6 +3031,13 @@ let class_reified_param_errors env node errors =
 let attr_spec_contains_sealed node =
   attribute_specification_contains node SN.UserAttributes.uaSealed
 
+let attr_spec_contains_const node =
+  attribute_specification_contains node SN.UserAttributes.uaConst
+
+let attr_spec_contains_late_init node =
+  attribute_specification_contains node SN.UserAttributes.uaLateInit ||
+  attribute_specification_contains node SN.UserAttributes.uaSoftLateInit
+
 (* If there's more than one XHP category, report an error on the last one. *)
 let duplicate_xhp_category_errors (elts : Syntax.t list) errors =
   let category_nodes = List.filter elts ~f:(fun elt ->
@@ -3145,6 +3152,13 @@ let classish_errors env node namespace_name names errors =
         not (is_missing cd.classish_implements_keyword)
       then make_error_from_node node
         SyntaxError.interface_implements :: errors
+      else errors in
+    let errors =
+      if attr_spec_contains_const cd.classish_attribute &&
+        (is_token_kind cd.classish_keyword TokenKind.Interface ||
+         is_token_kind cd.classish_keyword TokenKind.Trait)
+      then make_error_from_node node
+        SyntaxError.no_const_interfaces_traits_enums :: errors
       else errors in
     let name = text cd.classish_name in
     let errors =
@@ -3665,6 +3679,22 @@ let class_property_abstract_errors node errors =
     else errors
   | _ -> errors
 
+let class_property_const_errors node errors =
+  match syntax node with
+  | PropertyDeclaration { property_attribute_spec; _ } ->
+    if attr_spec_contains_const property_attribute_spec then
+      if attr_spec_contains_late_init property_attribute_spec then
+        (* __SoftLateInit together with const would be a runtime bug, since
+         * __SoftLateInit properties are mutated if they're read before they
+         * were ever written.
+         * __LateInit together with const just doesn't make sense. *)
+        make_error_from_node node SyntaxError.no_const_late_init_props :: errors
+      else if methodish_contains_static node then
+        make_error_from_node node SyntaxError.no_const_static_props :: errors
+      else errors
+    else errors
+  | _ -> errors
+
 let mixed_namespace_errors _env node parents namespace_type errors =
   match syntax node with
   | NamespaceBody { namespace_left_brace; namespace_right_brace; _ } ->
@@ -3758,7 +3788,10 @@ let enum_decl_errors node errors =
    ; _ } ->
     if attr_spec_contains_sealed attrs then
       make_error_from_node node SyntaxError.sealed_enum :: errors
-      else errors
+    else if attr_spec_contains_const attrs then
+      make_error_from_node node
+        SyntaxError.no_const_interfaces_traits_enums :: errors
+    else errors
   | _ -> errors
 
 let assignment_errors _env node errors =
@@ -4062,6 +4095,7 @@ let find_syntax_errors env =
         let errors = class_property_visibility_errors env node errors in
         let errors = class_reified_param_errors env node errors in
         let errors = class_property_abstract_errors node errors in
+        let errors = class_property_const_errors node errors in
         trait_require_clauses, names, errors
       | EnumDeclaration _ ->
         let errors = enum_decl_errors node errors in

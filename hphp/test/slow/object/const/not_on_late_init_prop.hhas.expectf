@@ -1,0 +1,1 @@
+Fatal error: Assembler Error: line 18: const properties may not also be late init in %s/not_on_late_init_prop.hhas on line -1

@@ -1,0 +1,1 @@
+Fatal error: Assembler Error: line 20: all instance properties of a const class must be const in %s/not_all_props.hhas on line -1

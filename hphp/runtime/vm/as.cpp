@@ -2848,14 +2848,13 @@ TypedValue parse_member_tv_initializer(AsmState& as) {
   return tvInit;
 }
 
-template<class EmitterType, class AdderType>
-void parse_prop_or_field_impl(AsmState& as,
-                              EmitterType* AsmState::* em,
-                              AdderType EmitterType::* add) {
+template<typename AttrValidator, typename Adder>
+void parse_prop_or_field_impl(AsmState& as, AttrValidator validate, Adder add) {
   as.in.skipWhitespace();
 
   UserAttributeMap userAttributes;
   Attr attrs = parse_attribute_list(as, AttrContext::Prop, &userAttributes);
+  validate(attrs);
 
   auto const heredoc = makeStaticString(parse_maybe_long_string(as));
 
@@ -2873,14 +2872,14 @@ void parse_prop_or_field_impl(AsmState& as,
   }
 
   TypedValue tvInit = parse_member_tv_initializer(as);
-  ((as.*em)->*add)(makeStaticString(name),
-                   attrs,
-                   userTyStr,
-                   typeConstraint,
-                   heredoc,
-                   &tvInit,
-                   RepoAuthType{},
-                   userAttributes);
+  add(makeStaticString(name),
+      attrs,
+      userTyStr,
+      typeConstraint,
+      heredoc,
+      &tvInit,
+      RepoAuthType{},
+      userAttributes);
 }
 
 /*
@@ -2890,12 +2889,35 @@ void parse_prop_or_field_impl(AsmState& as,
  *
  * Define a property with an associated type and heredoc.
  */
-void parse_property(AsmState& as) {
-  parse_prop_or_field_impl(as, &AsmState::pce, &PreClassEmitter::addProperty);
+void parse_property(AsmState& as, bool class_is_const) {
+  parse_prop_or_field_impl(
+    as,
+    [&](Attr attrs) {
+      if (attrs & AttrIsConst) {
+        if (attrs & (AttrLateInit | AttrLateInitSoft)) {
+          as.error("const properties may not also be late init");
+        }
+        if (attrs & AttrStatic) {
+          as.error("static properties may not be const");
+        }
+      } else if (class_is_const && !(attrs & AttrStatic)) {
+        as.error("all instance properties of a const class must be const");
+      }
+    },
+    [&](auto&&... args) {
+      as.pce->addProperty(std::forward<decltype(args)>(args)...);
+    }
+  );
 }
 
 void parse_record_field(AsmState& as) {
-  parse_prop_or_field_impl(as, &AsmState::re, &RecordEmitter::addField);
+  parse_prop_or_field_impl(
+    as,
+    [](Attr attrs) {},
+    [&](auto&&... args) {
+      as.re->addField(std::forward<decltype(args)>(args)...);
+    }
+  );
 }
 
 
@@ -3118,15 +3140,18 @@ void parse_cls_doccomment(AsmState& as) {
  *                 | ".doc"          directive-doccomment
  *                 ;
  */
-void parse_class_body(AsmState& as) {
+void parse_class_body(AsmState& as, bool class_is_const) {
   if (!ensure_pseudomain(as)) {
     as.error(".class blocks must all follow the .main block");
   }
 
   std::string directive;
   while (as.in.readword(directive)) {
+    if (directive == ".property") {
+      parse_property(as, class_is_const);
+      continue;
+    }
     if (directive == ".method")       { parse_method(as);         continue; }
-    if (directive == ".property")     { parse_property(as);       continue; }
     if (directive == ".const")        { parse_constant(as);       continue; }
     if (directive == ".use")          { parse_use(as);            continue; }
     if (directive == ".default_ctor") { parse_default_ctor(as);   continue; }
@@ -3211,6 +3236,14 @@ void parse_class(AsmState& as) {
   if (!SystemLib::s_inited) {
     attrs |= AttrUnique | AttrPersistent | AttrBuiltin;
   }
+  if (attrs & AttrIsConst) {
+    if (attrs & (AttrEnum | AttrInterface | AttrTrait)) {
+      as.error("interfaces, traits and enums may not be const");
+    }
+    if (!(attrs & AttrForbidDynamicProps)) {
+      as.error("const class missing ForbidDynamicProps attribute");
+    }
+  }
 
   std::string name;
   if (!as.in.readname(name)) {
@@ -3263,7 +3296,7 @@ void parse_class(AsmState& as) {
   as.pce->setUserAttributes(userAttrs);
 
   as.in.expectWs('{');
-  parse_class_body(as);
+  parse_class_body(as, attrs & AttrIsConst);
 
   as.pce->setHoistable(
     isTop ? compute_hoistable(as, name, parentName) : PreClass::NotHoistable

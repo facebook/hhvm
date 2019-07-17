@@ -443,8 +443,6 @@ let emit_class (ast_class, hoisted) =
   Label.reset_label ();
   let class_properties =
     from_class_elt_classvars ast_class class_is_const tparams in
-  let class_has_const_props = class_is_const ||
-    List.exists class_properties (fun p -> Hhas_property.is_const p) in
   let env = Emit_env.make_class_env ast_class in
   let class_constants =
     from_class_elt_constants env ast_class in
@@ -563,7 +561,6 @@ let emit_class (ast_class, hoisted) =
     ast_class.A.c_is_xhp
     hoisted
     class_is_const
-    class_has_const_props
     class_no_dynamic_props
     no_reifiedinit_needed
     class_uses

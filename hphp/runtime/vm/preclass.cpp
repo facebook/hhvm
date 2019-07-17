@@ -103,12 +103,11 @@ void PreClass::prettyPrint(std::ostream &out) const {
   if (m_attrs & AttrUnique)     out << " (unique)";
   if (m_attrs & AttrPersistent) out << " (persistent)";
   if (m_attrs & AttrIsConst) {
-    // AttrIsConst classes will always also have AttrHasConstProps and
-    // AttrForbidDynamicProps set, so don't bother printing those
+    // AttrIsConst classes will always also have AttrForbidDynamicProps set,
+    // so don't bother printing it
     out << " (const)";
-  } else {
-    if (m_attrs & AttrHasConstProps) out << " (has-const-props)";
-    if (m_attrs & AttrForbidDynamicProps) out << " (no-dynamic-props)";
+  } else if (m_attrs & AttrForbidDynamicProps) {
+    out << " (no-dynamic-props)";
   }
   if (m_attrs & AttrDynamicallyConstructible) out << " (dyn_constructible)";
   if (m_id != -1) {

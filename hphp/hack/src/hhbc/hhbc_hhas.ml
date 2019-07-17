@@ -1538,8 +1538,6 @@ let class_special_attributes c =
     if Hhas_class.no_dynamic_props c
     then "no_dynamic_props" :: attrs
     else attrs in
-  let attrs = if Hhas_class.has_const_props c
-    then "has_const_props" :: attrs else attrs in
   let attrs = if Hhas_class.is_const c
     then "is_const" :: attrs else attrs in
   let attrs =

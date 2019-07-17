@@ -715,7 +715,6 @@ let mutate_metadata (input : HP.t)  =
       (cls |> HC.is_xhp             |> mutate_bool)
       (cls.HC.class_hoisted         |> mutate_hoisted)
       (cls |> HC.is_const           |> mutate_bool)
-      (cls |> HC.has_const_props    |> mutate_bool)
       (cls |> HC.no_dynamic_props   |> mutate_bool)
       (cls |> HC.needs_no_reifiedinit |> mutate_bool)
       (cls |> HC.class_uses)

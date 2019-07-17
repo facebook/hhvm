@@ -32,7 +32,6 @@ type t = {
   class_is_xhp                   : bool;
   class_hoisted                  : Closure_convert.hoist_kind;
   class_is_const                 : bool;
-  class_has_const_props          : bool;
   class_no_dynamic_props         : bool;
   class_needs_no_reifiedinit     : bool;
   class_uses                     : string list;
@@ -67,7 +66,6 @@ let make
   class_is_xhp
   class_hoisted
   class_is_const
-  class_has_const_props
   class_no_dynamic_props
   class_needs_no_reifiedinit
   class_uses
@@ -96,7 +94,6 @@ let make
     class_is_xhp;
     class_hoisted;
     class_is_const;
-    class_has_const_props;
     class_no_dynamic_props;
     class_needs_no_reifiedinit;
     class_uses;
@@ -129,7 +126,6 @@ let is_top hhas_class =
   | Closure_convert.TopLevel -> true
   | Closure_convert.Hoisted -> false
 let is_const hhas_class = hhas_class.class_is_const
-let has_const_props hhas_class = hhas_class.class_has_const_props
 let no_dynamic_props hhas_class = hhas_class.class_no_dynamic_props
 let needs_no_reifiedinit hhas_class = hhas_class.class_needs_no_reifiedinit
 let class_uses hhas_class = hhas_class.class_uses

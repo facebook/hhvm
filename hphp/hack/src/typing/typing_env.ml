@@ -1161,9 +1161,18 @@ let rec get_tyvars env ty =
   | Tfun ft ->
     let env, params_positive, params_negative =
       List.fold_left ft.ft_params ~init:(env, ISet.empty, ISet.empty)
-        ~f:(fun res {fp_type; _} -> get_tyvars_union res fp_type) in
+        ~f:(fun (env, acc_positive, acc_negative) {fp_type; fp_kind; _} ->
+          let env, positive, negative = get_tyvars env fp_type in
+          match fp_kind with
+          (* Parameters are treated contravariantly *)
+          | FPnormal ->
+            env, ISet.union negative acc_positive, ISet.union positive acc_negative
+          (* Inout/ref parameters are both co- and contra-variant *)
+          | FPinout | FPref ->
+            let tyvars = ISet.union negative positive in
+            env, ISet.union tyvars acc_positive, ISet.union tyvars acc_negative) in
     let env, ret_positive, ret_negative = get_tyvars env ft.ft_ret in
-    env, ISet.union ret_positive params_negative, ISet.union ret_negative params_positive
+    env, ISet.union ret_positive params_positive, ISet.union ret_negative params_negative
   | Tabstract (AKnewtype (name, tyl), _) ->
     begin match get_typedef env name with
     | Some {td_tparams; _} ->

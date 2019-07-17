@@ -7,7 +7,7 @@ class MyClass {
 
 function testClass($i, $className) {
     \printf("%s\n", \class_exists($className) ? 'YES' : 'NO');
-    \printf("%s\n", ($i instanceof $className) ? 'YES' : 'NO');
+    \printf("%s\n", \is_a($i, $className) ? 'YES' : 'NO');
 }
 
 

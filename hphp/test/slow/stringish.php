@@ -35,7 +35,7 @@ class CThruTrait {
 function f1(@?Stringish $x): void {
   $s = Stringish::class;
   echo ($x is Stringish) ? "true" : "false", ", ";
-  echo ($x instanceof $s) ? "true" : "false", ", ";
+  echo (is_a($x, $s)) ? "true" : "false", ", ";
   var_dump($x);
   echo "\n";
 }
@@ -43,7 +43,7 @@ function f1(@?Stringish $x): void {
 function f2(@Stringish $x): void {
   $s = Stringish::class;
   echo ($x is Stringish) ? "true" : "false", ", ";
-  echo ($x instanceof $s) ? "true" : "false", ", ";
+  echo (is_a($x, $s)) ? "true" : "false", ", ";
   var_dump($x);
   echo "\n";
 }

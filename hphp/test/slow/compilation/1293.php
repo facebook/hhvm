@@ -21,7 +21,7 @@ function test() {
 function main_1293() {
 $data = new stdclass;
 $type = 'OCI-Lob';
-if ($data instanceof $type) {
+if (is_a($data, $type)) {
   echo 'true';
 }
 ;

@@ -828,7 +828,7 @@ bool RuntimeOption::DisableReservedVariables = true;
 uint64_t RuntimeOption::DisableConstant = 0;
 bool RuntimeOption::DisableNontoplevelDeclarations = false;
 bool RuntimeOption::DisableStaticClosures = false;
-bool RuntimeOption::DisableInstanceof = false;
+bool RuntimeOption::DisableInstanceof = true;
 bool RuntimeOption::EnableClassLevelWhereClauses = false;
 
 #ifdef HHVM_DYNAMIC_EXTENSION_DIR

@@ -1,12 +1,12 @@
 ********** static string **********
-true, true, string(15) "a boring string"
+true, false, string(15) "a boring string"
 
-true, true, string(15) "a boring string"
+true, false, string(15) "a boring string"
 
 ********** dynamic string **********
-true, true, string(11) "hello world"
+true, false, string(11) "hello world"
 
-true, true, string(11) "hello world"
+true, false, string(11) "hello world"
 
 ********** explicit implements **********
 true, true, object(CExplicit) (0) {

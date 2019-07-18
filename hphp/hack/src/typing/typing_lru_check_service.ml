@@ -36,16 +36,51 @@ let process_in_parallel
   ServerProgress.send_percentage_progress_to_monitor
     "typechecking" 0 files_initial_count "files";
 
-  let job fc =
-    let opts = TypeCheckStore.load() in
-    process_file_computation ~dynamic_view_files ~opts ~errors:Errors.empty ~fc
+  let partition_list
+      ~(fnl: file_computation list)
+      ~(batch_size: int) =
+    let rec partition_list_h
+        ~(acc: (file_computation list) list)
+        ~(fnl: file_computation list)
+        ~(batch_size: int) =
+      match fnl with
+      | [] -> acc
+      | _ -> begin
+        let batch, remaining = List.split_n fnl batch_size in
+        partition_list_h ~acc:(batch :: acc) ~fnl:remaining ~batch_size
+      end
+    in
+    partition_list_h ~acc:[] ~fnl ~batch_size
   in
-  let reduce (e1, _) (e2, _) = (Errors.merge e1 e2), [] in
+
+  let job (fc_lst: file_computation list) =
+    let opts = TypeCheckStore.load() in
+
+    (* inner job proceses a single file *)
+    let inner_job (errors: Errors.t) (fc: file_computation) =
+      let e2, _ =
+        process_file_computation
+          ~dynamic_view_files
+          ~opts
+          ~errors:Errors.empty
+          ~fc
+      in
+      Errors.merge errors e2
+    in
+    List.fold fc_lst ~init:Errors.empty ~f:inner_job, (List.length fc_lst)
+  in
+
+  let reduce (e, m) (e2, m2) =
+    ServerProgress.send_percentage_progress_to_monitor
+      "typechecking" (m + m2) files_initial_count "files";
+    Errors.merge e e2, (m + m2)
+  in
+
   let errors, _ = Shared_lru.run
     ~host_env:lru_host_env
     ~job
     ~reduce
-    ~inputs:fnl
+    ~inputs:(partition_list ~fnl ~batch_size:500)
   in
   let cancelled = [] in
   let env = interrupt.MultiThreadedCall.env in

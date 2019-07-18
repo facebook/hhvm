@@ -982,16 +982,16 @@ inline std::pair<SSATmp*, SSATmp*> takeClsRef(
   return std::make_pair(ts, cls);
 }
 
-inline void putClsRef(
-  IRGS& env, uint32_t slot, SSATmp* cls, SSATmp* reified_generic = nullptr
-) {
-  if (!reified_generic) {
-    gen(env, StClsRefCls, ClsRefSlotData{slot}, fp(env), cls);
-    killClsRefTS(env, slot);
-    return;
-  }
+inline void putClsRef(IRGS& env, uint32_t slot,
+                      SSATmp* cls, SSATmp* reified = nullptr) {
   gen(env, StClsRefCls, ClsRefSlotData{slot}, fp(env), cls);
-  gen(env, StClsRefTS, ClsRefSlotData{slot}, fp(env), reified_generic);
+  gen(
+    env,
+    StClsRefTS,
+    ClsRefSlotData{slot},
+    fp(env),
+    reified ? reified : cns(env, TNullptr)
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

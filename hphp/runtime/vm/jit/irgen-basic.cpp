@@ -79,48 +79,48 @@ void emitClsRefGetTS(IRGS& env, uint32_t slot) {
       gen(env, RaiseError, cns(env, s_reified_type_must_be_ts.get()));
     }
   }
-  ifThenElse(
+
+  auto const val = gen(
     env,
-    [&] (Block* taken) {
-      auto const val = gen(
+    RuntimeOption::EvalHackArrDVArrs ? AKExistsDict : AKExistsArr,
+    ts,
+    cns(env, s_generic_types.get())
+  );
+  // Side-exit for now if it has reified generics
+  gen(env, JmpNZero, makeExitSlow(env), val);
+
+  auto const clsName = profiledArrayAccess(
+    env, ts, cns(env, s_classname.get()),
+    [&] (SSATmp* base, SSATmp* key, uint32_t pos) {
+      return gen(
         env,
-        RuntimeOption::EvalHackArrDVArrs ? AKExistsDict : AKExistsArr,
-        ts,
-        cns(env, s_generic_types.get())
+        RuntimeOption::EvalHackArrDVArrs
+          ? DictGetK
+          : MixedArrayGetK,
+        IndexData { pos }, base, key
       );
-      gen(env, JmpZero, taken, val);
     },
-    [&] {
-      // Has reified generics
-      hint(env, Block::Hint::Unlikely);
-      interpOne(env);
-    },
-    // taken
-    [&] {
-      // Does not have reified generics
-      auto const key = cns(env, s_classname.get());
-      auto const clsName = profiledArrayAccess(env, ts, key,
-        [&] (SSATmp* base, SSATmp* key, uint32_t pos) {
-          return gen(env, RuntimeOption::EvalHackArrDVArrs ? DictGetK
-                                                           : MixedArrayGetK,
-                     IndexData { pos }, base, key);
-        },
-        [&] (SSATmp* key) {
-          if (RuntimeOption::EvalHackArrDVArrs) {
-            return gen(env, DictGet, ts, key);
-          }
-          return gen(env, ArrayGet, MOpModeData { MOpMode::Warn }, ts, key);
-        }
-      );
-      if (!clsName->isA(TStr)) {
-        if (!ts->type().maybe(TStr)) PUNT(ClsRefGetTS-ClassnameNotStr);
-        gen(env, RaiseError, cns(env, s_new_instance_of_not_string.get()));
-      }
-      auto const cls = ldCls(env, clsName);
-      popDecRef(env);
-      putClsRef(env, slot, cls);
+    [&] (SSATmp* key) {
+      if (RuntimeOption::EvalHackArrDVArrs) return gen(env, DictGet, ts, key);
+      return gen(env, ArrayGet, MOpModeData { MOpMode::Warn }, ts, key);
     }
   );
+
+  SSATmp* name;
+  ifThen(
+    env,
+    [&] (Block* taken) {
+      name = gen(env, CheckType, TStr, taken, clsName);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, RaiseError, cns(env, s_new_instance_of_not_string.get()));
+    }
+  );
+
+  auto const cls = ldCls(env, name);
+  popDecRef(env);
+  putClsRef(env, slot, cls);
 }
 
 void emitCGetL(IRGS& env, int32_t id) {

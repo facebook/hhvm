@@ -1242,7 +1242,7 @@ To string conversions:
 
 | LdRecDescCachedSafe<recName>, D(RecDesc), NA, B
 
-  Loads the record whose name is recName out of the RDS. If the record is not 
+  Loads the record whose name is recName out of the RDS. If the record is not
   defined, branch to B.
 
 | DefCls, D(Cls), S(Int), NF
@@ -1984,7 +1984,7 @@ To string conversions:
 
   Store S1 to class-ref's cls slot `slot` on the frame pointed to by S0.
 
-| StClsRefTS<slot>, ND, S(FramePtr) SVArr, NF
+| StClsRefTS<slot>, ND, S(FramePtr) SVArrOrNull, NF
 
   Store S1 to class-ref's reified generic slot `slot` on the frame pointed to
   by S0.
@@ -2163,10 +2163,10 @@ To string conversions:
   a recoverable fatal error describing the type mismatch.
 
 | VerifyParamRecDesc, ND, S(RecDesc) S(RecDesc|Nullptr) C(Int) C(Int), NF
-  
+
   Verify parameter type for records. If S0 does not extend S1 (if S1 is a record
   type) or does not satisfy the type hint S2 (if S1 is null pointer),
-  this instruction will raise a recoverable fatal error describing the type 
+  this instruction will raise a recoverable fatal error describing the type
   mismatch for parameter S3.
 
 | VerifyParamCallable, ND, S(Gen) C(Int), NF
@@ -2197,7 +2197,7 @@ To string conversions:
   Verify a return type hint for a class.
 
 | VerifyRetRecDesc, ND, S(RecDesc) S(RecDesc|Nullptr) C(Int) S(Cell), NF
-  
+
   Verify a return type hint for a record.
 
 | VerifyRetFail, ND, S(PtrToGen), NF
@@ -2220,13 +2220,13 @@ To string conversions:
   S3. S4 is true if this is a static property, false otherwise.
 
 | VerifyPropRecDesc, ND, S(Cls) S(Int) S(RecDesc|Nullptr) S(Record) C(Bool), NF
-  
+
   Verify a property type hint with AnnotType::Record against a record value. S0
-  is the class of the object containing the property. S1 is the slot of the 
+  is the class of the object containing the property. S1 is the slot of the
   property. S3 is the record being set in the property. If S2 is not nullptr,
   it is the type hint and S3 will be checked to see if it's an instance of S2.
-  Otherwise, the type hint refers to a type-alias and the type-alias will be 
-  resolved and checked against S3. S4 is true if this is a static property, 
+  Otherwise, the type hint refers to a type-alias and the type-alias will be
+  resolved and checked against S3. S4 is true if this is a static property,
   otherwise false.
 
 | VerifyPropFail, ND, S(Cls) S(Int) S(Cell) C(Bool), NF

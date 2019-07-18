@@ -457,10 +457,13 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
     return true;
   };
 
-  auto checkArr = [&] (bool is_kv, bool is_const) {
+  auto checkArr = [&] (bool is_kv,
+                       bool is_const,
+                       bool include_nullptr = false) {
     auto t = src()->type();
     auto cond_type = RuntimeOption::EvalHackArrDVArrs
       ? (is_kv ? TDict : TVec) : TArr;
+    if (include_nullptr) cond_type |= TNullptr;
     if (is_const) {
       auto expected = folly::sformat("constant {}", t.toString());
       check(src()->hasConstVal(cond_type), t, expected.c_str());
@@ -524,6 +527,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
 #define CStr          C(StaticStr)
 #define SVar(...)     checkVariadic(buildUnion(__VA_ARGS__));
 #define SVArr         checkArr(false /* is_kv */, false /* is_const */);
+#define SVArrOrNull   checkArr(false, false, true);
 #define SDArr         checkArr(true  /* is_kv */, false /* is_const */);
 #define CDArr         checkArr(true  /* is_kv */, true  /* is_const */);
 #define ND
@@ -595,6 +599,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
 #undef CStr
 #undef SVar
 #undef SVArr
+#undef SVArrOrNull
 #undef SDArr
 #undef CDArr
 

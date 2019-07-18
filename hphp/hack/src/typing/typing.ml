@@ -749,7 +749,7 @@ and stmt_ env pos st =
       env, T.Noop
   | Expr e ->
       let env, te, _ = expr env e in
-      let env = if TFTerm.expression_exits env e
+      let env = if TFTerm.typed_expression_exits te
         then LEnv.move_and_merge_next_in_cont env C.Exit
         else env in
       env, T.Expr te

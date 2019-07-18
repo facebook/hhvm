@@ -573,6 +573,9 @@ type expand_env = {
   validate_dty : (expand_env -> decl ty -> unit) option;
 }
 
+let is_type_no_return ty =
+  ty = Tprim Nast.Tnoreturn
+
 let has_expanded {type_expansions; _} x =
   List.exists type_expansions begin function
     | (_, x') when x = x' -> true

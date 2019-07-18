@@ -50,17 +50,24 @@ let static_meth_is_noreturn env ci meth_id =
     funopt_is_noreturn (get_static_meth class_name (snd meth_id))
   | None -> false
 
-let expression_exits env (_, e) =
-  match e with
-  | Assert(AE_assert (_, False))
-  | Yield_break -> true
-  | Call (Cnormal, (_, Id (_, fun_name)), _, _, _) ->
-    funopt_is_noreturn @@ get_fun fun_name
-  | Call (Cnormal, (_, Class_const ((_, ci), meth_id)), _, _, _) ->
-    static_meth_is_noreturn env ci meth_id
-  | _ -> false
 
-let is_noreturn env =
+  let typed_expression_exits ((_, (_, ty)), e) =
+    match e with
+    | Tast.Assert(Tast.AE_assert (_, Tast.False))
+    | Tast.Yield_break -> true
+    | _ -> is_type_no_return ty
+
+  let expression_exits env (_, e) =
+    match e with
+    | Assert(AE_assert (_, False))
+    | Yield_break -> true
+    | Call (Cnormal, (_, Id (_, fun_name)), _, _, _) ->
+      funopt_is_noreturn @@ get_fun fun_name
+    | Call (Cnormal, (_, Class_const ((_, ci), meth_id)), _, _, _) ->
+      static_meth_is_noreturn env ci meth_id
+    | _ -> false
+
+  let is_noreturn env =
   match (Env.get_return env).Typing_env_return_info.return_type with
   | _, Tprim Tnoreturn -> true
   | _ -> false

@@ -324,6 +324,17 @@ class TestLsp(TestCase[LspTestDriver]):
         variables = self.setup_php_file("definition.php")
         self.load_and_run("definition", variables)
 
+    def test_serverless_ide_definition(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("definition.php"))
+        self.test_driver.stop_hh_server()
+        self.load_and_run(
+            "serverless_ide_definition",
+            variables,
+            wait_for_server=False,
+            use_serverless_ide=True,
+        )
+
     def test_type_definition(self) -> None:
         self.prepare_server_environment()
         variables = self.setup_php_file("type_definition.php")

@@ -534,7 +534,7 @@ function get_options($argv) {
       }
 
       if (!$found) {
-        error(sprintf("Invalid argument: '%s'\nSee $argv[0] --help", $arg));
+        error(sprintf("Invalid argument: '%s'\nSee {$argv[0]} --help", $arg));
       }
     } else {
       $files[] = $arg;

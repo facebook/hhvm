@@ -3312,6 +3312,9 @@ let pProgram : program parser = fun node env  ->
     | (Stmt (_, Noop) :: el) -> post_process el acc
     | (Stmt (_, Markup _) as e)::el ->
       post_process el (e :: acc)
+    | (Stmt (_, Expr (_, Import _)) as e)::el
+      when not (ParserOptions.disallow_toplevel_requires env.parser_options) ->
+      post_process el (e :: acc)
     (* Toplevel statements not allowed in strict mode *)
     | (Stmt (p, _) as e)::el
       when env.keep_errors && is_typechecker env &&

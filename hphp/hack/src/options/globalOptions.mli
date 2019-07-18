@@ -99,6 +99,9 @@ type t = {
   (* Flag to disable the backticks execution operator *)
   po_disallow_execution_operator : bool;
 
+  (* Flag to disallow `require`, `require_once` etc as toplevel statements *)
+  po_disallow_toplevel_requires : bool;
+
   (* Flag to disable PHP's non-top-level declarations *)
   po_disable_nontoplevel_declarations : bool;
 
@@ -280,6 +283,7 @@ val make :
   ?tco_safe_vector_array: bool ->
   ?po_deregister_php_stdlib: bool ->
   ?po_disallow_execution_operator: bool ->
+  ?po_disallow_toplevel_requires: bool ->
   ?po_disable_nontoplevel_declarations: bool ->
   ?po_disable_static_closures: bool ->
   ?po_allow_goto: bool ->
@@ -353,6 +357,7 @@ val tco_disallow_array_as_tuple : t -> bool
 val po_auto_namespace_map : t -> (string * string) list
 val po_deregister_php_stdlib : t -> bool
 val po_disallow_execution_operator : t -> bool
+val po_disallow_toplevel_requires : t -> bool
 val po_disable_nontoplevel_declarations : t -> bool
 val po_disable_static_closures : t -> bool
 val po_allow_goto : t -> bool

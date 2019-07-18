@@ -12,6 +12,7 @@ let auto_namespace_map = GlobalOptions.po_auto_namespace_map
 let codegen = GlobalOptions.po_codegen
 let deregister_php_stdlib = GlobalOptions.po_deregister_php_stdlib
 let disallow_execution_operator = GlobalOptions.po_disallow_execution_operator
+let disallow_toplevel_requires = GlobalOptions.po_disallow_toplevel_requires
 let allow_goto = GlobalOptions.po_allow_goto
 let default = GlobalOptions.default
 let disable_nontoplevel_declarations = GlobalOptions.po_disable_nontoplevel_declarations

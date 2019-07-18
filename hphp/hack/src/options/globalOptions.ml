@@ -25,6 +25,7 @@ type t = {
   po_codegen : bool;
   po_deregister_php_stdlib : bool;
   po_disallow_execution_operator : bool;
+  po_disallow_toplevel_requires : bool;
   po_disable_nontoplevel_declarations : bool;
   po_disable_static_closures : bool;
   po_allow_goto: bool;
@@ -210,6 +211,7 @@ let default = {
  po_auto_namespace_map = [];
  po_codegen = false;
  po_disallow_execution_operator = false;
+ po_disallow_toplevel_requires = true;
  po_deregister_php_stdlib = false;
  po_disable_nontoplevel_declarations = false;
  po_disable_static_closures = false;
@@ -260,6 +262,7 @@ let make
   ?(tco_safe_vector_array = default.tco_safe_vector_array)
   ?(po_deregister_php_stdlib = default.po_deregister_php_stdlib)
   ?(po_disallow_execution_operator = default.po_disallow_execution_operator)
+  ?(po_disallow_toplevel_requires = default.po_disallow_toplevel_requires)
   ?(po_disable_nontoplevel_declarations = default.po_disable_nontoplevel_declarations)
   ?(po_disable_static_closures = default.po_disable_static_closures)
   ?(po_allow_goto = default.po_allow_goto)
@@ -335,6 +338,7 @@ let make
   ignored_fixme_regex;
   po_deregister_php_stdlib;
   po_disallow_execution_operator;
+  po_disallow_toplevel_requires;
   po_disable_nontoplevel_declarations;
   po_disable_static_closures;
   po_allow_goto;
@@ -409,6 +413,7 @@ let po_allow_goto t = t.po_allow_goto
 let tco_log_inference_constraints t = t.tco_log_inference_constraints
 let po_codegen t = t.po_codegen
 let po_disallow_execution_operator t = t.po_disallow_execution_operator
+let po_disallow_toplevel_requires t = t.po_disallow_toplevel_requires
 let tco_disallow_ambiguous_lambda t = t.tco_disallow_ambiguous_lambda
 let tco_disallow_array_typehint t = t.tco_disallow_array_typehint
 let tco_disallow_array_literal t = t.tco_disallow_array_literal

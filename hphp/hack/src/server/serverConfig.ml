@@ -318,6 +318,7 @@ let load config_filename options =
     ?tco_use_lru_workers:(Some local_config.ServerLocalConfig.use_lru_workers)
     ?use_new_type_errors:(bool_opt "use_new_type_errors" config)
     ?po_disable_outside_dollar_str_interp:(bool_opt "disable_outside_dollar_str_interp" config)
+    ?po_disallow_toplevel_requires:(bool_opt "disallow_toplevel_requires" config)
     ?disable_linter_fixmes:(bool_opt "disable_linter_fixmes" config)
     ()
   in

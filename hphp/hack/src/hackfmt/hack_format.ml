@@ -1960,6 +1960,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       type_constraints = constraints; } ->
     Concat [
       t env attr;
+      when_present attr space;
       t env reified;
       when_present reified space;
       t env variance;

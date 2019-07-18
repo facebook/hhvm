@@ -11,6 +11,7 @@ import urllib.parse
 from typing import Iterable, List, Mapping, Tuple
 
 import common_tests
+from hh_paths import hh_server
 from lspcommand import LspCommandProcessor, Transcript
 from test_case import TestCase
 from utils import Json, JsonObject
@@ -40,6 +41,22 @@ lazy_init2 = {use_saved_state}
                     use_saved_state=use_saved_state_str
                 )
             )
+
+    def write_naming_table_saved_state(self) -> str:
+        naming_table_saved_state_path = os.path.join(
+            self.repo_dir, "naming_table_saved_state.sqlite"
+        )
+        (_, _, retcode) = self.proc_call(
+            [
+                hh_server,
+                "--check",
+                self.repo_dir,
+                "--save-naming",
+                naming_table_saved_state_path,
+            ]
+        )
+        assert retcode == 0, "Failed to save naming table saved state"
+        return naming_table_saved_state_path
 
 
 class TestLsp(TestCase[LspTestDriver]):
@@ -167,11 +184,35 @@ class TestLsp(TestCase[LspTestDriver]):
         )
 
     def run_lsp_test(
-        self, test_name: str, test: Json, expected: Json, wait_for_server: bool
+        self,
+        test_name: str,
+        test: Json,
+        expected: Json,
+        wait_for_server: bool,
+        use_serverless_ide: bool,
     ) -> None:
-        if wait_for_server:  # wait until hh_server is ready before starting lsp
+        if wait_for_server:
+            assert not use_serverless_ide, (
+                "Warning: both `wait_for_server` and `use_serverless_ide` "
+                + "were set to `True` for testing in "
+                + self.run_lsp_test.__name__
+                + ". "
+                + "While this is a possible test case, it hasn't been written yet, "
+                + "so it's more likely that this is a mistake "
+                + "and you're accidentally relying on hh_server to fulfill "
+                + "serverless IDE requests."
+                + "(If you're writing that test, "
+                + "then it's time to remove this assertion.)"
+            )
+
+            # wait until hh_server is ready before starting lsp
             self.test_driver.run_check()
-        with LspCommandProcessor.create(self.test_driver.test_env) as lsp:
+        elif use_serverless_ide:
+            self.test_driver.stop_hh_server()
+
+        with LspCommandProcessor.create(
+            self.test_driver.test_env, use_serverless_ide=use_serverless_ide
+        ) as lsp:
             observed_transcript = lsp.communicate(test)
 
         self.write_observed(test_name, observed_transcript)
@@ -181,10 +222,12 @@ class TestLsp(TestCase[LspTestDriver]):
             list(self.get_important_received_items(observed_transcript))
         )
 
-        # If the server's busy, maybe the machine's just under too much pressure
-        # to give results in a timely fashion. Doing a retry would only defer
-        # the question of what to do in that case, so instead we'll just skip.
-        self.throw_on_skip(observed_transcript)
+        if not use_serverless_ide:
+            # If the server's busy, maybe the machine's just under too much
+            # pressure to give results in a timely fashion. Doing a retry would
+            # only defer the question of what to do in that case, so instead
+            # we'll just skip.
+            self.throw_on_skip(observed_transcript)
 
         # validation checks that the number of items matches and that
         # the responses are exactly identical to what we expect
@@ -209,7 +252,7 @@ class TestLsp(TestCase[LspTestDriver]):
                     if failure_message in message:
                         raise unittest.SkipTest(message)
 
-    def prepare_environment(self) -> None:
+    def prepare_server_environment(self) -> None:
         self.maxDiff = None
         self.test_driver.write_load_config()
         self.test_driver.start_hh_server()
@@ -218,8 +261,20 @@ class TestLsp(TestCase[LspTestDriver]):
             raise unittest.SkipTest("Hack server could not be launched")
         self.assertEqual(output.strip(), "No errors!")
 
+    def prepare_serverless_ide_environment(self) -> Mapping[str, str]:
+        self.maxDiff = None
+        self.test_driver.write_load_config(use_saved_state=False)
+        naming_table_saved_state_path = (
+            self.test_driver.write_naming_table_saved_state()
+        )
+        return {"naming_table_saved_state_path": naming_table_saved_state_path}
+
     def load_and_run(
-        self, test_name: str, variables: Mapping[str, str], wait_for_server: bool = True
+        self,
+        test_name: str,
+        variables: Mapping[str, str],
+        wait_for_server: bool = True,
+        use_serverless_ide: bool = False,
     ) -> None:
         test, expected = self.load_test_data(test_name, variables)
         self.run_lsp_test(
@@ -227,6 +282,7 @@ class TestLsp(TestCase[LspTestDriver]):
             test=test,
             expected=expected,
             wait_for_server=wait_for_server,
+            use_serverless_ide=use_serverless_ide,
         )
 
     def setup_php_file(self, test_php: str) -> Mapping[str, str]:
@@ -247,44 +303,55 @@ class TestLsp(TestCase[LspTestDriver]):
         }
 
     def test_init_shutdown(self) -> None:
-        self.prepare_environment()
+        self.prepare_server_environment()
 
         self.load_and_run(
             "initialize_shutdown", {"root_path": self.test_driver.repo_dir}
         )
 
     def test_completion(self) -> None:
-        self.prepare_environment()
+        self.prepare_server_environment()
         variables = self.setup_php_file("completion.php")
         self.load_and_run("completion", variables)
 
     def test_completion_legacy(self) -> None:
-        self.prepare_environment()
+        self.prepare_server_environment()
         variables = self.setup_php_file("completion.php")
         self.load_and_run("completion_legacy", variables)
 
     def test_definition(self) -> None:
-        self.prepare_environment()
+        self.prepare_server_environment()
         variables = self.setup_php_file("definition.php")
         self.load_and_run("definition", variables)
 
     def test_type_definition(self) -> None:
-        self.prepare_environment()
+        self.prepare_server_environment()
         variables = self.setup_php_file("type_definition.php")
         self.load_and_run("type_definition", variables)
 
     def test_hover(self) -> None:
-        self.prepare_environment()
+        self.prepare_server_environment()
         variables = self.setup_php_file("hover.php")
         self.load_and_run("hover", variables)
 
+    def test_serverless_ide_hover(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("hover.php"))
+        self.test_driver.stop_hh_server()
+        self.load_and_run(
+            "serverless_ide_hover",
+            variables,
+            wait_for_server=False,
+            use_serverless_ide=True,
+        )
+
     def test_coverage(self) -> None:
-        self.prepare_environment()
+        self.prepare_server_environment()
         variables = self.setup_php_file("coverage.php")
         self.load_and_run("coverage", variables)
 
     def test_highlight(self) -> None:
-        self.prepare_environment()
+        self.prepare_server_environment()
         variables = self.setup_php_file("highlight.php")
         self.load_and_run("highlight", variables)
 
@@ -294,7 +361,7 @@ class TestLsp(TestCase[LspTestDriver]):
         if not self.test_driver.run_hackfmt_check():
             raise unittest.SkipTest("Hackfmt can't be found. Skipping.")
 
-        self.prepare_environment()
+        self.prepare_server_environment()
         variables = self.setup_php_file("messy.php")
         self.load_and_run("formatting", variables)
 
@@ -304,45 +371,45 @@ class TestLsp(TestCase[LspTestDriver]):
         if not self.test_driver.run_hackfmt_check():
             raise unittest.SkipTest("Hackfmt can't be found. Skipping.")
 
-        self.prepare_environment()
+        self.prepare_server_environment()
         variables = self.setup_php_file("ontypeformatting.php")
         self.load_and_run("ontypeformatting", variables)
 
     def test_did_change(self) -> None:
         # Disabling this test because it has a race condition:
         # see T27194253 for transcript
-        # self.prepare_environment()
+        # self.prepare_server_environment()
         # variables = self.setup_php_file('didchange.php')
         # self.load_and_run('didchange', variables)
         return
 
     def test_signature_help(self) -> None:
-        self.prepare_environment()
+        self.prepare_server_environment()
         variables = self.setup_php_file("signaturehelp.php")
         self.load_and_run("signaturehelp", variables)
 
     def test_rename(self) -> None:
-        self.prepare_environment()
+        self.prepare_server_environment()
         variables = self.setup_php_file("rename.php")
         self.load_and_run("rename", variables)
 
     def test_references(self) -> None:
-        self.prepare_environment()
+        self.prepare_server_environment()
         variables = self.setup_php_file("references.php")
         self.load_and_run("references", variables)
 
     def test_non_existing_method(self) -> None:
-        self.prepare_environment()
+        self.prepare_server_environment()
         variables = self.setup_php_file("nomethod.php")
         self.load_and_run("nomethod", variables)
 
     def test_bad_call(self) -> None:
-        self.prepare_environment()
+        self.prepare_server_environment()
         variables = self.setup_php_file("bad_call.php")
         self.load_and_run("bad_call", variables)
 
     def test_non_blocking(self) -> None:
-        self.prepare_environment()
+        self.prepare_server_environment()
         variables = self.setup_php_file("non_blocking.php")
         self.test_driver.start_hh_loop_forever_assert_timeout()
         self.load_and_run("non_blocking", variables, wait_for_server=False)

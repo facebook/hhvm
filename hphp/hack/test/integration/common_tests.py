@@ -127,6 +127,15 @@ class CommonTestDriver(TestDriver):
         self.proc_call(cmd)
         self.wait_until_server_ready()
 
+    def stop_hh_server(self, retries: int = 3) -> None:
+        (_, _, exit_code) = self.proc_call([hh_client, "stop", self.repo_dir])
+        if exit_code == 0:
+            return
+        elif retries > 0 and exit_code != 0:
+            self.stop_hh_server(retries=retries - 1)
+        else:
+            self.assertEqual(exit_code, 0, msg="Stopping hh_server failed")
+
     def get_server_logs(self) -> str:
         time.sleep(2)  # wait for logs to be written
         log_file = self.proc_call([hh_client, "--logname", self.repo_dir])[0].strip()
@@ -145,14 +154,8 @@ class CommonTestDriver(TestDriver):
         shutil.copytree(self.template_repo, self.repo_dir)
 
     def tearDownWithRetries(self, retries: int = 3) -> None:
-        (_, _, exit_code) = self.proc_call([hh_client, "stop", self.repo_dir])
-        if exit_code == 0:
-            shutil.rmtree(self.repo_dir)
-            return
-        elif retries > 0 and exit_code != 0:
-            self.tearDownWithRetries(retries=retries - 1)
-        else:
-            self.assertEqual(exit_code, 0, msg="Stopping hh_server failed")
+        self.stop_hh_server(retries=retries)
+        shutil.rmtree(self.repo_dir)
 
     def tearDown(self) -> None:
         self.tearDownWithRetries()

@@ -276,6 +276,9 @@ type t = {
   (* Force 5000s to be @lint-ignored rather than fixme'd *)
   disable_linter_fixmes : bool;
 
+  (* Set of error codes disallowed in decl positions *)
+  po_disallowed_decl_fixmes : ISet.t;
+
 } [@@deriving show]
 
 val make :
@@ -338,6 +341,7 @@ val make :
   ?use_new_type_errors : bool ->
   ?po_disable_outside_dollar_str_interp: bool ->
   ?disable_linter_fixmes : bool ->
+  ?po_disallowed_decl_fixmes: ISet.t ->
   unit ->
   t
 
@@ -424,3 +428,4 @@ val tco_use_lru_workers : t -> bool
 val use_new_type_errors : t -> bool
 val po_disable_outside_dollar_str_interp : t -> bool
 val disable_linter_fixmes : t -> bool
+val po_disallowed_decl_fixmes : t -> ISet.t

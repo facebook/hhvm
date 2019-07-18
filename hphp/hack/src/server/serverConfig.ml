@@ -214,17 +214,20 @@ let prepare_auto_namespace_map config =
     ~default:[]
     ~f:convert_auto_namespace_to_map
 
-let prepare_ignored_fixme_codes config =
-  SMap.get config "ignored_fixme_codes"
+let prepare_iset config config_name initial_values =
+  SMap.get config config_name
   |> Option.value_map ~f:(Str.split config_list_regexp) ~default:[]
   |> List.map ~f:int_of_string
-  |> List.fold_right ~init:Errors.default_ignored_fixme_codes ~f:ISet.add
+  |> List.fold_right ~init:initial_values ~f:ISet.add
+
+let prepare_ignored_fixme_codes config =
+  prepare_iset config "ignored_fixme_codes" Errors.default_ignored_fixme_codes
 
 let prepare_error_codes_treated_strictly config =
-  SMap.get config "error_codes_treated_strictly"
-  |> Option.value_map ~f:(Str.split config_list_regexp) ~default:[]
-  |> List.map ~f:int_of_string
-  |> List.fold_right ~init:(ISet.of_list []) ~f:ISet.add
+  prepare_iset config "error_codes_treated_strictly" (ISet.of_list [])
+
+let prepare_disallowed_decl_fixmes config =
+  prepare_iset config "disallowed_decl_fixmes" (ISet.of_list [])
 
 let load config_filename options =
   let config_overrides = SMap.of_list @@ ServerArgs.config options in
@@ -320,6 +323,7 @@ let load config_filename options =
     ?po_disable_outside_dollar_str_interp:(bool_opt "disable_outside_dollar_str_interp" config)
     ?po_disallow_toplevel_requires:(bool_opt "disallow_toplevel_requires" config)
     ?disable_linter_fixmes:(bool_opt "disable_linter_fixmes" config)
+    ~po_disallowed_decl_fixmes:(prepare_disallowed_decl_fixmes config)
     ()
   in
   Errors.ignored_fixme_codes :=

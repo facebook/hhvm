@@ -3390,7 +3390,7 @@ let scour_comments
   (env         : env)
   : accumulator =
     let pos_of_offset = SourceText.relative_pos path source_text in
-    let go (node : node) (cmts, fm as acc : accumulator) (t : Trivia.t)
+    let go (node : node) (in_block : bool) (cmts, fm as acc : accumulator) (t : Trivia.t)
         : accumulator =
       match Trivia.kind t with
       | TriviaKind.WhiteSpace
@@ -3440,17 +3440,21 @@ let scour_comments
                ignore (search_forward ignore_error txt 0);
                let p = pos_of_offset (Trivia.start_offset t) (Trivia.end_offset t) in
                let code = int_of_string (matched_group 2 txt) in
-               let ignores = IMap.add code p ignores in
-               cmts, IMap.add line ignores fm
+               if (not in_block) && ISet.mem code (ParserOptions.disallowed_decl_fixmes env.parser_options)
+               then cmts, fm
+               else
+                let ignores = IMap.add code p ignores in
+                  cmts, IMap.add line ignores fm
              with
              | Not_found_s _
              | Caml.Not_found ->
                Errors.fixme_format pos;
                cmts, fm
     in
-    let rec aux (_cmts, _fm as acc : accumulator) (node : node) : accumulator =
-      let recurse () = List.fold_left ~f:aux ~init:acc (children node) in
+    let rec aux (in_block : bool) (_cmts, _fm as acc : accumulator) (node : node) : accumulator =
+      let recurse (in_block : bool) = List.fold_left ~f:(aux in_block) ~init:acc (children node) in
       match syntax node with
+      | CompoundStatement _ -> recurse true
       | Token t ->
         if Token.has_trivia_kind t TriviaKind.DelimitedComment
         || (include_line_comments && Token.has_trivia_kind t TriviaKind.SingleLineComment)
@@ -3458,15 +3462,15 @@ let scour_comments
             Token.has_trivia_kind t TriviaKind.FixMe ||
             Token.has_trivia_kind t TriviaKind.IgnoreError))
         then
-          let f = go node in
+          let f = go node in_block in
           let trivia = Token.leading t in
           let acc = List.fold_left ~f ~init:acc trivia in
           let trivia = Token.trailing t in
           List.fold_left ~f ~init:acc trivia
-        else recurse ()
-      | _ -> recurse ()
+        else recurse in_block
+      | _ -> recurse in_block
     in
-    aux ([], IMap.empty) tree
+    aux false ([], IMap.empty) tree
 
 (*****************************************************************************(
  * Front-end matter

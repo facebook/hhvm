@@ -45,6 +45,8 @@ let with_disable_legacy_soft_typehints po b =
 let with_disable_outside_dollar_str_interp po b =
   { po with GlobalOptions.po_disable_outside_dollar_str_interp = b }
 
+let disallowed_decl_fixmes = GlobalOptions.po_disallowed_decl_fixmes
+
 let make
   ~auto_namespace_map
   ~codegen

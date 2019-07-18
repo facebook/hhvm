@@ -125,6 +125,16 @@ class TestLsp(TestCase[LspTestDriver]):
                 if "data" in response["error"]:
                     if "stack" in response["error"]["data"]:
                         del response["error"]["data"]["stack"]
+            elif response.get("method") == "telemetry/event":
+                lines = response["params"]["message"].split("\n")
+                num_lines = len(lines)
+                if num_lines > 1:
+                    num_remaining_lines = num_lines - 1
+                    response["params"]["message"] = (
+                        lines[0]
+                        + f" [remaining {num_remaining_lines} lines "
+                        + "truncated for testing...]"
+                    )
         return sanitized
 
     # dumps an LSP response into a standard json format that can be used for

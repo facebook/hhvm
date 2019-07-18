@@ -1,0 +1,12 @@
+Linearization for class \A:
+[\A]
+Linearization for class \B:
+[\B]
+Linearization for class \IA:
+[\IA]
+Linearization for class \IB:
+[\IB]
+Linearization for class \X:
+[\X(copy_private_members), \IA(requirement, consts_only), \IB(requirement, consts_only), \IB, \IA]
+Linearization for class \Y:
+[\Y(copy_private_members), \IA(consts_only), \X(copy_private_members), \IA(requirement, consts_only), \IB(requirement, consts_only), \IB, \IA]

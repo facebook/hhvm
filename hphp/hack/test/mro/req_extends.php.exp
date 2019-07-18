@@ -3,8 +3,8 @@ Linearization for class \I:
 Linearization for class \C:
 [\C]
 Linearization for class \T:
-[\T(copy_private_members), \I, \I(requirement, consts_only), \C(requirement)]
+[\T(copy_private_members), \I(requirement, consts_only), \I, \C(requirement)]
 Linearization for class \T2:
 [\T2(copy_private_members)]
 Linearization for class \D:
-[\D, \I(consts_only), \T(copy_private_members), \I, \C, \I(requirement, consts_only), \C(requirement)]
+[\D, \I(consts_only), \T(copy_private_members), \I(requirement, consts_only), \I, \C, \C(requirement)]

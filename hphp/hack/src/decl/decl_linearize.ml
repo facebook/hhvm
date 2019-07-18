@@ -40,15 +40,21 @@ type state =
       type parameters substituted) unless it was already emitted earlier in the
       current linearization sequence. *)
   | Synthesized_elts of mro_element list
-  (** A list of synthesized ancestor MRO elements which were accumulated while
-      we iterated over ancestor linearizations. We want to de-prioritize
-      synthesized ancestors (i.e., ancestors arising from a require-extends or
-      require-implements relationship) by placing them at the end of the
+  (** A list of synthesized ancestor MRO elements (that is, classes which were
+      specified in a require-extends clause, plus all ancestors of those
+      classes) which were accumulated while we iterated over ancestor
+      linearizations. These are called "synthesized" ancestors because although
+      traits and interfaces don't actually inherit from them at runtime, the
+      typechecker acts as if they do, in order to support typechecking of trait
+      method bodies and uses of values with interface types. We want to
+      de-prioritize require-extends ancestors by placing them at the end of the
       linearization, so that non-synthesized members (if they are present) are
-      inherited instead of synthesized ones. For each MRO element in the list,
-      that element should be emitted as an element of the current linearization
-      (with the appropriate source and type parameters substituted) unless it
-      was already emitted earlier in the current linearization sequence. *)
+      inherited instead of synthesized ones (since we are interested in the
+      actual type arguments rather than the type arguments applied in the
+      requirement). For each MRO element in the list, that element should be
+      emitted as an element of the current linearization (with the appropriate
+      type parameter substitutions) unless it was already emitted earlier in the
+      current linearization sequence. *)
 
 module CacheKey = struct
   type t = string * linearization_kind [@@deriving show]
@@ -127,7 +133,8 @@ let empty_mro_element = {
   mro_cyclic = None;
   mro_trait_reuse = None;
   mro_required_at = None;
-  mro_synthesized = false;
+  mro_via_req_extends = false;
+  mro_via_req_impl = false;
   mro_xhp_attrs_only = false;
   mro_consts_only = false;
   mro_copy_private_members = false;
@@ -158,7 +165,8 @@ let rec ancestor_linearization
   Decl_env.add_extends_dependency env.decl_env class_name;
   let lin = get_linearization env class_name in
   let lin = Sequence.map lin ~f:begin fun c ->
-    let mro_synthesized = c.mro_synthesized || is_requirement source in
+    let mro_via_req_extends = c.mro_via_req_extends || source = ReqExtends in
+    let mro_via_req_impl = c.mro_via_req_impl || source = ReqImpl in
     let mro_xhp_attrs_only = c.mro_xhp_attrs_only || source = XHPAttr in
     let mro_consts_only = c.mro_consts_only || is_interface source in
     let mro_copy_private_members = c.mro_copy_private_members && source = Trait in
@@ -166,7 +174,8 @@ let rec ancestor_linearization
       child_class_abstract in
     { c with
       mro_trait_reuse = Option.map c.mro_trait_reuse ~f:(Fn.const class_name);
-      mro_synthesized;
+      mro_via_req_extends;
+      mro_via_req_impl;
       mro_xhp_attrs_only;
       mro_consts_only;
       mro_copy_private_members;
@@ -265,8 +274,9 @@ and linearize (env : env) (c : shallow_class) : linearization =
         parents c;
       ]
     | Ancestor_types ->
-      (* In order to match the historical handling of ancestor types (used in
-         use cases like subtyping and override checking), we need to build the
+      (* In order to match the historical handling of ancestor types (that is,
+         the collection of "canonical" type parameterizations of each ancestor
+         of a class, which is used in subtyping), we need to build the
          linearization in the order [extends; implements; uses]. Require-extends
          and require-implements relationships need to be included only to
          support Stringish (and can be removed here if we remove support for the
@@ -338,7 +348,7 @@ and next_state
       let next, synths =
         match env.linearization_kind with
         | Member_resolution ->
-          if next.mro_synthesized
+          if next.mro_via_req_extends
           then
             let synths =
               match next.mro_required_at, child_class_kind with
@@ -364,7 +374,8 @@ and next_state
              Stringish as an ancestor if we have some ancestor which requires
              it. *)
           let should_skip =
-            next.mro_synthesized && next.mro_name <> SN.Classes.cStringish
+            (next.mro_via_req_extends || next.mro_via_req_impl)
+            && next.mro_name <> SN.Classes.cStringish
           in
           let next =
             if should_skip

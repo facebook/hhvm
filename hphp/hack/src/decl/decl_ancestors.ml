@@ -40,7 +40,7 @@ let members_fully_known lin =
 
 let req_ancestor_names class_name =
   Decl_linearize.get_linearization class_name
-  |> Sequence.filter ~f:(fun mro -> mro.mro_synthesized)
+  |> Sequence.filter ~f:(fun mro -> mro.mro_via_req_extends || mro.mro_via_req_impl)
   |> Sequence.map ~f:(fun mro -> mro.mro_name, ())
 
 let all_requirements class_name =

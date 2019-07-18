@@ -89,9 +89,11 @@ type mro_element = {
      hierarchy. *)
   mro_required_at : Pos.t option;
   (* True if this element is included in the linearization (directly or
-     indirectly) because of a require extends or require implements
-     relationship. *)
-  mro_synthesized : bool;
+     indirectly) because of a require extends relationship. *)
+  mro_via_req_extends : bool;
+  (* True if this element is included in the linearization (directly or
+     indirectly) because of a require implements relationship. *)
+  mro_via_req_impl : bool;
   (* True if this element is included in the linearization because of any
      XHP-attribute-inclusion relationship, and thus, the linearized class
      inherits only the XHP attributes from this element. *)

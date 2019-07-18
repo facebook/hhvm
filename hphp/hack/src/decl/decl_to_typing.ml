@@ -94,7 +94,7 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
     ce_override;
     ce_lsb = false;
     ce_memoizelsb;
-    ce_synthesized = mro.mro_synthesized;
+    ce_synthesized = mro.mro_via_req_extends;
     ce_visibility = visibility;
     ce_origin = mro.mro_name;
     ce_type = ty;
@@ -162,7 +162,7 @@ let shallow_const_to_class_const child_class mro subst const =
   in
   let visibility = base_visibility mro.mro_name scc_visibility in
   snd scc_name, {
-    cc_synthesized = mro.mro_synthesized;
+    cc_synthesized = mro.mro_via_req_extends;
     cc_visibility = visibility;
     cc_abstract;
     cc_pos = fst scc_name;

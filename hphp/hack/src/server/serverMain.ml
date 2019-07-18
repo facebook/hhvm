@@ -46,6 +46,7 @@ end = struct
     Hh_logger.log "Init id: %s" init_id;
     let t' = Unix.gettimeofday () in
     Hh_logger.log "Took %f seconds." (t' -. t);
+    HackEventLogger.server_is_partially_ready ();
 
     env
 end
@@ -134,6 +135,7 @@ let finalize_init init_env =
   Hh_logger.log "Heap size: %d" (SharedMem.heap_size ());
   Hh_logger.log "Server is READY";
   Hh_logger.log "Took %f seconds to initialize." (t' -. init_env.init_start_t);
+  HackEventLogger.server_is_ready ();
   ServerProgress.send_to_monitor (MonitorRpc.PROGRESS_WARNING None)
 
 let shutdown_persistent_client client env  =

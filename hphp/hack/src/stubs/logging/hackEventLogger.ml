@@ -47,6 +47,8 @@ let init_lazy_end
   ~approach_name:_
   ~init_error:_
   ~init_type:_ = ()
+let server_is_partially_ready () = ()
+let server_is_ready () = ()
 let load_deptable_end _ = ()
 let nfs_root _ = ()
 let load_state_worker_end ~is_cached:_ _ _ = ()

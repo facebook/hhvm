@@ -1,2 +1,2 @@
 File "require_strict.php", line 2, characters 1-25:
-Toplevel statements besides requires are not allowed in strict files (Parsing[1002])
+Toplevel statements are not allowed in strict files (Parsing[1002])

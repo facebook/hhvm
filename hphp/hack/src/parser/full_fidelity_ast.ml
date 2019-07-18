@@ -3310,15 +3310,12 @@ let pProgram : program parser = fun node env  ->
       let result = post_process il [] in
       post_process el (Namespace (n, result) :: acc)
     | (Stmt (_, Noop) :: el) -> post_process el acc
-    | (Stmt (_, Markup _) as e)::el
-    | (Stmt (_, Expr (_, Import _)) as e)::el ->
+    | (Stmt (_, Markup _) as e)::el ->
       post_process el (e :: acc)
     (* Toplevel statements not allowed in strict mode *)
     | (Stmt (p, _) as e)::el
-      when (env.keep_errors) && (not env.codegen) &&
+      when env.keep_errors && is_typechecker env &&
            Partial.should_check_error env.fi_mode 1002 ->
-      (* We've already lowered at this point, so raise_parsing_error doesn't
-        really fit. This is only a typechecker error anyway, so do it anyway *)
       raise_parsing_error env (`Pos p) SyntaxError.toplevel_statements;
       post_process el (e :: acc)
     | (e::el) -> post_process el (e :: acc)

@@ -569,7 +569,7 @@ let pair_initializer_arity =
 let nested_unary_reference = "References cannot be followed by unary operators"
 
 let toplevel_statements =
-  "Toplevel statements besides requires are not allowed in strict files"
+  "Toplevel statements are not allowed in strict files"
 let invalid_reified =
   "Reify keyword can only appear at function or class type parameter position"
 let reified_in_invalid_classish s =

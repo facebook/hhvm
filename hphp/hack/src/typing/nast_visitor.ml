@@ -50,6 +50,16 @@ class virtual iter = object (self)
       self#on_block env else_stmt
     | _ -> super#on_func_body env fb
 
+  method! on_expr env e =
+    match e with
+    | (_, Call (ct, e1, ta, el, uel)) when Nast_check_env.is_rx_move e1 ->
+      self#on_Call {env with rx_move_allowed = false} ct e1 ta el uel
+    | (_, Call (ct, e1, ta, el, uel)) ->
+      self#on_Call {env with rx_move_allowed = true} ct e1 ta el uel
+    | (_, Binop (Ast.Eq None, e1, rhs)) ->
+      self#on_Binop {env with rx_move_allowed = true} (Ast.Eq None) e1 rhs
+    | _ -> super#on_expr { env with rx_move_allowed = false } e
+
 end
 
 class virtual ['state] iter_with_state = object (self)

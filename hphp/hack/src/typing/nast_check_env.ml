@@ -29,6 +29,7 @@ type env = {
   control_context: control_context;
   rx_is_enabled_allowed: bool;
   array_append_allowed: bool;
+  rx_move_allowed: bool;
 }
 
 let is_some_reactivity_attribute { ua_name = (_, name); _ } =
@@ -77,6 +78,7 @@ let get_empty_env () = {
   control_context = Toplevel;
   rx_is_enabled_allowed = false;
   array_append_allowed = false;
+  rx_move_allowed = false;
 }
 
 let def_env x =
@@ -91,3 +93,8 @@ let def_env x =
   | NamespaceUse _
   | SetNamespaceEnv _
   | FileAttributes _ -> empty_env
+
+let is_rx_move e =
+  match e with
+  | _, Id (_, v) -> Utils.add_ns v = SN.Rx.move
+  | _ -> false

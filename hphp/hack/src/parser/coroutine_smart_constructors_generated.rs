@@ -28,7 +28,7 @@ impl<'src, S, Token, Value> SmartConstructors<'src, State<'src, S>>
     for CoroutineSmartConstructors<S>
 where
     Token: LexableToken,
-    Value: SyntaxValueType<Token>,
+    Value: SyntaxValueType<Token> + SyntaxValueWithKind,
     S: SyntaxType<Token=Token, Value=Value>,
 {
     type Token = Token;

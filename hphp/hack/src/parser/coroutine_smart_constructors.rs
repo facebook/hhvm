@@ -60,6 +60,8 @@ impl<S: SyntaxType> CoroutineSmartConstructors<S> {
 
 impl<'a, S: SyntaxType> SyntaxSmartConstructors<'a, S, State<'a, S>>
     for CoroutineSmartConstructors<S>
+where
+    S::Value: SyntaxValueWithKind,
 {
     fn make_token(st: State<'a, S>, token: Self::Token) -> (State<'a, S>, Self::R) {
         let token = if st.is_codegen() {
@@ -70,26 +72,13 @@ impl<'a, S: SyntaxType> SyntaxSmartConstructors<'a, S, State<'a, S>>
         (st, Self::R::make_token(token))
     }
 
-    fn make_function_declaration_header(
+    fn make_list(
         mut st: State<'a, S>,
-        modifiers: Self::R,
-        r2: Self::R,
-        r3: Self::R,
-        r4: Self::R,
-        r5: Self::R,
-        r6: Self::R,
-        r7: Self::R,
-        r8: Self::R,
-        r9: Self::R,
-        r10: Self::R,
+        items: Vec<Self::R>,
+        offset: usize,
     ) -> (State<'a, S>, Self::R) {
-        st.set_seen_ppl(st.seen_ppl || modifiers.any(|r| Self::is_coroutine(r)));
-        (
-            st,
-            Self::R::make_function_declaration_header(
-                modifiers, r2, r3, r4, r5, r6, r7, r8, r9, r10,
-            ),
-        )
+        st.set_seen_ppl(st.seen_ppl || items.iter().any(|i| Self::is_coroutine(i)));
+        (st, Self::R::make_list(items, offset))
     }
 
     fn make_closure_type_specifier(
@@ -165,45 +154,31 @@ impl<'a, S: SyntaxType> SyntaxSmartConstructors<'a, S, State<'a, S>>
         )
     }
 
-    fn make_attribute_specification(
+    fn make_constructor_call(
         mut st: State<'a, S>,
-        left: Self::R,
-        attribute_name: Self::R,
-        right: Self::R,
+        call_type: Self::R,
+        left_paren: Self::R,
+        argument_list: Self::R,
+        right_paren: Self::R,
     ) -> (State<'a, S>, Self::R) {
-        let is_ppl_attr_folder = |has_seen_ppl: bool, r: &Self::R| {
-            if has_seen_ppl {
-                return true;
-            }
-            match &r.as_syntax().syntax {
-                SyntaxVariant::ConstructorCall(box crate::syntax::ConstructorCallChildren {
-                    constructor_call_type,
-                    constructor_call_left_paren,
-                    constructor_call_argument_list,
-                    constructor_call_right_paren,
-                }) => {
-                    use SyntaxVariant::Missing;
-                    if let (Missing, Missing, Missing) = (
-                        &constructor_call_left_paren.syntax,
-                        &constructor_call_argument_list.syntax,
-                        &constructor_call_right_paren.syntax,
-                    ) {
-                        let text: Option<&[u8]> = constructor_call_type
-                            .value
-                            .text_range()
-                            .map(|range| &st.source.text()[range.0..range.1]);
-                        text.map_or(false, |t| String::from_utf8_lossy(t) == PPL_MACRO_STR)
-                    } else {
-                        false
-                    }
-                }
-                _ => true,
-            }
+        let seen_ppl = if st.seen_ppl {
+            true
+        } else if !left_paren.value().is_missing()
+            || !argument_list.value().is_missing()
+            || !right_paren.value().is_missing()
+        {
+            false
+        } else {
+            let text: Option<&[u8]> = call_type
+                .value()
+                .text_range()
+                .map(|range| &st.source.text()[range.0..range.1]);
+            text.map_or(false, |t| String::from_utf8_lossy(t) == PPL_MACRO_STR)
         };
-        st.set_seen_ppl(st.seen_ppl || attribute_name.fold_list(false, is_ppl_attr_folder));
+        st.set_seen_ppl(seen_ppl);
         (
             st,
-            Self::R::make_attribute_specification(left, attribute_name, right),
+            Self::R::make_constructor_call(call_type, left_paren, argument_list, right_paren),
         )
     }
 }

@@ -17,12 +17,17 @@ where
     Self: Sized,
 {
     fn from_syntax(syntax: &SyntaxVariant<T, Self>) -> Self;
-    fn from_children(kind: SyntaxKind, offset: usize, syntax: &[Syntax<T, Self>]) -> Self;
+    fn from_values(ndoes: &[&Self]) -> Self;
+    fn from_children(kind: SyntaxKind, offset: usize, nodes: &[&Self]) -> Self;
     fn from_token(token: &T) -> Self;
 
     /// Returns a range [inclusive, exclusive] for the corresponding text if meaningful
     /// (note: each implementor will either always return Some(range) or always return None).
     fn text_range(&self) -> Option<(usize, usize)>; // corresponds to extract_text in OCaml impl.
+}
+
+pub trait SyntaxValueWithKind {
+    fn is_missing(&self) -> bool;
 }
 
 #[derive(Debug, Clone)]
@@ -41,15 +46,7 @@ pub trait SyntaxTypeBase {
     where
         Self: Sized;
 
-    /// Tests if the node, or any of its immediate children in case of a SyntaxList, matches a
-    /// predicate in a short-circuiting fashion (i.e., it is more efficient than fold/for_each).
-    fn any<F: FnMut(&Self) -> bool>(&self, f: F) -> bool;
-
-    /// Shallow version of fold_over_children that folds only over children of SyntaxList &,
-    /// or the node itself unless it is Ignored.
-    fn fold_list<U, F: FnMut(U, &Self) -> U>(&self, init: U, f: F) -> U;
-
-    fn as_syntax(&self) -> &Syntax<Self::Token, Self::Value>;
+    fn value(&self) -> &Self::Value;
 }
 
 impl<T, V> SyntaxTypeBase for Syntax<T, V>
@@ -61,8 +58,7 @@ where
     type Value = V;
 
     fn make_missing(offset: usize) -> Self {
-        let children: Vec<Self> = vec![];
-        let value = V::from_children(SyntaxKind::Missing, offset, &children);
+        let value = V::from_children(SyntaxKind::Missing, offset, &[]);
         let syntax = SyntaxVariant::Missing;
         Self::make(syntax, value)
     }
@@ -79,35 +75,16 @@ where
         if arg.is_empty() {
             Self::make_missing(offset)
         } else {
-            let value = V::from_children(SyntaxKind::SyntaxList, offset, &arg);
+            // todo: pass iter directly
+            let nodes = &arg.iter().map(|x| &x.value).collect::<Vec<_>>();
+            let value = V::from_children(SyntaxKind::SyntaxList, offset, nodes);
             let syntax = SyntaxVariant::SyntaxList(arg);
             Self::make(syntax, value)
         }
     }
 
-    fn any<F: FnMut(&Self) -> bool>(&self, mut f: F) -> bool {
-        match &self.syntax {
-            SyntaxVariant::SyntaxList(nodes) => nodes.iter().any(f),
-            SyntaxVariant::Missing => false,
-            _ => f(&self),
-        }
-    }
-
-    fn fold_list<U, F: FnMut(U, &Self) -> U>(&self, init: U, mut f: F) -> U {
-        use SyntaxVariant::*;
-        match &self.syntax {
-            SyntaxList(nodes) => nodes.iter().fold(init, |init, node| match &node.syntax {
-                ListItem(box li) => f(init, &li.list_item),
-                Missing => init,
-                _ => f(init, &node),
-            }),
-            Missing => init,
-            _ => f(init, &self),
-        }
-    }
-
-    fn as_syntax(&self) -> &Syntax<T, V> {
-        &self
+    fn value(&self) -> &Self::Value {
+        &self.value
     }
 }
 
@@ -146,6 +123,19 @@ where
                 }
                 None
             }
+        }
+    }
+
+    fn fold_list<U, F: FnMut(U, &Self) -> U>(&self, init: U, mut f: F) -> U {
+        use SyntaxVariant::*;
+        match &self.syntax {
+            SyntaxList(nodes) => nodes.iter().fold(init, |init, node| match &node.syntax {
+                ListItem(box li) => f(init, &li.list_item),
+                Missing => init,
+                _ => f(init, &node),
+            }),
+            Missing => init,
+            _ => f(init, &self),
         }
     }
 

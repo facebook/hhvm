@@ -15,6 +15,15 @@ pub struct MinimalValue {
 }
 
 impl SyntaxValueType<MinimalToken> for MinimalValue {
+    fn from_values(nodes: &[&Self]) -> Self {
+        let f = |acc, node: &&Self| {
+            let w = node.full_width;
+            acc + w
+        };
+        let full_width = nodes.iter().fold(0, &f);
+        Self { full_width }
+    }
+
     fn from_syntax(variant: &SyntaxVariant<MinimalToken, Self>) -> Self {
         let f = |node: &Syntax<MinimalToken, Self>, acc| {
             let w = node.value.full_width;
@@ -25,10 +34,10 @@ impl SyntaxValueType<MinimalToken> for MinimalValue {
         Self { full_width }
     }
 
-    fn from_children(_: SyntaxKind, _offser: usize, nodes: &[Syntax<MinimalToken, Self>]) -> Self {
+    fn from_children(_: SyntaxKind, _offser: usize, nodes: &[&Self]) -> Self {
         let mut full_width = 0;
         for node in nodes {
-            let w = node.value.full_width;
+            let w = node.full_width;
             full_width += w
         }
         Self { full_width }

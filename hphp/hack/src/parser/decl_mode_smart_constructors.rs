@@ -8,25 +8,49 @@
 */
 use crate::lexable_token::LexableToken;
 use crate::parser_env::ParserEnv;
-use crate::smart_constructors::StateType;
 use crate::source_text::SourceText;
 use crate::syntax::*;
-use crate::syntax_smart_constructors::SyntaxSmartConstructors;
+use crate::syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
 use crate::token_kind::TokenKind;
 
+#[derive(Clone)]
 pub struct State<S> {
+    stack: Vec<bool>,
     phantom_s: std::marker::PhantomData<S>,
 }
-impl<'src, S> StateType<'src, S> for State<S> {
-    type T = Vec<bool>;
-    fn initial(_: &ParserEnv, _: &SourceText<'src>) -> Self::T {
-        vec![]
+
+impl<S> State<S> {
+    /// Pops n times and returns the first popped element
+    fn pop_n(&mut self, n: usize) -> bool {
+        if self.stack.len() < n {
+            panic!("invalid state");
+        }
+        let head = self.stack.pop().unwrap();
+        self.stack.truncate(self.stack.len() - (n - 1)); // pop n-1 times efficiently
+        head
     }
-    fn next(mut st: Self::T, inputs: Vec<&S>) -> Self::T {
-        let st_todo = if st.len() > inputs.len() {
-            st.split_off(st.len() - inputs.len())
+
+    fn push(&mut self, s: bool) {
+        self.stack.push(s);
+    }
+
+    pub fn stack(&self) -> &Vec<bool> {
+        &self.stack
+    }
+}
+
+impl<'src, S> StateType<'src, S> for State<S> {
+    fn initial(_: &ParserEnv, _: &SourceText<'src>) -> Self {
+        Self {
+            stack: vec![],
+            phantom_s: std::marker::PhantomData,
+        }
+    }
+    fn next(mut st: Self, inputs: Vec<&S>) -> Self {
+        let st_todo = if st.stack.len() > inputs.len() {
+            st.stack.split_off(st.stack.len() - inputs.len())
         } else {
-            std::mem::replace(&mut st, vec![])
+            std::mem::replace(&mut st.stack, vec![])
         };
         let res = st_todo.into_iter().any(|b2| b2);
         st.push(res);
@@ -48,40 +72,47 @@ where
     Token: LexableToken,
     Value: SyntaxValueType<Token>,
 {
-    fn make_yield_expression(st: Vec<bool>, _r1: Self::R, _r2: Self::R) -> (Vec<bool>, Self::R) {
-        let (_, st) = pop_n(st, 2);
-        (push(st, true), Self::R::make_missing(0))
+    fn make_yield_expression(
+        mut st: State<Syntax<Token, Value>>,
+        _r1: Self::R,
+        _r2: Self::R,
+    ) -> (State<Syntax<Token, Value>>, Self::R) {
+        st.pop_n(2);
+        st.push(true);
+        (st, Self::R::make_missing(0))
     }
 
     fn make_yield_from_expression(
-        st: Vec<bool>,
+        mut st: State<Syntax<Token, Value>>,
         _r1: Self::R,
         _r2: Self::R,
         _r3: Self::R,
-    ) -> (Vec<bool>, Self::R) {
-        let (_, st) = pop_n(st, 3);
-        (push(st, true), Self::R::make_missing(0))
+    ) -> (State<Syntax<Token, Value>>, Self::R) {
+        st.pop_n(3);
+        st.push(true);
+        (st, Self::R::make_missing(0))
     }
 
     fn make_lambda_expression(
-        st: Vec<bool>,
+        mut st: State<Syntax<Token, Value>>,
         r1: Self::R,
         r2: Self::R,
         r3: Self::R,
         r4: Self::R,
         r5: Self::R,
         body: Self::R,
-    ) -> (Vec<bool>, Self::R) {
-        let (saw_yield, st) = pop_n(st, 6);
+    ) -> (State<Syntax<Token, Value>>, Self::R) {
+        let saw_yield = st.pop_n(6);
         let body = replace_body(body, saw_yield);
+        st.push(false);
         (
-            push(st, false),
+            st,
             Self::R::make_lambda_expression(r1, r2, r3, r4, r5, body),
         )
     }
 
     fn make_anonymous_function(
-        st: Vec<bool>,
+        mut st: State<Syntax<Token, Value>>,
         r1: Self::R,
         r2: Self::R,
         r3: Self::R,
@@ -94,74 +125,57 @@ where
         r10: Self::R,
         r11: Self::R,
         body: Self::R,
-    ) -> (Vec<bool>, Self::R) {
-        let (saw_yield, st) = pop_n(st, 12);
+    ) -> (State<Syntax<Token, Value>>, Self::R) {
+        let saw_yield = st.pop_n(12);
         let body = replace_body(body, saw_yield);
+        st.push(false);
         (
-            push(st, false),
+            st,
             Self::R::make_anonymous_function(r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, body),
         )
     }
 
     fn make_awaitable_creation_expression(
-        st: Vec<bool>,
+        mut st: State<Syntax<Token, Value>>,
         r1: Self::R,
         r2: Self::R,
         r3: Self::R,
         body: Self::R,
-    ) -> (Vec<bool>, Self::R) {
-        let (saw_yield, st) = pop_n(st, 4);
+    ) -> (State<Syntax<Token, Value>>, Self::R) {
+        let saw_yield = st.pop_n(4);
         let body = replace_body(body, saw_yield);
+        st.push(false);
         (
-            push(st, false),
+            st,
             Self::R::make_awaitable_creation_expression(r1, r2, r3, body),
         )
     }
 
     fn make_methodish_declaration(
-        st: Vec<bool>,
+        mut st: State<Syntax<Token, Value>>,
         r1: Self::R,
         r2: Self::R,
         body: Self::R,
         r3: Self::R,
-    ) -> (Vec<bool>, Self::R) {
-        let (_, st) = pop_n(st, 1);
-        let (saw_yield, st) = pop_n(st, 3);
+    ) -> (State<Syntax<Token, Value>>, Self::R) {
+        st.pop_n(1);
+        let saw_yield = st.pop_n(3);
         let body = replace_body(body, saw_yield);
-        (
-            push(st, false),
-            Self::R::make_methodish_declaration(r1, r2, body, r3),
-        )
+        st.push(false);
+        (st, Self::R::make_methodish_declaration(r1, r2, body, r3))
     }
 
     fn make_function_declaration(
-        st: Vec<bool>,
+        mut st: State<Syntax<Token, Value>>,
         r1: Self::R,
         r2: Self::R,
         body: Self::R,
-    ) -> (Vec<bool>, Self::R) {
-        let (saw_yield, st) = pop_n(st, 3);
+    ) -> (State<Syntax<Token, Value>>, Self::R) {
+        let saw_yield = st.pop_n(3);
         let body = replace_body(body, saw_yield);
-        (
-            push(st, false),
-            Self::R::make_function_declaration(r1, r2, body),
-        )
+        st.push(false);
+        (st, Self::R::make_function_declaration(r1, r2, body))
     }
-}
-
-/// Pops n times and returns the first popped element as well as the resulting vector
-fn pop_n(mut st: Vec<bool>, n: usize) -> (bool, Vec<bool>) {
-    if st.len() < n {
-        panic!("invalid state");
-    }
-    let head = st.pop().unwrap();
-    st.truncate(st.len() - (n - 1)); // pop n-1 times efficiently
-    (head, st)
-}
-
-fn push(mut st: Vec<bool>, s: bool) -> Vec<bool> {
-    st.push(s);
-    st
 }
 
 fn replace_body<Token, Value>(body: Syntax<Token, Value>, saw_yield: bool) -> Syntax<Token, Value>

@@ -38,6 +38,7 @@ pub mod smart_constructors; // must be before users of providing macros (*_parse
 mod smart_constructors_generated;
 pub mod smart_constructors_wrappers;
 pub mod syntax_smart_constructors;
+mod syntax_smart_constructors_generated;
 
 pub mod parser_trait;
 

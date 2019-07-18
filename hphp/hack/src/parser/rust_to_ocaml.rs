@@ -14,6 +14,8 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::iter::Iterator;
 
+use parser::coroutine_smart_constructors::State as CoroutineState;
+use parser::decl_mode_smart_constructors::State as DeclModeState;
 use parser::file_mode::FileMode;
 use parser::lexable_token::LexableToken;
 use parser::minimal_syntax::MinimalValue;
@@ -107,6 +109,12 @@ impl ToOcaml for bool {
 impl ToOcaml for Vec<bool> {
     unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
         to_list(&self, context)
+    }
+}
+
+impl<S> ToOcaml for DeclModeState<S> {
+    unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
+        self.stack().to_ocaml(context)
     }
 }
 
@@ -376,5 +384,11 @@ where
     unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
         // don't serialize .1 (source text) as it is not part the real state we care about
         self.0.to_ocaml(_context)
+    }
+}
+
+impl<'a, S> ToOcaml for CoroutineState<'a, S> {
+    unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
+        self.seen_ppl.to_ocaml(_context)
     }
 }

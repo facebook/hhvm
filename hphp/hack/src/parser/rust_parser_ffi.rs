@@ -27,7 +27,7 @@ use parser::parser::Parser;
 use parser::positioned_smart_constructors::*;
 use parser::positioned_syntax::{PositionedSyntax, PositionedValue};
 use parser::positioned_token::PositionedToken;
-use parser::smart_constructors::{NoState, StateType};
+use parser::smart_constructors::NoState;
 use parser::smart_constructors_wrappers::WithKind;
 
 type PositionedSyntaxParser<'a> = Parser<'a, WithKind<PositionedSmartConstructors>, NoState>;
@@ -38,7 +38,7 @@ use parser::coroutine_smart_constructors::State as CoroutineState;
 type CoroutineParser<'a> = Parser<
     'a,
     WithKind<CoroutineSmartConstructors<PositionedSyntax>>,
-    <CoroutineState<PositionedSyntax> as StateType<'a, PositionedSyntax>>::T,
+    CoroutineState<'a, PositionedSyntax>,
 >;
 
 use parser::decl_mode_smart_constructors::DeclModeSmartConstructors;
@@ -47,7 +47,7 @@ use parser::decl_mode_smart_constructors::State as DeclModeState;
 type DeclModeParser<'a> = Parser<
     'a,
     WithKind<DeclModeSmartConstructors<PositionedToken, PositionedValue>>,
-    <DeclModeState<PositionedSyntax> as StateType<'a, PositionedSyntax>>::T,
+    DeclModeState<PositionedSyntax>,
 >;
 
 extern "C" {

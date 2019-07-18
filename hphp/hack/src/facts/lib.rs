@@ -6,7 +6,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 //
 //
-#![feature(bind_by_move_pattern_guards)]
 #![feature(box_patterns)]
 
 extern crate crypto;

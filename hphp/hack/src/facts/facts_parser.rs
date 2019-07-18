@@ -159,26 +159,26 @@ fn type_info_from_class_body(
     type_facts: &mut TypeFacts,
 ) {
     let aux = |mut constants: Vec<String>, node| {
-        match node {
-            RequireExtendsClause(box name) if check_require => {
+        if let RequireExtendsClause(box name) = node {
+            if check_require {
                 if let Some(name) = qualified_name(namespace, name) {
                     type_facts.require_extends.insert(name);
                 }
             }
-            RequireImplementsClause(box name) if check_require => {
+        } else if let RequireImplementsClause(box name) = node {
+            if check_require {
                 if let Some(name) = qualified_name(namespace, name) {
                     type_facts.require_implements.insert(name);
                 }
             }
-            TraitUseClause(box uses) => {
-                typenames_from_list(uses, namespace, &mut type_facts.base_types);
-            }
-            MethodDecl(box body) if namespace.is_empty() => {
+        } else if let TraitUseClause(box uses) = node {
+            typenames_from_list(uses, namespace, &mut type_facts.base_types);
+        } else if let MethodDecl(box body) = node {
+            if namespace.is_empty() {
                 // in methods we collect only defines
                 constants = defines_from_method_body(constants, body);
             }
-            _ => (),
-        };
+        }
         constants
     };
     if let List(nodes) = body {

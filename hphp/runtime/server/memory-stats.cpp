@@ -64,7 +64,7 @@ void MemoryStats::ReportMemory(std::string& output, Writer::Format format) {
     unused += alloc::g_arena0->retained();
   }
   for (auto const arena : alloc::g_local_arenas) {
-    unused += arena->retained();
+    if (arena) unused += arena->retained();
   }
   procStatus.registerUnused(unused >> 10); // convert to kB
 #endif

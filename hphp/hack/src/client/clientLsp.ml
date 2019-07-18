@@ -2866,8 +2866,19 @@ let run_ide_service
       )
     end;
 
+    let naming_table_saved_state_path =
+      Lsp.Initialize.(
+        initialize_params
+        .initializationOptions
+        .namingTableSavedStatePath)
+      |> Option.map ~f:Path.make in
+
     let%lwt result =
-      ClientIdeService.initialize_from_saved_state ide_service ~root in
+      ClientIdeService.initialize_from_saved_state ide_service
+        ~root
+        ~naming_table_saved_state_path
+        ~wait_for_initialization:(Option.is_some naming_table_saved_state_path)
+    in
     match result with
     | Ok () ->
       let%lwt () = ClientIdeService.serve ide_service in

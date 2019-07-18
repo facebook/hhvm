@@ -7,6 +7,13 @@
  *
  *)
 
+module Initialize_from_saved_state_param = struct
+  type t = {
+    root: Path.t;
+    naming_table_saved_state_path: Path.t option;
+  }
+end
+
 module Hover_param = struct
   type t = {
     file_path: Path.t;
@@ -52,7 +59,7 @@ end
 (* GADT for request/response types. See [ServerCommandTypes] for a discussion on
    using GADTs in this way. *)
 type _ t =
-  | Initialize_from_saved_state: Path.t -> unit t
+  | Initialize_from_saved_state: Initialize_from_saved_state_param.t -> unit t
   | Shutdown: unit -> unit t
   | File_changed: Path.t -> unit t
   | Hover:

@@ -51,9 +51,11 @@ inline bool notClassMethodPair(const StringData* name) {
 
 const char kInOutSuffix[] = "$inout";
 inline bool needsStripInOut(const StringData* name) {
-  return
-    name->size() > sizeof(kInOutSuffix) &&
-    !strcmp(name->data() + name->size() - strlen(kInOutSuffix), kInOutSuffix);
+  auto const sz = name->size();
+  return sz > 6 &&
+    !memcmp(name->data() + sz - 6, kInOutSuffix, 6) &&
+    folly::qfind(name->slice().subpiece(0, sz - 6), folly::StringPiece("$")) !=
+      std::string::npos;
 }
 
 /*

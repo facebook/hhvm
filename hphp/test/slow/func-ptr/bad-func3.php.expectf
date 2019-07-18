@@ -1,0 +1,1 @@
+Fatal error: Failure to resolve undefined function foo$inout() in %s/test/slow/func-ptr/bad-func3.php on line 5

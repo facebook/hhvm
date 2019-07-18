@@ -298,7 +298,7 @@ module DeclModeTest = DeclModeTest_.WithSmartConstructors(DeclModeSC)
 (*
 Tool comparing outputs of Rust and OCaml parsers. Example usage:
 
-  buck run @mode/dbg hphp/hack/test/rust:rust_ocaml
+  buck run @mode/opt-clang hphp/hack/test/rust:rust_ocaml
 
 See parse_args for all the options
 *)

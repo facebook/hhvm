@@ -1836,6 +1836,8 @@ module WithStatementAndDeclAndTypeParser
         parse_record_creation_expression parser name
       else
         (parser, name)
+    | At ->
+      parse_record_creation_expression parser name
     | _ -> (parser, name)
 
   and parse_record_creation_expression parser name =
@@ -1848,6 +1850,13 @@ module WithStatementAndDeclAndTypeParser
      * record-field-initializer
        * field-name => expression
      *)
+    let (parser, array_token) =
+      match peek_token_kind parser with
+      | At -> assert_token parser At
+      | _ ->
+        let (parser, missing) = Make.missing parser (pos parser) in
+        (parser, missing)
+    in
     let (parser1, left_bracket) = assert_token parser LeftBracket in
     let (parser, members) =
       parse_comma_list_opt_allow_trailing
@@ -1859,6 +1868,7 @@ module WithStatementAndDeclAndTypeParser
     Make.record_creation_expression
       parser
       name
+      array_token
       left_bracket
       members
       right_bracket

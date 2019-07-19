@@ -113,6 +113,8 @@ let string_of_lit_const instruction =
     | NewPair -> "NewPair"
     | NewRecord (cid, l) ->
       sep ["NewRecord"; string_of_class_id cid; "<" ^ string_of_list_of_shape_fields l ^ ">"]
+    | NewRecordArray (cid, l) ->
+      sep ["NewRecordArray"; string_of_class_id cid; "<" ^ string_of_list_of_shape_fields l ^ ">"]
     | ClsCns (cnsid, cr) ->
       sep ["ClsCns"; string_of_const_id cnsid; string_of_classref cr]
     | ClsCnsD (cnsid, cid) ->
@@ -1167,7 +1169,7 @@ and string_of_param_default_value ~env expr =
     ^ "("
     ^ String.concat ~sep:", " es
     ^ ")"
-  | A.Record (e, es) ->
+  | A.Record (e, _, es) ->
     let es = List.map ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
     let e =
       match e with

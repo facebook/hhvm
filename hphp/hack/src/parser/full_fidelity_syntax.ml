@@ -1696,11 +1696,13 @@ module WithToken(Token: TokenType) = struct
          acc
       | RecordCreationExpression {
         record_creation_type;
+        record_creation_array_token;
         record_creation_left_bracket;
         record_creation_members;
         record_creation_right_bracket;
       } ->
          let acc = f acc record_creation_type in
+         let acc = f acc record_creation_array_token in
          let acc = f acc record_creation_left_bracket in
          let acc = f acc record_creation_members in
          let acc = f acc record_creation_right_bracket in
@@ -3563,11 +3565,13 @@ module WithToken(Token: TokenType) = struct
       ]
       | RecordCreationExpression {
         record_creation_type;
+        record_creation_array_token;
         record_creation_left_bracket;
         record_creation_members;
         record_creation_right_bracket;
       } -> [
         record_creation_type;
+        record_creation_array_token;
         record_creation_left_bracket;
         record_creation_members;
         record_creation_right_bracket;
@@ -5431,11 +5435,13 @@ module WithToken(Token: TokenType) = struct
       ]
       | RecordCreationExpression {
         record_creation_type;
+        record_creation_array_token;
         record_creation_left_bracket;
         record_creation_members;
         record_creation_right_bracket;
       } -> [
         "record_creation_type";
+        "record_creation_array_token";
         "record_creation_left_bracket";
         "record_creation_members";
         "record_creation_right_bracket";
@@ -7464,12 +7470,14 @@ module WithToken(Token: TokenType) = struct
         }
       | (SyntaxKind.RecordCreationExpression, [
           record_creation_type;
+          record_creation_array_token;
           record_creation_left_bracket;
           record_creation_members;
           record_creation_right_bracket;
         ]) ->
         RecordCreationExpression {
           record_creation_type;
+          record_creation_array_token;
           record_creation_left_bracket;
           record_creation_members;
           record_creation_right_bracket;
@@ -9875,12 +9883,14 @@ module WithToken(Token: TokenType) = struct
 
       let make_record_creation_expression
         record_creation_type
+        record_creation_array_token
         record_creation_left_bracket
         record_creation_members
         record_creation_right_bracket
       =
         let syntax = RecordCreationExpression {
           record_creation_type;
+          record_creation_array_token;
           record_creation_left_bracket;
           record_creation_members;
           record_creation_right_bracket;

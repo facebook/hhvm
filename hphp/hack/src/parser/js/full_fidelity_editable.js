@@ -14803,23 +14803,35 @@ class RecordCreationExpression extends EditableSyntax
 {
   constructor(
     type,
+    array_token,
     left_bracket,
     members,
     right_bracket)
   {
     super('record_creation_expression', {
       type: type,
+      array_token: array_token,
       left_bracket: left_bracket,
       members: members,
       right_bracket: right_bracket });
   }
   get type() { return this.children.type; }
+  get array_token() { return this.children.array_token; }
   get left_bracket() { return this.children.left_bracket; }
   get members() { return this.children.members; }
   get right_bracket() { return this.children.right_bracket; }
   with_type(type){
     return new RecordCreationExpression(
       type,
+      this.array_token,
+      this.left_bracket,
+      this.members,
+      this.right_bracket);
+  }
+  with_array_token(array_token){
+    return new RecordCreationExpression(
+      this.type,
+      array_token,
       this.left_bracket,
       this.members,
       this.right_bracket);
@@ -14827,6 +14839,7 @@ class RecordCreationExpression extends EditableSyntax
   with_left_bracket(left_bracket){
     return new RecordCreationExpression(
       this.type,
+      this.array_token,
       left_bracket,
       this.members,
       this.right_bracket);
@@ -14834,6 +14847,7 @@ class RecordCreationExpression extends EditableSyntax
   with_members(members){
     return new RecordCreationExpression(
       this.type,
+      this.array_token,
       this.left_bracket,
       members,
       this.right_bracket);
@@ -14841,6 +14855,7 @@ class RecordCreationExpression extends EditableSyntax
   with_right_bracket(right_bracket){
     return new RecordCreationExpression(
       this.type,
+      this.array_token,
       this.left_bracket,
       this.members,
       right_bracket);
@@ -14852,11 +14867,13 @@ class RecordCreationExpression extends EditableSyntax
     let new_parents = parents.slice();
     new_parents.push(this);
     var type = this.type.rewrite(rewriter, new_parents);
+    var array_token = this.array_token.rewrite(rewriter, new_parents);
     var left_bracket = this.left_bracket.rewrite(rewriter, new_parents);
     var members = this.members.rewrite(rewriter, new_parents);
     var right_bracket = this.right_bracket.rewrite(rewriter, new_parents);
     if (
       type === this.type &&
+      array_token === this.array_token &&
       left_bracket === this.left_bracket &&
       members === this.members &&
       right_bracket === this.right_bracket)
@@ -14867,6 +14884,7 @@ class RecordCreationExpression extends EditableSyntax
     {
       return rewriter(new RecordCreationExpression(
         type,
+        array_token,
         left_bracket,
         members,
         right_bracket), parents);
@@ -14877,6 +14895,9 @@ class RecordCreationExpression extends EditableSyntax
     let type = EditableSyntax.from_json(
       json.record_creation_type, position, source);
     position += type.width;
+    let array_token = EditableSyntax.from_json(
+      json.record_creation_array_token, position, source);
+    position += array_token.width;
     let left_bracket = EditableSyntax.from_json(
       json.record_creation_left_bracket, position, source);
     position += left_bracket.width;
@@ -14888,6 +14909,7 @@ class RecordCreationExpression extends EditableSyntax
     position += right_bracket.width;
     return new RecordCreationExpression(
         type,
+        array_token,
         left_bracket,
         members,
         right_bracket);
@@ -14897,6 +14919,7 @@ class RecordCreationExpression extends EditableSyntax
     if (RecordCreationExpression._children_keys == null)
       RecordCreationExpression._children_keys = [
         'type',
+        'array_token',
         'left_bracket',
         'members',
         'right_bracket'];

@@ -257,7 +257,7 @@ module CheckFunctionBody = struct
       List.iter el (expr f_type env);
       List.iter uel (expr f_type env);
       ()
-    | _, Record (_, afl) ->
+    | _, Record (_, _, afl) ->
       List.iter afl (expr2 f_type env);
       ()
     | _, InstanceOf (e, _)
@@ -766,7 +766,7 @@ and expr_ env _p = function
       List.iter el (expr env);
       List.iter uel (expr env);
       ()
-  | Record (_, fdl) ->
+  | Record (_, _, fdl) ->
       List.iter fdl (field env);
       ()
   | Efun (f, _)

@@ -1543,6 +1543,7 @@
       "prefix" : "record_creation",
       "fields" : [
         { "field_name" : "type" },
+        { "field_name" : "array_token" },
         { "field_name" : "left_bracket" },
         { "field_name" : "members" },
         { "field_name" : "right_bracket" }

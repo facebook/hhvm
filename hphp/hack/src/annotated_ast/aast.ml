@@ -166,7 +166,7 @@ and expr_ =
   | Is of expr * hint
   | As of expr * hint * (* is nullable *) bool
   | New of class_id * targ list * expr list * expr list * (* constructor *) expr_annotation
-  | Record of class_id * (expr * expr) list
+  | Record of class_id * (* is array *) bool * (expr * expr) list
   | Efun of fun_ * lid list
   | Lfun of fun_ * lid list
   | Xml of sid * xhp_attribute list * expr list

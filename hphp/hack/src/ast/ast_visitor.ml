@@ -432,7 +432,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
    | BracedExpr e
    | ParenthesizedExpr e -> this#on_expr acc e
    | New         (e, hl, el, uel) -> this#on_new acc e hl el uel
-   | Record      (e, fl)          -> this#on_record acc e fl
+   | Record      (e, _, fl)          -> this#on_record acc e fl
    | Efun        (f, idl)         -> this#on_efun acc f idl
    | Xml         (id, attrl, el) -> this#on_xml acc id attrl el
    | Omitted                     -> this#on_omitted  acc

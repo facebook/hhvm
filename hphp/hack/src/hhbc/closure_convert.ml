@@ -916,7 +916,7 @@ let rec convert_expr env st (p, expr_ as expr) =
     let st, el1 = convert_exprs env st el1 in
     let st, el2 = convert_exprs env st el2 in
     st, (p, New (cid, targs, el1, el2, annot))
-  | Record (cid, es) ->
+  | Record (cid, is_array, es) ->
     let st, cid = convert_class_id env st cid in
     let convert_pair st (e1, e2) = begin
       let st, e1 = convert_expr env st e1 in
@@ -924,7 +924,7 @@ let rec convert_expr env st (p, expr_ as expr) =
       st, (e1, e2)
     end in
     let st, es = List.map_env st es convert_pair in
-    st, (p, Record (cid, es))
+    st, (p, Record (cid, is_array, es))
   | Efun (fd, use_vars) ->
     convert_lambda env st p fd (Some use_vars)
   | Lfun (fd, _) ->

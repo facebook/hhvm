@@ -1689,13 +1689,16 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
     | RecordCreationExpression
       { record_creation_type = rec_type
       ; record_creation_members = members
+      ; record_creation_array_token = array_token
       ; _ } ->
       let e = match syntax rec_type with
       | SimpleTypeSpecifier _ ->
         let name = pos_name rec_type env in
         (fst name, Id name)
       | _ -> pExpr rec_type env in
-      Record (e, couldMap ~f:pMember members env)
+      let is_record_array =
+        (token_kind array_token = Some TK.At) in
+      Record (e, is_record_array, couldMap ~f:pMember members env)
     | LiteralExpression { literal_expression = expr } ->
       (match syntax expr with
       | Token _ ->

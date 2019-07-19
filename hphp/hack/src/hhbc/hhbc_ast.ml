@@ -188,6 +188,7 @@ type instruct_lit_const =
   | NewKeysetArray of int
   | NewPair
   | NewRecord of class_id * string list
+  | NewRecordArray of class_id * string list
   | AddElemC
   | AddNewElemC
   | NewCol of CollectionType.t

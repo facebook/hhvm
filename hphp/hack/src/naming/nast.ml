@@ -537,7 +537,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
    | Typename n -> this#on_typename acc n
    | New         (cid, _, el, uel, _)   -> this#on_new acc cid el uel
    | Efun        (f, idl)-> this#on_efun acc f idl
-   | Record      (cid, fl)        -> this#on_record acc cid fl
+   | Record      (cid, _, fl)        -> this#on_record acc cid fl
    | Xml         (sid, attrl, el) -> this#on_xml acc sid attrl el
    | Callconv    (kind, e)        -> this#on_callconv acc kind e
    | ValCollection    (s, ta, el)     ->

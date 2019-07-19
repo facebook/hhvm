@@ -192,7 +192,7 @@ let rec expr acc (_, e) =
     acc
   | Aast.New _ ->
     failwith "Unexpected Expr: Typing_get_locals expected CIexpr in New"
-  | Aast.Record ((_, Aast.CIexpr e1), exprexprs) ->
+  | Aast.Record ((_, Aast.CIexpr e1), _, exprexprs) ->
     let acc = expr acc e1 in
     List.fold_left exprexprs ~init:acc ~f:(fun acc -> fun (e1, e2) -> expr_expr acc e1 e2)
   | Aast.Record _ ->

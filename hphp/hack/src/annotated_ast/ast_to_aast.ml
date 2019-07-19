@@ -273,8 +273,10 @@ struct
     | Darray (tap, d) -> Aast.Darray (optional (both on_targ) tap, on_list on_darray_element d)
     | Shape s -> Aast.Shape (on_list on_shape s)
     | Collection (id, tal, al) -> Aast.Collection (id, on_collection_targ tal, on_list on_afield al)
-    | Record (e, etl) -> Aast.Record (
+    | Record (e, is_array, etl) ->
+      Aast.Record (
         (annot, Aast.CIexpr (on_expr e)),
+        is_array,
         on_list (both on_expr) etl
       )
     | Null -> Aast.Null

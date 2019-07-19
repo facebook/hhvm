@@ -1457,6 +1457,7 @@ let schema : schema_node list =
     ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
     ; fields =
       [ "type", Aggregate TODO
+      ; "array_token", ZeroOrOne Token
       ; "left_bracket", Token
       ; "members", ZeroOrMore (Just "ElementInitializer")
       ; "right_bracket", Token

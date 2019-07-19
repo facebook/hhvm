@@ -884,7 +884,7 @@ and emit_new env pos (cid : A.class_id) (targs : Aast.targ list) (args : A.expr 
   empty
 
 (* TODO(T36697624) more efficient bytecode for static records *)
-and emit_record env pos cid es =
+and emit_record env pos cid is_array es =
   let cexpr = class_id_to_class_expr ~resolve_self:false
     (Emit_env.get_scope env) cid
   in
@@ -892,8 +892,9 @@ and emit_record env pos cid es =
   | Class_id id ->
     let fq_id =
       Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
+    let instr = if is_array then instr_new_recordarray else instr_new_record in
     Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string fq_id);
-    emit_struct_array env pos es (instr_new_record fq_id)
+    emit_struct_array env pos es (instr fq_id)
   | _ ->
     failwith "No record with specified name found"
 
@@ -1592,9 +1593,9 @@ and emit_expr (env : Emit_env.t) (expr: A.expr) =
     emit_call_expr env pos e targs args uargs None
   | A.New (cid, targs, args, uargs, _constructor_annot) ->
     emit_new env pos cid targs args uargs
-  | A.Record (cid, es) ->
+  | A.Record (cid, is_array, es) ->
     let es2 = List.map ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
-    emit_record env pos cid es2
+    emit_record env pos cid is_array es2
   | A.Array es ->
     emit_pos_then pos @@ emit_collection env expr es
   | A.Darray (ta, es) ->

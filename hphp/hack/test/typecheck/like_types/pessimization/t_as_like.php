@@ -13,5 +13,5 @@ function f<Tx as arraykey>(Contain<Tx> $c): void {
   hh_show($c);
   $t = $c->get();
   hh_show($t);
-  expect_arraykey($t); // TODO: should coerce
+  expect_arraykey($t);
 }

@@ -98,9 +98,11 @@ let force_null_union env r t =
 *    (you can coerce t1 to optional type if the inner type is a valid coercion target)
 * 4. t is enforceable |- dynamic ~> t
 *    (coercion from dynamic to enforceable types is permitted)
-* 5. T1 ~> T and T2 ~> T |- T1|T2 ~> T
+* 5. t is enforceable, t1 <: t2, t2 ~> t |- t1 ~> t
+*    (an abstract type coerces to a valid coercion target if one of its upper bounds coerces)
+* 6. T1 ~> T and T2 ~> T |- T1|T2 ~> T
 *    (coercion from a union is valid if coercion from each element is valid)
-* 6. t1 <: t2 |- t1 ~> t2
+* 7. t1 <: t2 |- t1 ~> t2
 *    (you can coerce t1 to any of its supertypes)
 *
 * This boils down to running the normal sub_type procedure whenever possible,
@@ -130,6 +132,19 @@ let rec can_coerce env ?(ur=Reason.URnone) ty_have ?ty_expect_decl ty_expect =
     when (TypecheckerOptions.coercion_from_dynamic (Env.get_tcopt env)) ->
     let open Option in
     ty_expect_decl >>= (supports_coercion_from_dynamic env)
+
+  (* T1 ~> T2 if T1 is bounded above by T3, T2 is enforceable, and T3 ~> T2 *)
+  | (_, Tabstract _), _
+    when (TypecheckerOptions.coercion_from_dynamic (Env.get_tcopt env)) ->
+    let open Option in
+    ty_expect_decl >>= (supports_coercion_from_dynamic env) >>| (fun env ->
+      let env, upper_bounds = Typing_utils.get_concrete_supertypes env ety_have in
+      Typing_utils.run_on_intersection env ~f:(fun env upper_bound ->
+        let p = Reason.to_pos (fst upper_bound) in
+        let env = coerce_type p ur env upper_bound ?ty_expect_decl ty_expect in
+        env, ()
+      ) upper_bounds |> fst
+    )
 
   (* T1|T2 ~> T if T1 ~> T and T2 ~> T *)
   | (_, Tunion tyl), _

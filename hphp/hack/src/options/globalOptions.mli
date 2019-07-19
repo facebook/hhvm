@@ -279,8 +279,12 @@ type t = {
   (* Set of error codes disallowed in decl positions *)
   po_disallowed_decl_fixmes : ISet.t;
 
- (* Switch from <<...>> to @ for attributes *)
- po_allow_new_attribute_syntax : bool;
+  (* Switch from <<...>> to @ for attributes *)
+  po_allow_new_attribute_syntax : bool;
+
+  (* Trigger the use of inferred types in the tast for non annotated
+    arguments and return types *)
+  tco_global_inference : bool;
 } [@@deriving show]
 
 val make :
@@ -345,6 +349,7 @@ val make :
   ?disable_linter_fixmes : bool ->
   ?po_disallowed_decl_fixmes: ISet.t ->
   ?po_allow_new_attribute_syntax : bool ->
+  ?tco_global_inference : bool ->
   unit ->
   t
 
@@ -433,3 +438,4 @@ val po_disable_outside_dollar_str_interp : t -> bool
 val disable_linter_fixmes : t -> bool
 val po_disallowed_decl_fixmes : t -> ISet.t
 val po_allow_new_attribute_syntax : t -> bool
+val tco_global_inference : t -> bool

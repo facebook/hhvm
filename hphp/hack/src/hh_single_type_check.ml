@@ -215,6 +215,7 @@ let parse_options () =
   let disable_outside_dollar_str_interp = ref false in
   let disable_linter_fixmes = ref false in
   let allow_new_attribute_syntax = ref false in
+  let global_inference = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -461,6 +462,9 @@ let parse_options () =
     "--allow-new-attribute-syntax",
       Arg.Set allow_new_attribute_syntax,
       "Allow the new @ attribute syntax (disables legacy soft typehints)";
+    "--global-inference",
+      Arg.Set global_inference,
+      "Use inference results as the types of unannotated parameters / functions in the tast";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -505,6 +509,7 @@ let parse_options () =
     ~po_disable_outside_dollar_str_interp:!disable_outside_dollar_str_interp
     ~disable_linter_fixmes:!disable_linter_fixmes
     ~po_allow_new_attribute_syntax:!allow_new_attribute_syntax
+    ~tco_global_inference:!global_inference
     ()
   in
   let tcopt = {

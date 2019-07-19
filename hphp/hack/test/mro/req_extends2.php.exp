@@ -1,9 +1,9 @@
 Linearization for class \I:
-[\I]
+[\I(PAT)]
 Linearization for class \A:
 [\A, \I<T>(consts_only)]
 Linearization for class \T:
-[\T(copy_private_members), \A<mixed>(requirement), \I<mixed>(synthesized, consts_only)]
+[\T(copy_private_members, PAT), \A<mixed>(requirement), \I<mixed>(synthesized, consts_only)]
 Linearization for class \B:
 [\B, \T(copy_private_members), \A<int>, \I<int>(consts_only), \A<mixed>(requirement)]
 Linearization for class \C:

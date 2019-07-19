@@ -1,8 +1,8 @@
 Linearization for class \Ico:
-[\Ico]
+[\Ico(PAT)]
 Linearization for class \I2:
-[\I2, \Ico<mixed>]
+[\I2(PAT), \Ico<mixed>(PAT)]
 Linearization for class \I3:
-[\I3, \I2, \Ico<mixed>, \Ico<num>]
+[\I3(PAT), \I2(PAT), \Ico<mixed>(PAT), \Ico<num>(PAT)]
 Linearization for class \I4:
-[\I4, \Ico<int>, \I3, \I2, \Ico<mixed>, \Ico<num>]
+[\I4(PAT), \Ico<int>(PAT), \I3(PAT), \I2(PAT), \Ico<mixed>(PAT), \Ico<num>(PAT)]

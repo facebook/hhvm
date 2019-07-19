@@ -158,7 +158,7 @@ let is_interface (source : source_type) =
 
 let rec ancestor_linearization
     (env : env)
-    (child_class_abstract : bool)
+    (child_class_concrete : bool)
     (ancestor : Pos.t * (Pos.t * string) * decl ty list * source_type)
   : string * linearization =
   let ty_pos, (use_pos, class_name), type_args, source = ancestor in
@@ -171,7 +171,7 @@ let rec ancestor_linearization
     let mro_consts_only = c.mro_consts_only || is_interface source in
     let mro_copy_private_members = c.mro_copy_private_members && source = Trait in
     let mro_passthrough_abstract_typeconst = c.mro_passthrough_abstract_typeconst &&
-      child_class_abstract in
+      not child_class_concrete in
     { c with
       mro_trait_reuse = Option.map c.mro_trait_reuse ~f:(Fn.const class_name);
       mro_via_req_extends;
@@ -238,7 +238,7 @@ and linearize (env : env) (c : shallow_class) : linearization =
     mro_use_pos = fst c.sc_name;
     mro_ty_pos = fst c.sc_name;
     mro_copy_private_members = c.sc_kind = Ast_defs.Ctrait;
-    mro_passthrough_abstract_typeconst = c.sc_kind = Ast_defs.Cabstract;
+    mro_passthrough_abstract_typeconst = c.sc_kind <> Ast_defs.Cnormal;
   } in
   let get_ancestors kind = List.map ~f:(ancestor_from_ty kind) in
   let interfaces c     = get_ancestors Interface c.sc_implements in
@@ -301,11 +301,11 @@ and next_state
     (child_class_kind: Ast_defs.class_kind)
     (state, ancestors, acc, synths) =
   let open Sequence.Step in
-  let child_class_abstract = child_class_kind = Ast_defs.Cabstract in
+  let child_class_concrete = child_class_kind = Ast_defs.Cnormal in
   match state, ancestors with
   | Child child, _ -> Yield (child, (Next_ancestor, ancestors, child::acc, synths))
   | Next_ancestor, ancestor::ancestors ->
-    let name_and_lin = ancestor_linearization env child_class_abstract ancestor in
+    let name_and_lin = ancestor_linearization env child_class_concrete ancestor in
     Skip (Ancestor name_and_lin, ancestors, acc, synths)
   | Ancestor (name, lin), ancestors ->
     begin match Sequence.next lin with

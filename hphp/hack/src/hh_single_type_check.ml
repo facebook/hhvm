@@ -1233,7 +1233,7 @@ let handle_mode
             ; if mro.mro_xhp_attrs_only then Some "xhp_attrs_only" else None
             ; if mro.mro_consts_only    then Some "consts_only"    else None
             ; if mro.mro_copy_private_members then Some "copy_private_members" else None
-            ; if mro.mro_passthrough_abstract_typeconst then Some "passthrough_abstract_typeconst" else None
+            ; if mro.mro_passthrough_abstract_typeconst then Some "PAT" else None
             ; Option.map mro.mro_trait_reuse ~f:(fun c -> "trait reuse via "^c)
             ]
             |> List.filter_map ~f:(fun x -> x)

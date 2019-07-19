@@ -337,7 +337,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
     then declaration
     else
       WithLazyRule (Rule.Parental,
-        t env attr,
+        handle_attribute_spec env attr ~always_split:false,
         Concat [
           Space;
           Split;
@@ -763,7 +763,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       parameter_default_value = default } ->
     Concat [
       handle_attribute_spec env attr ~always_split:false;
-      when_present attr space;
+      when_present attr (fun _ -> Concat [ Space; SplitWith Cost.Base ]);
       t env visibility;
       when_present visibility space;
       t env callconv;
@@ -775,7 +775,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       then t env name
       else Concat [
         Space;
-        SplitWith Cost.Base;
+        SplitWith Cost.Moderate;
         Nest [t env name];
       ];
       t env default;
@@ -821,6 +821,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       attributized_specifier_type = attr_type; } ->
     Concat [
       handle_attribute_spec env attr_spec ~always_split:false;
+      Space;
       t env attr_type;
     ]
   | Syntax.InclusionExpression {
@@ -1246,7 +1247,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       anonymous_use = use;
       anonymous_body = body; } ->
     Concat [
-      t env attr;
+      handle_attribute_spec env attr ~always_split:false;
       when_present attr space;
       t env static_kw;
       when_present static_kw space;
@@ -1282,7 +1283,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       lambda_arrow = arrow;
       lambda_body = body; } ->
     Concat [
-      t env attr;
+      handle_attribute_spec env attr ~always_split:false;
       when_present attr space;
       t env async;
       when_present async space;
@@ -1687,7 +1688,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       awaitable_coroutine = coroutine_kw;
       awaitable_compound_statement = body; } ->
     Concat [
-      t env attr;
+      handle_attribute_spec env attr ~always_split:false;
       when_present attr space;
       t env async_kw;
       when_present async_kw space;
@@ -1970,7 +1971,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       type_name = name;
       type_constraints = constraints; } ->
     Concat [
-      t env attr;
+      handle_attribute_spec env attr ~always_split:false;
       when_present attr space;
       t env reified;
       when_present reified space;
@@ -2262,9 +2263,8 @@ and handle_attribute_spec env node ~always_split =
       old_attribute_specification_right_double_angle = right_da; } ->
     transform_argish env ~allow_trailing:false left_da attrs right_da
   | Syntax.AttributeSpecification { attribute_specification_attributes = attrs } ->
-    handle_possible_list env ~after_each:(fun is_last ->
+    handle_possible_list env ~after_each:(fun _ ->
       if always_split then Newline
-      else if is_last then Concat [Space; SplitWith Cost.Moderate]
       else Space
     ) attrs
   | Syntax.Missing -> Nothing

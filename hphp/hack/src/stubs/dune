@@ -51,6 +51,12 @@
     loadScriptUtils))
 
 (library
+  (name lru_worker_stubs)
+  (wrapped false)
+  (modules
+    lru_worker))
+
+(library
   (name messages_stubs)
   (wrapped false)
   (modules

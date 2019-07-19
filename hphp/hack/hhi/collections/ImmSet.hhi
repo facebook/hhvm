@@ -403,6 +403,7 @@ final class ImmSet<+Tv as arraykey> implements ConstSet<Tv> {
   public function zip<Tu>(
     <<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable
   /* HH_FIXME[4110] need bottom type as generic */
+  /* HH_FIXME[4323] need bottom type as generic */
   ): ImmSet<Pair<Tv, Tu>>;
 
   /**

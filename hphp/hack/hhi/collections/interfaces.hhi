@@ -1524,6 +1524,7 @@ interface ConstSet<+Tv as arraykey> extends ConstCollection<Tv>,
   public function zip<Tu>(
     <<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable
   /* HH_FIXME[4110] need bottom type as generic */
+  /* HH_FIXME[4323] */
   ): ConstSet<Pair<Tv, Tu>>;
   /**
    * Returns a `ConstSet` containing the first `n` values of the current
@@ -1805,6 +1806,7 @@ interface MutableSet<Tv as arraykey> extends ConstSet<Tv>,
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
   /* HH_FIXME[4110] need bottom type as generic */
+  /* HH_FIXME[4323] */
   MutableSet<Pair<Tv, Tu>>;
   /**
    * Returns a `MutableSet` containing the first `n` values of the current

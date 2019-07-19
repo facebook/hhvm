@@ -24,10 +24,14 @@ type decl_cache_key =
 type decl_cache = (decl_cache_key, Obj.t) Memory_bounded_lru_cache.t
 
 type backend =
+  | Lru_shared_memory
   | Shared_memory
   | Local_memory of { decl_cache: decl_cache }
 
 let backend_ref = ref Shared_memory
+
+let set_lru_shared_memory_backend (): unit =
+  backend_ref := Lru_shared_memory
 
 let set_shared_memory_backend (): unit =
   backend_ref := Shared_memory

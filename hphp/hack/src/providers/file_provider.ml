@@ -36,6 +36,7 @@ let read_file_contents_from_disk (fn: Relative_path.t): string option =
 
 let get fn =
   match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     FileHeap.get fn
   | Provider_config.Local_memory _ ->
@@ -43,6 +44,7 @@ let get fn =
 
 let get_unsafe fn =
   match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     begin match get fn with
     | Some contents -> contents
@@ -54,6 +56,7 @@ let get_unsafe fn =
 
 let get_contents fn =
   match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     begin match FileHeap.get fn with
     | Some Ide f -> Some f
@@ -71,6 +74,7 @@ let get_contents fn =
 
 let get_ide_contents_unsafe fn =
   match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     begin match FileHeap.get fn with
     | Some Ide f -> f
@@ -85,6 +89,7 @@ let get_ide_contents_unsafe fn =
 
 let provide_file fn contents =
   match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     FileHeap.add fn contents
   | Provider_config.Local_memory _ ->
@@ -93,6 +98,7 @@ let provide_file fn contents =
 
 let provide_file_hint fn contents =
   match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     FileHeap.write_around fn contents
   | Provider_config.Local_memory _ ->
@@ -101,6 +107,7 @@ let provide_file_hint fn contents =
 
 let remove_batch paths =
   match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     FileHeap.remove_batch paths
   | Provider_config.Local_memory _ ->
@@ -109,6 +116,7 @@ let remove_batch paths =
 
 let local_changes_push_stack () =
   match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     FileHeap.LocalChanges.push_stack ()
   | Provider_config.Local_memory _ ->
@@ -116,6 +124,7 @@ let local_changes_push_stack () =
 
 let local_changes_pop_stack () =
   match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     FileHeap.LocalChanges.pop_stack ()
   | Provider_config.Local_memory _ ->
@@ -123,6 +132,7 @@ let local_changes_pop_stack () =
 
 let local_changes_commit_batch paths =
   match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     FileHeap.LocalChanges.commit_batch paths
   | Provider_config.Local_memory _ ->
@@ -133,6 +143,7 @@ let local_changes_commit_batch paths =
 
 let local_changes_revert_batch paths =
   match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     FileHeap.LocalChanges.revert_batch paths
   | Provider_config.Local_memory _ ->

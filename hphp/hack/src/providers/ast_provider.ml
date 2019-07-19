@@ -152,6 +152,7 @@ let get_gconst defs name =
 *)
 let get_ast ?(full = false) file_name =
   match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     begin match ParserHeap.get file_name with
       | None ->

@@ -21,6 +21,7 @@ type gconst_decl = Typing_defs.decl Typing_defs.ty * Errors.t
 
 let get_fun (fun_name: fun_key): fun_decl option =
   match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     Typing_lazy_heap.get_fun fun_name
   | Provider_config.Local_memory { decl_cache } ->
@@ -46,6 +47,7 @@ let get_fun (fun_name: fun_key): fun_decl option =
 
 let get_class (class_name: class_key): class_decl option =
   match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     Typing_lazy_heap.get_class class_name
   | Provider_config.Local_memory { decl_cache } ->
@@ -71,6 +73,7 @@ let get_type_id_filename x expected_kind =
 
 let get_typedef (typedef_name: string): typedef_decl option =
   match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     Typing_lazy_heap.get_typedef typedef_name
   | Provider_config.Local_memory { decl_cache } ->
@@ -96,6 +99,7 @@ let get_typedef (typedef_name: string): typedef_decl option =
 
 let get_gconst (gconst_name: string): gconst_decl option =
   match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     Typing_lazy_heap.get_gconst gconst_name
   | Provider_config.Local_memory { decl_cache } ->
@@ -140,6 +144,7 @@ let local_changes_push_stack () =
   Decl_linearize.push_local_changes ();
 
   match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     ()
   | Provider_config.Local_memory { decl_cache } ->
@@ -161,6 +166,7 @@ let local_changes_pop_stack () =
   Decl_linearize.pop_local_changes ();
 
   match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
     ()
   | Provider_config.Local_memory { decl_cache } ->

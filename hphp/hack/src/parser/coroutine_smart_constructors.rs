@@ -52,7 +52,7 @@ impl<'src, S> StateType<'src, S> for State<'src, S> {
         }
     }
 
-    fn next(t: Self, _inputs: Vec<&S>) -> Self {
+    fn next(t: Self, _inputs: &[&S]) -> Self {
         t
     }
 }

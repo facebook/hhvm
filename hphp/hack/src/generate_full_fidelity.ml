@@ -1280,7 +1280,7 @@ module GenerateFFRustSyntaxSmartConstructors = struct
     let next_args = String.concat ~sep:", " next_args in
 
     sprintf "    fn make_%s(s: State, %s) -> (State, Self::R) {
-        let s = State::next(s, vec![%s]);
+        let s = State::next(s, &[%s]);
         let r = Self::R::make_%s(&s, %s);
         (s, r)
     }\n\n"
@@ -1304,12 +1304,12 @@ where
 
     fn make_missing(s: State, offset: usize) -> (State, Self::R) {
         let r = Self::R::make_missing(&s, offset);
-        (State::next(s, vec![]), r)
+        (State::next(s, &[]), r)
     }
 
     fn make_token(s: State, arg: Self::Token) -> (State, Self::R) {
         let r = Self::R::make_token(&s, arg);
-        (State::next(s, vec![]), r)
+        (State::next(s, &[]), r)
     }
 
     fn make_list(s: State, items: Vec<Self::R>, offset: usize) -> (State, Self::R) {
@@ -1317,7 +1317,7 @@ where
             <Self as SyntaxSmartConstructors<'src, S, State>>::make_missing(s, offset)
         } else {
             let item_refs: Vec<_> = items.iter().collect();
-            let s = State::next(s, item_refs);
+            let s = State::next(s, &item_refs);
             let r = Self::R::make_list(&s, items, offset);
             (s, r)
         }

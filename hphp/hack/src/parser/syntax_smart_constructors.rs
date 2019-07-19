@@ -11,14 +11,14 @@ pub use crate::syntax_smart_constructors_generated::*;
 
 pub trait StateType<'src, R> {
     fn initial(env: &ParserEnv, source_text: &SourceText<'src>) -> Self;
-    fn next(t: Self, inputs: Vec<&R>) -> Self;
+    fn next(t: Self, inputs: &[&R]) -> Self;
 }
 
 impl<'src, R> StateType<'src, R> for NoState {
     fn initial(_env: &ParserEnv, _: &SourceText<'src>) -> Self {
         NoState {}
     }
-    fn next(t: Self, _inputs: Vec<&R>) -> Self {
+    fn next(t: Self, _inputs: &[&R]) -> Self {
         t
     }
 }

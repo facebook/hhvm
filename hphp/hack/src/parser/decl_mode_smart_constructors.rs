@@ -46,7 +46,8 @@ impl<'src, S> StateType<'src, S> for State<S> {
             phantom_s: std::marker::PhantomData,
         }
     }
-    fn next(mut st: Self, inputs: Vec<&S>) -> Self {
+
+    fn next(mut st: Self, inputs: &[&S]) -> Self {
         let st_todo = if st.stack.len() > inputs.len() {
             st.stack.split_off(st.stack.len() - inputs.len())
         } else {

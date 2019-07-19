@@ -13,6 +13,7 @@
   (wrapped false)
   (modules
     process)
+  (flags (:standard -unsafe-string))
   (libraries
     process_types
     utils_core

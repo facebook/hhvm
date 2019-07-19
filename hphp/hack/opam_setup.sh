@@ -33,8 +33,6 @@ source "$SOURCE_ROOT/opam_helpers.sh"
 opam_switch_create_if_needed () {
     local name=$1
     local switch=$2
-    local source_dir="$OPAMROOT/custom-sources"
-    local ocaml_dir="$source_dir/$switch"
     local switch_exists=no
     for installed_switch in $(opam switch list --short); do
         if [ "$installed_switch" == "$name" ]; then
@@ -45,13 +43,7 @@ opam_switch_create_if_needed () {
     if [ "$switch_exists" = "no" ]; then
         # Creates an empty switch so we can fetch ocaml source code
         # and patch it for arm64 builds
-        opam switch create --empty "$name"
-        mkdir -p "$source_dir"
-        opam source "$switch" --dir "$ocaml_dir"
-        pushd "$ocaml_dir"
-        patch -p1 < "$SOURCE_ROOT/ocaml.patch"
-        popd
-        opam pin add ocaml-variants.4.05.0+arm64-patch "$ocaml_dir"
+        opam switch create "$name" "$switch"
         eval "$(opam env)"
     fi
 }
@@ -60,7 +52,7 @@ opam_require_version_2
 
 # End of shame
 
-HACK_OPAM_SWITCH="ocaml-base-compiler.4.05.0"
+HACK_OPAM_SWITCH="ocaml-base-compiler.4.07.1"
 HACK_OPAM_DEFAULT_NAME="hack-switch"
 HACK_OPAM_NAME=${HACK_OPAM_NAME:-$HACK_OPAM_DEFAULT_NAME}
 
@@ -86,12 +78,12 @@ opam install \
   dtoa.0.3.1 \
   dune.1.10.0 \
   fileutils.0.5.3 \
-  lwt.4.1.0 \
+  lwt.4.2.1 \
   lwt_log.1.1.0 \
-  lwt_ppx.1.2.1 \
-  merlin.3.3.0 \
+  lwt_ppx.1.2.2 \
+  merlin.3.3.2 \
   ocp-indent.1.7.0 \
-  pcre.7.3.4 \
+  pcre.7.3.5 \
   ppx_deriving.4.2.1 \
   ppx_gen_rec.1.1.0 \
   sedlex.1.99.4 \

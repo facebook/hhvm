@@ -90,7 +90,9 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val decorated_expression : t -> SC.r -> SC.r -> t * SC.r
         val parameter_declaration : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val variadic_parameter : t -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val attribute_specification : t -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val old_attribute_specification : t -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val attribute_specification : t -> SC.r -> t * SC.r
+        val attribute : t -> SC.r -> SC.r -> t * SC.r
         val inclusion_expression : t -> SC.r -> SC.r -> t * SC.r
         val inclusion_directive : t -> SC.r -> SC.r -> t * SC.r
         val compound_statement : t -> SC.r -> SC.r -> SC.r -> t * SC.r

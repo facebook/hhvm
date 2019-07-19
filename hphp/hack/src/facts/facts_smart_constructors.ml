@@ -223,8 +223,14 @@ module SC = struct
   let make_classish_body _left_brace elements _right_brace st =
     st, elements
 
-  let make_attribute_specification _left_double_angle attributes _right_double_angle st =
+  let make_old_attribute_specification _left_double_angle attributes _right_double_angle st =
     st, attributes
+
+  let make_attribute_specification attributes st =
+    st, attributes
+
+  let make_attribute _at attribute st =
+    st, attribute
 
   let make_constructor_call class_type _left_paren argument_list _right_paren st =
     st, ListItem (class_type, argument_list)

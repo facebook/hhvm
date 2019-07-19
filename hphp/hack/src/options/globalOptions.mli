@@ -279,6 +279,8 @@ type t = {
   (* Set of error codes disallowed in decl positions *)
   po_disallowed_decl_fixmes : ISet.t;
 
+ (* Switch from <<...>> to @ for attributes *)
+ po_allow_new_attribute_syntax : bool;
 } [@@deriving show]
 
 val make :
@@ -342,6 +344,7 @@ val make :
   ?po_disable_outside_dollar_str_interp: bool ->
   ?disable_linter_fixmes : bool ->
   ?po_disallowed_decl_fixmes: ISet.t ->
+  ?po_allow_new_attribute_syntax : bool ->
   unit ->
   t
 
@@ -429,3 +432,4 @@ val use_new_type_errors : t -> bool
 val po_disable_outside_dollar_str_interp : t -> bool
 val disable_linter_fixmes : t -> bool
 val po_disallowed_decl_fixmes : t -> ISet.t
+val po_allow_new_attribute_syntax : t -> bool

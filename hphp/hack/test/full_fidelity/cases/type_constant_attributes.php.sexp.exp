@@ -14,7 +14,7 @@
         ((() { 1 ((end_of_line 1)))
          (list 151
           ((type_const_declaration 49
-            ((attribute_specification 17
+            ((old_attribute_specification 17
               ((((whitespace 2)) << 2 ())
                (list 13
                 ((list_item 13
@@ -41,7 +41,7 @@
                (simple_type_specifier 3 ((() num 3 ())))))
              (missing 0 ()) (missing 0 ()) (() ";" 1 ((end_of_line 1)))))
            (type_const_declaration 40
-            ((attribute_specification 17
+            ((old_attribute_specification 17
               ((((end_of_line 1) (whitespace 2)) << 2 ())
                (list 13
                 ((list_item 13

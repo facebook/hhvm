@@ -37,7 +37,7 @@
                (missing 0 ())))
              (missing 0 ()) (() ";" 1 ((end_of_line 1)))))
            (methodish_declaration 32
-            ((attribute_specification 8
+            ((old_attribute_specification 8
               ((((whitespace 2)) << 2 ())
                (list 4
                 ((list_item 4
@@ -56,7 +56,7 @@
               ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))
              (missing 0 ())))
            (methodish_declaration 47
-            ((attribute_specification 8
+            ((old_attribute_specification 8
               ((((whitespace 2)) << 2 ())
                (list 4
                 ((list_item 4

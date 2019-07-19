@@ -12,7 +12,7 @@
         ((() { 1 ((end_of_line 1)))
          (list 24
           ((property_declaration 24
-            ((attribute_specification 14
+            ((old_attribute_specification 14
               ((((whitespace 2)) << 2 ())
                (list 10
                 ((list_item 10

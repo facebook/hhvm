@@ -324,6 +324,7 @@ let load config_filename options =
     ?po_disallow_toplevel_requires:(bool_opt "disallow_toplevel_requires" config)
     ?disable_linter_fixmes:(bool_opt "disable_linter_fixmes" config)
     ~po_disallowed_decl_fixmes:(prepare_disallowed_decl_fixmes config)
+    ?po_allow_new_attribute_syntax:(bool_opt "allow_new_attribute_syntax" config)
     ()
   in
   Errors.ignored_fixme_codes :=

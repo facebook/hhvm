@@ -180,6 +180,7 @@ module WithStatementAndDeclAndTypeParser
 
   and parse_term parser =
     let (parser1, token) = next_xhp_class_name_or_other_token parser in
+    let allow_new_attr = Full_fidelity_parser_env.allow_new_attribute_syntax parser.env in
     match Token.kind token with
     | DecimalLiteral
     | OctalLiteral
@@ -266,8 +267,9 @@ module WithStatementAndDeclAndTypeParser
     | Ampersand
     | Await
     | Clone
-    | Print
-    | At -> parse_prefix_unary_expression parser
+    | Print -> parse_prefix_unary_expression parser
+    (* Allow error suppression prefix when not using new attributes *)
+    | At when not allow_new_attr -> parse_prefix_unary_expression parser
     | LeftParen -> parse_cast_or_parenthesized_or_lambda_expression parser
     | LessThan -> parse_possible_xhp_expression ~in_xhp_body:false token parser1
     | List  -> parse_list_expression parser
@@ -292,6 +294,7 @@ module WithStatementAndDeclAndTypeParser
     | LessThanLessThan
     | Async
     | Coroutine -> parse_anon_or_lambda_or_awaitable parser
+    | At when allow_new_attr -> parse_anon_or_lambda_or_awaitable parser
     | Include
     | Include_once
     | Require

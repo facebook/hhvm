@@ -392,10 +392,17 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; variadic_parameter_type                            : t
     ; variadic_parameter_ellipsis                        : t
     }
+  | OldAttributeSpecification         of
+    { old_attribute_specification_left_double_angle      : t
+    ; old_attribute_specification_attributes             : t
+    ; old_attribute_specification_right_double_angle     : t
+    }
   | AttributeSpecification            of
-    { attribute_specification_left_double_angle          : t
-    ; attribute_specification_attributes                 : t
-    ; attribute_specification_right_double_angle         : t
+    { attribute_specification_attributes                 : t
+    }
+  | Attribute                         of
+    { attribute_at                                       : t
+    ; attribute_attribute_name                           : t
     }
   | InclusionExpression               of
     { inclusion_require                                  : t
@@ -1665,7 +1672,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and type_const_declaration =
     { type_const_attribute_spec: attribute_specification option value
-    ; type_const_modifiers: Token.t listesque value
+    ; type_const_modifiers: Token.t option value
     ; type_const_keyword: Token.t value
     ; type_const_type_keyword: Token.t value
     ; type_const_name: Token.t value
@@ -1692,10 +1699,17 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; variadic_parameter_type: simple_type_specifier option value
     ; variadic_parameter_ellipsis: Token.t value
     }
+  and old_attribute_specification =
+    { old_attribute_specification_left_double_angle: Token.t value
+    ; old_attribute_specification_attributes: constructor_call listesque value
+    ; old_attribute_specification_right_double_angle: Token.t value
+    }
   and attribute_specification =
-    { attribute_specification_left_double_angle: Token.t value
-    ; attribute_specification_attributes: constructor_call listesque value
-    ; attribute_specification_right_double_angle: Token.t value
+    { attribute_specification_attributes: attribute listesque value
+    }
+  and attribute =
+    { attribute_at: Token.t value
+    ; attribute_attribute_name: constructor_call value
     }
   and inclusion_expression =
     { inclusion_require: Token.t value

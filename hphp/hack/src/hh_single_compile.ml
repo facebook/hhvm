@@ -473,6 +473,7 @@ let make_popt () =
     ~rust:(use_rust_parser co)
     ~disable_legacy_soft_typehints:(disable_legacy_soft_typehints co)
     ~disable_outside_dollar_str_interp:(disable_outside_dollar_str_interp co)
+    ~allow_new_attribute_syntax:(allow_new_attribute_syntax co)
 
 let process_single_source_unit compiler_options
   handle_output handle_exception filename source_text source_root =

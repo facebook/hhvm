@@ -290,6 +290,51 @@ let assert_last_in_list assert_fun node =
     | _ :: t -> aux t in
   aux (syntax_to_list_no_separators node)
 
+let attr_spec_to_node_list node =
+  match syntax node with
+  | OldAttributeSpecification { old_attribute_specification_attributes = attrs; _ }
+  | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
+    syntax_to_list_no_separators attrs
+  | _ -> []
+
+let attr_constructor_call node =
+  match syntax node with
+  | ConstructorCall _ as constructor_call -> constructor_call
+  | Attribute { attribute_attribute_name = { syntax; _ }; _ } -> syntax
+  | _ -> Missing
+
+let attr_name node =
+  match attr_constructor_call node with
+  | ConstructorCall { constructor_call_type; _ } ->
+    Some (text constructor_call_type)
+  | _ -> None
+
+let attr_args node =
+  match attr_constructor_call node with
+  | ConstructorCall { constructor_call_argument_list; _ } ->
+    Some (syntax_to_list_no_separators constructor_call_argument_list)
+  | _ -> None
+
+let attribute_specification_contains node name =
+  match syntax node with
+  | AttributeSpecification _
+  | OldAttributeSpecification _ ->
+    List.exists (attr_spec_to_node_list node) ~f:(fun node -> attr_name node = Some name)
+  | _ -> false
+
+let fold_attribute_spec node ~f ~init =
+  match syntax node with
+  | AttributeSpecification _
+  | OldAttributeSpecification _ ->
+    List.fold (attr_spec_to_node_list node) ~init ~f
+  | _ -> init
+
+let methodish_contains_attribute node attribute =
+  match node with
+  | MethodishDeclaration { methodish_attribute; _ } ->
+    attribute_specification_contains methodish_attribute attribute
+  | _ -> false
+
 let is_decorated_expression ~f node =
   begin match syntax node with
     | DecoratedExpression { decorated_expression_decorator; _ } ->
@@ -644,16 +689,7 @@ let methodish_has_body node =
 
 (* whether a methodish decl is native *)
 let methodish_is_native node =
-  match syntax node with
-  | MethodishDeclaration { methodish_attribute = {
-      syntax = AttributeSpecification {
-        attribute_specification_attributes = attrs; _}; _}; _} ->
-    let attrs = syntax_to_list_no_separators attrs in
-    List.exists attrs
-      ~f:(function { syntax = ConstructorCall {constructor_call_type; _}; _} ->
-            String.lowercase @@ text constructor_call_type = "__native"
-          | _ -> false)
-  | _ -> false
+  methodish_contains_attribute (syntax node) "__Native"
 
 (* By checking the third parent of a methodish node, tests whether the methodish
  * node is inside an interface. *)
@@ -954,19 +990,12 @@ let get_params_for_enclosing_callable context =
 
 let first_parent_function_attributes_contains context name =
   match context.active_methodish with
-  | Some { syntax = FunctionDeclaration { function_attribute_spec = {
-      syntax = AttributeSpecification {
-        attribute_specification_attributes; _ }; _ }; _ }; _ }
-  | Some { syntax = MethodishDeclaration { methodish_attribute = {
-      syntax = AttributeSpecification {
-        attribute_specification_attributes; _ }; _ }; _ }; _ }
-    ->
-      let attrs =
-        syntax_to_list_no_separators attribute_specification_attributes in
-      List.exists attrs
-        ~f:(function { syntax = ConstructorCall { constructor_call_type; _}; _} ->
-          text constructor_call_type = name | _ -> false)
+  | Some { syntax = FunctionDeclaration { function_attribute_spec = attr_spec; _ }; _ }
+  | Some { syntax = MethodishDeclaration { methodish_attribute = attr_spec; _ }; _ } ->
+    let node_list = attr_spec_to_node_list attr_spec in
+    List.exists node_list ~f:(fun node -> attr_name node = Some name)
   | _ -> false
+
 let is_parameter_with_callconv param =
   match syntax param with
   | ParameterDeclaration { parameter_call_convention; _ } ->
@@ -1099,33 +1128,6 @@ let is_param_by_ref node =
     is_byref_parameter_variable parameter_name
   | _ -> false
 
-let attribute_constructor_name node =
-  match syntax node with
-  | ListItem {
-      list_item = { syntax = ConstructorCall { constructor_call_type; _ }; _ }; _
-    } -> Syntax.extract_text constructor_call_type
-  | _ -> None
-
-let attribute_specification_contains node name =
-  match syntax node with
-  | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
-    List.exists (syntax_node_to_list attrs) ~f:begin fun n ->
-      attribute_constructor_name n = Some name
-    end
-  | _ -> false
-
-let fold_attribute_spec node ~f ~init =
-  match syntax node with
-  | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
-    List.fold (syntax_node_to_list attrs) ~init ~f
-  | _ -> init
-
-let methodish_contains_attribute node attribute =
-  match node with
-  | MethodishDeclaration { methodish_attribute = attr_spec; _ } ->
-    attribute_specification_contains attr_spec attribute
-  | _ -> false
-
 let methodish_memoize_lsb_on_non_static node errors =
   if methodish_contains_attribute (syntax node) SN.UserAttributes.uaMemoizeLSB  &&
      not (methodish_contains_static node)
@@ -1150,32 +1152,17 @@ let is_some_reactivity_attribute_name name =
   name = SN.UserAttributes.uaLocalReactive ||
   name = SN.UserAttributes.uaNonRx
 
-let attribute_matches_criteria f n =
-  match syntax n with
-    | ListItem {
-        list_item = {
-          syntax = ConstructorCall {
-            constructor_call_type;
-            constructor_call_argument_list = args; _
-          }; _
-        }; _
-      } ->
-      begin match Syntax.extract_text constructor_call_type with
-        | Some n when f n -> Some args
-        | _ -> None
-      end
-    | _ -> None
+let is_some_reactivity_attribute node =
+  match attr_name node with
+  | None -> false
+  | Some name -> is_some_reactivity_attribute_name name
 
-let is_some_reactivity_attribute n =
-  attribute_matches_criteria is_some_reactivity_attribute_name n
-  |> Option.is_some
-
-let attribute_first_reactivity_annotation attr_spec =
-  match syntax attr_spec with
-  | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
-    List.find (syntax_node_to_list attrs) ~f:is_some_reactivity_attribute
+let attribute_first_reactivity_annotation node =
+  match syntax node with
+  | AttributeSpecification _
+  | OldAttributeSpecification _ ->
+    List.find (attr_spec_to_node_list node) ~f:is_some_reactivity_attribute
   | _ -> None
-
 
 let attribute_has_reactivity_annotation attr_spec =
   Option.is_some (attribute_first_reactivity_annotation attr_spec)
@@ -1191,11 +1178,12 @@ let error_if_memoize_function_returns_mutable attrs errors =
   let (has_memoize, mutable_node, mut_return_node) =
     fold_attribute_spec attrs ~init:(false, None, None) ~f:(
       fun ((has_memoize, mutable_node, mut_return_node) as acc) node ->
-        match attribute_constructor_name node with
+        match attr_name node with
         | Some n when n = SN.UserAttributes.uaMutableReturn ->
           (has_memoize, mutable_node, (Some node))
-        | Some n when n = SN.UserAttributes.uaMemoize ||
-                      n = SN.UserAttributes.uaMemoizeLSB ->
+        | Some n when
+          n = SN.UserAttributes.uaMemoize
+          || n = SN.UserAttributes.uaMemoizeLSB ->
           (true, mutable_node, mut_return_node)
         | Some n when n = SN.UserAttributes.uaMutable ->
           (has_memoize, Some node, mut_return_node)
@@ -1239,36 +1227,35 @@ let check_nonrx_annotation node errors =
     match syntax node with
     | MethodishDeclaration { methodish_attribute = s; _ }
     | FunctionDeclaration { function_attribute_spec = s; _ } ->
-      Some (syntax s, true)
+      Some (s, true)
     | AnonymousFunction { anonymous_attribute_spec = s; _ }
     | LambdaExpression { lambda_attribute_spec = s; _ }
     | AwaitableCreationExpression { awaitable_attribute_spec = s; _ } ->
-      Some (syntax s, false)
+      Some (s, false)
     | _ -> None in
   match attr_spec with
-  | Some (AttributeSpecification { attribute_specification_attributes = attrs; _ }, is_decl) ->
+  | Some (node, is_decl) ->
     (* try find argument list *)
-    let args =
-      List.find_map (syntax_node_to_list attrs)
-        ~f:(attribute_matches_criteria ((=)SN.UserAttributes.uaNonRx)) in
-    begin match args with
+    let args_opt =
+      List.find_map (attr_spec_to_node_list node) ~f:(fun node ->
+        if attr_name node = Some SN.UserAttributes.uaNonRx then attr_args node else None
+      ) in
+    begin match args_opt with
     (* __NonRx attribute not found *)
-    | None ->  errors
+    | None -> errors
     (* __NonRx attribute is found and argument list is empty.
       This is ok for lambdas but error for declarations *)
-    | Some { syntax = Missing; _  } ->
+    | Some [] ->
       if is_decl then err_decl ()
       else errors
     (* __NonRx attribute is found with single string argument.
       This is ok for declarations for not allowed for lambdas *)
-    | Some { syntax = SyntaxList [
-        { syntax = ListItem {
-            list_item = { syntax = LiteralExpression {
-                literal_expression = { syntax = Token token; _ }; _
-                }; _ }; _
-          }; _ }
-        ]; _  } when Token.kind token = TokenKind.DoubleQuotedStringLiteral ||
-                     Token.kind token = TokenKind.SingleQuotedStringLiteral ->
+    | Some [
+        { syntax = LiteralExpression {
+            literal_expression = { syntax = Token token; _ }; _
+        }; _ };
+      ] when Token.kind token = TokenKind.DoubleQuotedStringLiteral ||
+             Token.kind token = TokenKind.SingleQuotedStringLiteral ->
       if is_decl then errors
       else err_lambda ()
     (* __NonRx attribute is found but argument list is not suitable
@@ -1299,8 +1286,9 @@ let attribute_multiple_reactivity_annotations attr_spec =
       if seen then true else check xs true
     | _ :: xs -> check xs seen in
   match syntax attr_spec with
-  | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
-    check (syntax_node_to_list attrs) false
+  | OldAttributeSpecification _
+  | AttributeSpecification _ ->
+    check (attr_spec_to_node_list attr_spec) false
   | _ -> false
 
 let methodish_multiple_reactivity_annotations node =
@@ -2124,25 +2112,17 @@ let no_async_before_lambda_body env body_node errors =
 
 let no_memoize_attribute_on_lambda node errors =
   match syntax node with
-  | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
-    List.fold (syntax_node_to_list attrs) ~init:errors ~f:begin fun errors n ->
-      match syntax n with
-      | ListItem {
-          list_item = ({ syntax = ConstructorCall { constructor_call_type; _ }; _ } as attr);_
-        } ->
-        begin match Syntax.extract_text constructor_call_type with
-        | Some n when n = SN.UserAttributes.uaMemoize ->
-          let e =
-            make_error_from_node attr SyntaxError.memoize_on_lambda in
-          e::errors
-        | Some n when n = SN.UserAttributes.uaMemoizeLSB ->
-          let e =
-            make_error_from_node attr SyntaxError.memoize_on_lambda in
-          e::errors
-        | _ -> errors
-        end
+  | OldAttributeSpecification _
+  | AttributeSpecification _ ->
+    List.fold (attr_spec_to_node_list node) ~init:errors ~f:(fun errors node ->
+      match attr_name node with
+      | Some n when
+        n = SN.UserAttributes.uaMemoize
+        || n = SN.UserAttributes.uaMemoizeLSB ->
+        let e = make_error_from_node node SyntaxError.memoize_on_lambda in
+        e :: errors
       | _ -> errors
-    end
+    )
   | _ -> errors
 
 let is_good_scope_resolution_qualifier node =
@@ -2546,9 +2526,11 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
     let typechecker_errors =
       if is_typechecker env then
         match parents with
-        (* list item -> syntax list -> attribute *)
+        (* attr or list item -> syntax list -> attribute *)
         | _ :: _ :: a :: _ when
-          is_attribute_specification a || is_file_attribute_specification a ->
+          is_attribute_specification a
+          || is_old_attribute_specification a
+          || is_file_attribute_specification a ->
           []
         | _ ->
           if (is_missing ctr_call.constructor_call_left_paren ||
@@ -2758,6 +2740,10 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
         make_error_from_node hint
           (SyntaxError.invalid_is_as_expression_hint n "Callable") :: errors
       | SoftTypeSpecifier _ ->
+        make_error_from_node hint
+          (SyntaxError.invalid_is_as_expression_hint n "Soft") :: errors
+      | AttributizedSpecifier { attributized_specifier_attribute_spec = attr_spec; _ } when
+          attribute_specification_contains attr_spec "__Soft" ->
         make_error_from_node hint
           (SyntaxError.invalid_is_as_expression_hint n "Soft") :: errors
       | _ -> errors
@@ -3080,20 +3066,20 @@ let classish_errors env node namespace_name names errors =
     (* Given a sealed ClassishDeclaration node, test whether all the params
      * are classnames. *)
     let classish_sealed_arg_not_classname _env _ =
-      match cd.classish_attribute.syntax with
-      | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
-        let attrs = syntax_to_list_no_separators attrs in
-        List.exists attrs (fun e ->
-          match syntax e with
-          | ConstructorCall {constructor_call_argument_list; constructor_call_type; _ } ->
-            text constructor_call_type = SN.UserAttributes.uaSealed &&
-            List.exists (syntax_to_list_no_separators constructor_call_argument_list) (fun e ->
-              match syntax e with
-              | ScopeResolutionExpression {scope_resolution_name; _ } ->
+      List.exists (attr_spec_to_node_list cd.classish_attribute) ~f:(fun node ->
+        attr_name node = Some SN.UserAttributes.uaSealed &&
+        begin
+          match attr_args node with
+          | Some args ->
+            List.exists args ~f:(fun arg_node ->
+              match syntax arg_node with
+              | ScopeResolutionExpression { scope_resolution_name; _ } ->
                 text scope_resolution_name <> "class"
-              | _ -> true)
-          | _ -> false)
-      | _ -> false in
+              | _ -> true
+            )
+          | None -> false
+        end
+      ) in
 
     let classish_is_sealed =
       attr_spec_contains_sealed cd.classish_attribute in
@@ -3952,11 +3938,10 @@ let disabled_legacy_soft_typehint_errors env node errors =
 let find_syntax_errors env =
   let has_rx_attr_mutable_hack attrs =
     attribute_first_reactivity_annotation attrs
-    |> Option.value_map ~default:false ~f:(fun a ->
-      match attribute_matches_criteria ((<>) SN.UserAttributes.uaNonRx) a with
-      | Some _ -> true
-      | None -> false
-    ) in
+    |> Option.value_map ~default:false ~f:(fun node ->
+      attr_name node <> Some SN.UserAttributes.uaNonRx
+    )
+  in
   let rec folder env acc node parents =
     let { errors
         ; namespace_type

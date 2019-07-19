@@ -16,7 +16,7 @@
            (list 18
             ((list_item 18
               ((type_parameter 18
-                ((attribute_specification 10
+                ((old_attribute_specification 10
                   ((() << 2 ())
                    (list 6
                     ((list_item 6
@@ -42,7 +42,7 @@
            (list 18
             ((list_item 18
               ((type_parameter 18
-                ((attribute_specification 10
+                ((old_attribute_specification 10
                   ((() << 2 ())
                    (list 6
                     ((list_item 6
@@ -93,7 +93,7 @@
                (list 10
                 ((list_item 10
                   ((type_parameter 10
-                    ((attribute_specification 8
+                    ((old_attribute_specification 8
                       ((() << 2 ())
                        (list 4
                         ((list_item 4
@@ -119,7 +119,7 @@
                  (list 19
                   ((list_item 19
                     ((type_parameter 19
-                      ((attribute_specification 10
+                      ((old_attribute_specification 10
                         ((() << 2 ())
                          (list 6
                           ((list_item 6
@@ -147,7 +147,7 @@
                  (list 19
                   ((list_item 19
                     ((type_parameter 19
-                      ((attribute_specification 10
+                      ((old_attribute_specification 10
                         ((() << 2 ())
                          (list 6
                           ((list_item 6
@@ -193,7 +193,7 @@
          (list 19
           ((list_item 19
             ((type_parameter 19
-              ((attribute_specification 10
+              ((old_attribute_specification 10
                 ((() << 2 ())
                  (list 6
                   ((list_item 6
@@ -218,7 +218,7 @@
          (list 19
           ((list_item 19
             ((type_parameter 19
-              ((attribute_specification 10
+              ((old_attribute_specification 10
                 ((() << 2 ())
                  (list 6
                   ((list_item 6
@@ -259,7 +259,7 @@
          (list 10
           ((list_item 10
             ((type_parameter 10
-              ((attribute_specification 8
+              ((old_attribute_specification 8
                 ((() << 2 ())
                  (list 4
                   ((list_item 4
@@ -281,7 +281,7 @@
          (list 10
           ((list_item 10
             ((type_parameter 10
-              ((attribute_specification 8
+              ((old_attribute_specification 8
                 ((() << 2 ())
                  (list 4
                   ((list_item 4

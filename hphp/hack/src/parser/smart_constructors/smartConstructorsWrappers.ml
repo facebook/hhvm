@@ -74,7 +74,9 @@ module type SyntaxKind_S = sig
   val is_decorated_expression : r -> bool
   val is_parameter_declaration : r -> bool
   val is_variadic_parameter : r -> bool
+  val is_old_attribute_specification : r -> bool
   val is_attribute_specification : r -> bool
+  val is_attribute : r -> bool
   val is_inclusion_expression : r -> bool
   val is_inclusion_directive : r -> bool
   val is_compound_statement : r -> bool
@@ -277,7 +279,9 @@ module SyntaxKind(SC : SC_S)
   let make_decorated_expression arg0 arg1 state = compose SK.DecoratedExpression (SC.make_decorated_expression (snd arg0) (snd arg1) state)
   let make_parameter_declaration arg0 arg1 arg2 arg3 arg4 arg5 state = compose SK.ParameterDeclaration (SC.make_parameter_declaration (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) state)
   let make_variadic_parameter arg0 arg1 arg2 state = compose SK.VariadicParameter (SC.make_variadic_parameter (snd arg0) (snd arg1) (snd arg2) state)
-  let make_attribute_specification arg0 arg1 arg2 state = compose SK.AttributeSpecification (SC.make_attribute_specification (snd arg0) (snd arg1) (snd arg2) state)
+  let make_old_attribute_specification arg0 arg1 arg2 state = compose SK.OldAttributeSpecification (SC.make_old_attribute_specification (snd arg0) (snd arg1) (snd arg2) state)
+  let make_attribute_specification arg0 state = compose SK.AttributeSpecification (SC.make_attribute_specification (snd arg0) state)
+  let make_attribute arg0 arg1 state = compose SK.Attribute (SC.make_attribute (snd arg0) (snd arg1) state)
   let make_inclusion_expression arg0 arg1 state = compose SK.InclusionExpression (SC.make_inclusion_expression (snd arg0) (snd arg1) state)
   let make_inclusion_directive arg0 arg1 state = compose SK.InclusionDirective (SC.make_inclusion_directive (snd arg0) (snd arg1) state)
   let make_compound_statement arg0 arg1 arg2 state = compose SK.CompoundStatement (SC.make_compound_statement (snd arg0) (snd arg1) (snd arg2) state)
@@ -456,7 +460,9 @@ module SyntaxKind(SC : SC_S)
   let is_decorated_expression                 = has_kind SK.DecoratedExpression
   let is_parameter_declaration                = has_kind SK.ParameterDeclaration
   let is_variadic_parameter                   = has_kind SK.VariadicParameter
+  let is_old_attribute_specification          = has_kind SK.OldAttributeSpecification
   let is_attribute_specification              = has_kind SK.AttributeSpecification
+  let is_attribute                            = has_kind SK.Attribute
   let is_inclusion_expression                 = has_kind SK.InclusionExpression
   let is_inclusion_directive                  = has_kind SK.InclusionDirective
   let is_compound_statement                   = has_kind SK.CompoundStatement

@@ -69,6 +69,7 @@ type t = {
   po_disable_outside_dollar_str_interp : bool;
   disable_linter_fixmes: bool;
   po_disallowed_decl_fixmes: ISet.t;
+  po_allow_new_attribute_syntax : bool;
 } [@@deriving show]
 
 let tco_experimental_instanceof = "instanceof"
@@ -257,6 +258,7 @@ let default = {
  po_disable_outside_dollar_str_interp = false;
  disable_linter_fixmes = false;
  po_disallowed_decl_fixmes = ISet.of_list [];
+ po_allow_new_attribute_syntax = false;
 }
 
 let make
@@ -320,6 +322,7 @@ let make
   ?(po_disable_outside_dollar_str_interp = default.po_disable_outside_dollar_str_interp)
   ?(disable_linter_fixmes = default.disable_linter_fixmes)
   ?(po_disallowed_decl_fixmes = default.po_disallowed_decl_fixmes)
+  ?(po_allow_new_attribute_syntax = default.po_allow_new_attribute_syntax)
   ()
 = {
   tco_safe_array;
@@ -383,6 +386,7 @@ let make
   po_disable_outside_dollar_str_interp;
   disable_linter_fixmes;
   po_disallowed_decl_fixmes;
+  po_allow_new_attribute_syntax;
 }
 let tco_safe_array t = t.tco_safe_array
 let tco_safe_vector_array t = t.tco_safe_vector_array
@@ -470,6 +474,8 @@ let po_disable_outside_dollar_str_interp t = t.po_disable_outside_dollar_str_int
 let disable_linter_fixmes t = t.disable_linter_fixmes
 
 let po_disallowed_decl_fixmes t = t.po_disallowed_decl_fixmes
+
+let po_allow_new_attribute_syntax t = t.po_allow_new_attribute_syntax
 
 let setup_pocket_universes env enabled =
   let exp_features = env.tco_experimental_features in

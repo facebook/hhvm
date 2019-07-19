@@ -96,6 +96,7 @@ let rec parse_type_specifier ?(allow_var=false) ?(allow_attr=true) parser =
   (* Strictly speaking, "mixed" is a nullable type specifier. We parse it as
      a simple type specifier here. *)
   let (parser1, token) = next_xhp_class_name_or_other_token parser in
+  let new_attr_syntax = Full_fidelity_parser_env.allow_new_attribute_syntax parser.env in
   match Token.kind token with
   | Var when allow_var ->
     let (parser, token) = Make.token parser1 token in
@@ -145,7 +146,8 @@ let rec parse_type_specifier ?(allow_var=false) ?(allow_attr=true) parser =
   | Shape -> parse_shape_specifier parser
   | Question -> parse_nullable_type_specifier parser
   | Tilde -> parse_like_type_specifier parser
-  | At -> parse_soft_type_specifier parser
+  | At when not new_attr_syntax -> parse_soft_type_specifier parser
+  | At when allow_attr -> parse_attributized_specifier parser
   | LessThanLessThan when allow_attr -> parse_attributized_specifier parser
   | Classname -> parse_classname_type_specifier parser
   | _ ->

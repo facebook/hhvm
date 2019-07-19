@@ -9,7 +9,7 @@
        (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (() = 1 ((whitespace 1)))
        (attributized_specifier 41
-        ((attribute_specification 10
+        ((old_attribute_specification 10
           ((() << 2 ())
            (list 6
             ((list_item 6
@@ -22,7 +22,7 @@
            (simple_type_specifier 3 ((() int 3 ())))
            (() , 1 ((whitespace 1)))
            (attributized_specifier 17
-            ((attribute_specification 10
+            ((old_attribute_specification 10
               ((() << 2 ())
                (list 6
                 ((list_item 6
@@ -41,7 +41,7 @@
        (varray_type_specifier 22
         ((() varray 6 ()) (() < 1 ())
          (attributized_specifier 14
-          ((attribute_specification 10
+          ((old_attribute_specification 10
             ((() << 2 ())
              (list 6
               ((list_item 6
@@ -80,7 +80,7 @@
          (list 17
           ((list_item 17
             ((parameter_declaration 17
-              ((attribute_specification 10
+              ((old_attribute_specification 10
                 ((() << 2 ())
                  (list 6
                   ((list_item 6
@@ -95,7 +95,7 @@
              (missing 0 ())))))
          (() ")" 1 ()) (() : 1 ((whitespace 1)))
          (attributized_specifier 17
-          ((attribute_specification 10
+          ((old_attribute_specification 10
             ((() << 2 ())
              (list 6
               ((list_item 6
@@ -117,7 +117,7 @@
                  (list 16
                   ((list_item 16
                     ((attributized_specifier 16
-                      ((attribute_specification 10
+                      ((old_attribute_specification 10
                         ((() << 2 ())
                          (list 6
                           ((list_item 6
@@ -146,7 +146,7 @@
         ((() { 1 ((end_of_line 1)))
          (list 140
           ((property_declaration 30
-            ((attribute_specification 10
+            ((old_attribute_specification 10
               ((((whitespace 2)) << 2 ())
                (list 6
                 ((list_item 6
@@ -168,7 +168,7 @@
              (() type 4 ((whitespace 1))) (() name 1 ((whitespace 1)))
              (missing 0 ()) (missing 0 ()) (() = 1 ((whitespace 1)))
              (attributized_specifier 14
-              ((attribute_specification 10
+              ((old_attribute_specification 10
                 ((() << 2 ())
                  (list 6
                   ((list_item 6
@@ -195,7 +195,7 @@
                    (list 14
                     ((list_item 14
                       ((attributized_specifier 14
-                        ((attribute_specification 10
+                        ((old_attribute_specification 10
                           ((() << 2 ())
                            (list 6
                             ((list_item 6

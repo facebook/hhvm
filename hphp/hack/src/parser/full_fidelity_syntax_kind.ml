@@ -62,7 +62,9 @@ type t =
   | DecoratedExpression
   | ParameterDeclaration
   | VariadicParameter
+  | OldAttributeSpecification
   | AttributeSpecification
+  | Attribute
   | InclusionExpression
   | InclusionDirective
   | CompoundStatement
@@ -242,7 +244,9 @@ let to_string kind =
   | DecoratedExpression               -> "decorated_expression"
   | ParameterDeclaration              -> "parameter_declaration"
   | VariadicParameter                 -> "variadic_parameter"
+  | OldAttributeSpecification         -> "old_attribute_specification"
   | AttributeSpecification            -> "attribute_specification"
+  | Attribute                         -> "attribute"
   | InclusionExpression               -> "inclusion_expression"
   | InclusionDirective                -> "inclusion_directive"
   | CompoundStatement                 -> "compound_statement"

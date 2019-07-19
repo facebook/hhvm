@@ -1109,33 +1109,53 @@ and pFunParam : fun_param parser = fun node env ->
   | Token _ when text node = "..."
     -> { (param_template node env) with param_is_variadic = true }
   | _ -> missing_syntax "function parameter" node env
+
+and process_attribute_constructor_call
+    node constructor_call_argument_list constructor_call_type env =
+  let ua_name = pos_name constructor_call_type env in
+  let name = String.lowercase (snd ua_name) in
+  if name = "__reified" || name = "__hasreifiedparent" then
+    raise_parsing_error env (`Node node) SyntaxError.reified_attribute
+  else if name = "__soft" && List.length (as_list constructor_call_argument_list) > 0 then
+    raise_parsing_error env (`Node node) SyntaxError.soft_no_arguments;
+  let ua_params = couldMap constructor_call_argument_list env ~f:(fun p ->
+    begin
+      match syntax p with
+      | ScopeResolutionExpression {
+          scope_resolution_name = { syntax = Token t; _ }; _
+        } when Token.kind t = TK.Name ->
+        raise_parsing_error env (`Node p) SyntaxError.constants_as_attribute_arguments
+      | Token t when Token.kind t = TK.Name ->
+        raise_parsing_error env (`Node p) SyntaxError.constants_as_attribute_arguments
+      | _ -> ()
+    end;
+    pExpr p
+  ) in
+  { ua_name; ua_params }
+
 and pUserAttribute : user_attribute list parser = fun node env ->
   match syntax node with
   | FileAttributeSpecification { file_attribute_specification_attributes = attrs; _ }
+  | OldAttributeSpecification { old_attribute_specification_attributes = attrs; _ } ->
+    couldMap attrs env ~f:(
+      function
+      | { syntax = ConstructorCall {
+          constructor_call_argument_list; constructor_call_type; _ }; _
+        } ->
+        process_attribute_constructor_call
+          node constructor_call_argument_list constructor_call_type
+      | _ -> missing_syntax "attribute" node
+    )
   | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
-    couldMap attrs env ~f:begin function
-      | { syntax = ConstructorCall { constructor_call_argument_list; constructor_call_type; _ }; _ } ->
-        fun env ->
-          let ua_name = pos_name constructor_call_type env in
-          let name = String.lowercase (snd ua_name) in
-          if name = "__reified" || name = "__hasreifiedparent" then
-            raise_parsing_error env (`Node node) SyntaxError.reified_attribute
-          else if name = "__soft" && List.length (as_list constructor_call_argument_list) > 0 then
-            raise_parsing_error env (`Node node) SyntaxError.soft_no_arguments;
-          let ua_params = couldMap constructor_call_argument_list env
-            ~f:(fun p ->
-              begin match syntax p with
-              | ScopeResolutionExpression {
-                  scope_resolution_name = { syntax = Token t; _ }; _
-                } when Token.kind t = TK.Name ->
-                raise_parsing_error env (`Node p) SyntaxError.constants_as_attribute_arguments
-              | Token t when Token.kind t = TK.Name ->
-                raise_parsing_error env (`Node p) SyntaxError.constants_as_attribute_arguments
-              | _ -> () end;
-              pExpr p) in
-          { ua_name; ua_params }
+    couldMap attrs env ~f:(
+      function
+      | { syntax = Attribute { attribute_attribute_name = { syntax = ConstructorCall {
+          constructor_call_argument_list; constructor_call_type; _
+        }; _ }; _ }; _ } ->
+        process_attribute_constructor_call
+          node constructor_call_argument_list constructor_call_type
       | node -> missing_syntax "attribute" node
-    end
+    )
   | _ -> missing_syntax "attribute specification" node env
 and pUserAttributes env attrs =
   List.concat @@ couldMap ~f:pUserAttribute attrs env
@@ -3570,6 +3590,7 @@ let parse_text
         ~rust:(GlobalOptions.po_rust env.parser_options)
         ~disable_legacy_soft_typehints:
           (GlobalOptions.po_disable_legacy_soft_typehints env.parser_options)
+        ~allow_new_attribute_syntax:(GlobalOptions.po_allow_new_attribute_syntax env.parser_options)
         ?mode
         ()
     in

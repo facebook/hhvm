@@ -59,7 +59,9 @@ namespace HH\ExperimentalParserUtils {
       },
       // This is necessary, otherwise the line returned by find_boundary_token and
       // ReflectionFunction::getStartLine may not match
-      ($json) ==> $json["kind"] === "attribute_specification"
+      ($json) ==>
+        $json["kind"] === "attribute_specification"
+        || $json["kind"] === "old_attribute_specification"
     );
   }
 

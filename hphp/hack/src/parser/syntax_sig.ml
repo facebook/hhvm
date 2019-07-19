@@ -279,10 +279,17 @@ module type Syntax_S = sig
     ; variadic_parameter_type                            : t
     ; variadic_parameter_ellipsis                        : t
     }
+  | OldAttributeSpecification         of
+    { old_attribute_specification_left_double_angle      : t
+    ; old_attribute_specification_attributes             : t
+    ; old_attribute_specification_right_double_angle     : t
+    }
   | AttributeSpecification            of
-    { attribute_specification_left_double_angle          : t
-    ; attribute_specification_attributes                 : t
-    ; attribute_specification_right_double_angle         : t
+    { attribute_specification_attributes                 : t
+    }
+  | Attribute                         of
+    { attribute_at                                       : t
+    ; attribute_attribute_name                           : t
     }
   | InclusionExpression               of
     { inclusion_require                                  : t
@@ -1116,7 +1123,9 @@ module type Syntax_S = sig
   val make_decorated_expression : t -> t -> t
   val make_parameter_declaration : t -> t -> t -> t -> t -> t -> t
   val make_variadic_parameter : t -> t -> t -> t
-  val make_attribute_specification : t -> t -> t -> t
+  val make_old_attribute_specification : t -> t -> t -> t
+  val make_attribute_specification : t -> t
+  val make_attribute : t -> t -> t
   val make_inclusion_expression : t -> t -> t
   val make_inclusion_directive : t -> t -> t
   val make_compound_statement : t -> t -> t -> t
@@ -1294,7 +1303,9 @@ module type Syntax_S = sig
   val is_decorated_expression : t -> bool
   val is_parameter_declaration : t -> bool
   val is_variadic_parameter : t -> bool
+  val is_old_attribute_specification : t -> bool
   val is_attribute_specification : t -> bool
+  val is_attribute : t -> bool
   val is_inclusion_expression : t -> bool
   val is_inclusion_directive : t -> bool
   val is_compound_statement : t -> bool

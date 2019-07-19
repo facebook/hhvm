@@ -251,37 +251,38 @@ let rewrite_ppl_class_body classish_body =
 (* Determines whether a list of attributes has the __PPL macro *)
 let has_ppl_attribute attributes =
   match syntax attributes with
-  | AttributeSpecification {
-      attribute_specification_attributes;
-      _;
-    } ->
-      let attribute_list =
-        syntax_node_to_list attribute_specification_attributes in
-      List.exists ~f:is_ppl_attribute attribute_list
+  | OldAttributeSpecification { old_attribute_specification_attributes = attrs; _ }
+  | AttributeSpecification { attribute_specification_attributes = attrs } ->
+    let attribute_list = syntax_node_to_list attrs in
+    List.exists ~f:is_ppl_attribute attribute_list
   | _ -> false
 
 (* Removes the macro when lowering the code to coroutines *)
 let remove_ppl_attribute attributes =
   match syntax attributes with
-  | AttributeSpecification ({
-      attribute_specification_attributes;
-      _;
-    } as attribute_specification) ->
-      let attribute_list =
-        syntax_node_to_list attribute_specification_attributes in
-      let new_attribute_list =
-        List.filter ~f:(fun a -> not @@ is_ppl_attribute a) attribute_list in
-      if List.length new_attribute_list = 0
-      then make_missing ()
-      else
-        let new_syntax =
-          AttributeSpecification {
-            attribute_specification with
-            attribute_specification_attributes = make_list new_attribute_list
-          } in
-        Syntax.synthesize_from
-          attributes
-          new_syntax
+  | OldAttributeSpecification ({
+      old_attribute_specification_attributes = attrs; _
+    } as old_attr_spec) ->
+    let attribute_list = syntax_node_to_list attrs in
+    let new_attribute_list =
+      List.filter ~f:(fun a -> not @@ is_ppl_attribute a) attribute_list in
+    if List.is_empty new_attribute_list
+    then make_missing ()
+    else
+      let new_syntax = OldAttributeSpecification {
+        old_attr_spec with old_attribute_specification_attributes = make_list new_attribute_list
+      } in
+      Syntax.synthesize_from attributes new_syntax
+  | AttributeSpecification { attribute_specification_attributes = attrs } ->
+    let attribute_list = syntax_node_to_list attrs in
+    let new_attribute_list =
+      List.filter ~f:(fun a -> not @@ is_ppl_attribute a) attribute_list in
+    if List.is_empty new_attribute_list
+    then make_missing () else
+      let new_syntax = AttributeSpecification {
+        attribute_specification_attributes = make_list new_attribute_list
+      } in
+      Syntax.synthesize_from attributes new_syntax
   | _ -> failwith "Expected Attribute Specification"
 
 (* Rewrites all classes annotated with the __PPL macro in a list *)

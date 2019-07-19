@@ -38,7 +38,6 @@ let with_enable_constant_visibility_modifiers po b =
   { po with GlobalOptions.po_enable_constant_visibility_modifiers = b }
 
 let disable_legacy_soft_typehints = GlobalOptions.po_disable_legacy_soft_typehints
-
 let with_disable_legacy_soft_typehints po b =
   { po with GlobalOptions.po_disable_legacy_soft_typehints = b }
 
@@ -46,6 +45,10 @@ let with_disable_outside_dollar_str_interp po b =
   { po with GlobalOptions.po_disable_outside_dollar_str_interp = b }
 
 let disallowed_decl_fixmes = GlobalOptions.po_disallowed_decl_fixmes
+
+let allow_new_attribute_syntax = GlobalOptions.po_allow_new_attribute_syntax
+let with_allow_new_attribute_syntax po b =
+  { po with GlobalOptions.po_allow_new_attribute_syntax = b }
 
 let make
   ~auto_namespace_map
@@ -60,6 +63,7 @@ let make
   ~enable_class_level_where_clauses
   ~disable_legacy_soft_typehints
   ~disable_outside_dollar_str_interp
+  ~allow_new_attribute_syntax
 = GlobalOptions.{
   default with
   po_auto_namespace_map = auto_namespace_map;
@@ -74,4 +78,5 @@ let make
   po_enable_class_level_where_clauses = enable_class_level_where_clauses;
   po_disable_legacy_soft_typehints = disable_legacy_soft_typehints;
   po_disable_outside_dollar_str_interp = disable_outside_dollar_str_interp;
+  po_allow_new_attribute_syntax = allow_new_attribute_syntax;
 }

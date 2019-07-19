@@ -1383,7 +1383,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; type_const_name = validate_token x.type_const_name
     ; type_const_type_keyword = validate_token x.type_const_type_keyword
     ; type_const_keyword = validate_token x.type_const_keyword
-    ; type_const_modifiers = validate_list_with (validate_token) x.type_const_modifiers
+    ; type_const_modifiers = validate_option_with (validate_token) x.type_const_modifiers
     ; type_const_attribute_spec = validate_option_with (validate_attribute_specification) x.type_const_attribute_spec
     }
   | s -> validation_fail (Some SyntaxKind.TypeConstDeclaration) s
@@ -1391,7 +1391,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { Syntax.syntax =
       Syntax.TypeConstDeclaration
       { type_const_attribute_spec = invalidate_option_with (invalidate_attribute_specification) x.type_const_attribute_spec
-      ; type_const_modifiers = invalidate_list_with (invalidate_token) x.type_const_modifiers
+      ; type_const_modifiers = invalidate_option_with (invalidate_token) x.type_const_modifiers
       ; type_const_keyword = invalidate_token x.type_const_keyword
       ; type_const_type_keyword = invalidate_token x.type_const_type_keyword
       ; type_const_name = invalidate_token x.type_const_name
@@ -1455,19 +1455,45 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       }
     ; Syntax.value = v
     }
+  and validate_old_attribute_specification : old_attribute_specification validator = function
+  | { Syntax.syntax = Syntax.OldAttributeSpecification x; value = v } -> v,
+    { old_attribute_specification_right_double_angle = validate_token x.old_attribute_specification_right_double_angle
+    ; old_attribute_specification_attributes = validate_list_with (validate_constructor_call) x.old_attribute_specification_attributes
+    ; old_attribute_specification_left_double_angle = validate_token x.old_attribute_specification_left_double_angle
+    }
+  | s -> validation_fail (Some SyntaxKind.OldAttributeSpecification) s
+  and invalidate_old_attribute_specification : old_attribute_specification invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.OldAttributeSpecification
+      { old_attribute_specification_left_double_angle = invalidate_token x.old_attribute_specification_left_double_angle
+      ; old_attribute_specification_attributes = invalidate_list_with (invalidate_constructor_call) x.old_attribute_specification_attributes
+      ; old_attribute_specification_right_double_angle = invalidate_token x.old_attribute_specification_right_double_angle
+      }
+    ; Syntax.value = v
+    }
   and validate_attribute_specification : attribute_specification validator = function
   | { Syntax.syntax = Syntax.AttributeSpecification x; value = v } -> v,
-    { attribute_specification_right_double_angle = validate_token x.attribute_specification_right_double_angle
-    ; attribute_specification_attributes = validate_list_with (validate_constructor_call) x.attribute_specification_attributes
-    ; attribute_specification_left_double_angle = validate_token x.attribute_specification_left_double_angle
+    { attribute_specification_attributes = validate_list_with (validate_attribute) x.attribute_specification_attributes
     }
   | s -> validation_fail (Some SyntaxKind.AttributeSpecification) s
   and invalidate_attribute_specification : attribute_specification invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.AttributeSpecification
-      { attribute_specification_left_double_angle = invalidate_token x.attribute_specification_left_double_angle
-      ; attribute_specification_attributes = invalidate_list_with (invalidate_constructor_call) x.attribute_specification_attributes
-      ; attribute_specification_right_double_angle = invalidate_token x.attribute_specification_right_double_angle
+      { attribute_specification_attributes = invalidate_list_with (invalidate_attribute) x.attribute_specification_attributes
+      }
+    ; Syntax.value = v
+    }
+  and validate_attribute : attribute validator = function
+  | { Syntax.syntax = Syntax.Attribute x; value = v } -> v,
+    { attribute_attribute_name = validate_constructor_call x.attribute_attribute_name
+    ; attribute_at = validate_token x.attribute_at
+    }
+  | s -> validation_fail (Some SyntaxKind.Attribute) s
+  and invalidate_attribute : attribute invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.Attribute
+      { attribute_at = invalidate_token x.attribute_at
+      ; attribute_attribute_name = invalidate_constructor_call x.attribute_attribute_name
       }
     ; Syntax.value = v
     }

@@ -170,7 +170,6 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
   | Syntax.NullableTypeSpecifier _
   | Syntax.LikeTypeSpecifier _
   | Syntax.SoftTypeSpecifier _
-  | Syntax.AttributizedSpecifier _
   | Syntax.ListItem _
   | Syntax.PocketAtomExpression _
   | Syntax.PocketIdentifierExpression _
@@ -763,7 +762,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       parameter_name = name;
       parameter_default_value = default } ->
     Concat [
-      t env attr;
+      handle_attribute_spec env attr ~always_split:false;
       when_present attr space;
       t env visibility;
       when_present visibility space;
@@ -809,11 +808,21 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
         right_da;
       Newline;
     ]
-  | Syntax.AttributeSpecification {
-      attribute_specification_left_double_angle = left_da;
-      attribute_specification_attributes = attrs;
-      attribute_specification_right_double_angle = right_da; } ->
-    transform_argish env ~allow_trailing:false left_da attrs right_da
+  | Syntax.OldAttributeSpecification _
+  | Syntax.AttributeSpecification _ ->
+    handle_attribute_spec env node ~always_split:true
+  | Syntax.Attribute { attribute_at = at; attribute_attribute_name = attr } ->
+    Concat [
+      t env at;
+      t env attr;
+    ]
+  | Syntax.AttributizedSpecifier {
+      attributized_specifier_attribute_spec = attr_spec;
+      attributized_specifier_type = attr_type; } ->
+    Concat [
+      handle_attribute_spec env attr_spec ~always_split:false;
+      t env attr_type;
+    ]
   | Syntax.InclusionExpression {
       inclusion_require = kw;
       inclusion_filename = expr; } ->
@@ -2242,6 +2251,22 @@ and separate_with_space_split is_last =
   if is_last
   then Nothing
   else space_split ()
+
+and handle_attribute_spec env node ~always_split =
+  match Syntax.syntax node with
+  | Syntax.OldAttributeSpecification {
+      old_attribute_specification_left_double_angle = left_da;
+      old_attribute_specification_attributes = attrs;
+      old_attribute_specification_right_double_angle = right_da; } ->
+    transform_argish env ~allow_trailing:false left_da attrs right_da
+  | Syntax.AttributeSpecification { attribute_specification_attributes = attrs } ->
+    handle_possible_list env ~after_each:(fun is_last ->
+      if always_split then Newline
+      else if is_last then Concat [Space; SplitWith Cost.Moderate]
+      else Space
+    ) attrs
+  | Syntax.Missing -> Nothing
+  | _ -> failwith "Attribute specification expected"
 
 and handle_lambda_body env node =
   match Syntax.syntax node with

@@ -98,7 +98,7 @@
         ((() { 1 ((end_of_line 1)))
          (list 184
           ((property_declaration 33
-            ((attribute_specification 12
+            ((old_attribute_specification 12
               ((((whitespace 2)) << 2 ())
                (list 8
                 ((list_item 8
@@ -133,7 +133,7 @@
                (list 27
                 ((list_item 27
                   ((parameter_declaration 27
-                    ((attribute_specification 12
+                    ((old_attribute_specification 12
                       ((() << 2 ())
                        (list 8
                         ((list_item 8

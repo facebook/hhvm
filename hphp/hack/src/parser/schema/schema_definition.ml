@@ -11,6 +11,7 @@ type aggregate_type =
   | TopLevelDeclaration
   | Expression
   | Specifier
+  | AttributeSpecification
   | Parameter
   | ClassBodyDeclaration
   | Statement
@@ -132,7 +133,7 @@ let schema : schema_node list =
     ; prefix      = "enum"
     ; aggregates  = [ TopLevelDeclaration ]
     ; fields =
-      [ "attribute_spec", ZeroOrOne (Just "AttributeSpecification")
+      [ "attribute_spec", ZeroOrOne (Aggregate AttributeSpecification)
       ; "keyword", Token
       ; "name", Token
       ; "colon", Token
@@ -163,7 +164,7 @@ let schema : schema_node list =
     ; prefix      = "record"
     ; aggregates  = [ TopLevelDeclaration ]
     ; fields =
-      [ "attribute_spec", ZeroOrOne (Just "AttributeSpecification")
+      [ "attribute_spec", ZeroOrOne (Aggregate AttributeSpecification)
       ; "modifier", Token
       ; "keyword", Token
       ; "name", Token
@@ -195,7 +196,7 @@ let schema : schema_node list =
     ; prefix      = "alias"
     ; aggregates  = [ TopLevelDeclaration ]
     ; fields =
-      [ "attribute_spec", ZeroOrOne (Just "AttributeSpecification")
+      [ "attribute_spec", ZeroOrOne (Aggregate AttributeSpecification)
       ; "keyword", Token
       ; "name", ZeroOrOne Token
       ; "generic_parameter", ZeroOrOne (Just "TypeParameters")
@@ -212,7 +213,7 @@ let schema : schema_node list =
     ; prefix      = "property"
     ; aggregates  = [ ClassBodyDeclaration ]
     ; fields =
-      [ "attribute_spec", ZeroOrOne (Just "AttributeSpecification")
+      [ "attribute_spec", ZeroOrOne (Aggregate AttributeSpecification)
       ; "modifiers", ZeroOrMore Token
       ; "type", ZeroOrOne (Aggregate Specifier)
       ; "declarators", ZeroOrMore (Just "PropertyDeclarator")
@@ -311,7 +312,7 @@ let schema : schema_node list =
     ; prefix      = "function"
     ; aggregates  = [ TopLevelDeclaration ]
     ; fields =
-      [ "attribute_spec", ZeroOrOne (Just "AttributeSpecification")
+      [ "attribute_spec", ZeroOrOne (Aggregate AttributeSpecification)
       ; "declaration_header", Just "FunctionDeclarationHeader"
       ; "body", Just "CompoundStatement"
       ]
@@ -365,7 +366,7 @@ let schema : schema_node list =
     ; prefix      = "methodish"
     ; aggregates  = [ ClassBodyDeclaration ]
     ; fields =
-      [ "attribute", ZeroOrOne (Just "AttributeSpecification")
+      [ "attribute", ZeroOrOne (Aggregate AttributeSpecification)
       ; "function_decl_header", Just "FunctionDeclarationHeader"
       ; "function_body", ZeroOrOne (Just "CompoundStatement")
       ; "semicolon", ZeroOrOne Token
@@ -378,7 +379,7 @@ let schema : schema_node list =
     ; prefix      = "methodish_trait"
     ; aggregates  = [ ClassBodyDeclaration ]
     ; fields =
-      [ "attribute", ZeroOrOne (Just "AttributeSpecification")
+      [ "attribute", ZeroOrOne (Aggregate AttributeSpecification)
       ; "function_decl_header", Just "FunctionDeclarationHeader"
       ; "equal", Token
       ; "name", Aggregate Specifier
@@ -392,7 +393,7 @@ let schema : schema_node list =
     ; prefix      = "classish"
     ; aggregates  = [ TopLevelDeclaration ]
     ; fields =
-      [ "attribute", ZeroOrOne (Just "AttributeSpecification")
+      [ "attribute", ZeroOrOne (Aggregate AttributeSpecification)
       ; "modifiers", ZeroOrMore Token
       ; "keyword", Token
       ; "name", Token
@@ -513,8 +514,8 @@ let schema : schema_node list =
     ; prefix      = "type_const"
     ; aggregates  = [ ClassBodyDeclaration ]
     ; fields =
-      [ "attribute_spec", ZeroOrOne (Just "AttributeSpecification")
-      ; "modifiers", ZeroOrMore Token
+      [ "attribute_spec", ZeroOrOne (Aggregate AttributeSpecification)
+      ; "modifiers", ZeroOrOne Token
       ; "keyword", Token
       ; "type_keyword", Token
       ; "name", Token
@@ -543,7 +544,7 @@ let schema : schema_node list =
     ; prefix      = "parameter"
     ; aggregates  = [ Parameter ]
     ; fields =
-      [ "attribute", ZeroOrOne (Just "AttributeSpecification")
+      [ "attribute", ZeroOrOne (Aggregate AttributeSpecification)
       ; "visibility", ZeroOrOne Token
       ; "call_convention", ZeroOrOne Token
       ; "type", ZeroOrOne (Aggregate Specifier)
@@ -563,16 +564,36 @@ let schema : schema_node list =
       ; "ellipsis", Token
       ]
     }
+  ; { kind_name   = "OldAttributeSpecification"
+    ; type_name   = "old_attribute_specification"
+    ; func_name   = "old_attribute_specification"
+    ; description = "old_attribute_specification"
+    ; prefix      = "old_attribute_specification"
+    ; aggregates  = [ AttributeSpecification ]
+    ; fields =
+      [ "left_double_angle", Token
+      ; "attributes", ZeroOrMore (Just "ConstructorCall")
+      ; "right_double_angle", Token
+      ]
+    }
   ; { kind_name   = "AttributeSpecification"
     ; type_name   = "attribute_specification"
     ; func_name   = "attribute_specification"
     ; description = "attribute_specification"
     ; prefix      = "attribute_specification"
+    ; aggregates  = [ AttributeSpecification ]
+    ; fields =
+      [ "attributes", ZeroOrMore (Just "Attribute") ]
+    }
+  ; { kind_name   = "Attribute"
+    ; type_name   = "attribute"
+    ; func_name   = "attribute"
+    ; description = "attribute"
+    ; prefix      = "attribute"
     ; aggregates  = []
     ; fields =
-      [ "left_double_angle", Token
-      ; "attributes", ZeroOrMore (Just "ConstructorCall")
-      ; "right_double_angle", Token
+      [ "at", Token
+      ; "attribute_name", Just "ConstructorCall"
       ]
     }
   ; { kind_name   = "InclusionExpression"
@@ -1040,7 +1061,7 @@ let schema : schema_node list =
     ; prefix      = "anonymous"
     ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
     ; fields =
-      [ "attribute_spec", ZeroOrOne (Just "AttributeSpecification")
+      [ "attribute_spec", ZeroOrOne (Aggregate AttributeSpecification)
       ; "static_keyword", ZeroOrOne Token
       ; "async_keyword", ZeroOrOne Token
       ; "coroutine_keyword", ZeroOrOne Token
@@ -1074,7 +1095,7 @@ let schema : schema_node list =
     ; prefix      = "lambda"
     ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
     ; fields =
-      [ "attribute_spec", ZeroOrOne (Just "AttributeSpecification")
+      [ "attribute_spec", ZeroOrOne (Aggregate AttributeSpecification)
       ; "async", ZeroOrOne Token
       ; "coroutine", ZeroOrOne Token
       ; "signature", Aggregate Specifier
@@ -1581,7 +1602,7 @@ let schema : schema_node list =
     ; prefix      = "awaitable"
     ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
     ; fields =
-      [ "attribute_spec", ZeroOrOne (Just "AttributeSpecification")
+      [ "attribute_spec", ZeroOrOne (Aggregate AttributeSpecification)
       ; "async", Token
       ; "coroutine", ZeroOrOne Token
       ; "compound_statement", Just "CompoundStatement"
@@ -1841,7 +1862,7 @@ let schema : schema_node list =
     ; prefix      = "type"
     ; aggregates  = []
     ; fields =
-      [ "attribute_spec", ZeroOrOne (Just "AttributeSpecification")
+      [ "attribute_spec", ZeroOrOne (Aggregate AttributeSpecification)
       ; "reified", ZeroOrOne Token
       ; "variance", ZeroOrOne Token
       ; "name", Token
@@ -2066,7 +2087,7 @@ let schema : schema_node list =
     ; prefix      = "attributized_specifier"
     ; aggregates  = []
     ; fields =
-      [ "attribute_spec", ZeroOrOne (Just "AttributeSpecification")
+      [ "attribute_spec", ZeroOrOne (Aggregate AttributeSpecification)
       ; "type", Aggregate Specifier
       ]
     }
@@ -2284,6 +2305,7 @@ let string_of_aggregate_type = function
   | Expression             -> "Expression"
   | Specifier              -> "Specifier"
   | Parameter              -> "Parameter"
+  | AttributeSpecification -> "AttributeSpecification"
   | ClassBodyDeclaration   -> "ClassBodyDeclaration"
   | Statement              -> "Statement"
   | SwitchLabel            -> "SwitchLabel"
@@ -2304,43 +2326,46 @@ end
 module AggMap = MyMap.Make(AggregateKey)
 
 let aggregation_of_top_level_declaration =
-  List.filter (fun x -> List.mem TopLevelDeclaration   x.aggregates) schema
+  List.filter (fun x -> List.mem TopLevelDeclaration    x.aggregates) schema
 let aggregation_of_expression =
-  List.filter (fun x -> List.mem Expression            x.aggregates) schema
+  List.filter (fun x -> List.mem Expression             x.aggregates) schema
 let aggregation_of_specifier =
-  List.filter (fun x -> List.mem Specifier             x.aggregates) schema
+  List.filter (fun x -> List.mem Specifier              x.aggregates) schema
 let aggregation_of_parameter =
-  List.filter (fun x -> List.mem Parameter             x.aggregates) schema
+  List.filter (fun x -> List.mem Parameter              x.aggregates) schema
+let aggregation_of_attribute_specification =
+  List.filter (fun x -> List.mem AttributeSpecification x.aggregates) schema
 let aggregation_of_class_body_declaration =
-  List.filter (fun x -> List.mem ClassBodyDeclaration  x.aggregates) schema
+  List.filter (fun x -> List.mem ClassBodyDeclaration   x.aggregates) schema
 let aggregation_of_statement =
-  List.filter (fun x -> List.mem Statement             x.aggregates) schema
+  List.filter (fun x -> List.mem Statement              x.aggregates) schema
 let aggregation_of_switch_label =
-  List.filter (fun x -> List.mem SwitchLabel           x.aggregates) schema
+  List.filter (fun x -> List.mem SwitchLabel            x.aggregates) schema
 let aggregation_of_lambda_body =
-  List.filter (fun x -> List.mem LambdaBody            x.aggregates) schema
+  List.filter (fun x -> List.mem LambdaBody             x.aggregates) schema
 let aggregation_of_constructor_expression =
-  List.filter (fun x -> List.mem ConstructorExpression x.aggregates) schema
+  List.filter (fun x -> List.mem ConstructorExpression  x.aggregates) schema
 let aggregation_of_namespace_internals =
-  List.filter (fun x -> List.mem NamespaceInternals    x.aggregates) schema
+  List.filter (fun x -> List.mem NamespaceInternals     x.aggregates) schema
 let aggregation_of_xhp_attribute =
-  List.filter (fun x -> List.mem XHPAttribute          x.aggregates) schema
+  List.filter (fun x -> List.mem XHPAttribute           x.aggregates) schema
 let aggregation_of_object_creation_what =
-  List.filter (fun x -> List.mem ObjectCreationWhat    x.aggregates) schema
+  List.filter (fun x -> List.mem ObjectCreationWhat     x.aggregates) schema
 let aggregation_of_todo_aggregate =
-  List.filter (fun x -> List.mem TODO                  x.aggregates) schema
+  List.filter (fun x -> List.mem TODO                   x.aggregates) schema
 let aggregation_of_name_aggregate =
-  List.filter (fun x -> List.mem Name                  x.aggregates) schema
+  List.filter (fun x -> List.mem Name                   x.aggregates) schema
 let aggregation_of_pufield_aggregate =
-  List.filter (fun x -> List.mem PUField               x.aggregates) schema
+  List.filter (fun x -> List.mem PUField                x.aggregates) schema
 let aggregation_of_pumapping_aggregate =
-  List.filter (fun x -> List.mem PUMapping             x.aggregates) schema
+  List.filter (fun x -> List.mem PUMapping              x.aggregates) schema
 
 let aggregation_of = function
   | TopLevelDeclaration    -> aggregation_of_top_level_declaration
   | Expression             -> aggregation_of_expression
   | Specifier              -> aggregation_of_specifier
   | Parameter              -> aggregation_of_parameter
+  | AttributeSpecification -> aggregation_of_attribute_specification
   | ClassBodyDeclaration   -> aggregation_of_class_body_declaration
   | Statement              -> aggregation_of_statement
   | SwitchLabel            -> aggregation_of_switch_label
@@ -2359,6 +2384,7 @@ let aggregate_type_name = function
   | Expression             -> "expression"
   | Specifier              -> "specifier"
   | Parameter              -> "parameter"
+  | AttributeSpecification -> "attribute_specification"
   | ClassBodyDeclaration   -> "class_body_declaration"
   | Statement              -> "statement"
   | SwitchLabel            -> "switch_label"
@@ -2377,6 +2403,7 @@ let aggregate_type_pfx_trim = function
   | Expression             -> "Expr",   "Expression$"
   | Specifier              -> "Spec",   "\\(Type\\)?Specifier$"
   | Parameter              -> "Param",  ""
+  | AttributeSpecification -> "AttrSpec", ""
   | ClassBodyDeclaration   -> "Body",   "Declaration"
   | Statement              -> "Stmt",   "Statement$"
   | SwitchLabel            -> "Switch", "Label$"

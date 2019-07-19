@@ -162,8 +162,12 @@ class EditableSyntax
       return ParameterDeclaration.from_json(json, position, source);
     case 'variadic_parameter':
       return VariadicParameter.from_json(json, position, source);
+    case 'old_attribute_specification':
+      return OldAttributeSpecification.from_json(json, position, source);
     case 'attribute_specification':
       return AttributeSpecification.from_json(json, position, source);
+    case 'attribute':
+      return Attribute.from_json(json, position, source);
     case 'inclusion_expression':
       return InclusionExpression.from_json(json, position, source);
     case 'inclusion_directive':
@@ -7566,14 +7570,14 @@ class VariadicParameter extends EditableSyntax
     return VariadicParameter._children_keys;
   }
 }
-class AttributeSpecification extends EditableSyntax
+class OldAttributeSpecification extends EditableSyntax
 {
   constructor(
     left_double_angle,
     attributes,
     right_double_angle)
   {
-    super('attribute_specification', {
+    super('old_attribute_specification', {
       left_double_angle: left_double_angle,
       attributes: attributes,
       right_double_angle: right_double_angle });
@@ -7582,19 +7586,19 @@ class AttributeSpecification extends EditableSyntax
   get attributes() { return this.children.attributes; }
   get right_double_angle() { return this.children.right_double_angle; }
   with_left_double_angle(left_double_angle){
-    return new AttributeSpecification(
+    return new OldAttributeSpecification(
       left_double_angle,
       this.attributes,
       this.right_double_angle);
   }
   with_attributes(attributes){
-    return new AttributeSpecification(
+    return new OldAttributeSpecification(
       this.left_double_angle,
       attributes,
       this.right_double_angle);
   }
   with_right_double_angle(right_double_angle){
-    return new AttributeSpecification(
+    return new OldAttributeSpecification(
       this.left_double_angle,
       this.attributes,
       right_double_angle);
@@ -7617,7 +7621,7 @@ class AttributeSpecification extends EditableSyntax
     }
     else
     {
-      return rewriter(new AttributeSpecification(
+      return rewriter(new OldAttributeSpecification(
         left_double_angle,
         attributes,
         right_double_angle), parents);
@@ -7626,27 +7630,138 @@ class AttributeSpecification extends EditableSyntax
   static from_json(json, position, source)
   {
     let left_double_angle = EditableSyntax.from_json(
-      json.attribute_specification_left_double_angle, position, source);
+      json.old_attribute_specification_left_double_angle, position, source);
     position += left_double_angle.width;
     let attributes = EditableSyntax.from_json(
-      json.attribute_specification_attributes, position, source);
+      json.old_attribute_specification_attributes, position, source);
     position += attributes.width;
     let right_double_angle = EditableSyntax.from_json(
-      json.attribute_specification_right_double_angle, position, source);
+      json.old_attribute_specification_right_double_angle, position, source);
     position += right_double_angle.width;
-    return new AttributeSpecification(
+    return new OldAttributeSpecification(
         left_double_angle,
         attributes,
         right_double_angle);
   }
   get children_keys()
   {
-    if (AttributeSpecification._children_keys == null)
-      AttributeSpecification._children_keys = [
+    if (OldAttributeSpecification._children_keys == null)
+      OldAttributeSpecification._children_keys = [
         'left_double_angle',
         'attributes',
         'right_double_angle'];
+    return OldAttributeSpecification._children_keys;
+  }
+}
+class AttributeSpecification extends EditableSyntax
+{
+  constructor(
+    attributes)
+  {
+    super('attribute_specification', {
+      attributes: attributes });
+  }
+  get attributes() { return this.children.attributes; }
+  with_attributes(attributes){
+    return new AttributeSpecification(
+      attributes);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var attributes = this.attributes.rewrite(rewriter, new_parents);
+    if (
+      attributes === this.attributes)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new AttributeSpecification(
+        attributes), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let attributes = EditableSyntax.from_json(
+      json.attribute_specification_attributes, position, source);
+    position += attributes.width;
+    return new AttributeSpecification(
+        attributes);
+  }
+  get children_keys()
+  {
+    if (AttributeSpecification._children_keys == null)
+      AttributeSpecification._children_keys = [
+        'attributes'];
     return AttributeSpecification._children_keys;
+  }
+}
+class Attribute extends EditableSyntax
+{
+  constructor(
+    at,
+    attribute_name)
+  {
+    super('attribute', {
+      at: at,
+      attribute_name: attribute_name });
+  }
+  get at() { return this.children.at; }
+  get attribute_name() { return this.children.attribute_name; }
+  with_at(at){
+    return new Attribute(
+      at,
+      this.attribute_name);
+  }
+  with_attribute_name(attribute_name){
+    return new Attribute(
+      this.at,
+      attribute_name);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var at = this.at.rewrite(rewriter, new_parents);
+    var attribute_name = this.attribute_name.rewrite(rewriter, new_parents);
+    if (
+      at === this.at &&
+      attribute_name === this.attribute_name)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new Attribute(
+        at,
+        attribute_name), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let at = EditableSyntax.from_json(
+      json.attribute_at, position, source);
+    position += at.width;
+    let attribute_name = EditableSyntax.from_json(
+      json.attribute_attribute_name, position, source);
+    position += attribute_name.width;
+    return new Attribute(
+        at,
+        attribute_name);
+  }
+  get children_keys()
+  {
+    if (Attribute._children_keys == null)
+      Attribute._children_keys = [
+        'at',
+        'attribute_name'];
+    return Attribute._children_keys;
   }
 }
 class InclusionExpression extends EditableSyntax
@@ -21342,7 +21457,9 @@ exports.TypeConstDeclaration = TypeConstDeclaration;
 exports.DecoratedExpression = DecoratedExpression;
 exports.ParameterDeclaration = ParameterDeclaration;
 exports.VariadicParameter = VariadicParameter;
+exports.OldAttributeSpecification = OldAttributeSpecification;
 exports.AttributeSpecification = AttributeSpecification;
+exports.Attribute = Attribute;
 exports.InclusionExpression = InclusionExpression;
 exports.InclusionDirective = InclusionDirective;
 exports.CompoundStatement = CompoundStatement;

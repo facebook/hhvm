@@ -214,6 +214,7 @@ let parse_options () =
   let use_new_type_errors = ref false in
   let disable_outside_dollar_str_interp = ref false in
   let disable_linter_fixmes = ref false in
+  let allow_new_attribute_syntax = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -457,6 +458,9 @@ let parse_options () =
     "--disable-linter-fixmes",
       Arg.Set disable_linter_fixmes,
       "Disables HH_FIXME and HH_IGNORE_ERROR for 5000-5999 error codes";
+    "--allow-new-attribute-syntax",
+      Arg.Set allow_new_attribute_syntax,
+      "Allow the new @ attribute syntax (disables legacy soft typehints)";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -500,6 +504,7 @@ let parse_options () =
     ~use_new_type_errors:!use_new_type_errors
     ~po_disable_outside_dollar_str_interp:!disable_outside_dollar_str_interp
     ~disable_linter_fixmes:!disable_linter_fixmes
+    ~po_allow_new_attribute_syntax:!allow_new_attribute_syntax
     ()
   in
   let tcopt = {

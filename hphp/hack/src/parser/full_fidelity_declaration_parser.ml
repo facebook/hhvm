@@ -738,6 +738,10 @@ module WithExpressionAndStatementAndTypeParser
       (* Parse methods, constructors, destructors, properties, or type constants. *)
       let (parser, attr) = parse_attribute_specification_opt parser in
       parse_methodish_or_property_or_type_constant parser attr
+    | At when Full_fidelity_parser_env.allow_new_attribute_syntax parser.env ->
+      (* Parse methods, constructors, destructors, properties, or type constants. *)
+      let (parser, attr) = parse_attribute_specification_opt parser in
+      parse_methodish_or_property_or_type_constant parser attr
     | Require ->
       (* We give an error if these are found where they should not be,
          in a later pass. *)
@@ -1413,11 +1417,18 @@ module WithExpressionAndStatementAndTypeParser
       semicolon
 
   (* SPEC:
-    attribute_specification := << attribute_list >>
+    attribute_specification :=
+      attribute_list
+      old_attribute_specification
     attribute_list :=
       attribute
-      attribute_list , attribute
-    attribute := attribute_name attribute_value_list_opt
+      attribute_list attribute
+    attribute := @ attribute_name attribute_value_list_opt
+    old_attribute_specification := << old_attribute_list >>
+    old_attribute_list :=
+      old_attribute
+      old_attribute_list , old_attribute
+    old_attribute := attribute_name attribute_value_list_opt
     attribute_name := name
     attribute_value_list := ( attribute_values_opt )
     attribute_values :=
@@ -1430,17 +1441,42 @@ module WithExpressionAndStatementAndTypeParser
    TODO: The list of values can have a trailing comma. Update the spec.
    (Both these work items are tracked by spec issue 106.) *)
 
-  and parse_attribute_specification_opt parser =
+  and parse_old_attribute_specification_opt parser =
     if peek_token_kind parser = LessThanLessThan then
       let (parser, left, items, right) =
-        parse_double_angled_comma_list_allow_trailing parser parse_attribute
+        parse_double_angled_comma_list_allow_trailing parser parse_old_attribute
       in
-      Make.attribute_specification parser left items right
+      Make.old_attribute_specification parser left items right
     else
       Make.missing parser (pos parser)
 
-  and parse_attribute parser =
+  and parse_old_attribute parser =
     with_expression_parser parser ExpressionParser.parse_constructor_call
+
+  and parse_attribute_specification_opt parser =
+    match peek_token_kind parser with
+    | At when Full_fidelity_parser_env.allow_new_attribute_syntax parser.env ->
+      parse_new_attribute_specification_opt parser
+    | LessThanLessThan -> parse_old_attribute_specification_opt parser
+    | _ -> Make.missing parser (pos parser)
+
+  and parse_new_attribute_specification_opt parser =
+    let (parser, attributes) =
+      parse_list_while parser parse_new_attribute (fun parser -> peek_token_kind parser = At)
+    in
+    Make.attribute_specification parser attributes
+
+  and parse_new_attribute parser =
+    let (parser, at) = assert_token parser At in
+    let token = peek_token parser in
+    let (parser, constructor_call) =
+      match Token.kind token with
+      | Name -> with_expression_parser parser ExpressionParser.parse_constructor_call
+      | _ ->
+        let parser = with_error parser SyntaxError.expected_user_attribute in
+        Make.missing parser (pos parser)
+    in
+    Make.attribute parser at constructor_call
 
   and parse_file_attribute_specification_opt parser =
     if peek_token_kind parser = LessThanLessThan then
@@ -1452,7 +1488,7 @@ module WithExpressionAndStatementAndTypeParser
           parser
           GreaterThanGreaterThan
           SyntaxError.expected_user_attribute
-          parse_attribute in
+          parse_old_attribute in
       let (parser, right) = require_token parser GreaterThanGreaterThan SyntaxError.error1029 in
       Make.file_attribute_specification parser left keyword colon items right
     else
@@ -1910,6 +1946,8 @@ module WithExpressionAndStatementAndTypeParser
         with_statement_parser
           parser
           (StatementParser.parse_possible_php_function ~toplevel:true)
+      | At when Full_fidelity_parser_env.allow_new_attribute_syntax parser.env ->
+        parse_enum_or_classish_or_function_declaration parser
       | LessThanLessThan ->
         begin match peek_token_kind parser1 with
         | File when peek_token_kind ~lookahead:1 parser1 = Colon ->

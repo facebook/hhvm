@@ -64,7 +64,7 @@ module WithSyntax(Syntax : Positioned_syntax_sig.PositionedSyntax_S) = struct
       is_coroutine coroutine in
     state, Syntax.make_awaitable_creation_expression r1 r2 coroutine r4
 
-  let make_attribute_specification left attribute_name right state =
+  let make_old_attribute_specification left attribute_name right state =
     let open Syntax in
     let is_ppl_attribute_folder has_seen_ppl constructor_call =
       if has_seen_ppl then has_seen_ppl else
@@ -85,6 +85,6 @@ module WithSyntax(Syntax : Positioned_syntax_sig.PositionedSyntax_S) = struct
       | _ -> false in
     let state = state
       || syntax_list_fold ~init:false ~f:is_ppl_attribute_folder attribute_name in
-    state, Syntax.make_attribute_specification left attribute_name right
+    state, Syntax.make_old_attribute_specification left attribute_name right
 
 end (* WithSyntax *)

@@ -70,6 +70,7 @@ module FullFidelityParseArgs = struct
     enable_class_level_where_clauses : bool;
     disable_legacy_soft_typehints : bool;
     disable_outside_dollar_str_interp : bool;
+    allow_new_attribute_syntax : bool;
   }
 
   let make
@@ -103,6 +104,7 @@ module FullFidelityParseArgs = struct
     enable_class_level_where_clauses
     disable_legacy_soft_typehints
     disable_outside_dollar_str_interp
+    allow_new_attribute_syntax
     = {
     full_fidelity_json;
     full_fidelity_dot;
@@ -134,6 +136,7 @@ module FullFidelityParseArgs = struct
     enable_class_level_where_clauses;
     disable_legacy_soft_typehints;
     disable_outside_dollar_str_interp;
+    allow_new_attribute_syntax;
   }
 
   let parse_args () =
@@ -183,6 +186,7 @@ module FullFidelityParseArgs = struct
     let enable_class_level_where_clauses = ref false in
     let disable_legacy_soft_typehints = ref false in
     let disable_outside_dollar_str_interp = ref false in
+    let allow_new_attribute_syntax = ref false in
     let options =  [
       (* modes *)
       "--full-fidelity-json",
@@ -304,6 +308,9 @@ No errors are filtered out.";
       "--disable-outside-dollar-str-interp",
         Arg.Set disable_outside_dollar_str_interp,
         "Disables ${x} syntax for string interpolation (use {$x} instead)";
+      "--allow-new-attribute-syntax",
+        Arg.Set allow_new_attribute_syntax,
+        "Allow the new @ attribute syntax (disables legacy soft typehints)";
       ] in
     Arg.parse options push_file usage;
     let modes = [
@@ -350,6 +357,7 @@ No errors are filtered out.";
       !enable_class_level_where_clauses
       !disable_legacy_soft_typehints
       !disable_outside_dollar_str_interp
+      !allow_new_attribute_syntax
 end
 
 open FullFidelityParseArgs
@@ -376,6 +384,7 @@ let handle_existing_file args filename =
     args.disable_legacy_soft_typehints in
   let popt = ParserOptions.with_disable_outside_dollar_str_interp popt
     args.disable_outside_dollar_str_interp in
+  let popt = ParserOptions.with_allow_new_attribute_syntax popt args.allow_new_attribute_syntax in
 
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in
@@ -385,6 +394,7 @@ let handle_existing_file args filename =
     ~disable_lval_as_an_expression:args.disable_lval_as_an_expression
     ~rust:args.rust
     ~disable_legacy_soft_typehints:args.disable_legacy_soft_typehints
+    ~allow_new_attribute_syntax:args.allow_new_attribute_syntax
     ?mode () in
   let syntax_tree = SyntaxTree.make ~env source_text in
   let editable = SyntaxTransforms.editable_from_positioned syntax_tree in

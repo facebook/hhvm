@@ -10,8 +10,8 @@ let make_type_const_equal env tconstty ty tconstid ~as_tyvar_with_cnstr =
   let ety_env = Phase.env_with_self env in
   let env, tytconst =
     Utils.expand_typeconst ety_env env ~as_tyvar_with_cnstr ty tconstid in
-  let env = Utils.sub_type env tytconst tconstty in
-  let env = Utils.sub_type env tconstty tytconst in
+  let env = Utils.sub_type env tytconst tconstty Errors.type_constant_mismatch in
+  let env = Utils.sub_type env tconstty tytconst Errors.type_constant_mismatch in
   env
 
 (** Add a type constant with id `tyconstid` and type `ty` to a type variable,

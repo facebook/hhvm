@@ -24,6 +24,7 @@ end
 type phase = Init | Parsing | Naming | Decl | Typing
 type severity = Warning | Error
 type format = Context | Raw
+type typing_error_callback = (Pos.t * string) list -> (Pos.t * string) list -> unit
 
 module Parsing : Error_category
 module Naming : Error_category
@@ -236,7 +237,23 @@ val this_final : Pos.t * string -> Pos.t -> error -> unit
 val exact_class_final : Pos.t * string -> Pos.t -> error -> unit
 val fun_arity_mismatch : Pos.t -> Pos.t -> unit
 val discarded_awaitable : Pos.t -> Pos.t -> unit
-val unify_error : (Pos.t * string) list -> (Pos.t * string) list -> unit
+val unify_error : typing_error_callback
+val index_type_mismatch : typing_error_callback
+val expected_stringlike : typing_error_callback
+val type_constant_mismatch : typing_error_callback
+val type_constant_redeclaration : typing_error_callback
+val constant_does_not_match_enum_type : typing_error_callback
+val enum_constraint_must_be_arraykey : typing_error_callback
+val enum_subtype_must_have_compatible_constraint : typing_error_callback
+val parameter_default_value_wrong_type : typing_error_callback
+val newtype_alias_must_satisfy_constraint : typing_error_callback
+val bad_function_typevar : typing_error_callback
+val bad_class_typevar : typing_error_callback
+val bad_method_typevar : typing_error_callback
+val return_type_mismatch : typing_error_callback
+val inout_return_type_mismatch : typing_error_callback
+val class_constant_value_does_not_match_hint : typing_error_callback
+val class_property_initializer_type_does_not_match_hint : typing_error_callback
 val static_redeclared_as_dynamic :
   Pos.t -> Pos.t -> string -> elt_type:[`Method | `Property] -> unit
 val dynamic_redeclared_as_static :

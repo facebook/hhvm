@@ -259,12 +259,19 @@ and simplify_subtype
   ?(this_ty : locl ty option = None)
   (ty_sub : locl ty)
   (ty_super : locl ty)
+  ~(on_error : Errors.typing_error_callback)
   env : Env.env * TL.subtype_prop =
   log_subtype ~this_ty ~function_name:"simplify_subtype" env ty_sub ty_super;
   let env, ety_super = Env.expand_type env ty_super in
   let env, ety_sub = Env.expand_type env ty_sub in
   let fail () =
-    TUtils.uerror env (fst ety_super) (snd ety_super) (fst ety_sub) (snd ety_sub) in
+    TUtils.uerror
+      env
+      (fst ety_super)
+      (snd ety_super)
+      (fst ety_sub)
+      (snd ety_sub)
+      on_error in
   let (|||) (env, p1) (f : Env.env -> Env.env * TL.subtype_prop) =
     if TL.is_valid p1
     then env, p1
@@ -280,9 +287,9 @@ and simplify_subtype
   let valid () = env, TL.valid in
   (* We don't know whether the assertion is valid or not *)
   let default () = env, TL.IsSubtype (ety_sub, ety_super) in
-  let simplify_subtype = simplify_subtype ~no_top_bottom in
+  let simplify_subtype = simplify_subtype ~no_top_bottom ~on_error in
   let simplify_subtype_funs = simplify_subtype_funs ~no_top_bottom in
-  let simplify_subtype_variance = simplify_subtype_variance ~no_top_bottom in
+  let simplify_subtype_variance = simplify_subtype_variance ~no_top_bottom ~on_error in
   let simplify_subtype_generic_sub name_sub opt_sub_cstr ty_super env =
   begin match seen_generic_params with
   | None -> default ()
@@ -498,7 +505,7 @@ and simplify_subtype
   | Tfun ft_sub, Tfun ft_super ->
     let r_sub, r_super = fst ety_sub, fst ety_super in
     simplify_subtype_funs ~seen_generic_params ~check_return:true
-      r_sub ft_sub r_super ft_super env
+      r_sub ft_sub r_super ft_super on_error env
   | Tanon (anon_arity, id), Tfun ft ->
     let r_sub, r_super = fst ety_sub, fst ety_super in
     begin match Env.get_anonymous env id with
@@ -559,7 +566,8 @@ and simplify_subtype
     let simplify_subtype_shape_field name res sft_sub sft_super =
       match sft_sub.sft_optional, sft_super.sft_optional with
       | _, true | false, false ->
-        res &&& simplify_subtype ~seen_generic_params ~this_ty sft_sub.sft_ty sft_super.sft_ty
+        res &&& simplify_subtype ~seen_generic_params ~this_ty
+          sft_sub.sft_ty sft_super.sft_ty
       | true, false ->
         res |> with_error (fun () ->
           let printable_name = TUtils.get_printable_shape_field_name name in
@@ -620,7 +628,8 @@ and simplify_subtype
       begin match td with
         | Some {td_tparams; _} ->
           let variancel = List.map td_tparams (fun t -> t.tp_variance) in
-          simplify_subtype_variance ~seen_generic_params name_sub variancel tyl_sub tyl_super env
+          simplify_subtype_variance ~seen_generic_params name_sub variancel
+            tyl_sub tyl_super env
         | None ->
           invalid ()
       end
@@ -798,7 +807,8 @@ and simplify_subtype
            * where vi is the variance of the i'th generic parameter of C,
            * and <:v denotes the appropriate direction of subtyping for variance v
            *)
-          simplify_subtype_variance ~seen_generic_params cid_sub variancel tyl_sub tyl_super env
+          simplify_subtype_variance ~seen_generic_params cid_sub variancel tyl_sub
+            tyl_super env
     else
       if not exact_match
       then invalid ()
@@ -869,7 +879,8 @@ and simplify_subtype
       (match akind with
         (* array <: Traversable<_> and emptyarray <: Traversable<t> for any t *)
       | AKany ->
-        simplify_subtype ~seen_generic_params ~this_ty (fst ety_sub, Tany) tv_super env
+        simplify_subtype ~seen_generic_params ~this_ty
+          (fst ety_sub, Tany) tv_super env
       | AKempty -> valid ()
       (* vec<tv> <: Traversable<tv_super>
        * iff tv <: tv_super
@@ -881,7 +892,8 @@ and simplify_subtype
       | AKvec tv
       | AKdarray (_, tv)
       | AKvarray_or_darray tv
-      | AKmap (_, tv) -> simplify_subtype ~seen_generic_params ~this_ty tv tv_super env
+      | AKmap (_, tv) ->
+        simplify_subtype ~seen_generic_params ~this_ty tv tv_super env
     )
   | Tarraykind akind, Tclass ((_, coll), Nonexact, [tk_super; tv_super])
     when (coll = SN.Collections.cKeyedTraversable
@@ -1214,12 +1226,13 @@ and simplify_subtype_variance
   (variancel : Ast.variance list)
   (children_tyl : locl ty list)
   (super_tyl : locl ty list)
+  ~(on_error : Errors.typing_error_callback)
   : Env.env -> Env.env * TL.subtype_prop
   = fun env ->
-  let simplify_subtype = simplify_subtype ~no_top_bottom ~seen_generic_params
+  let simplify_subtype = simplify_subtype ~no_top_bottom ~seen_generic_params ~on_error
     ~this_ty:None in
   let simplify_subtype_variance = simplify_subtype_variance ~no_top_bottom
-    ~seen_generic_params in
+    ~seen_generic_params ~on_error in
   match variancel, children_tyl, super_tyl with
   | [], _, _
   | _, [], _
@@ -1251,11 +1264,12 @@ and simplify_subtype_params
   (superl : locl fun_param list)
   (variadic_sub_ty : locl ty option)
   (variadic_super_ty : locl ty option)
+  ~(on_error : Errors.typing_error_callback)
   env =
 
-  let simplify_subtype = simplify_subtype ~seen_generic_params ~no_top_bottom in
+  let simplify_subtype = simplify_subtype ~seen_generic_params ~no_top_bottom ~on_error in
   let simplify_subtype_params = simplify_subtype_params ~seen_generic_params
-    ~no_top_bottom in
+    ~no_top_bottom ~on_error in
   let simplify_subtype_params_with_variadic = simplify_subtype_params_with_variadic
     ~seen_generic_params ~no_top_bottom in
   let simplify_supertype_params_with_variadic = simplify_supertype_params_with_variadic
@@ -1288,10 +1302,10 @@ and simplify_subtype_params
   *)
   | [], _ -> (match variadic_super_ty with
     | None -> valid env
-    | Some ty -> simplify_supertype_params_with_variadic superl ty env)
+    | Some ty -> simplify_supertype_params_with_variadic superl ty on_error env)
   | _, [] -> (match variadic_sub_ty with
     | None -> valid env
-    | Some ty -> simplify_subtype_params_with_variadic subl ty env)
+    | Some ty -> simplify_subtype_params_with_variadic subl ty on_error env)
   | sub :: subl, super :: superl ->
     env |>
     begin
@@ -1334,8 +1348,9 @@ and simplify_subtype_params_with_variadic
   ~(no_top_bottom : bool)
   (subl : locl fun_param list)
   (variadic_ty : locl ty)
+  (on_error : Errors.typing_error_callback)
   env =
-  let simplify_subtype = simplify_subtype ~seen_generic_params ~no_top_bottom in
+  let simplify_subtype = simplify_subtype ~seen_generic_params ~no_top_bottom ~on_error in
   let simplify_subtype_params_with_variadic = simplify_subtype_params_with_variadic
     ~seen_generic_params ~no_top_bottom in
   match subl with
@@ -1343,15 +1358,16 @@ and simplify_subtype_params_with_variadic
   | { fp_type = sub; _ } :: subl ->
     env |>
     simplify_subtype sub variadic_ty &&&
-    simplify_subtype_params_with_variadic subl variadic_ty
+    simplify_subtype_params_with_variadic subl variadic_ty on_error
 
 and simplify_supertype_params_with_variadic
   ~(seen_generic_params : SSet.t option)
   ~(no_top_bottom : bool)
   (superl : locl fun_param list)
   (variadic_ty : locl ty)
+  (on_error : Errors.typing_error_callback)
   env =
-  let simplify_subtype = simplify_subtype ~seen_generic_params ~no_top_bottom in
+  let simplify_subtype = simplify_subtype ~seen_generic_params ~no_top_bottom ~on_error in
   let simplify_supertype_params_with_variadic = simplify_supertype_params_with_variadic
     ~seen_generic_params ~no_top_bottom in
   match superl with
@@ -1359,7 +1375,7 @@ and simplify_supertype_params_with_variadic
   | { fp_type = super; _ } :: superl ->
     env |>
     simplify_subtype variadic_ty super &&&
-    simplify_supertype_params_with_variadic superl variadic_ty
+    simplify_supertype_params_with_variadic superl variadic_ty on_error
 
 and subtype_reactivity
   ?(extra_info: reactivity_extra_info option)
@@ -1749,6 +1765,7 @@ and check_subtype_funs_attributes
   (ft_sub : locl fun_type)
   (r_super : Reason.t)
   (ft_super : locl fun_type)
+  (on_error : Errors.typing_error_callback)
   env
    : Env.env * TL.subtype_prop =
   let variadic_subtype = match ft_sub.ft_arity with
@@ -1758,9 +1775,9 @@ and check_subtype_funs_attributes
     | Fvariadic (_, {fp_type = var_super; _ }) -> Some var_super
     | _ -> None in
 
-  let simplify_subtype = simplify_subtype ~seen_generic_params ~no_top_bottom in
+  let simplify_subtype = simplify_subtype ~seen_generic_params ~no_top_bottom ~on_error in
   let simplify_subtype_params = simplify_subtype_params ~seen_generic_params
-    ~no_top_bottom in
+    ~no_top_bottom ~on_error in
 
   (* First apply checks on attributes, coroutine-ness and variadic arity *)
   env |>
@@ -1795,15 +1812,17 @@ and check_subtype_funs_attributes
 and sub_type
   (env : Env.env)
   (ty_sub : locl ty)
-  (ty_super : locl ty) : Env.env =
+  (ty_super : locl ty)
+  (on_error : Errors.typing_error_callback)
+  : Env.env =
     Env.log_env_change "sub_type" env @@
-    sub_type_inner env ~this_ty:None ty_sub ty_super
+    sub_type_inner env ~this_ty:None ty_sub ty_super on_error
 
 (* Add a new upper bound ty on var.  Apply transitivity of sutyping,
  * so if we already have tyl <: var, then check that for each ty_sub
  * in tyl we have ty_sub <: ty.
  *)
-and add_tyvar_upper_bound_and_close env var ty =
+and add_tyvar_upper_bound_and_close env var ty on_error =
   Env.log_env_change "add_tyvar_upper_bound_and_close" env @@
   let upper_bounds_before = Env.get_tyvar_upper_bounds env var in
   let env = Env.add_tyvar_upper_bound ~intersect:(try_intersect env) env var ty in
@@ -1815,7 +1834,7 @@ and add_tyvar_upper_bound_and_close env var ty =
       let env = Typing_subtype_tconst.make_all_type_consts_equal env var
         upper_bound ~as_tyvar_with_cnstr:true in
       Typing_set.fold (fun lower_bound env ->
-        sub_type env lower_bound upper_bound)
+        sub_type env lower_bound upper_bound on_error)
         lower_bounds env)
       added_upper_bounds env in
   env
@@ -1824,7 +1843,7 @@ and add_tyvar_upper_bound_and_close env var ty =
  * so if we already have var <: tyl, then check that for each ty_super
  * in tyl we have ty <: ty_super.
  *)
-and add_tyvar_lower_bound_and_close env var ty =
+and add_tyvar_lower_bound_and_close env var ty on_error =
   Env.log_env_change "add_tyvar_lower_bound_and_close" env @@
   let lower_bounds_before = Env.get_tyvar_lower_bounds env var in
   let env = Env.add_tyvar_lower_bound ~union:(try_union env) env var ty in
@@ -1836,27 +1855,27 @@ and add_tyvar_lower_bound_and_close env var ty =
       let env = Typing_subtype_tconst.make_all_type_consts_equal env var
         lower_bound ~as_tyvar_with_cnstr:false in
       Typing_set.fold (fun upper_bound env ->
-        sub_type env lower_bound upper_bound)
+        sub_type env lower_bound upper_bound on_error)
         upper_bounds env)
       added_lower_bounds env in
   env
 
-and props_to_env env remain props =
+and props_to_env env remain props on_error =
   match props with
   | [] ->
     env, List.rev remain
   | TL.IsSubtype (((_, Tvar var_sub) as ty_sub), ((_, Tvar var_super) as ty_super)) :: props ->
-    let env = add_tyvar_upper_bound_and_close env var_sub ty_super in
-    let env = add_tyvar_lower_bound_and_close env var_super ty_sub in
-    props_to_env env remain props
+    let env = add_tyvar_upper_bound_and_close env var_sub ty_super on_error in
+    let env = add_tyvar_lower_bound_and_close env var_super ty_sub on_error in
+    props_to_env env remain props on_error
   | TL.IsSubtype ((_, Tvar var), ty) :: props ->
-    let env = add_tyvar_upper_bound_and_close env var ty in
-    props_to_env env remain props
+    let env = add_tyvar_upper_bound_and_close env var ty on_error in
+    props_to_env env remain props on_error
   | TL.IsSubtype (ty, (_, Tvar var)) :: props ->
-    let env = add_tyvar_lower_bound_and_close env var ty in
-    props_to_env env remain props
+    let env = add_tyvar_lower_bound_and_close env var ty on_error in
+    props_to_env env remain props on_error
   | TL.Conj props' :: props ->
-    props_to_env env remain (props' @ props)
+    props_to_env env remain (props' @ props) on_error
   | TL.Disj (f, disj_props) :: conj_props ->
     (* For now, just find the first prop in the disjunction that works *)
     let rec try_disj disj_props =
@@ -1864,23 +1883,23 @@ and props_to_env env remain props =
       | [] ->
         (* For now let it fail later when calling
         process_simplify_subtype_result on the remaining constraints. *)
-        props_to_env env (TL.invalid ~fail:f :: remain) conj_props
+        props_to_env env (TL.invalid ~fail:f :: remain) conj_props on_error
       | prop :: disj_props' ->
         Errors.try_
           (fun () ->
-            ignore_hh_fixmes (fun () -> props_to_env env remain (prop::conj_props)))
+            ignore_hh_fixmes (fun () -> props_to_env env remain (prop::conj_props) on_error))
           (fun _ -> try_disj disj_props')
     in
     try_disj disj_props
   | prop :: props ->
-    props_to_env env (prop::remain) props
+    props_to_env env (prop::remain) props on_error
 
 (* Move any top-level conjuncts of the form Tvar v <: t or t <: Tvar v to
  * the type variable environment. To do: use intersection and union to
  * simplify bounds.
  *)
-and prop_to_env env prop =
-  let env, props' = props_to_env env [] [prop] in
+and prop_to_env env prop on_error =
+  let env, props' = props_to_env env [] [prop] on_error in
   env, TL.conj_list props'
 
 and env_to_prop env =
@@ -1917,13 +1936,15 @@ and sub_type_inner
   (env : Env.env)
   ~(this_ty : locl ty option)
   (ty_sub: locl ty)
-  (ty_super: locl ty) : Env.env =
+  (ty_super: locl ty)
+  (on_error : Errors.typing_error_callback)
+   : Env.env =
   log_subtype ~this_ty ~function_name:"sub_type_inner" env ty_sub ty_super;
   let env, prop = simplify_subtype
     ~seen_generic_params:empty_seen
     ~no_top_bottom:false
-    ~this_ty ty_sub ty_super env in
-  let env, prop = prop_to_env env prop in
+    ~this_ty ty_sub ty_super ~on_error env in
+  let env, prop = prop_to_env env prop on_error in
   let env = Env.add_subtype_prop env prop in
   process_simplify_subtype_result prop;
   env
@@ -1944,7 +1965,7 @@ and is_sub_type_LEGACY_DEPRECATED
   Errors.try_
     (fun () ->
       ignore_hh_fixmes (fun () ->
-        ignore (sub_type env ty_sub ty_super); true))
+        ignore (sub_type env ty_sub ty_super Errors.unify_error); true))
     (fun _ -> false)
 
 and is_sub_type_alt ~ignore_generic_params ~no_top_bottom env ty1 ty2 =
@@ -1952,7 +1973,9 @@ and is_sub_type_alt ~ignore_generic_params ~no_top_bottom env ty1 ty2 =
     ~seen_generic_params:(if ignore_generic_params then None else empty_seen)
     ~no_top_bottom
     ~this_ty:(Some ty1)
-    ty1 ty2 env in
+    (* It is weird that this can cause errors, but I am wary to discard them.
+     * Using the generic unify_error to maintain current behavior. *)
+    ty1 ty2 ~on_error:Errors.unify_error env in
   if TL.is_valid prop then Some true
   else
   if TL.is_unsat prop then Some false
@@ -2057,7 +2080,7 @@ let sub_string
     then tyl
     else stringish::tyl in
   let stringlike = (Reason.Rwitness p, Toption (Reason.Rwitness p, Tunion tyl)) in
-  sub_type env ty2 stringlike
+  sub_type env ty2 stringlike Errors.expected_stringlike
 
 (** Check that the method with signature ft_sub can be used to override
  * (is a subtype of) method with signature ft_super.
@@ -2115,7 +2138,8 @@ let subtype_method
   (r_sub : Reason.t)
   (ft_sub : decl fun_type)
   (r_super : Reason.t)
-  (ft_super : decl fun_type) : Env.env =
+  (ft_super : decl fun_type)
+  (on_error : Errors.typing_error_callback) : Env.env =
   if not ft_super.ft_abstract && ft_sub.ft_abstract then
     (* It is valid for abstract class to extend a concrete class, but it cannot
      * redefine already concrete members as abstract.
@@ -2157,6 +2181,7 @@ let subtype_method
     ~extra_info
     r_sub ft_sub_no_tvars
     r_super ft_super_no_tvars
+    on_error
     env in
 
   process_simplify_subtype_result res;
@@ -2241,11 +2266,12 @@ let rec decompose_subtype
   (env : Env.env)
   (ty_sub : locl ty)
   (ty_super : locl ty)
+  (on_error : Errors.typing_error_callback)
   : Env.env =
   log_subtype ~this_ty:None ~function_name:"decompose_subtype" env ty_sub ty_super;
   let env, prop =
     simplify_subtype ~seen_generic_params:None
-      ~no_top_bottom:false ~this_ty:None ty_sub ty_super env in
+      ~no_top_bottom:false ~this_ty:None ty_sub ty_super ~on_error env in
   decompose_subtype_add_prop p env prop
 
 and decompose_subtype_add_prop p env prop =
@@ -2268,14 +2294,15 @@ and decompose_constraint
   (ty_sub : locl ty)
   (ty_super : locl ty)
   : Env.env =
+  (* constraints are caught based on reason, not error callback. Using unify_error *)
   match ck with
   | Ast.Constraint_as ->
-    decompose_subtype p env ty_sub ty_super
+    decompose_subtype p env ty_sub ty_super Errors.unify_error
   | Ast.Constraint_super ->
-    decompose_subtype p env ty_super ty_sub
+    decompose_subtype p env ty_super ty_sub Errors.unify_error
   | Ast.Constraint_eq ->
-    let env' = decompose_subtype p env ty_sub ty_super in
-    decompose_subtype p env' ty_super ty_sub
+    let env' = decompose_subtype p env ty_sub ty_super Errors.unify_error in
+    decompose_subtype p env' ty_super ty_sub Errors.unify_error
   | Ast.Constraint_pu_from -> failwith "TODO(T36532263): Pocket Universes"
 
 (* Given a constraint ty1 ck ty2 where ck is AS, SUPER or =,
@@ -2304,7 +2331,7 @@ let add_constraint
   (env : Env.env)
   (ck : Ast.constraint_kind)
   (ty_sub : locl ty)
-  (ty_super : locl ty): Env.env =
+  (ty_super : locl ty) : Env.env =
   log_subtype ~this_ty:None ~function_name:"add_constraint" env ty_sub ty_super;
   let oldsize = Env.get_tpenv_size env in
   let env' = decompose_constraint p env ck ty_sub ty_super in
@@ -2322,7 +2349,7 @@ let add_constraint
               ~f:(fun env ty_sub' ->
                 List.fold_left (Typing_set.elements (Env.get_upper_bounds env x)) ~init:env
                   ~f:(fun env ty_super' ->
-                    decompose_subtype p env ty_sub' ty_super'))) in
+                    decompose_subtype p env ty_sub' ty_super' Errors.unify_error))) in
       if Env.get_tpenv_size env' = oldsize
       then env'
       else iter (n+1) env'
@@ -2581,7 +2608,7 @@ let remove_tyvar_from_bounds env r var =
  * If freshen=true, first freshen the covariant and contravariant components of
  * the bounds.
  *)
-let bind_to_lower_bound ~freshen env r var lower_bounds =
+let bind_to_lower_bound ~freshen env r var lower_bounds on_error =
   Env.log_env_change "bind_to_lower_bound" env @@
   let env, ty = TUtils.union_list env r (TySet.elements lower_bounds) in
   (* Freshen components of the types in the union wrt their variance.
@@ -2594,7 +2621,7 @@ let bind_to_lower_bound ~freshen env r var lower_bounds =
     if freshen
     then
       let env, newty = freshen_inside_ty env ty in
-      let env = sub_type env ty newty in
+      let env = sub_type env ty newty on_error in
       env, newty
     else env, ty in
   (* If any of the components of the union are type variables, then remove
@@ -2687,7 +2714,7 @@ let ty_equal_shallow ty1 ty2 =
     ak1 = ak2
   | _ -> false
 
-let try_bind_to_equal_bound ~freshen env r var =
+let try_bind_to_equal_bound ~freshen env r var on_error =
   if tyvar_is_solved env var
   then env
   else
@@ -2709,15 +2736,15 @@ let try_bind_to_equal_bound ~freshen env r var =
         if tyvar_is_solved env var
         then
           let env, ty = Env.expand_type env (var_as_ty var) in
-          let env = sub_type env lower_bound ty in
-          let env = sub_type env ty upper_bound in
+          let env = sub_type env lower_bound ty on_error in
+          let env = sub_type env ty upper_bound on_error in
           env
         else
         if ty_equal_shallow lower_bound upper_bound
         then
           let env, ty = freshen_inside_ty env lower_bound in
-          let env = sub_type env lower_bound ty in
-          let env = sub_type env ty upper_bound in
+          let env = sub_type env lower_bound ty on_error in
+          let env = sub_type env ty upper_bound on_error in
           bind env var ty
         else env) lower_bounds env) upper_bounds env
 
@@ -2725,18 +2752,18 @@ let try_bind_to_equal_bound ~freshen env r var =
  * produces a "more specific" type, and we don't have support for intersections
  * of upper bounds
  *)
-let rec always_solve_tyvar ~freshen env r var =
+let rec always_solve_tyvar ~freshen env r var on_error =
   (* If there is a type that is both a lower and upper bound, force to that type *)
-  let env = try_bind_to_equal_bound ~freshen env r var in
+  let env = try_bind_to_equal_bound ~freshen env r var on_error in
   if tyvar_is_solved env var
   then env
   else
   let tyvar_info = Env.get_tyvar_info env var in
   let r = if r = Reason.Rnone then Reason.Rwitness tyvar_info.Env.tyvar_pos else r in
-  let env = bind_to_lower_bound ~freshen env r var tyvar_info.Env.lower_bounds in
+  let env = bind_to_lower_bound ~freshen env r var tyvar_info.Env.lower_bounds on_error in
   let env, ety = Env.expand_var env r var in
   match ety with
-  | _, Tvar var' when var <> var' -> always_solve_tyvar ~freshen env r var
+  | _, Tvar var' when var <> var' -> always_solve_tyvar ~freshen env r var on_error
   | _ -> env
 
 (* Use the variance information about a type variable to force a solution.
@@ -2753,14 +2780,14 @@ let rec always_solve_tyvar ~freshen env r var =
  *   there exist i, j such that uj <: ti, which implies ti == uj and allows
  *   us to set v := ti.
  *)
-let solve_tyvar_wrt_variance env r var =
+let solve_tyvar_wrt_variance env r var on_error =
   Typing_log.(log_with_level env "prop" 2 (fun () ->
     log_types (Reason.to_pos r) env
     [Log_head (Printf.sprintf "Typing_subtype.solve_tyvar_wrt_variance #%d"
       var, [])]));
 
   (* If there is a type that is both a lower and upper bound, force to that type *)
-  let env = try_bind_to_equal_bound ~freshen:false env r var in
+  let env = try_bind_to_equal_bound ~freshen:false env r var on_error in
   if tyvar_is_solved env var
   then env
   else
@@ -2773,7 +2800,7 @@ let solve_tyvar_wrt_variance env r var =
     (* As in Local Type Inference by Pierce & Turner, if type variable does
      * not appear at all, or only appears covariantly, solve to lower bound
      *)
-    bind_to_lower_bound ~freshen:false env r var lower_bounds
+    bind_to_lower_bound ~freshen:false env r var lower_bounds on_error
   | false, true ->
     (* As in Local Type Inference by Pierce & Turner, if type variable
      * appears only contravariantly, solve to upper bound
@@ -2783,9 +2810,9 @@ let solve_tyvar_wrt_variance env r var =
     (* Not ready to solve yet! *)
     env
 
-let solve_tyvar_wrt_variance env r var =
+let solve_tyvar_wrt_variance env r var on_error =
   let rec solve_until_concrete_ty env v =
-    let env = solve_tyvar_wrt_variance env r v in
+    let env = solve_tyvar_wrt_variance env r v on_error in
     let env, ety = Env.expand_var env r v in
     match ety with
     | _, Tvar v' when v <> v' -> solve_until_concrete_ty env v'
@@ -2793,11 +2820,11 @@ let solve_tyvar_wrt_variance env r var =
   solve_until_concrete_ty env var
 
 (* Force solve all type variables in the environment *)
-let solve_all_unsolved_tyvars env =
+let solve_all_unsolved_tyvars env on_error =
   Env.log_env_change "solve_all_unsolved_tyvars" env @@
     IMap.fold
     (fun tyvar _ env ->
-      always_solve_tyvar ~freshen:false env Reason.Rnone tyvar) env.Env.tvenv env
+      always_solve_tyvar ~freshen:false env Reason.Rnone tyvar on_error) env.Env.tvenv env
 
 (* Expand an already-solved type variable, and solve an unsolved type variable
  * by binding it to the union of its lower bounds, with covariant and contravariant
@@ -2806,10 +2833,10 @@ let solve_all_unsolved_tyvars env =
  * will be solved by
  *    #1 := vec<#2>  where C <: #2
  *)
-let expand_type_and_solve env ~description_of_expected p ty =
+let expand_type_and_solve env ~description_of_expected p ty on_error =
   let env', ety = Typing_utils.simplify_unions env ty
     ~on_tyvar:(fun env r v ->
-      let env = always_solve_tyvar ~freshen:true env r v in
+      let env = always_solve_tyvar ~freshen:true env r v on_error in
       Env.expand_var env r v) in
   match ty, ety with
   | (r, Tvar v), (_, Tunion [])
@@ -2820,10 +2847,10 @@ let expand_type_and_solve env ~description_of_expected p ty =
     env, (Reason.Rsolve_fail p, TUtils.terr env)
   | _ -> env', ety
 
-let expand_type_and_solve_eq env ty =
+let expand_type_and_solve_eq env ty on_error =
   Typing_utils.simplify_unions env ty
     ~on_tyvar:(fun env r v ->
-      let env = try_bind_to_equal_bound ~freshen:true env r v in
+      let env = try_bind_to_equal_bound ~freshen:true env r v on_error in
       Env.expand_var env r v)
 
 (* When applied to concrete types (typically classes), the `widen_concrete_type`
@@ -2883,8 +2910,8 @@ let is_nothing env ty =
  * The optional `default` parameter is used to solve a type variable
  * if `widen_concrete_type` does not produce a result.
  *)
-let expand_type_and_narrow env ?default ~description_of_expected widen_concrete_type p ty =
-  let env, ty = expand_type_and_solve_eq env ty in
+let expand_type_and_narrow env ?default ~description_of_expected widen_concrete_type p ty on_error =
+  let env, ty = expand_type_and_solve_eq env ty on_error in
   (* Deconstruct the type into union elements (if it's a union). For variables,
    * take the lower bounds. If there are no variables, then we have a concrete
    * type so just return expanded type
@@ -2911,27 +2938,27 @@ let expand_type_and_narrow env ?default ~description_of_expected widen_concrete_
     (* We really don't want to just guess `nothing` if none of the types can be widened *)
     if is_nothing env widened_ty
     (* Default behaviour is currently to force solve *)
-    then expand_type_and_solve env ~description_of_expected p ty
+    then expand_type_and_solve env ~description_of_expected p ty on_error
     else
       Errors.try_
         (fun () ->
-          let env = sub_type env ty widened_ty in
+          let env = sub_type env ty widened_ty on_error in
           env, widened_ty)
         (fun _ ->
           if Option.is_some default
           then env, widened_ty
           else
-          expand_type_and_solve env ~description_of_expected p ty)
+          expand_type_and_solve env ~description_of_expected p ty on_error)
 
 (* Solve type variables on top of stack, without losing completeness (by using
  * their variance), and pop variables off the stack
  *)
-let close_tyvars_and_solve env =
+let close_tyvars_and_solve env on_error =
   Env.log_env_change "close_tyvars_and_solve" env @@
   let tyvars = Env.get_current_tyvars env in
   let env = Env.close_tyvars env in
   List.fold_left tyvars ~init:env
-    ~f:(fun env tyvar -> solve_tyvar_wrt_variance env Reason.Rnone tyvar)
+    ~f:(fun env tyvar -> solve_tyvar_wrt_variance env Reason.Rnone tyvar on_error)
 
 let log_prop env =
   let filename = Pos.filename (Pos.to_absolute env.Env.function_pos) in
@@ -2953,8 +2980,10 @@ let log_prop env =
  * Let's at least notice when these bounds imply an equality.
  *)
 let is_sub_type env ty1 ty2 =
-  let env, ty1 = expand_type_and_solve_eq env ty1 in
-  let env, ty2 = expand_type_and_solve_eq env ty2 in
+  (* It seems weird that this can cause errors, but I'm wary of simply discarding
+   *  errors here. Using unify_error for now to maintain existing behavior. *)
+  let env, ty1 = expand_type_and_solve_eq env ty1 Errors.unify_error in
+  let env, ty2 = expand_type_and_solve_eq env ty2 Errors.unify_error in
   is_sub_type env ty1 ty2
 
 (*****************************************************************************)

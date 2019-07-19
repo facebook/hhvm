@@ -76,10 +76,10 @@ let check_param : Env.env -> Nast.fun_param -> unit =
       let env, is_container =
         Errors.try_
           (fun () ->
-            SubType.sub_type env ty container_type, true)
+            SubType.sub_type env ty container_type Errors.unify_error, true)
           (fun _ -> env, false) in
       let env = Env.set_tyvar_variance env container_type in
-      let env = SubType.close_tyvars_and_solve env in
+      let env = SubType.close_tyvars_and_solve env Errors.unify_error in
       if is_container then
         check_memoizable env type_param
       else

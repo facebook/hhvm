@@ -36,7 +36,7 @@ let widen_for_refine_shape ~expr_pos field_name env ty =
 let refine_shape field_name pos env shape =
   let env, shape =
     Typing_subtype.expand_type_and_narrow ~description_of_expected:"a shape" env
-      (widen_for_refine_shape ~expr_pos:pos field_name) pos shape in
+      (widen_for_refine_shape ~expr_pos:pos field_name) pos shape Errors.unify_error in
   let sft_ty =
     MakeType.mixed
       (Reason.Rmissing_optional_field
@@ -55,7 +55,7 @@ let refine_shape field_name pos env shape =
 
 let rec shrink_shape pos field_name env shape =
   let env, shape =
-    Typing_subtype.expand_type_and_solve ~description_of_expected:"a shape" env pos shape in
+    Typing_subtype.expand_type_and_solve ~description_of_expected:"a shape" env pos shape Errors.unify_error in
   match shape with
   | _, Tshape (shape_kind, fields) ->
       let fields = match shape_kind with
@@ -90,7 +90,7 @@ let shapes_idx_not_null env shape_ty (p, field) =
   | Some field ->
    let env, (r, shape_ty) =
     Typing_subtype.expand_type_and_narrow ~description_of_expected:"a shape" env
-      (widen_for_refine_shape ~expr_pos:p field) p (r, shape_ty) in
+      (widen_for_refine_shape ~expr_pos:p field) p (r, shape_ty) Errors.unify_error in
     begin match shape_ty with
     | Tshape (shape_kind, ftm) ->
       let env, field_type =
@@ -177,7 +177,8 @@ let idx env ~expr_pos ~fun_pos ~shape_pos shape_ty field default =
       let env =
         Type.sub_type shape_pos Reason.URparam env
           shape_ty
-          fake_super_shape_ty in
+          fake_super_shape_ty
+          Errors.unify_error in
       env,
       (if experiment_enabled env
            TypecheckerOptions.experimental_stronger_shape_idx_ret &&
@@ -188,11 +189,13 @@ let idx env ~expr_pos ~fun_pos ~shape_pos shape_ty field default =
       let env =
         Type.sub_type shape_pos Reason.URparam env
           shape_ty
-          fake_super_shape_ty in
+          fake_super_shape_ty
+          Errors.unify_error in
       let env =
         Type.sub_type default_pos Reason.URparam env
           default_ty
-          res in
+          res
+          Errors.unify_error in
       env, res
 
 let at env ~expr_pos ~shape_pos shape_ty field =
@@ -211,7 +214,8 @@ let at env ~expr_pos ~shape_pos shape_ty field =
      let env =
        Type.sub_type shape_pos Reason.URparam env
          shape_ty
-         fake_super_shape_ty in
+         fake_super_shape_ty
+         Errors.unify_error in
      env, res
 
 let remove_key p env shape_ty field  =
@@ -262,12 +266,14 @@ let to_collection env shape_ty res return_type =
 
 let to_array env pos shape_ty res =
   let env, shape_ty =
-    Typing_subtype.expand_type_and_solve ~description_of_expected:"a shape" env pos shape_ty in
+    Typing_subtype.expand_type_and_solve ~description_of_expected:"a shape" env
+      pos shape_ty Errors.unify_error in
   to_collection env shape_ty res (fun r key value ->
     (r, Tarraykind (AKmap (key, value))))
 
 let to_dict env pos shape_ty res =
   let env, shape_ty =
-    Typing_subtype.expand_type_and_solve ~description_of_expected:"a shape" env pos shape_ty in
+    Typing_subtype.expand_type_and_solve ~description_of_expected:"a shape" env
+      pos shape_ty Errors.unify_error in
   to_collection env shape_ty res (fun r key value ->
     MakeType.dict r key value)

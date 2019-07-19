@@ -109,10 +109,10 @@ let check_types_for_const env
   match (parent_type, class_type) with
     | fty_parent, fty_child when parent_abstract && class_abstract ->
       (* redeclaration of an abstract constant *)
-      Phase.sub_type_decl env fty_child fty_parent
+      Phase.sub_type_decl env fty_child fty_parent Errors.type_constant_redeclaration
     | fty_parent, _ when parent_abstract ->
       (* const definition constrained by parent abstract const *)
-      Phase.sub_type_decl env class_type fty_parent
+      Phase.sub_type_decl env class_type fty_parent Errors.type_constant_mismatch
     | _, _ when class_abstract ->
       (* Trying to override concrete type with an abstract one *)
       let pos = Reason.to_pos (fst class_type) in
@@ -120,7 +120,7 @@ let check_types_for_const env
       Errors.abstract_concrete_override pos parent_pos `constant
     | (_, _) ->
       (* types should be the same *)
-      Phase.unify_decl env parent_type class_type
+      Phase.unify_decl env parent_type class_type Errors.type_constant_mismatch
 
 (* An abstract member can be declared in multiple ancestors. Sometimes these
  * declarations can be different, but yet compatible depending on which ancestor
@@ -280,7 +280,8 @@ let check_override env ~check_member_unique member_name mem_source ?(ignore_fun_
             member_name
             ((Cls.name class_))
         | _ -> () end;
-        ignore(subtype_funs env r2 ft2 r1 ft1) in
+        (* these unify errors are collected into errorl *)
+        ignore(subtype_funs env r2 ft2 r1 ft1 Errors.unify_error) in
       check_ambiguous_inheritance check (r_parent, ft_parent) (r_child, ft_child)
         (Reason.to_pos r_child) class_ class_elt.ce_origin
     | lazy fty_parent, _ ->

@@ -57,7 +57,7 @@ val fresh_type : env -> Pos.t -> env * Tast.ty
 (** Return a type consisting of a fresh type variable *)
 
 val open_tyvars : env -> Pos.t -> env
-val close_tyvars_and_solve : env -> env
+val close_tyvars_and_solve : env -> Errors.typing_error_callback -> env
 val set_tyvar_variance : env -> Tast.ty -> env
 
 val get_class : env -> Decl_provider.class_key -> Decl_provider.class_decl option
@@ -167,7 +167,8 @@ val is_fresh_generic_parameter: string -> bool
     as part of an `instanceof`, `is`, or `as` expression (instead of being
     explicitly declared in code by the user). *)
 
-val assert_subtype: Pos.t -> Typing_reason.ureason -> env -> Tast.ty -> Tast.ty -> env
+val assert_subtype: Pos.t -> Typing_reason.ureason -> env -> Tast.ty -> Tast.ty ->
+  Errors.typing_error_callback -> env
 (** Assert that one type is a subtype of another, resolving unbound type
     variables in both types (if any), with {!env} reflecting the new state of
     these type variables. Produce an error if they cannot be subtypes. *)
@@ -238,7 +239,7 @@ val typing_env_as_tast_env : Typing_env.env -> env
 val tast_env_as_typing_env : env -> Typing_env.env
 
 val can_coerce : env -> Tast.ty ->
-  ?ty_expect_decl: Typing_defs.decl Typing_defs.ty -> Tast.ty -> env option
+  ?ty_expect_decl: Typing_defs.decl Typing_defs.ty -> Tast.ty -> Errors.typing_error_callback -> env option
 (** Return None when coercion cannot occur from the second arg to the third,
     otherwise return Some env where env is the first arg updated with coercion
     constraints. *)

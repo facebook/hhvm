@@ -129,7 +129,7 @@ let check_arraykey_index env pos container_ty index_ty =
     let ty_arraykey = MakeType.arraykey (Reason.Ridx_dict pos) in
     (* Wrap generic type mismatch error with special error code *)
     Errors.try_
-      (fun () -> Typing_coercion.coerce_type pos reason env index_ty ty_arraykey)
+      (fun () -> Typing_coercion.coerce_type pos reason env index_ty ty_arraykey Errors.unify_error)
       (fun _ ->
         Errors.invalid_arraykey pos (info_of_type container_ty) (info_of_type index_ty);
         env)
@@ -143,7 +143,7 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
       [Log_type ("ty1", ty1); Log_type("ty2", ty2)])]));
   let env, (r, ety1_ as ety1) = SubType.expand_type_and_narrow env
     ~description_of_expected:"an array or collection"
-    (widen_for_array_get ~lhs_of_null_coalesce ~expr_pos e2) array_pos ty1 in
+    (widen_for_array_get ~lhs_of_null_coalesce ~expr_pos e2) array_pos ty1 Errors.unify_error in
 
   (* This is a little weird -- we enforce the right arity when you use certain
    * collections, even in partial mode (where normally completely omitting the
@@ -182,7 +182,7 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
         then env
         (* fail with useful error *)
         else
-          Typing_ops.sub_type p reason env ty_have ty_expect in
+          Typing_ops.sub_type p reason env ty_have ty_expect Errors.index_type_mismatch in
   match ety1_ with
   | Tunion tyl ->
       let env, tyl = List.map_env env tyl begin fun env ty1 ->
@@ -409,7 +409,7 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
   | Tvar _ ->
     let env, value = Env.fresh_type env expr_pos in
     let keyed_container = MakeType.keyed_container r ty2 value in
-    let env = SubType.sub_type env ty1 keyed_container in
+    let env = SubType.sub_type env ty1 keyed_container Errors.index_type_mismatch in
     env, value
 
 (* Given a type `ty` known to be a lower bound on the type of the array operand
@@ -443,7 +443,7 @@ let widen_for_assign_array_append ~expr_pos env ty =
 let rec assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
   let env, ety1 = SubType.expand_type_and_narrow
       ~description_of_expected:"an array or collection" env
-      (widen_for_assign_array_append ~expr_pos) array_pos ty1 in
+      (widen_for_assign_array_append ~expr_pos) array_pos ty1 Errors.unify_error in
   Typing_log.(log_with_level env "typing" 1 (fun () ->
   log_types expr_pos env
     [Log_head ("assign_array_append",
@@ -455,7 +455,7 @@ let rec assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
     env, (ty1, (r, TUtils.terr env))
   | _, Tclass ((_, n), _, [tv])
     when n = SN.Collections.cVector || n = SN.Collections.cSet ->
-    let env = Typing_ops.sub_type expr_pos ur env ty2 tv in
+    let env = Typing_ops.sub_type expr_pos ur env ty2 tv Errors.unify_error in
     env, (ty1, tv)
   (* Handle the case where Vector or Set was used as a typehint
      without type parameters *)
@@ -464,13 +464,13 @@ let rec assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
     env, (ty1, (r, TUtils.tany env))
   | _, Tclass ((_, n), _, [tk; tv]) when n = SN.Collections.cMap ->
     let tpair = MakeType.pair (Reason.Rmap_append expr_pos) tk tv in
-    let env = Typing_ops.sub_type expr_pos ur env ty2 tpair in
+    let env = Typing_ops.sub_type expr_pos ur env ty2 tpair Errors.unify_error in
     env, (ty1, tpair)
   (* Handle the case where Map was used as a typehint without
      type parameters *)
   | _, Tclass ((_, n), _, []) when n = SN.Collections.cMap ->
     let tpair = MakeType.class_type (Reason.Rmap_append expr_pos) SN.Collections.cPair [] in
-    let env = Typing_ops.sub_type expr_pos ur env ty2 tpair in
+    let env = Typing_ops.sub_type expr_pos ur env ty2 tpair Errors.unify_error in
     env, (ty1, tpair)
   | r, Tclass ((_, n) as id, e, [tv])
     when n = SN.Collections.cVec || n = SN.Collections.cKeyset ->
@@ -579,7 +579,7 @@ let widen_for_assign_array_get ~expr_pos index_expr env ty =
 let rec assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
   let env, (r, ety1_ as ety1) = SubType.expand_type_and_narrow
     ~description_of_expected:"an array or collection" env
-    (widen_for_assign_array_get ~expr_pos key) array_pos ty1 in
+    (widen_for_assign_array_get ~expr_pos key) array_pos ty1 Errors.unify_error in
   Typing_log.(log_with_level env "typing" 1 (fun () ->
   log_types expr_pos env
   [Log_head ("assign_array_get",
@@ -599,7 +599,7 @@ let rec assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
       if Typing_subtype.is_sub_type env ty_have (MakeType.dynamic Reason.none)
       then env
       (* fail with useful error *)
-      else Typing_ops.sub_type p reason env ty_have ty_expect in
+      else Typing_ops.sub_type p reason env ty_have ty_expect Errors.index_type_mismatch in
   let error = env, (ety1, err_witness env expr_pos) in
   match ety1_ with
   | Tunion ty1l ->
@@ -638,7 +638,7 @@ let rec assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
       | _ -> arity_error id; err_witness env expr_pos in
     let tk = MakeType.int (Reason.Ridx_vector (fst key)) in
     let env = type_index env expr_pos tkey tk (Reason.index_class cn) in
-    let env = Typing_ops.sub_type expr_pos ur env ty2 tv in
+    let env = Typing_ops.sub_type expr_pos ur env ty2 tv Errors.unify_error in
     env, (ety1, tv)
   | Tclass ((_, cn) as id, e, argl) when cn = SN.Collections.cVec ->
     let tv = match argl with
@@ -655,7 +655,7 @@ let rec assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
       | [tk; tv] -> (tk, tv)
       | _ -> arity_error id; let any = err_witness env expr_pos in any, any in
     let env = type_index env expr_pos tkey tk (Reason.index_class cn) in
-    let env = Typing_ops.sub_type expr_pos ur env ty2 tv in
+    let env = Typing_ops.sub_type expr_pos ur env ty2 tv Errors.unify_error in
     env, (ety1, tv)
   | Tclass ((_, cn) as id, e, argl) when cn = SN.Collections.cDict ->
     let env = check_arraykey_index env expr_pos ety1 tkey in
@@ -703,7 +703,7 @@ let rec assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
     let tk = MakeType.int (Reason.Ridx (fst key, fst ety1)) in
     let tv = MakeType.string (Reason.Rwitness expr_pos) in
     let env = type_index env expr_pos tkey tk Reason.index_array in
-    let env = Typing_ops.sub_type expr_pos ur env ty2 tv in
+    let env = Typing_ops.sub_type expr_pos ur env ty2 tv Errors.unify_error in
     env, (ety1, tv)
   | Ttuple tyl ->
     let fail reason =

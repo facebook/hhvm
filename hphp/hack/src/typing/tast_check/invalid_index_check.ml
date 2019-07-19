@@ -26,7 +26,7 @@ let should_enforce env = TCO.disallow_invalid_arraykey (Env.get_tcopt env)
  *)
 let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
   let type_index env ty_have ty_expect reason =
-    match Env.can_coerce env ty_have ty_expect with
+    match Env.can_coerce env ty_have ty_expect Errors.index_type_mismatch with
     | Some _ -> ()
     | None ->
       if (Env.can_subtype env ty_have (fst ty_have, Tdynamic)
@@ -43,7 +43,7 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
       let ty_expect_str = Env.print_error_ty env ty_expect in
       let ty_have_str = Env.print_error_ty env ty_have in
         Errors.try_add_err expr_pos (Reason.string_of_ureason reason)
-        (fun () -> Errors.unify_error
+        (fun () -> Errors.index_type_mismatch
           (Typing_reason.to_string ("This is " ^ ty_expect_str) (fst ty_expect))
           (Typing_reason.to_string ("It is incompatible with " ^ ty_have_str) (fst ty_have)))
         (fun () -> ())

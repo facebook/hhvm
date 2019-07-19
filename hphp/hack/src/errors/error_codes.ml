@@ -569,6 +569,26 @@ module Typing                               = struct
   | OverrideNoDefaultTypeconst
   | ShapeAccessWithNonExistentField
   | DisallowPHPArraysAttr
+  | TypeConstraintViolation
+  | IndexTypeMismatch
+  | ExpectedStringlike
+  | TypeConstantMismatch
+  | TypeConstantRedeclaration
+  | ConstantDoesNotMatchEnumType
+  | EnumConstraintMustBeArraykey
+  | EnumSubtypeMustHaveCompatibleConstraint
+  | ParameterDefaultValueWrongType
+  | NewtypeAliasMustSatisfyConstraint
+  | BadFunctionTypevar
+  | BadClassTypevar
+  | BadMethodTypevar
+  | ReturnTypeMismatch
+  | InoutReturnTypeMismatch
+  | ClassConstantValueDoesNotMatchHint
+  | ClassPropertyInitializerTypeDoesNotMatchHint
+  | BadDeclOverride
+  | BadMethodOverride
+  | BadEnumExtends
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@ deriving enum, show { with_path = false } ]
   let err_code = to_enum

@@ -109,7 +109,7 @@ let force_awaitable env p ty =
     let wrapped_ty = wrap_awaitable env p underlying_ty in
     Errors.try_add_err p (Reason.string_of_ureason Reason.URnone)
       (fun () ->
-        let env = Typing_subtype.sub_type env wrapped_ty ty in
+        let env = Typing_subtype.sub_type env wrapped_ty ty Errors.unify_error in
         env, wrapped_ty)
       (fun () -> env, (Reason.Rwitness p, TUtils.terr env))
   | _ ->
@@ -141,6 +141,6 @@ let async_suggest_return fkind hint pos =
 let implicit_return env pos ~expected ~actual =
   let env =
     if TypecheckerOptions.disallow_implicit_returns_in_non_void_functions (Env.get_tcopt env)
-    then Typing_ops.sub_type pos Reason.URreturn env expected actual
+    then Typing_ops.sub_type pos Reason.URreturn env expected actual Errors.return_type_mismatch
     else env in
-  Typing_ops.coerce_type pos Reason.URreturn env actual expected
+  Typing_ops.coerce_type pos Reason.URreturn env actual expected Errors.return_type_mismatch

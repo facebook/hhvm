@@ -73,6 +73,7 @@ val sub_type :
   Env.env ->
   locl ty ->
   locl ty ->
+  Errors.typing_error_callback ->
   Env.env
 
 (** Make a type a subtype of string. *)
@@ -92,6 +93,7 @@ val subtype_method :
   decl fun_type ->
   Reason.t ->
   decl fun_type ->
+  Errors.typing_error_callback ->
   Env.env
 
 val subtype_reactivity :
@@ -113,6 +115,7 @@ val add_constraint :
 (* Force solve all remaining unsolved type variables *)
 val solve_all_unsolved_tyvars :
   Env.env ->
+  Errors.typing_error_callback ->
   Env.env
 
 val expand_type_and_solve :
@@ -120,6 +123,7 @@ val expand_type_and_solve :
   description_of_expected:string ->
   Pos.t ->
   locl ty ->
+  Errors.typing_error_callback ->
   Env.env * locl ty
 
 val expand_type_and_narrow :
@@ -129,10 +133,12 @@ val expand_type_and_narrow :
   (Env.env -> locl ty -> Env.env * locl ty option) ->
   Pos.t ->
   locl ty ->
+  Errors.typing_error_callback ->
   Env.env * locl ty
 
 val close_tyvars_and_solve :
   Env.env ->
+  Errors.typing_error_callback ->
   Env.env
 
 val log_prop :

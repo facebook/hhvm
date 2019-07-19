@@ -437,7 +437,8 @@ let rec bind_param env (ty1, param) =
           (* Otherwise we have an explicit type, and the default expression type
            * must be a subtype *)
           else
-            let env = Type.sub_type param.param_pos Reason.URhint env ty2 ty1 in
+            let env = Type.sub_type param.param_pos Reason.URhint env ty2 ty1
+              Errors.parameter_default_value_wrong_type in
             env, ty1 in
         env, Some te, ty1
   in
@@ -497,7 +498,7 @@ and check_inout_return env =
       let env, ety = Env.expand_type env local_ty in
       let pos = Reason.to_pos (fst ety) in
       let param_ty = Reason.Rinout_param (Reason.to_pos r), ty in
-      Type.sub_type pos Reason.URassign_inout env ety param_ty
+      Type.sub_type pos Reason.URassign_inout env ety param_ty Errors.inout_return_type_mismatch
     | _ -> env
   end
 
@@ -577,7 +578,7 @@ and fun_def tcopt f : Tast.fun_def option =
     List.map_env env f.f_tparams type_param in
   let env, user_attributes =
     List.map_env env f.f_user_attributes user_attribute in
-  let env = SubType.solve_all_unsolved_tyvars env in
+  let env = SubType.solve_all_unsolved_tyvars env Errors.bad_function_typevar in
   Typing_subtype.log_prop env;
   let fundef = {
     T.f_annotation = Env.save local_tpenv env;
@@ -734,7 +735,7 @@ and stmt env (pos, st) =
 
 and stmt_ env pos st =
   let env = Env.open_tyvars env pos in
-  (fun (env, tb) -> SubType.close_tyvars_and_solve env, tb) @@
+  (fun (env, tb) -> SubType.close_tyvars_and_solve env Errors.unify_error, tb) @@
   match st with
   | Fallthrough ->
       let env = if env.Env.in_case
@@ -813,7 +814,10 @@ and stmt_ env pos st =
         end
         else env in
       let return_type = TR.strip_condition_type_in_return env return_type in
-      let env = Type.coerce_type expr_pos Reason.URreturn env rty ?ty_expect_decl:return_type_decl return_type in
+      (* This is a unify_error rather than a return_type_mismatch because the return
+       * statement is the problem, not the return type itself. *)
+      let env = Type.coerce_type expr_pos Reason.URreturn env rty ?ty_expect_decl:return_type_decl
+        return_type Errors.unify_error in
       let env = LEnv.move_and_merge_next_in_cont env C.Exit in
       env, T.Return (Some te)
   | Do (b, e) as st ->
@@ -1103,7 +1107,7 @@ and case_list parent_locals ty env switch_pos cl =
        * in order to check for an enum *)
       if has_default
       then Env.expand_type env ty
-      else SubType.expand_type_and_solve env ~description_of_expected:"a value" switch_pos ty in
+      else SubType.expand_type_and_solve env ~description_of_expected:"a value" switch_pos ty Errors.unify_error in
     let is_enum = match snd ty with
       | Tabstract (AKnewtype (cid, _), _) -> Env.is_enum env cid
       | _ -> false in
@@ -1151,9 +1155,9 @@ and as_expr env ty1 pe e =
     let env =
       if TUtils.is_dynamic env ty1
       then env
-      else Type.sub_type pe Reason.URforeach env ty1 ty in
+      else Type.sub_type pe Reason.URforeach env ty1 ty Errors.unify_error in
     let env = Env.set_tyvar_variance env ty in
-  SubType.close_tyvars_and_solve env, tk, tv) @@
+  SubType.close_tyvars_and_solve env Errors.unify_error, tk, tv) @@
   let env, tv = Env.fresh_type env pe in
   match e with
   | As_v _ ->
@@ -1376,7 +1380,7 @@ and expr_
   env (p, e) =
   let env = Env.open_tyvars env p in
   (fun (env, te, ty) ->
-    let env = SubType.close_tyvars_and_solve env in
+    let env = SubType.close_tyvars_and_solve env Errors.unify_error in
     (* Solving type variables may leave intersections and unions unsimplified. *)
     (* TODO: possible improvement:
     simplify all intersections in type, not just at top-level. *)
@@ -1406,7 +1410,7 @@ and expr_
       (* No need to check individual subtypes if expected type is mixed or any! *)
       | (_, Tany) -> env, supertype
       | _ ->
-      let subtype_value env ty = Type.sub_type p reason env ty supertype in
+      let subtype_value env ty = Type.sub_type p reason env ty supertype Errors.unify_error in
       let env = List.fold_left tys ~init:env ~f:subtype_value in
       if List.exists tys (fun (_, ty) -> ty = Typing_utils.tany env) then
         (* If one of the values comes from PHP land, we have to be conservative
@@ -1668,7 +1672,7 @@ and expr_
     let env, te, ty = expr env e in
     (* Clone only works on objects; anything else fatals at runtime *)
     let tobj = (Reason.Rwitness p, Tobject) in
-    let env = Type.sub_type p Reason.URclone env ty tobj in
+    let env = Type.sub_type p Reason.URclone env ty tobj Errors.unify_error in
     make_result env p (T.Clone te) ty
   | This ->
       let r, _ = Env.get_self env in
@@ -2002,7 +2006,7 @@ and expr_
           | _ -> env
         else
         if s = SN.PseudoFunctions.hh_force_solve
-        then SubType.solve_all_unsolved_tyvars env
+        then SubType.solve_all_unsolved_tyvars env Errors.unify_error
         else
         if s = SN.PseudoFunctions.hh_loop_forever then (loop_forever env; env)
         else env in
@@ -2023,14 +2027,14 @@ and expr_
       let env, te1, ty1 = raw_expr ~lhs_of_null_coalesce:true env e1 in
       let env, te2, ty2 = expr ?expected env e2 in
       let env, ty1' = Env.fresh_type env (fst e1) in
-      let env = SubType.sub_type env ty1 (MakeType.nullable Reason.Rnone ty1') in
+      let env = SubType.sub_type env ty1 (MakeType.nullable Reason.Rnone ty1') Errors.unify_error in
       (* Essentially mimic a call to
        *   function coalesce<Tr, Ta as Tr, Tb as Tr>(?Ta, Tb): Tr
        * That way we let the constraint solver take care of the union logic.
        *)
       let env, ty_result = Env.fresh_type env (fst e2) in
-      let env = SubType.sub_type env ty1' ty_result in
-      let env = SubType.sub_type env ty2 ty_result in
+      let env = SubType.sub_type env ty1' ty_result Errors.unify_error in
+      let env = SubType.sub_type env ty2 ty_result Errors.unify_error in
       make_result env p (T.Binop (Ast.QuestionQuestion, te1, te2)) ty_result
   (* For example, e1 += e2. This is typed and translated as if
    * written e1 = e1 + e2.
@@ -2244,7 +2248,7 @@ and expr_
             failwith "Parsing should never allow this" in
       let Typing_env_return_info.{ return_type = expected_return; _ } = Env.get_return env in
       let env =
-        Type.coerce_type p (Reason.URyield) env rty expected_return in
+        Type.coerce_type p (Reason.URyield) env rty expected_return Errors.unify_error in
       let env = Env.forget_members env (Fake.Blame_call p) in
       let env = LEnv.save_and_merge_next_in_cont env C.Exit in
       make_result env p (T.Yield taf) (MakeType.nullable (Reason.Ryield_send p) send)
@@ -2259,7 +2263,7 @@ and expr_
     let env =
       if from_dynamic
       then env (* all set if dynamic, otherwise need to check against KeyedTraversable *)
-      else Type.coerce_type p Reason.URyield_from env yield_from_ty expected_yield_from_ty in
+      else Type.coerce_type p Reason.URyield_from env yield_from_ty expected_yield_from_ty Errors.unify_error in
     let rty = match Env.get_fn_kind env with
       | Ast.FCoroutine ->
         (* yield in coroutine is already reported as error in NastCheck *)
@@ -2273,7 +2277,7 @@ and expr_
         failwith "Parsing should never allow this" in
     let Typing_env_return_info.{ return_type = expected_return; _ } = Env.get_return env in
     let env =
-      Type.coerce_type p (Reason.URyield_from) env rty expected_return in
+      Type.coerce_type p (Reason.URyield_from) env rty expected_return Errors.unify_error in
     let env = Env.forget_members env (Fake.Blame_call p) in
     make_result env p (T.Yield_from te) (MakeType.void (Reason.Rwitness p))
   | Await e ->
@@ -2288,7 +2292,7 @@ and expr_
         match e with
         | _, Call (call_type, e, hl, el, uel) ->
           let env = Env.open_tyvars env p in
-          (fun (env, te, ty) -> SubType.close_tyvars_and_solve env, te, ty) @@
+          (fun (env, te, ty) -> SubType.close_tyvars_and_solve env Errors.unify_error, te, ty) @@
           check_call ~is_using_clause ~expected
             env p call_type e hl el uel ~in_suspend:true
         | (epos, _)  ->
@@ -2326,7 +2330,7 @@ and expr_
         then
           Errors.try_
             (fun () ->
-              SubType.sub_type env ty2 (MakeType.nonnull (fst ty2)))
+              SubType.sub_type env ty2 (MakeType.nonnull (fst ty2)) Errors.unify_error)
             (fun _ ->
               Errors.nullable_cast p (Typing_print.error env ty2) (Reason.to_pos (fst ty2));
               env)
@@ -2584,7 +2588,7 @@ and expr_
             obj_get ~obj_pos:(fst sid) ~is_method:false ~nullsafe:None env obj cid
               namepstr (fun x -> x) in
           let ureason = Reason.URxhp ((Cls.name class_info), snd namepstr) in
-          Type.coerce_type valp ureason env valty declty
+          Type.coerce_type valp ureason env valty declty Errors.unify_error
         end ~init:env in
         make_result env p txml obj
       )
@@ -2646,9 +2650,9 @@ and class_const ?(incl_tc=false) env p ((cpos, cid), mid) =
     | None ->
       make_result env p (T.Class_const (ce, mid)) const_ty
 
-and anon_sub_type pos ur env ty_sub ty_super =
+and anon_sub_type pos ur env ty_sub ty_super on_error =
   Errors.try_add_err pos (Reason.string_of_ureason ur)
-    (fun () -> SubType.sub_type env ty_sub ty_super)
+    (fun () -> SubType.sub_type env ty_sub ty_super on_error)
     (fun () -> env)
 
 and anon_coerce_type pos ur env ty_have ty_expect =
@@ -2725,7 +2729,7 @@ and anon_bind_param params (env, t_params) ty : Env.env * Tast.fun_param list =
           { (Phase.env_with_self env) with from_class = Some CIstatic } in
         let env, h = Phase.localize ~ety_env env h in
         let pos = Reason.to_pos (fst ty) in
-        let env = anon_coerce_type pos Reason.URparam env ty h in
+        let env = anon_coerce_type pos Reason.URparam env ty h Errors.unify_error in
         (* Closures are allowed to have explicit type-hints. When
          * that is the case we should check that the argument passed
          * is compatible with the type-hint.
@@ -2755,7 +2759,7 @@ and anon_bind_variadic env vparam variadic_ty =
         { (Phase.env_with_self env) with from_class = Some CIstatic; } in
       let env, h = Phase.localize ~ety_env env h in
       let pos = Reason.to_pos (fst variadic_ty) in
-      let env = anon_coerce_type pos Reason.URparam env variadic_ty h in
+      let env = anon_coerce_type pos Reason.URparam env variadic_ty h Errors.unify_error in
       env, h, vparam.param_pos
   in
   let r = Reason.Rvar_param pos in
@@ -2784,7 +2788,7 @@ and anon_check_param env param =
       let env, hty = Phase.localize_hint_with_self env hty in
       let paramty = Env.get_local env (Local_id.make_unscoped param.param_name) in
       let hint_pos = Reason.to_pos (fst hty) in
-      let env = Type.coerce_type hint_pos Reason.URhint env paramty hty in
+      let env = Type.coerce_type hint_pos Reason.URhint env paramty hty Errors.unify_error in
       env
 
 and stash_conts_for_anon env p is_anon captured f =
@@ -3017,7 +3021,7 @@ and check_expected_ty message env inferred_ty (expected: ExpectedTy.t option) =
       [Log_head (Printf.sprintf "Typing.check_expected_ty %s" message,
        [Log_type ("inferred_ty", inferred_ty);
         Log_type ("expected_ty", expected_ty)])]));
-    Type.coerce_type p ur env inferred_ty ?ty_expect_decl expected_ty
+    Type.coerce_type p ur env inferred_ty ?ty_expect_decl expected_ty Errors.unify_error
 
 and new_object
   ~(expected: ExpectedTy.t option)
@@ -3134,7 +3138,7 @@ and new_object
            * for generic and dependent types to be correctly carried
            * through the 'new $foo()' iff the constructed obj_ty is a
            * supertype of the variable-dictated c_ty *)
-          let env = SubType.sub_type env c_ty obj_ty in
+          let env = SubType.sub_type env c_ty obj_ty Errors.unify_error in
           gather env tel tuel ((c_ty,ctor_fty)::res) classes
   in
   gather env [] [] [] classes
@@ -3175,7 +3179,7 @@ and uninstantiable_error env reason_pos cid c_tc_pos c_name c_usage_pos c_ty =
 
 and exception_ty pos env ty =
   let exn_ty = MakeType.throwable (Reason.Rthrow pos) in
-  Type.sub_type pos (Reason.URthrow) env ty exn_ty
+  Type.sub_type pos (Reason.URthrow) env ty exn_ty Errors.unify_error
 
 and shape_field_pos = function
   | Ast.SFlit_int (p, _) | Ast.SFlit_str (p, _) -> p
@@ -3259,7 +3263,7 @@ and assign_ p ur env e1 ty2 =
       TUtils.try_over_concrete_supertypes env folded_ty2
         begin fun env ty2 ->
           let env, ty2 = SubType.expand_type_and_solve
-            ~description_of_expected:"assignable value" env p ty2 in
+            ~description_of_expected:"assignable value" env p ty2 Errors.unify_error in
           match ty2 with
           (* Vector<t> or ImmVector<t> or ConstVector<t> or vec<T> *)
           | (_, Tclass ((_, x), _, [elt_type]))
@@ -3340,9 +3344,9 @@ and assign_ p ur env e1 ty2 =
           let env, tyl = List.map_env env el
              ~f:(fun env _ -> Env.fresh_type env (Reason.to_pos r)) in
           let tuple_ty = (Reason.Rwitness (fst e1), Ttuple tyl) in
-          let env = Type.sub_type p ur env folded_ty2 tuple_ty in
+          let env = Type.sub_type p ur env folded_ty2 tuple_ty Errors.unify_error in
           let env = Env.set_tyvar_variance env tuple_ty in
-          let env = SubType.close_tyvars_and_solve env in
+          let env = SubType.close_tyvars_and_solve env Errors.unify_error in
           let env, reversed_tel =
             List.fold2_exn el tyl ~init:(env,[]) ~f:(fun (env,tel) lvalue ty2 ->
             let env, te, _ = assign p env lvalue ty2 in
@@ -3372,7 +3376,7 @@ and assign_ p ur env e1 ty2 =
       let env, tobj, obj_ty = expr ~accept_using_var:true no_fakes obj in
       let env = might_throw env in
       let k (env, member_ty, member_ty_decl, vis) =
-        let env = Type.coerce_type p ur env ty2 ?ty_expect_decl:member_ty_decl member_ty in
+        let env = Type.coerce_type p ur env ty2 ?ty_expect_decl:member_ty_decl member_ty Errors.unify_error in
         env, member_ty, member_ty_decl, vis in
       let env, result =
         obj_get ~obj_pos:(fst obj) ~is_method:false ~nullsafe ~valkind:`lvalue
@@ -3399,7 +3403,7 @@ and assign_ p ur env e1 ty2 =
       let env, te1, real_type = lvalue no_fakes e1 in
       let env, exp_real_type = Env.expand_type env real_type in
       let env = { env with Env.lenv = lenv } in
-      let env = Type.coerce_type p ur env ty2 exp_real_type in
+      let env = Type.coerce_type p ur env ty2 exp_real_type Errors.unify_error in
       env, te1, ty2
   | _, Class_get (_, CGexpr _) -> failwith "AST should not have any CGexprs after naming"
   | _, Class_get ((pos_classid, x), CGstring (pos_member, y)) ->
@@ -3412,7 +3416,7 @@ and assign_ p ur env e1 ty2 =
       let env, _, cty = static_class_id ~check_constraints:false pos_classid env [] x in
       let env = might_throw env in
       let k (env, locl_ty, decl_ty, cc_abstract_info) =
-        let env = Type.coerce_type p ur env ety2 ?ty_expect_decl:decl_ty locl_ty in
+        let env = Type.coerce_type p ur env ety2 ?ty_expect_decl:decl_ty locl_ty Errors.unify_error in
         env, locl_ty, decl_ty, cc_abstract_info in
       let env, _, _ =
         class_get ~is_method:false ~is_const:false env cty (pos_member, y) x k in
@@ -3448,7 +3452,7 @@ and assign_ p ur env e1 ty2 =
 
 and assign_simple pos ur env e1 ty2 =
   let env, te1, ty1 = lvalue env e1 in
-  let env = Type.coerce_type pos ur env ty2 ty1 in
+  let env = Type.coerce_type pos ur env ty2 ty1 Errors.unify_error in
   env, te1, ty2
 
 and array_field env = function
@@ -3471,7 +3475,7 @@ and array_field_value ~(expected: ExpectedTy.t option) env = function
 and arraykey_value p class_name ~(expected: ExpectedTy.t option) env ((pos, _) as x) =
   let env, (te, ty) = array_value ~expected env x in
   let ty_arraykey = MakeType.arraykey (Reason.Ridx_dict pos) in
-  let env = Type.sub_type p (Reason.index_class class_name) env ty ty_arraykey in
+  let env = Type.sub_type p (Reason.index_class class_name) env ty ty_arraykey Errors.unify_error in
   env, (te, ty)
 
 and array_field_key ~(expected: ExpectedTy.t option) env = function
@@ -3490,8 +3494,8 @@ and check_parent_construct pos env el uel env_parent =
       ~is_using_clause:false
       pos env CIparent [] el uel in
   (* Not sure why we need to equate these types *)
-  let env = Type.sub_type pos (Reason.URnone) env env_parent parent in
-  let env = Type.sub_type pos (Reason.URnone) env parent env_parent in
+  let env = Type.sub_type pos (Reason.URnone) env env_parent parent Errors.unify_error in
+  let env = Type.sub_type pos (Reason.URnone) env parent env_parent Errors.unify_error in
   env, tel, tuel, MakeType.void (Reason.Rwitness pos), parent, fty
 
 and call_parent_construct pos env el uel =
@@ -3579,7 +3583,7 @@ and call_parent_construct pos env el uel =
      * see T37483866 and the linked diff for discussion.
      *)
     let rec is_coroutine env ty =
-      let env, ety = SubType.expand_type_and_solve env (Reason.to_pos (fst ty)) ty
+      let env, ety = SubType.expand_type_and_solve env (Reason.to_pos (fst ty)) ty Errors.unify_error
         ~description_of_expected:"a function value" in
       match snd ety with
       | Tfun { ft_is_coroutine = true; _ } ->
@@ -3698,7 +3702,7 @@ and call_parent_construct pos env el uel =
                  (r, Tarraykind (AKmap (tmixed, tmixed)))
                else (r, Tarraykind AKany)]) in
            Errors.try_
-             (fun () -> SubType.sub_type env ty super)
+             (fun () -> SubType.sub_type env ty super Errors.unify_error)
              (fun _ ->
                checked_unset_error p
                  (Reason.to_string ("This is " ^ Typing_print.error env ty) (fst ty));
@@ -3755,7 +3759,7 @@ and call_parent_construct pos env el uel =
             Errors.try_
               (fun () ->
                 let keyed_container_type = MakeType.keyed_container Reason.Rnone tk tv in
-                let env = SubType.sub_type env ety keyed_container_type in
+                let env = SubType.sub_type env ety keyed_container_type Errors.unify_error in
                 let env, tv = get_value_type env tv in
                 env, (r, Tarraykind (AKmap (
                   (explain_array_filter tk),
@@ -3764,7 +3768,7 @@ and call_parent_construct pos env el uel =
               (fun _ -> Errors.try_
                 (fun () ->
                   let container_type = MakeType.container Reason.Rnone tv in
-                  let env = SubType.sub_type env ety container_type in
+                  let env = SubType.sub_type env ety container_type Errors.unify_error in
                   let env, tv = get_value_type env tv in
                   env, (r, Tarraykind (AKmap (
                     (explain_array_filter (MakeType.arraykey r)),
@@ -3907,20 +3911,20 @@ and call_parent_construct pos env el uel =
                 let env, tv = Env.fresh_type env p in
                 let try_vector env =
                   let vector_type = MakeType.const_vector r_fty tv in
-                  let env = SubType.sub_type env x vector_type in
+                  let env = SubType.sub_type env x vector_type Errors.unify_error in
                   env, (fun tr -> (r, Tarraykind (
                     AKvec(tr)
                   ))) in
                 let try_keyed_container env =
                   let keyed_container_type = MakeType.keyed_container r_fty tk tv in
-                  let env = SubType.sub_type env x keyed_container_type in
+                  let env = SubType.sub_type env x keyed_container_type Errors.unify_error in
                   env, (fun tr -> (r, Tarraykind (AKmap (
                     tk,
                     tr
                   )))) in
                 let try_container env =
                   let container_type = MakeType.container r_fty tv in
-                  let env = SubType.sub_type env x container_type in
+                  let env = SubType.sub_type env x container_type Errors.unify_error in
                   env, (fun tr -> (r, Tarraykind (AKmap (
                     (MakeType.arraykey r),
                     tr)))) in
@@ -4232,7 +4236,7 @@ and call_parent_construct pos env el uel =
   | _ ->
       let env, te, fty = expr env e in
       let env, fty = SubType.expand_type_and_solve
-        ~description_of_expected:"a function value" env fpos fty in
+        ~description_of_expected:"a function value" env fpos fty Errors.unify_error in
       let env = check_coroutine_call env fty in
       let env, (tel, tuel, ty) = call ~expected p env fty ~fty_decl:None el uel in
       make_call env te tal tel tuel ty
@@ -4731,9 +4735,9 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~obj_pos
   env ty1 cid (id_pos, id_str as id) k k_lhs =
   let env, ety1 =
     if is_method
-    then SubType.expand_type_and_solve env ~description_of_expected:"an object" obj_pos ty1
+    then SubType.expand_type_and_solve env ~description_of_expected:"an object" obj_pos ty1 Errors.unify_error
     else SubType.expand_type_and_narrow env ~description_of_expected:"an object"
-      (widen_class_for_obj_get ~is_method ~nullsafe id_str) obj_pos ty1 in
+      (widen_class_for_obj_get ~is_method ~nullsafe id_str) obj_pos ty1 Errors.unify_error in
   let nullable_obj_get ty = match nullsafe with
     | Some p1 ->
         let env, method_, method_decl_, x = obj_get_ ~obj_pos ~is_method ~nullsafe ~valkind
@@ -5040,7 +5044,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
   | CIexpr (p, _ as e) ->
       let env, te, ty = expr env e in
       let rec resolve_ety env ty =
-        let env, ty = SubType.expand_type_and_solve ~description_of_expected:"an object" env p ty in
+        let env, ty = SubType.expand_type_and_solve ~description_of_expected:"an object" env p ty Errors.unify_error in
         let env, ty = TUtils.fold_unresolved env ty in
         match TUtils.get_base_type env ty with
         | _, Tabstract (AKnewtype (classname, [the_cls]), _) when
@@ -5187,7 +5191,7 @@ and call ~(expected: ExpectedTy.t option) ?method_call_info pos env fty ~fty_dec
   let make_unpacked_traversable_ty pos ty = MakeType.traversable (Reason.Runpack_param pos) ty in
   let resl = TUtils.try_over_concrete_supertypes env fty begin fun env fty ->
     let env, efty = SubType.expand_type_and_solve
-      ~description_of_expected:"a function value" env pos fty in
+      ~description_of_expected:"a function value" env pos fty Errors.unify_error in
     match efty with
     | _, (Terr | Tany | Tunion [] | Tdynamic) ->
       let el = el @ uel in
@@ -5330,7 +5334,7 @@ and call ~(expected: ExpectedTy.t option) ?method_call_info pos env fty ~fty_dec
            * parameter types *)
           let env, te, ty = expr env e in
           let env, ety = SubType.expand_type_and_solve
-            ~description_of_expected:"an unpackable value" env (fst e) ty in
+            ~description_of_expected:"an unpackable value" env (fst e) ty Errors.unify_error in
           match ety with
           | _, Ttuple tyl ->
             let rec check_elements env tyl paraml dparaml =
@@ -5357,7 +5361,7 @@ and call ~(expected: ExpectedTy.t option) ?method_call_info pos env fty ~fty_dec
             let env = List.fold_right param_tyl ~init:env
               ~f:(fun param_ty env ->
               let traversable_ty = make_unpacked_traversable_ty pos param_ty in
-              Type.sub_type pos Reason.URparam env ety traversable_ty)
+              Type.sub_type pos Reason.URparam env ety traversable_ty Errors.unify_error)
             in
             env, [te], List.length el, true
       in
@@ -5405,7 +5409,7 @@ and call ~(expected: ExpectedTy.t option) ?method_call_info pos env fty ~fty_dec
            *)
           let env, ty = Env.fresh_type env pos in
           let traversable_ty = make_unpacked_traversable_ty pos ty in
-          let env = Type.sub_type pos Reason.URparam env ety traversable_ty in
+          let env = Type.sub_type pos Reason.URparam env ety traversable_ty Errors.unify_error in
           let param =
              { fp_pos = pos;
                fp_name = None;
@@ -5476,7 +5480,7 @@ and call_param env param opt_dparam ((pos, _ as e), arg_ty) ~is_variadic =
     | Lvar _ -> ExprDepTy.make env (CIexpr e) arg_ty
     | _ -> env, arg_ty in
   let ty_expect_decl = Option.map ~f:(fun p -> p.fp_type) opt_dparam in
-  Type.coerce_type pos Reason.URparam env dep_ty ?ty_expect_decl param.fp_type
+  Type.coerce_type pos Reason.URparam env dep_ty ?ty_expect_decl param.fp_type Errors.unify_error
 
 and call_untyped_unpack env uel = match uel with
   (* In the event that we don't have a known function call type, we can still
@@ -5492,7 +5496,7 @@ and call_untyped_unpack env uel = match uel with
       let env, ty = Env.fresh_type env pos in
       let unpack_r = Reason.Runpack_param pos in
       let unpack_ty = MakeType.traversable unpack_r ty in
-      Type.coerce_type pos Reason.URparam env ety unpack_ty
+      Type.coerce_type pos Reason.URparam env ety unpack_ty Errors.unify_error
     end
   end
 
@@ -5508,14 +5512,14 @@ and check_dynamic_or_enforce_num env p t r =
   if TUtils.is_dynamic env t
   then env, true
   else
-    let env = Type.sub_type p Reason.URnone env t (MakeType.num r) in
+    let env = Type.sub_type p Reason.URnone env t (MakeType.num r) Errors.unify_error in
     let widen_for_arithmetic env ty =
       match ty with
       | _, Tprim Tfloat -> env, Some ty
       | _ -> env, None in
     let default = MakeType.num (Reason.Rarith p) in
     let env, _ = SubType.expand_type_and_narrow env ~default
-      ~description_of_expected:"a number" widen_for_arithmetic p t in
+      ~description_of_expected:"a number" widen_for_arithmetic p t Errors.unify_error in
     env, false
 
 (* Checking of numeric operands for arithmetic operators that work only
@@ -5528,7 +5532,7 @@ and check_dynamic_or_enforce_int env p t r =
   if TUtils.is_dynamic env t
   then env, true
   (* Next make sure that it's a subtype of int *)
-  else Type.sub_type p Reason.URnone env t (MakeType.int r), false
+  else Type.sub_type p Reason.URnone env t (MakeType.int r) Errors.unify_error, false
 
 (* Secondary check of numeric operand for arithmetic operators. We've
  * already enforced num and tried to infer a float. Now let's
@@ -5543,7 +5547,7 @@ and expand_type_and_narrow_to_int env p ty =
       | _ -> env, None in
     let default = MakeType.int (Reason.Rarith p) in
     SubType.expand_type_and_narrow env ~default
-      ~description_of_expected:"a number" widen_for_arithmetic p ty
+      ~description_of_expected:"a number" widen_for_arithmetic p ty Errors.unify_error
 
 and is_float env t = SubType.is_sub_type env t (MakeType.float Reason.Rnone)
 
@@ -6412,7 +6416,7 @@ and class_def_ env c tc =
   let env, tparams = class_type_param env c.c_tparams in
   let env, user_attributes =
     List.map_env env c.c_user_attributes user_attribute in
-  let env = SubType.solve_all_unsolved_tyvars env in
+  let env = SubType.solve_all_unsolved_tyvars env Errors.bad_class_typevar in
   Typing_subtype.log_prop env;
   {
     T.c_span = c.c_span;
@@ -6523,8 +6527,9 @@ and typeconst_def env {
 } =
   let env, cstr = opt Phase.localize_hint_with_self env c_tconst_constraint in
   let env, ty = opt Phase.localize_hint_with_self env hint in
+  let check = fun t c -> (Type.sub_type pos Reason.URtypeconst_cstr env t c Errors.unify_error) in
   ignore (
-    Option.map2 ty cstr ~f:(Type.sub_type pos Reason.URtypeconst_cstr env)
+    Option.map2 ty cstr ~f:(check)
   );
   let env = begin match hint with
     | Some (pos, Hshape { nsi_field_map; _ }) ->
@@ -6562,7 +6567,8 @@ and class_const_def env cc =
     match e with
       | Some e ->
         let env, te, ty' = expr ?expected:opt_expected env e in
-        let env = Type.coerce_type (fst id) Reason.URhint env ty' ty in
+        let env = Type.coerce_type (fst id) Reason.URhint env ty' ty
+          Errors.class_constant_value_does_not_match_hint in
         env, Some te, ty'
       | None ->
         env, None, ty
@@ -6628,7 +6634,8 @@ and class_var_def ~is_static env cv =
             reason = ur;
             locl_ty = cty;
             decl_ty = decl_cty;
-          }) -> Type.coerce_type p ur env ty ?ty_expect_decl:decl_cty cty in
+          }) -> Type.coerce_type p ur env ty ?ty_expect_decl:decl_cty cty
+            Errors.class_property_initializer_type_does_not_match_hint in
       env, Some te in
   let env =
     if is_static
@@ -6685,6 +6692,7 @@ and supertype_redeclared_method tc env m =
           ft_child
           r_parent
           ft_parent
+          Errors.unify_error
         ))
       ) (fun errorl ->
         Errors.try_
@@ -6852,7 +6860,7 @@ and method_def env m =
     List.map_env env m.m_tparams type_param in
   let env, user_attributes =
     List.map_env env m.m_user_attributes user_attribute in
-  let env = SubType.solve_all_unsolved_tyvars env in
+  let env = SubType.solve_all_unsolved_tyvars env Errors.bad_method_typevar in
   Typing_subtype.log_prop env;
   let method_def = {
     T.m_annotation = Env.save local_tpenv env;
@@ -6903,6 +6911,7 @@ and typedef_def tcopt typedef  =
       let cstr = Decl_hint.hint env.Env.decl_env tcstr in
       let env, cstr = Phase.localize_with_self env cstr in
       Typing_ops.sub_type t_pos Reason.URnewtype_cstr env ty cstr
+        Errors.newtype_alias_must_satisfy_constraint
     | _ -> env
   end in
   let env = begin match hint with
@@ -6942,7 +6951,7 @@ and gconst_def tcopt cst =
       let env, te, value_type =
         let expected = ExpectedTy.make (fst hint) Reason.URhint dty in
         expr ~expected env value in
-      let env = Typing_utils.sub_type env value_type dty in
+      let env = Typing_utils.sub_type env value_type dty Errors.unify_error in
       te, env
     | None ->
       let env, te, _value_type = expr env value in

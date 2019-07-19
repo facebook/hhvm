@@ -280,7 +280,7 @@ and create_root_from_type_constant env (root_ty_r, _ as root) class_pos class_na
         if as_tyvar_with_cnstr then
           let tenv, tvar = Env.fresh_invariant_type_var tenv tconst_pos in
           Log.log_new_tvar_for_tconst_access tenv tconst_pos tvar class_name tconst;
-          let tenv = Typing_utils.sub_type tenv tvar cstr in
+          let tenv = Typing_utils.sub_type tenv tvar cstr Errors.unify_error in
           tenv, tvar
         else
           let ty = reason, Tabstract (AKgeneric ty_name, None) in

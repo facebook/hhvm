@@ -26,7 +26,7 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
   let r = Reason.Rwitness p in
   let rec extract_inner env opt_ty_maybe =
     let env, e_opt_ty =
-      SubType.expand_type_and_solve ~description_of_expected:"an Awaitable" env p opt_ty_maybe in
+      SubType.expand_type_and_solve ~description_of_expected:"an Awaitable" env p opt_ty_maybe Errors.unify_error in
     (match e_opt_ty with
     | _, Tunion tyl ->
       (* If we cannot fold the union into a single type, we need to look at
@@ -65,13 +65,14 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
           | Tabstract _ | Tclass _ | Ttuple _ | Tanon _ | Tintersection _
           | Toption _ | Tunion _ | Tobject | Tshape _) -> type_var
       in
-      let env = Type.sub_type p Reason.URawait env opt_ty_maybe expected_type in
+      let env = Type.sub_type p Reason.URawait env opt_ty_maybe expected_type
+        Errors.unify_error in
       env, return_type
     )
   in
   let env = Env.open_tyvars env p in
   let env, ty = extract_inner env opt_ty_maybe in
-  let env = SubType.close_tyvars_and_solve env in
+  let env = SubType.close_tyvars_and_solve env Errors.unify_error in
   env, ty
 
 let overload_extract_from_awaitable_list env p tyl =

@@ -42,7 +42,7 @@ type expand_typedef =
 let (expand_typedef_ref : expand_typedef ref) = ref not_implemented
 let expand_typedef x = !expand_typedef_ref x
 
-type sub_type = Env.env -> locl ty -> locl ty -> Env.env
+type sub_type = Env.env -> locl ty -> locl ty -> Errors.typing_error_callback -> Env.env
 let (sub_type_ref: sub_type ref) = ref not_implemented
 let sub_type x = !sub_type_ref x
 
@@ -61,7 +61,8 @@ type add_constraint = Pos.Map.key -> Env.env -> Ast.constraint_kind -> locl ty -
 let (add_constraint_ref: add_constraint ref) = ref not_implemented
 let add_constraint x = !add_constraint_ref x
 
-type expand_type_and_solve_type = Env.env -> description_of_expected:string -> Pos.t -> locl ty -> Env.env * locl ty
+type expand_type_and_solve_type = Env.env -> description_of_expected:string -> Pos.t -> locl ty ->
+  Errors.typing_error_callback -> Env.env * locl ty
 let (expand_type_and_solve_ref: expand_type_and_solve_type ref) = ref not_implemented
 let expand_type_and_solve env ~description_of_expected = !expand_type_and_solve_ref env ~description_of_expected
 
@@ -111,13 +112,15 @@ let localize_with_self x = !localize_with_self_ref x
 
 type coerce_type =
   Pos.t ->
-  ?sub_fn:(Pos.t -> Reason.ureason -> Env.env -> locl ty -> locl ty -> Env.env) ->
-  Reason.ureason -> Env.env -> locl ty -> ?ty_expect_decl: decl ty -> locl ty -> Env.env
+  ?sub_fn:(Pos.t -> Reason.ureason -> Env.env -> locl ty -> locl ty ->
+    Errors.typing_error_callback -> Env.env) ->
+  Reason.ureason -> Env.env -> locl ty -> ?ty_expect_decl: decl ty -> locl ty ->
+    Errors.typing_error_callback -> Env.env
 let (coerce_type_ref : coerce_type ref) = ref not_implemented
 let coerce_type x = !coerce_type_ref x
 
 type can_coerce = Env.env -> ?ur:Reason.ureason -> locl ty -> ?ty_expect_decl: decl ty -> locl ty ->
-  Env.env option
+  Errors.typing_error_callback -> Env.env option
 let (can_coerce_ref : can_coerce ref) = ref not_implemented
 let can_coerce x = !can_coerce_ref x
 
@@ -354,7 +357,7 @@ let reactivity_to_string env r =
 (*****************************************************************************)
 (* Unification error *)
 (*****************************************************************************)
-let uerror env r1 ty1 r2 ty2 =
+let uerror env r1 ty1 r2 ty2 on_error =
   let ty1 = Typing_print.with_blank_tyvars (fun () -> Typing_print.full_strip_ns env (r1,ty1)) in
   let ty2 = Typing_print.with_blank_tyvars (fun () -> Typing_print.full_strip_ns env (r2,ty2)) in
   let ty1, ty2 =
@@ -367,7 +370,7 @@ let uerror env r1 ty1 r2 ty2 =
   match (r1, r2) with
   | Reason.Rcstr_on_generics (p, tparam), _ | _, Reason.Rcstr_on_generics (p, tparam) ->
     Errors.violated_constraint p tparam left right
-  | _ -> Errors.unify_error left right
+  | _ -> on_error left right
 
 let get_printable_shape_field_name = Env.get_shape_field_name
 
@@ -464,7 +467,7 @@ let rec push_option_out pos env ty =
     if List.exists lower_bounds (has_null env)
     then begin
       let env, ty = expand_type_and_solve env
-        ~description_of_expected:"a value of known type" pos ty in
+        ~description_of_expected:"a value of known type" pos ty Errors.unify_error in
       push_option_out pos env ty
     end
     else env, ty

@@ -62,11 +62,13 @@ val sub_type_decl:
   Env.env ->
   decl ty ->
   decl ty ->
+  Errors.typing_error_callback ->
   unit
 val unify_decl:
   Env.env ->
   decl ty ->
   decl ty ->
+  Errors.typing_error_callback ->
   unit
 val check_tparams_constraints:
   use_pos:Pos.t ->

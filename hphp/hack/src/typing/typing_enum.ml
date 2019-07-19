@@ -74,7 +74,8 @@ let check_valid_array_key_type f_fail ~allow_any:allow_any env p t =
 let enum_check_const ty_exp env cc t =
   let p = fst cc.cc_id in
   (* Constants need to be subtypes of the enum type *)
-  let env = Typing_ops.sub_type p Reason.URenum env t ty_exp in
+  let env = Typing_ops.sub_type p Reason.URenum env t ty_exp
+    Errors.constant_does_not_match_enum_type in
   (* Make sure the underlying type of the constant is an int
    * or a string. This matters because we need to only allow
    * int and string constants (since only they can be array
@@ -133,8 +134,9 @@ let enum_class_check env tc consts const_types =
                Tprim Tarraykey
              ) in
              let env = Typing_ops.sub_type (Cls.pos tc) Reason.URenum_cstr env
-               ty ty_arraykey in
+               ty ty_arraykey Errors.enum_constraint_must_be_arraykey in
              Typing_ops.sub_type (Cls.pos tc) Reason.URenum_cstr env ty_exp ty
+               Errors.enum_subtype_must_have_compatible_constraint
           | None -> env) in
 
         List.fold2_exn ~f:(enum_check_const ty_exp) ~init:env consts const_types

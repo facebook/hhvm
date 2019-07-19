@@ -116,7 +116,7 @@ let force_null_union env r t =
 *)
 
 (* checks coercion that isn't just subtyping *)
-let rec can_coerce env ?(ur=Reason.URnone) ty_have ?ty_expect_decl ty_expect =
+let rec can_coerce env ?(ur=Reason.URnone) ty_have ?ty_expect_decl ty_expect on_error =
   let env, ety_expect = Env.expand_type env ty_expect in
   let env, ety_have = Env.expand_type env ty_have in
   match ety_have, ety_expect with
@@ -153,25 +153,25 @@ let rec can_coerce env ?(ur=Reason.URnone) ty_have ?ty_expect_decl ty_expect =
      * errors will be emitted *)
     Some (List.fold tyl ~init:env ~f:(fun env ty ->
       let p = Reason.to_pos (fst ty) in
-      coerce_type p ur env ty ?ty_expect_decl ty_expect
+      coerce_type p ur env ty ?ty_expect_decl ty_expect on_error
     ))
 
   (* TODO: remove in accordance with T45650596 *)
   | (r, Toption t), _
     when (TypecheckerOptions.coercion_from_dynamic (Env.get_tcopt env)) ->
     let union: locl ty = force_null_union env r t in
-    can_coerce env ~ur union ?ty_expect_decl ty_expect
+    can_coerce env ~ur union ?ty_expect_decl ty_expect on_error
 
   (* TODO: remove in accordance with T45650596 *)
-  | _, (_, Toption ty) -> can_coerce env ty_have ?ty_expect_decl ty
+  | _, (_, Toption ty) -> can_coerce env ty_have ?ty_expect_decl ty on_error
 
   | _ -> None
 
 (* does coercion, including subtyping *)
-and coerce_type p ?sub_fn:(sub=Typing_ops.sub_type) ur env ty_have ?ty_expect_decl ty_expect =
-  match can_coerce env ~ur ty_have ?ty_expect_decl ty_expect with
+and coerce_type p ?sub_fn:(sub=Typing_ops.sub_type) ur env ty_have ?ty_expect_decl ty_expect on_error =
+  match can_coerce env ~ur ty_have ?ty_expect_decl ty_expect on_error with
   | Some e -> e
-  | None -> sub p ur env ty_have ty_expect
+  | None -> sub p ur env ty_have ty_expect on_error
 
 (* does coercion if possible, returning Some env with resultant coercion constraints
  * otherwise suppresses errors from attempted coercion and returns None *)
@@ -180,7 +180,7 @@ let try_coerce ?sub_fn:(sub=Typing_ops.sub_type) p ur env ty_have ty_expect =
   Errors.is_hh_fixme := (fun _ _ -> false);
   let result =
     Errors.try_
-      (fun () -> Some (coerce_type ~sub_fn:sub p ur env ty_have ty_expect))
+      (fun () -> Some (coerce_type ~sub_fn:sub p ur env ty_have ty_expect Errors.unify_error))
       (fun _ -> None) in
   Errors.is_hh_fixme := f;
   result

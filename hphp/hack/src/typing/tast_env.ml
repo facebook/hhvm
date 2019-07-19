@@ -98,8 +98,8 @@ let get_reified = Typing_env.get_reified
 let get_enforceable = Typing_env.get_enforceable
 let get_newable = Typing_env.get_newable
 
-let assert_subtype p reason env ty_have ty_expect =
-  Typing_ops.sub_type p reason env ty_have ty_expect
+let assert_subtype p reason env ty_have ty_expect on_error =
+  Typing_ops.sub_type p reason env ty_have ty_expect on_error
 
 let is_sub_type env ty_sub ty_super =
   Typing_subtype.is_sub_type env ty_sub ty_super

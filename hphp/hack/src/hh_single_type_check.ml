@@ -215,6 +215,7 @@ let parse_options () =
   let disable_outside_dollar_str_interp = ref false in
   let disable_linter_fixmes = ref false in
   let allow_new_attribute_syntax = ref false in
+  let allow_toplevel_requires = ref false in
   let global_inference = ref false in
   let options = [
     "--ai",
@@ -462,6 +463,9 @@ let parse_options () =
     "--allow-new-attribute-syntax",
       Arg.Set allow_new_attribute_syntax,
       "Allow the new @ attribute syntax (disables legacy soft typehints)";
+    "--allow-toplevel-requires",
+      Arg.Set allow_toplevel_requires,
+      "Allow `require()` and similar at the top-level in strict files";
     "--global-inference",
       Arg.Set global_inference,
       "Use inference results as the types of unannotated parameters / functions in the tast";
@@ -509,6 +513,7 @@ let parse_options () =
     ~po_disable_outside_dollar_str_interp:!disable_outside_dollar_str_interp
     ~disable_linter_fixmes:!disable_linter_fixmes
     ~po_allow_new_attribute_syntax:!allow_new_attribute_syntax
+    ~po_disallow_toplevel_requires:(not !allow_toplevel_requires)
     ~tco_global_inference:!global_inference
     ()
   in

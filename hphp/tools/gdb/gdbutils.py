@@ -300,7 +300,12 @@ def rawptr(val):
 
     if name == 'HPHP::LowPtr' or name == 'HPHP::detail::LowPtrImpl':
         inner = t.template_argument(0)
-        ptr = val['m_s'].cast(inner.pointer())
+        try:
+            # Unwrap the std::atomic in AtomicLowPtr. (LowPtr is templated on
+            # the m_s field's type, and for AtomicLowPtr, it's an atomic.)
+            ptr = val['m_s']['_M_i'].cast(inner.pointer())
+        except:
+            ptr = val['m_s'].cast(inner.pointer())
 
     if name == 'HPHP::CompactTaggedPtr':
         inner = t.template_argument(0)

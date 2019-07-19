@@ -2080,6 +2080,9 @@ let sub_string
     then tyl
     else stringish::tyl in
   let stringlike = (Reason.Rwitness p, Toption (Reason.Rwitness p, Tunion tyl)) in
+  (* at time of writing, this error can't actually be triggered here.
+   * typing_ops::sub_string wraps this in a Errors.try_ and emits different
+   * errors depending on the cause of the mismatch. *)
   sub_type env ty2 stringlike Errors.expected_stringlike
 
 (** Check that the method with signature ft_sub can be used to override

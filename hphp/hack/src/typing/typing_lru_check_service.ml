@@ -55,27 +55,38 @@ let process_in_parallel
 
   let job (fc_lst: file_computation list) =
     let opts = TypeCheckStore.load() in
+    SharedMem.allow_removes false;
+    SharedMem.invalidate_caches();
+    File_provider.local_changes_push_stack ();
+    Ast_provider.local_changes_push_stack ();
 
-    (* inner job proceses a single file *)
-    let inner_job (errors: Errors.t) (fc: file_computation) =
-      let e2, _ =
+    (* inner_job processes a single file *)
+    let inner_job (acc: Errors.t) (fc: file_computation) =
+      let new_errors, _ =
         process_file_computation
           ~dynamic_view_files
           ~opts
           ~errors:Errors.empty
           ~fc
       in
-      Errors.merge errors e2
+      (* Errors.merge is a List.rev_append, so put the [acc] second *)
+      Errors.merge new_errors acc
     in
+
+    Ast_provider.local_changes_pop_stack ();
+    File_provider.local_changes_pop_stack ();
+    SharedMem.allow_removes true;
     List.fold fc_lst ~init:Errors.empty ~f:inner_job, (List.length fc_lst)
   in
 
-  let reduce (e, m) (e2, m2) =
+  let reduce (errors_acc, files_count_acc) (errors, num_files) =
     ServerProgress.send_percentage_progress_to_monitor
-      "typechecking" (m + m2) files_initial_count "files";
-    Errors.merge e e2, (m + m2)
+      "typechecking" (files_count_acc + num_files) files_initial_count "files";
+    (* Errors.merge is a List.rev_append, so put the [acc] second *)
+    Errors.merge errors errors_acc, (files_count_acc + num_files)
   in
 
+  (* Start shared_lru workers *)
   let errors, _ = Shared_lru.run
     ~host_env:lru_host_env
     ~job

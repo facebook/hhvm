@@ -34,6 +34,14 @@ let type_kind_to_string = function
   | TKTrait -> "trait"
   | TKUnknown -> "unknown"
   | TKMixed -> "mixed"
+let type_kind_from_string s =
+  if s = "class" then TKClass
+  else if s = "interface" then TKInterface
+  else if s = "enum" then TKEnum
+  else if s = "trait" then TKTrait
+  else if s = "unknown" then TKUnknown
+  else if s = "mixed" then TKMixed
+  else raise (Failure (Printf.sprintf "No Facts.type_kind matches string: %s" s))
 
 type type_facts = {
   base_types: InvSSet.t;
@@ -42,6 +50,14 @@ type type_facts = {
   require_extends: InvSSet.t;
   require_implements: InvSSet.t;
   attributes: string list InvSMap.t;
+}
+let empty_type_facts = {
+  base_types = InvSSet.empty;
+  kind = TKUnknown;
+  flags = 0;
+  require_extends = InvSSet.empty;
+  require_implements = InvSSet.empty;
+  attributes = InvSMap.empty;
 }
 
 type facts = {
@@ -131,3 +147,66 @@ let facts_to_json ~md5 ~sha1 facts =
     functions_json;
     constants_json;
     type_aliases_json; ]
+
+(* Facts from JSON *)
+
+let facts_from_json : Hh_json.json -> facts option =
+  let open Hh_json in
+  let list_from_jstr_array = List.rev_map ~f:get_string_exn in
+  let type_facts_from_jobj entry : string * type_facts =
+    let set_from_jstr_array = List.fold
+      ~init:InvSSet.empty
+      ~f:(fun acc j -> InvSSet.add (get_string_exn j) acc)
+    in
+    let name_ref = ref "" in
+    let ret = List.fold_left ~init:empty_type_facts ~f:(fun acc (k, v) ->
+      match v with
+      | JSON_String name when k = "name" ->
+        name_ref := name;
+        acc
+      | JSON_String kind when k = "kindOf" ->
+        { acc with kind = type_kind_from_string kind }
+      | JSON_Number flags when k = "flags" ->
+        { acc with flags = int_of_string flags }
+      | JSON_Array xs when k = "baseTypes" ->
+        { acc with base_types = set_from_jstr_array xs }
+      | JSON_Array xs when k = "requireExtends" ->
+        { acc with require_extends = set_from_jstr_array xs }
+      | JSON_Array xs when k = "requireImplements" ->
+        { acc with require_implements = set_from_jstr_array xs }
+      | JSON_Object key_values when k = "attributes" ->
+        { acc with attributes =
+          List.fold_left ~init:InvSMap.empty ~f:(fun acc -> function
+          | k, JSON_Array attrs_json ->
+            InvSMap.add k (list_from_jstr_array attrs_json) acc
+          | _ -> acc
+          ) key_values
+        }
+      | _ -> acc
+      ) entry
+    in
+    !name_ref, ret
+  in
+  function
+  | JSON_Object key_values ->
+    Some (List.fold ~init:empty ~f:(fun acc (k, v) ->
+      match v with
+      | JSON_Array xs when k = "constants" ->
+        { acc with constants = list_from_jstr_array xs }
+      | JSON_Array xs when k = "functions" ->
+        { acc with functions = list_from_jstr_array xs }
+      | JSON_Array xs when k = "typeAliases" ->
+        { acc with type_aliases = list_from_jstr_array xs }
+      | JSON_Array types when k = "types" ->
+        { acc with types =
+          List.fold_left ~init:InvSMap.empty ~f:(fun acc v ->
+            match v with
+            | JSON_Object entry ->
+              let k, v = type_facts_from_jobj entry in
+              InvSMap.add k v acc
+            | _ -> acc
+          ) types
+        }
+      | _ -> acc
+    ) key_values)
+  | _ -> None

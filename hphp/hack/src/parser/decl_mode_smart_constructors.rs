@@ -79,7 +79,8 @@ where
     ) -> (State<Syntax<Token, Value>>, Self::R) {
         st.pop_n(2);
         st.push(true);
-        (st, Self::R::make_missing(0))
+        let r = Self::R::make_missing(&st, 0);
+        (st, r)
     }
 
     fn make_yield_from_expression(
@@ -90,7 +91,8 @@ where
     ) -> (State<Syntax<Token, Value>>, Self::R) {
         st.pop_n(3);
         st.push(true);
-        (st, Self::R::make_missing(0))
+        let r = Self::R::make_missing(&st, 0);
+        (st, r)
     }
 
     fn make_lambda_expression(
@@ -103,12 +105,10 @@ where
         body: Self::R,
     ) -> (State<Syntax<Token, Value>>, Self::R) {
         let saw_yield = st.pop_n(6);
-        let body = replace_body(body, saw_yield);
+        let body = replace_body(&st, body, saw_yield);
         st.push(false);
-        (
-            st,
-            Self::R::make_lambda_expression(r1, r2, r3, r4, r5, body),
-        )
+        let r = Self::R::make_lambda_expression(&st, r1, r2, r3, r4, r5, body);
+        (st, r)
     }
 
     fn make_anonymous_function(
@@ -127,12 +127,12 @@ where
         body: Self::R,
     ) -> (State<Syntax<Token, Value>>, Self::R) {
         let saw_yield = st.pop_n(12);
-        let body = replace_body(body, saw_yield);
+        let body = replace_body(&st, body, saw_yield);
         st.push(false);
-        (
-            st,
-            Self::R::make_anonymous_function(r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, body),
-        )
+        let r = Self::R::make_anonymous_function(
+            &st, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, body,
+        );
+        (st, r)
     }
 
     fn make_awaitable_creation_expression(
@@ -143,12 +143,10 @@ where
         body: Self::R,
     ) -> (State<Syntax<Token, Value>>, Self::R) {
         let saw_yield = st.pop_n(4);
-        let body = replace_body(body, saw_yield);
+        let body = replace_body(&st, body, saw_yield);
         st.push(false);
-        (
-            st,
-            Self::R::make_awaitable_creation_expression(r1, r2, r3, body),
-        )
+        let r = Self::R::make_awaitable_creation_expression(&st, r1, r2, r3, body);
+        (st, r)
     }
 
     fn make_methodish_declaration(
@@ -160,9 +158,10 @@ where
     ) -> (State<Syntax<Token, Value>>, Self::R) {
         st.pop_n(1);
         let saw_yield = st.pop_n(3);
-        let body = replace_body(body, saw_yield);
+        let body = replace_body(&st, body, saw_yield);
         st.push(false);
-        (st, Self::R::make_methodish_declaration(r1, r2, body, r3))
+        let r = Self::R::make_methodish_declaration(&st, r1, r2, body, r3);
+        (st, r)
     }
 
     fn make_function_declaration(
@@ -172,13 +171,18 @@ where
         body: Self::R,
     ) -> (State<Syntax<Token, Value>>, Self::R) {
         let saw_yield = st.pop_n(3);
-        let body = replace_body(body, saw_yield);
+        let body = replace_body(&st, body, saw_yield);
         st.push(false);
-        (st, Self::R::make_function_declaration(r1, r2, body))
+        let r = Self::R::make_function_declaration(&st, r1, r2, body);
+        (st, r)
     }
 }
 
-fn replace_body<Token, Value>(body: Syntax<Token, Value>, saw_yield: bool) -> Syntax<Token, Value>
+fn replace_body<Token, Value>(
+    st: &State<Syntax<Token, Value>>,
+    body: Syntax<Token, Value>,
+    saw_yield: bool,
+) -> Syntax<Token, Value>
 where
     Token: LexableToken,
     Value: SyntaxValueType<Token>,
@@ -187,12 +191,13 @@ where
         SyntaxVariant::CompoundStatement(children @ box CompoundStatementChildren { .. }) => {
             let stmts = if saw_yield {
                 let token = Token::make(TokenKind::Yield, 0, 0, vec![], vec![]);
-                let yield_ = Syntax::<Token, Value>::make_token(token);
-                Syntax::make_list(vec![yield_], 0)
+                let yield_ = Syntax::<Token, Value>::make_token(st, token);
+                Syntax::make_list(st, vec![yield_], 0)
             } else {
-                Syntax::make_missing(0)
+                Syntax::make_missing(st, 0)
             };
             Syntax::make_compound_statement(
+                st,
                 children.compound_left_brace,
                 stmts,
                 children.compound_right_brace,

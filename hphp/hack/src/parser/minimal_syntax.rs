@@ -30,7 +30,7 @@ impl SyntaxValueType<MinimalToken> for MinimalValue {
             acc + w
         };
 
-        let full_width = SyntaxType::fold_over_children(&f, 0, variant);
+        let full_width = Syntax::fold_over_children(&f, 0, variant);
         Self { full_width }
     }
 

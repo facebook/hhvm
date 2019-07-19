@@ -9,7 +9,11 @@ extern crate ocaml;
 
 extern crate libc;
 
+mod ocaml_coroutine_state;
+mod ocaml_syntax;
+mod ocaml_syntax_generated;
 pub mod rust_to_ocaml;
+
 use parser_rust as parser;
 
 use parser::file_mode::parse_mode;
@@ -32,13 +36,14 @@ use parser::smart_constructors_wrappers::WithKind;
 
 type PositionedSyntaxParser<'a> = Parser<'a, WithKind<PositionedSmartConstructors>, NoState>;
 
+use crate::ocaml_coroutine_state::OcamlCoroutineState;
+use crate::ocaml_syntax::OcamlSyntax;
 use parser::coroutine_smart_constructors::CoroutineSmartConstructors;
-use parser::coroutine_smart_constructors::State as CoroutineState;
 
 type CoroutineParser<'a> = Parser<
     'a,
-    WithKind<CoroutineSmartConstructors<PositionedSyntax>>,
-    CoroutineState<'a, PositionedSyntax>,
+    WithKind<CoroutineSmartConstructors<OcamlSyntax<PositionedValue>>>,
+    OcamlCoroutineState<'a, OcamlSyntax<PositionedValue>>,
 >;
 
 use parser::decl_mode_smart_constructors::DeclModeSmartConstructors;
@@ -147,12 +152,17 @@ macro_rules! parse {
 
                 let try_parse = move || {
                     let stack_limit = std::rc::Rc::new(StackLimit::relative(relative_stack_size));
-                    let source_text = SourceText::make(&file_path.as_str(), &content.data());
+                    let source_text = SourceText::make_with_raw(
+                        &file_path.as_str(),
+                        &content.data(),
+                        ocaml_source_text_value,
+                    );
+                    ocamlpool_enter();
                     let mut parser = $parser::make(&source_text, env);
                     let root = parser.parse_script(Some(stack_limit.clone()));
                     let errors = parser.errors();
                     let state = parser.sc_state();
-                    if (*stack_limit).exceeded() {
+                    let result = if (*stack_limit).exceeded() {
                         // Not always printing warning here because this would fail some HHVM tests
                         let istty = libc::isatty(libc::STDERR_FILENO as i32) != 0;
                         if istty || std::env::var_os("HH_TEST_MODE").is_some() {
@@ -163,8 +173,6 @@ macro_rules! parse {
                         }
                         None
                     } else {
-                        ocamlpool_enter();
-
                         // traversing the parsed syntax tree uses about 1/3 of the stack
                         let context = SerializationContext::new(ocaml_source_text_value);
                         let ocaml_root = root.to_ocaml(&context);
@@ -176,9 +184,10 @@ macro_rules! parse {
                             ocaml_errors
                         ]);
                         let l = ocaml::Value::new(res);
-                        ocamlpool_leave();
                         Some(l)
-                    }
+                    };
+                    ocamlpool_leave();
+                    result
                 };
 
                 let l_opt = if default_stack_size_sufficient {

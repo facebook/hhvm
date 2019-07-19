@@ -164,6 +164,13 @@ impl SyntaxValueWithKind for PositionedValue {
             false
         }
     }
+
+    fn token_kind(&self) -> Option<TokenKind> {
+        match self {
+            PositionedValue::TokenValue(pt) => Some(pt.kind()),
+            _ => None,
+        }
+    }
 }
 
 impl SyntaxValueType<PositionedToken> for PositionedValue {

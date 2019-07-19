@@ -18,11 +18,25 @@ pub struct SourceText<'a> {
     text: &'a [u8],
     // TODO(kasper) This eventually should be a RelativePath
     file_path: &'a str,
+
+    ocaml_source_text: usize,
 }
 
 impl<'a> SourceText<'a> {
     pub fn make(file_path: &'a str, text: &'a [u8]) -> Self {
-        Self { file_path, text }
+        Self {
+            file_path,
+            text,
+            ocaml_source_text: 0,
+        }
+    }
+
+    pub fn make_with_raw(file_path: &'a str, text: &'a [u8], ocaml_source_text: usize) -> Self {
+        Self {
+            file_path,
+            text,
+            ocaml_source_text,
+        }
     }
 
     pub fn file_path(&self) -> &'a str {
@@ -35,6 +49,10 @@ impl<'a> SourceText<'a> {
 
     pub fn length(&self) -> usize {
         self.text().len()
+    }
+
+    pub fn ocaml_source_text(&self) -> usize {
+        self.ocaml_source_text
     }
 
     pub fn get(&self, index: usize) -> char {

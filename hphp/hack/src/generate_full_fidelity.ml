@@ -501,7 +501,7 @@ module GenerateFFRustSyntax = struct
     let args = map_and_concat_separated ", " (mapper x.prefix) x.fields in
     let mapper prefix (f,_) = sprintf "%s_%s" prefix f in
     let fields = map_and_concat_separated ",\n            " (mapper x.prefix) x.fields in
-    sprintf("    fn make_%s(%s) -> Self {
+    sprintf("    fn make_%s(_: &C, %s) -> Self {
         let syntax = SyntaxVariant::%s(Box::new(%sChildren {
             %s,
         }));
@@ -515,12 +515,18 @@ use crate::lexable_token::LexableToken;
 use crate::syntax::*;
 use crate::syntax_kind::SyntaxKind;
 
-impl<T, V> SyntaxType for Syntax<T, V>
+impl<T, V, C> SyntaxType<C> for Syntax<T, V>
 where
     T: LexableToken,
     V: SyntaxValueType<T>,
 {
-SYNTAX_CONSTRUCTORS    fn fold_over_children<'a, U>(
+SYNTAX_CONSTRUCTORS }
+
+impl<T, V> Syntax<T, V>
+where
+    T: LexableToken,
+{
+    pub fn fold_over_children<'a, U>(
         f: &dyn Fn(&'a Self, U) -> U,
         acc: U,
         syntax: &'a SyntaxVariant<T, V>,
@@ -539,7 +545,7 @@ FOLD_OVER_CHILDREN
         }
     }
 
-    fn kind(&self) -> SyntaxKind  {
+    pub fn kind(&self) -> SyntaxKind {
         match &self.syntax {
             SyntaxVariant::Missing => SyntaxKind::Missing,
             SyntaxVariant::Token (t) => SyntaxKind::Token(t.kind()),
@@ -604,24 +610,15 @@ module GenerateFFRustSyntaxType = struct
   let to_syntax_constructors x =
     let mapper prefix (f,_) = sprintf "%s_%s: Self" prefix f in
     let args = map_and_concat_separated ", " (mapper x.prefix) x.fields in
-    sprintf("    fn make_%s(%s) -> Self;\n")
+    sprintf("    fn make_%s(ctx: &C, %s) -> Self;\n")
     x.type_name args
 
   let full_fidelity_syntax_template = make_header CStyle "" ^ "
 use crate::syntax::*;
-use crate::syntax_kind::SyntaxKind;
 
-pub trait SyntaxType: SyntaxTypeBase
+pub trait SyntaxType<C>: SyntaxTypeBase<C>
 {
 SYNTAX_CONSTRUCTORS
-
-    fn fold_over_children<'a, U>(
-        f: &dyn Fn(&'a Self, U) -> U,
-        acc: U,
-        syntax: &'a SyntaxVariant<Self::Token, Self::Value>,
-    ) -> U;
-
-    fn kind(&self) -> SyntaxKind;
 }
 "
   let full_fidelity_syntax = Full_fidelity_schema.make_template_file
@@ -974,8 +971,8 @@ module GenerateFFRustCoroutineSmartConstructors = struct
     let args = String.concat ~sep:", " args in
     let fwd_args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
     let fwd_args = String.concat ~sep:", " fwd_args in
-    sprintf "    fn make_%s(s: State<'src, Self::R>, %s) -> (State<'src, Self::R>, Self::R) {
-        <Self as SyntaxSmartConstructors<Self::R, State<Self::R>>>::make_%s(s, %s)
+    sprintf "    fn make_%s(st: T, %s) -> (T, Self::R) {
+        <Self as SyntaxSmartConstructors<Self::R, T>>::make_%s(st, %s)
     }\n\n"
       x.type_name args x.type_name fwd_args
 
@@ -986,36 +983,37 @@ use crate::parser_env::ParserEnv;
 use crate::smart_constructors::SmartConstructors;
 use crate::source_text::SourceText;
 use crate::syntax::*;
-use crate::syntax_smart_constructors::SyntaxSmartConstructors;
+use crate::syntax_smart_constructors::{SyntaxSmartConstructors, StateType};
 
-impl<'src, S, Token, Value> SmartConstructors<'src, State<'src, S>>
+impl<'src, S, T, Token, Value> SmartConstructors<'src, T>
     for CoroutineSmartConstructors<S>
 where
     Token: LexableToken,
     Value: SyntaxValueType<Token> + SyntaxValueWithKind,
-    S: SyntaxType<Token=Token, Value=Value>,
+    S: SyntaxType<T, Token=Token, Value=Value>,
+    T: StateType<'src, S> + CoroutineStateType,
 {
     type Token = Token;
     type R = S;
 
-    fn initial_state(env: &ParserEnv, src: &SourceText<'src>) -> State<'src, Self::R> {
-        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::initial_state(env, src)
+    fn initial_state(env: &ParserEnv, src: &SourceText<'src>) -> T {
+        <Self as SyntaxSmartConstructors<'src, Self::R, T>>::initial_state(env, src)
     }
 
-    fn make_missing(s: State<'src, Self::R>, offset: usize) -> (State<'src, Self::R>, Self::R) {
-       <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_missing(s, offset)
+    fn make_missing(st: T, offset: usize) -> (T, Self::R) {
+       <Self as SyntaxSmartConstructors<'src, Self::R, T>>::make_missing(st, offset)
     }
 
-    fn make_token(s: State<'src, Self::R>, offset: Self::Token) -> (State<'src, Self::R>, Self::R) {
-       <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_token(s, offset)
+    fn make_token(st: T, offset: Self::Token) -> (T, Self::R) {
+       <Self as SyntaxSmartConstructors<'src, Self::R, T>>::make_token(st, offset)
     }
 
     fn make_list(
-        s: State<'src, Self::R>,
+        st: T,
         lst: Vec<Self::R>,
         offset: usize,
-    ) -> (State<'src, Self::R>, Self::R) {
-        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_list(s, lst, offset)
+    ) -> (T, Self::R) {
+        <Self as SyntaxSmartConstructors<'src, Self::R, T>>::make_list(st, lst, offset)
     }
 
 CONSTRUCTOR_METHODS}
@@ -1283,7 +1281,8 @@ module GenerateFFRustSyntaxSmartConstructors = struct
 
     sprintf "    fn make_%s(s: State, %s) -> (State, Self::R) {
         let s = State::next(s, vec![%s]);
-        (s, Self::R::make_%s(%s))
+        let r = Self::R::make_%s(&s, %s);
+        (s, r)
     }\n\n"
       x.type_name params next_args x.type_name args
 
@@ -1294,7 +1293,7 @@ use crate::syntax_smart_constructors::StateType;
 use crate::source_text::SourceText;
 use crate::syntax::*;
 
-pub trait SyntaxSmartConstructors<'src, S: SyntaxType, State = NoState>:
+pub trait SyntaxSmartConstructors<'src, S: SyntaxType<State>, State = NoState>:
     SmartConstructors<'src, State, R=S, Token=S::Token>
 where
     State: StateType<'src, S>,
@@ -1304,11 +1303,13 @@ where
     }
 
     fn make_missing(s: State, offset: usize) -> (State, Self::R) {
-        (State::next(s, vec![]), Self::R::make_missing(offset))
+        let r = Self::R::make_missing(&s, offset);
+        (State::next(s, vec![]), r)
     }
 
     fn make_token(s: State, arg: Self::Token) -> (State, Self::R) {
-        (State::next(s, vec![]), Self::R::make_token(arg))
+        let r = Self::R::make_token(&s, arg);
+        (State::next(s, vec![]), r)
     }
 
     fn make_list(s: State, items: Vec<Self::R>, offset: usize) -> (State, Self::R) {
@@ -1317,7 +1318,8 @@ where
         } else {
             let item_refs: Vec<_> = items.iter().collect();
             let s = State::next(s, item_refs);
-            (s, Self::R::make_list(items, offset))
+            let r = Self::R::make_list(&s, items, offset);
+            (s, r)
         }
     }
 
@@ -1332,6 +1334,59 @@ CONSTRUCTOR_METHODS}
       ~template: full_fidelity_syntax_smart_constructors_template
       ()
 end (* GenerateFFRustSyntaxSmartConstructors *)
+
+module GenerateOcamlSyntax = struct
+  let to_constructor_methods x =
+    let sep s = String.concat ~sep:s in
+    let comma_sep = sep ", " in
+    let newline_sep spaces = sep (", \n" ^ spaces) in
+    let args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d: Self" i)in
+    let args = comma_sep args in
+    let params f = List.mapi x.fields ~f:(fun i _ -> f (sprintf "arg%d" i)) in
+    let param_values = newline_sep "          " (params (sprintf "&%s.value")) in
+    let param_nodes = newline_sep "              " (params (sprintf "%s.syntax")) in
+    sprintf "    fn make_%s(ctx: &C, %s) -> Self {
+      let children = [
+          %s
+      ];
+      let value = V::from_values(&children);
+      let syntax = Self::make(
+          ctx,
+          SyntaxKind::%s,
+          &value,
+          &[
+              %s
+          ],
+      );
+      Self { syntax, value }
+    }\n\n"
+      x.type_name args param_values x.kind_name param_nodes
+
+  let template: string = (make_header CStyle "") ^ "
+use crate::ocaml_syntax::{OcamlSyntax, Context};
+use crate::rust_to_ocaml::*;
+
+use parser_rust as parser;
+use parser::syntax_kind::SyntaxKind;
+use parser::syntax::{SyntaxType, SyntaxValueType};
+use parser::positioned_token::PositionedToken;
+
+impl<V, C> SyntaxType<C> for OcamlSyntax<V>
+where
+    C: Context,
+    V: SyntaxValueType<PositionedToken> + ToOcaml,
+{
+CONSTRUCTOR_METHODS}
+  "
+  let ocaml_syntax = Full_fidelity_schema.make_template_file
+    ~transformations: [
+      { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }
+    ]
+    ~filename: (full_fidelity_path_prefix ^
+      "ocaml_syntax_generated.rs")
+    ~template: template
+    ()
+end
 
 module GenerateFFRustDeclModeSmartConstructors = struct
   let to_constructor_methods x =
@@ -3275,5 +3330,7 @@ let () =
       GenerateRustFactsSmartConstructors.facts_smart_constructors;
     generate_file
       GenerateFFRustSmartConstructorsWrappers
-        .full_fidelity_smart_constructors_wrappers
+        .full_fidelity_smart_constructors_wrappers;
+    generate_file
+      GenerateOcamlSyntax.ocaml_syntax;
   end

@@ -7,6 +7,9 @@
 extern crate ocaml;
 use parser_rust as parser;
 
+use crate::ocaml_coroutine_state::OcamlCoroutineState;
+use crate::ocaml_syntax::OcamlSyntax;
+
 use ocaml::core::memory;
 use ocaml::core::mlvalues::{empty_list, Size, Tag, Value};
 
@@ -14,7 +17,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::iter::Iterator;
 
-use parser::coroutine_smart_constructors::State as CoroutineState;
+use parser::coroutine_smart_constructors::{CoroutineStateType, State as CoroutineState};
 use parser::decl_mode_smart_constructors::State as DeclModeState;
 use parser::file_mode::FileMode;
 use parser::lexable_token::LexableToken;
@@ -40,7 +43,7 @@ extern "C" {
 // Unsafe functions in this file should be called only:
 // - while being called from OCaml process
 // - between ocamlpool_enter / ocamlpool_leave invocations
-unsafe fn caml_block(tag: Tag, fields: &[Value]) -> Value {
+pub unsafe fn caml_block(tag: Tag, fields: &[Value]) -> Value {
     let result = ocamlpool_reserve_block(tag, fields.len());
     for (i, field) in fields.iter().enumerate() {
         memory::store_field(result, i, *field);
@@ -96,7 +99,7 @@ fn usize_to_ocaml(x: usize) -> Value {
     (x << 1) + 1
 }
 
-fn u8_to_ocaml(x: u8) -> Value {
+pub fn u8_to_ocaml(x: u8) -> Value {
     usize_to_ocaml(x as usize)
 }
 
@@ -389,6 +392,18 @@ where
 
 impl<'a, S> ToOcaml for CoroutineState<'a, S> {
     unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
-        self.seen_ppl.to_ocaml(_context)
+        self.seen_ppl().to_ocaml(_context)
+    }
+}
+
+impl<'a, S> ToOcaml for OcamlCoroutineState<'a, S> {
+    unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
+        self.seen_ppl().to_ocaml(context)
+    }
+}
+
+impl<V> ToOcaml for OcamlSyntax<V> {
+    unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
+        self.syntax
     }
 }

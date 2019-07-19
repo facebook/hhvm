@@ -6,6 +6,7 @@
 
 use crate::lexable_token::LexableToken;
 use crate::syntax_kind::SyntaxKind;
+use crate::token_kind::TokenKind;
 
 use std::marker::Sized;
 
@@ -28,6 +29,7 @@ where
 
 pub trait SyntaxValueWithKind {
     fn is_missing(&self) -> bool;
+    fn token_kind(&self) -> Option<TokenKind>;
 }
 
 #[derive(Debug, Clone)]
@@ -36,20 +38,20 @@ pub struct Syntax<T, V> {
     pub value: V,
 }
 
-pub trait SyntaxTypeBase {
+pub trait SyntaxTypeBase<C> {
     type Token: LexableToken;
     type Value: SyntaxValueType<Self::Token>;
 
-    fn make_missing(offset: usize) -> Self;
-    fn make_token(arg: Self::Token) -> Self;
-    fn make_list(arg: Vec<Self>, offset: usize) -> Self
+    fn make_missing(ctx: &C, offset: usize) -> Self;
+    fn make_token(ctx: &C, arg: Self::Token) -> Self;
+    fn make_list(ctx: &C, arg: Vec<Self>, offset: usize) -> Self
     where
         Self: Sized;
 
     fn value(&self) -> &Self::Value;
 }
 
-impl<T, V> SyntaxTypeBase for Syntax<T, V>
+impl<T, V, C> SyntaxTypeBase<C> for Syntax<T, V>
 where
     T: LexableToken,
     V: SyntaxValueType<T>,
@@ -57,23 +59,23 @@ where
     type Token = T;
     type Value = V;
 
-    fn make_missing(offset: usize) -> Self {
+    fn make_missing(_: &C, offset: usize) -> Self {
         let value = V::from_children(SyntaxKind::Missing, offset, &[]);
         let syntax = SyntaxVariant::Missing;
         Self::make(syntax, value)
     }
 
-    fn make_token(arg: T) -> Self {
+    fn make_token(_: &C, arg: T) -> Self {
         let value = V::from_token(&arg);
         let syntax = SyntaxVariant::Token(Box::new(arg));
         Self::make(syntax, value)
     }
 
-    fn make_list(arg: Vec<Self>, offset: usize) -> Self {
+    fn make_list(ctx: &C, arg: Vec<Self>, offset: usize) -> Self {
         // An empty list is represented by Missing; everything else is a
         // SyntaxList, even if the list has only one item.
         if arg.is_empty() {
-            Self::make_missing(offset)
+            Self::make_missing(ctx, offset)
         } else {
             // todo: pass iter directly
             let nodes = &arg.iter().map(|x| &x.value).collect::<Vec<_>>();
@@ -123,19 +125,6 @@ where
                 }
                 None
             }
-        }
-    }
-
-    fn fold_list<U, F: FnMut(U, &Self) -> U>(&self, init: U, mut f: F) -> U {
-        use SyntaxVariant::*;
-        match &self.syntax {
-            SyntaxList(nodes) => nodes.iter().fold(init, |init, node| match &node.syntax {
-                ListItem(box li) => f(init, &li.list_item),
-                Missing => init,
-                _ => f(init, &node),
-            }),
-            Missing => init,
-            _ => f(init, &self),
         }
     }
 

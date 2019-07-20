@@ -4106,7 +4106,14 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
                                                  SString clsName) const {
   clsName = normalizeNS(clsName);
 
-  if (ctx.cls && ctx.cls->name->isame(clsName)) return resolve_class(ctx.cls);
+  if (ctx.cls) {
+    if (ctx.cls->name->isame(clsName)) {
+      return resolve_class(ctx.cls);
+    }
+    if (ctx.cls->parentName && ctx.cls->parentName->isame(clsName)) {
+      if (auto const parent = resolve_class(ctx.cls).parent()) return parent;
+    }
+  }
 
   /*
    * If there's only one preresolved ClassInfo, we can give out a

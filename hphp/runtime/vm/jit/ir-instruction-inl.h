@@ -162,7 +162,7 @@ inline uint32_t IRInstruction::numDsts() const {
 }
 
 inline SSATmp* IRInstruction::src(uint32_t i) const {
-  always_assert(i < numSrcs());
+  always_assert_flog(i < numSrcs(), "src {} out of range in {}", i, toString());
   return m_srcs[i];
 }
 

@@ -187,6 +187,34 @@ let type_info_from_class_body facts ns check_require body =
     else { facts with constants } in
   extends, implements, trait_uses, facts
 
+let attributes_from_decl attributes =
+  let open FSC in
+  let attributes_value_aux node l =
+    match node with
+    | Name s -> l @ [s()]
+    | String s -> l @ [s()]
+    | ScopeResolutionExpression (Name name, Class) ->
+      l @ [String.concat ~sep:"::" [name(); "class"]]
+    | _ -> l in
+    let attributes_values_aux node =
+    match node with
+    | Name s -> [s()]
+    | String s -> [s()]
+    | List l -> List.fold_right ~f:attributes_value_aux ~init:[] l
+    | _ -> [] in
+    let attributes_name_aux acc l2 node =
+    match node with
+    | Name s -> InvSMap.add (s()) (attributes_values_aux l2) acc
+    | String s -> InvSMap.add (s()) (attributes_values_aux l2) acc
+    | _ -> acc in
+    let attributes_aux acc node =
+    match node with
+    | ListItem (l1, l2) -> attributes_name_aux acc l2 l1
+    | _ -> acc in
+    match attributes with
+    | List l -> List.fold_left l ~init:InvSMap.empty ~f:attributes_aux
+    | _ -> InvSMap.empty
+
 let facts_from_class_decl facts ns modifiers attributes kind name extends implements body =
   let open FSC in
   match qualified_name ns name with
@@ -203,32 +231,7 @@ let facts_from_class_decl facts ns modifiers attributes kind name extends implem
         (kind = TKInterface || kind = TKTrait) body in
     let base_types = typenames_from_list ns trait_uses extends in
     let base_types = typenames_from_list ns base_types implements in
-    let attributes_value_aux node l =
-      match node with
-      | Name s -> l @ [s()]
-      | String s -> l @ [s()]
-      | ScopeResolutionExpression (Name name, Class) ->
-        l @ [String.concat ~sep:"::" [name(); "class"]]
-      | _ -> l in
-    let attributes_values_aux node =
-      match node with
-      | Name s -> [s()]
-      | String s -> [s()]
-      | List l -> List.fold_right ~f:attributes_value_aux ~init:[] l
-      | _ -> [] in
-    let attributes_name_aux acc l2 node =
-      match node with
-      | Name s -> InvSMap.add (s()) (attributes_values_aux l2) acc
-      | String s -> InvSMap.add (s()) (attributes_values_aux l2) acc
-      | _ -> acc in
-    let attributes_aux acc node =
-      match node with
-      | ListItem (l1, l2) -> attributes_name_aux acc l2 l1
-      | _ -> acc in
-    let attributes =
-      match attributes with
-      | List l -> List.fold_left l ~init:InvSMap.empty ~f:attributes_aux
-      | _ -> InvSMap.empty in
+    let attributes = attributes_from_decl attributes in
     let types =
       add_or_update_classish_declaration facts.types name kind flags
         attributes base_types require_extends require_implements in
@@ -246,12 +249,13 @@ let rec collect (ns, facts as acc) n =
         decl.modifiers decl.attributes decl.kind decl.name
         decl.extends decl.implements decl.body in
     ns, facts
-  | EnumDecl name ->
-    begin match qualified_name ns name with
+  | EnumDecl decl ->
+    begin match qualified_name ns decl.name with
       | Some name ->
+      let attributes = attributes_from_decl decl.attributes in
         let types =
           add_or_update_classish_declaration facts.types name
-            TKEnum flags_final InvSMap.empty InvSSet.empty InvSSet.empty InvSSet.empty in
+            TKEnum flags_final attributes InvSSet.empty InvSSet.empty InvSSet.empty in
         let facts =
           if phys_equal types facts.types
           then facts

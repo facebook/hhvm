@@ -45,7 +45,7 @@ pub enum Node {
     ClassDecl(Box<ClassDeclChildren>),
     FunctionDecl(Box<Node>),
     MethodDecl(Box<Node>),
-    EnumDecl(Box<Node>),
+    EnumDecl(Box<EnumDeclChildren>),
     TraitUseClause(Box<Node>),
     RequireExtendsClause(Box<Node>),
     RequireImplementsClause(Box<Node>),
@@ -66,6 +66,12 @@ pub struct ClassDeclChildren {
     pub implements: Node,
     pub constrs: Node,
     pub body: Node,
+}
+
+#[derive(Debug)]
+pub struct EnumDeclChildren {
+    pub name: Node,
+    pub attributes: Node,
 }
 
 impl FlattenOp for FactsSmartConstructors {
@@ -226,7 +232,7 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
 
     fn make_enum_declaration(
         st: HasScriptContent<'a>,
-        _attributes: Self::R,
+        attributes: Self::R,
         _keyword: Self::R,
         name: Self::R,
         _colon: Self::R,
@@ -240,7 +246,7 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
             st,
             match name {
                 Node::Ignored => Node::Ignored,
-                _ => Node::EnumDecl(Box::new(name)),
+                _ => Node::EnumDecl(Box::new(EnumDeclChildren { name, attributes })),
             },
         )
     }

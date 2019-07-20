@@ -24,7 +24,7 @@ pub enum TypeKind {
 }
 
 pub type StringSet = BTreeSet<String>;
-pub type ClassAttributes = BTreeMap<String, Vec<String>>;
+pub type Attributes = BTreeMap<String, Vec<String>>;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -32,7 +32,7 @@ pub struct TypeFacts {
     pub base_types: StringSet,
     #[serde(rename = "kindOf")]
     pub kind: TypeKind,
-    pub attributes: ClassAttributes,
+    pub attributes: Attributes,
     pub flags: isize,
     pub require_extends: StringSet,
     pub require_implements: StringSet,
@@ -215,7 +215,7 @@ mod tests {
                 String::from("include_empty_both_when_trait_kind"),
                 TypeFacts {
                     kind: TypeKind::Trait,
-                    attributes: ClassAttributes::new(),
+                    attributes: Attributes::new(),
                     require_extends: StringSet::new(),
                     require_implements: StringSet::new(),
                     base_types,
@@ -227,7 +227,7 @@ mod tests {
                 String::from("include_empty_neither_when_class_kind"),
                 TypeFacts {
                     kind: TypeKind::Class,
-                    attributes: ClassAttributes::new(),
+                    attributes: Attributes::new(),
                     require_extends: StringSet::new(),
                     require_implements: StringSet::new(),
                     base_types: StringSet::new(),
@@ -239,7 +239,7 @@ mod tests {
                 String::from("include_empty_req_extends_when_interface_kind"),
                 TypeFacts {
                     kind: TypeKind::Interface,
-                    attributes: ClassAttributes::new(),
+                    attributes: Attributes::new(),
                     require_extends: StringSet::new(),
                     require_implements: StringSet::new(),
                     base_types: StringSet::new(),
@@ -252,7 +252,7 @@ mod tests {
                 TypeFacts {
                     kind: TypeKind::Unknown,
                     attributes: {
-                        let mut map = ClassAttributes::new();
+                        let mut map = Attributes::new();
                         map.insert("A".into(), {
                             let mut set = Vec::new();
                             set.push("'B'".into());

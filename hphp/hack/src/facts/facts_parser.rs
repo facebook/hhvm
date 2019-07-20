@@ -185,74 +185,76 @@ fn type_info_from_class_body(
         let facts_constants = std::mem::replace(&mut facts.constants, vec![]);
         facts.constants = nodes.into_iter().fold(facts_constants, aux);
     }
-    type_facts.attributes = match attributes {
-        Node::List(nodes) => {
-            nodes
-                .into_iter()
-                .fold(ClassAttributes::new(), |mut attributes, node| match node {
-                    Node::ListItem(box item) => {
-                        let attribute_values_aux = |attribute_node| match attribute_node {
-                            Node::Name(name) => {
-                                let mut attribute_values = Vec::new();
-                                attribute_values.push(String::from_utf8_lossy(&name).to_string());
-                                attribute_values
-                            }
-                            Node::String(name) => {
-                                let mut attribute_values = Vec::new();
-                                attribute_values.push(String::from_utf8_lossy(&name).to_string());
-                                attribute_values
-                            }
-                            Node::List(nodes) => {
-                                nodes
-                                    .into_iter()
-                                    .fold(Vec::new(), |mut attribute_values, node| match node {
-                                        Node::Name(name) => {
-                                            attribute_values
-                                                .push(String::from_utf8_lossy(&name).to_string());
-                                            attribute_values
-                                        }
-                                        Node::String(name) => {
-                                            attribute_values
-                                                .push(String::from_utf8_lossy(&name).to_string());
-                                            attribute_values
-                                        }
-                                        Node::ScopeResolutionExpression(box (
-                                            Node::Name(name),
-                                            Node::Class,
-                                        )) => {
-                                            attribute_values.push(format!(
-                                                "{}::class",
-                                                String::from_utf8_lossy(&name).to_string()
-                                            ));
-                                            attribute_values
-                                        }
-                                        _ => attribute_values,
-                                    })
-                            }
-                            _ => Vec::new(),
-                        };
-                        match &(item.0) {
-                            Node::Name(name) => {
-                                attributes.insert(
-                                    String::from_utf8_lossy(name).to_string(),
-                                    attribute_values_aux(item.1),
-                                );
-                                attributes
-                            }
-                            Node::String(name) => {
-                                attributes.insert(
-                                    String::from_utf8_lossy(name).to_string(),
-                                    attribute_values_aux(item.1),
-                                );
-                                attributes
-                            }
-                            _ => attributes,
+    type_facts.attributes = attributes_into_facts(attributes);
+}
+
+fn attributes_into_facts(attributes: Node) -> Attributes {
+    match attributes {
+        Node::List(nodes) => nodes
+            .into_iter()
+            .fold(Attributes::new(), |mut attributes, node| match node {
+                Node::ListItem(box item) => {
+                    let attribute_values_aux = |attribute_node| match attribute_node {
+                        Node::Name(name) => {
+                            let mut attribute_values = Vec::new();
+                            attribute_values.push(String::from_utf8_lossy(&name).to_string());
+                            attribute_values
                         }
+                        Node::String(name) => {
+                            let mut attribute_values = Vec::new();
+                            attribute_values.push(String::from_utf8_lossy(&name).to_string());
+                            attribute_values
+                        }
+                        Node::List(nodes) => {
+                            nodes
+                                .into_iter()
+                                .fold(Vec::new(), |mut attribute_values, node| match node {
+                                    Node::Name(name) => {
+                                        attribute_values
+                                            .push(String::from_utf8_lossy(&name).to_string());
+                                        attribute_values
+                                    }
+                                    Node::String(name) => {
+                                        attribute_values
+                                            .push(String::from_utf8_lossy(&name).to_string());
+                                        attribute_values
+                                    }
+                                    Node::ScopeResolutionExpression(box (
+                                        Node::Name(name),
+                                        Node::Class,
+                                    )) => {
+                                        attribute_values.push(format!(
+                                            "{}::class",
+                                            String::from_utf8_lossy(&name).to_string()
+                                        ));
+                                        attribute_values
+                                    }
+                                    _ => attribute_values,
+                                })
+                        }
+                        _ => Vec::new(),
+                    };
+                    match &(item.0) {
+                        Node::Name(name) => {
+                            attributes.insert(
+                                String::from_utf8_lossy(name).to_string(),
+                                attribute_values_aux(item.1),
+                            );
+                            attributes
+                        }
+                        Node::String(name) => {
+                            attributes.insert(
+                                String::from_utf8_lossy(name).to_string(),
+                                attribute_values_aux(item.1),
+                            );
+                            attributes
+                        }
+                        _ => attributes,
                     }
-                    _ => attributes,
-                })
-        }
-        _ => ClassAttributes::new(),
+                }
+                _ => attributes,
+            }),
+        _ => Attributes::new(),
     }
 }
 
@@ -271,7 +273,7 @@ fn class_decl_into_facts(decl: ClassDeclChildren, namespace: &str, mut facts: &m
         let mut decl_facts = TypeFacts {
             kind,
             flags,
-            attributes: ClassAttributes::new(),
+            attributes: Attributes::new(),
             base_types: StringSet::new(),
             require_extends: StringSet::new(),
             require_implements: StringSet::new(),
@@ -320,12 +322,13 @@ fn collect(mut acc: CollectAcc, node: Node) -> CollectAcc {
         ClassDecl(box decl) => {
             class_decl_into_facts(decl, &acc.0, &mut acc.1);
         }
-        EnumDecl(box name) => {
-            if let Some(name) = qualified_name(&acc.0, name) {
+        EnumDecl(box decl) => {
+            if let Some(name) = qualified_name(&acc.0, decl.name) {
+                let attributes = attributes_into_facts(decl.attributes);
                 let enum_facts = TypeFacts {
                     flags: Flag::Final as isize,
                     kind: TypeKind::Enum,
-                    attributes: ClassAttributes::new(),
+                    attributes,
                     base_types: StringSet::new(),
                     require_extends: StringSet::new(),
                     require_implements: StringSet::new(),

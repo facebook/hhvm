@@ -51,7 +51,10 @@ type node =
     }
   | FunctionDecl of node
   | MethodDecl of node
-  | EnumDecl of node
+  | EnumDecl of {
+    attributes: node;
+    name: node;
+    }
   | TraitUseClause of node
   | RequireExtendsClause of node
   | RequireImplementsClause of node
@@ -161,9 +164,9 @@ module SC = struct
 
   let make_generic_type_specifier class_type _argument_list st =
     st, class_type
-  let make_enum_declaration _attributes _keyword name _colon _base _type
+  let make_enum_declaration attributes _keyword name _colon _base _type
     _left_brace _enumerators _right_brace st =
-    st, if name = Ignored then Ignored else EnumDecl name
+    st, if name = Ignored then Ignored else EnumDecl { attributes; name }
 
   let make_alias_declaration _attributes _keyword name _generic_params _constraint
     _equal _type _semicolon st =

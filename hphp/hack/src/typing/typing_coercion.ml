@@ -141,7 +141,7 @@ let rec can_coerce env ?(ur=Reason.URnone) ty_have ?ty_expect_decl ty_expect on_
       let env, upper_bounds = Typing_utils.get_concrete_supertypes env ety_have in
       Typing_utils.run_on_intersection env ~f:(fun env upper_bound ->
         let p = Reason.to_pos (fst upper_bound) in
-        let env = coerce_type p ur env upper_bound ?ty_expect_decl ty_expect in
+        let env = coerce_type p ur env upper_bound ?ty_expect_decl ty_expect on_error in
         env, ()
       ) upper_bounds |> fst
     )

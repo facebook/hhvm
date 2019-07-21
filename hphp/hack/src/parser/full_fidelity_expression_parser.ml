@@ -1837,7 +1837,11 @@ module WithStatementAndDeclAndTypeParser
       else
         (parser, name)
     | At ->
-      parse_record_creation_expression parser name
+      if peek_token_kind ~lookahead:1 parser = LeftBracket
+      then
+        parse_record_creation_expression parser name
+      else
+        (parser, name)
     | _ -> (parser, name)
 
   and parse_record_creation_expression parser name =

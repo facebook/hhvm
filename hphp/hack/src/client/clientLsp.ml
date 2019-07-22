@@ -753,6 +753,44 @@ let do_shutdown
   Lwt.return Post_shutdown
 
 
+let state_to_rage (state: state) : string =
+  let details = match state with
+  | Pre_init -> []
+  | Post_shutdown -> []
+  | Main_loop menv ->
+    let open Main_env in
+    [
+      "needs_idle"; menv.needs_idle |> string_of_bool;
+      "editor_open_files"; menv.editor_open_files |> SMap.keys |> List.length |> string_of_int;
+      "uris_with_diagnostics"; menv.uris_with_diagnostics |> SSet.cardinal |> string_of_int;
+      "uris_with_unsaved_changes"; menv.uris_with_unsaved_changes |> SSet.cardinal |> string_of_int;
+      "status.message"; menv.status.message;
+      "status.shortMessage"; Option.value menv.status.shortMessage ~default:"";
+    ]
+  | In_init ienv ->
+    let open In_init_env in
+    [
+      "first_start_time"; ienv.first_start_time |> string_of_float;
+      "most_recent_start_time"; ienv.most_recent_start_time |> string_of_float;
+      "editor_open_files"; ienv.editor_open_files |> SMap.keys |> List.length |> string_of_int;
+      "file_edits"; ienv.file_edits |> ImmQueue.length |> string_of_int;
+      "uris_with_unsaved_changes"; ienv.uris_with_unsaved_changes |> SSet.cardinal |> string_of_int;
+    ]
+  | Lost_server lenv ->
+    let open Lost_env in
+    [
+      "editor_open_files"; lenv.editor_open_files |> SMap.keys |> List.length |> string_of_int;
+      "uris_with_unsaved_changes"; lenv.uris_with_unsaved_changes |> SSet.cardinal |> string_of_int;
+      "lock_file"; lenv.lock_file;
+      "explanation"; lenv.p.explanation;
+      "new_hh_server_state"; lenv.p.new_hh_server_state |> hh_server_state_to_string;
+      "start_on_click"; lenv.p.start_on_click |> string_of_bool;
+      "trigger_on_lsp"; lenv.p.trigger_on_lsp |> string_of_bool;
+      "trigger_on_lock_file"; lenv.p.trigger_on_lock_file |> string_of_bool;
+    ]
+  in
+  (state_to_string state) ^ "\n" ^ (String.concat ~sep:"\n" details) ^ "\n"
+
 let do_rage (state: state) (ref_unblocked_time: float ref): Rage.result Lwt.t =
   let open Rage in
   let items: rageItem list ref = ref [] in
@@ -791,7 +829,7 @@ let do_rage (state: state) (ref_unblocked_time: float ref): Rage.result Lwt.t =
     | None -> ()
   end;
   (* client *)
-  add_data ("LSP adapter state: " ^ (state_to_string state) ^ "\n");
+  add_data ("LSP adapter state: " ^ (state_to_rage state) ^ "\n");
   (* client's log of server state *)
   let tnow = Unix.gettimeofday () in
   let server_state_to_string (tstate, state) =

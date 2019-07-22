@@ -2616,7 +2616,7 @@ CLOWN
     print "\nSKIP-ALOO: Only skipped tests!\n";
     if (!($options['no-fun'] ?? false)) {
       print <<<SKIPPER
-                        .".
+                          .".
                          /  |
                         /  /
                        / ,"

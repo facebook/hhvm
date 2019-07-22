@@ -78,7 +78,8 @@ let search_local_symbols
 
   (* case insensitive search, must include namespace, escaped for regex *)
   let query_text_regex_case_insensitive =
-    Str.regexp_case_fold ("\\\\" ^ query_text) in
+    Str.regexp_case_fold (Str.quote ("\\" ^ query_text))
+  in
 
   (* In fileinfo.t, we only know that a thing is a "class," but it could
    * actually be a trait or something else.  Let's map that knowledge. *)

@@ -51,6 +51,7 @@ type position_descr =
   | Rwhere_as
   | Rwhere_super
   | Rwhere_eq
+  | Rfun_inout_parameter of [`Static | `Instance]
 
 type position_variance =
   | Pcovariant
@@ -151,6 +152,8 @@ let reason_to_string ~sign (_, descr, variance) =
     "`where _ = _` constraints are invariant on the left and right"
   | Rwhere_super ->
     "`where _ super _` constraints are contravariant on the left, covariant on the right"
+  | Rfun_inout_parameter _ ->
+    "Inout/ref function parameters are both covariant and contravariant"
 
 let detailed_message variance pos stack =
   match stack with
@@ -376,17 +379,22 @@ and class_method tcopt root static env (_method_name, method_) =
             ~f:begin fun env t ->
               SMap.remove (snd t.tp_name) env
             end ~init:env in
-          List.iter ft_params ~f:(fun_param tcopt root static env);
+          List.iter ft_params ~f:(fun_param tcopt root (Vcovariant []) static env);
           List.iter tparams ~f:(fun_tparam tcopt root env);
           List.iter ft_where_constraints ~f:(fun_where_constraint tcopt root env);
-          fun_ret tcopt root static env ft_ret
+          fun_ret tcopt root (Vcovariant []) static env ft_ret
       | _ -> assert false
 
-and fun_param tcopt root static env { fp_type = (reason, _ as ty); _ } =
+and fun_param tcopt root variance static env { fp_type = (reason, _ as ty); fp_kind; _ } =
   let pos = Reason.to_pos reason in
-  let reason_contravariant = pos, Rfun_parameter static, Pcontravariant in
-  let variance = Vcontravariant [reason_contravariant] in
-  type_ tcopt root variance env ty
+  match fp_kind with
+  | FPnormal ->
+    let reason = pos, Rfun_parameter static, Pcontravariant in
+    let variance = flip reason variance in
+    type_ tcopt root variance env ty
+  | FPref | FPinout ->
+    let variance = make_variance (Rfun_inout_parameter static) pos Ast.Invariant in
+    type_ tcopt root variance env ty
 
 and fun_tparam tcopt root env t =
   List.iter t.tp_constraints ~f:(constraint_ tcopt root env)
@@ -413,10 +421,14 @@ and fun_where_constraint tcopt root env (ty1, ck, ty2) =
     type_ tcopt root var2 env ty2
   | Ast.Constraint_pu_from -> failwith "TODO(T36532263): Pocket Universes"
 
-and fun_ret tcopt root static env (reason, _ as ty) =
+and fun_ret tcopt root variance static env (reason, _ as ty) =
   let pos = Reason.to_pos reason in
   let reason_covariant = pos, Rfun_return static, Pcovariant in
-  let variance = Vcovariant [reason_covariant] in
+  let variance =
+    match variance with
+    | Vcovariant stack -> Vcovariant (reason_covariant :: stack)
+    | Vcontravariant stack -> Vcontravariant (reason_covariant :: stack)
+    | variance -> variance in
   type_ tcopt root variance env ty
 
 and type_option tcopt root variance env = function
@@ -497,21 +509,8 @@ and type_ tcopt root variance env (reason, ty) =
       type_ tcopt root variance env ty
   | Tprim _ -> ()
   | Tfun ft ->
-      List.iter ft.ft_params ~f:begin fun { fp_type = (r, _ as ty); _ } ->
-        let pos = Reason.to_pos r in
-        let reason = pos, Rfun_parameter `Instance, Pcontravariant in
-        let variance = flip reason variance in
-        type_ tcopt root variance env ty
-      end;
-      let ret_pos = Reason.to_pos (fst ft.ft_ret) in
-      let ret_variance = ret_pos, Rfun_return `Instance, Pcovariant in
-      let variance =
-        match variance with
-        | Vcovariant stack -> Vcovariant (ret_variance :: stack)
-        | Vcontravariant stack -> Vcontravariant (ret_variance :: stack)
-        | variance -> variance
-      in
-      type_ tcopt root variance env ft.ft_ret
+      List.iter ft.ft_params ~f:(fun_param tcopt root variance `Instance env);
+      fun_ret tcopt root variance `Instance env ft.ft_ret
   | Tapply (_, []) -> ()
   | Tapply ((_, name as pos_name), tyl) ->
       let variancel = get_class_variance root pos_name in

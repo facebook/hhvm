@@ -1,0 +1,6 @@
+File "contravariance_inout_2.php", line 6, characters 41-41:
+Illegal usage of a contravariant type parameter (Typing[4121])
+File "contravariance_inout_2.php", line 4, characters 10-10:
+This is where the parameter was declared as contravariant (-)
+File "contravariance_inout_2.php", line 6, characters 41-41:
+Inout/ref function parameters are both covariant and contravariant

@@ -92,7 +92,6 @@ let go_ctx
   let tast = ServerIdeContext.get_tast entry in
   let identities =
     ServerIdentifyFunction.go_ctx
-      ~ctx
       ~entry
       ~line
       ~char in

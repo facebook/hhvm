@@ -98,8 +98,36 @@
    }
 },
 {
+  "comment": "make local, unsaved change to the file",
   "jsonrpc": "2.0",
+  "method": "textDocument/didChange",
+  "params": {
+    "textDocument": {
+      "uri": "${php_file_uri}",
+      "version": 2
+    },
+    "contentChanges": [
+      {
+        "text": "<?hh  //strict\n// comment\nfunction a_hover(): int {\n  return b_hover();\n}\n\n# Another comment describing b_hover.\nfunction b_hover(): int {\n  return 42;\n}\n"
+      }
+    ]
+  }
+},
+{
+  "comment": "another hover over function invocation",
+  "jsonrpc": "2.0",
+  "method": "textDocument/hover",
   "id": 8,
+  "params": {
+      "textDocument": {
+        "uri":"${php_file_uri}"
+      },
+      "position": {"line": 3, "character": 16}
+   }
+},
+{
+  "jsonrpc": "2.0",
+  "id": 99,
   "method": "shutdown",
   "params": {}
 }

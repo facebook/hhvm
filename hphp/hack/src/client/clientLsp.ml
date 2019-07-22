@@ -719,6 +719,21 @@ let hack_errors_to_lsp_diagnostic
 (** Protocol                                                           **)
 (************************************************************************)
 
+let get_labelled_file_from_editor_open_files
+    (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
+    (uri: documentUri)
+    : ServerCommandTypes.labelled_file =
+  let filename = lsp_uri_to_path uri in
+  match SMap.get uri editor_open_files with
+  | Some document ->
+    let content = document.TextDocumentItem.text in
+    ServerCommandTypes.LabelledFileContent {
+      filename;
+      content;
+    }
+  | None ->
+    ServerCommandTypes.LabelledFileName filename
+
 let do_shutdown
     (state: state)
     (ide_service: ClientIdeService.t)
@@ -943,12 +958,18 @@ let do_hover
 
 let do_hover_local
     (ide_service: ClientIdeService.t)
+    (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
     (params: Hover.params)
   : Hover.result Lwt.t =
-  let (file_path, line, column) = lsp_file_position_to_hack params in
+  let uri =
+    params.TextDocumentPositionParams.textDocument.TextDocumentIdentifier.uri in
+  let file_input =
+    get_labelled_file_from_editor_open_files editor_open_files uri in
+
+  let (_, line, column) = lsp_file_position_to_hack params in
   let%lwt infos = ClientIdeService.hover
     ide_service
-    ~file_input:(ServerCommandTypes.LabelledFileName file_path)
+    ~file_input
     ~line
     ~char:column
   in
@@ -2322,7 +2343,6 @@ let track_edits_if_necessary (state: state) (event: event) : state =
   | Lost_server lenv -> Lost_server { lenv with Lost_env.uris_with_unsaved_changes; }
   | _ -> state
 
-
 let log_response_if_necessary
     (event: event)
     (response: Hh_json.json option)
@@ -2618,6 +2638,18 @@ let handle_event
     result |> print_documentHighlight |> Jsonrpc.respond to_stdout c;
     Lwt.return_unit
 
+  | (In_init { In_init_env.editor_open_files; _ }
+     | Lost_server { Lost_env.editor_open_files; _ }),
+     Client_message c
+    when env.use_serverless_ide
+      && c.method_ = "textDocument/hover" ->
+    let%lwt () = cancel_if_stale client c short_timeout in
+    let%lwt result = parse_hover c.params
+      |> do_hover_local ide_service editor_open_files
+    in
+    result |> print_hover |> Jsonrpc.respond to_stdout c;
+    Lwt.return_unit
+
   (* any request/notification if we're not yet ready *)
   | In_init ienv, Client_message c ->
     let open In_init_env in
@@ -2691,16 +2723,6 @@ let handle_event
     let%lwt () = cancel_if_stale client c short_timeout in
     let%lwt result = parse_hover c.params
       |> do_hover menv.conn ref_unblocked_time
-    in
-    result |> print_hover |> Jsonrpc.respond to_stdout c;
-    Lwt.return_unit
-
-  | _, Client_message c
-    when env.use_serverless_ide
-      && c.method_ = "textDocument/hover" ->
-    let%lwt () = cancel_if_stale client c short_timeout in
-    let%lwt result = parse_hover c.params
-      |> do_hover_local ide_service
     in
     result |> print_hover |> Jsonrpc.respond to_stdout c;
     Lwt.return_unit

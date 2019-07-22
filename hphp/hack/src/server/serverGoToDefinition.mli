@@ -7,7 +7,6 @@
  *)
 
 val go_ctx:
-  ctx:ServerIdeContext.t ->
   entry:ServerIdeContext.entry ->
   line:int ->
   char:int ->

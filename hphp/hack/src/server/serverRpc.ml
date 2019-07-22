@@ -287,4 +287,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           ~path
           ~file_input
         in
-        env, ServerGoToDefinition.go_ctx ~ctx ~entry ~line ~char
+        ServerIdeContext.with_context ~ctx ~f:(fun () ->
+          env, ServerGoToDefinition.go_ctx ~entry ~line ~char
+        )

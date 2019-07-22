@@ -1003,12 +1003,12 @@ let handle_mode
       ~path
       ~file_input
     in
-    let result = ServerIdentifyFunction.go_ctx_absolute
-      ~ctx
-      ~entry
-      ~line
-      ~char:column
-    in
+    let result = ServerIdeContext.with_context ~ctx ~f:(fun () ->
+      ServerIdentifyFunction.go_ctx_absolute
+        ~entry
+        ~line
+        ~char:column
+    ) in
     begin match result with
       | [] -> print_endline "None"
       | result -> ClientGetDefinition.print_readable ~short_pos:true result

@@ -24,7 +24,8 @@
     temp_file
     typed_positioned_syntax
     typing
-    utils_core))
+    utils_core
+    utils_multifile))
 
 (executable
   (name hh_server)

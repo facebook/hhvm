@@ -550,60 +550,6 @@ let parse_options () =
     out_extension = !out_extension;
   }, sienv)
 
-(* This allows one to fake having multiple files in one file. This
- * is used only in unit test files.
- * Indeed, there are some features that require mutliple files to be tested.
- * For example, newtype has a different meaning depending on the file.
- *)
-let rec make_files = function
-  | [] -> []
-  | Str.Delim header :: Str.Text content :: rl ->
-      let pattern = Str.regexp "////" in
-      let header = Str.global_replace pattern "" header in
-      let pattern = Str.regexp "[ ]*" in
-      let filename = Str.global_replace pattern "" header in
-      (filename, content) :: make_files rl
-  | _ -> assert false
-
-(* We have some hacky "syntax extensions" to have one file contain multiple
- * files, which can be located at arbitrary paths. This is useful e.g. for
- * testing lint rules, some of which activate only on certain paths. It's also
- * useful for testing abstract types, since the abstraction is enforced at the
- * file boundary.
- * Takes the path to a single file, returns a map of filenames to file contents.
- *)
-let file_to_files file =
-  let abs_fn = Relative_path.to_absolute file in
-  let content = cat abs_fn in
-  let delim = Str.regexp "////.*\n" in
-  if Str.string_match delim content 0
-  then
-    let contentl = Str.full_split delim content in
-    let files = make_files contentl in
-    List.fold_left ~f: begin fun acc (sub_fn, content) ->
-      let file =
-        Relative_path.create Relative_path.Dummy (abs_fn^"--"^sub_fn) in
-      Relative_path.Map.add acc ~key:file ~data:content
-    end ~init: Relative_path.Map.empty files
-  else if string_starts_with content "// @directory " then
-    let contentl = Str.split (Str.regexp "\n") content in
-    let first_line = List.hd_exn contentl in
-    let regexp = Str.regexp ("^// @directory *\\([^ ]*\\) \
-      *\\(@file *\\([^ ]*\\)*\\)?") in
-    let has_match = Str.string_match regexp first_line 0 in
-    assert has_match;
-    let dir = Str.matched_group 1 first_line in
-    let file_name =
-      try
-        Str.matched_group 3 first_line
-      with
-        Caml.Not_found -> abs_fn in
-    let file = Relative_path.create Relative_path.Dummy (dir ^ file_name) in
-    let content = String.concat ~sep:"\n" (List.tl_exn contentl) in
-    Relative_path.Map.singleton file content
-  else
-    Relative_path.Map.singleton file content
-
 (* Make readable test output *)
 let replace_color input =
   let open Ide_api_types in
@@ -1188,7 +1134,7 @@ let handle_mode
         begin
         Typing_log.out_channel := oc;
         ServerIdeUtils.make_local_changes ();
-        let files_contents = file_to_files filename in
+        let files_contents = Multifile.file_to_files filename in
         let parse_errors, individual_file_info = parse_name_and_decl popt files_contents in
         let errors = check_file tcopt (Errors.get_error_list parse_errors) individual_file_info in
         write_error_list error_format errors oc max_errors;
@@ -1308,7 +1254,7 @@ let decl_and_run_mode
   let files = List.map ~f:(Relative_path.create Relative_path.Dummy) files in
   let files_contents = List.fold files
   ~f:(fun acc filename ->
-    let files_contents = file_to_files filename in
+    let files_contents = Multifile.file_to_files filename in
     Relative_path.Map.union acc files_contents
   ) ~init:Relative_path.Map.empty in
   (* Merge in builtins *)
@@ -1361,7 +1307,7 @@ let main_hack ({files; mode; tcopt; _} as opts) (sienv: SearchUtils.si_env): uni
     | Ai ai_options ->
       begin match files with
       | [filename] ->
-        let filecontents = filename |> Relative_path.create Relative_path.Dummy |> file_to_files in
+        let filecontents = filename |> Relative_path.create Relative_path.Dummy |> Multifile.file_to_files in
         Ai.do_ Typing_check_utils.type_file filecontents ai_options tcopt
       | _ -> die "Ai mode does not support multiple files"
       end

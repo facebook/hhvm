@@ -17,6 +17,15 @@
     relative_path))
 
 (library
+  (name utils_multifile)
+  (wrapped false)
+  (modules
+    multifile)
+  (libraries
+    relative_path
+    sys_utils))
+
+(library
   (name utils_php_escape)
   (wrapped false)
   (modules

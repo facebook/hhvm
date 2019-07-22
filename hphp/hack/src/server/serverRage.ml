@@ -21,8 +21,31 @@ let go (_genv: ServerEnv.genv) (env: ServerEnv.env) : ServerRageTypes.result =
        {
          title = Some ((Relative_path.to_absolute relPath) ^ ":modified_hh");
          data;
-       } end
-  in
-  let data = Printf.sprintf "hh_server pid=%d ppid=%d" (Unix.getpid ()) (Unix.getppid ())
-  in
-  { title = None; data; } :: ide_files_different_from_disk
+       } end in
+
+  (* include PIDs that we know *)
+  let pids_data = Printf.sprintf "hh_server pid=%d ppid=%d\n" (Unix.getpid ()) (Unix.getppid ()) in
+  let pids = {title = None; data = pids_data; } in
+
+  (* include current state of diagnostics on client, as we know it *)
+  let open ServerEnv in
+  let subscription_data = match env.diag_subscribe, env.persistent_client with
+  | None, None -> "no diag subscription, no client"
+  | Some _, None -> "?? diagnostics subscription but no client ??"
+  | None, Some _ -> "?? client but no diagnostics subscription ??"
+  | Some sub, Some client ->
+    let (is_truncated, count) = Diagnostic_subscription.get_pushed_error_length sub in
+    let _sub, errors = Diagnostic_subscription.pop_errors sub env.errorl in
+    let messages = [
+      "hh_server view of diagnostics on client:";
+      "client_has_message"; ClientProvider.client_has_message client |> string_of_bool;
+      "ide_needs_parsing"; not (Relative_path.Set.is_empty env.ide_needs_parsing) |> string_of_bool;
+      "error_count"; Errors.count env.errorl |> string_of_int;
+      "errors_in_client"; count |> string_of_int; is_truncated |> string_of_bool;
+      "error_files_to_push"; errors |> SMap.keys |> List.length |> string_of_int;
+      ""
+      ] in
+    String.concat "\n" messages in
+  let subscription = {title = None; data = subscription_data; } in
+
+  pids :: subscription :: ide_files_different_from_disk

@@ -8,9 +8,12 @@ function __autoload($n) {
 trait tttt {}
 class cccc {}
 interface iiii {}
-if (0) {
+
+if (__hhvm_intrinsics\launder_value(0)) {
   include 'class_interface_trait_exists2.inc';
 }
+
+<<__EntryPoint>>
 function main() {
   var_dump(class_exists('fooo', false));
   var_dump(class_exists('fooo'));
@@ -35,4 +38,3 @@ function main() {
     var_dump(trait_exists($n));
   }
 }
-main();

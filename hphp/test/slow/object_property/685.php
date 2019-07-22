@@ -1,9 +1,8 @@
 <?hh
 
-if (true) {
+if (__hhvm_intrinsics\launder_value(true)) {
   include '685-1.inc';
-}
- else {
+} else {
   include '685-2.inc';
 }
 class B extends A {
@@ -26,21 +25,25 @@ class Z {
   static $z1 = 1;
   static $z2 = 2;
 }
-$vars = get_class_vars('A');
- asort(&$vars);
- var_dump($vars);
-$vars = get_class_vars('B');
- asort(&$vars);
- var_dump($vars);
-$vars = get_class_vars('C');
- asort(&$vars);
- var_dump($vars);
-$vars = get_class_vars('X');
- asort(&$vars);
- var_dump($vars);
-$vars = get_class_vars('Y');
- asort(&$vars);
- var_dump($vars);
-$vars = get_class_vars('Z');
- asort(&$vars);
- var_dump($vars);
+
+<<__EntryPoint>>
+function test() {
+  $vars = get_class_vars('A');
+  asort(&$vars);
+  var_dump($vars);
+  $vars = get_class_vars('B');
+  asort(&$vars);
+  var_dump($vars);
+  $vars = get_class_vars('C');
+  asort(&$vars);
+  var_dump($vars);
+  $vars = get_class_vars('X');
+  asort(&$vars);
+  var_dump($vars);
+  $vars = get_class_vars('Y');
+  asort(&$vars);
+  var_dump($vars);
+  $vars = get_class_vars('Z');
+  asort(&$vars);
+  var_dump($vars);
+}

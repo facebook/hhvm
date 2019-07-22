@@ -15,14 +15,12 @@ y:', $this->y, '
 
 <<__EntryPoint>>
 function main_60() {
-;
-if (0) {
- include '60.inc';
- }
-try {
-  throw(new b(1, 2));
-}
- catch (b $e) {
-  $e->dump();
-}
+  if (__hhvm_intrinsics\launder_value(0)) {
+    include '60.inc';
+  }
+  try {
+    throw(new b(1, 2));
+  } catch (b $e) {
+    $e->dump();
+  }
 }

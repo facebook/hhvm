@@ -14,7 +14,7 @@ function test() {
 
 <<__EntryPoint>>
 function main_1836() {
-  if (0) {
+  if (__hhvm_intrinsics\launder_value(0)) {
     include '1836.inc';
   }
 }

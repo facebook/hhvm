@@ -11,9 +11,8 @@ class A extends B {
 
 <<__EntryPoint>>
 function main_1223() {
-if (false) {
-  include '1223.inc';
-;
-}
-A::make();
+  if (__hhvm_intrinsics\launder_value(false)) {
+    include '1223.inc';
+  }
+  A::make();
 }

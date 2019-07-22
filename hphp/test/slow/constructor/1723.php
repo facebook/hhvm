@@ -1,6 +1,6 @@
 <?hh
 
-if (true) {
+if (__hhvm_intrinsics\launder_value(true)) {
   include '1723.inc';
 }
 class B extends A {
@@ -16,8 +16,9 @@ class B extends A {
   protected $bb = 4;
   private $cc = 1.222;
 }
+
+<<__EntryPoint>>
 function foo() {
   $obj = new B(1, 2, 3);
   var_dump($obj);
 }
-foo();

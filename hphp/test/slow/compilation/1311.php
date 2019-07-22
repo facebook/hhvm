@@ -1,6 +1,6 @@
 <?hh
 
-if (0) {
+if (__hhvm_intrinsics\launder_value(0)) {
   include '1311-1.inc';
 } else {
   include '1311-2.inc';

@@ -19,7 +19,7 @@ require $path;
 $path = __DIR__ . '/include.3.inc';
 require $path;
 
-if (0) {
+if (__hhvm_intrinsics\launder_value(0)) {
   // to ensure we include the file in
   // RepoAuthoritative mode
   require 'include.3.inc';

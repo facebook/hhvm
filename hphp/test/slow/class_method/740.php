@@ -1,6 +1,6 @@
 <?hh
 
-if (true) {
+if (__hhvm_intrinsics\launder_value(true)) {
   include '740-1.inc';
 } else {
   include '740-2.inc';

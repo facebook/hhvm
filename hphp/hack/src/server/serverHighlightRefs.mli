@@ -9,3 +9,11 @@
 
 val go: (string * int * int) -> TypecheckerOptions.t ->
   ServerHighlightRefsTypes.result
+
+(* For serverless IDE *)
+val go_ctx:
+  entry: ServerIdeContext.entry ->
+  line: int ->
+  column: int ->
+  tcopt: TypecheckerOptions.t ->
+  ServerHighlightRefsTypes.result

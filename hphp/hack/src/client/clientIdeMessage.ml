@@ -56,6 +56,17 @@ module Lsp_docblock = struct
   type result = DocblockService.result
 end
 
+(* Handles "textDocument/documentHighlight" LSP messages *)
+module Lsp_highlight = struct
+  type request = {
+    file_path: Path.t;
+    file_input: ServerCommandTypes.file_input;
+    line: int;
+    column: int;
+  }
+  type result = Ide_api_types.range list
+end
+
 (* GADT for request/response types. See [ServerCommandTypes] for a discussion on
    using GADTs in this way. *)
 type _ t =
@@ -74,3 +85,6 @@ type _ t =
   | Resolve:
     Lsp_docblock.request ->
     Lsp_docblock.result t
+  | Highlight:
+    Lsp_highlight.request ->
+    Lsp_highlight.result t

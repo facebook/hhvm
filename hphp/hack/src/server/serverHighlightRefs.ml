@@ -31,15 +31,16 @@ let get_target symbol =
   | SymbolOccurrence.GConst -> Some (IGConst symbol.name)
   | _ -> None
 
-let highlight_symbol tcopt (line, char) path file_info symbol =
+let highlight_symbol tcopt ast (line, char) path file_info symbol =
   let res = match get_target symbol with
     | Some target ->
       let results = FindRefsService.find_refs
          tcopt target [] [(path, file_info)] in
       List.rev (List.map results snd)
     | None when symbol.SymbolOccurrence.type_ = SymbolOccurrence.LocalVar ->
-      ServerFindLocals.go_from_ast (Ast_provider.get_ast path) line char
-    | None -> []
+      ServerFindLocals.go_from_ast ast line char
+    | None ->
+      []
   in
   List.map res Ide_api_types.pos_to_range
 
@@ -79,11 +80,29 @@ let rec combine_result l l1 l2 =
 let go (content, line, char) tcopt =
   ServerIdentifyFunction.get_occurrence_and_map tcopt content line char
     ~f:begin fun path file_info symbols ->
+      let ast = (Ast_provider.get_ast path) in
       match symbols with
       | symbol::_ ->
         let symbols = filter_result symbols symbol in
         List.fold symbols ~init:[] ~f:(fun acc symbol ->
           combine_result [] acc
-            (highlight_symbol tcopt (line, char) path file_info symbol))
+            (highlight_symbol tcopt ast (line, char) path file_info symbol))
       | _ -> []
     end
+
+let go_ctx
+    ~(entry: ServerIdeContext.entry)
+    ~(line: int)
+    ~(column: int)
+    ~(tcopt: TypecheckerOptions.t)
+    : ServerHighlightRefsTypes.result =
+  let path = ServerIdeContext.get_path ~entry in
+  let ast = ServerIdeContext.get_ast entry in
+  let tast = ServerIdeContext.get_tast entry in
+  let symbol_to_highlight = IdentifySymbolService.go tast line column in
+  let file_info = ServerIdeContext.get_fileinfo entry in
+  let results = List.fold symbol_to_highlight ~init:[] ~f:(fun acc s ->
+    let stuff = highlight_symbol tcopt ast (line, column) path file_info s in
+    List.append stuff acc
+  ) in
+  results

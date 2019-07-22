@@ -1466,27 +1466,62 @@ let do_findReferences
     Lwt.return (
       List.map positions ~f:(hack_pos_to_lsp_location ~default_path:filename))
 
+(* Shared function for hack range conversion *)
+let hack_range_to_lsp_highlight range =
+  { DocumentHighlight.
+    range = ide_range_to_lsp range;
+    kind = None;
+  }
+;;
 
 let do_documentHighlight
     (conn: server_conn)
     (ref_unblocked_time: float ref)
     (params: DocumentHighlight.params)
   : DocumentHighlight.result Lwt.t =
-  let open DocumentHighlight in
 
   let (file, line, column) = lsp_file_position_to_hack params in
   let command =
     ServerCommandTypes.(IDE_HIGHLIGHT_REFS (FileName file, line, column)) in
   let%lwt results = rpc conn ref_unblocked_time command in
-
-  let hack_range_to_lsp_highlight range =
-    {
-      range = ide_range_to_lsp range;
-      kind = None;
-    }
-  in
   Lwt.return (List.map results ~f:hack_range_to_lsp_highlight)
 
+(* Serverless IDE implementation of highlight *)
+let do_highlight_local
+    (ide_service: ClientIdeService.t)
+    (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
+    (params: DocumentHighlight.params)
+    : DocumentHighlight.result Lwt.t =
+  let open TextDocumentPositionParams in
+  let open Lsp.TextDocumentIdentifier in
+  let open Ide_api_types in
+
+  (* Figure out location *)
+  let pos = lsp_position_to_ide params.position in
+  let lsp_doc_opt = SMap.get
+    params.textDocument.uri
+    editor_open_files in
+  let lsp_doc = match lsp_doc_opt with
+  | None -> failwith (Printf.sprintf "Cannot find LSP document [%s]"
+    params.textDocument.uri)
+  | Some doc -> doc
+  in
+
+  let filename = Lsp_helpers.lsp_textDocumentIdentifier_to_filename params.textDocument in
+  let request = { ClientIdeMessage.Lsp_highlight.
+    file_path = Path.make filename;
+    file_input = (ServerCommandTypes.FileContent lsp_doc.TextDocumentItem.text);
+    line = pos.line;
+    column = pos.column;
+  } in
+
+  let%lwt result = ClientIdeService.highlight ide_service request in
+  match result with
+  | Ok ranges ->
+    Lwt.return (List.map ranges ~f:hack_range_to_lsp_highlight)
+  | Error error_message ->
+    failwith (Printf.sprintf "Local highlight failed: %s" error_message)
+;;
 
 let do_typeCoverage
     (conn: server_conn)
@@ -2569,6 +2604,18 @@ let handle_event
     result
     |> print_completionItem
     |> Jsonrpc.respond to_stdout c;
+    Lwt.return_unit
+
+  (* Document highlighting in serverless IDE *)
+  | (In_init { In_init_env.editor_open_files; _ } | Lost_server { Lost_env.editor_open_files; _ }), Client_message c
+    when env.use_serverless_ide
+      && c.method_ = "textDocument/documentHighlight" ->
+    let%lwt () = cancel_if_stale client c short_timeout in
+    let%lwt result =
+      parse_documentHighlight c.params
+      |> do_highlight_local ide_service editor_open_files
+    in
+    result |> print_documentHighlight |> Jsonrpc.respond to_stdout c;
     Lwt.return_unit
 
   (* any request/notification if we're not yet ready *)

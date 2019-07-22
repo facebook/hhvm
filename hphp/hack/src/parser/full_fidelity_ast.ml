@@ -957,8 +957,7 @@ let rec pHint : hint parser = fun node env ->
         closure_coroutine; _} ->
       let make_variadic_hint x variadic_type =
         if is_missing variadic_type then begin
-          if is_typechecker env then
-            raise_parsing_error env (`Node x) "Cannot use ... without a typehint";
+          raise_parsing_error env (`Node x) "Cannot use ... without a typehint";
           Hvariadic (None)
         end else
           Hvariadic (Some (pHint variadic_type env))

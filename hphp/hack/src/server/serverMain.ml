@@ -935,7 +935,14 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   let lru_host_env =
     match lru_cache_directory with
     | Some cache_dir_path ->
-      Some (Shared_lru.init ~num_workers ~cache_dir_path)
+      let host_env =
+        Shared_lru.init
+          ~cache_name:"hack_server_lru"
+          ~cache_size_in_bytes:(10 * 1024 * 1024 * 1024) (* 10 GBs *)
+          ~cache_dir_path
+          ~num_workers
+      in
+      Some(host_env)
     | None -> None
   in
   let init_id = Random_id.short_string () in

@@ -3258,106 +3258,16 @@ and assign_ p ur env e1 ty2 =
     let placeholder_ty = MakeType.void (Reason.Rplaceholder p) in
     make_result env (fst e1) (T.Lplaceholder id) placeholder_ty
   | (_, List el) ->
-    let env, folded_ty2 = TUtils.fold_unresolved env ty2 in
-    let resl =
-      TUtils.try_over_concrete_supertypes env folded_ty2
-        begin fun env ty2 ->
-          let env, ty2 = SubType.expand_type_and_solve
-            ~description_of_expected:"assignable value" env p ty2 Errors.unify_error in
-          match ty2 with
-          (* Vector<t> or ImmVector<t> or ConstVector<t> or vec<T> *)
-          | (_, Tclass ((_, x), _, [elt_type]))
-          when x = SN.Collections.cVector
-            || x = SN.Collections.cImmVector
-            || x = SN.Collections.cVec
-            || x = SN.Collections.cConstVector ->
-            let env, tel = List.map_env env el begin fun env e ->
-              let env, te, _ = assign (fst e) env e elt_type in
-              env, te
-            end in
-            make_result env (fst e1) (T.List tel) ty2
-          (* array<t> or varray<t> *)
-          | (_, Tarraykind (AKvec elt_type))
-          | (_, Tarraykind (AKvarray elt_type)) ->
-            let env, tel = List.map_env env el begin fun env e ->
-              let env, te, _ = assign (fst e) env e elt_type in
-              env, te
-            end in
-            make_result env (fst e1) (T.List tel) ty2
-          (* array or empty array or Tany *)
-          | (r, (Tarraykind (AKany | AKempty) | Tany)) ->
-            let env, tel = List.map_env env el begin fun env e ->
-              let env, te, _ = assign (fst e) env e (r, Typing_utils.tany env) in
-              env, te
-            end in
-            make_result env (fst e1) (T.List tel) ty2
-          | (r, (Tdynamic)) ->
-            let env, tel = List.map_env env el begin fun env e ->
-              let env, te, _ = assign (fst e) env e (MakeType.dynamic r) in
-              env, te
-            end in
-            make_result env (fst e1) (T.List tel) ty2
-          (* Pair<t1,t2> *)
-          | ((r, Tclass ((_, coll), _, [ty1; ty2])) as folded_ety2)
-            when coll = SN.Collections.cPair ->
-              (match el with
-            | [x1; x2] ->
-                let env, te1, _ = assign p env x1 ty1 in
-                let env, te2, _ = assign p env x2 ty2 in
-                make_result env (fst e1) (T.List [te1; te2]) folded_ety2
-            | _ ->
-                Errors.pair_arity p;
-                make_result env (fst e1) T.Any (r, Typing_utils.terr env))
-          | (r, Tunion tyl) ->
-            (* Get one List expression per type in the union *)
-            let env, list_expressions = List.map_env env tyl begin fun env ty ->
-              let env, te, _ = assign p env e1 ty in
-              env, te
-            end in
-            (* Get a union of all valid tuple types for our list *)
-            let types = List.filter_map list_expressions ~f:(fun list_expression ->
-              match list_expression with
-              | _, T.List elements ->
-                List.map elements ~f:(fun ((_pos, ty), _element) -> ty) |> Option.some
-              | _ ->
-                (* Only other case is the error case of Pair, omit *)
-                None
-            ) in
-            begin match types with
-            | [] ->
-              (* Degenerate case, either destructured `nothing` or hit the error case of Pair *)
-              assign p env e1 (MakeType.nothing r)
-            | tup :: tups ->
-              (* Create a tuple of unions and assign it to the original list expression *)
-              let env, unions = List.fold_left_env env tups ~init:tup ~f:(fun env union tup ->
-                List.map2_env env union tup ~f:(fun env ty_union ty ->
-                  Typing_union.union env ty_union ty
-                )
-              ) in
-              assign p env e1 (r, Ttuple unions)
-            end
-        (* Other, including tuples. Create a tuple type for the left hand
-         * side and attempt subtype against it. In particular this deals with
-         * types such as (string,int) | (int,bool) *)
-        | (r, _) ->
-          let env = Env.open_tyvars env p in
-          let env, tyl = List.map_env env el
-             ~f:(fun env _ -> Env.fresh_type env (Reason.to_pos r)) in
-          let tuple_ty = (Reason.Rwitness (fst e1), Ttuple tyl) in
-          let env = Type.sub_type p ur env folded_ty2 tuple_ty Errors.unify_error in
-          let env = Env.set_tyvar_variance env tuple_ty in
-          let env = SubType.close_tyvars_and_solve env Errors.unify_error in
-          let env, reversed_tel =
-            List.fold2_exn el tyl ~init:(env,[]) ~f:(fun (env,tel) lvalue ty2 ->
-            let env, te, _ = assign p env lvalue ty2 in
-            env, te::tel) in
-          make_result env (fst e1) (T.List (List.rev reversed_tel)) ty2
-        end in
-    begin match resl with
-      | [res] -> res
-      | _ -> assign_simple p ur env e1 ty2
-    end
-
+    let env, tyl = List.map_env env el
+      ~f:(fun env _ -> Env.fresh_type env (Reason.to_pos (fst ty2))) in
+    let destructure_ty = (Reason.Rdestructure (fst e1, List.length tyl), Tdestructure tyl) in
+    let env = Type.sub_type p ur env ty2 destructure_ty Errors.unify_error in
+    let env = Env.set_tyvar_variance env destructure_ty in
+    let env, reversed_tel =
+      List.fold2_exn el tyl ~init:(env,[]) ~f:(fun (env,tel) lvalue ty2 ->
+      let env, te, _ = assign p env lvalue ty2 in
+      env, te::tel) in
+    make_result env (fst e1) (T.List (List.rev reversed_tel)) ty2
   | pobj, Obj_get (obj, (pm, Id (_, member_name as m)), nullflavor) ->
       let lenv = env.Env.lenv in
       let no_fakes = LEnv.env_with_empty_fakes env in
@@ -3542,7 +3452,7 @@ and call_parent_construct pos env el uel =
               else Errors.undefined_parent pos;
               default
             | None -> assert false)
-        | _, (Terr | Tany | Tnonnull | Tarraykind _ | Toption _
+        | _, (Terr | Tany | Tnonnull | Tarraykind _ | Toption _ | Tdestructure _
               | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tvar _ | Tdynamic
               | Tabstract (_, _) | Tanon (_, _) | Tunion _ | Tintersection _ | Tobject
              ) ->
@@ -4423,7 +4333,7 @@ and class_get_ ~is_method ~is_const ~this_ty ?(explicit_tparams=[])
       )
   | _, (Tvar _ | Tnonnull | Tarraykind _ | Toption _
         | Tprim _ | Tfun _ | Ttuple _ | Tanon (_, _) | Tobject
-       | Tshape _) ->
+       | Tshape _ | Tdestructure _) ->
       (* should never happen; static_class_id takes care of these *)
       k (env, (Reason.Rnone, Typing_utils.tany env), None, None)
 
@@ -4869,7 +4779,7 @@ and class_id_for_new ~exact p env cid tal =
         | _, (Tany | Terr | Tnonnull | Tarraykind _ | Toption _
               | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Ttuple _
               | Tanon (_, _) | Tunion _ | Tintersection _ | Tobject | Tshape _
-              | Tdynamic ) ->
+              | Tdynamic | Tdestructure _) ->
           get_info res tyl in
   get_info [] [cid_ty]
 
@@ -5003,7 +4913,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
             make_result env T.CIparent (r, TUtils.this_of (r, snd parent))
           )
       | _, (Terr | Tany | Tnonnull | Tarraykind _ | Toption _ | Tprim _
-            | Tfun _ | Ttuple _ | Tshape _ | Tvar _ | Tdynamic
+            | Tfun _ | Ttuple _ | Tshape _ | Tvar _ | Tdynamic | Tdestructure _
             | Tanon (_, _) | Tunion _ | Tintersection _ | Tabstract (_, _) | Tobject
            ) ->
         let parent = Env.get_parent env in
@@ -5068,7 +4978,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
           env, (Reason.Rwitness p, Typing_utils.terr env)
 
         | (_, (Tany | Tnonnull | Tarraykind _ | Toption _
-                 | Tprim _ | Tfun _ | Ttuple _
+                 | Tprim _ | Tfun _ | Ttuple _ | Tdestructure _
                  | Tabstract ((AKdependent _ | AKnewtype _), _)
                  | Tanon (_, _) | Tobject | Tshape _)) as ty
           ->
@@ -5888,7 +5798,7 @@ and condition ?lhs_of_null_coalesce env tparamet
       | _, Tarraykind (AKany | AKempty)
       | _, Tprim Tbool -> env
       | _, (Terr | Tany | Tnonnull | Tarraykind _ | Toption _ | Tdynamic
-        | Tprim _ | Tvar _ | Tfun _ | Tabstract _ | Tclass _
+        | Tprim _ | Tvar _ | Tfun _ | Tabstract _ | Tclass _ | Tdestructure _
         | Ttuple _ | Tanon (_, _) | Tunion _ | Tintersection _ | Tobject | Tshape _
         ) ->
           condition_nullity ~nonnull:tparamet env te)
@@ -5983,7 +5893,7 @@ and class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
       end in
     env, (reason, Ttuple tyl)
   | _, (Tany | Tprim _ | Toption _ | Ttuple _ | Tnonnull
-        | Tshape _ | Tvar _ | Tabstract _ | Tarraykind _ | Tanon _
+        | Tshape _ | Tvar _ | Tabstract _ | Tarraykind _ | Tanon _ | Tdestructure _
         | Tunion _ | Tintersection _ | Tobject | Terr | Tfun _  | Tdynamic) ->
     env, hint_ty
 

@@ -70,6 +70,7 @@ end = struct
       | Tvarray_or_darray t -> ty t
       | Tshape (_, fdm) ->
           ShapeFieldMap.iter (fun _ v -> ty v) fdm
+      | Tdestructure _ -> () (* Only apperas in assignment lhs position *)
 
     and ty_opt : type a . a ty option -> _ =
       function None -> () | Some x -> ty x in

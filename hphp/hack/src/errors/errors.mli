@@ -170,7 +170,6 @@ val anonymous_recursive : Pos.t -> unit
 val static_outside_class : Pos.t -> unit
 val self_outside_class : Pos.t -> unit
 val new_inconsistent_construct : Pos.t -> Pos.t * string -> [< `static | `classname] -> unit
-val pair_arity : Pos.t -> unit
 val undefined_parent : Pos.t -> unit
 val parent_outside_class : Pos.t -> unit
 val parent_abstract_call : string -> Pos.t -> Pos.t -> unit

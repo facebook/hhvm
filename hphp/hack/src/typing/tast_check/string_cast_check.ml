@@ -48,7 +48,7 @@ let rec is_stringish env ty =
     Option.is_none (Env.get_class env (snd x))
   | Tany | Terr | Tdynamic | Tobject | Tnonnull | Tprim _ ->
     true
-  | Tarraykind _ | Tvar _ | Ttuple _ | Tanon (_, _) | Tfun _ | Tshape _ ->
+  | Tarraykind _ | Tvar _ | Ttuple _ | Tanon (_, _) | Tfun _ | Tshape _ | Tdestructure _ ->
     false
 
 let handler = object

@@ -226,6 +226,10 @@ and _ ty_ =
   (* Localized version of Tarray *)
   | Tarraykind : array_kind -> locl ty_
 
+  (* The type of a list destructructuring assignment.
+   * Implements valid destructuring operations via subtyping *)
+  | Tdestructure : locl ty list -> locl ty_
+
 and array_kind =
   (* Those three types directly correspond to their decl level counterparts:
    * array, array<_> and array<_, _> *)
@@ -676,6 +680,7 @@ let ty_con_ordinal ty =
   | Tobject -> 14
   | Tclass _ -> 15
   | Tarraykind _ -> 16
+  | Tdestructure _ -> 17
 
 let array_kind_con_ordinal ak =
   match ak with

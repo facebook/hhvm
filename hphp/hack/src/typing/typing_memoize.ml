@@ -91,6 +91,7 @@ let check_param : Env.env -> Nast.fun_param -> unit =
     | _, Tfun _
     | _, Tvar _
     | _, Tanon (_, _)
+    | _, Tdestructure _
     | _, Tobject -> error ty
   in
   match param_hint with

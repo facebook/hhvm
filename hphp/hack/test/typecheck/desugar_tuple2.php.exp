@@ -1,6 +1,6 @@
 File "desugar_tuple2.php", line 13, characters 5-25:
 Invalid assignment (Typing[4110])
 File "desugar_tuple2.php", line 13, characters 5-16:
-Expected ([unresolved], [unresolved])
+Expected list([unresolved], [unresolved]) resulting from a list destructuring assignment of length 2
 File "desugar_tuple2.php", line 12, characters 14-28:
 But got (int, int, int)

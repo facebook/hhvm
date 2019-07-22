@@ -99,6 +99,7 @@ type t =
   | Rlambda_param    of Pos.t * t
   | Rshape of Pos.t * string
   | Renforceable     of Pos.t
+  | Rdestructure     of Pos.t * int
 
 and arg_position =
   | Aonly
@@ -330,6 +331,8 @@ let rec to_string prefix r =
   | Rshape (p, fun_name) -> [(p, prefix ^ " because " ^ fun_name ^ " expects a shape")]
   | Renforceable p ->
     [(p, prefix ^ " because it is an unenforceable type")]
+  | Rdestructure (p, n) ->
+    [(p, prefix ^ " resulting from a list destructuring assignment of length " ^ (string_of_int n))]
 
 and to_pos = function
   | Rnone     -> Pos.none
@@ -418,6 +421,7 @@ and to_pos = function
   | Rlambda_param (p, _) -> p
   | Rshape (p, _) -> p
   | Renforceable p -> p
+  | Rdestructure (p, _) -> p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -534,6 +538,7 @@ match r with
   | Rlambda_param _ -> "Rlambda_param"
   | Rshape _ -> "Rshape"
   | Renforceable _ -> "Renforceable"
+  | Rdestructure _ -> "Rdestructure"
 
 let pp fmt r =
   Format.pp_print_string fmt @@ to_constructor_string r

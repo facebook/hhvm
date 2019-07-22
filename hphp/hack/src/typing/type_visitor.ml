@@ -44,6 +44,7 @@ class type ['a] type_visitor_type = object
   method on_taccess : 'a -> Reason.t -> taccess_type -> 'a
   method on_tclass : 'a -> Reason.t -> Nast.sid -> exact -> locl ty list -> 'a
   method on_tarraykind : 'a -> Reason.t -> array_kind -> 'a
+  method on_tlist : 'a -> Reason.t -> locl ty list -> 'a
 end
 
 class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
@@ -110,6 +111,7 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
     | AKmap (tk, tv) ->
       let acc = this#on_type acc tk in
       this#on_type acc tv
+  method on_tlist acc _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
   method on_type: type a. _ -> a ty -> _ = fun acc (r, x) ->
     match x with
     | Tany -> this#on_tany acc r
@@ -144,4 +146,5 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
     | Tshape (shape_kind, fdm) -> this#on_tshape acc r shape_kind fdm
     | Tclass (cls, exact, tyl) -> this#on_tclass acc r cls exact tyl
     | Tarraykind akind -> this#on_tarraykind acc r akind
+    | Tdestructure tyl -> this#on_tlist acc r tyl
 end

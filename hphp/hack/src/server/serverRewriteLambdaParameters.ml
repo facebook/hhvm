@@ -54,6 +54,8 @@ end = struct
         (String.concat ~sep:", " params) (print_ty_exn ft.ft_ret)
     | Ttuple tyl ->
       "(" ^ print_tyl_exn tyl ^ ")"
+    | Tdestructure tyl ->
+      "list(" ^ print_tyl_exn tyl ^ ")"
     | Tshape (shape_kind, fdm) ->
       let fields =
         List.map (Nast.ShapeMap.elements fdm) ~f:print_shape_field_exn in

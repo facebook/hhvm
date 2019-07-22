@@ -67,6 +67,8 @@ let rec strip_ty : type a. a ty -> a ty = fun ty ->
 
     | Ttuple tyl ->
       Ttuple (strip_tyl tyl)
+    | Tdestructure tyl ->
+      Tdestructure (strip_tyl tyl)
 
     | Toption ty ->
       Toption (strip_ty ty)

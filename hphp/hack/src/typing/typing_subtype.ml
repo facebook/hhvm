@@ -1134,6 +1134,35 @@ and simplify_subtype
     List.fold_left tyl ~init:(env, TL.invalid ~fail) ~f:(fun res ty_sub ->
       res ||| simplify_subtype ~seen_generic_params ~this_ty ty_sub ty_super)
 
+  | Ttuple tyl, Tdestructure tyl_dest ->
+    if List.length tyl <> List.length tyl_dest then invalid () else
+    List.fold2_exn tyl tyl_dest ~init:(env, TL.valid) ~f:(fun res ty ty_dest ->
+      res &&& simplify_subtype ~seen_generic_params ~this_ty ty ty_dest)
+  | Tclass ((_, x), _, [elt_type]), Tdestructure tyl_dest
+    when x = SN.Collections.cVector
+      || x = SN.Collections.cImmVector
+      || x = SN.Collections.cVec
+      || x = SN.Collections.cConstVector ->
+    List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
+      res &&& simplify_subtype ~seen_generic_params ~this_ty elt_type ty_dest)
+  | Tclass ((_, x), _, tyl), Tdestructure tyl_dest when x = SN.Collections.cPair ->
+    if List.length tyl <> List.length tyl_dest then invalid () else
+    List.fold2_exn tyl tyl_dest ~init:(env, TL.valid) ~f:(fun res ty ty_dest ->
+      res &&& simplify_subtype ~seen_generic_params ~this_ty ty ty_dest)
+  | Tarraykind (AKvec elt_type), Tdestructure tyl_dest
+  | Tarraykind (AKvarray elt_type), Tdestructure tyl_dest ->
+    List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
+      res &&& simplify_subtype ~seen_generic_params ~this_ty elt_type ty_dest)
+  | Tdynamic, Tdestructure tyl_dest ->
+    List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
+      res &&& simplify_subtype ~seen_generic_params ~this_ty ty_sub ty_dest)
+  (* TODO: should remove these any cases *)
+  | Tarraykind (AKany | AKempty), Tdestructure tyl_dest
+  | Tany, Tdestructure tyl_dest ->
+    let any = (fst ty_super, Tany) in
+    List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
+      res &&& simplify_subtype ~seen_generic_params ~this_ty any ty_dest)
+
   | Tany, Tany ->
     valid ()
 
@@ -1218,6 +1247,11 @@ and simplify_subtype
 
   | _, Tabstract (AKgeneric name_super, _) ->
     simplify_subtype_generic_super ty_sub name_super env
+
+  | Tdestructure _, _ ->
+    invalid ()
+  | _, Tdestructure _ ->
+    invalid ()
 
 and simplify_subtype_variance
   ~(seen_generic_params : SSet.t option)
@@ -2400,6 +2434,9 @@ let rec freshen_inside_ty env ((r, ty_) as ty) =
   | Ttuple tyl ->
     let env, tyl = List.map_env env tyl freshen_ty in
     env, (r, Ttuple tyl)
+  | Tdestructure tyl ->
+    let env, tyl = List.map_env env tyl freshen_ty in
+    env, (r, Tdestructure tyl)
     (* Shape data is covariant *)
   | Tshape (shape_kind, fdm) ->
     let env, fdm = ShapeFieldMap.map_env freshen_ty env fdm in

@@ -140,7 +140,7 @@ let rec truthiness env ty =
     else Possibly_falsy
 
   | Ttuple [] -> Always_falsy
-  | Tobject | Tfun _ | Ttuple _ | Tanon _ -> Always_truthy
+  | Tobject | Tfun _ | Ttuple _ | Tanon _ | Tdestructure _ -> Always_truthy
 
 (** When a type represented by one of these variants is used in a truthiness
     test, it indicates a potential logic error, since the truthiness of some
@@ -190,7 +190,7 @@ let rec find_sketchy_types env acc ty =
     List.fold tyl ~init:acc ~f:(find_sketchy_types env)
 
   | Tany | Tnonnull | Tdynamic | Terr | Tobject | Tprim _ | Tfun _ | Ttuple _
-  | Tshape _ | Tvar _ | Tanon _ | Tarraykind _ -> acc
+  | Tshape _ | Tvar _ | Tanon _ | Tarraykind _ | Tdestructure _ -> acc
 
 let find_sketchy_types env ty = find_sketchy_types env [] ty
 

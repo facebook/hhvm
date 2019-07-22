@@ -2023,9 +2023,6 @@ let new_inconsistent_construct new_pos (cpos, cname) kind =
     cpos, ("This declaration is neither final nor uses \
            the <<__ConsistentConstruct>> attribute")]
 
-let pair_arity pos =
-  add (Typing.err_code Typing.PairArity) pos "A pair has exactly 2 elements"
-
 let undefined_parent pos =
   add (Typing.err_code Typing.UndefinedParent) pos
     "The parent class is undefined"

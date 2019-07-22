@@ -231,7 +231,7 @@ and expand env ~as_tyvar_with_cnstr root id =
     let tenv, ty = Typing_subtype_tconst.get_tyvar_type_const env.tenv n id in
     { env with tenv }, ty
   | Tanon _ | Tobject | Tnonnull | Tprim _ | Tshape _ | Ttuple _
-  | Tarraykind _ | Tfun _ | Tabstract (_, _)  | Tdynamic | Toption _ ->
+  | Tarraykind _ | Tfun _ | Tabstract (_, _)  | Tdynamic | Toption _ | Tdestructure _ ->
     let pos, tconst = id in
     let ty = Typing_print.error env.tenv root in
     raise_error (fun () ->

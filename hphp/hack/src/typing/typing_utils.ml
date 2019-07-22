@@ -473,7 +473,7 @@ let rec push_option_out pos env ty =
     else env, ty
   | _, (Terr | Tany | Tnonnull | Tarraykind _ | Tprim _
     | Tclass _ | Ttuple _ | Tanon _ | Tfun _
-    | Tobject | Tshape _ | Tdynamic) -> env, ty
+    | Tobject | Tshape _ | Tdynamic | Tdestructure _) -> env, ty
 
 (**
  * Strips away all Toption that we possible can in a type, expanding type

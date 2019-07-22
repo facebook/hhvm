@@ -38,6 +38,7 @@ let expand_ty ?pos env ty =
       | (p, Tintersection tyl) -> (p, Tintersection (exp_tys tyl))
       | (p, Toption ty) -> (p, Toption (exp_ty ty))
       | (p, Ttuple tyl) -> (p, Ttuple (exp_tys tyl))
+      | (p, Tdestructure tyl) -> (p, Tdestructure (exp_tys tyl))
       | (p, Tfun ft) -> (p, Tfun (exp_fun_type ft))
       | (p, Tabstract (ak, tyopt)) ->
         (p, Tabstract (exp_abstract_kind ak, Option.map tyopt exp_ty))

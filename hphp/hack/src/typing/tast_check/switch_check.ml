@@ -83,7 +83,7 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
       env
     | Terr | Tany | Tnonnull | Tarraykind _ | Tclass _ | Toption _
       | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Ttuple _ | Tanon (_, _)
-      | Tobject | Tshape _ | Tdynamic -> env
+      | Tobject | Tshape _ | Tdynamic | Tdestructure _ -> env
 
 let check_exhaustiveness env pos ty caselist =
   ignore (check_exhaustiveness_ env pos ty caselist false)

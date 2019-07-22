@@ -318,7 +318,7 @@ module Typing                               = struct
   | OverflowDEPRECATED
   | OverrideFinal
   | OverridePerTrait
-  | PairArity
+  | PairArityDEPRECATED
   | AbstractCall
   | ParentInTrait
   | ParentOutsideClass

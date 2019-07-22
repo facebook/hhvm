@@ -64,7 +64,7 @@ let check_valid_array_key_type f_fail ~allow_any:allow_any env p t =
       then env, None
       else env, Option.value ~default:None (List.find errors ~f:Option.is_some)
     | Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic
-      | Tvar _ | Tabstract _ | Tclass _ | Ttuple _ | Tanon _
+      | Tvar _ | Tabstract _ | Tclass _ | Ttuple _ | Tanon _ | Tdestructure _
       | Tfun _ | Tunion _ | Tobject | Tshape _ ->
       env, Some (fun () -> f_fail p (Reason.to_pos r) (Typing_print.error env (r, t')) trail) in
   let env, err = check_valid_array_key_type env t in
@@ -118,7 +118,7 @@ let enum_class_check env tc consts const_types =
            * Enum subclasses that need to do that *)
           | Tabstract (AKgeneric _, _) -> ()
           | Terr | Tany | Tarraykind _ | Tprim _ | Toption _ | Tvar _
-            | Tabstract (_, _) | Tclass _ | Ttuple _ | Tanon (_, _)
+            | Tabstract (_, _) | Tclass _ | Ttuple _ | Tanon (_, _) | Tdestructure _
             | Tunion _ | Tintersection _ | Tobject | Tfun _ | Tshape _ | Tdynamic ->
               Errors.enum_type_bad (Reason.to_pos r)
                 (Typing_print.error env (r, ty_exp')) trail);

@@ -195,6 +195,9 @@ and pp_ty_ : type a. Format.formatter -> a ty_ -> unit = fun fmt ty ->
     Format.fprintf fmt "(@[<2>Tarraykind@ ";
     pp_array_kind fmt a0;
     Format.fprintf fmt "@])"
+  | Tdestructure tyl ->
+    Format.fprintf fmt "(@[<2>Tdestructure@ ";
+    pp_ty_list fmt tyl
 
 and pp_ty_list : type a. Format.formatter -> a ty list -> unit = fun fmt tyl ->
   Format.fprintf fmt "@[<2>[";

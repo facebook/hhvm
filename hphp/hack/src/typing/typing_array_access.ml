@@ -398,7 +398,7 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
       let env, res = res in env, res
     | _ -> error_array env expr_pos ety1
     end
-  | Tnonnull | Tprim _ | Tfun _
+  | Tnonnull | Tprim _ | Tfun _ | Tdestructure _
   | Tclass _ | Tanon (_, _) ->
       error_array env expr_pos ety1
   (* Type-check array access as though it is the method
@@ -513,7 +513,7 @@ let rec assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
     | _ -> error_assign_array_append env expr_pos ty1
     end
   | _, (Tnonnull | Tarraykind _ | Toption _ | Tprim _ | Tvar _ |
-        Tfun _ | Tclass _ | Ttuple _ | Tanon _ | Tshape _) ->
+        Tfun _ | Tclass _ | Ttuple _ | Tanon _ | Tshape _ | Tdestructure _) ->
     error_assign_array_append env expr_pos ty1
 
 let widen_for_assign_array_get ~expr_pos index_expr env ty =
@@ -747,7 +747,7 @@ let rec assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
       Errors.array_access expr_pos (Reason.to_pos r) (Typing_print.error env ety1);
       error
     end
-  | (Toption _ | Tnonnull | Tprim _ |
+  | (Toption _ | Tnonnull | Tprim _ | Tdestructure _ |
      Tvar _ | Tfun _ | Tclass _ | Tanon _) ->
     Errors.array_access expr_pos (Reason.to_pos r) (Typing_print.error env ety1);
     error

@@ -81,6 +81,7 @@ module Suggest = struct
     | Tabstract (AKdependent _, _) -> "..."
     | Tobject                -> "..."
     | Tshape _               -> "..."
+    | Tdestructure _         -> "..."
     | Taccess (root_ty, ids) ->
         let x =
           match snd root_ty with
@@ -271,6 +272,7 @@ module Full = struct
     *)
     | Tapply ((_, s), tyl) -> to_doc s ^^ list "<" k tyl ">"
     | Ttuple tyl -> list "(" k tyl ")"
+    | Tdestructure tyl -> list "list(" k tyl ")"
     | Tanon (_, id) ->
       begin match Env.get_anonymous env id with
       | Some { Env. rx = Reactive _; is_coroutine = true; _ } -> text "[coroutine rx fun]"
@@ -631,6 +633,8 @@ module ErrorString = struct
       "an object of type " ^ strip_ns x ^ inst env tyl
     | Tobject            -> "an object"
     | Tshape _           -> "a shape"
+    | Tdestructure l     ->
+      "a list destructuring assignment of length " ^ string_of_int (List.length l)
 
   and array: type a. a ty option * a ty option -> _ = function
     | None, None     -> "an untyped array"
@@ -870,6 +874,8 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
     obj @@ kind "array" @ empty false @ args [ty1; ty2]
   | Tarraykind AKempty ->
     obj @@ kind "array" @ empty true @ args []
+  | Tdestructure tyl ->
+    obj @@ kind "union" @ args tyl
 
 type 'a deserialized_result = ('a ty, deserialization_error) result
 

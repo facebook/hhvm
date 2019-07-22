@@ -115,6 +115,7 @@ let rec reason = function
   | Rlambda_param (p, r) -> Rlambda_param (pos p, reason r)
   | Rshape (p, fun_name) -> Rshape (pos p, fun_name)
   | Renforceable p -> Renforceable (pos p)
+  | Rdestructure (p, l) -> Rdestructure (pos p, l)
 
 let rec ty (p, x) =
   reason p, ty_ x

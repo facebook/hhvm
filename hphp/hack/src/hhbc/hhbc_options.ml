@@ -117,8 +117,8 @@ let default = {
   option_enable_constant_visibility_modifiers = false;
   option_enable_class_level_where_clauses = false;
   option_disable_legacy_soft_typehints = false;
-  option_disable_outside_dollar_str_interp = false;
   option_allow_new_attribute_syntax = false;
+  option_disable_outside_dollar_str_interp = true;
 }
 
 let constant_folding o = o.option_constant_folding

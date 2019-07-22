@@ -12,5 +12,5 @@
 function test(): string {
   $clauses = '';
   $prefix = '';
-  return "(term ${prefix}${clauses})";
+  return "(term {$prefix}{$clauses})";
 }

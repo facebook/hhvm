@@ -1,1 +1,2 @@
-No errors
+File "string_expressions16.php", line 16, characters 12-14:
+The ${x} syntax is disallowed in Hack. Use {$x} instead. (Parsing[1002])

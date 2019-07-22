@@ -185,8 +185,8 @@ module FullFidelityParseArgs = struct
     let enable_constant_visibility_modifiers = ref false in
     let enable_class_level_where_clauses = ref false in
     let disable_legacy_soft_typehints = ref false in
-    let disable_outside_dollar_str_interp = ref false in
     let allow_new_attribute_syntax = ref false in
+    let disable_outside_dollar_str_interp = ref true in
     let options =  [
       (* modes *)
       "--full-fidelity-json",

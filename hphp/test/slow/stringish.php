@@ -4,7 +4,7 @@
 // disallowed in RepoAuthoritative mode. Thus, this test
 // is set to be norepo.
 function err($code, $msg) {
-  echo "Handled ${code}: $msg", "\n";
+  echo "Handled {$code}: $msg", "\n";
   return true;
 }
 

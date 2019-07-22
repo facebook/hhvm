@@ -138,8 +138,8 @@ var_dump(lcfirst("$str"));
 var_dump(lcfirst("$str'S"));
 var_dump(lcfirst("$strS"));
 
+
 /* String with curly braces, complex syntax */
-var_dump(lcfirst("${str}S"));
 var_dump(lcfirst("{$str}S"));
 
 echo "\n--- Nested lcfirst() ---\n";

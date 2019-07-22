@@ -106,8 +106,8 @@ var_dump(ucfirst("$str"));
 var_dump(ucfirst("$str'S"));
 var_dump(ucfirst("$strS"));
 
+
 /* String with curly braces, complex syntax */
-var_dump(ucfirst("${str}S"));
 var_dump(ucfirst("{$str}S"));
 
 echo "\n--- Nested ucfirst() ---\n";

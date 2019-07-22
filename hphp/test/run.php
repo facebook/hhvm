@@ -1082,7 +1082,7 @@ function hphp_cmd($options, $test, $program) {
     $compiler_args = implode(" ", array(
       '-vRuntime.Eval.HackCompilerUseEmbedded=false',
       "-vRuntime.Eval.HackCompilerInheritConfig=true",
-      "-vRuntime.Eval.HackCompilerCommand=\"${hh_single_compile} -v Hack.Compiler.SourceMapping=1 --daemon --dump-symbol-refs\""
+      "-vRuntime.Eval.HackCompilerCommand=\"{$hh_single_compile} -v Hack.Compiler.SourceMapping=1 --daemon --dump-symbol-refs\""
     ));
   }
 
@@ -1570,7 +1570,7 @@ class Status {
       if (is_integer($str)) {
         $color = $str;
         if (self::$use_color) {
-          print "\033[0;${color}m";
+          print "\033[0;{$color}m";
         }
         $str = $args[$i++];
       }

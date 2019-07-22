@@ -21,7 +21,7 @@ function fn1() {
 
 function fn2() {
     $row = ArrayForEachVariableVariableForeach::$row;
-    echo "row=${row}\n";
+    echo "row={$row}\n";
 }
 
 // ORIGINAL ARRAY

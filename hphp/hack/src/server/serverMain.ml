@@ -572,31 +572,45 @@ let serve_one_iteration genv env client_provider =
   let env = recheck_loop genv env client has_persistent_connection_request in
   let env = update_recheck_values env start_t recheck_id in
 
-  let env = Option.value_map env.diag_subscribe
-      ~default:env
-      ~f:begin fun sub ->
+  (* if actual work was done, log whether anything got communicated to client *)
+  let log_diagnostics = env.recent_recheck_loop_stats.total_rechecked_count > 0 in
 
+  let env = match env.diag_subscribe with
+  | None ->
+    if log_diagnostics then Hh_logger.log "Finished recheck_loop; no diag subscriptions";
+    env
+  | Some sub -> begin
     let client = Utils.unsafe_opt env.persistent_client in
     (* We possibly just did a lot of work. Check the client again to see
      * that we are still idle before proceeding to send diagnostics *)
-    if ClientProvider.client_has_message client then env else
-    (* We processed some edits but didn't recheck them yet. *)
-    if not @@ Relative_path.Set.is_empty env.ide_needs_parsing then env else
-    if has_pending_disk_changes genv then env else
-
-    let sub, errors = Diagnostic_subscription.pop_errors sub env.errorl in
-
-    if not @@ SMap.is_empty errors then begin
-      let id = Diagnostic_subscription.get_id sub in
-      let res = ServerCommandTypes.DIAGNOSTIC (id, errors) in
-      try
-        ClientProvider.send_push_message_to_client client res
-      with ClientProvider.Client_went_away ->
-        (* Leaving cleanup of this condition to handled_connection function *)
-        ()
-    end;
-    { env with diag_subscribe = Some sub }
-  end in
+    if ClientProvider.client_has_message client then begin
+      if log_diagnostics then Hh_logger.log "Finished recheck_loop; client has message";
+      env
+    end else if not @@ Relative_path.Set.is_empty env.ide_needs_parsing then begin
+      (* We processed some edits but didn't recheck them yet. *)
+      if log_diagnostics then Hh_logger.log "Finished recheck_loop; ide_needs_parsing";
+      env
+    end else if has_pending_disk_changes genv then begin
+      if log_diagnostics then Hh_logger.log "Finished recheck_loop; has_pending_disk_changes";
+      env
+    end else begin
+      let sub, errors = Diagnostic_subscription.pop_errors sub env.errorl in
+      if SMap.is_empty errors then begin
+        if log_diagnostics then Hh_logger.log "Finished recheck_loop; is_empty errors";
+      end else begin
+        let id = Diagnostic_subscription.get_id sub in
+        let res = ServerCommandTypes.DIAGNOSTIC (id, errors) in
+        try
+          Hh_logger.log "Finished recheck_loop; sending push message";
+          ClientProvider.send_push_message_to_client client res
+        with ClientProvider.Client_went_away ->
+          (* Leaving cleanup of this condition to handled_connection function *)
+          Hh_logger.log "Finished recheck_loop; Client_went_away"
+      end;
+      { env with diag_subscribe = Some sub }
+      end
+    end
+  in
 
   let env = match client with
   | None -> env

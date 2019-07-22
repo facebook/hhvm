@@ -85,9 +85,9 @@ let total = ref 0
 let correct = ref 0
 let crashed = ref 0 (* not all parse modes are supposed to work with all test files *)
 
-let test args ~ocaml_env ~rust_env path =
-  let file = Relative_path.(create Dummy (path)) in
-  let source_text = SourceText.from_file file in
+let test args ~ocaml_env ~rust_env file contents =
+  let source_text = SourceText.make file contents in
+  let path = Relative_path.to_absolute file in
 
   let ok_ocaml, from_ocaml = match args.mode with
     | OCAML | COMPARE ->
@@ -182,8 +182,14 @@ let test args ~ocaml_env ~rust_env path =
       !crashed;
   if !failed && not args.keep_going then exit 1
 
-let test_batch args ~ocaml_env ~rust_env files =
-  List.iter files ~f:(test args ~ocaml_env ~rust_env)
+let test_multi args ~ocaml_env ~rust_env path =
+  (* Some typechecked files embed multiple files; they're invalid without a split *)
+  Relative_path.(create Dummy (path))
+  |> Multifile.file_to_files
+  |> Relative_path.Map.iter ~f:(test args ~ocaml_env ~rust_env)
+
+let test_batch args ~ocaml_env ~rust_env paths =
+  List.iter paths ~f:(test_multi args ~ocaml_env ~rust_env)
 
 end (* WithSmartConstructors *)
 
@@ -218,18 +224,6 @@ let get_files_in_path ~args path =
       (not @@ String_utils.string_ends_with f "let/let_lambda.php") &&
       (not @@ String_utils.string_ends_with f "test_variadic_type_hint.php") &&
       (not @@ String_utils.string_ends_with f "namespace_group_use_decl.php") &&
-      (* FIXME: These ones crashes during Rust parse but in OCaml code with: *)
-      (not @@ String_utils.string_ends_with f "nullsafe_call_on_expr_dep.php") &&
-      (*
-Uncaught exception:
-
-  (Invalid_argument "index out of bounds")
-
-Raised by primitive operation at file "$HOME/fbsource/fbcode/hphp/hack/src/utils/line_break_map.ml", line 60, characters 19-41
-Called from file "$HOME/fbsource/fbcode/hphp/hack/src/utils/line_break_map.ml", line 67, characters 4-43
-Called from file "$HOME/fbsource/fbcode/hphp/hack/src/parser/full_fidelity_source_text.ml" (inlined), line 83, characters 2-60
-Called from file "$HOME/fbsource/fbcode/hphp/hack/src/parser/full_fidelity_positioned_token.ml" (inlined), line 317, characters 2-72
-      *)
       true
     | _ -> true
   end files

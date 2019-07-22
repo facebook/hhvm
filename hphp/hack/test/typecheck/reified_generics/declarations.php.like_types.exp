@@ -1,0 +1,12 @@
+File "declarations.php", line 9, characters 7-7:
+Some type constraint(s) here are violated (Typing[4110])
+File "declarations.php", line 3, characters 19-20:
+'T2' is a constrained type parameter
+File "declarations.php", line 3, characters 19-20:
+Some type constraint(s) are violated here
+File "declarations.php", line 3, characters 19-20:
+T2 is a constrained type parameter
+File "declarations.php", line 9, characters 14-19:
+Expected string
+File "declarations.php", line 3, characters 19-20:
+But got dynamic

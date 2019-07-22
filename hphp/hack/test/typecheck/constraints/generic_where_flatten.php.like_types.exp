@@ -1,0 +1,24 @@
+File "generic_where_flatten.php", line 49, characters 13-19:
+A 'where' type constraint is violated here (Typing[4110])
+File "generic_where_flatten.php", line 7, characters 28-34:
+This is the method with 'where' type constraints
+File "generic_where_flatten.php", line 40, characters 17-17:
+Some type constraint(s) are violated here
+File "generic_where_flatten.php", line 40, characters 17-17:
+T is a constrained type parameter
+File "generic_where_flatten.php", line 7, characters 64-73:
+Expected MyList<[unresolved]>
+File "generic_where_flatten.php", line 40, characters 17-17:
+But got dynamic
+File "generic_where_flatten.php", line 50, characters 12-14:
+A 'where' type constraint is violated here (Typing[4110])
+File "generic_where_flatten.php", line 8, characters 28-30:
+This is the method with 'where' type constraints
+File "generic_where_flatten.php", line 7, characters 36-37:
+Some type constraint(s) are violated here
+File "generic_where_flatten.php", line 7, characters 36-37:
+Tu is a constrained type parameter
+File "generic_where_flatten.php", line 8, characters 50-52:
+Expected num
+File "generic_where_flatten.php", line 7, characters 36-37:
+But got dynamic

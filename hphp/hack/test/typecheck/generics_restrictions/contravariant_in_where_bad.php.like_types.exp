@@ -1,0 +1,80 @@
+File "contravariant_in_where_bad.php", line 30, characters 13-22:
+Invalid argument (Typing[4110])
+File "contravariant_in_where_bad.php", line 9, characters 24-25:
+Some type constraint(s) are violated here
+File "contravariant_in_where_bad.php", line 9, characters 24-25:
+Tu is a constrained type parameter
+File "contravariant_in_where_bad.php", line 26, characters 20-22:
+Expected int
+File "contravariant_in_where_bad.php", line 9, characters 24-25:
+But got dynamic
+File "contravariant_in_where_bad.php", line 31, characters 13-22:
+Invalid argument (Typing[4110])
+File "contravariant_in_where_bad.php", line 13, characters 24-25:
+Some type constraint(s) are violated here
+File "contravariant_in_where_bad.php", line 13, characters 24-25:
+Tu is a constrained type parameter
+File "contravariant_in_where_bad.php", line 26, characters 20-22:
+Expected int
+File "contravariant_in_where_bad.php", line 13, characters 24-25:
+But got dynamic
+File "contravariant_in_where_bad.php", line 32, characters 13-22:
+Invalid argument (Typing[4110])
+File "contravariant_in_where_bad.php", line 17, characters 24-25:
+Some type constraint(s) are violated here
+File "contravariant_in_where_bad.php", line 17, characters 24-25:
+Tu is a constrained type parameter
+File "contravariant_in_where_bad.php", line 26, characters 20-22:
+Expected int
+File "contravariant_in_where_bad.php", line 17, characters 24-25:
+But got dynamic
+File "contravariant_in_where_bad.php", line 33, characters 17-20:
+A 'where' type constraint is violated here (Typing[4110])
+File "contravariant_in_where_bad.php", line 21, characters 19-22:
+This is the method with 'where' type constraints
+File "contravariant_in_where_bad.php", line 21, characters 41-43:
+Expected int
+File "contravariant_in_where_bad.php", line 28, characters 27-29:
+But got dynamic because it is an unenforceable type
+File "contravariant_in_where_bad.php", line 37, characters 12-17:
+Some type constraint(s) here are violated (Typing[4110])
+File "contravariant_in_where_bad.php", line 4, characters 15-15:
+'T' is a constrained type parameter
+File "contravariant_in_where_bad.php", line 4, characters 15-15:
+Some type constraint(s) are violated here
+File "contravariant_in_where_bad.php", line 4, characters 15-15:
+T is a constrained type parameter
+File "contravariant_in_where_bad.php", line 37, characters 19-26:
+Expected arraykey
+File "contravariant_in_where_bad.php", line 4, characters 15-15:
+But got dynamic
+File "contravariant_in_where_bad.php", line 38, characters 13-14:
+Invalid argument (Typing[4110])
+File "contravariant_in_where_bad.php", line 37, characters 19-26:
+Expected arraykey
+File "contravariant_in_where_bad.php", line 28, characters 27-29:
+But got dynamic because it is an unenforceable type
+File "contravariant_in_where_bad.php", line 9, characters 39-39:
+Illegal usage of a contravariant type parameter (Typing[4121])
+File "contravariant_in_where_bad.php", line 4, characters 15-15:
+This is where the parameter was declared as contravariant (-)
+File "contravariant_in_where_bad.php", line 9, characters 39-39:
+`where _ as _` constraints are covariant on the left, contravariant on the right
+File "contravariant_in_where_bad.php", line 13, characters 48-48:
+Illegal usage of a contravariant type parameter (Typing[4121])
+File "contravariant_in_where_bad.php", line 4, characters 15-15:
+This is where the parameter was declared as contravariant (-)
+File "contravariant_in_where_bad.php", line 13, characters 48-48:
+`where _ super _` constraints are contravariant on the left, covariant on the right
+File "contravariant_in_where_bad.php", line 17, characters 39-39:
+Illegal usage of a contravariant type parameter (Typing[4121])
+File "contravariant_in_where_bad.php", line 4, characters 15-15:
+This is where the parameter was declared as contravariant (-)
+File "contravariant_in_where_bad.php", line 17, characters 39-39:
+`where _ = _` constraints are invariant on the left and right
+File "contravariant_in_where_bad.php", line 21, characters 36-36:
+Illegal usage of a contravariant type parameter (Typing[4121])
+File "contravariant_in_where_bad.php", line 4, characters 15-15:
+This is where the parameter was declared as contravariant (-)
+File "contravariant_in_where_bad.php", line 21, characters 36-36:
+`where _ as _` constraints are covariant on the left, contravariant on the right

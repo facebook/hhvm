@@ -1,0 +1,10 @@
+File "rx_move2.php", line 9, characters 12-26:
+Invalid argument (Typing[4110])
+File "rx/functions.hhi", line 30, characters 15-15:
+Some type constraint(s) are violated here
+File "rx/functions.hhi", line 30, characters 15-15:
+T is a constrained type parameter
+File "rx_move2.php", line 13, characters 31-31:
+Expected C
+File "rx/functions.hhi", line 30, characters 15-15:
+But got dynamic

@@ -1,0 +1,6 @@
+File "shape8.php", line 16, characters 22-43:
+Invalid return type (Typing[4110])
+File "shape8.php", line 18, characters 34-40:
+Expected ~shape('field1' => ~int, 'field2' => ~bool)
+File "shape8.php", line 16, characters 22-43:
+But got shape('field1' => ~int)

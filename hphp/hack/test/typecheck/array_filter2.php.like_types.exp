@@ -1,0 +1,10 @@
+File "array_filter2.php", line 6, characters 12-37:
+Invalid argument (Typing[4110])
+File "array_filter2.php", line 11, characters 19-20:
+Some type constraint(s) are violated here
+File "array_filter2.php", line 11, characters 19-20:
+Tk is a constrained type parameter
+File "array_filter2.php", line 9, characters 19-21:
+Expected int
+File "array_filter2.php", line 11, characters 19-20:
+But got dynamic

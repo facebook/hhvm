@@ -1,0 +1,2 @@
+File "odersky1.php", line 9, characters 10-20:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

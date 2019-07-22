@@ -1,0 +1,9 @@
+File "odersky2.php", line 16, characters 10-12:
+  There are remaining unsolved constraints!: (FALSE && FALSE)
+File "odersky2.php", line 19, characters 10-13:
+  There are remaining unsolved constraints!: (FALSE && FALSE)
+File "odersky2.php", line 22, characters 10-15:
+  There are remaining unsolved constraints!: FALSE
+File "odersky2.php", line 6, characters 19-23:
+  There are remaining unsolved constraints!: (FALSE && FALSE)
+No errors

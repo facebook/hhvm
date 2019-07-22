@@ -1,0 +1,10 @@
+File "test_mutable_return2.php", line 7, characters 10-32:
+Invalid return type (Typing[4110])
+File "rx/functions.hhi", line 26, characters 18-18:
+Some type constraint(s) are violated here
+File "rx/functions.hhi", line 26, characters 18-18:
+T is a constrained type parameter
+File "test_mutable_return2.php", line 6, characters 16-16:
+Expected A
+File "rx/functions.hhi", line 26, characters 18-18:
+But got dynamic

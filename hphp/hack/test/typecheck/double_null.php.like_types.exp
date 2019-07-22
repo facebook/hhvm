@@ -1,0 +1,10 @@
+File "double_null.php", line 39, characters 12-21:
+Invalid return type (Typing[4110])
+File "double_null.php", line 26, characters 16-16:
+Some type constraint(s) are violated here
+File "double_null.php", line 26, characters 16-16:
+T is a constrained type parameter
+File "double_null.php", line 36, characters 27-29:
+Expected Env
+File "double_null.php", line 26, characters 16-16:
+But got dynamic

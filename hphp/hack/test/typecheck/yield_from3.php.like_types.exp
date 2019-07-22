@@ -1,0 +1,6 @@
+File "yield_from3.php", line 7, characters 3-19:
+Invalid yield from (Typing[4110])
+File "yield_from3.php", line 7, characters 3-19:
+Expected void
+File "yield_from3.php", line 4, characters 46-49:
+But got dynamic because it is an unenforceable type

@@ -1,0 +1,12 @@
+File "let_subtype_covariance.php", line 12, characters 30-32:
+Some type constraint(s) here are violated (Typing[4110])
+File "let_subtype_covariance.php", line 3, characters 12-12:
+'T' is a constrained type parameter
+File "let_subtype_covariance.php", line 3, characters 12-12:
+Some type constraint(s) are violated here
+File "let_subtype_covariance.php", line 3, characters 12-12:
+T is a constrained type parameter
+File "let_subtype_covariance.php", line 12, characters 34-41:
+Expected Subclass
+File "let_subtype_covariance.php", line 3, characters 12-12:
+But got dynamic

@@ -1,0 +1,6 @@
+File "option_unify.php", line 10, characters 15-33:
+Invalid return type (Typing[4110])
+File "option_unify.php", line 8, characters 26-31:
+Expected string
+File "option_unify.php", line 10, characters 24-25:
+But got int

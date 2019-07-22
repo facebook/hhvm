@@ -1,0 +1,2 @@
+File "expected_float.php", line 6, characters 18-30:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

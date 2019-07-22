@@ -1,0 +1,84 @@
+File "generic_new.php", line 12, characters 12-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "generic_new.php", line 4, characters 9-9:
+'T' is a constrained type parameter
+File "generic_new.php", line 4, characters 9-9:
+Some type constraint(s) are violated here
+File "generic_new.php", line 4, characters 9-9:
+T is a constrained type parameter
+File "generic_new.php", line 12, characters 14-19:
+Expected string
+File "generic_new.php", line 4, characters 9-9:
+But got dynamic
+File "generic_new.php", line 14, characters 12-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "generic_new.php", line 4, characters 9-9:
+'T' is a constrained type parameter
+File "generic_new.php", line 4, characters 9-9:
+Some type constraint(s) are violated here
+File "generic_new.php", line 4, characters 9-9:
+T is a constrained type parameter
+File "generic_new.php", line 14, characters 14-16:
+Expected int
+File "generic_new.php", line 4, characters 9-9:
+But got dynamic
+File "generic_new.php", line 15, characters 12-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "generic_new.php", line 7, characters 9-10:
+'Tu' is a constrained type parameter
+File "generic_new.php", line 7, characters 9-10:
+Some type constraint(s) are violated here
+File "generic_new.php", line 7, characters 9-10:
+Tu is a constrained type parameter
+File "generic_new.php", line 15, characters 14-16:
+Expected int
+File "generic_new.php", line 7, characters 9-10:
+But got dynamic
+File "generic_new.php", line 15, characters 12-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "generic_new.php", line 7, characters 12-13:
+'Tv' is a constrained type parameter
+File "generic_new.php", line 7, characters 12-13:
+Some type constraint(s) are violated here
+File "generic_new.php", line 7, characters 12-13:
+Tv is a constrained type parameter
+File "generic_new.php", line 15, characters 18-23:
+Expected string
+File "generic_new.php", line 7, characters 12-13:
+But got dynamic
+File "generic_new.php", line 16, characters 12-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "generic_new.php", line 7, characters 9-10:
+'Tu' is a constrained type parameter
+File "generic_new.php", line 7, characters 9-10:
+Some type constraint(s) are violated here
+File "generic_new.php", line 7, characters 9-10:
+Tu is a constrained type parameter
+File "generic_new.php", line 16, characters 14-21:
+Expected arraykey
+File "generic_new.php", line 7, characters 9-10:
+But got dynamic
+File "generic_new.php", line 16, characters 12-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "generic_new.php", line 7, characters 12-13:
+'Tv' is a constrained type parameter
+File "generic_new.php", line 7, characters 12-13:
+Some type constraint(s) are violated here
+File "generic_new.php", line 7, characters 12-13:
+Tv is a constrained type parameter
+File "generic_new.php", line 16, characters 24-31:
+Expected arraykey
+File "generic_new.php", line 7, characters 12-13:
+But got dynamic
+File "generic_new.php", line 17, characters 12-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "generic_new.php", line 7, characters 12-13:
+'Tv' is a constrained type parameter
+File "generic_new.php", line 7, characters 12-13:
+Some type constraint(s) are violated here
+File "generic_new.php", line 7, characters 12-13:
+Tv is a constrained type parameter
+File "generic_new.php", line 17, characters 17-22:
+Expected string
+File "generic_new.php", line 7, characters 12-13:
+But got dynamic

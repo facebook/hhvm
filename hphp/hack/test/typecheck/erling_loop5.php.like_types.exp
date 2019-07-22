@@ -1,0 +1,10 @@
+File "erling_loop5.php", line 17, characters 26-26:
+Invalid return type (Typing[4110])
+File "erling_loop5.php", line 12, characters 9-9:
+Some type constraint(s) are violated here
+File "erling_loop5.php", line 12, characters 9-9:
+T is a constrained type parameter
+File "erling_loop5.php", line 22, characters 18-20:
+Expected int
+File "erling_loop5.php", line 12, characters 9-9:
+But got dynamic

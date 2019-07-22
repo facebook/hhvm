@@ -1,0 +1,6 @@
+File "pending_switch5.php", line 23, characters 16-20:
+Invalid return type (Typing[4110])
+File "pending_switch5.php", line 12, characters 15-17:
+Expected int
+File "pending_switch5.php", line 23, characters 16-20:
+But got bool

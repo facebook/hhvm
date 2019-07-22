@@ -1,0 +1,34 @@
+File "tconst_on_generics4.php", line 31, characters 14-16:
+Some type constraint(s) here are violated (Typing[4062])
+File "tconst_on_generics4.php", line 21, characters 30-31:
+'T1' is a constrained type parameter
+File "tconst_on_generics4.php", line 21, characters 76-76:
+You are trying to access the member T but this is not an object, it is a dynamic value
+File "tconst_on_generics4.php", line 21, characters 30-31:
+Definition is here
+File "tconst_on_generics4.php", line 31, characters 14-16:
+Some type constraint(s) here are violated (Typing[4062])
+File "tconst_on_generics4.php", line 21, characters 30-31:
+'T1' is a constrained type parameter
+File "tconst_on_generics4.php", line 21, characters 76-76:
+You are trying to access the member T but this is not an object, it is a dynamic value
+File "tconst_on_generics4.php", line 21, characters 36-38:
+Definition is here
+File "tconst_on_generics4.php", line 13, characters 18-23:
+Invalid return type (Typing[4110])
+File "tconst_on_generics4.php", line 26, characters 16-18:
+Expected int
+File "tconst_on_generics4.php", line 13, characters 18-23:
+But got string
+File "tconst_on_generics4.php", line 21, characters 76-76:
+  resulting from accessing the type constant 'T'
+File "tconst_on_generics4.php", line 27, characters 12-20:
+  on an object of exactly the class StringBox
+File "tconst_on_generics4.php", line 21, characters 76-76:
+You are trying to access the member T but this is not an object, it is a dynamic value (Typing[4062])
+File "tconst_on_generics4.php", line 21, characters 36-38:
+Definition is here
+File "tconst_on_generics4.php", line 22, characters 16-19:
+You are trying to access the member getK but this is not an object, it is a dynamic value or an object of type Box (Typing[4062])
+File "tconst_on_generics4.php", line 21, characters 36-38:
+Definition is here

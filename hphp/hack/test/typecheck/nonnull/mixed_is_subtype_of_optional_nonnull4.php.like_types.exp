@@ -1,0 +1,10 @@
+File "mixed_is_subtype_of_optional_nonnull4.php", line 8, characters 10-40:
+Invalid return type (Typing[4110])
+File "mixed_is_subtype_of_optional_nonnull4.php", line 3, characters 22-22:
+Some type constraint(s) are violated here
+File "mixed_is_subtype_of_optional_nonnull4.php", line 3, characters 22-22:
+T is a constrained type parameter
+File "mixed_is_subtype_of_optional_nonnull4.php", line 7, characters 36-42:
+Expected nonnull
+File "mixed_is_subtype_of_optional_nonnull4.php", line 3, characters 22-22:
+But got dynamic

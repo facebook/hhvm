@@ -1,0 +1,204 @@
+File "deep_soft_reification.php", line 9, characters 7-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "deep_soft_reification.php", line 4, characters 14-14:
+'T' is a constrained type parameter
+File "deep_soft_reification.php", line 4, characters 14-14:
+Some type constraint(s) are violated here
+File "deep_soft_reification.php", line 4, characters 14-14:
+T is a constrained type parameter
+File "deep_soft_reification.php", line 9, characters 14-19:
+Expected Erased
+File "deep_soft_reification.php", line 4, characters 14-14:
+But got dynamic
+File "deep_soft_reification.php", line 10, characters 7-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "deep_soft_reification.php", line 4, characters 14-14:
+'T' is a constrained type parameter
+File "deep_soft_reification.php", line 4, characters 14-14:
+Some type constraint(s) are violated here
+File "deep_soft_reification.php", line 4, characters 14-14:
+T is a constrained type parameter
+File "deep_soft_reification.php", line 10, characters 14-24:
+Expected Erased<int>
+File "deep_soft_reification.php", line 4, characters 14-14:
+But got dynamic
+File "deep_soft_reification.php", line 12, characters 7-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "deep_soft_reification.php", line 4, characters 14-14:
+'T' is a constrained type parameter
+File "deep_soft_reification.php", line 4, characters 14-14:
+Some type constraint(s) are violated here
+File "deep_soft_reification.php", line 4, characters 14-14:
+T is a constrained type parameter
+File "deep_soft_reification.php", line 12, characters 14-24:
+Expected SoftReified
+File "deep_soft_reification.php", line 4, characters 14-14:
+But got dynamic
+File "deep_soft_reification.php", line 13, characters 7-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "deep_soft_reification.php", line 4, characters 14-14:
+'T' is a constrained type parameter
+File "deep_soft_reification.php", line 4, characters 14-14:
+Some type constraint(s) are violated here
+File "deep_soft_reification.php", line 4, characters 14-14:
+T is a constrained type parameter
+File "deep_soft_reification.php", line 13, characters 14-29:
+Expected SoftReified<int>
+File "deep_soft_reification.php", line 4, characters 14-14:
+But got dynamic
+File "deep_soft_reification.php", line 15, characters 7-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "deep_soft_reification.php", line 4, characters 14-14:
+'T' is a constrained type parameter
+File "deep_soft_reification.php", line 4, characters 14-14:
+Some type constraint(s) are violated here
+File "deep_soft_reification.php", line 4, characters 14-14:
+T is a constrained type parameter
+File "deep_soft_reification.php", line 15, characters 14-20:
+Expected Reified
+File "deep_soft_reification.php", line 4, characters 14-14:
+But got dynamic
+File "deep_soft_reification.php", line 16, characters 7-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "deep_soft_reification.php", line 4, characters 14-14:
+'T' is a constrained type parameter
+File "deep_soft_reification.php", line 4, characters 14-14:
+Some type constraint(s) are violated here
+File "deep_soft_reification.php", line 4, characters 14-14:
+T is a constrained type parameter
+File "deep_soft_reification.php", line 16, characters 14-25:
+Expected Reified<int>
+File "deep_soft_reification.php", line 4, characters 14-14:
+But got dynamic
+File "deep_soft_reification.php", line 12, characters 14-24:
+All type arguments must be specified because a type parameter is reified (Typing[4303])
+File "deep_soft_reification.php", line 5, characters 7-17:
+Definition is here
+File "deep_soft_reification.php", line 15, characters 14-20:
+All type arguments must be specified because a type parameter is reified (Typing[4303])
+File "deep_soft_reification.php", line 6, characters 7-13:
+Definition is here
+File "deep_soft_reification.php", line 24, characters 7-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "deep_soft_reification.php", line 4, characters 14-14:
+'T' is a constrained type parameter
+File "deep_soft_reification.php", line 4, characters 14-14:
+Some type constraint(s) are violated here
+File "deep_soft_reification.php", line 4, characters 14-14:
+T is a constrained type parameter
+File "deep_soft_reification.php", line 24, characters 14-27:
+Expected Erased<Terase>
+File "deep_soft_reification.php", line 4, characters 14-14:
+But got dynamic
+File "deep_soft_reification.php", line 25, characters 7-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "deep_soft_reification.php", line 4, characters 14-14:
+'T' is a constrained type parameter
+File "deep_soft_reification.php", line 4, characters 14-14:
+Some type constraint(s) are violated here
+File "deep_soft_reification.php", line 4, characters 14-14:
+T is a constrained type parameter
+File "deep_soft_reification.php", line 25, characters 14-26:
+Expected Erased<Tsoft>
+File "deep_soft_reification.php", line 4, characters 14-14:
+But got dynamic
+File "deep_soft_reification.php", line 26, characters 7-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "deep_soft_reification.php", line 4, characters 14-14:
+'T' is a constrained type parameter
+File "deep_soft_reification.php", line 4, characters 14-14:
+Some type constraint(s) are violated here
+File "deep_soft_reification.php", line 4, characters 14-14:
+T is a constrained type parameter
+File "deep_soft_reification.php", line 26, characters 14-26:
+Expected Erased<Thard>
+File "deep_soft_reification.php", line 4, characters 14-14:
+But got dynamic
+File "deep_soft_reification.php", line 28, characters 7-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "deep_soft_reification.php", line 4, characters 14-14:
+'T' is a constrained type parameter
+File "deep_soft_reification.php", line 4, characters 14-14:
+Some type constraint(s) are violated here
+File "deep_soft_reification.php", line 4, characters 14-14:
+T is a constrained type parameter
+File "deep_soft_reification.php", line 28, characters 14-32:
+Expected SoftReified<Terase>
+File "deep_soft_reification.php", line 4, characters 14-14:
+But got dynamic
+File "deep_soft_reification.php", line 29, characters 7-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "deep_soft_reification.php", line 4, characters 14-14:
+'T' is a constrained type parameter
+File "deep_soft_reification.php", line 4, characters 14-14:
+Some type constraint(s) are violated here
+File "deep_soft_reification.php", line 4, characters 14-14:
+T is a constrained type parameter
+File "deep_soft_reification.php", line 29, characters 14-31:
+Expected SoftReified<Tsoft>
+File "deep_soft_reification.php", line 4, characters 14-14:
+But got dynamic
+File "deep_soft_reification.php", line 30, characters 7-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "deep_soft_reification.php", line 4, characters 14-14:
+'T' is a constrained type parameter
+File "deep_soft_reification.php", line 4, characters 14-14:
+Some type constraint(s) are violated here
+File "deep_soft_reification.php", line 4, characters 14-14:
+T is a constrained type parameter
+File "deep_soft_reification.php", line 30, characters 14-31:
+Expected SoftReified<Thard>
+File "deep_soft_reification.php", line 4, characters 14-14:
+But got dynamic
+File "deep_soft_reification.php", line 32, characters 7-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "deep_soft_reification.php", line 4, characters 14-14:
+'T' is a constrained type parameter
+File "deep_soft_reification.php", line 4, characters 14-14:
+Some type constraint(s) are violated here
+File "deep_soft_reification.php", line 4, characters 14-14:
+T is a constrained type parameter
+File "deep_soft_reification.php", line 32, characters 14-28:
+Expected Reified<Terase>
+File "deep_soft_reification.php", line 4, characters 14-14:
+But got dynamic
+File "deep_soft_reification.php", line 33, characters 7-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "deep_soft_reification.php", line 4, characters 14-14:
+'T' is a constrained type parameter
+File "deep_soft_reification.php", line 4, characters 14-14:
+Some type constraint(s) are violated here
+File "deep_soft_reification.php", line 4, characters 14-14:
+T is a constrained type parameter
+File "deep_soft_reification.php", line 33, characters 14-27:
+Expected Reified<Tsoft>
+File "deep_soft_reification.php", line 4, characters 14-14:
+But got dynamic
+File "deep_soft_reification.php", line 34, characters 7-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "deep_soft_reification.php", line 4, characters 14-14:
+'T' is a constrained type parameter
+File "deep_soft_reification.php", line 4, characters 14-14:
+Some type constraint(s) are violated here
+File "deep_soft_reification.php", line 4, characters 14-14:
+T is a constrained type parameter
+File "deep_soft_reification.php", line 34, characters 14-27:
+Expected Reified<Thard>
+File "deep_soft_reification.php", line 4, characters 14-14:
+But got dynamic
+File "deep_soft_reification.php", line 28, characters 26-31:
+This is not reified, it cannot be used as a reified type argument (Typing[4305])
+File "deep_soft_reification.php", line 5, characters 36-36:
+T is reified
+File "deep_soft_reification.php", line 29, characters 26-30:
+This is soft reified, it cannot be used as a reified type argument (Typing[4305])
+File "deep_soft_reification.php", line 5, characters 36-36:
+T is reified
+File "deep_soft_reification.php", line 32, characters 22-27:
+This is not reified, it cannot be used as a reified type argument (Typing[4305])
+File "deep_soft_reification.php", line 6, characters 21-21:
+T is reified
+File "deep_soft_reification.php", line 33, characters 22-26:
+This is soft reified, it cannot be used as a reified type argument (Typing[4305])
+File "deep_soft_reification.php", line 6, characters 21-21:
+T is reified

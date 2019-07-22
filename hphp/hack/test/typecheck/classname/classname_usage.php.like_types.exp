@@ -1,0 +1,10 @@
+File "classname_usage.php", line 80, characters 3-15:
+  ~string
+File "classname_usage.php", line 85, characters 3-16:
+  ~classname<T>
+File "classname_usage.php", line 87, characters 3-15:
+  ~string
+File "classname_usage.php", line 34, characters 17-19:
+You are trying to access the member foo but this is not an object, it is a dynamic value or an object of type I (Typing[4062])
+File "classname_usage.php", line 31, characters 24-24:
+Definition is here

@@ -1,0 +1,3 @@
+File "byval_collection_as_property4.php", line 7, characters 5-27:
+This object's property is being mutated(used as an lvalue)
+You cannot set non-mutable object properties in reactive functions (Typing[4202])

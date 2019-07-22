@@ -1,0 +1,94 @@
+File "tconst_on_generics.php", line 55, characters 14-16:
+Some type constraint(s) here are violated (Typing[4062])
+File "tconst_on_generics.php", line 30, characters 30-31:
+'T1' is a constrained type parameter
+File "tconst_on_generics.php", line 30, characters 72-72:
+You are trying to access the member T but this is not an object, it is a dynamic value
+File "tconst_on_generics.php", line 30, characters 30-31:
+Definition is here
+File "tconst_on_generics.php", line 55, characters 14-16:
+Some type constraint(s) here are violated (Typing[4062])
+File "tconst_on_generics.php", line 30, characters 30-31:
+'T1' is a constrained type parameter
+File "tconst_on_generics.php", line 30, characters 72-72:
+You are trying to access the member T but this is not an object, it is a dynamic value
+File "tconst_on_generics.php", line 30, characters 36-38:
+Definition is here
+File "tconst_on_generics.php", line 55, characters 18-19:
+Invalid argument (Typing[4110])
+File "tconst_on_generics.php", line 30, characters 41-42:
+Some type constraint(s) are violated here
+File "tconst_on_generics.php", line 30, characters 41-42:
+T2 is a constrained type parameter
+File "tconst_on_generics.php", line 17, characters 18-23:
+Expected string
+File "tconst_on_generics.php", line 30, characters 72-72:
+  resulting from accessing the type constant 'T'
+File "tconst_on_generics.php", line 51, characters 12-20:
+  on an object of exactly the class StringBox
+File "tconst_on_generics.php", line 30, characters 41-42:
+But got dynamic
+File "tconst_on_generics.php", line 30, characters 72-72:
+You are trying to access the member T but this is not an object, it is a dynamic value (Typing[4062])
+File "tconst_on_generics.php", line 30, characters 36-38:
+Definition is here
+File "tconst_on_generics.php", line 34, characters 81-81:
+You are trying to access the member T but this is not an object, it is a dynamic value (Typing[4062])
+File "tconst_on_generics.php", line 34, characters 36-38:
+Definition is here
+File "tconst_on_generics.php", line 38, characters 84-84:
+You are trying to access the member T but this is not an object, it is a dynamic value (Typing[4062])
+File "tconst_on_generics.php", line 38, characters 37-39:
+Definition is here
+File "tconst_on_generics.php", line 38, characters 90-90:
+You are trying to access the member T but this is not an object, it is a dynamic value (Typing[4062])
+File "tconst_on_generics.php", line 38, characters 48-50:
+Definition is here
+File "tconst_on_generics.php", line 45, characters 22-22:
+You are trying to access the member T but this is not an object, it is a dynamic value (Typing[4062])
+File "tconst_on_generics.php", line 42, characters 55-57:
+Definition is here
+File "tconst_on_generics.php", line 45, characters 28-28:
+You are trying to access the member T but this is not an object, it is a dynamic value (Typing[4062])
+File "tconst_on_generics.php", line 42, characters 73-75:
+Definition is here
+File "tconst_on_generics.php", line 30, characters 72-72:
+You are trying to access the member T but this is not an object, it is a dynamic value (Typing[4062])
+File "tconst_on_generics.php", line 30, characters 36-38:
+Definition is here
+File "tconst_on_generics.php", line 31, characters 16-19:
+You are trying to access the member getK but this is not an object, it is a dynamic value or an object of type Box (Typing[4062])
+File "tconst_on_generics.php", line 30, characters 36-38:
+Definition is here
+File "tconst_on_generics.php", line 34, characters 81-81:
+You are trying to access the member T but this is not an object, it is a dynamic value (Typing[4062])
+File "tconst_on_generics.php", line 34, characters 36-38:
+Definition is here
+File "tconst_on_generics.php", line 35, characters 9-12:
+You are trying to access the member setK but this is not an object, it is a dynamic value or an object of type Box (Typing[4062])
+File "tconst_on_generics.php", line 34, characters 36-38:
+Definition is here
+File "tconst_on_generics.php", line 38, characters 84-84:
+You are trying to access the member T but this is not an object, it is a dynamic value (Typing[4062])
+File "tconst_on_generics.php", line 38, characters 37-39:
+Definition is here
+File "tconst_on_generics.php", line 38, characters 90-90:
+You are trying to access the member T but this is not an object, it is a dynamic value (Typing[4062])
+File "tconst_on_generics.php", line 38, characters 48-50:
+Definition is here
+File "tconst_on_generics.php", line 39, characters 14-17:
+You are trying to access the member getK but this is not an object, it is a dynamic value or an object of type Box (Typing[4062])
+File "tconst_on_generics.php", line 38, characters 48-50:
+Definition is here
+File "tconst_on_generics.php", line 45, characters 22-22:
+You are trying to access the member T but this is not an object, it is a dynamic value (Typing[4062])
+File "tconst_on_generics.php", line 42, characters 55-57:
+Definition is here
+File "tconst_on_generics.php", line 45, characters 28-28:
+You are trying to access the member T but this is not an object, it is a dynamic value (Typing[4062])
+File "tconst_on_generics.php", line 42, characters 73-75:
+Definition is here
+File "tconst_on_generics.php", line 46, characters 14-17:
+You are trying to access the member getK but this is not an object, it is a dynamic value or an object of type Box (Typing[4062])
+File "tconst_on_generics.php", line 42, characters 73-75:
+Definition is here

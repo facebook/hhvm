@@ -1,0 +1,2 @@
+File "inter_sub_tvar.php", line 7, characters 5-111:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

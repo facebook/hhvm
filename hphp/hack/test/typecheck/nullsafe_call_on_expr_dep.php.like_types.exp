@@ -1,0 +1,2 @@
+File "nullsafe_call_on_expr_dep.php--file2.php", line 11, characters 18-31:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

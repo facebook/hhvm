@@ -1,0 +1,32 @@
+File "t21684610.php", line 13, characters 25-27:
+Invalid argument (Typing[4110])
+File "printf.hhi", line 133, characters 30-56:
+Expected ~HH\FormatString<~PlainSprintf> because it is an unenforceable type
+File "t21684610.php", line 13, characters 25-27:
+But got string
+File "t21684610.php", line 19, characters 25-27:
+Invalid argument (Typing[4110])
+File "printf.hhi", line 133, characters 30-56:
+Expected ~HH\FormatString<~PlainSprintf> because it is an unenforceable type
+File "t21684610.php", line 19, characters 25-27:
+But got string
+File "t21684610.php", line 23, characters 27-27:
+Invalid argument (Typing[4110])
+File "t21684610.php", line 9, characters 44-48:
+Some type constraint(s) are violated here
+File "t21684610.php", line 9, characters 38-39:
+Ti is a constrained type parameter
+File "t21684610.php", line 9, characters 44-48:
+Expected ~I1<[unresolved]>
+File "t21684610.php", line 23, characters 27-27:
+But got int
+File "t21684610.php", line 27, characters 16-16:
+Invalid argument (Typing[4110])
+File "t21684610.php", line 9, characters 44-48:
+Some type constraint(s) are violated here
+File "t21684610.php", line 9, characters 38-39:
+Ti is a constrained type parameter
+File "t21684610.php", line 9, characters 44-48:
+Expected ~I1<[unresolved]>
+File "t21684610.php", line 27, characters 16-16:
+But got int

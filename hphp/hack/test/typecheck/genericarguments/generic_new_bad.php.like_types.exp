@@ -1,0 +1,20 @@
+File "generic_new_bad.php", line 9, characters 12-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "generic_new_bad.php", line 4, characters 9-9:
+'T' is a constrained type parameter
+File "generic_new_bad.php", line 4, characters 9-9:
+Some type constraint(s) are violated here
+File "generic_new_bad.php", line 4, characters 9-9:
+T is a constrained type parameter
+File "generic_new_bad.php", line 9, characters 14-16:
+Expected int
+File "generic_new_bad.php", line 4, characters 9-9:
+But got dynamic
+File "generic_new_bad.php", line 9, characters 19-20:
+Invalid argument (Typing[4110])
+File "generic_new_bad.php", line 9, characters 14-16:
+Expected int
+File "generic_new_bad.php", line 5, characters 39-39:
+  via this generic T
+File "generic_new_bad.php", line 8, characters 15-20:
+But got string

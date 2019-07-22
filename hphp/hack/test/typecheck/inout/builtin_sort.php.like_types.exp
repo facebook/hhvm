@@ -1,0 +1,44 @@
+File "builtin_sort.php", line 19, characters 13-22:
+Invalid argument (Typing[4110])
+File "builtin_sort.php", line 4, characters 17-17:
+Some type constraint(s) are violated here
+File "builtin_sort.php", line 4, characters 17-17:
+T is a constrained type parameter
+File "builtin_sort.php", line 12, characters 20-22:
+Expected int
+File "builtin_sort.php", line 4, characters 17-17:
+But got dynamic
+File "builtin_sort.php", line 0, characters 0-0:
+Type checking of this file produced an error with the primary position in a different file. This is a bug in the type checker. Please report it by clicking the bug button in Nuclide or by creating a diff preview and posting it in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
+File "container_functions.hhi", line 38, characters 17-17:
+Invalid argument
+File "container_functions.hhi", line 38, characters 17-17:
+Some type constraint(s) are violated here
+File "container_functions.hhi", line 38, characters 17-17:
+T is a constrained type parameter
+File "builtin_sort.php", line 4, characters 20-33:
+Expected Traversable<[unresolved]>
+File "container_functions.hhi", line 38, characters 17-17:
+But got dynamic
+File "builtin_sort.php", line 20, characters 16-29:
+Invalid argument (Typing[4110])
+File "builtin_sort.php", line 8, characters 21-22:
+Some type constraint(s) are violated here
+File "builtin_sort.php", line 8, characters 21-22:
+Tk is a constrained type parameter
+File "builtin_sort.php", line 13, characters 23-28:
+Expected string
+File "builtin_sort.php", line 8, characters 21-22:
+But got dynamic
+File "builtin_sort.php", line 0, characters 0-0:
+Type checking of this file produced an error with the primary position in a different file. This is a bug in the type checker. Please report it by clicking the bug button in Nuclide or by creating a diff preview and posting it in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
+File "container_functions.hhi", line 38, characters 17-17:
+Invalid argument
+File "container_functions.hhi", line 38, characters 17-17:
+Some type constraint(s) are violated here
+File "container_functions.hhi", line 38, characters 17-17:
+T is a constrained type parameter
+File "builtin_sort.php", line 8, characters 29-52:
+Expected KeyedTraversable<[unresolved], [unresolved]>
+File "container_functions.hhi", line 38, characters 17-17:
+But got dynamic

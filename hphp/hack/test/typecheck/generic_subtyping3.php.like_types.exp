@@ -1,0 +1,4 @@
+File "generic_subtyping3.php", line 27, characters 25-27:
+You are trying to access the member get but this is not an object, it is a dynamic value or an object of type TestGeneric<T> (Typing[4062])
+File "generic_subtyping3.php", line 24, characters 31-44:
+Definition is here

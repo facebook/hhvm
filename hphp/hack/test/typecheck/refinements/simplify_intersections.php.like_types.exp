@@ -1,0 +1,2 @@
+File "simplify_intersections.php", line 11, characters 5-103:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

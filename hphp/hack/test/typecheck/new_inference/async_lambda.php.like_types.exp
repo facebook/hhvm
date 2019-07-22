@@ -1,0 +1,8 @@
+File "async_lambda.php", line 6, characters 11-25:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "async_lambda.php", line 6, characters 11-25:
+Invalid argument (Typing[4110])
+File "collections/Set.hhi", line 221, characters 59-76:
+Expected ~(function([unresolved]): [unresolved]) because it is an unenforceable type
+File "async_lambda.php", line 6, characters 11-25:
+But got (function($_): Awaitable<int>)

@@ -1,0 +1,6 @@
+File "let_lambda_error3.php", line 5, characters 11-30:
+Wrong type hint (Typing[4110])
+File "let_lambda_error3.php", line 5, characters 11-30:
+Expected ~(function(): string) because it is an unenforceable type
+File "let_lambda_error3.php", line 5, characters 34-59:
+But got (function(): int)

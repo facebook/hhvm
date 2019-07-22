@@ -1,0 +1,6 @@
+File "bad_inout_hint_return5.php", line 4, characters 10-55:
+Invalid return type (Typing[4110])
+File "bad_inout_hint_return5.php", line 3, characters 17-42:
+Expected ~(function(inout int): int) because it is an unenforceable type
+File "bad_inout_hint_return5.php", line 4, characters 10-55:
+But got (function(inout string $x): int)

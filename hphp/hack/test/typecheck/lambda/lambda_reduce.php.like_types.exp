@@ -1,0 +1,22 @@
+File "lambda_reduce.php", line 27, characters 12-146:
+Invalid return type (Typing[4110])
+File "lambda_reduce.php", line 7, characters 23-24:
+Some type constraint(s) are violated here
+File "lambda_reduce.php", line 7, characters 23-24:
+Ta is a constrained type parameter
+File "lambda_reduce.php", line 26, characters 6-8:
+Expected num
+File "lambda_reduce.php", line 7, characters 23-24:
+But got dynamic
+File "lambda_reduce.php", line 28, characters 22-53:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_reduce.php", line 29, characters 7-53:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_reduce.php", line 37, characters 7-26:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_reduce.php", line 45, characters 7-68:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_reduce.php", line 53, characters 5-42:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_reduce.php", line 62, characters 7-36:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

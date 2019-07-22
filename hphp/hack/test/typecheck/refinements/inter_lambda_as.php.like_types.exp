@@ -1,0 +1,4 @@
+File "inter_lambda_as.php", line 8, characters 3-13:
+  vec<~(_ & ?C)>
+File "inter_lambda_as.php", line 6, characters 20-34:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

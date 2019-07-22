@@ -1,0 +1,12 @@
+File "generic_subtyping4.php", line 0, characters 0-0:
+Type checking of this file produced an error with the primary position in a different file. This is a bug in the type checker. Please report it by clicking the bug button in Nuclide or by creating a diff preview and posting it in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
+File "rx/interfaces.hhi", line 26, characters 49-50:
+Invalid argument
+File "generic_subtyping4.php", line 12, characters 19-19:
+Some type constraint(s) are violated here
+File "generic_subtyping4.php", line 12, characters 19-19:
+T is a constrained type parameter
+File "generic_subtyping4.php", line 41, characters 19-22:
+Expected bool
+File "generic_subtyping4.php", line 12, characters 19-19:
+But got dynamic

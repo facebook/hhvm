@@ -1,0 +1,8 @@
+File "lambda_classname.php", line 34, characters 39-61:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_classname.php", line 34, characters 54-59:
+Was expecting a class, but got an untyped value (Typing[4026])
+File "lambda_classname.php", line 39, characters 31-53:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_classname.php", line 39, characters 46-51:
+Was expecting a class, but got an untyped value (Typing[4026])

@@ -1,0 +1,6 @@
+File "subtype_funs.php", line 14, characters 31-47:
+Invalid assignment (Typing[4110])
+File "subtype_funs.php", line 13, characters 11-29:
+Expected (function(): mixed)
+File "subtype_funs.php", line 14, characters 31-47:
+But got dynamic because it is an unenforceable type

@@ -1,0 +1,10 @@
+File "gena_correctly_types_varray_or_darray_argument.php", line 13, characters 10-72:
+Invalid return type (Typing[4110])
+File "hh_single_type_check_magic.hhi", line 3, characters 21-22:
+Some type constraint(s) are violated here
+File "hh_single_type_check_magic.hhi", line 3, characters 21-22:
+Tk is a constrained type parameter
+File "gena_correctly_types_varray_or_darray_argument.php", line 12, characters 54-74:
+This is varray_or_darray, which requires arraykey-typed keys when used with an array (used like a hashtable)
+File "hh_single_type_check_magic.hhi", line 3, characters 21-22:
+But got dynamic

@@ -1,0 +1,8 @@
+File "explicit_type_collection_wildcard_map1.php", line 6, characters 3-13:
+  Map<[unresolved], bool>
+File "explicit_type_collection_wildcard_map1.php", line 7, characters 10-11:
+Invalid argument (Typing[4110])
+File "explicit_type_collection_wildcard_map1.php", line 5, characters 14-17:
+Expected bool
+File "explicit_type_collection_wildcard_map1.php", line 3, characters 28-31:
+But got dynamic because it is an unenforceable type

@@ -1,0 +1,16 @@
+File "lambda_prop.php", line 24, characters 39-52:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_prop.php", line 26, characters 39-52:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_prop.php", line 28, characters 28-41:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_prop.php", line 30, characters 28-41:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_prop.php", line 36, characters 28-54:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_prop.php", line 38, characters 28-54:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_prop.php", line 40, characters 28-54:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_prop.php", line 42, characters 28-54:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

@@ -1,0 +1,32 @@
+File "generic_self_type_access_failure.php", line 13, characters 13-13:
+You are trying to access the member T but this is not an object, it is a dynamic value (Typing[4062])
+File "generic_self_type_access_failure.php", line 11, characters 38-40:
+Definition is here
+File "generic_self_type_access_failure.php", line 19, characters 13-13:
+You are trying to access the member T but this is not an object, it is a dynamic value (Typing[4062])
+File "generic_self_type_access_failure.php", line 16, characters 22-24:
+Definition is here
+File "generic_self_type_access_failure.php", line 18, characters 36-53:
+Some type constraint(s) here are violated (Typing[4110])
+File "generic_self_type_access_failure.php", line 11, characters 32-33:
+'TX' is a constrained type parameter
+File "generic_self_type_access_failure.php", line 11, characters 38-40:
+Expected ~Box because it is an unenforceable type
+File "generic_self_type_access_failure.php", line 18, characters 52-52:
+But got T
+File "generic_self_type_access_failure.php", line 19, characters 13-13:
+You are trying to access the member T but this is not an object, it is a dynamic value (Typing[4062])
+File "generic_self_type_access_failure.php", line 16, characters 22-24:
+Definition is here
+File "generic_self_type_access_failure.php", line 13, characters 13-13:
+You are trying to access the member T but this is not an object, it is a dynamic value (Typing[4062])
+File "generic_self_type_access_failure.php", line 18, characters 30-33:
+Definition is here
+File "generic_self_type_access_failure.php", line 20, characters 11-11:
+A 'where' type constraint is violated here (Typing[4062])
+File "generic_self_type_access_failure.php", line 12, characters 28-28:
+This method's where constraints contain a generic type access
+File "generic_self_type_access_failure.php", line 13, characters 13-13:
+You are trying to access the member T but this is not an object, it is a dynamic value
+File "generic_self_type_access_failure.php", line 18, characters 30-33:
+Definition is here

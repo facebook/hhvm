@@ -1,0 +1,48 @@
+File "shape_idx_refine.php", line 7, characters 19-20:
+Invalid argument (Typing[4110])
+File "shape_idx_refine.php", line 7, characters 19-20:
+Expected shape(?'a' => [unresolved], ...) because Shapes::idx expects a shape
+File "shape_idx_refine.php", line 3, characters 13-31:
+But got dynamic because it is an unenforceable type
+File "shape_idx_refine.php", line 3, characters 13-31:
+Invalid return type (Typing[4110])
+File "shape_idx_refine.php", line 6, characters 22-22:
+Expected ~shape('a' => ~int, ...)
+File "shape_idx_refine.php", line 3, characters 13-31:
+But got shape(?'a' => ~int)
+File "shape_idx_refine.php", line 14, characters 19-20:
+Invalid argument (Typing[4110])
+File "shape_idx_refine.php", line 14, characters 19-20:
+Expected shape(?'a' => [unresolved], ...) because Shapes::idx expects a shape
+File "shape_idx_refine.php", line 13, characters 12-21:
+But got dynamic because it is an unenforceable type
+File "shape_idx_refine.php", line 13, characters 12-21:
+Invalid return type (Typing[4110])
+File "shape_idx_refine.php", line 13, characters 28-28:
+Expected ~shape('a' => ~int, ...)
+File "shape_idx_refine.php", line 13, characters 12-21:
+But got shape(...)
+File "shape_idx_refine.php", line 21, characters 19-20:
+Invalid argument (Typing[4110])
+File "shape_idx_refine.php", line 21, characters 19-20:
+Expected shape(?'a' => [unresolved], ...) because Shapes::idx expects a shape
+File "shape_idx_refine.php", line 3, characters 13-31:
+But got dynamic because it is an unenforceable type
+File "shape_idx_refine.php", line 3, characters 13-31:
+Invalid return type (Typing[4110])
+File "shape_idx_refine.php", line 20, characters 23-23:
+Expected ~shape('a' => ~int, ...)
+File "shape_idx_refine.php", line 3, characters 13-31:
+But got shape(?'a' => ~int)
+File "shape_idx_refine.php", line 29, characters 19-20:
+Invalid argument (Typing[4110])
+File "shape_idx_refine.php", line 29, characters 19-20:
+Expected shape(?'a' => [unresolved], ...) because Shapes::idx expects a shape
+File "shape_idx_refine.php", line 28, characters 13-22:
+But got dynamic because it is an unenforceable type
+File "shape_idx_refine.php", line 28, characters 13-22:
+Invalid return type (Typing[4110])
+File "shape_idx_refine.php", line 28, characters 29-29:
+Expected ~shape('a' => ~int, ...)
+File "shape_idx_refine.php", line 28, characters 13-22:
+But got shape(...)

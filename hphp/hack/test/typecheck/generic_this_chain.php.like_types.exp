@@ -1,0 +1,10 @@
+File "generic_this_chain.php", line 19, characters 26-26:
+Invalid argument (Typing[4110])
+File "generic_this_chain.php", line 17, characters 12-12:
+Some type constraint(s) are violated here
+File "generic_this_chain.php", line 17, characters 12-12:
+T is a constrained type parameter
+File "generic_this_chain.php", line 53, characters 17-17:
+Expected X
+File "generic_this_chain.php", line 17, characters 12-12:
+But got dynamic

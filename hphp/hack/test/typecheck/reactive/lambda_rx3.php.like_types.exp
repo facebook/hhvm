@@ -1,0 +1,4 @@
+File "lambda_rx3.php", line 5, characters 10-13:
+Reactive functions can only call other reactive functions. (Typing[4200])
+File "lambda_rx3.php", line 4, characters 33-49:
+This function is non-reactive.

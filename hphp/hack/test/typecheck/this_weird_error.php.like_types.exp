@@ -1,0 +1,6 @@
+File "this_weird_error.php", line 35, characters 28-78:
+Invalid argument (Typing[4110])
+File "this_weird_error.php", line 13, characters 36-52:
+Expected ~(function(~A): [unresolved]) because it is an unenforceable type
+File "this_weird_error.php", line 35, characters 28-78:
+But got (function(A $x): MyVector<[unresolved]>)

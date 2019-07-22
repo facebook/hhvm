@@ -1,0 +1,19 @@
+File "t13262460.php", line 9, characters 41-43:
+You are trying to access the member bar but this is not an object, it is a dynamic value or an object of type C (Typing[4062])
+File "t13262460.php", line 8, characters 20-20:
+Definition is here
+File "t13262460.php", line 17, characters 7-7:
+Class C does not correctly implement all required members  (Typing[4110])
+File "t13262460.php", line 17, characters 17-17:
+Some members are incompatible with those declared in type B
+Read the following to see why:
+File "t13262460.php", line 18, characters 19-21:
+Member foo has the wrong type
+File "t13262460.php", line 18, characters 28-28:
+Some type constraint(s) are violated here
+File "t13262460.php", line 18, characters 23-23:
+T is a constrained type parameter
+File "t13262460.php", line 18, characters 28-28:
+Expected ~C
+File "t13262460.php", line 18, characters 23-23:
+But got T

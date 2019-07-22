@@ -1,0 +1,21 @@
+File "where_override_bad.php", line 25, characters 7-9:
+A 'where' type constraint is violated here (Typing[4110])
+File "where_override_bad.php", line 10, characters 19-21:
+This is the method with 'where' type constraints
+File "where_override_bad.php", line 10, characters 45-48:
+Expected Base
+File "where_override_bad.php", line 24, characters 25-28:
+But got dynamic because it is an unenforceable type
+File "where_override_bad.php", line 15, characters 7-11:
+Class List4 does not correctly implement all required members  (Typing[4110])
+File "where_override_bad.php", line 15, characters 24-29:
+Some members are incompatible with those declared in type MyList
+Read the following to see why:
+File "where_override_bad.php", line 16, characters 19-21:
+Member foo has the wrong type
+File "where_override_bad.php", line 16, characters 45-51:
+Expected Derived
+File "where_override_bad.php", line 15, characters 13-13:
+But got T
+File "where_override_bad.php", line 16, characters 40-40:
+  via this generic T

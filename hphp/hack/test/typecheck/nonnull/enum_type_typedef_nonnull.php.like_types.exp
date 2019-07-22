@@ -1,0 +1,2 @@
+File "enum_type_typedef_nonnull.php--file2.php", line 5, characters 24-26:
+Enums must be int or string, not a dynamic value or a value of type Foo (Typing[4024])

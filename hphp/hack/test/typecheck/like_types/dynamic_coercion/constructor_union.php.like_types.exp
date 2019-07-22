@@ -1,0 +1,12 @@
+File "constructor_union.php", line 13, characters 10-11:
+Invalid argument (Typing[4110])
+File "constructor_union.php", line 4, characters 31-33:
+Expected int
+File "constructor_union.php", line 11, characters 21-27:
+But got dynamic
+File "constructor_union.php", line 13, characters 10-11:
+Invalid argument (Typing[4110])
+File "constructor_union.php", line 8, characters 31-36:
+Expected string
+File "constructor_union.php", line 11, characters 21-27:
+But got dynamic

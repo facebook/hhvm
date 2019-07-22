@@ -1,0 +1,20 @@
+File "lambda.php", line 10, characters 10-147:
+Invalid return type (Typing[4110])
+File "lambda.php", line 5, characters 26-26:
+Some type constraint(s) are violated here
+File "lambda.php", line 5, characters 26-26:
+T is a constrained type parameter
+File "lambda.php", line 9, characters 42-54:
+Expected array<~string>
+File "lambda.php", line 5, characters 26-26:
+But got dynamic
+File "lambda.php", line 5, characters 26-26:
+Invalid return type (Typing[4110])
+File "lambda.php", line 5, characters 26-26:
+Some type constraint(s) are violated here
+File "lambda.php", line 5, characters 26-26:
+T is a constrained type parameter
+File "lambda.php", line 9, characters 42-54:
+Expected array<~string>
+File "lambda.php", line 5, characters 26-26:
+But got dynamic

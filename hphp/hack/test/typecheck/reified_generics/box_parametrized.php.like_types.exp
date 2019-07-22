@@ -1,0 +1,88 @@
+File "box_parametrized.php", line 11, characters 7-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "box_parametrized.php", line 7, characters 14-14:
+'T' is a constrained type parameter
+File "box_parametrized.php", line 7, characters 14-14:
+Some type constraint(s) are violated here
+File "box_parametrized.php", line 7, characters 14-14:
+T is a constrained type parameter
+File "box_parametrized.php", line 11, characters 14-19:
+Expected Erased
+File "box_parametrized.php", line 7, characters 14-14:
+But got dynamic
+File "box_parametrized.php", line 13, characters 7-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "box_parametrized.php", line 7, characters 14-14:
+'T' is a constrained type parameter
+File "box_parametrized.php", line 7, characters 14-14:
+Some type constraint(s) are violated here
+File "box_parametrized.php", line 7, characters 14-14:
+T is a constrained type parameter
+File "box_parametrized.php", line 13, characters 14-20:
+Expected Reified
+File "box_parametrized.php", line 7, characters 14-14:
+But got dynamic
+File "box_parametrized.php", line 14, characters 7-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "box_parametrized.php", line 7, characters 14-14:
+'T' is a constrained type parameter
+File "box_parametrized.php", line 7, characters 14-14:
+Some type constraint(s) are violated here
+File "box_parametrized.php", line 7, characters 14-14:
+T is a constrained type parameter
+File "box_parametrized.php", line 14, characters 14-25:
+Expected Reified<int>
+File "box_parametrized.php", line 7, characters 14-14:
+But got dynamic
+File "box_parametrized.php", line 13, characters 14-20:
+All type arguments must be specified because a type parameter is reified (Typing[4303])
+File "box_parametrized.php", line 8, characters 7-13:
+Definition is here
+File "box_parametrized.php", line 20, characters 15-21:
+All type arguments must be specified because a type parameter is reified (Typing[4303])
+File "box_parametrized.php", line 8, characters 7-13:
+Definition is here
+File "box_parametrized.php", line 26, characters 7-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "box_parametrized.php", line 7, characters 14-14:
+'T' is a constrained type parameter
+File "box_parametrized.php", line 7, characters 14-14:
+Some type constraint(s) are violated here
+File "box_parametrized.php", line 7, characters 14-14:
+T is a constrained type parameter
+File "box_parametrized.php", line 26, characters 14-27:
+Expected Erased<Erased>
+File "box_parametrized.php", line 7, characters 14-14:
+But got dynamic
+File "box_parametrized.php", line 27, characters 7-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "box_parametrized.php", line 7, characters 14-14:
+'T' is a constrained type parameter
+File "box_parametrized.php", line 7, characters 14-14:
+Some type constraint(s) are violated here
+File "box_parametrized.php", line 7, characters 14-14:
+T is a constrained type parameter
+File "box_parametrized.php", line 27, characters 14-36:
+Expected Erased<Erased<Reified>>
+File "box_parametrized.php", line 7, characters 14-14:
+But got dynamic
+File "box_parametrized.php", line 28, characters 7-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "box_parametrized.php", line 7, characters 14-14:
+'T' is a constrained type parameter
+File "box_parametrized.php", line 7, characters 14-14:
+Some type constraint(s) are violated here
+File "box_parametrized.php", line 7, characters 14-14:
+T is a constrained type parameter
+File "box_parametrized.php", line 28, characters 14-41:
+Expected Erased<Erased<Reified<int>>>
+File "box_parametrized.php", line 7, characters 14-14:
+But got dynamic
+File "box_parametrized.php", line 27, characters 28-34:
+All type arguments must be specified because a type parameter is reified (Typing[4303])
+File "box_parametrized.php", line 8, characters 7-13:
+Definition is here
+File "box_parametrized.php", line 31, characters 29-35:
+All type arguments must be specified because a type parameter is reified (Typing[4303])
+File "box_parametrized.php", line 8, characters 7-13:
+Definition is here

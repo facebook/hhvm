@@ -1,0 +1,20 @@
+File "lambda_constraint_bad.php", line 17, characters 17-28:
+Invalid argument (Typing[4110])
+File "lambda_constraint_bad.php", line 12, characters 31-47:
+Expected ~(function([unresolved]): int) because it is an unenforceable type
+File "lambda_constraint_bad.php", line 17, characters 17-28:
+But got (function(C $x): int)
+File "lambda_constraint_bad.php", line 18, characters 15-21:
+Invalid argument (Typing[4110])
+File "lambda_constraint_bad.php", line 11, characters 17-17:
+Some type constraint(s) are violated here
+File "lambda_constraint_bad.php", line 11, characters 12-12:
+T is a constrained type parameter
+File "lambda_constraint_bad.php", line 11, characters 17-17:
+Expected ~I
+File "lambda_constraint_bad.php", line 18, characters 19-19:
+But got C
+File "lambda_constraint_bad.php", line 13, characters 49-51:
+You are trying to access the member foo but this is not an object, it is a dynamic value or an object of type I (Typing[4062])
+File "lambda_constraint_bad.php", line 11, characters 17-17:
+Definition is here

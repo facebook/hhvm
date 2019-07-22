@@ -1,0 +1,8 @@
+File "switch_tyvar.php", line 19, characters 5-148:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "switch_tyvar.php", line 19, characters 5-148:
+Invalid return type (Typing[4110])
+File "switch_tyvar.php", line 19, characters 5-148:
+Expected void because this function implicitly returns void
+File "switch_tyvar.php", line 22, characters 18-21:
+But got null

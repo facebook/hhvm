@@ -1,0 +1,12 @@
+File "inferred_variadic_type.php", line 22, characters 5-162:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "inferred_variadic_type.php", line 36, characters 5-51:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "inferred_variadic_type.php", line 41, characters 19-42:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "inferred_variadic_type.php", line 47, characters 19-26:
+Invalid argument (Typing[4110])
+File "inferred_variadic_type.php", line 15, characters 26-51:
+Expected ~(function(D, C, int): int) because it is an unenforceable type
+File "inferred_variadic_type.php", line 46, characters 14-39:
+But got (function(C $y...): int)

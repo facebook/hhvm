@@ -1,0 +1,14 @@
+File "instanceof_instantiate_2.php", line 12, characters 5-15:
+  Cov<~(I<T#1> & J<T#1>)>
+File "instanceof_instantiate_2.php", line 16, characters 14-16:
+Some type constraint(s) here are violated (Typing[4110])
+File "instanceof_instantiate_2.php", line 6, characters 12-12:
+'T' is a constrained type parameter
+File "instanceof_instantiate_2.php", line 6, characters 12-12:
+Some type constraint(s) are violated here
+File "instanceof_instantiate_2.php", line 6, characters 12-12:
+T is a constrained type parameter
+File "instanceof_instantiate_2.php", line 16, characters 18-18:
+Expected F
+File "instanceof_instantiate_2.php", line 6, characters 12-12:
+But got dynamic

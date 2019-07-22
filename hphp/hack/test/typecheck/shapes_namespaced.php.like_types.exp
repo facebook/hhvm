@@ -1,0 +1,6 @@
+File "shapes_namespaced.php", line 8, characters 23-28:
+Invalid argument (Typing[4110])
+File "shapes_namespaced.php", line 8, characters 23-28:
+Expected shape(?'herp' => [unresolved], ...) because Shapes::idx expects a shape
+File "shapes_namespaced.php", line 5, characters 12-35:
+But got dynamic because it is an unenforceable type

@@ -1,0 +1,46 @@
+File "instance_of_refinement.php", line 23, characters 16-17:
+Invalid argument (Typing[4110])
+File "instance_of_refinement.php", line 15, characters 21-23:
+Expected int
+File "instance_of_refinement.php", line 20, characters 13-20:
+But got (arraykey & [unresolved]) from this is expression test
+File "instance_of_refinement.php", line 33, characters 13-13:
+Invalid return type (Typing[4110])
+File "instance_of_refinement.php", line 30, characters 19-24:
+Expected string
+File "instance_of_refinement.php", line 33, characters 13-13:
+But got ([unresolved] & B) from this is expression test
+File "instance_of_refinement.php", line 5, characters 26-26:
+Invalid return type (Typing[4110])
+File "instance_of_refinement.php", line 3, characters 9-9:
+Some type constraint(s) are violated here
+File "instance_of_refinement.php", line 3, characters 9-9:
+T is a constrained type parameter
+File "instance_of_refinement.php", line 30, characters 19-24:
+Expected string
+File "instance_of_refinement.php", line 3, characters 9-9:
+But got dynamic
+File "instance_of_refinement.php", line 41, characters 13-14:
+Invalid argument (Typing[4110])
+File "instance_of_refinement.php", line 40, characters 13-16:
+Expected T#1 from this is expression test
+File "instance_of_refinement.php", line 8, characters 23-23:
+  via this generic T
+File "instance_of_refinement.php", line 41, characters 13-14:
+But got string
+File "instance_of_refinement.php", line 41, characters 9-11:
+Could not find method set in an object of type B (Typing[4053])
+File "instance_of_refinement.php", line 39, characters 12-12:
+This is why I think it is an object of type B
+File "instance_of_refinement.php", line 12, characters 7-7:
+Declaration of B is here
+File "instance_of_refinement.php", line 5, characters 26-26:
+Invalid return type (Typing[4110])
+File "instance_of_refinement.php", line 3, characters 9-9:
+Some type constraint(s) are violated here
+File "instance_of_refinement.php", line 3, characters 9-9:
+T is a constrained type parameter
+File "instance_of_refinement.php", line 56, characters 30-37:
+Expected arraykey
+File "instance_of_refinement.php", line 3, characters 9-9:
+But got dynamic

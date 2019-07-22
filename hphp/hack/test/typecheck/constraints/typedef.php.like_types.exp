@@ -1,0 +1,6 @@
+File "typedef.php", line 9, characters 9-21:
+Invalid constraint on newtype (Typing[4110])
+File "typedef.php", line 9, characters 29-41:
+Expected Constraint<T>
+File "typedef.php", line 9, characters 45-62:
+But got dynamic because it is an unenforceable type

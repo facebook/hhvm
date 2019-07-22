@@ -1,0 +1,4 @@
+File "weird.php", line 37, characters 14-19:
+You are trying to access the member getInt but this is not an object, it is a dynamic value or an object of type B (Typing[4062])
+File "weird.php", line 16, characters 18-18:
+Definition is here

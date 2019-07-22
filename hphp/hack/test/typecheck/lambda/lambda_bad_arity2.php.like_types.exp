@@ -1,0 +1,16 @@
+File "lambda_bad_arity2.php", line 9, characters 7-13:
+Invalid return type (Typing[4110])
+File "lambda_bad_arity2.php", line 5, characters 36-42:
+Some type constraint(s) are violated here
+File "lambda_bad_arity2.php", line 5, characters 36-42:
+Treturn is a constrained type parameter
+File "lambda_bad_arity2.php", line 13, characters 39-41:
+Expected int
+File "lambda_bad_arity2.php", line 5, characters 36-42:
+But got dynamic
+File "lambda_bad_arity2.php", line 15, characters 7-80:
+Invalid argument (Typing[4110])
+File "lambda_bad_arity2.php", line 6, characters 5-32:
+Expected ~(function([unresolved], [unresolved]): ?[unresolved]) because it is an unenforceable type
+File "lambda_bad_arity2.php", line 15, characters 7-80:
+But got (function(int $x, int $y, string $z): int)

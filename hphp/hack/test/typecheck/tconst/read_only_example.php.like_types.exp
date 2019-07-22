@@ -1,0 +1,2 @@
+File "read_only_example.php", line 36, characters 21-40:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

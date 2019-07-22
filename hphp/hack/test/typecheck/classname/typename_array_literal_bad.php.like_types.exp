@@ -1,0 +1,8 @@
+File "typename_array_literal_bad.php", line 10, characters 3-15:
+  array<string, ~?(classname<~exact D> | typename<~I>)>
+File "typename_array_literal_bad.php", line 11, characters 10-13:
+Invalid return type (Typing[4110])
+File "typename_array_literal_bad.php", line 8, characters 42-52:
+Expected ~typename<~I> because it is an unenforceable type
+File "typename_array_literal_bad.php", line 6, characters 7-7:
+But got classname<~D>; implicitly defined constant ::class is a string that contains the fully qualified name of D

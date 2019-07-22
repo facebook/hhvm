@@ -1,0 +1,12 @@
+File "yield_from_generic.php", line 7, characters 3-18:
+Invalid yield from (Typing[4110])
+File "yield_from_generic.php", line 7, characters 3-18:
+Expected void
+File "yield_from_generic.php", line 6, characters 38-41:
+But got dynamic because it is an unenforceable type
+File "yield_from_generic.php", line 8, characters 3-19:
+Invalid yield from (Typing[4110])
+File "yield_from_generic.php", line 6, characters 33-35:
+Expected ~int because it is an unenforceable type
+File "yield_from_generic.php", line 8, characters 16-18:
+But got string

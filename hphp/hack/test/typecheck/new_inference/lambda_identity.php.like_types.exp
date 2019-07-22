@@ -1,0 +1,8 @@
+File "lambda_identity.php", line 21, characters 23-31:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_identity.php", line 4, characters 52-68:
+Invalid return type (Typing[4110])
+File "lambda_identity.php", line 8, characters 26-54:
+Expected ~(function(arraykey): arraykey) because it is an unenforceable type
+File "lambda_identity.php", line 4, characters 52-68:
+But got (function(_): ~_)

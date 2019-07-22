@@ -1,0 +1,10 @@
+File "merge_tvars2.php", line 7, characters 27-28:
+Invalid argument (Typing[4110])
+File "merge_tvars2.php", line 3, characters 10-11:
+Some type constraint(s) are violated here
+File "merge_tvars2.php", line 3, characters 10-11:
+T1 is a constrained type parameter
+File "merge_tvars2.php", line 18, characters 27-32:
+Expected string
+File "merge_tvars2.php", line 3, characters 10-11:
+But got dynamic

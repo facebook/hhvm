@@ -1,0 +1,9 @@
+File "fc_enum_classname.php", line 9, characters 6-6:
+This enum declaration is invalid.
+Read the following to see why: (Typing[4110])
+File "BuiltinEnum.hhi", line 43, characters 32-39:
+Member getNames has the wrong type
+File "BuiltinEnum.hhi", line 43, characters 73-80:
+Expected arraykey
+File "classname.hhi", line 15, characters 26-36:
+But got dynamic because it is an unenforceable type

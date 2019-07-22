@@ -1,0 +1,6 @@
+File "shape.php", line 4, characters 15-48:
+Invalid return type (Typing[4110])
+File "shape.php", line 4, characters 55-71:
+Expected ~shape('x' => ~int) because it is an unenforceable type
+File "shape.php", line 4, characters 15-48:
+But got shape('x' => ~int, ?'y' => dynamic)

@@ -1,0 +1,4 @@
+File "apply_with_invoke_curried.php", line 10, characters 10-27:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "apply_with_invoke_curried.php", line 18, characters 11-26:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

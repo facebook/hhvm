@@ -1,0 +1,10 @@
+File "generic_attr1.php", line 10, characters 10-20:
+Invalid return type (Typing[4110])
+File "generic_attr1.php", line 3, characters 15-15:
+Some type constraint(s) are violated here
+File "generic_attr1.php", line 3, characters 15-15:
+T is a constrained type parameter
+File "generic_attr1.php", line 7, characters 18-20:
+Expected int
+File "generic_attr1.php", line 3, characters 15-15:
+But got dynamic

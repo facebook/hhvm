@@ -1,0 +1,6 @@
+File "function_hint_with_variadic_parameter_wrong_types.php", line 8, characters 14-32:
+Invalid argument (Typing[4110])
+File "function_hint_with_variadic_parameter_wrong_types.php", line 5, characters 21-52:
+Expected ~(function(int, int, bool): void) because it is an unenforceable type
+File "function_hint_with_variadic_parameter_wrong_types.php", line 3, characters 10-21:
+But got (function(int $y...): void)

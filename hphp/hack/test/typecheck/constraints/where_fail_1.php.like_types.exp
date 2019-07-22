@@ -1,0 +1,12 @@
+File "where_fail_1.php", line 14, characters 12-26:
+A 'where' type constraint is violated here (Typing[4110])
+File "where_fail_1.php", line 10, characters 19-33:
+This is the method with 'where' type constraints
+File "where_fail_1.php", line 10, characters 35-35:
+Some type constraint(s) are violated here
+File "where_fail_1.php", line 10, characters 35-35:
+T is a constrained type parameter
+File "where_fail_1.php", line 10, characters 61-67:
+Expected Derived
+File "where_fail_1.php", line 10, characters 35-35:
+But got dynamic

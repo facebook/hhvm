@@ -1,0 +1,48 @@
+File "box_keyword.php", line 8, characters 7-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "box_keyword.php", line 4, characters 14-14:
+'T' is a constrained type parameter
+File "box_keyword.php", line 4, characters 14-14:
+Some type constraint(s) are violated here
+File "box_keyword.php", line 4, characters 14-14:
+T is a constrained type parameter
+File "box_keyword.php", line 8, characters 14-19:
+Expected Erased
+File "box_keyword.php", line 4, characters 14-14:
+But got dynamic
+File "box_keyword.php", line 9, characters 7-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "box_keyword.php", line 4, characters 14-14:
+'T' is a constrained type parameter
+File "box_keyword.php", line 4, characters 14-14:
+Some type constraint(s) are violated here
+File "box_keyword.php", line 4, characters 14-14:
+T is a constrained type parameter
+File "box_keyword.php", line 9, characters 14-19:
+Expected Erased
+File "box_keyword.php", line 4, characters 14-14:
+But got dynamic
+File "box_keyword.php", line 11, characters 7-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "box_keyword.php", line 4, characters 14-14:
+'T' is a constrained type parameter
+File "box_keyword.php", line 4, characters 14-14:
+Some type constraint(s) are violated here
+File "box_keyword.php", line 4, characters 14-14:
+T is a constrained type parameter
+File "box_keyword.php", line 11, characters 14-25:
+Expected Reified<int>
+File "box_keyword.php", line 4, characters 14-14:
+But got dynamic
+File "box_keyword.php", line 12, characters 7-12:
+Some type constraint(s) here are violated (Typing[4110])
+File "box_keyword.php", line 4, characters 14-14:
+'T' is a constrained type parameter
+File "box_keyword.php", line 4, characters 14-14:
+Some type constraint(s) are violated here
+File "box_keyword.php", line 4, characters 14-14:
+T is a constrained type parameter
+File "box_keyword.php", line 12, characters 14-25:
+Expected Reified<int>
+File "box_keyword.php", line 4, characters 14-14:
+But got dynamic

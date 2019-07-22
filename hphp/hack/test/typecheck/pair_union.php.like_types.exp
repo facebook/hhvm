@@ -1,0 +1,10 @@
+File "pair_union.php", line 12, characters 10-138:
+Invalid return type (Typing[4110])
+File "pair_union.php", line 7, characters 20-21:
+Some type constraint(s) are violated here
+File "pair_union.php", line 7, characters 20-21:
+Tb is a constrained type parameter
+File "pair_union.php", line 11, characters 25-43:
+Expected Pair<~arraykey, ~int>
+File "pair_union.php", line 7, characters 20-21:
+But got dynamic

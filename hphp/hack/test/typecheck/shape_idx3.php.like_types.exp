@@ -1,0 +1,14 @@
+File "shape_idx3.php", line 14, characters 3-28:
+  ~arraykey
+File "shape_idx3.php", line 15, characters 3-28:
+  ~arraykey
+File "shape_idx3.php", line 16, characters 3-36:
+  int
+File "shape_idx3.php", line 17, characters 3-36:
+  arraykey
+File "shape_idx3.php", line 16, characters 23-25:
+Invalid argument (Typing[4110])
+File "shape_idx3.php", line 16, characters 23-25:
+Expected shape(?'x' => [unresolved], ...) because Shapes::idx expects a shape
+File "shape_idx3.php", line 3, characters 18-40:
+But got dynamic because it is an unenforceable type

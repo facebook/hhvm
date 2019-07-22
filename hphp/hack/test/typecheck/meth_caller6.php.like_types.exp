@@ -1,0 +1,6 @@
+File "meth_caller6.php", line 23, characters 16-38:
+Invalid argument (Typing[4110])
+File "meth_caller6.php", line 18, characters 31-49:
+Expected ~(function([unresolved]): void) because it is an unenforceable type
+File "meth_caller6.php", line 13, characters 19-21:
+But got (function(E): void)

@@ -1,0 +1,4 @@
+File "variadics02.php", line 39, characters 5-125:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "variadics02.php", line 50, characters 5-121:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

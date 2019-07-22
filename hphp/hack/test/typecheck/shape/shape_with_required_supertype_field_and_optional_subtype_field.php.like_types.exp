@@ -1,0 +1,6 @@
+File "shape_with_required_supertype_field_and_optional_subtype_field.php", line 4, characters 16-33:
+Invalid argument (Typing[4110])
+File "shape_with_required_supertype_field_and_optional_subtype_field.php", line 6, characters 28-36:
+Expected ~shape('a' => ~int)
+File "shape_with_required_supertype_field_and_optional_subtype_field.php", line 4, characters 16-33:
+But got shape(?'a' => ~int)

@@ -1,0 +1,10 @@
+File "bad_contra_constraint_2.php", line 25, characters 21-34:
+Invalid argument (Typing[4110])
+File "bad_contra_constraint_2.php", line 17, characters 27-58:
+Expected ~KeyedTraversable<~string, ~string> because it is an unenforceable type
+File "bad_contra_constraint_2.php", line 11, characters 28-43:
+  via this generic TContextProvider
+File "bad_contra_constraint_2.php", line 19, characters 3-25:
+But got <expr#1>
+File "bad_contra_constraint_2.php", line 25, characters 21-34:
+  where '<expr#1>' is a reference to this expression

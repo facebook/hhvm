@@ -1,0 +1,8 @@
+File "multi_as_invoke.php", line 24, characters 9-11:
+You are trying to access the member Foo but this is not an object, it is a value of generic type T (Typing[4062])
+File "multi_as_invoke.php", line 19, characters 23-23:
+Definition is here
+File "multi_as_invoke.php", line 25, characters 9-11:
+You are trying to access the member Bar but this is not an object, it is a value of generic type T (Typing[4062])
+File "multi_as_invoke.php", line 19, characters 23-23:
+Definition is here

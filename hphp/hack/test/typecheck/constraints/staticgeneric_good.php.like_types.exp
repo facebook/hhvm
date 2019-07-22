@@ -1,0 +1,10 @@
+File "staticgeneric_good.php", line 15, characters 10-29:
+Invalid return type (Typing[4110])
+File "staticgeneric_good.php", line 4, characters 9-9:
+Some type constraint(s) are violated here
+File "staticgeneric_good.php", line 4, characters 9-9:
+T is a constrained type parameter
+File "staticgeneric_good.php", line 13, characters 24-29:
+Expected string
+File "staticgeneric_good.php", line 4, characters 9-9:
+But got dynamic

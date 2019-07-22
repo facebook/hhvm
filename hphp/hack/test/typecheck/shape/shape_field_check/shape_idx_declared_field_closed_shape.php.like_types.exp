@@ -1,0 +1,6 @@
+File "shape_idx_declared_field_closed_shape.php", line 4, characters 15-16:
+Invalid argument (Typing[4110])
+File "shape_idx_declared_field_closed_shape.php", line 4, characters 15-16:
+Expected shape(?'x' => [unresolved], ...) because Shapes::idx expects a shape
+File "shape_idx_declared_field_closed_shape.php", line 3, characters 15-31:
+But got dynamic because it is an unenforceable type

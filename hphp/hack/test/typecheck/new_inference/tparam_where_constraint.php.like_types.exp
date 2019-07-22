@@ -1,0 +1,12 @@
+File "tparam_where_constraint.php", line 10, characters 3-3:
+A 'where' type constraint is violated here (Typing[4110])
+File "tparam_where_constraint.php", line 3, characters 10-10:
+This is the method with 'where' type constraints
+File "tparam_where_constraint.php", line 3, characters 12-13:
+Some type constraint(s) are violated here
+File "tparam_where_constraint.php", line 3, characters 12-13:
+Tk is a constrained type parameter
+File "tparam_where_constraint.php", line 3, characters 66-68:
+Expected int
+File "tparam_where_constraint.php", line 3, characters 12-13:
+But got dynamic

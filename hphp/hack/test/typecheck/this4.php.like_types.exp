@@ -1,0 +1,10 @@
+File "this4.php", line 31, characters 10-25:
+Invalid return type (Typing[4110])
+File "this4.php", line 12, characters 9-10:
+Some type constraint(s) are violated here
+File "this4.php", line 12, characters 9-10:
+T1 is a constrained type parameter
+File "this4.php", line 29, characters 18-20:
+Expected int
+File "this4.php", line 12, characters 9-10:
+But got dynamic

@@ -1,0 +1,24 @@
+File "contravariance_constraint_bad_2.php", line 16, characters 39-57:
+Invalid assignment (Typing[4110])
+File "contravariance_constraint_bad_2.php", line 16, characters 39-57:
+Expected (function(T): void)
+File "contravariance_constraint_bad_2.php", line 16, characters 39-57:
+But got dynamic because it is an unenforceable type
+File "contravariance_constraint_bad_2.php", line 39, characters 7-55:
+Invalid argument (Typing[4110])
+File "contravariance_constraint_bad_2.php", line 16, characters 39-57:
+Expected ~(function([unresolved]): void) because it is an unenforceable type
+File "contravariance_constraint_bad_2.php", line 39, characters 7-55:
+But got (function(NAC\AAA $arg): void)
+File "contravariance_constraint_bad_2.php", line 43, characters 12-13:
+Invalid return type (Typing[4110])
+File "contravariance_constraint_bad_2.php", line 14, characters 17-19:
+Some type constraint(s) are violated here
+File "contravariance_constraint_bad_2.php", line 14, characters 12-12:
+T is a constrained type parameter
+File "contravariance_constraint_bad_2.php", line 14, characters 17-19:
+Expected ~NAC\AAA
+File "contravariance_constraint_bad_2.php", line 37, characters 33-33:
+But got T
+File "contravariance_constraint_bad_2.php", line 37, characters 33-33:
+Considering that this type argument is contravariant with respect to NAC\CONTRA

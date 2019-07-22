@@ -1,0 +1,14 @@
+File "new_generic.php", line 13, characters 3-16:
+  <expr#1> as C<Targ>
+File "new_generic.php", line 18, characters 3-32:
+  ~C<~int>
+File "new_generic.php", line 19, characters 3-38:
+  ~C<~int>
+File "new_generic.php", line 14, characters 10-14:
+Invalid return type (Typing[4110])
+File "new_generic.php", line 11, characters 4-7:
+Expected Tobj
+File "new_generic.php", line 12, characters 15-20:
+But got <expr#1>
+File "new_generic.php", line 12, characters 15-20:
+  where '<expr#1>' is a reference to this expression

@@ -1,0 +1,10 @@
+File "await_as_an_expression_shadow.php", line 3, characters 13-13:
+Invalid return type (Typing[4110])
+File "await_as_an_expression_shadow.php", line 3, characters 13-13:
+Some type constraint(s) are violated here
+File "await_as_an_expression_shadow.php", line 3, characters 13-13:
+T is a constrained type parameter
+File "await_as_an_expression_shadow.php", line 7, characters 33-51:
+Expected darray<~string, ~int>
+File "await_as_an_expression_shadow.php", line 3, characters 13-13:
+But got dynamic

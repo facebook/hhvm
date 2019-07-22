@@ -1,0 +1,10 @@
+File "option_subtype_null.php", line 4, characters 23-23:
+Invalid argument (Typing[4110])
+File "option_subtype_null.php", line 4, characters 16-16:
+Some type constraint(s) are violated here
+File "option_subtype_null.php", line 4, characters 16-16:
+T is a constrained type parameter
+File "option_subtype_null.php", line 8, characters 22-25:
+Expected null
+File "option_subtype_null.php", line 4, characters 16-16:
+But got dynamic

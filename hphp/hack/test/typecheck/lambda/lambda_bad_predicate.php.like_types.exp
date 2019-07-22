@@ -1,0 +1,2 @@
+File "lambda_bad_predicate.php", line 39, characters 7-97:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

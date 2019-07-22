@@ -1,0 +1,2 @@
+File "enum_3.php--def.php", line 6, characters 24-26:
+Enums must be int or string, not a dynamic value or an int (Typing[4024])

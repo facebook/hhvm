@@ -1,0 +1,14 @@
+File "keyset.php", line 6, characters 20-21:
+Invalid argument (Typing[4110])
+File "keyset.php", line 25, characters 32-37:
+Expected ~string because it is an unenforceable type
+File "hackarray.hhi", line 12, characters 35-42:
+But got arraykey
+File "keyset.php", line 4, characters 13-18:
+The type keyset expects 1 type parameter(s) (Typing[4101])
+File "keyset.php", line 13, characters 20-21:
+Invalid argument (Typing[4110])
+File "keyset.php", line 25, characters 32-37:
+Expected ~string because it is an unenforceable type
+File "hackarray.hhi", line 12, characters 35-42:
+But got arraykey

@@ -1,0 +1,12 @@
+File "expr_method.php", line 11, characters 6-7:
+Invalid argument (Typing[4110])
+File "expr_method.php", line 5, characters 48-50:
+Expected int
+File "expr_method.php", line 8, characters 21-27:
+But got dynamic
+File "expr_method.php", line 5, characters 38-58:
+Invalid assignment (Typing[4110])
+File "expr_method.php", line 5, characters 38-58:
+Expected (function(int): void)
+File "expr_method.php", line 5, characters 38-58:
+But got dynamic because it is an unenforceable type

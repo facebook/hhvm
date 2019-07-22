@@ -1,0 +1,6 @@
+File "fun_generics_bad.php", line 24, characters 29-33:
+Invalid argument (Typing[4110])
+File "fun_generics_bad.php", line 10, characters 3-20:
+Expected ~(function([unresolved]): [unresolved]) because it is an unenforceable type
+File "fun_generics_bad.php", line 4, characters 10-27:
+But got (function(int $val): int)

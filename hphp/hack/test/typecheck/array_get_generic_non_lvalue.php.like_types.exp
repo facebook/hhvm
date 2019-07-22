@@ -1,0 +1,10 @@
+File "array_get_generic_non_lvalue.php", line 12, characters 10-14:
+Invalid return type (Typing[4110])
+File "array_get_generic_non_lvalue.php", line 6, characters 12-13:
+Some type constraint(s) are violated here
+File "array_get_generic_non_lvalue.php", line 6, characters 12-13:
+Tv is a constrained type parameter
+File "array_get_generic_non_lvalue.php", line 11, characters 42-62:
+Expected array<~string, ~string>
+File "array_get_generic_non_lvalue.php", line 6, characters 12-13:
+But got dynamic

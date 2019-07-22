@@ -1,0 +1,20 @@
+File "valid_targ_tpenv_bounds_test.php", line 16, characters 3-3:
+Some type constraint(s) here are violated (Typing[4110])
+File "valid_targ_tpenv_bounds_test.php", line 11, characters 9-16:
+'Tassuper' is a constrained type parameter
+File "valid_targ_tpenv_bounds_test.php", line 11, characters 21-21:
+Some type constraint(s) are violated here
+File "valid_targ_tpenv_bounds_test.php", line 11, characters 9-16:
+Tassuper is a constrained type parameter
+File "valid_targ_tpenv_bounds_test.php", line 11, characters 21-21:
+Expected A
+File "valid_targ_tpenv_bounds_test.php", line 16, characters 5-9:
+But got Tbad1
+File "valid_targ_tpenv_bounds_test.php", line 16, characters 5-9:
+This is not reified, it cannot be used as a reified type argument (Typing[4305])
+File "valid_targ_tpenv_bounds_test.php", line 11, characters 9-16:
+Tassuper is reified
+File "valid_targ_tpenv_bounds_test.php", line 16, characters 12-16:
+This is not reified, it cannot be used as a reified type argument (Typing[4305])
+File "valid_targ_tpenv_bounds_test.php", line 12, characters 9-11:
+Teq is reified

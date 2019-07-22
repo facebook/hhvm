@@ -1,0 +1,24 @@
+File "cond_is.php", line 12, characters 24-26:
+Invalid argument (Typing[4110])
+File "printf.hhi", line 133, characters 30-56:
+Expected ~HH\FormatString<~PlainSprintf> because it is an unenforceable type
+File "cond_is.php", line 12, characters 24-26:
+But got string
+File "cond_is.php", line 14, characters 10-16:
+Invalid return type (Typing[4110])
+File "cond_is.php", line 8, characters 44-44:
+Expected T
+File "cond_is.php", line 14, characters 14-14:
+But got B
+File "cond_is.php", line 21, characters 22-22:
+Some type constraint(s) here are violated (Typing[4110])
+File "cond_is.php", line 3, characters 10-10:
+'T' is a constrained type parameter
+File "cond_is.php", line 3, characters 10-10:
+Some type constraint(s) are violated here
+File "cond_is.php", line 3, characters 10-10:
+T is a constrained type parameter
+File "cond_is.php", line 21, characters 24-24:
+Expected A
+File "cond_is.php", line 3, characters 10-10:
+But got dynamic

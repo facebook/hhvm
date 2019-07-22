@@ -1,0 +1,6 @@
+File "null_coalesce_optional_in_abstract.php", line 21, characters 36-50:
+Some elements in this Vector are incompatible (Typing[4110])
+File "null_coalesce_optional_in_abstract.php", line 21, characters 23-25:
+Expected Foo
+File "null_coalesce_optional_in_abstract.php", line 10, characters 7-9:
+But got dynamic because it is an unenforceable type

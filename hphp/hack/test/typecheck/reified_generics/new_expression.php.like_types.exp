@@ -1,0 +1,18 @@
+File "new_expression.php", line 10, characters 7-7:
+Some type constraint(s) here are violated (Typing[4110])
+File "new_expression.php", line 4, characters 18-19:
+'Tu' is a constrained type parameter
+File "new_expression.php", line 4, characters 18-19:
+Some type constraint(s) are violated here
+File "new_expression.php", line 4, characters 18-19:
+Tu is a constrained type parameter
+File "new_expression.php", line 10, characters 14-19:
+Expected string
+File "new_expression.php", line 4, characters 18-19:
+But got dynamic
+File "new_expression.php", line 11, characters 7-7:
+The type D expects 0 type parameter(s) (Typing[4101])
+File "new_expression.php", line 12, characters 3-9:
+All type arguments must be specified because a type parameter is reified (Typing[4303])
+File "new_expression.php", line 6, characters 7-7:
+Definition is here

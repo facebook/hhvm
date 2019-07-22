@@ -1,0 +1,4 @@
+File "my_array_map_then_invoke_curried.php", line 9, characters 10-21:
+  There are remaining unsolved constraints!: (FALSE && FALSE)
+File "my_array_map_then_invoke_curried.php", line 14, characters 25-33:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

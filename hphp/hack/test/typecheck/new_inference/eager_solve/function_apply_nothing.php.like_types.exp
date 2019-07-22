@@ -1,0 +1,8 @@
+File "function_apply_nothing.php", line 12, characters 18-58:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "function_apply_nothing.php", line 5, characters 38-55:
+Invalid assignment (Typing[4110])
+File "function_apply_nothing.php", line 5, characters 38-55:
+Expected (function(T): bool)
+File "function_apply_nothing.php", line 5, characters 38-55:
+But got dynamic because it is an unenforceable type

@@ -1,0 +1,6 @@
+File "tconst7.php", line 15, characters 14-30:
+Invalid argument (Typing[4110])
+File "tconst7.php", line 6, characters 21-30:
+Expected ~this::TFoo because it is an unenforceable type
+File "tconst7.php", line 15, characters 14-30:
+But got null

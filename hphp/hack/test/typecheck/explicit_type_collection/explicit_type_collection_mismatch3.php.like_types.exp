@@ -1,0 +1,6 @@
+File "explicit_type_collection_mismatch3.php", line 4, characters 8-58:
+The values of this Map are incompatible (Typing[4110])
+File "explicit_type_collection_mismatch3.php", line 4, characters 21-23:
+Expected int
+File "explicit_type_collection_mismatch3.php", line 4, characters 33-35:
+But got string

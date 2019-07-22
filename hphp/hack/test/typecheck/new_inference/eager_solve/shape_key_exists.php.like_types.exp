@@ -1,0 +1,12 @@
+File "shape_key_exists.php", line 7, characters 31-32:
+Invalid argument (Typing[4110])
+File "shape_key_exists.php", line 7, characters 31-32:
+Expected shape(?'rtl' => [unresolved], ...) because Shapes::idx expects a shape
+File "shape_key_exists.php", line 4, characters 11-43:
+But got dynamic because it is an unenforceable type
+File "shape_key_exists.php", line 7, characters 43-49:
+Invalid argument (Typing[4110])
+File "printf.hhi", line 133, characters 30-56:
+Expected ~HH\FormatString<~PlainSprintf> because it is an unenforceable type
+File "shape_key_exists.php", line 7, characters 43-49:
+But got string

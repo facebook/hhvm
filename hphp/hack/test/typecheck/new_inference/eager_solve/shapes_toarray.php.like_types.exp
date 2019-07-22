@@ -1,0 +1,10 @@
+File "shapes_toarray.php", line 28, characters 7-117:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "shapes_toarray.php", line 30, characters 9-35:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "shapes_toarray.php", line 28, characters 7-117:
+Invalid argument (Typing[4110])
+File "shapes_toarray.php", line 18, characters 1-22:
+Expected ~(function([unresolved], [unresolved]): [unresolved]) because it is an unenforceable type
+File "shapes_toarray.php", line 28, characters 7-117:
+But got (function($_, $spec): darray<[unresolved], [unresolved]>)

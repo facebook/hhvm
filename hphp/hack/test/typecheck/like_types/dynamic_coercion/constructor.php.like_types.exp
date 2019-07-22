@@ -1,0 +1,6 @@
+File "constructor.php", line 8, characters 9-10:
+Invalid argument (Typing[4110])
+File "constructor.php", line 4, characters 31-33:
+Expected int
+File "constructor.php", line 7, characters 12-18:
+But got dynamic

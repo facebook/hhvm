@@ -1,0 +1,8 @@
+File "tconst_on_generics.php", line 47, characters 14-16:
+Some type constraint(s) here are violated (Typing[4062])
+File "tconst_on_generics.php", line 29, characters 30-31:
+'T1' is a constrained type parameter
+File "tconst_on_generics.php", line 29, characters 72-72:
+You are trying to access the member T but this is not an object, it is a dynamic value
+File "tconst_on_generics.php", line 29, characters 30-31:
+Definition is here

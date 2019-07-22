@@ -1,0 +1,6 @@
+File "key_exists_optional_nothing.php", line 5, characters 25-26:
+Invalid argument (Typing[4110])
+File "key_exists_optional_nothing.php", line 5, characters 25-26:
+Expected shape(?'a' => [unresolved], ...) because Shapes::idx expects a shape
+File "key_exists_optional_nothing.php", line 4, characters 15-36:
+But got dynamic because it is an unenforceable type

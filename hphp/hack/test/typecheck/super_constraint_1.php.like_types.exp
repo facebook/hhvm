@@ -1,0 +1,10 @@
+File "super_constraint_1.php", line 22, characters 10-24:
+Invalid return type (Typing[4110])
+File "super_constraint_1.php", line 10, characters 23-24:
+Some type constraint(s) are violated here
+File "super_constraint_1.php", line 10, characters 23-24:
+Tu is a constrained type parameter
+File "super_constraint_1.php", line 21, characters 58-67:
+Expected FooBase123
+File "super_constraint_1.php", line 10, characters 23-24:
+But got dynamic

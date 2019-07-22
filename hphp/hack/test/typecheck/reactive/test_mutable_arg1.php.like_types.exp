@@ -1,0 +1,10 @@
+File "test_mutable_arg1.php", line 17, characters 7-32:
+Invalid argument (Typing[4110])
+File "rx/functions.hhi", line 26, characters 18-18:
+Some type constraint(s) are violated here
+File "rx/functions.hhi", line 26, characters 18-18:
+T is a constrained type parameter
+File "test_mutable_arg1.php", line 9, characters 27-29:
+Expected Foo
+File "rx/functions.hhi", line 26, characters 18-18:
+But got dynamic

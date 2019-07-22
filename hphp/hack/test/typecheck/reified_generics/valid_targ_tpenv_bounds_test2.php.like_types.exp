@@ -1,0 +1,12 @@
+File "valid_targ_tpenv_bounds_test2.php", line 7, characters 31-38:
+Some type constraint(s) here are violated (Typing[4110])
+File "valid_targ_tpenv_bounds_test2.php", line 6, characters 18-19:
+'Tc' is a constrained type parameter
+File "valid_targ_tpenv_bounds_test2.php", line 6, characters 24-24:
+Expected A
+File "valid_targ_tpenv_bounds_test2.php", line 7, characters 36-37:
+But got Tf
+File "valid_targ_tpenv_bounds_test2.php", line 7, characters 36-37:
+This is not reified, it cannot be used as a reified type argument (Typing[4305])
+File "valid_targ_tpenv_bounds_test2.php", line 6, characters 18-19:
+Tc is reified

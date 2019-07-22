@@ -1,0 +1,2 @@
+File "reduce_vec.php", line 13, characters 17-88:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

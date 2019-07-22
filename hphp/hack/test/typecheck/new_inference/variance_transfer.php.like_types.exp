@@ -1,0 +1,38 @@
+File "variance_transfer.php", line 17, characters 27-28:
+Invalid argument (Typing[4110])
+File "variance_transfer.php", line 9, characters 10-11:
+Some type constraint(s) are violated here
+File "variance_transfer.php", line 9, characters 10-11:
+T1 is a constrained type parameter
+File "variance_transfer.php", line 31, characters 29-36:
+Expected arraykey
+File "variance_transfer.php", line 9, characters 10-11:
+But got dynamic
+File "variance_transfer.php", line 26, characters 15-17:
+Some type constraint(s) here are violated (Typing[4110])
+File "variance_transfer.php", line 3, characters 12-12:
+'T' is a constrained type parameter
+File "variance_transfer.php", line 3, characters 12-12:
+Some type constraint(s) are violated here
+File "variance_transfer.php", line 3, characters 12-12:
+T is a constrained type parameter
+File "variance_transfer.php", line 26, characters 19-21:
+Expected int
+File "variance_transfer.php", line 3, characters 12-12:
+But got dynamic
+File "variance_transfer.php", line 27, characters 15-17:
+Some type constraint(s) here are violated (Typing[4110])
+File "variance_transfer.php", line 3, characters 12-12:
+'T' is a constrained type parameter
+File "variance_transfer.php", line 3, characters 12-12:
+Some type constraint(s) are violated here
+File "variance_transfer.php", line 3, characters 12-12:
+T is a constrained type parameter
+File "variance_transfer.php", line 27, characters 19-24:
+Expected string
+File "variance_transfer.php", line 3, characters 12-12:
+But got dynamic
+File "variance_transfer.php", line 15, characters 22-24:
+You are trying to access the member get but this is not an object, it is a dynamic value or an object of type Cov<T1> (Typing[4062])
+File "variance_transfer.php", line 9, characters 21-27:
+Definition is here

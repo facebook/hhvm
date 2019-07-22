@@ -1,0 +1,4 @@
+File "rx_of_scope8.php", line 4, characters 31-34:
+Reactive functions can only call other reactive functions. (Typing[4200])
+File "rx_of_scope8.php", line 3, characters 32-48:
+This function is non-reactive.

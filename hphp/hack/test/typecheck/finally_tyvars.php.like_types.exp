@@ -1,0 +1,6 @@
+File "finally_tyvars.php", line 14, characters 17-18:
+Invalid argument (Typing[4110])
+File "finally_tyvars.php", line 14, characters 17-18:
+Expected shape(?'foo' => [unresolved], ...) because Shapes::idx expects a shape
+File "finally_tyvars.php", line 4, characters 45-51:
+But got dynamic because it is an unenforceable type

@@ -1,0 +1,18 @@
+File "is_in_loop.php", line 12, characters 10-16:
+Invalid return type (Typing[4110])
+File "is_in_loop.php", line 8, characters 50-50:
+Expected T
+File "is_in_loop.php", line 12, characters 14-14:
+But got B
+File "is_in_loop.php", line 19, characters 26-26:
+Some type constraint(s) here are violated (Typing[4110])
+File "is_in_loop.php", line 3, characters 10-10:
+'T' is a constrained type parameter
+File "is_in_loop.php", line 3, characters 10-10:
+Some type constraint(s) are violated here
+File "is_in_loop.php", line 3, characters 10-10:
+T is a constrained type parameter
+File "is_in_loop.php", line 19, characters 28-28:
+Expected A
+File "is_in_loop.php", line 3, characters 10-10:
+But got dynamic

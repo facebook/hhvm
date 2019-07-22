@@ -1,0 +1,44 @@
+File "lambda_variadic_generic.php", line 17, characters 10-10:
+Some type constraint(s) here are violated (Typing[4110])
+File "lambda_variadic_generic.php", line 9, characters 9-9:
+'T' is a constrained type parameter
+File "lambda_variadic_generic.php", line 9, characters 9-9:
+Some type constraint(s) are violated here
+File "lambda_variadic_generic.php", line 9, characters 9-9:
+T is a constrained type parameter
+File "lambda_variadic_generic.php", line 16, characters 37-37:
+Expected C
+File "lambda_variadic_generic.php", line 16, characters 37-37:
+Considering that this type argument is invariant with respect to A
+File "lambda_variadic_generic.php", line 9, characters 9-9:
+But got dynamic
+File "lambda_variadic_generic.php", line 22, characters 22-23:
+Invalid argument (Typing[4110])
+File "lambda_variadic_generic.php", line 22, characters 16-16:
+Expected C
+File "lambda_variadic_generic.php", line 22, characters 16-16:
+But got dynamic because it is an unenforceable type
+File "lambda_variadic_generic.php", line 24, characters 27-28:
+Invalid argument (Typing[4110])
+File "lambda_variadic_generic.php", line 24, characters 21-21:
+Expected C
+File "lambda_variadic_generic.php", line 24, characters 21-21:
+But got dynamic because it is an unenforceable type
+File "lambda_variadic_generic.php", line 24, characters 18-95:
+Invalid argument (Typing[4110])
+File "lambda_variadic_generic.php", line 16, characters 25-46:
+Expected ~(function(A<C>...): C) because it is an unenforceable type
+File "lambda_variadic_generic.php", line 24, characters 18-95:
+But got (function(A<C> $y...): ~C)
+File "lambda_variadic_generic.php", line 30, characters 18-44:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_variadic_generic.php", line 32, characters 18-90:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_variadic_generic.php", line 38, characters 18-46:
+Invalid argument (Typing[4110])
+File "lambda_variadic_generic.php", line 16, characters 25-46:
+Expected ~(function(A<C>...): C) because it is an unenforceable type
+File "lambda_variadic_generic.php", line 38, characters 18-46:
+But got (function(A $y...): _)
+File "lambda_variadic_generic.php", line 40, characters 18-51:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

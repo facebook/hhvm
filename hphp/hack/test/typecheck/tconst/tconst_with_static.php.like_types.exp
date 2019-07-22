@@ -1,0 +1,8 @@
+File "tconst_with_static.php", line 16, characters 12-13:
+Invalid return type (Typing[4110])
+File "tconst_with_static.php", line 5, characters 22-29:
+Expected ~int because it is an unenforceable type
+File "tconst_with_static.php", line 15, characters 27-44:
+  resulting from expanding the type constant Test::TC_ID::ALIAS
+File "tconst_with_static.php", line 16, characters 12-13:
+But got string

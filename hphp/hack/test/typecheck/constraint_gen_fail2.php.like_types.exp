@@ -1,0 +1,4 @@
+File "constraint_gen_fail2.php", line 17, characters 7-12:
+You are trying to access the member render but this is not an object, it is a dynamic value or an object of type A (Typing[4062])
+File "constraint_gen_fail2.php", line 16, characters 19-19:
+Definition is here

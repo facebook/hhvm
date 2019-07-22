@@ -1,0 +1,6 @@
+File "printf7.php", line 21, characters 14-17:
+Invalid argument (Typing[4110])
+File "printf7.php", line 16, characters 21-51:
+Expected ~HH\FormatString<~MyPlainSprintf> because it is an unenforceable type
+File "printf7.php", line 21, characters 14-17:
+But got string

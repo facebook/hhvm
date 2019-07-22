@@ -1,0 +1,10 @@
+File "cond_rx3.php", line 7, characters 25-40:
+Invalid argument (Typing[4110])
+File "rx/functions.hhi", line 30, characters 15-15:
+Some type constraint(s) are violated here
+File "rx/functions.hhi", line 30, characters 15-15:
+T is a constrained type parameter
+File "cond_rx3.php", line 15, characters 44-46:
+Expected Foo
+File "rx/functions.hhi", line 30, characters 15-15:
+But got dynamic

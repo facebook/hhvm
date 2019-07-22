@@ -1,0 +1,18 @@
+File "merge_is_bad.php", line 22, characters 27-29:
+Invalid argument (Typing[4110])
+File "printf.hhi", line 133, characters 30-56:
+Expected ~HH\FormatString<~PlainSprintf> because it is an unenforceable type
+File "merge_is_bad.php", line 22, characters 27-29:
+But got string
+File "merge_is_bad.php", line 24, characters 27-29:
+Invalid argument (Typing[4110])
+File "printf.hhi", line 133, characters 30-56:
+Expected ~HH\FormatString<~PlainSprintf> because it is an unenforceable type
+File "merge_is_bad.php", line 24, characters 27-29:
+But got string
+File "merge_is_bad.php", line 9, characters 14-14:
+Invalid argument (Typing[4110])
+File "merge_is_bad.php", line 19, characters 18-18:
+Expected J
+File "merge_is_bad.php", line 9, characters 14-14:
+But got I

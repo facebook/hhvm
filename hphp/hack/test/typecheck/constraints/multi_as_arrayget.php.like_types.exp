@@ -1,0 +1,4 @@
+File "multi_as_arrayget.php", line 12, characters 12-18:
+You are trying to access the member getName but this is not an object, it is a value of generic type T (Typing[4062])
+File "multi_as_arrayget.php", line 11, characters 63-63:
+Definition is here

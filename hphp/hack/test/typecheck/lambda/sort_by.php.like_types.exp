@@ -1,0 +1,8 @@
+File "sort_by.php", line 20, characters 21-54:
+Invalid argument (Typing[4110])
+File "sort_by.php", line 12, characters 3-20:
+Expected ~(function([unresolved]): [unresolved]) because it is an unenforceable type
+File "sort_by.php", line 20, characters 21-54:
+But got (function(TimePeriod $u): float)
+File "sort_by.php", line 20, characters 57-76:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

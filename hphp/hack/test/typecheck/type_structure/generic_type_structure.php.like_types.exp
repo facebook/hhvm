@@ -1,0 +1,6 @@
+File "generic_type_structure.php", line 10, characters 3-36:
+Invalid assignment (Typing[4110])
+File "generic_type_structure.php", line 10, characters 3-16:
+Expected list([unresolved], [unresolved]) resulting from a list destructuring assignment of length 2
+File "typestructure.hhi", line 60, characters 19-25:
+But got ~?varray<~_>

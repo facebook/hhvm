@@ -1,0 +1,10 @@
+File "test_to_sort_static.php", line 31, characters 10-16:
+Invalid return type (Typing[4110])
+File "test_to_sort_static.php", line 24, characters 9-9:
+Some type constraint(s) are violated here
+File "test_to_sort_static.php", line 24, characters 9-9:
+T is a constrained type parameter
+File "test_to_sort_static.php", line 30, characters 19-21:
+Expected int
+File "test_to_sort_static.php", line 24, characters 9-9:
+But got dynamic

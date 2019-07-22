@@ -1,0 +1,16 @@
+File "recursive_constraint_good.php", line 19, characters 13-19:
+You are trying to access the member Compare but this is not an object, it is a dynamic value or an object of type GIComparable<T> (Typing[4062])
+File "recursive_constraint_good.php", line 11, characters 19-33:
+Definition is here
+File "recursive_constraint_good.php", line 22, characters 13-19:
+You are trying to access the member Compare but this is not an object, it is a dynamic value or an object of type GIComparable<T> (Typing[4062])
+File "recursive_constraint_good.php", line 11, characters 19-33:
+Definition is here
+File "recursive_constraint_good.php", line 50, characters 22-28:
+You are trying to access the member Compare but this is not an object, it is a dynamic value or an object of type GIComparable<Tx> (Typing[4062])
+File "recursive_constraint_good.php", line 46, characters 20-35:
+Definition is here
+File "recursive_constraint_good.php", line 53, characters 24-30:
+You are trying to access the member Compare but this is not an object, it is a dynamic value or an object of type GIComparable<Ty> (Typing[4062])
+File "recursive_constraint_good.php", line 46, characters 44-59:
+Definition is here

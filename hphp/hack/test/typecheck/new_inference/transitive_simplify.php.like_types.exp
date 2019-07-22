@@ -1,0 +1,10 @@
+File "transitive_simplify.php", line 26, characters 18-25:
+Invalid argument (Typing[4110])
+File "transitive_simplify.php", line 12, characters 19-19:
+Some type constraint(s) are violated here
+File "transitive_simplify.php", line 12, characters 19-19:
+T is a constrained type parameter
+File "transitive_simplify.php", line 16, characters 24-30:
+Expected Inv<[unresolved]>
+File "transitive_simplify.php", line 12, characters 19-19:
+But got dynamic

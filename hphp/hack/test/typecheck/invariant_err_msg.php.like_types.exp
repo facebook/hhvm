@@ -1,0 +1,6 @@
+File "invariant_err_msg.php", line 7, characters 10-11:
+Invalid return type (Typing[4110])
+File "invariant_err_msg.php", line 6, characters 21-21:
+Expected ~B because it is an unenforceable type
+File "invariant_err_msg.php", line 6, characters 36-36:
+But got A

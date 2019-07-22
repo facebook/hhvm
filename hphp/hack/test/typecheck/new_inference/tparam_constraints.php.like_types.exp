@@ -1,0 +1,16 @@
+File "tparam_constraints.php", line 5, characters 10-36:
+Invalid return type (Typing[4110])
+File "tparam_constraints.php", line 8, characters 20-21:
+Some type constraint(s) are violated here
+File "tparam_constraints.php", line 8, characters 20-21:
+Tr is a constrained type parameter
+File "tparam_constraints.php", line 4, characters 56-58:
+Expected int
+File "tparam_constraints.php", line 8, characters 20-21:
+But got dynamic
+File "tparam_constraints.php", line 4, characters 46-49:
+Invalid return type (Typing[4110])
+File "tparam_constraints.php", line 4, characters 56-58:
+Expected int
+File "tparam_constraints.php", line 4, characters 46-49:
+But got null

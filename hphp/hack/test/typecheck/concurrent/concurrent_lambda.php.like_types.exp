@@ -1,0 +1,6 @@
+File "concurrent_lambda.php", line 12, characters 21-48:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "concurrent_lambda.php", line 13, characters 21-60:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "concurrent_lambda.php", line 14, characters 21-64:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

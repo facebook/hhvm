@@ -1,0 +1,11 @@
+File "require_is.php", line 18, characters 11-12:
+Class IC does not correctly implement all required members  (Typing[4110])
+File "require_is.php", line 18, characters 22-26:
+Some members are incompatible with those declared in type IThis
+Read the following to see why:
+File "require_is.php", line 20, characters 19-21:
+Member set has the wrong type
+File "require_is.php", line 20, characters 23-23:
+Expected C
+File "require_is.php", line 15, characters 23-26:
+But got dynamic because it is an unenforceable type

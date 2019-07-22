@@ -1,0 +1,4 @@
+File "printf.php", line 25, characters 5-16:
+I don't understand the format string %. in %.....s %% (Typing[4038])
+File "printf.php", line 21, characters 25-29:
+You can add a new format specifier by adding format_0x2e() to ...

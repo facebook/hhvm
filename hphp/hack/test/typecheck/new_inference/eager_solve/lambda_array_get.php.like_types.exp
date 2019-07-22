@@ -1,0 +1,76 @@
+File "lambda_array_get.php", line 23, characters 5-28:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_array_get.php", line 27, characters 5-28:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_array_get.php", line 31, characters 5-28:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_array_get.php", line 35, characters 5-28:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_array_get.php", line 11, characters 65-74:
+Invalid argument (Typing[4110])
+File "lambda_array_get.php", line 18, characters 29-45:
+Expected Contra<~(~bool, ~B)>
+File "lambda_array_get.php", line 11, characters 65-74:
+But got dynamic because it is an unenforceable type
+File "lambda_array_get.php", line 11, characters 65-74:
+Invalid argument (Typing[4110])
+File "lambda_array_get.php", line 17, characters 29-45:
+Expected Contra<~(~bool, ~C)>
+File "lambda_array_get.php", line 11, characters 65-74:
+But got dynamic because it is an unenforceable type
+File "lambda_array_get.php", line 11, characters 65-74:
+Invalid argument (Typing[4110])
+File "lambda_array_get.php", line 18, characters 29-45:
+Expected Contra<~(~bool, ~B)>
+File "lambda_array_get.php", line 11, characters 65-74:
+But got dynamic because it is an unenforceable type
+File "lambda_array_get.php", line 11, characters 65-74:
+Invalid argument (Typing[4110])
+File "lambda_array_get.php", line 17, characters 29-45:
+Expected Contra<~(~bool, ~C)>
+File "lambda_array_get.php", line 11, characters 65-74:
+But got dynamic because it is an unenforceable type
+File "lambda_array_get.php", line 46, characters 5-30:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_array_get.php", line 50, characters 5-30:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_array_get.php", line 54, characters 5-30:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_array_get.php", line 58, characters 5-30:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_array_get.php", line 69, characters 5-41:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_array_get.php", line 73, characters 5-41:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_array_get.php", line 77, characters 5-41:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_array_get.php", line 81, characters 5-41:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_array_get.php", line 92, characters 5-41:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_array_get.php", line 96, characters 5-41:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_array_get.php", line 100, characters 5-41:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_array_get.php", line 104, characters 5-41:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_array_get.php", line 117, characters 5-97:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_array_get.php", line 117, characters 55-61:
+Invalid argument (Typing[4110])
+File "printf.hhi", line 133, characters 30-56:
+Expected ~HH\FormatString<~PlainSprintf> because it is an unenforceable type
+File "lambda_array_get.php", line 117, characters 55-61:
+But got string
+File "lambda_array_get.php", line 121, characters 5-41:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_array_get.php", line 125, characters 5-41:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_array_get.php", line 129, characters 5-41:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_array_get.php", line 140, characters 5-28:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_array_get.php", line 145, characters 5-28:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_array_get.php", line 153, characters 5-28:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

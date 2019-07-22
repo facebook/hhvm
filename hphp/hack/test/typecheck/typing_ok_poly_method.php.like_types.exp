@@ -1,0 +1,6 @@
+File "typing_ok_poly_method.php", line 24, characters 5-54:
+Invalid argument (Typing[4110])
+File "typing_ok_poly_method.php", line 14, characters 5-22:
+Expected ~(function([unresolved]): [unresolved]) because it is an unenforceable type
+File "typing_ok_poly_method.php", line 24, characters 5-54:
+But got (function(int $x): string)

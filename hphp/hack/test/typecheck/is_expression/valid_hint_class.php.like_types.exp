@@ -1,0 +1,4 @@
+File "valid_hint_class.php", line 9, characters 5-15:
+  D<T#1>
+  where T#1 super dynamic, T#1 super int, T#1 as ~int
+No errors

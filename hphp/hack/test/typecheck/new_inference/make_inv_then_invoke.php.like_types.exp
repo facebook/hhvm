@@ -1,0 +1,10 @@
+File "make_inv_then_invoke.php", line 25, characters 10-11:
+Invalid return type (Typing[4110])
+File "make_inv_then_invoke.php", line 21, characters 8-15:
+Expected ~<expr#1> because type parameter T of make_inv could not be determined. Please add explicit type parameters to the invocation of make_inv
+File "make_inv_then_invoke.php", line 12, characters 33-33:
+  via this generic T
+File "make_inv_then_invoke.php", line 9, characters 38-41:
+  via this generic Tinv
+File "make_inv_then_invoke.php", line 19, characters 25-25:
+But got B

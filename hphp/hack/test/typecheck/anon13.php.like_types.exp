@@ -1,0 +1,6 @@
+File "anon13.php", line 23, characters 10-11:
+Invalid return type (Typing[4110])
+File "anon13.php", line 16, characters 5-41:
+Expected (function([unresolved] $x): [unresolved])
+File "anon13.php", line 14, characters 25-44:
+But got dynamic because it is an unenforceable type

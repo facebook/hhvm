@@ -1,0 +1,6 @@
+File "await_in_expressions8.php", line 4, characters 10-17:
+Invalid exception (Typing[4110])
+File "await_in_expressions8.php", line 4, characters 10-17:
+Expected Throwable because it is used as an exception
+File "await_in_expressions8.php", line 3, characters 29-34:
+But got string

@@ -1,0 +1,6 @@
+File "integrate_if1.php", line 20, characters 12-16:
+Invalid argument (Typing[4110])
+File "integrate_if1.php", line 13, characters 12-14:
+Expected int
+File "integrate_if1.php", line 20, characters 12-16:
+But got bool

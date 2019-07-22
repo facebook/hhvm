@@ -1,0 +1,12 @@
+File "primitive4.php", line 5, characters 12-16:
+Invalid argument (Typing[4110])
+File "primitive4.php", line 3, characters 12-14:
+Expected int
+File "primitive4.php", line 5, characters 12-16:
+But got null
+File "primitive4.php", line 5, characters 12-16:
+Invalid argument (Typing[4110])
+File "primitive4.php", line 3, characters 12-14:
+Expected int
+File "primitive4.php", line 5, characters 12-16:
+But got nonnull

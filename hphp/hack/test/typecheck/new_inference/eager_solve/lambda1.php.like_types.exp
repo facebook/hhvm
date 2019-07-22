@@ -1,0 +1,8 @@
+File "lambda1.php", line 5, characters 10-37:
+  There are remaining unsolved constraints!: FALSE
+File "lambda1.php", line 33, characters 16-19:
+  There are remaining unsolved constraints!: FALSE
+File "lambda1.php", line 40, characters 9-33:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda1.php", line 48, characters 33-52:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

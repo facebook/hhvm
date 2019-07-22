@@ -1,0 +1,27 @@
+File "tconst_on_generics8.php", line 50, characters 51-51:
+You are trying to access the member T but this is not an object, it is a dynamic value (Typing[4062])
+File "tconst_on_generics8.php", line 42, characters 19-21:
+Definition is here
+File "tconst_on_generics8.php", line 60, characters 25-28:
+A 'where' type constraint is violated here (Typing[4062])
+File "tconst_on_generics8.php", line 50, characters 19-22:
+This method's where constraints contain a generic type access
+File "tconst_on_generics8.php", line 50, characters 51-51:
+You are trying to access the member T but this is not an object, it is a dynamic value
+File "tconst_on_generics8.php", line 42, characters 19-21:
+Definition is here
+File "tconst_on_generics8.php", line 50, characters 51-51:
+You are trying to access the member T but this is not an object, it is a dynamic value (Typing[4062])
+File "tconst_on_generics8.php", line 42, characters 19-21:
+Definition is here
+File "tconst_on_generics8.php", line 52, characters 33-36:
+You are trying to access the member getK but this is not an object, it is a dynamic value or an object of type Box (Typing[4062])
+File "tconst_on_generics8.php", line 42, characters 19-21:
+Definition is here
+File "tconst_on_generics8.php", line 52, characters 33-36:
+You are trying to access the member getK but this object can be null.  (Typing[4064])
+File "tconst_on_generics8.php", line 43, characters 11-13:
+This is what makes me believe it can be null
+File "tconst_on_generics8.php", line 52, characters 23-38:
+All the local information about $this->v has been invalidated during this call.
+This is a limitation of the type-checker, use a local if that's the problem.

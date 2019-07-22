@@ -1,0 +1,6 @@
+File "allow_non_strict_darray_or_varray_usage.php", line 15, characters 40-70:
+Invalid argument (Typing[4110])
+File "allow_non_strict_darray_or_varray_usage.php", line 10, characters 5-28:
+This is varray_or_darray, which requires arraykey-typed keys when used with an array (used like a hashtable)
+File "allow_non_strict_darray_or_varray_usage.php", line 5, characters 61-68:
+But got dynamic because it is an unenforceable type

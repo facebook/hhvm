@@ -1,0 +1,2 @@
+File "mutable_return_ft_in_rx1.php", line 11, characters 8-27:
+Single argument to \HH\Rx\mutable should be an expression that yields new mutably-owned value, like 'new A()', Hack collection literal or 'f()' where f is function annotated with <<__MutableReturn>> attribute. (Typing[4243])

@@ -1,0 +1,4 @@
+File "gen_trait3.php", line 15, characters 18-21:
+You are trying to access the member test but this is not an object, it is a dynamic value or an object of type A (Typing[4062])
+File "gen_trait3.php", line 12, characters 20-20:
+Definition is here

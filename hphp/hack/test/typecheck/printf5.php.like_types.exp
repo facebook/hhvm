@@ -1,0 +1,4 @@
+File "printf5.php", line 22, characters 5-8:
+I don't understand the format string %s in %s (Typing[4038])
+File "printf5.php", line 18, characters 25-29:
+You can add a new format specifier by adding format_s() to ...

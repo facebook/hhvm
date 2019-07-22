@@ -1,0 +1,6 @@
+File "test_to_sort_test2.php", line 31, characters 35-74:
+Invalid argument (Typing[4110])
+File "printf.hhi", line 133, characters 30-56:
+Expected ~HH\FormatString<~PlainSprintf> because it is an unenforceable type
+File "test_to_sort_test2.php", line 31, characters 35-74:
+But got string

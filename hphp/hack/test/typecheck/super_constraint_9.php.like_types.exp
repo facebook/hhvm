@@ -1,0 +1,6 @@
+File "super_constraint_9.php", line 12, characters 16-17:
+Invalid argument (Typing[4110])
+File "super_constraint_9.php", line 10, characters 32-34:
+Expected ~int because it is an unenforceable type
+File "super_constraint_9.php", line 10, characters 46-50:
+But got nonnull

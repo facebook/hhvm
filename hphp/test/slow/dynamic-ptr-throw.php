@@ -1,7 +1,5 @@
 <?hh
 
-set_error_handler(($_n, $str) ==> { echo "Warning: $str\n"; return true; });
-
 function no_dyn() { echo __FUNCTION__."\n"; }
 <<__DynamicallyCallable>> function dyn() { echo __FUNCTION__."\n"; }
 
@@ -25,6 +23,8 @@ function test_it($fname, $cname = null) {
 
 <<__EntryPoint>>
 function main() {
+  set_error_handler(($_n, $str) ==> { echo "Warning: $str\n"; return true; });
+
   test_it('dyn');
   test_it('no_dyn');
   test_it('static_dyn', 'Cls');

@@ -1,14 +1,14 @@
 <?hh
-  setlocale(LC_ALL,"C");
 
-  function ctype_test_001($function) {
-    $n=0;
-    for($a=0;$a<256;$a++) {
-        if($function($a)) $n++;
-    }
-      echo "$function $n\n";
+function ctype_test_001($function) {
+  $n=0;
+  for($a=0;$a<256;$a++) {
+    if($function($a)) $n++;
   }
+  echo "$function $n\n";
+}
 <<__EntryPoint>> function main(): void {
+setlocale(LC_ALL,"C");
 ctype_test_001("ctype_lower");
 ctype_test_001("ctype_upper");
 ctype_test_001("ctype_alpha");

@@ -1,13 +1,13 @@
 <?hh
-
-set_error_handler(($n, $str) ==> {
-  if ($n === E_RECOVERABLE_ERROR) {
-    print "Caught: ".$str."\n";
-    return true;
-  }
-  return false;
-});
-
+function install_error_handler(): void {
+  set_error_handler(($n, $str) ==> {
+    if ($n === E_RECOVERABLE_ERROR) {
+      print "Caught: ".$str."\n";
+      return true;
+    }
+    return false;
+  });
+}
 class A {
   static public function func1() { return 1; }
 }
@@ -122,8 +122,8 @@ function test_class_prop_type_check($c, $f) {
   var_dump($v);
 }
 
-<<__EntryPoint>>
-function main() {
+<<__EntryPoint>> function main(): void {
+  install_error_handler();
   $c = A::class;
   $f = 'func1';
   test_param_type_cast($c, $f);

@@ -1,30 +1,29 @@
 <?hh
-  class C
-  {
-      function foo($a, $b)
-      {
-          echo "Called C::foo($a, $b)\n";
-      }
-  }
+class C
+{
+    function foo($a, $b)
+    {
+        echo "Called C::foo($a, $b)\n";
+    }
+}
 
-  $c = new C;
+function foo($a, $b)
+{
+    echo "Called global foo($a, $b)\n";
+}
 
-  $functions = ['foo', [2 => [3 => array()]]];
-  $functions[1][2][3][4] = 'foo';
+<<__EntryPoint>> function main(): void {
+$c = new C;
 
-  $c->$functions[0](1, 2);
-  $c->$functions[1][2][3][4](3, 4);
+$functions = ['foo', [2 => [3 => array()]]];
+$functions[1][2][3][4] = 'foo';
 
+$c->$functions[0](1, 2);
+$c->$functions[1][2][3][4](3, 4);
 
-  function foo($a, $b)
-  {
-      echo "Called global foo($a, $b)\n";
-  }
+$c->functions = ['foo', [2 => [3 => array()]]];
+$c->functions[1][2][3][4] = 'foo';
 
-  $c->functions = ['foo', [2 => [3 => array()]]];
-  $c->functions[1][2][3][4] = 'foo';
-
-  $c->functions[0](5, 6);
-  $c->functions[1][2][3][4](7, 8);
-
-<<__EntryPoint>> function main(): void {}
+$c->functions[0](5, 6);
+$c->functions[1][2][3][4](7, 8);
+}

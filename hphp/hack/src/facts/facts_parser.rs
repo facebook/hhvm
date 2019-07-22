@@ -26,6 +26,24 @@ pub fn extract_as_json(text: &str, opts: ExtractAsJsonOpts) -> Option<String> {
     from_text(text, opts).map(|facts| facts.to_json(text))
 }
 
+pub fn from_text(text: &str, opts: ExtractAsJsonOpts) -> Option<Facts> {
+    let env = ParserEnv {
+        php5_compat_mode: opts.php5_compat_mode,
+        hhvm_compat_mode: opts.hhvm_compat_mode,
+        ..ParserEnv::default()
+    };
+    let text = SourceText::make(&opts.filename, text.as_bytes());
+    let mut parser = FactsParser::make(&text, env);
+    let root = parser.parse_script(None);
+
+    // report errors only if result of parsing is non-empty *)
+    if parser.sc_state().0 && !parser.errors().is_empty() {
+        None
+    } else {
+        Some(collect(("".to_owned(), Facts::default()), root).1)
+    }
+}
+
 pub fn without_xhp_mangling<T>(f: impl FnOnce() -> T) -> T {
     MANGLE_XHP_MODE.with(|cur| {
         let old = cur.replace(false);
@@ -372,24 +390,6 @@ fn collect(mut acc: CollectAcc, node: Node) -> CollectAcc {
         _ => (),
     };
     acc
-}
-
-fn from_text(text: &str, opts: ExtractAsJsonOpts) -> Option<Facts> {
-    let env = ParserEnv {
-        php5_compat_mode: opts.php5_compat_mode,
-        hhvm_compat_mode: opts.hhvm_compat_mode,
-        ..ParserEnv::default()
-    };
-    let text = SourceText::make(&opts.filename, text.as_bytes());
-    let mut parser = FactsParser::make(&text, env);
-    let root = parser.parse_script(None);
-
-    // report errors only if result of parsing is non-empty *)
-    if parser.sc_state().0 && !parser.errors().is_empty() {
-        None
-    } else {
-        Some(collect(("".to_owned(), Facts::default()), root).1)
-    }
 }
 
 #[cfg(test)]

@@ -82,10 +82,10 @@ def test_all(paths: Iterable[str], args: List[str], on_failure, on_success):
     for path in paths:
         total += 1
         caml_output = binary_output_as_pretty_json(
-            "facts_json_ocaml/facts_json_ocaml.opt", path
+            "facts_parse_ocaml/facts_parse_ocaml.opt", path
         )
         rust_output = binary_output_as_pretty_json(
-            "facts_json_rust#binary/facts_json_rust", path
+            "facts_parse_rust#binary/facts_parse_rust", path
         )
         ok = rust_output == caml_output
         if ok:

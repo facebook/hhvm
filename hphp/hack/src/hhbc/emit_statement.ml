@@ -140,7 +140,9 @@ and emit_stmt env (pos, stmt) =
       instr_null;
       emit_return env;
     ]
-  | A.Expr ((pos, _), (A.Call (_, (_, A.Id (_, s)), _, exprl, [])) as expr) ->
+  | A.Expr ((pos, _), (A.Call (_, (_, A.Id s), _, exprl, [])) as expr) ->
+    let ns = Emit_env.get_namespace env in
+    let s = Hhbc_id.Function.(elaborate_id ns s |> to_raw_string) in
     if String.lowercase s = "unset" then
       gather (List.map exprl (emit_unset_expr env))
     else

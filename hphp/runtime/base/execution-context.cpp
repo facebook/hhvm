@@ -1345,7 +1345,8 @@ void pseudomainHelper(const Unit* unit, bool callByHPHPInvoke) {
   }
 }
 
-const static StaticString s_entry_point("__SystemLib\\enter_async_entry_point");
+const static StaticString
+  s_enter_async_entry_point("__SystemLib\\enter_async_entry_point");
 
 TypedValue ExecutionContext::invokeUnit(const Unit* unit,
                                         bool callByHPHPInvoke) {
@@ -1365,13 +1366,13 @@ TypedValue ExecutionContext::invokeUnit(const Unit* unit,
   if (callByHPHPInvoke && it != nullptr) {
     if (it->isAsync()) {
       invokeFunc(
-        Unit::lookupFunc(s_entry_point.get()),
-        make_vec_array(VarNR{it->fullDisplayName()}),
-        nullptr, nullptr, nullptr, nullptr, InvokeNormal
+        Unit::lookupFunc(s_enter_async_entry_point.get()),
+        make_vec_array(Variant{it}),
+        nullptr, nullptr, nullptr, nullptr, InvokeNormal, false
       );
     } else {
       invokeFunc(it, init_null_variant, nullptr, nullptr,
-                    nullptr, nullptr, InvokeNormal);
+                    nullptr, nullptr, InvokeNormal, false);
     }
   }
   return ret;

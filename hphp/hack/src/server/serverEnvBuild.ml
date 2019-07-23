@@ -245,7 +245,7 @@ let default_genv =
     lru_host_env          = None;
   }
 
-let make_env config =
+let make_env ?init_id config =
   { tcopt          = ServerConfig.typechecker_options config;
     popt           = ServerConfig.parser_options config;
     naming_table   = Naming_table.empty;
@@ -269,6 +269,8 @@ let make_env config =
     persistent_client_pending_command_needs_full_check = None;
     default_client_pending_command_needs_full_check = None;
     init_env = {
+      init_id = (match init_id with Some init_id -> init_id | None -> Random_id.short_string ());
+      recheck_id = None;
       needs_full_init = false;
       init_start_t = Unix.gettimeofday ();
       state_distance = None;

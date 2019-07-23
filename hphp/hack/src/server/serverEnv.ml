@@ -197,6 +197,8 @@ and prechecked_files_status =
   | Prechecked_files_ready of dirty_deps
 
 and init_env = {
+  init_id : string;
+  recheck_id : string option;
   init_start_t : float;
   (* Whether a full check was ever completed since init. *)
   needs_full_init : bool;

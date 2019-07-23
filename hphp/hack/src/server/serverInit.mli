@@ -42,5 +42,5 @@ type init_result =
 (* will parse, name, typecheck, the next set of files
  * and refresh the environment and update the many shared heaps
  *)
-val init: init_approach:init_approach -> ServerEnv.genv
+val init: init_approach:init_approach -> ServerEnv.genv -> ServerEnv.env
   -> ServerEnv.env * init_result (* If the script failed, the error message *)

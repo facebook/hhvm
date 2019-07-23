@@ -30,20 +30,18 @@ module MainInit : sig
   val go:
     genv ->
     ServerArgs.options ->
-    string ->
     (unit -> env) ->    (* init function to run while we have init lock *)
     env
 end = struct
   (* This code is only executed when the options --check is NOT present *)
-  let go genv options init_id init_fun =
+  let go genv options init_fun =
     let root = ServerArgs.root options in
     let t = Unix.gettimeofday () in
     Hh_logger.log "Initializing Server (This might take some time)";
     (* note: we only run periodical tasks on the root, not extras *)
-    let env = HackEventLogger.with_id ~stage:`Init init_id init_fun in
+    let env = init_fun () in
     Hh_logger.log "Server is partially ready";
     ServerIdle.init genv env.local_symbol_table root;
-    Hh_logger.log "Init id: %s" init_id;
     let t' = Unix.gettimeofday () in
     Hh_logger.log "Took %f seconds." (t' -. t);
     HackEventLogger.server_is_partially_ready ();
@@ -515,6 +513,12 @@ let update_recheck_values env start_t recheck_id =
 
 let serve_one_iteration genv env client_provider =
   let recheck_id = new_serve_iteration_id () in
+  let env = { env with
+    ServerEnv.init_env = { env.ServerEnv.init_env with
+      ServerEnv.recheck_id = Some recheck_id;
+    }
+  }
+  in
   ServerMonitorUtils.exit_if_parent_dead ();
   ServerProgress.send_to_monitor (MonitorRpc.PROGRESS None);
   let has_default_client_pending =
@@ -864,27 +868,22 @@ let resolve_init_approach genv: ServerInit.init_approach * string =
         ServerInit.Saved_state_init (ServerInit.Load_state_natively use_canary),
         "Load_state_natively"
 
-let program_init genv =
+let program_init genv env =
+  Hh_logger.log "Init id: %s" env.init_env.init_id;
   let init_approach, approach_name = resolve_init_approach genv in
   Hh_logger.log "Initing with approach: %s" approach_name;
   let env, init_type, init_error, state_distance =
+    let env, init_result = ServerInit.init ~init_approach genv env in
     match init_approach with
-    | ServerInit.Full_init ->
-      let env, _ = ServerInit.init ~init_approach genv in
-      env, "fresh", None, None
-    | ServerInit.Parse_only_init ->
-      let env, _ = ServerInit.init ~init_approach genv in
-      env, "parse-only", None, None
-    | ServerInit.Saved_state_init _ ->
-      let env, init_result = ServerInit.init ~init_approach genv in
-      begin match init_result with
+    | ServerInit.Write_symbol_info
+    | ServerInit.Full_init -> env, "fresh", None, None
+    | ServerInit.Parse_only_init -> env, "parse-only", None, None
+    | ServerInit.Saved_state_init _ -> begin
+      match init_result with
         | ServerInit.Load_state_succeeded distance -> env, "state_load", None, distance
         | ServerInit.Load_state_failed err -> env, "state_load_failed", Some err, None
         | ServerInit.Load_state_declined reason -> env, "state_load_declined", Some reason, None
       end
-    | ServerInit.Write_symbol_info ->
-      let env, _  = ServerInit.init ~init_approach genv in
-      env, "fresh", None, None
   in
   let env = { env with
     init_env = { env.init_env with
@@ -1047,17 +1046,17 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
     workers
     lru_host_env
   in
-  genv, init_id
+  genv, (ServerEnvBuild.make_env genv.config ~init_id)
 
 let run_once options config local_config =
-  let genv, _ = setup_server options config local_config
+  let genv, env = setup_server options config local_config
     ~informant_managed:false ~monitor_pid:None in
   if not (ServerArgs.check_mode genv.options) then
     (Hh_logger.log "ServerMain run_once only supported in check mode.";
     Exit_status.(exit Input_error));
 
   (* The type-checking happens here *)
-  let env = program_init genv in
+  let env = program_init genv env in
 
   (* All of saving state happens here *)
   let env, save_state_results =
@@ -1099,12 +1098,13 @@ let run_once options config local_config =
 let daemon_main_exn ~informant_managed options monitor_pid in_fds =
   Printexc.record_backtrace true;
   let config, local_config = ServerConfig.(load filename options) in
-  let genv, init_id = setup_server options config local_config
+  let genv, env = setup_server options config local_config
     ~informant_managed ~monitor_pid:(Some monitor_pid) in
   if ServerArgs.check_mode genv.options then
     (Hh_logger.log "Invalid program args - can't run daemon in check mode.";
     Exit_status.(exit Input_error));
-  let env = MainInit.go genv options init_id (fun () -> program_init genv) in
+  HackEventLogger.with_id ~stage:`Init env.init_env.init_id @@ fun () ->
+  let env = MainInit.go genv options (fun () -> program_init genv env) in
   serve genv env in_fds
 
 let daemon_main

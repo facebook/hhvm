@@ -92,9 +92,9 @@ let get_lazy_level (genv: ServerEnv.genv) : lazy_level =
 let init
     ~(init_approach: init_approach)
     (genv: ServerEnv.genv)
+    (env: ServerEnv.env)
   : ServerEnv.env * init_result =
   let lazy_lev = get_lazy_level genv in
-  let env = ServerEnvBuild.make_env genv.config in
   (* Save the global settings for parsing, naming, and declaration.
      These settings cannot be changed during the lifetime of the server. *)
   GlobalParserOptions.set env.popt;

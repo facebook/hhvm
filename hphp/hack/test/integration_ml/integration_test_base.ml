@@ -523,8 +523,10 @@ let load_state
     deptable_fn;
     prechecked_changes;
     changes;
-  } in
-  match ServerInit.init ~init_approach:(ServerInit.Saved_state_init load_state_approach) !genv with
+  }
+  in
+  let env = ServerEnvBuild.make_env !genv.ServerEnv.config in
+  match ServerInit.init ~init_approach:(ServerInit.Saved_state_init load_state_approach) !genv env with
   | env, ServerInit.Load_state_succeeded _ -> env
   | _env, ServerInit.Load_state_declined s ->
     Printf.eprintf "> DECLINED %s\n" s; assert false

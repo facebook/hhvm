@@ -2510,6 +2510,8 @@ and expr_
             if TypecheckerOptions.new_inference_lambda (Env.get_tcopt env)
             then begin
               Typing_log.increment_feature_count env FL.Lambda.fresh_tyvar_params;
+              (* Replace uses of Tany that originated from "untyped" parameters or return type
+               * with fresh type variables *)
               let freshen_ftype env ft =
                 let freshen_untyped_param env ft_param =
                   match snd ft_param.fp_type with
@@ -2523,6 +2525,9 @@ and expr_
                   match snd ft.ft_ret with
                   | Tany ->
                     Env.fresh_type env ft.ft_pos
+                  | Tclass(id, e, [(_, Tany)]) when snd id = SN.Classes.cAwaitable ->
+                    let env, t = Env.fresh_type env ft.ft_pos in
+                    env, (fst ft.ft_ret, Tclass(id, e, [t]))
                   | _ ->
                     env, ft.ft_ret in
                 env, { ft with ft_params; ft_ret } in

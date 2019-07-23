@@ -69,11 +69,11 @@
                   )))));
            ([9:3-11:5],
             (Expr
-               (([9:3-11:4], (function(string $x): Awaitable<_>)),
+               (([9:3-11:4], (function(string $x): Awaitable<void>)),
                 (Binop ((Eq None),
-                   (([9:3-6], (function(string $x): Awaitable<_>)),
+                   (([9:3-6], (function(string $x): Awaitable<void>)),
                     (Lvar ([9:3-6], $f1))),
-                   (([9:9-11:4], (function(string $x): Awaitable<_>)),
+                   (([9:9-11:4], (function(string $x): Awaitable<void>)),
                     (Lfun (
                        { f_span = [9:9-11:4]; f_annotation = ();
                          f_mode = <opaque>; f_ret = None;

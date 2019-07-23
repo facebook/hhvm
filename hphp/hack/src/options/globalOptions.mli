@@ -279,7 +279,7 @@ type t = {
   (* Set of error codes disallowed in decl positions *)
   po_disallowed_decl_fixmes : ISet.t;
 
-  (* Switch from <<...>> to @ for attributes *)
+  (* Enable @ attribute syntax *)
   po_allow_new_attribute_syntax : bool;
 
   (* Trigger the use of inferred types in the tast for non annotated
@@ -288,6 +288,9 @@ type t = {
 
   (* Enable const static properties *)
   tco_enable_const_static_props : bool;
+
+  (* Disable <<...>> attribute syntax *)
+  po_disable_legacy_attribute_syntax : bool;
 } [@@deriving show]
 
 val make :
@@ -354,6 +357,7 @@ val make :
   ?po_allow_new_attribute_syntax : bool ->
   ?tco_global_inference : bool ->
   ?tco_enable_const_static_props : bool ->
+  ?po_disable_legacy_attribute_syntax : bool ->
   unit ->
   t
 
@@ -444,3 +448,4 @@ val po_disallowed_decl_fixmes : t -> ISet.t
 val po_allow_new_attribute_syntax : t -> bool
 val tco_global_inference : t -> bool
 val tco_enable_const_static_props : t -> bool
+val po_disable_legacy_attribute_syntax : t -> bool

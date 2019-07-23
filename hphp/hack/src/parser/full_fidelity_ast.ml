@@ -3593,6 +3593,8 @@ let parse_text
         ~disable_legacy_soft_typehints:
           (GlobalOptions.po_disable_legacy_soft_typehints env.parser_options)
         ~allow_new_attribute_syntax:(GlobalOptions.po_allow_new_attribute_syntax env.parser_options)
+        ~disable_legacy_attribute_syntax:
+          (GlobalOptions.po_disable_legacy_attribute_syntax env.parser_options)
         ?mode
         ()
     in

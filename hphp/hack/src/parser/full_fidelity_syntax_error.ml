@@ -756,3 +756,9 @@ let no_const_interfaces_traits_enums =
 
 let no_const_late_init_props =
   "__Const properties may not also be __LateInit or __SoftLateInit"
+
+let no_const_static_props =
+  "Static properties may not be __Const"
+
+let no_legacy_attribute_syntax =
+  "The <<...>> syntax for user attributes is not allowed. Use the @ syntax instead."

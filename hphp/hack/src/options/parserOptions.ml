@@ -50,6 +50,10 @@ let allow_new_attribute_syntax = GlobalOptions.po_allow_new_attribute_syntax
 let with_allow_new_attribute_syntax po b =
   { po with GlobalOptions.po_allow_new_attribute_syntax = b }
 
+let disable_legacy_attribute_syntax = GlobalOptions.po_disable_legacy_attribute_syntax
+let with_disable_legacy_attribute_syntax po b =
+  { po with GlobalOptions.po_disable_legacy_attribute_syntax = b }
+
 let make
   ~auto_namespace_map
   ~codegen
@@ -64,6 +68,7 @@ let make
   ~disable_legacy_soft_typehints
   ~disable_outside_dollar_str_interp
   ~allow_new_attribute_syntax
+  ~disable_legacy_attribute_syntax
 = GlobalOptions.{
   default with
   po_auto_namespace_map = auto_namespace_map;
@@ -79,4 +84,5 @@ let make
   po_disable_legacy_soft_typehints = disable_legacy_soft_typehints;
   po_disable_outside_dollar_str_interp = disable_outside_dollar_str_interp;
   po_allow_new_attribute_syntax = allow_new_attribute_syntax;
+  po_disable_legacy_attribute_syntax = disable_legacy_attribute_syntax;
 }

@@ -3933,6 +3933,13 @@ let disabled_legacy_soft_typehint_errors env node errors =
     make_error_from_node node SyntaxError.no_legacy_soft_typehints :: errors
   | _ -> errors
 
+let disabled_legacy_attribute_syntax_errors env node errors =
+  match syntax node with
+  | OldAttributeSpecification _ when
+    ParserOptions.disable_legacy_attribute_syntax env.parser_options ->
+    make_error_from_node node SyntaxError.no_legacy_attribute_syntax :: errors
+  | _ -> errors
+
 let find_syntax_errors env =
   let has_rx_attr_mutable_hack attrs =
     attribute_first_reactivity_annotation attrs
@@ -4107,6 +4114,9 @@ let find_syntax_errors env =
         trait_require_clauses, names, errors
       | SoftTypeSpecifier _ ->
         let errors = disabled_legacy_soft_typehint_errors env node errors in
+        trait_require_clauses, names, errors
+      | OldAttributeSpecification _ ->
+        let errors = disabled_legacy_attribute_syntax_errors env node errors in
         trait_require_clauses, names, errors
       | _ -> trait_require_clauses, names, errors in
 

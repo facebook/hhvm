@@ -218,6 +218,7 @@ let parse_options () =
   let allow_toplevel_requires = ref false in
   let global_inference = ref false in
   let enable_const_static_props = ref false in
+  let disable_legacy_attribute_syntax = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -473,6 +474,9 @@ let parse_options () =
     "--enable-const-static-props",
       Arg.Set enable_const_static_props,
       "Enable const props to be static";
+    "--disable-legacy-attribute-syntax",
+      Arg.Set disable_legacy_attribute_syntax,
+      "Disable the legacy <<...>> user attribute syntax";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -520,6 +524,7 @@ let parse_options () =
     ~po_disallow_toplevel_requires:(not !allow_toplevel_requires)
     ~tco_global_inference:!global_inference
     ~tco_enable_const_static_props:!enable_const_static_props
+    ~po_disable_legacy_attribute_syntax:!disable_legacy_attribute_syntax
     ()
   in
   let tcopt = {

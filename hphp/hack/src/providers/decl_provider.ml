@@ -21,7 +21,19 @@ type gconst_decl = Typing_defs.decl Typing_defs.ty * Errors.t
 
 let get_fun (fun_name: fun_key): fun_decl option =
   match Provider_config.get_backend () with
-  | Provider_config.Lru_shared_memory
+  | Provider_config.Lru_shared_memory -> begin
+    match Lru_worker.get fun_name with
+    | Some s -> Some s
+    | None ->
+      match Naming_table.Funs.get_pos fun_name with
+      | Some pos ->
+        let filename = FileInfo.get_pos_filename pos in
+        let ft = Errors.run_in_decl_mode filename
+          (fun () -> Decl.declare_fun_in_file filename fun_name) in
+        let _success = Lru_worker.set fun_name ft in
+        Some ft
+      | None -> None
+    end
   | Provider_config.Shared_memory ->
     Typing_lazy_heap.get_fun fun_name
   | Provider_config.Local_memory { decl_cache } ->

@@ -43,6 +43,7 @@
   (wrapped false)
   (modules decl_provider)
   (libraries
+    lru_worker_stubs
     provider_config
     typing_heap))
 

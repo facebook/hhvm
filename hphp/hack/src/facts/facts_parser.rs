@@ -203,10 +203,10 @@ fn type_info_from_class_body(
         let facts_constants = std::mem::replace(&mut facts.constants, vec![]);
         facts.constants = nodes.into_iter().fold(facts_constants, aux);
     }
-    type_facts.attributes = attributes_into_facts(attributes);
+    type_facts.attributes = attributes_into_facts(namespace, attributes);
 }
 
-fn attributes_into_facts(attributes: Node) -> Attributes {
+fn attributes_into_facts(namespace: &str, attributes: Node) -> Attributes {
     match attributes {
         Node::List(nodes) => nodes
             .into_iter()
@@ -228,11 +228,13 @@ fn attributes_into_facts(attributes: Node) -> Attributes {
                                 .into_iter()
                                 .fold(Vec::new(), |mut attribute_values, node| match node {
                                     Node::Name(name) => {
+                                        // TODO(T47593892) fold constant
                                         attribute_values
                                             .push(String::from_utf8_lossy(&name).to_string());
                                         attribute_values
                                     }
                                     Node::String(name) => {
+                                        // TODO(T47593892) fold constant
                                         attribute_values
                                             .push(String::from_utf8_lossy(&name).to_string());
                                         attribute_values
@@ -241,10 +243,13 @@ fn attributes_into_facts(attributes: Node) -> Attributes {
                                         Node::Name(name),
                                         Node::Class,
                                     )) => {
-                                        attribute_values.push(format!(
-                                            "{}::class",
+                                        attribute_values.push(if namespace.is_empty() {
                                             String::from_utf8_lossy(&name).to_string()
-                                        ));
+                                        } else {
+                                            namespace.to_owned()
+                                                + "\\"
+                                                + &String::from_utf8_lossy(&name).to_string()
+                                        });
                                         attribute_values
                                     }
                                     _ => attribute_values,
@@ -342,7 +347,7 @@ fn collect(mut acc: CollectAcc, node: Node) -> CollectAcc {
         }
         EnumDecl(box decl) => {
             if let Some(name) = qualified_name(&acc.0, decl.name) {
-                let attributes = attributes_into_facts(decl.attributes);
+                let attributes = attributes_into_facts(&acc.0, decl.attributes);
                 let enum_facts = TypeFacts {
                     flags: Flag::Final as isize,
                     kind: TypeKind::Enum,

@@ -187,14 +187,14 @@ let type_info_from_class_body facts ns check_require body =
     else { facts with constants } in
   extends, implements, trait_uses, facts
 
-let attributes_from_decl attributes =
+let attributes_from_decl ns attributes =
   let open FSC in
   let attributes_value_aux node l =
     match node with
-    | Name s -> l @ [s()]
-    | String s -> l @ [s()]
+    | Name s -> l @ [s()] (* TODO(T47593892) fold constant *)
+    | String s -> l @ [s()] (* TODO(T47593892) fold constant *)
     | ScopeResolutionExpression (Name name, Class) ->
-      l @ [String.concat ~sep:"::" [name(); "class"]]
+      l @ [if ns = "" then name() else ns ^ "\\" ^ name()]
     | _ -> l in
     let attributes_values_aux node =
     match node with
@@ -231,7 +231,7 @@ let facts_from_class_decl facts ns modifiers attributes kind name extends implem
         (kind = TKInterface || kind = TKTrait) body in
     let base_types = typenames_from_list ns trait_uses extends in
     let base_types = typenames_from_list ns base_types implements in
-    let attributes = attributes_from_decl attributes in
+    let attributes = attributes_from_decl ns attributes in
     let types =
       add_or_update_classish_declaration facts.types name kind flags
         attributes base_types require_extends require_implements in
@@ -252,7 +252,7 @@ let rec collect (ns, facts as acc) n =
   | EnumDecl decl ->
     begin match qualified_name ns decl.name with
       | Some name ->
-      let attributes = attributes_from_decl decl.attributes in
+      let attributes = attributes_from_decl ns decl.attributes in
         let types =
           add_or_update_classish_declaration facts.types name
             TKEnum flags_final attributes InvSSet.empty InvSSet.empty InvSSet.empty in

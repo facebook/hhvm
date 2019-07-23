@@ -285,6 +285,9 @@ type t = {
   (* Trigger the use of inferred types in the tast for non annotated
     arguments and return types *)
   tco_global_inference : bool;
+
+  (* Enable const static properties *)
+  tco_enable_const_static_props : bool;
 } [@@deriving show]
 
 val make :
@@ -350,6 +353,7 @@ val make :
   ?po_disallowed_decl_fixmes: ISet.t ->
   ?po_allow_new_attribute_syntax : bool ->
   ?tco_global_inference : bool ->
+  ?tco_enable_const_static_props : bool ->
   unit ->
   t
 
@@ -439,3 +443,4 @@ val disable_linter_fixmes : t -> bool
 val po_disallowed_decl_fixmes : t -> ISet.t
 val po_allow_new_attribute_syntax : t -> bool
 val tco_global_inference : t -> bool
+val tco_enable_const_static_props : t -> bool

@@ -217,6 +217,7 @@ let parse_options () =
   let allow_new_attribute_syntax = ref false in
   let allow_toplevel_requires = ref false in
   let global_inference = ref false in
+  let enable_const_static_props = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -469,6 +470,9 @@ let parse_options () =
     "--global-inference",
       Arg.Set global_inference,
       "Use inference results as the types of unannotated parameters / functions in the tast";
+    "--enable-const-static-props",
+      Arg.Set enable_const_static_props,
+      "Enable const props to be static";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -515,6 +519,7 @@ let parse_options () =
     ~po_allow_new_attribute_syntax:!allow_new_attribute_syntax
     ~po_disallow_toplevel_requires:(not !allow_toplevel_requires)
     ~tco_global_inference:!global_inference
+    ~tco_enable_const_static_props:!enable_const_static_props
     ()
   in
   let tcopt = {

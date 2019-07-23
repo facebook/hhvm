@@ -20,9 +20,9 @@ type comment_style =
 [@@deriving show]
 
 let make_header comment_style (header_comment : string) : string =
-  let open_char, close_char, generate_arg = match comment_style with
-  | CStyle -> "/", '/', " -- --rust"
-  | MLStyle -> "(", ')', ""
+  let open_char, close_char = match comment_style with
+  | CStyle -> "/", '/'
+  | MLStyle -> "(", ')'
   in
   sprintf
 "%s**
@@ -38,7 +38,7 @@ let make_header comment_style (header_comment : string) : string =
  * THIS FILE IS @%s; DO NOT EDIT IT
  * To regenerate this file, run
  *
- *   buck run //hphp/hack/src:generate_full_fidelity%s
+ *   buck run //hphp/hack/src:generate_full_fidelity
  *
  **
  *%s
@@ -48,7 +48,6 @@ let make_header comment_style (header_comment : string) : string =
    * generated file in Phabricator. Cheeky trick to avoid making this script
    * being seen as generated. *)
   "generated"
-  generate_arg
   header_comment
   close_char
 
@@ -3259,78 +3258,53 @@ OPERATOR_DECL_IMPLend
 end
 
 let () =
-  let rust = ref false in
-  let options =  [ "--rust", Arg.Set rust, ""; ] in
-  Arg.parse options (fun _ -> ()) "";
-
+  generate_file GenerateFFOperatorRust.full_fidelity_operators;
   generate_file GenerateFFOperator.full_fidelity_operator;
   generate_file GenerateFFSyntaxType.full_fidelity_syntax_type;
   generate_file GenerateFFSyntaxSig.full_fidelity_syntax_sig;
   generate_file GenerateFFValidatedSyntax.full_fidelity_validated_syntax;
   generate_file GenerateFFTriviaKind.full_fidelity_trivia_kind;
+  generate_file GenerateFFRustTriviaKind.full_fidelity_trivia_kind;
   generate_file GenerateFFSyntax.full_fidelity_syntax;
+  generate_file GenerateFFRustSyntax.full_fidelity_syntax;
+  generate_file GenerateFFRustSyntaxType.full_fidelity_syntax;
   generate_file GenerateFFSyntaxKind.full_fidelity_syntax_kind;
+  generate_file GenerateFFRustSyntaxKind.full_fidelity_syntax_kind;
   generate_file GenerateFFJavaScript.full_fidelity_javascript;
   generate_file GenerateFFTokenKind.full_fidelity_token_kind;
+  generate_file GenerateFFRustTokenKind.full_fidelity_token_kind;
   generate_file GenerateFFJSONSchema.full_fidelity_json_schema;
   generate_file
     GenerateFFSmartConstructors.full_fidelity_smart_constructors;
+  generate_file
+    GenerateFFRustSmartConstructors.full_fidelity_smart_constructors;
+  generate_file
+    GenerateFFRustMinimalSmartConstructors.minimal_smart_constructors;
+  generate_file
+    GenerateFFRustPositionedSmartConstructors.positioned_smart_constructors;
   generate_file
     GenerateFFVerifySmartConstructors.full_fidelity_verify_smart_constructors;
   generate_file
     GenerateFFSyntaxSmartConstructors.full_fidelity_syntax_smart_constructors;
   generate_file
+    GenerateFFRustSyntaxSmartConstructors.full_fidelity_syntax_smart_constructors;
+  generate_file
+    GenerateFFRustCoroutineSmartConstructors.coroutine_smart_constructors;
+  generate_file
+    GenerateFFRustDeclModeSmartConstructors.decl_mode_smart_constructors;
+  generate_file
     GenerateFlattenSmartConstructors.flatten_smart_constructors;
+  generate_file
+    GenerateRustFlattenSmartConstructors.flatten_smart_constructors;
+  generate_file
+    GenerateRustFactsSmartConstructors.facts_smart_constructors;
   generate_file
     GenerateFFParserSig.full_fidelity_parser_sig;
   generate_file
     GenerateFFSmartConstructorsWrappers
       .full_fidelity_smart_constructors_wrappers;
-  if !rust then begin
-    (* One of the promises of Rust migration is that we will not force people to
-       write the same code twice as long as possible. To achieve that, all the
-       tests testing Rust codepaths are with "disabled" tag and require explicit
-       --run-disabled invocation. But it's not enough - even if this allows
-       others to land code that breaks those tests (so we can fix it later for
-       them), the code still needs to compile.
-
-       This means that changing schema (by renaming / removing items) and
-       re-running generator can force people to update Rust code too (and writing
-       the same code twice), which leaves a bad first impression and can deplete
-       people's goodwill banks for this project.
-
-       As a mitigation, we won't regenerate Rust code by default, unless you run
-       the generator with --rust flag. That means that the parsers can diverge,
-       in which case calling Rust from OCaml can now lead to segfaults /
-       unexpected results until the code is regenerated. Effectively, we are
-       moving the possibly bad experience from "everyone" to "people working on
-       Rust port".
-    *)
-    generate_file GenerateFFOperatorRust.full_fidelity_operators;
-    generate_file GenerateFFRustTriviaKind.full_fidelity_trivia_kind;
-    generate_file GenerateFFRustSyntax.full_fidelity_syntax;
-    generate_file GenerateFFRustSyntaxType.full_fidelity_syntax;
-    generate_file GenerateFFRustSyntaxKind.full_fidelity_syntax_kind;
-    generate_file GenerateFFRustTokenKind.full_fidelity_token_kind;
-    generate_file
-      GenerateFFRustSmartConstructors.full_fidelity_smart_constructors;
-    generate_file
-      GenerateFFRustMinimalSmartConstructors.minimal_smart_constructors;
-    generate_file
-      GenerateFFRustPositionedSmartConstructors.positioned_smart_constructors;
-    generate_file
-      GenerateFFRustSyntaxSmartConstructors.full_fidelity_syntax_smart_constructors;
-    generate_file
-      GenerateFFRustCoroutineSmartConstructors.coroutine_smart_constructors;
-    generate_file
-      GenerateFFRustDeclModeSmartConstructors.decl_mode_smart_constructors;
-    generate_file
-      GenerateRustFlattenSmartConstructors.flatten_smart_constructors;
-    generate_file
-      GenerateRustFactsSmartConstructors.facts_smart_constructors;
-    generate_file
-      GenerateFFRustSmartConstructorsWrappers
-        .full_fidelity_smart_constructors_wrappers;
-    generate_file
-      GenerateOcamlSyntax.ocaml_syntax;
-  end
+  generate_file
+    GenerateFFRustSmartConstructorsWrappers
+      .full_fidelity_smart_constructors_wrappers;
+  generate_file
+    GenerateOcamlSyntax.ocaml_syntax

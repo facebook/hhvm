@@ -11,7 +11,7 @@
  * THIS FILE IS @generated; DO NOT EDIT IT
  * To regenerate this file, run
  *
- *   buck run //hphp/hack/src:generate_full_fidelity -- --rust
+ *   buck run //hphp/hack/src:generate_full_fidelity
  *
  **
  *

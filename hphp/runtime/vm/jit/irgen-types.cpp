@@ -710,6 +710,7 @@ SSATmp* isDictImpl(IRGS& env, SSATmp* src) {
   }
 
   auto const darrCheck = [&]{
+    if (!RuntimeOption::EvalHackArrCompatIsVecDictNotices) return;
     cond(
       env,
       [&](Block* taken) { return gen(env, CheckType, TArr, taken, src); },

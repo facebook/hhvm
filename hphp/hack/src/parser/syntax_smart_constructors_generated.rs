@@ -298,9 +298,21 @@ where
         (s, r)
     }
 
-    fn make_attribute_specification(s: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R) {
+    fn make_old_attribute_specification(s: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R) {
         let s = State::next(s, &[&arg0, &arg1, &arg2]);
-        let r = Self::R::make_attribute_specification(&s, arg0, arg1, arg2);
+        let r = Self::R::make_old_attribute_specification(&s, arg0, arg1, arg2);
+        (s, r)
+    }
+
+    fn make_attribute_specification(s: State, arg0 : Self::R) -> (State, Self::R) {
+        let s = State::next(s, &[&arg0]);
+        let r = Self::R::make_attribute_specification(&s, arg0);
+        (s, r)
+    }
+
+    fn make_attribute(s: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R) {
+        let s = State::next(s, &[&arg0, &arg1]);
+        let r = Self::R::make_attribute(&s, arg0, arg1);
         (s, r)
     }
 
@@ -700,9 +712,9 @@ where
         (s, r)
     }
 
-    fn make_record_creation_expression(s: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State, Self::R) {
-        let s = State::next(s, &[&arg0, &arg1, &arg2, &arg3]);
-        let r = Self::R::make_record_creation_expression(&s, arg0, arg1, arg2, arg3);
+    fn make_record_creation_expression(s: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> (State, Self::R) {
+        let s = State::next(s, &[&arg0, &arg1, &arg2, &arg3, &arg4]);
+        let r = Self::R::make_record_creation_expression(&s, arg0, arg1, arg2, arg3, arg4);
         (s, r)
     }
 

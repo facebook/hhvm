@@ -115,11 +115,13 @@ macro_rules! parse {
             let hhvm_compat_mode = bool_field(&opts, 1);
             let php5_compat_mode = bool_field(&opts, 2);
             let codegen = bool_field(&opts, 3);
+            let allow_new_attribute_syntax = bool_field(&opts, 4);
             let env = ParserEnv {
                 is_experimental_mode,
                 hhvm_compat_mode,
                 php5_compat_mode,
                 codegen,
+                allow_new_attribute_syntax,
             };
 
             // Note: Determining the current thread size cannot be done portably,

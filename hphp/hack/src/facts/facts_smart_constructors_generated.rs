@@ -214,8 +214,16 @@ impl<'src> SmartConstructors<'src, HasScriptContent<'src>> for FactsSmartConstru
         <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_variadic_parameter(s, arg0, arg1, arg2)
     }
 
-    fn make_attribute_specification(s: HasScriptContent<'src>, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> (HasScriptContent<'src>, Self::R) {
-        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_attribute_specification(s, arg0, arg1, arg2)
+    fn make_old_attribute_specification(s: HasScriptContent<'src>, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> (HasScriptContent<'src>, Self::R) {
+        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_old_attribute_specification(s, arg0, arg1, arg2)
+    }
+
+    fn make_attribute_specification(s: HasScriptContent<'src>, arg0: Self::R) -> (HasScriptContent<'src>, Self::R) {
+        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_attribute_specification(s, arg0)
+    }
+
+    fn make_attribute(s: HasScriptContent<'src>, arg0: Self::R, arg1: Self::R) -> (HasScriptContent<'src>, Self::R) {
+        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_attribute(s, arg0, arg1)
     }
 
     fn make_inclusion_expression(s: HasScriptContent<'src>, arg0: Self::R, arg1: Self::R) -> (HasScriptContent<'src>, Self::R) {
@@ -482,8 +490,8 @@ impl<'src> SmartConstructors<'src, HasScriptContent<'src>> for FactsSmartConstru
         <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_constructor_call(s, arg0, arg1, arg2, arg3)
     }
 
-    fn make_record_creation_expression(s: HasScriptContent<'src>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> (HasScriptContent<'src>, Self::R) {
-        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_record_creation_expression(s, arg0, arg1, arg2, arg3)
+    fn make_record_creation_expression(s: HasScriptContent<'src>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> (HasScriptContent<'src>, Self::R) {
+        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_record_creation_expression(s, arg0, arg1, arg2, arg3, arg4)
     }
 
     fn make_array_creation_expression(s: HasScriptContent<'src>, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> (HasScriptContent<'src>, Self::R) {

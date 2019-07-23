@@ -61,7 +61,9 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_decorated_expression(ctx: &C, decorated_expression_decorator: Self, decorated_expression_expression: Self) -> Self;
     fn make_parameter_declaration(ctx: &C, parameter_attribute: Self, parameter_visibility: Self, parameter_call_convention: Self, parameter_type: Self, parameter_name: Self, parameter_default_value: Self) -> Self;
     fn make_variadic_parameter(ctx: &C, variadic_parameter_call_convention: Self, variadic_parameter_type: Self, variadic_parameter_ellipsis: Self) -> Self;
-    fn make_attribute_specification(ctx: &C, attribute_specification_left_double_angle: Self, attribute_specification_attributes: Self, attribute_specification_right_double_angle: Self) -> Self;
+    fn make_old_attribute_specification(ctx: &C, old_attribute_specification_left_double_angle: Self, old_attribute_specification_attributes: Self, old_attribute_specification_right_double_angle: Self) -> Self;
+    fn make_attribute_specification(ctx: &C, attribute_specification_attributes: Self) -> Self;
+    fn make_attribute(ctx: &C, attribute_at: Self, attribute_attribute_name: Self) -> Self;
     fn make_inclusion_expression(ctx: &C, inclusion_require: Self, inclusion_filename: Self) -> Self;
     fn make_inclusion_directive(ctx: &C, inclusion_expression: Self, inclusion_semicolon: Self) -> Self;
     fn make_compound_statement(ctx: &C, compound_left_brace: Self, compound_statements: Self, compound_right_brace: Self) -> Self;
@@ -128,7 +130,7 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_collection_literal_expression(ctx: &C, collection_literal_name: Self, collection_literal_left_brace: Self, collection_literal_initializers: Self, collection_literal_right_brace: Self) -> Self;
     fn make_object_creation_expression(ctx: &C, object_creation_new_keyword: Self, object_creation_object: Self) -> Self;
     fn make_constructor_call(ctx: &C, constructor_call_type: Self, constructor_call_left_paren: Self, constructor_call_argument_list: Self, constructor_call_right_paren: Self) -> Self;
-    fn make_record_creation_expression(ctx: &C, record_creation_type: Self, record_creation_left_bracket: Self, record_creation_members: Self, record_creation_right_bracket: Self) -> Self;
+    fn make_record_creation_expression(ctx: &C, record_creation_type: Self, record_creation_array_token: Self, record_creation_left_bracket: Self, record_creation_members: Self, record_creation_right_bracket: Self) -> Self;
     fn make_array_creation_expression(ctx: &C, array_creation_left_bracket: Self, array_creation_members: Self, array_creation_right_bracket: Self) -> Self;
     fn make_array_intrinsic_expression(ctx: &C, array_intrinsic_keyword: Self, array_intrinsic_left_paren: Self, array_intrinsic_members: Self, array_intrinsic_right_paren: Self) -> Self;
     fn make_darray_intrinsic_expression(ctx: &C, darray_intrinsic_keyword: Self, darray_intrinsic_explicit_type: Self, darray_intrinsic_left_bracket: Self, darray_intrinsic_members: Self, darray_intrinsic_right_bracket: Self) -> Self;

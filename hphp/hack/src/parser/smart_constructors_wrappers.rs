@@ -178,8 +178,14 @@ where S: SmartConstructors<'src, State> {
     fn make_variadic_parameter(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R) {
         compose(SyntaxKind::VariadicParameter, S::make_variadic_parameter(st, arg0.1, arg1.1, arg2.1))
     }
-    fn make_attribute_specification(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R) {
-        compose(SyntaxKind::AttributeSpecification, S::make_attribute_specification(st, arg0.1, arg1.1, arg2.1))
+    fn make_old_attribute_specification(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R) {
+        compose(SyntaxKind::OldAttributeSpecification, S::make_old_attribute_specification(st, arg0.1, arg1.1, arg2.1))
+    }
+    fn make_attribute_specification(st: State, arg0 : Self::R) -> (State, Self::R) {
+        compose(SyntaxKind::AttributeSpecification, S::make_attribute_specification(st, arg0.1))
+    }
+    fn make_attribute(st: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R) {
+        compose(SyntaxKind::Attribute, S::make_attribute(st, arg0.1, arg1.1))
     }
     fn make_inclusion_expression(st: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R) {
         compose(SyntaxKind::InclusionExpression, S::make_inclusion_expression(st, arg0.1, arg1.1))
@@ -379,8 +385,8 @@ where S: SmartConstructors<'src, State> {
     fn make_constructor_call(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State, Self::R) {
         compose(SyntaxKind::ConstructorCall, S::make_constructor_call(st, arg0.1, arg1.1, arg2.1, arg3.1))
     }
-    fn make_record_creation_expression(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State, Self::R) {
-        compose(SyntaxKind::RecordCreationExpression, S::make_record_creation_expression(st, arg0.1, arg1.1, arg2.1, arg3.1))
+    fn make_record_creation_expression(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> (State, Self::R) {
+        compose(SyntaxKind::RecordCreationExpression, S::make_record_creation_expression(st, arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))
     }
     fn make_array_creation_expression(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R) {
         compose(SyntaxKind::ArrayCreationExpression, S::make_array_creation_expression(st, arg0.1, arg1.1, arg2.1))

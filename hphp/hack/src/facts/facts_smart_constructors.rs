@@ -468,13 +468,28 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
         (st, elements)
     }
 
-    fn make_attribute_specification(
+    fn make_old_attribute_specification(
         st: HasScriptContent<'a>,
         _left_double_angle: Self::R,
         attributes: Self::R,
         _right_double_angle: Self::R,
     ) -> (HasScriptContent<'a>, Self::R) {
         (st, attributes)
+    }
+
+    fn make_attribute_specification(
+        st: HasScriptContent<'a>,
+        attributes: Self::R,
+    ) -> (HasScriptContent<'a>, Self::R) {
+        (st, attributes)
+    }
+
+    fn make_attribute(
+        st: HasScriptContent<'a>,
+        _at: Self::R,
+        attibute: Self::R,
+    ) -> (HasScriptContent<'a>, Self::R) {
+        (st, attibute)
     }
 
     fn make_constructor_call(

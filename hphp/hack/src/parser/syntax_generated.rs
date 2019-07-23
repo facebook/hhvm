@@ -478,11 +478,28 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_attribute_specification(_: &C, attribute_specification_left_double_angle: Self, attribute_specification_attributes: Self, attribute_specification_right_double_angle: Self) -> Self {
+    fn make_old_attribute_specification(_: &C, old_attribute_specification_left_double_angle: Self, old_attribute_specification_attributes: Self, old_attribute_specification_right_double_angle: Self) -> Self {
+        let syntax = SyntaxVariant::OldAttributeSpecification(Box::new(OldAttributeSpecificationChildren {
+            old_attribute_specification_left_double_angle,
+            old_attribute_specification_attributes,
+            old_attribute_specification_right_double_angle,
+        }));
+        let value = V::from_syntax(&syntax);
+        Self::make(syntax, value)
+    }
+
+    fn make_attribute_specification(_: &C, attribute_specification_attributes: Self) -> Self {
         let syntax = SyntaxVariant::AttributeSpecification(Box::new(AttributeSpecificationChildren {
-            attribute_specification_left_double_angle,
             attribute_specification_attributes,
-            attribute_specification_right_double_angle,
+        }));
+        let value = V::from_syntax(&syntax);
+        Self::make(syntax, value)
+    }
+
+    fn make_attribute(_: &C, attribute_at: Self, attribute_attribute_name: Self) -> Self {
+        let syntax = SyntaxVariant::Attribute(Box::new(AttributeChildren {
+            attribute_at,
+            attribute_attribute_name,
         }));
         let value = V::from_syntax(&syntax);
         Self::make(syntax, value)
@@ -1209,9 +1226,10 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_record_creation_expression(_: &C, record_creation_type: Self, record_creation_left_bracket: Self, record_creation_members: Self, record_creation_right_bracket: Self) -> Self {
+    fn make_record_creation_expression(_: &C, record_creation_type: Self, record_creation_array_token: Self, record_creation_left_bracket: Self, record_creation_members: Self, record_creation_right_bracket: Self) -> Self {
         let syntax = SyntaxVariant::RecordCreationExpression(Box::new(RecordCreationExpressionChildren {
             record_creation_type,
+            record_creation_array_token,
             record_creation_left_bracket,
             record_creation_members,
             record_creation_right_bracket,
@@ -2204,10 +2222,19 @@ where
                 let acc = f(&x.variadic_parameter_ellipsis, acc);
                 acc
             },
+            SyntaxVariant::OldAttributeSpecification(x) => {
+                let acc = f(&x.old_attribute_specification_left_double_angle, acc);
+                let acc = f(&x.old_attribute_specification_attributes, acc);
+                let acc = f(&x.old_attribute_specification_right_double_angle, acc);
+                acc
+            },
             SyntaxVariant::AttributeSpecification(x) => {
-                let acc = f(&x.attribute_specification_left_double_angle, acc);
                 let acc = f(&x.attribute_specification_attributes, acc);
-                let acc = f(&x.attribute_specification_right_double_angle, acc);
+                acc
+            },
+            SyntaxVariant::Attribute(x) => {
+                let acc = f(&x.attribute_at, acc);
+                let acc = f(&x.attribute_attribute_name, acc);
                 acc
             },
             SyntaxVariant::InclusionExpression(x) => {
@@ -2669,6 +2696,7 @@ where
             },
             SyntaxVariant::RecordCreationExpression(x) => {
                 let acc = f(&x.record_creation_type, acc);
+                let acc = f(&x.record_creation_array_token, acc);
                 let acc = f(&x.record_creation_left_bracket, acc);
                 let acc = f(&x.record_creation_members, acc);
                 let acc = f(&x.record_creation_right_bracket, acc);
@@ -3146,7 +3174,9 @@ where
             SyntaxVariant::DecoratedExpression {..} => SyntaxKind::DecoratedExpression,
             SyntaxVariant::ParameterDeclaration {..} => SyntaxKind::ParameterDeclaration,
             SyntaxVariant::VariadicParameter {..} => SyntaxKind::VariadicParameter,
+            SyntaxVariant::OldAttributeSpecification {..} => SyntaxKind::OldAttributeSpecification,
             SyntaxVariant::AttributeSpecification {..} => SyntaxKind::AttributeSpecification,
+            SyntaxVariant::Attribute {..} => SyntaxKind::Attribute,
             SyntaxVariant::InclusionExpression {..} => SyntaxKind::InclusionExpression,
             SyntaxVariant::InclusionDirective {..} => SyntaxKind::InclusionDirective,
             SyntaxVariant::CompoundStatement {..} => SyntaxKind::CompoundStatement,
@@ -3612,10 +3642,21 @@ pub struct VariadicParameterChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+pub struct OldAttributeSpecificationChildren<T, V> {
+    pub old_attribute_specification_left_double_angle: Syntax<T, V>,
+    pub old_attribute_specification_attributes: Syntax<T, V>,
+    pub old_attribute_specification_right_double_angle: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
 pub struct AttributeSpecificationChildren<T, V> {
-    pub attribute_specification_left_double_angle: Syntax<T, V>,
     pub attribute_specification_attributes: Syntax<T, V>,
-    pub attribute_specification_right_double_angle: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct AttributeChildren<T, V> {
+    pub attribute_at: Syntax<T, V>,
+    pub attribute_attribute_name: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -4144,6 +4185,7 @@ pub struct ConstructorCallChildren<T, V> {
 #[derive(Debug, Clone)]
 pub struct RecordCreationExpressionChildren<T, V> {
     pub record_creation_type: Syntax<T, V>,
+    pub record_creation_array_token: Syntax<T, V>,
     pub record_creation_left_bracket: Syntax<T, V>,
     pub record_creation_members: Syntax<T, V>,
     pub record_creation_right_bracket: Syntax<T, V>,
@@ -4681,7 +4723,9 @@ pub enum SyntaxVariant<T, V> {
     DecoratedExpression(Box<DecoratedExpressionChildren<T, V>>),
     ParameterDeclaration(Box<ParameterDeclarationChildren<T, V>>),
     VariadicParameter(Box<VariadicParameterChildren<T, V>>),
+    OldAttributeSpecification(Box<OldAttributeSpecificationChildren<T, V>>),
     AttributeSpecification(Box<AttributeSpecificationChildren<T, V>>),
+    Attribute(Box<AttributeChildren<T, V>>),
     InclusionExpression(Box<InclusionExpressionChildren<T, V>>),
     InclusionDirective(Box<InclusionDirectiveChildren<T, V>>),
     CompoundStatement(Box<CompoundStatementChildren<T, V>>),

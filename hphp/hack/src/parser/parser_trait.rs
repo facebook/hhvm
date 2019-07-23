@@ -587,6 +587,10 @@ where
         self.require_token(TokenKind::LeftBrace, Errors::error1034)
     }
 
+    fn require_slashgt(&mut self) -> S::R {
+        self.require_token(TokenKind::SlashGreaterThan, Errors::error1029)
+    }
+
     fn require_right_brace(&mut self) -> S::R {
         self.require_token(TokenKind::RightBrace, Errors::error1006)
     }

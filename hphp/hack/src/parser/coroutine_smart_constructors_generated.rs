@@ -219,8 +219,16 @@ where
         <Self as SyntaxSmartConstructors<Self::R, T>>::make_variadic_parameter(st, arg0, arg1, arg2)
     }
 
-    fn make_attribute_specification(st: T, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> (T, Self::R) {
-        <Self as SyntaxSmartConstructors<Self::R, T>>::make_attribute_specification(st, arg0, arg1, arg2)
+    fn make_old_attribute_specification(st: T, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> (T, Self::R) {
+        <Self as SyntaxSmartConstructors<Self::R, T>>::make_old_attribute_specification(st, arg0, arg1, arg2)
+    }
+
+    fn make_attribute_specification(st: T, arg0: Self::R) -> (T, Self::R) {
+        <Self as SyntaxSmartConstructors<Self::R, T>>::make_attribute_specification(st, arg0)
+    }
+
+    fn make_attribute(st: T, arg0: Self::R, arg1: Self::R) -> (T, Self::R) {
+        <Self as SyntaxSmartConstructors<Self::R, T>>::make_attribute(st, arg0, arg1)
     }
 
     fn make_inclusion_expression(st: T, arg0: Self::R, arg1: Self::R) -> (T, Self::R) {
@@ -487,8 +495,8 @@ where
         <Self as SyntaxSmartConstructors<Self::R, T>>::make_constructor_call(st, arg0, arg1, arg2, arg3)
     }
 
-    fn make_record_creation_expression(st: T, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> (T, Self::R) {
-        <Self as SyntaxSmartConstructors<Self::R, T>>::make_record_creation_expression(st, arg0, arg1, arg2, arg3)
+    fn make_record_creation_expression(st: T, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> (T, Self::R) {
+        <Self as SyntaxSmartConstructors<Self::R, T>>::make_record_creation_expression(st, arg0, arg1, arg2, arg3, arg4)
     }
 
     fn make_array_creation_expression(st: T, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> (T, Self::R) {

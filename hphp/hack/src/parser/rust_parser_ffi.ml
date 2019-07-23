@@ -18,13 +18,15 @@ type parser_opts = (
   bool * (* is_experimental mode *)
   bool * (* hhvm_compat_mode *)
   bool * (* php5_compat_mode *)
-  bool   (* codegen *)
+  bool * (* codegen *)
+  bool (* allow_new_attribute_syntax *)
 )
 let env_to_opts env = (
   (Env.is_experimental_mode env),
   (Env.hhvm_compat_mode env),
   (Env.php5_compat_mode env),
-  (Env.codegen env)
+  (Env.codegen env),
+  (Env.allow_new_attribute_syntax env)
 )
 let set_global_lexer_env _ =
   (* Parsing of file sets up global variables in lexer module. Those variables

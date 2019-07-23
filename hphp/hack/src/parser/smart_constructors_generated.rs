@@ -70,7 +70,9 @@ pub trait SmartConstructors<'src, State> {
     fn make_decorated_expression(st: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R);
     fn make_parameter_declaration(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R) -> (State, Self::R);
     fn make_variadic_parameter(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R);
-    fn make_attribute_specification(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R);
+    fn make_old_attribute_specification(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R);
+    fn make_attribute_specification(st: State, arg0 : Self::R) -> (State, Self::R);
+    fn make_attribute(st: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R);
     fn make_inclusion_expression(st: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R);
     fn make_inclusion_directive(st: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R);
     fn make_compound_statement(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R);
@@ -137,7 +139,7 @@ pub trait SmartConstructors<'src, State> {
     fn make_collection_literal_expression(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State, Self::R);
     fn make_object_creation_expression(st: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R);
     fn make_constructor_call(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State, Self::R);
-    fn make_record_creation_expression(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State, Self::R);
+    fn make_record_creation_expression(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> (State, Self::R);
     fn make_array_creation_expression(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R);
     fn make_array_intrinsic_expression(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State, Self::R);
     fn make_darray_intrinsic_expression(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> (State, Self::R);

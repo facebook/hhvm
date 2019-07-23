@@ -935,7 +935,7 @@ where
       Self { syntax, value }
     }
 
-    fn make_attribute_specification(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
+    fn make_old_attribute_specification(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
       let children = [
           &arg0.value, 
           &arg1.value, 
@@ -944,12 +944,46 @@ where
       let value = V::from_values(&children);
       let syntax = Self::make(
           ctx,
-          SyntaxKind::AttributeSpecification,
+          SyntaxKind::OldAttributeSpecification,
           &value,
           &[
               arg0.syntax, 
               arg1.syntax, 
               arg2.syntax
+          ],
+      );
+      Self { syntax, value }
+    }
+
+    fn make_attribute_specification(ctx: &C, arg0: Self) -> Self {
+      let children = [
+          &arg0.value
+      ];
+      let value = V::from_values(&children);
+      let syntax = Self::make(
+          ctx,
+          SyntaxKind::AttributeSpecification,
+          &value,
+          &[
+              arg0.syntax
+          ],
+      );
+      Self { syntax, value }
+    }
+
+    fn make_attribute(ctx: &C, arg0: Self, arg1: Self) -> Self {
+      let children = [
+          &arg0.value, 
+          &arg1.value
+      ];
+      let value = V::from_values(&children);
+      let syntax = Self::make(
+          ctx,
+          SyntaxKind::Attribute,
+          &value,
+          &[
+              arg0.syntax, 
+              arg1.syntax
           ],
       );
       Self { syntax, value }
@@ -2397,12 +2431,13 @@ where
       Self { syntax, value }
     }
 
-    fn make_record_creation_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
+    fn make_record_creation_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
       let children = [
           &arg0.value, 
           &arg1.value, 
           &arg2.value, 
-          &arg3.value
+          &arg3.value, 
+          &arg4.value
       ];
       let value = V::from_values(&children);
       let syntax = Self::make(
@@ -2413,7 +2448,8 @@ where
               arg0.syntax, 
               arg1.syntax, 
               arg2.syntax, 
-              arg3.syntax
+              arg3.syntax, 
+              arg4.syntax
           ],
       );
       Self { syntax, value }

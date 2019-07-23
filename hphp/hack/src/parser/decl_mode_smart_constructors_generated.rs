@@ -219,8 +219,16 @@ where
         <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_variadic_parameter(s, arg0, arg1, arg2)
     }
 
-    fn make_attribute_specification(s: State<Self::R>, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> (State<Self::R>, Self::R) {
-        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_attribute_specification(s, arg0, arg1, arg2)
+    fn make_old_attribute_specification(s: State<Self::R>, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> (State<Self::R>, Self::R) {
+        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_old_attribute_specification(s, arg0, arg1, arg2)
+    }
+
+    fn make_attribute_specification(s: State<Self::R>, arg0: Self::R) -> (State<Self::R>, Self::R) {
+        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_attribute_specification(s, arg0)
+    }
+
+    fn make_attribute(s: State<Self::R>, arg0: Self::R, arg1: Self::R) -> (State<Self::R>, Self::R) {
+        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_attribute(s, arg0, arg1)
     }
 
     fn make_inclusion_expression(s: State<Self::R>, arg0: Self::R, arg1: Self::R) -> (State<Self::R>, Self::R) {
@@ -487,8 +495,8 @@ where
         <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_constructor_call(s, arg0, arg1, arg2, arg3)
     }
 
-    fn make_record_creation_expression(s: State<Self::R>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> (State<Self::R>, Self::R) {
-        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_record_creation_expression(s, arg0, arg1, arg2, arg3)
+    fn make_record_creation_expression(s: State<Self::R>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> (State<Self::R>, Self::R) {
+        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_record_creation_expression(s, arg0, arg1, arg2, arg3, arg4)
     }
 
     fn make_array_creation_expression(s: State<Self::R>, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> (State<Self::R>, Self::R) {

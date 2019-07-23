@@ -1461,11 +1461,18 @@ where
     }
 
     // SPEC:
-    // attribute_specification := << attribute_list >>
+    // attribute_specification :=
+    //   attribute_list
+    //   old_attribute_specification
     // attribute_list :=
     //   attribute
-    //   attribute_list , attribute
-    // attribute := attribute_name attribute_value_list_opt
+    //   attribute_list attribute
+    // attribute := @ attribute_name attribute_value_list_opt
+    // old_attribute_specification := << old_attribute_list >>
+    // old_attribute_list :=
+    //   old_attribute
+    //   old_attribute_list , old_attribute
+    // old_attribute := attribute_name attribute_value_list_opt
     // attribute_name := name
     // attribute_value_list := ( attribute_values_opt )
     // attribute_values :=
@@ -1476,11 +1483,13 @@ where
     // TODO: The list of attrs can have a trailing comma. Update the spec.
     // TODO: The list of values can have a trailing comma. Update the spec.
     // (Both these work items are tracked by spec issue 106.)
-    pub fn parse_attribute_specification_opt(&mut self) -> S::R {
+    pub fn parse_old_attribute_specification_opt(&mut self) -> S::R {
         if self.peek_token_kind() == TokenKind::LessThanLessThan {
-            let (left, items, right) = self
-                .parse_double_angled_comma_list_allow_trailing(&|x: &mut Self| x.parse_attribute());
-            S!(make_attribute_specification, self, left, items, right)
+            let (left, items, right) =
+                self.parse_double_angled_comma_list_allow_trailing(&|x: &mut Self| {
+                    x.parse_old_attribute()
+                });
+            S!(make_old_attribute_specification, self, left, items, right)
         } else {
             S!(make_missing, self, self.pos())
         }
@@ -1494,7 +1503,7 @@ where
             let (items, _) = self.parse_comma_list_allow_trailing(
                 TokenKind::GreaterThanGreaterThan,
                 Errors::expected_user_attribute,
-                &|x: &mut Self| x.parse_attribute(),
+                &|x: &mut Self| x.parse_old_attribute(),
             );
             let right = self.require_token(TokenKind::GreaterThanGreaterThan, Errors::error1029);
             S!(
@@ -1857,10 +1866,45 @@ where
         }
     }
 
-    fn parse_attribute(&mut self) -> S::R {
+    fn parse_old_attribute(&mut self) -> S::R {
         self.with_expression_parser(&|p: &mut ExpressionParser<'a, S, T>| {
             p.parse_constructor_call()
         })
+    }
+
+    pub fn parse_attribute_specification_opt(&mut self) -> S::R {
+        match self.peek_token_kind() {
+            TokenKind::At if self.env.allow_new_attribute_syntax => {
+                self.parse_new_attribute_specification_opt()
+            }
+            TokenKind::LessThanLessThan => self.parse_old_attribute_specification_opt(),
+            _ => S!(make_missing, self, self.pos()),
+        }
+    }
+
+    fn parse_new_attribute_specification_opt(&mut self) -> S::R {
+        let attributes = self
+            .parse_list_while(&|p: &mut Self| p.parse_new_attribute(), &|p: &Self| {
+                p.peek_token_kind() == TokenKind::At
+            });
+        S!(make_attribute_specification, self, attributes)
+    }
+
+    fn parse_new_attribute(&mut self) -> S::R {
+        let at = self.assert_token(TokenKind::At);
+        let token = self.peek_token();
+        let constructor_call = match token.kind() {
+            TokenKind::Name => {
+                self.with_expression_parser(&|p: &mut ExpressionParser<'a, S, T>| {
+                    p.parse_constructor_call()
+                })
+            }
+            _ => {
+                self.with_error(Errors::expected_user_attribute);
+                S!(make_missing, self, self.pos())
+            }
+        };
+        S!(make_attribute, self, at, constructor_call)
     }
 
     // Parses modifiers and passes them into the parse methods for the
@@ -2145,6 +2189,10 @@ where
                 let attr = self.parse_attribute_specification_opt();
                 self.parse_methodish_or_property_or_type_constant(attr)
             }
+            TokenKind::At if self.env.allow_new_attribute_syntax => {
+                let attr = self.parse_attribute_specification_opt();
+                self.parse_methodish_or_property_or_type_constant(attr)
+            }
             TokenKind::Require => {
                 // We give an error if these are found where they should not be,
                 // in a later pass.
@@ -2338,7 +2386,9 @@ where
                 .with_statement_parser(&|p: &mut StatementParser<'a, S, T>| {
                     p.parse_possible_php_function(true)
                 }),
-
+            TokenKind::At if self.env.allow_new_attribute_syntax => {
+                self.parse_enum_or_classish_or_function_declaration()
+            }
             TokenKind::LessThanLessThan => match parser1.peek_token_kind() {
                 TokenKind::File
                     if parser1.peek_token_kind_with_lookahead(1) == TokenKind::Colon =>

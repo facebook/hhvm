@@ -368,11 +368,27 @@ pub trait FlattenSmartConstructors<'src, State>
         }
     }
 
-    fn make_attribute_specification(s: State, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> (State, Self::R) {
+    fn make_old_attribute_specification(s: State, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> (State, Self::R) {
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           (s, Self::zero())
         } else {
           (s, Self::flatten(vec!(arg0, arg1, arg2)))
+        }
+    }
+
+    fn make_attribute_specification(s: State, arg0: Self::R) -> (State, Self::R) {
+        if Self::is_zero(&arg0) {
+          (s, Self::zero())
+        } else {
+          (s, Self::flatten(vec!(arg0)))
+        }
+    }
+
+    fn make_attribute(s: State, arg0: Self::R, arg1: Self::R) -> (State, Self::R) {
+        if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
+          (s, Self::zero())
+        } else {
+          (s, Self::flatten(vec!(arg0, arg1)))
         }
     }
 
@@ -904,11 +920,11 @@ pub trait FlattenSmartConstructors<'src, State>
         }
     }
 
-    fn make_record_creation_expression(s: State, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> (State, Self::R) {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
+    fn make_record_creation_expression(s: State, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> (State, Self::R) {
+        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           (s, Self::zero())
         } else {
-          (s, Self::flatten(vec!(arg0, arg1, arg2, arg3)))
+          (s, Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4)))
         }
     }
 

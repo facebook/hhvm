@@ -315,6 +315,7 @@ where
     fn parse_term(&mut self) -> S::R {
         let mut parser1 = self.clone();
         let token = parser1.next_xhp_class_name_or_other_token();
+        let allow_new_attr = self.env.allow_new_attribute_syntax;
         match token.kind() {
             | TokenKind::DecimalLiteral
             | TokenKind::OctalLiteral
@@ -419,8 +420,9 @@ where
             | TokenKind::Ampersand
             | TokenKind::Await
             | TokenKind::Clone
-            | TokenKind::Print
-            | TokenKind::At => self.parse_prefix_unary_expression(),
+            | TokenKind::Print => self.parse_prefix_unary_expression(),
+            // Allow error suppression prefix when not using new attributes
+            | TokenKind::At if !allow_new_attr => self.parse_prefix_unary_expression(),
             | TokenKind::LeftParen => self.parse_cast_or_parenthesized_or_lambda_expression(),
             | TokenKind::LessThan => {
                 self.continue_from(parser1);
@@ -441,7 +443,7 @@ where
                 let attribute_spec = S!(make_missing, self, self.pos());
                 self.parse_anon(attribute_spec)
             }
-            | TokenKind::DollarDollar => {
+             | TokenKind::DollarDollar => {
                 self.continue_from(parser1);
                 let token = S!(make_token, self, token);
                 S!(make_pipe_variable_expression, self, token)
@@ -451,6 +453,7 @@ where
             | TokenKind::LessThanLessThan
             | TokenKind::Async
             | TokenKind::Coroutine => self.parse_anon_or_lambda_or_awaitable(),
+            | TokenKind::At if allow_new_attr => self.parse_anon_or_lambda_or_awaitable(),
             | TokenKind::Include
             | TokenKind::Include_once
             | TokenKind::Require
@@ -2298,6 +2301,13 @@ where
                     name
                 }
             }
+            TokenKind::At => {
+                if self.peek_token_kind_with_lookahead(1) == TokenKind::LeftBracket {
+                    self.parse_record_creation_expression(name)
+                } else {
+                    name
+                }
+            }
             _ => name,
         }
     }
@@ -2311,6 +2321,11 @@ where
         //   record-field-initializer-list, record-field-initializer
         // record-field-initializer:
         //   field-name => expression
+        let array_token = match self.peek_token_kind() {
+            TokenKind::At => self.assert_token(TokenKind::At),
+            _ => S!(make_missing, self, self.pos()),
+        };
+
         let left_bracket = self.assert_token(TokenKind::LeftBracket);
         let members = self.parse_comma_list_opt_allow_trailing(
             TokenKind::RightBracket,
@@ -2322,6 +2337,7 @@ where
             make_record_creation_expression,
             self,
             name,
+            array_token,
             left_bracket,
             members,
             right_bracket

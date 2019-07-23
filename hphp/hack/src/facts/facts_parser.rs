@@ -14,7 +14,7 @@ use parser::source_text::SourceText;
 use crate::facts::*;
 use crate::facts_smart_constructors::*;
 
-pub type FactsParser<'a> = Parser<'a, WithKind<FactsSmartConstructors>, HasScriptContent<'a>>;
+pub type FactsParser<'a> = Parser<'a, WithKind<FactsSmartConstructors<'a>>, HasScriptContent<'a>>;
 
 pub struct ExtractAsJsonOpts {
     pub php5_compat_mode: bool,

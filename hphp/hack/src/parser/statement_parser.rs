@@ -4,8 +4,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::marker::PhantomData;
-
 use crate::declaration_parser::DeclarationParser;
 use crate::expression_parser::ExpressionParser;
 use crate::lexable_token::LexableToken;
@@ -28,11 +26,10 @@ where
     env: ParserEnv,
     context: Context<S::Token>,
     errors: Vec<SyntaxError>,
-    sc_state: Option<T>,
-    _phantom: PhantomData<S>,
+    sc: S,
 }
 
-impl<'a, S, T: Clone> std::clone::Clone for StatementParser<'a, S, T>
+impl<'a, S, T: Clone> Clone for StatementParser<'a, S, T>
 where
     S: SmartConstructors<'a, T>,
     S::R: NodeType,
@@ -43,8 +40,7 @@ where
             env: self.env.clone(),
             context: self.context.clone(),
             errors: self.errors.clone(),
-            sc_state: self.sc_state.clone(),
-            _phantom: self._phantom,
+            sc: self.sc.clone(),
         }
     }
 }
@@ -59,25 +55,19 @@ where
         env: ParserEnv,
         context: Context<S::Token>,
         errors: Vec<SyntaxError>,
-        sc_state: T,
+        sc: S,
     ) -> Self {
         Self {
             lexer,
             env,
             context,
             errors,
-            sc_state: Some(sc_state),
-            _phantom: PhantomData,
+            sc,
         }
     }
 
-    fn into_parts(self) -> (Lexer<'a, S::Token>, Context<S::Token>, Vec<SyntaxError>, T) {
-        (
-            self.lexer,
-            self.context,
-            self.errors,
-            self.sc_state.unwrap(),
-        )
+    fn into_parts(self) -> (Lexer<'a, S::Token>, Context<S::Token>, Vec<SyntaxError>, S) {
+        (self.lexer, self.context, self.errors, self.sc)
     }
 
     fn lexer(&self) -> &Lexer<'a, S::Token> {
@@ -92,11 +82,11 @@ where
     where
         T: Clone,
     {
-        let (lexer, context, errors, sc_state) = other.into_parts();
+        let (lexer, context, errors, sc) = other.into_parts();
         self.lexer = lexer;
         self.context = context;
         self.errors = errors;
-        self.sc_state = Some(sc_state);
+        self.sc = sc;
     }
 
     fn add_error(&mut self, error: SyntaxError) {
@@ -107,8 +97,8 @@ where
         &self.env
     }
 
-    fn sc_state_mut(&mut self) -> &mut Option<T> {
-        &mut self.sc_state
+    fn sc_mut(&mut self) -> &mut S {
+        &mut self.sc
     }
 
     fn skipped_tokens_mut(&mut self) -> &mut Vec<S::Token> {
@@ -139,7 +129,7 @@ where
             self.env.clone(),
             self.context.clone(),
             self.errors.clone(),
-            self.sc_state.clone().unwrap(),
+            self.sc.clone(),
         );
         let res = f(&mut type_parser);
         self.continue_from(type_parser);
@@ -156,7 +146,7 @@ where
             self.env.clone(),
             self.context.clone(),
             self.errors.clone(),
-            self.sc_state.clone().unwrap(),
+            self.sc.clone(),
         );
         let res = f(&mut expression_parser);
         self.continue_from(expression_parser);
@@ -169,7 +159,7 @@ where
             self.env.clone(),
             self.context.clone(),
             self.errors.clone(),
-            self.sc_state.clone().unwrap(),
+            self.sc.clone(),
         );
         let res = f(&mut decl_parser);
         self.continue_from(decl_parser);

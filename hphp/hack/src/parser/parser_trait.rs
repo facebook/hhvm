@@ -121,10 +121,10 @@ where
         _: ParserEnv,
         _: Context<S::Token>,
         _: Vec<SyntaxError>,
-        _: T,
+        _: S,
     ) -> Self;
     fn add_error(&mut self, _: SyntaxError);
-    fn into_parts(self) -> (Lexer<'a, S::Token>, Context<S::Token>, Vec<SyntaxError>, T);
+    fn into_parts(self) -> (Lexer<'a, S::Token>, Context<S::Token>, Vec<SyntaxError>, S);
     fn lexer(&self) -> &Lexer<'a, S::Token>;
     fn lexer_mut(&mut self) -> &mut Lexer<'a, S::Token>;
     fn continue_from<P: ParserTrait<'a, S, T>>(&mut self, _: P)
@@ -133,9 +133,7 @@ where
 
     fn env(&self) -> &ParserEnv;
 
-    // The state is never observably None; it is None only during a Smart Constructor call
-    // (It is exposed as Option to avoid clone in SC calls.)
-    fn sc_state_mut(&mut self) -> &mut Option<T>;
+    fn sc_mut(&mut self) -> &mut S;
 
     fn skipped_tokens(&self) -> &[S::Token];
     fn skipped_tokens_mut(&mut self) -> &mut Vec<S::Token>;
@@ -326,7 +324,8 @@ where
     }
 
     fn fetch_token(&mut self) -> S::R {
-        S!(make_token, self, self.lexer_mut().next_token())
+        let token = self.lexer_mut().next_token();
+        S!(make_token, self, token)
     }
 
     fn assert_token_with_tokenizer(

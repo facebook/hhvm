@@ -42,7 +42,13 @@ use parser::coroutine_smart_constructors::CoroutineSmartConstructors;
 
 type CoroutineParser<'a> = Parser<
     'a,
-    WithKind<CoroutineSmartConstructors<OcamlSyntax<PositionedValue>>>,
+    WithKind<
+        CoroutineSmartConstructors<
+            'a,
+            OcamlSyntax<PositionedValue>,
+            OcamlCoroutineState<'a, OcamlSyntax<PositionedValue>>,
+        >,
+    >,
     OcamlCoroutineState<'a, OcamlSyntax<PositionedValue>>,
 >;
 
@@ -51,7 +57,7 @@ use parser::decl_mode_smart_constructors::State as DeclModeState;
 
 type DeclModeParser<'a> = Parser<
     'a,
-    WithKind<DeclModeSmartConstructors<PositionedToken, PositionedValue>>,
+    WithKind<DeclModeSmartConstructors<PositionedSyntax, PositionedToken, PositionedValue>>,
     DeclModeState<PositionedSyntax>,
 >;
 

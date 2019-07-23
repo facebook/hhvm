@@ -47,7 +47,7 @@ impl<'src, S> Context for OcamlCoroutineState<'src, S> {
     }
 }
 
-impl<'src, S> StateType<'src, S> for OcamlCoroutineState<'src, S> {
+impl<'src, S: Clone> StateType<'src, S> for OcamlCoroutineState<'src, S> {
     fn initial(env: &ParserEnv, src: &SourceText<'src>) -> Self {
         Self {
             seen_ppl: false,
@@ -58,7 +58,5 @@ impl<'src, S> StateType<'src, S> for OcamlCoroutineState<'src, S> {
         }
     }
 
-    fn next(t: Self, _inputs: &[&S]) -> Self {
-        t
-    }
+    fn next(&mut self, _inputs: &[&S]) {}
 }

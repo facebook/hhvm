@@ -2657,19 +2657,20 @@ where
         // Skip any async or coroutine declarations that may be present. When we
         // feed the original parser into the syntax parsers. they will take care of
         // them as appropriate.
+        let parser1 = self.clone();
         let attribute_spec = self.with_decl_parser(&|p| p.parse_attribute_specification_opt());
-        let mut parser1 = self.clone();
-
-        let _ = parser1.optional_token(TokenKind::Static);
-        let _ = parser1.optional_token(TokenKind::Async);
-        let _ = parser1.optional_token(TokenKind::Coroutine);
-        match parser1.peek_token_kind() {
+        let mut parser2 = self.clone();
+        let _ = parser2.optional_token(TokenKind::Static);
+        let _ = parser2.optional_token(TokenKind::Async);
+        let _ = parser2.optional_token(TokenKind::Coroutine);
+        match parser2.peek_token_kind() {
             TokenKind::Function => self.parse_anon(attribute_spec),
             TokenKind::LeftBrace => self.parse_async_block(attribute_spec),
             TokenKind::Variable | TokenKind::LeftParen => {
                 self.parse_lambda_expression(attribute_spec)
             }
             _ => {
+                self.continue_from(parser1);
                 let static_or_async_or_coroutine_as_name = self.next_token_as_name();
                 S!(make_token, self, static_or_async_or_coroutine_as_name)
             }

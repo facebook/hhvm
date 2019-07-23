@@ -2155,16 +2155,16 @@ module WithStatementAndDeclAndTypeParser
     (* Skip any async or coroutine declarations that may be present. When we
        feed the original parser into the syntax parsers. they will take care of
        them as appropriate. *)
-    let (parser, attribute_spec) =
+    let (parser1, attribute_spec) =
       with_decl_parser parser DeclParser.parse_attribute_specification_opt in
-    let (parser1, _) = optional_token parser Static in
-    let (parser1, _) = optional_token parser1 Async in
-    let (parser1, _) = optional_token parser1 Coroutine in
-    match peek_token_kind parser1 with
-    | Function -> parse_anon parser attribute_spec
-    | LeftBrace -> parse_async_block parser attribute_spec
+    let (parser2, _) = optional_token parser1 Static in
+    let (parser2, _) = optional_token parser2 Async in
+    let (parser2, _) = optional_token parser2 Coroutine in
+    match peek_token_kind parser2 with
+    | Function -> parse_anon parser1 attribute_spec
+    | LeftBrace -> parse_async_block parser1 attribute_spec
     | Variable
-    | LeftParen -> parse_lambda_expression parser attribute_spec
+    | LeftParen -> parse_lambda_expression parser1 attribute_spec
     | _ ->
       let (parser, static_or_async_or_coroutine_as_name) = next_token_as_name
         parser in

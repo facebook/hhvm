@@ -972,26 +972,31 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   List.iter (ServerConfig.coroutine_whitelist_paths config)
     ~f:Coroutine_check.whitelist_path;
   let prechecked_files = ServerPrecheckedFiles.should_use options local_config in
-  let logging_init init_id =
+  let logging_init init_id ~is_worker =
     if Sys_utils.is_test_mode ()
     then EventLogger.init ~exit_on_parent_exit EventLogger.Event_logger_fake 0.0
-    else HackEventLogger.init
-      ~exit_on_parent_exit
-      ~root
-      ~init_id
-      ~informant_managed
-      ~time:(Unix.gettimeofday ())
-      ~search_chunk_size
-      ~max_workers:num_workers
-      ~max_bucket_size
-      ~use_full_fidelity_parser
-      ~interrupt_on_watchman
-      ~interrupt_on_client
-      ~prechecked_files
-      ~predeclare_ide
-      ~max_typechecker_worker_memory_mb
+    else begin
+      if is_worker then HackEventLogger.init_worker
+        ~exit_on_parent_exit ~root ~init_id ~time:(Unix.gettimeofday ())
+      else HackEventLogger.init
+        ~exit_on_parent_exit
+        ~root
+        ~init_id
+        ~informant_managed
+        ~time:(Unix.gettimeofday ())
+        ~search_chunk_size
+        ~max_workers:num_workers
+        ~max_bucket_size
+        ~use_full_fidelity_parser
+        ~interrupt_on_watchman
+        ~interrupt_on_client
+        ~prechecked_files
+        ~predeclare_ide
+        ~max_typechecker_worker_memory_mb
+    end
   in
-  logging_init init_id;
+  logging_init init_id ~is_worker:false;
+  HackEventLogger.init_start ();
   let root_s = Path.to_string root in
   let check_mode = ServerArgs.check_mode options in
   if not check_mode && Sys_utils.is_nfs root_s && not enable_on_nfs then begin
@@ -1000,7 +1005,8 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
     Exit_status.(exit Nfs_root);
   end;
 
-  if rust && ServerConfig.warn_on_non_opt_build config && (not Build_id.is_build_optimized) then begin
+  if rust && ServerConfig.warn_on_non_opt_build config && (not Build_id.is_build_optimized) then
+  begin
     let msg = (Printf.sprintf
       "hh_server binary was built in \"%s\" mode, " Build_id.build_mode) ^
       "is running with Rust version of parser enabled, " ^
@@ -1028,9 +1034,8 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   (* Make a sub-init_id because we use it to name temporary files for piping to
      scuba logging processes. *)
   let worker_logging_init =
-    if (ServerConfig.sharedmem_config config).SharedMem.sample_rate = 0.0
-    then fun () -> ()
-    else fun () -> logging_init (init_id ^ "." ^ Random_id.short_string ()) in
+    fun () -> logging_init (init_id ^ "." ^ Random_id.short_string ()) ~is_worker:true
+  in
   let workers =
     let gc_control = ServerConfig.gc_control config in
     ServerWorker.make ~nbr_procs:num_workers gc_control handle ~logging_init:worker_logging_init

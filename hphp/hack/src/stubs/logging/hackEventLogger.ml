@@ -30,6 +30,12 @@ let init
   ~predeclare_ide:_
   ~max_typechecker_worker_memory_mb:_
   = ()
+let init_worker
+  ?exit_on_parent_exit:_
+  ~root:_
+  ~init_id:_
+  ~time:_
+  = ()
 let init_monitor
   ?exit_on_parent_exit:_
   ~from:_
@@ -50,6 +56,7 @@ let init_lazy_end
 let server_is_partially_ready () = ()
 let server_is_ready () = ()
 let load_deptable_end _ = ()
+let init_start _ = ()
 let nfs_root _ = ()
 let load_state_worker_end ~is_cached:_ _ _ = ()
 let vcs_changed_files_end _ _ = ()

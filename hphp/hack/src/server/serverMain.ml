@@ -930,21 +930,6 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
     num_workers options local_config |> Ai.modify_worker_count
   in
   let handle = SharedMem.init ~num_workers (ServerConfig.sharedmem_config config) in
-  let lru_cache_directory = ServerArgs.lru_cache_directory options in
-  let lru_host_env =
-    match lru_cache_directory with
-    | Some cache_dir_path ->
-      Provider_config.set_lru_shared_memory_backend();
-      let host_env =
-        Shared_lru.init
-          ~cache_name:"hack_server_lru"
-          ~cache_size_in_bytes:(10 * 1024 * 1024 * 1024) (* 10 GBs *)
-          ~cache_dir_path
-          ~num_workers
-      in
-      Some(host_env)
-    | None -> None
-  in
   let init_id = Random_id.short_string () in
   Hh_logger.log "Version: %s" Hh_version.version;
   Hh_logger.log "Hostname: %s" (Unix.gethostname ());
@@ -1039,6 +1024,21 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   let workers =
     let gc_control = ServerConfig.gc_control config in
     ServerWorker.make ~nbr_procs:num_workers gc_control handle ~logging_init:worker_logging_init
+  in
+  let lru_cache_directory = ServerArgs.lru_cache_directory options in
+  let lru_host_env =
+    match lru_cache_directory with
+    | Some cache_dir_path ->
+      Provider_config.set_lru_shared_memory_backend();
+      let host_env =
+        Shared_lru.init
+          ~cache_name:"hack_server_lru"
+          ~cache_size_in_bytes:(10 * 1024 * 1024 * 1024) (* 10 GBs *)
+          ~cache_dir_path
+          ~num_workers
+      in
+      Some(host_env)
+    | None -> None
   in
   let genv = ServerEnvBuild.make_genv
     options

@@ -79,13 +79,13 @@ let check_param : Env.env -> Nast.fun_param -> unit =
             SubType.sub_type env ty container_type Errors.unify_error, true)
           (fun _ -> env, false) in
       let env = Env.set_tyvar_variance env container_type in
-      let env = SubType.close_tyvars_and_solve env Errors.unify_error in
+      let env = Typing_solver.close_tyvars_and_solve env Errors.unify_error in
       if is_container then
         check_memoizable env type_param
       else
         let r, _ = ty in
         let memoizable_type = MakeType.class_type r SN.Classes.cIMemoizeParam [] in
-        if SubType.is_sub_type env ty memoizable_type
+        if Typing_solver.is_sub_type env ty memoizable_type
         then ()
         else error ty;
     | _, Tfun _

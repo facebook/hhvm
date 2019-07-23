@@ -15,7 +15,6 @@ module Env          = Typing_env
 module Phase        = Typing_phase
 module Reason       = Typing_reason
 module Subst        = Decl_subst
-module SubType      = Typing_subtype
 module TUtils       = Typing_utils
 module MakeType     = Typing_make_type
 module Cls          = Decl_provider.Class
@@ -37,7 +36,7 @@ let xhp_attributes_for_class info: (string * class_elt) Sequence.t =
  * type that is not XHP.
  *)
 let rec walk_and_gather_xhp_ ~env ~pos cty =
-  let env, cty = SubType.expand_type_and_solve
+  let env, cty = Typing_solver.expand_type_and_solve
     ~description_of_expected:"an XHP instance" env pos cty Errors.unify_error in
   match (snd cty) with
   | Tany
@@ -117,4 +116,4 @@ let is_xhp_child env pos ty =
   let ty_child = MakeType.class_type r SN.Classes.cXHPChild [] in
   (* Any Traversable *)
   let ty_traversable = MakeType.traversable r (MakeType.mixed r) in
-  SubType.is_sub_type env ty (MakeType.nullable r (r, Tunion [ty_child; ty_traversable]))
+  Typing_solver.is_sub_type env ty (MakeType.nullable r (r, Tunion [ty_child; ty_traversable]))

@@ -36,48 +36,42 @@ let ty_size env ty =
 (*****************************************************************************)
 (* Importing what is necessary *)
 (*****************************************************************************)
-let not_implemented _ = failwith "Function not implemented"
+let not_implemented s _ = failwith (Printf.sprintf "Function %s not implemented" s)
 type expand_typedef =
     expand_env -> Env.env -> Reason.t -> string -> locl ty list -> Env.env * locl ty
-let (expand_typedef_ref : expand_typedef ref) = ref not_implemented
+let (expand_typedef_ref : expand_typedef ref) = ref (not_implemented "expand_typedef")
 let expand_typedef x = !expand_typedef_ref x
 
 type sub_type = Env.env -> locl ty -> locl ty -> Errors.typing_error_callback -> Env.env
-let (sub_type_ref: sub_type ref) = ref not_implemented
+let (sub_type_ref: sub_type ref) = ref (not_implemented "sub_type")
 let sub_type x = !sub_type_ref x
 
 type is_sub_type_type =
   Env.env -> locl ty -> locl ty -> bool
-let (is_sub_type_ref: is_sub_type_type ref) = ref not_implemented
-let is_sub_type x = !is_sub_type_ref x
-let (is_sub_type_for_union_ref: is_sub_type_type ref) = ref not_implemented
+(*let (is_sub_type_ref: is_sub_type_type ref) = ref not_implemented*)
+let (is_sub_type_for_union_ref: is_sub_type_type ref) = ref (not_implemented "is_sub_type_for_union")
 let is_sub_type_for_union x = !is_sub_type_for_union_ref x
 
 type add_constraint = Pos.Map.key -> Env.env -> Ast.constraint_kind -> locl ty -> locl ty -> Env.env
-let (add_constraint_ref: add_constraint ref) = ref not_implemented
+let (add_constraint_ref: add_constraint ref) = ref (not_implemented "add_constraint")
 let add_constraint x = !add_constraint_ref x
-
-type expand_type_and_solve_type = Env.env -> description_of_expected:string -> Pos.t -> locl ty ->
-  Errors.typing_error_callback -> Env.env * locl ty
-let (expand_type_and_solve_ref: expand_type_and_solve_type ref) = ref not_implemented
-let expand_type_and_solve env ~description_of_expected = !expand_type_and_solve_ref env ~description_of_expected
 
 type expand_typeconst =
   expand_env -> Env.env -> ?as_tyvar_with_cnstr:bool -> locl ty ->
   Nast.sid -> Env.env * locl ty
-let (expand_typeconst_ref: expand_typeconst ref) = ref not_implemented
+let (expand_typeconst_ref: expand_typeconst ref) = ref (not_implemented "expand_typeconst")
 let expand_typeconst x = !expand_typeconst_ref x
 
 type union = Env.env -> locl ty -> locl ty -> Env.env * locl ty
-let (union_ref: union ref) = ref not_implemented
+let (union_ref: union ref) = ref (not_implemented "union")
 let union x = !union_ref x
 
 type union_list = Env.env -> Reason.t -> locl ty list -> (Env.env * locl ty)
-let (union_list_ref : union_list ref) = ref not_implemented
+let (union_list_ref : union_list ref) = ref (not_implemented "union_list")
 let union_list x = !union_list_ref x
 
 type fold_union = Env.env -> Reason.t -> locl ty list -> Env.env * locl ty
-let (fold_union_ref : fold_union ref) = ref not_implemented
+let (fold_union_ref : fold_union ref) = ref (not_implemented "fold_union")
 let fold_union x = !fold_union_ref x
 
 type simplify_unions =
@@ -85,25 +79,25 @@ type simplify_unions =
   ?on_tyvar:(Env.env -> Reason.t -> Ident.t -> Env.env * locl ty) ->
   locl ty ->
   Env.env * locl ty
-let (simplify_unions_ref : simplify_unions ref) = ref not_implemented
+let (simplify_unions_ref : simplify_unions ref) = ref (not_implemented "simplify_unions")
 let simplify_unions x = !simplify_unions_ref x
 
 type diff = locl ty -> locl ty -> locl ty
-let (diff_ref : diff ref) = ref not_implemented
+let (diff_ref : diff ref) = ref (not_implemented "diff")
 let diff x = !diff_ref x
 
 type approx = ApproxUp | ApproxDown
 type non = Env.env -> Reason.t -> locl ty -> approx:approx -> (Env.env * locl ty)
-let (non_ref : non ref) = ref not_implemented
+let (non_ref : non ref) = ref (not_implemented "non")
 let non x = !non_ref x
 
 type simplify_intersections = Env.env ->
   ?on_tyvar:(Env.env -> Reason.t -> int -> Env.env * locl ty) -> locl ty -> Env.env * locl ty
-let (simplify_intersections_ref : simplify_intersections ref) = ref not_implemented
+let (simplify_intersections_ref : simplify_intersections ref) = ref (not_implemented "simplify_intersections")
 let simplify_intersections x = !simplify_intersections_ref x
 
 type localize_with_self = Env.env -> decl ty -> Env.env * locl ty
-let (localize_with_self_ref : localize_with_self ref) = ref not_implemented
+let (localize_with_self_ref : localize_with_self ref) = ref (not_implemented "localize_with_self")
 let localize_with_self x = !localize_with_self_ref x
 
 type coerce_type =
@@ -112,12 +106,12 @@ type coerce_type =
     Errors.typing_error_callback -> Env.env) ->
   Reason.ureason -> Env.env -> locl ty -> ?ty_expect_decl: decl ty -> locl ty ->
     Errors.typing_error_callback -> Env.env
-let (coerce_type_ref : coerce_type ref) = ref not_implemented
+let (coerce_type_ref : coerce_type ref) = ref (not_implemented "coerce_type")
 let coerce_type x = !coerce_type_ref x
 
 type can_coerce = Env.env -> ?ur:Reason.ureason -> locl ty -> ?ty_expect_decl: decl ty -> locl ty ->
   Errors.typing_error_callback -> Env.env option
-let (can_coerce_ref : can_coerce ref) = ref not_implemented
+let (can_coerce_ref : can_coerce ref) = ref (not_implemented "can_coerce")
 let can_coerce x = !can_coerce_ref x
 
 (* Convenience function for creating `this` types *)
@@ -138,13 +132,6 @@ let is_mixed env ty =
 let is_nothing env ty =
   let nothing = MakeType.nothing Reason.Rnone in
   is_sub_type_for_union env ty nothing
-
-let is_stringish env ty =
-  let stringish = MakeType.class_type Reason.Rnone SN.Classes.cStringish [] in
-  is_sub_type env ty stringish
-
-let is_object env ty =
-  is_sub_type env ty (Reason.Rnone, Tobject)
 
 let ensure_option env r ty = if is_option env ty then ty else (r, Toption ty)
 
@@ -262,10 +249,6 @@ let is_dynamic env ty =
   let dynamic = MakeType.dynamic Reason.Rnone in
   (is_sub_type_for_union env dynamic ty && not (is_mixed env ty)) ||
   (is_sub_type_for_union env ty dynamic && not (is_nothing env ty))
-
-let is_hack_collection env ty =
-  is_sub_type env ty
-    (MakeType.const_collection Reason.Rnone (MakeType.mixed Reason.Rnone))
 
 (*****************************************************************************)
 (* Check if type is any or a variant thereof  *)
@@ -405,82 +388,6 @@ let flatten_unresolved env ty acc =
     | (_, Tany) -> acc
     | _ -> ty :: acc in
   env, res
-
-let rec push_option_out pos env ty =
-  let is_option = function
-    | _, Toption _ -> true
-    | _ -> false in
-  let env, ty = Env.expand_type env ty in
-  match ty with
-  | r, Toption ty ->
-    let env, ty = push_option_out pos env ty in
-    env, if is_option ty then ty else (r, Toption ty)
-  | r, Tprim N.Tnull ->
-    let ty = (r, Tunion []) in
-    env, (r, Toption ty)
-  | r, Tunion tyl ->
-    let env, tyl = List.map_env env tyl (push_option_out pos) in
-    if List.exists tyl is_option then
-      let (env, tyl), r' =
-        List.fold_right tyl ~f:begin fun ty ((env, tyl), r) ->
-          match ty with
-          | r', Toption ty' -> flatten_unresolved env ty' tyl, r'
-          | _ -> flatten_unresolved env ty tyl, r
-          end ~init:((env, []), r) in
-      env, (r', Toption (r, Tunion tyl))
-    else
-      let env, tyl =
-        List.fold_right tyl ~f:begin fun ty (env, tyl) ->
-          flatten_unresolved env ty tyl
-          end ~init:(env, []) in
-      env, (r, Tunion tyl)
-  | r, Tintersection tyl ->
-    let env, tyl = List.map_env env tyl (push_option_out pos) in
-    if List.for_all tyl is_option then
-      let r', tyl = List.fold_map tyl ~init:Reason.none
-        ~f:(fun r' ty -> match ty with r, Toption ty -> r, ty | _ -> r', ty) in
-      env, (r', Toption (r, Tintersection tyl))
-    else
-      env, (r, Tintersection tyl)
-  | r, Tabstract (ak, _) ->
-    begin match get_concrete_supertypes env ty with
-    | env, [ty'] ->
-      let env, ty' = push_option_out pos env ty' in
-      (match ty' with
-      | r', Toption ty' -> env, (r', Toption (r, Tabstract (ak, Some ty')))
-      | _ -> env, ty)
-    | env, _ -> env, ty
-    end
-  (* Solve type variable to lower bound if it's manifestly nullable *)
-  | _, Tvar var ->
-    let rec has_null env ty =
-      match snd (Env.expand_type env ty) with
-      | _, Tprim Nast.Tnull -> true
-      | _, Toption _ -> true
-      | _, Tabstract (_, Some ty) -> has_null env ty
-      | _ -> false in
-    let lower_bounds = Typing_set.elements (Typing_env.get_tyvar_lower_bounds env var) in
-    if List.exists lower_bounds (has_null env)
-    then begin
-      let env, ty = expand_type_and_solve env
-        ~description_of_expected:"a value of known type" pos ty Errors.unify_error in
-      push_option_out pos env ty
-    end
-    else env, ty
-  | _, (Terr | Tany | Tnonnull | Tarraykind _ | Tprim _
-    | Tclass _ | Ttuple _ | Tanon _ | Tfun _
-    | Tobject | Tshape _ | Tdynamic | Tdestructure _) -> env, ty
-
-(**
- * Strips away all Toption that we possible can in a type, expanding type
- * variables along the way, turning ?T -> T. This exists to avoid ??T when
- * we wrap a type in Toption while typechecking.
- *)
-let non_null env pos ty =
-  let env, ty = push_option_out pos env ty in
-  match ty with
-  | _, Toption ty' -> env, ty'
-  | _ -> env, ty
 
 (*****************************************************************************)
 (*****************************************************************************)

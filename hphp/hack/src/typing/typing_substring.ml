@@ -15,6 +15,9 @@ module Env = Typing_env
 module TUtils = Typing_utils
 module MakeType = Typing_make_type
 
+let is_object env ty =
+  Typing_solver.is_sub_type env ty (Reason.Rnone, Tobject)
+
 let sub_string
   (p : Pos.Map.key)
   (env : Env.env)
@@ -47,9 +50,9 @@ let sub_string
   Errors.try_
     (fun () -> Typing_subtype.sub_type env ty stringlike Errors.expected_stringlike)
     (fun _ ->
-      if stringish_deprecated && Typing_utils.is_stringish env ty then
+      if stringish_deprecated && Typing_solver.is_sub_type env ty stringish then
         Errors.object_string_deprecated p
-      else if Typing_utils.is_object env ty then
+      else if is_object env ty then
         Errors.object_string p (Reason.to_pos (fst ty))
       else
         Errors.invalid_sub_string p (Typing_print.error env ty);

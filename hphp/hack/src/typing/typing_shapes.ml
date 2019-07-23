@@ -35,7 +35,7 @@ let widen_for_refine_shape ~expr_pos field_name env ty =
 
 let refine_shape field_name pos env shape =
   let env, shape =
-    Typing_subtype.expand_type_and_narrow ~description_of_expected:"a shape" env
+    Typing_solver.expand_type_and_narrow ~description_of_expected:"a shape" env
       (widen_for_refine_shape ~expr_pos:pos field_name) pos shape Errors.unify_error in
   let sft_ty =
     MakeType.mixed
@@ -55,7 +55,7 @@ let refine_shape field_name pos env shape =
 
 let rec shrink_shape pos field_name env shape =
   let env, shape =
-    Typing_subtype.expand_type_and_solve ~description_of_expected:"a shape" env pos shape Errors.unify_error in
+    Typing_solver.expand_type_and_solve ~description_of_expected:"a shape" env pos shape Errors.unify_error in
   match shape with
   | _, Tshape (shape_kind, fields) ->
       let fields = match shape_kind with
@@ -89,14 +89,14 @@ let shapes_idx_not_null env shape_ty (p, field) =
   | None -> env, (r, shape_ty)
   | Some field ->
    let env, (r, shape_ty) =
-    Typing_subtype.expand_type_and_narrow ~description_of_expected:"a shape" env
+    Typing_solver.expand_type_and_narrow ~description_of_expected:"a shape" env
       (widen_for_refine_shape ~expr_pos:p field) p (r, shape_ty) Errors.unify_error in
     begin match shape_ty with
     | Tshape (shape_kind, ftm) ->
       let env, field_type =
         begin match ShapeMap.find_opt field ftm with
         | Some { sft_ty; _ } ->
-          let env, sft_ty = TUtils.non_null env p sft_ty in
+          let env, sft_ty = Typing_solver.non_null env p sft_ty in
           env, { sft_optional = false; sft_ty }
         | None ->
           env,
@@ -140,7 +140,7 @@ let is_shape_field_required env shape_pos fun_name field_name shape_ty =
     sft_optional = false;
     sft_ty = MakeType.mixed Reason.Rnone
   } in
-  Typing_subtype.is_sub_type env
+  Typing_solver.is_sub_type env
     shape_ty
     (make_idx_fake_super_shape shape_pos fun_name field_name field_ty)
 
@@ -266,14 +266,14 @@ let to_collection env shape_ty res return_type =
 
 let to_array env pos shape_ty res =
   let env, shape_ty =
-    Typing_subtype.expand_type_and_solve ~description_of_expected:"a shape" env
+    Typing_solver.expand_type_and_solve ~description_of_expected:"a shape" env
       pos shape_ty Errors.unify_error in
   to_collection env shape_ty res (fun r key value ->
     (r, Tarraykind (AKmap (key, value))))
 
 let to_dict env pos shape_ty res =
   let env, shape_ty =
-    Typing_subtype.expand_type_and_solve ~description_of_expected:"a shape" env
+    Typing_solver.expand_type_and_solve ~description_of_expected:"a shape" env
       pos shape_ty Errors.unify_error in
   to_collection env shape_ty res (fun r key value ->
     MakeType.dict r key value)

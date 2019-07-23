@@ -11,7 +11,6 @@ open Typing_defs
 
 module Reason = Typing_reason
 module Type   = Typing_ops
-module SubType = Typing_subtype
 module Env    = Typing_env
 module TUtils = Typing_utils
 module MakeType    = Typing_make_type
@@ -26,7 +25,7 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
   let r = Reason.Rwitness p in
   let rec extract_inner env opt_ty_maybe =
     let env, e_opt_ty =
-      SubType.expand_type_and_solve ~description_of_expected:"an Awaitable" env p opt_ty_maybe Errors.unify_error in
+      Typing_solver.expand_type_and_solve ~description_of_expected:"an Awaitable" env p opt_ty_maybe Errors.unify_error in
     (match e_opt_ty with
     | _, Tunion tyl ->
       (* If we cannot fold the union into a single type, we need to look at
@@ -72,7 +71,7 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
   in
   let env = Env.open_tyvars env p in
   let env, ty = extract_inner env opt_ty_maybe in
-  let env = SubType.close_tyvars_and_solve env Errors.unify_error in
+  let env = Typing_solver.close_tyvars_and_solve env Errors.unify_error in
   env, ty
 
 let overload_extract_from_awaitable_list env p tyl =

@@ -53,7 +53,7 @@ let get_self env =
 
 let fresh_type = Typing_env.fresh_type
 let open_tyvars = Typing_env.open_tyvars
-let close_tyvars_and_solve = Typing_subtype.close_tyvars_and_solve
+let close_tyvars_and_solve = Typing_solver.close_tyvars_and_solve
 let set_tyvar_variance env ty = Typing_env.set_tyvar_variance env ty
 let get_class = Typing_env.get_class
 let is_static = Typing_env.is_static
@@ -74,7 +74,7 @@ let fully_expand = Typing_expand.fully_expand
 let get_class_ids = Typing_utils.get_class_ids
 let fold_unresolved = Typing_utils.fold_unresolved
 let flatten_unresolved = Typing_utils.flatten_unresolved
-let push_option_out = Typing_utils.push_option_out Pos.none
+let push_option_out = Typing_solver.push_option_out Pos.none
 let get_concrete_supertypes = Typing_utils.get_concrete_supertypes
 
 let is_visible = Typing_visibility.is_visible

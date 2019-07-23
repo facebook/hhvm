@@ -578,8 +578,7 @@ and fun_def tcopt f : Tast.fun_def option =
     List.map_env env f.f_tparams type_param in
   let env, user_attributes =
     List.map_env env f.f_user_attributes user_attribute in
-  let env = SubType.solve_all_unsolved_tyvars env Errors.bad_function_typevar in
-  Typing_subtype.log_prop env;
+  let env = Typing_solver.solve_all_unsolved_tyvars env Errors.bad_function_typevar in
   let fundef = {
     T.f_annotation = Env.save local_tpenv env;
     T.f_span = f.f_span;
@@ -735,7 +734,7 @@ and stmt env (pos, st) =
 
 and stmt_ env pos st =
   let env = Env.open_tyvars env pos in
-  (fun (env, tb) -> SubType.close_tyvars_and_solve env Errors.unify_error, tb) @@
+  (fun (env, tb) -> Typing_solver.close_tyvars_and_solve env Errors.unify_error, tb) @@
   match st with
   | Fallthrough ->
       let env = if env.Env.in_case
@@ -1107,7 +1106,7 @@ and case_list parent_locals ty env switch_pos cl =
        * in order to check for an enum *)
       if has_default
       then Env.expand_type env ty
-      else SubType.expand_type_and_solve env ~description_of_expected:"a value" switch_pos ty Errors.unify_error in
+      else Typing_solver.expand_type_and_solve env ~description_of_expected:"a value" switch_pos ty Errors.unify_error in
     let is_enum = match snd ty with
       | Tabstract (AKnewtype (cid, _), _) -> Env.is_enum env cid
       | _ -> false in
@@ -1157,7 +1156,7 @@ and as_expr env ty1 pe e =
       then env
       else Type.sub_type pe Reason.URforeach env ty1 ty Errors.unify_error in
     let env = Env.set_tyvar_variance env ty in
-  SubType.close_tyvars_and_solve env Errors.unify_error, tk, tv) @@
+  Typing_solver.close_tyvars_and_solve env Errors.unify_error, tk, tv) @@
   let env, tv = Env.fresh_type env pe in
   match e with
   | As_v _ ->
@@ -1303,7 +1302,7 @@ and eif env ~(expected: ExpectedTy.t option) p c e1 e2 =
   let env = condition env true tc in
   let env, te1, ty1 = match e1 with
     | None ->
-        let env, ty = TUtils.non_null env p tyc in
+        let env, ty = Typing_solver.non_null env p tyc in
         env, None, ty
     | Some e1 ->
         let env, te1, ty1 = expr ?expected env e1 in
@@ -1380,7 +1379,7 @@ and expr_
   env (p, e) =
   let env = Env.open_tyvars env p in
   (fun (env, te, ty) ->
-    let env = SubType.close_tyvars_and_solve env Errors.unify_error in
+    let env = Typing_solver.close_tyvars_and_solve env Errors.unify_error in
     (* Solving type variables may leave intersections and unions unsimplified. *)
     (* TODO: possible improvement:
     simplify all intersections in type, not just at top-level. *)
@@ -2006,7 +2005,7 @@ and expr_
           | _ -> env
         else
         if s = SN.PseudoFunctions.hh_force_solve
-        then SubType.solve_all_unsolved_tyvars env Errors.unify_error
+        then Typing_solver.solve_all_unsolved_tyvars env Errors.unify_error
         else
         if s = SN.PseudoFunctions.hh_loop_forever then (loop_forever env; env)
         else env in
@@ -2259,7 +2258,7 @@ and expr_
       expr ~is_using_clause env e in
       (* Expected type of `e` in `yield from e` is KeyedTraversable<Tk,Tv> (but might be dynamic)*)
     let expected_yield_from_ty = MakeType.keyed_traversable (Reason.Ryield_gen p) key value in
-    let from_dynamic = SubType.is_sub_type env yield_from_ty (MakeType.dynamic (fst yield_from_ty)) in
+    let from_dynamic = Typing_solver.is_sub_type env yield_from_ty (MakeType.dynamic (fst yield_from_ty)) in
     let env =
       if from_dynamic
       then env (* all set if dynamic, otherwise need to check against KeyedTraversable *)
@@ -2292,7 +2291,7 @@ and expr_
         match e with
         | _, Call (call_type, e, hl, el, uel) ->
           let env = Env.open_tyvars env p in
-          (fun (env, te, ty) -> SubType.close_tyvars_and_solve env Errors.unify_error, te, ty) @@
+          (fun (env, te, ty) -> Typing_solver.close_tyvars_and_solve env Errors.unify_error, te, ty) @@
           check_call ~is_using_clause ~expected
             env p call_type e hl el uel ~in_suspend:true
         | (epos, _)  ->
@@ -3223,7 +3222,7 @@ and check_shape_keys_validity env pos keys =
           if cls1 <> cls2 then
             Errors.shape_field_class_mismatch
               key_pos witness_pos (strip_ns cls2) (strip_ns cls1);
-          if not (SubType.is_sub_type env ty1 ty2 && SubType.is_sub_type env ty2 ty1)
+          if not (Typing_solver.is_sub_type env ty1 ty2 && Typing_solver.is_sub_type env ty2 ty1)
           then
             Errors.shape_field_type_mismatch
               key_pos witness_pos
@@ -3253,6 +3252,10 @@ and set_valid_rvalue p env x ty =
 (* Deal with assignment of a value of type ty2 to lvalue e1 *)
 and assign p env e1 ty2 : _ * T.expr * T.ty =
   assign_ p Reason.URassign env e1 ty2
+
+and is_hack_collection env ty =
+  Typing_solver.is_sub_type env ty
+    (MakeType.const_collection Reason.Rnone (MakeType.mixed Reason.Rnone))
 
 and assign_ p ur env e1 ty2 =
   match e1 with
@@ -3343,7 +3346,7 @@ and assign_ p ur env e1 ty2 =
     let env, (ty1', _ty2') =
       Typing_array_access.assign_array_append ~array_pos:(fst e1) ~expr_pos:p ur env ty1 ty2 in
     let env, te1 =
-      if TUtils.is_hack_collection env ty1
+      if is_hack_collection env ty1
       then env, te1
       else let env, te1, _ = assign_ p ur env e1 ty1' in env, te1 in
     make_result env pos (T.Array_get (te1, None)) ty2
@@ -3353,7 +3356,7 @@ and assign_ p ur env e1 ty2 =
     let env, (ty1', ty2') =
       Typing_array_access.assign_array_get ~array_pos:(fst e1) ~expr_pos:p ur env ty1 e ty ty2 in
     let env, te1 =
-      if TUtils.is_hack_collection env ty1
+      if is_hack_collection env ty1
       then env, te1
       else let env, te1, _ = assign_ p ur env e1 ty1' in env, te1 in
     env, ((pos, ty2'), T.Array_get (te1, Some te)), ty2
@@ -3498,7 +3501,7 @@ and call_parent_construct pos env el uel =
      * see T37483866 and the linked diff for discussion.
      *)
     let rec is_coroutine env ty =
-      let env, ety = SubType.expand_type_and_solve env (Reason.to_pos (fst ty)) ty Errors.unify_error
+      let env, ety = Typing_solver.expand_type_and_solve env (Reason.to_pos (fst ty)) ty Errors.unify_error
         ~description_of_expected:"a function value" in
       match snd ety with
       | Tfun { ft_is_coroutine = true; _ } ->
@@ -3648,7 +3651,7 @@ and call_parent_construct pos env el uel =
         let env, tv =
           if List.length el > 1
           then env, tv
-          else TUtils.non_null env p tv in
+          else Typing_solver.non_null env p tv in
         env, explain_array_filter tv in
       let rec get_array_filter_return_type env ty =
         let env, ety = Env.expand_type env ty in
@@ -4150,7 +4153,7 @@ and call_parent_construct pos env el uel =
       make_call env (T.make_typed_expr fpos fty (T.Id x)) tal tel tuel ty
   | _ ->
       let env, te, fty = expr env e in
-      let env, fty = SubType.expand_type_and_solve
+      let env, fty = Typing_solver.expand_type_and_solve
         ~description_of_expected:"a function value" env fpos fty Errors.unify_error in
       let env = check_coroutine_call env fty in
       let env, (tel, tuel, ty) = call ~expected p env fty ~fty_decl:None el uel in
@@ -4577,7 +4580,7 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
         if member_ce.ce_const && valkind = `lvalue then
           if not (env.Env.inside_constructor &&
             (* expensive call behind short circuiting && *)
-            SubType.is_sub_type env (Env.get_self env) concrete_ty) then
+            Typing_solver.is_sub_type env (Env.get_self env) concrete_ty) then
             Errors.assigning_to_const id_pos;
 
         let env, ty, _, vis' = Errors.try_
@@ -4650,14 +4653,14 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~obj_pos
   env ty1 cid (id_pos, id_str as id) k k_lhs =
   let env, ety1 =
     if is_method
-    then SubType.expand_type_and_solve env ~description_of_expected:"an object" obj_pos ty1 Errors.unify_error
-    else SubType.expand_type_and_narrow env ~description_of_expected:"an object"
+    then Typing_solver.expand_type_and_solve env ~description_of_expected:"an object" obj_pos ty1 Errors.unify_error
+    else Typing_solver.expand_type_and_narrow env ~description_of_expected:"an object"
       (widen_class_for_obj_get ~is_method ~nullsafe id_str) obj_pos ty1 Errors.unify_error in
   let nullable_obj_get ty = match nullsafe with
     | Some p1 ->
         let env, method_, method_decl_, x = obj_get_ ~obj_pos ~is_method ~nullsafe ~valkind
           ~pos_params ~explicit_tparams env ty cid id k k_lhs in
-        let env, method_ = TUtils.non_null env id_pos method_ in
+        let env, method_ = Typing_solver.non_null env id_pos method_ in
         env, MakeType.nullable (Reason.Rnullsafe_op p1) method_, method_decl_, x
     | None ->
         Errors.null_member id_str id_pos
@@ -4959,7 +4962,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
   | CIexpr (p, _ as e) ->
       let env, te, ty = expr env e in
       let rec resolve_ety env ty =
-        let env, ty = SubType.expand_type_and_solve ~description_of_expected:"an object" env p ty Errors.unify_error in
+        let env, ty = Typing_solver.expand_type_and_solve ~description_of_expected:"an object" env p ty Errors.unify_error in
         let env, ty = TUtils.fold_unresolved env ty in
         match TUtils.get_base_type env ty with
         | _, Tabstract (AKnewtype (classname, [the_cls]), _) when
@@ -5105,7 +5108,7 @@ Returns in this order the typed expressions for the arguments, for the variadic 
 and call ~(expected: ExpectedTy.t option) ?method_call_info pos env fty ~fty_decl el uel =
   let make_unpacked_traversable_ty pos ty = MakeType.traversable (Reason.Runpack_param pos) ty in
   let resl = TUtils.try_over_concrete_supertypes env fty begin fun env fty ->
-    let env, efty = SubType.expand_type_and_solve
+    let env, efty = Typing_solver.expand_type_and_solve
       ~description_of_expected:"a function value" env pos fty Errors.unify_error in
     match efty with
     | _, (Terr | Tany | Tunion [] | Tdynamic) ->
@@ -5248,7 +5251,7 @@ and call ~(expected: ExpectedTy.t option) ?method_call_info pos env fty ~fty_dec
           (* Enforces that e is unpackable. If e is a tuple, check types against
            * parameter types *)
           let env, te, ty = expr env e in
-          let env, ety = SubType.expand_type_and_solve
+          let env, ety = Typing_solver.expand_type_and_solve
             ~description_of_expected:"an unpackable value" env (fst e) ty Errors.unify_error in
           match ety with
           | _, Ttuple tyl ->
@@ -5433,7 +5436,7 @@ and check_dynamic_or_enforce_num env p t r =
       | _, Tprim Tfloat -> env, Some ty
       | _ -> env, None in
     let default = MakeType.num (Reason.Rarith p) in
-    let env, _ = SubType.expand_type_and_narrow env ~default
+    let env, _ = Typing_solver.expand_type_and_narrow env ~default
       ~description_of_expected:"a number" widen_for_arithmetic p t Errors.unify_error in
     env, false
 
@@ -5461,12 +5464,12 @@ and expand_type_and_narrow_to_int env p ty =
       | _, Tprim Tint -> env, Some ty
       | _ -> env, None in
     let default = MakeType.int (Reason.Rarith p) in
-    SubType.expand_type_and_narrow env ~default
+    Typing_solver.expand_type_and_narrow env ~default
       ~description_of_expected:"a number" widen_for_arithmetic p ty Errors.unify_error
 
-and is_float env t = SubType.is_sub_type env t (MakeType.float Reason.Rnone)
+and is_float env t = Typing_solver.is_sub_type env t (MakeType.float Reason.Rnone)
 
-and is_int env t = SubType.is_sub_type env t (MakeType.int Reason.Rnone)
+and is_int env t = Typing_solver.is_sub_type env t (MakeType.int Reason.Rnone)
 
 and is_super_num env t = SubType.is_sub_type_for_union env (MakeType.num Reason.Rnone) t
 
@@ -5759,7 +5762,7 @@ and condition_nullity ~nonnull (env: Env.env) te =
     refine_lvalue_type env shape ~refine
   | (p, _), _ ->
     let refine env ty = if nonnull
-      then TUtils.non_null env p ty
+      then Typing_solver.non_null env p ty
       else
         let r = Reason.Rwitness (Reason.to_pos (fst ty)) in
         Inter.intersect env r ty (MakeType.null r) in
@@ -6331,8 +6334,7 @@ and class_def_ env c tc =
   let env, tparams = class_type_param env c.c_tparams in
   let env, user_attributes =
     List.map_env env c.c_user_attributes user_attribute in
-  let env = SubType.solve_all_unsolved_tyvars env Errors.bad_class_typevar in
-  Typing_subtype.log_prop env;
+  let env = Typing_solver.solve_all_unsolved_tyvars env Errors.bad_class_typevar in
   {
     T.c_span = c.c_span;
     T.c_annotation = Env.save (Env.get_tpenv env) env;
@@ -6775,8 +6777,7 @@ and method_def env m =
     List.map_env env m.m_tparams type_param in
   let env, user_attributes =
     List.map_env env m.m_user_attributes user_attribute in
-  let env = SubType.solve_all_unsolved_tyvars env Errors.bad_method_typevar in
-  Typing_subtype.log_prop env;
+  let env = Typing_solver.solve_all_unsolved_tyvars env Errors.bad_method_typevar in
   let method_def = {
     T.m_annotation = Env.save local_tpenv env;
     T.m_span = m.m_span;
@@ -6866,7 +6867,7 @@ and gconst_def tcopt cst =
       let env, te, value_type =
         let expected = ExpectedTy.make (fst hint) Reason.URhint dty in
         expr ~expected env value in
-      let env = Typing_utils.sub_type env value_type dty Errors.unify_error in
+      let env = SubType.sub_type env value_type dty Errors.unify_error in
       te, env
     | None ->
       let env, te, _value_type = expr env value in

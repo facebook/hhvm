@@ -141,7 +141,7 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
     log_types expr_pos env
       [Log_head ("array_get",
       [Log_type ("ty1", ty1); Log_type("ty2", ty2)])]));
-  let env, (r, ety1_ as ety1) = SubType.expand_type_and_narrow env
+  let env, (r, ety1_ as ety1) = Typing_solver.expand_type_and_narrow env
     ~description_of_expected:"an array or collection"
     (widen_for_array_get ~lhs_of_null_coalesce ~expr_pos e2) array_pos ty1 Errors.unify_error in
 
@@ -178,7 +178,7 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
     | Some env -> env
     | None ->
         (* if subtype of dynamic, allow it to be used *)
-        if Typing_subtype.is_sub_type env ty_have (MakeType.dynamic Reason.none)
+        if Typing_solver.is_sub_type env ty_have (MakeType.dynamic Reason.none)
         then env
         (* fail with useful error *)
         else
@@ -441,7 +441,7 @@ let widen_for_assign_array_append ~expr_pos env ty =
     env, None
 
 let rec assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
-  let env, ety1 = SubType.expand_type_and_narrow
+  let env, ety1 = Typing_solver.expand_type_and_narrow
       ~description_of_expected:"an array or collection" env
       (widen_for_assign_array_append ~expr_pos) array_pos ty1 Errors.unify_error in
   Typing_log.(log_with_level env "typing" 1 (fun () ->
@@ -577,7 +577,7 @@ let widen_for_assign_array_get ~expr_pos index_expr env ty =
  * Return (ty1', ty2') where ty1' is the new array type, and ty2' is the element type
  *)
 let rec assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
-  let env, (r, ety1_ as ety1) = SubType.expand_type_and_narrow
+  let env, (r, ety1_ as ety1) = Typing_solver.expand_type_and_narrow
     ~description_of_expected:"an array or collection" env
     (widen_for_assign_array_get ~expr_pos key) array_pos ty1 Errors.unify_error in
   Typing_log.(log_with_level env "typing" 1 (fun () ->
@@ -596,7 +596,7 @@ let rec assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
     | Some e -> e
     | None ->
       (* if subtype of dynamic, allow it to be used *)
-      if Typing_subtype.is_sub_type env ty_have (MakeType.dynamic Reason.none)
+      if Typing_solver.is_sub_type env ty_have (MakeType.dynamic Reason.none)
       then env
       (* fail with useful error *)
       else Typing_ops.sub_type p reason env ty_have ty_expect Errors.index_type_mismatch in

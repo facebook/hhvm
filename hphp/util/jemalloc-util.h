@@ -13,35 +13,87 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #ifndef incl_HPHP_UTIL_MALLOC_SIZE_CLASS_H_
 #define incl_HPHP_UTIL_MALLOC_SIZE_CLASS_H_
 
+#include "hphp/util/alloc-defs.h" // must include before checking USE_JEMALLOC
+
+#include <cassert>
+#include <cstdio>
+#include <stdexcept>
+#include <string>
 #include <type_traits>
-
-#include "hphp/util/assertions.h"
-
-#include "hphp/util/alloc.h" // must be included before USE_JEMALLOC is used
 
 namespace HPHP {
 
-//////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 /*
- * Define two metafunctions:
- *
- *   - is_malloc_size_class<Size>
- *
- *       Returns true is Size is a malloc size class, or true if we
- *       don't know anything about the malloc implementation and can't
- *       tell.
- *
- *   - next_malloc_size_class<Size>
- *
- *       Returns the next size class larger than or equal to Size, or
- *       returns Size if we don't know anything about this malloc.
+ * Note: Some of the the functions in this file depend on the internal
+ * implementation details of jemalloc, which are subject to change in new
+ * jemalloc major versions.
  */
 
-//////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Call mallctl, reading/writing values of type <T> if out/in are non-null,
+ * respectively.  Assert/log on error, depending on errOk.
+ */
+template <typename T, bool ErrOK>
+int mallctlHelper(const char *cmd, T* out, T* in) {
+#ifdef USE_JEMALLOC
+  auto outLen = sizeof(T);
+  int err = mallctl(cmd,
+                    out, out ? &outLen : nullptr,
+                    in, in ? sizeof(T) : 0);
+  assert(err != 0 || outLen == sizeof(T));
+#else
+  int err = ENOENT;
+#endif
+  if (!ErrOK && err != 0) {
+    char msg[128];
+    std::snprintf(msg, sizeof(msg),
+                  "mallctl(\"%s\") failed with error %d",
+                  cmd, err);
+    throw std::runtime_error{msg};
+  }
+  return err;
+}
+
+template <typename T, bool ErrOK = false>
+int mallctlReadWrite(const char *cmd, T* out, T in) {
+  return mallctlHelper<T, ErrOK>(cmd, out, &in);
+}
+
+template <typename T, bool ErrOK = false>
+int mallctlRead(const char* cmd, T* out) {
+  return mallctlHelper<T, ErrOK>(cmd, out, static_cast<T*>(nullptr));
+}
+
+template <typename T, bool ErrOK = false>
+int mallctlWrite(const char* cmd, T in) {
+  return mallctlHelper<T, ErrOK>(cmd, static_cast<T*>(nullptr), &in);
+}
+
+template <bool ErrOK = false> int mallctlCall(const char* cmd) {
+  // Use <unsigned> rather than <void> to avoid sizeof(void).
+  return mallctlHelper<unsigned, ErrOK>(cmd, nullptr, nullptr);
+}
+
+/*
+ * jemalloc pprof utility functions.
+ */
+int jemalloc_pprof_enable();
+int jemalloc_pprof_disable();
+int jemalloc_pprof_dump(const std::string& prefix, bool force);
+
+/**
+ * Free all unused memory back to system. On error, returns false and, if
+ * not null, sets an error message in *errStr.
+ */
+bool purge_all(std::string* errStr = nullptr);
 
 #ifndef USE_JEMALLOC
 
@@ -54,9 +106,8 @@ struct next_malloc_size_class : std::integral_constant<size_t, Size> {};
 #else
 
 /*
- * jemalloc-specific implementation.
+ * Returns whether Size is a jemalloc size class.
  */
-
 template<size_t Size>
 struct is_malloc_size_class
   : std::integral_constant<bool,
@@ -75,6 +126,9 @@ struct is_malloc_size_class
     >
 {};
 
+/*
+ * Returns the next jemalloc size class larger than or equal to Size.
+ */
 template<size_t Size>
 struct next_malloc_size_class {
 private:
@@ -105,6 +159,11 @@ public:
   static_assert(is_malloc_size_class<value>::value,
                 "Bug in malloc-size-class.h");
 };
+
+void init_mallctl_mibs();
+
+void mallctl_epoch();
+size_t mallctl_pactive(unsigned arenaId);
 
 #endif
 

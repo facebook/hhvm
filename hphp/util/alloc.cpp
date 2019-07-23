@@ -49,41 +49,6 @@ void flush_thread_caches() {
 #endif
 }
 
-bool purge_all(std::string* errStr) {
-#ifdef USE_JEMALLOC
-  assert(mallctlnametomib && mallctlbymib);
-  unsigned allArenas = 0;
-#ifndef MALLCTL_ARENAS_ALL
-  if (mallctlRead<unsigned, true>("arenas.narenas", &allArenas)) {
-    if (errStr) {
-      *errStr = "arenas.narena";
-    }
-    return false;
-  }
-#else
-  allArenas = MALLCTL_ARENAS_ALL;
-#endif
-
-  size_t mib[3];
-  size_t miblen = 3;
-  if (mallctlnametomib("arena.0.purge", mib, &miblen)) {
-    if (errStr) {
-      *errStr = "mallctlnametomib(arena.0.purge)";
-    }
-    return false;
-  }
-
-  mib[1] = allArenas;
-  if (mallctlbymib(mib, miblen, nullptr, nullptr, nullptr, 0)) {
-    if (errStr) {
-      *errStr = "mallctlbymib(arena.all.purge)";
-    }
-    return false;
-  }
-#endif
-  return true;
-}
-
 __thread int32_t s_numaNode;
 
 __thread uintptr_t s_stackLimit;
@@ -194,24 +159,6 @@ int low_cold_arena_flags = 0;
 int high_cold_arena_flags = 0;
 __thread int high_arena_flags = 0;
 __thread int local_arena_flags = 0;
-
-// jemalloc frequently used mibs
-size_t g_pactive_mib[4];                // "stats.arenas.<i>.pactive"
-size_t g_epoch_mib[1];                  // "epoch"
-
-void mallctl_epoch() {
-  uint64_t epoch = 1;
-  mallctlbymib(g_epoch_mib, 1, nullptr, nullptr, &epoch, sizeof(epoch));
-}
-
-size_t mallctl_pactive(unsigned arenaId) {
-  size_t mib[4] =
-    {g_pactive_mib[0], g_pactive_mib[1], arenaId, g_pactive_mib[3]};
-  size_t pactive = 0;
-  size_t sz = sizeof(pactive);
-  if (mallctlbymib(mib, 4, &pactive, &sz, nullptr, 0)) return 0;
-  return pactive;
-}
 
 #if USE_JEMALLOC_EXTENT_HOOKS
 // Keep track of the size of recently freed memory that might be in the high1g
@@ -825,10 +772,7 @@ struct JEMallocInitializer {
     arenas_thread_init();
 #endif
     // Initialize global mibs
-    size_t miblen = 1;
-    mallctlnametomib("epoch", g_epoch_mib, &miblen);
-    miblen = 4;
-    mallctlnametomib("stats.arenas.0.pactive", g_pactive_mib, &miblen);
+    init_mallctl_mibs();
 #endif
   }
 };
@@ -862,34 +806,6 @@ void high_2m_pages(uint32_t pages) {
     high_2m_mapper->setMaxPages(pages);
   }
 #endif
-}
-
-int jemalloc_pprof_enable() {
-  return mallctlWrite<bool, true>("prof.active", true);
-}
-
-int jemalloc_pprof_disable() {
-  return mallctlWrite<bool, true>("prof.active", false);
-}
-
-int jemalloc_pprof_dump(const std::string& prefix, bool force) {
-  if (!force) {
-    bool enabled = false;
-    bool active = false;
-    // Check if profiling is active before trying to dump.
-    int err = mallctlRead<bool, true>("opt.prof", &enabled) ||
-      (enabled && mallctlRead<bool, true>("prof.active", &active));
-    if (err || !active) {
-      return 0; // nothing to do
-    }
-  }
-
-  if (prefix != "") {
-    const char *s = prefix.c_str();
-    return mallctlWrite<const char*, true>("prof.dump", s);
-  } else {
-    return mallctlCall<true>("prof.dump");
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

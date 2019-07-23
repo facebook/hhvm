@@ -250,8 +250,12 @@ void raise_array_serialization_notice(const char* src, const ArrayData* arr) {
   })();
 
   auto const bail = [&]() {
-    raise_notice("Observing %s in %s from unknown location",
-                 dvarray, src);
+    raise_dynamically_sampled_notice(
+      "Observing {}{}{} in {} from unknown location",
+      arr->empty() ? "empty, " : "",
+      arr->isStatic() ? "static, " : "",
+      dvarray,
+      src);
   };
 
   assertx(RuntimeOption::EvalLogArrayProvenance);

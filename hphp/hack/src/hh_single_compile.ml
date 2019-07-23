@@ -467,7 +467,6 @@ let make_popt () =
     ~disable_nontoplevel_declarations:(phpism_disable_nontoplevel_declarations co)
     ~disable_static_closures:(phpism_disable_static_closures co)
     ~disable_lval_as_an_expression:(disable_lval_as_an_expression co)
-    ~disable_instanceof:(phpism_disable_instanceof co)
     ~enable_constant_visibility_modifiers:(enable_constant_visibility_modifiers co)
     ~enable_class_level_where_clauses:(enable_class_level_where_clauses co)
     ~rust:(use_rust_parser co)

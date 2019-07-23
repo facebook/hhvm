@@ -44,7 +44,6 @@ type t = {
   tco_disallow_invalid_arraykey : bool;
   tco_disallow_byref_dynamic_calls : bool;
   tco_disallow_byref_calls : bool;
-  po_disable_instanceof : bool;
   ignored_fixme_codes : ISet.t;
   ignored_fixme_regex : string option;
   log_levels : int SMap.t;
@@ -236,7 +235,6 @@ let default = {
  tco_disallow_invalid_arraykey = false;
  tco_disallow_byref_dynamic_calls = false;
  tco_disallow_byref_calls = false;
- po_disable_instanceof = true;
  ignored_fixme_codes = Errors.default_ignored_fixme_codes;
  ignored_fixme_regex = None;
  log_levels = SMap.empty;
@@ -303,7 +301,6 @@ let make
   ?(tco_disallow_invalid_arraykey = default.tco_disallow_invalid_arraykey)
   ?(tco_disallow_byref_dynamic_calls = default.tco_disallow_byref_dynamic_calls)
   ?(tco_disallow_byref_calls = default.tco_disallow_byref_calls)
-  ?(po_disable_instanceof = default.po_disable_instanceof)
   ?(ignored_fixme_codes = default.ignored_fixme_codes)
   ?ignored_fixme_regex
   ?(log_levels = default.log_levels)
@@ -372,7 +369,6 @@ let make
   tco_disallow_invalid_arraykey;
   tco_disallow_byref_dynamic_calls;
   tco_disallow_byref_calls;
-  po_disable_instanceof;
   log_levels;
   po_disable_lval_as_an_expression;
   tco_typecheck_xhp_cvars;
@@ -451,7 +447,6 @@ let tco_disallow_invalid_arraykey t = t.tco_disallow_invalid_arraykey
 let tco_disallow_invalid_arraykey_constraint t = t.tco_disallow_invalid_arraykey_constraint
 let tco_disallow_byref_dynamic_calls t = t.tco_disallow_byref_dynamic_calls
 let tco_disallow_byref_calls t = t.tco_disallow_byref_calls
-let po_disable_instanceof t = t.po_disable_instanceof
 let ignored_fixme_codes t = t.ignored_fixme_codes
 let ignored_fixme_regex t = t.ignored_fixme_regex
 let log_levels t = t.log_levels

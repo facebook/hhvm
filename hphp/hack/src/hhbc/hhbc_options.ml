@@ -47,7 +47,6 @@ type t = {
   option_phpism_disallow_execution_operator: bool;
   option_phpism_disable_nontoplevel_declarations : bool;
   option_phpism_disable_static_closures : bool;
-  option_phpism_disable_instanceof        : bool;
   option_emit_func_pointers               : bool;
   option_emit_cls_meth_pointers           : bool;
   option_emit_inst_meth_pointers          : bool;
@@ -104,7 +103,6 @@ let default = {
   option_phpism_disallow_execution_operator = false;
   option_phpism_disable_nontoplevel_declarations = false;
   option_phpism_disable_static_closures = false;
-  option_phpism_disable_instanceof = false;
   option_emit_func_pointers = true;
   option_emit_cls_meth_pointers = true;
   option_emit_inst_meth_pointers = true;
@@ -158,7 +156,6 @@ let hhjs_setlocs o = o.option_hhjs_setlocs
 let phpism_disallow_execution_operator o = o.option_phpism_disallow_execution_operator
 let phpism_disable_nontoplevel_declarations o = o.option_phpism_disable_nontoplevel_declarations
 let phpism_disable_static_closures o = o.option_phpism_disable_static_closures
-let phpism_disable_instanceof o = o.option_phpism_disable_instanceof
 let emit_func_pointers o = o.option_emit_func_pointers
 let emit_cls_meth_pointers o = o.option_emit_cls_meth_pointers
 let emit_inst_meth_pointers o = o.option_emit_inst_meth_pointers
@@ -217,7 +214,6 @@ let to_string o =
       @@ phpism_disable_nontoplevel_declarations o
     ; Printf.sprintf "phpism_disable_static_closures %B"
       @@ phpism_disable_static_closures o
-    ; Printf.sprintf "phpism_disable_instanceof: %B" @@ phpism_disable_instanceof o
     ; Printf.sprintf "emit_func_pointers: %B" @@ emit_func_pointers o
     ; Printf.sprintf "emit_cls_meth_pointers: %B" @@ emit_cls_meth_pointers o
     ; Printf.sprintf "emit_inst_meth_pointers: %B" @@ emit_inst_meth_pointers o
@@ -320,8 +316,6 @@ let set_option options name value =
     { options with option_phpism_disable_nontoplevel_declarations = as_bool value }
   | "hack.lang.phpism.disablestaticclosures" ->
     { options with option_phpism_disable_static_closures = as_bool value }
-  | "hack.lang.phpism.disableinstanceof" ->
-    { options with option_phpism_disable_instanceof = as_bool value }
   | "hhvm.emit_func_pointers" ->
     { options with option_emit_func_pointers = int_of_string value > 0 }
   | "hhvm.emit_cls_meth_pointers" ->
@@ -484,8 +478,6 @@ let value_setters = [
      fun opts v -> { opts with option_phpism_disable_nontoplevel_declarations = (v = 1) });
   (set_value "hhvm.hack.lang.phpism.disable_static_closures" get_value_from_config_int @@
      fun opts v -> { opts with option_phpism_disable_static_closures = (v = 1) });
-  (set_value "hhvm.hack.lang.phpism.disable_instanceof" get_value_from_config_int @@
-     fun opts v -> { opts with option_phpism_disable_instanceof = (v = 1) });
   (set_value "hhvm.emit_func_pointers" get_value_from_config_int @@
      fun opts v -> { opts with option_emit_func_pointers = (v > 0) });
   (set_value "hhvm.emit_cls_meth_pointers" get_value_from_config_int @@

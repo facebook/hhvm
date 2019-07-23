@@ -571,9 +571,6 @@ struct RuntimeOption {
   // Disables static closures
   // true => error, false => default behaviour
   static bool DisableStaticClosures;
-  // Disables the `instanceof` operator
-  // true => error, false => default behaviour
-  static bool DisableInstanceof;
   // Enables the class-level where constraints
   // true => allow the feature, false => disable the feature
   static bool EnableClassLevelWhereClauses;

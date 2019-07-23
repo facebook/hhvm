@@ -17,7 +17,6 @@ let allow_goto = GlobalOptions.po_allow_goto
 let default = GlobalOptions.default
 let disable_nontoplevel_declarations = GlobalOptions.po_disable_nontoplevel_declarations
 let disable_static_closures = GlobalOptions.po_disable_static_closures
-let disable_instanceof = GlobalOptions.po_disable_instanceof
 let disable_outside_dollar_str_interp = GlobalOptions.po_disable_outside_dollar_str_interp
 
 let with_codegen po b =
@@ -61,7 +60,6 @@ let make
   ~disable_nontoplevel_declarations
   ~disable_static_closures
   ~disable_lval_as_an_expression
-  ~disable_instanceof
   ~rust
   ~enable_constant_visibility_modifiers
   ~enable_class_level_where_clauses
@@ -77,7 +75,6 @@ let make
   po_disable_nontoplevel_declarations = disable_nontoplevel_declarations;
   po_disable_static_closures = disable_static_closures;
   po_disable_lval_as_an_expression = disable_lval_as_an_expression;
-  po_disable_instanceof = disable_instanceof;
   po_rust = rust;
   po_enable_constant_visibility_modifiers = enable_constant_visibility_modifiers;
   po_enable_class_level_where_clauses = enable_class_level_where_clauses;

@@ -828,7 +828,6 @@ bool RuntimeOption::DisableReservedVariables = true;
 uint64_t RuntimeOption::DisableConstant = 0;
 bool RuntimeOption::DisableNontoplevelDeclarations = false;
 bool RuntimeOption::DisableStaticClosures = false;
-bool RuntimeOption::DisableInstanceof = true;
 bool RuntimeOption::EnableClassLevelWhereClauses = false;
 
 #ifdef HHVM_DYNAMIC_EXTENSION_DIR
@@ -1614,9 +1613,6 @@ void RuntimeOption::Load(
     Config::Bind(DisableStaticClosures, ini, config,
                  "Hack.Lang.Phpism.DisableStaticClosures",
                  DisableStaticClosures);
-    Config::Bind(DisableInstanceof, ini, config,
-                 "Hack.Lang.Phpism.DisableInstanceof",
-                 DisableInstanceof);
     Config::Bind(DisableConstant, ini, config,
                  "Hack.Lang.Phpism.DisableConstant",
                  DisableConstant);

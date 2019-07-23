@@ -46,10 +46,6 @@ type sub_type = Env.env -> locl ty -> locl ty -> Errors.typing_error_callback ->
 let (sub_type_ref: sub_type ref) = ref not_implemented
 let sub_type x = !sub_type_ref x
 
-type sub_string = Pos.t -> Env.env -> locl ty -> Env.env
-let (sub_string_ref: sub_string ref) = ref not_implemented
-let sub_string x = !sub_string_ref x
-
 type is_sub_type_type =
   Env.env -> locl ty -> locl ty -> bool
 let (is_sub_type_ref: is_sub_type_type ref) = ref not_implemented

@@ -76,13 +76,6 @@ val sub_type :
   Errors.typing_error_callback ->
   Env.env
 
-(** Make a type a subtype of string. *)
-val sub_string :
-  Pos.t ->
-  Env.env ->
-  locl ty ->
-  Env.env
-
 (** Check that the method with signature ft_sub can be used to override
 (is a subtype of) method with signature ft_super. *)
 val subtype_method :

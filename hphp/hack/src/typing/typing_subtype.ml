@@ -2085,40 +2085,6 @@ and try_union env ty tyl =
       try_union env t tyl'
     | _, _ -> ty' :: try_union env ty tyl'
 
-let sub_string
-  (p : Pos.Map.key)
-  (env : Env.env)
-  (ty2 : locl ty) : Env.env =
-  let stringish_deprecated =
-    TypecheckerOptions.disallow_stringish_magic (Env.get_tcopt env) in
-  (* Under constraint-based inference, we implement sub_string as a subtype test.
-   * All the cases in the legacy implementation just fall out from subtyping rules.
-   * We test against ?(arraykey | bool | float | resource | object | dynamic |
-   * FormatString<T> | HH\FormatString<T>).
-   *)
-  let r = Reason.Rwitness p in
-  let env, formatter_tyvar = Env.fresh_invariant_type_var env p in
-  let tyl = [
-    MakeType.arraykey r;
-    MakeType.bool r;
-    MakeType.float r;
-    MakeType.resource r;
-    MakeType.dynamic r;
-    MakeType.class_type r SN.Classes.cFormatString [formatter_tyvar];
-    MakeType.class_type r SN.Classes.cHHFormatString [formatter_tyvar];
-  ] in
-  let stringish =
-    (Reason.Rwitness p, Tclass((p, SN.Classes.cStringish), Nonexact, [])) in
-  let tyl =
-    if stringish_deprecated
-    then tyl
-    else stringish::tyl in
-  let stringlike = (Reason.Rwitness p, Toption (Reason.Rwitness p, Tunion tyl)) in
-  (* at time of writing, this error can't actually be triggered here.
-   * typing_ops::sub_string wraps this in a Errors.try_ and emits different
-   * errors depending on the cause of the mismatch. *)
-  sub_type env ty2 stringlike Errors.expected_stringlike
-
 (** Check that the method with signature ft_sub can be used to override
  * (is a subtype of) method with signature ft_super.
  *
@@ -3031,7 +2997,6 @@ let is_sub_type env ty1 ty2 =
 (*****************************************************************************)
 
 let () = Typing_utils.sub_type_ref := sub_type
-let () = Typing_utils.sub_string_ref := sub_string
 let () = Typing_utils.add_constraint_ref := add_constraint
 let () = Typing_utils.is_sub_type_ref := is_sub_type
 let () = Typing_utils.is_sub_type_for_union_ref := is_sub_type_for_union

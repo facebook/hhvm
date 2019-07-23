@@ -73,6 +73,7 @@
     typing_phase
     typing_print
     typing_reactivity
+    typing_substring
     typing_subtype
     typing_subtype_tconst
     typing_taccess

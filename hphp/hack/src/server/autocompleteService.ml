@@ -456,58 +456,69 @@ let compute_complete_global
     List.iter gname_results.With_complete_flag.value add_res;
   end
 
+(* Print a descriptive "detail" element *)
+let get_desc_string_for env ty kind =
+  match kind with
+  | Method_kind
+  | Function_kind
+  | Variable_kind
+  | Property_kind
+  | Class_constant_kind
+  | Constructor_kind ->
+    (* Functions get detail *)
+    let result = match ty with
+    | DeclTy declt -> Tast_env.print_ty env declt
+    | LoclTy loclt -> Tast_env.print_ty env loclt
+    in
+    result
+
+  | Abstract_class_kind -> "abstract class"
+  | Class_kind -> "class"
+  | Interface_kind -> "interface"
+  | Trait_kind -> "trait"
+  | Enum_kind -> "enum"
+  | Namespace_kind -> "namespace"
+  | Keyword_kind -> "keyword"
+  | Literal_kind -> "literal"
+  | Constant_kind -> "constant"
+
+let get_func_details_for env ty =
+  let param_to_record ?(is_variadic=false) param =
+    {
+      param_name     = (match param.fp_name with
+                         | Some n -> n
+                         | None -> "");
+      param_ty       = Tast_env.print_ty env param.fp_type;
+      param_variadic = is_variadic;
+    }
+  in
+  let tfun_to_func_details ft =
+    Some {
+      return_ty = Tast_env.print_ty env ft.ft_ret;
+      min_arity = arity_min ft.ft_arity;
+      params    = List.map ft.ft_params param_to_record @
+        (match ft.ft_arity with
+           | Fellipsis _ ->
+               let empty = TUtils.default_fun_param (Reason.none, Tany) in
+               [param_to_record ~is_variadic:true empty]
+           | Fvariadic (_, p) -> [param_to_record ~is_variadic:true p]
+           | Fstandard _ -> [])
+    }
+  in
+  match ty with
+  | DeclTy (_, Tfun ft) -> tfun_to_func_details ft
+  | LoclTy (_, Tfun ft) -> tfun_to_func_details ft
+  | _ -> None
+
 (* Here we turn partial_autocomplete_results into complete_autocomplete_results *)
 (* by using typing environment to convert ty information into strings. *)
 let resolve_ty
     (env: Tast_env.t)
     (autocomplete_context: legacy_autocomplete_context)
     (x: partial_autocomplete_result)
+    (replace_pos: Ide_api_types.range)
   : complete_autocomplete_result =
-  let env, ty = match x.ty with
-    | DeclTy ty -> Tast_env.localize_with_self env ty
-    | LoclTy ty -> env, ty
-  in
-  let desc_string = match x.kind_ with
-    | Method_kind
-    | Function_kind
-    | Variable_kind
-    | Property_kind
-    | Class_constant_kind
-    | Constructor_kind -> Tast_env.print_ty env ty
-    | Abstract_class_kind -> "abstract class"
-    | Class_kind -> "class"
-    | Interface_kind -> "interface"
-    | Trait_kind -> "trait"
-    | Enum_kind -> "enum"
-    | Namespace_kind -> "namespace"
-    | Keyword_kind -> "keyword"
-    | Literal_kind -> "literal"
-    | Constant_kind -> "constant"
-  in
-  let func_details = match ty with
-    | (_, Tfun ft) ->
-      let param_to_record ?(is_variadic=false) param =
-        {
-          param_name     = (match param.fp_name with
-                             | Some n -> n
-                             | None -> "");
-          param_ty       = Tast_env.print_ty env param.fp_type;
-          param_variadic = is_variadic;
-        }
-      in
-      Some {
-        return_ty = Tast_env.print_ty env ft.ft_ret;
-        min_arity = arity_min ft.ft_arity;
-        params    = List.map ft.ft_params param_to_record @
-          (match ft.ft_arity with
-             | Fellipsis _ ->
-                 let empty = TUtils.default_fun_param (Reason.none, Tany) in
-                 [param_to_record ~is_variadic:true empty]
-             | Fvariadic (_, p) -> [param_to_record ~is_variadic:true p]
-             | Fstandard _ -> [])
-      }
-    | _ -> None
-  in
+
   (* XHP class+attribute names are stored internally with a leading colon.    *)
   (* We'll render them without it if and only if we're in an XHP context.     *)
   (*   $x = new :class1() -- do strip the colon in front of :class1           *)
@@ -522,15 +533,19 @@ let resolve_ty
     | Class_kind, { AutocompleteTypes.is_xhp_classname = true; _ } -> lstrip x.name ":"
     | _ -> x.name
   in
+  let pos = match x.ty with
+    | LoclTy loclt -> (fst loclt) |> Typing_reason.to_pos |> Pos.to_absolute
+    | DeclTy declt -> (fst declt) |> Typing_reason.to_pos |> Pos.to_absolute
+  in
   {
-    res_pos         = (fst ty) |> Typing_reason.to_pos |> Pos.to_absolute;
-    res_replace_pos = get_replace_pos_exn ();
+    res_pos         = pos;
+    res_replace_pos = replace_pos;
     res_base_class  = x.base_class;
-    res_ty          = desc_string;
+    res_ty          = get_desc_string_for env x.ty x.kind_;
     res_name        = name;
     res_fullname    = name;
     res_kind        = x.kind_;
-    func_details    = func_details;
+    func_details    = get_func_details_for env x.ty;
   }
 
 let tast_cid_to_nast_cid cid =
@@ -874,9 +889,14 @@ let go
       | Some Actrait_only, _ -> false
       | _ -> true
     in
+    let replace_pos = try
+      get_replace_pos_exn ()
+    with _ ->
+      Pos.none |> Pos.to_absolute |> Ide_api_types.pos_to_range
+    in
     let resolve (result: autocomplete_result) : complete_autocomplete_result =
       match result with
-      | Partial res -> resolve_ty tast_env autocomplete_context res
+      | Partial res -> resolve_ty tast_env autocomplete_context res replace_pos
       | Complete res -> res
     in
     let results = {

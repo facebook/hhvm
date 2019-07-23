@@ -10,7 +10,8 @@ function gen() {
     throw new LogicException('new throw');
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $gen = gen();
 $gen->next();
 var_dump($gen->throw(new RuntimeException('throw')));
+}

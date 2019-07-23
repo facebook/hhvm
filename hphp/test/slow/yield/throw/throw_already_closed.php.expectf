@@ -3,4 +3,4 @@ bool(false)
 Fatal error: Uncaught exception 'Exception' with message 'Generator is already finished' in %s/throw_already_closed.php:11
 Stack trace:
 #0 %s/throw_already_closed.php(11): Generator->throw()
-#1 {main}
+%a {main}

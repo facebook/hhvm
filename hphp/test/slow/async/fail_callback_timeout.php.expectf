@@ -5,4 +5,4 @@ Fatal error: Uncaught exception 'Exception' with message 'x' in %s/async/fail_ca
 Stack trace:
 #0 (): heh()
 #1 %s/async/fail_callback_timeout.php(16): HH\Asio\join()
-#2 {main}
+%a {main}

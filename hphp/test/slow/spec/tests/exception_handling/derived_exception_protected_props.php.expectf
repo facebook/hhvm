@@ -7,4 +7,4 @@ Foo
 
 Fatal error: Uncaught exception 'DerivedException' with message 'Derived message' in %s:29
 Stack trace:
-#0 {main}
+%a {main}

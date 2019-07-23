@@ -1,9 +1,8 @@
 
 Fatal error: Uncaught Error: Error message in %s:%d
 Stack trace:
-#0 {main}
+%a {main}
 
 Next exception 'Exception' with message 'Exception message' in %s:%d
 Stack trace:
-#0 {main}
-
+%a {main}

@@ -4,7 +4,7 @@ class DerivedException extends Exception {
   protected $message = 'Derived message';
   protected $code = 12345;
 }
-
+<<__EntryPoint>> function main(): void {
 try {
   throw new DerivedException; // from init
 } catch (Exception $e) {
@@ -27,3 +27,4 @@ try {
 }
 
 throw new DerivedException;
+}

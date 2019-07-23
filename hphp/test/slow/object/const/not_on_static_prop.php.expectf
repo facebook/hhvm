@@ -1,1 +1,0 @@
-Fatal error: Static properties may not be __Const in %s/not_on_static_prop.php on line 4

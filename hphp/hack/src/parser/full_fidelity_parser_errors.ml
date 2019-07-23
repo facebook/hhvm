@@ -3675,8 +3675,6 @@ let class_property_const_errors node errors =
          * were ever written.
          * __LateInit together with const just doesn't make sense. *)
         make_error_from_node node SyntaxError.no_const_late_init_props :: errors
-      else if methodish_contains_static node then
-        make_error_from_node node SyntaxError.no_const_static_props :: errors
       else errors
     else errors
   | _ -> errors

@@ -2897,9 +2897,6 @@ void parse_property(AsmState& as, bool class_is_const) {
         if (attrs & (AttrLateInit | AttrLateInitSoft)) {
           as.error("const properties may not also be late init");
         }
-        if (attrs & AttrStatic) {
-          as.error("static properties may not be const");
-        }
       } else if (class_is_const && !(attrs & AttrStatic)) {
         as.error("all instance properties of a const class must be const");
       }

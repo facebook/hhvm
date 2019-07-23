@@ -836,64 +836,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       break;
     }
 
-#ifdef USE_TCMALLOC
-    if (MallocExtensionInstance) {
-      if (cmd == "tcmalloc-stats") {
-        std::ostringstream stats;
-        size_t user_allocated, heap_size, slack_bytes;
-        size_t pageheap_free, pageheap_unmapped;
-        size_t tc_max, tc_allocated;
-
-        MallocExtensionInstance()->
-          GetNumericProperty("generic.current_allocated_bytes",
-              &user_allocated);
-        MallocExtensionInstance()->
-          GetNumericProperty("generic.heap_size", &heap_size);
-        MallocExtensionInstance()->
-          GetNumericProperty("tcmalloc.slack_bytes", &slack_bytes);
-        MallocExtensionInstance()->
-          GetNumericProperty("tcmalloc.pageheap_free_bytes", &pageheap_free);
-        MallocExtensionInstance()->
-          GetNumericProperty("tcmalloc.pageheap_unmapped_bytes",
-              &pageheap_unmapped);
-        MallocExtensionInstance()->
-          GetNumericProperty("tcmalloc.max_total_thread_cache_bytes",
-              &tc_max);
-        MallocExtensionInstance()->
-          GetNumericProperty("tcmalloc.current_total_thread_cache_bytes",
-              &tc_allocated);
-        stats << "<tcmalloc-stats>" << endl;
-        stats << "  <user_allocated>" << user_allocated << "</user_allocated>"
-          << endl;
-        stats << "  <heap_size>" << heap_size << "</heap_size>" << endl;
-        stats << "  <slack_bytes>" << slack_bytes << "</slack_bytes>" << endl;
-        stats << "  <pageheap_free>" << pageheap_free
-          << "</pageheap_free>" << endl;
-        stats << "  <pageheap_unmapped>" << pageheap_unmapped
-          << "</pageheap_unmapped>" << endl;
-        stats << "  <thread_cache_max>" << tc_max
-          << "</thread_cache_max>" << endl;
-        stats << "  <thread_cache_allocated>" << tc_allocated
-          << "</thread_cache_allocated>" << endl;
-        stats << "</tcmalloc-stats>" << endl;
-        transport->sendString(stats.str());
-        break;
-      }
-      if (cmd == "tcmalloc-set-tc") {
-        size_t tc_max;
-
-        MallocExtensionInstance()->
-          GetNumericProperty("tcmalloc.max_total_thread_cache_bytes", &tc_max);
-
-        size_t tcache = transport->getInt64Param("s");
-        bool retval = MallocExtensionInstance()->
-          SetNumericProperty("tcmalloc.max_total_thread_cache_bytes", tcache);
-        transport->sendString(retval == true ? "OK\n" : "FAILED\n");
-        break;
-      }
-    }
-#endif
-
 #ifdef USE_JEMALLOC
     assertx(mallctlnametomib && mallctlbymib);
     if (cmd == "jemalloc-stats") {
@@ -911,32 +853,24 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       size_t allocated = call_mallctl("stats.allocated");
       size_t active = call_mallctl("stats.active");
       size_t mapped = call_mallctl("stats.mapped");
+
+#if USE_JEMALLOC_EXTENT_HOOKS
+      size_t low_mapped = 0;
+      // The low range [1G, 4G) is divided into two ranges, and shared by 3
+      // arenas.
+      low_mapped += alloc::getRange(alloc::AddrRangeClass::VeryLow).used();
+      low_mapped += alloc::getRange(alloc::AddrRangeClass::Low).used();
+#else
       size_t low_mapped = call_mallctl(
           folly::sformat("stats.arenas.{}.mapped",
                          low_arena).c_str());
-      size_t low_small_allocated = call_mallctl(
-          folly::sformat("stats.arenas.{}.small.allocated",
-                         low_arena).c_str());
-      size_t low_large_allocated = call_mallctl(
-          folly::sformat("stats.arenas.{}.large.allocated",
-                         low_arena).c_str());
-      size_t low_active = call_mallctl(
-          folly::sformat("stats.arenas.{}.pactive",
-                         low_arena).c_str()) * sysconf(_SC_PAGESIZE);
-
+#endif
       std::ostringstream stats;
       stats << "<jemalloc-stats>" << endl;
       stats << "  <allocated>" << allocated << "</allocated>" << endl;
       stats << "  <active>" << active << "</active>" << endl;
       stats << "  <mapped>" << mapped << "</mapped>" << endl;
       stats << "  <low_mapped>" << low_mapped << "</low_mapped>" << endl;
-      stats << "  <low_allocated>"
-            << (low_small_allocated + low_large_allocated)
-            << "</low_allocated>" << endl;
-      stats << "  <low_active>"
-            << low_active
-            << "</low_active>" << endl;
-      stats << "  <error>" << error << "</error>" << endl;
       stats << "</jemalloc-stats>" << endl;
       transport->sendString(stats.str());
       break;

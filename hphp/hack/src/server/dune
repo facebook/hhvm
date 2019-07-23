@@ -255,6 +255,7 @@
     bad_files
     lwt
     parent
+    provider_config
     server
     state_loader
     typing_symbol_info

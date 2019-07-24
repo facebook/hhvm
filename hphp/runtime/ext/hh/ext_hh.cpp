@@ -24,6 +24,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
@@ -637,6 +638,30 @@ TypedValue HHVM_FUNCTION(dynamic_class_meth, StringArg cls, StringArg meth) {
       folly::sformat("Unable to method {}::{}",
                      cls.get()->data(), meth.get()->data())
     );
+  }
+  if (!func->isStatic()) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      folly::sformat("Method {}::{} is not static",
+                     cls.get()->data(), meth.get()->data())
+    );
+  }
+  if (!func->isPublic()) {
+    auto const ctx = GetCallerClass();
+    if (func->attrs() & AttrPrivate) {
+      if (func->cls() != ctx) {
+        SystemLib::throwInvalidArgumentExceptionObject(
+          folly::sformat("Method {}::{} is marked Private",
+                         cls.get()->data(), meth.get()->data())
+        );
+      }
+    } else if (func->attrs() & AttrProtected) {
+      if (!ctx || !ctx->classof(func->cls())) {
+        SystemLib::throwInvalidArgumentExceptionObject(
+          folly::sformat("Method {}::{} is marked Protected",
+                         cls.get()->data(), meth.get()->data())
+        );
+      }
+    }
   }
   if (!func->isDynamicallyCallable()) {
     auto const level = RuntimeOption::EvalDynamicClsMethLevel;

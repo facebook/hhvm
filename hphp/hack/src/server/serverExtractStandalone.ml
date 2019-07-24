@@ -36,7 +36,7 @@ let extract_function_body func =
   let include_first_whsp = Pos.merge (Pos.first_char_of_line pos) pos in
   Pos.get_text_from_pos file_content include_first_whsp
 
-let strip_namespace obj_name =
+let strip_ns obj_name =
   let (_, name) = String.rsplit2_exn obj_name '\\' in
   name
 
@@ -49,7 +49,7 @@ let get_function_declaration tcopt fun_name fun_type =
   | ([], _) -> ""
   | (tparams, _) -> Printf.sprintf "<%s>" @@ list_items @@ List.map tparams tparam_name in
   let fun_type_str = (Typing_print.fun_type tcopt fun_type) in
-  Printf.sprintf "function %s%s%s" (strip_namespace fun_name) tparams fun_type_str
+  Printf.sprintf "function %s%s%s" (strip_ns fun_name) tparams fun_type_str
 
 (* TODO: constants, class fields *)
 let extract_object_declaration tcopt obj =
@@ -71,7 +71,7 @@ let list_direct_ancestors cls =
   let cls_name = Decl_provider.Class.name cls in
   let filename = Pos.filename cls_pos in
   let ast_class = value_exn DependencyNotFound @@ Ast_provider.find_class_in_file filename cls_name in
-  let get_unqualified_class_name hint = strip_namespace @@ name_from_hint hint in
+  let get_unqualified_class_name hint = strip_ns @@ name_from_hint hint in
   let list_types hints = list_items @@ List.map hints get_unqualified_class_name in
   let open Ast in
   let extends = list_types ast_class.c_extends in
@@ -100,9 +100,9 @@ let format text =
 
 let get_class_declaration cls =
   let open Decl_provider in
-  let cls = match get_class cls with
-  | None -> raise DependencyNotFound  (* TODO: type alias *)
-  | Some cls -> cls in
+  match get_class cls with
+  | None -> raise DependencyNotFound
+  | Some cls ->
   let kind = match Class.kind cls with
   | Ast_defs.Cabstract -> "abstract class"
   | Ast_defs.Cnormal -> "class"
@@ -110,21 +110,31 @@ let get_class_declaration cls =
   | Ast_defs.Ctrait -> "trait"
   | Ast_defs.Cenum -> "enum"
   | Ast_defs.Crecord -> "record" in
-  let name = strip_namespace (Class.name cls) in
+  let name = strip_ns (Class.name cls) in
   let tparams = if List.is_empty @@ Class.tparams cls then ""
   else Printf.sprintf "<%s>" (list_items @@ List.map (Class.tparams cls) tparam_name) in
   (* TODO: traits, enums, records *)
   kind^" "^name^tparams^" "^(list_direct_ancestors cls)
 
 (* TODO: namespaces *)
-let construct_class_declaration tcopt cls fields acc =
+let construct_class_declaration tcopt cls fields =
   let decl = get_class_declaration cls in
   let open Typing_deps.Dep in
   let process_field f = match f with
   | AllMembers _ | Extends _ -> raise UnexpectedDependency
   | _ -> extract_object_declaration tcopt f in
   let body = HashSet.fold (fun f accum -> accum^"\n"^(process_field f)) fields "" in
-  (format (decl^" {"^body^"}")) :: acc
+  decl^" {"^body^"}"
+
+let construct_typedef_declaration tcopt t =
+  let td = value_exn DependencyNotFound @@ Decl_provider.get_typedef t in
+  let typ = if td.td_vis = Aast_defs.Transparent then "type" else "newtype" in
+  Printf.sprintf "%s %s = %s;" typ (strip_ns t) (Typing_print.full_decl tcopt td.td_type)
+
+let construct_type_declaration tcopt t fields acc =
+  match Decl_provider.get_class t with
+  | Some _ -> construct_class_declaration tcopt t fields :: acc
+  | None -> construct_typedef_declaration tcopt t :: acc
 
 (* TODO: Tfun? Any other cases? *)
 let add_dep ty deps = match ty with
@@ -170,26 +180,27 @@ let collect_dependencies tcopt func =
   Typing_deps.add_dependency_callback "add_dependency" add_dependency;
   let filename = get_filename func in
   let _ : Tast.def option = Typing_check_service.type_fun tcopt filename func in
-  let classes = Caml.Hashtbl.create 0 in
+  let types = Caml.Hashtbl.create 0 in
   let globals = HashSet.create 0 in
-  let group_by_class obj = match obj with
-  | Class cls -> (match Caml.Hashtbl.find_opt classes cls with
+  let group_by_type obj = match obj with
+  | Class cls -> (match Caml.Hashtbl.find_opt types cls with
     | Some set -> HashSet.add set obj
-    | None -> let set = HashSet.create 0 in Caml.Hashtbl.add classes cls set)
+    | None -> let set = HashSet.create 0 in Caml.Hashtbl.add types cls set)
   | Prop (cls, _)
   | SProp (cls, _)
   | Method (cls, _)
   | SMethod (cls, _)
   | Const (cls, _)
-  | Cstr cls -> (match Caml.Hashtbl.find_opt classes cls with
+  | Cstr cls -> (match Caml.Hashtbl.find_opt types cls with
     | Some set -> HashSet.add set obj
-    | None -> let set = HashSet.create 0 in HashSet.add set obj; Caml.Hashtbl.add classes cls set)
+    | None -> let set = HashSet.create 0 in HashSet.add set obj;
+              Caml.Hashtbl.add types cls set)
   | Extends _ -> raise UnexpectedDependency
   | AllMembers _ -> raise UnexpectedDependency
   | _ -> HashSet.add globals obj in
-  HashSet.iter group_by_class dependencies;
+  HashSet.iter group_by_type dependencies;
   let global_code = HashSet.fold (fun el l -> extract_object_declaration tcopt el :: l) globals [] in
-  let code = Caml.Hashtbl.fold (construct_class_declaration tcopt) classes global_code in
+  let code = Caml.Hashtbl.fold (construct_type_declaration tcopt) types global_code in
   List.map code format
 
 

@@ -15,6 +15,11 @@ class D<Tfirst, Tsecond> extends B {}
 
 class E<T> extends D<T, int> {}
 
+type Complex = shape('first' => int, 'second' => B);
+
+// TODO: check that the type alias is opaque
+newtype Point = shape('x' => int, 'y' => int);
+
 function generic<T>(): int {
   return 1;
 }
@@ -29,4 +34,8 @@ function f(C $c): void  {
 
 function h<Tfirst, Tsecond>(D<Tfirst, Tsecond> $d, E<Tfirst> $e): int {
   return generic<C>();
+}
+
+function with_types(Complex $c, shape('x' => int, 'y' => C) $pair) : Point {
+  return shape('x' => $pair['x'], 'y' => $c['first']);
 }

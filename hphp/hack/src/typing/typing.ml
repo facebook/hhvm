@@ -526,7 +526,7 @@ and fun_def tcopt f : Tast.fun_def option =
   let mut = TUtils.fun_mutable f.f_user_attributes in
   let env = Env.set_env_reactive env reactive in
   let env = Env.set_fun_mutable env mut in
-  NastCheck.fun_ env f nb;
+  NastCheck.fun_ env f;
   let ety_env = Phase.env_with_self env in
   let env, constraints =
     Phase.localize_generic_parameters_with_bounds env f.f_tparams

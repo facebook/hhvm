@@ -151,6 +151,7 @@ and static_prop env c cv =
     SN.UserAttributes.uaSoftLateInit
     cv.cv_user_attributes in
   let lsb = Attrs.mem SN.UserAttributes.uaLSB cv.cv_user_attributes in
+  let const = Attrs.mem SN.UserAttributes.uaConst cv.cv_user_attributes in
   if cv.cv_expr = None && FileInfo.(is_strict c.c_mode || c.c_mode = Mpartial)
   then begin match cv.cv_type with
     | None
@@ -161,7 +162,7 @@ and static_prop env c cv =
   end;
   if lateinit && cv.cv_expr <> None then Errors.lateinit_with_default cv_pos;
   {
-    sp_const = false; (* unsupported for static properties *)
+    sp_const = const;
     sp_xhp_attr = make_xhp_attr cv;
     sp_lateinit = lateinit;
     sp_lsb = lsb;

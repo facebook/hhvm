@@ -2167,7 +2167,7 @@ and expr_
       let env, te, cty = static_class_id ~check_constraints:false cpos env [] cid in
       let env = might_throw env in
       let env, ty, _ =
-        class_get ~is_method:false ~is_const:false env cty mid cid (fun x -> x) in
+        class_get ~is_method:false ~is_const:false ~valkind env cty mid cid (fun x -> x) in
       let env, ty = Env.FakeMembers.check_static_invalid env cid (snd mid) ty in
       make_result env p (T.Class_get (te, T.CGstring mid)) ty
 
@@ -4189,7 +4189,7 @@ and class_contains_smethod env cty (_pos, mid) =
   let _env, tyl = TUtils.get_concrete_supertypes env cty in
   List.exists tyl ~f:lookup_member
 
-and class_get ~is_method ~is_const ?(explicit_tparams=[]) ?(incl_tc=false)
+and class_get ~is_method ~is_const ?(valkind = `other) ?(explicit_tparams=[]) ?(incl_tc=false)
               env cty (p, mid) cid k =
   let env, this_ty =
     if is_method then
@@ -4197,10 +4197,10 @@ and class_get ~is_method ~is_const ?(explicit_tparams=[]) ?(incl_tc=false)
     else
       env, cty in
   let env, ty, _decl_ty, cc_abstract_info =
-    class_get_ ~is_method ~is_const ~this_ty ~explicit_tparams ~incl_tc env cid cty (p, mid) k in
+    class_get_ ~is_method ~is_const ~this_ty ~valkind ~explicit_tparams ~incl_tc env cid cty (p, mid) k in
   env, ty, cc_abstract_info
 
-and class_get_ ~is_method ~is_const ~this_ty ?(explicit_tparams=[])
+and class_get_ ~is_method ~is_const ~this_ty ~valkind ?(explicit_tparams=[])
                ?(incl_tc=false) env cid cty (p, mid) k =
   let env, cty = Env.expand_type env cty in
   match cty with
@@ -4211,7 +4211,7 @@ and class_get_ ~is_method ~is_const ~this_ty ?(explicit_tparams=[])
       let env, tyl =
         List.map_env env tyl begin fun env ty ->
         let env, ty, _ =
-          class_get ~is_method ~is_const ~explicit_tparams ~incl_tc
+          class_get ~is_method ~is_const ~valkind ~explicit_tparams ~incl_tc
                      env ty (p, mid) cid k
             in env, ty
         end in
@@ -4220,16 +4220,16 @@ and class_get_ ~is_method ~is_const ~this_ty ?(explicit_tparams=[])
   | _, Tintersection tyl ->
       let env, tyl = TUtils.run_on_intersection env tyl ~f:(fun env ty ->
         let env, ty, _ =
-          class_get ~is_method ~is_const ~explicit_tparams ~incl_tc env ty (p, mid) cid k in
+          class_get ~is_method ~is_const ~valkind ~explicit_tparams ~incl_tc env ty (p, mid) cid k in
         env, ty) in
       let env, ty = Inter.intersect_list env (fst cty) tyl in
       env, ty, None, None
   | _, Tabstract (_, Some ty) ->
-      class_get_ ~is_method ~is_const ~this_ty ~explicit_tparams ~incl_tc
+      class_get_ ~is_method ~is_const ~this_ty ~valkind ~explicit_tparams ~incl_tc
         env cid ty (p, mid) k
   | _, Tabstract (_, None) ->
       let resl = TUtils.try_over_concrete_supertypes env cty (fun env ty ->
-        class_get_ ~is_method ~is_const ~this_ty ~explicit_tparams ~incl_tc
+        class_get_ ~is_method ~is_const ~this_ty ~valkind ~explicit_tparams ~incl_tc
           env cid ty (p, mid) k) in
       begin match resl with
       | [] ->
@@ -4295,7 +4295,7 @@ and class_get_ ~is_method ~is_const ~this_ty ?(explicit_tparams=[])
               let env, inter_ty =
                 Inter.intersect_list env (Reason.Rwitness p) upper_bounds
               in
-              class_get_ ~is_method ~is_const ~this_ty ~explicit_tparams ~incl_tc
+              class_get_ ~is_method ~is_const ~this_ty ~valkind ~explicit_tparams ~incl_tc
                 env cid inter_ty (p, mid) (fun x -> x) end
             else begin
               smember_not_found p ~is_const ~is_method class_ mid;
@@ -4314,7 +4314,13 @@ and class_get_ ~is_method ~is_const ~this_ty ?(explicit_tparams=[])
                 env, (Reason.Rnone, Typing_utils.terr env), None, None
               ))
 
-          | Some { ce_visibility = vis; ce_lsb = lsb; ce_type = lazy decl_method_; _ } ->
+          | Some {
+              ce_visibility = vis;
+              ce_lsb = lsb;
+              ce_type = lazy decl_method_;
+              ce_const = const;
+              _
+            } ->
             let p_vis = Reason.to_pos (fst decl_method_) in
             TVis.check_class_access p env (p_vis, vis, lsb) cid class_;
             let env, method_ =
@@ -4330,6 +4336,9 @@ and class_get_ ~is_method ~is_const ~this_ty ?(explicit_tparams=[])
                 | _ ->
                   Phase.localize ~ety_env env decl_method_
               end in
+              if const && valkind = `lvalue then
+                Errors.assigning_to_const p;
+
             let env, ty, _, _ = Errors.try_
               (fun () -> get_smember_from_constraints env class_)
               (fun _ ->

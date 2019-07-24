@@ -6528,20 +6528,7 @@ and class_var_def ~is_static env cv =
     | None ->
       env, None
     | Some (p, _ as cty) ->
-      let orig_mode = Env.get_mode env in
-      let env =
-        (* If this is an XHP attribute and we're in strict mode,
-           relax to partial mode to allow the use of the "array"
-           annotation without specifying type parameters. Until
-           recently HHVM did not allow "array" with type parameters
-           in XHP attribute declarations, so this is a temporary
-           hack to support existing code for now. *)
-        (* Task #5815945: Get rid of this Hack *)
-        if Option.is_some cv.cv_xhp_attr && (Env.is_strict env)
-          then Env.set_mode env FileInfo.Mpartial
-          else env in
       let decl_cty = Decl_hint.hint env.Env.decl_env cty in
-      let env = Env.set_mode env orig_mode in
       let env, cty = Phase.localize_with_self env decl_cty in
       env, Some (ExpectedTy.make_and_allow_coercion p Reason.URhint cty (Some decl_cty)) in
   (* Next check the expression, passing in expected type if present *)

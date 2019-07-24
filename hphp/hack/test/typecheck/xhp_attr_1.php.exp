@@ -1,1 +1,2 @@
-No errors
+File "xhp_attr_1.php", line 12, characters 5-9:
+You cannot have an array without generics in strict mode (Typing[4045])

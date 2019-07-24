@@ -506,16 +506,7 @@ and typeconst (env, _) tconst =
   maybe hint env tconst.c_tconst_type;
   maybe hint env tconst.c_tconst_constraint;
 and class_var env cv =
-  let hint_env =
-    (* If this is an XHP attribute and we're in strict mode,
-       relax to partial mode to allow the use of generic
-       classes without specifying type parameters. This is
-       a temporary hack to support existing code for now. *)
-    (* Task #5815945: Get rid of this Hack *)
-    if Option.is_some cv.cv_xhp_attr && (Typing_env.is_strict env.tenv)
-      then { env with tenv = Typing_env.set_mode env.tenv FileInfo.Mpartial }
-      else env in
-  maybe hint hint_env cv.cv_type;
+  maybe hint env cv.cv_type;
   maybe expr env cv.cv_expr;
   ()
 

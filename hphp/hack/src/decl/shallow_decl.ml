@@ -106,24 +106,7 @@ let make_xhp_attr cv = Option.map cv.cv_xhp_attr (fun xai -> {
 
 let prop env cv =
   let cv_pos = fst cv.cv_id in
-  let ty = Option.map cv.cv_type ~f:begin fun ty' ->
-    if Option.is_some cv.cv_xhp_attr
-    then
-      (* If this is an XHP attribute and we're in strict mode,
-         relax to partial mode to allow the use of the "array"
-         annotation without specifying type parameters. Until
-         recently HHVM did not allow "array" with type parameters
-         in XHP attribute declarations, so this is a temporary
-         hack to support existing code for now. *)
-      (* Task #5815945: Get rid of this Hack *)
-      let env =
-        if FileInfo.is_strict (Decl_env.mode env)
-        then { env with Decl_env.mode = FileInfo.Mpartial }
-        else env
-      in
-      Decl_hint.hint env ty'
-    else Decl_hint.hint env ty'
-  end in
+  let ty = Option.map cv.cv_type ~f:(Decl_hint.hint env) in
   let const = Attrs.mem SN.UserAttributes.uaConst cv.cv_user_attributes in
   let lateinit = Attrs.mem2
     SN.UserAttributes.uaLateInit SN.UserAttributes.uaSoftLateInit

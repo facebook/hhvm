@@ -301,9 +301,12 @@ const SSATmpSet& resolveDefLabel(InlineAnalysis& ia,
   auto const it = ia.defLabelCache.find(tmp);
   if (it != ia.defLabelCache.end()) return it->second;
 
-  // We shouldn't be generated self-referential DefLabels with
-  // FramePtrs.
-  always_assert(!visited[tmp]);
+  // We can generate self-referential DefLabels because of
+  // loops. Ignore that part.
+  if (visited[tmp]) {
+    static const SSATmpSet empty;
+    return empty;
+  }
   visited.add(tmp);
 
   auto const dests = defLabel->dsts();
@@ -344,7 +347,9 @@ void resolve(InlineAnalysis& ia, SSATmp* tmp, F&& f) {
   if (!tmp->isA(TFramePtr)) return;
   if (tmp->inst()->is(DefLabel)) {
     SSATmpSet visited;
-    resolveDefLabel(ia, tmp, visited).forEach(
+    auto const& resolved = resolveDefLabel(ia, tmp, visited);
+    assertx(!resolved.none());
+    resolved.forEach(
       [&] (size_t id) { f(ia.unit->findSSATmp(id)); }
     );
     return;
@@ -965,9 +970,9 @@ void transformUses(InlineAnalysis& ia,
  * Normally this is straight-forward, but if the parent is DefLabel,
  * we may have do a recursive walk.
  */
-int32_t findSPOffset(const IRUnit& unit,
-                     const SSATmp* fp,
-                     SSATmpSet& visited) {
+folly::Optional<int32_t> findSPOffset(const IRUnit& unit,
+                                      const SSATmp* fp,
+                                      SSATmpSet& visited) {
   assertx(fp->isA(TFramePtr));
   auto const inst = fp->inst();
 
@@ -980,9 +985,9 @@ int32_t findSPOffset(const IRUnit& unit,
 
   assertx(inst->is(DefLabel));
 
-  // We shouldn't be generating self-referential DefLabels for
-  // FramePtrs, so fail loudly if we ever encounter one.
-  always_assert(!visited[fp]);
+  // We can encounter self-referential DefLabels because of loops, so
+  // ignore those.
+  if (visited[fp]) return folly::none;
   visited.add(fp);
 
   auto const dests = inst->dsts();
@@ -994,23 +999,20 @@ int32_t findSPOffset(const IRUnit& unit,
   // same offset. So, just recurse down an arbitrary source and use
   // the offset from that. In debug builds, we'll visit all the
   // sources and assert that the offsets are all the same.
-  auto first = true;
-  int32_t spOff;
+  folly::Optional<int32_t> spOff;
   inst->block()->forEachSrc(
     destIdx,
     [&] (const IRInstruction*, const SSATmp* tmp) {
-      if (first) {
+      if (!spOff) {
         spOff = findSPOffset(unit, tmp, visited);
-        first = false;
         return;
       }
       if (!debug) return;
       auto const off = findSPOffset(unit, tmp, visited);
-      always_assert(off == spOff);
+      always_assert(!off || *off == *spOff);
     }
   );
 
-  assertx(!first);
   return spOff;
 }
 
@@ -1023,7 +1025,9 @@ void adjustBCMarkers(OptimizeContext& ctx) {
     assertx(def->is(DefInlineFP));
     auto const curSpOff = def->extra<DefInlineFP>()->spOffset.offset;
     SSATmpSet visited;
-    return findSPOffset(*ctx.unit, parentFp, visited) - curSpOff;
+    auto const spOff = findSPOffset(*ctx.unit, parentFp, visited);
+    assertx(spOff);
+    return *spOff - curSpOff;
   }();
 
   /*

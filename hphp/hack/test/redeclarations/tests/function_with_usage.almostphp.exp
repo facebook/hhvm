@@ -1,0 +1,39 @@
+function foo(mixed ...$x){$GLOBALS['bento_renamed_function_foo'](...$x);}
+function bento_function_foo_1() {
+  print "FOO1";
+}
+$bento_renamed_function_foo='bento_function_foo_1';
+foo();
+function bento_function_foo_2() {
+  print "FOO2";
+}
+$bento_renamed_function_foo='bento_function_foo_2';
+foo();
+function bento_function_foo_3() {
+  print "FOO3";
+}
+$bento_renamed_function_foo='bento_function_foo_3';
+foo();
+
+_CODE_BLOCK_END_
+function bento_function_foo_4(int $x) {
+    print (string)$x;
+}
+$bento_renamed_function_foo='bento_function_foo_4';
+foo(1);
+function bento_function_foo_5(int $x, int $y) : int {
+    print $x + $y;
+}
+$bento_renamed_function_foo='bento_function_foo_5';
+print (string)foo(2, 3);
+function bento_function_foo_6(int $val1, int ... $vals): int {
+  $retVal = $val1;
+  foreach ($vals as $e) {
+    if ($e > $retVal) $retVal = $e;
+  }
+  return $retVal;
+}
+$bento_renamed_function_foo='bento_function_foo_6';
+print (string)foo(2, 3, 4, 5);
+
+_CODE_BLOCK_END_

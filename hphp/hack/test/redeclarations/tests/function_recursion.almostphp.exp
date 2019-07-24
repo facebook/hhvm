@@ -1,0 +1,11 @@
+function bar(mixed ...$x){$GLOBALS['bento_renamed_function_bar'](...$x);}
+function bento_function_bar_1(int $x) {
+    if ($x > 0) {
+        bar($x - 1);
+        print (string)$x;
+    }
+}
+$bento_renamed_function_bar='bento_function_bar_1';
+bar(5);
+
+_CODE_BLOCK_END_

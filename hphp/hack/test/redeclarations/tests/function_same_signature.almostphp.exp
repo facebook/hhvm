@@ -1,0 +1,38 @@
+function foo(mixed ...$x){$GLOBALS['bento_renamed_function_foo'](...$x);}
+function bento_function_foo_1() {
+  print "FOO1";
+}
+$bento_renamed_function_foo='bento_function_foo_1';
+function bento_function_foo_2() {
+  print "FOO2";
+}
+$bento_renamed_function_foo='bento_function_foo_2';
+function bento_function_foo_3() {
+  print "FOO3";
+}
+$bento_renamed_function_foo='bento_function_foo_3';
+
+_CODE_BLOCK_END_
+function bento_function_foo_4() {
+  print "FOO4";
+}
+$bento_renamed_function_foo='bento_function_foo_4';
+
+_CODE_BLOCK_END_
+function bar(mixed ...$x){$GLOBALS['bento_renamed_function_bar'](...$x);}
+function bento_function_bar_1(int $x, int $y) : int {
+  return $x + $y;
+}
+$bento_renamed_function_bar='bento_function_bar_1';
+
+_CODE_BLOCK_END_
+function bento_function_bar_2(int $x, int $y) : int {
+  return $x - $y;
+}
+$bento_renamed_function_bar='bento_function_bar_2';
+function bento_function_bar_3(int $x, int $y) : int {
+  return $x + $y - 10;
+}
+$bento_renamed_function_bar='bento_function_bar_3';
+
+_CODE_BLOCK_END_

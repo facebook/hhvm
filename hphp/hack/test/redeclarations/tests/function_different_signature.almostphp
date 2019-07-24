@@ -1,0 +1,24 @@
+function foo() {
+  print "FOO1";
+}
+_CODE_BLOCK_END_
+function foo(string $x) {
+    print $x;
+}
+_CODE_BLOCK_END_
+function foo(int $x) {
+    print (string)$x;
+}
+_CODE_BLOCK_END_
+function foo(int $x, int $y) : int {
+    print $x + $y;
+}
+_CODE_BLOCK_END_
+function foo(int $val1, int ... $vals): int {
+  $retVal = $val1;
+  foreach ($vals as $e) {
+    if ($e > $retVal) $retVal = $e;
+  }
+  return $retVal;
+}
+_CODE_BLOCK_END_

@@ -1,0 +1,7 @@
+(library
+  (name redeclarations)
+  (wrapped false)
+  (libraries
+    full_fidelity
+    map
+    utils_core))

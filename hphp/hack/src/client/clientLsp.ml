@@ -1519,19 +1519,13 @@ let do_highlight_local
 
   (* Figure out location *)
   let pos = lsp_position_to_ide params.position in
-  let lsp_doc_opt = SMap.get
-    params.textDocument.uri
-    editor_open_files in
-  let lsp_doc = match lsp_doc_opt with
-  | None -> failwith (Printf.sprintf "Cannot find LSP document [%s]"
-    params.textDocument.uri)
-  | Some doc -> doc
-  in
-
-  let filename = Lsp_helpers.lsp_textDocumentIdentifier_to_filename params.textDocument in
+  let labelled_file =
+    get_labelled_file_from_editor_open_files editor_open_files params.textDocument.uri in
+  let (file_path, file_input) =
+    ServerCommandTypesUtils.extract_labelled_file labelled_file in
   let request = { ClientIdeMessage.Lsp_highlight.
-    file_path = Path.make filename;
-    file_input = (ServerCommandTypes.FileContent lsp_doc.TextDocumentItem.text);
+    file_path = Path.make (Relative_path.to_absolute file_path);
+    file_input = file_input;
     line = pos.line;
     column = pos.column;
   } in

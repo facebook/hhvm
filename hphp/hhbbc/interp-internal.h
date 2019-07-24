@@ -437,8 +437,7 @@ bool canFold(ISS& env, const php::Func* func, int32_t nArgs,
   if (maybeDynamic && (
       (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls &&
        (func->attrs & AttrBuiltin)) ||
-      (RuntimeOption::EvalForbidDynamicCalls > 0 &&
-       !(func->attrs & AttrDynamicallyCallable)))) {
+      (dyn_call_error_level(func) > 0))) {
     return false;
   }
 

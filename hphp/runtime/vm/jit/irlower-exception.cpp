@@ -84,10 +84,17 @@ void cgRaiseHackArrCompatNotice(IRLS& env, const IRInstruction* inst) {
 }
 
 static void raiseForbiddenDynCall(const Func* func) {
-  assertx(RuntimeOption::EvalForbidDynamicCalls > 0);
   assertx(!func->isDynamicallyCallable());
+  int dynCallErrorLevel = func->isMethod() ?
+    (
+      func->isStatic() ?
+        RuntimeOption::EvalForbidDynamicCallsToClsMeth :
+        RuntimeOption::EvalForbidDynamicCallsToInstMeth
+    ) :
+    RuntimeOption::EvalForbidDynamicCallsToFunc;
+  if (dynCallErrorLevel <= 0) return;
 
-  if (RuntimeOption::EvalForbidDynamicCalls >= 2) {
+  if (dynCallErrorLevel >= 2) {
     std::string msg;
     string_printf(
       msg,
@@ -104,10 +111,10 @@ static void raiseForbiddenDynCall(const Func* func) {
 }
 
 static void raiseForbiddenDynConstruct(const Class* cls) {
-  assertx(RuntimeOption::EvalForbidDynamicCalls > 0);
+  assertx(RuntimeOption::EvalForbidDynamicConstructs > 0);
   assertx(!cls->isDynamicallyConstructible());
 
-  if (RuntimeOption::EvalForbidDynamicCalls >= 2) {
+  if (RuntimeOption::EvalForbidDynamicConstructs >= 2) {
     std::string msg;
     string_printf(
       msg,

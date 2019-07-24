@@ -131,7 +131,10 @@ struct Repo::GlobalData {
    * Should the runtime emit notices or throw whenever a function is called
    * dynamically and that function has not been marked as allowing that?
    */
-  int32_t ForbidDynamicCalls = 0;
+  int32_t ForbidDynamicCallsToFunc = 0;
+  int32_t ForbidDynamicCallsToClsMeth = 0;
+  int32_t ForbidDynamicCallsToInstMeth = 0;
+  int32_t ForbidDynamicConstructs = 0;
 
   /*
    * Should the runtime emit notices whenever a builtin is called dynamically?
@@ -204,7 +207,10 @@ struct Repo::GlobalData {
       (HackArrDVArrs)
       (EnableIntrinsicsExtension)
       (ReffinessInvariance)
-      (ForbidDynamicCalls)
+      (ForbidDynamicCallsToFunc)
+      (ForbidDynamicCallsToClsMeth)
+      (ForbidDynamicCallsToInstMeth)
+      (ForbidDynamicConstructs)
       (NoticeOnBuiltinDynamicCalls)
       (Signature)
       (AbortBuildOnVerifyError)

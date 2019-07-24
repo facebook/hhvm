@@ -290,7 +290,12 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
     RuntimeOption::EvalHackArrCompatCheckArrayPlus =
     RuntimeOption::EvalHackArrCompatCheckArrayKeyCast =
       gd.HackArrCompatNotices;
-  RuntimeOption::EvalForbidDynamicCalls      = gd.ForbidDynamicCalls;
+  RuntimeOption::EvalForbidDynamicCallsToFunc = gd.ForbidDynamicCallsToFunc;
+  RuntimeOption::EvalForbidDynamicCallsToClsMeth =
+    gd.ForbidDynamicCallsToClsMeth;
+  RuntimeOption::EvalForbidDynamicCallsToInstMeth =
+    gd.ForbidDynamicCallsToInstMeth;
+  RuntimeOption::EvalForbidDynamicConstructs = gd.ForbidDynamicConstructs;
   RuntimeOption::EvalNoticeOnBuiltinDynamicCalls =
     gd.NoticeOnBuiltinDynamicCalls;
   RuntimeOption::EvalHackArrCompatIsArrayNotices =
@@ -370,7 +375,12 @@ void write_global_data(
   gd.EnableIntrinsicsExtension   = RuntimeOption::EnableIntrinsicsExtension;
   gd.APCProfile                  = std::move(apcProfile);
   gd.ReffinessInvariance         = RuntimeOption::EvalReffinessInvariance;
-  gd.ForbidDynamicCalls          = RuntimeOption::EvalForbidDynamicCalls;
+  gd.ForbidDynamicCallsToFunc    = RuntimeOption::EvalForbidDynamicCallsToFunc;
+  gd.ForbidDynamicCallsToClsMeth =
+    RuntimeOption::EvalForbidDynamicCallsToClsMeth;
+  gd.ForbidDynamicCallsToInstMeth =
+    RuntimeOption::EvalForbidDynamicCallsToInstMeth;
+  gd.ForbidDynamicConstructs     = RuntimeOption::EvalForbidDynamicConstructs;
   gd.AbortBuildOnVerifyError     = RuntimeOption::EvalAbortBuildOnVerifyError;
   gd.EnableArgsInBacktraces      = RuntimeOption::EnableArgsInBacktraces;
   gd.NoticeOnBuiltinDynamicCalls =

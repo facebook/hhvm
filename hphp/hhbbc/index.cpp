@@ -751,7 +751,7 @@ bool Class::couldHaveReifiedGenerics() const {
 }
 
 bool Class::mightCareAboutDynConstructs() const {
-  if (RuntimeOption::EvalForbidDynamicCalls > 0) {
+  if (RuntimeOption::EvalForbidDynamicConstructs > 0) {
     return val.match(
       [] (SString) { return true; },
       [] (ClassInfo* cinfo) {
@@ -909,27 +909,33 @@ bool Func::mightCareAboutDynCalls() const {
   if (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && mightBeBuiltin()) {
     return true;
   }
-  if (RuntimeOption::EvalForbidDynamicCalls > 0) {
-    auto const res = match<bool>(
-      val,
-      [&](FuncName) { return true; },
-      [&](MethodName) { return true; },
-      [&](FuncInfo* fi) {
-        return !(fi->func->attrs & AttrDynamicallyCallable);
-      },
-      [&](const MethTabEntryPair* mte) {
-        return !(mte->second.func->attrs & AttrDynamicallyCallable);
-      },
-      [&](FuncFamily* fa) {
-        for (auto const pf : fa->possibleFuncs()) {
-          if (!(pf->second.func->attrs & AttrDynamicallyCallable)) return true;
-        }
-        return false;
+  auto const mightCareAboutFuncs =
+    RuntimeOption::EvalForbidDynamicCallsToFunc > 0;
+  auto const mightCareAboutInstMeth =
+    RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0;
+  auto const mightCareAboutClsMeth =
+    RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0;
+
+  return match<bool>(
+    val,
+    [&](FuncName) { return mightCareAboutFuncs; },
+    [&](MethodName) {
+      return mightCareAboutClsMeth || mightCareAboutInstMeth;
+    },
+    [&](FuncInfo* fi) {
+      return dyn_call_error_level(fi->func) > 0;
+    },
+    [&](const MethTabEntryPair* mte) {
+      return dyn_call_error_level(mte->second.func) > 0;
+    },
+    [&](FuncFamily* fa) {
+      for (auto const pf : fa->possibleFuncs()) {
+        if (dyn_call_error_level(pf->second.func) > 0)
+          return true;
       }
-    );
-    if (res) return true;
-  }
-  return false;
+      return false;
+    }
+  );
 }
 
 bool Func::mightBeBuiltin() const {

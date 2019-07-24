@@ -45,7 +45,10 @@ std::string show(const Repo::GlobalData& gd) {
   SHOW(HackArrCompatSerializeNotices);
   SHOW(HackArrDVArrs);
   SHOW(EnableIntrinsicsExtension);
-  SHOW(ForbidDynamicCalls);
+  SHOW(ForbidDynamicCallsToFunc);
+  SHOW(ForbidDynamicCallsToClsMeth);
+  SHOW(ForbidDynamicCallsToInstMeth);
+  SHOW(ForbidDynamicConstructs);
   SHOW(NoticeOnBuiltinDynamicCalls);
   SHOW(ReffinessInvariance);
   SHOW(AbortBuildOnVerifyError);

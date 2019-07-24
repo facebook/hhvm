@@ -1,0 +1,2 @@
+-vEval.ForbidDynamicConstructs=1
+-vEval.EmitClsMethPointers=1

@@ -47,10 +47,17 @@ inline void callerReffinessChecks(const Func* func, const FCallArgs& fca) {
  * raise a notice and return false or raise an exception.
  */
 inline bool callerDynamicCallChecks(const Func* func) {
-  if (RuntimeOption::EvalForbidDynamicCalls <= 0) return true;
+  int dynCallErrorLevel = func->isMethod() ?
+    (
+      func->isStatic() ?
+        RuntimeOption::EvalForbidDynamicCallsToClsMeth :
+        RuntimeOption::EvalForbidDynamicCallsToInstMeth
+    ) :
+    RuntimeOption::EvalForbidDynamicCallsToFunc;
+  if (dynCallErrorLevel <= 0) return true;
   if (func->isDynamicallyCallable()) return true;
 
-  if (RuntimeOption::EvalForbidDynamicCalls >= 2) {
+  if (dynCallErrorLevel >= 2) {
     std::string msg;
     string_printf(
       msg,
@@ -68,10 +75,10 @@ inline bool callerDynamicCallChecks(const Func* func) {
 }
 
 inline void callerDynamicConstructChecks(const Class* cls) {
-  if (RuntimeOption::EvalForbidDynamicCalls <= 0) return;
+  if (RuntimeOption::EvalForbidDynamicConstructs <= 0) return;
   if (cls->isDynamicallyConstructible()) return;
 
-  if (RuntimeOption::EvalForbidDynamicCalls >= 2) {
+  if (RuntimeOption::EvalForbidDynamicConstructs >= 2) {
     std::string msg;
     string_printf(
       msg,

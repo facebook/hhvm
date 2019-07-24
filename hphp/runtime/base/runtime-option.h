@@ -1088,7 +1088,10 @@ struct RuntimeOption {
    * 2 - Throw exception                                                \
    *                                                                    \
    */                                                                   \
-  F(int32_t, ForbidDynamicCalls, 0)                                     \
+  F(int32_t, ForbidDynamicCallsToFunc, 0)                               \
+  F(int32_t, ForbidDynamicCallsToClsMeth, 0)                            \
+  F(int32_t, ForbidDynamicCallsToInstMeth, 0)                           \
+  F(int32_t, ForbidDynamicConstructs, 0)                                \
   /*                                                                    \
    * Control handling of out-of-range integer values in the compact     \
    * Thrift serializer.                                                 \

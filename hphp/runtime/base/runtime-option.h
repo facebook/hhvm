@@ -828,6 +828,7 @@ struct RuntimeOption {
   F(bool,     HHIRInliningIgnoreHints, !debug)                          \
   F(bool,     HHIRInliningUseStackedCost, true)                         \
   F(bool,     HHIRInliningUseReachableCost, false)                      \
+  F(bool,     HHIRInliningUseLayoutBlocks, false)                       \
   F(bool, HHIRInlineFrameOpts,         true)                            \
   F(bool, HHIRPartialInlineFrameOpts,  true)                            \
   F(bool, HHIRGenerateAsserts,         false)                           \

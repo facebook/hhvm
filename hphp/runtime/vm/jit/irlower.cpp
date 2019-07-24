@@ -189,8 +189,11 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit,
 }
 
 Vcost computeIRUnitCost(const IRUnit& unit) {
-  auto const vunit = lowerUnit(unit, nullptr /* annotations */,
-                               CodeKind::Trace, false /* regAlloc */);
+  auto vunit = lowerUnit(unit, nullptr /* annotations */,
+                         CodeKind::Trace, false /* regAlloc */);
+  if (RuntimeOption::EvalHHIRInliningUseLayoutBlocks) {
+    layoutBlocks(*vunit);
+  }
   return computeVunitCost(*vunit);
 }
 

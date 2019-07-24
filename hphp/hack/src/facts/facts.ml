@@ -24,6 +24,7 @@ type type_kind =
   | TKInterface
   | TKEnum
   | TKTrait
+  | TKTypeAlias
   | TKUnknown
   | TKMixed
 
@@ -32,6 +33,7 @@ let type_kind_to_string = function
   | TKInterface -> "interface"
   | TKEnum -> "enum"
   | TKTrait -> "trait"
+  | TKTypeAlias -> "typeAlias"
   | TKUnknown -> "unknown"
   | TKMixed -> "mixed"
 let type_kind_from_string s =
@@ -39,6 +41,7 @@ let type_kind_from_string s =
   else if s = "interface" then TKInterface
   else if s = "enum" then TKEnum
   else if s = "trait" then TKTrait
+  else if s = "typeAlias" then TKTypeAlias
   else if s = "unknown" then TKUnknown
   else if s = "mixed" then TKMixed
   else raise (Failure (Printf.sprintf "No Facts.type_kind matches string: %s" s))

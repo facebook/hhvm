@@ -51,7 +51,7 @@ pub enum Node {
     RequireImplementsClause(Box<Node>),
     ConstDecl(Box<Node>),
     Define(Box<Node>),
-    TypeAliasDecl(Box<Node>),
+    TypeAliasDecl(Box<TypeAliasDeclChildren>),
     NamespaceDecl(Box<Node>, Box<Node>),
     EmptyBody,
 }
@@ -70,6 +70,12 @@ pub struct ClassDeclChildren {
 
 #[derive(Debug)]
 pub struct EnumDeclChildren {
+    pub name: Node,
+    pub attributes: Node,
+}
+
+#[derive(Debug)]
+pub struct TypeAliasDeclChildren {
     pub name: Node,
     pub attributes: Node,
 }
@@ -232,7 +238,7 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
 
     fn make_alias_declaration(
         &mut self,
-        _attributes: Self::R,
+        attributes: Self::R,
         _keyword: Self::R,
         name: Self::R,
         _generic_params: Self::R,
@@ -243,7 +249,7 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
     ) -> Self::R {
         match name {
             Node::Ignored => Node::Ignored,
-            _ => Node::TypeAliasDecl(Box::new(name)),
+            _ => Node::TypeAliasDecl(Box::new(TypeAliasDeclChildren { name, attributes })),
         }
     }
 

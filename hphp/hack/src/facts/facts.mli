@@ -16,6 +16,7 @@ type type_kind =
   | TKInterface
   | TKEnum
   | TKTrait
+  | TKTypeAlias
   | TKUnknown
   | TKMixed
 

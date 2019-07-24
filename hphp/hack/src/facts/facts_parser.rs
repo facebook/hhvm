@@ -369,8 +369,18 @@ fn collect(mut acc: CollectAcc, node: Node) -> CollectAcc {
                 acc.1.constants.push(name);
             }
         }
-        TypeAliasDecl(box name) => {
-            if let Some(name) = qualified_name(&acc.0, name) {
+        TypeAliasDecl(box decl) => {
+            if let Some(name) = qualified_name(&acc.0, decl.name) {
+                let attributes = attributes_into_facts(&acc.0, decl.attributes);
+                let type_alias_facts = TypeFacts {
+                    flags: Flag::default() as isize,
+                    kind: TypeKind::TypeAlias,
+                    attributes,
+                    base_types: StringSet::new(),
+                    require_extends: StringSet::new(),
+                    require_implements: StringSet::new(),
+                };
+                add_or_update_classish_decl(name.clone(), type_alias_facts, &mut acc.1.types);
                 acc.1.type_aliases.push(name);
             }
         }

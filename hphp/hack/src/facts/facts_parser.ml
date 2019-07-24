@@ -252,10 +252,10 @@ let rec collect (ns, facts as acc) n =
   | EnumDecl decl ->
     begin match qualified_name ns decl.name with
       | Some name ->
-      let attributes = attributes_from_decl ns decl.attributes in
+        let attributes = attributes_from_decl ns decl.attributes in
         let types =
-          add_or_update_classish_declaration facts.types name
-            TKEnum flags_final attributes InvSSet.empty InvSSet.empty InvSSet.empty in
+          add_or_update_classish_declaration facts.types name TKEnum flags_final
+            attributes InvSSet.empty InvSSet.empty InvSSet.empty in
         let facts =
           if phys_equal types facts.types
           then facts
@@ -273,9 +273,20 @@ let rec collect (ns, facts as acc) n =
       | Some name -> ns, { facts with constants = name :: facts.constants }
       | None -> acc
     end
-  | TypeAliasDecl name ->
-    begin match qualified_name ns name with
-      | Some name -> ns, { facts with type_aliases = name :: facts.type_aliases }
+  | TypeAliasDecl decl ->
+    begin match qualified_name ns decl.name with
+      | Some name ->
+        let type_aliases = name :: facts.type_aliases in
+        let facts = {facts with type_aliases} in
+        let attributes = attributes_from_decl ns decl.attributes in
+        let types =
+          add_or_update_classish_declaration facts.types name TKTypeAlias
+            flags_default attributes InvSSet.empty InvSSet.empty InvSSet.empty in
+        let facts =
+          if phys_equal types facts.types
+          then facts
+          else { facts with types } in
+          ns, facts
       | None -> acc
     end
   | Define (String name) when ns = "" ->

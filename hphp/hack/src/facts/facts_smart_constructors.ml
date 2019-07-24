@@ -60,7 +60,10 @@ type node =
   | RequireImplementsClause of node
   | ConstDecl of node
   | Define of node
-  | TypeAliasDecl of node
+  | TypeAliasDecl of {
+    attributes: node;
+    name: node;
+    }
   | NamespaceDecl of node * node
   | EmptyBody
   [@@deriving show]
@@ -168,9 +171,9 @@ module SC = struct
     _left_brace _enumerators _right_brace st =
     st, if name = Ignored then Ignored else EnumDecl { attributes; name }
 
-  let make_alias_declaration _attributes _keyword name _generic_params _constraint
+  let make_alias_declaration attributes _keyword name _generic_params _constraint
     _equal _type _semicolon st =
-    st, if name = Ignored then Ignored else TypeAliasDecl name
+    st, if name = Ignored then Ignored else TypeAliasDecl { attributes; name }
 
   let make_define_expression _keyword _left_paren args _right_paren st =
     match args with

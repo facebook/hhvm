@@ -9,9 +9,10 @@ function gen() {
 function yf() {
   yield from gen();
 }
-
+<<__EntryPoint>> function main(): void {
 $g = yf();
 // Prime the generator
 $g->next();
 // THROW
 $g->throw(new Exception("This should throw from gen!"));
+}

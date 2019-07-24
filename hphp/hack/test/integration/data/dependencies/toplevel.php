@@ -11,10 +11,22 @@ class B implements I1 {}
 
 class C extends A {}
 
+class D<Tfirst, Tsecond> extends B {}
+
+class E<T> extends D<T, int> {}
+
+function generic<T>(): int {
+  return 1;
+}
+
 function g() : void {
   $b = new B();
 }
 
 function f(C $c): void  {
   g();
+}
+
+function h<Tfirst, Tsecond>(D<Tfirst, Tsecond> $d, E<Tfirst> $e): int {
+  return generic<C>();
 }

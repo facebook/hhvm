@@ -53,11 +53,11 @@ let extract_object_declaration obj =
     declaration ^ "{throw new Exception();}"
   | _ -> to_string obj
 
-let list objects = String.concat (Sequence.to_list objects) ~sep:", "
+let list_items items = String.concat items ~sep:", "
 
-(* TODO: generics *)
-let name_from_hint hint = match hint with
-  | (_, Ast.Happly((_, s), _)) -> s
+let rec name_from_hint hint = match hint with
+  | (_, Ast.Happly((_, s), params)) -> if List.is_empty params then s
+    else Printf.sprintf "%s<%s>" s (list_items @@ List.map params name_from_hint)
   | _ -> raise UnexpectedDependency
 
 let list_direct_ancestors cls =
@@ -66,7 +66,7 @@ let list_direct_ancestors cls =
   let filename = Pos.filename cls_pos in
   let ast_class = value_exn (Ast_provider.find_class_in_file filename cls_name) DependencyNotFound in
   let get_unqualified_class_name hint = strip_namespace @@ name_from_hint hint in
-  let list_types hints = String.concat ~sep:", " @@ List.map hints get_unqualified_class_name in
+  let list_types hints = list_items @@ List.map hints get_unqualified_class_name in
   let open Ast in
   let extends = list_types ast_class.c_extends in
   let implements = list_types ast_class.c_implements in
@@ -105,10 +105,12 @@ let get_class_declaration cls =
   | Ast_defs.Cenum -> "enum"
   | Ast_defs.Crecord -> "record" in
   let name = strip_namespace (Class.name cls) in
+  let tparams = if List.is_empty @@ Class.tparams cls then ""
+  else Printf.sprintf "<%s>" (list_items @@ List.map (Class.tparams cls) (fun tp -> snd tp.tp_name)) in
   (* TODO: traits, enums, records *)
-  kind^" "^name^" "^(list_direct_ancestors cls)
+  kind^" "^name^tparams^" "^(list_direct_ancestors cls)
 
-(* TODO: namespaces; mind that cls might start with \ at this point, remove if needed *)
+(* TODO: namespaces *)
 let construct_class_declaration cls fields acc =
   let decl = get_class_declaration cls in
   let open Typing_deps.Dep in

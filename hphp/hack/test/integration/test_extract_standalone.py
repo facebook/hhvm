@@ -57,3 +57,6 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
 
     def test_extract_toplevel(self) -> None:
         assert self.test_driver.check_extract_standalone("\\f") == 0
+
+    def test_extract_with_generic_deps(self) -> None:
+        assert self.test_driver.check_extract_standalone("\\h") == 0

@@ -315,7 +315,6 @@ struct
       let id = Local_id.make_scoped SN.SpecialIdents.dollardollar in
       Aast.Pipe ((p, id), on_expr e1, on_expr e2)
     | Eif (e1, opt_e, e2) -> Aast.Eif (on_expr e1, optional on_expr opt_e, on_expr e2)
-    | InstanceOf (e1, e2) -> Aast.InstanceOf (on_expr e1, (annot, Aast.CIexpr (on_expr e2)))
     | Is (e, h) -> Aast.Is (on_expr e, on_hint h)
     | As (e, h, b) -> Aast.As (on_expr e, on_hint h, b)
     | New (e, tl, el1, el2) ->

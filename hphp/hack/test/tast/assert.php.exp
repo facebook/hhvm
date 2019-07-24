@@ -30,15 +30,14 @@
          ];
        f_body =
        { fb_ast =
-         [([15:3-27],
+         [([15:3-19],
            (Expr
-              (([15:3-26], void),
+              (([15:3-18], void),
                (Assert
                   (AE_assert
-                     (([15:10-25], bool),
-                      (InstanceOf (
-                         (([15:10-12], ?A), (Lvar ([15:10-12], $x))),
-                         (([15:24-25], A), (CI ([15:24-25], "\\A")))))))))))
+                     (([15:10-17], bool),
+                      (Is ((([15:10-12], ?A), (Lvar ([15:10-12], $x))),
+                         ([15:16-17], (Happly (([15:16-17], "\\A"), [])))))))))))
            ];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

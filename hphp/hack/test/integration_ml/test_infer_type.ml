@@ -253,11 +253,9 @@ function class_id(): void {
 //^7:3
   A::foo;
 //^9:3
-  if ($x instanceof B) {}
-//                  ^11:21
   $cls = A::class;
   $cls;
-// ^14:4
+// ^12:4
 }
 "
 
@@ -266,8 +264,7 @@ let class_id_cases = [
   ("class_id.php", 5, 3), "A";
   ("class_id.php", 7, 3), "A";
   ("class_id.php", 9, 3), "A";
-  ("class_id.php", 11, 21), "B";
-  ("class_id.php", 14, 4), "classname<A>";
+  ("class_id.php", 12, 4), "classname<A>";
 ]
 
 

@@ -1752,20 +1752,9 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         if name_text <> "re"
         then raise_parsing_error env (`Node node) SyntaxError.non_re_prefix;
         PrefixedString (text name, pExpr str env)
-    | InstanceofExpression
-      { instanceof_left_operand; instanceof_right_operand; _ } ->
-      let ty =
-        match pExpr instanceof_right_operand env with
-        | p, Class_const ((_, pid), (_, "")) -> p, pid
-        | ty -> ty
-      in
+    | InstanceofExpression _ ->
       raise_parsing_error env (`Node node) SyntaxError.instanceof_disabled;
-      InstanceOf (pExpr instanceof_left_operand env, ty)
-      (* TODO: Priority fix? *)
-      (*match pExpr instanceof_left_operand env with
-      | p, Unop (o,e) -> Unop (0, (p, InstanceOf (e, ty)))
-      | e -> InstanceOf (e, ty)
-      *)
+      Omitted
     | IsExpression
       { is_left_operand; is_right_operand; _ } ->
       Is (pExpr is_left_operand env, pHint is_right_operand env)

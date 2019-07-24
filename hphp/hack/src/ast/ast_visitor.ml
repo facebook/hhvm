@@ -92,7 +92,6 @@ class type ['a] ast_visitor_type = object
   method on_import_flavor: 'a -> import_flavor -> 'a
   method on_include: 'a -> 'a
   method on_includeOnce: 'a -> 'a
-  method on_instanceOf : 'a -> expr -> expr -> 'a
   method on_int : 'a -> string -> 'a
   method on_is : 'a -> expr -> hint -> 'a
   method on_as : 'a -> expr -> hint -> bool -> 'a
@@ -426,7 +425,6 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
    | Binop       (bop, e1, e2)    -> this#on_binop acc bop e1 e2
    | Pipe        (e1, e2)    -> this#on_pipe acc e1 e2
    | Eif         (e1, e2, e3)     -> this#on_eif acc e1 e2 e3
-   | InstanceOf  (e1, e2)         -> this#on_instanceOf acc e1 e2
    | Is          (e, h) -> this#on_is acc e h
    | As          (e, h, b) -> this#on_as acc e h b
    | BracedExpr e
@@ -556,11 +554,6 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
       | Some e -> this#on_expr acc e
     in
     let acc = this#on_expr acc e3 in
-    acc
-
-  method on_instanceOf acc e1 e2 =
-    let acc = this#on_expr acc e1 in
-    let acc = this#on_expr acc e2 in
     acc
 
   method on_is acc e h =

@@ -459,7 +459,6 @@ and expr_ =
   | Binop of bop * expr * expr
   | Pipe of expr * expr
   | Eif of expr * expr option * expr
-  | InstanceOf of expr * expr
   | Is of expr * hint
   | As of expr * hint * (* is nullable *) bool
   (* Braced expression exists so we can distinguish $f->${x} from $f->{x}

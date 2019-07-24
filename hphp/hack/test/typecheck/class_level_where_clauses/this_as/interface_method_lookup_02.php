@@ -9,16 +9,16 @@
  *
  */
 
-class C {
-  public function foo(): num { return 0.0; }
+abstract class C {
+  abstract public function foo(): num;
 }
 
 interface I where this as C {
   public function foo(): mixed;
 }
 
-class D extends C implements I {
-  public function foo(): int { return 0; }
+abstract class D extends C implements I {
+  abstract public function foo(): int;
 }
 
 function test1(D $x): int {

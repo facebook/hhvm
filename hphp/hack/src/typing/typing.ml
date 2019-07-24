@@ -4454,22 +4454,16 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
   match concrete_ty with
   | (r, Tclass(x, exact, paraml)) ->
     let get_member_from_constraints env class_info =
-      if not (Sequence.is_empty
-        (Cls.upper_bounds_on_this_from_constraints class_info)) then begin
-        let ety_env = mk_ety_env r class_info x exact paraml in
-        let upper_bounds = Sequence.to_list (Cls.upper_bounds_on_this class_info) in
-        let env, upper_bounds = List.map_env env upper_bounds
-          ~f:(fun env up -> Phase.localize ~ety_env env up) in
-        let env, inter_ty =
-          Inter.intersect_list env (Reason.Rwitness id_pos) upper_bounds
-        in
-        obj_get_ ~is_method ~nullsafe:None ~obj_pos:(Reason.to_pos r)
-          ~valkind ~pos_params: None ~explicit_tparams
-          env inter_ty class_id (id_pos, id_str) (fun x -> x) k_lhs
-      end else begin
-        member_not_found id_pos ~is_method class_info id_str r;
-        default ()
-      end
+      let ety_env = mk_ety_env r class_info x exact paraml in
+      let upper_bounds = Sequence.to_list (Cls.upper_bounds_on_this class_info) in
+      let env, upper_bounds = List.map_env env upper_bounds
+        ~f:(fun env up -> Phase.localize ~ety_env env up) in
+      let env, inter_ty =
+        Inter.intersect_list env (Reason.Rwitness id_pos) upper_bounds
+      in
+      obj_get_ ~is_method ~nullsafe:None ~obj_pos:(Reason.to_pos r)
+        ~valkind ~pos_params: None ~explicit_tparams
+        env inter_ty class_id (id_pos, id_str) (fun x -> x) k_lhs
     in
     begin match Env.get_class env (snd x) with
     | None ->
@@ -4592,15 +4586,17 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
             Typing_solver.is_sub_type env (Env.get_self env) concrete_ty) then
             Errors.assigning_to_const id_pos;
 
-        let env, ty, _, vis' = Errors.try_
-          (fun () -> get_member_from_constraints env class_info)
-          (fun _  -> env, MakeType.mixed Reason.Rnone, None, None)
-        in
-        let vis = TVis.min_vis_opt (Some (mem_pos, vis)) vis' in
-        let env, member_ty =
-          Inter.intersect env (Reason.Rwitness id_pos) member_ty ty
-        in
-        env, member_ty, Some member_decl_ty, vis
+        if not (Sequence.is_empty (Cls.upper_bounds_on_this_from_constraints class_info))
+        then begin
+          let env, ty, _, vis' = get_member_from_constraints env class_info in
+          let vis = TVis.min_vis_opt (Some (mem_pos, vis)) vis' in
+          let env, member_ty =
+            Inter.intersect env (Reason.Rwitness id_pos) member_ty ty
+          in
+          env, member_ty, Some member_decl_ty, vis
+        end
+        else
+          env, member_ty, Some member_decl_ty, Some (mem_pos, vis)
       end (* match member_info *)
 
     end (* match Env.get_class env (snd x) *)

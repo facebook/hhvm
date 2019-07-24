@@ -10,8 +10,8 @@
  *
  */
 
-class C {
-  public function foo(): C { return $this; }
+abstract class C {
+  abstract public function foo(): C;
 }
 
 interface I where this as C {
@@ -40,6 +40,7 @@ function test4(I $x): D {
 
 function test5(I $x): I {
   return $x->foo();  // I::foo
+
 }
 
 function test6(I $x): C {

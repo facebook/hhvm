@@ -52,6 +52,7 @@ type t = {
   tco_ignore_collection_expr_type_arguments : bool;
   tco_shallow_class_decl : bool;
   po_rust : bool;
+  profile_type_check_duration_threshold : float;
   tco_like_types : bool;
   tco_pessimize_types : bool;
   tco_coercion_from_dynamic : bool;
@@ -197,72 +198,73 @@ let tco_migration_flags_all =
     ]
 
 let default = {
- tco_safe_array = true;
- tco_safe_vector_array = true;
- (** Default all features for testing. Actual options are set by reading
+  tco_safe_array = true;
+  tco_safe_vector_array = true;
+  (** Default all features for testing. Actual options are set by reading
   * from hhconfig, which defaults to empty. *)
- tco_experimental_features = tco_experimental_all;
- tco_migration_flags = SSet.empty;
- tco_dynamic_view = false;
- tco_defer_class_declaration_threshold = None;
- tco_remote_type_check_threshold = None;
- tco_remote_worker_key = None;
- tco_remote_check_id = None;
- tco_num_remote_workers = 4;
- so_remote_worker_eden_checkout_threshold = 10000;
- so_naming_sqlite_path = None;
- tco_disallow_array_as_tuple = false;
- po_auto_namespace_map = [];
- po_codegen = false;
- po_disallow_execution_operator = false;
- po_disallow_toplevel_requires = false;
- po_deregister_php_stdlib = false;
- po_disable_nontoplevel_declarations = false;
- po_disable_static_closures = false;
- po_allow_goto = true;
- tco_log_inference_constraints = false;
- tco_disallow_ambiguous_lambda = false;
- tco_disallow_array_typehint = false;
- tco_disallow_array_literal = false;
- tco_language_feature_logging = false;
- tco_unsafe_rx = true;
- tco_disallow_implicit_returns_in_non_void_functions = true;
- tco_disallow_unset_on_varray = false;
- tco_disallow_scrutinee_case_value_type_mismatch = false;
- tco_disallow_stringish_magic = false;
- tco_new_inference_lambda = false;
- tco_timeout = 0;
- tco_disallow_invalid_arraykey = false;
- tco_disallow_byref_dynamic_calls = false;
- tco_disallow_byref_calls = false;
- ignored_fixme_codes = Errors.default_ignored_fixme_codes;
- ignored_fixme_regex = None;
- log_levels = SMap.empty;
- po_disable_lval_as_an_expression = false;
- tco_typecheck_xhp_cvars = false;
- tco_ignore_collection_expr_type_arguments = false;
- tco_shallow_class_decl = false;
- po_rust = false;
- tco_like_types = false;
- tco_pessimize_types = false;
- tco_coercion_from_dynamic = false;
- tco_disable_partially_abstract_typeconsts = false;
- error_codes_treated_strictly = ISet.of_list [];
- tco_check_xhp_attribute = false;
- tco_disallow_unresolved_type_variables = false;
- tco_disallow_invalid_arraykey_constraint = false;
- po_enable_constant_visibility_modifiers = false;
- po_enable_class_level_where_clauses = false;
- po_disable_legacy_soft_typehints = false;
- tco_use_lru_workers = true;
- use_new_type_errors = false;
- po_disable_outside_dollar_str_interp = true;
- disable_linter_fixmes = false;
- po_disallowed_decl_fixmes = ISet.of_list [];
- po_allow_new_attribute_syntax = false;
- tco_global_inference = false;
- tco_enable_const_static_props = false;
- po_disable_legacy_attribute_syntax = false;
+  tco_experimental_features = tco_experimental_all;
+  tco_migration_flags = SSet.empty;
+  tco_dynamic_view = false;
+  tco_defer_class_declaration_threshold = None;
+  tco_remote_type_check_threshold = None;
+  tco_remote_worker_key = None;
+  tco_remote_check_id = None;
+  tco_num_remote_workers = 4;
+  so_remote_worker_eden_checkout_threshold = 10000;
+  so_naming_sqlite_path = None;
+  tco_disallow_array_as_tuple = false;
+  po_auto_namespace_map = [];
+  po_codegen = false;
+  po_disallow_execution_operator = false;
+  po_disallow_toplevel_requires = false;
+  po_deregister_php_stdlib = false;
+  po_disable_nontoplevel_declarations = false;
+  po_disable_static_closures = false;
+  po_allow_goto = true;
+  tco_log_inference_constraints = false;
+  tco_disallow_ambiguous_lambda = false;
+  tco_disallow_array_typehint = false;
+  tco_disallow_array_literal = false;
+  tco_language_feature_logging = false;
+  tco_unsafe_rx = true;
+  tco_disallow_implicit_returns_in_non_void_functions = true;
+  tco_disallow_unset_on_varray = false;
+  tco_disallow_scrutinee_case_value_type_mismatch = false;
+  tco_disallow_stringish_magic = false;
+  tco_new_inference_lambda = false;
+  tco_timeout = 0;
+  tco_disallow_invalid_arraykey = false;
+  tco_disallow_byref_dynamic_calls = false;
+  tco_disallow_byref_calls = false;
+  ignored_fixme_codes = Errors.default_ignored_fixme_codes;
+  ignored_fixme_regex = None;
+  log_levels = SMap.empty;
+  po_disable_lval_as_an_expression = false;
+  tco_typecheck_xhp_cvars = false;
+  tco_ignore_collection_expr_type_arguments = false;
+  tco_shallow_class_decl = false;
+  po_rust = false;
+  profile_type_check_duration_threshold = 0.05;
+  tco_like_types = false;
+  tco_pessimize_types = false;
+  tco_coercion_from_dynamic = false;
+  tco_disable_partially_abstract_typeconsts = false;
+  error_codes_treated_strictly = ISet.of_list [];
+  tco_check_xhp_attribute = false;
+  tco_disallow_unresolved_type_variables = false;
+  tco_disallow_invalid_arraykey_constraint = false;
+  po_enable_constant_visibility_modifiers = false;
+  po_enable_class_level_where_clauses = false;
+  po_disable_legacy_soft_typehints = false;
+  tco_use_lru_workers = true;
+  use_new_type_errors = false;
+  po_disable_outside_dollar_str_interp = true;
+  disable_linter_fixmes = false;
+  po_disallowed_decl_fixmes = ISet.of_list [];
+  po_allow_new_attribute_syntax = false;
+  tco_global_inference = false;
+  tco_enable_const_static_props = false;
+  po_disable_legacy_attribute_syntax = false;
 }
 
 let make
@@ -309,6 +311,7 @@ let make
   ?(tco_ignore_collection_expr_type_arguments = default.tco_ignore_collection_expr_type_arguments)
   ?(tco_shallow_class_decl = default.tco_shallow_class_decl)
   ?(po_rust = default.po_rust)
+  ?(profile_type_check_duration_threshold = default.profile_type_check_duration_threshold)
   ?(tco_like_types = default.tco_like_types)
   ?(tco_pessimize_types = default.tco_pessimize_types)
   ?(tco_coercion_from_dynamic = default.tco_coercion_from_dynamic)
@@ -375,6 +378,7 @@ let make
   tco_ignore_collection_expr_type_arguments;
   tco_shallow_class_decl;
   po_rust;
+  profile_type_check_duration_threshold;
   tco_like_types;
   tco_pessimize_types;
   tco_coercion_from_dynamic;
@@ -454,6 +458,7 @@ let po_disable_lval_as_an_expression t = t.po_disable_lval_as_an_expression
 let tco_typecheck_xhp_cvars t = t.tco_typecheck_xhp_cvars
 let tco_shallow_class_decl t = t.tco_shallow_class_decl
 let po_rust t = t.po_rust
+let profile_type_check_duration_threshold t = t.profile_type_check_duration_threshold
 let tco_like_types t = t.tco_like_types
 let tco_pessimize_types t = t.tco_pessimize_types
 let tco_coercion_from_dynamic t = t.tco_coercion_from_dynamic

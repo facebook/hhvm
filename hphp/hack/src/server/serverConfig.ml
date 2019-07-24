@@ -306,6 +306,7 @@ let load config_filename options =
     ~tco_migration_flags:(config_tc_migration_flags config)
     ~tco_shallow_class_decl:(local_config.ServerLocalConfig.shallow_class_decl)
     ~po_rust:(local_config.ServerLocalConfig.rust)
+    ~profile_type_check_duration_threshold:(local_config.ServerLocalConfig.profile_type_check_duration_threshold)
     ?tco_like_types:(bool_opt "like_types" config)
     ?tco_pessimize_types:(bool_opt "pessimize_types" config)
     ?tco_coercion_from_dynamic:(bool_opt "coercion_from_dynamic" config)

@@ -107,6 +107,7 @@ type t = {
   tico_invalidate_smart : bool; (* Use finer grain hh_server dependencies *)
   (* Use rust parser *)
   rust : bool;
+  profile_type_check_duration_threshold : float;
   (* Use shared_lru workers *)
   use_lru_workers : bool;
 }
@@ -173,6 +174,7 @@ let default = {
   tico_invalidate_files = false;
   tico_invalidate_smart = false;
   rust = false;
+  profile_type_check_duration_threshold = 0.05; (* seconds *)
   use_lru_workers = false;
 }
 
@@ -329,18 +331,19 @@ let load_ fn ~silent overrides =
         ~default:default.enable_naming_table_fallback config
   in
   let symbolindex_search_provider = string_ "symbolindex_search_provider"
-      ~default:default.symbolindex_search_provider config in
+    ~default:default.symbolindex_search_provider config in
   let symbolindex_quiet = bool_ "symbolindex_quiet"
-      ~default:default.symbolindex_quiet config in
+    ~default:default.symbolindex_quiet config in
   let symbolindex_file = string_opt "symbolindex_file" config in
   let tico_invalidate_files = bool_ "tico_invalidate_files"
     ~default:default.tico_invalidate_files config in
   let tico_invalidate_smart = bool_ "tico_invalidate_smart"
     ~default:default.tico_invalidate_smart config in
-  let rust = bool_if_version "rust"
-      ~default:default.rust config in
+  let rust = bool_if_version "rust" ~default:default.rust config in
+  let profile_type_check_duration_threshold = float_ "profile_type_check_duration_threshold"
+    ~default:default.profile_type_check_duration_threshold config in
   let use_lru_workers = bool_if_version "use_lru_workers"
-      ~default:default.use_lru_workers config in
+    ~default:default.use_lru_workers config in
   {
     use_watchman;
     watchman_init_timeout;
@@ -402,6 +405,7 @@ let load_ fn ~silent overrides =
     tico_invalidate_files;
     tico_invalidate_smart;
     rust;
+    profile_type_check_duration_threshold;
     use_lru_workers;
   }
 

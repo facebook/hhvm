@@ -5,8 +5,9 @@ class A
     }
 }
 
-  class_alias('A', 'AliasA');
+class_alias('A', 'AliasA');
 
+<<__EntryPoint>> function main(): void {
   eval('
     class B extends A
     {
@@ -16,5 +17,4 @@ class A
   ');
 
   echo "DONE\n";
-
-<<__EntryPoint>> function main(): void {}
+}

@@ -67,7 +67,7 @@ enum E0 : int {
 #
 # Execute single-threaded test
 #
-
+<<__EntryPoint>> function main(): void {
 $source = file(__FILE__);
 $source[0] = '<?hh namespace NS {';
 $source[] = '}';
@@ -209,4 +209,5 @@ try {
   HH\facts_parse(null, varray[array()], null, null);
 } catch (Exception $e) {
   var_dump($e->getMessage());
+}
 }

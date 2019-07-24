@@ -14,7 +14,7 @@ vec(1) {
     ["error-line"]=>
     int(4)
     ["error-backtrace"]=>
-    array(4) {
+    array(5) {
       [0]=>
       array(2) {
         ["file"]=>
@@ -48,6 +48,11 @@ vec(1) {
         int(41)
         ["function"]=>
         string(10) "make_error"
+      }
+      [4]=>
+      array(1) {
+        ["function"]=>
+        string(4) "main"
       }
     }
   }

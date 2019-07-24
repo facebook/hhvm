@@ -91,7 +91,8 @@ class B {
 
   }
 }
-
+<<__EntryPoint>> function main(): void {
 A::positive_tests();
 B::positive_tests();
 B::negative_tests();
+}

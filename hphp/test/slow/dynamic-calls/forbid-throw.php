@@ -431,9 +431,10 @@ async function negative_tests() {
   $x = [new A, 'static_cmp2']; $y = [2, 1]; usort(&$y, $x);
   $x = [new CCmp2, 'foobar']; $y = [2, 1]; usort(&$y, $x);
 }
-
+<<__EntryPoint>> function main(): void {
 echo "=============== positive tests =====================\n";
 HH\Asio\join(positive_tests());
 
 echo "=============== negative tests =====================\n";
 HH\Asio\join(negative_tests());
+}

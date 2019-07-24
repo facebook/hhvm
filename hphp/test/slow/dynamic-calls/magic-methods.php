@@ -102,7 +102,7 @@ function test_ctor() {
 
   $x->__construct();
 }
-
+<<__EntryPoint>> function main(): void {
 test_magic_call();
 test_magic_props();
 test_sleep();
@@ -113,3 +113,4 @@ test_clone();
 test_ctor();
 
 echo "DONE\n";
+}

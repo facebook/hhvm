@@ -8,7 +8,7 @@ class C {
     return "hello world";
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $rl = new ReflectionFunction(async ($a) ==> 4);
 $ranon = new ReflectionFunction(function ($b) { return 4; });
 
@@ -26,3 +26,4 @@ invariant(array_key_exists($ranon->getStartLine(), $allfuns), "Anonymous functio
 var_dump(HH\ExperimentalParserUtils\body_bounds($allfuns[$ra->getStartLine()]));
 var_dump(HH\ExperimentalParserUtils\body_bounds($allfuns[$rl->getStartLine()]));
 var_dump(HH\ExperimentalParserUtils\body_bounds($allfuns[$ranon->getStartLine()]));
+}

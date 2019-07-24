@@ -61,7 +61,6 @@ function main1() {
     echo "caught\n";
   }
 }
-main1();
 
 class A {
   function __construct() {
@@ -76,7 +75,6 @@ function main2() {
     print "caught exception\n";
   }
 }
-main2();
 
 class Ex4 extends Ex3 {
   function __construct($s) {
@@ -84,6 +82,8 @@ class Ex4 extends Ex3 {
     var_dump($this->getTraceAsString());
   }
 }
+
+
 function a() {
   return b();
 }
@@ -108,5 +108,9 @@ function main3() {
     throw $e;
   }
 }
-main3();
 
+<<__EntryPoint>> function main(): void {
+  main1();
+  main2();
+  main3();
+}

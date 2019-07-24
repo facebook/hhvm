@@ -17,6 +17,8 @@ val suggest: 'a Typing_defs.ty -> string
 val full: Typing_env.env -> 'a Typing_defs.ty -> string
 val full_rec: Typing_env.env -> int -> 'a Typing_defs.ty -> string
 val full_strip_ns: Typing_env.env -> 'a Typing_defs.ty -> string
+val full_decl: TypecheckerOptions.t -> Typing_defs.decl Typing_defs.ty -> string
+val fun_type: TypecheckerOptions.t -> Typing_defs.decl Typing_defs.fun_type -> string
 
 (** Pretty print a type and all of its associated declaration information. *)
 val full_with_identity:

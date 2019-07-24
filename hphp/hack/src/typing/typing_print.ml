@@ -515,6 +515,13 @@ module Full = struct
         ~droot:None in
     to_string Doc.text env x
 
+  let fun_to_string tcopt (x: decl fun_type) =
+    let env =
+      Typing_env.empty tcopt Relative_path.default ~droot:None in
+    fun_type Doc.text ISet.empty env x
+    |> Libhackfmt.format_doc_unbroken format_env
+    |> String.strip
+
   let to_string_with_identity env x occurrence definition_opt =
     let prefix =
       let open SymbolDefinition in
@@ -1615,6 +1622,7 @@ let full env ty = Full.to_string Doc.text env ty
 let full_rec env n ty = Full.to_string_rec env n ty
 let full_strip_ns env ty = Full.to_string_strip_ns env ty
 let full_with_identity = Full.to_string_with_identity
+let full_decl = Full.to_string_decl
 let debug env ty =
   Full.debug_mode := true;
   let f_str = full_strip_ns env ty in
@@ -1623,6 +1631,7 @@ let debug env ty =
 let class_ tcopt c = PrintClass.class_type tcopt c
 let gconst tcopt gc = Full.to_string_decl tcopt (fst gc)
 let fun_ tcopt f = PrintFun.fun_type tcopt f
+let fun_type tcopt f = Full.fun_to_string tcopt f
 let typedef tcopt td = PrintTypedef.typedef tcopt td
 let constraints_for_type env ty =
   Full.constraints_for_type Doc.text env ty

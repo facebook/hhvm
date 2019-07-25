@@ -8,7 +8,7 @@ File "shapes_key_exists.php", line 10, characters 28-29:
 Expected shape(?'x' => [unresolved], ...) because Shapes::idx expects a shape
 File "shapes_key_exists.php", line 4, characters 11-11:
 But got dynamic
-File "shapes_key_exists.php", line 8, characters 29-31:
+File "shapes_key_exists.php", line 10, characters 10-49:
 Invalid return type (Typing[4110])
 File "shapes_key_exists.php", line 8, characters 44-46:
 Expected int

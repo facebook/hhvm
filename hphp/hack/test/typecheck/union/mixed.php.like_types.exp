@@ -30,25 +30,25 @@ File "mixed.php", line 102, characters 19-19:
 Expected A
 File "mixed.php", line 11, characters 48-54:
 But got nonnull
-File "mixed.php", line 11, characters 34-38:
+File "mixed.php", line 36, characters 12-13:
 Invalid argument (Typing[4110])
 File "mixed.php", line 102, characters 19-19:
 Expected A
 File "mixed.php", line 11, characters 34-38:
 But got null
-File "mixed.php", line 11, characters 34-38:
+File "mixed.php", line 36, characters 12-13:
 Invalid argument (Typing[4110])
 File "mixed.php", line 102, characters 19-19:
 Expected A
 File "mixed.php", line 11, characters 34-38:
 But got nonnull
-File "mixed.php", line 41, characters 14-14:
+File "mixed.php", line 44, characters 17-18:
 Invalid argument (Typing[4110])
 File "mixed.php", line 101, characters 24-29:
 Expected Object
 File "mixed.php", line 41, characters 14-14:
 But got A
-File "mixed.php", line 39, characters 14-19:
+File "mixed.php", line 45, characters 12-13:
 Invalid argument (Typing[4110])
 File "mixed.php", line 102, characters 19-19:
 Expected A

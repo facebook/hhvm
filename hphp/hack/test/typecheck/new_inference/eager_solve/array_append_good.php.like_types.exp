@@ -1,22 +1,22 @@
-File "array_append_good.php", line 41, characters 9-11:
+File "array_append_good.php", line 52, characters 18-22:
 Invalid argument (Typing[4110])
 File "array_append_good.php", line 8, characters 25-32:
 Expected arraykey
 File "array_append_good.php", line 41, characters 9-11:
 But got dynamic because it is an unenforceable type
-File "array_append_good.php", line 46, characters 10-12:
+File "array_append_good.php", line 56, characters 18-27:
 Invalid argument (Typing[4110])
 File "array_append_good.php", line 8, characters 25-32:
 Expected arraykey
 File "array_append_good.php", line 46, characters 10-12:
 But got dynamic because it is an unenforceable type
-File "array_append_good.php", line 42, characters 7-9:
+File "array_append_good.php", line 59, characters 18-22:
 Invalid argument (Typing[4110])
 File "array_append_good.php", line 8, characters 25-32:
 Expected arraykey
 File "array_append_good.php", line 42, characters 7-9:
 But got dynamic because it is an unenforceable type
-File "array_append_good.php", line 34, characters 11-11:
+File "array_append_good.php", line 68, characters 26-28:
 Invalid argument (Typing[4110])
 File "array_append_good.php", line 34, characters 11-11:
 Some type constraint(s) are violated here
@@ -26,7 +26,7 @@ File "array_append_good.php", line 12, characters 33-48:
 Expected keyset<~arraykey>
 File "array_append_good.php", line 34, characters 11-11:
 But got dynamic
-File "array_append_good.php", line 34, characters 11-11:
+File "array_append_good.php", line 71, characters 18-21:
 Invalid argument (Typing[4110])
 File "array_append_good.php", line 34, characters 11-11:
 Some type constraint(s) are violated here

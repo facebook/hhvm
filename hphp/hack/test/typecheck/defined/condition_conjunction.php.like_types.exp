@@ -1,4 +1,4 @@
-File "condition_conjunction.php", line 3, characters 19-22:
+File "condition_conjunction.php", line 10, characters 16-17:
 Invalid argument (Typing[4110])
 File "condition_conjunction.php", line 39, characters 21-23:
 Expected int
@@ -8,7 +8,7 @@ File "condition_conjunction.php", line 11, characters 20-21:
 Variable $z is undefined, or there exists at least one control flow path reaching this point which does not define $z. (Naming[2050])
 File "condition_conjunction.php", line 12, characters 20-21:
 Variable $u is undefined, or there exists at least one control flow path reaching this point which does not define $u. (Naming[2050])
-File "condition_conjunction.php", line 3, characters 19-22:
+File "condition_conjunction.php", line 16, characters 14-15:
 Invalid argument (Typing[4110])
 File "condition_conjunction.php", line 39, characters 21-23:
 Expected int

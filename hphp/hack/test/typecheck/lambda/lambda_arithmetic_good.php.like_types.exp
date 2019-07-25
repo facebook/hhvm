@@ -10,7 +10,7 @@ File "lambda_arithmetic_good.php", line 24, characters 14-25:
 Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
 File "lambda_arithmetic_good.php", line 27, characters 14-24:
 Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_arithmetic_good.php", line 7, characters 45-61:
+File "lambda_arithmetic_good.php", line 28, characters 31-32:
 Invalid argument (Typing[4110])
 File "lambda_arithmetic_good.php", line 28, characters 10-28:
 Expected ~(function(int): int) because it is an unenforceable type
@@ -20,7 +20,7 @@ File "lambda_arithmetic_good.php", line 7, characters 45-61:
 But got (function(_): ~_)
 File "lambda_arithmetic_good.php", line 29, characters 14-25:
 Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_arithmetic_good.php", line 7, characters 45-61:
+File "lambda_arithmetic_good.php", line 30, characters 31-32:
 Invalid argument (Typing[4110])
 File "lambda_arithmetic_good.php", line 30, characters 10-28:
 Expected ~(function(int): int) because it is an unenforceable type
@@ -30,7 +30,7 @@ File "lambda_arithmetic_good.php", line 7, characters 45-61:
 But got (function(_): ~_)
 File "lambda_arithmetic_good.php", line 31, characters 14-26:
 Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_arithmetic_good.php", line 7, characters 45-61:
+File "lambda_arithmetic_good.php", line 32, characters 31-32:
 Invalid argument (Typing[4110])
 File "lambda_arithmetic_good.php", line 32, characters 10-28:
 Expected ~(function(num): num) because it is an unenforceable type

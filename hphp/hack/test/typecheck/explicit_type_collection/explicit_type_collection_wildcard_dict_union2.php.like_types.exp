@@ -1,3 +1,0 @@
-File "explicit_type_collection_wildcard_dict_union2.php", line 6, characters 3-13:
-  dict<string, (int | string)>
-No errors

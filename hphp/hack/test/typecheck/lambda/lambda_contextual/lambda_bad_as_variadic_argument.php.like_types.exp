@@ -1,12 +1,12 @@
 File "lambda_bad_as_variadic_argument.php", line 30, characters 7-83:
 Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_bad_as_variadic_argument.php", line 11, characters 39-59:
+File "lambda_bad_as_variadic_argument.php", line 11, characters 61-68:
 Invalid assignment (Typing[4110])
 File "lambda_bad_as_variadic_argument.php", line 11, characters 39-59:
 Expected (function(T): string)
 File "lambda_bad_as_variadic_argument.php", line 11, characters 39-59:
 But got dynamic because it is an unenforceable type
-File "lambda_bad_as_variadic_argument.php", line 18, characters 39-65:
+File "lambda_bad_as_variadic_argument.php", line 18, characters 67-74:
 Invalid assignment (Typing[4110])
 File "lambda_bad_as_variadic_argument.php", line 18, characters 39-65:
 Expected (function(MyClass): string)

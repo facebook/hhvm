@@ -1,6 +1,0 @@
-File "pending_trycatch4.php", line 19, characters 12-16:
-Invalid return type (Typing[4110])
-File "pending_trycatch4.php", line 13, characters 15-17:
-Expected int
-File "pending_trycatch4.php", line 19, characters 12-16:
-But got bool

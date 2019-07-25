@@ -1,7 +1,5 @@
-File "idx_test.php", line 0, characters 0-0:
-Type checking of this file produced an error with the primary position in a different file. This is a bug in the type checker. Please report it by clicking the bug button in Nuclide or by creating a diff preview and posting it in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
-File "idx.hhi", line 31, characters 10-12:
-Invalid argument
+File "idx_test.php", line 9, characters 23-24:
+Invalid argument (Typing[4110])
 File "idx.hhi", line 31, characters 30-31:
 Some type constraint(s) are violated here
 File "idx.hhi", line 31, characters 30-31:

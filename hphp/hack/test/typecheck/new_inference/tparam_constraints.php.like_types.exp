@@ -8,7 +8,7 @@ File "tparam_constraints.php", line 4, characters 56-58:
 Expected int
 File "tparam_constraints.php", line 8, characters 20-21:
 But got dynamic
-File "tparam_constraints.php", line 4, characters 46-49:
+File "tparam_constraints.php", line 5, characters 10-36:
 Invalid return type (Typing[4110])
 File "tparam_constraints.php", line 4, characters 56-58:
 Expected int

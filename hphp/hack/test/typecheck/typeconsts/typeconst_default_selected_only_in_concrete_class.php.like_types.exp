@@ -1,4 +1,4 @@
-File "typeconst_default_selected_only_in_concrete_class.php", line 4, characters 28-34:
+File "typeconst_default_selected_only_in_concrete_class.php", line 30, characters 10-17:
 Invalid return type (Typing[4110])
 File "typeconst_default_selected_only_in_concrete_class.php", line 29, characters 20-22:
 Expected int

@@ -1,6 +1,0 @@
-File "vec_literal_error.php", line 4, characters 14-14:
-Invalid argument (Typing[4110])
-File "vec_literal_error.php", line 9, characters 22-27:
-Expected string
-File "vec_literal_error.php", line 4, characters 14-14:
-But got int

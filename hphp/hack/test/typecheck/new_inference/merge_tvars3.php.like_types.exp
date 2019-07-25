@@ -1,4 +1,4 @@
-File "merge_tvars3.php", line 6, characters 27-28:
+File "merge_tvars3.php", line 14, characters 21-29:
 Invalid argument (Typing[4110])
 File "merge_tvars3.php", line 3, characters 10-11:
 Some type constraint(s) are violated here

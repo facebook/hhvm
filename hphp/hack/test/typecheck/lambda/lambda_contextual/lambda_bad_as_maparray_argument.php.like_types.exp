@@ -1,4 +1,4 @@
-File "lambda_bad_as_maparray_argument.php", line 22, characters 17-40:
+File "lambda_bad_as_maparray_argument.php", line 25, characters 10-11:
 Invalid return type (Typing[4110])
 File "lambda_bad_as_maparray_argument.php", line 23, characters 4-27:
 Expected MyClosureRunner<~MyClass>
@@ -6,13 +6,13 @@ File "lambda_bad_as_maparray_argument.php", line 22, characters 17-40:
 But got dynamic because it is an unenforceable type
 File "lambda_bad_as_maparray_argument.php", line 31, characters 9-91:
 Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_bad_as_maparray_argument.php", line 11, characters 39-59:
+File "lambda_bad_as_maparray_argument.php", line 11, characters 61-68:
 Invalid assignment (Typing[4110])
 File "lambda_bad_as_maparray_argument.php", line 11, characters 39-59:
 Expected (function(T): string)
 File "lambda_bad_as_maparray_argument.php", line 11, characters 39-59:
 But got dynamic because it is an unenforceable type
-File "lambda_bad_as_maparray_argument.php", line 18, characters 39-65:
+File "lambda_bad_as_maparray_argument.php", line 18, characters 67-74:
 Invalid assignment (Typing[4110])
 File "lambda_bad_as_maparray_argument.php", line 18, characters 39-65:
 Expected (function(MyClass): string)

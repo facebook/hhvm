@@ -1,6 +1,0 @@
-File "ternary1.php", line 20, characters 17-19:
-Invalid return type (Typing[4110])
-File "ternary1.php", line 28, characters 16-21:
-Expected string
-File "ternary1.php", line 20, characters 17-19:
-But got int

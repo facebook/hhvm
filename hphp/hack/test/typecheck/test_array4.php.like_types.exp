@@ -1,6 +1,0 @@
-File "test_array4.php", line 12, characters 27-29:
-Invalid return type (Typing[4110])
-File "test_array4.php", line 12, characters 37-40:
-Expected bool
-File "test_array4.php", line 12, characters 27-29:
-But got int

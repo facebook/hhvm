@@ -1,6 +1,6 @@
 File "closure.php", line 15, characters 10-27:
 Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "closure.php", line 14, characters 46-46:
+File "closure.php", line 25, characters 17-18:
 Invalid argument (Typing[4110])
 File "closure.php", line 4, characters 11-11:
 Some type constraint(s) are violated here

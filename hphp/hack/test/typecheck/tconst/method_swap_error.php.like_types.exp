@@ -1,4 +1,4 @@
-File "method_swap_error.php", line 8, characters 32-32:
+File "method_swap_error.php", line 17, characters 14-23:
 Invalid argument (Typing[4110])
 File "method_swap_error.php", line 12, characters 24-30:
 Expected ~<expr#1>::T because it is an unenforceable type

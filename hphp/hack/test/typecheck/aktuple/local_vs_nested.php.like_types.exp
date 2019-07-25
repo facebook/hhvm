@@ -1,6 +1,0 @@
-File "local_vs_nested.php", line 8, characters 14-14:
-Invalid argument (Typing[4110])
-File "local_vs_nested.php", line 20, characters 22-27:
-Expected string
-File "local_vs_nested.php", line 8, characters 14-14:
-But got int

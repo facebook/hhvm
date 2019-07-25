@@ -6,7 +6,7 @@ File "array_get_bad.php", line 14, characters 3-13:
 This can only be indexed with integers
 File "array_get_bad.php", line 29, characters 18-20:
 But got string
-File "array_get_bad.php", line 14, characters 9-12:
+File "array_get_bad.php", line 29, characters 14-21:
 Invalid argument (Typing[4110])
 File "array_get_bad.php", line 4, characters 21-24:
 Expected bool
@@ -18,7 +18,7 @@ File "array_get_bad.php", line 31, characters 17-19:
 Expected int because only int can be used to index into a Vector or vec.
 File "array_get_bad.php", line 31, characters 17-19:
 But got string
-File "array_get_bad.php", line 15, characters 7-10:
+File "array_get_bad.php", line 31, characters 14-20:
 Invalid argument (Typing[4110])
 File "array_get_bad.php", line 4, characters 21-24:
 Expected bool
@@ -46,19 +46,19 @@ File "array_get_bad.php", line 18, characters 3-17:
 This can only be indexed with integers
 File "array_get_bad.php", line 37, characters 23-25:
 But got string
-File "array_get_bad.php", line 18, characters 13-16:
+File "array_get_bad.php", line 37, characters 14-26:
 Invalid argument (Typing[4110])
 File "array_get_bad.php", line 4, characters 21-24:
 Expected bool
 File "array_get_bad.php", line 18, characters 13-16:
 But got dynamic because it is an unenforceable type
-File "array_get_bad.php", line 20, characters 16-20:
+File "array_get_bad.php", line 39, characters 15-21:
 Invalid argument (Typing[4110])
 File "array_get_bad.php", line 5, characters 22-26:
 Expected float
 File "array_get_bad.php", line 20, characters 16-20:
 But got dynamic because it is an unenforceable type
-File "array_get_bad.php", line 21, characters 15-19:
+File "array_get_bad.php", line 41, characters 15-20:
 Invalid argument (Typing[4110])
 File "array_get_bad.php", line 5, characters 22-26:
 Expected float
@@ -70,13 +70,13 @@ File "array_get_bad.php", line 22, characters 7-12:
 Expected ~string because it is an unenforceable type
 File "array_get_bad.php", line 43, characters 20-21:
 But got int
-File "array_get_bad.php", line 23, characters 17-21:
+File "array_get_bad.php", line 45, characters 15-23:
 Invalid argument (Typing[4110])
 File "array_get_bad.php", line 5, characters 22-26:
 Expected float
 File "array_get_bad.php", line 23, characters 17-21:
 But got dynamic because it is an unenforceable type
-File "array_get_bad.php", line 25, characters 10-15:
+File "array_get_bad.php", line 49, characters 16-22:
 Invalid argument (Typing[4110])
 File "array_get_bad.php", line 6, characters 23-28:
 Expected string

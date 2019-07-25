@@ -1,6 +1,0 @@
-File "list_array2.php", line 12, characters 22-26:
-Invalid return type (Typing[4110])
-File "list_array2.php", line 12, characters 34-36:
-Expected int
-File "list_array2.php", line 12, characters 22-26:
-But got float

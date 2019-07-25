@@ -1,7 +1,5 @@
-File "mutable_args_to_ctor1.php", line 0, characters 0-0:
-Type checking of this file produced an error with the primary position in a different file. This is a bug in the type checker. Please report it by clicking the bug button in Nuclide or by creating a diff preview and posting it in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
-File "rx/functions.hhi", line 26, characters 18-18:
-Invalid argument
+File "mutable_args_to_ctor1.php", line 19, characters 15-16:
+Invalid argument (Typing[4110])
 File "rx/functions.hhi", line 26, characters 18-18:
 Some type constraint(s) are violated here
 File "rx/functions.hhi", line 26, characters 18-18:

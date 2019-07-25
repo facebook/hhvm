@@ -109,7 +109,7 @@ type coerce_type =
 let (coerce_type_ref : coerce_type ref) = ref (not_implemented "coerce_type")
 let coerce_type x = !coerce_type_ref x
 
-type can_coerce = Env.env -> ?ur:Reason.ureason -> locl ty -> ?ty_expect_decl: decl ty -> locl ty ->
+type can_coerce = Pos.t -> Env.env -> ?ur:Reason.ureason -> locl ty -> ?ty_expect_decl: decl ty -> locl ty ->
   Errors.typing_error_callback -> Env.env option
 let (can_coerce_ref : can_coerce ref) = ref (not_implemented "can_coerce")
 let can_coerce x = !can_coerce_ref x

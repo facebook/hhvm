@@ -1,7 +1,5 @@
-File "with_tconst_bad2.php", line 0, characters 0-0:
-Type checking of this file produced an error with the primary position in a different file. This is a bug in the type checker. Please report it by clicking the bug button in Nuclide or by creating a diff preview and posting it in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
-File "classes.hhi", line 198, characters 13-20:
-Wrong type hint
+File "with_tconst_bad2.php", line 13, characters 29-34:
+Wrong type hint (Typing[4110])
 File "with_tconst_bad2.php", line 12, characters 19-19:
 Expected C
 File "with_tconst_bad2.php", line 13, characters 19-26:

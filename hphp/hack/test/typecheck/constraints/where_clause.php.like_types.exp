@@ -20,13 +20,3 @@ File "where_clause.php", line 31, characters 42-49:
 Expected Bar<~Foo>
 File "where_clause.php", line 22, characters 29-34:
 But got dynamic
-File "where_clause.php", line 22, characters 29-34:
-Invalid return type (Typing[4110])
-File "where_clause.php", line 22, characters 29-34:
-Some type constraint(s) are violated here
-File "where_clause.php", line 22, characters 29-34:
-Tcorge is a constrained type parameter
-File "where_clause.php", line 31, characters 42-49:
-Expected Bar<~Foo>
-File "where_clause.php", line 22, characters 29-34:
-But got dynamic

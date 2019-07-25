@@ -8,13 +8,3 @@ File "lambda15.php", line 26, characters 18-22:
 Expected float
 File "lambda15.php", line 13, characters 11-11:
 But got dynamic
-File "lambda15.php", line 12, characters 26-26:
-Invalid argument (Typing[4110])
-File "lambda15.php", line 13, characters 11-11:
-Some type constraint(s) are violated here
-File "lambda15.php", line 13, characters 11-11:
-T is a constrained type parameter
-File "lambda15.php", line 26, characters 18-22:
-Expected float
-File "lambda15.php", line 13, characters 11-11:
-But got dynamic

@@ -1,4 +1,4 @@
-File "erling_loop5.php", line 17, characters 26-26:
+File "erling_loop5.php", line 35, characters 10-11:
 Invalid return type (Typing[4110])
 File "erling_loop5.php", line 12, characters 9-9:
 Some type constraint(s) are violated here

@@ -4,13 +4,13 @@ File "instance_of_refinement.php", line 15, characters 21-23:
 Expected int
 File "instance_of_refinement.php", line 20, characters 13-20:
 But got (arraykey & [unresolved]) from this is expression test
-File "instance_of_refinement.php", line 33, characters 13-13:
+File "instance_of_refinement.php", line 35, characters 10-11:
 Invalid return type (Typing[4110])
 File "instance_of_refinement.php", line 30, characters 19-24:
 Expected string
 File "instance_of_refinement.php", line 33, characters 13-13:
 But got ([unresolved] & B) from this is expression test
-File "instance_of_refinement.php", line 5, characters 26-26:
+File "instance_of_refinement.php", line 35, characters 10-11:
 Invalid return type (Typing[4110])
 File "instance_of_refinement.php", line 3, characters 9-9:
 Some type constraint(s) are violated here
@@ -34,7 +34,7 @@ File "instance_of_refinement.php", line 39, characters 12-12:
 This is why I think it is an object of type B
 File "instance_of_refinement.php", line 12, characters 7-7:
 Declaration of B is here
-File "instance_of_refinement.php", line 5, characters 26-26:
+File "instance_of_refinement.php", line 64, characters 10-11:
 Invalid return type (Typing[4110])
 File "instance_of_refinement.php", line 3, characters 9-9:
 Some type constraint(s) are violated here

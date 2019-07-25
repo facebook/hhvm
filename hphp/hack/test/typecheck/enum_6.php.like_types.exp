@@ -1,7 +1,5 @@
-File "enum_6.php--use.php", line 0, characters 0-0:
-Type checking of this file produced an error with the primary position in a different file. This is a bug in the type checker. Please report it by clicking the bug button in Nuclide or by creating a diff preview and posting it in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4110])
-File "enum_6.php--def.php", line 8, characters 9-11:
-Wrong type hint
+File "enum_6.php--use.php", line 5, characters 13-15:
+Wrong type hint (Typing[4110])
 File "enum_6.php--use.php", line 5, characters 9-11:
 Expected foo
 File "enum_6.php--def.php", line 8, characters 9-11:

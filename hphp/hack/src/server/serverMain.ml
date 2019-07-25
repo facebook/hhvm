@@ -1036,6 +1036,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
           ~cache_size_in_bytes:(10 * 1024 * 1024 * 1024) (* 10 GBs *)
           ~cache_dir_path
           ~num_workers
+          ~shm_handle:(Some handle)
       in
       Some(host_env)
     | None -> None

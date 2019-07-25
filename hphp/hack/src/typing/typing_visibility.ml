@@ -15,6 +15,24 @@ module Env = Typing_env
 module TUtils = Typing_utils
 module Cls = Decl_provider.Class
 
+let is_private_visible env x self_id =
+  if x = self_id then None
+  else begin
+    let my_class = Env.get_class env self_id in
+    let their_class = Env.get_class env x in
+    match my_class, their_class with
+    | Some my_class, Some their_class ->
+      let my_class_ty = Typing_make_type.class_type Reason.Rnone self_id
+        (List.map (Cls.tparams my_class) (fun _ -> (Reason.Rnone, Tany))) in
+      let their_class_ty = Typing_make_type.class_type Reason.Rnone x
+        (List.map (Cls.tparams their_class) (fun _ -> (Reason.Rnone, Tany))) in
+      if (Typing_subtype.is_sub_type env my_class_ty their_class_ty) &&
+         (Typing_subtype.is_sub_type env their_class_ty my_class_ty) then
+        None
+      else Some "You cannot access this member"
+    | _, _ -> Some "You cannot access this member"
+  end
+
 let is_protected_visible env x self_id =
   if x = self_id then None else
   let my_class = Env.get_class env self_id in
@@ -24,11 +42,15 @@ let is_protected_visible env x self_id =
     (* Children can call parent's protected methods and
      * parents can call children's protected methods (like a
      * constructor) *)
-    if Cls.extends my_class x
-       || Cls.has_ancestor my_class x
+    let my_class_ty = Typing_make_type.class_type Reason.Rnone self_id
+      (List.map (Cls.tparams my_class) (fun _ -> (Reason.Rnone, Tany))) in
+    let their_class_ty = Typing_make_type.class_type Reason.Rnone x
+      (List.map (Cls.tparams their_class) (fun _ -> (Reason.Rnone, Tany))) in
+    if Typing_subtype.is_sub_type env my_class_ty their_class_ty
        || Cls.extends their_class self_id
-       || Cls.requires_ancestor my_class x
        || not (Cls.members_fully_known my_class)
+       (* This is for the case where type generics are emitted *)
+       || Cls.has_ancestor my_class x
     then None
     else Some (
       "Cannot access this protected member, you don't extend "^
@@ -48,15 +70,16 @@ let is_private_visible_for_class env x self_id cid class_ =
              named private member")
   | CIparent ->
     Some "You cannot access a private member with parent::"
-  | CIself -> None
+  | CIself -> is_private_visible env x self_id
   | CI (_, called_ci) ->
-    (if x = self_id then None else
-     match Env.get_class env called_ci with
-     | Some cls when Cls.kind cls = Ast.Ctrait ->
-       Some "You cannot access private members \
-             using the trait's name (did you mean to use self::?)"
-     | _ ->
-       Some "You cannot access this member")
+    (match (is_private_visible env x self_id) with
+    | None -> None
+    | Some _ -> begin match Env.get_class env called_ci with
+      | Some cls when Cls.kind cls = Ast.Ctrait ->
+        Some "You cannot access private members \
+          using the trait's name (did you mean to use self::?)"
+      | _ ->
+        Some "You cannot access this member" end)
   | CIexpr _ ->
     if (Cls.final class_) then None
     else Some "Private members cannot be accessed dynamically. \
@@ -69,8 +92,7 @@ let is_visible_for_obj env vis =
   | (Vprivate _ | Vprotected _) when Env.is_outside_class env ->
     Some "You cannot access this member"
   | Vprivate x ->
-    if x = self_id then None
-    else Some "You cannot access this member"
+    is_private_visible env x self_id
   | Vprotected x ->
     is_protected_visible env x self_id
 
@@ -90,8 +112,7 @@ let is_lsb_accessible env vis =
   | (Vprivate _ | Vprotected _) when Env.is_outside_class env ->
     Some "You cannot access this member"
   | Vprivate x ->
-    if x = self_id then None
-    else Some "You cannot access this member"
+    is_private_visible env x self_id
   | Vprotected x ->
     is_protected_visible env x self_id
 

@@ -638,11 +638,14 @@ template TypedValue arrFirstLast<false, true>(ArrayData*);
 TypedValue* getSPropOrNull(const Class* cls,
                            const StringData* name,
                            Class* ctx,
-                           bool ignoreLateInit) {
+                           bool ignoreLateInit,
+                           bool disallowConst) {
   auto const lookup = ignoreLateInit
     ? cls->getSPropIgnoreLateInit(ctx, name)
     : cls->getSProp(ctx, name);
-
+  if (disallowConst && UNLIKELY(lookup.constant)) {
+    throw_cannot_modify_static_const_prop(cls->name()->data(), name->data());
+  }
   if (UNLIKELY(!lookup.val || !lookup.accessible)) return nullptr;
 
   return lookup.val;
@@ -651,8 +654,9 @@ TypedValue* getSPropOrNull(const Class* cls,
 TypedValue* getSPropOrRaise(const Class* cls,
                             const StringData* name,
                             Class* ctx,
-                            bool ignoreLateInit) {
-  auto sprop = getSPropOrNull(cls, name, ctx, ignoreLateInit);
+                            bool ignoreLateInit,
+                            bool disallowConst) {
+  auto sprop = getSPropOrNull(cls, name, ctx, ignoreLateInit, disallowConst);
   if (UNLIKELY(!sprop)) {
     raise_error("Invalid static property access: %s::%s",
                 cls->name()->data(), name->data());

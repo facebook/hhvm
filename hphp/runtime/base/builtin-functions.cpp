@@ -848,6 +848,16 @@ void throw_cannot_modify_const_prop(const char* className,
   SystemLib::throwInvalidOperationExceptionObject(msg);
 }
 
+void throw_cannot_modify_static_const_prop(const char* className,
+                                           const char* propName)
+{
+  auto msg = folly::sformat(
+   "Cannot modify static const property {} of class {}.",
+   propName, className
+  );
+  SystemLib::throwInvalidOperationExceptionObject(msg);
+}
+
 NEVER_INLINE
 void throw_late_init_prop(const Class* cls,
                           const StringData* propName,

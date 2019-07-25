@@ -1795,6 +1795,7 @@ static inline void lookup_sprop(ActRec* fp,
                                 Slot& slot,
                                 bool& visible,
                                 bool& accessible,
+                                bool& constant,
                                 bool ignoreLateInit) {
   name = lookup_name(key);
   auto const ctx = arGetContextClass(fp);
@@ -1806,6 +1807,7 @@ static inline void lookup_sprop(ActRec* fp,
   val = lookup.val;
   slot = lookup.slot;
   visible = lookup.val != nullptr;
+  constant = lookup.constant;
   accessible = lookup.accessible;
 }
 
@@ -3395,13 +3397,14 @@ struct SpropState {
   Slot slot;
   bool visible;
   bool accessible;
+  bool constant;
 };
 
 SpropState::SpropState(Stack& vmstack, clsref_slot cslot, bool ignoreLateInit) {
   cls = cslot.take().second;
   auto nameCell = output = vmstack.topTV();
   lookup_sprop(vmfp(), cls, name, nameCell, val,
-               slot, visible, accessible, ignoreLateInit);
+               slot, visible, accessible, constant, ignoreLateInit);
   oldNameCell = *nameCell;
 }
 
@@ -3468,6 +3471,9 @@ static inline tv_lval baseSImpl(TypedValue* key,
     raise_error("Invalid static property access: %s::%s",
                 class_->name()->data(),
                 name->data());
+  }
+  if (lookup.constant && mode == MOpMode::Define){
+    throw_cannot_modify_static_const_prop(class_->name()->data(), name->data());
   }
 
   if (RuntimeOption::EvalCheckPropTypeHints > 0 && mode == MOpMode::Define) {
@@ -4367,14 +4373,18 @@ OPTBLD_INLINE void iopSetS(clsref_slot cslot) {
   TypedValue* output = propn;
   StringData* name;
   TypedValue* val;
-  bool visible, accessible;
+  bool visible, accessible, constant;
   Slot slot;
-  lookup_sprop(vmfp(), cls, name, propn, val, slot, visible, accessible, true);
+  lookup_sprop(vmfp(), cls, name, propn, val, slot, visible, accessible,
+               constant, true);
   SCOPE_EXIT { decRefStr(name); };
   if (!(visible && accessible)) {
     raise_error("Invalid static property access: %s::%s",
                 cls->name()->data(),
                 name->data());
+  }
+  if (constant) {
+    throw_cannot_modify_static_const_prop(cls->name()->data(), name->data());
   }
   if (RuntimeOption::EvalCheckPropTypeHints > 0) {
     auto const& sprop = cls->staticProperties()[slot];
@@ -4418,16 +4428,19 @@ OPTBLD_INLINE void iopSetOpS(SetOpOp op, clsref_slot cslot) {
   TypedValue* output = propn;
   StringData* name;
   TypedValue* val;
-  bool visible, accessible;
+  bool visible, accessible, constant;
   Slot slot;
-  lookup_sprop(vmfp(), cls, name, propn, val, slot, visible, accessible, false);
+  lookup_sprop(vmfp(), cls, name, propn, val, slot, visible, accessible,
+               constant, false);
   SCOPE_EXIT { decRefStr(name); };
   if (!(visible && accessible)) {
     raise_error("Invalid static property access: %s::%s",
                 cls->name()->data(),
                 name->data());
   }
-
+  if (constant) {
+    throw_cannot_modify_static_const_prop(cls->name()->data(), name->data());
+  }
   val = tvToCell(val);
   auto const& sprop = cls->staticProperties()[slot];
   if (setOpNeedsTypeCheck(sprop.typeConstraint, op, val)) {
@@ -4482,7 +4495,10 @@ OPTBLD_INLINE void iopIncDecS(IncDecOp op, clsref_slot slot) {
                 ss.cls->name()->data(),
                 ss.name->data());
   }
-
+  if (ss.constant) {
+    throw_cannot_modify_static_const_prop(ss.cls->name()->data(),
+                                          ss.name->data());
+  }
   auto const checkable_sprop = [&]() -> const Class::SProp* {
     if (RuntimeOption::EvalCheckPropTypeHints <= 0) return nullptr;
     auto const& sprop = ss.cls->staticProperties()[ss.slot];

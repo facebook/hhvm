@@ -1143,10 +1143,12 @@ Class::PropSlotLookup Class::findSProp(
   auto const sPropInd = lookupSProp(sPropName);
 
   // Non-existent property.
-  if (sPropInd == kInvalidSlot) return PropSlotLookup { kInvalidSlot, false };
+  if (sPropInd == kInvalidSlot)
+    return PropSlotLookup { kInvalidSlot, false, false };
 
   auto const& sProp = m_staticProperties[sPropInd];
   auto const sPropAttrs = sProp.attrs;
+  auto const sPropConst = bool(sPropAttrs & AttrIsConst);
   const Class* baseCls = this;
   if (sPropAttrs & AttrLSB) {
     // For an LSB static, accessibility attributes are relative to the class
@@ -1154,7 +1156,7 @@ Class::PropSlotLookup Class::findSProp(
     baseCls = sProp.cls;
   }
   // Property access within this Class's context.
-  if (ctx == baseCls) return PropSlotLookup { sPropInd, true };
+  if (ctx == baseCls) return PropSlotLookup { sPropInd, true, sPropConst };
 
   auto const accessible = [&] {
     switch (sPropAttrs & (AttrPublic | AttrProtected | AttrPrivate)) {
@@ -1177,7 +1179,7 @@ Class::PropSlotLookup Class::findSProp(
     not_reached();
   }();
 
-  return PropSlotLookup { sPropInd, accessible };
+  return PropSlotLookup { sPropInd, accessible, sPropConst };
 }
 
 Class::PropValLookup Class::getSPropIgnoreLateInit(
@@ -1188,7 +1190,7 @@ Class::PropValLookup Class::getSPropIgnoreLateInit(
 
   auto const lookup = findSProp(ctx, sPropName);
   if (lookup.slot == kInvalidSlot) {
-    return PropValLookup { nullptr, kInvalidSlot, false };
+    return PropValLookup { nullptr, kInvalidSlot, false, false };
   }
 
   auto const sProp = getSPropData(lookup.slot);
@@ -1227,7 +1229,8 @@ Class::PropValLookup Class::getSPropIgnoreLateInit(
     }
   }
 
-  return PropValLookup { sProp, lookup.slot, lookup.accessible };
+  return
+    PropValLookup { sProp, lookup.slot, lookup.accessible, lookup.constant };
 }
 
 Class::PropValLookup Class::getSProp(

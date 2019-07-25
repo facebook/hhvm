@@ -144,11 +144,13 @@ TypedValue* ldGblAddrDefHelper(StringData* name);
 TypedValue* getSPropOrNull(const Class* cls,
                            const StringData* name,
                            Class* ctx,
-                           bool ignoreLateInit);
+                           bool ignoreLateInit,
+                           bool disallowConst);
 TypedValue* getSPropOrRaise(const Class* cls,
                             const StringData* name,
                             Class* ctx,
-                            bool ignoreLateInit);
+                            bool ignoreLateInit,
+                            bool disallowConst);
 
 int64_t switchDoubleHelper(double val, int64_t base, int64_t nTargets);
 int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets);

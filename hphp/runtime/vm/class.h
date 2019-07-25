@@ -838,11 +838,13 @@ public:
     TypedValue* val;
     Slot slot;
     bool accessible;
+    bool constant;
   };
 
   struct PropSlotLookup {
     Slot slot;
     bool accessible;
+    bool constant;
   };
 
   /*

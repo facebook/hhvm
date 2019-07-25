@@ -1264,7 +1264,7 @@ let do_completion_local
   in
 
   (* this is what I want to fix *)
-  let request = { ClientIdeMessage.Lsp_autocomplete.
+  let request = { ClientIdeMessage.Completion.
     filename;
     file_content = lsp_doc.Lsp.TextDocumentItem.text;
     line = pos.Ide_api_types.line;
@@ -1385,7 +1385,7 @@ let do_resolve_local
   let symbolname = params.Completion.label in
   let raw_kind = params.Completion.kind in
   let kind = completion_kind_to_si_kind raw_kind in
-  let request = { ClientIdeMessage.Lsp_docblock.
+  let request = { ClientIdeMessage.Completion_resolve.
     symbol = symbolname;
     kind = kind;
   } in
@@ -1558,7 +1558,7 @@ let do_highlight_local
     get_labelled_file_from_editor_open_files editor_open_files params.textDocument.uri in
   let (file_path, file_input) =
     ServerCommandTypesUtils.extract_labelled_file labelled_file in
-  let request = { ClientIdeMessage.Lsp_highlight.
+  let request = { ClientIdeMessage.Document_highlight.
     file_path = Path.make (Relative_path.to_absolute file_path);
     file_input = file_input;
     line = pos.line;

@@ -7,24 +7,35 @@
  *
  *)
 
-module Initialize_from_saved_state_param = struct
+module Initialize_from_saved_state = struct
   type t = {
     root: Path.t;
     naming_table_saved_state_path: Path.t option;
   }
 end
 
-module Hover_param = struct
-  type t = {
+module Hover = struct
+  type request = {
     file_path: Path.t;
     file_input: ServerCommandTypes.file_input;
     line: int;
     char: int;
   }
+  type result = HoverService.result
+end
+
+module Definition = struct
+  type request = {
+    file_path: Path.t;
+    file_input: ServerCommandTypes.file_input;
+    line: int;
+    char: int;
+  }
+  type result = ServerCommandTypes.Go_to_definition.result
 end
 
 (* Handles "textDocument/completion" LSP messages *)
-module Lsp_autocomplete = struct
+module Completion = struct
   type request = {
     filename: string;
     line: int;
@@ -37,18 +48,8 @@ module Lsp_autocomplete = struct
   type result = AutocompleteTypes.ide_result
 end
 
-module Go_to_definition = struct
-  type request = {
-    file_path: Path.t;
-    file_input: ServerCommandTypes.file_input;
-    line: int;
-    char: int;
-  }
-  type result = ServerCommandTypes.Go_to_definition.result
-end
-
 (* Handles "completionItem/resolve" LSP messages *)
-module Lsp_docblock = struct
+module Completion_resolve = struct
   type request = {
     symbol: string;
     kind: SearchUtils.si_kind;
@@ -57,7 +58,7 @@ module Lsp_docblock = struct
 end
 
 (* Handles "textDocument/documentHighlight" LSP messages *)
-module Lsp_highlight = struct
+module Document_highlight = struct
   type request = {
     file_path: Path.t;
     file_input: ServerCommandTypes.file_input;
@@ -70,21 +71,21 @@ end
 (* GADT for request/response types. See [ServerCommandTypes] for a discussion on
    using GADTs in this way. *)
 type _ t =
-  | Initialize_from_saved_state: Initialize_from_saved_state_param.t -> unit t
+  | Initialize_from_saved_state: Initialize_from_saved_state.t -> unit t
   | Shutdown: unit -> unit t
   | File_changed: Path.t -> unit t
   | Hover:
-    Hover_param.t ->
-    HoverService.result t
+    Hover.request ->
+    Hover.result t
+  | Definition:
+    Definition.request ->
+    Definition.result t
   | Completion:
-    Lsp_autocomplete.request ->
-    Lsp_autocomplete.result t
-  | Go_to_definition:
-    Go_to_definition.request ->
-    Go_to_definition.result t
-  | Resolve:
-    Lsp_docblock.request ->
-    Lsp_docblock.result t
-  | Highlight:
-    Lsp_highlight.request ->
-    Lsp_highlight.result t
+    Completion.request ->
+    Completion.result t
+  | Completion_resolve:
+    Completion_resolve.request ->
+    Completion_resolve.result t
+  | Document_highlight:
+    Document_highlight.request ->
+    Document_highlight.result t

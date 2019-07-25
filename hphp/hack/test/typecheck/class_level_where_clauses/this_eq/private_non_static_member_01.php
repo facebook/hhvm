@@ -9,8 +9,8 @@
  *
  */
 
-class C {
-  use PartialC;
+final class C {
+  use PartialC;  // OK! this = C
   private function me(): void {}
 }
 

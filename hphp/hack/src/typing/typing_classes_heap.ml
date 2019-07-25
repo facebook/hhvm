@@ -302,6 +302,13 @@ module Api = struct
     | Lazy lc -> LSTable.to_seq lc.parents_and_traits |> Sequence.map ~f:fst
     | Eager c -> Sequence.of_list (SSet.elements c.tc_extends)
 
+  let all_where_constraints_on_this t =
+    List.filter ~f:(fun c ->
+      match c with
+      | (_, Typing_defs.Tthis), _, _
+      | _, _, (_, Typing_defs.Tthis) -> true
+      | _ -> false) (where_constraints t)
+
   let upper_bounds_on_this_from_constraints t =
     List.filter_map ~f:(fun c ->
       match c with

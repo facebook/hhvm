@@ -149,7 +149,7 @@ and check_happly unchecked_tparams env h =
   let subst = Inst.make_subst unchecked_tparams tyl in
   let decl_ty = Inst.instantiate subst decl_ty in
   match decl_ty with
-  | _, Tapply ((p,_), _) ->
+  | _, Tapply _ ->
       let env, locl_ty = Phase.localize_with_self env decl_ty in
       begin match TUtils.get_base_type env locl_ty with
         | _, (Tclass (cls, _, tyl)) ->
@@ -180,11 +180,7 @@ and check_happly unchecked_tparams env h =
                           Reason.explain_generic_constraint (fst h) r x l;
                           env
                         ))
-                end tc_tparams tyl;
-                ignore(
-                  Phase.check_where_constraints ~in_class:true
-                  ~use_pos:p ~definition_pos:(Cls.pos cls) ~ety_env env
-                  (Cls.where_constraints cls))
+                end tc_tparams tyl
             | _ -> ()
             )
         | _ -> ()

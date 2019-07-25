@@ -1,8 +1,1 @@
-File "constraint_interface_subtype.php", line 23, characters 14-14:
-A 'where' type constraint is violated here (Typing[4110])
-File "constraint_interface_subtype.php", line 14, characters 11-11:
-This is the class with 'where' type constraints
-File "constraint_interface_subtype.php", line 14, characters 44-46:
-Expected num
-File "constraint_interface_subtype.php", line 23, characters 16-18:
-But got dynamic because it is an unenforceable type
+No errors

@@ -9,9 +9,12 @@
  *
  */
 
-final class C {
-  use PartialC;  // OK! this = C
-  private static function me(): void {}
+class C {
+  private function me(): void {}
+}
+
+final class C2 {
+  use PartialC;  // Error! Must be class C
 }
 
 interface I {
@@ -22,5 +25,5 @@ trait PartialC implements I where this = C {
   public static function get(): C {
     return new C();
   }
-  public function foo(): void { self::me(); }
+  public function foo(): void { $this->me(); }
 }

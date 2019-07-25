@@ -11,7 +11,7 @@ open Core_kernel
 
 module Reason = Typing_reason
 module TUtils = Typing_utils
-module Cls = Decl_provider.Class
+module Cls    = Decl_provider.Class
 
 (* Only applied to classes. Checks that all the requirements of the traits
  * and interfaces it uses are satisfied. *)

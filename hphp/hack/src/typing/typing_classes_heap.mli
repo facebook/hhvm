@@ -40,6 +40,7 @@ module Api : sig
   val pos                   : t -> Pos.t
   val tparams               : t -> decl tparam list
   val where_constraints     : t -> decl where_constraint list
+  val all_where_constraints_on_this          : t -> decl where_constraint list
   val upper_bounds_on_this  : t -> decl ty Sequence.t
   val upper_bounds_on_this_from_constraints  : t -> decl ty Sequence.t
   val lower_bounds_on_this  : t -> decl ty Sequence.t

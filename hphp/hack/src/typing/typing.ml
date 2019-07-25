@@ -6273,6 +6273,26 @@ and class_def_ env c tc =
         env (Cls.where_constraints tc) in
   Typing_variance.class_ (Env.get_tcopt env) (snd c.c_name) tc impl;
   List.iter impl (check_implements_tparaml env);
+  let check_where_constraints env ht =
+    let _, (p, _), _ = TUtils.unwrap_class_type ht in
+    let env, locl_ty = Phase.localize_with_self env ht in
+    match TUtils.get_base_type env locl_ty with
+    | _, (Tclass (cls, _, tyl)) ->
+       (match Env.get_class env (snd cls) with
+        | Some cls when (Cls.where_constraints cls) <> [] ->
+           let tc_tparams = Cls.tparams cls in
+           let tc_tparams = List.map tc_tparams ~f:(Typing_enforceability.pessimize_tparam_constraints env) in
+           let ety_env =
+             { (Phase.env_with_self env) with
+               substs = Subst.make tc_tparams tyl;
+             } in
+           ignore(Phase.check_where_constraints ~in_class:true
+                    ~use_pos:pc ~definition_pos:p ~ety_env
+                    env (Cls.where_constraints cls))
+        | _ -> ())
+    | _ -> ()
+  in
+  List.iter impl (check_where_constraints env);
   check_parents_sealed env c tc;
 
   let env, parent_id, parent = class_def_parent env c tc in

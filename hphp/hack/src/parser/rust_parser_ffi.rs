@@ -132,11 +132,16 @@ macro_rules! parse {
 
             // Note: Determining the current thread size cannot be done portably,
             // therefore assume the worst (running on non-main thread with min size, 2MiB)
-            const MIB: usize = 1024 * 1024;
-            const MAX_STACK_SIZE: usize = 300 * MIB;
-            let mut stack_size = 2 * MIB;
+            const KI: usize = 1024;
+            const MI: usize = KI * KI;
+            const MAX_STACK_SIZE: usize = 1024 * MI;
+            let mut stack_size = 2 * MI;
             let mut default_stack_size_sufficient = true;
-            while stack_size <= MAX_STACK_SIZE {
+            loop {
+                if stack_size > MAX_STACK_SIZE {
+                    panic!("Rust FFI exceeded maximum allowed stack of {} KiB", MAX_STACK_SIZE / KI);
+                }
+
                 // Avoid eagerly wasting of space that will not be used in practice (WWW),
                 // but only for degenerate test cases (/test/{slow,quick}), by starting off
                 // with small stack (default thread) then fall back to bigger ones (custom thread).
@@ -144,13 +149,15 @@ macro_rules! parse {
                 // where the total parse time with unbounded stack is T=k*t, which is
                 // bounded by 2*T (much less in practice due to superlinear parsing time).
                 let next_stack_size = if default_stack_size_sufficient {
-                    13 * MIB // assume we need much more if default stack size isn't enough
+                    13 * MI // assume we need much more if default stack size isn't enough
                 } else { // exponential backoff to limit parsing time to at most twice as long
                     2 * stack_size
                 };
-                // Note: detect almost full stack by setting wiggle room of 1/2 MiB for StackLimit
-                // (if this isn't enough then the granularity of StackLimit checks is insufficient)
-                let relative_stack_size = stack_size - MIB*1/2;
+                // Note: detect almost full stack by setting "slack" of 60% for StackLimit because
+                // Syntax::to_ocaml is deeply & mutually recursive and uses nearly 2.5x of stack
+                // TODO: rewrite to_ocaml iteratively & reduce it to "stack_size - MB" as in HHVM
+                // (https://github.com/facebook/hhvm/blob/master/hphp/runtime/base/request-info.h)
+                let relative_stack_size = stack_size - stack_size*6/10;
                 stack_size = next_stack_size;
 
                 let relative_path = block_field(&ocaml_source_text, 0);
@@ -174,8 +181,8 @@ macro_rules! parse {
                         // Not always printing warning here because this would fail some HHVM tests
                         let istty = libc::isatty(libc::STDERR_FILENO as i32) != 0;
                         if istty || std::env::var_os("HH_TEST_MODE").is_some() {
-                            eprintln!("[hrust] warning: parser exceeded stack of {} MiB on: {}",
-                                      (*stack_limit).get() / MIB,
+                            eprintln!("[hrust] warning: parser exceeded stack of {} KiB on: {}",
+                                      stack_limit.get() / KI,
                                       file_path.as_str(),
                             );
                         }

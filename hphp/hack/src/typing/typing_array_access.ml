@@ -33,7 +33,7 @@ let error_const_mutation env p ty =
 
 let error_assign_array_append env p ty =
   Errors.array_append p (Reason.to_pos (fst ty)) (Typing_print.error env ty);
-  env, (ty, err_witness env p)
+  env, ty
 
 (* Given a type `ty` known to be a lower bound on the type of the array operand
  * to an array get operation, compute the largest upper bound on that type
@@ -449,60 +449,54 @@ let rec assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
     [Log_head ("assign_array_append",
     [Log_type ("ty1", ty1); Log_type("ety1", ety1); Log_type("ty2", ty2)])]));
   match ety1 with
-  | r, (Tany | Tarraykind (AKany | AKempty)) ->
-    env, (ty1, (r, TUtils.tany env))
-  | r, Terr ->
-    env, (ty1, (r, TUtils.terr env))
+  | _, (Tany | Tarraykind (AKany | AKempty)) ->
+    env, ty1
+  | _, Terr ->
+    env, ty1
   | _, Tclass ((_, n), _, [tv])
     when n = SN.Collections.cVector || n = SN.Collections.cSet ->
     let env = Typing_ops.sub_type expr_pos ur env ty2 tv Errors.unify_error in
-    env, (ty1, tv)
+    env, ty1
   (* Handle the case where Vector or Set was used as a typehint
      without type parameters *)
-  | r, Tclass ((_, n), _, [])
+  | _, Tclass ((_, n), _, [])
     when n = SN.Collections.cVector || n = SN.Collections.cSet ->
-    env, (ty1, (r, TUtils.tany env))
+    env, ty1
   | _, Tclass ((_, n), _, [tk; tv]) when n = SN.Collections.cMap ->
     let tpair = MakeType.pair (Reason.Rmap_append expr_pos) tk tv in
     let env = Typing_ops.sub_type expr_pos ur env ty2 tpair Errors.unify_error in
-    env, (ty1, tpair)
+    env, ty1
   (* Handle the case where Map was used as a typehint without
      type parameters *)
   | _, Tclass ((_, n), _, []) when n = SN.Collections.cMap ->
     let tpair = MakeType.class_type (Reason.Rmap_append expr_pos) SN.Collections.cPair [] in
     let env = Typing_ops.sub_type expr_pos ur env ty2 tpair Errors.unify_error in
-    env, (ty1, tpair)
+    env, ty1
   | r, Tclass ((_, n) as id, e, [tv])
     when n = SN.Collections.cVec || n = SN.Collections.cKeyset ->
     let env, tv' = Typing_union.union env tv ty2 in
-    env, ((r, Tclass (id, e, [tv'])), tv')
+    env, (r, Tclass (id, e, [tv']))
   | r, Tarraykind (AKvec tv) ->
     let  env, tv' = Typing_union.union env tv ty2 in
-    env, ((r, Tarraykind (AKvec tv')), tv')
+    env, (r, Tarraykind (AKvec tv'))
   | r, Tarraykind (AKvarray tv) ->
     let  env, tv' = Typing_union.union env tv ty2 in
-    env, ((r, Tarraykind (AKvarray tv')), tv')
-  | r, Tdynamic -> env, (ty1, (r, Tdynamic))
+    env, (r, Tarraykind (AKvarray tv'))
+  | _, Tdynamic -> env, ty1
   | _, Tobject ->
     if Partial.should_check_error (Env.get_mode env) 4006
     then error_assign_array_append env expr_pos ty1
-    else env, (ty1, (Reason.Rwitness expr_pos, TUtils.tany env))
+    else env, ty1
   | r, Tunion ty1l ->
     let env, resl =
       List.map_env env ty1l
         (fun env ty1 -> assign_array_append ~expr_pos ~array_pos ur env ty1 ty2) in
-    let (ty1l', tyl') = List.unzip resl in
-    let env, ty1' = Union.union_list env r ty1l' in
-    let env, ty' = Union.union_list env r tyl' in
-    env, (ty1', ty')
+    Union.union_list env r resl
   | r, Tintersection ty1l ->
     (* If any of the types is valid for an array append, then this should be valid. *)
     let env, resl = TUtils.run_on_intersection env ty1l ~f:(fun env ty1 ->
       assign_array_append ~expr_pos ~array_pos ur env ty1 ty2) in
-    let (ty1l', tyl') = List.unzip resl in
-    let env, ty1' = Inter.intersect_list env r ty1l' in
-    let env, ty' = Inter.intersect_list env r tyl' in
-    env, (ty1', ty')
+    Inter.intersect_list env r resl
   | _, Tabstract _ ->
     let resl = TUtils.try_over_concrete_supertypes env ty1 begin fun env ty1 ->
       let _env, res = assign_array_append ~expr_pos ~array_pos ur env ty1 ty2 in

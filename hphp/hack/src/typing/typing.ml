@@ -3339,7 +3339,7 @@ and assign_ p ur env e1 ty2 =
       env, te1, ty2
   | pos, Array_get (e1, None) ->
     let env, te1, ty1 = update_array_type pos env e1 None `lvalue in
-    let env, (ty1', _ty2') =
+    let env, ty1' =
       Typing_array_access.assign_array_append ~array_pos:(fst e1) ~expr_pos:p ur env ty1 ty2 in
     let env, te1 =
       if is_hack_collection env ty1

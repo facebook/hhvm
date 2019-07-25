@@ -1,0 +1,26 @@
+{
+    "runtime_base#compile-preg.cpp.o746d8e66,platform007-gcc,v8165034": {
+        "workerSize": "MEDIUM",
+        "platformType": "LINUX"
+    },
+    "runtime_base#compile-rds.cpp.o989475c3,platform007-gcc,v8165034": {
+        "workerSize": "MEDIUM",
+        "platformType": "LINUX"
+    },
+    "runtime_base#compile-perf-mem-event.cpp.o6b27d02f,platform007-gcc,v8165034": {
+        "workerSize": "MEDIUM",
+        "platformType": "LINUX"
+    },
+    "runtime_base#compile-crash-reporter.cpp.o59e6b400,platform007-gcc,v8165034": {
+        "workerSize": "MEDIUM",
+        "platformType": "LINUX"
+    },
+    "runtime_base#compile-execution-context.cpp.o7764d6c2,platform007-gcc,v8165034": {
+        "workerSize": "MEDIUM",
+        "platformType": "LINUX"
+    },
+    "runtime_base#compile-program-functions.cpp.o2761a5d6,platform007-gcc,v8165034": {
+        "workerSize": "MEDIUM",
+        "platformType": "LINUX"
+    }
+}

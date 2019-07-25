@@ -543,7 +543,7 @@ let initial_local tpenv local_reactive = {
   local_reactive = local_reactive;
 }
 
-let empty tcopt file ~droot = {
+let empty ?(mode = FileInfo.Mstrict) tcopt file ~droot = {
   function_pos = Pos.none;
   tenv    = IMap.empty;
   subst   = IMap.empty;
@@ -555,7 +555,7 @@ let empty tcopt file ~droot = {
   inside_constructor = false;
   inside_ppl_class = false;
   decl_env = {
-    mode = FileInfo.Mstrict;
+    mode;
     droot;
     decl_tcopt = tcopt;
   };
@@ -841,11 +841,6 @@ let set_static env =
   let genv = env.genv in
   let genv = { genv with static = true } in
   { env with genv = genv }
-
-let set_mode env mode =
-  let decl_env = env.decl_env in
-  let decl_env = { decl_env with mode } in
-  { env with decl_env }
 
 let get_mode env = env.decl_env.mode
 

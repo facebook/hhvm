@@ -31,7 +31,7 @@ val expand_var : env -> Reason.t -> Ident.t -> env * locl ty
 val expand_type : env -> locl ty -> env * locl ty
 val get_shape_field_name : Ast.shape_field_name -> string
 val get_shape_field_name_pos : Ast.shape_field_name -> Pos.t
-val empty : TypecheckerOptions.t -> Relative_path.t ->
+val empty : ?mode: FileInfo.mode -> TypecheckerOptions.t -> Relative_path.t ->
   droot: Typing_deps.Dep.variant option -> env
 val is_typedef : typedef_key -> bool
 val get_enum : env -> class_key -> class_decl option
@@ -79,7 +79,6 @@ val set_self : env -> locl ty -> env
 val set_parent_id : env -> string -> env
 val set_parent : env -> decl ty -> env
 val set_static : env -> env
-val set_mode : env -> FileInfo.mode -> env
 val get_mode : env -> FileInfo.mode
 val is_strict : env -> bool
 val is_decl : env -> bool

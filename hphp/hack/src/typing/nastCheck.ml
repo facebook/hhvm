@@ -66,7 +66,7 @@ let rec fun_ tenv f =
   let tenv =
     Phase.localize_where_constraints ~ety_env tenv f.f_where_constraints in
   let env = { env with
-    tenv = Env.set_mode tenv f.f_mode;
+    tenv;
     is_reactive = env.is_reactive || fun_is_reactive f.f_user_attributes;
   } in
   maybe hint env f.f_ret;
@@ -205,7 +205,7 @@ and class_ tenv c =
    * parameters before checking base class *)
   let tenv = Phase.localize_where_constraints
       ~ety_env:(Phase.env_with_self tenv) tenv c.c_where_constraints in
-  let env = { env with tenv = Env.set_mode tenv c.c_mode } in
+  let env = { env with tenv } in
   let c_constructor, c_statics, c_methods = split_methods c in
   let c_static_vars, c_vars = split_vars c in
 

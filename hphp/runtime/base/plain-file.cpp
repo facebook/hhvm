@@ -18,7 +18,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "hphp/runtime/base/rds-local.h"
+#include "hphp/util/rds-local.h"
 
 #include <folly/portability/Fcntl.h>
 #include <folly/portability/Stdio.h>

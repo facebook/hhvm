@@ -23,12 +23,12 @@
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/weakref-data.h"
-#include "hphp/runtime/base/rds-local.h"
 
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/hhbc.h"
 
 #include "hphp/util/low-ptr.h"
+#include "hphp/util/rds-local.h"
 
 #include <vector>
 

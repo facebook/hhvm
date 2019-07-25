@@ -21,8 +21,6 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/thread-local.h"
 
-#include "hphp/runtime/base/rds.h"
-
 #include <folly/Optional.h>
 
 namespace HPHP {
@@ -142,7 +140,7 @@ struct RDSLocalNode {
   RDSLocalNode* m_next;
   // s_RDSLocalsBase is the base of the RDSLocal section in RDS.  Its only
   // used for computing RDS offsets for use in the JIT.
-  static Handle s_RDSLocalsBase;
+  static uint32_t s_RDSLocalsBase;
 
   template<typename Fn>
   void iterateRoot(Fn fn) {
@@ -186,6 +184,41 @@ struct RDSLocalBase<T, std::enable_if_t<!std::is_copy_constructible<T>::value>>
 ///////////////////////////////////////////////////////////////////////////////
 }
 
+struct Configuration {
+  // Returns a handle to the base of the RDS locals in the RDS region.  If no
+  // RDS section is used and RDS locals are backed by other allocation, this
+  // can be left as nullptr.  The parameter is the space required for the
+  // RDS locals.
+  uint32_t(*rdsInitFunc)(size_t) = nullptr;
+  // Initializes a pointer to the base of the RDS locals area to be used by the
+  // calling thread/fiber.  It is passed the size required for the RDS locals
+  // (guaranteed to be identical to the size that was passed to rdsInitFunc),
+  // and the handle that rdsInitFunc returned.
+  void*(*initFunc)(size_t, uint32_t) = nullptr;
+  // Call to deallocate the region passed as the parameter.  The parameter is
+  // guaranteed to be a pointer returned by initFunc earlier.  It also will
+  // not be in RDS.
+  void(*finiFunc)(void*) = nullptr;
+  // Returns true if the region passed as a parameter lives within RDS.  If
+  // RDS is not in use, this may be left as nullptr.
+  bool(*inRdsFunc)(void*, size_t) = nullptr;
+  // Register the parameter to have its requestInit, and requestShutdown
+  // methods called at request start and end.  If no RequestEventHandlers are
+  // stored in RDS locals, then this may be left as nullptr.
+  void(*initRequestEventHandler)(RequestEventHandler*) = nullptr;
+};
+
+namespace detail {
+extern Configuration g_config;
+}
+
+struct RegisterConfig {
+  explicit RegisterConfig(Configuration&& config) {
+    detail::g_config = std::move(config);
+  }
+};
+
+// RDSInit is called to configure offsets into the rds local area.
 void RDSInit();
 // init is called to allocate and initialize the rdslocals.
 void init();
@@ -296,7 +329,8 @@ protected:
   template<typename V = void>
   REH_t<V> rehInit() const {
     if (!getInited()) {
-      detail::initializeRequestEventHandler(getNoCheck());
+      assertx(detail::g_config.initRequestEventHandler);
+      detail::g_config.initRequestEventHandler(getNoCheck());
     }
   }
   template<typename V = void>

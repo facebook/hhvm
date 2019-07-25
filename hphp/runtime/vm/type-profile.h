@@ -17,7 +17,7 @@
 #ifndef TYPE_PROFILE_H_
 #define TYPE_PROFILE_H_
 
-#include "hphp/runtime/base/rds-local.h"
+#include "hphp/util/rds-local.h"
 
 namespace HPHP {
 

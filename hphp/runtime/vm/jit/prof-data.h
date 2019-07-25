@@ -18,9 +18,9 @@
 #define incl_HPHP_PROF_TRANS_DATA_H_
 
 #include "hphp/util/atomic-vector.h"
+#include "hphp/util/rds-local.h"
 
 #include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/rds-local.h"
 
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/srckey.h"

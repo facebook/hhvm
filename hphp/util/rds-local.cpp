@@ -14,9 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/rds-local.h"
+#include "hphp/util/rds-local.h"
 
-#include "hphp/runtime/base/execution-context.h"
 #include "hphp/util/alloc.h"
 
 namespace HPHP {
@@ -37,30 +36,16 @@ static RDS_LOCAL(HotRDSLocals, rl_hotBackingStore);
 alignas(64) __thread HotRDSLocals rl_hotSection = {};
 uint32_t s_usedbytes = 0;
 
-Handle RDSLocalNode::s_RDSLocalsBase;
+uint32_t RDSLocalNode::s_RDSLocalsBase = 0;
 
-void initializeRequestEventHandler(RequestEventHandler* h) {
-  h->setInited(true);
-  // This registration makes sure obj->requestShutdown() will be called. Do
-  // it before calling requestInit() so that obj is reachable to the GC no
-  // matter what the callback does.
-  auto index = g_context->registerRequestEventHandler(h);
-  SCOPE_FAIL {
-    h->setInited(false);
-    g_context->unregisterRequestEventHandler(h, index);
-  };
-
-  h->requestInit();
-}
-
+Configuration g_config;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
 void RDSInit() {
-  assertx(!isHandleBound(detail::RDSLocalNode::s_RDSLocalsBase));
+  assertx(detail::g_config.rdsInitFunc);
   detail::RDSLocalNode::s_RDSLocalsBase =
-    rds::detail::allocUnlocked(Mode::Local, std::max(detail::s_usedbytes, 16U),
-                               16U, type_scan::kIndexUnknown);
+    detail::g_config.rdsInitFunc(detail::s_usedbytes);
 }
 
 void init() {
@@ -69,12 +54,12 @@ void init() {
   // This should not happen on request threads or RDS locals might not be
   // accessible from the JIT.
   if (detail::rl_hotSection.rdslocal_base != nullptr) return;
-  if (tl_base) {
-    detail::rl_hotSection.rdslocal_base =
-      handleToPtr<void, Mode::Local>(detail::RDSLocalNode::s_RDSLocalsBase);
-  } else {
-    detail::rl_hotSection.rdslocal_base = local_malloc(detail::s_usedbytes);
-  }
+
+  assertx(detail::g_config.initFunc);
+  detail::rl_hotSection.rdslocal_base =
+    detail::g_config.initFunc(detail::s_usedbytes,
+                              detail::RDSLocalNode::s_RDSLocalsBase);
+
   always_assert(detail::rl_hotSection.rdslocal_base);
   always_assert((uintptr_t)detail::rl_hotSection.rdslocal_base % 16 == 0);
   detail::iterate([](detail::RDSLocalNode* p) { p->init(); });
@@ -87,18 +72,16 @@ void fini(bool inrds) {
   // malloced area.
   if (!detail::rl_hotSection.rdslocal_base) return;
 
-  if (inrds != (tl_base &&
-                std::less_equal<void>()(localSection().cbegin(),
-                                        detail::rl_hotSection.rdslocal_base)
-                && std::less_equal<void>()(
-                  (const char*)detail::rl_hotSection.rdslocal_base
-                  + detail::s_usedbytes, localSection().cend()))) {
+  if (detail::g_config.inRdsFunc &&
+      inrds != detail::g_config.inRdsFunc(detail::rl_hotSection.rdslocal_base,
+                                  detail::s_usedbytes)) {
     // There will be another call to deallocate the rds local section.
     return;
   }
   detail::iterate([](detail::RDSLocalNode* p) { p->fini(); });
   if (!inrds) {
-    local_free(detail::rl_hotSection.rdslocal_base);
+    assertx(detail::g_config.finiFunc);
+    detail::g_config.finiFunc(detail::rl_hotSection.rdslocal_base);
   }
   detail::rl_hotSection.rdslocal_base = nullptr;
 }

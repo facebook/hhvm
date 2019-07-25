@@ -18,8 +18,8 @@
 #include <string.h>
 #include <math.h>
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/util/rds-local.h"
 
 /*
  * This class reimplements the setlocale() and localeconv() functions

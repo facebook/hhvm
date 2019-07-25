@@ -35,7 +35,6 @@
 
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/vm-worker.h"
 #include "hphp/hhvm/process-init.h"
 #include "hphp/runtime/vm/native.h"
@@ -47,6 +46,8 @@
 #include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/stats.h"
 #include "hphp/hhbbc/parallel.h"
+
+#include "hphp/util/rds-local.h"
 
 namespace HPHP { namespace HHBBC {
 

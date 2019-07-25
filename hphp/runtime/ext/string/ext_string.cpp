@@ -29,7 +29,6 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/plain-file.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-util.h"
@@ -41,8 +40,9 @@
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/server/http-request-handler.h"
-#include "hphp/util/lock.h"
 #include "hphp/util/concurrent-lru-cache.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/zend/html-table.h"
 #include "hphp/zend/zend-string.h"
 

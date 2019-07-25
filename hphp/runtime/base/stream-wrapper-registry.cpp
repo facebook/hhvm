@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/glob-stream-wrapper.h"
 #include "hphp/runtime/base/http-stream-wrapper.h"
 #include "hphp/runtime/base/php-stream-wrapper.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/req-optional.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
@@ -29,6 +28,7 @@
 #include "hphp/runtime/base/string-hash-map.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/hash-map.h"
+#include "hphp/util/rds-local.h"
 
 namespace HPHP { namespace Stream {
 ///////////////////////////////////////////////////////////////////////////////

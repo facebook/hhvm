@@ -19,8 +19,8 @@
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-variant.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/util/rds-local.h"
 
 namespace HPHP {
 

@@ -18,7 +18,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/req-optional.h"
 #include "hphp/runtime/base/unit-cache.h"
@@ -27,6 +26,7 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/util/lock.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/util/trace.h"
 
 using namespace HPHP::Trace;

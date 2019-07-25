@@ -27,7 +27,7 @@
 #include "hphp/util/exception.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/req-root.h"
-#include "hphp/runtime/base/rds-local.h"
+#include "hphp/util/rds-local.h"
 
 namespace HPHP {
 

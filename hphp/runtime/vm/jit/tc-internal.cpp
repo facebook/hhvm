@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/perf-warning.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/debug/debug.h"
@@ -44,6 +43,7 @@
 #include "hphp/util/disasm.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/process.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/util/trace.h"
 
 #include <tbb/concurrent_hash_map.h>

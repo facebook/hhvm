@@ -27,7 +27,6 @@
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/rds-header.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/resource-data.h"
@@ -53,6 +52,7 @@
 
 #include "hphp/util/hphp-config.h"
 
+#include "hphp/util/rds-local.h"
 #include "hphp/util/type-scan.h"
 
 namespace HPHP {

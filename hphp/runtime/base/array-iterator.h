@@ -28,9 +28,9 @@
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/req-ptr.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/util/type-scan.h"
 
 namespace HPHP {

@@ -24,7 +24,6 @@
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -42,6 +41,7 @@
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 
 #include "hphp/util/exception.h"
+#include "hphp/util/rds-local.h"
 
 #include <cmath>
 

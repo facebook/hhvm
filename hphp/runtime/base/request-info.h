@@ -20,7 +20,8 @@
 #include <map>
 #include <functional>
 
-#include "hphp/runtime/base/rds-local.h"
+#include "hphp/util/rds-local.h"
+
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/surprise-flags.h"
 

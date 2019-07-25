@@ -28,7 +28,6 @@
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/double-to-int64.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/request-info.h"
@@ -44,6 +43,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/rds-local.h"
 
 #include <vector>
 

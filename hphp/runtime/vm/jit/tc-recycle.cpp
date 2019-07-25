@@ -30,11 +30,10 @@
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 
-#include "hphp/runtime/base/rds-local.h"
-
 #include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/match.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/util/trace.h"
 
 #include "hphp/ppc64-asm/asm-ppc64.h"

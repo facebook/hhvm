@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/server/server-note.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/tv-conversions.h"
+#include "hphp/util/rds-local.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -16,7 +16,7 @@
 #ifndef incl_HPHP_TREADMILL_INL_H_
 #define incl_HPHP_TREADMILL_INL_H_
 
-#include "hphp/runtime/base/rds-local.h"
+#include "hphp/util/rds-local.h"
 
 #include <folly/Likely.h>
 

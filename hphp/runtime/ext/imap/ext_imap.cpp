@@ -19,12 +19,12 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-util.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/rds-local.h"
 
 #include <c-client.h> /* includes mail.h and rfc822.h */
 #define namespace namespace_

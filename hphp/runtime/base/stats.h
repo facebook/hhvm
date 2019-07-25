@@ -20,9 +20,9 @@
 
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/util/data-block.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/util/trace.h"
 
-#include "hphp/runtime/base/rds-local.h"
 
 namespace HPHP {
 namespace Stats {

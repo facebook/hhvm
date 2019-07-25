@@ -18,9 +18,9 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/init-fini-node.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
+#include "hphp/util/rds-local.h"
 #include "hphp/util/type-scan.h"
 
 #include <folly/AtomicHashMap.h>

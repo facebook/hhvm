@@ -17,12 +17,12 @@
 */
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/ext/memcached/libmemcached_portability.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/json/ext_json.h"
+#include "hphp/util/rds-local.h"
 #include <map>
 #include <memory>
 #include <vector>

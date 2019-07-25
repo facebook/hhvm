@@ -18,7 +18,6 @@
 #include "hphp/runtime/ext/thrift/ext_thrift.h"
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -35,6 +34,7 @@
 #include "hphp/runtime/vm/jit/perf-counters.h"
 
 #include "hphp/util/fixed-vector.h"
+#include "hphp/util/rds-local.h"
 
 #include <folly/AtomicHashMap.h>
 #include <folly/Format.h>

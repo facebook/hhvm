@@ -24,7 +24,7 @@
 #include <folly/Format.h>
 
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/rds-local.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"

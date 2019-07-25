@@ -26,7 +26,7 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/rds-local.h"
+#include "hphp/util/rds-local.h"
 
 namespace HPHP {
 

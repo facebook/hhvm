@@ -21,9 +21,9 @@
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/ext/memcached/libmemcached_portability.h"
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/zend-string.h"
+#include "hphp/util/rds-local.h"
 #include <vector>
 
 // MMC values must match pecl-memcache for compatibility

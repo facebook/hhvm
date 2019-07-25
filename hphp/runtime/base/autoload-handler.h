@@ -28,7 +28,7 @@
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/user-autoload-map.h"
-#include "hphp/runtime/base/rds-local.h"
+#include "hphp/util/rds-local.h"
 
 namespace HPHP {
 

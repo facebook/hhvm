@@ -1093,19 +1093,6 @@ void dce(Env& env, const bc::NewArray&)      { pushRemovable(env); }
 void dce(Env& env, const bc::NewCol&)        { pushRemovable(env); }
 void dce(Env& env, const bc::CheckProp&)     { pushRemovable(env); }
 
-void dce(Env& env, const bc::ClsRefName& op) {
-  // If the usage of the name is discardable, then so is this read of the
-  // class-ref.
-  stack_ops(env, [&] (UseInfo& ui) {
-      if (allUnused(ui) && !isLinked(ui)) {
-        readSlotDiscardable(env, op.slot, std::move(ui.actions));
-      } else {
-        readSlot(env, op.slot);
-      }
-      return PushFlags::MarkLive;
-    });
-}
-
 bool clsRefGetHelper(Env& env, const Type& ty, ClsRefSlotId slot) {
   if (!ty.subtypeOf(BObj)) {
     if (!ty.strictSubtypeOf(TStr)) return false;
@@ -1118,47 +1105,12 @@ bool clsRefGetHelper(Env& env, const Type& ty, ClsRefSlotId slot) {
   return !isSlotLive(env, slot);
 }
 
-void dce(Env& env, const bc::ClsRefGetC& op) {
-  // If the usage of this class-ref slot is dead, then it can be potentially be
-  // removed if the source is dead as well.
-  if (clsRefGetHelper(env, topC(env), op.slot)) {
-    auto ui = slotUsage(env, op.slot);
-    ui.actions.emplace(env.id, DceAction::Kill);
-    writeSlot(env, op.slot);
-    return pop(
-      env,
-      Use::Not,
-      std::move(ui.actions)
-    );
-  }
-  writeSlot(env, op.slot);
-  pop(env);
-}
-
 void discardableWriteSlot(Env& env, ClsRefSlotId slot, bool safe) {
   if (safe && !isSlotLive(env, slot)) {
     commitActions(env, false, slotUsage(env, slot).actions);
     return;
   }
   writeSlot(env, slot);
-}
-
-void dce(Env& env, const bc::LateBoundCls& op) {
-  discardableWriteSlot(env, op.slot, env.dceState.ainfo.ctx.cls != nullptr);
-}
-
-void dce(Env& env, const bc::Self& op) {
-  discardableWriteSlot(env, op.slot, env.dceState.ainfo.ctx.cls != nullptr);
-}
-
-void dce(Env& env, const bc::Parent& op) {
-  discardableWriteSlot(env, op.slot,
-                       env.dceState.ainfo.ctx.cls != nullptr &&
-                       env.dceState.ainfo.ctx.cls->parentName != nullptr);
-}
-
-void dce(Env& env, const bc::DiscardClsRef& op) {
-  readSlotDiscardable(env, op.slot, {});
 }
 
 void dce(Env& env, const bc::Dup&) {
@@ -1645,6 +1597,11 @@ void dce(Env& env, const bc::Shr&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Sub&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::SubO&)             { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Xor&)              { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::LateBoundCls&)     { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::Self&)             { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::Parent&)           { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::ClassName&)        { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::ClassGetC&)        { pushRemovableIfNoThrow(env); }
 
 /*
  * Default implementation is conservative: assume we use all of our
@@ -1697,7 +1654,7 @@ void dce(Env& env, const bc::CheckThis& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Clone& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ClsCns& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ClsCnsD& op) { no_dce(env, op); }
-void dce(Env& env, const bc::ClsRefGetTS& op) { no_dce(env, op); }
+void dce(Env& env, const bc::ClassGetTS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CnsE& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ContAssignDelegate& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ContCheck& op) { no_dce(env, op); }
@@ -1770,6 +1727,7 @@ void dce(Env& env, const bc::Method& op) { no_dce(env, op); }
 void dce(Env& env, const bc::NativeImpl& op) { no_dce(env, op); }
 void dce(Env& env, const bc::NewLikeArrayL& op) { no_dce(env, op); }
 void dce(Env& env, const bc::NewObj& op) { no_dce(env, op); }
+void dce(Env& env, const bc::NewObjR& op) { no_dce(env, op); }
 void dce(Env& env, const bc::NewObjD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::NewObjRD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::NewObjS& op) { no_dce(env, op); }
@@ -1879,7 +1837,10 @@ void minstr_final(Env& env, const Op& op, int32_t ndiscard) {
 
 void dce(Env& env, const bc::BaseC& op)       { minstr_base(env, op, op.arg1); }
 void dce(Env& env, const bc::BaseGC& op)      { minstr_base(env, op, op.arg1); }
-void dce(Env& env, const bc::BaseSC& op)      { minstr_base(env, op, op.arg1); }
+void dce(Env& env, const bc::BaseSC& op)      {
+  minstr_base(env, op, op.arg1);
+  minstr_base(env, op, op.arg2);
+}
 
 void dce(Env& env, const bc::Dim& op)         { minstr_dim(env, op); }
 
@@ -1952,7 +1913,10 @@ void adjustMinstr(Op& /*op*/, MaskType /*mask*/) {
 
 void adjustMinstr(bc::BaseC& op, MaskType m)       { m_adj(op.arg1, m); }
 void adjustMinstr(bc::BaseGC& op, MaskType m)      { m_adj(op.arg1, m); }
-void adjustMinstr(bc::BaseSC& op, MaskType m)      { m_adj(op.arg1, m); }
+void adjustMinstr(bc::BaseSC& op, MaskType m)      {
+  m_adj(op.arg1, m);
+  m_adj(op.arg2, m);
+}
 
 void adjustMinstr(bc::Dim& op, MaskType m)         { m_adj(op.mkey, m); }
 

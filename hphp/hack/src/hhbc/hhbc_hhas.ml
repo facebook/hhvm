@@ -64,8 +64,6 @@ let string_of_list_of_shape_fields sl =
 
 let string_of_stack_index si = string_of_int si
 
-let string_of_classref id = string_of_int id
-
 let string_of_adata_id id = "@" ^ id
 
 let string_of_param_id x =
@@ -115,8 +113,8 @@ let string_of_lit_const instruction =
       sep ["NewRecord"; string_of_class_id cid; "<" ^ string_of_list_of_shape_fields l ^ ">"]
     | NewRecordArray (cid, l) ->
       sep ["NewRecordArray"; string_of_class_id cid; "<" ^ string_of_list_of_shape_fields l ^ ">"]
-    | ClsCns (cnsid, cr) ->
-      sep ["ClsCns"; string_of_const_id cnsid; string_of_classref cr]
+    | ClsCns cnsid ->
+      sep ["ClsCns"; string_of_const_id cnsid]
     | ClsCnsD (cnsid, cid) ->
       sep ["ClsCnsD"; string_of_const_id cnsid; string_of_class_id cid]
     | File -> "File"
@@ -133,11 +131,6 @@ let string_of_lit_const instruction =
 let string_of_typestruct_resolve_op = function
   | Resolve -> "Resolve"
   | DontResolve -> "DontResolve"
-
-let string_of_has_generics_op = function
-  | NoGenerics -> "NoGenerics"
-  | HasGenerics -> "HasGenerics"
-  | MaybeGenerics -> "MaybeGenerics"
 
 let string_of_operator instruction =
   match instruction with
@@ -208,10 +201,10 @@ let string_of_get x =
   | CUGetL id -> sep ["CUGetL"; string_of_local_id id]
   | PushL id -> sep ["PushL"; string_of_local_id id]
   | CGetG -> "CGetG"
-  | CGetS id -> sep ["CGetS"; string_of_classref id]
+  | CGetS -> "CGetS"
   | VGetL id -> sep ["VGetL"; string_of_local_id id]
-  | ClsRefGetC cr -> sep ["ClsRefGetC"; string_of_int cr]
-  | ClsRefGetTS cr -> sep ["ClsRefGetTS"; string_of_int cr]
+  | ClassGetC -> "ClassGetC"
+  | ClassGetTS -> "ClassGetTS"
 
 let string_of_member_key mk =
   let open MemberKey in
@@ -288,16 +281,15 @@ let string_of_mutator x =
   | SetL id -> sep ["SetL"; string_of_local_id id]
   | PopL id -> sep ["PopL"; string_of_local_id id]
   | SetG -> "SetG"
-  | SetS id -> sep ["SetS"; string_of_classref id]
+  | SetS -> "SetS"
   | SetOpL (id, op) ->
     sep ["SetOpL"; string_of_local_id id; string_of_eq_op op]
   | SetOpG op -> sep ["SetOpG"; string_of_eq_op op]
-  | SetOpS (op, id) -> sep ["SetOpS"; string_of_eq_op op; string_of_classref id]
+  | SetOpS op -> sep ["SetOpS"; string_of_eq_op op]
   | IncDecL (id, op) ->
     sep ["IncDecL"; string_of_local_id id; string_of_incdec_op op]
   | IncDecG op -> sep ["IncDecG"; string_of_incdec_op op]
-  | IncDecS (op, id) ->
-    sep ["IncDecS"; string_of_incdec_op op; string_of_classref id]
+  | IncDecS op -> sep ["IncDecS"; string_of_incdec_op op]
   | UnsetL id -> sep ["UnsetL"; string_of_local_id id]
   | UnsetG -> "UnsetG"
   | CheckProp id -> sep ["CheckProp"; string_of_prop_id id]
@@ -385,10 +377,10 @@ let string_of_isset instruction =
   | IssetC -> "IssetC"
   | IssetL id -> "IssetL " ^ string_of_local_id id
   | IssetG -> "IssetG"
-  | IssetS cls -> "IssetS " ^ string_of_int cls
+  | IssetS -> "IssetS"
   | EmptyL id -> "EmptyL " ^ string_of_local_id id
   | EmptyG -> "EmptyG"
-  | EmptyS cls -> "EmptyS " ^ string_of_int cls
+  | EmptyS -> "EmptyS"
   | IsTypeC op -> "IsTypeC " ^ string_of_istype_op op
   | IsTypeL (id, op) ->
     "IsTypeL " ^ string_of_local_id id ^ " " ^ string_of_istype_op op
@@ -399,9 +391,9 @@ let string_of_base x =
     sep ["BaseGC"; string_of_stack_index si; MemberOpMode.to_string m]
   | BaseGL (id, m) ->
     sep ["BaseGL"; string_of_local_id id; MemberOpMode.to_string m]
-  | BaseSC (si, id, m) ->
+  | BaseSC (si, si2, m) ->
     sep ["BaseSC";
-         string_of_stack_index si; string_of_classref id; MemberOpMode.to_string m]
+         string_of_stack_index si; string_of_stack_index si2; MemberOpMode.to_string m]
   | BaseL (lid, m) ->
     sep ["BaseL"; string_of_local_id lid; MemberOpMode.to_string m]
   | BaseC (si, m) ->
@@ -449,8 +441,8 @@ let string_of_call instruction =
     sep ["FPushFuncD"; string_of_int n; string_of_function_id id]
   | FPushFuncRD (n, id) ->
     sep ["FPushFuncRD"; string_of_int n; string_of_function_id id]
-  | FPushClsMethod (n, id, pl) ->
-    sep ["FPushClsMethod"; string_of_int n; string_of_classref id; string_of_param_locations pl]
+  | FPushClsMethod (n, pl) ->
+    sep ["FPushClsMethod"; string_of_int n; string_of_param_locations pl]
   | FPushClsMethodD (n, id, cid) ->
     sep ["FPushClsMethodD";
       string_of_int n;
@@ -473,8 +465,8 @@ let string_of_call instruction =
           string_of_int n;
           SpecialClsRef.to_string r;
           string_of_method_id id]
-  | NewObj (id, op) ->
-    sep ["NewObj"; string_of_int id; string_of_has_generics_op op]
+  | NewObj -> "NewObj"
+  | NewObjR -> "NewObjR"
   | NewObjD cid ->
     sep ["NewObjD"; string_of_class_id cid]
   | NewObjRD cid ->
@@ -518,10 +510,10 @@ let string_of_misc instruction =
   match instruction with
     | This -> "This"
     | BareThis op -> sep ["BareThis"; string_of_barethis_op op]
-    | Self id -> sep ["Self"; string_of_classref id]
-    | Parent id -> sep ["Parent"; string_of_classref id]
-    | LateBoundCls id -> sep ["LateBoundCls"; string_of_classref id]
-    | ClsRefName id -> sep ["ClsRefName"; string_of_classref id]
+    | Self -> "Self"
+    | Parent -> "Parent"
+    | LateBoundCls -> "LateBoundCls"
+    | ClassName -> "ClassName"
     | ReifiedName name -> sep ["ReifiedName"; SU.quote_string name]
     | RecordReifiedGeneric-> "RecordReifiedGeneric"
     | CheckReifiedGenericMismatch -> "CheckReifiedGenericMismatch"

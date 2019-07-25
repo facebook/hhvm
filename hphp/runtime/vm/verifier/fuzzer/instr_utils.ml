@@ -83,8 +83,6 @@ let stk_data : instruct -> stack_sig = function
   | IContFlow SSwitch _
   | IContFlow RetC
   | IContFlow Throw
-  | IGet ClsRefGetC _
-  | IGet ClsRefGetTS _
   | IMutator UnsetG
   | IMutator InitProp _
   | IIterator IterInit _
@@ -128,7 +126,6 @@ let stk_data : instruct -> stack_sig = function
   | IGenerator ContValid
   | IGenerator ContKey
   | IGenerator ContGetReturn
-  | ICall NewObj _
   | ICall NewObjD _
   | ICall NewObjRD _
   | IGet CGetQuietL _                      -> [], ["C"]

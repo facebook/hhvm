@@ -477,7 +477,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(Nop,             NA,               NOV,             NOV,        NF) \
   O(EntryNop,        NA,               NOV,             NOV,        NF) \
   O(BreakTraceHint,  NA,               NOV,             NOV,        NF) \
-  O(DiscardClsRef,   ONE(CAR),         NOV,             NOV,        NF) \
   O(PopC,            NA,               ONE(CV),         NOV,        NF) \
   O(PopV,            NA,               ONE(VV),         NOV,        NF) \
   O(PopU,            NA,               ONE(UV),         NOV,        NF) \
@@ -519,9 +518,9 @@ constexpr uint32_t kMaxConcatN = 4;
   O(ColFromArray,    ONE(OA(CollectionType)),                           \
                                        ONE(CV),         ONE(CV),    NF) \
   O(CnsE,            ONE(SA),          NOV,             ONE(CV),    NF) \
-  O(ClsCns,          TWO(SA,CAR),      NOV,             ONE(CV),    NF) \
+  O(ClsCns,          ONE(SA),          ONE(CV),         ONE(CV),    NF) \
   O(ClsCnsD,         TWO(SA,SA),       NOV,             ONE(CV),    NF) \
-  O(ClsRefName,      ONE(CAR),         NOV,             ONE(CV),    NF) \
+  O(ClassName,       NA,               ONE(CV),         ONE(CV),    NF) \
   O(File,            NA,               NOV,             ONE(CV),    NF) \
   O(Dir,             NA,               NOV,             ONE(CV),    NF) \
   O(Method,          NA,               NOV,             ONE(CV),    NF) \
@@ -596,18 +595,18 @@ constexpr uint32_t kMaxConcatN = 4;
   O(CGetL2,          ONE(LA),          ONE(CV),         TWO(CV,CV), NF) \
   O(PushL,           ONE(LA),          NOV,             ONE(CV),    NF) \
   O(CGetG,           NA,               ONE(CV),         ONE(CV),    NF) \
-  O(CGetS,           ONE(CAR),         ONE(CV),         ONE(CV),    NF) \
+  O(CGetS,           NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(VGetL,           ONE(LA),          NOV,             ONE(VV),    NF) \
-  O(ClsRefGetC,      ONE(CAW),         ONE(CV),         NOV,        NF) \
-  O(ClsRefGetTS,     ONE(CAW),         ONE(CV),         NOV,        NF) \
+  O(ClassGetC,       NA,               ONE(CV),         ONE(CV),    NF) \
+  O(ClassGetTS,      NA,               ONE(CV),         TWO(CV,CV), NF) \
   O(GetMemoKeyL,     ONE(LA),          NOV,             ONE(CV),    NF) \
   O(AKExists,        NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(IssetL,          ONE(LA),          NOV,             ONE(CV),    NF) \
   O(IssetG,          NA,               ONE(CV),         ONE(CV),    NF) \
-  O(IssetS,          ONE(CAR),         ONE(CV),         ONE(CV),    NF) \
+  O(IssetS,          NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(EmptyL,          ONE(LA),          NOV,             ONE(CV),    NF) \
   O(EmptyG,          NA,               ONE(CV),         ONE(CV),    NF) \
-  O(EmptyS,          ONE(CAR),         ONE(CV),         ONE(CV),    NF) \
+  O(EmptyS,          NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(IsTypeC,         ONE(OA(IsTypeOp)),ONE(CV),         ONE(CV),    NF) \
   O(IsTypeL,         TWO(LA,                                            \
                        OA(IsTypeOp)),  NOV,             ONE(CV),    NF) \
@@ -615,25 +614,23 @@ constexpr uint32_t kMaxConcatN = 4;
   O(AssertRATStk,    TWO(IVA,RATA),    NOV,             NOV,        NF) \
   O(SetL,            ONE(LA),          ONE(CV),         ONE(CV),    NF) \
   O(SetG,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(SetS,            ONE(CAR),         TWO(CV,CV),      ONE(CV),    NF) \
+  O(SetS,            NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(SetOpL,          TWO(LA,                                            \
                        OA(SetOpOp)),   ONE(CV),         ONE(CV),    NF) \
   O(SetOpG,          ONE(OA(SetOpOp)), TWO(CV,CV),      ONE(CV),    NF) \
-  O(SetOpS,          TWO(OA(SetOpOp),CAR),                              \
-                                       TWO(CV,CV),      ONE(CV),    NF) \
+  O(SetOpS,          ONE(OA(SetOpOp)), THREE(CV,CV,CV), ONE(CV),    NF) \
   O(IncDecL,         TWO(LA,                                            \
                        OA(IncDecOp)),  NOV,             ONE(CV),    NF) \
   O(IncDecG,         ONE(OA(IncDecOp)),ONE(CV),         ONE(CV),    NF) \
-  O(IncDecS,         TWO(OA(IncDecOp),CAR),                             \
-                                       ONE(CV),         ONE(CV),    NF) \
+  O(IncDecS,         ONE(OA(IncDecOp)),TWO(CV,CV),      ONE(CV),    NF) \
   O(UnsetL,          ONE(LA),          NOV,             NOV,        NF) \
   O(UnsetG,          NA,               ONE(CV),         NOV,        NF) \
                                                                         \
   O(ResolveFunc,     ONE(SA),          NOV,             ONE(CV),    NF) \
   O(ResolveObjMethod,NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(ResolveClsMethod,NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(NewObj,          TWO(CAR,OA(HasGenericsOp)),                        \
-                                       NOV,             ONE(CV),    NF) \
+  O(NewObj,          NA,               ONE(CV),         ONE(CV),    NF) \
+  O(NewObjR,         NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(NewObjD,         ONE(SA),          NOV,             ONE(CV),    NF) \
   O(NewObjRD,        ONE(SA),          ONE(CV),         ONE(CV),    NF) \
   O(NewObjS,         ONE(OA(SpecialClsRef)),                            \
@@ -649,8 +646,7 @@ constexpr uint32_t kMaxConcatN = 4;
                                        FCALL(0, 1),     FCALL,      CF) \
   O(FCallObjMethodRD,FOUR(FCA,SA,OA(ObjMethodOp),SA),                   \
                                        FCALL(1, 1),     FCALL,      CF) \
-  O(FPushClsMethod,  THREE(IVA,CAR,I32LA),                              \
-                                       FPUSH(1, 0),     FPUSH,      PF) \
+  O(FPushClsMethod,  TWO(IVA,I32LA),   FPUSH(2, 0),     FPUSH,      PF) \
   O(FPushClsMethodS, THREE(IVA,OA(SpecialClsRef),I32LA),                \
                                        FPUSH(1, 0),     FPUSH,      PF) \
   O(FPushClsMethodSD,THREE(IVA,OA(SpecialClsRef),SA),                   \
@@ -698,9 +694,9 @@ constexpr uint32_t kMaxConcatN = 4;
   O(VerifyRetTypeC,  NA,               ONE(CV),         ONE(CV),    NF) \
   O(VerifyRetTypeTS, NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(VerifyRetNonNullC, NA,             ONE(CV),         ONE(CV),    NF) \
-  O(Self,            ONE(CAW),         NOV,             NOV,        NF) \
-  O(Parent,          ONE(CAW),         NOV,             NOV,        NF) \
-  O(LateBoundCls,    ONE(CAW),         NOV,             NOV,        NF) \
+  O(Self,            NA,               NOV,             ONE(CV),    NF) \
+  O(Parent,          NA,               NOV,             ONE(CV),    NF) \
+  O(LateBoundCls,    NA,               NOV,             ONE(CV),    NF) \
   O(RecordReifiedGeneric, NA,          ONE(CV),         ONE(CV),    NF) \
   O(ReifiedName,     ONE(SA),          ONE(CV),         ONE(CV),    NF) \
   O(CheckReifiedGenericMismatch, NA,   ONE(CV),         NOV,        NF) \
@@ -737,7 +733,7 @@ constexpr uint32_t kMaxConcatN = 4;
                                        NOV,             NOV,        NF) \
   O(BaseGL,          TWO(LA, OA(MOpMode)),                              \
                                        NOV,             NOV,        NF) \
-  O(BaseSC,          THREE(IVA, CAR, OA(MOpMode)),                      \
+  O(BaseSC,          THREE(IVA, IVA, OA(MOpMode)),                      \
                                        NOV,             NOV,        NF) \
   O(BaseL,           TWO(LA, OA(MOpMode)),                              \
                                        NOV,             NOV,        NF) \

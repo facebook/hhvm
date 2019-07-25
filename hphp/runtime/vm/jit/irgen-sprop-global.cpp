@@ -171,32 +171,31 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls,
 
 //////////////////////////////////////////////////////////////////////
 
-void emitCGetS(IRGS& env, uint32_t slot) {
-  auto const ssaPropName = topC(env);
+void emitCGetS(IRGS& env) {
+  auto const ssaCls      = topC(env);
+  auto const ssaPropName = topC(env, BCSPRelOffset{1});
 
-  if (!ssaPropName->isA(TStr)) {
-    PUNT(CGetS-PropNameNotString);
-  }
+  if (!ssaPropName->isA(TStr)) PUNT(CGetS-PropNameNotString);
+  if (!ssaCls->isA(TCls))      PUNT(EmptyS-NotClass);
 
-  auto const ssaCls    = takeClsRefCls(env, slot);
   auto const propAddr  =
     ldClsPropAddr(env, ssaCls, ssaPropName, true, false, false).propPtr;
   auto const unboxed   = gen(env, UnboxPtr, propAddr);
   auto const ldMem     = gen(env, LdMem, unboxed->type().deref(), unboxed);
 
+  discard(env);
   destroyName(env, ssaPropName);
   pushIncRef(env, ldMem);
 }
 
-void emitSetS(IRGS& env, uint32_t slot) {
-  auto const ssaPropName = topC(env, BCSPRelOffset{1});
+void emitSetS(IRGS& env) {
+  auto const ssaCls      = topC(env, BCSPRelOffset{1});
+  auto const ssaPropName = topC(env, BCSPRelOffset{2});
 
-  if (!ssaPropName->isA(TStr)) {
-    PUNT(SetS-PropNameNotString);
-  }
+  if (!ssaPropName->isA(TStr)) PUNT(SetS-PropNameNotString);
+  if (!ssaCls->isA(TCls))      PUNT(SetS-NotClass);
 
   auto const value  = popC(env, DataTypeCountness);
-  auto const ssaCls = peekClsRefCls(env, slot);
   auto const lookup = ldClsPropAddr(env, ssaCls, ssaPropName, true, true, true);
 
   if (lookup.tc) {
@@ -216,17 +215,17 @@ void emitSetS(IRGS& env, uint32_t slot) {
 
   auto const ptr = gen(env, UnboxPtr, lookup.propPtr);
 
-  killClsRef(env, slot);
+  discard(env);
   destroyName(env, ssaPropName);
   bindMem(env, ptr, value);
 }
 
-void emitIssetS(IRGS& env, uint32_t slot) {
-  auto const ssaPropName = topC(env);
-  if (!ssaPropName->isA(TStr)) {
-    PUNT(IssetS-PropNameNotString);
-  }
-  auto const ssaCls = takeClsRefCls(env, slot);
+void emitIssetS(IRGS& env) {
+  auto const ssaCls      = topC(env);
+  auto const ssaPropName = topC(env, BCSPRelOffset{1});
+
+  if (!ssaPropName->isA(TStr)) PUNT(IssetS-PropNameNotString);
+  if (!ssaCls->isA(TCls))      PUNT(IssetS-NotClass);
 
   auto const ret = cond(
     env,
@@ -243,17 +242,18 @@ void emitIssetS(IRGS& env, uint32_t slot) {
     }
   );
 
+  discard(env);
   destroyName(env, ssaPropName);
   push(env, ret);
 }
 
-void emitEmptyS(IRGS& env, uint32_t slot) {
-  auto const ssaPropName = topC(env);
-  if (!ssaPropName->isA(TStr)) {
-    PUNT(EmptyS-PropNameNotString);
-  }
+void emitEmptyS(IRGS& env) {
+  auto const ssaCls      = topC(env);
+  auto const ssaPropName = topC(env, BCSPRelOffset{1});
 
-  auto const ssaCls = takeClsRefCls(env, slot);
+  if (!ssaPropName->isA(TStr)) PUNT(EmptyS-PropNameNotString);
+  if (!ssaCls->isA(TCls))      PUNT(EmptyS-NotClass);
+
   auto const ret = cond(
     env,
     [&] (Block* taken) {
@@ -270,18 +270,18 @@ void emitEmptyS(IRGS& env, uint32_t slot) {
       return cns(env, true);
     });
 
+  discard(env);
   destroyName(env, ssaPropName);
   push(env, ret);
 }
 
-void emitIncDecS(IRGS& env, IncDecOp subop, uint32_t slot) {
-  auto const ssaPropName = topC(env);
+void emitIncDecS(IRGS& env, IncDecOp subop) {
+  auto const ssaCls      = topC(env);
+  auto const ssaPropName = topC(env, BCSPRelOffset{1});
 
-  if (!ssaPropName->isA(TStr)) {
-    PUNT(IncDecS-PropNameNotString);
-  }
+  if (!ssaPropName->isA(TStr)) PUNT(IncDecS-PropNameNotString);
+  if (!ssaCls->isA(TCls))      PUNT(IncDecS-NotClass);
 
-  auto const ssaCls  = peekClsRefCls(env, slot);
   auto const lookup  =
     ldClsPropAddr(env, ssaCls, ssaPropName, true, false, true);
   auto const unboxed = gen(env, UnboxPtr, lookup.propPtr);
@@ -306,7 +306,7 @@ void emitIncDecS(IRGS& env, IncDecOp subop, uint32_t slot) {
     gen(env, VerifyProp, ssaCls, slot, result, cns(env, true));
   }
 
-  killClsRef(env, slot);
+  discard(env);
   destroyName(env, ssaPropName);
   pushIncRef(env, isPre(subop) ? result : oldVal);
 

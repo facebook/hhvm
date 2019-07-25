@@ -345,10 +345,9 @@ ArrayData* impl_type_structure_opts(ISS& env, const bc::FCallBuiltin& op,
   auto const cns_sd = cns_name->m_data.pstr;
   if (!cls_or_obj) {
     if (auto const last = op_from_slot(env, 1)) {
-      if (last->op == Op::ClsRefName) {
+      if (last->op == Op::ClassName) {
         if (auto const prev = op_from_slot(env, 1, 1)) {
-          if (prev->op == Op::LateBoundCls &&
-              last->ClsRefName.slot == prev->LateBoundCls.slot) {
+          if (prev->op == Op::LateBoundCls) {
             if (!env.ctx.cls) return fail();
             return result(env.index.resolve_class(env.ctx.cls), cns_sd, true);
           }

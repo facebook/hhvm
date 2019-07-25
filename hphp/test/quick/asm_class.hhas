@@ -185,8 +185,8 @@
   String "printing this string"
   String "print_it"
   String "Base"
-  ClsRefGetC 0
-  FPushClsMethod 1 0
+  ClassGetC
+  FPushClsMethod 1
   FCall <> 1 1 "" - "" ""
   PopC
 

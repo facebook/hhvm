@@ -119,36 +119,30 @@ let instr_this = instr (IMisc This)
 let instr_istypec op = instr (IIsset (IsTypeC op))
 let instr_istypel id op = instr (IIsset (IsTypeL (id, op)))
 let instr_not = instr (IOp Not)
-let instr_sets =
-  instr (IMutator (SetS class_ref_rewrite_sentinel))
+let instr_sets = instr (IMutator SetS)
 let instr_setl local = instr (IMutator (SetL local))
 let instr_unsetl local = instr (IMutator (UnsetL local))
 let instr_issetl local = instr (IIsset (IssetL local))
 let instr_issetg = instr (IIsset IssetG)
-let instr_issets = instr (IIsset (IssetS class_ref_rewrite_sentinel))
-let instr_emptys = instr (IIsset (EmptyS class_ref_rewrite_sentinel))
+let instr_issets = instr (IIsset IssetS)
+let instr_emptys = instr (IIsset EmptyS)
 let instr_emptyg = instr (IIsset EmptyG)
 let instr_emptyl local = instr (IIsset (EmptyL local))
-let instr_cgets =
-  instr (IGet (CGetS class_ref_rewrite_sentinel))
+let instr_cgets = instr (IGet CGetS)
 let instr_cgetg = instr (IGet CGetG)
 let instr_cgetl local = instr (IGet (CGetL local))
 let instr_cugetl local = instr (IGet (CUGetL local))
 let instr_vgetl local = instr (IGet (VGetL local))
 let instr_cgetl2 local = instr (IGet (CGetL2 local))
 let instr_cgetquietl local = instr (IGet (CGetQuietL local))
-let instr_clsrefgetc =
-  instr (IGet (ClsRefGetC class_ref_rewrite_sentinel))
-let instr_clsrefgetts =
-  instr (IGet (ClsRefGetTS class_ref_rewrite_sentinel))
-let instr_clsrefname =
-  instr (IMisc (ClsRefName class_ref_rewrite_sentinel))
-let instr_self =
-  instr (IMisc (Self class_ref_rewrite_sentinel))
-let instr_lateboundcls =
-  instr (IMisc (LateBoundCls class_ref_rewrite_sentinel))
-let instr_parent =
-  instr (IMisc (Parent class_ref_rewrite_sentinel))
+let instr_classgetc = instr (IGet ClassGetC)
+let instr_classgetts = instr (IGet ClassGetTS)
+
+let instr_classname =
+  instr (IMisc ClassName)
+let instr_self = instr (IMisc Self)
+let instr_lateboundcls = instr (IMisc LateBoundCls)
+let instr_parent = instr (IMisc Parent)
 
 let instr_popu = instr (IBasic PopU)
 let instr_popc = instr (IBasic PopC)
@@ -161,7 +155,8 @@ let instr_new_vec_array i = instr (ILitConst (NewVecArray i))
 let instr_add_elemc = instr (ILitConst (AddElemC))
 let instr_add_new_elemc = instr (ILitConst (AddNewElemC))
 let instr_switch labels = instr (IContFlow (Switch (Unbounded, 0, labels)))
-let instr_newobj id op = instr (ICall (NewObj (id, op)))
+let instr_newobj = instr (ICall NewObj)
+let instr_newobjr = instr (ICall NewObjR)
 let instr_newobjd id = instr (ICall (NewObjD id))
 let instr_newobjrd id = instr (ICall (NewObjRD id))
 let instr_newobjs scref = instr (ICall (NewObjS scref))
@@ -179,8 +174,7 @@ let instr_entrynop = instr (IBasic EntryNop)
 let instr_typedvalue xs = instr (ILitConst (TypedValue xs))
 let instr_basel local mode = instr (IBase(BaseL(local, mode)))
 let instr_basec stack_index mode = instr (IBase (BaseC(stack_index, mode)))
-let instr_basesc y mode =
-  instr (IBase(BaseSC(y, class_ref_rewrite_sentinel, mode)))
+let instr_basesc y z mode = instr (IBase(BaseSC(y, z, mode)))
 let instr_baseh = instr (IBase BaseH)
 let instr_cgetcunop = instr (IMisc CGetCUNop)
 let instr_ugetcunop = instr (IMisc UGetCUNop)
@@ -231,7 +225,7 @@ let instr_fcallclsmethodrd fcall_args method_name class_name = gather [
 ]
 let instr_fcallclsmethod fcall_args pl = gather [
   instr (ICall (
-    FPushClsMethod ((num_args_of fcall_args), class_ref_rewrite_sentinel, pl)));
+    FPushClsMethod ((num_args_of fcall_args), pl)));
   instr (ICall (FCall (fcall_args)))
 ]
 let instr_fcallclsmethods fcall_args scref = gather [
@@ -433,12 +427,6 @@ let get_num_cls_ref_slots instrseq =
     ~init:0
     ~f:(fun num i ->
         match i with
-        | IMisc (Parent id)
-        | IMisc (LateBoundCls id)
-        | IMisc (Self id)
-        | IMisc (ClsRefName id)
-        | IGet (ClsRefGetTS id)
-        | IGet (ClsRefGetC id) -> if id + 1 > num then id + 1 else num
         | _ -> num)
 
 let get_or_put_label name_label_map name =
@@ -499,23 +487,6 @@ let rewrite_user_labels instrseq =
  * control flow, we should just kill class ref slots in favor of class pointers.
  *)
 let rewrite_class_refs_instr num stack = function
-| IGet (ClsRefGetC _) -> (num + 1, stack, IGet (ClsRefGetC (num + 1)))
-| IGet (ClsRefGetTS _) -> (num + 1, stack, IGet (ClsRefGetTS (num + 1)))
-| IMisc (Parent _) -> (num + 1, stack, IMisc (Parent (num + 1)))
-| IMisc (LateBoundCls _) -> (num + 1, stack, IMisc (LateBoundCls (num + 1)))
-| IMisc (Self _) -> (num + 1, stack, IMisc (Self (num + 1)))
-| IMisc (ClsRefName _) -> (num - 1, stack, IMisc (ClsRefName num))
-| ILitConst (ClsCns (id, _)) -> (num - 1, stack, ILitConst (ClsCns (id, num)))
-| IGet (CGetS _) -> (num - 1, stack, IGet (CGetS num))
-| IMutator (SetS _) -> (num - 1, stack, IMutator (SetS num))
-| IMutator (SetOpS (o, _)) -> (num - 1, stack, IMutator (SetOpS (o, num)))
-| IMutator (IncDecS (o, _)) -> (num - 1, stack, IMutator (IncDecS (o, num)))
-| IBase (BaseSC (si, _, m)) -> (num - 1, stack, IBase (BaseSC (si, num, m)))
-| ICall (NewObj (_, op)) -> (num - 1, stack, ICall (NewObj (num, op)))
-| ICall (FPushClsMethod (np, _, pl)) ->
-  (num - 1, stack, ICall (FPushClsMethod (np, num, pl)))
-| IIsset (IssetS _) -> (num - 1, stack, IIsset (IssetS num))
-| IIsset (EmptyS _) -> (num - 1, stack, IIsset (EmptyS num))
 | ILitConst (TypedValue tv) -> (num, stack, Emit_adata.rewrite_typed_value tv)
 (* Limited support for try/catch while class ref slot is active. Propagate the
  * number of active class ref slots from the end of the try block to the code

@@ -514,6 +514,7 @@ public:
   ALWAYS_INLINE void pushBool(bool v) { pushVal<KindOfBoolean>(v); }
   ALWAYS_INLINE void pushInt(int64_t v) { pushVal<KindOfInt64>(v); }
   ALWAYS_INLINE void pushDouble(double v) { pushVal<KindOfDouble>(v); }
+  ALWAYS_INLINE void pushClass(Class* v) { pushVal<KindOfClass>(v); }
 
   // This should only be called directly when the caller has
   // already adjusted the refcount appropriately

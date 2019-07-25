@@ -183,7 +183,7 @@ let emit_deprecation_warning scope deprecation_info =
       match Ast_scope.Scope.get_class scope with
       | None -> "", empty, empty
       | Some c when c.A.c_kind = Ast.Ctrait ->
-        "::", gather [instr_self; instr_clsrefname;], instr_concat
+        "::", gather [instr_self; instr_classname;], instr_concat
       | Some c -> strip_id c.A.c_name ^ "::", empty, empty in
     let fn_name =
       match scope with

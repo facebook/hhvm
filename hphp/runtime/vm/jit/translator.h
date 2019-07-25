@@ -323,6 +323,7 @@ enum Operands {
   MKey            = 1 << 17, // member lookup key
   LocalRange      = 1 << 18, // read range of locals given in imm[1].u_LAR
   DontGuardBase   = 1 << 19, // Dont force a guard for the base
+  StackI2         = 1 << 20, // Consume 1 cell at index imm_[1].u_IVA
   StackTop2 = Stack1 | Stack2,
   StackTop3 = Stack1 | Stack2 | Stack3,
 };

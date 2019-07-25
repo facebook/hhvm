@@ -852,10 +852,6 @@ EntryNop []  ->  []
   avoid having jumps to the entry of a function. Contrary to a Nop, EntryNop
   is guaranteed to not be optimized away.
 
-DiscardClsRef <class-ref slot> []  ->  []
-
-  Discard the class in %1.
-
 PopC                  [C]  ->  []
 PopV                  [V]  ->  []
 PopU                  [U]  ->  []
@@ -1046,11 +1042,11 @@ CnsE <litstr id>    []  ->  [C:Null|Bool|Int|Dbl|Str|Arr|Vec|Dict|Keyset|Resourc
   Get constant. Pushes the value of the global constant named %1 onto the stack
   as a cell. If there is no constant named %1, throws a fatal error.
 
-ClsCns <litstr id> <class-ref slot>  []  ->  [C:Null|Bool|Int|Dbl|Str|Arr|Vec|Dict|Keyset|Resource]
+ClsCns <litstr id>  [C:Class]  ->  [C:Null|Bool|Int|Dbl|Str|Arr|Vec|Dict|Keyset|Resource]
 
   Get class constant. This instruction pushes the value of the class constant
-  named %1 from class %2 onto the stack. If there is no class constant named %1
-  in class %2, this instruction throws a fatal error.
+  named %1 from the class $1 onto the stack. If there is no class
+  constant named %1 in class $1, this instruction throws a fatal error.
 
 ClsCnsD <litstr id> <litstr id>    []  ->  [C:Null|Bool|Int|Dbl|Str|Arr|Vec|Dict|Keyset|Resource]
 
@@ -1072,13 +1068,14 @@ Method  []  ->  [C:Static Str]
   Push string. File pushes __FILE__ onto the stack, Dir pushes __DIR__ onto
   the stack, and Method pushes __METHOD__.
 
-FuncCred []  -> [Object]
+FuncCred      []  -> [C:Obj]
+
   Push object holding information about current executing function
   onto the stack
 
-ClsRefName <class-ref slot>  [] ->  [C:Static Str]
+ClassName    [C:Class] ->  [C:Static Str]
 
-  Push the name of the class in %1 as a string.
+  Push the name of the class in $1 as a string.
 
 
 3. Operator instructions
@@ -1528,10 +1525,10 @@ CGetG    [C]  ->  [C]
   If there is not a global variable defined named x, this instruction pushes
   null onto the stack.
 
-CGetS <class-ref slot>    [C]  ->  [C]
+CGetS    [C C:Class]  ->  [C]
 
-  Get static property as cell. This instruction first checks if class %1 has a
-  visible and accessible static property named (string)$1. If it doesn't, this
+  Get static property as cell. This instruction first checks if class $1 has a
+  visible and accessible static property named (string)$2. If it doesn't, this
   instruction throws a fatal error. Otherwise, this instruction pushes the
   static property onto the stack as a cell.
 
@@ -1542,34 +1539,27 @@ VGetL <local variable id>    []  ->  [V]
   is not defined, this instruction defines it, sets it to null, boxes it, and
   pushes a the value of the local variable onto the stack as a ref.
 
-ClsRefGetC  <class-ref slot>                        [C]  ->  []
-ClsRefGetTS <class-ref slot>                        [C]  ->  []
+ClassGetC                          [C]  ->  [C:Class]
 
-  Fetch class. This instruction first loads a value into x as shown by the
-  following table:
+  Fetch class. This instruction checks if $1 is a string, object, or class. If
+  a class, it pushes the input unchanged. If a string, it checks if $1 is the
+  name of a defined class. If so, the class is pushed. If not, this instruction
+  will invoke the autoload facility passing in $1, and then it will again check
+  if $1 matches the name of a defined class. If still not defined, this
+  instruction throws a fatal error. If $1 is an object, it pushes the runtime
+  class of the object. If $1 is not any of the above cases, this instruction
+  throws a fatal error.
 
-      instruction    x
-    ---------------+----
-      ClsRefGetC   | $1
-      ClsRefGetTS  | $1['classname']
+ClassGetTS                         [C:DArr]  ->  [C:Class, C:StaticVArr|Null]
 
-  If the flavor is TS, then this instruction checks whether $1 is a type
-  structure. If not, it throws a fatal error. Loads the classname field onto
-  x and checks to see whether the type structure contains generics. If it does,
-  then mangles the name of those generics and performs the duties of the
-  RecordReifiedGeneric instruction.
+  Fetch class from type-structure. This instruction checks if $1 is a valid
+  type-structure (darray or dict). If not, this instruction throws a fatal
+  error. Otherwise, $1['classname'] is loaded, and mangled as dictated by the
+  type-structure's generics information (if present). The possibly mangled
+  classname is then processed like ClassGetC and the resulting class is
+  pushed. If present, the type-structure's generics information is processed as
+  in RecordReifiedGeneric and pushed. If not present, null is pushed.
 
-  Next this instruction checks if x is a string or an object. If x is not a
-  string or object, this instruction throws a fatal error. Otherwise, this
-  instruction executes y = (is_object(x) ? get_class(x) : (string)x) and checks
-  if y matches the name of a defined class. If y does not match the name of a
-  defined class, this instruction will invoke the autoload facility passing in
-  the class name y, and then it will again check if y matches the name of a
-  defined class. If y still does not match the name of a defined class this
-  instruction throws a fatal error.
-
-  Next, this instruction writes a classref that refers to the class named y to
-  %1.
 
 6. Isset, Empty, and type querying instructions
 -----------------------------------------------
@@ -1591,13 +1581,13 @@ IssetG    [C]  ->  [C:Bool]
   the global variable is undefined or null, this instruction pushes false onto
   the stack, otherwise it pushes true.
 
-IssetS <class-ref slot>    [C]  ->  [C:Bool]
+IssetS    [C C:Class]  ->  [C:Bool]
 
-  Isset static property. This instruction first computes x = (string)$1. Next
-  it checks if class %1 has an accessible static property named x. If it
+  Isset static property. This instruction first computes x = (string)$2. Next
+  it checks if class $1 has an accessible static property named x. If it
   doesn't, this instruction pushes false.
 
-  If class %1 does have an accessible property named x, this instruction reads
+  If class $1 does have an accessible property named x, this instruction reads
   the static property named x. If the static property is null, this instruction
   pushes false onto the stack, otherwise it pushes true.
 
@@ -1613,10 +1603,10 @@ EmptyG    [C]  ->  [C:Bool]
   into x. If the global variable is defined this instruction pushes !(x) onto
   the stack, otherwise it pushes true.
 
-EmptyS <class-ref slot>    [C]  ->  [C:Bool]
+EmptyS    [C C:Class]  ->  [C:Bool]
 
-  Empty static property. This instruction first checks if class %1 has an
-  accessible static property named (string)$1. If it doesn't, this instruction
+  Empty static property. This instruction first checks if $1 has an
+  accessible static property named (string)$2. If it doesn't, this instruction
   pushes true, otherwise this instruction reads the static property into x and
   pushes !(x) onto the stack.
 
@@ -1692,10 +1682,10 @@ SetG    [C C]  ->  [C]
   defined, assigns the value $1 to the global variable, and then pushes $1 onto
   the stack.
 
-SetS <class-ref slot>    [C C]  ->  [C]
+SetS    [C C:Class C]  ->  [C]
 
-  Set static property. First this instruction checks if class %1 has an
-  accessible static property named (string)$2. If it doesn't, this instruction
+  Set static property. First this instruction checks if the class $2 has an
+  accessible static property named (string)$3. If it doesn't, this instruction
   throws a fatal error. Otherwise, this instruction assigns the value $1 to the
   static property, and then it pushes $1 onto the stack.
 
@@ -1722,10 +1712,10 @@ SetOpG <op>    [C C]  ->  [C]
   opcodes:
     Add, Sub, Mul, Div, Mod, Shl, Shr, Concat, BitAnd, BitOr, BitXor.
 
-SetOpS <op> <class-ref slot>    [C C]  ->  [C]
+SetOpS <op>    [C C:Class C]  ->  [C]
 
-  Set op static property. This instruction first computes x = (string)$2. Next
-  it checks if class %2 has an accessible static property named x. If it
+  Set op static property. This instruction first computes x = (string)$3. Next
+  it checks if class $2 has an accessible static property named x. If it
   doesn't, this instruction throws a fatal error. Otherwise, this instruction
   reads the static property named x into y, executes z = y <op> $1, assigns z
   into the static property, and then pushes z onto the stack. The immediate
@@ -1772,10 +1762,10 @@ IncDecG <op>    [C]  ->  [C]
   If op is PostDec, this instruction pushes v onto the stack and then it
   executes --v.
 
-IncDecS <op> <class-ref slot>    [C]  ->  [C]
+IncDecS <op>    [C C:Class]  ->  [C]
 
   Increment/decrement static property. This instruction first computes x =
-  (string)$1. Next it checks if class %1 has an accessible static property
+  (string)$2. Next it checks if class $1 has an accessible static property
   named x. If it doesn't, this instruction throws a fatal error.
 
   Where s is the static property named x, this instruction performs the
@@ -1824,23 +1814,25 @@ InitProp <propName> <op> [C] -> []
 8. Call instructions
 --------------------
 
-NewObj <class-ref slot> <has-generics-op>  []  ->  [C:Obj]
-NewObjD <litstr id>                        []  ->  [C:Obj]
-NewObjRD <litstr id>                       [C:Vec/Arr]  ->  [C:Obj]
-NewObjS <mode>                             []  ->  [C:Obj]
+NewObj                                      [C:Class]              ->  [C:Obj]
+NewObjR                                     [C:Class, C:VArr|Null] ->  [C:Obj]
+NewObjD   <litstr id>                       []                     ->  [C:Obj]
+NewObjRD  <litstr id>                       [C:VArr|Null]          ->  [C:Obj]
+NewObjS   <mode>                            []                     ->  [C:Obj]
 
-  New object. First, these instructions load a value into x as given
+  New object. First, these instructions load a class into x as given
   by the following table:
 
     instruction   x
     ------------+----
-      NewObj    | %1
+      NewObj    | $1
+      NewObjR   | $2
       NewObjD   | %1
       NewObjRD  | %1
       NewObjS   | %1
 
-  When loading %1 into x, NewObjD will perform the work performed by the
-  ClsRefGetC instruction to convert the name given by %1 into a classref.
+  When loading %1 into x, NewObjD and NewObjRD will perform the work performed
+  by the ClassGetC instruction to convert the name given by %1 into a class.
   NewObjS will perform the same work as LateBoundCls/Self/Parent depending on
   the specified mode.
 
@@ -1848,13 +1840,8 @@ NewObjS <mode>                             []  ->  [C:Obj]
   initialization will complete by running a constructor with FCallCtor, and
   clearing the IsBeingConstructed flag using LockObj.
 
-  If HasGenerics is passed to NewObj, this indicates that the data at cls-ref
-  slot's reified generics portion is valid.
-  If MaybeGenerics is passed to NewObj, this indicates that data at cls-ref
-  slot's reified generics portion will be nulled out when there are no reified
-  generics.
-
-  NewObjRD's $1 contains a list of reified generics.
+  NewObjR's and NewObjRD's $1 contains a list of reified generics, or null if
+  none present.
 
 LockObj                                    [C:Obj] -> [C:Obj]
 
@@ -1902,8 +1889,8 @@ FPushFuncD <num params> <litstr id>    [U U U C|V..C|V]  ->  [C|V..C|V]
   If x is not a string, object, array, or func, this instruction throws a fatal
   error.
 
-FPushClsMethod   <num params> <class-ref slot>
-  [U U U C|V..C|V C]  ->  [C|V..C|V]
+FPushClsMethod   <num params>
+  [U U U C|V..C|V C C:Class]  ->  [C|V..C|V]
 FPushClsMethodD  <num params> <litstr id> <litstr id>
   [U U U C|V..C|V]    ->  [C|V..C|V]
 FPushClsMethodRD <num params> <litstr id> <litstr id>
@@ -1920,7 +1907,7 @@ FPushClsMethodSRD <num params> <mode> <litstr id>
 
     instruction            x    y
     --------------------+----+-----
-      FPushClsMethod    | %2 | $1
+      FPushClsMethod    | $1 | $2
       FPushClsMethodD   | %3 | %2
       FPushClsMethodRD  | %3 | %2
       FPushClsMethodS   | %2 | $1
@@ -1928,7 +1915,7 @@ FPushClsMethodSRD <num params> <mode> <litstr id>
       FPushClsMethodSRD | %2 | %3
 
   When loading %3 into x, FPushClsMethodD will perform the work performed by
-  the ClsRefGetC instruction to convert the name given by %3 into a classref.
+  the ClassGetC instruction to convert the name given by %3 into a classref.
 
   When loading %2 into x, FPushClsMethodS and FPushClsMethodSD will perform the
   work performed by LateBoundCls/Self/Parent depending on the specified mode.
@@ -2149,10 +2136,10 @@ BaseGLD <local variable id>    []  ->  [B]
   global variable whose name is given by (string)%1 or (string)$1, defining it
   first if necessary.
 
-BaseSC <class-ref slot>                        [C]  ->  [B]
+BaseSC                         [C C:Class]  ->  [B]
 
-  Get base from static property. First, this operation computes x = (string)$1.
-  Then this instruction checks if class in %1 has an accessible property named
+  Get base from static property. First, this operation computes x = (string)$2.
+  Then this instruction checks if class $1 has an accessible property named
   x. If it does, this operation outputs a base that points to the static
   property. Otherwise, this operation throws a fatal error.
 
@@ -2991,10 +2978,10 @@ BaseGL <local id>    <member op mode>    []  ->  []
 
   BaseG{C,L}{,W,D} member operation.
 
-BaseSC <stack index> <class-ref slot> <member op mode>   []  ->  []
+BaseSC <stack index> <stack index> <member op mode>    []  ->  []
 
-  BaseSC member operation. %1 gives the location of the static property
-  name, and %2 gives the class input. The class is consumed.
+  BaseSC member operation. %1 gives the location of the static property name,
+  and %2 gives the location of the class.
 
 BaseL <local id> <member op mode>    []  ->  []
 
@@ -3418,24 +3405,23 @@ VerifyRetTypeTS [C C]  ->  [C]
   an error is raised. This instruction also verifies the reified generic type
   parameters of $2.
 
-Self <class-ref slot>    []  ->  []
+Self                     []  ->  [C:Class]
 
-  Creates a classref that refers to the class in which the current function is
+  Push a class that refers to the class in which the current function is
   defined. This instruction throws a fatal error if the current method is
-  defined outside of a class, otherwise it writes a classref to %1.
+  defined outside of a class.
 
-Parent <class-ref slot>  []  ->  []
+Parent                   []  ->  [C:Class]
 
-  Creates a classref that refers to the parent of the class in which the
+  Push a class that refers to the parent of the class in which the
   current method is defined. This instruction throws a fatal error if the
   current method is defined outside of a class or if the class in which the
-  current method is defined has no parent, otherwise it writes a classref to
-  %1.
+  current method is defined has no parent.
 
-LateBoundCls <class-ref slot>    []  ->  []
+LateBoundCls             []  ->  [C:Class]
 
-  Late-bound class. Creates a classref that refers to the current late-bound
-  class and writes it to %1.
+  Late-bound class. Push a class that refers to the current late-bound
+  class.
 
 RecordReifiedGeneric [C:VArr] -> [C:VArr]
 

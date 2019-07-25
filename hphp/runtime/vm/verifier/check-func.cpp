@@ -802,7 +802,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     m_tmp_sig[idx++] = UV;
     m_tmp_sig[idx++] = UV;
     for (int i = 0; i < numArgs; ++i) m_tmp_sig[idx++] = CVV;
-    assertx(idx == numPops || idx + 1 == numPops);
+    assertx(idx == numPops || idx + 1 == numPops || idx + 2 == numPops);
     while (idx < numPops) m_tmp_sig[idx++] = CV;
     return m_tmp_sig;
   }
@@ -1191,7 +1191,7 @@ bool FuncChecker::checkClsRefSlots(State* cur, PC const pc) {
       ok = false;
     }
     cur->clsRefSlots[write] = true;
-    cur->writtenByClsRefGetTSSlots[write] = op == Op::ClsRefGetTS;
+    cur->writtenByClsRefGetTSSlots[write] = op == Op::ClassGetTS;
   }
 
   return ok;
@@ -1359,12 +1359,26 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       if (op == Op::AssertRATL) break;
     }
     case Op::BaseGC:
-    case Op::BaseSC:
     case Op::BaseC: {
       auto const stackIdx = getImm(pc, 0).u_IVA;
       if (stackIdx >= cur->stklen) {
         ferror("{} indexes ({}) past end of stack ({})\n", opcodeToName(op),
                stackIdx, cur->stklen);
+        return false;
+      }
+      break;
+    }
+    case Op::BaseSC: {
+      auto const keyIdx = getImm(pc, 0).u_IVA;
+      auto const clsIdx = getImm(pc, 1).u_IVA;
+      if (keyIdx >= cur->stklen) {
+        ferror("{} indexes key index ({}) past end of stack ({})\n",
+               opcodeToName(op), keyIdx, cur->stklen);
+        return false;
+      }
+      if (clsIdx >= cur->stklen) {
+        ferror("{} indexes class index ({}) past end of stack ({})\n",
+               opcodeToName(op), clsIdx, cur->stklen);
         return false;
       }
       break;
@@ -1465,7 +1479,8 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       break;
     }
 
-    case Op::NewObj: {
+    case Op::NewObj:
+    case Op::NewObjR: {
       auto new_pc = pc;
       decode_op(new_pc);
       auto const slot = decode_iva(new_pc);
@@ -1549,9 +1564,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   if (cur->stklen + pushes > maxStack()) reportStkOverflow(b, *cur, pc);
   FlavorDesc *outs = &cur->stk[cur->stklen];
   cur->stklen += pushes;
-  if (op == Op::BaseSC) {
-    if (pushes == 1) outs[0] = outs[1];
-  } else if (isLegacyFPush(op)) {
+  if (isLegacyFPush(op)) {
     for (int i = 0; i < pushes; ++i) {
       outs[i] = outs[i + 3];
     }
@@ -1753,10 +1766,9 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::Self:
     case Op::Parent:
     case Op::LateBoundCls:
-    case Op::ClsRefGetC:
-    case Op::ClsRefGetTS:
-    case Op::DiscardClsRef:
-    case Op::ClsRefName:
+    case Op::ClassGetC:
+    case Op::ClassGetTS:
+    case Op::ClassName:
     case Op::OODeclExists:
       return true;
 
@@ -1807,6 +1819,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::FCallObjMethodRD:
     case Op::NativeImpl:
     case Op::NewObj:
+    case Op::NewObjR:
     case Op::NewObjD:
     case Op::NewObjRD:
     case Op::NewObjS:

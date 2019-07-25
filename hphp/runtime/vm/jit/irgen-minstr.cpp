@@ -1259,16 +1259,6 @@ void baseGImpl(IRGS& env, SSATmp* name, MOpMode mode) {
   setEmptyMIPropState(env, gblPtr, mode);
 }
 
-void baseSImpl(IRGS& env, SSATmp* name, uint32_t clsRefSlot, MOpMode mode) {
-  if (!name->isA(TStr)) PUNT(BaseS-non-string-name);
-  auto const cls = takeClsRefCls(env, clsRefSlot);
-  auto const disallowConst = mode == MOpMode::Define;
-  auto const spropPtr =
-    ldClsPropAddr(env, cls, name, true, false, disallowConst).propPtr;
-  stMBase(env, spropPtr);
-  setClsMIPropState(env, spropPtr, mode, cls, name);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -2058,10 +2048,20 @@ void emitBaseGL(IRGS& env, int32_t locId, MOpMode mode) {
   baseGImpl(env, name, mode);
 }
 
-void emitBaseSC(IRGS& env, uint32_t propIdx, uint32_t slot, MOpMode mode) {
+void emitBaseSC(IRGS& env, uint32_t propIdx, uint32_t clsIdx, MOpMode mode) {
   initTvRefs(env);
-  auto name = top(env, BCSPRelOffset{safe_cast<int32_t>(propIdx)});
-  baseSImpl(env, name, slot, mode);
+
+  auto const cls = topC(env, BCSPRelOffset{safe_cast<int32_t>(clsIdx)});
+  if (!cls->isA(TCls)) PUNT(BaseSC-NotClass);
+
+  auto const name = top(env, BCSPRelOffset{safe_cast<int32_t>(propIdx)});
+  if (!name->isA(TStr)) PUNT(BaseS-non-string-name);
+
+  auto const spropPtr = ldClsPropAddr(
+    env, cls, name, true, false, mode == MOpMode::Define
+  ).propPtr;
+  stMBase(env, spropPtr);
+  setClsMIPropState(env, spropPtr, mode, cls, name);
 }
 
 void emitBaseL(IRGS& env, int32_t locId, MOpMode mode) {

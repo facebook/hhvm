@@ -236,10 +236,11 @@ type array_get_instr =
   }
 
 type 'a array_get_base_data = {
-  instrs_begin: 'a;
-  instrs_end: Instruction_sequence.t;
+  base_instrs: 'a;
+  cls_instrs: Instruction_sequence.t;
   setup_instrs: Instruction_sequence.t;
-  stack_size: int
+  base_stack_size: int;
+  cls_stack_size: int
 }
 
 (* result of emit_base *)
@@ -827,9 +828,9 @@ and emit_new env pos (cid : A.class_id) (targs : Aast.targ list) (args : A.expr 
     end
   | Class_special cls_ref -> gather [ emit_pos pos; instr_newobjs cls_ref ]
   | Class_reified instrs when has_generics = H.MaybeGenerics ->
-    gather [ instrs; instr_clsrefgetts; instr_newobj 0 has_generics ]
+     gather [ instrs; instr_classgetts; instr_newobjr ]
   | _ ->
-    gather [ emit_load_class_ref env pos cexpr; instr_newobj 0 has_generics ]
+     gather [ emit_load_class_ref env pos cexpr; instr_newobj ]
   in
   Scope.with_unnamed_locals @@ fun () ->
   let instr_args, _ = emit_args_and_inout_setters env args in
@@ -934,7 +935,7 @@ and emit_known_class_id (env : Emit_env.t) id =
   Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string fq_id);
   gather [
     instr_string (Hhbc_id.Class.to_raw_string fq_id);
-    instr_clsrefgetc;
+    instr_classgetc
   ]
 
 and emit_load_class_ref env pos cexpr =
@@ -948,20 +949,20 @@ and emit_load_class_ref env pos cexpr =
     gather [
       emit_pos pos;
       emit_expr env expr;
-      instr_clsrefgetc
+      instr_classgetc;
     ]
   | Class_reified instrs ->
     gather [
       emit_pos pos;
       instrs;
-      instr_clsrefgetc
+      instr_classgetc;
     ]
 
 and emit_load_class_const env pos (cexpr : Ast_class_expr.class_expr) id =
   let load_const =
     if SU.is_class id
-    then instr (IMisc (ClsRefName 0))
-    else instr (ILitConst (ClsCns (Hhbc_id.Const.from_ast_name id, 0)))
+    then instr (IMisc ClassName)
+    else instr (ILitConst (ClsCns (Hhbc_id.Const.from_ast_name id)))
   in
   gather [
     emit_load_class_ref env pos cexpr;
@@ -983,7 +984,7 @@ and emit_class_expr env (cexpr : Ast_class_expr.class_expr) (prop : A.class_get_
     gather [
       cexpr_local;
       Scope.stash_top_in_unnamed_local load_prop;
-      instr_clsrefgetc;
+      instr_classgetc;
     ] in
   match cexpr with
   | Class_expr ((_, (A.BracedExpr _ |
@@ -1109,7 +1110,7 @@ and emit_id (env : Emit_env.t) (id: Aast.sid) =
   match s with
   | "__FILE__" -> instr (ILitConst File)
   | "__DIR__" -> instr (ILitConst Dir)
-  | "__CLASS__" -> gather [instr_self; instr_clsrefname]
+  | "__CLASS__" -> gather [instr_self; instr_classname]
   | "__METHOD__" -> instr (ILitConst Method)
   | "__FUNCTION_CREDENTIAL__" -> instr (ILitConst FuncCred)
   | "__LINE__" ->
@@ -1288,17 +1289,17 @@ and emit_set_range_expr env pos name kind args =
     | [], _ -> instr_int (-1)
     | _, false -> raise_fatal "expects no more than 3 arguments"
     | _, true -> raise_fatal "expects no more than 4 arguments" in
-  let base_expr_begin, base_expr_end, base_setup, base_stack =
+  let base_expr, cls_expr, base_setup, base_stack, cls_stack =
     emit_base ~notice:Notice ~is_object:false
-      env MemberOpMode.Define 3 base in
+      env MemberOpMode.Define 3 3 base in
   gather [
-    base_expr_begin;
-    base_expr_end;
+    base_expr;
+    cls_expr;
     emit_expr env offset;
     emit_expr env src;
     count_instrs;
     base_setup;
-    instr (IFinal (SetRangeM (base_stack, range_op, size)))
+    instr (IFinal (SetRangeM (base_stack + cls_stack, range_op, size)))
   ]
 
 and emit_call_isset_exprs env pos (exprs : A.expr list) =
@@ -2204,9 +2205,9 @@ and emit_store_for_simple_base ~is_base env pos elem_stack_size (base_expr : A.e
   let base_expr_instrs_begin,
       base_expr_instrs_end,
       base_setup_instrs,
-      _ =
+      _, _ =
     emit_base ~is_object:false ~notice:Notice env MemberOpMode.Define
-      elem_stack_size base_expr in
+      elem_stack_size 0 base_expr in
   let expr =
     let mk = MemberKey.EL local in
     if is_base then instr_dim MemberOpMode.Define mk else instr_setm 0 mk in
@@ -2277,12 +2278,15 @@ and emit_array_get_worker ?(null_coalesce_assignment=false) ?(no_final=false) ?m
   let querym_n_unpopped = ref None in
   let elem_expr_instrs, elem_stack_size =
     emit_elem_instrs ~local_temp_kind ~null_coalesce_assignment env opt_elem_expr in
-  let mk = get_elem_member_key ~null_coalesce_assignment env 0 opt_elem_expr in
   let base_result =
     emit_base_worker ~is_object:false ~inout_param_info
       ~notice:(match qop with QueryOp.Isset -> NoNotice | _ -> Notice)
       ~null_coalesce_assignment
-      env mode elem_stack_size base_expr in
+      env mode elem_stack_size 0 base_expr in
+  let cls_stack_size = match base_result with
+    | Array_get_base_regular base -> base.cls_stack_size
+    | Array_get_base_inout base -> base.load.cls_stack_size in
+  let mk = get_elem_member_key ~null_coalesce_assignment env cls_stack_size opt_elem_expr in
   let make_final total_stack_size =
     if no_final then empty else
     instr (IFinal (
@@ -2296,12 +2300,12 @@ and emit_array_get_worker ?(null_coalesce_assignment=false) ?(no_final=false) ?m
   | Array_get_base_regular base, None ->
     (* both base and expression don't need to store anything *)
     Array_get_regular (gather [
-      base.instrs_begin;
+      base.base_instrs;
       elem_expr_instrs;
-      base.instrs_end;
+      base.cls_instrs;
       emit_pos outer_pos;
       base.setup_instrs;
-      make_final (base.stack_size + elem_stack_size);
+      make_final (base.base_stack_size + base.cls_stack_size + elem_stack_size);
     ])
   | Array_get_base_regular base, Some local_kind ->
     (* base does not need temp locals but index expression does *)
@@ -2310,15 +2314,15 @@ and emit_array_get_worker ?(null_coalesce_assignment=false) ?(no_final=false) ?m
       [
         (* load base and indexer, value of indexer will be saved in local *)
         gather [
-          base.instrs_begin;
+          base.base_instrs;
           elem_expr_instrs
         ], Some (local, local_kind);
         (* finish loading the value *)
         gather [
-          base.instrs_end;
+          base.base_instrs;
           emit_pos outer_pos;
           base.setup_instrs;
-          make_final (base.stack_size + elem_stack_size);
+          make_final (base.base_stack_size + base.cls_stack_size + elem_stack_size);
         ], None
       ] in
     let store =
@@ -2332,13 +2336,13 @@ and emit_array_get_worker ?(null_coalesce_assignment=false) ?(no_final=false) ?m
   | Array_get_base_inout base, None ->
     (* base needs temp locals, indexer - does not,
        simply concat two instruction sequences *)
-    let load = base.load.instrs_begin @ [
+    let load = base.load.base_instrs @ [
       gather [
         elem_expr_instrs;
-        base.load.instrs_end;
+        base.load.cls_instrs;
         emit_pos outer_pos;
         base.load.setup_instrs;
-        make_final (base.load.stack_size + elem_stack_size);
+        make_final (base.load.base_stack_size + base.load.cls_stack_size + elem_stack_size);
       ], None
     ] in
     let store = gather [
@@ -2354,14 +2358,14 @@ and emit_array_get_worker ?(null_coalesce_assignment=false) ?(no_final=false) ?m
     let local = Local.get_unnamed_local () in
     let load =
       (* load base *)
-      base.load.instrs_begin @ [
+      base.load.base_instrs @ [
       (* load index, value will be saved in local *)
       elem_expr_instrs, Some (local, local_kind);
       gather [
-        base.load.instrs_end;
+        base.load.cls_instrs;
         emit_pos outer_pos;
         base.load.setup_instrs;
-        make_final (base.load.stack_size + elem_stack_size);
+        make_final (base.load.base_stack_size + base.load.cls_stack_size + elem_stack_size);
       ], None
     ] in
     let store = gather [
@@ -2391,17 +2395,20 @@ and emit_obj_get ?(null_coalesce_assignment=false)
       let mode =
         if null_coalesce_assignment then MemberOpMode.Warn
         else get_queryMOpMode qop in
-      let mk, prop_expr_instrs, prop_stack_size =
+      let _, _, prop_stack_size =
         emit_prop_expr ~null_coalesce_assignment env null_flavor 0 prop in
       let base_expr_instrs_begin,
           base_expr_instrs_end,
           base_setup_instrs,
-          base_stack_size =
+          base_stack_size,
+          cls_stack_size =
         emit_base
           ~is_object:true ~notice:Notice ~null_coalesce_assignment
-          env mode prop_stack_size expr
+          env mode prop_stack_size 0 expr
       in
-      let total_stack_size = prop_stack_size + base_stack_size in
+      let mk, prop_expr_instrs, _ =
+        emit_prop_expr ~null_coalesce_assignment env null_flavor cls_stack_size prop in
+      let total_stack_size = prop_stack_size + base_stack_size + cls_stack_size in
       let num_params = if null_coalesce_assignment then 0 else total_stack_size in
       let final_instr = instr (IFinal (QueryM (num_params, qop, mk))) in
       let querym_n_unpopped =
@@ -2553,19 +2560,21 @@ and emit_prop_expr ?(null_coalesce_assignment=false) env null_flavor
  *   QueryM 1 CGet EC:0
  *)
 
-and emit_base ~is_object ~notice ?(null_coalesce_assignment=false) env mode base_offset (e : A.expr) =
+and emit_base ~is_object ~notice ?(null_coalesce_assignment=false)
+              env mode base_offset rhs_stack_size (e : A.expr) =
   let result = emit_base_worker ~is_object ~notice ~inout_param_info:None ~null_coalesce_assignment
-    env mode base_offset e in
+    env mode base_offset rhs_stack_size e in
   match result with
   | Array_get_base_regular i ->
-    i.instrs_begin,
-    i.instrs_end,
+    i.base_instrs,
+    i.cls_instrs,
     i.setup_instrs,
-    i.stack_size
+    i.base_stack_size,
+    i.cls_stack_size
   | Array_get_base_inout _ -> failwith "unexpected inout"
 
 and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assignment=false)
-  env mode base_offset
+  env mode base_offset rhs_stack_size
   (expr : A.expr) =
   let ((pos, _) as annot, expr_) = expr in
   let base_mode =
@@ -2576,22 +2585,23 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
     let local_temp_kind =
       get_local_temp_kind ~is_base:true inout_param_info env (Some expr) in
     (* generic handler that will try to save local into temp if this is necessary *)
-    let emit_default instrs_begin instrs_end setup_instrs stack_size =
+    let emit_default base_instrs cls_instrs setup_instrs base_stack_size cls_stack_size =
       match local_temp_kind with
       | Some local_temp ->
         let local = Local.get_unnamed_local () in
         Array_get_base_inout {
           load = {
             (* run begin part, result will be stored into temp  *)
-            instrs_begin = [instrs_begin, Some (local, local_temp)];
-            instrs_end;
+            base_instrs = [base_instrs, Some (local, local_temp)];
+            cls_instrs;
             setup_instrs;
-            stack_size };
+            base_stack_size;
+            cls_stack_size };
           store =  instr_basel local MemberOpMode.Define
         }
       | _ ->
         Array_get_base_regular {
-          instrs_begin; instrs_end; setup_instrs; stack_size }
+          base_instrs; cls_instrs; setup_instrs; base_stack_size; cls_stack_size }
    in
    match expr_ with
    | A.Lvar (name_pos, x)
@@ -2602,12 +2612,14 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
        empty
        (instr (IBase (BaseGC (base_offset, base_mode))))
        1
+       0
 
    | A.Lvar (thispos, x) when is_object && (Local_id.get_name x) = SN.SpecialIdents.this ->
      emit_default
        (emit_pos_then thispos @@ instr (IMisc CheckThis))
        empty
        (instr (IBase BaseH))
+       0
        0
 
    | A.Lvar (pos, str)
@@ -2620,12 +2632,14 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
          empty
          (instr_basel v base_mode)
          0
+         0
      end
      else begin
        emit_default
          empty
          empty
          (instr (IBase (BaseL (v, base_mode))))
+         0
          0
      end
 
@@ -2635,6 +2649,7 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
        empty
        (instr (IBase (BaseC (base_offset, base_mode))))
        1
+       0
 
    | A.Array_get ((_, A.Lvar (_, x)), Some (_, A.Lvar (y_pos, y_id)))
      when (Local_id.get_name x) = SN.Superglobals.globals ->
@@ -2644,6 +2659,7 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
        empty
        (instr (IBase (BaseGL (v, base_mode))))
        0
+       0
 
    | A.Array_get ((_, A.Lvar (_, x)), Some e) when (Local_id.get_name x) = SN.Superglobals.globals ->
      let elem_expr_instrs = emit_expr env e in
@@ -2652,6 +2668,8 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
        empty
        (instr (IBase (BaseGC (base_offset, base_mode))))
        1
+       0
+
    (* $a[] can not be used as the base of an array get unless as an lval *)
    | A.Array_get (_, None)
       when not (Emit_env.does_env_allow_array_append env) ->
@@ -2667,9 +2685,13 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
      let base_result =
        emit_base_worker
          ~notice ~is_object:false ~inout_param_info ~null_coalesce_assignment
-         env mode (base_offset + elem_stack_size) base_expr
+         env mode (base_offset + elem_stack_size) rhs_stack_size base_expr
      in
-     let mk = get_elem_member_key ~null_coalesce_assignment env base_offset opt_elem_expr in
+     let cls_stack_size = match base_result with
+       | Array_get_base_regular base -> base.cls_stack_size
+       | Array_get_base_inout base -> base.load.cls_stack_size in
+     let mk = get_elem_member_key ~null_coalesce_assignment
+                                  env (base_offset + cls_stack_size) opt_elem_expr in
      let make_setup_instrs base_setup_instrs =
        gather [
          base_setup_instrs;
@@ -2680,26 +2702,28 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
      | Array_get_base_regular base, None ->
        emit_default
          (gather [
-           base.instrs_begin;
+           base.base_instrs;
            elem_expr_instrs;
          ])
-         base.instrs_end
+         base.cls_instrs
          (make_setup_instrs base.setup_instrs)
-         (base.stack_size + elem_stack_size)
+         (base.base_stack_size + elem_stack_size)
+         base.cls_stack_size
      | Array_get_base_regular base, Some local_temp ->
        (* base does not need temps but index does *)
        let local = Local.get_unnamed_local () in
-       let instrs_begin = gather [
-         base.instrs_begin;
+       let base_instrs = gather [
+         base.base_instrs;
          elem_expr_instrs;
        ] in
        Array_get_base_inout {
          load = {
            (* store result of instr_begin to temp *)
-           instrs_begin = [instrs_begin, Some (local, local_temp)];
-           instrs_end = base.instrs_end;
+           base_instrs = [base_instrs, Some (local, local_temp)];
+           cls_instrs = base.cls_instrs;
            setup_instrs = make_setup_instrs base.setup_instrs;
-           stack_size = base.stack_size + elem_stack_size };
+           base_stack_size = base.base_stack_size + elem_stack_size;
+           cls_stack_size = base.cls_stack_size };
          store = emit_store_for_simple_base ~is_base:true env pos elem_stack_size
                  base_expr local
        }
@@ -2708,10 +2732,11 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
        Array_get_base_inout {
          load = {
            (* concat index evaluation to base *)
-           instrs_begin = base.load.instrs_begin @ [elem_expr_instrs, None];
-           instrs_end = base.load.instrs_end;
+           base_instrs = base.load.base_instrs @ [elem_expr_instrs, None];
+           cls_instrs = base.load.cls_instrs;
            setup_instrs = make_setup_instrs base.load.setup_instrs;
-           stack_size = base.load.stack_size + elem_stack_size };
+           base_stack_size = base.load.base_stack_size + elem_stack_size;
+           cls_stack_size = base.load.cls_stack_size };
          store = gather [
           base.store;
           instr_dim MemberOpMode.Define mk;
@@ -2722,14 +2747,15 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
         let local = Local.get_unnamed_local () in
         Array_get_base_inout {
           load = {
-            instrs_begin =
-              base.load.instrs_begin @ [
+            base_instrs =
+              base.load.base_instrs @ [
                 (* evaluate index, result will be stored in local *)
                 elem_expr_instrs, Some (local, local_kind)
               ];
-            instrs_end = base.load.instrs_end;
+            cls_instrs = base.load.cls_instrs;
             setup_instrs = make_setup_instrs base.load.setup_instrs;
-            stack_size = base.load.stack_size + elem_stack_size };
+            base_stack_size = base.load.base_stack_size + elem_stack_size;
+            cls_stack_size = base.load.cls_stack_size };
           store = gather [
             base.store;
             instr_dim MemberOpMode.Define (MemberKey.EL local);
@@ -2745,16 +2771,22 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
          empty
          (gather [ instr_basec base_offset base_mode ])
          1
+         0
+
      | _ ->
-       let mk, prop_expr_instrs, prop_stack_size =
-         emit_prop_expr ~null_coalesce_assignment env null_flavor base_offset prop_expr in
+       let _, _, prop_stack_size =
+          emit_prop_expr ~null_coalesce_assignment env null_flavor 0 prop_expr in
        let base_expr_instrs_begin,
            base_expr_instrs_end,
            base_setup_instrs,
-           base_stack_size =
+           base_stack_size,
+           cls_stack_size =
          emit_base ~notice:Notice ~is_object:true ~null_coalesce_assignment
-           env mode (base_offset + prop_stack_size) base_expr
+           env mode (base_offset + prop_stack_size) rhs_stack_size base_expr
        in
+       let mk, prop_expr_instrs, _ =
+         emit_prop_expr ~null_coalesce_assignment env
+                        null_flavor (base_offset + cls_stack_size) prop_expr in
        let total_stack_size = prop_stack_size + base_stack_size in
        let final_instr = instr (IBase (Dim (mode, mk))) in
        emit_default
@@ -2768,6 +2800,7 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
            final_instr
          ])
          total_stack_size
+         cls_stack_size
      end
 
    | A.Class_get(cid, prop) ->
@@ -2777,8 +2810,10 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
      emit_default
        cexpr_begin
        cexpr_end
-       (instr_basesc base_offset base_mode)
+       (instr_basesc (base_offset + 1) rhs_stack_size base_mode)
        1
+       1
+
    | _ ->
      let base_expr_instrs = emit_expr env expr in
      emit_default
@@ -2787,6 +2822,7 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
        (emit_pos_then pos @@
        instr (IBase (BaseC (base_offset, base_mode))))
        1
+       0
 
 and emit_ignored_expr env ?(pop_pos : Pos.t = Pos.none) (e : A.expr) =
  match snd e with
@@ -3088,7 +3124,7 @@ and emit_call_lhs_and_fcall
       let emit_fcall instr_meth = gather [
         instr_meth;
         emit_expr env expr;
-        instr_clsrefgetc;
+        instr_classgetc;
         instr_fcallclsmethod fcall_args []
       ] in
       if does_not_have_non_tparam_generics then
@@ -3107,7 +3143,7 @@ and emit_call_lhs_and_fcall
       gather [
         instr_string method_id_string;
         instr_pushl tmp;
-        instr_clsrefgetc;
+        instr_classgetc;
         instr_fcallclsmethod fcall_args []
       ]
     end
@@ -3161,7 +3197,7 @@ and emit_call_lhs_and_fcall
       gather [
         instr_pushl meth;
         instr_pushl cls;
-        instr_clsrefgetc;
+        instr_classgetc;
         instr_fcallclsmethod fcall_args inout_arg_positions
       ]
     | Class_reified instrs ->
@@ -3177,7 +3213,7 @@ and emit_call_lhs_and_fcall
       gather [
         instr_pushl meth;
         instr_pushl cls;
-        instr_clsrefgetc;
+        instr_classgetc;
         instr_fcallclsmethod fcall_args inout_arg_positions
       ]
     end
@@ -3532,9 +3568,9 @@ and emit_final_global_op pos op =
 
 and emit_final_static_op cid (prop : A.class_get_expr) op =
   match op with
-  | LValOp.Set -> instr (IMutator (SetS 0))
-  | LValOp.SetOp op -> instr (IMutator (SetOpS (op, 0)))
-  | LValOp.IncDec op -> instr (IMutator (IncDecS (op, 0)))
+  | LValOp.Set -> instr (IMutator SetS)
+  | LValOp.SetOp op -> instr (IMutator (SetOpS op))
+  | LValOp.IncDec op -> instr (IMutator (IncDecS op))
   | LValOp.Unset ->
      let pos = match prop with
        | A.CGexpr ((pos, _), _) -> pos
@@ -3787,19 +3823,21 @@ and emit_lval_op_nonlist_steps ?(null_coalesce_assignment=false)
     let base_expr_instrs_begin,
         base_expr_instrs_end,
         base_setup_instrs,
-        base_stack_size =
+        base_stack_size,
+        cls_stack_size =
       emit_base ~is_object:false ~notice:Notice ~null_coalesce_assignment env
-        mode base_offset base_expr
+        mode base_offset rhs_stack_size base_expr
     in
-    let mk = get_elem_member_key ~null_coalesce_assignment env rhs_stack_size opt_elem_expr in
-    let total_stack_size = elem_stack_size + base_stack_size in
+    let mk = get_elem_member_key ~null_coalesce_assignment env
+                                 (rhs_stack_size + cls_stack_size) opt_elem_expr in
+    let total_stack_size = elem_stack_size + base_stack_size + cls_stack_size in
     let final_instr =
       emit_pos_then pos @@
       emit_final_member_op total_stack_size op mk in
     gather [
       if null_coalesce_assignment then empty else base_expr_instrs_begin;
       elem_expr_instrs;
-      base_expr_instrs_end;
+      if null_coalesce_assignment then empty else base_expr_instrs_end;
     ],
     rhs_instrs,
     gather [
@@ -3815,27 +3853,31 @@ and emit_lval_op_nonlist_steps ?(null_coalesce_assignment=false)
       match op with
       | LValOp.Unset -> MemberOpMode.Unset
       | _ -> MemberOpMode.Define in
-    let mk, prop_expr_instrs, prop_stack_size =
-      emit_prop_expr ~null_coalesce_assignment env null_flavor rhs_stack_size e2 in
-    let prop_expr_instrs =
-      if null_coalesce_assignment then empty else prop_expr_instrs in
+    let _, _, prop_stack_size =
+      emit_prop_expr ~null_coalesce_assignment env null_flavor 0 e2 in
     let base_offset = prop_stack_size + rhs_stack_size in
     let base_expr_instrs_begin,
         base_expr_instrs_end,
         base_setup_instrs,
-        base_stack_size =
+        base_stack_size,
+        cls_stack_size =
       emit_base
         ~notice:Notice ~is_object:true ~null_coalesce_assignment
-        env mode base_offset e1
+        env mode base_offset rhs_stack_size e1
     in
-    let total_stack_size = prop_stack_size + base_stack_size in
+    let mk, prop_expr_instrs, _ =
+      emit_prop_expr ~null_coalesce_assignment env
+                     null_flavor (rhs_stack_size + cls_stack_size) e2 in
+    let prop_expr_instrs =
+      if null_coalesce_assignment then empty else prop_expr_instrs in
+    let total_stack_size = prop_stack_size + base_stack_size + cls_stack_size in
     let final_instr =
       emit_pos_then pos @@
       emit_final_member_op total_stack_size op mk in
     gather [
       if null_coalesce_assignment then empty else base_expr_instrs_begin;
       prop_expr_instrs;
-      base_expr_instrs_end;
+      if null_coalesce_assignment then empty else base_expr_instrs_end;
     ],
     rhs_instrs,
     gather [

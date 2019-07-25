@@ -1406,8 +1406,8 @@ void in(ISS& env, const bc::BaseGL& op) {
 }
 
 void in(ISS& env, const bc::BaseSC& op) {
+  auto cls = topC(env, op.arg2);
   auto prop = topC(env, op.arg1);
-  auto cls = takeClsRefSlot(env, op.slot);
   auto newBase = miBaseSProp(env, std::move(cls), prop);
   if (newBase.type.subtypeOf(BBottom)) return unreachable(env);
   startBase(env, std::move(newBase));
@@ -1473,7 +1473,6 @@ void in(ISS& env, const bc::Dim& op) {
           [&] {
             switch (base.op) {
               case Op::BaseGC: return base.BaseGC.arg1 == 0;
-              case Op::BaseSC: return base.BaseSC.arg1 == 0;
               case Op::BaseC:  return base.BaseC.arg1 == 0;
               default: return false;
             }

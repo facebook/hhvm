@@ -89,7 +89,6 @@ static const struct {
 
   /*** 1. Basic instructions ***/
 
-  { OpDiscardClsRef, {None,           None,         OutNone         }},
   { OpPopC,        {Stack1|
                     DontGuardStack1,  None,         OutNone         }},
   { OpPopV,        {Stack1|
@@ -133,12 +132,12 @@ static const struct {
   { OpNewRecord,   {StackN,           Stack1,       OutRecord       }},
   { OpColFromArray,   {Stack1,        Stack1,       OutObject       }},
   { OpCnsE,        {None,             Stack1,       OutCns          }},
-  { OpClsCns,      {None,             Stack1,       OutUnknown      }},
+  { OpClsCns,      {Stack1,           Stack1,       OutUnknown      }},
   { OpClsCnsD,     {None,             Stack1,       OutUnknown      }},
   { OpFile,        {None,             Stack1,       OutString       }},
   { OpDir,         {None,             Stack1,       OutString       }},
   { OpMethod,      {None,             Stack1,       OutString       }},
-  { OpClsRefName,  {None,             Stack1,       OutString       }},
+  { OpClassName,   {Stack1,           Stack1,       OutString       }},
   { OpFuncCred,    {None,             Stack1,       OutObject       }},
 
   /*** 3. Operator instructions ***/
@@ -238,20 +237,20 @@ static const struct {
   { OpCUGetL,      {Local,            Stack1,       OutCInputL      }},
   { OpPushL,       {Local,            Stack1|Local, OutCInputL      }},
   { OpCGetG,       {Stack1,           Stack1,       OutUnknown      }},
-  { OpCGetS,       {Stack1,           Stack1,       OutUnknown      }},
+  { OpCGetS,       {StackTop2,        Stack1,       OutUnknown      }},
   { OpVGetL,       {Local,            Stack1|Local, OutVInputL      }},
-  { OpClsRefGetC,  {Stack1,           None,         OutNone         }},
-  { OpClsRefGetTS, {Stack1,           None,         OutNone         }},
+  { OpClassGetC,   {Stack1,           Stack1,       OutClass        }},
+  { OpClassGetTS,  {Stack1,           StackTop2,    OutUnknown      }},
 
   /*** 6. Isset, Empty, and type querying instructions ***/
 
   { OpAKExists,    {StackTop2,        Stack1,       OutBoolean      }},
   { OpIssetL,      {Local,            Stack1,       OutBoolean      }},
   { OpIssetG,      {Stack1,           Stack1,       OutBoolean      }},
-  { OpIssetS,      {Stack1,           Stack1,       OutBoolean      }},
+  { OpIssetS,      {StackTop2,        Stack1,       OutBoolean      }},
   { OpEmptyL,      {Local,            Stack1,       OutBoolean      }},
   { OpEmptyG,      {Stack1,           Stack1,       OutBoolean      }},
-  { OpEmptyS,      {Stack1,           Stack1,       OutBoolean      }},
+  { OpEmptyS,      {StackTop2,        Stack1,       OutBoolean      }},
   { OpIsTypeC,     {Stack1|
                     DontGuardStack1,  Stack1,       OutBoolean      }},
   { OpIsTypeL,     {Local,            Stack1,       OutIsTypeL      }},
@@ -260,19 +259,20 @@ static const struct {
 
   { OpSetL,        {Stack1|Local,     Stack1|Local, OutSameAsInput1  }},
   { OpSetG,        {StackTop2,        Stack1,       OutSameAsInput1  }},
-  { OpSetS,        {StackTop2,        Stack1,       OutSameAsInput1  }},
+  { OpSetS,        {StackTop3,        Stack1,       OutSameAsInput1  }},
   { OpSetOpL,      {Stack1|Local,     Stack1|Local, OutSetOp        }},
   { OpSetOpG,      {StackTop2,        Stack1,       OutUnknown      }},
-  { OpSetOpS,      {StackTop2,        Stack1,       OutUnknown      }},
+  { OpSetOpS,      {StackTop3,        Stack1,       OutUnknown      }},
   { OpIncDecL,     {Local,            Stack1|Local, OutIncDec       }},
   { OpIncDecG,     {Stack1,           Stack1,       OutUnknown      }},
-  { OpIncDecS,     {Stack1,           Stack1,       OutUnknown      }},
+  { OpIncDecS,     {StackTop2,        Stack1,       OutUnknown      }},
   { OpUnsetL,      {Local,            Local,        OutNone         }},
   { OpUnsetG,      {Stack1,           None,         OutNone         }},
 
   /*** 8. Call instructions ***/
 
-  { OpNewObj,      {None,             Stack1,       OutObject       }},
+  { OpNewObj,      {Stack1,           Stack1,       OutObject       }},
+  { OpNewObjR,     {StackTop2,        Stack1,       OutObject       }},
   { OpNewObjD,     {None,             Stack1,       OutObject       }},
   { OpNewObjRD,    {Stack1,           Stack1,       OutObject       }},
   { OpNewObjS,     {None,             Stack1,       OutObject       }},
@@ -294,7 +294,7 @@ static const struct {
   { OpFCallObjMethodRD,
                    {Stack1,           StackN,       OutUnknown      }},
   { OpFPushClsMethod,
-                   {Stack1,           FStack,       OutFDesc        }},
+                   {StackTop2,        FStack,       OutFDesc        }},
   { OpFPushClsMethodS,
                    {Stack1,           FStack,       OutFDesc        }},
   { OpFPushClsMethodSD,
@@ -359,9 +359,9 @@ static const struct {
                    {Stack1,           Stack1,       OutSameAsInput1  }},
   { OpOODeclExists,
                    {StackTop2,        Stack1,       OutBoolean      }},
-  { OpSelf,        {None,             None,         OutNone         }},
-  { OpParent,      {None,             None,         OutNone         }},
-  { OpLateBoundCls,{None,             None,         OutNone         }},
+  { OpSelf,        {None,             Stack1,       OutClass        }},
+  { OpParent,      {None,             Stack1,       OutClass        }},
+  { OpLateBoundCls,{None,             Stack1,       OutClass        }},
   { OpRecordReifiedGeneric,
                    {Stack1,           Stack1,       OutVArray       }},
   { OpReifiedName, {Stack1,           Stack1,       OutString       }},
@@ -417,7 +417,7 @@ static const struct {
 
   { OpBaseGC,      {StackI,           MBase,        OutNone         }},
   { OpBaseGL,      {Local,            MBase,        OutNone         }},
-  { OpBaseSC,      {StackI,           MBase,        OutNone         }},
+  { OpBaseSC,      {StackI|StackI2,   MBase,        OutNone         }},
   { OpBaseL,       {Local,            MBase,        OutNone         }},
   { OpBaseC,       {StackI,           MBase,        OutNone         }},
   { OpBaseH,       {None,             MBase,        OutNone         }},
@@ -473,7 +473,7 @@ const InstrInfo& getInstrInfo(Op op) {
 namespace {
 int64_t countOperands(uint64_t mask) {
   const uint64_t ignore = Local | Iter | DontGuardStack1 |
-    DontGuardAny | This | MBase | StackI | MKey | LocalRange |
+    DontGuardAny | This | MBase | StackI | StackI2 | MKey | LocalRange |
     DontGuardBase;
   mask &= ~ignore;
 
@@ -742,6 +742,13 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
         to<FPInvOffset>(bcSPOff)
     });
   }
+  if (flags & StackI2) {
+    inputs.emplace_back(Location::Stack {
+      BCSPRelOffset{safe_cast<int32_t>(ni.imm[1].u_IVA)}.
+        to<FPInvOffset>(bcSPOff)
+    });
+  }
+
   if (flags & StackN) {
     int numArgs = (ni.op() == Op::NewPackedArray ||
                    ni.op() == Op::NewVecArray ||
@@ -914,8 +921,8 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::MulO:
   case Op::Add:
   case Op::AddO:
-  case Op::ClsRefGetC:
-  case Op::ClsRefGetTS:
+  case Op::ClassGetC:
+  case Op::ClassGetTS:
   case Op::AKExists:
   case Op::AddElemC:
   case Op::AddNewElemC:
@@ -1002,7 +1009,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Method:
   case Op::Mod:
   case Op::Pow:
-  case Op::ClsRefName:
+  case Op::ClassName:
   case Op::NativeImpl:
   case Op::NewArray:
   case Op::NewCol:
@@ -1016,6 +1023,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::NewVArray:
   case Op::NewDArray:
   case Op::NewObj:
+  case Op::NewObjR:
   case Op::NewObjD:
   case Op::NewObjRD:
   case Op::NewObjS:
@@ -1025,7 +1033,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::NullUninit:
   case Op::OODeclExists:
   case Op::Parent:
-  case Op::DiscardClsRef:
   case Op::PopC:
   case Op::PopV:
   case Op::PopU:

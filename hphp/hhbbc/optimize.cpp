@@ -144,13 +144,16 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
    */
   for (auto i = size_t{0}; i < bcode.numPop(); ++i) assert_stack(i);
 
-  // The base instructions are special in that they don't pop anything, but do
-  // read from the stack. We want type assertions on the stack slots they'll
-  // read.
+  // The base instructions are special in that they may read from the
+  // stack without necessarily popping it. We want type assertions on
+  // the stack slots they'll read.
   switch (bcode.op) {
     case Op::BaseC:       assert_stack(bcode.BaseC.arg1);       break;
     case Op::BaseGC:      assert_stack(bcode.BaseGC.arg1);      break;
-    case Op::BaseSC:      assert_stack(bcode.BaseSC.arg1);      break;
+    case Op::BaseSC:
+      assert_stack(bcode.BaseSC.arg1);
+      assert_stack(bcode.BaseSC.arg2);
+      break;
     case Op::Dim: {
       switch (bcode.Dim.mkey.mcode) {
         case MEC: case MPC:
@@ -212,7 +215,7 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::AddNewElemC:
   case Op::NewCol:
   case Op::NewPair:
-  case Op::ClsRefName:
+  case Op::ClassName:
   case Op::File:
   case Op::Dir:
   case Op::Concat:
@@ -262,6 +265,10 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::IsTypeL:
   case Op::OODeclExists:
   case Op::AliasCls:
+  case Op::ClassGetC:
+  case Op::Self:
+  case Op::Parent:
+  case Op::LateBoundCls:
     return true;
 
   case Op::This:
@@ -427,9 +434,6 @@ bool propagate_constants(const Bytecode& op, State& state, Gen gen) {
       return false;
     }
   }
-
-  auto const slot = visit(op, ReadClsRefSlotVisitor{});
-  if (slot != NoClsRefSlotId) gen(bc::DiscardClsRef { slot });
 
   // Pop the inputs, and push the constants.
   for (auto i = size_t{0}; i < numPop; ++i) {

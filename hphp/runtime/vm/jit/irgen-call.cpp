@@ -1165,37 +1165,29 @@ void emitDynamicConstructChecks(IRGS& env, SSATmp* cls) {
 
 } // namespace
 
-void emitNewObj(IRGS& env, uint32_t slot, HasGenericsOp op) {
-  /*
-   * NoGenerics:    Do not read the generic part of clsref and emit AllocObj
-   * HasGenerics:   Read the full clsref and emit AllocObjReified
-   * MaybeGenerics: Read the full clsref, if generic part is not nullptr,
-   *                emit AllocObjReified, otherwise use AllocObj
-   */
-  if (HasGenericsOp::NoGenerics == op) {
-    auto const cls  = takeClsRefCls(env, slot);
-    emitDynamicConstructChecks(env, cls);
-    push(env, gen(env, AllocObj, cls));
-    return;
-  }
-
-  auto const clsref = takeClsRef(env, slot, HasGenericsOp::HasGenerics == op);
-  auto const reified_generic = clsref.first;
-  auto const cls  = clsref.second;
+void emitNewObj(IRGS& env) {
+  auto const cls = popC(env);
+  if (!cls->isA(TCls)) PUNT(NewObj-NotClass);
   emitDynamicConstructChecks(env, cls);
-  if (HasGenericsOp::HasGenerics == op) {
-    push(env, gen(env, AllocObjReified, cls, reified_generic));
-    return;
-  }
-  assertx(HasGenericsOp::MaybeGenerics == op);
-  push(env, cond(
-    env,
-    [&] (Block* taken) {
-      return gen(env, CheckNonNull, taken, reified_generic);
-    },
-    [&] (SSATmp* generics) { return gen(env, AllocObjReified, cls, generics); },
-    [&] { return gen(env, AllocObj, cls); }
-  ));
+  push(env, gen(env, AllocObj, cls));
+}
+
+void emitNewObjR(IRGS& env) {
+  auto const generics = popC(env);
+  auto const cls      = popC(env);
+  if (!cls->isA(TCls))     PUNT(NewObjR-NotClass);
+
+  emitDynamicConstructChecks(env, cls);
+  auto const obj = [&] {
+    if (generics->isA(RuntimeOption::EvalHackArrDVArrs ? TVec : TArr)) {
+      return gen(env, AllocObjReified, cls, generics);
+    } else if (generics->isA(TInitNull)) {
+      return gen(env, AllocObj, cls);
+    } else {
+      PUNT(NewObjR-BadReified);
+    }
+  }();
+  push(env, obj);
 }
 
 namespace {
@@ -1237,9 +1229,18 @@ void emitNewObjD(IRGS& env, const StringData* className) {
 }
 
 void emitNewObjRD(IRGS& env, const StringData* className) {
-  auto tsList = popC(env);
+  auto const cell = popC(env);
+  auto const tsList = [&] () -> SSATmp* {
+    if (cell->isA(RuntimeOption::EvalHackArrDVArrs ? TVec : TArr)) {
+      return cell;
+    } else if (cell->isA(TInitNull)) {
+      return nullptr;
+    } else {
+      PUNT(NewObjRD-BadReified);
+    }
+  }();
   emitNewObjDImpl(env, className, tsList);
-  decRef(env, tsList);
+  decRef(env, cell);
 }
 
 void emitNewObjS(IRGS& env, SpecialClsRef ref) {
@@ -1799,20 +1800,15 @@ void optimizeProfiledPushClsMethod(IRGS& env,
   emitFPush();
 }
 
-template <typename Take, typename Get>
-ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
-                                        uint32_t numParams,
-                                        Take takeCls,
-                                        Get getMeth,
-                                        bool forward,
-                                        bool dynamic,
-                                        SSATmp* tsList) {
-  auto const clsVal = takeCls();
-  auto const methVal = getMeth();
-
-  if (!methVal->isA(TStr)) {
-    PUNT(FPushClsMethod-unknownType);
-  }
+void fpushClsMethodCommon(IRGS& env,
+                          uint32_t numParams,
+                          SSATmp* clsVal,
+                          SSATmp* methVal,
+                          bool forward,
+                          bool dynamic,
+                          SSATmp* tsList) {
+  if (!methVal->isA(TStr)) PUNT(FPushClsMethod-unknownType);
+  if (!clsVal->isA(TCls))  PUNT(FPushClsMethod-NotClass);
 
   auto const emitFPush = [&] (TargetProfile<MethProfile>* profile = nullptr) {
     auto const prepare = [&] (IRSPRelOffset arOffset) {
@@ -1865,14 +1861,15 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
 
 void emitFPushClsMethod(IRGS& env,
                         uint32_t numParams,
-                        uint32_t slot,
                         const ImmVector& v) {
   if (v.size() != 0) PUNT(InOut-FPushClsMethod);
+  auto const cls = popC(env);
+  auto const meth = popC(env);
   fpushClsMethodCommon(
     env,
     numParams,
-    [&] { return takeClsRefCls(env, slot); },
-    [&] { return popC(env); },
+    cls,
+    meth,
     false,
     true,
     nullptr
@@ -1884,11 +1881,12 @@ void emitFPushClsMethodS(IRGS& env,
                          SpecialClsRef ref,
                          const ImmVector& v) {
   if (v.size() != 0) PUNT(InOut-FPushClsMethodS);
+  auto const meth = popC(env);
   fpushClsMethodCommon(
     env,
     numParams,
-    [&] { return specialClsRefToCls(env, ref); },
-    [&] { return popC(env); },
+    specialClsRefToCls(env, ref),
+    meth,
     ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
     true,
     nullptr
@@ -1902,8 +1900,8 @@ void emitFPushClsMethodSD(IRGS& env,
   fpushClsMethodCommon(
     env,
     numParams,
-    [&] { return specialClsRefToCls(env, ref); },
-    [&] { return cns(env, name); },
+    specialClsRefToCls(env, ref),
+    cns(env, name),
     ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
     false,
     nullptr
@@ -1918,8 +1916,8 @@ void emitFPushClsMethodSRD(IRGS& env,
   fpushClsMethodCommon(
     env,
     numParams,
-    [&] { return specialClsRefToCls(env, ref); },
-    [&] { return cns(env, name); },
+    specialClsRefToCls(env, ref),
+    cns(env, name),
     ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
     false,
     tsList

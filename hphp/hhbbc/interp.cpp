@@ -700,10 +700,7 @@ resolveTSStatically(ISS& env, SArray ts, const php::Class* declaringCls,
 namespace interp_step {
 
 void in(ISS& env, const bc::Nop&)  { reduce(env); }
-void in(ISS& env, const bc::DiscardClsRef& op) {
-  nothrow(env);
-  takeClsRefSlot(env, op.slot);
-}
+
 void in(ISS& env, const bc::PopC&) {
   if (auto const last = last_op(env)) {
     if (poppable(last->op)) {
@@ -1152,11 +1149,11 @@ void in(ISS& env, const bc::CnsE& op) {
 }
 
 void in(ISS& env, const bc::ClsCns& op) {
-  auto const& t1 = peekClsRefSlot(env, op.slot);
+  auto const& t1 = topC(env);
   if (is_specialized_cls(t1)) {
     auto const dcls = dcls_of(t1);
     auto const finish = [&] {
-      reduce(env, bc::DiscardClsRef { op.slot },
+      reduce(env, bc::PopC { },
                   bc::ClsCnsD { op.str1, dcls.cls.name() });
     };
     if (dcls.type == DCls::Exact) return finish();
@@ -1164,7 +1161,7 @@ void in(ISS& env, const bc::ClsCns& op) {
                                                        op.str1, false);
     if (cnst && cnst->isNoOverride) return finish();
   }
-  takeClsRefSlot(env, op.slot);
+  popC(env);
   push(env, TInitCell);
 }
 
@@ -1184,18 +1181,18 @@ void in(ISS& env, const bc::Method&) { effect_free(env); push(env, TSStr); }
 
 void in(ISS& env, const bc::FuncCred&) { effect_free(env); push(env, TObj); }
 
-void in(ISS& env, const bc::ClsRefName& op) {
-  auto ty = peekClsRefSlot(env, op.slot);
+void in(ISS& env, const bc::ClassName& op) {
+  auto const ty = topC(env);
   if (is_specialized_cls(ty)) {
     auto const dcls = dcls_of(ty);
     if (dcls.type == DCls::Exact) {
       return reduce(env,
-                    bc::DiscardClsRef { op.slot },
+                    bc::PopC {},
                     bc::String { dcls.cls.name() });
     }
   }
-  nothrow(env);
-  takeClsRefSlot(env, op.slot);
+  if (ty.subtypeOf(TCls)) nothrow(env);
+  popC(env);
   push(env, TSStr);
 }
 
@@ -2372,7 +2369,7 @@ void in(ISS& env, const bc::CGetL2& op) {
 void in(ISS& env, const bc::CGetG&) { popC(env); push(env, TInitCell); }
 
 void in(ISS& env, const bc::CGetS& op) {
-  auto const tcls  = takeClsRefSlot(env, op.slot);
+  auto const tcls  = popC(env);
   auto const tname = popC(env);
   auto const vname = tv(tname);
   auto const self  = selfCls(env);
@@ -2429,26 +2426,35 @@ void in(ISS& env, const bc::VGetL& op) {
   push(env, TRef);
 }
 
-void clsRefGetImpl(ISS& env, Type t1, ClsRefSlotId slot) {
-  auto cls = [&]{
-    if (auto const clsname = getNameFromType(t1)) {
-      auto const rcls = env.index.resolve_class(env.ctx, clsname);
-      if (rcls) return clsExact(*rcls);
+void in(ISS& env, const bc::ClassGetC& op) {
+  auto const t = topC(env);
+
+  if (t.subtypeOf(BCls)) return reduce(env, bc::Nop {});
+  popC(env);
+
+  if (t.subtypeOf(BObj)) {
+    effect_free(env);
+    push(env, objcls(t));
+    return;
+  }
+
+  if (auto const clsname = getNameFromType(t)) {
+    if (auto const rcls = env.index.resolve_class(env.ctx, clsname)) {
+      auto const cls = rcls->cls();
+      if (cls &&
+          ((cls->attrs & AttrPersistent) ||
+           cls == env.ctx.cls)) {
+        effect_free(env);
+      }
+      push(env, clsExact(*rcls));
+      return;
     }
-    if (t1.subtypeOf(BObj)) {
-      nothrow(env);
-      return objcls(t1);
-    }
-    return TCls;
-  }();
-  putClsRefSlot(env, slot, std::move(cls));
+  }
+
+  push(env, TCls);
 }
 
-void in(ISS& env, const bc::ClsRefGetC& op) {
-  clsRefGetImpl(env, popC(env), op.slot);
-}
-
-void in(ISS& env, const bc::ClsRefGetTS& op) {
+void in(ISS& env, const bc::ClassGetTS& op) {
   // TODO(T31677864): implement real optimizations
   auto const ts = popC(env);
   auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? BDict : BDArr;
@@ -2456,7 +2462,12 @@ void in(ISS& env, const bc::ClsRefGetTS& op) {
     push(env, TBottom);
     return;
   }
-  clsRefGetImpl(env, TStr, op.slot);
+
+  auto const& genericsType =
+    RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
+
+  push(env, TCls);
+  push(env, opt(genericsType));
 }
 
 void in(ISS& env, const bc::AKExists& /*op*/) {
@@ -2782,13 +2793,13 @@ void in(ISS& env, const bc::EmptyL& op) {
 }
 
 void in(ISS& env, const bc::EmptyS& op) {
-  takeClsRefSlot(env, op.slot);
+  popC(env);
   popC(env);
   push(env, TBool);
 }
 
 void in(ISS& env, const bc::IssetS& op) {
-  auto const tcls  = takeClsRefSlot(env, op.slot);
+  auto const tcls  = popC(env);
   auto const tname = popC(env);
   auto const vname = tv(tname);
   auto const self  = selfCls(env);
@@ -3503,7 +3514,7 @@ void in(ISS& env, const bc::SetG&) {
 
 void in(ISS& env, const bc::SetS& op) {
   auto const t1    = popC(env);
-  auto const tcls  = takeClsRefSlot(env, op.slot);
+  auto const tcls  = popC(env);
   auto const tname = popC(env);
   auto const vname = tv(tname);
   auto const self  = selfCls(env);
@@ -3563,7 +3574,7 @@ void in(ISS& env, const bc::SetOpG&) {
 
 void in(ISS& env, const bc::SetOpS& op) {
   popC(env);
-  auto const tcls  = takeClsRefSlot(env, op.slot);
+  auto const tcls  = popC(env);
   auto const tname = popC(env);
   auto const vname = tv(tname);
   auto const self  = selfCls(env);
@@ -3602,7 +3613,7 @@ void in(ISS& env, const bc::IncDecL& op) {
 void in(ISS& env, const bc::IncDecG&) { popC(env); push(env, TInitCell); }
 
 void in(ISS& env, const bc::IncDecS& op) {
-  auto const tcls  = takeClsRefSlot(env, op.slot);
+  auto const tcls  = popC(env);
   auto const tname = popC(env);
   auto const vname = tv(tname);
   auto const self  = selfCls(env);
@@ -3770,7 +3781,7 @@ bool fcallTryFold(
     if (auto v = tv(ty)) {
       BytecodeVec repl;
       if (clsRefSlot != NoClsRefSlotId) {
-        repl.push_back(bc::DiscardClsRef { clsRefSlot });
+        repl.push_back(bc::PopC { });
       }
       for (uint32_t i = 0; i < numExtraInputs; ++i) repl.push_back(bc::PopC {});
       for (uint32_t i = 0; i < fca.numArgs; ++i) repl.push_back(bc::PopC {});
@@ -4203,23 +4214,21 @@ namespace {
 
 template <typename Op>
 void fpushClsMethodImpl(ISS& env, const Op& op, Type clsTy, SString methName,
-                        bool dynamic, bool extraInput,
-                        ClsRefSlotId clsRefSlot) {
+                        bool dynamic, size_t popCount) {
   auto const rcls = is_specialized_cls(clsTy)
     ? folly::Optional<res::Class>(dcls_of(clsTy).cls)
     : folly::none;
   auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
   auto const ar = ActRec { FPIKind::ClsMeth, clsTy, rcls, rfunc };
   if (fpiPush(env, ar, op.arg1, dynamic)) {
-    if (clsRefSlot != NoClsRefSlotId) {
-      reduce(env, bc::DiscardClsRef { clsRefSlot });
+    while (popCount > 0) {
+      reduce(env, bc::PopC{});
+      --popCount;
     }
-    if (extraInput) reduce(env, bc::PopC {});
     return reduce(env);
   }
 
-  if (clsRefSlot != NoClsRefSlotId) takeClsRefSlot(env, clsRefSlot);
-  if (extraInput) popC(env);
+  discard(env, popCount);
   discardAR(env, op.arg1);
 }
 
@@ -4246,7 +4255,7 @@ void in(ISS& env, const bc::FPushClsMethodD& op) {
     }
   }
 
-  fpushClsMethodImpl(env, op, clsTy, op.str2, false, false, NoClsRefSlotId);
+  fpushClsMethodImpl(env, op, clsTy, op.str2, false, 0);
 }
 
 void in(ISS& env, const bc::FPushClsMethodRD& op) {
@@ -4263,33 +4272,33 @@ void in(ISS& env, const bc::FPushClsMethodRD& op) {
 
   // Builtins do not support reified generics.
   assertx(!rfunc.exactFunc() || !rfunc.exactFunc()->nativeInfo);
-  fpushClsMethodImpl(env, op, clsTy, op.str2, false, true, NoClsRefSlotId);
+  fpushClsMethodImpl(env, op, clsTy, op.str2, false, 1);
 }
 
 void in(ISS& env, const bc::FPushClsMethod& op) {
-  auto const methName = getNameFromType(topC(env));
+  auto const methName = getNameFromType(topC(env, 1));
   if (!methName || op.argv.size() != 0) {
-    takeClsRefSlot(env, op.slot);
+    popC(env);
     popC(env);
     discardAR(env, op.arg1);
     fpiPushNoFold(env, ActRec { FPIKind::ClsMeth, TCls });
     return;
   }
 
-  auto const clsTy = peekClsRefSlot(env, op.slot);
+  auto const clsTy = topC(env);
   auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
   if (is_specialized_cls(clsTy) && dcls_of(clsTy).type == DCls::Exact &&
       !rfunc.mightCareAboutDynCalls()) {
     auto const clsName = dcls_of(clsTy).cls.name();
     return reduce(
       env,
-      bc::DiscardClsRef { op.slot },
+      bc::PopC {},
       bc::PopC {},
       bc::FPushClsMethodD { op.arg1, methName, clsName, op.has_unpack }
     );
   }
 
-  fpushClsMethodImpl(env, op, clsTy, methName, true, true, op.slot);
+  fpushClsMethodImpl(env, op, clsTy, methName, true, 2);
 }
 
 namespace {
@@ -4450,25 +4459,58 @@ void in(ISS& env, const bc::NewObjS& op) {
 }
 
 void in(ISS& env, const bc::NewObj& op) {
-  auto const cls = peekClsRefSlot(env, op.slot);
-  if (!is_specialized_cls(cls) || op.subop2 == HasGenericsOp::MaybeGenerics) {
-    takeClsRefSlot(env, op.slot);
+  auto const cls = topC(env);
+  if (!is_specialized_cls(cls)) {
+    popC(env);
     push(env, TObj);
     return;
   }
 
   auto const dcls = dcls_of(cls);
   auto const exact = dcls.type == DCls::Exact;
-  if (exact && !dcls.cls.mightCareAboutDynConstructs() &&
-      !dcls.cls.couldHaveReifiedGenerics()) {
+  if (exact && !dcls.cls.mightCareAboutDynConstructs()) {
     return reduce(
       env,
-      bc::DiscardClsRef { op.slot },
-      bc::NewObjD { dcls.cls.name(), }
+      bc::PopC {},
+      bc::NewObjD { dcls.cls.name() }
     );
   }
 
-  takeClsRefSlot(env, op.slot);
+  popC(env);
+  push(env, toobj(cls));
+}
+
+void in(ISS& env, const bc::NewObjR& op) {
+  auto const generics = topC(env);
+  auto const cls = topC(env, 1);
+
+  if (generics.subtypeOf(BInitNull)) {
+    return reduce(
+      env,
+      bc::PopC {},
+      bc::NewObj {}
+    );
+  }
+
+  if (!is_specialized_cls(cls)) {
+    popC(env);
+    popC(env);
+    push(env, TObj);
+    return;
+  }
+
+  auto const dcls = dcls_of(cls);
+  auto const exact = dcls.type == DCls::Exact;
+  if (exact && !dcls.cls.couldHaveReifiedGenerics()) {
+    return reduce(
+      env,
+      bc::PopC {},
+      bc::NewObj {}
+    );
+  }
+
+  popC(env);
+  popC(env);
   push(env, toobj(cls));
 }
 
@@ -4988,7 +5030,7 @@ void in(ISS& env, const bc::This&) {
 void in(ISS& env, const bc::LateBoundCls& op) {
   if (env.ctx.cls) effect_free(env);
   auto const ty = selfCls(env);
-  putClsRefSlot(env, op.slot, setctx(ty ? *ty : TCls));
+  push(env, setctx(ty ? *ty : TCls));
 }
 
 void in(ISS& env, const bc::CheckThis&) {
@@ -5353,13 +5395,23 @@ void in(ISS& env, const bc::VerifyRetNonNullC& /*op*/) {
 }
 
 void in(ISS& env, const bc::Self& op) {
-  auto self = selfClsExact(env);
-  putClsRefSlot(env, op.slot, self ? *self : TCls);
+  auto const self = selfClsExact(env);
+  if (self) {
+    effect_free(env);
+    push(env, *self);
+  } else {
+    push(env, TCls);
+  }
 }
 
 void in(ISS& env, const bc::Parent& op) {
-  auto parent = parentClsExact(env);
-  putClsRefSlot(env, op.slot, parent ? *parent : TCls);
+  auto const parent = parentClsExact(env);
+  if (parent) {
+    effect_free(env);
+    push(env, *parent);
+  } else {
+    push(env, TCls);
+  }
 }
 
 void in(ISS& env, const bc::CreateCl& op) {
@@ -5863,9 +5915,6 @@ void interpStep(ISS& env, const Bytecode& bc) {
         case Flavor::CV: not_reached();
       }
     }
-
-    auto const slot = visit(bc, ReadClsRefSlotVisitor{});
-    if (slot != NoClsRefSlotId) interpStep(env, bc::DiscardClsRef { slot });
 
     while (i--) {
       push(env, from_cell(cells[i]));

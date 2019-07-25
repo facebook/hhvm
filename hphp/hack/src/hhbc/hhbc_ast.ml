@@ -194,7 +194,7 @@ type instruct_lit_const =
   | NewCol of CollectionType.t
   | ColFromArray of CollectionType.t
   | CnsE of const_id
-  | ClsCns of const_id * classref_id
+  | ClsCns of const_id
   | ClsCnsD of const_id * class_id
   | File
   | Dir
@@ -289,10 +289,10 @@ type instruct_get =
   | CUGetL of local_id
   | PushL of local_id
   | CGetG
-  | CGetS of classref_id
+  | CGetS
   | VGetL of local_id
-  | ClsRefGetC of classref_id
-  | ClsRefGetTS of classref_id
+  | ClassGetC
+  | ClassGetTS
 
 type istype_op =
   | OpNull
@@ -316,10 +316,10 @@ type instruct_isset =
   | IssetC
   | IssetL of local_id
   | IssetG
-  | IssetS of classref_id
+  | IssetS
   | EmptyL of local_id
   | EmptyG
-  | EmptyS of classref_id
+  | EmptyS
   | IsTypeC of istype_op
   | IsTypeL of local_id * istype_op
 
@@ -363,13 +363,13 @@ type instruct_mutator =
   (* PopL is put in mutators since it behaves as SetL + PopC *)
   | PopL of Local.t
   | SetG
-  | SetS of classref_id
+  | SetS
   | SetOpL of local_id * eq_op
   | SetOpG of eq_op
-  | SetOpS of eq_op * classref_id
+  | SetOpS of eq_op
   | IncDecL of local_id * incdec_op
   | IncDecG of incdec_op
-  | IncDecS of incdec_op * classref_id
+  | IncDecS of incdec_op
   | UnsetL of local_id
   | UnsetG
   | CheckProp of prop_id
@@ -379,13 +379,14 @@ type instruct_call =
   | FPushFunc of num_params * param_locations
   | FPushFuncD of num_params * function_id
   | FPushFuncRD of num_params * function_id
-  | FPushClsMethod of num_params * classref_id * param_locations
+  | FPushClsMethod of num_params * param_locations
   | FPushClsMethodD of num_params * method_id * class_id
   | FPushClsMethodRD of num_params * method_id * class_id
   | FPushClsMethodS of num_params * SpecialClsRef.t
   | FPushClsMethodSD of num_params * SpecialClsRef.t * method_id
   | FPushClsMethodSRD of num_params * SpecialClsRef.t * method_id
-  | NewObj of classref_id * has_generics_op
+  | NewObj
+  | NewObjR
   | NewObjD of class_id
   | NewObjRD of class_id
   | NewObjS of SpecialClsRef.t
@@ -399,7 +400,7 @@ type instruct_call =
 type instruct_base =
   | BaseGC of stack_index * MemberOpMode.t
   | BaseGL of local_id * MemberOpMode.t
-  | BaseSC of stack_index * classref_id * MemberOpMode.t
+  | BaseSC of stack_index * stack_index * MemberOpMode.t
   | BaseL of local_id * MemberOpMode.t
   | BaseC of stack_index * MemberOpMode.t
   | BaseH
@@ -471,10 +472,10 @@ type instruct_misc =
   | VerifyOutType of param_id
   | VerifyRetTypeC
   | VerifyRetTypeTS
-  | Self of classref_id
-  | Parent of classref_id
-  | LateBoundCls of classref_id
-  | ClsRefName of classref_id
+  | Self
+  | Parent
+  | LateBoundCls
+  | ClassName
   | ReifiedName of string
   | RecordReifiedGeneric
   | CheckReifiedGenericMismatch

@@ -73,8 +73,8 @@
   .numclsrefslots 1;
 
   CGetL $who
-  ClsRefGetC 0
-  ClsCns "BAR" 0
+  ClassGetC
+  ClsCns "BAR"
   String "\n"
   Concat
   Print
@@ -82,16 +82,16 @@
 
   String "foo"
   CGetL $who
-  ClsRefGetC 0
-  CGetS 0
+  ClassGetC
+  CGetS
   String "\n"
   Concat
   Print
   PopC
 
   CGetL $who
-  ClsRefGetC 0
-  NewObj 0 NoGenerics
+  ClassGetC
+  NewObj
   Dup
   NullUninit
   NullUninit

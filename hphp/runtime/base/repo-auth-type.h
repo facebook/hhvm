@@ -87,10 +87,10 @@ struct RepoAuthType {
     TAG(ArrKey)                                   \
     TAG(OptUncArrKey)                             \
     TAG(OptArrKey)                                \
-    TAG(UncStrLike)                             \
-    TAG(StrLike)                                \
-    TAG(OptUncStrLike)                          \
-    TAG(OptStrLike)                             \
+    TAG(UncStrLike)                               \
+    TAG(StrLike)                                  \
+    TAG(OptUncStrLike)                            \
+    TAG(OptStrLike)                               \
     TAG(InitCell)                                 \
     TAG(Cell)                                     \
     TAG(Ref)                                      \
@@ -125,7 +125,11 @@ struct RepoAuthType {
     TAG(ExactObj)                                 \
     TAG(SubObj)                                   \
     TAG(OptExactObj)                              \
-    TAG(OptSubObj)
+    TAG(OptSubObj)                                \
+    TAG(ExactCls)                                 \
+    TAG(SubCls)                                   \
+    TAG(OptExactCls)                              \
+    TAG(OptSubCls)                                \
 
   enum class Tag : uint16_t {
 #define TAG(x) x,
@@ -137,7 +141,9 @@ struct RepoAuthType {
     m_data.set(static_cast<uint16_t>(tag), sd);
     switch (tag) {
     case Tag::OptSubObj: case Tag::OptExactObj:
-    case Tag::SubObj: case Tag::ExactObj:
+    case Tag::SubObj:    case Tag::ExactObj:
+    case Tag::OptSubCls: case Tag::OptExactCls:
+    case Tag::SubCls:    case Tag::ExactCls:
       assertx(sd != nullptr);
       break;
     default:
@@ -167,8 +173,10 @@ struct RepoAuthType {
 
   bool hasClassName() const {
     switch (tag()) {
-    case Tag::SubObj: case Tag::ExactObj:
+    case Tag::SubObj:    case Tag::ExactObj:
     case Tag::OptSubObj: case Tag::OptExactObj:
+    case Tag::SubCls:    case Tag::ExactCls:
+    case Tag::OptSubCls: case Tag::OptExactCls:
       return true;
     default:
       return false;

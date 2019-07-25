@@ -5453,6 +5453,15 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
     return RepoAuthType { tag, dobj.cls.name() };
   }
 
+  if (is_specialized_cls(t) && t.subtypeOf(TOptCls)) {
+    auto const dcls = dcls_of(t);
+    auto const tag =
+      is_opt(t)
+        ? (dcls.type == DCls::Exact ? T::OptExactCls : T::OptSubCls)
+        : (dcls.type == DCls::Exact ? T::ExactCls : T::SubCls);
+    return RepoAuthType { tag, dcls.cls.name() };
+  }
+
   if ((is_specialized_array(t) && t.subtypeOf(TOptArr)) ||
       (is_specialized_vec(t) && t.subtypeOf(TOptVec))) {
     return make_repo_type_arr(arrTable, t);

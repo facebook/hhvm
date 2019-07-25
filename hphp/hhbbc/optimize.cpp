@@ -265,10 +265,6 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::IsTypeL:
   case Op::OODeclExists:
   case Op::AliasCls:
-  case Op::ClassGetC:
-  case Op::Self:
-  case Op::Parent:
-  case Op::LateBoundCls:
     return true;
 
   case Op::This:

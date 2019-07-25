@@ -999,6 +999,26 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
       }
       return base;
     }
+
+    case T::SubCls:
+    case T::ExactCls:
+    case T::OptSubCls:
+    case T::OptExactCls: {
+      auto base = TCls;
+
+      if (auto const cls = Unit::lookupUniqueClassInContext(ty.clsName(),
+                                                            ctx)) {
+        if (ty.tag() == T::ExactCls || ty.tag() == T::OptExactCls) {
+          base = Type::ExactCls(cls);
+        } else {
+          base = Type::SubCls(cls);
+        }
+      }
+      if (ty.tag() == T::OptSubCls || ty.tag() == T::OptExactCls) {
+        base |= TInitNull;
+      }
+      return base;
+    }
   }
   not_reached();
 }

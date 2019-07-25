@@ -1054,6 +1054,10 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   Y("?Obj=",    T::OptExactObj);
   Y("?Obj<=",   T::OptSubObj);
   Y("Obj<=",    T::SubObj);
+  Y("Cls=",     T::ExactCls);
+  Y("?Cls=",    T::OptExactCls);
+  Y("?Cls<=",   T::OptSubCls);
+  Y("Cls<=",    T::SubCls);
   X("Arr",      T::Arr);
   X("?Arr",     T::OptArr);
   X("VArr",     T::VArr);
@@ -1193,6 +1197,10 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   case T::SubObj:
   case T::OptExactObj:
   case T::OptSubObj:
+  case T::ExactCls:
+  case T::SubCls:
+  case T::OptExactCls:
+  case T::OptSubCls:
     break;
   }
 

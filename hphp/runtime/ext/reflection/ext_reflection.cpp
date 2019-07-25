@@ -513,11 +513,14 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
   );
   if (!lookup.val) {
     raise_error("Class %s does not have a property named %s",
-                cls.get()->data(), prop.get()->data());
+                sd->data(), prop.get()->data());
   }
   if (!lookup.accessible) {
     raise_error("Invalid access to class %s's property %s",
                 sd->data(), prop.get()->data());
+  }
+  if (lookup.constant) {
+    throw_cannot_modify_static_const_prop(sd->data(), prop.get()->data());
   }
 
   auto const& sprop = class_->staticProperties()[lookup.slot];

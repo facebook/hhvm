@@ -78,12 +78,14 @@ let query_real_time = Unix.gettimeofday
  * the first run and number of runs.  It returns 0 for the number of runs if the first run fails
  * so that failures can be unambiguously identified and filtered out if needed.
  *)
-let profile_longer_than run ?(min_runs=1) min_time =
+let profile_longer_than run ?(min_runs=1) ?(retry=true) min_time =
   let rec work ?mem_stat dt_user_tot nbr_runs =
     let t_user0 = query_user_time () in
     let run_incr =
       try run (); 1
-      with _ -> 0 (* distinguish failures by letting run count stay 0 *)
+      with e -> if retry
+        then 0 (* distinguish failures by letting run count stay 0 *)
+        else raise e
     in
     let dt_user = (query_user_time ()) -. t_user0 in
     let dt_user_tot = dt_user_tot +. dt_user in

@@ -55,8 +55,8 @@ type args = {
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
 
 module WithSmartConstructors(SC : SmartConstructors.SmartConstructors_S
-  with type r = Syntax.t
   with module Token = Syntax.Token
+  with type r = Syntax.t
 ) = struct
 
 module SyntaxTree_ = Full_fidelity_syntax_tree.WithSyntax(Syntax)
@@ -316,7 +316,7 @@ let () =
     | COROUTINE -> CoroutineTest.test_batch args ~ocaml_env ~rust_env
     | DECL_MODE -> DeclModeTest.test_batch args ~ocaml_env ~rust_env
   in
-  let (user, runs, _mem) = Profile.profile_longer_than (fun () -> f files) 0. in
+  let (user, runs, _mem) = Profile.profile_longer_than (fun () -> f files) ~retry:false 0. in
   ignore (Hh_logger.log_duration "Done:" t);
   ignore (Hh_logger.log "User:: %f" user);
   ignore (Hh_logger.log "Runs:: %d" runs);

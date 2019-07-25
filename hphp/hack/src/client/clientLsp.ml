@@ -472,6 +472,35 @@ let get_next_event (state: state) (client: Jsonrpc.queue) : event Lwt.t =
         Lwt.return Tick
     end
 
+type powered_by =
+  | Hh_server
+  | Language_server
+  | Serverless_ide
+
+let respond_jsonrpc
+    ~(powered_by: powered_by)
+    (message: Jsonrpc.message)
+    (json: Hh_json.json)
+    : unit =
+  let powered_by = match powered_by with
+    | Serverless_ide -> Some "serverless_ide"
+    | Hh_server
+    | Language_server -> None
+  in
+  Jsonrpc.respond to_stdout ?powered_by message json
+
+let notify_jsonrpc
+    ~(powered_by: powered_by)
+    (method_: string)
+    (json: Hh_json.json)
+    : unit =
+  let powered_by = match powered_by with
+    | Serverless_ide -> Some "serverless_ide"
+    | Hh_server
+    | Language_server -> None
+  in
+  Jsonrpc.notify to_stdout ?powered_by method_ json
+
 
 (* respond_to_error: if we threw an exception during the handling of a request,
    report the exception to the client as the response to their request. *)
@@ -480,7 +509,7 @@ let respond_to_error (event: event option) (e: exn) (stack: string): unit =
   let e = error_of_exn e in
   match event with
   | Some (Client_message c) when c.Jsonrpc.kind = Jsonrpc.Request ->
-    print_error e stack |> Jsonrpc.respond to_stdout c
+    print_error e stack |> respond_jsonrpc ~powered_by:Language_server c
   | _ ->
     Lsp_helpers.telemetry_error to_stdout (Printf.sprintf "%s [%i]\n%s" e.message e.code stack)
 
@@ -1794,7 +1823,7 @@ let do_diagnostics
   let per_file file errors =
     hack_errors_to_lsp_diagnostic file errors
     |> print_diagnostics
-    |> Jsonrpc.notify to_stdout "textDocument/publishDiagnostics"
+    |> notify_jsonrpc ~powered_by:Hh_server "textDocument/publishDiagnostics"
   in
   SMap.iter per_file file_reports;
 
@@ -2532,7 +2561,7 @@ let handle_event
   | _, Client_message c when c.method_ = "shutdown" ->
     let%lwt new_state = do_shutdown !state ide_service ref_unblocked_time in
     state := new_state;
-    print_shutdown () |> Jsonrpc.respond to_stdout c;
+    print_shutdown () |> respond_jsonrpc ~powered_by:Language_server c;
     Lwt.return_unit
 
   (* cancel notification *)
@@ -2547,7 +2576,7 @@ let handle_event
   (* rage request *)
   | _, Client_message c when c.method_ = "telemetry/rage" ->
     let%lwt result = do_rage !state ref_unblocked_time in
-    result |> print_rage |> Jsonrpc.respond to_stdout c;
+    result |> print_rage |> respond_jsonrpc ~powered_by:Language_server c;
     Lwt.return_unit
 
   | _, Client_message c
@@ -2572,7 +2601,7 @@ let handle_event
     hhconfig_version := version;
     let%lwt new_state = connect !state in
     state := new_state;
-    do_initialize () |> print_initialize |> Jsonrpc.respond to_stdout c;
+    do_initialize () |> print_initialize |> respond_jsonrpc ~powered_by:Language_server c;
 
     if env.use_serverless_ide then begin
       Relative_path.set_path_prefix Relative_path.Root
@@ -2603,7 +2632,7 @@ let handle_event
     let%lwt result = parse_completion c.params
       |> do_completion_local ide_service editor_open_files
     in
-    result |> print_completion |> Jsonrpc.respond to_stdout c;
+    result |> print_completion |> respond_jsonrpc ~powered_by:Serverless_ide c;
     Lwt.return_unit
 
   (* Resolve documentation for a symbol: "Autocomplete Docblock!" *)
@@ -2617,7 +2646,7 @@ let handle_event
     in
     result
     |> print_completionItem
-    |> Jsonrpc.respond to_stdout c;
+    |> respond_jsonrpc ~powered_by:Serverless_ide c;
     Lwt.return_unit
 
   (* Document highlighting in serverless IDE *)
@@ -2641,7 +2670,7 @@ let handle_event
     let%lwt result = parse_hover c.params
       |> do_hover_local ide_service editor_open_files
     in
-    result |> print_hover |> Jsonrpc.respond to_stdout c;
+    result |> print_hover |> respond_jsonrpc ~powered_by:Serverless_ide c;
     Lwt.return_unit
 
   (* any request/notification if we're not yet ready *)
@@ -2718,7 +2747,7 @@ let handle_event
     let%lwt result = parse_hover c.params
       |> do_hover menv.conn ref_unblocked_time
     in
-    result |> print_hover |> Jsonrpc.respond to_stdout c;
+    result |> print_hover |> respond_jsonrpc ~powered_by:Hh_server c;
     Lwt.return_unit
 
   (* textDocument/typeDefinition request *)
@@ -2727,7 +2756,7 @@ let handle_event
     let%lwt result = parse_definition c.params
       |> do_typeDefinition menv.conn ref_unblocked_time
     in
-    result |> print_definition |> Jsonrpc.respond to_stdout c;
+    result |> print_definition |> respond_jsonrpc ~powered_by:Hh_server c;
     Lwt.return_unit
 
   (* textDocument/definition request *)
@@ -2737,7 +2766,7 @@ let handle_event
     let%lwt result = parse_definition c.params
       |> do_definition conn ref_unblocked_time editor_open_files
     in
-   result |> print_definition |> Jsonrpc.respond to_stdout c;
+   result |> print_definition |> respond_jsonrpc ~powered_by:Hh_server c;
    Lwt.return_unit
 
   | _, Client_message c
@@ -2747,7 +2776,7 @@ let handle_event
     let%lwt result = parse_definition c.params
       |> do_definition_local ide_service
     in
-   result |> print_definition |> Jsonrpc.respond to_stdout c;
+   result |> print_definition |> respond_jsonrpc ~powered_by:Serverless_ide c;
    Lwt.return_unit
 
   (* textDocument/completion request *)
@@ -2758,7 +2787,7 @@ let handle_event
     let%lwt result = parse_completion c.params
       |> do_completion menv.conn ref_unblocked_time
     in
-    result |> print_completion |> Jsonrpc.respond to_stdout c;
+    result |> print_completion |> respond_jsonrpc ~powered_by:Hh_server c;
     Lwt.return_unit
 
   (* completionItem/resolve request *)
@@ -2770,7 +2799,7 @@ let handle_event
     in
     result
     |> print_completionItem
-    |> Jsonrpc.respond to_stdout c;
+    |> respond_jsonrpc ~powered_by:Hh_server c;
     Lwt.return_unit
 
   (* workspace/symbol request *)
@@ -2778,7 +2807,7 @@ let handle_event
     let%lwt result = parse_workspaceSymbol c.params
       |> do_workspaceSymbol menv.conn ref_unblocked_time
     in
-    result |> print_workspaceSymbol |> Jsonrpc.respond to_stdout c;
+    result |> print_workspaceSymbol |> respond_jsonrpc ~powered_by:Hh_server c;
     Lwt.return_unit
 
   (* textDocument/documentSymbol request *)
@@ -2786,7 +2815,7 @@ let handle_event
     let%lwt result = parse_documentSymbol c.params
       |> do_documentSymbol menv.conn ref_unblocked_time
     in
-    result |> print_documentSymbol |> Jsonrpc.respond to_stdout c;
+    result |> print_documentSymbol |> respond_jsonrpc ~powered_by:Hh_server c;
     Lwt.return_unit
 
   (* textDocument/references request *)
@@ -2795,7 +2824,7 @@ let handle_event
     let%lwt result = parse_findReferences c.params
       |> do_findReferences menv.conn ref_unblocked_time
     in
-    result |> print_findReferences |> Jsonrpc.respond to_stdout c;
+    result |> print_findReferences |> respond_jsonrpc ~powered_by:Hh_server c;
     Lwt.return_unit
 
   (* textDocument/rename *)
@@ -2805,7 +2834,7 @@ let handle_event
     in
     result
     |> print_documentRename
-    |> Jsonrpc.respond to_stdout c;
+    |> respond_jsonrpc ~powered_by:Hh_server c;
     Lwt.return_unit
 
   (* textDocument/documentHighlight *)
@@ -2814,7 +2843,7 @@ let handle_event
     let%lwt result = parse_documentHighlight c.params
       |> do_documentHighlight menv.conn ref_unblocked_time
     in
-    result |> print_documentHighlight |> Jsonrpc.respond to_stdout c;
+    result |> print_documentHighlight |> respond_jsonrpc ~powered_by:Hh_server c;
     Lwt.return_unit
 
   (* textDocument/typeCoverage *)
@@ -2822,14 +2851,14 @@ let handle_event
     let%lwt result = parse_typeCoverage c.params
       |> do_typeCoverage menv.conn ref_unblocked_time
     in
-    result |> print_typeCoverage |> Jsonrpc.respond to_stdout c;
+    result |> print_typeCoverage |> respond_jsonrpc ~powered_by:Hh_server c;
     Lwt.return_unit
 
   (* textDocument/formatting *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/formatting" ->
     parse_documentFormatting c.params
     |> do_documentFormatting menv.editor_open_files
-    |> print_documentFormatting |> Jsonrpc.respond to_stdout c;
+    |> print_documentFormatting |> respond_jsonrpc ~powered_by:Language_server c;
     Lwt.return_unit
 
   (* textDocument/formatting *)
@@ -2837,7 +2866,7 @@ let handle_event
     when c.method_ = "textDocument/rangeFormatting" ->
     parse_documentRangeFormatting c.params
     |> do_documentRangeFormatting menv.editor_open_files
-    |> print_documentRangeFormatting |> Jsonrpc.respond to_stdout c;
+    |> print_documentRangeFormatting |> respond_jsonrpc ~powered_by:Language_server c;
     Lwt.return_unit
 
   (* textDocument/onTypeFormatting *)
@@ -2845,7 +2874,7 @@ let handle_event
     let%lwt () = cancel_if_stale client c short_timeout in
     parse_documentOnTypeFormatting c.params
     |> do_documentOnTypeFormatting menv.editor_open_files
-    |> print_documentOnTypeFormatting |> Jsonrpc.respond to_stdout c;
+    |> print_documentOnTypeFormatting |> respond_jsonrpc ~powered_by:Language_server c;
     Lwt.return_unit
 
   (* textDocument/didOpen notification *)
@@ -2874,7 +2903,7 @@ let handle_event
     in
     result
     |> print_signatureHelp
-    |> Jsonrpc.respond to_stdout c;
+    |> respond_jsonrpc ~powered_by:Hh_server c;
     Lwt.return_unit
 
   (* server busy status *)

@@ -101,7 +101,8 @@
         },
         "title": "b_definition"
       }
-    ]
+    ],
+    "powered_by": "serverless_ide"
   },
   {
     "jsonrpc": "2.0",
@@ -121,7 +122,8 @@
         },
         "title": "BB::__construct"
       }
-    ]
+    ],
+    "powered_by": "serverless_ide"
   },
   {
     "jsonrpc": "2.0",
@@ -155,7 +157,8 @@
         },
         "title": "BB::__construct"
       }
-    ]
+    ],
+    "powered_by": "serverless_ide"
   },
   {
     "jsonrpc": "2.0",
@@ -189,7 +192,8 @@
         },
         "title": "BB::__construct"
       }
-    ]
+    ],
+    "powered_by": "serverless_ide"
   },
   {
     "jsonrpc": "2.0",
@@ -209,7 +213,8 @@
         },
         "title": "EE::__construct"
       }
-    ]
+    ],
+    "powered_by": "serverless_ide"
   },
   {
     "jsonrpc": "2.0",
@@ -229,7 +234,8 @@
         },
         "title": "FF"
       }
-    ]
+    ],
+    "powered_by": "serverless_ide"
   },
   {
     "jsonrpc": "2.0",
@@ -249,7 +255,8 @@
         },
         "title": "HasString"
       }
-    ]
+    ],
+    "powered_by": "serverless_ide"
   },
   {
     "jsonrpc": "2.0",

@@ -487,6 +487,10 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
     for (unsigned i = 0; i < m_litstrs.size(); ++i) {
       urp.insertUnitLitstr[repoId].insert(txn, usn, i, m_litstrs[i]);
     }
+    for (unsigned i = 0; i < m_typeAliases.size(); ++i) {
+      urp.insertUnitTypeAlias[repoId].insert(*this, txn, usn, i,
+                                             m_typeAliases[i]);
+    }
     for (unsigned i = 0; i < m_arrays.size(); ++i) {
       // We check that arrays do not exceed a configurable maximum size in the
       // assembler, so just assume that they're okay here.
@@ -835,7 +839,6 @@ void UnitEmitter::serdeMetaData(SerDe& sd) {
   sd(m_mainReturn)
     (m_mergeOnly)
     (m_isHHFile)
-    (m_typeAliases)
     (m_metaData)
     (m_fileAttributes)
     (m_symbol_refs)
@@ -877,6 +880,14 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
       "(unitSn INTEGER, litstrId INTEGER, litstr TEXT,"
       " PRIMARY KEY (unitSn, litstrId));",
       m_repo.table(repoId, "UnitLitstr"));
+    txn.exec(createQuery);
+  }
+  {
+    auto createQuery = folly::sformat(
+      "CREATE TABLE {} "
+      "(unitSn INTEGER, typeAliasId INTEGER, name TEXT, data BLOB, "
+      " PRIMARY KEY (unitSn, typeAliasId));",
+      m_repo.table(repoId, "UnitTypeAlias"));
     txn.exec(createQuery);
   }
   {
@@ -949,6 +960,7 @@ std::unique_ptr<UnitEmitter> UnitRepoProxy::loadEmitter(
     getUnitArrayTypeTable[repoId].get(*ue);
     m_repo.pcrp().getPreClasses[repoId].get(*ue);
     m_repo.rrp().getRecords[repoId].get(*ue);
+    getUnitTypeAliases[repoId].get(*ue);
     getUnitMergeables[repoId].get(*ue);
     getUnitLineTable[repoId].get(ue->m_sn, ue->m_lineTable);
     m_repo.frp().getFuncs[repoId].get(*ue);
@@ -1361,6 +1373,57 @@ void UnitRepoProxy::GetUnitLineTableStmt::get(int64_t unitSn,
       }
     );
   }
+  txn.commit();
+}
+
+void UnitRepoProxy::InsertUnitTypeAliasStmt
+                  ::insert(const UnitEmitter& ue,
+                           RepoTxn& txn,
+                           int64_t unitSn,
+                           Id typeAliasId,
+                           const TypeAlias& typeAlias) {
+  if (!prepared()) {
+    auto insertQuery = folly::sformat(
+      "INSERT INTO {} VALUES (@unitSn, @typeAliasId, @name, @data);",
+      m_repo.table(m_repoId, "UnitTypeAlias"));
+    txn.prepare(*this, insertQuery);
+  }
+
+  BlobEncoder dataBlob{ue.useGlobalIds()};
+  RepoTxnQuery query(txn, *this);
+  query.bindInt64("@unitSn", unitSn);
+  query.bindInt64("@typeAliasId", typeAliasId);
+  query.bindStaticString("@name", typeAlias.name);
+
+  dataBlob(typeAlias);
+  query.bindBlob("@data", dataBlob, /* static */ true);
+  query.exec();
+}
+
+void UnitRepoProxy::GetUnitTypeAliasesStmt::get(UnitEmitter& ue) {
+  auto txn = RepoTxn{m_repo.begin()};
+  if (!prepared()) {
+    auto selectQuery = folly::sformat(
+      "SELECT typeAliasId, name, data FROM {} WHERE unitSn == @unitSn;",
+      m_repo.table(m_repoId, "UnitTypeAlias"));
+    txn.prepare(*this, selectQuery);
+  }
+  RepoTxnQuery query(txn, *this);
+
+  query.bindInt64("@unitSn", ue.m_sn);
+  do {
+    query.step();
+    if (query.row()) {
+      TypeAlias ta;
+      Id typeAliasId;        /**/ query.getId(0, typeAliasId);
+      StringData *name;      /**/ query.getStaticString(1, name);
+      ta.name = makeStaticString(name);
+      BlobDecoder dataBlob = /**/ query.getBlob(2, ue.useGlobalIds());
+      dataBlob(ta);
+      Id id UNUSED = ue.addTypeAlias(ta);
+      assertx(id == typeAliasId);
+    }
+  } while (!query.done());
   txn.commit();
 }
 

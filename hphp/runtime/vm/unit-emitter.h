@@ -545,6 +545,19 @@ struct UnitRepoProxy : public RepoProxy {
     void get(int64_t unitSn, LineTable& lineTable);
   };
 
+  struct InsertUnitTypeAliasStmt : public RepoProxy::Stmt {
+    InsertUnitTypeAliasStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void insert(const UnitEmitter& ue,
+                RepoTxn& txn,
+                int64_t unitSn,
+                Id typeAliasId,
+                const TypeAlias& typeAlias); // throws(RepoExc)
+  };
+  struct GetUnitTypeAliasesStmt : public RepoProxy::Stmt {
+    GetUnitTypeAliasesStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void get(UnitEmitter& ue);
+  };
+
   struct InsertUnitStmt : public RepoProxy::Stmt {
     InsertUnitStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(const UnitEmitter& ue,
@@ -614,6 +627,8 @@ struct UnitRepoProxy : public RepoProxy {
   URP_GOP(Unit) \
   URP_IOP(UnitLineTable) \
   URP_GOP(UnitLineTable) \
+  URP_IOP(UnitTypeAlias) \
+  URP_GOP(UnitTypeAliases) \
   URP_IOP(UnitLitstr) \
   URP_GOP(UnitLitstrs) \
   URP_IOP(UnitArrayTypeTable) \

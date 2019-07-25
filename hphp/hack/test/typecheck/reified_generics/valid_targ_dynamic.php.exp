@@ -1,4 +1,1 @@
-File "valid_targ_dynamic.php", line 5, characters 13-19:
-This is dynamic, it cannot be used as a reified type argument (Typing[4305])
-File "valid_targ_dynamic.php", line 3, characters 15-15:
-T is reified
+No errors

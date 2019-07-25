@@ -2,4 +2,5 @@
 
 class C<reify T> {}
 
-type Ty = C<(function (): string)>;
+type Ta = C<(function (int, bool): string)>;
+type Tc = C<(function (int, bool, float...): string)>;

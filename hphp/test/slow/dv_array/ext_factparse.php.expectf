@@ -35,7 +35,7 @@ array(3) {
       string(3) "TA2"
     }
     ["types"]=>
-    array(10) {
+    array(13) {
       [0]=>
       array(4) {
         ["baseTypes"]=>
@@ -148,6 +148,42 @@ array(3) {
         }
       }
       [7]=>
+      array(4) {
+        ["baseTypes"]=>
+        array(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(3) "TA0"
+      }
+      [8]=>
+      array(4) {
+        ["baseTypes"]=>
+        array(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(3) "TA1"
+      }
+      [9]=>
+      array(4) {
+        ["baseTypes"]=>
+        array(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(3) "TA2"
+      }
+      [10]=>
       array(6) {
         ["baseTypes"]=>
         array(0) {
@@ -165,7 +201,7 @@ array(3) {
         array(0) {
         }
       }
-      [8]=>
+      [11]=>
       array(6) {
         ["baseTypes"]=>
         array(0) {
@@ -183,7 +219,7 @@ array(3) {
         array(0) {
         }
       }
-      [9]=>
+      [12]=>
       array(6) {
         ["baseTypes"]=>
         array(4) {
@@ -251,7 +287,7 @@ array(3) {
       string(6) "NS\TA2"
     }
     ["types"]=>
-    array(10) {
+    array(13) {
       [0]=>
       array(4) {
         ["baseTypes"]=>
@@ -364,6 +400,42 @@ array(3) {
         }
       }
       [7]=>
+      array(4) {
+        ["baseTypes"]=>
+        array(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(6) "NS\TA0"
+      }
+      [8]=>
+      array(4) {
+        ["baseTypes"]=>
+        array(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(6) "NS\TA1"
+      }
+      [9]=>
+      array(4) {
+        ["baseTypes"]=>
+        array(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(6) "NS\TA2"
+      }
+      [10]=>
       array(6) {
         ["baseTypes"]=>
         array(0) {
@@ -381,7 +453,7 @@ array(3) {
         array(0) {
         }
       }
-      [8]=>
+      [11]=>
       array(6) {
         ["baseTypes"]=>
         array(0) {
@@ -399,7 +471,7 @@ array(3) {
         array(0) {
         }
       }
-      [9]=>
+      [12]=>
       array(6) {
         ["baseTypes"]=>
         array(4) {
@@ -467,7 +539,7 @@ array(3) {
       string(9) "NS\NS\TA2"
     }
     ["types"]=>
-    array(10) {
+    array(13) {
       [0]=>
       array(4) {
         ["baseTypes"]=>
@@ -580,6 +652,42 @@ array(3) {
         }
       }
       [7]=>
+      array(4) {
+        ["baseTypes"]=>
+        array(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(9) "NS\NS\TA0"
+      }
+      [8]=>
+      array(4) {
+        ["baseTypes"]=>
+        array(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(9) "NS\NS\TA1"
+      }
+      [9]=>
+      array(4) {
+        ["baseTypes"]=>
+        array(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(9) "NS\NS\TA2"
+      }
+      [10]=>
       array(6) {
         ["baseTypes"]=>
         array(0) {
@@ -597,7 +705,7 @@ array(3) {
         array(0) {
         }
       }
-      [8]=>
+      [11]=>
       array(6) {
         ["baseTypes"]=>
         array(0) {
@@ -615,7 +723,7 @@ array(3) {
         array(0) {
         }
       }
-      [9]=>
+      [12]=>
       array(6) {
         ["baseTypes"]=>
         array(4) {

@@ -82,12 +82,7 @@ class LspCommandProcessor:
         notify_timeout: float = 1,
     ) -> Transcript:
         transcript = self._send_commands({}, json_commands)
-
-        # we are expecting at least one response per request sent so
-        # we read these giving the server more time to respond with them.
-        transcript = self._read_request_responses(
-            transcript, json_commands, request_timeout
-        )
+        transcript = self._wait_for_shutdown(transcript)
 
         # because it's possible the server sent us notifications
         # along with responses we need to try to keep reading
@@ -116,7 +111,7 @@ class LspCommandProcessor:
             "id": -1,
             "params": {"query": "my test query"},
         }
-        id = self._client_request_id(dummy_command)
+        id = self._client_request_id(dummy_command["id"])
 
         def has_error_message(entry: TranscriptEntry, message: str) -> bool:
             if (
@@ -147,6 +142,39 @@ class LspCommandProcessor:
                 and transcript[id].received is not None
             ):
                 return transcript
+
+    def _wait_for_shutdown(self, transcript: Transcript) -> Transcript:
+        shutdown_commands = [
+            v.sent
+            for v in transcript.values()
+            if v.sent is not None and v.sent["method"] == "shutdown"
+        ]
+        num_shutdown_commands = len(shutdown_commands)
+        assert num_shutdown_commands == 1, (
+            "Expected this test case to have sent "
+            + "exactly 1 shutdown command to wait for, "
+            + f"but instead got {num_shutdown_commands}. "
+            + "If you are writing an LSP test, "
+            + "make sure that you have exactly one `shutdown` command at the end, "
+            + "as we wait for that `shutdown` command to return "
+            + "to know when the test is done running. "
+            + f"Here are the shutdown commands I saw: {shutdown_commands}"
+        )
+        [shutdown_command] = shutdown_commands
+        return self._wait_for_response(transcript, shutdown_command["id"])
+
+    def _wait_for_response(
+        self, transcript: Transcript, request_id: Json
+    ) -> Transcript:
+        transcript_id = self._client_request_id(request_id)
+        request = transcript[transcript_id].sent
+        requests = [request]
+
+        while transcript[transcript_id].received is None:
+            transcript = self._read_request_responses(
+                transcript, commands=requests, timeout_seconds=5
+            )
+        return transcript
 
     def _read_request_responses(
         self, transcript: Transcript, commands: Sequence[Json], timeout_seconds: float
@@ -191,9 +219,9 @@ class LspCommandProcessor:
         ) -> str:
             if LspCommandProcessor._has_id(json):
                 if is_client_request:
-                    return LspCommandProcessor._client_request_id(json)
+                    return LspCommandProcessor._client_request_id(json["id"])
                 else:
-                    return LspCommandProcessor._server_request_id(json)
+                    return LspCommandProcessor._server_request_id(json["id"])
             else:
                 return idgen()
 
@@ -238,13 +266,13 @@ class LspCommandProcessor:
         return prefix + str(uuid.uuid4())
 
     @staticmethod
-    def _client_request_id(json_command: Json) -> str:
-        return "REQUEST_CLIENT_TO_SERVER_" + str(json_command["id"])
+    def _client_request_id(id: Json) -> str:
+        return "REQUEST_CLIENT_TO_SERVER_" + str(id)
 
     @staticmethod
-    def _server_request_id(json_command: Json) -> str:
-        return "REQUEST_SERVER_TO_CLIENT_" + str(json_command["id"])
+    def _server_request_id(id: Json) -> str:
+        return "REQUEST_SERVER_TO_CLIENT_" + str(id)
 
     @staticmethod
     def dummy_request_id() -> str:
-        return LspCommandProcessor._client_request_id({"id": -1})
+        return LspCommandProcessor._client_request_id(-1)

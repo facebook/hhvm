@@ -102,7 +102,6 @@ struct
     | S.Pipe(id, e1, e2) -> T.Pipe(id, map_expr menv e1, map_expr menv e2)
     | S.Eif(e1, e2, e3) ->
       T.Eif(map_expr menv e1, Option.map e2 (map_expr menv), map_expr menv e3)
-    | S.InstanceOf (e, ci) -> T.InstanceOf (map_expr menv e, map_class_id menv ci)
     | S.Is (e, h) -> T.Is (map_expr menv e, h)
     | S.As (e, h, b) -> T.As (map_expr menv e, h, b)
     | S.New (ci, tl, el1, el2, ctor_annot) ->

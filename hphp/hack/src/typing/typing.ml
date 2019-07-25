@@ -758,7 +758,7 @@ and stmt_ env pos st =
 
       (* We stash away the locals environment because condition updates it
        * locally for checking b1. For example, we might have condition
-       * $x === null, or $x instanceof C, which changes the type of $x in
+       * $x === null, or $x is C, which changes the type of $x in
        * lenv *)
       let parent_lenv = env.Env.lenv in
 
@@ -2336,10 +2336,6 @@ and expr_
         else env in
       let env, ty = Phase.localize_hint_with_self env hint in
       make_result env p (T.Cast (hint, te)) ty
-  | InstanceOf (e, (pos, cid)) ->
-      let env, te, _ = expr env e in
-      let env, te2, _class = instantiable_cid pos env cid [] in
-      make_result env p (T.InstanceOf (te, te2)) (MakeType.bool (Reason.Rwitness p))
   | Is (e, hint) ->
     let env, te, _ = expr env e in
     make_result env p (T.Is (te, hint)) (MakeType.bool (Reason.Rwitness p))
@@ -5984,7 +5980,7 @@ and safely_refine_class_type
 
   (* It's often the case that the fresh name isn't necessary. For
    * example, if C<T> extends B<T>, and we have $x:B<t> for some type t
-   * then $x instanceof C should refine to $x:C<t>.
+   * then $x is C should refine to $x:C<t>.
    * We take a simple approach:
    *    For a fresh type parameter T#1, if
    *      - There is an eqality constraint T#1 = t,

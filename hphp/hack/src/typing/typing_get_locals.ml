@@ -173,11 +173,9 @@ let rec expr acc (_, e) =
   | Aast.Obj_get (e1, e2, _)
   | Aast.Binop (_, e1, e2)
   | Aast.Pipe (_, e1, e2)
-  | Aast.InstanceOf (e1, (_, Aast.CIexpr e2))
   | Aast.Class_get ((_, Aast.CIexpr e1), Aast.CGexpr e2) -> expr_expr acc e1 e2
   | Aast.Class_get ((_, Aast.CIexpr e1), _) -> expr acc e1
   | Aast.Class_const _
-  | Aast.InstanceOf _
   | Aast.Class_get _ ->
     failwith "Unexpected Expr: Typing_get_locals expected CIexpr"
   | Aast.Array_get (e1, oe2) ->

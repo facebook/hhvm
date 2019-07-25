@@ -109,7 +109,6 @@ val this_type_forbidden : Pos.t -> unit
 val nonstatic_property_with_lsb : Pos.t -> unit
 val lowercase_this : Pos.t -> string -> unit
 val classname_param : Pos.t -> unit
-val invalid_instanceof : Pos.t -> unit
 val tparam_with_tparam : Pos.t -> string -> unit
 val shadowed_type_param : Pos.t -> Pos.t -> string -> unit
 val missing_typehint : Pos.t -> unit
@@ -520,7 +519,6 @@ val no_atmost_rx_as_rxfunc_for_rx_if_args : Pos.t -> unit
 val coroutine_in_constructor : Pos.t -> unit
 val illegal_by_ref_expr : Pos.t -> string -> string -> unit
 val variadic_byref_param : Pos.t -> unit
-val classname_const_instanceof : string -> Pos.t -> unit
 val byref_dynamic_call : Pos.t -> unit
 val byref_call : Pos.t -> unit
 val reference_in_strict_mode : Pos.t -> unit

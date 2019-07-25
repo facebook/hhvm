@@ -47,7 +47,6 @@ let refine ((_p, (_r, cond_ty)), cond_expr) _cond_is_true gamma =
       _,
       _) ->
     raise Not_implemented
-  | InstanceOf _
   | Is _
   | As _
   | Binop _

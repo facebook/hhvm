@@ -596,39 +596,6 @@ and emit_binop env annot op (e1: A.expr) (e2: A.expr) =
     | _ ->
       default ()
 
-and emit_instanceof (env : Emit_env.t) pos (e: A.expr) (cid: A.class_id) =
-  let lhs = emit_expr env e in
-  let from_class_ref instrs =
-    gather [
-        lhs;
-        emit_pos pos;
-        instrs;
-        instr_instanceof;
-      ] in
-  let scope = Emit_env.get_scope env in
-  match class_id_to_class_expr ~resolve_self:true scope cid with
-  | Class_special clsref ->
-    let instr_clsref =
-      match clsref with
-      | SpecialClsRef.Self -> instr_self
-      | SpecialClsRef.Static -> instr_lateboundcls
-      | SpecialClsRef.Parent -> instr_parent in
-     from_class_ref @@ gather [ instr_clsref; instr_clsrefname; ]
-  | Class_id name ->
-      let n =
-        Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) name in
-      gather [
-        lhs;
-        instr_instanceofd n;
-        ]
-  | Class_expr e2 ->
-    gather [
-      emit_expr env e;
-      emit_expr env e2;
-      instr_instanceof; ]
-  | Class_reified _ ->
-     failwith "cannot get this shape from from Aast.Id"
-
 and get_type_structure_for_hint env ~targ_map (h : Aast.hint) =
   let namespace = Emit_env.get_namespace env in
   let tv = Emit_type_constant.hint_to_type_constant
@@ -1565,8 +1532,6 @@ and emit_expr (env : Emit_env.t) (expr: A.expr) =
     emit_binop env annot op e1 e2
   | A.Pipe (_, e1, e2) ->
     emit_pipe env e1 e2
-  | A.InstanceOf (e1, e2) ->
-    emit_instanceof env pos e1 e2
   | A.Is (e, h) ->
     gather [
       emit_expr env e;
@@ -3627,8 +3592,7 @@ and can_use_as_rhs_in_list_assignment (expr : A.expr_) =
   | Binop _ | Shape _ | Null | True | False | Omitted | Id _
   | Int _ | Float _ | String _ | String2 _
   | PrefixedString _ | Yield_break | Yield_from _ | Suspend _
-  | InstanceOf _ | Is _ | BracedExpr _ | ParenthesizedExpr _
-  | Efun _ | Lfun _ | Xml _
+  | Is _ | BracedExpr _ | ParenthesizedExpr _ | Efun _ | Lfun _ | Xml _
   | Import _ | Callconv _ | List _ -> false
   | PU_identifier _ ->
     failwith "TODO(T35357243): Pocket Universes syntax must be erased by now"

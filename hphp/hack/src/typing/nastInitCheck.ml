@@ -490,7 +490,6 @@ and expr_ env acc p e =
       let acc = expr acc e1 in
       let acc = expr acc e2 in
       expr acc e3
-  | InstanceOf (e, _) -> expr acc e
   | Is (e, _) -> expr acc e
   | As (e, _, _) -> expr acc e
   | Efun (f, _)

@@ -2320,35 +2320,6 @@ module Make (GetLocals : GetLocals) = struct
         e2opt, e3
       ) in
       N.Eif (e1, e2opt, e3)
-    | Aast.InstanceOf (e, (_, Aast.CIexpr (p, Aast.Id x))) ->
-      let id =
-        match x with
-        | px, n when n = SN.Classes.cParent ->
-          if (fst env).current_cls = None then
-            let () = Errors.parent_outside_class p in
-            N.CI (px, SN.Classes.cUnknown)
-          else N.CIparent
-        | px, n when n = SN.Classes.cSelf ->
-          if (fst env).current_cls = None then
-            let () = Errors.self_outside_class p in
-            N.CI (px, SN.Classes.cUnknown)
-          else N.CIself
-        | px, n when n = SN.Classes.cStatic ->
-          if (fst env).current_cls = None then
-            let () = Errors.static_outside_class p in
-            N.CI (px, SN.Classes.cUnknown)
-          else N.CIstatic
-        | _ ->
-          N.CI (Env.type_name env x ~allow_typedef:false ~allow_generics:false)
-      in
-      N.InstanceOf (expr env e, (p, id))
-    | Aast.InstanceOf (e1, (_, Aast.CIexpr (_,
-        (Aast.Lvar _ | Aast.Obj_get _ | Aast.Class_get _ | Aast.Class_const _
-        | Aast.Array_get _ | Aast.Call _) as e2))) ->
-      N.InstanceOf (expr env e1, (fst e2, N.CIexpr (expr env e2)))
-    | Aast.InstanceOf (_e1, (p, _)) ->
-      Errors.invalid_instanceof p;
-      N.Any
     | Aast.Is (e, h) ->
       N.Is (expr env e, hint ~allow_wildcard:true env h)
     | Aast.As (e, h, b) ->

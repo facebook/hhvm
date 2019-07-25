@@ -162,7 +162,6 @@ and expr_ =
   (** The ID of the $$ that is implicitly declared by this pipe. *)
   | Pipe of lid * expr * expr
   | Eif of expr * expr option * expr
-  | InstanceOf of expr * class_id
   | Is of expr * hint
   | As of expr * hint * (* is nullable *) bool
   | New of class_id * targ list * expr list * expr list * (* constructor *) expr_annotation
@@ -579,7 +578,6 @@ let expr_to_string expr =
   | Binop _  -> "Binop"
   | Pipe _  -> "Pipe"
   | Eif _  -> "Eif"
-  | InstanceOf _  -> "InstanceOf"
   | Is _ -> "Is"
   | As _ -> "As"
   | New _  -> "New"

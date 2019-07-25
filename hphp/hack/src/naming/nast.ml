@@ -294,7 +294,6 @@ class type ['a] visitor_type = object
   method on_pipe : 'a -> id -> expr -> expr -> 'a
   method on_eif : 'a -> expr -> expr option -> expr -> 'a
   method on_typename : 'a -> sid -> 'a
-  method on_instanceOf : 'a -> expr -> class_id -> 'a
   method on_is : 'a -> expr -> hint -> 'a
   method on_as : 'a -> expr -> hint -> bool -> 'a
   method on_class_id : 'a -> class_id -> 'a
@@ -531,7 +530,6 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
    | Binop       (bop, e1, e2)    -> this#on_binop acc bop e1 e2
    | Pipe        (id, e1, e2)         -> this#on_pipe acc id e1 e2
    | Eif         (e1, e2, e3)     -> this#on_eif acc e1 e2 e3
-   | InstanceOf  (e1, e2)         -> this#on_instanceOf acc e1 e2
    | Is          (e, h)           -> this#on_is acc e h
    | As          (e, h, b)           -> this#on_as acc e h b
    | Typename n -> this#on_typename acc n
@@ -698,11 +696,6 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
       | Some e -> this#on_expr acc e
     in
     let acc = this#on_expr acc e3 in
-    acc
-
-  method on_instanceOf acc e1 e2 =
-    let acc = this#on_expr acc e1 in
-    let acc = this#on_class_id acc e2 in
     acc
 
   method on_is acc e _ = this#on_expr acc e

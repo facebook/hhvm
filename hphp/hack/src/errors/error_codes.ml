@@ -114,7 +114,7 @@ module Naming                               = struct
   | UnexpectedTypeArguments
   | TooManyTypeArguments
   | ClassnameParam
-  | InvalidInstanceof
+  | InvalidInstanceofDEPRECATED
   | NameIsReserved
   | DollardollarUnused
   | IllegalMemberVariableClass
@@ -235,7 +235,7 @@ module NastCheck                            = struct
   | InterfaceUsesTrait
   | NonstaticMethodInAbstractFinalClass
   | MutableOnStaticDEPRECATED
-  | ClassnameConstInstanceOf
+  | ClassnameConstInstanceOfDEPRECATED
   | ByRefParamOnConstruct
   | ByRefDynamicCall
   | ByRefProperty

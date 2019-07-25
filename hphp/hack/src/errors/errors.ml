@@ -987,12 +987,6 @@ let classname_param pos =
     ("Missing type parameter to classname; classname is entirely"
      ^" meaningless without one")
 
-let invalid_instanceof pos =
-  add (Naming.err_code Naming.InvalidInstanceof) pos
-    "This instanceof has an invalid right operand. Only class identifiers, \
-    local variables, accesses of objects / classes / arrays, and function / \
-    method calls are allowed."
-
 let tparam_with_tparam pos x =
   add (Naming.err_code Naming.TparamWithTparam) pos (
   Printf.sprintf "%s is a type parameter. Type parameters cannot \
@@ -1552,10 +1546,6 @@ let byref_dynamic_call pos =
 let byref_call pos =
   add (NastCheck.err_code NastCheck.ByRefCall) pos
     "Arguments can not be passed by reference"
-
-let classname_const_instanceof class_name pos =
-  add (NastCheck.err_code NastCheck.ClassnameConstInstanceOf) pos
-    (class_name^"::class is redundant in an instanceof, just write '"^class_name^"'.")
 
 let byref_on_property pos =
   add (NastCheck.err_code NastCheck.ByRefProperty) pos

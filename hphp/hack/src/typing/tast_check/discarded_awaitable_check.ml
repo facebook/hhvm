@@ -89,12 +89,6 @@ let visitor = object(this)
     | Cast (hint, e) ->
       this#on_hint (env, ctx) hint;
       this#on_expr (env, disallow_awaitable ctx) e
-    | InstanceOf (e, ((_, obj_ty), _)) ->
-      let ctx' =
-        if is_awaitable env obj_ty
-        then allow_awaitable
-        else disallow_non_nullable_awaitable ctx in
-      this#on_expr (env, ctx') e
     | Is (e, hint)
     | As (e, hint, _) ->
       let hint_ty = Env.hint_to_ty env hint in

@@ -1253,7 +1253,6 @@ and string_of_param_default_value ~env expr =
     let e = string_of_param_default_value ~env e in
     "(" ^ h ^ ")" ^ e
   | A.Pipe (_, e1, e2) -> middle_aux e1 " |> " e2
-  | A.InstanceOf (e1, (_, A.CIexpr e2)) -> middle_aux e1 " instanceof " e2
   | A.Is (e, h) ->
     let e = string_of_param_default_value ~env e in
     let h = string_of_hint ~ns:true h in

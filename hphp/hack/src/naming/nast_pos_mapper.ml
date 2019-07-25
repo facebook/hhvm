@@ -59,7 +59,6 @@ and expr_ f = function
   | Binop (bop, e1, e2) -> Binop (bop, expr f e1, expr f e2)
   | Pipe ((p, id), e1, e2) -> Pipe ((f p, id), expr f e1, expr f e2)
   | Eif (e1, e2, e3) -> Eif (expr f e1, Option.map e2 (expr f), expr f e3)
-  | InstanceOf (e1, e2) -> InstanceOf (expr f e1, class_id f e2)
   | Is (e, h) -> Is (expr f e, hint f h)
   | As (e, h, b) -> As (expr f e, hint f h, b)
   | Typename n -> Typename (pstring f n)

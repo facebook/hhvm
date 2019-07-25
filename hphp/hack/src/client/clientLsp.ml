@@ -1050,12 +1050,18 @@ let do_definition
 
 let do_definition_local
     (ide_service: ClientIdeService.t)
+    (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
     (params: Definition.params)
     : Definition.result Lwt.t =
+  let uri =
+    params.TextDocumentPositionParams.textDocument.TextDocumentIdentifier.uri in
+  let file_input =
+    get_labelled_file_from_editor_open_files editor_open_files uri in
+
   let (file, line, char) = lsp_file_position_to_hack params in
   let%lwt results = ClientIdeService.go_to_definition
     ide_service
-    ~file_input:(ServerCommandTypes.LabelledFileName file)
+    ~file_input
     ~line
     ~char
   in
@@ -2673,6 +2679,18 @@ let handle_event
     result |> print_hover |> respond_jsonrpc ~powered_by:Serverless_ide c;
     Lwt.return_unit
 
+  | (In_init { In_init_env.editor_open_files; _ }
+      | Lost_server { Lost_env.editor_open_files; _ }),
+      Client_message c
+    when env.use_serverless_ide
+      && c.method_ = "textDocument/definition" ->
+    let%lwt () = cancel_if_stale client c short_timeout in
+    let%lwt result = parse_definition c.params
+      |> do_definition_local ide_service editor_open_files
+    in
+   result |> print_definition |> respond_jsonrpc ~powered_by:Serverless_ide c;
+   Lwt.return_unit
+
   (* any request/notification if we're not yet ready *)
   | In_init ienv, Client_message c ->
     let open In_init_env in
@@ -2767,16 +2785,6 @@ let handle_event
       |> do_definition conn ref_unblocked_time editor_open_files
     in
    result |> print_definition |> respond_jsonrpc ~powered_by:Hh_server c;
-   Lwt.return_unit
-
-  | _, Client_message c
-    when env.use_serverless_ide
-      && c.method_ = "textDocument/definition" ->
-    let%lwt () = cancel_if_stale client c short_timeout in
-    let%lwt result = parse_definition c.params
-      |> do_definition_local ide_service
-    in
-   result |> print_definition |> respond_jsonrpc ~powered_by:Serverless_ide c;
    Lwt.return_unit
 
   (* textDocument/completion request *)

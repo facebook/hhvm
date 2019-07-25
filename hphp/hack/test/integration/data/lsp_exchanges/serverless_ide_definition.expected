@@ -252,6 +252,27 @@
   },
   {
     "jsonrpc": "2.0",
+    "id": 9,
+    "result": [
+      {
+        "uri": "file://${root_path}${path_sep}definition.php",
+        "range": {
+          "start": {
+            "line": 28,
+            "character": 9
+          },
+          "end": {
+            "line": 28,
+            "character": 13
+          }
+        },
+        "title": "test"
+      }
+    ],
+    "powered_by": "serverless_ide"
+  },
+  {
+    "jsonrpc": "2.0",
     "id": 99,
     "result": null
   }

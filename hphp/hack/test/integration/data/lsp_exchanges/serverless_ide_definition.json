@@ -110,6 +110,44 @@
    }
 },
 {
+  "comment": "make local, unsaved change to the file",
+  "jsonrpc": "2.0",
+  "method": "textDocument/didChange",
+  "params": {
+    "textDocument": {
+      "uri": "${php_file_uri}",
+      "version": 2
+    },
+    "contentChanges": [
+      {
+        "text": "test",
+        "range": {
+          "start": {
+            "line": 3,
+            "character": 9
+          },
+          "end": {
+            "line": 3,
+            "character": 21
+          }
+        }
+      }
+    ]
+  }
+},
+{
+  "comment": "call to `test` instead of `b_definition`",
+  "jsonrpc": "2.0",
+  "method": "textDocument/definition",
+  "id": 9,
+  "params": {
+      "textDocument": {
+        "uri":"${php_file_uri}"
+      },
+      "position": {"line": 3, "character": 10}
+   }
+},
+{
   "jsonrpc": "2.0",
   "id": 99,
   "method": "shutdown",

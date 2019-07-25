@@ -129,6 +129,8 @@ extern uint32_t s_usedbytes;
 namespace detail {
 
 struct RDSLocalNode {
+  virtual ~RDSLocalNode() {}
+
   virtual void init() = 0;
   virtual void fini() = 0;
 

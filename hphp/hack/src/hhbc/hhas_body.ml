@@ -12,7 +12,6 @@ type t = {
   body_instrs                 : Instruction_sequence.t;
   body_decl_vars              : string list; (* Actually local_id list *)
   body_num_iters              : int;
-  body_num_cls_ref_slots      : int;
   body_is_memoize_wrapper     : bool;
   body_is_memoize_wrapper_lsb : bool;
   body_params                 : Hhas_param.t list;
@@ -25,7 +24,6 @@ let make
     instrs
     decl_vars
     num_iters
-    num_cls_ref_slots
     is_memoize_wrapper
     is_memoize_wrapper_lsb
     params
@@ -36,7 +34,6 @@ let make
     body_instrs = instrs;
     body_decl_vars = decl_vars;
     body_num_iters = num_iters;
-    body_num_cls_ref_slots = num_cls_ref_slots;
     body_is_memoize_wrapper = is_memoize_wrapper;
     body_is_memoize_wrapper_lsb = is_memoize_wrapper_lsb;
     body_params = params;
@@ -49,7 +46,6 @@ let params body = body.body_params
 let instrs body = body.body_instrs
 let decl_vars body = body.body_decl_vars
 let num_iters body = body.body_num_iters
-let num_cls_ref_slots body = body.body_num_cls_ref_slots
 let return_type body = body.body_return_type
 let is_memoize_wrapper body = body.body_is_memoize_wrapper
 let is_memoize_wrapper_lsb body = body.body_is_memoize_wrapper_lsb

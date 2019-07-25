@@ -391,7 +391,6 @@ static_assert(kMaxSmallSize < kMaxSizeClass,
  */
 constexpr char kSmallFreeFill   = 0x6a;
 constexpr char kRDSTrashFill    = 0x6b; // used by RDS for "normal" section
-constexpr char kTrashClsRef     = 0x6c; // used for class-ref slots
 constexpr char kTVTrashFill     = 0x7a; // used by interpreter
 constexpr char kTVTrashFill2    = 0x7b; // used by req::ptr dtors
 constexpr char kTVTrashJITStk   = 0x7c; // used by the JIT for stack slots

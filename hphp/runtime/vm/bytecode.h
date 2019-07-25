@@ -30,7 +30,6 @@
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
-#include "hphp/runtime/vm/cls-ref.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/name-value-table.h"
 #include "hphp/runtime/vm/unit.h"
@@ -285,10 +284,6 @@ struct CallCtx {
 
 constexpr size_t kNumIterCells = sizeof(Iter) / sizeof(Cell);
 constexpr size_t kNumActRecCells = sizeof(ActRec) / sizeof(Cell);
-
-constexpr size_t clsRefCountToCells(size_t n) {
-  return (n * sizeof(cls_ref) + sizeof(Cell) - 1) / sizeof(Cell);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -705,15 +700,6 @@ public:
     assertx(kNumIterCells * sizeof(Cell) == sizeof(Iter));
     assertx((uintptr_t)(m_top - kNumIterCells) >= (uintptr_t)m_elms);
     m_top -= kNumIterCells;
-  }
-
-  ALWAYS_INLINE
-  void allocClsRefSlots(size_t n) {
-    assertx((uintptr_t)(m_top - clsRefCountToCells(n)) >= (uintptr_t)m_elms);
-    m_top -= clsRefCountToCells(n);
-    if (debug) {
-      memset(m_top, kTrashClsRef, clsRefCountToCells(n) * sizeof(Cell));
-    }
   }
 
   ALWAYS_INLINE

@@ -76,7 +76,6 @@ let emit_body scope namespace class_attrs name params ret =
     body_instrs
     [] (* decl vars *)
     0
-    0
     false
     false
     params

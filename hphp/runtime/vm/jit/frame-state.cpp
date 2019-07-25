@@ -140,9 +140,6 @@ bool merge_into(FrameState& dst, const FrameState& src) {
   // We must always have the same spValue.
   always_assert(dst.spValue == src.spValue);
 
-  always_assert(src.clsRefClsSlots.size() == dst.clsRefClsSlots.size());
-  always_assert(src.clsRefTSSlots.size() == dst.clsRefTSSlots.size());
-
   if (dst.needRatchet != src.needRatchet) {
     dst.needRatchet = true;
     changed = true;
@@ -215,14 +212,6 @@ bool merge_into(FrameState& dst, const FrameState& src) {
   }
 
   changed |= merge_memory_stack_into(dst.stack, src.stack);
-
-  for (auto i = uint32_t{0}; i < src.clsRefClsSlots.size(); ++i) {
-    changed |= merge_into(dst.clsRefClsSlots[i], src.clsRefClsSlots[i]);
-  }
-
-  for (auto i = uint32_t{0}; i < src.clsRefTSSlots.size(); ++i) {
-    changed |= merge_into(dst.clsRefTSSlots[i], src.clsRefTSSlots[i]);
-  }
 
   changed |= merge_util(dst.stackModified,
                         dst.stackModified || src.stackModified);
@@ -311,33 +300,6 @@ bool check_invariants(const FrameState& state) {
     "stack was smaller than possible"
   );
 
-  for (auto id = uint32_t{0}; id < state.clsRefClsSlots.size(); ++id) {
-    auto const& clsRef = state.clsRefClsSlots[id];
-
-    always_assert_flog(
-      clsRef.predictedType <= clsRef.type,
-      "class-ref {} failed prediction invariants; pred = {}, type = {}\n",
-      id,
-      clsRef.predictedType,
-      clsRef.type
-    );
-
-    always_assert_flog(
-      clsRef.value == nullptr || clsRef.value->type() == clsRef.type,
-      "class-ref {} had type {}, but value {}\n",
-      id,
-      clsRef.type,
-      clsRef.value->toString()
-    );
-
-    always_assert_flog(
-      clsRef.type <= TCls,
-      "class-ref {} had non-Cls type {}\n",
-      id,
-      clsRef.type
-    );
-  }
-
   return true;
 }
 
@@ -374,8 +336,6 @@ FrameStateMgr::FrameStateMgr(BCMarker marker) {
   cur().bcSPOff = marker.spOff();
   cur().locals.resize(marker.func()->numLocals());
   cur().stack.resize(marker.spOff().offset);
-  cur().clsRefClsSlots.resize(marker.func()->numClsRefSlots());
-  cur().clsRefTSSlots.resize(marker.func()->numClsRefSlots());
 }
 
 void FrameStateMgr::update(const IRInstruction* inst) {
@@ -565,12 +525,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
       for (auto& state : frame.stack) {
         refineValue(state, inst->src(0), inst->dst());
       }
-      for (auto& state : frame.clsRefClsSlots) {
-        refineValue(state, inst->src(0), inst->dst());
-      }
-      for (auto& state : frame.clsRefTSSlots) {
-        refineValue(state, inst->src(0), inst->dst());
-      }
       refineValue(frame.mbase, inst->src(0), inst->dst());
     }
     break;
@@ -627,37 +581,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   case StLocPseudoMain:
     setLocalPredictedType(inst->extra<LocalId>()->locId,
                           inst->src(1)->type());
-    break;
-
-  case StClsRefCls:
-    setValue(cslotcls(inst->extra<StClsRefCls>()->slot), inst->src(1));
-    break;
-
-  case StClsRefTS:
-    setValue(cslotts(inst->extra<StClsRefTS>()->slot), inst->src(1));
-    break;
-
-  case LdClsRefCls:
-    {
-      auto const slot = inst->extra<LdClsRefCls>()->slot;
-      refinePredictedTmpType(
-        inst->dst(),
-        cur().clsRefClsSlots[slot].predictedType
-      );
-      setValue(cslotcls(slot), inst->dst());
-    }
-    break;
-
-  case LdClsRefTS:
-    setValue(cslotts(inst->extra<LdClsRefTS>()->slot), inst->dst());
-    break;
-
-  case KillClsRefCls:
-    setValue(cslotcls(inst->extra<KillClsRefCls>()->slot), nullptr);
-    break;
-
-  case KillClsRefTS:
-    setValue(cslotts(inst->extra<KillClsRefTS>()->slot), nullptr);
     break;
 
   case StRef:
@@ -760,15 +683,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
         if (local.type <= TBoxedCell) dropLocalRefsInnerTypes();
         setType(loc(local.id), local.type);
       }
-    }
-
-    for (auto i = uint32_t{0}; i < extra.nChangedClsRefSlots; ++i) {
-      auto const& slot = extra.changedClsRefSlots[i];
-      // Either its written to, in which case we don't know the value, or its
-      // read from, in which case it no longer has any value. Either way, drop
-      // any information we have.
-      setValue(cslotcls(slot.id), nullptr);
-      setValue(cslotts(slot.id), nullptr);
     }
 
     // Offset of the bytecode stack top relative to the IR stack pointer.
@@ -903,8 +817,6 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
         case LTag::Local: return LocalState::default_type();
         case LTag::Stack: return StackState::default_type();
         case LTag::MBase: return MBaseState::default_type();
-        case LTag::CSlotCls:
-        case LTag::CSlotTS:
           always_assert(false); // Can't be a base
       }
       not_reached();
@@ -1306,7 +1218,6 @@ void FrameStateMgr::clearForUnprocessedPred() {
 
   cur().fpiStack.clear();
   clearLocals();
-  clearClsRefSlots();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1366,10 +1277,6 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
   cur().stack.clear();
   cur().stack.resize(std::max(cur().bcSPOff.offset,
                               cur().irSPOff.offset));
-  cur().clsRefClsSlots.clear();
-  cur().clsRefClsSlots.resize(target->numClsRefSlots());
-  cur().clsRefTSSlots.clear();
-  cur().clsRefTSSlots.resize(target->numClsRefSlots());
 }
 
 void FrameStateMgr::trackInlineReturn() {
@@ -1393,12 +1300,6 @@ void FrameStateMgr::trackCall() {
     for (auto& stk : state.stack) {
       stk.value = nullptr;
     }
-    for (auto& slot : state.clsRefClsSlots) {
-      if (slot.value && !slot.value->inst()->is(DefConst)) slot.value = nullptr;
-    }
-    for (auto& slot : state.clsRefTSSlots) {
-      if (slot.value && !slot.value->inst()->is(DefConst)) slot.value = nullptr;
-    }
     state.frameMaySpanCall = true;
   }
 }
@@ -1413,7 +1314,7 @@ bool FrameStateMgr::checkInvariants() const {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Wrap a local, stack ID, or class-ref slot into a Location.
+ * Wrap a local or stack ID into a Location.
  */
 Location FrameStateMgr::loc(uint32_t id) const {
   return Location::Local { id };
@@ -1421,12 +1322,6 @@ Location FrameStateMgr::loc(uint32_t id) const {
 Location FrameStateMgr::stk(IRSPRelOffset off) const {
   auto const fpRel = off.to<FPInvOffset>(irSPOff());
   return Location::Stack { fpRel };
-}
-Location FrameStateMgr::cslotcls(uint32_t slot) const {
-  return Location::CSlotCls { slot };
-}
-Location FrameStateMgr::cslotts(uint32_t slot) const {
-  return Location::CSlotTS { slot };
 }
 
 LocalState& FrameStateMgr::localState(uint32_t id) {
@@ -1470,32 +1365,6 @@ StackState& FrameStateMgr::stackState(Location l) {
   return stackState(l.stackIdx());
 }
 
-CSlotClsState& FrameStateMgr::clsRefClsSlotState(uint32_t slot) {
-  assertx(slot < cur().clsRefClsSlots.size());
-  auto& ret = cur().clsRefClsSlots[slot];
-
-  assertx(ret.value == nullptr || ret.value->type() == ret.type);
-  return ret;
-}
-
-CSlotTSState& FrameStateMgr::clsRefTSSlotState(uint32_t slot) {
-  assertx(slot < cur().clsRefTSSlots.size());
-  auto& ret = cur().clsRefTSSlots[slot];
-
-  assertx(ret.value == nullptr || ret.value->type() == ret.type);
-  return ret;
-}
-
-CSlotClsState& FrameStateMgr::clsRefClsSlotState(Location l) {
-  assertx(l.tag() == LTag::CSlotCls);
-  return clsRefClsSlotState(l.clsRefClsSlot());
-}
-
-CSlotTSState& FrameStateMgr::clsRefTSSlotState(Location l) {
-  assertx(l.tag() == LTag::CSlotTS);
-  return clsRefTSSlotState(l.clsRefTSSlot());
-}
-
 const LocalState& FrameStateMgr::local(uint32_t id) const {
   return const_cast<FrameStateMgr&>(*this).localState(id);
 }
@@ -1511,14 +1380,6 @@ const StackState& FrameStateMgr::stack(FPInvOffset offset) const {
   return const_cast<FrameStateMgr&>(*this).stackState(offset);
 }
 
-const CSlotClsState& FrameStateMgr::clsRefClsSlot(uint32_t slot) const {
-  return const_cast<FrameStateMgr&>(*this).clsRefClsSlotState(slot);
-}
-
-const CSlotTSState& FrameStateMgr::clsRefTSSlot(uint32_t slot) const {
-  return const_cast<FrameStateMgr&>(*this).clsRefTSSlotState(slot);
-}
-
 #define IMPL_MEMBER_OF(type_t, name)                           \
   type_t FrameStateMgr::name##Of(Location l) const {           \
     return [&]() -> type_t {                                   \
@@ -1526,8 +1387,6 @@ const CSlotTSState& FrameStateMgr::clsRefTSSlot(uint32_t slot) const {
         case LTag::Local:    return local(l.localId()).name;   \
         case LTag::Stack:    return stack(l.stackIdx()).name;  \
         case LTag::MBase:    return mbase().name;              \
-        case LTag::CSlotCls: return clsRefClsSlot(l.clsRefClsSlot()).name;    \
-        case LTag::CSlotTS:  return clsRefTSSlot(l.clsRefTSSlot()).name;      \
       }                                                        \
       not_reached();                                           \
     }();                                                       \
@@ -1617,10 +1476,6 @@ void FrameStateMgr::setValue(Location l, SSATmp* value) {
       return setValueImpl(l, stackState(l), value);
     case LTag::MBase:
       return setValueImpl(l, cur().mbase, value);
-    case LTag::CSlotCls:
-      return setValueImpl(l, clsRefClsSlotState(l), value);
-    case LTag::CSlotTS:
-      return setValueImpl(l, clsRefTSSlotState(l), value);
   }
   not_reached();
 }
@@ -1651,10 +1506,6 @@ void FrameStateMgr::setType(Location l, Type type) {
       return setTypeImpl(l, stackState(l), type);
     case LTag::MBase:
       return setTypeImpl(l, cur().mbase, type);
-    case LTag::CSlotCls:
-      return setTypeImpl(l, clsRefClsSlotState(l), type);
-    case LTag::CSlotTS:
-      return setTypeImpl(l, clsRefTSSlotState(l), type);
   }
   not_reached();
 }
@@ -1684,10 +1535,6 @@ void FrameStateMgr::widenType(Location l, Type type) {
       return widenTypeImpl(l, stackState(l), type);
     case LTag::MBase:
       return widenTypeImpl(l, cur().mbase, type);
-    case LTag::CSlotCls:
-      return widenTypeImpl(l, clsRefClsSlotState(l), type);
-    case LTag::CSlotTS:
-      return widenTypeImpl(l, clsRefTSSlotState(l), type);
   }
   not_reached();
 }
@@ -1720,10 +1567,6 @@ void FrameStateMgr::refineType(Location l, Type type, TypeSource typeSrc) {
     case LTag::Local: return refineTypeImpl(l, localState(l), type, typeSrc);
     case LTag::Stack: return refineTypeImpl(l, stackState(l), type, typeSrc);
     case LTag::MBase: return refineTypeImpl(l, cur().mbase, type, typeSrc);
-    case LTag::CSlotCls:
-      return refineTypeImpl(l, clsRefClsSlotState(l), type, typeSrc);
-    case LTag::CSlotTS:
-      return refineTypeImpl(l, clsRefTSSlotState(l), type, typeSrc);
   }
   not_reached();
 }
@@ -1747,10 +1590,6 @@ void FrameStateMgr::refinePredictedType(Location l, Type type) {
     case LTag::Local: return refinePredictedTypeImpl(localState(l), type);
     case LTag::Stack: return refinePredictedTypeImpl(stackState(l), type);
     case LTag::MBase: return refinePredictedTypeImpl(cur().mbase, type);
-    case LTag::CSlotCls:
-      return refinePredictedTypeImpl(clsRefClsSlotState(l), type);
-    case LTag::CSlotTS:
-      return refinePredictedTypeImpl(clsRefTSSlotState(l), type);
   }
   not_reached();
 }
@@ -1768,9 +1607,6 @@ void FrameStateMgr::setBoxedPrediction(Location l, Type type) {
     case LTag::Local: return setBoxedPredictionImpl(localState(l), type);
     case LTag::Stack: return setBoxedPredictionImpl(stackState(l), type);
     case LTag::MBase: return setBoxedPredictionImpl(cur().mbase, type);
-    case LTag::CSlotCls:
-    case LTag::CSlotTS:
-      always_assert(false); // Never has a box
   }
   not_reached();
 }
@@ -1918,18 +1754,6 @@ void FrameStateMgr::clearLocals() {
   ITRACE(2, "clearLocals\n");
   for (auto i = uint32_t{0}; i < cur().locals.size(); ++i) {
     setValue(loc(i), nullptr);
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void FrameStateMgr::clearClsRefSlots() {
-  ITRACE(2, "clearClsRefSlots\n");
-  for (auto i = uint32_t{0}; i < cur().clsRefClsSlots.size(); ++i) {
-    setValue(cslotcls(i), nullptr);
-  }
-  for (auto i = uint32_t{0}; i < cur().clsRefTSSlots.size(); ++i) {
-    setValue(cslotts(i), nullptr);
   }
 }
 

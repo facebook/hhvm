@@ -85,12 +85,10 @@ State pseudomain_entry_state(const php::Func* func) {
   ret.thisType = TOptObj;
   ret.locals.resize(func->locals.size());
   ret.iters.resize(func->numIters);
-  ret.clsRefSlots.resize(func->numClsRefSlots);
   for (auto i = 0; i < ret.locals.size(); ++i) {
     // Named pseudomain locals are bound to $GLOBALS.
     ret.locals[i] = func->locals[i].name ? TGen : TUninit;
   }
-  for (auto& s : ret.clsRefSlots) s = TCls;
   return ret;
 }
 
@@ -117,7 +115,6 @@ State entry_state(const Index& index, Context const ctx,
   }();
   ret.locals.resize(ctx.func->locals.size());
   ret.iters.resize(ctx.func->numIters);
-  ret.clsRefSlots.resize(ctx.func->numClsRefSlots, TCls);
 
   auto locId = uint32_t{0};
   for (; locId < ctx.func->params.size(); ++locId) {

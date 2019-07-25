@@ -90,8 +90,7 @@ void pretty_print(const FuncEmitter* fe, std::ostream& out) {
   }
   out << "maxStackCells: " << fe->maxStackCells << '\n'
       << "numLocals: " << fe->numLocals() << '\n'
-      << "numIterators: " << fe->numIterators() << '\n'
-      << "numClsRefSlots: " << fe->numClsRefSlots() << '\n';
+      << "numIterators: " << fe->numIterators() << '\n';
 
   auto const& ehtab = fe->ehtab;
   size_t ehId = 0;

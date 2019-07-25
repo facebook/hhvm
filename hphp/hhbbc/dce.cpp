@@ -356,13 +356,6 @@ struct DceState {
   std::bitset<kMaxTrackedLocals> liveLocals;
 
   /*
-   * Class-ref slots known to be live at a point in a DCE walk.  This is used
-   * when we're actually acting on information we discovered during liveness
-   * analysis.
-   */
-  std::bitset<kMaxTrackedClsRefSlots> liveSlots;
-
-  /*
    * Instructions marked in this set will be processed by dce_perform.
    * They must all be processed together to keep eval stack consumers
    * and producers balanced.
@@ -376,19 +369,12 @@ struct DceState {
   DceReplaceMap replaceMap;
 
   /*
-   * The set of locals and class-ref slots that were ever live in this block.
-   * (This includes ones that were live going out of this block.)  This set is
-   * used by global DCE to remove locals and class-ref slots that are completely
-   * unused in the entire function.
+   * The set of locals and that were ever live in this block.  (This
+   * includes ones that were live going out of this block.)  This set
+   * is used by global DCE to remove locals that are completely unused
+   * in the entire function.
    */
   std::bitset<kMaxTrackedLocals> usedLocals;
-  std::bitset<kMaxTrackedClsRefSlots> usedSlots;
-
-  /*
-   * Mapping of class-ref slots to their usage. If the currently live usage
-   * of the slot is removed, the corresponding actions must be taken.
-   */
-  std::vector<UseInfo> slotUsage;
 
   /*
    * Can be set by a minstr-final instruction to indicate the actions
@@ -480,20 +466,6 @@ std::string DEBUG_ONLY loc_bits_string(const php::Func* func,
     }
   } else {
     out << locs;
-  }
-  return out.str();
-}
-
-std::string DEBUG_ONLY
-slot_bits_string(const php::Func* func,
-                 std::bitset<kMaxTrackedClsRefSlots> slots) {
-  std::ostringstream out;
-  if (func->numClsRefSlots < kMaxTrackedClsRefSlots) {
-    for (auto i = 0; i < func->numClsRefSlots; ++i) {
-      out << (slots.test(i) ? '1' : '0');
-    }
-  } else {
-    out << slots;
   }
   return out.str();
 }
@@ -662,54 +634,6 @@ void readDtorLocs(Env& env) {
       addLocGen(env, i);
     }
   }
-}
-
-//////////////////////////////////////////////////////////////////////
-// class-ref slots
-
-void readSlot(Env& env, uint32_t id) {
-  FTRACE(2, "     read-slot: {}\n", id);
-  if (id >= kMaxTrackedClsRefSlots) return;
-  env.dceState.liveSlots[id] = 1;
-  env.dceState.slotUsage[id] = UseInfo { Use::Used };
-}
-
-// Read a slot, but in a usage that is discardable. If this read actually is
-// discarded, then also discard the given instructions.
-void readSlotDiscardable(Env& env, uint32_t id, DceActionMap actions) {
-  FTRACE(2, "     read-slot (discardable): {}\n", id);
-  if (id >= kMaxTrackedClsRefSlots) return;
-  env.dceState.liveSlots[id] = 0;
-  actions.emplace(env.id, DceAction::Kill);
-  env.dceState.slotUsage[id] = { Use::Not, std::move(actions) };
-}
-
-void writeSlot(Env& env, uint32_t id) {
-  FTRACE(2, "     write-slot: {}\n", id);
-  if (id >= kMaxTrackedClsRefSlots) return;
-  env.dceState.liveSlots[id] = 0;
-  env.dceState.usedSlots[id] = 1;
-  auto const& ui = env.dceState.slotUsage[id];
-  validate(ui.usage);
-  if (ui.usage != Use::Used &&
-      ui.actions.size() &&
-      ui.location.blk != NoBlockId) {
-    FTRACE(2, "       force-live: {}\n", id);
-    env.dceState.forcedLiveLocations.insert(ui.location);
-  }
-  env.dceState.slotUsage[id] = UseInfo { Use::Not };
-}
-
-bool isSlotLive(Env& env, uint32_t id) {
-  if (id >= kMaxTrackedClsRefSlots) return true;
-  return env.dceState.liveSlots[id];
-}
-
-UseInfo slotUsage(Env& env, uint32_t id) {
-  auto ret = std::move(env.dceState.slotUsage[id]);
-  // Leaving this set can pessimize block merging
-  env.dceState.slotUsage[id].location.blk = NoBlockId;
-  return ret;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1092,26 +1016,6 @@ void dce(Env& env, const bc::FuncCred&)      { pushRemovable(env); }
 void dce(Env& env, const bc::NewArray&)      { pushRemovable(env); }
 void dce(Env& env, const bc::NewCol&)        { pushRemovable(env); }
 void dce(Env& env, const bc::CheckProp&)     { pushRemovable(env); }
-
-bool clsRefGetHelper(Env& env, const Type& ty, ClsRefSlotId slot) {
-  if (!ty.subtypeOf(BObj)) {
-    if (!ty.strictSubtypeOf(TStr)) return false;
-    auto const name = getNameFromType(ty);
-    if (!name) return false;
-    auto const res = env.dceState.index.resolve_class(env.dceState.ainfo.ctx,
-                                                      name);
-    if (!res || !res->resolved()) return false;
-  }
-  return !isSlotLive(env, slot);
-}
-
-void discardableWriteSlot(Env& env, ClsRefSlotId slot, bool safe) {
-  if (safe && !isSlotLive(env, slot)) {
-    commitActions(env, false, slotUsage(env, slot).actions);
-    return;
-  }
-  writeSlot(env, slot);
-}
 
 void dce(Env& env, const bc::Dup&) {
   // Various cases:
@@ -1611,27 +1515,11 @@ void dce(Env& env, const bc::ClassGetC&)        { pushRemovableIfNoThrow(env); }
  * added to the live local set, and don't remove anything from it.
  */
 
-template<typename Op>
-auto dce_slot_default(Env& env, const Op& op, bool) ->
-  decltype(typename Op::has_car_flag{}, void()) {
-  readSlot(env, op.slot);
-}
-
-template<typename Op>
-auto dce_slot_default(Env& env, const Op& op, bool) ->
-  decltype(typename Op::has_caw_flag{}, void()) {
-  writeSlot(env, op.slot);
-}
-
-template <typename Op>
-void dce_slot_default(Env&, const Op&, int) {}
-
 template<class Op>
 void no_dce(Env& env, const Op& op) {
   addLocGenSet(env, env.flags.mayReadLocalSet);
   push_outputs(env, op.numPush());
   pop_inputs(env, op.numPop());
-  dce_slot_default(env, op, true);
 }
 
 void dce(Env& env, const bc::AliasCls& op) { no_dce(env, op); }
@@ -1821,7 +1709,6 @@ template<class Op>
 void minstr_final(Env& env, const Op& op, int32_t ndiscard) {
   addLocGenSet(env, env.flags.mayReadLocalSet);
   push_outputs(env, op.numPush());
-  dce_slot_default(env, op, true);
   auto const numPop = op.numPop();
   auto const stackRead = op.mkey.mcode == MEC || op.mkey.mcode == MPC ?
     op.mkey.idx : numPop;
@@ -1942,8 +1829,6 @@ struct DceOutState {
   explicit DceOutState(Local) : isLocal(true) {
     locLive.set();
     locLiveExn.set();
-    slotLive.set();
-    slotLiveExn.set();
   }
 
   /*
@@ -1951,25 +1836,17 @@ struct DceOutState {
    * locals and stack slots respectively.
    */
   std::bitset<kMaxTrackedLocals>             locLive;
-  std::bitset<kMaxTrackedClsRefSlots>        slotLive;
 
   /*
    * The union of the liveIn states of each exceptional successor for
    * locals and stack slots respectively.
    */
   std::bitset<kMaxTrackedLocals>             locLiveExn;
-  std::bitset<kMaxTrackedClsRefSlots>        slotLiveExn;
 
   /*
    * The union of the dceStacks from the start of the normal successors.
    */
   folly::Optional<std::vector<UseInfo>>      dceStack;
-
-  /*
-   * The union of the slotUsage from the start of the normal
-   * successors.
-   */
-  folly::Optional<std::vector<UseInfo>>       slotUsage;
 
   /*
    * Whether this is for local_dce
@@ -2003,8 +1880,6 @@ dce_visit(const Index& index,
   auto dceState = DceState{ index, fa };
   dceState.liveLocals = dceOutState.locLive;
   dceState.usedLocals = dceOutState.locLive;
-  dceState.liveSlots  = dceOutState.slotLive;
-  dceState.usedSlots  = dceOutState.slotLive;
   dceState.isLocal    = dceOutState.isLocal;
 
   if (dceOutState.dceStack) {
@@ -2013,15 +1888,6 @@ dce_visit(const Index& index,
   } else {
     dceState.stack.resize(states.back().first.stack.size(),
                           UseInfo { Use::Used });
-  }
-
-  if (dceOutState.slotUsage) {
-    dceState.slotUsage = *dceOutState.slotUsage;
-    assert(dceState.slotUsage.size() ==
-           states.back().first.clsRefSlots.size());
-  } else {
-    dceState.slotUsage.resize(
-      states.back().first.clsRefSlots.size(), UseInfo { Use::Used });
   }
 
   auto const blk = fa.ctx.func->blocks[bid].get();
@@ -2083,12 +1949,9 @@ dce_visit(const Index& index,
       if (states[idx].second.wasPEI) {
         FTRACE(2, "    <-- exceptions\n");
         dceState.liveLocals |= dceOutState.locLiveExn;
-        dceState.liveSlots  |= dceOutState.slotLiveExn;
       }
 
       dceState.usedLocals |= dceState.liveLocals;
-      dceState.usedSlots  |= dceState.liveSlots;
-
     }
 
     FTRACE(4, "    dce stack: {}\n",
@@ -2110,20 +1973,6 @@ dce_visit(const Index& index,
     if (dceState.minstrUI) {
       FTRACE(4, "    minstr ui: {}\n", show(*dceState.minstrUI));
     }
-    FTRACE(4, "    cls-ref slots: {}\n{}\n",
-      slot_bits_string(dceState.ainfo.ctx.func, dceState.liveSlots),
-      [&]{
-        using namespace folly::gen;
-        auto i = uint32_t{0};
-        return from(dceState.slotUsage)
-          | mapped(
-            [&] (const UseInfo& ui) {
-              return folly::sformat("  {}: [{}]\n",
-                                    i++, show(ui));
-            })
-          | unsplit<std::string>("");
-      }()
-    );
 
     // We're now at the state before this instruction, so the stack
     // sizes must line up.
@@ -2136,9 +1985,7 @@ dce_visit(const Index& index,
 
 struct DceAnalysis {
   std::bitset<kMaxTrackedLocals>      locLiveIn;
-  std::bitset<kMaxTrackedClsRefSlots> slotLiveIn;
   std::vector<UseInfo>                stack;
-  std::vector<UseInfo>                slotUsage;
   LocationIdSet                       forcedLiveLocations;
 };
 
@@ -2152,9 +1999,7 @@ DceAnalysis analyze_dce(const Index& index,
                                 bid, stateIn, dceOutState)) {
     return DceAnalysis {
       dceState->liveLocals,
-      dceState->liveSlots,
       dceState->stack,
-      dceState->slotUsage,
       dceState->forcedLiveLocations
     };
   }
@@ -2252,7 +2097,6 @@ void dce_perform(php::Func& func,
 
 struct DceOptResult {
   std::bitset<kMaxTrackedLocals> usedLocals;
-  std::bitset<kMaxTrackedClsRefSlots> usedSlots;
   DceActionMap actionMap;
   DceReplaceMap replaceMap;
   bool didAddElemOpts{false};
@@ -2268,13 +2112,11 @@ optimize_dce(const Index& index,
   auto dceState = dce_visit(index, fa, collect, bid, stateIn, dceOutState);
 
   if (!dceState) {
-    return {std::bitset<kMaxTrackedLocals>{},
-            std::bitset<kMaxTrackedClsRefSlots>{}};
+    return {std::bitset<kMaxTrackedLocals>{}};
   }
 
   return {
     std::move(dceState->usedLocals),
-    std::move(dceState->usedSlots),
     std::move(dceState->actionMap),
     std::move(dceState->replaceMap),
     dceState->didAddElemOpts
@@ -2311,90 +2153,6 @@ void remove_unused_locals(Context const ctx,
       const_cast<php::Local&>(*loc).killed = true;
     }
   }
-}
-
-//////////////////////////////////////////////////////////////////////
-
-namespace {
-
-struct WritableClsRefSlotVisitor {
-  WritableClsRefSlotVisitor() {}
-
-  template<typename T>
-  std::nullptr_t fun(T&, int) const { return nullptr; }
-
-  template<typename T>
-  auto fun(T& t, bool) const -> decltype(&t.slot) { return &t.slot; }
-
-  template<typename T>
-  ClsRefSlotId* operator()(T& t) const { return fun(t, true); }
-
-  template<typename T>
-  const ClsRefSlotId* operator()(const T& t) const { return fun(t, true); }
-};
-
-}
-
-// Remove totally unused class-ref slots. Shift any usages downward so we can
-// reduce the total number of class-ref slots needed.
-void remove_unused_clsref_slots(Context const ctx,
-                                std::bitset<kMaxTrackedClsRefSlots> usedSlots) {
-  if (!options.RemoveUnusedClsRefSlots) return;
-  auto func = ctx.func;
-
-  auto numSlots = func->numClsRefSlots;
-  if (numSlots > kMaxTrackedClsRefSlots) return;
-
-  auto unusedSlots = usedSlots;
-  unusedSlots.flip();
-
-  // Construct a mapping of class-ref slots that should be rewritten to a
-  // different one. For each totally unused class-ref slot, rewrite a higher
-  // (used) class-ref to it.
-  boost::container::flat_map<size_t, size_t> rewrites;
-  while (numSlots > 0) {
-    if (!unusedSlots[numSlots - 1]) {
-      auto const unused = bitset_find_first(unusedSlots);
-      if (unused >= numSlots) break;
-      unusedSlots[unused] = false;
-      unusedSlots[numSlots - 1] = true;
-      rewrites[numSlots - 1] = unused;
-    }
-    --numSlots;
-  }
-
-  FTRACE(2, "    cls-ref rewrites: {}\n",
-    [&]{
-      using namespace folly::gen;
-      return from(rewrites)
-        | mapped(
-          [&] (const std::pair<size_t, size_t>& p) {
-            return folly::sformat("{}->{}", p.first, p.second);
-          })
-        | unsplit<std::string>(";");
-    }()
-  );
-
-  // Do the actual rewriting
-  if (!rewrites.empty()) {
-    for (auto& block : func->blocks) {
-      for (size_t ix = 0; ix < block->hhbcs.size(); ++ix) {
-        auto const bcop = block->hhbcs[ix];
-        if (auto const cslot = visit(bcop, WritableClsRefSlotVisitor{})) {
-          auto const iter = rewrites.find(*cslot);
-          if (iter == rewrites.end()) continue;
-          auto const oldOp = bcop;
-          auto const slot = visit(block.mutate()->hhbcs[ix],
-                                  WritableClsRefSlotVisitor{});
-          *slot = iter->second;
-          FTRACE(4, "    rewriting {} to {}\n",
-                 show(func, oldOp), show(func, bcop));
-        }
-      }
-    }
-  }
-
-  func->numClsRefSlots = numSlots;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2614,17 +2372,10 @@ bool global_dce(const Index& index, const FuncAnalysis& ai) {
 
     FTRACE(2, "loc live out  : {}\n"
               "loc out exn   : {}\n"
-              "loc live in   : {}\n"
-              "slot live out : {}\n"
-              "slot out exn  : {}\n"
-              "slot live in  : {}\n",
+              "loc live in   : {}\n",
               loc_bits_string(ai.ctx.func, blockState.locLive),
               loc_bits_string(ai.ctx.func, blockState.locLiveExn),
-              loc_bits_string(ai.ctx.func, result.locLiveIn),
-              slot_bits_string(ai.ctx.func, blockState.slotLive),
-              slot_bits_string(ai.ctx.func, blockState.slotLiveExn),
-              slot_bits_string(ai.ctx.func, result.slotLiveIn));
-
+              loc_bits_string(ai.ctx.func, result.locLiveIn));
 
     processForcedLive(result.forcedLiveLocations);
 
@@ -2647,20 +2398,8 @@ bool global_dce(const Index& index, const FuncAnalysis& ai) {
       auto& pbs = blockStates[pid];
       auto const oldPredLocLive = pbs.locLive;
       pbs.locLive |= result.locLiveIn;
-      auto changed =
-        mergeUIVecs(pbs.slotUsage, result.slotUsage, bid, true);
-      auto const oldPredSlotLive = pbs.slotLive;
-      pbs.slotLive |= result.slotLiveIn;
-      // If any slotUsage entries were forced live, we also have to
-      // mark the slot live.
-      for (auto const& loc : forcedLiveLocations) {
-        if (loc.isSlot && loc.blk == bid) pbs.slotLive.set(loc.id);
-      }
+      auto changed = pbs.locLive != oldPredLocLive;
 
-      if (pbs.locLive != oldPredLocLive ||
-          pbs.slotLive != oldPredSlotLive) {
-        changed = true;
-      }
       changed |= [&] {
         auto const pred = ai.ctx.func->blocks[pid].get();
         if (isCFPushTaken(pred, bid)) {
@@ -2685,10 +2424,7 @@ bool global_dce(const Index& index, const FuncAnalysis& ai) {
       auto& pbs = blockStates[pid];
       auto const oldPredLocLiveExn = pbs.locLiveExn;
       pbs.locLiveExn |= result.locLiveIn;
-      auto const oldPredSlotLiveExn = pbs.slotLiveExn;
-      pbs.slotLiveExn |= result.slotLiveIn;
-      if (pbs.locLiveExn != oldPredLocLiveExn ||
-          pbs.slotLiveExn != oldPredSlotLiveExn) {
+      if (pbs.locLiveExn != oldPredLocLiveExn) {
         incompleteQ.push(rpoId(pid));
       }
     }
@@ -2705,7 +2441,6 @@ bool global_dce(const Index& index, const FuncAnalysis& ai) {
    */
   FTRACE(1, "|---- global DCE optimize ({})\n", show(ai.ctx));
   std::bitset<kMaxTrackedLocals> usedLocals;
-  std::bitset<kMaxTrackedClsRefSlots> usedSlots;
   DceActionMap actionMap;
   DceReplaceMap replaceMap;
   bool didAddElemOpts = false;
@@ -2721,7 +2456,6 @@ bool global_dce(const Index& index, const FuncAnalysis& ai) {
     );
     didAddElemOpts = didAddElemOpts || ret.didAddElemOpts;
     usedLocals |= ret.usedLocals;
-    usedSlots  |= ret.usedSlots;
     if (ret.actionMap.size()) {
       if (!actionMap.size()) {
         actionMap = std::move(ret.actionMap);
@@ -2745,8 +2479,6 @@ bool global_dce(const Index& index, const FuncAnalysis& ai) {
   FTRACE(1, "  used locals: {}\n", loc_bits_string(ai.ctx.func, usedLocals));
   remove_unused_locals(ai.ctx, usedLocals);
 
-  FTRACE(1, "  used slots: {}\n", slot_bits_string(ai.ctx.func, usedSlots));
-  remove_unused_clsref_slots(ai.ctx, usedSlots);
   return didAddElemOpts;
 }
 

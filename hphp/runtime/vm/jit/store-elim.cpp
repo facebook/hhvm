@@ -603,8 +603,6 @@ void visit(Local& env, IRInstruction& inst) {
       // things.
       addAllLoad(env);
       killSet(env, env.global.ainfo.all_frame);
-      killSet(env, env.global.ainfo.all_clsRefClsSlot);
-      killSet(env, env.global.ainfo.all_clsRefTSSlot);
       kill(env, l.kills);
     },
 
@@ -622,14 +620,14 @@ void visit(Local& env, IRInstruction& inst) {
       // this wouldn't be an issue but the TFramePtr is still stored in a
       // reserved register.
       mayStore(env, AFrameAny);
-      mayStore(env, AClsRefSlotAny);
     },
 
     [&] (InlineExitEffects l) {
-      // These locations are dead, but it's unsafe to sync stores passed
-      // InlineReturn as they reference the callee safe. Kill sets are
-      // conservative so we must also indicate mayStore. In practice this value
-      // will generally be AMIStateAny | AClsRefSlotAny so this is fine.
+      // These locations are dead, but it's unsafe to sync stores
+      // passed InlineReturn as they reference the callee safe. Kill
+      // sets are conservative so we must also indicate mayStore. In
+      // practice this value will generally be AMIStateAny so this is
+      // fine.
       mayStore(env, l.inlMeta);
 
       // The same applies to the frame, but we're more likely to end up with

@@ -764,10 +764,6 @@ void RegionDesc::Block::checkMetadata() const {
         case LTag::Stack:
         case LTag::MBase:
           break;
-        case LTag::CSlotCls:
-        case LTag::CSlotTS:
-          assertx("Class-ref slot type-prediction" && false);
-          break;
       }
     }
   };
@@ -784,10 +780,6 @@ void RegionDesc::Block::checkMetadata() const {
           break;
         case LTag::Stack:
         case LTag::MBase:
-          break;
-        case LTag::CSlotCls:
-        case LTag::CSlotTS:
-          assertx("Class-ref slot type-precondition" && false);
           break;
       }
     }

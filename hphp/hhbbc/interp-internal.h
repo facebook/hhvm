@@ -947,35 +947,6 @@ void killLocals(ISS& env) {
 }
 
 //////////////////////////////////////////////////////////////////////
-// class-ref slots
-
-// Read the specified class-ref slot without discarding the stored value.
-const Type& peekClsRefSlot(ISS& env, ClsRefSlotId slot) {
-  assert(slot != NoClsRefSlotId);
-  always_assert_flog(env.state.clsRefSlots[slot].subtypeOf(BCls),
-                     "class-ref slot contained non-TCls");
-  return env.state.clsRefSlots[slot];
-}
-
-// Read the specified class-ref slot and discard the stored value.
-Type takeClsRefSlot(ISS& env, ClsRefSlotId slot) {
-  assert(slot != NoClsRefSlotId);
-  auto ret = std::move(env.state.clsRefSlots[slot]);
-  FTRACE(2, "    read class-ref: {} -> {}\n", slot, show(ret));
-  always_assert_flog(ret.subtypeOf(BCls), "class-ref slot contained non-TCls");
-  env.state.clsRefSlots[slot] = TCls;
-  return ret;
-}
-
-void putClsRefSlot(ISS& env, ClsRefSlotId slot, Type ty) {
-  assert(slot != NoClsRefSlotId);
-  always_assert_flog(ty.subtypeOf(BCls),
-                     "attempted to set class-ref slot to non-TCls");
-  FTRACE(2, "    write class-ref: {} -> {}\n", slot, show(ty));
-  env.state.clsRefSlots[slot] = std::move(ty);
-}
-
-//////////////////////////////////////////////////////////////////////
 // iterators
 
 void setIter(ISS& env, IterId iter, Iter iterState) {

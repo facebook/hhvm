@@ -68,8 +68,6 @@ constexpr const LocalId StackThisId = -3;
 constexpr const LocalId MaxLocalId = StackThisId - 1;
 
 using IterId = uint32_t;
-using ClsRefSlotId = uint32_t;
-constexpr const ClsRefSlotId NoClsRefSlotId = -1;
 using BlockId = uint32_t;
 constexpr const BlockId NoBlockId = -1;
 using ExnNodeId = uint32_t;

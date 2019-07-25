@@ -3735,7 +3735,6 @@ bool fcallTryFold(
   Type context,
   bool maybeDynamic,
   uint32_t numExtraInputs,
-  ClsRefSlotId clsRefSlot,
   const ActRec* legacyAR = nullptr
 ) {
   auto const foldableFunc = func.exactFunc();
@@ -3780,9 +3779,6 @@ bool fcallTryFold(
 
     if (auto v = tv(ty)) {
       BytecodeVec repl;
-      if (clsRefSlot != NoClsRefSlotId) {
-        repl.push_back(bc::PopC { });
-      }
       for (uint32_t i = 0; i < numExtraInputs; ++i) repl.push_back(bc::PopC {});
       for (uint32_t i = 0; i < fca.numArgs; ++i) repl.push_back(bc::PopC {});
       repl.push_back(bc::PopU {});
@@ -3803,7 +3799,6 @@ bool fcallTryFold(
   if (legacyAR) {
     assertx(legacyAR->foldable);
     assertx(numExtraInputs == 0);
-    assertx(clsRefSlot == NoClsRefSlotId);
     fpiNotFoldable(env);
     fpiPop(env);
     discard(env, fca.numArgsInclUnpack());
@@ -3873,7 +3868,6 @@ void fcallKnownImpl(
   Type context,
   bool nullsafe,
   uint32_t numExtraInputs,
-  ClsRefSlotId clsRefSlot,
   FCallWithFCA fcallWithFCA,
   bool legacy = false
 ) {
@@ -3921,7 +3915,6 @@ void fcallKnownImpl(
     }
   }
 
-  if (clsRefSlot != NoClsRefSlotId) takeClsRefSlot(env, clsRefSlot);
   for (auto i = uint32_t{0}; i < numExtraInputs; ++i) popC(env);
   if (fca.hasUnpack()) popC(env);
   for (auto i = uint32_t{0}; i < fca.numArgs; ++i) popCV(env);
@@ -4137,7 +4130,7 @@ void fcallObjMethodImpl(ISS& env, const Op& op, SString methName, bool dynamic,
   auto const canFold = !mayUseNullsafe && !mayThrowNonObj;
   if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC) ||
       (canFold && fcallTryFold(env, op.fca, rfunc, ctxTy, dynamic,
-                               extraInput ? 1 : 0, NoClsRefSlotId))) {
+                               extraInput ? 1 : 0))) {
     return;
   }
 
@@ -4146,7 +4139,7 @@ void fcallObjMethodImpl(ISS& env, const Op& op, SString methName, bool dynamic,
   }
 
   fcallKnownImpl(env, op.fca, rfunc, ctxTy, mayUseNullsafe, extraInput ? 1 : 0,
-                 NoClsRefSlotId, updateBC);
+                 updateBC);
   refineLoc();
 }
 
@@ -4558,8 +4551,8 @@ void in(ISS& env, const bc::FCallCtor& op) {
 
   auto const canFold = obj.subtypeOf(BObj);
   if (fcallOptimizeChecks(env, op.fca, *rfunc, updateFCA) ||
-      (canFold && fcallTryFold(env, op.fca, *rfunc, obj, false /* dynamic */, 0,
-                               NoClsRefSlotId))) {
+      (canFold && fcallTryFold(env, op.fca, *rfunc,
+                               obj, false /* dynamic */, 0))) {
     return;
   }
 
@@ -4569,7 +4562,7 @@ void in(ISS& env, const bc::FCallCtor& op) {
   }
 
   fcallKnownImpl(env, op.fca, *rfunc, obj, false /* nullsafe */, 0,
-                 NoClsRefSlotId, updateFCA);
+                 updateFCA);
 }
 
 void in(ISS& env, const bc::LockObj& op) {
@@ -4596,7 +4589,7 @@ void in(ISS& env, const bc::FCall& op) {
 
     if (fcallOptimizeChecks(env, fca, *ar.func, updateFCA, &ar) ||
         fcallTryFold(env, fca, *ar.func, ar.context, false /* unused */, 0,
-                     NoClsRefSlotId, &ar)) {
+                     &ar)) {
       return;
     }
 
@@ -4613,7 +4606,7 @@ void in(ISS& env, const bc::FCall& op) {
           fca, staticEmptyString(), ar.func->name() });
       }
       fcallKnownImpl(env, fca, *ar.func, ar.context, false /* nullsafe */, 0,
-                     NoClsRefSlotId, updateFCA, true /* legacy */);
+                     updateFCA, true /* legacy */);
       return;
     case FPIKind::Builtin:
       assertx(fca.numRets == 1);
@@ -4631,7 +4624,7 @@ void in(ISS& env, const bc::FCall& op) {
       // If we didn't return a reduce above, we still can compute a
       // partially-known FCall effect with our res::Func.
       fcallKnownImpl(env, fca, *ar.func, ar.context, false /* nullsafe */, 0,
-                     NoClsRefSlotId, updateFCA, true /* legacy */);
+                     updateFCA, true /* legacy */);
       return;
     }
   }

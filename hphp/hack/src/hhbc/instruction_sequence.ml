@@ -39,8 +39,6 @@ let optional b instrs = if b then gather instrs else empty
 let optionally f v = match v with None -> empty | Some v -> f v
 let of_pair (i1, i2) = gather [i1; i2]
 
-let class_ref_rewrite_sentinel = -100
-
 let default_fcall_flags = {
   has_unpack = false;
   supports_async_eager_return = false;
@@ -421,14 +419,6 @@ let instr_seq_to_list t =
     | i :: is -> compact_src_locs (i :: acc) is in
   go [] [t] |> compact_src_locs []
 
-let get_num_cls_ref_slots instrseq =
-  InstrSeq.fold_left
-    instrseq
-    ~init:0
-    ~f:(fun num i ->
-        match i with
-        | _ -> num)
-
 let get_or_put_label name_label_map name =
   match SMap.get name name_label_map with
   | Some label -> label, name_label_map
@@ -482,54 +472,12 @@ let rewrite_user_labels instrseq =
       Instr_list (List.rev l), name_label_map in
   fst @@ aux instrseq SMap.empty
 
-(* TODO: This function lacks any awareness of control flow and will produce
- * garbage when control flow is present. However, instead of implementing
- * control flow, we should just kill class ref slots in favor of class pointers.
- *)
-let rewrite_class_refs_instr num stack = function
-| ILitConst (TypedValue tv) -> (num, stack, Emit_adata.rewrite_typed_value tv)
-(* Limited support for try/catch while class ref slot is active. Propagate the
- * number of active class ref slots from the end of the try block to the code
- * after try/catch.
- *)
-| ITry TryCatchMiddle -> (num, num :: stack, ITry TryCatchMiddle)
-| ITry TryCatchEnd ->
-  begin match stack with
-  | [] -> failwith "mismatched TryCatchEnd"
-  | top :: stack -> (top, stack, ITry TryCatchEnd)
-  end
-(* Fatal and Throw enter unwinder, so we don't know anything about the number of
- * active class ref slots after it.
- *)
-| (IOp (Fatal _) | IContFlow Throw) as i -> (-1, stack, i)
-| i -> (num, stack, i)
+let rewrite_tv instruction =
+  match instruction with
+  | ILitConst (TypedValue tv) -> Emit_adata.rewrite_typed_value tv
+  | _ -> instruction
 
-(* Cannot use InstrSeq.fold_left since we want to maintain the exact
- * placement of try blocks *)
-let rewrite_class_refs instrseq =
-  let rec aux instrseq num stack =
-    match instrseq with
-    | Instr_empty ->
-      Instr_empty, num, stack
-    | Instr_one i ->
-      let n, s, i = rewrite_class_refs_instr num stack i in
-      Instr_one i, n, s
-    | Instr_concat l ->
-      let l, num, stack = List.fold_left l
-        ~f:(fun (acc, n, s) is -> let l, n, s = aux is n s in l :: acc, n, s)
-        ~init:([], num, stack)
-      in
-      Instr_concat (List.rev l), num, stack
-    | Instr_list l ->
-      let l, num, stack = List.fold_left l
-        ~f:(fun (acc, n, s) i ->
-            let n, s, i = rewrite_class_refs_instr n s i in i :: acc, n, s)
-        ~init:([], num, stack)
-      in
-      Instr_list (List.rev l), num, stack
-  in
-  let is, _, _ = aux instrseq (-1) [] in
-  is
+let rewrite_tvs instrseq = InstrSeq.map instrseq rewrite_tv
 
 let rec can_initialize_static_var e =
   match snd e with

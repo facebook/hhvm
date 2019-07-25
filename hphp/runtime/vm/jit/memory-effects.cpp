@@ -293,8 +293,7 @@ InlineExitEffects inline_exit_effects(SSATmp* fp) {
     return AFrame {fp, AliasIdSet::IdRange(0, func->numLocals())};
   }();
   auto const stack = stack_below(fp, FPRelOffset{2});
-  AliasClass clsref = func->numClsRefSlots() ? AClsRefSlotAny : AEmpty;
-  return InlineExitEffects{ stack, frame, clsref | AMIStateAny };
+  return InlineExitEffects{ stack, frame, AMIStateAny };
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -502,17 +501,6 @@ GeneralEffects interp_one_effects(const IRInstruction& inst) {
     }
   }
 
-  for (auto i = uint32_t{0}; i < extra->nChangedClsRefSlots; ++i) {
-    auto const& slot = extra->changedClsRefSlots[i];
-    if (slot.write) {
-      stores = stores | AClsRefClsSlot { inst.src(1), slot.id } |
-               AClsRefTSSlot { inst.src(1), slot.id };
-    } else {
-      loads = loads | AClsRefClsSlot { inst.src(1), slot.id } |
-              AClsRefTSSlot { inst.src(1), slot.id };
-    }
-  }
-
   auto kills = AEmpty;
   if (isMemberBaseOp(extra->opcode)) {
     stores = stores | AMIStateAny;
@@ -668,7 +656,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return UnknownEffects {};
     }
     return ReturnEffects {
-      AStackAny | AFrameAny | AClsRefSlotAny | AMIStateAny
+      AStackAny | AFrameAny | AMIStateAny
     };
 
   case AsyncFuncRet:
@@ -736,14 +724,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     AliasClass frame = func->numLocals()
       ? AFrame{inst.dst(), AliasIdSet::IdRange(0, func->numLocals())}
       : AEmpty;
-    AliasClass clsrefs = func->numClsRefSlots() ? AClsRefSlotAny : AEmpty;
     /*
      * Notice that the stack positions and frame locals described here are
      * exactly the set of alias locations that are about to be overlapping
-     * inside the inlined frame. Likewise, ClsRefSlots from the caller and the
-     * callee are about to be jumbled.
+     * inside the inlined frame.
      */
-    return InlineEnterEffects{ stack, frame | clsrefs, inline_fp_frame(&inst) };
+    return InlineEnterEffects{ stack, frame, inline_fp_frame(&inst) };
   }
 
   /*
@@ -947,16 +933,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         ? AFrame { fp, AliasIdSet::IdRange(0, nlocals)}
         : AEmpty;
     }();
-    auto const clsrefs = [&] () -> AliasClass {
-      if (fpInst->is(DefFP)) return AClsRefSlotAny;
-      assertx(fpInst->is(DefInlineFP));
-      auto const nrefs = fpInst->extra<DefInlineFP>()->target->numClsRefSlots();
-      return nrefs ? AClsRefSlotAny : AEmpty;
-    }();
     return may_load_store_move(
-      frame | clsrefs,
+      frame,
       AHeapAny,
-      frame | clsrefs
+      frame
     );
   }
 
@@ -1078,45 +1058,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     // This can store to globals or locals, but we don't have globals supported
     // in AliasClass yet.
     return PureStore { AUnknown, inst.src(1), nullptr };
-
-  //////////////////////////////////////////////////////////////////////
-  // Instructions that manipulate class-ref slots
-
-  case LdClsRefCls:
-    return PureLoad {
-      AClsRefClsSlot { inst.src(0), inst.extra<LdClsRefCls>()->slot }
-    };
-
-  case LdClsRefTS:
-    return PureLoad {
-      AClsRefTSSlot { inst.src(0), inst.extra<LdClsRefTS>()->slot }
-    };
-
-  case StClsRefCls:
-    return PureStore {
-      AClsRefClsSlot { inst.src(0), inst.extra<StClsRefCls>()->slot },
-      inst.src(1),
-      nullptr
-    };
-
-  case StClsRefTS:
-    return PureStore {
-      AClsRefTSSlot { inst.src(0), inst.extra<StClsRefTS>()->slot },
-      inst.src(1),
-      nullptr
-    };
-
-  case KillClsRefCls:
-    return may_load_store_kill(
-      AEmpty, AEmpty,
-      AClsRefClsSlot { inst.src(0), inst.extra<KillClsRefCls>()->slot }
-    );
-
-  case KillClsRefTS:
-    return may_load_store_kill(
-      AEmpty, AEmpty,
-      AClsRefTSSlot { inst.src(0), inst.extra<KillClsRefTS>()->slot }
-    );
 
   //////////////////////////////////////////////////////////////////////
   // Pointer-based loads and stores
@@ -2290,8 +2231,6 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
 
   auto check = [&] (AliasClass a) {
     if (auto const fr = a.frame()) check_fp(fr->base);
-    if (auto const sl = a.clsRefClsSlot()) check_fp(sl->base);
-    if (auto const sl = a.clsRefTSSlot()) check_fp(sl->base);
     if (auto const pr = a.prop())  check_obj(pr->obj);
   };
 

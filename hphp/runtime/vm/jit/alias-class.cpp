@@ -71,8 +71,6 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
   case A::BMIBase:         break;
   case A::BMIPropS:        break;
   case A::BRef:            break;
-  case A::BClsRefClsSlot:  break;
-  case A::BClsRefTSSlot:   break;
   case A::BRds:            break;
   }
 
@@ -104,8 +102,6 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
     case A::BMIBase:         ret += "MiB"; break;
     case A::BMIPropS:        ret += "MiP"; break;
     case A::BRef:            ret += "Ref"; break;
-    case A::BClsRefClsSlot:  ret += "Cls"; break;
-    case A::BClsRefTSSlot:   ret += "TS"; break;
     case A::BRds:            ret += "Rds"; break;
     }
   }
@@ -205,14 +201,6 @@ size_t AliasClass::Hash::operator()(AliasClass acls) const {
     return folly::hash::hash_combine(hash,
                                      acls.m_frame.base.offset,
                                      acls.m_frame.ids.raw());
-  case STag::ClsRefClsSlot:
-    return folly::hash::hash_combine(hash,
-                                     acls.m_clsRefClsSlot.base.offset,
-                                     acls.m_clsRefClsSlot.ids.raw());
-  case STag::ClsRefTSSlot:
-   return folly::hash::hash_combine(hash,
-                                    acls.m_clsRefTSSlot.base.offset,
-                                    acls.m_clsRefTSSlot.ids.raw());
   case STag::Prop:
     return folly::hash::hash_combine(hash,
                                      acls.m_prop.obj,
@@ -262,8 +250,6 @@ X(ElemI, elemI)
 X(ElemS, elemS)
 X(Stack, stack)
 X(Ref, ref)
-X(ClsRefClsSlot, clsRefClsSlot)
-X(ClsRefTSSlot, clsRefTSSlot)
 X(Rds, rds)
 
 #undef X
@@ -280,8 +266,6 @@ X(ElemI, elemI)
 X(ElemS, elemS)
 X(Stack, stack)
 X(Ref, ref)
-X(ClsRefClsSlot, clsRefClsSlot)
-X(ClsRefTSSlot, clsRefTSSlot)
 X(Rds, rds)
 
 #undef X
@@ -326,8 +310,6 @@ AliasClass::rep AliasClass::stagBits(STag tag) {
   case STag::Stack:          return BStack;
   case STag::Ref:            return BRef;
   case STag::Rds:            return BRds;
-  case STag::ClsRefClsSlot:  return BClsRefClsSlot;
-  case STag::ClsRefTSSlot:   return BClsRefTSSlot;
   case STag::IterBoth:       return static_cast<rep>(BIterPos | BIterBase);
   }
   always_assert(0);
@@ -344,14 +326,6 @@ bool AliasClass::checkInvariants() const {
   case STag::Frame:
     assertx(m_frame.base.offset <= 0);
     assertx(!m_frame.ids.empty());
-    break;
-  case STag::ClsRefClsSlot:
-    assertx(m_clsRefClsSlot.base.offset <= 0);
-    assertx(!m_clsRefClsSlot.ids.empty());
-    break;
-  case STag::ClsRefTSSlot:
-    assertx(m_clsRefTSSlot.base.offset <= 0);
-    assertx(!m_clsRefTSSlot.ids.empty());
     break;
   case STag::Stack:
     assertx(m_stack.size > 0);          // use AEmpty if you want that
@@ -378,12 +352,6 @@ bool AliasClass::equivData(AliasClass o) const {
   case STag::None:     return true;
   case STag::Frame:    return m_frame.base == o.m_frame.base &&
                               m_frame.ids == o.m_frame.ids;
-  case STag::ClsRefClsSlot:
-    return m_clsRefClsSlot.base == o.m_clsRefClsSlot.base &&
-           m_clsRefClsSlot.ids == o.m_clsRefClsSlot.ids;
-  case STag::ClsRefTSSlot:
-    return m_clsRefTSSlot.base == o.m_clsRefTSSlot.base &&
-           m_clsRefTSSlot.ids == o.m_clsRefTSSlot.ids;
   case STag::IterPos:  return framelike_equal(m_iterPos, o.m_iterPos);
   case STag::IterBase: return framelike_equal(m_iterBase, o.m_iterBase);
   case STag::IterBoth: return framelike_equal(m_iterBoth, o.m_iterBoth);
@@ -434,40 +402,6 @@ AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
       // frames, so keep the specialization tag.
       ret.m_stag = STag::Frame;
       ret.m_frame = AFrame { frmA.base, newIds };
-      assertx(ret.checkInvariants());
-      assertx(a <= ret && b <= ret);
-      return ret;
-    }
-
-  case STag::ClsRefClsSlot:
-    {
-      auto ret = AliasClass{newBits};
-      auto const slotA = a.m_clsRefClsSlot;
-      auto const slotB = b.m_clsRefClsSlot;
-      if (slotA.base != slotB.base) return ret;
-
-      auto const newIds = slotA.ids | slotB.ids;
-      // Even when newIds.isAny(), we still know it won't alias class-ref slots
-      // in other frames, so keep the specialization tag.
-      ret.m_stag = STag::ClsRefClsSlot;
-      ret.m_clsRefClsSlot = AClsRefClsSlot { slotA.base, newIds };
-      assertx(ret.checkInvariants());
-      assertx(a <= ret && b <= ret);
-      return ret;
-    }
-
-  case STag::ClsRefTSSlot:
-    {
-      auto ret = AliasClass{newBits};
-      auto const slotA = a.m_clsRefTSSlot;
-      auto const slotB = b.m_clsRefTSSlot;
-      if (slotA.base != slotB.base) return ret;
-
-      auto const newIds = slotA.ids | slotB.ids;
-      // Even when newIds.isAny(), we still know it won't alias class-ref slots
-      // in other frames, so keep the specialization tag.
-      ret.m_stag = STag::ClsRefTSSlot;
-      ret.m_clsRefTSSlot = AClsRefTSSlot { slotA.base, newIds };
       assertx(ret.checkInvariants());
       assertx(a <= ret && b <= ret);
       return ret;
@@ -605,12 +539,6 @@ AliasClass AliasClass::operator|(AliasClass o) const {
   case STag::IterBoth: new (&ret.m_iterBoth) UIterBoth(chosen->m_iterBoth);
                        break;
   case STag::Frame:    new (&ret.m_frame) AFrame(chosen->m_frame); break;
-  case STag::ClsRefClsSlot:
-    new (&ret.m_clsRefClsSlot) AClsRefClsSlot(chosen->m_clsRefClsSlot);
-    break;
-  case STag::ClsRefTSSlot:
-    new (&ret.m_clsRefTSSlot) AClsRefTSSlot(chosen->m_clsRefTSSlot);
-    break;
   case STag::Prop:     new (&ret.m_prop) AProp(chosen->m_prop); break;
   case STag::ElemI:    new (&ret.m_elemI) AElemI(chosen->m_elemI); break;
   case STag::ElemS:    new (&ret.m_elemS) AElemS(chosen->m_elemS); break;
@@ -637,12 +565,6 @@ bool AliasClass::subclassData(AliasClass o) const {
     return equivData(o);
   case STag::Frame:
     return m_frame.base == o.m_frame.base && m_frame.ids <= o.m_frame.ids;
-  case STag::ClsRefClsSlot:
-    return m_clsRefClsSlot.base == o.m_clsRefClsSlot.base &&
-           m_clsRefClsSlot.ids <= o.m_clsRefClsSlot.ids;
-  case STag::ClsRefTSSlot:
-    return m_clsRefTSSlot.base == o.m_clsRefTSSlot.base &&
-           m_clsRefTSSlot.ids <= o.m_clsRefTSSlot.ids;
   case STag::Stack:
     return m_stack.offset <= o.m_stack.offset &&
            lowest_offset(m_stack) >= lowest_offset(o.m_stack);
@@ -660,8 +582,6 @@ folly::Optional<AliasClass::UIterBoth> AliasClass::asUIter() const {
   case STag::Ref:
   case STag::Rds:
   case STag::Stack:
-  case STag::ClsRefClsSlot:
-  case STag::ClsRefTSSlot:
     return folly::none;
   case STag::IterPos:   return UIterBoth { m_iterPos.base, m_iterPos.id };
   case STag::IterBase:  return UIterBoth { m_iterBase.base, m_iterBase.id };
@@ -763,12 +683,6 @@ bool AliasClass::maybeData(AliasClass o) const {
   case STag::IterBoth: return framelike_equal(m_iterBoth, o.m_iterBoth);
   case STag::Frame:
     return m_frame.base == o.m_frame.base && m_frame.ids.maybe(o.m_frame.ids);
-  case STag::ClsRefClsSlot:
-    return m_clsRefClsSlot.base == o.m_clsRefClsSlot.base &&
-           m_clsRefClsSlot.ids.maybe(o.m_clsRefClsSlot.ids);
-  case STag::ClsRefTSSlot:
-    return m_clsRefTSSlot.base == o.m_clsRefTSSlot.base &&
-            m_clsRefTSSlot.ids.maybe(o.m_clsRefTSSlot.ids);
   case STag::Prop:
     /*
      * We can't tell if two objects could be the same from here in general, but
@@ -856,15 +770,9 @@ bool AliasClass::isSingleLocation() const {
   // location.
   if (m_stag == STag::None) return *this <= AMIStateAny;
 
-  // AFrame, AClsRefSlot, and AStack can contain multiple locations.
+  // AFrame and AStack can contain multiple locations.
   if (auto const frame = is_frame()) {
     return frame->ids.hasSingleValue();
-  }
-  if (auto const slot = is_clsRefClsSlot()) {
-    return slot->ids.hasSingleValue();
-  }
-  if (auto const slot = is_clsRefTSSlot()) {
-    return slot->ids.hasSingleValue();
   }
   if (auto const stk = is_stack()) {
     return stk->size == 1;
@@ -904,8 +812,6 @@ AliasClass canonicalize(AliasClass a) {
   case T::Stack:          return a;
   case T::Ref:            return a;
   case T::Rds:            return a;
-  case T::ClsRefClsSlot:  return a;
-  case T::ClsRefTSSlot:   return a;
   case T::Prop:     a.m_prop.obj = canonical(a.m_prop.obj);   return a;
   case T::ElemI:    a.m_elemI.arr = canonical(a.m_elemI.arr); return a;
   case T::ElemS:    a.m_elemS.arr = canonical(a.m_elemS.arr); return a;
@@ -929,14 +835,6 @@ std::string show(AliasClass acls) {
   case A::STag::Frame:
     folly::format(&ret, "Fr {}:{}", acls.m_frame.base.offset,
                   show(acls.m_frame.ids));
-    break;
-  case A::STag::ClsRefClsSlot:
-    folly::format(&ret, "ClsC {}:{}", acls.m_clsRefClsSlot.base.offset,
-                  show(acls.m_clsRefClsSlot.ids));
-    break;
-  case A::STag::ClsRefTSSlot:
-    folly::format(&ret, "ClsTS {}:{}", acls.m_clsRefTSSlot.base.offset,
-                  show(acls.m_clsRefTSSlot.ids));
     break;
   case A::STag::IterPos:
     folly::format(&ret, "ItP {}:{}", acls.m_iterPos.base.offset,

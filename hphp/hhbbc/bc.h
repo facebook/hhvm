@@ -375,8 +375,6 @@ namespace imm {
 #define IMM_ID_I64A     I64A
 #define IMM_ID_LA       LA
 #define IMM_ID_IA       IA
-#define IMM_ID_CAR      CAR
-#define IMM_ID_CAW      CAW
 #define IMM_ID_DA       DA
 #define IMM_ID_SA       SA
 #define IMM_ID_RATA     RATA
@@ -396,8 +394,6 @@ namespace imm {
 #define IMM_TY_I64A     int64_t
 #define IMM_TY_LA       LocalId
 #define IMM_TY_IA       IterId
-#define IMM_TY_CAR      ClsRefSlotId
-#define IMM_TY_CAW      ClsRefSlotId
 #define IMM_TY_DA       double
 #define IMM_TY_SA       LSString
 #define IMM_TY_RATA     RepoAuthType
@@ -417,8 +413,6 @@ namespace imm {
 #define IMM_NAME_I64A(n)    arg##n
 #define IMM_NAME_LA(n)      loc##n
 #define IMM_NAME_IA(n)      iter##n
-#define IMM_NAME_CAR(n)     slot
-#define IMM_NAME_CAW(n)     slot
 #define IMM_NAME_DA(n)      dbl##n
 #define IMM_NAME_SA(n)      str##n
 #define IMM_NAME_RATA(n)    rat
@@ -439,8 +433,6 @@ namespace imm {
 #define IMM_TARGETS_I64A(n)
 #define IMM_TARGETS_LA(n)
 #define IMM_TARGETS_IA(n)
-#define IMM_TARGETS_CAR(n)
-#define IMM_TARGETS_CAW(n)
 #define IMM_TARGETS_DA(n)
 #define IMM_TARGETS_SA(n)
 #define IMM_TARGETS_RATA(n)
@@ -463,8 +455,6 @@ namespace imm {
 #define IMM_EXTRA_I64A
 #define IMM_EXTRA_LA
 #define IMM_EXTRA_IA
-#define IMM_EXTRA_CAR       using has_car_flag = std::true_type;
-#define IMM_EXTRA_CAW       using has_caw_flag = std::true_type;
 #define IMM_EXTRA_DA
 #define IMM_EXTRA_SA
 #define IMM_EXTRA_RATA
@@ -786,8 +776,6 @@ OPCODES
 #undef IMM_TY_I64A
 #undef IMM_TY_LA
 #undef IMM_TY_IA
-#undef IMM_TY_CAR
-#undef IMM_TY_CAW
 #undef IMM_TY_DA
 #undef IMM_TY_SA
 #undef IMM_TY_RATA
@@ -809,8 +797,6 @@ OPCODES
 // #undef IMM_NAME_I64A
 // #undef IMM_NAME_LA
 // #undef IMM_NAME_IA
-// #undef IMM_NAME_CAR
-// #undef IMM_NAME_CAW
 // #undef IMM_NAME_DA
 // #undef IMM_NAME_SA
 // #undef IMM_NAME_RATA
@@ -829,8 +815,6 @@ OPCODES
 #undef IMM_TARGETS_I64A
 #undef IMM_TARGETS_LA
 #undef IMM_TARGETS_IA
-#undef IMM_TARGETS_CAR
-#undef IMM_TARGETS_CAW
 #undef IMM_TARGETS_DA
 #undef IMM_TARGETS_SA
 #undef IMM_TARGETS_RATA
@@ -856,8 +840,6 @@ OPCODES
 #undef IMM_EXTRA_I64A
 #undef IMM_EXTRA_LA
 #undef IMM_EXTRA_IA
-#undef IMM_EXTRA_CAR
-#undef IMM_EXTRA_CAW
 #undef IMM_EXTRA_DA
 #undef IMM_EXTRA_SA
 #undef IMM_EXTRA_RATA
@@ -1111,36 +1093,6 @@ auto visit(const Bytecode& b, Visit v) {
 #undef O
   not_reached();
 }
-
-//////////////////////////////////////////////////////////////////////
-
-struct ReadClsRefSlotVisitor {
-  ReadClsRefSlotVisitor() {}
-
-  template<typename T>
-  auto fun(T&, int) const { return NoClsRefSlotId; }
-
-  template<typename T>
-  auto fun(T& t, bool) const -> decltype(typename T::has_car_flag{},t.slot) {
-    return t.slot;
-  }
-
-  template<typename T>
-  ClsRefSlotId operator()(T& t) const { return fun(t, true); }
-};
-
-struct WriteClsRefSlotVisitor {
-  template<typename T>
-  auto fun(T&, int) const { return NoClsRefSlotId; }
-
-  template<typename T>
-  auto fun(T& t, bool) const -> decltype(typename T::has_caw_flag{},t.slot) {
-    return t.slot;
-  }
-
-  template<typename T>
-  ClsRefSlotId operator()(T& t) const { return fun(t, true); }
-};
 
 //////////////////////////////////////////////////////////////////////
 

@@ -336,13 +336,6 @@ void beginInlining(IRGS& env,
   }
   emitPrologueLocals(env, fca.numArgs, target, ctx);
 
-  // "Kill" all the class-ref slots initially. This normally won't do anything
-  // (the class-ref slots should be unoccupied at this point), but in debugging
-  // builds it will write poison values to them.
-  for (uint32_t slot = 0; slot < target->numClsRefSlots(); ++slot) {
-    killClsRef(env, slot);
-  }
-
   updateMarker(env);
   env.irb->exceptionStackBoundary();
   emitCalleeDynamicCallCheck(env);

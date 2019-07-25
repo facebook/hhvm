@@ -394,7 +394,6 @@ struct StateBase {
   Type thisType;
   CompactVector<Type> locals;
   CompactVector<Iter> iters;
-  CompactVector<Type> clsRefSlots;
   CompactVector<ActRec> fpiStack;
 
   /*

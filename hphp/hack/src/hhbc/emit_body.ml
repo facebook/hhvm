@@ -143,19 +143,17 @@ let make_body
     params return_type_info doc_comment
     env =
   let body_instrs = rewrite_user_labels body_instrs in
-  let body_instrs = rewrite_class_refs body_instrs in
+  let body_instrs = rewrite_tvs body_instrs in
   let params, body_instrs =
     if Hhbc_options.relabel !Hhbc_options.compiler_options
     then Label_rewriter.relabel_function params body_instrs
     else params, body_instrs in
   let num_iters =
     if is_memoize_wrapper then 0 else !Iterator.num_iterators in
-  let num_cls_ref_slots = get_num_cls_ref_slots body_instrs in
   Hhas_body.make
     body_instrs
     decl_vars
     num_iters
-    num_cls_ref_slots
     is_memoize_wrapper
     is_memoize_wrapper_lsb
     params

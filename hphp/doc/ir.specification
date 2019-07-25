@@ -1100,16 +1100,6 @@ To string conversions:
   instruction is used for loading locals in pseudo-mains, where they can alias
   globals.
 
-| LdClsRefCls<T,slot>, DParamMayRelax(Cls), S(FramePtr), NF
-
-  Loads class-ref's cls from slot `slot` in frame S0 and puts the value in D
-  as type T. T must be a sub-type of TCls.
-
-| LdClsRefTS<slot>, DVArrOrNull, S(FramePtr), NF
-
-  Loads class-ref's reified generics from slot `slot` in frame S0 and puts the
-  value in D.
-
 | LdStkAddr<T,offset>, D(PtrToStkGen), S(StkPtr), NF
 
   Loads the address of the stack slot given by the pointer in S0 at the offset
@@ -1983,15 +1973,6 @@ To string conversions:
   Store S1 to the local variables corresponding to localIds, on the frame
   pointed to by S0.
 
-| StClsRefCls<slot>, ND, S(FramePtr) S(Cls), NF
-
-  Store S1 to class-ref's cls slot `slot` on the frame pointed to by S0.
-
-| StClsRefTS<slot>, ND, S(FramePtr) SVArrOrNull, NF
-
-  Store S1 to class-ref's reified generic slot `slot` on the frame pointed to
-  by S0.
-
 | StRef, ND, S(BoxedCell) S(Cell), NF
 
   Store the value in S1 into the RefData pointed to by S0. Stores the
@@ -2555,18 +2536,6 @@ To string conversions:
   nanoseconds as integer. This will call kernel's clock_gettime_ns() API. Note
   that this cannot be used for CLOCK_THREAD_CPUTIME_ID, as HHVM provides
   different semantics for that counter.
-
-| KillClsRefCls<slot>, ND, S(FramePtr), NF
-
-  Mark the class-ref's cls slot `slot` in frame S0 as no longer containing a
-  meaningful value. This is used to aid in memory analysis. In debugging
-  builds, it may overwrite the slot with a poison value.
-
-| KillClsRefTS<slot>, ND, S(FramePtr), NF
-
-  Mark the class-ref's reified generic slot `slot` in frame S0 as no longer
-  containing a meaningful value. This is used to aid in memory analysis.
-  In debugging builds, it may overwrite the slot with a poison value.
 
 15. Generators & Closures
 

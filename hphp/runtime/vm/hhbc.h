@@ -151,8 +151,6 @@ std::string show(const FCallArgsBase&, const uint8_t* byRefs,
   ARGTYPE(I64A,   int64_t)       /* 64-bit Integer */                          \
   ARGTYPE(LA,     int32_t)       /* Local variable ID: 8 or 32-bit int */      \
   ARGTYPE(IA,     int32_t)       /* Iterator ID: 8 or 32-bit int */            \
-  ARGTYPE(CAR,    int32_t)       /* Class-ref slot (read): 8 or 32-bit int */  \
-  ARGTYPE(CAW,    int32_t)       /* Class-ref slot (write): 8 or 32-bit int */ \
   ARGTYPE(DA,     double)        /* Double */                                  \
   ARGTYPE(SA,     Id)            /* Static string ID */                        \
   ARGTYPE(AA,     Id)            /* Static array ID */                         \
@@ -425,17 +423,6 @@ enum class SetRangeOp : uint8_t {
 enum class TypeStructResolveOp : uint8_t {
 #define OP(name) name,
   TYPE_STRUCT_RESOLVE_OPS
-#undef OP
-};
-
-#define HAS_GENERICS_OPS \
-  OP(NoGenerics)         \
-  OP(HasGenerics)        \
-  OP(MaybeGenerics)
-
-enum class HasGenericsOp : uint8_t {
-#define OP(name) name,
-  HAS_GENERICS_OPS
 #undef OP
 };
 
@@ -920,7 +907,6 @@ const char* subopToName(MOpMode);
 const char* subopToName(QueryMOp);
 const char* subopToName(SetRangeOp);
 const char* subopToName(TypeStructResolveOp);
-const char* subopToName(HasGenericsOp);
 const char* subopToName(ContCheckOp);
 const char* subopToName(CudOp);
 const char* subopToName(SpecialClsRef);

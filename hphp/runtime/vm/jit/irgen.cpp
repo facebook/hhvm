@@ -194,10 +194,6 @@ Type predictedType(const IRGS& env, const Location& loc) {
       return fs.local(loc.localId()).predictedType;
     case LTag::MBase:
       return fs.mbase().predictedType;
-    case LTag::CSlotCls:
-      return fs.clsRefClsSlot(loc.clsRefClsSlot()).predictedType;
-    case LTag::CSlotTS:
-      return fs.clsRefTSSlot(loc.clsRefTSSlot()).predictedType;
   }
   not_reached();
 }
@@ -212,10 +208,6 @@ Type provenType(const IRGS& env, const Location& loc) {
       return fs.local(loc.localId()).type;
     case LTag::MBase:
       return fs.mbase().type;
-    case LTag::CSlotCls:
-      return fs.clsRefClsSlot(loc.clsRefClsSlot()).type;
-    case LTag::CSlotTS:
-      return fs.clsRefTSSlot(loc.clsRefTSSlot()).type;
   }
   not_reached();
 }

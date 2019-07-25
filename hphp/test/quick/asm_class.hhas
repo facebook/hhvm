@@ -167,8 +167,6 @@
 }
 
 .function main {
-  .numclsrefslots 1;
-
   NewObjD "Base"
   Dup
   NullUninit

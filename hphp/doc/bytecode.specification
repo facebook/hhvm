@@ -99,7 +99,7 @@ Values
 
 HHBC instructions may push and pop values on the current frame's evaluation
 stack and they may read and write values to the current frame's local
-variables. Values come in three flavors: cells, refs, and classrefs.
+variables. Values come in two flavors: cells and refs.
 
 A "cell" is a structure that contains a type identifier and either data (for
 non-refcounted types) or a pointer to data (for refcounted types). When a cell
@@ -113,43 +113,33 @@ ref. When a ref is duplicated or destroyed, the execution engine is responsible
 for honoring the container's refcount logic. When the container is destroyed,
 the cell it contains is also destroyed.
 
-A "classref" is a structure that contains a reference to a class. Classrefs are
-never stored on the stack or in locals. They can only be manipulated via
-"classref slots". Certain HHBC operations will read or write classref slots as
-a side-effect. Classref slots have "move semantics" in that reading from one
-automatically invalidates its contents.
-
-Values on the evaluation stack and local variables may only be cells or refs.
-
-
 Functions
 ---------
 
 A unit's bytecode is organized into functions. Each function has its own
 metadata that provides essential information about the function, such as the
 name of the function, how many local variables it has, how many iterator
-variables it has, how many classref slots it has, how many formal parameters it
-has, the names of the local variables, the names of the formal parameters, how
-each parameter should be passed (pass by value vs. pass by reference), whether
-each parameter has a default value, and an upper bound for the maximum depth
-the evaluation stack can reach at run time.
+variables it has, how many formal parameters it has, the names of the local
+variables, the names of the formal parameters, how each parameter should be
+passed (pass by value vs. pass by reference), whether each parameter has a
+default value, and an upper bound for the maximum depth the evaluation stack
+can reach at run time.
 
-Each local variable, iterator variable, and classref slot has an id, and HHBC
-instructions can reference these variables using these ids. The id space for
-local variables, iterator variables, and classref slots are all distinct from
-each other. Thus local id 1 refers to a different variable than iterator id
-1. Local variable ids, iterator ids, and classref slots are signed 32-bit
-integer values. No function may have more than 2^31 - 1 each of local
-variables, iterator variables, and classref slots.
+Each local variable and iterator variable has an id, and HHBC instructions can
+reference these variables using these ids. The id space for local variables and
+iterator variables are all distinct from each other. Thus local id 1 refers to
+a different variable than iterator id 1. Local variable ids and iterator ids
+are signed 32-bit integer values. No function may have more than 2^31 - 1 each
+of local variables or iterator variables.
 
 Some local variables have names associated with them (called "named local
 variables"), while other local variables do not have names associated with them
 (called "unnamed local variables"). All local variables that reference formally
-declared parameters have names associated with them. Iterator variables and
-classref slots do not have names associated with them. Variables that have a
-name associated with them will appear in the current variable environment (if
-they are defined), while variables that do not have a name associated with them
-will never appear in the current variable environment.
+declared parameters have names associated with them. Iterator variables do not
+have names associated with them. Variables that have a name associated with
+them will appear in the current variable environment (if they are defined),
+while variables that do not have a name associated with them will never appear
+in the current variable environment.
 
 Formally declared parameters are considered to be local variables. Given a
 function with n formally declared parameters, local ids 0 through n-1 will be
@@ -631,9 +621,6 @@ Here is a description of each flavor descriptor:
   U - uninit; specifies that the value must be an uninitialized null at run
       time; this is only used for FCallBuiltin, CreateCl, and CUGetL.
 
-Classrefs are not assigned a flavor as they only can appear within classref
-slots and thus are implicit.
-
 Verifiability
 -------------
 
@@ -669,18 +656,17 @@ available at that given point in the bytecode. Likewise, the flavor descriptor
 of each slot on the evaluation stack must be compatible with the instruction's
 inputs' flavor descriptors.
 
-3) The evaluation stack must be empty and all classref slots must be
-uninitialized at any offset listed as a catch entry point.
+3) The evaluation stack must be empty at any offset listed as a catch entry
+point.
 
 4) If a given instruction is not the target of a forward branch and it follows
 a Jmp, Switch, SSwitch, RetC, Fatal, Throw, or NativeImpl instruction, the
-evaluation stack before executing the given instruction must be empty, and all
-classref slots must be uninitialized.
+evaluation stack before executing the given instruction must be empty.
 
 5) Before executing the RetC instruction, the evaluation stack must contain
 exactly one value and the flavor descriptor of the value must be cell.
 Finally, before executing the NativeImpl instruction, the evaluation stack must
-be empty. In all the above cases, all classref slots must be uninitialized.
+be empty.
 
 6) The code for the function body must be laid out in one contiguous block.
 
@@ -715,17 +701,11 @@ conditionally free the iterator variable.
 12) Each EH table must follow all of the rules specified in the "Exception
 handler (EH) table" section.
 
-13) The initialization state of each classref slot must be known at every point
-in the code and must be the same for all control paths. A classref slot must be
-initialized before being read and becomes uninitialized after being read. A
-classref slot must be uninitialized before being written to and becomes
-initialized after being written.
-
-14) Assertion (AssertRATL and AssertRATStk) instructions cannot be separated
+13) Assertion (AssertRATL and AssertRATStk) instructions cannot be separated
 from the following instruction by control flow. Practically speaking, this means
 that the instruction immediately following an assertion cannot be a jump target.
 
-15) Sequences of member instructions should be consistent and continuous. That
+14) Sequences of member instructions should be consistent and continuous. That
 is, only member instructions and asserts may appear in the sequence, control
 flow cannot interrupt the sequence, and the member op mode should be consistent
 across all instructions in the sequence. This is because in the case of
@@ -792,7 +772,7 @@ location descriptors is given below:
   G - global name; location is the global variable whose name is given by the
       value of a cell.
   S - static property; location is the static property whose class is given by
-      a classref and whose name is given by value of a cell.
+      value of a cell, and whose name is given by value of a cell.
   C - cell; location is a temporary value given by a cell.
   H - $this; location is the $this pointer in the current frame. Must only be
       used in a frame that is known to have a non-null $this pointer; CheckThis
@@ -1915,7 +1895,7 @@ FPushClsMethodSRD <num params> <mode> <litstr id>
       FPushClsMethodSRD | %2 | %3
 
   When loading %3 into x, FPushClsMethodD will perform the work performed by
-  the ClassGetC instruction to convert the name given by %3 into a classref.
+  the ClassGetC instruction to convert the name given by %3 into a class.
 
   When loading %2 into x, FPushClsMethodS and FPushClsMethodSD will perform the
   work performed by LateBoundCls/Self/Parent depending on the specified mode.

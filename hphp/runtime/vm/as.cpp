@@ -744,8 +744,7 @@ struct AsmState {
 
     fe->maxStackCells +=
       fe->numLocals() +
-      fe->numIterators() * kNumIterCells +
-      clsRefCountToCells(fe->numClsRefSlots());
+      fe->numIterators() * kNumIterCells;
 
     fe->finish(ue->bcPos(), false);
 
@@ -753,7 +752,6 @@ struct AsmState {
     fpiRegs.clear();
     labelMap.clear();
     numItersSet = false;
-    numClsRefSlotsSet = false;
     initStackDepth = StackDepth();
     initStackDepth.setBase(*this, 0);
     currentStackDepth = &initStackDepth;
@@ -784,14 +782,6 @@ struct AsmState {
       error("iterator id exceeded number of iterators in the function");
     }
     return id;
-  }
-
-  int getClsRefSlot(int32_t slot) {
-    if (slot >= fe->numClsRefSlots()) {
-      error("class-ref slot id exceeded number of class-ref "
-            "slots in the function");
-    }
-    return slot;
   }
 
   UnitEmitter* ue;
@@ -835,7 +825,6 @@ struct AsmState {
   std::vector<FPIReg> fpiRegs;
   std::map<std::string,Label> labelMap;
   bool numItersSet{false};
-  bool numClsRefSlotsSet{false};
   bool enumTySet{false};
   StackDepth initStackDepth;
   StackDepth* currentStackDepth{&initStackDepth};
@@ -1503,10 +1492,6 @@ std::map<std::string,ParserFunc> opcode_parsers;
                      read_opcode_arg<std::string>(as)))
 #define IMM_IA     as.ue->emitIVA(as.getIterId( \
                      read_opcode_arg<int32_t>(as)))
-#define IMM_CAR    as.ue->emitIVA(as.getClsRefSlot( \
-                     read_opcode_arg<int32_t>(as)))
-#define IMM_CAW    as.ue->emitIVA(as.getClsRefSlot( \
-                     read_opcode_arg<int32_t>(as)))
 #define IMM_OA(ty) as.ue->emitByte(read_subop<ty>(as));
 #define IMM_LAR    encodeLocalRange(*as.ue, read_local_range(as))
 #define IMM_FCA do {                                                \
@@ -1711,8 +1696,6 @@ OPCODES
 #undef IMM_DA
 #undef IMM_IVA
 #undef IMM_LA
-#undef IMM_CAR
-#undef IMM_CAW
 #undef IMM_BA
 #undef IMM_ILA
 #undef IMM_I32LA
@@ -1917,21 +1900,6 @@ void parse_numiters(AsmState& as) {
   int32_t count = read_opcode_arg<int32_t>(as);
   as.numItersSet = true;
   as.fe->setNumIterators(count);
-  as.in.expectWs(';');
-}
-
-/*
- * directive-numclsrefslots : integer ';'
- *                          ;
- */
-void parse_numclsrefslots(AsmState& as) {
-  if (as.numClsRefSlotsSet) {
-    as.error("only one .numclsrefslots directive may appear "
-             "in a given function");
-  }
-  int32_t count = read_opcode_arg<int32_t>(as);
-  as.numClsRefSlotsSet = true;
-  as.fe->setNumClsRefSlots(count);
   as.in.expectWs(';');
 }
 
@@ -2195,7 +2163,6 @@ void fixup_default_values(AsmState& as, FuncEmitter* fe) {
  *               ;
  *
  * fbody-line :  ".numiters" directive-numiters
- *            |  ".numclsrefslots" directive-numclsrefslots
  *            |  ".declvars" directive-declvars
  *            |  ".try_fault" directive-fault
  *            |  ".try_catch" directive-catch
@@ -2243,7 +2210,6 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
       }
       if (word == ".numiters")  { parse_numiters(as); continue; }
       if (word == ".declvars")  { parse_declvars(as); continue; }
-      if (word == ".numclsrefslots") { parse_numclsrefslots(as); continue; }
       if (word == ".try_catch") { parse_catch(as, nestLevel); continue; }
       if (word == ".try") { parse_try_catch(as, nestLevel); continue; }
       if (word == ".srcloc") { parse_srcloc(as, nestLevel); continue; }

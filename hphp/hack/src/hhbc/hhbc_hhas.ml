@@ -1328,11 +1328,6 @@ let add_indented_line buf indent str =
   add_indent buf indent;
   Acc.add buf str
 
-let add_num_cls_ref_slots buf indent num_cls_ref_slots =
-  if num_cls_ref_slots <> 0
-  then add_indented_line buf indent
-    (Printf.sprintf ".numclsrefslots %d;" num_cls_ref_slots)
-
 let is_bareword_char c =
   match Char.lowercase c with
   | '_' | '.' | '$' | '\\' -> true
@@ -1372,7 +1367,6 @@ let add_body buf indent body =
   if Hhas_body.is_memoize_wrapper_lsb body
   then add_indented_line buf indent ".ismemoizewrapperlsb;";
   add_num_iters buf indent (Hhas_body.num_iters body);
-  add_num_cls_ref_slots buf indent (Hhas_body.num_cls_ref_slots body);
   add_decl_vars buf indent (Hhas_body.decl_vars body);
   Acc.add buf "\n";
   add_instruction_list buf indent

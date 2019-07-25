@@ -58,8 +58,8 @@
 namespace HPHP {
 
 inline void scanFrameSlots(const ActRec* ar, type_scan::Scanner& scanner) {
-  // layout: [clsrefs][iters][locals][ActRec]
-  //                                 ^ar
+  // layout: [iters][locals][ActRec]
+  //                        ^ar
   auto num_locals = ar->func()->numLocals();
   auto locals = frame_local(ar, num_locals - 1);
   scanner.scan(*locals, num_locals * sizeof(TypedValue));

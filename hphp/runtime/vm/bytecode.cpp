@@ -194,7 +194,6 @@ inline const char* prettytype(SetRangeOp) { return "SetRangeOp"; }
 inline const char* prettytype(TypeStructResolveOp) {
   return "TypeStructResolveOp";
 }
-inline const char* prettytype(HasGenericsOp) { return "HasGenericsOp"; }
 inline const char* prettytype(CudOp) { return "CudOp"; }
 inline const char* prettytype(ContCheckOp) { return "ContCheckOp"; }
 inline const char* prettytype(SpecialClsRef) { return "SpecialClsRef"; }
@@ -233,26 +232,6 @@ struct local_var {
   TypedValue& operator*() const { return *ptr; }
 };
 
-// wrapper for class-ref slot CA(R|W) operand
-struct clsref_slot {
-  cls_ref* ptr;
-  uint32_t index;
-
-  std::pair<ArrayData*, Class*> take() const {
-    auto cls = ptr->cls;
-    auto ret = std::make_pair(ptr->reified_types, cls.get());
-    if (debug) {
-      cls->validate();
-      memset(ptr, kTrashClsRef, sizeof(*ptr));
-    }
-    return ret;
-  }
-
-  void put(ArrayData* reified_types, Class* cls) {
-    *ptr = cls_ref{reified_types, cls};
-  }
-};
-
 // wrapper to handle unaligned access to variadic immediates
 template<class T> struct imm_array {
   uint32_t const size;
@@ -281,12 +260,6 @@ ALWAYS_INLINE local_var decode_local(PC& pc) {
 ALWAYS_INLINE Iter* decode_iter(PC& pc) {
   auto ia = decode_iva(pc);
   return frame_iter(vmfp(), ia);
-}
-
-ALWAYS_INLINE clsref_slot decode_clsref_slot(PC& pc) {
-  uint32_t ca = decode_iva(pc);
-  assertx(ca < vmfp()->m_func->numClsRefSlots());
-  return clsref_slot{frame_clsref_slot(vmfp(), ca), ca};
 }
 
 template<typename T>
@@ -966,9 +939,6 @@ static void toStringFrame(std::ostream& os, const ActRec* fp,
     }
     os << "|";
   }
-
-  // Ideally we'd like to display the contents of the class-ref slots here, but
-  // we have no metadata to tell us which ones are currently occupied and valid.
 
   std::vector<std::string> stackElems;
   visitStackElems(
@@ -1702,7 +1672,6 @@ void pushFrameSlots(const Func* func, int nparams /*= 0*/) {
   for (int i = 0; i < func->numIterators(); i++) {
     vmStack().allocI();
   }
-  vmStack().allocClsRefSlots(func->numClsRefSlots());
 }
 
 void unwindPreventReturnToTC(ActRec* ar) {
@@ -6884,8 +6853,6 @@ struct litstr_id {
 #define DECODE_I64A decode<int64_t>(pc)
 #define DECODE_LA decode_local(pc)
 #define DECODE_IA decode_iter(pc)
-#define DECODE_CAR decode_clsref_slot(pc)
-#define DECODE_CAW DECODE_CAR
 #define DECODE_DA decode<double>(pc)
 #define DECODE_SA decode<litstr_id>(pc)
 #define DECODE_AA decode_litarr(pc)
@@ -6936,8 +6903,6 @@ OPCODES
 #undef DECODE_I64A
 #undef DECODE_LA
 #undef DECODE_IA
-#undef DECODE_CAR
-#undef DECODE_CAW
 #undef DECODE_DA
 #undef DECODE_SA
 #undef DECODE_AA

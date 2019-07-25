@@ -139,12 +139,6 @@ struct Options {
   bool RemoveUnusedLocals = true;
 
   /*
-   * Whether to remove completely unused class-ref slots.  This requires
-   * GlobalDCE.
-   */
-  bool RemoveUnusedClsRefSlots = true;
-
-  /*
    * If true, insert opcodes that assert inferred types, so we can assume them
    * at runtime.
    */

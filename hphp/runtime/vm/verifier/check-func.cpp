@@ -63,9 +63,6 @@ struct State {
   FlavorDesc* stk{};  // Evaluation stack.
   FpiState* fpi{};    // FPI stack.
   bool* iters{};      // defined/not-defined state of each iter var.
-  boost::dynamic_bitset<> clsRefSlots; // init state of class-ref slots
-  boost::dynamic_bitset<> writtenByClsRefGetTSSlots; // cls-ref slots written
-                                                     // by ClsRefGetTS
   int stklen{0};       // length of evaluation stack.
   int fpilen{0};       // length of FPI stack.
   bool mbr_live{false};    // liveness of member base register
@@ -132,7 +129,6 @@ struct FuncChecker {
   bool checkTerminal(State* cur, PC pc);
   bool checkLegacyFCall(State* cur, PC pc);
   bool checkIter(State* cur, PC pc);
-  bool checkClsRefSlots(State* cur, PC pc);
   bool checkIterBreak(State* cur, PC pc);
   bool checkLocal(PC pc, int val);
   bool checkString(PC pc, Id id);
@@ -157,7 +153,6 @@ struct FuncChecker {
   int numIters() const { return m_func->numIterators(); }
   int numLocals() const { return m_func->numLocals(); }
   int numParams() const { return m_func->params.size(); }
-  int numClsRefSlots() const { return m_func->numClsRefSlots(); }
   const UnitEmitter* unit() const { return &m_func->ue(); }
   IterKindIdTable iterBreakIds(PC& pc) const;
 
@@ -506,24 +501,6 @@ bool FuncChecker::checkImmIA(PC& pc, PC const instr) {
   auto const k = decode_iva(pc);
   if (k >= numIters()) {
     error("invalid iterator variable id %d at %d\n", k, offset(instr));
-    return false;
-  }
-  return true;
-}
-
-bool FuncChecker::checkImmCAR(PC& pc, PC const instr) {
-  auto const slot = decode_iva(pc);
-  if (slot >= numClsRefSlots()) {
-    error("invalid class-ref slot %d at %d\n", slot, offset(instr));
-    return false;
-  }
-  return true;
-}
-
-bool FuncChecker::checkImmCAW(PC& pc, PC const instr) {
-  auto const slot = decode_iva(pc);
-  if (slot >= numClsRefSlots()) {
-    error("invalid class-ref slot %d at %d\n", slot, offset(instr));
     return false;
   }
   return true;
@@ -1003,13 +980,6 @@ bool FuncChecker::checkTerminal(State* cur, PC pc) {
              cur->stklen);
       return false;
     }
-    if (cur->clsRefSlots.any() || cur->writtenByClsRefGetTSSlots.any()) {
-      ferror("all class-ref slots must be uninitialized after Ret*; "
-             "got [{}][{}]\n",
-             slotsToString(cur->clsRefSlots),
-             slotsToString(cur->writtenByClsRefGetTSSlots));
-      return false;
-    }
   }
   return true;
 }
@@ -1069,36 +1039,6 @@ bool FuncChecker::checkIter(State* cur, PC const pc) {
   return ok;
 }
 
-std::array<int32_t, 4> getReadClsRefSlots(PC pc) {
-  std::array<int32_t, 4> ret = { -1, -1, -1, -1 };
-  size_t index = 0;
-
-  auto const op = peek_op(pc);
-  auto const numImmeds = numImmediates(op);
-  for (int i = 0; i < numImmeds; ++i) {
-    if (immType(op, i) == ArgType::CAR) {
-      assertx(index < ret.size());
-      ret[index++] = getImm(pc, i).u_CAR;
-    }
-  }
-  return ret;
-}
-
-std::array<int32_t, 4> getWrittenClsRefSlots(PC pc) {
-  std::array<int32_t, 4> ret = { -1, -1, -1, -1 };
-  size_t index = 0;
-
-  auto const op = peek_op(pc);
-  auto const numImmeds = numImmediates(op);
-  for (int i = 0; i < numImmeds; ++i) {
-    if (immType(op, i) == ArgType::CAW) {
-      assertx(index < ret.size());
-      ret[index++] = getImm(pc, i).u_CAW;
-    }
-  }
-  return ret;
-}
-
 /* Returns a set of the immediates to op that are a local id */
 std::set<int> localImmediates(Op op) {
   std::set<int> imms;
@@ -1118,8 +1058,6 @@ std::set<int> localImmediates(Op op) {
 #define IVA(n)
 #define I64A(n)
 #define IA(n)
-#define CAR(n)
-#define CAW(n)
 #define DA(n)
 #define SA(n)
 #define AA(n)
@@ -1148,8 +1086,6 @@ std::set<int> localImmediates(Op op) {
 #undef IVA
 #undef I64A
 #undef IA
-#undef CAR
-#undef CAW
 #undef DA
 #undef SA
 #undef AA
@@ -1164,37 +1100,6 @@ std::set<int> localImmediates(Op op) {
 #undef O
   }
   return imms;
-}
-
-bool FuncChecker::checkClsRefSlots(State* cur, PC const pc) {
-  bool ok = true;
-
-  auto const op = peek_op(pc);
-
-  for (auto const read : getReadClsRefSlots(pc)) {
-    if (read < 0) continue;
-    if (!cur->clsRefSlots[read]) {
-      ferror("{} trying to read from uninitialized class-ref slot {} at {}\n",
-             opcodeToName(op), read, offset(pc));
-      ok = false;
-    }
-    cur->clsRefSlots[read] = false;
-    cur->writtenByClsRefGetTSSlots[read] = false;
-  }
-  for (auto const write : getWrittenClsRefSlots(pc)) {
-    if (write < 0) continue;
-    if (cur->clsRefSlots[write]) {
-      ferror(
-        "{} trying to write to already initialized class-ref slot {} at {}\n",
-        opcodeToName(op), write, offset(pc)
-      );
-      ok = false;
-    }
-    cur->clsRefSlots[write] = true;
-    cur->writtenByClsRefGetTSSlots[write] = op == Op::ClassGetTS;
-  }
-
-  return ok;
 }
 
 bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
@@ -1479,21 +1384,6 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       break;
     }
 
-    case Op::NewObj:
-    case Op::NewObjR: {
-      auto new_pc = pc;
-      decode_op(new_pc);
-      auto const slot = decode_iva(new_pc);
-      auto const has_generic_op = decode_oa<HasGenericsOp>(new_pc);
-      if (has_generic_op == HasGenericsOp::MaybeGenerics &&
-          !cur->writtenByClsRefGetTSSlots[slot]) {
-        ferror("NewObj uses MaybeGenerics flavor but a cls-ref slot that "
-               "was not written by ClsRefGetTS\n");
-        return false;
-      }
-      break;
-    }
-
     case Op::RetCSuspended:
       if (!m_func->isAsync || m_func->isGenerator) {
         ferror("{} can only appear within async functions\n",
@@ -1762,7 +1652,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::InitThisLoc:
       return true;
 
-    // classref and related
+    // classes and related
     case Op::Self:
     case Op::Parent:
     case Op::LateBoundCls:
@@ -2072,11 +1962,9 @@ FuncChecker::slotsToString(const boost::dynamic_bitset<>& slots) const {
 
 std::string FuncChecker::stateToString(const State& cur) const {
   return folly::sformat(
-    "{}{}[{}][{}]",
+    "{}{}",
     iterToString(cur),
-    stkToString(cur.stklen, cur.stk),
-    slotsToString(cur.clsRefSlots),
-    slotsToString(cur.writtenByClsRefGetTSSlots)
+    stkToString(cur.stklen, cur.stk)
   );
 }
 
@@ -2091,8 +1979,6 @@ void FuncChecker::initState(State* s) {
   s->fpi = new (m_arena) FpiState[maxFpi()];
   s->iters = new (m_arena) bool[numIters()];
   for (int i = 0, n = numIters(); i < n; ++i) s->iters[i] = false;
-  s->clsRefSlots.resize(numClsRefSlots());
-  s->writtenByClsRefGetTSSlots.resize(numClsRefSlots());
   s->stklen = 0;
   s->fpilen = 0;
   s->mbr_live = false;
@@ -2110,8 +1996,6 @@ void FuncChecker::copyState(State* to, const State* from) {
   memcpy(to->stk, from->stk, from->stklen * sizeof(*to->stk));
   memcpy(to->fpi, from->fpi, from->fpilen * sizeof(*to->fpi));
   memcpy(to->iters, from->iters, numIters() * sizeof(*to->iters));
-  to->clsRefSlots = from->clsRefSlots;
-  to->writtenByClsRefGetTSSlots = from->writtenByClsRefGetTSSlots;
   to->stklen = from->stklen;
   to->fpilen = from->fpilen;
   to->mbr_live = from->mbr_live;
@@ -2123,27 +2007,21 @@ void FuncChecker::copyState(State* to, const State* from) {
 }
 
 bool FuncChecker::checkExnEdge(State cur, Block* b) {
-  // Reachable catch blocks have just the exception on the stack and
-  // non-initialized class-ref slots. Checking an edge to the catch block
-  // right before every instruction is unnecessary since not every instruction
-  // can throw; there is room for improvement here if we want to note in the
+  // Reachable catch blocks have just the exception on the
+  // stack. Checking an edge to the catch block right before every
+  // instruction is unnecessary since not every instruction can throw;
+  // there is room for improvement here if we want to note in the
   // bytecode table which instructions can actually throw.
   auto save_stklen = cur.stklen;
   auto save_stktop = cur.stklen ? cur.stk[0] : CV;
   auto save_fpilen = cur.fpilen;
-  auto save_slots = cur.clsRefSlots;
-  auto save_slots_clsrefgetts = cur.writtenByClsRefGetTSSlots;
   cur.stklen = 1;
   cur.stk[0] = CV;
   cur.fpilen = 0;
-  cur.clsRefSlots.reset();
-  cur.writtenByClsRefGetTSSlots.reset();
   auto const ok = checkEdge(b, cur, b->exn);
   cur.stklen = save_stklen;
   cur.stk[0] = save_stktop;
   cur.fpilen = save_fpilen;
-  cur.clsRefSlots = std::move(save_slots);
-  cur.writtenByClsRefGetTSSlots = std::move(save_slots_clsrefgetts);
   return ok;
 }
 
@@ -2183,7 +2061,6 @@ bool FuncChecker::checkBlock(State& cur, Block* b) {
     if (isLegacyFCall(op)) ok &= checkLegacyFCall(&cur, pc);
     if (isIter(pc)) ok &= checkIter(&cur, pc);
     if (op == Op::IterBreak) ok &= checkIterBreak(&cur, pc);
-    ok &= checkClsRefSlots(&cur, pc);
     ok &= checkOutputs(&cur, pc, b);
     if (verify_rx) ok &= checkRxOp(&cur, pc, op);
   }
@@ -2395,21 +2272,6 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
         return false;
       }
     }
-  }
-
-  // Check class-ref slot state.
-  if (state.clsRefSlots != cur.clsRefSlots ||
-      state.writtenByClsRefGetTSSlots != cur.writtenByClsRefGetTSSlots) {
-    ferror(
-      "mismatched class-ref state on edge B{}->B{}, "
-      "current [{}][{}] target [{}][{}]\n",
-      b->id, t->id,
-      slotsToString(cur.clsRefSlots),
-      slotsToString(cur.writtenByClsRefGetTSSlots),
-      slotsToString(state.clsRefSlots),
-      slotsToString(state.writtenByClsRefGetTSSlots)
-    );
-    return false;
   }
 
   // t's state has changed, but we've already visited it, so we need to visit

@@ -944,57 +944,6 @@ SSATmp* boxHelper(IRGS& env, SSATmp* value, F rewrite) {
 }
 
 //////////////////////////////////////////////////////////////////////
-// Class-ref slots
-
-inline void killClsRefTS(IRGS& env, uint32_t slot) {
-  gen(env, KillClsRefTS, ClsRefSlotData{slot}, fp(env));
-}
-
-inline void killClsRef(IRGS& env, uint32_t slot) {
-  killClsRefTS(env, slot);
-  gen(env, KillClsRefCls, ClsRefSlotData{slot}, fp(env));
-}
-
-inline SSATmp* peekClsRefCls(IRGS& env, uint32_t slot) {
-  auto const knownType = env.irb->clsRefClsSlot(slot).type;
-  return gen(env, LdClsRefCls, knownType, ClsRefSlotData{slot}, fp(env));
-}
-
-inline SSATmp* peekClsRefTS(IRGS& env, uint32_t slot) {
-  return gen(env, LdClsRefTS, ClsRefSlotData{slot}, fp(env));
-}
-
-inline SSATmp* takeClsRefCls(IRGS& env, uint32_t slot) {
-  auto const cls = peekClsRefCls(env, slot);
-  killClsRef(env, slot);
-  return cls;
-}
-
-inline std::pair<SSATmp*, SSATmp*> takeClsRef(
-  IRGS& env,
-  uint32_t slot,
-  bool assertNonNullTS = true
-) {
-  auto ts = peekClsRefTS(env, slot);
-  if (assertNonNullTS) ts = gen(env, AssertNonNull, ts);
-  auto const cls = peekClsRefCls(env, slot);
-  killClsRef(env, slot);
-  return std::make_pair(ts, cls);
-}
-
-inline void putClsRef(IRGS& env, uint32_t slot,
-                      SSATmp* cls, SSATmp* reified = nullptr) {
-  gen(env, StClsRefCls, ClsRefSlotData{slot}, fp(env), cls);
-  gen(
-    env,
-    StClsRefTS,
-    ClsRefSlotData{slot},
-    fp(env),
-    reified ? reified : cns(env, TNullptr)
-  );
-}
-
-//////////////////////////////////////////////////////////////////////
 
 /*
  * Creates a catch block and calls body immediately as the catch block begins

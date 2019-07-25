@@ -177,7 +177,6 @@ void parse_options(int argc, char** argv) {
     ("local-dce",               po::value(&options.LocalDCE))
     ("global-dce",              po::value(&options.GlobalDCE))
     ("remove-unused-locals",    po::value(&options.RemoveUnusedLocals))
-    ("remove-unused-clsref-slots", po::value(&options.RemoveUnusedClsRefSlots))
     ("insert-assertions",       po::value(&options.InsertAssertions))
     ("insert-stack-assertions", po::value(&options.InsertStackAssertions))
     ("filter-assertions",       po::value(&options.FilterAssertions))
@@ -254,11 +253,6 @@ UNUSED void validate_options() {
 
   if (options.RemoveUnusedLocals && !options.GlobalDCE) {
     std::cerr << "-fremove-unused-locals requires -fglobal-dce\n";
-    std::exit(1);
-  }
-
-  if (options.RemoveUnusedClsRefSlots && !options.GlobalDCE) {
-    std::cerr << "-fremove-unused-clsref-slots requires -fglobal-dce\n";
     std::exit(1);
   }
 }

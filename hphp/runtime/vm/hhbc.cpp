@@ -106,7 +106,7 @@ int immSize(Op op, ArgType type, PC immPC) {
 #undef ARGTYPEVEC
   };
 
-  if (type == IVA || type == LA || type == IA || type == CAR || type == CAW) {
+  if (type == IVA || type == LA || type == IA) {
     return encoded_iva_size(decode_raw<uint8_t>(pc));
   }
 
@@ -197,8 +197,7 @@ ArgUnion getImm(const PC origPC, int idx, const Unit* unit) {
   }
   always_assert(cursor == idx);
   auto const type = immType(op, idx);
-  if (type == IVA || type == LA || type == IA ||
-      type == CAR || type == CAW) {
+  if (type == IVA || type == LA || type == IA) {
     retval.u_IVA = decode_iva(pc);
   } else if (type == KA) {
     assertx(unit != nullptr);
@@ -223,8 +222,6 @@ ArgUnion* getImmPtr(const PC origPC, int idx) {
   assertx(immType(op, idx) != IVA);
   assertx(immType(op, idx) != LA);
   assertx(immType(op, idx) != IA);
-  assertx(immType(op, idx) != CAR);
-  assertx(immType(op, idx) != CAW);
   assertx(immType(op, idx) != RATA);
   for (int i = 0; i < idx; i++) {
     pc += immSize(op, immType(op, i), pc);
@@ -265,8 +262,6 @@ OffsetList instrJumpOffsets(const PC origPC) {
 #define IMM_SLA 3
 #define IMM_LA 0
 #define IMM_IA 0
-#define IMM_CAR 0
-#define IMM_CAW 0
 #define IMM_OA(x) 0
 #define IMM_VSA 0
 #define IMM_KA 0
@@ -290,8 +285,6 @@ OffsetList instrJumpOffsets(const PC origPC) {
 #undef IMM_RATA
 #undef IMM_LA
 #undef IMM_IA
-#undef IMM_CAR
-#undef IMM_CAW
 #undef IMM_BA
 #undef IMM_BLA
 #undef IMM_ILA
@@ -814,8 +807,6 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
 #define H_I64A READ(int64_t)
 #define H_LA READLA()
 #define H_IA READV()
-#define H_CAR READV()
-#define H_CAW READV()
 #define H_DA READ(double)
 #define H_BA (out += ' ', out += showOffset(decode_ba(it)))
 #define H_OA(type) READOA(type)
@@ -871,8 +862,6 @@ OPCODES
 #undef H_I64A
 #undef H_LA
 #undef H_IA
-#undef H_CAR
-#undef H_CAW
 #undef H_DA
 #undef H_BA
 #undef H_OA
@@ -986,12 +975,6 @@ static const char* TypeStructResolveOp_names[] = {
 #undef OP
 };
 
-static const char* HasGenericsOp_names[] = {
-#define OP(x) #x,
-  HAS_GENERICS_OPS
-#undef OP
-};
-
 static const char* MOpMode_names[] = {
 #define MODE(x) #x,
   M_OP_MODES
@@ -1083,7 +1066,6 @@ X(QueryMOp,       static_cast<int>(QueryMOp::CGet))
 X(SetRangeOp,     static_cast<int>(SetRangeOp::Forward))
 X(TypeStructResolveOp,
                   static_cast<int>(TypeStructResolveOp::Resolve))
-X(HasGenericsOp,  static_cast<int>(HasGenericsOp::NoGenerics))
 X(MOpMode,        static_cast<int>(MOpMode::None))
 X(ContCheckOp,    static_cast<int>(ContCheckOp::IgnoreStarted))
 X(CudOp,          static_cast<int>(CudOp::IgnoreIter))

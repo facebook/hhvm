@@ -129,12 +129,12 @@ the main block that can either be transformed to stack relative uses or adjusted
 to use the parent frame pointer (generally with some additional fixup in any
 associated catch traces) are also accepted.
 
-All pure memory access and pointer logic can be transformed, in particular:
-LdLoc, StLoc, LdLocAddr, CheckLoc, HintLocInner, AssertLoc, LdClsRef, StClsRef,
-and KillClsRef.
+All pure memory access and pointer logic can be transformed, in
+particular: LdLoc, StLoc, LdLocAddr, CheckLoc, HintLocInner, and
+AssertLoc.
 
-Currently only EagerSyncVMRegs, CallBuiltin, Call, LdClsRef, StClsRef, and
-KillClsRef can be adjusted to use the parent frame.
+Currently only EagerSyncVMRegs, CallBuiltin, and Call can be adjusted
+to use the parent frame.
 
 A special list of instructions known to access the current frame without
 explicitly depending on it are also blacklisted.
@@ -608,11 +608,6 @@ bool canConvertToStack(IRInstruction& inst) {
   return inst.is(LdLoc, CheckLoc, AssertLoc, HintLocInner, LdLocAddr);
 }
 
-bool canRewriteToParent(const IRInstruction& inst) {
-  return inst.is(LdClsRefCls, LdClsRefTS, StClsRefCls, StClsRefTS,
-                 KillClsRefCls, KillClsRefTS);
-}
-
 /*
  * Instructions which require a FramePtr for chaining but will accept a parent
  * FramePtr. (NB: these instructions will likely require a DefInlineFP in their
@@ -936,11 +931,6 @@ void transformUses(InlineAnalysis& ia,
 
       // We may have change the types of some pointers
       reflow = true;
-    } else if (canRewriteToParent(*inst)) {
-      assertx(ctx.mainBlocks.count(block) != 0);
-      ITRACE(3, "Converting to use parent frame for instruction: {}\n", *inst);
-      rewriteToParentFrame(*ctx.unit, *inst);
-      recordNewUse(ia, ctx, inst, parentFp);
     } else if (canAdjustFrame(*inst)) {
       assertx(ctx.mainBlocks.count(block) != 0);
       ITRACE(3, "Using parent frame for instruction: {}\n", *inst);
@@ -1124,9 +1114,6 @@ bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn, bool& reflow) {
   assertx(env.fpUses.count(fp));
   assertx(def->is(DefInlineFP));
 
-  auto const parentResumed =
-    def->src(1)->inst()->marker().resumeMode() != ResumeMode::None;
-
   OptimizeContext ctx {env.unit, fp, inlineReturn, &env.fpUses};
   ctx.mainBlocks = findMainBlocks(def->block(), inlineReturn->block());
 
@@ -1148,7 +1135,6 @@ bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn, bool& reflow) {
       return
         ctx.mainBlocks.count(inst->block()) &&
         !canConvertToStack(*inst) &&
-        (parentResumed || !canRewriteToParent(*inst)) &&
         !canAdjustFrame(*inst) &&
         !canMoveInitCtx(*inst);
       }

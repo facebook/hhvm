@@ -404,16 +404,6 @@ void populate_block(ParseUnitState& puState,
                          always_assert(id < func.numIters);      \
                          return id;                              \
                        }();
-#define IMM_CAR(n)     auto slot = [&] {                                \
-                         ClsRefSlotId id = decode_iva(pc);              \
-                         always_assert(id >= 0 && id < func.numClsRefSlots); \
-                         return id;                                     \
-                       }();
-#define IMM_CAW(n)     auto slot = [&] {                                \
-                         ClsRefSlotId id = decode_iva(pc);              \
-                         always_assert(id >= 0 && id < func.numClsRefSlots); \
-                         return id;                                     \
-                       }();
 #define IMM_DA(n)      auto dbl##n = decode<double>(pc);
 #define IMM_SA(n)      auto str##n = ue.lookupLitstr(decode<Id>(pc));
 #define IMM_RATA(n)    auto rat = decodeRAT(ue, pc);
@@ -579,8 +569,6 @@ void populate_block(ParseUnitState& puState,
 #undef IMM_I64A
 #undef IMM_LA
 #undef IMM_IA
-#undef IMM_CAR
-#undef IMM_CAW
 #undef IMM_DA
 #undef IMM_SA
 #undef IMM_RATA
@@ -743,7 +731,6 @@ void add_frame_variables(php::Func& func, const FuncEmitter& fe) {
   }
 
   func.numIters = fe.numIterators();
-  func.numClsRefSlots = fe.numClsRefSlots();
 }
 
 std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
@@ -792,7 +779,6 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
     if (it != RuntimeOption::ConstantFunctions.end()) {
       ret->locals.resize(fe.params.size());
       ret->numIters = 0;
-      ret->numClsRefSlots = 0;
       ret->attrs |= AttrIsFoldable;
 
       auto const mainEntry = BlockId{0};

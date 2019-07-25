@@ -298,14 +298,13 @@ struct Func : FuncBase {
   Attr attrs;
 
   /*
-   * Parameters, locals, class-refs, and iterators.
+   * Parameters, locals, and iterators.
    *
    * There are at least as many locals as parameters (parameters are
    * also locals---the names of parameters are stored in the locals
    * vector).
    */
   IterId             numIters;
-  ClsRefSlotId       numClsRefSlots;
   CompactVector<Param> params;
   CompactVector<Local> locals;
 

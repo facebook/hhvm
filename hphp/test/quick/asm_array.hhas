@@ -24,7 +24,6 @@
 }
 
 .function ArrayMember() {
-  .numclsrefslots 1;
   NullUninit
   NullUninit
   NullUninit

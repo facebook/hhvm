@@ -165,7 +165,6 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
     if (debug) {
       assertx(argc == callee->numLocals());
       assertx(callee->numIterators() == 0);
-      assertx(callee->numClsRefSlots() == 0);
 
       auto addr = callee->getEntry();
       while (peek_op(addr) == Op::AssertRATL) {

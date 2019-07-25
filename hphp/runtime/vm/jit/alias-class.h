@@ -52,11 +52,11 @@ struct SSATmp;
  *                         Unknown
  *                            |
  *                            |
- *                    +-------+-------+----------+--------------+
- *                    |               |          |              |
- *                 UnknownTV      IterPosAny  IterBaseAny  ClsRefSlotAny
- *                    |               |          |              |
- *                    |              ...        ...            ...
+ *                    +-------+-------+----------+
+ *                    |               |          |
+ *                 UnknownTV      IterPosAny  IterBaseAny
+ *                    |               |          |
+ *                    |              ...        ...
  *                    |
  *      +---------+---+---------------+-------------------------+----+
  *      |         |                   |                         |    |
@@ -209,13 +209,6 @@ struct AStack {
  */
 struct ARef { SSATmp* boxed; };
 
-
-/*
- * A set of class-ref slots in the given frame.
- */
-FRAME_RELATIVE(AClsRefClsSlot, AliasIdSet, ids);
-FRAME_RELATIVE(AClsRefTSSlot, AliasIdSet, ids);
-
 /*
  * A TypedValue stored in rds.
  *
@@ -241,8 +234,6 @@ struct AliasClass {
     BElemS          = 1U << 5,
     BStack          = 1U << 6,
     BRef            = 1U << 7,
-    BClsRefClsSlot  = 1U << 8,
-    BClsRefTSSlot   = 1U << 9,
     BRds            = 1U << 10,
 
     // Have no specialization, put them last.
@@ -259,8 +250,7 @@ struct AliasClass {
 
     BIter      = BIterPos | BIterBase,
 
-    BUnknownTV =
-      ~(BIter | BMIBase | BMIPropS | BClsRefClsSlot | BClsRefTSSlot),
+    BUnknownTV = ~(BIter | BMIBase | BMIPropS),
 
     BUnknown   = static_cast<uint32_t>(-1),
   };
@@ -288,8 +278,6 @@ struct AliasClass {
   /* implicit */ AliasClass(AElemS);
   /* implicit */ AliasClass(AStack);
   /* implicit */ AliasClass(ARef);
-  /* implicit */ AliasClass(AClsRefClsSlot);
-  /* implicit */ AliasClass(AClsRefTSSlot);
   /* implicit */ AliasClass(ARds);
 
   /*
@@ -350,8 +338,6 @@ struct AliasClass {
   folly::Optional<AElemS>          elemS() const;
   folly::Optional<AStack>          stack() const;
   folly::Optional<ARef>            ref() const;
-  folly::Optional<AClsRefClsSlot>  clsRefClsSlot() const;
-  folly::Optional<AClsRefTSSlot>   clsRefTSSlot() const;
   folly::Optional<ARds>            rds() const;
 
   /*
@@ -370,8 +356,6 @@ struct AliasClass {
   folly::Optional<AElemS>          is_elemS() const;
   folly::Optional<AStack>          is_stack() const;
   folly::Optional<ARef>            is_ref() const;
-  folly::Optional<AClsRefClsSlot>  is_clsRefClsSlot() const;
-  folly::Optional<AClsRefTSSlot>   is_clsRefTSSlot() const;
   folly::Optional<ARds>            is_rds() const;
 
   /*
@@ -392,8 +376,6 @@ private:
     ElemS,
     Stack,
     Ref,
-    ClsRefClsSlot,
-    ClsRefTSSlot,
     Rds,
 
     IterBoth,  // A union of base and pos for the same iter.
@@ -428,8 +410,6 @@ private:
     AElemS          m_elemS;
     AStack          m_stack;
     ARef            m_ref;
-    AClsRefClsSlot  m_clsRefClsSlot;
-    AClsRefTSSlot   m_clsRefTSSlot;
     ARds            m_rds;
 
     UIterBoth       m_iterBoth;
@@ -447,9 +427,6 @@ auto const APropAny           = AliasClass{AliasClass::BProp};
 auto const AHeapAny           = AliasClass{AliasClass::BHeap};
 auto const ARefAny            = AliasClass{AliasClass::BRef};
 auto const AStackAny          = AliasClass{AliasClass::BStack};
-auto const AClsRefClsSlotAny  = AliasClass{AliasClass::BClsRefClsSlot};
-auto const AClsRefTSSlotAny   = AliasClass{AliasClass::BClsRefTSSlot};
-auto const AClsRefSlotAny     = AClsRefClsSlotAny | AClsRefTSSlotAny;
 auto const ARdsAny            = AliasClass{AliasClass::BRds};
 auto const AElemIAny          = AliasClass{AliasClass::BElemI};
 auto const AElemSAny          = AliasClass{AliasClass::BElemS};

@@ -570,11 +570,10 @@ struct Func final {
   // Locals, iterators, and stack.                                      [const]
 
   /*
-   * Number of locals, iterators, class-ref slots, or named locals.
+   * Number of locals, iterators, or named locals.
    */
   int numLocals() const;
   int numIterators() const;
-  int numClsRefSlots() const;
   Id numNamedLocals() const;
 
   /*
@@ -1225,10 +1224,6 @@ private:
     bool m_isPhpLeafFn : 1;
     bool m_hasReifiedGenerics : 1;
     bool m_isRxDisabled : 1;
-    // Needing more than 2 class ref slots basically doesn't happen, so just use
-    // two bits normally. If we actually need more than that, we'll store the
-    // count in ExtendedSharedData.
-    unsigned int m_numClsRefSlots : 2;
 
     // 16 bits of padding here in LOWPTR builds
 
@@ -1277,7 +1272,6 @@ private:
     ReifiedGenericsInfo m_reifiedGenericsInfo;
     Offset m_past;  // Only read if SharedData::m_pastDelta is kSmallDeltaLimit
     int m_line2;    // Only read if SharedData::m_line2 is kSmallDeltaLimit
-    Id m_actualNumClsRefSlots;
   };
 
   /*

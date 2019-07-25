@@ -621,7 +621,6 @@ let mutate_metadata (input : HP.t)  =
       (body |> Hhas_body.instrs)
       (body |> Hhas_body.decl_vars)
       (body |> Hhas_body.num_iters)
-      (body |> Hhas_body.num_cls_ref_slots      |> fun n -> mutate_int n !mag)
       (body |> Hhas_body.is_memoize_wrapper     |> mutate_bool)
       (body |> Hhas_body.is_memoize_wrapper_lsb |> mutate_bool)
       (body |> Hhas_body.params                 |> delete_map mutate_param)

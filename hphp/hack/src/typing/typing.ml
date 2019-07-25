@@ -3349,13 +3349,13 @@ and assign_ p ur env e1 ty2 =
   | pos, Array_get (e1, Some e) ->
     let env, te1, ty1 = update_array_type pos env e1 (Some e) `lvalue in
     let env, te, ty = expr env e in
-    let env, (ty1', ty2') =
+    let env, ty1' =
       Typing_array_access.assign_array_get ~array_pos:(fst e1) ~expr_pos:p ur env ty1 e ty ty2 in
     let env, te1 =
       if is_hack_collection env ty1
       then env, te1
       else let env, te1, _ = assign_ p ur env e1 ty1' in env, te1 in
-    env, ((pos, ty2'), T.Array_get (te1, Some te)), ty2
+    env, ((pos, ty2), T.Array_get (te1, Some te)), ty2
   | pref, Unop (Ast.Uref, e1') ->
     (* references can be "lvalues" in foreach bindings *)
     Errors.binding_ref_to_array pref;

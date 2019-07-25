@@ -9,7 +9,7 @@ function bar(): void {}
 
 let bar_error =
   "File \"/bar.php\", line 3, characters 1-6:\n" ^
-  "Toplevel statements are not allowed in strict files (Parsing[1002])\n\n"
+  "Toplevel statements are not allowed. Use __EntryPoint attribute instead (Parsing[1002])\n\n"
 
 let test_parsing_error () : unit =
   Tempfile.with_real_tempdir @@ fun temp_dir ->

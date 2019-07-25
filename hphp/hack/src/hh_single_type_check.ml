@@ -467,7 +467,7 @@ let parse_options () =
       "Allow the new @ attribute syntax (disables legacy soft typehints)";
     "--allow-toplevel-requires",
       Arg.Set allow_toplevel_requires,
-      "Allow `require()` and similar at the top-level in strict files";
+      "Allow `require()` and similar at the top-level";
     "--global-inference",
       Arg.Set global_inference,
       "Use inference results as the types of unannotated parameters / functions in the tast";

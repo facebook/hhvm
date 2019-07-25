@@ -1142,7 +1142,6 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
     Concat [
       t env kw;
       Space;
-      SplitWith Cost.Base;
       t env expr;
       t env colon;
     ]

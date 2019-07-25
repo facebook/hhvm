@@ -1,8 +1,0 @@
-function bar(int $x) {
-    if ($x > 0) {
-        bar($x - 1);
-        print (string)$x;
-    }
-}
-bar(5);
-_CODE_BLOCK_END_

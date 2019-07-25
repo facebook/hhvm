@@ -109,15 +109,6 @@
     utils_core))
 
 (executable
-  (name hh_rewrite_declarations)
-  (modules
-    hh_rewrite_declarations)
-  (ocamlc_flags (:standard -custom))
-  (libraries
-    default_injector_config
-    redeclarations))
-
-(executable
   (name hackfmt)
   (modules
     hackfmt)

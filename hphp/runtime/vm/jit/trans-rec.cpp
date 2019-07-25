@@ -94,7 +94,7 @@ void TransRec::optimizeForMemory() {
 
 TransRec::SavedAnnotation
 TransRec::writeAnnotation(const Annotation& annotation, bool compress) {
-  static jit::fast_set<std::string> fileWritten;
+  static jit::fast_map<std::string, size_t> fileWritten;
   SavedAnnotation saved = {
     folly::sformat("{}/tc_annotations.txt{}",
                    RuntimeOption::EvalDumpTCPath,
@@ -104,13 +104,15 @@ TransRec::writeAnnotation(const Annotation& annotation, bool compress) {
   };
   auto const fileName = saved.fileName.c_str();
 
-  if (fileWritten.insert(saved.fileName).second) {
+  if (fileWritten.emplace(saved.fileName, 0).second) {
     unlink(fileName);
   }
 
+  auto& fileOffset = fileWritten.at(saved.fileName);
+
   FILE* file = fopen(fileName, "a");
   if (!file) return saved;
-  saved.offset = lseek(fileno(file), 0, SEEK_END);
+  saved.offset = fileOffset;
   if (saved.offset == (off_t)-1) {
     fclose(file);
     return saved;
@@ -131,6 +133,7 @@ TransRec::writeAnnotation(const Annotation& annotation, bool compress) {
     }
     fclose(file);
   }
+  fileOffset += saved.length;
 
   return saved;
 }

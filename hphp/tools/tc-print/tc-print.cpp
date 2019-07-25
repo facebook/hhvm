@@ -83,6 +83,8 @@ RepoWrapper*      g_repo;
 OfflineTransData* g_transData;
 OfflineCode*   transCode;
 
+std::unique_ptr<AnnotationCache> g_annotations;
+
 const char* kListKeyword = "list";
 TCPrintLogger* g_logger;
 
@@ -1031,6 +1033,7 @@ int main(int argc, char *argv[]) {
                               g_transData->getColdBase(),
                               g_transData->getFrozenBase());
   g_repo = new RepoWrapper(g_transData->getRepoSchema(), configFile, !useJSON);
+  g_annotations = std::make_unique<AnnotationCache>(dumpDir);
 
   loadProfData();
 

@@ -354,60 +354,26 @@ void OfflineTransData::printTransRec(TransID transId,
       std::cout << folly::format(
         "  annotation[\"{}\"]",
         annotation.first);
+      auto const& annotationValue = annotation.second;
       // Either read annotation from file or print inline.
-      if (annotationsVerbosity > 1 &&
-          annotation.second.substr(0, 5) == "file:") {
+      if (annotationsVerbosity > 1 && annotationValue.substr(0, 5) == "file:") {
         std::cout << '\n';
-        string fileName = annotation.second.substr(5);
-        // The actual file should be located in dumpDir.
-        size_t pos = fileName.find_last_of('/');
-        if (pos != std::string::npos) {
-          fileName = fileName.substr(pos+1);
-        }
-        uint64_t offset = 0;
-        uint64_t length = std::numeric_limits<decltype(length)>::max();
-        pos = fileName.find_first_of(':');
-        if (pos != std::string::npos) {
-          auto filePos = fileName.substr(pos+1);
-          fileName.resize(pos);
-          if (sscanf(filePos.c_str(), "%ld:%ld", &offset, &length) != 2) {
-            std::cout << annotation.second << '\n';
-            continue;
-          }
-        }
-        fileName = folly::sformat("{}/{}", dumpDir, fileName);
-        FILE *file = fopen(fileName.c_str(), "r");
-        if (!file) {
-          std::cout << folly::format("<Error opening file {}>\n",
-                                     fileName);
+        auto const maybeFileInfo = g_annotations->getFileInfo(annotationValue);
+
+        if (!maybeFileInfo) {
+          std::cout << annotationValue << '\n';
           continue;
         }
-        if (fseeko(file, offset, SEEK_SET) != 0) {
-          std::cout << folly::format("<Error positioning file {} at {}>\n",
-                                     fileName, offset);
-          fclose(file);
-          continue;
-        }
-        // zlib can read uncompressed files too.
-        gzFile compressedFile = gzdopen(fileno(file), "r");
-        if (!compressedFile) {
-          std::cout << folly::format("<Error opening file {} with gzdopen>\n",
-                                     fileName);
-          fclose(file);
-          continue;
-        }
-        SCOPE_EXIT{ gzclose(compressedFile); };
-        std::cout << '\n';
-        char buf[BUFLEN];
-        uint64_t bytesRead = 0;
-        while (gzgets(compressedFile, buf, BUFLEN) != Z_NULL &&
-               bytesRead < length) {
-          std::cout << folly::format("    {}", buf);
-          bytesRead += std::strlen(buf);
+        auto const& fileInfo = *maybeFileInfo;
+
+        auto const& maybeValue = g_annotations->getValue(fileInfo);
+        if (maybeValue) {
+          std::cout << '\n' << (folly::gen::split(*maybeValue, '\n') |
+                                folly::gen::unsplit("\n    "));
         }
         std::cout << '\n';
       } else {
-        std::cout << folly::format(" = {}\n", annotation.second);
+        std::cout << folly::format(" = {}\n", annotationValue);
       }
     }
   }

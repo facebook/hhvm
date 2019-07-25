@@ -1,1 +1,3 @@
---ffile=hphp/test/quick/record-alias.inc --ffile=hphp/test/quick/record-alias2.inc -vRuntime.Eval.HackRecords=true
+--ffile=hphp/test/quick/record-alias.inc --ffile=test/quick/record-alias.inc --ffile=quick/record-alias.inc
+--ffile=hphp/test/quick/record-alias2.inc --ffile=test/quick/record-alias2.inc --ffile=quick/record-alias2.inc
+-vRuntime.Eval.HackRecords=true

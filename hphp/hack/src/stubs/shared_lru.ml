@@ -6,7 +6,9 @@
  *
  *)
 
-type host_env = unit
+type host_env = {
+  num_workers: int;
+}
 
 let init
     ~cache_name:_

@@ -6,7 +6,9 @@
  *
  *)
 
+module Hack_bucket = Bucket
 open Core_kernel
+module Bucket = Hack_bucket
 open Typing_check_service
 
 (* Helper function to process a single [file_computation] *)
@@ -36,10 +38,8 @@ let process_in_parallel
   ServerProgress.send_percentage_progress_to_monitor
     "typechecking" 0 files_initial_count "files";
 
-  let partition_list
-      ~(fnl: file_computation list)
-      ~(batch_size: int) =
-    let rec partition_list_h
+  let partition_files ~(fnl: file_computation list) =
+    let rec partition_files_h
         ~(acc: (file_computation list) list)
         ~(fnl: file_computation list)
         ~(batch_size: int) =
@@ -47,10 +47,16 @@ let process_in_parallel
       | [] -> acc
       | _ -> begin
         let batch, remaining = List.split_n fnl batch_size in
-        partition_list_h ~acc:(batch :: acc) ~fnl:remaining ~batch_size
+        partition_files_h ~acc:(batch :: acc) ~fnl:remaining ~batch_size
       end
     in
-    partition_list_h ~acc:[] ~fnl ~batch_size
+    let max_size = Bucket.max_size () in
+    let batch_size = Bucket.calculate_bucket_size
+      ~num_jobs:files_initial_count
+      ~num_workers:(lru_host_env.Shared_lru.num_workers)
+      ~max_size
+    in
+    partition_files_h ~acc:[] ~fnl ~batch_size
   in
 
   let job (fc_lst: file_computation list) =
@@ -91,7 +97,7 @@ let process_in_parallel
     ~host_env:lru_host_env
     ~job
     ~reduce
-    ~inputs:(partition_list ~fnl ~batch_size:500)
+    ~inputs:(partition_files ~fnl)
   in
   let cancelled = [] in
   let env = interrupt.MultiThreadedCall.env in

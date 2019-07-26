@@ -3389,7 +3389,7 @@ let pScript node env =
 type fixmes = Pos.t IMap.t IMap.t
 type scoured_comment = Pos.t * comment
 type scoured_comments = scoured_comment list
-type accumulator = scoured_comments * fixmes
+type accumulator = scoured_comments * fixmes * fixmes
 
 let scour_comments
   (path        : Relative_path.t)
@@ -3400,7 +3400,7 @@ let scour_comments
   (env         : env)
   : accumulator =
     let pos_of_offset = SourceText.relative_pos path source_text in
-    let go (node : node) (in_block : bool) (cmts, fm as acc : accumulator) (t : Trivia.t)
+    let go (node : node) (in_block : bool) (cmts, fm, mu as acc : accumulator) (t : Trivia.t)
         : accumulator =
       match Trivia.kind t with
       | TriviaKind.WhiteSpace
@@ -3418,9 +3418,9 @@ let scour_comments
         let len   = end_ - start - 1 in
         let p = pos_of_offset (end_ - 1) end_ in
         let t = String.sub (Trivia.text t) 2 len in
-        (p, CmtBlock t) :: cmts, fm
+        (p, CmtBlock t) :: cmts, fm, mu
       | TriviaKind.SingleLineComment ->
-        if not include_line_comments then cmts, fm
+        if not include_line_comments then cmts, fm, mu
         else
         let text = SourceText.text (Trivia.source_text t) in
         let start = Trivia.start_offset t in
@@ -3429,10 +3429,10 @@ let scour_comments
         let len   = end_ - start + 1 in
         let p = pos_of_offset start end_ in
         let t = String.sub text start len in
-        (p, CmtLine (t ^ "\n")) :: cmts, fm
+        (p, CmtLine (t ^ "\n")) :: cmts, fm, mu
       | TriviaKind.FixMe
       | TriviaKind.IgnoreError
-        -> if not collect_fixmes then cmts, fm
+        -> if not collect_fixmes then cmts, fm, mu
            else
            let open Str in
            let txt = Trivia.text t in
@@ -3441,27 +3441,31 @@ let scour_comments
              | Some s -> string_match (Str.regexp s) txt 0
              | None -> false in
            if ignore_fixme
-           then cmts, fm
+           then cmts, fm, mu
            else
              let pos = pPos node env in
              let line = Pos.line pos in
              let ignores = try IMap.find line fm with Caml.Not_found -> IMap.empty in
+             let misuses = try IMap.find line mu with Caml.Not_found -> IMap.empty in
              try
                ignore (search_forward ignore_error txt 0);
                let p = pos_of_offset (Trivia.start_offset t) (Trivia.end_offset t) in
                let code = int_of_string (matched_group 2 txt) in
                if (not in_block) && ISet.mem code (ParserOptions.disallowed_decl_fixmes env.parser_options)
-               then cmts, fm
+               then begin
+                 let misuses = IMap.add code p misuses in
+                   cmts, fm, IMap.add line misuses mu
+               end
                else
-                let ignores = IMap.add code p ignores in
-                  cmts, IMap.add line ignores fm
+                 let ignores = IMap.add code p ignores in
+                   cmts, IMap.add line ignores fm, mu
              with
              | Not_found_s _
              | Caml.Not_found ->
                Errors.fixme_format pos;
-               cmts, fm
+               cmts, fm, mu
     in
-    let rec aux (in_block : bool) (_cmts, _fm as acc : accumulator) (node : node) : accumulator =
+    let rec aux (in_block : bool) (_cmts, _fm, _mu as acc : accumulator) (node : node) : accumulator =
       let recurse (in_block : bool) = List.fold_left ~f:(aux in_block) ~init:acc (children node) in
       match syntax node with
       | CompoundStatement _ -> recurse true
@@ -3480,7 +3484,7 @@ let scour_comments
         else recurse in_block
       | _ -> recurse in_block
     in
-    aux false ([], IMap.empty) tree
+    aux false ([], IMap.empty, IMap.empty) tree
 
 (*****************************************************************************(
  * Front-end matter
@@ -3597,12 +3601,13 @@ let parse_text
   (mode, tree)
 
 let scour_comments_and_add_fixmes (env : env) source_text script =
-  let comments, fixmes =
+  let comments, fixmes, misuses =
     FromPositionedSyntax.scour_comments env.file source_text script env
       ~collect_fixmes:env.keep_errors
       ~include_line_comments:env.include_line_comments
       in
   let () = if env.keep_errors then
+    Fixme_provider.provide_disallowed_fixmes env.file misuses;
     if env.quick_mode then
       Fixme_provider.provide_decl_hh_fixmes env.file fixmes
     else

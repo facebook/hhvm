@@ -12,6 +12,7 @@ type fixme_map = Pos.t IMap.t IMap.t
 val get_fixmes : Relative_path.t -> fixme_map option
 val get_hh_fixmes : Relative_path.t -> fixme_map option
 val get_decl_hh_fixmes : Relative_path.t -> fixme_map option
+val get_disallowed_fixmes : Relative_path.t -> fixme_map option
 val get_fixme_codes_for_pos : Pos.t -> ISet.t
 val get_unused_fixmes :
   codes:int list ->
@@ -23,6 +24,7 @@ val get_unused_fixmes :
 
 val provide_hh_fixmes : Relative_path.t -> fixme_map -> unit
 val provide_decl_hh_fixmes : Relative_path.t -> fixme_map -> unit
+val provide_disallowed_fixmes : Relative_path.t -> fixme_map -> unit
 val remove_batch : Relative_path.Set.t -> unit
 
 val local_changes_push_stack : unit -> unit

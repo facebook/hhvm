@@ -575,22 +575,30 @@ let is_ignored_fixme code = is_ignored_code code
 let (is_hh_fixme: (Pos.t -> error_code -> bool) ref) = ref (fun _ _ -> false)
 let (get_hh_fixme_pos: (Pos.t -> error_code -> Pos.t option) ref) =
   ref (fun _ _ -> None)
+let (is_hh_fixme_disallowed: (Pos.t -> error_code -> bool) ref) = ref (fun _ _ -> false)
 
 let add_ignored_fixme_code_error pos code =
-  if !is_hh_fixme pos code && is_ignored_code code then
-    let pos = Option.value (!get_hh_fixme_pos pos code) ~default:pos in
-    if (code / 1000) = 5
-    then
-      add_error (make_error code
-        [pos,
-        Printf.sprintf
-          "You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress error %d.\
-           Please use @lint-ignore."
-          code])
-    else
-      add_error (make_error code
-        [pos,
-        Printf.sprintf "You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress error %d" code])
+  if !is_hh_fixme_disallowed pos code then
+    add_error (make_error code
+      [pos,
+      Printf.sprintf
+        "You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress error %d in declarations"
+        code])
+  else
+    if !is_hh_fixme pos code && is_ignored_code code then
+      let pos = Option.value (!get_hh_fixme_pos pos code) ~default:pos in
+      if (code / 1000) = 5
+      then
+        add_error (make_error code
+          [pos,
+          Printf.sprintf
+            "You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress error %d.\
+            Please use @lint-ignore."
+            code])
+      else
+        add_error (make_error code
+          [pos,
+          Printf.sprintf "You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress error %d" code])
 
 (*****************************************************************************)
 (* Errors accumulator. *)

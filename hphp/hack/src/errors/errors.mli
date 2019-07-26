@@ -48,6 +48,7 @@ val is_strict_code : int -> bool
 val set_allow_errors_in_default_path : bool -> unit
 
 val is_hh_fixme : (Pos.t -> int -> bool) ref
+val is_hh_fixme_disallowed : (Pos.t -> int -> bool) ref
 val get_hh_fixme_pos : (Pos.t -> int -> Pos.t option) ref
 val to_list : 'a error_ -> ('a * string) list
 val get_code : 'a error_ -> int

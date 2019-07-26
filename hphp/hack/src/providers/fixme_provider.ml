@@ -33,6 +33,12 @@ module DECL_HH_FIXMES = SharedMem.WithCache (SharedMem.ProfiledImmediate) (Relat
   let description = "DECL_HH_FIXMES"
   end)
 
+module DISALLOWED_FIXMES = SharedMem.WithCache (SharedMem.Immediate) (Relative_path.S) (struct
+  type t = fixme_map
+  let prefix = Prefix.make()
+  let description = "DISALLOWED_FIXMES"
+  end)
+
 let get_fixmes filename =
   match HH_FIXMES.get filename with
   | None -> DECL_HH_FIXMES.get filename
@@ -44,31 +50,42 @@ let get_hh_fixmes filename =
 let get_decl_hh_fixmes filename =
   DECL_HH_FIXMES.get filename
 
+let get_disallowed_fixmes filename =
+  DISALLOWED_FIXMES.get filename
+
 let provide_hh_fixmes filename fixmes =
   HH_FIXMES.add filename fixmes
 
 let provide_decl_hh_fixmes filename fixmes =
   DECL_HH_FIXMES.add filename fixmes
 
+let provide_disallowed_fixmes filename fixmes =
+  DISALLOWED_FIXMES.add filename fixmes
+
 let remove_batch paths =
   HH_FIXMES.remove_batch paths;
-  DECL_HH_FIXMES.remove_batch paths
+  DECL_HH_FIXMES.remove_batch paths;
+  DISALLOWED_FIXMES.remove_batch paths
 
 let local_changes_push_stack () =
   HH_FIXMES.LocalChanges.push_stack ();
-  DECL_HH_FIXMES.LocalChanges.push_stack ()
+  DECL_HH_FIXMES.LocalChanges.push_stack ();
+  DISALLOWED_FIXMES.LocalChanges.push_stack ()
 
 let local_changes_pop_stack () =
   HH_FIXMES.LocalChanges.pop_stack ();
-  DECL_HH_FIXMES.LocalChanges.pop_stack ()
+  DECL_HH_FIXMES.LocalChanges.pop_stack ();
+  DISALLOWED_FIXMES.LocalChanges.pop_stack ()
 
 let local_changes_commit_batch paths =
   HH_FIXMES.LocalChanges.commit_batch paths;
-  DECL_HH_FIXMES.LocalChanges.commit_batch paths
+  DECL_HH_FIXMES.LocalChanges.commit_batch paths;
+  DISALLOWED_FIXMES.LocalChanges.commit_batch paths
 
 let local_changes_revert_batch paths =
   HH_FIXMES.LocalChanges.revert_batch paths;
-  DECL_HH_FIXMES.LocalChanges.revert_batch paths
+  DECL_HH_FIXMES.LocalChanges.revert_batch paths;
+  DISALLOWED_FIXMES.LocalChanges.revert_batch paths
 
 let fixme_was_applied applied_fixmes fn err_line err_code =
   match Relative_path.Map.get applied_fixmes fn with
@@ -132,10 +149,19 @@ let get_fixmes_for_pos pos =
 let get_fixme_codes_for_pos pos =
   get_fixmes_for_pos pos |> IMap.keys |> ISet.of_list
 
+let is_disallowed pos code =
+  let filename = Pos.filename pos in
+  let line, _, _ = Pos.info_pos pos in
+  DISALLOWED_FIXMES.get filename |> Option.value ~default:IMap.empty
+    |> IMap.get line |> Option.value ~default:IMap.empty
+    |> IMap.get code
+
 let () =
   Errors.get_hh_fixme_pos := begin fun err_pos err_code ->
     get_fixmes_for_pos err_pos
     |> IMap.get err_code
     end;
-  Errors.is_hh_fixme := fun err_pos err_code ->
-    Option.is_some (!Errors.get_hh_fixme_pos err_pos err_code)
+  Errors.is_hh_fixme := begin fun err_pos err_code ->
+    Option.is_some (!Errors.get_hh_fixme_pos err_pos err_code) end;
+  Errors.is_hh_fixme_disallowed := fun err_pos err_code ->
+    Option.is_some (is_disallowed err_pos err_code)

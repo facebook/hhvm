@@ -1571,6 +1571,13 @@ void Class::setParent() {
         );
       }
     }
+    if ((m_attrCopy & AttrIsConst) && !(parentAttrs & AttrIsConst)) {
+      raise_error(
+        "Const class %s cannot extend non-const parent %s",
+        m_preClass->name()->data(),
+        m_parent->name()->data()
+      );
+    }
     m_preClass->enforceInMaybeSealedParentWhitelist(m_parent->preClass());
     if (m_parent->m_maybeRedefsPropTy) m_maybeRedefsPropTy = true;
   }
@@ -2390,6 +2397,12 @@ void Class::setProperties() {
                 (preProp->attrs() & AttrNoImplicitNullable));
         assertx(prop.attrs & AttrNoBadRedeclare);
 
+        if ((preProp->attrs() & AttrIsConst) != (prop.attrs & AttrIsConst)) {
+          raise_error("Cannot redeclare property %s of class %s with different "
+                      "constness in class %s", preProp->name()->data(),
+                      m_parent->name()->data(), m_preClass->name()->data());
+        }
+
         lateInitCheck(prop);
 
         prop.preProp = preProp;
@@ -2642,6 +2655,11 @@ void Class::importTraitInstanceProp(Prop& traitProp,
   if (curSPropMap.find(traitProp.name) != curSPropMap.end()) {
     raise_error("trait declaration of property '%s' is incompatible with "
                 "previous declaration", traitProp.name->data());
+  }
+
+  if ((attrs() & AttrIsConst) && !(traitProp.attrs & AttrIsConst)) {
+    raise_error("trait's non-const declaration of property '%s' is "
+                "incompatible with a const class", traitProp.name->data());
   }
 
   auto prevIt = curPropMap.find(traitProp.name);

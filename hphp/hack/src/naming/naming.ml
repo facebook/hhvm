@@ -399,7 +399,8 @@ end = struct
   let found_dollardollar (_, lenv) p =
     match !(lenv.pipe_locals) with
     | [] ->
-      Errors.undefined ~in_rx_scope:false p SN.SpecialIdents.dollardollar; (* TODO better error *)
+      (* TODO better error *)
+      Errors.undefined ~in_rx_scope:false p SN.SpecialIdents.dollardollar None;
       Local_id.make_scoped SN.SpecialIdents.dollardollar
     | pipe_scope :: scopes ->
       let pipe_scope = { pipe_scope with used_dollardollar = true } in

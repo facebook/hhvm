@@ -76,7 +76,7 @@ This member is private
 
 let child_foo_user_error = {|
 File "/child_foo_user.php", line 3, characters 14-16:
-Could not find method foo in an object of type Child (Typing[4053])
+No method 'foo' in Child (did you mean 'bar'?) (Typing[4053])
 File "/child_foo_user.php", line 2, characters 25-29:
 This is why I think it is an object of type Child
 File "/child.php", line 2, characters 7-11:

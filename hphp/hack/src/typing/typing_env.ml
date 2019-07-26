@@ -708,13 +708,25 @@ let get_static_member is_method env class_ mid =
   Option.iter ce_opt (fun ce -> add_dep ce.ce_origin);
   ce_opt
 
-let suggest_member members mid =
-  let members = Sequence.fold ~f:begin fun acc (x, {ce_type = lazy (r, _); _}) ->
-    let pos = Reason.to_pos r in
-    SMap.add (String.lowercase x) (pos, x) acc
-  end members ~init:SMap.empty
+(* Given a list of things whose name we can extract with `f`, return
+   the item whose name is closest to `name`. *)
+let most_similar (name: string) (possibilities: 'a Sequence.t) (f: 'a -> string): 'a option =
+  let distance = String_utils.levenshtein_distance in
+  let choose_closest x y =
+    if distance (f x) name < distance (f y) name then x else y
   in
-  SMap.get mid members
+  Sequence.fold possibilities ~init:None ~f:(fun acc possibility ->
+      match acc with
+      | None -> Some possibility
+      | Some current_best ->
+         Some (choose_closest current_best possibility))
+
+let suggest_member members mid =
+  let pairs = Sequence.map members ~f:begin fun (x, {ce_type = lazy (r, _); _}) ->
+    (Reason.to_pos r, x)
+  end
+  in
+  most_similar mid pairs snd
 
 let suggest_static_member is_method class_ mid =
   let mid = String.lowercase mid in
@@ -914,10 +926,19 @@ let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx =
     Fake.is_valid ctx.LEnvC.fake_members x in
   let error_if_pos_provided posopt =
     match posopt with
-    | Some p ->
-      let in_rx_scope = env_local_reactive env in
-      Errors.undefined ~in_rx_scope p (LID.to_string x);
-    | None -> () in
+      | Some p ->
+        let in_rx_scope = env_local_reactive env in
+        let lid = LID.to_string x in
+
+        let suggest_most_similar lid =
+          let all_locals = Sequence.of_list (LID.Map.elements ctx.LEnvC.local_types) in
+          let var_name = (fun (k, _) -> LID.to_string k) in
+          match most_similar lid all_locals var_name with
+          | Some (k, _) -> Some (LID.to_string k)
+          | None -> None
+        in
+        Errors.undefined ~in_rx_scope p lid (suggest_most_similar lid)
+      | None -> () in
   let lcl = LID.Map.get x ctx.LEnvC.local_types in
   begin match lcl with
   | None -> if not_found_is_ok x then () else error_if_pos_provided p

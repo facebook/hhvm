@@ -5,9 +5,9 @@ Expected int
 File "condition_conjunction.php", line 3, characters 19-22:
 But got ?int
 File "condition_conjunction.php", line 11, characters 20-21:
-Variable $z is undefined, or there exists at least one control flow path reaching this point which does not define $z. (Naming[2050])
+Variable $z is undefined, or not always defined (did you mean $s instead?) (Naming[2050])
 File "condition_conjunction.php", line 12, characters 20-21:
-Variable $u is undefined, or there exists at least one control flow path reaching this point which does not define $u. (Naming[2050])
+Variable $u is undefined, or not always defined (did you mean $s instead?) (Naming[2050])
 File "condition_conjunction.php", line 16, characters 14-15:
 Invalid argument (Typing[4110])
 File "condition_conjunction.php", line 39, characters 21-23:
@@ -15,18 +15,18 @@ Expected int
 File "condition_conjunction.php", line 3, characters 19-22:
 But got ?int
 File "condition_conjunction.php", line 17, characters 18-19:
-Variable $z is undefined, or there exists at least one control flow path reaching this point which does not define $z. (Naming[2050])
+Variable $z is undefined, or not always defined (did you mean $s instead?) (Naming[2050])
 File "condition_conjunction.php", line 18, characters 18-19:
-Variable $u is undefined, or there exists at least one control flow path reaching this point which does not define $u. (Naming[2050])
+Variable $u is undefined, or not always defined (did you mean $s instead?) (Naming[2050])
 File "condition_conjunction.php", line 19, characters 18-19:
-Variable $t is undefined, or there exists at least one control flow path reaching this point which does not define $t. (Naming[2050])
+Variable $t is undefined, or not always defined (did you mean $s instead?) (Naming[2050])
 File "condition_conjunction.php", line 29, characters 20-21:
-Variable $z is undefined, or there exists at least one control flow path reaching this point which does not define $z. (Naming[2050])
+Variable $z is undefined, or not always defined (did you mean $s instead?) (Naming[2050])
 File "condition_conjunction.php", line 30, characters 20-21:
-Variable $u is undefined, or there exists at least one control flow path reaching this point which does not define $u. (Naming[2050])
+Variable $u is undefined, or not always defined (did you mean $s instead?) (Naming[2050])
 File "condition_conjunction.php", line 34, characters 18-19:
-Variable $z is undefined, or there exists at least one control flow path reaching this point which does not define $z. (Naming[2050])
+Variable $z is undefined, or not always defined (did you mean $s instead?) (Naming[2050])
 File "condition_conjunction.php", line 35, characters 18-19:
-Variable $u is undefined, or there exists at least one control flow path reaching this point which does not define $u. (Naming[2050])
+Variable $u is undefined, or not always defined (did you mean $s instead?) (Naming[2050])
 File "condition_conjunction.php", line 36, characters 18-19:
-Variable $t is undefined, or there exists at least one control flow path reaching this point which does not define $t. (Naming[2050])
+Variable $t is undefined, or not always defined (did you mean $s instead?) (Naming[2050])

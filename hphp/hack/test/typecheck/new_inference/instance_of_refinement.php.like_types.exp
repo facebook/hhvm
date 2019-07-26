@@ -29,7 +29,7 @@ File "instance_of_refinement.php", line 8, characters 23-23:
 File "instance_of_refinement.php", line 41, characters 13-14:
 But got string
 File "instance_of_refinement.php", line 41, characters 9-11:
-Could not find method set in an object of type B (Typing[4053])
+No method 'set' in B (Typing[4053])
 File "instance_of_refinement.php", line 39, characters 12-12:
 This is why I think it is an object of type B
 File "instance_of_refinement.php", line 12, characters 7-7:

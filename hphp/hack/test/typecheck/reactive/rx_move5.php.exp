@@ -1,2 +1,2 @@
 File "rx_move5.php", line 12, characters 11-12:
-Variable $a is undefined, or there exists at least one control flow path reaching this point which does not define or unsets $a. (Naming[2050])
+Variable $a is undefined, not always defined, or unset afterwards (Naming[2050])

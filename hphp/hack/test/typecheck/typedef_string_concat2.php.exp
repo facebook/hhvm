@@ -1,5 +1,5 @@
 File "typedef_string_concat2.php", line 13, characters 12-15:
-Could not find method blah in an object of type C (Typing[4053])
+No method 'blah' in C (did you mean 'f'?) (Typing[4053])
 File "typedef_string_concat2.php", line 13, characters 5-9:
 This is why I think it is an object of type C
 File "typedef_string_concat2.php", line 5, characters 7-7:

@@ -1,5 +1,5 @@
 File "typing_fail_private_access2.php", line 18, characters 19-19:
-Could not find method f in an object of type Bar (Typing[4053])
+No method 'f' in Bar (did you mean 'x'?) (Typing[4053])
 File "typing_fail_private_access2.php", line 18, characters 12-16:
 This is why I think it is an object of type Bar
 File "typing_fail_private_access2.php", line 16, characters 7-9:

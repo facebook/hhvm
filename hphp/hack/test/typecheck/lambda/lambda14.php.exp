@@ -1,2 +1,2 @@
 File "lambda14.php", line 36, characters 23-24:
-Variable $z is undefined, or there exists at least one control flow path reaching this point which does not define $z. (Naming[2050])
+Variable $z is undefined, or not always defined (did you mean $baz instead?) (Naming[2050])

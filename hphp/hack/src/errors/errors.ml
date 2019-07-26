@@ -882,14 +882,17 @@ let rx_move_invalid_location pos =
   add (Naming.err_code Naming.RxMoveInvalidLocation) pos
     "Rx\\move is only allowed in argument position or as right hand side of the assignment."
 
-let undefined ~in_rx_scope pos var_name =
-  let rx_scope_clarification =
-    if in_rx_scope then "or unsets "
-    else "" in
-  add (Naming.err_code Naming.Undefined) pos ("Variable "^var_name^
-    " is undefined, "^
-    "or there exists at least one control flow path reaching this point which "^
-    "does not define " ^ rx_scope_clarification ^ var_name ^".")
+let undefined ~in_rx_scope pos var_name did_you_mean =
+  let msg =
+    if in_rx_scope then
+      Printf.sprintf "Variable %s is undefined, not always defined, or unset afterwards" var_name
+    else
+      Printf.sprintf "Variable %s is undefined, or not always defined" var_name
+  in
+  let suggestion = match did_you_mean with
+    | Some var_name -> Printf.sprintf " (did you mean %s instead?)" var_name
+    | None -> "" in
+  add_list (Naming.err_code Naming.Undefined) [(pos, msg^suggestion)]
 
 let this_reserved pos =
   add (Naming.err_code Naming.ThisReserved) pos
@@ -2120,13 +2123,21 @@ let unknown_type description pos r =
   add_list (Typing.err_code Typing.UnknownType)
     ([pos, msg] @ r)
 
+let not_found_hint = function
+  | `no_hint ->
+      ""
+  | `closest (_pos, v) ->
+      Printf.sprintf " (did you mean static method '%s'?)" v
+  | `did_you_mean (_pos, v) ->
+     Printf.sprintf " (did you mean '%s'?)" v
+
 let snot_found_hint = function
   | `no_hint ->
-      []
-  | `closest (pos, v) ->
-      [pos, "The closest thing is "^v^" but it's not a static method"]
-  | `did_you_mean (pos, v) ->
-      [pos, "Did you mean: "^v]
+      ""
+  | `closest (_pos, v) ->
+      Printf.sprintf " (did you mean method '%s'?)" v
+  | `did_you_mean (_pos, v) ->
+     Printf.sprintf " (did you mean '%s'?)" v
 
 let string_of_class_member_kind = function
   | `class_constant -> "class constant"
@@ -2137,18 +2148,10 @@ let string_of_class_member_kind = function
 let smember_not_found kind pos (cpos, class_name) member_name hint =
   let kind = string_of_class_member_kind kind in
   let class_name = strip_ns class_name in
-  let msg = "Could not find "^kind^" "^member_name^" in type "^class_name in
+  let msg = Printf.sprintf "No %s '%s' in %s" kind member_name class_name in
   add_list (Typing.err_code Typing.SmemberNotFound)
-    ((pos, msg) :: (snot_found_hint hint
-                    @ [(cpos, "Declaration of "^class_name^" is here")]))
-
-let not_found_hint = function
-  | `no_hint ->
-      []
-  | `closest (pos, v) ->
-      [pos, "The closest thing is "^v^" but it's a static method"]
-  | `did_you_mean (pos, v) ->
-      [pos, "Did you mean: "^v]
+    [(pos, msg ^ snot_found_hint hint);
+     (cpos, "Declaration of "^class_name^" is here")]
 
 let member_not_found kind pos (cpos, type_name) member_name hint reason =
   let type_name = strip_ns type_name in
@@ -2157,11 +2160,10 @@ let member_not_found kind pos (cpos, type_name) member_name hint reason =
     | `method_ -> "method"
     | `member -> "member"
   in
-  let msg = "Could not find "^kind^" "^member_name^" in an object of type "^
-    type_name in
+  let msg = Printf.sprintf "No %s '%s' in %s" kind member_name type_name in
   add_list (Typing.err_code Typing.MemberNotFound)
-    ((pos, msg) :: (not_found_hint hint @ reason
-                    @ [(cpos, "Declaration of "^type_name^" is here")]))
+    ((pos, msg ^ not_found_hint hint) ::
+    (reason @ [(cpos, "Declaration of "^type_name^" is here")]))
 
 let parent_in_trait pos =
   add (Typing.err_code Typing.ParentInTrait) pos

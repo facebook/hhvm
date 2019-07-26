@@ -4364,20 +4364,20 @@ and smember_not_found pos ~is_const ~is_method class_ member_name =
     let cid = ((Cls.pos class_), (Cls.name class_)) in
     Errors.smember_not_found kind pos cid member_name hint
   in
-  match Env.suggest_static_member is_method class_ member_name with
-  | None ->
-      (match Env.suggest_member is_method class_ member_name with
-      | None when not (Cls.members_fully_known class_) ->
-          (* no error in this case ... the member might be present
-           * in one of the parents of class_ that the typing cannot see *)
-          ()
-      | None ->
-          error `no_hint
-      | Some (pos2, v) ->
-          error (`closest (pos2, v))
-      );
-  | Some (pos2, v) ->
-      error (`did_you_mean (pos2, v))
+  let static_suggestion = Env.suggest_static_member is_method class_ member_name in
+  let method_suggestion = Env.suggest_member is_method class_ member_name in
+  match (static_suggestion, method_suggestion) with
+  (* Prefer suggesting a different static method, unless there's a
+     normal method whose name matches exactly. *)
+  | Some _, Some (def_pos, v) when v = member_name ->
+     error (`closest (def_pos, v))
+  | Some (def_pos, v), _ -> error (`did_you_mean (def_pos, v))
+  | None, Some (def_pos, v) -> error (`closest (def_pos, v))
+  | None, None when not (Cls.members_fully_known class_) ->
+     (* no error in this case ... the member might be present
+      * in one of the parents of class_ that the typing cannot see *)
+     ()
+  | None, None -> error `no_hint
 
 and member_not_found pos ~is_method class_ member_name r =
   let kind = if is_method then `method_ else `member in
@@ -4387,20 +4387,20 @@ and member_not_found pos ~is_method class_ member_name r =
   in
   let error hint =
     Errors.member_not_found kind pos cid member_name hint reason in
-  match Env.suggest_member is_method class_ member_name with
-    | None ->
-      (match Env.suggest_static_member is_method class_ member_name with
-        | None when not (Cls.members_fully_known class_) ->
-          (* no error in this case ... the member might be present
-           * in one of the parents of class_ that the typing cannot see *)
-          ()
-        | None ->
-          error `no_hint
-        | Some (def_pos, v) ->
-          error (`closest (def_pos, v))
-      )
-    | Some (def_pos, v) ->
-        error (`did_you_mean (def_pos, v))
+  let method_suggestion = Env.suggest_member is_method class_ member_name in
+  let static_suggestion = Env.suggest_static_member is_method class_ member_name in
+  match (method_suggestion, static_suggestion) with
+  (* Prefer suggesting a different method, unless there's a
+      static method whose name matches exactly. *)
+  | Some _, Some (def_pos, v) when v = member_name ->
+     error (`closest (def_pos, v))
+  | Some (def_pos, v), _ -> error (`did_you_mean (def_pos, v))
+  | None, Some (def_pos, v) -> error (`closest (def_pos, v))
+  | None, None when not (Cls.members_fully_known class_) ->
+     (* no error in this case ... the member might be present
+      * in one of the parents of class_ that the typing cannot see *)
+     ()
+  | None, None -> error `no_hint
 
 (* Look up the type of the property or method id in the type ty1 of the
  * receiver and use the function k to postprocess the result.

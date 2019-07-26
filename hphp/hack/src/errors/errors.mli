@@ -247,7 +247,7 @@ val newtype_alias_must_satisfy_constraint : typing_error_callback
 val bad_function_typevar : typing_error_callback
 val bad_class_typevar : typing_error_callback
 val bad_method_typevar : typing_error_callback
-val return_type_mismatch : typing_error_callback
+val missing_return : typing_error_callback
 val inout_return_type_mismatch : typing_error_callback
 val class_constant_value_does_not_match_hint : typing_error_callback
 val class_property_initializer_type_does_not_match_hint : typing_error_callback

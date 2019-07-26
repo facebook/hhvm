@@ -2671,7 +2671,7 @@ let bad_class_typevar = maybe_unify_error Typing.BadClassTypevar
 
 let bad_method_typevar = maybe_unify_error Typing.BadMethodTypevar
 
-let return_type_mismatch = maybe_unify_error Typing.ReturnTypeMismatch
+let missing_return = maybe_unify_error Typing.MissingReturnInNonVoidFunction
 
 let inout_return_type_mismatch = maybe_unify_error Typing.InoutReturnTypeMismatch
 

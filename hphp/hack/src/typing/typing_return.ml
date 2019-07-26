@@ -141,6 +141,6 @@ let async_suggest_return fkind hint pos =
 let implicit_return env pos ~expected ~actual =
   let env =
     if TypecheckerOptions.disallow_implicit_returns_in_non_void_functions (Env.get_tcopt env)
-    then Typing_ops.sub_type pos Reason.URreturn env expected actual Errors.return_type_mismatch
+    then Typing_ops.sub_type pos Reason.URreturn env expected actual Errors.missing_return
     else env in
-  Typing_ops.coerce_type pos Reason.URreturn env actual expected Errors.return_type_mismatch
+  Typing_ops.coerce_type pos Reason.URreturn env actual expected Errors.missing_return

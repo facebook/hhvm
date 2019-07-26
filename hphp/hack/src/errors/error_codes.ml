@@ -582,7 +582,7 @@ module Typing                               = struct
   | BadFunctionTypevar
   | BadClassTypevar
   | BadMethodTypevar
-  | ReturnTypeMismatch
+  | MissingReturnInNonVoidFunction
   | InoutReturnTypeMismatch
   | ClassConstantValueDoesNotMatchHint
   | ClassPropertyInitializerTypeDoesNotMatchHint

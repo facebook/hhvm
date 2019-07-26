@@ -2588,7 +2588,7 @@ and expr_
             obj_get ~obj_pos:(fst sid) ~is_method:false ~nullsafe:None env obj cid
               namepstr (fun x -> x) in
           let ureason = Reason.URxhp ((Cls.name class_info), snd namepstr) in
-          Type.coerce_type valp ureason env valty declty Errors.unify_error
+          Type.coerce_type valp ureason env valty declty Errors.xhp_attribute_does_not_match_hint
         end ~init:env in
         make_result env p txml obj
       )

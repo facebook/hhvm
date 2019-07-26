@@ -2669,6 +2669,7 @@ let class_constant_value_does_not_match_hint = maybe_unify_error Typing.ClassCon
 
 let class_property_initializer_type_does_not_match_hint = maybe_unify_error Typing.ClassPropertyInitializerTypeDoesNotMatchHint
 
+let xhp_attribute_does_not_match_hint = maybe_unify_error Typing.XhpAttributeValueDoesNotMatchHint
 let elt_type_to_string = function
   | `Method -> "method"
   | `Property -> "property"

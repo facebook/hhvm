@@ -252,6 +252,7 @@ val return_type_mismatch : typing_error_callback
 val inout_return_type_mismatch : typing_error_callback
 val class_constant_value_does_not_match_hint : typing_error_callback
 val class_property_initializer_type_does_not_match_hint : typing_error_callback
+val xhp_attribute_does_not_match_hint : typing_error_callback
 val static_redeclared_as_dynamic :
   Pos.t -> Pos.t -> string -> elt_type:[`Method | `Property] -> unit
 val dynamic_redeclared_as_static :

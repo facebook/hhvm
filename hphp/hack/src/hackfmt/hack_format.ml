@@ -1426,10 +1426,12 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
     Concat [
       t env left;
       Space;
-      t env kw;
-      Space;
       SplitWith Cost.Base;
-      Nest [t env right];
+      Nest [
+        t env kw;
+        Space;
+        t env right;
+      ];
     ]
   | Syntax.ConditionalExpression {
       conditional_test = test_expr;

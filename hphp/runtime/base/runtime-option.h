@@ -392,6 +392,8 @@ struct RuntimeOption {
   static std::map<std::string, std::string> IncludeRoots;
   static std::map<std::string, std::string> AutoloadRoots;
 
+  static std::string AutoloadDBPath;
+
   static std::string FileCache;
   static std::string DefaultDocument;
   static std::string ErrorDocument404;

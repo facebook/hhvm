@@ -11,7 +11,7 @@ Expected int
 File "interface_method_lookup_11.php", line 16, characters 26-28:
 But got num
 File "interface_method_lookup_11.php", line 44, characters 14-16:
-Could not find method foo in an object of type J (Typing[4053])
+No method 'foo' in J (Typing[4053])
 File "interface_method_lookup_11.php", line 43, characters 16-16:
 This is why I think it is an object of type J
 File "interface_method_lookup_11.php", line 13, characters 11-11:

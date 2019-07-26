@@ -2334,8 +2334,8 @@ void Class::setProperties() {
       }
       // Prohibit strengthening.
       if (parentProp
-          && (preProp->attrs() & (AttrPublic|AttrProtected|AttrPrivate))
-             > (parentProp->attrs & (AttrPublic|AttrProtected|AttrPrivate))) {
+          && (preProp->attrs() & VisibilityAttrs)
+             > (parentProp->attrs & VisibilityAttrs)) {
         raise_error(
           "Access level to %s::$%s() must be %s (as in class %s) or weaker",
           m_preClass->name()->data(), preProp->name()->data(),
@@ -2345,6 +2345,7 @@ void Class::setProperties() {
       if (preProp->attrs() & AttrDeepInit) {
         m_hasDeepInitProps = true;
       }
+
       auto addNewProp = [&] {
         Prop prop;
         initProp(prop, preProp);
@@ -2373,30 +2374,18 @@ void Class::setProperties() {
         check(AttrLateInit, "LateInit");
       };
 
-      switch (preProp->attrs() & (AttrPublic|AttrProtected|AttrPrivate)) {
-      case AttrPrivate: {
-        addNewProp();
-        break;
-      }
-      case AttrProtected: {
-        // Check whether a superclass has already declared this protected
-        // property.
-        PropMap::Builder::iterator it2 = curPropMap.find(preProp->name());
-        if (it2 == curPropMap.end()) {
-          addNewProp();
-          break;
-        }
+      auto const redeclareProp = [&] (const Slot slot) {
         // For duplicate property name, add the slot # defined in curPropMap,
         // and mark the property visited.
-        assertx(serializationVisited.size() > it2->second);
-        if (!serializationVisited[it2->second]) {
-          curPropMap[serializationIdx++].serializationIdx = it2->second;
-          serializationVisited[it2->second] = true;
+        assertx(serializationVisited.size() > slot);
+        if (!serializationVisited[slot]) {
+          curPropMap[serializationIdx++].serializationIdx = slot;
+          serializationVisited[slot] = true;
         }
 
-        auto& prop = curPropMap[it2->second];
-        assertx((prop.attrs & (AttrPublic|AttrProtected|AttrPrivate)) ==
-                AttrProtected);
+        auto& prop = curPropMap[slot];
+        assertx((preProp->attrs() & VisibilityAttrs)
+                <= (prop.attrs & VisibilityAttrs));
         assertx(!(prop.attrs & AttrNoImplicitNullable) ||
                 (preProp->attrs() & AttrNoImplicitNullable));
         assertx(prop.attrs & AttrNoBadRedeclare);
@@ -2405,62 +2394,10 @@ void Class::setProperties() {
 
         prop.preProp = preProp;
         prop.cls = this;
-
-        auto const& tc = preProp->typeConstraint();
-        if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
-            !(preProp->attrs() & AttrNoBadRedeclare) &&
-            tc.maybeInequivalentForProp(prop.typeConstraint)) {
-          // If this property isn't obviously not redeclaring a property in
-          // the parent, we need to check that when we initialize the class.
-          prop.attrs = Attr(prop.attrs & ~AttrNoBadRedeclare);
-          m_selfMaybeRedefsPropTy = true;
-          m_maybeRedefsPropTy = true;
-        }
-        prop.typeConstraint = tc;
-
-        if (preProp->attrs() & AttrNoImplicitNullable) {
-          prop.attrs |= AttrNoImplicitNullable;
-        }
-        attrSetter(prop.attrs,
-                   preProp->attrs() & AttrSystemInitialValue,
-                   AttrSystemInitialValue);
-        if (preProp->attrs() & AttrInitialSatisfiesTC) {
-          prop.attrs |= AttrInitialSatisfiesTC;
-        }
-
-        checkPrePropVal(prop, preProp);
-        TypedValueAux& tvaux = m_declPropInit[it2->second];
-        auto const& tv = preProp->val();
-        tvaux.m_data = tv.m_data;
-        tvaux.m_type = tv.m_type;
-        copyDeepInitAttr(preProp, &prop);
-        break;
-      }
-      case AttrPublic: {
-        // Check whether a superclass has already declared this as a
-        // protected/public property.
-        auto it2 = curPropMap.find(preProp->name());
-        if (it2 == curPropMap.end()) {
-          addNewProp();
-          break;
-        }
-        assertx(serializationVisited.size() > it2->second);
-        if (!serializationVisited[it2->second]) {
-          curPropMap[serializationIdx++].serializationIdx = it2->second;
-          serializationVisited[it2->second] = true;
-        }
-
-        auto& prop = curPropMap[it2->second];
-        assertx(!(prop.attrs & AttrNoImplicitNullable) ||
-                (preProp->attrs() & AttrNoImplicitNullable));
-        assertx(prop.attrs & AttrNoBadRedeclare);
-
-        lateInitCheck(prop);
-
-        prop.preProp = preProp;
-        prop.cls = this;
-        if ((prop.attrs & (AttrPublic|AttrProtected|AttrPrivate))
-            == AttrProtected) {
+        if ((preProp->attrs() & VisibilityAttrs)
+            < (prop.attrs & VisibilityAttrs)) {
+          assertx((prop.attrs & VisibilityAttrs) == AttrProtected);
+          assertx((preProp->attrs() & VisibilityAttrs) == AttrPublic);
           // Weaken protected property to public.
           prop.mangledName = preProp->mangledName();
           prop.attrs = Attr(prop.attrs ^ (AttrProtected|AttrPublic));
@@ -2489,14 +2426,41 @@ void Class::setProperties() {
         }
 
         checkPrePropVal(prop, preProp);
-        TypedValueAux& tvaux = m_declPropInit[it2->second];
+        TypedValueAux& tvaux = m_declPropInit[slot];
         auto const& tv = preProp->val();
         tvaux.m_data = tv.m_data;
         tvaux.m_type = tv.m_type;
         copyDeepInitAttr(preProp, &prop);
-        break;
-      }
-      default: assertx(false);
+      };
+
+      switch (preProp->attrs() & VisibilityAttrs) {
+        case AttrPrivate: {
+          addNewProp();
+          break;
+        }
+        case AttrProtected: {
+          // Check whether a superclass has already declared this protected
+          // property.
+          PropMap::Builder::iterator it2 = curPropMap.find(preProp->name());
+          if (it2 == curPropMap.end()) {
+            addNewProp();
+          } else {
+            redeclareProp(it2->second);
+          }
+          break;
+        }
+        case AttrPublic: {
+          // Check whether a superclass has already declared this as a
+          // protected/public property.
+          auto it2 = curPropMap.find(preProp->name());
+          if (it2 == curPropMap.end()) {
+            addNewProp();
+          } else {
+            redeclareProp(it2->second);
+          }
+          break;
+        }
+        default: always_assert(false);
       }
     } else { // Static property.
       // Prohibit non-static-->static redeclaration.
@@ -2515,8 +2479,8 @@ void Class::setProperties() {
       // Prohibit strengthening.
       if (it3 != curSPropMap.end()) {
         const SProp& parentSProp = curSPropMap[it3->second];
-        if ((preProp->attrs() & (AttrPublic|AttrProtected|AttrPrivate))
-            > (parentSProp.attrs & (AttrPublic|AttrProtected|AttrPrivate))) {
+        if ((preProp->attrs() & VisibilityAttrs)
+            > (parentSProp.attrs & VisibilityAttrs)) {
           raise_error(
             "Access level to %s::$%s() must be %s (as in class %s) or weaker",
             m_preClass->name()->data(), preProp->name()->data(),

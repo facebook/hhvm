@@ -59,7 +59,7 @@ void PreClass::atomicRelease() {
 const StringData* PreClass::manglePropName(const StringData* className,
                                            const StringData* propName,
                                            Attr attrs) {
-  switch (attrs & (AttrPublic|AttrProtected|AttrPrivate)) {
+  switch (attrs & VisibilityAttrs) {
     case AttrPublic: {
       return propName;
     }

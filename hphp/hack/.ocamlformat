@@ -1,0 +1,12 @@
+# -*- conf -*-
+
+indicate-nested-or-patterns = unsafe-no
+break-string-literals = never
+sequence-style = terminator
+field-space = tight-decl
+break-separators = after-and-docked
+break-cases = toplevel
+space-around-records = true
+type-decl = sparse
+sequence-blank-line = preserve-one
+let-open = short

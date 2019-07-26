@@ -60,6 +60,13 @@ bool is_special_method_name(SString name);
 bool is_mock_class(const php::Class*);
 
 /*
+ * Returns true if the given trait class has the __NoFlatten user attribute.
+ * This can be used to forcibly disable flattening for the given trait.
+ * Asserts that the class passed in is a trait.
+ */
+bool is_noflatten_trait(const php::Class*);
+
+/*
  * Returns true if cls is a trait which will not be imported into any
  * classes at runtime (probably because it was flattened into them).
  */

@@ -2230,6 +2230,11 @@ void flatten_traits(NamingEnv& env, ClassInfo* cinfo) {
              cinfo->cls->name, t->cls->name);
       return;
     }
+    if (is_noflatten_trait(t->cls)) {
+      ITRACE(5, "Not flattening {} because {} is annotated with __NoFlatten\n",
+             cinfo->cls->name, t->cls->name);
+      return;
+    }
     if (t->cls->hasConstProp) hasConstProp = true;
   }
   auto const cls = const_cast<php::Class*>(cinfo->cls);

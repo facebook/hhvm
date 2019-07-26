@@ -590,6 +590,18 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       else
         List.iter responses ~f:(Printf.printf "%s\n");
       Lwt.return Exit_status.No_error
+    | MODE_BIGCODE arg ->
+      let filename = arg in
+      let fn =
+        try
+          (expand_path filename)
+        with _ ->
+          Printf.eprintf "Invalid filename: %s\n" filename;
+          raise Exit_status.(Exit_with Input_error)
+      in
+      let%lwt result = rpc args @@ Rpc.BIGCODE (fn) in
+      print_endline result;
+      Lwt.return Exit_status.No_error
   in
   HackEventLogger.client_check_finish exit_status;
   Lwt.return exit_status

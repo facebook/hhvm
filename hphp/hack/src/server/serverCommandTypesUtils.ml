@@ -61,6 +61,7 @@ let debug_describe_t : type a. a t -> string = function
   | IDENTIFY_TYPES           _ -> "IDENTIFY_TYPES"
   | EXTRACT_STANDALONE     _ -> "EXTRACT_STANDALONE"
   | GO_TO_DEFINITION         _ -> "GO_TO_DEFINITION"
+  | BIGCODE                  _ -> "BIGCODE"
 
 let debug_describe_cmd : type a. a command -> string = function
   | Rpc rpc -> debug_describe_t rpc

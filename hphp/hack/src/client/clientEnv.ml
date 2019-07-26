@@ -10,6 +10,7 @@
 type client_mode =
 | MODE_AI_QUERY of string
 | MODE_AUTO_COMPLETE
+| MODE_BIGCODE of string
 | MODE_COLORING of string
 | MODE_COVERAGE of string
 | MODE_CREATE_CHECKPOINT of string
@@ -87,6 +88,7 @@ type client_check_env = {
 let mode_to_string = function
   | MODE_AI_QUERY _ -> "MODE_AI_QUERY"
   | MODE_AUTO_COMPLETE -> "MODE_AUTO_COMPLETE"
+  | MODE_BIGCODE _ -> "MODE_BIGCODE"
   | MODE_COLORING _ -> "MODE_COLORING"
   | MODE_COVERAGE _ -> "MODE_COVERAGE"
   | MODE_CREATE_CHECKPOINT _ -> "MODE_CREATE_CHECKPOINT"

@@ -290,3 +290,5 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         ServerIdeContext.with_context ~ctx ~f:(fun () ->
           env, ServerGoToDefinition.go_ctx ~entry ~line ~column
         )
+    | BIGCODE filename ->
+        env, ServerBigCode.go env filename

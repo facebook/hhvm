@@ -69,6 +69,66 @@ let test_exec_checked_big_payload (): bool Lwt.t =
   | Error _ ->
     failwith "command failed"
 
+let test_basic_lwt_message_queue (): bool Lwt.t =
+  let q = Lwt_message_queue.create () in
+  Bool_asserter.assert_equals
+    (Lwt_message_queue.is_empty q)
+    true
+    "queue was expected to be empty";
+  let%lwt () =
+    let%lwt () = Lwt_unix.sleep 1.0 in
+    let _success: bool = Lwt_message_queue.push q "message1" in
+    let _success: bool = Lwt_message_queue.push q "message2" in
+    Bool_asserter.assert_equals
+      (Lwt_message_queue.is_empty q)
+      false
+      "queue was expected to be non-empty";
+    Lwt.return_unit
+  and () =
+    let%lwt () = match%lwt Lwt_message_queue.pop q with
+    | None ->
+      failwith "expected queue to still have messages"
+    | Some result ->
+      String_asserter.assert_equals
+        result
+        "message1"
+        "wrong message in queue";
+      Lwt.return_unit
+    in
+    let%lwt () = match%lwt Lwt_message_queue.pop q with
+    | None ->
+      failwith "expected queue to still have messages"
+    | Some result ->
+      String_asserter.assert_equals
+        result
+        "message2"
+        "wrong message in queue";
+      Lwt.return_unit
+    in
+    Lwt.return_unit
+  in
+  Lwt.return true
+
+let test_close_lwt_message_queue (): bool Lwt.t =
+  let q = Lwt_message_queue.create () in
+  let success = Lwt_message_queue.push q "should be dropped later" in
+  Bool_asserter.assert_equals
+    success
+    true
+    "should have pushed message successfully";
+  Lwt_message_queue.close q;
+  let success = Lwt_message_queue.push q "should be dropped now" in
+  Bool_asserter.assert_equals
+    success
+    false
+    "should have failed to push message";
+
+  match%lwt Lwt_message_queue.pop q with
+  | Some _ ->
+    failwith "popped a message despite the queue being closed"
+  | None ->
+    Lwt.return true
+
 let wrap_lwt_test
     (test: string * (unit -> bool Lwt.t))
     : (string * (unit -> bool)) =
@@ -91,7 +151,10 @@ let wrap_lwt_test
 
 let () =
   Unit_test.run_all @@ List.map wrap_lwt_test [
-    ("test basic exec_checked", test_basic_exec_checked);
-    ("test failing exec_checked", test_failing_exec_checked);
-    ("test exec_checked big payload", test_exec_checked_big_payload);
+    ("test basic Lwt_utils.exec_checked", test_basic_exec_checked);
+    ("test failing Lwt_utils.exec_checked", test_failing_exec_checked);
+    ("test Lwt_utils.exec_checked big payload", test_exec_checked_big_payload);
+
+    ("test basic Lwt_message_queue.t", test_basic_lwt_message_queue);
+    ("test close Lwt_message_queue.t", test_close_lwt_message_queue);
   ]

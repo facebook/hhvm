@@ -20,23 +20,6 @@ type func_details_result = {
     min_arity : int;
   }
 
-type autocomplete_kind =
-  | Abstract_class_kind
-  | Class_kind
-  | Class_constant_kind
-  | Constructor_kind
-  | Enum_kind
-  | Function_kind
-  | Interface_kind
-  | Keyword_kind
-  | Literal_kind
-  | Method_kind
-  | Namespace_kind
-  | Property_kind
-  | Trait_kind
-  | Variable_kind
-  | Constant_kind
-
 (* Results ready to be displayed to the user *)
 type complete_autocomplete_result = {
     (** The position of the declaration we're returning. *)
@@ -53,7 +36,7 @@ type complete_autocomplete_result = {
     res_ty          : string;
     res_name        : string;
     res_fullname    : string; (** Without trimming for namespaces *)
-    res_kind        : autocomplete_kind;
+    res_kind        : SearchUtils.si_kind;
     func_details    : func_details_result option;
   }
 
@@ -62,7 +45,7 @@ type complete_autocomplete_result = {
 type partial_autocomplete_result = {
     ty   : Typing_defs.phase_ty;
     name : string;
-    kind_: autocomplete_kind;
+    kind_: SearchUtils.si_kind;
     base_class: string option;
   }
 

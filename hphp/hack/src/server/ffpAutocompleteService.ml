@@ -26,7 +26,7 @@ let make_keyword_completion (replace_pos:Ide_api_types.range) (keyword_name:stri
     res_ty = "keyword";
     res_name = keyword_name;
     res_fullname = keyword_name;
-    res_kind = Keyword_kind;
+    res_kind = SearchUtils.SI_Keyword;
     func_details = None;
   }
 

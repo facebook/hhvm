@@ -157,14 +157,14 @@ let autocomplete_shape_key env fields id =
         | Ast.SFlit_int (pos, str) ->
           let reason = Typing_reason.Rwitness pos in
           let ty = Typing_defs.Tprim Aast_defs.Tint in
-          (str, Literal_kind, (reason, ty))
+          (str, SI_Literal, (reason, ty))
         | Ast.SFlit_str (pos, str) ->
           let reason = Typing_reason.Rwitness pos in
           let ty = Typing_defs.Tprim Aast_defs.Tstring in
           let quote = if have_prefix then Str.first_chars prefix 1 else "'" in
-          (quote^str^quote, Literal_kind, (reason, ty))
+          (quote^str^quote, SI_Literal, (reason, ty))
         | Ast.SFclass_const ((pos, cid), (_, mid)) ->
-          (Printf.sprintf "%s::%s" cid mid, Class_constant_kind, (Reason.Rwitness pos, Typing_defs.Tany))
+          (Printf.sprintf "%s::%s" cid mid, SI_ClassConstant, (Reason.Rwitness pos, Typing_defs.Tany))
       in
       if (not have_prefix) || string_starts_with code prefix
       then add_partial_result code (Phase.decl ty) kind None
@@ -190,13 +190,13 @@ let autocomplete_member ~is_static env class_ cid id =
     argument_global_type := Some Acclass_get;
     let add kind (name, ty) = add_partial_result name (Phase.decl ty) kind (Some class_) in
     if is_static || match_both_static_and_instance then begin
-      Sequence.iter (get_class_elt_types env class_ cid (Cls.smethods class_)) ~f:(add Method_kind);
-      Sequence.iter (get_class_elt_types env class_ cid (Cls.sprops class_)) ~f:(add Property_kind);
-      Sequence.iter (Cls.consts class_) ~f:(fun (name, cc) -> add Class_constant_kind (name, cc.cc_type));
+      Sequence.iter (get_class_elt_types env class_ cid (Cls.smethods class_)) ~f:(add SearchUtils.SI_ClassMethod);
+      Sequence.iter (get_class_elt_types env class_ cid (Cls.sprops class_)) ~f:(add SearchUtils.SI_Property);
+      Sequence.iter (Cls.consts class_) ~f:(fun (name, cc) -> add SearchUtils.SI_ClassConstant (name, cc.cc_type));
     end;
     if (not is_static) || match_both_static_and_instance then begin
-      Sequence.iter (get_class_elt_types env class_ cid (Cls.methods class_)) ~f:(add Method_kind);
-      Sequence.iter (get_class_elt_types env class_ cid (Cls.props class_)) ~f:(add Property_kind);
+      Sequence.iter (get_class_elt_types env class_ cid (Cls.methods class_)) ~f:(add SearchUtils.SI_ClassMethod);
+      Sequence.iter (get_class_elt_types env class_ cid (Cls.props class_)) ~f:(add SearchUtils.SI_Property);
     end;
   end
 
@@ -342,17 +342,17 @@ let compute_complete_global
             get_partial_result
               (string_to_replace_prefix name)
               (Phase.decl (get_constructor_ty c))
-              Constructor_kind
+              SearchUtils.SI_Constructor
               (* Only do doc block fallback on constructors if they're consistent. *)
               (if snd (Cls.construct c) <> Inconsistent then Some c else None)
           else
             let kind = match (Cls.kind c) with
-              | Ast.Cabstract -> Abstract_class_kind
-              | Ast.Cnormal -> Class_kind
-              | Ast.Cinterface -> Interface_kind
-              | Ast.Ctrait -> Trait_kind
-              | Ast.Cenum -> Enum_kind
-              | Ast.Crecord -> Enum_kind (* TODO(T36697624): Add Record_kind *)
+              | Ast.Cabstract
+              | Ast.Cnormal -> SearchUtils.SI_Class
+              | Ast.Cinterface -> SearchUtils.SI_Interface
+              | Ast.Ctrait -> SearchUtils.SI_Trait
+              | Ast.Cenum
+              | Ast.Crecord -> SearchUtils.SI_Enum (* TODO(T36697624): Add Record_kind *)
             in
             let ty =
               Typing_reason.Rwitness (Cls.pos c),
@@ -369,7 +369,7 @@ let compute_complete_global
       Option.map (Decl_provider.get_fun name) ~f:(fun fun_ ->
         incr result_count;
         let ty = Typing_reason.Rwitness fun_.Typing_defs.ft_pos, Typing_defs.Tfun fun_ in
-        get_partial_result (string_to_replace_prefix name) (Phase.decl ty) Function_kind None
+        get_partial_result (string_to_replace_prefix name) (Phase.decl ty) SearchUtils.SI_Function None
       )
     in
 
@@ -385,7 +385,7 @@ let compute_complete_global
         res_ty = "namespace";
         res_name = string_to_replace_prefix name;
         res_fullname = string_to_replace_prefix name;
-        res_kind = Namespace_kind;
+        res_kind = SearchUtils.SI_Namespace;
         func_details = None;
       })
     in
@@ -462,28 +462,17 @@ let compute_complete_global
 (* Print a descriptive "detail" element *)
 let get_desc_string_for env ty kind =
   match kind with
-  | Method_kind
-  | Function_kind
-  | Variable_kind
-  | Property_kind
-  | Class_constant_kind
-  | Constructor_kind ->
-    (* Functions get detail *)
+  | SearchUtils.SI_ClassMethod
+  | SearchUtils.SI_ClassConstant
+  | SearchUtils.SI_Property
+  | SearchUtils.SI_Function
+  | SearchUtils.SI_Constructor ->
     let result = match ty with
     | DeclTy declt -> Tast_env.print_ty env declt
     | LoclTy loclt -> Tast_env.print_ty env loclt
     in
     result
-
-  | Abstract_class_kind -> "abstract class"
-  | Class_kind -> "class"
-  | Interface_kind -> "interface"
-  | Trait_kind -> "trait"
-  | Enum_kind -> "enum"
-  | Namespace_kind -> "namespace"
-  | Keyword_kind -> "keyword"
-  | Literal_kind -> "literal"
-  | Constant_kind -> "constant"
+  | _ -> kind_to_string kind
 
 let get_func_details_for env ty =
   let param_to_record ?(is_variadic=false) param =
@@ -531,9 +520,11 @@ let resolve_ty
   (* The logic is thorny here because we're relying upon regexes to figure    *)
   (* out the context. Once we switch autocomplete to FFP, it'll be cleaner.   *)
   let name = match x.kind_, autocomplete_context with
-    | Property_kind, { AutocompleteTypes.is_instance_member = false; _ } -> lstrip x.name ":"
-    | Abstract_class_kind, { AutocompleteTypes.is_xhp_classname = true; _ }
-    | Class_kind, { AutocompleteTypes.is_xhp_classname = true; _ } -> lstrip x.name ":"
+    | SearchUtils.SI_Property, { AutocompleteTypes.is_instance_member = false; _ } ->
+      lstrip x.name ":"
+    | SearchUtils.SI_XHP, { AutocompleteTypes.is_xhp_classname = true; _ }
+    | SearchUtils.SI_Class, { AutocompleteTypes.is_xhp_classname = true; _ } ->
+      lstrip x.name ":"
     | _ -> x.name
   in
   let pos = match x.ty with
@@ -745,7 +736,7 @@ end
 let compute_complete_local tast =
   new local_types#get_types tast
   |> Local_id.Map.iter begin fun x ty ->
-    add_partial_result (Local_id.get_name x) (Phase.locl ty) Variable_kind None
+    add_partial_result (Local_id.get_name x) (Phase.locl ty) SearchUtils.SI_LocalVariable None
   end
 
 let reset () =
@@ -755,36 +746,6 @@ let reset () =
   ac_env := None;
   autocomplete_results := [];
   autocomplete_is_complete := true
-
-let get_autocomplete_kind
-  (item: SearchUtils.si_item): autocomplete_kind =
-  let open SearchUtils in
-  match item.si_kind with
-  | SI_Interface -> Interface_kind
-  | SI_Trait -> Trait_kind
-  | SI_Enum -> Enum_kind
-  | SI_Function -> Function_kind
-  | SI_GlobalConstant -> Constant_kind
-  | SI_XHP -> Class_kind
-  | SI_ClassMethod -> Method_kind
-  (* This mapping isn't precise.  We should separate abstract kinds *)
-  | SI_Class -> Class_kind
-  (*
-   * The mapping for typedef isn't precise, but resolving the
-   * underlying kind had performance implications, so we will select this
-   * value - it only controls what icon to display in autocomplete in an
-   * editor.
-   *)
-  | SI_Typedef -> Class_kind
-  (*
-   * Items below this line are included for completeness, although
-   * the global-index-builder does not currently generate them.
-   * Since this function is used to select an icon for display,
-   * including these is harmless.
-   *)
-  | SI_Mixed -> Variable_kind
-  | SI_Unknown -> Class_kind
-  | SI_Namespace -> Namespace_kind
 
 (* Find global autocomplete results *)
 let find_global_results
@@ -839,7 +800,7 @@ let find_global_results
         res_ty          = (kind_to_string r.si_kind);
         res_name        = r.si_name;
         res_fullname    = r.si_fullname;
-        res_kind        = (get_autocomplete_kind r);
+        res_kind        = r.si_kind;
         func_details    = None;
       } in
       add_res (Complete complete)
@@ -889,7 +850,7 @@ let go
         | Complete res -> res.res_kind
       in
       match completion_type, kind with
-      | Some Actrait_only, Trait_kind -> true
+      | Some Actrait_only, SearchUtils.SI_Trait -> true
       | Some Actrait_only, _ -> false
       | _ -> true
     in

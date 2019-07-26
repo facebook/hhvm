@@ -86,6 +86,12 @@ type si_kind =
   | SI_XHP
   | SI_Namespace
   | SI_ClassMethod
+  | SI_Literal
+  | SI_ClassConstant
+  | SI_Property
+  | SI_LocalVariable
+  | SI_Keyword
+  | SI_Constructor
   [@@deriving show]
 
 (* Individual result object as known by the autocomplete system *)
@@ -121,6 +127,12 @@ let kind_to_int (kind: si_kind): int =
   | SI_XHP -> 10
   | SI_Namespace -> 11
   | SI_ClassMethod -> 12
+  | SI_Literal -> 13
+  | SI_ClassConstant -> 14
+  | SI_Property -> 15
+  | SI_LocalVariable -> 16
+  | SI_Keyword -> 17
+  | SI_Constructor -> 18
 
 (* Convert an integer back to an enum *)
 let int_to_kind (kind_num: int): si_kind =
@@ -137,6 +149,12 @@ let int_to_kind (kind_num: int): si_kind =
   | 10 -> SI_XHP
   | 11 -> SI_Namespace
   | 12 -> SI_ClassMethod
+  | 13 -> SI_Literal
+  | 14 -> SI_ClassConstant
+  | 15 -> SI_Property
+  | 16 -> SI_LocalVariable
+  | 17 -> SI_Keyword
+  | 18 -> SI_Constructor
   | _ -> SI_Unknown
 
 (* Internal representation of a single item stored by the symbol list *)
@@ -162,6 +180,12 @@ let kind_to_string (kind: si_kind): string =
   | SI_XHP -> "XHP class"
   | SI_Namespace -> "namespace"
   | SI_ClassMethod -> "class method"
+  | SI_Literal -> "literal"
+  | SI_ClassConstant -> "class constant"
+  | SI_Property -> "class property"
+  | SI_LocalVariable -> "local variable"
+  | SI_Keyword -> "keyword"
+  | SI_Constructor -> "constructor"
 
 (* Sigh, yet another string to enum conversion *)
 let string_to_kind (type_: string): si_kind option =
@@ -179,6 +203,12 @@ let string_to_kind (type_: string): si_kind option =
   | "xhp" -> Some SI_XHP
   | "namespace" -> Some SI_Namespace
   | "class method" -> Some SI_ClassMethod
+  | "literal" -> Some SI_Literal
+  | "class constant" -> Some SI_ClassConstant
+  | "property" | "class property" -> Some SI_Property
+  | "local variable" -> Some SI_LocalVariable
+  | "keyword" -> Some SI_Keyword
+  | "constructor" -> Some SI_Constructor
   | _ -> None
 
 (* More complete representation of a symbol index item *)

@@ -199,8 +199,13 @@ let symboldefinition_kind_from_si_kind
   | SearchUtils.SI_GlobalConstant -> SymbolDefinition.Const
   | SearchUtils.SI_XHP -> SymbolDefinition.Class
   | SearchUtils.SI_ClassMethod -> SymbolDefinition.Method
-  | SearchUtils.SI_Namespace ->
-    failwith "Cannot look up a namespace"
+  | SearchUtils.SI_Literal -> SymbolDefinition.LocalVar
+  | SearchUtils.SI_ClassConstant -> SymbolDefinition.Const
+  | SearchUtils.SI_Property -> SymbolDefinition.Property
+  | SearchUtils.SI_LocalVariable -> SymbolDefinition.LocalVar
+  | SearchUtils.SI_Constructor -> SymbolDefinition.Method
+  | SearchUtils.SI_Keyword -> failwith "Cannot look up a keyword"
+  | SearchUtils.SI_Namespace -> failwith "Cannot look up a namespace"
 
 (* Given a location, find best doc block *)
 let go_docblock_at
@@ -242,6 +247,9 @@ let go_docblock_for_symbol
   if kind = SearchUtils.SI_Namespace then begin
     let namespace_declaration = Printf.sprintf "namespace %s;" symbol in
     [ (DocblockService.HackSnippet namespace_declaration) ]
+  end else if kind = SearchUtils.SI_Keyword then begin
+    let txt = Printf.sprintf "Hack language keyword: %s;" symbol in
+    [ (DocblockService.HackSnippet txt) ]
   end else begin
     match go_locate_symbol ~env ~symbol ~kind with
     | None ->

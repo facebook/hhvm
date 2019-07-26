@@ -1074,21 +1074,24 @@ let make_ide_completion_response
   let hack_to_kind (completion: complete_autocomplete_result)
     : Completion.completionItemKind option =
     match completion.res_kind with
-    | Abstract_class_kind
-    | Class_kind -> Some Completion.Class
-    | Method_kind -> Some Completion.Method
-    | Function_kind -> Some Completion.Function
-    | Variable_kind -> Some Completion.Variable
-    | Property_kind -> Some Completion.Property
-    | Class_constant_kind -> Some Completion.Value (* a bit off, but the best we can do *)
-    | Interface_kind
-    | Trait_kind -> Some Completion.Interface
-    | Enum_kind -> Some Completion.Enum
-    | Namespace_kind -> Some Completion.Module
-    | Constructor_kind -> Some Completion.Constructor
-    | Keyword_kind -> Some Completion.Keyword
-    | Literal_kind -> Some Completion.Value
-    | Constant_kind -> Some Completion.Constant
+    | SearchUtils.SI_XHP
+    | SearchUtils.SI_Class -> Some Completion.Class
+    | SearchUtils.SI_ClassMethod -> Some Completion.Method
+    | SearchUtils.SI_Function -> Some Completion.Function
+    | SearchUtils.SI_Mixed
+    | SearchUtils.SI_LocalVariable -> Some Completion.Variable
+    | SearchUtils.SI_Property -> Some Completion.Property
+    | SearchUtils.SI_ClassConstant -> Some Completion.Constant
+    | SearchUtils.SI_Interface
+    | SearchUtils.SI_Trait -> Some Completion.Interface
+    | SearchUtils.SI_Enum -> Some Completion.Enum
+    | SearchUtils.SI_Namespace -> Some Completion.Module
+    | SearchUtils.SI_Constructor -> Some Completion.Constructor
+    | SearchUtils.SI_Keyword -> Some Completion.Keyword
+    | SearchUtils.SI_Literal -> Some Completion.Value
+    | SearchUtils.SI_GlobalConstant -> Some Completion.Constant
+    | SearchUtils.SI_Typedef -> Some Completion.TypeParameter
+    | SearchUtils.SI_Unknown -> None
   in
   let hack_to_itemType (completion: complete_autocomplete_result) : string option =
     (* TODO: we're using itemType (left column) for function return types, and *)
@@ -1170,7 +1173,7 @@ let make_ide_completion_response
       ])
     in
     {
-      label = completion.res_name ^ (if completion.res_kind = Namespace_kind then "\\" else "");
+      label = completion.res_name ^ (if completion.res_kind = SearchUtils.SI_Namespace then "\\" else "");
       kind = hack_to_kind completion;
       detail = Some (hack_to_detail completion);
       inlineDetail = Some (hack_to_inline_detail completion);
@@ -1399,9 +1402,16 @@ let do_workspaceSymbol
     (* LSP doesn't have typedef, so we approximate with class *)
     | SearchUtils.SI_GlobalConstant -> SymbolInformation.Constant
     | SearchUtils.SI_Namespace -> SymbolInformation.Namespace
-    | SearchUtils.SI_Unknown -> failwith "Unknown symbol kind"
     | SearchUtils.SI_Mixed -> SymbolInformation.Variable
     | SearchUtils.SI_XHP -> SymbolInformation.Class
+    | SearchUtils.SI_Literal -> SymbolInformation.Variable
+    | SearchUtils.SI_ClassConstant -> SymbolInformation.Constant
+    | SearchUtils.SI_Property -> SymbolInformation.Property
+    | SearchUtils.SI_LocalVariable -> SymbolInformation.Variable
+    | SearchUtils.SI_Constructor -> SymbolInformation.Constructor
+    (* Do these happen in practice? *)
+    | SearchUtils.SI_Keyword
+    | SearchUtils.SI_Unknown -> failwith "Unknown symbol kind"
   in
   (* Hack sometimes gives us back items with an empty path, by which it       *)
   (* intends "whichever path you asked me about". That would be meaningless   *)

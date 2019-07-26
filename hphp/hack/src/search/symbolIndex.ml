@@ -303,9 +303,17 @@ let get_position_for_symbol
     Naming_table.Funs.get_pos name_with_ns
   | SI_GlobalConstant ->
     Naming_table.Consts.get_pos name_with_ns
+
+  (* Items below this are not global symbols and cannot be 'position'ed *)
   | SI_Unknown
   | SI_Namespace
   | SI_ClassMethod
+  | SI_Literal
+  | SI_ClassConstant
+  | SI_Property
+  | SI_LocalVariable
+  | SI_Keyword
+  | SI_Constructor
   | SI_Mixed ->
     None
   in

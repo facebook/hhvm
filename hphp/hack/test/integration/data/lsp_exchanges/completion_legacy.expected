@@ -494,7 +494,7 @@
       "items": [
         {
           "label": "class",
-          "kind": 12,
+          "kind": 21,
           "detail": "classname<this>",
           "inlineDetail": "classname<this>",
           "insertText": "class",
@@ -509,7 +509,7 @@
         },
         {
           "label": "Bard",
-          "kind": 12,
+          "kind": 21,
           "detail": "Elsa",
           "inlineDetail": "Elsa",
           "insertText": "Bard",
@@ -524,7 +524,7 @@
         },
         {
           "label": "Alonso",
-          "kind": 12,
+          "kind": 21,
           "detail": "Elsa",
           "inlineDetail": "Elsa",
           "insertText": "Alonso",

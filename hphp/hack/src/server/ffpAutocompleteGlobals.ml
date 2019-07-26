@@ -69,7 +69,7 @@ let make_class_completion (context:context) (replace_pos:Ide_api_types.range) (n
       res_ty = "class";
       res_name = name;
       res_fullname = name;
-      res_kind = Class_kind;
+      res_kind = SearchUtils.SI_Class;
       func_details = None;
     })
   else
@@ -84,7 +84,7 @@ let make_interface_completion (context:context) (replace_pos:Ide_api_types.range
       res_ty = "interface";
       res_name = name;
       res_fullname = name;
-      res_kind = Interface_kind;
+      res_kind = SearchUtils.SI_Interface;
       func_details = None;
     })
   else
@@ -99,7 +99,7 @@ let make_trait_completion (context:context) (replace_pos:Ide_api_types.range) (n
       res_ty = "trait";
       res_name = name;
       res_fullname = name;
-      res_kind = Trait_kind;
+      res_kind = SearchUtils.SI_Trait;
       func_details = None;
     })
   else

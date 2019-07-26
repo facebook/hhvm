@@ -133,7 +133,7 @@ void AutoloadHandler::requestInit() {
   auto* factory = AutoloadMapFactory::getInstance();
   if (factory) {
     auto* map = getAutoloadMapFromFactory(*factory);
-    if (map && map->sync()) {
+    if (map && map->ensureUpdated()) {
       m_map = map;
     }
   }

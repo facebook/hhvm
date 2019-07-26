@@ -54,7 +54,7 @@ struct AutoloadMap {
    * Block until the AutoloadMap is up-to-date. Return true on success and
    * false on failure.
    */
-  virtual bool sync() {
+  virtual bool ensureUpdated() {
     return true;
   }
 

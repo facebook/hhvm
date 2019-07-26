@@ -1,0 +1,10 @@
+---- serialize ----
+Accessing <<__LateInit>> property 'A::x' before initialization
+---- json_encode ----
+Accessing <<__LateInit>> property 'A::x' before initialization
+---- var_dump ----
+object(B) (0) {
+}
+---- var_export ----
+B::__set_state(array(
+))

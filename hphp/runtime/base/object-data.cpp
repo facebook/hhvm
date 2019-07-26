@@ -544,7 +544,7 @@ void ObjectData::o_getArray(Array& props,
       if (UNLIKELY(val.type() == KindOfUninit)) {
         if (!ignoreLateInit) {
           if (prop.attrs & AttrLateInitSoft) {
-            raise_soft_late_init_prop(cls, prop.name, false);
+            raise_soft_late_init_prop(prop.cls, prop.name, false);
             tvDup(
               *g_context->getSoftLateInitDefault().asTypedValue(),
               const_cast<ObjectData*>(this)->propLvalAtOffset(slot)
@@ -554,7 +554,7 @@ void ObjectData::o_getArray(Array& props,
               val.tv()
             );
           } else if (prop.attrs & AttrLateInit) {
-            throw_late_init_prop(cls, prop.name, false);
+            throw_late_init_prop(prop.cls, prop.name, false);
           }
         }
       } else if (!pubOnly || (prop.attrs & AttrPublic)) {
@@ -969,7 +969,6 @@ bool ObjectData::equal(const ObjectData& other) const {
   check_recursion_error();
 
   bool result = true;
-  auto cls = m_cls;
   IteratePropMemOrderNoInc(
     this,
     [&](Slot slot, const Class::Prop& prop, tv_rval thisVal) {
@@ -978,7 +977,7 @@ bool ObjectData::equal(const ObjectData& other) const {
            UNLIKELY(otherVal.type() == KindOfUninit)) &&
           (prop.attrs & AttrLateInit)) {
         if (prop.attrs & AttrLateInitSoft) {
-          raise_soft_late_init_prop(cls, prop.name, false);
+          raise_soft_late_init_prop(prop.cls, prop.name, false);
           auto const& d = g_context->getSoftLateInitDefault();
 
           if (thisVal.type() == KindOfUninit) {
@@ -994,7 +993,7 @@ bool ObjectData::equal(const ObjectData& other) const {
             );
           }
         } else {
-          throw_late_init_prop(cls, prop.name, false);
+          throw_late_init_prop(prop.cls, prop.name, false);
         }
       }
       if (!tvEqual(thisVal.tv(), otherVal.tv())) {
@@ -1080,7 +1079,6 @@ int64_t ObjectData::compare(const ObjectData& other) const {
   check_recursion_error();
 
   int64_t result = 0;
-  auto cls = m_cls;
   IteratePropToArrayOrderNoInc(
     this,
     [&](Slot slot, const Class::Prop& prop, tv_rval thisVal) {
@@ -1089,7 +1087,7 @@ int64_t ObjectData::compare(const ObjectData& other) const {
            UNLIKELY(otherVal.type() == KindOfUninit)) &&
           (prop.attrs & AttrLateInit)) {
         if (prop.attrs & AttrLateInitSoft) {
-          raise_soft_late_init_prop(cls, prop.name, false);
+          raise_soft_late_init_prop(prop.cls, prop.name, false);
           auto const& d = g_context->getSoftLateInitDefault();
 
           if (thisVal.type() == KindOfUninit) {
@@ -1105,7 +1103,7 @@ int64_t ObjectData::compare(const ObjectData& other) const {
             );
           }
         } else {
-          throw_late_init_prop(cls, prop.name, false);
+          throw_late_init_prop(prop.cls, prop.name, false);
         }
       }
       auto cmp = tvCompare(thisVal.tv(), otherVal.tv());

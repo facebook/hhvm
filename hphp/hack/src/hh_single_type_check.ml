@@ -1017,7 +1017,7 @@ let handle_mode
       ServerIdentifyFunction.go_ctx_absolute
         ~entry
         ~line
-        ~char:column
+        ~column
     ) in
     begin match result with
       | [] -> print_endline "None"

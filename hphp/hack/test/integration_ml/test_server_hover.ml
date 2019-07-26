@@ -938,14 +938,14 @@ let test () =
   Test.assert_no_errors env;
 
   let failed_cases =
-    List.filter_map cases ~f:begin fun ((file, line, col), expectedHover) ->
+    List.filter_map cases ~f:begin fun ((file, line, column), expectedHover) ->
       let list_to_string hover_list =
         let string_list = hover_list |> List.map ~f:HoverService.string_of_result in
         let inner = match string_list |> List.reduce ~f:(fun a b -> a ^ "; " ^ b) with
           | None -> ""
           | Some s -> s
         in
-        Printf.sprintf "%s:%d:%d: [%s]" file line col inner
+        Printf.sprintf "%s:%d:%d: [%s]" file line column inner
       in
       let path = Relative_path.from_root file in
       let file_input = ServerCommandTypes.FileName ("/" ^ file) in
@@ -959,7 +959,7 @@ let test () =
         ~ctx
         ~entry
         ~line
-        ~char:col
+        ~column
       in
       let expected = list_to_string expectedHover in
       let actual = list_to_string hover in

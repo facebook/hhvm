@@ -46,7 +46,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, ServerInferTypeBatch.go genv.workers positions env
     | TYPED_AST (filename) ->
         env, ServerTypedAst.go env filename
-    | IDE_HOVER (path, line, char) ->
+    | IDE_HOVER (path, line, column) ->
         let relative_path = Relative_path.create_detect_prefix path in
         let (ctx, entry) = ServerIdeContext.update
           ~tcopt:env.ServerEnv.tcopt
@@ -58,7 +58,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           ~ctx
           ~entry
           ~line
-          ~char
+          ~column
         in
         env, result
     | DOCBLOCK_AT (filename, line, column, base_class_name, kind) ->
@@ -278,7 +278,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, ServerTypeDefinition.go env (filename, line, char)
     | EXTRACT_STANDALONE name ->
         env, ServerExtractStandalone.go env.tcopt name
-    | GO_TO_DEFINITION (labelled_file, line, char) ->
+    | GO_TO_DEFINITION (labelled_file, line, column) ->
         let (path, file_input) =
           ServerCommandTypesUtils.extract_labelled_file labelled_file in
         let (ctx, entry) = ServerIdeContext.update
@@ -288,5 +288,5 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           ~file_input
         in
         ServerIdeContext.with_context ~ctx ~f:(fun () ->
-          env, ServerGoToDefinition.go_ctx ~entry ~line ~char
+          env, ServerGoToDefinition.go_ctx ~entry ~line ~column
         )

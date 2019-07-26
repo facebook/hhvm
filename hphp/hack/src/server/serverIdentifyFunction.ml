@@ -71,10 +71,10 @@ let go_absolute content line char tcopt =
 let go_ctx
     ~(entry : ServerIdeContext.entry)
     ~(line : int)
-    ~(char : int) =
+    ~(column : int) =
   let ast = ServerIdeContext.get_ast entry in
   let tast = ServerIdeContext.get_tast entry in
-  let symbols = IdentifySymbolService.go tast line char in
+  let symbols = IdentifySymbolService.go tast line column in
   let symbols = take_best_suggestions (List.sort by_nesting symbols) in
   List.map symbols ~f:(fun symbol ->
     let symbol_definition = ServerSymbolDefinition.go ast symbol in
@@ -84,13 +84,13 @@ let go_ctx
 let go_ctx_absolute
     ~(entry : ServerIdeContext.entry)
     ~(line : int)
-    ~(char : int)
+    ~(column : int)
     : (string SymbolOccurrence.t *
        string SymbolDefinition.t option) list =
   go_ctx
     ~entry
     ~line
-    ~char
+    ~column
     |> List.map ~f:(fun (occurrence, definition) ->
       let occurrence = SymbolOccurrence.to_absolute occurrence in
       let definition = Option.map ~f:SymbolDefinition.to_absolute definition in

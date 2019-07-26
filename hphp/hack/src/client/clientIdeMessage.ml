@@ -14,35 +14,29 @@ module Initialize_from_saved_state = struct
   }
 end
 
+type document_location = {
+  file_path: Path.t;
+  file_contents: string option; (* if absent, should read from file on disk *)
+  line: int;
+  column: int;
+} [@@deriving show]
+(** Denotes a location of the cursor in a document at which an IDE request is
+being executed (e.g. hover). *)
+
 module Hover = struct
-  type request = {
-    file_path: Path.t;
-    file_input: ServerCommandTypes.file_input;
-    line: int;
-    char: int;
-  }
+  type request = document_location
   type result = HoverService.result
 end
 
 module Definition = struct
-  type request = {
-    file_path: Path.t;
-    file_input: ServerCommandTypes.file_input;
-    line: int;
-    char: int;
-  }
+  type request = document_location
   type result = ServerCommandTypes.Go_to_definition.result
 end
 
 (* Handles "textDocument/completion" LSP messages *)
 module Completion = struct
   type request = {
-    filename: string;
-    line: int;
-    column: int;
-
-    (* Contents of the file reflecting unsaved changes in the IDE *)
-    file_content: string;
+    document_location: document_location;
     is_manually_invoked: bool;
   }
   type result = AutocompleteTypes.ide_result
@@ -59,12 +53,7 @@ end
 
 (* Handles "textDocument/documentHighlight" LSP messages *)
 module Document_highlight = struct
-  type request = {
-    file_path: Path.t;
-    file_input: ServerCommandTypes.file_input;
-    line: int;
-    column: int;
-  }
+  type request = document_location
   type result = Ide_api_types.range list
 end
 

@@ -10,9 +10,9 @@ open Core_kernel
 let go_ctx
     ~(entry: ServerIdeContext.entry)
     ~(line: int)
-    ~(char: int)
+    ~(column: int)
     : ServerCommandTypes.Go_to_definition.result =
-  let results = ServerIdentifyFunction.go_ctx ~entry ~line ~char in
+  let results = ServerIdentifyFunction.go_ctx ~entry ~line ~column in
   let results = List.filter_map results ~f:Utils.unwrap_snd in
   (* What's it like when we return multiple definitions? For instance, if you ask *)
   (* for the definition of "new C()" then we've now got the definition of the     *)

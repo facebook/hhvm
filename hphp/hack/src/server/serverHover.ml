@@ -87,15 +87,15 @@ let go_ctx
     ~(ctx: ServerIdeContext.t)
     ~(entry: ServerIdeContext.entry)
     ~(line: int)
-    ~(char: int)
+    ~(column: int)
     : HoverService.result =
   let tast = ServerIdeContext.get_tast entry in
   let identities =
     ServerIdentifyFunction.go_ctx
       ~entry
       ~line
-      ~char in
-  let env_and_ty = ServerInferType.type_at_pos tast line char
+      ~column in
+  let env_and_ty = ServerInferType.type_at_pos tast line column
     |> Option.map ~f:(fun (env, ty) -> (env, Tast_expand.expand_ty env ty)) in
   (* There are legitimate cases where we expect to have no identities returned,
      so just format the type. *)

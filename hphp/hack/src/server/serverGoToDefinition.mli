@@ -9,7 +9,7 @@
 val go_ctx:
   entry:ServerIdeContext.entry ->
   line:int ->
-  char:int ->
+  column:int ->
   ServerCommandTypes.Go_to_definition.result
 (** Returns the definition of the symbol at the given position in the document.
 

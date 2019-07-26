@@ -748,20 +748,20 @@ let hack_errors_to_lsp_diagnostic
 (** Protocol                                                           **)
 (************************************************************************)
 
-let get_labelled_file_from_editor_open_files
+let get_document_location
     (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
-    (uri: documentUri)
-    : ServerCommandTypes.labelled_file =
-  let filename = lsp_uri_to_path uri in
-  match SMap.get uri editor_open_files with
-  | Some document ->
-    let content = document.TextDocumentItem.text in
-    ServerCommandTypes.LabelledFileContent {
-      filename;
-      content;
-    }
-  | None ->
-    ServerCommandTypes.LabelledFileName filename
+    (params: Lsp.TextDocumentPositionParams.t)
+    : ClientIdeMessage.document_location =
+  let (file_path, line, column) = lsp_file_position_to_hack params in
+  let file_path = Path.make file_path in
+  let file_contents =
+    let uri =
+      params.TextDocumentPositionParams.textDocument.TextDocumentIdentifier.uri in
+    match SMap.get uri editor_open_files with
+    | Some document -> Some document.TextDocumentItem.text
+    | None -> None
+  in
+  { ClientIdeMessage.file_path; file_contents; line; column }
 
 let do_shutdown
     (state: state)
@@ -990,18 +990,9 @@ let do_hover_local
     (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
     (params: Hover.params)
   : Hover.result Lwt.t =
-  let uri =
-    params.TextDocumentPositionParams.textDocument.TextDocumentIdentifier.uri in
-  let file_input =
-    get_labelled_file_from_editor_open_files editor_open_files uri in
-
-  let (_, line, column) = lsp_file_position_to_hack params in
-  let%lwt infos = ClientIdeService.hover
-    ide_service
-    ~file_input
-    ~line
-    ~char:column
-  in
+  let document_location = get_document_location editor_open_files params in
+  let%lwt infos = ClientIdeService.rpc
+    ide_service (ClientIdeMessage.Hover document_location) in
   match infos with
   | Ok infos ->
     let infos = do_hover_common infos in
@@ -1053,24 +1044,16 @@ let do_definition_local
     (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
     (params: Definition.params)
     : Definition.result Lwt.t =
-  let uri =
-    params.TextDocumentPositionParams.textDocument.TextDocumentIdentifier.uri in
-  let file_input =
-    get_labelled_file_from_editor_open_files editor_open_files uri in
-
-  let (file, line, char) = lsp_file_position_to_hack params in
-  let%lwt results = ClientIdeService.go_to_definition
-    ide_service
-    ~file_input
-    ~line
-    ~char
-  in
+  let document_location = get_document_location editor_open_files params in
+  let%lwt results = ClientIdeService.rpc
+    ide_service (ClientIdeMessage.Definition document_location) in
   match results with
   | Ok results ->
     let results = List.map results ~f:begin fun (_occurrence, definition) ->
       hack_symbol_definition_to_lsp_identifier_location
         definition
-        ~default_path:file
+        ~default_path:(document_location.ClientIdeMessage.file_path
+          |> Path.to_string)
     end in
     Lwt.return results
   | Error error_message ->
@@ -1244,18 +1227,7 @@ let do_completion_local
     (params: Completion.params)
   : Completion.result Lwt.t =
   let open Completion in
-  let open TextDocumentIdentifier in
-
-  (* Retrieve the file contents *)
-  let pos = lsp_position_to_ide params.loc.TextDocumentPositionParams.position in
-  let filename = lsp_uri_to_path params.loc.TextDocumentPositionParams.textDocument.uri in
-  let lsp_doc_opt = SMap.get
-    params.loc.TextDocumentPositionParams.textDocument.uri
-    editor_open_files in
-  let lsp_doc = match lsp_doc_opt with
-  | None -> failwith (Printf.sprintf "Cannot find LSP document [%s]" filename)
-  | Some doc -> doc
-  in
+  let document_location = get_document_location editor_open_files params.loc in
 
   (* Other parameters *)
   let is_manually_invoked = match params.context with
@@ -1264,16 +1236,15 @@ let do_completion_local
   in
 
   (* this is what I want to fix *)
-  let request = { ClientIdeMessage.Completion.
-    filename;
-    file_content = lsp_doc.Lsp.TextDocumentItem.text;
-    line = pos.Ide_api_types.line;
-    column = pos.Ide_api_types.column;
+  let request = ClientIdeMessage.Completion { ClientIdeMessage.Completion.
+    document_location;
     is_manually_invoked;
   } in
-  let%lwt result = ClientIdeService.completion ide_service request in
+  let%lwt result = ClientIdeService.rpc ide_service request in
   match result with
   | Ok infos ->
+    let filename = document_location.ClientIdeMessage.file_path
+      |> Path.to_string in
     let%lwt response = make_ide_completion_response infos filename in
     Lwt.return response
   | Error error_message ->
@@ -1385,11 +1356,12 @@ let do_resolve_local
   let symbolname = params.Completion.label in
   let raw_kind = params.Completion.kind in
   let kind = completion_kind_to_si_kind raw_kind in
-  let request = { ClientIdeMessage.Completion_resolve.
+  let request = ClientIdeMessage.Completion_resolve {
+    ClientIdeMessage.Completion_resolve.
     symbol = symbolname;
     kind = kind;
   } in
-  let%lwt result = ClientIdeService.resolve ide_service request in
+  let%lwt result = ClientIdeService.rpc ide_service request in
   match result with
   | Ok raw_docblock ->
     let documentation = docblock_to_markdown raw_docblock in
@@ -1542,24 +1514,9 @@ let do_highlight_local
     (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
     (params: DocumentHighlight.params)
     : DocumentHighlight.result Lwt.t =
-  let open TextDocumentPositionParams in
-  let open Lsp.TextDocumentIdentifier in
-  let open Ide_api_types in
-
-  (* Figure out location *)
-  let pos = lsp_position_to_ide params.position in
-  let labelled_file =
-    get_labelled_file_from_editor_open_files editor_open_files params.textDocument.uri in
-  let (file_path, file_input) =
-    ServerCommandTypesUtils.extract_labelled_file labelled_file in
-  let request = { ClientIdeMessage.Document_highlight.
-    file_path = Path.make (Relative_path.to_absolute file_path);
-    file_input = file_input;
-    line = pos.line;
-    column = pos.column;
-  } in
-
-  let%lwt result = ClientIdeService.highlight ide_service request in
+  let document_location = get_document_location editor_open_files params in
+  let%lwt result = ClientIdeService.rpc
+    ide_service (ClientIdeMessage.Document_highlight document_location) in
   match result with
   | Ok ranges ->
     Lwt.return (List.map ranges ~f:hack_range_to_lsp_highlight)

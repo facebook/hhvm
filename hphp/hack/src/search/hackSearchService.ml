@@ -15,16 +15,18 @@ open SearchUtils
 let fuzzy = ref false
 
 module SS = SearchService.Make(struct
-    type t = search_result_type
-    let fuzzy_types = [Class (Some Ast_defs.Cnormal); Function; Constant; Typedef]
-    let type_num = function
-      | Class _ -> 0
-      | Function -> 1
-      | Typedef -> 2
-      | Constant -> 3
-      | _ -> 4
+    type t = si_kind
+    let fuzzy_types = [
+      SI_Class;
+      SI_Interface;
+      SI_Trait;
+      SI_Enum;
+      SI_Function;
+      SI_GlobalConstant;
+      SI_Typedef
+    ]
     let compare_result_type a b =
-      (type_num a) - (type_num b)
+      (kind_to_int a) - (kind_to_int b)
   end)
 
 module WorkerApi = struct
@@ -70,28 +72,28 @@ module WorkerApi = struct
         ~init:(SS.Fuzzy.TMap.empty, [], [])
         ~f:begin fun name (f, t, a)  ->
           let pos = FileInfo.File (FileInfo.Fun, fn) in
-          let f, t = update_defs (pos, name) Function f t in
-          f, t, add_autocomplete_term (pos, name) Function a
+          let f, t = update_defs (pos, name) SI_Function f t in
+          f, t, add_autocomplete_term (pos, name) SI_Function a
         end in
     let fuzzy, trie, auto = SSet.fold n_classes
         ~init:(fuzzy, trie, auto)
         ~f:begin fun name (f, t, a)  ->
           let pos = FileInfo.File (FileInfo.Class, fn) in
-          let f, t = update_defs (pos, name) (Class None) f t in
-          f, t, add_autocomplete_term (pos, name) (Class None) a
+          let f, t = update_defs (pos, name) SI_Class f t in
+          f, t, add_autocomplete_term (pos, name) SI_Class a
         end in
     let fuzzy, trie, auto = SSet.fold n_types
         ~init:(fuzzy, trie, auto)
         ~f:begin fun name (f, t, _a)  ->
           let pos = FileInfo.File (FileInfo.Typedef, fn) in
-          let f, t = update_defs (pos, name) Typedef f t in
+          let f, t = update_defs (pos, name) SI_Typedef f t in
           f, t, _a
         end in
     let fuzzy, trie, auto = SSet.fold n_consts
         ~init:(fuzzy, trie, auto)
         ~f:begin fun name (f, t, _a)  ->
           let pos = FileInfo.File (FileInfo.Const, fn) in
-          let f, t = update_defs (pos, name) Constant f t in
+          let f, t = update_defs (pos, name) SI_GlobalConstant f t in
           f, t, _a
         end in
     SS.WorkerApi.update fn trie fuzzy auto
@@ -102,41 +104,35 @@ module WorkerApi = struct
     let fuzzy, trie, auto = List.fold funs
         ~init:(SS.Fuzzy.TMap.empty, [], [])
         ~f:begin fun (f, t, a) id ->
-          let f, t = update_defs id Function f t in
-          f, t, add_autocomplete_term id Function a
+          let f, t = update_defs id SI_Function f t in
+          f, t, add_autocomplete_term id SI_Function a
         end in
 
     let fuzzy, trie, auto = List.fold classes
         ~init:(fuzzy, trie, auto)
         ~f:begin fun  (f, t, a) id ->
-          let f, t = update_defs id (Class None) f t in
-          f, t, add_autocomplete_term id (Class None) a
+          let f, t = update_defs id SI_Class f t in
+          f, t, add_autocomplete_term id SI_Class a
         end in
     let fuzzy, trie, auto = List.fold typedefs
         ~init:(fuzzy, trie, auto)
         ~f:begin fun  (f, t, _a) id  ->
-          let f, t = update_defs id Typedef f t in
+          let f, t = update_defs id SI_Typedef f t in
           f, t, _a
         end in
     let fuzzy, trie, auto = List.fold consts
         ~init:(fuzzy, trie, auto)
         ~f:begin fun (f, t, _a) id ->
-          let f, t = update_defs id Constant f t in
+          let f, t = update_defs id SI_GlobalConstant f t in
           f, t, _a
         end in
     SS.WorkerApi.update fn trie fuzzy auto
 end
 
 module MasterApi = struct
-  let get_type = function
-    | "class" -> Some (Class (Some Ast_defs.Cnormal))
-    | "function" -> Some Function
-    | "constant" -> Some Constant
-    | "typedef" -> Some Typedef
-    | _ -> None
 
   let query workers input type_ ~fuzzy =
-    let results = SS.MasterApi.query workers input (get_type type_) ~fuzzy in
+    let results = SS.MasterApi.query workers input (string_to_kind type_) ~fuzzy in
     List.filter_map results
       (fun search_term ->
          let {
@@ -147,18 +143,18 @@ module MasterApi = struct
          begin
            match pos, result_type with
            (* Need both class kind and position *)
-           | FileInfo.File (FileInfo.Class, fn), Class _ ->
+           | FileInfo.File (FileInfo.Class, fn), SI_Class ->
              (match Ast_provider.find_class_in_file_nast fn name with
               | Some c ->
                 let pos, result_type =
-                  (fst c.Nast.c_name, Class (Some c.Nast.c_kind)) in
+                  (fst c.Nast.c_name, SI_Class) in
                 Some {
                   SearchUtils.name;
                   pos;
                   result_type;
                 }
               | None -> None)
-           | FileInfo.File (FileInfo.Fun, fn), Function ->
+           | FileInfo.File (FileInfo.Fun, fn), SI_Function ->
              (match Ast_provider.find_fun_in_file_nast fn name with
               | Some c ->
                 let pos = fst c.Nast.f_name in
@@ -168,7 +164,7 @@ module MasterApi = struct
                   result_type;
                 }
               | None -> None)
-           | FileInfo.File (FileInfo.Typedef, fn), Typedef ->
+           | FileInfo.File (FileInfo.Typedef, fn), SI_Typedef ->
              (match Ast_provider.find_typedef_in_file_nast fn name with
               | Some c ->
                 let pos = fst c.Nast.t_name in
@@ -178,7 +174,7 @@ module MasterApi = struct
                   result_type;
                 }
               | None -> None)
-           | FileInfo.File (FileInfo.Const, fn), Constant ->
+           | FileInfo.File (FileInfo.Const, fn), SI_GlobalConstant ->
              (match Ast_provider.find_gconst_in_file_nast fn name with
               | Some c ->
                 let pos = fst c.Nast.cst_name in
@@ -188,11 +184,11 @@ module MasterApi = struct
                   result_type;
                 }
               | None -> None)
-           | FileInfo.Full p, Class None ->
+           | FileInfo.Full p, SI_Class ->
              let fn = Pos.filename p in
              (match Ast_provider.find_class_in_file_nast fn name with
-              | Some c ->
-                let result_type = Class (Some c.Nast.c_kind) in
+              | Some _ ->
+                let result_type = SI_Class in
                 Some {
                   SearchUtils.name;
                   pos = p;
@@ -267,7 +263,7 @@ let index_search
       ~limit:(Some max_results)
       ~filter_map:(fun _ _ result -> begin
             let name = result.SearchUtils.name in
-            let kind = result_to_kind result.SearchUtils.result_type in
+            let kind = result.SearchUtils.result_type in
             if kind_match kind then begin
               Some {
                 si_kind = kind;

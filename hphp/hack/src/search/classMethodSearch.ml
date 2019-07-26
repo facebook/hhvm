@@ -41,7 +41,7 @@ let query_class_methods
       Some SearchUtils. {
         name;
         pos = (Pos.to_absolute pos);
-        result_type = Method (m.Nast.m_static, class_name)
+        result_type = SearchUtils.SI_ClassMethod
       }
     else None
   end

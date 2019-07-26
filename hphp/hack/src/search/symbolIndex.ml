@@ -218,7 +218,7 @@ let query_for_symbol_search
     (worker_list_opt: MultiWorker.worker list option)
     (s1: string)
     (s2: string)
-    ~(fuzzy: bool): (Pos.t, search_result_type) term list =
+    ~(fuzzy: bool): (Pos.t, si_kind) term list =
 
   (* Just route to the trie-based search service for now *)
   HackSearchService.MasterApi.query worker_list_opt s1 s2 fuzzy
@@ -234,7 +234,7 @@ let query_for_autocomplete
     ~(filter_map:(
         string ->
         string ->
-        (FileInfo.pos, search_result_type) term ->
+        (FileInfo.pos, si_kind) term ->
         'a option)): 'a list Utils.With_complete_flag.t =
 
   (* Just route to the trie-based search service for now *)
@@ -305,6 +305,7 @@ let get_position_for_symbol
     Naming_table.Consts.get_pos name_with_ns
   | SI_Unknown
   | SI_Namespace
+  | SI_ClassMethod
   | SI_Mixed ->
     None
   in

@@ -12,40 +12,8 @@ open Hh_core
 module SS = SearchUtils
 module SUtils = SearchUtils
 
-let scope_string_from_type result_type =
-  match result_type with
-  | SS.Method (_, scope)
-  | SS.ClassVar (_, scope) -> scope
-  | _ -> ""
-
-let desc_string_from_type result_type =
-  match result_type with
-  | SS.Class (Some class_kind) ->
-    (match class_kind with
-     | Ast.Cabstract -> "abstract class"
-     | Ast.Cnormal -> "class"
-     | Ast.Cinterface -> "interface"
-     | Ast.Ctrait -> "trait"
-     | Ast.Cenum -> "enum"
-     | Ast.Crecord -> "record")
-  (* This should never happen *)
-  | SS.Class None ->  assert false
-  | SS.Method (static, scope) ->
-    if static
-    then "static method in "^scope
-    else "method in "^scope
-  | SS.ClassVar (static, scope) ->
-    if static
-    then "static class var in "^scope
-    else "class var in "^scope
-  | SS.Function -> "function"
-  | SS.Typedef -> "typedef"
-  | SS.Constant -> "constant"
-  | SS.Namespace -> "namespace"
-
 let result_to_json res =
-  let desc_string = desc_string_from_type res.SUtils.result_type in
-  let scope_string = scope_string_from_type res.SUtils.result_type in
+  let desc_string = SearchUtils.kind_to_string res.SUtils.result_type in
   let p = res.SUtils.pos in
   let fn = Pos.filename p in
   let line, start, end_ = Pos.info_pos p in
@@ -56,7 +24,7 @@ let result_to_json res =
       "line",  Hh_json.int_ line;
       "char_start", Hh_json.int_ start;
       "char_end", Hh_json.int_ end_;
-      "scope", Hh_json.JSON_String scope_string;
+      "scope", Hh_json.JSON_String "";
     ]
 
 let re_colon_colon = Str.regexp "::"
@@ -85,7 +53,10 @@ let go workers query type_ (sienv: SearchUtils.si_env)
           SymbolIndex.query_for_symbol_search ~fuzzy workers class_name_query type_
           |> List.find ~f:begin fun result ->
             match result with
-            | SearchUtils.{result_type = SearchUtils.Class _; _} -> true
+            | SearchUtils.{result_type = SearchUtils.SI_Trait; _} -> true
+            | SearchUtils.{result_type = SearchUtils.SI_Enum; _} -> true
+            | SearchUtils.{result_type = SearchUtils.SI_Interface; _} -> true
+            | SearchUtils.{result_type = SearchUtils.SI_Class; _} -> true
             | _ -> false
           end
           |> Option.map ~f:(fun s -> s.SearchUtils.name)

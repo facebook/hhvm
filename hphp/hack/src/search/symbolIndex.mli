@@ -49,7 +49,7 @@ val query_for_symbol_search :
   string ->
   string ->
   fuzzy:bool ->
-  (Pos.t, SearchUtils.search_result_type) SearchUtils.term list
+  (Pos.t, SearchUtils.si_kind) SearchUtils.term list
 
 (* Legacy query interface for LSP autocomplete, depends on filter-map *)
 val query_for_autocomplete :
@@ -58,7 +58,7 @@ val query_for_autocomplete :
   filter_map:(
     string ->
     string ->
-    (FileInfo.pos, SearchUtils.search_result_type) SearchUtils.term ->
+    (FileInfo.pos, SearchUtils.si_kind) SearchUtils.term ->
     'a option) ->
   'a list Utils.With_complete_flag.t
 

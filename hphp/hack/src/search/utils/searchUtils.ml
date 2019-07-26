@@ -63,26 +63,6 @@ type ('a, 'b) term = {
 
 let to_absolute t = { t with pos = Pos.to_absolute t.pos }
 
-(* This is the result type as known by the autocomplete system *)
-type search_result_type =
-  | Class of Ast_defs.class_kind option
-  | Method of bool * string
-  | ClassVar of bool * string
-  | Function
-  | Typedef
-  | Constant
-  | Namespace
-
-(* Individual result object as known by the autocomplete system *)
-type symbol = (Pos.absolute, search_result_type) term
-
-(* Used by some legacy APIs *)
-type legacy_symbol = (FileInfo.pos, search_result_type) term
-
-(* Collected results as known by the autocomplete system *)
-type result = symbol list
-
-
 (*
  * Needed to distinguish between two types of typechecker updates
  * to the local symbol table. When we no longer need to get local
@@ -105,7 +85,17 @@ type si_kind =
   | SI_GlobalConstant
   | SI_XHP
   | SI_Namespace
+  | SI_ClassMethod
   [@@deriving show]
+
+(* Individual result object as known by the autocomplete system *)
+type symbol = (Pos.absolute, si_kind) term
+
+(* Used by some legacy APIs *)
+type legacy_symbol = (FileInfo.pos, si_kind) term
+
+(* Collected results as known by the autocomplete system *)
+type result = symbol list
 
 (*
  * Convert the enum to an integer whose value will not change accidentally.
@@ -130,6 +120,7 @@ let kind_to_int (kind: si_kind): int =
   | SI_GlobalConstant -> 9
   | SI_XHP -> 10
   | SI_Namespace -> 11
+  | SI_ClassMethod -> 12
 
 (* Convert an integer back to an enum *)
 let int_to_kind (kind_num: int): si_kind =
@@ -145,36 +136,7 @@ let int_to_kind (kind_num: int): si_kind =
   | 9 -> SI_GlobalConstant
   | 10 -> SI_XHP
   | 11 -> SI_Namespace
-  | _ -> SI_Unknown
-
-(* Convert an internal "kind" into an autocomplete result kind *)
-let kind_to_result (kind: si_kind): search_result_type =
-  match kind with
-  | SI_Class -> Class (Some Ast_defs.Cnormal)
-  | SI_Interface -> Class (Some Ast_defs.Cinterface)
-  | SI_Enum -> Class (Some Ast_defs.Cenum)
-  | SI_Trait -> Class (Some Ast_defs.Ctrait)
-  | SI_Unknown -> Constant
-  | SI_Mixed -> Constant
-  | SI_Function -> Function
-  | SI_Typedef -> Typedef
-  | SI_GlobalConstant -> Constant
-  | SI_XHP -> Class (Some Ast_defs.Cnormal)
-  | SI_Namespace -> Namespace
-
-(* Convert an autocomplete result "kind" into an internal kind *)
-let result_to_kind (result: search_result_type): si_kind =
-  match result with
-  | Class (Some Ast_defs.Cnormal) -> SI_Class
-  | Class (Some Ast_defs.Ctrait) -> SI_Trait
-  | Class (Some Ast_defs.Cabstract) -> SI_Class
-  | Class (Some Ast_defs.Cinterface) -> SI_Interface
-  | Class (Some Ast_defs.Cenum) -> SI_Enum
-  | Class (None) -> SI_Class
-  | Constant -> SI_GlobalConstant
-  | Function -> SI_Function
-  | Typedef -> SI_Typedef
-  | Namespace -> SI_Namespace
+  | 12 -> SI_ClassMethod
   | _ -> SI_Unknown
 
 (* Internal representation of a single item stored by the symbol list *)
@@ -186,8 +148,8 @@ type si_item = {
 }
 
 (* Determine the best "ty" string for an item *)
-let to_ty_string (item: si_item): string =
-  match item.si_kind with
+let kind_to_string (kind: si_kind): string =
+  match kind with
   | SI_Class -> "class"
   | SI_Interface -> "interface"
   | SI_Enum -> "enum"
@@ -199,6 +161,7 @@ let to_ty_string (item: si_item): string =
   | SI_GlobalConstant -> "constant"
   | SI_XHP -> "XHP class"
   | SI_Namespace -> "namespace"
+  | SI_ClassMethod -> "class method"
 
 (* Sigh, yet another string to enum conversion *)
 let string_to_kind (type_: string): si_kind option =
@@ -215,6 +178,7 @@ let string_to_kind (type_: string): si_kind option =
   | "constant" -> Some SI_GlobalConstant
   | "xhp" -> Some SI_XHP
   | "namespace" -> Some SI_Namespace
+  | "class method" -> Some SI_ClassMethod
   | _ -> None
 
 (* More complete representation of a symbol index item *)

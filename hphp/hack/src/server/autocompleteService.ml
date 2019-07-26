@@ -38,7 +38,7 @@ let add_position_to_results (raw_results: SearchUtils.si_results): SearchUtils.r
       {
         name = r.si_name;
         pos;
-        result_type = (kind_to_result r.si_kind);
+        result_type = r.si_kind;
       }
     | None -> None
   )
@@ -264,8 +264,11 @@ let search_funs_and_classes input ~limit ~on_class ~on_function =
     ~filter_map:begin fun _ _ res ->
       let name = res.SearchUtils.name in
       match res.SearchUtils.result_type with
-      | SearchUtils.Class _-> on_class name
-      | SearchUtils.Function -> on_function name
+      | SearchUtils.SI_Interface
+      | SearchUtils.SI_Trait
+      | SearchUtils.SI_Enum
+      | SearchUtils.SI_Class -> on_class name
+      | SearchUtils.SI_Function -> on_function name
       | _ -> None
     end
 
@@ -763,6 +766,7 @@ let get_autocomplete_kind
   | SI_Function -> Function_kind
   | SI_GlobalConstant -> Constant_kind
   | SI_XHP -> Class_kind
+  | SI_ClassMethod -> Method_kind
   (* This mapping isn't precise.  We should separate abstract kinds *)
   | SI_Class -> Class_kind
   (*
@@ -832,7 +836,7 @@ let find_global_results
         res_pos         = absolute_none; (* This is okay - resolve will fill it in *)
         res_replace_pos = replace_pos;
         res_base_class  = None;
-        res_ty          = (to_ty_string r);
+        res_ty          = (kind_to_string r.si_kind);
         res_name        = r.si_name;
         res_fullname    = r.si_fullname;
         res_kind        = (get_autocomplete_kind r);

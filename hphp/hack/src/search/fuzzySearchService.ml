@@ -13,12 +13,12 @@ module Make(S : SearchUtils.Searchable) = struct
 
 open SearchUtils
 
-type search_result_type = S.t
+type si_kind = S.t
 
 let all_types = S.fuzzy_types
 
 module TMap = MyMap.Make (struct
-  type t = search_result_type
+  type t = si_kind
   let compare = S.compare_result_type
 end)
 

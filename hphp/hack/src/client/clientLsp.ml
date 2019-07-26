@@ -1415,27 +1415,21 @@ let do_workspaceSymbol
   let%lwt results = rpc conn ref_unblocked_time command in
 
   let hack_to_lsp_kind = function
-    | SearchUtils.Class (Some Ast.Cabstract) -> SymbolInformation.Class
-    | SearchUtils.Class (Some Ast.Cnormal) -> SymbolInformation.Class
-    | SearchUtils.Class (Some Ast.Cinterface) -> SymbolInformation.Interface
-    | SearchUtils.Class (Some Ast.Ctrait) -> SymbolInformation.Interface
+    | SearchUtils.SI_Class -> SymbolInformation.Class
+    | SearchUtils.SI_Interface -> SymbolInformation.Interface
+    | SearchUtils.SI_Trait -> SymbolInformation.Interface
     (* LSP doesn't have traits, so we approximate with interface *)
-    | SearchUtils.Class (Some Ast.Cenum) -> SymbolInformation.Enum
+    | SearchUtils.SI_Enum -> SymbolInformation.Enum
     (* TODO(T36697624): Add SymbolInformation.Record *)
-    | SearchUtils.Class (Some Ast.Crecord) -> SymbolInformation.Enum
-    | SearchUtils.Class (None) -> assert false (* should never happen *)
-    | SearchUtils.Method _ -> SymbolInformation.Method
-    | SearchUtils.ClassVar _ -> SymbolInformation.Property
-    | SearchUtils.Function -> SymbolInformation.Function
-    | SearchUtils.Typedef -> SymbolInformation.Class
+    | SearchUtils.SI_ClassMethod -> SymbolInformation.Method
+    | SearchUtils.SI_Function -> SymbolInformation.Function
+    | SearchUtils.SI_Typedef -> SymbolInformation.Class
     (* LSP doesn't have typedef, so we approximate with class *)
-    | SearchUtils.Constant -> SymbolInformation.Constant
-    | SearchUtils.Namespace -> SymbolInformation.Namespace
-  in
-  let hack_to_lsp_container = function
-    | SearchUtils.Method (_, scope) -> Some scope
-    | SearchUtils.ClassVar (_, scope) -> Some scope
-    | _ -> None
+    | SearchUtils.SI_GlobalConstant -> SymbolInformation.Constant
+    | SearchUtils.SI_Namespace -> SymbolInformation.Namespace
+    | SearchUtils.SI_Unknown -> failwith "Unknown symbol kind"
+    | SearchUtils.SI_Mixed -> SymbolInformation.Variable
+    | SearchUtils.SI_XHP -> SymbolInformation.Class
   in
   (* Hack sometimes gives us back items with an empty path, by which it       *)
   (* intends "whichever path you asked me about". That would be meaningless   *)
@@ -1446,7 +1440,7 @@ let do_workspaceSymbol
       name = (Utils.strip_ns symbol.name);
       kind = hack_to_lsp_kind symbol.result_type;
       location = hack_pos_to_lsp_location symbol.pos ~default_path:"";
-      containerName = hack_to_lsp_container symbol.result_type;
+      containerName = None;
     }
   in
   Lwt.return (List.map results ~f:hack_symbol_to_lsp)

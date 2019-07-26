@@ -50,7 +50,7 @@ TypedValue shapes_idx(const Class* self, ArrayArg arr,
 }
 
 static struct ShapesExtension final : Extension {
-  ShapesExtension() : Extension("shapes", get_PHP_VERSION().c_str()) { }
+  ShapesExtension() : Extension("shapes") { }
 
   void moduleInit() override {
     HHVM_NAMED_STATIC_ME(HH\\Shapes, idx, shapes_idx);

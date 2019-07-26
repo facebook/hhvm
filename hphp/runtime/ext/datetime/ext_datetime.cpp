@@ -983,7 +983,7 @@ TypedValue date_sunrise_sunset(int64_t timestamp, int64_t format,
 #define DATE_W3C "Y-m-d\\TH:i:sP"
 
 static struct DateTimeExtension final : Extension {
-  DateTimeExtension() : Extension("date", get_PHP_VERSION().c_str()) { }
+  DateTimeExtension() : Extension("date") { }
 
   void moduleInit() override {
     HHVM_ME(DateTime, __construct);

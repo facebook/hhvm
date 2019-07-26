@@ -853,11 +853,11 @@ function extra_args($options): string {
   return $args;
 }
 
-function hhvm_cmd_impl($options, $config, ...$extra_args) {
+function hhvm_cmd_impl($options, $config, $test, ...$extra_args) {
   $modes = (array)mode_cmd($options);
 
   $cmds = array();
-  foreach ($modes as $mode) {
+  foreach ($modes as $mode_num => $mode) {
     $args = array(
       hhvm_path(),
       '-c',
@@ -865,6 +865,7 @@ function hhvm_cmd_impl($options, $config, ...$extra_args) {
       '-vEval.EnableArgsInBacktraces=true',
       '-vEval.EnableIntrinsicsExtension=true',
       '-vEval.HHIRInliningIgnoreHints=false',
+      '-vAutoload.DBPath='.escapeshellarg("$test.$mode_num.autoloadDB"),
       $mode,
       isset($options['wholecfg']) ? '-vEval.JitPGORegionSelector=wholecfg' : '',
 
@@ -954,7 +955,7 @@ function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
   $cmds = hhvm_cmd_impl(
     $options,
     find_test_ext($test, 'ini'),
-    '-vAutoload.DBPath='.escapeshellarg($test_run.'.autoloadDB'),
+    $test,
     $hdf,
     find_debug_config($test, 'hphpd.ini'),
     read_opts_file(find_test_ext($test, 'opts')),
@@ -1679,9 +1680,13 @@ function clean_intermediate_files($test, $options) {
     'before.round_trip.hhas',
     'after.round_trip.hhas',
     // temporary autoloader DB and associated cruft
-    'autoloadDB',
-    'autoloadDB-shm',
-    'autoloadDB-wal',
+    // We have at most two modes for now - see hhvm_cmd_impl
+    '0.autoloadDB',
+    '0.autoloadDB-shm',
+    '0.autoloadDB-wal',
+    '1.autoloadDB',
+    '1.autoloadDB-shm',
+    '1.autoloadDB-wal',
   );
   foreach ($exts as $ext) {
     $file = "$test.$ext";

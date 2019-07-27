@@ -326,6 +326,7 @@ let load config_filename options =
     ~po_disallowed_decl_fixmes:(prepare_disallowed_decl_fixmes config)
     ?po_allow_new_attribute_syntax:(bool_opt "allow_new_attribute_syntax" config)
     ?po_disable_legacy_attribute_syntax:(bool_opt "disable_legacy_attribute_syntax" config)
+    ?tco_const_attribute:(bool_opt "const_attribute" config)
     ()
   in
   Errors.ignored_fixme_codes :=

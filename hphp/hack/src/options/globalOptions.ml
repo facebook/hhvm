@@ -73,6 +73,7 @@ type t = {
   tco_global_inference : bool;
   tco_enable_const_static_props : bool;
   po_disable_legacy_attribute_syntax : bool;
+  tco_const_attribute : bool;
 } [@@deriving show]
 
 let tco_experimental_instanceof = "instanceof"
@@ -265,6 +266,7 @@ let default = {
   tco_global_inference = false;
   tco_enable_const_static_props = false;
   po_disable_legacy_attribute_syntax = false;
+  tco_const_attribute = false;
 }
 
 let make
@@ -332,6 +334,7 @@ let make
   ?(tco_global_inference = default.tco_global_inference)
   ?(tco_enable_const_static_props = default.tco_enable_const_static_props)
   ?(po_disable_legacy_attribute_syntax = default.po_disable_legacy_attribute_syntax)
+  ?(tco_const_attribute = default.tco_const_attribute)
   ()
 = {
   tco_safe_array;
@@ -399,6 +402,7 @@ let make
   tco_global_inference;
   tco_enable_const_static_props;
   po_disable_legacy_attribute_syntax;
+  tco_const_attribute;
 }
 let tco_safe_array t = t.tco_safe_array
 let tco_safe_vector_array t = t.tco_safe_vector_array
@@ -494,6 +498,8 @@ let tco_global_inference t = t.tco_global_inference
 let tco_enable_const_static_props t = t.tco_enable_const_static_props
 
 let po_disable_legacy_attribute_syntax t = t.po_disable_legacy_attribute_syntax
+
+let tco_const_attribute t = t.tco_const_attribute
 
 let setup_pocket_universes env enabled =
   let exp_features = env.tco_experimental_features in

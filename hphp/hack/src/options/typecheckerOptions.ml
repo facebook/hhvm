@@ -87,5 +87,5 @@ let disallow_invalid_arraykey_constraint = GlobalOptions.tco_disallow_invalid_ar
 let enable_constant_visibility_modifiers = GlobalOptions.po_enable_constant_visibility_modifiers
 let enable_const_static_props = GlobalOptions.tco_enable_const_static_props
 let use_lru_workers = GlobalOptions.tco_use_lru_workers
-
 let global_inference = GlobalOptions.tco_global_inference
+let const_attribute = GlobalOptions.tco_const_attribute

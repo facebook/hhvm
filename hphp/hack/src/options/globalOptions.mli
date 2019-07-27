@@ -293,6 +293,9 @@ type t = {
 
   (* Disable <<...>> attribute syntax *)
   po_disable_legacy_attribute_syntax : bool;
+
+  (* Allow <<__Const>> attribute *)
+  tco_const_attribute : bool;
 } [@@deriving show]
 
 val make :
@@ -360,6 +363,7 @@ val make :
   ?tco_global_inference : bool ->
   ?tco_enable_const_static_props : bool ->
   ?po_disable_legacy_attribute_syntax : bool ->
+  ?tco_const_attribute : bool ->
   unit ->
   t
 
@@ -451,3 +455,4 @@ val po_allow_new_attribute_syntax : t -> bool
 val tco_global_inference : t -> bool
 val tco_enable_const_static_props : t -> bool
 val po_disable_legacy_attribute_syntax : t -> bool
+val tco_const_attribute : t -> bool

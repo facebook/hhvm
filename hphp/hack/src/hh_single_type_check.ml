@@ -219,6 +219,7 @@ let parse_options () =
   let global_inference = ref false in
   let enable_const_static_props = ref false in
   let disable_legacy_attribute_syntax = ref false in
+  let const_attribute = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -477,6 +478,9 @@ let parse_options () =
     "--disable-legacy-attribute-syntax",
       Arg.Set disable_legacy_attribute_syntax,
       "Disable the legacy <<...>> user attribute syntax";
+    "--const-attribute",
+      Arg.Set const_attribute,
+      "Allow __Const attribute";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -525,6 +529,7 @@ let parse_options () =
     ~tco_global_inference:!global_inference
     ~tco_enable_const_static_props:!enable_const_static_props
     ~po_disable_legacy_attribute_syntax:!disable_legacy_attribute_syntax
+    ~tco_const_attribute:!const_attribute
     ()
   in
   let tcopt = {

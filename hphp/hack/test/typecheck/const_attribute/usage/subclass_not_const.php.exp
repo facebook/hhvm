@@ -1,2 +1,6 @@
 File "subclass_not_const.php", line 4, characters 7-7:
 Cannot use experimental feature: The __Const attribute is not supported. (Other[0000])
+File "subclass_not_const.php", line 7, characters 7-7:
+Cannot use experimental feature: The __Const attribute is not supported. (Other[0000])
+File "subclass_not_const.php", line 9, characters 7-7:
+Only __Const classes may extend a __Const class (Typing[4198])

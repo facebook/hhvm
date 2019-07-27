@@ -214,6 +214,7 @@ val anonymous_recursive_call : Pos.t -> unit
 val bad_call : Pos.t -> string -> unit
 val extend_final : Pos.t -> Pos.t -> string -> unit
 val extend_sealed : Pos.t -> Pos.t -> string -> string -> string -> unit
+val trait_prop_const_class : Pos.t -> string -> unit
 val extend_ppl : Pos.t -> string -> bool -> Pos.t -> string -> string -> string -> unit
 val read_before_write : Pos.t * string -> unit
 val interface_final : Pos.t -> unit

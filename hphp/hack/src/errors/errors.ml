@@ -2223,6 +2223,12 @@ let extend_sealed child_pos parent_pos parent_name parent_kind verb =
     parent_pos, "Declaration is here"
   ]
 
+let trait_prop_const_class pos x =
+  add (Typing.err_code Typing.TraitPropConstClass) pos (
+    "Trait declaration of non-const property "^x^
+    " is incompatible with a const class"
+  )
+
 let extend_ppl
   child_pos child_class_type child_is_ppl parent_pos parent_class_type parent_name verb =
   let name = (strip_ns parent_name) in

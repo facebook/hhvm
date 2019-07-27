@@ -1,10 +1,2 @@
-File "class.php", line 4, characters 7-14:
-Cannot use experimental feature: The __Const attribute is not supported. (Other[0000])
-File "class.php", line 7, characters 16-24:
-Cannot use experimental feature: The __Const attribute is not supported. (Other[0000])
-File "class.php", line 10, characters 13-18:
-Cannot use experimental feature: The __Const attribute is not supported. (Other[0000])
-File "class.php", line 13, characters 22-34:
-Cannot use experimental feature: The __Const attribute is not supported. (Other[0000])
 File "class.php", line 13, characters 22-34:
 Cannot apply __Const attribute to an abstract final class (NastCheck[3048])

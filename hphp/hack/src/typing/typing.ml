@@ -6203,6 +6203,15 @@ and check_parent_abstract position parent_type class_type =
       ~is_final position (Cls.typeconsts class_type);
   end else ()
 
+and check_const_trait_members pos env use_list =
+  let _, trait, _ = Decl_utils.unwrap_class_hint use_list in
+  match Env.get_class env trait with
+  | Some c when Cls.kind c = Ast.Ctrait ->
+    Sequence.iter (Cls.props c) begin fun (x, ce) ->
+      if not ce.ce_const then Errors.trait_prop_const_class pos x
+    end
+  | _ -> ()
+
 and shallow_decl_enabled () =
   TCO.shallow_class_decl (GlobalNamingOptions.get ())
 
@@ -6319,6 +6328,8 @@ and class_def_ env c tc =
         (if c.c_kind = Ast.Cenum then "enums" else "records"))
     | Ast.Cnormal -> ()
   end;
+  if Cls.const tc then
+    List.iter c.c_uses (check_const_trait_members pc env);
   let static_vars, vars = split_vars c in
   List.iter static_vars ~f:begin fun {cv_id=(p,id); _} ->
     check_static_class_element (Cls.get_prop tc) ~elt_type:`Property id p

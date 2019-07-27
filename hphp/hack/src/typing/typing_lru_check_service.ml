@@ -118,6 +118,7 @@ let go_with_interrupt
     (fnl: (Relative_path.t * FileInfo.names) list)
     ~(interrupt: 'a MultiWorker.interrupt_config)
     : (computation_kind, Errors.t, 'a) job_result =
+  Hh_logger.log "Using shared_lru workers to typecheck!";
   let fnl = List.map fnl ~f:(fun (path, names) -> path, Check names) in
   process_in_parallel
     dynamic_view_files

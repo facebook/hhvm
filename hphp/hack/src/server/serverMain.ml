@@ -837,9 +837,23 @@ let serve genv env in_fds =
  * 8. Otherwise, load it normally!
  *)
 let resolve_init_approach genv: ServerInit.init_approach * string =
+  match genv.local_config.ServerLocalConfig.remote_worker_key,
+        genv.local_config.ServerLocalConfig.remote_check_id with
+  | Some worker_key, Some check_id ->
+    let remote_init = ServerInit.{ worker_key; check_id; } in
+    (ServerInit.Remote_init remote_init), "Server_args_remote_worker"
+  | Some worker_key, None ->
+    let check_id = Random_id.short_string () in
+    let remote_init = ServerInit.{ worker_key; check_id; } in
+    (ServerInit.Remote_init remote_init), "Server_args_remote_worker"
+  | None, Some check_id ->
+    failwith (Printf.sprintf
+      "Remote check ID is specified (%s), but the remote worker ID is not"
+      check_id)
+  | None, None -> begin
   if ServerArgs.save_naming_filename genv.options <> None
-      && ServerArgs.save_filename genv.options = None
-    then ServerInit.Parse_only_init, "Server_args_saving_naming"
+      && ServerArgs.save_filename genv.options = None then
+    ServerInit.Parse_only_init, "Server_args_saving_naming"
   else if not genv.local_config.ServerLocalConfig.use_saved_state then
     ServerInit.Full_init, "Local_config_saved_state_disabled"
   else if ServerArgs.no_load genv.options then
@@ -867,6 +881,7 @@ let resolve_init_approach genv: ServerInit.init_approach * string =
         let use_canary = ServerArgs.load_state_canary genv.options in
         ServerInit.Saved_state_init (ServerInit.Load_state_natively use_canary),
         "Load_state_natively"
+  end
 
 let program_init genv env =
   Hh_logger.log "Init id: %s" env.init_env.init_id;
@@ -875,6 +890,7 @@ let program_init genv env =
   let env, init_type, init_error, state_distance =
     let env, init_result = ServerInit.init ~init_approach genv env in
     match init_approach with
+    | ServerInit.Remote_init _ -> env, "remote", None, None
     | ServerInit.Write_symbol_info
     | ServerInit.Full_init -> env, "fresh", None, None
     | ServerInit.Parse_only_init -> env, "parse-only", None, None

@@ -75,6 +75,17 @@
     sys_utils))
 
 (library
+  (name remote_worker_stubs)
+  (wrapped false)
+  (modules
+    remoteWorker)
+  (libraries
+    errors
+    file_info
+    relative_path
+    sys_utils))
+
+(library
   (name state_loader_stubs)
   (wrapped false)
   (modules

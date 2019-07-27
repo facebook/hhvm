@@ -22,10 +22,16 @@ type load_state_approach =
   | Load_state_natively of bool
   | Load_state_natively_with_target of ServerMonitorUtils.target_saved_state
 
+type remote_init = {
+  worker_key: string;
+  check_id: string;
+}
+
 type init_approach =
   | Full_init
   | Parse_only_init
   | Saved_state_init of load_state_approach
+  | Remote_init of remote_init
   | Write_symbol_info
 
 (** Docs are in .mli *)

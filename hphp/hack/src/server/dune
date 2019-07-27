@@ -249,6 +249,7 @@
     serverInitTypes
     serverLazyInit
     serverMain
+    serverRemoteInit
     serverRpc)
   (libraries
     build
@@ -257,6 +258,7 @@
     lwt
     parent
     provider_config
+    remote_worker_stubs
     server
     state_loader
     typing_symbol_info

@@ -16,10 +16,16 @@ type load_state_approach =
   (* Use the supplied saved state target to skip lookup in XDB. *)
   | Load_state_natively_with_target of ServerMonitorUtils.target_saved_state
 
+type remote_init = {
+  worker_key: string;
+  check_id: string;
+}
+
 type init_approach =
   | Full_init
   | Parse_only_init
   | Saved_state_init of load_state_approach
+  | Remote_init of remote_init
   | Write_symbol_info
 
 (* Saves the state that is used by init below and returns the number of

@@ -101,6 +101,22 @@ let init
   GlobalNamingOptions.set env.tcopt;
   let root = ServerArgs.root genv.options in
   let (env, t), init_result, skip_post_init = match lazy_lev, init_approach with
+    | _, Remote_init { worker_key; check_id; } ->
+      if not (ServerArgs.check_mode genv.options) then
+        failwith "Remote init is only supported in check (run once) mode";
+      let bin_root = Path.make(Filename.dirname Sys.argv.(0)) in
+      let (errorl, t) = ServerRemoteInit.init
+        genv.workers
+        env.tcopt
+        ~worker_key
+        ~check_id
+        ~bin_root
+        ~root
+      in
+      ({ env with errorl }, t),
+      Load_state_declined "Out-of-band naming table initialization only",
+      true
+
     | Init, Full_init ->
       ServerLazyInit.full_init genv env,
       Load_state_declined "No saved-state requested (for lazy init)",

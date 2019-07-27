@@ -760,5 +760,8 @@ let no_const_late_init_props =
 let no_const_static_props =
   "Static properties may not be __Const"
 
+let no_const_abstract_final_class =
+  "Cannot apply __Const attribute to an abstract final class"
+
 let no_legacy_attribute_syntax =
   "The <<...>> syntax for user attributes is not allowed. Use the @ syntax instead."

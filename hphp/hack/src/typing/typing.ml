@@ -6148,8 +6148,6 @@ and check_parent class_def class_type parent_type =
   let position = fst class_def.c_name in
   if Cls.const class_type && not (Cls.const parent_type)
   then Errors.self_const_parent_not position;
-  if Cls.const parent_type && not (Cls.const class_type)
-  then Errors.parent_const_self_not position;
   (* Are all the parents in Hack? Do we know all their methods?
    * If so, let's check that the abstract methods have been implemented.
    *)

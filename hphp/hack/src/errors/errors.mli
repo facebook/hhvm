@@ -80,7 +80,6 @@ val name_is_reserved : string -> Pos.t -> unit
 val dollardollar_unused : Pos.t -> unit
 val assigning_to_const : Pos.t -> unit
 val self_const_parent_not : Pos.t -> unit
-val parent_const_self_not : Pos.t -> unit
 val overriding_prop_const_mismatch : Pos.t -> bool -> Pos.t -> bool -> unit
 val method_name_already_bound : Pos.t -> string -> unit
 val error_name_already_bound : string -> string -> Pos.t -> Pos.t -> unit
@@ -446,7 +445,6 @@ val goto_invoked_in_finally : Pos.t -> unit
 val method_needs_visibility : Pos.t -> unit
 val dynamic_class_name_in_strict_mode : Pos.t -> unit
 val reading_from_append : Pos.t -> unit
-val const_attribute_prohibited : Pos.t -> string -> unit
 val nullable_cast : Pos.t -> string -> Pos.t -> unit
 val non_call_argument_in_suspend : Pos.t -> (Pos.t * string) list -> unit
 val non_coroutine_call_in_suspend : Pos.t -> (Pos.t * string) list -> unit

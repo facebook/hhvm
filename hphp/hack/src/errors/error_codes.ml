@@ -207,7 +207,7 @@ module NastCheck                            = struct
   | InoutParamsMemoize
   | InoutParamsRetByRefDEPRECATED
   | ReadingFromAppend
-  | ConstAttributeProhibited
+  | ConstAttributeProhibitedDEPRECATED
   | RetiredError3049DEPRECATED
   | InoutArgumentBadExpr
   | MutableParamsOutsideOfSyncDEPRECATED
@@ -444,7 +444,7 @@ module Typing                               = struct
   | InvalidIsAsExpressionHint
   | AssigningToConst
   | SelfConstParentNot
-  | ParentConstSelfNot
+  | ParentConstSelfNotDEPRECATED
   | PartiallyValidIsAsExpressionHintDEPRECATED
   | NonreactiveFunctionCall
   | NonreactiveIndexing

@@ -3146,6 +3146,14 @@ let classish_errors env node namespace_name names errors =
       then make_error_from_node node
         SyntaxError.no_const_interfaces_traits_enums :: errors
       else errors in
+    let errors =
+      if attr_spec_contains_const cd.classish_attribute &&
+        (is_token_kind cd.classish_keyword TokenKind.Class &&
+         list_contains_predicate is_abstract cd.classish_modifiers &&
+         list_contains_predicate is_final cd.classish_modifiers)
+      then make_error_from_node node
+        SyntaxError.no_const_abstract_final_class :: errors
+      else errors in
     let name = text cd.classish_name in
     let errors =
       match syntax cd.classish_body with

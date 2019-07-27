@@ -1489,10 +1489,6 @@ let inout_params_memoize fpos pos =
 let reading_from_append pos =
   add (NastCheck.err_code NastCheck.ReadingFromAppend) pos "Cannot use [] for reading"
 
-let const_attribute_prohibited pos kind =
-  add (NastCheck.err_code NastCheck.ConstAttributeProhibited) pos
-    ("Cannot apply __Const attribute to " ^ kind)
-
 let inout_argument_bad_expr pos =
   add (NastCheck.err_code NastCheck.InoutArgumentBadExpr) pos (
     "Arguments for inout parameters must be local variables or simple " ^
@@ -2928,10 +2924,6 @@ let assigning_to_const pos =
 let self_const_parent_not pos =
   add (Typing.err_code Typing.SelfConstParentNot) pos
     "A __Const class may only extend other __Const classes"
-
-let parent_const_self_not pos =
-  add (Typing.err_code Typing.ParentConstSelfNot) pos
-    "Only __Const classes may extend a __Const class"
 
 let overriding_prop_const_mismatch parent_pos parent_const child_pos child_const =
   let m1 = "This property is __Const" in

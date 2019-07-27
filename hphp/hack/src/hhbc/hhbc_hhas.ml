@@ -310,6 +310,7 @@ let string_of_fcall_flags fl =
   let fl = [
     if fl.has_unpack then "Unpack" else "";
     if fl.supports_async_eager_return then "SupportsAER" else "";
+    if fl.lock_while_unwinding then "LockWhileUnwinding" else "";
   ] in
   "<" ^ (String.concat ~sep:" " @@ List.filter ~f:(fun f -> f <> "") fl) ^ ">"
 

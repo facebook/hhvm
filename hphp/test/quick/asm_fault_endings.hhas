@@ -27,7 +27,7 @@
       NullUninit
       NullUninit
       String "ex"
-      FCallCtor <> 1 1 "" - ""
+      FCallCtor <LockWhileUnwinding> 1 1 "" - ""
       PopC
       LockObj
       Throw

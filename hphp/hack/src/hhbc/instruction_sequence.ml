@@ -42,6 +42,7 @@ let of_pair (i1, i2) = gather [i1; i2]
 let default_fcall_flags = {
   has_unpack = false;
   supports_async_eager_return = false;
+  lock_while_unwinding = false;
 }
 let make_fcall_args ?(flags=default_fcall_flags) ?(num_rets=1)
   ?(by_refs=[]) ?async_eager_label num_args =

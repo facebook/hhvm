@@ -33,6 +33,7 @@ type num_params = int
 type fcall_flags = {
   has_unpack : bool;
   supports_async_eager_return : bool;
+  lock_while_unwinding : bool;
 }
 type by_refs = bool list
 type fcall_args =

@@ -113,8 +113,8 @@ struct FCallArgs : FCallArgsBase {
     : FCallArgs(Flags::None, numArgs, 1, nullptr, NoBlockId, false) {}
   explicit FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
                      std::unique_ptr<uint8_t[]> byRefs,
-                     BlockId asyncEagerTarget, bool constructNoConst)
-    : FCallArgsBase(flags, numArgs, numRets, constructNoConst)
+                     BlockId asyncEagerTarget, bool lockWhileUnwinding)
+    : FCallArgsBase(flags, numArgs, numRets, lockWhileUnwinding)
     , asyncEagerTarget(asyncEagerTarget)
     , byRefs(std::move(byRefs)) {
     assertx(IMPLIES(asyncEagerTarget == NoBlockId,
@@ -122,7 +122,7 @@ struct FCallArgs : FCallArgsBase {
   }
   FCallArgs(const FCallArgs& o)
     : FCallArgs(o.flags, o.numArgs, o.numRets, nullptr, o.asyncEagerTarget,
-                o.constructNoConst) {
+                o.lockWhileUnwinding) {
     if (o.byRefs) {
       auto const numBytes = (numArgs + 7) / 8;
       byRefs = std::make_unique<uint8_t[]>(numBytes);
@@ -131,7 +131,7 @@ struct FCallArgs : FCallArgsBase {
   }
   FCallArgs(FCallArgs&& o)
     : FCallArgs(o.flags, o.numArgs, o.numRets, std::move(o.byRefs),
-                o.asyncEagerTarget, o.constructNoConst) {}
+                o.asyncEagerTarget, o.lockWhileUnwinding) {}
 
   bool enforceReffiness() const { return byRefs.get() != nullptr; }
   bool byRef(uint32_t i) const {
@@ -153,7 +153,7 @@ inline bool operator==(const FCallArgs& a, const FCallArgs& b) {
     a.flags == b.flags && a.numArgs == b.numArgs && a.numRets == b.numRets &&
     eq(a.byRefs.get(), b.byRefs.get(), (a.numArgs + 7) / 8) &&
     a.asyncEagerTarget == b.asyncEagerTarget &&
-    a.constructNoConst == b.constructNoConst;
+    a.lockWhileUnwinding == b.lockWhileUnwinding;
 }
 
 inline bool operator!=(const FCallArgs& a, const FCallArgs& b) {
@@ -240,7 +240,7 @@ struct hasher_impl {
       hash = HPHP::hash_int64_pair(hash, hash_br);
     }
     hash = HPHP::hash_int64_pair(hash, fca.asyncEagerTarget);
-    hash = HPHP::hash_int64_pair(hash, fca.constructNoConst);
+    hash = HPHP::hash_int64_pair(hash, fca.lockWhileUnwinding);
     return static_cast<size_t>(hash);
   }
 

@@ -65,7 +65,7 @@
     String "\\C::Field::stuff unknown atom access: "
     CGetL $atom
     Concat
-    FCallCtor <> 1 1 "0" - ""
+    FCallCtor <LockWhileUnwinding> 1 1 "0" - ""
     PopC
     LockObj
     Throw
@@ -97,7 +97,7 @@
     String "\\C::Field::name unknown atom access: "
     CGetL $atom
     Concat
-    FCallCtor <> 1 1 "0" - ""
+    FCallCtor <LockWhileUnwinding> 1 1 "0" - ""
     PopC
     LockObj
     Throw
@@ -129,7 +129,7 @@
     String "\\C::Field::default_value unknown atom access: "
     CGetL $atom
     Concat
-    FCallCtor <> 1 1 "0" - ""
+    FCallCtor <LockWhileUnwinding> 1 1 "0" - ""
     PopC
     LockObj
     Throw

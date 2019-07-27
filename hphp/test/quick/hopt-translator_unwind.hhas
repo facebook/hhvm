@@ -55,7 +55,7 @@
   NullUninit
   NullUninit
     String "hi"
-  FCallCtor <> 1 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 1 1 "" - ""
   PopC
   LockObj
   Throw
@@ -89,7 +89,7 @@
   NullUninit
   NullUninit
     CGetL $id
-  FCallCtor <> 1 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 1 1 "" - ""
   PopC
   LockObj
   RetC

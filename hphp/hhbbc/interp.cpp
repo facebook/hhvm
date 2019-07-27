@@ -3701,7 +3701,7 @@ bool fcallOptimizeChecks(
       // Optimize away the runtime reffiness check.
       reduce(env, fcallWithFCA(FCallArgs(
         fca.flags, fca.numArgs, fca.numRets, nullptr, fca.asyncEagerTarget,
-        fca.constructNoConst)));
+        fca.lockWhileUnwinding)));
       return true;
     }
   }
@@ -4532,9 +4532,9 @@ void in(ISS& env, const bc::FCallCtor& op) {
     return fcallUnknownImpl(env, op.fca);
   }
 
-  if (!op.fca.constructNoConst && !objMightHaveConstProps(obj)) {
+  if (op.fca.lockWhileUnwinding && !objMightHaveConstProps(obj)) {
     auto newFca = folly::copy(op.fca);
-    newFca.constructNoConst = true;
+    newFca.lockWhileUnwinding = false;
     return reduce(env, bc::FCallCtor { std::move(newFca), op.str2 });
   }
 

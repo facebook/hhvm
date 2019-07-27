@@ -845,7 +845,7 @@ and emit_new env pos (cid : A.class_id) (targs : Aast.targ list) (args : A.expr 
     instr_args;
     instr_uargs;
     emit_pos pos;
-    instr_fcallctor (get_fcall_args args uargs None);
+    instr_fcallctor (get_fcall_args ~lock_while_unwinding:true args uargs None);
     instr_popc;
     instr_lockobj
   ],
@@ -3015,11 +3015,13 @@ and emit_args_and_inout_setters env (args: A.expr list) =
     instr_args, empty
 
 (* Create fcall_args for a given call *)
-and get_fcall_args args uargs async_eager_label =
+and get_fcall_args ?(lock_while_unwinding=false) args uargs async_eager_label =
   let num_args = List.length args in
   let num_rets = List.fold_left args ~init:1
     ~f:(fun acc arg -> if is_inout_arg arg then acc + 1 else acc) in
-  let flags = { default_fcall_flags with has_unpack = uargs <> [] } in
+  let flags = { default_fcall_flags with has_unpack = uargs <> [];
+                                         lock_while_unwinding }
+  in
   let by_refs = List.map args expr_starts_with_ref in
   make_fcall_args ~flags ~num_rets ~by_refs ?async_eager_label num_args
 

@@ -43,7 +43,7 @@ dv_init2:
       Dup
       NullUninit
       NullUninit
-      FCallCtor <> 0 1 "" - ""
+      FCallCtor <LockWhileUnwinding> 0 1 "" - ""
       PopC
       LockObj
       Throw

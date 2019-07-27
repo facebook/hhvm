@@ -310,13 +310,13 @@ ALWAYS_INLINE void lockObjectWhileUnwinding(PC pc, Stack& stack) {
   auto const op = decode_op(pc);
   if (LIKELY(op != OpFCallCtor)) return;
   auto fca = decodeFCallArgs(op, pc);
-  if (fca.constructNoConst) return;
+  if (!fca.lockWhileUnwinding) return;
 
   // We just unwound from a constructor that was called from a new expression
   // (as opposed to via e.g. parent::__construct()). The object being
   // constructed is on the top of the stack, and needs to be locked.
   auto const obj = stack.top();
-  assertx(isObjectType(obj->m_type));
+  assertx(tvIsObject(obj));
   obj->m_data.pobj->lockObject();
 }
 

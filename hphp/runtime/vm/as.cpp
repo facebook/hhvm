@@ -1389,7 +1389,7 @@ LocalRange read_local_range(AsmState& as) {
 std::pair<FCallArgs::Flags, bool>
 read_fcall_flags(AsmState& as, Op thisOpcode) {
   uint8_t flags = 0;
-  bool constructNoConst = false;
+  bool lockWhileUnwinding = false;
 
   as.in.skipSpaceTab();
   as.in.expect('<');
@@ -1404,12 +1404,12 @@ read_fcall_flags(AsmState& as, Op thisOpcode) {
         continue;
       }
     }
-    if (flag == "NoConst") {
+    if (flag == "LockWhileUnwinding") {
       if (thisOpcode == Op::FCallCtor) {
-        constructNoConst = true;
+        lockWhileUnwinding = true;
         continue;
       } else {
-        as.error("FCall flag NoConst is only valid for FCallCtor");
+        as.error("FCall flag LockWhileUnwinding is only valid for FCallCtor");
       }
     }
     if (flag == "Unpack") { flags |= FCallArgs::HasUnpack; continue; }
@@ -1417,7 +1417,8 @@ read_fcall_flags(AsmState& as, Op thisOpcode) {
   }
   as.in.expectWs('>');
 
-  return std::make_pair(static_cast<FCallArgs::Flags>(flags), constructNoConst);
+  return std::make_pair(static_cast<FCallArgs::Flags>(flags),
+                        lockWhileUnwinding);
 }
 
 // Read a vector of booleans formatted as a quoted string of '0' and '1'.
@@ -1446,14 +1447,14 @@ std::unique_ptr<uint8_t[]> read_by_refs(AsmState& as, uint32_t numArgs) {
 std::tuple<FCallArgsBase, std::unique_ptr<uint8_t[]>, std::string>
 read_fcall_args(AsmState& as, Op thisOpcode) {
   FCallArgs::Flags flags;
-  bool constructNoConst;
-  std::tie(flags, constructNoConst) = read_fcall_flags(as, thisOpcode);
+  bool lockWhileUnwinding;
+  std::tie(flags, lockWhileUnwinding) = read_fcall_flags(as, thisOpcode);
   auto const numArgs = read_opcode_arg<uint32_t>(as);
   auto const numRets = read_opcode_arg<uint32_t>(as);
   auto byRefs = read_by_refs(as, numArgs);
   auto asyncEagerLabel = read_opcode_arg<std::string>(as);
   return std::make_tuple(
-    FCallArgsBase(flags, numArgs, numRets, constructNoConst),
+    FCallArgsBase(flags, numArgs, numRets, lockWhileUnwinding),
     std::move(byRefs),
     std::move(asyncEagerLabel)
   );

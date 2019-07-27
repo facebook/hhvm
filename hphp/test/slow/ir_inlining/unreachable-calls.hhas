@@ -69,7 +69,7 @@ end:
   Dup
   NullUninit
   NullUninit
-  FCallCtor <> 0 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" - ""
   PopC
   LockObj
   SetL $obj
@@ -89,7 +89,7 @@ cls2:
   Dup
   NullUninit
   NullUninit
-  FCallCtor <> 0 1 "" - ""
+  FCallCtor <LockWhileUnwinding> 0 1 "" - ""
   PopC
   LockObj
   SetL $obj

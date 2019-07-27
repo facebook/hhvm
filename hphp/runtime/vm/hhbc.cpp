@@ -1193,7 +1193,7 @@ std::string show(const FCallArgsBase& fca, const uint8_t* byRefsRaw,
   std::vector<std::string> flags;
   if (fca.hasUnpack()) flags.push_back("Unpack");
   if (fca.supportsAsyncEagerReturn()) flags.push_back("SupportsAER");
-  if (fca.constructNoConst) flags.push_back("NoConst");
+  if (fca.lockWhileUnwinding) flags.push_back("LockWhileUnwinding");
   return folly::sformat(
     "<{}> {} {} {} {}",
     folly::join(' ', flags), fca.numArgs, fca.numRets, byRefs, asyncEagerLabel

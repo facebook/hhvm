@@ -158,23 +158,25 @@ let type_check
     let count = (List.length files_to_check) in
     let logstring = Printf.sprintf "Type-check %d files" count in
     Hh_logger.log "Begin %s" logstring;
-
     let (errorl: Errors.t) =
-      let memory_cap = genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb in
-      match genv.lru_host_env with
-      | Some (lru_host_env) ->
-        Typing_lru_check_service.go
-          lru_host_env
-          env.tcopt
-          Relative_path.Set.empty
-          files_to_check
-      | None ->
-        Typing_check_service.go
-          genv.workers
-          env.tcopt
-          Relative_path.Set.empty
-          files_to_check
-          ~memory_cap
+      ServerCheckUtils.maybe_remote_type_check_without_interrupt
+        genv env files_to_check ~local:begin fun () ->
+          let memory_cap = genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb in
+          match genv.lru_host_env with
+          | Some (lru_host_env) ->
+            Typing_lru_check_service.go
+              lru_host_env
+              env.tcopt
+              Relative_path.Set.empty
+              files_to_check
+          | None ->
+            Typing_check_service.go
+              genv.workers
+              env.tcopt
+              Relative_path.Set.empty
+              files_to_check
+              ~memory_cap
+        end
     in
     let hs = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" hs;

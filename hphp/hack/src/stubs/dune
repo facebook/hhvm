@@ -63,6 +63,18 @@
     clientMessages))
 
 (library
+  (name remote_scheduler_stubs)
+  (wrapped false)
+  (modules
+    remoteScheduler)
+  (libraries
+    file_info
+    naming
+    procs_procs
+    relative_path
+    sys_utils))
+
+(library
   (name state_loader_stubs)
   (wrapped false)
   (modules

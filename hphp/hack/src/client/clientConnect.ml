@@ -191,6 +191,7 @@ let with_server_hung_up (f : unit -> 'a Lwt.t) : 'a Lwt.t =
 
 let rec connect
     ?(first_attempt=false)
+    ?(allow_macos_hack=true)
     (env : env)
     (start_time : float)
   : conn Lwt.t =
@@ -212,6 +213,7 @@ let rec connect
   HackEventLogger.client_connect_once connect_once_start_t;
   match conn with
   | Ok (ic, oc, server_finale_file) ->
+    let start = Unix.gettimeofday () in
     let%lwt () =
       if env.do_post_handoff_handshake then
         with_server_hung_up @@ fun () ->
@@ -220,13 +222,41 @@ let rec connect
       else
         Lwt.return_unit
     in
-    Lwt.return {
-      channels = (ic, oc);
-      server_finale_file;
-      conn_progress_callback = env.progress_callback;
-      conn_root = env.root;
-      conn_deadline = env.deadline;
-    }
+    let threshold = 2.0 in
+    if (Sys_utils.is_apple_os ()) && allow_macos_hack && (Unix.gettimeofday ()) -. start > threshold then (
+      (**
+        HACK: on MacOS, re-establish the connection if it took a long time
+        during the initial attempt.
+
+        The MacOS implementation of the server monitor does not appear to make a
+        graceful handoff of the client connection to the server main process.
+        If, after the handoff, the monitor closes its connection fd before the
+        server main attempts any reads, the server main's connection will go
+        stale for reads (i.e., reading will generate an EOF). This is the case
+        if the server needs to run a long typecheck phase before communication
+        with the client, e.g. for cold starts.
+
+        For shorter startup times, ServerMonitor.Sent_fds_collector attempts to
+        compensate for this issue by having the monitor wait a few seconds after
+        handoff before attempting to close its connection fd.
+
+        For longer startup times, a sufficient (if not exactly clean) workaround
+        is simply to have the client re-establish a connection.
+      *)
+      Printf.eprintf "Server connection took over %.1f seconds. Refreshing...\n" threshold;
+      (try Timeout.shutdown_connection ic with _ -> ());
+      Timeout.close_in_noerr ic;
+      Pervasives.close_out_noerr oc;
+      (* allow_macos_hack:false is a defensive measure against infinite connection loops *)
+      connect ~allow_macos_hack:false env start_time
+    ) else
+      Lwt.return {
+        channels = (ic, oc);
+        server_finale_file;
+        conn_progress_callback = env.progress_callback;
+        conn_root = env.root;
+        conn_deadline = env.deadline;
+      }
   | Error e ->
     if first_attempt then
       Printf.eprintf

@@ -1268,7 +1268,7 @@ static Variant preg_match_impl(const StringData* pattern,
                   );
                 } else {
                   if (subpat_names[i]) {
-                    result_set.set(String(subpat_names[i]), empty_string());
+                    result_set.set(String(subpat_names[i]), empty_string_tv());
                   }
                   result_set.append(empty_string());
                 }

@@ -1205,8 +1205,6 @@ int ExecutionContext::getLine() {
   return unit->getLineNumber(pc);
 }
 
-const StaticString s___call("__call");
-
 ActRec* ExecutionContext::getFrameAtDepthForDebuggerUnsafe(int frame) {
   auto fp = GetFrameForDebuggerUnsafe(frame);
   assertx(!fp || !fp->magicDispatch());

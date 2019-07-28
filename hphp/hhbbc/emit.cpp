@@ -56,7 +56,6 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString s_empty("");
 const StaticString s_invoke("__invoke");
 
 //////////////////////////////////////////////////////////////////////
@@ -1447,7 +1446,7 @@ void emit_class(EmitUnitState& state,
     std::get<1>(cls.srcInfo.loc),
     offset == kInvalidOffset ? ue.bcPos() : offset,
     cls.attrs,
-    cls.parentName ? cls.parentName : s_empty.get(),
+    cls.parentName ? cls.parentName : staticEmptyString(),
     cls.srcInfo.docComment
   );
   pce->setUserAttributes(cls.userAttributes);

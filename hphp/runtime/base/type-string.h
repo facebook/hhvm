@@ -515,6 +515,10 @@ ALWAYS_INLINE String empty_string() {
   return String::attach(staticEmptyString());
 }
 
+ALWAYS_INLINE TypedValue empty_string_tv() {
+  return make_tv<KindOfPersistentString>(staticEmptyString());
+}
+
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE String& asStrRef(tv_lval tv) {

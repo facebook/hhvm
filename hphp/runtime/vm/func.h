@@ -42,6 +42,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+extern const StaticString s___call;
+
 struct ActRec;
 struct Class;
 struct NamedEntity;
@@ -1421,7 +1423,6 @@ private:
     return static_cast<uint32_t>(arg) / kBitsPerQword - 1;
   }
   static constexpr int kBitsPerQword = 64;
-  static const StringData* s___call;
   static constexpr int kMagic = 0xba5eba11;
   static constexpr intptr_t kNeedsFullName = 0x1;
 

@@ -64,8 +64,9 @@ namespace HPHP {
 
 TRACE_SET_MOD(hhbc);
 
-const StringData*     Func::s___call       = makeStaticString("__call");
-std::atomic<bool>     Func::s_treadmill;
+const StaticString s___call("__call");
+
+std::atomic<bool> Func::s_treadmill;
 
 /*
  * FuncId high water mark and FuncId -> Func* table.

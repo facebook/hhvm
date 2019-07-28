@@ -36,6 +36,7 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 
 #include "hphp/runtime/vm/event-hook.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/method-lookup.h"
@@ -65,7 +66,6 @@ using std::string;
 
 const StaticString
   s_offsetExists("offsetExists"),
-  s___call("__call"),
   s___invoke("__invoke"),
   s_self("self"),
   s_parent("parent"),

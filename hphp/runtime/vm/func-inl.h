@@ -550,7 +550,7 @@ inline bool Func::isGenerated() const {
 }
 
 inline bool Func::isMagicCallMethod() const {
-  return m_name->isame(s___call);
+  return m_name->isame(s___call.get());
 }
 
 inline bool Func::isSpecial(const StringData* name) {

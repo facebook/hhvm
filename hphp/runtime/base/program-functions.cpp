@@ -740,7 +740,7 @@ init_command_line_globals(
     serverArr.set(s_REQUEST_START_TIME, now);
     serverArr.set(s_REQUEST_TIME, now);
     serverArr.set(s_REQUEST_TIME_FLOAT, now_double);
-    serverArr.set(s_DOCUMENT_ROOT, empty_string_variant_ref);
+    serverArr.set(s_DOCUMENT_ROOT, empty_string_tv());
     serverArr.set(s_SCRIPT_FILENAME, file);
     serverArr.set(s_SCRIPT_NAME, file);
     serverArr.set(s_PHP_SELF, file);

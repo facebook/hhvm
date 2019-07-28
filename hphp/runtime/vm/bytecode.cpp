@@ -164,7 +164,6 @@ void frame_free_locals_no_hook(ActRec* fp) {
   frame_free_locals_inl_no_hook(fp, fp->func()->numLocals());
 }
 
-const StaticString s___call("__call");
 const StaticString s_file("file");
 const StaticString s_line("line");
 

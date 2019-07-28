@@ -54,7 +54,6 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_Awaitable("HH\\Awaitable");
-const StaticString s_empty("");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -2185,7 +2184,7 @@ Type aempty_darray()  {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   return Type { BSDArrE };
 }
-Type sempty()         { return sval(s_empty.get()); }
+Type sempty()         { return sval(staticEmptyString()); }
 Type some_aempty()    { return Type { BPArrE }; }
 Type some_aempty_darray() {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
@@ -4206,7 +4205,7 @@ ArrKey disect_array_key(const Type& keyTy) {
     return ret;
   }
   if (keyTy.subtypeOf(BNull)) {
-    ret.s = s_empty.get();
+    ret.s = staticEmptyString();
     ret.type = sempty();
     ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
     return ret;

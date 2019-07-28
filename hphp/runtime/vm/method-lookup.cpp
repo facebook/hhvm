@@ -31,8 +31,6 @@ namespace HPHP {
 
 namespace {
 
-const StaticString s___call("__call");
-
 /*
  * Looks for a Func named methodName in any of the interfaces cls implements,
  * including cls if it is an interface. Returns nullptr if none was found,

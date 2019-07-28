@@ -49,21 +49,12 @@
 
 namespace HPHP {
 
-const Variant empty_string_variant_ref(staticEmptyString(),
-                                       Variant::PersistentStrInit{});
-
 using BlackHoleStorage = std::aligned_storage<
   sizeof(req::root<Variant>),
   alignof(req::root<Variant>)
 >::type;
 
 static RDS_LOCAL(BlackHoleStorage, bhStorage);
-
-///////////////////////////////////////////////////////////////////////////////
-// static strings
-
-const StaticString
-  s_scalar("scalar");
 
 ///////////////////////////////////////////////////////////////////////////////
 

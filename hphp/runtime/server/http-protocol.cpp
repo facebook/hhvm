@@ -244,7 +244,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   }
 
   if (shouldSetHttpRawPostData) {
-    php_global_set(s_HTTP_RAW_POST_DATA, empty_string_variant_ref);
+    php_global_set(s_HTTP_RAW_POST_DATA, empty_string());
   }
 
 #define X(name)                                       \
@@ -587,8 +587,8 @@ static void CopyServerInfo(Array& server,
   server.set(s_SERVER_PORT, transport->getServerPort());
   server.set(s_SERVER_SOFTWARE, transport->getServerSoftware());
   server.set(s_SERVER_PROTOCOL, "HTTP/" + transport->getHTTPVersion());
-  server.set(s_SERVER_ADMIN, empty_string_variant_ref);
-  server.set(s_SERVER_SIGNATURE, empty_string_variant_ref);
+  server.set(s_SERVER_ADMIN, empty_string_tv());
+  server.set(s_SERVER_SIGNATURE, empty_string_tv());
 }
 
 static void CopyRemoteInfo(Array& server, Transport *transport) {
@@ -739,10 +739,13 @@ static void CopyPathInfo(Array& server,
     }
     break;
   default:
-    server.set(s_REQUEST_METHOD, empty_string_variant_ref); break;
+    server.set(s_REQUEST_METHOD, empty_string_tv()); break;
   }
-  server.set(s_HTTPS, transport->isSSL() ? Variant(s_on) :
-                                           empty_string_variant_ref);
+  if (transport->isSSL()) {
+    server.set(s_HTTPS, s_on);
+  } else {
+    server.set(s_HTTPS, empty_string_tv());
+  }
   server.set(s_QUERY_STRING, r.queryString());
 
   server.set(s_argv, make_varray(r.queryString()));
@@ -845,8 +848,7 @@ void HttpProtocol::DecodeParameters(Array& variables, const char *data,
       register_variable(variables, (char*)sname.data(), value);
     } else if (!post) {
       String sname = url_decode(s, p - s);
-      register_variable(variables, (char*)sname.data(),
-                        empty_string_variant_ref);
+      register_variable(variables, (char*)sname.data(), empty_string());
     }
     s = p + 1;
   }
@@ -882,7 +884,7 @@ void HttpProtocol::DecodeCookies(Array& variables, char *data) {
         String sname = url_decode(var, strlen(var));
 
         register_variable(variables, (char*)sname.data(),
-                          empty_string_variant_ref, false);
+                          empty_string(), false);
       }
     }
 

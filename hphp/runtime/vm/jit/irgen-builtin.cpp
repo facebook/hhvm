@@ -79,7 +79,6 @@ const StaticString
   s_type_structure_classname("hh\\type_structure_classname"),
   s_is_list_like("hh\\is_list_like"),
   s_one("1"),
-  s_empty(""),
   s_container_first("HH\\Lib\\_Private\\Native\\first"),
   s_container_last("HH\\Lib\\_Private\\Native\\last"),
   s_container_first_key("HH\\Lib\\_Private\\Native\\first_key"),
@@ -311,7 +310,7 @@ SSATmp* opt_ini_get(IRGS& env, const ParamPrep& params) {
   if (value.isBoolean()) {
     return cns(
       env,
-      value.toBoolean() ? s_one.get() : s_empty.get()
+      value.toBoolean() ? s_one.get() : staticEmptyString()
     );
   }
   // ini_get() is now enhanced to return more than strings.

@@ -181,7 +181,7 @@ Array HHVM_FUNCTION(hphp_get_extension_info, const String& name) {
 
   ret.set(s_name,      name);
   ret.set(s_version,   ext ? ext->getVersion() : "");
-  ret.set(s_info,      empty_string_variant_ref);
+  ret.set(s_info,      empty_string_tv());
   ret.set(s_ini,       Array::Create());
   ret.set(s_constants, Array::Create());
   ret.set(s_functions, Array::Create());
@@ -2293,7 +2293,7 @@ Array get_class_info(const String& name) {
 
   Array ret;
   ret.set(s_name, make_tv<KindOfPersistentString>(cls->name()));
-  ret.set(s_extension, empty_string_variant_ref);
+  ret.set(s_extension, empty_string_tv());
   ret.set(s_parent, make_tv<KindOfPersistentString>(cls->preClass()->parent()));
 
   // interfaces

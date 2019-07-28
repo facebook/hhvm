@@ -155,14 +155,6 @@ inline ArrayData* MixedArray::addValNoAsserts(StringData* key, Cell data) {
   return this;
 }
 
-inline MixedArray::Elm& MixedArray::addKeyAndGetElem(StringData* key) {
-  strhash_t h = key->hash();
-  auto ei = findForNewInsert(h);
-  auto e = allocElm(ei);
-  e->setStrKey(key, h);
-  return *e;
-}
-
 template <class K>
 ArrayData* MixedArray::updateWithRef(K k, TypedValue data) {
   assertx(!isFull());

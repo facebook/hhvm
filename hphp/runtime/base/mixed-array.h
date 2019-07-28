@@ -765,8 +765,6 @@ private:
   ArrayData* addVal(StringData* key, Cell data);
   ArrayData* addValNoAsserts(StringData* key, Cell data);
 
-  Elm& addKeyAndGetElem(StringData* key);
-
   template <bool warn, class K> arr_lval addLvalImpl(K k);
   template <class K> ArrayData* update(K k, Cell data);
   template <class K> ArrayData* updateWithRef(K k, TypedValue data);

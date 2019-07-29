@@ -4002,75 +4002,41 @@ and call_parent_construct pos env el uel =
       make_call env (T.make_typed_expr fpos ctor_fty
         (T.Class_const (((pos, pty), T.CIparent), id))) tal tel tuel ty
 
-  (* Calling parent method *)
-  | Class_const ((pos, CIparent), m) ->
-      let env, tcid, ty1 = static_class_id ~check_constraints:false pos env [] CIparent in
+  (* Calling parent / class method *)
+  | Class_const ((pos, e1), m) ->
+      let env, tcid, ty1 = static_class_id ~check_constraints:(e1 <> CIparent) pos env [] e1 in
       let this_ty = (Reason.Rwitness fpos, TUtils.this_of (Env.get_self env)) in
-      if Env.is_static env
-      then begin
-        (* in static context, you can only call parent::foo() on static
-         * methods *)
-        let getter env k =
-          class_get ~is_method:true ~is_const:false ~explicit_tparams:tal
-            env ty1 m CIparent (fun (env, ty, decl_ty) ->
-              let (env, ty, decl_ty, _) = k (env, ty, decl_ty,None) in (env, ty, decl_ty)) in
-        let call_continuation env fty fty_decl =
-          let env = check_coroutine_call env fty in
-          call ~expected ~method_call_info:(TR.make_call_info ~receiver_is_self:false
-            ~is_static:true this_ty (snd m)) ~fty_decl p env fty el uel in
-        let env, ty, fty, tel, tuel = method_get_helper env getter call_continuation in
-        make_call env (T.make_typed_expr fpos fty
-          (T.Class_const (tcid, m))) tal tel tuel ty
-      end
-      else begin
-        (* in instance context, you can call parent:foo() on static
-         * methods as well as instance methods *)
-        if not(class_contains_smethod env ty1 m)
+      (* In static context, you can only call parent::foo() on static methods.
+       * In instance context, you can call parent:foo() on static
+       * methods as well as instance methods
+       *)
+      let is_static =
+        e1 <> CIparent || Env.is_static env || class_contains_smethod env ty1 m in
+      let getter =
+        if is_static
         then
-            (* parent::nonStaticFunc() is really weird. It's calling a method
-             * defined on the parent class, but $this is still the child class.
-             * We can deal with this by hijacking the continuation that
-             * calculates the SN.Typehints.this type *)
-            let k_lhs _ = this_ty in
-            let getter env k =
-              let env, method_, _, _ = obj_get_ ~is_method:true ~nullsafe:None ~obj_pos:pos
-                ~pos_params:(Some el) ~valkind:`other env ty1 CIparent m k k_lhs in
-              env, method_ in
-            let call_continuation env fty fty_decl =
-              let env = check_coroutine_call env fty in
-              call ~expected ~method_call_info:(TR.make_call_info ~receiver_is_self:false
-                ~is_static:false this_ty (snd m)) ~fty_decl p env fty el uel in
-            let env, method_, fty, tel, tuel = method_get_helper env getter call_continuation in
-            make_call env (T.make_typed_expr fpos fty (T.Class_const (tcid, m)))
-              tal tel tuel method_
+          fun env k ->
+            class_get ~is_method:true ~is_const:false ~explicit_tparams:tal env ty1 m e1
+            (fun (env, ty, decl_ty) ->
+             let (env, ty, decl_ty, _) = k (env, ty, decl_ty, None) in (env, ty, decl_ty))
         else
-            let getter env k =
-              class_get ~is_method:true ~is_const:false
-                ~explicit_tparams:tal env ty1 m CIparent
-                (fun (env, ty, decl_ty) ->
-                  let (env, ty, decl_ty, _) = k (env, ty, decl_ty, None) in (env, ty, decl_ty)) in
-            let call_continuation env fty fty_decl =
-              let env = check_coroutine_call env fty in
-              call ~expected ~method_call_info:(TR.make_call_info ~receiver_is_self:false
-                ~is_static:true this_ty (snd m)) ~fty_decl p env fty el uel in
-            let env, ty, fty, tel, tuel = method_get_helper env getter call_continuation in
-            make_call  env (T.make_typed_expr fpos fty
-              (T.Class_const (tcid, m))) tal tel tuel ty
-      end
-  (* Call class method *)
-  | Class_const ((pid, e1), m) ->
-      let env, te1, ty1 = static_class_id ~check_constraints:true pid env [] e1 in
-      let getter env k =
-        class_get ~is_method:true ~is_const:false ~explicit_tparams:tal
-          env ty1 m e1 (fun (env, ty, decl_ty) ->
-            let (env, ty, decl_ty, _) = k (env, ty, decl_ty, None) in (env, ty, decl_ty)) in
+          (* parent::nonStaticFunc() is really weird. It's calling a method
+           * defined on the parent class, but $this is still the child class.
+           * We can deal with this by hijacking the continuation that
+           * calculates the SN.Typehints.this type *)
+          let k_lhs _ = this_ty in
+          fun env k ->
+            let env, method_, _, _ = obj_get_ ~is_method:true ~nullsafe:None ~obj_pos:pos
+              ~pos_params:(Some el) ~valkind:`other env ty1 e1 m k k_lhs in
+            env, method_ in
       let call_continuation env fty fty_decl =
         let env = check_coroutine_call env fty in
+        let ty = if e1 = CIparent then this_ty else ty1 in
         call ~expected ~method_call_info:(TR.make_call_info ~receiver_is_self:(e1 = CIself)
-          ~is_static:true ty1 (snd m)) ~fty_decl p env fty el uel in
-      let env, ty, tfty, tel, tuel = method_get_helper env getter call_continuation in
-      make_call env (T.make_typed_expr fpos tfty
-        (T.Class_const(te1, m))) tal tel tuel ty
+          ~is_static ty (snd m)) ~fty_decl p env fty el uel in
+      let env, method_, fty, tel, tuel = method_get_helper env getter call_continuation in
+      make_call env (T.make_typed_expr fpos fty (T.Class_const (tcid, m))) tal tel tuel method_
+
   (* <<__PPL>>: sample, factor, observe, condition *)
   | Id (pos, id) when env.Env.inside_ppl_class && SN.PPLFunctions.is_reserved id ->
       let m = (pos, String_utils.lstrip id "\\") in

@@ -167,6 +167,7 @@ macro_rules! parse {
 
                 let try_parse = move || {
                     let stack_limit = std::rc::Rc::new(StackLimit::relative(relative_stack_size));
+                    stack_limit.reset();
                     let source_text = SourceText::make_with_raw(
                         &file_path.as_str(),
                         &content.data(),

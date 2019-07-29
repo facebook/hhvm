@@ -19,6 +19,7 @@ pub struct StackLimit {
 /// # Usage:
 /// ```
 /// let limit = std::sync::Arc::new(StackLimit::relative(3_000_000)); // some thread
+/// limit.reset(); // set the baseline (when the stack is low)
 /// let deeply_recursive_task = || {
 ///      if limit.check_exceeded() {
 ///          // terminate (*resets* the internal state but not the "exceeded" flag)
@@ -60,7 +61,6 @@ impl StackLimit {
         if overflow {
             // Note: we never store false, so Release constraint (write reordering suffices)
             self.overflow.store(true, Ordering::Release);
-            StackGuard::reset();
         }
         overflow
     }

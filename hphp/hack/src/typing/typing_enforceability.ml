@@ -103,6 +103,8 @@ and pessimize_targs env targs tparams =
 and pessimize_wrap env ty =
   let ty = pessimize_type env ty in
   match ty with
+  | _, Terr
+  | _, Tany -> ty (* like Tany is useless *)
   | _, Tlike _ -> ty
   | _, Tgeneric x when Env.get_reified env x <> Nast.Reified -> ty
   | _, Tapply ((_, x), []) when x = Naming_special_names.Typehints.wildcard -> ty

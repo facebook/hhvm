@@ -1,5 +1,5 @@
 File "tvarray_or_darray.php", line 5, characters 3-13:
-  varray_or_darray<~_>
+  varray_or_darray<_>
 File "tvarray_or_darray.php", line 9, characters 3-13:
   varray_or_darray<~int>
 No errors

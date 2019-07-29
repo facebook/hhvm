@@ -1,7 +1,7 @@
 File "tdarray.php", line 6, characters 10-11:
 Invalid return type (Typing[4110])
 File "tdarray.php", line 5, characters 37-42:
-Expected darray<~_, ~_>
+Expected darray<_, _>
 File "tdarray.php", line 5, characters 25-30:
 But got dynamic because it is an unenforceable type
 File "tdarray.php", line 10, characters 10-11:

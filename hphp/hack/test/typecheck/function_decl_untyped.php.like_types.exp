@@ -1,7 +1,7 @@
 File "function_decl_untyped.php--partial.php", line 4, characters 3-23:
-  AsyncGenerator<~_, ~_, ~_>
+  AsyncGenerator<_, _, _>
 File "function_decl_untyped.php--partial.php", line 5, characters 3-18:
-  Generator<~_, ~_, ~_>
+  Generator<_, _, _>
 File "function_decl_untyped.php--partial.php", line 6, characters 3-20:
   Awaitable<_>
 File "function_decl_untyped.php--partial.php", line 7, characters 3-19:

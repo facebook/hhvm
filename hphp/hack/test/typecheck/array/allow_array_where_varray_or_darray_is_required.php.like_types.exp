@@ -1,6 +1,1 @@
-File "allow_array_where_varray_or_darray_is_required.php", line 11, characters 35-56:
-Invalid argument (Typing[4110])
-File "allow_array_where_varray_or_darray_is_required.php", line 4, characters 42-57:
-Expected varray_or_darray<~_>
-File "allow_array_where_varray_or_darray_is_required.php", line 6, characters 34-38:
-But got array
+No errors

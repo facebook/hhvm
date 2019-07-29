@@ -71,6 +71,7 @@ let get_positional_info (cst : Syntax.t) (file_offset : int) : ((int * int) * in
     end
 
 let get_occurrence_info ast tast (line, char) occurrence =
+  let ast = Some ast in
   let def_opt = ServerSymbolDefinition.go ast occurrence in
   ServerInferType.type_at_pos tast line char
   >>= fun (env, ty) ->

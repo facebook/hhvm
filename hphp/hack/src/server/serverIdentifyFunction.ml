@@ -52,7 +52,7 @@ let rec take_best_suggestions l = match l with
 let go content line char (tcopt : TypecheckerOptions.t) =
   get_occurrence_and_map tcopt content line char ~f:(fun path _ symbols ->
     let symbols = take_best_suggestions (List.sort by_nesting symbols) in
-    let ast = Ast_provider.get_ast path in
+    let ast = Some (Ast_provider.get_ast path) in
     let result = List.map symbols ~f:(fun x ->
       let symbol_definition = ServerSymbolDefinition.go ast x in
       x, symbol_definition)
@@ -72,7 +72,7 @@ let go_ctx
     ~(entry : ServerIdeContext.entry)
     ~(line : int)
     ~(column : int) =
-  let ast = ServerIdeContext.get_ast entry in
+  let ast = Some (ServerIdeContext.get_ast entry) in
   let tast = ServerIdeContext.get_tast entry in
   let symbols = IdentifySymbolService.go tast line column in
   let symbols = take_best_suggestions (List.sort by_nesting symbols) in

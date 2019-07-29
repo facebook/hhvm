@@ -11,33 +11,60 @@ open Core_kernel
 open Hh_json
 open Tast
 open Typing_symbol_json_builder
+open SymbolOccurrence
 module Bucket = Hack_bucket
+
+let get_localvars fn_def lv_acc =
+  let process_lv symbol = {
+      lv_name = symbol.name;
+      lv_definition = symbol.pos;
+      lvs = [symbol];
+    }
+  in
+  let symbols = IdentifySymbolService.all_symbols [fn_def] in
+  let new_lvs = List.fold symbols ~init:[] ~f:begin fun acc symbol ->
+    match symbol.type_ with
+    | LocalVar ->
+      if List.exists ~f:(fun x -> x.lv_name = symbol.name) acc
+      then (* if we found a localvar already, update it *)
+        List.map acc ~f:begin fun lv ->
+          if lv.lv_name = symbol.name
+          then { lv with lvs = symbol::lv.lvs }
+          else lv
+        end
+      else (* found a new localvar - must be the definition *)
+        (process_lv symbol)::acc
+    | _ -> acc
+  end in
+  new_lvs @ lv_acc
 
 let get_decls
   (tast: (Relative_path.t * Tast.program) list)
-  : decls =
-  let empty_decls = Typing_symbol_json_builder.default_decls in
-  List.fold tast ~init:empty_decls ~f:begin fun acc (_,prog) ->
-    List.fold prog ~init:acc ~f:begin fun acc2 def ->
-      let {funs=acc_funs; classes=acc_clss; typedefs=acc_typedef; consts=acc_consts} = acc2 in
-      match def with
-      | Fun f -> { acc2 with funs = f::acc_funs }
-      | Class c  -> { acc2 with classes = c::acc_clss }
-      | Typedef t  -> { acc2 with typedefs = t::acc_typedef }
-      | Constant g -> { acc2 with consts = g::acc_consts }
-      | _ -> acc2
-    end
-  end
+  : symbol_occurrences =
+  let all_decls, all_defs, all_lvs =
+    List.fold tast ~init:([],[],[])
+      ~f:begin fun (decl_acc, def_acc, lvs_acc) (_, prog) ->
+        List.fold prog ~init:(decl_acc, def_acc, lvs_acc)
+          ~f:begin fun (decls, defs, lvs) def ->
+            match def with
+            | Class _
+            | Typedef _
+            | Constant _ -> def::decls, def::defs, lvs
+            | Fun _ -> def::decls, def::defs, get_localvars def lvs
+            | _ -> decls, def::defs, lvs
+          end
+      end in
+  let symbols = IdentifySymbolService.all_symbols all_defs in
+  { decls = all_decls; occurrences = symbols; localvars = all_lvs }
 
 let write_json
     (tcopt: TypecheckerOptions.t)
     (file_dir: string)
     (tast_lst: (Relative_path.t * Tast.program) list)
   : unit =
-
-  let decls = get_decls tast_lst in
-  let json_chunks = Typing_symbol_json_builder.build_json tcopt decls in
-  let _, channel = Filename.open_temp_file ~temp_dir:file_dir (file_dir ^ "_chunk_") ".json" in
+  let symbol_occurrences = get_decls tast_lst in
+  let json_chunks = Typing_symbol_json_builder.build_json tcopt symbol_occurrences in
+  let _, channel = Filename.open_temp_file ~temp_dir:file_dir ("glean_symbol_info_chunk_") ".json" in
   let json = JSON_Array(json_chunks) in
   Out_channel.output_string channel (json_to_string ~pretty:true json);
   Out_channel.close channel

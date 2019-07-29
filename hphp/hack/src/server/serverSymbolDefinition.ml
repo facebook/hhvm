@@ -157,8 +157,11 @@ let go ast result =
       Cls.get_typeconst class_ typeconst_name >>= fun m ->
       get_member_def (Typeconst, m.ttc_origin, typeconst_name)
     | SymbolOccurrence.LocalVar ->
-      get_local_var_def
-        ast result.SymbolOccurrence.name result.SymbolOccurrence.pos
+      begin match ast with
+        | None -> None
+        | Some ast -> get_local_var_def
+            ast result.SymbolOccurrence.name result.SymbolOccurrence.pos
+      end
 
 let get_definition_cst_node_from_pos kind source_text pos =
   let tree = if Ide_parser_cache.is_enabled () then

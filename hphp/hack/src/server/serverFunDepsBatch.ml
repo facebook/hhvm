@@ -162,6 +162,7 @@ let handlers = {
     Ast_provider.get_ast ~full:true fn
   end;
   S.map_result = begin fun ast refs ->
+    let ast = Some ast in
     Results.elements refs
     |> List.map ~f:(ServerSymbolDefinition.go ast)
     |> List.sort ~compare

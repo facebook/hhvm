@@ -229,7 +229,7 @@ class TestLsp(TestCase[LspTestDriver]):
             + json.dumps(observed_transcript, indent=2, separators=(",", ": ")),
         )
         for i in range(len(expected_items)):
-            self.assertEqual(observed_items[i], expected_items[i])
+            self.assertEqual(expected_items[i], observed_items[i])
 
     def throw_on_skip(self, transcript: Transcript) -> None:
         failure_messages = ["Server busy", "timed out"]

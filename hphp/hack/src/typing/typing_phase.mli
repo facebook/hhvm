@@ -47,7 +47,7 @@ val localize_generic_parameters_with_bounds:
   ety_env:expand_env ->
   Env.env ->
   Nast.tparam list ->
-  Env.env * (locl ty * Ast.constraint_kind * locl ty) list
+  Env.env * (locl ty * Ast_defs.constraint_kind * locl ty) list
 val localize_where_constraints:
   ety_env:expand_env ->
   Env.env ->

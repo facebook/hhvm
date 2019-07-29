@@ -125,13 +125,13 @@ class gatherer env = object (self) inherit [_] Nast.reduce as parent
   method! on_Binop () bop e1 e2 =
     let delta = parent#on_Binop () bop e1 e2 in
     match bop with
-    | Ast.Eq None ->
+    | Ast_defs.Eq None ->
       let (_, e1) = e1 in
       begin match e1 with
       | Lvar (_, id) -> self#add_local id delta
       | _ -> delta
       end
-    | Ast.Barbar | Ast.Ampamp -> self#on_expr () e1
+    | Ast_defs.Barbar | Ast_defs.Ampamp -> self#on_expr () e1
     | _ -> delta
 
   method might_throw delta =

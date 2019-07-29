@@ -13,7 +13,7 @@ open Tast
 let check_tparams tps =
   let check_tparam tp =
     match tp.tp_variance with
-    | Ast.Invariant -> ()
+    | Ast_defs.Invariant -> ()
     | _ -> Errors.method_variance (fst tp.tp_name)
   in List.iter tps check_tparam
 

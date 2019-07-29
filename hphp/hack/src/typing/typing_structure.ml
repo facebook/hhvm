@@ -57,7 +57,7 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
       let is_generic =
         match snd ty with Tabstract (AKgeneric _, _) -> true | _ -> false in
       let transform_shape_field field { sft_ty; _ } (env, shape) =
-        let open Ast in
+        let open Ast_defs in
 
         (* Accumulates the provided type for this iteration of the fold, adding
            it to the accumulation ShapeMap for the current field. Since the

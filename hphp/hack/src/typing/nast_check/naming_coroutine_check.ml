@@ -12,15 +12,15 @@ open Nast
 open Nast_check_env
 
 let is_coroutine env =
-  env.function_kind = Some Ast.FCoroutine
+  env.function_kind = Some Ast_defs.FCoroutine
 
 let is_generator env =
   let fun_kind = env.function_kind in
-  fun_kind = Some Ast.FGenerator || fun_kind = Some Ast.FAsyncGenerator
+  fun_kind = Some Ast_defs.FGenerator || fun_kind = Some Ast_defs.FAsyncGenerator
 
 let is_sync env =
   let fun_kind = env.function_kind in
-  fun_kind = Some Ast.FGenerator || fun_kind = Some Ast.FSync
+  fun_kind = Some Ast_defs.FGenerator || fun_kind = Some Ast_defs.FSync
 
 let handler = object
   inherit Nast_visitor.handler_base

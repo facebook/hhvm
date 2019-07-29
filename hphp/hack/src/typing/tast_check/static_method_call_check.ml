@@ -38,7 +38,7 @@ let handler = object
              * self:: is in the context of the non-trait "use"-ing
              * the trait's code *)
             begin match Env.get_class env self with
-              | Some cls when Cls.kind cls = Ast.Ctrait -> ()
+              | Some cls when Cls.kind cls = Ast_defs.Ctrait -> ()
               | _ -> Errors.self_abstract_call (snd m) p (Reason.to_pos (fst fty))
             end
           | _ -> ()

@@ -73,13 +73,13 @@ let visitor = object(this)
   inherit [_] Tast_visitor.iter_with_state as super
 
   method! on_expr (env, ctx) ((p, ty), e as te) = match e with
-    | Unop (Ast.Unot, e) | Assert (AE_assert e) ->
+    | Unop (Ast_defs.Unot, e) | Assert (AE_assert e) ->
       this#on_expr (env, disallow_non_nullable_awaitable ctx) e
-    | Binop (Ast.(Eqeq | Eqeqeq | Diff | Diff2 | Barbar | Ampamp | LogXor),
+    | Binop (Ast_defs.(Eqeq | Eqeqeq | Diff | Diff2 | Barbar | Ampamp | LogXor),
              e1, e2) ->
       this#on_expr (env, disallow_non_nullable_awaitable ctx) e1;
       this#on_expr (env, disallow_non_nullable_awaitable ctx) e2
-    | Binop (Ast.QuestionQuestion, e1, e2) ->
+    | Binop (Ast_defs.QuestionQuestion, e1, e2) ->
       this#on_expr (env, disallow_non_nullable_awaitable ctx) e1;
       this#on_expr (env, ctx) e2
     | Eif (e1, e2, e3) ->
@@ -107,7 +107,7 @@ let visitor = object(this)
       super#on_expr (env, allow_awaitable) te
 
   method! on_stmt (env, ctx) stmt = match snd stmt with
-    | Expr (_, Binop (Ast.Eq _, _, _) as e) ->
+    | Expr (_, Binop (Ast_defs.Eq _, _, _) as e) ->
       this#on_expr (env, allow_awaitable) e
     | Expr e ->
       this#on_expr (env, disallow_awaitable ctx) e

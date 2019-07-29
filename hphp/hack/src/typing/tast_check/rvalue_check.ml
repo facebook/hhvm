@@ -58,7 +58,7 @@ let visitor = object(this)
     non_returning_allowed := is_non_returning_allowed
 
   method! on_expr env ((p, ty), e as te) = match e with
-    | Binop (Ast.Eq None, e1, e2) ->
+    | Binop (Ast_defs.Eq None, e1, e2) ->
       this#allow_non_returning (fun () -> this#on_expr env e1);
       this#disallow_non_returning (fun () -> this#on_expr env e2)
     | Eif (e1, e2, e3) ->

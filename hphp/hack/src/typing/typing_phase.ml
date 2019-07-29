@@ -363,13 +363,13 @@ and localize_ft ?(instantiation) ~ety_env env ft =
         add them to the environment here, and reset the environment later.
       *)
       let env = match ck with
-      | Ast.Constraint_as ->
+      | Ast_defs.Constraint_as ->
         Env.add_upper_bound env name_str ty
-      | Ast.Constraint_super ->
+      | Ast_defs.Constraint_super ->
         Env.add_lower_bound env name_str ty
-      | Ast.Constraint_eq ->
+      | Ast_defs.Constraint_eq ->
         Env.add_upper_bound (Env.add_lower_bound env name_str ty) name_str ty
-      | Ast.Constraint_pu_from -> failwith "TODO(T36532263): Pocket Universes" in
+      | Ast_defs.Constraint_pu_from -> failwith "TODO(T36532263): Pocket Universes" in
       env, (ck, ty)
     end in
     env, { t with tp_constraints = cstrl }

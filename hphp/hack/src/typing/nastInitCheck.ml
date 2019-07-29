@@ -173,7 +173,7 @@ let rec class_ tenv c =
   if c.c_mode = FileInfo.Mdecl then () else
   let c_constructor, _, _ = split_methods c in
   match c_constructor with
-  | _ when c.c_kind = Ast.Cinterface -> ()
+  | _ when c.c_kind = Ast_defs.Cinterface -> ()
   | Some { m_body =
       { fb_annotation = Annotations.FuncBodyAnnotation.NamedWithUnsafeBlocks; _ }; _ } -> ()
   | _ -> (
@@ -205,7 +205,7 @@ let rec class_ tenv c =
       | S.Set inits ->
         check_inits inits in
 
-    if c.c_kind = Ast.Ctrait || c.c_kind = Ast.Cabstract
+    if c.c_kind = Ast_defs.Ctrait || c.c_kind = Ast_defs.Cabstract
     then begin
       let has_constructor = match c_constructor with
         | None -> false
@@ -471,11 +471,11 @@ and expr_ env acc p e =
     expr acc e2
   | Cast (_, e)
   | Unop (_, e) -> expr acc e
-  | Binop (Ast.Eq None, e1, e2) ->
+  | Binop (Ast_defs.Eq None, e1, e2) ->
       let acc = expr acc e2 in
       assign_expr env acc e1
-  | Binop (Ast.Ampamp, e, _)
-  | Binop (Ast.Barbar, e, _) ->
+  | Binop (Ast_defs.Ampamp, e, _)
+  | Binop (Ast_defs.Barbar, e, _) ->
       expr acc e
   | Binop (_, e1, e2) ->
       let acc = expr acc e1 in

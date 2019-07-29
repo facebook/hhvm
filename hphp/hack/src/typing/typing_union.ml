@@ -300,10 +300,10 @@ and union_tylists_w_variances env tparams tyl1 tyl2 =
       let len = List.length l in
       if len < newlen then l @ (List.init (newlen - len) (fun _ -> filler))
       else List.sub l 0 newlen in
-    adjust_list_length variances (List.length tyl1) Ast.Invariant in
+    adjust_list_length variances (List.length tyl1) Ast_defs.Invariant in
   let merge_ty_params env ty1 ty2 variance =
     match variance with
-    | Ast.Covariant -> union env ty1 ty2
+    | Ast_defs.Covariant -> union env ty1 ty2
     | _ -> ty_equiv env ty1 ty2 ~are_ty_param:true in
   let env, tyl = try List.map3_env env tyl1 tyl2 variances ~f:merge_ty_params
     with Not_equiv | Invalid_argument _ -> raise Dont_unify in

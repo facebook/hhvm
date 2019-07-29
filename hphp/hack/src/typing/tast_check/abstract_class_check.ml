@@ -20,7 +20,7 @@ let check_expr env (pos, e) =
     when construct = SN.Members.__construct ->
     let tenv = Env.tast_env_as_typing_env env in
     begin match Env.get_class env (Typing_env.get_parent_id tenv) with
-    | Some parent_class when Cls.kind parent_class = Ast.Cabstract ->
+    | Some parent_class when Cls.kind parent_class = Ast_defs.Cabstract ->
       if fst (Cls.construct parent_class) = None then
         Errors.parent_abstract_call construct (fst pos) (Cls.pos parent_class);
     | _ -> ()
@@ -36,7 +36,7 @@ let check_method_body env m =
   then Errors.not_abstract_without_body m.m_name
 
 let check_class _ c =
-  if c.c_kind = Ast.Cabstract && c.c_final then begin
+  if c.c_kind = Ast_defs.Cabstract && c.c_final then begin
     let err m =
       Errors.nonstatic_method_in_abstract_final_class (fst m.m_name) in
     let c_constructor, _, c_methods = split_methods c in

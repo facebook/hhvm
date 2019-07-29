@@ -129,7 +129,7 @@ and freshen_tparams env variancel tyl =
     | variance::variancel, ty::tyl ->
       let env, tyl = freshen_tparams env variancel tyl in
       let env, ty =
-        if variance = Ast.Invariant then env,ty
+        if variance = Ast_defs.Invariant then env,ty
         else freshen_ty env ty in
       env, ty::tyl
     | _ ->
@@ -370,7 +370,7 @@ let ty_equal_shallow ty1 ty2 =
   | Tshape (shape_kind1, fdm1), Tshape (shape_kind2, fdm2) ->
     shape_kind1 = shape_kind2 &&
     List.compare (fun (k1,v1) (k2,v2) ->
-      match Ast.ShapeField.compare k1 k2 with
+      match Ast_defs.ShapeField.compare k1 k2 with
       | 0 -> compare v1.sft_optional v2.sft_optional
       | n -> n)
       (ShapeFieldMap.elements fdm1) (ShapeFieldMap.elements fdm2) = 0

@@ -116,13 +116,13 @@ val is_visible :
     {class_id_}, if provided) allows the current class (the one returned by
     {!get_self}) to access its members with the given {visibility}. *)
 
-val assert_nontrivial : Pos.t -> Ast.bop -> env -> Tast.ty -> Tast.ty -> unit
+val assert_nontrivial : Pos.t -> Ast_defs.bop -> env -> Tast.ty -> Tast.ty -> unit
 (** Assert that the types of values involved in a strict (non-)equality
     comparison are compatible; e.g., that the types are not statically
     known to be disjoint, in which case the comparison will always return
     true or false. *)
 
-val assert_nullable : Pos.t -> Ast.bop -> env -> Tast.ty -> unit
+val assert_nullable : Pos.t -> Ast_defs.bop -> env -> Tast.ty -> unit
 (** Assert that the type of a value involved in a strict (non-)equality
     comparsion to null is nullable (otherwise it is known to always
     return true or false). *)

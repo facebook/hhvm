@@ -8,7 +8,7 @@
  *)
 
 open Core_kernel
-open Ast
+open Ast_defs
 open Utils
 
 module Aast = Nast

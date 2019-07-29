@@ -29,8 +29,8 @@ val get_type : env -> Reason.t -> int -> env * locl ty
 val get_type_unsafe : env -> int -> env * locl ty
 val expand_var : env -> Reason.t -> Ident.t -> env * locl ty
 val expand_type : env -> locl ty -> env * locl ty
-val get_shape_field_name : Ast.shape_field_name -> string
-val get_shape_field_name_pos : Ast.shape_field_name -> Pos.t
+val get_shape_field_name : Ast_defs.shape_field_name -> string
+val get_shape_field_name_pos : Ast_defs.shape_field_name -> Pos.t
 val empty : ?mode: FileInfo.mode -> TypecheckerOptions.t -> Relative_path.t ->
   droot: Typing_deps.Dep.variant option -> env
 val is_typedef : typedef_key -> bool
@@ -66,10 +66,10 @@ val get_self_id : env -> string
 val is_outside_class : env -> bool
 val get_parent_id : env -> string
 val get_parent : env -> decl ty
-val get_fn_kind : env -> Ast.fun_kind
+val get_fn_kind : env -> Ast_defs.fun_kind
 val get_file : env -> Relative_path.t
 val get_fun : env -> fun_key -> fun_decl option
-val set_fn_kind : env -> Ast.fun_kind -> env
+val set_fn_kind : env -> Ast_defs.fun_kind -> env
 val set_inside_ppl_class : env -> bool -> env
 val add_anonymous : env -> anon -> env * int
 val get_anonymous : env -> int -> anon option

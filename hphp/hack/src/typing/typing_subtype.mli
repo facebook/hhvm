@@ -12,7 +12,7 @@ module ConditionTypes : sig
   val try_get_class_for_condition_type :
     Env.env ->
     decl ty ->
-    ((Ast.pos * string) * Decl_provider.class_decl) option
+    ((Ast_defs.pos * string) * Decl_provider.class_decl) option
 
   val try_get_method_from_condition_type :
     Env.env ->
@@ -100,7 +100,7 @@ val subtype_reactivity :
 val add_constraint :
   Pos.t ->
   Env.env ->
-  Ast.constraint_kind ->
+  Ast_defs.constraint_kind ->
   locl ty ->
   locl ty ->
   Env.env

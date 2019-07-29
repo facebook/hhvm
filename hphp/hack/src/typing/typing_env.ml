@@ -168,14 +168,14 @@ let expand_type env x =
   | x -> env, x
 
 let get_shape_field_name = function
-  | Ast.SFlit_int (_, s)
-  | Ast.SFlit_str (_, s) -> s
-  | Ast.SFclass_const ((_, s1), (_, s2)) -> s1^"::"^s2
+  | Ast_defs.SFlit_int (_, s)
+  | Ast_defs.SFlit_str (_, s) -> s
+  | Ast_defs.SFclass_const ((_, s1), (_, s2)) -> s1^"::"^s2
 
 let get_shape_field_name_pos = function
-  | Ast.SFlit_int (p, _)
-  | Ast.SFlit_str (p, _)
-  | Ast.SFclass_const ((p, _), _) -> p
+  | Ast_defs.SFlit_int (p, _)
+  | Ast_defs.SFlit_str (p, _)
+  | Ast_defs.SFclass_const ((p, _), _) -> p
 
 let next_cont_opt env = LEnvC.get_cont_option C.Next env.lenv.per_cont_env
 
@@ -577,7 +577,7 @@ let empty ?(mode = FileInfo.Mstrict) tcopt file ~droot = {
     static  = false;
     parent_id = "";
     parent  = Reason.none, Tany;
-    fun_kind = Ast.FSync;
+    fun_kind = Ast_defs.FSync;
     fun_mutable = None;
     anons   = IMap.empty;
     file    = file;
@@ -1221,11 +1221,11 @@ and get_tyvars_variance_list (env, acc_positive, acc_negative) variancel tyl =
     let env, positive, negative = get_tyvars env ty in
     let acc_positive, acc_negative =
       match variance with
-      | Ast.Covariant ->
+      | Ast_defs.Covariant ->
         ISet.union acc_positive positive, ISet.union acc_negative negative
-      | Ast.Contravariant ->
+      | Ast_defs.Contravariant ->
         ISet.union acc_positive negative, ISet.union acc_negative positive
-      | Ast.Invariant ->
+      | Ast_defs.Invariant ->
         let positive_or_negative = ISet.union positive negative in
         ISet.union acc_positive positive_or_negative,
         ISet.union acc_negative positive_or_negative in

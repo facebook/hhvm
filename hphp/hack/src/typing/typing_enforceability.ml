@@ -116,14 +116,14 @@ and pessimize_tparam_constraints env (t: decl tparam) =
   | _ ->
     let tp_constraints = List.map t.tp_constraints ~f:(fun (ck, cstr_ty) ->
       match ck with
-      | Ast.Constraint_as | Ast.Constraint_eq ->
+      | Ast_defs.Constraint_as | Ast_defs.Constraint_eq ->
         ck, pessimize_wrap env cstr_ty
       | _ ->
         ck, cstr_ty
     ) in
     let dyn = MakeType.dynamic (Reason.Renforceable (fst t.tp_name)) in
     let tp_constraints =
-      (Ast.Constraint_super, dyn) :: tp_constraints in
+      (Ast_defs.Constraint_super, dyn) :: tp_constraints in
     { t with tp_constraints }
 
 and pessimize_fun_type env (ft: decl fun_type) =
@@ -138,7 +138,7 @@ and pessimize_fun_type env (ft: decl fun_type) =
   (* The runtime will enforce the inner type of an Awaitable in the return of an
    * async function *)
   let trust_awaitable = match ft_fun_kind with
-  | Ast.FAsync | Ast.FAsyncGenerator -> true
+  | Ast_defs.FAsync | Ast_defs.FAsyncGenerator -> true
   | _ -> false in
   let ft_ret = pessimize_type env ~trust_awaitable ft_ret in
   let ft_params = List.map ft_params ~f:(fun param ->

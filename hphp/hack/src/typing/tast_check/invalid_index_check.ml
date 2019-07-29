@@ -85,7 +85,7 @@ let index_visitor = object(this)
       then array_get ~array_pos:p1 ~expr_pos:p ~index_pos:p2 env ty1 ty2;
       this#on_expr (env, false) e1;
       this#on_expr (env, false) e2
-    | Binop (Ast.Eq _, e1, e2) ->
+    | Binop (Ast_defs.Eq _, e1, e2) ->
       this#on_expr (env, true) e1;
       this#on_expr (env, false) e2
     | List el ->

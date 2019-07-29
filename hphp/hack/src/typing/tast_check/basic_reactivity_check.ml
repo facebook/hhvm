@@ -21,7 +21,7 @@ let expr_is_valid_owned_arg (e : expr) : bool =
 let expr_is_valid_borrowed_arg env (e: expr): bool =
   expr_is_valid_owned_arg e || begin
     match snd e with
-    | Callconv (Ast.Pinout, (_, Lvar (_, id)))
+    | Callconv (Ast_defs.Pinout, (_, Lvar (_, id)))
     | Lvar (_, id) -> Env.local_is_mutable ~include_borrowed:true env id
     | This when Env.function_is_mutable env = Some Param_borrowed_mutable -> true
     | _ ->
@@ -133,7 +133,7 @@ let with_mutable_value env e ~default ~f =
   (* invoke f only for mutable values *)
   | This when Env.function_is_mutable env <> None ->
     f Arg_this
-  | Callconv (Ast.Pinout, (_, Lvar (_, id)))
+  | Callconv (Ast_defs.Pinout, (_, Lvar (_, id)))
   | Lvar (_, id) when Env.local_is_mutable ~include_borrowed:true env id ->
     f (Arg_local id)
   | _ -> default
@@ -534,7 +534,7 @@ let check = object(self)
         self#on_expr (env, ctx) e1
       );
       self#on_expr (env, ctx) e2
-    | _, Binop (Ast.QuestionQuestion, e1, e2) ->
+    | _, Binop (Ast_defs.QuestionQuestion, e1, e2) ->
       let ctx = allow_awaitable ctx in
       check_conditional_operator e1 e2;
       self#on_expr (env, ctx) e1;
@@ -576,7 +576,7 @@ let check = object(self)
         in
         self#handle_body env ctx f.f_body;
 
-      | _, Binop (Ast.Eq _, te1, _) ->
+      | _, Binop (Ast_defs.Eq _, te1, _) ->
         check_assignment_or_unset_target
           ~is_assignment:true
           ~append_pos_opt:(get_position expr)

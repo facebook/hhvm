@@ -312,10 +312,10 @@ module Api = struct
   let upper_bounds_on_this_from_constraints t =
     List.filter_map ~f:(fun c ->
       match c with
-      | (_, Typing_defs.Tthis), Ast.Constraint_as, ty
-      | (_, Typing_defs.Tthis), Ast.Constraint_eq, ty
-      | ty, Ast.Constraint_eq, (_, Typing_defs.Tthis)
-      | ty, Ast.Constraint_super, (_, Typing_defs.Tthis) ->
+      | (_, Typing_defs.Tthis), Ast_defs.Constraint_as, ty
+      | (_, Typing_defs.Tthis), Ast_defs.Constraint_eq, ty
+      | ty, Ast_defs.Constraint_eq, (_, Typing_defs.Tthis)
+      | ty, Ast_defs.Constraint_super, (_, Typing_defs.Tthis) ->
         Some ty
       | _ -> None) (where_constraints t)
     |> Sequence.of_list
@@ -332,10 +332,10 @@ module Api = struct
   let lower_bounds_on_this_from_constraints t =
     List.filter_map ~f:(fun c ->
       match c with
-      | (_, Typing_defs.Tthis), Ast.Constraint_super, ty
-      | (_, Typing_defs.Tthis), Ast.Constraint_eq, ty
-      | ty, Ast.Constraint_eq, (_, Typing_defs.Tthis)
-      | ty, Ast.Constraint_as, (_, Typing_defs.Tthis) ->
+      | (_, Typing_defs.Tthis), Ast_defs.Constraint_super, ty
+      | (_, Typing_defs.Tthis), Ast_defs.Constraint_eq, ty
+      | ty, Ast_defs.Constraint_eq, (_, Typing_defs.Tthis)
+      | ty, Ast_defs.Constraint_as, (_, Typing_defs.Tthis) ->
         Some(ty)
       | _ -> None) (where_constraints t)
     |> Sequence.of_list

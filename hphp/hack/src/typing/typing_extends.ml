@@ -309,7 +309,7 @@ let check_const_override env
       we should allow it in Hack files)
     *)
     match (Cls.kind parent_class) with
-    | Ast.Cinterface ->
+    | Ast_defs.Cinterface ->
       (* Synthetic  *)
       not class_const.cc_synthesized
       (* The parent we are checking is synthetic, no point in checking *)
@@ -356,7 +356,7 @@ let check_members check_private env removals (parent_class, psubst, parent_ty)
     4. It is abstract, and all other declarations are identical
     *)
     match (Cls.kind parent_class) with
-    | Ast.Cinterface | Ast.Ctrait ->
+    | Ast_defs.Cinterface | Ast_defs.Ctrait ->
       (* Synthetic  *)
       not class_elt.ce_synthesized
       (* The parent we are checking is synthetic, no point in checking *)
@@ -427,7 +427,7 @@ let default_constructor_ce class_ =
              ft_where_constraints = [];
              ft_params   = [];
              ft_ret      = MakeType.void r;
-             ft_fun_kind = Ast.FSync;
+             ft_fun_kind = Ast_defs.FSync;
              ft_reactive = Nonreactive;
              ft_mutability = None;
              ft_returns_mutable = false;
@@ -452,7 +452,7 @@ let default_constructor_ce class_ =
 (* When an interface defines a constructor, we check that they are compatible *)
 let check_constructors env (parent_class, parent_ty) (class_, class_ty) psubst subst =
   let consistent = snd (Cls.construct parent_class) <> Inconsistent in
-  if (Cls.kind parent_class) = Ast.Cinterface || consistent
+  if (Cls.kind parent_class) = Ast_defs.Cinterface || consistent
   then (
     match (fst (Cls.construct parent_class)), (fst (Cls.construct class_)) with
       | Some parent_cstr, _  when parent_cstr.ce_synthesized -> ()
@@ -617,7 +617,7 @@ let check_class_implements env removals (parent_class, parent_ty) (class_, class
   check_consts env parent_class class_ psubst subst;
   let memberl = make_all_members ~parent_class ~child_class:class_ in
   check_constructors env (parent_class, parent_ty) (class_, class_ty) psubst subst;
-  let check_privates:bool = Cls.kind parent_class = Ast.Ctrait in
+  let check_privates:bool = Cls.kind parent_class = Ast_defs.Ctrait in
   if not fully_known then () else
     List.iter memberl
       (check_members_implemented check_privates parent_pos pos);

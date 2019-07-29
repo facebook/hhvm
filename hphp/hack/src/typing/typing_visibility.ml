@@ -75,7 +75,7 @@ let is_private_visible_for_class env x self_id cid class_ =
     (match (is_private_visible env x self_id) with
     | None -> None
     | Some _ -> begin match Env.get_class env called_ci with
-      | Some cls when Cls.kind cls = Ast.Ctrait ->
+      | Some cls when Cls.kind cls = Ast_defs.Ctrait ->
         Some "You cannot access private members \
           using the trait's name (did you mean to use self::?)"
       | _ ->
@@ -134,7 +134,7 @@ let is_visible_for_class env (vis, lsb) cid cty =
   | Vprotected x ->
     let their_class = Env.get_class env x in
     (match cid, their_class with
-     | CI _, Some cls when Cls.kind cls = Ast.Ctrait ->
+     | CI _, Some cls when Cls.kind cls = Ast_defs.Ctrait ->
        Some "You cannot access protected members using the trait's name \
              (did you mean to use static:: or self::?)"
      | _ -> is_protected_visible env x self_id)

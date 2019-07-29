@@ -48,9 +48,9 @@ module EnvFromDef(ASTAnnotations: Aast.ASTAnnotationTypes) = struct
     (* For enums, localize makes self:: into an abstract type, which we don't
      * want *)
     let env, self = match c.c_kind with
-      | Ast.Cenum | Ast.Crecord -> env, MakeType.class_type (fst self) (snd c.c_name) []
-      | Ast.Cinterface | Ast.Cabstract | Ast.Ctrait
-      | Ast.Cnormal -> Typing_phase.localize_with_self env self in
+      | Ast_defs.Cenum | Ast_defs.Crecord -> env, MakeType.class_type (fst self) (snd c.c_name) []
+      | Ast_defs.Cinterface | Ast_defs.Cabstract | Ast_defs.Ctrait
+      | Ast_defs.Cnormal -> Typing_phase.localize_with_self env self in
     let env = Env.set_self env self in
     let env = match c.c_extends with
     | (_, Happly ((_, parent_id), _) as _parent_ty) :: _ ->

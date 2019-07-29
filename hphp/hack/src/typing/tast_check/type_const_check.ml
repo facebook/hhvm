@@ -121,7 +121,7 @@ let handler = object
     | None -> ()
     | Some cls ->
       begin match Cls.kind cls, c_tconst_abstract with
-      | Ast.Cnormal, TCAbstract _ ->
+      | Ast_defs.Cnormal, TCAbstract _ ->
         Errors.implement_abstract ~is_final:(Cls.final cls) (Cls.pos cls) p "type constant" name
       | _ -> ()
       end;

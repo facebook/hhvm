@@ -52,7 +52,7 @@ type is_sub_type_type =
 let (is_sub_type_for_union_ref: is_sub_type_type ref) = ref (not_implemented "is_sub_type_for_union")
 let is_sub_type_for_union x = !is_sub_type_for_union_ref x
 
-type add_constraint = Pos.Map.key -> Env.env -> Ast.constraint_kind -> locl ty -> locl ty -> Env.env
+type add_constraint = Pos.Map.key -> Env.env -> Ast_defs.constraint_kind -> locl ty -> locl ty -> Env.env
 let (add_constraint_ref: add_constraint ref) = ref (not_implemented "add_constraint")
 let add_constraint x = !add_constraint_ref x
 
@@ -355,14 +355,14 @@ let get_printable_shape_field_name = Env.get_shape_field_name
 
 let shape_field_name_ env field =
   let open Nast in match field with
-    | p, Int name -> Ok (Ast.SFlit_int (p, name))
-    | p, String name -> Ok (Ast.SFlit_str (p, name))
-    | _, Class_const ((_, CI (x)), y) -> Ok (Ast.SFclass_const (x, y))
+    | p, Int name -> Ok (Ast_defs.SFlit_int (p, name))
+    | p, String name -> Ok (Ast_defs.SFlit_str (p, name))
+    | _, Class_const ((_, CI (x)), y) -> Ok (Ast_defs.SFclass_const (x, y))
     | _, Class_const ((_, CIself), y) ->
       let _, c_ty = Env.get_self env in
       (match c_ty with
       | Tclass (sid, _, _) ->
-        Ok (Ast.SFclass_const(sid, y))
+        Ok (Ast_defs.SFclass_const(sid, y))
       | _ ->
         Error `Expected_class)
     | _ -> Error `Invalid_shape_field_name
@@ -447,7 +447,7 @@ let class_is_final_and_not_contravariant class_ty =
     List.for_all
       (Cls.tparams class_ty)
       ~f:(begin function
-          | { tp_variance = (Ast.Invariant | Ast.Covariant); _ } -> true
+          | { tp_variance = (Ast_defs.Invariant | Ast_defs.Covariant); _ } -> true
           | _ -> false
           end)
 

@@ -114,7 +114,7 @@ and genv = {
   (* Type of the enclosing class, instantiated at its generic parameters *)
   self    : locl_ty;
   static  : bool;
-  fun_kind : Ast.fun_kind;
+  fun_kind : Ast_defs.fun_kind;
   fun_mutable : param_mutability option;
   anons   : anon IMap.t;
   file    : Relative_path.t;

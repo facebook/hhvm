@@ -37,7 +37,7 @@ class virtual iter = object (self)
   method! on_Array_get env = super#on_Array_get ({ env with array_append_allowed = false })
   method! on_Binop env op e1 e2=
     match op with
-    | Ast.Eq _ ->
+    | Ast_defs.Eq _ ->
       self#on_expr { env with array_append_allowed = true } e1;
       self#on_expr env e2
     | _ -> super#on_Binop env op e1 e2
@@ -56,8 +56,8 @@ class virtual iter = object (self)
       self#on_Call {env with rx_move_allowed = false} ct e1 ta el uel
     | (_, Call (ct, e1, ta, el, uel)) ->
       self#on_Call {env with rx_move_allowed = true} ct e1 ta el uel
-    | (_, Binop (Ast.Eq None, e1, rhs)) ->
-      self#on_Binop {env with rx_move_allowed = true} (Ast.Eq None) e1 rhs
+    | (_, Binop (Ast_defs.Eq None, e1, rhs)) ->
+      self#on_Binop {env with rx_move_allowed = true} (Ast_defs.Eq None) e1 rhs
     | _ -> super#on_expr { env with rx_move_allowed = false } e
 
 end

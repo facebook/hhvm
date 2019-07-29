@@ -132,7 +132,7 @@ let rec const_string_of (env:Env.env) (e:Nast.expr) : Env.env * (Pos.t, string) 
     | p, Nast.String2 xs ->
         let env, xs = mapM const_string_of env (List.rev xs) in
         env, List.fold_right ~f:glue xs ~init:(Left p)
-    | _, Nast.Binop (Ast.Dot, a, b) ->
+    | _, Nast.Binop (Ast_defs.Dot, a, b) ->
         let env, stra = const_string_of env a in
         let env, strb = const_string_of env b in
         env, glue stra strb

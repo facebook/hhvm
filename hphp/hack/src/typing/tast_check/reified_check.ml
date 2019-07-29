@@ -23,7 +23,7 @@ let valid_newable_hint env tp (pos, hint) =
   | Aast.Happly ((p, h), _) ->
     begin match Env.get_class env h with
     | Some cls ->
-      if Cls.kind cls <> Ast.Cnormal then
+      if Cls.kind cls <> Ast_defs.Cnormal then
         Errors.invalid_newable_type_argument tp p
     | None ->
       (* This case should never happen *)

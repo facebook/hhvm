@@ -62,7 +62,7 @@ let check_trait_override_annotations env cls ~static =
     match Env.get_class env meth.ce_origin with
     | None -> ()
     | Some parent_class ->
-      if Cls.kind parent_class <> Ast.Ctrait then () else
+      if Cls.kind parent_class <> Ast_defs.Ctrait then () else
       match meth with
       | { ce_type = lazy (_, Tfun { ft_pos; _ }); _ } ->
         let parent_method_exists =
@@ -87,7 +87,7 @@ let check_if_cyclic cls =
     Errors.cyclic_class_def classes (Cls.pos cls)
 
 let check_extend_kind parent_pos parent_kind child_pos child_kind =
-  let open Ast in
+  let open Ast_defs in
   match parent_kind, child_kind with
   | (Cabstract | Cnormal), (Cabstract | Cnormal)
   | Cabstract, Cenum (* enums extend BuiltinEnum under the hood *)
@@ -95,8 +95,8 @@ let check_extend_kind parent_pos parent_kind child_pos child_kind =
   | Cinterface, Cinterface ->
     ()
   | _ ->
-    let parent = Ast.string_of_class_kind parent_kind in
-    let child = Ast.string_of_class_kind child_kind in
+    let parent = Ast_defs.string_of_class_kind parent_kind in
+    let child = Ast_defs.string_of_class_kind child_kind in
     Errors.wrong_extend_kind child_pos child parent_pos parent
 
 let check_extend_kinds shallow_class =
@@ -135,11 +135,11 @@ let check_class env cls =
   check_extend_kinds shallow_class;
   if no_trait_reuse_enabled env then
     check_trait_reuse shallow_class;
-  if Cls.kind cls <> Ast.Ctrait then begin
+  if Cls.kind cls <> Ast_defs.Ctrait then begin
     check_override_annotations cls ~static:false;
     check_override_annotations cls ~static:true;
   end;
-  if Cls.kind cls = Ast.Cnormal then begin
+  if Cls.kind cls = Ast_defs.Cnormal then begin
     check_trait_override_annotations env cls ~static:false;
     check_trait_override_annotations env cls ~static:true;
   end;

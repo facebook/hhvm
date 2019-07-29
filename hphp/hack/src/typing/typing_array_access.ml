@@ -359,7 +359,7 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
           then
             let declared_field =
               List.find_exn
-                ~f:(fun x -> Ast.ShapeField.compare field x = 0)
+                ~f:(fun x -> Ast_defs.ShapeField.compare field x = 0)
                 (ShapeMap.keys fdm) in
             begin
               Errors.array_get_with_optional_field

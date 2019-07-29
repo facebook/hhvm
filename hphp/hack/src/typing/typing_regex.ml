@@ -138,4 +138,4 @@ let type_pattern (p, e_) =
       Tabstract (AKnewtype (Naming_special_names.Regex.tPattern,
       [match_type]),
       Some (Reason.Rregex p, Tprim Tstring))
-  | _ -> failwith "Should have caught non-Ast.String prefixed expression!"
+  | _ -> failwith "Should have caught non-Ast_defs.String prefixed expression!"

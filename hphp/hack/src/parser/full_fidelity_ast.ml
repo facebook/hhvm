@@ -411,7 +411,7 @@ let mpStripNoop pThing node env = match pThing node env with
   | [_, Noop] -> []
   | stmtl -> stmtl
 
-let mpOptional : ('a, 'a option) metaparser = fun p -> fun node env ->
+let mpOptional : ('a, 'a option) metaparser = fun p node env ->
   match syntax node with
     | Missing -> None
     | _ -> Some (p node env)

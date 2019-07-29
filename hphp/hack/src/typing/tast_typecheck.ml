@@ -104,16 +104,16 @@ let check_expr env (expr:ETast.expr) (gamma:gamma) : gamma =
 
     method! on_Binop env bop expr1 (ty2, _ as expr2) =
       match bop with
-      | Ast.Eq None ->
+      | Ast_defs.Eq None ->
         let gamma_, updates = check_assign expr1 ty2 gamma in
         gamma <- gamma_;
         self#on_expr env expr2;
         gamma <- update_gamma gamma updates
-      | Ast.Eq _ -> raise Not_implemented
-      | Ast.Ampamp | Ast.Barbar ->
+      | Ast_defs.Eq _ -> raise Not_implemented
+      | Ast_defs.Ampamp | Ast_defs.Barbar ->
         self#on_expr env expr1;
         let gamma_ = gamma in
-        gamma <- refine expr1 (bop = Ast.Ampamp) gamma;
+        gamma <- refine expr1 (bop = Ast_defs.Ampamp) gamma;
         self#on_expr env expr2;
         gamma <- gamma_
       | _ -> (* TODO *) super#on_Binop env bop expr1 expr2
@@ -134,7 +134,7 @@ let check_expr env (expr:ETast.expr) (gamma:gamma) : gamma =
 
     method! on_Callconv _env param_kind _expr =
       match param_kind with
-      | Ast.Pinout -> raise Not_implemented
+      | Ast_defs.Pinout -> raise Not_implemented
   end in
   expr_checker#on_expr env expr;
   expr_checker#gamma ()

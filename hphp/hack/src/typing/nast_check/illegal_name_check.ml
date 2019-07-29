@@ -26,15 +26,15 @@ let handler = object
 
   method! at_expr env (pos, e) =
     match e with
-    | Binop ((Ast.Eq None), e1, e2) ->
+    | Binop ((Ast_defs.Eq None), e1, e2) ->
       begin match e1, e2 with
-      | (_, (Lvar (_, x))), (_, Unop (Ast.Uref, _))
+      | (_, (Lvar (_, x))), (_, Unop (Ast_defs.Uref, _))
         when Local_id.to_string x |> SN.Superglobals.is_superglobal
           || SN.Superglobals.globals = Local_id.to_string x ->
         Errors.illegal_by_ref_expr pos ("Superglobal " ^ Local_id.to_string x) "bound"
       | _ -> ()
       end;
-    | Unop (Ast.Uref, e) ->
+    | Unop (Ast_defs.Uref, e) ->
       let ref_expr ident = Errors.illegal_by_ref_expr pos ident "passed" in
       begin match snd e with
       | Lvar (_, x) when Local_id.to_string x = SN.SpecialIdents.this ->
@@ -50,7 +50,7 @@ let handler = object
       then ()
       else if const = SN.PseudoConsts.g__CLASS__ && ck = None
       then Errors.illegal_CLASS pos
-      else if const = SN.PseudoConsts.g__TRAIT__ && ck <> Some Ast.Ctrait
+      else if const = SN.PseudoConsts.g__TRAIT__ && ck <> Some Ast_defs.Ctrait
       then Errors.illegal_TRAIT pos
     | Class_const ((_, CIexpr (_, (Id(_, "parent")))), (_, m_name))
       when env.function_name = Some m_name -> ()
@@ -75,7 +75,7 @@ let handler = object
     | Some cname ->
         let p, mname = m.m_name in
         if String.lowercase (strip_ns cname) = String.lowercase mname
-            && env.class_kind <> Some Ast.Ctrait
+            && env.class_kind <> Some Ast_defs.Ctrait
         then Errors.dangerous_method_name p
     | None -> assert false
     end

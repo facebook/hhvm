@@ -20,11 +20,11 @@ type control_context =
 type env = {
   tcopt: TypecheckerOptions.t;
   is_reactive: bool;
-  class_kind: Ast.class_kind option;
+  class_kind: Ast_defs.class_kind option;
   class_name: string option;
   function_name: string option;
   file_mode: FileInfo.mode;
-  function_kind: Ast.fun_kind option;
+  function_kind: Ast_defs.fun_kind option;
   is_finally: bool;
   control_context: control_context;
   rx_is_enabled_allowed: bool;

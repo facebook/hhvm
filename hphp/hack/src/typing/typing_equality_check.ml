@@ -21,8 +21,8 @@ module Phase = Typing_phase
 
 let trivial_result_str bop =
   match bop with
-    | Ast.Eqeqeq -> "false"
-    | Ast.Diff2 -> "true"
+    | Ast_defs.Eqeqeq -> "false"
+    | Ast_defs.Diff2 -> "true"
     | _ -> assert false
 
 let trivial_comparison_error env p bop ty1 ty2 trail1 trail2 =

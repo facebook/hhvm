@@ -22,10 +22,10 @@ let check_is_class env (p, h) =
       let kind = Cls.kind cls in
       let name = Cls.name cls in
       match kind with
-      | Ast.(Cabstract | Cnormal) ->
+      | Ast_defs.(Cabstract | Cnormal) ->
         if Cls.final cls then Errors.requires_final_class p name
       | _ ->
-        Errors.requires_non_class p name (Ast.string_of_class_kind kind)
+        Errors.requires_non_class p name (Ast_defs.string_of_class_kind kind)
     end
   | Aast.Habstr name ->
     Errors.requires_non_class p name "a generic"
@@ -37,7 +37,7 @@ let check_is_interface (env, error_verb) (p, h) =
   | Aast.Happly ((_, name), _) ->
     begin match Env.get_class env name with
     | None -> ()
-    | Some cls when Cls.kind cls = Ast.Cinterface -> ()
+    | Some cls when Cls.kind cls = Ast_defs.Cinterface -> ()
     | Some cls ->
       Errors.non_interface p (Cls.name cls) error_verb
     end
@@ -52,11 +52,11 @@ let check_is_trait env (p, h) =
     let type_info = Env.get_class env name in
     begin match type_info with
     | None -> ()
-    | Some cls when Cls.kind cls = Ast.Ctrait -> ()
+    | Some cls when Cls.kind cls = Ast_defs.Ctrait -> ()
     | Some cls ->
       let name = Cls.name cls in
       let kind = Cls.kind cls in
-      Errors.uses_non_trait p name (Ast.string_of_class_kind kind)
+      Errors.uses_non_trait p name (Ast_defs.string_of_class_kind kind)
     end
   | _ -> failwith "assertion failure: trait isn't an Happly"
 

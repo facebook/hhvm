@@ -79,7 +79,7 @@ let handler = object
         class_name = SN.Shapes.cShapes &&
         (method_name = SN.Shapes.idx || method_name = SN.Shapes.at) ->
       shapes_method_access_with_non_existent_field p env method_name shape (pos, field_name)
-    | (p, _), Binop (Ast.QuestionQuestion, (_, Array_get (shape, Some ((pos, _), String field_name))), _) ->
+    | (p, _), Binop (Ast_defs.QuestionQuestion, (_, Array_get (shape, Some ((pos, _), String field_name))), _) ->
       shape_access_with_non_existent_field p env shape (pos, field_name)
     | _ -> ()
 end

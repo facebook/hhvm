@@ -742,7 +742,7 @@ and pp_class_type : Format.formatter -> class_type -> unit = fun fmt x ->
   Format.fprintf fmt ";@ ";
 
   Format.fprintf fmt "@[%s =@ " "tc_kind";
-  Ast.pp_class_kind fmt x.tc_kind;
+  Ast_defs.pp_class_kind fmt x.tc_kind;
   Format.fprintf fmt "@]";
   Format.fprintf fmt ";@ ";
 
@@ -1018,9 +1018,9 @@ and show_typedef_type : typedef_type -> string = fun x ->
 and pp_tparam : type a. Format.formatter -> a tparam -> unit =
 fun fmt { tp_variance; tp_name; tp_constraints; tp_reified = _; tp_user_attributes = _ } ->
   Format.fprintf fmt "(@[";
-  Ast.pp_variance fmt tp_variance;
+  Ast_defs.pp_variance fmt tp_variance;
   Format.fprintf fmt ",@ ";
-  Ast.pp_id fmt tp_name;
+  Ast_defs.pp_id fmt tp_name;
   Format.fprintf fmt ",@ ";
   Format.fprintf fmt "@[<2>[";
   ignore
@@ -1029,7 +1029,7 @@ fun fmt { tp_variance; tp_name; tp_constraints; tp_reified = _; tp_user_attribut
         if sep then Format.fprintf fmt ";@ ";
         let (b0, b1) = x in
         Format.fprintf fmt "(@[";
-        Ast.pp_constraint_kind fmt b0;
+        Ast_defs.pp_constraint_kind fmt b0;
         Format.fprintf fmt ",@ ";
         pp_ty fmt b1;
         Format.fprintf fmt "@])";
@@ -1047,7 +1047,7 @@ and pp_where_constraint
   Format.fprintf fmt "(@[";
   pp_ty fmt a0;
   Format.fprintf fmt ",@ ";
-  Ast.pp_constraint_kind fmt a1;
+  Ast_defs.pp_constraint_kind fmt a1;
   Format.fprintf fmt ",@ ";
   pp_ty fmt a2;
   Format.fprintf fmt "@])"

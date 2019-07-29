@@ -357,7 +357,7 @@ module Full = struct
       let fields =
         let f_field (shape_map_key, { sft_optional; sft_ty }) =
         let key_delim =
-          match shape_map_key with Ast.SFlit_str _ -> text "'" | _ -> Nothing
+          match shape_map_key with Ast_defs.SFlit_str _ -> text "'" | _ -> Nothing
         in
           Concat [
             if sft_optional then text "?" else Nothing;
@@ -452,16 +452,16 @@ module Full = struct
     ]
 
   and tparam_constraint:
-    type a. _ -> _ -> _ -> (Ast.constraint_kind * a ty) -> _ =
+    type a. _ -> _ -> _ -> (Ast_defs.constraint_kind * a ty) -> _ =
     fun to_doc st env (ck, cty) ->
       Concat [
         Space;
         text
           (match ck with
-          | Ast.Constraint_as -> "as"
-          | Ast.Constraint_super -> "super"
-          | Ast.Constraint_eq -> "="
-          | Ast.Constraint_pu_from -> "from"
+          | Ast_defs.Constraint_as -> "as"
+          | Ast_defs.Constraint_super -> "super"
+          | Ast_defs.Constraint_eq -> "="
+          | Ast_defs.Constraint_pu_from -> "from"
           );
         Space;
         ty to_doc st env cty
@@ -474,11 +474,11 @@ module Full = struct
     let equ = Env.get_equal_bounds env tparam in
     (* If we have an equality we can ignore the other bounds *)
     if not (TySet.is_empty equ)
-    then List.map (TySet.elements equ) (fun ty -> (tparam, Ast.Constraint_eq, ty))
+    then List.map (TySet.elements equ) (fun ty -> (tparam, Ast_defs.Constraint_eq, ty))
     else
-      List.map (TySet.elements lower) (fun ty -> (tparam, Ast.Constraint_super, ty))
+      List.map (TySet.elements lower) (fun ty -> (tparam, Ast_defs.Constraint_super, ty))
       @
-      List.map (TySet.elements upper) (fun ty -> (tparam, Ast.Constraint_as, ty))
+      List.map (TySet.elements upper) (fun ty -> (tparam, Ast_defs.Constraint_as, ty))
 
   let to_string to_doc env x =
     ty to_doc ISet.empty env x
@@ -695,12 +695,12 @@ module ErrorString = struct
   and class_kind c_kind final =
     let fs = if final then " final" else "" in
     match c_kind with
-    | Ast.Cabstract -> "an abstract" ^ fs ^ " class"
-    | Ast.Cnormal -> "a" ^ fs ^ " class"
-    | Ast.Cinterface -> "an interface"
-    | Ast.Ctrait -> "a trait"
-    | Ast.Cenum -> "an enum"
-    | Ast.Crecord -> "a record"
+    | Ast_defs.Cabstract -> "an abstract" ^ fs ^ " class"
+    | Ast_defs.Cnormal -> "a" ^ fs ^ " class"
+    | Ast_defs.Cinterface -> "an interface"
+    | Ast_defs.Ctrait -> "a trait"
+    | Ast_defs.Cenum -> "an enum"
+    | Ast_defs.Crecord -> "a record"
 
   and to_string : _ -> locl ty -> _ = fun env ty ->
     let _, ety = Env.expand_type env ty in
@@ -751,9 +751,9 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
     let shape_field_name_to_json shape_field =
       (* TODO: need to update userland tooling? *)
       match shape_field with
-      | Ast.SFlit_int (_, s) -> Hh_json.JSON_Number s
-      | Ast.SFlit_str (_, s) -> Hh_json.JSON_String s
-      | Ast.SFclass_const ((_, s1), (_, s2)) ->
+      | Ast_defs.SFlit_int (_, s) -> Hh_json.JSON_Number s
+      | Ast_defs.SFlit_str (_, s) -> Hh_json.JSON_String s
+      | Ast_defs.SFclass_const ((_, s1), (_, s2)) ->
         Hh_json.JSON_Array [
           Hh_json.JSON_String s1;
           Hh_json.JSON_String s2;
@@ -1170,14 +1170,14 @@ let to_locl_ty
         let dummy_pos = Pos.none in
         begin match name with
         | Hh_json.JSON_Number name ->
-          Ok (Ast.SFlit_int (dummy_pos, name))
+          Ok (Ast_defs.SFlit_int (dummy_pos, name))
         | Hh_json.JSON_String name ->
-          Ok (Ast.SFlit_str (dummy_pos, name))
+          Ok (Ast_defs.SFlit_str (dummy_pos, name))
         | Hh_json.JSON_Array [
             Hh_json.JSON_String name1;
             Hh_json.JSON_String name2;
           ] ->
-          Ok (Ast.SFclass_const ((dummy_pos, name1), (dummy_pos, name2)))
+          Ok (Ast_defs.SFclass_const ((dummy_pos, name1), (dummy_pos, name2)))
         | _ ->
           deserialization_error
             ~message:"Unexpected format for shape field name"
@@ -1290,7 +1290,7 @@ let to_locl_ty
         ft_arity = Fstandard (0, 0);
         ft_tparams = ([], FTKtparams);
         ft_where_constraints = [];
-        ft_fun_kind = Ast.FSync;
+        ft_fun_kind = Ast_defs.FSync;
         ft_reactive = Nonreactive;
         ft_return_disposable = false;
         ft_mutability = None;
@@ -1381,23 +1381,23 @@ module PrintClass = struct
     Printf.sprintf "(line %d: chars %d-%d)" line start end_
 
   let class_kind = function
-    | Ast.Cabstract -> "Cabstract"
-    | Ast.Cnormal -> "Cnormal"
-    | Ast.Cinterface -> "Cinterface"
-    | Ast.Ctrait -> "Ctrait"
-    | Ast.Cenum -> "Cenum"
-    | Ast.Crecord -> "Crecord"
+    | Ast_defs.Cabstract -> "Cabstract"
+    | Ast_defs.Cnormal -> "Cnormal"
+    | Ast_defs.Cinterface -> "Cinterface"
+    | Ast_defs.Ctrait -> "Ctrait"
+    | Ast_defs.Cenum -> "Cenum"
+    | Ast_defs.Crecord -> "Crecord"
 
   let constraint_ty tcopt = function
-    | (Ast.Constraint_as, ty) -> "as " ^ (Full.to_string_decl tcopt ty)
-    | (Ast.Constraint_eq, ty) -> "= " ^ (Full.to_string_decl tcopt ty)
-    | (Ast.Constraint_super, ty) -> "super " ^ (Full.to_string_decl tcopt ty)
-    | (Ast.Constraint_pu_from, ty) -> "from " ^ (Full.to_string_decl tcopt ty)
+    | (Ast_defs.Constraint_as, ty) -> "as " ^ (Full.to_string_decl tcopt ty)
+    | (Ast_defs.Constraint_eq, ty) -> "= " ^ (Full.to_string_decl tcopt ty)
+    | (Ast_defs.Constraint_super, ty) -> "super " ^ (Full.to_string_decl tcopt ty)
+    | (Ast_defs.Constraint_pu_from, ty) -> "from " ^ (Full.to_string_decl tcopt ty)
 
   let variance = function
-    | Ast.Covariant -> "+"
-    | Ast.Contravariant -> "-"
-    | Ast.Invariant -> ""
+    | Ast_defs.Covariant -> "+"
+    | Ast_defs.Contravariant -> "-"
+    | Ast_defs.Invariant -> ""
 
   let tparam tcopt {
     tp_variance = var;

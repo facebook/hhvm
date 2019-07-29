@@ -798,7 +798,7 @@ and simplify_subtype
         let variancel =
           match class_def_sub with
           | None ->
-            List.map tyl_sub (fun _ -> Ast.Invariant)
+            List.map tyl_sub (fun _ -> Ast_defs.Invariant)
           | Some class_sub ->
             List.map (Cls.tparams class_sub) (fun t -> t.tp_variance) in
 
@@ -846,7 +846,7 @@ and simplify_subtype
               let env, up_obj = Phase.localize ~ety_env env up_obj in
               simplify_subtype ~seen_generic_params ~this_ty up_obj ty_super env
             | None ->
-              if Cls.kind class_sub = Ast.Ctrait || Cls.kind class_sub = Ast.Cinterface then
+              if Cls.kind class_sub = Ast_defs.Ctrait || Cls.kind class_sub = Ast_defs.Cinterface then
               let rec try_upper_bounds_on_this up_objs env =
                 match Sequence.next up_objs with
                 | None ->
@@ -1257,7 +1257,7 @@ and simplify_subtype_variance
   ~(seen_generic_params : SSet.t option)
   ~(no_top_bottom : bool)
   (cid : string)
-  (variancel : Ast.variance list)
+  (variancel : Ast_defs.variance list)
   (children_tyl : locl ty list)
   (super_tyl : locl ty list)
   ~(on_error : Errors.typing_error_callback)
@@ -1273,13 +1273,13 @@ and simplify_subtype_variance
   | _, _, [] -> valid env
   | variance :: variancel, child :: childrenl, super :: superl ->
       begin match variance with
-      | Ast.Covariant ->
+      | Ast_defs.Covariant ->
         simplify_subtype child super env
-      | Ast.Contravariant ->
+      | Ast_defs.Contravariant ->
         let super = (Reason.Rcontravariant_generic (fst super,
           Utils.strip_ns cid), snd super) in
         simplify_subtype super child env
-      | Ast.Invariant ->
+      | Ast_defs.Invariant ->
         let super' = (Reason.Rinvariant_generic (fst super,
           Utils.strip_ns cid), snd super) in
         env |>
@@ -2293,20 +2293,20 @@ and decompose_subtype_add_prop p env prop =
 and decompose_constraint
   p
   (env : Env.env)
-  (ck : Ast.constraint_kind)
+  (ck : Ast_defs.constraint_kind)
   (ty_sub : locl ty)
   (ty_super : locl ty)
   : Env.env =
   (* constraints are caught based on reason, not error callback. Using unify_error *)
   match ck with
-  | Ast.Constraint_as ->
+  | Ast_defs.Constraint_as ->
     decompose_subtype p env ty_sub ty_super Errors.unify_error
-  | Ast.Constraint_super ->
+  | Ast_defs.Constraint_super ->
     decompose_subtype p env ty_super ty_sub Errors.unify_error
-  | Ast.Constraint_eq ->
+  | Ast_defs.Constraint_eq ->
     let env' = decompose_subtype p env ty_sub ty_super Errors.unify_error in
     decompose_subtype p env' ty_super ty_sub Errors.unify_error
-  | Ast.Constraint_pu_from -> failwith "TODO(T36532263): Pocket Universes"
+  | Ast_defs.Constraint_pu_from -> failwith "TODO(T36532263): Pocket Universes"
 
 (* Given a constraint ty1 ck ty2 where ck is AS, SUPER or =,
  * add bounds to type parameters in the environment that necessarily
@@ -2332,7 +2332,7 @@ let constraint_iteration_limit = 20
 let add_constraint
   p
   (env : Env.env)
-  (ck : Ast.constraint_kind)
+  (ck : Ast_defs.constraint_kind)
   (ty_sub : locl ty)
   (ty_super : locl ty) : Env.env =
   log_subtype ~this_ty:None ~function_name:"add_constraint" env ty_sub ty_super;

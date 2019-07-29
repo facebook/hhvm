@@ -17,15 +17,15 @@ let check_param _env params p user_attributes f_type name =
   let byref = List.find params (fun x -> x.param_is_reference) in
   List.iter params begin fun param ->
     match param.param_callconv with
-    | Some Ast.Pinout ->
+    | Some Ast_defs.Pinout ->
       let pos = param.param_pos in
-      if f_type <> Ast.FSync then Errors.inout_params_outside_of_sync pos;
+      if f_type <> Ast_defs.FSync then Errors.inout_params_outside_of_sync pos;
       if SSet.mem name SN.Members.as_set then Errors.inout_params_special pos;
       Option.iter byref ~f:(fun p ->
         Errors.inout_params_mix_byref pos p.param_pos)
     | None -> ()
   end;
-  let inout = List.find params (fun x -> x.param_callconv = Some Ast.Pinout) in
+  let inout = List.find params (fun x -> x.param_callconv = Some Ast_defs.Pinout) in
   begin match inout with
   | Some param ->
     if Attributes.mem2
@@ -48,11 +48,11 @@ let is_dynamic_call func_expr =
 let check_call_expr env func_expr func_args =
   List.iter func_args begin fun (arg_pos, arg) ->
     match arg with
-    | Unop (Ast.Uref, _) when TypecheckerOptions.disallow_byref_calls env.tcopt ->
+    | Unop (Ast_defs.Uref, _) when TypecheckerOptions.disallow_byref_calls env.tcopt ->
         Errors.byref_call arg_pos
-    | Unop (Ast.Uref, (_, (Class_get _ | Obj_get _))) ->
+    | Unop (Ast_defs.Uref, (_, (Class_get _ | Obj_get _))) ->
         Errors.byref_on_property arg_pos
-    | Unop (Ast.Uref, _) when is_dynamic_call func_expr ->
+    | Unop (Ast_defs.Uref, _) when is_dynamic_call func_expr ->
       if TypecheckerOptions.disallow_byref_dynamic_calls env.tcopt
       then Errors.byref_dynamic_call arg_pos
     | _ -> ()

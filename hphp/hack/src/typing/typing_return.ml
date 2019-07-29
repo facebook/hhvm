@@ -18,13 +18,13 @@ module MakeType = Typing_make_type
 (* The regular strip_awaitable function depends on expand_type and only works on locl types *)
 let strip_awaitable_decl env (ty: decl ty) =
   match Env.get_fn_kind env, ty with
-  | Ast.FAsync, (_, Tapply ((_, class_name), [inner_ty]))
+  | Ast_defs.FAsync, (_, Tapply ((_, class_name), [inner_ty]))
     when class_name = Naming_special_names.Classes.cAwaitable ->
       inner_ty
   | _ -> ty
 
 let strip_awaitable fun_kind env ty =
-  if fun_kind <> Ast.FAsync then ty
+  if fun_kind <> Ast_defs.FAsync then ty
   else
   match Env.expand_type env ty with
   | _env, (_, Tclass ((_, class_name), _, [ty]))
@@ -76,20 +76,20 @@ let make_info fun_kind attributes env ~is_explicit locl_ty decl_ty =
 (* For async functions, wrap Awaitable<_> around the return type *)
 let wrap_awaitable env p rty =
   match Env.get_fn_kind env with
-    | Ast.FCoroutine
-    | Ast.FSync ->
+    | Ast_defs.FCoroutine
+    | Ast_defs.FSync ->
       rty
-    | Ast.FGenerator
+    | Ast_defs.FGenerator
       (* Is an error, but caught in NastCheck. *)
-    | Ast.FAsyncGenerator ->
+    | Ast_defs.FAsyncGenerator ->
       (Reason.Rnone, TUtils.terr env)
-    | Ast.FAsync ->
-      MakeType.awaitable (Reason.Rret_fun_kind (p, Ast.FAsync)) rty
+    | Ast_defs.FAsync ->
+      MakeType.awaitable (Reason.Rret_fun_kind (p, Ast_defs.FAsync)) rty
 
 
 let make_return_type localize env (ty: decl ty) =
   match Env.get_fn_kind env, ty with
-  | Ast.FAsync, (r, Tapply ((_, class_name), [inner_ty]))
+  | Ast_defs.FAsync, (r, Tapply ((_, class_name), [inner_ty]))
     when class_name = Naming_special_names.Classes.cAwaitable ->
     let env, ty = localize env inner_ty in
     env, wrap_awaitable env (Reason.to_pos r) ty
@@ -100,11 +100,11 @@ let force_awaitable env p ty =
   let fun_kind = Env.get_fn_kind env in
   match Env.expand_type env ty with
   | env, (_, Tclass ((_, class_name), _, _))
-    when fun_kind = Ast.FAsync && class_name = Naming_special_names.Classes.cAwaitable ->
+    when fun_kind = Ast_defs.FAsync && class_name = Naming_special_names.Classes.cAwaitable ->
     env, ty
-  | env, (_, Tany) when fun_kind = Ast.FAsync ->
+  | env, (_, Tany) when fun_kind = Ast_defs.FAsync ->
     env, wrap_awaitable env p ty
-  | _ when fun_kind = Ast.FAsync ->
+  | _ when fun_kind = Ast_defs.FAsync ->
     let env, underlying_ty = Env.fresh_type env p in
     let wrapped_ty = wrap_awaitable env p underlying_ty in
     Errors.try_add_err p (Reason.string_of_ureason Reason.URnone)

@@ -95,7 +95,7 @@ let used_variables_visitor =
    * (We do still count operator-assignments) *)
   method! on_expr acc (_, e_ as e) =
     match e_ with
-    | Binop (Ast.Eq None, e1, e2) ->
+    | Binop (Ast_defs.Eq None, e1, e2) ->
       let _, not_vars = List.partition_map (unpack_lvals e1) get_lvar in
       let acc = List.fold_left ~f:this#on_expr ~init:acc not_vars in
       this#on_expr acc e2
@@ -180,14 +180,14 @@ let sequence_visitor ~require_used used_vars =
     | Lvar id ->
       use_local env id
 
-    | Unop ((Ast.Uincr | Ast.Udecr | Ast.Upincr | Ast.Updecr),
+    | Unop ((Ast_defs.Uincr | Ast_defs.Udecr | Ast_defs.Upincr | Ast_defs.Updecr),
             (_, Lvar id)) ->
       assign_local env id
 
     (* Assignment. This is pretty hairy because of list(...)
      * destructuring and the treatment necessary to allow
      * code like '$x = $x + 1'. *)
-    | Binop (Ast.Eq _, e1, e2) ->
+    | Binop (Ast_defs.Eq _, e1, e2) ->
       (* Unpack any list(...) destructuring and separate out locals
        * we are assigning to from other lvals. *)
       let lvars, lval_exprs =
@@ -222,7 +222,7 @@ let sequence_visitor ~require_used used_vars =
 
     (* leave && and || sequenced before making all
      * the other binops unsequenced *)
-    | Binop ((Ast.Ampamp | Ast.Barbar | Ast.QuestionQuestion), _, _) -> parent#on_expr env e
+    | Binop ((Ast_defs.Ampamp | Ast_defs.Barbar | Ast_defs.QuestionQuestion), _, _) -> parent#on_expr env e
 
     (* These operations have unsequenced subexpressions. *)
     | Binop (_, e1, e2)

@@ -45,7 +45,7 @@ let rec check_hint env (pos, hint) =
     | Some cls when
       let kind = Cls.kind cls in
       let tc_name = Cls.name cls in
-      (kind = Ast.Ctrait || kind = Ast.Cabstract && Cls.final cls)
+      (kind = Ast_defs.Ctrait || kind = Ast_defs.Cabstract && Cls.final cls)
       && tc_name <> SN.Collections.cDict
       && tc_name <> SN.Collections.cKeyset
       && tc_name <> SN.Collections.cVec ->

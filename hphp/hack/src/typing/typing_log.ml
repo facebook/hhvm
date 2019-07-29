@@ -337,11 +337,11 @@ let local_mutability_as_value local_mutability =
 
 let fun_kind_to_string k =
   match k with
-  | Ast.FSync -> "normal"
-  | Ast.FAsync -> "async"
-  | Ast.FGenerator -> "generator"
-  | Ast.FAsyncGenerator -> "async generator"
-  | Ast.FCoroutine -> "coroutine"
+  | Ast_defs.FSync -> "normal"
+  | Ast_defs.FAsync -> "async"
+  | Ast_defs.FGenerator -> "generator"
+  | Ast_defs.FAsyncGenerator -> "async generator"
+  | Ast_defs.FCoroutine -> "coroutine"
 
 let rec reactivity_to_string env r =
   match r with

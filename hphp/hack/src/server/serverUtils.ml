@@ -19,8 +19,9 @@ type 'env handle_command_result =
   | Needs_full_recheck of 'env * ('env -> 'env) * string
   (* Commands that want to modify global state, by modifying file contents.
    * The boolean indicates whether current recheck should be automatically
-   * restarted after applying the writes *)
-  | Needs_writes of 'env * ('env -> 'env) * bool
+   * restarted after applying the writes. The string specifies a reason why this
+   * command needs writes (for logging/debugging purposes) *)
+  | Needs_writes of 'env * ('env -> 'env) * bool * string
 
 let wrap try_ f = fun env -> try_ env (fun () -> f env)
 
@@ -29,7 +30,7 @@ let wrap try_ = function
   | Done env -> Done env
   | Needs_full_recheck (env, f, reason) ->
     Needs_full_recheck (env, wrap try_ f, reason)
-  | Needs_writes (env, f, reason) -> Needs_writes (env, wrap try_ f, reason)
+  | Needs_writes (env, f, restart, reason) -> Needs_writes (env, wrap try_ f, restart, reason)
 
 let shutdown_client (_ic, oc) =
   let cli = Unix.descr_of_out_channel oc in

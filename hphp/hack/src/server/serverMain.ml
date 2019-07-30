@@ -223,7 +223,7 @@ let handle_connection_ genv env client =
       if Option.is_some env.persistent_client
         (* Cleaning up after existing client (in shutdown_persistent_client)
          * will attempt to write to shared memory *)
-        then ServerUtils.Needs_writes (env, f, true)
+        then ServerUtils.Needs_writes (env, f, true, "Cleaning up persistent client")
         else ServerUtils.Done (f env)
     | Non_persistent ->
       ServerCommand.handle genv env client
@@ -252,20 +252,22 @@ let handle_persistent_connection_try return client env f =
   | Sys_error("Broken pipe")
   | ServerCommandTypes.Read_command_timeout
   | ServerClientProvider.Client_went_away ->
-    return env (shutdown_persistent_client client) ~needs_writes:true
+    return env (shutdown_persistent_client client) ~needs_writes:(Some "Client_went_away")
   | ServerCommand.Nonfatal_rpc_exception (e, stack, env) ->
     report_persistent_exception ~e ~stack ~client ~is_fatal:false;
-    return env (fun env -> env) ~needs_writes:false
+    return env (fun env -> env) ~needs_writes:None
   | e ->
     let stack = Printexc.get_backtrace () in
     report_persistent_exception ~e ~stack ~client ~is_fatal:true;
-    return env (shutdown_persistent_client client) ~needs_writes:true
+    let needs_writes = (Some (Caml.Printexc.to_string e ^ "\n" ^ stack)) in
+    return env (shutdown_persistent_client client) ~needs_writes
 [@@@warning "+52"] (* CARE! scope of suppression should be only handle_persistent_connection_try *)
 
 let handle_persistent_connection_ genv env client =
   let return env f ~needs_writes =
-    if needs_writes then ServerUtils.Needs_writes (env, f, true)
-    else ServerUtils.Done (f env)
+    match needs_writes with
+    | Some reason -> ServerUtils.Needs_writes (env, f, true, reason)
+    | None -> ServerUtils.Done (f env)
   in
   handle_persistent_connection_try return client env
       @@ fun () ->
@@ -482,7 +484,7 @@ let main_loop_command_handler client_kind client result  =
         persistent_client_pending_command_needs_full_check = Some (f, reason)
       }
     end
-  | ServerUtils.Needs_writes (env, f, _) -> f env
+  | ServerUtils.Needs_writes (env, f, _, _) -> f env
 
 let has_pending_disk_changes genv =
   match genv.notifier_async_reader () with
@@ -741,10 +743,10 @@ let priority_client_interrupt_handler genv client_provider env =
      * sleep_and_check. *)
     | None -> env
     | Some client -> match handle_connection genv env client `Non_persistent with
-      | ServerUtils.Needs_full_recheck _ ->
-        failwith "unexpected command needing full recheck in priority channel"
-      | ServerUtils.Needs_writes _ ->
-        failwith "unexpected command needing writes in priority channel"
+      | ServerUtils.Needs_full_recheck (_, _, reason) ->
+        failwith ("unexpected command needing full recheck in priority channel: " ^ reason)
+      | ServerUtils.Needs_writes (_, _, _, reason) ->
+        failwith ("unexpected command needing writes in priority channel: " ^ reason)
       | ServerUtils.Done env -> env
   in
   env, MultiThreadedCall.Continue
@@ -764,7 +766,7 @@ let persistent_client_interrupt_handler genv env =
         persistent_client_pending_command_needs_full_check = Some (f, reason)
       },
       MultiThreadedCall.Continue
-    | ServerUtils.Needs_writes (env, f, should_restart_recheck) ->
+    | ServerUtils.Needs_writes (env, f, should_restart_recheck, _) ->
       let full_check = match env.full_check with
         | Full_check_started when not should_restart_recheck ->
             Full_check_needed

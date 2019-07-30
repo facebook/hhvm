@@ -17,7 +17,7 @@
 (15,3)-(15,42) Redeclared method E::f
 (15,22)-(15,34) Parameters cannot have visibility modifiers (except in parameter lists of constructors).
 (16,3)-(16,38) Redeclared method E::__construct
-(16,36)-(16,38) A constructor or destructor cannot have a non-void type annotation.
+(16,36)-(16,38) A constructor cannot have a non-void type annotation.
 (17,3)-(17,39) Redeclared method E::__construct
 (18,3)-(18,32) Redeclared method E::f
 (19,3)-(19,33) Redeclared method E::f

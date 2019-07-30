@@ -465,7 +465,6 @@ module WithToken(Token: TokenType) = struct
 
     let is_name       = is_specific_token TokenKind.Name
     let is_construct  = is_specific_token TokenKind.Construct
-    let is_destruct   = is_specific_token TokenKind.Destruct
     let is_static     = is_specific_token TokenKind.Static
     let is_private    = is_specific_token TokenKind.Private
     let is_public     = is_specific_token TokenKind.Public

@@ -673,10 +673,6 @@ module WithExpressionAndStatementAndTypeParser
      Note that a visibility modifier is required; static is optional;
      any order is allowed.
 
-     TODO: The spec indicates that abstract is disallowed, but Hack allows
-     TODO: it; resolve this disagreement.
-     (This work is tracked by task T21622566)
-
      // method-declaration
      <<attr>> public/private/protected/abstract/final/static async function
      Note that a modifier is required, the attr and async are optional.
@@ -688,13 +684,6 @@ module WithExpressionAndStatementAndTypeParser
      <<attr>> public/private/protected/abstract/final function __construct
      Note that we allow static constructors in this parser; we produce an
      error in the post-parse error detection pass.
-
-     // destructor-declaration
-     <<attr>> public/private/protected function __destruct
-     TODO: Hack and HHVM allow final and abstract destructors, but the
-     TODO: spec says that these should not be legal; resolve this discrepancy.
-     We do not give an error for incorrect destructor modifiers in this parser;
-     we produce an error in the post-parse error detection pass.
 
      // trait clauses
     require  extends  qualified-name
@@ -728,18 +717,18 @@ module WithExpressionAndStatementAndTypeParser
     | Final -> begin
         match peek_token_kind ~lookahead:1 parser with
         | Enum -> parse_class_enum ~final:true parser
-        | _ -> (* Parse class methods, constructors, destructors, properties
+        | _ -> (* Parse class methods, constructors, properties
                or type constants. *)
           let (parser, attr) = parse_attribute_specification_opt parser in
           parse_methodish_or_property_or_type_constant parser attr
       end
     | Async
     | LessThanLessThan ->
-      (* Parse methods, constructors, destructors, properties, or type constants. *)
+      (* Parse methods, constructors, properties, or type constants. *)
       let (parser, attr) = parse_attribute_specification_opt parser in
       parse_methodish_or_property_or_type_constant parser attr
     | At when Full_fidelity_parser_env.allow_new_attribute_syntax parser.env ->
-      (* Parse methods, constructors, destructors, properties, or type constants. *)
+      (* Parse methods, constructors, properties, or type constants. *)
       let (parser, attr) = parse_attribute_specification_opt parser in
       parse_methodish_or_property_or_type_constant parser attr
     | Require ->
@@ -1766,8 +1755,7 @@ module WithExpressionAndStatementAndTypeParser
       return_type
       where_clause
 
-  (* A function label is either a function name, a __construct label, or a
-  __destruct label. *)
+  (* A function label is either a function name or a __construct label *)
   and parse_function_label_opt parser ~is_methodish =
     let report_error parser token =
       let parser = with_error parser SyntaxError.error1044 in
@@ -1777,8 +1765,7 @@ module WithExpressionAndStatementAndTypeParser
     let (parser1, token) = next_token parser in
     match Token.kind token with
     | Name
-    | Construct
-    | Destruct -> Make.token parser1 token
+    | Construct -> Make.token parser1 token
     | LeftParen ->
       (* It turns out, it was just a verbose lambda; YOLO PHP *)
       Make.missing parser (pos parser)

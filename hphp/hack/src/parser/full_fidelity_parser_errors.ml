@@ -532,9 +532,6 @@ let is_clone label =
 let class_constructor_has_static node context =
   has_static node context is_construct
 
-let class_destructor_cannot_be_static node context =
-  has_static node context is_destruct
-
 let clone_cannot_be_static node context =
   has_static node context is_clone
 
@@ -634,8 +631,8 @@ let interface_or_trait_has_visibility_param node context =
     promoted_params params <> [] && is_interface_or_trait
   | _ -> false
 
-(* check that a constructor or a destructor is type annotated *)
-let class_constructor_destructor_has_non_void_type env node _context =
+(* check that a constructor is type annotated *)
+let class_constructor_has_non_void_type env node _context =
   if not (is_typechecker env) then false
   else
   match node with
@@ -649,7 +646,7 @@ let class_constructor_destructor_has_non_void_type env node _context =
         is_void spec.simple_type_specifier
       | _ -> false
     in
-    (is_construct label || is_destruct label) &&
+    (is_construct label) &&
     not (is_missing || is_void)
   | _ -> false
 
@@ -672,11 +669,11 @@ let call_static_method node _context =
     name = String.lowercase SN.Members.__callStatic
   | _ -> false
 
-let clone_destruct_takes_no_arguments _method_name node _context =
+let clone_takes_no_arguments _method_name node _context =
   match node with
   | FunctionDeclarationHeader { function_parameter_list = l; function_name = name; _} ->
     let num_params = List.length (syntax_to_list_no_separators l) in
-    ((is_clone name) || (is_destruct name)) && num_params <> 0
+    (is_clone name) && num_params <> 0
   | _ -> false
 
 (* whether a methodish decl has body *)
@@ -1372,7 +1369,7 @@ let methodish_errors env node errors =
   | FunctionDeclarationHeader { function_parameter_list; function_type; _} ->
     let errors =
       produce_error_for_header errors
-      (class_constructor_destructor_has_non_void_type env)
+      (class_constructor_has_non_void_type env)
       node env.context SyntaxError.error2018 function_type in
     let errors =
       produce_error_for_header errors class_non_constructor_has_visibility_param
@@ -1437,11 +1434,6 @@ let methodish_errors env node errors =
       (class_constructor_has_static) header_node
       env.context (SyntaxError.error2009 class_name method_name) modifiers in
     let errors =
-      produce_error_for_header errors
-      (class_destructor_cannot_be_static)
-      header_node env.context
-      (SyntaxError.class_destructor_cannot_be_static class_name method_name) modifiers in
-    let errors =
       produce_error_for_header errors async_magic_method header_node env.context
       (SyntaxError.async_magic_method ~name:method_name) modifiers in
     let errors =
@@ -1449,8 +1441,8 @@ let methodish_errors env node errors =
       (SyntaxError.call_static_method) modifiers in
     let errors =
       produce_error_for_header errors
-      (clone_destruct_takes_no_arguments method_name) header_node env.context
-      (SyntaxError.clone_destruct_takes_no_arguments class_name method_name) modifiers in
+      (clone_takes_no_arguments method_name) header_node env.context
+      (SyntaxError.clone_takes_no_arguments class_name method_name) modifiers in
     let errors =
       produce_error_for_header errors (clone_cannot_be_static) header_node env.context
       (SyntaxError.clone_cannot_be_static class_name method_name) modifiers in

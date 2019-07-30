@@ -387,9 +387,7 @@ let make_memoize_wrapper_method env info ast_class ast_method =
   let method_visibility = ast_method.T.m_visibility in
   let (_, original_name) = ast_method.T.m_name in
   let ret =
-    if original_name = Naming_special_names.Members.__construct
-    || original_name = Naming_special_names.Members.__destruct
-    then None
+    if original_name = Naming_special_names.Members.__construct then None
     else ast_method.T.m_ret in
   let method_id = Hhbc_id.Method.from_ast_name original_name in
   let scope =

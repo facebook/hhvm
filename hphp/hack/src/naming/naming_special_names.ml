@@ -129,7 +129,6 @@ module UserAttributes = struct
   let uaShallowReactive          = "__RxShallow"
   let uaMutable                  = "__Mutable"
   let uaMutableReturn            = "__MutableReturn"
-  let uaOptionalDestruct         = "__OptionalDestruct"
   let uaOnlyRxIfImpl             = "__OnlyRxIfImpl"
   let uaProbabilisticModel       = "__PPL"
   let uaLSB                      = "__LSB"
@@ -171,7 +170,6 @@ module UserAttributes = struct
       uaMutable;
       uaMutableReturn;
       uaShallowReactive;
-      uaOptionalDestruct;
       uaOnlyRxIfImpl;
       uaProbabilisticModel;
       uaLSB;

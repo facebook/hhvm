@@ -68,9 +68,7 @@ let handler = object
 
   method! at_method_ env m =
     let pos, name = m.m_name in
-    if name = SN.Members.__destruct
-      && not (Attributes.mem SN.UserAttributes.uaOptionalDestruct m.m_user_attributes)
-    then Errors.illegal_destructor pos;
+    if name = SN.Members.__destruct then Errors.illegal_destructor pos;
     begin match env.class_name with
     | Some cname ->
         let p, mname = m.m_name in

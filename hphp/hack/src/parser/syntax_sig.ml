@@ -1444,7 +1444,6 @@ module type Syntax_S = sig
   val is_external       : t -> bool
   val is_name           : t -> bool
   val is_construct      : t -> bool
-  val is_destruct       : t -> bool
   val is_static         : t -> bool
   val is_private        : t -> bool
   val is_public         : t -> bool

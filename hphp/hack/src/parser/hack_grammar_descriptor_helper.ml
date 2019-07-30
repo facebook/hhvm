@@ -155,7 +155,6 @@ module HackGrammarTermSpec = struct
   let extends = Term Extends
   let use = Term Use
   let const = Term Const
-  let destruct = Term Destruct
   let construct = Term Construct
   let term_public = Term Public
   let term_private = Term Private

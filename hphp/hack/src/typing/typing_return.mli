@@ -64,7 +64,7 @@ val force_awaitable:
   Env.env * Typing_defs.locl Typing_defs.ty
 
 (** If there is no return type annotation on method, assume `void` for the
-special functions `__destruct` and `__construct`, otherwise Tany *)
+special function `__construct`, otherwise Tany *)
 val make_default_return:
   Env.env ->
   Ast_defs.pos * string -> Typing_reason.t * 'a Typing_defs.ty_

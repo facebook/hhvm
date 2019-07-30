@@ -1815,8 +1815,7 @@ where
         )
     }
 
-    // A function label is either a function name, a __construct label, or a
-    // __destruct label.
+    // A function label is either a function name or a __construct label.
     fn parse_function_label_opt(&mut self, is_methodish: bool) -> S::R {
         let report_error = |x: &mut Self, token: S::Token| {
             x.with_error(Errors::error1044);
@@ -1825,7 +1824,7 @@ where
         };
         let token_kind = self.peek_token_kind();
         match token_kind {
-            TokenKind::Name | TokenKind::Construct | TokenKind::Destruct => {
+            TokenKind::Name | TokenKind::Construct => {
                 let token = self.next_token();
                 S!(make_token, self, token)
             }
@@ -2112,10 +2111,6 @@ where
         // Note that a visibility modifier is required; static is optional;
         // any order is allowed.
         //
-        // TODO: The spec indicates that abstract is disallowed, but Hack allows
-        // TODO: it; resolve this disagreement.
-        // (This work is tracked by task T21622566)
-        //
         // // method-declaration
         // <<attr>> public/private/protected/abstract/final/static async function
         // Note that a modifier is required, the attr and async are optional.
@@ -2127,13 +2122,6 @@ where
         // <<attr>> public/private/protected/abstract/final function __construct
         // Note that we allow static constructors in this parser; we produce an
         // error in the post-parse error detection pass.
-        //
-        // // destructor-declaration
-        // <<attr>> public/private/protected function __destruct
-        // TODO: Hack and HHVM allow final and abstract destructors, but the
-        // TODO: spec says that these should not be legal; resolve this discrepancy.
-        // We do not give an error for incorrect destructor modifiers in this parser;
-        // we produce an error in the post-parse error detection pass.
         //
         // // trait clauses
         // require  extends  qualified-name
@@ -2165,7 +2153,7 @@ where
                 match self.peek_token_kind_with_lookahead(1) {
                     TokenKind::Enum => self.parse_class_enum(/* final:*/ true),
                     _ => {
-                        // Parse class methods, constructors, destructors, properties
+                        // Parse class methods, constructors, properties
                         // or type constants.
                         let attr = self.parse_attribute_specification_opt();
                         self.parse_methodish_or_property_or_type_constant(attr)
@@ -2173,7 +2161,7 @@ where
                 }
             }
             TokenKind::Async | TokenKind::LessThanLessThan => {
-                // Parse methods, constructors, destructors, properties, or type constants.
+                // Parse methods, constructors, properties, or type constants.
                 let attr = self.parse_attribute_specification_opt();
                 self.parse_methodish_or_property_or_type_constant(attr)
             }

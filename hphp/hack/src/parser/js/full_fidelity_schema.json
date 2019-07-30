@@ -73,8 +73,6 @@
       "token_text" : "default" },
     { "token_kind" : "Define",
       "token_text" : "define" },
-    { "token_kind" : "Destruct",
-      "token_text" : "__destruct" },
     { "token_kind" : "Dict",
       "token_text" : "dict" },
     { "token_kind" : "Do",

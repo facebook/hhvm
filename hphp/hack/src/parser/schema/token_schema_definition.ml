@@ -267,10 +267,6 @@ let given_text_tokens = [
     ~allowed_as_identifier:true
     ();
   make_token_node
-    "Destruct"
-    "__destruct"
-    ();
-  make_token_node
     "Dict"
     "dict"
     ~allowed_as_identifier:true

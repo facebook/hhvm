@@ -109,8 +109,6 @@ val error2007 : string
 val error2008 : string
 val error2009 : string -> string -> string
 val error2010 : string
-val error2011 : string
-val error2012 : string
 val error2013 : string
 val error2014 : string
 val error2015 : string -> string -> string
@@ -255,8 +253,7 @@ val property_has_multiple_visibilities : string -> string
 val property_has_multiple_modifiers : string -> string
 val property_requires_visibility : string
 val autoload_takes_one_argument : string
-val clone_destruct_takes_no_arguments : string -> string -> string
-val class_destructor_cannot_be_static : string -> string -> string
+val clone_takes_no_arguments : string -> string -> string
 val clone_cannot_be_static : string -> string -> string
 val namespace_not_a_classname : string
 val parent_static_const_decl : string

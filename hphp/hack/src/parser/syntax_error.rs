@@ -92,7 +92,7 @@ pub const error1039: Error = Cow::Borrowed("A closing XHP tag is expected here."
 pub const error1041: Error =
     Cow::Borrowed("A function body or a semicolon (';') is expected here.");
 pub const error1044: Error =
-    Cow::Borrowed("A name, __construct, or __destruct keyword is expected here.");
+    Cow::Borrowed("A name or __construct keyword is expected here.");
 pub const error1045: Error =
     Cow::Borrowed("An 'extends' or 'implements' keyword is expected here.");
 pub const error1046: Error = Cow::Borrowed("A lambda arrow ('==>') is expected here.");
@@ -161,14 +161,12 @@ pub const error2010: Error = Cow::Borrowed(concat!(
     "Parameters cannot have visibility modifiers (except in ",
     "parameter lists of constructors)."
 ));
-pub const error2011: Error = Cow::Borrowed("A destructor must have an empty parameter list.");
-pub const error2012: Error = Cow::Borrowed("A destructor can only have visibility modifiers.");
 pub const error2013: Error = Cow::Borrowed("A method declaration cannot have duplicate modifiers.");
 pub const error2014: Error = Cow::Borrowed("An abstract method cannot have a method body.");
 pub const error2017: Error =
     Cow::Borrowed("A method declaration cannot have multiple visibility modifiers.");
 pub const error2018: Error =
-    Cow::Borrowed("A constructor or destructor cannot have a non-void type annotation.");
+    Cow::Borrowed("A constructor cannot have a non-void type annotation.");
 pub const error2020: Error = Cow::Borrowed(concat!(
     "Use of the '{}' subscript operator is deprecated; ",
     " use '[]' instead."

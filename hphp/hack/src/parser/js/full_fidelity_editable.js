@@ -769,8 +769,6 @@ class EditableToken extends EditableSyntax
        return new DefaultToken(leading, trailing);
     case 'define':
        return new DefineToken(leading, trailing);
-    case '__destruct':
-       return new DestructToken(leading, trailing);
     case 'dict':
        return new DictToken(leading, trailing);
     case 'do':
@@ -1382,13 +1380,6 @@ class DefineToken extends EditableToken
   constructor(leading, trailing)
   {
     super('define', leading, trailing, 'define');
-  }
-}
-class DestructToken extends EditableToken
-{
-  constructor(leading, trailing)
-  {
-    super('__destruct', leading, trailing, '__destruct');
   }
 }
 class DictToken extends EditableToken
@@ -21242,7 +21233,6 @@ exports.CoroutineToken = CoroutineToken;
 exports.DarrayToken = DarrayToken;
 exports.DefaultToken = DefaultToken;
 exports.DefineToken = DefineToken;
-exports.DestructToken = DestructToken;
 exports.DictToken = DictToken;
 exports.DoToken = DoToken;
 exports.DoubleToken = DoubleToken;

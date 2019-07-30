@@ -6740,9 +6740,7 @@ and method_def env m =
   let env = Env.set_env_reactive env reactive in
   let m_ret =
     match m.m_ret with
-    | None when
-         snd m.m_name = SN.Members.__destruct
-      || snd m.m_name = SN.Members.__construct ->
+    | None when snd m.m_name = SN.Members.__construct ->
       Some (pos, Happly((pos, "void"), []))
     | None ->
       Typing_return.suggest_return

@@ -108,7 +108,7 @@ let error1037 = "Either 'abstract' or 'final' keyword is expected here."
 let error1038 = "A semicolon (';') or a namespace body is expected here."
 let error1039 = "A closing XHP tag is expected here."
 let error1041 = "A function body or a semicolon (';') is expected here."
-let error1044 = "A name, __construct, or __destruct keyword is expected here."
+let error1044 = "A name or __construct keyword is expected here."
 let error1045 = "An 'extends' or 'implements' keyword is expected here."
 let error1046 = "A lambda arrow ('==>') is expected here."
 let error1047 = "A scope resolution operator ('::') is expected here."
@@ -147,8 +147,6 @@ let error2009 class_name method_name =
 
 let error2010 = "Parameters cannot have visibility modifiers (except in " ^
   "parameter lists of constructors)."
-let error2011 = "A destructor must have an empty parameter list."
-let error2012 = "A destructor can only have visibility modifiers."
 let error2013 = "A method declaration cannot have duplicate modifiers."
 let error2014 = "An abstract method cannot have a method body."
 let error2015 class_name method_name =
@@ -160,7 +158,7 @@ let error2016 class_name method_name =
 let error2017 =
   "A method declaration cannot have multiple visibility modifiers."
 let error2018 =
-  "A constructor or destructor cannot have a non-void type annotation."
+  "A constructor cannot have a non-void type annotation."
 let error2019 class_name method_name =
   Printf.sprintf "Cannot declare abstract method %s::%s final"
     class_name method_name
@@ -329,7 +327,7 @@ let shape_type_ellipsis_without_trailing_comma =
   "A comma is required before the ... in a shape type"
 
 let yield_in_magic_methods =
-  "'yield' is not allowed in constructor, destructor, or magic methods"
+  "'yield' is not allowed in constructors or magic methods"
 
 let reference_not_allowed_on_key = "Key of collection element cannot " ^
   "be marked as reference"
@@ -357,7 +355,7 @@ let reassign_this =
 let this_in_static =
   "Don't use $this in a static method, use static:: instead"
 let async_magic_method ~name =
-  "cannot declare constructors, destructors, and magic methods such as '"^ name ^ "' async"
+  "cannot declare constructors and magic methods such as '"^ name ^ "' async"
 let call_static_method =
   "__callStatic methods are no longer supported"
 
@@ -440,12 +438,9 @@ let invalid_is_as_expression_hint n hint =
 let elvis_operator_space = "An Elvis operator ('?:') is expected here."
 let autoload_takes_one_argument =
   "__autoload() must take exactly 1 argument"
-let clone_destruct_takes_no_arguments class_name method_name =
+let clone_takes_no_arguments class_name method_name =
   Printf.sprintf "Method %s::%s cannot accept any arguments"
     class_name method_name
-let class_destructor_cannot_be_static class_name method_name =
-  Printf.sprintf "Destructor %s::%s() cannot be static"
-  class_name method_name
 
 let clone_cannot_be_static class_name method_name =
   Printf.sprintf "Clone method %s::%s() cannot be static"

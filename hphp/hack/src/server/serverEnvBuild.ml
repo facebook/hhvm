@@ -82,7 +82,8 @@ let make_genv options config local_config workers lru_host_env =
     else begin
       Hh_logger.log "Using watchman";
       let watchman_env = Watchman.init ?since_clockspec {
-        Watchman.init_timeout = local_config.SLC.watchman_init_timeout;
+        Watchman.init_timeout =
+          Watchman.Explicit_timeout (float local_config.SLC.watchman_init_timeout);
         subscribe_mode = if local_config.SLC.watchman_subscribe
           then Some Watchman.Defer_changes
           else None;

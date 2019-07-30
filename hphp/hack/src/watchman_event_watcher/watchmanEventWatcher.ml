@@ -274,7 +274,7 @@ let rec serve env =
 let init_watchman root =
   Watchman.init {
     Watchman.subscribe_mode = Some Watchman.All_changes;
-    init_timeout = 30;
+    init_timeout = Watchman.Explicit_timeout 30.;
     debug_logging = false;
     expression_terms = watchman_expression_terms;
     subscription_prefix = "hh_event_watcher";

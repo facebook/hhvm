@@ -837,7 +837,7 @@ let init {
   else
     let watchman = Watchman.init {
       Watchman.subscribe_mode = Some Watchman.Scm_aware;
-      init_timeout = 30;
+      init_timeout = Watchman.Explicit_timeout 30.;
       expression_terms = watchman_expression_terms;
       debug_logging = watchman_debug_logging;
       subscription_prefix = "hh_informant_watcher";

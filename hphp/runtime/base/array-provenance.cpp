@@ -104,20 +104,17 @@ TypedValue tagTV(TypedValue tv) {
 }
 
 Tag tagFromProgramCounter() {
-  VMRegAnchor _;
-
-  auto frame = vmfp();
-  auto offset  = frame->unit()->offsetOf(vmpc());
-  while (UNLIKELY(frame &&
-                  frame->func()->isProvenanceSkipFrame())) {
-    frame = g_context->getPrevVMState(frame, &offset);
-  }
-
-  auto const unit = frame->unit();
-  auto const filename = unit->filepath();
-  auto const line = unit->getLineNumber(offset);
-
-  return Tag{filename, line};
+  auto const tag = fromLeaf(
+    [&] (const ActRec* fp, Offset offset) {
+      auto const unit = fp->unit();
+      auto const filename = unit->filepath();
+      auto const line = unit->getLineNumber(offset);
+      return Tag { filename, line };
+    },
+    [] (const ActRec* fp) { return !fp->func()->isProvenanceSkipFrame(); }
+  );
+  assertx(tag.filename() != nullptr);
+  return tag;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

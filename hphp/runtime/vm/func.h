@@ -873,11 +873,6 @@ struct Func final {
   bool isGenerated() const;
 
   /*
-   * Is this function __destruct()?
-   */
-  bool isDestructor() const;
-
-  /*
    * Is this function __call()?
    */
   bool isMagicCallMethod() const;
@@ -973,8 +968,7 @@ struct Func final {
   /*
    * Indicates that a function does not make any explicit calls to other PHP
    * functions.  It may still call other user-level functions via re-entry
-   * (e.g., for destructors and autoload), and it may make calls to builtins
-   * using FCallBuiltin.
+   * (e.g., for autoload), and it may make calls to builtins using FCallBuiltin.
    */
   bool isPhpLeafFn() const;
 

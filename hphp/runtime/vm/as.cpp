@@ -2627,9 +2627,9 @@ static const StaticString
  * attribute map and sets the isNative flag accoringly
  * If the give function is op code implementation, then isNative is not set
  */
-void check_native(AsmState& as, bool is_construct_or_destruct) {
+void check_native(AsmState& as, bool is_construct) {
   if (as.fe->userAttributes.count(s_native.get())) {
-    as.fe->hniReturnType = is_construct_or_destruct
+    as.fe->hniReturnType = is_construct
       ? KindOfNull
       : type_constraint_to_data_type(as.fe->retUserType,
         as.fe->retTypeConstraint);
@@ -2768,7 +2768,7 @@ void parse_method(AsmState& as) {
   // parse_function_flabs relies on as.fe already having valid attrs
   parse_function_flags(as);
 
-  check_native(as, name == "__construct" || name == "__destruct");
+  check_native(as, name == "__construct");
 
   as.in.expectWs('{');
 

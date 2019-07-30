@@ -68,17 +68,6 @@ const StaticString
   s_clone("__clone");
 
 ALWAYS_INLINE
-void invoke_destructor(ObjectData* obj, const Func* dtor) {
-  try {
-    // Call the destructor method
-    g_context->invokeMethodV(obj, dtor, InvokeArgs{}, false);
-  } catch (...) {
-    // Swallow any exceptions that escape the __destruct method
-    handle_destructor_exception();
-  }
-}
-
-ALWAYS_INLINE
 void verifyTypeHint(const Class* thisCls,
                     const Class::Prop* prop,
                     tv_rval val) {

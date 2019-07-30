@@ -646,9 +646,9 @@ static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
        * We are not going to transfer ownership of obj to the iterator,
        * so arrange to decRef it later. The actual decRef has to happen
        * after the call to arr().end() below, because both can have visible side
-       * effects (calls to __destruct() and valid()). Similarly it has to
-       * happen before the iter_*_cell_local_impl calls below, because they call
-       * current() and key() (hence the explicit scope around FreeObj fo;)
+       * effects (calls to valid()). Similarly it has to happen before the
+       * iter_*_cell_local_impl calls below, because they call current() and
+       * key() (hence the explicit scope around FreeObj fo;)
        */
       fo = obj;
 

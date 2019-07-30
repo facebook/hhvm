@@ -61,7 +61,10 @@
     Null
     RetC
   }
-  .method [public] <"" N  > __destruct() isClosureBody {
+}
+
+.class B {
+  .method [public] <"" N  > __construct() isClosureBody {
     String ""
     BaseH
     SetM 0 PT:"attre"

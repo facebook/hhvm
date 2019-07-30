@@ -742,9 +742,7 @@ void NEVER_INLINE throw_invalid_property_name(const String& name) {
 }
 
 void throw_instance_method_fatal(const char *name) {
-  if (!strstr(name, "::__destruct")) {
-    raise_error("Non-static method %s() cannot be called statically", name);
-  }
+  raise_error("Non-static method %s() cannot be called statically", name);
 }
 
 void throw_iterator_not_valid() {

@@ -77,11 +77,9 @@ instruction on tmps whose must-alias-sets say they "will_be_used_again" to
 DecRefNZ.
 
 One rule this pass relies on is that it is illegal to DecRef an object in a way
-that takes its refcount to zero, and then IncRef it again after that.  This is
-not illegal for trivial reasons, because object __destruct methods can
-ressurect an object in PHP.  But within one JIT region, right now we declare it
-illegal to generate IR that uses an object after a DecRef that might take it to
-zero.
+that takes its refcount to zero, and then IncRef it again after that.  Within
+one JIT region, right now we declare it illegal to generate IR that uses an
+object after a DecRef that might take it to zero.
 
 Since this pass converts instructions that may (in general) re-enter the
 VM---running arbitrary PHP code for a destructor---it's potentially profitable

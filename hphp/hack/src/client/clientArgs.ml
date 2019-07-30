@@ -93,6 +93,8 @@ let parse_check_args cmd =
   let max_errors = ref None in
   let mode = ref None in
   let monitor_logname = ref false in
+  let ide_logname = ref false in
+  let lsp_logname = ref false in
   let no_load = ref false in
   let output_json = ref false in
   let prechecked = ref None in
@@ -396,6 +398,12 @@ let parse_check_args cmd =
     "--monitor-logname",
       Arg.Set monitor_logname,
       " (mode) show monitor log filename and exit";
+    "--ide-logname",
+      Arg.Set ide_logname,
+      " (mode) show client ide log filename and exit";
+    "--lsp-logname",
+      Arg.Set lsp_logname,
+      " (mode) show client lsp log filename and exit";
     "--no-load",
       Arg.Set no_load,
       " start from a fresh state";
@@ -539,6 +547,18 @@ let parse_check_args cmd =
              "Error: please provide at most one www directory\n%!";
            exit 1
   in
+
+  if !ide_logname then begin
+    let ide_log_link = ServerFiles.client_ide_log root in
+    Printf.printf "%s\n%!" ide_log_link;
+    exit 0;
+  end;
+
+  if !lsp_logname then begin
+    let lsp_log_link = ServerFiles.client_lsp_log root in
+    Printf.printf "%s\n%!" lsp_log_link;
+    exit 0;
+  end;
 
   if !monitor_logname then begin
     let monitor_log_link = ServerFiles.monitor_log_link root in

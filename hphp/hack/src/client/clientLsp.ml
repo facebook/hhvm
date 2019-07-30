@@ -223,6 +223,50 @@ let hh_server_state_to_string (hh_server_state: hh_server_state) : string =
   | Hh_server_unknown -> "hh_server unknown state"
   | Hh_server_forgot -> "hh_server forgotten state"
 
+
+(* This conversion is imprecise.  Comments indicate potential gaps *)
+let completion_kind_to_si_kind
+    (completion_kind: Completion.completionItemKind option): SearchUtils.si_kind =
+  let open Lsp in
+  let open SearchUtils in
+  match completion_kind with
+  | Some Completion.Class -> SI_Class
+  | Some Completion.Method -> SI_ClassMethod
+  | Some Completion.Function -> SI_Function
+  | Some Completion.Variable -> SI_LocalVariable (* or SI_Mixed, but that's never used *)
+  | Some Completion.Property -> SI_Property
+  | Some Completion.Constant -> SI_GlobalConstant (* or SI_ClassConstant *)
+  | Some Completion.Interface -> SI_Interface (* or SI_Trait *)
+  | Some Completion.Enum -> SI_Enum
+  | Some Completion.Module -> SI_Namespace
+  | Some Completion.Constructor -> SI_Constructor
+  | Some Completion.Keyword -> SI_Keyword
+  | Some Completion.Value -> SI_Literal
+  | Some Completion.TypeParameter -> SI_Typedef
+  | _ -> SI_Unknown (* The completion enum includes things we don't really support *)
+
+let si_kind_to_completion_kind (kind: SearchUtils.si_kind)
+  : Completion.completionItemKind option =
+  match kind with
+  | SearchUtils.SI_XHP
+  | SearchUtils.SI_Class -> Some Completion.Class
+  | SearchUtils.SI_ClassMethod -> Some Completion.Method
+  | SearchUtils.SI_Function -> Some Completion.Function
+  | SearchUtils.SI_Mixed
+  | SearchUtils.SI_LocalVariable -> Some Completion.Variable
+  | SearchUtils.SI_Property -> Some Completion.Property
+  | SearchUtils.SI_ClassConstant -> Some Completion.Constant
+  | SearchUtils.SI_Interface
+  | SearchUtils.SI_Trait -> Some Completion.Interface
+  | SearchUtils.SI_Enum -> Some Completion.Enum
+  | SearchUtils.SI_Namespace -> Some Completion.Module
+  | SearchUtils.SI_Constructor -> Some Completion.Constructor
+  | SearchUtils.SI_Keyword -> Some Completion.Keyword
+  | SearchUtils.SI_Literal -> Some Completion.Value
+  | SearchUtils.SI_GlobalConstant -> Some Completion.Constant
+  | SearchUtils.SI_Typedef -> Some Completion.TypeParameter
+  | SearchUtils.SI_Unknown -> None
+
 (** We keep a log of server state over the past 2mins. When adding a new server
    state: if this state is the same as the current one, then ignore it. Also,
    retain only states younger than 2min plus the first one older than 2min.
@@ -1086,28 +1130,6 @@ let make_ide_completion_response
   let is_caret_followed_by_lparen = result.char_at_pos = '(' in
   let p = initialize_params_exc () in
 
-  let hack_to_kind (completion: complete_autocomplete_result)
-    : Completion.completionItemKind option =
-    match completion.res_kind with
-    | SearchUtils.SI_XHP
-    | SearchUtils.SI_Class -> Some Completion.Class
-    | SearchUtils.SI_ClassMethod -> Some Completion.Method
-    | SearchUtils.SI_Function -> Some Completion.Function
-    | SearchUtils.SI_Mixed
-    | SearchUtils.SI_LocalVariable -> Some Completion.Variable
-    | SearchUtils.SI_Property -> Some Completion.Property
-    | SearchUtils.SI_ClassConstant -> Some Completion.Constant
-    | SearchUtils.SI_Interface
-    | SearchUtils.SI_Trait -> Some Completion.Interface
-    | SearchUtils.SI_Enum -> Some Completion.Enum
-    | SearchUtils.SI_Namespace -> Some Completion.Module
-    | SearchUtils.SI_Constructor -> Some Completion.Constructor
-    | SearchUtils.SI_Keyword -> Some Completion.Keyword
-    | SearchUtils.SI_Literal -> Some Completion.Value
-    | SearchUtils.SI_GlobalConstant -> Some Completion.Constant
-    | SearchUtils.SI_Typedef -> Some Completion.TypeParameter
-    | SearchUtils.SI_Unknown -> None
-  in
   let hack_to_itemType (completion: complete_autocomplete_result) : string option =
     (* TODO: we're using itemType (left column) for function return types, and *)
     (* the inlineDetail (right column) for variable/field types. Is that good? *)
@@ -1189,7 +1211,7 @@ let make_ide_completion_response
     in
     {
       label = completion.res_name ^ (if completion.res_kind = SearchUtils.SI_Namespace then "\\" else "");
-      kind = hack_to_kind completion;
+      kind = si_kind_to_completion_kind completion.AutocompleteTypes.res_kind;
       detail = Some (hack_to_detail completion);
       inlineDetail = Some (hack_to_inline_detail completion);
       itemType = hack_to_itemType completion;
@@ -1267,19 +1289,6 @@ let do_completion_local
     Lwt.return response
   | Error error_message ->
     failwith (Printf.sprintf "Local completion failed: %s" error_message)
-
-let completion_kind_to_si_kind
-    (completion_kind: Completion.completionItemKind option): SearchUtils.si_kind =
-  let open Lsp in
-  let open SearchUtils in
-  match completion_kind with
-  | Some Completion.Class -> SI_Class
-  | Some Completion.Interface -> SI_Interface
-  | Some Completion.Function -> SI_Function
-  | Some Completion.Enum -> SI_Enum
-  | Some Completion.Constant -> SI_GlobalConstant
-  | Some Completion.TypeParameter -> SI_Typedef
-  | _ -> SI_Class
 
 exception NoLocationFound
 

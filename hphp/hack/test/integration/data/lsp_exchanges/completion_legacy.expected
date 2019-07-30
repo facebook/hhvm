@@ -340,10 +340,6 @@
       "detail": "function(): :ab:cd:alpha",
       "inlineDetail": "()",
       "itemType": ":ab:cd:alpha",
-      "documentation": {
-        "kind": "markdown",
-        "value": ":ab:cd:alpha docblock"
-      },
       "insertText": ":ab:cd:alpha",
       "insertTextFormat": 1,
       "data": {

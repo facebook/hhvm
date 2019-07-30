@@ -1874,6 +1874,7 @@ let report_connect_progress
 let report_connect_end
     (ienv: In_init_env.t)
   : state =
+  Hh_logger.log "report_connect_end";
   let open In_init_env in
   let open Main_env in
   let _state = dismiss_ui (In_init ienv) in
@@ -1900,6 +1901,7 @@ let connect_after_hello
     (server_conn: server_conn)
     (file_edits: Hh_json.json ImmQueue.t)
   : unit Lwt.t =
+  Hh_logger.log "connect_after_hello";
   let ignore = ref 0.0 in
   let%lwt () =
     try%lwt
@@ -1949,6 +1951,7 @@ let connect_after_hello
     with e ->
       let message = Exn.to_string e in
       let stack = Printexc.get_backtrace () in
+      Hh_logger.log "connect_after_hello exception %s\n%s" message stack;
       raise (Server_fatal_connection_exception { Marshal_tools.message; stack; })
   in
 
@@ -1961,6 +1964,7 @@ let rec connect_client
     (root: Path.t)
     ~(autostart: bool)
   : server_conn Lwt.t =
+  Hh_logger.log "connect_client";
   let open Exit_status in
   (* This basically does the same connection attempt as "hh_client check":  *)
   (* it makes repeated attempts to connect; it prints useful messages to    *)
@@ -1998,6 +2002,7 @@ let rec connect_client
   with
   | Exit_with Build_id_mismatch when !can_autostart_after_mismatch ->
     (* Raised when the server was running an old version. We'll retry once.   *)
+    Hh_logger.log "connect_client: build_id_mismatch";
     can_autostart_after_mismatch := false;
     connect_client root ~autostart:true
 

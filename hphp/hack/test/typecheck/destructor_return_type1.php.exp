@@ -1,2 +1,0 @@
-File "destructor_return_type1.php", line 13, characters 33-37:
-A constructor or destructor cannot have a non-void type annotation. (Parsing[1002])

@@ -1,17 +1,17 @@
-((script 405
-  ((list 405
+((script 326
+  ((list 326
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
        (missing 0 ())))
-     (classish_declaration 399
+     (classish_declaration 320
       ((missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
        (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (classish_body 391
+       (classish_body 312
         ((() { 1 ((end_of_line 1)))
-         (list 385
+         (list 306
           ((methodish_declaration 35
             ((missing 0 ())
              (function_declaration_header 32
@@ -156,36 +156,6 @@
                    (missing 0 ())))))
                (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
                (missing 0 ())))
-             (compound_statement 2
-              ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))
-             (missing 0 ())))
-           (methodish_declaration 32
-            ((missing 0 ())
-             (function_declaration_header 29
-              ((list 6 ((((whitespace 2)) public 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1)))
-               (() __destruct 10 ((whitespace 1))) (missing 0 ())
-               (() "(" 1 ()) (missing 0 ()) (() ")" 1 ((whitespace 1)))
-               (missing 0 ()) (missing 0 ()) (missing 0 ())))
-             (compound_statement 2
-              ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))
-             (missing 0 ())))
-           (methodish_declaration 41
-            ((old_attribute_specification 8
-              ((((whitespace 2)) << 2 ())
-               (list 4
-                ((list_item 4
-                  ((constructor_call 4
-                    ((() name 4 ()) (missing 0 ()) (missing 0 ())
-                     (missing 0 ())))
-                   (missing 0 ())))))
-               (() >> 2 ((whitespace 1)))))
-             (function_declaration_header 29
-              ((list 6 ((() public 6 ((whitespace 1)))))
-               (() function 8 ((whitespace 1)))
-               (() __destruct 10 ((whitespace 1))) (missing 0 ())
-               (() "(" 1 ()) (missing 0 ()) (() ")" 1 ((whitespace 1)))
-               (missing 0 ()) (missing 0 ()) (missing 0 ())))
              (compound_statement 2
               ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))
              (missing 0 ())))))

@@ -14,14 +14,7 @@ open Typing_defs
 
 module Inst = Decl_instantiate
 
-let check_arity pos class_name class_type class_parameters =
-  let arity = List.length class_type.dc_tparams in
-  if List.length class_parameters <> arity
-  then Errors.class_arity pos class_type.dc_pos class_name arity;
-  ()
-
-let make_substitution pos class_name class_type class_parameters =
-  check_arity pos class_name class_type class_parameters;
+let make_substitution class_type class_parameters =
   Inst.make_subst class_type.dc_tparams class_parameters
 
 (* Accumulate requirements so that we can successfully check the bodies
@@ -38,7 +31,7 @@ let flatten_parent_class_reqs env shallow_class
     req_ancestors, req_ancestors_extends
   | Some parent_type ->
     let subst =
-      make_substitution parent_pos parent_name parent_type parent_params in
+      make_substitution parent_type parent_params in
     let req_ancestors =
       List.rev_map_append parent_type.dc_req_ancestors req_ancestors
         begin fun (_p, ty) ->

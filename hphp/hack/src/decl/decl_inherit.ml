@@ -241,14 +241,7 @@ let collapse_trait_inherited methods smethods acc =
 (* Helpers *)
 (*****************************************************************************)
 
-let check_arity pos class_name class_type class_parameters =
-  let arity = List.length class_type.dc_tparams in
-  if List.length class_parameters <> arity
-  then Errors.class_arity pos class_type.dc_pos class_name arity;
-  ()
-
-let make_substitution pos class_name class_type class_parameters =
-  check_arity pos class_name class_type class_parameters;
+let make_substitution class_type class_parameters =
   Inst.make_subst class_type.dc_tparams class_parameters
 
 let mark_as_synthesized inh =
@@ -300,8 +293,8 @@ let chown_privates owner class_type =
 (* Builds the inherited type when the class lives in Hack *)
 (*****************************************************************************)
 
-let inherit_hack_class env c p class_name class_type argl =
-  let subst = make_substitution p class_name class_type argl in
+let inherit_hack_class env c class_name class_type argl =
+  let subst = make_substitution class_type argl in
   let class_type =
     match class_type.dc_kind with
     | Ast_defs.Ctrait ->
@@ -338,8 +331,8 @@ let inherit_hack_class env c p class_name class_type argl =
   result
 
 (* mostly copy paste of inherit_hack_class *)
-let inherit_hack_class_constants_only p class_name class_type argl =
-  let subst = make_substitution p class_name class_type argl in
+let inherit_hack_class_constants_only class_type argl =
+  let subst = make_substitution class_type argl in
   let instantiate = SMap.map (Inst.instantiate_cc subst) in
   let consts  = instantiate class_type.dc_consts in
   let typeconsts = SMap.map (Inst.instantiate_typeconst subst)
@@ -364,7 +357,7 @@ let inherit_hack_xhp_attrs_only class_type =
 (*****************************************************************************)
 
 let from_class env c ty =
-  let _, (pos, class_name), class_params = Decl_utils.unwrap_class_type ty in
+  let _, (_, class_name), class_params = Decl_utils.unwrap_class_type ty in
   let class_type = Decl_env.get_class_dep env class_name in
   match class_type with
   | None ->
@@ -372,11 +365,11 @@ let from_class env c ty =
     empty
   | Some class_ ->
     (* The class lives in Hack *)
-    inherit_hack_class env c pos class_name class_ class_params
+    inherit_hack_class env c class_name class_ class_params
 
 (* mostly copy paste of from_class *)
 let from_class_constants_only env ty =
-  let _, (pos, class_name), class_params = Decl_utils.unwrap_class_type ty in
+  let _, (_, class_name), class_params = Decl_utils.unwrap_class_type ty in
   let class_type = Decl_env.get_class_dep env class_name in
   match class_type with
   | None ->
@@ -384,7 +377,7 @@ let from_class_constants_only env ty =
     empty
   | Some class_ ->
     (* The class lives in Hack *)
-    inherit_hack_class_constants_only pos class_name class_ class_params
+    inherit_hack_class_constants_only class_ class_params
 
 let from_class_xhp_attrs_only env ty =
   let _, (_pos, class_name), _class_params = Decl_utils.unwrap_class_type ty in

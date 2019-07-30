@@ -1286,11 +1286,11 @@ let call_before_init pos cv =
 (* Nast errors check *)
 (*****************************************************************************)
 
-let type_arity pos name nargs =
-  add (Typing.err_code Typing.TypeArityMismatch) pos (
-  sl["The type ";(Utils.strip_ns name);
-     " expects ";nargs;" type parameter(s)"]
- )
+let type_arity pos name nargs c_pos=
+  add_list (Typing.err_code Typing.TypeArityMismatch)
+    [ pos, ("The type "^(Utils.strip_ns name)^
+     " expects "^nargs^" type parameter(s)");
+     c_pos, "Definition is here"]
 
 let abstract_with_body (p, _) =
   add (NastCheck.err_code NastCheck.AbstractWithBody) p
@@ -1837,12 +1837,6 @@ let tuple_syntax p =
   add (Typing.err_code Typing.TupleSyntax) p
     ("Did you want a tuple? Try (X,Y), not tuple<X,Y>")
 
-let class_arity usage_pos class_pos class_name arity =
-  add_list (Typing.err_code Typing.ClassArity)
-    [usage_pos, ("The class "^(Utils.strip_ns class_name)^" expects "^
-                    soi arity^" arguments");
-     class_pos, "Definition is here"]
-
 let redeclaring_missing_method p trait_method =
   add (Typing.err_code Typing.RedeclaringMissingMethod) p
     ("Attempting to redeclare a trait method " ^ trait_method ^ " which was never inherited. " ^
@@ -2344,11 +2338,6 @@ let object_string_deprecated pos =
   add (Typing.err_code Typing.ObjectString) pos
     "You cannot use this object as a string\n\
     Implicit conversions of Stringish objects to string are deprecated."
-
-let type_param_arity pos x n =
-  add (Typing.err_code Typing.TypeParamArity) pos (
-  "The type "^x^" expects "^n^" parameters"
- )
 
 let cyclic_typedef p =
   add (Typing.err_code Typing.CyclicTypedef) p

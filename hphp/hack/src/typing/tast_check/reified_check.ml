@@ -173,10 +173,11 @@ let handler = object
         let tparams_length = List.length tparams in
         let targs_length = List.length targs in
         if tparams_length <> targs_length then
-          if targs_length <> 0
-          then Errors.type_arity pos class_id (string_of_int (tparams_length))
+          let c_pos = Cls.pos tc in
+          if targs_length <> 0 then
+            Errors.type_arity pos class_id (string_of_int (tparams_length)) c_pos
           else if tparams_has_reified tparams then
-            Errors.require_args_reify (Cls.pos tc) pos
+            Errors.require_args_reify c_pos pos
       )
     | _ ->
       ()

@@ -39,11 +39,6 @@ let expand_typedef_ ?force_expand:(force_expand=false) ety_env env r x argl =
           Pos.filename td_pos = Env.get_file env
         | Aast.Transparent -> true
     in
-    if List.length td_tparams <> List.length argl then begin
-      let n = List.length td_tparams in
-      let n = string_of_int n in
-      Errors.type_param_arity pos x n
-    end;
     let ety_env = {
       ety_env with
       type_expansions = (td_pos, x) :: ety_env.type_expansions;

@@ -20,8 +20,8 @@ let rec check_hint env (pos, hint) =
   match hint with
   | Aast.Happly ((_, x), hl) when Typing_env.is_typedef x ->
     begin match Decl_provider.get_typedef x with
-    | Some {td_tparams; _} as _ty ->
-      check_tparams env pos x td_tparams hl
+    | Some {td_tparams; td_pos; _ } as _ty ->
+      check_tparams env pos x td_tparams hl td_pos
     | None -> ()
     end
   | Aast.Happly ((_, x), hl) ->
@@ -29,7 +29,8 @@ let rec check_hint env (pos, hint) =
     | None -> ()
     | Some class_ ->
       let tparams = Cls.tparams class_ in
-      check_tparams env pos x tparams hl
+      let c_pos = Cls.pos class_ in
+      check_tparams env pos x tparams hl c_pos
     end;
     ()
   | Aast.Harray (ty1, ty2) ->
@@ -60,12 +61,12 @@ let rec check_hint env (pos, hint) =
   | Aast.Hany  | Aast.Hmixed | Aast.Hnonnull | Aast.Hprim _
   | Aast.Hthis | Aast.Habstr _  | Aast.Hdynamic | Aast.Hnothing -> ()
 
-and check_tparams env p x tparams hl =
+and check_tparams env p x tparams hl c_pos =
   let arity = List.length tparams in
-  check_arity env p x arity (List.length hl);
+  check_arity env p x arity (List.length hl) c_pos;
   List.iter hl (check_hint env)
 
-and check_arity env pos tname arity size =
+and check_arity env pos tname arity size c_pos =
   if size = arity then () else
   if size = 0 && not (Partial.should_check_error (Env.get_mode env) 4101)
   && not (TypecheckerOptions.experimental_feature_enabled (Env.get_tcopt env)
@@ -73,7 +74,7 @@ and check_arity env pos tname arity size =
   then ()
   else
   let num_args = soi arity in
-  Errors.type_arity pos tname num_args
+  Errors.type_arity pos tname num_args c_pos
 
 let check_param env p =
   Option.iter p.param_hint (check_hint env)
@@ -120,8 +121,9 @@ let handler = object
       | Some class_ ->
         let tparams_length = List.length (Cls.tparams class_) in
         let hargs_length = List.length targs in
-        if (hargs_length <> tparams_length) && (hargs_length <> 0)
-          then Errors.type_arity p cid (string_of_int tparams_length)
+        let c_pos = Cls.pos class_ in
+        if (hargs_length <> tparams_length) && (hargs_length <> 0) then
+          Errors.type_arity p cid (string_of_int tparams_length) c_pos
       end
     | _ -> ()
 

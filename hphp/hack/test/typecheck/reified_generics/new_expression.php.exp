@@ -1,6 +1,8 @@
 File "new_expression.php", line 11, characters 7-7:
 The type D expects 0 type parameter(s) (Typing[4101])
+File "new_expression.php", line 5, characters 7-7:
+Definition is here
 File "new_expression.php", line 12, characters 3-9:
 All type arguments must be specified because a type parameter is reified (Typing[4303])
-  File "new_expression.php", line 6, characters 7-7:
-  Definition is here
+File "new_expression.php", line 6, characters 7-7:
+Definition is here

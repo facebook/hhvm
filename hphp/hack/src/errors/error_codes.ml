@@ -256,7 +256,7 @@ module Typing                               = struct
   | ArrayCast
   | ArrayGetArity
   | BadCall
-  | ClassArity
+  | ClassArityDEPRECATED
   | ConstMutation
   | ConstructorNoArgs
   | CyclicClassDef
@@ -348,7 +348,7 @@ module Typing                               = struct
   | TupleIndexTooLargeDEPRECATED
   | TupleSyntax
   | TypeArityMismatch
-  | TypeParamArity
+  | TypeParamArityDEPRECATED
   | RetiredError4103DEPRECATED
   | TypingTooFewArgs
   | TypingTooManyArgs

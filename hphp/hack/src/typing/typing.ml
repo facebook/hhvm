@@ -6046,16 +6046,13 @@ and check_implements_tparaml (env: Env.env) ht =
     | _, Tapply ((_, x), _) when not (Env.is_typedef x || Env.is_enum env x) ->
       Typing_enforceability.pessimize_type env ht
     | _ -> ht in
-  let _r, (p, c), paraml = TUtils.unwrap_class_type ht in
+  let _r, (_, c), paraml = TUtils.unwrap_class_type ht in
   let class_ = Env.get_class_dep env c in
   match class_ with
   | None ->
       (* The class lives in PHP land *)
       ()
   | Some class_ ->
-      let size1 = List.length (Cls.tparams class_) in
-      let size2 = List.length paraml in
-      if size1 <> size2 then Errors.class_arity p (Cls.pos class_) c size1;
       let subst = Inst.make_subst (Cls.tparams class_) paraml in
       iter2_shortest begin fun t ty ->
         let t = Typing_enforceability.pessimize_tparam_constraints env t in

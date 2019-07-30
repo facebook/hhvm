@@ -142,7 +142,6 @@ val generic_array_strict : Pos.t -> unit
 val strict_members_not_known : Pos.t -> string -> unit
 val option_return_only_typehint : Pos.t -> [< `void | `noreturn] -> unit
 val tuple_syntax : Pos.t -> unit
-val class_arity : Pos.t -> Pos.t -> string -> int -> unit
 val redeclaring_missing_method : Pos.t -> string -> unit
 val expecting_type_hint : Pos.t -> unit
 val expecting_type_hint_suggest : Pos.t -> string -> unit
@@ -227,7 +226,6 @@ val fun_variadicity_hh_vs_php56 : Pos.t -> Pos.t -> unit
 val expected_tparam : use_pos:Pos.t -> definition_pos:Pos.t -> int -> unit
 val object_string : Pos.t -> Pos.t -> unit
 val object_string_deprecated : Pos.t -> unit
-val type_param_arity : Pos.t -> string -> string -> unit
 val cyclic_typedef : Pos.t -> unit
 val type_arity_mismatch : Pos.t -> string -> Pos.t -> string -> unit
 val this_final : Pos.t * string -> Pos.t -> error -> unit
@@ -290,7 +288,7 @@ val no_construct_parent : Pos.t -> unit
 val constructor_required : Pos.t * string -> SSet.t -> unit
 val not_initialized : Pos.t * string -> string list -> unit
 val call_before_init : Pos.t -> string -> unit
-val type_arity : Pos.t -> string -> string -> unit
+val type_arity : Pos.t -> string -> string -> Pos.t -> unit
 val invalid_req_implements : Pos.t -> unit
 val invalid_req_extends : Pos.t -> unit
 val abstract_with_body : Pos.t * 'a -> unit

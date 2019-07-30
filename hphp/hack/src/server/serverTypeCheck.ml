@@ -53,6 +53,19 @@ type check_results = {
 (* Debugging *)
 (*****************************************************************************)
 
+(** Something is removing diagnostic subscriptions, but I don't know what... *)
+let log_if_diag_subscribe_removed
+    (title: string)
+    (old_diag_subscribe: Diagnostic_subscription.t option)
+    (new_diag_subscribe: Diagnostic_subscription.t option)
+  : unit =
+  match old_diag_subscribe, new_diag_subscribe with
+  | Some _, None ->
+    let stack = Caml.Printexc.get_callstack 100 |> Caml.Printexc.raw_backtrace_to_string in
+    Hh_logger.log "Diag_subscribe: %s - removed!\n%s" title stack
+  | _ ->
+    ()
+
 let print_defs prefix defs =
   List.iter defs begin fun (_, fname) ->
     Printf.printf "  %s %s\n" prefix fname;
@@ -479,6 +492,8 @@ module FullCheckKind : CheckKindType = struct
       Full_check_done else old_env.full_check in
     let needs_full_init =
       old_env.init_env.needs_full_init && full_check <> Full_check_done in
+    let () = log_if_diag_subscribe_removed "get_env1" old_env.diag_subscribe diag_subscribe
+    in
     { old_env with
       errorl;
       needs_phase2_redecl = Relative_path.Set.empty;
@@ -575,7 +590,8 @@ module LazyCheckKind : CheckKindType = struct
     (* If it was started, it's still started, otherwise it needs starting *)
     let full_check = match old_env.full_check with
       | Full_check_started -> Full_check_started
-      | _ -> Full_check_needed
+      | _ -> Full_check_needed in
+    let () = log_if_diag_subscribe_removed "get_env2" old_env.diag_subscribe diag_subscribe
     in
     { old_env with
        errorl;
@@ -833,6 +849,8 @@ end = functor(CheckKind:CheckKindType) -> struct
         ~global_errors:errors
         ~full_check_done
     end in
+
+    let () = log_if_diag_subscribe_removed "type_checking" old_env.diag_subscribe diag_subscribe in
 
     let total_rechecked_count = Relative_path.Map.cardinal fast in
     {

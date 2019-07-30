@@ -775,6 +775,7 @@ let do_shutdown
       (* In Main_loop state, we're expected to unsubscribe diagnostics and tell *)
       (* server to disconnect so it can revert the state of its unsaved files.  *)
       let open Main_env in
+      Hh_logger.log "Diag_subscribe: clientLsp do_shutdown unsubscribing diagnostic 0 ";
       let%lwt () =
         rpc menv.conn ref_unblocked_time (ServerCommandTypes.UNSUBSCRIBE_DIAGNOSTIC 0)
       in
@@ -1942,9 +1943,9 @@ let connect_after_hello
       raise (Server_fatal_connection_exception { Marshal_tools.message; stack; })
   in
 
-  let%lwt result =
-    rpc server_conn ignore (ServerCommandTypes.SUBSCRIBE_DIAGNOSTIC 0) in
-  Lwt.return result
+  Hh_logger.log "Diag_subscribe: clientLsp subscribing diagnostic 0";
+  let%lwt () = rpc server_conn ignore (ServerCommandTypes.SUBSCRIBE_DIAGNOSTIC 0) in
+  Lwt.return_unit
 
 
 let rec connect_client

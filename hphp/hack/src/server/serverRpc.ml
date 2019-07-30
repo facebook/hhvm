@@ -223,11 +223,16 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let new_env = { env with
           diag_subscribe = Some (Diagnostic_subscription.of_id id init)
         } in
+        let () = Hh_logger.log "Diag_subscribe: SUBSCRIBE %d" id in
         new_env, ()
     | UNSUBSCRIBE_DIAGNOSTIC id ->
         let diag_subscribe = match env.diag_subscribe with
-          | Some x when Diagnostic_subscription.get_id x = id -> None
-          | x -> x
+          | Some x when Diagnostic_subscription.get_id x = id ->
+            let () = Hh_logger.log "Diag_subscribe: UNSUBSCRIBE %d" id in
+            None
+          | x ->
+            let () = Hh_logger.log "Diag_subscribe: UNSUBSCRIBE %d no effect" id in
+            x
         in
         let new_env = { env with diag_subscribe } in
         new_env, ()

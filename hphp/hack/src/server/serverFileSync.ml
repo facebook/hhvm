@@ -49,6 +49,7 @@ let update_diagnostics diag_subscribe editor_open_files errorl  =
 
 let open_file ~predeclare env path content =
   let prev_content = get_file_content (ServerCommandTypes.FileName path) in
+  let full_path = path in
   let new_env = try_relativize_path path >>= fun path ->
     (* Before making any changes, pre-load (into Decl_heap) currently existing
      * declarations so there is always a previous version to compare against,
@@ -65,9 +66,16 @@ let open_file ~predeclare env path content =
          * errors that were previously throttled. They are available only
          * when full recheck was completed and there were no further changes. In
          * all other cases, we will need to (lazily) recheck the file. *)
-        env.ide_needs_parsing,
-        update_diagnostics env.diag_subscribe editor_open_files env.errorl
+        let diag_subscribe = update_diagnostics env.diag_subscribe editor_open_files env.errorl in
+        let () = match env.diag_subscribe, diag_subscribe with
+          | None, None -> Hh_logger.log "Diag_subscribe: open, none before or after"
+          | None, Some _ -> Hh_logger.log "Diag_subscribe: open, now active"
+          | Some _, Some _ -> Hh_logger.log "Diag_subscribe: open, remains active"
+          | Some _, None -> Hh_logger.log "Diag_subscribe: open, REMOVED - %s" full_path
+        in
+        env.ide_needs_parsing, diag_subscribe
       end else
+        let () = Hh_logger.log "open_file; diag_subscribe remains as it was" in
         Relative_path.Set.add env.ide_needs_parsing path, env.diag_subscribe
       in
     (* Need to re-parse this file during next full check to update

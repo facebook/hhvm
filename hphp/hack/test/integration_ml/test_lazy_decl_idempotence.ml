@@ -62,15 +62,16 @@ let test () =
   let empty = Relative_path.Set.empty in
   let memory_cap = None in
   let fnl = Relative_path.Map.elements bar_fast in
-  let errors = Typing_check_service.go None tcopt empty fnl ~memory_cap in
+  let check_info = Typing_check_service.{ init_id = ""; recheck_id = Some ""; } in
+  let errors = Typing_check_service.go None tcopt empty fnl ~memory_cap ~check_info in
   Test.assert_errors errors "";
-  let errors = Typing_check_service.go None tcopt empty fnl ~memory_cap in
+  let errors = Typing_check_service.go None tcopt empty fnl ~memory_cap ~check_info in
   Test.assert_errors errors "";
 
   let fnl = Relative_path.Map.elements foo_fast in
-  let errors = Typing_check_service.go None tcopt empty fnl ~memory_cap in
+  let errors = Typing_check_service.go None tcopt empty fnl ~memory_cap ~check_info in
   Test.assert_errors errors expected_errors;
-  let errors = Typing_check_service.go None tcopt empty fnl ~memory_cap in
+  let errors = Typing_check_service.go None tcopt empty fnl ~memory_cap ~check_info in
   Test.assert_errors errors expected_errors;
 
   ignore env;

@@ -18,12 +18,15 @@ let init
 
   (* Set up the type checking callback *)
   let type_check files_to_check =
-    Typing_check_service.go
+    let open Typing_check_service in
+    let check_info = { init_id = Random_id.short_string (); recheck_id = None } in
+    go
       workers
       tcopt
       Relative_path.Set.empty
       files_to_check
       ~memory_cap:None
+      ~check_info
   in
 
   (* Prepare the input for the remote worker *)

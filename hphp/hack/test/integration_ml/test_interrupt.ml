@@ -48,8 +48,16 @@ let test () =
   (* Run the recheck *)
   let interrupt = MultiThreadedCall.no_interrupt () in
   let fnl = Relative_path.Map.elements fast in
+  let check_info = Typing_check_service.{ init_id = ""; recheck_id = Some ""; } in
   let errors, (), cancelled = Typing_check_service.go_with_interrupt
-    workers options Relative_path.Set.empty fnl ~interrupt ~memory_cap:None in
+    workers
+    options
+    Relative_path.Set.empty
+    fnl
+    ~interrupt
+    ~memory_cap:None
+    ~check_info
+  in
 
   (* Assert that we got the errors in bar2 only... *)
   Test.assert_errors errors expected_errors;

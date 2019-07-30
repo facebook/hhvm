@@ -974,6 +974,12 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
     ~f:Coroutine_check.whitelist_path;
   let prechecked_files = ServerPrecheckedFiles.should_use options local_config in
   let logging_init init_id ~is_worker =
+    (* It's OK to unconditionally initialize profile logging; actual logging to
+        Scuba will only occur if we were started with --profile-log *)
+    let profile_threshold =
+      local_config.ServerLocalConfig.profile_type_check_duration_threshold
+    in
+    TypingLogger.ProfileTypeCheck.init ~threshold:profile_threshold ~root:(Path.to_string root);
     if Sys_utils.is_test_mode ()
     then EventLogger.init ~exit_on_parent_exit EventLogger.Event_logger_fake 0.0
     else begin

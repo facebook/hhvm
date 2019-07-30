@@ -798,7 +798,13 @@ end = functor(CheckKind:CheckKindType) -> struct
               ~interrupt
           | None ->
             Typing_check_service.go_with_interrupt
-              genv.workers env.tcopt dynamic_view_files fnl ~interrupt ~memory_cap
+              genv.workers
+              env.tcopt
+              dynamic_view_files
+              fnl
+              ~interrupt
+              ~memory_cap
+              ~check_info:(get_check_info env)
       end
     in
     (* Add new things that need to be rechecked *)

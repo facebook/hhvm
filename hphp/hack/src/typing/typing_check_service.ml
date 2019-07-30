@@ -84,6 +84,11 @@ type progress = {
   deferred: file_computation list;
 }
 
+type check_info = {
+  init_id: string;
+  recheck_id: string option;
+}
+
 (*****************************************************************************)
 (* The place where we store the shared data in cache *)
 (*****************************************************************************)
@@ -204,6 +209,7 @@ let process_files
     (errors: Errors.t)
     (progress: progress)
     ~(memory_cap: int option)
+    ~(check_info: check_info)
     : Errors.t * progress =
   SharedMem.invalidate_caches();
   File_provider.local_changes_push_stack ();
@@ -211,13 +217,16 @@ let process_files
   let process_file_wrapper =
     if !Utils.profile
     then (fun acc fn ->
-      let t = Sys.time () in
+      let start_time = Unix.gettimeofday () in
       let result = process_file dynamic_view_files opts acc fn in
-      let t' = Sys.time () in
-      let duration = t' -. t in
       let filepath = Relative_path.suffix (fst fn) in
-      TypingLogger.TypingTimes.log duration filepath;
-      !Utils.log (Printf.sprintf "%f %s [type-check]" duration filepath);
+      TypingLogger.ProfileTypeCheck.log
+        ~init_id:check_info.init_id
+        ~recheck_id:check_info.recheck_id
+        ~start_time
+        ~absolute:(Relative_path.to_absolute (fst fn))
+        ~relative:filepath;
+      let _t = Hh_logger.log_duration (Printf.sprintf "%s [type-check]" filepath) start_time in
       result)
     else process_file dynamic_view_files opts
   in
@@ -265,9 +274,10 @@ let load_and_process_files
     (errors: Errors.t)
     (progress: progress)
     ~(memory_cap: int option)
+    ~(check_info: check_info)
     : Errors.t * progress =
   let opts = TypeCheckStore.load() in
-  process_files dynamic_view_files opts errors progress ~memory_cap
+  process_files dynamic_view_files opts errors progress ~memory_cap ~check_info
 
 (*****************************************************************************)
 (* Let's go! That's where the action is *)
@@ -362,6 +372,7 @@ let process_in_parallel
     (fnl: file_computation list)
     ~(interrupt: 'a MultiWorker.interrupt_config)
     ~(memory_cap: int option)
+    ~(check_info: check_info)
     : Errors.t * 'a * file_computation list =
   TypeCheckStore.store opts;
   let files_to_process = ref fnl in
@@ -374,7 +385,7 @@ let process_in_parallel
   let errors, env, cancelled =
     MultiWorker.call_with_interrupt
       workers
-      ~job:(load_and_process_files dynamic_view_files ~memory_cap)
+      ~job:(load_and_process_files dynamic_view_files ~memory_cap ~check_info)
       ~neutral
       ~merge:(merge files_to_process files_initial_count files_in_progress files_processed_count)
       ~next
@@ -429,15 +440,34 @@ let go_with_interrupt
     (fnl: (Relative_path.t * FileInfo.names) list)
     ~(interrupt: 'a MultiWorker.interrupt_config)
     ~(memory_cap: int option)
+    ~(check_info: check_info)
     : (computation_kind, Errors.t, 'a) job_result =
   let fnl = List.map fnl ~f:(fun (path, names) -> path, Check names) in
   Mocking.with_test_mocking fnl @@ fun fnl ->
-    if List.length fnl < 10
+    let result = if List.length fnl < 10
     then
       let progress = { completed = []; remaining = fnl; deferred = []; } in
-      let (errors, _) = process_files dynamic_view_files opts neutral progress ~memory_cap:None in
+      let (errors, _) = process_files
+        dynamic_view_files
+        opts
+        neutral
+        progress
+        ~memory_cap:None
+        ~check_info
+      in
       errors, interrupt.MultiThreadedCall.env, []
-    else process_in_parallel dynamic_view_files workers opts fnl ~interrupt ~memory_cap
+    else process_in_parallel
+      dynamic_view_files
+      workers
+      opts
+      fnl
+      ~interrupt
+      ~memory_cap
+      ~check_info
+    in
+    if !Utils.profile then
+      TypingLogger.ProfileTypeCheck.print_path ~init_id:check_info.init_id;
+    result
 
 let go
     (workers: MultiWorker.worker list option)
@@ -445,9 +475,10 @@ let go
     (dynamic_view_files: Relative_path.Set.t)
     (fnl: (Relative_path.t * FileInfo.names) list)
     ~memory_cap
+    ~check_info
     : Errors.t =
   let interrupt = MultiThreadedCall.no_interrupt () in
   let res, (), cancelled =
-    go_with_interrupt workers opts dynamic_view_files fnl ~interrupt ~memory_cap in
+    go_with_interrupt workers opts dynamic_view_files fnl ~interrupt ~memory_cap ~check_info in
   assert (cancelled = []);
   res

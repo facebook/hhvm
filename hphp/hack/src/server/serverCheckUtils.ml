@@ -67,3 +67,12 @@ let maybe_remote_type_check_with_interrupt genv env fnl ~local =
   match maybe_remote_type_check genv env fnl with
   | Some remote_errors -> (remote_errors, env, [])
   | None -> local ()
+
+let get_check_info env =
+  let open ServerEnv in
+  let init_id = env.init_env.init_id in
+  let recheck_id = env.init_env.recheck_id in
+  {Typing_check_service.
+    init_id;
+    recheck_id;
+  }

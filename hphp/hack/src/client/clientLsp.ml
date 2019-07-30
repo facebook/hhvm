@@ -1905,6 +1905,7 @@ let connect_after_hello
   let ignore = ref 0.0 in
   let%lwt () =
     try%lwt
+      (* tell server we want persistent connection *)
       let oc = server_conn.oc in
       ServerCommandLwt.send_connection_type oc ServerCommandTypes.Persistent;
       let fd = oc |> Unix.descr_of_out_channel |> Lwt_unix.of_unix_file_descr in
@@ -1917,6 +1918,11 @@ let connect_after_hello
         failwith "Didn't get server Connected response"
       end;
 
+      (* tell server we want diagnostics *)
+      Hh_logger.log "Diag_subscribe: clientLsp subscribing diagnostic 0";
+      let%lwt () = rpc server_conn ignore (ServerCommandTypes.SUBSCRIBE_DIAGNOSTIC 0) in
+
+      (* send open files and unsaved buffers to server *)
       let handle_file_edit (json: Hh_json.json) =
         let open Jsonrpc in
         let c = Jsonrpc.parse_message ~json ~timestamp:0.0 in
@@ -1954,9 +1960,6 @@ let connect_after_hello
       Hh_logger.log "connect_after_hello exception %s\n%s" message stack;
       raise (Server_fatal_connection_exception { Marshal_tools.message; stack; })
   in
-
-  Hh_logger.log "Diag_subscribe: clientLsp subscribing diagnostic 0";
-  let%lwt () = rpc server_conn ignore (ServerCommandTypes.SUBSCRIBE_DIAGNOSTIC 0) in
   Lwt.return_unit
 
 

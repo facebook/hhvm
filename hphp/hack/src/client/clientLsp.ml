@@ -874,6 +874,14 @@ let do_rage (state: state) (ref_unblocked_time: float ref): Rage.result Lwt.t =
   end;
   (* client *)
   add_data ("LSP adapter state: " ^ (state_to_rage state) ^ "\n");
+  (* client: version *)
+  let%lwt current_version = read_hhconfig_version () in
+  add_data ("Version previously read from .hhconfig: " ^ !hhconfig_version);
+  add_data ("Version in .hhconfig: " ^ current_version);
+  if Str.string_match (Str.regexp "^\\^[0-9]+\\.[0-9]+\\.[0-9]+") current_version 0 then
+    add_data (
+      "Version source control: hg update remote/releases/hack/v" ^
+      (String_utils.lstrip current_version "^"));
   (* client's log of server state *)
   let tnow = Unix.gettimeofday () in
   let server_state_to_string (tstate, state) =

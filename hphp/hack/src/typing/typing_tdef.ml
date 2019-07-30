@@ -27,7 +27,7 @@ let expand_typedef_ ?force_expand:(force_expand=false) ety_env env r x argl =
   if Typing_defs.has_expanded ety_env x
   then begin
     Errors.cyclic_typedef pos;
-    env, (ety_env, (r, Tany))
+    env, (ety_env, (r, Terr))
   end else begin
     let {td_pos; td_vis; td_tparams; td_type; td_constraint;
         td_decl_errors = _;} =

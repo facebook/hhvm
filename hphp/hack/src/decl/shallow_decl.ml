@@ -43,8 +43,9 @@ let class_const env c cc =
             | Some ty -> ty, false
             | None ->
               if Partial.should_check_error c.c_mode 2035 && c.c_kind <> Ast_defs.Cenum
-              then Errors.missing_typehint pos;
-              (Reason.Rwitness pos, Tany), false
+              then begin
+                Errors.missing_typehint pos; (Reason.Rwitness pos, Terr), false
+              end else (Reason.Rwitness pos, Tany), false
           end
         | None, None ->
           if Partial.should_check_error c.c_mode 2035 then Errors.missing_typehint pos;

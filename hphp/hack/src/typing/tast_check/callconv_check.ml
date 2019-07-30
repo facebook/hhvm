@@ -20,7 +20,8 @@ let check_types env ((p, _), te) =
       let rec iter ty1 =
         let _, ety1 = Env.expand_type env ty1 in
         match ety1 with
-        | _, Tany -> true
+        | _, Tany
+        | _, Terr -> true
         | _, (Tarraykind _ | Ttuple _ | Tshape _) -> true
         | _, Tclass ((_, cn), _, _)
           when cn = SN.Collections.cDict

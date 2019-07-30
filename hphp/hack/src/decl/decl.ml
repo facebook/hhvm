@@ -898,7 +898,7 @@ let const_decl cst =
     | Some ty -> ty
     | None when Partial.should_check_error cst.cst_mode 2035 ->
       Errors.missing_typehint cst_pos;
-      Reason.Rwitness cst_pos, Tany
+      Reason.Rwitness cst_pos, Terr
     | None ->
       Reason.Rwitness cst_pos, Tany
 

@@ -78,11 +78,6 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_construct("__construct");
-const StaticString s_call("__call");
-const StaticString s_get("__get");
-const StaticString s_set("__set");
-const StaticString s_isset("__isset");
-const StaticString s_unset("__unset");
 const StaticString s_toBoolean("__toBoolean");
 const StaticString s_invoke("__invoke");
 const StaticString s_Closure("Closure");
@@ -589,18 +584,19 @@ struct ClassInfo {
     magicBool;
 };
 
-using MagicMapInfo = struct {
+struct MagicMapInfo {
+  StaticString name;
   ClassInfo::MagicFnInfo ClassInfo::*pmem;
   Attr attrBit;
 };
 
-const std::vector<std::pair<SString,MagicMapInfo>> magicMethodMap {
-  { s_call.get(),       { &ClassInfo::magicCall,       AttrNone } },
-  { s_toBoolean.get(),  { &ClassInfo::magicBool,       AttrNone } },
-  { s_get.get(),        { &ClassInfo::magicGet,   AttrNoOverrideMagicGet } },
-  { s_set.get(),        { &ClassInfo::magicSet,   AttrNoOverrideMagicSet } },
-  { s_isset.get(),      { &ClassInfo::magicIsset, AttrNoOverrideMagicIsset } },
-  { s_unset.get(),      { &ClassInfo::magicUnset, AttrNoOverrideMagicUnset } }
+const MagicMapInfo magicMethods[] {
+  { StaticString{"__call"}, &ClassInfo::magicCall, AttrNone },
+  { StaticString{"__toBoolean"}, &ClassInfo::magicBool, AttrNone },
+  { StaticString{"__get"}, &ClassInfo::magicGet, AttrNoOverrideMagicGet },
+  { StaticString{"__set"}, &ClassInfo::magicSet, AttrNoOverrideMagicSet },
+  { StaticString{"__isset"}, &ClassInfo::magicIsset, AttrNoOverrideMagicIsset },
+  { StaticString{"__unset"}, &ClassInfo::magicUnset, AttrNoOverrideMagicUnset }
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -2954,9 +2950,9 @@ void compute_iface_vtables(IndexData& index) {
 
 void mark_magic_on_parents(ClassInfo& cinfo, ClassInfo& derived) {
   auto any = false;
-  for (auto& kv : magicMethodMap) {
-    if ((derived.*kv.second.pmem).thisHas) {
-      auto& derivedHas = (cinfo.*kv.second.pmem).derivedHas;
+  for (const auto& mm : magicMethods) {
+    if ((derived.*mm.pmem).thisHas) {
+      auto& derivedHas = (cinfo.*mm.pmem).derivedHas;
       if (!derivedHas) {
         derivedHas = any = true;
       }
@@ -2984,10 +2980,10 @@ bool has_magic_method(const ClassInfo* cinfo, SString name) {
 void find_magic_methods(IndexData& index) {
   for (auto& cinfo : index.allClassInfos) {
     bool any = false;
-    for (auto& kv : magicMethodMap) {
-      bool const found = has_magic_method(cinfo.get(), kv.first);
+    for (const auto& mm : magicMethods) {
+      bool const found = has_magic_method(cinfo.get(), mm.name.get());
       any = any || found;
-      (cinfo.get()->*kv.second.pmem).thisHas = found;
+      (cinfo.get()->*mm.pmem).thisHas = found;
     }
     if (any) mark_magic_on_parents(*cinfo, *cinfo);
   }
@@ -3036,13 +3032,13 @@ void mark_no_override_classes(IndexData& index) {
       attribute_setter(cinfo->cls->attrs, true, AttrNoOverride);
     }
 
-    for (auto& kv : magicMethodMap) {
-      if (kv.second.attrBit == AttrNone) continue;
-      if (!(cinfo.get()->*kv.second.pmem).derivedHas) {
+    for (const auto& mm : magicMethods) {
+      if (mm.attrBit == AttrNone) continue;
+      if (!(cinfo.get()->*mm.pmem).derivedHas) {
         FTRACE(2, "Adding no-override of {} to {}\n",
-          kv.first->data(),
-          cinfo->cls->name);
-        attribute_setter(cinfo->cls->attrs, true, kv.second.attrBit);
+               mm.name.get()->data(),
+               cinfo->cls->name);
+        attribute_setter(cinfo->cls->attrs, true, mm.attrBit);
       }
     }
   }
@@ -3180,11 +3176,11 @@ void check_invariants(const ClassInfo* cinfo) {
   always_assert(!cinfo->baseList.empty());
   always_assert(cinfo->baseList.back() == cinfo);
 
-  for (auto& kv : magicMethodMap) {
-    auto& info = cinfo->*kv.second.pmem;
+  for (const auto& mm : magicMethods) {
+    const auto& info = cinfo->*mm.pmem;
 
     // Magic method flags should be consistent with the method table.
-    always_assert(info.thisHas == has_magic_method(cinfo, kv.first));
+    always_assert(info.thisHas == has_magic_method(cinfo, mm.name.get()));
 
     // Non-'derived' flags (thisHas) about magic methods imply the derived
     // ones.

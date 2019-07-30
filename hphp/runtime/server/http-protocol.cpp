@@ -154,16 +154,6 @@ const StaticString
   s_HTTP_("HTTP_"),
   s_forwardslash("/");
 
-static auto const s_arraysToClear = {
-  s__SERVER,
-  s__GET,
-  s__POST,
-  s__FILES,
-  s__REQUEST,
-  s__ENV,
-  s__COOKIE,
-};
-
 static void PrepareEnv(Array& env, Transport *transport) {
   // $_ENV
   process_env_variables(env);
@@ -228,10 +218,14 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
                                           const RequestURI &r,
                                           const SourceRootInfo &sri) {
   auto const vhost = VirtualHost::GetCurrent();
-  auto const& emptyArr = empty_darray();
-  for (auto const& key : s_arraysToClear) {
-    php_global_set(key, emptyArr);
-  }
+  auto const emptyArr = empty_darray();
+  php_global_set(s__SERVER, emptyArr);
+  php_global_set(s__GET, emptyArr);
+  php_global_set(s__POST, emptyArr);
+  php_global_set(s__FILES, emptyArr);
+  php_global_set(s__REQUEST, emptyArr);
+  php_global_set(s__ENV, emptyArr);
+  php_global_set(s__COOKIE, emptyArr);
 
   // according to doc if content type is multipart/form-data
   // $HTTP_RAW_POST_DATA should always not available
@@ -265,7 +259,6 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   SCOPE_EXIT {
     if (shouldSetHttpRawPostData) {
       php_global_set(s_HTTP_RAW_POST_DATA, std::move(HTTP_RAW_POST_DATA));
-
     }
   };
 

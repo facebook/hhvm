@@ -139,7 +139,7 @@ inline bool useAddrForCountedCheck() {
 
 }
 
-static auto const s_IncRef = makeStaticString("IncRefProfile");
+static const StaticString s_IncRef("IncRefProfile");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -154,7 +154,7 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
 
   auto const profile = TargetProfile<IncRefProfile>(env.unit.context(),
                                                     inst->marker(),
-                                                    s_IncRef);
+                                                    s_IncRef.get());
 
   auto const incr = incrAmount(v, profile);
   incrementProfile(v, profile, incr, offsetof(IncRefProfile, total));

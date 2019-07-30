@@ -90,9 +90,7 @@
     docblock_finder
     full_fidelity_ast
     globalParserOptions
-    hack_grammar_descriptor_for_old
     hack_grammar_descriptor_helper
-    hack_grammar_descriptor
     html_entities
     ide_parser_cache
     limited_width_pretty_printing_library

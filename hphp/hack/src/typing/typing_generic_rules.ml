@@ -76,7 +76,7 @@ let apply_rules ?(ignore_type_structure=false) env ty f =
       default ()
 
     (* Enums with arraykey upper bound are treated as "abstract" *)
-    | _, Tabstract (AKnewtype (cid, _), Some (_, Tprim Nast.Tarraykey)) when Env.is_enum env cid ->
+    | _, Tabstract (AKnewtype (cid, _), Some (_, Tprim Aast.Tarraykey)) when Env.is_enum env cid ->
       default ()
 
     (* If there is an explicit upper bound, delegate to it *)

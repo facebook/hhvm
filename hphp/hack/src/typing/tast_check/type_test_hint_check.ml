@@ -10,6 +10,7 @@
 open Core_kernel
 open Aast
 open Typing_defs
+open Type_validator
 
 module Env = Tast_env
 module Reason = Typing_reason
@@ -17,22 +18,12 @@ module TySet = Typing_set
 module Cls = Decl_provider.Class
 module Nast = Aast
 
-type validity =
-  | Valid
-  | Invalid: Reason.t * string -> validity
-
-type validation_state = {
-  env: Env.env;
-  ety_env: expand_env;
-  validity: validity;
-}
-
 let update state new_validity =
   if state.validity = Valid
   then { state with validity = new_validity }
   else state
 
-let visitor = object(this)
+let validator = object(this)
   inherit [validation_state] Type_visitor.type_visitor as _super
   (* Only comes about because naming has reported an error and left Hany *)
   method! on_tany acc _ = acc
@@ -172,7 +163,7 @@ end
 let validate_type env root_ty emit_error =
   let should_suppress = ref false in
   let validate env ety_env ty =
-    let state = visitor#on_type {env; ety_env; validity = Valid} ty in
+    let state = validator#on_type {env; ety_env; validity = Valid} ty in
     match state.validity with
       | Invalid (r, msg) ->
         if not !should_suppress

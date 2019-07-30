@@ -43,6 +43,7 @@
     nast_check_env
     type_mapper
     type_parameter_env_ops
+    type_validator
     type_visitor
     typing_arrays
     typing_async

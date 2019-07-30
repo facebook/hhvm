@@ -9,23 +9,23 @@
 
 open Core_kernel
 open Typing_defs
+open Type_validator
 
 module Env     = Typing_env
 module SubType = Typing_subtype
+module Cls = Decl_provider.Class
 
 let validator =
-  let open Type_test_hint_check in
-  object(this)
-    inherit [validation_state] Type_visitor.type_visitor as _super
+  object(this) inherit type_validator
 
-    method! on_tthis acc r = update acc @@ Invalid (r, "the this type")
+    method! on_tthis acc r = this#invalid acc r "the this type"
     method! on_tapply acc r (_, name) tyl =
       (* TODO(T45690473): follow type aliases in the `type` case and allow enforceable targets *)
-      let not_class = Typing_env.is_typedef name ||
-        Typing_env.is_enum (Env.tast_env_as_typing_env acc.env) name in
-      if not_class then update acc @@ Invalid (r, "a typedef or enum") else
+      let not_class = Env.is_typedef name ||
+        Env.is_enum (Tast_env.tast_env_as_typing_env acc.env) name in
+      if not_class then this#invalid acc r "a typedef or enum" else
 
-      match Env.get_class acc.env name with
+      match Tast_env.get_class acc.env name with
       | Some tc ->
         let tparams = Cls.tparams tc in
         begin match tyl with
@@ -39,8 +39,8 @@ let validator =
               acc
             | _ ->
               match tparam.tp_reified with
-              | Aast.Erased -> update acc @@ Invalid (r, "a type with an erased generic type argument")
-              | Aast.SoftReified -> update acc @@ Invalid (r, "a type with a soft reified type argument")
+              | Aast.Erased -> this#invalid acc r "a type with an erased generic type argument"
+              | Aast.SoftReified -> this#invalid acc r "a type with a soft reified type argument"
               | Aast.Reified -> this#on_type acc targ
           ) with
           | Ok new_acc -> new_acc
@@ -48,22 +48,24 @@ let validator =
           end
         end
       | None -> acc
-    method! on_tgeneric acc r name = visitor#check_generic acc r name
-    method! on_taccess acc r _ = update acc @@ Invalid (r, "a type const")
+    method! on_tgeneric acc r name =
+      Type_test_hint_check.validator#check_generic acc r name
+    method! on_taccess acc r _ = this#invalid acc r "a type const"
     method! on_tarray acc r ty1_opt ty2_opt =
       match ty1_opt, ty2_opt with
       | None, None -> acc
-      | _ -> update acc @@ Invalid (r, "an array type")
+      | _ -> this#invalid acc r "an array type"
     (* Optimization, don't visit type in dynamic ~> ~T case, fall back to subtyping *)
-    method! on_tlike acc r _ = update acc @@ Invalid (r, "a like type")
-    method! on_tprim acc r prim = visitor#on_tprim acc r prim
-    method! on_tfun acc r _ = update acc @@ Invalid (r, "a function type")
-    method! on_ttuple acc r _ = update acc @@ Invalid (r, "a tuple type")
-    method! on_tshape acc r _ _ = update acc @@ Invalid (r, "a shape type")
+    method! on_tlike acc r _ = this#invalid acc r "a like type"
+    method! on_tprim acc r prim =
+      Type_test_hint_check.validator#on_tprim acc r prim
+    method! on_tfun acc r _ = this#invalid acc r "a function type"
+    method! on_ttuple acc r _ = this#invalid acc r "a tuple type"
+    method! on_tshape acc r _ _ = this#invalid acc r "a shape type"
+
   end
 
 let supports_coercion_from_dynamic env (ty_expect_decl: decl ty) =
-  let open Type_test_hint_check in
   let { validity; env; _ } = validator#on_type {
     env = Tast_env.typing_env_as_tast_env env;
     ety_env = Typing_phase.env_with_self env;

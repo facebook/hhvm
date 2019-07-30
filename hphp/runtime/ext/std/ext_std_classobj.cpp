@@ -31,8 +31,20 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
-static inline StrNR ctxClassName() {
-  Class* ctx = GetCallerClassSkipCPPBuiltins();
+static const Class* clsFromCallerSkipBuiltins() {
+  return fromCaller(
+    [] (const ActRec* fp, Offset) { return fp->func()->cls(); },
+    [] (const ActRec* fp) {
+      return !fp->func()->isBuiltin() && !fp->func()->isPseudoMain();
+    }
+  );
+}
+
+static StrNR ctxClassName() {
+  auto const ctx = fromCaller(
+    [] (const ActRec* fp, Offset) { return fp->func()->cls(); },
+    [] (const ActRec* fp) { return !fp->func()->isSkipFrame(); }
+  );
   return ctx ? ctx->nameStr() : StrNR(staticEmptyString());
 }
 
@@ -100,7 +112,7 @@ Variant HHVM_FUNCTION(get_class_methods, const Variant& class_or_object) {
   if (!cls) return init_null();
 
   auto retVal = Array::attach(PackedArray::MakeReserve(cls->numMethods()));
-  Class::getMethodNames(cls, GetCallerClassSkipBuiltins(), retVal);
+  Class::getMethodNames(cls, clsFromCallerSkipBuiltins(), retVal);
   return Variant::attach(HHVM_FN(array_values)(retVal)).toArray();
 }
 
@@ -158,7 +170,9 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
   assertx(propVals->size() == numDeclProps);
 
   // For visibility checks
-  auto ctx = GetCallerClass();
+  auto const ctx = fromCaller(
+    [] (const ActRec* fp, Offset) { return fp->func()->cls(); }
+  );
 
   ArrayInit arr(numDeclProps + numSProps, ArrayInit::Map{});
 
@@ -202,8 +216,7 @@ Variant HHVM_FUNCTION(get_class, const Variant& object /* = uninit_variant */) {
     // No arg passed.
     logOrThrow(object);
 
-    auto cls = GetCallerClassSkipBuiltins();
-    if (cls) {
+    if (auto const cls = clsFromCallerSkipBuiltins()) {
       return Variant{cls->name(), Variant::PersistentStrInit{}};
     }
 
@@ -235,7 +248,9 @@ Variant HHVM_FUNCTION(get_parent_class,
   const Class* cls;
   if (object.isNull()) {
     logOrThrow(object);
-    cls = GetCallerClass();
+    cls = fromCaller(
+      [] (const ActRec* fp, Offset) { return fp->func()->cls(); }
+    );
     if (!cls) return false;
   } else {
     if (object.isObject()) {

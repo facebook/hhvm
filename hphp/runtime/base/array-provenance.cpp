@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/array-provenance.h"
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/vm/vm-regs.h"
 

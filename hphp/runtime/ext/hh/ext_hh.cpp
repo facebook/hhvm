@@ -646,7 +646,9 @@ TypedValue HHVM_FUNCTION(dynamic_class_meth, StringArg cls, StringArg meth) {
     );
   }
   if (!func->isPublic()) {
-    auto const ctx = GetCallerClass();
+    auto const ctx = fromCaller(
+      [] (const ActRec* fp, Offset) { return fp->func()->cls(); }
+    );
     if (func->attrs() & AttrPrivate) {
       if (func->cls() != ctx) {
         SystemLib::throwInvalidArgumentExceptionObject(

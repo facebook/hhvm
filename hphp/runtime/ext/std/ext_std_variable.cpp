@@ -658,10 +658,10 @@ Variant HHVM_FUNCTION(hhvm_intrinsics_create_class_pointer, StringArg name) {
 bool HHVM_FUNCTION(HH_is_late_init_prop_init,
                    const Object& obj,
                    const String& name) {
-  auto const val = obj->getPropIgnoreLateInit(
-    GetCallerClass(),
-    name.get()
+  auto const ctx = fromCaller(
+    [] (const ActRec* fp, Offset) { return fp->func()->cls(); }
   );
+  auto const val = obj->getPropIgnoreLateInit(ctx, name.get());
   if (!val) {
     SystemLib::throwInvalidArgumentExceptionObject(
       folly::sformat(
@@ -683,10 +683,10 @@ bool HHVM_FUNCTION(HH_is_late_init_sprop_init,
       folly::sformat("Unknown class {}", clsName)
     );
   }
-  auto const lookup = cls->getSPropIgnoreLateInit(
-    GetCallerClass(),
-    name.get()
+  auto const ctx = fromCaller(
+    [] (const ActRec* fp, Offset) { return fp->func()->cls(); }
   );
+  auto const lookup = cls->getSPropIgnoreLateInit(ctx, name.get());
   if (!lookup.val || !lookup.accessible) {
     SystemLib::throwInvalidArgumentExceptionObject(
       folly::sformat(

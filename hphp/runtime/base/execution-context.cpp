@@ -1205,10 +1205,21 @@ int ExecutionContext::getLine() {
   return unit->getLineNumber(pc);
 }
 
-ActRec* ExecutionContext::getFrameAtDepthForDebuggerUnsafe(int frame) {
-  auto fp = GetFrameForDebuggerUnsafe(frame);
-  assertx(!fp || !fp->magicDispatch());
-  return fp;
+ActRec* ExecutionContext::getFrameAtDepthForDebuggerUnsafe(int frameDepth) {
+  ActRec* ret = nullptr;
+  walkStack([&] (ActRec* fp, Offset) {
+    if (frameDepth == 0) {
+      if (fp && !fp->localsDecRefd()) {
+        ret = fp;
+      }
+      return true;
+    }
+
+    frameDepth--;
+    return false;
+  });
+  assertx(!ret || !ret->magicDispatch());
+  return ret;
 }
 
 void ExecutionContext::setVar(StringData* name, tv_rval v) {

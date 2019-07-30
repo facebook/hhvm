@@ -275,6 +275,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "\n"
         "/instance-id:     instance id that's passed in from command line\n"
         "/compiler-id:     returns the compiler id that built this app\n"
+        "/config-id:       returns the config id passed in from command line\n"
         "/repo-schema:     return the repo schema id used by this app\n"
         "/ini-get-all:     dump all settings as JSON\n"
         "/check-load:      how many threads are actively handling requests\n"
@@ -439,7 +440,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 
     bool needs_password = (cmd != "build-id") && (cmd != "compiler-id") &&
                           (cmd != "instance-id") && (cmd != "flush-logs") &&
-                          (cmd != "warmup-status")
+                          (cmd != "warmup-status") && (cmd != "config-id")
 #if defined(ENABLE_HHPROF) && defined(USE_JEMALLOC)
                           && (mallctl == nullptr || (
                                  (cmd != "hhprof/start")
@@ -597,6 +598,10 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
     if (cmd == "compiler-id") {
       transport->sendString(compilerId().begin(), 200);
+      break;
+    }
+    if (cmd == "config-id") {
+      transport->sendString(std::to_string(RuntimeOption::ConfigId), 200);
       break;
     }
     if (cmd == "repo-schema") {

@@ -157,6 +157,14 @@ let check_obj_access p env (p_vis, vis) =
   | Some msg ->
     visibility_error p msg (p_vis, vis)
 
+let check_inst_meth_access use_pos (def_pos, vis) =
+  match vis with
+  | Vprivate _ ->
+    Errors.private_inst_meth ~def_pos ~use_pos
+  | Vprotected _ ->
+    Errors.protected_inst_meth ~def_pos ~use_pos
+  | _ -> ()
+
 let check_class_access p env (p_vis, vis, lsb) cid class_ =
   match is_visible_for_class env (vis, lsb) cid class_ with
   | None -> ()

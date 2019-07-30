@@ -16,6 +16,9 @@ val check_class_access:
 val check_obj_access:
   Pos.t -> Typing_env.env -> (Pos.t * visibility) -> unit
 
+val check_inst_meth_access:
+  Pos.t -> (Pos.t * visibility) -> unit
+
 val is_visible:
   Typing_env.env -> (visibility * bool) -> Nast.class_id_ option -> Decl_provider.class_decl -> bool
 

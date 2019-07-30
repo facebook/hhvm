@@ -1769,21 +1769,14 @@ and expr_
      * is public+not static and then return its type.
      *)
     let env, te, ty1 = expr env instance in
-    let env, result, _decl_ty, vis =
-      obj_get_with_visibility ~obj_pos:p ~is_method:true ~nullsafe:None
-        ~valkind:`other ~pos_params:None env ty1 (CIexpr instance) meth (fun x -> x) in
+    let env, result, _decl_ty =
+      obj_get_ ~inst_meth:true ~obj_pos:p ~is_method:true ~nullsafe:None
+        ~valkind:`other ~pos_params:None env ty1 (CIexpr instance) meth (fun x -> x) (fun x -> x) in
     let env, result = Env.FakeMembers.check_instance_invalid env instance (snd meth) result in
       begin
         (match result with
         | _, Tfun fty -> check_deprecated p fty
         | _ -> ());
-        (match vis with
-        | Some (def_pos, Vprivate _) ->
-            Errors.private_inst_meth ~def_pos ~use_pos:(fst meth)
-        | Some (def_pos, Vprotected _) ->
-            Errors.protected_inst_meth ~def_pos ~use_pos:(fst meth)
-        | _ -> ()
-        );
         make_result env p (T.Method_id (te, meth)) result
       end
   | Method_caller ((pos, class_name) as pos_cname, meth_name) ->
@@ -3278,9 +3271,9 @@ and assign_ p ur env e1 ty2 =
         | OG_nullsafe -> Some pobj in
       let env, tobj, obj_ty = expr ~accept_using_var:true no_fakes obj in
       let env = might_throw env in
-      let k (env, member_ty, member_ty_decl, vis) =
+      let k (env, member_ty, member_ty_decl) =
         let env = Type.coerce_type p ur env ty2 ?ty_expect_decl:member_ty_decl member_ty Errors.unify_error in
-        env, member_ty, member_ty_decl, vis in
+        env, member_ty, member_ty_decl in
       let env, result =
         obj_get ~obj_pos:(fst obj) ~is_method:false ~nullsafe ~valkind:`lvalue
           env obj_ty (CIexpr e1) m k in
@@ -3535,7 +3528,7 @@ and call_parent_construct pos env el uel =
 
   let method_get_helper env getter call_continuation =
     let tel = ref [] and tuel = ref [] and tftyl = ref [] in
-    let k = (fun (env, fty, method_decl_, _) ->
+    let k = (fun (env, fty, method_decl_) ->
       (* extract decl fun_type record for call function *)
       let fty_decl = Option.bind method_decl_ ~f:(fun f ->
         match f with
@@ -3546,7 +3539,7 @@ and call_parent_construct pos env el uel =
         call_continuation env fty fty_decl in
       tel := tel_; tuel := tuel_;
       tftyl := fty :: !tftyl;
-      env, method_, method_decl_, None) in
+      env, method_, method_decl_) in
     let env, ty = getter env k in
     let tfty =
       match !tftyl with
@@ -4012,9 +4005,7 @@ and call_parent_construct pos env el uel =
         if is_static
         then
           fun env k ->
-            class_get ~is_method:true ~is_const:false ~explicit_tparams:tal env ty1 m e1
-            (fun (env, ty, decl_ty) ->
-             let (env, ty, decl_ty, _) = k (env, ty, decl_ty, None) in (env, ty, decl_ty))
+            class_get ~is_method:true ~is_const:false ~explicit_tparams:tal env ty1 m e1 k
         else
           (* parent::nonStaticFunc() is really weird. It's calling a method
            * defined on the parent class, but $this is still the child class.
@@ -4022,7 +4013,7 @@ and call_parent_construct pos env el uel =
            * calculates the SN.Typehints.this type *)
           let k_lhs _ = this_ty in
           fun env k ->
-            let env, method_, _, _ = obj_get_ ~is_method:true ~nullsafe:None ~obj_pos:pos
+            let env, method_, _ = obj_get_ ~inst_meth:false ~is_method:true ~nullsafe:None ~obj_pos:pos
               ~pos_params:(Some el) ~valkind:`other env ty1 e1 m k k_lhs in
             env, method_ in
       let call_continuation env fty fty_decl =
@@ -4384,21 +4375,16 @@ and member_not_found pos ~is_method class_ member_name r =
  *)
 and obj_get ~obj_pos ~is_method ~nullsafe ?(valkind = `other) ?(explicit_tparams=[])
             ?pos_params env ty1 cid id k =
-  let env, method_, _method_decl, _ =
-    obj_get_with_visibility ~is_method ~nullsafe ~valkind ~obj_pos ~pos_params
-      ~explicit_tparams env ty1 cid id k in
+  let env, method_, _method_decl =
+    obj_get_ ~inst_meth:false ~is_method ~nullsafe ~valkind ~obj_pos ~pos_params
+      ~explicit_tparams env ty1 cid id k (fun x -> x) in
   env, method_
-
-and obj_get_with_visibility ~is_method ~nullsafe ~valkind ~obj_pos ~pos_params
-    ?(explicit_tparams=[]) env ty1 cid id k =
-  obj_get_ ~is_method ~nullsafe ~valkind ~obj_pos ~pos_params ~explicit_tparams env ty1
-    cid id k (fun ty -> ty)
 
 (* We know that the receiver is a concrete class: not a generic with
  * bounds, or a Tunion. *)
-and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
+and obj_get_concrete_ty ~inst_meth ~is_method ~valkind ?(explicit_tparams=[])
     env concrete_ty class_id (id_pos, id_str) k_lhs =
-  let default () = env, (Reason.Rwitness id_pos, Typing_utils.tany env), None, None in
+  let default () = env, (Reason.Rwitness id_pos, Typing_utils.tany env), None in
   let mk_ety_env r class_info x e paraml =
     let this_ty = k_lhs (r, (Tclass(x, e, paraml))) in
     {
@@ -4419,7 +4405,7 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
       let env, inter_ty =
         Inter.intersect_list env (Reason.Rwitness id_pos) upper_bounds
       in
-      obj_get_ ~is_method ~nullsafe:None ~obj_pos:(Reason.to_pos r)
+      obj_get_ ~inst_meth ~is_method ~nullsafe:None ~obj_pos:(Reason.to_pos r)
         ~valkind ~pos_params: None ~explicit_tparams
         env inter_ty class_id (id_pos, id_str) (fun x -> x) k_lhs
     in
@@ -4499,7 +4485,9 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
             ft_arity = Fellipsis (0, arity_pos); ft_tparams = ([], FTKtparams); ft_params = []; } in
 
           let member_ty = (r, Tfun ft) in
-          env, member_ty, None, Some (mem_pos, vis)
+          if inst_meth
+          then TVis.check_inst_meth_access id_pos (mem_pos, vis);
+          env, member_ty, None
 
         | _ -> assert false
 
@@ -4540,26 +4528,28 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
             Typing_solver.is_sub_type env (Env.get_self env) concrete_ty) then
             Errors.assigning_to_const id_pos;
 
+        if inst_meth
+        then TVis.check_inst_meth_access id_pos (mem_pos, vis);
         if (Cls.has_upper_bounds_on_this_from_constraints class_info) then
-          let (env, ty, _, vis'), succeed =
+          let (env, ty, _), succeed =
             Errors.try_with_result
               (fun () -> get_member_from_constraints env class_info, true)
               (fun _ _ ->
                 (* No eligible functions found in constraints *)
-                (env, MakeType.mixed Reason.Rnone, None, None), false) in
+                (env, MakeType.mixed Reason.Rnone, None), false) in
           if (succeed) then
             let env, member_ty = Inter.intersect env (Reason.Rwitness id_pos) member_ty ty in
-            let vis = TVis.min_vis_opt (Some (mem_pos, vis)) vis' in
-            env, member_ty, Some member_decl_ty, vis
-          else env, member_ty, Some member_decl_ty, Some (mem_pos, vis)
+            env, member_ty, Some member_decl_ty
+          else
+           env, member_ty, Some member_decl_ty
         else
-          env, member_ty, Some member_decl_ty, Some (mem_pos, vis)
+          env, member_ty, Some member_decl_ty
       end (* match member_info *)
 
     end (* match Env.get_class env (snd x) *)
   | _, Tdynamic ->
     let ty = MakeType.dynamic (Reason.Rdynamic_prop id_pos) in
-    env, ty, None, None
+    env, ty, None
   | _, Tobject
   | _, Tany
   | _, Terr ->
@@ -4610,7 +4600,7 @@ and widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
     env, None
 
 (* k_lhs takes the type of the object receiver *)
-and obj_get_ ~is_method ~nullsafe ~valkind ~obj_pos
+and obj_get_ ~inst_meth ~is_method ~nullsafe ~valkind ~obj_pos
   ~pos_params ?(explicit_tparams=[])
   env ty1 cid (id_pos, id_str as id) k k_lhs =
   let env, ety1 =
@@ -4620,23 +4610,23 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~obj_pos
       (widen_class_for_obj_get ~is_method ~nullsafe id_str) obj_pos ty1 Errors.unify_error in
   let nullable_obj_get ty = match nullsafe with
     | Some p1 ->
-        let env, method_, method_decl_, x = obj_get_ ~obj_pos ~is_method ~nullsafe ~valkind
+        let env, method_, method_decl_ = obj_get_ ~inst_meth ~obj_pos ~is_method ~nullsafe ~valkind
           ~pos_params ~explicit_tparams env ty cid id k k_lhs in
         let env, method_ = Typing_solver.non_null env id_pos method_ in
-        env, MakeType.nullable (Reason.Rnullsafe_op p1) method_, method_decl_, x
+        env, MakeType.nullable (Reason.Rnullsafe_op p1) method_, method_decl_
     | None ->
         Errors.null_member id_str id_pos
           (Reason.to_string
              "This is what makes me believe it can be null"
              (fst ety1)
           );
-        k (env, (fst ety1, Typing_utils.terr env), None, None) in
+        k (env, (fst ety1, Typing_utils.terr env), None) in
   match ety1 with
   | _, Tunion tyl ->
-      let (env, vis), tyl = List.map_env (env, None) tyl
-        begin fun (env, vis) ty ->
-          let env, ty, _decl_ty, vis' =
-            obj_get_ ~obj_pos ~is_method ~nullsafe ~valkind ~pos_params
+      let env, tyl = List.map_env env tyl
+        begin fun env ty ->
+          let env, ty, _decl_ty =
+            obj_get_ ~inst_meth ~obj_pos ~is_method ~nullsafe ~valkind ~pos_params
               ~explicit_tparams env ty cid id k k_lhs in
           (* There is one special case where we need to expose the
            * visibility outside of obj_get (checkout inst_meth special
@@ -4645,29 +4635,25 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~obj_pos
            * we encountered (position + visibility), to be able to
            * special case inst_meth.
            *)
-          let vis = TVis.min_vis_opt vis vis' in
-          (env, vis), ty
+          env, ty
         end in
       let env, ty = Union.union_list env (fst ety1) tyl in
-      env, ty, None, vis
+      env, ty, None
 
   | _, Tintersection tyl ->
-      let (env, vis), tyl = TUtils.run_on_intersection (env, None) tyl ~f:(fun (env, vis) ty ->
-        let env, ty, _decl_ty, vis' =
-          obj_get_ ~obj_pos ~is_method ~nullsafe ~valkind ~pos_params
+      let env, tyl = TUtils.run_on_intersection env tyl ~f:(fun env ty ->
+        let env, ty, _decl_ty =
+          obj_get_ ~inst_meth ~obj_pos ~is_method ~nullsafe ~valkind ~pos_params
             ~explicit_tparams env ty cid id k k_lhs in
-
-        (* The intersection of 2 visibilities is the most restrictive visibility. *)
-        let vis = TVis.min_vis_opt vis vis' in
-        (env, vis), ty) in
+        env, ty) in
       let env, ty = Inter.intersect_list env (fst ety1) tyl in
-      env, ty, None, vis
+      env, ty, None
 
   | p', (Tabstract(ak, Some ty)) ->
     let k_lhs' ty = match ak with
     | AKnewtype (_, _) -> k_lhs ty
     | _ -> k_lhs (p', Tabstract (ak, Some ty)) in
-      obj_get_ ~obj_pos ~is_method ~nullsafe ~valkind ~pos_params
+      obj_get_ ~inst_meth ~obj_pos ~is_method ~nullsafe ~valkind ~pos_params
         ~explicit_tparams env ty cid id k k_lhs'
 
   | p', (Tabstract(ak,_)) ->
@@ -4680,23 +4666,23 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~obj_pos
          let k_lhs' ty = match ak with
          | AKnewtype (_, _) -> k_lhs ty
          | _ -> k_lhs (p', Tabstract (ak, Some ty)) in
-         obj_get_concrete_ty ~is_method ~valkind ~explicit_tparams env ty cid id k_lhs'
+         obj_get_concrete_ty ~inst_meth ~is_method ~valkind ~explicit_tparams env ty cid id k_lhs'
       ) in
     begin match resl with
       | [] -> begin
           Errors.non_object_member
             id_str id_pos (Typing_print.error env ety1)
             (Reason.to_pos (fst ety1));
-          k (env, err_witness env id_pos, None, None)
+          k (env, err_witness env id_pos, None)
         end
-      | ((_env, ty, _decl_ty, _vis) as res)::rest ->
-        if List.exists rest (fun (_, ty', _, _) -> not @@ ty_equal ty' ty)
+      | ((_env, ty, _decl_ty) as res)::rest ->
+        if List.exists rest (fun (_, ty', _) -> not @@ ty_equal ty' ty)
         then
         begin
           Errors.ambiguous_member
             id_str id_pos (Typing_print.error env ety1)
             (Reason.to_pos (fst ety1));
-          k (env, err_witness env id_pos, None, None)
+          k (env, err_witness env id_pos, None)
         end
         else k res
     end
@@ -4708,10 +4694,10 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~obj_pos
   (* We are trying to access a member through a value of unknown type *)
   | r, Tvar _ ->
     Errors.unknown_object_member id_str id_pos (Reason.to_string "It is unknown" r);
-    k (env, (r, Typing_utils.terr env), None, None)
+    k (env, (r, Typing_utils.terr env), None)
 
   | _, _ ->
-    k (obj_get_concrete_ty ~is_method ~valkind ~explicit_tparams env ety1 cid id k_lhs)
+    k (obj_get_concrete_ty ~inst_meth ~is_method ~valkind ~explicit_tparams env ety1 cid id k_lhs)
 
 and class_id_for_new ~exact p env cid tal =
   let env, te, cid_ty = static_class_id ~exact ~check_constraints:false p env tal cid in

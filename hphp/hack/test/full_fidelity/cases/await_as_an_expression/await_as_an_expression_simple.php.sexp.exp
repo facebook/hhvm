@@ -1,10 +1,10 @@
-((script 3152
-  ((list 3152
+((script 3103
+  ((list 3103
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
        (missing 0 ())))
-     (function_declaration 3096
+     (function_declaration 3047
       ((missing 0 ())
        (function_declaration_header 37
         ((list 5 ((((end_of_line 1)) async 5 ((whitespace 1)))))
@@ -19,9 +19,9 @@
                 ((simple_type_specifier 4 ((() void 4 ()))) (missing 0 ())))))
              (() > 1 ((whitespace 1)))))))
          (missing 0 ())))
-       (compound_statement 3058
+       (compound_statement 3009
         ((() { 1 ((end_of_line 1)))
-         (list 3052
+         (list 3003
           ((expression_statement 28
             ((binary_expression 27
               ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
@@ -141,29 +141,6 @@
                          (missing 0 ()) (() ")" 1 ())))))
                      (missing 0 ())))))
                  (() ")" 1 ())))))
-             (() ";" 1 ((end_of_line 1)))))
-           (expression_statement 46
-            ((binary_expression 45
-              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
-               (() = 1 ((whitespace 1)))
-               (instanceof_expression 40
-                ((parenthesized_expression 14
-                  ((() "(" 1 ())
-                   (prefix_unary_expression 12
-                    ((() await 5 ((whitespace 1)))
-                     (function_call_expression 6
-                      ((() name 4 ()) (missing 0 ()) (() "(" 1 ())
-                       (missing 0 ()) (() ")" 1 ())))))
-                   (() ")" 1 ((whitespace 1)))))
-                 (() instanceof 10 ((whitespace 1)))
-                 (parenthesized_expression 14
-                  ((() "(" 1 ())
-                   (prefix_unary_expression 12
-                    ((() await 5 ((whitespace 1)))
-                     (function_call_expression 6
-                      ((() name 4 ()) (missing 0 ()) (() "(" 1 ())
-                       (missing 0 ()) (() ")" 1 ())))))
-                   (() ")" 1 ())))))))
              (() ";" 1 ((end_of_line 1)))))
            (expression_statement 27
             ((binary_expression 26

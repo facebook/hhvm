@@ -11,7 +11,7 @@
 (75,13)-(75,15) A right brace ('}') is expected here.
 (77,12)-(77,12) A right brace ('}') is expected here.
 (78,13)-(78,13) A right brace ('}') is expected here.
-(79,9)-(79,25) The only legal expressions inside a {$...}-expression embedded in a string are variables, function calls, subscript expressions, and member access expressions
+(79,9)-(79,17) The only legal expressions inside a {$...}-expression embedded in a string are variables, function calls, subscript expressions, and member access expressions
 (80,9)-(80,15) The only legal expressions inside a {$...}-expression embedded in a string are variables, function calls, subscript expressions, and member access expressions
 (81,9)-(81,16) The only legal expressions inside a {$...}-expression embedded in a string are variables, function calls, subscript expressions, and member access expressions
 (82,9)-(82,16) The only legal expressions inside a {$...}-expression embedded in a string are variables, function calls, subscript expressions, and member access expressions

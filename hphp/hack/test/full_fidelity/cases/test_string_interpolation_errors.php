@@ -76,7 +76,7 @@ function not_okay() {
 
   $a = "{$b";
   $a = "{$b foo $c}";
-  $a = "{$b instanceof C}";
+  $a = "{$b is C}";
   $a = "{$b.$c}";
   $a = "{$b + 1}";
   $a = "{$b = 1}";

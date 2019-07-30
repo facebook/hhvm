@@ -843,11 +843,7 @@ let do_rage (state: state) (ref_unblocked_time: float ref): Rage.result Lwt.t =
   let add_fn fn =  if Sys.file_exists fn then add { title = Some fn; data = Sys_utils.cat fn; } in
   let add_stack (pid, reason) =
     let pid = string_of_int pid in
-    let stack = try Sys_utils.exec_read_lines ~reverse:true ("pstack " ^ pid)
-    with _ -> begin
-      try Sys_utils.exec_read_lines ~reverse:true ("gstack " ^ pid)
-      with e -> ["unable to pstack - " ^ (Exn.to_string e)]
-    end in
+    let stack = ["[stack omitted because pstack/gstack takes too long to run...]"] in
     add_data (Printf.sprintf "PSTACK %s (%s) - %s\n\n" pid reason (String.concat ~sep:"\n" stack))
   in
   (* logfiles *)

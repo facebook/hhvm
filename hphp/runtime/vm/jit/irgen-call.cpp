@@ -562,8 +562,7 @@ void fcallObjMethodUnknown(
   // prepare to do a regular (non-magic) call
   auto const mightCareAboutDynCall =
     RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0
-    || RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0
-    || RuntimeOption::EvalForbidDynamicCallsToFunc > 0;
+    || RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0;
   profileMethod(funcWoM);
   if (noCallProfiling) {
     prepareAndCallUnknown(env, funcWoM, fca, obj, nullptr, dynamic,
@@ -820,8 +819,7 @@ void optimizeProfiledCallObjMethod(IRGS& env,
         auto const ctx = getCtx(baseMeth, objOrCls, nullptr);
         auto const mightCareAboutDynCall =
           RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0
-          || RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0
-          || RuntimeOption::EvalForbidDynamicCallsToFunc > 0;
+          || RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0;
         prepareAndCallProfiled(env, meth, fca, ctx, dynamic,
                                mightCareAboutDynCall, nullptr);
       },
@@ -866,8 +864,7 @@ void optimizeProfiledCallObjMethod(IRGS& env,
         auto const ctx = getCtx(intfMeth, objOrCls, nullptr);
         auto const mightCareAboutDynCall =
           RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0
-          || RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0
-          || RuntimeOption::EvalForbidDynamicCallsToFunc > 0;
+          || RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0;
         prepareAndCallProfiled(env, meth, fca, ctx, dynamic,
                                mightCareAboutDynCall, nullptr);
       },
@@ -937,8 +934,7 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
       auto const func = lookupObjMethodNonExactFunc(env, obj, lookup.func);
       auto const mightCareAboutDynCall =
         RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0
-        || RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0
-        || RuntimeOption::EvalForbidDynamicCallsToFunc > 0;
+        || RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0;
       prepareAndCallProfiled(env, func, fca, obj, dynamic,
                              mightCareAboutDynCall, tsList);
       return;
@@ -967,8 +963,7 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
       auto const func = lookupObjMethodInterfaceFunc(env, obj, knownIfaceFunc);
       auto const mightCareAboutDynCall =
         RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0
-        || RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0
-        || RuntimeOption::EvalForbidDynamicCallsToFunc > 0;
+        || RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0;
       profileMethod(func);
       if (noCallProfiling) {
         prepareAndCallUnknown(env, func, fca, obj, nullptr, dynamic,
@@ -1482,8 +1477,7 @@ bool fpushClsMethodKnown(IRGS& env,
   if (!func) return false;
   auto const mightCareAboutDynCall =
     RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0
-    || RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0
-    || RuntimeOption::EvalForbidDynamicCallsToFunc > 0;
+    || RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0;
   prepareToCallUnknown(env, func, ctx, numParams, nullptr, dynamic,
                        mightCareAboutDynCall, tsList);
   return true;
@@ -1741,8 +1735,7 @@ void optimizeProfiledPushClsMethod(IRGS& env,
         auto const ctx = getCtx(baseMeth, objOrCls, nullptr);
         auto const mightCareAboutDynCall =
           RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0
-          || RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0
-          || RuntimeOption::EvalForbidDynamicCallsToFunc > 0;
+          || RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0;
         prepareToCallUnknown(env, meth, ctx, numParams, nullptr, dynamic,
                              mightCareAboutDynCall, nullptr);
       },
@@ -1787,8 +1780,7 @@ void optimizeProfiledPushClsMethod(IRGS& env,
         auto const ctx = getCtx(intfMeth, objOrCls, nullptr);
         auto const mightCareAboutDynCall =
           RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0
-          || RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0
-          || RuntimeOption::EvalForbidDynamicCallsToFunc > 0;
+          || RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0;
         prepareToCallUnknown(env, meth, ctx, numParams, nullptr, dynamic,
                              mightCareAboutDynCall, nullptr);
       },

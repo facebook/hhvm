@@ -539,7 +539,7 @@ let widen env widen_concrete_type ty =
     | r, Tunion tyl ->
       widen_all env r tyl
     | r, Toption ty ->
-      widen_all env r [(r, Tprim Nast.Tnull); ty]
+      widen_all env r [(r, Tprim Aast.Tnull); ty]
     (* Don't widen the `this` type, because the field type changes up the hierarchy
      * so we lose precision
      *)
@@ -649,7 +649,7 @@ let rec push_option_out pos env ty =
   | r, Toption ty ->
     let env, ty = push_option_out pos env ty in
     env, if is_option ty then ty else (r, Toption ty)
-  | r, Tprim Nast.Tnull ->
+  | r, Tprim Aast.Tnull ->
     let ty = (r, Tunion []) in
     env, (r, Toption ty)
   | r, Tunion tyl ->
@@ -689,7 +689,7 @@ let rec push_option_out pos env ty =
   | _, Tvar var ->
     let rec has_null env ty =
       match snd (Env.expand_type env ty) with
-      | _, Tprim Nast.Tnull -> true
+      | _, Tprim Aast.Tnull -> true
       | _, Toption _ -> true
       | _, Tabstract (_, Some ty) -> has_null env ty
       | _ -> false in

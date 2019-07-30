@@ -102,22 +102,22 @@ val is_using_var : env -> Local_id.t -> bool
 val set_using_var : env -> Local_id.t -> env
 val unset_local : env -> Local_id.t -> env
 val get_local : env -> Local_id.t -> locl ty
-val get_locals : env -> Nast.lid list -> Typing_local_types.t
+val get_locals : env -> Aast.lid list -> Typing_local_types.t
 val set_locals : env -> Typing_local_types.t -> env
 val set_fake_members : env -> Typing_fake_members.t -> env
 val is_local_defined : env -> Local_id.t -> bool
-val get_local_check_defined : env -> Nast.lid -> locl ty
+val get_local_check_defined : env -> Aast.lid -> locl ty
 val set_local_expr_id : env -> Local_id.t -> Typing_local_types.expression_id -> env
 val get_local_expr_id : env -> Local_id.t -> Typing_local_types.expression_id option
 val get_tpenv : env -> tpenv
 val get_tpenv_lower_bounds : tpenv -> string -> tparam_bounds
 val get_tpenv_upper_bounds : tpenv -> string -> tparam_bounds
-val get_tpenv_reified: tpenv -> string -> Nast.reify_kind
+val get_tpenv_reified: tpenv -> string -> Aast.reify_kind
 val get_tpenv_enforceable: tpenv -> string -> bool
 val get_tpenv_newable: tpenv -> string -> bool
 val get_lower_bounds : env -> string -> tparam_bounds
 val get_upper_bounds : env -> string -> tparam_bounds
-val get_reified: env -> string -> Nast.reify_kind
+val get_reified: env -> string -> Aast.reify_kind
 val get_enforceable: env -> string -> bool
 val get_newable: env -> string -> bool
 val add_upper_bound :
@@ -170,16 +170,16 @@ val get_tyvar_info :
 val get_tyvar_eager_solve_fail :
   env -> Ident.t -> bool
 val get_tyvar_type_const :
-  env -> int -> Nast.sid -> (Nast.sid * locl ty) option
+  env -> int -> Aast.sid -> (Aast.sid * locl ty) option
 val set_tyvar_type_const :
-  env -> int -> Nast.sid -> locl ty -> env
+  env -> int -> Aast.sid -> locl ty -> env
 val get_tyvar_type_consts :
-  env -> int -> (Nast.sid * locl ty) SMap.t
+  env -> int -> (Aast.sid * locl ty) SMap.t
 val remove_tyvar :
   env -> Ident.t -> env
 val error_if_reactive_context : env -> (unit -> unit) -> unit
 val error_if_shallow_reactive_context : env -> (unit -> unit) -> unit
-val add_fresh_generic_parameter : env -> string -> reified:Nast.reify_kind -> enforceable:bool -> newable:bool -> env * string
+val add_fresh_generic_parameter : env -> string -> reified:Aast.reify_kind -> enforceable:bool -> newable:bool -> env * string
 val is_fresh_generic_parameter : string -> bool
 val get_tpenv_size : env -> int
 val get_tpenv_tparams : env -> SSet.t

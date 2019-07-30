@@ -7,8 +7,6 @@
  *
  *)
 
-module Aast = Nast
-
 (** Module "naming" a program.
  * Transform all the local names into a unique identifier
  *)
@@ -29,9 +27,9 @@ val global_const: Nast.gconst -> Nast.gconst
 
 module type GetLocals = sig
   val lvalue : Namespace_env.env * Pos.t SMap.t ->
-    Aast.expr -> Namespace_env.env * Pos.t SMap.t
+    Nast.expr -> Namespace_env.env * Pos.t SMap.t
   val stmt : Namespace_env.env * Pos.t SMap.t ->
-    Aast.stmt -> Namespace_env.env * Pos.t SMap.t
+    Nast.stmt -> Namespace_env.env * Pos.t SMap.t
 end
 
 module Make : functor (GetLocals : GetLocals) -> sig

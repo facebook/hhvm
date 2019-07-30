@@ -17,7 +17,7 @@ type tparam_bounds = TySet.t
 type tparam_info = {
   lower_bounds : tparam_bounds;
   upper_bounds : tparam_bounds;
-  reified      : Nast.reify_kind;
+  reified      : Aast.reify_kind;
   enforceable  : bool;
   newable      : bool;
 }
@@ -41,7 +41,7 @@ let pp_tparam_info fmt tpi =
   Format.fprintf fmt ";@ ";
 
   Format.fprintf fmt "@[%s =@ " "reified";
-  Nast.pp_reify_kind fmt tpi.reified;
+  Aast.pp_reify_kind fmt tpi.reified;
   Format.fprintf fmt "@]";
   Format.fprintf fmt ";@ ";
 

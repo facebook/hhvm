@@ -7,13 +7,13 @@
  *
 *)
 
-module T = Tast
+module T = Aast
 
 let generator_visitor () =
   (* is_generator, is_pair_generator *)
   let state = ref (false, false) in
   object (_)
-    inherit [_] T.iter
+    inherit [_] Aast.iter
 
     method state () = !state
 

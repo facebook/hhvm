@@ -13,7 +13,7 @@ module Ast = Tast
 type t = {
   xhp_attribute_type : Ast.hint option;
   xhp_attribute_class_var : Ast.class_var;
-  xhp_attribute_tag : Ast.xhp_attr_tag option;
+  xhp_attribute_tag : Aast.xhp_attr_tag option;
   xhp_attribute_maybe_enum : ((Pos.t * bool * Ast.expr list) option);
 }
 
@@ -33,5 +33,5 @@ let class_var xa = xa.xhp_attribute_class_var
 let is_required xa = Option.value_map
   xa.xhp_attribute_tag
   ~default:false
-  ~f: (fun tag -> match tag with | Ast.Required | Ast.LateInit -> true)
+  ~f: (fun tag -> match tag with | Aast.Required | Aast.LateInit -> true)
 let maybe_enum xa = xa.xhp_attribute_maybe_enum

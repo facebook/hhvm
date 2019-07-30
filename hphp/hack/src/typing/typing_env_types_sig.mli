@@ -27,7 +27,7 @@
    appears_contravariantly: bool;
    lower_bounds : TySet.t;
    upper_bounds : TySet.t;
-   type_constants : (Nast.sid * locl ty) SMap.t;
+   type_constants : (Aast.sid * locl ty) SMap.t;
  }
  type tvenv = tyvar_info IMap.t
 
@@ -87,7 +87,7 @@ and genv = {
 and anon_log = locl ty list * locl ty list
 and anon = {
   rx : reactivity;
-  is_coroutine : Nast.is_coroutine;
+  is_coroutine : Aast.is_coroutine;
   counter : anon_log ref;
   pos : Pos.t;
   typecheck :

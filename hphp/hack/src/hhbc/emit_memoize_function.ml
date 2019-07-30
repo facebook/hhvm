@@ -12,6 +12,7 @@ open Instruction_sequence
 open Emit_memoize_helpers
 
 module R = Hhbc_string_utils.Reified
+module T = Aast
 
 let make_memoize_function_no_params_code
     ~deprecation_info env renamed_function_id is_async =

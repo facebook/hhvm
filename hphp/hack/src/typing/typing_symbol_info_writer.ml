@@ -9,7 +9,7 @@
 module Hack_bucket = Bucket
 open Core_kernel
 open Hh_json
-open Tast
+open Aast
 open Typing_symbol_json_builder
 open SymbolOccurrence
 module Bucket = Hack_bucket

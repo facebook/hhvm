@@ -1,4 +1,5 @@
-(*
+open Ast
+(**
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -6,97 +7,80 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Ast
+
 open Core_kernel
+module SN = Naming_special_names
 
-module type AstToAastEnvType = sig
-  module AastAnnotations : Aast.ASTAnnotationTypes
+type ('ex, 'fb, 'en) class_body = {
+  c_uses: Aast.hint list;
+  c_use_as_aliases: Aast.use_as_alias list;
+  c_insteadof_aliases: Aast.insteadof_alias list;
+  c_method_redeclarations: ('ex, 'fb, 'en) Aast.method_redeclaration list;
+  c_xhp_attr_uses: Aast.hint list;
+  c_xhp_category: (pos * pstring list) option;
+  c_reqs: (Aast.hint * Aast.is_extends) list;
+  c_consts: ('ex, 'fb, 'en) Aast.class_const list;
+  c_typeconsts: ('ex, 'fb, 'en) Aast.class_typeconst list;
+  c_vars: ('ex, 'fb, 'en) Aast.class_var list;
+  c_methods: ('ex, 'fb, 'en) Aast.method_ list;
+  c_attributes: ('ex, 'fb, 'en) Aast.class_attr list;
+  c_xhp_children: (pos * Aast.xhp_child) list;
+  c_xhp_attrs: ('ex, 'fb, 'en) Aast.xhp_attr list;
+  c_pu_enums: ('ex, 'fb, 'en) Aast.pu_enum list;
+}
 
-  val get_expr_annotation : Ast_defs.pos -> AastAnnotations.ExprAnnotation.t
-
-  val env_annotation : AastAnnotations.EnvAnnotation.t
-
-  val funcbody_annotation : AastAnnotations.FuncBodyAnnotation.t
-end
-
-module AnnotatedAST (AastAnnotations : Aast.ASTAnnotationTypes) = struct
-  include Aast
-  include Aast.AnnotatedAST (AastAnnotations)
-end
-
-module MapAstToAast (Env : AstToAastEnvType) = struct
-  module Aast = AnnotatedAST (Env.AastAnnotations)
-  module SN = Naming_special_names
-
-  type class_body = {
-    c_uses: Aast.hint list;
-    c_use_as_aliases: Aast.use_as_alias list;
-    c_insteadof_aliases: Aast.insteadof_alias list;
-    c_method_redeclarations: Aast.method_redeclaration list;
-    c_xhp_attr_uses: Aast.hint list;
-    c_xhp_category: (pos * pstring list) option;
-    c_reqs: (Aast.hint * Aast.is_extends) list;
-    c_consts: Aast.class_const list;
-    c_typeconsts: Aast.class_typeconst list;
-    c_vars: Aast.class_var list;
-    c_methods: Aast.method_ list;
-    c_attributes: Aast.class_attr list;
-    c_xhp_children: (pos * Aast.xhp_child) list;
-    c_xhp_attrs: Aast.xhp_attr list;
-    c_pu_enums: Aast.pu_enum list;
+let make_empty_class_body =
+  {
+    c_uses = [];
+    c_use_as_aliases = [];
+    c_insteadof_aliases = [];
+    c_method_redeclarations = [];
+    c_xhp_attr_uses = [];
+    c_xhp_category = None;
+    c_reqs = [];
+    c_consts = [];
+    c_typeconsts = [];
+    c_vars = [];
+    c_methods = [];
+    c_attributes = [];
+    c_xhp_children = [];
+    c_xhp_attrs = [];
+    c_pu_enums = [];
   }
 
-  let make_empty_class_body =
-    {
-      c_uses = [];
-      c_use_as_aliases = [];
-      c_insteadof_aliases = [];
-      c_method_redeclarations = [];
-      c_xhp_attr_uses = [];
-      c_xhp_category = None;
-      c_reqs = [];
-      c_consts = [];
-      c_typeconsts = [];
-      c_vars = [];
-      c_methods = [];
-      c_attributes = [];
-      c_xhp_children = [];
-      c_xhp_attrs = [];
-      c_pu_enums = [];
-    }
+let on_list f l = List.map ~f l
 
-  let on_list f l = List.map ~f l
+let mem lst e = List.mem ~equal:( = ) lst e
 
-  let mem lst e = List.mem ~equal:( = ) lst e
+let on_list_append_acc acc f l =
+  List.fold_left ~f:(fun acc li -> f li :: acc) ~init:acc l
 
-  let on_list_append_acc acc f l =
-    List.fold_left ~f:(fun acc li -> f li :: acc) ~init:acc l
+let optional f = function
+  | None -> None
+  | Some x -> Some (f x)
 
-  let optional f = function
-    | None -> None
-    | Some x -> Some (f x)
+let both f (p1, p2) = (f p1, f p2)
 
-  let both f (p1, p2) = (f p1, f p2)
+let reification reified attributes =
+  let soft =
+    List.exists
+      ~f:(fun { Aast.ua_name = _, n; _ } -> n = SN.UserAttributes.uaSoft)
+      attributes
+  in
+  if reified then if soft then Aast.SoftReified else Aast.Reified
+  else Aast.Erased
 
-  let reification reified attributes =
-    let soft =
-      List.exists
-        ~f:(fun { Aast.ua_name = _, n; _ } -> n = SN.UserAttributes.uaSoft)
-        attributes
-    in
-    if reified then if soft then Aast.SoftReified else Aast.Reified
-    else Aast.Erased
-
+(* Convert an AST to an AAST, using the annotations provided. *)
+let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
+    (env_annotation : 'en) =
   let rec on_variadic_hint h =
     match h with
     | Hvariadic h -> Aast.Hvariadic (optional on_hint h)
     | Hnon_variadic -> Aast.Hnon_variadic
-
   and get_pos_shape_name name =
     match name with
     | SFlit_int (pos, _) | SFlit_str (pos, _) | SFclass_const (_, (pos, _)) ->
         pos
-
   and on_shape_info info =
     let on_shape_field sf =
       Aast.
@@ -123,11 +107,9 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
         nsi_allows_unknown_fields = info.si_allows_unknown_fields;
         nsi_field_map = nfm;
       }
-
   and on_haccess (pos, root_id) id ids =
     let root_ty = Aast.Happly ((pos, root_id), []) in
     Aast.Haccess ((pos, root_ty), id :: ids)
-
   and on_hint (p, h) : Aast.hint =
     match h with
     | Hoption h -> (p, Aast.Hoption (on_hint h))
@@ -148,8 +130,7 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
     | Haccess (root, id, ids) -> (p, on_haccess root id ids)
     | Hsoft h -> (p, Aast.Hsoft (on_hint h))
     | Hlike h -> (p, Aast.Hlike (on_hint h))
-
-  and on_class_elt body elt : class_body =
+  and on_class_elt body elt =
     match elt with
     | Attributes attrs ->
         let attrs = on_list_append_acc body.c_attributes on_class_attr attrs in
@@ -237,25 +218,19 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
         let pu_enum = on_pu pu_name pu_is_final fields in
         let pu_enums = pu_enum :: body.c_pu_enums in
         { body with c_pu_enums = pu_enums }
-
-  and on_as_expr aw e : Aast.as_expr =
+  and on_as_expr aw e =
     match (aw, e) with
     | None, As_v ev -> Aast.As_v (on_expr ev)
     | Some p, As_v ev -> Aast.Await_as_v (p, on_expr ev)
     | None, As_kv (k, ev) -> Aast.As_kv (on_expr k, on_expr ev)
     | Some p, As_kv (k, ev) -> Aast.Await_as_kv (p, on_expr k, on_expr ev)
-
-  and on_afield f : Aast.afield =
+  and on_afield f =
     match f with
     | AFvalue e -> Aast.AFvalue (on_expr e)
     | AFkvalue (e1, e2) -> Aast.AFkvalue (on_expr e1, on_expr e2)
-
   and on_darray_element (e1, e2) = (on_expr e1, on_expr e2)
-
   and on_shape (sfn, e) = (sfn, on_expr e)
-
   and on_awaitall el b = (on_list on_awaitall_expr el, on_block b)
-
   and on_awaitall_expr (e1, e2) =
     let e2 = on_expr e2 in
     let e1 =
@@ -266,23 +241,19 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
       | None -> None
     in
     (e1, e2)
-
-  and on_xhp_attribute a : Aast.xhp_attribute =
+  and on_xhp_attribute a =
     match a with
     | Xhp_simple (id, e) -> Aast.Xhp_simple (id, on_expr e)
     | Xhp_spread e -> Aast.Xhp_spread (on_expr e)
-
   and on_targ h : Aast.targ = on_hint h
-
   and on_collection_targ targ =
     match targ with
     | Some (CollectionTKV (tk, tv)) ->
         Some (Aast.CollectionTKV (on_targ tk, on_targ tv))
     | Some (CollectionTV tv) -> Some (Aast.CollectionTV (on_targ tv))
     | None -> None
-
-  and on_expr (p, e) : Aast.expr =
-    let annot = Env.get_expr_annotation p in
+  and on_expr (p, e) =
+    let annot = expr_annotation p in
     let node =
       match e with
       | Array al -> Aast.Array (on_list on_afield al)
@@ -371,26 +342,21 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
           Aast.PU_identifier ((annot, Aast.CIexpr (on_expr e)), id1, id2)
     in
     (annot, node)
-
   and on_import_flavor f =
     match f with
     | Include -> Aast.Include
     | Require -> Aast.Require
     | IncludeOnce -> Aast.IncludeOnce
     | RequireOnce -> Aast.RequireOnce
-
-  and on_case c : Aast.case =
+  and on_case c =
     match c with
     | Default b -> Aast.Default (on_block b)
     | Case (e, b) -> Aast.Case (on_expr e, on_block b)
-
-  and on_catch (id1, id2, b) : Aast.catch =
+  and on_catch (id1, id2, b) =
     let lid = Local_id.make_unscoped (snd id2) in
     (id1, (fst id2, lid), on_block b)
-
-  and on_stmt (p, st) : Aast.stmt = (p, on_stmt_ p st)
-
-  and on_stmt_ p st : Aast.stmt_ =
+  and on_stmt (p, st) = (p, on_stmt_ p st)
+  and on_stmt_ p st =
     match st with
     | Let (id, h, e) ->
         let lid = Local_id.make_unscoped (snd id) in
@@ -428,16 +394,13 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
     | Try (b, cl, fb) -> Aast.Try (on_block b, on_list on_catch cl, on_block fb)
     | Def_inline d -> Aast.Def_inline (on_def d)
     | Expr e -> Aast.Expr (on_expr e)
-
-  and on_block stmt_list : Aast.stmt list =
+  and on_block stmt_list =
     match stmt_list with
     | [] -> []
     | x :: rest -> on_stmt x :: on_block rest
-
   and on_tparam_constraint (kind, hint) : constraint_kind * Aast.hint =
     (kind, on_hint hint)
-
-  and on_tparam t : Aast.tparam =
+  and on_tparam t =
     let attributes = on_list on_user_attribute t.tp_user_attributes in
     {
       Aast.tp_variance = t.tp_variance;
@@ -446,11 +409,10 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
       tp_reified = reification t.tp_reified attributes;
       tp_user_attributes = attributes;
     }
-
-  and on_fun_param param : Aast.fun_param =
+  and on_fun_param param =
     let p, name = param.param_id in
     {
-      Aast.param_annotation = Env.get_expr_annotation p;
+      Aast.param_annotation = expr_annotation p;
       param_hint = optional on_hint param.param_hint;
       param_is_reference = param.param_is_reference;
       param_is_variadic = param.param_is_variadic;
@@ -461,7 +423,6 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
       param_user_attributes =
         on_list on_user_attribute param.param_user_attributes;
     }
-
   and determine_variadicity params =
     match params with
     | [] -> Aast.FVnonVariadic
@@ -471,28 +432,22 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
       | true, (p, "...") -> Aast.FVellipsis p
       | true, (_, _) -> Aast.FVvariadicArg (on_fun_param x) )
     | _ :: rl -> determine_variadicity rl
-
-  and on_user_attribute attribute : Aast.user_attribute =
+  and on_user_attribute attribute =
     let ua_params = on_list on_expr attribute.ua_params in
     Aast.{ ua_name = attribute.ua_name; ua_params }
-
-  and on_file_attribute (attribute : Ast.file_attributes) : Aast.file_attribute
-      =
+  and on_file_attribute (attribute : Ast.file_attributes) =
     Aast.
       {
         fa_user_attributes =
           on_list on_user_attribute attribute.fa_user_attributes;
         fa_namespace = attribute.fa_namespace;
       }
-
-  and on_fun f : Aast.fun_ =
+  and on_fun f =
     let body = on_block f.f_body in
-    let body =
-      { Aast.fb_ast = body; Aast.fb_annotation = Env.funcbody_annotation }
-    in
+    let body = { Aast.fb_ast = body; Aast.fb_annotation = func_body_ann } in
     let named_fun =
       {
-        Aast.f_annotation = Env.env_annotation;
+        Aast.f_annotation = env_annotation;
         f_span = f.f_span;
         f_mode = f.f_mode;
         f_ret = optional on_hint f.f_ret;
@@ -512,15 +467,13 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
       }
     in
     named_fun
-
   and on_enum (e : enum_) : Aast.enum_ =
     Aast.
       {
         e_base = on_hint e.e_base;
         e_constraint = optional on_hint e.e_constraint;
       }
-
-  and on_class_attr attr : Aast.class_attr =
+  and on_class_attr attr =
     match attr with
     | CA_name id -> Aast.CA_name id
     | CA_field f ->
@@ -532,13 +485,11 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
               ca_value = optional on_expr f.ca_value;
               ca_required = f.ca_required;
             }
-
   and on_ca_type ty : Aast.ca_type =
     match ty with
     | CA_hint h -> Aast.CA_hint (on_hint h)
     | CA_enum sl -> Aast.CA_enum sl
-
-  and on_class_typeconst (tc : Ast.typeconst) : Aast.class_typeconst =
+  and on_class_typeconst (tc : Ast.typeconst) =
     let vis = get_visibility_from_kinds tc.tconst_kinds in
     let has_abstract = mem tc.tconst_kinds Abstract in
     let tconst_type, abstract_kind =
@@ -575,7 +526,6 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
           on_list on_user_attribute tc.tconst_user_attributes;
         c_tconst_span = tc.tconst_span;
       }
-
   and get_visibility_from_kinds kinds =
     List.fold_left
       ~f:(fun acc k ->
@@ -585,9 +535,7 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
         | Protected -> Aast.Protected
         | _ -> acc)
       ~init:Aast.Public kinds
-
-  and on_class_var xhp_info h attrs kinds variadic doc_com (_, id, eopt) :
-      Aast.class_var =
+  and on_class_var xhp_info h attrs kinds variadic doc_com (_, id, eopt) =
     let cv_final = mem kinds Final in
     let cv_visibility = get_visibility_from_kinds kinds in
     let cv_is_static = mem kinds Static in
@@ -604,8 +552,7 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
         cv_doc_comment = doc_com;
         cv_is_static;
       }
-
-  (**
+  (*
    * Doc comments are currently used for codegen but are not required for typing.
    * When used for codegen, doc comments are only used for the emission of the
    * first variable in a list of class vars declared together. For instance, $x:
@@ -624,8 +571,7 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
         let acc = cv :: acc in
         on_list_append_acc acc (with_dc_name None) rest
     | [] -> acc
-
-  and on_class_const hint kind (id, eopt) : Aast.class_const =
+  and on_class_const hint kind (id, eopt) =
     let vis =
       match kind with
       | Private -> Aast.Private
@@ -639,18 +585,14 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
         cc_id = id;
         cc_expr = optional on_expr eopt;
       }
-
   and on_class_consts_with_acc acc ccs =
     let with_name =
       on_class_const (optional on_hint ccs.cc_hint) ccs.cc_visibility
     in
     on_list_append_acc acc with_name ccs.cc_names
-
   and on_xhp_attr (p, b, el) = (p, b, on_list on_expr el)
-
   and on_constr (h1, k, h2) = (on_hint h1, k, on_hint h2)
-
-  and on_method_trait_resolution res : Aast.method_redeclaration =
+  and on_method_trait_resolution res =
     let acc = (false, false, false, None) in
     let final, abs, static, vis =
       List.fold_left ~f:kind ~init:acc res.mt_kind
@@ -679,7 +621,6 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
         mt_method = res.mt_method;
         mt_user_attributes = on_list on_user_attribute res.mt_user_attributes;
       }
-
   and on_xhp_child c : Aast.xhp_child =
     match c with
     | ChildName id -> Aast.ChildName id
@@ -687,13 +628,11 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
     | ChildUnary (c, op) -> Aast.ChildUnary (on_xhp_child c, on_xhp_child_op op)
     | ChildBinary (c1, c2) ->
         Aast.ChildBinary (on_xhp_child c1, on_xhp_child c2)
-
   and on_xhp_child_op op : Aast.xhp_child_op =
     match op with
     | ChildStar -> Aast.ChildStar
     | ChildPlus -> Aast.ChildPlus
     | ChildQuestion -> Aast.ChildQuestion
-
   and kind (final, abs, static, vis) = function
     | Final -> (true, abs, static, vis)
     | Static -> (final, abs, true, vis)
@@ -701,14 +640,13 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
     | Private -> (final, abs, static, Some Aast.Private)
     | Public -> (final, abs, static, Some Aast.Public)
     | Protected -> (final, abs, static, Some Aast.Protected)
-
-  and on_method m : Aast.method_ =
+  and on_method m =
     let body = on_block m.m_body in
     let body =
       {
         Aast.fb_ast = body;
         (* Still seems incorrect to have this as a Named body... *)
-        Aast.fb_annotation = Env.funcbody_annotation;
+        Aast.fb_annotation = func_body_ann;
       }
     in
     let acc = (false, false, false, None) in
@@ -723,7 +661,7 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
     Aast.
       {
         m_span = m.m_span;
-        m_annotation = Env.env_annotation;
+        m_annotation = env_annotation;
         m_final = final;
         m_abstract = abs;
         m_static = static;
@@ -740,7 +678,6 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
         m_external = m.m_external;
         m_doc_comment = m.m_doc_comment;
       }
-
   and on_pu_mapping pum_atom mappings =
     let rec aux types exprs = function
       | PUMappingType (id, hint) :: tl ->
@@ -751,7 +688,6 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
     in
     let pum_types, pum_exprs = aux [] [] mappings in
     Aast.{ pum_atom; pum_types; pum_exprs }
-
   and on_pu pu_name pu_is_final fields =
     let rec aux case_types case_values members = function
       | PUCaseType id :: tl -> aux (id :: case_types) case_values members tl
@@ -764,7 +700,6 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
     in
     let pu_case_types, pu_case_values, pu_members = aux [] [] [] fields in
     Aast.{ pu_name; pu_is_final; pu_case_types; pu_case_values; pu_members }
-
   and on_class_body cb =
     let reversed_body =
       List.fold_left ~f:on_class_elt ~init:make_empty_class_body cb
@@ -786,8 +721,7 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
       c_xhp_attrs = List.rev reversed_body.c_xhp_attrs;
       c_pu_enums = List.rev reversed_body.c_pu_enums;
     }
-
-  and on_class c : Aast.class_ =
+  and on_class c =
     let c_tparams =
       {
         Aast.c_tparam_list = on_list on_tparam c.c_tparams;
@@ -798,7 +732,7 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
     let named_class =
       Aast.
         {
-          c_annotation = Env.env_annotation;
+          c_annotation = env_annotation;
           c_span = c.c_span;
           c_mode = c.c_mode;
           c_final = c.c_final;
@@ -832,8 +766,7 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
         }
     in
     named_class
-
-  and on_typedef t : Aast.typedef =
+  and on_typedef t =
     let t_vis =
       match t.t_kind with
       | Alias _ -> Aast.Transparent
@@ -846,7 +779,7 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
     in
     Aast.
       {
-        t_annotation = Env.env_annotation;
+        t_annotation = env_annotation;
         t_name = t.t_id;
         t_tparams = on_list on_tparam t.t_tparams;
         t_constraint = optional on_hint t.t_constraint;
@@ -856,11 +789,10 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
         t_vis;
         t_namespace = t.t_namespace;
       }
-
-  and on_constant (c : gconst) : Aast.gconst =
+  and on_constant (c : gconst) =
     Aast.
       {
-        cst_annotation = Env.env_annotation;
+        cst_annotation = env_annotation;
         cst_mode = c.cst_mode;
         cst_name = c.cst_name;
         cst_type = optional on_hint c.cst_type;
@@ -868,7 +800,6 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
         cst_namespace = c.cst_namespace;
         cst_span = c.cst_span;
       }
-
   and on_ns_use (k, id1, id2) : Aast.ns_kind * Aast.sid * Aast.sid =
     let kind =
       match k with
@@ -879,8 +810,7 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
       | NSConst -> Aast.NSConst
     in
     (kind, id1, id2)
-
-  and on_def : def -> Aast.def = function
+  and on_def = function
     | Fun f -> Aast.Fun (on_fun f)
     | Class c -> Aast.Class (on_class c)
     | Stmt s -> Aast.Stmt (on_stmt s)
@@ -890,8 +820,22 @@ module MapAstToAast (Env : AstToAastEnvType) = struct
     | NamespaceUse usel -> Aast.NamespaceUse (on_list on_ns_use usel)
     | SetNamespaceEnv env -> Aast.SetNamespaceEnv env
     | FileAttributes fa -> Aast.FileAttributes (on_file_attribute fa)
+  and on_program ast = on_list on_def ast in
+  object
+    method on_program = on_program
 
-  and on_program ast = on_list on_def ast
+    method on_def = on_def
 
-  let convert ast : Aast.program = on_program ast
-end
+    method on_class = on_class
+
+    method on_fun = on_fun
+
+    method on_typedef = on_typedef
+
+    method on_constant = on_constant
+  end
+
+let convert_program (expr_annotation : Ast_defs.pos -> 'ex)
+    (func_body_ann : 'fb) (env_annotation : 'en) (p : Ast.program) :
+    ('ex, 'fb, 'en) Aast.program =
+  (converter expr_annotation func_body_ann env_annotation)#on_program p

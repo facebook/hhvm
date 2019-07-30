@@ -23,7 +23,11 @@ let from_variadic_param_hint_opt ho =
 
 let resolver_visitor =
 object(_)
-  inherit [_] Tast.endo
+  inherit [_] Aast.endo
+
+  method on_'ex _ ex = ex
+  method on_'fb _ fb = fb
+  method on_'en _ en = en
 
   method! on_CIexpr scope this e =
     match expr_to_class_expr ~resolve_self:false scope e with

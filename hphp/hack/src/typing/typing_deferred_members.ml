@@ -8,7 +8,7 @@
  *)
 
 open Core_kernel
-open Nast
+open Aast
 open Shallow_decl_defs
 open Typing_defs
 

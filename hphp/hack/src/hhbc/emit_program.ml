@@ -61,12 +61,12 @@ let debugger_eval_should_modify ast =
      there was exactly one user def (both 0 user defs and > 1 user def are
      valid situations where we pass the program through unmodififed) *)
   begin match (List.hd ast) with
-    | Some (Tast.Stmt (_, Tast.Markup _)) -> ()
+    | Some (Aast.Stmt (_, Aast.Markup _)) -> ()
     | _ -> failwith "Lowered AST did not start with a Markup statement"
   end;
   if List.length ast <> 2 then false else
   match List.nth_exn ast 1 with
-    | Tast.Stmt (_, Tast.Expr _) -> true
+    | Aast.Stmt (_, Aast.Expr _) -> true
     | _ -> false
 
 let from_ast ~is_hh_file ?(is_js_file = false) ~is_evaled ~for_debugger_eval ~popt tast =

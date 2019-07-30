@@ -36,12 +36,12 @@ val localize_ft:
   Env.env * locl fun_type
 val localize_hint_with_self:
   Env.env ->
-  Nast.hint ->
+  Aast.hint ->
   Env.env * locl ty
 val localize_hint:
   ety_env:expand_env ->
   Env.env ->
-  Nast.hint ->
+  Aast.hint ->
   Env.env * locl ty
 val localize_generic_parameters_with_bounds:
   ety_env:expand_env ->
@@ -51,7 +51,7 @@ val localize_generic_parameters_with_bounds:
 val localize_where_constraints:
   ety_env:expand_env ->
   Env.env ->
-  Nast.where_constraint list ->
+  Aast.where_constraint list ->
   Env.env
 val localize_with_dty_validator:
   Env.env ->

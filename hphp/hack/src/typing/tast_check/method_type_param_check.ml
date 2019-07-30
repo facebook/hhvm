@@ -8,7 +8,7 @@
  *)
 
 open Core_kernel
-open Tast
+open Aast
 
 let check_tparams tps =
   let check_tparam tp =

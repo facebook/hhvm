@@ -9,7 +9,7 @@
 open Core_kernel
 open Instruction_sequence
 
-module T = Tast
+module T = Aast
 
 let get_first_param_name params =
   match params with

@@ -19,17 +19,6 @@ module StringAnnotation = struct
   let pp fmt str = Format.pp_print_string fmt str
 end
 
-module StringNASTAnnotations = struct
-  module ExprAnnotation = StringAnnotation
-  module EnvAnnotation = Nast.UnitAnnotation
-  module FuncBodyAnnotation = StringAnnotation
-end
-
-module StringNAST = Nast.AnnotatedAST(StringNASTAnnotations)
-
-module TASTStringMapper =
-  Aast_mapper.MapAnnotatedAST(Tast_expand.ExpandedTypeAnnotations)(StringNASTAnnotations)
-
 module PS = Full_fidelity_positioned_syntax
 module PositionedTree = Full_fidelity_syntax_tree
   .WithSyntax(PS)
@@ -779,17 +768,23 @@ let compute_tasts_expand_types opts files_info interesting_files =
 let print_tasts tasts tcopt =
   let dummy_filename = Relative_path.default in
   let env = Typing_env.empty tcopt dummy_filename ~droot:None in
-  let stringify_types tast =
-    let print_pos_and_ty (pos, ty) =
-      Format.asprintf "(%a, %s)" Pos.pp pos (Typing_print.full_strip_ns env ty)
+
+  let print_pos_and_ty (pos, ty) =
+    Format.asprintf "(%a, %s)" Pos.pp pos (Typing_print.full_strip_ns env ty)
+  in
+
+  let pp_fb fmt fb =
+    let s = match fb with
+    | Tast.HasUnsafeBlocks -> "Has unsafe blocks"
+    | Tast.NoUnsafeBlocks -> "No unsafe blocks"
     in
-    TASTStringMapper.map_program tast
-      ~map_env_annotation:(fun () -> ())
-      ~map_expr_annotation:print_pos_and_ty
-      ~map_funcbody_annotation:(fun b -> Tast.annotation_to_string b) in
-  Relative_path.Map.iter tasts (fun _k tast ->
-    let string_ast = stringify_types tast in
-    Printf.printf "%s\n" (StringNAST.show_program string_ast))
+    Format.pp_print_string fmt s
+  in
+  let pp_en fmt _ = Format.pp_print_string fmt "()" in
+  let pp_ex fmt ex = Format.pp_print_string fmt (print_pos_and_ty ex) in
+
+  Relative_path.Map.iter tasts (fun _k (tast : Tast.program) ->
+    Printf.printf "%s\n" (Aast.show_program pp_ex pp_fb pp_en tast))
 
 let typecheck_tasts tasts tcopt (filename:Relative_path.t) =
   let env = Typing_env.empty tcopt filename ~droot:None in

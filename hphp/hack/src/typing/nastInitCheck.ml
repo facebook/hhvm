@@ -12,6 +12,7 @@
  * To be more precise, this checks that if the constructor does not throw,
  * it initializes all members. *)
 open Core_kernel
+open Aast
 open Nast
 
 module DICheck = Decl_init_check
@@ -175,7 +176,7 @@ let rec class_ tenv c =
   match c_constructor with
   | _ when c.c_kind = Ast_defs.Cinterface -> ()
   | Some { m_body =
-      { fb_annotation = Annotations.FuncBodyAnnotation.NamedWithUnsafeBlocks; _ }; _ } -> ()
+      { fb_annotation = Nast.NamedWithUnsafeBlocks; _ }; _ } -> ()
   | _ -> (
     let p = match c_constructor with
       | Some m -> fst m.m_name

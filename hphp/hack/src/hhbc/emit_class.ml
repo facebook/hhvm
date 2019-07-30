@@ -14,7 +14,7 @@ module H = Hhbc_ast
 module SU = Hhbc_string_utils
 module SN = Naming_special_names
 module TV = Typed_value
-module A = Tast
+module A = Aast
 
 let hack_arr_dv_arrs () =
   Hhbc_options.hack_arr_dv_arrs !Hhbc_options.compiler_options
@@ -148,7 +148,7 @@ let from_class_elt_classvars
   List.map ~f:mapping_aux ast_class.A.c_vars
 
 let from_class_elt_constants env class_ =
-  let map_aux (c : A.class_const) =
+  let map_aux (c : Tast.class_const) =
     from_constant
       env
       c.A.cc_visibility

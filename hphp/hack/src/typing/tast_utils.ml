@@ -23,8 +23,8 @@ module Cls = Decl_provider.Class
 let rec type_non_nullable env ty =
   let _, ty = Env.expand_type env ty in
   match ty with
-  | _, (Tprim Nast.(Tint | Tbool | Tfloat | Tstring | Tresource | Tnum
-                    | Tarraykey | Tnoreturn)
+  | _, (Tprim (Tint | Tbool | Tfloat | Tstring | Tresource | Tnum
+              | Tarraykey | Tnoreturn)
         | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject
         | Tclass _ | Tarraykind _) -> true
   | _, Tabstract (_, Some ty) when type_non_nullable env ty -> true

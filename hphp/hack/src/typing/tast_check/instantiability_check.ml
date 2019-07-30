@@ -8,7 +8,7 @@
  *)
 
 open Core_kernel
-open Tast
+open Aast
 module ShapeMap = Aast.ShapeMap
 module SN = Naming_special_names
 module Cls = Decl_provider.Class

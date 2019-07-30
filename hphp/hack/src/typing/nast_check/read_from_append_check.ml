@@ -7,7 +7,7 @@
  *
  *)
 
-open Nast
+open Aast
 open Nast_check_env
 
 let handler = object

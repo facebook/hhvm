@@ -12,7 +12,7 @@ open Typing_defs
 
 module Env = Typing_env
 module TDef = Typing_tdef
-module N = Nast
+module N = Aast
 module Phase = Typing_phase
 
 (*****************************************************************************)

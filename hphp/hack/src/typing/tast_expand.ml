@@ -9,16 +9,7 @@
 
 open Core_kernel
 open Typing_defs
-module T = Tast
-
-module ExpandedTypeAnnotations = struct
-  module ExprAnnotation = T.Annotations.ExprAnnotation
-  module EnvAnnotation = Nast.UnitAnnotation
-  module FuncBodyAnnotation = T.Annotations.FuncBodyAnnotation
-end
-
-module ExpandedTypeAnnotatedAST = Nast.AnnotatedAST(ExpandedTypeAnnotations)
-module ETast = ExpandedTypeAnnotatedAST
+module T = Aast
 
 (* Eliminate residue of type inference:
  *   1. Tvars are replaced (deep) by the expanded type
@@ -110,16 +101,8 @@ let expand_ty ?pos env ty =
 
 let expander = object
   inherit Tast_visitor.endo
-  method! on_expr_annotation env (pos, ty) = (pos, expand_ty ~pos env ty)
+  method! on_'ex env (pos, ty) = (pos, expand_ty ~pos env ty)
 end
 
-module ExpandAST =
-  Aast_mapper.MapAnnotatedAST(Tast.Annotations)(ExpandedTypeAnnotations)
-
 (* Replace all types in a program AST by their expansions *)
-let expand_program tast =
-  let tast = expander#go tast in
-  ExpandAST.map_program tast
-    ~map_env_annotation:(fun _ -> ())
-    ~map_expr_annotation:(fun x -> x)
-    ~map_funcbody_annotation:(fun x -> x)
+let expand_program tast = expander#go tast

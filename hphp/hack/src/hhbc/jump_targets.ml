@@ -9,7 +9,7 @@
 
 open Core_kernel
 
-module T = Tast
+module T = Aast
 
 let labels_in_function_: (bool SMap.t) ref = ref SMap.empty
 let function_has_goto_ = ref false
@@ -221,7 +221,7 @@ let with_loop label_break label_continue iterator t s f =
   Loop ({ label_break; label_continue; iterator }, labels) :: t
   |> run_and_release_ids labels f s
 
-let with_switch end_label t (cl : T.case list) f =
+let with_switch end_label t cl f =
   let labels = collect_valid_target_labels_for_switch_cases cl in
   (* CONSIDER: now HHVM eagerly reserves state id for the switch end label
     which does not seem to be necessary - do it for now for HHVM compatibility *)
@@ -234,7 +234,7 @@ let with_try finally_label t s f =
   TryFinally (finally_label, labels) :: t
   |> run_and_release_ids labels f s
 
-let with_finally t (s : T.stmt) f =
+let with_finally t s f =
   let labels = collect_valid_target_labels_for_stmt s in
   Finally labels :: t
   |> run_and_release_ids labels f s

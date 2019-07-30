@@ -10,7 +10,7 @@
 open Core_kernel
 
 module TV = Typed_value
-module A = Tast
+module A = Aast
 
 let from_attribute_base namespace (_, attr_name as attribute_id) arguments =
 try
@@ -59,7 +59,7 @@ let ast_any_is_deprecated ast_attrs =
  * followed by the indicies of these reified type parameters and whether they
  * are soft reified or not
  *)
-let add_reified_attribute attrs (params : A.tparam list) =
+let add_reified_attribute attrs (params : Tast.tparam list) =
   let is_soft =
     List.exists ~f:(function { A.ua_name = n; _ } -> snd n = "__Soft") in
   let is_warn =

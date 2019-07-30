@@ -10,7 +10,7 @@
 open Hh_core
 open Typing_defs
 
-module T = Tast
+module T = Aast
 module S = ServerRxApiShared
 module BRC = Basic_reactivity_check
 module Env = Tast_env

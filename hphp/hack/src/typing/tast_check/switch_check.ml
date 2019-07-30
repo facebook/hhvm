@@ -8,7 +8,7 @@
  *)
 
 open Core_kernel
-open Tast
+open Aast
 open Typing_defs
 open Utils
 
@@ -90,8 +90,8 @@ let check_exhaustiveness env pos ty caselist =
 
 let ensure_valid_switch_case_value_types env scrutinee_ty casel errorf =
   let is_subtype ty_sub ty_super = Env.can_subtype env ty_sub ty_super in
-  let ty_num = (Reason.Rnone, Tprim Nast.Tnum) in
-  let ty_arraykey = (Reason.Rnone, Tprim Nast.Tarraykey) in
+  let ty_num = (Reason.Rnone, Tprim Tnum) in
+  let ty_arraykey = (Reason.Rnone, Tprim Tarraykey) in
   let ty_mixed = MakeType.mixed Reason.Rnone in
   let ty_traversable = MakeType.traversable Typing_reason.Rnone ty_mixed in
   let compatible_types ty1 ty2 =

@@ -13,7 +13,7 @@ open Instruction_sequence
 open Emit_expression
 open Emit_pos
 
-module A = Tast
+module A = Aast
 module H = Hhbc_ast
 module TC = Hhas_type_constraint
 module SN = Naming_special_names
@@ -512,7 +512,7 @@ and emit_do env b e =
     instr_label break_label;
   ]
 
-and emit_for (env : Emit_env.t) p (e1 : A.expr) e2 e3 b =
+and emit_for (env : Emit_env.t) p (e1 : Tast.expr) e2 e3 b =
   let break_label = Label.next_regular () in
   let cont_label = Label.next_regular () in
   let start_label = Label.next_regular () in
@@ -534,7 +534,7 @@ and emit_for (env : Emit_env.t) p (e1 : A.expr) e2 e3 b =
     in
     let rec expr_list h tl =
       match tl with
-      | [] -> [final @@ ((Pos.none, (Typing_reason.none, Typing_defs.Tany)), Tast.Expr_list [h])]
+      | [] -> [final @@ ((Pos.none, (Typing_reason.none, Typing_defs.Tany)), A.Expr_list [h])]
       | h1 :: t1 -> emit_ignored_expr env ~pop_pos:p h :: expr_list h1 t1
     in
     match e2 with
@@ -612,7 +612,7 @@ and emit_switch (env : Emit_env.t) pos scrutinee_expr cl =
     instr_label break_label
   ]
 
-and block_pos (b : A.block) =
+and block_pos b =
   let bpos = List.map b fst in
   let valid_pos = List.filter bpos (fun e -> e <> Pos.none) in
   if valid_pos = [] then Pos.none
@@ -636,7 +636,7 @@ and emit_catch (env : Emit_env.t) pos end_label (catch_type, (_, catch_local), b
       instr_label next_catch;
     ]
 
-and emit_catches (env : Emit_env.t) pos (catch_list : A.catch list) end_label =
+and emit_catches (env : Emit_env.t) pos catch_list end_label =
   gather (List.map catch_list ~f:(emit_catch env pos end_label))
 
 and is_empty_block (_, b) =
@@ -907,7 +907,7 @@ and emit_foreach_await_lvalue_storage (env : Emit_env.t) (expr1 : Tast.expr) ind
  * and [1;0] (for $b[0]) and [1;1] (for $c->g) indices of the array returned
  * from the `next` method.
  *)
- and emit_foreach_await_key_value_storage (env : Emit_env.t) (iterator : A.as_expr) =
+and emit_foreach_await_key_value_storage (env : Emit_env.t) iterator =
    match iterator with
    | A.Await_as_kv (_, expr_k, expr_v)
    | A.As_kv (expr_k, expr_v) ->
@@ -1078,10 +1078,10 @@ let emit_dropthrough_return env =
 
 let rec emit_final_statement env s =
   match snd s with
-  | Tast.Throw _ | Tast.Return _ | Tast.Goto _
-  | Tast.Expr (_, Tast.Yield_break) ->
+  | A.Throw _ | A.Return _ | A.Goto _
+  | A.Expr (_, A.Yield_break) ->
     emit_stmt env s
-  | Tast.Block b ->
+  | A.Block b ->
     emit_final_statements env b
   | _ ->
     gather [

@@ -9,7 +9,7 @@
 
 open Core_kernel
 open Typing_defs
-open Nast
+open Aast
 open Ast_defs
 module Reason = Typing_reason
 

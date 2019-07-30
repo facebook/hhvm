@@ -8,7 +8,7 @@
  *)
 
 open Core_kernel
-open Nast
+open Aast
 open Utils
 
 module SN = Naming_special_names

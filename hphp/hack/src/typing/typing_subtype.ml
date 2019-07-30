@@ -27,6 +27,7 @@ module MakeType = Typing_make_type
 module Partial = Partial_provider
 module ShapeMap = Nast.ShapeMap
 module ShapeSet = Ast_defs.ShapeSet
+module Nast = Aast
 
 type reactivity_extra_info = {
   method_info: ((* method_name *) string * (* is_static *) bool) option;

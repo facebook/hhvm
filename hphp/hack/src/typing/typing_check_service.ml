@@ -111,9 +111,9 @@ let type_fun
   match Ast_provider.find_fun_in_file ~full:true fn x with
   | Some f ->
     let fun_ = Naming.fun_ (Ast_to_nast.on_fun f) in
-    Nast_check.def (Nast.Fun fun_);
+    Nast_check.def (Aast.Fun fun_);
     let def_opt = Typing.fun_def opts fun_
-      |> Option.map ~f:(fun f -> Tast.Fun f) in
+      |> Option.map ~f:(fun f -> Aast.Fun f) in
     Option.iter def_opt (Tast_check.def opts);
     def_opt
   | None -> None
@@ -126,10 +126,10 @@ let type_class
   match Ast_provider.find_class_in_file ~full:true fn x with
   | Some cls ->
     let class_ = Naming.class_ (Ast_to_nast.on_class cls) in
-    Nast_check.def (Nast.Class class_);
+    Nast_check.def (Aast.Class class_);
     let def_opt =
       Typing.class_def opts class_
-      |> Option.map ~f:(fun c -> Tast.Class c)
+      |> Option.map ~f:(fun c -> Aast.Class c)
     in
     Option.iter def_opt (Tast_check.def opts);
     def_opt
@@ -143,10 +143,10 @@ let check_typedef
   match Ast_provider.find_typedef_in_file ~full:true fn x with
   | Some t ->
     let typedef = Naming.typedef (Ast_to_nast.on_typedef t) in
-    Nast_check.def (Nast.Typedef typedef);
+    Nast_check.def (Aast.Typedef typedef);
     let ret = Typing.typedef_def opts typedef in
     Typing_variance.typedef opts x;
-    let def = Tast.Typedef ret in
+    let def = Aast.Typedef ret in
     Tast_check.def opts def;
     Some def
   | None -> None
@@ -160,7 +160,7 @@ let check_const
   | None -> None
   | Some cst ->
     let cst = Naming.global_const (Ast_to_nast.on_constant cst) in
-    let def = Tast.Constant (Typing.gconst_def opts cst) in
+    let def = Aast.Constant (Typing.gconst_def opts cst) in
     Tast_check.def opts def;
     Some def
 

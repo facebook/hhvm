@@ -8,14 +8,14 @@
  *)
 
 open Core_kernel
-open Nast
+open Aast
 open Nast_check_env
 
 class virtual iter = object (self)
-  inherit [_] Nast.iter as super
+  inherit [_] Aast.iter as super
 
   (* Entry point *)
-  method go program = self#on_list (fun () -> self#go_def) () program
+  method go (program : Nast.program) = self#on_list (fun () -> self#go_def) () program
 
   method go_def x = self#on_def (def_env x) x
 
@@ -63,10 +63,10 @@ class virtual iter = object (self)
 end
 
 class virtual ['state] iter_with_state = object (self)
-  inherit [_] Nast.iter as super
+  inherit [_] Aast.iter as super
 
   (* Entry point *)
-  method go (state: 'state) program =
+  method go (state: 'state) (program : Nast.program) =
     self#on_list (fun () -> self#go_def state) () program
 
   method go_def state x = self#on_def (def_env x, state) x
@@ -83,7 +83,7 @@ class type handler = object
   method at_method_ : env -> Nast.method_ -> unit
   method at_expr : env -> Nast.expr -> unit
   method at_stmt : env -> Nast.stmt -> unit
-  method at_hint : env -> Nast.hint -> unit
+  method at_hint : env -> hint -> unit
 end
 
 class virtual handler_base : handler = object

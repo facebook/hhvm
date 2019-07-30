@@ -532,7 +532,7 @@ let localize_generic_parameters_with_bounds
   env, List.concat cstrss
 
 let localize_where_constraints
-    ~ety_env (env:Env.env) (where_constraints:Nast.where_constraint list) =
+    ~ety_env (env:Env.env) where_constraints =
   let add_constraint env (h1, ck, h2) =
     let env, ty1 =
       localize env (Decl_hint.hint env.Env.decl_env h1) ~ety_env in
@@ -580,15 +580,15 @@ let localize_ft ?instantiation ~ety_env env ft =
 let localize_generic_parameters_with_bounds
     ~ety_env (env:Env.env) (tparams:Nast.tparam list) =
   let tparams: decl tparam list = List.map ~f:(fun t ->
-    let cstrl = List.map t.Nast.tp_constraints (fun (ck, cstr) ->
+    let cstrl = List.map t.Aast.tp_constraints (fun (ck, cstr) ->
       let cstr = Decl_hint.hint env.Env.decl_env cstr in
       (ck, cstr)) in
     let tparam = {
-      Typing_defs.tp_variance = t.Nast.tp_variance;
-      tp_name = t.Nast.tp_name;
+      Typing_defs.tp_variance = t.Aast.tp_variance;
+      tp_name = t.Aast.tp_name;
       tp_constraints = cstrl;
-      tp_reified = t.Nast.tp_reified;
-      tp_user_attributes = t.Nast.tp_user_attributes;
+      tp_reified = t.Aast.tp_reified;
+      tp_user_attributes = t.Aast.tp_user_attributes;
     } in
     Typing_enforceability.pessimize_tparam_constraints env tparam
   ) tparams in

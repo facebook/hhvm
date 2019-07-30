@@ -46,7 +46,7 @@ let is_disposable_type env ty =
 
 let enforce_is_disposable env hint =
   match hint with
-    | (_, Nast.Happly ((p, c), _)) ->
+    | (_, Aast.Happly ((p, c), _)) ->
       begin match Env.get_class_dep env c with
       | None -> ()
       | Some c ->

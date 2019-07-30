@@ -33,7 +33,7 @@
 
 open Core_kernel
 open Common
-open Nast
+open Aast
 module Fake = Typing_fake_members
 
 (*****************************************************************************)

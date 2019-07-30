@@ -11,7 +11,7 @@
 (* Converts a type hint into a type  *)
 (*****************************************************************************)
 open Core_kernel
-open Nast
+open Aast
 open Typing_defs
 module Partial = Partial_provider
 
@@ -67,9 +67,9 @@ and hint_ p env = function
     let make_param (p, _ as x) k mut =
       let fp_mutability =
         match mut with
-        | Some Nast.PMutable -> Some Param_borrowed_mutable
-        | Some Nast.POwnedMutable -> Some Param_owned_mutable
-        | Some Nast.PMaybeMutable -> Some Param_maybe_mutable
+        | Some PMutable -> Some Param_borrowed_mutable
+        | Some POwnedMutable -> Some Param_owned_mutable
+        | Some PMaybeMutable -> Some Param_maybe_mutable
         | _ -> None in
       { fp_pos = p;
         fp_name = None;

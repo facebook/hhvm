@@ -59,7 +59,7 @@ and pp_ty_ : type a. Format.formatter -> a ty_ -> unit = fun fmt ty ->
   | Tnothing -> Format.pp_print_string fmt "Tnothing"
   | Tapply (a0,a1) ->
     Format.fprintf fmt "(@[<2>Tapply (@,";
-    let () = Nast.pp_sid fmt a0 in
+    let () = Aast.pp_sid fmt a0 in
     Format.fprintf fmt ",@ ";
     Format.fprintf fmt "@[<2>[";
     ignore
@@ -122,7 +122,7 @@ and pp_ty_ : type a. Format.formatter -> a ty_ -> unit = fun fmt ty ->
     Format.fprintf fmt "@])"
   | Tprim a0 ->
     Format.fprintf fmt "(@[<2>Tprim@ ";
-    Nast.pp_tprim fmt a0;
+    Aast.pp_tprim fmt a0;
     Format.fprintf fmt "@])"
   | Tfun a0 ->
     Format.fprintf fmt "(@[<2>Tfun@ ";
@@ -178,7 +178,7 @@ and pp_ty_ : type a. Format.formatter -> a ty_ -> unit = fun fmt ty ->
   | Tobject -> Format.pp_print_string fmt "Tobject"
   | Tclass (a0,_a2,a1) ->
     Format.fprintf fmt "(@[<2>Tclass (@,";
-    Nast.pp_sid fmt a0;
+    Aast.pp_sid fmt a0;
     Format.fprintf fmt ",@ ";
     Format.fprintf fmt "@[<2>[";
     ignore
@@ -304,7 +304,7 @@ fun fmt (a0,a1) ->
     (List.fold_left
       ~f:(fun sep x ->
         if sep then Format.fprintf fmt ";@ ";
-        Nast.pp_sid fmt x;
+        Aast.pp_sid fmt x;
         true)
       ~init:false
       a1);
@@ -903,7 +903,7 @@ fun fmt x ->
   Format.fprintf fmt ";@ ";
 
   Format.fprintf fmt "@[%s =@ " "ttc_name";
-  Nast.pp_sid fmt x.ttc_name;
+  Aast.pp_sid fmt x.ttc_name;
   Format.fprintf fmt "@]";
   Format.fprintf fmt ";@ ";
 
@@ -977,7 +977,7 @@ and pp_typedef_type : Format.formatter -> typedef_type -> unit = fun fmt x ->
   Format.fprintf fmt ";@ ";
 
   Format.fprintf fmt "@[%s =@ " "td_vis";
-  Nast.pp_typedef_visibility fmt x.td_vis;
+  Aast.pp_typedef_visibility fmt x.td_vis;
   Format.fprintf fmt "@]";
   Format.fprintf fmt ";@ ";
 

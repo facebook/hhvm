@@ -209,7 +209,7 @@ module Api = struct
     | Eager c -> c.tc_enum_type
 
   let get_sealed_whitelist sc =
-    let open Nast in
+    let open Aast in
     match Attrs.find SN.UserAttributes.uaSealed sc.sc_user_attributes with
     | None -> None
     | Some { ua_params; _ } ->

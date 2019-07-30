@@ -7,10 +7,10 @@
  *
  *)
 
-open Tast
+open Aast
 
 let visitor = object(this)
-  inherit [_] Tast.iter as super
+  inherit [_] Aast.iter as super
 
   val return_type_ref = ref None
 

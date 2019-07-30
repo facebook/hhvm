@@ -8,7 +8,7 @@
  *)
 
 open Core_kernel
-open Nast
+open Aast
 
 type ctx = { class_tparams: Nast.tparam list }
 

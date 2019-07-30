@@ -14,7 +14,7 @@
  *)
 (*****************************************************************************)
 open Core_kernel
-open Nast
+open Aast
 open Typing_defs
 
 module Phase = Typing_phase

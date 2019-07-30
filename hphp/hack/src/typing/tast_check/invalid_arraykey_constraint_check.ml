@@ -7,7 +7,7 @@
  *
 *)
 
-open Tast
+open Aast
 open Typing_defs
 
 module Env = Tast_env

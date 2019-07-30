@@ -10,7 +10,7 @@
 open Core_kernel
 open Typing_defs
 open String_utils
-open Tast
+open Aast
 module Env = Tast_env
 module Cls = Decl_provider.Class
 module ShapeMap = Aast.ShapeMap

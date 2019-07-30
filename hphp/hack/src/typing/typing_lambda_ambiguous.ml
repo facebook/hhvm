@@ -12,6 +12,7 @@ open Typing_defs
 module Env = Typing_env
 module Reason = Typing_reason
 module FL = FeatureLogging
+module Tast = Aast
 
 let log_anonymous env =
   let found = ref false in

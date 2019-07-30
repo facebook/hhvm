@@ -18,5 +18,5 @@ type variable and add it as the type of the type constant in the environment.
 val get_tyvar_type_const:
   Env.env ->
   Ident.t ->
-  Nast.sid ->
+  Aast.sid ->
   Env.env * locl ty

@@ -9,8 +9,8 @@
 
 open Core_kernel
 
-module Ast = Tast
-module T = Tast
+module Ast = Aast
+module T = Aast
 
 (* The possible Rx levels of a function or method *)
 type t =

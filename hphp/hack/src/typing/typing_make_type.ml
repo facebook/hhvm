@@ -11,6 +11,7 @@ open Typing_defs
 
 module SN = Naming_special_names
 module Reason = Typing_reason
+module Nast = Aast
 
 let class_type r name tyl = (r, Tclass ((Reason.to_pos r, name), Nonexact, tyl))
 let prim_type r t = (r, Tprim t)

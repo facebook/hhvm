@@ -9,7 +9,7 @@
 
 module SU = Hhbc_string_utils
 module SN = Naming_special_names
-module T = Tast
+module T = Aast
 
 open Core_kernel
 open Instruction_sequence

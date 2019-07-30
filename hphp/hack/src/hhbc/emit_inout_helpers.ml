@@ -9,7 +9,7 @@
 open Core_kernel
 
 module H = Hhbc_ast
-module T = Tast
+module T = Aast
 
 type wrapper_type = InoutWrapper | RefWrapper
 

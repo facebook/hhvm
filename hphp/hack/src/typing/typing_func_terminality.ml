@@ -8,7 +8,7 @@
  *)
 
 open Core_kernel
-open Nast
+open Aast
 open Typing_defs
 
 module Env = Typing_env
@@ -30,7 +30,7 @@ let get_static_meth (cls_name:string) (meth_name:string) =
     end
 
 let funopt_is_noreturn = function
-  | Some ({ Typing_defs.ft_ret = (_r, Typing_defs.Tprim Nast.Tnoreturn); _})
+  | Some ({ Typing_defs.ft_ret = (_r, Typing_defs.Tprim Tnoreturn); _})
     -> true
   | _ -> false
 
@@ -53,8 +53,8 @@ let static_meth_is_noreturn env ci meth_id =
 
   let typed_expression_exits ((_, (_, ty)), e) =
     match e with
-    | Tast.Assert(Tast.AE_assert (_, Tast.False))
-    | Tast.Yield_break -> true
+    | Assert(AE_assert (_, False))
+    | Yield_break -> true
     | _ -> is_type_no_return ty
 
   let expression_exits env (_, e) =

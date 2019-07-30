@@ -18,9 +18,7 @@ open Common
 open Utils
 open String_utils
 
-(* Alias for Nast used by functions on potentially unnamed Aast values *)
-module Aast = Nast
-module N = Nast
+module N = Aast
 module SN = Naming_special_names
 module NS = Namespaces
 module Partial = Partial_provider
@@ -37,7 +35,7 @@ module GEnv = NamingGlobal.GEnv
 type positioned_ident = (Pos.t * Local_id.t)
 
 (* <T as A>, A is a type constraint *)
-type type_constraint = N.reify_kind * (Ast_defs.constraint_kind * Aast.hint) list
+type type_constraint = Aast.reify_kind * (Ast_defs.constraint_kind * Aast.hint) list
 
 type genv = {
 
@@ -76,7 +74,6 @@ type unbound_handler = (Pos.t * string) -> positioned_ident
 
 (* The primitives to manipulate the naming environment *)
 module Env : sig
-
   type lenv
 
   val empty_local : unbound_handler option -> lenv
@@ -85,26 +82,26 @@ module Env : sig
     FileInfo.mode ->
     Ast_defs.id * Ast_defs.class_kind -> Namespace_env.env -> bool -> genv
   val make_class_env :
-    type_constraint SMap.t -> Aast.class_ -> genv * lenv
+    type_constraint SMap.t -> Nast.class_ -> genv * lenv
   val make_typedef_env :
-    type_constraint SMap.t -> Aast.typedef -> genv * lenv
+    type_constraint SMap.t -> Nast.typedef -> genv * lenv
   val make_top_level_env :
     unit -> genv * lenv
   val make_fun_genv :
     type_constraint SMap.t ->
     FileInfo.mode -> string -> Namespace_env.env -> genv
   val make_fun_decl_genv :
-    type_constraint SMap.t -> Aast.fun_ -> genv
+    type_constraint SMap.t -> Nast.fun_ -> genv
   val make_file_attributes_env :
     FileInfo.mode -> Aast.nsenv -> genv * lenv
   val make_const_env :
-    Aast.gconst -> genv * lenv
+    Nast.gconst -> genv * lenv
 
   val in_ppl : genv * lenv -> bool
   val set_ppl : genv * lenv -> bool -> genv * lenv
 
   val add_lvar : genv * lenv -> Ast_defs.id -> positioned_ident -> unit
-  val add_param : genv * lenv -> N.fun_param -> genv * lenv
+  val add_param : genv * lenv -> Nast.fun_param -> genv * lenv
   val new_lvar : genv * lenv -> Ast_defs.id -> positioned_ident
   val new_let_local : genv * lenv -> Ast_defs.id -> positioned_ident
   val found_dollardollar : genv * lenv -> Pos.t -> Local_id.t
@@ -125,7 +122,7 @@ module Env : sig
   val scope : genv * lenv -> (genv * lenv -> 'a) -> 'a
   val scope_lexical : genv * lenv -> (genv * lenv -> 'a) -> 'a
   val remove_locals : genv * lenv -> Ast_defs.id list -> unit
-  val pipe_scope : genv * lenv -> (genv * lenv -> N.expr) -> Local_id.t * N.expr
+  val pipe_scope : genv * lenv -> (genv * lenv -> Nast.expr) -> Local_id.t * Nast.expr
 end = struct
 
   type map = positioned_ident SMap.t
@@ -630,9 +627,9 @@ let arg_unpack_unexpected = function
 
 module type GetLocals = sig
   val lvalue : Namespace_env.env * Pos.t SMap.t ->
-    Aast.expr -> Namespace_env.env * Pos.t SMap.t
+    Nast.expr -> Namespace_env.env * Pos.t SMap.t
   val stmt : Namespace_env.env * Pos.t SMap.t ->
-    Aast.stmt -> Namespace_env.env * Pos.t SMap.t
+    Nast.stmt -> Namespace_env.env * Pos.t SMap.t
 end
 
 (* This was made a functor due to the awkward nature of how our naming
@@ -1522,13 +1519,13 @@ module Make (GetLocals : GetLocals) = struct
       match genv.in_mode with
       | FileInfo.Mdecl | FileInfo.Mphp ->
         { N.fb_ast = [];
-          fb_annotation = N.BodyNamingAnnotation.NamedWithUnsafeBlocks;
+          fb_annotation = Nast.NamedWithUnsafeBlocks;
         }
       | FileInfo.Mstrict | FileInfo.Mpartial | FileInfo.Mexperimental ->
-        if Aast.is_body_named m.Aast.m_body
+        if Nast.is_body_named m.Aast.m_body
         then
           { N.fb_ast = m.Aast.m_body.Aast.fb_ast;
-            fb_annotation = N.BodyNamingAnnotation.Unnamed genv.namespace;
+            fb_annotation = Nast.Unnamed genv.namespace;
           }
         else failwith "ast_to_nast error unnamedbody in method_"
     in
@@ -1600,7 +1597,7 @@ module Make (GetLocals : GetLocals) = struct
       let variadicity, rl = determine_variadicity env rl in
       variadicity, x :: rl
 
-  and fun_param env (param : Aast.fun_param) =
+  and fun_param env (param : Nast.fun_param) =
     let p = param.Aast.param_pos in
     let name = param.Aast.param_name in
     let ident = Local_id.make_unscoped name in
@@ -1655,13 +1652,13 @@ module Make (GetLocals : GetLocals) = struct
       match genv.in_mode with
       | FileInfo.Mdecl | FileInfo.Mphp ->
         { N.fb_ast = [];
-          fb_annotation = N.BodyNamingAnnotation.NamedWithUnsafeBlocks;
+          fb_annotation = Nast.NamedWithUnsafeBlocks;
         }
       | FileInfo.Mstrict | FileInfo.Mpartial | FileInfo.Mexperimental ->
-        if Aast.is_body_named f.Aast.f_body
+        if Nast.is_body_named f.Aast.f_body
         then
           { N.fb_ast = f.Aast.f_body.Aast.fb_ast;
-            fb_annotation = N.BodyNamingAnnotation.Unnamed genv.namespace;
+            fb_annotation = Nast.Unnamed genv.namespace;
           }
         else failwith "ast_to_nast error unnamedbody in fun_"
     in
@@ -1961,7 +1958,7 @@ module Make (GetLocals : GetLocals) = struct
 
   and expr env (p, e) = p, expr_ env p e
 
-  and expr_ env p (e : Aast.expr_) =
+  and expr_ env p (e : Nast.expr_) =
     match e with
     | Aast.ParenthesizedExpr e -> N.ParenthesizedExpr (expr env e)
     | Aast.Array l ->
@@ -1980,20 +1977,20 @@ module Make (GetLocals : GetLocals) = struct
       let p, cn = NS.elaborate_id ((fst env).namespace) NS.ElaborateClass id in
       begin
         match cn with
-        | x when N.is_vc_kind x ->
+        | x when Nast.is_vc_kind x ->
           let ta = begin match tal with
           | Some Aast.CollectionTV tv -> Some (targ env tv)
           | Some Aast.CollectionTKV _ -> Errors.naming_too_many_arguments p; None
           | None -> None
           end in
-          N.ValCollection ((N.get_vc_kind cn), ta, (List.map l (afield_value env cn)))
-        | x when N.is_kvc_kind x ->
+          N.ValCollection ((Nast.get_vc_kind cn), ta, (List.map l (afield_value env cn)))
+        | x when Nast.is_kvc_kind x ->
           let ta = begin match tal with
           | Some Aast.CollectionTV _ -> Errors.naming_too_few_arguments p; None
           | Some Aast.CollectionTKV (tk, tv) -> Some (targ env tk, targ env tv)
           | None -> None
           end in
-          N.KeyValCollection ((N.get_kvc_kind cn), ta,
+          N.KeyValCollection ((Nast.get_kvc_kind cn), ta,
             (List.map l (afield_kvalue env cn)))
         | x when x = SN.Collections.cPair ->
           begin
@@ -2439,7 +2436,7 @@ module Make (GetLocals : GetLocals) = struct
     (* The bodies of lambdas go through naming in the containing local
      * environment *)
     let body_nast = f_body env f.Aast.f_body in
-    let annotation = N.BodyNamingAnnotation.Named in
+    let annotation = Nast.Named in
     (* These could all be probably be replaced with a {... where ...} *)
     let body = {
       N.fb_ast = body_nast;
@@ -2465,7 +2462,7 @@ module Make (GetLocals : GetLocals) = struct
     }
 
   and f_body env f_body =
-    if Aast.is_body_named f_body
+    if Nast.is_body_named f_body
     then block env f_body.Aast.fb_ast
     else failwith "Malformed f_body: unexpected UnnamedBody from ast_to_nast"
 
@@ -2658,9 +2655,9 @@ module Make (GetLocals : GetLocals) = struct
 
   let func_body f =
     match f.N.f_body.N.fb_annotation with
-    | N.BodyNamingAnnotation.Named
-    | N.BodyNamingAnnotation.NamedWithUnsafeBlocks -> f.N.f_body
-    | N.BodyNamingAnnotation.Unnamed nsenv ->
+    | Nast.Named
+    | Nast.NamedWithUnsafeBlocks -> f.N.f_body
+    | Nast.Unnamed nsenv ->
       let genv = Env.make_fun_genv
         SMap.empty f.N.f_mode (snd f.N.f_name) nsenv in
       let genv = extend_params genv f.N.f_tparams in
@@ -2673,7 +2670,7 @@ module Make (GetLocals : GetLocals) = struct
         | N.FVvariadicArg param -> Env.add_param env param
       in
       let fub_ast = block env f.N.f_body.N.fb_ast in
-      let annotation = N.BodyNamingAnnotation.Named in
+      let annotation = Nast.Named in
       Env.check_goto_references env;
       {
         N.fb_ast = fub_ast;
@@ -2683,9 +2680,9 @@ module Make (GetLocals : GetLocals) = struct
   let meth_body genv m =
     let named_body =
       match m.N.m_body.N.fb_annotation with
-      | N.BodyNamingAnnotation.Named
-      | N.BodyNamingAnnotation.NamedWithUnsafeBlocks -> m.N.m_body
-      | N.BodyNamingAnnotation.Unnamed nsenv ->
+      | Nast.Named
+      | Nast.NamedWithUnsafeBlocks -> m.N.m_body
+      | Nast.Unnamed nsenv ->
         let genv = { genv with namespace = nsenv } in
         let genv = extend_params genv m.N.m_tparams in
         let env = genv, Env.empty_local None in
@@ -2696,7 +2693,7 @@ module Make (GetLocals : GetLocals) = struct
           | N.FVvariadicArg param -> Env.add_param env param
         in
         let fub_ast = block env m.N.m_body.N.fb_ast in
-        let annotation = N.BodyNamingAnnotation.Named in
+        let annotation = Nast.Named in
         Env.check_goto_references env;
         { N.fb_ast = fub_ast;
           fb_annotation = annotation;

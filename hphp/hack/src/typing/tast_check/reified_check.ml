@@ -8,13 +8,14 @@
  *)
 
 open Core_kernel
-open Tast
+open Aast
 open Typing_defs
 
 module Env = Tast_env
 module SN = Naming_special_names
 module UA = SN.UserAttributes
 module Cls = Decl_provider.Class
+module Nast = Aast
 
 let tparams_has_reified tparams =
   List.exists tparams ~f:(fun tparam -> tparam.tp_reified <> Nast.Erased)

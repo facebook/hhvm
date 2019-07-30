@@ -235,9 +235,9 @@ let local_id_map_as_value f m =
 let reify_kind_as_value k =
   string_as_value (
     match k with
-    | Nast.Erased -> "erased"
-    | Nast.SoftReified -> "soft_reified"
-    | Nast.Reified -> "reified")
+    | Aast.Erased -> "erased"
+    | Aast.SoftReified -> "soft_reified"
+    | Aast.Reified -> "reified")
 
 let tyset_as_value env tys =
   Set (TySet.fold (fun t s -> SSet.add (Typing_print.debug env t) s) tys SSet.empty)

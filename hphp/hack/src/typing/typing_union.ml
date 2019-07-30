@@ -16,6 +16,7 @@ module Reason = Typing_reason
 module TySet = Typing_set
 module Utils = Typing_utils
 module MakeType = Typing_make_type
+module Nast = Aast
 
 exception Not_equiv
 exception Dont_unify

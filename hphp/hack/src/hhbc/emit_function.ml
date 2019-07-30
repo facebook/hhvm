@@ -10,7 +10,7 @@
 open Core_kernel
 open Instruction_sequence
 module A = Ast_defs
-module T = Tast
+module T = Aast
 
 (* Given a function definition, emit code, and in the case of <<__Memoize>>,
  * a wrapper function

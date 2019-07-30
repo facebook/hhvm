@@ -8,7 +8,7 @@
 *)
 open Core_kernel
 
-module T = Tast
+module T = Aast
 
 module ScopeItem =
 struct
@@ -62,7 +62,7 @@ struct
     | ScopeItem.Method md :: _ -> md.T.m_tparams
     | _ :: scope -> get_fun_tparams scope
 
-  let rec get_class_tparams scope : T.class_tparams =
+  let rec get_class_tparams scope =
     match scope with
     | [] -> { T.c_tparam_list = []; T.c_tparam_constraints = SMap.empty }
     | ScopeItem.Class cd :: _ -> cd.T.c_tparams

@@ -9,7 +9,9 @@
 
 include Aast_defs
 
+[@@@warning "-33"]
 open Core_kernel
+[@@@warning "+33"]
 
 (* This is the current notion of type in the typed AST.
  * In future we might want to reconsider this and define a new representation
@@ -49,6 +51,37 @@ type saved_env = {
   condition_types: decl_ty SMap.t;
 } [@@deriving show]
 
+type func_body_ann =
+  | HasUnsafeBlocks
+  | NoUnsafeBlocks
+  [@@deriving show] (* True if there are any UNSAFE blocks *)
+
+type program = ((Pos.t * ty), func_body_ann, saved_env) Aast.program
+type def = ((Pos.t * ty), func_body_ann, saved_env) Aast.def
+type expr = ((Pos.t * ty), func_body_ann, saved_env) Aast.expr
+type expr_ = ((Pos.t * ty), func_body_ann, saved_env) Aast.expr_
+type stmt = ((Pos.t * ty), func_body_ann, saved_env) Aast.stmt
+type block = ((Pos.t * ty), func_body_ann, saved_env) Aast.block
+type class_ = ((Pos.t * ty), func_body_ann, saved_env) Aast.class_
+type class_id = ((Pos.t * ty), func_body_ann, saved_env) Aast.class_id
+type class_get_expr = ((Pos.t * ty), func_body_ann, saved_env) Aast.class_get_expr
+type class_typeconst = ((Pos.t * ty), func_body_ann, saved_env) Aast.class_typeconst
+type user_attribute = ((Pos.t * ty), func_body_ann, saved_env) Aast.user_attribute
+type fun_ = ((Pos.t * ty), func_body_ann, saved_env) Aast.fun_
+type fun_def = ((Pos.t * ty), func_body_ann, saved_env) Aast.fun_def
+type fun_param = ((Pos.t * ty), func_body_ann, saved_env) Aast.fun_param
+type func_body = ((Pos.t * ty), func_body_ann, saved_env) Aast.func_body
+type method_ = ((Pos.t * ty), func_body_ann, saved_env) Aast.method_
+type method_redeclaration = ((Pos.t * ty), func_body_ann, saved_env) Aast.method_redeclaration
+type class_var = ((Pos.t * ty), func_body_ann, saved_env) Aast.class_var
+type class_tparams = ((Pos.t * ty), func_body_ann, saved_env) Aast.class_tparams
+type class_const = ((Pos.t * ty), func_body_ann, saved_env) Aast.class_const
+type tparam = ((Pos.t * ty), func_body_ann, saved_env) Aast.tparam
+type typedef = ((Pos.t * ty), func_body_ann, saved_env) Aast.typedef
+type gconst = ((Pos.t * ty), func_body_ann, saved_env) Aast.gconst
+type pu_enum = ((Pos.t * ty), func_body_ann, saved_env) Aast.pu_enum
+
+
 let empty_saved_env tcopt : saved_env = {
   tcopt;
   tenv = IMap.empty;
@@ -65,48 +98,12 @@ let empty_saved_env tcopt : saved_env = {
  *)
 let dummy_saved_env = empty_saved_env GlobalOptions.default
 
-(* Typed AST.
- *
- * We re-use the NAST, but annotate expressions with position *and* type, not
- * just position.
- *
- * Going forward, we will need further annotations
- * such as type arguments to generic methods and `new`, annotations on locals
- * at merge points to make flow typing explicit, bound type parameters for
- * `instanceof` refinements, and possibly other features.
- *
- * Ideally we should record anything that is computed by the type inference
- * algorithm that can't be deduced again cheaply from the embedded type.
- *
- *)
-module Annotations = struct
-  module ExprAnnotation = struct
-    type t = Pos.t * ty [@@deriving show]
-  end
-
-  module EnvAnnotation = struct
-    type t = saved_env [@@deriving show]
-  end
-
-  module FuncBodyAnnotation = struct
-    (* All items should be named in the TAST *)
-    type t =
-      | HasUnsafeBlocks
-      | NoUnsafeBlocks
-      [@@deriving show] (* True if there are any UNSAFE blocks *)
-  end
-end
-
-module TypeAndPosAnnotatedAST = Aast.AnnotatedAST(Annotations)
-
-include TypeAndPosAnnotatedAST
-
 (* Helper function to create an annotation for a typed and positioned expression.
  * Do not construct this tuple directly - at some point we will build
  * some abstraction in so that we can change the representation (e.g. put
  * further annotations on the expression) as we see fit.
  *)
-let make_expr_annotation p ty : Annotations.ExprAnnotation.t = (p, ty)
+let make_expr_annotation p ty: (Pos.t * ty) = (p, ty)
 
 (* Helper function to create a typed and positioned expression.
  * Do not construct this triple directly - at some point we will build
@@ -121,34 +118,25 @@ let get_position (((p, _), _) : expr) = p
 (* Get the type of an expression *)
 let get_type (((_, ty), _) : expr) = ty
 
-module NastMapper = Aast_mapper.MapAnnotatedAST(Annotations)(Nast.Annotations)
+let nast_converter =
+  object
+    inherit [_] Aast.map
 
-let annotation_to_string an =
-  match an with
-  | Annotations.FuncBodyAnnotation.HasUnsafeBlocks -> "Has unsafe blocks"
-  | Annotations.FuncBodyAnnotation.NoUnsafeBlocks -> "No unsafe blocks"
+    method on_'ex _ (p, _ex) = p
 
-let map_fb_annotation an =
-  if an = Annotations.FuncBodyAnnotation.HasUnsafeBlocks
-  then Nast.Annotations.FuncBodyAnnotation.NamedWithUnsafeBlocks
-  else Nast.Annotations.FuncBodyAnnotation.Named
+    method on_'fb _ fb =
+      match fb with
+      | HasUnsafeBlocks -> Nast.NamedWithUnsafeBlocks
+      | _ -> Nast.Named
 
-let nast_mapping_env =
-  NastMapper.{
-    map_env_annotation = (fun _ -> ());
-    map_expr_annotation = fst;
-    map_funcbody_annotation = map_fb_annotation
-  }
+    method on_'en _ _ = ()
+  end
 
-let to_nast program =
-  NastMapper.map_program
-    ~map_env_annotation:(fun _ -> ())
-    ~map_expr_annotation:fst
-    ~map_funcbody_annotation:map_fb_annotation
-    program
+let to_nast p =
+  nast_converter#on_program () p
 
-let to_nast_expr =
-  NastMapper.map_expr nast_mapping_env
+let to_nast_expr (tast: expr): Nast.expr =
+  nast_converter#on_expr () tast
 
-let to_nast_class_id_ =
-  NastMapper.map_class_id_ nast_mapping_env
+let to_nast_class_id_ cid =
+  nast_converter#on_class_id_ () cid

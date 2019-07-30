@@ -64,7 +64,7 @@ let base_visitor line char = object (self)
     let rpos, _, _ = rhs in
     if Pos.length lpos <= Pos.length rpos then lhs else rhs
 
-  method! on_expr_annotation env (pos, ty) =
+  method! on_'ex env (pos, ty) =
     if Pos.inside pos line char
     then Some (pos, env, ty)
     else None
@@ -75,7 +75,7 @@ let base_visitor line char = object (self)
        type) when hovering over a CIexpr--we will want to show the type the
        expression is annotated with (e.g., classname<C>) and it will not have a
        smaller position. *)
-    | _, Tast.CIexpr e -> self#on_expr env e
+    | _, Aast.CIexpr e -> self#on_expr env e
     | _ -> super#on_class_id env cid
 end
 
@@ -88,7 +88,7 @@ let range_visitor startl startc endl endc = object
   inherit [_] Tast_visitor.reduce
   inherit [_] Ast.option_monoid
   method merge x _ = x
-  method! on_expr_annotation env (pos, ty) =
+  method! on_'ex env (pos, ty) =
     if Pos.exactly_matches_range pos startl startc endl endc
     then Some (env, ty)
     else None

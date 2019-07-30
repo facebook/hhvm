@@ -9,7 +9,7 @@
 
 open Core_kernel
 
-module T = Tast
+module T = Aast
 
 let emit_file_attributes fa =
   let namespace = fa.T.fa_namespace in

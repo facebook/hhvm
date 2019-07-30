@@ -17,6 +17,7 @@ type env = {
   ns_name: string option;
   ns_popt: ParserOptions.t;
 }
+[@@deriving show]
 
 let empty popt =
   {

@@ -11,7 +11,7 @@ open Core_kernel
 open Typing_defs
 
 module ExprDepTy = struct
-  module N = Nast
+  module N = Aast
   module Env = Typing_env
   module TUtils = Typing_utils
 

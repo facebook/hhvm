@@ -8,7 +8,7 @@
  *)
 
 open Core_kernel
-open Nast
+open Aast
 open Typing_defs
 
 let conditionally_reactive_attribute_to_hint env { ua_params = l; _ } =

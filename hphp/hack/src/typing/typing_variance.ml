@@ -470,7 +470,7 @@ and type_ tcopt root variance env (reason, ty) =
   | Tvarray_or_darray ty ->
     let tk =
       Typing_reason.Rvarray_or_darray_key (Reason.to_pos reason),
-      Tprim Nast.Tarraykey in
+      Tprim Aast.Tarraykey in
     type_ tcopt root variance env (reason, Tarray (Some tk, Some ty))
   | Tthis ->
     (* Check that 'this' isn't being improperly referenced in a contravariant

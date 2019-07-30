@@ -39,9 +39,9 @@ let validator =
               acc
             | _ ->
               match tparam.tp_reified with
-              | Nast.Erased -> update acc @@ Invalid (r, "a type with an erased generic type argument")
-              | Nast.SoftReified -> update acc @@ Invalid (r, "a type with a soft reified type argument")
-              | Nast.Reified -> this#on_type acc targ
+              | Aast.Erased -> update acc @@ Invalid (r, "a type with an erased generic type argument")
+              | Aast.SoftReified -> update acc @@ Invalid (r, "a type with a soft reified type argument")
+              | Aast.Reified -> this#on_type acc targ
           ) with
           | Ok new_acc -> new_acc
           | Unequal_lengths -> acc (* arity error elsewhere *)

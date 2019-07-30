@@ -7,7 +7,6 @@
     heap_global_storage
     naming
     naming_attributes
-    nast_pos_mapper
     partial_provider
     procs_procs
     typing_defs)

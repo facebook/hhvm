@@ -9,7 +9,7 @@
 open Core_kernel
 open Hhbc_ast
 open Instruction_sequence
-module A = Tast
+module A = Aast
 module SU = Hhbc_string_utils
 module RGH = Reified_generics_helpers
 
@@ -399,7 +399,7 @@ let emit_body
       | _ when Ast_scope.Scope.is_toplevel scope -> move_this decl_vars
       | _ -> decl_vars in
   let decl_vars =
-    if List.exists ~f:(fun t -> not (t.A.tp_reified = Tast.Erased)) immediate_tparams &&
+    if List.exists ~f:(fun t -> not (t.A.tp_reified = A.Erased)) immediate_tparams &&
        not is_closure_body
     then SU.Reified.reified_generics_local_name :: decl_vars
     else decl_vars in

@@ -8,7 +8,7 @@
  *)
 
 open Core_kernel
-open Tast
+open Aast
 open Typing_defs
 
 module Cls = Decl_provider.Class

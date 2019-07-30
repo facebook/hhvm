@@ -8,13 +8,14 @@
  *)
 
 open Core_kernel
-open Tast
+open Aast
 open Typing_defs
 
 module Env = Tast_env
 module Reason = Typing_reason
 module TySet = Typing_set
 module Cls = Decl_provider.Class
+module Nast = Aast
 
 type validity =
   | Valid

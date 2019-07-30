@@ -35,9 +35,9 @@ let expand_typedef_ ?force_expand:(force_expand=false) ety_env env r x argl =
     let should_expand =
       force_expand ||
         match td_vis with
-        | Nast.Opaque ->
+        | Aast.Opaque ->
           Pos.filename td_pos = Env.get_file env
-        | Nast.Transparent -> true
+        | Aast.Transparent -> true
     in
     if List.length td_tparams <> List.length argl then begin
       let n = List.length td_tparams in

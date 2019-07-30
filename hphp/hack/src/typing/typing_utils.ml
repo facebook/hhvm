@@ -11,7 +11,7 @@ open Core_kernel
 open Common
 open Typing_defs
 
-module N = Nast
+module Nast = Aast
 module SN = Naming_special_names
 module Reason = Typing_reason
 module Env = Typing_env
@@ -58,7 +58,7 @@ let add_constraint x = !add_constraint_ref x
 
 type expand_typeconst =
   expand_env -> Env.env -> ?as_tyvar_with_cnstr:bool -> locl ty ->
-  Nast.sid -> Env.env * locl ty
+  Aast.sid -> Env.env * locl ty
 let (expand_typeconst_ref: expand_typeconst ref) = ref (not_implemented "expand_typeconst")
 let expand_typeconst x = !expand_typeconst_ref x
 
@@ -280,7 +280,7 @@ let rec get_base_type env ty =
       then ty else get_base_type env ty
     | [] -> ty
     end
-  | Tabstract (AKnewtype (cid, _), Some (_, Tprim N.Tarraykey)) when Env.is_enum env cid -> ty
+  | Tabstract (AKnewtype (cid, _), Some (_, Tprim Aast.Tarraykey)) when Env.is_enum env cid -> ty
   | Tabstract _ ->
     begin match get_concrete_supertypes env ty with
     (* If the type is exactly equal, we don't want to recurse *)
@@ -354,7 +354,7 @@ let uerror env r1 ty1 r2 ty2 on_error =
 let get_printable_shape_field_name = Env.get_shape_field_name
 
 let shape_field_name_ env field =
-  let open Nast in match field with
+  let open Aast in match field with
     | p, Int name -> Ok (Ast_defs.SFlit_int (p, name))
     | p, String name -> Ok (Ast_defs.SFlit_str (p, name))
     | _, Class_const ((_, CI (x)), y) -> Ok (Ast_defs.SFclass_const (x, y))

@@ -7,12 +7,13 @@
  *
  *)
 
+let converter =
+  let convert_pos p: Pos.t = p in
+  Ast_to_aast.converter convert_pos Nast.NamedWithUnsafeBlocks ()
 
-module AstToNastEnv = struct
- module AastAnnotations = Nast.Annotations
- let get_expr_annotation (p: Ast_defs.pos) = p
- let env_annotation = ()
- let funcbody_annotation = Nast.BodyNamingAnnotation.NamedWithUnsafeBlocks
-end
+let convert = converter#on_program
 
-include Ast_to_aast.MapAstToAast(AstToNastEnv)
+let on_class = converter#on_class
+let on_fun : (Ast.fun_ -> Nast.fun_) = converter#on_fun
+let on_typedef = converter#on_typedef
+let on_constant = converter#on_constant

@@ -12,7 +12,7 @@ open Common
 include Typing_env_types
 open Decl_env
 open Typing_defs
-open Nast
+open Aast
 open Typing_env_return_info
 open Type_parameter_env
 

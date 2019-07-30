@@ -7,6 +7,7 @@
  *
  *)
 
+open Aast
 open Tast
 open Ast_scope
 open Core_kernel
@@ -701,7 +702,7 @@ let convert_meth_caller_to_func_ptr env st ann pc cls pf func =
           fb_ast =
             [ (p, Expr assert_invariant);
               (p, Return (Some meth_caller_handle))];
-          fb_annotation = Annotations.FuncBodyAnnotation.NoUnsafeBlocks;
+          fb_annotation = Tast.NoUnsafeBlocks;
         };
       f_fun_kind = Ast_defs.FSync;
       f_user_attributes = [{ua_name = (p, "__MethCaller"); ua_params = []}];

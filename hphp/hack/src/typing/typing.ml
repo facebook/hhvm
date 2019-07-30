@@ -14,7 +14,8 @@
  * consistent) *)
 open Core_kernel
 open Common
-open Nast
+open Aast
+open Tast
 open Typing_defs
 open Utils
 
@@ -33,12 +34,12 @@ module Inter        = Typing_intersection
 module SN           = Naming_special_names
 module TVis         = Typing_visibility
 module TNBody       = Typing_naming_body
-module T            = Tast
+module T            = Aast
 module Phase        = Typing_phase
 module Subst        = Decl_subst
 module ExprDepTy    = Typing_dependent_type.ExprDepTy
 module TCO          = TypecheckerOptions
-module EnvFromDef   = Typing_env_from_def.EnvFromDef(Nast.Annotations)
+module EnvFromDef   = Typing_env_from_def
 module C            = Typing_continuations
 module CMap         = C.Map
 module Try          = Typing_try
@@ -48,11 +49,6 @@ module MakeType     = Typing_make_type
 module Cls          = Decl_provider.Class
 module Partial      = Partial_provider
 module Fake         = Typing_fake_members
-
-(* Maps a Nast to a Tast where every type is Tany.
-   Used to produce a Tast for unsafe code without inferring types for it. *)
-module NastTanyMapper =
-  Aast_mapper.MapAnnotatedAST(Nast.Annotations)(Tast.Annotations)
 
 module ExpectedTy: sig
   [@@@warning "-32"]
@@ -97,11 +93,11 @@ end
 
 let map_funcbody_annotation an =
   match an with
-  | Nast.Annotations.FuncBodyAnnotation.NamedWithUnsafeBlocks ->
-    Tast.Annotations.FuncBodyAnnotation.HasUnsafeBlocks
-  | Nast.Annotations.FuncBodyAnnotation.Named ->
-    Tast.Annotations.FuncBodyAnnotation.NoUnsafeBlocks
-  | Nast.Annotations.FuncBodyAnnotation.Unnamed _ ->
+  | Nast.NamedWithUnsafeBlocks ->
+    Tast.HasUnsafeBlocks
+  | Nast.Named ->
+    Tast.NoUnsafeBlocks
+  | Nast.Unnamed _ ->
     failwith "Should not map over unnamed body"
 
 (*****************************************************************************)
@@ -143,16 +139,16 @@ let err_witness env p = Reason.Rwitness p, Typing_utils.terr env
 
 let expr_error env p r =
   let ty = (r, Typing_utils.terr env) in
-  env, T.make_typed_expr p ty T.Any, ty
+  env, Tast.make_typed_expr p ty T.Any, ty
 
 let expr_any env p r =
   let ty = (r, Typing_utils.tany env) in
-  env, T.make_typed_expr p ty T.Any, ty
+  env, Tast.make_typed_expr p ty T.Any, ty
 
 let compare_field_kinds x y =
   match x, y with
-  | Nast.AFvalue (p1, _), Nast.AFkvalue ((p2, _), _)
-  | Nast.AFkvalue ((p2, _), _), Nast.AFvalue (p1, _) ->
+  | AFvalue (p1, _), AFkvalue ((p2, _), _)
+  | AFkvalue ((p2, _), _), AFvalue (p1, _) ->
       Errors.field_kinds p1 p2;
       false
   | _ ->
@@ -220,7 +216,7 @@ let get_varray_inst ty =
 let get_vc_inst vc_kind ty =
   match ty with
   | (_, Tclass ((_, c), _, [vty]))
-    when c = vc_kind_to_name vc_kind -> Some vty
+    when c = Nast.vc_kind_to_name vc_kind -> Some vty
   | _ ->  get_value_collection_inst ty
 
 (* Is this type array<vty> or a supertype for some vty? *)
@@ -240,7 +236,7 @@ let get_akmap_inst ty =
 let get_kvc_inst kvc_kind ty =
   match ty with
   | (_, Tclass ((_, c), _, [kty; vty]))
-    when c = kvc_kind_to_name kvc_kind -> Some (kty, vty)
+    when c = Nast.kvc_kind_to_name kvc_kind -> Some (kty, vty)
   | _ -> get_key_value_collection_inst ty
 
 (* Is this type darray<kty, vty> or a supertype for some kty and vty? *)
@@ -445,7 +441,7 @@ let rec bind_param env (ty1, param) =
   let env, user_attributes =
     List.map_env env param.param_user_attributes user_attribute in
   let tparam = {
-    T.param_annotation = T.make_expr_annotation param.param_pos ty1;
+    T.param_annotation = Tast.make_expr_annotation param.param_pos ty1;
     T.param_hint = param.param_hint;
     T.param_is_reference = param.param_is_reference;
     T.param_is_variadic = param.param_is_variadic;
@@ -639,7 +635,7 @@ and fun_implicit_return env pos ret = function
     let rty = MakeType.awaitable r (MakeType.void r) in
     Typing_return.implicit_return env pos ~expected:ret ~actual:rty
 
-and block env (stl : block) = List.map_env env stl ~f:stmt
+and block env stl = List.map_env env stl ~f:stmt
 
 (* Set a local; must not be already assigned if it is a using variable *)
 and set_local ?(is_using_clause = false) env (pos,x) ty =
@@ -671,8 +667,8 @@ and check_using_expr has_await env ((pos, content) as using_clause) =
      * generate a new expression id
      *)
     let env = Env.set_local_expr_id env (snd lvar) (Ident.tmp()) in
-    env, (T.make_typed_expr pos ty (T.Binop (Ast_defs.Eq None,
-      T.make_typed_expr lvar_pos ty (T.Lvar lvar), te)), [snd lvar])
+    env, (Tast.make_typed_expr pos ty (T.Binop (Ast_defs.Eq None,
+      Tast.make_typed_expr lvar_pos ty (T.Lvar lvar), te)), [snd lvar])
 
     (* Arbitrary expression. This will be assigned to a temporary *)
   | _ ->
@@ -693,9 +689,9 @@ and check_using_clause env has_await ((pos, content) as using_clause) =
   | Expr_list using_clauses ->
     let env, pairs = List.map_env env using_clauses (check_using_expr has_await) in
     let typed_using_clauses, vars_list = List.unzip pairs in
-    let ty_ = Ttuple (List.map typed_using_clauses T.get_type) in
+    let ty_ = Ttuple (List.map typed_using_clauses Tast.get_type) in
     let ty = (Reason.Rnone, ty_) in
-    env, T.make_typed_expr pos ty (T.Expr_list typed_using_clauses),
+    env, Tast.make_typed_expr pos ty (T.Expr_list typed_using_clauses),
       List.concat vars_list
   | _ ->
     let env, (typed_using_clause, vars) = check_using_expr has_await env using_clause in
@@ -1194,7 +1190,7 @@ and bind_as_expr env loop_ty p ty1 ty2 aexpr =
     | As_kv ((p, Lvar ((_, k) as id)), ev) ->
       let env = set_valid_rvalue p env k ty1 in
       let env, te, _ = assign p env ev ty2 in
-      let tk = T.make_typed_expr p ty1 (T.Lvar id) in
+      let tk = Tast.make_typed_expr p ty1 (T.Lvar id) in
       let env = check_reassigned_mutable env tk in
       let env = check_reassigned_mutable env te in
       env, T.As_kv(tk, te)
@@ -1202,7 +1198,7 @@ and bind_as_expr env loop_ty p ty1 ty2 aexpr =
     | Await_as_kv (p, (p1, Lvar ((_, k) as id)), ev) ->
       let env = set_valid_rvalue p env k ty1 in
       let env, te, _ = assign p env ev ty2 in
-      let tk = T.make_typed_expr p1 ty1 (T.Lvar id) in
+      let tk = Tast.make_typed_expr p1 ty1 (T.Lvar id) in
       let env = check_reassigned_mutable env tk in
       let env = check_reassigned_mutable env te in
       env, T.Await_as_kv(p, tk, te)
@@ -1365,7 +1361,7 @@ and make_result env p te ty =
   (* Set the variance of any type variables that were generated according
    * to how they appear in the expression type *)
   let env = Env.set_tyvar_variance env ty in
-  env, T.make_typed_expr p ty te, ty
+  env, Tast.make_typed_expr p ty te, ty
 
 and expr_
   ?(expected: ExpectedTy.t option)
@@ -1470,8 +1466,8 @@ and expr_
       (* True if all fields are values, or all fields are key => value *)
       let fields_consistent = check_consistent_fields x rl in
       let is_vec = match x with
-        | Nast.AFvalue _ -> true
-        | Nast.AFkvalue _ -> false in
+        | AFvalue _ -> true
+        | AFkvalue _ -> false in
       if fields_consistent && is_vec then
         (* Use expected type to determine expected element type *)
         let env, elem_expected =
@@ -1617,7 +1613,7 @@ and expr_
             end
           | _ -> env, None
           end in
-      let class_name = vc_kind_to_name kind in
+      let class_name = Nast.vc_kind_to_name kind in
       let subtype_val =
         match kind with
         | `Set | `ImmSet | `Keyset ->
@@ -1656,7 +1652,7 @@ and expr_
           | _ -> env, None, None
           end in
       let kl, vl = List.unzip l in
-      let class_name = kvc_kind_to_name kind in
+      let class_name = Nast.kvc_kind_to_name kind in
       let env, tkl, k =
         compute_exprs_and_supertype ~expected:kexpected ~reason:Reason.URkey
           (Reason.Rtype_variable_generics (p, "Tk", strip_ns class_name))
@@ -2013,7 +2009,7 @@ and expr_
       make_result env p
         (T.Call(
           Cnormal,
-          T.make_typed_expr pos_id (Reason.Rnone, TUtils.tany env) (T.Id id),
+          Tast.make_typed_expr pos_id (Reason.Rnone, TUtils.tany env) (T.Id id),
           hl,
           tel,
           [])) ty
@@ -2182,7 +2178,7 @@ and expr_
       let local = p, Lvar (p, local) in
       let env, _, ty = expr env local in
       let env, t_lhs, _ = expr ~accept_using_var:true env e in
-      let t_rhs = T.make_typed_expr pid ty (T.Id (py, y)) in
+      let t_rhs = Tast.make_typed_expr pid ty (T.Id (py, y)) in
       make_result env p (T.Obj_get (t_lhs, t_rhs, nf)) ty
     (* Statically-known instance property access e.g. $x->f *)
   | Obj_get (e1, (pm, Id m), nullflavor) ->
@@ -2199,7 +2195,7 @@ and expr_
       let env, result =
         Env.FakeMembers.check_instance_invalid env e1 (snd m) result in
       make_result env p (T.Obj_get(te1,
-        T.make_typed_expr pm result (T.Id m), nullflavor)) result
+        Tast.make_typed_expr pm result (T.Id m), nullflavor)) result
     (* Dynamic instance property access e.g. $x->$f *)
   | Obj_get (e1, e2, nullflavor) ->
     let env, te1, ty1 = expr ~accept_using_var:true env e1 in
@@ -2210,7 +2206,7 @@ and expr_
     in
     let (pos, _), te2 = te2 in
     let env = might_throw env in
-    let te2 = T.make_typed_expr pos ty te2 in
+    let te2 = Tast.make_typed_expr pos ty te2 in
     make_result env p (T.Obj_get(te1, te2, nullflavor)) ty
   | Yield_break ->
       make_result env p T.Yield_break (Reason.Rwitness p, Typing_utils.tany env)
@@ -2218,7 +2214,7 @@ and expr_
       let env, (taf, opt_key, value) = array_field env af in
       let env, send = Env.fresh_type env p in
       let env, key = match af, opt_key with
-        | Nast.AFvalue (p, _), None ->
+        | AFvalue (p, _), None ->
           begin match Env.get_fn_kind env with
           | Ast_defs.FCoroutine
           | Ast_defs.FSync
@@ -2920,8 +2916,8 @@ and anon_make tenv p f ft idl is_anon =
         is_typing_self := false;
         let annotation =
           if Nast.named_body_is_unsafe nb
-          then Tast.Annotations.FuncBodyAnnotation.HasUnsafeBlocks
-          else Tast.Annotations.FuncBodyAnnotation.NoUnsafeBlocks in
+          then Tast.HasUnsafeBlocks
+          else Tast.NoUnsafeBlocks in
         let env, tparams =
           List.map_env env f.f_tparams type_param in
         let env, user_attributes =
@@ -2947,8 +2943,8 @@ and anon_make tenv p f ft idl is_anon =
         } in
         let ty = (Reason.Rwitness p, Tfun ft) in
         let te = if is_anon
-          then T.make_typed_expr p ty (T.Efun (tfun_, idl))
-          else T.make_typed_expr p ty (T.Lfun (tfun_, idl)) in
+          then Tast.make_typed_expr p ty (T.Efun (tfun_, idl))
+          else Tast.make_typed_expr p ty (T.Lfun (tfun_, idl)) in
         let env = Env.set_tyvar_variance env ty in
         env, te, hret
       end (* stash_conts_for_anon *)
@@ -3239,7 +3235,7 @@ and set_valid_rvalue p env x ty =
   Env.set_local_expr_id env x (Ident.tmp())
 
 (* Deal with assignment of a value of type ty2 to lvalue e1 *)
-and assign p env e1 ty2 : _ * T.expr * T.ty =
+and assign p env e1 ty2 : _ * Tast.expr * Tast.ty =
   assign_ p Reason.URassign env e1 ty2
 
 and is_hack_collection env ty =
@@ -3289,9 +3285,9 @@ and assign_ p ur env e1 ty2 =
         obj_get ~obj_pos:(fst obj) ~is_method:false ~nullsafe ~valkind:`lvalue
           env obj_ty (CIexpr e1) m k in
       let te1 =
-        T.make_typed_expr pobj result
+        Tast.make_typed_expr pobj result
           (T.Obj_get
-             (tobj, T.make_typed_expr pm result (T.Id m), nullflavor)) in
+             (tobj, Tast.make_typed_expr pm result (T.Id m), nullflavor)) in
       let env = { env with Env.lenv = lenv } in
       begin match obj with
       | _, This ->
@@ -3363,10 +3359,10 @@ and assign_simple pos ur env e1 ty2 =
   env, te1, ty2
 
 and array_field env = function
-  | Nast.AFvalue ve ->
+  | AFvalue ve ->
     let env, tve, tv = expr env ve in
     env, (T.AFvalue tve, None, tv)
-  | Nast.AFkvalue (ke, ve) ->
+  | AFkvalue (ke, ve) ->
       let env, tke, tk = expr env ke in
       let env, tve, tv = expr env ve in
       env, (T.AFkvalue (tke, tve), Some tk, tv)
@@ -3376,7 +3372,7 @@ and array_value ~(expected: ExpectedTy.t option) env x =
   env, (te, ty)
 
 and array_field_value ~(expected: ExpectedTy.t option) env = function
-  | Nast.AFvalue x | Nast.AFkvalue (_, x) ->
+  | AFvalue x | AFkvalue (_, x) ->
       array_value ~expected env x
 
 and arraykey_value p class_name ~(expected: ExpectedTy.t option) env ((pos, _) as x) =
@@ -3387,10 +3383,10 @@ and arraykey_value p class_name ~(expected: ExpectedTy.t option) env ((pos, _) a
 
 and array_field_key ~(expected: ExpectedTy.t option) env = function
   (* This shouldn't happen *)
-  | Nast.AFvalue (p, _) ->
+  | AFvalue (p, _) ->
       let ty = MakeType.int (Reason.Rwitness p) in
-      env, (T.make_typed_expr p ty T.Any, ty)
-  | Nast.AFkvalue (x, _) ->
+      env, (Tast.make_typed_expr p ty T.Any, ty)
+  | AFkvalue (x, _) ->
       array_value ~expected env x
 
 and check_parent_construct pos env el uel env_parent =
@@ -3468,14 +3464,14 @@ and call_parent_construct pos env el uel =
   (* TODO: Avoid Tany annotations in TAST by eliminating `make_call_special` *)
   let make_call_special env id tel ty =
     make_call env
-      (T.make_typed_expr fpos (Reason.Rnone, TUtils.tany env) (T.Id id)) [] tel [] ty in
+      (Tast.make_typed_expr fpos (Reason.Rnone, TUtils.tany env) (T.Id id)) [] tel [] ty in
   (* For special functions and pseudofunctions with a definition in hhi. *)
   let make_call_special_from_def env id tel ty_ =
     let env, fty, _decl_fty = fun_type_of_id env id tal in
     let ty = match fty with
       | _, Tfun ft -> ft.ft_ret
       | _ -> (Reason.Rwitness p, ty_) in
-    make_call env (T.make_typed_expr fpos fty (T.Id id)) [] tel [] ty in
+    make_call env (Tast.make_typed_expr fpos fty (T.Id id)) [] tel [] ty in
   let overload_function = overload_function make_call fpos in
 
   let check_coroutine_call env fty =
@@ -3686,7 +3682,7 @@ and call_parent_construct pos env el uel =
         match fty with
         | r, Tfun ft -> r, Tfun {ft with ft_ret = rty}
         | _ -> fty in
-      make_call env (T.make_typed_expr fpos fty (T.Id id)) tal tel tuel rty
+      make_call env (Tast.make_typed_expr fpos fty (T.Id id)) tal tel tuel rty
   (* Special function `type_structure` *)
   | Id (p, type_structure)
       when type_structure = SN.StdlibFunctions.type_structure
@@ -3695,12 +3691,12 @@ and call_parent_construct pos env el uel =
     (match el with
      | [e1; e2] ->
        (match e2 with
-        | p, Nast.String cst ->
+        | p, String cst ->
           (* find the class constant implicitly defined by the typeconst *)
           let cid = (match e1 with
             | _, Class_const (cid, (_, x))
             | _, Class_get (cid, CGstring (_, x)) when x = SN.Members.mClass -> cid
-            | _ -> (fst e1, Nast.CIexpr e1)) in
+            | _ -> (fst e1, CIexpr e1)) in
           class_const ~incl_tc:true env p (cid, (p, cst))
         | _ ->
           Errors.illegal_type_structure p "second argument is not a string";
@@ -3861,7 +3857,7 @@ and call_parent_construct pos env el uel =
                 (r_fty, Tarraykind (AKvec(tr)))))
         | _ -> env, fty in
       let env, (tel, tuel, ty) = call ~expected p env fty ~fty_decl:None el [] in
-      make_call env (T.make_typed_expr fpos fty (T.Id x)) tal tel tuel ty
+      make_call env (Tast.make_typed_expr fpos fty (T.Id x)) tal tel tuel ty
   (* Special function `idx` *)
   | Id ((_, idx) as id) when idx = SN.FB.idx ->
       check_function_in_suspend SN.FB.idx;
@@ -3901,7 +3897,7 @@ and call_parent_construct pos env el uel =
           ~ety_env env fty) in
         let tfun = Reason.Rwitness fty.ft_pos, Tfun fty in
         let env, (tel, _tuel, ty) = call ~expected p env tfun ~fty_decl:None el [] in
-        make_call env (T.make_typed_expr fpos tfun (T.Id id)) [] tel [] ty
+        make_call env (Tast.make_typed_expr fpos tfun (T.Id id)) [] tel [] ty
       | None -> unbound_name env id)
 
   (* Special function `Shapes::idx` *)
@@ -3999,7 +3995,7 @@ and call_parent_construct pos env el uel =
       check_class_function_in_suspend "parent" SN.Members.__construct;
       let env, tel, tuel, ty, pty, ctor_fty =
         call_parent_construct p env el uel in
-      make_call env (T.make_typed_expr fpos ctor_fty
+      make_call env (Tast.make_typed_expr fpos ctor_fty
         (T.Class_const (((pos, pty), T.CIparent), id))) tal tel tuel ty
 
   (* Calling parent / class method *)
@@ -4035,7 +4031,7 @@ and call_parent_construct pos env el uel =
         call ~expected ~method_call_info:(TR.make_call_info ~receiver_is_self:(e1 = CIself)
           ~is_static ty (snd m)) ~fty_decl p env fty el uel in
       let env, method_, fty, tel, tuel = method_get_helper env getter call_continuation in
-      make_call env (T.make_typed_expr fpos fty (T.Class_const (tcid, m))) tal tel tuel method_
+      make_call env (Tast.make_typed_expr fpos fty (T.Class_const (tcid, m))) tal tel tuel method_
 
   (* <<__PPL>>: sample, factor, observe, condition *)
   | Id (pos, id) when env.Env.inside_ppl_class && SN.PPLFunctions.is_reserved id ->
@@ -4051,7 +4047,7 @@ and call_parent_construct pos env el uel =
         obj_get ~obj_pos:p ~is_method:true ~nullsafe ~pos_params:el
           ~explicit_tparams:tal env ty1 infer_e m k in
       let env, ty, tfty, tel, tuel = method_get_helper env getter call_continuation in
-      make_call env (T.make_typed_expr fpos tfty (T.Fun_id m)) tal tel tuel ty
+      make_call env (Tast.make_typed_expr fpos tfty (T.Fun_id m)) tal tel tuel ty
 
   (* Call instance method *)
   | Obj_get(e1, (pos_id, Id m), nullflavor) ->
@@ -4070,8 +4066,8 @@ and call_parent_construct pos env el uel =
         obj_get ~obj_pos:(fst e1) ~is_method ~nullsafe ~pos_params:el
           ~explicit_tparams:tal env ty1 (CIexpr e1) m k in
       let env, ty, tfty, tel, tuel = method_get_helper env getter call_continuation in
-      make_call env (T.make_typed_expr fpos tfty (T.Obj_get(te1,
-        T.make_typed_expr pos_id tfty (T.Id m), nullflavor))) tal tel tuel ty
+      make_call env (Tast.make_typed_expr fpos tfty (T.Obj_get(te1,
+        Tast.make_typed_expr pos_id tfty (T.Id m), nullflavor))) tal tel tuel ty
 
   (* Function invocation *)
   | Fun_id x ->
@@ -4079,7 +4075,7 @@ and call_parent_construct pos env el uel =
       let env = check_coroutine_call env fty in
       let env, (tel, tuel, ty) =
         call ~expected p env fty ~fty_decl el uel in
-      make_call  env (T.make_typed_expr fpos fty (T.Fun_id x)) tal tel tuel ty
+      make_call  env (Tast.make_typed_expr fpos fty (T.Fun_id x)) tal tel tuel ty
   | Id (_, id as x) ->
       let env, fty, fty_decl = fun_type_of_id env x tal in
       let env = check_coroutine_call env fty in
@@ -4106,7 +4102,7 @@ and call_parent_construct pos env el uel =
         then Typing_mutability.move_local p env tel
         else env
       in
-      make_call env (T.make_typed_expr fpos fty (T.Id x)) tal tel tuel ty
+      make_call env (Tast.make_typed_expr fpos fty (T.Id x)) tal tel tuel ty
   | _ ->
       let env, te, fty = expr env e in
       let env, fty = Typing_solver.expand_type_and_solve
@@ -4387,7 +4383,7 @@ and member_not_found pos ~is_method class_ member_name r =
  *   of the receiver.
  *)
 and obj_get ~obj_pos ~is_method ~nullsafe ?(valkind = `other) ?(explicit_tparams=[])
-            ?(pos_params: expr list option) env ty1 cid id k =
+            ?pos_params env ty1 cid id k =
   let env, method_, _method_decl, _ =
     obj_get_with_visibility ~is_method ~nullsafe ~valkind ~obj_pos ~pos_params
       ~explicit_tparams env ty1 cid id k in
@@ -4615,7 +4611,7 @@ and widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
 
 (* k_lhs takes the type of the object receiver *)
 and obj_get_ ~is_method ~nullsafe ~valkind ~obj_pos
-  ~(pos_params : expr list option) ?(explicit_tparams=[])
+  ~pos_params ?(explicit_tparams=[])
   env ty1 cid (id_pos, id_str as id) k k_lhs =
   let env, ety1 =
     if is_method
@@ -4706,7 +4702,7 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~obj_pos
     end
 
   | _, Toption ty -> nullable_obj_get ty
-  | r, Tprim Nast.Tnull ->
+  | r, Tprim Tnull ->
     let ty = (r, Tunion []) in
     nullable_obj_get ty
   (* We are trying to access a member through a value of unknown type *)
@@ -5442,7 +5438,7 @@ and is_super_num env t = SubType.is_sub_type_for_union env (MakeType.num Reason.
 
 and unop ~is_func_arg ~array_ref_ctx p env uop te ty =
   let make_result env te result_ty =
-    env, T.make_typed_expr p result_ty (T.Unop(uop, te)), result_ty in
+    env, Tast.make_typed_expr p result_ty (T.Unop(uop, te)), result_ty in
   let is_any = TUtils.is_any env in
   match uop with
   | Ast_defs.Unot ->
@@ -5537,7 +5533,7 @@ and unop ~is_func_arg ~array_ref_ctx p env uop te ty =
 
 and binop p env bop p1 te1 ty1 p2 te2 ty2 =
   let make_result env te1 te2 ty =
-    env, T.make_typed_expr p ty (T.Binop (bop, te1, te2)), ty in
+    env, Tast.make_typed_expr p ty (T.Binop (bop, te1, te2)), ty in
   let is_any = TUtils.is_any env in
   let contains_any = (is_any ty1) || (is_any ty2) in
 
@@ -5700,7 +5696,7 @@ and make_a_local_of env e =
  *)
 and refine_lvalue_type env ((_p, ty), _ as te) ~refine =
   let env, ty = refine env ty in
-  let e = T.to_nast_expr te in
+  let e = Tast.to_nast_expr te in
   let env, localopt = make_a_local_of env e in
   (* TODO TAST: generate an assignment to the fake local in the TAST *)
   match localopt with
@@ -5722,7 +5718,7 @@ and condition_nullity ~nonnull (env: Env.env) te =
       [shape; field],
       _)
     when shapes = SN.Shapes.cShapes && idx = SN.Shapes.idx ->
-    let field = T.to_nast_expr field in
+    let field = Tast.to_nast_expr field in
     let refine env shape_ty = if nonnull
       then Typing_shapes.shapes_idx_not_null env shape_ty field
       else env, shape_ty in
@@ -5829,14 +5825,14 @@ and condition ?lhs_of_null_coalesce env tparamet
       key_exists env p shape field
   | T.Unop (Ast_defs.Unot, e) ->
       condition env (not tparamet) e
-  | T.Is (ivar, h) when is_instance_var (T.to_nast_expr ivar) ->
+  | T.Is (ivar, h) when is_instance_var (Tast.to_nast_expr ivar) ->
     let ety_env = { (Phase.env_with_self env) with from_class = Some CIstatic; } in
     let env, hint_ty = Phase.localize_hint ~ety_env env h in
     let env, hint_ty = Env.expand_type env hint_ty in
     let reason = Reason.Ris (fst h) in
     let refine_type env hint_ty =
       let ivar_pos, ivar_ty = fst ivar in
-      let env, ivar = get_instance_var env (T.to_nast_expr ivar) in
+      let env, ivar = get_instance_var env (Tast.to_nast_expr ivar) in
       let env, hint_ty = class_for_refinement env p reason ivar_pos ivar_ty hint_ty in
       let env, refined_ty = Inter.intersect env reason ivar_ty hint_ty in
       set_local env ivar refined_ty
@@ -5993,10 +5989,10 @@ and get_instance_var env = function
 and is_array env ty p pred_name arg_expr =
   refine_lvalue_type env arg_expr ~refine:begin fun env arg_ty ->
     let r = Reason.Rpredicated (p, pred_name) in
-    let env, tarrkey_name = Env.add_fresh_generic_parameter env "Tk" ~reified:Nast.Erased ~enforceable:false ~newable:false in
+    let env, tarrkey_name = Env.add_fresh_generic_parameter env "Tk" ~reified:Erased ~enforceable:false ~newable:false in
     let tarrkey = (r, Tabstract (AKgeneric tarrkey_name, None)) in
     let env = SubType.add_constraint p env Ast_defs.Constraint_as tarrkey (MakeType.arraykey r) in
-    let env, tfresh_name = Env.add_fresh_generic_parameter env "T" ~reified:Nast.Erased ~enforceable:false ~newable:false in
+    let env, tfresh_name = Env.add_fresh_generic_parameter env "T" ~reified:Erased ~enforceable:false ~newable:false in
     let tfresh = (r, Tabstract (AKgeneric tfresh_name, None)) in
     (* This is the refined type of e inside the branch *)
     let refined_ty =
@@ -6022,7 +6018,7 @@ and is_array env ty p pred_name arg_expr =
   end
 
 and key_exists env pos shape field =
-  let field = T.to_nast_expr field in
+  let field = Tast.to_nast_expr field in
   refine_lvalue_type env shape ~refine:begin fun env shape_ty ->
     match TUtils.shape_field_name env field with
     | None -> env, shape_ty
@@ -6424,11 +6420,6 @@ and check_extend_abstract_const ~is_final p seq =
       Errors.implement_abstract ~is_final p cc_pos "constant" x
   end
 
-and typeconst_abstract_kind = function
-  | Nast.TCAbstract default -> T.TCAbstract default
-  | Nast.TCPartiallyAbstract -> T.TCPartiallyAbstract
-  | Nast.TCConcrete -> T.TCConcrete
-
 and typeconst_def env {
   c_tconst_abstract;
   c_tconst_visibility;
@@ -6456,7 +6447,7 @@ and typeconst_def env {
     List.map_env env c_tconst_user_attributes user_attribute in
   env,
   {
-    T.c_tconst_abstract = typeconst_abstract_kind c_tconst_abstract;
+    T.c_tconst_abstract = c_tconst_abstract;
     T.c_tconst_visibility = c_tconst_visibility;
     T.c_tconst_name = id;
     T.c_tconst_constraint = c_tconst_constraint;
@@ -6553,7 +6544,7 @@ and class_var_def ~is_static env cv =
     env,
     {
       T.cv_final = cv.cv_final;
-      T.cv_xhp_attr = NastTanyMapper.map_xhp_info cv.cv_xhp_attr;
+      T.cv_xhp_attr = cv.cv_xhp_attr;
       T.cv_visibility = cv.cv_visibility;
       T.cv_type = cv.cv_type;
       T.cv_id = cv.cv_id;
@@ -6634,9 +6625,9 @@ and user_attribute env ua =
   }
 
 and reify_kind = function
-  | Nast.Erased -> T.Erased
-  | Nast.SoftReified -> T.SoftReified
-  | Nast.Reified -> T.Reified
+  | Erased -> T.Erased
+  | SoftReified -> T.SoftReified
+  | Reified -> T.Reified
 
 
 and type_param env t =
@@ -6754,8 +6745,8 @@ and method_def env m =
   let m = { m with m_ret = m_ret; } in
   let annotation =
     if Nast.named_body_is_unsafe nb
-    then Tast.Annotations.FuncBodyAnnotation.HasUnsafeBlocks
-    else Tast.Annotations.FuncBodyAnnotation.NoUnsafeBlocks in
+    then Tast.HasUnsafeBlocks
+    else Tast.NoUnsafeBlocks in
   let env, tparams =
     List.map_env env m.m_tparams type_param in
   let env, user_attributes =
@@ -6881,14 +6872,14 @@ and overload_function make_call fpos p env (cpos, class_id) method_id el uel f =
   (* if there are errors already stop here - going forward would
    * report them twice *)
   if has_error
-  then env, T.make_typed_expr p res T.Any, res
+  then env, Tast.make_typed_expr p res T.Any, res
   else
     let env, ty = f env fty res el in
     let fty =
       match fty with
       | r, Tfun ft -> r, Tfun {ft with ft_ret = ty}
       | _ -> fty in
-    let te = T.make_typed_expr fpos fty (T.Class_const(tcid, method_id)) in
+    let te = Tast.make_typed_expr fpos fty (T.Class_const(tcid, method_id)) in
     make_call env te [] tel tuel ty
 
 and update_array_type ?lhs_of_null_coalesce p env e1 e2 valkind  =
@@ -6912,15 +6903,15 @@ and update_array_type ?lhs_of_null_coalesce p env e1 e2 valkind  =
 
 let nast_to_tast opts nast =
   let convert_def = function
-    | Nast.Fun f ->
+    | Fun f ->
       begin match fun_def opts f with
       | Some f -> T.Fun f
       | None -> failwith @@ Printf.sprintf
           "Error when typechecking function: %s" (snd f.f_name)
       end
-    | Nast.Constant gc -> T.Constant (gconst_def opts gc)
-    | Nast.Typedef td  -> T.Typedef (typedef_def opts td)
-    | Nast.Class c -> begin
+    | Constant gc -> T.Constant (gconst_def opts gc)
+    | Typedef td  -> T.Typedef (typedef_def opts td)
+    | Class c -> begin
       match class_def opts c with
       | Some c -> (T.Class c)
       | None -> failwith @@ Printf.sprintf
@@ -6930,13 +6921,13 @@ let nast_to_tast opts nast =
      * https://docs.hhvm.com/hack/unsupported/top-level
      * so just create the minimal env for us to construct a Stmt.
      *)
-    | Nast.Stmt s ->
+    | Stmt s ->
     let env = Env.empty opts Relative_path.default None in
       T.Stmt (snd (stmt env s))
-    | Nast.Namespace _
-    | Nast.NamespaceUse _
-    | Nast.SetNamespaceEnv _
-    | Nast.FileAttributes _ ->
+    | Namespace _
+    | NamespaceUse _
+    | SetNamespaceEnv _
+    | FileAttributes _ ->
       failwith "Invalid nodes in NAST. These nodes should be removed during naming."
   in
   Nast_check.program nast;

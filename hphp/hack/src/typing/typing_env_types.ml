@@ -69,7 +69,7 @@ type tyvar_info = {
   indexed by "T" in the type_constants of the type variable representing T1.
   This allows to properly check constraints on "T1::T". *)
   type_constants :
-    (Nast.sid (* id of the type constant "T", containing its position. *)
+    (Aast.sid (* id of the type constant "T", containing its position. *)
     * locl_ty) SMap.t;
 }
 type tvenv = tyvar_info IMap.t
@@ -131,7 +131,7 @@ and anon_log = locl_ty list * locl ty list
 
 and anon = {
   rx : reactivity;
-  is_coroutine : Nast.is_coroutine;
+  is_coroutine : Aast.is_coroutine;
   counter : anon_log ref;
   pos : Pos.t;
   typecheck :

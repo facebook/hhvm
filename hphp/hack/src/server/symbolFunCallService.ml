@@ -9,6 +9,7 @@
 
 open Core_kernel
 module SN = Naming_special_names
+module Tast = Aast
 
 open ServerCommandTypes.Symbol_info_service
 

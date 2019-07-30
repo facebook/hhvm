@@ -7,7 +7,7 @@
  *
  *)
 
-open Nast
+open Aast
 open Nast_check_env
 
 module Partial = Partial_provider

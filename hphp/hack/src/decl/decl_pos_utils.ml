@@ -117,6 +117,17 @@ let rec reason = function
   | Renforceable p -> Renforceable (pos p)
   | Rdestructure (p, l) -> Rdestructure (pos p, l)
 
+let pos_mapper =
+  object
+    inherit [_] Aast.map
+
+    method! on_pos _ p = pos p
+
+    method on_'fb _ fb = fb
+    method on_'en _ en = en
+    method on_'ex _ ex = pos ex
+  end
+
 let rec ty (p, x) =
   reason p, ty_ x
 
@@ -189,7 +200,7 @@ let rec ty (p, x) =
       cc_abstract = cc.cc_abstract;
       cc_pos = pos cc.cc_pos;
       cc_type = ty cc.cc_type;
-      cc_expr = Option.map cc.cc_expr (Nast_pos_mapper.expr pos);
+      cc_expr = Option.map ~f:(pos_mapper#on_expr ()) cc.cc_expr;
       cc_origin = cc.cc_origin;
     }
 
@@ -210,8 +221,8 @@ let rec ty (p, x) =
     }
 
   and user_attribute ua =
-    { Nast.ua_name = string_id ua.Nast.ua_name;
-      ua_params = List.map ~f:(Nast_pos_mapper.expr pos) ua.Nast.ua_params;
+    { Aast.ua_name = string_id ua.Aast.ua_name;
+      ua_params = List.map ~f:(pos_mapper#on_expr ()) ua.Aast.ua_params;
     }
 
   and type_param t =

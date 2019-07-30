@@ -8,46 +8,58 @@
  *)
 
 open Core_kernel
+open Aast
 
 module SN = Naming_special_names
 
-include Aast
+type func_body_ann =
+  | Named
+  | NamedWithUnsafeBlocks
+  (* Namespace info *)
+  | Unnamed of Namespace_env.env [@opaque]
 
-(* The NAST definitions, which we just include into this file *)
-module PosAnnotation = struct type t = Pos.t [@@deriving show] end
-module UnitAnnotation = struct type t = unit [@@deriving show] end
-module BodyNamingAnnotation = struct
-  type t =
-    | Named
-    | NamedWithUnsafeBlocks
-    | Unnamed of Namespace_env.env [@opaque] (* Namespace info *)
+let show_func_body_ann = function
+  | Named -> "Named"
+  | NamedWithUnsafeBlocks -> "NamedWithUnsafeBlocks"
+  | Unnamed _ -> "Unnamed"
 
-  let pp f t =
-    let s =
-      match t with
-      | Named -> "Named"
-      | NamedWithUnsafeBlocks -> "NamedWithUnsafeBlocks"
-      | Unnamed _ -> "Unnamed" in
-    Format.pp_print_string f s
-end
+let pp_func_body_ann fmt fba =
+  Format.pp_print_string fmt (show_func_body_ann fba)
 
-module Annotations = struct
-  module ExprAnnotation = PosAnnotation
-  module EnvAnnotation = UnitAnnotation
-  module FuncBodyAnnotation = BodyNamingAnnotation
-end
+type program = (Pos.t, func_body_ann, unit) Aast.program [@@deriving show]
+type expr = (Pos.t, func_body_ann, unit) Aast.expr [@@deriving show]
+type expr_ = (Pos.t, func_body_ann, unit) Aast.expr_
+type stmt = (Pos.t, func_body_ann, unit) Aast.stmt
+type block = (Pos.t, func_body_ann, unit) Aast.block
+type user_attribute = (Pos.t, func_body_ann, unit) Aast.user_attribute [@@deriving show]
+type class_id_ = (Pos.t, func_body_ann, unit) Aast.class_id_
+type class_ = (Pos.t, func_body_ann, unit) Aast.class_
+type method_ = (Pos.t, func_body_ann, unit) Aast.method_
+type fun_ = (Pos.t, func_body_ann, unit) Aast.fun_
+type fun_def = (Pos.t, func_body_ann, unit) Aast.fun_def
+type func_body = (Pos.t, func_body_ann, unit) Aast.func_body
+type fun_param = (Pos.t, func_body_ann, unit) Aast.fun_param
+type fun_variadicity = (Pos.t, func_body_ann, unit) Aast.fun_variadicity
+type typedef = (Pos.t, func_body_ann, unit) Aast.typedef
+type tparam = (Pos.t, func_body_ann, unit) Aast.tparam
+type gconst = (Pos.t, func_body_ann, unit) Aast.gconst
+type class_id = (Pos.t, func_body_ann, unit) Aast.class_id
+type catch = (Pos.t, func_body_ann, unit) Aast.catch
+type case = (Pos.t, func_body_ann, unit) Aast.case
+type field = (Pos.t, func_body_ann, unit) Aast.field
+type afield = (Pos.t, func_body_ann, unit) Aast.afield
+type sid = Aast.sid
 
-module PosAnnotatedAST = AnnotatedAST(Annotations)
-include PosAnnotatedAST
+module ShapeMap = Ast_defs.ShapeMap
 
 (* Expecting that Naming.func_body / Naming.class_meth_bodies has been
  * allowed at the AST. Ideally this would be enforced by the compiler,
  * a la the typechecking decl vs local phases *)
 let is_body_named fb =
  match fb.fb_annotation with
- | BodyNamingAnnotation.Named
- | BodyNamingAnnotation.NamedWithUnsafeBlocks -> true
- | BodyNamingAnnotation.Unnamed _ -> false
+ | Named
+ | NamedWithUnsafeBlocks -> true
+ | Unnamed _ -> false
 
 let assert_named_body fb =
   if is_body_named fb
@@ -56,9 +68,9 @@ let assert_named_body fb =
 
 let named_body_is_unsafe fb =
   match fb.fb_annotation with
-  | BodyNamingAnnotation.Named -> false
-  | BodyNamingAnnotation.NamedWithUnsafeBlocks -> true
-  | BodyNamingAnnotation.Unnamed _ -> failwith "Expecting a named function body"
+  | Named -> false
+  | NamedWithUnsafeBlocks -> true
+  | Unnamed _ -> failwith "Expecting a named function body"
 
 let class_id_to_str = function
   | CIparent -> SN.Classes.cParent
@@ -139,6 +151,7 @@ let get_defs ast =
   let rec get_defs ast acc =
   List.fold_right ast ~init:acc
     ~f:begin fun def (acc1, acc2, acc3, acc4 as acc) ->
+      let open Aast in
       match def with
       | Fun f ->
         (FileInfo.pos_full f.f_name) :: acc1, acc2, acc3, acc4
@@ -235,7 +248,7 @@ class type ['a] visitor_type = object
   method on_for :
       'a -> expr -> expr -> expr -> block -> 'a
   method on_foreach :
-      'a -> expr -> as_expr -> block -> 'a
+      'a -> expr -> (Pos.t, func_body_ann, unit) as_expr -> block -> 'a
   method on_if : 'a -> expr -> block -> block -> 'a
   method on_noop : 'a -> 'a
   method on_fallthrough : 'a -> 'a
@@ -244,15 +257,15 @@ class type ['a] visitor_type = object
   method on_goto : 'a -> pstring -> 'a
   method on_awaitall : 'a -> (id option * expr) list -> block -> 'a
   method on_stmt : 'a -> stmt -> 'a
-  method on_stmt_ : 'a -> stmt_ -> 'a
+  method on_stmt_ : 'a -> (Pos.t, func_body_ann, unit) stmt_ -> 'a
   method on_switch : 'a -> expr -> case list -> 'a
   method on_throw : 'a -> expr -> 'a
   method on_try : 'a -> block -> catch list -> block -> 'a
-  method on_def_inline : 'a -> def -> 'a
+  method on_def_inline : 'a -> (Pos.t, func_body_ann, unit) def -> 'a
   method on_let : 'a -> id -> hint option -> expr -> 'a
   method on_while : 'a -> expr -> block -> 'a
-  method on_using : 'a -> using_stmt -> 'a
-  method on_as_expr : 'a -> as_expr -> 'a
+  method on_using : 'a -> (Pos.t, func_body_ann, unit) using_stmt -> 'a
+  method on_as_expr : 'a -> (Pos.t, func_body_ann, unit) as_expr -> 'a
   method on_array : 'a -> afield list -> 'a
   method on_shape : 'a -> (Ast_defs.shape_field_name * expr) list -> 'a
   method on_valCollection : 'a -> vc_kind -> targ option -> expr list -> 'a
@@ -269,7 +282,7 @@ class type ['a] visitor_type = object
   method on_method_caller : 'a -> sid -> pstring -> 'a
   method on_obj_get : 'a -> expr -> expr -> 'a
   method on_array_get : 'a -> expr -> expr option -> 'a
-  method on_class_get : 'a -> class_id -> class_get_expr -> 'a
+  method on_class_get : 'a -> class_id -> (Pos.t, func_body_ann, unit) class_get_expr -> 'a
   method on_class_const : 'a -> class_id -> pstring -> 'a
   method on_call : 'a -> call_type -> expr -> expr list -> expr list -> 'a
   method on_true : 'a -> 'a
@@ -279,7 +292,7 @@ class type ['a] visitor_type = object
   method on_null : 'a -> 'a
   method on_string : 'a -> string -> 'a
   method on_string2 : 'a -> expr list -> 'a
-  method on_special_func : 'a -> special_func -> 'a
+  method on_special_func : 'a -> (Pos.t, func_body_ann, unit) special_func -> 'a
   method on_yield_break : 'a -> 'a
   method on_yield : 'a -> afield -> 'a
   method on_yield_from : 'a -> expr -> 'a
@@ -302,10 +315,10 @@ class type ['a] visitor_type = object
   method on_record : 'a -> class_id -> (expr * expr) list -> 'a
   method on_efun : 'a -> fun_ -> id list -> 'a
   method on_lfun : 'a -> fun_ -> id list -> 'a
-  method on_xml : 'a -> sid -> xhp_attribute list -> expr list -> 'a
+  method on_xml : 'a -> sid -> (Pos.t, func_body_ann, unit) xhp_attribute list -> expr list -> 'a
   method on_param_kind : 'a -> Ast_defs.param_kind -> 'a
   method on_callconv : 'a -> Ast_defs.param_kind -> expr -> 'a
-  method on_assert : 'a -> assert_expr -> 'a
+  method on_assert : 'a -> (Pos.t, func_body_ann, unit) assert_expr -> 'a
   method on_clone : 'a -> expr -> 'a
   method on_field: 'a -> field -> 'a
   method on_afield: 'a -> afield -> 'a
@@ -323,7 +336,7 @@ class type ['a] visitor_type = object
   method on_hint: 'a -> hint -> 'a
   method on_targ: 'a -> targ -> 'a
 
-  method on_def: 'a -> def -> 'a
+  method on_def: 'a -> (Pos.t, func_body_ann, unit) def -> 'a
   method on_program: 'a -> program -> 'a
 
   method on_markup: 'a -> pstring -> expr option -> 'a
@@ -834,86 +847,4 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     acc
 end
 
-(*****************************************************************************)
-(* Returns true if a block has a return statement. *)
-(*****************************************************************************)
-
-module HasReturn: sig
-  val block: block -> bool
-end = struct
-
-  let visitor =
-    object
-      inherit [bool] visitor
-      method! on_expr acc _ = acc
-      method! on_return _ _ = true
-    end
-
-  let block b = visitor#on_block false b
-
 end
-
-(* Used by HasBreak and HasContinue. Does not traverse nested loops, since the
- * breaks / continues in those loops do not affect the control flow of the
- * outermost loop. *)
-
-class loop_visitor =
-  object
-    inherit [bool] visitor
-    method! on_expr acc _ = acc
-    method! on_for acc _ _ _ _ = acc
-    method! on_foreach acc _ _ _ = acc
-    method! on_do acc _ _ = acc
-    method! on_while acc _ _ = acc
-    method! on_switch acc _ _ = acc
-  end
-
-(*****************************************************************************)
-(* Returns true if a block has a continue statement.
- * It is necessary to properly handle the type of locals.
- * When a block statement has a continue statement, the control flow graph
- * could be interrupted. When that is the case, the types of locals has to
- * be more conservative. Locals can have different types depending on their
- * position in a block. In the presence of constructions that can interrupt
- * the control flow (exceptions, continue), the type of the local becomes:
- * "any type that the local had, regardless of its position".
- *)
-(*****************************************************************************)
-
-module HasContinue: sig
-  val block: block -> bool
-end = struct
-
-  let visitor =
-    object
-      inherit loop_visitor
-      method! on_continue _ = true
-      method! on_temp_continue _ _ = true
-    end
-
-  let block b = visitor#on_block false b
-
-end
-
-(*****************************************************************************)
-(* Returns true if a block has a continue statement.
- * Useful for checking if a while(true) {...} loop is non-terminating.
- *)
-(*****************************************************************************)
-
-module HasBreak: sig
-  val block: block -> bool
-end = struct
-
-  let visitor =
-    object
-      inherit loop_visitor
-      method! on_break _ = true
-      method! on_temp_break _ _ = true
-    end
-
-  let block b = visitor#on_block false b
-
-end
-
-end (* of Visitor *)

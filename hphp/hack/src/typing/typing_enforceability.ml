@@ -42,7 +42,7 @@ let rec pessimize_type env ?(trust_awaitable=false) (ty: decl ty) =
   | r, Tvarray_or_darray tv ->
     r, Tvarray_or_darray (pessimize_wrap env tv)
   | _, Tgeneric x ->
-    if Env.get_reified env x = Nast.Reified
+    if Env.get_reified env x = Aast.Reified
     then
       if Env.get_enforceable env x
       then ty
@@ -90,7 +90,7 @@ and pessimize_targs env targs tparams =
   let open List in
   let new_targs = map2 targs tparams ~f:(fun targ tparam ->
     (* Trust reified type arguments *)
-    if tparam.tp_reified = Nast.Reified
+    if tparam.tp_reified = Aast.Reified
     then targ
     else pessimize_wrap env targ
   ) in
@@ -106,7 +106,7 @@ and pessimize_wrap env ty =
   | _, Terr
   | _, Tany -> ty (* like Tany is useless *)
   | _, Tlike _ -> ty
-  | _, Tgeneric x when Env.get_reified env x <> Nast.Reified -> ty
+  | _, Tgeneric x when Env.get_reified env x <> Aast.Reified -> ty
   | _, Tapply ((_, x), []) when x = Naming_special_names.Typehints.wildcard -> ty
   | _ -> wrap_like ty
 
@@ -114,7 +114,7 @@ and pessimize_wrap env ty =
 and pessimize_tparam_constraints env (t: decl tparam) =
   if not (TypecheckerOptions.pessimize_types (Env.get_tcopt env)) then t else
   match t.tp_reified with
-  | Nast.Reified -> t
+  | Aast.Reified -> t
   | _ ->
     let tp_constraints = List.map t.tp_constraints ~f:(fun (ck, cstr_ty) ->
       match ck with

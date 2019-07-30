@@ -11,6 +11,7 @@
 open Core_kernel
 [@@@warning "+33"]
 open Ast_defs
+open Aast
 open Tast
 
 let trivial_equality_check p bop env ((_, ty1), _ as te1 : expr) ((_, ty2), _ as te2 : expr) =

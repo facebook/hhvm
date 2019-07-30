@@ -8,7 +8,7 @@
  *)
 
 open Core_kernel
-open Nast
+open Aast
 
 let enforce_no_body m =
   match m.m_body.fb_ast with

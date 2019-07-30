@@ -147,7 +147,7 @@ module MasterApi = struct
              (match Ast_provider.find_class_in_file_nast fn name with
               | Some c ->
                 let pos, result_type =
-                  (fst c.Nast.c_name, SI_Class) in
+                  (fst c.Aast.c_name, SI_Class) in
                 Some {
                   SearchUtils.name;
                   pos;
@@ -157,7 +157,7 @@ module MasterApi = struct
            | FileInfo.File (FileInfo.Fun, fn), SI_Function ->
              (match Ast_provider.find_fun_in_file_nast fn name with
               | Some c ->
-                let pos = fst c.Nast.f_name in
+                let pos = fst c.Aast.f_name in
                 Some {
                   SearchUtils.name;
                   pos;
@@ -167,7 +167,7 @@ module MasterApi = struct
            | FileInfo.File (FileInfo.Typedef, fn), SI_Typedef ->
              (match Ast_provider.find_typedef_in_file_nast fn name with
               | Some c ->
-                let pos = fst c.Nast.t_name in
+                let pos = fst c.Aast.t_name in
                 Some {
                   SearchUtils.name;
                   pos;
@@ -177,7 +177,7 @@ module MasterApi = struct
            | FileInfo.File (FileInfo.Const, fn), SI_GlobalConstant ->
              (match Ast_provider.find_gconst_in_file_nast fn name with
               | Some c ->
-                let pos = fst c.Nast.cst_name in
+                let pos = fst c.Aast.cst_name in
                 Some {
                   SearchUtils.name;
                   pos;

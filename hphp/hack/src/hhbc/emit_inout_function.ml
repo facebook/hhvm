@@ -11,7 +11,7 @@ open Core_kernel
 open Hhbc_ast
 open Instruction_sequence
 
-module T = Tast
+module T = Aast
 module H = Hhbc_ast
 
 let is_last_param_variadic param_count params =

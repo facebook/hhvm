@@ -12,7 +12,7 @@ open Hhbc_ast
 open Hhbc_string_utils
 open Core_kernel
 module A = Ast_defs
-module T = Tast
+module T = Aast
 module SN = Naming_special_names
 module SU = Hhbc_string_utils
 module TC = Hhas_type_constraint

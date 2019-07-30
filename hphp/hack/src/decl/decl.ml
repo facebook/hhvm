@@ -16,7 +16,7 @@
 open Core_kernel
 open Decl_defs
 open Decl_fun_utils
-open Nast
+open Aast
 open Shallow_decl_defs
 open Typing_defs
 open Typing_deps
@@ -274,7 +274,7 @@ let check_if_cyclic class_env (pos, cid) =
 let shallow_decl_enabled () =
   TypecheckerOptions.shallow_class_decl (GlobalNamingOptions.get ())
 
-let rec class_decl_if_missing class_env (c: class_) =
+let rec class_decl_if_missing class_env (c: Nast.class_) =
   let _, cid as c_name = c.c_name in
   if check_if_cyclic class_env c_name
   then None

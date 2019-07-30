@@ -8,7 +8,7 @@
 *)
 open Core_kernel
 
-module T = Tast
+module T = Aast
 module ULS = Unique_list_string
 module SN = Naming_special_names
 
@@ -79,11 +79,11 @@ let on_class_get visitor (_, cid_) cge ~is_call_target =
 let declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body =
   let state = ref dvs_empty in
   object (self)
-    inherit [_] Tast.iter as super
+    inherit [_] Aast.iter as super
 
     method! on_stmt_ _ s =
       match s with
-      | Tast.Try (body, catch_list, finally) ->
+      | Aast.Try (body, catch_list, finally) ->
          self#on_block () body;
          List.iter catch_list
            (fun (_exn_name, (pos, id), catch_body) ->
@@ -94,38 +94,38 @@ let declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body =
 
     method! on_expr_ _ e =
       match e with
-      | Tast.Obj_get (receiver_e, prop_e, _) ->
+      | Aast.Obj_get (receiver_e, prop_e, _) ->
          (match (snd receiver_e) with
-          | Tast.Lvar (_, id) when (Local_id.get_name id) = "$this" ->
+          | Aast.Lvar (_, id) when (Local_id.get_name id) = "$this" ->
              if is_in_static_method && not is_closure_body then ()
              else
                state := with_local (Local_id.get_name id) !state
           | _ -> super#on_expr () receiver_e);
          (match (snd prop_e) with
           (* Only add if it is a variable *)
-          | Tast.Lvar (pos, id) ->
+          | Aast.Lvar (pos, id) ->
              state := add_local ~barethis:Bare_this !state (pos, Local_id.get_name id)
           | _ -> super#on_expr () prop_e)
-      | Tast.Unop (Ast_defs.Uref, (_, Tast.Lvar (_, id))) when (Local_id.get_name id) = "$this" ->
+      | Aast.Unop (Ast_defs.Uref, (_, Aast.Lvar (_, id))) when (Local_id.get_name id) = "$this" ->
          state := with_this Bare_this_as_ref !state
-      | Tast.Binop (binop, e1, e2) ->
+      | Aast.Binop (binop, e1, e2) ->
          (match binop, e2 with
-          | (Ast_defs.Eq _, (_, Tast.Await _))
-          | (Ast_defs.Eq _, (_, Tast.Yield _))
-          | (Ast_defs.Eq _, (_, Tast.Yield_from _)) ->
+          | (Ast_defs.Eq _, (_, Aast.Await _))
+          | (Ast_defs.Eq _, (_, Aast.Yield _))
+          | (Ast_defs.Eq _, (_, Aast.Yield_from _)) ->
              (* Visit e2 before e1. The ordering of declvars in async
                 expressions matters to HHVM. See D5674623. *)
              self#on_expr () e2;
              self#on_expr () e1
           | _ -> super#on_expr_ () e)
-      | Tast.Lvar (pos, id) ->
+      | Aast.Lvar (pos, id) ->
          state := add_local ~barethis:Bare_this !state (pos, Local_id.get_name id)
-      | Tast.Class_get (cid, expr) ->
+      | Aast.Class_get (cid, expr) ->
         on_class_get self cid expr ~is_call_target:false
-      | Tast.Lfun _ ->
+      | Aast.Lfun _ ->
          (* For an Lfun, we don't want to recurse, because it's a separate scope. *)
          ()
-      | Tast.Efun (fun_, use_list) ->
+      | Aast.Efun (fun_, use_list) ->
          (* at this point AST is already rewritten so use lists on EFun nodes
             contain list of captured variables. However if use list was initially absent
             it is not correct to traverse such nodes to collect locals because it will impact
@@ -140,7 +140,7 @@ let declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body =
             $b = 2;
 
             'explicit_use_set' is used to in order to avoid synthesized use list *)
-         let fn_name = snd fun_.Tast.f_name in
+         let fn_name = snd fun_.Aast.f_name in
          let has_use_list =
            Option.value_map explicit_use_set_opt
              ~default:false ~f:(fun s -> SSet.mem fn_name s) in
@@ -149,36 +149,36 @@ let declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body =
              (fun (pos, id) -> state := add_local ~barethis:Bare_this !state (pos, Local_id.get_name id))
          else ()
 
-      | Tast.Call (_, func_e, _, pos_args, unpacked_args) ->
+      | Aast.Call (_, func_e, _, pos_args, unpacked_args) ->
          (match func_e with
-          | (_, Tast.Id (pos, "HH\\set_frame_metadata"))
-          | (_, Tast.Id (pos, "\\HH\\set_frame_metadata")) ->
+          | (_, Aast.Id (pos, "HH\\set_frame_metadata"))
+          | (_, Aast.Id (pos, "\\HH\\set_frame_metadata")) ->
              state := add_local ~barethis:Bare_this !state (pos, "$86metadata")
           | _ -> ());
          let barethis =
            match func_e with
-           | (_, Tast.Id (_, ("isset" | "echo" | "empty"))) -> Bare_this
+           | (_, Aast.Id (_, ("isset" | "echo" | "empty"))) -> Bare_this
            | _ -> Bare_this_as_ref in
          let on_arg e =
            match e with
            (* Only add $this to locals if it's bare *)
-           | (_, Tast.Lvar(_, id)) when (Local_id.get_name id) = "$this" ->
+           | (_, Aast.Lvar(_, id)) when (Local_id.get_name id) = "$this" ->
               state := with_this barethis !state
-           | (_, Tast.Unop (Ast_defs.Uref, (_, Tast.Lvar (pos, id)))) ->
+           | (_, Aast.Unop (Ast_defs.Uref, (_, Aast.Lvar (pos, id)))) ->
               state := add_local ~barethis:Bare_this !state (pos, Local_id.get_name id)
            | _ -> self#on_expr () e
          in
          (match (snd func_e) with
-         | Tast.Class_get (id, prop) ->
+         | Aast.Class_get (id, prop) ->
             on_class_get self id prop ~is_call_target:true
          | _ -> self#on_expr () func_e);
          List.iter pos_args on_arg;
          List.iter unpacked_args on_arg
 
-      | Tast.New (_, _, exprs1, exprs2, _) ->
+      | Aast.New (_, _, exprs1, exprs2, _) ->
          let add_bare_expr expr =
            (match expr with
-           | (_, Tast.Lvar(_, id)) when (Local_id.get_name id) = "$this" ->
+           | (_, Aast.Lvar(_, id)) when (Local_id.get_name id) = "$this" ->
               state := with_this Bare_this_as_ref !state
            | _ -> self#on_expr () expr) in
          List.iter exprs1 add_bare_expr;
@@ -250,8 +250,8 @@ let vars_from_ast
       ~params
       ~is_toplevel
       ~is_in_static_method
-      ~get_param_name:(fun p -> p.Tast.param_name)
-      ~get_param_default_value:(fun p -> p.Tast.param_expr)
+      ~get_param_name:(fun p -> p.Aast.param_name)
+      ~get_param_default_value:(fun p -> p.Aast.param_expr)
       ~explicit_use_set_opt:None
       b in
   ULS.items_set decl_vars

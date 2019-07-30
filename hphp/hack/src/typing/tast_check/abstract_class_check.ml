@@ -7,7 +7,7 @@
  *
  *)
 
-open Tast
+open Aast
 open Core_kernel
 
 module Env = Tast_env

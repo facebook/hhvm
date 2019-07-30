@@ -10,6 +10,7 @@
 open Core_kernel
 open SymbolOccurrence
 open Typing_defs
+module Tast = Aast
 
 module Result_set = Caml.Set.Make(struct
   type t = Relative_path.t SymbolOccurrence.t
@@ -247,7 +248,6 @@ let visitor = object (self)
     self#plus acc (super#on_catch env (sid, lid, block))
 
   method! on_class_ env class_ =
-    let open Tast in
     let open Aast in
     let acc = process_class class_ in
     (*

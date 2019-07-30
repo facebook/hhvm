@@ -32,7 +32,7 @@ the block.
 *)
 
 open Core_kernel
-open Nast
+open Aast
 
 module C = Typing_continuations
 module LEnvC = Typing_per_cont_env
@@ -84,7 +84,7 @@ end
 
 module L = LocalIdsPerCont
 
-class gatherer env = object (self) inherit [_] Nast.reduce as parent
+class gatherer env = object (self) inherit [_] Aast.reduce as parent
   val mutable gamma = L.get C.Next (LEnv.get_all_locals env)
 
   method union = L.union env
@@ -119,7 +119,7 @@ class gatherer env = object (self) inherit [_] Nast.reduce as parent
       | _ ->
         delta
 
-  method! on_stmt () s =
+  method! on_stmt () (s : Nast.stmt) =
     self#update_gamma (parent#on_stmt () s)
 
   method! on_Binop () bop e1 e2 =

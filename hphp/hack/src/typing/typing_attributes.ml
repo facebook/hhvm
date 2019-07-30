@@ -15,8 +15,8 @@ module MakeType = Typing_make_type
 module Cls = Decl_provider.Class
 
 let check_implements check_new_object attr_interface
-  { Nast.ua_name = (attr_pos, attr_name)
-  ; Nast.ua_params = params } env =
+  { Aast.ua_name = (attr_pos, attr_name)
+  ; ua_params = params } env =
   if String_utils.string_starts_with attr_name "__"
   then begin
     (* Check against builtins *)
@@ -48,7 +48,7 @@ let check_implements check_new_object attr_interface
           ~check_parent:false
           ~check_not_abstract:false
           ~is_using_clause:false attr_pos env
-          (Nast.CI attr_cid)
+          (Aast.CI attr_cid)
           []
           params (* list of attr parameter literals *)
           [] (* no variadic arguments *) in

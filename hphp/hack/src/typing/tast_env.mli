@@ -153,7 +153,7 @@ val localize_with_dty_validator:
 val get_upper_bounds: env -> string -> Type_parameter_env.tparam_bounds
 (** Get the upper bounds of the type parameter with the given name. *)
 
-val get_reified: env -> string -> Nast.reify_kind
+val get_reified: env -> string -> Aast.reify_kind
 (** Get the reification of the type parameter with the given name. *)
 
 val get_enforceable: env -> string -> bool

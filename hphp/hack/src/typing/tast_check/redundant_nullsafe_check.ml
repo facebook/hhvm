@@ -10,7 +10,7 @@
 [@@@warning "-33"]
 open Core_kernel
 [@@@warning "+33"]
-open Tast
+open Aast
 open Typing_defs
 
 module Env = Tast_env

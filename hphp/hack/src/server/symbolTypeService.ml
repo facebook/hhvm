@@ -8,6 +8,7 @@
  *)
 
 open Hh_core
+open Aast
 
 open ServerCommandTypes.Symbol_type
 
@@ -25,8 +26,8 @@ let visitor = object (self)
   method! on_expr env (((pos, ty), expr_) as expr) =
     let acc =
       match expr_ with
-      | Tast.Lvar (_, id)
-      | Tast.Dollardollar (_, id) ->
+      | Lvar (_, id)
+      | Dollardollar (_, id) ->
         Result_set.singleton {
           pos = Pos.to_relative_string pos;
           type_ = Tast_env.print_ty env ty;
@@ -38,11 +39,11 @@ let visitor = object (self)
 
   method! on_fun_param env param =
     let acc =
-      let (pos, ty) = param.Tast.param_annotation in
+      let (pos, ty) = param.param_annotation in
       Result_set.singleton {
         pos = Pos.to_relative_string pos;
         type_ = Tast_env.print_ty env ty;
-        ident_ = Local_id.to_int (Local_id.make_unscoped param.Tast.param_name);
+        ident_ = Local_id.to_int (Local_id.make_unscoped param.param_name);
       }
     in
     self#plus acc @@ super#on_fun_param env param

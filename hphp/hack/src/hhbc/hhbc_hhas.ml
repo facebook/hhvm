@@ -10,7 +10,7 @@
 open Core_kernel
 module Acc = Mutable_accumulator
 module H = Hhbc_ast
-module A = Tast
+module A = Aast
 module SU = Hhbc_string_utils
 module SN = Naming_special_names
 module ULS = Unique_list_string

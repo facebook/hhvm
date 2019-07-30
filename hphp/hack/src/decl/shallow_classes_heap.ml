@@ -37,7 +37,7 @@ let add_to_store cid c =
   else failwith "shallow_class_decl not enabled"
 
 let class_decl_if_missing (c: Nast.class_) =
-  let _, cid = c.Nast.c_name in
+  let _, cid = c.Aast.c_name in
   match get_from_store cid with
   | Some c -> c
   | None ->

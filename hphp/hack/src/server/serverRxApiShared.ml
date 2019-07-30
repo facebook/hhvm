@@ -55,12 +55,12 @@ let find_in_tree (walker: 'a walker) line char = object(self)
   method merge = walker.plus
 
   method! on_method_ env m =
-    if pos_contains_line_char (fst m.Tast.m_name) line char
+    if pos_contains_line_char (fst m.Aast.m_name) line char
     then Some (walker.on_method env m)
     else self#zero
 
   method! on_fun_ env f =
-    if pos_contains_line_char (fst f.Tast.f_name) line char
+    if pos_contains_line_char (fst f.Aast.f_name) line char
     then Some (walker.on_fun env f)
     else self#zero
 end

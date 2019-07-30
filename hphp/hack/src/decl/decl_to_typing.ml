@@ -14,7 +14,7 @@
 
 open Core_kernel
 open Decl_defs
-open Nast
+open Aast
 open Shallow_decl_defs
 open Typing_defs
 

@@ -46,7 +46,7 @@ let enforce_return_not_disposable fun_kind env ty =
     ()
 
 let has_attribute attr l =
-  List.exists l (fun { Nast.ua_name; _ } -> attr = snd ua_name)
+  List.exists l (fun { Aast.ua_name; _ } -> attr = snd ua_name)
 
 let has_return_disposable_attribute attrs =
   has_attribute SN.UserAttributes.uaReturnDisposable attrs
@@ -133,7 +133,7 @@ let async_suggest_return fkind hint pos =
   if is_async then
     let e_func = Errors.expecting_awaitable_return_type_hint in
     match snd hint with
-    | Nast.Happly (s, _) ->
+    | Aast.Happly (s, _) ->
         if snd s <> Naming_special_names.Classes.cAwaitable then e_func pos
     | _ -> e_func pos
 

@@ -40,7 +40,7 @@
  *)
 
 open Core_kernel
-open Nast
+open Aast
 
 type env = {
   (* tracking will be set when we are under an unsequenced operation

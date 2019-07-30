@@ -9,7 +9,7 @@
 
 open Core_kernel
 
-module T = Tast
+module T = Aast
 
 let kind_to_type_info ~tparams ~namespace h =
   let nullable =

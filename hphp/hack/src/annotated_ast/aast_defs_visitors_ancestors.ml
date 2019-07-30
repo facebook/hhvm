@@ -22,6 +22,12 @@ class ['self] iter_defs_base =
       fun f env key data ->
         self#on_shape_field_name env key;
         f env data
+
+    method on_'fb _ _ = ()
+
+    method on_'ex _ _ = ()
+
+    method on_'en _ _ = ()
   end
 
 class virtual ['self] reduce_defs_base =
@@ -39,6 +45,12 @@ class virtual ['self] reduce_defs_base =
         : 'a. ('env -> 'a -> 'acc) -> 'env -> SM.key -> 'a -> 'acc =
       fun f env key data ->
         self#plus (self#on_shape_field_name env key) (f env data)
+
+    method on_'fb _env _ = self#zero
+
+    method on_'ex _env _ = self#zero
+
+    method on_'en _env _ = self#zero
   end
 
 class ['self] map_defs_base =

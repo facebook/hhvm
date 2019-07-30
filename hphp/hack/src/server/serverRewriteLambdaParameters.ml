@@ -24,7 +24,7 @@ end = struct
   exception Non_denotable
 
   let print_tprim =
-    let open Nast in
+    let open Aast in
     function
     | Tbool -> "bool"
     | Tint -> "int"

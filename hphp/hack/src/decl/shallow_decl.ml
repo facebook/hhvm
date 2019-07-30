@@ -11,7 +11,7 @@ open Core_kernel
 open Decl_defs
 open Decl_fun_utils
 open Shallow_decl_defs
-open Nast
+open Aast
 open Typing_deps
 open Typing_defs
 
@@ -60,9 +60,9 @@ let class_const env c cc =
     }
 
 let typeconst_abstract_kind env = function
-  | Nast.TCAbstract default -> TCAbstract (Option.map default (Decl_hint.hint env))
-  | Nast.TCPartiallyAbstract -> TCPartiallyAbstract
-  | Nast.TCConcrete -> TCConcrete
+  | Aast.TCAbstract default -> TCAbstract (Option.map default (Decl_hint.hint env))
+  | Aast.TCPartiallyAbstract -> TCPartiallyAbstract
+  | Aast.TCConcrete -> TCConcrete
 
 let typeconst env c tc =
   match c.c_kind with

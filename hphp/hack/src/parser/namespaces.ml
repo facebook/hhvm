@@ -11,6 +11,7 @@ open Core_kernel
 open Ast
 open Namespace_env
 
+module Nast = Aast
 module SN = Naming_special_names
 
 (* The typechecker has a different view of HH autoimporting than the compiler.

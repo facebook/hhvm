@@ -8,6 +8,7 @@
  *)
 
 open Base
+open Aast
 open Tast
 open Ast_defs
 
@@ -98,7 +99,7 @@ let gen_pu_accessor
   let cases = cases @ [default] in
   let body = {
     fb_ast = [(pos, Switch (var_atom, cases))];
-    fb_annotation = Annotations.FuncBodyAnnotation.NoUnsafeBlocks
+    fb_annotation = NoUnsafeBlocks
   }
   in
   {
@@ -150,7 +151,7 @@ let gen_Members field pos (fields: pu_enum) =
                     )))));
      (pos, (Return (Some (annot, (Lvar (pos, Local_id.make_unscoped "$mems"))))))
    ];
-   fb_annotation = Annotations.FuncBodyAnnotation.NoUnsafeBlocks
+   fb_annotation = NoUnsafeBlocks
  }
  in {
    m_visibility = Public;
@@ -228,6 +229,10 @@ let erase_tparams clean_hint on_user_attribute (params: tparam list) =
 *)
 class ['self] erase_body_visitor = object (_self: 'self)
   inherit [_] endo as super
+  method on_'fb _env fb = fb
+  method on_'ex _env ex = ex
+  method on_'en _env en = en
+
   method! on_PU_atom _ _ s = String s
   method! on_PU_identifier _ _ qual (pos, field) (_, name) =
     let fun_name = (pos, gen_fun_name field name) in

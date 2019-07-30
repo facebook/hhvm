@@ -9,7 +9,7 @@
 
 open Core_kernel
 open Common
-open Nast
+open Aast
 open Typing_defs
 
 module Env          = Typing_env

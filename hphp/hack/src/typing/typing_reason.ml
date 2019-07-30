@@ -72,7 +72,7 @@ type t =
   | Rtype_access     of t * (t * string) list
   | Rexpr_dep_type   of t * Pos.t * expr_dep_type_reason
   | Rnullsafe_op     of Pos.t (* ?-> operator is used *)
-  | Rtconst_no_cstr  of Nast.sid
+  | Rtconst_no_cstr  of Aast.sid
   | Rused_as_map     of Pos.t
   | Rused_as_shape   of Pos.t
   | Rpredicated      of Pos.t * string
@@ -95,7 +95,7 @@ type t =
   | Rtype_variable   of Pos.t
   | Rtype_variable_generics   of Pos.t * string * string
   | Rsolve_fail      of Pos.t
-  | Rcstr_on_generics of Pos.t * Nast.sid
+  | Rcstr_on_generics of Pos.t * Aast.sid
   | Rlambda_param    of Pos.t * t
   | Rshape of Pos.t * string
   | Renforceable     of Pos.t

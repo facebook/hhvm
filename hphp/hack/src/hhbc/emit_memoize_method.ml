@@ -13,7 +13,7 @@ open Emit_memoize_helpers
 open Hhbc_ast
 
 module R = Hhbc_string_utils.Reified
-module T = Tast
+module T = Aast
 
 (* Precomputed information required for generation of memoized methods *)
 type memoize_info = {

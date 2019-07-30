@@ -12,7 +12,7 @@ open Core_kernel
 module Env = Tast_env
 
 class virtual iter = object (self)
-  inherit [_] Tast.iter as super
+  inherit [_] Aast.iter as super
 
   (* Entry point *)
   method go program = self#on_list (fun () -> self#go_def) () program
@@ -22,16 +22,16 @@ class virtual iter = object (self)
   method! on_fun_ env x = super#on_fun_ (Env.restore_fun_env env x) x
   method! on_method_ env x =
     let env =
-      if snd x.Tast.m_name = Naming_special_names.Members.__construct
+      if snd x.Aast.m_name = Naming_special_names.Members.__construct
       then Env.set_inside_constructor env
-      else if x.Tast.m_static
+      else if x.Aast.m_static
       then Env.set_static env
       else env in
     super#on_method_ (Env.restore_method_env env x) x
 
   method! on_class_var env cv =
     let env =
-      if cv.Tast.cv_is_static
+      if cv.Aast.cv_is_static
       then Env.set_static env
       else env in
     super#on_class_var env cv
@@ -41,7 +41,7 @@ class virtual iter = object (self)
 end
 
 class virtual ['state] iter_with_state = object (self)
-  inherit [_] Tast.iter as super
+  inherit [_] Aast.iter as super
 
   (* Entry point *)
   method go (state: 'state) program =
@@ -54,16 +54,16 @@ class virtual ['state] iter_with_state = object (self)
 
   method! on_method_ (env, state) x =
     let env =
-      if snd x.Tast.m_name = Naming_special_names.Members.__construct
+      if snd x.Aast.m_name = Naming_special_names.Members.__construct
       then Env.set_inside_constructor env
-      else if x.Tast.m_static
+      else if x.Aast.m_static
       then Env.set_static env
       else env in
     super#on_method_ (Env.restore_method_env env x, state) x
 
   method! on_class_var (env, state) cv =
     let env =
-      if cv.Tast.cv_is_static
+      if cv.Aast.cv_is_static
       then Env.set_static env
       else env in
     super#on_class_var (env, state) cv
@@ -75,7 +75,7 @@ class virtual ['state] iter_with_state = object (self)
 end
 
 class virtual ['a] reduce = object (self)
-  inherit [_] Tast.reduce as super
+  inherit [_] Aast.reduce as super
 
   (* Entry point *)
   method go program : 'a = self#on_list (fun () -> self#go_def) () program
@@ -86,16 +86,16 @@ class virtual ['a] reduce = object (self)
 
   method! on_method_ env x =
     let env =
-      if snd x.Tast.m_name = Naming_special_names.Members.__construct
+      if snd x.Aast.m_name = Naming_special_names.Members.__construct
       then Env.set_inside_constructor env
-      else if x.Tast.m_static
+      else if x.Aast.m_static
       then Env.set_static env
       else env in
     super#on_method_ (Env.restore_method_env env x) x
 
   method! on_class_var env cv =
     let env =
-      if cv.Tast.cv_is_static
+      if cv.Aast.cv_is_static
       then Env.set_static env
       else env in
     super#on_class_var env cv
@@ -106,10 +106,14 @@ class virtual ['a] reduce = object (self)
 end
 
 class virtual map = object (self)
-  inherit [_] Tast.map as super
+  inherit [_] Aast.map as super
+
+  method on_'ex _ ex = ex
+  method on_'fb _ fb = fb
+  method on_'en _ en = en
 
   (* Entry point *)
-  method go program = self#on_list (fun () -> self#go_def) () program
+  method go program : Tast.program = self#on_list (fun () -> self#go_def) () program
 
   method go_def x = self#on_def (Env.def_env x) x
 
@@ -117,16 +121,16 @@ class virtual map = object (self)
 
   method! on_method_ env x =
     let env =
-      if snd x.Tast.m_name = Naming_special_names.Members.__construct
+      if snd x.Aast.m_name = Naming_special_names.Members.__construct
       then Env.set_inside_constructor env
-      else if x.Tast.m_static
+      else if x.Aast.m_static
       then Env.set_static env
       else env in
     super#on_method_ (Env.restore_method_env env x) x
 
   method! on_class_var env cv =
     let env =
-      if cv.Tast.cv_is_static
+      if cv.Aast.cv_is_static
       then Env.set_static env
       else env in
     super#on_class_var env cv
@@ -137,7 +141,11 @@ class virtual map = object (self)
 end
 
 class virtual endo = object (self)
-  inherit [_] Tast.endo as super
+  inherit [_] Aast.endo as super
+
+  method on_'ex _ ex = ex
+  method on_'fb _ fb = fb
+  method on_'en _ en = en
 
   (* Entry point *)
   method go program = self#on_list (fun () -> self#go_def) () program
@@ -148,16 +156,16 @@ class virtual endo = object (self)
 
   method! on_method_ env x =
     let env =
-      if snd x.Tast.m_name = Naming_special_names.Members.__construct
+      if snd x.Aast.m_name = Naming_special_names.Members.__construct
       then Env.set_inside_constructor env
-      else if x.Tast.m_static
+      else if x.Aast.m_static
       then Env.set_static env
       else env in
     super#on_method_ (Env.restore_method_env env x) x
 
   method! on_class_var env cv =
     let env =
-      if cv.Tast.cv_is_static
+      if cv.Aast.cv_is_static
       then Env.set_static env
       else env in
     super#on_class_var env cv

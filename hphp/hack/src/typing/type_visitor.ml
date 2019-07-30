@@ -24,12 +24,12 @@ class type ['a] type_visitor_type = object
   method on_tgeneric : 'a -> Reason.t -> string -> 'a
   method on_toption : 'a -> Reason.t -> 'b ty -> 'a
   method on_tlike : 'a -> Reason.t -> 'b ty -> 'a
-  method on_tprim : 'a -> Reason.t -> Nast.tprim -> 'a
+  method on_tprim : 'a -> Reason.t -> Aast.tprim -> 'a
   method on_tvar : 'a -> Reason.t -> Ident.t -> 'a
   method on_type : 'a -> 'b ty -> 'a
   method on_tfun : 'a -> Reason.t -> 'b fun_type -> 'a
   method on_tabstract : 'a -> Reason.t -> abstract_kind -> locl ty option -> 'a
-  method on_tapply : 'a -> Reason.t -> Nast.sid -> decl ty list -> 'a
+  method on_tapply : 'a -> Reason.t -> Aast.sid -> decl ty list -> 'a
   method on_ttuple : 'a -> Reason.t -> 'b ty list -> 'a
   method on_tanon : 'a -> Reason.t -> locl fun_arity -> Ident.t -> 'a
   method on_tunion : 'a -> Reason.t -> locl ty list -> 'a
@@ -42,7 +42,7 @@ class type ['a] type_visitor_type = object
       -> 'b shape_field_type Nast.ShapeMap.t
       -> 'a
   method on_taccess : 'a -> Reason.t -> taccess_type -> 'a
-  method on_tclass : 'a -> Reason.t -> Nast.sid -> exact -> locl ty list -> 'a
+  method on_tclass : 'a -> Reason.t -> Aast.sid -> exact -> locl ty list -> 'a
   method on_tarraykind : 'a -> Reason.t -> array_kind -> 'a
   method on_tlist : 'a -> Reason.t -> locl ty list -> 'a
 end

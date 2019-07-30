@@ -262,10 +262,10 @@ let check_call env method_info pos reason ft arg_types =
 
 let disallow_atmost_rx_as_rxfunc_on_non_functions env param param_ty =
   let module UA = Naming_special_names.UserAttributes in
-  if Attributes.mem UA.uaAtMostRxAsFunc param.Nast.param_user_attributes
+  if Attributes.mem UA.uaAtMostRxAsFunc param.Aast.param_user_attributes
   then begin
-    if param.Nast.param_hint = None
-    then Errors.missing_annotation_for_atmost_rx_as_rxfunc_parameter param.Nast.param_pos
+    if param.Aast.param_hint = None
+    then Errors.missing_annotation_for_atmost_rx_as_rxfunc_parameter param.Aast.param_pos
     else
       let rec err_if_not_fun ty =
         match snd ty with

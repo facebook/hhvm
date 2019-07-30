@@ -106,8 +106,8 @@ let as_log_value fake =
 let make_id obj_name member_name =
   let obj_name =
     match obj_name with
-    | _, Nast.This -> Typing_defs.this
-    | _, Nast.Lvar (_, x) -> x
+    | _, Aast.This -> Typing_defs.this
+    | _, Aast.Lvar (_, x) -> x
     | _ -> assert false
   in
   Local_id.make_unscoped (Local_id.to_string obj_name ^ "->" ^ member_name)

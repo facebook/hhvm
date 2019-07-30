@@ -10,7 +10,7 @@
 open Core_kernel
 open Hhbc_ast
 
-module A = Tast
+module A = Aast
 module SN = Naming_special_names
 module SU = Hhbc_string_utils
 
@@ -18,7 +18,7 @@ module SU = Hhbc_string_utils
 type class_expr =
 | Class_special of SpecialClsRef.t
 | Class_id of Ast_defs.id
-| Class_expr of A.expr
+| Class_expr of Tast.expr
 | Class_reified of Instruction_sequence.t
 
 let get_original_class_name ~resolve_self ~check_traits scope =
@@ -83,7 +83,7 @@ let expr_to_class_expr ?(check_traits=false) ~resolve_self scope (_, expr_ as ex
  * so always expect CIexpr as the class_id node
  *)
 let class_id_to_class_expr
-      ?(check_traits=false) ~resolve_self scope (cid : A.class_id): class_expr =
+      ?(check_traits=false) ~resolve_self scope (cid : Tast.class_id): class_expr =
   let (annot, cid_) = cid in
   let e = match cid_ with
     | A.CIexpr e -> e

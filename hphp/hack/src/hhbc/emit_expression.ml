@@ -29,7 +29,7 @@ let max_array_elem_on_stack () =
 type genva_inline_context =
   | GI_expression
   | GI_ignore_result
-  | GI_list_assignment of A.expr list
+  | GI_list_assignment of Tast.expr list
 
 type emit_jmp_result = {
   (* generated instruction sequence *)
@@ -100,9 +100,9 @@ module InoutLocals = struct
   let add_inout name i m = update (Local_id.get_name name) i add_inout m
   let add_use name i m = update (Local_id.get_name name) i add_use m
 
-  let collect_written_variables env (args : A.expr list) : alias_info SMap.t =
+  let collect_written_variables env (args : Tast.expr list) : alias_info SMap.t =
     (* check value of the argument *)
-    let rec handle_arg ~is_top i acc (arg : A.expr) =
+    let rec handle_arg ~is_top i acc (arg : Tast.expr) =
       match snd arg with
       (* inout $v *)
       | A.Callconv (Ast_defs.Pinout, (_, A.Lvar (_, id)))
@@ -122,7 +122,7 @@ module InoutLocals = struct
         dive i acc arg
 
     (* collect lvars on the left hand side of '=' operator *)
-    and collect_lvars_lhs i acc (e : A.expr) =
+    and collect_lvars_lhs i acc (e : Tast.expr) =
       match snd e with
       | A.Lvar (_, id) when not (is_local_this env id) ->
         let acc = add_use id i acc in
@@ -414,7 +414,7 @@ let extract_shape_field_name_pstring env annot = function
         "Reified generics cannot be used in shape keys";
     A.Class_const ((annot, A.CI id), p)
 
-let rec text_of_expr (e : A.expr) = match e with
+let rec text_of_expr (e : Tast.expr) = match e with
   (* Note we force string literals to become single-quoted, regardless of
      whether they were single- or double-quoted in the source. Gross. *)
   | _, A.String s -> "'" ^ s ^ "'"
@@ -424,7 +424,7 @@ let rec text_of_expr (e : A.expr) = match e with
      (Local_id.get_name id) ^ "[" ^ (text_of_expr e) ^ "]"
   | _ -> "unknown" (* TODO: get text of expression *)
 
-let text_of_class_id (cid : A.class_id) =
+let text_of_class_id (cid : Tast.class_id) =
   match (snd cid) with
   | A.CIparent -> "parent"
   | A.CIself -> "self"
@@ -432,12 +432,12 @@ let text_of_class_id (cid : A.class_id) =
   | A.CIexpr e -> text_of_expr e
   | A.CI (_, id) -> id
 
-let text_of_prop (prop : A.class_get_expr) =
+let text_of_prop (prop : Tast.class_get_expr) =
   match prop with
   | A.CGstring (_, s) -> s
   | A.CGexpr e -> text_of_expr e
 
-let parse_include (e : A.expr) =
+let parse_include (e : Tast.expr) =
   let strip_backslash p =
     let len = String.length p in
     if len > 0 && p.[0] = '/' then String.sub p 1 (len-1) else p in
@@ -506,7 +506,7 @@ and emit_local ~notice ~need_ref env (lid: Aast.lid) =
 
 (* Emit CGetL2 for local variables, and return true to indicate that
  * the result will be just below the top of the stack *)
-and emit_first_expr env (expr : A.expr) =
+and emit_first_expr env (expr : Tast.expr) =
   match snd expr with
   | A.Lvar (pos, id)
     when not ((is_local_this env id) && not (Emit_env.get_needs_local_this env)
@@ -517,7 +517,7 @@ and emit_first_expr env (expr : A.expr) =
      emit_expr env expr, false
 
 (* Special case for binary operations to make use of CGetL2 *)
-and emit_two_exprs env (outer_pos : Pos.t) (e1 : A.expr) (e2 : A.expr) =
+and emit_two_exprs env (outer_pos : Pos.t) (e1 : Tast.expr) (e2 : Tast.expr) =
   let instrs1, is_under_top = emit_first_expr env e1 in
   let instrs2 = emit_expr env e2 in
   let instrs2_is_var =
@@ -535,7 +535,7 @@ and emit_two_exprs env (outer_pos : Pos.t) (e1 : A.expr) (e2 : A.expr) =
       then [instrs1; emit_pos outer_pos; instrs2]
       else [instrs1; instrs2; emit_pos outer_pos]
 
-and emit_is_null env (e : A.expr) =
+and emit_is_null env (e : Tast.expr) =
   match e with
   | (_, A.Lvar (pos, id)) when not (is_local_this env id) ->
      instr_istypel (get_local env (pos, (Local_id.get_name id))) OpNull
@@ -545,7 +545,7 @@ and emit_is_null env (e : A.expr) =
       instr_istypec OpNull
     ]
 
-and emit_binop env annot op (e1: A.expr) (e2: A.expr) =
+and emit_binop env annot op (e1: Tast.expr) (e2: Tast.expr) =
   let (pos, _) = annot in
   let default () = gather [
     emit_two_exprs env pos e1 e2;
@@ -685,7 +685,7 @@ and emit_cast env pos hint expr =
     op;
   ]
 
-and emit_conditional_expression env pos (etest : A.expr) (etrue : A.expr option) (efalse : A.expr) =
+and emit_conditional_expression env pos (etest : Tast.expr) (etrue : Tast.expr option) (efalse : Tast.expr) =
   match etrue with
   | Some etrue ->
     let false_label = Label.next_regular () in
@@ -778,7 +778,7 @@ and emit_reified_targs env pos targs =
     ]
   end
 
-and emit_new env pos (cid : A.class_id) (targs : Aast.targ list) (args : A.expr list) (uargs : A.expr list) =
+and emit_new env pos (cid : Tast.class_id) (targs : Aast.targ list) (args : Tast.expr list) (uargs : Tast.expr list) =
   if has_inout_args args then
     Emit_fatal.raise_fatal_parse pos "Unexpected inout arg in new expr";
   let scope = Emit_env.get_scope env in
@@ -872,7 +872,7 @@ and emit_clone env expr =
     instr_clone;
   ]
 
-and emit_shape env (expr : A.expr) (fl : (Ast_defs.shape_field_name * A.expr) list) =
+and emit_shape env (expr : Tast.expr) (fl : (Ast_defs.shape_field_name * Tast.expr) list) =
   let p = fst expr in
   let fl =
     List.map fl
@@ -969,7 +969,7 @@ and emit_load_class_const env pos (cexpr : Ast_class_expr.class_expr) id =
     load_const;
   ]
 
-and emit_class_expr env (cexpr : Ast_class_expr.class_expr) (prop : A.class_get_expr) =
+and emit_class_expr env (cexpr : Ast_class_expr.class_expr) (prop : Tast.class_get_expr) =
   let load_prop () =
     match prop with
     | A.CGstring (pos, id) ->
@@ -1002,7 +1002,7 @@ and emit_class_expr env (cexpr : Ast_class_expr.class_expr) (prop : A.class_get_
       load_prop (), emit_load_class_ref env pos cexpr
     end
 
-and emit_class_get env qop (cid : A.class_id) (prop : A.class_get_expr) =
+and emit_class_get env qop (cid : Tast.class_id) (prop : Tast.class_get_expr) =
   let cexpr = class_id_to_class_expr ~resolve_self:false
     (Emit_env.get_scope env) cid
   in
@@ -1020,7 +1020,7 @@ and emit_class_get env qop (cid : A.class_id) (prop : A.class_get_expr) =
  * We follow the logic for the Construct::KindOfClassConstantExpression
  * case in emitter.cpp
  *)
-and emit_class_const env pos (cid: A.class_id) (_, id): Instruction_sequence.t =
+and emit_class_const env pos (cid: Tast.class_id) (_, id): Instruction_sequence.t =
   let cexpr = class_id_to_class_expr ~resolve_self:true
     (Emit_env.get_scope env) cid in
   let cexpr = match cexpr with
@@ -1061,7 +1061,7 @@ and emit_yield env pos = function
       instr_yieldk;
     ]
 
-and emit_string2 env pos (exprs : A.expr list) =
+and emit_string2 env pos (exprs : Tast.expr list) =
   match exprs with
   | [e] ->
     gather [
@@ -1081,7 +1081,7 @@ and emit_string2 env pos (exprs : A.expr list) =
 
   | [] -> failwith "String2 with zero arguments is impossible"
 
-and emit_lambda (env : Emit_env.t) (fundef : A.fun_) (ids : Aast.lid list) =
+and emit_lambda (env : Emit_env.t) (fundef : Tast.fun_) (ids : Aast.lid list) =
   (* Closure conversion puts the class number used for CreateCl in the "name"
    * of the function definition *)
   let fundef_name = snd fundef.A.f_name in
@@ -1130,7 +1130,7 @@ and emit_id (env : Emit_env.t) (id: Aast.sid) =
 
 and rename_xhp (p, s) = (p, SU.Xhp.mangle s)
 
-and emit_xhp (env : Emit_env.t) (annot : A.expr_annotation) id (attributes : A.xhp_attribute list) (children : A.expr list) =
+and emit_xhp (env : Emit_env.t) annot id attributes (children : Tast.expr list) =
   (* Translate into a constructor call. The arguments are:
    *  1) struct-like array of attributes
    *  2) vec-like array of children
@@ -1166,7 +1166,7 @@ and emit_xhp (env : Emit_env.t) (annot : A.expr_annotation) id (attributes : A.x
       [],
       annot))
 
-and emit_import env annot (flavor : Aast.import_flavor) (e : A.expr) =
+and emit_import env annot (flavor : Aast.import_flavor) (e : Tast.expr) =
   let (pos, _) = annot in
   let inc = parse_include e in
   Emit_symbol_refs.add_include inc;
@@ -1187,7 +1187,7 @@ and emit_import env annot (flavor : Aast.import_flavor) (e : A.expr) =
     instr import_op;
   ]
 
-and emit_call_isset_expr env outer_pos (expr : A.expr) =
+and emit_call_isset_expr env outer_pos (expr : Tast.expr) =
   let ((pos, _), expr_) = expr in
   match expr_ with
   | A.Array_get ((_, A.Lvar (_, x)), Some e) when (Local_id.get_name x) = SN.Superglobals.globals ->
@@ -1302,7 +1302,7 @@ and emit_set_range_expr env pos name kind args =
     instr (IFinal (SetRangeM (base_stack + cls_stack, range_op, size)))
   ]
 
-and emit_call_isset_exprs env pos (exprs : A.expr list) =
+and emit_call_isset_exprs env pos (exprs : Tast.expr list) =
   match exprs with
   | [] -> Emit_fatal.raise_fatal_parse
     pos "Cannot use isset() without any arguments"
@@ -1327,7 +1327,7 @@ and emit_call_isset_exprs env pos (exprs : A.expr list) =
         instr_label its_done
       ]
 
-and emit_exit env (expr_opt : A.expr option) =
+and emit_exit env (expr_opt : Tast.expr option) =
   gather [
     (match expr_opt with
       | None -> instr_int 0
@@ -1335,7 +1335,7 @@ and emit_exit env (expr_opt : A.expr option) =
     instr_exit;
   ]
 
-and emit_idx env pos (es : A.expr list) =
+and emit_idx env pos (es : Tast.expr list) =
   let default = if List.length es = 2 then instr_null else empty in
   gather [
     emit_exprs env es;
@@ -1351,13 +1351,13 @@ and emit_eval env pos e =
     instr_eval;
   ]
 
-and emit_xhp_obj_get env pos (_, ty) (e : A.expr) s nullflavor =
+and emit_xhp_obj_get env pos (_, ty) (e : Tast.expr) s nullflavor =
   let annot = (pos, ty) in
   let fn_name = annot, A.Obj_get (e, (annot, A.Id (pos, "getAttribute")), nullflavor) in
   let args = [annot, A.String (SU.Xhp.clean s)] in
   emit_call env pos fn_name [] args [] None
 
-and try_inline_gen_call env (e : A.expr) =
+and try_inline_gen_call env (e : Tast.expr) =
   if not (can_inline_gen_functions ()) then None
   else match snd e with
   | A.Call (_, (_, A.Id (_, s)), _, [arg], [])
@@ -1391,7 +1391,7 @@ and emit_iter ~collection f =
   ] in
   iter_init, iterate, iter_done
 
-and inline_gena_call env (arg : A.expr) = Local.scope @@ fun () ->
+and inline_gena_call env (arg : Tast.expr) = Local.scope @@ fun () ->
   (* convert input to array *)
   let load_array = emit_expr env arg in
   Scope.with_unnamed_local @@ fun arr_local ->
@@ -1430,7 +1430,7 @@ and inline_gena_call env (arg : A.expr) = Local.scope @@ fun () ->
   (* after *)
   instr_pushl arr_local
 
-and emit_await env pos (expr : A.expr) =
+and emit_await env pos (expr : Tast.expr) =
   begin match try_inline_gen_call env expr with
   | Some r -> r
   | None ->
@@ -1510,7 +1510,7 @@ and emit_reified_type env pos name =
   | Some instrs -> instrs
   | None -> Emit_fatal.raise_fatal_runtime Pos.none "Invalid reified param"
 
-and emit_expr (env : Emit_env.t) (expr: A.expr) =
+and emit_expr (env : Emit_env.t) (expr: Tast.expr) =
   let ((pos, _) as annot, expr_) = expr in
   match expr_ with
   | A.Float _ | A.String _ | A.Int _ | A.Null | A.False | A.True ->
@@ -1666,9 +1666,9 @@ and emit_static_collection ~transform_to_collection pos tv =
     transform_instr;
   ]
 
-and emit_value_only_collection env pos (es : A.afield list) constructor =
+and emit_value_only_collection env pos es constructor =
   let limit = max_array_elem_on_stack () in
-  let inline (exprs : A.afield list) =
+  let inline exprs =
     gather
     [gather @@ List.map exprs
       ~f:(function
@@ -1678,7 +1678,7 @@ and emit_value_only_collection env pos (es : A.afield list) constructor =
       emit_pos pos;
       instr @@ ILitConst (constructor @@ List.length exprs)]
   in
-  let outofline (exprs : A.afield list) =
+  let outofline exprs =
     gather @@
     List.map exprs
       ~f:(function
@@ -1691,7 +1691,7 @@ and emit_value_only_collection env pos (es : A.afield list) constructor =
     | x1 :: [] -> inline x1
     | x1 :: x2 :: _ -> gather [inline x1; outofline x2]
 
-and emit_keyvalue_collection name env pos (es : A.afield list) constructor =
+and emit_keyvalue_collection name env pos es constructor =
   let name = SU.strip_ns name in
   let transform_instr =
     if name = "dict" || name = "array" then empty else
@@ -1710,7 +1710,7 @@ and emit_keyvalue_collection name env pos (es : A.afield list) constructor =
     transform_instr;
   ]
 
-and emit_struct_array env pos (es : A.afield list) ctor =
+and emit_struct_array env pos es ctor =
   let es =
     List.map es
       ~f:(function A.AFkvalue (k, v) ->
@@ -1730,7 +1730,7 @@ and emit_struct_array env pos (es : A.afield list) ctor =
 
 (* isPackedInit() returns true if this expression list looks like an
  * array with no keys and no ref values *)
-and is_packed_init ?(hack_arr_compat=true) (es : A.afield list) =
+and is_packed_init ?(hack_arr_compat=true) es =
   let is_only_values =
     List.for_all es ~f:(function A.AFkvalue _ -> false | _ -> true)
   in
@@ -1766,7 +1766,7 @@ and is_packed_init ?(hack_arr_compat=true) (es : A.afield list) =
   && not has_references
   && (List.length es) > 0
 
-and is_struct_init env (es : A.afield list) allow_numerics =
+and is_struct_init env es allow_numerics =
   let has_references =
     (* Reference can only exist as a value *)
     List.exists es
@@ -1802,7 +1802,7 @@ and is_struct_init env (es : A.afield list) allow_numerics =
 
 (* transform_to_collection argument keeps track of
  * what collection to transform to *)
-and emit_dynamic_collection env (expr : A.expr) (es : A.afield list) =
+and emit_dynamic_collection env (expr : Tast.expr) es =
   let ((pos, _), expr_) = expr in
   let count = List.length es in
   match expr_ with
@@ -1890,7 +1890,7 @@ and emit_dynamic_collection env (expr : A.expr) (es : A.afield list) =
   else
     emit_keyvalue_collection "array" env pos es (NewMixedArray count)
 
-and emit_named_collection env (expr : A.expr) pos name (fields : A.afield list) =
+and emit_named_collection env (expr : Tast.expr) pos name fields =
   let name = SU.Types.fix_casing @@ SU.strip_ns name in
   match name with
   | "dict" | "vec" | "keyset" ->
@@ -1936,7 +1936,7 @@ and is_php_array = function
  | _, A.Darray _ -> not (hack_arr_dv_arrs ())
  | _ -> false
 
-and emit_collection ?(transform_to_collection) env (expr : A.expr) (es : A.afield list) =
+and emit_collection ?(transform_to_collection) env (expr : Tast.expr) es =
   let pos = Tast_annotate.get_pos expr in
   match Ast_constant_folder.expr_to_opt_typed_value
           ~allow_maps:true
@@ -1949,7 +1949,7 @@ and emit_collection ?(transform_to_collection) env (expr : A.expr) (es : A.afiel
   | None ->
     emit_dynamic_collection env expr es
 
-and emit_pipe env (e1: A.expr) (e2: A.expr) =
+and emit_pipe env (e1: Tast.expr) (e2: Tast.expr) =
   let lhs_instrs = emit_expr env e1 in
   Scope.with_unnamed_local @@ fun temp ->
   let env = Emit_env.with_pipe_var temp env in
@@ -1962,7 +1962,7 @@ and emit_pipe env (e1: A.expr) (e2: A.expr) =
  * Generate specialized code in case expr is statically known, and for
  * !, && and || expressions
  *)
-and emit_jmpz env (expr : A.expr) label: emit_jmp_result =
+and emit_jmpz env (expr : Tast.expr) label: emit_jmp_result =
   let ((pos, _), expr_) = expr in
   let with_pos i = emit_pos_then pos i in
   let opt = optimize_null_check () in
@@ -2048,7 +2048,7 @@ and emit_jmpz env (expr : A.expr) label: emit_jmp_result =
  * Generate specialized code in case expr is statically known, and for
  * !, && and || expressions
  *)
-and emit_jmpnz env annot (expr_ : A.expr_) label: emit_jmp_result =
+and emit_jmpnz env annot (expr_ : Tast.expr_) label: emit_jmp_result =
   let (pos, _) = annot in
   let with_pos i = emit_pos_then pos i in
   let opt = optimize_null_check () in
@@ -2121,7 +2121,7 @@ and emit_jmpnz env annot (expr_ : A.expr_) label: emit_jmp_result =
         is_label_used = true; }
     end
 
-and emit_short_circuit_op env annot (expr : A.expr_) =
+and emit_short_circuit_op env annot (expr : Tast.expr_) =
   let (pos, _) = annot in
   let its_true = Label.next_regular () in
   let its_done = Label.next_regular () in
@@ -2145,7 +2145,7 @@ and emit_short_circuit_op env annot (expr : A.expr_) =
     r1.instrs;
     if_true; ]
 
-and emit_null_coalesce_assignment env pos (e1 : A.expr) (e2 : A.expr) =
+and emit_null_coalesce_assignment env pos (e1 : Tast.expr) (e2 : Tast.expr) =
   let end_label = Label.next_regular () in
   let do_set_label = Label.next_regular () in
   let l_nonnull = Local.get_unnamed_local () in
@@ -2171,7 +2171,7 @@ and emit_null_coalesce_assignment env pos (e1 : A.expr) (e2 : A.expr) =
     instr_label end_label;
   ]
 
-and emit_quiet_expr ?(null_coalesce_assignment=false) (env : Emit_env.t) pos (expr : A.expr): Instruction_sequence.t * Hhbc_ast.num_params option =
+and emit_quiet_expr ?(null_coalesce_assignment=false) (env : Emit_env.t) pos (expr : Tast.expr): Instruction_sequence.t * Hhbc_ast.num_params option =
   let (_, expr_) = expr in
   match expr_ with
   | A.Lvar (name_pos, name) when (Local_id.get_name name) = SN.Superglobals.globals ->
@@ -2201,7 +2201,7 @@ and emit_quiet_expr ?(null_coalesce_assignment=false) (env : Emit_env.t) pos (ex
 (* returns instruction that will represent setter for $base[local] where
    is_base is true when result cell is base for another subscript operator and
    false when it is final left hand side of the assignment *)
-and emit_store_for_simple_base ~is_base env pos elem_stack_size (base_expr : A.expr) local =
+and emit_store_for_simple_base ~is_base env pos elem_stack_size (base_expr : Tast.expr) local =
   let base_expr_instrs_begin,
       base_expr_instrs_end,
       base_setup_instrs,
@@ -2225,7 +2225,7 @@ and emit_store_for_simple_base ~is_base env pos elem_stack_size (base_expr : A.e
    - Some Value_kind_local - expression represents local that will be
      overwritten later
    - Some Value_kind_expression - spilled non-trivial expression *)
-and get_local_temp_kind ~is_base inout_param_info env (e_opt : A.expr option) =
+and get_local_temp_kind ~is_base inout_param_info env (e_opt : Tast.expr option) =
   match e_opt, inout_param_info with
   (* not inout case - no need to save *)
   | _, None -> None
@@ -2253,7 +2253,7 @@ and is_trivial ~is_base env (_, e) =
 (* Emit code for e1[e2] or isset(e1[e2]).
  *)
 and emit_array_get ?(null_coalesce_assignment=false) ?(no_final=false) ?mode
- env outer_pos qop (base_expr : A.expr) (opt_elem_expr : A.expr option) =
+ env outer_pos qop (base_expr : Tast.expr) (opt_elem_expr : Tast.expr option) =
  let result =
    emit_array_get_worker ~null_coalesce_assignment ~no_final ?mode ~inout_param_info:None
    env outer_pos qop base_expr opt_elem_expr in
@@ -2262,7 +2262,7 @@ and emit_array_get ?(null_coalesce_assignment=false) ?(no_final=false) ?mode
  | Array_get_inout _, _ -> failwith "unexpected inout"
 
 and emit_array_get_worker ?(null_coalesce_assignment=false) ?(no_final=false) ?mode ~inout_param_info
-  env outer_pos qop (base_expr : A.expr) (opt_elem_expr : A.expr option) =
+  env outer_pos qop (base_expr : Tast.expr) (opt_elem_expr : Tast.expr option) =
   (* Disallow use of array(..)[] *)
   match base_expr, opt_elem_expr with
   | ((pos, _), A.Array _), None ->
@@ -2380,7 +2380,7 @@ and emit_array_get_worker ?(null_coalesce_assignment=false) ?(no_final=false) ?m
 (* Emit code for e1->e2 or e1?->e2 or isset(e1->e2).
  *)
 and emit_obj_get ?(null_coalesce_assignment=false)
-  env pos qop (expr : A.expr) (prop : A.expr) null_flavor =
+  env pos qop (expr : Tast.expr) (prop : Tast.expr) null_flavor =
   let (annot, expr_) = expr in
   match expr_ with
   | A.Lvar (pos, id)
@@ -2425,7 +2425,7 @@ and emit_obj_get ?(null_coalesce_assignment=false)
       instr, querym_n_unpopped
     end
 
-and is_special_class_constant_accessed_with_class_id (cName : A.class_id_) (id : string) =
+and is_special_class_constant_accessed_with_class_id cName (id : string) =
   let is_self_parent_or_static =
     match cName with
     | A.CIexpr (_, A.Id (_, cName))
@@ -2433,7 +2433,7 @@ and is_special_class_constant_accessed_with_class_id (cName : A.class_id_) (id :
     | _ -> false in
   SU.is_class id && (not is_self_parent_or_static)
 
-and emit_elem_instrs env ~local_temp_kind ?(null_coalesce_assignment=false) (opt_elem_expr : A.expr option) =
+and emit_elem_instrs env ~local_temp_kind ?(null_coalesce_assignment=false) (opt_elem_expr : Tast.expr option) =
   match opt_elem_expr with
   (* These all have special inline versions of member keys *)
   | Some (_, (A.Int _ | A.String _)) -> empty, 0
@@ -2452,7 +2452,7 @@ and emit_elem_instrs env ~local_temp_kind ?(null_coalesce_assignment=false) (opt
  * expressions of the form `base[elem]`.
  * If the array element is missing, use the special key `W`.
  *)
-and get_elem_member_key ?(null_coalesce_assignment=false) env stack_index (opt_expr : A.expr option) =
+and get_elem_member_key ?(null_coalesce_assignment=false) env stack_index (opt_expr : Tast.expr option) =
   match opt_expr with
   (* Special case for local *)
   | Some (_, A.Lvar (p, id)) when not (is_local_this env id) ->
@@ -2492,7 +2492,7 @@ and get_elem_member_key ?(null_coalesce_assignment=false) env stack_index (opt_e
  * the size of the stack in the case that the property cannot be
  * placed inline in the instruction. *)
 and emit_prop_expr ?(null_coalesce_assignment=false) env null_flavor
-  stack_index (prop_expr : A.expr) =
+  stack_index (prop_expr : Tast.expr) =
   let mk =
     match snd prop_expr with
     | A.Id (pos, name) when String_utils.string_starts_with name "$" ->
@@ -2561,7 +2561,7 @@ and emit_prop_expr ?(null_coalesce_assignment=false) env null_flavor
  *)
 
 and emit_base ~is_object ~notice ?(null_coalesce_assignment=false)
-              env mode base_offset rhs_stack_size (e : A.expr) =
+              env mode base_offset rhs_stack_size (e : Tast.expr) =
   let result = emit_base_worker ~is_object ~notice ~inout_param_info:None ~null_coalesce_assignment
     env mode base_offset rhs_stack_size e in
   match result with
@@ -2575,7 +2575,7 @@ and emit_base ~is_object ~notice ?(null_coalesce_assignment=false)
 
 and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assignment=false)
   env mode base_offset rhs_stack_size
-  (expr : A.expr) =
+  (expr : Tast.expr) =
   let ((pos, _) as annot, expr_) = expr in
   let base_mode =
     if mode = MemberOpMode.InOut
@@ -2824,7 +2824,7 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
        1
        0
 
-and emit_ignored_expr env ?(pop_pos : Pos.t = Pos.none) (e : A.expr) =
+and emit_ignored_expr env ?(pop_pos : Pos.t = Pos.none) (e : Tast.expr) =
  match snd e with
  | A.Expr_list es -> gather @@ List.map ~f:(emit_ignored_expr env ~pop_pos) es
  | _ ->
@@ -2929,13 +2929,13 @@ and emit_reified_arg env ~isas pos (hint : Aast.hint) =
     ], (count = 0)
 
 (* Emit arguments of a function call and inout setter for inout args *)
-and emit_args_and_inout_setters env (args: A.expr list) =
+and emit_args_and_inout_setters env (args: Tast.expr list) =
   let aliases =
     if has_inout_args args
     then InoutLocals.collect_written_variables env args
     else SMap.empty in
 
-  let emit_arg_and_inout_setter i (arg : A.expr) =
+  let emit_arg_and_inout_setter i (arg : Tast.expr) =
     match snd arg with
     (* inout $var *)
     | A.Callconv (Ast_defs.Pinout, (_, A.Lvar (pos, id))) ->
@@ -2998,7 +2998,7 @@ and emit_args_and_inout_setters env (args: A.expr list) =
     | _ -> emit_expr env arg, empty
   in
 
-  let rec aux i (args : A.expr list) = match args with
+  let rec aux i (args : Tast.expr list) = match args with
   | [] -> empty, empty
   | arg :: rem_args ->
     let this_arg, this_setter = emit_arg_and_inout_setter i arg in
@@ -3026,7 +3026,7 @@ and get_fcall_args ?(lock_while_unwinding=false) args uargs async_eager_label =
   make_fcall_args ~flags ~num_rets ~by_refs ?async_eager_label num_args
 
 (* Expression that appears in an object context, such as expr->meth(...) *)
-and emit_object_expr env (expr : A.expr) =
+and emit_object_expr env (expr : Tast.expr) =
   let (_, expr_) = expr in
   match expr_ with
   | A.Lvar(_, x) when is_local_this env x ->
@@ -3041,7 +3041,7 @@ and has_inout_args es =
   List.exists es ~f:is_inout_arg
 
 and emit_call_lhs_and_fcall
-  env (expr : A.expr) fcall_args (targs : Aast.targ list) inout_arg_positions =
+  env (expr : Tast.expr) fcall_args (targs : Aast.targ list) inout_arg_positions =
   let ((pos, _), expr_) = expr in
   let has_inout_args = List.length inout_arg_positions <> 0 in
   let does_not_have_non_tparam_generics =
@@ -3287,7 +3287,7 @@ and get_call_builtin_func_info lower_fq_id =
 and emit_name_string env e =
   emit_expr env e
 
-and emit_special_function env pos annot id (args : A.expr list) (uargs : A.expr list) default =
+and emit_special_function env pos annot id (args : Tast.expr list) (uargs : Tast.expr list) default =
   let nargs = List.length args + List.length uargs in
   let fq_id =
     Hhbc_id.Function.elaborate_id (Emit_env.get_namespace env) (Pos.none, id) in
@@ -3508,7 +3508,7 @@ and get_inout_arg_positions args =
           | _, A.Callconv (Ast_defs.Pinout, _) -> Some i
           | _ -> None)
 
-and emit_call env pos expr (targs: Aast.targ list) (args : A.expr list) (uargs : A.expr list) async_eager_label =
+and emit_call env pos expr (targs: Aast.targ list) (args : Tast.expr list) (uargs : Tast.expr list) async_eager_label =
   let (annot, expr_) = expr in
   (match expr_ with
     | A.Id (_, s) -> Emit_symbol_refs.add_function s
@@ -3568,7 +3568,7 @@ and emit_final_global_op pos op =
   | LValOp.IncDec op -> instr (IMutator (IncDecG op))
   | LValOp.Unset -> emit_pos_then pos @@ instr (IMutator UnsetG)
 
-and emit_final_static_op cid (prop : A.class_get_expr) op =
+and emit_final_static_op cid (prop : Tast.class_get_expr) op =
   match op with
   | LValOp.Set -> instr (IMutator SetS)
   | LValOp.SetOp op -> instr (IMutator (SetOpS op))
@@ -3609,8 +3609,8 @@ and emit_array_get_fixed last_usage local indices =
     indices;
   ]
 
-and can_use_as_rhs_in_list_assignment (expr : A.expr_) =
-  let open Tast in
+and can_use_as_rhs_in_list_assignment (expr : Tast.expr_) =
+  let open Aast in
   match expr with
   | Call (_, (_, Id (_, s)), _, _, _) when String.lowercase s = "echo" ->
     false
@@ -3647,7 +3647,7 @@ and can_use_as_rhs_in_list_assignment (expr : A.expr_) =
  * list($a[$f()]) = b();
  * here f() should be invoked before b()
  *)
-and emit_lval_op_list ?(last_usage=false) (env : Emit_env.t) (outer_pos : Pos.t) local (indices : int list) (expr : A.expr) =
+and emit_lval_op_list ?(last_usage=false) (env : Emit_env.t) (outer_pos : Pos.t) local (indices : int list) (expr : Tast.expr) =
   let is_ltr = php7_ltr_assign () in
   match snd expr with
   | A.List exprs ->
@@ -3707,7 +3707,7 @@ and expr_starts_with_ref = function
   | _ -> false
 
 (* Emit code for an l-value operation *)
-and emit_lval_op ?(null_coalesce_assignment=false) (env : Emit_env.t) pos op (expr1 : A.expr) opt_expr2 =
+and emit_lval_op ?(null_coalesce_assignment=false) (env : Emit_env.t) pos op (expr1 : Tast.expr) opt_expr2 =
   match op, expr1, opt_expr2 with
   | LValOp.Set, _, Some e when expr_starts_with_ref e ->
     failwith "parser should not allow by-ref assignments"
@@ -3762,7 +3762,7 @@ and emit_lval_op_nonlist ?(null_coalesce_assignment=false) env pos op e rhs_inst
   ]
 
 and emit_lval_op_nonlist_steps ?(null_coalesce_assignment=false)
-  (env : Emit_env.t) outer_pos op (expr : A.expr) rhs_instrs rhs_stack_size =
+  (env : Emit_env.t) outer_pos op (expr : Tast.expr) rhs_instrs rhs_stack_size =
   let ((pos, _), expr_) = expr in
   let env =
   match op with
@@ -3963,7 +3963,7 @@ and emit_unop env pos op e =
         instr_silence_end temp_local
       ]
 
-and emit_exprs env (exprs : A.expr list) =
+and emit_exprs env (exprs : Tast.expr list) =
   match exprs with
   | [] -> empty
   | expr::exprs ->

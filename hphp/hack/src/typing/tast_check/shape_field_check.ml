@@ -9,7 +9,7 @@
 
 open Core_kernel
 open Ast_defs
-open Tast
+open Aast
 open Typing_defs
 
 module Aast = Aast_defs

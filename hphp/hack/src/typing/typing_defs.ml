@@ -136,7 +136,7 @@ and _ ty_ =
   | Toption : 'phase ty -> 'phase ty_
 
   (* All the primitive types: int, string, void, etc. *)
-  | Tprim : Nast.tprim -> 'phase ty_
+  | Tprim : Aast.tprim -> 'phase ty_
 
   (* A wrapper around fun_type, which contains the full type information for a
    * function, method, lambda, etc. Note that lambdas have an additional layer
@@ -526,7 +526,7 @@ and enum_type = {
 
 and typedef_type = {
   td_pos: Pos.t;
-  td_vis: Nast.typedef_visibility;
+  td_vis: Aast.typedef_visibility;
   td_tparams: decl tparam list;
   td_constraint: decl ty option;
   td_type: decl ty;
@@ -537,7 +537,7 @@ and 'phase tparam = {
   tp_variance: Ast_defs.variance;
   tp_name: Ast_defs.id;
   tp_constraints: (Ast_defs.constraint_kind * 'phase ty) list;
-  tp_reified: Nast.reify_kind;
+  tp_reified: Aast.reify_kind;
   tp_user_attributes: Nast.user_attribute list;
 }
 
@@ -578,7 +578,7 @@ type expand_env = {
 }
 
 let is_type_no_return ty =
-  ty = Tprim Nast.Tnoreturn
+  ty = Tprim Aast.Tnoreturn
 
 let has_expanded {type_expansions; _} x =
   List.exists type_expansions begin function

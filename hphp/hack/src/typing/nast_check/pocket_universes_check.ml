@@ -8,7 +8,7 @@
  *)
 
 open Base
-open Nast
+open Aast
 
 let handler = object
   inherit Nast_visitor.handler_base

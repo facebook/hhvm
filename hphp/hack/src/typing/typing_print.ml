@@ -21,6 +21,7 @@ module SN = Naming_special_names
 module Reason = Typing_reason
 module TySet = Typing_set
 module Cls = Decl_provider.Class
+module Nast = Aast
 
 let shallow_decl_enabled () =
   TypecheckerOptions.shallow_class_decl (GlobalNamingOptions.get ())

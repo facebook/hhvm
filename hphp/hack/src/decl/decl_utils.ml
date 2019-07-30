@@ -9,7 +9,7 @@
 
 open Core_kernel
 open Reordered_argument_collections
-open Nast
+open Aast
 open Typing_defs
 
 let unwrap_class_hint = function
@@ -65,7 +65,6 @@ let split_defs defs split_if_in_defs =
   r1, r2
 
 let rec infer_const (p, expr_) =
-  let open Nast in
   match expr_ with
   | String _ -> Reason.Rwitness p, Tprim Tstring
   | True

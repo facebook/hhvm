@@ -30,6 +30,7 @@ Ad-hoc rules for typing some common idioms
 open Core_kernel
 open Typing_defs
 open Utils
+open Aast
 
 module Env = Typing_env
 module Reason = Typing_reason
@@ -69,7 +70,7 @@ let lookup_magic_type (env:Env.env) (class_:locl ty) (fname:string) :
                     ) ->
                      env, Some (pars,
                                 (match ty with
-                                 | (_, Tprim Nast.Tstring) -> None
+                                 | (_, Tprim Tstring) -> None
                                  | _ -> Some ty))
                   | _ -> env, None)
            | None -> env, None)
@@ -126,13 +127,13 @@ let rec const_string_of (env:Env.env) (e:Nast.expr) : Env.env * (Pos.t, string) 
     | Left p, _ -> Left p
     | _, Left p -> Left p in
     match e with
-    | _, Nast.String s -> env, Right s
+    | _, String s -> env, Right s
     (* It's an invariant that this is going to fail, but look for the best
      * evidence *)
-    | p, Nast.String2 xs ->
+    | p, String2 xs ->
         let env, xs = mapM const_string_of env (List.rev xs) in
         env, List.fold_right ~f:glue xs ~init:(Left p)
-    | _, Nast.Binop (Ast_defs.Dot, a, b) ->
+    | _, Binop (Ast_defs.Dot, a, b) ->
         let env, stra = const_string_of env a in
         let env, strb = const_string_of env b in
         env, glue stra strb
@@ -142,7 +143,7 @@ let rec const_string_of (env:Env.env) (e:Nast.expr) : Env.env * (Pos.t, string) 
 let retype_magic_func (env:Env.env) (ft:locl fun_type) (el:Nast.expr list) : Env.env * locl fun_type =
   let rec f env param_types args : Env.env * locl fun_params option =
     (match param_types, args with
-      | [ { fp_type = (_, Toption (_, Tclass ((_, fs), _, [_]))); _ }], [(_, Nast.Null)]
+      | [ { fp_type = (_, Toption (_, Tclass ((_, fs), _, [_]))); _ }], [(_, Null)]
         when SN.Classes.is_format_string fs -> env, None
       | [({ fp_type = (why, Toption (_, Tclass ((_, fs), _, [type_arg]))); _ } as fp)], (arg :: _)
       | [({ fp_type = (why,             Tclass ((_, fs), _, [type_arg] )); _ } as fp)], (arg :: _)
@@ -151,7 +152,7 @@ let retype_magic_func (env:Env.env) (ft:locl fun_type) (el:Nast.expr list) : Env
              |  env, Right str ->
                   let env, argl =
                     parse_printf_string env str (fst arg) type_arg in
-                  env, Some ({ fp with fp_type = (why, Tprim Nast.Tstring) } :: argl)
+                  env, Some ({ fp with fp_type = (why, Tprim Tstring) } :: argl)
              |  env, Left pos ->
                   if Partial.should_check_error (Env.get_mode env) 4027
                   then Errors.expected_literal_format_string pos;

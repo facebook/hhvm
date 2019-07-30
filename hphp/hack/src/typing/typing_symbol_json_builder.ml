@@ -8,7 +8,7 @@
 
 open Core_kernel
 open Hh_json
-open Tast
+open Aast
 open Ast_defs
 open Decl_env
 

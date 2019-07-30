@@ -9,7 +9,7 @@
 open Core_kernel
 open Instruction_sequence
 module A = Ast_defs
-module T = Tast
+module T = Aast
 
 type type_constraint =
   | DefinitelyReified (* There is a reified generic *)
@@ -21,7 +21,7 @@ type type_constraint =
 let get_erased_tparams env =
   Ast_scope.Scope.get_tparams (Emit_env.get_scope env)
     |> List.filter_map ~f:(fun tp ->
-          if tp.T.tp_reified <> Tast.Reified
+          if tp.T.tp_reified <> Aast.Reified
           then Some (snd tp.T.tp_name) else None)
 
 let rec has_reified_type_constraint env h =

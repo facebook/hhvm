@@ -8,7 +8,7 @@
  *)
 
 open Core_kernel
-open Tast
+open Aast
 open Typing_defs
 
 module Env = Tast_env
@@ -41,7 +41,7 @@ let check_valid_rvalue p env ty =
   ignore (iter_over_types env [ty])
 
 let visitor = object(this)
-  inherit [_] Tast.iter as super
+  inherit [_] Aast.iter as super
 
   val non_returning_allowed = ref true
 

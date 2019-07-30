@@ -47,8 +47,8 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
     | _, Tintersection tyl ->
       let env, rtyl = List.fold_map ~init:env tyl ~f:extract_inner in
       env, (r, Tintersection rtyl)
-    | r, Tprim Nast.Tnull ->
-      env, (r, Tprim Nast.Tnull)
+    | r, Tprim Aast.Tnull ->
+      env, (r, Tprim Aast.Tnull)
     | _, Tdynamic -> (* Awaiting a dynamic results in a new dynamic *)
       env, (r, Tdynamic)
     | _, (Terr | Tany | Tarraykind _ | Tnonnull | Tprim _

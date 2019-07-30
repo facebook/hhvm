@@ -11,7 +11,7 @@ open Core_kernel
 
 module A = Ast_defs
 module SU = Hhbc_string_utils
-module T = Tast
+module T = Aast
 
 let p = Pos.none
 
@@ -24,14 +24,14 @@ let get_array3 i0 i1 i2 =
 let xhp_attribute_declaration_method ?p name final abstract static visibility stmtl =
   let m_body = T.{
       fb_ast = stmtl;
-      fb_annotation = T.Annotations.FuncBodyAnnotation.NoUnsafeBlocks;
+      fb_annotation = Tast.NoUnsafeBlocks;
     } in
   let p = match p with
   | Some p -> p
   | None -> Pos.none in
   T.{
     m_span = p;
-    m_annotation = T.dummy_saved_env; (* Dummy env *)
+    m_annotation = Tast.dummy_saved_env; (* Dummy env *)
     m_final = final;
     m_abstract = abstract;
     m_static = static;

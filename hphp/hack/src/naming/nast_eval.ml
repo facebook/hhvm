@@ -7,7 +7,7 @@
  *
  *)
 
-open Nast
+open Aast
 
 (* this should never be exposed / thrown outside of this module; translate
  * it into a result type first *)

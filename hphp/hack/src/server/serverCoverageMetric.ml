@@ -14,6 +14,7 @@ open Option.Monad_infix
 open Reordered_argument_collections
 open String_utils
 
+module Tast = Aast
 module NamingTableStore = GlobalStorage.Make(struct
   type t = Naming_table.t
 end)

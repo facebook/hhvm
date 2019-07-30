@@ -9,7 +9,7 @@
 open Ast_class_expr
 open Core_kernel
 
-module A = Tast
+module A = Aast
 module TV = Typed_value
 module SN = Naming_special_names
 module SU = Hhbc_string_utils
@@ -129,7 +129,7 @@ let rec expr_to_typed_value
      TV.Vec (List.map fields (value_afield_to_typed_value ns))
   | A.ValCollection (`Vec, _, el)
   | A.ValCollection (`Vector, _, el) ->
-     let fields = List.map el ~f:(fun e -> Tast.AFvalue e) in
+     let fields = List.map el ~f:(fun e -> Aast.AFvalue e) in
      TV.Vec (List.map fields (value_afield_to_typed_value ns))
   | A.Collection ((_, "keyset"), _, fields) ->
     let l = List.fold_left fields
@@ -137,7 +137,7 @@ let rec expr_to_typed_value
       ~init:TVL.empty in
     TV.Keyset (TVL.items l)
   | A.ValCollection (`Keyset, _, el) ->
-    let fields = List.map el ~f:(fun e -> Tast.AFvalue e) in
+    let fields = List.map el ~f:(fun e -> Aast.AFvalue e) in
     let l = List.fold_left fields
       ~f:(fun l x -> TVL.add l (keyset_value_afield_to_typed_value ns x))
       ~init:TVL.empty in
@@ -155,7 +155,7 @@ let rec expr_to_typed_value
   | A.KeyValCollection (`Dict, _, fields)
   | A.KeyValCollection (`Map, _, fields)
   | A.KeyValCollection (`ImmMap, _, fields) ->
-    let fields = List.map fields ~f:(fun (e1, e2) -> Tast.AFkvalue (e1, e2)) in
+    let fields = List.map fields ~f:(fun (e1, e2) -> Aast.AFkvalue (e1, e2)) in
     let values =
       List.map fields ~f:(afield_to_typed_value_pair ~restrict_keys ns) in
     let d = update_duplicates_in_map values in
@@ -169,7 +169,7 @@ let rec expr_to_typed_value
     TV.Dict d
   | A.ValCollection (`Set, _, el)
   | A.ValCollection (`ImmSet, _, el) ->
-    let fields = List.map el ~f:(fun e -> Tast.AFvalue e) in
+    let fields = List.map el ~f:(fun e -> Aast.AFvalue e) in
     let values =
       List.map fields ~f:(set_afield_to_typed_value_pair ns)
     in
@@ -409,6 +409,10 @@ let cast_value hint v =
 let folder_visitor =
 object (self)
   inherit [_] A.endo as super
+
+  method on_'ex _ ex = ex
+  method on_'fb _ fb = fb
+  method on_'en _ en = en
 
   method! on_class_ _env cd =
     super#on_class_ cd.A.c_namespace cd

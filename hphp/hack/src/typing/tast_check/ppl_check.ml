@@ -10,7 +10,7 @@
 (* Typing code concerned the <<__PPL>> attribute. *)
 open Core_kernel
 open Typing_defs
-open Tast
+open Aast
 
 module Cls = Decl_provider.Class
 module Env = Tast_env
@@ -38,7 +38,7 @@ let check_ppl_class c =
   let error = Errors.extend_ppl c_pos child_class_string is_ppl in
   let check verb parent_class_string =
     function
-    | _, Nast.Happly ((_, name), _) ->
+    | _, Happly ((_, name), _) ->
       begin match TLazyHeap.get_class name with
         | Some parent_type ->
           if Cls.ppl parent_type <> is_ppl

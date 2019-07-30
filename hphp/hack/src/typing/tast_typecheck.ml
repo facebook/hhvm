@@ -10,10 +10,11 @@
 open Hh_core
 
 open Delta
-open Tast_expand
 open Typing_defs
-open ETast
+open Aast
 
+module ETast = Tast
+module Nast = Aast
 module C = Typing_continuations
 module Env = Typing_env
 module Phase = Typing_phase
@@ -78,7 +79,7 @@ let check_assign (_lty, lvalue) ty gamma =
 let check_expr env (expr:ETast.expr) (gamma:gamma) : gamma =
   let expect_ty_equal = expect_ty_equal env in
   let expr_checker = object (self)
-    inherit [_] ETast.iter as super
+    inherit [_] Aast.iter as super
 
     val mutable gamma = gamma
 
@@ -210,7 +211,7 @@ and check_block env (block:ETast.block) gamma =
   go block gamma (empty_delta_with_next_cont gamma)
 
 let check_func_body env (body:ETast.func_body) gamma =
-  if body.fb_annotation = Tast.Annotations.FuncBodyAnnotation.HasUnsafeBlocks
+  if body.fb_annotation = Tast.HasUnsafeBlocks
   then raise Cant_check
   else
     let _ = check_block env body.fb_ast gamma in

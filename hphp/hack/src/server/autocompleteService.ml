@@ -15,6 +15,9 @@ open String_utils
 open SearchUtils
 include AutocompleteTypes
 
+open Tast
+module Nast = Aast
+module Tast = Aast
 module Phase = Typing_phase
 module TUtils = Typing_utils
 module Cls = Decl_provider.Class
@@ -542,16 +545,12 @@ let resolve_ty
     func_details    = get_func_details_for env x.ty;
   }
 
-let tast_cid_to_nast_cid cid =
-  let nmenv = Tast.nast_mapping_env in
-  Tast.NastMapper.map_class_id_ nmenv cid
-
 let autocomplete_typed_member ~is_static env class_ty cid mid =
   Tast_env.get_class_ids env class_ty
   |> List.iter ~f:begin fun cname ->
     Decl_provider.get_class cname
     |> Option.iter ~f:begin fun class_ ->
-      let cid = Option.map cid tast_cid_to_nast_cid in
+      let cid = Option.map cid to_nast_class_id_ in
       autocomplete_member ~is_static env class_ cid mid
     end
   end
@@ -571,7 +570,7 @@ let visitor = object (self)
     super#on_Fun_id env id
 
   method! on_New env cid el uel =
-    autocomplete_new (tast_cid_to_nast_cid (snd cid)) env;
+    autocomplete_new (to_nast_class_id_ (snd cid)) env;
     super#on_New env cid el uel
 
   method! on_Happly env sid hl =
@@ -595,7 +594,7 @@ let visitor = object (self)
   method! on_Obj_get env obj mid ognf =
     (match mid with
     | _, Tast.Id mid ->
-      autocomplete_typed_member ~is_static:false env (Tast.get_type obj) None mid
+      autocomplete_typed_member ~is_static:false env (get_type obj) None mid
     | _ -> ()
     );
     super#on_Obj_get env obj mid ognf
@@ -603,7 +602,7 @@ let visitor = object (self)
   method! on_expr env expr =
     (match expr with
     | (_, Tast.Array_get (arr, Some ((pos, _), key))) ->
-      let ty = Tast.get_type arr in
+      let ty = get_type arr in
       let _, ty = Tast_env.expand_type env ty in
       begin match ty with
       | _, Typing_defs.Tshape (_, fields) ->

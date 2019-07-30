@@ -27,8 +27,8 @@ return nothing. *)
 let non env r ty ~approx =
   let (env, ty) = Env.expand_type env ty in
   let non_ty = match snd ty with
-    | Tprim Nast.Tnull -> (r, Tnonnull)
-    | Tnonnull -> (r, Tprim Nast.Tnull)
+    | Tprim Aast.Tnull -> (r, Tnonnull)
+    | Tnonnull -> (r, Tprim Aast.Tnull)
     | _ -> if approx = Utils.ApproxUp then MkType.mixed r else MkType.nothing r in
   env, non_ty
 

@@ -33,7 +33,7 @@ class type type_mapper_type = object
   method on_tany : env -> Reason.t -> result
   method on_terr : env -> Reason.t -> result
   method on_tanon : env -> Reason.t -> locl fun_arity -> Ident.t -> result
-  method on_tprim : env -> Reason.t -> Nast.tprim -> result
+  method on_tprim : env -> Reason.t -> Aast.tprim -> result
   method on_tarraykind_akany : env -> Reason.t -> result
   method on_tarraykind_akempty : env -> Reason.t -> result
   method on_tarraykind_akvec : env -> Reason.t -> locl ty -> result
@@ -49,7 +49,7 @@ class type type_mapper_type = object
   method on_tfun : env -> Reason.t -> locl fun_type -> result
   method on_tabstract :
     env -> Reason.t  -> abstract_kind -> locl ty option -> result
-  method on_tclass : env -> Reason.t -> Nast.sid -> exact -> locl ty list -> result
+  method on_tclass : env -> Reason.t -> Aast.sid -> exact -> locl ty list -> result
   method on_tobject : env -> Reason.t -> result
   method on_tshape :
     env

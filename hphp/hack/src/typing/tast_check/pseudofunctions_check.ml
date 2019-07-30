@@ -7,7 +7,7 @@
  *
  *)
 
-open Tast
+open Aast
 
 module Env = Tast_env
 module SN  = Naming_special_names

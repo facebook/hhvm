@@ -13,7 +13,7 @@ open Instruction_sequence
 
 module JT = Jump_targets
 module RGH = Reified_generics_helpers
-module T = Tast
+module T = Aast
 
 (* Collect list of Ret* and non rewritten Break/Continue instructions inside
    try body. *)
@@ -87,7 +87,7 @@ let fail_if_goto_from_try_to_finally try_block finally_block =
     let visitor =
       let state = ref [] in
       object
-        inherit [_] Tast.iter
+        inherit [_] Aast.iter
         method! on_Goto () label =
           state := (label :: !state)
         method state () = !state
@@ -98,7 +98,7 @@ let fail_if_goto_from_try_to_finally try_block finally_block =
   let fail_if_find_any_label_in block =
     let visitor =
       object
-        inherit [_] Tast.iter
+        inherit [_] Aast.iter
         method! on_GotoLabel () (_, label) =
           let label_opt = List.find ~f:(fun (_, l) -> l = label) goto_labels in
           match label_opt with

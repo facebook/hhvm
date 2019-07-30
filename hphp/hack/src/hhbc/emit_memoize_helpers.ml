@@ -10,8 +10,6 @@
 open Core_kernel
 open Instruction_sequence
 
-module T = Tast
-
 let memoize_suffix = "$memoize_impl"
 
 let getmemokeyl local index name =
@@ -30,9 +28,9 @@ let param_code_gets params =
       instr_cgetl (Local.Named (Hhas_param.name param)))
 
 let check_memoize_possible pos ~params ~is_method =
-  if List.exists params (fun p -> p.T.param_is_reference)
+  if List.exists params (fun p -> p.Aast.param_is_reference)
   then Emit_fatal.raise_fatal_runtime pos
     "<<__Memoize>> cannot be used on functions with args passed by reference";
-  if not is_method && List.exists params (fun p -> p.T.param_is_variadic)
+  if not is_method && List.exists params (fun p -> p.Aast.param_is_variadic)
   then Emit_fatal.raise_fatal_runtime pos
     "<<__Memoize>> cannot be used on functions with variable arguments"

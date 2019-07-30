@@ -1,4 +1,5 @@
 open Core_kernel
+open Aast
 open Tast
 open Typing_defs
 
@@ -42,7 +43,7 @@ let rec is_byval_collection_or_string_or_any_type env ty =
       x = SN.Collections.cKeyset
     | _, (Tarraykind _ | Ttuple _ | Tshape _)
       -> true
-    | _, Tprim Nast.Tstring
+    | _, Tprim Tstring
     | _, Tany -> true
     | _, Tunion tl -> List.for_all tl ~f:(is_byval_collection_or_string_or_any_type env)
     | _ -> false in

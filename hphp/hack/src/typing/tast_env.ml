@@ -8,6 +8,8 @@
  *)
 
 open Core_kernel
+open Aast
+
 (** {!Tast_env.env} is just an alias to {!Typing_env.env}, and the functions we
     provide for it are largely just aliases to functions that take a
     {!Typing_env.env}.
@@ -113,7 +115,7 @@ let is_sub_type_for_union env ty_sub ty_super =
 let referenced_typeconsts env root ids =
   let root = hint_to_ty env root in
   let ety_env = {(Typing_phase.env_with_self env) with
-                  Typing_defs.from_class = Some Nast.CIstatic} in
+                  Typing_defs.from_class = Some CIstatic} in
   Typing_taccess.referenced_typeconsts env ety_env (root, ids)
 
 let empty tcopt = Typing_env.empty tcopt Relative_path.default ~droot:None
@@ -135,7 +137,7 @@ let restore_saved_env env saved_env =
         Env.local_mutability = saved_env.Tast.local_mutability};
   }
 
-module EnvFromDef = Typing_env_from_def.EnvFromDef(Tast.Annotations)
+module EnvFromDef = Typing_env_from_def
 open Tast
 
 let restore_method_env env m =

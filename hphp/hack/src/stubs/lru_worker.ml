@@ -9,3 +9,5 @@
 let set _ _ = failwith "not implemented"
 
 let get _ = failwith "not implemented"
+
+let get_with_offset _ = failwith "not implemented"

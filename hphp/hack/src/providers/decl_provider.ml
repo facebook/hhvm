@@ -23,7 +23,7 @@ let get_fun (fun_name: fun_key): fun_decl option =
   match Provider_config.get_backend () with
   | Provider_config.Lru_shared_memory -> begin
     let fun_name_key = Provider_config.Fun_decl fun_name in
-    match Lru_worker.get fun_name_key with
+    match Lru_worker.get_with_offset fun_name_key with
     | Some s -> Some s
     | None ->
       match Naming_table.Funs.get_pos fun_name with
@@ -88,7 +88,7 @@ let get_typedef (typedef_name: string): typedef_decl option =
   match Provider_config.get_backend () with
   | Provider_config.Lru_shared_memory -> begin
     let typedef_name_key = Provider_config.Typedef_decl typedef_name in
-    match Lru_worker.get typedef_name_key with
+    match Lru_worker.get_with_offset typedef_name_key with
     | Some s -> Some s
     | None ->
       match get_type_id_filename typedef_name Naming_table.TTypedef with
@@ -127,7 +127,7 @@ let get_gconst (gconst_name: string): gconst_decl option =
   match Provider_config.get_backend () with
   | Provider_config.Lru_shared_memory -> begin
     let gconst_name_key = Provider_config.Gconst_decl gconst_name in
-    match Lru_worker.get gconst_name_key with
+    match Lru_worker.get_with_offset gconst_name_key with
     | Some s -> Some s
     | None ->
       match Naming_table.Consts.get_pos gconst_name with

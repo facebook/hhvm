@@ -18,24 +18,18 @@ module TySet = Typing_set
 module Cls = Decl_provider.Class
 module Nast = Aast
 
-let update state new_validity =
-  if state.validity = Valid
-  then { state with validity = new_validity }
-  else state
-
-let validator = object(this)
-  inherit [validation_state] Type_visitor.type_visitor as _super
+let validator = object(this) inherit type_validator
   (* Only comes about because naming has reported an error and left Hany *)
   method! on_tany acc _ = acc
   (* Already reported an error *)
   method! on_terr acc _ = acc
   method! on_tprim acc r prim =
     match prim with
-      | Aast.Tvoid -> update acc @@ Invalid (r, "the void type")
-      | Aast.Tnoreturn -> update acc @@ Invalid (r, "the noreturn type")
+      | Aast.Tvoid -> this#invalid acc r "the void type"
+      | Aast.Tnoreturn -> this#invalid acc r "the noreturn type"
       | _ -> acc
-  method! on_tfun acc r _fun_type = update acc @@ Invalid (r, "a function type")
-  method! on_tvar acc r _id = update acc @@ Invalid (r, "an unknown type")
+  method! on_tfun acc r _fun_type = this#invalid acc r "a function type"
+  method! on_tvar acc r _id = this#invalid acc r "an unknown type"
 
   method! on_taccess acc r (root, ids) =
     (* We care only about the last type constant we access in the chain
@@ -68,10 +62,12 @@ let validator = object(this)
             | TCPartiallyAbstract when phys_equal root ty ->
               Some acc
             | _ ->
-              Some (update acc @@
-                Invalid (Reason.Rwitness (fst typeconst.ttc_name), "the abstract type constant " ^
-                  tconst ^ " because it is not marked <<__Enforceable>>")
-              )
+              let r = Reason.Rwitness (fst typeconst.ttc_name) in
+              let acc = this#invalid acc r @@
+                "the abstract type constant " ^ tconst ^
+                " because it is not marked <<__Enforceable>>"
+              in
+              Some acc
           end
         | _ -> acc
       end
@@ -84,13 +80,13 @@ let validator = object(this)
                           AbstractKind.is_generic_dep_ty name -> acc
     | AKgeneric name ->
       this#check_generic acc r name
-    | AKnewtype _ -> update acc @@ Invalid (r, "a newtype")
-    | AKdependent _ -> update acc @@ Invalid (r, "an expression dependent type")
+    | AKnewtype _ -> this#invalid acc r "a newtype"
+    | AKdependent _ -> this#invalid acc r "an expression dependent type"
   method! on_tanon acc r _arity _id =
-    update acc @@ Invalid (r, "a function type")
+    this#invalid acc r "a function type"
   method! on_tunion acc r _tyl =
-    update acc @@ Invalid (r, "a union")
-  method! on_tobject acc r = update acc @@ Invalid (r, "the object type")
+    this#invalid acc r "a union"
+  method! on_tobject acc r = this#invalid acc r "the object type"
   method! on_tclass acc r cls _ tyl =
     match Env.get_class acc.env (snd cls) with
     | Some tc ->
@@ -105,8 +101,8 @@ let validator = object(this)
           then acc
           else
             match tparam.tp_reified with
-            | Nast.Erased -> update acc @@ Invalid (r, "a type with an erased generic type argument")
-            | Nast.SoftReified -> update acc @@ Invalid (r, "a type with a soft reified type argument")
+            | Nast.Erased -> this#invalid acc r "a type with an erased generic type argument"
+            | Nast.SoftReified -> this#invalid acc r "a type with a soft reified type argument"
             | Nast.Reified -> this#on_type acc targ
         ) with
         | Ok new_acc -> new_acc
@@ -116,10 +112,10 @@ let validator = object(this)
     | None -> acc
   method! on_tapply acc r (_, name) tyl =
     if tyl <> [] && Typing_env.is_typedef name
-    then update acc @@ Invalid (r, "a type with generics, because generics are erased at runtime")
+    then this#invalid acc r "a type with generics, because generics are erased at runtime"
     else acc
   method! on_tarraykind acc r _array_kind =
-    update acc @@ Invalid (r, "an array type")
+    this#invalid acc r "an array type"
 
   method is_wildcard: type a. a ty -> bool = function
     | _, Tabstract (AKgeneric name, _) ->
@@ -127,12 +123,12 @@ let validator = object(this)
     | _ -> false
   method check_generic acc r name =
     match Env.get_reified acc.env name, Env.get_enforceable acc.env name with
-    | Nast.Erased, _ -> update acc @@
-      Invalid (r, "an erased generic type parameter")
-    | Nast.SoftReified, _ -> update acc @@
-      Invalid (r, "a soft reified generic type parameter")
-    | Nast.Reified, false -> update acc @@
-      Invalid (r, "a reified type parameter that is not marked <<__Enforceable>>")
+    | Nast.Erased, _ ->
+      this#invalid acc r "an erased generic type parameter"
+    | Nast.SoftReified, _ ->
+      this#invalid acc r "a soft reified generic type parameter"
+    | Nast.Reified, false ->
+      this#invalid acc r "a reified type parameter that is not marked <<__Enforceable>>"
     | Nast.Reified, true ->
       acc
   method check_class_targs: type a. _ -> _ -> _ -> a ty list -> _ = fun acc r c_name targs ->
@@ -149,8 +145,8 @@ let validator = object(this)
           then acc
           else
             match tparam.tp_reified with
-            | Nast.Erased -> update acc @@ Invalid (r, "a type with an erased generic type argument")
-            | Nast.SoftReified -> update acc @@ Invalid (r, "a type with a soft reified type argument")
+            | Nast.Erased -> this#invalid acc r "a type with an erased generic type argument"
+            | Nast.SoftReified -> this#invalid acc r "a type with a soft reified type argument"
             | Nast.Reified -> this#on_type acc targ
         ) with
         | Ok new_acc -> new_acc
@@ -160,35 +156,14 @@ let validator = object(this)
     | None -> acc
 end
 
-let validate_type env root_ty emit_error =
-  let should_suppress = ref false in
-  let validate env ety_env ty =
-    let state = validator#on_type {env; ety_env; validity = Valid} ty in
-    match state.validity with
-      | Invalid (r, msg) ->
-        if not !should_suppress
-        then emit_error (Reason.to_pos (fst root_ty)) (Reason.to_pos r) msg;
-        should_suppress := true
-      | Valid -> ()
-  in
-  let env, root_ty =
-    Env.localize_with_dty_validator env root_ty (validate env) in
-  validate env {
-    type_expansions = [];
-    substs = SMap.empty;
-    this_ty = Option.value ~default:(Reason.none, Tany) @@ Env.get_self env;
-    from_class = None;
-    validate_dty = None;
-  } root_ty
-
-let validate_hint env hint emit_error =
-  let hint_ty = Env.hint_to_ty env hint in
-  validate_type env hint_ty emit_error
-
 let handler = object
   inherit Tast_visitor.handler_base
-  method! at_expr env = function
-    | _, Is (_, hint) -> validate_hint env hint (Errors.invalid_is_as_expression_hint "is")
-    | _, As (_, hint, _) -> validate_hint env hint (Errors.invalid_is_as_expression_hint "as")
+  method! at_expr env e =
+    let validate hint op =
+      validator#validate_hint env hint (Errors.invalid_is_as_expression_hint op)
+    in
+    match snd e with
+    | Is (_, hint) -> validate hint "is"
+    | As (_, hint, _) -> validate hint "as"
     | _ -> ()
 end

@@ -133,7 +133,7 @@ let handler = object
         | (TCPartiallyAbstract | TCConcrete), Some ty ->
           if snd tc.ttc_enforceable then begin
             let pos = fst tc.ttc_enforceable in
-            Type_test_hint_check.validate_type env ty
+            Enforceable_hint_check.validator#validate_type env ty
               (Errors.invalid_enforceable_type "constant" (pos, name))
           end;
         | _ -> ()

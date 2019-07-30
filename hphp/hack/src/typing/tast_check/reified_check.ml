@@ -110,7 +110,7 @@ let verify_targ_valid env tparam targ =
   | Nast.Erased -> () end;
 
   begin if Attributes.mem UA.uaEnforceable tparam.tp_user_attributes then
-    Type_test_hint_check.validate_hint env targ
+    Enforceable_hint_check.validator#validate_hint env targ
       (Errors.invalid_enforceable_type "parameter" tparam.tp_name) end;
 
   begin if Attributes.mem UA.uaNewable tparam.tp_user_attributes then

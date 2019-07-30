@@ -49,7 +49,7 @@ let validator =
         end
       | None -> acc
     method! on_tgeneric acc r name =
-      Type_test_hint_check.validator#check_generic acc r name
+      Enforceable_hint_check.validator#check_generic acc r name
     method! on_taccess acc r _ = this#invalid acc r "a type const"
     method! on_tarray acc r ty1_opt ty2_opt =
       match ty1_opt, ty2_opt with
@@ -58,7 +58,7 @@ let validator =
     (* Optimization, don't visit type in dynamic ~> ~T case, fall back to subtyping *)
     method! on_tlike acc r _ = this#invalid acc r "a like type"
     method! on_tprim acc r prim =
-      Type_test_hint_check.validator#on_tprim acc r prim
+      Enforceable_hint_check.validator#on_tprim acc r prim
     method! on_tfun acc r _ = this#invalid acc r "a function type"
     method! on_ttuple acc r _ = this#invalid acc r "a tuple type"
     method! on_tshape acc r _ _ = this#invalid acc r "a shape type"

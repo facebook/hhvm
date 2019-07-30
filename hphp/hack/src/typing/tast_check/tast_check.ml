@@ -21,7 +21,7 @@ let visitor opts =
   Shape_field_check.handler;
   String_cast_check.handler;
   Tautology_check.handler;
-  Type_test_hint_check.handler;
+  Enforceable_hint_check.handler;
   Ppl_check.handler;
   Coroutine_check.handler;
   Redundant_nullsafe_check.handler;

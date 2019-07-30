@@ -543,8 +543,9 @@ let tconst_subsumption env parent_typeconst child_typeconst =
   begin match child_typeconst.ttc_abstract, child_typeconst.ttc_type, parent_typeconst.ttc_enforceable with
   | (TCAbstract (Some ty)), _, (pos, true)
   | (TCPartiallyAbstract | TCConcrete), Some ty, (pos, true) ->
-    Type_test_hint_check.validate_type (Tast_env.typing_env_as_tast_env env) ty
-      (Errors.invalid_enforceable_type "constant" (pos, name))
+    let tast_env = Tast_env.typing_env_as_tast_env env in
+    let emit_error = Errors.invalid_enforceable_type "constant" (pos, name) in
+    Enforceable_hint_check.validator#validate_type tast_env ty emit_error
   | _ -> ()
   end;
 

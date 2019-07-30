@@ -295,7 +295,7 @@ let load_context_lines (pos : Pos.absolute): string list =
 
 let format_context_lines (pos : Pos.absolute) (lines : string list) col_width: string =
   let lines = (match lines with
-    | [] -> [Tty.apply_color (Tty.Dim Tty.White) "No source found"]
+    | [] -> [Tty.apply_color (Tty.Dim Tty.Default) "No source found"]
     | ls -> ls) in
   let line_num = Pos.line pos in
   let format_line i (line : string) =
@@ -459,7 +459,7 @@ let to_contextual_string (error : Pos.absolute error_) : string =
       Buffer.add_string buf begin
         Printf.sprintf "%s %s\n"
           (Tty.apply_color (Tty.Bold Tty.Red) (error_code_to_string error_code))
-          (Tty.apply_color (Tty.Bold Tty.White) msg)
+          (Tty.apply_color (Tty.Bold Tty.Default) msg)
         end);
   (try Buffer.add_string buf (format_messages msgl)
    with _ -> Buffer.add_string buf "Error could not be pretty-printed. Please file a bug.");

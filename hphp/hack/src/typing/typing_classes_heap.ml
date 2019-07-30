@@ -328,6 +328,9 @@ module Api = struct
     ) (all_ancestor_reqs t)
     |> Sequence.append (upper_bounds_on_this_from_constraints t)
 
+  let has_upper_bounds_on_this_from_constraints t =
+    not (Sequence.is_empty (upper_bounds_on_this_from_constraints t))
+
   (* get lower bounds on `this` from the where constraints *)
   let lower_bounds_on_this_from_constraints t =
     List.filter_map ~f:(fun c ->
@@ -341,6 +344,9 @@ module Api = struct
     |> Sequence.of_list
 
   let lower_bounds_on_this = lower_bounds_on_this_from_constraints
+
+  let has_lower_bounds_on_this_from_constraints t =
+    not (Sequence.is_empty (lower_bounds_on_this_from_constraints t))
 
   let is_disposable_class_name class_name =
     class_name = SN.Classes.cIDisposable ||

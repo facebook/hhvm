@@ -4213,6 +4213,25 @@ and class_get_ ~is_method ~is_const ~this_ty ~valkind ?(explicit_tparams=[])
           from_class = Some cid;
           validate_dty = None;
         } in
+        let get_smember_from_constraints env class_info k =
+          let upper_bounds =
+            Sequence.to_list (Cls.upper_bounds_on_this_from_constraints class_info)
+          in
+          let env, upper_bounds = List.map_env env upper_bounds
+            ~f:(fun env up -> Phase.localize ~ety_env env up) in
+          let env, inter_ty =
+            Inter.intersect_list env (Reason.Rwitness p) upper_bounds
+          in
+          class_get_ ~is_method ~is_const ~valkind ~this_ty ~explicit_tparams ~incl_tc
+            env cid inter_ty (p, mid) k
+        in
+        let try_get_smember_from_constraints env class_info k =
+          k (Errors.try_with_result
+            (fun () -> get_smember_from_constraints env class_info (fun x -> x))
+            (fun _ _ ->
+              smember_not_found p ~is_const ~is_method class_info mid;
+              env, (Reason.Rnone, Typing_utils.terr env), None))
+        in
         if is_const then begin
           let const =
             if incl_tc then Env.get_const env class_ mid else
@@ -4224,6 +4243,8 @@ and class_get_ ~is_method ~is_const ~this_ty ~valkind ?(explicit_tparams=[])
               Env.get_const env class_ mid
           in
           match const with
+          | None when (Cls.has_upper_bounds_on_this_from_constraints class_) ->
+            try_get_smember_from_constraints env class_ k
           | None ->
             smember_not_found p ~is_const ~is_method class_ mid;
             k (env, (Reason.Rnone, Typing_utils.terr env), None)
@@ -4241,33 +4262,13 @@ and class_get_ ~is_method ~is_const ~this_ty ~valkind ?(explicit_tparams=[])
               end;
               k (env, cc_locl_type, None)
         end else begin
-          let get_smember_from_constraints env class_info k =
-            let upper_bounds =
-              Sequence.to_list (Cls.upper_bounds_on_this_from_constraints class_info)
-            in
-            let env, upper_bounds = List.map_env env upper_bounds
-              ~f:(fun env up -> Phase.localize ~ety_env env up) in
-            let env, inter_ty =
-              Inter.intersect_list env (Reason.Rwitness p) upper_bounds
-            in
-            class_get_ ~is_method ~is_const ~valkind ~this_ty ~explicit_tparams ~incl_tc
-              env cid inter_ty (p, mid) k
-          in
-          let has_constraints class_info =
-              not (Sequence.is_empty (Cls.upper_bounds_on_this_from_constraints class_info))
-          in
           let smethod = Env.get_static_member is_method env class_ mid in
           match smethod with
-          | None when (has_constraints class_) ->
-              k (Errors.try_with_result
-                (fun () -> get_smember_from_constraints env class_ (fun x -> x))
-                (fun _ _ ->
-                  smember_not_found p ~is_const ~is_method class_ mid;
-                  env, (Reason.Rnone, Typing_utils.terr env), None))
+          | None when (Cls.has_upper_bounds_on_this_from_constraints class_) ->
+            try_get_smember_from_constraints env class_ k
           | None ->
-              smember_not_found p ~is_const ~is_method class_ mid;
-              k (env, (Reason.Rnone, Typing_utils.terr env), None)
-
+            smember_not_found p ~is_const ~is_method class_ mid;
+            k (env, (Reason.Rnone, Typing_utils.terr env), None)
           | Some {
               ce_visibility = vis;
               ce_lsb = lsb;
@@ -4293,7 +4294,7 @@ and class_get_ ~is_method ~is_const ~this_ty ~valkind ?(explicit_tparams=[])
             if const && valkind = `lvalue then
               Errors.assigning_to_const p;
 
-            if (has_constraints class_) then
+            if (Cls.has_upper_bounds_on_this_from_constraints class_) then
               let (env, method_', _), succeed =
                 Errors.try_with_result
                   (fun () ->
@@ -4426,9 +4427,6 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
         ~valkind ~pos_params: None ~explicit_tparams
         env inter_ty class_id (id_pos, id_str) (fun x -> x) k_lhs
     in
-    let has_constraints class_info =
-        not (Sequence.is_empty (Cls.upper_bounds_on_this_from_constraints class_info))
-    in
     begin match Env.get_class env (snd x) with
     | None ->
       default ()
@@ -4463,7 +4461,7 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
       in
 
       begin match member_info with
-      | None when (has_constraints class_info) ->
+      | None when (Cls.has_upper_bounds_on_this_from_constraints class_info) ->
         Errors.try_with_result
           (fun () -> get_member_from_constraints env class_info)
           (fun _ _ ->
@@ -4546,7 +4544,7 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
             Typing_solver.is_sub_type env (Env.get_self env) concrete_ty) then
             Errors.assigning_to_const id_pos;
 
-        if (has_constraints class_info) then
+        if (Cls.has_upper_bounds_on_this_from_constraints class_info) then
           let (env, ty, _, vis'), succeed =
             Errors.try_with_result
               (fun () -> get_member_from_constraints env class_info, true)

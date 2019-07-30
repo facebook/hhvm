@@ -743,7 +743,6 @@ struct RuntimeOption {
   F(uint32_t, WarnOnIncDecInvalidType, 0)                               \
   F(bool, PromoteEmptyObject,          false)                           \
   F(bool, LibXMLUseSafeSubtrees,       true)                            \
-  F(bool, AllDestructorsOptional,      false)                           \
   F(bool, AllowScopeBinding,           false)                           \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \

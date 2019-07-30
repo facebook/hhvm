@@ -1015,25 +1015,6 @@ void fpushFuncClsMeth(IRGS& env, uint32_t numParams) {
                        nullptr);
 }
 
-SSATmp* forwardCtx(IRGS& env, const Func* parentFunc, SSATmp* funcTmp) {
-  assertx(!parentFunc->isClosureBody());
-  assertx(funcTmp->type() <= TFunc);
-
-  if (parentFunc->isStatic()) {
-    return gen(env, FwdCtxStaticCall, ldCtx(env));
-  }
-
-  if (!hasThis(env)) {
-    assertx(!parentFunc->isStaticInPrologue());
-    gen(env, ThrowMissingThis, funcTmp);
-    return ldCtx(env);
-  }
-
-  auto const obj = castCtxThis(env, ldCtx(env));
-  gen(env, IncRef, obj);
-  return obj;
-}
-
 void fPushFuncDImpl(IRGS& env, uint32_t numParams, const StringData* name,
                     SSATmp* tsList) {
   auto const lookup = lookupImmutableFunc(curUnit(env), name);
@@ -1409,34 +1390,6 @@ void emitFCallObjMethodRD(IRGS& env, FCallArgs fca, const StringData* clsHint,
 
 namespace {
 
-SSATmp* lookupClsMethodKnown(IRGS& env,
-                             const StringData* methodName,
-                             SSATmp* callerCtx,
-                             const Class *baseClass,
-                             bool exact,
-                             bool check,
-                             bool forward,
-                             SSATmp*& calleeCtx) {
-  auto const func = lookupImmutableClsMethod(
-    baseClass, methodName, curFunc(env), exact);
-  if (!func) return nullptr;
-
-  if (check) {
-    assertx(exact);
-    if (!classIsPersistentOrCtxParent(env, baseClass)) {
-      gen(env, LdClsCached, cns(env, baseClass->name()));
-    }
-  }
-  auto funcTmp = exact || func->isImmutableFrom(baseClass) ?
-    cns(env, func) :
-    gen(env, LdClsMethod, callerCtx, cns(env, -(func->methodSlot() + 1)));
-
-  calleeCtx = forward
-    ? forwardCtx(env, func, funcTmp)
-    : ldCtxForClsMethod(env, func, callerCtx, baseClass, exact);
-  return funcTmp;
-}
-
 SSATmp* loadClsMethodUnknown(IRGS& env,
                              const ClsMethodData& data,
                              Block* onFail) {
@@ -1459,70 +1412,50 @@ SSATmp* loadClsMethodUnknown(IRGS& env,
   );
 }
 
-}
-
-bool fpushClsMethodKnown(IRGS& env,
-                         uint32_t numParams,
-                         const StringData* methodName,
-                         SSATmp* ctxTmp,
-                         const Class *baseClass,
-                         bool exact,
-                         bool check,
-                         bool forward,
-                         bool dynamic,
-                         SSATmp* tsList) {
-  SSATmp* ctx = nullptr;
-  auto const func = lookupClsMethodKnown(env, methodName, ctxTmp, baseClass,
-                                         exact, check, forward, ctx);
-  if (!func) return false;
-  auto const mightCareAboutDynCall =
-    RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0
-    || RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0;
-  prepareToCallUnknown(env, func, ctx, numParams, nullptr, dynamic,
-                       mightCareAboutDynCall, tsList);
-  return true;
-}
-
-void implFPushClsMethodD(IRGS& env,
-                         uint32_t numParams,
-                         const StringData* methodName,
-                         const StringData* className,
-                         SSATmp* tsList) {
-
-  if (auto const baseClass =
-      Unit::lookupUniqueClassInContext(className, curClass(env))) {
-    if (fpushClsMethodKnown(env, numParams,
-                            methodName, cns(env, baseClass), baseClass,
-                            true, true, false, false, tsList)) {
+void fpushClsMethodD(IRGS& env,
+                     uint32_t numParams,
+                     const StringData* className,
+                     const StringData* methodName,
+                     bool isRFlavor) {
+  auto const cls = Unit::lookupUniqueClassInContext(className, curClass(env));
+  if (cls) {
+    auto const func = lookupImmutableClsMethod(cls, methodName, curFunc(env),
+                                               true);
+    if (func) {
+      if (!classIsPersistentOrCtxParent(env, cls)) {
+        gen(env, LdClsCached, cns(env, className));
+      }
+      auto const ctx = ldCtxForClsMethod(env, func, cns(env, cls), cls, true);
+      auto const tsList = isRFlavor ? popC(env) : nullptr;
+      prepareToCallKnown(env, func, ctx, numParams, nullptr, false, tsList);
       return;
     }
   }
 
-  if (tsList) push(env, tsList);
-  env.irb->exceptionStackBoundary();
   auto const slowExit = makeExitSlow(env);
-  if (tsList) popC(env);
   auto const ne = NamedEntity::get(className);
   auto const data = ClsMethodData { className, methodName, ne };
   auto const func = loadClsMethodUnknown(env, data, slowExit);
-  auto const clsCtx = gen(env, LdClsMethodCacheCls, data);
-  prepareToCallUnknown(env, func, clsCtx, numParams, nullptr, false, false,
+  auto const ctx = gen(env, LdClsMethodCacheCls, data);
+  auto const tsList = isRFlavor ? popC(env) : nullptr;
+  prepareToCallUnknown(env, func, ctx, numParams, nullptr, false, false,
                        tsList);
+}
+
 }
 
 void emitFPushClsMethodD(IRGS& env,
                          uint32_t numParams,
                          const StringData* methodName,
                          const StringData* className) {
-  implFPushClsMethodD(env, numParams, methodName, className, nullptr);
+  fpushClsMethodD(env, numParams, className, methodName, false);
 }
 
 void emitFPushClsMethodRD(IRGS& env,
                          uint32_t numParams,
                          const StringData* methodName,
                          const StringData* className) {
-  auto const tsList = popC(env);
-  implFPushClsMethodD(env, numParams, methodName, className, tsList);
+  fpushClsMethodD(env, numParams, className, methodName, true);
 }
 
 const StaticString s_resolveMagicCall(
@@ -1579,39 +1512,41 @@ const StaticString s_resolveClsMagicCall(
   "Unable to resolve magic call for class_meth()");
 
 void emitResolveClsMethod(IRGS& env) {
-  auto const name = topC(env, BCSPRelOffset { 0 });
-  auto const cls = topC(env, BCSPRelOffset { 1 });
-  if (!(cls->type() <= TStr) || !(name->type() <= TStr)) {
-    PUNT(ResolveClsMethod-nonStr);
+  auto const classNameTmp = topC(env, BCSPRelOffset { 1 });
+  auto const methodNameTmp = topC(env, BCSPRelOffset { 0 });
+  if (!classNameTmp->hasConstVal(TStr) || !methodNameTmp->hasConstVal(TStr)) {
+    return interpOne(env);
   }
-  if (!name->hasConstVal() || !cls->hasConstVal()) {
-    PUNT(ResolveClsMethod-nonConstStr);
-  }
-  auto className = cls->strVal();
-  auto methodName = name->strVal();
-  SSATmp* clsTmp = nullptr;
-  SSATmp* funcTmp = nullptr;
-  if (auto const baseClass =
-      Unit::lookupUniqueClassInContext(className, curClass(env))) {
-    SSATmp* ctx = nullptr;
-    funcTmp = lookupClsMethodKnown(env, methodName, cns(env, baseClass),
-                                    baseClass, true, true, false, ctx);
-    // For clsmeth, we want to return the class user gave,
-    // not the class where func is associated with.
-    clsTmp = cns(env, baseClass);
-  }
-  if (!funcTmp) {
+  auto className = classNameTmp->strVal();
+  auto methodName = methodNameTmp->strVal();
+
+  auto const clsMeth = [&] {
+    auto const cls = Unit::lookupUniqueClassInContext(className, curClass(env));
+    if (cls) {
+      auto const func = lookupImmutableClsMethod(cls, methodName, curFunc(env),
+                                                 true);
+      if (func) {
+        if (!classIsPersistentOrCtxParent(env, cls)) {
+          gen(env, LdClsCached, classNameTmp);
+        }
+        ldCtxForClsMethod(env, func, cns(env, cls), cls, true);
+
+        // For clsmeth, we want to return the class user gave,
+        // not the class where func is associated with.
+        return gen(env, NewClsMeth, cns(env, cls), cns(env, func));
+      }
+    }
+
     auto const slowExit = makeExitSlow(env);
     auto const ne = NamedEntity::get(className);
     auto const data = ClsMethodData { className, methodName, ne };
-    funcTmp = loadClsMethodUnknown(env, data, slowExit);
-    clsTmp = gen(env, LdClsCached, cns(env, className));
-  }
-  assertx(clsTmp);
-  assertx(funcTmp);
-  auto const clsMeth = gen(env, NewClsMeth, clsTmp, funcTmp);
-  decRef(env, name);
-  decRef(env, cls);
+    auto const funcTmp = loadClsMethodUnknown(env, data, slowExit);
+    auto const clsTmp = gen(env, LdClsCached, classNameTmp);
+    return gen(env, NewClsMeth, clsTmp, funcTmp);
+  }();
+
+  decRef(env, methodNameTmp);
+  decRef(env, classNameTmp);
   popC(env);
   popC(env);
   push(env, clsMeth);
@@ -1792,6 +1727,46 @@ void optimizeProfiledPushClsMethod(IRGS& env,
   emitFPush();
 }
 
+SSATmp* forwardCtx(IRGS& env, const Func* parentFunc, SSATmp* funcTmp) {
+  assertx(!parentFunc->isClosureBody());
+  assertx(funcTmp->type() <= TFunc);
+
+  if (parentFunc->isStatic()) {
+    return gen(env, FwdCtxStaticCall, ldCtx(env));
+  }
+
+  if (!hasThis(env)) {
+    assertx(!parentFunc->isStaticInPrologue());
+    gen(env, ThrowMissingThis, funcTmp);
+    return ldCtx(env);
+  }
+
+  auto const obj = castCtxThis(env, ldCtx(env));
+  gen(env, IncRef, obj);
+  return obj;
+}
+
+SSATmp* lookupClsMethodKnown(IRGS& env,
+                             const StringData* methodName,
+                             SSATmp* callerCtx,
+                             const Class *baseClass,
+                             bool exact,
+                             bool forward,
+                             SSATmp*& calleeCtx) {
+  auto const func = lookupImmutableClsMethod(
+    baseClass, methodName, curFunc(env), exact);
+  if (!func) return nullptr;
+
+  auto funcTmp = exact || func->isImmutableFrom(baseClass) ?
+    cns(env, func) :
+    gen(env, LdClsMethod, callerCtx, cns(env, -(func->methodSlot() + 1)));
+
+  calleeCtx = forward
+    ? forwardCtx(env, func, funcTmp)
+    : ldCtxForClsMethod(env, func, callerCtx, baseClass, exact);
+  return funcTmp;
+}
+
 void fpushClsMethodCommon(IRGS& env,
                           uint32_t numParams,
                           SSATmp* clsVal,
@@ -1826,16 +1801,26 @@ void fpushClsMethodCommon(IRGS& env,
   }
 
   auto const methodName = methVal->strVal();
-  const Class* cls = nullptr;
-  bool exact = false;
-  if (auto clsSpec = clsVal->type().clsSpec()) {
-    cls = clsSpec.cls();
-    exact = clsSpec.exact();
-  }
+  auto const knownClass = [&] () -> std::pair<const Class*, bool> {
+    if (auto const cs = clsVal->type().clsSpec()) {
+      return std::make_pair(cs.cls(), cs.exact());
+    }
 
-  if (cls && fpushClsMethodKnown(env, numParams, methodName, clsVal, cls,
-                                 exact, false, forward, dynamic, tsList)) {
-    return;
+    return std::make_pair(nullptr, false);
+  }();
+
+  if (knownClass.first) {
+    SSATmp* ctx;
+    auto const func = lookupClsMethodKnown(env, methodName, clsVal,
+                                           knownClass.first, knownClass.second,
+                                           forward, ctx);
+    if (func) {
+      auto const mightCareAboutDynCall =
+        RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0
+        || RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0;
+      return prepareToCallUnknown(env, func, ctx, numParams, nullptr, dynamic,
+                                  mightCareAboutDynCall, tsList);
+    }
   }
 
   // If the method has reified generics, we can't burn the value in the JIT

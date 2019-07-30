@@ -1607,6 +1607,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AEmpty
     );
 
+  case DbgTraceCall:
+    return may_load_store(AStackAny | AFrameAny, AEmpty);
+
   case Unreachable:
     // Unreachable code kills every memory location.
     return may_load_store_kill(AEmpty, AEmpty, AUnknown);
@@ -1919,7 +1922,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdWHState:
   case LdWHNotDone:
   case LookupClsRDS:
-  case DbgTraceCall:
   case InitCtx:
   case PackMagicArgs:
   case StrictlyIntegerConv:

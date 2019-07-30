@@ -67,17 +67,17 @@ let get_replace_pos_exn () =
   match !autocomplete_identifier with
   | None -> failwith "No autocomplete position was set."
   | Some (pos, text) ->
-    if Pos.length pos < suffix_len
-    then failwith "Matched position is shorter than autocomplete suffix."
-    else
+    let (_, name) = Utils.split_ns_from_name text in
+    let name =
+      if matches_auto_complete_suffix name then
+        strip_suffix name
+      else
+        name
+    in
     let open Ide_api_types in
     let range = pos_to_range pos in
-    let st = match String.rindex text '\\' with
-      | Some index ->
-        { range.st with column = range.st.column + index }
-      | None -> range.st
-    in
     let ed = { range.ed with column = range.ed.column - suffix_len } in
+    let st = { range.st with column = ed.column - (String.length name) } in
     { st; ed }
 
 

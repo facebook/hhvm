@@ -106,4 +106,13 @@ AnnotationCache::getValue(const FileInfo& fileInfo) {
   return folly::StringPiece(start, end);
 }
 
+folly::StringPiece
+AnnotationCache::getAnnotation(const std::string& annotation) {
+  auto const maybeFileInfo = getFileInfo(annotation);
+  if (!maybeFileInfo) return annotation;
+
+  auto const maybeValue = getValue(*maybeFileInfo);
+  return maybeValue.value_or(annotation);
+}
+
 } // namespace HPHP

@@ -26,6 +26,7 @@
 
 #include <folly/Format.h>
 #include <folly/dynamic.h>
+#include <folly/json.h>
 #include <folly/Singleton.h>
 
 #include "hphp/util/build-info.h"
@@ -533,6 +534,23 @@ std::string show(TCA tca) {
   return folly::sformat("{}", static_cast<void*>(tca));
 }
 
+dynamic getAnnotations(const Annotations& annotations) {
+  dynamic annotationObjs = dynamic::array;
+  for (auto const& annotation : annotations) {
+    auto const rawValue = g_annotations->getAnnotation(annotation.second);
+    dynamic annotationValue;
+    try {
+      annotationValue = folly::parseJson(rawValue);
+    }
+    catch (const std::runtime_error&){
+      annotationValue = rawValue;
+    }
+    annotationObjs.push_back(dynamic::object("caption", annotation.first)
+                                            ("value", annotationValue));
+  }
+  return annotationObjs;
+}
+
 dynamic getTransRec(const TransRec* tRec,
                     const PerfEventsMap<TransID>& transPerfEvents) {
   auto const guards = dynamic(tRec->guards.begin(), tRec->guards.end());
@@ -565,9 +583,9 @@ dynamic getTransRec(const TransRec* tRec,
                                         ("coldLen", tRec->acoldLen)
                                         ("frozenStart",
                                          show(tRec->afrozenStart))
-                                        ("frozenLen", tRec->afrozenLen);
-
-  // TODO(elijahrivera) - JSON annotations go here (follow-up diff)
+                                        ("frozenLen", tRec->afrozenLen)
+                                        ("annotations",
+                                         getAnnotations(tRec->annotations));
 
   return result;
 }

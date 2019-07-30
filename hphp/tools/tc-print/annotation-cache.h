@@ -41,6 +41,15 @@ struct AnnotationCache {
 
   /*
    * Given an annotation string, if the annotation is a redirect to a file,
+   * use the file cache to return the string represented. Updates the file cache
+   * with the current file if it is not already present. If the string is not a
+   * redirect, return the string itself.
+   */
+
+  folly::StringPiece getAnnotation(const std::string& annotation);
+
+  /*
+   * Given an annotation string, if the annotation is a redirect to a file,
    * parse the redirect for the information required in FileInfo. Returns an
    * empty Optional if either the annotation string is not a redirect or if it
    * is improperly formatted.

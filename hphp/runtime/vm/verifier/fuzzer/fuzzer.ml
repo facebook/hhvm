@@ -684,8 +684,8 @@ let mutate_metadata (input : HP.t)  =
                                           |> option_lift mutate_typed_value) in
     let mutate_req ((trait, str) as pair) =
       if should_mutate() then match trait with
-                              | Ast.MustExtend -> Ast.MustImplement, str
-                              | Ast.MustImplement -> Ast.MustExtend, str
+                              | Hhas_class.MustExtend -> Hhas_class.MustImplement, str
+                              | Hhas_class.MustImplement -> Hhas_class.MustExtend, str
                          else pair in
     HC.make
       (cls |> HC.attributes         |> delete_map mutate_attribute)

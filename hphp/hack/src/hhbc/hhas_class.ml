@@ -17,6 +17,10 @@
 
 module T = Tast
 
+type trait_req_kind =
+  | MustExtend
+  | MustImplement
+
 type t = {
   class_attributes               : Hhas_attribute.t list;
   class_base                     : Hhbc_id.Class.t option;
@@ -47,7 +51,7 @@ type t = {
   class_properties               : Hhas_property.t list;
   class_constants                : Hhas_constant.t list;
   class_type_constants           : Hhas_type_constant.t list;
-  class_requirements             : (Ast.trait_req_kind * string) list;
+  class_requirements             : (trait_req_kind * string) list;
   class_doc_comment              : string option;
 }
 

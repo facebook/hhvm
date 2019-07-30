@@ -364,8 +364,8 @@ let string_of_control_flow instruction =
 let string_of_iterator_id i = Iterator.to_string i
 let string_of_null_flavor nf =
   match nf with
-  | Ast.OG_nullthrows -> "NullThrows"
-  | Ast.OG_nullsafe -> "NullSafe"
+  | Ast_defs.OG_nullthrows -> "NullThrows"
+  | Ast_defs.OG_nullsafe -> "NullSafe"
 
 let string_of_class_kind ck =
   match ck with
@@ -829,50 +829,50 @@ and string_of_afield_list ~env afl =
 
 and shape_field_name_to_expr sfn =
   match sfn with
-  | Ast.SFlit_int (pos, s) -> Tast_annotate.with_pos pos (A.Int s)
-  | Ast.SFlit_str (pos, s)
-  | Ast.SFclass_const (_, (pos, s)) -> Tast_annotate.with_pos pos (A.String s)
+  | Ast_defs.SFlit_int (pos, s) -> Tast_annotate.with_pos pos (A.Int s)
+  | Ast_defs.SFlit_str (pos, s)
+  | Ast_defs.SFclass_const (_, (pos, s)) -> Tast_annotate.with_pos pos (A.String s)
 
 and string_of_bop = function
-  | Ast.Plus -> "+"
-  | Ast.Minus -> "-"
-  | Ast.Star -> "*"
-  | Ast.Slash -> "/"
-  | Ast.Eqeq -> "=="
-  | Ast.Eqeqeq -> "==="
-  | Ast.Starstar -> "**"
-  | Ast.Eq None -> "="
-  | Ast.Eq (Some bop) -> "=" ^ string_of_bop bop
-  | Ast.Ampamp -> "&&"
-  | Ast.Barbar -> "||"
-  | Ast.Lt -> "<"
-  | Ast.Lte -> "<="
-  | Ast.Cmp -> "<=>"
-  | Ast.Gt -> ">"
-  | Ast.Gte -> ">="
-  | Ast.Dot -> "."
-  | Ast.Amp -> "&"
-  | Ast.Bar -> "|"
-  | Ast.Ltlt -> "<<"
-  | Ast.Gtgt -> ">>"
-  | Ast.Percent -> "%"
-  | Ast.Xor -> "^"
-  | Ast.LogXor -> "xor"
-  | Ast.Diff -> "!="
-  | Ast.Diff2 -> "!=="
-  | Ast.QuestionQuestion -> "\\?\\?"
+  | Ast_defs.Plus -> "+"
+  | Ast_defs.Minus -> "-"
+  | Ast_defs.Star -> "*"
+  | Ast_defs.Slash -> "/"
+  | Ast_defs.Eqeq -> "=="
+  | Ast_defs.Eqeqeq -> "==="
+  | Ast_defs.Starstar -> "**"
+  | Ast_defs.Eq None -> "="
+  | Ast_defs.Eq (Some bop) -> "=" ^ string_of_bop bop
+  | Ast_defs.Ampamp -> "&&"
+  | Ast_defs.Barbar -> "||"
+  | Ast_defs.Lt -> "<"
+  | Ast_defs.Lte -> "<="
+  | Ast_defs.Cmp -> "<=>"
+  | Ast_defs.Gt -> ">"
+  | Ast_defs.Gte -> ">="
+  | Ast_defs.Dot -> "."
+  | Ast_defs.Amp -> "&"
+  | Ast_defs.Bar -> "|"
+  | Ast_defs.Ltlt -> "<<"
+  | Ast_defs.Gtgt -> ">>"
+  | Ast_defs.Percent -> "%"
+  | Ast_defs.Xor -> "^"
+  | Ast_defs.LogXor -> "xor"
+  | Ast_defs.Diff -> "!="
+  | Ast_defs.Diff2 -> "!=="
+  | Ast_defs.QuestionQuestion -> "\\?\\?"
 
 and string_of_uop = function
-  | Ast.Utild -> "~"
-  | Ast.Unot -> "!"
-  | Ast.Uplus -> "+"
-  | Ast.Uminus -> "-"
-  | Ast.Uincr -> "++"
-  | Ast.Udecr -> "--"
-  | Ast.Uref -> "&"
-  | Ast.Usilence -> "@"
-  | Ast.Upincr
-  | Ast.Updecr
+  | Ast_defs.Utild -> "~"
+  | Ast_defs.Unot -> "!"
+  | Ast_defs.Uplus -> "+"
+  | Ast_defs.Uminus -> "-"
+  | Ast_defs.Uincr -> "++"
+  | Ast_defs.Udecr -> "--"
+  | Ast_defs.Uref -> "&"
+  | Ast_defs.Usilence -> "@"
+  | Ast_defs.Upincr
+  | Ast_defs.Updecr
     -> failwith "string_of_uop - should have been captures earlier"
 
 and string_of_hint ~ns h =
@@ -902,7 +902,7 @@ and string_of_fun ~env f use_list =
     | ""
     | "..." -> None
     | name ->
-      let inout = if p.A.param_callconv = Some Ast.Pinout then "inout " else "" in
+      let inout = if p.A.param_callconv = Some Ast_defs.Pinout then "inout " else "" in
       let hint =
         Option.value_map p.A.param_hint ~default:"" ~f:(string_of_hint ~ns:true) in
       let default_val =
@@ -929,7 +929,7 @@ and string_of_fun ~env f use_list =
       ^ (String.concat ~sep:", " @@ List.map ~f:use_list_helper use_list)
       ^ ") " in
   (if f.A.f_static then "static " else "")
-  ^ (if f.A.f_fun_kind = Ast.FAsync || f.A.f_fun_kind = Ast.FAsyncGenerator then "async " else "")
+  ^ (if f.A.f_fun_kind = Ast_defs.FAsync || f.A.f_fun_kind = Ast_defs.FAsyncGenerator then "async " else "")
   ^ "function ("
   ^ args
   ^ ") "
@@ -1199,8 +1199,8 @@ and string_of_param_default_value ~env expr =
     begin
       let e = string_of_param_default_value ~env e in
       match uop with
-      | Ast.Upincr -> e ^ "++"
-      | Ast.Updecr -> e ^ "--"
+      | Ast_defs.Upincr -> e ^ "++"
+      | Ast_defs.Updecr -> e ^ "--"
       | _ -> string_of_uop uop ^ e
     end
   | A.Obj_get (e1, e2, f) ->
@@ -1658,9 +1658,9 @@ let add_type_constant buf c =
 let add_requirement buf r =
   Acc.add buf "\n  .require ";
   match r with
-  | (Ast.MustExtend, name) ->
+  | (Hhas_class.MustExtend, name) ->
       Acc.add buf ("extends <" ^ name ^ ">;")
-  | (Ast.MustImplement, name) ->
+  | (Hhas_class.MustImplement, name) ->
       Acc.add buf ("implements <" ^ name ^ ">;")
 
 let add_enum_ty buf c =

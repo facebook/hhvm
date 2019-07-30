@@ -9,7 +9,7 @@
 
 open Core_kernel
 
-module A = Ast
+module A = Ast_defs
 module SU = Hhbc_string_utils
 module T = Tast
 

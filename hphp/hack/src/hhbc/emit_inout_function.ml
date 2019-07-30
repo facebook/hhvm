@@ -188,7 +188,7 @@ let emit_wrapper_method
     ~scope ast_method.T.m_params in
   let has_ref_params = List.exists params ~f:Hhas_param.is_reference in
   let method_is_abstract =
-    ast_method.T.m_abstract || ast_class.T.c_kind = Ast.Cinterface in
+    ast_method.T.m_abstract || ast_class.T.c_kind = Ast_defs.Cinterface in
   let method_is_final = ast_method.T.m_final in
   let method_is_static = not is_closure && ast_method.T.m_static in
   let method_attributes = Emit_attribute.from_asts

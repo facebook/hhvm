@@ -48,7 +48,7 @@ let emit_def_inline def =
   match def with
   | A.Class cd ->
     (match cd.A.c_kind with
-    | Ast.Crecord ->
+    | Ast_defs.Crecord ->
       Emit_pos.emit_pos_then (fst cd.A.c_name) @@
       instr_defrecord (int_of_string (snd cd.A.c_name))
     | _ ->
@@ -170,7 +170,7 @@ and emit_stmt env (pos, stmt) =
       instr_popc;
     ]
   | A.Expr
-    (_, A.Binop ((Ast.Eq None), ((_, A.List l) as e1), ((await_pos, _), A.Await e_await))) ->
+    (_, A.Binop ((Ast_defs.Eq None), ((_, A.List l) as e1), ((await_pos, _), A.Await e_await))) ->
     let awaited_instrs = emit_await env await_pos e_await in
     let has_elements = List.exists l ~f: (function
       | _, A.Omitted -> false
@@ -186,7 +186,7 @@ and emit_stmt env (pos, stmt) =
       instr_unsetl temp
     else
       gather [ awaited_instrs; instr_popc ]
-  | A.Expr (_, A.Binop (Ast.Eq None, e_lhs, ((await_pos, _), A.Await e_await))) ->
+  | A.Expr (_, A.Binop (Ast_defs.Eq None, e_lhs, ((await_pos, _), A.Await e_await))) ->
     emit_await_assignment env await_pos e_lhs e_await
   | A.Expr (_, A.Yield_from e) ->
     gather [
@@ -194,7 +194,7 @@ and emit_stmt env (pos, stmt) =
       emit_pos pos;
       instr_popc;
     ]
-  | A.Expr ((pos, _), A.Binop (Ast.Eq None, e_lhs, (_, A.Yield_from e))) ->
+  | A.Expr ((pos, _), A.Binop (Ast_defs.Eq None, e_lhs, (_, A.Yield_from e))) ->
     Local.scope @@ fun () ->
       let temp = Local.get_unnamed_local () in
       let rhs_instrs = instr_pushl temp in
@@ -429,7 +429,7 @@ and emit_using (env : Emit_env.t) pos is_block_scoped has_await (e : Tast.expr) 
   | _ ->
     Local.scope @@ begin fun () ->
     let local, preamble = match snd e with
-      | A.Binop (Ast.Eq None, (_, A.Lvar (_, id)), _)
+      | A.Binop (Ast_defs.Eq None, (_, A.Lvar (_, id)), _)
       | A.Lvar (_, id) ->
          Local.Named (Local_id.get_name id), gather [
           emit_expr env e;
@@ -788,7 +788,7 @@ and get_id_of_simple_lvar_opt v =
   match v with
   | A.Lvar (pos, id) when (Local_id.get_name id) = SN.SpecialIdents.this ->
     Emit_fatal.raise_fatal_parse pos "Cannot re-assign $this"
-  | A.Lvar (_, id) | A.Unop (Ast.Uref, (_, A.Lvar (_, id)))
+  | A.Lvar (_, id) | A.Unop (Ast_defs.Uref, (_, A.Lvar (_, id)))
     when not (SN.Superglobals.is_superglobal (Local_id.get_name id)
       || (Local_id.get_name id) = SN.Superglobals.globals) ->
     Some (Local_id.get_name id)

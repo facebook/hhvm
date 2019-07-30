@@ -11,7 +11,7 @@ open Instruction_sequence
 open Hhbc_ast
 open Hhbc_string_utils
 open Core_kernel
-module A = Ast
+module A = Ast_defs
 module T = Tast
 module SN = Naming_special_names
 module SU = Hhbc_string_utils
@@ -115,7 +115,7 @@ let from_ast
     (_, (pos, cv_name), initial_value) =
   (* TODO: Hack allows a property to be marked final, which is nonsensical.
   HHVM does not allow this.  Fix this in the Hack parser? *)
-  let class_is_record = class_.T.c_kind = Ast.Crecord in
+  let class_is_record = class_.T.c_kind = Ast_defs.Crecord in
   let pid = Hhbc_id.Prop.from_ast_name cv_name in
   let attributes = Emit_attribute.from_asts namespace cv_user_attributes in
   let is_const = (not is_static && class_is_const) ||
@@ -125,7 +125,7 @@ let from_ast
   let is_soft_late_init = Hhas_attribute.has_soft_late_init attributes in
   let visibility = cv_visibility in
   let is_private = cv_visibility = Aast.Private in
-  if not is_static && class_.T.c_final && class_.T.c_kind = Ast.Cabstract
+  if not is_static && class_.T.c_final && class_.T.c_kind = Ast_defs.Cabstract
   then Emit_fatal.raise_fatal_parse pos
     ("Class " ^ Utils.strip_ns (snd class_.T.c_name)
       ^ " contains non-static property declaration"

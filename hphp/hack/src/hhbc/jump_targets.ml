@@ -9,7 +9,6 @@
 
 open Core_kernel
 
-module A = Ast
 module T = Tast
 
 let labels_in_function_: (bool SMap.t) ref = ref SMap.empty

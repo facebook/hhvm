@@ -17,7 +17,7 @@ module SU = Hhbc_string_utils
 (* Class expressions; similar to Nast.class_id *)
 type class_expr =
 | Class_special of SpecialClsRef.t
-| Class_id of Ast.id
+| Class_id of Ast_defs.id
 | Class_expr of A.expr
 | Class_reified of Instruction_sequence.t
 
@@ -25,7 +25,7 @@ let get_original_class_name ~resolve_self ~check_traits scope =
   match Ast_scope.Scope.get_class scope with
   | None ->  None
   | Some cd ->
-    if (cd.A.c_kind = Ast.Ctrait && not check_traits) || not resolve_self
+    if (cd.A.c_kind = Ast_defs.Ctrait && not check_traits) || not resolve_self
     then None
     else
       let class_name = snd cd.A.c_name in
@@ -34,7 +34,7 @@ let get_original_class_name ~resolve_self ~check_traits scope =
       | None -> Some class_name
       | Some _ when resolve_self ->
         begin match SMap.get class_name (Emit_env.get_closure_enclosing_classes ()) with
-          | Some cd when cd.A.c_kind <> Ast.Ctrait -> Some (snd cd.A.c_name)
+          | Some cd when cd.A.c_kind <> Ast_defs.Ctrait -> Some (snd cd.A.c_name)
           | _ -> None
         end
       | _ -> None
@@ -50,8 +50,8 @@ let get_original_parent_class_name ~check_traits ~resolve_self scope =
   | Some cd ->
     (* Parent doesn't make sense on an interface, so we treat
       "parent" as the literal class id to grab from *)
-    if cd.A.c_kind = Ast.Cinterface then Some SN.Classes.cParent else
-    if (cd.A.c_kind = Ast.Ctrait && not check_traits)
+    if cd.A.c_kind = Ast_defs.Cinterface then Some SN.Classes.cParent else
+    if (cd.A.c_kind = Ast_defs.Ctrait && not check_traits)
       || not resolve_self
     then None
     else

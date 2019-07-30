@@ -161,7 +161,7 @@ let from_class_elt_requirements class_ =
   let ns = class_.A.c_namespace in
   List.map
     ~f:(fun (h, is_extends) ->
-      let kind = if is_extends then Ast.MustExtend else Ast.MustImplement in
+      let kind = if is_extends then Hhas_class.MustExtend else Hhas_class.MustImplement in
       (kind, (Hhbc_id.Class.to_raw_string (Emit_type_hint.hint_to_class ns h))))
     class_.A.c_reqs
 
@@ -318,9 +318,9 @@ let emit_class (ast_class, hoisted) =
   let class_no_dynamic_props = class_is_const in
   let class_id =
     Hhbc_id.Class.elaborate_id namespace ast_class.A.c_name in
-  let class_is_trait = ast_class.A.c_kind = Ast.Ctrait in
-  let class_is_record = ast_class.A.c_kind = Ast.Crecord in
-  let class_is_interface = ast_class.A.c_kind = Ast.Cinterface in
+  let class_is_trait = ast_class.A.c_kind = Ast_defs.Ctrait in
+  let class_is_record = ast_class.A.c_kind = Ast_defs.Crecord in
+  let class_is_interface = ast_class.A.c_kind = Ast_defs.Cinterface in
   let class_uses =
     List.filter_map
       ast_class.A.c_uses
@@ -371,7 +371,7 @@ let emit_class (ast_class, hoisted) =
       ast_class.A.c_method_redeclarations
       ~f:(fun mtr -> mtr, string_of_trait mtr.A.mt_trait) in
   let class_enum_type =
-    if ast_class.A.c_kind = Ast.Cenum
+    if ast_class.A.c_kind = Ast_defs.Cenum
     then from_enum_type ~namespace:ast_class.A.c_namespace ast_class.A.c_enum
     else None
   in
@@ -391,7 +391,7 @@ let emit_class (ast_class, hoisted) =
     | Some (p, c) -> Some (p, List.map c ~f:snd)
     | None -> None
   in
-  let class_is_abstract = ast_class.A.c_kind = Ast.Cabstract in
+  let class_is_abstract = ast_class.A.c_kind = Ast_defs.Cabstract in
   let class_is_final = ast_class.A.c_final || class_is_trait || (class_enum_type <> None) in
   let class_is_sealed = Hhas_attribute.has_sealed class_attributes in
   let tparams = Emit_body.tparams_to_strings ast_class.A.c_tparams.A.c_tparam_list in

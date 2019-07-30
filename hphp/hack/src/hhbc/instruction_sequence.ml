@@ -11,7 +11,7 @@ open Core_kernel
 open Common
 open Hhbc_ast
 
-module A = Ast
+module A = Ast_defs
 
 (* The various from_X functions below take some kind of AST (expression,
  * statement, etc.) and produce what is logically a sequence of instructions.
@@ -242,7 +242,7 @@ let instr_fcallclsmethodsrd fcall_args scref method_name = gather [
   instr (ICall (FCall (fcall_args)))
 ]
 let instr_fcallobjmethodd_nullthrows fcall_args method_ =
-  instr_fcallobjmethodd fcall_args method_ Ast.OG_nullthrows
+  instr_fcallobjmethodd fcall_args method_ Ast_defs.OG_nullthrows
 let instr_querym num_params op key =
   instr (IFinal (QueryM (num_params, op, key)))
 let instr_querym_cget_pt num_params key =
@@ -479,45 +479,6 @@ let rewrite_tv instruction =
   | _ -> instruction
 
 let rewrite_tvs instrseq = InstrSeq.map instrseq rewrite_tv
-
-let rec can_initialize_static_var e =
-  match snd e with
-  | A.Float _ | A.String _ | A.Int _ | A.Null | A.False | A.True -> true
-  | A.Array es ->
-    List.for_all es ~f:(function
-      | A.AFvalue v ->
-        can_initialize_static_var v
-      | A.AFkvalue (k, v) ->
-        can_initialize_static_var k
-        && can_initialize_static_var v)
-  | A.Darray (_, es) ->
-    List.for_all es ~f:(fun (k, v) ->
-      can_initialize_static_var k
-      && can_initialize_static_var v)
-  | A.Varray (_, es) ->
-    List.for_all es ~f:can_initialize_static_var
-  | A.Class_const(_, (_, name)) ->
-    String.lowercase name = Naming_special_names.Members.mClass
-  | A.Collection ((_, name), _, fields) ->
-    let name =
-      Hhbc_string_utils.Types.fix_casing @@ Hhbc_string_utils.strip_ns name in
-    begin match name with
-    | "vec" ->
-      List.for_all fields ~f:(function
-        | A.AFvalue e -> can_initialize_static_var e
-        | _ -> false)
-    | "keyset" ->
-      List.for_all fields ~f:(function
-        | A.AFvalue (_, (A.String _ | A.Int _)) -> true
-        | _ -> false)
-    | "dict" ->
-      List.for_all fields ~f:(function
-        | A.AFkvalue ((_, (A.String _ | A.Int _)), v) ->
-          can_initialize_static_var v
-        | _ -> false)
-    | _ -> false
-    end
-  | _ -> false
 
 let is_srcloc i =
   match i with

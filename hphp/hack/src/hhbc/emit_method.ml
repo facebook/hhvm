@@ -14,38 +14,6 @@ module T = Tast
 open Core_kernel
 open Instruction_sequence
 
-let has_valid_access_modifiers kind_list =
-  let count_of_modifiers = List.fold_right kind_list
-    ~f:(fun x acc ->
-        if x = Ast.Private || x = Ast.Public || x = Ast.Protected
-        then acc + 1 else acc)
-    ~init:0
-  in
-  (* Either only one modifier or none *)
-  count_of_modifiers <= 1
-
-let rec hint_uses_tparams tparam_names (_, hint)  =
-  match hint with
-  | Ast.Hsoft h  | Ast.Hoption h | Ast.Hlike h ->
-    hint_uses_tparams tparam_names h
-  | Ast.Hfun (_, ps, _, _, r) ->
-    List.exists ps ~f:(hint_uses_tparams tparam_names) ||
-    hint_uses_tparams tparam_names r
-  | Ast.Htuple ts ->
-    List.exists ts ~f:(hint_uses_tparams tparam_names)
-  | Ast.Happly ((_, h), ts) ->
-    SSet.mem h tparam_names ||
-    List.exists ts ~f:(hint_uses_tparams tparam_names)
-  | Ast.Hshape { Ast.si_shape_field_list = _l; _ } ->
-    (* HHVM currenly does not report errors if constructor type parameter
-       is captured in shape field type annotation *)
-    (*
-    List.exists l ~f:(fun { Ast.sf_hint = h; _ } ->
-      hint_uses_tparams tparam_names h)
-    *)
-    false
-  | Ast.Haccess ((_, n), _, _) -> SSet.mem n tparam_names
-
 (* Extracts inout params
  * Or ref params only if the function is a closure
  *)
@@ -54,8 +22,6 @@ let extract_inout_or_ref_param_locations is_closure_or_func md =
     Emit_inout_helpers.extract_method_inout_or_ref_param_locations
       ~is_closure_or_func md in
   l
-
-let has_kind m k = List.mem ~equal:(=) m.Ast.m_kind k
 
 let from_ast_wrapper privatize make_name ast_class ast_method =
   let pos, original_name = ast_method.T.m_name in
@@ -79,7 +45,7 @@ let from_ast_wrapper privatize make_name ast_class ast_method =
     Hhas_attribute.is_native_opcode_impl method_attributes in
   let method_is_final = ast_method.T.m_final in
   let method_is_abstract =
-    ast_class.T.c_kind = Ast.Cinterface || ast_method.T.m_abstract in
+    ast_class.T.c_kind = Ast_defs.Cinterface || ast_method.T.m_abstract in
   let method_is_static = ast_method.T.m_static in
   let method_visibility =
     if is_native_opcode_impl then Aast.Public
@@ -110,15 +76,15 @@ let from_ast_wrapper privatize make_name ast_class ast_method =
           (Emit_inout_helpers.inout_suffix inout_param_locations)
     else original_method_id in
   let method_is_async =
-    ast_method.T.m_fun_kind = Ast.FAsync
-    || ast_method.T.m_fun_kind = Ast.FAsyncGenerator in
-  if ast_class.T.c_kind = Ast.Cinterface && not (List.is_empty ast_method.T.m_body.T.fb_ast)
+    ast_method.T.m_fun_kind = Ast_defs.FAsync
+    || ast_method.T.m_fun_kind = Ast_defs.FAsyncGenerator in
+  if ast_class.T.c_kind = Ast_defs.Cinterface && not (List.is_empty ast_method.T.m_body.T.fb_ast)
   then
     Emit_fatal.raise_fatal_parse pos
       (Printf.sprintf "Interface method %s::%s cannot contain body" class_name original_name);
   if not method_is_static
     && ast_class.T.c_final
-    && ast_class.T.c_kind = Ast.Cabstract
+    && ast_class.T.c_kind = Ast_defs.Cabstract
   then Emit_fatal.raise_fatal_parse pos
     ("Class " ^ class_name ^ " contains non-static method " ^ original_name
      ^ " and therefore cannot be declared 'abstract final'");

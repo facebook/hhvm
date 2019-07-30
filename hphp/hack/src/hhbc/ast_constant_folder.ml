@@ -253,15 +253,15 @@ and shape_to_typed_value ns fields =
   let aux (sf, expr) =
     let key =
       match sf with
-      | Ast.SFlit_int (pos, str) ->
+      | Ast_defs.SFlit_int (pos, str) ->
         begin
           match expr_to_typed_value ns (Tast_annotate.with_pos pos (A.Int str)) with
           | TV.Int _ as tv -> tv
           | _ -> failwith (str ^ " is not a valid integer index")
         end
-      | Ast.SFlit_str id ->
+      | Ast_defs.SFlit_str id ->
         TV.String (snd id)
-      | Ast.SFclass_const (class_id, id) ->
+      | Ast_defs.SFclass_const (class_id, id) ->
         class_const_to_typed_value ns (Tast_annotate.make (A.CI class_id)) id in
     (key, expr_to_typed_value ns expr) in
   let a = List.map fields ~f:aux in
@@ -339,23 +339,23 @@ and value_pair_to_afield p (v1, v2) =
  * Return None if we can't or won't determine the result *)
 let unop_on_value unop v =
   match unop with
-  | Ast.Unot -> TV.not v
-  | Ast.Uplus -> TV.add TV.zero v
-  | Ast.Uminus -> TV.neg v
-  | Ast.Utild -> TV.bitwise_not v
-  | Ast.Usilence -> Some v
+  | Ast_defs.Unot -> TV.not v
+  | Ast_defs.Uplus -> TV.add TV.zero v
+  | Ast_defs.Uminus -> TV.neg v
+  | Ast_defs.Utild -> TV.bitwise_not v
+  | Ast_defs.Usilence -> Some v
   | _ -> None
 
 (* Likewise for binary operations *)
 let binop_on_values binop v1 v2 =
   match binop with
-  | Ast.Dot -> TV.concat v1 v2
-  | Ast.Plus -> TV.add v1 v2
-  | Ast.Minus -> TV.sub v1 v2
-  | Ast.Star -> TV.mul v1 v2
-  | Ast.Ltlt -> TV.shift_left v1 v2
-  | Ast.Slash -> TV.div v1 v2
-  | Ast.Bar -> TV.bitwise_or v1 v2
+  | Ast_defs.Dot -> TV.concat v1 v2
+  | Ast_defs.Plus -> TV.add v1 v2
+  | Ast_defs.Minus -> TV.sub v1 v2
+  | Ast_defs.Star -> TV.mul v1 v2
+  | Ast_defs.Ltlt -> TV.shift_left v1 v2
+  | Ast_defs.Slash -> TV.div v1 v2
+  | Ast_defs.Bar -> TV.bitwise_or v1 v2
   (* temporarily disabled *)
   (*
   | A.Gtgt -> TV.shift_right v1 v2

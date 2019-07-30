@@ -106,13 +106,13 @@ let declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body =
           | Tast.Lvar (pos, id) ->
              state := add_local ~barethis:Bare_this !state (pos, Local_id.get_name id)
           | _ -> super#on_expr () prop_e)
-      | Tast.Unop (Ast.Uref, (_, Tast.Lvar (_, id))) when (Local_id.get_name id) = "$this" ->
+      | Tast.Unop (Ast_defs.Uref, (_, Tast.Lvar (_, id))) when (Local_id.get_name id) = "$this" ->
          state := with_this Bare_this_as_ref !state
       | Tast.Binop (binop, e1, e2) ->
          (match binop, e2 with
-          | (Ast.Eq _, (_, Tast.Await _))
-          | (Ast.Eq _, (_, Tast.Yield _))
-          | (Ast.Eq _, (_, Tast.Yield_from _)) ->
+          | (Ast_defs.Eq _, (_, Tast.Await _))
+          | (Ast_defs.Eq _, (_, Tast.Yield _))
+          | (Ast_defs.Eq _, (_, Tast.Yield_from _)) ->
              (* Visit e2 before e1. The ordering of declvars in async
                 expressions matters to HHVM. See D5674623. *)
              self#on_expr () e2;
@@ -164,7 +164,7 @@ let declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body =
            (* Only add $this to locals if it's bare *)
            | (_, Tast.Lvar(_, id)) when (Local_id.get_name id) = "$this" ->
               state := with_this barethis !state
-           | (_, Tast.Unop (Ast.Uref, (_, Tast.Lvar (pos, id)))) ->
+           | (_, Tast.Unop (Ast_defs.Uref, (_, Tast.Lvar (pos, id)))) ->
               state := add_local ~barethis:Bare_this !state (pos, Local_id.get_name id)
            | _ -> self#on_expr () e
          in

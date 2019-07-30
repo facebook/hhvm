@@ -10,7 +10,7 @@
 open Core_kernel
 open Hhbc_string_utils
 
-module A = Ast
+module A = Ast_defs
 module SN = Naming_special_names
 module TC = Hhas_type_constraint
 

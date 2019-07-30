@@ -9,7 +9,7 @@
 
 open Core_kernel
 open Instruction_sequence
-module A = Ast
+module A = Ast_defs
 module T = Tast
 
 (* Given a function definition, emit code, and in the case of <<__Memoize>>,

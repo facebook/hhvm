@@ -87,7 +87,7 @@ struct
     | ScopeItem.Class _ :: _ -> false
     | ScopeItem.Function { T.f_fun_kind = kind; _ } :: _
     | ScopeItem.Method { T.m_fun_kind = kind; _ } :: _ ->
-      kind = Ast.FAsync || kind = Ast.FAsyncGenerator
+      kind = Ast_defs.FAsync || kind = Ast_defs.FAsyncGenerator
 
   let is_toplevel scope = scope = []
 
@@ -102,7 +102,7 @@ struct
   let is_in_trait scope =
     match get_class scope with
     | None -> false
-    | Some cd -> cd.T.c_kind = Ast.Ctrait
+    | Some cd -> cd.T.c_kind = Ast_defs.Ctrait
 
   let is_in_lambda = function
     | ScopeItem.Lambda _ :: _ | ScopeItem.LongLambda _ :: _ -> true

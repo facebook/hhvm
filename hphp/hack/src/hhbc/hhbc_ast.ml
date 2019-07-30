@@ -394,9 +394,9 @@ type instruct_call =
   | FCall of fcall_args
   | FCallBuiltin of num_params * num_params * string
   | FCallCtor of fcall_args
-  | FCallObjMethod of fcall_args * Ast.og_null_flavor * param_locations
-  | FCallObjMethodD of fcall_args * Ast.og_null_flavor * method_id
-  | FCallObjMethodRD of fcall_args * Ast.og_null_flavor * method_id
+  | FCallObjMethod of fcall_args * Ast_defs.og_null_flavor * param_locations
+  | FCallObjMethodD of fcall_args * Ast_defs.og_null_flavor * method_id
+  | FCallObjMethodRD of fcall_args * Ast_defs.og_null_flavor * method_id
 
 type instruct_base =
   | BaseGC of stack_index * MemberOpMode.t

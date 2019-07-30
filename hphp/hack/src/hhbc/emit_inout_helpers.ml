@@ -15,7 +15,7 @@ type wrapper_type = InoutWrapper | RefWrapper
 
 let extract_inout_or_ref_param_locations ~is_sync ~is_closure_or_func params =
   let inout_param_locations = List.filter_mapi params
-    ~f:(fun i p -> if p.T.param_callconv <> Some Ast.Pinout then None else Some i) in
+    ~f:(fun i p -> if p.T.param_callconv <> Some Ast_defs.Pinout then None else Some i) in
   if List.length inout_param_locations <> 0
   then Some InoutWrapper, inout_param_locations
   else if not is_sync
@@ -36,14 +36,14 @@ let extract_inout_or_ref_param_locations ~is_sync ~is_closure_or_func params =
     else Some RefWrapper, l
 
 let extract_function_inout_or_ref_param_locations fd =
-  let is_sync = fd.T.f_fun_kind = Ast.FSync in
+  let is_sync = fd.T.f_fun_kind = Ast_defs.FSync in
   extract_inout_or_ref_param_locations
     ~is_closure_or_func:true
     ~is_sync
     fd.T.f_params
 
 let extract_method_inout_or_ref_param_locations md ~is_closure_or_func =
-  let is_sync = md.T.m_fun_kind = Ast.FSync in
+  let is_sync = md.T.m_fun_kind = Ast_defs.FSync in
   extract_inout_or_ref_param_locations
     ~is_closure_or_func
     ~is_sync

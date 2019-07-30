@@ -10,7 +10,7 @@
 open Core_kernel
 open Hhbc_string_utils
 
-module A = Ast
+module A = Ast_defs
 module TV = Typed_value
 
 let hack_arr_dv_arrs () =

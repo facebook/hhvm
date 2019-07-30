@@ -289,8 +289,8 @@ let env_with_function_like env e ~is_closure_body fd =
     fd.f_span fd.f_body.fb_ast
 
 let fun_is_async = function
-  | Ast.FAsync
-  | Ast.FAsyncGenerator -> true
+  | Ast_defs.FAsync
+  | Ast_defs.FAsyncGenerator -> true
   | _ -> false
 
 let env_with_lambda env fd =
@@ -426,7 +426,7 @@ let make_defrecord (cd : class_) n: class_ =
  c_methods = [];
  c_xhp_children = [];
  c_xhp_attrs = [];
- c_kind = Ast.Crecord;
+ c_kind = Ast_defs.Crecord;
  c_name = (fst cd.c_name, string_of_int n) }
 
 (* Def inline is not implemented yet *)
@@ -503,7 +503,7 @@ let make_closure ~class_num
     c_file_attributes = [];
     c_final = false;
     c_is_xhp = false;
-    c_kind = Ast.Cnormal;
+    c_kind = Ast_defs.Cnormal;
     c_name = (p, make_closure_name env st name);
     c_tparams = class_tparams;
     c_extends = [(p, Aast.Happly((p, "Closure"), []))];
@@ -546,12 +546,12 @@ let convert_id (env:env) p (pid, str as id) =
   match str with
   | "__TRAIT__" ->
     begin match Scope.get_class env.scope with
-    | Some c when c.c_kind = Ast.Ctrait -> name c
+    | Some c when c.c_kind = Ast_defs.Ctrait -> name c
     | _ -> return ""
     end
   | "__CLASS__" ->
     begin match Scope.get_class env.scope with
-    | Some c when c.c_kind <> Ast.Ctrait -> name c
+    | Some c when c.c_kind <> Ast_defs.Ctrait -> name c
     | Some _ -> p, Id (pid, (snd id))
     | None -> return ""
     end
@@ -561,7 +561,7 @@ let convert_id (env:env) p (pid, str as id) =
       | None -> "", false
       | Some cd ->
         (SU.Xhp.mangle @@ strip_id cd.c_name) ^ "::",
-        cd.c_kind = Ast.Ctrait in
+        cd.c_kind = Ast_defs.Ctrait in
     let scope =
       if not is_trait then env.scope
       (* for lambdas nested in trait methods HHVM replaces __METHOD__
@@ -703,7 +703,7 @@ let convert_meth_caller_to_func_ptr env st ann pc cls pf func =
               (p, Return (Some meth_caller_handle))];
           fb_annotation = Annotations.FuncBodyAnnotation.NoUnsafeBlocks;
         };
-      f_fun_kind = Ast.FSync;
+      f_fun_kind = Ast_defs.FSync;
       f_user_attributes = [{ua_name = (p, "__MethCaller"); ua_params = []}];
       f_file_attributes = [];
       f_external = false;
@@ -1274,7 +1274,7 @@ and convert_stmt (env : env) (st : state) (p, stmt_): _ * stmt =
       let id, st = update_let_var_id st (Local_id.get_name var) in
       let var_name = transform_let_var_name (Local_id.get_name var) id in
       (* We convert let statement to a simple assignment expression for simplicity *)
-      st, Expr (an @@ Binop (Ast.Eq None, (an @@ Lvar (p, Local_id.make_scoped var_name)), e))
+      st, Expr (an @@ Binop (Ast_defs.Eq None, (an @@ Lvar (p, Local_id.make_scoped var_name)), e))
     | Fallthrough
     | Noop
     | Break
@@ -1510,12 +1510,12 @@ and convert_defs env class_count record_count typedef_count st dl =
     let st = { st with let_vars = SMap.empty } in
     let st, cd = convert_class env st cd in
     let stub_class =
-      if cd.c_kind = Ast.Crecord then
+      if cd.c_kind = Ast_defs.Crecord then
         make_defrecord cd record_count
       else
         make_defcls cd class_count in
     let st, dl =
-      if cd.c_kind = Ast.Crecord then
+      if cd.c_kind = Ast_defs.Crecord then
         convert_defs env class_count (record_count + 1) typedef_count st dl
       else
         convert_defs env (class_count + 1) record_count typedef_count st dl
@@ -1556,12 +1556,12 @@ and convert_defs env class_count record_count typedef_count st dl =
 
 let count_classes (defs: program) =
   List.count defs ~f:(function
-    | Class { c_kind; _} when c_kind <> Ast.Crecord -> true
+    | Class { c_kind; _} when c_kind <> Ast_defs.Crecord -> true
     | _ -> false)
 
 let count_records defs =
   List.count defs ~f:(function
-    | Class { c_kind = Ast.Crecord; _} -> true
+    | Class { c_kind = Ast_defs.Crecord; _} -> true
     | _ -> false)
 
 let hoist_toplevel_functions all_defs =

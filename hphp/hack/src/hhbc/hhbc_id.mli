@@ -25,7 +25,7 @@ module Class : sig
    * determine the HHAS representation of the identifier, with
    * namespace qualification but no initial backslash, and XHP
    * mangling. *)
-  val elaborate_id : Namespace_env.env -> Ast.id -> t
+  val elaborate_id : Namespace_env.env -> Ast_defs.id -> t
 end
 
 module Function : sig
@@ -36,7 +36,7 @@ module Function : sig
   val to_raw_string : t -> string
   (* Used to add suffixes for memoized functions *)
   val add_suffix : t -> string -> t
-  val elaborate_id : Namespace_env.env -> Ast.id -> t
+  val elaborate_id : Namespace_env.env -> Ast_defs.id -> t
 end
 
 module Prop : sig
@@ -62,5 +62,5 @@ module Const : sig
   (* As used in `define('name')` and the assembler *)
   val from_raw_string : string -> t
   val to_raw_string : t -> string
-  val elaborate_id : Namespace_env.env -> Ast.id -> t
+  val elaborate_id : Namespace_env.env -> Ast_defs.id -> t
 end

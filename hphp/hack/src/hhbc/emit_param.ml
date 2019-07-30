@@ -98,7 +98,7 @@ let default_type_check param_name param_type_info param_expr =
 let from_ast ~tparams ~namespace ~generate_defaults ~scope p =
   let param_name = p.A.param_name in
   let param_is_variadic = p.A.param_is_variadic in
-  let param_is_inout = p.A.param_callconv = Some Ast.Pinout in
+  let param_is_inout = p.A.param_callconv = Some Ast_defs.Pinout in
   let param_user_attributes =
     Emit_attribute.from_asts namespace p.A.param_user_attributes in
   let param_hint =

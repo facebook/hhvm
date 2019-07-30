@@ -41,7 +41,7 @@ let make_info ast_class class_id ast_methods =
       Emit_memoize_helpers.check_memoize_possible pos
         ~params: ast_method.T.m_params
         ~is_method:true;
-    if ast_class.T.c_kind = Ast.Cinterface
+    if ast_class.T.c_kind = Ast_defs.Cinterface
     then
       Emit_fatal.raise_fatal_runtime pos
         "<<__Memoize>> cannot be used in interfaces"
@@ -51,7 +51,7 @@ let make_info ast_class class_id ast_methods =
         ("Abstract method " ^ Hhbc_id.Class.to_raw_string class_id ^ "::" ^
         snd ast_method.T.m_name ^ " cannot be memoized") in
   List.iter ast_methods check_method;
-  let is_trait = ast_class.T.c_kind = Ast.Ctrait in
+  let is_trait = ast_class.T.c_kind = Ast_defs.Ctrait in
   let class_prefix =
     if is_trait
     then "$" ^ String.lowercase (Hhbc_id.Class.to_raw_string class_id)
@@ -157,7 +157,7 @@ let make_memoize_instance_method_with_params_code ~pos
     else
       gather [
         instr_cgetl (Local.Named R.reified_generics_local_name);
-        instr_fcallobjmethodrd fcall_args renamed_name Ast.OG_nullthrows
+        instr_fcallobjmethodrd fcall_args renamed_name Ast_defs.OG_nullthrows
       ]
   in
   let reified_memokeym =

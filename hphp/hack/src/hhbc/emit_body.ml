@@ -180,7 +180,7 @@ let emit_deprecation_warning scope deprecation_info =
     let class_name, trait_instrs, concat_instruction =
       match Ast_scope.Scope.get_class scope with
       | None -> "", empty, empty
-      | Some c when c.A.c_kind = Ast.Ctrait ->
+      | Some c when c.A.c_kind = Ast_defs.Ctrait ->
         "::", gather [instr_self; instr_classname;], instr_concat
       | Some c -> strip_id c.A.c_name ^ "::", empty, empty in
     let fn_name =

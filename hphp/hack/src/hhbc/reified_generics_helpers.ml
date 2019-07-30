@@ -8,7 +8,7 @@
 *)
 open Core_kernel
 open Instruction_sequence
-module A = Ast
+module A = Ast_defs
 module T = Tast
 
 type type_constraint =

@@ -105,12 +105,12 @@ module InoutLocals = struct
     let rec handle_arg ~is_top i acc (arg : A.expr) =
       match snd arg with
       (* inout $v *)
-      | A.Callconv (Ast.Pinout, (_, A.Lvar (_, id)))
+      | A.Callconv (Ast_defs.Pinout, (_, A.Lvar (_, id)))
         when not (is_local_this env id) ->
         let acc = add_use id i acc in
         if is_top then add_inout id i acc else add_write id i acc
       (* &$v *)
-      | A.Unop (Ast.Uref, (_, A.Lvar (_, id))) ->
+      | A.Unop (Ast_defs.Uref, (_, A.Lvar (_, id))) ->
         let acc = add_use id i acc in
         add_write id i acc
       (* $v *)
@@ -141,7 +141,7 @@ module InoutLocals = struct
         method! on_Binop _ bop l r =
           let _ =
             match bop with
-            | Ast.Eq _ -> state := collect_lvars_lhs i !state l
+            | Ast_defs.Eq _ -> state := collect_lvars_lhs i !state l
             | _ -> () in
           super#on_Binop () bop l r
 
@@ -149,8 +149,8 @@ module InoutLocals = struct
         method! on_Unop _ op e =
           let _ =
             match op with
-            | Ast.Uincr
-            | Ast.Udecr -> state := collect_lvars_lhs i !state e
+            | Ast_defs.Uincr
+            | Ast_defs.Udecr -> state := collect_lvars_lhs i !state e
             | _ -> () in
           super#on_Unop () op e
 
@@ -282,56 +282,56 @@ let php7_ltr_assign () =
 (* Strict binary operations; assumes that operands are already on stack *)
 let from_binop op =
   match op with
-  | Ast.Plus -> instr (IOp Add)
-  | Ast.Minus -> instr (IOp Sub)
-  | Ast.Star -> instr (IOp Mul)
-  | Ast.Slash -> instr (IOp Div)
-  | Ast.Eqeq -> instr (IOp Eq)
-  | Ast.Eqeqeq -> instr (IOp Same)
-  | Ast.Starstar -> instr (IOp Pow)
-  | Ast.Diff -> instr (IOp Neq)
-  | Ast.Diff2 -> instr (IOp NSame)
-  | Ast.Lt -> instr (IOp Lt)
-  | Ast.Lte -> instr (IOp Lte)
-  | Ast.Gt -> instr (IOp Gt)
-  | Ast.Gte -> instr (IOp Gte)
-  | Ast.Dot -> instr (IOp Concat)
-  | Ast.Amp -> instr (IOp BitAnd)
-  | Ast.Bar -> instr (IOp BitOr)
-  | Ast.Ltlt -> instr (IOp Shl)
-  | Ast.Gtgt -> instr (IOp Shr)
-  | Ast.Cmp -> instr (IOp Cmp)
-  | Ast.Percent -> instr (IOp Mod)
-  | Ast.Xor -> instr (IOp BitXor)
-  | Ast.LogXor -> instr (IOp Xor)
-  | Ast.Eq _ -> failwith "assignment is emitted differently"
-  | Ast.QuestionQuestion -> failwith "null coalescence is emitted differently"
-  | Ast.Ampamp
-  | Ast.Barbar ->
+  | Ast_defs.Plus -> instr (IOp Add)
+  | Ast_defs.Minus -> instr (IOp Sub)
+  | Ast_defs.Star -> instr (IOp Mul)
+  | Ast_defs.Slash -> instr (IOp Div)
+  | Ast_defs.Eqeq -> instr (IOp Eq)
+  | Ast_defs.Eqeqeq -> instr (IOp Same)
+  | Ast_defs.Starstar -> instr (IOp Pow)
+  | Ast_defs.Diff -> instr (IOp Neq)
+  | Ast_defs.Diff2 -> instr (IOp NSame)
+  | Ast_defs.Lt -> instr (IOp Lt)
+  | Ast_defs.Lte -> instr (IOp Lte)
+  | Ast_defs.Gt -> instr (IOp Gt)
+  | Ast_defs.Gte -> instr (IOp Gte)
+  | Ast_defs.Dot -> instr (IOp Concat)
+  | Ast_defs.Amp -> instr (IOp BitAnd)
+  | Ast_defs.Bar -> instr (IOp BitOr)
+  | Ast_defs.Ltlt -> instr (IOp Shl)
+  | Ast_defs.Gtgt -> instr (IOp Shr)
+  | Ast_defs.Cmp -> instr (IOp Cmp)
+  | Ast_defs.Percent -> instr (IOp Mod)
+  | Ast_defs.Xor -> instr (IOp BitXor)
+  | Ast_defs.LogXor -> instr (IOp Xor)
+  | Ast_defs.Eq _ -> failwith "assignment is emitted differently"
+  | Ast_defs.QuestionQuestion -> failwith "null coalescence is emitted differently"
+  | Ast_defs.Ampamp
+  | Ast_defs.Barbar ->
     failwith "short-circuiting operator cannot be generated as a simple binop"
 
 let binop_to_eqop op =
   match op with
-  | Ast.Plus -> Some PlusEqual
-  | Ast.Minus -> Some MinusEqual
-  | Ast.Star -> Some MulEqual
-  | Ast.Slash -> Some DivEqual
-  | Ast.Starstar -> Some PowEqual
-  | Ast.Amp -> Some AndEqual
-  | Ast.Bar -> Some OrEqual
-  | Ast.Xor -> Some XorEqual
-  | Ast.Ltlt -> Some SlEqual
-  | Ast.Gtgt -> Some SrEqual
-  | Ast.Percent -> Some ModEqual
-  | Ast.Dot -> Some ConcatEqual
+  | Ast_defs.Plus -> Some PlusEqual
+  | Ast_defs.Minus -> Some MinusEqual
+  | Ast_defs.Star -> Some MulEqual
+  | Ast_defs.Slash -> Some DivEqual
+  | Ast_defs.Starstar -> Some PowEqual
+  | Ast_defs.Amp -> Some AndEqual
+  | Ast_defs.Bar -> Some OrEqual
+  | Ast_defs.Xor -> Some XorEqual
+  | Ast_defs.Ltlt -> Some SlEqual
+  | Ast_defs.Gtgt -> Some SrEqual
+  | Ast_defs.Percent -> Some ModEqual
+  | Ast_defs.Dot -> Some ConcatEqual
   | _ -> None
 
 let unop_to_incdec_op op =
   match op with
-  | Ast.Uincr -> PreInc
-  | Ast.Udecr -> PreDec
-  | Ast.Upincr -> PostInc
-  | Ast.Updecr -> PostDec
+  | Ast_defs.Uincr -> PreInc
+  | Ast_defs.Udecr -> PreDec
+  | Ast_defs.Upincr -> PostInc
+  | Ast_defs.Updecr -> PostDec
   | _ -> failwith "invalid incdec op"
 
 let collection_type = function
@@ -405,9 +405,9 @@ let is_reified_tparam ~(is_fun : bool) (env : Emit_env.t) (name : string) =
           && id = name then Some (i, is_soft ual) else None)
 
 let extract_shape_field_name_pstring env annot = function
-  | Ast.SFlit_int s -> A.Int (snd s)
-  | Ast.SFlit_str s -> A.String (snd s)
-  | Ast.SFclass_const ((pn, name) as id, p) ->
+  | Ast_defs.SFlit_int s -> A.Int (snd s)
+  | Ast_defs.SFlit_str s -> A.String (snd s)
+  | Ast_defs.SFclass_const ((pn, name) as id, p) ->
     if Option.is_some (is_reified_tparam ~is_fun:true env name) ||
        Option.is_some (is_reified_tparam ~is_fun:false env name) then
       Emit_fatal.raise_fatal_parse pn
@@ -442,7 +442,7 @@ let parse_include (e : A.expr) =
     let len = String.length p in
     if len > 0 && p.[0] = '/' then String.sub p 1 (len-1) else p in
   let rec split_var_lit = function
-    | _, A.Binop (Ast.Dot, e1, e2) -> begin
+    | _, A.Binop (Ast_defs.Dot, e1, e2) -> begin
       let v, l = split_var_lit e2 in
       if v = ""
       then let var, lit = split_var_lit e1 in var, lit ^ l
@@ -552,18 +552,18 @@ and emit_binop env annot op (e1: A.expr) (e2: A.expr) =
     from_binop op
   ] in
   match op with
-  | Ast.Ampamp | Ast.Barbar ->
+  | Ast_defs.Ampamp | Ast_defs.Barbar ->
     emit_short_circuit_op env annot (A.Binop (op, e1, e2))
-  | Ast.Eq None ->
+  | Ast_defs.Eq None ->
     emit_lval_op env pos LValOp.Set e1 (Some e2)
-  | Ast.Eq (Some Ast.QuestionQuestion) ->
+  | Ast_defs.Eq (Some Ast_defs.QuestionQuestion) ->
     emit_null_coalesce_assignment env pos e1 e2
-  | Ast.Eq (Some obop) ->
+  | Ast_defs.Eq (Some obop) ->
     begin match binop_to_eqop obop with
     | None -> failwith "illegal eq op"
     | Some op -> emit_lval_op env pos (LValOp.SetOp op) e1 (Some e2)
     end
-  | Ast.QuestionQuestion ->
+  | Ast_defs.QuestionQuestion ->
     let end_label = Label.next_regular () in
     gather [
       fst (emit_quiet_expr env pos e1);
@@ -580,16 +580,16 @@ and emit_binop env annot op (e1: A.expr) (e2: A.expr) =
     then default ()
     else
     match op with
-    | Ast.Eqeqeq when snd e2 = A.Null ->
+    | Ast_defs.Eqeqeq when snd e2 = A.Null ->
       emit_is_null env e1
-    | Ast.Eqeqeq when snd e1 = A.Null ->
+    | Ast_defs.Eqeqeq when snd e1 = A.Null ->
       emit_is_null env e2
-    | Ast.Diff2 when snd e2 = A.Null ->
+    | Ast_defs.Diff2 when snd e2 = A.Null ->
       gather [
         emit_is_null env e1;
         instr_not
       ]
-    | Ast.Diff2 when snd e1 = A.Null ->
+    | Ast_defs.Diff2 when snd e1 = A.Null ->
       gather [
         emit_is_null env e2;
         instr_not
@@ -872,7 +872,7 @@ and emit_clone env expr =
     instr_clone;
   ]
 
-and emit_shape env (expr : A.expr) (fl : (Ast.shape_field_name * A.expr) list) =
+and emit_shape env (expr : A.expr) (fl : (Ast_defs.shape_field_name * A.expr) list) =
   let p = fst expr in
   let fl =
     List.map fl
@@ -1145,11 +1145,11 @@ and emit_xhp (env : Emit_env.t) (annot : A.expr_annotation) id (attributes : A.x
   let create_spread p id = (p, "...$" ^ string_of_int(id)) in
   let convert_attr (spread_id, attrs) = function
     | A.Xhp_simple (name, v) ->
-        let attr = (Ast.SFlit_str name, v) in
+        let attr = (Ast_defs.SFlit_str name, v) in
         (spread_id, attr::attrs)
     | A.Xhp_spread e ->
         let ((p, _), _) = e in
-        let attr = (Ast.SFlit_str (create_spread p spread_id), e) in
+        let attr = (Ast_defs.SFlit_str (create_spread p spread_id), e) in
         (spread_id + 1, attr::attrs) in
   let (_, attributes) = List.fold_left ~f:convert_attr ~init:(0, []) attributes in
   let attribute_map = annot, A.Shape (List.rev attributes) in
@@ -1453,7 +1453,7 @@ and emit_await env pos (expr : A.expr) =
 
 and emit_callconv _env kind _e =
   match kind with
-  | Ast.Pinout ->
+  | Ast_defs.Pinout ->
     failwith "emit_callconv: This should have been caught at emit_arg"
 
 and get_reified_var_cexpr env pos name: Ast_class_expr.class_expr option =
@@ -1980,10 +1980,10 @@ and emit_jmpz env (expr : A.expr) label: emit_jmp_result =
         is_label_used = true; }
   | None ->
     begin match expr_ with
-    | A.Unop(Ast.Unot, e) ->
+    | A.Unop(Ast_defs.Unot, e) ->
       let (annot, expr_) = e in
       emit_jmpnz env annot expr_ label
-    | A.Binop(Ast.Barbar, e1, e2) ->
+    | A.Binop(Ast_defs.Barbar, e1, e2) ->
       let skip_label = Label.next_regular () in
       let (e1_annot, e1_expr_) = e1 in
       let r1 = emit_jmpnz env e1_annot e1_expr_ skip_label in
@@ -2005,7 +2005,7 @@ and emit_jmpz env (expr : A.expr) label: emit_jmp_result =
         { instrs = with_pos instrs;
           is_fallthrough = r2.is_fallthrough || r1.is_label_used;
           is_label_used = r2.is_label_used }
-    | A.Binop(Ast.Ampamp, e1, e2) ->
+    | A.Binop(Ast_defs.Ampamp, e1, e2) ->
       let r1 = emit_jmpz env e1 label in
       if not r1.is_fallthrough
       then
@@ -2017,16 +2017,16 @@ and emit_jmpz env (expr : A.expr) label: emit_jmp_result =
         { instrs = with_pos @@ gather [ r1.instrs; r2.instrs; ];
           is_fallthrough = r2.is_fallthrough;
            is_label_used = r1.is_label_used || r2.is_label_used }
-    | A.Binop(Ast.Eqeqeq, e, (_, A.Null))
-    | A.Binop(Ast.Eqeqeq, (_, A.Null), e) when opt ->
+    | A.Binop(Ast_defs.Eqeqeq, e, (_, A.Null))
+    | A.Binop(Ast_defs.Eqeqeq, (_, A.Null), e) when opt ->
       { instrs = with_pos @@ gather [
           emit_is_null env e;
           instr_jmpz label;
         ];
         is_fallthrough = true;
         is_label_used = true; }
-    | A.Binop(Ast.Diff2, e, (_, A.Null))
-    | A.Binop(Ast.Diff2, (_, A.Null), e) when opt ->
+    | A.Binop(Ast_defs.Diff2, e, (_, A.Null))
+    | A.Binop(Ast_defs.Diff2, (_, A.Null), e) when opt ->
       { instrs = with_pos @@ gather [
           emit_is_null env e;
           instr_jmpnz label;
@@ -2065,9 +2065,9 @@ and emit_jmpnz env annot (expr_ : A.expr_) label: emit_jmp_result =
         is_label_used = false }
   | None ->
     begin match expr_ with
-    | A.Unop(Ast.Unot, e) ->
+    | A.Unop(Ast_defs.Unot, e) ->
       emit_jmpz env e label
-    | A.Binop(Ast.Barbar, (annot1, e1), (annot2, e2)) ->
+    | A.Binop(Ast_defs.Barbar, (annot1, e1), (annot2, e2)) ->
        let r1 = emit_jmpnz env annot1 e1 label in
       if not r1.is_fallthrough then r1
       else
@@ -2075,7 +2075,7 @@ and emit_jmpnz env annot (expr_ : A.expr_) label: emit_jmp_result =
         { instrs = with_pos @@ gather [ r1.instrs; r2.instrs ];
           is_fallthrough = r2.is_fallthrough;
           is_label_used = r1.is_label_used || r2.is_label_used }
-    | A.Binop(Ast.Ampamp, e1, (annot2, e2)) ->
+    | A.Binop(Ast_defs.Ampamp, e1, (annot2, e2)) ->
       let skip_label = Label.next_regular () in
       let r1 = emit_jmpz env e1 skip_label in
       if not r1.is_fallthrough
@@ -2096,16 +2096,16 @@ and emit_jmpnz env annot (expr_ : A.expr_) label: emit_jmp_result =
           is_fallthrough = r2.is_fallthrough || r1.is_label_used;
           is_label_used = r2.is_label_used }
       end
-    | A.Binop(Ast.Eqeqeq, e, (_, A.Null))
-    | A.Binop(Ast.Eqeqeq, (_, A.Null), e) when opt ->
+    | A.Binop(Ast_defs.Eqeqeq, e, (_, A.Null))
+    | A.Binop(Ast_defs.Eqeqeq, (_, A.Null), e) when opt ->
       { instrs = with_pos @@ gather [
           emit_is_null env e;
           instr_jmpnz label;
         ];
         is_fallthrough = true;
         is_label_used = true; }
-    | A.Binop(Ast.Diff2, e, (_, A.Null))
-    | A.Binop(Ast.Diff2, (_, A.Null), e) when opt ->
+    | A.Binop(Ast_defs.Diff2, e, (_, A.Null))
+    | A.Binop(Ast_defs.Diff2, (_, A.Null), e) when opt ->
       { instrs = with_pos @@ gather [
           emit_is_null env e;
           instr_jmpz label;
@@ -2384,7 +2384,7 @@ and emit_obj_get ?(null_coalesce_assignment=false)
   let (annot, expr_) = expr in
   match expr_ with
   | A.Lvar (pos, id)
-    when (Local_id.get_name id) = SN.SpecialIdents.this && null_flavor = Ast.OG_nullsafe ->
+    when (Local_id.get_name id) = SN.SpecialIdents.this && null_flavor = Ast_defs.OG_nullsafe ->
     Emit_fatal.raise_fatal_parse
       pos "?-> is not allowed with $this"
   | _ ->
@@ -2502,8 +2502,8 @@ and emit_prop_expr ?(null_coalesce_assignment=false) env null_flavor
     | A.String id ->
       let pid = Hhbc_id.Prop.from_ast_name id in
       begin match null_flavor with
-      | Ast.OG_nullthrows -> MemberKey.PT pid
-      | Ast.OG_nullsafe -> MemberKey.QT pid
+      | Ast_defs.OG_nullthrows -> MemberKey.PT pid
+      | Ast_defs.OG_nullsafe -> MemberKey.QT pid
       end
     | A.Lvar (pos, name) when not (is_local_this env name) ->
       MemberKey.PL (get_local env (pos, (Local_id.get_name name)))
@@ -2515,7 +2515,7 @@ and emit_prop_expr ?(null_coalesce_assignment=false) env null_flavor
   begin match mk with
   | MemberKey.PL _ | MemberKey.PC _ ->
     let ((pos, _), _) = prop_expr in
-    if null_flavor = Ast.OG_nullsafe then
+    if null_flavor = Ast_defs.OG_nullsafe then
       Emit_fatal.raise_fatal_parse pos
         "?-> can only be used with scalar property names"
   | _ -> ()
@@ -2938,7 +2938,7 @@ and emit_args_and_inout_setters env (args: A.expr list) =
   let emit_arg_and_inout_setter i (arg : A.expr) =
     match snd arg with
     (* inout $var *)
-    | A.Callconv (Ast.Pinout, (_, A.Lvar (pos, id))) ->
+    | A.Callconv (Ast_defs.Pinout, (_, A.Lvar (pos, id))) ->
       let local = get_local env (pos, (Local_id.get_name id)) in
       let not_in_try = not (Emit_env.is_in_try env) in
       let move_instrs =
@@ -2948,7 +2948,7 @@ and emit_args_and_inout_setters env (args: A.expr list) =
       gather [ instr_cgetl local; move_instrs ],
       instr_popl local
     (* inout $arr[...][...] *)
-    | A.Callconv (Ast.Pinout, ((pos, _), A.Array_get (base_expr, opt_elem_expr))) ->
+    | A.Callconv (Ast_defs.Pinout, ((pos, _), A.Array_get (base_expr, opt_elem_expr))) ->
       let array_get_result =
         fst (emit_array_get_worker
           ~inout_param_info:(Some (i, aliases)) env pos
@@ -2969,11 +2969,11 @@ and emit_args_and_inout_setters env (args: A.expr list) =
         rebuild_load_store load store
       end
     (* unsupported inout *)
-    | A.Callconv (Ast.Pinout, _) ->
+    | A.Callconv (Ast_defs.Pinout, _) ->
       failwith "emit_arg_and_inout_setter: Unexpected inout expression type"
 
     (* by-ref annotated argument *)
-    | A.Unop (Ast.Uref, expr) ->
+    | A.Unop (Ast_defs.Uref, expr) ->
       let pos = fst @@ fst expr in
       begin match snd expr with
       (* passed by reference *)
@@ -3034,7 +3034,7 @@ and emit_object_expr env (expr : A.expr) =
   | _ -> emit_expr env expr
 
 and is_inout_arg = function
-  | _, A.Callconv (Ast.Pinout, _) -> true
+  | _, A.Callconv (Ast_defs.Pinout, _) -> true
   | _ -> false
 
 and has_inout_args es =
@@ -3505,7 +3505,7 @@ and emit_special_function env pos annot id (args : A.expr list) (uargs : A.expr 
 and get_inout_arg_positions args =
   List.filter_mapi args
     ~f:(fun i -> function
-          | _, A.Callconv (Ast.Pinout, _) -> Some i
+          | _, A.Callconv (Ast_defs.Pinout, _) -> Some i
           | _ -> None)
 
 and emit_call env pos expr (targs: Aast.targ list) (args : A.expr list) (uargs : A.expr list) async_eager_label =
@@ -3619,10 +3619,10 @@ and can_use_as_rhs_in_list_assignment (expr : A.expr_) =
   | Array _ | Varray _ | Darray _ | Collection _ | Clone _ | Unop _
   | As _ | Await _ -> true
   | Pipe (_, _, (_, r))
-  | Binop ((Ast.Eq None), (_, List _), (_, r)) ->
+  | Binop ((Ast_defs.Eq None), (_, List _), (_, r)) ->
     can_use_as_rhs_in_list_assignment r
-  | Binop (Ast.Plus, _, _) | Binop (Ast.QuestionQuestion, _, _)
-  | Binop (Ast.Eq _, _, _) | Class_const _ -> true
+  | Binop (Ast_defs.Plus, _, _) | Binop (Ast_defs.QuestionQuestion, _, _)
+  | Binop (Ast_defs.Eq _, _, _) | Class_const _ -> true
   (* Everything below is false *)
   | This | Any | ValCollection _ | KeyValCollection _ | ImmutableVar _
   | Dollardollar _ | Lplaceholder _| Fun_id _| Method_id (_, _) | Method_caller (_, _)
@@ -3703,7 +3703,7 @@ and emit_lval_op_list ?(last_usage=false) (env : Emit_env.t) (outer_pos : Pos.t)
     lhs, rest
 
 and expr_starts_with_ref = function
-  | _, A.Unop (Ast.Uref, _) -> true
+  | _, A.Unop (Ast_defs.Uref, _) -> true
   | _ -> false
 
 (* Emit code for an l-value operation *)
@@ -3742,9 +3742,9 @@ and emit_lval_op ?(null_coalesce_assignment=false) (env : Emit_env.t) pos op (ex
           instr_popc;
           instr_pushl temp;
         ], 1
-      | Some ((pos, _), A.Unop (Ast.Uref, (_, A.Obj_get (_, _, Ast.OG_nullsafe)
+      | Some ((pos, _), A.Unop (Ast_defs.Uref, (_, A.Obj_get (_, _, Ast_defs.OG_nullsafe)
                                   | _, A.Array_get ((_,
-                                    A.Obj_get (_, _, Ast.OG_nullsafe)), _)))) ->
+                                    A.Obj_get (_, _, Ast_defs.OG_nullsafe)), _)))) ->
         Emit_fatal.raise_fatal_runtime
           pos "?-> is not allowed in write context"
       | Some e -> emit_expr env e, 1
@@ -3849,7 +3849,7 @@ and emit_lval_op_nonlist_steps ?(null_coalesce_assignment=false)
     ]
 
   | A.Obj_get (e1, e2, null_flavor) ->
-    if null_flavor = Ast.OG_nullsafe then
+    if null_flavor = Ast_defs.OG_nullsafe then
      Emit_fatal.raise_fatal_parse pos "?-> is not allowed in write context";
     let mode =
       match op with
@@ -3910,44 +3910,44 @@ and emit_lval_op_nonlist_steps ?(null_coalesce_assignment=false)
 
 and from_unop op =
   match op with
-  | Ast.Utild -> instr (IOp BitNot)
-  | Ast.Unot -> instr (IOp Not)
-  | Ast.Uplus -> instr (IOp Add)
-  | Ast.Uminus -> instr (IOp Sub)
-  | Ast.Uincr | Ast.Udecr | Ast.Upincr | Ast.Updecr | Ast.Uref | Ast.Usilence ->
+  | Ast_defs.Utild -> instr (IOp BitNot)
+  | Ast_defs.Unot -> instr (IOp Not)
+  | Ast_defs.Uplus -> instr (IOp Add)
+  | Ast_defs.Uminus -> instr (IOp Sub)
+  | Ast_defs.Uincr | Ast_defs.Udecr | Ast_defs.Upincr | Ast_defs.Updecr | Ast_defs.Uref | Ast_defs.Usilence ->
     failwith "this unary operation cannot be translated"
 
 and emit_unop env pos op e =
   match op with
-  | Ast.Utild ->
+  | Ast_defs.Utild ->
     gather [
       emit_expr env e;
       emit_pos_then pos @@ from_unop op
     ]
-  | Ast.Unot ->
+  | Ast_defs.Unot ->
     gather [
       emit_expr env e;
       emit_pos_then pos @@ from_unop op
     ]
-  | Ast.Uplus ->
-    gather [
-      emit_pos pos;
-      instr (ILitConst (Int (Int64.zero)));
-      emit_expr env e;
-      emit_pos_then pos @@ from_unop op
-    ]
-  | Ast.Uminus ->
+  | Ast_defs.Uplus ->
     gather [
       emit_pos pos;
       instr (ILitConst (Int (Int64.zero)));
       emit_expr env e;
       emit_pos_then pos @@ from_unop op
     ]
-  | Ast.Uincr | Ast.Udecr | Ast.Upincr | Ast.Updecr ->
+  | Ast_defs.Uminus ->
+    gather [
+      emit_pos pos;
+      instr (ILitConst (Int (Int64.zero)));
+      emit_expr env e;
+      emit_pos_then pos @@ from_unop op
+    ]
+  | Ast_defs.Uincr | Ast_defs.Udecr | Ast_defs.Upincr | Ast_defs.Updecr ->
     emit_lval_op env pos (LValOp.IncDec (unop_to_incdec_op op)) e None
-  | Ast.Uref ->
-    failwith "Ast.Uref is used only for argument passing"
-  | Ast.Usilence ->
+  | Ast_defs.Uref ->
+    failwith "Ast_defs.Uref is used only for argument passing"
+  | Ast_defs.Usilence ->
     Local.scope @@ fun () ->
       let temp_local = Local.get_unnamed_local () in
       gather [

@@ -240,6 +240,20 @@ void raise_array_serialization_notice(const char* src, const ArrayData* arr) {
   static auto const sampl_threshold =
     RAND_MAX / RuntimeOption::EvalLogArrayProvenanceSampleRatio;
   if (std::rand() >= sampl_threshold) return;
+  static auto knownCounter = ServiceData::createTimeSeries(
+    "vm.provlogging.known",
+    {ServiceData::StatsType::COUNT}
+  );
+  static decltype(knownCounter) unknownCounters[] = {
+    ServiceData::createTimeSeries("vm.provlogging.unknown.counted.nonempty",
+                                  {ServiceData::StatsType::COUNT}),
+    ServiceData::createTimeSeries("vm.provlogging.unknown.static.nonempty",
+                                  {ServiceData::StatsType::COUNT}),
+    ServiceData::createTimeSeries("vm.provlogging.unknown.counted.empty",
+                                  {ServiceData::StatsType::COUNT}),
+    ServiceData::createTimeSeries("vm.provlogging.unknown.static.empty",
+                                  {ServiceData::StatsType::COUNT}),
+  };
 
   auto const dvarray = ([&](){
     if (arr->isVArray()) return "varray";
@@ -250,10 +264,14 @@ void raise_array_serialization_notice(const char* src, const ArrayData* arr) {
   })();
 
   auto const bail = [&]() {
+    auto const isEmpty = arr->empty();
+    auto const isStatic = arr->isStatic();
+    auto const counterIdx = (isEmpty ? 2 : 0) + (isStatic ? 1 : 0);
+    unknownCounters[counterIdx]->addValue(1);
     raise_dynamically_sampled_notice(
       "Observing {}{}{} in {} from unknown location",
-      arr->empty() ? "empty, " : "",
-      arr->isStatic() ? "static, " : "",
+      isEmpty ? "empty, " : "",
+      isStatic ? "static, " : "",
       dvarray,
       src);
   };
@@ -267,6 +285,7 @@ void raise_array_serialization_notice(const char* src, const ArrayData* arr) {
 
   if (!name) { bail(); return; }
 
+  knownCounter->addValue(1);
   raise_dynamically_sampled_notice("Observing {} in {} from {}:{}",
                                    dvarray, src, name->slice(), line);
 }

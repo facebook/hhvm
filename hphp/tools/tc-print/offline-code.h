@@ -20,6 +20,8 @@
 #include <string>
 #include <unordered_map>
 
+#include <folly/Optional.h>
+
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
@@ -48,6 +50,47 @@ enum TCRegion {
 
 extern std::string TCRegionString[];
 
+using EventCounts = std::vector<uint64_t>;
+
+/*
+ * Information on a single disasm instruction.
+ */
+struct TCDisasmInfo {
+  const std::string binaryStr;
+  const std::string callDest;
+  const std::string codeStr;
+  const EventCounts eventCounts;
+  const TCA ip;
+  const uint32_t instrLen;
+};
+
+/*
+ * Information shared across the specified range of disasm instructions within a
+ * single TC region.
+ */
+struct TCRangeInfo {
+  const TCA start;
+  const TCA end;
+
+  const folly::Optional<Offset> bc;
+  const folly::Optional<SHA1> sha1;
+
+  folly::Optional<const Func*> func;
+  folly::Optional<std::string> instrStr;
+  folly::Optional<int> lineNum;
+  folly::Optional<const Unit*> unit;
+
+  std::vector<TCDisasmInfo> disasm;
+};
+
+/*
+ * Information about an entire region of the TC
+ */
+struct TCRegionInfo {
+  const TCRegion tcRegion;
+  std::vector<TCRangeInfo> ranges;
+};
+
 struct TCRegionRec {
   FILE*    file;
   TCA      baseAddr;
@@ -55,7 +98,6 @@ struct TCRegionRec {
 };
 
 struct OfflineCode {
-
   OfflineCode(std::string _dumpDir,
                  TCA _ahotBase,
                  TCA _aBase,
@@ -131,6 +173,53 @@ private:
               bool   printAddr,
               bool   printBinary);
 
+  /*
+   * Read in the specified FILE, starting at the given offset and reading
+   * `codeLen` bytes, and store those bytes in the location pointed to by
+   * `code`. Throws an error if the file is unable to be read at that location.
+   */
+  void readDisasmFile(FILE*, const Offset, const uint64_t codeLen, void* code);
+
+  /*
+   * Get all of the disassembly information for the region
+   * [codeStartAddr, codeStartAddr + codeLen) as read from the provided FILE.
+   */
+  TCRegionInfo getRegionInfo(FILE*  file,
+                              TCA fileStartAddr,
+                              TCA codeStartAddr,
+                              uint64_t codeLen,
+                              const PerfEventsMap<TCA>& perfEvents,
+                              BCMappingInfo bcMappingInfo);
+
+  /*
+   * Get information on the different divisions of ranges within [start, end),
+   * as specified by bcMappingInfo.
+   *
+   * bcMappingInfo.bcMapping is expected to be in order, such that if region i
+   * in the mapping covers range [a, b), region i+1 is expected to cover some
+   * range [b, c).
+   */
+  std::vector<TCRangeInfo> getRanges(const BCMappingInfo& bcMappingInfo,
+                                      const TCA start,
+                                      const TCA end);
+
+  /*
+   * Get information about this specific range [start, end)
+   */
+  TCRangeInfo getRangeInfo(const TransBCMapping& transBCMap,
+                            const TCA start,
+                            const TCA end);
+
+  /*
+   * Collate information about a single instruction
+   */
+  TCDisasmInfo getDisasmInfo(const TCA ip,
+                              const uint32_t instrLen,
+                              const PerfEventsMap<TCA>& perfEvents,
+                              const std::string& binaryStr,
+                              const std::string& callDest,
+                              const std::string& codeStr);
+
   TCA collectJmpTargets(FILE* file,
                         TCA fileStartAddr,
                         TCA codeStartAddr,
@@ -139,15 +228,33 @@ private:
 
   std::string getSymbolName(TCA addr);
 
-  size_t printBCMapping(std::ostream&,
-                        BCMappingInfo bcMappingInfo,
-                        size_t currBC,
-                        TCA ip);
+  /*
+   * Find the specific address which starts the given region
+   */
+  TCA getRegionStart(TCRegion region, TransBCMapping transBCMap);
+
+  /*
+   * Format and print information about a range into os
+   */
+  void printRangeInfo(std::ostream& os,
+                      const TCRangeInfo& rangeInfo,
+                      const bool printAddr,
+                      const bool printBinary);
+
+  /*
+   * Format and print information about a disasm instruction into os
+   */
+  void printDisasmInfo(std::ostream& os,
+                      const TCDisasmInfo& disasmInfo,
+                      const bool printAddr,
+                      const bool printBinary);
 
   void printEventStats(std::ostream&,
-                       TCA address,
-                       uint32_t instrLen,
-                       const PerfEventsMap<TCA>& perfEvents);
+                       EventCounts events);
+
+  EventCounts getEventCounts(TCA address,
+                             uint32_t instrLen,
+                             const PerfEventsMap<TCA>& perfEvents);
 };
 
 } }

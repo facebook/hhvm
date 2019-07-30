@@ -90,18 +90,20 @@ TCA OfflineCode::collectJmpTargets(FILE *file,
   return 0;
 }
 
+TCRegionInfo OfflineCode::getRegionInfo(FILE* file,
+                                         TCA fileStartAddr,
+                                         TCA codeStartAddr,
+                                         uint64_t codeLen,
+                                         const PerfEventsMap<TCA>& perfEvents,
+                                         BCMappingInfo bcMappingInfo) {
+  if (codeLen == 0) return TCRegionInfo{bcMappingInfo.tcRegion};
 
-void OfflineCode::disasm(const ostream& os,
-                         FILE* file,
-                         TCA fileStartAddr,
-                         TCA codeStartAddr,
-                         uint64_t codeLen,
-                         const PerfEventsMap<TCA>& perfEvents,
-                         BCMappingInfo bcMappingInfo,
-                         bool printAddr,
-                         bool printBinary) {
-
-  if (codeLen == 0) return;
+  auto const codeEndAddr = codeStartAddr + codeLen;
+  TCRegionInfo regionInfo{bcMappingInfo.tcRegion,
+                           getRanges(bcMappingInfo,
+                                     codeStartAddr,
+                                     codeEndAddr)};
+  auto& ranges = regionInfo.ranges;
 
   char codeStr[MAX_INSTR_ASM_LEN];
   Instruction* code = (Instruction*) alloca(codeLen);
@@ -110,15 +112,7 @@ void OfflineCode::disasm(const ostream& os,
   size_t  currBC = 0;
 
   auto const offset = codeStartAddr - fileStartAddr;
-  if (fseek(file, offset, SEEK_SET)) {
-    error("disasm error: seeking file");
-  }
-
-  size_t readLen = fread(code, codeLen, 1, file);
-  if (readLen != 1) {
-    error("Failed to read {} bytes at offset {} from code file due to {}",
-          codeLen, offset, feof(file) ? "EOF" : "read error");
-  }
+  readDisasmFile(file, offset, codeLen, code);
 
   Decoder dec;
   Disassembler dis(codeStr, MAX_INSTR_ASM_LEN);
@@ -136,15 +130,6 @@ void OfflineCode::disasm(const ostream& os,
 
   for (frontier = code, ip = codeStartAddr; frontier < code + codeLen; ) {
     dec.Decode(frontier);
-
-    currBC = printBCMapping(os, bcMappingInfo, currBC, (TCA)ip);
-    if (printAddr) os << folly::format("{:>#14x}: ", ip);
-
-    if (printBinary) {
-      os << folly::format("{:08" PRIx32 "}",
-                          *reinterpret_cast<int32_t*>(frontier));
-      os << string(10, ' ');
-    }
 
     // Shadow potential call destinations based on fixed sequence.
     // This needs to match code generation in JIT.
@@ -173,17 +158,24 @@ void OfflineCode::disasm(const ostream& os,
       callAddr = 0;
     }
 
-    if (! perfEvents.empty()) {
-      printEventStats(os, (TCA)ip, kInstructionSize, perfEvents);
-    } else {
-      os << string(48, ' ');
-    }
+    auto const binaryStr = [&] {
+      std::ostringstream binary_os;
+      binary_os << folly::format("{:08" PRIx32 "}",
+                                 *reinterpret_cast<int32_t*>(frontier));
+      binary_os << string(10, ' ');
+      return binary_os.str();
+    }();
 
-    os << folly::format("{}{}\n", codeStr, callDest);
+    while (currBC < ranges.size() - 1 && ip >= ranges[currBC].end) currBC++;
+
+    auto const disasmInfo = getDisasmInfo(ip, kInstructionSize, perfEvents,
+                                          binaryStr, callDest, codeStr);
+    ranges[currBC].disasm.push_back(disasmInfo);
 
     frontier += kInstructionSize;
     ip += kInstructionSize;
   }
+  return regionInfo;
 }
 
 #endif

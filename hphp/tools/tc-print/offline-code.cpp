@@ -128,6 +128,21 @@ void OfflineCode::printDisasm(std::ostream& os,
          perfEvents, BCMappingInfo(tcr, bcMap), true, hostOpcodes);
 }
 
+folly::dynamic OfflineCode::getDisasm(TCA startAddr,
+                                      uint32_t len,
+                                      const vector<TransBCMapping>& bcMap,
+                                      const PerfEventsMap<TCA>& perfEvents,
+                                      bool hostOpcodes) {
+  auto const tcr = findTCRegionContaining(startAddr);
+  auto const regionInfo = getRegionInfo(tcRegions[tcr].file,
+                                        tcRegions[tcr].baseAddr,
+                                        startAddr,
+                                        len,
+                                        perfEvents,
+                                        BCMappingInfo(tcr, bcMap));
+  return regionInfo.toDynamic();
+}
+
 void OfflineCode::loadSymbolsMap() {
   FILE* nmMapFile;
 

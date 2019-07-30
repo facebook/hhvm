@@ -56,6 +56,24 @@ using EventCounts = std::vector<uint64_t>;
  * Information on a single disasm instruction.
  */
 struct TCDisasmInfo {
+  folly::dynamic toDynamic() const {
+    using folly::dynamic;
+
+    dynamic eventsObj = dynamic::object();
+    for (int i = 0; i < eventCounts.size(); i++) {
+      auto const event = static_cast<PerfEventType>(i);
+      auto const eventName = eventTypeToCommandLineArgument(event);
+      eventsObj[eventName] = eventCounts[i];
+    }
+
+    return dynamic::object("binary", folly::trimWhitespace(binaryStr))
+                          ("callDest", callDest)
+                          ("code", codeStr)
+                          ("perfEvents", eventsObj)
+                          ("ip", folly::sformat("{}", static_cast<void*>(ip)))
+                          ("instrLen", instrLen);
+  }
+
   const std::string binaryStr;
   const std::string callDest;
   const std::string codeStr;
@@ -69,6 +87,27 @@ struct TCDisasmInfo {
  * single TC region.
  */
 struct TCRangeInfo {
+  folly::dynamic toDynamic() const {
+      using folly::dynamic;
+
+      dynamic disasmObjs = dynamic::array;
+      for (auto const& disasmInfo : disasm) {
+        disasmObjs.push_back(disasmInfo.toDynamic());
+      }
+
+      auto const startStr = folly::sformat("{}", static_cast<void*>(start));
+      auto const endStr = folly::sformat("{}", static_cast<void*>(end));
+
+      // TODO(elijahrivera) - maybe also include func and unit info?
+      return dynamic::object("start", startStr)
+                            ("end", endStr)
+                            ("bc", bc ? *bc : dynamic())
+                            ("sha1", sha1 ? sha1->toString() : dynamic())
+                            ("instrStr", instrStr ? *instrStr : dynamic())
+                            ("lineNum", lineNum ? *lineNum : dynamic())
+                            ("disasm", disasmObjs);
+  }
+
   const TCA start;
   const TCA end;
 
@@ -87,6 +126,19 @@ struct TCRangeInfo {
  * Information about an entire region of the TC
  */
 struct TCRegionInfo {
+  folly::dynamic toDynamic() const {
+    using folly::dynamic;
+
+    dynamic rangeObjs = dynamic::array;
+    for (auto const& rangeInfo : ranges) {
+      rangeObjs.push_back(rangeInfo.toDynamic());
+    }
+
+    always_assert(tcRegion < TCRCount);
+    return dynamic::object("tcRegion", TCRegionString[tcRegion])
+                          ("ranges", rangeObjs);
+  }
+
   const TCRegion tcRegion;
   std::vector<TCRangeInfo> ranges;
 };
@@ -125,6 +177,12 @@ struct OfflineCode {
                    const std::vector<TransBCMapping>& bcMap,
                    const PerfEventsMap<TCA>& perfEvents,
                    bool hostOpcodes);
+
+  folly::dynamic getDisasm(TCA startAddr,
+                           uint32_t len,
+                           const std::vector<TransBCMapping>& bcMap,
+                           const PerfEventsMap<TCA>& perfEvents,
+                           bool hostOpcodes);
 
   // Returns the fall-thru successor from 'a', if any
   TCA getTransJmpTargets(const TransRec *transRec,

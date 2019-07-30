@@ -514,12 +514,12 @@ void loadProfData() {
   }
 }
 
-const char* getDisasm(OfflineCode* code,
-                      TCA startAddr,
-                      uint32_t len,
-                      const std::vector<TransBCMapping>& bcMap,
-                      const PerfEventsMap<TCA>& perfEvents,
-                      bool hostOpcodes) {
+const char* getDisasmStr(OfflineCode* code,
+                         TCA startAddr,
+                         uint32_t len,
+                         const std::vector<TransBCMapping>& bcMap,
+                         const PerfEventsMap<TCA>& perfEvents,
+                         bool hostOpcodes) {
   std::ostringstream os;
   code->printDisasm(os, startAddr, len, bcMap, perfEvents, hostOpcodes);
   return os.str().c_str();
@@ -537,14 +537,22 @@ dynamic getTransRec(const TransRec* tRec,
                     const PerfEventsMap<TransID>& transPerfEvents) {
   auto const guards = dynamic(tRec->guards.begin(), tRec->guards.end());
 
+  auto const resumeMode = [&] {
+    switch (tRec->src.resumeMode()) {
+      case ResumeMode::None: return "None";
+      case ResumeMode::Async: return "Async";
+      case ResumeMode::GenIter: return "GenIter";
+    }
+    always_assert(false);
+  }();
+
   const dynamic src = dynamic::object("sha1", tRec->sha1.toString())
                                      ("funcId", tRec->src.funcID())
                                      ("funcName", tRec->funcName)
-                                     ("resumeMode", static_cast<int32_t>
-                                                      (tRec->src.resumeMode()))
+                                     ("resumeMode", resumeMode)
                                      ("hasThis", tRec->src.hasThis())
                                      ("prologue", tRec->src.prologue())
-                                     ("bsStartOffset", tRec->src.offset())
+                                     ("bcStartOffset", tRec->src.offset())
                                      ("guards", guards);
 
   const dynamic result = dynamic::object("id", tRec->id)
@@ -564,21 +572,25 @@ dynamic getTransRec(const TransRec* tRec,
   return result;
 }
 
-dynamic getEvents(const PerfEventsMap<TransID>& transPerfEvents,
-                  const TransID transId) {
-  dynamic eventObjs = dynamic::array;
+dynamic getPerfEvents(const PerfEventsMap<TransID>& transPerfEvents,
+                      const TransID transId) {
+  dynamic eventsObj = dynamic::object();
   auto const events = transPerfEvents.getAllEvents(transId);
 
-  for (size_t i = 0; i < PerfEventType::MAX_NUM_EVENT_TYPES; i++) {
-    if (events[i]) {
-      auto const perfType = static_cast<PerfEventType>(i);
-      auto const typeStr = eventTypeToCommandLineArgument(perfType);
-      eventObjs.push_back(dynamic::object("type", typeStr)
-                                         ("event", events[i]));
-    }
+  bool hasEvents = false;
+  for (auto const c : events) {
+    if (c) hasEvents = true;
+  }
+  if (!hasEvents) return eventsObj;
+
+  auto const numEvents = getNumEventTypes();
+  for (int i = 0; i < numEvents; i++) {
+    auto const event = static_cast<PerfEventType>(i);
+    auto const eventName = eventTypeToCommandLineArgument(event);
+    eventsObj[eventName] = events[i];
   }
 
-  return eventObjs;
+  return eventsObj;
 }
 
 dynamic getTrans(TransID transId) {
@@ -588,7 +600,7 @@ dynamic getTrans(TransID transId) {
   if (!tRec->isValid()) return dynamic();
 
   auto const transRec = getTransRec(tRec, transPerfEvents);
-  auto const transEvents = getEvents(transPerfEvents, transId);
+  auto const perfEvents = getPerfEvents(transPerfEvents, transId);
 
   dynamic blocks = dynamic::array;
   for (auto const& block : tRec->blocks) {
@@ -614,28 +626,27 @@ dynamic getTrans(TransID transId) {
   }
 
   const dynamic mainDisasm = tRec->aLen ?
-                             getDisasm(transCode,
-                                       tRec->aStart,
-                                       tRec->aLen,
-                                       tRec->bcMapping,
-                                       tcaPerfEvents,
-                                       hostOpcodes) :
+                             transCode->getDisasm(tRec->aStart,
+                                                  tRec->aLen,
+                                                  tRec->bcMapping,
+                                                  tcaPerfEvents,
+                                                  hostOpcodes) :
                              dynamic();
-  const dynamic coldDisasm = tRec->acoldLen ?
-                             getDisasm(transCode,
-                                       tRec->acoldStart,
-                                       tRec->acoldLen,
-                                       tRec->bcMapping,
-                                       tcaPerfEvents,
-                                       hostOpcodes) :
+
+  auto const coldIsFrozen = tRec->acoldStart == tRec->afrozenStart;
+  const dynamic coldDisasm = !coldIsFrozen && tRec->acoldLen ?
+                             transCode->getDisasm(tRec->acoldStart,
+                                                  tRec->acoldLen,
+                                                  tRec->bcMapping,
+                                                  tcaPerfEvents,
+                                                  hostOpcodes) :
                              dynamic();
   const dynamic frozenDisasm = tRec -> afrozenLen ?
-                               getDisasm(transCode,
-                                         tRec->afrozenStart,
-                                         tRec->afrozenLen,
-                                         tRec->bcMapping,
-                                         tcaPerfEvents,
-                                         hostOpcodes) :
+                               transCode->getDisasm(tRec->afrozenStart,
+                                                    tRec->afrozenLen,
+                                                    tRec->bcMapping,
+                                                    tcaPerfEvents,
+                                                    hostOpcodes) :
                                dynamic();
   const dynamic disasmObj = dynamic::object("main", mainDisasm)
                                            ("cold", coldDisasm)
@@ -643,9 +654,9 @@ dynamic getTrans(TransID transId) {
 
   return dynamic::object("transRec", transRec)
                         ("blocks", blocks)
-                        ("archName", dynamic(transCode->getArchName()))
-                        ("disasm", disasmObj)
-                        ("events", transEvents);
+                        ("archName", transCode->getArchName())
+                        ("regions", disasmObj)
+                        ("perfEvents", perfEvents);
 }
 
 dynamic getTC() {
@@ -700,34 +711,34 @@ void printTrans(TransID transId) {
 
   g_logger->printGeneric("----------\n%s: main\n----------\n",
                          transCode->getArchName());
-  g_logger->printAsm("%s", getDisasm(transCode,
-                                     tRec->aStart,
-                                     tRec->aLen,
-                                     tRec->bcMapping,
-                                     tcaPerfEvents,
-                                     hostOpcodes));
+  g_logger->printAsm("%s", getDisasmStr(transCode,
+                                        tRec->aStart,
+                                        tRec->aLen,
+                                        tRec->bcMapping,
+                                        tcaPerfEvents,
+                                        hostOpcodes));
 
   g_logger->printGeneric("----------\n%s: cold\n----------\n",
                          transCode->getArchName());
   // Sometimes acoldStart is the same as afrozenStart.  Avoid printing the code
   // twice in such cases.
   if (tRec->acoldStart != tRec->afrozenStart) {
-    g_logger->printAsm("%s", getDisasm(transCode,
-                                       tRec->acoldStart,
-                                       tRec->acoldLen,
-                                       tRec->bcMapping,
-                                       tcaPerfEvents,
-                                       hostOpcodes));
+    g_logger->printAsm("%s", getDisasmStr(transCode,
+                                          tRec->acoldStart,
+                                          tRec->acoldLen,
+                                          tRec->bcMapping,
+                                          tcaPerfEvents,
+                                          hostOpcodes));
   }
 
   g_logger->printGeneric("----------\n%s: frozen\n----------\n",
                          transCode->getArchName());
-  g_logger->printAsm("%s", getDisasm(transCode,
-                                     tRec->afrozenStart,
-                                     tRec->afrozenLen,
-                                     tRec->bcMapping,
-                                     tcaPerfEvents,
-                                     hostOpcodes));
+  g_logger->printAsm("%s", getDisasmStr(transCode,
+                                        tRec->afrozenStart,
+                                        tRec->afrozenLen,
+                                        tRec->bcMapping,
+                                        tcaPerfEvents,
+                                        hostOpcodes));
   g_logger->printGeneric("----------\n");
 
 }
@@ -977,30 +988,30 @@ void printTopBytecodes(const OfflineTransData* tdata,
 
     g_logger->printGeneric("----------\n%s: main\n----------\n",
                            olCode->getArchName());
-    g_logger->printAsm("%s", getDisasm(olCode,
-                                       tfrag.aStart,
-                                      tfrag.aLen,
-                                      trec->bcMapping,
-                                      samples,
-                                      hostOpcodes));
+    g_logger->printAsm("%s", getDisasmStr(olCode,
+                                          tfrag.aStart,
+                                          tfrag.aLen,
+                                          trec->bcMapping,
+                                          samples,
+                                          hostOpcodes));
 
     g_logger->printGeneric("----------\n%s: cold\n----------\n",
                            olCode->getArchName());
-    g_logger->printAsm("%s", getDisasm(olCode,
-                                       tfrag.acoldStart,
-                                       tfrag.acoldLen,
-                                       trec->bcMapping,
-                                       samples,
-                                       hostOpcodes));
+    g_logger->printAsm("%s", getDisasmStr(olCode,
+                                          tfrag.acoldStart,
+                                          tfrag.acoldLen,
+                                          trec->bcMapping,
+                                          samples,
+                                          hostOpcodes));
 
     g_logger->printGeneric("----------\n%s: frozen\n----------\n",
                            olCode->getArchName());
-    g_logger->printAsm("%s", getDisasm(olCode,
-                                       tfrag.afrozenStart,
-                                       tfrag.afrozenLen,
-                                       trec->bcMapping,
-                                       samples,
-                                       hostOpcodes));
+    g_logger->printAsm("%s", getDisasmStr(olCode,
+                                          tfrag.afrozenStart,
+                                          tfrag.afrozenLen,
+                                          trec->bcMapping,
+                                          samples,
+                                          hostOpcodes));
   }
 }
 

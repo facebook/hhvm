@@ -1,0 +1,8 @@
+File "classname.php", line 10, characters 13-21:
+This is a classname, it cannot be used as a reified type argument (Typing[4305])
+File "classname.php", line 3, characters 15-15:
+T is reified
+File "classname.php", line 11, characters 13-20:
+This is a typename, it cannot be used as a reified type argument (Typing[4305])
+File "classname.php", line 3, characters 15-15:
+T is reified

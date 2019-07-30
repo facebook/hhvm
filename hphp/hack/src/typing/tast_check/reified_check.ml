@@ -12,7 +12,8 @@ open Tast
 open Typing_defs
 
 module Env = Tast_env
-module UA = Naming_special_names.UserAttributes
+module SN = Naming_special_names
+module UA = SN.UserAttributes
 module Cls = Decl_provider.Class
 
 let tparams_has_reified tparams =
@@ -66,8 +67,12 @@ let verify_targ_valid env tparam targ =
     let ty = Env.hint_to_ty env targ in
     begin match ty with
     | _, Tapply ((pw, h), [])
-      when h = Naming_special_names.Typehints.wildcard && not (Env.get_allow_wildcards env) ->
+      when h = SN.Typehints.wildcard && not (Env.get_allow_wildcards env) ->
       Errors.invalid_reified_argument tparam.tp_name pw "a wildcard"
+    | _, Tapply ((pw, h), _) when h = SN.Classes.cClassname ->
+      Errors.invalid_reified_argument tparam.tp_name pw "a classname"
+    | _, Tapply ((pw, h), _) when h = SN.Classes.cTypename ->
+      Errors.invalid_reified_argument tparam.tp_name pw "a typename"
     | _, Tgeneric t ->
       begin match (Env.get_reified env t) with
       | Nast.Erased -> Errors.invalid_reified_argument tparam.tp_name p "not reified"

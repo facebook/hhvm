@@ -891,17 +891,27 @@ let do_rage (state: state) (ref_unblocked_time: float ref): Rage.result Lwt.t =
   let server_state_strings = List.map ~f:server_state_to_string !hh_server_state in
   add_data (String.concat ~sep:"" ("LSP belief of hh_server_state:\n" :: server_state_strings));
   (* server *)
-  let%lwt () =
-    match state with
+  let server_promise = match state with
     | Main_loop menv -> begin
         let open Main_env in
         let%lwt items = rpc menv.conn ref_unblocked_time ServerCommandTypes.RAGE in
         let add i = add { title = i.ServerRageTypes.title; data = i.ServerRageTypes.data; } in
         List.iter items ~f:add;
-        Lwt.return_unit
+        Lwt.return (Ok ())
       end
-    | _ -> Lwt.return_unit
+    | _ -> Lwt.return (Error "server rage - not in main loop") in
+  let timeout_promise = begin
+    let%lwt () = Lwt_unix.sleep 30. in (* 30s *)
+    Lwt.return (Error "server rage - timeout 30s")
+  end in
+  let%lwt server_rage_result = try%lwt
+    Lwt.pick [server_promise; timeout_promise]
+  with e ->
+    let message = Exn.to_string e in
+    let stack = Printexc.get_backtrace () in
+    Lwt.return (Error (Printf.sprintf "server rage - %s\n%s" message stack))
   in
+  Result.iter_error server_rage_result ~f:add_data;
   (* that's it! *)
   Lwt.return !items
 

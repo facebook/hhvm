@@ -148,6 +148,11 @@ and emit_stmt env (pos, stmt) =
     else
       begin match set_bytes_kind s with
       | Some kind ->
+        let exprl =
+          match exprl with
+          | (_, A.Callconv (Ast_defs.Pinout, e))::t -> e::t
+          | _ -> exprl
+        in
         emit_set_range_expr env pos s kind exprl
       | None ->
         emit_ignored_expr ~pop_pos:pos env expr

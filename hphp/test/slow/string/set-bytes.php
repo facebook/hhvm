@@ -162,6 +162,14 @@ function failures() {
   try_func(() ==> { HH\set_bytes_rev_int32($s, 0, 5); });
   try_func(() ==> { HH\set_bytes_rev_float64($s, 0, 5.0); });
 
+  // ignore inout modifiers on first parameter
+  $s = "This string is 34 characters long.";
+  var_dump($s);
+  HH\set_bytes_string(inout $s, 5, 'branch', 6);
+  var_dump($s);
+  HH\set_bytes_int8(inout $s, 33, 63);
+  var_dump($s);
+
   echo ">>> End of failure cases <<<\n";
 }
 

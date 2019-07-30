@@ -16,7 +16,8 @@ $i = 0;
 foreach( $search_arr as $value ) {
   echo "\n-- Iteration $i --\n";
   /* replace the string in array */
-  var_dump( str_replace($value, "FOUND", $search_arr, &$count) );
+  $count = 0;
+  var_dump( str_replace_with_count($value, "FOUND", $search_arr, inout $count) );
   var_dump( $count );
   $i++;
 }

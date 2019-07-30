@@ -449,6 +449,12 @@ function str_replace(mixed $search,
                      mixed $subject,
                      mixed &$count = null): mixed;
 
+<<__IsFoldable, __Native, __Rx>>
+function str_replace_with_count(mixed $search,
+                                mixed $replace,
+                                mixed $subject,
+                                mixed &$count): mixed;
+
 /**
  * This function returns a string or an array with all occurrences of search
  *   in subject (ignoring case) replaced with the given replace value. If you
@@ -477,6 +483,12 @@ function str_ireplace(mixed $search,
                       mixed $replace,
                       mixed $subject,
                       mixed &$count = null): mixed;
+
+<<__IsFoldable, __Native, __Rx>>
+function str_ireplace_with_count(mixed $search,
+                                 mixed $replace,
+                                 mixed $subject,
+                                 mixed &$count): mixed;
 
 /**
  * substr_replace() replaces a copy of string delimited by the start and

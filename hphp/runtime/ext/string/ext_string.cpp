@@ -740,7 +740,19 @@ TypedValue HHVM_FUNCTION(str_replace,
   return tvReturn(str_replace(search, replace, subject, count));
 }
 
+TypedValue HHVM_FUNCTION(str_replace_with_count,
+                         const Variant& search, const Variant& replace,
+                         const Variant& subject, VRefParam count) {
+  return tvReturn(str_replace(search, replace, subject, count));
+}
+
 TypedValue HHVM_FUNCTION(str_ireplace,
+                         const Variant& search, const Variant& replace,
+                         const Variant& subject, VRefParam count) {
+  return tvReturn(str_ireplace(search, replace, subject, count));
+}
+
+TypedValue HHVM_FUNCTION(str_ireplace_with_count,
                          const Variant& search, const Variant& replace,
                          const Variant& subject, VRefParam count) {
   return tvReturn(str_ireplace(search, replace, subject, count));
@@ -2616,7 +2628,9 @@ struct StringExtension final : Extension {
     HHVM_FE(chunk_split);
     HHVM_FE(strtok);
     HHVM_FE(str_replace);
+    HHVM_FE(str_replace_with_count);
     HHVM_FE(str_ireplace);
+    HHVM_FE(str_ireplace_with_count);
     HHVM_FE(substr_replace);
     HHVM_FE(substr);
     HHVM_FE(str_pad);

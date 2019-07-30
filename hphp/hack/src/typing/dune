@@ -60,6 +60,7 @@
     typing_fake_members
     typing_generic
     typing_generic_constraint
+    typing_generic_rules
     typing_local_types
     typing_intersection
     typing_log

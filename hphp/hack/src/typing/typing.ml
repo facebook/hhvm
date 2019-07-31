@@ -1771,7 +1771,7 @@ and expr_
     let env, te, ty1 = expr env instance in
     let env, result, _decl_ty =
       obj_get_ ~inst_meth:true ~obj_pos:p ~is_method:true ~nullsafe:None
-        ~valkind:`other ~pos_params:None env ty1 (CIexpr instance) meth (fun x -> x) (fun x -> x) in
+        ~pos_params:None env ty1 (CIexpr instance) meth (fun x -> x) (fun x -> x) in
     let env, result = Env.FakeMembers.check_instance_invalid env instance (snd meth) result in
       begin
         (match result with
@@ -2183,8 +2183,8 @@ and expr_
       let env, te1, ty1 = expr ~accept_using_var:true env e1 in
       let env = might_throw env in
       let env, result =
-        obj_get ~obj_pos:(fst e1) ~is_method:false ~nullsafe ~valkind
-          env ty1 (CIexpr e1) m (fun x -> x) in
+        obj_get ~obj_pos:(fst e1) ~is_method:false ~nullsafe env ty1
+          (CIexpr e1) m (fun x -> x) in
       let env, result =
         Env.FakeMembers.check_instance_invalid env e1 (snd m) result in
       make_result env p (T.Obj_get(te1,
@@ -3275,8 +3275,8 @@ and assign_ p ur env e1 ty2 =
         let env = Type.coerce_type p ur env ty2 ?ty_expect_decl:member_ty_decl member_ty Errors.unify_error in
         env, member_ty, member_ty_decl in
       let env, result =
-        obj_get ~obj_pos:(fst obj) ~is_method:false ~nullsafe ~valkind:`lvalue
-          env obj_ty (CIexpr e1) m k in
+        obj_get ~obj_pos:(fst obj) ~is_method:false ~nullsafe env obj_ty
+          (CIexpr e1) m k in
       let te1 =
         Tast.make_typed_expr pobj result
           (T.Obj_get
@@ -4014,7 +4014,7 @@ and call_parent_construct pos env el uel =
           let k_lhs _ = this_ty in
           fun env k ->
             let env, method_, _ = obj_get_ ~inst_meth:false ~is_method:true ~nullsafe:None ~obj_pos:pos
-              ~pos_params:(Some el) ~valkind:`other env ty1 e1 m k k_lhs in
+              ~pos_params:(Some el) env ty1 e1 m k k_lhs in
             env, method_ in
       let call_continuation env fty fty_decl =
         let env = check_coroutine_call env fty in
@@ -4151,13 +4151,13 @@ and class_get_ ~is_method ~is_const ~this_ty ?(explicit_tparams=[])
   | r, Terr -> k (env, err_witness env (Reason.to_pos r), None)
   | _, Tdynamic -> k (env, cty, None)
   | _, Tunion tyl ->
-      let env, tyl =
-        List.map_env env tyl begin fun env ty ->
-          class_get ~is_method ~is_const ~explicit_tparams ~incl_tc
-                     env ty (p, mid) cid k
-        end in
-      let env, ty = Union.union_list env (fst cty) tyl in
-      env, ty, None
+    let env, tyl =
+      List.map_env env tyl begin fun env ty ->
+        class_get ~is_method ~is_const ~explicit_tparams ~incl_tc
+                  env ty (p, mid) cid k
+      end in
+    let env, ty = Union.union_list env (fst cty) tyl in
+    env, ty, None
   | _, Tintersection tyl ->
       let env, tyl = TUtils.run_on_intersection env tyl ~f:(fun env ty ->
         class_get ~is_method ~is_const ~explicit_tparams ~incl_tc env ty (p, mid) cid k) in
@@ -4370,16 +4370,16 @@ and member_not_found pos ~is_method class_ member_name r =
  *   value can be assigned to the property id for each of the possible types
  *   of the receiver.
  *)
-and obj_get ~obj_pos ~is_method ~nullsafe ?(valkind = `other) ?(explicit_tparams=[])
+and obj_get ~obj_pos ~is_method ~nullsafe ?(explicit_tparams=[])
             ?pos_params env ty1 cid id k =
   let env, method_, _method_decl =
-    obj_get_ ~inst_meth:false ~is_method ~nullsafe ~valkind ~obj_pos ~pos_params
+    obj_get_ ~inst_meth:false ~is_method ~nullsafe ~obj_pos ~pos_params
       ~explicit_tparams env ty1 cid id k (fun x -> x) in
   env, method_
 
 (* We know that the receiver is a concrete class: not a generic with
  * bounds, or a Tunion. *)
-and obj_get_concrete_ty ~inst_meth ~is_method ~valkind ?(explicit_tparams=[])
+and obj_get_concrete_ty ~inst_meth ~is_method ?(explicit_tparams=[])
     env concrete_ty class_id (id_pos, id_str) k_lhs =
   let default () = env, (Reason.Rwitness id_pos, Typing_utils.tany env), None in
   let mk_ety_env r class_info x e paraml =
@@ -4403,7 +4403,7 @@ and obj_get_concrete_ty ~inst_meth ~is_method ~valkind ?(explicit_tparams=[])
         Inter.intersect_list env (Reason.Rwitness id_pos) upper_bounds
       in
       obj_get_ ~inst_meth ~is_method ~nullsafe:None ~obj_pos:(Reason.to_pos r)
-        ~valkind ~pos_params: None ~explicit_tparams
+        ~pos_params: None ~explicit_tparams
         env inter_ty class_id (id_pos, id_str) (fun x -> x) k_lhs
     in
     begin match Env.get_class env (snd x) with
@@ -4519,12 +4519,6 @@ and obj_get_concrete_ty ~inst_meth ~is_method ~valkind ?(explicit_tparams=[])
               Phase.localize ~ety_env env member_decl_ty
           end in
 
-        if member_ce.ce_const && valkind = `lvalue then
-          if not (env.Env.inside_constructor &&
-            (* expensive call behind short circuiting && *)
-            Typing_solver.is_sub_type env (Env.get_self env) concrete_ty) then
-            Errors.assigning_to_const id_pos;
-
         if inst_meth
         then TVis.check_inst_meth_access id_pos (mem_pos, vis);
         if (Cls.has_upper_bounds_on_this_from_constraints class_info) then
@@ -4597,7 +4591,7 @@ and widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
     env, None
 
 (* k_lhs takes the type of the object receiver *)
-and obj_get_ ~inst_meth ~is_method ~nullsafe ~valkind ~obj_pos
+and obj_get_ ~inst_meth ~is_method ~nullsafe ~obj_pos
   ~pos_params ?(explicit_tparams=[])
   env ty1 cid (id_pos, id_str as id) k k_lhs =
   let env, ety1 =
@@ -4607,7 +4601,7 @@ and obj_get_ ~inst_meth ~is_method ~nullsafe ~valkind ~obj_pos
       (widen_class_for_obj_get ~is_method ~nullsafe id_str) obj_pos ty1 Errors.unify_error in
   let nullable_obj_get ty = match nullsafe with
     | Some p1 ->
-        let env, method_, method_decl_ = obj_get_ ~inst_meth ~obj_pos ~is_method ~nullsafe ~valkind
+        let env, method_, method_decl_ = obj_get_ ~inst_meth ~obj_pos ~is_method ~nullsafe
           ~pos_params ~explicit_tparams env ty cid id k k_lhs in
         let env, method_ = Typing_solver.non_null env id_pos method_ in
         env, MakeType.nullable (Reason.Rnullsafe_op p1) method_, method_decl_
@@ -4623,7 +4617,7 @@ and obj_get_ ~inst_meth ~is_method ~nullsafe ~valkind ~obj_pos
       let env, tyl = List.map_env env tyl
         begin fun env ty ->
           let env, ty, _decl_ty =
-            obj_get_ ~inst_meth ~obj_pos ~is_method ~nullsafe ~valkind ~pos_params
+            obj_get_ ~inst_meth ~obj_pos ~is_method ~nullsafe ~pos_params
               ~explicit_tparams env ty cid id k k_lhs in
           (* There is one special case where we need to expose the
            * visibility outside of obj_get (checkout inst_meth special
@@ -4640,7 +4634,7 @@ and obj_get_ ~inst_meth ~is_method ~nullsafe ~valkind ~obj_pos
   | _, Tintersection tyl ->
       let env, tyl = TUtils.run_on_intersection env tyl ~f:(fun env ty ->
         let env, ty, _decl_ty =
-          obj_get_ ~inst_meth ~obj_pos ~is_method ~nullsafe ~valkind ~pos_params
+          obj_get_ ~inst_meth ~obj_pos ~is_method ~nullsafe ~pos_params
             ~explicit_tparams env ty cid id k k_lhs in
         env, ty) in
       let env, ty = Inter.intersect_list env (fst ety1) tyl in
@@ -4650,7 +4644,7 @@ and obj_get_ ~inst_meth ~is_method ~nullsafe ~valkind ~obj_pos
     let k_lhs' ty = match ak with
     | AKnewtype (_, _) -> k_lhs ty
     | _ -> k_lhs (p', Tabstract (ak, Some ty)) in
-      obj_get_ ~inst_meth ~obj_pos ~is_method ~nullsafe ~valkind ~pos_params
+      obj_get_ ~inst_meth ~obj_pos ~is_method ~nullsafe ~pos_params
         ~explicit_tparams env ty cid id k k_lhs'
 
   | p', (Tabstract(ak,_)) ->
@@ -4663,7 +4657,7 @@ and obj_get_ ~inst_meth ~is_method ~nullsafe ~valkind ~obj_pos
          let k_lhs' ty = match ak with
          | AKnewtype (_, _) -> k_lhs ty
          | _ -> k_lhs (p', Tabstract (ak, Some ty)) in
-         obj_get_concrete_ty ~inst_meth ~is_method ~valkind ~explicit_tparams env ty cid id k_lhs'
+         obj_get_concrete_ty ~inst_meth ~is_method ~explicit_tparams env ty cid id k_lhs'
       ) in
     begin match resl with
       | [] -> begin
@@ -4694,7 +4688,7 @@ and obj_get_ ~inst_meth ~is_method ~nullsafe ~valkind ~obj_pos
     k (env, (r, Typing_utils.terr env), None)
 
   | _, _ ->
-    k (obj_get_concrete_ty ~inst_meth ~is_method ~valkind ~explicit_tparams env ety1 cid id k_lhs)
+    k (obj_get_concrete_ty ~inst_meth ~is_method ~explicit_tparams env ety1 cid id k_lhs)
 
 and class_id_for_new ~exact p env cid tal =
   let env, te, cid_ty = static_class_id ~exact ~check_constraints:false p env tal cid in

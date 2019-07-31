@@ -378,11 +378,17 @@ let rec recheck_loop acc genv env new_client has_persistent_connection_request =
       * 60/200 = 0.3 *)
      t -. env.last_command_time > 0.3 in
 
-  let env = if Relative_path.Set.is_empty updates then env else { env with
-    disk_needs_parsing = Relative_path.Set.union updates env.disk_needs_parsing;
-    (* saving any file is our trigger to start full recheck *)
-    full_check = Full_check_started;
-  } in
+  (* saving any file is our trigger to start full recheck *)
+  let env = if Relative_path.Set.is_empty updates then
+    env
+  else begin
+    let disk_needs_parsing = Relative_path.Set.union updates env.disk_needs_parsing in
+    if env.paused then
+      let () = Hh_logger.log "Skipping full check due to `hh --pause`" in
+      { env with disk_needs_parsing; full_check = Full_check_needed; }
+    else
+      { env with disk_needs_parsing; full_check = Full_check_started; }
+  end in
 
   let env = match env.default_client_pending_command_needs_full_check with
     (* We need to auto-restart the recheck to make progress towards handling

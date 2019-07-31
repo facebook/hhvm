@@ -54,17 +54,19 @@ type check_results = {
 (*****************************************************************************)
 
 (** Something is removing diagnostic subscriptions, but I don't know what... *)
-let log_if_diag_subscribe_removed
+let log_if_diag_subscribe_changed
     (title: string)
-    (old_diag_subscribe: Diagnostic_subscription.t option)
-    (new_diag_subscribe: Diagnostic_subscription.t option)
+    ~(before: Diagnostic_subscription.t option)
+    ~(after: Diagnostic_subscription.t option)
   : unit =
-  match old_diag_subscribe, new_diag_subscribe with
-  | Some _, None ->
-    let stack = Caml.Printexc.get_callstack 100 |> Caml.Printexc.raw_backtrace_to_string in
-    Hh_logger.log "Diag_subscribe: %s - removed!\n%s" title stack
-  | _ ->
+  match before, after with
+  | None, None
+  | Some _, Some _ ->
     ()
+  | _ ->
+    let stack = Caml.Printexc.get_callstack 100 |> Caml.Printexc.raw_backtrace_to_string in
+    let disposition = if before = None then "added" else "removed" in
+    Hh_logger.log "Diag_subscribe: %s - %s!\n%s" title disposition stack
 
 let print_defs prefix defs =
   List.iter defs begin fun (_, fname) ->
@@ -492,7 +494,8 @@ module FullCheckKind : CheckKindType = struct
       Full_check_done else old_env.full_check in
     let needs_full_init =
       old_env.init_env.needs_full_init && full_check <> Full_check_done in
-    let () = log_if_diag_subscribe_removed "get_env1" old_env.diag_subscribe diag_subscribe
+    let () = log_if_diag_subscribe_changed "get_env[FullCheckKind]"
+      ~before:old_env.diag_subscribe ~after:diag_subscribe
     in
     { old_env with
       errorl;
@@ -591,7 +594,8 @@ module LazyCheckKind : CheckKindType = struct
     let full_check = match old_env.full_check with
       | Full_check_started -> Full_check_started
       | _ -> Full_check_needed in
-    let () = log_if_diag_subscribe_removed "get_env2" old_env.diag_subscribe diag_subscribe
+    let () = log_if_diag_subscribe_changed "get_env[LazyCheckKind]"
+      ~before:old_env.diag_subscribe ~after:diag_subscribe
     in
     { old_env with
        errorl;
@@ -802,7 +806,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     let interrupt = get_interrupt_config genv env in
     let memory_cap = genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb in
     let fnl = Relative_path.Map.elements fast in
-    let errorl', env , cancelled =
+    let errorl', env', cancelled =
       maybe_remote_type_check_with_interrupt genv env fnl ~local:begin fun () ->
         match genv.lru_host_env with
           | Some (lru_host_env) ->
@@ -823,6 +827,9 @@ end = functor(CheckKind:CheckKindType) -> struct
               ~check_info:(get_check_info env)
       end
     in
+    log_if_diag_subscribe_changed "type_checking.go_with_interrupt"
+      ~before:env.diag_subscribe ~after:env'.diag_subscribe;
+    let env = env' in
     (* Add new things that need to be rechecked *)
     let needs_recheck =
       Relative_path.Set.union env.needs_recheck lazy_check_later in
@@ -850,9 +857,12 @@ end = functor(CheckKind:CheckKindType) -> struct
         ~full_check_done
     end in
 
-    log_if_diag_subscribe_removed "type_checking.0" old_env.diag_subscribe env.diag_subscribe;
-    log_if_diag_subscribe_removed "type_checking.1" env.diag_subscribe diag_subscribe;
-    log_if_diag_subscribe_removed "type_checking.2" old_env.diag_subscribe diag_subscribe;
+    log_if_diag_subscribe_changed "type_checking[old_env->env]"
+      ~before:old_env.diag_subscribe ~after:env.diag_subscribe;
+    log_if_diag_subscribe_changed "type_checking[env->diag_subscribe]"
+      ~before:env.diag_subscribe ~after:diag_subscribe;
+    log_if_diag_subscribe_changed "type_checking[old_env->diag_subscribe]"
+      ~before:old_env.diag_subscribe ~after:diag_subscribe;
 
     let total_rechecked_count = Relative_path.Map.cardinal fast in
     {
@@ -1096,9 +1106,12 @@ end = functor(CheckKind:CheckKindType) -> struct
       do_type_checking genv env
         ~errors ~fast ~files_to_parse ~lazy_check_later ~old_env
     in
-    log_if_diag_subscribe_removed "type_check_core.0" old_env.diag_subscribe env.diag_subscribe;
-    log_if_diag_subscribe_removed "type_check_core.1" env.diag_subscribe diag_subscribe;
-    log_if_diag_subscribe_removed "type_check_core.2" old_env.diag_subscribe diag_subscribe;
+    log_if_diag_subscribe_changed "type_check_core[old_env->env]"
+      ~before:old_env.diag_subscribe ~after:env.diag_subscribe;
+    log_if_diag_subscribe_changed "type_check_core.[env->diag_subscribe]"
+      ~before:env.diag_subscribe ~after:diag_subscribe;
+    log_if_diag_subscribe_changed "type_check_core[old_env->diag_subscribe]"
+      ~before:old_env.diag_subscribe ~after:diag_subscribe;
 
     HackEventLogger.type_check_end to_recheck_count total_rechecked_count t;
     let logstring = Printf.sprintf "Typechecked %d files" total_rechecked_count in

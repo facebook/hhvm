@@ -212,6 +212,7 @@ bool can_emit_builtin(const php::Func* func,
 void finish_builtin(ISS& env,
                     const php::Func* func,
                     uint32_t numParams,
+                    uint32_t numOut,
                     bool unpack);
 
 bool handle_function_exists(ISS& env, int numArgs, bool allowConstProp);

@@ -1908,9 +1908,12 @@ SSATmp* optimizedCallIsObject(IRGS& env, SSATmp* src) {
 void emitFCallBuiltin(IRGS& env,
                       uint32_t numArgs,
                       uint32_t numNonDefault,
+                      uint32_t numOut,
                       const StringData* funcName) {
   auto const callee = Unit::lookupBuiltin(funcName);
   if (!callee) PUNT(Missing-builtin);
+
+  if (callee->numInOutParams() != numOut) PUNT(bad-inout);
 
   emitCallerRxChecksKnown(env, callee);
   assertx(!callee->isMethod() || (callee->isStatic() && callee->cls()));

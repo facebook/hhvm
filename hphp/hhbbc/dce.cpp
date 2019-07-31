@@ -1000,6 +1000,29 @@ void dce(Env& env, const bc::PopU2&)         {
   discard(env);
   env.dceState.stack.push_back(std::move(ui));
 }
+void dce(Env& env, const bc::PopFrame& op) {
+  std::vector<UseInfo> uis;
+  for (uint32_t i = 0; i < op.arg1; i++) {
+    uis.emplace_back(std::move(env.dceState.stack.back()));
+    env.dceState.stack.pop_back();
+
+    // As above this is overly conservative but in all likelihood won't matter
+    if (isLinked(uis.back())) {
+      markUisLive(env, true, uis.back());
+      uis.back() = UseInfo { Use::Used };
+    }
+  }
+
+  // Pop the Uninits from the frame
+  pop(env, Use::Not, DceActionMap {});
+  pop(env, Use::Not|Use::Linked, DceActionMap {});
+  pop(env, Use::Not|Use::Linked, DceActionMap {{ env.id, DceAction::Kill }});
+
+  for (auto it = uis.rbegin(); it != uis.rend(); it++) {
+    env.dceState.stack.push_back(std::move(*it));
+  }
+}
+
 void dce(Env& env, const bc::Int&)           { pushRemovable(env); }
 void dce(Env& env, const bc::String&)        { pushRemovable(env); }
 void dce(Env& env, const bc::Dict&)          { pushRemovable(env); }

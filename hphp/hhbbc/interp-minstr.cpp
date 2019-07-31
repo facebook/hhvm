@@ -1578,7 +1578,7 @@ void in(ISS& env, const bc::QueryM& op) {
         if (last->op == Op::BaseC) {
           if (auto const prev = last_op(env, 1)) {
             if (prev->op == Op::FCallBuiltin &&
-                prev->FCallBuiltin.str3->isame(s_type_structure.get()) &&
+                prev->FCallBuiltin.str4->isame(s_type_structure.get()) &&
                 prev->FCallBuiltin.arg1 == 2) {
               auto const params = prev->FCallBuiltin.arg1;
               auto const passed_params = prev->FCallBuiltin.arg2;
@@ -1590,6 +1590,7 @@ void in(ISS& env, const bc::QueryM& op) {
                 bc::FCallBuiltin {
                   params,
                   passed_params,
+                  0,
                   s_type_structure_classname.get()
                 }
               );

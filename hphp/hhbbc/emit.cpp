@@ -403,6 +403,19 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
   Type tos{};
 
+  SCOPE_ASSERT_DETAIL("emit") {
+    std::string ret;
+    for (auto bid : func.blockRange()) {
+      folly::format(&ret,
+                    "block #{}\n{}",
+                    bid,
+                    show(func, *func.blocks[bid])
+                   );
+    }
+
+    return ret;
+  };
+
   auto const pseudomain = is_pseudomain(&func);
   auto process_mergeable = [&] (const Bytecode& bc) {
     if (!pseudomain) return;
@@ -688,7 +701,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define POP_CMANY      pop(data.arg##1);
 #define POP_SMANY      pop(data.keys.size());
 #define POP_CUMANY     pop(data.arg##1);
-#define POP_CVUMANY    pop(data.arg##1);
+#define POP_CALLNATIVE pop(data.arg1 + data.arg3);
 #define POP_FPUSH(nin, nobj) \
                        pop(data.arg1 + nin + 3);
 #define POP_FCALL(nin, nobj) \
@@ -702,16 +715,17 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define PUSH_THREE(x, y, z)    push(3);
 #define PUSH_FPUSH             push(data.arg1);
 #define PUSH_FCALL             push(data.fca.numRets);
+#define PUSH_CALLNATIVE        push(data.arg3 + 1);
 
 #define O(opcode, imms, inputs, outputs, flags)                 \
     auto emit_##opcode = [&] (OpInfo<bc::opcode> data) {        \
       if (RuntimeOption::EnableIntrinsicsExtension) {           \
         if (Op::opcode == Op::FCallBuiltin &&                   \
-            inst.FCallBuiltin.str3->isame(                      \
+            inst.FCallBuiltin.str4->isame(                      \
               s_hhbbc_fail_verification.get())) {               \
           ue.emitOp(Op::CheckProp);                             \
           ue.emitInt32(                                         \
-            ue.mergeLitstr(inst.FCallBuiltin.str3));            \
+            ue.mergeLitstr(inst.FCallBuiltin.str4));            \
           ue.emitOp(Op::PopC);                                  \
         }                                                       \
       }                                                         \
@@ -792,7 +806,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef POP_CMANY
 #undef POP_SMANY
 #undef POP_CUMANY
-#undef POP_CVUMANY
+#undef POP_CALLNATIVE
 #undef POP_FPUSH
 #undef POP_FCALL
 #undef POP_FCALLO
@@ -805,6 +819,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef PUSH_THREE
 #undef PUSH_FPUSH
 #undef PUSH_FCALL
+#undef PUSH_CALLNATIVE
 
 #define O(opcode, ...)                                        \
     case Op::opcode:                                          \

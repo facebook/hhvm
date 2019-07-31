@@ -592,11 +592,11 @@ namespace imm {
                       return Flavor::CU;                      \
                     }
 
-#define POP_CVUMANY uint32_t numPop() const { return arg1; }  \
-                    Flavor popFlavor(uint32_t i) const {      \
-                      assert(i < numPop());                   \
-                      return Flavor::CVU;                     \
-                    }
+#define POP_CALLNATIVE uint32_t numPop() const { return arg1 + arg3; }  \
+                       Flavor popFlavor(uint32_t i) const {             \
+                         assert(i < numPop());                          \
+                         return i < arg1 ? Flavor::CVU : Flavor::U;     \
+                       }
 
 #define POP_FPUSH(nin, nobj)                                                   \
                     uint32_t numPop() const { return arg1 + nin + 3; }         \
@@ -643,6 +643,7 @@ namespace imm {
 
 #define PUSH_FPUSH        uint32_t numPush() const { return arg1; }
 #define PUSH_FCALL        uint32_t numPush() const { return fca.numRets; }
+#define PUSH_CALLNATIVE   uint32_t numPush() const { return arg3 + 1; }
 
 #define FLAGS_NF
 #define FLAGS_TF
@@ -748,6 +749,7 @@ OPCODES
 #undef PUSH_TWO
 #undef PUSH_FPUSH
 #undef PUSH_FCALL
+#undef PUSH_CALLNATIVE
 
 #undef POP_UV
 #undef POP_CV
@@ -762,7 +764,7 @@ OPCODES
 #undef POP_CMANY
 #undef POP_SMANY
 #undef POP_CUMANY
-#undef POP_CVUMANY
+#undef POP_CALLNATIVE
 #undef POP_FPUSH
 #undef POP_FCALL
 #undef POP_FCALLO

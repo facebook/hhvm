@@ -246,7 +246,7 @@ void coerceFCallArgs(TypedValue* args,
  */
 void callFunc(const Func* func, const void* ctx,
               const TypedValue* args, int32_t numNonDefault,
-              TypedValue& ret);
+              TypedValue& ret, bool isFCallBuiltin);
 
 /**
  * Extract the name used to invoke the function from the ActRec where name
@@ -449,6 +449,7 @@ struct NativeFunctionInfo {
  * values to be passed to builtins which use inout paramaters purely as out
  * values, ignoring their inputs.
  */
+MaybeDataType builtinOutType(const TypeConstraint&, const UserAttributeMap&);
 MaybeDataType builtinOutType(const Func* builtin, uint32_t i);
 folly::Optional<TypedValue> builtinInValue(const Func* builtin, uint32_t i);
 

@@ -434,7 +434,7 @@ bool builtin_type_structure_classname(ISS& env, const bc::FCallBuiltin& op) {
 #undef X
 
 bool handle_builtin(ISS& env, const bc::FCallBuiltin& op) {
-#define X(x, y) if (op.str3->isame(s_##x.get())) return builtin_##x(env, op);
+#define X(x, y) if (op.str4->isame(s_##x.get())) return builtin_##x(env, op);
   SPECIAL_BUILTINS
 #undef X
 
@@ -448,7 +448,7 @@ bool handle_builtin(ISS& env, const bc::FCallBuiltin& op) {
 namespace interp_step {
 
 void in(ISS& env, const bc::FCallBuiltin& op) {
-  auto const name = op.str3;
+  auto const name = op.str4;
   auto const func = env.index.resolve_func(env.ctx, name);
 
   if (options.ConstantFoldBuiltins && func.isFoldable()) {
@@ -494,7 +494,17 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
     return *precise_ty;
   }();
 
-  for (auto i = uint32_t{0}; i < num_args; ++i) popT(env);
+  auto const num_out = op.arg3;
+  for (auto i = uint32_t{0}; i < num_args + num_out; ++i) popT(env);
+
+  for (auto i = num_out; i > 0; --i) {
+    if (auto const f = func.exactFunc()) {
+      push(env, native_function_out_type(f, i - 1));
+    } else {
+      push(env, TInitCell);
+    }
+  }
+
   push(env, rt);
 }
 
@@ -502,8 +512,7 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
 
 bool can_emit_builtin(const php::Func* func,
                       int numArgs, bool hasUnpack) {
-  if (func->attrs & (AttrInterceptable | AttrNoFCallBuiltin |
-                     AttrTakesInOutParams) ||
+  if (func->attrs & (AttrInterceptable | AttrNoFCallBuiltin) ||
       (func->cls && !(func->attrs & AttrStatic))  ||
       !func->nativeInfo ||
       func->params.size() >= Native::maxFCallBuiltinArgs() ||
@@ -563,6 +572,7 @@ bool can_emit_builtin(const php::Func* func,
 void finish_builtin(ISS& env,
                     const php::Func* func,
                     uint32_t numArgs,
+                    uint32_t numOut,
                     bool unpack) {
   BytecodeVec repl;
   assert(!unpack ||
@@ -605,16 +615,22 @@ void finish_builtin(ISS& env,
 
   auto const numParams = static_cast<uint32_t>(func->params.size());
   if (func->cls == nullptr) {
-    repl.emplace_back(bc::FCallBuiltin { numParams, numArgs, func->name });
+    repl.emplace_back(
+      bc::FCallBuiltin { numParams, numArgs, numOut, func->name });
   } else {
     assertx(func->attrs & AttrStatic);
     auto const fullname =
       makeStaticString(folly::sformat("{}::{}", func->cls->name, func->name));
-    repl.emplace_back(bc::FCallBuiltin { numParams, numArgs, fullname });
+    repl.emplace_back(
+      bc::FCallBuiltin { numParams, numArgs, numOut, fullname });
   }
-  repl.emplace_back(bc::PopU2 {});
-  repl.emplace_back(bc::PopU2 {});
-  repl.emplace_back(bc::PopU2 {});
+  if (numOut) {
+    repl.emplace_back(bc::PopFrame {numOut + 1});
+  } else {
+    repl.emplace_back(bc::PopU2 {});
+    repl.emplace_back(bc::PopU2 {});
+    repl.emplace_back(bc::PopU2 {});
+  }
 
   reduce(env, std::move(repl));
 }

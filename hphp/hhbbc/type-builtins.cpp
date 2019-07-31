@@ -16,6 +16,7 @@
 #include "hphp/hhbbc/type-builtins.h"
 
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/vm/native.h"
 #include "hphp/hhbbc/representation.h"
 
 namespace HPHP { namespace HHBBC {
@@ -106,6 +107,22 @@ Type native_function_return_type(const php::Func* f) {
   }
 
   return remove_uninit(t);
+}
+
+Type native_function_out_type(const php::Func* f, uint32_t index) {
+  assertx(f->nativeInfo);
+  assertx(f->attrs & AttrTakesInOutParams);
+
+  for (auto& p : f->params) {
+    if (!p.inout) continue;
+
+    if (index-- == 0) {
+      auto dt = Native::builtinOutType(p.typeConstraint, p.userAttributes);
+      return dt ? from_DataType(*dt) : TInitCell;
+    }
+  }
+
+  return TBottom;
 }
 
 }}

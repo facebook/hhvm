@@ -392,7 +392,7 @@ type instruct_call =
   | NewObjRD of class_id
   | NewObjS of SpecialClsRef.t
   | FCall of fcall_args
-  | FCallBuiltin of num_params * num_params * string
+  | FCallBuiltin of num_params * num_params * num_params * string
   | FCallCtor of fcall_args
   | FCallObjMethod of fcall_args * Ast_defs.og_null_flavor * param_locations
   | FCallObjMethodD of fcall_args * Ast_defs.og_null_flavor * method_id

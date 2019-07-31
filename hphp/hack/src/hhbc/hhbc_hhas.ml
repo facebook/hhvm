@@ -476,8 +476,9 @@ let string_of_call instruction =
     sep ["NewObjS"; SpecialClsRef.to_string r]
   | FCall fcall_args ->
     sep ["FCall"; string_of_fcall_args fcall_args; "\"\""; "\"\"" ]
-  | FCallBuiltin (n1, n2, id) ->
-    sep ["FCallBuiltin"; string_of_int n1; string_of_int n2; SU.quote_string id]
+  | FCallBuiltin (n1, n2, n3, id) ->
+    sep ["FCallBuiltin"; string_of_int n1; string_of_int n2; string_of_int n3;
+         SU.quote_string id]
   | FCallCtor fcall_args ->
     sep ["FCallCtor"; string_of_fcall_args fcall_args; "\"\""]
   | FCallObjMethod (fcall_args, nf, pl) ->

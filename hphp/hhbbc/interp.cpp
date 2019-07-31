@@ -750,6 +750,20 @@ void in(ISS& env, const bc::PopU2&) {
 }
 void in(ISS& env, const bc::PopV&) { nothrow(env); popV(env); }
 
+void in(ISS& env, const bc::PopFrame& op) {
+  effect_free(env);
+
+  std::vector<std::pair<Type, LocalId>> vals{op.arg1};
+  for (auto i = op.arg1; i > 0; --i) {
+    vals[i - 1] = {popC(env), topStkEquiv(env)};
+  }
+  for (uint32_t i = 0; i < 3; i++) popU(env);
+  for (auto& p : vals) {
+    push(
+      env, std::move(p.first), p.second != StackDupId ? p.second : NoLocalId);
+  }
+}
+
 void in(ISS& env, const bc::EntryNop&) { effect_free(env); }
 
 void in(ISS& env, const bc::Dup& /*op*/) {
@@ -4609,8 +4623,9 @@ void in(ISS& env, const bc::FCall& op) {
                      updateFCA, true /* legacy */);
       return;
     case FPIKind::Builtin:
-      assertx(fca.numRets == 1);
-      finish_builtin(env, ar.func->exactFunc(), fca.numArgs, fca.hasUnpack());
+      finish_builtin(
+        env, ar.func->exactFunc(), fca.numArgs, fca.numRets - 1, fca.hasUnpack()
+      );
       fpiPop(env);
       return;
     case FPIKind::ClsMeth:

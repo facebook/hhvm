@@ -1871,6 +1871,16 @@ OPTBLD_INLINE void iopPopU2() {
   vmStack().discard();
 }
 
+OPTBLD_INLINE void iopPopFrame(uint32_t nout) {
+  assertx(vmStack().indC(nout + 0)->m_type == KindOfUninit);
+  assertx(vmStack().indC(nout + 1)->m_type == KindOfUninit);
+  assertx(vmStack().indC(nout + 2)->m_type == KindOfUninit);
+  for (int32_t i = nout - 1; i >= 0; --i) {
+    *vmStack().indC(i + 3) = *vmStack().indC(i);
+  }
+  vmStack().ndiscard(3);
+}
+
 OPTBLD_INLINE void iopPopL(local_var to) {
   assertx(to.index < vmfp()->m_func->numLocals());
   Cell* fr = vmStack().topC();
@@ -5512,12 +5522,19 @@ void iopFCall(PC origpc, PC& pc, FCallArgs fca,
 }
 
 OPTBLD_FLT_INLINE
-void iopFCallBuiltin(uint32_t numArgs, uint32_t numNonDefault, Id id) {
+void iopFCallBuiltin(
+  uint32_t numArgs, uint32_t numNonDefault, uint32_t numOut, Id id
+) {
   auto const ne = vmfp()->m_func->unit()->lookupNamedEntityId(id);
   auto const func = ne->uniqueFunc();
   if (func == nullptr || !func->isBuiltin()) {
     raise_error("Call to undefined function %s()",
                 vmfp()->m_func->unit()->lookupLitstrId(id)->data());
+  }
+
+  if (func->numInOutParams() != numOut) {
+    raise_error("Call to function %s() with incorrectly annotated inout "
+                "parameter", func->fullDisplayName()->data());
   }
 
   callerRxChecks(vmfp(), func);
@@ -5536,7 +5553,7 @@ void iopFCallBuiltin(uint32_t numArgs, uint32_t numNonDefault, Id id) {
         : isArrayType(args[1 - safe_cast<int32_t>(numArgs)].m_type)
     );
   }
-  Native::callFunc(func, ctx, args, numNonDefault, ret);
+  Native::callFunc(func, ctx, args, numNonDefault, ret, true);
 
   frame_free_args(args, numNonDefault);
   vmStack().ndiscard(numArgs);

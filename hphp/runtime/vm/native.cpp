@@ -135,8 +135,13 @@ void pushNativeArg(Registers& regs, const Func* const func, const int i,
 
 // Push each argument, spilling ones we don't have registers for to the stack.
 void populateArgs(Registers& regs, const Func* const func,
-                  const TypedValue* const args, const int numArgs) {
-  auto io = const_cast<TypedValue*>(args + kNumActRecCells + 1);
+                  const TypedValue* const args, const int numArgs,
+                  bool isFCallBuiltin) {
+  auto io = const_cast<TypedValue*>(args + 1);
+
+  // Regular FCalls will have their out parameter locations below the ActRec on
+  // the stack, while FCallBuiltin has no ActRec to skip over.
+  if (!isFCallBuiltin) io += kNumActRecCells;
   for (auto i = 0; i < numArgs; ++i) {
     auto const& arg = args[-i];
     auto const& pi = func->params()[i];
@@ -180,14 +185,14 @@ void populateArgs(Registers& regs, const Func* const func,
 
 void callFunc(const Func* const func, const void* const ctx,
               const TypedValue* const args, const int numNonDefault,
-              TypedValue& ret) {
+              TypedValue& ret, bool isFCallBuiltin) {
   auto const f = func->nativeFuncPtr();
   auto const numArgs = func->numParams();
   auto retType = func->hniReturnType();
   auto regs = Registers{};
 
   if (ctx) pushInt(regs, (int64_t)ctx);
-  populateArgs(regs, func, args, numArgs);
+  populateArgs(regs, func, args, numArgs, isFCallBuiltin);
 
   // Decide how many int and double arguments we need to call func. Note that
   // spilled arguments come after the GP registers, in line with them. We can
@@ -456,7 +461,7 @@ TypedValue* functionWrapper(ActRec* ar) {
 
   TypedValue rv;
   rv.m_type = KindOfUninit;
-  callFunc(func, nullptr, args, numNonDefault, rv);
+  callFunc(func, nullptr, args, numNonDefault, rv, false);
 
   assertx(rv.m_type != KindOfUninit);
   frame_free_locals_no_this_inl(ar, func->numLocals(), &rv);
@@ -496,7 +501,7 @@ TypedValue* methodWrapper(ActRec* ar) {
 
   TypedValue rv;
   rv.m_type = KindOfUninit;
-  callFunc(func, ctx, args, numNonDefault, rv);
+  callFunc(func, ctx, args, numNonDefault, rv, false);
 
   assertx(rv.m_type != KindOfUninit);
   if (isStatic) {
@@ -565,9 +570,11 @@ static MaybeDataType typeForOutParam(TypedValue attr) {
   return {};
 }
 
-MaybeDataType builtinOutType(const Func::ParamInfo& pinfo) {
-  auto const tcDT = pinfo.typeConstraint.underlyingDataType();
-  auto& map = pinfo.userAttributes;
+MaybeDataType builtinOutType(
+  const TypeConstraint& tc,
+  const UserAttributeMap& map
+) {
+  auto const tcDT = tc.underlyingDataType();
 
   auto const it = map.find(s_outOnly.get());
   if (it == map.end()) return tcDT;
@@ -619,7 +626,8 @@ static folly::Optional<TypedValue> builtinInValue(
 }
 
 MaybeDataType builtinOutType(const Func* builtin, uint32_t i) {
-  return builtinOutType(builtin->params()[i]);
+  auto const& pinfo = builtin->params()[i];
+  return builtinOutType(pinfo.typeConstraint, pinfo.userAttributes);
 }
 
 folly::Optional<TypedValue> builtinInValue(const Func* builtin, uint32_t i) {

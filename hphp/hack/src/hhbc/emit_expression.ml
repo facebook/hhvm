@@ -3325,7 +3325,7 @@ and emit_special_function env pos annot id (args : Tast.expr list) (uargs : Tast
     let l1 = Label.next_regular () in
     Some (gather [
       instr_string "zend.assertions";
-      instr_fcallbuiltin 1 1 "ini_get";
+      instr_fcallbuiltin 1 1 0 "ini_get";
       instr_int 0;
       instr_gt;
       instr_jmpz l0;

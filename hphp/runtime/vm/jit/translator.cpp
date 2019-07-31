@@ -97,6 +97,8 @@ static const struct {
                     DontGuardStack1,  None,         OutNone         }},
   { OpPopU2,       {StackTop2|
                     DontGuardAny,     Stack1,       OutSameAsInput1 }},
+  { OpPopFrame,    {StackN|
+                    DontGuardAny,     StackN,       OutUnknown      }},
   { OpPopL,        {Stack1|Local,     Local,        OutNone         }},
   { OpDup,         {Stack1,           StackTop2,    OutSameAsInput1 }},
 
@@ -307,7 +309,7 @@ static const struct {
                    {Stack1,           FStack,       OutFDesc        }},
   { OpFCall,       {FStack,           StackN,       OutUnknown      }},
   { OpFCallBuiltin,{BStackN|DontGuardAny,
-                                      Stack1,       OutUnknown      }},
+                                      StackN,       OutUnknown      }},
 
   /*** 11. Iterator instructions ***/
 
@@ -534,9 +536,14 @@ int64_t getStackPopped(PC pc) {
     case Op::NewVArray:
     case Op::ConcatN:
     case Op::CombineAndResolveTypeStruct:
-    case Op::FCallBuiltin:
     case Op::CreateCl:
       return getImm(pc, 0).u_IVA;
+
+    case Op::FCallBuiltin:
+      return getImm(pc, 0).u_IVA + getImm(pc, 2).u_IVA;
+
+    case Op::PopFrame:
+      return getImm(pc, 0).u_IVA + 3;
 
     case Op::SetM:
     case Op::SetOpM:
@@ -579,6 +586,10 @@ int64_t getStackPushed(PC pc) {
     case Op::FCallObjMethodD:
     case Op::FCallObjMethodRD:
       return getImm(pc, 0).u_FCA.numRets;
+    case Op::FCallBuiltin:
+      return getImm(pc, 2).u_IVA + 1;
+    case Op::PopFrame:
+      return getImm(pc, 0).u_IVA;
     default:
       break;
   }
@@ -746,14 +757,22 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
   }
 
   if (flags & StackN) {
-    int numArgs = (ni.op() == Op::NewPackedArray ||
-                   ni.op() == Op::NewVecArray ||
-                   ni.op() == Op::NewKeysetArray ||
-                   ni.op() == Op::NewVArray ||
-                   ni.op() == Op::CombineAndResolveTypeStruct ||
-                   ni.op() == Op::ConcatN)
-      ? ni.imm[0].u_IVA
-      : ni.immVec.numStackValues();
+    int numArgs = [&] () -> int {
+      switch (ni.op()) {
+      case Op::NewPackedArray:
+      case Op::NewVecArray:
+      case Op::NewKeysetArray:
+      case Op::NewVArray:
+      case Op::CombineAndResolveTypeStruct:
+      case Op::ConcatN:
+        return ni.imm[0].u_IVA;
+      case Op::PopFrame:
+        return ni.imm[0].u_IVA + 3;
+      default:
+        return ni.immVec.numStackValues();
+      }
+      not_reached();
+    }();
 
     SKTRACE(1, sk, "getInputs: StackN %d %d\n", stackOff.offset, numArgs);
     for (int i = 0; i < numArgs; i++) {
@@ -1033,6 +1052,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::PopV:
   case Op::PopU:
   case Op::PopU2:
+  case Op::PopFrame:
   case Op::PopL:
   case Op::Print:
   case Op::PushL:
@@ -1224,7 +1244,7 @@ void translateInstr(irgen::IRGS& irgs, const NormalizedInstruction& ni,
 
   const Func* builtinFunc = nullptr;
   if (ni.op() == OpFCallBuiltin) {
-    auto str = ni.m_unit->lookupLitstrId(ni.imm[2].u_SA);
+    auto str = ni.m_unit->lookupLitstrId(ni.imm[3].u_SA);
     builtinFunc = Unit::lookupBuiltin(str);
   }
   auto pc = ni.pc();

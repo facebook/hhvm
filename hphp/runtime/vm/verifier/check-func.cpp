@@ -720,7 +720,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   static const FlavorDesc inputSigs[][kMaxHhbcImms] = {
   #define NOV { },
   #define CUMANY { },
-  #define CVUMANY { },
+  #define CALLNATIVE { },
   #define FPUSH(nin, nobj) { nobj ? CV : UV },
   #define FCALL(nin, nobj) { nobj ? CV : UV },
   #define FCALLO { },
@@ -739,7 +739,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef MFINAL
   #undef C_MFINAL
   #undef CUMANY
-  #undef CVUMANY
+  #undef CALLNATIVE
   #undef FPUSH
   #undef FCALL
   #undef FCALLO
@@ -763,6 +763,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
       m_tmp_sig[i] = CV;
     }
     return m_tmp_sig;
+  case Op::PopFrame:
   case Op::FPushFunc:
   case Op::FPushFuncD:
   case Op::FPushFuncRD:
@@ -811,11 +812,18 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     assertx(idx == instrNumPops(pc));
     return m_tmp_sig;
   }
-  case Op::FCallBuiltin: //TWO(IVA, SA), CVUMANY,  ONE(CV)
-    for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
+  case Op::FCallBuiltin: { //TWO(IVA, SA), CALLNATIVE,  CALLNATIVE
+    auto const nargs = getImm(pc, 0).u_IVA;
+    auto const nout  = getImm(pc, 2).u_IVA;
+    assertx(instrNumPops(pc) == nargs + nout);
+    for (int i = 0; i < nout; ++i) {
+      m_tmp_sig[i] = UV;
+    }
+    for (int i = nout; i < nargs + nout; i++) {
       m_tmp_sig[i] = CVUV;
     }
     return m_tmp_sig;
+  }
   case Op::CreateCl:  // TWO(IVA,SA),  CUMANY,   ONE(CV)
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CUV;
@@ -1431,6 +1439,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   #define NOV { },
   #define FPUSH { },
   #define FCALL { },
+  #define CALLNATIVE { },
   #define ONE(a) { a },
   #define TWO(a,b) { a, b },
   #define THREE(a,b,c) { a, b, c },
@@ -1467,7 +1476,9 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
     cur->fpilen++;
     fpi.fpush = offset(pc);
     fpi.stkmin = cur->stklen - pushes;
-  } else if (hasFCallEffects(op)) {
+  } else if (op == OpPopFrame) {
+    for (int i = 0; i < pushes; ++i) outs[i] = outs[i + 3];
+  } else if (hasFCallEffects(op) || op == OpFCallBuiltin) {
     for (int i = 0; i < pushes; ++i) {
       outs[i] = CV;
     }
@@ -1628,6 +1639,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::PopC:
     case Op::PopU:
     case Op::PopU2:
+    case Op::PopFrame:
     case Op::PopL:
     case Op::CGetL:
     case Op::CGetQuietL:

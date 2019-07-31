@@ -168,7 +168,7 @@ ActRec* initBTContextAt(BTContext& ctx, jit::CTCA ip,
     auto const func = fp->func();
     auto const pc = func->unit()->entry() + *prevPc;
     if (peek_op(pc) != OpFCallBuiltin) return nullptr;
-    auto const ne = func->unit()->lookupNamedEntityId(getImm(pc, 2).u_SA);
+    auto const ne = func->unit()->lookupNamedEntityId(getImm(pc, 3).u_SA);
     return Unit::lookupFunc(ne);
   };
   if (auto stk = jit::inlineStackAt(ip)) {

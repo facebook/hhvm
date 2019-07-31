@@ -619,6 +619,13 @@ void emitPopL(IRGS& env, int32_t id) {
   stLocMove(env, id, ldrefExit, ldPMExit, src);
 }
 
+void emitPopFrame(IRGS& env, uint32_t nout) {
+  jit::vector<SSATmp*> v{nout, nullptr};
+  for (auto i = nout; i > 0; --i) v[i - 1] = pop(env, DataTypeGeneric);
+  for (uint32_t i = 0; i < 3; ++i) popU(env);
+  for (auto tmp : v) push(env, tmp);
+}
+
 void emitDir(IRGS& env)    { push(env, cns(env, curUnit(env)->dirpath())); }
 void emitFile(IRGS& env)   { push(env, cns(env, curUnit(env)->filepath())); }
 void emitMethod(IRGS& env) { push(env, cns(env, curFunc(env)->fullName())); }

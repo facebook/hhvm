@@ -536,7 +536,7 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
         | Protected -> Aast.Protected
         | _ -> acc)
       ~init:Aast.Public kinds
-  and on_class_var xhp_info h attrs kinds variadic doc_com (_, id, eopt) =
+  and on_class_var xhp_info h attrs kinds variadic doc_com (span, id, eopt) =
     let cv_final = mem kinds Final in
     let cv_visibility = get_visibility_from_kinds kinds in
     let cv_is_static = mem kinds Static in
@@ -552,6 +552,7 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
         cv_is_promoted_variadic = variadic;
         cv_doc_comment = doc_com;
         cv_is_static;
+        cv_span = span;
       }
   (*
    * Doc comments are currently used for codegen but are not required for typing.

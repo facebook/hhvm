@@ -6529,7 +6529,8 @@ and class_var_def ~is_static env cv =
       T.cv_user_attributes = user_attributes;
       T.cv_is_promoted_variadic = cv.cv_is_promoted_variadic;
       T.cv_doc_comment = cv.cv_doc_comment; (* Can make None to save space *)
-      T.cv_is_static = is_static
+      T.cv_is_static = is_static;
+      T.cv_span = cv.cv_span
     }
   end
 

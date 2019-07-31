@@ -492,6 +492,7 @@ let make_closure ~class_num
       cv_doc_comment = None;
       cv_is_promoted_variadic = false;
       cv_is_static = false;
+      cv_span = p;
     } in
   let cvl =
     List.map lambda_vars
@@ -1432,6 +1433,7 @@ and add_reified_property cd c_vars =
         cv_expr = None;
         cv_user_attributes = [];
         cv_is_static = false;
+        cv_span = p;
       } in
     var :: c_vars
 

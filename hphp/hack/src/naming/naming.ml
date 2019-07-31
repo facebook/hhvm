@@ -1276,6 +1276,7 @@ module Make (GetLocals : GetLocals) = struct
     ; N.cv_is_promoted_variadic = cv.Aast.cv_is_promoted_variadic
     ; N.cv_doc_comment = cv.Aast.cv_doc_comment (* Can make None to save space *)
     ; N.cv_is_static = cv.Aast.cv_is_static
+    ; N.cv_span = cv.Aast.cv_span
     }
 
   and enum_ env e =
@@ -1362,6 +1363,7 @@ module Make (GetLocals : GetLocals) = struct
     ; N.cv_is_promoted_variadic = cv.Aast.cv_is_promoted_variadic
     ; N.cv_doc_comment = cv.Aast.cv_doc_comment (* Can make None to save space *)
     ; N.cv_is_static = cv.Aast.cv_is_static
+    ; N.cv_span = cv.Aast.cv_span
     }
 
   and class_prop_non_static env ?(const = None) cv =
@@ -1392,6 +1394,7 @@ module Make (GetLocals : GetLocals) = struct
     ; N.cv_is_promoted_variadic = cv.Aast.cv_is_promoted_variadic
     ; N.cv_doc_comment = cv.Aast.cv_doc_comment (* Can make None to save space *)
     ; N.cv_is_static = cv.Aast.cv_is_static
+    ; N.cv_span = cv.Aast.cv_span
     }
 
   and class_method env c_meth =

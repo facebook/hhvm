@@ -430,6 +430,7 @@ and ('ex, 'fb, 'en) class_var = {
   cv_doc_comment: string option;
   cv_is_promoted_variadic: bool;
   cv_is_static: bool;
+  cv_span: pos;
 }
 
 and ('ex, 'fb, 'en) method_ = {

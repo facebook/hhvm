@@ -1049,7 +1049,7 @@ let handle_mode
   | Dump_tast ->
     let errors, tasts = compute_tasts_expand_types tcopt files_info
       files_contents in
-    (match Errors.get_error_list errors with
+    (match parse_errors @ Errors.get_error_list errors with
     | [] -> ()
     | errors ->
       Printf.printf "Errors:\n";

@@ -2246,7 +2246,9 @@ and pStmt : stmt parser = fun node env ->
             match n with
             | (p1, Expr (p2, Binop ((Eq op), e1, ((p3, _) as e2)))) ->
               (match tmp_vars with
-              | [] -> assert false
+              | [] ->
+                raise_parsing_error env (`Pos pos) SyntaxError.statement_without_await_in_concurrent_block;
+                (n :: body_stmts, assign_stmts, tmp_vars)
               | first_tmp_var :: rest_tmp_vars ->
                 let tmp_n = p3, Lvar (p3, first_tmp_var) in
                 let body_stmts =

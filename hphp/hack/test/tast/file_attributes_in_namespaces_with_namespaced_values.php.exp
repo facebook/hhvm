@@ -1,3 +1,6 @@
+Errors:
+  [9:57-10:1] A semicolon (';') is expected here.
+  [12:33-56] User-defined constants are not allowed in user attribute expressions
 [(Class
     { c_span = [4:3-6:4]; c_annotation = (); c_mode = <opaque>;
       c_final = false; c_is_xhp = false; c_kind = Cnormal;

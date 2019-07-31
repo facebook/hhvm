@@ -700,11 +700,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; binary_operator                                    : t
     ; binary_right_operand                               : t
     }
-  | InstanceofExpression              of
-    { instanceof_left_operand                            : t
-    ; instanceof_operator                                : t
-    ; instanceof_right_operand                           : t
-    }
   | IsExpression                      of
     { is_left_operand                                    : t
     ; is_operator                                        : t
@@ -1228,7 +1223,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | ExprPrefixUnary                  of prefix_unary_expression
   | ExprPostfixUnary                 of postfix_unary_expression
   | ExprBinary                       of binary_expression
-  | ExprInstanceof                   of instanceof_expression
   | ExprIs                           of is_expression
   | ExprAs                           of as_expression
   | ExprNullableAs                   of nullable_as_expression
@@ -1348,7 +1342,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | LambdaPrefixUnary                  of prefix_unary_expression
   | LambdaPostfixUnary                 of postfix_unary_expression
   | LambdaBinary                       of binary_expression
-  | LambdaInstanceof                   of instanceof_expression
   | LambdaIs                           of is_expression
   | LambdaAs                           of as_expression
   | LambdaNullableAs                   of nullable_as_expression
@@ -1399,7 +1392,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | CExprPrefixUnary                  of prefix_unary_expression
   | CExprPostfixUnary                 of postfix_unary_expression
   | CExprBinary                       of binary_expression
-  | CExprInstanceof                   of instanceof_expression
   | CExprIs                           of is_expression
   | CExprAs                           of as_expression
   | CExprNullableAs                   of nullable_as_expression
@@ -2007,11 +1999,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { binary_left_operand: expression value
     ; binary_operator: Token.t value
     ; binary_right_operand: expression value
-    }
-  and instanceof_expression =
-    { instanceof_left_operand: expression value
-    ; instanceof_operator: Token.t value
-    ; instanceof_right_operand: expression value
     }
   and is_expression =
     { is_left_operand: expression value

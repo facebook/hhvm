@@ -435,10 +435,6 @@ impl<'src, State: StateType<'src, PositionedSyntax>> SmartConstructors<'src, Sta
         <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_binary_expression(self, arg0, arg1, arg2)
     }
 
-    fn make_instanceof_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_instanceof_expression(self, arg0, arg1, arg2)
-    }
-
     fn make_is_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
         <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_is_expression(self, arg0, arg1, arg2)
     }

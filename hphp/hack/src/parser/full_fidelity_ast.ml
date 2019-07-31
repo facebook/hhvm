@@ -1752,9 +1752,6 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         if name_text <> "re"
         then raise_parsing_error env (`Node node) SyntaxError.non_re_prefix;
         PrefixedString (text name, pExpr str env)
-    | InstanceofExpression _ ->
-      raise_parsing_error env (`Node node) SyntaxError.instanceof_disabled;
-      Omitted
     | IsExpression
       { is_left_operand; is_right_operand; _ } ->
       Is (pExpr is_left_operand env, pHint is_right_operand env)

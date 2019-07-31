@@ -474,10 +474,6 @@ let memoize_lsb_on_non_method =
 let constants_as_attribute_arguments =
   "User-defined constants are not allowed in user attribute expressions"
 
-let instanceof_paren x =
-  Printf.sprintf "`instanceof (%s)` is not allowed because it is ambiguous. Is `%s` a class or a constant?"
-    x x
-
 let instanceof_invalid_scope_resolution = "A scope resolution (::) on the right side of an " ^
   "instanceof operator must start with a class name, `self`, `parent`, or `static`, and end with " ^
   "a variable"

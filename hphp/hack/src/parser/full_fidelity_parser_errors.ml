@@ -2184,7 +2184,7 @@ let class_type_designator_errors node =
     [make_error_from_node node SyntaxError.instanceof_reference]
   | ParenthesizedExpression _ ->
     (* A parenthesized expression that evaluates to a string or object is a
-       valid RHS for instanceof and new. *)
+       valid RHS for `new`. *)
     []
   | _ -> new_variable_errors node
 
@@ -2408,7 +2408,6 @@ let await_as_an_expression_errors await_node parents =
     | CastExpression _
     | MemberSelectionExpression _
     | ScopeResolutionExpression _
-    | InstanceofExpression _
     | IsExpression _
     | AsExpression _
     | NullableAsExpression _
@@ -2496,23 +2495,9 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
     | _ -> false
   in
   match syntax node with
-  (* It is ambiguous what `instanceof (A)` means: either instanceof a type A
-   * or instanceof a type whose name is what the constant A evaluates to.
-   * We therefore simply disallow this. *)
-  | InstanceofExpression
-    { instanceof_right_operand =
-      { syntax = ParenthesizedExpression
-        { parenthesized_expression_expression =
-          { syntax = Token _; _ } as in_paren
-        ; _ }
-      ; _ }
-    ; _ } when is_typechecker env ->
-    let in_paren = text in_paren in
-    make_error_from_node node (SyntaxError.instanceof_paren in_paren) :: errors
-  (* We parse the right hand side of `new` and `instanceof` as a generic
-     expression, but PHP (and therefore Hack) only allow a certain subset of
-     expressions, so we should verify here that the expression we parsed is in
-     that subset.
+  (* We parse the right hand side of `new` as a generic expression, but PHP
+     (and therefore Hack) only allow a certain subset of expressions, so we
+     should verify here that the expression we parsed is in that subset.
      Refer: https://github.com/php/php-langspec/blob/master/spec/10-expressions.md#instanceof-operator*)
   | ConstructorCall ctr_call ->
     let typechecker_errors =
@@ -2541,8 +2526,6 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
         ~f:(fun p acc -> function_call_argument_errors ~in_constructor_call:true p acc)
     in
     typechecker_errors @ designator_errors @ func_errors @ errors
-  | InstanceofExpression { instanceof_right_operand = operand; _ } ->
-    (class_type_designator_errors operand) @ errors
   | LiteralExpression { literal_expression = {syntax = Token token; _} as e ; _}
     when is_decimal_or_hexadecimal_literal token ->
     let text = text e in
@@ -3831,7 +3814,6 @@ let assignment_errors _env node errors =
       | CastExpression _
       | BinaryExpression _
       | ConditionalExpression _
-      | InstanceofExpression _
       | IsExpression _
       | AsExpression _ | NullableAsExpression _
       | ConstructorCall _ | AnonymousClass _
@@ -4014,7 +3996,6 @@ let find_syntax_errors env =
         let errors =
           expression_errors env is_in_concurrent_block namespace_name node parents errors in
         trait_require_clauses, names, errors
-      | InstanceofExpression _
       | LiteralExpression _
       | SafeMemberSelectionExpression _
       | HaltCompilerExpression _

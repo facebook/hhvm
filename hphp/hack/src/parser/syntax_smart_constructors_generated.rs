@@ -516,11 +516,6 @@ where
         Self::R::make_binary_expression(self.state_mut(), arg0, arg1, arg2)
     }
 
-    fn make_instanceof_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
-        self.state_mut().next(&[&arg0, &arg1, &arg2]);
-        Self::R::make_instanceof_expression(self.state_mut(), arg0, arg1, arg2)
-    }
-
     fn make_is_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
         self.state_mut().next(&[&arg0, &arg1, &arg2]);
         Self::R::make_is_expression(self.state_mut(), arg0, arg1, arg2)

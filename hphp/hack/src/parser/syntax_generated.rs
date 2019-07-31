@@ -1046,16 +1046,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_instanceof_expression(_: &C, instanceof_left_operand: Self, instanceof_operator: Self, instanceof_right_operand: Self) -> Self {
-        let syntax = SyntaxVariant::InstanceofExpression(Box::new(InstanceofExpressionChildren {
-            instanceof_left_operand,
-            instanceof_operator,
-            instanceof_right_operand,
-        }));
-        let value = V::from_syntax(&syntax);
-        Self::make(syntax, value)
-    }
-
     fn make_is_expression(_: &C, is_left_operand: Self, is_operator: Self, is_right_operand: Self) -> Self {
         let syntax = SyntaxVariant::IsExpression(Box::new(IsExpressionChildren {
             is_left_operand,
@@ -2582,12 +2572,6 @@ where
                 let acc = f(&x.binary_right_operand, acc);
                 acc
             },
-            SyntaxVariant::InstanceofExpression(x) => {
-                let acc = f(&x.instanceof_left_operand, acc);
-                let acc = f(&x.instanceof_operator, acc);
-                let acc = f(&x.instanceof_right_operand, acc);
-                acc
-            },
             SyntaxVariant::IsExpression(x) => {
                 let acc = f(&x.is_left_operand, acc);
                 let acc = f(&x.is_operator, acc);
@@ -3226,7 +3210,6 @@ where
             SyntaxVariant::PrefixUnaryExpression {..} => SyntaxKind::PrefixUnaryExpression,
             SyntaxVariant::PostfixUnaryExpression {..} => SyntaxKind::PostfixUnaryExpression,
             SyntaxVariant::BinaryExpression {..} => SyntaxKind::BinaryExpression,
-            SyntaxVariant::InstanceofExpression {..} => SyntaxKind::InstanceofExpression,
             SyntaxVariant::IsExpression {..} => SyntaxKind::IsExpression,
             SyntaxVariant::AsExpression {..} => SyntaxKind::AsExpression,
             SyntaxVariant::NullableAsExpression {..} => SyntaxKind::NullableAsExpression,
@@ -4054,13 +4037,6 @@ pub struct BinaryExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
-pub struct InstanceofExpressionChildren<T, V> {
-    pub instanceof_left_operand: Syntax<T, V>,
-    pub instanceof_operator: Syntax<T, V>,
-    pub instanceof_right_operand: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
 pub struct IsExpressionChildren<T, V> {
     pub is_left_operand: Syntax<T, V>,
     pub is_operator: Syntax<T, V>,
@@ -4775,7 +4751,6 @@ pub enum SyntaxVariant<T, V> {
     PrefixUnaryExpression(Box<PrefixUnaryExpressionChildren<T, V>>),
     PostfixUnaryExpression(Box<PostfixUnaryExpressionChildren<T, V>>),
     BinaryExpression(Box<BinaryExpressionChildren<T, V>>),
-    InstanceofExpression(Box<InstanceofExpressionChildren<T, V>>),
     IsExpression(Box<IsExpressionChildren<T, V>>),
     AsExpression(Box<AsExpressionChildren<T, V>>),
     NullableAsExpression(Box<NullableAsExpressionChildren<T, V>>),

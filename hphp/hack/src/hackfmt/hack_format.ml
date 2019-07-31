@@ -1399,18 +1399,6 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
         transform_binary_expression env ~is_nested:false
           (binary_left_operand, binary_operator, binary_right_operand)
     end
-  | Syntax.InstanceofExpression {
-      instanceof_left_operand = left;
-      instanceof_operator = kw;
-      instanceof_right_operand = right; } ->
-    Concat [
-      t env left;
-      Space;
-      t env kw;
-      Space;
-      SplitWith Cost.Base;
-      Nest [t env right];
-    ]
   | Syntax.IsExpression {
       is_left_operand = left;
       is_operator = kw;

@@ -113,7 +113,6 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_prefix_unary_expression(ctx: &C, prefix_unary_operator: Self, prefix_unary_operand: Self) -> Self;
     fn make_postfix_unary_expression(ctx: &C, postfix_unary_operand: Self, postfix_unary_operator: Self) -> Self;
     fn make_binary_expression(ctx: &C, binary_left_operand: Self, binary_operator: Self, binary_right_operand: Self) -> Self;
-    fn make_instanceof_expression(ctx: &C, instanceof_left_operand: Self, instanceof_operator: Self, instanceof_right_operand: Self) -> Self;
     fn make_is_expression(ctx: &C, is_left_operand: Self, is_operator: Self, is_right_operand: Self) -> Self;
     fn make_as_expression(ctx: &C, as_left_operand: Self, as_operator: Self, as_right_operand: Self) -> Self;
     fn make_nullable_as_expression(ctx: &C, nullable_as_left_operand: Self, nullable_as_operator: Self, nullable_as_right_operand: Self) -> Self;

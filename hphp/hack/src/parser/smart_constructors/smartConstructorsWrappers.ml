@@ -126,7 +126,6 @@ module type SyntaxKind_S = sig
   val is_prefix_unary_expression : r -> bool
   val is_postfix_unary_expression : r -> bool
   val is_binary_expression : r -> bool
-  val is_instanceof_expression : r -> bool
   val is_is_expression : r -> bool
   val is_as_expression : r -> bool
   val is_nullable_as_expression : r -> bool
@@ -331,7 +330,6 @@ module SyntaxKind(SC : SC_S)
   let make_prefix_unary_expression arg0 arg1 state = compose SK.PrefixUnaryExpression (SC.make_prefix_unary_expression (snd arg0) (snd arg1) state)
   let make_postfix_unary_expression arg0 arg1 state = compose SK.PostfixUnaryExpression (SC.make_postfix_unary_expression (snd arg0) (snd arg1) state)
   let make_binary_expression arg0 arg1 arg2 state = compose SK.BinaryExpression (SC.make_binary_expression (snd arg0) (snd arg1) (snd arg2) state)
-  let make_instanceof_expression arg0 arg1 arg2 state = compose SK.InstanceofExpression (SC.make_instanceof_expression (snd arg0) (snd arg1) (snd arg2) state)
   let make_is_expression arg0 arg1 arg2 state = compose SK.IsExpression (SC.make_is_expression (snd arg0) (snd arg1) (snd arg2) state)
   let make_as_expression arg0 arg1 arg2 state = compose SK.AsExpression (SC.make_as_expression (snd arg0) (snd arg1) (snd arg2) state)
   let make_nullable_as_expression arg0 arg1 arg2 state = compose SK.NullableAsExpression (SC.make_nullable_as_expression (snd arg0) (snd arg1) (snd arg2) state)
@@ -512,7 +510,6 @@ module SyntaxKind(SC : SC_S)
   let is_prefix_unary_expression              = has_kind SK.PrefixUnaryExpression
   let is_postfix_unary_expression             = has_kind SK.PostfixUnaryExpression
   let is_binary_expression                    = has_kind SK.BinaryExpression
-  let is_instanceof_expression                = has_kind SK.InstanceofExpression
   let is_is_expression                        = has_kind SK.IsExpression
   let is_as_expression                        = has_kind SK.AsExpression
   let is_nullable_as_expression               = has_kind SK.NullableAsExpression

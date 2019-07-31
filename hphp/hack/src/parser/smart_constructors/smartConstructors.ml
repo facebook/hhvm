@@ -129,7 +129,6 @@ module type SmartConstructors_S = sig
   val make_prefix_unary_expression : r -> r -> t -> t * r
   val make_postfix_unary_expression : r -> r -> t -> t * r
   val make_binary_expression : r -> r -> r -> t -> t * r
-  val make_instanceof_expression : r -> r -> r -> t -> t * r
   val make_is_expression : r -> r -> r -> t -> t * r
   val make_as_expression : r -> r -> r -> t -> t * r
   val make_nullable_as_expression : r -> r -> r -> t -> t * r
@@ -318,7 +317,6 @@ end) = struct
     let prefix_unary_expression parser arg0 arg1 = call parser (SCI.make_prefix_unary_expression arg0 arg1)
     let postfix_unary_expression parser arg0 arg1 = call parser (SCI.make_postfix_unary_expression arg0 arg1)
     let binary_expression parser arg0 arg1 arg2 = call parser (SCI.make_binary_expression arg0 arg1 arg2)
-    let instanceof_expression parser arg0 arg1 arg2 = call parser (SCI.make_instanceof_expression arg0 arg1 arg2)
     let is_expression parser arg0 arg1 arg2 = call parser (SCI.make_is_expression arg0 arg1 arg2)
     let as_expression parser arg0 arg1 arg2 = call parser (SCI.make_as_expression arg0 arg1 arg2)
     let nullable_as_expression parser arg0 arg1 arg2 = call parser (SCI.make_nullable_as_expression arg0 arg1 arg2)

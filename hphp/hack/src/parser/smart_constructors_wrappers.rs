@@ -339,9 +339,6 @@ where S: SmartConstructors<'src, State> {
     fn make_binary_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
         compose(SyntaxKind::BinaryExpression, self.s.make_binary_expression(arg0.1, arg1.1, arg2.1))
     }
-    fn make_instanceof_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
-        compose(SyntaxKind::InstanceofExpression, self.s.make_instanceof_expression(arg0.1, arg1.1, arg2.1))
-    }
     fn make_is_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
         compose(SyntaxKind::IsExpression, self.s.make_is_expression(arg0.1, arg1.1, arg2.1))
     }

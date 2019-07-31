@@ -266,8 +266,6 @@ class EditableSyntax
       return PostfixUnaryExpression.from_json(json, position, source);
     case 'binary_expression':
       return BinaryExpression.from_json(json, position, source);
-    case 'instanceof_expression':
-      return InstanceofExpression.from_json(json, position, source);
     case 'is_expression':
       return IsExpression.from_json(json, position, source);
     case 'as_expression':
@@ -13163,89 +13161,6 @@ class BinaryExpression extends EditableSyntax
     return BinaryExpression._children_keys;
   }
 }
-class InstanceofExpression extends EditableSyntax
-{
-  constructor(
-    left_operand,
-    operator,
-    right_operand)
-  {
-    super('instanceof_expression', {
-      left_operand: left_operand,
-      operator: operator,
-      right_operand: right_operand });
-  }
-  get left_operand() { return this.children.left_operand; }
-  get operator() { return this.children.operator; }
-  get right_operand() { return this.children.right_operand; }
-  with_left_operand(left_operand){
-    return new InstanceofExpression(
-      left_operand,
-      this.operator,
-      this.right_operand);
-  }
-  with_operator(operator){
-    return new InstanceofExpression(
-      this.left_operand,
-      operator,
-      this.right_operand);
-  }
-  with_right_operand(right_operand){
-    return new InstanceofExpression(
-      this.left_operand,
-      this.operator,
-      right_operand);
-  }
-  rewrite(rewriter, parents)
-  {
-    if (parents == undefined)
-      parents = [];
-    let new_parents = parents.slice();
-    new_parents.push(this);
-    var left_operand = this.left_operand.rewrite(rewriter, new_parents);
-    var operator = this.operator.rewrite(rewriter, new_parents);
-    var right_operand = this.right_operand.rewrite(rewriter, new_parents);
-    if (
-      left_operand === this.left_operand &&
-      operator === this.operator &&
-      right_operand === this.right_operand)
-    {
-      return rewriter(this, parents);
-    }
-    else
-    {
-      return rewriter(new InstanceofExpression(
-        left_operand,
-        operator,
-        right_operand), parents);
-    }
-  }
-  static from_json(json, position, source)
-  {
-    let left_operand = EditableSyntax.from_json(
-      json.instanceof_left_operand, position, source);
-    position += left_operand.width;
-    let operator = EditableSyntax.from_json(
-      json.instanceof_operator, position, source);
-    position += operator.width;
-    let right_operand = EditableSyntax.from_json(
-      json.instanceof_right_operand, position, source);
-    position += right_operand.width;
-    return new InstanceofExpression(
-        left_operand,
-        operator,
-        right_operand);
-  }
-  get children_keys()
-  {
-    if (InstanceofExpression._children_keys == null)
-      InstanceofExpression._children_keys = [
-        'left_operand',
-        'operator',
-        'right_operand'];
-    return InstanceofExpression._children_keys;
-  }
-}
 class IsExpression extends EditableSyntax
 {
   constructor(
@@ -21522,7 +21437,6 @@ exports.YieldFromExpression = YieldFromExpression;
 exports.PrefixUnaryExpression = PrefixUnaryExpression;
 exports.PostfixUnaryExpression = PostfixUnaryExpression;
 exports.BinaryExpression = BinaryExpression;
-exports.InstanceofExpression = InstanceofExpression;
 exports.IsExpression = IsExpression;
 exports.AsExpression = AsExpression;
 exports.NullableAsExpression = NullableAsExpression;

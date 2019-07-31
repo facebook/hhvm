@@ -153,7 +153,6 @@ module WithToken(Token: TokenType) = struct
       | PrefixUnaryExpression             _ -> SyntaxKind.PrefixUnaryExpression
       | PostfixUnaryExpression            _ -> SyntaxKind.PostfixUnaryExpression
       | BinaryExpression                  _ -> SyntaxKind.BinaryExpression
-      | InstanceofExpression              _ -> SyntaxKind.InstanceofExpression
       | IsExpression                      _ -> SyntaxKind.IsExpression
       | AsExpression                      _ -> SyntaxKind.AsExpression
       | NullableAsExpression              _ -> SyntaxKind.NullableAsExpression
@@ -341,7 +340,6 @@ module WithToken(Token: TokenType) = struct
     let is_prefix_unary_expression              = has_kind SyntaxKind.PrefixUnaryExpression
     let is_postfix_unary_expression             = has_kind SyntaxKind.PostfixUnaryExpression
     let is_binary_expression                    = has_kind SyntaxKind.BinaryExpression
-    let is_instanceof_expression                = has_kind SyntaxKind.InstanceofExpression
     let is_is_expression                        = has_kind SyntaxKind.IsExpression
     let is_as_expression                        = has_kind SyntaxKind.AsExpression
     let is_nullable_as_expression               = has_kind SyntaxKind.NullableAsExpression
@@ -1519,15 +1517,6 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc binary_left_operand in
          let acc = f acc binary_operator in
          let acc = f acc binary_right_operand in
-         acc
-      | InstanceofExpression {
-        instanceof_left_operand;
-        instanceof_operator;
-        instanceof_right_operand;
-      } ->
-         let acc = f acc instanceof_left_operand in
-         let acc = f acc instanceof_operator in
-         let acc = f acc instanceof_right_operand in
          acc
       | IsExpression {
         is_left_operand;
@@ -3389,15 +3378,6 @@ module WithToken(Token: TokenType) = struct
         binary_operator;
         binary_right_operand;
       ]
-      | InstanceofExpression {
-        instanceof_left_operand;
-        instanceof_operator;
-        instanceof_right_operand;
-      } -> [
-        instanceof_left_operand;
-        instanceof_operator;
-        instanceof_right_operand;
-      ]
       | IsExpression {
         is_left_operand;
         is_operator;
@@ -5258,15 +5238,6 @@ module WithToken(Token: TokenType) = struct
         "binary_left_operand";
         "binary_operator";
         "binary_right_operand";
-      ]
-      | InstanceofExpression {
-        instanceof_left_operand;
-        instanceof_operator;
-        instanceof_right_operand;
-      } -> [
-        "instanceof_left_operand";
-        "instanceof_operator";
-        "instanceof_right_operand";
       ]
       | IsExpression {
         is_left_operand;
@@ -7276,16 +7247,6 @@ module WithToken(Token: TokenType) = struct
           binary_left_operand;
           binary_operator;
           binary_right_operand;
-        }
-      | (SyntaxKind.InstanceofExpression, [
-          instanceof_left_operand;
-          instanceof_operator;
-          instanceof_right_operand;
-        ]) ->
-        InstanceofExpression {
-          instanceof_left_operand;
-          instanceof_operator;
-          instanceof_right_operand;
         }
       | (SyntaxKind.IsExpression, [
           is_left_operand;
@@ -9635,19 +9596,6 @@ module WithToken(Token: TokenType) = struct
           binary_left_operand;
           binary_operator;
           binary_right_operand;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_instanceof_expression
-        instanceof_left_operand
-        instanceof_operator
-        instanceof_right_operand
-      =
-        let syntax = InstanceofExpression {
-          instanceof_left_operand;
-          instanceof_operator;
-          instanceof_right_operand;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

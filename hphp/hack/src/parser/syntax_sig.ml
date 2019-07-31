@@ -587,11 +587,6 @@ module type Syntax_S = sig
     ; binary_operator                                    : t
     ; binary_right_operand                               : t
     }
-  | InstanceofExpression              of
-    { instanceof_left_operand                            : t
-    ; instanceof_operator                                : t
-    ; instanceof_right_operand                           : t
-    }
   | IsExpression                      of
     { is_left_operand                                    : t
     ; is_operator                                        : t
@@ -1176,7 +1171,6 @@ module type Syntax_S = sig
   val make_prefix_unary_expression : t -> t -> t
   val make_postfix_unary_expression : t -> t -> t
   val make_binary_expression : t -> t -> t -> t
-  val make_instanceof_expression : t -> t -> t -> t
   val make_is_expression : t -> t -> t -> t
   val make_as_expression : t -> t -> t -> t
   val make_nullable_as_expression : t -> t -> t -> t
@@ -1356,7 +1350,6 @@ module type Syntax_S = sig
   val is_prefix_unary_expression : t -> bool
   val is_postfix_unary_expression : t -> bool
   val is_binary_expression : t -> bool
-  val is_instanceof_expression : t -> bool
   val is_is_expression : t -> bool
   val is_as_expression : t -> bool
   val is_nullable_as_expression : t -> bool

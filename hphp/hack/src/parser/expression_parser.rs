@@ -791,8 +791,8 @@ where
         //
         // An embedded variable expression inside braces can be a much more complex
         // expression than indicated by the grammar above.  For example,
-        // {$c->x->y[0]} is good, and {$c[$x instanceof foo ? 0 : 1]} is good,
-        // but {$c instanceof foo ? $x : $y} is not.  It is not clear to me what
+        // {$c->x->y[0]} is good, and {$c[$x is foo ? 0 : 1]} is good,
+        // but {$c is foo ? $x : $y} is not.  It is not clear to me what
         // the legal grammar here is; it seems best in this situation to simply
         // parse any expression and do an error pass later.
         //
@@ -1328,7 +1328,10 @@ where
                         | TokenKind::QuestionQuestionEqual => {
                             self.parse_remaining_binary_expression(term, assignment_prefix_kind)
                         }
-                        TokenKind::Instanceof => self.parse_instanceof_expression(term),
+                        TokenKind::Instanceof => {
+                            self.with_error(Errors::instanceof_disabled);
+                            S!(make_missing, self, self.pos())
+                        }
                         TokenKind::Is => self.parse_is_expression(term),
                         TokenKind::As if self.allow_as_expressions() => {
                             self.parse_as_expression(term)
@@ -1735,7 +1738,7 @@ where
         //
         // * If the thing in parens is one of the keywords mentioned above, then
         //   it's a cast.
-        // * If the token which follows (x) is "as" or "instanceof" then
+        // * If the token which follows (x) is "is" or "as" then
         //   it's a parenthesized expression.
         // * PHP-ism extension: if the token is "and", "or" or "xor", then it's a
         //   parenthesized expression.
@@ -1950,104 +1953,6 @@ where
             )),
         };
         S!(make_prefix_unary_expression, self, dollar, operand)
-    }
-
-    fn parse_instanceof_expression(&mut self, left: S::R) -> S::R {
-        // SPEC:
-        // instanceof-expression:
-        //   instanceof-subject  instanceof   instanceof-type-designator
-        //
-        // instanceof-subject:
-        //   expression
-        //
-        // instanceof-type-designator:
-        //   qualified-name
-        //   variable-name
-        //
-        // TODO: The spec is plainly wrong here. This is a bit of a mess and there
-        // are a number of issues.
-        //
-        // The issues arise from the fact that the thing on the right can be either
-        // a type, or an expression that evaluates to a string that names the type.
-        //
-        // The grammar in the spec, above, says that the only things that can be
-        // here are a qualified name -- in which case it names the type directly --
-        // or a variable of classname type, which names the type.  But this is
-        // not the grammar that is accepted by Hack / HHVM.  The accepted grammar
-        // treats "instanceof" as a binary operator which takes expressions on
-        // each side, and is of lower precedence than =>.  Thus
-        //
-        // $x instanceof $y => z
-        //
-        // must be parsed as ($x instanceof ($y => z)), and not, as the grammar
-        // implies, (($x instanceof $y) => z).
-        //
-        // But wait, it gets worse.
-        //
-        // The less-than operator is of lower precedence than instanceof, so
-        // "$x instanceof foo < 10" should be parsed as (($x instanceof foo) < 10).
-        // But it seems plausible that we might want to parse
-        // "$x instanceof foo<int>" someday, in which case now we have an ambiguity.
-        // How do we know when we see the < whether we are attempting to parse a type?
-        //
-        // Moreover: we need to be able to parse XHP class names on the right hand
-        // side of the operator.  That is, we need to be able to say
-        //
-        // $x instanceof :foo
-        //
-        // However, we cannot simply say that the grammar is
-        //
-        // instanceof-type-designator:
-        //   xhp-class-name
-        //   expression
-        //
-        // Why not?   Because that then gives the wrong parse for:
-        //
-        // class :foo { static $bar = "abc" }
-        // class abc { }
-        // ...
-        // $x instanceof :foo :: $bar
-        //
-        // We need to parse that as $x instanceof (:foo :: $bar).
-        //
-        // The solution to all this is as follows.
-        //
-        // First, an XHP class name must be a legal expression. I had thought that
-        // it might be possible to say that an XHP class name is a legal type, or
-        // legal in an expression context when immediately followed by ::, but
-        // that's not the case. We need to be able to parse both
-        //
-        // $x instanceof :foo :: $bar
-        //
-        // and
-        //
-        // $x instanceof :foo
-        //
-        // so the most expedient way to do that is to parse any expression on the
-        // right, and to make XHP class names into legal expressions.
-        //
-        // So, with all this in mind, the grammar we will actually parse here is:
-        //
-        // instanceof-type-designator:
-        //   expression
-        //
-        // This has the unfortunate property that the common case, say,
-        //
-        // $x instanceof C
-        //
-        // creates a parse node for C as a name token, not as a name token wrapped
-        // up as a simple type.
-        //
-        // Should we ever need to parse both arbitrary expressions and arbitrary
-        // types here, we'll have some tricky problems to solve.
-        //
-        //
-        let op = self.assert_token(TokenKind::Instanceof);
-        let precedence = Operator::InstanceofOperator.precedence(&self.env);
-        let right_term = self.parse_term();
-        let right = self.parse_remaining_binary_expression_helper(right_term, precedence);
-        let result = S!(make_instanceof_expression, self, left, op, right);
-        self.parse_remaining_expression(result)
     }
 
     fn parse_is_as_helper(

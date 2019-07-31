@@ -114,7 +114,6 @@ type t =
   | PrefixUnaryExpression
   | PostfixUnaryExpression
   | BinaryExpression
-  | InstanceofExpression
   | IsExpression
   | AsExpression
   | NullableAsExpression
@@ -296,7 +295,6 @@ let to_string kind =
   | PrefixUnaryExpression             -> "prefix_unary_expression"
   | PostfixUnaryExpression            -> "postfix_unary_expression"
   | BinaryExpression                  -> "binary_expression"
-  | InstanceofExpression              -> "instanceof_expression"
   | IsExpression                      -> "is_expression"
   | AsExpression                      -> "as_expression"
   | NullableAsExpression              -> "nullable_as_expression"

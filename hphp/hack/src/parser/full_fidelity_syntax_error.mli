@@ -270,7 +270,6 @@ val memoize_on_lambda: string
 val memoize_lsb_on_non_static: string
 val memoize_lsb_on_non_method: string
 val constants_as_attribute_arguments: string
-val instanceof_paren: string -> string
 val instanceof_invalid_scope_resolution: string
 val instanceof_memberselection_inside_scoperesolution: string
 val instanceof_missing_subscript_index: string

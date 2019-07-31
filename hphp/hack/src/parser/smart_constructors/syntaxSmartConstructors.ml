@@ -153,7 +153,6 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
     let make_prefix_unary_expression arg0 arg1 state = State.next state [arg0; arg1], Syntax.make_prefix_unary_expression arg0 arg1
     let make_postfix_unary_expression arg0 arg1 state = State.next state [arg0; arg1], Syntax.make_postfix_unary_expression arg0 arg1
     let make_binary_expression arg0 arg1 arg2 state = State.next state [arg0; arg1; arg2], Syntax.make_binary_expression arg0 arg1 arg2
-    let make_instanceof_expression arg0 arg1 arg2 state = State.next state [arg0; arg1; arg2], Syntax.make_instanceof_expression arg0 arg1 arg2
     let make_is_expression arg0 arg1 arg2 state = State.next state [arg0; arg1; arg2], Syntax.make_is_expression arg0 arg1 arg2
     let make_as_expression arg0 arg1 arg2 state = State.next state [arg0; arg1; arg2], Syntax.make_as_expression arg0 arg1 arg2
     let make_nullable_as_expression arg0 arg1 arg2 state = State.next state [arg0; arg1; arg2], Syntax.make_nullable_as_expression arg0 arg1 arg2

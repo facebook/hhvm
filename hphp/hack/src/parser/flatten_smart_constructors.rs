@@ -784,14 +784,6 @@ pub trait FlattenSmartConstructors<'src, State>
         }
     }
 
-    fn make_instanceof_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
-          Self::zero()
-        } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
-        }
-    }
-
     fn make_is_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()

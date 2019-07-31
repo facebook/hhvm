@@ -737,6 +737,7 @@ descriptions:
   Dict - denotes the dict type
   Keyset - denotes the keyset type
   Obj - denotes the object type
+  Rec - denotes the record type
   ArrLike - denotes array, vec, dict, or keyset
 
 Multiple type annotations may be combined together using the "|" symbol. For
@@ -976,6 +977,15 @@ NewDArray <capacity hint>    []  ->  [C:Arr]
   New dict-like array with a capacity hint. Creates a new dict-like array and
   pushes it onto the stack. The implementation may make use of the hint in %1
   to pre-size the array. The hint %1 must be greater than or equal to 0.
+
+NewRecord <record-name><litstr id vector>    [C..C]  ->  [C:Rec]
+
+  New record. Creates a new record of the record type corresponding to the name 
+  in %1. The vector of litstr ids in %2 gives the field names to initialize. 
+  One initial value for each name is popped from the stack. This instruction
+  throws errors if the initial values do not match their corresponding 
+  type-hints or if a field in %2 is not declared in the record type or if any 
+  field declared in the record type is left uninitialized. 
 
 AddElemC    [C C C]  ->  [C:Arr|Dict]
 
@@ -3301,6 +3311,12 @@ DefTypeAlias <litstr id>   []  ->  []
   the same name as %1, this function checks whether it is compatible with the
   type alias given by %1, and if it isn't it throws a fatal error.
 
+DefRecord <record id>    []  ->  []
+
+  Define record. Bind the record specified by %1. If the record specified by %1 
+  is already bound, this instruction does nothing. If another record or class 
+  or type alias is already bound to the associated name, this instruction throws 
+  a fatal error.
 
 13. Miscellaneous instructions
 ------------------------------

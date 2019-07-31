@@ -575,6 +575,7 @@ let empty ?(mode = FileInfo.Mstrict) tcopt file ~droot = {
     self_id = "";
     self    = Reason.none, Tany;
     static  = false;
+    val_kind = Other;
     parent_id = "";
     parent  = Reason.none, Tany;
     fun_kind = Ast_defs.FSync;
@@ -797,6 +798,7 @@ let with_env env f =
   env, result
 
 let is_static env = env.genv.static
+let get_val_kind env = env.genv.val_kind
 let get_self env = env.genv.self
 let get_self_id env = env.genv.self_id
 let is_outside_class env = (env.genv.self_id = "")
@@ -853,6 +855,16 @@ let set_static env =
   let genv = env.genv in
   let genv = { genv with static = true } in
   { env with genv = genv }
+
+let set_val_kind env x =
+  let genv = env.genv in
+  let genv = { genv with val_kind = x } in
+  { env with genv = genv }
+
+let set_mode env mode =
+  let decl_env = env.decl_env in
+  let decl_env = { decl_env with mode } in
+  { env with decl_env }
 
 let get_mode env = env.decl_env.mode
 

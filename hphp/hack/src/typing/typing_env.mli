@@ -61,6 +61,7 @@ val log_env_change : string -> ?level:int -> env -> env -> env
 val clear_params : env -> env
 val with_env : env -> (env -> env * 'a) -> env * 'a
 val is_static : env -> bool
+val get_val_kind : env -> Typing_defs.val_kind
 val get_self : env -> locl ty
 val get_self_id : env -> string
 val is_outside_class : env -> bool
@@ -79,6 +80,8 @@ val set_self : env -> locl ty -> env
 val set_parent_id : env -> string -> env
 val set_parent : env -> decl ty -> env
 val set_static : env -> env
+val set_val_kind : env -> Typing_defs.val_kind -> env
+val set_mode : env -> FileInfo.mode -> env
 val get_mode : env -> FileInfo.mode
 val is_strict : env -> bool
 val is_decl : env -> bool

@@ -25,6 +25,7 @@ let visitor opts =
   Ppl_check.handler;
   Coroutine_check.handler;
   Redundant_nullsafe_check.handler;
+  Const_write_check.handler;
   Switch_check.handler begin fun t ->
     if TypecheckerOptions.disallow_scrutinee_case_value_type_mismatch t
     then Errors.invalid_switch_case_value_type

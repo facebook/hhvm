@@ -72,6 +72,7 @@ and genv = {
   self    : locl ty;
   static  : bool;
   fun_kind : Ast_defs.fun_kind;
+  val_kind : Typing_defs.val_kind;
   fun_mutable : param_mutability option;
   anons   : anon IMap.t;
   file    : Relative_path.t;

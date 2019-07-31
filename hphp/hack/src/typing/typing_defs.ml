@@ -321,6 +321,11 @@ and reactivity =
   | MaybeReactive of reactivity
   | RxVar of reactivity option
 
+and val_kind =
+  | Lval
+  | LvalSubexpr
+  | Other
+
 and param_mutability =
   | Param_owned_mutable
   | Param_borrowed_mutable

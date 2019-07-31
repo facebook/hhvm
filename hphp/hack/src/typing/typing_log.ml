@@ -343,6 +343,12 @@ let fun_kind_to_string k =
   | Ast_defs.FAsyncGenerator -> "async generator"
   | Ast_defs.FCoroutine -> "coroutine"
 
+let val_kind_to_string k =
+  match k with
+  | Other -> "other"
+  | Lval -> "lval"
+  | LvalSubexpr -> "lval subexpression"
+
 let rec reactivity_to_string env r =
   match r with
   | Nonreactive -> "nonreactive"
@@ -391,6 +397,7 @@ let genv_as_value env genv =
     self_id;
     self;
     static;
+    val_kind;
     fun_kind;
     fun_mutable;
     anons = _;
@@ -405,6 +412,7 @@ let genv_as_value env genv =
     "self_id", string_as_value self_id;
     "self", type_as_value env self;
     "static", bool_as_value static;
+    "val_kind", string_as_value (val_kind_to_string val_kind);
     "fun_kind", string_as_value (fun_kind_to_string fun_kind);
   ] @
   match fun_mutable with

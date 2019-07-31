@@ -198,6 +198,12 @@ val set_static : env -> env
 (** Return an {!env} for which {!is_static} will return {true}.
     If you are using {!Tast_visitor}, you should have no need of this. *)
 
+val set_val_kind : env -> Typing_defs.val_kind -> env
+(** Return an {!env} for which {!val_kind} is set to the second argument. *)
+
+val get_val_kind : env -> Typing_defs.val_kind
+(** Returns the val_kind of the typing environment *)
+
 val set_inside_constructor : env -> env
 (** Returns an {!env} for which {!inside_constructor} is set to {true}.
     If you are using {!Tast_visitor}, you should have no need of this. *)

@@ -64,38 +64,29 @@ let get_mode = Typing_env.get_mode
 let get_tcopt = Typing_env.get_tcopt
 let expand_type = Typing_env.expand_type
 let set_static = Typing_env.set_static
+let set_val_kind = Typing_env.set_val_kind
 let set_inside_constructor env = { env with Typing_env.inside_constructor = true }
 let get_inside_constructor env = env.Typing_env.inside_constructor
 let get_decl_env env = env.Typing_env.decl_env
 let get_inside_ppl_class env = env.Typing_env.inside_ppl_class
-
+let get_val_kind = Typing_env.get_val_kind
 let get_file = Typing_env.get_file
-
 let fully_expand = Typing_expand.fully_expand
-
 let get_class_ids = Typing_utils.get_class_ids
 let fold_unresolved = Typing_utils.fold_unresolved
 let flatten_unresolved = Typing_utils.flatten_unresolved
 let push_option_out = Typing_solver.push_option_out Pos.none
 let get_concrete_supertypes = Typing_utils.get_concrete_supertypes
-
 let is_visible = Typing_visibility.is_visible
-
 let assert_nontrivial = Typing_equality_check.assert_nontrivial
 let assert_nullable = Typing_equality_check.assert_nullable
-
 let hint_to_ty env = Decl_hint.hint env.Typing_env.decl_env
-
 let localize env ety_env = Typing_phase.localize ~ety_env env
 let localize_with_self = Typing_phase.localize_with_self
 let localize_with_dty_validator = Typing_phase.localize_with_dty_validator
-
 let get_upper_bounds = Typing_env.get_upper_bounds
-
 let is_fresh_generic_parameter = Typing_env.is_fresh_generic_parameter
-
 let simplify_unions env ty = Typing_union.simplify_unions env ty
-
 let get_reified = Typing_env.get_reified
 let get_enforceable = Typing_env.get_enforceable
 let get_newable = Typing_env.get_newable

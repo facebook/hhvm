@@ -23,6 +23,7 @@ type decl_ty = Typing_defs.decl Typing_defs.ty
 type reactivity = Typing_defs.reactivity
 type mutability_env = Typing_mutability_env.mutability_env
 type type_param_mutability = Typing_defs.param_mutability
+type val_kind = Typing_defs.val_kind
 
 let pp_ty fmt ty = Pp_type.pp_ty () fmt ty
 let show_ty ty = Pp_type.show_ty () ty

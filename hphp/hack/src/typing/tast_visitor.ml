@@ -38,6 +38,13 @@ class virtual iter = object (self)
 
   method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
   method! on_Lfun env x = super#on_Lfun (Env.set_ppl_lambda env) x
+  method! on_Binop env op e1 e2=
+    match op with
+    | Ast_defs.Eq _ ->
+      self#on_expr (Env.set_val_kind env Typing_defs.Lval) e1;
+      self#on_expr env e2
+    | _ -> super#on_Binop env op e1 e2
+
 end
 
 class virtual ['state] iter_with_state = object (self)

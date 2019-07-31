@@ -144,6 +144,12 @@
     serverLoadFlag))
 
 (library
+  (name promise)
+  (wrapped false)
+  (modules
+    promise))
+
+(library
   (name lwt_utils)
   (wrapped false)
   (modules
@@ -152,6 +158,7 @@
     lwt
     lwt.unix
     core_kernel
+    promise
     utils_core)
   (preprocess
     (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)))

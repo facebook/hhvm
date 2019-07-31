@@ -6,6 +6,7 @@ edition = "2018"
 [lib]
 name = "parser_rust"
 path = "lib.rs"
+crate-type = ["lib", "staticlib"]
 
 [dependencies]
 ocaml = "^0.7"

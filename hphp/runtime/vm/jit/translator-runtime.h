@@ -161,6 +161,8 @@ void checkFrame(ActRec* fp, Cell* sp, bool fullCheck, Offset bcOff);
 void loadArrayFunctionContext(ArrayData*, ActRec* preLiveAR, ActRec* fp);
 
 const Func* loadClassCtor(Class* cls, ActRec* fp);
+const Func* lookupClsMethodHelper(const Class* cls, const StringData* methName,
+                                  ObjectData* obj, const Class* ctx);
 
 // These shuffle* functions are the JIT's version of bytecode.cpp's
 // shuffleExtraStackArgs

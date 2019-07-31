@@ -2151,8 +2151,6 @@ void analyze_mem_effects(Env& env,
 bool consumes_reference_taken(const IRInstruction& inst, uint32_t srcID) {
   switch (inst.op()) {
   // The following consume some arguments only in the event of an exception.
-  case LookupClsMethod:
-    return srcID == 1;
   case LdArrFuncCtx:
   case SuspendHookAwaitEF:
   case SuspendHookAwaitEG:

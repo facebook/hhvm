@@ -1931,6 +1931,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdWHResult:
   case LdWHState:
   case LdWHNotDone:
+  case LookupClsMethod:
   case LookupClsRDS:
   case InitCtx:
   case PackMagicArgs:
@@ -1993,13 +1994,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     {
       AliasClass effects =
         actrec(inst.src(1), inst.extra<IRSPRelOffsetData>()->offset);
-      return may_load_store(effects, effects);
-    }
-
-  case LookupClsMethod:   // autoload, and it writes part of the new actrec
-    {
-      AliasClass effects =
-        actrec(inst.src(2), inst.extra<LookupClsMethod>()->calleeAROffset);
       return may_load_store(effects, effects);
     }
 

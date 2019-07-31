@@ -268,6 +268,8 @@ static CallMap s_callMap {
                            DNone, debug ? SSync : SNone, {{SSA, 0}}},
     {LdClsCtor,          loadClassCtor, DSSA, SSync,
                            {{SSA, 0}, {SSA, 1}}},
+    {LookupClsMethod,    lookupClsMethodHelper, DSSA, SSync,
+                           {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
     {LookupClsRDS,       lookupClsRDS, DSSA, SNone, {{SSA, 0}}},
     {PrintStr,           print_string, DNone, SSync, {{SSA, 0}}},
     {PrintInt,           print_int, DNone, SSync, {{SSA, 0}}},

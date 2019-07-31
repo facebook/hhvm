@@ -1789,22 +1789,24 @@ void fpushClsMethodCommon(IRGS& env,
   assertx(methVal->isA(TStr));
 
   auto const emitFPush = [&] (TargetProfile<MethProfile>* profile = nullptr) {
-    auto const prepare = [&] (IRSPRelOffset arOffset) {
-      auto const lcmData = LookupClsMethodData { arOffset, forward, dynamic };
-      auto const func = gen(env, LookupClsMethod, lcmData, clsVal, methVal,
-                            sp(env), fp(env));
-      decRef(env, methVal);
-      return func;
-    };
-
-    discard(env, numExtraInputs);
-    auto const func = prepareToCallCustom(
-      env, nullptr, numParams, dynamic, tsList, prepare);
+    auto const curCls = curClass(env);
+    auto const thiz = curCls && hasThis(env) ? ldThis(env) : cns(env, nullptr);
+    auto const lctx = curCls ? cns(env, curCls) : cns(env, nullptr);
+    auto const funcN = gen(env, LookupClsMethod, clsVal, methVal, thiz, lctx);
+    auto const func = gen(env, CheckNonNull, makeExitSlow(env), funcN);
 
     if (profile && profile->profiling()) {
       auto const pctData = ProfileCallTargetData { profile->handle() };
       gen(env, ProfileMethod, pctData, clsVal, func);
     }
+
+    auto const ctx = forward ? gen(env, FwdCtxStaticCall, ldCtx(env)) : clsVal;
+    auto const mightCareAboutDynCall =
+      RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0;
+    decRef(env, methVal);
+    discard(env, numExtraInputs);
+    prepareToCallUnknown(env, func, ctx, numParams, nullptr, dynamic,
+                         mightCareAboutDynCall, tsList);
   };
 
   if (!methVal->hasConstVal()) {

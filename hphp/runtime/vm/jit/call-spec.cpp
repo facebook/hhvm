@@ -121,9 +121,11 @@ bool CallSpec::verifySignature(const CallDest& dest,
       // A few instructions pass Cls|Nullptr to helpers that take
       // Class*. Handle that special case here.
       if (param <= TCls && args[argi].maybe(TNullptr)) continue;
-      // Similarly for ArrayData|NullPtr
+      // Similarly for ArrayData|Nullptr
       if (param <= TArrLike && args[argi].maybe(TNullptr)) continue;
-      // Similarly for RecDesc|NullPtr
+      // Similarly for Obj|Nullptr
+      if (param <= TObj && args[argi].maybe(TNullptr)) continue;
+      // Similarly for RecDesc|Nullptr
       if (param <= TRecDesc && args[argi].maybe(TNullptr)) continue;
       // LdObjMethod{D,S} takes a TSmashable as uintptr_t.
       if (param <= TInt && args[argi] <= TSmashable) continue;

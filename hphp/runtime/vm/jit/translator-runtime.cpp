@@ -783,6 +783,25 @@ const Func* loadClassCtor(Class* cls, ActRec* fp) {
   return f;
 }
 
+const Func* lookupClsMethodHelper(const Class* cls, const StringData* methName,
+                                  ObjectData* obj, const Class* ctx) {
+  const Func* f;
+  auto const res = lookupClsMethod(f, cls, methName, obj, ctx, true);
+
+  if (res == LookupResult::MethodFoundWithThis ||
+      res == LookupResult::MagicCallFound) {
+    // Handled by interpreter.
+    return nullptr;
+  }
+
+  assertx(res == LookupResult::MethodFoundNoThis);
+  if (!f->isStaticInPrologue()) {
+    throw_missing_this(f);
+  }
+
+  return f;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void raiseArgumentImpl(const Func* func, int got, bool missing) {

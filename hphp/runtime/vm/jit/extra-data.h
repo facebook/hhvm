@@ -1382,23 +1382,6 @@ struct CheckRefsData : IRExtraData {
   uint64_t vals;
 };
 
-struct LookupClsMethodData : IRExtraData {
-  explicit LookupClsMethodData(IRSPRelOffset offset, bool forward, bool dynamic)
-    : calleeAROffset(offset), forward(forward), dynamic(dynamic) {}
-
-  std::string show() const {
-    return folly::to<std::string>("IRSPOff ", calleeAROffset.offset,
-                                  forward ? " forwarded" : "",
-                                  dynamic ? " dynamic" : "");
-  }
-
-  // offset from caller SP to bottom of callee's ActRec
-  IRSPRelOffset calleeAROffset;
-  bool forward;
-  bool dynamic;
-};
-
-
 struct ProfileCallTargetData : IRExtraData {
   explicit ProfileCallTargetData(rds::Handle handle)
     : handle(handle)
@@ -1636,7 +1619,6 @@ X(AsyncFuncRetSlow,             IRSPRelOffsetData);
 X(AsyncSwitchFast,              IRSPRelOffsetData);
 X(LdArrFuncCtx,                 IRSPRelOffsetData);
 X(LdFunc,                       IRSPRelOffsetData);
-X(LookupClsMethod,              LookupClsMethodData);
 X(LookupClsMethodCache,         ClsMethodData);
 X(LdClsMethodCacheFunc,         ClsMethodData);
 X(LdClsMethodCacheCls,          ClsMethodData);

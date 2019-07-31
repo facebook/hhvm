@@ -1054,8 +1054,8 @@ Variant unserialize_ex(const char* str, int len,
     );
     return false;
   } catch (Exception& e) {
-    raise_notice("Unable to unserialize: [%.1000s]. %s.", str,
-                 e.getMessage().c_str());
+    raise_notice("Unable to unserialize: [%.*s]. %s.",
+                 std::min(len, 1000), str, e.getMessage().c_str());
     return false;
   }
   return v;

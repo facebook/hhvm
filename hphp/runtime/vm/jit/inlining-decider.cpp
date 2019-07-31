@@ -169,10 +169,6 @@ bool checkNumArgs(SrcKey callSK, const Func* callee, Annotations* annotations) {
     return refuse("callee called with variadic arguments");
   }
 
-  if (fca.numRets != 1) {
-    return refuse("callee with multiple returns");
-  }
-
   if (fca.enforceReffiness()) {
     for (auto i = 0; i < fca.numArgs; ++i) {
       if (callee->byRef(i) != fca.byRef(i)) {
@@ -213,10 +209,6 @@ bool canInlineAt(SrcKey callSK, const Func* callee, Annotations* annotations) {
   }
   if (callee->attrs() & AttrInterceptable) {
     return traceRefusal(callSK, callee, "callee is interceptable", annotations);
-  }
-  if (callee->takesInOutParams()) {
-    return traceRefusal(callSK, callee, "callee takes inout params",
-                        annotations);
   }
 
   // TODO(#4238160): Inlining into pseudomain callsites is still buggy.
@@ -611,11 +603,6 @@ bool shouldInline(const irgen::IRGS& irgs,
       if (needsCheckVVSafe && !isInliningVVSafe(op)) {
         return refuse(folly::format("{} may use dynamic environment",
                                     opcodeToName(op)).str().c_str());
-      }
-
-      // RetM is currently not supported in the callee region.
-      if (op == OpRetM) {
-        return refuse("RetM is not supported");
       }
 
       // Detect that the region contains a return.

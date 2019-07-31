@@ -530,16 +530,31 @@ void implReturnBlock(IRGS& env, const RegionDesc& calleeRegion) {
   decRefThis(env);
 
   auto const callee = curFunc(env);
-  auto retVal = pop(env, DataTypeGeneric);
+
+  auto const nret = callee->numInOutParams() + 1;
+  jit::vector<SSATmp*> retVals{nret, nullptr};
+  for (auto& v : retVals) v = pop(env, DataTypeGeneric);
+
   implInlineReturn(env, false);
+
+  // Pop the NullUninit values from the stack.
+  for (uint32_t idx = 0; idx < nret - 1; ++idx) pop(env);
 
   if (!callee->isAsyncFunction()) {
     // Non-async function. Just push the result on the stack.
-    push(env, gen(env, AssertType, callReturnType(callee), retVal));
+    if (nret > 1) {
+      for (int32_t idx = nret - 2; idx >= 0; --idx) {
+        auto const val = retVals[idx];
+        push(env, gen(env, AssertType, callOutType(callee, idx), val));
+      }
+    }
+    push(env, gen(env, AssertType, callReturnType(callee), retVals.back()));
     return;
   }
 
-  retVal = gen(env, AssertType, awaitedCallReturnType(callee), retVal);
+  assertx(nret == 1);
+  auto const retVal =
+    gen(env, AssertType, awaitedCallReturnType(callee), retVals.back());
   if (rt.asyncEagerOffset == kInvalidOffset) {
     // Async eager return was not requested. Box the returned value and
     // continue execution at the next opcode.

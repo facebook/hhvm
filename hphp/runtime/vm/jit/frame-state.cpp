@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
+#include "hphp/runtime/vm/jit/irgen-call.h"
 #include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/memory-effects.h"
 #include "hphp/runtime/vm/jit/minstr-effects.h"
@@ -397,7 +398,10 @@ void FrameStateMgr::update(const IRInstruction* inst) {
       // Mark out parameter locations as being at least InitCell
       auto const base = extra->spOffset + kNumActRecCells + extra->numParams;
       for (auto i = uint32_t{0}; i < extra->numOut; ++i) {
-        setType(stk(base + i), TInitCell);
+        auto const ty = extra->callee && extra->callee->takesInOutParams()
+          ? irgen::callOutType(extra->callee, i)
+          : TInitCell;
+        setType(stk(base + i), ty);
       }
       trackCall();
       // The return value is known to be at least a Gen.

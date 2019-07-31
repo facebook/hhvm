@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/translate-region.h"
 #include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/jit/type-array-elem.h"
 
 #include "hphp/runtime/vm/jit/irgen-basic.h"
 #include "hphp/runtime/vm/jit/irgen-builtin.h"
@@ -2053,8 +2054,34 @@ Type callReturnType(const Func* callee) {
     return builtinReturnType(callee);
   }
 
+  if (callee->takesInOutParams()) {
+    auto const ty = typeFromRAT(callee->repoReturnType(), callee->cls());
+    if (ty <= TVec) return vecElemType(ty, Type::cns(0), callee->cls()).first;
+    return TInitCell;
+  }
+
   // Otherwise use HHBBC's analysis if present
   return typeFromRAT(callee->repoReturnType(), callee->cls());
+}
+
+Type callOutType(const Func* callee, uint32_t index) {
+  assertx(callee->takesInOutParams());
+  assertx(index < callee->numInOutParams());
+  assertx(!callee->isCPPBuiltin());
+
+  // Don't make any assumptions about functions which can be intercepted. The
+  // interception functions can return arbitrary types.
+  if (RuntimeOption::EvalJitEnableRenameFunction ||
+      callee->attrs() & AttrInterceptable) {
+    return TInitCell;
+  }
+
+  auto const ty = typeFromRAT(callee->repoReturnType(), callee->cls());
+  if (ty <= TVec) {
+    auto const off = callee->numInOutParams() - index - 1;
+    return vecElemType(ty, Type::cns(off + 1), callee->cls()).first;
+  }
+  return TInitCell;
 }
 
 Type awaitedCallReturnType(const Func* callee) {

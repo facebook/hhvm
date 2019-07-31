@@ -32,65 +32,71 @@ impl FileMode {
 use crate::minimal_parser::MinimalSyntaxParser;
 
 pub fn parse_mode(text: &SourceText) -> Option<FileMode> {
-    let is_hhi = text.file_path().ends_with(".hhi");
-    let header = MinimalSyntaxParser::parse_header_only(ParserEnv::default(), text);
-    match header {
-        None => {
-            Some(FileMode::Mstrict) // no header - assume .hack file
-        }
-        Some(header) => match header.syntax {
-            SyntaxVariant::MarkupSection(box syntax::MarkupSectionChildren {
-                markup_prefix: pfx,
-                markup_text: txt,
-                markup_suffix:
-                    syntax::Syntax {
-                        syntax:
-                            SyntaxVariant::MarkupSuffix(box syntax::MarkupSuffixChildren {
-                                markup_suffix_less_than_question: ltq,
-                                markup_suffix_name: name,
-                            }),
-                        ..
-                    },
-                ..
-            }) => match &name.syntax {
-                SyntaxVariant::Missing => Some(FileMode::Mphp),
-                SyntaxVariant::Token(t) if t.kind() == TokenKind::Equal => Some(FileMode::Mphp),
-                _ => {
-                    let skip_length = pfx.value.full_width
-                        + txt.value.full_width
-                        + ltq.value.full_width
-                        + name.leading_width();
+    if let Some(header) = MinimalSyntaxParser::parse_header_only(ParserEnv::default(), text) {
+        match header.syntax {
+            SyntaxVariant::MarkupSection(section_children) => {
+                if let syntax::MarkupSectionChildren {
+                    markup_prefix: pfx,
+                    markup_text: txt,
+                    markup_suffix:
+                        syntax::Syntax {
+                            syntax: SyntaxVariant::MarkupSuffix(suffix_children),
+                            ..
+                        },
+                    ..
+                } = *section_children
+                {
+                    let syntax::MarkupSuffixChildren {
+                        markup_suffix_less_than_question: ltq,
+                        markup_suffix_name: name,
+                    } = *suffix_children;
+                    return match &name.syntax {
+                        SyntaxVariant::Missing => Some(FileMode::Mphp),
+                        SyntaxVariant::Token(t) if t.kind() == TokenKind::Equal => {
+                            Some(FileMode::Mphp)
+                        }
+                        _ => {
+                            let is_hhi = text.file_path().ends_with(".hhi");
+                            let skip_length = pfx.value.full_width
+                                + txt.value.full_width
+                                + ltq.value.full_width
+                                + name.leading_width();
 
-                    let language = text
-                        .sub_as_str(skip_length, name.width())
-                        .to_ascii_lowercase();
-                    if language == "php" {
-                        Some(FileMode::Mphp)
-                    } else if is_hhi {
-                        Some(FileMode::Mdecl)
-                    } else {
-                        let skip_length = skip_length + name.width();
-                        let s = text.sub_as_str(skip_length, name.trailing_width()).trim();
+                            let language = text
+                                .sub_as_str(skip_length, name.width())
+                                .to_ascii_lowercase();
+                            if language == "php" {
+                                Some(FileMode::Mphp)
+                            } else if is_hhi {
+                                Some(FileMode::Mdecl)
+                            } else {
+                                let skip_length = skip_length + name.width();
+                                let s = text.sub_as_str(skip_length, name.trailing_width()).trim();
 
-                        let mut chars = s.chars();
-                        let c0 = chars.next();
-                        let c1 = chars.next();
+                                let mut chars = s.chars();
+                                let c0 = chars.next();
+                                let c1 = chars.next();
 
-                        let mode = if c0 != Some('/') || c1 != Some('/') {
-                            return FileMode::from_string("");
-                        } else {
-                            chars.as_str()
-                        };
+                                let mode = if c0 != Some('/') || c1 != Some('/') {
+                                    return FileMode::from_string("");
+                                } else {
+                                    chars.as_str()
+                                };
 
-                        let mode = match mode.trim().split_whitespace().next() {
-                            None => "",
-                            Some(mode) => mode,
-                        };
-                        FileMode::from_string(mode)
-                    }
+                                let mode = match mode.trim().split_whitespace().next() {
+                                    None => "",
+                                    Some(mode) => mode,
+                                };
+                                FileMode::from_string(mode)
+                            }
+                        }
+                    };
                 }
-            },
-            _ => Some(FileMode::Mstrict),
-        },
+            }
+            _ => (),
+        }
+    } else {
+        // no header - assume .hack file
     }
+    Some(FileMode::Mstrict)
 }

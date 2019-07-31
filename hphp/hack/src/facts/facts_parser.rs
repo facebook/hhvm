@@ -89,9 +89,11 @@ fn qualified_name(namespace: &str, name: Node) -> Option<String> {
             match part {
                 Name(name) => qualified_name.push_str(&String::from_utf8_lossy(name.as_slice())),
                 Backslash if index == 0 => leading_backslash = true,
-                ListItem(box (Name(name), Backslash)) => {
-                    qualified_name.push_str(&String::from_utf8_lossy(name.as_slice()));
-                    qualified_name.push_str("\\");
+                ListItem(listitem) => {
+                    if let (Name(name), Backslash) = *listitem {
+                        qualified_name.push_str(&String::from_utf8_lossy(name.as_slice()));
+                        qualified_name.push_str("\\");
+                    }
                 }
                 _ => return None,
             }
@@ -158,8 +160,10 @@ fn defines_from_method_body(constants: Vec<String>, body: Node) -> Vec<String> {
     fn aux(mut acc: Vec<String>, list: Node) -> Vec<String> {
         match list {
             Node::List(nodes) => nodes.into_iter().fold(acc, aux),
-            Node::Define(box Node::Name(name)) => {
-                acc.push(define_name(&name));
+            Node::Define(define) => {
+                if let Node::Name(name) = *define {
+                    acc.push(define_name(&name));
+                }
                 acc
             }
             _ => acc,
@@ -177,24 +181,24 @@ fn type_info_from_class_body(
     type_facts: &mut TypeFacts,
 ) {
     let aux = |mut constants: Vec<String>, node| {
-        if let RequireExtendsClause(box name) = node {
+        if let RequireExtendsClause(name) = node {
             if check_require {
-                if let Some(name) = qualified_name(namespace, name) {
+                if let Some(name) = qualified_name(namespace, *name) {
                     type_facts.require_extends.insert(name);
                 }
             }
-        } else if let RequireImplementsClause(box name) = node {
+        } else if let RequireImplementsClause(name) = node {
             if check_require {
-                if let Some(name) = qualified_name(namespace, name) {
+                if let Some(name) = qualified_name(namespace, *name) {
                     type_facts.require_implements.insert(name);
                 }
             }
-        } else if let TraitUseClause(box uses) = node {
-            typenames_from_list(uses, namespace, &mut type_facts.base_types);
-        } else if let MethodDecl(box body) = node {
+        } else if let TraitUseClause(uses) = node {
+            typenames_from_list(*uses, namespace, &mut type_facts.base_types);
+        } else if let MethodDecl(body) = node {
             if namespace.is_empty() {
                 // in methods we collect only defines
-                constants = defines_from_method_body(constants, body);
+                constants = defines_from_method_body(constants, *body);
             }
         }
         constants
@@ -211,7 +215,7 @@ fn attributes_into_facts(namespace: &str, attributes: Node) -> Attributes {
         Node::List(nodes) => nodes
             .into_iter()
             .fold(Attributes::new(), |mut attributes, node| match node {
-                Node::ListItem(box item) => {
+                Node::ListItem(item) => {
                     let attribute_values_aux = |attribute_node| match attribute_node {
                         Node::Name(name) => {
                             let mut attribute_values = Vec::new();
@@ -239,17 +243,16 @@ fn attributes_into_facts(namespace: &str, attributes: Node) -> Attributes {
                                             .push(String::from_utf8_lossy(&name).to_string());
                                         attribute_values
                                     }
-                                    Node::ScopeResolutionExpression(box (
-                                        Node::Name(name),
-                                        Node::Class,
-                                    )) => {
-                                        attribute_values.push(if namespace.is_empty() {
-                                            String::from_utf8_lossy(&name).to_string()
-                                        } else {
-                                            namespace.to_owned()
-                                                + "\\"
-                                                + &String::from_utf8_lossy(&name).to_string()
-                                        });
+                                    Node::ScopeResolutionExpression(expr) => {
+                                        if let (Node::Name(name), Node::Class) = *expr {
+                                            attribute_values.push(if namespace.is_empty() {
+                                                String::from_utf8_lossy(&name).to_string()
+                                            } else {
+                                                namespace.to_owned()
+                                                    + "\\"
+                                                    + &String::from_utf8_lossy(&name).to_string()
+                                            });
+                                        }
                                         attribute_values
                                     }
                                     _ => attribute_values,
@@ -342,10 +345,10 @@ type CollectAcc = (String, Facts);
 fn collect(mut acc: CollectAcc, node: Node) -> CollectAcc {
     match node {
         List(nodes) => acc = nodes.into_iter().fold(acc, collect),
-        ClassDecl(box decl) => {
-            class_decl_into_facts(decl, &acc.0, &mut acc.1);
+        ClassDecl(decl) => {
+            class_decl_into_facts(*decl, &acc.0, &mut acc.1);
         }
-        EnumDecl(box decl) => {
+        EnumDecl(decl) => {
             if let Some(name) = qualified_name(&acc.0, decl.name) {
                 let attributes = attributes_into_facts(&acc.0, decl.attributes);
                 let enum_facts = TypeFacts {
@@ -359,17 +362,17 @@ fn collect(mut acc: CollectAcc, node: Node) -> CollectAcc {
                 add_or_update_classish_decl(name, enum_facts, &mut acc.1.types);
             }
         }
-        FunctionDecl(box name) => {
-            if let Some(name) = qualified_name(&acc.0, name) {
+        FunctionDecl(name) => {
+            if let Some(name) = qualified_name(&acc.0, *name) {
                 acc.1.functions.push(name);
             }
         }
-        ConstDecl(box name) => {
-            if let Some(name) = qualified_name(&acc.0, name) {
+        ConstDecl(name) => {
+            if let Some(name) = qualified_name(&acc.0, *name) {
                 acc.1.constants.push(name);
             }
         }
-        TypeAliasDecl(box decl) => {
+        TypeAliasDecl(decl) => {
             if let Some(name) = qualified_name(&acc.0, decl.name) {
                 let attributes = attributes_into_facts(&acc.0, decl.attributes);
                 let type_alias_facts = TypeFacts {
@@ -384,22 +387,27 @@ fn collect(mut acc: CollectAcc, node: Node) -> CollectAcc {
                 acc.1.type_aliases.push(name);
             }
         }
-        Define(box Node::String(ref name)) if acc.0.is_empty() => {
-            acc.1.constants.push(define_name(name));
-        }
-        NamespaceDecl(box name, box Node::EmptyBody) => {
-            if let Some(name) = qualified_name("", name) {
-                acc.0 = name;
+        Define(define) => {
+            if acc.0.is_empty() {
+                if let Node::String(ref name) = *define {
+                    acc.1.constants.push(define_name(name));
+                }
             }
         }
-        NamespaceDecl(box name, box body) => {
-            let name = if let Ignored = name {
-                Some(acc.0.clone())
+        NamespaceDecl(name, body) => {
+            if let Node::EmptyBody = *body {
+                if let Some(name) = qualified_name("", *name) {
+                    acc.0 = name;
+                }
             } else {
-                qualified_name(&acc.0, name)
-            };
-            if let Some(name) = name {
-                acc.1 = collect((name, acc.1), body).1;
+                let name = if let Ignored = *name {
+                    Some(acc.0.clone())
+                } else {
+                    qualified_name(&acc.0, *name)
+                };
+                if let Some(name) = name {
+                    acc.1 = collect((name, acc.1), *body).1;
+                }
             }
         }
         _ => (),

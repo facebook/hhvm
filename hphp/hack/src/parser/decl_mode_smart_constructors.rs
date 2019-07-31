@@ -204,7 +204,7 @@ where
     Value: SyntaxValueType<Token>,
 {
     match body.syntax {
-        SyntaxVariant::CompoundStatement(children @ box CompoundStatementChildren { .. }) => {
+        SyntaxVariant::CompoundStatement(children) => {
             let stmts = if saw_yield {
                 let token = Token::make(TokenKind::Yield, 0, 0, vec![], vec![]);
                 let yield_ = Syntax::<Token, Value>::make_token(st, token);

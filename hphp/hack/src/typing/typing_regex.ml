@@ -38,9 +38,9 @@ let rec keys_aux p top names_numbers acc =
  * [ SFlit_int (p, "1"); SFlit_int (p, 'o') ].
  *
  *)
-let keys p s =
+let keys p s ~flags =
   (* Compile `re`-prefixed string for use in Pcre functions *)
-  let pattern = Pcre.regexp s in
+  let pattern = Pcre.regexp s ~flags in
   (* For re"Hel(\D)(?'o'\D)", this is 2. *)
   let count =
     try Pcre.capturecount pattern
@@ -59,21 +59,32 @@ let keys p s =
       names_numbers in
   keys_aux p count names_numbers_sorted []
 
-let type_match p s =
+let type_match p s ~flags =
   let sft =
     { sft_optional = false; sft_ty = Reason.Rregex p, Tprim Tstring; } in
-  let keys = keys p s in
+  let keys = keys p s ~flags in
   let shape_map = List.fold_left ~f:(fun acc key -> ShapeMap.add key sft acc)
     ~init:ShapeMap.empty keys in
   (* Any Regex\Match will contain the entire matched substring at key 0 *)
   let shape_map = ShapeMap.add (SFlit_int (p, "0")) sft shape_map in
   Reason.Rregex p, Tshape (Closed_shape, shape_map)
 
-let check_global_options s =
-  String.iter ~f:(fun c ->
-    match c with
-    | 'i' | 'm' | 's' | 'x' | 'A' | 'D' | 'S' | 'U' | 'X' | 'u' -> ()
-    | _ -> raise Invalid_global_option) s
+let get_global_options s =
+  List.fold_left (String.to_list_rev s) ~init:[] ~f:(fun acc x ->
+    match x with
+    | 'u' -> `UTF8::acc
+    | 'i' -> `CASELESS::acc
+    | 'm' -> `MULTILINE::acc
+    | 's' -> `DOTALL::acc
+    | 'x' -> `EXTENDED::acc
+    | 'A' -> `ANCHORED::acc
+    | 'D' -> `DOLLAR_ENDONLY::acc
+    | 'U' -> `UNGREEDY::acc
+    | 'X' -> `EXTRA::acc
+    | 'S' -> acc
+    | _ -> raise Invalid_global_option
+  )
+
 
 let complement c =
   match c with
@@ -121,19 +132,19 @@ let check_and_strip_delimiters s =
     let no_first_delim = (String.sub s 1 (length - 1)) in
     match String.rindex_from no_first_delim (length - 2) closed_delim with
     | Some i ->
-      check_global_options (String.sub s (i + 2) (length - i - 2));
+      let flags = get_global_options (String.sub s (i + 2) (length - i - 2)) in
       let stripped_string = (String.sub s 1 i) in
       if (closed_delim <> first) then
-        check_balanced_delimiters stripped_string first
-      else stripped_string
+        check_balanced_delimiters stripped_string first, flags
+      else stripped_string, flags
     | None -> raise Missing_delimiter
   end else raise Missing_delimiter
 
 let type_pattern (p, e_) =
   match e_ with
   | String s ->
-    let s = check_and_strip_delimiters s in
-    let match_type = type_match p s in
+    let s, flags = check_and_strip_delimiters s in
+    let match_type = type_match p s ~flags in
     Reason.Rregex p,
       Tabstract (AKnewtype (Naming_special_names.Regex.tPattern,
       [match_type]),

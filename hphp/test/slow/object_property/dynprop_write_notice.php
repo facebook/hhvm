@@ -9,7 +9,7 @@ function test($thing) {
   var_dump($thing);
   var_dump(unserialize(serialize($thing)));
   apc_store('dynamic', $thing);
-  var_dump(apc_fetch('dynamic'));
+  var_dump(__hhvm_intrinsics\apc_fetch_no_check('dynamic'));
 }
 
 class C {}

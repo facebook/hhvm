@@ -8,7 +8,7 @@ class C<reify T> {
 
 class D extends C<int> {}
 <<__EntryPoint>> function main(): void {
-$d = apc_fetch('d');
+$d = __hhvm_intrinsics\apc_fetch_no_check('d');
 if ($d === false) {
   echo "Not in APC\n";
   $d = new D();

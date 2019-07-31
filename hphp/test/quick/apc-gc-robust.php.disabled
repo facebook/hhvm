@@ -10,7 +10,7 @@ function dump($i): string {
   $nestArray = ["AAA.{$i}","BBBBBBBBBBBBBBB.{$i}"];
   $valuei = [$nestArray,"valuess"."{$i}"];
   apc_store($keyi,$valuei);
-  $r = apc_fetch($keyi);
+  $r = __hhvm_intrinsics\apc_fetch_no_check($keyi);
   gc_collect_cycles();
   apc_delete($keyi);
   show(); // If we free APC value here

@@ -148,7 +148,7 @@ function with_keyset($k1) {
 echo "apc_add: ";
 var_dump(apc_add('foo', keyset[1, 2, 3]));
 echo "apc_fetch: ";
-var_dump(apc_fetch('foo'));
+var_dump(__hhvm_intrinsics\apc_fetch_no_check('foo'));
 
 // All the functions below must see keysets (and dicts, vecs)
 // as arrays and return an array.

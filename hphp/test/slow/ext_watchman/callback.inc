@@ -9,7 +9,7 @@ function callback_stress(
   string $data_json,
   string $socket_path,
 ): void {
-  $hit_counter = apc_fetch('stress_counter');
+  $hit_counter = __hhvm_intrinsics\apc_fetch_no_check('stress_counter');
   if ($hit_counter) {
     $hit_counter++;
   } else {

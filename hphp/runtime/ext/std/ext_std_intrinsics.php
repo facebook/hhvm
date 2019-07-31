@@ -41,6 +41,11 @@ function dummy_dict_builtin(dict $x): dict;
 <<__Native, __HipHopSyntax>>
 function create_class_pointer(string $name): mixed;
 
+function apc_fetch_no_check(mixed $key) {
+  $ignored = false;
+  return \apc_fetch($key, inout $ignored);
+}
+
 <<__Native>>
 function builtin_io(
   string $s,

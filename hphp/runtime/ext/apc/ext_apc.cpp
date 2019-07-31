@@ -368,7 +368,7 @@ Variant HHVM_FUNCTION(apc_add,
   return apc_store().add(strKey, var, ttl);
 }
 
-TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, VRefParam success) {
+TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, bool& success) {
   if (!apcExtension::Enable) return make_tv<KindOfBoolean>(false);
 
   Variant v;
@@ -389,14 +389,14 @@ TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, VRefParam success) {
         init.set(strKey, v);
       }
     }
-    success.assignIfRef(tmp);
+    success = tmp;
     return tvReturn(init.toVariant());
   }
 
   if (apc_store().get(key.toString(), v)) {
-    success.assignIfRef(true);
+    success = true;
   } else {
-    success.assignIfRef(false);
+    success = false;
     v = false;
   }
   return tvReturn(std::move(v));

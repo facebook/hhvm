@@ -1,7 +1,8 @@
 <?hh
 
 function apc_apache_note() {
-  apache_note('what', (string)apc_fetch('what'));
+  $ignore = false;
+  apache_note('what', (string)apc_fetch('what', inout $ignore));
   apc_store('what', 'hello' . rand(100));
 }
 

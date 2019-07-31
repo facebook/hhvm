@@ -27,7 +27,7 @@ function foo($x) {
   var_dump((array)$y);
   if (function_exists('apc_store')) {
     apc_store('foo', $y);
-    $z = apc_fetch('foo');
+    $z = __hhvm_intrinsics\apc_fetch_no_check('foo');
   }
  else {
     $z = clone $y;

@@ -14,6 +14,6 @@ class A implements Serializable {
 function main_1819() {
 $o = new A;
 apc_store('key', $o);
-$r = apc_fetch('key');
+$r = __hhvm_intrinsics\apc_fetch_no_check('key');
 var_dump($r);
 }

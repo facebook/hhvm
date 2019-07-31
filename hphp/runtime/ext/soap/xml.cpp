@@ -80,7 +80,8 @@ xmlDocPtr soap_xmlParseFile(const char *filename) {
   String cache_key("HPHP.SOAP.WSDL.");
   cache_key += filename;
 
-  auto content = Variant::attach(HHVM_FN(apc_fetch)(cache_key));
+  bool success = false;
+  auto content = Variant::attach(HHVM_FN(apc_fetch)(cache_key, success));
   if (same(content, false)) {
     Variant cxt = HHVM_FN(stream_context_create)(make_map_array(
                   s_http, make_map_array(s_timeout, 1000)));

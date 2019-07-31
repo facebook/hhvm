@@ -305,7 +305,7 @@ function test_core(WatchmanInstance $wminst): void {
   if (HH\watchman_check_sub(SUB_NAME)) {
     HH\asio\join(HH\watchman_unsubscribe(SUB_NAME));
   }
-  $hit_c = apc_fetch('stress_counter');
+  $hit_c = __hhvm_intrinsics\apc_fetch_no_check('stress_counter');
   if (!$subscribe_c || !$unsubscribe_c || !$touch_c || !$hit_c) {
     print("\nFAIL ($subscribe_c, $unsubscribe_c, $touch_c, $hit_c)\n");
   } else {

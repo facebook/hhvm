@@ -10,5 +10,5 @@ class B extends A {
 <<__EntryPoint>>
 function main_1815() {
 apc_store('key', new B());
-var_dump(apc_fetch('key'));
+var_dump(__hhvm_intrinsics\apc_fetch_no_check('key'));
 }

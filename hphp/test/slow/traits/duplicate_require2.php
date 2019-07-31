@@ -2,7 +2,7 @@
 
 <<__EntryPoint>>
 function main_duplicate_require2() {
-  $n = apc_fetch('foo');
+  $n = __hhvm_intrinsics\apc_fetch_no_check('foo');
   if (!$n) $n = 0;
   apc_store('foo', ++$n);
 

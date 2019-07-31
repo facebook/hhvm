@@ -2,7 +2,7 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function get_count() {
-  $count = apc_fetch('count');
+  $count = __hhvm_intrinsics\apc_fetch_no_check('count');
   if ($count === false) {
     $count = 0;
     apc_store('count', $count);
@@ -23,18 +23,18 @@ function store() {
   $a = new A();
   $a->x = true;
   apc_store('some-key', $a);
-  apc_fetch('some-key');
+  __hhvm_intrinsics\apc_fetch_no_check('some-key');
 
   $b = new B();
   $b->x = true;
   apc_store('some-key2', $b);
-  apc_fetch('some-key2');
+  __hhvm_intrinsics\apc_fetch_no_check('some-key2');
 }
 
 function get() {
   echo "get()\n";
-  apc_fetch('some-key');
-  apc_fetch('some-key2');
+  __hhvm_intrinsics\apc_fetch_no_check('some-key');
+  __hhvm_intrinsics\apc_fetch_no_check('some-key2');
 }
 
 function run() {

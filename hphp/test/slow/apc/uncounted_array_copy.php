@@ -14,13 +14,13 @@ function makeNonStatic($n) {
 function main_uncounted_array_copy() {
 if (apc_exists('minefield')) {
   // Second run: verify array was correctly copied.
-  var_dump(apc_fetch('minefield'));
+  var_dump(__hhvm_intrinsics\apc_fetch_no_check('minefield'));
 } else {
   // First run: Create array with uncounted, non-static string value.
   $ns = makeNonStatic(10);
   apc_store('mine', $ns, 3);
-  $unc0 = apc_fetch('mine');
-  $unc1 = apc_fetch('mine');
+  $unc0 = __hhvm_intrinsics\apc_fetch_no_check('mine');
+  $unc1 = __hhvm_intrinsics\apc_fetch_no_check('mine');
   $v = array();
   $v['hey'] = $unc0;
   $v[] = $unc1;

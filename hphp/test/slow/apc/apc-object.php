@@ -21,11 +21,11 @@ class WithStuff extends ParentClass {
 
 if (apc_exists('foo')) {
   include 'apc-object-1.inc';
-  var_dump(apc_fetch('foo'));
+  var_dump(__hhvm_intrinsics\apc_fetch_no_check('foo'));
 } else {
   include 'apc-object-2.inc';
   apc_store('foo', new X);
-  var_dump(apc_fetch('foo'));
+  var_dump(__hhvm_intrinsics\apc_fetch_no_check('foo'));
 
   $o = new WithStuff();
   $o->dynProp = $o->add(1, 2);
@@ -33,13 +33,13 @@ if (apc_exists('foo')) {
 
   apc_store('o', $o);
   var_dump($o);
-  $o2 = apc_fetch('o');
+  $o2 = __hhvm_intrinsics\apc_fetch_no_check('o');
   var_dump($o2);
   $o2->add(1, 2);
   $o2->add(1, 2);
 
-  apc_fetch('o');
-  $o2 = apc_fetch('o');
+  __hhvm_intrinsics\apc_fetch_no_check('o');
+  $o2 = __hhvm_intrinsics\apc_fetch_no_check('o');
   var_dump($o2);
   $o2->add(1, 2);
   $o2->add(1, 2);

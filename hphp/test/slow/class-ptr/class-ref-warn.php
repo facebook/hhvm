@@ -23,7 +23,7 @@ function test_apc_str($key, $clsname, $v, $isDynamic) {
       "class ".$clsname.
       " { public \$a; function __construct(\$a) { \$this->a = \$a; } }");
   }
-  test_basic_new_clsref(apc_fetch($key), $v);
+  test_basic_new_clsref(__hhvm_intrinsics\apc_fetch_no_check($key), $v);
   apc_delete($key);
 }
 

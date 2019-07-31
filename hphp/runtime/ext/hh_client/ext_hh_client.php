@@ -210,7 +210,8 @@ function typecheck(string $client_name = 'hh_client'): TypecheckResult {
   // Fetch times from cache and from the stamp file. Both will return "false" on
   // error (no cached time or the stamp doesn't exist). The latter will also
   // emit a warning, which we don't care about, so suppress it.
-  $cached_time = \apc_fetch(CacheKeys::TIME_CACHE_KEY);
+  $success = false;
+  $cached_time = \apc_fetch(CacheKeys::TIME_CACHE_KEY, inout $success);
   $old = \error_reporting();
   try {
     \error_reporting(0);
@@ -227,7 +228,7 @@ function typecheck(string $client_name = 'hh_client'): TypecheckResult {
   // doesn't exist and become nonzero when hh_server starts up and creates it,
   // which is what we want.
   if ($cached_time !== false && (int)$cached_time === $time) {
-    $result = \apc_fetch(CacheKeys::RESULT_CACHE_KEY);
+    $result = \apc_fetch(CacheKeys::RESULT_CACHE_KEY, inout $success);
   } else {
     $result = \__SystemLib\HH\Client\typecheck_impl($client_name);
 

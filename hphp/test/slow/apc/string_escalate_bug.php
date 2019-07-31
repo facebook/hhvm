@@ -10,7 +10,7 @@ function bar($n) {
 
 function foo() {
   apc_store("foo", bar(50));
-  $x = apc_fetch("foo");
+  $x = __hhvm_intrinsics\apc_fetch_no_check("foo");
   $x[5] = 1;
   $x = bar(20);
   var_dump($x);

@@ -78,9 +78,7 @@ Variant HHVM_FUNCTION(apc_store,
 bool HHVM_FUNCTION(apc_store_as_primed_do_not_use,
                    const String& key,
                    const Variant& var);
-TypedValue HHVM_FUNCTION(apc_fetch,
-                         const Variant& key,
-                         VRefParam success = uninit_null());
+TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, bool& success);
 Variant HHVM_FUNCTION(apc_delete,
                       const Variant& key);
 bool HHVM_FUNCTION(apc_clear_cache,

@@ -21,6 +21,6 @@ class Foo {
   var_dump($foo1);
   apc_store('x', $foo1);
   unset($foo1);
-  $foo2 = apc_fetch('x');
+  $foo2 = __hhvm_intrinsics\apc_fetch_no_check('x');
   var_dump($foo2);
 }

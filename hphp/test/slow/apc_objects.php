@@ -15,8 +15,8 @@ function apcOps($key, $val) {
   // config settings object are serialized on first store
   // and APCObject (APCCollection) are created on second
   // fetch
-  var_dump(apc_fetch($key));
-  var_dump(apc_fetch($key));
+  var_dump(__hhvm_intrinsics\apc_fetch_no_check($key));
+  var_dump(__hhvm_intrinsics\apc_fetch_no_check($key));
 }
 
 
@@ -32,67 +32,67 @@ echo "**** Vector containing object reference\n";
 $c = Vector{1, 2, $o};
 apcOps('key', $c);
 echo "modify previous instance from APC\n";
-$apcObj = apc_fetch('key');
+$apcObj = __hhvm_intrinsics\apc_fetch_no_check('key');
 $apcObj[] = 'hi';
 $apcObj[0] = 100;
 $opcObj = null;
 var_dump('MUTATED', $apcObj);
-var_dump(apc_fetch('key'));
+var_dump(__hhvm_intrinsics\apc_fetch_no_check('key'));
 
 echo "**** Vector containing non-refcounted values\n";
 $c = Vector{1, 'hello'};
 apcOps('key', $c);
 echo "modify previous instance from APC\n";
-$apcObj = apc_fetch('key');
+$apcObj = __hhvm_intrinsics\apc_fetch_no_check('key');
 $apcObj[] = 'hi';
 $apcObj[0] = 100;
 $opcObj = null;
 var_dump('MUTATED', $apcObj);
-var_dump(apc_fetch('key'));
+var_dump(__hhvm_intrinsics\apc_fetch_no_check('key'));
 
 echo "**** Vector containing simple values\n";
 $c = Vector{true, $s};
 apcOps('key', $c);
 echo "modify previous instance from APC\n";
-$apcObj = apc_fetch('key');
+$apcObj = __hhvm_intrinsics\apc_fetch_no_check('key');
 $apcObj[] = 'hi';
 $apcObj[0] = 100;
 $opcObj = null;
 var_dump('MUTATED', $apcObj);
-var_dump(apc_fetch('key'));
+var_dump(__hhvm_intrinsics\apc_fetch_no_check('key'));
 
 echo "**** Map containing non-refcounted values\n";
 $m = Map{'a' => 'b', 'c' => 'd'};
 apcOps('key', $m);
 echo "modify previous instance from APC\n";
-$apcObj = apc_fetch('key');
+$apcObj = __hhvm_intrinsics\apc_fetch_no_check('key');
 $apcObj['one'] = 'hi';
 $apcObj['a'] = 100;
 $opcObj = null;
 var_dump('MUTATED', $apcObj);
-var_dump(apc_fetch('key'));
+var_dump(__hhvm_intrinsics\apc_fetch_no_check('key'));
 
 echo "**** Map containing itself\n";
 $m = Map{'a' => 'b', 'c' => $m};
 apcOps('key', $m);
 echo "modify previous instance from APC\n";
-$apcObj = apc_fetch('key');
+$apcObj = __hhvm_intrinsics\apc_fetch_no_check('key');
 $apcObj['one'] = 'hi';
 $apcObj['a'] = 100;
 $opcObj = null;
 var_dump('MUTATED', $apcObj);
-var_dump(apc_fetch('key'));
+var_dump(__hhvm_intrinsics\apc_fetch_no_check('key'));
 
 echo "**** Map containing a vector\n";
 $m = Map{'a' => 'b', 'c' => $c};
 apcOps('key', $m);
 echo "modify previous instance from APC\n";
-$apcObj = apc_fetch('key');
+$apcObj = __hhvm_intrinsics\apc_fetch_no_check('key');
 $apcObj['one'] = 'hi';
 $apcObj['a'] = 100;
 $opcObj = null;
 var_dump('MUTATED', $apcObj);
-var_dump(apc_fetch('key'));
+var_dump(__hhvm_intrinsics\apc_fetch_no_check('key'));
 
 echo "**** Immutable Vector instance\n";
 $c = ImmVector{1, 'hello'};

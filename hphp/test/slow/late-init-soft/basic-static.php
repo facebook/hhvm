@@ -64,7 +64,7 @@ function test5() {
 function main() {
   set_error_handler('error_handler');
 
-  $count = apc_fetch('test-count');
+  $count = __hhvm_intrinsics\apc_fetch_no_check('test-count');
   if ($count === false) $count = 0;
   if ($count >= count(TESTS)) return;
   TESTS[$count]();

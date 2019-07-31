@@ -2,7 +2,7 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function get_count() {
-  $count = apc_fetch("count");
+  $count = __hhvm_intrinsics\apc_fetch_no_check("count");
   if (!$count) {
     $count = 0;
   }
@@ -12,10 +12,10 @@ function get_count() {
 }
 
 function read() {
-  var_dump(apc_fetch("val1"));
-  var_dump(apc_fetch("val2"));
-  var_dump(apc_fetch("val3"));
-  var_dump(apc_fetch("val4"));
+  var_dump(__hhvm_intrinsics\apc_fetch_no_check("val1"));
+  var_dump(__hhvm_intrinsics\apc_fetch_no_check("val2"));
+  var_dump(__hhvm_intrinsics\apc_fetch_no_check("val3"));
+  var_dump(__hhvm_intrinsics\apc_fetch_no_check("val4"));
 }
 
 function write($count) {

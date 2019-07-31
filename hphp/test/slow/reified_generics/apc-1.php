@@ -12,7 +12,7 @@ function main() {
  $c->f();
 
  apc_store('c', $c);
- $d = apc_fetch('c');
+ $d = __hhvm_intrinsics\apc_fetch_no_check('c');
 
  $d->f();
 }

@@ -123,7 +123,8 @@ class APCIterator implements Iterator{
       $ret['key'] = $info['info'];
     }
     if ($this->format & APC_ITER_VALUE) {
-      $ret['value'] = apc_fetch($info['info']);
+      $ignored = false;
+      $ret['value'] = apc_fetch($info['info'], inout $ignored);
     }
     if ($this->format & APC_ITER_MEM_SIZE) {
       $ret['mem_size'] = $info['mem_size'];

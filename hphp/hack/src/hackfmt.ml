@@ -84,7 +84,11 @@ let read_hhconfig path =
       "hackfmt.line_width"
       ~default:default.line_width
       config
-  }
+  },
+  Full_fidelity_parser_env.make
+    ?allow_new_attribute_syntax:
+      (Config_file.Getters.bool_opt "allow_new_attribute_syntax" config)
+    ()
 
 let opt_default opt def = match opt with | Some v -> v | None -> def
 
@@ -196,8 +200,11 @@ let parse_options () =
     | None -> if !diff then get_root_for_diff () else get_root_for_format !files
   in
   let hhconfig_path = Path.concat root ".hhconfig" |> Path.to_string in
-  let config =
-    if file_exists hhconfig_path then read_hhconfig hhconfig_path else FEnv.default
+  let (config, parser_env) =
+    if file_exists hhconfig_path then
+      read_hhconfig hhconfig_path
+    else
+      (FEnv.default, Full_fidelity_parser_env.default)
   in
   let config =
     FEnv.{
@@ -210,6 +217,7 @@ let parse_options () =
   (!files, !filename_for_logging, range, !at_char, !inplace, !diff, !diff_dry,
    config),
   root,
+  parser_env,
   (!debug, !test)
 
 type format_options =
@@ -320,7 +328,7 @@ let print_error source_text error =
     error (SourceText.offset_to_position source_text) in
   Printf.eprintf "%s\n" text
 
-let parse text_source =
+let parse ~parser_env text_source =
   let source_text =
     match text_source with
     | File filename ->
@@ -328,8 +336,10 @@ let parse text_source =
     | Stdin _ ->
       SourceText.make Relative_path.default @@ read_stdin ()
   in
-  let mode = Full_fidelity_parser.parse_mode ~rust:false source_text in
-  let parser_env = Full_fidelity_parser_env.make ?mode () in
+  let parser_env = {
+    parser_env with
+    Full_fidelity_parser_env.mode = Full_fidelity_parser.parse_mode ~rust:false source_text
+  } in
   let tree = SyntaxTree.make ~env:parser_env source_text in
   if List.is_empty (SyntaxTree.all_errors tree)
     then tree
@@ -406,7 +416,7 @@ let format_diff_intervals ?config env intervals tree =
   | Invalid_argument s -> raise (InvalidDiff s)
 
 let debug_print ?range ?config text_source =
-  let tree = parse text_source in
+  let tree = parse ~parser_env:(Full_fidelity_parser_env.default) text_source in
   let source_text = SyntaxTree.text tree in
   let range = Option.map range (expand_or_convert_range source_text) in
   let env = Libhackfmt.env_from_config config in
@@ -414,7 +424,7 @@ let debug_print ?range ?config text_source =
   let chunk_groups = Chunk_builder.build doc in
   Hackfmt_debug.debug env ~range source_text tree doc chunk_groups
 
-let main (env: Env.t) (options: format_options) =
+let main (env: Env.t) (options: format_options) (parser_env: Full_fidelity_parser_env.t) =
   env.Env.mode <- Some (mode_string options);
   match options with
   | Print {text_source; range; config} ->
@@ -423,7 +433,7 @@ let main (env: Env.t) (options: format_options) =
       debug_print ?range ~config text_source
     else
       text_source
-        |> parse
+        |> parse ~parser_env
         |> format ?range ~config env
         |> output
   | InPlace {filename; config} ->
@@ -431,12 +441,12 @@ let main (env: Env.t) (options: format_options) =
     env.Env.text_source <- text_source;
     if env.Env.debug then debug_print ~config text_source;
     text_source
-      |> parse
+      |> parse ~parser_env
       |> format ~config env
       |> output ~text_source
   | AtChar {text_source; pos; config} ->
     env.Env.text_source <- text_source;
-    let tree = parse text_source in
+    let tree = parse ~parser_env text_source in
     let range, formatted =
       try
         logging_time_taken env Logger.format_at_offset_end
@@ -470,7 +480,7 @@ let main (env: Env.t) (options: format_options) =
         try
           let contents =
             text_source
-            |> parse
+            |> parse ~parser_env
             |> format_diff_intervals ~config env intervals in
           Some (text_source, rel_path, contents)
         with
@@ -494,7 +504,7 @@ let () =
      HackfmtEventLogger) to behave correctly *)
   Daemon.check_entry_point ();
 
-  let options, root, (debug, test) = parse_options () in
+  let options, root, parser_env, (debug, test) = parse_options () in
   let env = { Env.
     debug;
     test;
@@ -509,7 +519,7 @@ let () =
   let err_msg, exit_code =
     try
       let options = validate_options env options in
-      main env options;
+      main env options parser_env;
       None, 0
     with exn ->
       let exit_code = get_exception_exit_value exn in

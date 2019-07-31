@@ -19,7 +19,6 @@ let get_save_state_result_props_json
     : (string * Hh_json.json) list =
   let open SaveStateServiceTypes in
   [
-    "naming_table_rows_changed", Hh_json.int_ save_state_result.naming_table_rows_changed;
     "dep_table_edges_added", Hh_json.int_ save_state_result.dep_table_edges_added;
   ]
 

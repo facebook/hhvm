@@ -418,6 +418,7 @@ let assert_no_errors env =
   assert_env_errors env ""
 
 let saved_state_filename = "test_saved_state"
+let saved_naming_filename = "test_saved_naming"
 
 let in_daemon f =
   let handle = Daemon.fork
@@ -446,7 +447,14 @@ let save_state
         ServerLocalConfig.enable_naming_table_fallback;
       }
     };
-    let _edges_added = ServerInit.save_state !genv env (temp_dir ^ "/" ^ saved_state_filename) in ()
+    let _edges_added = ServerInit.save_state !genv env (temp_dir ^ "/" ^ saved_state_filename) in
+    if enable_naming_table_fallback then
+      let _rows_added =
+        SaveStateService.go_naming
+          env.ServerEnv.naming_table
+          (temp_dir ^ "/" ^ saved_naming_filename)
+        |> Result.ok_or_failwith in ();
+    ()
   end
 
 let save_state_incremental
@@ -498,6 +506,10 @@ let load_state
       disable_conservative_redecl;
       predeclare_ide_deps;
       load_decls_from_saved_state;
+      naming_sqlite_path =
+        if enable_naming_table_fallback
+        then Some (saved_state_dir ^ "/" ^ saved_naming_filename)
+        else None;
       enable_naming_table_fallback;
     }
   };

@@ -11,7 +11,6 @@
 type saved_state_errors = (Errors.phase * Relative_path.Set.t) list
 
 type save_state_result = {
-  naming_table_rows_changed : int;
   dep_table_edges_added : int;
 }
 

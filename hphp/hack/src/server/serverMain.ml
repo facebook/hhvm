@@ -1094,31 +1094,15 @@ let run_once options config local_config =
   let env, save_state_results =
     match (ServerArgs.save_filename genv.options), (ServerArgs.save_with_spec genv.options) with
     | None, None -> env, None
-    | Some filename, None -> ServerInit.save_state genv env filename
+    | Some filename, None -> env, ServerInit.save_state genv env filename
     | None, Some (spec: ServerArgs.save_state_spec_info) ->
-      ServerInit.save_state genv env spec.ServerArgs.filename
+      env, ServerInit.save_state genv env spec.ServerArgs.filename
     | Some _, Some _ -> failwith "Saved state file name is specified in two different ways!"
   in
-  let env, naming_table_rows_changed =
+  let _naming_table_rows_changed =
     match (ServerArgs.save_naming_filename genv.options) with
-    | None -> env, None
-    | Some filename ->
-      let results = Naming_table.save env.naming_table filename in
-      env, Some Naming_table.(results.files_added + results.symbols_added)
-  in
-  let save_state_results =
-    match save_state_results, naming_table_rows_changed with
-    | Some results, Some naming_table_rows_changed ->
-      Some SaveStateServiceTypes.{ results with
-        naming_table_rows_changed = results.naming_table_rows_changed + naming_table_rows_changed;
-      }
-    | Some _, None -> save_state_results
-    | None, Some naming_table_rows_changed ->
-      Some SaveStateServiceTypes.{
-        dep_table_edges_added = 0;
-        naming_table_rows_changed = naming_table_rows_changed;
-      }
-    | None, None -> None
+    | None -> None
+    | Some filename -> Some (Naming_table.save env.naming_table filename)
   in
 
   (* Finish up by generating the output and the exit code *)

@@ -9,15 +9,12 @@
 open ServerEnv
 open ServerLocalConfig
 
-let get_naming_table_fallback_path genv (deptable_fn: string option): string option =
+let get_naming_table_fallback_path genv _fallback: string option =
   Hh_logger.log "Figuring out naming table SQLite path";
   match genv.local_config.naming_sqlite_path with
   | Some path ->
     Hh_logger.log "Found path: %s" path;
     Some path
-  | None when genv.local_config.enable_naming_table_fallback ->
-    Hh_logger.log "No path, using dep table";
-    deptable_fn
   | None ->
     Hh_logger.log "Load from blob";
     None

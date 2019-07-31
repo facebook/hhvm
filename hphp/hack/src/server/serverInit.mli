@@ -34,7 +34,7 @@ val save_state:
   ServerEnv.genv ->
   ServerEnv.env ->
   string ->
-  ServerEnv.env * SaveStateServiceTypes.save_state_result option
+  SaveStateServiceTypes.save_state_result option
 
 type init_result =
   (** Loaded a saved saved state of this distance. Note: for older load scripts

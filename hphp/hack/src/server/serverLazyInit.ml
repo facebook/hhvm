@@ -103,10 +103,7 @@ let download_and_load_state_exn
       ~ignore_hh_version
       ~fail_if_missing;
     let load_decls = genv.local_config.SLC.load_decls_from_saved_state in
-    let naming_table_fallback_path = get_naming_table_fallback_path
-      genv
-      (Some result.State_loader.deptable_fn)
-    in
+    let naming_table_fallback_path = get_naming_table_fallback_path genv None in
     let (old_naming_table, old_errors) = SaveStateService.load_saved_state
       result.State_loader.saved_state_fn
       ~naming_table_fallback_path
@@ -156,7 +153,7 @@ let use_precomputed_state_exn
   let changes = Relative_path.set_of_list changes in
   let prechecked_changes = Relative_path.set_of_list prechecked_changes in
   let load_decls = genv.local_config.SLC.load_decls_from_saved_state in
-  let naming_table_fallback_path = get_naming_table_fallback_path genv (Some deptable_fn) in
+  let naming_table_fallback_path = get_naming_table_fallback_path genv None in
   let (old_naming_table, old_errors) =
     SaveStateService.load_saved_state saved_state_fn ~naming_table_fallback_path ~load_decls
   in
@@ -561,8 +558,8 @@ let post_saved_state_initialization
   (* If we're falling back to SQLite we don't need to explicitly do a naming
      pass. *)
   let t =
-    if genv.local_config.SLC.enable_naming_table_fallback
-    then begin
+    match genv.local_config.SLC.naming_sqlite_path with
+    | Some _ ->
       (* Set the SQLite fallback path for the reverse naming table, then block out all entries in
       any dirty files to make sure we properly handle file deletes. *)
       Relative_path.Set.iter parsing_files begin fun k ->
@@ -578,7 +575,7 @@ let post_saved_state_initialization
           Naming_table.Consts.remove_batch (v.FileInfo.consts |> List.map ~f:snd |> SSet.of_list)
       end;
       t
-    end else
+    | None ->
       (* Name all the files from the old fast (except the new ones we parsed) *)
       let old_hack_names = Naming_table.filter old_naming_table begin fun k _v ->
           not (Relative_path.Set.mem parsing_files k)

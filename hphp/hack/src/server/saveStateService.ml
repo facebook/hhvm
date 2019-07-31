@@ -161,11 +161,10 @@ let dump_saved_state
     dump_class_decls (get_decls_filename output_filename)
 
 let update_save_state
-    ~(enable_naming_table_fallback: bool)
     ~(save_decls: bool)
     (env: ServerEnv.env)
     (output_filename: string)
-    (replace_state_after_saving: bool) : ServerEnv.env * save_state_result =
+    (replace_state_after_saving: bool) : save_state_result =
   let t = Unix.gettimeofday () in
   let db_name = output_filename ^ ".sql" in
   if not (RealDisk.file_exists db_name) then
@@ -173,41 +172,22 @@ let update_save_state
   let naming_table = env.ServerEnv.naming_table in
   let errors = env.ServerEnv.errorl in
   dump_saved_state ~save_decls output_filename naming_table errors;
-  let naming_table_rows_changed = if enable_naming_table_fallback then begin
-    Hh_logger.log "Updating naming table in place...";
-    let _ : Naming_table.save_result = Naming_table.save naming_table db_name in
-    1 (* But it's a doozy! *)
-  end else begin
-    Hh_logger.log "skip writing file info to sqlite table";
-    0
-  end in
   let dep_table_edges_added = SharedMem.update_dep_table_sqlite
     db_name
     Build_id.build_revision
     replace_state_after_saving in
   ignore @@ Hh_logger.log_duration "Updating saved state took" t;
-  let result = { naming_table_rows_changed; dep_table_edges_added } in
-
-  (* To support incremental generation we have to switch to a backed naming
-   * table. *)
-  if enable_naming_table_fallback && replace_state_after_saving
-  then
-    let naming_table = Naming_table.load_from_sqlite
-      ~update_reverse_entries:false
-      db_name
-    in
-    { env with ServerEnv.naming_table; }, result
-  else env, result
+  let result = { dep_table_edges_added } in
+  result
 
 (** Saves the saved state to the given path. Returns number of dependency
 * edges dumped into the database. *)
 let save_state
-    ~(enable_naming_table_fallback: bool)
     ~(dep_table_as_blob: bool)
     ~(save_decls: bool)
     (env: ServerEnv.env)
     (output_filename: string)
-    ~(replace_state_after_saving: bool): ServerEnv.env * save_state_result =
+    ~(replace_state_after_saving: bool): save_state_result =
   let () = Sys_utils.mkdir_p (Filename.dirname output_filename) in
   let db_name = output_filename ^ ".sql" in
   let () = if Sys.file_exists output_filename then
@@ -223,16 +203,6 @@ let save_state
     let t = Unix.gettimeofday () in
     dump_saved_state ~save_decls output_filename naming_table errors;
 
-    let naming_table_rows_changed =
-      if enable_naming_table_fallback then
-      begin
-        Hh_logger.log "Saving file info (naming table) into a SQLite table.\n";
-        let result = Naming_table.save naming_table db_name in
-        Naming_table.(result.files_added + result.symbols_added)
-      end
-      else 0
-    in
-
     let dep_table_saver =
       if dep_table_as_blob then
         SharedMem.save_dep_table_blob
@@ -245,12 +215,7 @@ let save_state
         Build_id.build_revision
         replace_state_after_saving in
     let _ : float = Hh_logger.log_duration "Saving saved state took" t in
-    let result = { naming_table_rows_changed; dep_table_edges_added } in
-    if replace_state_after_saving && enable_naming_table_fallback
-    then begin
-      let naming_table = Naming_table.load_from_sqlite ~update_reverse_entries:false db_name in
-      { env with ServerEnv.naming_table; }, result
-    end else env, result
+    { dep_table_edges_added }
   | Some old_table_filename ->
     (** If server is running from a loaded saved state, its in-memory
      * tracked depdnencies are incomplete - most of the actual dependencies
@@ -260,7 +225,6 @@ let save_state
     FileUtil.cp [ old_table_filename ] db_name;
     let _ : float = Hh_logger.log_duration "Made disk copy of loaded saved state. Took" t in
     update_save_state
-      ~enable_naming_table_fallback
       ~save_decls
       env
       output_filename
@@ -287,22 +251,18 @@ let go_naming
 (* If successful, returns the # of edges from the dependency table that were written. *)
 (* TODO: write some other stats, e.g., the number of names, the number of errors, etc. *)
 let go
-    ~(enable_naming_table_fallback: bool)
     ~(dep_table_as_blob: bool)
     ~(save_decls: bool)
     (env: ServerEnv.env)
     (output_filename: string)
-    ~(replace_state_after_saving: bool): ServerEnv.env * (save_state_result, string) result =
+    ~(replace_state_after_saving: bool): (save_state_result, string) result =
   Utils.try_with_stack
   begin
     fun () -> save_state
-      ~enable_naming_table_fallback
       ~dep_table_as_blob
       ~save_decls
       env
       output_filename
       ~replace_state_after_saving
   end
-  |> fun result -> match result with
-    | Ok (env, result) -> env, Ok result
-    | Error (exn, _stack) -> env, Error (Exn.to_string exn)
+  |> Result.map_error ~f:(fun (exn, _stack) -> Exn.to_string exn)

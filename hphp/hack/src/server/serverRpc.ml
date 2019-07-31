@@ -150,10 +150,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       if Errors.is_empty env.errorl || gen_saved_ignore_type_errors then
         let save_decls =
           genv.local_config.ServerLocalConfig.store_decls_in_saved_state in
-        let enable_naming_table_fallback =
-          genv.local_config.ServerLocalConfig.enable_naming_table_fallback in
+        env,
         SaveStateService.go
-          ~enable_naming_table_fallback
           ~dep_table_as_blob:false
           ~save_decls
           env

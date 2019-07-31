@@ -21,8 +21,7 @@ module SyntaxTree = Full_fidelity_syntax_tree
 module SaveStateResultPrinter = ClientResultPrinter.Make (struct
     type t = SaveStateServiceTypes.save_state_result
     let to_string t =
-      Printf.sprintf "Naming table rows changed: %d\nDependency table edges added: %d"
-        t.SaveStateServiceTypes.naming_table_rows_changed
+      Printf.sprintf "Dependency table edges added: %d"
         t.SaveStateServiceTypes.dep_table_edges_added
     let to_json t =
       Hh_json.JSON_Object (ServerError.get_save_state_result_props_json t)

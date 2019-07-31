@@ -4,6 +4,7 @@
   (wrapped false)
   (modules
     trie)
+  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)) ; See T41851208
   (libraries
     utils_core))
 
@@ -12,6 +13,7 @@
   (wrapped false)
   (modules
     findUtils)
+  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)) ; See T41851208
   (libraries
     ignore
     relative_path))
@@ -21,6 +23,7 @@
   (wrapped false)
   (modules
     multifile)
+  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)) ; See T41851208
   (libraries
     relative_path
     sys_utils))
@@ -28,6 +31,7 @@
 (library
   (name utils_php_escape)
   (wrapped false)
+  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)) ; See T41851208
   (modules
     php_escaping))
 
@@ -36,6 +40,7 @@
   (wrapped false)
   (modules
     scheduler)
+  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)) ; See T41851208
   (libraries
     utils_core))
 
@@ -44,6 +49,7 @@
   (wrapped false)
   (modules
     wwwroot)
+  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)) ; See T41851208
   (libraries
     sys_utils))
 
@@ -52,12 +58,14 @@
   (wrapped false)
   (modules
     tempfile)
+  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)) ; See T41851208
   (libraries
     sys_utils))
 
 (library
   (name mutable_accumulator)
   (wrapped false)
+  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)) ; See T41851208
   (modules
     mutable_accumulator))
 ; end of splitted utils:utils
@@ -70,8 +78,8 @@
   (libraries
     collections
     sys_utils)
-  (preprocess
-    (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)))
+  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
+)
 
 (library
   (name cli_args)
@@ -79,6 +87,7 @@
   (modules
     cli_args
     cli_args_sig)
+  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)) ; See T41851208
   (libraries
     collections
     hh_json
@@ -96,12 +105,14 @@
     pos
     pos_embedded
     pos_source)
+  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)) ; See T41851208
   (libraries
     relative_path))
 
 (library
   (name stack_utils)
   (wrapped false)
+  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)) ; See T41851208
   (modules
     stack_utils))
 
@@ -110,6 +121,7 @@
   (wrapped false)
   (modules
     ocaml_overrides)
+  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)) ; See T41851208
   (libraries
     disk))
 
@@ -119,6 +131,7 @@
   (modules
     symbolDefinition
     symbolOccurrence)
+  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)) ; See T41851208
   (libraries
     naming_special_names
     pos))
@@ -126,6 +139,7 @@
 (library
   (name server_load_flag)
   (wrapped false)
+  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)) ; See T41851208
   (modules
     serverLoadFlag))
 

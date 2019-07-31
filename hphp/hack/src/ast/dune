@@ -22,4 +22,6 @@
   (libraries
     collections
     core_kernel
-    parser_options))
+    parser_options)
+  (preprocess
+    (pps visitors.ppx ppx_deriving.std))) ; See T41851208

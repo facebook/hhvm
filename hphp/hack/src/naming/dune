@@ -5,7 +5,8 @@
   (libraries
     collections
     core_kernel
-    utils_core))
+    utils_core)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
 
 (library
   (name nast)
@@ -26,7 +27,8 @@
     nast_eval)
   (libraries
     core_kernel
-    nast))
+    nast)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
 
 (library
   (name naming_heap_api)
@@ -35,7 +37,8 @@
     naming_heap_api)
   (libraries
     ast_provider
-    naming))
+    naming)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
 
 (library
   (name naming)

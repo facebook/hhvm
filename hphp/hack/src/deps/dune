@@ -18,4 +18,5 @@
     collections
     file_info
     relative_path
-    worker_cancel))
+    worker_cancel)
+  (preprocess (pps ppx_deriving.std))); See T41851208

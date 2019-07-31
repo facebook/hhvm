@@ -100,6 +100,7 @@
     pretty_printing_library_sig
     random_ast_generator_config
     random_ast_generator)
+  (preprocess (pps visitors.ppx ppx_deriving.std)) ; See T41851208
   (libraries
     ast
     fixme_provider
@@ -117,6 +118,7 @@
   (name hh_autoimport)
   (wrapped false)
   (modules hh_autoimport)
+  (preprocess (pps visitors.ppx ppx_deriving.std)) ; See T41851208
   (libraries
     collections
     core_kernel))
@@ -126,6 +128,7 @@
   (wrapped false)
   (modules
     parsing_service)
+  (preprocess (pps visitors.ppx ppx_deriving.std)) ; See T41851208
   (libraries
     ast_provider
     procs_procs))

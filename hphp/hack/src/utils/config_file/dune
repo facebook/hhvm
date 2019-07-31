@@ -7,7 +7,9 @@
     core_kernel
     sys_utils
     utils_core
-    utils_hash))
+    utils_hash)
+  (preprocess (pps lwt_ppx)) ; See T41851208
+)
 
 (library
   (name utils_config_file)
@@ -19,7 +21,9 @@
     sys_utils
     utils_config_file_common
     utils_core
-    utils_hash))
+    utils_hash)
+  (preprocess (pps lwt_ppx)) ; See T41851208
+)
 
 (library
   (name utils_config_file_lwt)
@@ -35,5 +39,5 @@
     utils_config_file_common
     utils_core
     utils_hash)
-  (preprocess
-    (pps lwt_ppx)))
+  (preprocess (pps lwt_ppx))
+)

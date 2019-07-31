@@ -98,6 +98,138 @@ let test_delayed_future () =
     "retrieve delayed value";
   true
 
+let test_future_continue_with () =
+  Tempfile.with_real_tempdir begin fun dir_path ->
+    let fn = Path.concat dir_path "test.txt" in
+    RealDisk.write_file ~file:(Path.to_string fn) ~contents:"my file contents";
+    let ls_proc = Process.exec "ls" [Path.to_string dir_path] in
+    let future = Future.make ls_proc String.trim in
+    let future = Future.continue_with future String.uppercase_ascii in
+    String_asserter.assert_equals
+      "TEST.TXT"
+      (Future.get_exn future)
+      "future mapping should modify results"
+  end;
+  true
+
+let test_future_continue_with_future () =
+  Tempfile.with_real_tempdir begin fun dir_path ->
+    let fn = Path.concat dir_path "test.txt" in
+    RealDisk.write_file ~file:(Path.to_string fn) ~contents:"my file contents";
+    let ls_proc = Process.exec "ls" [Path.to_string dir_path] in
+    let future = Future.make ls_proc String.trim in
+    let future = Future.continue_with_future future begin fun a ->
+      let cat_proc = Process.exec "cat" [Path.to_string (Path.concat dir_path a)] in
+      Future.make cat_proc String.trim
+    end in
+    String_asserter.assert_equals
+      "my file contents"
+      (Future.get_exn future)
+      "ls >>= cat should return file contents"
+  end;
+  true
+
+let test_future_continue_and_map_err_ok () =
+  Tempfile.with_real_tempdir begin fun dir_path ->
+    let fn = Path.concat dir_path "test.txt" in
+    RealDisk.write_file ~file:(Path.to_string fn) ~contents:"my file contents";
+    let ls_proc = Process.exec "ls" [Path.to_string dir_path] in
+    let future = Future.make ls_proc String.trim in
+    let future = Future.continue_and_map_err future begin fun res ->
+      match res with
+      | Ok str -> Ok (String.uppercase_ascii str)
+      | Error _ -> Error "should not hit this point"
+    end in
+    begin match Future.get_exn future with
+    | Ok s ->
+      String_asserter.assert_equals
+        "TEST.TXT"
+        s
+        "the mapped result should be used, not the original"
+    | Error s -> failwith s
+    end
+  end;
+  true
+
+let test_future_continue_and_map_err_error () =
+  let fail_proc = Process.exec "command_that_doesnt_exist" [] in
+  let future = Future.make fail_proc String.trim in
+  let future = Future.continue_and_map_err future begin fun res ->
+    match res with
+    | Ok _ -> Ok "should not hit this point"
+    | Error _ -> Error "successfully failed"
+  end in
+  begin match Future.get_exn future with
+  | Ok s -> failwith s
+  | Error s ->
+    String_asserter.assert_equals "successfully failed" s "the error message should be preserved"
+  end;
+  true
+
+let test_future_long_continuation_chain_ok () =
+  Tempfile.with_real_tempdir begin fun dir_path ->
+    let dir1 = Path.concat dir_path "dir1" in
+    let dir2 = Path.concat dir_path "dir2" in
+    RealDisk.mkdir_p (Path.to_string dir1);
+    RealDisk.mkdir_p (Path.to_string dir2);
+    let fn = Path.to_string (Path.concat dir1 "test.txt") in
+    let fn2 = Path.to_string (Path.concat dir2 "test2.txt") in
+    RealDisk.write_file ~file:fn ~contents:fn2;
+    RealDisk.write_file ~file:fn2 ~contents:"my file contents";
+    let ls_proc = Process.exec "ls" [Path.to_string dir1] in
+    let future = Future.make ls_proc String.trim in
+    let future = Future.continue_with_future future begin fun ls_result ->
+      let cat_proc = Process.exec "cat" [Path.to_string (Path.concat dir1 ls_result)] in
+      Future.make cat_proc String.trim
+    end in
+    let future = Future.continue_with_future future begin fun cat_result ->
+      let cat_proc = Process.exec "cat" [cat_result] in
+      Future.make cat_proc String.trim
+    end in
+    String_asserter.assert_equals
+      "my file contents"
+      (Future.get_exn future)
+      "ls >>= cat >>= cat should return file contents"
+  end;
+  true
+
+let test_future_long_continuation_chain_error () =
+  Tempfile.with_real_tempdir begin fun dir_path ->
+    let dir1 = Path.concat dir_path "dir1" in
+    let dir2 = Path.concat dir_path "dir2" in
+    RealDisk.mkdir_p (Path.to_string dir1);
+    RealDisk.mkdir_p (Path.to_string dir2);
+    let fn = Path.to_string (Path.concat dir1 "test.txt") in
+    let fn2 = Path.to_string (Path.concat dir2 "test2.txt") in
+    RealDisk.write_file ~file:fn ~contents:(fn2 ^ ".nowhere");
+    RealDisk.write_file ~file:fn2 ~contents:"my file contents";
+    let ls_proc = Process.exec "ls" [Path.to_string dir1] in
+    let future = Future.make ls_proc String.trim in
+    let future = Future.continue_with_future future begin fun ls_result ->
+      let cat_proc = Process.exec "cat" [Path.to_string (Path.concat dir1 ls_result)] in
+      Future.make cat_proc String.trim
+    end in
+    let future = Future.continue_with_future future begin fun cat_result ->
+      let cat_proc = Process.exec "cat" [cat_result] in
+      Future.make cat_proc String.trim
+    end in
+    let future = Future.continue_and_map_err future begin fun res ->
+      match res with
+      | Ok s -> Ok (Printf.sprintf "Expected no output, got '%s'" s)
+      | Error _ -> Error "successfully failed"
+    end in
+    let future = Future.continue_with future begin fun res ->
+      match res with
+      | Ok s -> Ok (String.uppercase_ascii s)
+      | Error s -> Error (String.uppercase_ascii s)
+    end in
+    match (Future.get_exn future) with
+    | Ok s -> failwith (Printf.sprintf "Expected failure, got Ok '%s'" s)
+    | Error s ->
+      String_asserter.assert_equals "SUCCESSFULLY FAILED" s "the error message should be mapped"
+  end;
+  true
+
 (** Send "hello" to stdin and use sed to replace hello to world. *)
 let test_stdin_input () =
   let process = Process.exec "sed" ~input:"hello" [ "s/hello/world/g"; ] in
@@ -191,6 +323,21 @@ let tests = [
     assert_no_fd_leaked test_process_finishes_within_timeout);
   ("test_future", assert_no_fd_leaked test_future);
   ("test_future_is_ready", assert_no_fd_leaked test_future_is_ready);
+  ("test_future_continue_with", assert_no_fd_leaked test_future_continue_with);
+  ("test_future_continue_with_future", assert_no_fd_leaked test_future_continue_with_future);
+  ("test_future_continue_and_map_err_ok", assert_no_fd_leaked test_future_continue_and_map_err_ok);
+  (
+    "test_future_continue_and_map_err_error",
+    assert_no_fd_leaked test_future_continue_and_map_err_error
+  );
+  (
+    "test_future_long_continuation_chain_ok",
+    assert_no_fd_leaked test_future_long_continuation_chain_ok
+  );
+  (
+    "test_future_long_continuation_chain_error",
+    assert_no_fd_leaked test_future_long_continuation_chain_error
+  );
   ("test_stdin_input", assert_no_fd_leaked test_stdin_input);
   ("test_entry_point", assert_no_fd_leaked test_entry_point);
   ("test_chdir", assert_no_fd_leaked test_chdir);

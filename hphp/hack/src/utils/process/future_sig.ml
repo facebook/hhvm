@@ -47,6 +47,17 @@ module type S = sig
   val merge : 'a t -> 'b t ->
     (('a, error) result -> ('b, error) result -> ('c, error) result) -> 'c t
 
+  (** Adds a computation that will be applied to the result of the future when
+   * it is finished. *)
+  val continue_with : 'a t -> ('a -> 'b) -> 'b t
+
+  (** Adds another future to be generated after the given future finishes. *)
+  val continue_with_future : 'a t -> ('a -> 'b t) -> 'b t
+
+  (** Adds another future to be generated after the given future finishes, but
+  * allows custom handling of process errors. *)
+  val continue_and_map_err : 'a t -> (('a, error) result -> ('b, 'c) result) -> ('b, 'c) result t
+
   (** Just wrap a value inside a future. *)
   val of_value : 'a -> 'a t
 

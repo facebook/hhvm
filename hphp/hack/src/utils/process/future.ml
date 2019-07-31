@@ -27,7 +27,7 @@ type 'a delayed = {
 
 type 'a promise =
   | Complete : 'a -> 'a promise
-  | Complete_but_transformer_raised of (Process_types.invocation_info * exn * Utils.callstack)
+  | Complete_but_failed of error
     (** Delayed is useful for deterministic testing. Must be tapped by "is ready" or
      * "check_status" the remaining number of times before it is ready. *)
   | Delayed : 'a delayed -> 'a promise
@@ -35,6 +35,7 @@ type 'a promise =
      * both underlying are ready. *)
   | Merged : ('a t * 'b t * (('a, error) result ->
       ('b, error) result -> ('c, error) result)) -> 'c promise
+  | Bound : ('a t * (('a, error) result -> 'b t)) -> 'b promise
   | Incomplete of Process_types.t * (string -> 'a)
 
 (** float is the time the Future was constructed. *)
@@ -98,8 +99,8 @@ let error_to_exn e = raise (Failure e)
 let rec get : 'a. ?timeout:int -> 'a t -> ('a, error) result =
   fun ?(timeout=30) (promise, _) -> match !promise with
   | Complete v -> Ok v
-  | Complete_but_transformer_raised (info, e, stack) ->
-    Error (info, Transformer_raised (e, stack))
+  | Complete_but_failed e ->
+    Error e
   | Delayed { value; remaining; _ } when remaining <= 0 ->
     Ok value
   | Delayed _ ->
@@ -116,6 +117,12 @@ let rec get : 'a. ?timeout:int -> 'a t -> ('a, error) result =
      * subsequent calls to "get" on this Merged Future will just re-run
      * the handler on the cached result. *)
     handler a b
+  | Bound (a, f) ->
+    let start_t = Unix.time () in
+    let a = get ~timeout a in
+    let consumed_t = int_of_float @@ Unix.time () -. start_t in
+    let timeout = timeout - consumed_t in
+    get ~timeout (f a)
   | Incomplete (process, transformer) ->
     let info = process.Process_types.info in
     match Process.read_and_wait_pid ~timeout process with
@@ -127,7 +134,7 @@ let rec get : 'a. ?timeout:int -> 'a t -> ('a, error) result =
       with
       | e ->
         let stack = Utils.Callstack (Printexc.get_backtrace ()) in
-        promise := (Complete_but_transformer_raised (info, e, stack));
+        promise := (Complete_but_failed (info, (Transformer_raised (e, stack))));
         Error (info, Transformer_raised (e, stack))
       end
     | Error (Process_types.Abnormal_exit {status; stderr; _}) ->
@@ -144,7 +151,7 @@ let get_exn ?timeout x = get ?timeout x
 (** Must explicitly make recursive functions polymorphic. *)
 let rec is_ready : 'a. 'a t -> bool = fun (promise, _) ->
   match !promise with
-  | Complete _ | Complete_but_transformer_raised _ -> true
+  | Complete _ | Complete_but_failed _ -> true
   | Delayed {remaining; _} when remaining <= 0 ->
     true
   | Delayed { tapped; remaining; value; } ->
@@ -152,6 +159,12 @@ let rec is_ready : 'a. 'a t -> bool = fun (promise, _) ->
     false
   | Merged (a, b, _) ->
     is_ready a && is_ready b
+  | Bound (a, f) ->
+    if is_ready a then begin
+      let b = f (get a) in
+      promise := !(fst b);
+      is_ready b
+    end else false
   | Incomplete (process, _) ->
     Process.is_ready process
 
@@ -170,13 +183,42 @@ let start_t : 'a. 'a t -> float = fun (_, time) -> time
 let merge a b handler =
   (ref (Merged (a, b, handler)), (min (start_t a) (start_t b)))
 
+let make_continue a f =
+  (ref (Bound (a, f)), start_t a)
+
+let continue_with_future
+  (a: 'a t)
+  (f: 'a -> 'b t)
+: 'b t =
+  let f res =
+    match res with
+    | Ok res -> f res
+    | Error error -> (ref (Complete_but_failed error), start_t a)
+  in
+  make_continue a f
+
+let continue_with
+  (a: 'a t)
+  (f: 'a -> 'b)
+: 'b t =
+  continue_with_future a (fun a -> of_value (f a))
+
+let continue_and_map_err
+  (a: 'a t)
+  (f: (('a, error) result -> ('b, 'c) result))
+: ('b, 'c) result t =
+  let f res =
+    of_value (f res)
+  in
+  make_continue a f
+
 (** Must explicitly make recursive function polymorphic. *)
 let rec check_status : 'a. 'a t -> 'a status = fun (promise, start_t) ->
   match !promise with
   | Complete v ->
     Complete_with_result (Ok v)
-  | Complete_but_transformer_raised (info, e, stack) ->
-    Complete_with_result (Error (info, Transformer_raised (e, stack)))
+  | Complete_but_failed e ->
+    Complete_with_result (Error e)
   | Delayed { value; remaining; _ } when remaining <= 0 ->
     Complete_with_result (Ok value)
   | Delayed { tapped; remaining; value; } ->
@@ -184,6 +226,11 @@ let rec check_status : 'a. 'a t -> 'a status = fun (promise, start_t) ->
     In_progress {age = float_of_int tapped;}
   | Merged (a, b, handler) ->
     merge_status (check_status a) (check_status b) handler
+  | Bound _ ->
+    if is_ready (promise, start_t) then Complete_with_result (get (promise, start_t))
+    else
+      let age = Unix.time () -. start_t in
+      In_progress {age;}
   | Incomplete (process, _) ->
     if Process.is_ready process then
       Complete_with_result (get (promise, start_t))

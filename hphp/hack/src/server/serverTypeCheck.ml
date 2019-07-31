@@ -850,7 +850,9 @@ end = functor(CheckKind:CheckKindType) -> struct
         ~full_check_done
     end in
 
-    let () = log_if_diag_subscribe_removed "type_checking" old_env.diag_subscribe diag_subscribe in
+    log_if_diag_subscribe_removed "type_checking.0" old_env.diag_subscribe env.diag_subscribe;
+    log_if_diag_subscribe_removed "type_checking.1" env.diag_subscribe diag_subscribe;
+    log_if_diag_subscribe_removed "type_checking.2" old_env.diag_subscribe diag_subscribe;
 
     let total_rechecked_count = Relative_path.Map.cardinal fast in
     {
@@ -1094,6 +1096,9 @@ end = functor(CheckKind:CheckKindType) -> struct
       do_type_checking genv env
         ~errors ~fast ~files_to_parse ~lazy_check_later ~old_env
     in
+    log_if_diag_subscribe_removed "type_check_core.0" old_env.diag_subscribe env.diag_subscribe;
+    log_if_diag_subscribe_removed "type_check_core.1" env.diag_subscribe diag_subscribe;
+    log_if_diag_subscribe_removed "type_check_core.2" old_env.diag_subscribe diag_subscribe;
 
     HackEventLogger.type_check_end to_recheck_count total_rechecked_count t;
     let logstring = Printf.sprintf "Typechecked %d files" total_rechecked_count in

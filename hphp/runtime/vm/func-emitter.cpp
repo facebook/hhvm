@@ -304,7 +304,7 @@ String FuncEmitter::nativeFullname() const {
 Native::NativeFunctionInfo FuncEmitter::getNativeInfo() const {
   return Native::getNativeFunction(
       m_ue.m_nativeFuncs,
-      name,
+      stripInOutSuffix(name),
       m_pce ? m_pce->name() : nullptr,
       (attrs & AttrStatic)
     );

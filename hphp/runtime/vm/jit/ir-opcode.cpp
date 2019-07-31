@@ -860,6 +860,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdRecDesc:
   case LdObjClass:
   case LdObjInvoke:
+  case LdOutAddr:
   case LdPackedArrayDataElemAddr:
   case LdPackedElem:
   case LdPairBase:

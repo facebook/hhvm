@@ -254,7 +254,7 @@ void callFunc(const Func* func, const void* ctx,
  */
 const StringData* getInvokeName(ActRec* ar);
 
-#define NATIVE_TYPES                                \
+#define NATIVE_TYPES                                  \
   /* kind       arg type              return type */  \
   X(Int32,      int32_t,              int32_t)        \
   X(Int64,      int64_t,              int64_t)        \
@@ -277,6 +277,17 @@ const StringData* getInvokeName(ActRec* ar);
   X(MixedRef,   const VRefParamValue&,VRefParamValue) \
   X(This,       ObjectData*,          ObjectData*)    \
   X(Void,       void,                 void)           \
+  X(IntIO,      int64_t&,             int64_t&)       \
+  X(DoubleIO,   double&,              double&)        \
+  X(BoolIO,     bool&,                bool&)          \
+  X(ObjectIO,   Object&,              Object&)        \
+  X(StringIO,   String&,              String&)        \
+  X(ArrayIO,    Array&,               Array&)         \
+  X(ResourceIO, Resource&,            Resource&)      \
+  X(FuncIO,     Func*&,               Func*&)         \
+  X(ClassIO,    Class*&,              Class*&)        \
+  X(ClsMethIO,  ClsMethDataRef&,      ClsMethDataRef&)\
+  X(MixedIO,    Variant&,             Variant&)       \
   /**/
 
 template <class T>

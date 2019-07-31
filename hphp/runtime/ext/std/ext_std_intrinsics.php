@@ -41,6 +41,32 @@ function dummy_dict_builtin(dict $x): dict;
 <<__Native, __HipHopSyntax>>
 function create_class_pointer(string $name): mixed;
 
+<<__Native>>
+function builtin_io(
+  string $s,
+  inout string $str,
+  inout int $num,
+  int $i,
+  inout object $obj,
+  object $o,
+  mixed $m,
+  inout mixed $mix,
+  bool $retOrig
+): array;
+
+<<__Native("NoFCallBuiltin")>>
+function builtin_io_no_fca(
+  string $s,
+  inout string $str,
+  inout int $num,
+  int $i,
+  inout object $obj,
+  object $o,
+  mixed $m,
+  inout mixed $mix,
+  bool $retOrig
+): array;
+
 /*
  * Like serialize(), but serialize d/varrays into their own format so that they
  * can be distinguished and deserialized as themselves (serialize() will

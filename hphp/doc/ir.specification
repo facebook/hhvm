@@ -1987,6 +1987,11 @@ To string conversions:
   Store S1 in a caller allocated out-value vm stack cell index cells above
   S0 on the stack.
 
+| LdOutAddr<index>, D(PtrToOtherCell), S(FramePtr), NF
+
+  Load the address of the storage for out parameter `index` provided by the
+  callee (the address will be a location on the callee stack).
+
 | DbgTrashStk<offset>, ND, S(StkPtr), NF
 
   For debugging purposes.  Store kTVTrashJITStk to the stack slot pointed to

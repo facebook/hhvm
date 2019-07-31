@@ -14,6 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/request-tracing.h"
 #include "hphp/runtime/base/surprise-flags.h"
@@ -161,10 +162,56 @@ void HHVM_FUNCTION(hhbbc_fail_verification) {
   g_context->write("PASS\n", 5);
 }
 
+/*
+ * function builtin_io(
+ *   string $s,
+ *   inout string $str,
+ *   inout int $num,
+ *   int $i,
+ *   inout object $obj
+ *   object $o,
+ *   mixed $m,
+ *   inout mixed $mix
+ *   bool retOrig
+ * ): array;
+ */
+Array HHVM_FUNCTION(
+  builtin_io,
+  StringArg s,
+  String& str,
+  int64_t& num,
+  int i,
+  Object& obj,
+  ObjectArg o,
+  const Variant& m,
+  Variant& mix,
+  bool retOrig
+) {
+  auto const orig = retOrig
+    ? make_packed_array(s.get(), str, num, i, obj, o.get(), m, mix)
+    : Array::Create();
+
+  str += ";; IN =\"";
+  str += StrNR{s.get()};
+  str += "\"";
+
+  num = num + i * i;
+
+  if (retOrig) mix = obj;
+  else         mix = m;
+
+  obj = Object{o.get()};
+
+  return orig;
+}
+
 }
 
 void StandardExtension::initIntrinsics() {
   if (!RuntimeOption::EnableIntrinsicsExtension) return;
+
+  HHVM_FALIAS(__hhvm_intrinsics\\builtin_io, builtin_io);
+  HHVM_FALIAS(__hhvm_intrinsics\\builtin_io_no_fca, builtin_io);
 
   HHVM_FALIAS(__hhvm_intrinsics\\trigger_oom, trigger_oom);
   HHVM_FALIAS(__hhvm_intrinsics\\launder_value, launder_value);

@@ -747,9 +747,11 @@ struct CallUnpackData : IRExtraData {
 
 struct CallBuiltinData : IRExtraData {
   explicit CallBuiltinData(IRSPRelOffset spOffset,
+                           IRSPRelOffset retSpOffset,
                            const Func* callee,
                            int32_t numNonDefault)
     : spOffset(spOffset)
+    , retSpOffset(retSpOffset)
     , callee{callee}
     , numNonDefault{numNonDefault}
   {}
@@ -762,6 +764,7 @@ struct CallBuiltinData : IRExtraData {
   }
 
   IRSPRelOffset spOffset; // offset from StkPtr to last passed arg
+  IRSPRelOffset retSpOffset; // offset from StkPtr after a return
   const Func* callee;
   int32_t numNonDefault;
 };
@@ -1608,6 +1611,7 @@ X(CheckStk,                     IRSPRelOffsetData);
 X(HintStkInner,                 IRSPRelOffsetData);
 X(StStk,                        IRSPRelOffsetData);
 X(StOutValue,                   IndexData);
+X(LdOutAddr,                    IndexData);
 X(AssertStk,                    IRSPRelOffsetData);
 X(DefSP,                        FPInvOffsetData);
 X(LdStk,                        IRSPRelOffsetData);

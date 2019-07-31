@@ -153,8 +153,9 @@ void storeTVVal(Vout& v, Type type, Vloc srcLoc, Vptr valPtr) {
 
 }
 
-void storeTV(Vout& v, Vptr dst, Vloc srcLoc, const SSATmp* src) {
-  storeTV(v, src->type(), srcLoc, dst + TVOFF(m_type), dst + TVOFF(m_data));
+void storeTV(Vout& v, Vptr dst, Vloc srcLoc, const SSATmp* src, Type ty) {
+  if (ty == TBottom) ty = src->type();
+  storeTV(v, ty, srcLoc, dst + TVOFF(m_type), dst + TVOFF(m_data));
 }
 
 void storeTV(Vout& v, Type type, Vloc srcLoc, Vptr typePtr, Vptr valPtr) {

@@ -116,6 +116,7 @@ struct ParamPrep {
     bool passByAddr{false};
     bool needsConversion{false};
     bool isOutputArg{false};
+    bool isInOut{false};
   };
 
   const Info& operator[](size_t idx) const { return info[idx]; }
@@ -1186,10 +1187,11 @@ prepare_params(IRGS& /*env*/, const Func* callee, SSATmp* ctx,
     // need to apply a conversion there.
     cur.needsConversion = cur.isOutputArg ||
       (offset < numNonDefault && ty > TBottom);
+    cur.isInOut = pi.inout;
     // We do actually mean exact type equality here.  We're only capable of
     // passing the following primitives through registers; everything else goes
     // by address unless its flagged "nativeArg".
-    if (ty == TBool || ty == TInt || ty == TDbl || pi.nativeArg) {
+    if (ty == TBool || ty == TInt || ty == TDbl || pi.nativeArg || pi.inout) {
       continue;
     }
 
@@ -1561,7 +1563,8 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
             assertx(targetTy == TBool ||
                     targetTy == TInt ||
                     targetTy == TDbl ||
-                    callee->params()[paramIdx].nativeArg);
+                    callee->params()[paramIdx].nativeArg ||
+                    callee->params()[paramIdx].inout);
             return gen(env, LdMem,
                        targetTy == TBottom ? TCell : targetTy,
                        param.value);
@@ -1732,14 +1735,49 @@ SSATmp* builtinCall(IRGS& env,
     env.irb->exceptionStackBoundary();
   }
 
-  // Make the actual call.
+  // Collect the realized parameters.
   auto realized = realize_params(env, callee, params, catchMaker);
+
+  // Store the inout parameters into their out locations.
+  if (callee->takesInOutParams()) {
+    int32_t idx = 0;
+    uint32_t aoff = params.ctx ? 3 : 2;
+    for (auto i = uint32_t{0}; i < params.size(); ++i) {
+      if (!params[i].isInOut) continue;
+      auto const ty = [&] () -> folly::Optional<Type> {
+        auto const r = builtinOutType(callee, i);
+        if (r.isKnownDataType()) return r;
+        return {};
+      }();
+      if (params.forNativeImpl) {
+        // Move the value to the caller stack to avoid an extra ref-count
+        gen(env, StLoc, LocalId{i}, fp(env), cns(env, TInitNull));
+        auto const addr = gen(env, LdOutAddr, IndexData(idx++), fp(env));
+        gen(env, StMem, ty, addr, realized[i + aoff]);
+        realized[i + aoff] = addr;
+        continue;
+      }
+      auto const offset =
+        BCSPRelOffset{safe_cast<int32_t>(params.numByAddr + idx++)};
+      auto const out = offsetFromIRSP(env, offset);
+      gen(env, StStk, IRSPRelOffsetData{out}, ty, sp(env), realized[i + aoff]);
+      params[i].value = cns(env, TInitNull);
+      realized[i + aoff] = gen(env, LdStkAddr, IRSPRelOffsetData{out}, sp(env));
+    }
+    env.irb->exceptionStackBoundary();
+  }
+
+  auto const retOff =
+    offsetFromIRSP(env, BCSPRelOffset{safe_cast<int32_t>(params.numByAddr)});
+
+  // Make the actual call.
   SSATmp** const decayedPtr = &realized[0];
   auto const ret = gen(
     env,
     CallBuiltin,
     CallBuiltinData {
       spOffBCFromIRSP(env),
+      retOff,
       callee,
       numNonDefault
     },
@@ -2020,6 +2058,52 @@ bool collectionMethodReturnsThis(const Func* callee) {
   return false;
 }
 
+}
+
+Type builtinOutType(const Func* builtin, uint32_t i) {
+  assertx(builtin->isCPPBuiltin());
+  assertx(builtin->params()[i].inout);
+  auto const& tc = builtin->params()[i].typeConstraint;
+
+  if (tc.isSoft() || tc.isMixed()) return TInitCell;
+
+  auto ty = [&] () -> Type {
+    switch (tc.metaType()) {
+    case AnnotMetaType::Precise:
+      return Type{*tc.underlyingDataType()};
+    case AnnotMetaType::Mixed:
+      return TInitCell;
+    case AnnotMetaType::Self:
+      return TObj;
+    case AnnotMetaType::Parent:
+      return TObj;
+    case AnnotMetaType::Callable:
+      return TInitCell;
+    case AnnotMetaType::Number:
+      return TInt | TDbl;
+    case AnnotMetaType::ArrayKey:
+      return TInt | TStr;
+    case AnnotMetaType::This:
+      return TObj;
+    case AnnotMetaType::VArray:
+      return RuntimeOption::EvalHackArrDVArrs ? TVec : TArr;
+    case AnnotMetaType::DArray:
+      return RuntimeOption::EvalHackArrDVArrs ? TDict : TArr;
+    case AnnotMetaType::VArrOrDArr:
+      return RuntimeOption::EvalHackArrDVArrs ? TVec | TDict : TArr;
+    case AnnotMetaType::VecOrDict:
+      return TVec | TDict;
+    case AnnotMetaType::ArrayLike:
+      return TArrLike;
+    case AnnotMetaType::Nonnull:
+    case AnnotMetaType::NoReturn:
+    case AnnotMetaType::Nothing:
+      return TInitCell;
+    }
+    not_reached();
+  }();
+
+  return tc.isNullable() ? ty | TInitNull : ty;
 }
 
 Type builtinReturnType(const Func* builtin) {

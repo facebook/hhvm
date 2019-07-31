@@ -363,6 +363,7 @@ bool canDCE(IRInstruction* inst) {
   case ConvShapeToDArr:
   case ConvKeysetToDArr:
   case ConvObjToDArr:
+  case LdOutAddr:
     return !opcodeMayRaise(inst->op()) &&
       (!inst->consumesReferences() || inst->producesReference());
 

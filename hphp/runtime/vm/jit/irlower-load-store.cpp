@@ -139,7 +139,12 @@ void cgLdStkAddr(IRLS& env, const IRInstruction* inst) {
 void cgStStk(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const off = cellsToBytes(inst->extra<StStk>()->offset.offset);
-  storeTV(vmain(env), sp[off], srcLoc(env, inst, 1), inst->src(1));
+
+  auto const type = inst->hasTypeParam()
+    ? inst->typeParam()
+    : inst->src(1)->type();
+
+  storeTV(vmain(env), sp[off], srcLoc(env, inst, 1), inst->src(1), type);
 }
 
 void cgStOutValue(IRLS& env, const IRInstruction* inst) {
@@ -148,6 +153,14 @@ void cgStOutValue(IRLS& env, const IRInstruction* inst) {
     inst->extra<StOutValue>()->index + kNumActRecCells
   );
   storeTV(vmain(env), fp[off], srcLoc(env, inst, 1), inst->src(1));
+}
+
+void cgLdOutAddr(IRLS& env, const IRInstruction* inst) {
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const off = cellsToBytes(
+    inst->extra<LdOutAddr>()->index + kNumActRecCells
+  );
+  vmain(env) << lea{fp[off], dstLoc(env, inst, 0).reg()};
 }
 
 void cgDbgTrashStk(IRLS& env, const IRInstruction* inst) {
@@ -195,7 +208,9 @@ void cgStMem(IRLS& env, const IRInstruction* inst) {
   auto const src    = inst->src(1);
   auto const srcLoc = tmpLoc(env, src);
 
-  storeTV(vmain(env), src->type(), srcLoc,
+  auto const type   = inst->hasTypeParam() ? inst->typeParam() : src->type();
+
+  storeTV(vmain(env), type, srcLoc,
           memTVTypePtr(ptr, ptrLoc), memTVValPtr(ptr, ptrLoc));
 }
 

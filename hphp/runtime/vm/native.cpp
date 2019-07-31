@@ -136,11 +136,26 @@ void pushNativeArg(Registers& regs, const Func* const func, const int i,
 // Push each argument, spilling ones we don't have registers for to the stack.
 void populateArgs(Registers& regs, const Func* const func,
                   const TypedValue* const args, const int numArgs) {
+  auto io = const_cast<TypedValue*>(args + kNumActRecCells + 1);
   for (auto i = 0; i < numArgs; ++i) {
     auto const& arg = args[-i];
     auto const& pi = func->params()[i];
     auto const type = pi.builtinType;
-    if (type == KindOfDouble) {
+    if (pi.inout) {
+      *io = arg;
+
+      // Any persistent values may become counted...
+      if (isArrayLikeType(io->m_type)) {
+        io->m_type = io->m_data.parr->toDataType();
+      } else if (isStringType(io->m_type)) {
+        io->m_type = KindOfString;
+      }
+
+      // Set the input value to null to avoid double freeing it
+      const_cast<TypedValue&>(arg).m_type = KindOfNull;
+
+      pushInt(regs, (int64_t)io++);
+    } else if (type == KindOfDouble) {
       pushDouble(regs, val(arg));
     } else if (pi.nativeArg) {
       pushNativeArg(regs, func, i, type, arg);
@@ -562,8 +577,51 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfFunc:         return ty == T::Func;
     case KindOfClass:        return ty == T::Class;
     case KindOfClsMeth:      return ty == T::ClsMeth;
-    case KindOfRecord: // TODO (T41031632)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
+    case KindOfRecord:       return false; // TODO (T41031632)
+  }
+  not_reached();
+}
+
+static bool tcCheckNativeIO(
+  const TypeConstraint& tc, const NativeSig::Type ty
+) {
+  using T = NativeSig::Type;
+
+  if (!tc.hasConstraint() || tc.isNullable() || tc.isCallable() ||
+      tc.isArrayKey() || tc.isNumber() || tc.isVecOrDict() ||
+      tc.isVArrayOrDArray() || tc.isArrayLike()) {
+    return ty == T::MixedIO;
+  }
+
+  if (!tc.underlyingDataType()) {
+    return false;
+  }
+
+  switch (*tc.underlyingDataType()) {
+    case KindOfDouble:       return ty == T::DoubleIO;
+    case KindOfBoolean:      return ty == T::BoolIO;
+    case KindOfObject:       return ty == T::ObjectIO;
+    case KindOfPersistentString:
+    case KindOfString:       return ty == T::StringIO;
+    case KindOfPersistentVec:
+    case KindOfVec:          return ty == T::ArrayIO;
+    case KindOfPersistentDict:
+    case KindOfDict:         return ty == T::ArrayIO;
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:       return ty == T::ArrayIO;
+    case KindOfPersistentShape:
+    case KindOfShape:        return ty == T::ArrayIO;
+    case KindOfPersistentArray:
+    case KindOfArray:        return ty == T::ArrayIO;
+    case KindOfResource:     return ty == T::ResourceIO;
+    case KindOfUninit:
+    case KindOfNull:         return false;
+    case KindOfRef:          return ty == T::MixedIO;
+    case KindOfInt64:        return ty == T::IntIO;
+    case KindOfFunc:         return ty == T::FuncIO;
+    case KindOfClass:        return ty == T::ClassIO;
+    case KindOfClsMeth:      return ty == T::ClsMethIO;
+    case KindOfRecord:       return false; // TODO (T41031632)
   }
   not_reached();
 }
@@ -616,6 +674,13 @@ const char* checkTypeFunc(const NativeSig& sig,
 
     if (pInfo.variadic) {
       if (argTy != T::Array) return kInvalidArgTypeMessage;
+      continue;
+    }
+
+    if (pInfo.inout) {
+      if (!tcCheckNativeIO(pInfo.typeConstraint, argTy)) {
+        return kInvalidArgTypeMessage;
+      }
       continue;
     }
 
@@ -707,6 +772,17 @@ static std::string nativeTypeString(NativeSig::Type ty) {
   case T::Void:       return "void";
   case T::Func:       return "func";
   case T::ClsMeth:    return "clsmeth";
+  case T::IntIO:      return "inout int";
+  case T::DoubleIO:   return "inout double";
+  case T::BoolIO:     return "inout bool";
+  case T::ObjectIO:   return "inout object";
+  case T::StringIO:   return "inout string";
+  case T::ArrayIO:    return "inout array";
+  case T::ResourceIO: return "inout resource";
+  case T::FuncIO:     return "inout func";
+  case T::ClassIO:    return "inout class";
+  case T::ClsMethIO:  return "inout clsmeth";
+  case T::MixedIO:    return "inout mixed";
   }
   not_reached();
 }

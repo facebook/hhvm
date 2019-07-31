@@ -2067,13 +2067,25 @@ Type callReturnType(const Func* callee) {
 Type callOutType(const Func* callee, uint32_t index) {
   assertx(callee->takesInOutParams());
   assertx(index < callee->numInOutParams());
-  assertx(!callee->isCPPBuiltin());
 
   // Don't make any assumptions about functions which can be intercepted. The
   // interception functions can return arbitrary types.
   if (RuntimeOption::EvalJitEnableRenameFunction ||
       callee->attrs() & AttrInterceptable) {
     return TInitCell;
+  }
+
+  if (callee->isCPPBuiltin()) {
+    uint32_t param_idx = 0;
+    for (; param_idx < callee->numParams(); param_idx++) {
+      if (!callee->params()[param_idx].inout) continue;
+      if (!index) break;
+      index--;
+    }
+    assertx(!index);
+    // If the function is builtin, use the builtin's return type, then take into
+    // account coercion failures.
+    return builtinOutType(callee, param_idx);
   }
 
   auto const ty = typeFromRAT(callee->repoReturnType(), callee->cls());

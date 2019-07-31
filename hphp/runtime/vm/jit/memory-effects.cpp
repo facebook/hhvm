@@ -892,6 +892,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case CallBuiltin:
     {
+      AliasClass out_stk = AEmpty;
+      auto const callee = inst.extra<CallBuiltin>()->callee;
       auto const stk = [&] () -> AliasClass {
         AliasClass ret = AEmpty;
         for (auto i = uint32_t{2}; i < inst.numSrcs(); ++i) {
@@ -899,18 +901,23 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
             auto const cls = pointee(inst.src(i));
             if (cls.maybe(AStackAny)) {
               ret = ret | cls;
+              auto const paramOff = callee->isMethod() ? 3 : 2;
+              if (i >= paramOff && callee->params()[i - paramOff].inout) {
+                out_stk = out_stk | cls;
+              }
             }
           }
         }
         return ret;
       }();
-      auto const callee = inst.extra<CallBuiltin>()->callee;
       if (callee->isFoldable()) {
-        return may_load_store_kill(stk | AHeapAny, AHeapAny, AMIStateAny);
+        return may_load_store_kill(
+          stk | AHeapAny, out_stk | AHeapAny, AMIStateAny
+        );
       } else {
         return may_load_store_kill(
           stk | AHeapAny | ARdsAny,
-          AHeapAny | ARdsAny,
+          out_stk | AHeapAny | ARdsAny,
           AMIStateAny
         );
       }
@@ -1574,6 +1581,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     // to actually observe them from within the callee. They can also only
     // occur once on any exit path from a function.
     return may_load_store(AEmpty, AEmpty);
+
+  case LdOutAddr:
+    return IrrelevantEffects{};
 
   case SpillFrame:
     {

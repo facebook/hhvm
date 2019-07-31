@@ -2412,7 +2412,7 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Import _ ->
       N.Any
     | Aast.Omitted ->
-      N.Any
+      N.Omitted
     | Aast.Callconv (kind, e) ->
       N.Callconv (kind, expr env e)
     (* The below were not found on the AST.ml so they are not implemented here *)

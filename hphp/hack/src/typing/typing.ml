@@ -1452,9 +1452,12 @@ and expr_
   match e with
   | Import _
   | Collection _
-  | Omitted
   | BracedExpr _ ->
     failwith "AST should not contain these nodes"
+  | Omitted ->
+     let r = (Reason.Rwitness p) in
+     let ty = (r, Typing_utils.tany env) in
+     make_result env p T.Omitted ty
   | ParenthesizedExpr e ->
     let env, te, ty = expr env e in
     make_result env p (T.ParenthesizedExpr te) ty

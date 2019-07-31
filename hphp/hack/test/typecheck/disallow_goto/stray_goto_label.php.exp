@@ -1,0 +1,2 @@
+File "stray_goto_label.php", line 5, characters 3-7:
+Labels are used only for `goto`, which is not allowed in Hack files (Parsing[1002])

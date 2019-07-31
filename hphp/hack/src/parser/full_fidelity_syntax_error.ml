@@ -540,6 +540,7 @@ let alternate_control_flow =
 let execution_operator =
   "The execution operator is not allowed in Hack files"
 let goto = "The `goto` operator is not allowed in Hack files"
+let goto_label = "Labels are used only for `goto`, which is not allowed in Hack files"
 let invalid_octal_integer = "Invalid octal integers"
 
 let prefixed_invalid_string_kind = "Only double-quoted strings may be prefixed."

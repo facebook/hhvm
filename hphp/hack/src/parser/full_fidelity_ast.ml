@@ -2197,6 +2197,8 @@ and pStmt : stmt parser = fun node env ->
     then f ()
     else lift_awaits_in_statement env pos f
   | Syntax.GotoLabel { goto_label_name; _ } ->
+    if is_typechecker env && not (ParserOptions.allow_goto env.parser_options)
+    then raise_parsing_error env (`Node node) SyntaxError.goto_label;
     let pos_label = pPos goto_label_name env in
     let label_name = text goto_label_name in
     pos, Ast.GotoLabel (pos_label, label_name)

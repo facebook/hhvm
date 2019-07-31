@@ -294,6 +294,7 @@ val nested_ternary: string
 val alternate_control_flow : string
 val execution_operator : string
 val goto : string
+val goto_label : string
 val invalid_octal_integer : string
 val prefixed_invalid_string_kind : string
 val non_re_prefix : string

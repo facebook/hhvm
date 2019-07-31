@@ -1,0 +1,4 @@
+File "goto.php", line 4, characters 3-10:
+The `goto` operator is not allowed in Hack files (Parsing[1002])
+File "goto.php", line 5, characters 3-5:
+Labels are used only for `goto`, which is not allowed in Hack files (Parsing[1002])

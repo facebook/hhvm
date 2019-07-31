@@ -203,6 +203,22 @@ let process_file
     let () = prerr_endline ("Exception on file " ^ (Relative_path.S.to_string fn)) in
     Caml.Printexc.raise_with_backtrace e stack
 
+let should_exit ~(memory_cap: int option) =
+  match memory_cap with
+  | None -> false
+  | Some max_heap_mb ->
+    (* Use [quick_stat] instead of [stat] in order to avoid walking the major
+       heap on each call, and just check the major heap because the minor
+       heap is a) small and b) fixed size. *)
+    let heap_size_mb = Gc.((quick_stat ()).Stat.heap_words) * 8 / 1024 / 1024 in
+    if heap_size_mb > max_heap_mb then
+      let error_msg =
+        Printf.sprintf "Exiting worker due to memory pressure: %d MB" heap_size_mb
+      in
+      !Utils.log error_msg;
+      true
+    else false
+
 let process_files
     (dynamic_view_files: Relative_path.Set.t)
     (opts: GlobalOptions.t)
@@ -245,22 +261,8 @@ let process_files
         remaining = fns;
         deferred = List.concat [ deferred; progress.deferred ];
       } in
-      (* Use [quick_stat] instead of [stat] in order to avoid walking the major
-         heap on each call, and just check the major heap because the minor
-         heap is a) small and b) fixed size. *)
-      let should_exit = match memory_cap with
-        | None -> false
-        | Some max_heap_mb ->
-          let heap_size_mb = Gc.((quick_stat ()).Stat.heap_words) * 8 / 1024 / 1024 in
-          if heap_size_mb > max_heap_mb then
-            let error_msg =
-              Printf.sprintf "Exiting worker due to memory pressure: %d MB" heap_size_mb
-            in
-            !Utils.log error_msg;
-            true
-          else false
-      in
-      if should_exit then (errors, progress) else process_or_exit errors progress
+      if (should_exit memory_cap) then (errors, progress)
+      else process_or_exit errors progress
     | [] -> errors, progress
   in
   let result = process_or_exit errors progress in
@@ -474,8 +476,8 @@ let go
     (opts: TypecheckerOptions.t)
     (dynamic_view_files: Relative_path.Set.t)
     (fnl: (Relative_path.t * FileInfo.names) list)
-    ~memory_cap
-    ~check_info
+    ~(memory_cap: int option)
+    ~(check_info: check_info)
     : Errors.t =
   let interrupt = MultiThreadedCall.no_interrupt () in
   let res, (), cancelled =

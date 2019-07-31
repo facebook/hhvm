@@ -192,7 +192,8 @@ let emit_wrapper_method
   let method_is_final = ast_method.T.m_final in
   let method_is_static = not is_closure && ast_method.T.m_static in
   let method_attributes = Emit_attribute.from_asts
-    (Emit_env.get_namespace env) ast_method.T.m_user_attributes in
+    (Emit_env.get_namespace env) ast_method.T.m_user_attributes
+    |> List.filter ~f:(fun attr -> not (Hhas_attribute.is_native attr)) in
   let method_visibility = ast_method.T.m_visibility in
   let return_type_info =
     Emit_body.emit_return_type_info

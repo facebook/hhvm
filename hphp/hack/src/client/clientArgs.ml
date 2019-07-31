@@ -412,6 +412,9 @@ let parse_check_args cmd =
       " (mode) prints an outline of the text on stdin";
     Common_argspecs.prechecked prechecked;
     Common_argspecs.no_prechecked prechecked;
+    "--pause",
+      Arg.Unit (set_mode (MODE_PAUSE true)),
+      " (mode) pause recheck-on-file-change [EXPERIMENTAL]";
     "--profile-log",
       Arg.Set profile_log,
       " enable profile logging";
@@ -444,6 +447,9 @@ let parse_check_args cmd =
       " if combined with --save-mini, causes the saved state" ^
       " to replace the program state; otherwise, the state files are not" ^
       " used after being written to disk (default: false)";
+    "--resume",
+      Arg.Unit (set_mode (MODE_PAUSE false)),
+      " (mode) resume recheck-on-file-change [EXPERIMENTAL]";
     "--retries",
       Arg.Int (fun n -> timeout := Some (float_of_int (max 5 n))),
       " (deprecated) same as --timeout";

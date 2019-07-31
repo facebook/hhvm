@@ -27,6 +27,13 @@ let go (_genv: ServerEnv.genv) (env: ServerEnv.env) : ServerRageTypes.result =
   let pids_data = Printf.sprintf "hh_server pid=%d ppid=%d\n" (Unix.getpid ()) (Unix.getppid ()) in
   let pids = {title = None; data = pids_data; } in
 
+  (* is it paused? *)
+  let paused_data = Printf.sprintf "\n%s... disk_needs_parsing:\n%s\n"
+    (if env.ServerEnv.paused then "hh --pause" else "hh --resume")
+    (Relative_path.Set.elements env.ServerEnv.disk_needs_parsing
+      |> List.map ~f:Relative_path.to_absolute |> String.concat "\n") in
+  let paused = {title = None; data = paused_data; } in
+
   (* include current state of diagnostics on client, as we know it *)
   let open ServerEnv in
   let subscription_data = match env.diag_subscribe, env.persistent_client with
@@ -48,4 +55,4 @@ let go (_genv: ServerEnv.genv) (env: ServerEnv.env) : ServerRageTypes.result =
     String.concat "\n" messages in
   let subscription = {title = None; data = subscription_data; } in
 
-  pids :: subscription :: ide_files_different_from_disk
+  pids :: subscription :: paused :: ide_files_different_from_disk

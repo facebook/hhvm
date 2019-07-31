@@ -602,6 +602,17 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       let%lwt result = rpc args @@ Rpc.BIGCODE (fn) in
       print_endline result;
       Lwt.return Exit_status.No_error
+    | MODE_PAUSE pause ->
+      let%lwt () = rpc args @@ Rpc.PAUSE pause in
+      if pause then begin
+        print_endline "Paused the automatic triggering of full checks upon file changes.";
+        print_endline "To manually trigger a full check, do `hh check`.";
+        print_endline "***PAUSE MODE CURRENTLY GETS RESET UPON REBASES.***";
+        print_endline "***PAUSE MODE IS EXPERIMENTAL. USE AT YOUR OWN RISK.***";
+      end else begin
+        print_endline "Resumed the automatic triggering of full checks upon file changes.";
+      end;
+      Lwt.return Exit_status.No_error
   in
   HackEventLogger.client_check_finish exit_status;
   Lwt.return exit_status

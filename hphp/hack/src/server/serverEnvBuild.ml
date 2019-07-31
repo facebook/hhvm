@@ -262,6 +262,7 @@ let make_env ?init_id config =
     disk_needs_parsing = Relative_path.Set.empty;
     needs_phase2_redecl = Relative_path.Set.empty;
     needs_recheck = Relative_path.Set.empty;
+    paused = false;
     full_check = Full_check_done;
     prechecked_files = Prechecked_files_disabled;
     can_interrupt = true;

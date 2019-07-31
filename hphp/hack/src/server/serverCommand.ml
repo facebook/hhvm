@@ -89,6 +89,8 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | EXTRACT_STANDALONE _ -> false
   | GO_TO_DEFINITION _ -> false
   | BIGCODE _ -> false
+  | PAUSE true -> false
+  | PAUSE false -> true (* when you unpause, then it will catch up *)
 
 let command_needs_full_check = function
   | Rpc x -> rpc_command_needs_full_check x
@@ -161,6 +163,7 @@ let get_description : type a. a command -> string = function
   | Rpc EXTRACT_STANDALONE _ -> "EXTRACT_STANDALONE"
   | Rpc GO_TO_DEFINITION _ -> "GO_TO_DEFINITION"
   | Rpc BIGCODE _ -> "BIGCODE"
+  | Rpc PAUSE _ -> "PAUSE"
 
 let rpc_command_needs_writes : type a. a t -> bool  = function
   | OPEN_FILE _ -> true

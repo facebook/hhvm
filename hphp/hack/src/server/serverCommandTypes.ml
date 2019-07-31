@@ -274,6 +274,7 @@ type _ t =
   | EXTRACT_STANDALONE : string -> string t
   | GO_TO_DEFINITION : labelled_file * int * int -> Go_to_definition.result t
   | BIGCODE : string -> string t
+  | PAUSE : bool -> unit t
 
 
 let is_disconnect_rpc : type a. a t -> bool = function

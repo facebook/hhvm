@@ -322,6 +322,11 @@ class type ['a] visitor_type = object
   method on_clone : 'a -> expr -> 'a
   method on_field: 'a -> field -> 'a
   method on_afield: 'a -> afield -> 'a
+  method on_class_typeconst: 'a -> (Pos.t, func_body_ann, unit) class_typeconst -> 'a
+  method on_class_c_const: 'a -> (Pos.t, func_body_ann, unit) class_const -> 'a
+  method on_class_var: 'a -> (Pos.t, func_body_ann, unit) class_var -> 'a
+  method on_class_use: 'a -> hint -> 'a
+  method on_class_req: 'a -> (hint * bool) -> 'a
 
   method on_func_named_body: 'a -> func_body -> 'a
   method on_func_unnamed_body: 'a -> func_body -> 'a
@@ -806,8 +811,47 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     let acc = List.fold_left c.c_uses ~f:this#on_hint ~init:acc in
     let acc = List.fold_left c.c_implements ~f:this#on_hint ~init:acc in
 
+    let acc = List.fold_left c.c_typeconsts ~f:this#on_class_typeconst ~init:acc in
+    let acc = List.fold_left c.c_consts ~f:this#on_class_c_const ~init:acc in
+    let acc = List.fold_left c.c_vars ~f:this#on_class_var ~init:acc in
+    let acc = List.fold_left c.c_uses ~f:this#on_class_use ~init:acc in
+    let acc = List.fold_left c.c_reqs ~f:this#on_class_req ~init:acc in
     let acc = List.fold_left c.c_methods ~f:this#on_method_ ~init:acc in
     acc
+
+  method on_class_typeconst acc t =
+    let acc = this#on_id acc t.c_tconst_name in
+    let acc = match t.c_tconst_constraint with
+      | Some h -> this#on_hint acc h
+      | None -> acc in
+    let acc = match t.c_tconst_type with
+      | Some h -> this#on_hint acc h
+      | None -> acc in
+    acc
+
+  method on_class_c_const acc c_const =
+    let acc = match c_const.cc_type with
+      | Some h -> this#on_hint acc h
+      | None -> acc in
+    let acc = this#on_id acc c_const.cc_id in
+    let acc = match c_const.cc_expr with
+      | Some e -> this#on_expr acc e
+      | None -> acc in
+    acc
+
+  method on_class_var acc c_var =
+    let acc = this#on_id acc c_var.cv_id in
+    let acc = match c_var.cv_type with
+      | Some h -> this#on_hint acc h
+      | None -> acc in
+    let acc = match c_var.cv_expr with
+      | Some e -> this#on_expr acc e
+      | None -> acc in
+    acc
+
+  method on_class_use acc h = this#on_hint acc h
+
+  method on_class_req acc (h, _) = this#on_hint acc h
 
   method on_gconst acc g =
     let acc = this#on_id acc g.cst_name in

@@ -179,8 +179,8 @@ let check_mutability
 
 let empty_seen = Some SSet.empty
 
-let log_subtype ~this_ty ~function_name env ty_sub ty_super =
-  Typing_log.(log_with_level env "sub" 2 begin fun () ->
+let log_subtype ~level ~this_ty ~function_name env ty_sub ty_super =
+  Typing_log.(log_with_level env "sub" level begin fun () ->
     let types =
       [Log_type ("ty_sub", ty_sub);
        Log_type ("ty_super", ty_super)]  in
@@ -262,7 +262,7 @@ and simplify_subtype
   (ty_super : locl ty)
   ~(on_error : Errors.typing_error_callback)
   env : Env.env * TL.subtype_prop =
-  log_subtype ~this_ty ~function_name:"simplify_subtype" env ty_sub ty_super;
+  log_subtype ~level:2 ~this_ty ~function_name:"simplify_subtype" env ty_sub ty_super;
   let env, ety_super = Env.expand_type env ty_super in
   let env, ety_sub = Env.expand_type env ty_sub in
   let fail () =
@@ -1974,7 +1974,7 @@ and sub_type_inner
   (ty_super: locl ty)
   (on_error : Errors.typing_error_callback)
    : Env.env =
-  log_subtype ~this_ty ~function_name:"sub_type_inner" env ty_sub ty_super;
+  log_subtype ~level:1 ~this_ty ~function_name:"sub_type_inner" env ty_sub ty_super;
   let env, prop = simplify_subtype
     ~seen_generic_params:empty_seen
     ~no_top_bottom:false
@@ -2230,7 +2230,7 @@ let decompose_subtype_add_bound
 
   (* name_sub <: ty_super so add an upper bound on name_sub *)
   | (_, Tabstract (AKgeneric name_sub, _)), _ when not (phys_equal ty_sub ty_super) ->
-    log_subtype ~this_ty:None ~function_name:"decompose_subtype_add_bound" env ty_sub ty_super;
+    log_subtype ~level:2 ~this_ty:None ~function_name:"decompose_subtype_add_bound" env ty_sub ty_super;
     let tys = Env.get_upper_bounds env name_sub in
     (* Don't add the same type twice! *)
     if Typing_set.mem ty_super tys then env
@@ -2238,7 +2238,7 @@ let decompose_subtype_add_bound
 
   (* ty_sub <: name_super so add a lower bound on name_super *)
   | _, (_, Tabstract (AKgeneric name_super, _)) when not (phys_equal ty_sub ty_super) ->
-    log_subtype ~this_ty:None ~function_name:"decompose_subtype_add_bound" env ty_sub ty_super;
+    log_subtype ~level:2 ~this_ty:None ~function_name:"decompose_subtype_add_bound" env ty_sub ty_super;
     let tys = Env.get_lower_bounds env name_super in
     (* Don't add the same type twice! *)
     if Typing_set.mem ty_sub tys then env
@@ -2272,7 +2272,7 @@ let rec decompose_subtype
   (ty_super : locl ty)
   (on_error : Errors.typing_error_callback)
   : Env.env =
-  log_subtype ~this_ty:None ~function_name:"decompose_subtype" env ty_sub ty_super;
+  log_subtype ~level:2 ~this_ty:None ~function_name:"decompose_subtype" env ty_sub ty_super;
   let env, prop =
     simplify_subtype ~seen_generic_params:None
       ~no_top_bottom:false ~this_ty:None ty_sub ty_super ~on_error env in
@@ -2336,7 +2336,7 @@ let add_constraint
   (ck : Ast_defs.constraint_kind)
   (ty_sub : locl ty)
   (ty_super : locl ty) : Env.env =
-  log_subtype ~this_ty:None ~function_name:"add_constraint" env ty_sub ty_super;
+  log_subtype ~level:1 ~this_ty:None ~function_name:"add_constraint" env ty_sub ty_super;
   let oldsize = Env.get_tpenv_size env in
   let env' = decompose_constraint p env ck ty_sub ty_super in
   if Env.get_tpenv_size env' = oldsize

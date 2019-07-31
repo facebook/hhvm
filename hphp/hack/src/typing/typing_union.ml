@@ -65,7 +65,7 @@ let rec union env (r1, _ as ty1) (r2, _ as ty2) =
   if Typing_utils.is_sub_type_for_union env ty2 ty1 then env, ty1 else
   let r = union_reason r1 r2 in
   union_ env ty1 ty2 r in
-    Typing_log.(log_with_level env "sub" 1 (fun () ->
+    Typing_log.(log_with_level env "union" 1 (fun () ->
       log_types (Reason.to_pos r2) env
       [Log_head ("Typing_union.union",
          [Log_type ("ty1", ty1);

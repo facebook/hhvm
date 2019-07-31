@@ -238,6 +238,7 @@ val expected_stringlike : typing_error_callback
 val type_constant_mismatch : typing_error_callback
 val type_constant_redeclaration : typing_error_callback
 val constant_does_not_match_enum_type : typing_error_callback
+val enum_underlying_type_must_be_arraykey : typing_error_callback
 val enum_constraint_must_be_arraykey : typing_error_callback
 val enum_subtype_must_have_compatible_constraint : typing_error_callback
 val parameter_default_value_wrong_type : typing_error_callback

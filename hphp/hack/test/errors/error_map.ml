@@ -585,4 +585,5 @@ BadMethodOverride = 4341
 BadEnumExtends = 4342
 XhpAttributeValueDoesNotMatchHint = 4343
 TraitPropConstClass = 4344
+EnumUnderlyingTypeMustBeArraykey = 4345
   |}]

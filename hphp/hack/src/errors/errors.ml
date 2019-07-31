@@ -1644,7 +1644,7 @@ let enum_constant_type_bad pos ty_pos ty trail =
 
 let enum_type_bad pos ty trail =
   add_with_trail (Typing.err_code Typing.EnumTypeBad)
-    [pos, "Enums must be int or string, not " ^ ty]
+    [pos, "Enums must be int or string or arraykey, not " ^ ty]
     trail
 
 let enum_type_typedef_nonnull pos =
@@ -2647,6 +2647,8 @@ let type_constant_mismatch = maybe_unify_error Typing.TypeConstantMismatch
 let type_constant_redeclaration = maybe_unify_error Typing.TypeConstantRedeclaration
 
 let constant_does_not_match_enum_type = maybe_unify_error Typing.ConstantDoesNotMatchEnumType
+
+let enum_underlying_type_must_be_arraykey = maybe_unify_error Typing.EnumUnderlyingTypeMustBeArraykey
 
 let enum_constraint_must_be_arraykey = maybe_unify_error Typing.EnumConstraintMustBeArraykey
 

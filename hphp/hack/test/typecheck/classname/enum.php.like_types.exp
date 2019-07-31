@@ -1,2 +1,2 @@
-File "enum.php", line 9, characters 22-33:
-Enums must be int or string, not a classname string or a dynamic value (Typing[4024])
+File "enum.php", line 9, characters 7-7:
+Enums must be int or string or arraykey, not ~classname<~C> (Typing[4024])

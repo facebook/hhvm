@@ -8,13 +8,9 @@ Expected arraykey
 File "4329-4330-enum_constaint_must_be_arraykey_and_compatible.php", line 4, characters 19-22:
 But got bool
 File "4329-4330-enum_constaint_must_be_arraykey_and_compatible.php", line 4, characters 6-8:
-Invalid constraint on enum (Typing[4329])
+Enums must be int or string or arraykey, not bool (Typing[4024])
 File "4329-4330-enum_constaint_must_be_arraykey_and_compatible.php", line 4, characters 6-8:
-Expected arraykey arising from an implicit 'as arraykey' constraint on this type
-File "4329-4330-enum_constaint_must_be_arraykey_and_compatible.php", line 4, characters 19-22:
-But got bool
-File "4329-4330-enum_constaint_must_be_arraykey_and_compatible.php", line 4, characters 6-8:
-Invalid constraint on enum (Typing[4330])
+Underlying type for enum is incompatible with constraint (Typing[4330])
 File "4329-4330-enum_constaint_must_be_arraykey_and_compatible.php", line 4, characters 19-22:
 Expected bool
 File "4329-4330-enum_constaint_must_be_arraykey_and_compatible.php", line 4, characters 12-14:

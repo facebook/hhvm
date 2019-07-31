@@ -574,6 +574,8 @@ type ureason =
   | URclass_req
   | URenum
   | URenum_cstr
+  | URenum_underlying
+  | URenum_incompatible_cstr
   | URtypeconst_cstr
   | URsubsume_tconst_cstr
   | URsubsume_tconst_assign
@@ -623,6 +625,10 @@ let string_of_ureason = function
       "Constant does not match the type of the enum it is in"
   | URenum_cstr ->
       "Invalid constraint on enum"
+  | URenum_underlying ->
+      "Invalid underlying type for enum"
+  | URenum_incompatible_cstr ->
+      "Underlying type for enum is incompatible with constraint"
   | URtypeconst_cstr ->
      "Unable to satisfy constraint on this type constant"
   | URsubsume_tconst_cstr ->

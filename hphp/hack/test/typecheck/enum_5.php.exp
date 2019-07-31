@@ -1,1 +1,2 @@
-No errors
+File "enum_5.php--use.php", line 4, characters 7-9:
+Enums must be int or string or arraykey, not foo_alias (Typing[4024])

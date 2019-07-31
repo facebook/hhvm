@@ -848,7 +848,7 @@ end = functor(CheckKind:CheckKindType) -> struct
 
     let full_check_done =
       CheckKind.is_full && Relative_path.Set.is_empty needs_recheck in
-    let diag_subscribe = Option.map old_env.diag_subscribe ~f:begin fun x ->
+    let diag_subscribe = Option.map env.diag_subscribe ~f:begin fun x ->
       Diagnostic_subscription.update x
         ~priority_files:env.editor_open_files
         ~reparsed:files_to_parse

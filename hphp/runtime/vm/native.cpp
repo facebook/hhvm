@@ -142,7 +142,12 @@ void populateArgs(Registers& regs, const Func* const func,
     auto const& pi = func->params()[i];
     auto const type = pi.builtinType;
     if (pi.inout) {
-      *io = arg;
+      if (auto const iv = builtinInValue(func, i)) {
+        *io = *iv;
+        tvDecRefGen(arg);
+      } else {
+        *io = arg;
+      }
 
       // Any persistent values may become counted...
       if (isArrayLikeType(io->m_type)) {
@@ -540,6 +545,89 @@ void getFunctionPointers(const NativeFunctionInfo& info, int nativeAttrs,
 
 //////////////////////////////////////////////////////////////////////////////
 
+const StaticString s_outOnly("__OutOnly");
+
+static MaybeDataType typeForOutParam(TypedValue attr) {
+
+  if (!isArrayLikeType(attr.m_type) || attr.m_data.parr->size() < 1) {
+    return {};
+  }
+
+  auto const& type = attr.m_data.parr->atPos(attr.m_data.parr->iter_begin());
+  if (!isStringType(type.m_type)) return {};
+
+  auto const str = type.m_data.pstr->data();
+
+#define DT(name, ...) if (strcmp(str, "KindOf" #name) == 0) return KindOf##name;
+  DATATYPES
+#undef DT
+
+  return {};
+}
+
+MaybeDataType builtinOutType(const Func::ParamInfo& pinfo) {
+  auto const tcDT = pinfo.typeConstraint.underlyingDataType();
+  auto& map = pinfo.userAttributes;
+
+  auto const it = map.find(s_outOnly.get());
+  if (it == map.end()) return tcDT;
+
+  auto const dt = typeForOutParam(it->second);
+  return dt ? dt : tcDT;
+}
+
+static folly::Optional<TypedValue> builtinInValue(
+  const Func::ParamInfo& pinfo
+) {
+  assertx(pinfo.inout);
+  auto& map = pinfo.userAttributes;
+
+  auto const it = map.find(s_outOnly.get());
+  if (it == map.end()) return {};
+
+  auto const dt = typeForOutParam(it->second);
+  if (!dt) return make_tv<KindOfNull>();
+
+  switch (*dt) {
+  case KindOfNull:    return make_tv<KindOfNull>();
+  case KindOfBoolean: return make_tv<KindOfBoolean>(false);
+  case KindOfInt64:   return make_tv<KindOfInt64>(0);
+  case KindOfDouble:  return make_tv<KindOfDouble>(0.0);
+  case KindOfPersistentString:
+  case KindOfString:  return make_tv<KindOfString>(empty_string().get());
+  case KindOfPersistentVec:
+  case KindOfVec:     return make_tv<KindOfVec>(empty_vec_array().get());
+  case KindOfPersistentDict:
+  case KindOfDict:    return make_tv<KindOfDict>(empty_dict_array().get());
+  case KindOfPersistentKeyset:
+  case KindOfKeyset:  return make_tv<KindOfNull>();
+  case KindOfPersistentShape:
+  case KindOfShape:   return make_array_like_tv(empty_darray().get());
+  case KindOfPersistentArray:
+  case KindOfArray:   return make_tv<KindOfArray>(empty_array().get());
+  case KindOfUninit:
+  case KindOfObject:
+  case KindOfResource:
+  case KindOfRef:
+  case KindOfFunc:
+  case KindOfClass:
+  case KindOfClsMeth:
+  case KindOfRecord:  return make_tv<KindOfNull>();
+  }
+
+  not_reached();
+}
+
+MaybeDataType builtinOutType(const Func* builtin, uint32_t i) {
+  return builtinOutType(builtin->params()[i]);
+}
+
+folly::Optional<TypedValue> builtinInValue(const Func* builtin, uint32_t i) {
+  return builtinInValue(builtin->params()[i]);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
   using T = NativeSig::Type;
 
@@ -583,10 +671,47 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
 }
 
 static bool tcCheckNativeIO(
-  const TypeConstraint& tc, const NativeSig::Type ty
+  const Func::ParamInfo& pinfo, const NativeSig::Type ty
 ) {
   using T = NativeSig::Type;
 
+  auto const checkDT = [&] (DataType dt) -> bool {
+    switch (dt) {
+      case KindOfDouble:       return ty == T::DoubleIO;
+      case KindOfBoolean:      return ty == T::BoolIO;
+      case KindOfObject:       return ty == T::ObjectIO;
+      case KindOfPersistentString:
+      case KindOfString:       return ty == T::StringIO;
+      case KindOfPersistentVec:
+      case KindOfVec:          return ty == T::ArrayIO;
+      case KindOfPersistentDict:
+      case KindOfDict:         return ty == T::ArrayIO;
+      case KindOfPersistentKeyset:
+      case KindOfKeyset:       return ty == T::ArrayIO;
+      case KindOfPersistentShape:
+      case KindOfShape:        return ty == T::ArrayIO;
+      case KindOfPersistentArray:
+      case KindOfArray:        return ty == T::ArrayIO;
+      case KindOfResource:     return ty == T::ResourceIO;
+      case KindOfUninit:
+      case KindOfNull:         return false;
+      case KindOfRef:          return ty == T::MixedIO;
+      case KindOfInt64:        return ty == T::IntIO;
+      case KindOfFunc:         return ty == T::FuncIO;
+      case KindOfClass:        return ty == T::ClassIO;
+      case KindOfClsMeth:      return ty == T::ClsMethIO;
+      case KindOfRecord:       return false; // TODO (T41031632)
+    }
+    not_reached();
+  };
+
+  auto const tv = builtinInValue(pinfo);
+  if (tv) {
+    if (isNullType(tv->m_type)) return ty == T::MixedIO;
+    return checkDT(tv->m_type);
+  }
+
+  auto const& tc = pinfo.typeConstraint;
   if (!tc.hasConstraint() || tc.isNullable() || tc.isCallable() ||
       tc.isArrayKey() || tc.isNumber() || tc.isVecOrDict() ||
       tc.isVArrayOrDArray() || tc.isArrayLike()) {
@@ -597,33 +722,7 @@ static bool tcCheckNativeIO(
     return false;
   }
 
-  switch (*tc.underlyingDataType()) {
-    case KindOfDouble:       return ty == T::DoubleIO;
-    case KindOfBoolean:      return ty == T::BoolIO;
-    case KindOfObject:       return ty == T::ObjectIO;
-    case KindOfPersistentString:
-    case KindOfString:       return ty == T::StringIO;
-    case KindOfPersistentVec:
-    case KindOfVec:          return ty == T::ArrayIO;
-    case KindOfPersistentDict:
-    case KindOfDict:         return ty == T::ArrayIO;
-    case KindOfPersistentKeyset:
-    case KindOfKeyset:       return ty == T::ArrayIO;
-    case KindOfPersistentShape:
-    case KindOfShape:        return ty == T::ArrayIO;
-    case KindOfPersistentArray:
-    case KindOfArray:        return ty == T::ArrayIO;
-    case KindOfResource:     return ty == T::ResourceIO;
-    case KindOfUninit:
-    case KindOfNull:         return false;
-    case KindOfRef:          return ty == T::MixedIO;
-    case KindOfInt64:        return ty == T::IntIO;
-    case KindOfFunc:         return ty == T::FuncIO;
-    case KindOfClass:        return ty == T::ClassIO;
-    case KindOfClsMeth:      return ty == T::ClsMethIO;
-    case KindOfRecord:       return false; // TODO (T41031632)
-  }
-  not_reached();
+  return checkDT(*tc.underlyingDataType());
 }
 
 const char* kInvalidReturnTypeMessage = "Invalid return type detected";
@@ -678,7 +777,7 @@ const char* checkTypeFunc(const NativeSig& sig,
     }
 
     if (pInfo.inout) {
-      if (!tcCheckNativeIO(pInfo.typeConstraint, argTy)) {
+      if (!tcCheckNativeIO(pInfo, argTy)) {
         return kInvalidArgTypeMessage;
       }
       continue;

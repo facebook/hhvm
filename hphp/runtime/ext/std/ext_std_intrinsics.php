@@ -51,7 +51,10 @@ function builtin_io(
   object $o,
   mixed $m,
   inout mixed $mix,
-  bool $retOrig
+  bool $retOrig,
+  <<__OutOnly("KindOfBoolean")>> inout mixed $out1,
+  <<__OutOnly("KindOfArray")>> inout mixed $out2,
+  <<__OutOnly("KindOfObject")>> inout mixed $out3,
 ): array;
 
 <<__Native("NoFCallBuiltin")>>
@@ -64,7 +67,10 @@ function builtin_io_no_fca(
   object $o,
   mixed $m,
   inout mixed $mix,
-  bool $retOrig
+  bool $retOrig,
+  <<__OutOnly("KindOfBoolean")>> inout mixed $out1,
+  <<__OutOnly("KindOfArray")>> inout mixed $out2,
+  <<__OutOnly("KindOfObject")>> inout mixed $out3,
 ): array;
 
 /*

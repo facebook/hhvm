@@ -171,8 +171,11 @@ void HHVM_FUNCTION(hhbbc_fail_verification) {
  *   inout object $obj
  *   object $o,
  *   mixed $m,
- *   inout mixed $mix
- *   bool retOrig
+ *   inout mixed $mix,
+ *   bool retOrig,
+ *   <<__OutOnly("KindOfBoolean")>> inout mixed $out1,
+ *   <<__OutOnly("KindOfArray")>> inout mixed $out2,
+ *   <<__OutOnly("KindOfObject")>> inout mixed $out3,
  * ): array;
  */
 Array HHVM_FUNCTION(
@@ -185,7 +188,10 @@ Array HHVM_FUNCTION(
   ObjectArg o,
   const Variant& m,
   Variant& mix,
-  bool retOrig
+  bool retOrig,
+  bool& outBool,
+  Array& outArr,
+  Variant& outObj
 ) {
   auto const orig = retOrig
     ? make_packed_array(s.get(), str, num, i, obj, o.get(), m, mix)
@@ -201,6 +207,12 @@ Array HHVM_FUNCTION(
   else         mix = m;
 
   obj = Object{o.get()};
+
+  outArr = retOrig
+    ? make_packed_array(outBool, outArr, outObj)
+    : Array::Create();
+  outBool = true;
+  outObj = SystemLib::AllocStdClassObject();
 
   return orig;
 }

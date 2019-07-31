@@ -9,8 +9,11 @@
  *   inout object $obj
  *   object $o,
  *   mixed $m,
- *   inout mixed $mix
- *   bool retOrig
+ *   inout mixed $mix,
+ *   bool retOrig,
+ *   <<__OutOnly("KindOfBoolean")>> inout mixed $out1,
+ *   <<__OutOnly("KindOfArray")>> inout mixed $out2,
+ *   <<__OutOnly("KindOfObject")>> inout mixed $out3,
  * ): array;
  */
 function go(bool $ret) {
@@ -24,6 +27,9 @@ function go(bool $ret) {
   $o2 = new Exception;
   $m1 = "mixed";
   $m2 = 42;
+  $out1 = new stdclass;
+  $out2 = [1, 2, new stdclass];
+  $out3 = "beepboop";
   var_dump(
     "one",
     "two",
@@ -44,6 +50,9 @@ function go(bool $ret) {
         $m1,
         inout $m2,
         $ret,
+        inout $out1,
+        inout $out2,
+        inout $out3,
       ),
     ),
   );
@@ -56,6 +65,9 @@ function go(bool $ret) {
     get_class($o2),
     gettype($m1),
     gettype($m2),
+    $out1,
+    $out2,
+    $out3,
   );
   echo "====================================================================\n";
 }
@@ -69,8 +81,11 @@ function go(bool $ret) {
  *   inout object $obj
  *   object $o,
  *   mixed $m,
- *   inout mixed $mix
- *   bool retOrig
+ *   inout mixed $mix,
+ *   bool retOrig,
+ *   <<__OutOnly("KindOfBoolean")>> inout mixed $out1,
+ *   <<__OutOnly("KindOfArray")>> inout mixed $out2,
+ *   <<__OutOnly("KindOfObject")>> inout mixed $out3,
  * ): array;
  */
 function go2(bool $ret) {
@@ -84,6 +99,9 @@ function go2(bool $ret) {
   $o2 = new Exception;
   $m1 = "mixed";
   $m2 = 42;
+  $out1 = new stdclass;
+  $out2 = [1, 2, new stdclass];
+  $out3 = "beepboop";
   var_dump(
     "one",
     "two",
@@ -104,6 +122,9 @@ function go2(bool $ret) {
         $m1,
         inout $m2,
         $ret,
+        inout $out1,
+        inout $out2,
+        inout $out3,
       ),
     ),
   );
@@ -116,6 +137,9 @@ function go2(bool $ret) {
     get_class($o2),
     gettype($m1),
     gettype($m2),
+    $out1,
+    $out2,
+    $out3,
   );
   echo "====================================================================\n";
 }

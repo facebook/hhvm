@@ -1691,6 +1691,12 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
 
 //////////////////////////////////////////////////////////////////////
 
+SSATmp* builtinInValue(IRGS& env, const Func* builtin, uint32_t i) {
+  auto const tv = Native::builtinInValue(builtin, i);
+  if (!tv) return nullptr;
+  return cns(env, *tv);
+}
+
 SSATmp* builtinCall(IRGS& env,
                     const Func* callee,
                     ParamPrep& params,
@@ -1744,11 +1750,22 @@ SSATmp* builtinCall(IRGS& env,
     uint32_t aoff = params.ctx ? 3 : 2;
     for (auto i = uint32_t{0}; i < params.size(); ++i) {
       if (!params[i].isInOut) continue;
-      auto const ty = [&] () -> folly::Optional<Type> {
+      auto ty = [&] () -> folly::Optional<Type> {
         auto const r = builtinOutType(callee, i);
         if (r.isKnownDataType()) return r;
         return {};
       }();
+      if (auto const iv = builtinInValue(env, callee, i)) {
+        decRef(env, realized[i + aoff]);
+        realized[i + aoff] = iv;
+        ty = iv->type();
+        if (ty->maybe(TPersistentArr)) *ty |= TArr;
+        if (ty->maybe(TPersistentVec)) *ty |= TVec;
+        if (ty->maybe(TPersistentDict)) *ty |= TDict;
+        if (ty->maybe(TPersistentKeyset)) *ty |= TKeyset;
+        if (ty->maybe(TPersistentShape)) *ty |= TShape;
+        if (ty->maybe(TPersistentStr)) *ty |= TStr;
+      }
       if (params.forNativeImpl) {
         // Move the value to the caller stack to avoid an extra ref-count
         gen(env, StLoc, LocalId{i}, fp(env), cns(env, TInitNull));
@@ -2063,6 +2080,9 @@ bool collectionMethodReturnsThis(const Func* callee) {
 Type builtinOutType(const Func* builtin, uint32_t i) {
   assertx(builtin->isCPPBuiltin());
   assertx(builtin->params()[i].inout);
+
+  if (auto const dt = Native::builtinOutType(builtin, i)) return Type{*dt};
+
   auto const& tc = builtin->params()[i].typeConstraint;
 
   if (tc.isSoft() || tc.isMixed()) return TInitCell;

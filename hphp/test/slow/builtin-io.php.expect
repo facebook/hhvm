@@ -40,6 +40,18 @@ string(9) "Exception"
 string(9) "Exception"
 string(6) "string"
 string(6) "object"
+bool(true)
+array(3) {
+  [0]=>
+  bool(false)
+  [1]=>
+  array(0) {
+  }
+  [2]=>
+  NULL
+}
+object(stdClass) (0) {
+}
 ====================================================================
 ret = 
 
@@ -67,6 +79,11 @@ string(9) "Exception"
 string(9) "Exception"
 string(6) "string"
 string(6) "string"
+bool(true)
+array(0) {
+}
+object(stdClass) (0) {
+}
 ====================================================================
 ret = 1
 
@@ -110,6 +127,18 @@ string(9) "Exception"
 string(9) "Exception"
 string(6) "string"
 string(6) "object"
+bool(true)
+array(3) {
+  [0]=>
+  bool(false)
+  [1]=>
+  array(0) {
+  }
+  [2]=>
+  NULL
+}
+object(stdClass) (0) {
+}
 ====================================================================
 ret = 1
 
@@ -153,6 +182,18 @@ string(9) "Exception"
 string(9) "Exception"
 string(6) "string"
 string(6) "object"
+bool(true)
+array(3) {
+  [0]=>
+  bool(false)
+  [1]=>
+  array(0) {
+  }
+  [2]=>
+  NULL
+}
+object(stdClass) (0) {
+}
 ====================================================================
 ret = 
 
@@ -180,6 +221,11 @@ string(9) "Exception"
 string(9) "Exception"
 string(6) "string"
 string(6) "string"
+bool(true)
+array(0) {
+}
+object(stdClass) (0) {
+}
 ====================================================================
 ret = 1
 
@@ -223,4 +269,16 @@ string(9) "Exception"
 string(9) "Exception"
 string(6) "string"
 string(6) "object"
+bool(true)
+array(3) {
+  [0]=>
+  bool(false)
+  [1]=>
+  array(0) {
+  }
+  [2]=>
+  NULL
+}
+object(stdClass) (0) {
+}
 ====================================================================

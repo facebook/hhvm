@@ -212,35 +212,18 @@ let instr_fcallobjmethodd fcall_args method_ flavor =
   instr (ICall (FCallObjMethodD (fcall_args, flavor, method_)))
 let instr_fcallobjmethodrd fcall_args method_ flavor =
   instr (ICall (FCallObjMethodRD (fcall_args, flavor, method_)))
-let instr_fcallclsmethodd fcall_args method_name class_name = gather [
-  instr (ICall (
-    FPushClsMethodD ((num_args_of fcall_args), method_name, class_name)));
-  instr (ICall (FCall (fcall_args)))
-]
-let instr_fcallclsmethodrd fcall_args method_name class_name = gather [
-  instr (ICall (
-    FPushClsMethodRD ((num_args_of fcall_args), method_name, class_name)));
-  instr (ICall (FCall (fcall_args)))
-]
-let instr_fcallclsmethod fcall_args pl = gather [
-  instr (ICall (
-    FPushClsMethod ((num_args_of fcall_args), pl)));
-  instr (ICall (FCall (fcall_args)))
-]
-let instr_fcallclsmethods fcall_args scref = gather [
-  instr (ICall (FPushClsMethodS ((num_args_of fcall_args), scref)));
-  instr (ICall (FCall (fcall_args)))
-]
-let instr_fcallclsmethodsd fcall_args scref method_name = gather [
-  instr (ICall (
-    FPushClsMethodSD ((num_args_of fcall_args), scref, method_name)));
-  instr (ICall (FCall (fcall_args)))
-]
-let instr_fcallclsmethodsrd fcall_args scref method_name = gather [
-  instr (ICall (
-    FPushClsMethodSRD ((num_args_of fcall_args), scref, method_name)));
-  instr (ICall (FCall (fcall_args)))
-]
+let instr_fcallclsmethodd fcall_args method_name class_name =
+  instr (ICall (FCallClsMethodD (fcall_args, class_name, method_name)))
+let instr_fcallclsmethodrd fcall_args method_name class_name =
+  instr (ICall (FCallClsMethodRD (fcall_args, class_name, method_name)))
+let instr_fcallclsmethod fcall_args pl =
+  instr (ICall (FCallClsMethod (fcall_args, pl)))
+let instr_fcallclsmethods fcall_args scref =
+  instr (ICall (FCallClsMethodS (fcall_args, scref)))
+let instr_fcallclsmethodsd fcall_args scref method_name =
+  instr (ICall (FCallClsMethodSD (fcall_args, scref, method_name)))
+let instr_fcallclsmethodsrd fcall_args scref method_name =
+  instr (ICall (FCallClsMethodSRD (fcall_args, scref, method_name)))
 let instr_fcallobjmethodd_nullthrows fcall_args method_ =
   instr_fcallobjmethodd fcall_args method_ Ast_defs.OG_nullthrows
 let instr_querym num_params op key =

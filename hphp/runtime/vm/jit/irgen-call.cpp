@@ -701,14 +701,14 @@ inline SSATmp* ldCtxForClsMethod(IRGS& env,
 }
 
 template<class Fn>
-void optimizeProfiledCallObjMethod(IRGS& env,
-                                   const FCallArgs& fca,
-                                   SSATmp* objOrCls,
-                                   bool knownIfaceFunc,
-                                   const StringData* methodName,
-                                   bool dynamic,
-                                   uint32_t numExtraInputs,
-                                   Fn emitFCall) {
+void optimizeProfiledCallMethod(IRGS& env,
+                                const FCallArgs& fca,
+                                SSATmp* objOrCls,
+                                bool knownIfaceFunc,
+                                const StringData* methodName,
+                                bool dynamic,
+                                uint32_t numExtraInputs,
+                                Fn emitFCall) {
   always_assert(objOrCls->type().subtypeOfAny(TObj, TCls));
   auto const isStaticCall = objOrCls->type() <= TCls;
   auto profile = TargetProfile<MethProfile>(env.context, env.irb->curMarker(),
@@ -989,8 +989,8 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
 
   // If we don't know anything about the object's class, or all we know is an
   // interface that it implements, then enable PGO.
-  optimizeProfiledCallObjMethod(env, fca, obj, knownIfaceFunc != nullptr,
-                                methodName->strVal(), dynamic, 0, emitFCall);
+  optimizeProfiledCallMethod(env, fca, obj, knownIfaceFunc != nullptr,
+                             methodName->strVal(), dynamic, 0, emitFCall);
 }
 
 void fpushFuncObj(IRGS& env, uint32_t numParams) {
@@ -1417,11 +1417,13 @@ SSATmp* loadClsMethodUnknown(IRGS& env,
   );
 }
 
-void fpushClsMethodD(IRGS& env,
-                     uint32_t numParams,
+void fcallClsMethodD(IRGS& env,
+                     const FCallArgs& fca,
+                     const StringData* classHint,
                      const StringData* className,
                      const StringData* methodName,
                      bool isRFlavor) {
+  // TODO: take advantage of classHint if it is unique, but className is not
   auto const cls = Unit::lookupUniqueClassInContext(className, curClass(env));
   if (cls) {
     auto const func = lookupImmutableClsMethod(cls, methodName, curFunc(env),
@@ -1432,8 +1434,7 @@ void fpushClsMethodD(IRGS& env,
       }
       auto const ctx = ldCtxForClsMethod(env, func, cns(env, cls), cls, true);
       auto const tsList = isRFlavor ? popC(env) : nullptr;
-      prepareToCallKnown(env, func, ctx, numParams, nullptr, false, tsList);
-      return;
+      return prepareAndCallKnown(env, func, fca, ctx, nullptr, false, tsList);
     }
   }
 
@@ -1443,24 +1444,25 @@ void fpushClsMethodD(IRGS& env,
   auto const func = loadClsMethodUnknown(env, data, slowExit);
   auto const ctx = gen(env, LdClsMethodCacheCls, data);
   auto const tsList = isRFlavor ? popC(env) : nullptr;
-  prepareToCallUnknown(env, func, ctx, numParams, nullptr, false, false,
-                       tsList);
+  prepareAndCallProfiled(env, func, fca, ctx, false, false, tsList);
 }
 
 }
 
-void emitFPushClsMethodD(IRGS& env,
-                         uint32_t numParams,
-                         const StringData* methodName,
-                         const StringData* className) {
-  fpushClsMethodD(env, numParams, className, methodName, false);
+void emitFCallClsMethodD(IRGS& env,
+                         FCallArgs fca,
+                         const StringData* classHint,
+                         const StringData* className,
+                         const StringData* methodName) {
+  fcallClsMethodD(env, fca, classHint, className, methodName, false);
 }
 
-void emitFPushClsMethodRD(IRGS& env,
-                         uint32_t numParams,
-                         const StringData* methodName,
-                         const StringData* className) {
-  fpushClsMethodD(env, numParams, className, methodName, true);
+void emitFCallClsMethodRD(IRGS& env,
+                          FCallArgs fca,
+                          const StringData* classHint,
+                          const StringData* className,
+                          const StringData* methodName) {
+  fcallClsMethodD(env, fca, classHint, className, methodName, true);
 }
 
 const StaticString s_resolveMagicCall(
@@ -1559,184 +1561,6 @@ void emitResolveClsMethod(IRGS& env) {
 
 namespace {
 
-template<class Fn>
-void optimizeProfiledPushClsMethod(IRGS& env,
-                                   SSATmp* objOrCls,
-                                   bool knownIfaceFunc,
-                                   const StringData* methodName,
-                                   uint32_t numParams,
-                                   bool dynamic,
-                                   uint32_t numExtraInputs,
-                                   Fn emitFPush) {
-  always_assert(objOrCls->type().subtypeOfAny(TObj, TCls));
-  auto const isStaticCall = objOrCls->type() <= TCls;
-  auto profile = TargetProfile<MethProfile>(env.context, env.irb->curMarker(),
-                                            methProfileKey.get());
-  if (!profile.optimizing()) {
-    emitFPush(&profile);
-    return;
-  }
-
-  auto getCtx = [&](const Func* callee,
-                    SSATmp* ctx,
-                    const Class* cls) -> SSATmp* {
-    if (isStaticCall) {
-      return ldCtxForClsMethod(env, callee, ctx,
-                               cls ? cls : callee->cls(), cls != nullptr);
-    }
-    if (!callee->isStaticInPrologue()) return ctx;
-    assertx(ctx->type() <= TObj);
-    auto ret = cls ? cns(env, cls) : gen(env, LdObjClass, ctx);
-    decRef(env, ctx);
-    return ret;
-  };
-
-  auto const fallback = [&] {
-    hint(env, Block::Hint::Unlikely);
-    IRUnit::Hinter h(env.irb->unit(), Block::Hint::Unlikely);
-
-    emitFPush();
-    gen(env, Jmp, makeExit(env, nextBcOff(env)));
-  };
-
-  MethProfile data = profile.data();
-
-  if (auto const uniqueMeth = data.uniqueMeth()) {
-    bool isMagic = !uniqueMeth->name()->isame(methodName);
-    if (auto const uniqueClass = data.uniqueClass()) {
-      // Profiling saw a unique class.
-      // Check for it, then burn in the func
-      ifThen(
-        env,
-        [&] (Block* sideExit) {
-          auto const ty = isStaticCall
-            ? Type::ExactCls(uniqueClass) : Type::ExactObj(uniqueClass);
-          auto const refined = gen(env, CheckType, ty, sideExit, objOrCls);
-          env.irb->constrainValue(refined, GuardConstraint(uniqueClass));
-          auto const ctx = getCtx(uniqueMeth, refined, uniqueClass);
-          discard(env, numExtraInputs);
-          prepareToCallKnown(env, uniqueMeth, ctx, numParams,
-                             isMagic ? methodName : nullptr,
-                             dynamic, nullptr);
-        },
-        fallback
-      );
-      return;
-    }
-
-    if (isMagic) {
-      emitFPush();
-      return;
-    }
-
-    // Although there were multiple classes, the method was unique
-    // (this comes up eg for a final method in a base class).  But
-    // note that we can't allow a magic call here since it's possible
-    // that an as-yet-unseen derived class defines a method named
-    // methodName.
-    ifThen(
-      env,
-      [&] (Block* sideExit) {
-        auto const slot = cns(env, uniqueMeth->methodSlot());
-        auto const negSlot = cns(env, -(uniqueMeth->methodSlot() + 1));
-        auto const cls = isStaticCall
-          ? objOrCls : gen(env, LdObjClass, objOrCls);
-        auto const len = gen(env, LdFuncVecLen, cls);
-        auto const cmp = gen(env, LteInt, len, slot);
-        gen(env, JmpNZero, sideExit, cmp);
-        auto const meth = gen(env, LdClsMethod, cls, negSlot);
-        auto const same = gen(env, EqFunc, meth, cns(env, uniqueMeth));
-        gen(env, JmpZero, sideExit, same);
-        auto const ctx = getCtx(uniqueMeth, objOrCls, nullptr);
-        discard(env, numExtraInputs);
-        prepareToCallKnown(env, uniqueMeth, ctx, numParams, nullptr, dynamic,
-                           nullptr);
-      },
-      fallback
-    );
-    return;
-  }
-
-  if (auto const baseMeth = data.baseMeth()) {
-    if (!baseMeth->name()->isame(methodName)) {
-      emitFPush();
-      return;
-    }
-
-    // The method was defined in a common base class.  We just need to check for
-    // an instance of the class, and then use the method from the right slot.
-    ifThen(
-      env,
-      [&] (Block* sideExit) {
-        auto const cls = isStaticCall
-          ? objOrCls : gen(env, LdObjClass, objOrCls);
-        auto const ecData = ExtendsClassData{baseMeth->cls(), true};
-        auto const flag = gen(env, ExtendsClass, ecData, cls);
-        gen(env, JmpZero, sideExit, flag);
-        auto const negSlot = cns(env, -(baseMeth->methodSlot() + 1));
-        auto const meth = gen(env, LdClsMethod, cls, negSlot);
-        auto const ctx = getCtx(baseMeth, objOrCls, nullptr);
-        auto const mightCareAboutDynCall =
-          RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0
-          || RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0;
-        discard(env, numExtraInputs);
-        prepareToCallUnknown(env, meth, ctx, numParams, nullptr, dynamic,
-                             mightCareAboutDynCall, nullptr);
-      },
-      fallback
-    );
-    return;
-  }
-
-  // If we know the object implements a known interface that defines the called
-  // method, the other cases below are not worth the extra checks they insert.
-  if (knownIfaceFunc) {
-    emitFPush();
-    return;
-  }
-
-  if (auto const intfMeth = data.interfaceMeth()) {
-    if (!intfMeth->name()->isame(methodName)) {
-      emitFPush();
-      return;
-    }
-
-    auto const vtableSlot = intfMeth->cls()->preClass()->ifaceVtableSlot();
-    if (vtableSlot == kInvalidSlot) {
-      emitFPush();
-      return;
-    }
-
-    // The method was defined in a common interface, so check for that and use
-    // LdIfaceMethod.
-    ifThen(
-      env,
-      [&] (Block* sideExit) {
-        auto const cls = isStaticCall
-          ? objOrCls : gen(env, LdObjClass, objOrCls);
-        auto const cData = InstanceOfIfaceVtableData{
-          intfMeth->cls(), !isStaticCall
-        };
-        auto const flag = gen(env, InstanceOfIfaceVtable, cData, cls);
-        gen(env, JmpZero, sideExit, flag);
-        auto const imData = IfaceMethodData{vtableSlot, intfMeth->methodSlot()};
-        auto const meth = gen(env, LdIfaceMethod, imData, cls);
-        auto const ctx = getCtx(intfMeth, objOrCls, nullptr);
-        auto const mightCareAboutDynCall =
-          RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0
-          || RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0;
-        discard(env, numExtraInputs);
-        prepareToCallUnknown(env, meth, ctx, numParams, nullptr, dynamic,
-                             mightCareAboutDynCall, nullptr);
-      },
-      fallback
-    );
-    return;
-  }
-
-  emitFPush();
-}
-
 SSATmp* forwardCtx(IRGS& env, const Func* parentFunc, SSATmp* funcTmp) {
   assertx(!parentFunc->isClosureBody());
   assertx(funcTmp->type() <= TFunc);
@@ -1777,8 +1601,9 @@ SSATmp* lookupClsMethodKnown(IRGS& env,
   return funcTmp;
 }
 
-void fpushClsMethodCommon(IRGS& env,
-                          uint32_t numParams,
+void fcallClsMethodCommon(IRGS& env,
+                          const FCallArgs& fca,
+                          const StringData* clsHint,
                           SSATmp* clsVal,
                           SSATmp* methVal,
                           bool forward,
@@ -1788,7 +1613,8 @@ void fpushClsMethodCommon(IRGS& env,
   assertx(clsVal->isA(TCls));
   assertx(methVal->isA(TStr));
 
-  auto const emitFPush = [&] (TargetProfile<MethProfile>* profile = nullptr) {
+  auto const emitFCall = [&] (TargetProfile<MethProfile>* profile = nullptr,
+                              bool noCallProfiling = false) {
     auto const curCls = curClass(env);
     auto const thiz = curCls && hasThis(env) ? ldThis(env) : cns(env, nullptr);
     auto const lctx = curCls ? cns(env, curCls) : cns(env, nullptr);
@@ -1805,17 +1631,27 @@ void fpushClsMethodCommon(IRGS& env,
       RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0;
     decRef(env, methVal);
     discard(env, numExtraInputs);
-    prepareToCallUnknown(env, func, ctx, numParams, nullptr, dynamic,
-                         mightCareAboutDynCall, tsList);
+    if (noCallProfiling) {
+      prepareAndCallUnknown(env, func, fca, ctx, nullptr, dynamic,
+                            mightCareAboutDynCall, tsList, true);
+    } else {
+      prepareAndCallProfiled(env, func, fca, ctx, dynamic,
+                             mightCareAboutDynCall, tsList);
+    }
   };
 
   if (!methVal->hasConstVal()) {
-    emitFPush();
+    emitFCall();
     return;
   }
 
   auto const methodName = methVal->strVal();
   auto const knownClass = [&] () -> std::pair<const Class*, bool> {
+    if (!clsHint->empty()) {
+      auto const cls = Unit::lookupUniqueClassInContext(clsHint, curClass(env));
+      if (cls) return std::make_pair(cls, true);
+    }
+
     if (auto const cs = clsVal->type().clsSpec()) {
       return std::make_pair(cs.cls(), cs.exact());
     }
@@ -1833,26 +1669,25 @@ void fpushClsMethodCommon(IRGS& env,
         RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0
         || RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0;
       discard(env, numExtraInputs);
-      return prepareToCallUnknown(env, func, ctx, numParams, nullptr, dynamic,
-                                  mightCareAboutDynCall, tsList);
+      return prepareAndCallProfiled(env, func, fca, ctx, dynamic,
+                                    mightCareAboutDynCall, tsList);
     }
   }
 
   // If the method has reified generics, we can't burn the value in the JIT
   if (!RuntimeOption::RepoAuthoritative || clsVal->hasConstVal() || forward ||
       tsList) {
-    emitFPush();
+    emitFCall();
     return;
   }
 
-  optimizeProfiledPushClsMethod(env, clsVal, false, methodName, numParams,
-                                dynamic, numExtraInputs, emitFPush);
+  optimizeProfiledCallMethod(env, fca, clsVal, false, methodName, dynamic,
+                             numExtraInputs, emitFCall);
 }
 
 }
 
-void emitFPushClsMethod(IRGS& env,
-                        uint32_t numParams,
+void emitFCallClsMethod(IRGS& env, FCallArgs fca, const StringData* clsHint,
                         const ImmVector& v) {
   auto const cls = topC(env);
   auto const methName = topC(env, BCSPRelOffset { 1 });
@@ -1860,75 +1695,39 @@ void emitFPushClsMethod(IRGS& env,
     return interpOne(env);
   }
 
-  fpushClsMethodCommon(
-    env,
-    numParams,
-    cls,
-    methName,
-    false,
-    true,
-    2,
-    nullptr
-  );
+  fcallClsMethodCommon(env, fca, clsHint, cls, methName, false, true, 2,
+                       nullptr);
 }
 
-void emitFPushClsMethodS(IRGS& env,
-                         uint32_t numParams,
-                         SpecialClsRef ref,
-                         const ImmVector& v) {
+void emitFCallClsMethodS(IRGS& env, FCallArgs fca, const StringData* clsHint,
+                         SpecialClsRef ref, const ImmVector& v) {
   auto const cls = specialClsRefToCls(env, ref);
   auto const methName = topC(env);
   if (v.size() != 0 || !cls || !methName->isA(TStr)) return interpOne(env);
 
-  fpushClsMethodCommon(
-    env,
-    numParams,
-    cls,
-    methName,
-    ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
-    true,
-    1,
-    nullptr
-  );
+  auto const fwd = ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent;
+  fcallClsMethodCommon(env, fca, clsHint, cls, methName, fwd, true, 1, nullptr);
 }
 
-void emitFPushClsMethodSD(IRGS& env,
-                          uint32_t numParams,
-                          SpecialClsRef ref,
-                          const StringData* methName) {
+void emitFCallClsMethodSD(IRGS& env, FCallArgs fca, const StringData* clsHint,
+                          SpecialClsRef ref, const StringData* methName) {
   auto const cls = specialClsRefToCls(env, ref);
   if (!cls) return interpOne(env);
 
-  fpushClsMethodCommon(
-    env,
-    numParams,
-    cls,
-    cns(env, methName),
-    ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
-    false,
-    0,
-    nullptr
-  );
+  auto const fwd = ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent;
+  fcallClsMethodCommon(env, fca, clsHint, cls, cns(env, methName), fwd, false,
+                       0, nullptr);
 }
 
-void emitFPushClsMethodSRD(IRGS& env,
-                           uint32_t numParams,
-                           SpecialClsRef ref,
-                           const StringData* methName) {
+void emitFCallClsMethodSRD(IRGS& env, FCallArgs fca, const StringData* clsHint,
+                           SpecialClsRef ref, const StringData* methName) {
   auto const cls = specialClsRefToCls(env, ref);
   auto const tsList = topC(env);
   if (!cls) return interpOne(env);
 
-  fpushClsMethodCommon(
-    env,
-    numParams,
-    cls,
-    cns(env, methName),
-    ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
-    false,
-    1,
-    tsList
-  );
+  auto const fwd = ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent;
+  fcallClsMethodCommon(env, fca, clsHint, cls, cns(env, methName), fwd, false,
+                       1, tsList);
 }
 
 //////////////////////////////////////////////////////////////////////

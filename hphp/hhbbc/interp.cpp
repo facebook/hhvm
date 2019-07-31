@@ -4219,76 +4219,83 @@ void in(ISS& env, const bc::FCallObjMethod& op) {
 
 namespace {
 
-template <typename Op>
-void fpushClsMethodImpl(ISS& env, const Op& op, Type clsTy, SString methName,
-                        bool dynamic, size_t popCount) {
-  auto const rcls = is_specialized_cls(clsTy)
-    ? folly::Optional<res::Class>(dcls_of(clsTy).cls)
-    : folly::none;
+template <typename Op, class UpdateBC>
+void fcallClsMethodImpl(ISS& env, const Op& op, Type clsTy, SString methName,
+                        bool dynamic, uint32_t numExtraInputs, bool foldable,
+                        UpdateBC updateBC) {
   auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
-  auto const ar = ActRec { FPIKind::ClsMeth, clsTy, rcls, rfunc };
-  if (fpiPush(env, ar, op.arg1, dynamic)) {
-    while (popCount > 0) {
-      reduce(env, bc::PopC{});
-      --popCount;
-    }
-    return reduce(env);
+
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC) ||
+      (foldable && fcallTryFold(env, op.fca, rfunc, clsTy, dynamic,
+                                numExtraInputs))) {
+    return;
   }
 
-  discard(env, popCount);
-  discardAR(env, op.arg1);
+  if (rfunc.exactFunc() && op.str2->empty()) {
+    return reduce(env, updateBC(op.fca, rfunc.exactFunc()->cls->name));
+  }
+
+  fcallKnownImpl(env, op.fca, rfunc, clsTy, false /* nullsafe */,
+                 numExtraInputs, updateBC);
 }
 
 } // namespace
 
-void in(ISS& env, const bc::FPushClsMethodD& op) {
+void in(ISS& env, const bc::FCallClsMethodD& op) {
   auto const rcls = env.index.resolve_class(env.ctx, op.str3);
   auto const clsTy = rcls ? clsExact(*rcls) : TCls;
-  auto const rfunc = env.index.resolve_method(env.ctx, clsTy, op.str2);
+  auto const rfunc = env.index.resolve_method(env.ctx, clsTy, op.str4);
   if (auto const func = rfunc.exactFunc()) {
     assertx(func->cls != nullptr);
     if (will_reduce(env) &&
         !any(env.collect.opts & CollectionOpts::Speculating) &&
         func->cls->name->same(op.str3) &&
-        can_emit_builtin(func, op.arg1, op.has_unpack)) {
+        can_emit_builtin(func, op.fca.numArgsInclUnpack(), op.fca.hasUnpack())) {
       // When we use FCallBuiltin to call a static method, the litstr method
       // name will be a fully qualified cls::fn (e.g. "HH\Map::fromItems").
       //
       // As a result, we can only do this optimization if the name of the
       // builtin function's class matches this op's class name immediate.
-      auto const ar = ActRec { FPIKind::Builtin, TBottom, folly::none, rfunc };
-      fpiPushNoFold(env, ar);
-      return reduce(env);
+      return finish_builtin(
+        env, func, op.fca.numArgs, op.fca.numRets - 1, op.fca.hasUnpack());
     }
   }
 
-  fpushClsMethodImpl(env, op, clsTy, op.str2, false, 0);
+  auto const updateBC = [&] (FCallArgs fca, SString clsHint = nullptr) {
+    if (!clsHint) clsHint = op.str2;
+    return bc::FCallClsMethodD { std::move(fca), clsHint, op.str3, op.str4 };
+  };
+  fcallClsMethodImpl(env, op, clsTy, op.str4, false, 0, true, updateBC);
 }
 
-void in(ISS& env, const bc::FPushClsMethodRD& op) {
+void in(ISS& env, const bc::FCallClsMethodRD& op) {
   auto const rcls = env.index.resolve_class(env.ctx, op.str3);
   auto const clsTy = rcls ? clsExact(*rcls) : TCls;
-  auto const rfunc = env.index.resolve_method(env.ctx, clsTy, op.str2);
+  auto const rfunc = env.index.resolve_method(env.ctx, clsTy, op.str4);
   if (!rfunc.couldHaveReifiedGenerics()) {
     return reduce(
       env,
       bc::PopC {},
-      bc::FPushClsMethodD { op.arg1, op.str2, op.str3, op.has_unpack }
+      bc::FCallClsMethodD { op.fca, op.str2, op.str3, op.str4 }
     );
   }
 
   // Builtins do not support reified generics.
   assertx(!rfunc.exactFunc() || !rfunc.exactFunc()->nativeInfo);
-  fpushClsMethodImpl(env, op, clsTy, op.str2, false, 1);
+
+  auto const updateBC = [&] (FCallArgs fca, SString clsHint = nullptr) {
+    if (!clsHint) clsHint = op.str2;
+    return bc::FCallClsMethodRD { std::move(fca), clsHint, op.str3, op.str4 };
+  };
+  fcallClsMethodImpl(env, op, clsTy, op.str4, false, 1, false, updateBC);
 }
 
-void in(ISS& env, const bc::FPushClsMethod& op) {
+void in(ISS& env, const bc::FCallClsMethod& op) {
   auto const methName = getNameFromType(topC(env, 1));
   if (!methName || op.argv.size() != 0) {
     popC(env);
     popC(env);
-    discardAR(env, op.arg1);
-    fpiPushNoFold(env, ActRec { FPIKind::ClsMeth, TCls });
+    fcallUnknownImpl(env, op.fca);
     return;
   }
 
@@ -4301,11 +4308,15 @@ void in(ISS& env, const bc::FPushClsMethod& op) {
       env,
       bc::PopC {},
       bc::PopC {},
-      bc::FPushClsMethodD { op.arg1, methName, clsName, op.has_unpack }
+      bc::FCallClsMethodD { op.fca, op.str2, clsName, methName }
     );
   }
 
-  fpushClsMethodImpl(env, op, clsTy, methName, true, 2);
+  auto const updateBC = [&] (FCallArgs fca, SString clsHint = nullptr) {
+    if (!clsHint) clsHint = op.str2;
+    return bc::FCallClsMethod { std::move(fca), clsHint, op.argv };
+  };
+  fcallClsMethodImpl(env, op, clsTy, methName, true, 2, true, updateBC);
 }
 
 namespace {
@@ -4328,101 +4339,88 @@ Type specialClsRefToCls(ISS& env, SpecialClsRef ref) {
   return op ? *op : TCls;
 }
 
-}
-
-void in(ISS& env, const bc::FPushClsMethodS& op) {
-  auto const t1  = topC(env);
-  auto const cls = specialClsRefToCls(env, op.subop2);
-  folly::Optional<res::Func> rfunc;
-  auto const name = getNameFromType(t1);
-  if (name && op.argv.size() == 0) {
-    rfunc = env.index.resolve_method(env.ctx, cls, name);
-    if (!rfunc->mightCareAboutDynCalls() &&
-        !rfunc->couldHaveReifiedGenerics()) {
-      return reduce(
-        env,
-        bc::PopC {},
-        bc::FPushClsMethodSD {
-          op.arg1, op.subop2, name, op.has_unpack
-        }
-      );
-    }
-  }
-  auto const rcls = is_specialized_cls(cls)
-    ? folly::Optional<res::Class>{dcls_of(cls).cls}
-    : folly::none;
-  if (fpiPush(env, ActRec {
-                FPIKind::ClsMeth,
-                ctxCls(env),
-                rcls,
-                rfunc
-              }, op.arg1, true)) {
-    return reduce(env, bc::PopC {});
-  }
-  popC(env);
-  discardAR(env, op.arg1);
-}
-
-namespace {
-
-template <typename Op>
-void implFPushClsMethodSD(ISS& env, const Op& op, bool isRFlavor) {
-  auto const cls = specialClsRefToCls(env, op.subop2);
-
-  folly::Optional<res::Class> rcls;
-  auto exactCls = false;
-  if (is_specialized_cls(cls)) {
-    auto dcls = dcls_of(cls);
-    rcls = dcls.cls;
-    exactCls = dcls.type == DCls::Exact;
-  }
-
-  if (op.subop2 == SpecialClsRef::Static && rcls && exactCls) {
+template <typename Op, class UpdateBC>
+void fcallClsMethodSImpl(ISS& env, const Op& op, SString methName, bool dynamic,
+                         bool extraInput, bool isRFlavor, UpdateBC updateBC) {
+  auto const clsTy = specialClsRefToCls(env, op.subop3);
+  if (is_specialized_cls(clsTy) && dcls_of(clsTy).type == DCls::Exact &&
+      !dynamic && op.subop3 == SpecialClsRef::Static) {
+    auto const clsName = dcls_of(clsTy).cls.name();
     if (isRFlavor) {
-      return reduce(
-        env,
-        bc::FPushClsMethodRD {
-          op.arg1, op.str3, rcls->name(), op.has_unpack
-        }
-      );
+      reduce(env, bc::FCallClsMethodRD { op.fca, op.str2, clsName, methName });
+    } else {
+      reduce(env, bc::FCallClsMethodD { op.fca, op.str2, clsName, methName });
     }
-    return reduce(
-      env,
-      bc::FPushClsMethodD {
-        op.arg1, op.str3, rcls->name(), op.has_unpack
-      }
-    );
+    return;
   }
 
-  auto const rfun = env.index.resolve_method(env.ctx, cls, op.str3);
-  if (isRFlavor && !rfun.couldHaveReifiedGenerics()) {
-    return reduce(
-      env,
-      bc::PopC {},
-      bc::FPushClsMethodSD { op.arg1, op.subop2, op.str3, op.has_unpack  }
-    );
+  auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
+
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC) ||
+      fcallTryFold(env, op.fca, rfunc, ctxCls(env), dynamic,
+                   extraInput ? 1 : 0)) {
+    return;
   }
-  if (fpiPush(env, ActRec {
-                FPIKind::ClsMeth,
-                ctxCls(env),
-                rcls,
-                rfun
-              }, op.arg1, false)) {
-    assertx(!isRFlavor);
-    return reduce(env);
+
+  if (rfunc.exactFunc() && op.str2->empty()) {
+    return reduce(env, updateBC(op.fca, rfunc.exactFunc()->cls->name));
   }
-  if (isRFlavor) popC(env);
-  discardAR(env, op.arg1);
+
+  fcallKnownImpl(env, op.fca, rfunc, ctxCls(env), false /* nullsafe */,
+                 extraInput ? 1 : 0, updateBC);
 }
 
 } // namespace
 
-void in(ISS& env, const bc::FPushClsMethodSD& op) {
-  implFPushClsMethodSD(env, op, false);
+void in(ISS& env, const bc::FCallClsMethodSD& op) {
+  auto const updateBC = [&] (FCallArgs fca, SString clsHint = nullptr) {
+    if (!clsHint) clsHint = op.str2;
+    return bc::FCallClsMethodSD { std::move(fca), clsHint, op.subop3, op.str4 };
+  };
+  fcallClsMethodSImpl(env, op, op.str4, false, false, false, updateBC);
 }
 
-void in(ISS& env, const bc::FPushClsMethodSRD& op) {
-  implFPushClsMethodSD(env, op, true);
+void in(ISS& env, const bc::FCallClsMethodSRD& op) {
+  auto const clsTy = specialClsRefToCls(env, op.subop3);
+  auto const rfunc = env.index.resolve_method(env.ctx, clsTy, op.str4);
+  if (!rfunc.couldHaveReifiedGenerics()) {
+    return reduce(
+      env,
+      bc::PopC {},
+      bc::FCallClsMethodSD { op.fca, op.str2, op.subop3, op.str4  }
+    );
+  }
+
+  auto const updateBC = [&] (FCallArgs fca, SString clsHint = nullptr) {
+    if (!clsHint) clsHint = op.str2;
+    return bc::FCallClsMethodSRD { std::move(fca), clsHint, op.subop3, op.str4};
+  };
+  fcallClsMethodSImpl(env, op, op.str4, false, true, true, updateBC);
+}
+
+void in(ISS& env, const bc::FCallClsMethodS& op) {
+  auto const methName = getNameFromType(topC(env));
+  if (!methName || op.argv.size() != 0) {
+    popC(env);
+    fcallUnknownImpl(env, op.fca);
+    return;
+  }
+
+  auto const clsTy = specialClsRefToCls(env, op.subop3);
+  auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
+  if (!rfunc.mightCareAboutDynCalls() && !rfunc.couldHaveReifiedGenerics()) {
+    return reduce(
+      env,
+      bc::PopC {},
+      bc::FCallClsMethodSD { op.fca, op.str2, op.subop3, methName }
+    );
+  }
+
+  auto const updateBC = [&] (FCallArgs fca, SString clsHint = nullptr) {
+    if (!clsHint) clsHint = op.str2;
+    return bc::FCallClsMethodS { std::move(fca), clsHint, op.subop3, op.argv };
+  };
+  fcallClsMethodSImpl(env, op, methName, true, true, false, updateBC);
 }
 
 namespace {
@@ -4627,19 +4625,6 @@ void in(ISS& env, const bc::FCall& op) {
         env, ar.func->exactFunc(), fca.numArgs, fca.numRets - 1, fca.hasUnpack()
       );
       fpiPop(env);
-      return;
-    case FPIKind::ClsMeth:
-      assertx(op.str2->empty() == op.str3->empty());
-      if (ar.cls.hasValue() && ar.func->cantBeMagicCall() &&
-          (ar.cls->name() != op.str2 || ar.func->name() != op.str3)) {
-        // We've found a more precise type for the call, so update it
-        return reduce(env, bc::FCall {
-          fca, ar.cls->name(), ar.func->name() });
-      }
-      // If we didn't return a reduce above, we still can compute a
-      // partially-known FCall effect with our res::Func.
-      fcallKnownImpl(env, fca, *ar.func, ar.context, false /* nullsafe */, 0,
-                     updateFCA, true /* legacy */);
       return;
     }
   }

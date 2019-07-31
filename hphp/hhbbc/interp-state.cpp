@@ -540,7 +540,6 @@ static std::string fpiKindStr(FPIKind k) {
   case FPIKind::Unknown:     return "unk";
   case FPIKind::CallableArr: return "arr";
   case FPIKind::Func:        return "func";
-  case FPIKind::ClsMeth:     return "clsm";
   case FPIKind::ObjInvoke:   return "invoke";
   case FPIKind::Builtin:     return "builtin";
   }

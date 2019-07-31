@@ -424,7 +424,7 @@ handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
 static const StringData* mangleSmcName(const StringData* cls,
                                        const StringData* meth,
                                        const char* ctx) {
-  // Implementation detail of FPushClsMethodD/F: we use "C::M:ctx" as
+  // Implementation detail of FCallClsMethodD/S: we use "C::M:ctx" as
   // the key for invoking static method "M" on class "C". This
   // composes such a key. "::" is semi-arbitrary, though whatever we
   // choose must delimit possible class and method names, so we might
@@ -518,7 +518,7 @@ StaticMethodFCache::lookup(rds::Handle handle, const Class* cls,
     // or MethodNotFound. It will always return the same f and if we do give it
     // a this it will return MethodFoundWithThis iff (this->instanceof(cls) &&
     // !f->isStatic()). this->instanceof(cls) is always true for
-    // FPushClsMethodF because it is only used for self:: and parent::
+    // FCallClsMethodS because it is only used for self:: and parent::
     // calls. So, if we store f and its staticness we can handle calls with and
     // without this completely in assembly.
     f->validate();

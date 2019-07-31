@@ -380,12 +380,6 @@ type instruct_call =
   | FPushFunc of num_params * param_locations
   | FPushFuncD of num_params * function_id
   | FPushFuncRD of num_params * function_id
-  | FPushClsMethod of num_params * param_locations
-  | FPushClsMethodD of num_params * method_id * class_id
-  | FPushClsMethodRD of num_params * method_id * class_id
-  | FPushClsMethodS of num_params * SpecialClsRef.t
-  | FPushClsMethodSD of num_params * SpecialClsRef.t * method_id
-  | FPushClsMethodSRD of num_params * SpecialClsRef.t * method_id
   | NewObj
   | NewObjR
   | NewObjD of class_id
@@ -393,6 +387,12 @@ type instruct_call =
   | NewObjS of SpecialClsRef.t
   | FCall of fcall_args
   | FCallBuiltin of num_params * num_params * num_params * string
+  | FCallClsMethod of fcall_args * param_locations
+  | FCallClsMethodD of fcall_args * class_id * method_id
+  | FCallClsMethodRD of fcall_args * class_id * method_id
+  | FCallClsMethodS of fcall_args * SpecialClsRef.t
+  | FCallClsMethodSD of fcall_args * SpecialClsRef.t * method_id
+  | FCallClsMethodSRD of fcall_args * SpecialClsRef.t * method_id
   | FCallCtor of fcall_args
   | FCallObjMethod of fcall_args * Ast_defs.og_null_flavor * param_locations
   | FCallObjMethodD of fcall_args * Ast_defs.og_null_flavor * method_id

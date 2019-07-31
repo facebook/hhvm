@@ -38,6 +38,12 @@ let get_regular_labels instr =
   | IIterator (LIterNextK (_, _, l, _, _))
   | IIterator (IterBreak (l, _))
   | ICall (FCall ((_, _, _, _, Some l)))
+  | ICall (FCallClsMethod ((_, _, _, _, Some l), _))
+  | ICall (FCallClsMethodD ((_, _, _, _, Some l), _, _))
+  | ICall (FCallClsMethodRD ((_, _, _, _, Some l), _, _))
+  | ICall (FCallClsMethodS ((_, _, _, _, Some l), _))
+  | ICall (FCallClsMethodSD ((_, _, _, _, Some l), _, _))
+  | ICall (FCallClsMethodSRD ((_, _, _, _, Some l), _, _))
   | ICall (FCallObjMethod ((_, _, _, _, Some l), _, _))
   | ICall (FCallObjMethodD ((_, _, _, _, Some l), _, _))
   | ICall (FCallObjMethodRD ((_, _, _, _, Some l), _, _))
@@ -102,6 +108,18 @@ let relabel_instr instr relabel =
     IGenDelegation (YieldFromDelegate (i, relabel l))
   | ICall (FCall ((fl, na, nr, br, Some l))) ->
     ICall (FCall ((fl, na, nr, br, Some (relabel l))))
+  | ICall (FCallClsMethod ((fl, na, nr, br, Some l), p)) ->
+    ICall (FCallClsMethod ((fl, na, nr, br, Some (relabel l)), p))
+  | ICall (FCallClsMethodD ((fl, na, nr, br, Some l), c, m)) ->
+    ICall (FCallClsMethodD ((fl, na, nr, br, Some (relabel l)), c, m))
+  | ICall (FCallClsMethodRD ((fl, na, nr, br, Some l), c, m)) ->
+    ICall (FCallClsMethodRD ((fl, na, nr, br, Some (relabel l)), c, m))
+  | ICall (FCallClsMethodS ((fl, na, nr, br, Some l), c)) ->
+    ICall (FCallClsMethodS ((fl, na, nr, br, Some (relabel l)), c))
+  | ICall (FCallClsMethodSD ((fl, na, nr, br, Some l), c, m)) ->
+    ICall (FCallClsMethodSD ((fl, na, nr, br, Some (relabel l)), c, m))
+  | ICall (FCallClsMethodSRD ((fl, na, nr, br, Some l), c, m)) ->
+    ICall (FCallClsMethodSRD ((fl, na, nr, br, Some (relabel l)), c, m))
   | ICall (FCallObjMethod ((fl, na, nr, br, Some l), f, p)) ->
     ICall (FCallObjMethod ((fl, na, nr, br, Some (relabel l)), f, p))
   | ICall (FCallObjMethodD ((fl, na, nr, br, Some l), f, m)) ->

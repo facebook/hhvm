@@ -1766,8 +1766,8 @@ To string conversions:
 
      S0 - caller stack pointer
      S1 - callee Func or nullptr
-     S2 - object (for FCallObjMethod*), class (for FPushClsMethod*), context
-          (for FPushClsMethodF), or nullptr (for FPushFunc*).
+     S2 - object (for FCallObjMethod*), class (for FCallClsMethod*), context
+          (for FCallClsMethod*), or nullptr (for FPushFunc*).
      S3 - invoke name for magic dispatch
      S4 - whether this is a "dynamic" call
      S5 - reified generics type structure list

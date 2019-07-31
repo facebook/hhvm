@@ -31,34 +31,8 @@ TRACE_SET_MOD(trans);
 
 namespace {
 
-const StaticString s_empty("");
-const Func* lookupDirectFunc(SrcKey const sk,
-                             const StringData* fname,
-                             const StringData* clsName,
-                             bool isExact,
-                             bool isStatic) {
-  if (clsName && !clsName->empty()) {
-    auto const cls = Unit::lookupUniqueClassInContext(clsName,
-                                                      sk.func()->cls());
-    if (!cls || isInterface(cls)) return nullptr;
-    if (isStatic) {
-      auto const f = lookupImmutableClsMethod(cls, fname, sk.func(), isExact);
-      if (f && !isExact && !f->isImmutableFrom(cls)) return nullptr;
-      return f;
-    } else {
-      auto const l = lookupImmutableObjMethod(cls, fname, sk.func(), isExact);
-      if (l.type == ImmutableObjMethodLookup::Type::Func ||
-          l.type == ImmutableObjMethodLookup::Type::MagicFunc) {
-        return l.func;
-      }
-      return nullptr;
-    }
-  }
-  return lookupImmutableFunc(sk.unit(), fname).func;
-}
-
 const void annotate(NormalizedInstruction* i,
-                    const StringData* clsName, const StringData* funcName) {
+                    const StringData* funcName) {
   auto const fpi      = i->func()->findFPI(i->source.offset());
   auto pc             = i->m_unit->at(fpi->m_fpushOff);
   auto const pushOp   = decode_op(pc);
@@ -70,50 +44,13 @@ const void annotate(NormalizedInstruction* i,
     return i->m_unit->lookupLitstrId(id);
   };
 
-  if (funcName->empty() && clsName->empty()) {
-    switch (pushOp) {
-      case Op::FPushClsMethodD:
-      case Op::FPushClsMethodRD:
-        decode_iva(pc);
-        funcName = decode_litstr();
-        clsName = decode_litstr();
-        break;
-      case Op::FPushFuncD:
-      case Op::FPushFuncRD:
-        decode_iva(pc);
-        funcName = decode_litstr();
-        clsName = nullptr;
-        break;
-      default:
-        return;
-    }
+  if (funcName->empty() &&
+      (pushOp == Op::FPushFuncD || pushOp == Op::FPushFuncRD)) {
+    decode_iva(pc);
+    funcName = decode_litstr();
   }
 
-  bool isStatic = false;
-  bool isExact = false;
-  switch (pushOp) {
-    case Op::FPushClsMethodD:
-    case Op::FPushClsMethodRD:
-      isExact = true;
-      isStatic = true;
-      break;
-    case Op::FPushClsMethod:
-      isStatic = true;
-      break;
-    case Op::FPushClsMethodS:
-    case Op::FPushClsMethodSD: {
-      decode_iva(pc);
-      auto const ref = decode_oa<SpecialClsRef>(pc);
-      isExact = (ref == SpecialClsRef::Self) || (ref == SpecialClsRef::Parent);
-      isStatic = true;
-      break;
-    }
-    default:
-      break;
-  }
-
-  auto const func =
-    lookupDirectFunc(i->source, funcName, clsName, isExact, isStatic);
+  auto const func = lookupImmutableFunc(i->source.unit(), funcName).func;
 
   if (func) {
     FTRACE(1, "found direct func ({}) for FCall\n",
@@ -128,9 +65,7 @@ const void annotate(NormalizedInstruction* i,
 
 void annotate(NormalizedInstruction* i) {
   if (!isLegacyFCall(i->op())) return;
-  annotate(i,
-           i->m_unit->lookupLitstrId(i->imm[1].u_SA),
-           i->m_unit->lookupLitstrId(i->imm[2].u_SA));
+  annotate(i, i->m_unit->lookupLitstrId(i->imm[2].u_SA));
 }
 
 //////////////////////////////////////////////////////////////////////

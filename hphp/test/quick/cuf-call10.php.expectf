@@ -29,8 +29,6 @@ array(4) {
 }
 
 
-Warning: Invalid argument: function: method 'foo' not found in %s on line 53
-
 Warning: Invalid argument: function: method 'foo' not found in %s on line 55
 string(3) "foo"
 array(4) {

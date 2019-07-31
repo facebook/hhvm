@@ -634,15 +634,18 @@ constexpr uint32_t kMaxConcatN = 4;
                                        FCALL(0, 1),     FCALL,      CF) \
   O(FCallObjMethodRD,FOUR(FCA,SA,OA(ObjMethodOp),SA),                   \
                                        FCALL(1, 1),     FCALL,      CF) \
-  O(FPushClsMethod,  TWO(IVA,I32LA),   FPUSH(2, 0),     FPUSH,      PF) \
-  O(FPushClsMethodS, THREE(IVA,OA(SpecialClsRef),I32LA),                \
-                                       FPUSH(1, 0),     FPUSH,      PF) \
-  O(FPushClsMethodSD,THREE(IVA,OA(SpecialClsRef),SA),                   \
-                                       FPUSH(0, 0),     FPUSH,      PF) \
-  O(FPushClsMethodSRD,THREE(IVA,OA(SpecialClsRef),SA),                  \
-                                       FPUSH(1, 0),     FPUSH,      PF) \
-  O(FPushClsMethodD, THREE(IVA,SA,SA), FPUSH(0, 0),     FPUSH,      PF) \
-  O(FPushClsMethodRD,THREE(IVA,SA,SA), FPUSH(1, 0),     FPUSH,      PF) \
+  O(FCallClsMethod,  THREE(FCA,SA,I32LA),                               \
+                                       FCALL(2, 0),     FCALL,      CF) \
+  O(FCallClsMethodS, FOUR(FCA,SA,OA(SpecialClsRef),I32LA),              \
+                                       FCALL(1, 0),     FCALL,      CF) \
+  O(FCallClsMethodSD,FOUR(FCA,SA,OA(SpecialClsRef),SA),                 \
+                                       FCALL(0, 0),     FCALL,      CF) \
+  O(FCallClsMethodSRD,FOUR(FCA,SA,OA(SpecialClsRef),SA),                \
+                                       FCALL(1, 0),     FCALL,      CF) \
+  O(FCallClsMethodD, FOUR(FCA,SA,SA,SA),                                \
+                                       FCALL(0, 0),     FCALL,      CF) \
+  O(FCallClsMethodRD,FOUR(FCA,SA,SA,SA),                                \
+                                       FCALL(1, 0),     FCALL,      CF) \
   O(FCall,           THREE(FCA,SA,SA), FCALLO,          FCALL,      CF) \
   O(FCallBuiltin,    FOUR(IVA,IVA,IVA,SA),CALLNATIVE,   CALLNATIVE, NF) \
   O(IterInit,        THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
@@ -992,6 +995,16 @@ constexpr bool isJmp(Op opcode) {
     opcode == Op::JmpNZ;
 }
 
+constexpr bool isFCallClsMethod(Op opcode) {
+  return
+    opcode == OpFCallClsMethod ||
+    opcode == OpFCallClsMethodD ||
+    opcode == OpFCallClsMethodRD ||
+    opcode == OpFCallClsMethodS ||
+    opcode == OpFCallClsMethodSD ||
+    opcode == OpFCallClsMethodSRD;
+}
+
 constexpr bool isFCallObjMethod(Op opcode) {
   return
     opcode == OpFCallObjMethod ||
@@ -1002,6 +1015,7 @@ constexpr bool isFCallObjMethod(Op opcode) {
 constexpr bool isNewFCall(Op opcode) {
   return
     opcode == OpFCallCtor ||
+    isFCallClsMethod(opcode) ||
     isFCallObjMethod(opcode);
 }
 
@@ -1011,16 +1025,6 @@ constexpr bool isLegacyFPush(Op opcode) {
 
 constexpr bool hasFPushEffects(Op opcode) {
   return isLegacyFPush(opcode) || isNewFCall(opcode);
-}
-
-constexpr bool isFPushClsMethod(Op opcode) {
-  return
-    opcode == OpFPushClsMethod  ||
-    opcode == OpFPushClsMethodS ||
-    opcode == OpFPushClsMethodSD ||
-    opcode == OpFPushClsMethodSRD ||
-    opcode == OpFPushClsMethodRD ||
-    opcode == OpFPushClsMethodD;
 }
 
 constexpr bool isFPushFunc(Op opcode) {

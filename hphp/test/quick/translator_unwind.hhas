@@ -20,8 +20,7 @@
   NullUninit
   NullUninit
     CnsE "DEBUG_BACKTRACE_IGNORE_ARGS"
-  FPushClsMethodD 1 "setTraceOptions" "Exception"
-  FCall <> 1 1 "" - "" ""
+  FCallClsMethodD <> 1 1 "" - "" "Exception" "setTraceOptions"
   PopC
 
   .try {

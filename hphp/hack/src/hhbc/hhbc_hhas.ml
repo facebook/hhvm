@@ -442,30 +442,6 @@ let string_of_call instruction =
     sep ["FPushFuncD"; string_of_int n; string_of_function_id id]
   | FPushFuncRD (n, id) ->
     sep ["FPushFuncRD"; string_of_int n; string_of_function_id id]
-  | FPushClsMethod (n, pl) ->
-    sep ["FPushClsMethod"; string_of_int n; string_of_param_locations pl]
-  | FPushClsMethodD (n, id, cid) ->
-    sep ["FPushClsMethodD";
-      string_of_int n;
-      string_of_method_id id; string_of_class_id cid]
-  | FPushClsMethodRD (n, id, cid) ->
-    sep ["FPushClsMethodRD";
-      string_of_int n;
-      string_of_method_id id; string_of_class_id cid]
-  | FPushClsMethodS (n, r) ->
-     sep ["FPushClsMethodS";
-          string_of_int n;
-          SpecialClsRef.to_string r]
-  | FPushClsMethodSD (n, r, id) ->
-     sep ["FPushClsMethodSD";
-          string_of_int n;
-          SpecialClsRef.to_string r;
-          string_of_method_id id]
-  | FPushClsMethodSRD (n, r, id) ->
-     sep ["FPushClsMethodSRD";
-          string_of_int n;
-          SpecialClsRef.to_string r;
-          string_of_method_id id]
   | NewObj -> "NewObj"
   | NewObjR -> "NewObjR"
   | NewObjD cid ->
@@ -479,6 +455,36 @@ let string_of_call instruction =
   | FCallBuiltin (n1, n2, n3, id) ->
     sep ["FCallBuiltin"; string_of_int n1; string_of_int n2; string_of_int n3;
          SU.quote_string id]
+  | FCallClsMethod (fcall_args, pl) ->
+    sep [
+      "FCallClsMethod"; string_of_fcall_args fcall_args; "\"\"";
+      string_of_param_locations pl
+    ]
+  | FCallClsMethodD (fcall_args, cid, mid) ->
+    sep [
+      "FCallClsMethodD"; string_of_fcall_args fcall_args; "\"\"";
+      string_of_class_id cid; string_of_method_id mid
+    ]
+  | FCallClsMethodRD (fcall_args, cid, mid) ->
+    sep [
+      "FCallClsMethodRD"; string_of_fcall_args fcall_args; "\"\"";
+      string_of_class_id cid; string_of_method_id mid
+    ]
+  | FCallClsMethodS (fcall_args, r) ->
+    sep [
+      "FCallClsMethodS"; string_of_fcall_args fcall_args; "\"\"";
+      SpecialClsRef.to_string r
+    ]
+  | FCallClsMethodSD (fcall_args, r, mid) ->
+    sep [
+      "FCallClsMethodSD"; string_of_fcall_args fcall_args; "\"\"";
+      SpecialClsRef.to_string r; string_of_method_id mid
+    ]
+  | FCallClsMethodSRD (fcall_args, r, mid) ->
+    sep [
+      "FCallClsMethodSRD"; string_of_fcall_args fcall_args; "\"\"";
+      SpecialClsRef.to_string r; string_of_method_id mid
+    ]
   | FCallCtor fcall_args ->
     sep ["FCallCtor"; string_of_fcall_args fcall_args; "\"\""]
   | FCallObjMethod (fcall_args, nf, pl) ->

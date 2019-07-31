@@ -242,7 +242,7 @@ void beginInlining(IRGS& env,
     if (!target->isClosureBody()) {
       if (target->isStaticInPrologue() ||
           (!hasThis(env) &&
-           isFPushClsMethod(writeArOpc))) {
+           isFCallClsMethod(writeArOpc))) {
         assertx(!ty.maybe(TObj));
         if (ty.hasConstVal(TCctx)) {
           ty = Type::ExactCls(ty.cctxVal().cls());

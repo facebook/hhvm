@@ -5138,19 +5138,18 @@ OPTBLD_INLINE void iopResolveObjMethod() {
 
 namespace {
 
-void pushClsMethodImpl(Class* cls,
-                       StringData* name,
-                       int numArgs,
-                       bool forwarding,
-                       bool dynamic,
-                       folly::Optional<Array> tsList) {
+void fcallClsMethodImpl(PC origpc, PC& pc, const FCallArgs& fca, Class* cls,
+                        StringData* methName, bool forwarding, bool dynamic,
+                        folly::Optional<Array> tsList) {
   auto const ctx = liveClass();
   auto obj = ctx && vmfp()->hasThis() ? vmfp()->getThis() : nullptr;
   const Func* f;
-  auto const res = lookupClsMethod(f, cls, name, obj, ctx, true);
+  auto const res = lookupClsMethod(f, cls, methName, obj, ctx, true);
 
+  if (fca.enforceReffiness()) callerReffinessChecks(f, fca);
   if (dynamic) callerDynamicCallChecks(f);
   callerRxChecks(vmfp(), f);
+  checkStack(vmStack(), f, 0);
 
   if (res == LookupResult::MethodFoundNoThis) {
     if (!f->isStaticInPrologue()) {
@@ -5165,12 +5164,12 @@ void pushClsMethodImpl(Class* cls,
   }
   assertx(f);
   if (f->hasReifiedGenerics()) {
-    if (!isReifiedName(name) && !tsList) {
+    if (!isReifiedName(methName) && !tsList) {
       raise_error(Strings::REIFIED_GENERICS_NOT_GIVEN, f->fullName()->data());
     }
   }
   assertx(kNumActRecCells == 3);
-  ActRec* ar = vmStack().indA(numArgs);
+  ActRec* ar = vmStack().indA(fca.numArgsInclUnpack());
   ar->m_func = f;
   if (obj) {
     ar->setThis(obj);
@@ -5186,21 +5185,27 @@ void pushClsMethodImpl(Class* cls,
     }
     ar->setClass(cls);
   }
-  ar->initNumArgs(numArgs);
+  ar->initNumArgs(fca.numArgsInclUnpack());
   if (dynamic) ar->setDynamicCall();
   if (res == LookupResult::MagicCallFound) {
-    ar->setMagicDispatch(name);
+    ar->setMagicDispatch(methName);
   } else {
     ar->trashVarEnv();
-    decRefStr(const_cast<StringData*>(name));
+    decRefStr(const_cast<StringData*>(methName));
   }
+
+  if (fca.numRets != 1) ar->setFCallM();
+  auto const asyncEagerReturn =
+    fca.asyncEagerOffset != kInvalidOffset && f->supportsAsyncEagerReturn();
+  if (asyncEagerReturn) ar->setAsyncEagerReturn();
+  ar->setReturn(vmfp(), origpc, jit::tc::ustubs().retHelper);
 
   if (f->hasReifiedGenerics()) {
     // As long as a tsList is passed, we'll use that over reading it from
-    // the name
+    // the method name
     auto reifiedGenerics = [&] {
       if (!tsList) {
-        return getReifiedTypeList(stripClsOrFnNameFromReifiedName(name));
+        return getReifiedTypeList(stripClsOrFnNameFromReifiedName(methName));
       }
       auto tsListAD = tsList->detach();
       // The array-data passed on the stack may not be static
@@ -5209,6 +5214,9 @@ void pushClsMethodImpl(Class* cls,
     }();
     ar->setReifiedGenerics(reifiedGenerics);
   }
+
+  doFCall(ar, fca.numArgs, fca.hasUnpack());
+  pc = vmpc();
 }
 
 Class* specialClsRefToCls(SpecialClsRef ref) {
@@ -5231,11 +5239,12 @@ Class* specialClsRefToCls(SpecialClsRef ref) {
 
 }
 
-OPTBLD_INLINE void iopFPushClsMethod(uint32_t numArgs,
-                                     imm_array<uint32_t> args) {
+OPTBLD_INLINE void
+iopFCallClsMethod(PC origpc, PC& pc, FCallArgs fca, const StringData*,
+                  imm_array<uint32_t> args) {
   auto const c1 = vmStack().topC();
   if (!isClassType(c1->m_type)) {
-    raise_error("Attempting to use non-class in FPushClsMethod");
+    raise_error("Attempting to use non-class in FCallClsMethod");
   }
   auto const cls = c1->m_data.pclass;
 
@@ -5243,109 +5252,95 @@ OPTBLD_INLINE void iopFPushClsMethod(uint32_t numArgs,
   if (!isStringType(c2->m_type)) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
   }
-  auto name = c2->m_data.pstr;
+  auto methName = c2->m_data.pstr;
 
   if (UNLIKELY(args.size)) {
-    String s = String::attach(name);
-    name = mangleInOutName(name, args);
+    String s = String::attach(methName);
+    methName = mangleInOutName(methName, args);
   }
 
-  // pushClsMethodImpl will take care of decReffing name
+  // fcallClsMethodImpl will take care of decReffing method name
   vmStack().ndiscard(2);
-  assertx(cls && name);
-  pushClsMethodImpl(cls, name, numArgs, false, true, folly::none);
+  assertx(cls && methName);
+  fcallClsMethodImpl(origpc, pc, fca, cls, methName, false, true, folly::none);
 }
 
 
 namespace {
 
-ALWAYS_INLINE
-void implFPushClsMethodD(
-  uint32_t numArgs,
-  const StringData* name,
-  Id classId,
-  folly::Optional<Array> tsList
-) {
+ALWAYS_INLINE void
+fcallClsMethodDImpl(PC origpc, PC& pc, const FCallArgs& fca,
+                    Id classId, const StringData* methName,
+                    folly::Optional<Array> tsList) {
   const NamedEntityPair &nep =
     vmfp()->m_func->unit()->lookupNamedEntityPairId(classId);
   Class* cls = Unit::loadClass(nep.second, nep.first);
   if (cls == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS, nep.first->data());
   }
-  pushClsMethodImpl(cls, const_cast<StringData*>(name), numArgs,
-                    false, false, tsList);
+  fcallClsMethodImpl(origpc, pc, fca, cls, const_cast<StringData*>(methName),
+                     false, false, tsList);
 }
 
 } // namespace
 
-OPTBLD_INLINE
-void iopFPushClsMethodD(uint32_t numArgs, const StringData* name, Id classId) {
-  implFPushClsMethodD(numArgs, name, classId, folly::none);
+OPTBLD_INLINE void
+iopFCallClsMethodD(PC origpc, PC& pc, FCallArgs fca, const StringData*,
+                   Id classId, const StringData* methName) {
+  fcallClsMethodDImpl(origpc, pc, fca, classId, methName, folly::none);
 }
 
-OPTBLD_INLINE
-void iopFPushClsMethodRD(uint32_t numArgs, const StringData* name, Id classId) {
+OPTBLD_INLINE void
+iopFCallClsMethodRD(PC origpc, PC& pc, FCallArgs fca, const StringData*,
+                    Id classId, const StringData* methName) {
   auto const tsListCell = vmStack().topC();
   assertx(tvIsVecOrVArray(tsListCell));
   auto const tsList = Array::attach(tsListCell->m_data.parr);
   vmStack().discard();
-  implFPushClsMethodD(numArgs, name, classId, tsList);
+  fcallClsMethodDImpl(origpc, pc, fca, classId, methName, tsList);
 }
 
-OPTBLD_INLINE void iopFPushClsMethodS(uint32_t numArgs, SpecialClsRef ref,
-                                      imm_array<uint32_t> args) {
+OPTBLD_INLINE void
+iopFCallClsMethodS(PC origpc, PC& pc, FCallArgs fca, const StringData*,
+                   SpecialClsRef ref, imm_array<uint32_t> args) {
   auto const c1 = vmStack().topC(); // Method name.
   if (!isStringType(c1->m_type)) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
   }
   auto const cls = specialClsRefToCls(ref);
-  auto name = c1->m_data.pstr;
+  auto methName = c1->m_data.pstr;
 
   if (UNLIKELY(args.size)) {
-    String s = String::attach(name);
-    name = mangleInOutName(name, args);
+    String s = String::attach(methName);
+    methName = mangleInOutName(methName, args);
   }
 
-  // pushClsMethodImpl will take care of decReffing name
+  // fcallClsMethodImpl will take care of decReffing name
   vmStack().ndiscard(1);
-  pushClsMethodImpl(
-    cls,
-    name,
-    numArgs,
-    ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
-    true,
-    folly::none
-  );
+  auto const fwd = ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent;
+  fcallClsMethodImpl(origpc, pc, fca, cls, methName, fwd, true, folly::none);
 }
 
-OPTBLD_INLINE void iopFPushClsMethodSD(uint32_t numArgs,
-                                       SpecialClsRef ref,
-                                       const StringData* name) {
-  pushClsMethodImpl(
-    specialClsRefToCls(ref),
-    const_cast<StringData*>(name),
-    numArgs,
-    ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
-    false,
-    folly::none
-  );
+OPTBLD_INLINE void
+iopFCallClsMethodSD(PC origpc, PC& pc, FCallArgs fca, const StringData*,
+                    SpecialClsRef ref, const StringData* methName) {
+  auto const cls = specialClsRefToCls(ref);
+  auto const methNameC = const_cast<StringData*>(methName);
+  auto const fwd = ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent;
+  fcallClsMethodImpl(origpc, pc, fca, cls, methNameC, fwd, false, folly::none);
 }
 
-OPTBLD_INLINE void iopFPushClsMethodSRD(uint32_t numArgs,
-                                        SpecialClsRef ref,
-                                        const StringData* name) {
+OPTBLD_INLINE void
+iopFCallClsMethodSRD(PC origpc, PC& pc, FCallArgs fca, const StringData*,
+                     SpecialClsRef ref, const StringData* methName) {
+  auto const cls = specialClsRefToCls(ref);
+  auto const methNameC = const_cast<StringData*>(methName);
+  auto const fwd = ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent;
   auto const tsListCell = vmStack().topC();
   assertx(tvIsVecOrVArray(tsListCell));
   auto const tsList = Array::attach(tsListCell->m_data.parr);
   vmStack().discard();
-  pushClsMethodImpl(
-    specialClsRefToCls(ref),
-    const_cast<StringData*>(name),
-    numArgs,
-    ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
-    false,
-    tsList
-  );
+  fcallClsMethodImpl(origpc, pc, fca, cls, methNameC, fwd, false, tsList);
 }
 
 namespace {

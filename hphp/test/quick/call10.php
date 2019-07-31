@@ -31,11 +31,11 @@ class C2 {
     echo "\n";
   }
   public function test() {
-    // FPushClsMethodD
+    // FCallClsMethodD
     C2::__call("a", "b", "c", "d");
     C2::foo("a", "b", "c", "d");
 
-    // FPushClsMethod
+    // FCallClsMethod
     $cls = 'C2';
     $cls::__call("a", "b", "c", "d");
     $cls::foo("a", "b", "c", "d");
@@ -48,7 +48,7 @@ class C2 {
     $fn = 'foo';
     $cls::$fn("a", "b", "c", "d");
 
-    // FPushClsMethodF
+    // FCallClsMethodSD
     self::__call("a", "b", "c", "d");
     self::foo("a", "b", "c", "d");
   }

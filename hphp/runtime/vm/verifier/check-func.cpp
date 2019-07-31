@@ -766,13 +766,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::PopFrame:
   case Op::FPushFunc:
   case Op::FPushFuncD:
-  case Op::FPushFuncRD:
-  case Op::FPushClsMethod:
-  case Op::FPushClsMethodRD:
-  case Op::FPushClsMethodS:
-  case Op::FPushClsMethodSD:
-  case Op::FPushClsMethodSRD:
-  case Op::FPushClsMethodD: {  // IVA..., FPUSH, FPUSH
+  case Op::FPushFuncRD: {  // IVA..., FPUSH, FPUSH
     auto const numArgs = getImm(pc, 0).u_IVA;
     auto const numPops = instrNumPops(pc);
     auto idx = 0;
@@ -784,6 +778,12 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     while (idx < numPops) m_tmp_sig[idx++] = CV;
     return m_tmp_sig;
   }
+  case Op::FCallClsMethod:
+  case Op::FCallClsMethodD:
+  case Op::FCallClsMethodRD:
+  case Op::FCallClsMethodS:
+  case Op::FCallClsMethodSD:
+  case Op::FCallClsMethodSRD:
   case Op::FCallCtor:
   case Op::FCallObjMethod:
   case Op::FCallObjMethodD:
@@ -798,7 +798,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     m_tmp_sig[idx++] = UV;
     for (int i = 0; i < fca.numArgs; ++i) m_tmp_sig[idx++] = CVV;
     if (fca.hasUnpack()) m_tmp_sig[idx++] = CV;
-    assertx(idx == numPops || idx + 1 == numPops);
+    assertx(idx == numPops || idx + 1 == numPops || idx + 2 == numPops);
     while (idx < numPops) m_tmp_sig[idx++] = CV;
     return m_tmp_sig;
   }
@@ -1707,14 +1707,14 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::FPushFunc:
     case Op::FPushFuncD:
     case Op::FPushFuncRD:
-    case Op::FPushClsMethod:
-    case Op::FPushClsMethodD:
-    case Op::FPushClsMethodRD:
-    case Op::FPushClsMethodS:
-    case Op::FPushClsMethodSD:
-    case Op::FPushClsMethodSRD:
     case Op::FCall:
     case Op::FCallBuiltin:
+    case Op::FCallClsMethod:
+    case Op::FCallClsMethodD:
+    case Op::FCallClsMethodRD:
+    case Op::FCallClsMethodS:
+    case Op::FCallClsMethodSD:
+    case Op::FCallClsMethodSRD:
     case Op::FCallCtor:
     case Op::FCallObjMethod:
     case Op::FCallObjMethodD:

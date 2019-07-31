@@ -845,7 +845,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
     // Bail out if calling a static methods with an object ctx.
     if (ctxType.maybe(TObj) &&
         (callee->isStaticInPrologue() ||
-         (!sk.hasThis() && isFPushClsMethod(writeArOpc)))) {
+         (!sk.hasThis() && isFCallClsMethod(writeArOpc)))) {
       traceRefusal(sk, callee, "calling static method with an object",
                    annotationsPtr);
       return nullptr;

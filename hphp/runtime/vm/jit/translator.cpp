@@ -288,6 +288,18 @@ static const struct {
   { OpFPushFunc,   {Stack1,           FStack,       OutFDesc        }},
   { OpFPushFuncD,  {None,             FStack,       OutFDesc        }},
   { OpFPushFuncRD, {Stack1,           FStack,       OutFDesc        }},
+  { OpFCallClsMethod,
+                   {StackTop2,        StackN,       OutUnknown      }},
+  { OpFCallClsMethodD,
+                   {None,             StackN,       OutUnknown      }},
+  { OpFCallClsMethodRD,
+                   {Stack1,           StackN,       OutUnknown      }},
+  { OpFCallClsMethodS,
+                   {Stack1,           StackN,       OutUnknown      }},
+  { OpFCallClsMethodSD,
+                   {None,             StackN,       OutUnknown      }},
+  { OpFCallClsMethodSRD,
+                   {Stack1,           StackN,       OutUnknown      }},
   { OpFCallCtor,   {None,             StackN,       OutUnknown      }},
   { OpFCallObjMethod,
                    {Stack1,           StackN,       OutUnknown      }},
@@ -295,18 +307,6 @@ static const struct {
                    {None,             StackN,       OutUnknown      }},
   { OpFCallObjMethodRD,
                    {Stack1,           StackN,       OutUnknown      }},
-  { OpFPushClsMethod,
-                   {StackTop2,        FStack,       OutFDesc        }},
-  { OpFPushClsMethodS,
-                   {Stack1,           FStack,       OutFDesc        }},
-  { OpFPushClsMethodSD,
-                   {None,             FStack,       OutFDesc        }},
-  { OpFPushClsMethodSRD,
-                   {Stack1,           FStack,       OutFDesc        }},
-  { OpFPushClsMethodD,
-                   {None,             FStack,       OutFDesc        }},
-  { OpFPushClsMethodRD,
-                   {Stack1,           FStack,       OutFDesc        }},
   { OpFCall,       {FStack,           StackN,       OutUnknown      }},
   { OpFCallBuiltin,{BStackN|DontGuardAny,
                                       StackN,       OutUnknown      }},
@@ -505,14 +505,14 @@ int64_t getStackPopped(PC pc) {
     case Op::FPushFunc:
     case Op::FPushFuncD:
     case Op::FPushFuncRD:
-    case Op::FPushClsMethod:
-    case Op::FPushClsMethodS:
-    case Op::FPushClsMethodSD:
-    case Op::FPushClsMethodSRD:
-    case Op::FPushClsMethodD:
-    case Op::FPushClsMethodRD:
       return getImm(pc, 0).u_IVA + countOperands(getInstrInfo(op).in) + 3;
 
+    case Op::FCallClsMethod:
+    case Op::FCallClsMethodD:
+    case Op::FCallClsMethodRD:
+    case Op::FCallClsMethodS:
+    case Op::FCallClsMethodSD:
+    case Op::FCallClsMethodSRD:
     case Op::FCallCtor:
     case Op::FCallObjMethod:
     case Op::FCallObjMethodD:
@@ -573,14 +573,14 @@ int64_t getStackPushed(PC pc) {
     case Op::FPushFunc:
     case Op::FPushFuncD:
     case Op::FPushFuncRD:
-    case Op::FPushClsMethod:
-    case Op::FPushClsMethodS:
-    case Op::FPushClsMethodSD:
-    case Op::FPushClsMethodSRD:
-    case Op::FPushClsMethodD:
-    case Op::FPushClsMethodRD:
       return getImm(pc, 0).u_IVA + kNumActRecCells;
     case Op::FCall:
+    case Op::FCallClsMethod:
+    case Op::FCallClsMethodD:
+    case Op::FCallClsMethodRD:
+    case Op::FCallClsMethodS:
+    case Op::FCallClsMethodSD:
+    case Op::FCallClsMethodSRD:
     case Op::FCallCtor:
     case Op::FCallObjMethod:
     case Op::FCallObjMethodD:
@@ -989,12 +989,12 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Dup:
   case Op::EmptyG:
   case Op::EmptyS:
-  case Op::FPushClsMethodD:
-  case Op::FPushClsMethodRD:
-  case Op::FPushClsMethod:
-  case Op::FPushClsMethodS:
-  case Op::FPushClsMethodSD:
-  case Op::FPushClsMethodSRD:
+  case Op::FCallClsMethod:
+  case Op::FCallClsMethodD:
+  case Op::FCallClsMethodRD:
+  case Op::FCallClsMethodS:
+  case Op::FCallClsMethodSD:
+  case Op::FCallClsMethodSRD:
   case Op::FCallCtor:
   case Op::FPushFunc:
   case Op::FPushFuncD:

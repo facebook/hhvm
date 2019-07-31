@@ -886,13 +886,31 @@ let do_rage (state: state) (ref_unblocked_time: float ref): Rage.result Lwt.t =
   let add item = items := item :: !items in
   let add_data data = add { title = None; data; } in
   let add_fn fn =  if Sys.file_exists fn then add { title = Some fn; data = Sys_utils.cat fn; } in
-  let add_stack (pid, reason) =
+  let get_stack (pid, reason): string Lwt.t =
     let pid = string_of_int pid in
-    let stack = ["[stack omitted because pstack/gstack takes too long to run...]"] in
-    add_data (Printf.sprintf "PSTACK %s (%s) - %s\n\n" pid reason (String.concat ~sep:"\n" stack))
+    let format_data msg: string Lwt.t =
+      Lwt.return (Printf.sprintf "PSTACK %s (%s) - %s\n\n" pid reason msg)
+    in
+    Hh_logger.log "Getting pstack for %s" pid;
+    match%lwt Lwt_utils.exec_checked "pstack" [|pid|] with
+    | Ok result ->
+      let stack = result.Lwt_utils.Process_success.stdout in
+      format_data stack
+    | Error _ ->
+      (* pstack is just an alias for gstack, but it's not present on all systems. *)
+      Hh_logger.log "Failed to execute pstack for %s. Executing gstack instead" pid;
+      begin match%lwt Lwt_utils.exec_checked "gstack" [|pid|] with
+      | Ok result ->
+        let stack = result.Lwt_utils.Process_success.stdout in
+        format_data stack
+      | Error e ->
+        let err = "unable to get pstack - " ^ e.Lwt_utils.Process_failure.stderr in
+        format_data err
+      end
   in
-  (* logfiles *)
-  begin match get_root_opt () with
+  (* logfiles. Start them, but don't wait yet because we want this to run concurrently with fetching
+   * the server logs. *)
+  let get_log_files = match get_root_opt () with
     | Some root -> begin
         add_fn (ServerFiles.log_link root);
         add_fn ((ServerFiles.log_link root) ^ ".old");
@@ -902,27 +920,29 @@ let do_rage (state: state) (ref_unblocked_time: float ref): Rage.result Lwt.t =
         add_fn ((ServerFiles.client_lsp_log root) ^ ".old");
         add_fn (ServerFiles.client_ide_log root);
         add_fn ((ServerFiles.client_ide_log root) ^ ".old");
-        try
+        try%lwt
           let pids = PidLog.get_pids (ServerFiles.pids_file root) in
           let is_interesting (_, reason) = not (String_utils.string_starts_with reason "slave") in
-          List.filter pids ~f:is_interesting |> List.iter ~f:add_stack
+          let%lwt stacks = Lwt.pick [
+            (let%lwt () = Lwt_unix.sleep 4.50 in
+              Lwt.return ["Timed out while getting pstacks"]);
+            (pids
+              |> List.filter ~f:is_interesting
+              |> Lwt_list.map_p get_stack);
+          ] in
+          List.iter stacks ~f:add_data;
+          Lwt.return_unit
         with e ->
           let message = Exn.to_string e in
           let stack = Printexc.get_backtrace () in
-          add_data (Printf.sprintf "Failed to get PIDs: %s - %s" message stack)
+          Lwt.return (add_data (Printf.sprintf "Failed to get PIDs: %s - %s" message stack))
       end
-    | None -> ()
-  end;
+    | None -> Lwt.return_unit
+  in
   (* client *)
   add_data ("LSP adapter state: " ^ (state_to_rage state) ^ "\n");
   (* client: version *)
-  let%lwt current_version = read_hhconfig_version () in
-  add_data ("Version previously read from .hhconfig: " ^ !hhconfig_version);
-  add_data ("Version in .hhconfig: " ^ current_version);
-  if Str.string_match (Str.regexp "^\\^[0-9]+\\.[0-9]+\\.[0-9]+") current_version 0 then
-    add_data (
-      "Version source control: hg update remote/releases/hack/v" ^
-      (String_utils.lstrip current_version "^"));
+  let current_version = read_hhconfig_version () in
   (* client's log of server state *)
   let tnow = Unix.gettimeofday () in
   let server_state_to_string (tstate, state) =
@@ -956,6 +976,16 @@ let do_rage (state: state) (ref_unblocked_time: float ref): Rage.result Lwt.t =
     let stack = Printexc.get_backtrace () in
     Lwt.return (Error (Printf.sprintf "server rage - %s\n%s" message stack))
   in
+  (* Don't start waiting on these until the end because we want all of our LWT requests to be in
+   * flight simultaneously. *)
+  let%lwt () = get_log_files in
+  let%lwt current_version = current_version in
+  add_data ("Version previously read from .hhconfig: " ^ !hhconfig_version);
+  add_data ("Version in .hhconfig: " ^ current_version);
+  if Str.string_match (Str.regexp "^\\^[0-9]+\\.[0-9]+\\.[0-9]+") current_version 0 then
+    add_data (
+      "Version source control: hg update remote/releases/hack/v" ^
+      (String_utils.lstrip current_version "^"));
   Result.iter_error server_rage_result ~f:add_data;
   (* that's it! *)
   Lwt.return !items

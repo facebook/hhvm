@@ -84,9 +84,8 @@ and hint_ p env = function
     let ret = hint env h in
     let arity_min = List.length paraml in
     let arity = match vh with
-      | Hvariadic Some(t) -> Fvariadic (arity_min, make_param t None None)
-      | Hvariadic None -> Fvariadic (arity_min, make_param (p, Hany) None None)
-      | Hnon_variadic -> Fstandard (arity_min, arity_min)
+      | Some t -> Fvariadic (arity_min, make_param t None None)
+      | None -> Fstandard (arity_min, arity_min)
     in
     let reactivity = match reactivity with
     | FReactive -> Reactive None

@@ -70,9 +70,7 @@ and hint = pos * hint_
 
 and mutable_return = bool
 
-and variadic_hint =
-  | Hvariadic of hint option
-  | Hnon_variadic
+and variadic_hint = hint option
 
 and hint_ =
   | Hoption of hint

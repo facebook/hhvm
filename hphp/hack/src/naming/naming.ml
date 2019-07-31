@@ -696,11 +696,7 @@ module Make (GetLocals : GetLocals) = struct
     | t -> None, t
 
   and hfun env reactivity is_coroutine hl kl variadic_hint h =
-    let variadic_hint =
-      match variadic_hint with
-      | Aast.Hnon_variadic
-      | Aast.Hvariadic None -> variadic_hint
-      | Aast.Hvariadic (Some h) -> N.Hvariadic (Some (hint env h)) in
+    let variadic_hint = Option.map variadic_hint (hint env) in
     let muts, hl =
       List.map ~f:(fun h ->
         let mut, h1 = unwrap_mutability h in

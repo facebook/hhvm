@@ -357,9 +357,7 @@ and is_coroutine = bool
 
 and hint = pos * hint_
 
-and variadic_hint =
-  | Hvariadic of hint option
-  | Hnon_variadic
+and variadic_hint = hint option
 
 and hint_ =
   | Hoption of hint

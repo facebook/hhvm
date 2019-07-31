@@ -8,7 +8,6 @@
  *)
 
 open Aast
-open Nast_check_env
 
 module Partial = Partial_provider
 
@@ -24,11 +23,4 @@ let handler = object
   method! at_fun_ _ f = check_variadic f.f_variadic
 
   method! at_method_ _ m = check_variadic m.m_variadic
-
-  method! at_hint env (p, h) =
-    match h with
-    | Hfun (_, _, _hl, _, _, Hvariadic None, _, _)
-      when Partial.should_check_error env.file_mode 4223 ->
-      Errors.ellipsis_strict_mode ~require:`Type p
-    | _ -> ()
 end

@@ -51,10 +51,7 @@ let rec check_hint env (pos, hint) =
   | Aast.Hfun (_, _, hl, _, _, variadic_hint, h, _) ->
     List.iter hl (check_hint env);
     check_hint env h;
-    begin match variadic_hint with
-    | Aast.Hvariadic (Some h) -> check_hint env h;
-    | _ -> ()
-    end
+    Option.iter variadic_hint (check_hint env);
   | Aast.Hshape Aast.{ nsi_allows_unknown_fields=_; nsi_field_map } ->
     List.iter ~f:(fun v -> check_hint env v.Aast.sfi_hint) nsi_field_map
   | Aast.Haccess _ -> ()

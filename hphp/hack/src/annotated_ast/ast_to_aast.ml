@@ -73,10 +73,8 @@ let reification reified attributes =
 (* Convert an AST to an AAST, using the annotations provided. *)
 let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
     (env_annotation : 'en) =
-  let rec on_variadic_hint h =
-    match h with
-    | Hvariadic h -> Aast.Hvariadic (optional on_hint h)
-    | Hnon_variadic -> Aast.Hnon_variadic
+  let rec on_variadic_hint h = optional on_hint h
+
   and get_pos_shape_name name =
     match name with
     | SFlit_int (pos, _) | SFlit_str (pos, _) | SFclass_const (_, (pos, _)) ->

@@ -8,8 +8,7 @@
          param_hint =
          (Some ([3:20-41],
                 (Hfun (FNonreactive, false, [([3:31-34], (Hprim Tint))],
-                   [None], [None], Hnon_variadic, ([3:37-40], (Hprim Tnum)),
-                   false))));
+                   [None], [None], None, ([3:37-40], (Hprim Tnum)), false))));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [3:42-44]; param_name = "$f"; param_expr = None;
          param_callconv = None; param_user_attributes = [] }

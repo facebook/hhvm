@@ -1,4 +1,2 @@
 File "ellipsis_without_hint.php", line 3, characters 20-22:
 Cannot use ... without a typehint (Parsing[1002])
-File "ellipsis_without_hint.php", line 3, characters 10-29:
-Cannot use ... without a type hint in strict mode. Please add a type hint. (Typing[4223])

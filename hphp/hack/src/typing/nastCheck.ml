@@ -106,10 +106,7 @@ and hint_ env p = function
   | Hfun (_, _, hl, _, _, variadic_hint, h, _) ->
       List.iter hl (hint env);
       hint env h;
-      begin match variadic_hint with
-      | Hvariadic (Some h) -> hint env h;
-      | _ -> ()
-      end
+      Option.iter variadic_hint (hint env);
   | Happly ((_, x), hl) as h when Env.is_typedef x ->
     begin match Decl_provider.get_typedef x with
       | Some _ ->

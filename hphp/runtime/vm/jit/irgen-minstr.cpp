@@ -25,7 +25,6 @@
 #include "hphp/runtime/vm/jit/array-access-profile.h"
 #include "hphp/runtime/vm/jit/array-kind-profile.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
-#include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/type-array-elem.h"
@@ -1653,7 +1652,7 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
   return gen(env, CGetPropQ, base, key);
 }
 
-Block* makeCatchSet(IRGS& env) {
+Block* makeCatchSet(IRGS& env, uint32_t nDiscard) {
   auto block = defBlock(env, Block::Hint::Unused);
 
   BlockPusher bp(*env.irb, makeMarker(env, bcOff(env)), block);
@@ -1678,7 +1677,6 @@ Block* makeCatchSet(IRGS& env) {
   // For consistency with the interpreter, decref the rhs before we decref the
   // stack inputs, and decref the ratchet storage after the stack inputs.
   popDecRef(env, DataTypeGeneric);
-  auto const nDiscard = env.currentNormalizedInstruction->imm[0].u_IVA;
   for (int i = 0; i < nDiscard; ++i) {
     popDecRef(env, DataTypeGeneric);
   }
@@ -1694,7 +1692,7 @@ Block* makeCatchSet(IRGS& env) {
   return block;
 }
 
-SSATmp* setPropImpl(IRGS& env, SSATmp* key) {
+SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
   auto const value = topC(env, BCSPRelOffset{0}, DataTypeGeneric);
 
   auto const base = extractBaseIfObj(env);
@@ -1744,7 +1742,7 @@ SSATmp* setPropImpl(IRGS& env, SSATmp* key) {
     gen(
       env,
       SetProp,
-      makeCatchSet(env),
+      makeCatchSet(env, nDiscard),
       base,
       key,
       value,
@@ -1755,7 +1753,7 @@ SSATmp* setPropImpl(IRGS& env, SSATmp* key) {
   return value;
 }
 
-void handleStrTestResult(IRGS& env, SSATmp* strTestResult) {
+void handleStrTestResult(IRGS& env, uint32_t nDiscard, SSATmp* strTestResult) {
   // We expected SetElem's base to not be a Str but might be wrong. Make an
   // exit trace to side exit to the next instruction, replacing our guess with
   // the correct stack output.
@@ -1768,7 +1766,6 @@ void handleStrTestResult(IRGS& env, SSATmp* strTestResult) {
       hint(env, Block::Hint::Unlikely);
       auto const str = gen(env, AssertNonNull, strTestResult);
       popDecRef(env, DataTypeSpecific);
-      auto const nDiscard = env.currentNormalizedInstruction->imm[0].u_IVA;
       for (int i = 0; i < nDiscard; ++i) {
         popDecRef(env, DataTypeSpecific);
       }
@@ -1873,7 +1870,8 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
   return value;
 }
 
-void setNewElemPackedArrayDataImpl(IRGS& env, SSATmp* basePtr, Type baseType,
+void setNewElemPackedArrayDataImpl(IRGS& env, uint32_t nDiscard,
+                                   SSATmp* basePtr, Type baseType,
                                    SSATmp* value) {
   ifThen(
     env,
@@ -1899,9 +1897,9 @@ void setNewElemPackedArrayDataImpl(IRGS& env, SSATmp* basePtr, Type baseType,
     },
     [&] {
       if (baseType <= Type::Array(ArrayData::kPackedKind)) {
-        gen(env, SetNewElemArray, makeCatchSet(env), basePtr, value);
+        gen(env, SetNewElemArray, makeCatchSet(env, nDiscard), basePtr, value);
       } else if (baseType <= TVec) {
-        gen(env, SetNewElemVec, makeCatchSet(env), basePtr, value);
+        gen(env, SetNewElemVec, makeCatchSet(env, nDiscard), basePtr, value);
       } else {
         always_assert(false);
       }
@@ -1909,7 +1907,7 @@ void setNewElemPackedArrayDataImpl(IRGS& env, SSATmp* basePtr, Type baseType,
   );
 }
 
-SSATmp* setNewElemImpl(IRGS& env) {
+SSATmp* setNewElemImpl(IRGS& env, uint32_t nDiscard) {
   auto const value = topC(env);
 
   auto const baseType = predictedBaseType(env);
@@ -1922,23 +1920,23 @@ SSATmp* setNewElemImpl(IRGS& env) {
   env.irb->constrainLocation(Location::MBase{}, gc);
 
   if (baseType <= Type::Array(ArrayData::kPackedKind) || baseType <= TVec) {
-    setNewElemPackedArrayDataImpl(env, basePtr, baseType, value);
+    setNewElemPackedArrayDataImpl(env, nDiscard, basePtr, baseType, value);
   } else if (baseType <= TArr) {
     constrainBase(env);
-    gen(env, SetNewElemArray, makeCatchSet(env), basePtr, value);
+    gen(env, SetNewElemArray, makeCatchSet(env, nDiscard), basePtr, value);
   } else if (baseType <= TKeyset) {
     constrainBase(env);
     if (!value->isA(TInt | TStr)) {
       auto const base = extractBase(env);
-      gen(env, ThrowInvalidArrayKey, makeCatchSet(env), base, value);
+      gen(env, ThrowInvalidArrayKey, makeCatchSet(env, nDiscard), base, value);
     } else {
-      gen(env, SetNewElemKeyset, makeCatchSet(env), basePtr, value);
+      gen(env, SetNewElemKeyset, makeCatchSet(env, nDiscard), basePtr, value);
     }
   } else {
     gen(
       env,
       SetNewElem,
-      makeCatchSet(env),
+      makeCatchSet(env, nDiscard),
       basePtr,
       value,
       propStatePtrElem(env, basePtr)
@@ -1947,7 +1945,7 @@ SSATmp* setNewElemImpl(IRGS& env) {
   return value;
 }
 
-SSATmp* setElemImpl(IRGS& env, SSATmp* key) {
+SSATmp* setElemImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
   auto value = topC(env, BCSPRelOffset{0}, DataTypeGeneric);
 
   auto const baseType = predictedBaseType(env);
@@ -1986,7 +1984,7 @@ SSATmp* setElemImpl(IRGS& env, SSATmp* key) {
       // We load the member base pointer before calling makeCatchSet() to avoid
       // mismatched in-states for any catch block edges we emit later on.
       auto const basePtr = ldMBase(env);
-      auto const result = gen(env, SetElem, makeCatchSet(env),
+      auto const result = gen(env, SetElem, makeCatchSet(env, nDiscard),
                               basePtr, key, value,
                               propStatePtrElem(env, basePtr));
       auto const t = result->type();
@@ -2002,7 +2000,7 @@ SSATmp* setElemImpl(IRGS& env, SSATmp* key) {
         assertx(t == (TStaticStr | TNullptr));
         // Base might be a string. Emit a check to verify the result before
         // returning the optimistic result.
-        handleStrTestResult(env, result);
+        handleStrTestResult(env, nDiscard, result);
       }
       break;
   }
@@ -2204,9 +2202,9 @@ void emitSetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
 
   auto const key = memberKey(env, mk);
   auto const result =
-    mk.mcode == MW        ? setNewElemImpl(env) :
-    mcodeIsElem(mk.mcode) ? setElemImpl(env, key) :
-                            setPropImpl(env, key);
+    mk.mcode == MW        ? setNewElemImpl(env, nDiscard) :
+    mcodeIsElem(mk.mcode) ? setElemImpl(env, nDiscard, key) :
+                            setPropImpl(env, nDiscard, key);
 
   popC(env, DataTypeGeneric);
   mFinalImpl(env, nDiscard, result);

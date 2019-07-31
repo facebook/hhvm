@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "src/facts",
+    "src/parser",
+    "test",
+]

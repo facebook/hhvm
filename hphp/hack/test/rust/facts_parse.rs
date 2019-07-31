@@ -9,6 +9,7 @@ use std::fs;
 extern crate clap;
 use clap::{App, Arg};
 
+extern crate facts_rust;
 use facts_rust::facts_parser::*;
 
 fn main() {

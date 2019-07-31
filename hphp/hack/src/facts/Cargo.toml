@@ -1,0 +1,19 @@
+[package]
+name = "hack_facts"
+version = "3.36.0"
+edition = "2018"
+
+[lib]
+name = "facts_rust"
+path = "lib.rs"
+
+[dependencies]
+parser_rust = { path = "../parser", package = "hack_parser" }
+ocaml = "^0.7"
+rust-crypto = "^0.2"
+serde = "^1.0.98"
+serde_derive = "^1.0.98"
+serde_json = "^1.0.40"
+
+[dev-dependencies]
+pretty_assertions = "^0.6.1"

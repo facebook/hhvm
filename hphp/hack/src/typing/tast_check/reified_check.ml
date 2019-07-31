@@ -90,9 +90,9 @@ let verify_targ_valid env tparam targ =
       Errors.invalid_reified_argument tparam.tp_name p "the late static bound this type"
     | _, Taccess _ ->
       let emit_err =
-        Errors.invalid_reified_argument_disallow_php_arrays tparam.tp_name p
+        Errors.invalid_reified_argument_disallow_php_arrays tparam.tp_name
       in
-      Type_const_check.validate_type env ty emit_err
+      Type_const_check.php_array_validator#validate_type env ty emit_err
     | _, Tdynamic
     | _, Tfun _
     | _, Tprim _

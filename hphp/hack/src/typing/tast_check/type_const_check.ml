@@ -10,31 +10,16 @@
 open Core_kernel
 open Aast
 open Typing_defs
+open Type_validator
 
 module Cls = Decl_provider.Class
 module Env = Tast_env
 
-type validity =
-  | Valid
-  | Invalid: Reason.t * string -> validity
-
-type validation_state = {
-  env: Env.env;
-  ety_env: expand_env;
-  validity: validity;
-}
-
-let update state new_validity =
-  if state.validity = Valid
-  then { state with validity = new_validity }
-  else state
-
-let php_array_visitor = object(this)
-  inherit [validation_state] Type_visitor.type_visitor as _super
+let php_array_validator = object(this) inherit type_validator
   method! on_tarray acc r _ _ =
-    update acc @@ Invalid (r, "a PHP array was found here")
+    this#invalid acc r "a PHP array was found here"
   method! on_tarraykind acc r _array_kind =
-    update acc @@ Invalid (r, "a PHP array was found here")
+    this#invalid acc r "a PHP array was found here"
   method! on_taccess acc r (root, ids) =
     (* We care only about the last type constant we access in the chain
      * this::T1::T2::Tn. So we reverse the ids to get the last one then we resolve
@@ -65,43 +50,23 @@ let php_array_visitor = object(this)
              *)
             | TCPartiallyAbstract when phys_equal root ty -> Some acc
             | _ ->
-              Some (update acc @@
-                Invalid (Reason.Rwitness (fst typeconst.ttc_name),
-                         "this abstract type constant does not have the \
-                         __DisallowPHPArrays attribute")
-              )
+              let r = Reason.Rwitness (fst typeconst.ttc_name) in
+              let acc = this#invalid acc r
+                "this abstract type constant does not have the \
+                __DisallowPHPArrays attribute"
+              in
+              Some acc
           end
         | _ -> acc
       end
 end
 
-let validate_type env root_ty emit_err =
-  let should_suppress = ref false in
-  let validate env ety_env ty =
-    let state = php_array_visitor#on_type {env; ety_env; validity = Valid} ty in
-    match state.validity with
-      | Invalid (r, msg) ->
-        if not !should_suppress then emit_err (Reason.to_pos r) msg;
-        should_suppress := true
-      | Valid -> ()
-  in
-  let env, root_ty = Env.localize_with_dty_validator env root_ty (validate env) in
-  let ety_env = {
-    type_expansions = [];
-    substs = SMap.empty;
-    this_ty = Option.value ~default:(Reason.none, Tany) @@ Env.get_self env;
-    from_class = None;
-    validate_dty = None;
-  } in
-  validate env ety_env root_ty
-
-let disallow_php_arrays env tc pos =
+let disallow_php_arrays env tc attr_pos =
   let check_php_arrays kind ty_opt =
     match ty_opt with
     | Some ty ->
-      let ty_pos = Reason.to_pos (fst ty) in
-      let emit_err = Errors.disallow_php_arrays_attr kind ty_pos pos in
-      validate_type env ty emit_err
+      let emit_err = Errors.disallow_php_arrays_attr attr_pos kind in
+      php_array_validator#validate_type env ty emit_err
     | None -> ()
   in
   check_php_arrays "type" tc.ttc_type;

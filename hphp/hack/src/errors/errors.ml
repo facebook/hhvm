@@ -2975,7 +2975,7 @@ let invalid_enforceable_type kind_str (tp_pos, tp_name) targ_pos ty_pos ty_str =
     ty_pos, "This type is not enforceable because it has " ^ ty_str
   ]
 
-let disallow_php_arrays_attr decl_kind decl_pos attr_pos ty_pos ty_msg =
+let disallow_php_arrays_attr attr_pos decl_kind decl_pos ty_pos ty_msg =
   add_list (Typing.err_code Typing.DisallowPHPArraysAttr) [
     decl_pos, "Invalid "^decl_kind;
     attr_pos, "This type constant has the __DisallowPHPArrays attribute";

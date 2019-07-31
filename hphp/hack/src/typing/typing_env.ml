@@ -179,8 +179,6 @@ let get_shape_field_name_pos = function
 
 let next_cont_opt env = LEnvC.get_cont_option C.Next env.lenv.per_cont_env
 
-let next_cont_exn env = LEnvC.get_cont_exn C.Next env.lenv.per_cont_env
-
 let get_tpenv_lower_bounds tpenv name =
 match SMap.get name tpenv with
 | None -> empty_bounds
@@ -931,44 +929,50 @@ let local_is_mutable ~include_borrowed env id =
   | Some (_, TME.Borrowed) -> include_borrowed
   | _ -> false
 
-let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx =
-  let not_found_is_ok x =
-    let xstr = LID.to_string x in
-    (xstr = SG.globals || SG.is_superglobal xstr) && not (is_strict env) ||
-    Fake.is_valid ctx.LEnvC.fake_members x in
-  let error_if_pos_provided posopt =
-    match posopt with
-      | Some p ->
-        let in_rx_scope = env_local_reactive env in
-        let lid = LID.to_string x in
-
-        let suggest_most_similar lid =
-          let all_locals = Sequence.of_list (LID.Map.elements ctx.LEnvC.local_types) in
-          let var_name = (fun (k, _) -> LID.to_string k) in
-          match most_similar lid all_locals var_name with
-          | Some (k, _) -> Some (LID.to_string k)
-          | None -> None
-        in
-        Errors.undefined ~in_rx_scope p lid (suggest_most_similar lid)
-      | None -> () in
-  let lcl = LID.Map.get x ctx.LEnvC.local_types in
-  begin match lcl with
-  | None -> if not_found_is_ok x then () else error_if_pos_provided p
-  | Some _ -> ()
-  end;
-  lcl
-
 let tany env =
   let dynamic_view_enabled = TypecheckerOptions.dynamic_view (get_tcopt env) in
   if dynamic_view_enabled then Tdynamic else Tany
 
-let get_local_ty_in_ctx env ?error_if_undef_at_pos x ctx =
-  match get_local_in_ctx env ?error_if_undef_at_pos x ctx with
+let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx_opt =
+  let not_found_is_ok x ctx =
+    let xstr = LID.to_string x in
+    (xstr = SG.globals || SG.is_superglobal xstr) && not (is_strict env) ||
+    Fake.is_valid ctx.LEnvC.fake_members x in
+  let error_if_pos_provided posopt ctx =
+    match posopt with
+    | Some p ->
+      let in_rx_scope = env_local_reactive env in
+      let lid = LID.to_string x in
+
+      let suggest_most_similar lid =
+        let all_locals = Sequence.of_list (LID.Map.elements ctx.LEnvC.local_types) in
+        let var_name = (fun (k, _) -> LID.to_string k) in
+        match most_similar lid all_locals var_name with
+        | Some (k, _) -> Some (LID.to_string k)
+        | None -> None
+      in
+      Errors.undefined ~in_rx_scope p lid (suggest_most_similar lid)
+    | None -> () in
+  match ctx_opt with
+  | None ->
+    (* If the continuation is absent, we are in dead code so the variable should
+    have type nothing. TODO T46400549: actually change it to nothing instead of any. *)
+    Some ((Reason.Rnone, tany env), 0)
+  | Some ctx ->
+    let lcl = LID.Map.get x ctx.LEnvC.local_types in
+    begin match lcl with
+    | None -> if not_found_is_ok x ctx then () else error_if_pos_provided p ctx
+    | Some _ -> ()
+    end;
+    lcl
+
+let get_local_ty_in_ctx env ?error_if_undef_at_pos x ctx_opt =
+  match get_local_in_ctx env ?error_if_undef_at_pos x ctx_opt with
   | None -> false, (Reason.Rnone, tany env)
   | Some (x, _) -> true, x
 
 let get_local_in_next_continuation ?error_if_undef_at_pos:p env x =
-  let next_cont = next_cont_exn env in
+  let next_cont = next_cont_opt env in
   get_local_ty_in_ctx env ?error_if_undef_at_pos:p x next_cont
 
 let get_local_ ?error_if_undef_at_pos:p env x =
@@ -977,7 +981,7 @@ let get_local_ ?error_if_undef_at_pos:p env x =
 let get_local env x = snd (get_local_ env x)
 
 let get_locals env plids =
-  let next_cont = next_cont_exn env in
+  let next_cont = next_cont_opt env in
   List.fold plids ~init:LID.Map.empty ~f:(fun locals (p, lid) ->
     match get_local_in_ctx env ~error_if_undef_at_pos:p lid next_cont with
     | None -> locals
@@ -1007,9 +1011,11 @@ let set_local_expr_id env x new_eid =
     end
 
 let get_local_expr_id env x =
-  let next_cont = LEnvC.get_cont_exn C.Next env.lenv.per_cont_env in
-  let lcl = LID.Map.get x next_cont.LEnvC.local_types in
-  Option.map lcl ~f:(fun (_, x) -> x)
+  match next_cont_opt env with
+  | None -> (* dead code *) None
+  | Some next_cont ->
+    let lcl = LID.Map.get x next_cont.LEnvC.local_types in
+    Option.map lcl ~f:(fun (_, x) -> x)
 
 let set_fake_members env fake_members =
   let per_cont_env =

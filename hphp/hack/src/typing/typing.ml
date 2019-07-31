@@ -1448,7 +1448,6 @@ and expr_
     let env = forget_fake_members env p e in
     env, te, result in
 
-  try
   match e with
   | Import _
   | Collection _
@@ -2626,9 +2625,6 @@ and expr_
   | PU_atom _ -> failwith "TODO(T36532263): Pocket Universes"
   | PU_identifier _ -> failwith "TODO(T36532263): Pocket Universes"
 
-  with Typing_per_cont_env.Continuation_not_found _ ->
-    expr_any env p (Reason.Rwitness p)
-
 and class_const ?(incl_tc=false) env p ((cpos, cid), mid) =
   let env, ce, cty = static_class_id ~check_constraints:false cpos env [] cid in
   let env, const_ty =
@@ -2778,17 +2774,23 @@ and anon_check_param env param =
 
 and stash_conts_for_anon env p is_anon captured f =
   let captured = if Env.is_local_defined env this then (Pos.none, this) :: captured else captured in
-  let initial_locals = if is_anon
-    then Env.get_locals env captured
-    else (Env.next_cont_exn env).Typing_per_cont_env.local_types in
-  let initial_fakes = Fake.forget (Env.get_fake_members env) (Fake.Blame_lambda p) in
-  let tpenv = Env.get_tpenv env in
+  let init = Option.map (Env.next_cont_opt env) ~f:(fun next_cont ->
+    let initial_locals = if is_anon
+      then Env.get_locals env captured
+      else next_cont.Typing_per_cont_env.local_types in
+    let initial_fakes = Fake.forget (Env.get_fake_members env) (Fake.Blame_lambda p) in
+    let tpenv = Env.get_tpenv env in
+    initial_locals, initial_fakes, tpenv) in
   let env, (tfun, result) = Typing_lenv.stash_and_do env C.all (
     fun env ->
-      let env = Env.reinitialize_locals env in
-      let env = Env.set_locals env initial_locals in
-      let env = Env.set_fake_members env initial_fakes in
-      let env = Env.env_with_tpenv env tpenv in
+      let env = match init with
+        | None -> env
+        | Some (initial_locals, initial_fakes, tpenv) ->
+          let env = Env.reinitialize_locals env in
+          let env = Env.set_locals env initial_locals in
+          let env = Env.set_fake_members env initial_fakes in
+          let env = Env.env_with_tpenv env tpenv in
+          env in
       let env, tfun, result = f env in
       env, (tfun, result)) in
   env, tfun, result

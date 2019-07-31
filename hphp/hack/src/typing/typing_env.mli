@@ -98,7 +98,6 @@ module FakeMembers :
     val make_static : env -> Nast.class_id_ -> string -> env * Local_id.t
   end
 val tany : env -> 'a ty_
-val next_cont_exn : env -> Typing_per_cont_env.per_cont_entry
 val next_cont_opt : env -> Typing_per_cont_env.per_cont_entry option
 val set_local : env -> Local_id.t -> locl ty -> env
 val is_using_var : env -> Local_id.t -> bool

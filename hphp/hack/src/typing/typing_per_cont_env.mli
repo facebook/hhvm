@@ -45,8 +45,6 @@ type per_cont_entry = {
 
 type t = per_cont_entry Typing_continuations.Map.t
 
-exception Continuation_not_found of string
-
 val initial_locals : per_cont_entry -> t
 
 val empty_entry : per_cont_entry
@@ -54,9 +52,6 @@ val empty_entry : per_cont_entry
 (* Get a continuation wrapped in Some, or None if not found *)
 val get_cont_option :
   C.t -> t -> per_cont_entry option
-
-(* Get a continuation, or raise Continuation_not_found if not found *)
-val get_cont_exn : C.t -> t -> per_cont_entry
 
 (* Add the key, value pair to the continuation named 'name'
  * If the continuation doesn't exist, create it *)

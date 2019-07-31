@@ -77,7 +77,9 @@ type tvenv = tyvar_info IMap.t
 type env = {
   (* position of the function/method being checked *)
   function_pos: Pos.t;
+  (* Mapping of type variables to types. *)
   tenv    : locl_ty IMap.t ;
+  (* Mapping of type variables to other type variables *)
   subst   : int IMap.t ;
   fresh_typarams : SSet.t;
   lenv    : local_env  ;

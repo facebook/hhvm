@@ -6,7 +6,6 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Core_kernel
 open Common
 
 module C = Typing_continuations
@@ -59,15 +58,6 @@ let initial_locals entry = CMap.add C.Next entry CMap.empty
 
 let get_cont_option = CMap.get
 
-exception Continuation_not_found of string
-
-let get_cont_exn cont m =
-  try CMap.find cont m
-  with Caml.Not_found ->
-    (* Programming error. This is not supposed to happen. *)
-    raise (Continuation_not_found ("There is no continuation " ^
-      (C.to_string cont) ^ " in the locals."))
-
 (* Update an entry if it exists *)
 let update_cont_entry name m f =
   match CMap.get name m with
@@ -76,11 +66,11 @@ let update_cont_entry name m f =
       CMap.add name (f entry) m
 
 let add_to_cont name key value m =
-  let cont = match CMap.get name m with
-    | None -> empty_entry
-    | Some c -> c in
-  let cont = { cont with local_types = LMap.add key value cont.local_types } in
-  CMap.add name cont m
+  match CMap.get name m with
+  | None -> m
+  | Some cont ->
+    let cont = { cont with local_types = LMap.add key value cont.local_types } in
+    CMap.add name cont m
 
 let remove_from_cont name key m =
   match CMap.get name m with

@@ -19,7 +19,7 @@ module Attrs = Attributes
 module Partial = Partial_provider
 
 let class_const env c cc =
-  let { cc_id = name; cc_type = h; cc_expr = e; cc_visibility = v } = cc in
+  let { cc_id = name; cc_type = h; cc_expr = e; cc_visibility = v; cc_doc_comment = _ } = cc in
   let pos = fst name in
   match c.c_kind with
   | Ast_defs.Ctrait ->

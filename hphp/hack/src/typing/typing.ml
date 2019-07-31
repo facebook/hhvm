@@ -6402,6 +6402,7 @@ and typeconst_def env {
   c_tconst_type = hint;
   c_tconst_user_attributes;
   c_tconst_span;
+  c_tconst_doc_comment;
 } =
   let env, cstr = opt Phase.localize_hint_with_self env c_tconst_constraint in
   let env, ty = opt Phase.localize_hint_with_self env hint in
@@ -6428,6 +6429,7 @@ and typeconst_def env {
     T.c_tconst_type = hint;
     T.c_tconst_user_attributes = user_attributes;
     T.c_tconst_span = c_tconst_span;
+    T.c_tconst_doc_comment = c_tconst_doc_comment;
   }
 
 and class_const_def env cc =
@@ -6455,7 +6457,8 @@ and class_const_def env cc =
       T.cc_visibility = cc.cc_visibility;
       T.cc_type = cc.cc_type;
       T.cc_id = cc.cc_id;
-      T.cc_expr = eopt
+      T.cc_expr = eopt;
+      T.cc_doc_comment = cc.cc_doc_comment
     }, ty)
 
 and class_constr_def env constructor =

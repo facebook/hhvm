@@ -525,6 +525,7 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
         c_tconst_user_attributes =
           on_list on_user_attribute tc.tconst_user_attributes;
         c_tconst_span = tc.tconst_span;
+        c_tconst_doc_comment = tc.tconst_doc_comment;
       }
   and get_visibility_from_kinds kinds =
     List.fold_left
@@ -571,7 +572,7 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
         let acc = cv :: acc in
         on_list_append_acc acc (with_dc_name None) rest
     | [] -> acc
-  and on_class_const hint kind (id, eopt) =
+  and on_class_const hint kind doc_com (id, eopt) =
     let vis =
       match kind with
       | Private -> Aast.Private
@@ -584,10 +585,13 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
         cc_type = hint;
         cc_id = id;
         cc_expr = optional on_expr eopt;
+        cc_doc_comment = doc_com;
       }
   and on_class_consts_with_acc acc ccs =
     let with_name =
-      on_class_const (optional on_hint ccs.cc_hint) ccs.cc_visibility
+      on_class_const
+        (optional on_hint ccs.cc_hint)
+        ccs.cc_visibility ccs.cc_doc_comment
     in
     on_list_append_acc acc with_name ccs.cc_names
   and on_xhp_attr (p, b, el) = (p, b, on_list on_expr el)

@@ -17,8 +17,8 @@
                      ((([7:5-8], string), (String "b")),
                       (([7:12-13], int), (Int "2")))
                      ]
-                   ))))
-         }
+                   ))));
+         cc_doc_comment = None }
         ];
       c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
       c_xhp_children = []; c_xhp_attrs = []; c_namespace = <opaque>;

@@ -392,6 +392,7 @@ and ('ex, 'fb, 'en) class_const = {
   cc_type: hint option;
   cc_id: sid;
   cc_expr: ('ex, 'fb, 'en) expr option;
+  cc_doc_comment: string option;
 }
 
 and typeconst_abstract_kind =
@@ -413,6 +414,7 @@ and ('ex, 'fb, 'en) class_typeconst = {
   c_tconst_type: hint option;
   c_tconst_user_attributes: ('ex, 'fb, 'en) user_attribute list;
   c_tconst_span: pos;
+  c_tconst_doc_comment: string option;
 }
 
 and xhp_attr_info = { xai_tag: xhp_attr_tag option }

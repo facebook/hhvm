@@ -60,6 +60,12 @@ let ast_no_pos_or_docblock_mapper =
     method! on_method_ env m =
       super#on_method_ env { m with m_doc_comment = None }
 
+    method! on_class_consts_ env ccs =
+      super#on_class_consts_ env { ccs with cc_doc_comment = None }
+
+    method! on_typeconst env tc =
+      super#on_typeconst env { tc with tconst_doc_comment = None }
+
     (* Skip all blocks because we don't care about method bodies *)
     method! on_block env _ =
       self#on_list self#on_stmt env [(Pos.none, Ast.Noop)]

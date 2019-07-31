@@ -275,6 +275,7 @@ and class_consts_ = {
   cc_visibility: kind;
   cc_hint: hint option;
   cc_names: class_const list;
+  cc_doc_comment: string option;
 }
 
 and method_ = {
@@ -312,6 +313,7 @@ and typeconst = {
   tconst_constraint: hint option;
   tconst_type: hint option;
   tconst_span: pos;
+  tconst_doc_comment: string option;
 }
 
 and is_reference = bool

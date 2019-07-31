@@ -1474,6 +1474,7 @@ module Make (GetLocals : GetLocals) = struct
     ; N.cc_type = h
     ; N.cc_id = cc.Aast.cc_id
     ; N.cc_expr = e
+    ; N.cc_doc_comment = cc.Aast.cc_doc_comment
     }
 
   and typeconst env t =
@@ -1504,6 +1505,7 @@ module Make (GetLocals : GetLocals) = struct
     ; c_tconst_type = type_
     ; c_tconst_user_attributes = attrs
     ; c_tconst_span = t.Aast.c_tconst_span
+    ; c_tconst_doc_comment = t.Aast.c_tconst_doc_comment
     }
 
   and method_ genv m =

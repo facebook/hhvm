@@ -2559,6 +2559,9 @@ and top_docblock () =
   | Caml.Stack.Empty -> None
 
 and pClassElt : class_elt list parser = fun node env ->
+  (* TODO: doc comments do not have to be at the beginning, they can go in
+   * the middle of the declaration, to be associated with individual
+   * properties, right now we don't handle this *)
   let doc_comment_opt = extract_docblock node in
   let pClassElt_ = function
   | ConstDeclaration
@@ -2575,6 +2578,7 @@ and pClassElt : class_elt list parser = fun node env ->
       [ Const
         { cc_visibility = vis
         ; cc_hint = mpOptional pHint const_type_specifier env
+        ; cc_doc_comment = doc_comment_opt
         ; cc_names = couldMap const_declarators env ~f:begin function
             | { syntax = ConstantDeclarator
                 { constant_declarator_name; constant_declarator_initializer }
@@ -2612,6 +2616,7 @@ and pClassElt : class_elt list parser = fun node env ->
         ; tconst_name       = pos_name type_const_name env
         ; tconst_constraint = mpOptional pTConstraintTy type_const_type_constraint env
         ; tconst_span       = pPos node env
+        ; tconst_doc_comment = doc_comment_opt
         }
       ]
   | PropertyDeclaration
@@ -2621,10 +2626,6 @@ and pClassElt : class_elt list parser = fun node env ->
     ; property_declarators
     ; _
     } ->
-      (* TODO: doc comments do not have to be at the beginning, they can go in
-       * the middle of the declaration, to be associated with individual
-       * properties, right now we don't handle this *)
-      let doc_comment_opt = extract_docblock node in
       let typecheck = is_typechecker env in (* so we don't capture the env in the closure *)
       let check_modifier node =
         if is_final node
@@ -3172,7 +3173,12 @@ and pDef : def list parser = fun node env ->
       let pEnumerator node =
         match syntax node with
         | Enumerator { enumerator_name = name; enumerator_value = value; _ } ->
-          fun env -> Const {cc_hint = None; cc_visibility = Public; cc_names = [pos_name name env, Some (pExpr value env)]}
+          fun env -> Const {
+            cc_hint = None;
+            cc_visibility = Public;
+            cc_names = [pos_name name env, Some (pExpr value env)];
+            cc_doc_comment = None
+          }
         | _ -> missing_syntax "enumerator" node
       in
       [ Class

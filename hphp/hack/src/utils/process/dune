@@ -29,4 +29,5 @@
     future_sig)
   (libraries
     process
-    process_types))
+    process_types
+    promise))

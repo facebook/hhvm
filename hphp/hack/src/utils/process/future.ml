@@ -237,3 +237,13 @@ let rec check_status : 'a. 'a t -> 'a status = fun (promise, start_t) ->
     else
       let age = Unix.time () -. start_t in
       In_progress {age;}
+
+(* Necessary to avoid a cyclic type definition error. *)
+type 'a future = 'a t
+module Promise = struct
+  type 'a t = 'a future
+
+  let return = of_value
+  let map = continue_with
+  let bind = continue_with_future
+end

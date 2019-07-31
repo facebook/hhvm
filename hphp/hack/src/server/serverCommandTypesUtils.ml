@@ -34,6 +34,7 @@ let debug_describe_t : type a. a t -> string = function
   | RETRIEVE_CHECKPOINT      _ -> "RETRIEVE_CHECKPOINT"
   | DELETE_CHECKPOINT        _ -> "DELETE_CHECKPOINT"
   | IN_MEMORY_DEP_TABLE_SIZE   -> "IN_MEMORY_DEP_TABLE_SIZE"
+  | SAVE_NAMING              _ -> "SAVE_NAMING"
   | SAVE_STATE               _ -> "SAVE_STATE"
   | STATS                      -> "STATS"
   | FORMAT                   _ -> "FORMAT"

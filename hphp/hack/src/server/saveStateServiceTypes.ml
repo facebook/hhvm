@@ -14,3 +14,8 @@ type save_state_result = {
   naming_table_rows_changed : int;
   dep_table_edges_added : int;
 }
+
+type save_naming_result = {
+  nt_files_added : int;
+  nt_symbols_added : int;
+}

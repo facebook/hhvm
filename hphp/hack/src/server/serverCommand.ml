@@ -31,6 +31,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | FIND_REFS _ -> true
   | IDE_FIND_REFS _ -> true
   | METHOD_JUMP (_, _, find_children) -> find_children (* uses find refs *)
+  | SAVE_NAMING _ -> false
   | SAVE_STATE _ -> true
   (* COVERAGE_COUNTS (unnecessarily) uses GlobalStorage, so it cannot safely run
    * during interruptions *)
@@ -110,6 +111,7 @@ let get_description : type a. a command -> string = function
   | Rpc FIND_REFS _ -> "FIND_REFS"
   | Rpc IDE_FIND_REFS _ -> "IDE_FIND_REFS"
   | Rpc METHOD_JUMP _ -> "METHOD_JUMP"
+  | Rpc SAVE_NAMING _ -> "SAVE_NAMING"
   | Rpc SAVE_STATE _ -> "SAVE_STATE"
   | Rpc COVERAGE_COUNTS _ -> "COVERAGE_COUNTS"
   | Rpc REFACTOR _ -> "REFACTOR"

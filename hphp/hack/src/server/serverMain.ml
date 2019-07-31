@@ -1102,7 +1102,9 @@ let run_once options config local_config =
   let env, naming_table_rows_changed =
     match (ServerArgs.save_naming_filename genv.options) with
     | None -> env, None
-    | Some filename -> env, Some (Naming_table.save env.naming_table filename)
+    | Some filename ->
+      let results = Naming_table.save env.naming_table filename in
+      env, Some Naming_table.(results.files_added + results.symbols_added)
   in
   let save_state_results =
     match save_state_results, naming_table_rows_changed with

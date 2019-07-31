@@ -89,9 +89,10 @@ let run_naming_table_test f =
     let _ : SharedMem.handle = SharedMem.init config ~num_workers:0 in
     let unbacked_naming_table = write_and_parse_test_files () in
     let db_name = Path.to_string (Path.concat path "naming_table.sqlite") in
+    let save_results = Naming_table.save unbacked_naming_table db_name in
     Asserter.Int_asserter.assert_equals
       8
-      (Naming_table.save unbacked_naming_table db_name)
+      Naming_table.(save_results.files_added + save_results.symbols_added)
       "Expected to add eight rows (four files and four symbols)";
     let backed_naming_table = Naming_table.load_from_sqlite ~update_reverse_entries:false db_name in
     f ~unbacked_naming_table ~backed_naming_table ~db_name;

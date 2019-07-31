@@ -153,6 +153,14 @@ type t =
   [@@deriving show]
 type fast = FileInfo.names Relative_path.Map.t
 type saved_state_info = FileInfo.saved Relative_path.Map.t
+type save_result = {
+  files_added : int;
+  symbols_added : int;
+}
+let empty_save_result = {
+  files_added = 0;
+  symbols_added = 0;
+}
 
 (* The canon name (and assorted *Canon heaps) store the canonical name for a
    symbol, keyed off of the lowercase version of its name. We use the canon
@@ -165,13 +173,6 @@ type type_of_type =
   | TClass
   | TTypedef
   [@@deriving enum]
-
-type save_result = {
-  rows_deleted : int;
-  files_added : int;
-  symbols_added : int;
-}
-let empty_save_result = { rows_deleted = 0; files_added = 0; symbols_added = 0; }
 
 module Sqlite : sig
   val get_db_path : unit -> string option
@@ -646,7 +647,7 @@ end = struct
     LocalChanges.prime db;
     let save_result =
       Relative_path.Map.fold file_info_map ~init:empty_save_result ~f:begin fun path fi acc ->
-        { acc with
+        {
           files_added = acc.files_added + 1;
           symbols_added = acc.symbols_added + save_file_info db path fi
         }
@@ -833,7 +834,6 @@ let save naming_table db_name =
   | Unbacked naming_table ->
     let t = Unix.gettimeofday () in
     let save_result = Sqlite.save_file_infos db_name naming_table in
-    assert (save_result.rows_deleted = 0);
     let _ : float =
       Hh_logger.log_duration
         (Printf.sprintf "Inserted %d files and %d symbols"
@@ -841,22 +841,14 @@ let save naming_table db_name =
           save_result.symbols_added)
         t
     in
-    save_result.files_added + save_result.symbols_added
-  | Backed _ ->
-    (* We could technically have this automatically do an incremental save, but
-     * we'd really rather the caller be explicit about what they expect to avoid
-     * the potential for really subtle bugs. *)
-    failwith "SQLite-backed naming tables must be saved in incremental mode."
-
-let save_incremental naming_table db_name =
-  match naming_table with
-  | Unbacked _ ->
-    (* We could technically have this automatically do a fresh save, but we'd
-     * really rather the caller be explicit about what they expect to avoid the
-     * potential for really subtle bugs. *)
-    failwith "Non-SQLite-backed naming tables cannot be saved in incremental mode."
+    save_result
   | Backed local_changes ->
     let t = Unix.gettimeofday () in
+    (* Don't overwrite. *)
+    FileUtil.cp
+      ~force:(FileUtil.Ask (fun _ -> false))
+      [Core_kernel.Option.value_exn (Sqlite.get_db_path ())]
+      db_name;
     Sqlite.set_db_path db_name;
     Sqlite.update_file_infos db_name local_changes;
     let _ : float =
@@ -864,7 +856,7 @@ let save_incremental naming_table db_name =
         (Printf.sprintf "Updated a blob with %d entries" (Relative_path.Map.cardinal local_changes))
         t
     in
-    ()
+    { empty_save_result with files_added = 1 }
 
 
 (*****************************************************************************)

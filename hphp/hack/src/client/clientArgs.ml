@@ -473,6 +473,10 @@ let parse_check_args cmd =
          end,
       " (mode) rewrite lambdas in the files from the given list" ^
       " with suggested parameter types";
+    "--save-naming",
+      Arg.String (fun x -> set_mode (MODE_SAVE_NAMING x) ()),
+      (" (mode) Save the naming table to the given file." ^
+      " Returns the number of files and symbols written to disk.");
     "--save-state",
       Arg.String (fun x -> set_mode (MODE_SAVE_STATE x) ()),
       (" (mode) Save a saved state to the given file." ^

@@ -17,6 +17,10 @@
 type t [@@deriving show]
 type fast = FileInfo.names Relative_path.Map.t
 type saved_state_info = FileInfo.saved Relative_path.Map.t
+type save_result = {
+  files_added : int;
+  symbols_added : int;
+}
 
 (* Querying and updating forward naming tables. *)
 val combine : t -> t -> t
@@ -38,8 +42,7 @@ val iter : t -> f:(Relative_path.t -> FileInfo.t -> unit) -> unit
 val remove : t -> Relative_path.t -> t
 val update : t -> Relative_path.t -> FileInfo.t  -> t
 val update_many : t -> FileInfo.t Relative_path.Map.t -> t
-val save : t -> string -> int
-val save_incremental : t -> string -> unit
+val save : t -> string -> save_result
 
 (* Creation functions. *)
 val create : FileInfo.t Relative_path.Map.t -> t

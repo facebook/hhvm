@@ -236,6 +236,7 @@ type _ t =
   | REMOVE_DEAD_FIXMES : int list -> [`Ok of ServerRefactorTypes.patch list | `Error of string] t
   | REWRITE_LAMBDA_PARAMETERS : string list -> ServerRefactorTypes.patch list t
   | IN_MEMORY_DEP_TABLE_SIZE : ((int, string) Pervasives.result) t
+  | SAVE_NAMING : string -> ((SaveStateServiceTypes.save_naming_result, string) Pervasives.result) t
   | SAVE_STATE : (string * bool * bool) ->
     ((SaveStateServiceTypes.save_state_result, string) Pervasives.result) t
   | SEARCH : string * string -> SearchUtils.result t

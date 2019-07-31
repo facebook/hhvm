@@ -53,6 +53,7 @@
     ast_provider
     common
     file_provider
+    fileutils
     full_fidelity
     naming_attributes
     nast

@@ -141,6 +141,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, SymbolInfoService.go genv.workers file_list env
     | IN_MEMORY_DEP_TABLE_SIZE ->
       env, (SaveStateService.get_in_memory_dep_table_entry_count ())
+    | SAVE_NAMING filename ->
+      env, (SaveStateService.go_naming env.naming_table filename)
     | SAVE_STATE (
         filename,
         gen_saved_ignore_type_errors,

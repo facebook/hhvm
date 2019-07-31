@@ -28,6 +28,21 @@ module SaveStateResultPrinter = ClientResultPrinter.Make (struct
       Hh_json.JSON_Object (ServerError.get_save_state_result_props_json t)
   end)
 
+module SaveNamingResultPrinter = ClientResultPrinter.Make (struct
+    type t = SaveStateServiceTypes.save_naming_result
+    let to_string t =
+      Printf.sprintf "Files added: %d, symbols added: %d"
+        t.SaveStateServiceTypes.nt_files_added
+        t.SaveStateServiceTypes.nt_symbols_added
+    let to_json t =
+      Hh_json.JSON_Object [
+        "files_added",
+          Hh_json.JSON_Number (string_of_int t.SaveStateServiceTypes.nt_files_added);
+        "symbols_added",
+          Hh_json.JSON_Number (string_of_int t.SaveStateServiceTypes.nt_symbols_added);
+      ]
+  end)
+
 let parse_function_or_method_id ~func_action ~meth_action name =
   let pieces = Str.split (Str.regexp "::") name in
   try
@@ -389,6 +404,12 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
     | MODE_IN_MEMORY_DEP_TABLE_SIZE ->
       let%lwt result = rpc args @@ Rpc.IN_MEMORY_DEP_TABLE_SIZE in
       ClientResultPrinter.Int_printer.go result args.output_json;
+      Lwt.return Exit_status.No_error
+    | MODE_SAVE_NAMING path ->
+      let () = Sys_utils.mkdir_p (Filename.dirname path) in
+      let path = Path.make path in
+      let%lwt result = rpc args @@ Rpc.SAVE_NAMING (Path.to_string path) in
+      SaveNamingResultPrinter.go result args.output_json;
       Lwt.return Exit_status.No_error
     | MODE_SAVE_STATE path ->
       let () = Sys_utils.mkdir_p (Filename.dirname path) in

@@ -175,7 +175,7 @@ let update_save_state
   dump_saved_state ~save_decls output_filename naming_table errors;
   let naming_table_rows_changed = if enable_naming_table_fallback then begin
     Hh_logger.log "Updating naming table in place...";
-    Naming_table.save_incremental naming_table db_name;
+    let _ : Naming_table.save_result = Naming_table.save naming_table db_name in
     1 (* But it's a doozy! *)
   end else begin
     Hh_logger.log "skip writing file info to sqlite table";
@@ -227,7 +227,8 @@ let save_state
       if enable_naming_table_fallback then
       begin
         Hh_logger.log "Saving file info (naming table) into a SQLite table.\n";
-        Naming_table.save naming_table db_name
+        let result = Naming_table.save naming_table db_name in
+        Naming_table.(result.files_added + result.symbols_added)
       end
       else 0
     in
@@ -268,6 +269,19 @@ let save_state
 let get_in_memory_dep_table_entry_count () : (int, string) result =
   Utils.try_with_stack (fun () ->
     SharedMem.get_in_memory_dep_table_entry_count ())
+  |> Result.map_error ~f:(fun (exn, _stack) -> Exn.to_string exn)
+
+let go_naming
+  (naming_table: Naming_table.t)
+  (output_filename: string)
+: (save_naming_result, string) result =
+  Utils.try_with_stack begin fun () ->
+    let save_result = Naming_table.save naming_table output_filename in
+    {
+      nt_files_added = save_result.Naming_table.files_added;
+      nt_symbols_added = save_result.Naming_table.symbols_added;
+    }
+  end
   |> Result.map_error ~f:(fun (exn, _stack) -> Exn.to_string exn)
 
 (* If successful, returns the # of edges from the dependency table that were written. *)

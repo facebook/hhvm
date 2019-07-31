@@ -27,6 +27,7 @@ let pp_func_body_ann fmt fba =
   Format.pp_print_string fmt (show_func_body_ann fba)
 
 type program = (Pos.t, func_body_ann, unit) Aast.program [@@deriving show]
+type def = (Pos.t, func_body_ann, unit) Aast.def
 type expr = (Pos.t, func_body_ann, unit) Aast.expr [@@deriving show]
 type expr_ = (Pos.t, func_body_ann, unit) Aast.expr_
 type stmt = (Pos.t, func_body_ann, unit) Aast.stmt
@@ -261,7 +262,7 @@ class type ['a] visitor_type = object
   method on_switch : 'a -> expr -> case list -> 'a
   method on_throw : 'a -> expr -> 'a
   method on_try : 'a -> block -> catch list -> block -> 'a
-  method on_def_inline : 'a -> (Pos.t, func_body_ann, unit) def -> 'a
+  method on_def_inline : 'a -> def -> 'a
   method on_let : 'a -> id -> hint option -> expr -> 'a
   method on_while : 'a -> expr -> block -> 'a
   method on_using : 'a -> (Pos.t, func_body_ann, unit) using_stmt -> 'a
@@ -341,7 +342,7 @@ class type ['a] visitor_type = object
   method on_hint: 'a -> hint -> 'a
   method on_targ: 'a -> targ -> 'a
 
-  method on_def: 'a -> (Pos.t, func_body_ann, unit) def -> 'a
+  method on_def: 'a -> def -> 'a
   method on_program: 'a -> program -> 'a
 
   method on_markup: 'a -> pstring -> expr option -> 'a

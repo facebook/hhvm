@@ -706,6 +706,7 @@ void optimizeProfiledCallObjMethod(IRGS& env,
                                    bool knownIfaceFunc,
                                    const StringData* methodName,
                                    bool dynamic,
+                                   uint32_t numExtraInputs,
                                    Fn emitFCall) {
   always_assert(objOrCls->type().subtypeOfAny(TObj, TCls));
   auto const isStaticCall = objOrCls->type() <= TCls;
@@ -757,6 +758,7 @@ void optimizeProfiledCallObjMethod(IRGS& env,
           auto const refined = gen(env, CheckType, ty, sideExit, objOrCls);
           env.irb->constrainValue(refined, GuardConstraint(uniqueClass));
           auto const ctx = getCtx(uniqueMeth, refined, uniqueClass);
+          discard(env, numExtraInputs);
           prepareAndCallKnown(env, uniqueMeth, fca, ctx,
                               isMagic ? methodName : nullptr,
                               dynamic, nullptr);
@@ -790,6 +792,7 @@ void optimizeProfiledCallObjMethod(IRGS& env,
         auto const same = gen(env, EqFunc, meth, cns(env, uniqueMeth));
         gen(env, JmpZero, sideExit, same);
         auto const ctx = getCtx(uniqueMeth, objOrCls, nullptr);
+        discard(env, numExtraInputs);
         prepareAndCallKnown(env, uniqueMeth, fca, ctx, nullptr, dynamic,
                             nullptr);
       },
@@ -820,6 +823,7 @@ void optimizeProfiledCallObjMethod(IRGS& env,
         auto const mightCareAboutDynCall =
           RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0
           || RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0;
+        discard(env, numExtraInputs);
         prepareAndCallProfiled(env, meth, fca, ctx, dynamic,
                                mightCareAboutDynCall, nullptr);
       },
@@ -865,6 +869,7 @@ void optimizeProfiledCallObjMethod(IRGS& env,
         auto const mightCareAboutDynCall =
           RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0
           || RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0;
+        discard(env, numExtraInputs);
         prepareAndCallProfiled(env, meth, fca, ctx, dynamic,
                                mightCareAboutDynCall, nullptr);
       },
@@ -984,7 +989,7 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
   // If we don't know anything about the object's class, or all we know is an
   // interface that it implements, then enable PGO.
   optimizeProfiledCallObjMethod(env, fca, obj, knownIfaceFunc != nullptr,
-                                methodName->strVal(), dynamic, emitFCall);
+                                methodName->strVal(), dynamic, 0, emitFCall);
 }
 
 void fpushFuncObj(IRGS& env, uint32_t numParams) {
@@ -1049,18 +1054,16 @@ namespace {
 SSATmp* specialClsRefToCls(IRGS& env, SpecialClsRef ref) {
   switch (ref) {
     case SpecialClsRef::Static:
-      if (!curClass(env)) PUNT(SpecialClsRef-NoCls);
+      if (!curClass(env)) return nullptr;
       return gen(env, LdClsCtx, ldCtx(env));
     case SpecialClsRef::Self:
       if (auto const clss = curClass(env)) return cns(env, clss);
-      PUNT(SpecialClsRef-NoCls);
-      break;
+      return nullptr;
     case SpecialClsRef::Parent:
       if (auto const clss = curClass(env)) {
         if (auto const parent = clss->parent()) return cns(env, parent);
       }
-      PUNT(SpecialClsRef-NoCls);
-      break;
+      return nullptr;
   }
   always_assert(false);
 }
@@ -1220,7 +1223,8 @@ void emitNewObjRD(IRGS& env, const StringData* className) {
 }
 
 void emitNewObjS(IRGS& env, SpecialClsRef ref) {
-  auto const cls  = specialClsRefToCls(env, ref);
+  auto const cls = specialClsRefToCls(env, ref);
+  if (!cls) return interpOne(env);
   auto const slot = specialClsReifiedPropSlot(env, ref);
   if (slot == folly::none) {
     push(env, gen(env, AllocObj, cls));
@@ -1561,6 +1565,7 @@ void optimizeProfiledPushClsMethod(IRGS& env,
                                    const StringData* methodName,
                                    uint32_t numParams,
                                    bool dynamic,
+                                   uint32_t numExtraInputs,
                                    Fn emitFPush) {
   always_assert(objOrCls->type().subtypeOfAny(TObj, TCls));
   auto const isStaticCall = objOrCls->type() <= TCls;
@@ -1608,6 +1613,7 @@ void optimizeProfiledPushClsMethod(IRGS& env,
           auto const refined = gen(env, CheckType, ty, sideExit, objOrCls);
           env.irb->constrainValue(refined, GuardConstraint(uniqueClass));
           auto const ctx = getCtx(uniqueMeth, refined, uniqueClass);
+          discard(env, numExtraInputs);
           prepareToCallKnown(env, uniqueMeth, ctx, numParams,
                              isMagic ? methodName : nullptr,
                              dynamic, nullptr);
@@ -1641,6 +1647,7 @@ void optimizeProfiledPushClsMethod(IRGS& env,
         auto const same = gen(env, EqFunc, meth, cns(env, uniqueMeth));
         gen(env, JmpZero, sideExit, same);
         auto const ctx = getCtx(uniqueMeth, objOrCls, nullptr);
+        discard(env, numExtraInputs);
         prepareToCallKnown(env, uniqueMeth, ctx, numParams, nullptr, dynamic,
                            nullptr);
       },
@@ -1671,6 +1678,7 @@ void optimizeProfiledPushClsMethod(IRGS& env,
         auto const mightCareAboutDynCall =
           RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0
           || RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0;
+        discard(env, numExtraInputs);
         prepareToCallUnknown(env, meth, ctx, numParams, nullptr, dynamic,
                              mightCareAboutDynCall, nullptr);
       },
@@ -1716,6 +1724,7 @@ void optimizeProfiledPushClsMethod(IRGS& env,
         auto const mightCareAboutDynCall =
           RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0
           || RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0;
+        discard(env, numExtraInputs);
         prepareToCallUnknown(env, meth, ctx, numParams, nullptr, dynamic,
                              mightCareAboutDynCall, nullptr);
       },
@@ -1773,9 +1782,10 @@ void fpushClsMethodCommon(IRGS& env,
                           SSATmp* methVal,
                           bool forward,
                           bool dynamic,
+                          uint32_t numExtraInputs,
                           SSATmp* tsList) {
-  if (!methVal->isA(TStr)) PUNT(FPushClsMethod-unknownType);
-  if (!clsVal->isA(TCls))  PUNT(FPushClsMethod-NotClass);
+  assertx(clsVal->isA(TCls));
+  assertx(methVal->isA(TStr));
 
   auto const emitFPush = [&] (TargetProfile<MethProfile>* profile = nullptr) {
     auto const prepare = [&] (IRSPRelOffset arOffset) {
@@ -1786,6 +1796,7 @@ void fpushClsMethodCommon(IRGS& env,
       return func;
     };
 
+    discard(env, numExtraInputs);
     auto const func = prepareToCallCustom(
       env, nullptr, numParams, dynamic, tsList, prepare);
 
@@ -1818,6 +1829,7 @@ void fpushClsMethodCommon(IRGS& env,
       auto const mightCareAboutDynCall =
         RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0
         || RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0;
+      discard(env, numExtraInputs);
       return prepareToCallUnknown(env, func, ctx, numParams, nullptr, dynamic,
                                   mightCareAboutDynCall, tsList);
     }
@@ -1831,7 +1843,7 @@ void fpushClsMethodCommon(IRGS& env,
   }
 
   optimizeProfiledPushClsMethod(env, clsVal, false, methodName, numParams,
-                                dynamic, emitFPush);
+                                dynamic, numExtraInputs, emitFPush);
 }
 
 }
@@ -1839,16 +1851,20 @@ void fpushClsMethodCommon(IRGS& env,
 void emitFPushClsMethod(IRGS& env,
                         uint32_t numParams,
                         const ImmVector& v) {
-  if (v.size() != 0) PUNT(InOut-FPushClsMethod);
-  auto const cls = popC(env);
-  auto const meth = popC(env);
+  auto const cls = topC(env);
+  auto const methName = topC(env, BCSPRelOffset { 1 });
+  if (v.size() != 0 || !cls->isA(TCls) || !methName->isA(TStr)) {
+    return interpOne(env);
+  }
+
   fpushClsMethodCommon(
     env,
     numParams,
     cls,
-    meth,
+    methName,
     false,
     true,
+    2,
     nullptr
   );
 }
@@ -1857,15 +1873,18 @@ void emitFPushClsMethodS(IRGS& env,
                          uint32_t numParams,
                          SpecialClsRef ref,
                          const ImmVector& v) {
-  if (v.size() != 0) PUNT(InOut-FPushClsMethodS);
-  auto const meth = popC(env);
+  auto const cls = specialClsRefToCls(env, ref);
+  auto const methName = topC(env);
+  if (v.size() != 0 || !cls || !methName->isA(TStr)) return interpOne(env);
+
   fpushClsMethodCommon(
     env,
     numParams,
-    specialClsRefToCls(env, ref),
-    meth,
+    cls,
+    methName,
     ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
     true,
+    1,
     nullptr
   );
 }
@@ -1873,14 +1892,18 @@ void emitFPushClsMethodS(IRGS& env,
 void emitFPushClsMethodSD(IRGS& env,
                           uint32_t numParams,
                           SpecialClsRef ref,
-                          const StringData* name) {
+                          const StringData* methName) {
+  auto const cls = specialClsRefToCls(env, ref);
+  if (!cls) return interpOne(env);
+
   fpushClsMethodCommon(
     env,
     numParams,
-    specialClsRefToCls(env, ref),
-    cns(env, name),
+    cls,
+    cns(env, methName),
     ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
     false,
+    0,
     nullptr
   );
 }
@@ -1888,15 +1911,19 @@ void emitFPushClsMethodSD(IRGS& env,
 void emitFPushClsMethodSRD(IRGS& env,
                            uint32_t numParams,
                            SpecialClsRef ref,
-                           const StringData* name) {
-  auto const tsList = popC(env);
+                           const StringData* methName) {
+  auto const cls = specialClsRefToCls(env, ref);
+  auto const tsList = topC(env);
+  if (!cls) return interpOne(env);
+
   fpushClsMethodCommon(
     env,
     numParams,
-    specialClsRefToCls(env, ref),
-    cns(env, name),
+    cls,
+    cns(env, methName),
     ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
     false,
+    1,
     tsList
   );
 }

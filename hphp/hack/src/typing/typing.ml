@@ -327,6 +327,10 @@ let fun_reactivity env attrs params =
 
 type array_ctx = NoArray | ElementAssignment | ElementAccess
 
+(* TODO: allow passing an inferred type here *)
+let convert_type_hint (pos, expression_annotation) =
+  (pos, (Reason.Rnone, Tany)), expression_annotation
+
 (* This function is used to determine the type of an argument.
  * When we want to type-check the body of a function, we need to
  * introduce the type of the arguments of the function in the environment
@@ -530,7 +534,10 @@ and fun_def tcopt f : Tast.fun_def option =
   let env = add_constraints pos env constraints in
   let env =
     Phase.localize_where_constraints ~ety_env env f.f_where_constraints in
-  let decl_ty = Option.map ~f:(Decl_hint.hint env.Env.decl_env) f.f_ret in
+  let decl_ty =
+    Option.map
+    ~f:(Decl_hint.hint env.Env.decl_env)
+    (hint_of_type_hint f.f_ret) in
   let env = Env.set_fn_kind env f.f_fun_kind in
   let env, locl_ty =
     match decl_ty with
@@ -539,7 +546,7 @@ and fun_def tcopt f : Tast.fun_def option =
     | Some ty ->
       Typing_return.make_return_type Phase.localize_with_self env ty in
   let return = Typing_return.make_info f.f_fun_kind f.f_user_attributes env
-    ~is_explicit:(Option.is_some f.f_ret) locl_ty decl_ty in
+    ~is_explicit:(Option.is_some (hint_of_type_hint f.f_ret)) locl_ty decl_ty in
   let env, param_tys =
     List.map_env env f.f_params make_param_local_ty in
   let partial_callback = Partial.should_check_error (Env.get_mode env) in
@@ -563,7 +570,7 @@ and fun_def tcopt f : Tast.fun_def option =
   let env, tb = fun_ env return pos nb f.f_fun_kind in
   (* restore original reactivity *)
   let env = Env.set_env_reactive env reactive in
-  begin match f.f_ret with
+  begin match hint_of_type_hint f.f_ret with
     | None ->
       Typing_return.suggest_return env pos return.Typing_env_return_info.return_type partial_callback
     | Some hint ->
@@ -579,7 +586,7 @@ and fun_def tcopt f : Tast.fun_def option =
     T.f_annotation = Env.save local_tpenv env;
     T.f_span = f.f_span;
     T.f_mode = f.f_mode;
-    T.f_ret = f.f_ret;
+    T.f_ret = convert_type_hint f.f_ret;
     T.f_name = f.f_name;
     T.f_tparams = tparams;
     T.f_where_constraints = f.f_where_constraints;
@@ -2377,7 +2384,7 @@ and expr_
       | _ -> ()
       end;
       (* Is the return type declared? *)
-      let is_explicit_ret = Option.is_some f.f_ret in
+      let is_explicit_ret = Option.is_some (hint_of_type_hint f.f_ret) in
       let reactivity =
           Decl_fun_utils.fun_reactivity_opt env.Env.decl_env f.f_user_attributes
           |> Option.value ~default:(TR.strip_conditional_reactivity (Env.env_reactivity env)) in
@@ -2878,7 +2885,10 @@ and anon_make tenv p f ft idl is_anon =
             iter ft.ft_params x;
             wfold_left2 inout_write_back env ft.ft_params x in
         let env = Env.set_fn_kind env f.f_fun_kind in
-        let decl_ty = Option.map ~f:(Decl_hint.hint env.Env.decl_env) f.f_ret in
+        let decl_ty =
+          Option.map
+            ~f:(Decl_hint.hint env.Env.decl_env)
+            (hint_of_type_hint f.f_ret) in
         let env, hret =
           match decl_ty with
           | None ->
@@ -2924,7 +2934,7 @@ and anon_make tenv p f ft idl is_anon =
           T.f_annotation = Env.save local_tpenv env;
           T.f_span = f.f_span;
           T.f_mode = f.f_mode;
-          T.f_ret = f.f_ret;
+          T.f_ret = convert_type_hint f.f_ret;
           T.f_name = f.f_name;
           T.f_tparams = tparams;
           T.f_where_constraints = f.f_where_constraints;
@@ -6675,7 +6685,7 @@ and method_def env m =
       then Env.set_using_var env this
       else env in
   let env = Env.clear_params env in
-  let decl_ty = Option.map ~f:(Decl_hint.hint env.Env.decl_env) m.m_ret in
+  let decl_ty = Option.map ~f:(Decl_hint.hint env.Env.decl_env) (hint_of_type_hint m.m_ret) in
   let env = Env.set_fn_kind env m.m_fun_kind in
   let env, locl_ty = match decl_ty with
     | None ->
@@ -6689,7 +6699,7 @@ and method_def env m =
           from_class = Some CIstatic } in
       Typing_return.make_return_type (Phase.localize ~ety_env) env ret in
   let return = Typing_return.make_info m.m_fun_kind m.m_user_attributes env
-    ~is_explicit:(Option.is_some m.m_ret) locl_ty decl_ty in
+    ~is_explicit:(Option.is_some (hint_of_type_hint m.m_ret)) locl_ty decl_ty in
   let env, param_tys =
     List.map_env env m.m_params make_param_local_ty in
   let partial_callback = Partial.should_check_error (Env.get_mode env) in
@@ -6712,8 +6722,8 @@ and method_def env m =
     fun_ ~abstract:m.m_abstract env return pos nb m.m_fun_kind in
   (* restore original method reactivity  *)
   let env = Env.set_env_reactive env reactive in
-  let m_ret =
-    match m.m_ret with
+  let type_hint' =
+    match hint_of_type_hint m.m_ret with
     | None when snd m.m_name = SN.Members.__construct ->
       Some (pos, Happly((pos, "void"), []))
     | None ->
@@ -6724,8 +6734,8 @@ and method_def env m =
         partial_callback;
       None
     | Some hint ->
-      Typing_return.async_suggest_return (m.m_fun_kind) hint (fst m.m_name); m.m_ret in
-  let m = { m with m_ret = m_ret; } in
+      Typing_return.async_suggest_return (m.m_fun_kind) hint (fst m.m_name); hint_of_type_hint m.m_ret in
+  let m = { m with m_ret = fst m.m_ret, type_hint'; } in
   let annotation =
     if Nast.named_body_is_unsafe nb
     then Tast.HasUnsafeBlocks
@@ -6749,7 +6759,7 @@ and method_def env m =
     T.m_params = typed_params;
     T.m_fun_kind = m.m_fun_kind;
     T.m_user_attributes = user_attributes;
-    T.m_ret = m.m_ret;
+    T.m_ret = convert_type_hint m.m_ret;
     T.m_body = { T.fb_ast = tb; fb_annotation = annotation };
     T.m_external = m.m_external;
     T.m_doc_comment = m.m_doc_comment;

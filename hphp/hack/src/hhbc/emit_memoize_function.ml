@@ -176,7 +176,8 @@ let emit_wrapper_function
   let scope = [Ast_scope.ScopeItem.Function ast_fun] in
   let return_type_info =
     Emit_body.emit_return_type_info
-      ~scope ~skipawaitable:function_is_async ~namespace ast_fun.T.f_ret in
+      ~scope ~skipawaitable:function_is_async
+      ~namespace (T.hint_of_type_hint ast_fun.T.f_ret) in
   let is_reified =
     List.exists
       ~f:(fun t -> t.T.tp_reified = T.Reified || t.T.tp_reified = T.SoftReified)

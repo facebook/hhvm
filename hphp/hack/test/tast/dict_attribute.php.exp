@@ -28,7 +28,9 @@
          m_body =
          { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
          m_fun_kind = FSync; m_user_attributes = [];
-         m_ret = (Some ([6:19-30], (Happly (([6:19-30], "void"), []))));
+         m_ret =
+         (([Pos.none], _),
+          (Some ([6:19-30], (Happly (([6:19-30], "void"), [])))));
          m_external = false; m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
@@ -345,7 +347,7 @@
        c_enum = None; c_pu_enums = []; c_doc_comment = None });
   (Fun
      { f_span = [19:1-20:60]; f_annotation = (); f_mode = <opaque>;
-       f_ret = (Some ([20:53-57], (Hprim Tvoid)));
+       f_ret = (([Pos.none], _), (Some ([20:53-57], (Hprim Tvoid))));
        f_name = ([20:10-12], "\\ff"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params =
@@ -464,8 +466,8 @@
                ]
              }
             ];
-          m_ret = (Some ([29:27-31], (Hprim Tvoid))); m_external = false;
-          m_doc_comment = None }
+          m_ret = (([Pos.none], _), (Some ([29:27-31], (Hprim Tvoid))));
+          m_external = false; m_doc_comment = None }
          ];
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace = <opaque>;

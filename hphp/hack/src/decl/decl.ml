@@ -222,7 +222,7 @@ and fun_decl_in_env env f =
   let return_disposable = has_return_disposable_attribute f.f_user_attributes in
   let arity_min = minimum_arity f.f_params in
   let params = make_params env f.f_params in
-  let ret_ty = match f.f_ret with
+  let ret_ty = match hint_of_type_hint f.f_ret with
     | None -> ret_from_fun_kind (fst f.f_name) f.f_fun_kind
     | Some ty -> Decl_hint.hint env ty in
   let arity = match f.f_variadic with

@@ -1,6 +1,6 @@
 [(Fun
     { f_span = [3:1-42]; f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([3:35-39], (Hprim Tvoid)));
+      f_ret = (([Pos.none], _), (Some ([3:35-39], (Hprim Tvoid))));
       f_name = ([3:10-22], "\\takes_string"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
@@ -17,7 +17,7 @@
       f_static = false });
   (Fun
      { f_span = [5:1-7:2]; f_annotation = (); f_mode = <opaque>;
-       f_ret = (Some ([5:15-19], (Hprim Tvoid)));
+       f_ret = (([Pos.none], _), (Some ([5:15-19], (Hprim Tvoid))));
        f_name = ([5:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
        f_variadic = FVnonVariadic; f_params = [];
        f_body =

@@ -99,12 +99,12 @@ let handler = object
     List.iter c.c_vars check_var
 
   method! at_method_ env m =
-    Option.iter m.m_ret (check_hint env);
+    Option.iter (hint_of_type_hint m.m_ret) (check_hint env);
     List.iter m.m_tparams (check_tparam env);
     List.iter m.m_params (check_param env)
 
   method! at_fun_ env f =
-    Option.iter f.f_ret (check_hint env);
+    Option.iter (hint_of_type_hint f.f_ret) (check_hint env);
     List.iter f.f_tparams (check_tparam env);
     List.iter f.f_params (check_param env)
 

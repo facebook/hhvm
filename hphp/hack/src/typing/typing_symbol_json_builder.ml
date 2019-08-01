@@ -131,7 +131,7 @@ let json_of_typedef _ td_id td json_data_progress =
   glean_json TypedefDeclaration json json_data_progress
 
 let json_of_fun tcopt fn_id fn json_data_progress =
-  let ret_type = match fn.f_ret with
+  let ret_type = match hint_of_type_hint fn.f_ret with
     | None -> Typing_reason.Rnone, Typing_defs.Tnothing
     | Some h -> hint tcopt h
   in

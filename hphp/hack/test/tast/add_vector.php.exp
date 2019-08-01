@@ -45,7 +45,9 @@
              ];
            fb_annotation = No unsafe blocks };
          m_fun_kind = FSync; m_user_attributes = [];
-         m_ret = (Some ([15:19-30], (Happly (([15:19-30], "void"), []))));
+         m_ret =
+         (([Pos.none], _),
+          (Some ([15:19-30], (Happly (([15:19-30], "void"), [])))));
          m_external = false; m_doc_comment = None };
         { m_span = [19:3-21:4]; m_annotation = (); m_final = false;
           m_abstract = false; m_static = false; m_visibility = Public;
@@ -75,8 +77,8 @@
               ];
             fb_annotation = No unsafe blocks };
           m_fun_kind = FSync; m_user_attributes = [];
-          m_ret = (Some ([19:30-34], (Hprim Tvoid))); m_external = false;
-          m_doc_comment = None };
+          m_ret = (([Pos.none], _), (Some ([19:30-34], (Hprim Tvoid))));
+          m_external = false; m_doc_comment = None };
         { m_span = [23:3-25:4]; m_annotation = (); m_final = false;
           m_abstract = false; m_static = false; m_visibility = Public;
           m_name = ([23:19-22], "get"); m_tparams = [];
@@ -103,8 +105,8 @@
               ];
             fb_annotation = No unsafe blocks };
           m_fun_kind = FSync; m_user_attributes = [];
-          m_ret = (Some ([23:32-33], (Habstr "T"))); m_external = false;
-          m_doc_comment = None }
+          m_ret = (([Pos.none], _), (Some ([23:32-33], (Habstr "T"))));
+          m_external = false; m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace = <opaque>; c_user_attributes = []; c_file_attributes = [];
@@ -155,7 +157,7 @@
        c_doc_comment = None });
   (Fun
      { f_span = [32:1-37:2]; f_annotation = (); f_mode = <opaque>;
-       f_ret = (Some ([32:37-41], (Hprim Tvoid)));
+       f_ret = (([Pos.none], _), (Some ([32:37-41], (Hprim Tvoid))));
        f_name = ([32:10-14], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params =

@@ -131,7 +131,8 @@ let emit_wrapper_function
     |> List.filter ~f:(fun attr -> not (Hhas_attribute.is_native attr)) in
   let return_type_info =
     Emit_body.emit_return_type_info
-      ~scope ~skipawaitable:false ~namespace ast_fun.T.f_ret in
+      ~scope ~skipawaitable:false ~namespace
+      (T.hint_of_type_hint ast_fun.T.f_ret) in
   let modified_params, name, call_instrs =
     if wrapper_type = Emit_inout_helpers.InoutWrapper
     then
@@ -197,7 +198,7 @@ let emit_wrapper_method
   let method_visibility = ast_method.T.m_visibility in
   let return_type_info =
     Emit_body.emit_return_type_info
-      ~scope ~skipawaitable:false ~namespace ast_method.T.m_ret in
+      ~scope ~skipawaitable:false ~namespace (T.hint_of_type_hint ast_method.T.m_ret) in
   let wrapper_type, original_id, renamed_id, params =
     if is_closure || has_ref_params
     then

@@ -21,9 +21,9 @@ let visitor = object(this)
     return_type_ref := old_return_type
 
   method! on_fun_ env fun_ =
-    this#with_return_type fun_.f_ret (fun () -> super#on_fun_ env fun_)
+    this#with_return_type (hint_of_type_hint fun_.f_ret) (fun () -> super#on_fun_ env fun_)
   method! on_method_ env method_ =
-    this#with_return_type method_.m_ret (fun () -> super#on_method_ env method_)
+    this#with_return_type (hint_of_type_hint method_.m_ret) (fun () -> super#on_method_ env method_)
 
   method! on_stmt env st = match st with
   | pos1, Return (Some _) ->

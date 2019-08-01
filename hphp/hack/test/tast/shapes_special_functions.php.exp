@@ -16,7 +16,7 @@
       t_namespace = <opaque> });
   (Fun
      { f_span = [5:1-11:2]; f_annotation = (); f_mode = <opaque>;
-       f_ret = (Some ([5:26-30], (Hprim Tvoid)));
+       f_ret = (([Pos.none], _), (Some ([5:26-30], (Hprim Tvoid))));
        f_name = ([5:10-14], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params =

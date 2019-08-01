@@ -166,7 +166,7 @@ let method_type env m =
   let return_disposable = has_return_disposable_attribute m.m_user_attributes in
   let arity_min = minimum_arity m.m_params in
   let params = make_params env m.m_params in
-  let ret = match m.m_ret with
+  let ret = match hint_of_type_hint m.m_ret with
     | None -> ret_from_fun_kind (fst m.m_name) m.m_fun_kind
     | Some ret -> Decl_hint.hint env ret in
   let arity = match m.m_variadic with
@@ -204,7 +204,7 @@ let method_redeclaration_type env m =
   check_params env m.mt_params;
   let arity_min = minimum_arity m.mt_params in
   let params = make_params env m.mt_params in
-  let ret = match m.mt_ret with
+  let ret = match hint_of_type_hint m.mt_ret with
     | None -> ret_from_fun_kind (fst m.mt_name) m.mt_fun_kind
     | Some ret -> Decl_hint.hint env ret in
   let arity = match m.mt_variadic with

@@ -44,6 +44,11 @@ let process_class_enum fields =
 (* Creates a simple type hint from a string *)
 let simple_typ pos name = (pos, Happly ((pos, name), []))
 
+let create_mixed_type_hint pos =
+  (* The Pos.none on the first position is voluntary, see (T47713369) *)
+  (Pos.none, Typing_make_type.nothing (Typing_defs.Reason.Rhint pos)),
+  Some (simple_typ pos "mixed")
+
 (* Error formatter *)
 let error_msg cls field name =
   Printf.sprintf "%s::%s::%s unknown atom access: " cls field name
@@ -118,7 +123,7 @@ let gen_pu_accessor
     }];
     m_body = body;
     m_user_attributes  = []; (* TODO: Memoize ? *)
-    m_ret = Some (simple_typ pos "mixed");
+    m_ret = create_mixed_type_hint pos;
     m_fun_kind = FSync;
     m_span = pos;
     m_doc_comment = None;
@@ -162,7 +167,7 @@ let gen_Members field pos (fields: pu_enum) =
    m_params = [];
    m_body = body;
    m_user_attributes  = []; (* TODO: Memoize ? *)
-   m_ret = Some (simple_typ pos "mixed");
+   m_ret = create_mixed_type_hint pos;
    m_fun_kind = FSync;
    m_span = pos;
    m_doc_comment = None;
@@ -291,7 +296,7 @@ class ['self] erase_body_visitor = object (_self: 'self)
         Some (super#on_hint from_cstrs h1, c, super#on_hint from_cstrs h2)
     in
     let f_where_constraints = List.filter_map ~f:erase_constrs f.f_where_constraints in
-    let f_ret = Option.map ~f:(super#on_hint from_cstrs) f.f_ret in
+    let f_ret = type_hint_option_map ~f:(super#on_hint from_cstrs) f.f_ret in
     let f_params =
       List.map ~f:(super#on_fun_param from_cstrs) f.f_params in
     let f_body = {

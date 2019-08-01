@@ -74,7 +74,6 @@ let reification reified attributes =
 let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
     (env_annotation : 'en) =
   let rec on_variadic_hint h = optional on_hint h
-
   and get_pos_shape_name name =
     match name with
     | SFlit_int (pos, _) | SFlit_str (pos, _) | SFclass_const (_, (pos, _)) ->
@@ -440,6 +439,7 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
           on_list on_user_attribute attribute.fa_user_attributes;
         fa_namespace = attribute.fa_namespace;
       }
+  and on_type_hint ta = (expr_annotation Pos.none, optional on_hint ta)
   and on_fun f =
     let body = on_block f.f_body in
     let body = { Aast.fb_ast = body; Aast.fb_annotation = func_body_ann } in
@@ -448,7 +448,7 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
         Aast.f_annotation = env_annotation;
         f_span = f.f_span;
         f_mode = f.f_mode;
-        f_ret = optional on_hint f.f_ret;
+        f_ret = on_type_hint f.f_ret;
         f_name = f.f_name;
         f_tparams = on_list on_tparam f.f_tparams;
         f_where_constraints = on_list on_constr f.f_constrs;
@@ -619,7 +619,7 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
         mt_variadic = determine_variadicity res.mt_params;
         mt_params = on_list on_fun_param res.mt_params;
         mt_fun_kind = res.mt_fun_kind;
-        mt_ret = optional on_hint res.mt_ret;
+        mt_ret = on_type_hint res.mt_ret;
         mt_trait = on_hint res.mt_trait;
         mt_method = res.mt_method;
         mt_user_attributes = on_list on_user_attribute res.mt_user_attributes;
@@ -677,7 +677,7 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
         m_body = body;
         m_fun_kind = m.m_fun_kind;
         m_user_attributes = on_list on_user_attribute m.m_user_attributes;
-        m_ret = optional on_hint m.m_ret;
+        m_ret = on_type_hint m.m_ret;
         m_external = m.m_external;
         m_doc_comment = m.m_doc_comment;
       }

@@ -59,7 +59,7 @@ let from_ast_wrapper privatize make_name ast_class ast_method =
     then None
     else Hhas_attribute.deprecation_info method_attributes in
   let is_no_injection = Hhas_attribute.is_no_injection method_attributes in
-  let ret = ast_method.T.m_ret in
+  let ret = T.hint_of_type_hint ast_method.T.m_ret in
   let original_method_id = make_name ast_method.T.m_name in
   if not (method_is_static || method_is_closure_body) then
     List.iter ast_method.T.m_params ~f:(fun p ->

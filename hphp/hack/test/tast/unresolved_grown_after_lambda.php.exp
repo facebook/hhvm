@@ -4,7 +4,7 @@ Errors:
   [3:23-29] But got string
 [(Fun
     { f_span = [3:1-15:2]; f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([3:35-38], (Hprim Tint)));
+      f_ret = (([Pos.none], _), (Some ([3:35-38], (Hprim Tint))));
       f_name = ([3:10-14], "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
@@ -39,7 +39,8 @@ Errors:
                    (Lfun (
                       { f_span = [5:8-12:4]; f_annotation = ();
                         f_mode = <opaque>;
-                        f_ret = (Some ([5:12-15], (Hprim Tint)));
+                        f_ret =
+                        (([Pos.none], _), (Some ([5:12-15], (Hprim Tint))));
                         f_name = ([5:8-12:4], ";anonymous"); f_tparams = [];
                         f_where_constraints = []; f_variadic = FVnonVariadic;
                         f_params = [];

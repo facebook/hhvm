@@ -1,7 +1,8 @@
 [(Fun
     { f_span = [5:1-26:2]; f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([5:30-34], (Hprim Tvoid))); f_name = ([5:10-11], "\\f");
-      f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+      f_ret = (([Pos.none], _), (Some ([5:30-34], (Hprim Tvoid))));
+      f_name = ([5:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
+      f_variadic = FVnonVariadic;
       f_params =
       [{ param_annotation = ([5:17-19], bool);
          param_hint = (Some ([5:12-16], (Hprim Tbool)));

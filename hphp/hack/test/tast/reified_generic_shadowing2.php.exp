@@ -31,8 +31,8 @@ Errors:
          m_body =
          { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
          m_fun_kind = FSync; m_user_attributes = [];
-         m_ret = (Some ([6:34-38], (Hprim Tvoid))); m_external = false;
-         m_doc_comment = None }
+         m_ret = (([Pos.none], _), (Some ([6:34-38], (Hprim Tvoid))));
+         m_external = false; m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace = <opaque>; c_user_attributes = []; c_file_attributes = [];
@@ -65,8 +65,8 @@ Errors:
           m_body =
           { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
           m_fun_kind = FSync; m_user_attributes = [];
-          m_ret = (Some ([11:34-38], (Hprim Tvoid))); m_external = false;
-          m_doc_comment = None }
+          m_ret = (([Pos.none], _), (Some ([11:34-38], (Hprim Tvoid))));
+          m_external = false; m_doc_comment = None }
          ];
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace = <opaque>; c_user_attributes = [];

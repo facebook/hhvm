@@ -72,7 +72,7 @@ let emit_function (ast_fun, hoisted) : Hhas_function.t list =
       ~doc_comment:ast_fun.T.f_doc_comment
       ast_fun.T.f_tparams
       ast_fun.T.f_params
-      ast_fun.T.f_ret
+      (T.hint_of_type_hint ast_fun.T.f_ret)
       [T.Stmt (Pos.none, T.Block ast_body)] in
   let normal_function_name =
     if wrapper_type_opt = Some Emit_inout_helpers.RefWrapper

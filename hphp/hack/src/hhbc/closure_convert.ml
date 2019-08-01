@@ -691,7 +691,7 @@ let convert_meth_caller_to_func_ptr env st ann pc cls pf func =
       f_span = p;
       f_annotation = dummy_saved_env;
       f_mode = get_scope_fmode env.scope;
-      f_ret = None;
+      f_ret = dummy_type_hint;
       f_name = (p, mangle_name);
       f_tparams = [];
       f_where_constraints = [];
@@ -1079,7 +1079,7 @@ and convert_lambda env st p fd use_vars_opt =
   let st = { st with closure_cnt_per_fun = st.closure_cnt_per_fun + 1 } in
   let st = List.filter_map ~f:(fun p -> p.param_hint) fd.f_params
     |> convert_hints env st |> fst in
-  let st = match fd.f_ret with
+  let st = match hint_of_type_hint fd.f_ret with
     | None -> st
     | Some h -> fst @@ convert_hint env st h in
   let current_generics = ULS.items st.captured_generics in

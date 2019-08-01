@@ -785,7 +785,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
   method on_fun_ acc f =
     let acc = this#on_id acc f.f_name in
     let acc = this#on_func_body acc f.f_body in
-    let acc = match f.f_ret with
+    let acc = match hint_of_type_hint f.f_ret with
       | Some h -> this#on_hint acc h
       | None -> acc in
     acc

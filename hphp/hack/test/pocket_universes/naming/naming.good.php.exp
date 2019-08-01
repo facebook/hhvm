@@ -41,7 +41,9 @@
              ];
            fb_annotation = No unsafe blocks };
          m_fun_kind = FSync; m_user_attributes = [];
-         m_ret = (Some ([6:19-30], (Happly (([6:19-30], "void"), []))));
+         m_ret =
+         (([Pos.none], _),
+          (Some ([6:19-30], (Happly (([6:19-30], "void"), [])))));
          m_external = false; m_doc_comment = None };
         { m_span = [10:3-12:4]; m_annotation = (); m_final = false;
           m_abstract = false; m_static = false; m_visibility = Public;
@@ -59,8 +61,8 @@
               ];
             fb_annotation = No unsafe blocks };
           m_fun_kind = FSync; m_user_attributes = [];
-          m_ret = (Some ([10:27-30], (Hprim Tint))); m_external = false;
-          m_doc_comment = None }
+          m_ret = (([Pos.none], _), (Some ([10:27-30], (Hprim Tint))));
+          m_external = false; m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace = <opaque>; c_user_attributes = []; c_file_attributes = [];

@@ -1515,7 +1515,7 @@ module Make (GetLocals : GetLocals) = struct
     let tparam_l = type_paraml env m.Aast.m_tparams in
     List.iter tparam_l check_constraint;
     let where_constraints = type_where_constraints env m.Aast.m_where_constraints in
-    let ret = Option.map m.Aast.m_ret (hint ~allow_retonly:true env) in
+    let ret = Aast.type_hint_option_map ~f:(hint ~allow_retonly:true env) m.Aast.m_ret in
     let body =
       match genv.in_mode with
       | FileInfo.Mdecl | FileInfo.Mphp ->
@@ -1561,7 +1561,7 @@ module Make (GetLocals : GetLocals) = struct
     let variadicity, paraml = fun_paraml env mt.Aast.mt_params in
     let tparam_l = type_paraml env mt.Aast.mt_tparams in
     let where_constraints = type_where_constraints env mt.Aast.mt_where_constraints in
-    let ret = Option.map mt.Aast.mt_ret (hint ~allow_retonly:true env) in
+    let ret = Aast.type_hint_option_map ~f:(hint ~allow_retonly:true env) mt.Aast.mt_ret in
     { N.mt_final = mt.Aast.mt_final
     ; N.mt_visibility = mt.Aast.mt_visibility
     ; N.mt_abstract = mt.Aast.mt_abstract
@@ -1643,7 +1643,7 @@ module Make (GetLocals : GetLocals) = struct
     let lenv = Env.empty_local None in
     let env = genv, lenv in
     let where_constraints = type_where_constraints env f.Aast.f_where_constraints in
-    let h = Option.map f.Aast.f_ret (hint ~allow_retonly:true env) in
+    let h = Aast.type_hint_option_map ~f:(hint ~allow_retonly:true env) f.Aast.f_ret in
     let variadicity, paraml = fun_paraml env f.Aast.f_params in
     let x = Env.fun_id env f.Aast.f_name in
     List.iter f.Aast.f_tparams check_constraint;
@@ -2432,7 +2432,7 @@ module Make (GetLocals : GetLocals) = struct
 
   and expr_lambda env f =
     let env = Env.set_ppl env false in
-    let h = Option.map f.Aast.f_ret (hint ~allow_retonly:true env) in
+    let h = Aast.type_hint_option_map ~f:(hint ~allow_retonly:true env) f.Aast.f_ret in
     let variadicity, paraml = fun_paraml env f.Aast.f_params in
     (* The bodies of lambdas go through naming in the containing local
      * environment *)

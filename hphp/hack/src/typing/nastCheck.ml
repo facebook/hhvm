@@ -69,7 +69,7 @@ let rec fun_ tenv f =
     tenv;
     is_reactive = env.is_reactive || fun_is_reactive f.f_user_attributes;
   } in
-  maybe hint env f.f_ret;
+  maybe hint env (hint_of_type_hint f.f_ret);
 
   List.iter f.f_tparams (tparam env);
   List.iter f.f_params (fun_param env);
@@ -243,7 +243,7 @@ and method_ env m =
 
   List.iter m.m_params (fun_param env);
   List.iter m.m_tparams (tparam env);
-  maybe hint env m.m_ret
+  maybe hint env (hint_of_type_hint m.m_ret)
 
 and fun_param env param =
   maybe hint env param.param_hint

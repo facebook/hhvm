@@ -26,7 +26,9 @@
          m_body =
          { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
          m_fun_kind = FSync; m_user_attributes = [];
-         m_ret = (Some ([3:62-73], (Happly (([3:62-73], "void"), []))));
+         m_ret =
+         (([Pos.none], _),
+          (Some ([3:62-73], (Happly (([3:62-73], "void"), [])))));
          m_external = false; m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];

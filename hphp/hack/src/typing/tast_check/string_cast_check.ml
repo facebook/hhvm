@@ -29,7 +29,7 @@ let check__toString m =
   then begin
     if m.m_visibility <> Public || m.m_static
     then Errors.toString_visibility pos;
-    match m.m_ret with
+    match hint_of_type_hint m.m_ret with
     | Some (_, Hprim Tstring) -> ()
     | Some (p, _) -> Errors.toString_returns_string p
     | None -> ()

@@ -1,6 +1,6 @@
 [(Fun
     { f_span = [3:1-57]; f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([3:33-39], (Hprim Tstring)));
+      f_ret = (([Pos.none], _), (Some ([3:33-39], (Hprim Tstring))));
       f_name = ([3:10-29], "\\returnsTheStringFoo"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
@@ -12,7 +12,7 @@
       f_static = false });
   (Fun
      { f_span = [5:1-10:2]; f_annotation = (); f_mode = <opaque>;
-       f_ret = (Some ([5:28-32], (Hprim Tvoid)));
+       f_ret = (([Pos.none], _), (Some ([5:28-32], (Hprim Tvoid))));
        f_name = ([5:10-14], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params =

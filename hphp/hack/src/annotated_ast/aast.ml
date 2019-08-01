@@ -260,7 +260,7 @@ and ('ex, 'fb, 'en) fun_ = {
   f_span: pos;
   f_annotation: 'en;
   f_mode: FileInfo.mode; [@opaque]
-  f_ret: hint option;
+  f_ret: ('ex, 'fb, 'en) type_hint;
   f_name: sid;
   f_tparams: ('ex, 'fb, 'en) tparam list;
   f_where_constraints: where_constraint list;
@@ -290,6 +290,13 @@ and ('ex, 'fb, 'en) func_body = {
  * have named and unnamed variants of the annotation.
  * See BodyNamingAnnotation in nast.ml and the comment in naming.ml
  *)
+
+(* A type annotation is two things:
+  - the localized hint, or if the hint is missing, the inferred type
+  - The typehint associated to this expression if it exists *)
+and ('ex, 'fb, 'en) type_hint = 'ex * ('ex, 'fb, 'en) type_hint_
+
+and ('ex, 'fb, 'en) type_hint_ = hint option
 
 and ('ex, 'fb, 'en) user_attribute = {
   ua_name: sid;
@@ -448,7 +455,7 @@ and ('ex, 'fb, 'en) method_ = {
   m_body: ('ex, 'fb, 'en) func_body;
   m_fun_kind: Ast_defs.fun_kind;
   m_user_attributes: ('ex, 'fb, 'en) user_attribute list;
-  m_ret: hint option;
+  m_ret: ('ex, 'fb, 'en) type_hint;
   m_external: bool;
   (* see f_external above for context *)
   m_doc_comment: string option;
@@ -465,7 +472,7 @@ and ('ex, 'fb, 'en) method_redeclaration = {
   mt_variadic: ('ex, 'fb, 'en) fun_variadicity;
   mt_params: ('ex, 'fb, 'en) fun_param list;
   mt_fun_kind: Ast_defs.fun_kind;
-  mt_ret: hint option;
+  mt_ret: ('ex, 'fb, 'en) type_hint;
   mt_trait: hint;
   mt_method: pstring;
   mt_user_attributes: ('ex, 'fb, 'en) user_attribute list;
@@ -608,3 +615,15 @@ let get_break_continue_level level_opt =
       if i <= 0 then Level_non_positive else Level_ok (Some i)
   | _ -> Level_non_literal
   | exception _ -> Level_non_literal
+
+(* map a function over the second part of a type annotation *)
+let type_hint_option_map ~f ta =
+  let mapped_hint =
+    match snd ta with
+    | Some hint -> Some (f hint)
+    | None -> None
+  in
+  (fst ta, mapped_hint)
+
+(* extract an hint from a type annotation *)
+let hint_of_type_hint = snd

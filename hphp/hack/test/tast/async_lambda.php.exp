@@ -1,9 +1,10 @@
 [(Fun
     { f_span = [3:1-70]; f_annotation = (); f_mode = <opaque>;
       f_ret =
-      (Some ([3:38-55],
-             (Happly (([3:38-47], "\\Awaitable"),
-                [([3:48-54], (Hprim Tstring))]))));
+      (([Pos.none], _),
+       (Some ([3:38-55],
+              (Happly (([3:38-47], "\\Awaitable"),
+                 [([3:48-54], (Hprim Tstring))])))));
       f_name = ([3:16-25], "\\genString"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
@@ -23,7 +24,7 @@
       f_static = false });
   (Fun
      { f_span = [5:1-12:2]; f_annotation = (); f_mode = <opaque>;
-       f_ret = (Some ([5:18-22], (Hprim Tvoid)));
+       f_ret = (([Pos.none], _), (Some ([5:18-22], (Hprim Tvoid))));
        f_name = ([5:10-14], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
@@ -37,7 +38,7 @@
                   (([6:9-8:4], (function(): Awaitable<_>)),
                    (Lfun (
                       { f_span = [6:9-8:4]; f_annotation = ();
-                        f_mode = <opaque>; f_ret = None;
+                        f_mode = <opaque>; f_ret = (([Pos.none], _), None);
                         f_name = ([6:9-8:4], ";anonymous"); f_tparams = [];
                         f_where_constraints = []; f_variadic = FVnonVariadic;
                         f_params = [];
@@ -76,7 +77,7 @@
                    (([9:9-11:4], (function(string $x): Awaitable<void>)),
                     (Lfun (
                        { f_span = [9:9-11:4]; f_annotation = ();
-                         f_mode = <opaque>; f_ret = None;
+                         f_mode = <opaque>; f_ret = (([Pos.none], _), None);
                          f_name = ([9:9-11:4], ";anonymous"); f_tparams = [];
                          f_where_constraints = [];
                          f_variadic = FVnonVariadic;

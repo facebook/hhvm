@@ -6,8 +6,6 @@
    +-------------------------------------------------------------+
 */
 
-error_reporting(-1);
-
 interface iX
 {
     const C1 = 123;
@@ -51,11 +49,6 @@ class D implements iZ
     public static function f3 () {}
 }
 
-var_dump(D::C1);
-var_dump(D::C2);
-
-echo "------------------------------------\n";
-
 include_once 'MyCollection.inc';
 include_once 'MyList.inc';
 
@@ -78,6 +71,13 @@ function processCollection(MyCollection $p1)
 {
     var_dump($p1);
 }
+<<__EntryPoint>> function main(): void {
+error_reporting(-1);
+
+var_dump(D::C1);
+var_dump(D::C2);
+
+echo "------------------------------------\n";
 
 $list = new MyList;
 processCollection($list);
@@ -90,3 +90,4 @@ processCollection(new MyQueue);
 var_dump(MyCollection::MAX_NUMBER_ITEMS);
 var_dump(MyList::MAX_NUMBER_ITEMS);
 var_dump(MyQueue::MAX_NUMBER_ITEMS);
+}

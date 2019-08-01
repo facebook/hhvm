@@ -6,7 +6,7 @@
    +-------------------------------------------------------------+
 */
 
-error_reporting(-1);
+
 
 interface XIterator extends Traversable
 {
@@ -15,4 +15,8 @@ interface XIterator extends Traversable
     function next();
     function rewind();
     function valid();
+}
+
+<<__EntryPoint>> function main(): void {
+error_reporting(-1);
 }

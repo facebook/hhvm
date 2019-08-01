@@ -6,12 +6,13 @@
    +-------------------------------------------------------------+
 */
 
-error_reporting(-1);
-
 interface XArrayAccess
 {
     function offsetExists ($offset);
     function offsetGet ($offset);
     function offsetSet ($offset, $value);
     function offsetUnset ($offset);
+}
+<<__EntryPoint>> function main(): void {
+error_reporting(-1);
 }

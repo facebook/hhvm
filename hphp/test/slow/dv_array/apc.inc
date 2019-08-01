@@ -63,6 +63,7 @@ function make_circular_darray() {
   return $d;
 }
 
+function test(): void {
 $values = dict[
   'varray1' => varray[],
   'varray2' => varray[1, 2, 3],
@@ -83,4 +84,5 @@ if (__hhvm_intrinsics\apc_fetch_no_check('second-time') === false) {
 } else {
   get_all($values);
   echo "============ DONE ================\n";
+}
 }

@@ -4,10 +4,10 @@
  * Source code: ext/standard/array.c
  * Alias to functions:
  */
+include('compare_function.inc');
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_uintersect_assoc() : basic functionality - testing with multiple array arguments ***\n";
 
-include('compare_function.inc');
 $data_compare_function = 'compare_function';
 
 // Initialise all required variables

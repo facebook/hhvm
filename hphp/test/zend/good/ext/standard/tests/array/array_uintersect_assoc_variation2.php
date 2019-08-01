@@ -16,8 +16,8 @@ class classWithToString
 class classWithoutToString
 {
 }
-<<__EntryPoint>> function main(): void {
 include('compare_function.inc');
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_uintersect_assoc() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)

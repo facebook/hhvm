@@ -404,14 +404,9 @@ val tco_disallow_invalid_arraykey : t -> bool
 val tco_disallow_byref_dynamic_calls : t -> bool
 val tco_disallow_byref_calls : t -> bool
 val default : t
-val tco_experimental_instanceof : string
 val tco_experimental_isarray : string
-val tco_experimental_goto : string
-val tco_experimental_disable_shape_and_tuple_arrays : string
 val tco_experimental_stronger_shape_idx_ret : string
-val tco_experimental_unresolved_fix : string
 val tco_experimental_generics_arity : string
-val tco_experimental_annotate_function_calls : string
 val tco_experimental_forbid_nullable_cast : string
 val tco_experimental_coroutines: string
 val tco_experimental_disallow_static_memoized : string
@@ -419,8 +414,6 @@ val tco_experimental_no_trait_reuse : string
 val tco_experimental_type_param_shadowing : string
 val tco_experimental_trait_method_redeclarations : string
 val tco_experimental_type_const_attributes : string
-val tco_experimental_decl_linearization : string
-val tco_experimental_track_subtype_prop : string
 val tco_experimental_pocket_universes : string
 val tco_experimental_abstract_type_const_with_default : string
 val tco_experimental_all : SSet.t

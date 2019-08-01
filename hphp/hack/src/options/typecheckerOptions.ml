@@ -27,15 +27,8 @@ let migration_flag_enabled =
 let log_inference_constraints = GlobalOptions.tco_log_inference_constraints
 let default = GlobalOptions.default
 let experimental_isarray = GlobalOptions.tco_experimental_isarray
-let experimental_goto = GlobalOptions.tco_experimental_goto
-let experimental_disable_shape_and_tuple_arrays =
-  GlobalOptions.tco_experimental_disable_shape_and_tuple_arrays
 let experimental_stronger_shape_idx_ret =
   GlobalOptions.tco_experimental_stronger_shape_idx_ret
-let experimental_annotate_function_calls =
-  GlobalOptions.tco_experimental_annotate_function_calls
-let experimental_unresolved_fix =
-  GlobalOptions.tco_experimental_unresolved_fix
 let experimental_generics_arity =
   GlobalOptions.tco_experimental_generics_arity
 let experimental_forbid_nullable_cast =
@@ -53,11 +46,6 @@ let experimental_type_const_attributes =
   GlobalOptions.tco_experimental_type_const_attributes
 let experimental_abstract_type_const_with_default =
   GlobalOptions.tco_experimental_abstract_type_const_with_default
-
-let experimental_decl_linearization =
-  GlobalOptions.tco_experimental_decl_linearization
-let experimental_track_subtype_prop =
-  GlobalOptions.tco_experimental_track_subtype_prop
 let experimental_all = GlobalOptions.tco_experimental_all
 let migration_flags_all = GlobalOptions.tco_migration_flags_all
 let dynamic_view = GlobalOptions.tco_dynamic_view

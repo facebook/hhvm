@@ -14,6 +14,7 @@ open Typing_defs
 module Reason = Typing_reason
 module Env = Typing_env
 module Inter = Typing_intersection
+module Union = Typing_union
 module TUtils = Typing_utils
 module Cls = Decl_provider.Class
 module TySet = Typing_set
@@ -380,6 +381,16 @@ let ty_equal_shallow ty1 ty2 =
     ak1 = ak2
   | _ -> false
 
+let union_any_if_any_in_lower_bounds env ty lower_bounds =
+  let r = Reason.none in let any = (r, Tany) and err = (r, Terr) in
+  let env, ty = match TySet.find_opt any lower_bounds with
+    | Some any -> Union.union env ty any
+    | None -> env, ty in
+  let env, ty = match TySet.find_opt err lower_bounds with
+    | Some err -> Union.union env ty err
+    | None -> env, ty in
+  env, ty
+
 let try_bind_to_equal_bound ~freshen env r var on_error =
   if tyvar_is_solved env var
   then env
@@ -392,8 +403,12 @@ let try_bind_to_equal_bound ~freshen env r var on_error =
   let lower_bounds = expand_all tyvar_info.Env.lower_bounds in
   let upper_bounds = expand_all tyvar_info.Env.upper_bounds in
   let equal_bounds = Typing_set.inter lower_bounds upper_bounds in
+  let r = Reason.none in let any = (r, Tany) and err = (r, Terr) in
+  let equal_bounds = equal_bounds |> TySet.remove any |> TySet.remove err in
   match Typing_set.choose_opt equal_bounds with
-  | Some ty -> bind env var ty
+  | Some ty ->
+    let env, ty = union_any_if_any_in_lower_bounds env ty lower_bounds in
+    bind env var ty
   | None ->
     if not freshen then env
     else
@@ -411,6 +426,7 @@ let try_bind_to_equal_bound ~freshen env r var on_error =
           let env, ty = freshen_inside_ty env lower_bound in
           let env = Typing_subtype.sub_type env lower_bound ty on_error in
           let env = Typing_subtype.sub_type env ty upper_bound on_error in
+          let env, ty = union_any_if_any_in_lower_bounds env ty lower_bounds in
           bind env var ty
         else env) lower_bounds env) upper_bounds env
 

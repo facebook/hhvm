@@ -431,17 +431,29 @@ dynamic getOpcodeStats(const BlockList& blocks) {
   return result;
 }
 
+dynamic getSrcKey(const SrcKey& sk) {
+  return dynamic::object("func", sk.func()->name()->slice())
+                        ("unit", sk.unit()->filepath()->slice())
+                        ("prologue", sk.prologue())
+                        ("offset", sk.offset())
+                        ("resumeMode", resumeModeShortName(sk.resumeMode()))
+                        ("hasThis", sk.hasThis());
+}
+
+dynamic getTransContext(const TransContext& ctx) {
+  return dynamic::object("kind", show(ctx.kind))
+                        ("id", ctx.transID)
+                        ("optIndex", ctx.optIndex)
+                        ("srcKey", getSrcKey(ctx.srcKey()));
+}
+
 dynamic getUnit(const IRUnit& unit,
                 const AsmInfo* asmInfo,
                 const GuardConstraints* guards) {
   dynamic result = dynamic::object;
 
   auto const kind = unit.context().kind;
-
-  result["transKind"] = show(kind);
-  if (kind == TransKind::Optimize) {
-    result["optIndex"] =  unit.context().optIndex;
-  }
+  result["translation"] = getTransContext(unit.context());
 
   auto blocks = rpoSortCfg(unit);
   // Partition into main, cold and frozen, without changing relative order.

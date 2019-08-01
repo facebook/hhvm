@@ -117,7 +117,7 @@ function openssl_verify(string $data, string $signature, $pub_key_id, $signature
 <<__PHPStdLib>>
 function openssl_x509_check_private_key($cert, $key);
 <<__PHPStdLib>>
-function openssl_x509_checkpurpose($x509cert, int $purpose, $cainfo = null, string $untrustedfile = "");
+function openssl_x509_checkpurpose($x509cert, int $purpose, varray $cainfo = varray[], string $untrustedfile = "");
 <<__PHPStdLib>>
 function openssl_x509_export_to_file($x509, string $outfilename, bool $notext = true);
 <<__PHPStdLib>>

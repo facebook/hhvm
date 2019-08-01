@@ -25,7 +25,7 @@
                       ([5:15-24], (function(string $message, int $code, ?Exception $previous): _))
                       )))))
                ],
-             (([6:12-17], _), (Lvar ([6:12-17], $cond))))))
+             (([6:12-17], nothing), (Lvar ([6:12-17], $cond))))))
           ];
         fb_annotation = No unsafe blocks };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

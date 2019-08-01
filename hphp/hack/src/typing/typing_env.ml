@@ -956,8 +956,9 @@ let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx_opt =
   match ctx_opt with
   | None ->
     (* If the continuation is absent, we are in dead code so the variable should
-    have type nothing. TODO T46400549: actually change it to nothing instead of any. *)
-    Some ((Reason.Rnone, tany env), 0)
+    have type nothing. *)
+    Some (Typing_make_type.nothing Reason.Rnone, 0)
+
   | Some ctx ->
     let lcl = LID.Map.get x ctx.LEnvC.local_types in
     begin match lcl with

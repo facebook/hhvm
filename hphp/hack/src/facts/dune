@@ -1,8 +1,14 @@
 (library
   (name facts)
   (wrapped false)
+  (modules
+    facts
+    facts_parser
+    facts_smart_constructors
+    flatten_smart_constructors)
   (libraries
     core_kernel
+    rust_facts_ffi_stubs
     hhbc
     parser
     utils_hash)

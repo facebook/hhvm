@@ -31,6 +31,12 @@
     full_fidelity))
 
 (library
+  (name rust_facts_ffi_stubs)
+  (wrapped false)
+  (modules
+    rust_facts_ffi))
+
+(library
   (name hackc_parse_delegator_stubs)
   (wrapped false)
   (modules

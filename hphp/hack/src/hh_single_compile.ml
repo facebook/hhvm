@@ -424,22 +424,17 @@ let do_compile filename compiler_options popt fail_or_ast debug_time =
   then log_success compiler_options filename debug_time;
   hhas
 
-let extract_facts ?pretty ~filename ~source_root text =
-  let () = ignore @@ pretty in
-  let json_facts = match Hackc_parse_delegator.extract_facts filename source_root with
-    | Some result -> Some result
+let extract_facts ~rust ~filename ~source_root text = [
+  match Hackc_parse_delegator.extract_facts filename source_root with
+    | Some result -> Hh_json.json_to_multiline ~sort_keys:true result
     | None ->
-      Facts_parser.extract_as_json
+      Facts_parser.extract_as_json_string
+        ~rust
         ~php5_compat_mode:true
         ~hhvm_compat_mode:true
         ~filename ~text
-  in
-  (* return empty string if file has syntax errors *)
-  Option.value_map
-    ~default:""
-    ~f:(Hh_json.json_to_multiline ~sort_keys:true)
-    json_facts
-  |> fun x -> [x]
+      |> Option.value ~default:""
+]
 
 let parse_hh_file filename body =
   let file = Relative_path.create Relative_path.Dummy filename in
@@ -478,7 +473,7 @@ let process_single_source_unit compiler_options
     let t = Unix.gettimeofday () in
     let output =
       if compiler_options.extract_facts
-      then extract_facts ~pretty:true ~filename ~source_root source_text
+      then extract_facts ~rust:(ParserOptions.rust popt) ~filename ~source_root source_text
       else begin
         let fail_or_ast =
           match Hackc_parse_delegator.parse_file filename source_text source_root with
@@ -590,7 +585,8 @@ let decl_and_run_mode compiler_options =
             source_root in
           Hhbc_options.set_compiler_options old_config;
           result)
-        ; facts = (fun header body -> (
+        ; facts =
+        (fun header body -> (
           (* if body is empty - read file from disk *)
           let filename = get_field
             (get_string "file")
@@ -602,10 +598,11 @@ let decl_and_run_mode compiler_options =
             then Sys_utils.cat filename
             else body in
           let path = Relative_path.create Relative_path.Dummy filename in
+          let rust = Hhbc_options.use_rust_parser !Hhbc_options.compiler_options in
           handle_output
             path
-            (extract_facts ~filename:path ~source_root body))
-            (new_debug_time ()))
+            (extract_facts ~rust ~filename:path ~source_root body)
+        ) (new_debug_time ()))
         ; parse = (fun header body -> (
           let filename = get_field
             (get_string "file")

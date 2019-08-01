@@ -11,16 +11,17 @@ val mangle_xhp_mode: bool ref
 val flags_abstract: int
 val flags_final: int
 
-val extract_as_json:
+val extract_as_json_string:
   php5_compat_mode: bool ->
   hhvm_compat_mode: bool ->
   filename: Relative_path.t ->
-  text:string
-  -> Hh_json.json option
+  text:string ->
+  rust: bool ->
+  string option
 
 val from_text:
   php5_compat_mode: bool ->
   hhvm_compat_mode: bool ->
   filename: Relative_path.t ->
-  text:string
-  -> Facts.facts option
+  text:string ->
+  Facts.facts option

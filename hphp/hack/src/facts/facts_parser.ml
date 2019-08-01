@@ -327,6 +327,7 @@ let from_text
     let _, facts = collect ("", empty) root in
     Some facts
   end
+
 let extract_as_json
     ~(php5_compat_mode:bool)
     ~(hhvm_compat_mode:bool)
@@ -337,3 +338,29 @@ let extract_as_json
       let md5 = OpaqueDigest.to_hex @@ OpaqueDigest.string text in
       let sha1 = Sha1.digest text in
       facts_to_json ~md5 ~sha1 facts)
+
+let extract_as_json_string
+    ~(php5_compat_mode:bool)
+    ~(hhvm_compat_mode:bool)
+    ~(filename: Relative_path.t)
+    ~(text: string)
+    ~(rust: bool): string option =
+  (* return empty string if file has syntax errors *)
+  if rust then
+  begin
+    let unnormalized = Rust_facts_ffi.extract_as_json_ffi
+      php5_compat_mode
+      hhvm_compat_mode
+      (Relative_path.suffix filename)
+      text
+    in
+    if unnormalized = "" then
+      None
+    else
+      (* make it compact (same line breaks and whitespace) via Hh_json *)
+      (* to avoid differences in output (because many tests rely on it!) *)
+      Some (unnormalized |> Hh_json.json_of_string |> Hh_json.json_to_multiline)
+  end
+  else
+    extract_as_json ~php5_compat_mode ~hhvm_compat_mode ~filename ~text
+    |> Option.map ~f:(Hh_json.json_to_multiline ~sort_keys:true)

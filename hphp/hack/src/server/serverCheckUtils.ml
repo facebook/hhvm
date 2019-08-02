@@ -9,15 +9,14 @@
 open ServerEnv
 open ServerLocalConfig
 
-let get_naming_table_fallback_path genv _fallback: string option =
+let get_naming_table_fallback_path genv (naming_table_fn: string option): string option =
   Hh_logger.log "Figuring out naming table SQLite path";
   match genv.local_config.naming_sqlite_path with
   | Some path ->
-    Hh_logger.log "Found path: %s" path;
     Some path
   | None ->
-    Hh_logger.log "Load from blob";
-    None
+    Hh_logger.log "No path, using loaded naming table";
+    naming_table_fn
 
 let extend_fast fast naming_table additional_files =
   Relative_path.Set.fold additional_files ~init:fast ~f:begin fun x acc ->

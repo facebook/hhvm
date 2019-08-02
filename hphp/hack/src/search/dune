@@ -16,5 +16,5 @@
     pos
     search_utils
     sqlite3
-    state_loader_fb
+    state_loader
     trie))

@@ -84,6 +84,13 @@ let download_and_load_state_exn
   let ignore_hhconfig = ServerArgs.saved_state_ignore_hhconfig genv.options in
   let use_prechecked_files = ServerPrecheckedFiles.should_use genv.options genv.local_config in
 
+  let naming_table_saved_state =
+    if genv.local_config.ServerLocalConfig.enable_naming_table_fallback
+    then begin
+      Hh_logger.log "Starting naming table download.";
+      Some (State_loader_futures.load ~repo:root ~saved_state_type:Saved_state_loader.Naming_table)
+    end else None
+  in
   let state_future : (State_loader.native_load_result, State_loader.error) result =
     State_loader.mk_state_future
       ~config:genv.local_config.SLC.state_loader_timeouts
@@ -96,6 +103,32 @@ let download_and_load_state_exn
   | Error error ->
     Error (Load_state_loader_failure error)
   | Ok result ->
+    let (downloaded_naming_table_path, dirty_naming_files) = match naming_table_saved_state with
+      | None -> (None, [])
+      | Some future ->
+        begin match Future.get ~timeout:100 future with
+        | Ok (Ok (naming_table_info, changed_files)) ->
+          let _ : float =
+            Hh_logger.log_duration "Finished downloading naming table." (Future.start_t future)
+          in
+          let path =
+            naming_table_info.Saved_state_loader.Naming_table_saved_state_info.naming_table_path
+          in
+          let changed_files = List.map
+            ~f:(fun path -> Relative_path.create_detect_prefix (Path.to_string path))
+            changed_files
+          in
+          (Some (Path.to_string path), changed_files)
+        | Ok (Error inner_err) ->
+          Hh_logger.warn "Failed to download naming table saved state: %s"
+            (Saved_state_loader.load_error_to_string inner_err);
+          (None, [])
+        | Error err ->
+          Hh_logger.warn "Failed to download naming table saved state: %s"
+            (Future.error_to_string err);
+          (None, [])
+        end
+    in
     let ignore_hh_version = ServerArgs.ignore_hh_version genv.ServerEnv.options in
     let fail_if_missing = not genv.local_config.SLC.can_skip_deptable in
     lock_and_load_deptable
@@ -103,7 +136,9 @@ let download_and_load_state_exn
       ~ignore_hh_version
       ~fail_if_missing;
     let load_decls = genv.local_config.SLC.load_decls_from_saved_state in
-    let naming_table_fallback_path = get_naming_table_fallback_path genv None in
+    let naming_table_fallback_path =
+      get_naming_table_fallback_path genv downloaded_naming_table_path
+    in
     let (old_naming_table, old_errors) = SaveStateService.load_saved_state
       result.State_loader.saved_state_fn
       ~naming_table_fallback_path
@@ -118,13 +153,16 @@ let download_and_load_state_exn
         let () = HackEventLogger.state_loader_dirty_files t in
         let list_to_set x =
           List.map x Relative_path.from_root |> Relative_path.set_of_list in
+        let dirty_naming_files = Relative_path.Set.of_list dirty_naming_files in
         let dirty_master_files = list_to_set dirty_master_files in
         let dirty_local_files = list_to_set dirty_local_files in
         Ok {
           saved_state_fn = result.State_loader.saved_state_fn;
           deptable_fn = result.State_loader.deptable_fn;
+          naming_table_fn = naming_table_fallback_path;
           corresponding_rev = result.State_loader.corresponding_rev;
           mergebase_rev = result.State_loader.mergebase_rev;
+          dirty_naming_files;
           dirty_master_files;
           dirty_local_files;
           old_naming_table;
@@ -160,8 +198,10 @@ let use_precomputed_state_exn
   {
     saved_state_fn;
     deptable_fn;
+    naming_table_fn = naming_table_fallback_path;
     corresponding_rev = (Hg.Global_rev (int_of_string (corresponding_base_revision)));
     mergebase_rev  = None;
+    dirty_naming_files = Relative_path.Set.empty;
     dirty_master_files = prechecked_changes;
     dirty_local_files = changes;
     old_naming_table;
@@ -496,6 +536,8 @@ let post_saved_state_initialization
   let trace = genv.local_config.SLC.trace_parsing in
   let hg_aware = genv.local_config.SLC.hg_aware in
   let {
+    naming_table_fn;
+    dirty_naming_files;
     dirty_local_files;
     dirty_master_files;
     old_naming_table;
@@ -535,8 +577,13 @@ let post_saved_state_initialization
 
   (* Parse and name all dirty files uniformly *)
   let dirty_files =
-    Relative_path.Set.union naming_and_parsing_error_files (
-      Relative_path.Set.union dirty_master_files dirty_local_files) in
+    List.fold ~init:Relative_path.Set.empty ~f:Relative_path.Set.union [
+      naming_and_parsing_error_files;
+      dirty_naming_files;
+      dirty_master_files;
+      dirty_local_files;
+    ]
+  in
   let t = Unix.gettimeofday () in
   let dirty_files =
     Relative_path.Set.union dirty_files changed_while_parsing in
@@ -558,7 +605,7 @@ let post_saved_state_initialization
   (* If we're falling back to SQLite we don't need to explicitly do a naming
      pass. *)
   let t =
-    match genv.local_config.SLC.naming_sqlite_path with
+    match naming_table_fn with
     | Some _ ->
       (* Set the SQLite fallback path for the reverse naming table, then block out all entries in
       any dirty files to make sure we properly handle file deletes. *)

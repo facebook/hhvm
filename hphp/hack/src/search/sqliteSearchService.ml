@@ -27,6 +27,34 @@ let sql_check_alive =
 let sql_select_namespaces =
   "SELECT namespace FROM namespaces"
 
+(* Select a filename for a temporary symbol index *)
+let get_filename_for_symbol_index (extension: string): string =
+
+  (* Where does our repository live? *)
+  let repo_path = Relative_path.to_absolute
+    (Relative_path.from_root "/") in
+  let timestamp = string_of_int (int_of_float (Unix.gettimeofday ())) in
+
+  (* Clean the path string *)
+  let cleanpath = Path.slash_escaped_string_of_path (Path.make repo_path) in
+  let tempdir = (Path.make (Filename.get_temp_dir_name ())) in
+  let temppath =
+    Path.concat tempdir
+      ("symbolindex." ^ cleanpath ^ "." ^ timestamp ^ extension) in
+  let tempfilename = Path.to_string temppath in
+  tempfilename
+
+(* Attempt to fetch this file *)
+let find_saved_symbolindex (): (string, string) Core_kernel.result =
+  let repo = Path.make (Relative_path.path_of_prefix Relative_path.Root) in
+  let res = Future.get_exn
+    (State_loader_futures.load ~repo ~saved_state_type:Saved_state_loader.Symbol_index)
+  in
+  match res with
+  | Ok (info, _) ->
+    Ok (Path.to_string (info.Saved_state_loader.Symbol_index_saved_state_info.symbol_index_path))
+  | Error load_error -> Error (Saved_state_loader.load_error_to_string load_error)
+
 (* Determine the correct filename to use for the db_path or build it *)
 let find_or_build_sqlite_file
     (workers: MultiWorker.worker list option)
@@ -35,13 +63,13 @@ let find_or_build_sqlite_file
   | Some path -> path
   | None ->
     (* Can we get one from the saved state fetcher? *)
-    match SavedStateFetcher.find_saved_symbolindex () with
+    match find_saved_symbolindex () with
     | Ok filename -> filename
     | Error errmsg ->
       let repo_path = Relative_path.to_absolute
         (Relative_path.from_root "") in
       Hh_logger.log "Unable to fetch sqlite symbol index: %s" errmsg;
-      let tempfilename = SavedStateFetcher.get_filename_for_symbol_index ".db" in
+      let tempfilename = get_filename_for_symbol_index ".db" in
       Hh_logger.log "Sqlite saved state not specified, generating on the fly";
       Hh_logger.log "Generating [%s] from repository [%s]" tempfilename repo_path;
       let ctxt = { IndexBuilderTypes.

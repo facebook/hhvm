@@ -96,6 +96,8 @@
   (wrapped false)
   (modules
     state_loader
+    saved_state_loader
+    state_loader_futures
     xdb)
   (libraries
     hg

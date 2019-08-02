@@ -572,34 +572,45 @@ and reify_kind =
  * emission, which is observable in user code via `ReflectionClass`.
  *)
 let split_methods class_ =
-  let constr, statics, res =
+  let (constr, statics, res) =
     List.fold_left
       (fun (constr, statics, rest) m ->
-        if snd m.m_name = "__construct" then (Some m, statics, rest)
-        else if m.m_static then (constr, m :: statics, rest)
-        else (constr, statics, m :: rest))
-      (None, [], []) class_.c_methods
+        if snd m.m_name = "__construct" then
+          (Some m, statics, rest)
+        else if m.m_static then
+          (constr, m :: statics, rest)
+        else
+          (constr, statics, m :: rest))
+      (None, [], [])
+      class_.c_methods
   in
   (constr, List.rev statics, List.rev res)
 
 (* Splits class properties into statics, dynamics *)
 let split_vars class_ =
-  let statics, res =
+  let (statics, res) =
     List.fold_left
       (fun (statics, rest) v ->
-        if v.cv_is_static then (v :: statics, rest) else (statics, v :: rest))
-      ([], []) class_.c_vars
+        if v.cv_is_static then
+          (v :: statics, rest)
+        else
+          (statics, v :: rest))
+      ([], [])
+      class_.c_vars
   in
   (List.rev statics, List.rev res)
 
 (* Splits `require`s into extends, implements *)
 let split_reqs class_ =
-  let extends, implements =
+  let (extends, implements) =
     List.fold_left
       (fun (extends, implements) (h, is_extends) ->
-        if is_extends then (h :: extends, implements)
-        else (extends, h :: implements))
-      ([], []) class_.c_reqs
+        if is_extends then
+          (h :: extends, implements)
+        else
+          (extends, h :: implements))
+      ([], [])
+      class_.c_reqs
   in
   (List.rev extends, List.rev implements)
 
@@ -610,9 +621,12 @@ type break_continue_level =
 
 let get_break_continue_level level_opt =
   match level_opt with
-  | _, Int s ->
-      let i = int_of_string s in
-      if i <= 0 then Level_non_positive else Level_ok (Some i)
+  | (_, Int s) ->
+    let i = int_of_string s in
+    if i <= 0 then
+      Level_non_positive
+    else
+      Level_ok (Some i)
   | _ -> Level_non_literal
   | exception _ -> Level_non_literal
 

@@ -1,12 +1,22 @@
 # -*- conf -*-
 
-indicate-nested-or-patterns = unsafe-no
-break-string-literals = never
-sequence-style = terminator
-field-space = tight-decl
+break-cases = all
+break-fun-decl = smart
+break-infix = fit-or-vertical
 break-separators = after-and-docked
-break-cases = toplevel
-space-around-records = true
-type-decl = sparse
-sequence-blank-line = preserve-one
+break-sequences = true
+break-string-literals = never
+cases-exp-indent = 2
+disambiguate-non-breaking-match = true
+field-space = tight-decl
+if-then-else = k-r
+indicate-nested-or-patterns = unsafe-no
+leading-nested-match-parens = true
 let-open = short
+parens-tuple-patterns = always
+sequence-blank-line = preserve-one
+sequence-style = terminator
+space-around-records = true
+space-around-variants = true
+type-decl = sparse
+wrap-fun-args = false

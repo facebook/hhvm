@@ -325,44 +325,48 @@ class virtual ['a] ast_visitor : ['a] ast_visitor_type =
 
     method on_hint acc h =
       match snd h with
-      | Hsoft h | Hlike h | Hoption h ->
-          let acc = this#on_hint acc h in
-          acc
+      | Hsoft h
+      | Hlike h
+      | Hoption h ->
+        let acc = this#on_hint acc h in
+        acc
       | Hfun (_, hl, kl, _, h) ->
-          let acc = List.fold_left this#on_hint acc hl in
-          let acc =
-            List.fold_left
-              (fun acc k ->
-                match k with
-                | Some kind -> this#on_param_kind acc kind
-                | None -> acc)
-              acc kl
-          in
-          let acc = this#on_hint acc h in
-          acc
+        let acc = List.fold_left this#on_hint acc hl in
+        let acc =
+          List.fold_left
+            (fun acc k ->
+              match k with
+              | Some kind -> this#on_param_kind acc kind
+              | None -> acc)
+            acc
+            kl
+        in
+        let acc = this#on_hint acc h in
+        acc
       | Htuple hl ->
-          let acc = List.fold_left this#on_hint acc hl in
-          acc
+        let acc = List.fold_left this#on_hint acc hl in
+        acc
       | Happly (id, hl) ->
-          let acc = this#on_id acc id in
-          let acc = List.fold_left this#on_hint acc hl in
-          acc
+        let acc = this#on_id acc id in
+        let acc = List.fold_left this#on_hint acc hl in
+        acc
       | Hshape shape_info ->
-          let { si_shape_field_list; _ } = shape_info in
-          let acc =
-            List.fold_left
-              (fun acc sf ->
-                let acc = this#on_shape_field_name acc sf.sf_name in
-                let acc = this#on_hint acc sf.sf_hint in
-                acc)
-              acc si_shape_field_list
-          in
-          acc
+        let { si_shape_field_list; _ } = shape_info in
+        let acc =
+          List.fold_left
+            (fun acc sf ->
+              let acc = this#on_shape_field_name acc sf.sf_name in
+              let acc = this#on_hint acc sf.sf_hint in
+              acc)
+            acc
+            si_shape_field_list
+        in
+        acc
       | Haccess (id1, id2, idl) ->
-          let acc = this#on_id acc id1 in
-          let acc = this#on_id acc id2 in
-          let acc = List.fold_left this#on_id acc idl in
-          acc
+        let acc = this#on_id acc id1 in
+        let acc = this#on_id acc id2 in
+        let acc = List.fold_left this#on_id acc idl in
+        acc
 
     method on_targ acc h =
       let acc = this#on_hint acc h in
@@ -387,7 +391,8 @@ class virtual ['a] ast_visitor : ['a] ast_visitor_type =
               | Some e -> this#on_lvar acc e
             in
             this#on_expr acc e2)
-          acc el
+          acc
+          el
       in
       this#on_block acc b
 
@@ -441,22 +446,22 @@ class virtual ['a] ast_visitor : ['a] ast_visitor_type =
     method on_case acc =
       function
       | Default b ->
-          let acc = this#on_block acc b in
-          acc
+        let acc = this#on_block acc b in
+        acc
       | Case (e, b) ->
-          let acc = this#on_expr acc e in
-          let acc = this#on_block acc b in
-          acc
+        let acc = this#on_expr acc e in
+        let acc = this#on_block acc b in
+        acc
 
     method on_as_expr acc =
       function
       | As_v e ->
-          let acc = this#on_expr acc e in
-          acc
+        let acc = this#on_expr acc e in
+        acc
       | As_kv (e1, e2) ->
-          let acc = this#on_expr acc e1 in
-          let acc = this#on_expr acc e2 in
-          acc
+        let acc = this#on_expr acc e1 in
+        let acc = this#on_expr acc e2 in
+        acc
 
     method on_catch acc (i1, i2, b) =
       let acc = this#on_id acc i1 in
@@ -513,8 +518,8 @@ class virtual ['a] ast_visitor : ['a] ast_visitor_type =
       | ChildList children -> List.fold_left this#on_xhp_child acc children
       | ChildUnary (child, _) -> this#on_xhp_child acc child
       | ChildBinary (c1, c2) ->
-          let acc = this#on_xhp_child acc c1 in
-          this#on_xhp_child acc c2
+        let acc = this#on_xhp_child acc c1 in
+        this#on_xhp_child acc c2
 
     method on_expr acc (_, e) = this#on_expr_ acc e
 
@@ -560,7 +565,9 @@ class virtual ['a] ast_visitor : ['a] ast_visitor_type =
       | Eif (e1, e2, e3) -> this#on_eif acc e1 e2 e3
       | Is (e, h) -> this#on_is acc e h
       | As (e, h, b) -> this#on_as acc e h b
-      | BracedExpr e | ParenthesizedExpr e -> this#on_expr acc e
+      | BracedExpr e
+      | ParenthesizedExpr e ->
+        this#on_expr acc e
       | New (e, hl, el, uel) -> this#on_new acc e hl el uel
       | Record (e, _, fl) -> this#on_record acc e fl
       | Efun (f, idl) -> this#on_efun acc f idl
@@ -577,9 +584,9 @@ class virtual ['a] ast_visitor : ['a] ast_visitor_type =
       let acc =
         match tap with
         | Some ta ->
-            let acc = this#on_targ acc (fst ta) in
-            let acc = this#on_targ acc (snd ta) in
-            acc
+          let acc = this#on_targ acc (fst ta) in
+          let acc = this#on_targ acc (snd ta) in
+          acc
         | None -> acc
       in
       let on_field acc (e1, e2) =
@@ -602,7 +609,8 @@ class virtual ['a] ast_visitor : ['a] ast_visitor_type =
           let acc = this#on_shape_field_name acc sfn in
           let acc = this#on_expr acc e in
           acc)
-        acc sfnel
+        acc
+        sfnel
 
     method on_id acc _ = acc
 
@@ -733,7 +741,8 @@ class virtual ['a] ast_visitor : ['a] ast_visitor_type =
             match attr with
             | Xhp_simple (_, e) -> this#on_expr acc e
             | Xhp_spread e -> this#on_expr acc e)
-          acc attrl
+          acc
+          attrl
       in
       let acc = List.fold_left this#on_expr acc el in
       acc
@@ -753,13 +762,15 @@ class virtual ['a] ast_visitor : ['a] ast_visitor_type =
       function
       | AFvalue e -> this#on_expr acc e
       | AFkvalue (e1, e2) ->
-          let acc = this#on_expr acc e1 in
-          let acc = this#on_expr acc e2 in
-          acc
+        let acc = this#on_expr acc e1 in
+        let acc = this#on_expr acc e2 in
+        acc
 
     method on_shape_field_name acc =
       function
-      | SFlit_int pstr | SFlit_str pstr -> this#on_sflit acc pstr
+      | SFlit_int pstr
+      | SFlit_str pstr ->
+        this#on_sflit acc pstr
       | SFclass_const (id, pstr) -> this#on_sfclass_const acc id pstr
 
     method on_sflit acc pstr = this#on_pstring acc pstr
@@ -773,9 +784,9 @@ class virtual ['a] ast_visitor : ['a] ast_visitor_type =
         match ta with
         | Some (CollectionTV t) -> this#on_targ acc t
         | Some (CollectionTKV (tk, tv)) ->
-            let acc = this#on_targ acc tk in
-            let acc = this#on_targ acc tv in
-            acc
+          let acc = this#on_targ acc tk in
+          let acc = this#on_targ acc tv in
+          acc
         | None -> acc
       in
       let acc = List.fold_left this#on_afield acc afl in
@@ -848,7 +859,9 @@ class virtual ['a] ast_visitor : ['a] ast_visitor_type =
       let acc = this#on_id acc t.t_id in
       let acc =
         match t.t_kind with
-        | Alias h | NewType h -> this#on_hint acc h
+        | Alias h
+        | NewType h ->
+          this#on_hint acc h
       in
       let acc = List.fold_left this#on_tparam acc t.t_tparams in
       let acc =
@@ -869,7 +882,8 @@ class virtual ['a] ast_visitor : ['a] ast_visitor_type =
           let acc = this#on_id acc i1 in
           let acc = this#on_id acc i2 in
           acc)
-        acc il
+        acc
+        il
 
     method on_file_attributes acc fa =
       List.fold_left this#on_user_attribute acc fa.fa_user_attributes
@@ -924,9 +938,9 @@ class virtual ['a] ast_visitor : ['a] ast_visitor_type =
       | TypeConst t -> this#on_typeConst acc t
       | ClassUse h -> this#on_classUse acc h
       | ClassUseAlias (ido1, ps, ido2, ko) ->
-          this#on_classUseAlias acc ido1 ps ido2 ko
+        this#on_classUseAlias acc ido1 ps ido2 ko
       | ClassUsePrecedence (id, ps, ids) ->
-          this#on_classUsePrecedence acc id ps ids
+        this#on_classUsePrecedence acc id ps ids
       | MethodTraitResolution i -> this#on_methodTraitResolution acc i
       | XhpAttrUse h -> this#on_xhpAttrUse acc h
       | XhpCategory (_, cs) -> this#on_xhpCategory acc cs
@@ -950,7 +964,8 @@ class virtual ['a] ast_visitor : ['a] ast_visitor_type =
             match opt_expr with
             | Some expr -> this#on_expr acc expr
             | None -> acc)
-          acc cc.cc_names
+          acc
+          cc.cc_names
       in
       acc
 
@@ -1029,7 +1044,8 @@ class virtual ['a] ast_visitor : ['a] ast_visitor_type =
             match opt_expr with
             | Some expr -> this#on_expr acc expr
             | None -> acc)
-          acc cv.cv_names
+          acc
+          cv.cv_names
       in
       acc
 
@@ -1069,25 +1085,25 @@ class virtual ['a] ast_visitor : ['a] ast_visitor_type =
     method on_pumapping acc =
       function
       | PUMappingID (id, e) ->
-          let acc = this#on_id acc id in
-          let acc = this#on_expr acc e in
-          acc
+        let acc = this#on_id acc id in
+        let acc = this#on_expr acc e in
+        acc
       | PUMappingType (id, h) ->
-          let acc = this#on_id acc id in
-          let acc = this#on_hint acc h in
-          acc
+        let acc = this#on_id acc id in
+        let acc = this#on_hint acc h in
+        acc
 
     method on_pufield acc =
       function
       | PUAtomDecl (id, mappings) ->
-          let acc = this#on_id acc id in
-          let acc = List.fold_left this#on_pumapping acc mappings in
-          acc
+        let acc = this#on_id acc id in
+        let acc = List.fold_left this#on_pumapping acc mappings in
+        acc
       | PUCaseType id -> this#on_id acc id
       | PUCaseTypeExpr (h, id) ->
-          let acc = this#on_hint acc h in
-          let acc = this#on_id acc id in
-          acc
+        let acc = this#on_hint acc h in
+        let acc = this#on_id acc id in
+        acc
 
     method on_class_enum_ acc id fields =
       let acc = this#on_id acc id in

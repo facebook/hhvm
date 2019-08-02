@@ -149,7 +149,8 @@ and nast_shape_info = {
 and kvc_kind =
   ([ `Map
    | `ImmMap
-   | `Dict ][@visitors.opaque])
+   | `Dict
+   ][@visitors.opaque])
 
 and vc_kind =
   ([ `Vector
@@ -158,7 +159,8 @@ and vc_kind =
    | `Set
    | `ImmSet
    | `Pair
-   | `Keyset ][@visitors.opaque])
+   | `Keyset
+   ][@visitors.opaque])
 
 and visibility =
   | Private [@visitors.name "visibility_Private"]

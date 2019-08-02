@@ -64,20 +64,29 @@ let both f (p1, p2) = (f p1, f p2)
 let reification reified attributes =
   let soft =
     List.exists
-      ~f:(fun { Aast.ua_name = _, n; _ } -> n = SN.UserAttributes.uaSoft)
+      ~f:(fun { Aast.ua_name = (_, n); _ } -> n = SN.UserAttributes.uaSoft)
       attributes
   in
-  if reified then if soft then Aast.SoftReified else Aast.Reified
-  else Aast.Erased
+  if reified then
+    if soft then
+      Aast.SoftReified
+    else
+      Aast.Reified
+  else
+    Aast.Erased
 
 (* Convert an AST to an AAST, using the annotations provided. *)
-let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
+let converter
+    (expr_annotation : Ast_defs.pos -> 'ex)
+    (func_body_ann : 'fb)
     (env_annotation : 'en) =
   let rec on_variadic_hint h = optional on_hint h
   and get_pos_shape_name name =
     match name with
-    | SFlit_int (pos, _) | SFlit_str (pos, _) | SFclass_const (_, (pos, _)) ->
-        pos
+    | SFlit_int (pos, _)
+    | SFlit_str (pos, _)
+    | SFclass_const (_, (pos, _)) ->
+      pos
   and on_shape_info info =
     let on_shape_field sf =
       Aast.
@@ -87,7 +96,7 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
           sfi_name = sf.sf_name;
         }
     in
-    let _, nfm =
+    let (_, nfm) =
       List.fold_left
         ~f:(fun (map_, list_) sf ->
           if ShapeMap.mem sf.sf_name map_ then
@@ -96,7 +105,8 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
           let map_ = ShapeMap.add sf.sf_name sfi map_ in
           let list_ = sfi :: list_ in
           (map_, list_))
-        ~init:(ShapeMap.empty, []) info.si_shape_field_list
+        ~init:(ShapeMap.empty, [])
+        info.si_shape_field_list
     in
     let nfm = List.rev nfm in
     Aast.
@@ -111,16 +121,16 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
     match h with
     | Hoption h -> (p, Aast.Hoption (on_hint h))
     | Hfun (is_coroutine, hl, param_kinds, variadic, h) ->
-        ( p,
-          Aast.Hfun
-            ( Aast.FNonreactive,
-              is_coroutine,
-              on_list on_hint hl,
-              param_kinds,
-              [],
-              on_variadic_hint variadic,
-              on_hint h,
-              true ) )
+      ( p,
+        Aast.Hfun
+          ( Aast.FNonreactive,
+            is_coroutine,
+            on_list on_hint hl,
+            param_kinds,
+            [],
+            on_variadic_hint variadic,
+            on_hint h,
+            true ) )
     | Htuple hl -> (p, Aast.Htuple (on_list on_hint hl))
     | Happly (x, hl) -> (p, Aast.Happly (x, on_list on_hint hl))
     | Hshape s -> (p, Aast.Hshape (on_shape_info s))
@@ -130,97 +140,95 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
   and on_class_elt body elt =
     match elt with
     | Attributes attrs ->
-        let attrs = on_list_append_acc body.c_attributes on_class_attr attrs in
-        { body with c_attributes = attrs }
+      let attrs = on_list_append_acc body.c_attributes on_class_attr attrs in
+      { body with c_attributes = attrs }
     | Const ccs ->
-        let consts = on_class_consts_with_acc body.c_consts ccs in
-        { body with c_consts = consts }
+      let consts = on_class_consts_with_acc body.c_consts ccs in
+      { body with c_consts = consts }
     | ClassUse h ->
-        let hints = on_hint h :: body.c_uses in
-        { body with c_uses = hints }
+      let hints = on_hint h :: body.c_uses in
+      { body with c_uses = hints }
     | ClassUseAlias (ido1, (p, s), ido2, kl) ->
-        Errors.unsupported_trait_use_as p;
-        let visl =
-          List.filter_map
-            ~f:(fun k ->
-              match k with
-              | Private -> Some Aast.UseAsPrivate
-              | Public -> Some Aast.UseAsPublic
-              | Protected -> Some Aast.UseAsProtected
-              | Final -> Some Aast.UseAsFinal
-              | _ ->
-                  Errors.invalid_trait_use_as_visibility p;
-                  None)
-            kl
-        in
-        let use_as_aliases =
-          (ido1, (p, s), ido2, visl) :: body.c_use_as_aliases
-        in
-        { body with c_use_as_aliases = use_as_aliases }
+      Errors.unsupported_trait_use_as p;
+      let visl =
+        List.filter_map
+          ~f:(fun k ->
+            match k with
+            | Private -> Some Aast.UseAsPrivate
+            | Public -> Some Aast.UseAsPublic
+            | Protected -> Some Aast.UseAsProtected
+            | Final -> Some Aast.UseAsFinal
+            | _ ->
+              Errors.invalid_trait_use_as_visibility p;
+              None)
+          kl
+      in
+      let use_as_aliases =
+        (ido1, (p, s), ido2, visl) :: body.c_use_as_aliases
+      in
+      { body with c_use_as_aliases = use_as_aliases }
     | ClassUsePrecedence (id1, (p, s), id2) ->
-        Errors.unsupported_instead_of p;
-        let insteadof_aliases =
-          (id1, (p, s), id2) :: body.c_insteadof_aliases
-        in
-        { body with c_insteadof_aliases = insteadof_aliases }
+      Errors.unsupported_instead_of p;
+      let insteadof_aliases = (id1, (p, s), id2) :: body.c_insteadof_aliases in
+      { body with c_insteadof_aliases = insteadof_aliases }
     | MethodTraitResolution res ->
-        let redecls =
-          on_method_trait_resolution res :: body.c_method_redeclarations
-        in
-        { body with c_method_redeclarations = redecls }
+      let redecls =
+        on_method_trait_resolution res :: body.c_method_redeclarations
+      in
+      { body with c_method_redeclarations = redecls }
     | XhpAttrUse h ->
-        let hints = on_hint h :: body.c_xhp_attr_uses in
-        { body with c_xhp_attr_uses = hints }
+      let hints = on_hint h :: body.c_xhp_attr_uses in
+      { body with c_xhp_attr_uses = hints }
     | ClassTraitRequire (MustExtend, h) ->
-        let hints = (on_hint h, true) :: body.c_reqs in
-        { body with c_reqs = hints }
+      let hints = (on_hint h, true) :: body.c_reqs in
+      { body with c_reqs = hints }
     | ClassTraitRequire (MustImplement, h) ->
-        let hints = (on_hint h, false) :: body.c_reqs in
-        { body with c_reqs = hints }
+      let hints = (on_hint h, false) :: body.c_reqs in
+      { body with c_reqs = hints }
     | ClassVars cvs ->
-        let vars = on_class_vars_with_acc body.c_vars cvs in
-        { body with c_vars = vars }
+      let vars = on_class_vars_with_acc body.c_vars cvs in
+      { body with c_vars = vars }
     | XhpAttr (hopt, var, tag, maybe_enum) ->
-        (* TODO: T37984688 Updating naming.ml to use c_xhp_attrs *)
-        let hopt = optional on_hint hopt in
-        let tag =
-          match tag with
-          | None -> None
-          | Some Required -> Some Aast.Required
-          | Some LateInit -> Some Aast.LateInit
-        in
-        let xhp_attr = Some { Aast.xai_tag = tag } in
-        let attrs =
-          ( hopt,
-            on_class_var xhp_attr hopt [] [] false None var,
-            tag,
-            optional on_xhp_attr maybe_enum )
-          :: body.c_xhp_attrs
-        in
-        { body with c_xhp_attrs = attrs }
+      (* TODO: T37984688 Updating naming.ml to use c_xhp_attrs *)
+      let hopt = optional on_hint hopt in
+      let tag =
+        match tag with
+        | None -> None
+        | Some Required -> Some Aast.Required
+        | Some LateInit -> Some Aast.LateInit
+      in
+      let xhp_attr = Some { Aast.xai_tag = tag } in
+      let attrs =
+        ( hopt,
+          on_class_var xhp_attr hopt [] [] false None var,
+          tag,
+          optional on_xhp_attr maybe_enum )
+        :: body.c_xhp_attrs
+      in
+      { body with c_xhp_attrs = attrs }
     | XhpCategory (p, cs) ->
-        if body.c_xhp_category <> None && cs <> [] then
-          Errors.multiple_xhp_category (fst (List.hd_exn cs));
-        { body with c_xhp_category = Some (p, cs) }
+      if body.c_xhp_category <> None && cs <> [] then
+        Errors.multiple_xhp_category (fst (List.hd_exn cs));
+      { body with c_xhp_category = Some (p, cs) }
     | XhpChild (p, c) ->
-        let children = (p, on_xhp_child c) :: body.c_xhp_children in
-        { body with c_xhp_children = children }
+      let children = (p, on_xhp_child c) :: body.c_xhp_children in
+      { body with c_xhp_children = children }
     | Method m ->
-        let methods = on_method m :: body.c_methods in
-        { body with c_methods = methods }
+      let methods = on_method m :: body.c_methods in
+      { body with c_methods = methods }
     | TypeConst tc ->
-        let typeconsts = on_class_typeconst tc :: body.c_typeconsts in
-        { body with c_typeconsts = typeconsts }
+      let typeconsts = on_class_typeconst tc :: body.c_typeconsts in
+      { body with c_typeconsts = typeconsts }
     | ClassEnum (pu_is_final, pu_name, fields) ->
-        let pu_enum = on_pu pu_name pu_is_final fields in
-        let pu_enums = pu_enum :: body.c_pu_enums in
-        { body with c_pu_enums = pu_enums }
+      let pu_enum = on_pu pu_name pu_is_final fields in
+      let pu_enums = pu_enum :: body.c_pu_enums in
+      { body with c_pu_enums = pu_enums }
   and on_as_expr aw e =
     match (aw, e) with
-    | None, As_v ev -> Aast.As_v (on_expr ev)
-    | Some p, As_v ev -> Aast.Await_as_v (p, on_expr ev)
-    | None, As_kv (k, ev) -> Aast.As_kv (on_expr k, on_expr ev)
-    | Some p, As_kv (k, ev) -> Aast.Await_as_kv (p, on_expr k, on_expr ev)
+    | (None, As_v ev) -> Aast.As_v (on_expr ev)
+    | (Some p, As_v ev) -> Aast.Await_as_v (p, on_expr ev)
+    | (None, As_kv (k, ev)) -> Aast.As_kv (on_expr k, on_expr ev)
+    | (Some p, As_kv (k, ev)) -> Aast.Await_as_kv (p, on_expr k, on_expr ev)
   and on_afield f =
     match f with
     | AFvalue e -> Aast.AFvalue (on_expr e)
@@ -233,8 +241,8 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
     let e1 =
       match e1 with
       | Some (pos, name) ->
-          let e = (pos, Local_id.make_unscoped name) in
-          Some e
+        let e = (pos, Local_id.make_unscoped name) in
+        Some e
       | None -> None
     in
     (e1, e2)
@@ -246,7 +254,7 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
   and on_collection_targ targ =
     match targ with
     | Some (CollectionTKV (tk, tv)) ->
-        Some (Aast.CollectionTKV (on_targ tk, on_targ tv))
+      Some (Aast.CollectionTKV (on_targ tk, on_targ tv))
     | Some (CollectionTV tv) -> Some (Aast.CollectionTV (on_targ tv))
     | None -> None
   and on_expr (p, e) =
@@ -256,41 +264,41 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
       | Array al -> Aast.Array (on_list on_afield al)
       | Varray (ta, el) -> Aast.Varray (optional on_targ ta, on_list on_expr el)
       | Darray (tap, d) ->
-          Aast.Darray (optional (both on_targ) tap, on_list on_darray_element d)
+        Aast.Darray (optional (both on_targ) tap, on_list on_darray_element d)
       | Shape s -> Aast.Shape (on_list on_shape s)
       | Collection (id, tal, al) ->
-          Aast.Collection (id, on_collection_targ tal, on_list on_afield al)
+        Aast.Collection (id, on_collection_targ tal, on_list on_afield al)
       | Record (e, is_array, etl) ->
-          Aast.Record
-            ( (annot, Aast.CIexpr (on_expr e)),
-              is_array,
-              on_list (both on_expr) etl )
+        Aast.Record
+          ( (annot, Aast.CIexpr (on_expr e)),
+            is_array,
+            on_list (both on_expr) etl )
       | Null -> Aast.Null
       | True -> Aast.True
       | False -> Aast.False
       | Omitted -> Aast.Omitted
       | Id id -> Aast.Id id
       | Lvar id ->
-          let lid = Local_id.make_unscoped (snd id) in
-          Aast.Lvar (p, lid)
+        let lid = Local_id.make_unscoped (snd id) in
+        Aast.Lvar (p, lid)
       | Clone e -> Aast.Clone (on_expr e)
       | Obj_get (e1, e2, f) -> Aast.Obj_get (on_expr e1, on_expr e2, f)
       | Array_get (e, opt_e) ->
-          Aast.Array_get (on_expr e, optional on_expr opt_e)
+        Aast.Array_get (on_expr e, optional on_expr opt_e)
       | Class_get (e1, (_, (Id x2 | Lvar x2))) ->
-          Aast.Class_get ((annot, Aast.CIexpr (on_expr e1)), Aast.CGstring x2)
+        Aast.Class_get ((annot, Aast.CIexpr (on_expr e1)), Aast.CGstring x2)
       | Class_get (e1, e2) ->
-          Aast.Class_get
-            ((annot, Aast.CIexpr (on_expr e1)), Aast.CGexpr (on_expr e2))
+        Aast.Class_get
+          ((annot, Aast.CIexpr (on_expr e1)), Aast.CGexpr (on_expr e2))
       | Class_const (e, s) ->
-          Aast.Class_const ((annot, Aast.CIexpr (on_expr e)), s)
+        Aast.Class_const ((annot, Aast.CIexpr (on_expr e)), s)
       | Call (e, tl, el, uel) ->
-          Aast.Call
-            ( Aast.Cnormal,
-              on_expr e,
-              on_list on_targ tl,
-              on_list on_expr el,
-              on_list on_expr uel )
+        Aast.Call
+          ( Aast.Cnormal,
+            on_expr e,
+            on_list on_targ tl,
+            on_list on_expr el,
+            on_list on_expr uel )
       | Int s -> Aast.Int s
       | Float s -> Aast.Float s
       | String s -> Aast.String s
@@ -307,36 +315,34 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
       | Unop (op, e) -> Aast.Unop (op, on_expr e)
       | Binop (op, e1, e2) -> Aast.Binop (op, on_expr e1, on_expr e2)
       | Pipe (e1, e2) ->
-          let id = Local_id.make_scoped SN.SpecialIdents.dollardollar in
-          Aast.Pipe ((p, id), on_expr e1, on_expr e2)
+        let id = Local_id.make_scoped SN.SpecialIdents.dollardollar in
+        Aast.Pipe ((p, id), on_expr e1, on_expr e2)
       | Eif (e1, opt_e, e2) ->
-          Aast.Eif (on_expr e1, optional on_expr opt_e, on_expr e2)
+        Aast.Eif (on_expr e1, optional on_expr opt_e, on_expr e2)
       | Is (e, h) -> Aast.Is (on_expr e, on_hint h)
       | As (e, h, b) -> Aast.As (on_expr e, on_hint h, b)
       | New (e, tl, el1, el2) ->
-          Aast.New
-            ( (annot, Aast.CIexpr (on_expr e)),
-              on_list on_targ tl,
-              on_list on_expr el1,
-              on_list on_expr el2,
-              annot )
+        Aast.New
+          ( (annot, Aast.CIexpr (on_expr e)),
+            on_list on_targ tl,
+            on_list on_expr el1,
+            on_list on_expr el2,
+            annot )
       | Efun (f, use_list) ->
-          let ids =
-            List.map
-              ~f:(fun (p, id) -> (p, Local_id.make_unscoped id))
-              use_list
-          in
-          Aast.Efun (on_fun f, ids)
+        let ids =
+          List.map ~f:(fun (p, id) -> (p, Local_id.make_unscoped id)) use_list
+        in
+        Aast.Efun (on_fun f, ids)
       | Lfun f -> Aast.Lfun (on_fun f, [])
       | BracedExpr e -> Aast.BracedExpr (on_expr e)
       | ParenthesizedExpr e -> Aast.ParenthesizedExpr (on_expr e)
       | Xml (id, xhpl, el) ->
-          Aast.Xml (id, on_list on_xhp_attribute xhpl, on_list on_expr el)
+        Aast.Xml (id, on_list on_xhp_attribute xhpl, on_list on_expr el)
       | Import (f, e) -> Aast.Import (on_import_flavor f, on_expr e)
       | Callconv (k, e) -> Aast.Callconv (k, on_expr e)
       | PU_atom id -> Aast.PU_atom (snd id)
       | PU_identifier (e, id1, id2) ->
-          Aast.PU_identifier ((annot, Aast.CIexpr (on_expr e)), id1, id2)
+        Aast.PU_identifier ((annot, Aast.CIexpr (on_expr e)), id1, id2)
     in
     (annot, node)
   and on_import_flavor f =
@@ -356,8 +362,8 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
   and on_stmt_ p st =
     match st with
     | Let (id, h, e) ->
-        let lid = Local_id.make_unscoped (snd id) in
-        Aast.Let ((p, lid), optional on_hint h, on_expr e)
+      let lid = Local_id.make_unscoped (snd id) in
+      Aast.Let ((p, lid), optional on_hint h, on_expr e)
     | Block sl -> Aast.Block (on_block sl)
     | Fallthrough -> Aast.Fallthrough
     | Noop -> Aast.Noop
@@ -375,19 +381,19 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
     | Do (b, e) -> Aast.Do (on_block b, on_expr e)
     | While (e, b) -> Aast.While (on_expr e, on_block b)
     | Using s ->
-        Aast.Using
-          Aast.
-            {
-              us_expr = on_expr s.us_expr;
-              us_block = on_block s.us_block;
-              us_has_await = s.us_has_await;
-              us_is_block_scoped = s.us_is_block_scoped;
-            }
+      Aast.Using
+        Aast.
+          {
+            us_expr = on_expr s.us_expr;
+            us_block = on_block s.us_block;
+            us_has_await = s.us_has_await;
+            us_is_block_scoped = s.us_is_block_scoped;
+          }
     | For (st1, e, st2, b) ->
-        Aast.For (on_expr st1, on_expr e, on_expr st2, on_block b)
+      Aast.For (on_expr st1, on_expr e, on_expr st2, on_block b)
     | Switch (e, cl) -> Aast.Switch (on_expr e, on_list on_case cl)
     | Foreach (e, aw, ae, b) ->
-        Aast.Foreach (on_expr e, on_as_expr aw ae, on_block b)
+      Aast.Foreach (on_expr e, on_as_expr aw ae, on_block b)
     | Try (b, cl, fb) -> Aast.Try (on_block b, on_list on_catch cl, on_block fb)
     | Def_inline d -> Aast.Def_inline (on_def d)
     | Expr e -> Aast.Expr (on_expr e)
@@ -407,7 +413,7 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
       tp_user_attributes = attributes;
     }
   and on_fun_param param =
-    let p, name = param.param_id in
+    let (p, name) = param.param_id in
     {
       Aast.param_annotation = expr_annotation p;
       param_hint = optional on_hint param.param_hint;
@@ -423,11 +429,11 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
   and determine_variadicity params =
     match params with
     | [] -> Aast.FVnonVariadic
-    | [x] -> (
-      match (x.param_is_variadic, x.param_id) with
-      | false, _ -> Aast.FVnonVariadic
-      | true, (p, "...") -> Aast.FVellipsis p
-      | true, (_, _) -> Aast.FVvariadicArg (on_fun_param x) )
+    | [x] ->
+      (match (x.param_is_variadic, x.param_id) with
+      | (false, _) -> Aast.FVnonVariadic
+      | (true, (p, "...")) -> Aast.FVellipsis p
+      | (true, (_, _)) -> Aast.FVvariadicArg (on_fun_param x))
     | _ :: rl -> determine_variadicity rl
   and on_user_attribute attribute =
     let ua_params = on_list on_expr attribute.ua_params in
@@ -475,14 +481,14 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
     match attr with
     | CA_name id -> Aast.CA_name id
     | CA_field f ->
-        Aast.CA_field
-          Aast.
-            {
-              ca_type = on_ca_type f.ca_type;
-              ca_id = f.ca_id;
-              ca_value = optional on_expr f.ca_value;
-              ca_required = f.ca_required;
-            }
+      Aast.CA_field
+        Aast.
+          {
+            ca_type = on_ca_type f.ca_type;
+            ca_id = f.ca_id;
+            ca_value = optional on_expr f.ca_value;
+            ca_required = f.ca_required;
+          }
   and on_ca_type ty : Aast.ca_type =
     match ty with
     | CA_hint h -> Aast.CA_hint (on_hint h)
@@ -490,28 +496,28 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
   and on_class_typeconst (tc : Ast.typeconst) =
     let vis = get_visibility_from_kinds tc.tconst_kinds in
     let has_abstract = mem tc.tconst_kinds Abstract in
-    let tconst_type, abstract_kind =
+    let (tconst_type, abstract_kind) =
       match (has_abstract, tc.tconst_constraint, tc.tconst_type) with
       (* const type T;
        * const type T as int; *)
-      | false, _, None ->
-          Errors.not_abstract_without_typeconst tc.tconst_name;
-          (tc.tconst_constraint, Aast.TCConcrete)
+      | (false, _, None) ->
+        Errors.not_abstract_without_typeconst tc.tconst_name;
+        (tc.tconst_constraint, Aast.TCConcrete)
       (* this is a degenerate case, so safe to call it concrete *)
       (* const type T = int; *)
-      | false, None, Some _ -> (tc.tconst_type, Aast.TCConcrete)
+      | (false, None, Some _) -> (tc.tconst_type, Aast.TCConcrete)
       (* const type T as num = int; *)
-      | false, Some _, Some _ -> (tc.tconst_type, Aast.TCPartiallyAbstract)
+      | (false, Some _, Some _) -> (tc.tconst_type, Aast.TCPartiallyAbstract)
       (* abstract const type T;
        * abstract const type T as num; *)
-      | true, _, None ->
-          (* Choice of tc.tconst_type based on the existing behavior, previously captured by the h, _ case *)
-          (tc.tconst_type, Aast.TCAbstract (optional on_hint tc.tconst_type))
+      | (true, _, None) ->
+        (* Choice of tc.tconst_type based on the existing behavior, previously captured by the h, _ case *)
+        (tc.tconst_type, Aast.TCAbstract (optional on_hint tc.tconst_type))
       (* abstract const type T = int;
        * abstract const type T as num = int; *)
-      | true, _, Some _ ->
-          (* This enforces that abstract type consts with defaults behave like old abstract type consts *)
-          (None, Aast.TCAbstract (optional on_hint tc.tconst_type))
+      | (true, _, Some _) ->
+        (* This enforces that abstract type consts with defaults behave like old abstract type consts *)
+        (None, Aast.TCAbstract (optional on_hint tc.tconst_type))
     in
     Aast.
       {
@@ -533,7 +539,8 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
         | Public -> Aast.Public
         | Protected -> Aast.Protected
         | _ -> acc)
-      ~init:Aast.Public kinds
+      ~init:Aast.Public
+      kinds
   and on_class_var xhp_info h attrs kinds variadic doc_com (span, id, eopt) =
     let cv_final = mem kinds Final in
     let cv_visibility = get_visibility_from_kinds kinds in
@@ -561,15 +568,17 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
   and on_class_vars_with_acc acc cvs =
     match cvs.cv_names with
     | cv :: rest ->
-        let with_dc_name =
-          on_class_var None
-            (optional on_hint cvs.cv_hint)
-            (on_list on_user_attribute cvs.cv_user_attributes)
-            cvs.cv_kinds cvs.cv_is_promoted_variadic
-        in
-        let cv = with_dc_name cvs.cv_doc_comment cv in
-        let acc = cv :: acc in
-        on_list_append_acc acc (with_dc_name None) rest
+      let with_dc_name =
+        on_class_var
+          None
+          (optional on_hint cvs.cv_hint)
+          (on_list on_user_attribute cvs.cv_user_attributes)
+          cvs.cv_kinds
+          cvs.cv_is_promoted_variadic
+      in
+      let cv = with_dc_name cvs.cv_doc_comment cv in
+      let acc = cv :: acc in
+      on_list_append_acc acc (with_dc_name None) rest
     | [] -> acc
   and on_class_const hint kind doc_com (id, eopt) =
     let vis =
@@ -590,21 +599,22 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
     let with_name =
       on_class_const
         (optional on_hint ccs.cc_hint)
-        ccs.cc_visibility ccs.cc_doc_comment
+        ccs.cc_visibility
+        ccs.cc_doc_comment
     in
     on_list_append_acc acc with_name ccs.cc_names
   and on_xhp_attr (p, b, el) = (p, b, on_list on_expr el)
   and on_constr (h1, k, h2) = (on_hint h1, k, on_hint h2)
   and on_method_trait_resolution res =
     let acc = (false, false, false, None) in
-    let final, abs, static, vis =
+    let (final, abs, static, vis) =
       List.fold_left ~f:kind ~init:acc res.mt_kind
     in
     let vis =
       match vis with
       | None ->
-          Errors.method_needs_visibility (fst res.mt_name);
-          Aast.Public
+        Errors.method_needs_visibility (fst res.mt_name);
+        Aast.Public
       | Some v -> v
     in
     Aast.
@@ -630,7 +640,7 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
     | ChildList cl -> Aast.ChildList (on_list on_xhp_child cl)
     | ChildUnary (c, op) -> Aast.ChildUnary (on_xhp_child c, on_xhp_child_op op)
     | ChildBinary (c1, c2) ->
-        Aast.ChildBinary (on_xhp_child c1, on_xhp_child c2)
+      Aast.ChildBinary (on_xhp_child c1, on_xhp_child c2)
   and on_xhp_child_op op : Aast.xhp_child_op =
     match op with
     | ChildStar -> Aast.ChildStar
@@ -653,12 +663,14 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
       }
     in
     let acc = (false, false, false, None) in
-    let final, abs, static, vis = List.fold_left ~f:kind ~init:acc m.m_kind in
+    let (final, abs, static, vis) =
+      List.fold_left ~f:kind ~init:acc m.m_kind
+    in
     let vis =
       match vis with
       | None ->
-          Errors.method_needs_visibility (fst m.m_name);
-          Aast.Public
+        Errors.method_needs_visibility (fst m.m_name);
+        Aast.Public
       | Some v -> v
     in
     Aast.
@@ -684,24 +696,24 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
   and on_pu_mapping pum_atom mappings =
     let rec aux types exprs = function
       | PUMappingType (id, hint) :: tl ->
-          aux ((id, on_hint hint) :: types) exprs tl
+        aux ((id, on_hint hint) :: types) exprs tl
       | PUMappingID (id, expr) :: tl ->
-          aux types ((id, on_expr expr) :: exprs) tl
+        aux types ((id, on_expr expr) :: exprs) tl
       | [] -> (List.rev types, List.rev exprs)
     in
-    let pum_types, pum_exprs = aux [] [] mappings in
+    let (pum_types, pum_exprs) = aux [] [] mappings in
     Aast.{ pum_atom; pum_types; pum_exprs }
   and on_pu pu_name pu_is_final fields =
     let rec aux case_types case_values members = function
       | PUCaseType id :: tl -> aux (id :: case_types) case_values members tl
       | PUCaseTypeExpr (h, id) :: tl ->
-          aux case_types ((id, on_hint h) :: case_values) members tl
+        aux case_types ((id, on_hint h) :: case_values) members tl
       | PUAtomDecl (id, maps) :: tl ->
-          let member = on_pu_mapping id maps in
-          aux case_types case_values (member :: members) tl
+        let member = on_pu_mapping id maps in
+        aux case_types case_values (member :: members) tl
       | [] -> (List.rev case_types, List.rev case_values, List.rev members)
     in
-    let pu_case_types, pu_case_values, pu_members = aux [] [] [] fields in
+    let (pu_case_types, pu_case_values, pu_members) = aux [] [] [] fields in
     Aast.{ pu_name; pu_is_final; pu_case_types; pu_case_values; pu_members }
   and on_class_body cb =
     let reversed_body =
@@ -838,7 +850,9 @@ let converter (expr_annotation : Ast_defs.pos -> 'ex) (func_body_ann : 'fb)
     method on_constant = on_constant
   end
 
-let convert_program (expr_annotation : Ast_defs.pos -> 'ex)
-    (func_body_ann : 'fb) (env_annotation : 'en) (p : Ast.program) :
-    ('ex, 'fb, 'en) Aast.program =
+let convert_program
+    (expr_annotation : Ast_defs.pos -> 'ex)
+    (func_body_ann : 'fb)
+    (env_annotation : 'en)
+    (p : Ast.program) : ('ex, 'fb, 'en) Aast.program =
   (converter expr_annotation func_body_ann env_annotation)#on_program p

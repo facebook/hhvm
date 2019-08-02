@@ -15,7 +15,7 @@ class ['self] iter_defs_base =
 
     method private on_shape_map
         : 'a. ('env -> 'a -> unit) -> 'env -> 'a SM.t -> unit =
-      fun f env x -> SM.iter (self#on_shape_map_entry f env) x
+      (fun f env x -> SM.iter (self#on_shape_map_entry f env) x)
 
     method private on_shape_map_entry
         : 'a. ('env -> 'a -> unit) -> 'env -> SM.key -> 'a -> unit =
@@ -39,7 +39,8 @@ class virtual ['self] reduce_defs_base =
       fun f env x ->
         SM.fold
           (fun k d acc -> self#plus acc (self#on_shape_map_entry f env k d))
-          x self#zero
+          x
+          self#zero
 
     method private on_shape_map_entry
         : 'a. ('env -> 'a -> 'acc) -> 'env -> SM.key -> 'a -> 'acc =

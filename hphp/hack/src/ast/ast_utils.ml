@@ -17,21 +17,27 @@ let get_defs ast =
    * declared twice in the same file, the error will say that the declaration
    * with the larger line number is a duplicate. *)
   let rec get_defs ast acc =
-    List.fold_right ast ~init:acc
+    List.fold_right
+      ast
+      ~init:acc
       ~f:(fun def ((acc1, acc2, acc3, acc4) as acc) ->
         match def with
         | Ast.Fun f ->
-            (FileInfo.pos_full f.Ast.f_name :: acc1, acc2, acc3, acc4)
+          (FileInfo.pos_full f.Ast.f_name :: acc1, acc2, acc3, acc4)
         | Ast.Class c ->
-            (acc1, FileInfo.pos_full c.Ast.c_name :: acc2, acc3, acc4)
+          (acc1, FileInfo.pos_full c.Ast.c_name :: acc2, acc3, acc4)
         | Ast.Typedef t ->
-            (acc1, acc2, FileInfo.pos_full t.Ast.t_id :: acc3, acc4)
+          (acc1, acc2, FileInfo.pos_full t.Ast.t_id :: acc3, acc4)
         | Ast.Constant cst ->
-            (acc1, acc2, acc3, FileInfo.pos_full cst.Ast.cst_name :: acc4)
+          (acc1, acc2, acc3, FileInfo.pos_full cst.Ast.cst_name :: acc4)
         | Ast.Namespace (_, defs) -> get_defs defs acc
-        | Ast.NamespaceUse _ | Ast.SetNamespaceEnv _ -> acc
+        | Ast.NamespaceUse _
+        | Ast.SetNamespaceEnv _ ->
+          acc
         (* toplevel statements are ignored *)
-        | Ast.FileAttributes _ | Ast.Stmt _ -> acc)
+        | Ast.FileAttributes _
+        | Ast.Stmt _ ->
+          acc)
   in
   get_defs ast ([], [], [], [])
 
@@ -104,7 +110,7 @@ let ast_deregister_attributes_mapper =
             match elt with
             | Method m when self#ignored_attr env m.m_user_attributes -> false
             | ClassVars cv when self#ignored_attr env cv.cv_user_attributes ->
-                false
+              false
             | _ -> true)
       in
       let this = { this with c_body = body } in

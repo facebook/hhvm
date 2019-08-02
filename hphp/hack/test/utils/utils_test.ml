@@ -6,17 +6,15 @@ let test_ns_split name assert_left assert_right =
   String_asserter.assert_equals right assert_right "Namespace is wrong"
 
 let test_namespace_splitter () =
-  test_ns_split "HH\\Lib\\Str\\Format"
-    "HH\\Lib\\Str\\" "Format";
-  test_ns_split "NameWithoutANamespace"
-    "\\" "NameWithoutANamespace";
-  test_ns_split "HH\\Lib\\Str\\"
-    "HH\\Lib\\Str\\" "";
-  test_ns_split "\\HH\\Lib\\Hellothisisafunction"
-    "\\HH\\Lib\\" "Hellothisisafunction";
+  test_ns_split "HH\\Lib\\Str\\Format" "HH\\Lib\\Str\\" "Format";
+  test_ns_split "NameWithoutANamespace" "\\" "NameWithoutANamespace";
+  test_ns_split "HH\\Lib\\Str\\" "HH\\Lib\\Str\\" "";
+  test_ns_split
+    "\\HH\\Lib\\Hellothisisafunction"
+    "\\HH\\Lib\\"
+    "Hellothisisafunction";
   true
 
 let () =
-  Unit_test.run_all [
-    ("test ability to split namespaces", test_namespace_splitter);
-  ]
+  Unit_test.run_all
+    [("test ability to split namespaces", test_namespace_splitter)]

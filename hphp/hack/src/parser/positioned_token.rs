@@ -21,6 +21,8 @@ pub struct PositionedTokenImpl {
     // TODO (kasper): implement LazyTrivia
     pub leading: Vec<PositionedTrivia>,
     pub trailing: Vec<PositionedTrivia>,
+    pub ocamlpool_generation: usize,
+    pub ocamlpool_forward_pointer: usize,
 }
 
 // Positioned tokens, when used as part of positioned syntax are shared - same leaf token can be
@@ -52,6 +54,8 @@ impl LexableToken for PositionedToken {
             trailing_width,
             leading,
             trailing,
+            ocamlpool_generation: 0,
+            ocamlpool_forward_pointer: 0,
         }))
     }
 

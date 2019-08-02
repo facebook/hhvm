@@ -13,8 +13,6 @@ use crate::ocaml_syntax::OcamlSyntax;
 use ocaml::core::memory;
 use ocaml::core::mlvalues::{empty_list, Size, Tag, Value};
 
-use std::cell::RefCell;
-use std::collections::HashMap;
 use std::iter::Iterator;
 
 use parser::coroutine_smart_constructors::{CoroutineStateType, State as CoroutineState};
@@ -38,6 +36,7 @@ use parser::trivia_kind::TriviaKind;
 extern "C" {
     fn ocamlpool_reserve_block(tag: Tag, size: Size) -> Value;
     fn ocamlpool_reserve_string(size: Size) -> Value;
+    static mut ocamlpool_generation: usize;
 }
 
 // Unsafe functions in this file should be called only:
@@ -57,23 +56,11 @@ pub unsafe fn caml_tuple(fields: &[Value]) -> Value {
 
 pub struct SerializationContext {
     source_text: Value,
-    shared_tokens: RefCell<HashMap<PositionedToken, Value>>,
 }
 
 impl SerializationContext {
     pub fn new(source_text: Value) -> Self {
-        Self {
-            source_text,
-            shared_tokens: RefCell::new(HashMap::new()),
-        }
-    }
-
-    pub fn get(&self, token: &PositionedToken) -> Option<Value> {
-        self.shared_tokens.borrow().get(token).cloned()
-    }
-
-    pub fn set(&self, token: PositionedToken, value: Value) {
-        self.shared_tokens.borrow_mut().insert(token, value);
+        Self { source_text }
     }
 }
 
@@ -252,9 +239,24 @@ fn build_lazy_trivia(trivia_list: &[PositionedTrivia], acc: Option<usize>) -> Op
         })
 }
 
+unsafe fn get_forward_pointer(token: &PositionedToken) -> Value {
+    if token.0.ocamlpool_generation == ocamlpool_generation {
+        return token.0.ocamlpool_forward_pointer;
+    } else {
+        return ocaml::core::mlvalues::UNIT;
+    }
+}
+
+unsafe fn set_forward_pointer(token: &PositionedToken, value: Value) {
+    *std::mem::transmute::<&usize, *mut Value>(&token.0.ocamlpool_forward_pointer) = value;
+    *std::mem::transmute::<&usize, *mut usize>(&token.0.ocamlpool_generation) =
+        ocamlpool_generation;
+}
+
 impl ToOcaml for PositionedToken {
     unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
-        if let Some(res) = context.get(self) {
+        let res = get_forward_pointer(self);
+        if res != ocaml::core::mlvalues::UNIT {
             return res;
         }
 
@@ -296,7 +298,7 @@ impl ToOcaml for PositionedToken {
             trailing_width,
             trivia,
         ]);
-        context.set(Self::clone_rc(self), res);
+        set_forward_pointer(self, res);
         res
     }
 }

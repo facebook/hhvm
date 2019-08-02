@@ -48,6 +48,9 @@ static color_t ocamlpool_color;
 static int ocamlpool_allocated_chunks_counter = 0;
 static size_t ocamlpool_next_chunk_size = OCAMLPOOL_DEFAULT_SIZE;
 
+/* */
+uintnat ocamlpool_generation = 0;
+
 /* Sanity checks
  * ===========================================================================
  *
@@ -127,6 +130,8 @@ void ocamlpool_leave(void)
   assert_in_section();
 
   ocamlpool_in_section = 0;
+
+  ocamlpool_generation += 1;
 
   assert_out_of_section();
 }

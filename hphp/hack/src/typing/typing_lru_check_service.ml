@@ -38,57 +38,51 @@ let process_in_parallel
   ServerProgress.send_percentage_progress_to_monitor
     "typechecking" 0 files_initial_count "files";
 
-  let partition_files ~(fnl: file_computation list) =
-    let rec partition_files_h
-        ~(acc: (file_computation list) list)
-        ~(fnl: file_computation list)
-        ~(batch_size: int) =
-      match fnl with
-      | [] -> acc
-      | _ -> begin
-        let batch, remaining = List.split_n fnl batch_size in
-        partition_files_h ~acc:(batch :: acc) ~fnl:remaining ~batch_size
-      end
-    in
-    let max_size = Bucket.max_size () in
-    let batch_size = Bucket.calculate_bucket_size
-      ~num_jobs:files_initial_count
-      ~num_workers:(lru_host_env.Shared_lru.num_workers)
-      ~max_size
-    in
-    partition_files_h ~acc:[] ~fnl ~batch_size
-  in
-
-  let next (all_files: file_computation list list) =
-    match all_files with
+  let next ~(batch_size: int) files_to_process =
+    match files_to_process with
     | [] -> [], None
-    | fc_lst :: fc_lst_tl -> fc_lst_tl, Some fc_lst
+    | _ ->
+      let batch, remaining = List.split_n files_to_process batch_size in
+      remaining, Some batch
   in
 
   let job (fc_lst: file_computation list) =
-    let opts = TypeCheckStore.load() in
+    (* Setup prior to processing files *)
+    let opts = TypeCheckStore.load () in
     SharedMem.allow_removes false;
     SharedMem.invalidate_caches();
     File_provider.local_changes_push_stack ();
     Ast_provider.local_changes_push_stack ();
 
-    (* inner_job processes a single file *)
-    let inner_job (acc: Errors.t) (fc: file_computation) =
-      let new_errors, _ =
-        process_file_computation
-          ~dynamic_view_files
-          ~opts
-          ~errors:Errors.empty
-          ~fc
-      in
-      (* Errors.merge is a List.rev_append, so put the [acc] second *)
-      Errors.merge new_errors acc
+    (* Job helper definition *)
+    let rec job_helper ~(fc_lst: file_computation list) ~(acc: Errors.t) =
+      match fc_lst with
+      | [] -> acc
+      | fc :: fc_tl ->
+        (* Note: the second param will need to be handled if deferred_decls
+         * are released. *)
+        let new_errors, _ =
+          process_file_computation
+            ~dynamic_view_files
+            ~opts
+            ~errors:Errors.empty
+            ~fc
+        in
+        (* Errors.merge is a List.rev_append, so put the [acc] second *)
+        let acc = Errors.merge new_errors acc in
+        (* Check if we should exit due to memory pressure *)
+        job_helper ~fc_lst:fc_tl ~acc
     in
+    (* Process the files! *)
+    let errors = job_helper ~fc_lst ~acc:Errors.empty in
 
+    (* Clean up after processing files *)
     Ast_provider.local_changes_pop_stack ();
     File_provider.local_changes_pop_stack ();
     SharedMem.allow_removes true;
-    List.fold fc_lst ~init:Errors.empty ~f:inner_job, (List.length fc_lst)
+
+    let num_files_checked = List.length fc_lst in
+    errors, num_files_checked
   in
 
   let reduce (errors_acc, files_count_acc) (errors, num_files) =
@@ -98,22 +92,26 @@ let process_in_parallel
     Errors.merge errors errors_acc, (files_count_acc + num_files)
   in
 
-  (* Start shared_lru workers *)
+  let max_size = Bucket.max_size () in
+  let batch_size = Bucket.calculate_bucket_size
+    ~num_jobs:files_initial_count
+    ~num_workers:(lru_host_env.Shared_lru.num_workers)
+    ~max_size
+  in
+
+  (* Start shared_lru workers. *)
   let errors, _ = Shared_lru.run
     ~host_env:lru_host_env
     ~initial_env:None
     ~job
     ~reduce
-    ~next
-    ~inputs:(partition_files ~fnl)
+    ~next:(next ~batch_size)
+    ~inputs:fnl
   in
-  let cancelled = [] in
+
   let env = interrupt.MultiThreadedCall.env in
   TypeCheckStore.clear();
-  let updated_file_computations =
-    List.concat (cancelled |> List.map ~f:(fun progress -> progress.remaining))
-  in
-  errors, env, updated_file_computations
+  errors, env, []
 
 
 (* Disclaimer: does not actually go with interrupt yet, although it will

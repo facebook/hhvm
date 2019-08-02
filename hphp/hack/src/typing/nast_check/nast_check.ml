@@ -17,6 +17,7 @@ let visitor = Nast_visitor.iter_with [
   Control_context_check.handler;
   Pocket_universes_check.handler;
   Read_from_append_check.handler;
+  Dynamically_callable_attr_check.handler;
 ]
 
 let program = visitor#go

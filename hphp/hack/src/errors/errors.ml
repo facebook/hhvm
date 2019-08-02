@@ -1230,6 +1230,10 @@ let pu_duplication pos name kind =
   add (Naming.err_code Naming.PocketUniversesDuplication) pos
     (sprintf "[PocketUniverses] %s (%s) is declared multiple times" name kind)
 
+let illegal_use_of_dynamically_callable attr_pos meth_pos visibility =
+  add_list (Naming.err_code Naming.IllegalUseOfDynamicallyCallable)
+    [attr_pos, "__DynamicallyCallable can only be used on public methods";
+     meth_pos, sprintf "But this method is %s" visibility]
 (*****************************************************************************)
 (* Init check errors *)
 (*****************************************************************************)

@@ -607,7 +607,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
    * Magic function called when invoking end($arrayObject)
    */
   private function __end() {
-    if($this->flags & self::STD_PROP_LIST) {
+    if ($this->flags & self::STD_PROP_LIST) {
       return false;
     }
     $__storage = $this->storage;

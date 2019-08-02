@@ -41,7 +41,9 @@
 (library
   (name decl_provider)
   (wrapped false)
-  (modules decl_provider)
+  (modules
+    decl_lru_cache
+    decl_provider)
   (libraries
     lru_worker_stubs
     provider_config

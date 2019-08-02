@@ -86,6 +86,7 @@ struct RepoOptions {
   H(bool,           DisableLvalAsAnExpression,      false)            \
   H(bool,           HackCompilerUseRustParser,      false)            \
   H(bool,           AllowNewAttributeSyntax,        false)            \
+  H(bool,           ConstDefaultFuncArgs,           false)            \
   E(bool,           CreateInOutWrapperFunctions,    true)             \
   E(std::string,    HHJSAdditionalTransform,        "")               \
   E(bool,           HHJSNoBabel,                    false)            \

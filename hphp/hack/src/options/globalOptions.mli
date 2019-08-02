@@ -296,6 +296,10 @@ type t = {
 
   (* Allow <<__Const>> attribute *)
   tco_const_attribute : bool;
+
+  (* Statically check default function arguments *)
+  po_const_default_func_args : bool;
+
 } [@@deriving show]
 
 val make :
@@ -364,6 +368,7 @@ val make :
   ?tco_enable_const_static_props : bool ->
   ?po_disable_legacy_attribute_syntax : bool ->
   ?tco_const_attribute : bool ->
+  ?po_const_default_func_args : bool ->
   unit ->
   t
 
@@ -449,3 +454,4 @@ val tco_global_inference : t -> bool
 val tco_enable_const_static_props : t -> bool
 val po_disable_legacy_attribute_syntax : t -> bool
 val tco_const_attribute : t -> bool
+val po_const_default_func_args : t -> bool

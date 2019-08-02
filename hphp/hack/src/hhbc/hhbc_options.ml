@@ -63,6 +63,7 @@ type t = {
   option_disable_outside_dollar_str_interp : bool;
   option_allow_new_attribute_syntax       : bool;
   option_disable_legacy_attribute_syntax  : bool;
+  option_const_default_func_args          : bool;
 }
 
 let default = {
@@ -119,6 +120,7 @@ let default = {
   option_allow_new_attribute_syntax = false;
   option_disable_outside_dollar_str_interp = true;
   option_disable_legacy_attribute_syntax = false;
+  option_const_default_func_args = false;
 }
 
 let constant_folding o = o.option_constant_folding
@@ -172,6 +174,7 @@ let disable_legacy_soft_typehints o = o.option_disable_legacy_soft_typehints
 let disable_outside_dollar_str_interp o = o.option_disable_outside_dollar_str_interp
 let allow_new_attribute_syntax o = o.option_allow_new_attribute_syntax
 let disable_legacy_attribute_syntax o = o.option_disable_legacy_attribute_syntax
+let const_default_func_args o = o.option_const_default_func_args
 
 let to_string o =
   let dynamic_invokes =
@@ -229,6 +232,7 @@ let to_string o =
     ; Printf.sprintf "disable_outside_dollar_str_interp: %B" @@ disable_outside_dollar_str_interp o
     ; Printf.sprintf "allow_new_attribute_syntax: %B" @@ allow_new_attribute_syntax o
     ; Printf.sprintf "disable_legacy_attribute_syntax: %B" @@ disable_legacy_attribute_syntax o
+    ; Printf.sprintf "const_default_func_args: %B" @@ const_default_func_args o
     ]
 
 let as_bool s =
@@ -346,6 +350,8 @@ let set_option options name value =
     { options with option_allow_new_attribute_syntax = as_bool value }
   | "hhvm.lang.disable_legacy_attribute_syntax" ->
     { options with option_disable_legacy_attribute_syntax = as_bool value }
+  | "hhvm.lang.constdefaultfuncargs" ->
+    { options with option_const_default_func_args = as_bool value }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -504,6 +510,8 @@ let value_setters = [
      fun opts v -> { opts with option_allow_new_attribute_syntax = (v = 1) });
   (set_value "hhvm.hack.lang.disable_legacy_attribute_syntax" get_value_from_config_int @@
      fun opts v -> { opts with option_disable_legacy_attribute_syntax = (v = 1) });
+  (set_value "hhvm.hack.lang.const_default_func_args" get_value_from_config_int @@
+    fun opts v -> { opts with option_const_default_func_args = (v = 1) });
 ]
 
 let extract_config_options_from_json ~init config_json =

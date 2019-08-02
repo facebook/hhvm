@@ -74,6 +74,7 @@ type t = {
   tco_enable_const_static_props : bool;
   po_disable_legacy_attribute_syntax : bool;
   tco_const_attribute : bool;
+  po_const_default_func_args : bool;
 } [@@deriving show]
 
 let tco_experimental_isarray = "is_array"
@@ -229,6 +230,7 @@ let default = {
   tco_enable_const_static_props = false;
   po_disable_legacy_attribute_syntax = false;
   tco_const_attribute = false;
+  po_const_default_func_args = false;
 }
 
 let make
@@ -297,6 +299,7 @@ let make
   ?(tco_enable_const_static_props = default.tco_enable_const_static_props)
   ?(po_disable_legacy_attribute_syntax = default.po_disable_legacy_attribute_syntax)
   ?(tco_const_attribute = default.tco_const_attribute)
+  ?(po_const_default_func_args = default.po_const_default_func_args)
   ()
 = {
   tco_safe_array;
@@ -365,6 +368,7 @@ let make
   tco_enable_const_static_props;
   po_disable_legacy_attribute_syntax;
   tco_const_attribute;
+  po_const_default_func_args;
 }
 let tco_safe_array t = t.tco_safe_array
 let tco_safe_vector_array t = t.tco_safe_vector_array
@@ -462,6 +466,8 @@ let tco_enable_const_static_props t = t.tco_enable_const_static_props
 let po_disable_legacy_attribute_syntax t = t.po_disable_legacy_attribute_syntax
 
 let tco_const_attribute t = t.tco_const_attribute
+
+let po_const_default_func_args t = t.po_const_default_func_args
 
 let setup_pocket_universes env enabled =
   let exp_features = env.tco_experimental_features in

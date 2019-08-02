@@ -18,7 +18,7 @@ let default = GlobalOptions.default
 let disable_nontoplevel_declarations = GlobalOptions.po_disable_nontoplevel_declarations
 let disable_static_closures = GlobalOptions.po_disable_static_closures
 let disable_outside_dollar_str_interp = GlobalOptions.po_disable_outside_dollar_str_interp
-
+let const_default_func_args = GlobalOptions.po_const_default_func_args
 let with_codegen po b =
   { po with GlobalOptions.po_codegen = b }
 let with_disable_lval_as_an_expression po b =
@@ -67,6 +67,7 @@ let make
   ~disable_outside_dollar_str_interp
   ~allow_new_attribute_syntax
   ~disable_legacy_attribute_syntax
+  ~const_default_func_args
 = GlobalOptions.{
   default with
   po_auto_namespace_map = auto_namespace_map;
@@ -82,4 +83,5 @@ let make
   po_disable_outside_dollar_str_interp = disable_outside_dollar_str_interp;
   po_allow_new_attribute_syntax = allow_new_attribute_syntax;
   po_disable_legacy_attribute_syntax = disable_legacy_attribute_syntax;
+  po_const_default_func_args = const_default_func_args;
 }

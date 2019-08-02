@@ -210,6 +210,7 @@ let parse_options () =
   let disable_legacy_attribute_syntax = ref false in
   let const_attribute = ref false in
   let disallow_goto = ref false in
+  let const_default_func_args = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -474,6 +475,9 @@ let parse_options () =
     "--disallow-goto",
       Arg.Set disallow_goto,
       "Forbid the goto operator and goto labels in the parser";
+    "--const-default-func-args",
+      Arg.Set const_default_func_args,
+      "Statically check default function arguments are constant initializers";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -524,6 +528,7 @@ let parse_options () =
     ~po_disable_legacy_attribute_syntax:!disable_legacy_attribute_syntax
     ~tco_const_attribute:!const_attribute
     ~po_allow_goto:(not !disallow_goto)
+    ~po_const_default_func_args:!const_default_func_args
     ()
   in
   let tcopt = {

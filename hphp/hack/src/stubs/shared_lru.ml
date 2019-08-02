@@ -22,6 +22,5 @@ let run
     ~initial_env:_
     ~job:_
     ~reduce:_
-    ~next:_
-    ~inputs:_ =
+    ~next:_ =
   failwith "not implemented"

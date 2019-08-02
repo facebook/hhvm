@@ -40,10 +40,10 @@ let process_in_parallel
 
   let next ~(batch_size: int) files_to_process =
     match files_to_process with
-    | [] -> [], None
+    | [] -> [], Hack_bucket.Done
     | _ ->
       let batch, remaining = List.split_n files_to_process batch_size in
-      remaining, Some batch
+      remaining, Hack_bucket.Job batch
   in
 
   let job (fc_lst: file_computation list) =
@@ -102,11 +102,10 @@ let process_in_parallel
   (* Start shared_lru workers. *)
   let errors, _ = Shared_lru.run
     ~host_env:lru_host_env
-    ~initial_env:None
+    ~initial_env:fnl
     ~job
     ~reduce
     ~next:(next ~batch_size)
-    ~inputs:fnl
   in
 
   let env = interrupt.MultiThreadedCall.env in

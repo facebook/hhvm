@@ -1052,12 +1052,17 @@ int apc_rfc1867_progress(apc_rfc1867_data* rfc1867ApcData, unsigned int event,
 ///////////////////////////////////////////////////////////////////////////////
 // apc serialization
 
-String apc_serialize(const_variant_ref value) {
+String apc_serialize(const_variant_ref value,
+                     APCSerializeMode mode /* = Normal */) {
+  auto const enableApcSerialize = apcExtension::EnableApcSerialize;
   VariableSerializer::Type sType =
-    apcExtension::EnableApcSerialize ?
+    enableApcSerialize ?
       VariableSerializer::Type::APCSerialize :
       VariableSerializer::Type::Internal;
-  VariableSerializer vs(sType);
+  auto const options = enableApcSerialize && mode == APCSerializeMode::Prime
+    ? VariableSerializer::kAPC_PRIME_SERIALIZE
+    : 0;
+  VariableSerializer vs(sType, options);
   return vs.serialize(value, true);
 }
 

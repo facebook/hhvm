@@ -170,9 +170,16 @@ static_assert(sizeof(int64_t) == sizeof(long long),
 ///////////////////////////////////////////////////////////////////////////////
 // apc serialization
 
-String apc_serialize(const_variant_ref value);
-inline String apc_serialize(const Variant& var) {
-  return apc_serialize(const_variant_ref{var});
+enum APCSerializeMode {
+  Normal,
+  Prime
+};
+
+String apc_serialize(const_variant_ref value,
+                     APCSerializeMode mode = APCSerializeMode::Normal);
+inline String apc_serialize(const Variant& var,
+                            APCSerializeMode mode = APCSerializeMode::Normal) {
+  return apc_serialize(const_variant_ref{var}, mode);
 }
 Variant apc_unserialize(const char* data, int len);
 String apc_reserialize(const String& str);

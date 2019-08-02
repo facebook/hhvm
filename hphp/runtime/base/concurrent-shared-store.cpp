@@ -986,7 +986,7 @@ bool ConcurrentTableSharedStore::constructPrime(const String& v,
     // TODO: currently we double serialize string for uniform handling later,
     // hopefully the unserialize won't be called often. We could further
     // optimize by storing more type info.
-    String s = apc_serialize(VarNR{v});
+    String s = apc_serialize(VarNR{v}, APCSerializeMode::Prime);
     char *sAddr = s_apc_file_storage.put(s.data(), s.size());
     if (sAddr) {
       item.sAddr = sAddr;
@@ -1007,7 +1007,7 @@ bool ConcurrentTableSharedStore::constructPrime(const Variant& v,
       APCFileStorage::StorageState::Invalid &&
       (isRefcountedType(v.getType()))) {
     // Only do the storage for ref-counted type
-    String s = apc_serialize(v);
+    String s = apc_serialize(v, APCSerializeMode::Prime);
     char *sAddr = s_apc_file_storage.put(s.data(), s.size());
     if (sAddr) {
       item.sAddr = sAddr;

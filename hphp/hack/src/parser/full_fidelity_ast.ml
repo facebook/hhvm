@@ -1605,6 +1605,9 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         | p, Lvar v when not env.codegen -> p, Id v
         | qual -> qual
       in
+      begin match qual with
+      | _, Id x -> fail_if_invalid_reified_generic env node x
+      | _ -> () end;
       begin match syntax scope_resolution_name with
       | Token token when Token.kind token = TK.Variable ->
         let name =

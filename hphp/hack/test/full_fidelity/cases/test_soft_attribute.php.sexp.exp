@@ -1,5 +1,5 @@
-((script 378
-  ((list 378
+((script 421
+  ((list 421
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
@@ -217,5 +217,36 @@
                    (() ";" 1 ((end_of_line 1)))))))
                (((whitespace 2)) } 1 ((end_of_line 1)))))
              (missing 0 ())))))
+         (() } 1 ((end_of_line 1)))))))
+     (classish_declaration 41
+      ((missing 0 ()) (missing 0 ())
+       (((end_of_line 1)) class 5 ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (classish_body 33
+        ((() { 1 ((end_of_line 1)))
+         (list 27
+          ((const_declaration 27
+            ((missing 0 ()) (((whitespace 2)) const 5 ((whitespace 1)))
+             (attributized_specifier 14
+              ((old_attribute_specification 10
+                ((() << 2 ())
+                 (list 6
+                  ((list_item 6
+                    ((constructor_call 6
+                      ((() name 6 ()) (missing 0 ()) (missing 0 ())
+                       (missing 0 ())))
+                     (missing 0 ())))))
+                 (() >> 2 ((whitespace 1)))))
+               (simple_type_specifier 3 ((() int 3 ((whitespace 1)))))))
+             (list 5
+              ((list_item 5
+                ((constant_declarator 5
+                  ((() name 1 ((whitespace 1)))
+                   (simple_initializer 3
+                    ((() = 1 ((whitespace 1)))
+                     (literal 1 ((() decimal_literal 1 ())))))))
+                 (missing 0 ())))))
+             (() ";" 1 ((end_of_line 1)))))))
          (() } 1 ((end_of_line 1)))))))
      (end_of_file 0 ((() end_of_file 0 ()))))))))

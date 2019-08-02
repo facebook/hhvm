@@ -18,3 +18,7 @@ abstract class C {
     return 42;
   }
 }
+
+class D {
+  const <<__Soft>> int X = 0;
+}

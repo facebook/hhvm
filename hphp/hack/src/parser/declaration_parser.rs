@@ -1352,7 +1352,7 @@ where
     //   =  const-expression
     fn parse_const_declaration(&mut self, modifiers: S::R, const_: S::R) -> S::R {
         let type_spec = if self.is_type_in_const() {
-            self.parse_type_specifier(/* allow_var = */ false, /* allow_attr = */ false)
+            self.parse_type_specifier(/* allow_var = */ false, /* allow_attr = */ true)
         } else {
             S!(make_missing, self, self.pos())
         };

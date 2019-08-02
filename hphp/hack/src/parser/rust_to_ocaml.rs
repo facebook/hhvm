@@ -11,7 +11,7 @@ use crate::ocaml_coroutine_state::OcamlCoroutineState;
 use crate::ocaml_syntax::OcamlSyntax;
 
 use ocaml::core::memory;
-use ocaml::core::mlvalues::{empty_list, Size, Tag, Value};
+use ocaml::core::mlvalues::{empty_list, Color, Size, Tag, Value};
 
 use std::iter::Iterator;
 
@@ -37,13 +37,26 @@ extern "C" {
     fn ocamlpool_reserve_block(tag: Tag, size: Size) -> Value;
     fn ocamlpool_reserve_string(size: Size) -> Value;
     static mut ocamlpool_generation: usize;
+    static ocamlpool_limit: *mut Value;
+    static mut ocamlpool_cursor: *mut Value;
+    static ocamlpool_color: Color;
+}
+
+unsafe fn reserve_block(tag: Tag, size: Size) -> Value {
+    let result = ocamlpool_cursor.offset(-(size as isize) - 1);
+    if result < ocamlpool_limit {
+        return ocamlpool_reserve_block(tag, size);
+    }
+    ocamlpool_cursor = result;
+    *result = (tag as usize) | ocamlpool_color | (size << 10);
+    return result.offset(1) as Value;
 }
 
 // Unsafe functions in this file should be called only:
 // - while being called from OCaml process
 // - between ocamlpool_enter / ocamlpool_leave invocations
 pub unsafe fn caml_block(tag: Tag, fields: &[Value]) -> Value {
-    let result = ocamlpool_reserve_block(tag, fields.len());
+    let result = reserve_block(tag, fields.len());
     for (i, field) in fields.iter().enumerate() {
         memory::store_field(result, i, *field);
     }
@@ -185,7 +198,7 @@ where
                 // passing it to caml_block, but the cost of this intermediate vector allocation is
                 // too big
                 let n = Self::fold_over_children(&|_, n| n + 1, 0, &self.syntax);
-                let result = ocamlpool_reserve_block(tag, n);
+                let result = reserve_block(tag, n);
                 // Similarly, fold_over_children() avoids intermediate allocation done by children()
                 Self::fold_over_children(
                     &|field, i| {

@@ -91,7 +91,7 @@ function fwrite(resource $handle, string $data, int $length = 0);
 <<__PHPStdLib>>
 function fputs(resource $handle, string $data, int $length = 0);
 <<__PHPStdLib>>
-function fprintf(resource $handle, string $format, ...);
+function fprintf(resource $handle, string $format, ...$args);
 <<__PHPStdLib>>
 function vfprintf($handle, $format, $args);
 <<__PHPStdLib>>

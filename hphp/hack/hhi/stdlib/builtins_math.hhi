@@ -34,9 +34,9 @@ const M_EULER = 0.57721566490153286061;
 <<__PHPStdLib, __Rx>>
 function pi();
 <<__PHPStdLib, __Rx>>
-function min($value, ...);
+function min($value, ...$args);
 <<__PHPStdLib, __Rx>>
-function max($value, ...);
+function max($value, ...$args);
 <<__PHPStdLib, __Rx>>
 function abs($number);
 <<__PHPStdLib, __Rx>>

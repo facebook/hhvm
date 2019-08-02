@@ -38,7 +38,7 @@ function takes_hash_array<Tk,Tv>(array<Tk,Tv> $c): void {}
 function f2(string $x, ...$args): void {}
 
 class C0 {
-  public function meth(...): void {}
+  public function meth(...$args): void {}
 }
 
 class C1 extends C0 {

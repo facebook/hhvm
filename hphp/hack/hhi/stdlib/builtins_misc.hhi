@@ -32,7 +32,7 @@ function get_browser($user_agent = null, $return_array = false);
 <<__PHPStdLib>>
 function ignore_user_abort(bool $setting = false);
 <<__PHPStdLib, __Rx>>
-function pack(string $format, ...);
+function pack(string $format, ...$args);
 <<__PHPStdLib>>
 function php_check_syntax($filename, &$error_message = null);
 <<__PHPStdLib>>

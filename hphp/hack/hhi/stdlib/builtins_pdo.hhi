@@ -134,7 +134,7 @@ class PDOStatement {
   public function getAttribute(int $attribute);
   public function columnCount();
   public function getColumnMeta(int $column);
-  public function setFetchMode(int $mode, ...);
+  public function setFetchMode(int $mode, ...$args);
   public function nextRowset();
   public function closeCursor();
   public function debugDumpParams();

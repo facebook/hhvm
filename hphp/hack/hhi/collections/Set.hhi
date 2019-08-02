@@ -632,12 +632,12 @@ final class Set<Tv as arraykey> implements MutableSet<Tv> {
   /**
    * Returns a `Set` containing all the values from the specified `array`(s).
    *
-   * @param ... - The `array`s to convert to a `Set`.
+   * @param ...$argv - The `array`s to convert to a `Set`.
    *
    * @return - A `Set` with the values from the passed `array`(s).
    */
   <<__Rx, __MutableReturn>>
-  public static function fromArrays(...): Set<Tv>;
+  public static function fromArrays(...$argv): Set<Tv>;
 
   /**
    * Creates a `Set` from the given `Traversable`, or an empty `Set` if `null`

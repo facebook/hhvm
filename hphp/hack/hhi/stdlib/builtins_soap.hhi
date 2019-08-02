@@ -96,7 +96,7 @@ function _soap_active_version();
 
 class SoapServer {
   public function __construct($wsdl, $options = null);
-  public function setclass(string $name, ...);
+  public function setclass(string $name, ...$args);
   public function setobject($obj);
   public function addfunction($func);
   public function getfunctions();

@@ -146,7 +146,7 @@ function hebrev(string $hebrew_text, int $max_chars_per_line = 0);
 <<__PHPStdLib>>
 function hebrevc(string $hebrew_text, int $max_chars_per_line = 0);
 <<__PHPStdLib>>
-function setlocale(int $category, $locale, ...);
+function setlocale(int $category, $locale, ...$args);
 <<__PHPStdLib>>
 function localeconv();
 <<__PHPStdLib>>

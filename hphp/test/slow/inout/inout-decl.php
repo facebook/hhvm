@@ -59,8 +59,8 @@ class PrivChild extends PrivParent {
 
 function foo($x, $y, inout $z, $q) {}
 function bar(inout int $x) {}
-function f<T>(inout vec<T> $v, ...) {}
-function g($q, inout dict<string,vec<int>> $r, ...) {}
+function f<T>(inout vec<T> $v, ...$_) {}
+function g($q, inout dict<string,vec<int>> $r, ...$_) {}
 function h(inout $a, inout $b, $t, inout bool $c, $a = 12) {}
 
 function fptr<T as (function(inout int, inout bool, inout float): arraykey)>(

@@ -3,7 +3,7 @@
 function ref(&$x) {
 }
 
-function foo($r, inout $a, inout $b, $q, inout $c, ...) {
+function foo($r, inout $a, inout $b, $q, inout $c, ...$_) {
   $a = 'FOO:A';
   $b = 'FOO:B';
   $c = 'FOO:C';

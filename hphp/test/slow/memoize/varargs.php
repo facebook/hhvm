@@ -2,4 +2,4 @@
 
 
 <<__Memoize>>
-function varargFn($a, ...) { return func_get_args(); }
+function varargFn($a, ...$_) { return 1; }

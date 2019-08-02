@@ -59,6 +59,12 @@ let process_in_parallel
     partition_files_h ~acc:[] ~fnl ~batch_size
   in
 
+  let next (all_files: file_computation list list) =
+    match all_files with
+    | [] -> [], None
+    | fc_lst :: fc_lst_tl -> fc_lst_tl, Some fc_lst
+  in
+
   let job (fc_lst: file_computation list) =
     let opts = TypeCheckStore.load() in
     SharedMem.allow_removes false;
@@ -97,6 +103,7 @@ let process_in_parallel
     ~host_env:lru_host_env
     ~job
     ~reduce
+    ~next
     ~inputs:(partition_files ~fnl)
   in
   let cancelled = [] in

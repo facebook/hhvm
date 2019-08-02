@@ -17,4 +17,10 @@ let init
     ~num_workers:_ =
   failwith "not implemented"
 
-let run ~host_env:_ ~job:_ ~reduce:_ ~inputs:_ = failwith "not implemented"
+let run
+    ~host_env:_
+    ~job:_
+    ~reduce:_
+    ~next:_
+    ~inputs:_ =
+  failwith "not implemented"

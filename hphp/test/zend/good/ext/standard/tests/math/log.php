@@ -1,4 +1,5 @@
 <?hh
+<<__EntryPoint>> function main(): void {
 echo "On failure, please mail result to php-dev@lists.php.net\n";
 for ($x = 0, $count= 0; $x < 200; $x++) {
     $x2 = (int) exp(log((float)$x));
@@ -23,4 +24,5 @@ for ($base = 2; $base < 11; $base++) {
         }
     }
     print $count . "\n";
+}
 }

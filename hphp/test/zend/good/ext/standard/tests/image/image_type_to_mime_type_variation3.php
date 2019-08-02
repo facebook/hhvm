@@ -1,9 +1,9 @@
 <?hh
 /* Prototype  : string image_type_to_mime_type(int imagetype)
- * Description: Get Mime-Type for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype 
+ * Description: Get Mime-Type for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype
  * Source code: ext/standard/image.c
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing image_type_to_mime_type() : usage variations ***\n";
 
 for($imagetype = 0; $imagetype <= IMAGETYPE_COUNT; ++$imagetype) {
@@ -11,3 +11,4 @@ for($imagetype = 0; $imagetype <= IMAGETYPE_COUNT; ++$imagetype) {
   var_dump(image_type_to_mime_type($imagetype));
 }
 echo "===DONE===\n";
+}

@@ -38,6 +38,7 @@ let parse_options (): index_builder_context option =
   let text_filename = ref None in
   let json_filename = ref None in
   let json_chunk_size = ref 500_000 in
+  let json_repo_name = ref None in
   let custom_service = ref None in
   let custom_repo_name = ref None in
   let repository = ref None in
@@ -58,6 +59,10 @@ let parse_options (): index_builder_context option =
       "--chunk-size",
       Arg.Int (fun x -> json_chunk_size := x),
       "[number]    Split the JSON file into chunks of a specified size";
+
+      "--upload-json-files",
+      Arg.String (fun x -> json_repo_name := (Some x)),
+      "[reponame]   Uploads all JSON files in specified repo name";
 
       "--custom-service",
       Arg.String (fun x -> custom_service := (Some x)),
@@ -87,6 +92,7 @@ let parse_options (): index_builder_context option =
       text_filename = !text_filename;
       json_filename = !json_filename;
       json_chunk_size = !json_chunk_size;
+      json_repo_name = !json_repo_name;
       custom_service = !custom_service;
       custom_repo_name = !custom_repo_name;
       include_builtins = !include_builtins;

@@ -90,6 +90,7 @@ let run_index_builder (harness : Test_harness.t) : si_env =
       sqlite_filename = file_opt;
       text_filename = None;
       json_filename = None;
+      json_repo_name = None;
       json_chunk_size = 0;
       custom_service = None;
       custom_repo_name = None;

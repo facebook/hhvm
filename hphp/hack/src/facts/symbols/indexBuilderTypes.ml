@@ -14,6 +14,7 @@ type index_builder_context = {
   text_filename: string option;
   json_filename: string option;
   json_chunk_size: int;
+  json_repo_name: string option;
   custom_service: string option;
   custom_repo_name: string option;
   include_builtins: bool;

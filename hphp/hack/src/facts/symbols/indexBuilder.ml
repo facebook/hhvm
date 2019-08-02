@@ -206,8 +206,39 @@ let convert_capture (incoming: si_capture): si_scan_result =
   result
 ;;
 
+let export_to_custom_writer json_exported_files ctxt =
+  match (ctxt.custom_service, ctxt.custom_repo_name) with
+  | Some _, None
+  | None, Some _ ->
+    print_endline "API export requires both a service and a repo name.";
+  | None, None ->
+    ()
+  | Some service, Some repo_name ->
+    let name = Printf.sprintf "Exported to custom symbol index writer [%s] [%s] in "
+      service repo_name in
+    measure_time ~f:(fun () ->
+        CustomSymbolIndexWriter.send_to_custom_writer
+          json_exported_files service repo_name ctxt.repo_folder;
+      ) ~name;
+;;
+
 (* Run the index builder project *)
 let go (ctxt: index_builder_context) (workers: MultiWorker.worker list option): unit =
+  if ctxt.json_repo_name <> None
+  then (* if json repo is specified, just export to custom writer directly *)
+    let json_exported_files =
+      begin match ctxt.json_repo_name with
+        | None -> []
+        | Some repo_name ->
+          Sys_utils.collect_paths begin fun filename ->
+            Str.string_match
+              ( Str.regexp "[./a-zA-Z0-9_]+.json" )
+              filename
+              0
+          end repo_name
+      end in
+    export_to_custom_writer json_exported_files ctxt
+  else
 
   (* Gather list of files *)
   let name = Printf.sprintf "Scanned repository folder [%s] in " ctxt.repo_folder in
@@ -261,8 +292,7 @@ let go (ctxt: index_builder_context) (workers: MultiWorker.worker list option): 
   (* Are we exporting a json file? *)
   let json_exported_files =
     match ctxt.json_filename with
-    | None ->
-      []
+    | None -> []
     | Some filename ->
       let name = Printf.sprintf "Wrote %d symbols to json in "
         (List.length results.sisr_capture) in
@@ -273,19 +303,5 @@ let go (ctxt: index_builder_context) (workers: MultiWorker.worker list option): 
   in
 
   (* Are we exporting to a custom writer? *)
-  begin
-    match (ctxt.custom_service, ctxt.custom_repo_name) with
-    | Some _, None
-    | None, Some _ ->
-      print_endline "API export requires both a service and a repo name.";
-    | None, None ->
-      ()
-    | Some service, Some repo_name ->
-      let name = Printf.sprintf "Exported to custom symbol index writer [%s] [%s] in "
-        service repo_name in
-      measure_time ~f:(fun () ->
-          CustomSymbolIndexWriter.send_to_custom_writer
-            json_exported_files service repo_name ctxt.repo_folder;
-        ) ~name;
-  end
+  export_to_custom_writer json_exported_files ctxt
 ;;

@@ -19,6 +19,7 @@ let init
 
 let run
     ~host_env:_
+    ~initial_env:_
     ~job:_
     ~reduce:_
     ~next:_

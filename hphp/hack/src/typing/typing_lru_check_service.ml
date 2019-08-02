@@ -101,6 +101,7 @@ let process_in_parallel
   (* Start shared_lru workers *)
   let errors, _ = Shared_lru.run
     ~host_env:lru_host_env
+    ~initial_env:None
     ~job
     ~reduce
     ~next

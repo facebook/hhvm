@@ -67,7 +67,7 @@ value ocamlpool_reserve_string(size_t bytes);
 value ocamlpool_reserve_block(int tag, size_t words);
 
 extern color_t ocamlpool_color;
-extern value *ocamlpool_limit, *ocamlpool_cursor;;
+extern value *ocamlpool_limit, *ocamlpool_cursor, *ocamlpool_bound;;
 extern uintnat ocamlpool_generation;
 
 #endif /*!OCAMLPOOL_H*/

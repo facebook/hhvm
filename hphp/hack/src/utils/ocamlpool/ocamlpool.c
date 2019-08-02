@@ -50,7 +50,7 @@ static size_t ocamlpool_next_chunk_size = OCAMLPOOL_DEFAULT_SIZE;
 
 /* */
 uintnat ocamlpool_generation = 0;
-value *ocamlpool_limit = 0, *ocamlpool_cursor = 0;
+value *ocamlpool_limit = 0, *ocamlpool_cursor = 0, *ocamlpool_bound = 0;
 
 /* Sanity checks
  * ===========================================================================
@@ -112,7 +112,8 @@ static void assert_out_of_section(void)
 static void init_cursor(void)
 {
   ocamlpool_limit = (value*)ocamlpool_root + 1;
-  ocamlpool_cursor = (value*)ocamlpool_root + Wosize_val(ocamlpool_root);
+  ocamlpool_bound = (value*)ocamlpool_root + Wosize_val(ocamlpool_root);
+  ocamlpool_cursor = ocamlpool_bound;
 }
 
 static void ocamlpool_chunk_alloc(void);
@@ -164,6 +165,7 @@ void ocamlpool_leave(void)
   ocamlpool_chunk_truncate();
   ocamlpool_in_section = 0;
   ocamlpool_limit = 0;
+  ocamlpool_bound = 0;
   ocamlpool_cursor = 0;
 
   ocamlpool_generation += 1;
@@ -207,6 +209,7 @@ void ocamlpool_chunk_release(void)
 {
   ocamlpool_chunk_truncate();
   ocamlpool_limit = 0;
+  ocamlpool_bound = 0;
   ocamlpool_cursor = 0;
   ocamlpool_root = Val_unit;
 }

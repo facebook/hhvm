@@ -38,6 +38,7 @@ extern "C" {
     fn ocamlpool_reserve_string(size: Size) -> Value;
     static mut ocamlpool_generation: usize;
     static ocamlpool_limit: *mut Value;
+    static ocamlpool_bound: *mut Value;
     static mut ocamlpool_cursor: *mut Value;
     static ocamlpool_color: Color;
 }
@@ -52,13 +53,23 @@ unsafe fn reserve_block(tag: Tag, size: Size) -> Value {
     return result.offset(1) as Value;
 }
 
+unsafe fn caml_set_field(obj: Value, index: usize, val: Value) {
+    if (val & 1 == 1)
+        || ((val as *const Value) >= ocamlpool_limit && (val as *const Value) <= ocamlpool_bound)
+    {
+        *(obj as *mut Value).offset(index as isize) = val;
+    } else {
+        memory::caml_initialize((obj as *mut Value).offset(index as isize), val);
+    }
+}
+
 // Unsafe functions in this file should be called only:
 // - while being called from OCaml process
 // - between ocamlpool_enter / ocamlpool_leave invocations
 pub unsafe fn caml_block(tag: Tag, fields: &[Value]) -> Value {
     let result = reserve_block(tag, fields.len());
     for (i, field) in fields.iter().enumerate() {
-        memory::store_field(result, i, *field);
+        caml_set_field(result, i, *field);
     }
     return result;
 }
@@ -203,7 +214,7 @@ where
                 Self::fold_over_children(
                     &|field, i| {
                         let field = field.to_ocaml(context);
-                        memory::store_field(result, i, field);
+                        caml_set_field(result, i, field);
                         i + 1
                     },
                     0,

@@ -38,12 +38,15 @@ let process_in_parallel
   ServerProgress.send_percentage_progress_to_monitor
     "typechecking" 0 files_initial_count "files";
 
-  let next ~(batch_size: int) files_to_process =
-    match files_to_process with
-    | [] -> [], Hack_bucket.Done
-    | _ ->
-      let batch, remaining = List.split_n files_to_process batch_size in
-      remaining, Hack_bucket.Job batch
+  let next ~(batch_size: int) (files_to_process, errors_acc, num_files) =
+    let files_to_process, next_input =
+      match files_to_process with
+      | [] -> [], Hack_bucket.Done
+      | _ ->
+        let batch, remaining = List.split_n files_to_process batch_size in
+        remaining, Hack_bucket.Job batch
+    in
+    (files_to_process, errors_acc, num_files), next_input
   in
 
   let job (fc_lst: file_computation list) =
@@ -85,11 +88,14 @@ let process_in_parallel
     errors, num_files_checked
   in
 
-  let reduce (errors_acc, files_count_acc) (errors, num_files) =
+  let callback
+      (fnl, errors_acc, files_count_acc)
+      (errors, num_files) =
     ServerProgress.send_percentage_progress_to_monitor
       "typechecking" (files_count_acc + num_files) files_initial_count "files";
     (* Errors.merge is a List.rev_append, so put the [acc] second *)
-    Errors.merge errors errors_acc, (files_count_acc + num_files)
+    let errors_acc = Errors.merge errors errors_acc in
+    fnl, errors_acc, (files_count_acc + num_files)
   in
 
   let max_size = Bucket.max_size () in
@@ -100,11 +106,11 @@ let process_in_parallel
   in
 
   (* Start shared_lru workers. *)
-  let errors, _ = Shared_lru.run
+  let _files_left, errors ,_num_files_checked = Shared_lru.run
     ~host_env:lru_host_env
-    ~initial_env:fnl
+    ~initial_env:(fnl, Errors.empty, 0)
     ~job
-    ~reduce
+    ~callback
     ~next:(next ~batch_size)
   in
 

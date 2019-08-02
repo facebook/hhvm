@@ -21,6 +21,6 @@ let run
     ~host_env:_
     ~initial_env:_
     ~job:_
-    ~reduce:_
+    ~callback:_
     ~next:_ =
   failwith "not implemented"

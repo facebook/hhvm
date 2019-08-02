@@ -132,6 +132,9 @@ let handler = object
   method! at_expr env x =
     (* only considering functions where one or more params are reified *)
     match x with
+    | (pos, _), Class_get ((_, CI (_, t)), _) ->
+      if Env.get_reified env t = Reified then
+        Errors.class_get_reified pos
     | (pos, _), Call (_, ((_, (_, Tfun { ft_pos; ft_tparams; _ })), _), targs, _, _) ->
       let tparams = fst ft_tparams in
       verify_call_targs env pos ft_pos tparams targs

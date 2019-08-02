@@ -562,6 +562,7 @@ let default_ignored_fixme_codes = ISet.of_list [
   Typing.err_code Typing.NewWithoutNewable;
   Typing.err_code Typing.NewStaticClassReified;
   Typing.err_code Typing.MemoizeReified;
+  Typing.err_code Typing.ClassGetReified;
 ]
 let ignored_fixme_codes = ref default_ignored_fixme_codes
 
@@ -2598,6 +2599,10 @@ let invalid_reified_argument_disallow_php_arrays (def_pos, def_name) arg_pos ty_
 let new_static_class_reified pos =
   add (Typing.err_code Typing.NewStaticClassReified) pos
     "Cannot call new static because the current class has reified generics"
+
+let class_get_reified pos =
+  add (Typing.err_code Typing.ClassGetReified) pos
+    "Cannot access static properties on reified generics"
 
 let consistent_construct_reified pos =
   add (Typing.err_code Typing.ConsistentConstructReified) pos

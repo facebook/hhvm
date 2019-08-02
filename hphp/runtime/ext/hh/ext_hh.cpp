@@ -635,7 +635,7 @@ TypedValue HHVM_FUNCTION(dynamic_class_meth, StringArg cls, StringArg meth) {
   auto const func = c->lookupMethod(meth.get());
   if (!func) {
     SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat("Unable to method {}::{}",
+      folly::sformat("Unable to find method {}::{}",
                      cls.get()->data(), meth.get()->data())
     );
   }

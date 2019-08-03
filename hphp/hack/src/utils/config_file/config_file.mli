@@ -8,7 +8,21 @@
 
 type t = string SMap.t
 
+type version_components = {
+  major: int;
+  minor: int;
+  build: int;
+}
+
+type version =
+  | Opaque_version of string option
+  | Version_components of version_components
+
 val file_path_relative_to_repo_root: string
+
+val compare_versions: version -> version -> int
+
+val parse_version: string option -> version
 
 val parse_hhconfig: silent:bool -> string -> string * string SMap.t
 
@@ -45,4 +59,11 @@ module Getters: sig
     string list
 
   val bool_if_version: string -> default:bool -> string SMap.t -> bool
+
+  val bool_if_min_version:
+    string ->
+    default:bool ->
+    current_version:version ->
+    string SMap.t ->
+    bool
 end

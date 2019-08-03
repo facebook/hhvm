@@ -2,7 +2,8 @@
   (name utils_config_file_common)
   (wrapped false)
   (modules
-    config_file_common)
+    config_file_common
+    config_file_version)
   (libraries
     core_kernel
     sys_utils

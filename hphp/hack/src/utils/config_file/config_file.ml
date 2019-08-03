@@ -9,6 +9,8 @@
 
 open Core_kernel
 
+include Config_file_version
+
 type t = string SMap.t
 
 let file_path_relative_to_repo_root = Config_file_common.file_path_relative_to_repo_root

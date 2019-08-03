@@ -130,4 +130,14 @@ module Getters = struct
       | x -> List.exists ~f:(fun s ->
           let s = if s = "master" then "" else s in
           s = Build_id.build_revision) x
+
+  let bool_if_min_version key ~default ~current_version config =
+    let version_value = string_ key ~default:(string_of_bool default) config in
+    match version_value with
+    | "true" -> true
+    | "false" -> false
+    | version_value ->
+      let version_value = Config_file_version.parse_version (Some version_value) in
+      if (Config_file_version.compare_versions current_version version_value) >= 0 then true
+      else false
 end

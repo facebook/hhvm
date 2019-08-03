@@ -101,13 +101,13 @@ class LspCommandProcessor:
                 )
             elif command["method"] == "$test/waitForTelemetryEvent":
                 transcript = self._wait_for_telemetry_event(transcript, command)
+            elif command["method"] == "$test/waitForHhServerReady":
+                # Hack: HackLSP server only connects to hh_server asynchronously.
+                # We want to delay until after it's connected before testing more.
+                transcript = self._wait_for_initialized(transcript)
             else:
                 self.writer.write(command)
                 transcript = self._scribe(transcript, sent=command, received=None)
-                # Hack: HackLSP server only connects to hh_server asynchronously.
-                # We want to delay until after it's connected before testing more.
-                if command["method"] == "initialize":
-                    transcript = self._wait_for_initialized(transcript)
 
         return transcript
 

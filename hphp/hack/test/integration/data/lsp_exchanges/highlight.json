@@ -13,6 +13,11 @@
 },
 {
   "jsonrpc": "2.0",
+  "method": "$test/waitForHhServerReady",
+  "params": {}
+},
+{
+  "jsonrpc": "2.0",
   "method": "textDocument/didOpen",
   "params": {
      "textDocument": {

@@ -78,3 +78,10 @@ type _ t =
   | Document_highlight:
     Document_highlight.request ->
     Document_highlight.result t
+
+type notification =
+  | Done_processing
+
+type 'a wire_message =
+  | Notification of notification
+  | Response of 'a

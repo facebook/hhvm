@@ -8,3 +8,5 @@ let destroy () = Lwt.return_unit
 let notify_file_changed () _ = ()
 let rpc () _ =
   Lwt.return_error "Serverless IDE not available in open-source build"
+let get_notifications () =
+  failwith "Serverless IDE not available in open-source build"

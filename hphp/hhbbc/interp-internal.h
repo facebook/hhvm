@@ -1183,6 +1183,27 @@ bool isMaybeLateInitSelfProp(ISS& env, SString name) {
   return true;
 }
 
+/*
+ * Determines whether we can skip expanding the type of a
+ * const property.
+ * Requires propName is the value of a TypedValue with type
+ * KindOfPersistentString
+ */
+bool canSkipMergeOnConstProp(ISS&env, Type tcls, SString propName) {
+    if (is_specialized_cls(tcls)) {
+      DCls cls = dcls_of(tcls);
+      if (cls.type == DCls::Exact && cls.cls.resolved()) {
+          for (auto& prop : cls.cls.cls()->properties) {
+            if (prop.name == propName &&
+               (prop.attrs & AttrIsConst)) {
+                 return true;
+            }
+          }
+       }
+    }
+    return false;
+}
+
 //////////////////////////////////////////////////////////////////////
 // misc
 

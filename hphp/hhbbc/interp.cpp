@@ -3533,20 +3533,11 @@ void in(ISS& env, const bc::SetS& op) {
   auto const vname = tv(tname);
   auto const self  = selfCls(env);
 
-  if (is_specialized_cls(tcls)) {
-    DCls cls = dcls_of(tcls);
-    if (cls.type == DCls::Exact &&
-        vname && vname->m_type == KindOfPersistentString &&
-        cls.cls.resolved()) {
-        for (auto& prop : cls.cls.cls()->properties) {
-          if (prop.name == vname->m_data.pstr &&
-             (prop.attrs & AttrIsConst)) {
-               unreachable(env);
-               push(env, TBottom);
-               return;
-          }
-        }
-     }
+  if (vname && vname->m_type == KindOfPersistentString &&
+      canSkipMergeOnConstProp(env, tcls, vname->m_data.pstr)) {
+      unreachable(env);
+      push(env, TBottom);
+      return;
   }
 
   if (!self || tcls.couldBe(*self)) {
@@ -3609,6 +3600,13 @@ void in(ISS& env, const bc::SetOpS& op) {
   auto const vname = tv(tname);
   auto const self  = selfCls(env);
 
+  if (vname && vname->m_type == KindOfPersistentString &&
+      canSkipMergeOnConstProp(env, tcls, vname->m_data.pstr)) {
+      unreachable(env);
+      push(env, TBottom);
+      return;
+  }
+
   if (!self || tcls.couldBe(*self)) {
     if (vname && vname->m_type == KindOfPersistentString) {
       mergeSelfProp(env, vname->m_data.pstr, TInitCell);
@@ -3647,6 +3645,13 @@ void in(ISS& env, const bc::IncDecS& op) {
   auto const tname = popC(env);
   auto const vname = tv(tname);
   auto const self  = selfCls(env);
+
+  if (vname && vname->m_type == KindOfPersistentString &&
+      canSkipMergeOnConstProp(env, tcls, vname->m_data.pstr)) {
+      unreachable(env);
+      push(env, TBottom);
+      return;
+  }
 
   if (!self || tcls.couldBe(*self)) {
     if (vname && vname->m_type == KindOfPersistentString) {

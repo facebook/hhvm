@@ -15,11 +15,11 @@ let should_do_remote
     (fnl: (Relative_path.t * FileInfo.names) list)
     ~(t: float)
     : bool * float =
+  let remote_type_check = TypecheckerOptions.remote_type_check opts in
   let remote_type_check_threshold = TypecheckerOptions.remote_type_check_threshold opts in
   let file_count = List.length fnl in
-  let do_remote = match remote_type_check_threshold with
-    | None -> false
-    | Some remote_type_check_threshold when file_count >= remote_type_check_threshold ->
+  let do_remote = match remote_type_check, remote_type_check_threshold with
+    | true, Some remote_type_check_threshold when file_count >= remote_type_check_threshold ->
       Hh_logger.log
         "Going to schedule work because file count %d >= threshold %d"
         file_count

@@ -87,6 +87,8 @@ type t = {
   (* If set, distributes type checking to remote workers if the number of files to
     type check exceeds the threshold. If not set, then always checks everything locally. *)
   remote_type_check_threshold : int option;
+  (* Enables remote type check *)
+  remote_type_check : bool;
   (* If set, uses the key to fetch type checking jobs *)
   remote_worker_key : string option;
   (* If set, uses the check ID when logging events in the context of remove init/work *)
@@ -162,6 +164,7 @@ let default = {
   shallow_class_decl = false;
   defer_class_declaration_threshold = None;
   remote_type_check_threshold = None;
+  remote_type_check = true;
   remote_worker_key = None;
   remote_check_id = None;
   num_remote_workers = 4;
@@ -207,7 +210,7 @@ let state_loader_timeouts_ ~default config =
     current_base_rev_timeout;
   }
 
-let load_ fn ~silent overrides =
+let load_ fn ~silent ~current_version overrides =
   let config = Config_file.apply_overrides
     ~silent
     ~config:(Config_file.parse_local_config ~silent fn)
@@ -311,6 +314,8 @@ let load_ fn ~silent overrides =
     int_opt "defer_class_declaration_threshold" config in
   let remote_type_check_threshold =
     int_opt "remote_type_check_threshold" config in
+  let remote_type_check =
+    bool_if_min_version "remote_type_check" ~default:true ~current_version config in
   let remote_worker_key =
     string_opt "remote_worker_key" config in
   let remote_check_id =
@@ -394,6 +399,7 @@ let load_ fn ~silent overrides =
     defer_class_declaration_threshold;
     remote_worker_eden_checkout_threshold;
     remote_type_check_threshold;
+    remote_type_check;
     remote_worker_key;
     remote_check_id;
     num_remote_workers;
@@ -409,5 +415,5 @@ let load_ fn ~silent overrides =
     use_lru_workers;
   }
 
-let load ~silent config_overrides =
-    load_ path ~silent config_overrides
+let load ~silent ~current_version config_overrides =
+    load_ path ~silent ~current_version config_overrides

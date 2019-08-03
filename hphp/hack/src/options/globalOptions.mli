@@ -69,6 +69,9 @@ type t = {
    type check exceeds the threshold. If not set, then always checks everything locally. *)
   tco_remote_type_check_threshold : int option;
 
+  (* Turns on remote type checking *)
+  tco_remote_type_check : bool;
+
   (* If set, uses the key to fetch type checking jobs *)
   tco_remote_worker_key : string option;
 
@@ -317,6 +320,7 @@ val make :
   ?tco_dynamic_view: bool ->
   ?tco_defer_class_declaration_threshold: int ->
   ?tco_remote_type_check_threshold: int ->
+  ?tco_remote_type_check: bool ->
   ?tco_remote_worker_key: string ->
   ?tco_remote_check_id: string ->
   ?tco_num_remote_workers: int ->
@@ -379,6 +383,7 @@ val tco_migration_flag_enabled : t -> SSet.elt -> bool
 val tco_dynamic_view : t -> bool
 val tco_defer_class_declaration_threshold : t -> int option
 val tco_remote_type_check_threshold : t -> int option
+val tco_remote_type_check : t -> bool
 val tco_remote_worker_key : t -> string option
 val tco_remote_check_id : t -> string option
 val tco_num_remote_workers : t -> int

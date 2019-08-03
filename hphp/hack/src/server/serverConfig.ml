@@ -240,7 +240,8 @@ let load config_filename options =
     ~overrides:config_overrides
   in
   process_untrusted_mode config;
-  let local_config = ServerLocalConfig.load ~silent:false config_overrides in
+  let version = Config_file.parse_version (SMap.get config "version") in
+  let local_config = ServerLocalConfig.load ~silent:false ~current_version:version config_overrides in
   let local_config =
     if ServerArgs.ai_mode options <> None then
       ServerLocalConfig.{
@@ -254,7 +255,6 @@ let load config_filename options =
     else
       local_config
   in
-  let version = Config_file.parse_version (SMap.get config "version") in
   let ignored_paths = process_ignored_paths config in
   let extra_paths = process_extra_paths config in
   let coroutine_whitelist_paths = process_coroutine_whitelist_paths config in
@@ -276,6 +276,7 @@ let load config_filename options =
     ?tco_disallow_array_literal:(bool_opt "disallow_array_literal" config)
     ?tco_defer_class_declaration_threshold:(local_config.ServerLocalConfig.defer_class_declaration_threshold)
     ?tco_remote_type_check_threshold:(local_config.ServerLocalConfig.remote_type_check_threshold)
+    ?tco_remote_type_check:(Some local_config.ServerLocalConfig.remote_type_check)
     ?tco_remote_worker_key:(local_config.ServerLocalConfig.remote_worker_key)
     ?tco_remote_check_id:(local_config.ServerLocalConfig.remote_check_id)
     ?tco_num_remote_workers:(Some local_config.ServerLocalConfig.num_remote_workers)

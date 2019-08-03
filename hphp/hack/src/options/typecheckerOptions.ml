@@ -13,6 +13,7 @@ let safe_vector_array = GlobalOptions.tco_safe_vector_array
 let disallow_ambiguous_lambda = GlobalOptions.tco_disallow_ambiguous_lambda
 let defer_class_declaration_threshold = GlobalOptions.tco_defer_class_declaration_threshold
 let remote_type_check_threshold = GlobalOptions.tco_remote_type_check_threshold
+let remote_type_check = GlobalOptions.tco_remote_type_check
 let remote_worker_key = GlobalOptions.tco_remote_worker_key
 let remote_check_id = GlobalOptions.tco_remote_check_id
 let num_remote_workers = GlobalOptions.tco_num_remote_workers

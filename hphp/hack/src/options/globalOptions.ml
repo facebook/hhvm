@@ -15,6 +15,7 @@ type t = {
   tco_dynamic_view : bool;
   tco_defer_class_declaration_threshold : int option;
   tco_remote_type_check_threshold : int option;
+  tco_remote_type_check : bool;
   tco_remote_worker_key : string option;
   tco_remote_check_id : string option;
   tco_num_remote_workers : int;
@@ -165,6 +166,7 @@ let default = {
   tco_dynamic_view = false;
   tco_defer_class_declaration_threshold = None;
   tco_remote_type_check_threshold = None;
+  tco_remote_type_check = true;
   tco_remote_worker_key = None;
   tco_remote_check_id = None;
   tco_num_remote_workers = 4;
@@ -242,6 +244,7 @@ let make
   ?(tco_dynamic_view = default.tco_dynamic_view)
   ?tco_defer_class_declaration_threshold
   ?tco_remote_type_check_threshold
+  ?(tco_remote_type_check = default.tco_remote_type_check)
   ?tco_remote_worker_key
   ?tco_remote_check_id
   ?(tco_num_remote_workers = default.tco_num_remote_workers)
@@ -303,6 +306,7 @@ let make
   tco_dynamic_view;
   tco_defer_class_declaration_threshold;
   tco_remote_type_check_threshold;
+  tco_remote_type_check;
   tco_remote_worker_key;
   tco_remote_check_id;
   tco_num_remote_workers;
@@ -377,6 +381,8 @@ let tco_defer_class_declaration_threshold t =
   t.tco_defer_class_declaration_threshold
 let tco_remote_type_check_threshold t =
   t.tco_remote_type_check_threshold
+let tco_remote_type_check t =
+  t.tco_remote_type_check
 let tco_remote_worker_key t =
   t.tco_remote_worker_key
 let tco_remote_check_id t =

@@ -16,8 +16,7 @@ open Config_file.Getters
 open Reordered_argument_collections
 
 type t = {
-  version : string option;
-
+  version : Config_file.version;
   load_script_timeout : int; (* in seconds *)
 
   (* Configures only the workers. Workers can have more relaxed GC configs as
@@ -255,7 +254,7 @@ let load config_filename options =
     else
       local_config
   in
-  let version = SMap.get config "version" in
+  let version = Config_file.parse_version (SMap.get config "version") in
   let ignored_paths = process_ignored_paths config in
   let extra_paths = process_extra_paths config in
   let coroutine_whitelist_paths = process_coroutine_whitelist_paths config in
@@ -355,7 +354,7 @@ let load config_filename options =
 
 (* useful in testing code *)
 let default_config = {
-  version = None;
+  version = Config_file.Opaque_version None;
   load_script_timeout = 0;
   gc_control = GlobalConfig.gc_control;
   sharedmem_config = GlobalConfig.default_sharedmem_config;

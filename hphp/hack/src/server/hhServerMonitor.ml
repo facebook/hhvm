@@ -101,7 +101,7 @@ let monitor_daemon_main (options: ServerArgs.options) ~(proc_stack: string list)
     let max_purgatory_clients =
       local_config.ServerLocalConfig.max_purgatory_clients in
     SM.start_monitoring
-      ?current_version
+      ~current_version
       ~waiting_client
       ~max_purgatory_clients
       options informant_options

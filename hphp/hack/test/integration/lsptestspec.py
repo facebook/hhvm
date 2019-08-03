@@ -4,6 +4,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import copy
 import difflib
 import inspect
+import itertools
 import lib2to3.patcomp  # pyre-ignore: Pyre can't find this
 import lib2to3.pgen2
 import lib2to3.pygram
@@ -241,7 +242,9 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 raise ValueError(f"unhandled message type {message.__class__.__name__}")
 
         handled_entries |= set(self._find_ignored_transcript_ids(transcript))
-        yield from self._flag_unhandled_notifications(handled_entries, transcript)
+        yield from self._flag_unhandled_notifications(
+            handled_entries, transcript, lsp_id_map
+        )
 
     def _verify_request(
         self, *, lsp_id: Json, entry: TranscriptEntry, request: "_RequestSpec"
@@ -264,7 +267,11 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
 
 {error_description}
     """
-            context = self._get_context_for_traceback(request.traceback)
+            request_context = self._get_context_for_traceback(request.traceback)
+            context = f"""\
+This was the associated request:
+
+{request_context}"""
             remediation = self._describe_response_for_remediation(
                 request=request, actual_response=entry.received
             )
@@ -276,7 +283,11 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
 {request_description} had an incorrect value for the `powered_by` field
 (expected {request.powered_by!r}; got {actual_powered_by!r})
 """
-            context = self._get_context_for_traceback(request.traceback)
+            request_context = self._get_context_for_traceback(request.traceback)
+            context = f"""\
+This was the associated request:
+
+{request_context}"""
             remediation = self._describe_response_for_remediation(
                 request=request, actual_response=entry.received
             )
@@ -284,7 +295,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 description=description, context=context, remediation=remediation
             )
 
-    def _get_context_for_traceback(self, traceback: _Traceback) -> Optional[str]:
+    def _get_context_for_traceback(self, traceback: _Traceback) -> str:
         # Find the first caller frame that isn't in this source file. The
         # assumption is that the first such frame is in the test code.
         caller_frame = next(frame for frame in traceback if frame.filename != __file__)
@@ -295,17 +306,12 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         (start_line_num, end_line_num) = self._find_line_range_for_function_call(
             file_contents=source_text, line_num=caller_frame.lineno
         )
-        file_context = self._pretty_print_file_context(
+        return self._pretty_print_file_context(
             file_path=source_filename,
             file_contents=source_text,
             start_line_num=start_line_num,
             end_line_num=end_line_num,
         )
-
-        return f"""\
-This was the associated request:
-
-{file_context}"""
 
     def _find_line_range_for_function_call(
         self, file_contents: str, line_num: int
@@ -427,7 +433,10 @@ make it match:
                 yield transcript_id
 
     def _flag_unhandled_notifications(
-        self, handled_entries: AbstractSet[str], transcript: Transcript
+        self,
+        handled_entries: AbstractSet[str],
+        transcript: Transcript,
+        lsp_id_map: _LspIdMap,
     ) -> Iterable["_ErrorDescription"]:
         for transcript_id, entry in transcript.items():
             if transcript_id in handled_entries:
@@ -492,9 +501,50 @@ to your test to wait for it before proceeding:
     )
 """
 
-            yield _ErrorDescription(
-                description=description, context=None, remediation=remediation
+            previous_request = self._find_previous_request(
+                transcript, lsp_id_map, current_id=transcript_id
             )
+            if previous_request is not None:
+                request_context = self._get_context_for_traceback(
+                    previous_request.traceback
+                )
+            else:
+                request_context = "<no previous request was found>"
+            context = f"""\
+This was the most recent request issued from the language client before it
+received the notification:
+
+{request_context}"""
+
+            yield _ErrorDescription(
+                description=description, context=context, remediation=remediation
+            )
+
+    def _find_previous_request(
+        self, transcript: Transcript, lsp_id_map: _LspIdMap, current_id: str
+    ) -> Optional["_RequestSpec"]:
+        previous_transcript_entries = itertools.takewhile(
+            lambda kv: kv[0] != current_id, transcript.items()
+        )
+        previous_request_entries = [
+            entry.sent
+            for _id, entry in previous_transcript_entries
+            if entry.sent is not None and LspCommandProcessor._is_request(entry.sent)
+        ]
+        if previous_request_entries:
+            previous_request_lsp_id = previous_request_entries[-1]["id"]
+        else:
+            return None
+
+        [corresponding_request] = [
+            request
+            for request, lsp_id in lsp_id_map.items()
+            if lsp_id == previous_request_lsp_id
+        ]
+        assert isinstance(
+            corresponding_request, _RequestSpec
+        ), "We should have identified a client-to-server request at this point"
+        return corresponding_request
 
     def _pretty_print_snippet(self, obj: object) -> str:
         return textwrap.indent(pprint.pformat(obj), prefix="  ")
@@ -579,9 +629,7 @@ class _WaitForNotificationSpec:
 
 
 class _ErrorDescription:
-    def __init__(
-        self, description: str, context: Optional[str], remediation: str
-    ) -> None:
+    def __init__(self, description: str, context: str, remediation: str) -> None:
         self.description = description
         self.context = context
         self.remediation = remediation

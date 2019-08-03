@@ -10,7 +10,7 @@ f<int>("hi");
 
 
 function g<reify T>() {
-  $ts = HH\ReifiedGenerics\getTypeStructure<T>();
+  $ts = HH\ReifiedGenerics\get_type_structure<T>();
   ksort(&$ts);
   var_dump($ts);
 }

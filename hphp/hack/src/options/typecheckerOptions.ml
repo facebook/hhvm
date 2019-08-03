@@ -42,8 +42,6 @@ let experimental_type_param_shadowing =
   GlobalOptions.tco_experimental_type_param_shadowing
 let experimental_trait_method_redeclarations =
   GlobalOptions.tco_experimental_trait_method_redeclarations
-let experimental_type_const_attributes =
-  GlobalOptions.tco_experimental_type_const_attributes
 let experimental_abstract_type_const_with_default =
   GlobalOptions.tco_experimental_abstract_type_const_with_default
 let experimental_all = GlobalOptions.tco_experimental_all

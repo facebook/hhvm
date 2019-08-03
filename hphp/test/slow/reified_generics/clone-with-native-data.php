@@ -3,7 +3,7 @@
 // Extend a class with NativeData
 class C<reify T> extends SimpleXMLElement {
   function f() {
-    var_dump(HH\ReifiedGenerics\getTypeStructure<T>());
+    var_dump(HH\ReifiedGenerics\get_type_structure<T>());
   }
 }
 <<__EntryPoint>> function main(): void {

@@ -125,11 +125,6 @@ let tco_experimental_type_param_shadowing = "type_param_shadowing"
 let tco_experimental_trait_method_redeclarations = "trait_method_redeclarations"
 
 (**
- * Enable attributes on type constants
- *)
-let tco_experimental_type_const_attributes = "type_const_attributes"
-
-(**
  * Enable support for the Pocket Universes
  *)
 let tco_experimental_pocket_universes = "pocket_universes"
@@ -151,7 +146,6 @@ let tco_experimental_all =
      tco_experimental_disallow_static_memoized;
      tco_experimental_no_trait_reuse;
      tco_experimental_trait_method_redeclarations;
-     tco_experimental_type_const_attributes;
      tco_experimental_abstract_type_const_with_default;
    ]
 

@@ -11,12 +11,22 @@
 namespace HH\ReifiedGenerics;
 
 /**
- * Returns the type structure representation of the reified type
+ * DO NOT USE; use `get_type_structure()` instead.
  */
 function getTypeStructure<reify T>(): TypeStructure<T>;
+
+/**
+ * DO NOT USE; use `get_classname()` instead.
+ */
+function getClassname<reify T>(): classname<T>;
+
+/**
+ * Returns the type structure representation of the reified type
+ */
+function get_type_structure<reify T>(): TypeStructure<T>;
 
 /**
  * Returns the name of the class represented by this reified type.
  * If this type does not represent a class, throws an exception
  */
-function getClassname<reify T>(): classname<T>;
+function get_classname<reify T>(): classname<T>;

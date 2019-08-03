@@ -227,22 +227,22 @@ namespace HH\ReifiedGenerics {
   /**
    * Returns the type structure representation of the reified type
    */
-  function getTypeStructure<reify T>(): mixed {
+  function get_type_structure<reify T>(): mixed {
     return ${'0ReifiedGenerics'}[0];
   }
 
-  // Old API for getTypeStructure
+  // Old API for get_type_structure()
   // TODO(T46695073): Kill after next HHVM release
-  function getType<reify T>(): mixed {
-    return getTypeStructure<T>();
+  function getTypeStructure<reify T>(): mixed {
+    return namespace\get_type_structure<T>();
   }
 
   /**
    * Returns the name of the class represented by this reified type.
    * If this type does not represent a class, throws an exception
    */
-  function getClassname<reify T>(): classname<T> {
-    $clsname = idx(getType<T>(), 'classname', null);
+  function get_classname<reify T>(): classname<T> {
+    $clsname = idx(namespace\get_type_structure<T>(), 'classname', null);
     if ($clsname is null) {
       throw new \Exception('Trying to get the classname out of a reified type'.
                            ' that does not represent a class');
@@ -250,4 +250,9 @@ namespace HH\ReifiedGenerics {
     return $clsname;
   }
 
+  // Old API for get_classname
+  // TODO(T46695073): Kill after next HHVM release
+  function getClassname<reify T>(): classname<T> {
+    return namespace\get_classname<T>();
+  }
 }

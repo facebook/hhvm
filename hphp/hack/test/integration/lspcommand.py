@@ -95,12 +95,19 @@ class LspCommandProcessor:
         self, transcript: Transcript, commands: Sequence[Json]
     ) -> Transcript:
         for command in commands:
-            self.writer.write(command)
-            transcript = self._scribe(transcript, sent=command, received=None)
-            # Hack: HackLSP server only connects to hh_server asynchronously.
-            # We want to delay until after it's connected before testing more.
-            if command["method"] == "initialize":
-                transcript = self._wait_for_initialized(transcript)
+            if command["method"] == "$test/waitForResponse":
+                transcript = self._wait_for_response(
+                    transcript, command["params"]["id"]
+                )
+            elif command["method"] == "$test/waitForTelemetryEvent":
+                transcript = self._wait_for_telemetry_event(transcript, command)
+            else:
+                self.writer.write(command)
+                transcript = self._scribe(transcript, sent=command, received=None)
+                # Hack: HackLSP server only connects to hh_server asynchronously.
+                # We want to delay until after it's connected before testing more.
+                if command["method"] == "initialize":
+                    transcript = self._wait_for_initialized(transcript)
 
         return transcript
 
@@ -174,6 +181,29 @@ class LspCommandProcessor:
             transcript = self._read_request_responses(
                 transcript, commands=requests, timeout_seconds=5
             )
+        return transcript
+
+    def _wait_for_telemetry_event(
+        self, transcript: Transcript, command: Json
+    ) -> Transcript:
+        params = command["params"]
+        while True:
+            message = self._try_read_logged(timeout_seconds=5)
+            assert message is not None, (
+                f"Was waiting for a telemetry/event message with params {params!r}, "
+                + f"but ran out of messages while waiting. Transcript: {transcript!r}"
+            )
+            transcript = self._scribe(transcript, sent=None, received=message)
+
+            if message.get("id") == -1:
+                # Dummy method from `_wait_for_initialize`, ignore.
+                continue
+
+            if (
+                message.get("method") == "telemetry/event"
+                and message["params"] == params
+            ):
+                break
         return transcript
 
     def _read_request_responses(

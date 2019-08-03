@@ -183,6 +183,7 @@ type event =
   | Server_hello
   | Server_message of server_message
   | Client_message of Jsonrpc.message
+  | Client_ide_notification of ClientIdeMessage.notification
   | Tick (* once per second, on idle *)
 
 (* Here are some exit points. *)
@@ -402,7 +403,10 @@ let rpc_with_retry server_conn ref_unblocked_time command =
 let get_message_source
     (server: server_conn)
     (client: Jsonrpc.queue)
-    : [> `From_server | `From_client | `No_source ] Lwt.t =
+    : [ `From_server
+      | `From_client
+      | `From_ide_service of event
+      | `No_source ] Lwt.t =
   (* Take action on server messages in preference to client messages, because
      server messages are very easy and quick to service (just send a message to
      the client), while client messages require us to launch a potentially
@@ -435,7 +439,8 @@ let get_message_source
 (* A simplified version of get_message_source which only looks at client *)
 let get_client_message_source
     (client: Jsonrpc.queue)
-  : [> `From_client | `No_source ] Lwt.t =
+    (ide_service: ClientIdeService.t)
+  : [ `From_client | `From_ide_service of event | `No_source ] Lwt.t =
   if Jsonrpc.has_message client then Lwt.return `From_client else
   let client_read_fd = Jsonrpc.get_read_fd client
     |> Lwt_unix.of_unix_file_descr in
@@ -444,6 +449,18 @@ let get_client_message_source
       Lwt.return `No_source);
     (let%lwt () = Lwt_unix.wait_read client_read_fd in
       Lwt.return `From_client);
+    (
+      let queue = ClientIdeService.get_notifications ide_service in
+      let%lwt (notification: ClientIdeMessage.notification option) =
+        Lwt_message_queue.pop queue in
+      match notification with
+      | None ->
+        let%lwt () = Lwt_unix.sleep 1.1 in
+        failwith
+          "this `sleep` should have deferred to the `No_source case above"
+      | Some message ->
+        Lwt.return (`From_ide_service (Client_ide_notification message))
+    );
   ] in
   Lwt.return message_source
 
@@ -475,7 +492,11 @@ let read_message_from_server (server: server_conn) : event Lwt.t =
    from either client or server, we block until that message is completely
    received. Note: if server is None (meaning we haven't yet established
    connection with server) then we'll just block waiting for client. *)
-let get_next_event (state: state) (client: Jsonrpc.queue) : event Lwt.t =
+let get_next_event
+    (state: state)
+    (client: Jsonrpc.queue)
+    (ide_service: ClientIdeService.t)
+    : event Lwt.t =
   let from_server (server: server_conn) : event Lwt.t =
     if Queue.is_empty server.pending_messages
     then read_message_from_server server
@@ -503,14 +524,18 @@ let get_next_event (state: state) (client: Jsonrpc.queue) : event Lwt.t =
       | `From_server ->
         let%lwt message = from_server conn in
         Lwt.return message
+      | `From_ide_service message ->
+        Lwt.return message
       | `No_source ->
         Lwt.return Tick
     end
   | _ -> begin
-      let%lwt message_source = get_client_message_source client in
+      let%lwt message_source = get_client_message_source client ide_service in
       match message_source with
       | `From_client ->
         let%lwt message = from_client client in
+        Lwt.return message
+      | `From_ide_service message ->
         Lwt.return message
       | `No_source ->
         Lwt.return Tick
@@ -2952,6 +2977,11 @@ let handle_event
   | _, Server_message {push=ServerCommandTypes.DIAGNOSTIC _; _} ->
     Lwt.return_unit
 
+  | _, Client_ide_notification ClientIdeMessage.Done_processing ->
+    Lsp_helpers.telemetry_log to_stdout
+      "[client-ide] Done processing file changes";
+    Lwt.return_unit
+
   (* catch-all for client reqs/notifications we haven't yet implemented *)
   | Main_loop _menv, Client_message c ->
     let message = Printf.sprintf "not implemented: %s" c.method_ in
@@ -3083,7 +3113,7 @@ let main (env: env) : Exit_status.t Lwt.t =
           Lwt.return_unit
       in
       deferred_action := None;
-      let%lwt event = get_next_event !state client in
+      let%lwt event = get_next_event !state client ide_service in
       ref_event := Some event;
       ref_unblocked_time := Unix.gettimeofday ();
 

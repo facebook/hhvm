@@ -153,6 +153,7 @@
   (name lwt_utils)
   (wrapped false)
   (modules
+    lwt_message_queue
     lwt_utils)
   (libraries
     lwt

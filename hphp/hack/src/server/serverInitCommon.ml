@@ -1,22 +1,23 @@
 (**
- * Copyright (c) 2018, Facebook, Inc.
- * All rights reserved.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
+module Hack_bucket = Bucket
+open Core_kernel
+module Bucket = Hack_bucket
 open Hh_core
 open ServerEnv
 
 type file_info = Relative_path.t * FileInfo.names
 
-let is_check_mode (options: ServerArgs.options) : bool =
-  ServerArgs.check_mode options &&
-  (* Note: we need to run update_files to get an accurate saved state *)
-  ServerArgs.save_filename options = None &&
-  ServerArgs.save_with_spec options = None
+let no_incremental_check (options: ServerArgs.options) : bool =
+  let in_check_mode = ServerArgs.check_mode options in
+  let full_init = Option.is_none(SharedMem.loaded_dep_table_filename ()) in
+  in_check_mode && full_init
 
 let indexing (genv: ServerEnv.genv) : Relative_path.t list Bucket.next * float =
   ServerProgress.send_progress_to_monitor "indexing";
@@ -68,10 +69,11 @@ let update_files
     (naming_table: Naming_table.t)
     (t: float)
   : float =
-  if is_check_mode genv.options then t else begin
+  if no_incremental_check genv.options then t else begin
+    Hh_logger.log "Updating file dependencies...";
     Naming_table.iter naming_table Typing_deps.update_file;
     HackEventLogger.updating_deps_end t;
-    Hh_logger.log_duration "Updating deps" t
+    Hh_logger.log_duration "Updated file dependencies" t
   end
 
 let naming (env: ServerEnv.env) (t: float) : ServerEnv.env * float =
@@ -132,14 +134,15 @@ let type_check
     (fast: FileInfo.names Relative_path.Map.t)
     (t: float)
   : ServerEnv.env * float =
+  (* No type checking in AI mode *)
   if ServerArgs.ai_mode genv.options <> None then env, t
   else if
-    is_check_mode genv.options ||
+    (ServerArgs.check_mode genv.options) ||
     (ServerArgs.save_filename genv.options <> None) ||
     (ServerArgs.save_with_spec genv.options <> None)
   then begin
-    (* Prechecked files are not supported in AI/check/saving-state modes, we
-     * should always recheck everything necessary up-front.*)
+    (* Prechecked files are not supported in check/saving-state modes, we
+     * should always recheck everything necessary up-front. *)
     assert (env.prechecked_files = Prechecked_files_disabled);
 
     let count = Relative_path.Map.cardinal fast in

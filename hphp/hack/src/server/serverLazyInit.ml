@@ -232,7 +232,7 @@ let naming_with_fast (fast: FileInfo.names Relative_path.Map.t) (t: float) : flo
  * instead since we aren't parsing the codebase.
  *)
 let update_search (genv: ServerEnv.genv) (naming_table: Naming_table.t) (t: float) : float =
-  (* Don't update search index when in check mode *)
+  (* Don't update search index when in check mode (type check once and exit) *)
   let provider_name = genv.local_config.ServerLocalConfig.symbolindex_search_provider in
   let index_needs_updates = SymbolIndex.init_needs_search_updates ~provider_name in
   let check_mode = ServerArgs.check_mode genv.options in
@@ -266,7 +266,7 @@ let update_search (genv: ServerEnv.genv) (naming_table: Naming_table.t) (t: floa
 let use_prechecked_files (genv: ServerEnv.genv) : bool =
   ServerPrecheckedFiles.should_use genv.options genv.local_config &&
   ServerArgs.ai_mode genv.options = None &&
-  (not @@ is_check_mode genv.options) &&
+  not (ServerArgs.check_mode genv.options) &&
   ServerArgs.save_filename genv.options = None &&
   ServerArgs.save_with_spec genv.options = None
 

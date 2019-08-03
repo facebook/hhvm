@@ -14,7 +14,7 @@ import common_tests
 from hh_paths import hh_server
 from lspcommand import LspCommandProcessor, Transcript
 from test_case import TestCase
-from utils import Json, JsonObject
+from utils import Json, JsonObject, interpolate_variables
 
 
 class LspTestDriver(common_tests.CommonTestDriver):
@@ -81,24 +81,8 @@ class TestLsp(TestCase[LspTestDriver]):
     def parse_test_data(self, file: str, variables: Mapping[str, str]) -> Json:
         text = self.read_repo_file(file)
         data: Json = json.loads(text)
-        for variable, value in variables.items():
-            data = self.replace_variable(data, variable, value)
+        data = interpolate_variables(data, variables)
         return data
-
-    def replace_variable(self, json: Json, variable: str, text: str) -> Json:
-        if isinstance(json, dict):
-            return {
-                self.replace_variable(k, variable, text): self.replace_variable(
-                    v, variable, text
-                )
-                for k, v in json.items()
-            }
-        elif isinstance(json, list):
-            return [self.replace_variable(i, variable, text) for i in json]
-        elif isinstance(json, str):
-            return json.replace("${" + variable + "}", text)
-        else:
-            return json
 
     def load_test_data(
         self, test_name: str, variables: Mapping[str, str]

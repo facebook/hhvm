@@ -52,3 +52,23 @@ def ensure_output_contains(f: BinaryIO, s: str, timeout: int = 20) -> None:
             lines.append(line)
     finally:
         signal.alarm(0)
+
+
+def interpolate_variables(payload: Json, variables: Mapping[str, str]) -> Json:
+    def replace_variable(json: Json, variable: str, text: str) -> Json:
+        if isinstance(json, dict):
+            return {
+                # pyre-ignore: pyre can't track this recursive call
+                replace_variable(k, variable, text): replace_variable(v, variable, text)
+                for k, v in json.items()
+            }
+        elif isinstance(json, list):
+            return [replace_variable(i, variable, text) for i in json]
+        elif isinstance(json, str):
+            return json.replace("${" + variable + "}", text)
+        else:
+            return json
+
+    for variable, value in variables.items():
+        payload = replace_variable(payload, variable, value)
+    return payload

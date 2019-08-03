@@ -203,6 +203,15 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                         },
                     }
                 )
+            elif isinstance(message, _WaitForNotificationSpec):
+                json_commands.append(
+                    {
+                        "jsonrpc": "2.0",
+                        "comment": message.comment,
+                        "method": "$test/waitForNotification",
+                        "params": {"method": message.method, "params": message.params},
+                    }
+                )
             else:
                 raise ValueError(f"unhandled message type {message.__class__.__name__}")
         return (json_commands, lsp_id_map)
@@ -233,9 +242,9 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 # Nothing needs to be done here, since we sent the notification
                 # and don't expect a response.
                 pass
-            elif isinstance(message, _WaitForRequestSpec):
+            elif isinstance(message, (_WaitForRequestSpec, _WaitForNotificationSpec)):
                 # Nothing needs to be done here -- if we failed to wait for the
-                # request, an exception will have been thrown at the
+                # message, an exception will have been thrown at the
                 # `LspCommandProcessor` layer.
                 pass
             else:

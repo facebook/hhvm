@@ -110,8 +110,8 @@ class LspCommandProcessor:
                 transcript = self._wait_for_response(
                     transcript, command["params"]["id"]
                 )
-            elif command["method"] == "$test/waitForTelemetryEvent":
-                transcript = self._wait_for_telemetry_event(transcript, command)
+            elif command["method"] == "$test/waitForNotification":
+                transcript = self._wait_for_notification(transcript, command)
             elif command["method"] == "$test/waitForHhServerReady":
                 # Hack: HackLSP server only connects to hh_server asynchronously.
                 # We want to delay until after it's connected before testing more.
@@ -233,12 +233,13 @@ Transcript of all the messages we saw:
         transcript = self._scribe(transcript, sent=response, received=None)
         return transcript
 
-    def _wait_for_telemetry_event(
+    def _wait_for_notification(
         self, transcript: Transcript, command: Json
     ) -> Transcript:
-        params = command["params"]
+        method = command["params"]["method"]
+        params = command["params"]["params"]
         (transcript, _message) = self._wait_for_message_from_server(
-            transcript, method="telemetry/event", params=params
+            transcript, method=method, params=params
         )
         return transcript
 

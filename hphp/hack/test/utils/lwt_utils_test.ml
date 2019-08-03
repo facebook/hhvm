@@ -1,6 +1,6 @@
 open Asserter
 
-let test_basic_exec_checked () : bool Lwt.t =
+let test_exec_checked_basic () : bool Lwt.t =
   let%lwt process_status =
     Lwt_utils.exec_checked "echo" [|"hello"; "world"|]
   in
@@ -15,7 +15,7 @@ let test_basic_exec_checked () : bool Lwt.t =
     Lwt.return true
   | Error _ -> failwith "command failed"
 
-let test_failing_exec_checked () : bool Lwt.t =
+let test_exec_checked_failing () : bool Lwt.t =
   let%lwt process_status =
     Lwt_utils.exec_checked "false" [|"ignored-argument"|]
   in
@@ -55,7 +55,7 @@ let test_exec_checked_big_payload () : bool Lwt.t =
     Lwt.return true
   | Error _ -> failwith "command failed"
 
-let test_basic_lwt_message_queue () : bool Lwt.t =
+let test_lwt_message_queue_basic () : bool Lwt.t =
   let q = Lwt_message_queue.create () in
   Bool_asserter.assert_equals
     (Lwt_message_queue.is_empty q)
@@ -95,7 +95,7 @@ let test_basic_lwt_message_queue () : bool Lwt.t =
   in
   Lwt.return true
 
-let test_close_lwt_message_queue () : bool Lwt.t =
+let test_lwt_message_queue_close () : bool Lwt.t =
   let q = Lwt_message_queue.create () in
   let success = Lwt_message_queue.push q "should be dropped later" in
   Bool_asserter.assert_equals
@@ -112,6 +112,29 @@ let test_close_lwt_message_queue () : bool Lwt.t =
   match%lwt Lwt_message_queue.pop q with
   | Some _ -> failwith "popped a message despite the queue being closed"
   | None -> Lwt.return true
+
+let test_lwt_message_queue_length () : bool Lwt.t =
+  let q = Lwt_message_queue.create () in
+  let initial_length = Lwt_message_queue.length q in
+  Int_asserter.assert_equals initial_length 0 "initial_length should be 0";
+
+  let (_ : bool) = Lwt_message_queue.push q 1 in
+  let (_ : bool) = Lwt_message_queue.push q 2 in
+  let (_ : bool) = Lwt_message_queue.push q 3 in
+  let intermediate_length = Lwt_message_queue.length q in
+  Int_asserter.assert_equals
+    intermediate_length
+    3
+    "intermediate_length should be 3";
+
+  Lwt_message_queue.close q;
+  let closed_length = Lwt_message_queue.length q in
+  Int_asserter.assert_equals
+    closed_length
+    0
+    ( "the length once the queue is closed should be reset to 0, "
+    ^ "regardless of the number of previously-present items" );
+  Lwt.return true
 
 let wrap_lwt_test (test : string * (unit -> bool Lwt.t)) :
     string * (unit -> bool) =
@@ -134,9 +157,10 @@ let () =
   Unit_test.run_all
   @@ List.map
        wrap_lwt_test
-       [ ("test basic Lwt_utils.exec_checked", test_basic_exec_checked);
-         ("test failing Lwt_utils.exec_checked", test_failing_exec_checked);
+       [ ("test Lwt_utils.exec_checked basic", test_exec_checked_basic);
+         ("test Lwt_utils.exec_checked failing", test_exec_checked_failing);
          ( "test Lwt_utils.exec_checked big payload",
            test_exec_checked_big_payload );
-         ("test basic Lwt_message_queue.t", test_basic_lwt_message_queue);
-         ("test close Lwt_message_queue.t", test_close_lwt_message_queue) ]
+         ("test Lwt_message_queue.t basic", test_lwt_message_queue_basic);
+         ("test Lwt_message_queue.t close", test_lwt_message_queue_close);
+         ("test Lwt_message_queue.t length", test_lwt_message_queue_length) ]

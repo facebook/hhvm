@@ -82,6 +82,6 @@ type _ t =
 type notification =
   | Done_processing
 
-type 'a wire_message =
+type message_from_daemon =
   | Notification of notification
-  | Response of 'a
+  | Response: ('a, string) result -> message_from_daemon

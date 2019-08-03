@@ -3,6 +3,13 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import copy
 import difflib
+import inspect
+import lib2to3.patcomp  # pyre-ignore: Pyre can't find this
+import lib2to3.pgen2
+import lib2to3.pygram
+import lib2to3.pytree as pytree
+import operator
+import os.path
 import pprint
 import textwrap
 from typing import AbstractSet, Iterable, Mapping, Optional, Sequence, Tuple, Union
@@ -20,6 +27,8 @@ _MessageSpec = Union[
 
 
 _LspIdMap = Mapping[_MessageSpec, Json]
+
+_Traceback = Sequence[inspect.FrameInfo]
 
 
 class LspTestSpec:
@@ -50,6 +59,9 @@ class LspTestSpec:
         comment: Optional[str] = None,
         powered_by: Optional[str] = None,
     ) -> "LspTestSpec":
+        traceback = inspect.stack()
+        assert traceback is not None, "Failed to get traceback info"
+
         messages = list(self._messages)
         messages.append(
             _RequestSpec(
@@ -59,6 +71,7 @@ class LspTestSpec:
                 wait=wait,
                 comment=comment,
                 powered_by=powered_by,
+                traceback=traceback,
             )
         )
         return self._update(messages=messages)
@@ -251,19 +264,122 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
 
 {error_description}
     """
+            context = self._get_context_for_traceback(request.traceback)
             remediation = self._describe_response_for_remediation(
                 request=request, actual_response=entry.received
             )
-            return _ErrorDescription(description=description, remediation=remediation)
+            return _ErrorDescription(
+                description=description, context=context, remediation=remediation
+            )
         elif entry.received.get("powered_by") != request.powered_by:
             description = f"""\
 {request_description} had an incorrect value for the `powered_by` field
 (expected {request.powered_by!r}; got {actual_powered_by!r})
 """
+            context = self._get_context_for_traceback(request.traceback)
             remediation = self._describe_response_for_remediation(
                 request=request, actual_response=entry.received
             )
-            return _ErrorDescription(description=description, remediation=remediation)
+            return _ErrorDescription(
+                description=description, context=context, remediation=remediation
+            )
+
+    def _get_context_for_traceback(self, traceback: _Traceback) -> Optional[str]:
+        # Find the first caller frame that isn't in this source file. The
+        # assumption is that the first such frame is in the test code.
+        caller_frame = next(frame for frame in traceback if frame.filename != __file__)
+        source_filename = caller_frame.filename
+        with open(source_filename) as f:
+            source_text = f.read()
+
+        (start_line_num, end_line_num) = self._find_line_range_for_function_call(
+            file_contents=source_text, line_num=caller_frame.lineno
+        )
+        file_context = self._pretty_print_file_context(
+            file_path=source_filename,
+            file_contents=source_text,
+            start_line_num=start_line_num,
+            end_line_num=end_line_num,
+        )
+
+        return f"""\
+This was the associated request:
+
+{file_context}"""
+
+    def _find_line_range_for_function_call(
+        self, file_contents: str, line_num: int
+    ) -> Tuple[int, int]:
+        driver = lib2to3.pgen2.driver.Driver(
+            grammar=lib2to3.pygram.python_grammar, convert=pytree.convert
+        )
+        tree = driver.parse_string(file_contents)
+
+        function_call_pattern = lib2to3.patcomp.compile_pattern(  # pyre-ignore
+            # For arithmetic precedence reasons, any regular, non-arithmetic
+            # expression node is a 'power' node, since that has the most extreme
+            # precedence in some respect. The 'trailer' denotes that it's
+            # followed by an argument list.
+            "power< any* trailer< '(' [any] ')' > >"
+        )
+        all_function_call_chains = [
+            # For similar arithmetic precedence reasons, consecutive function
+            # call and member access expressions appear to form one big n-ary
+            # node, instead of a sequence of nested binary nodes.
+            node
+            for node in tree.pre_order()
+            if function_call_pattern.match(node)
+        ]
+        all_function_calls = [
+            # Flatten all elements of all chains into one list.
+            child
+            for chain in all_function_call_chains
+            for child in chain.children
+        ]
+        function_calls_with_line_ranges = [
+            (node, self._line_range_of_node(node)) for node in all_function_calls
+        ]
+        function_calls_containing_line = [
+            (node, (max_line_num - min_line_num))
+            for (node, (min_line_num, max_line_num)) in function_calls_with_line_ranges
+            if min_line_num <= line_num <= max_line_num
+        ]
+        innermost_function_call = min(
+            function_calls_containing_line, key=operator.itemgetter(1)
+        )[0]
+        (start_line_num, end_line_num) = self._line_range_of_node(
+            innermost_function_call
+        )
+        start_line_num -= 1  # zero-index
+        end_line_num -= 1  # zero-index
+        return (start_line_num, end_line_num)
+
+    def _line_range_of_node(self, node: pytree.Base) -> Tuple[int, int]:
+        min_line_num = node.get_lineno()
+        num_lines_in_node = str(node).count("\n")
+        max_line_num = node.get_lineno() + num_lines_in_node
+        return (min_line_num, max_line_num)
+
+    def _pretty_print_file_context(
+        self, file_path: str, file_contents: str, start_line_num: int, end_line_num: int
+    ) -> str:
+        source_lines = file_contents.splitlines(keepends=True)
+        context_lines = source_lines[start_line_num : end_line_num + 1]
+        vertical_bar = "\N{BOX DRAWINGS LIGHT VERTICAL}"
+        context_lines = [
+            # Include the line number in a gutter for display.
+            f"{line_num:>5} {vertical_bar} {line_contents}"
+            for line_num, line_contents in enumerate(
+                context_lines, start=start_line_num + 1
+            )
+        ]
+        file_context = "".join(context_lines)
+
+        # The full path is likely not useful, since it includes any temporary
+        # directories that Buck introduced.
+        prefix = os.path.commonprefix([file_path, __file__])
+        display_filename = file_path[len(prefix) :]
+        return display_filename + "\n" + file_context
 
     def _describe_response_for_remediation(
         self, request: "_RequestSpec", actual_response: Json
@@ -376,7 +492,9 @@ to your test to wait for it before proceeding:
     )
 """
 
-            yield _ErrorDescription(description=description, remediation=remediation)
+            yield _ErrorDescription(
+                description=description, context=None, remediation=remediation
+            )
 
     def _pretty_print_snippet(self, obj: object) -> str:
         return textwrap.indent(pprint.pformat(obj), prefix="  ")
@@ -400,7 +518,15 @@ to your test to wait for it before proceeding:
 
 
 class _RequestSpec:
-    __slots__ = ["method", "params", "result", "wait", "comment", "powered_by"]
+    __slots__ = [
+        "method",
+        "params",
+        "result",
+        "wait",
+        "comment",
+        "powered_by",
+        "traceback",
+    ]
 
     def __init__(
         self,
@@ -411,6 +537,7 @@ class _RequestSpec:
         wait: bool,
         comment: Optional[str],
         powered_by: Optional[str],
+        traceback: _Traceback,
     ) -> None:
         self.method = method
         self.params = params
@@ -418,6 +545,7 @@ class _RequestSpec:
         self.wait = wait
         self.comment = comment
         self.powered_by = powered_by
+        self.traceback = traceback
 
 
 class _NotificationSpec:
@@ -451,12 +579,23 @@ class _WaitForNotificationSpec:
 
 
 class _ErrorDescription:
-    def __init__(self, description: str, remediation: str) -> None:
+    def __init__(
+        self, description: str, context: Optional[str], remediation: str
+    ) -> None:
         self.description = description
+        self.context = context
         self.remediation = remediation
 
     def __str__(self) -> str:
-        return f"""\
+        result = f"""\
 Description: {self.description}
+"""
+        if self.context is not None:
+            result += f"""\
+Context:
+{self.context}
+"""
+        result += f"""\
 Remediation:
 {self.remediation}"""
+        return result

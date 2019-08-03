@@ -388,6 +388,7 @@ module type CheckKindType = sig
 
   (* Returns a tuple: files to redecl now, files to redecl later *)
   val get_defs_to_redecl_phase2 :
+    ServerEnv.genv ->
     decl_defs:Naming_table.fast ->
     naming_table:Naming_table.t ->
     to_redecl_phase2:Relative_path.Set.t ->
@@ -401,6 +402,7 @@ module type CheckKindType = sig
 
   (* Which files to typecheck, based on results of declaration phase *)
   val get_defs_to_recheck :
+    ServerEnv.genv ->
     reparsed:Relative_path.Set.t ->
     phase_2_decl_defs:Naming_table.fast ->
     naming_table:Naming_table.t ->
@@ -446,10 +448,10 @@ module FullCheckKind : CheckKindType = struct
       ~phases:[Errors.Decl]
       ~errors:env.errorl
 
-  let get_defs_to_redecl_phase2 ~decl_defs ~naming_table ~to_redecl_phase2 ~env =
-    let fast = extend_fast decl_defs naming_table to_redecl_phase2 in
+  let get_defs_to_redecl_phase2 genv ~decl_defs ~naming_table ~to_redecl_phase2 ~env =
+    let fast = extend_fast genv decl_defs naming_table to_redecl_phase2 in
     (* Add decl fanout that was delayed by previous lazy checks to phase 2 *)
-    let fast = extend_fast fast naming_table env.needs_phase2_redecl in
+    let fast = extend_fast genv fast naming_table env.needs_phase2_redecl in
     fast, Relative_path.Map.empty
 
   let get_to_recheck2_approximation ~to_redecl_phase2_deps:_ ~env:_ =
@@ -457,7 +459,7 @@ module FullCheckKind : CheckKindType = struct
      * to approximate anything *)
     Relative_path.Set.empty
 
-  let get_defs_to_recheck ~reparsed ~phase_2_decl_defs ~naming_table ~to_recheck ~env =
+  let get_defs_to_recheck genv ~reparsed ~phase_2_decl_defs ~naming_table ~to_recheck ~env =
     (* Besides the files that actually changed, we want to also recheck
      * those that have typing errors referring to files that were
      * reparsed, since positions in those errors can be now stale. TODO: do we
@@ -471,7 +473,7 @@ module FullCheckKind : CheckKindType = struct
     in
     let to_recheck = Relative_path.Set.union stale_errors to_recheck in
     let to_recheck = Relative_path.Set.union env.needs_recheck to_recheck in
-    extend_fast phase_2_decl_defs naming_table to_recheck, Relative_path.Set.empty
+    extend_fast genv phase_2_decl_defs naming_table to_recheck, Relative_path.Set.empty
 
     let get_env_after_decl
         ~old_env
@@ -531,13 +533,13 @@ module LazyCheckKind : CheckKindType = struct
        ~errors:env.errorl
 
   let get_defs_to_redecl_phase2
-      ~decl_defs ~naming_table ~to_redecl_phase2 ~env =
+      genv ~decl_defs ~naming_table ~to_redecl_phase2 ~env =
      (* Do phase2 only for IDE files, delay the fanout until next full check *)
     let to_redecl_phase2_now, to_redecl_phase2_later =
       Relative_path.Set.partition (is_ide_file env) to_redecl_phase2
     in
-    extend_fast decl_defs naming_table to_redecl_phase2_now,
-    extend_fast decl_defs naming_table to_redecl_phase2_later
+    extend_fast genv decl_defs naming_table to_redecl_phase2_now,
+    extend_fast genv decl_defs naming_table to_redecl_phase2_later
 
 
   let get_related_files dep =
@@ -560,7 +562,7 @@ module LazyCheckKind : CheckKindType = struct
       ~f:(fun x acc -> Relative_path.Set.union acc @@ get_related_files x)
     |> Relative_path.Set.filter ~f:(is_ide_file env)
 
-  let get_defs_to_recheck ~reparsed ~phase_2_decl_defs ~naming_table ~to_recheck ~env =
+  let get_defs_to_recheck genv ~reparsed ~phase_2_decl_defs ~naming_table ~to_recheck ~env =
     (* Same as FullCheckKind.get_defs_to_recheck, but we limit returned set only
      * to files that are relevant to IDE *)
     let stale_errors = get_files_with_stale_errors
@@ -572,7 +574,7 @@ module LazyCheckKind : CheckKindType = struct
     let to_recheck = Relative_path.Set.union to_recheck stale_errors in
     let to_recheck_now, to_recheck_later =
       Relative_path.Set.partition (is_ide_file env) to_recheck in
-    extend_fast phase_2_decl_defs naming_table to_recheck_now, to_recheck_later
+    extend_fast genv phase_2_decl_defs naming_table to_recheck_now, to_recheck_later
 
   let get_env_after_decl
       ~old_env
@@ -671,6 +673,7 @@ end = functor(CheckKind:CheckKindType) -> struct
   }
 
   let do_naming
+      (genv : genv)
       (env : env)
       ~(errors : Errors.t)
       ~(failed_parsing : Relative_path.Set.t)
@@ -683,11 +686,11 @@ end = functor(CheckKind:CheckKindType) -> struct
     let errors = Errors.(incremental_update_map errors errorl' fast Naming) in
     (* failed_naming can be a superset of keys in fast - see comment in
      * NamingGlobal.ndecl_file *)
-    let fast = extend_fast fast naming_table failed_naming in
+    let fast = extend_fast genv fast naming_table failed_naming in
 
     (* COMPUTES WHAT MUST BE REDECLARED  *)
     let failed_decl = CheckKind.get_defs_to_redecl files_to_parse env in
-    let fast = extend_fast fast naming_table failed_decl in
+    let fast = extend_fast genv fast naming_table failed_decl in
     let fast = add_old_decls env.naming_table fast in
     let fast = remove_failed_parsing fast stop_at_errors env failed_parsing in
     { errors_after_naming = errors; failed_naming; fast }
@@ -960,7 +963,7 @@ end = functor(CheckKind:CheckKindType) -> struct
        module is something of a historical artifact and is slated for removal,
        but for now, it is run immediately before typechecking. *)
     let { errors_after_naming = errors; failed_naming; fast } =
-      do_naming env ~errors ~failed_parsing ~fast_parsed ~naming_table
+      do_naming genv env ~errors ~failed_parsing ~fast_parsed ~naming_table
         ~files_to_parse ~stop_at_errors in
 
     HackEventLogger.naming_end t;
@@ -1007,7 +1010,7 @@ end = functor(CheckKind:CheckKindType) -> struct
        lazily redeclared later. In either case, there's no need to attempt to
        redeclare definitions in files with parse errors. *)
     let fast_redecl_phase2_now, lazy_decl_later =
-      CheckKind.get_defs_to_redecl_phase2 fast naming_table to_redecl_phase2 env
+      CheckKind.get_defs_to_redecl_phase2 genv fast naming_table to_redecl_phase2 env
     in
     let fast_redecl_phase2_now = remove_failed_parsing
       fast_redecl_phase2_now stop_at_errors env failed_parsing in
@@ -1077,7 +1080,7 @@ end = functor(CheckKind:CheckKindType) -> struct
        open in the IDE, leaving other affected files to be lazily checked later.
        In either case, don't attempt to typecheck files with parse errors. *)
     let fast, lazy_check_later = CheckKind.get_defs_to_recheck
-      files_to_parse fast naming_table to_recheck env in
+      genv files_to_parse fast naming_table to_recheck env in
     let fast = remove_failed_parsing fast stop_at_errors env failed_parsing in
 
     let to_recheck_count = Relative_path.Map.cardinal fast in

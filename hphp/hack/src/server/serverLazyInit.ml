@@ -392,7 +392,7 @@ let type_check_dirty
      declarations may have changed, which affects error messages and FIXMEs. *)
   let get_files_to_recheck =
     get_files_to_recheck genv old_naming_table new_fast @@
-    extend_fast dirty_fast env.naming_table similar_files in
+    extend_fast genv dirty_fast env.naming_table similar_files in
 
   let env, to_recheck = if use_prechecked_files genv then begin
       (* Start with dirty files and fan-out of local changes only *)
@@ -423,7 +423,7 @@ let type_check_dirty
     end in
   (* We still need to typecheck files whose declarations did not change *)
   let to_recheck = Relative_path.Set.union to_recheck similar_files in
-  let fast = extend_fast dirty_fast env.naming_table to_recheck in
+  let fast = extend_fast genv dirty_fast env.naming_table to_recheck in
   let result = type_check genv env fast t in
   HackEventLogger.type_check_dirty ~start_t
     ~dirty_count:(Relative_path.Set.cardinal dirty_files)

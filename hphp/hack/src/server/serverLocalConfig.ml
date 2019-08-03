@@ -21,6 +21,7 @@ type t = {
   (** Prefer using Ocaml implementation over load script. *)
   load_state_natively: bool;
   type_decl_bucket_size: int;
+  extend_fast_bucket_size: int;
   enable_on_nfs: bool;
   enable_fuzzy_search: bool;
   lazy_parse: bool;
@@ -125,6 +126,7 @@ let default = {
   load_state_script_timeout = 20;
   load_state_natively = false;
   type_decl_bucket_size = 1000;
+  extend_fast_bucket_size = 2000;
   enable_on_nfs = false;
   enable_fuzzy_search = true;
   lazy_parse = false;
@@ -248,6 +250,8 @@ let load_ fn ~silent ~current_version overrides =
       ~default:default.informant_use_xdb config in
   let type_decl_bucket_size = int_ "type_decl_bucket_size"
       ~default:default.type_decl_bucket_size config in
+  let extend_fast_bucket_size = int_ "extend_fast_bucket_size"
+      ~default:default.extend_fast_bucket_size config in
   let watchman_init_timeout = int_ "watchman_init_timeout"
       ~default:default.watchman_init_timeout config in
   let watchman_subscribe = bool_if_version "watchman_subscribe_v2"
@@ -360,6 +364,7 @@ let load_ fn ~silent ~current_version overrides =
     load_state_natively;
     max_purgatory_clients;
     type_decl_bucket_size;
+    extend_fast_bucket_size;
     enable_on_nfs;
     enable_fuzzy_search;
     lazy_parse;

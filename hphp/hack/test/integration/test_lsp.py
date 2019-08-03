@@ -13,6 +13,7 @@ from typing import Iterable, List, Mapping, Tuple
 import common_tests
 from hh_paths import hh_server
 from lspcommand import LspCommandProcessor, Transcript
+from lsptestspec import LspTestSpec
 from test_case import TestCase
 from utils import Json, JsonObject, interpolate_variables
 
@@ -259,6 +260,72 @@ class TestLsp(TestCase[LspTestDriver]):
             wait_for_server=wait_for_server,
             use_serverless_ide=use_serverless_ide,
         )
+
+    def run_spec(
+        self,
+        spec: LspTestSpec,
+        variables: Mapping[str, str],
+        wait_for_server: bool,
+        use_serverless_ide: bool,
+    ) -> None:
+        if wait_for_server:
+            assert not use_serverless_ide, (
+                "Warning: both `wait_for_server` and `use_serverless_ide` "
+                + "were set to `True` for testing in "
+                + self.run_lsp_test.__name__
+                + ". "
+                + "While this is a possible test case, it hasn't been written yet, "
+                + "so it's more likely that this is a mistake "
+                + "and you're accidentally relying on hh_server to fulfill "
+                + "serverless IDE requests."
+                + "(If you're writing that test, "
+                + "then it's time to remove this assertion.)"
+            )
+
+            # wait until hh_server is ready before starting lsp
+            self.test_driver.run_check()
+        elif use_serverless_ide:
+            self.test_driver.stop_hh_server()
+
+        with LspCommandProcessor.create(
+            self.test_driver.test_env, use_serverless_ide=use_serverless_ide
+        ) as lsp_command_processor:
+            (observed_transcript, error_details) = spec.run(
+                lsp_command_processor=lsp_command_processor, variables=variables
+            )
+        file = os.path.join(self.test_driver.template_repo, spec.name + ".sent.log")
+        text = json.dumps(
+            [
+                sent
+                for sent, _received in observed_transcript.values()
+                if sent is not None
+            ],
+            indent=2,
+        )
+        with open(file, "w") as f:
+            f.write(text)
+
+        file = os.path.join(self.test_driver.template_repo, spec.name + ".received.log")
+        text = json.dumps(
+            [
+                received
+                for _sent, received in observed_transcript.values()
+                if received is not None
+            ],
+            indent=2,
+        )
+        with open(file, "w") as f:
+            f.write(text)
+
+        if not use_serverless_ide:
+            # If the server's busy, maybe the machine's just under too much
+            # pressure to give results in a timely fashion. Doing a retry would
+            # only defer the question of what to do in that case, so instead
+            # we'll just skip.
+            self.throw_on_skip(observed_transcript)
+
+        if error_details is not None:
+            raise AssertionError(error_details)
 
     def setup_php_file(self, test_php: str) -> Mapping[str, str]:
         # We want the path to the builtins directory. This is best we can do.

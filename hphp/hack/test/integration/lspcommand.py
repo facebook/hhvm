@@ -3,6 +3,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import contextlib
+import pprint
 import subprocess
 import uuid
 from typing import (
@@ -13,6 +14,7 @@ from typing import (
     NamedTuple,
     Optional,
     Sequence,
+    Tuple,
     Type,
     TypeVar,
 )
@@ -25,6 +27,13 @@ from utils import Json
 class TranscriptEntry(NamedTuple):
     sent: Optional[Json]
     received: Optional[Json]
+
+    def __repr__(self) -> str:
+        return (
+            "TranscriptEntry"
+            + pprint.pformat({"sent": self.sent, "received": self.received})
+            + "\n"
+        )
 
 
 Transcript = Mapping[str, TranscriptEntry]
@@ -95,7 +104,9 @@ class LspCommandProcessor:
         self, transcript: Transcript, commands: Sequence[Json]
     ) -> Transcript:
         for command in commands:
-            if command["method"] == "$test/waitForResponse":
+            if command["method"] == "$test/waitForRequest":
+                transcript = self._wait_for_request(transcript, command)
+            elif command["method"] == "$test/waitForResponse":
                 transcript = self._wait_for_response(
                     transcript, command["params"]["id"]
                 )
@@ -154,7 +165,7 @@ class LspCommandProcessor:
         shutdown_commands = [
             v.sent
             for v in transcript.values()
-            if v.sent is not None and v.sent["method"] == "shutdown"
+            if v.sent is not None and v.sent.get("method") == "shutdown"
         ]
         num_shutdown_commands = len(shutdown_commands)
         assert num_shutdown_commands == 1, (
@@ -183,27 +194,52 @@ class LspCommandProcessor:
             )
         return transcript
 
-    def _wait_for_telemetry_event(
-        self, transcript: Transcript, command: Json
-    ) -> Transcript:
-        params = command["params"]
+    def _wait_for_message_from_server(
+        self, transcript: Transcript, method: str, params: Json
+    ) -> Tuple[Transcript, Json]:
         while True:
             message = self._try_read_logged(timeout_seconds=5)
-            assert message is not None, (
-                f"Was waiting for a telemetry/event message with params {params!r}, "
-                + f"but ran out of messages while waiting. Transcript: {transcript!r}"
-            )
+            params_pretty = pprint.pformat(params)
+            assert (
+                message is not None
+            ), f"""\
+Timed out while waiting for a {method!r} message to be sent from the server.
+The message was expected to have params:
+
+{params_pretty}
+
+Transcript of all the messages we saw:
+
+{transcript}"""
             transcript = self._scribe(transcript, sent=None, received=message)
 
             if message.get("id") == -1:
                 # Dummy method from `_wait_for_initialize`, ignore.
                 continue
 
-            if (
-                message.get("method") == "telemetry/event"
-                and message["params"] == params
-            ):
-                break
+            if message.get("method") == method and message["params"] == params:
+                return (transcript, message)
+
+    def _wait_for_request(self, transcript: Transcript, command: Json) -> Transcript:
+        method = command["params"]["method"]
+        params = command["params"]["params"]
+        result = command["params"]["result"]
+        (transcript, message) = self._wait_for_message_from_server(
+            transcript, method=method, params=params
+        )
+
+        response = {"jsonrpc": 2.0, "id": message["id"], "result": result}
+        self.writer.write(response)
+        transcript = self._scribe(transcript, sent=response, received=None)
+        return transcript
+
+    def _wait_for_telemetry_event(
+        self, transcript: Transcript, command: Json
+    ) -> Transcript:
+        params = command["params"]
+        (transcript, _message) = self._wait_for_message_from_server(
+            transcript, method="telemetry/event", params=params
+        )
         return transcript
 
     def _read_request_responses(

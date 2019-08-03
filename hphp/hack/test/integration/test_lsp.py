@@ -387,16 +387,206 @@ class TestLsp(TestCase[LspTestDriver]):
         variables = self.setup_php_file("hover.php")
         self.load_and_run("hover", variables)
 
+    def initialize_spec(
+        self, spec: LspTestSpec, use_serverless_ide: bool
+    ) -> LspTestSpec:
+        spec = spec.ignore_notifications(method="telemetry/event").request(
+            method="initialize",
+            params={
+                "initializationOptions": {
+                    "namingTableSavedStatePath": "${naming_table_saved_state_path}"
+                },
+                "processId": None,
+                "rootPath": "${root_path}",
+                "capabilities": {},
+            },
+            wait=True,
+            result={
+                "capabilities": {
+                    "textDocumentSync": {
+                        "openClose": True,
+                        "change": 2,
+                        "willSave": False,
+                        "willSaveWaitUntil": False,
+                        "save": {"includeText": False},
+                    },
+                    "hoverProvider": True,
+                    "completionProvider": {
+                        "resolveProvider": True,
+                        "triggerCharacters": ["$", ">", "\\", ":", "<", "[", "'", '"'],
+                    },
+                    "signatureHelpProvider": {"triggerCharacters": ["(", ","]},
+                    "definitionProvider": True,
+                    "typeDefinitionProvider": True,
+                    "referencesProvider": True,
+                    "documentHighlightProvider": True,
+                    "documentSymbolProvider": True,
+                    "workspaceSymbolProvider": True,
+                    "codeActionProvider": False,
+                    "documentFormattingProvider": True,
+                    "documentRangeFormattingProvider": True,
+                    "documentOnTypeFormattingProvider": {
+                        "firstTriggerCharacter": ";",
+                        "moreTriggerCharacter": ["}"],
+                    },
+                    "renameProvider": True,
+                    "typeCoverageProvider": True,
+                    "rageProvider": True,
+                }
+            },
+        )
+        if use_serverless_ide:
+            spec = spec.wait_for_server_request(
+                method="client/registerCapability",
+                params={
+                    "registrations": [
+                        {
+                            "id": "did-change-watched-files",
+                            "method": "workspace/didChangeWatchedFiles",
+                            "registerOptions": {
+                                "watchers": [{"globPattern": "**", "kind": 7}]
+                            },
+                        }
+                    ]
+                },
+                result=None,
+            )
+        return spec
+
     def test_serverless_ide_hover(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("hover.php"))
         self.test_driver.stop_hh_server()
-        self.load_and_run(
-            "serverless_ide_hover",
-            variables,
-            wait_for_server=False,
-            use_serverless_ide=True,
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("serverless_ide_hover"), use_serverless_ide=True
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .request(
+                comment="hover over function invocation",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 16},
+                },
+                result={
+                    "contents": [
+                        {"language": "hack", "value": "int"},
+                        "A comment describing b_hover.",
+                    ],
+                    "range": {
+                        "start": {"line": 3, "character": 9},
+                        "end": {"line": 3, "character": 16},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            .request(
+                comment="hover over whitespace",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 1},
+                },
+                result=None,
+                powered_by="serverless_ide",
+            )
+            .request(
+                comment="hover over a keyword",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 2, "character": 1},
+                },
+                result=None,
+                powered_by="serverless_ide",
+            )
+            .request(
+                comment="hover over a comment",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 1, "character": 4},
+                },
+                result=None,
+                powered_by="serverless_ide",
+            )
+            .request(
+                comment="hover past the end of a line",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 100},
+                },
+                result=None,
+                powered_by="serverless_ide",
+            )
+            .request(
+                comment="hover past the end of a file",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 300, "character": 0},
+                },
+                result=None,
+                powered_by="serverless_ide",
+                wait=True,
+            )
+            .notification(
+                comment="make local, unsaved change to the file",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}", "version": 2},
+                    "contentChanges": [
+                        {
+                            "text": """\
+<?hh  //strict
+// comment
+function a_hover(): int {
+  return b_hover();
+}
+# Another comment describing b_hover.
+function b_hover(): int {
+  return 42;
+}
+"""
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="another hover over function invocation",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 16},
+                },
+                result={
+                    "contents": [
+                        {"language": "hack", "value": "int"},
+                        "Another comment describing b_hover.",
+                    ],
+                    "range": {
+                        "start": {"line": 3, "character": 9},
+                        "end": {"line": 3, "character": 16},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            .request(method="shutdown", params={}, result=None)
         )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_coverage(self) -> None:
         self.prepare_server_environment()

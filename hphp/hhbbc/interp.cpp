@@ -3533,6 +3533,22 @@ void in(ISS& env, const bc::SetS& op) {
   auto const vname = tv(tname);
   auto const self  = selfCls(env);
 
+  if (is_specialized_cls(tcls)) {
+    DCls cls = dcls_of(tcls);
+    if (cls.type == DCls::Exact &&
+        vname && vname->m_type == KindOfPersistentString &&
+        cls.cls.resolved()) {
+        for (auto& prop : cls.cls.cls()->properties) {
+          if (prop.name == vname->m_data.pstr &&
+             (prop.attrs & AttrIsConst)) {
+               unreachable(env);
+               push(env, TBottom);
+               return;
+          }
+        }
+     }
+  }
+
   if (!self || tcls.couldBe(*self)) {
     if (vname && vname->m_type == KindOfPersistentString) {
       mergeSelfProp(env, vname->m_data.pstr, t1);
@@ -5654,7 +5670,7 @@ void in(ISS& env, const bc::InitProp& op) {
     case InitPropOp::Static:
       mergeSelfProp(env, op.str1, t);
       env.collect.publicSPropMutations.merge(
-        env.index, env.ctx, *env.ctx.cls, sval(op.str1), t
+        env.index, env.ctx, *env.ctx.cls, sval(op.str1), t, true
       );
       break;
     case InitPropOp::NonStatic:

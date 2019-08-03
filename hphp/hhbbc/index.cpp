@@ -3436,6 +3436,12 @@ PublicSPropEntry lookup_public_static_impl(
     return noInfo;
   }
 
+  for (auto const& prop_it : knownCInfo->cls->properties) {
+    if (prop_it.name == prop && (prop_it.attrs & AttrIsConst)) {
+      return *knownClsPart;
+    }
+  }
+
   // NB: Inferred type can be TBottom here if the property is never set to a
   // value which can satisfy its type constraint. Such properties can't exist at
   // runtime.
@@ -6088,7 +6094,8 @@ void PublicSPropMutations::merge(const Index& index,
                                  Context ctx,
                                  const Type& tcls,
                                  const Type& name,
-                                 const Type& val) {
+                                 const Type& val,
+                                 bool ignoreConst) {
   // Figure out which class this can affect.  If we have a DCls::Sub we have to
   // assume it could affect any subclass, so we repeat this merge for all exact
   // class types deriving from that base.
@@ -6097,10 +6104,10 @@ void PublicSPropMutations::merge(const Index& index,
     if (auto const cinfo = dcls.cls.val.right()) {
       switch (dcls.type) {
         case DCls::Exact:
-          return merge(index, ctx, cinfo, name, val);
+          return merge(index, ctx, cinfo, name, val, ignoreConst);
         case DCls::Sub:
           for (auto const sub : cinfo->subclassList) {
-            merge(index, ctx, sub, name, val);
+            merge(index, ctx, sub, name, val, ignoreConst);
           }
           return;
       }
@@ -6108,14 +6115,15 @@ void PublicSPropMutations::merge(const Index& index,
     }
   }
 
-  merge(index, ctx, nullptr, name, val);
+  merge(index, ctx, nullptr, name, val, ignoreConst);
 }
 
 void PublicSPropMutations::merge(const Index& index,
                                  Context ctx,
                                  ClassInfo* cinfo,
                                  const Type& name,
-                                 const Type& val) {
+                                 const Type& val,
+                                 bool ignoreConst) {
   FTRACE(2, "merge_public_static: {} {} {}\n",
          cinfo ? cinfo->cls->name->data() : "<unknown>", show(name), show(val));
 
@@ -6165,7 +6173,8 @@ void PublicSPropMutations::merge(const Index& index,
     visit_parent_cinfo(cinfo,
                          [&] (const ClassInfo* ci) {
                            for (auto& kv : ci->publicStaticProps) {
-                             merge(index, ctx, cinfo, sval(kv.first), val);
+                             merge(index, ctx, cinfo, sval(kv.first),
+                                   val, ignoreConst);
                            }
                            return false;
                          });
@@ -6211,6 +6220,14 @@ void PublicSPropMutations::merge(const Index& index,
   auto const affectedCInfo = affectedInfo->first;
   auto const affectedTC = affectedInfo->second;
 
+  if (!ignoreConst) {
+    for (auto const& prop : affectedCInfo->cls->properties) {
+      if (prop.name == vname->m_data.pstr && (prop.attrs & AttrIsConst)) {
+        return;
+      }
+    }
+  }
+
   auto const adjusted =
     adjust_type_for_prop(index, *affectedCInfo->cls, affectedTC, val);
 
@@ -6226,14 +6243,15 @@ void PublicSPropMutations::merge(const Index& index,
                                  Context ctx,
                                  const php::Class& cls,
                                  const Type& name,
-                                 const Type& val) {
+                                 const Type& val,
+                                 bool ignoreConst) {
   auto range = find_range(index.m_data->classInfo, cls.name);
   for (auto const& pair : range) {
     auto const cinfo = pair.second;
     if (cinfo->cls != &cls) continue;
     // Note that this works for both traits and regular classes
     for (auto const sub : cinfo->subclassList) {
-      merge(index, ctx, sub, name, val);
+      merge(index, ctx, sub, name, val, ignoreConst);
     }
   }
 }

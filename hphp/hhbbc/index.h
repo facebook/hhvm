@@ -1082,11 +1082,11 @@ struct PublicSPropMutations {
    * give up all information it knows about any public static properties.
    */
   void merge(const Index& index, Context ctx, const Type& cls,
-             const Type& name, const Type& val);
+             const Type& name, const Type& val, bool ignoreConst = false);
   void merge(const Index& index, Context ctx, ClassInfo* cinfo,
-             const Type& name, const Type& val);
+             const Type& name, const Type& val, bool ignoreConst = false);
   void merge(const Index& index, Context ctx, const php::Class& cls,
-             const Type& name, const Type& val);
+             const Type& name, const Type& val, bool ignoreConst = false);
 
 private:
   friend struct Index;

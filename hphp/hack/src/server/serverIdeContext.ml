@@ -11,7 +11,7 @@ open Core_kernel
 type entry = {
   file_input: ServerCommandTypes.file_input;
   path: Relative_path.t;
-  ast: Ast.program;
+  ast: Nast.program;
   tast: Tast.program;
 }
 
@@ -20,22 +20,9 @@ type t = entry Relative_path.Map.t
 let empty = Relative_path.Map.empty
 
 let extract_symbols
-    (ast: Ast.program):
+    (ast: Nast.program):
     FileInfo.id list * FileInfo.id list * FileInfo.id list * FileInfo.id list =
-  let funs, classes, typedefs, consts =
-    List.fold_left ast ~f:begin fun (funs, classes, typedefs, consts) def ->
-      match def with
-      | Ast.Fun { Ast.f_name; _ } ->
-        (FileInfo.pos_full f_name)::funs, classes, typedefs, consts
-      | Ast.Class { Ast.c_name; _ } ->
-        funs, (FileInfo.pos_full c_name)::classes, typedefs, consts
-      | Ast.Typedef { Ast.t_id; _ } ->
-        funs, classes, (FileInfo.pos_full t_id)::typedefs, consts
-      | Ast.Constant { Ast.cst_name; _ } ->
-        funs, classes, typedefs, (FileInfo.pos_full cst_name)::consts
-      | _ -> funs, classes, typedefs, consts
-    end ~init:([], [], [], []) in
-  (funs, classes, typedefs, consts)
+      Nast.get_defs ast
 
 let with_context
     ~(ctx: t)
@@ -82,14 +69,15 @@ let update
     file_input
   in
   Ast_provider.provide_ast_hint path ast Ast_provider.Full;
+  let nast = (Ast_to_nast.convert ast) in
   let tast = with_context ~ctx ~f:(fun () ->
-    let nast = Naming.program (Ast_to_nast.convert ast) in
+    let nast = Naming.program nast in
     Typing.nast_to_tast tcopt nast
   ) in
   let entry = {
     path;
     file_input;
-    ast;
+    ast = nast;
     tast;
   } in
   let ctx = Relative_path.Map.add ctx path entry in
@@ -108,7 +96,7 @@ let get_file_input
 let get_path ~(entry: entry): Relative_path.t =
   entry.path
 
-let get_ast ~(entry: entry): Ast.program =
+let get_ast ~(entry: entry): Nast.program =
   entry.ast
 
 let get_tast ~(entry: entry): Tast.program =

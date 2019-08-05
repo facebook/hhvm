@@ -72,13 +72,12 @@ let go_ctx
     ~(entry : ServerIdeContext.entry)
     ~(line : int)
     ~(column : int) =
-  let ast = ServerIdeContext.get_ast entry in
-  let nast = Some (Ast_to_nast.convert ast) in
+  let ast = Some (ServerIdeContext.get_ast entry) in
   let tast = ServerIdeContext.get_tast entry in
   let symbols = IdentifySymbolService.go tast line column in
   let symbols = take_best_suggestions (List.sort by_nesting symbols) in
   List.map symbols ~f:(fun symbol ->
-    let symbol_definition = ServerSymbolDefinition.go nast symbol in
+    let symbol_definition = ServerSymbolDefinition.go ast symbol in
     (symbol, symbol_definition)
   )
 

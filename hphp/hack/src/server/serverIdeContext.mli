@@ -43,8 +43,8 @@ If the [path] is in the context, returns its associated
 val get_path: entry:entry -> Relative_path.t
 (** Get the path associated with the given [entry]. *)
 
-val get_ast: entry:entry -> Ast.program
-(** Get the AST associated with the given [entry]. *)
+val get_ast: entry:entry -> Nast.program
+(** Get the Nast associated with the given [entry]. *)
 
 val get_tast: entry:entry -> Tast.program
 (** Get the typed AST associated with the given [entry]. *)

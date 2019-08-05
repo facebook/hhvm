@@ -98,12 +98,11 @@ let go_ctx
     : ServerHighlightRefsTypes.result =
   let path = ServerIdeContext.get_path ~entry in
   let ast = ServerIdeContext.get_ast entry in
-  let nast = Ast_to_nast.convert ast in
   let tast = ServerIdeContext.get_tast entry in
   let symbol_to_highlight = IdentifySymbolService.go tast line column in
   let file_info = ServerIdeContext.get_fileinfo entry in
   let results = List.fold symbol_to_highlight ~init:[] ~f:(fun acc s ->
-    let stuff = highlight_symbol tcopt nast (line, column) path file_info s in
+    let stuff = highlight_symbol tcopt ast (line, column) path file_info s in
     List.append stuff acc
   ) in
   results

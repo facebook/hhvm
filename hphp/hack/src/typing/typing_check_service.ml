@@ -327,17 +327,16 @@ let merge
 
 let next
     (workers: MultiWorker.worker list option)
-    ~(files_initial_count: int)
     (files_to_process: file_computation list ref)
     (files_in_progress: file_computation Hash_set.Poly.t) =
   let max_size = Bucket.max_size () in
   let num_workers = (match workers with Some w -> List.length w | None -> 1) in
-  let bucket_size = Bucket.calculate_bucket_size
-    ~num_jobs:files_initial_count
-    ~num_workers
-    ~max_size
-  in
   fun () ->
+    let bucket_size = Bucket.calculate_bucket_size
+      ~num_jobs:(List.length !files_to_process)
+      ~num_workers
+      ~max_size
+    in
     match !files_to_process with
     | [] when Hash_set.Poly.is_empty files_in_progress -> Bucket.Done
     | [] -> Bucket.Wait
@@ -383,7 +382,7 @@ let process_in_parallel
   let files_initial_count = List.length fnl in
   ServerProgress.send_percentage_progress_to_monitor
     "typechecking" 0 files_initial_count "files";
-  let next = next ~files_initial_count workers files_to_process files_in_progress in
+  let next = next workers files_to_process files_in_progress in
   let errors, env, cancelled =
     MultiWorker.call_with_interrupt
       workers

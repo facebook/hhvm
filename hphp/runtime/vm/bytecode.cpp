@@ -4169,6 +4169,7 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
     }
     return is_darray(val);
   case IsTypeOp::ClsMeth: return is_clsmeth(val);
+  case IsTypeOp::Func: return is_fun(val);
   }
   not_reached();
 }

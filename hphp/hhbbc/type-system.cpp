@@ -3086,6 +3086,7 @@ Type type_of_istype(IsTypeOp op) {
     assertx(!RuntimeOption::EvalHackArrDVArrs);
     return TDArr;
   case IsTypeOp::ClsMeth: return TClsMeth;
+  case IsTypeOp::Func: return TFunc;
   case IsTypeOp::ArrLike:
   case IsTypeOp::Scalar: always_assert(0);
   }
@@ -3113,6 +3114,7 @@ folly::Optional<IsTypeOp> type_to_istypeop(const Type& t) {
     return IsTypeOp::DArray;
   }
   if (t.subtypeOf(BClsMeth)) return IsTypeOp::ClsMeth;
+  if (t.subtypeOf(BFunc)) return IsTypeOp::Func;
   return folly::none;
 }
 
@@ -3670,6 +3672,7 @@ Type union_of(Type a, Type b) {
   Y(StrLike)
 
   Y(ClsMeth)
+  Y(Func)
 
   // non-optional types that contain other types above (and hence
   // must come after them).

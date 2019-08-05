@@ -166,6 +166,11 @@ inline bool is_clsmeth(const Cell* c) {
   return tvIsClsMeth(c);
 }
 
+inline bool is_fun(const Cell* c) {
+  assertx(cellIsPlausible(*c));
+  return tvIsFunc(c);
+}
+
 inline bool is_empty_string(const Cell* c) {
   return tvIsString(c) && c->m_data.pstr->empty();
 }

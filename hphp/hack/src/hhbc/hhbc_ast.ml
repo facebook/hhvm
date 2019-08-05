@@ -312,6 +312,7 @@ type istype_op =
   | OpVArray
   | OpDArray
   | OpClsMeth
+  | OpFunc
 
 type instruct_isset =
   | IssetC

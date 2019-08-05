@@ -365,6 +365,7 @@ let istype_op lower_fq_id =
   | "hh\\is_darray" -> Some (if hack_arr_dv_arrs () then OpDict else OpDArray)
   | "hh\\is_any_array" -> Some OpArrLike
   | "hh\\is_class_meth" -> Some OpClsMeth
+  | "hh\\is_fun" -> Some OpFunc
   | _ -> None
 
 let is_isexp_op lower_fq_id: Aast.hint option =

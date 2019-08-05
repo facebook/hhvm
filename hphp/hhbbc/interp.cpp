@@ -3034,6 +3034,7 @@ bool isValidTypeOpForIsAs(const IsTypeOp& op) {
     case IsTypeOp::ArrLike:
     case IsTypeOp::Scalar:
     case IsTypeOp::ClsMeth:
+    case IsTypeOp::Func:
       return false;
   }
   not_reached();

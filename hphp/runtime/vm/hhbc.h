@@ -266,7 +266,8 @@ inline bool isIncDecO(IncDecOp op) {
   ISTYPE_OP(Res)                               \
   ISTYPE_OP(VArray)                            \
   ISTYPE_OP(DArray)                            \
-  ISTYPE_OP(ClsMeth)
+  ISTYPE_OP(ClsMeth)                           \
+  ISTYPE_OP(Func)
 
 enum class IsTypeOp : uint8_t {
 #define ISTYPE_OP(op) op,

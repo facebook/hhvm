@@ -474,6 +474,7 @@ Type typeOpToType(IsTypeOp op) {
   case IsTypeOp::ArrLike: return TArrLike;
   case IsTypeOp::Res:     return TRes;
   case IsTypeOp::ClsMeth: return TClsMeth;
+  case IsTypeOp::Func:    return TFunc;
   case IsTypeOp::Vec:
   case IsTypeOp::Dict:
   case IsTypeOp::VArray:

@@ -450,6 +450,7 @@ let rec bind_param env (ty1, param) =
     T.param_expr = param_te;
     T.param_callconv = param.param_callconv;
     T.param_user_attributes = user_attributes;
+    T.param_visibility = param.param_visibility;
   } in
   let mode = get_param_mode param.param_is_reference param.param_callconv in
   let id = Local_id.make_unscoped param.param_name in

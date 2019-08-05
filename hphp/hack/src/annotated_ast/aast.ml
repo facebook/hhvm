@@ -247,6 +247,7 @@ and ('ex, 'fb, 'en) fun_param = {
   param_expr: ('ex, 'fb, 'en) expr option;
   param_callconv: Ast_defs.param_kind option;
   param_user_attributes: ('ex, 'fb, 'en) user_attribute list;
+  param_visibility: visibility option;
 }
 
 and ('ex, 'fb, 'en) fun_variadicity =

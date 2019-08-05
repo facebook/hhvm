@@ -25,7 +25,8 @@
             param_hint = (Some ([6:31-34], (Hprim Tint)));
             param_is_reference = false; param_is_variadic = false;
             param_pos = [6:35-37]; param_name = "$x"; param_expr = None;
-            param_callconv = None; param_user_attributes = [] }
+            param_callconv = None; param_user_attributes = [];
+            param_visibility = None }
            ];
          m_body =
          { fb_ast =

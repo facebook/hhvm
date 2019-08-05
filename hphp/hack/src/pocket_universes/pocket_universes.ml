@@ -120,6 +120,7 @@ let gen_pu_accessor
       param_expr = None;
       param_callconv = None;
       param_user_attributes = [];
+      param_visibility = None;
     }];
     m_body = body;
     m_user_attributes  = []; (* TODO: Memoize ? *)

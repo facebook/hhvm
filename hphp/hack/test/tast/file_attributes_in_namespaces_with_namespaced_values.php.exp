@@ -31,7 +31,7 @@ Errors:
             param_is_reference = false; param_is_variadic = false;
             param_pos = [5:47-58]; param_name = "$attr_value";
             param_expr = None; param_callconv = None;
-            param_user_attributes = [] }
+            param_user_attributes = []; param_visibility = (Some Public) }
            ];
          m_body =
          { fb_ast =

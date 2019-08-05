@@ -1613,6 +1613,7 @@ module Make (GetLocals : GetLocals) = struct
       param_expr = eopt;
       param_callconv = param.Aast.param_callconv;
       param_user_attributes = user_attributes env param.Aast.param_user_attributes;
+      param_visibility = param.Aast.param_visibility;
     }
 
   and make_constraints paraml =

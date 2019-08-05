@@ -414,6 +414,13 @@ let converter
     }
   and on_fun_param param =
     let (p, name) = param.param_id in
+    let visibility =
+      match param.param_modifier with
+      | Some Public -> Some Aast.Public
+      | Some Private -> Some Aast.Private
+      | Some Protected -> Some Aast.Protected
+      | _ -> None
+    in
     {
       Aast.param_annotation = expr_annotation p;
       param_hint = optional on_hint param.param_hint;
@@ -425,6 +432,7 @@ let converter
       param_callconv = param.param_callconv;
       param_user_attributes =
         on_list on_user_attribute param.param_user_attributes;
+      param_visibility = visibility;
     }
   and determine_variadicity params =
     match params with

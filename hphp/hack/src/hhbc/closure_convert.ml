@@ -634,6 +634,7 @@ let make_fn_param (p, lid) is_variadic =
     param_expr = None;
     param_callconv = None;
     param_user_attributes = [];
+    param_visibility = None;
   }
 
 let convert_meth_caller_to_func_ptr env st ann pc cls pf func =

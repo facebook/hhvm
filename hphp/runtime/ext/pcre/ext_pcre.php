@@ -87,6 +87,13 @@ function preg_match_all(string $pattern,
                         int $flags = 0,
                         int $offset = 0): mixed;
 
+<<__Native, __Rx>>
+function preg_match_all_with_matches(string $pattern,
+                                     string $subject,
+                                     ?array &$matches,
+                                     int $flags = 0,
+                                     int $offset = 0): mixed;
+
 /**
  * Perform a regular expression match
  *
@@ -119,6 +126,13 @@ function preg_match(string $pattern,
                     ?array &$matches = null,
                     int $flags = 0,
                     int $offset = 0): mixed;
+
+<<__Native, __Rx>>
+function preg_match_with_matches(string $pattern,
+                                 string $subject,
+                                 ?array &$matches,
+                                 int $flags = 0,
+                                 int $offset = 0): mixed;
 
 /**
  * Quote regular expression characters

@@ -11,6 +11,12 @@ function icu_match(string $pattern,
                    int $flags = 0): mixed;
 
 <<__Native>>
+function icu_match_with_matches(string $pattern,
+                                string $subject,
+                                mixed &$matches,
+                                int $flags = 0): mixed;
+
+<<__Native>>
 function icu_transliterate(string $str,
                            bool $remove_accents): string;
 

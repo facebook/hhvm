@@ -42,15 +42,22 @@ function test_icu_match() {
   VERIFY(icu_match("(\\bPHP\\b))", $subject) == false);
 
   // Test returning matches functionality.
-  VERIFY(icu_match("(PHP) is", $subject, &$matches) != false);
+  VERIFY(icu_match_with_matches("(PHP) is", $subject, &$matches) != false);
   VS(print_r($matches, true),
     "Array\n".
     "(\n".
     "    [0] => PHP is\n".
     "    [1] => PHP\n".
     ")\n");
-  VERIFY(icu_match("is (a)", $subject, &$matches,
-                     UREGEX_OFFSET_CAPTURE) != false);
+  VERIFY(
+    icu_match_with_matches(
+      "is (a)",
+      $subject,
+      &$matches,
+      UREGEX_OFFSET_CAPTURE,
+    ) !=
+      false,
+  );
   VS(print_r($matches, true),
      "Array\n".
      "(\n".
@@ -67,8 +74,15 @@ function test_icu_match() {
      "        )\n".
      "\n".
      ")\n");
-  VERIFY(icu_match("\\. \xef\xba\xb0", $subject, &$matches,
-                     UREGEX_OFFSET_CAPTURE) != false);
+  VERIFY(
+    icu_match_with_matches(
+      "\\. \xef\xba\xb0",
+      $subject,
+      &$matches,
+      UREGEX_OFFSET_CAPTURE,
+    ) !=
+      false,
+  );
   VS(print_r($matches, true),
     "Array\n".
     "(\n".
@@ -81,8 +95,15 @@ function test_icu_match() {
     ")\n");
   $junk1="\xef\xbb\xa9\xef\xbb\xad";
   $junk2="\xef\xba\x8e\xef\xbb\xa0\xef\xbb\xa8\xef\xba\xbb";
-  VERIFY(icu_match("$junk1 ($junk2)",
-                     $subject_ar, &$matches, UREGEX_OFFSET_CAPTURE) != false);
+  VERIFY(
+    icu_match_with_matches(
+      "$junk1 ($junk2)",
+      $subject_ar,
+      &$matches,
+      UREGEX_OFFSET_CAPTURE,
+    ) !=
+      false,
+  );
   VS(print_r($matches, true),
     "Array\n".
     "(\n".
@@ -101,7 +122,7 @@ function test_icu_match() {
     ")\n");
 
   // Test match for 32-bit code points.
-  VERIFY(icu_match(".*", $subject_32, &$matches) != false);
+  VERIFY(icu_match_with_matches(".*", $subject_32, &$matches) != false);
   $expected="\xf0\x90\xa4\x85\xf0\x90\xa4\x85\xf0\x90\xa4".
     "\x85\xf0\x90\xa4\x85\xf0\x90\xa4\x85\xf0\x90\xa4\x85";
   VS(print_r($matches, true),
@@ -111,7 +132,15 @@ function test_icu_match() {
     ")\n");
 
   // Test regex caching functionality.
-  VERIFY(icu_match("(php)", $subject, &$ignore, UREGEX_CASE_INSENSITIVE) != false);
+  VERIFY(
+    icu_match_with_matches(
+      "(php)",
+      $subject,
+      &$ignore,
+      UREGEX_CASE_INSENSITIVE,
+    ) !=
+      false,
+  );
   VERIFY(icu_match("(php)", $subject) == false);
 
   // Test ICU specific (ie bidi) functionality.

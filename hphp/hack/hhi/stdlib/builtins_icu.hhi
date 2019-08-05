@@ -18,6 +18,9 @@ const int UREGEX_OFFSET_CAPTURE = 0;
 <<__PHPStdLib>>
 function icu_match(string $pattern, string $subject, &$matches = null, int $flags = 0);
 <<__PHPStdLib>>
+function icu_match_with_matches(string $pattern, string $subject, &$matches,
+                                int $flags = 0);
+<<__PHPStdLib>>
 function icu_transliterate(string $str, bool $remove_accents);
 <<__PHPStdLib>>
 function icu_tokenize(string $text);

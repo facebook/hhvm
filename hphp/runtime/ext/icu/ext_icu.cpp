@@ -127,6 +127,13 @@ static Variant HHVM_FUNCTION(icu_match, const String& pattern,
   return matched;
 }
 
+static Variant HHVM_FUNCTION(icu_match_with_matches,
+                             const String& pattern,
+                             const String& subject,
+                             VRefParam matches,
+                             int64_t flags /* = 0 */) {
+  return HHVM_FN(icu_match)(pattern, subject, matches, flags);
+}
 
 // Need to have a valid installation of the transliteration data in /lib64.
 // Initialization will be taken care of by ext_array which also uses icu.
@@ -332,6 +339,7 @@ void IntlExtension::initICU() {
   s_transliterator.initialize();
 
   HHVM_FE(icu_match);
+  HHVM_FE(icu_match_with_matches);
   HHVM_FE(icu_transliterate);
   HHVM_FE(icu_tokenize);
 

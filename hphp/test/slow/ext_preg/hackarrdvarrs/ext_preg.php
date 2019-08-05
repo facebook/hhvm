@@ -31,17 +31,20 @@ function test_preg_match() {
 
   // get host name from URL
   $matches = null;
-  preg_match("@^(?:http://)?([^/]+)@i",
-             "http://www.php.net/index.html", &$matches);
+  preg_match_with_matches(
+    "@^(?:http://)?([^/]+)@i",
+    "http://www.php.net/index.html",
+    &$matches,
+  );
   $host = $matches[1];
   VS($host, "www.php.net");
 
   // get last two segments of host name
-  preg_match("/[^.]+\\.[^.]+$/", $host, &$matches);
+  preg_match_with_matches("/[^.]+\\.[^.]+$/", $host, &$matches);
   VS($matches[0], "php.net");
 
   $str = "foobar: 2008";
-  preg_match("/(?<name>\\w+): (?<digit>\\d+)/", $str, &$matches);
+  preg_match_with_matches("/(?<name>\\w+): (?<digit>\\d+)/", $str, &$matches);
   VS(print_r($matches, true),
      "Dict\n".
      "(\n".
@@ -55,8 +58,11 @@ function test_preg_match() {
 
 
 function test_preg_match_all() {
-  preg_match_all("/\\(?  (\\d{3})?  \\)?  (?(1)  [\\-\\s] ) \\d{3}-\\d{4}/x",
-                   "Call 555-1212 or 1-800-555-1212", &$matches);
+  preg_match_all_with_matches(
+    "/\\(?  (\\d{3})?  \\)?  (?(1)  [\\-\\s] ) \\d{3}-\\d{4}/x",
+    "Call 555-1212 or 1-800-555-1212",
+    &$matches,
+  );
   VS(print_r($matches, true),
      "Dict\n".
      "(\n".
@@ -79,8 +85,12 @@ function test_preg_match_all() {
   // itself, which would be the ([\w]+) in this case. The extra backslash is
   // required because the string is in double quotes.
   $html = "<b>bold text</b><a href=howdy.html>click me</a>";
-  preg_match_all("/(<([\\w]+)[^>]*>)(.*)(<\\/\\2>)/", $html, &$matches,
-                 PREG_SET_ORDER);
+  preg_match_all_with_matches(
+    "/(<([\\w]+)[^>]*>)(.*)(<\\/\\2>)/",
+    $html,
+    &$matches,
+    PREG_SET_ORDER,
+  );
   VS(print_r($matches, true),
      "Dict\n".
      "(\n".
@@ -105,7 +115,11 @@ function test_preg_match_all() {
      ")\n");
 
   $str = "a: 1\nb: 2\nc: 3\n";
-  preg_match_all("/(?<name>\\w+): (?<digit>\\d+)/", $str, &$matches);
+  preg_match_all_with_matches(
+    "/(?<name>\\w+): (?<digit>\\d+)/",
+    $str,
+    &$matches,
+  );
   VS(print_r($matches, true),
      "Dict\n".
      "(\n".

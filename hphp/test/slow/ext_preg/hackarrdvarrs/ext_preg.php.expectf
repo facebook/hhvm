@@ -19,24 +19,24 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: No ending delimiter '/' found: [/xxx] in %s/test/slow/ext_preg/hackarrdvarrs/ext_preg.php on line 198
+Warning: No ending delimiter '/' found: [/xxx] in %s/test/slow/ext_preg/hackarrdvarrs/ext_preg.php on line %d
 bool(true)
 bool(true)
 bool(true)
 
-Warning: No ending delimiter '/' found: [/xxx] in %s/test/slow/ext_preg/hackarrdvarrs/ext_preg.php on line 202
+Warning: No ending delimiter '/' found: [/xxx] in %s/test/slow/ext_preg/hackarrdvarrs/ext_preg.php on line %d
 bool(true)
 bool(true)
 bool(true)
 
-Warning: No ending delimiter '/' found: [/xxx] in %s/test/slow/ext_preg/hackarrdvarrs/ext_preg.php on line 205
+Warning: No ending delimiter '/' found: [/xxx] in %s/test/slow/ext_preg/hackarrdvarrs/ext_preg.php on line %d
 bool(true)
 bool(true)
 
-Warning: Parameter mismatch, pattern is a string while replacement is an array in %s/test/slow/ext_preg/hackarrdvarrs/ext_preg.php on line 208
+Warning: Parameter mismatch, pattern is a string while replacement is an array in %s/test/slow/ext_preg/hackarrdvarrs/ext_preg.php on line %d
 bool(true)
 
-Warning: No ending delimiter '/' found: [/xxx] in %s/test/slow/ext_preg/hackarrdvarrs/ext_preg.php on line 209
+Warning: No ending delimiter '/' found: [/xxx] in %s/test/slow/ext_preg/hackarrdvarrs/ext_preg.php on line %d
 bool(true)
 bool(true)
 bool(true)

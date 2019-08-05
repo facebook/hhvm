@@ -80,7 +80,7 @@ let rec combine_result l l1 l2 =
 let go (content, line, char) tcopt =
   ServerIdentifyFunction.get_occurrence_and_map tcopt content line char
     ~f:begin fun path file_info symbols ->
-      let ast = (Ast_provider.get_ast path) in
+      let ast = (Ast_provider.get_nast path) in
       match symbols with
       | symbol::_ ->
         let symbols = filter_result symbols symbol in
@@ -98,11 +98,12 @@ let go_ctx
     : ServerHighlightRefsTypes.result =
   let path = ServerIdeContext.get_path ~entry in
   let ast = ServerIdeContext.get_ast entry in
+  let nast = Ast_to_nast.convert ast in
   let tast = ServerIdeContext.get_tast entry in
   let symbol_to_highlight = IdentifySymbolService.go tast line column in
   let file_info = ServerIdeContext.get_fileinfo entry in
   let results = List.fold symbol_to_highlight ~init:[] ~f:(fun acc s ->
-    let stuff = highlight_symbol tcopt ast (line, column) path file_info s in
+    let stuff = highlight_symbol tcopt nast (line, column) path file_info s in
     List.append stuff acc
   ) in
   results

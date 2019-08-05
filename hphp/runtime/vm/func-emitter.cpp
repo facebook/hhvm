@@ -35,7 +35,6 @@
 #include "hphp/system/systemlib.h"
 
 #include "hphp/util/atomic-vector.h"
-#include "hphp/util/debug.h"
 #include "hphp/util/file.h"
 #include "hphp/util/trace.h"
 

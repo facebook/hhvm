@@ -48,7 +48,6 @@
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/functional.h"
-#include "hphp/util/debug.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/trace.h"
 

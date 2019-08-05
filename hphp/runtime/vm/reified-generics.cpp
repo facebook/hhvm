@@ -22,8 +22,6 @@
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/reified-generics-info.h"
 
-#include "hphp/util/debug.h"
-
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////

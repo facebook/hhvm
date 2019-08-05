@@ -30,7 +30,6 @@
 #include <folly/String.h>
 #include <folly/portability/SysMman.h>
 
-#include "hphp/util/debug.h"
 #include "hphp/util/numa.h"
 #include "hphp/util/portability.h"
 #include "hphp/util/ringbuffer.h"
@@ -110,7 +109,6 @@
 #include "hphp/runtime/vm/memo-cache.h"
 #include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/native.h"
-#include "hphp/runtime/vm/php-debug.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/repo.h"
@@ -4603,7 +4601,6 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool unpack) {
 OPTBLD_INLINE ActRec* fPushFuncImpl(
   const Func* func, int numArgs, ArrayData* reifiedGenerics
 ) {
-  DEBUGGER_IF(phpBreakpointEnabled(func->name()->data()));
   assertx(kNumActRecCells == 3);
   ActRec* ar = vmStack().indA(numArgs);
   ar->m_func = func;

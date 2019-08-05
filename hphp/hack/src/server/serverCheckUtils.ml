@@ -76,10 +76,10 @@ let extend_fast
     let t = Unix.gettimeofday () in
     let bucket_size = genv.local_config.ServerLocalConfig.extend_fast_bucket_size in
     let extended_fast = match Naming_table.get_forward_naming_fallback_path naming_table with
-      | Some _sqlite_path when additional_count <= bucket_size ->
-        extend_fast_sequential fast naming_table additional_files
-      | _ ->
+      | Some _sqlite_path when additional_count >= bucket_size ->
         extend_fast_batch genv fast naming_table additional_files bucket_size
+      | _ ->
+        extend_fast_sequential fast naming_table additional_files
     in
     let _t = Hh_logger.log_duration "Extended FAST" t in
     extended_fast

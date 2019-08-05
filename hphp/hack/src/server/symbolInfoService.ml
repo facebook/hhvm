@@ -16,12 +16,12 @@ let recheck_naming filename_l =
   List.iter filename_l begin fun file ->
     Errors.ignore_ begin fun () ->
       (* We only need to name to find references to locals *)
-      List.iter (Ast_provider.get_ast file) begin function
-        | Ast.Fun f ->
-            let _ = Naming.fun_ (Ast_to_nast.on_fun f) in
+      List.iter (Ast_provider.get_nast file) begin function
+        | Aast.Fun f ->
+            let _ = Naming.fun_ f in
             ()
-        | Ast.Class c ->
-            let _ = Naming.class_ (Ast_to_nast.on_class c) in
+        | Aast.Class c ->
+            let _ = Naming.class_ c in
             ()
         | _ -> ()
       end

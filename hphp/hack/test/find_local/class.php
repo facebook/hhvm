@@ -1,9 +1,9 @@
 <?hh
 class C {
-  function f($x) {
+  public function f($x) {
     $this->g($this);  // Should find both
   }
-  function g($x) {
+  public function g($x) {
     $this->f($this); // Should not find
   }
 }

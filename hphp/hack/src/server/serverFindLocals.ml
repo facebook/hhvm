@@ -8,7 +8,7 @@
  *)
 
 open Core_kernel
-open Ast
+open Aast
 
 type result = Pos.absolute list
 
@@ -301,12 +301,12 @@ end (* End of module LocalMap *)
   *)
 
 class local_finding_visitor = object(this)
-  inherit [LocalMap.t] Ast_visitor.ast_visitor as _super
+  inherit [LocalMap.t] Nast.Visitor_DEPRECATED.visitor as _super
 
   method! on_lvar localmap (pos, name) =
-    LocalMap.add name pos localmap
+    LocalMap.add (Local_id.get_name name) pos localmap
 
-  method! on_pipe localmap left right =
+  method! on_pipe localmap _id left right =
     (**
       A pipe expression has a left side and a right side. It introduces a
       new scope on the right side only which defines a new magic local
@@ -340,7 +340,7 @@ class local_finding_visitor = object(this)
     let localmap = LocalMap.push localmap in
     let localmap =
       List.fold_left m.m_params ~init:localmap ~f:this#on_fun_param in
-    let localmap = this#on_block localmap m.m_body in
+    let localmap = this#on_block localmap m.m_body.fb_ast in
     LocalMap.pop localmap
 
   (**
@@ -351,16 +351,17 @@ class local_finding_visitor = object(this)
     let localmap = LocalMap.push localmap in
     let localmap =
       List.fold_left f.f_params ~init:localmap ~f:this#on_fun_param in
-    let localmap = this#on_block localmap f.f_body in
+    let localmap = this#on_block localmap f.f_body.fb_ast in
     LocalMap.pop localmap
 
-  method! on_fun_param localmap p =
+  method! on_lfun localmap f _idl = this#on_fun_ localmap f
+
+  method on_fun_param localmap p =
       (**
         * A formal parameter always introduces a new local into the current
         * scope; we never want to unify a formal with a local seen previously.
         *)
-      let pos, name = p.param_id in
-      LocalMap.force_add name pos localmap
+      LocalMap.force_add p.param_name p.param_pos localmap
 
   method! on_efun localmap fn use_list =
    (**
@@ -454,7 +455,7 @@ class local_finding_visitor = object(this)
      let localmap = LocalMap.push localmap in
      (* No need to pop; we're going to pop the whole scopechain. *)
      let localmap = List.fold_left use_list ~init:localmap
-       ~f:begin fun l ((p, n)) -> LocalMap.add_from_use n p l end in
+       ~f:begin fun l ((p, n)) -> LocalMap.add_from_use (Local_id.get_name n) p l end in
      let localmap = this#on_fun_ localmap fn in
      LocalMap.pop_scopechain localmap
 
@@ -466,7 +467,7 @@ class local_finding_visitor = object(this)
       * The type name should never reasonably contain a local; we'll ignore it.
       *)
     let localmap = LocalMap.push localmap in
-    let localmap = LocalMap.force_add name pos localmap in
+    let localmap = LocalMap.force_add (Local_id.get_name name) pos localmap in
     let localmap = this#on_block localmap body in
     LocalMap.pop localmap
 end
@@ -482,6 +483,7 @@ let parse tcopt path content =
   end
 
 let go_from_ast ast line char =
+  let ast = Ast_to_nast.convert ast in
   let empty = LocalMap.make line char in
   let visitor = new local_finding_visitor in
   let localmap = visitor#on_program empty ast in

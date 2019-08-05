@@ -8,14 +8,19 @@
  *
 *)
 
+(* heap_size only counts the size in the OCaml heap or young gen storage, but
+   data created for this test will be statically allocated. This function will
+   ensure that the values we create for this test are actually on the heap. *)
+let clone x = Marshal.from_string (Marshal.to_string x []) 0
+
 let test_heapsize_simple () =
   let wordsize = Sys.word_size / 8 in
-  let pair = (1, 2) in
+  let pair = clone (1, 2) in
   (* Have to be careful: Caml shares constant pairs *)
-  let nonshared = [(1, 2); (3, 4)] in
-  let shared = [pair; pair] in
-  let str1 = "0123456" in
-  let str2 = "01234567" in
+  let nonshared = clone [(1, 2); (3, 4)] in
+  let shared = clone [pair; pair] in
+  let str1 = clone "0123456" in
+  let str2 = clone "01234567" in
   (* We expect a two-element pair to use 3 words *)
   let c1 = SharedMem.value_size (Obj.repr pair) / wordsize in
   (* We expect a two element list of two-element pairs to use 12 words *)

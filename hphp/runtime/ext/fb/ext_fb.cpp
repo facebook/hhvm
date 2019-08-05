@@ -569,7 +569,7 @@ Variant HHVM_FUNCTION(fb_compact_serialize, const Variant& thing) {
 
 /* Check if there are enough bytes left in the buffer */
 #define CHECK_ENOUGH(bytes, pos, num) do {                      \
-    if ((int)(bytes) > (int)((num) - (pos))) {                  \
+    if ((int64_t)(bytes) > (int64_t)((num) - (pos))) {          \
       return FB_UNSERIALIZE_UNEXPECTED_END;                     \
     }                                                           \
   } while (0)

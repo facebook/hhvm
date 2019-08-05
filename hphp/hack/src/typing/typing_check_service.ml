@@ -140,9 +140,9 @@ let check_typedef
     (fn: Relative_path.t)
     (x: Decl_provider.typedef_key)
     : Tast.def option =
-  match Ast_provider.find_typedef_in_file ~full:true fn x with
+  match Ast_provider.find_typedef_in_file_nast ~full:true fn x with
   | Some t ->
-    let typedef = Naming.typedef (Ast_to_nast.on_typedef t) in
+    let typedef = Naming.typedef t in
     Nast_check.def (Aast.Typedef typedef);
     let ret = Typing.typedef_def opts typedef in
     Typing_variance.typedef opts x;

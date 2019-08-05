@@ -128,11 +128,11 @@ let get_typedef ?(case_insensitive = false) defs name =
   let rec get acc defs =
   List.fold_left defs ~init:acc ~f:begin fun acc def ->
     match def with
-    | Ast.Typedef typedef ->
-      let def_name = snd typedef.Ast.t_id in
+    | Aast.Typedef typedef ->
+      let def_name = snd typedef.Aast.t_name in
       let def_name = if case_insensitive then Caml.String.lowercase_ascii def_name else def_name in
       if def_name = name then Some typedef else acc
-    | Ast.Namespace(_, defs) -> get acc defs
+    | Aast.Namespace(_, defs) -> get acc defs
     | _ -> acc
   end in
   get None defs
@@ -178,8 +178,6 @@ let get_nast ?(full = false) file_name =
   Ast_to_nast.convert ast
 
 
-let find_typedef_in_file ?(full = false) ?(case_insensitive=false) file_name name =
-  get_typedef (get_ast ~full file_name) ~case_insensitive name
 
 let find_gconst_in_file ?(full = false) file_name name =
   get_gconst (get_ast ~full file_name) name
@@ -191,8 +189,7 @@ let find_fun_in_file_nast ?(full = false) ?(case_insensitive=false) file_name fu
   get_fun (get_nast ~full file_name) ~case_insensitive fun_name
 
 let find_typedef_in_file_nast ?(full = false) ?(case_insensitive=false) file_name name =
-  let t = find_typedef_in_file ~full ~case_insensitive file_name name in
-  Option.map t Ast_to_nast.on_typedef
+  get_typedef (get_nast ~full file_name) ~case_insensitive name
 
 let find_gconst_in_file_nast ?(full = false) file_name name =
   let cst = find_gconst_in_file ~full file_name name in

@@ -1,6 +1,6 @@
 [(Fun
     { f_span = [3:1-6:2]; f_annotation = (); f_mode = <opaque>;
-      f_ret = (([Pos.none], _), (Some ([3:23-26], (Hprim Tint))));
+      f_ret = (([Pos.none], int), (Some ([3:23-26], (Hprim Tint))));
       f_name = ([3:10-12], "\\f0"); f_tparams = []; f_where_constraints = [];
       f_variadic = FVnonVariadic;
       f_params =

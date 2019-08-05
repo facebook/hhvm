@@ -115,10 +115,15 @@ let force_awaitable env p ty =
   | _ ->
     env, ty
 
-let make_default_return env name =
+let make_default_return ~is_global_inference_on env name =
   if snd name = SN.Members.__construct
-  then MakeType.void (Reason.Rwitness (fst name))
-  else (Reason.Rwitness (fst name), Typing_utils.tany env)
+  then env, MakeType.void (Reason.Rwitness (fst name))
+  else begin
+    if is_global_inference_on then
+      Env.fresh_type_reason env (Reason.Rwitness (fst name))
+    else
+      env, (Reason.Rwitness (fst name), Typing_utils.tany env)
+  end
 
 let suggest_return env p ty is_code_error =
   let ty = Typing_expand.fully_expand env ty in

@@ -11,7 +11,10 @@
           (glob_files %{project_root}/test/tast/control_flow/*.exp)
           (glob_files %{project_root}/test/tast/re_prefixed_string/HH_FLAGS)
           (glob_files %{project_root}/test/tast/re_prefixed_string/*.php)
-          (glob_files %{project_root}/test/tast/re_prefixed_string/*.exp))
+          (glob_files %{project_root}/test/tast/re_prefixed_string/*.exp)
+          (glob_files %{project_root}/test/tast/global_inference/HH_FLAGS)
+          (glob_files %{project_root}/test/tast/global_inference/*.php)
+          (glob_files %{project_root}/test/tast/global_inference/*.exp))
     (action (run %{project_root}/test/verify.py %{project_root}/test/tast
     --program %{exe:../../src/hh_single_type_check.exe}
     --flags --new-inference-lambda)))

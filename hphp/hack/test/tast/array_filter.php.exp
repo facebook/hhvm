@@ -1,6 +1,6 @@
 [(Fun
     { f_span = [3:1-28:2]; f_annotation = (); f_mode = <opaque>;
-      f_ret = (([Pos.none], _), (Some ([10:4-8], (Hprim Tvoid))));
+      f_ret = (([Pos.none], void), (Some ([10:4-8], (Hprim Tvoid))));
       f_name = ([3:10-27], "\\test_array_filter"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
@@ -135,7 +135,8 @@
                       { f_span = [20:8-35]; f_annotation = ();
                         f_mode = <opaque>;
                         f_ret =
-                        (([Pos.none], _), (Some ([20:22-26], (Hprim Tbool))));
+                        (([Pos.none], bool),
+                         (Some ([20:22-26], (Hprim Tbool))));
                         f_name = ([20:8-35], ";anonymous"); f_tparams = [];
                         f_where_constraints = []; f_variadic = FVnonVariadic;
                         f_params =

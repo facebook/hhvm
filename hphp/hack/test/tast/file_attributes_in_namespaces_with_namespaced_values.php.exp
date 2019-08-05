@@ -48,7 +48,7 @@ Errors:
            fb_annotation = No unsafe blocks };
          m_fun_kind = FSync; m_user_attributes = [];
          m_ret =
-         (([Pos.none], _),
+         (([Pos.none], void),
           (Some ([5:21-32], (Happly (([5:21-32], "void"), [])))));
          m_external = false; m_doc_comment = None }
         ];

@@ -327,10 +327,6 @@ let fun_reactivity env attrs params =
 
 type array_ctx = NoArray | ElementAssignment | ElementAccess
 
-(* TODO: allow passing an inferred type here *)
-let convert_type_hint (pos, expression_annotation) =
-  (pos, (Reason.Rnone, Tany)), expression_annotation
-
 (* This function is used to determine the type of an argument.
  * When we want to type-check the body of a function, we need to
  * introduce the type of the arguments of the function in the environment
@@ -539,10 +535,16 @@ and fun_def tcopt f : Tast.fun_def option =
     ~f:(Decl_hint.hint env.Env.decl_env)
     (hint_of_type_hint f.f_ret) in
   let env = Env.set_fn_kind env f.f_fun_kind in
-  let env, locl_ty =
+  let (env, locl_ty) =
     match decl_ty with
     | None ->
-      env, (Reason.Rwitness pos, Typing_utils.tany env)
+      (* When global inference is turned on we create a fresh variable for the
+        returned type. Later on it will be reused to get back the inferred type
+        of the function. *)
+      if TCO.global_inference tcopt then
+        Env.fresh_type_reason env (Reason.Rwitness pos)
+      else
+       (env, (Reason.Rwitness pos, Typing_utils.tany env))
     | Some ty ->
       Typing_return.make_return_type Phase.localize_with_self env ty in
   let return = Typing_return.make_info f.f_fun_kind f.f_user_attributes env
@@ -586,7 +588,8 @@ and fun_def tcopt f : Tast.fun_def option =
     T.f_annotation = Env.save local_tpenv env;
     T.f_span = f.f_span;
     T.f_mode = f.f_mode;
-    T.f_ret = convert_type_hint f.f_ret;
+    (* TODO: Put a more accurate position here (T47713369) *)
+    T.f_ret = (Pos.none, locl_ty), hint_of_type_hint f.f_ret;
     T.f_name = f.f_name;
     T.f_tparams = tparams;
     T.f_where_constraints = f.f_where_constraints;
@@ -2934,7 +2937,7 @@ and anon_make tenv p f ft idl is_anon =
           T.f_annotation = Env.save local_tpenv env;
           T.f_span = f.f_span;
           T.f_mode = f.f_mode;
-          T.f_ret = convert_type_hint f.f_ret;
+          T.f_ret = (Pos.none, hret), hint_of_type_hint f.f_ret;
           T.f_name = f.f_name;
           T.f_tparams = tparams;
           T.f_where_constraints = f.f_where_constraints;
@@ -6172,9 +6175,9 @@ and class_def tcopt c =
     Typing_requirements.check_class env tc;
     if shallow_decl_enabled () then
       Typing_inheritance.check_class env tc;
-    Some (class_def_ env c tc)
+    Some (class_def_ tcopt env c tc)
 
-and class_def_ env c tc =
+and class_def_ tcopt env c tc =
   let env =
     let kind = match c.c_kind with
       | Ast_defs.Cenum -> SN.AttributeKinds.enum
@@ -6297,16 +6300,16 @@ and class_def_ env c tc =
     then List.iter (c.c_extends @ c.c_uses) (Typing_disposable.enforce_is_disposable env);
   let env, typed_vars = List.map_env env vars (class_var_def ~is_static:false) in
   let typed_method_redeclarations = [] in
-  let typed_methods = List.filter_map methods (method_def env) in
+  let typed_methods = List.filter_map methods (method_def tcopt env) in
   let env, typed_typeconsts = List.map_env env c.c_typeconsts typeconst_def in
   let env, consts = List.map_env env c.c_consts class_const_def in
   let typed_consts, const_types = List.unzip consts in
   let env = Typing_enum.enum_class_check env tc c.c_consts const_types in
-  let typed_constructor = class_constr_def env constructor in
+  let typed_constructor = class_constr_def tcopt env constructor in
   let env = Env.set_static env in
   let env, typed_static_vars =
     List.map_env env static_vars (class_var_def ~is_static:true) in
-  let typed_static_methods = List.filter_map static_methods (method_def env) in
+  let typed_static_methods = List.filter_map static_methods (method_def tcopt env) in
   let env, file_attrs = file_attributes env c.c_file_attributes in
   let methods =
     match typed_constructor with
@@ -6476,9 +6479,9 @@ and class_const_def env cc =
       T.cc_doc_comment = cc.cc_doc_comment
     }, ty)
 
-and class_constr_def env constructor =
+and class_constr_def tcopt env constructor =
   let env = { env with Env.inside_constructor = true } in
-  Option.bind constructor (method_def env)
+  Option.bind constructor (method_def tcopt env)
 
 and class_implements_type env c1 removals ctype2 =
   let params =
@@ -6645,7 +6648,7 @@ and class_type_param env ct =
     T.c_tparam_constraints = SMap.map (Tuple.T2.map_fst ~f:reify_kind) ct.c_tparam_constraints;
   }
 
-and method_def env m =
+and method_def tcopt env m =
   with_timeout env m.m_name ~do_:begin fun env ->
   (* reset the expression dependent display ids for each method body *)
   Reason.expr_display_id_map := IMap.empty;
@@ -6689,7 +6692,9 @@ and method_def env m =
   let env = Env.set_fn_kind env m.m_fun_kind in
   let env, locl_ty = match decl_ty with
     | None ->
-      env, Typing_return.make_default_return env m.m_name
+      Typing_return.make_default_return
+        ~is_global_inference_on:(TCO.global_inference tcopt)
+        env m.m_name
     | Some ret ->
       (* If a 'this' type appears it needs to be compatible with the
        * late static type
@@ -6759,7 +6764,7 @@ and method_def env m =
     T.m_params = typed_params;
     T.m_fun_kind = m.m_fun_kind;
     T.m_user_attributes = user_attributes;
-    T.m_ret = convert_type_hint m.m_ret;
+    T.m_ret = (Pos.none, locl_ty), hint_of_type_hint m.m_ret;
     T.m_body = { T.fb_ast = tb; fb_annotation = annotation };
     T.m_external = m.m_external;
     T.m_doc_comment = m.m_doc_comment;

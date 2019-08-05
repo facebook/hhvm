@@ -10,7 +10,7 @@ Errors:
 [(Fun
     { f_span = [3:1-5:2]; f_annotation = (); f_mode = <opaque>;
       f_ret =
-      (([Pos.none], _),
+      (([Pos.none], Awaitable<int>),
        (Some ([3:27-41],
               (Happly (([3:27-36], "\\Awaitable"),
                  [([3:37-40], (Hprim Tint))])))));
@@ -25,7 +25,7 @@ Errors:
   (Fun
      { f_span = [7:1-13:2]; f_annotation = (); f_mode = <opaque>;
        f_ret =
-       (([Pos.none], _),
+       (([Pos.none], Awaitable<int>),
         (Some ([7:24-38],
                (Happly (([7:24-33], "\\Awaitable"),
                   [([7:34-37], (Hprim Tint))])))));

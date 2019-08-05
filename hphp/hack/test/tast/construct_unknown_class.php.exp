@@ -7,7 +7,7 @@ Errors:
 [(Fun
     { f_span = [3:1-5:2]; f_annotation = (); f_mode = <opaque>;
       f_ret =
-      (([Pos.none], _),
+      (([Pos.none], Unknown),
        (Some ([3:32-39], (Happly (([3:32-39], "\\Unknown"), [])))));
       f_name = ([3:10-14], "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;

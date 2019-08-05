@@ -108,9 +108,9 @@ let type_fun
     (fn: Relative_path.t)
     (x: string)
     : Tast.def option =
-  match Ast_provider.find_fun_in_file ~full:true fn x with
+  match Ast_provider.find_fun_in_file_nast ~full:true fn x with
   | Some f ->
-    let fun_ = Naming.fun_ (Ast_to_nast.on_fun f) in
+    let fun_ = Naming.fun_ f in
     Nast_check.def (Aast.Fun fun_);
     let def_opt = Typing.fun_def opts fun_
       |> Option.map ~f:(fun f -> Aast.Fun f) in

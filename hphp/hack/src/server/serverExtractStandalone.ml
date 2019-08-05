@@ -30,8 +30,8 @@ let extract_function_body func =
   let filename = get_filename func in
   let abs_filename = Relative_path.to_absolute filename in
   let file_content = In_channel.read_all abs_filename in
-  let ast_function = value_exn FunctionNotFound @@ Ast_provider.find_fun_in_file filename func in
-  let open Ast in
+  let ast_function = value_exn FunctionNotFound @@ Ast_provider.find_fun_in_file_nast filename func in
+  let open Aast in
   let pos = ast_function.f_span in
   let include_first_whsp = Pos.merge (Pos.first_char_of_line pos) pos in
   Pos.get_text_from_pos file_content include_first_whsp

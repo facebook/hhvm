@@ -62,7 +62,7 @@ let extract_object_declaration tcopt obj =
   | _ -> to_string obj
 
 let rec name_from_hint hint = match hint with
-  | (_, Ast.Happly((_, s), params)) -> if List.is_empty params then s
+  | (_, Aast.Happly((_, s), params)) -> if List.is_empty params then s
     else Printf.sprintf "%s<%s>" s (list_items @@ List.map params name_from_hint)
   | _ -> raise UnexpectedDependency
 
@@ -70,10 +70,10 @@ let list_direct_ancestors cls =
   let cls_pos = Decl_provider.Class.pos cls in
   let cls_name = Decl_provider.Class.name cls in
   let filename = Pos.filename cls_pos in
-  let ast_class = value_exn DependencyNotFound @@ Ast_provider.find_class_in_file filename cls_name in
+  let ast_class = value_exn DependencyNotFound @@ Ast_provider.find_class_in_file_nast filename cls_name in
   let get_unqualified_class_name hint = strip_ns @@ name_from_hint hint in
   let list_types hints = list_items @@ List.map hints get_unqualified_class_name in
-  let open Ast in
+  let open Aast in
   let extends = list_types ast_class.c_extends in
   let implements = list_types ast_class.c_implements in
   let prefix_if_nonempty prefix s = if s = "" then "" else prefix ^ s in

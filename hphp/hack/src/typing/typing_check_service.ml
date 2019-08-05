@@ -123,9 +123,9 @@ let type_class
     (fn: Relative_path.t)
     (x: string)
     : Tast.def option =
-  match Ast_provider.find_class_in_file ~full:true fn x with
+  match Ast_provider.find_class_in_file_nast ~full:true fn x with
   | Some cls ->
-    let class_ = Naming.class_ (Ast_to_nast.on_class cls) in
+    let class_ = Naming.class_ cls in
     Nast_check.def (Aast.Class class_);
     let def_opt =
       Typing.class_def opts class_

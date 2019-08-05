@@ -156,10 +156,10 @@ let check_const
     (fn: Relative_path.t)
     (x: string)
     : Tast.def option =
-  match Ast_provider.find_gconst_in_file ~full:true fn x with
+  match Ast_provider.find_gconst_in_file_nast ~full:true fn x with
   | None -> None
   | Some cst ->
-    let cst = Naming.global_const (Ast_to_nast.on_constant cst) in
+    let cst = Naming.global_const cst in
     let def = Aast.Constant (Typing.gconst_def opts cst) in
     Tast_check.def opts def;
     Some def

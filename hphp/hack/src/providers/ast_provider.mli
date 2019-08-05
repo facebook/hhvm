@@ -13,8 +13,6 @@ val find_fun_in_file_nast :
   ?full:bool -> ?case_insensitive:bool -> Relative_path.t -> string -> Nast.fun_ option
 val find_typedef_in_file_nast :
   ?full:bool -> ?case_insensitive:bool -> Relative_path.t -> string -> Nast.typedef option
-val find_gconst_in_file :
-  ?full:bool -> Relative_path.t -> string -> Ast.gconst option
 val find_gconst_in_file_nast :
   ?full:bool -> Relative_path.t -> string -> Nast.gconst option
 

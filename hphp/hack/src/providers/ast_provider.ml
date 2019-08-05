@@ -141,8 +141,8 @@ let get_gconst defs name =
   let rec get acc defs =
   List.fold_left defs ~init:acc ~f:begin fun acc def ->
     match def with
-    | Ast.Constant cst when snd cst.Ast.cst_name = name -> Some cst
-    | Ast.Namespace(_, defs) -> get acc defs
+    | Aast.Constant cst when snd cst.Aast.cst_name = name -> Some cst
+    | Aast.Namespace(_, defs) -> get acc defs
     | _ -> acc
   end in
   get None defs
@@ -179,8 +179,6 @@ let get_nast ?(full = false) file_name =
 
 
 
-let find_gconst_in_file ?(full = false) file_name name =
-  get_gconst (get_ast ~full file_name) name
 
 let find_class_in_file_nast ?(full = false) ?(case_insensitive=false) file_name class_name =
   get_class (get_nast ~full file_name) ~case_insensitive class_name
@@ -192,8 +190,7 @@ let find_typedef_in_file_nast ?(full = false) ?(case_insensitive=false) file_nam
   get_typedef (get_nast ~full file_name) ~case_insensitive name
 
 let find_gconst_in_file_nast ?(full = false) file_name name =
-  let cst = find_gconst_in_file ~full file_name name in
-  Option.map cst Ast_to_nast.on_constant
+  get_gconst (get_nast ~full file_name) name
 
 let local_changes_push_stack () =
   ParserHeap.LocalChanges.push_stack ()

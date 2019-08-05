@@ -5,6 +5,6 @@ definition:
    id: property::C:::xhp_string
    position: line 5, characters 12-21
    span: line 5, character 12 - line 5, character 29
-   modifiers: 
+   modifiers: public 
 
 

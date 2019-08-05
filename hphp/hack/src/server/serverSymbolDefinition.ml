@@ -11,12 +11,13 @@ open Core_kernel
 open IdentifySymbolService
 open Option.Monad_infix
 open Typing_defs
-
 module SourceText = Full_fidelity_source_text
 module Syntax = Full_fidelity_positioned_syntax
 module SyntaxKind = Full_fidelity_syntax_kind
 module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(Full_fidelity_positioned_syntax)
 module Cls = Decl_provider.Class
+
+open Aast
 
 (* Element type, class name, element name. Class name refers to "origin" class,
  * we expect to find said element in AST/NAST of this class *)
@@ -34,19 +35,19 @@ let get_class_by_name x =
   Naming_table.Types.get_pos x >>= fun (pos, _) ->
   let fn = FileInfo.get_pos_filename pos in
   Ide_parser_cache.with_ide_cache @@ fun () ->
-    Ast_provider.find_class_in_file fn x
+    Ast_provider.find_class_in_file_nast fn x
 
 let get_function_by_name x =
   Naming_table.Funs.get_pos x >>= fun pos ->
   let fn = FileInfo.get_pos_filename pos in
   Ide_parser_cache.with_ide_cache @@ fun () ->
-    Ast_provider.find_fun_in_file fn x
+    Ast_provider.find_fun_in_file_nast fn x
 
 let get_gconst_by_name x =
   Naming_table.Consts.get_pos x >>= fun pos ->
   let fn = FileInfo.get_pos_filename pos in
   Ide_parser_cache.with_ide_cache @@ fun () ->
-    Ast_provider.find_gconst_in_file fn x
+    Ast_provider.find_gconst_in_file_nast fn x
 
 (* Span information is stored only in parsing AST *)
 let get_member_def (x : class_element) =
@@ -57,40 +58,28 @@ let get_member_def (x : class_element) =
   | Constructor
   | Method
   | Static_method ->
-    let methods = List.filter_map c.Ast.c_body begin function
-      | Ast.Method m -> Some m
-      | _ -> None
-    end in
-    List.find methods (fun m -> (snd m.Ast.m_name) = member_name) >>= fun m ->
+    List.find c.c_methods (fun m -> (snd m.m_name) = member_name) >>= fun m ->
     Some (FileOutline.summarize_method member_origin m)
   | Property
   | Static_property ->
-    let props = List.concat_map c.Ast.c_body begin function
-      | Ast.ClassVars { Ast.cv_kinds = kinds; Ast.cv_names = vars; _ } ->
-        List.map vars (fun var -> (kinds, var))
-      | Ast.XhpAttr (_, var, _, _) -> [([], var)]
-      | _ -> []
-    end in
-    let get_prop_name (_, (_, x), _) = x in
-    List.find props (fun p -> get_prop_name (snd p) = member_name) >>=
-      fun (kinds, p) ->
-    Some (FileOutline.summarize_property member_origin kinds p)
+    let props = c.c_vars @ (List.map c.c_xhp_attrs (fun (_, var, _, _) -> var)) in
+    let get_prop_name { cv_id; _ } = (snd cv_id) in
+    List.find props (fun p -> get_prop_name p = member_name) >>=
+      fun p ->
+    Some (FileOutline.summarize_property member_origin p)
   | Class_const ->
-    let consts = List.concat_map c.Ast.c_body begin function
-      | Ast.Const {Ast.cc_names = consts; _ } ->
-        List.map consts begin fun (((_, name), _) as const) ->
-          (const, name)
-        end
-      | _ -> []
-    end in
-    List.find consts (fun c -> snd c = member_name) >>= fun c ->
-    Some (FileOutline.summarize_const member_origin (fst c))
+    let consts, abs_consts = List.partition_map c.c_consts
+      (fun cc -> if Option.is_some cc.cc_expr then `Fst cc else `Snd cc)
+    in
+    let name_matches cc = snd cc.cc_id = member_name in
+    let res = Option.first_some
+      (List.find consts name_matches)
+      (List.find abs_consts name_matches)
+    in
+    Option.map ~f:(FileOutline.summarize_const member_origin) res
   | Typeconst ->
-    let tconsts = List.filter_map c.Ast.c_body begin function
-      | Ast.TypeConst t -> Some t
-      | _ -> None
-    end in
-    List.find tconsts (fun m -> (snd m.Ast.tconst_name) = member_name)
+    let tconsts = c.c_typeconsts in
+    List.find tconsts (fun t -> (snd t.c_tconst_name) = member_name)
       >>= fun t ->
     Some (FileOutline.summarize_typeconst member_origin t)
 
@@ -104,9 +93,9 @@ let summarize_class_typedef x =
   Naming_table.Types.get_pos x >>= fun (pos, ct) ->
     let fn = FileInfo.get_pos_filename pos in
     match ct with
-      | Naming_table.TClass -> (Ast_provider.find_class_in_file fn x >>=
+      | Naming_table.TClass -> (Ast_provider.find_class_in_file_nast fn x >>=
                 fun c -> Some (FileOutline.summarize_class c ~no_children:true))
-      | Naming_table.TTypedef -> (Ast_provider.find_typedef_in_file fn x >>=
+      | Naming_table.TTypedef -> (Ast_provider.find_typedef_in_file_nast fn x >>=
                 fun tdef -> Some (FileOutline.summarize_typedef tdef))
 
 let go ast result =

@@ -45,9 +45,7 @@ let process_class_enum fields =
 let simple_typ pos name = (pos, Happly ((pos, name), []))
 
 let create_mixed_type_hint pos =
-  (* The Pos.none on the first position is voluntary, see (T47713369) *)
-  (Pos.none, Typing_make_type.nothing (Typing_defs.Reason.Rhint pos)),
-  Some (simple_typ pos "mixed")
+  (Pos.none, Typing_make_type.mixed (Typing_defs.Reason.Rhint pos)), Some (simple_typ pos "mixed")
 
 (* Error formatter *)
 let error_msg cls field name =

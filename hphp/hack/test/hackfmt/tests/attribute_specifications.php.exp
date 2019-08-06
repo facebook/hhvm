@@ -11,7 +11,7 @@ class FooIsNotBrokenTest extends FooTest {
     ExpectedException('FooIsBrokenException'),
     ExpectedExceptionCode(
       'ErrorCode::FOO_IS_BROKEN_AND_CANNOT_POSSIBLY_BE_FIXED',
-    )
+    ),
   >>
   public function testFoo(FooEnvironment $env) {
     if ($env->isFooBroken()) {

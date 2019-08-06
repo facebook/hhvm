@@ -2250,7 +2250,7 @@ and handle_attribute_spec env node ~always_split =
       old_attribute_specification_left_double_angle = left_da;
       old_attribute_specification_attributes = attrs;
       old_attribute_specification_right_double_angle = right_da; } ->
-    transform_argish env ~allow_trailing:false left_da attrs right_da
+    transform_argish env left_da attrs right_da
   | Syntax.AttributeSpecification { attribute_specification_attributes = attrs } ->
     handle_possible_list env ~after_each:(fun _ ->
       if always_split then Newline

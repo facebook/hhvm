@@ -57,7 +57,7 @@ type func_body_ann =
   | NoUnsafeBlocks
   [@@deriving show] (* True if there are any UNSAFE blocks *)
 
-type program = ((Pos.t * ty), func_body_ann, saved_env) Aast.program
+type program = ((Pos.t * ty), func_body_ann, saved_env) Aast.program [@@deriving show]
 type def = ((Pos.t * ty), func_body_ann, saved_env) Aast.def
 type expr = ((Pos.t * ty), func_body_ann, saved_env) Aast.expr
 type expr_ = ((Pos.t * ty), func_body_ann, saved_env) Aast.expr_

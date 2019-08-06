@@ -40,6 +40,19 @@ let strip_ns obj_name =
   let (_, name) = String.rsplit2_exn obj_name '\\' in
   name
 
+(* Get "relative" namespace compared to the namespace of reference. For example,
+   for reference=/a/b/C and name=/a/b/c/d/f, return c/d/f *)
+let strip_ns_prefix reference name =
+  let split_ns name = String.lsplit2 name '\\' in
+  let reference = String.lstrip ~drop:(fun c -> c = '\\') reference in
+  let name = String.lstrip ~drop:(fun c -> c = '\\') name in
+  let rec strip_ reference name = match split_ns reference, split_ns name with
+    | (None, None) -> name
+    | (Some(ref_ns, refn), Some(ns, n)) ->
+      if ref_ns = ns then strip_ refn n else name
+    | (_, _) -> name in
+  strip_ reference name
+
 let list_items items = String.concat items ~sep:", "
 
 let tparam_name (tp: Typing_defs.decl Typing_defs.tparam) = snd tp.tp_name
@@ -58,7 +71,7 @@ let extract_object_declaration tcopt obj =
   | Fun f | FunName f ->
     let fun_type = value_exn DependencyNotFound @@ Decl_provider.get_fun f in
     let declaration = get_function_declaration tcopt f fun_type in
-    declaration ^ "{throw new Exception();}"
+    declaration ^ "{throw new \\Exception();}"
   | _ -> to_string obj
 
 let rec name_from_hint hint = match hint with
@@ -71,8 +84,8 @@ let list_direct_ancestors cls =
   let cls_name = Decl_provider.Class.name cls in
   let filename = Pos.filename cls_pos in
   let ast_class = value_exn DependencyNotFound @@ Ast_provider.find_class_in_file_nast filename cls_name in
-  let get_unqualified_class_name hint = strip_ns @@ name_from_hint hint in
-  let list_types hints = list_items @@ List.map hints get_unqualified_class_name in
+  let get_namespaced_class_name hint = strip_ns_prefix cls_name @@ name_from_hint hint in
+  let list_types hints = list_items @@ List.map hints get_namespaced_class_name in
   let open Aast in
   let extends = list_types ast_class.c_extends in
   let implements = list_types ast_class.c_implements in
@@ -131,10 +144,11 @@ let construct_typedef_declaration tcopt t =
   let typ = if td.td_vis = Aast_defs.Transparent then "type" else "newtype" in
   Printf.sprintf "%s %s = %s;" typ (strip_ns t) (Typing_print.full_decl tcopt td.td_type)
 
-let construct_type_declaration tcopt t fields acc =
-  match Decl_provider.get_class t with
-  | Some _ -> construct_class_declaration tcopt t fields :: acc
-  | None -> construct_typedef_declaration tcopt t :: acc
+let construct_type_declaration tcopt t fields =
+  if Option.is_some @@ Decl_provider.get_class t then
+    construct_class_declaration tcopt t fields
+  else
+    construct_typedef_declaration tcopt t
 
 (* TODO: Tfun? Any other cases? *)
 let add_dep ty deps = match ty with
@@ -199,15 +213,85 @@ let collect_dependencies tcopt func =
   | AllMembers _ -> raise UnexpectedDependency
   | _ -> HashSet.add globals obj in
   HashSet.iter group_by_type dependencies;
-  let global_code = HashSet.fold (fun el l -> extract_object_declaration tcopt el :: l) globals [] in
-  let code = Caml.Hashtbl.fold (construct_type_declaration tcopt) types global_code in
-  List.map code format
+  (types, globals)
 
+let global_dep_name = function
+  | Typing_deps.Dep.GConst s | Typing_deps.Dep.GConstName s
+  | Typing_deps.Dep.Fun s | Typing_deps.Dep.FunName s | Typing_deps.Dep.Class s -> s
+  | _ -> raise UnexpectedDependency
+
+(* Every namespace can contain declarations of classes, functions, constants
+   as well as nested namespaces *)
+type hack_namespace = {
+  namespaces : (string, hack_namespace) Caml.Hashtbl.t;
+  decls : string HashSet.t;
+}
+
+let subnamespace index name =
+  let nspaces, _ = String.rsplit2_exn ~on:'\\' name in
+  if nspaces = "" then None else
+  let nspaces = String.strip ~drop:(fun c -> c = '\\') nspaces in
+  let nspaces = String.split ~on:'\\' nspaces in
+  List.nth nspaces index
+
+(* Build the recursive hack_namespace data structure for given declarations *)
+let sort_by_namespace declarations =
+  let rec add_decl nspace decl index =
+    match subnamespace index decl with
+    | Some name -> if Caml.Hashtbl.find_opt nspace.namespaces name = None then
+      (let nested = Caml.Hashtbl.create 0 in
+      let declarations = HashSet.create 0 in
+      Caml.Hashtbl.add nspace.namespaces name { namespaces = nested; decls = declarations});
+      add_decl (Caml.Hashtbl.find nspace.namespaces name) decl (index + 1)
+    | None -> HashSet.add nspace.decls decl in
+  let namespaces = { namespaces = Caml.Hashtbl.create 0; decls = HashSet.create 0 } in
+  HashSet.iter (fun decl -> add_decl namespaces decl 0) declarations;
+  namespaces
+
+(* Takes declarations of Hack classes, functions, constants (map name -> code)
+   and produces file(s) with Hack code:
+    1) Groups declarations by namespaces, creating hack_namespace data structure
+    2) Recursively prints the code in every namespace.
+   Special case: since Hack files cannot contain both namespaces and toplevel
+   declarations, we "generate" a separate file for toplevel declarations, using
+   hh_single_type_check multifile syntax.
+*)
+let get_code (decl_names: string HashSet.t) declarations =
+  let global_namespace = sort_by_namespace decl_names in
+  let code_from_namespace_decls name acc =
+    List.append (Caml.Hashtbl.find_all declarations name) acc in
+  let hh_prefix = "<?hh" in
+  (* Toplevel code has to be in a separate file *)
+  let toplevel = HashSet.fold code_from_namespace_decls global_namespace.decls [] in
+  let toplevel = format @@ String.concat ~sep:"\n" @@ hh_prefix :: toplevel in
+  let rec code_from_namespace nspace_name nspace_content code =
+    let code = "}\n"::code in
+    let code = Caml.Hashtbl.fold code_from_namespace nspace_content.namespaces code in
+    let code = HashSet.fold code_from_namespace_decls nspace_content.decls code in
+    Printf.sprintf "namespace %s {" nspace_name :: code in
+  let code = Caml.Hashtbl.fold code_from_namespace global_namespace.namespaces [] in
+  let code = format @@ String.concat ~sep:"\n" @@ hh_prefix :: code in
+  let file_or_ignore filename code =
+    if (String.strip code) = hh_prefix then ""
+    else Printf.sprintf "////%s\n%s" filename code in
+  (file_or_ignore "toplevel.php" toplevel) ^ (file_or_ignore "namespaces.php" code)
 
 let go tcopt function_name =
   try
-    let header = "<?hh\n" in
+    let (types, globals) = collect_dependencies tcopt function_name in
+    let declarations = Caml.Hashtbl.create 0 in
+    let decl_names = HashSet.create 0 in
+    let add_global_declaration dep =
+      let name = global_dep_name dep in
+      HashSet.add decl_names name;
+      Caml.Hashtbl.add declarations name (extract_object_declaration tcopt dep) in
+    let add_class_declaration cls fields =
+      HashSet.add decl_names cls;
+      Caml.Hashtbl.add declarations cls (construct_type_declaration tcopt cls fields) in
+    HashSet.iter add_global_declaration globals;
+    Caml.Hashtbl.iter add_class_declaration types;
     let function_text = extract_function_body function_name in
-    let dependencies = collect_dependencies tcopt function_name in
-    format @@ String.concat ~sep:"\n" (header :: dependencies @ [function_text])
+    Caml.Hashtbl.add declarations function_name function_text;
+    HashSet.add decl_names function_name;
+    get_code decl_names declarations
   with FunctionNotFound -> "Function not found!"

@@ -94,13 +94,14 @@ let go env (file, line, char) =
   let (mode, tree) = Full_fidelity_ast.parse_text parser_env source_text in
   let results = Full_fidelity_ast.lower_tree parser_env source_text mode tree in
   let ast = results.Full_fidelity_ast.ast in
+  let ast = Ast_to_nast.convert ast in
   let tast = ServerIdeUtils.check_ast tcopt ast in
   let offset = SourceText.position_to_offset source_text (line, char) in
   get_positional_info (Full_fidelity_ast.PositionedSyntaxTree.root tree) offset
   >>= fun ((symbol_line, symbol_char), argument_idx) ->
   let results = IdentifySymbolService.go tast symbol_line symbol_char in
   List.hd results
-  >>= get_occurrence_info (Ast_to_nast.convert ast) tast (symbol_line, symbol_char)
+  >>= get_occurrence_info ast tast (symbol_line, symbol_char)
   >>| fun (occurrence, typing_env, ft, def_opt) ->
   let open Typing_defs in
   let open Lsp.SignatureHelp in

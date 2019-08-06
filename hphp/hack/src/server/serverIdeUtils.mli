@@ -35,7 +35,7 @@ val check_fileinfo :
     AST. *)
 val check_ast :
   TypecheckerOptions.t ->
-  Ast.program ->
+  Nast.program ->
   Tast.program
 
 (* Parses, names, declares and typechecks the content buffer, then run f

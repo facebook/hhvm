@@ -58,26 +58,14 @@ let declare_and_check_ast ?(path=path) ?content ~make_ast ~f tcopt =
   Errors.do_ @@ make_then_revert_local_changes begin fun () ->
     Fixme_provider.remove_batch (Relative_path.Set.singleton path);
     let ast = make_ast () in
-    let funs, classes, typedefs, consts =
-      List.fold_left ast ~f:begin fun (funs, classes, typedefs, consts) def ->
-        match def with
-        | Ast.Fun { Ast.f_name; _ } ->
-          (FileInfo.pos_full f_name)::funs, classes, typedefs, consts
-        | Ast.Class { Ast.c_name; _ } ->
-          funs, (FileInfo.pos_full c_name)::classes, typedefs, consts
-        | Ast.Typedef { Ast.t_id; _ } ->
-          funs, classes, (FileInfo.pos_full t_id)::typedefs, consts
-        | Ast.Constant { Ast.cst_name; _ } ->
-          funs, classes, typedefs, (FileInfo.pos_full cst_name)::consts
-        | _ -> funs, classes, typedefs, consts
-      end ~init:([], [], [], []) in
+    let funs, classes, typedefs, consts = Nast.get_defs ast in
 
     let file_info = { FileInfo.empty_t with
                       FileInfo.funs; classes; typedefs; consts;
                     } in
     let { FileInfo.n_funs; n_classes; n_types; n_consts; } =
       FileInfo.simplify file_info in
-    Ast_provider.provide_ast_hint path (Ast_to_nast.convert ast) Ast_provider.Full;
+    Ast_provider.provide_ast_hint path ast Ast_provider.Full;
     NamingGlobal.remove_decls
       ~funs:n_funs
       ~classes:n_classes
@@ -88,11 +76,10 @@ let declare_and_check_ast ?(path=path) ?content ~make_ast ~f tcopt =
     (* Decl is not necessary to run typing, since typing would get
      * whatever it needs using lazy decl, but we run it anyway in order to
      * ensure that hooks attached to decl phase are executed. *)
-    let nast = Ast_to_nast.convert ast in
-    Decl.name_and_declare_types_program nast;
+    Decl.name_and_declare_types_program ast;
 
     let make_tast () =
-      let nast = Naming.program nast in
+      let nast = Naming.program ast in
       Typing.nast_to_tast tcopt nast
     in
 
@@ -114,7 +101,7 @@ let declare_and_check_ast ?(path=path) ?content ~make_ast ~f tcopt =
  *)
 let declare_and_check ?(path=path) content ~f tcopt =
   let make_ast () =
-    if Ide_parser_cache.is_enabled () then
+    let ast = if Ide_parser_cache.is_enabled () then
       (Ide_parser_cache.get_ast tcopt path content).Parser_return.ast
     else
       (* We need to fail open since IDE services need to be able to run over
@@ -127,6 +114,8 @@ let declare_and_check ?(path=path) content ~f tcopt =
         path
         content
       ).Parser_return.ast
+    in
+    Ast_to_nast.convert ast
   in
   try
     declare_and_check_ast ~make_ast ~f ~path ~content tcopt

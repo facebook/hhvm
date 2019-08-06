@@ -496,7 +496,6 @@ let go_from_ast ast line char =
 let go tcopt path content line char =
   try
     let ast = parse tcopt path content in
-    let ast = Ast_to_nast.convert ast in
     let results_list = go_from_ast ast line char in
     List.map results_list (fun pos -> Pos.set_file path pos)
   with Failure error ->

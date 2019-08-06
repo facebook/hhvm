@@ -410,7 +410,7 @@ let outline popt content =
     in
     Parser.from_text_with_legacy env content
   end in
-  let result = outline_ast (Ast_to_nast.convert ast) in
+  let result = outline_ast ast in
   add_docblocks result comments
 
 let rec print_def ~short_pos indent def =

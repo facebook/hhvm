@@ -115,7 +115,7 @@ let declare_and_check ?(path=path) content ~f tcopt =
         content
       ).Parser_return.ast
     in
-    Ast_to_nast.convert ast
+    ast
   in
   try
     declare_and_check_ast ~make_ast ~f ~path ~content tcopt

@@ -67,21 +67,19 @@ let get_from_local_cache ~full file_name =
     let f contents =
       let contents = if (FindUtils.file_filter fn) then contents else "" in
       match Ide_parser_cache.get_ast_if_active popt file_name contents with
-      | Some ast -> Ast_to_nast.convert ast.Parser_return.ast
+      | Some ast -> ast.Parser_return.ast
       | None ->
         let source = Full_fidelity_source_text.make file_name contents in
         match Full_fidelity_parser.parse_mode ~rust:(ParserOptions.rust popt) source with
         | None
         | Some FileInfo.Mphp -> []
         | Some _ ->
-          let ast = (Full_fidelity_ast.defensive_program
+          (Full_fidelity_ast.defensive_program
             ~quick:(not full)
             popt
             file_name
             contents
           ).Parser_return.ast
-          in
-          Ast_to_nast.convert ast
     in
     let ast = Option.value_map
       ~default:[]

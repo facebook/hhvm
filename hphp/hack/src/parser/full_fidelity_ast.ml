@@ -3738,7 +3738,7 @@ let legacy (x : result) : Parser_return.t =
   { Parser_return.file_mode = Option.some_if (x.fi_mode <> FileInfo.Mphp) x.fi_mode
   ; Parser_return.is_hh_file = x.is_hh_file
   ; Parser_return.comments  = x.comments
-  ; Parser_return.ast       = x.ast
+  ; Parser_return.ast       = Ast_to_nast.convert x.ast
   ; Parser_return.content   = x.content
   }
 

@@ -606,10 +606,10 @@ let parse_name_and_decl popt files_contents =
           let ast =
             let { Parser_return.ast; _ } = parsed_file in
             if ParserOptions.deregister_php_stdlib popt
-            then Ast_utils.deregister_ignored_attributes ast
+            then Nast.deregister_ignored_attributes ast
             else ast
           in
-          Ast_provider.provide_ast_hint fn (Ast_to_nast.convert ast) Ast_provider.Full;
+          Ast_provider.provide_ast_hint fn ast Ast_provider.Full;
           { parsed_file with Parser_return.ast }
         end
       end
@@ -619,7 +619,7 @@ let parse_name_and_decl popt files_contents =
         let {Parser_return.file_mode; comments; ast; _} = parsed_file in
         (* If the feature is turned on, deregister functions with attribute
         __PHPStdLib. This does it for all functions, not just hhi files *)
-        let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
+        let funs, classes, typedefs, consts = Nast.get_defs ast in
         { FileInfo.
           file_mode; funs; classes; typedefs; consts; comments = Some comments;
           hash = None;
@@ -635,7 +635,7 @@ let parse_name_and_decl popt files_contents =
 
     Relative_path.Map.iter parsed_files begin fun fn parsed_file ->
       Errors.run_in_context fn Errors.Decl begin fun () ->
-        Decl.name_and_declare_types_program (Ast_to_nast.convert parsed_file.Parser_return.ast)
+        Decl.name_and_declare_types_program parsed_file.Parser_return.ast
       end
     end;
 

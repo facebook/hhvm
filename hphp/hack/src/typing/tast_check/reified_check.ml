@@ -10,12 +10,53 @@
 open Core_kernel
 open Aast
 open Typing_defs
+open Type_validator
 
 module Env = Tast_env
 module SN = Naming_special_names
 module UA = SN.UserAttributes
 module Cls = Decl_provider.Class
 module Nast = Aast
+
+let validator = object(this) inherit type_validator
+
+  method! on_tapply acc r (_, h) _ =
+    if h = SN.Classes.cTypename then
+      this#invalid acc r "a typename"
+    else if  h = SN.Classes.cClassname then
+      this#invalid acc r "a classname"
+    else if h = SN.Typehints.wildcard && not (Env.get_allow_wildcards acc.env) then
+      this#invalid acc r "a wildcard"
+    else
+      acc
+
+  method! on_tgeneric acc r t =
+    match Env.get_reified acc.env t with
+    | Nast.Erased -> this#invalid acc r "not reified"
+    | Nast.SoftReified -> this#invalid acc r "soft reified"
+    | Nast.Reified -> acc
+
+  method! on_tarraykind acc r _ =
+    this#invalid acc r "an array"
+
+  method! on_tfun acc r fty =
+    match fty with
+    | { ft_arity = (Fvariadic _ | Fellipsis _); _ } ->
+      this#invalid acc r "a function type with variadic args"
+    | _ -> acc
+
+  method! on_taccess acc _ _ =
+    (* Handled by reusing Type_const_check's validator. *)
+    acc
+
+  method! on_tabstract acc r ak _ty_opt =
+    match ak with
+    | AKdependent (`this) -> this#invalid acc r "the late static bound this type"
+    | AKgeneric _
+    | AKnewtype _
+    | AKdependent _ -> acc
+
+end
 
 let tparams_has_reified tparams =
   List.exists tparams ~f:(fun tparam -> tparam.tp_reified <> Nast.Erased)
@@ -47,7 +88,6 @@ let verify_has_consistent_bound env (tparam: Tast.tparam) =
     let cbs = List.map ~f:(Cls.name) valid_classes in
     Errors.invalid_newable_type_param_constraints tparam.tp_name cbs
 
-
 (* When passing targs to a reified position, they must either be concrete types
  * or reified type parameters. This prevents the case of
  *
@@ -64,49 +104,17 @@ let verify_targ_valid env tparam targ =
   begin match tparam.tp_reified with
   | Nast.Reified
   | Nast.SoftReified ->
-    let p, _h = targ in
     let ty = Env.hint_to_ty env targ in
     begin match ty with
-    | _, Tapply ((pw, h), [])
-      when h = SN.Typehints.wildcard && not (Env.get_allow_wildcards env) ->
-      Errors.invalid_reified_argument tparam.tp_name pw "a wildcard"
-    | _, Tapply ((pw, h), _) when h = SN.Classes.cClassname ->
-      Errors.invalid_reified_argument tparam.tp_name pw "a classname"
-    | _, Tapply ((pw, h), _) when h = SN.Classes.cTypename ->
-      Errors.invalid_reified_argument tparam.tp_name pw "a typename"
-    | _, Tgeneric t ->
-      begin match (Env.get_reified env t) with
-      | Nast.Erased -> Errors.invalid_reified_argument tparam.tp_name p "not reified"
-      | Nast.SoftReified -> Errors.invalid_reified_argument tparam.tp_name p "soft reified"
-      | Nast.Reified -> () end
-    | _, Tarray _
-    | _, Tdarray _
-    | _, Tvarray _
-    | _, Tvarray_or_darray _ ->
-      Errors.invalid_reified_argument tparam.tp_name p "an array"
-    | _, Tfun { ft_arity = (Fvariadic _ | Fellipsis _); _ } ->
-      Errors.invalid_reified_argument tparam.tp_name p "a function type with variadic args"
-    | _, Tthis ->
-      Errors.invalid_reified_argument tparam.tp_name p "the late static bound this type"
     | _, Taccess _ ->
-      let emit_err =
+      let emit_error =
         Errors.invalid_reified_argument_disallow_php_arrays tparam.tp_name
       in
-      Type_const_check.php_array_validator#validate_type env ty emit_err
-    | _, Tdynamic
-    | _, Tfun _
-    | _, Tprim _
-    | _, Toption _
-    | _, Tshape _
-    | _, Ttuple _
-    | _, Tlike _
-    | _, Tapply _
-    | _, Tnothing
-    | _, Tnonnull
-    | _, Tmixed
-    | _, Tany
-    | _, Terr -> ()
+      Type_const_check.php_array_validator#validate_type env ty emit_error
+    | _ -> ()
     end;
+    let emit_error _ p kind = Errors.invalid_reified_argument tparam.tp_name p kind in
+    validator#validate_type env ty emit_error
   | Nast.Erased -> () end;
 
   begin if Attributes.mem UA.uaEnforceable tparam.tp_user_attributes then

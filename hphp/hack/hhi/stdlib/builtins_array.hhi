@@ -232,8 +232,6 @@ function array_unshift(&$array, $var, ...$args);
 <<__PHPStdLib, __Rx>>
 function array_values<Tv>(Container<Tv> $input): array<Tv>;
 <<__PHPStdLib, __Deprecated('This function is scheduled for removal')>>
-function array_walk_recursive(&$input, $funcname, $userdata = null);
-<<__PHPStdLib, __Deprecated('This function is scheduled for removal')>>
 function array_walk(&$input, $funcname, $userdata = null);
 <<__PHPStdLib>>
 function shuffle(&$array);

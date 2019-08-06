@@ -211,6 +211,7 @@ let parse_options () =
   let const_attribute = ref false in
   let disallow_goto = ref false in
   let const_default_func_args = ref false in
+  let disallow_silence = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -478,6 +479,9 @@ let parse_options () =
     "--const-default-func-args",
       Arg.Set const_default_func_args,
       "Statically check default function arguments are constant initializers";
+    "--disallow-silence",
+      Arg.Set disallow_silence,
+      "Disallow the error suppression operator, @";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -529,6 +533,7 @@ let parse_options () =
     ~tco_const_attribute:!const_attribute
     ~po_allow_goto:(not !disallow_goto)
     ~po_const_default_func_args:!const_default_func_args
+    ~po_disallow_silence:!disallow_silence
     ()
   in
   let tcopt = {

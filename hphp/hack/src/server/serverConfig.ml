@@ -328,6 +328,7 @@ let load config_filename options =
     ?po_disable_legacy_attribute_syntax:(bool_opt "disable_legacy_attribute_syntax" config)
     ?tco_const_attribute:(bool_opt "const_attribute" config)
     ?po_const_default_func_args:(bool_opt "const_default_func_args" config)
+    ?po_disallow_silence:(bool_opt "disallow_silence" config)
     ()
   in
   Errors.ignored_fixme_codes :=

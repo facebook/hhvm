@@ -53,6 +53,8 @@ let disable_legacy_attribute_syntax = GlobalOptions.po_disable_legacy_attribute_
 let with_disable_legacy_attribute_syntax po b =
   { po with GlobalOptions.po_disable_legacy_attribute_syntax = b }
 
+let disallow_silence = GlobalOptions.po_disallow_silence
+
 let make
   ~auto_namespace_map
   ~codegen
@@ -68,6 +70,7 @@ let make
   ~allow_new_attribute_syntax
   ~disable_legacy_attribute_syntax
   ~const_default_func_args
+  ~disallow_silence
 = GlobalOptions.{
   default with
   po_auto_namespace_map = auto_namespace_map;
@@ -84,4 +87,5 @@ let make
   po_allow_new_attribute_syntax = allow_new_attribute_syntax;
   po_disable_legacy_attribute_syntax = disable_legacy_attribute_syntax;
   po_const_default_func_args = const_default_func_args;
+  po_disallow_silence = disallow_silence;
 }

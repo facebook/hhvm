@@ -1501,8 +1501,10 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         | Some TK.Plus                    -> Unop (Uplus,  expr)
         | Some TK.Minus                   -> Unop (Uminus, expr)
         | Some TK.Ampersand               -> Unop (Uref,   expr)
-        | Some TK.At     when env.codegen -> Unop (Usilence, expr)
-        | Some TK.At                      -> snd expr
+        | Some TK.At                      ->
+          if ParserOptions.disallow_silence env.parser_options then
+            raise_parsing_error env (`Node operator) SyntaxError.no_silence;
+          if env.codegen then Unop (Usilence, expr) else snd expr
         | Some TK.Inout                   -> Callconv (Pinout, expr)
         | Some TK.Await                   ->
             lift_await expr env location

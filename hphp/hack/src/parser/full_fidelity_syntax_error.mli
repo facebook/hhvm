@@ -375,3 +375,4 @@ val no_const_late_init_props : string
 val no_const_static_props : string
 val no_const_abstract_final_class : string
 val no_legacy_attribute_syntax : string
+val no_silence : string

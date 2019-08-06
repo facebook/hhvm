@@ -757,3 +757,6 @@ let no_const_abstract_final_class =
 
 let no_legacy_attribute_syntax =
   "The <<...>> syntax for user attributes is not allowed. Use the @ syntax instead."
+
+let no_silence =
+  "The error suppression operator @ is not allowed"

@@ -76,6 +76,7 @@ type t = {
   po_disable_legacy_attribute_syntax : bool;
   tco_const_attribute : bool;
   po_const_default_func_args : bool;
+  po_disallow_silence : bool;
 } [@@deriving show]
 
 let tco_experimental_isarray = "is_array"
@@ -227,6 +228,7 @@ let default = {
   po_disable_legacy_attribute_syntax = false;
   tco_const_attribute = false;
   po_const_default_func_args = false;
+  po_disallow_silence = false;
 }
 
 let make
@@ -297,6 +299,7 @@ let make
   ?(po_disable_legacy_attribute_syntax = default.po_disable_legacy_attribute_syntax)
   ?(tco_const_attribute = default.tco_const_attribute)
   ?(po_const_default_func_args = default.po_const_default_func_args)
+  ?(po_disallow_silence = default.po_disallow_silence)
   ()
 = {
   tco_safe_array;
@@ -367,6 +370,7 @@ let make
   po_disable_legacy_attribute_syntax;
   tco_const_attribute;
   po_const_default_func_args;
+  po_disallow_silence;
 }
 let tco_safe_array t = t.tco_safe_array
 let tco_safe_vector_array t = t.tco_safe_vector_array
@@ -468,6 +472,8 @@ let po_disable_legacy_attribute_syntax t = t.po_disable_legacy_attribute_syntax
 let tco_const_attribute t = t.tco_const_attribute
 
 let po_const_default_func_args t = t.po_const_default_func_args
+
+let po_disallow_silence t = t.po_disallow_silence
 
 let setup_pocket_universes env enabled =
   let exp_features = env.tco_experimental_features in

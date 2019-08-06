@@ -465,6 +465,7 @@ let make_popt () =
     ~allow_new_attribute_syntax:(allow_new_attribute_syntax co)
     ~disable_legacy_attribute_syntax:(disable_legacy_attribute_syntax co)
     ~const_default_func_args:(const_default_func_args co)
+    ~disallow_silence:false
 
 let process_single_source_unit compiler_options
   handle_output handle_exception filename source_text source_root =

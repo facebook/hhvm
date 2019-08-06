@@ -39,11 +39,8 @@ let validator = object(this) inherit type_validator
   method! on_tarraykind acc r _ =
     this#invalid acc r "an array"
 
-  method! on_tfun acc r fty =
-    match fty with
-    | { ft_arity = (Fvariadic _ | Fellipsis _); _ } ->
-      this#invalid acc r "a function type with variadic args"
-    | _ -> acc
+  method! on_tfun acc r _ =
+    this#invalid acc r "a function type"
 
   method! on_taccess acc r (root, ids) =
     (* We care only about the last type constant we access in the chain

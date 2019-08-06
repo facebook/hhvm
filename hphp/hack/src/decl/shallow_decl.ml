@@ -83,8 +83,8 @@ let typeconst env c tc =
         match Attrs.find SN.UserAttributes.uaEnforceable attributes with
         | Some { ua_name = (pos, _); _ } -> pos, true
         | None -> Pos.none, false in
-      let disallow_php_arrays =
-        match Attrs.find SN.UserAttributes.uaDisallowPHPArrays attributes with
+      let reifiable =
+        match Attrs.find SN.UserAttributes.uaReifiable attributes with
         | Some { ua_name = (pos, _); _ } -> Some pos
         | None -> None in
       Some {
@@ -94,7 +94,7 @@ let typeconst env c tc =
         stc_type = ty;
         stc_enforceable = enforceable;
         stc_visibility = tc.c_tconst_visibility;
-        stc_disallow_php_arrays = disallow_php_arrays;
+        stc_reifiable = reifiable;
       }
 let make_xhp_attr cv = Option.map cv.cv_xhp_attr (fun xai -> {
   xa_tag = (match xai.xai_tag with

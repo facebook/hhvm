@@ -3,17 +3,17 @@
 type Foo = darray<string, mixed>;
 
 abstract class C {
-  <<__DisallowPHPArrays>>
+  <<__Reifiable>>
   abstract const type Ta;
 
-  <<__DisallowPHPArrays>>
+  <<__Reifiable>>
   abstract const type Tb = vec<varray<int>>;
 
   const type Tc = this::Ta;
 
   abstract const type Td;
 
-  <<__DisallowPHPArrays>>
+  <<__Reifiable>>
   const type Te = this::Td;
 }
 
@@ -23,6 +23,6 @@ final class D extends C {
 }
 
 abstract class E {
-  <<__DisallowPHPArrays>>
+  <<__Reifiable>>
   abstract const type Tb as Foo;
 }

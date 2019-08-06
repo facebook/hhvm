@@ -1,6 +1,0 @@
-File "typeconst_disallow_php_arrays.php", line 11, characters 21-30:
-PHP arrays cannot be used as a reified type argument (Typing[4305])
-File "typeconst_disallow_php_arrays.php", line 8, characters 23-26:
-This abstract type constant does not have the __DisallowPHPArrays attribute
-File "typeconst_disallow_php_arrays.php", line 3, characters 15-15:
-T is reified

@@ -1455,7 +1455,7 @@ module PrintClass = struct
     ttc_origin = origin;
     ttc_enforceable = (_, enforceable);
     ttc_visibility = _;
-    ttc_disallow_php_arrays = disallow_php_arrays;
+    ttc_reifiable = reifiable;
   } =
     let name = snd tc_name in
     let ty x = Full.to_string_decl tcopt x in
@@ -1471,7 +1471,7 @@ module PrintClass = struct
     in
     name^constraint_^type_^" (origin:"^origin^")" ^
       (if enforceable then " (enforceable)" else "")^
-      (if disallow_php_arrays <> None then " (PHP arrays disallowed)" else "")
+      (if reifiable <> None then " (reifiable)" else "")
 
   let typeconsts tcopt m =
     Sequence.fold m ~init:"" ~f:begin fun acc (_, v) ->

@@ -2594,7 +2594,7 @@ let invalid_reified_argument (def_pos, def_name) hint_pos arg_pos arg_kind =
     def_pos, def_name ^ " is reified"
   ]
 
-let invalid_reified_argument_disallow_php_arrays (def_pos, def_name) arg_pos ty_pos ty_msg =
+let invalid_reified_argument_reifiable (def_pos, def_name) arg_pos ty_pos ty_msg =
   add_list (Typing.err_code Typing.InvalidReifiedArgument) [
     arg_pos, "PHP arrays cannot be used as a reified type argument";
     ty_pos, String.capitalize ty_msg;
@@ -2987,10 +2987,10 @@ let invalid_enforceable_type kind_str (tp_pos, tp_name) targ_pos ty_pos ty_str =
     ty_pos, "This type is not enforceable because it has " ^ ty_str
   ]
 
-let disallow_php_arrays_attr attr_pos decl_kind decl_pos ty_pos ty_msg =
+let reifiable_attr attr_pos decl_kind decl_pos ty_pos ty_msg =
   add_list (Typing.err_code Typing.DisallowPHPArraysAttr) [
     decl_pos, "Invalid "^decl_kind;
-    attr_pos, "This type constant has the __DisallowPHPArrays attribute";
+    attr_pos, "This type constant has the __Reifiable attribute";
     ty_pos, "But "^ty_msg;
   ]
 

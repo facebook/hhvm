@@ -42,7 +42,7 @@ let php_array_validator = object(this) inherit type_validator
             Env.get_class env class_name >>= fun class_ ->
             Cls.get_typeconst class_ tconst >>= fun typeconst ->
             match typeconst.ttc_abstract with
-            | _ when typeconst.ttc_disallow_php_arrays <> None -> Some acc
+            | _ when typeconst.ttc_reifiable <> None -> Some acc
             | TCConcrete -> Some acc
             (* This handles the case for partially abstract type constants. In this case
              * we know the assigned type will be chosen if the root is the same as the
@@ -53,7 +53,7 @@ let php_array_validator = object(this) inherit type_validator
               let r = Reason.Rwitness (fst typeconst.ttc_name) in
               let acc = this#invalid acc r
                 "this abstract type constant does not have the \
-                __DisallowPHPArrays attribute"
+                __Reifiable attribute"
               in
               Some acc
           end
@@ -61,11 +61,11 @@ let php_array_validator = object(this) inherit type_validator
       end
 end
 
-let disallow_php_arrays env tc attr_pos =
+let reifiable env tc attr_pos =
   let check_php_arrays kind ty_opt =
     match ty_opt with
     | Some ty ->
-      let emit_err = Errors.disallow_php_arrays_attr attr_pos kind in
+      let emit_err = Errors.reifiable_attr attr_pos kind in
       php_array_validator#validate_type env ty emit_err
     | None -> ()
   in
@@ -103,6 +103,6 @@ let handler = object
           end;
         | _ -> ()
         end;
-        Option.iter tc.ttc_disallow_php_arrays (disallow_php_arrays env tc);
+        Option.iter tc.ttc_reifiable (reifiable env tc);
       end;
   end

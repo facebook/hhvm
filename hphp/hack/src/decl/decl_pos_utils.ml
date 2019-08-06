@@ -217,7 +217,7 @@ let rec ty (p, x) =
       ttc_origin = tc.ttc_origin;
       ttc_enforceable = Tuple.T2.map_fst ~f:pos tc.ttc_enforceable;
       ttc_visibility = tc.ttc_visibility;
-      ttc_disallow_php_arrays = Option.map tc.ttc_disallow_php_arrays pos;
+      ttc_reifiable = Option.map tc.ttc_reifiable pos;
     }
 
   and user_attribute ua =

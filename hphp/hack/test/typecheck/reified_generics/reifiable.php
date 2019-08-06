@@ -3,7 +3,7 @@
 class C<reify T> {}
 
 abstract class X {
-  <<__DisallowPHPArrays>>
+  <<__Reifiable>>
   abstract const type TFoo;
   abstract const type TBar;
 

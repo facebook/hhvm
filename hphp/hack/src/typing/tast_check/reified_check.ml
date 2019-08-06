@@ -108,7 +108,7 @@ let verify_targ_valid env tparam targ =
     begin match ty with
     | _, Taccess _ ->
       let emit_error =
-        Errors.invalid_reified_argument_disallow_php_arrays tparam.tp_name
+        Errors.invalid_reified_argument_reifiable tparam.tp_name
       in
       Type_const_check.php_array_validator#validate_type env ty emit_error
     | _ -> ()

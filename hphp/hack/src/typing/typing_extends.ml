@@ -549,11 +549,11 @@ let tconst_subsumption env parent_typeconst child_typeconst =
   | _ -> ()
   end;
 
-  begin match parent_typeconst.ttc_disallow_php_arrays with
+  begin match parent_typeconst.ttc_reifiable with
   | None -> ()
   | Some pos ->
     let tast_env = Tast_env.typing_env_as_tast_env env in
-    Type_const_check.disallow_php_arrays tast_env child_typeconst pos
+    Type_const_check.reifiable tast_env child_typeconst pos
   end;
 
   (* If the parent cannot be overridden, we unify the types otherwise we ensure

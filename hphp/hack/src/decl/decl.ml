@@ -724,10 +724,10 @@ and typeconst_fold c ((typeconsts, consts) as acc) stc =
       else match ptc_opt with
         | Some ptc -> ptc.ttc_enforceable
         | None -> Pos.none, false in
-    let disallow_php_arrays =
-      if stc.stc_disallow_php_arrays <> None
-      then stc.stc_disallow_php_arrays
-      else Option.bind ptc_opt (fun ptc -> ptc.ttc_disallow_php_arrays)
+    let reifiable =
+      if stc.stc_reifiable <> None
+      then stc.stc_reifiable
+      else Option.bind ptc_opt (fun ptc -> ptc.ttc_reifiable)
     in
     let tc = {
       ttc_abstract = stc.stc_abstract;
@@ -737,7 +737,7 @@ and typeconst_fold c ((typeconsts, consts) as acc) stc =
       ttc_origin = c_name;
       ttc_enforceable = enforceable;
       ttc_visibility = vis;
-      ttc_disallow_php_arrays = disallow_php_arrays;
+      ttc_reifiable = reifiable;
     } in
     let typeconsts = SMap.add (snd stc.stc_name) tc typeconsts in
     typeconsts, consts

@@ -173,6 +173,45 @@ let get_defs ast =
 in
   get_defs ast ([],[],[],[])
 
+let ast_no_pos_or_docblock_mapper = object
+  inherit [_] Aast.endo as super
+  method! on_pos _ _pos = Pos.none
+
+  method on_'fb _ (annot: func_body_ann) = annot
+
+  method on_'ex _ _ex = Pos.none
+
+  method on_'en _ (en: unit) = en
+
+  method! on_fun_ env f = super#on_fun_ env { f with f_doc_comment = None}
+  method! on_class_ env c = super#on_class_ env { c with c_doc_comment = None}
+  method! on_class_var env cv = super#on_class_var env { cv with cv_doc_comment = None}
+  method! on_method_ env m = super#on_method_ env { m with m_doc_comment = None}
+
+  method! on_class_const env ccs =
+    super#on_class_const env { ccs with cc_doc_comment = None }
+
+  method! on_class_typeconst env tc =
+    super#on_class_typeconst env { tc with c_tconst_doc_comment = None }
+
+  (* Skip all blocks because we don't care about method bodies *)
+  method! on_block _ _ = []
+end
+
+(* Given an AST, return an AST with no position or docblock info *)
+let remove_pos_and_docblock ast =
+  ast_no_pos_or_docblock_mapper#on_program () ast
+
+(* Given an AST, generate a unique hash for its decl tree. *)
+let generate_ast_decl_hash ast =
+  (* Why we marshal it into a string first: regular Hashtbl.hash will
+    collide improperly because it doesn't compare ADTs with strings correctly.
+    Using Marshal, we guarantee that the two ASTs are represented by a single
+    primitive type, which we hash.
+  *)
+  let str = Marshal.to_string (remove_pos_and_docblock ast) [] in
+  OpaqueDigest.string str
+
 (*****************************************************************************)
 (** This module defines a visitor class on the Nast data structure.
     To use it you must inherit the generic object and redefine the appropriate

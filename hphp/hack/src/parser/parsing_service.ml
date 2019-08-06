@@ -50,7 +50,8 @@ let process_parse_result
     then File_provider.Ide content
     else File_provider.Disk content in
   if file_mode <> None then begin
-    let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
+    let nast = Ast_to_nast.convert ast in
+    let funs, classes, typedefs, consts = Nast.get_defs nast in
     (* If this file was parsed from a tmp directory,
       save it to the main directory instead *)
     let fn = if Relative_path.prefix fn =
@@ -62,7 +63,7 @@ let process_parse_result
     let mode = if quick then Ast_provider.Decl else Ast_provider.Full in
     Ast_provider.provide_ast_hint fn ast mode;
     let comments = None in
-    let hash = Some (Ast_utils.generate_ast_decl_hash ast) in
+    let hash = Some (Nast.generate_ast_decl_hash nast) in
     let defs =
       {FileInfo.hash; funs; classes; typedefs; consts; comments; file_mode}
     in

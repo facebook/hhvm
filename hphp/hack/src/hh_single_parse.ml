@@ -136,7 +136,7 @@ let run_parsers
       ) else
       if not hash then dumper ast
       else
-        let decl_hash = Ast_utils.generate_ast_decl_hash ast in
+        let decl_hash = Nast.generate_ast_decl_hash (Ast_to_nast.convert ast) in
         OpaqueDigest.to_hex decl_hash
     in
     Printf.printf "%s" output

@@ -49,38 +49,6 @@ class ast_get_defs_visitor =
     method! on_def acc def = def :: acc
   end
 
-let ast_no_pos_or_docblock_mapper =
-  object (self)
-    inherit [_] Ast.endo as super
-
-    method! private on_pos () _pos = Pos.none
-
-    method! on_fun_ env f = super#on_fun_ env { f with f_doc_comment = None }
-
-    method! on_class_ env c =
-      super#on_class_ env { c with c_doc_comment = None }
-
-    method! on_class_vars_ env cv =
-      super#on_class_vars_ env { cv with cv_doc_comment = None }
-
-    method! on_method_ env m =
-      super#on_method_ env { m with m_doc_comment = None }
-
-    method! on_class_consts_ env ccs =
-      super#on_class_consts_ env { ccs with cc_doc_comment = None }
-
-    method! on_typeconst env tc =
-      super#on_typeconst env { tc with tconst_doc_comment = None }
-
-    (* Skip all blocks because we don't care about method bodies *)
-    method! on_block env _ =
-      self#on_list self#on_stmt env [(Pos.none, Ast.Noop)]
-  end
-
-(* Given an AST, return an AST with no position or docblock info *)
-let remove_pos_and_docblock ast =
-  ast_no_pos_or_docblock_mapper#on_program () ast
-
 type ignore_attribute_env = { ignored_attributes: string list }
 
 let ast_deregister_attributes_mapper =
@@ -125,16 +93,6 @@ let deregister_ignored_attributes ast =
     }
   in
   ast_deregister_attributes_mapper#on_program env ast
-
-(* Given an AST, generate a unique hash for its decl tree. *)
-let generate_ast_decl_hash ast =
-  (* Why we marshal it into a string first: regular Hashtbl.hash will
-    collide improperly because it doesn't compare ADTs with strings correctly.
-    Using Marshal, we guarantee that the two ASTs are represented by a single
-    primitive type, which we hash.
-  *)
-  let str = Marshal.to_string (remove_pos_and_docblock ast) [] in
-  OpaqueDigest.string str
 
 let get_def_nodes ast = List.rev ((new ast_get_defs_visitor)#on_program [] ast)
 

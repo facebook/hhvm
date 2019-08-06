@@ -49,7 +49,7 @@ let bar2_contents =
 
   class Bar extends Foo  {
 
-    function test() : string {
+    public function test() : string {
       return $this->g();
     }
   }

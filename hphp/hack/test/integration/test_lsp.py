@@ -368,12 +368,209 @@ class TestLsp(TestCase[LspTestDriver]):
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("definition.php"))
         self.test_driver.stop_hh_server()
-        self.load_and_run(
-            "serverless_ide_definition",
-            variables,
-            wait_for_server=False,
-            use_serverless_ide=True,
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("serverless_ide_definition"), use_serverless_ide=True
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .request(
+                comment="call to `b_definition`",
+                method="textDocument/definition",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 10},
+                },
+                result=[
+                    {
+                        "uri": "file://${root_path}/definition.php",
+                        "range": {
+                            "start": {"line": 6, "character": 9},
+                            "end": {"line": 6, "character": 21},
+                        },
+                        "title": "b_definition",
+                    }
+                ],
+                powered_by="serverless_ide",
+            )
+            .request(
+                comment="call to `new BB(1)`",
+                method="textDocument/definition",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 29, "character": 13},
+                },
+                result=[
+                    {
+                        "uri": "file://${root_path}/definition.php",
+                        "range": {
+                            "start": {"line": 11, "character": 18},
+                            "end": {"line": 11, "character": 29},
+                        },
+                        "title": "BB::__construct",
+                    }
+                ],
+                powered_by="serverless_ide",
+            )
+            .request(
+                comment="call to `new CC(1)`",
+                method="textDocument/definition",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 30, "character": 13},
+                },
+                result=[
+                    {
+                        "uri": "file://${root_path}/definition.php",
+                        "range": {
+                            "start": {"line": 14, "character": 6},
+                            "end": {"line": 14, "character": 8},
+                        },
+                        "title": "CC",
+                    },
+                    {
+                        "uri": "file://${root_path}/definition.php",
+                        "range": {
+                            "start": {"line": 11, "character": 18},
+                            "end": {"line": 11, "character": 29},
+                        },
+                        "title": "BB::__construct",
+                    },
+                ],
+                powered_by="serverless_ide",
+            )
+            .request(
+                comment="call to `new DD(1)`",
+                method="textDocument/definition",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 31, "character": 13},
+                },
+                result=[
+                    {
+                        "uri": "file://${root_path}/definition.php",
+                        "range": {
+                            "start": {"line": 17, "character": 6},
+                            "end": {"line": 17, "character": 8},
+                        },
+                        "title": "DD",
+                    },
+                    {
+                        "uri": "file://${root_path}/definition.php",
+                        "range": {
+                            "start": {"line": 11, "character": 18},
+                            "end": {"line": 11, "character": 29},
+                        },
+                        "title": "BB::__construct",
+                    },
+                ],
+                powered_by="serverless_ide",
+            )
+            .request(
+                comment="call to `new EE(1)`",
+                method="textDocument/definition",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 32, "character": 13},
+                },
+                result=[
+                    {
+                        "uri": "file://${root_path}/definition.php",
+                        "range": {
+                            "start": {"line": 21, "character": 18},
+                            "end": {"line": 21, "character": 29},
+                        },
+                        "title": "EE::__construct",
+                    }
+                ],
+                powered_by="serverless_ide",
+            )
+            .request(
+                comment="call to `new FF(1)`",
+                method="textDocument/definition",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 33, "character": 13},
+                },
+                result=[
+                    {
+                        "uri": "file://${root_path}/definition.php",
+                        "range": {
+                            "start": {"line": 26, "character": 6},
+                            "end": {"line": 26, "character": 8},
+                        },
+                        "title": "FF",
+                    }
+                ],
+                powered_by="serverless_ide",
+            )
+            .request(
+                comment="call to `new TakesString(HasString::MyString)`",
+                method="textDocument/definition",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 45, "character": 23},
+                },
+                result=[
+                    {
+                        "uri": "file://${root_path}/definition.php",
+                        "range": {
+                            "start": {"line": 40, "character": 6},
+                            "end": {"line": 40, "character": 15},
+                        },
+                        "title": "HasString",
+                    }
+                ],
+                powered_by="serverless_ide",
+            )
+            .notification(
+                comment="make local, unsaved change to the file",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}", "version": 2},
+                    "contentChanges": [
+                        {
+                            "text": "test",
+                            "range": {
+                                "start": {"line": 3, "character": 9},
+                                "end": {"line": 3, "character": 21},
+                            },
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="call to `test` instead of `b_definition`",
+                method="textDocument/definition",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 10},
+                },
+                result=[
+                    {
+                        "uri": "file://${root_path}/definition.php",
+                        "range": {
+                            "start": {"line": 28, "character": 9},
+                            "end": {"line": 28, "character": 13},
+                        },
+                        "title": "test",
+                    }
+                ],
+                powered_by="serverless_ide",
+            )
+            .request(method="shutdown", params={}, result=None)
         )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_type_definition(self) -> None:
         self.prepare_server_environment()

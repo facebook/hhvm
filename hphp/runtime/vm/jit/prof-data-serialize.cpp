@@ -73,6 +73,8 @@ TRACE_SET_MOD(hhbc);
 
 StaticString s_invoke("__invoke");
 
+constexpr uint32_t kMagic = 0x4d564848;
+
 constexpr uint32_t k86pinitSlot = 0x80000000u;
 constexpr uint32_t k86sinitSlot = 0x80000001u;
 constexpr uint32_t k86linitSlot = 0x80000002u;
@@ -1327,6 +1329,7 @@ std::string serializeProfData(const std::string& filename) {
   try {
     ProfDataSerializer ser{filename};
 
+    write_raw(ser, kMagic);
     write_raw(ser, Repo::get().global().Signature);
     auto schema = repoSchemaId();
     write_raw(ser, schema.size());
@@ -1335,6 +1338,9 @@ std::string serializeProfData(const std::string& filename) {
     auto host = Process::GetHostName();
     write_raw(ser, host.size());
     write_raw(ser, &host[0], host.size());
+    auto& tag = RuntimeOption::ProfDataTag;
+    write_raw(ser, tag.size());
+    write_raw(ser, &tag[0], tag.size());
     write_raw(ser, TimeStamp::Current());
 
     Func::s_treadmill = true;
@@ -1377,6 +1383,9 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
 
     ProfDataDeserializer ser{filename};
 
+    if (read_raw<decltype(kMagic)>(ser) != kMagic) {
+      throw std::runtime_error("Not a profile-data dump");
+    }
     auto signature = read_raw<decltype(Repo::get().global().Signature)>(ser);
     if (signature != Repo::get().global().Signature) {
       throw std::runtime_error("Mismatched repo-schema");
@@ -1393,6 +1402,11 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
     std::string buildHost;
     buildHost.resize(size);
     read_raw(ser, &buildHost[0], size);
+
+    size = read_raw<size_t>(ser);
+    std::string tag;
+    tag.resize(size);
+    read_raw(ser, &tag[0], size);
 
     int64_t buildTime;
     read_raw(ser, buildTime);
@@ -1412,7 +1426,7 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
     ProfData::Session pds;
     auto const pd = profData();
     read_prof_data(ser, pd);
-    pd->setDeserialized(buildHost, buildTime);
+    pd->setDeserialized(buildHost, tag, buildTime);
 
     read_target_profiles(ser);
 

@@ -517,6 +517,7 @@ uint32_t RuntimeOption::EvalInitialStaticStringTableSize =
 uint32_t RuntimeOption::EvalInitialNamedEntityTableSize = 30000;
 JitSerdesMode RuntimeOption::EvalJitSerdesMode{};
 int RuntimeOption::ProfDataTTLHours = 24;
+std::string RuntimeOption::ProfDataTag;
 std::string RuntimeOption::EvalJitSerdesFile;
 
 std::map<std::string, ErrorLogFileData> RuntimeOption::ErrorLogs = {
@@ -1738,9 +1739,11 @@ void RuntimeOption::Load(
                  "Eval.DumpPreciseProfData", couldDump);
     Config::Bind(ProfDataTTLHours, ini, config,
                  "Eval.ProfDataTTLHours", ProfDataTTLHours);
+    Config::Bind(ProfDataTag, ini, config, "Eval.ProfDataTag", ProfDataTag);
 
     Config::Bind(CheckSymLink, ini, config, "Eval.CheckSymLink", true);
-    Config::Bind(TrustAutoloaderPath, ini, config, "Eval.TrustAutoloaderPath", false);
+    Config::Bind(TrustAutoloaderPath, ini, config,
+                 "Eval.TrustAutoloaderPath", false);
 
 #define F(type, name, defaultVal) \
     Config::Bind(Eval ## name, ini, config, "Eval."#name, defaultVal);

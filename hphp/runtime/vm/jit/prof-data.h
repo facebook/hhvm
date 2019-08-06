@@ -357,8 +357,14 @@ struct ProfData {
   static const StringData* buildHost() {
     return s_buildHost.load(std::memory_order_relaxed);
   }
-  static void setDeserialized(const std::string& buildHost, int64_t buildTime) {
+  static const StringData* tag() {
+    return s_tag.load(std::memory_order_relaxed);
+  }
+  static void setDeserialized(const std::string& buildHost,
+                              const std::string& tag,
+                              int64_t buildTime) {
     s_buildHost.store(makeStaticString(buildHost), std::memory_order_relaxed);
+    s_tag.store(makeStaticString(tag), std::memory_order_relaxed);
     s_buildTime.store(buildTime, std::memory_order_relaxed);
     s_wasDeserialized.store(true, std::memory_order_relaxed);
   }
@@ -755,6 +761,7 @@ struct ProfData {
   static std::atomic_bool s_triedDeserialization;
   static std::atomic_bool s_wasDeserialized;
   static std::atomic<StringData*> s_buildHost;
+  static std::atomic<StringData*> s_tag;
   static std::atomic<int64_t> s_buildTime;
 };
 

@@ -528,6 +528,7 @@ struct RuntimeOption {
   static JitSerdesMode EvalJitSerdesMode;
   static int ProfDataTTLHours;
   static std::string EvalJitSerdesFile;
+  static std::string ProfDataTag;
   static bool DumpPreciseProfData;
   static bool EnablePocketUniverses;
 

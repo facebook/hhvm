@@ -16,7 +16,6 @@ val find_typedef_in_file_nast :
 val find_gconst_in_file_nast :
   ?full:bool -> Relative_path.t -> string -> Nast.gconst option
 
-val get_ast : ?full:bool -> Relative_path.t -> Ast.program
 val get_nast : ?full:bool -> Relative_path.t -> Nast.program
 
 val parse_file_input :

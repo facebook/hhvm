@@ -150,32 +150,31 @@ let get_gconst defs name =
 (* Get an AST directly from the parser heap. Will return empty AProgram
    if the file does not exist
 *)
-let get_ast ?(full = false) file_name =
-  match Provider_config.get_backend () with
-  | Provider_config.Lru_shared_memory
-  | Provider_config.Shared_memory ->
-    begin match ParserHeap.get file_name with
-      | None ->
-        let ast = get_from_local_cache ~full file_name in
-        (* Only store decl asts *)
-        if not full then
-        ParserHeap.add file_name (ast, Decl);
-        ast
-      | Some (_, Decl) when full ->
-        let ast = get_from_local_cache ~full file_name in
-        ast
-      | Some (defs, _) -> defs
-    end
-  | Provider_config.Local_memory _ ->
-    let result =
-      parse_file_input ~full file_name
-        (ServerCommandTypes.FileName (Relative_path.to_absolute file_name))
-    in
-    result.Full_fidelity_ast.ast
-
 let get_nast ?(full = false) file_name =
-  let ast = get_ast ~full file_name in
-  Ast_to_nast.convert ast
+  let get_ast ?(full = false) file_name =
+    match Provider_config.get_backend () with
+    | Provider_config.Lru_shared_memory
+    | Provider_config.Shared_memory ->
+      begin match ParserHeap.get file_name with
+        | None ->
+          let ast = get_from_local_cache ~full file_name in
+          (* Only store decl asts *)
+          if not full then
+          ParserHeap.add file_name (ast, Decl);
+          ast
+        | Some (_, Decl) when full ->
+          let ast = get_from_local_cache ~full file_name in
+          ast
+        | Some (defs, _) -> defs
+      end
+    | Provider_config.Local_memory _ ->
+      let result =
+        parse_file_input ~full file_name
+          (ServerCommandTypes.FileName (Relative_path.to_absolute file_name))
+      in
+      result.Full_fidelity_ast.ast
+  in
+  Ast_to_nast.convert (get_ast ~full file_name)
 
 
 

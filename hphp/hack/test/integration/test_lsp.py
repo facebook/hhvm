@@ -783,6 +783,61 @@ function b_hover(): int {
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
+    def test_serverless_ide_file_on_disk_change(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("hover.php"))
+        self.test_driver.stop_hh_server()
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("serverless_ide_file_on_disk_change"),
+                use_serverless_ide=True,
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .notification(
+                method="workspace/didChangeWatchedFiles",
+                params={"changes": [{"uri": "${php_file_uri}", "type": 2}]},
+            )
+            .wait_for_notification(
+                comment="wait for sIDE to process file change",
+                method="telemetry/event",
+                params={
+                    "type": 4,
+                    "message": "[client-ide] Done processing file changes",
+                },
+            )
+            .request(
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 16},
+                },
+                result={
+                    "contents": [
+                        {"language": "hack", "value": "int"},
+                        "A comment describing b_hover.",
+                    ],
+                    "range": {
+                        "start": {"line": 3, "character": 9},
+                        "end": {"line": 3, "character": 16},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            .request(method="shutdown", params={}, result=None)
+        )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
     def test_coverage(self) -> None:
         self.prepare_server_environment()
         variables = self.setup_php_file("coverage.php")

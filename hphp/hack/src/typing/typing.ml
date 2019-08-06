@@ -6585,15 +6585,19 @@ and supertype_redeclared_method tc env m =
           Errors.unify_error
         ))
       ) (fun errorl ->
-        Errors.try_
-        (fun () -> Errors.bad_method_override pos name errorl)
-        (fun ierrorl ->
-          Errors.bad_decl_override
-          (Reason.to_pos r_parent)
-          trait
-          (Cls.pos tc)
-          (Cls.name tc)
-          ierrorl)
+        if !Errors.use_new_type_errors
+        then
+          Errors.bad_method_override pos name errorl
+        else
+          Errors.try_
+          (fun () -> Errors.bad_method_override pos name errorl)
+          (fun ierrorl ->
+            Errors.bad_decl_override
+            (Reason.to_pos r_parent)
+            trait
+            (Cls.pos tc)
+            (Cls.name tc)
+            ierrorl)
       )
     | _ -> ()
   end); env

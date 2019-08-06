@@ -1012,7 +1012,8 @@ module WithStatementAndDeclAndTypeParser
       parse_remaining_binary_expression parser term assignment_prefix_kind
     | Instanceof ->
       let parser = with_error parser SyntaxError.instanceof_disabled in
-      Make.missing parser (pos parser)
+      let (parser, _) = assert_token parser Instanceof in
+      (parser, term)
     | Is ->
       parse_is_expression parser term
     | As when allow_as_expressions parser ->

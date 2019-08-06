@@ -1330,7 +1330,8 @@ where
                         }
                         TokenKind::Instanceof => {
                             self.with_error(Errors::instanceof_disabled);
-                            S!(make_missing, self, self.pos())
+                            let _ = self.assert_token(TokenKind::Instanceof);
+                            term
                         }
                         TokenKind::Is => self.parse_is_expression(term),
                         TokenKind::As if self.allow_as_expressions() => {

@@ -2837,7 +2837,7 @@ const StaticString
   s_JIS_mapped_Japanese_Font_Support("JIS-mapped Japanese Font Support");
 
 Array HHVM_FUNCTION(gd_info) {
-  Array ret;
+  Array ret = Array::CreateDArray();
 
   ret.set(s_GD_Version, PHP_GD_VERSION_STRING);
 

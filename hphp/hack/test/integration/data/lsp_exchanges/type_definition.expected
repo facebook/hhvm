@@ -59,7 +59,7 @@
     "id": 2,
     "result": [
       {
-        "uri": "file://${root_path}${path_sep}type_definition.php",
+        "uri": "file://${root_path}/type_definition.php",
         "range": {
           "start": {
             "line": 2,
@@ -73,7 +73,7 @@
         "title": "\\HH"
       },
       {
-        "uri": "file://${root_path}${path_sep}type_definition.php",
+        "uri": "file://${root_path}/type_definition.php",
         "range": {
           "start": {
             "line": 12,
@@ -93,7 +93,7 @@
     "id": 3,
     "result": [
       {
-        "uri": "file://${root_path}${path_sep}type_definition.php",
+        "uri": "file://${root_path}/type_definition.php",
         "range": {
           "start": {
             "line": 2,
@@ -113,7 +113,7 @@
     "id": 4,
     "result": [
       {
-        "uri": "file://${root_path}${path_sep}type_definition.php",
+        "uri": "file://${root_path}/type_definition.php",
         "range": {
           "start": {
             "line": 2,
@@ -138,7 +138,7 @@
     "id": 6,
     "result": [
       {
-        "uri": "file://${root_path}${path_sep}type_definition.php",
+        "uri": "file://${root_path}/type_definition.php",
         "range": {
           "start": {
             "line": 12,
@@ -158,7 +158,7 @@
     "id": 7,
     "result": [
       {
-        "uri": "file://${root_path}${path_sep}type_definition.php",
+        "uri": "file://${root_path}/type_definition.php",
         "range": {
           "start": {
             "line": 22,

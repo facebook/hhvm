@@ -120,15 +120,15 @@ MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
                                        size_t neededSize) {
   assertx(checkInvariants(old));
 
+  auto const aux =
+    static_cast<uint16_t>(MixedArray::kIntKey) << 8 |
+    (old->isVArray() ? ArrayData::kDArray : ArrayData::kNotDVArray);
+
   auto const oldSize = old->m_size;
   auto const scale   = MixedArray::computeScaleFromSize(neededSize);
   auto const ad      = MixedArray::reqAlloc(scale);
   ad->m_sizeAndPos   = oldSize | int64_t{old->m_pos} << 32;
-  ad->initHeader_16(
-    HeaderKind::Mixed,
-    OneReference,
-    old->isVArray() ? ArrayData::kDArray : ArrayData::kNotDVArray
-  );
+  ad->initHeader_16(HeaderKind::Mixed, OneReference, aux);
   ad->m_scale_used   = scale | uint64_t{oldSize} << 32; // used=oldSize
   ad->m_nextKI       = oldSize;
 

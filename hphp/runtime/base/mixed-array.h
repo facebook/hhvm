@@ -242,6 +242,49 @@ private:
   static MixedArray* MakeMixedImpl(uint32_t size, const TypedValue* kvs);
 
 public:
+  using KeyTypes = uint8_t;
+  static constexpr size_t kKeyTypesOffset = 7;
+
+  // To save on stores, we can avoid tracking static string keys.
+  static constexpr bool kTrackStaticStrKeys = false;
+
+  static constexpr KeyTypes kNonStaticStrKey = 0b0001;
+  static constexpr KeyTypes kStaticStrKey    = 0b0010;
+  static constexpr KeyTypes kIntKey          = 0b0100;
+  static constexpr KeyTypes kTombstoneKey    = 0b1000;
+
+  KeyTypes keyTypes() const {
+    auto const pointer = uintptr_t(this) + kKeyTypesOffset;
+    return *reinterpret_cast<KeyTypes*>(pointer);
+  }
+
+  void copyKeyTypes(const MixedArray& other, bool compact) {
+    mutableKeyTypes() |= other.keyTypes() & (compact ? ~kTombstoneKey : 0xff);
+  }
+  void recordIntKey() {
+    mutableKeyTypes() |= kIntKey;
+  }
+  void recordStrKey(const StringData* sd) {
+    if (kTrackStaticStrKeys) {
+      mutableKeyTypes() |= sd->isStatic() ? kStaticStrKey : kNonStaticStrKey;
+    } else {
+      if (!sd->isStatic()) mutableKeyTypes() |= kNonStaticStrKey;
+    }
+  }
+  void recordStaticStrKey() {
+    mutableKeyTypes() |= kStaticStrKey;
+  }
+  void recordTombstoneKey() {
+    mutableKeyTypes() |= kTombstoneKey;
+  }
+
+private:
+  KeyTypes& mutableKeyTypes() {
+    auto const pointer = uintptr_t(this) + kKeyTypesOffset;
+    return *reinterpret_cast<KeyTypes*>(pointer);
+  }
+
+public:
   /*
    * Same semantics as PackedArray::MakeNatural().
    */

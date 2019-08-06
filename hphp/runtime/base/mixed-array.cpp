@@ -234,8 +234,12 @@ MixedArray* MixedArray::MakeStructImpl(uint32_t size,
   auto const scale = computeScaleFromSize(size);
   auto const ad    = reqAlloc(scale);
 
+  auto const static_str = kTrackStaticStrKeys ? kStaticStrKey : uint8_t(0x00);
+  auto const aux = static_cast<uint16_t>(static_str) << 8 |
+                   static_cast<uint16_t>(dvArray);
+
   ad->m_sizeAndPos       = size; // pos=0
-  ad->initHeader_16(hk, OneReference, dvArray);
+  ad->initHeader_16(hk, OneReference, aux);
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = 0;
 
@@ -324,6 +328,7 @@ MixedArray* MixedArray::MakeMixedImpl(uint32_t size, const TypedValue* kvs) {
         return nullptr;
       }
       data[i].setStrKeyNoIncRef(k, h);
+      ad->recordStrKey(k);
       *ei = i;
     } else {
       assertx(kTv.m_type == KindOfInt64);
@@ -337,6 +342,7 @@ MixedArray* MixedArray::MakeMixedImpl(uint32_t size, const TypedValue* kvs) {
         return nullptr;
       }
       data[i].setIntKey(k, h);
+      ad->recordIntKey();
       *ei = i;
     }
     const auto& tv = kvs[(i * 2) + 1];
@@ -390,9 +396,13 @@ MixedArray* MixedArray::MakeDArrayNatural(uint32_t size,
 
   ad->m_sizeAndPos       = size; // pos=0
   if (RuntimeOption::EvalHackArrDVArrs) {
-    ad->initHeader_16(HeaderKind::Dict, OneReference, ArrayData::kNotDVArray);
+    auto const aux = static_cast<uint16_t>(kIntKey) << 8 |
+                     static_cast<uint16_t>(ArrayData::kNotDVArray);
+    ad->initHeader_16(HeaderKind::Dict, OneReference, aux);
   } else {
-    ad->initHeader_16(HeaderKind::Mixed, OneReference, ArrayData::kDArray);
+    auto const aux = static_cast<uint16_t>(kIntKey) << 8 |
+                     static_cast<uint16_t>(ArrayData::kDArray);
+    ad->initHeader_16(HeaderKind::Mixed, OneReference, aux);
   }
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = size;
@@ -432,6 +442,11 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
           dest_hk == HeaderKind::Shape);
   assertx(dvArray == ArrayData::kNotDVArray || dvArray == ArrayData::kDArray);
   assertx(dest_hk != HeaderKind::Dict || dvArray == ArrayData::kNotDVArray);
+  if (mode == AllocMode::Static) {
+    assertx(other.m_size == other.m_used);
+    assertx((other.keyTypes() & kNonStaticStrKey) == 0);
+    assertx((other.keyTypes() & kTombstoneKey) == 0);
+  }
 
   auto const scale = other.m_scale;
   auto const ad = mode == AllocMode::Request ? reqAlloc(scale)
@@ -450,11 +465,10 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   memcpy(ad, &other, sizeof(MixedArray) + sizeof(Elm) * other.m_used);
 #endif
   auto const count = mode == AllocMode::Request ? OneReference : StaticValue;
-  ad->initHeader_16(
-      dest_hk,
-      count,
-      dvArray | (other.isLegacyArray() ? ArrayData::kLegacyArray : 0)
-  );
+  auto const aux =
+    static_cast<uint16_t>(other.keyTypes()) << 8 |
+    (dvArray | (other.isLegacyArray() ? ArrayData::kLegacyArray : 0));
+  ad->initHeader_16(dest_hk, count, aux);
   CopyHash(ad->hashTab(), other.hashTab(), scale);
 
   // Bump up refcounts as needed.
@@ -485,6 +499,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   assertx(ad->m_kind == dest_hk);
   assertx(ad->dvArray() == dvArray);
   assertx(ad->isLegacyArray() == other.isLegacyArray());
+  assertx(ad->keyTypes() == other.keyTypes());
   assertx(ad->m_size == other.m_size);
   assertx(ad->m_pos == other.m_pos);
   assertx(mode == AllocMode::Request ? ad->hasExactlyOneRef() :
@@ -544,6 +559,7 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array,
     ad->m_aux16 &= ~kHasApcTv;
   }
   ad->m_aux16 &= ~kHasProvenanceData;
+  ad->m_aux16 |= static_cast<uint16_t>(a->keyTypes()) << 8;
   CopyHash(ad->hashTab(), a->hashTab(), scale);
 
   // Need to make sure keys and values are all uncounted.
@@ -575,6 +591,8 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array,
     APCStats::getAPCStats().addAPCUncountedBlock();
   }
   if (updateSeen) (*seen)[array] = ad;
+  assertx(ad->keyTypes() == a->keyTypes());
+  assertx(ad->checkInvariants());
   return ad;
 }
 
@@ -693,6 +711,7 @@ void MixedArray::ReleaseUncounted(ArrayData* in) {
  *   m_nextKI >= highest actual int key
  *   Elm.data.m_type maybe kInvalidDataType (tombstone)
  *   hash[] maybe Tombstone
+ *   static arrays cannot contain tombstones
  */
 bool MixedArray::checkInvariants() const {
   static_assert(ssize_t(Empty) == ssize_t(-1), "");
@@ -721,9 +740,39 @@ bool MixedArray::checkInvariants() const {
   // Non-zombie:
   assertx(m_size <= m_used);
   assertx(m_used <= capacity());
+  assertx(IMPLIES(isStatic(), m_used == m_size));
   if (m_pos != m_used) {
     assertx(size_t(m_pos) < m_used);
     assertx(!isTombstone(data()[m_pos].data.m_type));
+  }
+
+  // This loop is too slow for normal use, but when enabled, will check the
+  // key types bit-set. It slows down dbgo builds by more than 2x.
+  //
+  // We can't check for exact equality here, because we only track one bit per
+  // key type; we can't discriminate between setting a string key and erasing
+  // it and setting *two* string keys and erasing one.
+  //
+  // Instead, we check that the set of true types is a subset of `keyTypes()`,
+  // that `keyTypes()` is a subset of all possible key types.
+  if (false) {
+    KeyTypes types = 0x00;
+    auto elm = data();
+    auto const static_str = kTrackStaticStrKeys ? kStaticStrKey : uint8_t(0x00);
+    for (auto const end = elm + m_used; elm < end; elm++) {
+      types |= [&]{
+        if (elm->isTombstone())        return kTombstoneKey;
+        if (elm->hasIntKey())          return kIntKey;
+        if (elm->strKey()->isStatic()) return static_str;
+        else                           return kNonStaticStrKey;
+      }();
+    }
+    DEBUG_ONLY auto const all =
+      kTombstoneKey | kIntKey | kNonStaticStrKey | static_str;
+    assert_flog((types & ~keyTypes()) == 0,
+                "Untracked key type: true = %02hhx, pred = %02hhx\n",
+                types, keyTypes());
+    assertx((keyTypes() & ~all) == 0);
   }
 
   return true;
@@ -786,6 +835,7 @@ MixedArray::InsertPos MixedArray::insert(int64_t k) {
   if (k >= m_nextKI && m_nextKI >= 0) m_nextKI = static_cast<uint64_t>(k) + 1;
   auto e = allocElm(ei);
   e->setIntKey(k, h);
+  recordIntKey();
   return InsertPos(false, e->data);
 }
 
@@ -798,6 +848,7 @@ MixedArray::InsertPos MixedArray::insert(StringData* k) {
   }
   auto e = allocElm(ei);
   e->setStrKey(k, h);
+  recordStrKey(k);
   return InsertPos(false, e->data);
 }
 
@@ -889,11 +940,7 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
   auto ad            = reqAlloc(newScale);
   auto const oldUsed = old->m_used;
   ad->m_sizeAndPos   = old->m_sizeAndPos;
-  ad->initHeader_16(
-      old->m_kind,
-      OneReference,
-      old->auxBits()
-  );
+  ad->initHeader_16(old->m_kind, OneReference, old->m_aux16);
   ad->m_scale_used   = newScale | uint64_t{oldUsed} << 32;
 
   copyElmsNextUnsafe(ad, old, oldUsed);
@@ -937,6 +984,7 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
   assertx(ad->kind() == old->kind());
   assertx(ad->dvArray() == old->dvArray());
   assertx(ad->isLegacyArray() == old->isLegacyArray());
+  assertx(ad->keyTypes() == old->keyTypes());
   assertx(ad->m_size == old->m_size);
   assertx(ad->hasExactlyOneRef());
   assertx(ad->m_pos == old->m_pos);
@@ -1009,6 +1057,8 @@ void MixedArray::compact(bool renumber /* = false */) {
   }
 
   m_used = m_size;
+  mutableKeyTypes() &= ~kTombstoneKey;
+  assertx(checkInvariants());
 }
 
 void MixedArray::nextInsert(Cell v) {
@@ -1025,6 +1075,7 @@ void MixedArray::nextInsert(Cell v) {
   // Allocate and initialize a new element.
   auto e = allocElm(ei);
   e->setIntKey(ki, h);
+  recordIntKey();
   m_nextKI = static_cast<uint64_t>(ki) + 1; // Update next free element.
   cellDup(v, e->data);
 }
@@ -1040,6 +1091,7 @@ ArrayData* MixedArray::nextInsertWithRef(TypedValue data) {
   // Allocate a new element.
   auto e = allocElm(ei);
   e->setIntKey(ki, h);
+  recordIntKey();
   m_nextKI = static_cast<uint64_t>(ki) + 1; // Update next free element.
   return initWithRef(e->data, data);
 }
@@ -1193,6 +1245,7 @@ void MixedArray::eraseNoCompact(ssize_t pos) {
     decRefStr(e.skey);
   }
   e.setTombstone();
+  recordTombstoneKey();
 
   --m_size;
   // Mark the hash entry as "deleted".
@@ -1291,8 +1344,10 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   auto const ad    = reqAlloc(scale);
   auto const oldUsed = src->m_used;
 
+  auto const aux = src->m_aux16 & ~(static_cast<uint16_t>(kTombstoneKey) << 8);
+
   ad->m_sizeAndPos      = src->m_sizeAndPos;
-  ad->initHeader_16(src->m_kind, OneReference, src->auxBits());
+  ad->initHeader_16(src->m_kind, OneReference, aux);
   ad->m_scale           = scale; // don't set m_used yet
   ad->m_nextKI          = src->m_nextKI;
 
@@ -1426,12 +1481,14 @@ ArrayData* MixedArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
       if (isValidPos(ei)) continue;
       auto e = ret->allocElm(ei);
       e->setStrKey(srcElem->skey, hash);
+      ret->recordStrKey(srcElem->skey);
       ret->initWithRef(e->data, tvAsCVarRef(&srcElem->data));
     } else {
       auto const ei = ret->findForInsertUpdate(srcElem->ikey, hash);
       if (isValidPos(ei)) continue;
       auto e = ret->allocElm(ei);
       e->setIntKey(srcElem->ikey, hash);
+      ret->recordIntKey();
       ret->initWithRef(e->data, tvAsCVarRef(&srcElem->data));
     }
   }
@@ -1465,7 +1522,8 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
   auto const ret = CopyReserve(asMixed(ad), ad->size() + elems->size());
   assertx(ret->hasExactlyOneRef());
   // Output is always a non-darray
-  ret->initHeader(HeaderKind::Mixed, OneReference);
+  auto const aux = static_cast<uint16_t>(asMixed(ad)->keyTypes()) << 8;
+  ret->initHeader_16(HeaderKind::Mixed, OneReference, aux);
 
   if (elems->hasMixedLayout()) {
     auto const rhs = asMixed(elems);
@@ -1564,6 +1622,7 @@ ArrayData* MixedArray::Prepend(ArrayData* adInput, Cell v) {
   ++a->m_size;
   auto& e = elms[0];
   e.setIntKey(0, hash_int64(0));
+  a->recordIntKey();
   cellDup(v, e.data);
 
   // Renumber.
@@ -1806,17 +1865,24 @@ void MixedArray::Renumber(ArrayData* ad) {
 
 void MixedArray::OnSetEvalScalar(ArrayData* ad) {
   auto a = asMixed(ad);
-  auto elms = a->data();
-  for (uint32_t i = 0, limit = a->m_used; i < limit; ++i) {
-    auto& e = elms[i];
-    if (!isTombstone(e.data.m_type)) {
-      auto key = e.skey;
-      if (e.hasStrKey() && !key->isStatic()) {
-        e.skey = makeStaticString(key);
-        decRefStr(key);
-      }
-      tvAsVariant(&e.data).setEvalScalar();
+  if (UNLIKELY(a->m_size < a->m_used)) {
+    a->compact(/*renumber=*/false);
+  }
+  auto const keyTypes = a->keyTypes();
+  if (kTrackStaticStrKeys && (keyTypes & kNonStaticStrKey)) {
+    a->mutableKeyTypes() = (keyTypes & ~kNonStaticStrKey) | kStaticStrKey;
+  } else {
+    a->mutableKeyTypes() &= ~kNonStaticStrKey;
+  }
+  auto elm = a->data();
+  for (auto const end = elm + a->m_used; elm < end; ++elm) {
+    assertx(!elm->isTombstone());
+    auto key = elm->skey;
+    if (elm->hasStrKey() && !key->isStatic()) {
+      elm->skey = makeStaticString(key);
+      decRefStr(key);
     }
+    tvAsVariant(&elm->data).setEvalScalar();
   }
 }
 

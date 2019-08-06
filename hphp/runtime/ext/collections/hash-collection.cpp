@@ -299,6 +299,7 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
     auto oldNextKI = nextKI();
     m_arr = MixedArray::asMixed(MixedArray::MakeReserveDict(newCap));
     m_arr->m_size = m_size;
+    m_arr->copyKeyTypes(*oldAd, /*compact=*/true);
     auto data = this->data();
     auto table = hashTab();
     auto table_mask = tableMask();

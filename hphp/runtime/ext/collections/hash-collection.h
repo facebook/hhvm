@@ -295,6 +295,7 @@ struct HashCollection : ObjectData {
     if (UNLIKELY(MixedArray::isValidPos(*p))) return nullptr;
     auto e = &allocElm(p);
     e->setIntKey(k, h);
+    arrayData()->recordIntKey();
     updateNextKI(k);
     return &e->data;
   }
@@ -305,6 +306,7 @@ struct HashCollection : ObjectData {
     if (UNLIKELY(MixedArray::isValidPos(*p))) return nullptr;
     auto e = &allocElm(p);
     e->setStrKey(key, h);
+    arrayData()->recordStrKey(key);
     return &e->data;
   }
 
@@ -326,6 +328,7 @@ struct HashCollection : ObjectData {
     int32_t unusedPos = -1;
     auto e = &allocElm(MixedArray::Inserter(&unusedPos));
     e->setStrKey(key, h);
+    arrayData()->recordStrKey(key);
     return &e->data;
   }
   /*

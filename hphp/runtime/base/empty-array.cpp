@@ -156,6 +156,7 @@ arr_lval EmptyArray::MakeMixed(StringData* key, TypedValue val) {
   auto const mask = MixedArray::SmallMask;
   hash[khash & mask] = 0;
   data[0].setStrKey(key, khash);
+  ad->recordStrKey(key);
 
   auto& elem  = data[0].data;
   elem.m_data = val.m_data;
@@ -185,6 +186,7 @@ arr_lval EmptyArray::MakeMixed(int64_t key, TypedValue val) {
   auto h = hash_int64(key);
   hash[h & mask] = 0;
   data[0].setIntKey(key, h);
+  ad->recordIntKey();
 
   auto& elem  = data[0].data;
   elem.m_data = val.m_data;

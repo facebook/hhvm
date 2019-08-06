@@ -198,7 +198,7 @@ var_dump(array_replace_recursive($ar1, ["colors" => ["green" => "blue"]]));
 // hack array.
 //
 echo "array_multisort: ";
-var_dump(array_multisort(&$k1));
+var_dump(array_multisort1(&$k1));
 
 // Those should simply return a php array.
 //

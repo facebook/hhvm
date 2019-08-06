@@ -15,7 +15,7 @@ echo "\n-- Testing array_multisort() function with all normal arguments --\n";
 $asc = SORT_ASC;
 $regular = SORT_REGULAR;
 $numeric = SORT_NUMERIC;
-var_dump( array_multisort(&$ar1, &$asc, &$regular, &$ar2, &$asc, &$numeric) );
+var_dump(array_multisort6(&$ar1, &$asc, &$regular, &$ar2, &$asc, &$numeric));
 var_dump($ar1, $ar2);
 
 echo "===DONE===\n";

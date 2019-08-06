@@ -8,7 +8,7 @@
 echo "*** Testing array_multisort() : Testing with empty array ***\n";
 
 $arr = array();
-var_dump(array_multisort(&$arr));
+var_dump(array_multisort1(&$arr));
 
 echo "===DONE===\n";
 }

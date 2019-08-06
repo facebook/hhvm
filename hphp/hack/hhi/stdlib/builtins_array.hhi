@@ -133,6 +133,78 @@ function array_multisort(
   mixed &$arg8 = null,
   mixed &$arg9 = null,
 );
+<<__PHPStdLib>>
+function array_multisort1(
+  mixed &$arg1,
+);
+<<__PHPStdLib>>
+function array_multisort2(
+  mixed &$arg1,
+  mixed &$arg2,
+);
+<<__PHPStdLib>>
+function array_multisort3(
+  mixed &$arg1,
+  mixed &$arg2,
+  mixed &$arg3,
+);
+<<__PHPStdLib>>
+function array_multisort4(
+  mixed &$arg1,
+  mixed &$arg2,
+  mixed &$arg3,
+  mixed &$arg4,
+);
+<<__PHPStdLib>>
+function array_multisort5(
+  mixed &$arg1,
+  mixed &$arg2,
+  mixed &$arg3,
+  mixed &$arg4,
+  mixed &$arg5,
+);
+<<__PHPStdLib>>
+function array_multisort6(
+  mixed &$arg1,
+  mixed &$arg2,
+  mixed &$arg3,
+  mixed &$arg4,
+  mixed &$arg5,
+  mixed &$arg6,
+);
+<<__PHPStdLib>>
+function array_multisort7(
+  mixed &$arg1,
+  mixed &$arg2,
+  mixed &$arg3,
+  mixed &$arg4,
+  mixed &$arg5,
+  mixed &$arg6,
+  mixed &$arg7,
+);
+<<__PHPStdLib>>
+function array_multisort8(
+  mixed &$arg1,
+  mixed &$arg2,
+  mixed &$arg3,
+  mixed &$arg4,
+  mixed &$arg5,
+  mixed &$arg6,
+  mixed &$arg7,
+  mixed &$arg8,
+);
+<<__PHPStdLib>>
+function array_multisort9(
+  mixed &$arg1,
+  mixed &$arg2,
+  mixed &$arg3,
+  mixed &$arg4,
+  mixed &$arg5,
+  mixed &$arg6,
+  mixed &$arg7,
+  mixed &$arg8,
+  mixed &$arg9,
+);
 <<__PHPStdLib, __Rx>>
 function array_pad($input, int $pad_size, $pad_value);
 <<__PHPStdLib>>

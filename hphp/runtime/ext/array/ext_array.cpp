@@ -3272,6 +3272,89 @@ bool HHVM_FUNCTION(array_multisort,
   return Array::MultiSort(data);
 }
 
+bool HHVM_FUNCTION(array_multisort1,
+                   VRefParam arg1) {
+  return HHVM_FN(array_multisort)(arg1);
+}
+
+bool HHVM_FUNCTION(array_multisort2,
+                   VRefParam arg1,
+                   VRefParam arg2) {
+  return HHVM_FN(array_multisort)(arg1, arg2);
+}
+
+bool HHVM_FUNCTION(array_multisort3,
+                   VRefParam arg1,
+                   VRefParam arg2,
+                   VRefParam arg3) {
+  return HHVM_FN(array_multisort)(arg1, arg2, arg3);
+}
+
+bool HHVM_FUNCTION(array_multisort4,
+                   VRefParam arg1,
+                   VRefParam arg2,
+                   VRefParam arg3,
+                   VRefParam arg4) {
+  return HHVM_FN(array_multisort)(arg1, arg2, arg3, arg4);
+}
+
+bool HHVM_FUNCTION(array_multisort5,
+                   VRefParam arg1,
+                   VRefParam arg2,
+                   VRefParam arg3,
+                   VRefParam arg4,
+                   VRefParam arg5) {
+  return HHVM_FN(array_multisort)(arg1, arg2, arg3, arg4, arg5);
+}
+
+bool HHVM_FUNCTION(array_multisort6,
+                   VRefParam arg1,
+                   VRefParam arg2,
+                   VRefParam arg3,
+                   VRefParam arg4,
+                   VRefParam arg5,
+                   VRefParam arg6) {
+  return HHVM_FN(array_multisort)(arg1, arg2, arg3, arg4, arg5, arg6);
+}
+
+bool HHVM_FUNCTION(array_multisort7,
+                   VRefParam arg1,
+                   VRefParam arg2,
+                   VRefParam arg3,
+                   VRefParam arg4,
+                   VRefParam arg5,
+                   VRefParam arg6,
+                   VRefParam arg7) {
+  return HHVM_FN(array_multisort)(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+}
+
+bool HHVM_FUNCTION(array_multisort8,
+                   VRefParam arg1,
+                   VRefParam arg2,
+                   VRefParam arg3,
+                   VRefParam arg4,
+                   VRefParam arg5,
+                   VRefParam arg6,
+                   VRefParam arg7,
+                   VRefParam arg8) {
+  return HHVM_FN(array_multisort)(
+      arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+}
+
+bool HHVM_FUNCTION(array_multisort9,
+                   VRefParam arg1,
+                   VRefParam arg2,
+                   VRefParam arg3,
+                   VRefParam arg4,
+                   VRefParam arg5,
+                   VRefParam arg6,
+                   VRefParam arg7,
+                   VRefParam arg8,
+                   VRefParam arg9) {
+  return HHVM_FN(array_multisort)(
+      arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+}
+
 // HH\\dict
 Array HHVM_FUNCTION(HH_dict, const Variant& input) {
   return input.toDict();
@@ -3544,6 +3627,15 @@ struct ArrayExtension final : Extension {
     HHVM_FE(i18n_loc_get_error_code);
     HHVM_FE(hphp_array_idx);
     HHVM_FE(array_multisort);
+    HHVM_FE(array_multisort1);
+    HHVM_FE(array_multisort2);
+    HHVM_FE(array_multisort3);
+    HHVM_FE(array_multisort4);
+    HHVM_FE(array_multisort5);
+    HHVM_FE(array_multisort6);
+    HHVM_FE(array_multisort7);
+    HHVM_FE(array_multisort8);
+    HHVM_FE(array_multisort9);
     HHVM_FALIAS(HH\\dict, HH_dict);
     HHVM_FALIAS(HH\\vec, HH_vec);
     HHVM_FALIAS(HH\\keyset, HH_keyset);

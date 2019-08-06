@@ -15,8 +15,8 @@
  *
  */
 <<__Native>>
-function stream_context_create(?array $options = null,
-                               ?array $params = null): mixed;
+function stream_context_create(?darray $options = null,
+                               ?darray $params = null): mixed;
 
 /**
  * @param array $options - The options to set for the default context.
@@ -27,7 +27,7 @@ function stream_context_create(?array $options = null,
  * @return mixed - Returns the default stream context.
  *
  */
-function stream_context_set_default(?array $options = null): mixed {
+function stream_context_set_default(?darray $options = null): mixed {
   return stream_context_get_default($options);
 }
 
@@ -41,7 +41,7 @@ function stream_context_set_default(?array $options = null): mixed {
  *
  */
 <<__Native>>
-function stream_context_get_default(?array $options = null): mixed;
+function stream_context_get_default(?darray $options = null): mixed;
 
 /**
  * @param resource $stream_or_context - The stream or context to get options
@@ -77,7 +77,7 @@ function stream_context_get_params(resource $stream_or_context): mixed;
 
 <<__Native>>
 function stream_context_set_params(resource $stream_or_context,
-                                   array $params): bool;
+                                   darray $params): bool;
 
 /**
  * Makes a copy of up to maxlength bytes of data from the current position (or

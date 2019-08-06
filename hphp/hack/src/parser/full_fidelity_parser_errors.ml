@@ -2995,10 +2995,6 @@ let attr_spec_contains_sealed node =
 let attr_spec_contains_const node =
   attribute_specification_contains node SN.UserAttributes.uaConst
 
-let attr_spec_contains_late_init node =
-  attribute_specification_contains node SN.UserAttributes.uaLateInit ||
-  attribute_specification_contains node SN.UserAttributes.uaSoftLateInit
-
 (* If there's more than one XHP category, report an error on the last one. *)
 let duplicate_xhp_category_errors (elts : Syntax.t list) errors =
   let category_nodes = List.filter elts ~f:(fun elt ->
@@ -3652,11 +3648,8 @@ let class_property_const_errors node errors =
   match syntax node with
   | PropertyDeclaration { property_attribute_spec; _ } ->
     if attr_spec_contains_const property_attribute_spec then
-      if attr_spec_contains_late_init property_attribute_spec then
-        (* __SoftLateInit together with const would be a runtime bug, since
-         * __SoftLateInit properties are mutated if they're read before they
-         * were ever written.
-         * __LateInit together with const just doesn't make sense. *)
+      if attribute_specification_contains property_attribute_spec SN.UserAttributes.uaLateInit then
+        (* __LateInit together with const just doesn't make sense. *)
         make_error_from_node node SyntaxError.no_const_late_init_props :: errors
       else errors
     else errors

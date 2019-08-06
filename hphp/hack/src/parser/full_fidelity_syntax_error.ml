@@ -747,7 +747,7 @@ let no_const_interfaces_traits_enums =
   "Interfaces, traits and enums may not be declared __Const"
 
 let no_const_late_init_props =
-  "__Const properties may not also be __LateInit or __SoftLateInit"
+  "__Const properties may not also be __LateInit"
 
 let no_const_static_props =
   "Static properties may not be __Const"

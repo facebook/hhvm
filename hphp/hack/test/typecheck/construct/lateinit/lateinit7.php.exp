@@ -1,2 +1,0 @@
-File "lateinit7.php", line 13, characters 18-22:
-A late-initialized property cannot have a default value (Typing[4277])

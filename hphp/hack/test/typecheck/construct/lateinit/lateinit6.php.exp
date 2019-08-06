@@ -9,6 +9,6 @@ Class D does not correctly implement all required members  (Typing[4282])
   Some members are incompatible with those declared in type C
 Read the following to see why:
   File "lateinit6.php", line 9, characters 10-12:
-  Redeclared properties must be consistently declared as late-initialized
+  Redeclared properties must be consistently declared __LateInit
   File "lateinit6.php", line 4, characters 10-12:
-  The property is not late-initialized here
+  The property is not declared __LateInit here

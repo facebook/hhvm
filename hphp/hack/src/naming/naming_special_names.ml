@@ -138,7 +138,6 @@ module UserAttributes = struct
   let uaReturnsVoidToRx          = "__ReturnsVoidToRx"
   let uaMaybeMutable             = "__MaybeMutable"
   let uaLateInit                 = "__LateInit"
-  let uaSoftLateInit             = "__SoftLateInit"
   let uaOwnedMutable             = "__OwnedMutable"
   let uaNonRx                    = "__NonRx"
   let uaNewable                  = "__Newable"
@@ -177,7 +176,6 @@ module UserAttributes = struct
       uaReturnsVoidToRx;
       uaMaybeMutable;
       uaLateInit;
-      uaSoftLateInit;
       uaAtMostRxAsFunc;
       uaAtMostRxAsArgs;
       uaOwnedMutable;

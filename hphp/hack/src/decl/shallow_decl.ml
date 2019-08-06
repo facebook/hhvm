@@ -109,9 +109,7 @@ let prop env cv =
   let cv_pos = fst cv.cv_id in
   let ty = Option.map cv.cv_type ~f:(Decl_hint.hint env) in
   let const = Attrs.mem SN.UserAttributes.uaConst cv.cv_user_attributes in
-  let lateinit = Attrs.mem2
-    SN.UserAttributes.uaLateInit SN.UserAttributes.uaSoftLateInit
-    cv.cv_user_attributes in
+  let lateinit = Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes in
   if cv.cv_final then Errors.final_property cv_pos;
   if lateinit && cv.cv_expr <> None then Errors.lateinit_with_default cv_pos;
   {
@@ -130,10 +128,7 @@ and static_prop env c cv =
   let cv_pos, cv_name = cv.cv_id in
   let ty = Option.map cv.cv_type ~f:(Decl_hint.hint env) in
   let id = "$" ^ cv_name in
-  let lateinit = Attrs.mem2
-    SN.UserAttributes.uaLateInit
-    SN.UserAttributes.uaSoftLateInit
-    cv.cv_user_attributes in
+  let lateinit = Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes in
   let lsb = Attrs.mem SN.UserAttributes.uaLSB cv.cv_user_attributes in
   let const = Attrs.mem SN.UserAttributes.uaConst cv.cv_user_attributes in
   if cv.cv_expr = None && FileInfo.(is_strict c.c_mode || c.c_mode = Mpartial)

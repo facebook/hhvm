@@ -44,9 +44,7 @@ let parent env c acc =
     | parent_ty :: _ -> add_parent_construct env c acc parent_ty
 
 let is_lateinit cv =
-  Attrs.mem2
-    SN.UserAttributes.uaLateInit
-    SN.UserAttributes.uaSoftLateInit cv.cv_user_attributes
+  Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes
 
 let prop_needs_init sp =
   if Option.is_some sp.sp_xhp_attr then false

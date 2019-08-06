@@ -1,6 +1,0 @@
-File "namespace_global_builtin1.php", line 6, characters 19-22:
-Invalid argument (Typing[4110])
-File "printf.hhi", line 133, characters 30-56:
-Expected ~HH\FormatString<~PlainSprintf> because it is an unenforceable type
-File "namespace_global_builtin1.php", line 6, characters 19-22:
-But got string

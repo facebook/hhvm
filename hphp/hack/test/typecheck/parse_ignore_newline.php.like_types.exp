@@ -1,6 +1,0 @@
-File "parse_ignore_newline.php", line 15, characters 5-30:
-Invalid argument (Typing[4110])
-File "printf.hhi", line 133, characters 30-56:
-Expected ~HH\FormatString<~PlainSprintf> because it is an unenforceable type
-File "parse_ignore_newline.php", line 15, characters 5-30:
-But got string

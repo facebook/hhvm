@@ -1,6 +1,0 @@
-File "xor_params.php", line 12, characters 7-45:
-Invalid argument (Typing[4110])
-File "printf.hhi", line 133, characters 30-56:
-Expected ~HH\FormatString<~PlainSprintf> because it is an unenforceable type
-File "xor_params.php", line 12, characters 7-45:
-But got string

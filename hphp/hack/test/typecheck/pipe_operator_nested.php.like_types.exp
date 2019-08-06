@@ -1,6 +1,0 @@
-File "pipe_operator_nested.php", line 8, characters 18-24:
-Invalid argument (Typing[4110])
-File "printf.hhi", line 122, characters 18-47:
-Expected ~HH\FormatString<~PlainSprintf> because it is an unenforceable type
-File "pipe_operator_nested.php", line 8, characters 18-24:
-But got string

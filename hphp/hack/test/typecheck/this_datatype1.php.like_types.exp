@@ -1,6 +1,0 @@
-File "this_datatype1.php", line 24, characters 25-26:
-Invalid argument (Typing[4110])
-File "printf.hhi", line 133, characters 30-56:
-Expected ~HH\FormatString<~PlainSprintf> because it is an unenforceable type
-File "this_datatype1.php", line 24, characters 25-26:
-But got string

@@ -56,12 +56,6 @@ File "lambda_array_get.php", line 104, characters 5-41:
 Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
 File "lambda_array_get.php", line 117, characters 5-97:
 Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_array_get.php", line 117, characters 55-61:
-Invalid argument (Typing[4110])
-File "printf.hhi", line 133, characters 30-56:
-Expected ~HH\FormatString<~PlainSprintf> because it is an unenforceable type
-File "lambda_array_get.php", line 117, characters 55-61:
-But got string
 File "lambda_array_get.php", line 121, characters 5-41:
 Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
 File "lambda_array_get.php", line 125, characters 5-41:

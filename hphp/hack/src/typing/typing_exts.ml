@@ -29,7 +29,6 @@ Ad-hoc rules for typing some common idioms
 
 open Core_kernel
 open Typing_defs
-open Utils
 open Aast
 
 module Env = Typing_env
@@ -51,30 +50,35 @@ let magic_method_name input =
 let lookup_magic_type (env:Env.env) (class_:locl ty) (fname:string) :
     Env.env * (locl fun_params * locl ty option) option =
   match class_ with
-    | (_, Tclass ((_, className), _, [])) ->
-        (match Env.get_class env className with
-           | Some c ->
-               let env, ce_type =
-                 Env.get_member true env c fname |>
-                   opt
-                     (fun env { ce_type = lazy ty; _ } ->
-                      Typing_phase.localize_with_self env ty)
-                     env
-               in
-               (match ce_type with
-                  | Some (_, Tfun {
-                                   ft_params = pars;
-                            ft_ret = ty;
-                            _;
-                          }
-                    ) ->
-                     env, Some (pars,
-                                (match ty with
-                                 | (_, Tprim Tstring) -> None
-                                 | _ -> Some ty))
-                  | _ -> env, None)
-           | None -> env, None)
-    | _ -> env, None
+  | (_, Tunion [
+      (_, Tdynamic);
+      (_, Tclass ((_, className), _, []));
+    ])
+  | (_, Tclass ((_, className), _, [])) ->
+    let (>>=) = Option.(>>=) in
+    let ce_type = Env.get_class env className >>=
+      (fun c -> Env.get_member true env c fname) >>=
+      (fun { ce_type = lazy ty; _ } ->
+        match ty with
+        | _, Tfun fty ->
+          let ety_env = Typing_phase.env_with_self env in
+          let instantiation = Typing_phase.({
+            use_pos = fty.ft_pos;
+            use_name = fname;
+            explicit_targs = [];
+          }) in
+          Some (Typing_phase.localize_ft ~instantiation ~ety_env env fty)
+        | _ -> None
+      ) in
+    begin match ce_type with
+    | Some (env, { ft_params = pars; ft_ret = ty; _; }) ->
+      let ty_opt =
+        match ty with
+        | (_, Tprim Tstring) -> None
+        | _ -> Some ty in
+      env, Some (pars, ty_opt)
+    | _ -> env, None end
+  | _ -> env, None
 
 let get_char s i =
   if i >= String.length s then None else Some (String.get s i)
@@ -147,6 +151,10 @@ let retype_magic_func (env:Env.env) (ft:locl fun_type) (el:Nast.expr list) : Env
         when SN.Classes.is_format_string fs -> env, None
       | [({ fp_type = (why, Toption (_, Tclass ((_, fs), _, [type_arg]))); _ } as fp)], (arg :: _)
       | [({ fp_type = (why,             Tclass ((_, fs), _, [type_arg] )); _ } as fp)], (arg :: _)
+      | [({ fp_type = (why, Tunion [
+          (_, Tdynamic);
+          (_, Tclass ((_, fs), _, [type_arg]));
+        ]); _ } as fp)], (arg :: _)
         when SN.Classes.is_format_string fs ->
           (match const_string_of env arg with
              |  env, Right str ->

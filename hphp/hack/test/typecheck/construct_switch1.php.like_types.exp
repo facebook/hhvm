@@ -1,6 +1,0 @@
-File "construct_switch1.php", line 21, characters 29-34:
-Invalid argument (Typing[4110])
-File "printf.hhi", line 133, characters 30-56:
-Expected ~HH\FormatString<~PlainSprintf> because it is an unenforceable type
-File "construct_switch1.php", line 21, characters 29-34:
-But got string

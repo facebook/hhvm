@@ -15,9 +15,11 @@ File "lvar_expr_dependent.php", line 34, characters 5-28:
 File "lvar_expr_dependent.php", line 41, characters 5-22:
   ~<expr#2>::T
   where <expr#2>::T as \C::T
-File "lvar_expr_dependent.php", line 32, characters 30-31:
+File "lvar_expr_dependent.php", line 42, characters 13-18:
 Invalid argument (Typing[4110])
-File "printf.hhi", line 133, characters 30-56:
-Expected ~HH\FormatString<~PlainSprintf> because it is an unenforceable type
-File "lvar_expr_dependent.php", line 32, characters 30-31:
-But got string
+File "lvar_expr_dependent.php", line 13, characters 26-32:
+Expected ~<expr#2>::T because it is an unenforceable type
+File "lvar_expr_dependent.php", line 12, characters 35-41:
+But got <expr#1>::T
+File "lvar_expr_dependent.php", line 38, characters 14-15:
+  where '<expr#1>' is a reference to this expression

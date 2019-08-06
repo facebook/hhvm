@@ -1,6 +1,0 @@
-File "pipe_operator_precedence.php", line 12, characters 18-21:
-Invalid argument (Typing[4110])
-File "printf.hhi", line 122, characters 18-47:
-Expected ~HH\FormatString<~PlainSprintf> because it is an unenforceable type
-File "pipe_operator_precedence.php", line 12, characters 18-21:
-But got string

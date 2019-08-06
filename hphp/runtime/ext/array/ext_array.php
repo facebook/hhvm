@@ -593,65 +593,6 @@ function array_values(
 ): mixed;
 
 /**
- * @param mixed $input - The input array.
- *
- * @param mixed $funcname - Typically, funcname takes on two parameters. The
- *   array parameter's value being the first, and the key/index second. If
- *   funcname needs to be working with the actual values of the array, specify
- *   the first parameter of funcname as a reference. Then, any changes made to
- *   those elements will be made in the original array itself. Users may not
- *   change the array itself from the callback function. e.g. Add/delete
- *   elements, unset elements, etc. If the array that array_walk() is applied to
- *   is changed, the behavior of this function is undefined, and unpredictable.
- * @param mixed $userdata - If the optional userdata parameter is supplied, it
- *   will be passed as the third parameter to the callback funcname.
- *
- * @return bool - Returns TRUE on success or FALSE on failure.
- *
- */
-<<__Deprecated('This function is scheduled for removal')>>
-function array_walk(
-  mixed &$input,
-  mixed $funcname,
-  mixed $userdata = null,
-): bool {
-  if (!is_array($input)) {
-    trigger_error(
-      "Invalid operand type was used: array_walk expects array(s)",
-      E_WARNING
-    );
-    return false;
-  }
-
-  $rf = new ReflectionFunction($funcname);
-  if ($rf->getParameters()[0]->isPassedByReference()) {
-    if ($userdata === null) {
-      foreach ($input as $k => $v) {
-        $funcname(&$v, $k);
-        $input[$k] = $v;
-      }
-    } else {
-      foreach ($input as $k => $v) {
-        $funcname(&$v, $k, $userdata);
-        $input[$k] = $v;
-      }
-    }
-  } else {
-    if ($userdata === null) {
-      foreach ($input as $k => $v) {
-        $funcname($v, $k);
-      }
-    } else {
-      foreach ($input as $k => $v) {
-        $funcname($v, $k, $userdata);
-      }
-    }
-  }
-
-  return true;
-}
-
-/**
  * This function shuffles (randomizes the order of the elements in) an array.
  *
  * @param mixed $array - The array.

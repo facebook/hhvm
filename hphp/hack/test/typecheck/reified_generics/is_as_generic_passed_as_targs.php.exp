@@ -7,7 +7,9 @@ Invalid "as" expression hint (Typing[4195])
 File "is_as_generic_passed_as_targs.php", line 8, characters 16-16:
 The "as" operator cannot be used with an erased generic type parameter
 File "is_as_generic_passed_as_targs.php", line 8, characters 16-16:
-This is not reified, it cannot be used as a reified type argument (Typing[4305])
+Invalid reified hint (Typing[4305])
+File "is_as_generic_passed_as_targs.php", line 8, characters 16-16:
+This is not reified, it cannot be used as a reified type argument
 File "is_as_generic_passed_as_targs.php", line 3, characters 22-23:
 Tb is reified
 File "is_as_generic_passed_as_targs.php", line 12, characters 8-17:

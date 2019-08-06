@@ -113,7 +113,7 @@ let verify_targ_valid env tparam targ =
       Type_const_check.php_array_validator#validate_type env ty emit_error
     | _ -> ()
     end;
-    let emit_error _ p kind = Errors.invalid_reified_argument tparam.tp_name p kind in
+    let emit_error = Errors.invalid_reified_argument tparam.tp_name in
     validator#validate_type env ty emit_error
   | Nast.Erased -> () end;
 

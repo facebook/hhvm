@@ -7,18 +7,26 @@ All type arguments must be specified because a type parameter is reified (Typing
 File "function_soft_reification.php", line 6, characters 10-16:
 Definition is here
 File "function_soft_reification.php", line 28, characters 15-20:
-This is not reified, it cannot be used as a reified type argument (Typing[4305])
+Invalid reified hint (Typing[4305])
+File "function_soft_reification.php", line 28, characters 15-20:
+This is not reified, it cannot be used as a reified type argument
 File "function_soft_reification.php", line 5, characters 39-39:
 T is reified
 File "function_soft_reification.php", line 29, characters 15-19:
-This is soft reified, it cannot be used as a reified type argument (Typing[4305])
+Invalid reified hint (Typing[4305])
+File "function_soft_reification.php", line 29, characters 15-19:
+This is soft reified, it cannot be used as a reified type argument
 File "function_soft_reification.php", line 5, characters 39-39:
 T is reified
 File "function_soft_reification.php", line 32, characters 11-16:
-This is not reified, it cannot be used as a reified type argument (Typing[4305])
+Invalid reified hint (Typing[4305])
+File "function_soft_reification.php", line 32, characters 11-16:
+This is not reified, it cannot be used as a reified type argument
 File "function_soft_reification.php", line 6, characters 24-24:
 T is reified
 File "function_soft_reification.php", line 33, characters 11-15:
-This is soft reified, it cannot be used as a reified type argument (Typing[4305])
+Invalid reified hint (Typing[4305])
+File "function_soft_reification.php", line 33, characters 11-15:
+This is soft reified, it cannot be used as a reified type argument
 File "function_soft_reification.php", line 6, characters 24-24:
 T is reified

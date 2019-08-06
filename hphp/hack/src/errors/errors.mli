@@ -569,7 +569,7 @@ val move_in_nonreactive_context : Pos.t -> unit
 val invalid_move_target : Pos.t -> Pos.t -> string -> unit
 val invalid_move_use : Pos.t -> unit
 val require_args_reify : Pos.t -> Pos.t -> unit
-val invalid_reified_argument : Pos.t * string -> Pos.t -> string -> unit
+val invalid_reified_argument : Pos.t * string -> Pos.t -> Pos.t -> string -> unit
 val invalid_reified_argument_disallow_php_arrays : Pos.t * string -> Pos.t -> Pos.t -> string -> unit
 val new_static_class_reified : Pos.t -> unit
 val class_get_reified : Pos.t -> unit

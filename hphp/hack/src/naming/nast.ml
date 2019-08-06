@@ -173,6 +173,56 @@ let get_defs ast =
 in
   get_defs ast ([],[],[],[])
 
+(** Some utility functions **)
+type ignore_attribute_env = {
+  ignored_attributes: string list
+}
+
+let ast_deregister_attributes_mapper = object (self)
+  inherit [_] Aast.endo as super
+
+  method on_'fb _ (fb: func_body_ann) = fb
+
+  method on_'ex _ (ex: pos) = ex
+
+  method on_'en _ (en: unit) = en
+
+  method ignored_attr env l =
+    List.exists l
+      (fun attr -> List.mem (env.ignored_attributes) (snd attr.ua_name) ~equal:(=))
+
+  (* Filter all functions and classes with the user attributes banned *)
+  method! on_program env toplevels =
+    let toplevels = List.filter toplevels (fun toplevel ->
+      match toplevel with
+      | Fun f when self#ignored_attr env f.f_user_attributes ->
+        false
+      | Class c when self#ignored_attr env c.c_user_attributes ->
+        false
+      | _ -> true
+    ) in
+    super#on_program env toplevels
+
+  method! on_class_ env this =
+    (* Filter out class elements which are methods with wrong attributes *)
+    let methods =
+      List.filter this.c_methods (fun m -> not @@ self#ignored_attr env m.m_user_attributes)
+    in
+    let cvars =
+      List.filter this.c_vars (fun cv -> not @@ self#ignored_attr env cv.cv_user_attributes)
+    in
+    let this = { this with c_methods = methods; c_vars = cvars } in
+    super#on_class_ env this
+end
+
+let deregister_ignored_attributes ast =
+  let env = {
+    (* For now, only ignore the __PHPStdLib *)
+    ignored_attributes = [Naming_special_names.UserAttributes.uaPHPStdLib]
+  } in
+  (ast_deregister_attributes_mapper)#on_program env ast
+
+
 let ast_no_pos_or_docblock_mapper = object
   inherit [_] Aast.endo as super
   method! on_pos _ _pos = Pos.none

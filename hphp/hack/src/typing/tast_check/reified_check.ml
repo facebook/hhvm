@@ -45,9 +45,42 @@ let validator = object(this) inherit type_validator
       this#invalid acc r "a function type with variadic args"
     | _ -> acc
 
-  method! on_taccess acc _ _ =
-    (* Handled by reusing Type_const_check's validator. *)
-    acc
+  method! on_taccess acc r (root, ids) =
+    (* We care only about the last type constant we access in the chain
+     * this::T1::T2::Tn. So we reverse the ids to get the last one then we resolve
+     * up to that point using localize to determine the root. i.e. we resolve
+     *   root = (this::T1::T2)
+     *   id = Tn
+     *)
+    match List.rev ids with
+    | [] ->
+      this#on_type acc root
+    | (_, tconst)::rest ->
+      let root = if rest = [] then root else (r, Taccess (root, List.rev rest)) in
+      let env, root = Env.localize acc.env acc.ety_env root in
+      let env, tyl = Env.get_concrete_supertypes env root in
+      List.fold tyl ~init:acc ~f:begin fun acc ty ->
+        match snd ty with
+        | Typing_defs.Tclass ((_, class_name), _, _) ->
+          let (>>=) = Option.(>>=) in
+          Option.value ~default:acc begin
+            Env.get_class env class_name >>= fun class_ ->
+            Cls.get_typeconst class_ tconst >>= fun typeconst ->
+            match typeconst.ttc_abstract with
+            | _ when typeconst.ttc_reifiable <> None -> Some acc
+            | TCConcrete -> Some acc
+            (* This handles the case for partially abstract type constants. In this case
+             * we know the assigned type will be chosen if the root is the same as the
+             * concrete supertype of the root.
+             *)
+            | TCPartiallyAbstract when phys_equal root ty -> Some acc
+            | _ ->
+              let r = Reason.Rwitness (fst typeconst.ttc_name) in
+              let kind = "an abstract type constant without the __Reifiable attribute" in
+              Some (this#invalid acc r kind)
+          end
+        | _ -> acc
+      end
 
   method! on_tabstract acc r ak _ty_opt =
     match ak with
@@ -104,17 +137,8 @@ let verify_targ_valid env tparam targ =
   begin match tparam.tp_reified with
   | Nast.Reified
   | Nast.SoftReified ->
-    let ty = Env.hint_to_ty env targ in
-    begin match ty with
-    | _, Taccess _ ->
-      let emit_error =
-        Errors.invalid_reified_argument_reifiable tparam.tp_name
-      in
-      Type_const_check.php_array_validator#validate_type env ty emit_error
-    | _ -> ()
-    end;
     let emit_error = Errors.invalid_reified_argument tparam.tp_name in
-    validator#validate_type env ty emit_error
+    validator#validate_hint env targ emit_error
   | Nast.Erased -> () end;
 
   begin if Attributes.mem UA.uaEnforceable tparam.tp_user_attributes then

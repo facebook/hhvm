@@ -3,7 +3,7 @@ Invalid type (Typing[4322])
 File "reifiable3.php", line 9, characters 5-15:
 This type constant has the __Reifiable attribute
 File "reifiable3.php", line 10, characters 32-42:
-But a PHP array was found here
+It cannot contain an array
 File "reifiable3.php", line 20, characters 13-13:
 Class D does not correctly implement all required members  (Typing[4322])
 File "reifiable3.php", line 20, characters 23-23:
@@ -14,16 +14,16 @@ Invalid type
 File "reifiable3.php", line 6, characters 5-15:
 This type constant has the __Reifiable attribute
 File "reifiable3.php", line 21, characters 25-35:
-But a PHP array was found here
+It cannot contain an array
 File "reifiable3.php", line 21, characters 19-36:
 Invalid type (Typing[4322])
 File "reifiable3.php", line 6, characters 5-15:
 This type constant has the __Reifiable attribute
 File "reifiable3.php", line 21, characters 25-35:
-But a PHP array was found here
+It cannot contain an array
 File "reifiable3.php", line 27, characters 29-31:
 Invalid constraint (Typing[4322])
 File "reifiable3.php", line 26, characters 5-15:
 This type constant has the __Reifiable attribute
-File "reifiable3.php", line 3, characters 12-32:
-But a PHP array was found here
+File "reifiable3.php", line 27, characters 29-31:
+It cannot contain an array

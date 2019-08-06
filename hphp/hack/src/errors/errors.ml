@@ -2991,7 +2991,7 @@ let reifiable_attr attr_pos decl_kind decl_pos ty_pos ty_msg =
   add_list (Typing.err_code Typing.DisallowPHPArraysAttr) [
     decl_pos, "Invalid "^decl_kind;
     attr_pos, "This type constant has the __Reifiable attribute";
-    ty_pos, "But "^ty_msg;
+    ty_pos, "It cannot contain "^ty_msg;
   ]
 
 let invalid_newable_type_argument (tp_pos, tp_name) ta_pos =

@@ -1272,6 +1272,7 @@ static Object HHVM_STATIC_METHOD(
   // At each step, we fetch from the PreClass is important because the
   // order in which getMethods returns matters
   req::StringIFastSet visitedMethods;
+  req::StringIFastSet visitedInterfaces;
   auto st = req::make<c_Set>();
   st->reserve(cls->numMethods());
 
@@ -1315,6 +1316,7 @@ static Object HHVM_STATIC_METHOD(
 
   collectInterface = [&] (const Class* iface) {
     if (!iface) return;
+    if (!visitedInterfaces.insert(iface->nameStr()).second) return;
 
     size_t const numMethods = iface->preClass()->numMethods();
     Func* const* methods = iface->preClass()->methods();

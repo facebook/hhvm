@@ -52,7 +52,7 @@ open Option.Monad_infix
 
 let base_visitor line char = object (self)
   inherit [_] Tast_visitor.reduce as super
-  inherit [Pos.t * _ * _] Ast.option_monoid
+  inherit [Pos.t * _ * _] Ast_defs.option_monoid
 
   method private merge lhs rhs =
     (* A node with position P is not always a parent of every other node with
@@ -86,7 +86,7 @@ end
 *)
 let range_visitor startl startc endl endc = object
   inherit [_] Tast_visitor.reduce
-  inherit [_] Ast.option_monoid
+  inherit [_] Ast_defs.option_monoid
   method merge x _ = x
   method! on_'ex env (pos, ty) =
     if Pos.exactly_matches_range pos startl startc endl endc

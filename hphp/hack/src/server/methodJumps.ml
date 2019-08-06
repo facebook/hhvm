@@ -115,10 +115,10 @@ let get_child_classes_and_methods cls ~filter naming_table workers =
 let class_passes_filter ~filter cls =
   match filter, cls with
   | No_filter, _ -> true
-  | Class, cls when Cls.kind cls = Ast.Cnormal -> true
-  | Class, cls when Cls.kind cls = Ast.Cabstract -> true
-  | Interface, cls when Cls.kind cls = Ast.Cinterface -> true
-  | Trait, cls when Cls.kind cls = Ast.Ctrait -> true
+  | Class, cls when Cls.kind cls = Ast_defs.Cnormal -> true
+  | Class, cls when Cls.kind cls = Ast_defs.Cabstract -> true
+  | Interface, cls when Cls.kind cls = Ast_defs.Cinterface -> true
+  | Trait, cls when Cls.kind cls = Ast_defs.Ctrait -> true
   | _ ->
     false
 

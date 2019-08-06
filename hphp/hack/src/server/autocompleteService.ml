@@ -155,24 +155,24 @@ let autocomplete_shape_key env fields id =
     (* not the same as `prefix == ""` in namespaces *)
     let have_prefix = (Pos.length (fst id)) > suffix_len in
     let prefix = strip_suffix (snd id) in
-    let add (name: Ast.shape_field_name) =
+    let add (name: Ast_defs.shape_field_name) =
       let code, kind, ty = match name with
-        | Ast.SFlit_int (pos, str) ->
+        | Ast_defs.SFlit_int (pos, str) ->
           let reason = Typing_reason.Rwitness pos in
           let ty = Typing_defs.Tprim Aast_defs.Tint in
           (str, SI_Literal, (reason, ty))
-        | Ast.SFlit_str (pos, str) ->
+        | Ast_defs.SFlit_str (pos, str) ->
           let reason = Typing_reason.Rwitness pos in
           let ty = Typing_defs.Tprim Aast_defs.Tstring in
           let quote = if have_prefix then Str.first_chars prefix 1 else "'" in
           (quote^str^quote, SI_Literal, (reason, ty))
-        | Ast.SFclass_const ((pos, cid), (_, mid)) ->
+        | Ast_defs.SFclass_const ((pos, cid), (_, mid)) ->
           (Printf.sprintf "%s::%s" cid mid, SI_ClassConstant, (Reason.Rwitness pos, Typing_defs.Tany))
       in
       if (not have_prefix) || string_starts_with code prefix
       then add_partial_result code (Phase.decl ty) kind None
     in
-    List.iter (Ast.ShapeMap.keys fields) ~f:add
+    List.iter (Ast_defs.ShapeMap.keys fields) ~f:add
   end
 
 let autocomplete_member ~is_static env class_ cid id =
@@ -215,10 +215,10 @@ let autocomplete_lvar id env =
 
 let should_complete_class completion_type class_kind =
   match completion_type, class_kind with
-  | Some Acid, Some Ast.Cnormal
-  | Some Acid, Some Ast.Cabstract
-  | Some Acnew, Some Ast.Cnormal
-  | Some Actrait_only, Some Ast.Ctrait
+  | Some Acid, Some Ast_defs.Cnormal
+  | Some Acid, Some Ast_defs.Cabstract
+  | Some Acnew, Some Ast_defs.Cnormal
+  | Some Actrait_only, Some Ast_defs.Ctrait
   | Some Actype, Some _ -> true
   | _ -> false
 
@@ -252,7 +252,7 @@ let get_constructor_ty c =
         ft_where_constraints = [];
         ft_params   = [];
         ft_ret      = return_ty;
-        ft_fun_kind = Ast.FSync;
+        ft_fun_kind = Ast_defs.FSync;
         ft_reactive = Nonreactive;
         ft_return_disposable = false;
         ft_returns_mutable = false;
@@ -350,12 +350,12 @@ let compute_complete_global
               (if snd (Cls.construct c) <> Inconsistent then Some c else None)
           else
             let kind = match (Cls.kind c) with
-              | Ast.Cabstract
-              | Ast.Cnormal -> SearchUtils.SI_Class
-              | Ast.Cinterface -> SearchUtils.SI_Interface
-              | Ast.Ctrait -> SearchUtils.SI_Trait
-              | Ast.Cenum
-              | Ast.Crecord -> SearchUtils.SI_Enum (* TODO(T36697624): Add Record_kind *)
+              | Ast_defs.Cabstract
+              | Ast_defs.Cnormal -> SearchUtils.SI_Class
+              | Ast_defs.Cinterface -> SearchUtils.SI_Interface
+              | Ast_defs.Ctrait -> SearchUtils.SI_Trait
+              | Ast_defs.Cenum
+              | Ast_defs.Crecord -> SearchUtils.SI_Enum (* TODO(T36697624): Add Record_kind *)
             in
             let ty =
               Typing_reason.Rwitness (Cls.pos c),
@@ -719,7 +719,7 @@ class local_types = object (self)
       if matches_auto_complete_suffix (Local_id.get_name id)
       then after_cursor <- true
       else self#add id ty
-    | Tast.Binop (Ast.Eq _, e1, e2) ->
+    | Tast.Binop (Ast_defs.Eq _, e1, e2) ->
       (* Process the rvalue before the lvalue, since the lvalue is annotated
          with its type after the assignment. *)
       self#on_expr env e2;

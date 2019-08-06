@@ -79,11 +79,11 @@ let summarize_const class_name cc =
   }
 
 let modifier_of_fun_kind acc = function
-  | Ast.FAsync | Ast.FAsyncGenerator -> Async :: acc
+  | Ast_defs.FAsync | Ast_defs.FAsyncGenerator -> Async :: acc
   | _ -> acc
 
 let modifier_of_param_kind acc = function
-  | Some Ast.Pinout -> Inout :: acc
+  | Some Ast_defs.Pinout -> Inout :: acc
   | _ -> acc
 
 let summarize_typeconst class_name t =
@@ -212,7 +212,7 @@ let summarize_class class_ ~no_children =
     if class_.c_final then [Final] else []
   in
   let modifiers = match class_.c_kind with
-    | Ast.Cabstract -> Abstract :: modifiers
+    | Ast_defs.Cabstract -> Abstract :: modifiers
     | _ -> modifiers
   in
   let children = if no_children then None else begin
@@ -246,10 +246,10 @@ let summarize_class class_ ~no_children =
   Some (sort_by_line acc)
   end in
   let kind = match class_.c_kind with
-    | Ast.Cinterface -> SymbolDefinition.Interface
-    | Ast.Ctrait -> SymbolDefinition.Trait
-    | Ast.Cenum -> SymbolDefinition.Enum
-    | _ -> SymbolDefinition.Class
+    | Ast_defs.Cinterface -> Interface
+    | Ast_defs.Ctrait -> Trait
+    | Ast_defs.Cenum -> Enum
+    | _ -> Class
   in
   let name = class_name in
   let id = get_symbol_id kind None name in

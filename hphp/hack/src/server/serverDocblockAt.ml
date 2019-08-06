@@ -86,8 +86,8 @@ let fallback class_name member_name =
         all_interfaces_or_first_class_docblock seen_interfaces ancestors
       | Some docblock ->
         match Cls.kind ancestor with
-        | Ast.Cabstract
-        | Ast.Cnormal ->
+        | Ast_defs.Cabstract
+        | Ast_defs.Cnormal ->
           [(Cls.name ancestor, docblock)]
         | _ ->
           all_interfaces_or_first_class_docblock

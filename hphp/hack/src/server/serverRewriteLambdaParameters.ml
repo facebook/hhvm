@@ -97,7 +97,7 @@ end = struct
   and print_shape_field_name name =
     let s = Typing_env.get_shape_field_name name in
     match name with
-    | Ast.SFlit_str _ -> "'" ^ s ^ "'"
+    | Ast_defs.SFlit_str _ -> "'" ^ s ^ "'"
     | _ -> s
 
   let print ty = try Some (print_ty_exn ty) with Non_denotable -> None

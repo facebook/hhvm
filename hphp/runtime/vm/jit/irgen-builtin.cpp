@@ -1031,9 +1031,9 @@ SSATmp* opt_shapes_idx(IRGS& env, const ParamPrep& params) {
       auto const op = is_dict ? DictGetK : MixedArrayGetK;
       return gen(env, op, IndexData { pos }, arr, key);
     },
-    [&] (SSATmp* key) {
+    [&] (SSATmp* key, SizeHintData data) {
       auto const op = is_dict ? DictIdx : ArrayIdx;
-      return gen(env, op, arr, key, def);
+      return gen(env, op, data, arr, key, def);
     }
   );
   auto const cell = is_dict ? elm : unbox(env, elm, nullptr);
@@ -2206,8 +2206,8 @@ void implArrayIdx(IRGS& env) {
     [&] (SSATmp* arr, SSATmp* key, uint32_t pos) {
       return gen(env, MixedArrayGetK, IndexData { pos }, arr, key);
     },
-    [&] (SSATmp* key) {
-      return gen(env, ArrayIdx, base, key, def);
+    [&] (SSATmp* key, SizeHintData data) {
+      return gen(env, ArrayIdx, data, base, key, def);
     }
   );
 
@@ -2302,8 +2302,9 @@ void implDictKeysetIdx(IRGS& env,
       return gen(env, is_dict ? DictGetK : KeysetGetK, IndexData { pos },
                  base, key);
     },
-    [&] (SSATmp* key) {
-      return gen(env, is_dict ? DictIdx : KeysetIdx, use_base, key, def);
+    [&] (SSATmp* key, SizeHintData data) {
+      return is_dict ? gen(env, DictIdx, data, use_base, key, def)
+                     : gen(env, KeysetIdx, use_base, key, def);
     }
   );
 

@@ -740,7 +740,7 @@ SSATmp* emitDictKeysetGet(IRGS& env, SSATmp* base, SSATmp* key,
       return gen(env, is_dict ? DictGetK : KeysetGetK, IndexData { pos },
                  base, key);
     },
-    [&] (SSATmp* key) {
+    [&] (SSATmp* key, SizeHintData data) {
       return gen(
         env,
         is_dict
@@ -762,7 +762,7 @@ SSATmp* emitArrayGet(IRGS& env, SSATmp* base, SSATmp* key, MOpMode mode,
     [&] (SSATmp* arr, SSATmp* key, uint32_t pos) {
       return gen(env, MixedArrayGetK, IndexData { pos }, arr, key);
     },
-    [&] (SSATmp* key) {
+    [&] (SSATmp* key, SizeHintData data) {
       return gen(env, ArrayGet, MOpModeData { mode }, base, key);
     }
   );
@@ -1487,7 +1487,7 @@ SSATmp* dictElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
     [&] (SSATmp* dict, SSATmp* key, uint32_t pos) {
       return gen(env, ElemDictK, IndexData { pos }, dict, key);
     },
-    [&] (SSATmp* key) {
+    [&] (SSATmp* key, SizeHintData data) {
       if (define || unset) {
         return gen(env, unset ? ElemDictU : ElemDictD,
                    baseType, ldMBase(env), key);
@@ -1530,7 +1530,7 @@ SSATmp* keysetElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
     [&] (SSATmp* keyset, SSATmp* key, uint32_t pos) {
       return gen(env, ElemKeysetK, IndexData { pos }, keyset, key);
     },
-    [&] (SSATmp* key) {
+    [&] (SSATmp* key, SizeHintData data) {
       if (unset) return gen(env, ElemKeysetU, baseType, ldMBase(env), key);
       assertx(
         mode == MOpMode::Warn ||
@@ -1566,7 +1566,7 @@ SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
       [&] (SSATmp* arr, SSATmp* key, uint32_t pos) {
         return gen(env, ElemMixedArrayK, IndexData { pos }, arr, key);
       },
-      [&] (SSATmp* key) {
+      [&] (SSATmp* key, SizeHintData data) {
         if (define || unset) {
           return gen(env, unset ? ElemArrayU : ElemArrayD,
                      base->type(), ldMBase(env), key);

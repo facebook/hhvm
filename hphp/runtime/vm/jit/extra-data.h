@@ -368,6 +368,33 @@ struct IndexData : IRExtraData {
 };
 
 /*
+ * Used to optimize array accesses. Does not change semantics, but changes how
+ * we do the lookup - e.g. we scan small static arrays for static string keys.
+ *
+ * NOTE: Currently, we only use this hint in ArrayIdx and DictIdx. We may want
+ * to use it for ArrayExists / ArrayGet / etc.
+ */
+struct SizeHintData : IRExtraData {
+  enum SizeHint {
+    Default,
+    SmallStatic
+  };
+
+  SizeHintData() : hint(SizeHint::Default) {}
+  explicit SizeHintData(SizeHint hint) : hint(hint) {}
+
+  std::string show() const {
+    switch (hint) {
+      case SizeHint::Default:     return "Default";
+      case SizeHint::SmallStatic: return "SmallStatic";
+    }
+    not_reached();
+  }
+
+  SizeHint hint;
+};
+
+/*
  * Iterator ID.
  */
 struct IterId : IRExtraData {
@@ -1556,6 +1583,8 @@ struct MethCallerData : IRExtraData {
   static_assert(boost::has_trivial_destructor<data>::value,           \
                 "IR extra data type must be trivially destructible")
 
+X(ArrayIdx,                     SizeHintData);
+X(DictIdx,                      SizeHintData);
 X(LdBindAddr,                   LdBindAddrData);
 X(ProfileSwitchDest,            ProfileSwitchData);
 X(JmpSwitchDest,                JmpSwitchData);

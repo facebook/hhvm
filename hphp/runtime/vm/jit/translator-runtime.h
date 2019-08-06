@@ -126,9 +126,11 @@ void raise_error_sd(const StringData* sd);
 
 TypedValue arrayIdxI(ArrayData*, int64_t, TypedValue);
 TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
+TypedValue arrayIdxScan(ArrayData*, StringData*, TypedValue);
 
 TypedValue dictIdxI(ArrayData*, int64_t, TypedValue);
 TypedValue dictIdxS(ArrayData*, StringData*, TypedValue);
+TypedValue dictIdxScan(ArrayData*, StringData*, TypedValue);
 
 TypedValue keysetIdxI(ArrayData*, int64_t, TypedValue);
 TypedValue keysetIdxS(ArrayData*, StringData*, TypedValue);

@@ -97,7 +97,7 @@ void emitClassGetTS(IRGS& env) {
         IndexData { pos }, base, key
       );
     },
-    [&] (SSATmp* key) {
+    [&] (SSATmp* key, SizeHintData) {
       if (RuntimeOption::EvalHackArrDVArrs) return gen(env, DictGet, ts, key);
       return gen(env, ArrayGet, MOpModeData { MOpMode::Warn }, ts, key);
     }

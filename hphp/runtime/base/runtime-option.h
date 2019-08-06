@@ -844,6 +844,7 @@ struct RuntimeOption {
   F(bool, HHIRStorePRE,                true)                            \
   F(bool, HHIROutlineGenericIncDecRef, true)                            \
   F(double, HHIRMixedArrayProfileThreshold, 0.8554)                     \
+  F(double, HHIRSmallArrayProfileThreshold, 0.8)                        \
   /* Register allocation flags */                                       \
   F(bool, HHIREnablePreColoring,       true)                            \
   F(bool, HHIREnableCoalescing,        true)                            \

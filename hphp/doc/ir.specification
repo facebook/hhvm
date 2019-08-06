@@ -2448,15 +2448,19 @@ To string conversions:
   Identical to GetMemoKey but only accepts scalar types and cannot produce
   errors.
 
-| ArrayIdx, DArrElem, S(Arr) S(Int,Str) S(Cell), NF
+| ArrayIdx<sizeHint>, DArrElem, S(Arr) S(Int,Str) S(Cell), NF
 
   Checks if S0 contains the key S1, and returns the result if found. Otherwise
-  S2 is returned.
+  S2 is returned. The optimization data `sizeHint` doesn't affect semantics.
+  (`sizeHint` describes S0; it's one of {Default, SmallStatic}. Default is a
+  hash lookup. For SmallStatic, we'll do a linear scan for static string keys.)
 
-| DictIdx, DDictElem, S(Dict) S(Int,Str) S(Cell), NF
+| DictIdx<sizeHint>, DDictElem, S(Dict) S(Int,Str) S(Cell), NF
 
   Checks if S0 contains the key S1 and returns the result if found. Otherwise
-  S2 is returned.
+  S2 is returned. The optimization data `sizeHint` doesn't affect semantics.
+  (`sizeHint` describes S0; it's one of {Default, SmallStatic}. Default is a
+  hash lookup. For SmallStatic, we'll do a linear scan for static string keys.)
 
 | KeysetIdx, DKeysetElem, S(Keyset) S(Int,Str) S(Cell), NF
 
@@ -2974,7 +2978,7 @@ fields of that struct for holding intermediate values.
 
 | ProfileMixedArrayAccess, ND, S(Arr) S(Int,Str), NF
 
-  Profile access of the element keyed by S1 in S0, tracking offsets.
+  Profile access of the element keyed by S1 in S0, tracking sizes and offsets.
 
 | CheckMixedArrayOffset<pos>, ND, S(AK(Mixed)) S(Int,Str), B
 
@@ -2989,7 +2993,7 @@ fields of that struct for holding intermediate values.
 
 | ProfileDictAccess, ND, S(Dict) S(Int,Str), NF
 
-  Profile access of the element keyed by S1 in S0, tracking offsets.
+  Profile access of the element keyed by S1 in S0, tracking sizes and offsets.
 
 | CheckDictOffset<pos>, ND, S(Dict) S(Int,Str), B
 
@@ -2999,7 +3003,7 @@ fields of that struct for holding intermediate values.
 
 | ProfileKeysetAccess, ND, S(Keyset) S(Int,Str), NF
 
-  Profile access of the element keyed by S1 in S0, tracking offsets.
+  Profile access of the element keyed by S1 in S0, tracking sizes and offsets.
 
 | CheckKeysetOffset<pos>, ND, S(Keyset) S(Int,Str), B
 

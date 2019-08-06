@@ -748,6 +748,15 @@ private:
                                HeaderKind, ArrayData::DVArray);
   static MixedArray* CopyReserve(const MixedArray* src, size_t expectedSize);
 
+  // Slow paths used for MixedArrays with references or counted string keys.
+  // We fall back to SlowCopy and SlowGrow in the middle of iteration when we
+  // encounter a reference, so we take an (elm, end) pair as arguments.
+  static MixedArray* SlowCopy(MixedArray*, const ArrayData& old,
+                              MixedArrayElm* elm, MixedArrayElm* end);
+  static MixedArray* SlowGrow(MixedArray*, const ArrayData& old,
+                              MixedArrayElm* elm, MixedArrayElm* end);
+  static void SlowRelease(MixedArray*);
+
   MixedArray() = delete;
   MixedArray(const MixedArray&) = delete;
   MixedArray& operator=(const MixedArray&) = delete;

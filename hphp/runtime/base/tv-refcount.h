@@ -233,6 +233,18 @@ ALWAYS_INLINE void tvIncRefGen(TypedValue tv) {
   }
 }
 
+/*
+ * Incref `tv', or do nothing if it's not refcounted. This method allows tv to
+ * have kInvalidDataType, which is never refcounted; that means that we can use
+ * it for MixedArray values (which may be tombstones with kInvalidDataType).
+ */
+ALWAYS_INLINE void tvIncRefGenUnsafe(TypedValue tv) {
+  assertx(tv.m_type == kInvalidDataType || tvIsPlausible(tv));
+  if (isRefcountedType(tv.m_type)) {
+    tvIncRefCountable(tv);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

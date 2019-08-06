@@ -431,6 +431,35 @@ MixedArray* MixedArray::MakeDArrayNatural(uint32_t size,
   return ad;
 }
 
+NEVER_INLINE
+MixedArray* MixedArray::SlowCopy(MixedArray* ad, const ArrayData& old,
+                                 MixedArrayElm* elm, MixedArrayElm* end) {
+  assertx(ad->isRefCounted());
+
+  for (; elm < end; ++elm) {
+    if (elm->hasStrKey()) elm->skey->incRefCount();
+    if (UNLIKELY(isRefType(elm->data.m_type))) {
+      auto const ref = elm->data.m_data.pref;
+      // See also tvDupWithRef()
+      if (!ref->isReferenced() && ref->cell()->m_data.parr != &old) {
+        cellDup(*ref->cell(), *reinterpret_cast<Cell*>(&elm->data));
+        continue;
+      } else if (ad->m_kind == HeaderKind::Dict) {
+        auto const i = uintptr_t(elm - ad->data()) / sizeof(MixedArrayElm);
+        ad->m_used = i;
+        ad->m_size = i;
+        ad->m_pos = 0;
+        Release(ad);
+        throwRefInvalidArrayValueException(staticEmptyDictArray());
+      }
+    }
+    // When we convert an element to a tombstone, we set its value type to
+    // kInvalidDataType, which is not a refcounted type.
+    tvIncRefGenUnsafe(elm->data);
+  }
+  return ad;
+}
+
 // for internal use by copyStatic() and copyMixed()
 ALWAYS_INLINE
 MixedArray* MixedArray::CopyMixed(const MixedArray& other,
@@ -469,44 +498,41 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
     static_cast<uint16_t>(other.keyTypes()) << 8 |
     (dvArray | (other.isLegacyArray() ? ArrayData::kLegacyArray : 0));
   ad->initHeader_16(dest_hk, count, aux);
+
+  // We want SlowCopy to be a tail call in the opt build, but we still want to
+  // check assertions in debug builds, so we check them in this helper.
+  auto const check = [&](MixedArray* res) {
+    assertx(res->checkInvariants());
+    assertx(res->m_kind == dest_hk);
+    assertx(res->dvArray() == dvArray);
+    assertx(res->isLegacyArray() == other.isLegacyArray());
+    assertx(res->keyTypes() == other.keyTypes());
+    assertx(res->m_size == other.m_size);
+    assertx(res->m_pos == other.m_pos);
+    assertx(res->m_used == other.m_used);
+    assertx(res->m_scale == scale);
+    return res;
+  };
+
   CopyHash(ad->hashTab(), other.hashTab(), scale);
+  if (mode == AllocMode::Static) return check(ad);
 
   // Bump up refcounts as needed.
-  auto const elms = ad->data();
-  for (uint32_t i = 0, limit = ad->m_used; i < limit; ++i) {
-    auto& e = elms[i];
-    if (UNLIKELY(e.isTombstone())) continue;
-    if (e.hasStrKey()) e.skey->incRefCount();
-    if (UNLIKELY(isRefType(e.data.m_type))) {
-      auto ref = e.data.m_data.pref;
-      // See also tvDupWithRef()
-      if (!ref->isReferenced() && ref->cell()->m_data.parr != &other) {
-        cellDup(*ref->cell(), *reinterpret_cast<Cell*>(&e.data));
-        continue;
-      } else if (dest_hk == HeaderKind::Dict) {
-        ad->m_used = i;
-        ad->m_size = i;
-        ad->m_pos = 0;
-        if (ad->isRefCounted()) Release(ad);
-        else assertx(ad->isStatic());
-        throwRefInvalidArrayValueException(staticEmptyDictArray());
-      }
-    }
-    tvIncRefGen(e.data);
+  MixedArrayElm* elm = ad->data();
+  auto const end = elm + ad->m_used;
+  if (other.keyTypes() & kNonStaticStrKey) {
+    return check(SlowCopy(ad, other, elm, end));
   }
-
-  assertx(ad->m_used == other.m_used);
-  assertx(ad->m_kind == dest_hk);
-  assertx(ad->dvArray() == dvArray);
-  assertx(ad->isLegacyArray() == other.isLegacyArray());
-  assertx(ad->keyTypes() == other.keyTypes());
-  assertx(ad->m_size == other.m_size);
-  assertx(ad->m_pos == other.m_pos);
-  assertx(mode == AllocMode::Request ? ad->hasExactlyOneRef() :
-         ad->isStatic());
-  assertx(ad->m_scale == scale);
-  assertx(ad->checkInvariants());
-  return ad;
+  for (; elm < end; ++elm) {
+    assertx(IMPLIES(elm->hasStrKey(), elm->strKey()->isStatic()));
+    if (UNLIKELY(isRefType(elm->data.m_type))) {
+      return check(SlowCopy(ad, other, elm, end));
+    }
+    // When we convert an element to a tombstone, we set its key type to int
+    // and value type to kInvalidDataType, neither of which are refcounted.
+    tvIncRefGenUnsafe(elm->data);
+  }
+  return check(ad);
 }
 
 NEVER_INLINE ArrayData* MixedArray::CopyStatic(const ArrayData* in) {
@@ -629,6 +655,26 @@ ArrayData* MixedArray::MakeShapeFromAPC(const APCArray* apc) {
 // Destruction
 
 NEVER_INLINE
+void MixedArray::SlowRelease(MixedArray* ad) {
+  assertx(ad->isRefCounted());
+  assertx(ad->hasExactlyOneRef());
+  assertx(!ad->isZombie());
+
+  MixedArrayElm* elm = ad->data();
+  for (auto const end = elm + ad->m_used; elm < end; ++elm) {
+    if (elm->hasStrKey()) {
+      decRefStr(elm->skey);
+      // Keep GC from asserting on freed string keys in debug mode.
+      if (debug) elm->skey = nullptr;
+    }
+    // When we convert an element to a tombstone, we set its key type to int
+    // and value type to kInvalidDataType, neither of which are refcounted.
+    tvDecRefGen(&elm->data);
+  }
+  tl_heap->objFree(ad, ad->heapSize());
+}
+
+NEVER_INLINE
 void MixedArray::Release(ArrayData* in) {
   in->fixCountForRelease();
   assertx(in->isRefCounted());
@@ -636,20 +682,17 @@ void MixedArray::Release(ArrayData* in) {
   auto const ad = asMixed(in);
 
   if (!ad->isZombie()) {
-    auto const data = ad->data();
-    auto const stop = data + ad->m_used;
+    assertx(ad->checkInvariants());
+    if (ad->keyTypes() & kNonStaticStrKey) return SlowRelease(ad);
 
-    for (auto ptr = data; ptr != stop; ++ptr) {
-      // Tombstones will appear to be an integer => invalid_obj.  We can safely
-      // do tvDecRefGen() on a TypedValue with invalid data type (appear
-      // uncounted).
-      if (ptr->hasStrKey()) {
-        decRefStr(ptr->skey);
-        // Keep GC from asserting on freed string in debug mode. GC will ignore
-        // pointers to freed memory gracefully in prod mode.
-        if (debug) ptr->skey = nullptr;
-      }
-      tvDecRefGen(&ptr->data);
+    MixedArrayElm* elm = ad->data();
+    for (auto const end = elm + ad->m_used; elm < end; ++elm) {
+      // Keep the GC from asserting on freed string keys in debug mode.
+      assertx(IMPLIES(elm->hasStrKey(), elm->strKey()->isStatic()));
+      if (debug && elm->hasStrKey()) elm->skey = nullptr;
+      // When we convert an element to a tombstone, we set its key type to int
+      // and value type to kInvalidDataType, neither of which are refcounted.
+      tvDecRefGen(&elm->data);
     }
   }
   tl_heap->objFree(ad, ad->heapSize());
@@ -757,7 +800,7 @@ bool MixedArray::checkInvariants() const {
   // that `keyTypes()` is a subset of all possible key types.
   if (false) {
     KeyTypes types = 0x00;
-    auto elm = data();
+    MixedArrayElm* elm = data();
     auto const static_str = kTrackStaticStrKeys ? kStaticStrKey : uint8_t(0x00);
     for (auto const end = elm + m_used; elm < end; elm++) {
       types |= [&]{
@@ -931,8 +974,39 @@ MixedArray::InsertCheckUnbalanced(MixedArray* ad,
 }
 
 NEVER_INLINE
-MixedArray*
-MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
+MixedArray* MixedArray::SlowGrow(MixedArray* ad, const ArrayData& old,
+                                 MixedArrayElm* elm, MixedArrayElm* end) {
+  for (; elm < end; ++elm) {
+    if (elm->hasStrKey()) elm->skey->incRefCount();
+    if (UNLIKELY(isRefType(elm->data.m_type))) {
+      auto ref = elm->data.m_data.pref;
+      // See also tvDupWithRef()
+      if (!ref->isReferenced() && ref->cell()->m_data.parr != &old) {
+        cellDup(*ref->cell(), elm->data);
+        continue;
+      }
+    }
+    // When we convert an element to a tombstone, we set its value type to
+    // kInvalidDataType, which is not a refcounted type.
+    tvIncRefGenUnsafe(elm->data);
+  }
+
+  auto const table = ad->initHash(ad->m_scale);
+  auto const mask = MixedArray::Mask(ad->m_scale);
+
+  elm = ad->data();
+  if (UNLIKELY(ad->m_used >= 2000)) {
+    return InsertCheckUnbalanced(ad, table, mask, elm, end);
+  }
+  for (uint32_t i = 0; elm != end; ++elm, ++i) {
+    if (elm->isTombstone()) continue;
+    *ad->findForNewInsert(table, mask, elm->probe()) = i;
+  }
+  return ad;
+}
+
+NEVER_INLINE
+MixedArray* MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
   assertx(old->m_size > 0);
   assertx(MixedArray::Capacity(newScale) >= old->m_size);
   assertx(newScale >= 1 && (newScale & (newScale - 1)) == 0);
@@ -944,20 +1018,36 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
   ad->m_scale_used   = newScale | uint64_t{oldUsed} << 32;
 
   copyElmsNextUnsafe(ad, old, oldUsed);
+
+  // We want SlowGrow to be a tail call in the opt build, but we still want to
+  // check assertions in debug builds, so we check them in this helper.
+  auto const check = [&](MixedArray* res) {
+    assertx(res->checkInvariants());
+    assertx(res->hasExactlyOneRef());
+    assertx(res->kind() == old->kind());
+    assertx(res->dvArray() == old->dvArray());
+    assertx(res->isLegacyArray() == old->isLegacyArray());
+    assertx(res->keyTypes() == old->keyTypes());
+    assertx(res->m_size == old->m_size);
+    assertx(res->m_pos == old->m_pos);
+    assertx(res->m_used == oldUsed);
+    assertx(res->m_scale == newScale);
+    return res;
+  };
+
   if (copy) {
-    auto elm = ad->data();
-    for (auto const end = elm + ad->m_used; elm < end; ++elm) {
-      if (UNLIKELY(elm->isTombstone())) continue;
-      if (elm->hasStrKey()) elm->skey->incRefCount();
+    MixedArrayElm* elm = ad->data();
+    auto const end = elm + oldUsed;
+    if (ad->keyTypes() & kNonStaticStrKey) {
+      return check(SlowGrow(ad, *old, elm, end));
+    }
+    for (; elm < end; ++elm) {
       if (UNLIKELY(isRefType(elm->data.m_type))) {
-        auto ref = elm->data.m_data.pref;
-        // See also tvDupWithRef()
-        if (!ref->isReferenced() && ref->cell()->m_data.parr != old) {
-          cellDup(*ref->cell(), elm->data);
-          continue;
-        }
+        return check(SlowGrow(ad, *old, elm, end));
       }
-      tvIncRefGen(elm->data);
+      // When we convert an element to a tombstone, we set its key type to int
+      // and value type to kInvalidDataType, neither of which are refcounted.
+      tvIncRefGenUnsafe(elm->data);
     }
   } else {
     old->setZombie();
@@ -971,27 +1061,14 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
   auto mask = MixedArray::Mask(newScale);
 
   if (UNLIKELY(oldUsed >= 2000)) {
-    // This should be a tail call in opt build.
-    ad = InsertCheckUnbalanced(ad, table, mask, iter, stop);
-  } else {
-    for (uint32_t i = 0; iter != stop; ++iter, ++i) {
-      auto& e = *iter;
-      if (e.isTombstone()) continue;
-      *ad->findForNewInsert(table, mask, e.probe()) = i;
-    }
+    return check(InsertCheckUnbalanced(ad, table, mask, iter, stop));
   }
-
-  assertx(ad->kind() == old->kind());
-  assertx(ad->dvArray() == old->dvArray());
-  assertx(ad->isLegacyArray() == old->isLegacyArray());
-  assertx(ad->keyTypes() == old->keyTypes());
-  assertx(ad->m_size == old->m_size);
-  assertx(ad->hasExactlyOneRef());
-  assertx(ad->m_pos == old->m_pos);
-  assertx(ad->m_used == oldUsed);
-  assertx(ad->m_scale == newScale);
-  assertx(ad->checkInvariants());
-  return ad;
+  for (uint32_t i = 0; iter != stop; ++iter, ++i) {
+    auto& e = *iter;
+    if (e.isTombstone()) continue;
+    *ad->findForNewInsert(table, mask, e.probe()) = i;
+  }
+  return check(ad);
 }
 
 ALWAYS_INLINE

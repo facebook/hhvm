@@ -16,7 +16,7 @@ import textwrap
 from typing import AbstractSet, Iterable, Mapping, Optional, Sequence, Tuple, Union
 
 from lspcommand import LspCommandProcessor, Transcript, TranscriptEntry
-from utils import Json, interpolate_variables
+from utils import Json, VariableMap, interpolate_variables, uninterpolate_variables
 
 
 _MessageSpec = Union[
@@ -107,7 +107,7 @@ class LspTestSpec:
         return self._update(messages=messages)
 
     def run(
-        self, lsp_command_processor: LspCommandProcessor, variables: Mapping[str, str]
+        self, lsp_command_processor: LspCommandProcessor, variables: VariableMap
     ) -> Tuple[Transcript, Optional[str]]:
         """Run the test given the LSP command processor.
 
@@ -115,7 +115,9 @@ class LspTestSpec:
         (json_commands, lsp_id_map) = self._get_json_commands(variables=variables)
         transcript = lsp_command_processor.communicate(json_commands=json_commands)
         errors = list(
-            self._verify_transcript(transcript=transcript, lsp_id_map=lsp_id_map)
+            self._verify_transcript(
+                variables=variables, transcript=transcript, lsp_id_map=lsp_id_map
+            )
         )
         if errors:
             num_errors = len(errors)
@@ -147,7 +149,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         return spec
 
     def _get_json_commands(
-        self, variables: Mapping[str, str]
+        self, variables: VariableMap
     ) -> Tuple[Sequence[Json], "_LspIdMap"]:
         """Transforms this test spec into something the LSP command processor
         can interpret."""
@@ -217,7 +219,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         return (json_commands, lsp_id_map)
 
     def _verify_transcript(
-        self, *, transcript: Transcript, lsp_id_map: "_LspIdMap"
+        self, *, variables: VariableMap, transcript: Transcript, lsp_id_map: "_LspIdMap"
     ) -> Iterable["_ErrorDescription"]:
         handled_entries = set()
 
@@ -234,7 +236,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 )
                 entry = transcript[transcript_id]
                 error_description = self._verify_request(
-                    entry=entry, lsp_id=lsp_id, request=message
+                    variables=variables, entry=entry, lsp_id=lsp_id, request=message
                 )
                 if error_description is not None:
                     yield error_description
@@ -256,7 +258,12 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         )
 
     def _verify_request(
-        self, *, lsp_id: Json, entry: TranscriptEntry, request: "_RequestSpec"
+        self,
+        *,
+        variables: VariableMap,
+        lsp_id: Json,
+        entry: TranscriptEntry,
+        request: "_RequestSpec",
     ) -> Optional["_ErrorDescription"]:
         actual_result = entry.received.get("result")
         actual_powered_by = entry.received.get("powered_by")
@@ -267,22 +274,25 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         else:
             request_description = f"Request with ID {lsp_id!r}"
 
-        if actual_result != request.result:
+        expected_result = interpolate_variables(
+            payload=request.result, variables=variables
+        )
+
+        if actual_result != expected_result:
             error_description = self._pretty_print_diff(
-                actual=actual_result, expected=request.result
+                actual=actual_result, expected=expected_result
             )
             description = f"""\
 {request_description} got an incorrect result:
 
-{error_description}
-    """
+{error_description}"""
             request_context = self._get_context_for_traceback(request.traceback)
             context = f"""\
 This was the associated request:
 
 {request_context}"""
             remediation = self._describe_response_for_remediation(
-                request=request, actual_response=entry.received
+                variables=variables, request=request, actual_response=entry.received
             )
             return _ErrorDescription(
                 description=description, context=context, remediation=remediation
@@ -298,7 +308,7 @@ This was the associated request:
 
 {request_context}"""
             remediation = self._describe_response_for_remediation(
-                request=request, actual_response=entry.received
+                variables=variables, request=request, actual_response=entry.received
             )
             return _ErrorDescription(
                 description=description, context=context, remediation=remediation
@@ -397,11 +407,13 @@ This was the associated request:
         return display_filename + "\n" + file_context
 
     def _describe_response_for_remediation(
-        self, request: "_RequestSpec", actual_response: Json
+        self, variables: VariableMap, request: "_RequestSpec", actual_response: Json
     ) -> str:
         method = request.method
         params = request.params
-        result = actual_response.get("result")
+        result = uninterpolate_variables(
+            payload=actual_response.get("result"), variables=variables
+        )
         powered_by = actual_response.get("powered_by")
 
         request_snippet = f"""\

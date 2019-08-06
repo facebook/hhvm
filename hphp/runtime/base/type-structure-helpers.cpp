@@ -695,6 +695,10 @@ bool checkTypeStructureMatchesCellImpl(
       result = cls && enumHasValue(cls, &c1);
       break;
     }
+    case TypeStructure::Kind::T_trait:
+      // For is/as, we will not get here since we'll throw an error on the
+      // resolution pass.
+      // For parameter/return type verification, we treat it as a class type.
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_xhp: {
@@ -893,10 +897,14 @@ bool checkTypeStructureMatchesCellImpl(
       break;
     case TypeStructure::Kind::T_fun:
     case TypeStructure::Kind::T_typevar:
-    case TypeStructure::Kind::T_trait:
+      // For is/as, we will not get here since we'll throw an error on the
+      // resolution pass.
+      // For parameter/return type verification, we don't check these types, so
+      // just return true.
+      result = true;
+      break;
     case TypeStructure::Kind::T_reifiedtype:
-      // Not supported, should have already thrown an error
-      // on these during resolution
+      // This type should have been removed in the resolution phase.
       always_assert(false);
   }
   if (!warn && is_ts_soft(ts.get())) warn = true;

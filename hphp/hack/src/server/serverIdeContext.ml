@@ -63,21 +63,20 @@ let update
     ~(path: Relative_path.t)
     ~(file_input: ServerCommandTypes.file_input)
     : (t * entry) =
-  let { Full_fidelity_ast.ast; _ } = Ast_provider.parse_file_input
+  let ast = Ast_provider.parse_file_input
     ~full:true
     path
     file_input
   in
   Ast_provider.provide_ast_hint path ast Ast_provider.Full;
-  let nast = (Ast_to_nast.convert ast) in
   let tast = with_context ~ctx ~f:(fun () ->
-    let nast = Naming.program nast in
+    let nast = Naming.program ast in
     Typing.nast_to_tast tcopt nast
   ) in
   let entry = {
     path;
     file_input;
-    ast = nast;
+    ast;
     tast;
   } in
   let ctx = Relative_path.Map.add ctx path entry in

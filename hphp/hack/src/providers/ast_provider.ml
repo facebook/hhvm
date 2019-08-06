@@ -19,13 +19,13 @@ open Core_kernel
 type parse_type = Decl | Full
 
 module ParserHeap = SharedMem.WithCache (SharedMem.ProfiledImmediate) (Relative_path.S) (struct
-    type t = Ast.program * parse_type
+    type t = Nast.program * parse_type
     let prefix = Prefix.make()
     let description = "Parser"
   end)
 
 module LocalParserCache = SharedMem.LocalCache (Relative_path.S) (struct
-    type t = Ast.program
+    type t = Nast.program
     let prefix = Prefix.make()
     let description = "ParserLocal"
   end)
@@ -34,7 +34,7 @@ let parse_file_input
     ?(full = false)
     (file_name: Relative_path.t)
     (file_input: ServerCommandTypes.file_input)
-    : Full_fidelity_ast.result =
+    : Nast.program =
   let popt = GlobalParserOptions.get () in
   let parser_env = Full_fidelity_ast.make_env
     ~quick_mode:(not full)
@@ -48,13 +48,14 @@ let parse_file_input
       parser_env
       source
   in
+  let ast = Ast_to_nast.convert result.Full_fidelity_ast.ast in
   let ast =
     if (Relative_path.prefix file_name = Relative_path.Hhi)
     && ParserOptions.deregister_php_stdlib popt
-    then Ast_utils.deregister_ignored_attributes result.Full_fidelity_ast.ast
-    else result.Full_fidelity_ast.ast
+    then Nast.deregister_ignored_attributes ast
+    else ast
   in
-  { result with Full_fidelity_ast.ast }
+  ast
 
 
 let get_from_local_cache ~full file_name =
@@ -66,19 +67,21 @@ let get_from_local_cache ~full file_name =
     let f contents =
       let contents = if (FindUtils.file_filter fn) then contents else "" in
       match Ide_parser_cache.get_ast_if_active popt file_name contents with
-      | Some ast -> ast.Parser_return.ast
+      | Some ast -> Ast_to_nast.convert ast.Parser_return.ast
       | None ->
         let source = Full_fidelity_source_text.make file_name contents in
         match Full_fidelity_parser.parse_mode ~rust:(ParserOptions.rust popt) source with
         | None
         | Some FileInfo.Mphp -> []
         | Some _ ->
-          (Full_fidelity_ast.defensive_program
+          let ast = (Full_fidelity_ast.defensive_program
             ~quick:(not full)
             popt
             file_name
             contents
           ).Parser_return.ast
+          in
+          Ast_to_nast.convert ast
     in
     let ast = Option.value_map
       ~default:[]
@@ -87,7 +90,7 @@ let get_from_local_cache ~full file_name =
     let ast =
       if (Relative_path.prefix file_name = Relative_path.Hhi)
       && ParserOptions.deregister_php_stdlib popt
-      then Ast_utils.deregister_ignored_attributes ast
+      then Nast.deregister_ignored_attributes ast
       else ast
     in
     let () = if full then LocalParserCache.add file_name ast in
@@ -168,13 +171,13 @@ let get_nast ?(full = false) file_name =
         | Some (defs, _) -> defs
       end
     | Provider_config.Local_memory _ ->
-      let result =
+      let ast =
         parse_file_input ~full file_name
           (ServerCommandTypes.FileName (Relative_path.to_absolute file_name))
       in
-      result.Full_fidelity_ast.ast
+      ast
   in
-  Ast_to_nast.convert (get_ast ~full file_name)
+  get_ast ~full file_name
 
 
 
@@ -205,7 +208,7 @@ let local_changes_revert_batch paths =
 
 let provide_ast_hint
     (path: Relative_path.t)
-    (program: Ast.program)
+    (program: Nast.program)
     (parse_type: parse_type)
     : unit =
   ParserHeap.write_around path (program, parse_type)

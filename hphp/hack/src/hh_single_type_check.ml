@@ -609,7 +609,7 @@ let parse_name_and_decl popt files_contents =
             then Ast_utils.deregister_ignored_attributes ast
             else ast
           in
-          Ast_provider.provide_ast_hint fn ast Ast_provider.Full;
+          Ast_provider.provide_ast_hint fn (Ast_to_nast.convert ast) Ast_provider.Full;
           { parsed_file with Parser_return.ast }
         end
       end

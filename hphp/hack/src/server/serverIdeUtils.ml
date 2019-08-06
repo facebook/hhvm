@@ -77,7 +77,7 @@ let declare_and_check_ast ?(path=path) ?content ~make_ast ~f tcopt =
                     } in
     let { FileInfo.n_funs; n_classes; n_types; n_consts; } =
       FileInfo.simplify file_info in
-    Ast_provider.provide_ast_hint path ast Ast_provider.Full;
+    Ast_provider.provide_ast_hint path (Ast_to_nast.convert ast) Ast_provider.Full;
     NamingGlobal.remove_decls
       ~funs:n_funs
       ~classes:n_classes

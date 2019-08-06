@@ -40,18 +40,19 @@ let legacy_php_file_info = ref (fun _fn ->
 let process_parse_result
   ?(ide = false) ~quick (acc, errorl, error_files) fn res popt =
   let errorl', {Parser_return.file_mode; comments = _; ast; content; is_hh_file = _} = res in
+  let ast = Ast_to_nast.convert ast in
   let ast =
-  if (Relative_path.prefix fn = Relative_path.Hhi)
-  && ParserOptions.deregister_php_stdlib popt
-  then Ast_utils.deregister_ignored_attributes ast
-  else ast in
+    if (Relative_path.prefix fn = Relative_path.Hhi)
+    && ParserOptions.deregister_php_stdlib popt
+    then Nast.deregister_ignored_attributes ast
+    else ast
+  in
   let content =
     if ide
     then File_provider.Ide content
     else File_provider.Disk content in
   if file_mode <> None then begin
-    let nast = Ast_to_nast.convert ast in
-    let funs, classes, typedefs, consts = Nast.get_defs nast in
+    let funs, classes, typedefs, consts = Nast.get_defs ast in
     (* If this file was parsed from a tmp directory,
       save it to the main directory instead *)
     let fn = if Relative_path.prefix fn =
@@ -63,7 +64,7 @@ let process_parse_result
     let mode = if quick then Ast_provider.Decl else Ast_provider.Full in
     Ast_provider.provide_ast_hint fn ast mode;
     let comments = None in
-    let hash = Some (Nast.generate_ast_decl_hash nast) in
+    let hash = Some (Nast.generate_ast_decl_hash ast) in
     let defs =
       {FileInfo.hash; funs; classes; typedefs; consts; comments; file_mode}
     in

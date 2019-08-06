@@ -22,7 +22,7 @@ val parse_file_input :
   ?full:bool ->
   Relative_path.t ->
   ServerCommandTypes.file_input ->
-  Full_fidelity_ast.result
+  Nast.program
 
 val local_changes_push_stack : unit -> unit
 val local_changes_pop_stack : unit -> unit
@@ -30,7 +30,7 @@ val local_changes_commit_batch : Relative_path.Set.t -> unit
 val local_changes_revert_batch : Relative_path.Set.t -> unit
 
 type parse_type = Decl | Full
-val provide_ast_hint : Relative_path.t -> Ast.program -> parse_type -> unit
+val provide_ast_hint : Relative_path.t -> Nast.program -> parse_type -> unit
 val remove_batch : Relative_path.Set.t -> unit
 
 val has_for_test : Relative_path.t -> bool

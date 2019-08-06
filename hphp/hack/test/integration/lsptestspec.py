@@ -428,7 +428,7 @@ This was the associated request:
         if not request.wait:
             request_snippet += f"""
         wait=False,"""
-        if request.powered_by is not None:
+        if powered_by is not None:
             request_snippet += f"""
         powered_by={powered_by!r},"""
         request_snippet += f"""

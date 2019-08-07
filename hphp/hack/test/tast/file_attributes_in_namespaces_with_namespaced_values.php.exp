@@ -47,9 +47,7 @@ Errors:
              ([Pos.none], Noop)];
            fb_annotation = No unsafe blocks };
          m_fun_kind = FSync; m_user_attributes = [];
-         m_ret =
-         (([Pos.none], void),
-          (Some ([5:21-32], (Happly (([5:21-32], "void"), [])))));
+         m_ret = (([Pos.none], void), (Some ([5:21-32], (Hprim Tvoid))));
          m_external = false; m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];

@@ -6748,7 +6748,7 @@ and method_def tcopt env m =
   let type_hint' =
     match hint_of_type_hint m.m_ret with
     | None when snd m.m_name = SN.Members.__construct ->
-      Some (pos, Happly((pos, "void"), []))
+      Some (pos, Hprim(Tvoid))
     | None ->
       Typing_return.suggest_return
         env

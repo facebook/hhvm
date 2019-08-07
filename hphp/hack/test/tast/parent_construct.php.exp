@@ -24,9 +24,7 @@
          m_body =
          { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
          m_fun_kind = FSync; m_user_attributes = [];
-         m_ret =
-         (([Pos.none], void),
-          (Some ([4:19-30], (Happly (([4:19-30], "void"), [])))));
+         m_ret = (([Pos.none], void), (Some ([4:19-30], (Hprim Tvoid))));
          m_external = false; m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
@@ -70,9 +68,7 @@
               ];
             fb_annotation = No unsafe blocks };
           m_fun_kind = FSync; m_user_attributes = [];
-          m_ret =
-          (([Pos.none], void),
-           (Some ([7:19-30], (Happly (([7:19-30], "void"), [])))));
+          m_ret = (([Pos.none], void), (Some ([7:19-30], (Hprim Tvoid))));
           m_external = false; m_doc_comment = None }
          ];
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];

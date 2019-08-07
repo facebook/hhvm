@@ -3611,12 +3611,15 @@ let scour_comments_and_add_fixmes (env : env) source_text script =
       ~collect_fixmes:env.keep_errors
       ~include_line_comments:env.include_line_comments
       in
-  let () = if env.keep_errors then
-    Fixme_provider.provide_disallowed_fixmes env.file misuses;
-    if env.quick_mode then
-      Fixme_provider.provide_decl_hh_fixmes env.file fixmes
-    else
-      Fixme_provider.provide_hh_fixmes env.file fixmes in
+  let () = if env.keep_errors then 
+    begin 
+      Fixme_provider.provide_disallowed_fixmes env.file misuses;
+      if env.quick_mode then
+        Fixme_provider.provide_decl_hh_fixmes env.file fixmes
+      else
+        Fixme_provider.provide_hh_fixmes env.file fixmes
+      end 
+    in
   comments
 
 let flush_parsing_errors env =

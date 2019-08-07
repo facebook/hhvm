@@ -23,55 +23,55 @@
 open Core_kernel
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
-  module Token = Syntax.Token
-  type t = Syntax.t list [@@deriving show]
-  type r = Syntax.t [@@deriving show]
+    module Token = Syntax.Token
+    type t = Syntax.t list [@@deriving show]
+    type r = Syntax.t [@@deriving show]
 
-  exception NotEquals of
-    string * Syntax.t list * Syntax.t list * Syntax.t list
-  exception NotPhysicallyEquals of
-    string * Syntax.t list * Syntax.t list * Syntax.t list
+    exception NotEquals of
+      string * Syntax.t list * Syntax.t list * Syntax.t list
+    exception NotPhysicallyEquals of
+      string * Syntax.t list * Syntax.t list * Syntax.t list
 
-  let verify ~stack params args cons_name =
-    let equals e1 e2 =
-      if not (phys_equal e1 e2) then
-        if e1 = e2
-        then
-          raise @@ NotPhysicallyEquals
-            (cons_name
-            , List.rev stack
-            , params
-            , args
-            )
-        else
-          raise @@ NotEquals
-            (cons_name
-            , List.rev stack
-            , params
-            , args
-            )
-    in
-    List.iter2_exn ~f:equals params args
+    let verify ~stack params args cons_name =
+      let equals e1 e2 =
+        if not (phys_equal e1 e2) then
+          if e1 = e2
+          then
+            raise @@ NotPhysicallyEquals
+              (cons_name
+              , List.rev stack
+              , params
+              , args
+              )
+          else
+            raise @@ NotEquals
+              (cons_name
+              , List.rev stack
+              , params
+              , args
+              )
+      in
+      List.iter2_exn ~f:equals params args
 
-  let rust_parse _ _ = failwith "not implemented"
+    let rust_parse = Syntax.rust_parse_with_verify_sc
 
-  let initial_state _ = []
+    let initial_state _ = []
 
-  let make_token token stack =
-    let token = Syntax.make_token token in
-    token :: stack, token
+    let make_token token stack =
+      let token = Syntax.make_token token in
+      token :: stack, token
 
-  let make_missing (s, o) stack =
-    let missing = Syntax.make_missing s o in
-    missing :: stack, missing
+    let make_missing (s, o) stack =
+      let missing = Syntax.make_missing s o in
+      missing :: stack, missing
 
-  let make_list (s, o) items stack =
-    if items <> [] then
-      let (h, t) = List.split_n stack (List.length items) in
-      let () = verify ~stack items (List.rev h) "list" in
-      let lst = Syntax.make_list s o items in
-      lst :: t, lst
-    else make_missing (s, o) stack
+    let make_list (s, o) items stack =
+      if items <> [] then
+        let (h, t) = List.split_n stack (List.length items) in
+        let () = verify ~stack items (List.rev h) "list" in
+        let lst = Syntax.make_list s o items in
+        lst :: t, lst
+      else make_missing (s, o) stack
 
   let make_end_of_file p0 stack =
     match stack with

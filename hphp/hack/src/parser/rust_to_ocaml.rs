@@ -32,6 +32,7 @@ use parser::syntax_error::SyntaxError;
 use parser::syntax_kind::SyntaxKind;
 use parser::token_kind::TokenKind;
 use parser::trivia_kind::TriviaKind;
+use parser::verify_smart_constructors::State as VerifyState;
 
 extern "C" {
     fn ocamlpool_reserve_block(tag: Tag, size: Size) -> Value;
@@ -401,6 +402,18 @@ impl ToOcaml for SyntaxError {
 impl ToOcaml for NoState {
     unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
         ocaml::core::mlvalues::UNIT
+    }
+}
+
+impl ToOcaml for SyntaxKind {
+    unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
+        u8_to_ocaml(self.ocaml_tag())
+    }
+}
+
+impl ToOcaml for VerifyState {
+    unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
+        to_list(self.stack(), context)
     }
 }
 

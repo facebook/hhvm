@@ -79,6 +79,16 @@ let parse_positioned_with_coroutine_sc text env =
   set_global_lexer_env env;
   parse_positioned_with_coroutine_sc text (env_to_opts env)
 
+external parse_positioned_with_verify_sc:
+  SourceText.t ->
+  parser_opts ->
+  PositionedSyntax.t list * PositionedSyntax.t * SyntaxError.t list = "parse_positioned_with_verify_sc"
+
+let parse_positioned_with_verify_sc text env =
+  set_global_lexer_env env;
+  parse_positioned_with_verify_sc text (env_to_opts env)
+
+
 let init () =
   Callback.register_exception "rust exception" (RustException "");
   Full_fidelity_minimal_syntax.rust_parse_ref := parse_minimal;
@@ -87,4 +97,6 @@ let init () =
     parse_positioned_with_coroutine_sc;
   Full_fidelity_positioned_syntax.rust_parse_with_decl_mode_sc_ref :=
     parse_positioned_with_decl_mode_sc;
+  Full_fidelity_positioned_syntax.rust_parse_with_verify_sc_ref :=
+    parse_positioned_with_verify_sc;
   ()

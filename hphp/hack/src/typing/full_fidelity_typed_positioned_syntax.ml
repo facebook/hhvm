@@ -259,3 +259,4 @@ let offset node = Some (start_offset node)
 let rust_parse _ _ = failwith "not implemented"
 let rust_parse_with_coroutine_sc _ _ = failwith "not implemented"
 let rust_parse_with_decl_mode_sc _ _ = failwith "not implemented"
+let rust_parse_with_verify_sc _ _ = failwith "not implemented"

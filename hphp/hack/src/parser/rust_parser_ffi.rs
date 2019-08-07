@@ -61,6 +61,11 @@ type DeclModeParser<'a> = Parser<
     DeclModeState<PositionedSyntax>,
 >;
 
+use parser::verify_smart_constructors::State as VerifyState;
+use parser::verify_smart_constructors::VerifySmartConstructors;
+
+type VerifyParser<'a> = Parser<'a, WithKind<VerifySmartConstructors>, VerifyState>;
+
 extern "C" {
     fn ocamlpool_enter();
     fn ocamlpool_leave();
@@ -230,6 +235,7 @@ parse!(parse_minimal, MinimalSyntaxParser);
 parse!(parse_positioned, PositionedSyntaxParser);
 parse!(parse_positioned_with_coroutine_sc, CoroutineParser);
 parse!(parse_positioned_with_decl_mode_sc, DeclModeParser);
+parse!(parse_positioned_with_verify_sc, VerifyParser);
 
 caml_raise!(rust_parse_mode, |ocaml_source_text|, <l>, {
     let relative_path = block_field(&ocaml_source_text, 0);

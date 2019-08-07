@@ -678,6 +678,10 @@ SYNTAX
     Full_fidelity_source_text.t ->
     Full_fidelity_parser_env.t ->
     bool list * t * Full_fidelity_syntax_error.t list
+  val rust_parse_with_verify_sc :
+    Full_fidelity_source_text.t ->
+    Full_fidelity_parser_env.t ->
+    t list * t * Full_fidelity_syntax_error.t list
   val has_leading_trivia : TriviaKind.t -> Token.t -> bool
   val to_json : ?with_value:bool -> t -> Hh_json.json
   val extract_text : t -> string option
@@ -978,6 +982,87 @@ CONSTRUCTOR_METHODS}
     ()
 end (* GenerateFFRustPositionedSmartConstructors *)
 
+module GenerateFFRustVerifySmartConstructors = struct
+  let to_constructor_methods x =
+    let args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d: Self::R" i)in
+    let args = String.concat ~sep:", " args in
+    let fwd_args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
+    let fwd_args = String.concat ~sep:", " fwd_args in
+    sprintf "    fn make_%s(&mut self, %s) -> Self::R {
+        let args = arg_kinds!(%s);
+        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_%s(self, %s);
+        self.state_mut().verify(&args);
+        self.state_mut().push(r.kind());
+        r
+    }\n\n"
+      x.type_name args fwd_args x.type_name fwd_args
+
+  let verify_smart_constructors_template: string = (make_header CStyle "") ^ "
+use crate::verify_smart_constructors::*;
+use crate::parser_env::ParserEnv;
+use crate::positioned_syntax::PositionedSyntax;
+use crate::positioned_token::PositionedToken;
+use crate::smart_constructors::SmartConstructors;
+use crate::source_text::SourceText;
+use crate::syntax_smart_constructors::SyntaxSmartConstructors;
+
+macro_rules! arg_kinds {
+    ($a0:ident) => (
+        vec![$a0.kind()]
+    );
+    ($a0:ident, $($a1:ident),+) => (
+        vec![$a0.kind(), $($a1.kind()),+]
+    );
+}
+
+impl<'src> SmartConstructors<'src, State> for VerifySmartConstructors
+{
+    type Token = PositionedToken;
+    type R = PositionedSyntax;
+
+    fn new(env: &ParserEnv, src: &SourceText<'src>) -> Self {
+        <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::new(env, src)
+    }
+
+    fn state_mut(&mut self) -> &mut State {
+       &mut self.state
+    }
+
+    fn make_missing(&mut self, offset: usize) -> Self::R {
+        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_missing(self, offset);
+        self.state_mut().push(r.kind());
+        r
+    }
+
+    fn make_token(&mut self, offset: Self::Token) -> Self::R {
+        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_token(self, offset);
+        self.state_mut().push(r.kind());
+        r
+    }
+
+    fn make_list(&mut self, lst: Vec<Self::R>, offset: usize) -> Self::R {
+        if !lst.is_empty() {
+            let args: Vec<_> = (&lst).iter().map(|s| s.kind()).collect();
+            let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_list(self, lst, offset);
+            self.state_mut().verify(&args);
+            self.state_mut().push(r.kind());
+            r
+        } else {
+            <Self as SmartConstructors<'src, State>>::make_missing(self, offset)
+        }
+    }
+
+CONSTRUCTOR_METHODS}
+"
+  let verify_smart_constructors = Full_fidelity_schema.make_template_file
+    ~transformations: [
+      { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }
+    ]
+    ~filename: (full_fidelity_path_prefix ^ "verify_smart_constructors_generated.rs")
+    ~template: verify_smart_constructors_template
+    ()
+end (* GenerateFFRustVerifySmartConstructors *)
+
 module GenerateFFRustCoroutineSmartConstructors = struct
   let to_constructor_methods x =
     let args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d: Self::R" i)in
@@ -1129,55 +1214,55 @@ module GenerateFFVerifySmartConstructors = struct
 open Core_kernel
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
-  module Token = Syntax.Token
-  type t = Syntax.t list [@@deriving show]
-  type r = Syntax.t [@@deriving show]
+    module Token = Syntax.Token
+    type t = Syntax.t list [@@deriving show]
+    type r = Syntax.t [@@deriving show]
 
-  exception NotEquals of
-    string * Syntax.t list * Syntax.t list * Syntax.t list
-  exception NotPhysicallyEquals of
-    string * Syntax.t list * Syntax.t list * Syntax.t list
+    exception NotEquals of
+      string * Syntax.t list * Syntax.t list * Syntax.t list
+    exception NotPhysicallyEquals of
+      string * Syntax.t list * Syntax.t list * Syntax.t list
 
-  let verify ~stack params args cons_name =
-    let equals e1 e2 =
-      if not (phys_equal e1 e2) then
-        if e1 = e2
-        then
-          raise @@ NotPhysicallyEquals
-            (cons_name
-            , List.rev stack
-            , params
-            , args
-            )
-        else
-          raise @@ NotEquals
-            (cons_name
-            , List.rev stack
-            , params
-            , args
-            )
-    in
-    List.iter2_exn ~f:equals params args
+    let verify ~stack params args cons_name =
+      let equals e1 e2 =
+        if not (phys_equal e1 e2) then
+          if e1 = e2
+          then
+            raise @@ NotPhysicallyEquals
+              (cons_name
+              , List.rev stack
+              , params
+              , args
+              )
+          else
+            raise @@ NotEquals
+              (cons_name
+              , List.rev stack
+              , params
+              , args
+              )
+      in
+      List.iter2_exn ~f:equals params args
 
-  let rust_parse _ _ = failwith \"not implemented\"
+    let rust_parse = Syntax.rust_parse_with_verify_sc
 
-  let initial_state _ = []
+    let initial_state _ = []
 
-  let make_token token stack =
-    let token = Syntax.make_token token in
-    token :: stack, token
+    let make_token token stack =
+      let token = Syntax.make_token token in
+      token :: stack, token
 
-  let make_missing (s, o) stack =
-    let missing = Syntax.make_missing s o in
-    missing :: stack, missing
+    let make_missing (s, o) stack =
+      let missing = Syntax.make_missing s o in
+      missing :: stack, missing
 
-  let make_list (s, o) items stack =
-    if items <> [] then
-      let (h, t) = List.split_n stack (List.length items) in
-      let () = verify ~stack items (List.rev h) \"list\" in
-      let lst = Syntax.make_list s o items in
-      lst :: t, lst
-    else make_missing (s, o) stack
+    let make_list (s, o) items stack =
+      if items <> [] then
+        let (h, t) = List.split_n stack (List.length items) in
+        let () = verify ~stack items (List.rev h) \"list\" in
+        let lst = Syntax.make_list s o items in
+        lst :: t, lst
+      else make_missing (s, o) stack
 CONSTRUCTOR_METHODS
 end (* WithSyntax *)
 "
@@ -2307,7 +2392,7 @@ module GenerateFFRustSyntaxKind = struct
   let full_fidelity_syntax_kind_template = make_header CStyle "" ^ "
 use crate::token_kind::TokenKind;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum SyntaxKind {
     Missing,
     Token(TokenKind),
@@ -3301,6 +3386,8 @@ let () =
     GenerateFFRustMinimalSmartConstructors.minimal_smart_constructors;
   generate_file
     GenerateFFRustPositionedSmartConstructors.positioned_smart_constructors;
+  generate_file
+    GenerateFFRustVerifySmartConstructors.verify_smart_constructors;
   generate_file
     GenerateFFVerifySmartConstructors.full_fidelity_verify_smart_constructors;
   generate_file

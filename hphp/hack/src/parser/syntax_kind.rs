@@ -18,7 +18,7 @@
  */
 use crate::token_kind::TokenKind;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum SyntaxKind {
     Missing,
     Token(TokenKind),

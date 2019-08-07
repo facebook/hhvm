@@ -31,6 +31,8 @@ mod coroutine_smart_constructors_generated;
 pub mod decl_mode_smart_constructors;
 mod decl_mode_smart_constructors_generated;
 pub mod flatten_smart_constructors;
+pub mod verify_smart_constructors;
+mod verify_smart_constructors_generated;
 
 #[macro_use]
 pub mod smart_constructors; // must be before users of providing macros (*_parser)

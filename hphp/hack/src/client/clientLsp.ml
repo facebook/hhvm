@@ -1125,6 +1125,26 @@ let do_typeDefinition (conn: server_conn) (ref_unblocked_time: float ref) (param
       ~default_path:file
   end)
 
+let do_typeDefinition_local
+    (ide_service: ClientIdeService.t)
+    (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
+    (params: Definition.params)
+  : TypeDefinition.result Lwt.t =
+  let document_location = get_document_location editor_open_files params in
+  let%lwt results = ClientIdeService.rpc
+    ide_service (ClientIdeMessage.Type_definition document_location) in
+  match results with
+  | Ok results ->
+    let file = Path.to_string document_location.ClientIdeMessage.file_path in
+    let results = List.map results ~f:begin fun nast_sid ->
+      hack_pos_definition_to_lsp_identifier_location
+        nast_sid
+        ~default_path:file
+    end in
+    Lwt.return results
+  | Error error_message ->
+    failwith (Printf.sprintf "Local go-to-type-definition failed: %s" error_message)
+
 let do_definition
   (conn: server_conn)
   (ref_unblocked_time: float ref)
@@ -2735,6 +2755,18 @@ let handle_event
     let%lwt () = cancel_if_stale client c short_timeout in
     let%lwt result = parse_definition c.params
       |> do_definition_local ide_service editor_open_files
+    in
+   result |> print_definition |> respond_jsonrpc ~powered_by:Serverless_ide c;
+   Lwt.return_unit
+
+  | (In_init { In_init_env.editor_open_files; _ }
+      | Lost_server { Lost_env.editor_open_files; _ }),
+      Client_message c
+    when env.use_serverless_ide
+      && c.method_ = "textDocument/typeDefinition" ->
+    let%lwt () = cancel_if_stale client c short_timeout in
+    let%lwt result = parse_definition c.params
+      |> do_typeDefinition_local ide_service editor_open_files
     in
    result |> print_definition |> respond_jsonrpc ~powered_by:Serverless_ide c;
    Lwt.return_unit

@@ -184,6 +184,10 @@ module Go_to_definition = struct
   type result = (string SymbolOccurrence.t * string SymbolDefinition.t) list
 end
 
+module Go_to_type_definition = struct
+  type result = (Pos.absolute * string) list
+end
+
 type file_input =
   | FileName of string
   | FileContent of string

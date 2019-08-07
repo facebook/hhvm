@@ -648,6 +648,144 @@ class TestLsp(TestCase[LspTestDriver]):
             )
         return spec
 
+    def test_serverless_ide_type_definition(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("type_definition.php"))
+        self.test_driver.stop_hh_server()
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("serverless_ide_type_definition"), use_serverless_ide=True
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .request(
+                comment="Conditional Type Definition of HH or II",
+                method="textDocument/typeDefinition",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 32, "character": 2},
+                },
+                result=[
+                    {
+                        "uri": "${php_file_uri}",
+                        "range": {
+                            "start": {"line": 2, "character": 6},
+                            "end": {"line": 2, "character": 8},
+                        },
+                        "title": "\\HH",
+                    },
+                    {
+                        "uri": "${php_file_uri}",
+                        "range": {
+                            "start": {"line": 12, "character": 6},
+                            "end": {"line": 12, "character": 8},
+                        },
+                        "title": "\\LL",
+                    },
+                ],
+                powered_by="serverless_ide",
+            )
+            .request(
+                comment="Standard Class Definition",
+                method="textDocument/typeDefinition",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 40, "character": 2},
+                },
+                result=[
+                    {
+                        "uri": "${php_file_uri}",
+                        "range": {
+                            "start": {"line": 2, "character": 6},
+                            "end": {"line": 2, "character": 8},
+                        },
+                        "title": "\\HH",
+                    }
+                ],
+                powered_by="serverless_ide",
+            )
+            .request(
+                comment="Class Type Definition with Casting",
+                method="textDocument/typeDefinition",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 41, "character": 2},
+                },
+                result=[
+                    {
+                        "uri": "${php_file_uri}",
+                        "range": {
+                            "start": {"line": 2, "character": 6},
+                            "end": {"line": 2, "character": 8},
+                        },
+                        "title": "\\HH",
+                    }
+                ],
+                powered_by="serverless_ide",
+            )
+            .request(
+                comment="Primitive Type Definition",
+                method="textDocument/typeDefinition",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 42, "character": 2},
+                },
+                result=[],
+                powered_by="serverless_ide",
+            )
+            .request(
+                comment="Function Return Type Definition",
+                method="textDocument/typeDefinition",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 43, "character": 2},
+                },
+                result=[
+                    {
+                        "uri": "${php_file_uri}",
+                        "range": {
+                            "start": {"line": 12, "character": 6},
+                            "end": {"line": 12, "character": 8},
+                        },
+                        "title": "\\LL",
+                    }
+                ],
+                powered_by="serverless_ide",
+            )
+            .request(
+                comment="Function definition with primitive return type",
+                method="textDocument/typeDefinition",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 44, "character": 2},
+                },
+                result=[
+                    {
+                        "uri": "${php_file_uri}",
+                        "range": {
+                            "start": {"line": 22, "character": 9},
+                            "end": {"line": 22, "character": 29},
+                        },
+                        "title": "(function(): int)",
+                    }
+                ],
+                powered_by="serverless_ide",
+                wait=True,
+            )
+            .request(method="shutdown", params={}, result=None)
+        )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
     def test_serverless_ide_hover(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("hover.php"))

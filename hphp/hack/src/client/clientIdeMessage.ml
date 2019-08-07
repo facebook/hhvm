@@ -33,6 +33,12 @@ module Definition = struct
   type result = ServerCommandTypes.Go_to_definition.result
 end
 
+(* Handles "textDocument/typeDefinition" LSP messages *)
+module Type_definition = struct
+  type request = document_location
+  type result = ServerCommandTypes.Go_to_type_definition.result
+end
+
 (* Handles "textDocument/completion" LSP messages *)
 module Completion = struct
   type request = {
@@ -78,6 +84,9 @@ type _ t =
   | Document_highlight:
     Document_highlight.request ->
     Document_highlight.result t
+  | Type_definition:
+    Type_definition.request ->
+    Type_definition.result t
 
 type notification =
   | Done_processing

@@ -1490,13 +1490,12 @@ To string conversions:
 
   Load the name of the Class* in S0.
 
-| LdFunc<offset>, D(Func), S(Str) S(StkPtr) S(FramePtr), NF
+| LdFunc, D(Func|Nullptr), S(Str), NF
 
-  Resolve the Func whose name is S0. Perform caller checks (dynamic call, rx).
-  Then store the Func into the partially constructed ActRec pointed to by
-  S1 + `offset` (in cells). Also populate the m_this/m_cls field if necessary.
-  Fatal if the named function is not defined, and the autoloader fails to
-  define it.
+  Loads the Func whose name is S0, invoking autoloader if it is not defined yet.
+  Fatals if the named function is not defined, and the autoloader fails to
+  define it. Returns nullptr if S0 contained '::', indicating that this legacy
+  call should be handled by interpreter.
 
 | LdFuncCached<funcName>, D(Func), NA, NF
 

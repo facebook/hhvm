@@ -2066,7 +2066,7 @@ void pure_spill_frame(Env& env,
    * frames even within our region (via DefInlineFP).  However, in the
    * meantime, we need to treat the store of the context like a normal
    * pure_store, because there are various IR instructions that can decref the
-   * context on a pre-live ActRec through memory (e.g. LdFunc).
+   * context on a pre-live ActRec through memory (e.g. LdArrFuncCtx).
    *
    * If the frame becomes live via DefInlineFP, we don't need to treat it as
    * memory support for this set anymore, for the same reason that LdCtx

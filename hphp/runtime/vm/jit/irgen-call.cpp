@@ -993,6 +993,36 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
                              methodName->strVal(), dynamic, 0, emitFCall);
 }
 
+SSATmp* getReifiedGenerics(IRGS& env, SSATmp* funcName) {
+  if (funcName->hasConstVal(TStr)) {
+    auto const name = funcName->strVal();
+    if (!isReifiedName(name)) return nullptr;
+    return cns(env, getReifiedTypeList(stripClsOrFnNameFromReifiedName(name)));
+  }
+  return cond(
+    env,
+    [&] (Block* not_reified_block) {
+      // Lets do a quick check before calling IsReifiedName since that's an
+      // expensive native call
+      // Reified names always start with a $
+      // It is also safe to read the 0th char without checking the length since
+      // if it is an empty string, then we'll be reading the null terminator
+      auto const first_char = gen(env, OrdStrIdx, funcName, cns(env, 0));
+      auto const issame = gen(env, EqInt, cns(env, (uint64_t)'$'), first_char);
+      gen(env, JmpZero, not_reified_block, issame);
+      auto const isreified = gen(env, IsReifiedName, funcName);
+      gen(env, JmpZero, not_reified_block, isreified);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      return gen(env, LdReifiedGeneric, funcName);
+    },
+    [&] {
+      return cns(env, TNullptr);
+    }
+  );
+}
+
 void fpushFuncObj(IRGS& env, uint32_t numParams) {
   auto const slowExit = makeExitSlow(env);
   auto const obj      = popC(env);
@@ -1019,6 +1049,21 @@ void fpushFuncClsMeth(IRGS& env, uint32_t numParams) {
   auto const func = gen(env, LdFuncFromClsMeth, clsMeth);
   prepareToCallUnknown(env, func, cls, numParams, nullptr, false, false,
                        nullptr);
+}
+
+void fpushFuncStr(IRGS& env, uint32_t numParams) {
+  auto const str = topC(env);
+  assertx(str->isA(TStr));
+
+  // TODO: improve this if str->hasConstVal()
+  auto const funcN = gen(env, LdFunc, str);
+  auto const func = gen(env, CheckNonNull, makeExitSlow(env), funcN);
+  auto const tsList = getReifiedGenerics(env, str);
+  popDecRef(env);
+  auto const mightCareAboutDynCall =
+    RuntimeOption::EvalForbidDynamicCallsToFunc > 0;
+  prepareToCallUnknown(env, func, nullptr, numParams, nullptr, true,
+                       mightCareAboutDynCall, tsList);
 }
 
 void fPushFuncDImpl(IRGS& env, uint32_t numParams, const StringData* name,
@@ -1068,37 +1113,6 @@ SSATmp* specialClsRefToCls(IRGS& env, SpecialClsRef ref) {
   }
   always_assert(false);
 }
-
-SSATmp* getReifiedGenerics(IRGS& env, SSATmp* funName) {
-  if (funName->hasConstVal(TStr)) {
-    auto const name = funName->strVal();
-    if (!isReifiedName(name)) return nullptr;
-    return cns(env, getReifiedTypeList(stripClsOrFnNameFromReifiedName(name)));
-  }
-  return cond(
-    env,
-    [&] (Block* not_reified_block) {
-      // Lets do a quick check before calling IsReifiedName since that's an
-      // expensive native call
-      // Reified names always start with a $
-      // It is also safe to read the 0th char without checking the length since
-      // if it is an empty string, then we'll be reading the null terminator
-      auto const first_char = gen(env, OrdStrIdx, funName, cns(env, 0));
-      auto const issame = gen(env, EqInt, cns(env, (uint64_t)'$'), first_char);
-      gen(env, JmpZero, not_reified_block, issame);
-      auto const isreified = gen(env, IsReifiedName, funName);
-      gen(env, JmpZero, not_reified_block, isreified);
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      return gen(env, LdReifiedGeneric, funName);
-    },
-    [&] {
-      return cns(env, TNullptr);
-    }
-  );
-}
-
 
 folly::Optional<int> specialClsReifiedPropSlot(IRGS& env, SpecialClsRef ref) {
   auto const cls = curClass(env);
@@ -1310,21 +1324,8 @@ void emitFPushFunc(IRGS& env, uint32_t numParams, const ImmVector& v) {
   if (topC(env)->isA(TClsMeth)) {
     return fpushFuncClsMeth(env, numParams);
   }
-
-  if (!callee->isA(TStr)) {
-    PUNT(FPushFunc_not_Str);
-  }
-
-  popC(env);
-
-  auto const prepare = [&] (IRSPRelOffset arOffset) {
-    auto const func = gen(env, LdFunc, IRSPRelOffsetData { arOffset }, callee,
-                          sp(env), fp(env));
-    decRef(env, callee);
-    return func;
-  };
-  auto const tsList = getReifiedGenerics(env, callee);
-  prepareToCallCustom(env, nullptr, numParams, true, tsList, prepare);
+  if (callee->isA(TStr)) return fpushFuncStr(env, numParams);
+  return interpOne(env);
 }
 
 void emitResolveFunc(IRGS& env, const StringData* name) {

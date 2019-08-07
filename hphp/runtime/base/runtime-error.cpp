@@ -335,6 +335,7 @@ void raise_hackarr_compat_type_hint_impl(const Func* func,
   }
 }
 
+[[noreturn]]
 void raise_func_undefined(const char* prefix, const StringData* name,
                           const Class* cls) {
   if (LIKELY(!needsStripInOut(name))) {

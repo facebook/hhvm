@@ -84,11 +84,7 @@ rds::Handle FuncCache::alloc() {
   return link.handle();
 }
 
-const Func* FuncCache::lookup(rds::Handle handle,
-                              StringData* sd,
-                              ActRec* ar,
-                              ActRec* fp) {
-  assertx(ar->isDynamicCall());
+const Func* FuncCache::lookup(rds::Handle handle, StringData* sd) {
   auto const thiz = rds::handleToPtr<FuncCache, rds::Mode::Normal>(handle);
   if (!rds::isHandleInit(handle, rds::NormalTag{})) {
     for (std::size_t i = 0; i < FuncCache::kNumLines; ++i) {
@@ -98,71 +94,25 @@ const Func* FuncCache::lookup(rds::Handle handle,
     rds::initHandle(handle);
   }
   auto const pair = keyToPair(thiz, sd);
-  const StringData* pairSd = pair->m_key;
-  if (!stringMatches(pairSd, sd)) {
-    // Miss. Does it actually exist?
-    auto const* func = Unit::lookupFunc(sd);
-    bool noEffects = true;
-    try {
-      if (LIKELY(func != nullptr)) {
-        noEffects &= callerDynamicCallChecks(func);
-        noEffects &= callerRxChecks(fp, func);
-      } else {
-        ObjectData *this_ = nullptr;
-        Class* self_ = nullptr;
-        StringData* inv = nullptr;
-        ArrayData* reifiedGenerics = nullptr;
-        bool dynamic = false;
-        func = vm_decode_function(
-          Variant{sd},
-          fp,
-          this_,
-          self_,
-          inv,
-          dynamic,
-          reifiedGenerics,
-          DecodeFlags::NoWarn);
-        if (!func) {
-          raise_call_to_undefined(sd);
-        }
-        assertx(dynamic);
-        noEffects &= callerDynamicCallChecks(func);
-        noEffects &= callerRxChecks(fp, func);
-
-        if (this_) {
-          ar->m_func = func;
-          ar->setThis(this_);
-          this_->incRefCount();
-          if (UNLIKELY(inv != nullptr)) ar->setMagicDispatch(inv);
-          return func;
-        }
-        if (self_) {
-          ar->m_func = func;
-          ar->setClass(self_);
-          if (UNLIKELY(inv != nullptr)) ar->setMagicDispatch(inv);
-          return func;
-        }
-      }
-    } catch (...) {
-      *arPreliveOverwriteCells(ar) = make_tv<KindOfString>(sd);
-      throw;
-    }
-    assertx(!func->implCls());
-    func->validate();
-    if (UNLIKELY(!noEffects)) {
-      ar->m_func = func;
-      ar->trashThis();
-      return func;
-    }
-    pair->m_key =
-      const_cast<StringData*>(func->displayName()); // use a static name
-    pair->m_value = func;
+  if (stringMatches(pair->m_key, sd)) {
+    assertx(stringMatches(pair->m_key, pair->m_value->displayName()));
+    pair->m_value->validate();
+    return pair->m_value;
   }
-  ar->m_func = pair->m_value;
-  ar->trashThis();
-  assertx(stringMatches(pair->m_key, pair->m_value->displayName()));
-  pair->m_value->validate();
-  return pair->m_value;
+
+  // Handle "cls::meth" in interpreter.
+  if (!notClassMethodPair(sd)) return nullptr;
+
+  // Miss. Does it actually exist?
+  auto const* func = Unit::loadFunc(sd);
+  if (UNLIKELY(func == nullptr)) raise_call_to_undefined(sd);
+
+  assertx(!func->implCls());
+  func->validate();
+  // use a static name
+  pair->m_key = const_cast<StringData*>(func->displayName());
+  pair->m_value = func;
+  return func;
 }
 
 void invalidateForRenameFunction(const StringData* name) {

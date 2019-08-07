@@ -1989,8 +1989,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case GetMemoKeyScalar:
     return IrrelevantEffects{};
 
-  case LdArrFuncCtx:
-  case LdFunc: // these all can autoload
+  case LdArrFuncCtx: // autoload
     {
       AliasClass effects =
         actrec(inst.src(1), inst.extra<IRSPRelOffsetData>()->offset);
@@ -2063,6 +2062,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DefCls:         // autoload
   case LdCls:          // autoload
   case LdClsCached:    // autoload
+  case LdFunc:         // autoload
   case LdFuncCached:   // autoload
   case LdRecDescCached:    // autoload
   case LdSwitchObjIndex:  // decrefs arg

@@ -82,12 +82,6 @@ void implLdMeta(IRLS& env, const IRInstruction* inst) {
                  inst->marker().func()->fullName()->slice());
 
   auto args = argGroup(env, inst).imm(ch).ssa(0 /* name */);
-  if (is_func) {
-    args
-      .addr(srcLoc(env, inst, 1).reg(),
-            cellsToBytes(inst->extra<LdFunc>()->offset.offset))
-      .ssa(2);
-  }
   cgCallHelper(
     vmain(env),
     env,

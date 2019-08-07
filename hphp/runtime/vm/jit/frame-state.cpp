@@ -657,7 +657,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   }
 
   case LdArrFuncCtx:
-  case LdFunc:
     writeToSpilledFrame(inst->extra<IRSPRelOffsetData>()->offset,
                         inst->src(1));
     break;

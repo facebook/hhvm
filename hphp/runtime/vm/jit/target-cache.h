@@ -45,8 +45,7 @@ struct FuncCache {
   };
 
   static rds::Handle alloc();
-  static const Func* lookup(rds::Handle, StringData* lookup, ActRec* ar,
-                            ActRec* fp);
+  static const Func* lookup(rds::Handle, StringData* lookup);
 
   Pair m_pairs[kNumLines];
 };

@@ -1,4 +1,6 @@
 File "lambda_tyvar.php", line 7, characters 24-62:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_tyvar.php", line 8, characters 24-81:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+Invalid argument (Typing[4110])
+File "lambda_tyvar.php", line 4, characters 28-45:
+Expected ~(function(dynamic): void) because it is an unenforceable type
+File "lambda_tyvar.php", line 7, characters 24-62:
+But got (function(dynamic $y): dynamic)

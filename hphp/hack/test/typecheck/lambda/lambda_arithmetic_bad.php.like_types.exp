@@ -1,8 +1,56 @@
-File "lambda_arithmetic_bad.php", line 16, characters 23-35:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_arithmetic_bad.php", line 17, characters 23-35:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_arithmetic_bad.php", line 18, characters 23-35:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_arithmetic_bad.php", line 19, characters 25-43:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_arithmetic_bad.php", line 16, characters 30-35:
+Typing error (Typing[4110])
+File "lambda_arithmetic_bad.php", line 2, characters 18-19:
+Some type constraint(s) are violated here
+File "lambda_arithmetic_bad.php", line 2, characters 18-19:
+T1 is a constrained type parameter
+File "lambda_arithmetic_bad.php", line 16, characters 30-31:
+Expected num because this is used in an arithmetic operation
+File "lambda_arithmetic_bad.php", line 2, characters 18-19:
+But got dynamic
+File "lambda_arithmetic_bad.php", line 17, characters 30-35:
+Typing error (Typing[4110])
+File "lambda_arithmetic_bad.php", line 2, characters 18-19:
+Some type constraint(s) are violated here
+File "lambda_arithmetic_bad.php", line 2, characters 18-19:
+T1 is a constrained type parameter
+File "lambda_arithmetic_bad.php", line 17, characters 30-31:
+Expected num because this is used in an arithmetic operation
+File "lambda_arithmetic_bad.php", line 2, characters 18-19:
+But got dynamic
+File "lambda_arithmetic_bad.php", line 18, characters 30-35:
+Typing error (Typing[4110])
+File "lambda_arithmetic_bad.php", line 2, characters 18-19:
+Some type constraint(s) are violated here
+File "lambda_arithmetic_bad.php", line 2, characters 18-19:
+T1 is a constrained type parameter
+File "lambda_arithmetic_bad.php", line 18, characters 30-31:
+Expected num because this is used in an arithmetic operation
+File "lambda_arithmetic_bad.php", line 2, characters 18-19:
+But got dynamic
+File "lambda_arithmetic_bad.php", line 19, characters 37-43:
+Typing error (Typing[4110])
+File "lambda_arithmetic_bad.php", line 5, characters 19-20:
+Some type constraint(s) are violated here
+File "lambda_arithmetic_bad.php", line 5, characters 19-20:
+T1 is a constrained type parameter
+File "lambda_arithmetic_bad.php", line 19, characters 37-38:
+Expected num because this is used in an arithmetic operation
+File "lambda_arithmetic_bad.php", line 5, characters 19-20:
+But got dynamic
+File "lambda_arithmetic_bad.php", line 19, characters 37-43:
+Typing error (Typing[4110])
+File "lambda_arithmetic_bad.php", line 5, characters 22-23:
+Some type constraint(s) are violated here
+File "lambda_arithmetic_bad.php", line 5, characters 22-23:
+T2 is a constrained type parameter
+File "lambda_arithmetic_bad.php", line 19, characters 42-43:
+Expected num because this is used in an arithmetic operation
+File "lambda_arithmetic_bad.php", line 5, characters 22-23:
+But got dynamic
+File "lambda_arithmetic_bad.php", line 20, characters 11-32:
+Invalid argument (Typing[4110])
+File "lambda_arithmetic_bad.php", line 11, characters 18-18:
+Expected ~E because it is an unenforceable type
+File "lambda_arithmetic_bad.php", line 19, characters 37-43:
+But got int because this is the result of an integer arithmetic operation

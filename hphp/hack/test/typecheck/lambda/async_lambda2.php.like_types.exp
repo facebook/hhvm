@@ -1,8 +1,0 @@
-File "async_lambda2.php", line 13, characters 10-24:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "async_lambda2.php", line 13, characters 10-24:
-Invalid return type (Typing[4110])
-File "async_lambda2.php", line 12, characters 15-34:
-Expected ~(function(int): int) because it is an unenforceable type
-File "async_lambda2.php", line 13, characters 10-24:
-But got (function($v): Awaitable<_>)

@@ -1,11 +1,3 @@
-File "lambda_array_get.php", line 23, characters 5-28:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_array_get.php", line 27, characters 5-28:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_array_get.php", line 31, characters 5-28:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_array_get.php", line 35, characters 5-28:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
 File "lambda_array_get.php", line 37, characters 22-27:
 Invalid argument (Typing[4110])
 File "lambda_array_get.php", line 18, characters 29-45:
@@ -30,41 +22,89 @@ File "lambda_array_get.php", line 17, characters 29-45:
 Expected Contra<~(~bool, ~C)>
 File "lambda_array_get.php", line 11, characters 65-74:
 But got dynamic because it is an unenforceable type
-File "lambda_array_get.php", line 46, characters 5-30:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_array_get.php", line 50, characters 5-30:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_array_get.php", line 54, characters 5-30:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_array_get.php", line 58, characters 5-30:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_array_get.php", line 69, characters 5-41:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_array_get.php", line 73, characters 5-41:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_array_get.php", line 77, characters 5-41:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_array_get.php", line 81, characters 5-41:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_array_get.php", line 92, characters 5-41:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_array_get.php", line 96, characters 5-41:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_array_get.php", line 100, characters 5-41:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_array_get.php", line 104, characters 5-41:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_array_get.php", line 117, characters 5-97:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_array_get.php", line 121, characters 5-41:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_array_get.php", line 125, characters 5-41:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_array_get.php", line 129, characters 5-41:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_array_get.php", line 140, characters 5-28:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_array_get.php", line 145, characters 5-28:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_array_get.php", line 153, characters 5-28:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_array_get.php", line 83, characters 36-41:
+Invalid argument (Typing[4110])
+File "lambda_array_get.php", line 83, characters 10-33:
+Expected ~Contra<~shape(?'a' => ~B)> because it is an unenforceable type
+File "lambda_array_get.php", line 16, characters 20-20:
+  via this generic T
+File "lambda_array_get.php", line 11, characters 65-74:
+But got Contra<~shape('a' => [unresolved])>
+File "lambda_array_get.php", line 84, characters 36-41:
+Invalid argument (Typing[4110])
+File "lambda_array_get.php", line 84, characters 10-33:
+Expected ~Contra<~shape(?'a' => ~C)> because it is an unenforceable type
+File "lambda_array_get.php", line 16, characters 20-20:
+  via this generic T
+File "lambda_array_get.php", line 11, characters 65-74:
+But got Contra<~shape('a' => [unresolved])>
+File "lambda_array_get.php", line 85, characters 36-41:
+Invalid argument (Typing[4110])
+File "lambda_array_get.php", line 85, characters 10-33:
+Expected ~Contra<~shape(?'a' => ~B)> because it is an unenforceable type
+File "lambda_array_get.php", line 16, characters 20-20:
+  via this generic T
+File "lambda_array_get.php", line 11, characters 65-74:
+But got Contra<~shape('a' => [unresolved])>
+File "lambda_array_get.php", line 86, characters 36-41:
+Invalid argument (Typing[4110])
+File "lambda_array_get.php", line 86, characters 10-33:
+Expected ~Contra<~shape(?'a' => ~C)> because it is an unenforceable type
+File "lambda_array_get.php", line 16, characters 20-20:
+  via this generic T
+File "lambda_array_get.php", line 11, characters 65-74:
+But got Contra<~shape('a' => [unresolved])>
+File "lambda_array_get.php", line 117, characters 36-37:
+Invalid argument (Typing[4110])
+File "lambda_array_get.php", line 11, characters 25-26:
+Some type constraint(s) are violated here
+File "lambda_array_get.php", line 11, characters 25-26:
+T1 is a constrained type parameter
+File "lambda_array_get.php", line 117, characters 36-37:
+Expected shape(?'a' => [unresolved], ...) because Shapes::idx expects a shape
+File "lambda_array_get.php", line 11, characters 25-26:
+But got dynamic
+File "lambda_array_get.php", line 117, characters 81-83:
+Invalid index operation: 'a' is marked as an optional shape field. It may not be present in the shape. Use the `??` operator instead. (Typing[4165])
+File "lambda_array_get.php", line 114, characters 31-33:
+This is where the field was declared as optional.
+File "lambda_array_get.php", line 132, characters 36-41:
+Invalid argument (Typing[4110])
+File "lambda_array_get.php", line 132, characters 10-33:
+Expected ~Contra<~shape(?'a' => ~C)> because it is an unenforceable type
+File "lambda_array_get.php", line 16, characters 20-20:
+  via this generic T
+File "lambda_array_get.php", line 11, characters 65-74:
+But got Contra<~shape(?'a' => [unresolved], 'b' => [unresolved])>
+File "lambda_array_get.php", line 133, characters 36-41:
+Invalid argument (Typing[4110])
+File "lambda_array_get.php", line 133, characters 10-33:
+Expected ~Contra<~shape(?'a' => ~B)> because it is an unenforceable type
+File "lambda_array_get.php", line 16, characters 20-20:
+  via this generic T
+File "lambda_array_get.php", line 11, characters 65-74:
+But got Contra<~shape(?'a' => [unresolved], 'b' => [unresolved])>
+File "lambda_array_get.php", line 134, characters 36-41:
+Invalid argument (Typing[4110])
+File "lambda_array_get.php", line 134, characters 10-33:
+Expected ~Contra<~shape(?'a' => ~C)> because it is an unenforceable type
+File "lambda_array_get.php", line 16, characters 20-20:
+  via this generic T
+File "lambda_array_get.php", line 11, characters 65-74:
+But got Contra<~shape(?'a' => [unresolved], 'b' => [unresolved])>
+File "lambda_array_get.php", line 142, characters 46-51:
+Invalid argument (Typing[4110])
+File "lambda_array_get.php", line 142, characters 10-43:
+Expected ~Contra<~KeyedContainer<~int, ~string>> because it is an unenforceable type
+File "lambda_array_get.php", line 16, characters 20-20:
+  via this generic T
+File "lambda_array_get.php", line 11, characters 65-74:
+But got Contra<~vec<[unresolved]>>
+File "lambda_array_get.php", line 147, characters 39-44:
+Invalid argument (Typing[4110])
+File "lambda_array_get.php", line 147, characters 10-36:
+Expected ~Contra<~ConstVector<~string>> because it is an unenforceable type
+File "lambda_array_get.php", line 16, characters 20-20:
+  via this generic T
+File "lambda_array_get.php", line 11, characters 65-74:
+But got Contra<~<expr#1>>

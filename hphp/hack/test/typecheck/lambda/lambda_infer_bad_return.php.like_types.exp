@@ -1,8 +1,0 @@
-File "lambda_infer_bad_return.php", line 5, characters 10-20:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_infer_bad_return.php", line 5, characters 10-20:
-Invalid return type (Typing[4110])
-File "lambda_infer_bad_return.php", line 4, characters 17-39:
-Expected ~(function(int): string) because it is an unenforceable type
-File "lambda_infer_bad_return.php", line 5, characters 10-20:
-But got (function($x): bool)

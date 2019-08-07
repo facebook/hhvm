@@ -1,4 +1,0 @@
-File "lambda_hof_bad.php", line 15, characters 14-26:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_hof_bad.php", line 16, characters 22-34:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

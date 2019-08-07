@@ -2423,6 +2423,12 @@ and expr_
           else (Reason.Rwitness p, Tfun { ft with ft_ret = ty }) in
         env, tefun, inferred_ty in
       let env, eexpected = expand_expected env expected in
+      (* TODO: move this into the expand_expected function and prune its callsites
+       * Strip like type from function type hint *)
+      let eexpected = match eexpected with
+      | Some (pos, ur, (_, Tunion [(_, Tdynamic); ((_, Tfun _) as f)])) ->
+        Some (pos, ur, f)
+      | _ -> eexpected in
       begin match eexpected with
       | Some (_pos, _ur, (_, Tfun expected_ft)) ->
         (* First check that arities match up *)

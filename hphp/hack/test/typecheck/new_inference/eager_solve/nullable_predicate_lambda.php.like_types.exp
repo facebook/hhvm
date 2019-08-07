@@ -1,4 +1,10 @@
-File "nullable_predicate_lambda.php", line 26, characters 7-274:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "nullable_predicate_lambda.php", line 29, characters 9-174:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "nullable_predicate_lambda.php", line 28, characters 9-28:
+Invalid argument (Typing[4110])
+File "nullable_predicate_lambda.php", line 7, characters 40-41:
+Some type constraint(s) are violated here
+File "nullable_predicate_lambda.php", line 7, characters 40-41:
+Tv is a constrained type parameter
+File "nullable_predicate_lambda.php", line 15, characters 3-16:
+Expected Traversable<[unresolved]>
+File "nullable_predicate_lambda.php", line 7, characters 40-41:
+But got dynamic

@@ -1,2 +1,8 @@
-File "map_from_keys.php--file2.php", line 5, characters 36-44:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "map_from_keys.php--file2.php", line 5, characters 43-44:
+Invalid return type (Typing[4110])
+File "map_from_keys.php--file2.php", line 4, characters 54-65:
+Expected ~classname<~C> because it is an unenforceable type
+File "map_from_keys.php--file2.php", line 4, characters 54-65:
+Considering that this type argument is invariant with respect to Map
+File "map_from_keys.php--file2.php", line 4, characters 46-51:
+But got string

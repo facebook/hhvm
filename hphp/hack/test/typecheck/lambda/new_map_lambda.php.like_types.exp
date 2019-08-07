@@ -1,7 +1,9 @@
-File "new_map_lambda.php", line 24, characters 25-66:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "new_map_lambda.php", line 25, characters 25-73:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "new_map_lambda.php", line 24, characters 60-65:
+Invalid argument (Typing[4110])
+File "new_map_lambda.php", line 18, characters 36-41:
+Expected ~MyEnum because it is an unenforceable type
+File "new_map_lambda.php", line 22, characters 30-35:
+But got string
 File "new_map_lambda.php", line 25, characters 26-31:
 Wrong type hint (Typing[4110])
 File "new_map_lambda.php", line 25, characters 26-31:
@@ -13,4 +15,4 @@ Invalid argument (Typing[4110])
 File "new_map_lambda.php", line 12, characters 5-26:
 Expected ~(function(~string, ~string): [unresolved]) because it is an unenforceable type
 File "new_map_lambda.php", line 25, characters 25-73:
-But got (function(~MyEnum $value, $name): string)
+But got (function(~MyEnum $value, ~string $name): [unresolved])

@@ -1,2 +1,0 @@
-File "lambda_in_pipe.php", line 9, characters 31-60:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

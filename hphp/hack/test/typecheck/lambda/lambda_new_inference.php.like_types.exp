@@ -1,5 +1,13 @@
-File "lambda_new_inference.php", line 23, characters 7-158:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_new_inference.php", line 24, characters 29-40:
+Invalid argument (Typing[4110])
+File "lambda_new_inference.php", line 5, characters 23-24:
+Some type constraint(s) are violated here
+File "lambda_new_inference.php", line 5, characters 23-24:
+Ta is a constrained type parameter
+File "lambda_new_inference.php", line 14, characters 3-24:
+Expected KeyedContainer<[unresolved], [unresolved]>
+File "lambda_new_inference.php", line 5, characters 23-24:
+But got dynamic
 File "lambda_new_inference.php", line 30, characters 10-19:
 Invalid return type (Typing[4110])
 File "lambda_new_inference.php", line 5, characters 23-24:

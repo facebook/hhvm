@@ -1,0 +1,10 @@
+File "map_any.php", line 14, characters 5-35:
+Invalid return type (Typing[4110])
+File "map_any.php", line 4, characters 21-22:
+Some type constraint(s) are violated here
+File "map_any.php", line 4, characters 21-22:
+T2 is a constrained type parameter
+File "map_any.php", line 14, characters 5-35:
+Expected void because this function implicitly returns void
+File "map_any.php", line 4, characters 21-22:
+But got dynamic

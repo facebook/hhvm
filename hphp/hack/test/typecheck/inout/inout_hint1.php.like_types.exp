@@ -1,2 +1,0 @@
-File "inout_hint1.php", line 59, characters 11-42:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

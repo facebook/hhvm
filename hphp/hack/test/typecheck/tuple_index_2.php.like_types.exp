@@ -1,2 +1,6 @@
-File "tuple_index_2.php", line 18, characters 5-51:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "tuple_index_2.php", line 20, characters 14-18:
+Invalid return type (Typing[4110])
+File "tuple_index_2.php", line 12, characters 22-24:
+Expected ~int because it is an unenforceable type
+File "tuple_index_2.php", line 16, characters 13-17:
+But got string

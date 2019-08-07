@@ -1,2 +1,6 @@
-File "lambda_bad_predicate.php", line 39, characters 7-97:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_bad_predicate.php", line 40, characters 27-30:
+No method 'hell' in MyClass (did you mean 'hello'?) (Typing[4053])
+File "lambda_bad_predicate.php", line 32, characters 45-51:
+This is why I think it is an object of type MyClass
+File "lambda_bad_predicate.php", line 26, characters 7-13:
+Declaration of MyClass is here

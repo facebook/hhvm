@@ -1,2 +1,10 @@
-File "functional_higher_order.php", line 18, characters 5-47:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "functional_higher_order.php", line 19, characters 14-21:
+Typing error (Typing[4110])
+File "functional_higher_order.php", line 12, characters 12-12:
+Some type constraint(s) are violated here
+File "functional_higher_order.php", line 12, characters 12-12:
+T is a constrained type parameter
+File "functional_higher_order.php", line 19, characters 14-15:
+Expected num because this is used in an arithmetic operation
+File "functional_higher_order.php", line 12, characters 12-12:
+But got dynamic

@@ -1,4 +1,0 @@
-File "async_lambda.php", line 13, characters 10-23:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "async_lambda.php", line 17, characters 10-29:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

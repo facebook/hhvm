@@ -1,2 +1,0 @@
-File "tuple_index_1.php", line 18, characters 5-34:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

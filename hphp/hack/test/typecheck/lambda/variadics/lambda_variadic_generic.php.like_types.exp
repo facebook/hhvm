@@ -24,21 +24,23 @@ File "lambda_variadic_generic.php", line 24, characters 21-21:
 Expected C
 File "lambda_variadic_generic.php", line 24, characters 21-21:
 But got dynamic because it is an unenforceable type
-File "lambda_variadic_generic.php", line 24, characters 18-95:
-Invalid argument (Typing[4110])
-File "lambda_variadic_generic.php", line 16, characters 25-46:
-Expected ~(function(A<C>...): C) because it is an unenforceable type
-File "lambda_variadic_generic.php", line 24, characters 18-95:
-But got (function(A<C> $y...): ~C)
-File "lambda_variadic_generic.php", line 30, characters 18-44:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_variadic_generic.php", line 32, characters 18-90:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "lambda_variadic_generic.php", line 27, characters 12-13:
+Invalid return type (Typing[4110])
+File "lambda_variadic_generic.php", line 16, characters 45-45:
+Expected C
+File "lambda_variadic_generic.php", line 24, characters 21-21:
+But got dynamic because it is an unenforceable type
 File "lambda_variadic_generic.php", line 38, characters 18-46:
 Invalid argument (Typing[4110])
 File "lambda_variadic_generic.php", line 16, characters 25-46:
 Expected ~(function(A<C>...): C) because it is an unenforceable type
 File "lambda_variadic_generic.php", line 38, characters 18-46:
-But got (function(A $y...): _)
-File "lambda_variadic_generic.php", line 40, characters 18-51:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+But got (function(A $y...): C)
+File "lambda_variadic_generic.php", line 40, characters 47-49:
+No method 'bar' in C (did you mean 'foo'?) (Typing[4053])
+File "lambda_variadic_generic.php", line 16, characters 37-37:
+This is why I think it is an object of type C
+File "lambda_variadic_generic.php", line 11, characters 29-29:
+  via this generic T
+File "lambda_variadic_generic.php", line 3, characters 7-7:
+Declaration of C is here

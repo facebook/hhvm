@@ -1,2 +1,0 @@
-File "regression_remove_remove_equiv_tyvars.php", line 23, characters 5-222:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

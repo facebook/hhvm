@@ -1,2 +1,0 @@
-File "expect_lambda_void.php", line 7, characters 15-30:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

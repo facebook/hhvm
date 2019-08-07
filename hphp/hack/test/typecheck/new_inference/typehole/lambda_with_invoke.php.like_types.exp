@@ -1,5 +1,9 @@
 File "lambda_with_invoke.php", line 21, characters 29-48:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+Invalid argument (Typing[4110])
+File "lambda_with_invoke.php", line 14, characters 39-57:
+Expected ~(function(~dynamic): void) because it is an unenforceable type
+File "lambda_with_invoke.php", line 21, characters 29-48:
+But got (function(~dynamic $m): dynamic)
 File "lambda_with_invoke.php", line 14, characters 59-63:
 Invalid assignment (Typing[4110])
 File "lambda_with_invoke.php", line 14, characters 39-57:

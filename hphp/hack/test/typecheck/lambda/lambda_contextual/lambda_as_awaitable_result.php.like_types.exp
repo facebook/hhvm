@@ -1,9 +1,15 @@
 File "lambda_as_awaitable_result.php", line 14, characters 10-44:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+Invalid return type (Typing[4110])
+File "lambda_as_awaitable_result.php", line 14, characters 10-44:
+Expected void because this async function implicitly returns Awaitable<void>
+File "lambda_as_awaitable_result.php", line 11, characters 36-39:
+But got dynamic because it is an unenforceable type
 File "lambda_as_awaitable_result.php", line 20, characters 10-44:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
-File "lambda_as_awaitable_result.php", line 25, characters 10-60:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+Invalid return type (Typing[4110])
+File "lambda_as_awaitable_result.php", line 20, characters 10-44:
+Expected void because this async function implicitly returns Awaitable<void>
+File "lambda_as_awaitable_result.php", line 11, characters 36-39:
+But got dynamic because it is an unenforceable type
 File "lambda_as_awaitable_result.php", line 63, characters 10-45:
 Some elements in this Vector are incompatible (Typing[4110])
 File "lambda_as_awaitable_result.php", line 62, characters 40-47:

@@ -1,2 +1,18 @@
-File "expected_float.php", line 6, characters 18-30:
-Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])
+File "expected_float.php", line 6, characters 25-30:
+Typing error (Typing[4110])
+File "collections/Vector.hhi", line 48, characters 20-21:
+Some type constraint(s) are violated here
+File "collections/Vector.hhi", line 48, characters 20-21:
+Tv is a constrained type parameter
+File "expected_float.php", line 6, characters 25-26:
+Expected num because this is used in an arithmetic operation
+File "collections/Vector.hhi", line 48, characters 20-21:
+But got dynamic
+File "expected_float.php", line 6, characters 25-30:
+Invalid return type (Typing[4110])
+File "expected_float.php", line 4, characters 42-46:
+Expected ~float because it is an unenforceable type
+File "expected_float.php", line 4, characters 42-46:
+Considering that this type argument is invariant with respect to Vector
+File "expected_float.php", line 6, characters 25-30:
+But got int because it is the result of a division (/)

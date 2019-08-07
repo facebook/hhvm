@@ -52,8 +52,6 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-using HdrBlock = MemRange<HeapObject*>;
-
 /*
  * Struct Slab encapsulates the header attached to each large block of memory
  * used for allocating smaller blocks. The header contains a start-bit map,

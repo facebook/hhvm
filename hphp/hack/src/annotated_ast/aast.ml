@@ -261,7 +261,7 @@ and ('ex, 'fb, 'en) fun_ = {
   f_span: pos;
   f_annotation: 'en;
   f_mode: FileInfo.mode; [@opaque]
-  f_ret: ('ex, 'fb, 'en) type_hint;
+  f_ret: 'ex type_hint;
   f_name: sid;
   f_tparams: ('ex, 'fb, 'en) tparam list;
   f_where_constraints: where_constraint list;
@@ -295,9 +295,9 @@ and ('ex, 'fb, 'en) func_body = {
 (* A type annotation is two things:
   - the localized hint, or if the hint is missing, the inferred type
   - The typehint associated to this expression if it exists *)
-and ('ex, 'fb, 'en) type_hint = 'ex * ('ex, 'fb, 'en) type_hint_
+and 'ex type_hint = 'ex * type_hint_
 
-and ('ex, 'fb, 'en) type_hint_ = hint option
+and type_hint_ = hint option
 
 and ('ex, 'fb, 'en) user_attribute = {
   ua_name: sid;
@@ -456,7 +456,7 @@ and ('ex, 'fb, 'en) method_ = {
   m_body: ('ex, 'fb, 'en) func_body;
   m_fun_kind: Ast_defs.fun_kind;
   m_user_attributes: ('ex, 'fb, 'en) user_attribute list;
-  m_ret: ('ex, 'fb, 'en) type_hint;
+  m_ret: 'ex type_hint;
   m_external: bool;
   (* see f_external above for context *)
   m_doc_comment: string option;
@@ -473,7 +473,7 @@ and ('ex, 'fb, 'en) method_redeclaration = {
   mt_variadic: ('ex, 'fb, 'en) fun_variadicity;
   mt_params: ('ex, 'fb, 'en) fun_param list;
   mt_fun_kind: Ast_defs.fun_kind;
-  mt_ret: ('ex, 'fb, 'en) type_hint;
+  mt_ret: 'ex type_hint;
   mt_trait: hint;
   mt_method: pstring;
   mt_user_attributes: ('ex, 'fb, 'en) user_attribute list;

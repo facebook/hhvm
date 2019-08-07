@@ -95,6 +95,16 @@ Variant HHVM_FUNCTION(preg_replace, const Variant& pattern, const Variant& repla
                            limit, count.getVariantOrNull(), false, false);
 }
 
+Variant HHVM_FUNCTION(preg_replace_with_count,
+                      const Variant& pattern,
+                      const Variant& replacement,
+                      const Variant& subject,
+                      int limit,
+                      VRefParam count) {
+  return preg_replace_impl(pattern, replacement, subject,
+                           limit, count.getVariantOrNull(), false, false);
+}
+
 Variant HHVM_FUNCTION(preg_replace_callback,
                       const Variant& pattern,
                       const Variant& callback,
@@ -336,6 +346,7 @@ struct PcreExtension final : Extension {
     HHVM_FE(preg_match_all);
     HHVM_FE(preg_match_all_with_matches);
     HHVM_FE(preg_replace);
+    HHVM_FE(preg_replace_with_count);
     HHVM_FE(preg_replace_callback);
     HHVM_FE(preg_replace_callback_array);
     HHVM_FE(preg_split);

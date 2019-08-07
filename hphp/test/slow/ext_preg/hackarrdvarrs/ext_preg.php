@@ -206,7 +206,7 @@ function test_preg_replace() {
   VS($str, "foo o");
 
   $count = 0;
-  preg_replace(array("/\\d/", "/\\s/"), "*", "xp 4 to", -1, &$count);
+  preg_replace_with_count(array("/\\d/", "/\\s/"), "*", "xp 4 to", -1, &$count);
   VS($count, 3);
 
   VS(preg_replace("/xxx", "w", "xxxx"), NULL);

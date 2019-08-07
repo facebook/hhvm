@@ -274,6 +274,14 @@ function preg_replace(mixed $pattern,
                       int $limit = -1,
                       ?int &$count = null): mixed;
 
+<<__Native, __Rx>>
+function preg_replace_with_count(mixed $pattern,
+                                 mixed $replacement,
+                                 mixed $subject,
+                                 int $limit,
+                                 ?int &$count): mixed;
+
+
 /**
  * Split string by a regular expression
  *

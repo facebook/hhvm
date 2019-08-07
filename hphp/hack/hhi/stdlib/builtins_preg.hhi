@@ -36,6 +36,9 @@ function preg_match_all_with_matches(string $pattern, string $subject, &$matches
 function preg_replace($pattern, $replacement, $subject, int $limit = -1,
                       &$count = null);
 <<__PHPStdLib>>
+function preg_replace_with_count($pattern, $replacement, $subject, int $limit,
+                                 &$count);
+<<__PHPStdLib>>
 function preg_replace_callback($pattern, $callback, $subject, int $limit = -1,
                                &$count = null);
 <<__PHPStdLib>>

@@ -4772,8 +4772,14 @@ Index::ConstraintResolution Index::get_type_for_annotated_type(
     return ConstraintResolution{ folly::none, false };
   }();
 
-  if (mainType.type && nullable && !mainType.type->couldBe(BInitNull)) {
-    mainType.type = opt(*mainType.type);
+  if (mainType.type && nullable) {
+    if (mainType.type->subtypeOf(BBottom)) {
+      if (candidate.couldBe(BInitNull)) {
+        mainType.type = TInitNull;
+      }
+    } else if (!mainType.type->couldBe(BInitNull)) {
+      mainType.type = opt(*mainType.type);
+    }
   }
   return mainType;
 }

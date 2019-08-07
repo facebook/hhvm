@@ -3474,8 +3474,11 @@ OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx, uint32_t clsIdx, MOpMode mode) {
                 class_->name()->data(),
                 name->data());
   }
-  if (lookup.constant && mode == MOpMode::Define){
-    throw_cannot_modify_static_const_prop(class_->name()->data(), name->data());
+
+  if (lookup.constant && (mode == MOpMode::Define ||
+    mode == MOpMode::Unset || mode == MOpMode::InOut)) {
+      throw_cannot_modify_static_const_prop(class_->name()->data(),
+        name->data());
   }
 
   if (RuntimeOption::EvalCheckPropTypeHints > 0 && mode == MOpMode::Define) {

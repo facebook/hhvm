@@ -2051,8 +2051,10 @@ void emitBaseSC(IRGS& env, uint32_t propIdx, uint32_t clsIdx, MOpMode mode) {
   auto const name = top(env, BCSPRelOffset{safe_cast<int32_t>(propIdx)});
   if (!name->isA(TStr)) PUNT(BaseS-non-string-name);
 
+  auto const disallowConst = mode == MOpMode::Define ||
+    mode == MOpMode::Unset || mode == MOpMode::InOut;
   auto const spropPtr = ldClsPropAddr(
-    env, cls, name, true, false, mode == MOpMode::Define
+    env, cls, name, true, false, disallowConst
   ).propPtr;
   stMBase(env, spropPtr);
   setClsMIPropState(env, spropPtr, mode, cls, name);

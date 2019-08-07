@@ -1,0 +1,12 @@
+vec(2) {
+  int(5)
+  int(6)
+}
+Cannot modify static const property ca of class A.
+vec(1) {
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+}

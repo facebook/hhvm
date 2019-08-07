@@ -1408,6 +1408,16 @@ void in(ISS& env, const bc::BaseGL& op) {
 void in(ISS& env, const bc::BaseSC& op) {
   auto cls = topC(env, op.arg2);
   auto prop = topC(env, op.arg1);
+
+  auto const vname = tv(prop);
+  if (op.subop3 == MOpMode::Define || op.subop3 == MOpMode::Unset ||
+      op.subop3 == MOpMode::InOut ) {
+        if (vname && vname->m_type == KindOfPersistentString &&
+          canSkipMergeOnConstProp(env, cls, vname->m_data.pstr)) {
+          unreachable(env);
+          return;
+        }
+  }
   auto newBase = miBaseSProp(env, std::move(cls), prop);
   if (newBase.type.subtypeOf(BBottom)) return unreachable(env);
   startBase(env, std::move(newBase));

@@ -1,2 +1,1 @@
 (lang dune 1.9)
-(allow_approximate_merlin) ; see https://discuss.ocaml.org/t/ann-dune-1-10-0/3896

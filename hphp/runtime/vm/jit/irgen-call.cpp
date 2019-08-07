@@ -441,7 +441,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
   if (!emitCallerReffinessChecksKnown(env, callee, fca)) return;
   prepareToCallKnown(env, callee, objOrClass, fca.numArgsInclUnpack(), invName,
                      dynamicCall, tsList);
-  if (invName == nullptr) {
+  if (invName == nullptr && hasFPushEffects(curSrcKey(env).op())) {
     auto const inlined = irGenTryInlineFCall(
       env, callee, fca, objOrClass, objOrClass->type(), curSrcKey(env).op());
     if (inlined) return;
@@ -1807,36 +1807,16 @@ void emitFCall(IRGS& env, FCallArgs fca, const StringData*, const StringData*) {
 
 void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
                     SSATmp* const* const args) {
-  auto const callBcOffset = bcOff(env) - curFunc(env)->base();
-
   allocActRec(env);
   for (int32_t i = 0; i < numParams; i++) {
     push(env, args[i]);
   }
 
   env.irb->fs().setFPushOverride(Op::FPushFuncD);
-  prepareToCallKnown(env, callee, nullptr, numParams, nullptr, false, nullptr);
+  auto const fca = FCallArgs(FCallArgs::Flags::None, numParams, 1, nullptr,
+                             kInvalidOffset, false);
+  prepareAndCallKnown(env, callee, fca, nullptr, nullptr, false, nullptr);
   assertx(!env.irb->fs().hasFPushOverride());
-
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
-
-  auto const retVal = gen(
-    env,
-    Call,
-    CallData {
-      spOffBCFromIRSP(env),
-      static_cast<uint32_t>(numParams),
-      0,
-      callBcOffset,
-      callee,
-      false
-    },
-    sp(env),
-    fp(env)
-  );
-
-  push(env, retVal);
 }
 
 //////////////////////////////////////////////////////////////////////

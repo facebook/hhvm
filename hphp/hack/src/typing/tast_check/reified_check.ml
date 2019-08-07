@@ -18,9 +18,9 @@ module UA = SN.UserAttributes
 module Cls = Decl_provider.Class
 module Nast = Aast
 
-let validator = object(this) inherit type_validator
+let validator = object(this) inherit type_validator as super
 
-  method! on_tapply acc r (_, h) _ =
+  method! on_tapply acc r (p, h) tyl =
     if h = SN.Classes.cTypename then
       this#invalid acc r "a typename"
     else if  h = SN.Classes.cClassname then
@@ -28,7 +28,7 @@ let validator = object(this) inherit type_validator
     else if h = SN.Typehints.wildcard && not (Env.get_allow_wildcards acc.env) then
       this#invalid acc r "a wildcard"
     else
-      acc
+      super#on_tapply acc r (p, h) tyl
 
   method! on_tgeneric acc r t =
     match Env.get_reified acc.env t with

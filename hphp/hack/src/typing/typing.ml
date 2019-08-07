@@ -137,13 +137,26 @@ let suggest env p ty is_code_error =
 
 let err_witness env p = Reason.Rwitness p, Typing_utils.terr env
 
+(* Set all the types in an expression to the given type. *)
+let with_type ty env (e : Nast.expr) : Tast.expr =
+  let visitor =
+    object
+      inherit [_] Aast.map
+
+      method on_'ex _ p = (p, ty)
+      method on_'fb _ _ = Tast.HasUnsafeBlocks
+      method on_'en _ _ = env
+    end
+  in
+  visitor#on_expr () e
+
 let expr_error env p r =
   let ty = (r, Typing_utils.terr env) in
   env, Tast.make_typed_expr p ty T.Any, ty
 
-let expr_any env p r =
+let expr_any env r e =
   let ty = (r, Typing_utils.tany env) in
-  env, Tast.make_typed_expr p ty T.Any, ty
+  env, with_type ty Tast.dummy_saved_env e, ty
 
 let compare_field_kinds x y =
   match x, y with
@@ -157,7 +170,7 @@ let compare_field_kinds x y =
 let check_consistent_fields x l =
   List.for_all l (compare_field_kinds x)
 
-let unbound_name env (pos, name) =
+let unbound_name env (pos, name) e =
   let strictish = Partial.should_check_error (Env.get_mode env) 4107 in
   match Env.get_mode env with
   | FileInfo.Mstrict | FileInfo.Mexperimental ->
@@ -167,7 +180,7 @@ let unbound_name env (pos, name) =
     (Errors.unbound_name_typing pos name;
       expr_error env pos (Reason.Rwitness pos))
   | FileInfo.Mdecl | FileInfo.Mpartial | FileInfo.Mphp ->
-    expr_any env pos (Reason.Rwitness pos)
+    expr_any env (Reason.Rwitness pos) e
 
 (* Is this type Traversable<vty> or Container<vty> for some vty? *)
 let get_value_collection_inst ty =
@@ -1383,7 +1396,7 @@ and expr_
   ?(array_ref_ctx = NoArray)
   ~(valkind: [> `lvalue | `lvalue_subexpr | `other ])
   ~check_defined
-  env (p, e) =
+  env (p, e as outer) =
   let env = Env.open_tyvars env p in
   (fun (env, te, ty) ->
     let env = Typing_solver.close_tyvars_and_solve env Errors.unify_error in
@@ -1798,7 +1811,7 @@ and expr_
      *)
     let class_ = Env.get_class env class_name in
     (match class_ with
-    | None -> unbound_name env pos_cname
+    | None -> unbound_name env pos_cname outer
     | Some class_ ->
        (* Create a class type for the given object instantiated with unresolved
         * types for its type parameters.
@@ -1875,7 +1888,7 @@ and expr_
     (match class_ with
     | None ->
       (* The class given as a static string was not found. *)
-      unbound_name env c
+      unbound_name env c outer
     | Some class_ ->
       let smethod = Env.get_static_member true env class_ (snd meth) in
       (match smethod with
@@ -3910,7 +3923,7 @@ and call_parent_construct pos env el uel =
         let tfun = Reason.Rwitness fty.ft_pos, Tfun fty in
         let env, (tel, _tuel, ty) = call ~expected p env tfun ~fty_decl:None el [] in
         make_call env (Tast.make_typed_expr fpos tfun (T.Id id)) [] tel [] ty
-      | None -> unbound_name env id)
+      | None -> unbound_name env id e)
 
   (* Special function `Shapes::idx` *)
   | Class_const ((_, CI (_, shapes)) as class_id, ((_, idx) as method_id))
@@ -4123,7 +4136,7 @@ and call_parent_construct pos env el uel =
 
 and fun_type_of_id env x tal =
   match Env.get_fun env (snd x) with
-  | None -> let env, _, ty = unbound_name env x in env, ty, None
+  | None -> let env, _, ty = unbound_name env x (Pos.none, Aast.Null) in env, ty, None
   | Some decl_fty ->
       let ety_env = Phase.env_with_self env in
       let tal = List.map ~f:(Decl_hint.hint env.Env.decl_env) tal in

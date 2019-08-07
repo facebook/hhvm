@@ -235,7 +235,7 @@ function array_values<Tv>(Container<Tv> $input): array<Tv>;
 function shuffle(&$array);
 <<__Deprecated('Use count(), it does the same thing as sizeof() in PHP and '.
   'doesn\'t suggest that it\'s counting bytes.'), __PHPStdLib, __Rx>>
-function sizeof($var, int $recursive = COUNT_NORMAL);
+function sizeof($var);
 <<__PHPStdLib>>
 function each(&$array);
 <<__PHPStdLib>>

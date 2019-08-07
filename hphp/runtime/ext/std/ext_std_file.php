@@ -372,7 +372,7 @@ function flock(resource $handle,
  */
 <<__Native>>
 function fputcsv(resource $handle,
-                 array $fields,
+                 varray $fields,
                  string $delimiter = ",",
                  string $enclosure = "\"",
                  string $escape_char = "\\"): mixed;

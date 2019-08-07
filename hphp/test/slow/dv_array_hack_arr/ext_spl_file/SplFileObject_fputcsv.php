@@ -29,14 +29,14 @@ $list = array (
 );
 
 foreach ($list as $v) {
-	$fo->fputcsv(explode(',', $v));
+  $fo->fputcsv(varray(explode(',', $v)));
 }
 unset($fo);
 
 $res = file($file);
 foreach($res as $k  => $val)
 {
-	$res[$k] = substr($val, 0, -1);
+  $res[$k] = substr($val, 0, -1);
 }
 echo '$list = ';var_export($res);echo ";\n";
 
@@ -44,7 +44,7 @@ $fp = fopen($file, "r");
 $res = array();
 while($l=fgetcsv($fp))
 {
-	$res[] = join(',',$l);
+  $res[] = join(',',$l);
 }
 fclose($fp);
 

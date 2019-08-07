@@ -484,7 +484,6 @@ bool canDCE(IRInstruction* inst) {
   case LdObjMethodD:
   case LdObjMethodS:
   case LdObjInvoke:
-  case LdArrFuncCtx:
   case LdFunc:
   case LdFuncCached:
   case LookupFuncCached:

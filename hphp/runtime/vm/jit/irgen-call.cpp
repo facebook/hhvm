@@ -1032,17 +1032,6 @@ void fpushFuncObj(IRGS& env, uint32_t numParams) {
                        nullptr);
 }
 
-void fpushFuncArr(IRGS& env, uint32_t numParams) {
-  auto const arr = popC(env);
-  auto const prepare = [&] (IRSPRelOffset arOffset) {
-    auto const func = gen(env, LdArrFuncCtx, IRSPRelOffsetData { arOffset },
-                          arr, sp(env), fp(env));
-    decRef(env, arr);
-    return func;
-  };
-  prepareToCallCustom(env, nullptr, numParams, true, nullptr, prepare);
-}
-
 void fpushFuncClsMeth(IRGS& env, uint32_t numParams) {
   auto const clsMeth = popC(env);
   auto const cls = gen(env, LdClsFromClsMeth, clsMeth);
@@ -1064,6 +1053,13 @@ void fpushFuncStr(IRGS& env, uint32_t numParams) {
     RuntimeOption::EvalForbidDynamicCallsToFunc > 0;
   prepareToCallUnknown(env, func, nullptr, numParams, nullptr, true,
                        mightCareAboutDynCall, tsList);
+}
+
+void fpushFuncArr(IRGS& env, uint32_t numParams) {
+  UNUSED auto const arr = topC(env);
+  assertx(arr->isA(TArr) || arr->isA(TVec));
+
+  return interpOne(env);
 }
 
 void fPushFuncDImpl(IRGS& env, uint32_t numParams, const StringData* name,

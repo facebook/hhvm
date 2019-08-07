@@ -428,7 +428,6 @@ bool opcodeMayRaise(Opcode opc) {
   case IterNext:
   case IterNextK:
   case KeysetGet:
-  case LdArrFuncCtx:
   case LdCls:
   case LdClsCached:
   case LdClsCtor:

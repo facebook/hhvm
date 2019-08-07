@@ -656,11 +656,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     break;
   }
 
-  case LdArrFuncCtx:
-    writeToSpilledFrame(inst->extra<IRSPRelOffsetData>()->offset,
-                        inst->src(1));
-    break;
-
   case InterpOne:
   case InterpOneCF: {
     auto const& extra = *inst->extra<InterpOneData>();
@@ -1698,25 +1693,6 @@ void FrameStateMgr::spillFrameStack(const IRInstruction* inst) {
     inlineEligible,
     false /* spans */
   });
-}
-
-void FrameStateMgr::writeToSpilledFrame(IRSPRelOffset offset,
-                                        const SSATmp* sp) {
-  for (auto& fpi : cur().fpiStack) {
-    if (fpi.returnSP == sp && fpi.irSPOff == offset) {
-      // The ops which write to a pre-live ActRec after the fact are generally
-      // used when we don't have sufficient Func or Ctx information. This makes
-      // it hard to predict what they actually write to the ActRec, so be
-      // generic. Mark this entry as not eligible for inlining because the
-      // generic type information isn't sufficient for inlining. (We usually
-      // won't even try to inline such things anyways).
-      fpi.ctxType = TCtx;
-      fpi.ctx = nullptr;
-      fpi.func = nullptr;
-      fpi.inlineEligible = false;
-      break;
-    }
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

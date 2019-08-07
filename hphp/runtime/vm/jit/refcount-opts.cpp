@@ -2066,7 +2066,8 @@ void pure_spill_frame(Env& env,
    * frames even within our region (via DefInlineFP).  However, in the
    * meantime, we need to treat the store of the context like a normal
    * pure_store, because there are various IR instructions that can decref the
-   * context on a pre-live ActRec through memory (e.g. LdArrFuncCtx).
+   * context on a pre-live ActRec through memory (FIXME: this may no longer
+   * be the case).
    *
    * If the frame becomes live via DefInlineFP, we don't need to treat it as
    * memory support for this set anymore, for the same reason that LdCtx
@@ -2151,7 +2152,6 @@ void analyze_mem_effects(Env& env,
 bool consumes_reference_taken(const IRInstruction& inst, uint32_t srcID) {
   switch (inst.op()) {
   // The following consume some arguments only in the event of an exception.
-  case LdArrFuncCtx:
   case SuspendHookAwaitEF:
   case SuspendHookAwaitEG:
   case SuspendHookCreateCont:

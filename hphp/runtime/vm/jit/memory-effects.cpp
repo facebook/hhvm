@@ -1989,13 +1989,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case GetMemoKeyScalar:
     return IrrelevantEffects{};
 
-  case LdArrFuncCtx: // autoload
-    {
-      AliasClass effects =
-        actrec(inst.src(1), inst.extra<IRSPRelOffsetData>()->offset);
-      return may_load_store(effects, effects);
-    }
-
   case LdClsPropAddrOrNull:   // may run 86{s,p}init, which can autoload
   case LdClsPropAddrOrRaise:  // raises errors, and 86{s,p}init
   case BaseG:

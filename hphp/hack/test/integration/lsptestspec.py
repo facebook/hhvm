@@ -122,6 +122,39 @@ class LspTestSpec:
         )
         return self._update(messages=messages)
 
+    def write_to_disk(
+        self, *, comment: Optional[str] = None, uri: str, contents: str, notify: bool
+    ) -> "LspTestSpec":
+        """Write a file to disk in the middle of the LSP test.
+
+        Due to the asynchronous nature of these LSP tests, it may be a good idea
+        to add a `wait=True` to the previous request(s) you sent. Otherwise, the
+        request will be sent and the file will be written to disk almost
+        simultaneously, and the language server may read the new file from disk
+        by the time it processes the request, rather than the old file.
+
+        If `notify` is `True`, also send a `workspace/didChangeWatchedFiles`
+        notification to the language server corresponding to the file you just
+        changed.
+        """
+        messages = list(self._messages)
+        messages.append(
+            _NotificationSpec(
+                method="$test/writeToDisk",
+                params={"uri": uri, "contents": contents},
+                comment=comment,
+            )
+        )
+        if notify:
+            messages.append(
+                _NotificationSpec(
+                    method="workspace/didChangeWatchedFiles",
+                    params={"changes": [{"uri": uri, "type": 2}]},
+                    comment=comment,
+                )
+            )
+        return self._update(messages=messages)
+
     def run(
         self, lsp_command_processor: LspCommandProcessor, variables: VariableMap
     ) -> Tuple[Transcript, Optional[str]]:

@@ -47,7 +47,7 @@ lazy_init2 = {use_saved_state}
         naming_table_saved_state_path = os.path.join(
             self.repo_dir, "naming_table_saved_state.sqlite"
         )
-        (_, _, retcode) = self.proc_call(
+        (stdout, stderr, retcode) = self.proc_call(
             [
                 hh_server,
                 "--check",
@@ -56,7 +56,11 @@ lazy_init2 = {use_saved_state}
                 naming_table_saved_state_path,
             ]
         )
-        assert retcode == 0, "Failed to save naming table saved state"
+        assert retcode == 0, (
+            f"Failed to save naming table saved state: {retcode}\n"
+            + f"STDOUT:\n{stdout}\n"
+            + f"STDERR:\n{stderr}\n"
+        )
         return naming_table_saved_state_path
 
 

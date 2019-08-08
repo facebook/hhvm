@@ -44,6 +44,7 @@ let rec is_byval_collection_or_string_or_any_type env ty =
     | _, (Tarraykind _ | Ttuple _ | Tshape _)
       -> true
     | _, Tprim Tstring
+    | _, Tdynamic
     | _, Tany -> true
     | _, Tunion tl -> List.for_all tl ~f:(is_byval_collection_or_string_or_any_type env)
     | _ -> false in

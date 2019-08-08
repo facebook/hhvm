@@ -45,12 +45,18 @@ let process_in_parallel
   ServerProgress.send_percentage_progress_to_monitor
     "typechecking" 0 files_initial_count "files";
 
-  let next ~(batch_size: int) job_state =
+  let next job_state =
     let files_to_process, next_input, pending_jobs =
       match (job_state.files_to_process, job_state.pending_jobs) with
       | ([], 0) -> ([], Hack_bucket.Done, 0)
       | ([], n) -> ([], Hack_bucket.Wait, n)
       | (files, n) ->
+        let max_size = Bucket.max_size () in
+        let batch_size = Bucket.calculate_bucket_size
+          ~num_jobs:(List.length files)
+          ~num_workers:(lru_host_env.Shared_lru.num_workers)
+          ~max_size
+        in
         let batch, remaining = List.split_n files batch_size in
         (remaining, Hack_bucket.Job batch, n + 1)
     in
@@ -112,13 +118,6 @@ let process_in_parallel
     }
   in
 
-  let max_size = Bucket.max_size () in
-  let batch_size = Bucket.calculate_bucket_size
-    ~num_jobs:files_initial_count
-    ~num_workers:(lru_host_env.Shared_lru.num_workers)
-    ~max_size
-  in
-
   (* Start shared_lru workers. *)
   let initial_state = {
     files_to_process=fnl;
@@ -131,7 +130,7 @@ let process_in_parallel
     ~initial_env:initial_state
     ~job
     ~callback
-    ~next:(next ~batch_size)
+    ~next
   in
 
   let env = interrupt.MultiThreadedCall.env in

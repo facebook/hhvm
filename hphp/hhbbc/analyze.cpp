@@ -75,7 +75,7 @@ Type get_type_of_reified_list(const UserAttributeMap& ua) {
   assertx(numGenerics > 0);
   std::vector<Type> types(numGenerics,
                           RuntimeOption::EvalHackArrDVArrs ? TDictN : TDArrN);
-  return RuntimeOption::EvalHackArrDVArrs ? vec(types)
+  return RuntimeOption::EvalHackArrDVArrs ? vec(types, folly::none)
                                           : arr_packed_varray(types);
 }
 
@@ -127,7 +127,7 @@ State entry_state(const Index& index, Context const ctx,
                                  knownArgs->args.end());
           for (auto& p : pack) p = unctx(std::move(p));
           ret.locals[locId] = RuntimeOption::EvalHackArrDVArrs
-            ? vec(std::move(pack))
+            ? vec(std::move(pack), folly::none)
             : arr_packed_varray(std::move(pack));
         } else {
           ret.locals[locId] = unctx(knownArgs->args[locId]);

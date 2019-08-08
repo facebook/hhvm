@@ -5572,7 +5572,7 @@ void Index::init_return_type(const php::Func* func) {
       if (t == TBottom) return;
       types.emplace_back(intersection_of(TInitCell, std::move(t)));
     }
-    tcT = vec(std::move(types));
+    tcT = vec(std::move(types), folly::none);
   }
 
   tcT = to_cell(std::move(tcT));

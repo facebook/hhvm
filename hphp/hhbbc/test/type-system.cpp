@@ -2056,7 +2056,8 @@ TEST(Type, EmptyArray) {
     EXPECT_TRUE(estat.couldBe(BSArrE));
   }
 
-  EXPECT_EQ(array_newelem(aempty(), ival(142)).first, arr_packed({ival(142)}));
+  EXPECT_EQ(array_newelem(aempty(), ival(142), folly::none).first,
+            arr_packed({ival(142)}));
 }
 
 TEST(Type, BasicArrays) {

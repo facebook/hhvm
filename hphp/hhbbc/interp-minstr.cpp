@@ -204,11 +204,17 @@ bool isDimBaseLoc(BaseLoc loc) {
  */
 bool array_do_set(ISS& env, const Type& key, const Type& value) {
   auto& base = env.collect.mInstrState.base.type;
+  auto const tag = provTagHere(env);
   auto res = [&] () -> folly::Optional<std::pair<Type,ThrowMode>> {
-    if (base.subtypeOf(BArr))    return  array_set(std::move(base), key, value);
-    if (base.subtypeOf(BVec))    return    vec_set(std::move(base), key, value);
-    if (base.subtypeOf(BDict))   return   dict_set(std::move(base), key, value);
-    if (base.subtypeOf(BKeyset)) return keyset_set(std::move(base), key, value);
+    if (base.subtypeOf(BArr)) {
+      return array_set(std::move(base), key, value, tag);
+    } else if (base.subtypeOf(BVec)) {
+      return vec_set(std::move(base), key, value, tag);
+    } else if (base.subtypeOf(BDict)) {
+      return dict_set(std::move(base), key, value, tag);
+    } else if (base.subtypeOf(BKeyset)) {
+      return keyset_set(std::move(base), key, value);
+    }
     return folly::none;
   }();
   if (!res) return false;
@@ -282,11 +288,17 @@ folly::Optional<Type> array_do_elem(ISS& env,
  */
 folly::Optional<Type> array_do_newelem(ISS& env, const Type& value) {
   auto& base = env.collect.mInstrState.base.type;
+  auto const tag = provTagHere(env);
   auto res = [&] () -> folly::Optional<std::pair<Type,Type>> {
-    if (base.subtypeOf(BArr))    return  array_newelem(std::move(base), value);
-    if (base.subtypeOf(BVec))    return    vec_newelem(std::move(base), value);
-    if (base.subtypeOf(BDict))   return   dict_newelem(std::move(base), value);
-    if (base.subtypeOf(BKeyset)) return keyset_newelem(std::move(base), value);
+    if (base.subtypeOf(BArr)) {
+      return array_newelem(std::move(base), value, tag);
+    } else if (base.subtypeOf(BVec)) {
+      return vec_newelem(std::move(base), value, tag);
+    } else if (base.subtypeOf(BDict)) {
+      return dict_newelem(std::move(base), value, tag);
+    } else if (base.subtypeOf(BKeyset)) {
+      return keyset_newelem(std::move(base), value);
+    }
     return folly::none;
   }();
   if (!res) return folly::none;
@@ -373,15 +385,16 @@ void setPublicStaticForBase(ISS& env, Type ty) {
 // intermediate defining dims.
 Type currentChainType(ISS& env, Type val) {
   auto it = env.collect.mInstrState.arrayChain.end();
+  auto const tag = provTagHere(env);
   while (it != env.collect.mInstrState.arrayChain.begin()) {
     --it;
     if (it->base.subtypeOf(BArr)) {
-      val = array_set(it->base, it->key, val).first;
+      val = array_set(it->base, it->key, val, tag).first;
     } else if (it->base.subtypeOf(BVec)) {
-      val = vec_set(it->base, it->key, val).first;
+      val = vec_set(it->base, it->key, val, tag).first;
       if (val == TBottom) val = TVec;
     } else if (it->base.subtypeOf(BDict)) {
-      val = dict_set(it->base, it->key, val).first;
+      val = dict_set(it->base, it->key, val, tag).first;
       if (val == TBottom) val = TDict;
     } else {
       assert(it->base.subtypeOf(BKeyset));
@@ -395,6 +408,7 @@ Type currentChainType(ISS& env, Type val) {
 Type resolveArrayChain(ISS& env, Type val) {
   static UNUSED const char prefix[] = "              ";
   FTRACE(5, "{}chain\n", prefix, show(val));
+  auto const tag = provTagHere(env);
   do {
     auto arr = std::move(env.collect.mInstrState.arrayChain.back().base);
     auto key = std::move(env.collect.mInstrState.arrayChain.back().key);
@@ -402,17 +416,17 @@ Type resolveArrayChain(ISS& env, Type val) {
     FTRACE(5, "{}  | {} := {} in {}\n", prefix,
       show(key), show(val), show(arr));
     if (arr.subtypeOf(BVec)) {
-      val = vec_set(std::move(arr), key, val).first;
+      val = vec_set(std::move(arr), key, val, tag).first;
       if (val == TBottom) val = TVec;
     } else if (arr.subtypeOf(BDict)) {
-      val = dict_set(std::move(arr), key, val).first;
+      val = dict_set(std::move(arr), key, val, tag).first;
       if (val == TBottom) val = TDict;
     } else if (arr.subtypeOf(BKeyset)) {
       val = keyset_set(std::move(arr), key, val).first;
       if (val == TBottom) val = TKeyset;
     } else {
       assert(arr.subtypeOf(BArr));
-      val = array_set(std::move(arr), key, val).first;
+      val = array_set(std::move(arr), key, val, tag).first;
     }
   } while (!env.collect.mInstrState.arrayChain.empty());
   FTRACE(5, "{}  = {}\n", prefix, show(val));

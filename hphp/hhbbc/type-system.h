@@ -27,6 +27,7 @@
 
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
+#include "hphp/runtime/base/array-provenance.h"
 
 #include "hphp/hhbbc/array-like-map.h"
 #include "hphp/hhbbc/index.h"
@@ -517,6 +518,37 @@ using MapElems = ArrayLikeMap<Cell>;
 struct ArrKey;
 struct IterTypes;
 
+/*
+ * A provenance tag as tracked on a DArrLike{Packed,Map}. (and, at runtime, on
+ * dicts and vecs.) The provenance tag on an array contains a file and line
+ * nubmer where that array is 'from' (ideally, where the array was
+ * allocated--for static arrays the srcloc where the array is first referenced)
+ *
+ * This is tracked here in hhbbc both because we manipulate and create new
+ * static arrays.
+ *
+ * If the runtime option EvalArrayProvenance is not set, all ProvTags should be
+ * equal to the top of the lattice (folly::none)
+ *
+ * The absence of a value here (folly::none) means the array type could have a
+ * provenance tag from anywhere, or no tag at all. (i.e. its provenance is
+ * unknown completely).
+ *
+ * This information forms a sublattice like:
+ *
+ *        top (folly::none)
+ *    ____/|\___________
+ *   /     |            \
+ *  t_1   t_2     ...   t_n (specific arrprov::Tag's)
+ *   \____ | ___________/
+ *        \|/
+ *       bottom (unrepresentable)
+ *
+ * If we would produce a 'bottom' provenance tag, (i.e. in intersectProvTag)
+ * we widen the result to 'top'
+ */
+using ProvTag  = folly::Optional<arrprov::Tag>;
+
 enum class Emptiness {
   Empty,
   NonEmpty,
@@ -649,11 +681,11 @@ private:
   friend Type clsExact(res::Class);
   friend Type ref_to(Type);
   friend Type rname(SString);
-  friend Type packed_impl(trep, std::vector<Type>);
+  friend Type packed_impl(trep, std::vector<Type>, ProvTag);
   friend Type packedn_impl(trep, Type);
-  friend Type map_impl(trep, MapElems);
-  friend Type mapn_impl(trep bits, Type k, Type v);
-  friend Type mapn_impl_from_map(trep bits, Type k, Type v);
+  friend Type map_impl(trep, MapElems, ProvTag);
+  friend Type mapn_impl(trep bits, Type k, Type v, ProvTag);
+  friend Type mapn_impl_from_map(trep bits, Type k, Type v, ProvTag);
   friend DObj dobj_of(const Type&);
   friend DCls dcls_of(Type);
   friend DReifiedName dreifiedname_of(const Type&);
@@ -693,14 +725,19 @@ private:
                                                    const Type& defaultTy);
   friend std::pair<Type,ThrowMode> array_like_set(Type arr,
                                                   const ArrKey& key,
-                                                  const Type& val);
-  friend std::pair<Type,Type> array_like_newelem(Type arr, const Type& val);
-  friend bool arr_map_set(Type& map, const ArrKey& key, const Type& val);
-  friend bool arr_packed_set(Type& pack, const ArrKey& key, const Type& val);
+                                                  const Type& val,
+                                                  ProvTag src);
+  friend std::pair<Type,Type> array_like_newelem(Type arr, const Type& val,
+                                                 ProvTag src);
+  friend bool arr_map_set(Type& map, const ArrKey& key,
+                          const Type& val, ProvTag src);
+  friend bool arr_packed_set(Type& pack, const ArrKey& key,
+                             const Type& val,
+                             ProvTag src);
   friend bool arr_packedn_set(Type& pack, const ArrKey& key,
                               const Type& val, bool maybeEmpty);
   friend bool arr_mapn_set(Type& map, const ArrKey& key, const Type& val);
-  friend Type arr_map_newelem(Type& map, const Type& val);
+  friend Type arr_map_newelem(Type& map, const Type& val, ProvTag src);
   friend IterTypes iter_types(const Type&);
   friend RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder&,
     const Type&);
@@ -710,12 +747,17 @@ private:
 
   friend Type spec_array_like_union(Type&, Type&, trep, trep);
   friend Type vec_val(SArray);
+  friend Type vec_empty();
+  friend Type some_vec_empty();
   friend Type dict_val(SArray);
+  friend Type dict_empty();
+  friend Type some_dict_empty();
   friend Type keyset_val(SArray);
   friend bool could_contain_objects(const Type&);
   friend bool could_copy_on_write(const Type&);
   friend Type loosen_staticness(Type);
   friend Type loosen_dvarrayness(Type);
+  friend Type loosen_provenance(Type);
   friend Type loosen_values(Type);
   friend Type loosen_emptiness(Type);
   friend Type add_nonemptiness(Type);
@@ -782,11 +824,13 @@ struct ArrKey {
 };
 
 struct DArrLikePacked {
-  explicit DArrLikePacked(std::vector<Type> elems)
+  explicit DArrLikePacked(std::vector<Type> elems, ProvTag tag)
     : elems(std::move(elems))
+    , provenance(tag)
   {}
 
   std::vector<Type> elems;
+  ProvTag provenance;
 };
 
 struct DArrLikePackedN {
@@ -796,8 +840,12 @@ struct DArrLikePackedN {
 
 struct DArrLikeMap {
   DArrLikeMap() {}
-  explicit DArrLikeMap(MapElems map) : map(std::move(map)) {}
+  explicit DArrLikeMap(MapElems map, ProvTag tag)
+    : map(std::move(map))
+    , provenance(tag)
+  {}
   MapElems map;
+  ProvTag provenance;
 };
 
 struct DArrLikeMapN {
@@ -1097,8 +1145,8 @@ Type sarr_mapn(Type k, Type v);
  *
  * Pre: !v.empty()
  */
-Type vec(std::vector<Type> v);
-Type svec(std::vector<Type> v);
+Type vec(std::vector<Type> v, ProvTag);
+Type svec(std::vector<Type> v, ProvTag);
 
 /*
  * Vec type of unknown size.
@@ -1111,13 +1159,13 @@ Type svec_n(Type);
  *
  * Pre: !m.empty()
  */
-Type dict_map(MapElems m);
+Type dict_map(MapElems m, ProvTag);
 
 /*
  * Dict with key/value types.
  */
-Type dict_n(Type, Type);
-Type sdict_n(Type, Type);
+Type dict_n(Type, Type, ProvTag);
+Type sdict_n(Type, Type, ProvTag);
 
 /*
  * Keyset with key (same as value) type.
@@ -1128,7 +1176,9 @@ Type ckeyset_n(Type);
 /*
  * Keyset from MapElems
  */
-inline Type keyset_map(MapElems m) { return map_impl(BKeysetN, std::move(m)); }
+inline Type keyset_map(MapElems m) {
+  return map_impl(BKeysetN, std::move(m), folly::none);
+}
 
 /*
  * Create the optional version of the Type t.
@@ -1472,6 +1522,11 @@ Type loosen_staticness(Type);
 Type loosen_dvarrayness(Type);
 
 /*
+ * Discard any specific provenance tag on this type and any sub-arrays
+ */
+Type loosen_provenance(Type);
+
+/*
  * Force any type which might contain any sub-types of Arr, Vec, Dict, and
  * Keyset to contain Arr, Vec, Dict, and Keyset. This is needed for some
  * operations whose effects on arrays cannot be predicted. Doesn't change the
@@ -1556,10 +1611,11 @@ std::pair<Type, ThrowMode> keyset_elem(const Type& keyset, const Type& key,
  * Pre: first arg is a subtype of TArr, TVec, TDict, TKeyset respectively.
  */
 std::pair<Type, ThrowMode> array_set(Type arr, const Type& key,
-                                     const Type& val);
-std::pair<Type, ThrowMode> vec_set(Type vec, const Type& key, const Type& val);
+                                     const Type& val, ProvTag src);
+std::pair<Type, ThrowMode> vec_set(Type vec, const Type& key, const Type& val,
+                                   ProvTag src);
 std::pair<Type, ThrowMode> dict_set(Type dict, const Type& key,
-                                    const Type& val);
+                                    const Type& val, ProvTag src);
 std::pair<Type, ThrowMode> keyset_set(Type keyset, const Type& key,
                                       const Type& val);
 
@@ -1573,9 +1629,9 @@ std::pair<Type, ThrowMode> keyset_set(Type keyset, const Type& key,
  *
  * Pre: first arg is a subtype of TArr, TVec, TDict, TKeyset respectively.
  */
-std::pair<Type,Type> array_newelem(Type arr, const Type& val);
-std::pair<Type,Type> vec_newelem(Type vec, const Type& val);
-std::pair<Type,Type> dict_newelem(Type dict, const Type& val);
+std::pair<Type,Type> array_newelem(Type arr, const Type& val, ProvTag src);
+std::pair<Type,Type> vec_newelem(Type vec, const Type& val, ProvTag src);
+std::pair<Type,Type> dict_newelem(Type dict, const Type& val, ProvTag src);
 std::pair<Type,Type> keyset_newelem(Type keyset, const Type& val);
 
 /*

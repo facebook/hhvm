@@ -635,6 +635,14 @@ void staticArrayStreamer(const ArrayData* ad, std::string& out) {
     }
   }
   out += ")";
+
+  if (ad->hasProvenanceData() && RuntimeOption::EvalArrayProvenance) {
+    out += " [";
+    if (auto const tag = arrprov::getTag(ad)) {
+      out += tag->toString();
+    }
+    out += "]";
+  }
 }
 
 void staticStreamer(const TypedValue* tv, std::string& out) {

@@ -26,8 +26,16 @@
 
 #include <folly/AtomicHashMap.h>
 #include <folly/container/F14Map.h>
+#include <folly/Format.h>
 
 namespace HPHP { namespace arrprov {
+
+////////////////////////////////////////////////////////////////////////////////
+
+std::string Tag::toString() const {
+  assertx(m_filename);
+  return folly::sformat("{}:{}", m_filename->slice(), m_line);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

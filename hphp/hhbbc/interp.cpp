@@ -191,6 +191,44 @@ bool start_add_elem(ISS& env, Type& ty, Op op) {
   return true;
 }
 
+/*
+ * Alter the saved add_elem array in a way that preserves its provenance tag
+ * or adds a new one if applicable (i.e. the array is a vec or dict)
+ *
+ * The `mutate` parameter should be callable with an ArrayData** pointing to the
+ * add_elem array cached in the interp state and should write to it directly.
+ */
+template <typename Fn>
+bool mutate_add_elem_array(ISS& env, ProvTag tag, Fn&& mutate) {
+  auto const arr = add_elem_array(env);
+  if (!arr) return false;
+  // We need to propagate the provenance info in case we promote *arr from
+  // static to counted (or if its representation changes in some other
+  // way) ...
+  auto const oldTag = RuntimeOption::EvalArrayProvenance ?
+    arrprov::getTag(*arr) :
+    folly::none;
+  mutate(arr);
+  // ... which means we'll have to setTag if
+  // - the array still needs a tag AND
+  // either:
+  //   - the array had no tag coming into this op OR
+  //   - the set op cleared the provenance bit somehow
+  //     (representation changed or we CoWed a static array)
+  if (RuntimeOption::EvalArrayProvenance &&
+      arrprov::arrayWantsTag(*arr) &&
+      (!oldTag || !(*arr)->hasProvenanceData())) {
+    // if oldTag is unset, then this operation is the provenance location
+    arrprov::setTag(*arr, oldTag ? *oldTag : *tag);
+  }
+  // make sure that if provenance is enabled and the array wants a tag,
+  // that we definitely assigned one leaving this op
+  assertx(!tag ||
+          !arrprov::arrayWantsTag(*arr) ||
+          (*arr)->hasProvenanceData());
+  return true;
+}
+
 void finish_tracked_elem(ISS& env) {
   auto const arr = add_elem_array(env);
   env.trackedElems.pop_back();
@@ -933,7 +971,7 @@ void in(ISS& env, const bc::NewStructDict& op) {
   for (auto it = op.keys.end(); it != op.keys.begin(); ) {
     map.emplace_front(make_tv<KindOfPersistentString>(*--it), popC(env));
   }
-  push(env, dict_map(std::move(map)));
+  push(env, dict_map(std::move(map), provTagHere(env)));
   effect_free(env);
   constprop(env);
 }
@@ -947,7 +985,7 @@ void in(ISS& env, const bc::NewVecArray& op) {
   discard(env, op.arg1);
   effect_free(env);
   constprop(env);
-  push(env, vec(std::move(elems)));
+  push(env, vec(std::move(elems), provTagHere(env)));
 }
 
 void in(ISS& env, const bc::NewKeysetArray& op) {
@@ -996,13 +1034,15 @@ void in(ISS& env, const bc::AddElemC& /*op*/) {
 
   auto inTy = (env.state.stack.end() - 3).unspecialize();
 
+  auto const tag = provTagHere(env);
+
   auto outTy = [&] (Type ty) ->
     folly::Optional<std::pair<Type,ThrowMode>> {
     if (ty.subtypeOf(BArr)) {
-      return array_set(std::move(ty), k, v);
+      return array_set(std::move(ty), k, v, tag);
     }
     if (ty.subtypeOf(BDict)) {
-      return dict_set(std::move(ty), k, v);
+      return dict_set(std::move(ty), k, v, tag);
     }
     return folly::none;
   }(std::move(inTy));
@@ -1016,10 +1056,9 @@ void in(ISS& env, const bc::AddElemC& /*op*/) {
         if (!ktv) return false;
         auto vtv = tv(v);
         if (!vtv) return false;
-        auto const arr = add_elem_array(env);
-        if (!arr) return false;
-        *arr = (*arr)->set(*ktv, *vtv);
-        return true;
+        return mutate_add_elem_array(env, tag, [&](ArrayData** arr){
+          *arr = (*arr)->set(*ktv, *vtv);
+        });
       }();
       if (handled) {
         (env.state.stack.end() - 3)->type = std::move(outTy->first);
@@ -1056,12 +1095,14 @@ void in(ISS& env, const bc::AddNewElemC&) {
   auto v = topC(env);
   auto inTy = (env.state.stack.end() - 2).unspecialize();
 
+  auto const tag = provTagHere(env);
+
   auto outTy = [&] (Type ty) -> folly::Optional<Type> {
     if (ty.subtypeOf(BArr)) {
-      return array_newelem(std::move(ty), std::move(v)).first;
+      return array_newelem(std::move(ty), std::move(v), tag).first;
     }
     if (ty.subtypeOf(BVec)) {
-      return vec_newelem(std::move(ty), std::move(v)).first;
+      return vec_newelem(std::move(ty), std::move(v), tag).first;
     }
     if (ty.subtypeOf(BKeyset)) {
       return keyset_newelem(std::move(ty), std::move(v)).first;
@@ -1075,10 +1116,9 @@ void in(ISS& env, const bc::AddNewElemC&) {
       auto const handled = [&] {
         auto vtv = tv(v);
         if (!vtv) return false;
-        auto const arr = add_elem_array(env);
-        if (!arr) return false;
-        *arr = (*arr)->append(*vtv);
-        return true;
+        return mutate_add_elem_array(env, tag, [&](ArrayData** arr){
+          *arr = (*arr)->append(*vtv);
+        });
       }();
       if (handled) {
         (env.state.stack.end() - 2)->type = std::move(*outTy);
@@ -1514,8 +1554,8 @@ bool sameJmpImpl(ISS& env, Op sameOp, const JmpOp& jmp) {
   // We need to loosen away the d/varray bits here because array comparison does
   // not take into account the difference.
   auto isect = intersection_of(
-    loosen_dvarrayness(ty0),
-    loosen_dvarrayness(ty1)
+    loosen_provenance(loosen_dvarrayness(ty0)),
+    loosen_provenance(loosen_dvarrayness(ty1))
   );
 
   // Unfortunately, floating point negative zero and positive zero are
@@ -2232,7 +2272,7 @@ void in(ISS& env, const bc::RetM& op) {
   for (int i = 0; i < op.arg1; i++) {
     ret[op.arg1 - i - 1] = popC(env);
   }
-  doRet(env, vec(std::move(ret)), false);
+  doRet(env, vec(std::move(ret), provTagHere(env)), false);
 }
 
 void in(ISS& env, const bc::RetCSuspended&) {

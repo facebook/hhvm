@@ -24,6 +24,7 @@
 #include "hphp/util/low-ptr.h"
 #include "hphp/util/rds-local.h"
 
+#include <folly/Format.h>
 #include <folly/Optional.h>
 
 namespace HPHP {
@@ -45,7 +46,9 @@ struct Tag {
   Tag() = default;
   Tag(const StringData* filename, int line)
     : m_filename(filename)
-    , m_line(line) {}
+    , m_line(line) {
+    assertx(m_filename);
+  }
 
   const StringData* filename() const { return m_filename; }
   int line() const { return m_line; }
@@ -55,6 +58,8 @@ struct Tag {
            m_line == other.m_line;
   }
   bool operator!=(const Tag& other) const { return !(*this == other); }
+
+  std::string toString() const;
 
 private:
   const StringData* m_filename{nullptr};

@@ -81,6 +81,11 @@ std::string array_string(SArray arr) {
   return str;
 }
 
+std::string provtag_string(const folly::Optional<arrprov::Tag>& tag) {
+  if (!tag) return "";
+  return folly::sformat(" [{}]", tag->toString());
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -521,13 +526,14 @@ std::string show(const Type& t) {
   case DataTag::ArrLikePacked:
     folly::format(
       &ret,
-      "({})",
+      "({}){}",
       [&] {
         using namespace folly::gen;
         return from(t.m_data.packed->elems)
           | map([&] (const Type& t) { return show(t); })
           | unsplit<std::string>(",");
-      }()
+      }(),
+      provtag_string(t.m_data.packed->provenance)
     );
     break;
   case DataTag::ReifiedName:
@@ -539,7 +545,7 @@ std::string show(const Type& t) {
   case DataTag::ArrLikeMap:
     folly::format(
       &ret,
-      "({})",
+      "({}){}",
       [&] {
         using namespace folly::gen;
         return from(t.m_data.map->map)
@@ -547,7 +553,8 @@ std::string show(const Type& t) {
               return showElem(from_cell(kv.first), kv.second);
             })
           | unsplit<std::string>(",");
-      }()
+      }(),
+      provtag_string(t.m_data.map->provenance)
     );
     break;
   case DataTag::ArrLikeMapN:

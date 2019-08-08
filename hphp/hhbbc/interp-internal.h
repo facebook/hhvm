@@ -21,6 +21,7 @@
 #include <folly/Optional.h>
 
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/array-provenance.h"
 
 #include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/context.h"
@@ -1206,6 +1207,11 @@ bool canSkipMergeOnConstProp(ISS&env, Type tcls, SString propName) {
 
 //////////////////////////////////////////////////////////////////////
 // misc
+
+folly::Optional<arrprov::Tag> provTagHere(ISS& env) {
+  if (!RuntimeOption::EvalArrayProvenance) return folly::none;
+  return arrprov::Tag{env.ctx.unit->filename, env.srcLoc};
+}
 
 /*
  * Check whether the class given by the type might raise when initialized.

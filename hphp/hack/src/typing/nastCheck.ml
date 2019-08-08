@@ -59,8 +59,10 @@ let rec fun_ tenv f =
   (* Add type parameters to typing environment and localize the bounds
      and where constraints *)
   let ety_env = Phase.env_with_self env.tenv in
+  let f_tparams : decl tparam list = List.map f.f_tparams
+    ~f:(Decl_hint.aast_tparam_to_decl_tparam env.tenv.Env.decl_env) in
   let tenv, constraints =
-    Phase.localize_generic_parameters_with_bounds env.tenv f.f_tparams
+    Phase.localize_generic_parameters_with_bounds env.tenv f_tparams
       ~ety_env in
   let tenv = add_constraints p tenv constraints in
   let tenv =
@@ -190,9 +192,10 @@ and class_ tenv c =
               tenv = tenv;
             } in
   (* Add type parameters to typing environment and localize the bounds *)
+  let c_tparam_list : decl tparam list = List.map c.c_tparams.c_tparam_list
+    ~f:(Decl_hint.aast_tparam_to_decl_tparam env.tenv.Env.decl_env) in
   let tenv, constraints = Phase.localize_generic_parameters_with_bounds
-               tenv c.c_tparams.c_tparam_list
-               ~ety_env:(Phase.env_with_self tenv) in
+    tenv c_tparam_list ~ety_env:(Phase.env_with_self tenv) in
   let tenv = add_constraints (fst c.c_name) tenv constraints in
   (* When where clauses are present, we need instantiate those type
    * parameters before checking base class *)
@@ -233,9 +236,10 @@ and method_ env m =
   (* Add method type parameters to environment and localize the bounds
      and where constraints *)
   let ety_env = Phase.env_with_self env.tenv in
+  let m_tparams : decl tparam list = List.map m.m_tparams
+    ~f:(Decl_hint.aast_tparam_to_decl_tparam env.tenv.Env.decl_env) in
   let tenv, constraints =
-    Phase.localize_generic_parameters_with_bounds env.tenv m.m_tparams
-      ~ety_env in
+    Phase.localize_generic_parameters_with_bounds env.tenv m_tparams ~ety_env in
   let tenv = add_constraints (fst m.m_name) tenv constraints in
   let tenv =
     Phase.localize_where_constraints ~ety_env tenv m.m_where_constraints in

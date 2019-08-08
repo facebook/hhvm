@@ -577,21 +577,9 @@ let localize_ft ?instantiation ~ety_env env ft =
   ) in
   localize_ft ?instantiation ~ety_env env ft
 
-let localize_generic_parameters_with_bounds
-    ~ety_env (env:Env.env) (tparams:Nast.tparam list) =
-  let tparams: decl tparam list = List.map ~f:(fun t ->
-    let cstrl = List.map t.Aast.tp_constraints (fun (ck, cstr) ->
-      let cstr = Decl_hint.hint env.Env.decl_env cstr in
-      (ck, cstr)) in
-    let tparam = {
-      Typing_defs.tp_variance = t.Aast.tp_variance;
-      tp_name = t.Aast.tp_name;
-      tp_constraints = cstrl;
-      tp_reified = t.Aast.tp_reified;
-      tp_user_attributes = t.Aast.tp_user_attributes;
-    } in
-    Typing_enforceability.pessimize_tparam_constraints env tparam
-  ) tparams in
+let localize_generic_parameters_with_bounds ~ety_env env tparams =
+  let tparams: decl tparam list = List.map tparams
+    ~f:(Typing_enforceability.pessimize_tparam_constraints env) in
   localize_generic_parameters_with_bounds ~ety_env env tparams
 
 let check_tparams_constraints ~use_pos ~ety_env env tparams =

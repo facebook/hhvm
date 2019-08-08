@@ -23,6 +23,14 @@ let rec hint env (p, h) =
 and shape_field_info_to_shape_field_type env { sfi_optional; sfi_hint; _ } =
   { sft_optional = sfi_optional; sft_ty = hint env sfi_hint }
 
+and aast_tparam_to_decl_tparam env t = {
+  tp_variance = t.Aast.tp_variance;
+  tp_name = t.Aast.tp_name;
+  tp_constraints = List.map ~f:(Tuple.T2.map_snd ~f:(hint env)) t.Aast.tp_constraints;
+  tp_reified = t.Aast.tp_reified;
+  tp_user_attributes = t.Aast.tp_user_attributes;
+}
+
 and hint_ p env = function
   | Hany -> Tany
   | Hmixed -> Tmixed

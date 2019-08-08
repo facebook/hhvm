@@ -539,8 +539,10 @@ and fun_def tcopt f : Tast.fun_def option =
   let env = Env.set_fun_mutable env mut in
   NastCheck.fun_ env f;
   let ety_env = Phase.env_with_self env in
+  let f_tparams : decl tparam list = List.map f.f_tparams
+    ~f:(Decl_hint.aast_tparam_to_decl_tparam env.Env.decl_env) in
   let env, constraints =
-    Phase.localize_generic_parameters_with_bounds env f.f_tparams
+    Phase.localize_generic_parameters_with_bounds env f_tparams
       ~ety_env in
   let env = add_constraints pos env constraints in
   let env =
@@ -6232,8 +6234,10 @@ and class_def_ tcopt env c tc =
   let impl = List.map
     (c.c_extends @ c.c_implements @ c.c_uses)
     (Decl_hint.hint env.Env.decl_env) in
+  let c_tparam_list : decl tparam list = List.map c.c_tparams.c_tparam_list
+    ~f:(Decl_hint.aast_tparam_to_decl_tparam env.Env.decl_env) in
   let env, constraints =
-    Phase.localize_generic_parameters_with_bounds env c.c_tparams.c_tparam_list
+    Phase.localize_generic_parameters_with_bounds env c_tparam_list
       ~ety_env:(Phase.env_with_self env) in
   let env = add_constraints (fst c.c_name) env constraints in
   let env = Phase.localize_where_constraints ~ety_env:(Phase.env_with_self env)
@@ -6691,8 +6695,10 @@ and method_def tcopt env m =
   let env = Env.set_fun_mutable env mut in
   let ety_env =
     { (Phase.env_with_self env) with from_class = Some CIstatic; } in
+  let m_tparams : decl tparam list = List.map m.m_tparams
+    ~f:(Decl_hint.aast_tparam_to_decl_tparam env.Env.decl_env) in
   let env, constraints =
-    Phase.localize_generic_parameters_with_bounds env m.m_tparams
+    Phase.localize_generic_parameters_with_bounds env m_tparams
     ~ety_env:ety_env in
   let env = add_constraints pos env constraints in
   let env =
@@ -6798,8 +6804,10 @@ and typedef_def tcopt typedef  =
   let env = EnvFromDef.typedef_env tcopt typedef in
   let tdecl = Env.get_typedef env (snd typedef.t_name) in
   add_decl_errors (Option.(map tdecl (fun tdecl -> value_exn tdecl.td_decl_errors)));
+  let t_tparams : decl tparam list = List.map typedef.t_tparams
+    ~f:(Decl_hint.aast_tparam_to_decl_tparam env.Env.decl_env) in
   let env, constraints =
-    Phase.localize_generic_parameters_with_bounds env typedef.t_tparams
+    Phase.localize_generic_parameters_with_bounds env t_tparams
               ~ety_env:(Phase.env_with_self env) in
   let env = add_constraints (fst typedef.t_name) env constraints in
   NastCheck.typedef env typedef;

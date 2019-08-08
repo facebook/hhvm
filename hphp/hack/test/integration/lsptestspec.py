@@ -21,6 +21,7 @@ from utils import Json, VariableMap, interpolate_variables, uninterpolate_variab
 
 _MessageSpec = Union[
     "_RequestSpec",
+    "_DebugRequestSpec",
     "_NotificationSpec",
     "_WaitForNotificationSpec",
     "_WaitForRequestSpec",
@@ -75,6 +76,21 @@ class LspTestSpec:
                 traceback=traceback,
             )
         )
+        return self._update(messages=messages)
+
+    def debug(self) -> "LspTestSpec":
+        """Issue a `telemetry/rage` request for debugging.
+
+        The language server has to support the `telemetry/rage` request. Once
+        the response is received, its debugging output is rendered in the test
+        output. This can be useful when trying to debug the internal state of
+        the language server.
+
+        The test will not pass while there's a `debug()` statement in its spec,
+        so it must be removed before committing the code.
+        """
+        messages = list(self._messages)
+        messages.append(_DebugRequestSpec())
         return self._update(messages=messages)
 
     def notification(
@@ -181,6 +197,15 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                             "params": {"id": current_id},
                         }
                     )
+            elif isinstance(message, _DebugRequestSpec):
+                json_commands.append(
+                    {
+                        "jsonrpc": "2.0",
+                        "id": current_id,
+                        "method": "telemetry/rage",
+                        "params": {},
+                    }
+                )
             elif isinstance(message, _NotificationSpec):
                 json_commands.append(
                     {
@@ -240,6 +265,20 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 )
                 if error_description is not None:
                     yield error_description
+            elif isinstance(message, _DebugRequestSpec):
+                transcript_id = LspCommandProcessor._client_request_id(lsp_id)
+                handled_entries.add(transcript_id)
+                assert transcript_id in transcript, (
+                    f"Expected message with ID {lsp_id!r} "
+                    + f"to have an entry in the transcript "
+                    + f"under key {transcript_id!r}, "
+                    + f"but it was not found. Transcript: {transcript!r}"
+                )
+                entry = transcript[transcript_id]
+                error_description = self._render_telemetry_rage(
+                    debug_request=message, result=entry.received["result"]
+                )
+                yield error_description
             elif isinstance(message, _NotificationSpec):
                 # Nothing needs to be done here, since we sent the notification
                 # and don't expect a response.
@@ -322,18 +361,21 @@ This was the associated request:
         with open(source_filename) as f:
             source_text = f.read()
 
-        (start_line_num, end_line_num) = self._find_line_range_for_function_call(
-            file_contents=source_text, line_num=caller_frame.lineno
+        (
+            start_line_num_0idx_incl,
+            end_line_num_0idx_incl,
+        ) = self._find_line_range_for_function_call(
+            file_contents=source_text, line_num_1idx=caller_frame.lineno
         )
         return self._pretty_print_file_context(
             file_path=source_filename,
             file_contents=source_text,
-            start_line_num=start_line_num,
-            end_line_num=end_line_num,
+            start_line_num_0idx_incl=start_line_num_0idx_incl,
+            end_line_num_0idx_incl=end_line_num_0idx_incl,
         )
 
     def _find_line_range_for_function_call(
-        self, file_contents: str, line_num: int
+        self, file_contents: str, line_num_1idx: int
     ) -> Tuple[int, int]:
         driver = lib2to3.pgen2.driver.Driver(
             grammar=lib2to3.pygram.python_grammar, convert=pytree.convert
@@ -365,37 +407,46 @@ This was the associated request:
             (node, self._line_range_of_node(node)) for node in all_function_calls
         ]
         function_calls_containing_line = [
-            (node, (max_line_num - min_line_num))
-            for (node, (min_line_num, max_line_num)) in function_calls_with_line_ranges
-            if min_line_num <= line_num <= max_line_num
+            (node, (max_line_num_1idx_incl - min_line_num_1idx_incl))
+            for (
+                node,
+                (min_line_num_1idx_incl, max_line_num_1idx_incl),
+            ) in function_calls_with_line_ranges
+            if min_line_num_1idx_incl <= line_num_1idx <= max_line_num_1idx_incl
         ]
         innermost_function_call = min(
             function_calls_containing_line, key=operator.itemgetter(1)
         )[0]
-        (start_line_num, end_line_num) = self._line_range_of_node(
+        (start_line_num_1idx_incl, end_line_num_1idx_incl) = self._line_range_of_node(
             innermost_function_call
         )
-        start_line_num -= 1  # zero-index
-        end_line_num -= 1  # zero-index
-        return (start_line_num, end_line_num)
+        start_line_num_0idx_incl = start_line_num_1idx_incl - 1
+        end_line_num_0idx_incl = end_line_num_1idx_incl - 1
+        return (start_line_num_0idx_incl, end_line_num_0idx_incl)
 
     def _line_range_of_node(self, node: pytree.Base) -> Tuple[int, int]:
-        min_line_num = node.get_lineno()
-        num_lines_in_node = str(node).count("\n")
-        max_line_num = node.get_lineno() + num_lines_in_node
-        return (min_line_num, max_line_num)
+        min_line_num_1idx_incl = node.get_lineno()
+        num_lines_in_node = str(node).strip().count("\n")
+        max_line_num_1idx_incl = node.get_lineno() + num_lines_in_node
+        return (min_line_num_1idx_incl, max_line_num_1idx_incl)
 
     def _pretty_print_file_context(
-        self, file_path: str, file_contents: str, start_line_num: int, end_line_num: int
+        self,
+        file_path: str,
+        file_contents: str,
+        start_line_num_0idx_incl: int,
+        end_line_num_0idx_incl: int,
     ) -> str:
         source_lines = file_contents.splitlines(keepends=True)
-        context_lines = source_lines[start_line_num : end_line_num + 1]
+        context_lines = source_lines[
+            start_line_num_0idx_incl : end_line_num_0idx_incl + 1
+        ]
         vertical_bar = "\N{BOX DRAWINGS LIGHT VERTICAL}"
         context_lines = [
             # Include the line number in a gutter for display.
             f"{line_num:>5} {vertical_bar} {line_contents}"
             for line_num, line_contents in enumerate(
-                context_lines, start=start_line_num + 1
+                context_lines, start=start_line_num_0idx_incl + 1
             )
         ]
         file_context = "".join(context_lines)
@@ -567,6 +618,37 @@ received the notification:
         ), "We should have identified a client-to-server request at this point"
         return corresponding_request
 
+    def _render_telemetry_rage(
+        self, debug_request: "_DebugRequestSpec", result: Json
+    ) -> "_ErrorDescription":
+        sections = []
+        for row in result:
+            title = row["title"]
+            if title is None:
+                title = "<none>"
+            data = row.get("data")
+            sections.append(
+                f"""\
+### Section {title} ###
+{data}
+"""
+            )
+        sections = textwrap.indent("".join(sections), prefix="  ")
+        description = f"""\
+Here are the results of issuing a `telemetry/rage` request to the language
+server:
+
+{sections}"""
+        context = """\
+<none>
+"""
+        remediation = """\
+Remove this `debug` request once you're done debugging.
+"""
+        return _ErrorDescription(
+            description=description, context=context, remediation=remediation
+        )
+
     def _pretty_print_snippet(self, obj: object) -> str:
         return textwrap.indent(pprint.pformat(obj), prefix="  ")
 
@@ -617,6 +699,10 @@ class _RequestSpec:
         self.comment = comment
         self.powered_by = powered_by
         self.traceback = traceback
+
+
+class _DebugRequestSpec:
+    pass
 
 
 class _NotificationSpec:

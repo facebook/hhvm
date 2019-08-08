@@ -553,13 +553,10 @@ and fun_def tcopt f : Tast.fun_def option =
   let (env, locl_ty) =
     match decl_ty with
     | None ->
-      (* When global inference is turned on we create a fresh variable for the
-        returned type. Later on it will be reused to get back the inferred type
-        of the function. *)
-      if TCO.global_inference tcopt then
-        Env.fresh_type_reason env (Reason.Rwitness pos)
-      else
-       (env, (Reason.Rwitness pos, Typing_utils.tany env))
+      Typing_return.make_default_return
+        ~is_method:false
+        ~is_global_inference_on:(TCO.global_inference tcopt)
+        env f.f_name
     | Some ty ->
       Typing_return.make_return_type Phase.localize_with_self env ty in
   let return = Typing_return.make_info f.f_fun_kind f.f_user_attributes env
@@ -6717,6 +6714,7 @@ and method_def tcopt env m =
   let env, locl_ty = match decl_ty with
     | None ->
       Typing_return.make_default_return
+        ~is_method:true
         ~is_global_inference_on:(TCO.global_inference tcopt)
         env m.m_name
     | Some ret ->

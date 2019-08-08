@@ -115,14 +115,19 @@ let force_awaitable env p ty =
   | _ ->
     env, ty
 
-let make_default_return ~is_global_inference_on env name =
-  if snd name = SN.Members.__construct
-  then env, MakeType.void (Reason.Rwitness (fst name))
+let make_default_return ~is_method ~is_global_inference_on env name =
+  let pos = fst name in
+  if is_method && snd name = SN.Members.__construct
+  then env, MakeType.void (Reason.Rwitness pos)
   else begin
     if is_global_inference_on then
-      Env.fresh_type_reason env (Reason.Rwitness (fst name))
+      (* When global inference is turned on we create a fresh variable for the
+        returned type. Later on it will be reused to get back the inferred type
+        of the function. *)
+      let env, ty = Env.fresh_type_reason env (Reason.Rwitness pos) in
+      env, wrap_awaitable env pos ty
     else
-      env, (Reason.Rwitness (fst name), Typing_utils.tany env)
+      env, (Reason.Rwitness pos, Typing_utils.tany env)
   end
 
 let suggest_return env p ty is_code_error =

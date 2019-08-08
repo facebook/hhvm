@@ -64,8 +64,10 @@ val force_awaitable:
   Env.env * Typing_defs.locl Typing_defs.ty
 
 (** If there is no return type annotation on method, assume `void` for the
-special function `__construct`, otherwise Tany *)
+special functions `__construct`, otherwise we can either
+introduce a new fresh variable when global inference is on or assume type Tany *)
 val make_default_return:
+  is_method:bool ->
   is_global_inference_on:bool ->
   Env.env ->
   Ast_defs.pos * string -> Env.env * (Typing_reason.t * Typing_defs.locl Typing_defs.ty_)

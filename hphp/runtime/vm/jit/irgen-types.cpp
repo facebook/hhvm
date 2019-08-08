@@ -596,7 +596,7 @@ SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
     );
   }
 
-  auto const provLogging = [&]{
+  auto const provLogging = [&](SSATmp* src) {
     if (!RuntimeOption::EvalLogArrayProvenance) return;
     gen(
       env,
@@ -631,8 +631,8 @@ SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
 
   return cond(
     env,
-    [&](Block* taken) { gen(env, CheckType, TVec, taken, src); },
-    [&]{ provLogging(); return cns(env, true); },
+    [&](Block* taken) { return gen(env, CheckType, TVec, taken, src); },
+    [&](SSATmp* src) { provLogging(src); return cns(env, true); },
     [&]{
       varrCheck();
       return cond(
@@ -640,13 +640,13 @@ SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
         [&] (Block* taken) {
           return gen(env, CheckType, TClsMeth, taken, src);
         },
-        [&] (SSATmp*) {
+        [&] (SSATmp* src) {
           if (RuntimeOption::EvalHackArrDVArrs) {
             if (RuntimeOption::EvalIsVecNotices) {
               gen(env, RaiseNotice, cns(env,
                 makeStaticString(Strings::CLSMETH_COMPAT_IS_VEC)));
             }
-            provLogging();
+            provLogging(src);
             return cns(env, true);
           }
           return cns(env, false);
@@ -733,7 +733,7 @@ SSATmp* isDictImpl(IRGS& env, SSATmp* src) {
     );
   };
 
-  auto const provLogging = [&] {
+  auto const provLogging = [&] (SSATmp* src) {
     if (RuntimeOption::EvalLogArrayProvenance) {
       gen(
         env,
@@ -746,14 +746,14 @@ SSATmp* isDictImpl(IRGS& env, SSATmp* src) {
 
   return cond(
     env,
-    [&](Block* taken) { gen(env, CheckType, TDict, taken, src); },
-    [&]{ provLogging(); return cns(env, true); },
+    [&](Block* taken) { return gen(env, CheckType, TDict, taken, src); },
+    [&](SSATmp* src) { provLogging(src); return cns(env, true); },
     [&]{
       if (RuntimeOption::EvalHackArrDVArrs) {
         return cond(
           env,
-          [&](Block* taken) { gen(env, CheckType, TShape, taken, src); },
-          [&]{ provLogging(); return cns(env, true); },
+          [&](Block* taken) { return gen(env, CheckType, TShape, taken, src); },
+          [&](SSATmp* src) { provLogging(src); return cns(env, true); },
           [&]{ darrCheck(); return cns(env, false); }
         );
       } else {

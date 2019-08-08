@@ -63,6 +63,16 @@
     sys_utils))
 
 (library
+  (name temp_file_lwt)
+  (wrapped false)
+  (modules
+    tempfile_lwt)
+  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)) ; See T41851208
+  (libraries
+    lwt_utils
+    sys_utils))
+
+(library
   (name mutable_accumulator)
   (wrapped false)
   (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)) ; See T41851208

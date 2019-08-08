@@ -14,14 +14,6 @@
     buildMain))
 
 (library
-  (name client_ide_service)
-  (wrapped false)
-  (modules
-    clientIdeService)
-  (libraries
-    lwt))
-
-(library
   (name debug_stubs)
   (wrapped false)
   (modules
@@ -98,6 +90,7 @@
     state_loader
     saved_state_loader
     state_loader_futures
+    state_loader_lwt
     xdb)
   (libraries
     hg

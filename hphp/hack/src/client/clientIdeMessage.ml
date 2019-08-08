@@ -19,7 +19,7 @@ type document_location = {
   file_contents: string option; (* if absent, should read from file on disk *)
   line: int;
   column: int;
-} [@@deriving show]
+}
 (** Denotes a location of the cursor in a document at which an IDE request is
 being executed (e.g. hover). *)
 

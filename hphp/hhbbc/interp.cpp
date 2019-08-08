@@ -3909,7 +3909,7 @@ void fcallKnownImpl(
 ) {
   auto returnType = [&] {
     CompactVector<Type> args(fca.numArgs);
-    auto const firstArgPos = fca.numArgsInclUnpack() - 1;
+    auto const firstArgPos = numExtraInputs + fca.numArgsInclUnpack() - 1;
     for (auto i = uint32_t{0}; i < fca.numArgs; ++i) {
       args[i] = topCV(env, firstArgPos - i);
     }
@@ -3943,7 +3943,7 @@ void fcallKnownImpl(
       func.name()->isame(s_defined.get())) {
     // If someone calls defined('foo') they probably want foo to be
     // defined normally; ie not a persistent constant.
-    if (auto const v = tv(topCV(env))) {
+    if (auto const v = tv(topCV(env, numExtraInputs))) {
       if (isStringType(v->m_type) &&
           !env.index.lookup_constant(env.ctx, v->m_data.pstr)) {
         env.collect.cnsMap[v->m_data.pstr].m_type = kDynamicConstant;

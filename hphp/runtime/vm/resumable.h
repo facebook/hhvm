@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_RUNTIME_VM_RESUMABLE_H_
 #define incl_HPHP_RUNTIME_VM_RESUMABLE_H_
 
+#include <folly/Optional.h>
+
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
@@ -56,6 +58,7 @@ enum class ResumeMode : uint8_t {
 };
 
 char* resumeModeShortName(ResumeMode resumeMode);
+folly::Optional<ResumeMode> nameToResumeMode(const std::string& name);
 
 ResumeMode resumeModeFromActRecImpl(ActRec* ar);
 ALWAYS_INLINE ResumeMode resumeModeFromActRec(ActRec* ar) {

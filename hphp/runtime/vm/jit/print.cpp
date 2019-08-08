@@ -408,7 +408,9 @@ dynamic getBlock(const Block* block,
     }
   } else {
     for (auto it = block->begin(); it != block->end(); ++it) {
-      result["instrs"].push_back(getIRInstruction(*it, guards));
+      result["instrs"].push_back(dynamic::merge(getIRInstruction(*it, guards),
+                                                dynamic::object("tc_ranges",
+                                                                dynamic())));
     }
   }
 

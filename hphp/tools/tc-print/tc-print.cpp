@@ -26,6 +26,7 @@
 
 #include <folly/Format.h>
 #include <folly/dynamic.h>
+#include <folly/DynamicConverter.h>
 #include <folly/json.h>
 #include <folly/Singleton.h>
 
@@ -36,6 +37,7 @@
 #include "hphp/runtime/base/program-functions.h"
 
 #include "hphp/tools/tc-print/perf-events.h"
+#include "hphp/tools/tc-print/printir-annotation.h"
 #include "hphp/tools/tc-print/offline-trans-data.h"
 #include "hphp/tools/tc-print/offline-code.h"
 #include "hphp/tools/tc-print/mappers.h"
@@ -540,9 +542,18 @@ dynamic getAnnotations(const Annotations& annotations) {
     auto const rawValue = g_annotations->getAnnotation(annotation.second);
     dynamic annotationValue;
     try {
-      annotationValue = folly::parseJson(rawValue);
+      auto const parsedJson = folly::parseJson(rawValue);
+      auto const coercedUnit = folly::convertTo<printir::Unit>(parsedJson);
+      annotationValue = folly::toDynamic(coercedUnit);
+      // Benefits to making the round-trip:
+      // 1. Checking for specific JSON format
+      // 2. Restructuring
+      // 3. TODO(elijahrivera) - fixed structure to work with when merging
+      //    annotation information into regular information
     }
-    catch (const std::runtime_error&){
+    catch (const std::runtime_error& re){
+      std::cerr << re.what() << std::endl;
+      std::cerr << "Parsing annotation as JSON failed, included as raw value\n";
       annotationValue = rawValue;
     }
     annotationObjs.push_back(dynamic::object("caption", annotation.first)

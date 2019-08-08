@@ -66,3 +66,12 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
 
     def test_extract_with_namespaces(self) -> None:
         assert self.test_driver.check_extract_standalone("\\Ns\\combine_fs") == 0
+
+    def test_interfaces_hierarchy(self) -> None:
+        assert self.test_driver.check_extract_standalone("\\with_interface") == 0
+
+    def test_extract_dependencies_on_methods(self) -> None:
+        assert self.test_driver.check_extract_standalone("\\with_overriding") == 0
+
+    def test_extract_with_enum(self) -> None:
+        assert self.test_driver.check_extract_standalone("\\with_enum") == 0

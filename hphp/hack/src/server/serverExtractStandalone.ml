@@ -111,11 +111,19 @@ let format text =
   try Libhackfmt.format_tree (tree_from_string text)
   with Hackfmt_error.InvalidSyntax -> text
 
-let get_class_declaration cls =
+let get_enum_declaration tcopt enum =
+  let name = Decl_provider.Class.name enum in
+  let enum = value_exn UnexpectedDependency @@ Decl_provider.Class.enum_type enum in
+  let cons = match enum.te_constraint with
+  | Some c -> " as " ^ (Typing_print.full_decl tcopt c)
+  | None -> "" in
+  let base = Typing_print.full_decl tcopt enum.te_base in
+  Printf.sprintf "enum %s: %s%s" (strip_ns name) base cons
+
+let get_class_declaration tcopt (cls: Decl_provider.class_decl) =
   let open Decl_provider in
-  match get_class cls with
-  | None -> raise DependencyNotFound
-  | Some cls ->
+  if Class.kind cls = Ast_defs.Cenum then (get_enum_declaration tcopt cls)
+  else
   let kind = match Class.kind cls with
   | Ast_defs.Cabstract -> "abstract class"
   | Ast_defs.Cnormal -> "class"
@@ -123,19 +131,59 @@ let get_class_declaration cls =
   | Ast_defs.Ctrait -> "trait"
   | Ast_defs.Cenum -> "enum"
   | Ast_defs.Crecord -> "record" in
-  let name = strip_ns (Class.name cls) in
+  let name = strip_ns @@ Class.name cls in
   let tparams = if List.is_empty @@ Class.tparams cls then ""
   else Printf.sprintf "<%s>" (list_items @@ List.map (Class.tparams cls) tparam_name) in
-  (* TODO: traits, enums, records *)
+  (* TODO: traits, records *)
   kind^" "^name^tparams^" "^(list_direct_ancestors cls)
 
-(* TODO: namespaces *)
+let get_method_declaration tcopt (meth: Typing_defs.class_elt) ~is_static method_name =
+  let abstract = if meth.ce_abstract then "abstract " else "" in
+  let visibility = Typing_utils.string_of_visibility meth.ce_visibility in
+  let static = if is_static then "static " else "" in
+  let method_type = match Lazy.force meth.ce_type with
+  | (_, Typing_defs.Tfun f) -> Typing_print.fun_type tcopt f
+  | _ -> raise UnexpectedDependency in
+  let body = if meth.ce_abstract then ";" else "{throw new Exception();}" in
+  Printf.sprintf "%s%s %sfunction %s%s%s" abstract visibility static method_name method_type body
+
+(* TODO: properties have to be initialized. Therefore we need to retrieve the initializer
+expression (which is not part of class_elt) or the relevant part of the constructor *)
+let get_property_declaration tcopt (prop: Typing_defs.class_elt) ~is_static name =
+  let visibility = Typing_utils.string_of_visibility prop.ce_visibility in
+  let static = if is_static then "static " else "" in
+  let prop_type = Typing_print.full_decl tcopt @@ Lazy.force prop.ce_type in
+  Printf.sprintf "%s %s%s $%s;" visibility static prop_type name
+
+let extract_field_declaration tcopt (cls: Decl_provider.class_decl)
+                              (field: Typing_deps.Dep.variant) =
+  let open Typing_deps.Dep in
+  let open Decl_provider in
+  match field with
+  | Cstr _ -> let (cstr, _) = Class.construct cls in
+    (match cstr with
+    | None -> ""
+    | Some cstr -> get_method_declaration tcopt cstr ~is_static:false "__construct")
+  | Method(_, method_name) ->
+    let m = value_exn DependencyNotFound @@ Class.get_method cls method_name in
+    get_method_declaration tcopt m ~is_static:false method_name
+  | SMethod(_, smethod_name) ->
+    let m = value_exn DependencyNotFound @@ Class.get_smethod cls smethod_name in
+    get_method_declaration tcopt m ~is_static:true smethod_name
+  | Prop(_, prop_name) ->
+    let p = value_exn DependencyNotFound @@ Class.get_prop cls prop_name in
+    get_property_declaration tcopt p ~is_static:false prop_name
+  | SProp(_, sprop_name) ->
+    let sp = value_exn DependencyNotFound @@ Class.get_sprop cls sprop_name in
+    get_property_declaration tcopt sp ~is_static:true (String.lstrip ~drop:(fun c -> c = '$') sprop_name)
+  | _ -> ""
+
 let construct_class_declaration tcopt cls fields =
-  let decl = get_class_declaration cls in
+  let decl = get_class_declaration tcopt cls in
   let open Typing_deps.Dep in
   let process_field f = match f with
   | AllMembers _ | Extends _ -> raise UnexpectedDependency
-  | _ -> extract_object_declaration tcopt f in
+  | _ -> extract_field_declaration tcopt cls f in
   let body = HashSet.fold (fun f accum -> accum^"\n"^(process_field f)) fields "" in
   decl^" {"^body^"}"
 
@@ -145,10 +193,9 @@ let construct_typedef_declaration tcopt t =
   Printf.sprintf "%s %s = %s;" typ (strip_ns t) (Typing_print.full_decl tcopt td.td_type)
 
 let construct_type_declaration tcopt t fields =
-  if Option.is_some @@ Decl_provider.get_class t then
-    construct_class_declaration tcopt t fields
-  else
-    construct_typedef_declaration tcopt t
+  match Decl_provider.get_class t with
+  | Some cls -> construct_class_declaration tcopt cls fields
+  | None -> construct_typedef_declaration tcopt t
 
 (* TODO: Tfun? Any other cases? *)
 let add_dep ty deps = match ty with
@@ -181,6 +228,31 @@ let get_signature_dependencies obj deps =
     add_dep ty deps)
   | AllMembers _ | Extends _ -> raise UnexpectedDependency
 
+let get_dependency_origin cls (dep: Typing_deps.Dep.variant) =
+  let open Decl_provider in
+  let open Typing_deps.Dep in
+  let cls = value_exn DependencyNotFound @@ get_class cls in
+  match dep with
+  | Prop (_, name) ->
+    let p = value_exn DependencyNotFound @@ Class.get_prop cls name in
+    p.ce_origin
+  | SProp (_, name) ->
+    let sp = value_exn DependencyNotFound @@ Class.get_sprop cls name in
+    sp.ce_origin
+  | Method (_, name) ->
+    let m = value_exn DependencyNotFound @@ Class.get_method cls name in
+    m.ce_origin
+  | SMethod (_, name) ->
+    let sm = value_exn DependencyNotFound @@ Class.get_smethod cls name in
+    sm.ce_origin
+  | Const (_, name) ->
+    let c = value_exn DependencyNotFound @@ Class.get_const cls name in
+    c.cc_origin
+  | Cstr _ ->
+    let c = value_exn DependencyNotFound @@ fst @@ Class.construct cls in
+    c.ce_origin
+  | _ -> assert false
+
 let collect_dependencies tcopt func =
   let dependencies = HashSet.create 0 in
   let open Typing_deps.Dep in
@@ -196,22 +268,37 @@ let collect_dependencies tcopt func =
   let _ : Tast.def option = Typing_check_service.type_fun tcopt filename func in
   let types = Caml.Hashtbl.create 0 in
   let globals = HashSet.create 0 in
-  let group_by_type obj = match obj with
-  | Class cls -> (match Caml.Hashtbl.find_opt types cls with
-    | Some set -> HashSet.add set obj
-    | None -> let set = HashSet.create 0 in Caml.Hashtbl.add types cls set)
-  | Prop (cls, _)
-  | SProp (cls, _)
-  | Method (cls, _)
-  | SMethod (cls, _)
-  | Const (cls, _)
-  | Cstr cls -> (match Caml.Hashtbl.find_opt types cls with
-    | Some set -> HashSet.add set obj
-    | None -> let set = HashSet.create 0 in HashSet.add set obj;
-              Caml.Hashtbl.add types cls set)
-  | Extends _ -> raise UnexpectedDependency
-  | AllMembers _ -> raise UnexpectedDependency
-  | _ -> HashSet.add globals obj in
+  let group_by_type obj =
+    match obj with
+    | Class cls ->
+      (match Caml.Hashtbl.find_opt types cls with
+      | Some _ -> ()
+      | None -> let set = HashSet.create 0 in Caml.Hashtbl.add types cls set)
+    | Prop (cls, _)
+    | SProp (cls, _)
+    | Method (cls, _)
+    | SMethod (cls, _)
+    | Const (cls, _)
+    | Cstr cls -> (let origin = get_dependency_origin cls obj in
+      (* Consider the following example:
+      * class Base {
+      *   public static function do(): void {}
+      * }
+      * class Derived {}
+      * function f(): void {
+      *   Derived::do();
+      * }
+      * We will pull both SMethod(Base, do) and SMethod(Derived, do) as dependencies, but we should
+      * not generate method do() in Derived. Therefore we should ignore dependencies whose origin
+      * differ from their class. *)
+      if origin = cls then
+      match Caml.Hashtbl.find_opt types cls with
+      | Some set -> HashSet.add set obj
+      | None -> let set = HashSet.create 0 in HashSet.add set obj;
+                Caml.Hashtbl.add types cls set)
+    | Extends _ -> raise UnexpectedDependency
+    | AllMembers _ -> raise UnexpectedDependency
+    | _ -> HashSet.add globals obj in
   HashSet.iter group_by_type dependencies;
   (types, globals)
 
@@ -234,9 +321,14 @@ let subnamespace index name =
   let nspaces = String.split ~on:'\\' nspaces in
   List.nth nspaces index
 
+(* TODO: to be continued? *)
+let is_builtin name = String.is_prefix ~prefix:"\\HH" name
+
 (* Build the recursive hack_namespace data structure for given declarations *)
 let sort_by_namespace declarations =
   let rec add_decl nspace decl index =
+    (* Ignore builtins because we shouldn't generate their declarations *)
+    if is_builtin decl then () else
     match subnamespace index decl with
     | Some name -> if Caml.Hashtbl.find_opt nspace.namespaces name = None then
       (let nested = Caml.Hashtbl.create 0 in

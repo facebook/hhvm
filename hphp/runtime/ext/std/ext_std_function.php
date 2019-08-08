@@ -19,6 +19,11 @@ namespace {
 function is_callable(mixed $callback, bool $syntax_only = false,
                      mixed &$callable_name = null): bool;
 
+<<__Native, __Rx>>
+function is_callable_with_name(mixed $callback,
+                               bool $syntax_only,
+                               mixed &$callable_name): bool;
+
 /**
  * Call a callback with an array of parameters
  *

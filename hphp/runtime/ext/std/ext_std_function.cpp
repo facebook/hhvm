@@ -60,6 +60,11 @@ bool HHVM_FUNCTION(is_callable, const Variant& v, bool syntax /* = false */,
   return is_callable(v, syntax, name.get());
 }
 
+bool HHVM_FUNCTION(is_callable_with_name, const Variant& v, bool syntax,
+                   OutputArg name) {
+  return is_callable(v, syntax, name.get());
+}
+
 Variant HHVM_FUNCTION(call_user_func, const Variant& function,
                       const Array& params /* = null_array */) {
     auto const warning = "call_user_func() is deprecated and subject"
@@ -155,6 +160,7 @@ void StandardExtension::initFunction() {
   HHVM_FE(get_defined_functions);
   HHVM_FE(function_exists);
   HHVM_FE(is_callable);
+  HHVM_FE(is_callable_with_name);
   HHVM_FE(call_user_func);
   HHVM_FE(call_user_func_array);
   HHVM_FE(register_postsend_function);

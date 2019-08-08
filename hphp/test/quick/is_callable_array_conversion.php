@@ -8,6 +8,6 @@ function myErrorHandler($errno, $errstr, $errfile, $errline)
 }
 <<__EntryPoint>> function main(): void {
 set_error_handler("myErrorHandler");
-var_dump( is_callable( array(1,2,3), true, &$name ) );
+var_dump( is_callable_with_name(array(1,2,3), true, &$name ) );
 echo $name . "\n";
 }

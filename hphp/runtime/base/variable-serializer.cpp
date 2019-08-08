@@ -1685,6 +1685,18 @@ void VariableSerializer::serializeArrayImpl(const ArrayData* arr) {
     kind
   );
 
+  if (m_type == Type::Internal && RuntimeOption::EvalArrayProvenance) {
+    if (kind == ArrayKind::Dict || kind == ArrayKind::Vec) {
+      if (auto tag = arrprov::getTag(arr)) {
+        auto const line = tag->line();
+        auto const filename = tag->filename();
+        m_buf->append("p:");
+        write(line);
+        write(filename->data(), filename->size());
+      }
+    }
+  }
+
   IterateKV(
     arr,
     [&](Cell k, TypedValue v) {

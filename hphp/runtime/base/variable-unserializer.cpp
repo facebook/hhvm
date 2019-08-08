@@ -1320,12 +1320,32 @@ Array VariableUnserializer::unserializeArray() {
   return arr;
 }
 
+folly::Optional<arrprov::Tag> VariableUnserializer::unserializeProvenanceTag() {
+  if (type() != VariableUnserializer::Type::Internal) return {};
+  if (peek() != 'p') return {};
+  expectChar('p');
+  expectChar(':');
+  expectChar('i');
+  expectChar(':');
+  auto const line = static_cast<int>(readInt());
+  expectChar(';');
+  expectChar('s');
+  expectChar(':');
+  auto const filename = unserializeString();
+  expectChar(';');
+  if (!RuntimeOption::EvalArrayProvenance) return {};
+  return arrprov::Tag{ makeStaticString(filename.get()), line };
+}
+
 Array VariableUnserializer::unserializeDict() {
   if (m_dvOverrides) m_dvOverrides->push_back(false);
 
   int64_t size = readInt();
   expectChar(':');
   expectChar('{');
+
+  auto const provTag = unserializeProvenanceTag();
+
   if (size == 0) {
     expectChar('}');
     return Array::CreateDict();
@@ -1378,6 +1398,7 @@ Array VariableUnserializer::unserializeDict() {
 
   check_non_safepoint_surprise();
   expectChar('}');
+  if (provTag) arrprov::setTag(arr.get(), *provTag);
   return arr;
 }
 
@@ -1387,6 +1408,9 @@ Array VariableUnserializer::unserializeVec() {
   int64_t size = readInt();
   expectChar(':');
   expectChar('{');
+
+  auto const provTag = unserializeProvenanceTag();
+
   if (size == 0) {
     expectChar('}');
     return Array::CreateVec();
@@ -1423,6 +1447,7 @@ Array VariableUnserializer::unserializeVec() {
   }
   check_non_safepoint_surprise();
   expectChar('}');
+  if (provTag) arrprov::setTag(arr.get(), *provTag);
   return arr;
 }
 

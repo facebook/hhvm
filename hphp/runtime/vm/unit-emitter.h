@@ -592,9 +592,7 @@ struct UnitRepoProxy : public RepoProxy {
   struct InsertUnitArrayStmt : public RepoProxy::Stmt {
     InsertUnitArrayStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(RepoTxn& txn, int64_t unitSn, Id arrayId,
-                const std::string& array,
-                folly::Optional<int> provenanceLine,
-                const StringData* provenanceFile); // throws(RepoExc)
+                const std::string& array); // throws(RepoExc)
   };
   struct GetUnitArraysStmt : public RepoProxy::Stmt {
     GetUnitArraysStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}

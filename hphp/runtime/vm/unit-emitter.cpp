@@ -176,11 +176,10 @@ Id UnitEmitter::mergeUnitLitstr(const StringData* litstr) {
 
 Id UnitEmitter::mergeArray(const ArrayData* a) {
   assertx(a->isStatic());
-  auto const emplaced = m_array2id.emplace(a, static_cast<Id>(m_arrays.size()));
-  if (emplaced.second) {
-    m_arrays.push_back(a);
-  }
-  return emplaced.first->second;
+  auto const id = static_cast<Id>(m_arrays.size());
+  m_array2id.emplace(a, id);
+  m_arrays.push_back(a);
+  return id;
 }
 
 
@@ -500,22 +499,7 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
         VarNR(const_cast<ArrayData*>(m_arrays[i]))
       ).toCppString();
 
-      if (RuntimeOption::EvalArrayProvenance) {
-        auto const tag = arrprov::getTag(m_arrays[i]);
-        auto const line = tag
-          ? folly::make_optional(tag->line())
-          : folly::none;
-        auto const file = (tag && tag->filename() != m_filepath)
-          ? tag->filename()
-          : nullptr;
-        urp.insertUnitArray[repoId].insert(
-          txn, usn, i, arr_str, line, file
-        );
-      } else {
-        urp.insertUnitArray[repoId].insert(
-          txn, usn, i, arr_str, folly::none, nullptr
-        );
-      }
+      urp.insertUnitArray[repoId].insert(txn, usn, i, arr_str);
     }
     urp.insertUnitArrayTypeTable[repoId].insert(txn, usn, *this);
     for (auto& fe : m_fes) {
@@ -894,7 +878,6 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
     auto createQuery = folly::sformat(
       "CREATE TABLE {} "
       "(unitSn INTEGER, arrayId INTEGER, array BLOB, "
-      " provenanceLine INTEGER, provenanceFile TEXT, "
       " PRIMARY KEY (unitSn, arrayId));",
       m_repo.table(repoId, "UnitArray"));
     txn.exec(createQuery);
@@ -1157,13 +1140,10 @@ void UnitRepoProxy::GetUnitArrayTypeTableStmt
 
 void UnitRepoProxy::InsertUnitArrayStmt
                   ::insert(RepoTxn& txn, int64_t unitSn, Id arrayId,
-                           const std::string& array,
-                           folly::Optional<int> provenanceLine,
-                           const StringData* provenanceFile) {
+                           const std::string& array) {
   if (!prepared()) {
     auto insertQuery = folly::sformat(
-      "INSERT INTO {} VALUES(@unitSn, @arrayId, @array, "
-      "@provenanceLine, @provenanceFile);",
+      "INSERT INTO {} VALUES(@unitSn, @arrayId, @array);",
       m_repo.table(m_repoId, "UnitArray"));
     txn.prepare(*this, insertQuery);
   }
@@ -1171,16 +1151,6 @@ void UnitRepoProxy::InsertUnitArrayStmt
   query.bindInt64("@unitSn", unitSn);
   query.bindId("@arrayId", arrayId);
   query.bindStdString("@array", array);
-  if (provenanceLine) {
-    query.bindInt("@provenanceLine", *provenanceLine);
-  } else {
-    query.bindNull("@provenanceLine");
-  }
-  if (provenanceFile) {
-    query.bindStaticString("@provenanceFile", provenanceFile);
-  } else {
-    query.bindNull("@provenanceFile");
-  }
   query.exec();
 }
 
@@ -1189,7 +1159,7 @@ void UnitRepoProxy::GetUnitArraysStmt
   auto txn = RepoTxn{m_repo.begin()};
   if (!prepared()) {
     auto selectQuery = folly::sformat(
-      "SELECT arrayId, array, provenanceLine, provenanceFile FROM {} "
+      "SELECT arrayId, array FROM {} "
       " WHERE unitSn == @unitSn ORDER BY arrayId ASC;",
       m_repo.table(m_repoId, "UnitArray"));
     txn.prepare(*this, selectQuery);
@@ -1206,13 +1176,6 @@ void UnitRepoProxy::GetUnitArraysStmt
       Id arrayId;        /**/ query.getId(0, arrayId);
       std::string key;   /**/ query.getStdString(1, key);
 
-      int prov_line;
-      bool has_prov = !query.isNull(2);
-      if (has_prov) query.getInt(2, prov_line);
-
-      StringData* prov_file;
-      query.getStaticString(3, prov_file);
-
       Variant v = unserialize_from_buffer(
         key.data(),
         key.size(),
@@ -1220,11 +1183,6 @@ void UnitRepoProxy::GetUnitArraysStmt
       );
       assertx(v.isArray());
       ArrayData* ad = v.detach().m_data.parr;
-      if (has_prov) {
-        assertx(!ad->empty());
-        auto const file = prov_file ? prov_file : ue.m_filepath;
-        arrprov::setTag(ad, {file, prov_line});
-      }
       ArrayData::GetScalarArray(&ad);
       Id id DEBUG_ONLY = ue.mergeArray(ad);
       assertx(id == arrayId);

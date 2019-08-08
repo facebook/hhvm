@@ -1,0 +1,7 @@
+////toplevel.php
+<?hh
+function with_interface(DerivedInterface $arg): void {}
+interface DerivedInterface extends BaseInterface {}
+interface BaseInterface {}
+
+

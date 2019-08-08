@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import os
+from difflib import ndiff
 from sys import stderr
 
 import hh_paths
@@ -18,7 +19,11 @@ class ExtractStandaloneDriver(CommonTestDriver):
             )
         return retcode
 
-    def check_extract_standalone(self, function_to_extract: str) -> int:
+    @staticmethod
+    def function_to_filename(func) -> str:
+        return str.replace(func, "\\", "__")
+
+    def check_extract_standalone(self, function_to_extract: str) -> None:
         generated_code, _, retcode = self.run_check(
             options=["--extract-standalone", function_to_extract]
         )
@@ -29,17 +34,31 @@ class ExtractStandaloneDriver(CommonTestDriver):
                 ),
                 file=stderr,
             )
-            return retcode
+            assert False
 
-        # Write the generated code to stderr to debug
-        print(generated_code, file=stderr)
-        extracted_file = os.path.join(self.repo_dir, "extracted.php")
-        # TODO: we shouldn't write the generated code to a file because it adds
-        # repeated declarations. A better approach is reading from stdin in
-        # hh_single_type_check.
+        extracted_file = os.path.join(self.repo_dir, "extracted.php.out")
+        # Check if the generated code typechecks
         with open(extracted_file, "w") as f:
-            print(generated_code, file=f)
-        return self.run_single_typecheck(extracted_file)
+            print(generated_code, file=f, flush=True)
+        assert self.run_single_typecheck(extracted_file) == 0
+        # Check if the generated code is the same as expected
+        expected_fname = self.function_to_filename(function_to_extract)
+        expected_file = os.path.join(
+            self.repo_dir, "expected/{}.php.exp".format(expected_fname)
+        )
+        with open(expected_file) as expected:
+            expected_code = expected.read()
+            expected_code = expected_code.strip()
+            generated_code = generated_code.strip()
+            if expected_code != generated_code:
+                print("Generated code is not equal to expected:", file=stderr)
+                print(
+                    "\n".join(
+                        ndiff(expected_code.splitlines(), generated_code.splitlines())
+                    ),
+                    file=stderr,
+                )
+            assert expected_code == generated_code
 
 
 class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
@@ -55,23 +74,18 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
     def get_test_driver(cls) -> ExtractStandaloneDriver:
         return ExtractStandaloneDriver()
 
-    def test_extract_toplevel(self) -> None:
-        assert self.test_driver.check_extract_standalone("\\f") == 0
-
-    def test_extract_with_typedef(self) -> None:
-        assert self.test_driver.check_extract_standalone("\\with_types") == 0
-
-    def test_extract_with_generic_deps(self) -> None:
-        assert self.test_driver.check_extract_standalone("\\h") == 0
-
-    def test_extract_with_namespaces(self) -> None:
-        assert self.test_driver.check_extract_standalone("\\Ns\\combine_fs") == 0
-
-    def test_interfaces_hierarchy(self) -> None:
-        assert self.test_driver.check_extract_standalone("\\with_interface") == 0
-
-    def test_extract_dependencies_on_methods(self) -> None:
-        assert self.test_driver.check_extract_standalone("\\with_overriding") == 0
-
-    def test_extract_with_enum(self) -> None:
-        assert self.test_driver.check_extract_standalone("\\with_enum") == 0
+    def test(self) -> None:
+        list(
+            map(
+                self.test_driver.check_extract_standalone,
+                [
+                    "\\shallow_toplevel",
+                    "\\with_typedefs",
+                    "\\with_generics",
+                    "\\Ns\\same_name_different_namespaces",
+                    "\\with_interface",
+                    "\\with_overriding",
+                    "\\with_enum_and_constant",
+                ],
+            )
+        )

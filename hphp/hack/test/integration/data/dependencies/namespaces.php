@@ -31,7 +31,7 @@ namespace Test2 {
 }
 
 namespace Ns {
-  function combine_fs(int $x) : int {
+  function same_name_different_namespaces(int $x) : int {
     \Test1\NestedTest\g($x);
     \Test1\NestedTest\UltraNested\noop();
     if ($x < 0) {

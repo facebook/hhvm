@@ -28,14 +28,14 @@ function g() : void {
   $b = new B();
 }
 
-function f(C $c): void  {
+function shallow_toplevel(C $c): void  {
   g();
 }
 
-function h<Tfirst, Tsecond>(D<Tfirst, Tsecond> $d, E<Tfirst> $e): int {
+function with_generics<Tfirst, Tsecond>(D<Tfirst, Tsecond> $d, E<Tfirst> $e): int {
   return generic<C>();
 }
 
-function with_types(Complex $c, shape('x' => int, 'y' => C) $pair) : Point {
+function with_typedefs(Complex $c, shape('x' => int, 'y' => C) $pair) : Point {
   return shape('x' => $pair['x'], 'y' => $c['first']);
 }

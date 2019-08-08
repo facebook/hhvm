@@ -1,0 +1,19 @@
+////toplevel.php
+<?hh
+abstract class AbstractBase {}
+class ImplementingBase extends AbstractBase {
+  public function inherited(): void {
+    throw new Exception();
+  }
+}
+function with_overriding(Derived $arg): int {
+  $arg->inherited();
+  return $arg->overridden();
+}
+class Derived extends ImplementingBase {
+  public function overridden(): int {
+    throw new Exception();
+  }
+}
+
+

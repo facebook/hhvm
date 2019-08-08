@@ -11,7 +11,7 @@ enum Mode: int as int {
   Two = 2;
 }
 
-function with_enum(Mode $arg): int {
+function with_enum_and_constant(Mode $arg): int {
   return $arg + Mode::One + GenericBase::GENERIC_CONSTANT;
 }
 

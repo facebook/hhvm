@@ -273,7 +273,6 @@ let handle_message: type a.
         ~line:document_location.ClientIdeMessage.line
         ~column:document_location.ClientIdeMessage.column
     ) in
-    Hh_logger.log "hover result length is %d" (List.length result);
     Lwt.return (state, Handle_message_result.Response result)
 
   (* Autocomplete *)

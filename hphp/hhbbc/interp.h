@@ -215,10 +215,11 @@ void finish_builtin(ISS& env,
                     uint32_t numOut,
                     bool unpack);
 
-bool handle_function_exists(ISS& env, int numArgs, bool allowConstProp);
+bool handle_function_exists(ISS& env, const Type& name);
 
 folly::Optional<Type>
-const_fold(ISS& env, uint32_t nArgs, const php::Func& phpFunc);
+const_fold(ISS& env, uint32_t nArgs, uint32_t numExtraInputs,
+           const php::Func& phpFunc, bool variadicsPacked);
 
 folly::Optional<Type> thisType(const Index& index, Context ctx);
 

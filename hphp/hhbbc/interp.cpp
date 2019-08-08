@@ -3792,20 +3792,21 @@ bool fcallTryFold(
     auto ty = [&] () {
       if (foldableFunc->attrs & AttrBuiltin &&
           foldableFunc->attrs & AttrIsFoldable) {
-        auto ret = const_fold(env, fca.numArgs, *foldableFunc);
+        auto ret = const_fold(env, fca.numArgs, numExtraInputs, *foldableFunc,
+                              false);
         return ret ? *ret : TBottom;
       }
       CompactVector<Type> args(fca.numArgs);
+      auto const firstArgPos = numExtraInputs + fca.numArgsInclUnpack() - 1;
       for (auto i = uint32_t{0}; i < fca.numArgs; ++i) {
-        auto const& arg = topT(env, i);
-        auto const argNum = fca.numArgs - i - 1;
+        auto const& arg = topT(env, firstArgPos - i);
         auto const isScalar = is_scalar(arg);
         if (!isScalar &&
-            (env.index.func_depends_on_arg(foldableFunc, argNum) ||
+            (env.index.func_depends_on_arg(foldableFunc, i) ||
              !arg.subtypeOf(BInitCell))) {
           return TBottom;
         }
-        args[argNum] = isScalar ? scalarize(arg) : arg;
+        args[i] = isScalar ? scalarize(arg) : arg;
       }
 
       tried_lookup = true;
@@ -3933,14 +3934,14 @@ void fcallKnownImpl(
     return;
   }
 
-  if (!fca.hasUnpack() && func.name()->isame(s_function_exists.get())) {
-    handle_function_exists(env, fca.numArgs, false);
+  if (func.name()->isame(s_function_exists.get()) &&
+      (fca.numArgs == 1 || fca.numArgs == 2) && !fca.hasUnpack()) {
+    handle_function_exists(env, topT(env, numExtraInputs + fca.numArgs - 1));
   }
 
-  if (options.HardConstProp &&
-      fca.numArgs == 1 &&
-      !fca.hasUnpack() &&
-      func.name()->isame(s_defined.get())) {
+  if (func.name()->isame(s_defined.get()) &&
+      fca.numArgs == 1 && !fca.hasUnpack() &&
+      options.HardConstProp) {
     // If someone calls defined('foo') they probably want foo to be
     // defined normally; ie not a persistent constant.
     if (auto const v = tv(topCV(env, numExtraInputs))) {

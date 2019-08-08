@@ -164,7 +164,13 @@ bool builtin_defined(ISS& env, const bc::FCallBuiltin& op) {
 }
 
 bool builtin_function_exists(ISS& env, const bc::FCallBuiltin& op) {
-  return handle_function_exists(env, op.arg1, true);
+  if (op.arg1 < 1 || op.arg1 > 2) return false;
+  if (!handle_function_exists(env, topT(env, op.arg1 - 1))) return false;
+
+  constprop(env);
+  for (int i = 0; i < op.arg1; i++) popC(env);
+  push(env, TTrue);
+  return true;
 }
 
 bool handle_oodecl_exists(ISS& env,
@@ -453,7 +459,7 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
 
   if (options.ConstantFoldBuiltins && func.isFoldable()) {
     assertx(func.exactFunc());
-    if (auto val = const_fold(env, op.arg1, *func.exactFunc())) {
+    if (auto val = const_fold(env, op.arg1, 0, *func.exactFunc(), true)) {
       constprop(env);
       discard(env, op.arg1);
       return push(env, std::move(*val));
@@ -635,21 +641,13 @@ void finish_builtin(ISS& env,
   reduce(env, std::move(repl));
 }
 
-bool handle_function_exists(ISS& env, int numArgs, bool allowConstProp) {
-  if (numArgs < 1 || numArgs > 2) return false;
-  auto const& name = topT(env, numArgs - 1);
+bool handle_function_exists(ISS& env, const Type& name) {
   if (!name.strictSubtypeOf(TStr)) return false;
   auto const v = tv(name);
   if (!v) return false;
   auto const rfunc = env.index.resolve_func(env.ctx, v->m_data.pstr);
   if (auto const func = rfunc.exactFunc()) {
-    if (is_systemlib_part(*func->unit)) {
-      if (!allowConstProp) return false;
-      constprop(env);
-      for (int i = 0; i < numArgs; i++) popC(env);
-      push(env, TTrue);
-      return true;
-    }
+    if (is_systemlib_part(*func->unit)) return true;
     if (!any(env.collect.opts & CollectionOpts::Inlining)) {
       func->unit->persistent.store(false, std::memory_order_relaxed);
     }
@@ -659,14 +657,17 @@ bool handle_function_exists(ISS& env, int numArgs, bool allowConstProp) {
 
 folly::Optional<Type> const_fold(ISS& env,
                                  uint32_t nArgs,
-                                 const php::Func& phpFunc) {
+                                 uint32_t numExtraInputs,
+                                 const php::Func& phpFunc,
+                                 bool variadicsPacked) {
   assert(phpFunc.attrs & AttrIsFoldable);
 
   std::vector<Cell> args(nArgs);
+  auto const firstArgPos = numExtraInputs + nArgs - 1;
   for (auto i = uint32_t{0}; i < nArgs; ++i) {
-    auto const val = tv(topT(env, i));
+    auto const val = tv(topT(env, firstArgPos - i));
     if (!val || val->m_type == KindOfUninit) return folly::none;
-    args[nArgs - i - 1] = *val;
+    args[i] = *val;
   }
 
   Class* cls = nullptr;
@@ -683,10 +684,10 @@ folly::Optional<Type> const_fold(ISS& env,
 
   if (!func) return folly::none;
 
-  // If the function is variadic, all the variadic parameters are already packed
-  // into an array as the last parameter. invokeFuncFew, however, expects them
-  // to be unpacked, so do so here.
-  if (func->hasVariadicCaptureParam()) {
+  // If the function is variadic and all the variadic parameters are already
+  // packed into an array as the last parameter, we need to unpack them, as
+  // invokeFuncFew expects them to be unpacked.
+  if (func->hasVariadicCaptureParam() && variadicsPacked) {
     if (args.empty()) return folly::none;
     if (!isArrayType(args.back().m_type) && !isVecType(args.back().m_type)) {
       return folly::none;

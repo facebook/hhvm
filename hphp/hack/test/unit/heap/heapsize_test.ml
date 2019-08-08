@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *
-*)
+ *)
 
 (* heap_size only counts the size in the OCaml heap or young gen storage, but
    data created for this test will be statically allocated. This function will

@@ -1,4 +1,4 @@
-(**
+(*
  * These are the arguments that integration test binaries using Test_harness
  * will want to parse.
  *)

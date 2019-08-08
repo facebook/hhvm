@@ -1,4 +1,4 @@
-(**
+(*
  * Put common type definitions outside of the module type signature so it can
  * be included in both the .mli and .ml.
  *)

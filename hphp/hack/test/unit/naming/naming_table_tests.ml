@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *
-*)
+ *)
 
 (* These are basically the same tests as in
  * test/integration_ml/saved_state/test_naming_table_sqlite_fallback.ml, but

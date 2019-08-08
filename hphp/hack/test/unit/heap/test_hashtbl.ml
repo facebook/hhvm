@@ -1,4 +1,4 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *
-*)
+ *)
 
 type key = OpaqueDigest.t
 

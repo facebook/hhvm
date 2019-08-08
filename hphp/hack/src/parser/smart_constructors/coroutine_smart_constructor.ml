@@ -1,4 +1,4 @@
-(**
+(*
  * Performs a regular parse, but determines whether the coroutine keyword
  * appears in the file so that we know whether to lower coroutines through
  * a conversion of the positioned syntax to an editable positioned syntax

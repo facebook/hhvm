@@ -3151,11 +3151,11 @@ void isAsTypeStructImpl(ISS& env, SArray inputTS) {
     case TypeStructure::Kind::T_null:
       return check(ts_type);
     case TypeStructure::Kind::T_tuple:
-      return RuntimeOption::EvalHackArrCompatIsArrayNotices
+      return RuntimeOption::EvalHackArrCompatTypeHintNotices
         ? check(ts_type, TDArr)
         : check(ts_type);
     case TypeStructure::Kind::T_shape:
-      return RuntimeOption::EvalHackArrCompatIsArrayNotices
+      return RuntimeOption::EvalHackArrCompatTypeHintNotices
         ? check(ts_type, TVArr)
         : check(ts_type);
     case TypeStructure::Kind::T_dict:

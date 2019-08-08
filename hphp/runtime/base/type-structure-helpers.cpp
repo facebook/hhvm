@@ -780,7 +780,7 @@ bool checkTypeStructureMatchesCellImpl(
       }
       if (elemsDidMatch && warn) elemsDidMatch = false;
       if (UNLIKELY(
-        RuntimeOption::EvalHackArrCompatIsArrayNotices &&
+        RuntimeOption::EvalHackArrCompatTypeHintNotices &&
         elemsDidMatch &&
         elems->isPHPArray()
       )) {
@@ -872,7 +872,7 @@ bool checkTypeStructureMatchesCellImpl(
         break;
       }
       if (UNLIKELY(
-        RuntimeOption::EvalHackArrCompatIsArrayNotices &&
+        RuntimeOption::EvalHackArrCompatTypeHintNotices &&
         !warn &&
         fields->isPHPArray()
       )) {

@@ -1,1 +1,1 @@
--vRuntime.Eval.HackArrCompatIsArrayNotices=true
+-vRuntime.Eval.HackArrCompatTypeHintNotices=true

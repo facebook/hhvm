@@ -2,7 +2,8 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class GenericBase<Tfirst, Tsecond> {
-  public function __construct(public Tfirst $first, public Tsecond $second): void {}
+  const int GENERIC_CONSTANT = -(1 + 2);
+  public function __construct(public Tfirst $first, public Tsecond $second) {}
 }
 
 enum Mode: int as int {
@@ -11,7 +12,7 @@ enum Mode: int as int {
 }
 
 function with_enum(Mode $arg): int {
-  return $arg;
+  return $arg + Mode::One + GenericBase::GENERIC_CONSTANT;
 }
 
 class GenericDerived<Tfirst> extends GenericBase<Tfirst, Mode> {

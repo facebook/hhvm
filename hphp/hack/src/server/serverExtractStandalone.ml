@@ -17,6 +17,7 @@ module SyntaxError = Full_fidelity_syntax_error
 exception FunctionNotFound
 exception UnexpectedDependency
 exception DependencyNotFound
+exception Unsupported
 
 let value_exn ex opt = match opt with
 | Some s -> s
@@ -64,7 +65,6 @@ let get_function_declaration tcopt fun_name fun_type =
   let fun_type_str = (Typing_print.fun_type tcopt fun_type) in
   Printf.sprintf "function %s%s%s" (strip_ns fun_name) tparams fun_type_str
 
-(* TODO: constants, class fields *)
 let extract_object_declaration tcopt obj =
   let open Typing_deps.Dep in
   match obj with
@@ -120,10 +120,8 @@ let get_enum_declaration tcopt enum =
   let base = Typing_print.full_decl tcopt enum.te_base in
   Printf.sprintf "enum %s: %s%s" (strip_ns name) base cons
 
-let get_class_declaration tcopt (cls: Decl_provider.class_decl) =
+let get_class_declaration (cls: Decl_provider.class_decl) =
   let open Decl_provider in
-  if Class.kind cls = Ast_defs.Cenum then (get_enum_declaration tcopt cls)
-  else
   let kind = match Class.kind cls with
   | Ast_defs.Cabstract -> "abstract class"
   | Ast_defs.Cnormal -> "class"
@@ -155,11 +153,49 @@ let get_property_declaration tcopt (prop: Typing_defs.class_elt) ~is_static name
   let prop_type = Typing_print.full_decl tcopt @@ Lazy.force prop.ce_type in
   Printf.sprintf "%s %s%s $%s;" visibility static prop_type name
 
+let bop_to_string = function
+  | Ast_defs.Plus -> "+"
+  | Ast_defs.Minus -> "-"
+  | Ast_defs.Star -> "*"
+  | _ -> raise Unsupported
+
+let unop_to_string = function
+  | Ast_defs.Unot -> "!"
+  | Ast_defs.Uplus -> "+"
+  | Ast_defs.Uminus -> "-"
+  | _ -> raise Unsupported
+
+let rec expr_to_string (expr:Nast.expr) =
+  let (_, expr) = expr in
+  match expr with
+  | Aast.Null -> "null"
+  | Aast.This -> "this"
+  | Aast.True -> "true"
+  | Aast.False -> "false"
+  | Aast.Int i -> i
+  | Aast.Float f -> f
+  | Aast.String s -> s
+  | Aast.Unop (op, expr) -> Printf.sprintf "(%s%s)" (unop_to_string op) (expr_to_string expr)
+  | Aast.Binop (op, expr1, expr2) ->
+    Printf.sprintf "(%s%s%s)" (expr_to_string expr1) (bop_to_string op) (expr_to_string expr2)
+  | _ -> raise Unsupported
+
+let get_class_const_declaration tcopt (cons: Typing_defs.class_const) name =
+  let abstract = if cons.cc_abstract then "abstract " else "" in
+  let typ = Typing_print.full_decl tcopt cons.cc_type in
+  let init = match cons.cc_expr with
+  | None -> ""
+  | Some expr -> " = " ^ expr_to_string expr in
+  Printf.sprintf "%sconst %s %s%s;" abstract typ name init
+
 let extract_field_declaration tcopt (cls: Decl_provider.class_decl)
                               (field: Typing_deps.Dep.variant) =
   let open Typing_deps.Dep in
   let open Decl_provider in
   match field with
+  | Const(_, const_name) ->
+    let cons = value_exn DependencyNotFound @@ Class.get_const cls const_name in
+    get_class_const_declaration tcopt cons const_name
   | Cstr _ -> let (cstr, _) = Class.construct cls in
     (match cstr with
     | None -> ""
@@ -178,8 +214,22 @@ let extract_field_declaration tcopt (cls: Decl_provider.class_decl)
     get_property_declaration tcopt sp ~is_static:true (String.lstrip ~drop:(fun c -> c = '$') sprop_name)
   | _ -> ""
 
+let construct_enum tcopt enum fields =
+  let string_enum_const = function
+    | Typing_deps.Dep.Const(_, name) ->
+      let enum_const = value_exn DependencyNotFound @@ Decl_provider.Class.get_const enum name in
+      Printf.sprintf "%s = %s;" name (expr_to_string @@ value_exn DependencyNotFound enum_const.cc_expr)
+    | _ -> raise UnexpectedDependency in
+  let enum_decl = get_enum_declaration tcopt enum in
+  let constants = HashSet.fold (fun f acc -> (string_enum_const f) :: acc) fields [] in
+  Printf.sprintf "%s {\n%s\n}" enum_decl (String.concat ~sep:"\n" constants)
+
 let construct_class_declaration tcopt cls fields =
-  let decl = get_class_declaration tcopt cls in
+  let decl = get_class_declaration cls in
+  (* Enum declaration have a very different format: for example, no 'const' keyword
+     for values, which are actually just class constants *)
+  if Decl_provider.Class.kind cls = Ast_defs.Cenum then (construct_enum tcopt cls fields)
+  else
   let open Typing_deps.Dep in
   let process_field f = match f with
   | AllMembers _ | Extends _ -> raise UnexpectedDependency

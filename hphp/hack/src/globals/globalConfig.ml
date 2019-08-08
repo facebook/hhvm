@@ -45,3 +45,19 @@ let default_sharedmem_config =
     log_level      = 0;
     sample_rate    = 0.0;
   }
+
+(* There are places where we don't expect to write to shared memory, and doing
+ * so would be a memory leak. But since shared memory is global, it's very easy
+ * to accidentally call a function that will attempt such write. Setting all the
+ * sizes to 0 will make it fail immediately. *)
+let empty_sharedmem_config =
+  { SharedMem.
+    global_size    = 0;
+    heap_size      = 0;
+    dep_table_pow  = 0;
+    hash_table_pow = 0;
+    shm_dirs       = [];
+    shm_min_avail  = 0;
+    log_level      = 0;
+    sample_rate    = 0.0;
+  }

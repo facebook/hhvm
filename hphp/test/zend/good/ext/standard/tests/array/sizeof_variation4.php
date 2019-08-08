@@ -66,14 +66,6 @@ foreach($values as $value)
   var_dump( sizeof($value) );
   echo "\n";
 
-  echo "COUNT_NORMAL Mode: ";
-  var_dump( sizeof($value, COUNT_NORMAL) );
-  echo "\n";
-
-  echo "COUNT_RECURSIVE Mode: ";
-  var_dump( sizeof($value, COUNT_RECURSIVE) );
-  echo "\n";
-
   $counter++;
 }
 

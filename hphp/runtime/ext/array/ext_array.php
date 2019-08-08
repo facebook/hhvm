@@ -635,16 +635,11 @@ function count(
 
 /**
  * @param mixed $var
- * @param int $mode
- *
  * @return int
- *
- * T35863429 for removing second arg
  */
 <<__Native, __IsFoldable, __Rx, __AtMostRxAsArgs>>
 function sizeof(
   <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class), __MaybeMutable>>mixed $var,
-  int $mode = COUNT_NORMAL,
 ): int;
 
 /**

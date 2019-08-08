@@ -81,14 +81,6 @@ for($i = 0; $i < count($objects); $i++)
   var_dump( sizeof($var) );
   echo "\n";
 
-  echo "COUNT_NORMAL Mode: ";
-  var_dump( sizeof($var, COUNT_NORMAL) );
-  echo "\n";
-
-  echo "COUNT_RECURSIVE Mode: ";
-  var_dump( sizeof($var, COUNT_RECURSIVE) );
-  echo "\n";
-
   $counter++;
 }
 

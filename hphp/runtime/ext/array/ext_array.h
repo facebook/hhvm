@@ -103,8 +103,7 @@ int64_t HHVM_FUNCTION(count,
                       const Variant& var,
                       int64_t mode = 0);
 int64_t HHVM_FUNCTION(sizeof,
-                      const Variant& var,
-                      int64_t mode = 0);
+                      const Variant& var);
 Variant HHVM_FUNCTION(each,
                       VRefParam array);
 Variant HHVM_FUNCTION(current,

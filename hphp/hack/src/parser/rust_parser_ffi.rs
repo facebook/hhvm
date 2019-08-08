@@ -16,11 +16,11 @@ pub mod rust_to_ocaml;
 
 use parser_rust as parser;
 
-use parser::file_mode::parse_mode;
 use parser::lexer::Lexer;
 use parser::minimal_parser::MinimalSyntaxParser;
 use parser::minimal_token::MinimalToken;
 use parser::minimal_trivia::MinimalTrivia;
+use parser::mode_parser::parse_mode;
 use parser::parser_env::ParserEnv;
 use parser::source_text::SourceText;
 use parser::stack_limit::StackLimit;

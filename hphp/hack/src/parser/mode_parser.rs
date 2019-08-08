@@ -9,25 +9,7 @@ use crate::parser_env::ParserEnv;
 use crate::source_text::SourceText;
 use crate::syntax::{self, SyntaxVariant};
 use crate::token_kind::TokenKind;
-
-pub enum FileMode {
-    Mphp,          // Do the best you can to support legacy PHP
-    Mdecl,         // just declare signatures, don't check anything
-    Mstrict,       // check everything!
-    Mpartial,      // Don't fail if you see a function/class you don't know
-    Mexperimental, // Strict mode + experimental features
-}
-
-impl FileMode {
-    fn from_string(s: &str) -> Option<Self> {
-        match s {
-            "strict" | "" => Some(FileMode::Mstrict),
-            "partial" => Some(FileMode::Mpartial),
-            "experimental" => Some(FileMode::Mexperimental),
-            _ => None,
-        }
-    }
-}
+use deps_rust::file_mode::FileMode;
 
 use crate::minimal_parser::MinimalSyntaxParser;
 

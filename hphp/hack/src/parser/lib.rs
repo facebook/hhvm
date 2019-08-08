@@ -20,6 +20,7 @@ mod syntax_type;
 pub mod syntax_error;
 
 pub mod lexer;
+pub mod mode_parser;
 pub mod operator;
 mod operator_generated;
 pub mod parser;
@@ -53,8 +54,6 @@ mod minimal_smart_constructors;
 pub mod minimal_syntax;
 pub mod minimal_token;
 pub mod minimal_trivia;
-
-pub mod file_mode;
 
 pub mod positioned_smart_constructors;
 pub mod positioned_syntax;

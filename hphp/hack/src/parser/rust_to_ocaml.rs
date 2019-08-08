@@ -17,7 +17,6 @@ use std::iter::Iterator;
 
 use parser::coroutine_smart_constructors::{CoroutineStateType, State as CoroutineState};
 use parser::decl_mode_smart_constructors::State as DeclModeState;
-use parser::file_mode::FileMode;
 use parser::lexable_token::LexableToken;
 use parser::minimal_syntax::MinimalValue;
 use parser::minimal_token::MinimalToken;
@@ -33,6 +32,8 @@ use parser::syntax_kind::SyntaxKind;
 use parser::token_kind::TokenKind;
 use parser::trivia_kind::TriviaKind;
 use parser::verify_smart_constructors::State as VerifyState;
+
+use deps_rust::file_mode::FileMode;
 
 extern "C" {
     fn ocamlpool_reserve_block(tag: Tag, size: Size) -> Value;

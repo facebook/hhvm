@@ -110,6 +110,13 @@ struct InstAreaRange {
                  (m_instRange.end() < other.m_instRange.end())))))));
   }
 
+  bool isContiguous(const InstAreaRange& other) const {
+    // TODO(elijahrivera) - check assertions as described in D16623372
+    return (m_instRange.end() == other.m_instRange.begin() &&
+            m_area == other.m_area &&
+            m_instIdx == other.m_instIdx);
+  }
+
   InstAreaRange(size_t instIdx,
                 AreaIndex area,
                 TcaRange instRange)
@@ -353,6 +360,23 @@ dynamic getBlock(const Block* block,
     }
 
     std::sort(instRanges.begin(), instRanges.end());
+
+    std::vector<InstAreaRange> collatedInstRanges;
+    for (auto const& inst : instRanges) {
+      if (collatedInstRanges.empty()) {
+        collatedInstRanges.push_back(inst);
+        continue;
+      }
+
+      auto& prevRange = collatedInstRanges.back();
+      if (prevRange.isContiguous(inst)) {
+        prevRange.m_instRange = TcaRange(prevRange.m_instRange.begin(),
+                                         inst.m_instRange.end());
+      } else {
+        collatedInstRanges.push_back(inst);
+      }
+    }
+    instRanges = collatedInstRanges;
 
     const IRInstruction* lastInst = nullptr;
     AreaIndex lastArea = AreaIndex::Main;

@@ -27,8 +27,11 @@ inline bool tvWantsTag(TypedValue tv) {
 }
 
 inline void copyTag(const ArrayData* src, ArrayData* dest) {
-  auto const tag = getTag(src);
-  setTag(dest, tag ? *tag : tagFromProgramCounter());
+  if (auto const tag = getTag(src)) {
+    setTag(dest, *tag);
+  } else if (auto const pctag = tagFromProgramCounter()) {
+    setTag(dest, *pctag);
+  }
 }
 
 inline void copyTagStatic(const ArrayData* src, ArrayData* dest) {

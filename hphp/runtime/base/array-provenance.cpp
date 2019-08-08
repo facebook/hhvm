@@ -98,14 +98,15 @@ TypedValue tagTV(TypedValue tv) {
     ad = ad->copy();
     type(tv) = dt_with_rc(type(tv));
     val(tv).parr = ad;
+  } else if (auto const pctag = tagFromProgramCounter()) {
+    setTag(ad, *pctag);
   }
-  setTag(ad, tagFromProgramCounter());
   return tv;
 }
 
-Tag tagFromProgramCounter() {
+folly::Optional<Tag> tagFromProgramCounter() {
   auto const tag = fromLeaf(
-    [&] (const ActRec* fp, Offset offset) {
+    [&] (const ActRec* fp, Offset offset) -> folly::Optional<Tag> {
       auto const unit = fp->unit();
       auto const filename = unit->filepath();
       auto const line = unit->getLineNumber(offset);
@@ -113,7 +114,7 @@ Tag tagFromProgramCounter() {
     },
     [] (const ActRec* fp) { return !fp->func()->isProvenanceSkipFrame(); }
   );
-  assertx(tag.filename() != nullptr);
+  assertx(!tag || tag->filename() != nullptr);
   return tag;
 }
 

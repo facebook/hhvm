@@ -83,7 +83,7 @@ struct ArrayProvenanceTable {
  *
  * Requires VM regs to be synced or for a sync point to be available.
  */
-Tag tagFromProgramCounter();
+folly::Optional<Tag> tagFromProgramCounter();
 
 /*
  * Whether `ad` or `tv` admits a provenance tag---i.e., whether it's either a

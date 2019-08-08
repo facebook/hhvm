@@ -263,7 +263,9 @@ ArrayData* with_prov(uint32_t size) {
   assertx(ad->hasExactlyOneRef());
   assertx(arrayWantsTag(ad));
 
-  setTag(ad, tagFromProgramCounter());
+  if (auto const pctag = tagFromProgramCounter()) {
+    setTag(ad, *pctag);
+  }
   return ad;
 }
 

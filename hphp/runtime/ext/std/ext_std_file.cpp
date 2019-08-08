@@ -264,7 +264,7 @@ const StaticString
   s_blocks("blocks");
 
 Array stat_impl(struct stat *stat_sb) {
-  ArrayInit ret(26, ArrayInit::Mixed{});
+  DArrayInit ret(26);
   ret.append((int64_t)stat_sb->st_dev);
   ret.append((int64_t)stat_sb->st_ino);
   ret.append((int64_t)stat_sb->st_mode);

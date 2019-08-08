@@ -5,16 +5,19 @@ interface Pred<-T> { }
 final class EqualsPred<Tv> implements Pred<Tv> {
 }
 
-/* HH_FIXME[4110] */
 function disj<Tv>(vec<Pred<Tv>> $predicates,
 ): Pred<Tv> {
+  throw new Exception();
 }
-/* HH_FIXME[4110] */
+
 function equals<Tv>(Tv $value): EqualsPred<Tv> {
+  throw new Exception();
 }
-/* HH_FIXME[4110] */
+
 function greaterThan<Tv>(Tv $value): Pred<Tv> {
+  throw new Exception();
 }
+
 function expect(Pred<?int> $predicate): void {
 }
 

@@ -5,10 +5,10 @@ interface I {
   public function query(): Awaitable<darray<int,string>>;
 }
 
-/* HH_FIXME[4110] */
 async function genEnforce(
   arraykey $key,
 ): Awaitable<I> {
+  throw new Exception();
 }
 
 async function genmk<Tk as arraykey, Tv>(

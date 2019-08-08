@@ -1,10 +1,10 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-/* HH_FIXME[4110] */
 function array_create_set_from_values<T as arraykey>(
    Traversable<T> $arr,
- ): darray<T, T> {
+): darray<T, T> {
+  throw new Exception();
 }
 
 function maybe_varray_map<Tv1, Tv2>(
@@ -29,10 +29,10 @@ function darray_map<Tk as arraykey, Tv1, Tv2>(
 async function genProfileInfos(): Awaitable<Vector<C>> {
     return Vector{};
 }
-/* HH_FIXME[4110] */
 async function genm<Tk as arraykey, Tv>(
   KeyedTraversable<Tk, Awaitable<Tv>> $awaitables,
 ): Awaitable<Map<Tk, Tv>> {
+  throw new Exception();
 }
 async function testit(Map<arraykey, Vector<C>> $m, varray<int> $user_ids):Awaitable<void> {
   $m = await genm(

@@ -1072,7 +1072,7 @@ void printUnit(int level, const IRUnit& unit, const char* caption,
         HPHP::Trace::traceRelease("%s\n", str.str().c_str());
       }
     } else if (dumpJsonIR(level)) {
-      str << get_json::getUnit(unit, ai, guards);
+      str << "json:" << get_json::getUnit(unit, ai, guards);
       if (HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir_json, level)) {
         HPHP::Trace::traceRelease("%s\n", str.str().c_str());
       }

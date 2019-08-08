@@ -541,23 +541,29 @@ dynamic getAnnotations(const Annotations& annotations) {
   for (auto const& annotation : annotations) {
     auto const rawValue = g_annotations->getAnnotation(annotation.second);
     dynamic annotationValue;
-    try {
-      auto const parsedJson = folly::parseJson(rawValue);
-      auto const coercedUnit = folly::convertTo<printir::Unit>(parsedJson);
-      annotationValue = folly::toDynamic(coercedUnit);
-      // Benefits to making the round-trip:
-      // 1. Checking for specific JSON format
-      // 2. Restructuring
-      // 3. TODO(elijahrivera) - fixed structure to work with when merging
-      //    annotation information into regular information
+    if (rawValue.subpiece(0, 5) == "json:") {
+      try {
+        auto const parsedJson = folly::parseJson(rawValue.subpiece(5));
+        auto const coercedUnit = folly::convertTo<printir::Unit>(parsedJson);
+        annotationValue = folly::toDynamic(coercedUnit);
+        // Benefits to making the round-trip:
+        // 1. Checking for specific JSON format
+        // 2. Restructuring
+        // 3. TODO(elijahrivera) - fixed structure to work with when merging
+        //    annotation information into regular information
+      }
+      catch (const std::runtime_error& re){
+        std::cerr << re.what() << std::endl;
+        std::cerr << "Parsing annotation as JSON failed. "
+                  << "Annotation included as raw value" << std::endl;
+        annotationValue = rawValue;
+      }
+      annotationObjs.push_back(dynamic::object("caption", annotation.first)
+                                              ("value", annotationValue));
+    } else {
+      annotationObjs.push_back(dynamic::object("caption", annotation.first)
+                                              ("value", rawValue));
     }
-    catch (const std::runtime_error& re){
-      std::cerr << re.what() << std::endl;
-      std::cerr << "Parsing annotation as JSON failed, included as raw value\n";
-      annotationValue = rawValue;
-    }
-    annotationObjs.push_back(dynamic::object("caption", annotation.first)
-                                            ("value", annotationValue));
   }
   return annotationObjs;
 }

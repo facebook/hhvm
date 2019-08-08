@@ -18,7 +18,7 @@
            [([6:5-14], (Return (Some (([6:12-13], int), (Int "5")))))];
            fb_annotation = No unsafe blocks };
          m_fun_kind = FSync; m_user_attributes = [];
-         m_ret = (([Pos.none], int), (Some ([5:26-29], (Hprim Tint))));
+         m_ret = ((int), (Some ([5:26-29], (Hprim Tint))));
          m_external = false; m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
@@ -46,8 +46,7 @@
               ];
             fb_annotation = No unsafe blocks };
           m_fun_kind = FSync; m_user_attributes = [];
-          m_ret =
-          (([Pos.none], string), (Some ([11:26-32], (Hprim Tstring))));
+          m_ret = ((string), (Some ([11:26-32], (Hprim Tstring))));
           m_external = false; m_doc_comment = None }
          ];
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
@@ -56,8 +55,7 @@
        c_doc_comment = None });
   (Fun
      { f_span = [16:1-19:2]; f_annotation = (); f_mode = <opaque>;
-       f_ret =
-       (([Pos.none], arraykey), (Some ([16:44-52], (Hprim Tarraykey))));
+       f_ret = ((arraykey), (Some ([16:44-52], (Hprim Tarraykey))));
        f_name = ([16:10-14], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params =

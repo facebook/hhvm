@@ -9,7 +9,7 @@
 
 let converter =
   let convert_pos p: Pos.t = p in
-  Ast_to_aast.converter convert_pos Nast.NamedWithUnsafeBlocks ()
+  Ast_to_aast.converter convert_pos Nast.NamedWithUnsafeBlocks () ()
 
 let convert = converter#on_program
 

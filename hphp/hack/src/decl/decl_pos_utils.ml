@@ -126,6 +126,7 @@ let pos_mapper =
     method on_'fb _ fb = fb
     method on_'en _ en = en
     method on_'ex _ ex = pos ex
+    method on_'hi _ hi = hi
   end
 
 let rec ty (p, x) =

@@ -16,7 +16,7 @@
          m_body =
          { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
          m_fun_kind = FSync; m_user_attributes = [];
-         m_ret = (([Pos.none], void), (Some ([4:39-43], (Hprim Tvoid))));
+         m_ret = ((void), (Some ([4:39-43], (Hprim Tvoid))));
          m_external = false; m_doc_comment = None };
         { m_span = [5:3-41]; m_annotation = (); m_final = false;
           m_abstract = false; m_static = false; m_visibility = Public;
@@ -26,7 +26,7 @@
           m_body =
           { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
           m_fun_kind = FSync; m_user_attributes = [];
-          m_ret = (([Pos.none], void), (Some ([5:34-38], (Hprim Tvoid))));
+          m_ret = ((void), (Some ([5:34-38], (Hprim Tvoid))));
           m_external = false; m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
@@ -34,7 +34,7 @@
       c_enum = None; c_pu_enums = []; c_doc_comment = None });
   (Fun
      { f_span = [8:1-23:2]; f_annotation = (); f_mode = <opaque>;
-       f_ret = (([Pos.none], void), (Some ([8:22-26], (Hprim Tvoid))));
+       f_ret = ((void), (Some ([8:22-26], (Hprim Tvoid))));
        f_name = ([8:10-14], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params =
@@ -120,7 +120,7 @@
        f_static = false });
   (Fun
      { f_span = [25:1-29:2]; f_annotation = (); f_mode = <opaque>;
-       f_ret = (([Pos.none], void), (Some ([26:21-25], (Hprim Tvoid))));
+       f_ret = ((void), (Some ([26:21-25], (Hprim Tvoid))));
        f_name = ([26:10-17], "\\rx_test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =

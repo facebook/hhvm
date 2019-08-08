@@ -118,6 +118,7 @@ class virtual map = object (self)
   method on_'ex _ ex = ex
   method on_'fb _ fb = fb
   method on_'en _ en = en
+  method on_'hi _ hi = hi
 
   (* Entry point *)
   method go program : Tast.program = self#on_list (fun () -> self#go_def) () program
@@ -153,6 +154,7 @@ class virtual endo = object (self)
   method on_'ex _ ex = ex
   method on_'fb _ fb = fb
   method on_'en _ en = en
+  method on_'hi _ hi = hi
 
   (* Entry point *)
   method go program = self#on_list (fun () -> self#go_def) () program

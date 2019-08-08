@@ -16,7 +16,7 @@
       });
   (Fun
      { f_span = [14:1-16:2]; f_annotation = (); f_mode = <opaque>;
-       f_ret = (([Pos.none], void), (Some ([14:22-26], (Hprim Tvoid))));
+       f_ret = ((void), (Some ([14:22-26], (Hprim Tvoid))));
        f_name = ([14:10-13], "\\foo"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params =

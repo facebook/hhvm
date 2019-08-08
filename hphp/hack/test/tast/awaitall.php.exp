@@ -1,7 +1,7 @@
 [(Fun
     { f_span = [3:1-5:2]; f_annotation = (); f_mode = <opaque>;
       f_ret =
-      (([Pos.none], Awaitable<int>),
+      ((Awaitable<int>),
        (Some ([3:26-40],
               (Happly (([3:26-35], "\\Awaitable"),
                  [([3:36-39], (Hprim Tint))])))));
@@ -16,7 +16,7 @@
   (Fun
      { f_span = [7:1-9:2]; f_annotation = (); f_mode = <opaque>;
        f_ret =
-       (([Pos.none], Awaitable<string>),
+       ((Awaitable<string>),
         (Some ([7:29-46],
                (Happly (([7:29-38], "\\Awaitable"),
                   [([7:39-45], (Hprim Tstring))])))));
@@ -32,7 +32,7 @@
   (Fun
      { f_span = [11:1-17:2]; f_annotation = (); f_mode = <opaque>;
        f_ret =
-       (([Pos.none], Awaitable<void>),
+       ((Awaitable<void>),
         (Some ([11:21-36],
                (Happly (([11:21-30], "\\Awaitable"),
                   [([11:31-35], (Hprim Tvoid))])))));

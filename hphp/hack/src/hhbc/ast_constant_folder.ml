@@ -413,6 +413,7 @@ object (self)
   method on_'ex _ ex = ex
   method on_'fb _ fb = fb
   method on_'en _ en = en
+  method on_'hi _ hi = hi
 
   method! on_class_ _env cd =
     super#on_class_ cd.A.c_namespace cd

@@ -1,6 +1,6 @@
 [(Fun
     { f_span = [2:1-7:2]; f_annotation = (); f_mode = <opaque>;
-      f_ret = (([Pos.none], void), (Some ([2:26-30], (Hprim Tvoid))));
+      f_ret = ((void), (Some ([2:26-30], (Hprim Tvoid))));
       f_name = ([2:10-22], "\\test_lambda1"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
@@ -19,8 +19,7 @@
                   (([4:8-41], (function(?(dynamic | bool | float | resource | arraykey | Stringish) $n): string)),
                    (Lfun (
                       { f_span = [4:8-41]; f_annotation = ();
-                        f_mode = <opaque>;
-                        f_ret = (([Pos.none], string), None);
+                        f_mode = <opaque>; f_ret = ((string), None);
                         f_name = ([4:8-41], ";anonymous"); f_tparams = [];
                         f_where_constraints = []; f_variadic = FVnonVariadic;
                         f_params =

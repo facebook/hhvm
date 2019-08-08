@@ -146,6 +146,7 @@ let with_type ty env (e : Nast.expr) : Tast.expr =
       method on_'ex _ p = (p, ty)
       method on_'fb _ _ = Tast.HasUnsafeBlocks
       method on_'en _ _ = env
+      method on_'hi _ _ = ty
     end
   in
   visitor#on_expr () e
@@ -602,8 +603,7 @@ and fun_def tcopt f : Tast.fun_def option =
     T.f_annotation = Env.save local_tpenv env;
     T.f_span = f.f_span;
     T.f_mode = f.f_mode;
-    (* TODO: Put a more accurate position here (T47713369) *)
-    T.f_ret = (Pos.none, locl_ty), hint_of_type_hint f.f_ret;
+    T.f_ret = locl_ty, hint_of_type_hint f.f_ret;
     T.f_name = f.f_name;
     T.f_tparams = tparams;
     T.f_where_constraints = f.f_where_constraints;
@@ -2957,7 +2957,7 @@ and anon_make tenv p f ft idl is_anon =
           T.f_annotation = Env.save local_tpenv env;
           T.f_span = f.f_span;
           T.f_mode = f.f_mode;
-          T.f_ret = (Pos.none, hret), hint_of_type_hint f.f_ret;
+          T.f_ret = hret, hint_of_type_hint f.f_ret;
           T.f_name = f.f_name;
           T.f_tparams = tparams;
           T.f_where_constraints = f.f_where_constraints;
@@ -6788,7 +6788,7 @@ and method_def tcopt env m =
     T.m_params = typed_params;
     T.m_fun_kind = m.m_fun_kind;
     T.m_user_attributes = user_attributes;
-    T.m_ret = (Pos.none, locl_ty), hint_of_type_hint m.m_ret;
+    T.m_ret = locl_ty, hint_of_type_hint m.m_ret;
     T.m_body = { T.fb_ast = tb; fb_annotation = annotation };
     T.m_external = m.m_external;
     T.m_doc_comment = m.m_doc_comment;

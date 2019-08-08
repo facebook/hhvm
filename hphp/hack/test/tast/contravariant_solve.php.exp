@@ -42,7 +42,7 @@
   (Fun
      { f_span = [9:1-10:2]; f_annotation = (); f_mode = <opaque>;
        f_ret =
-       (([Pos.none], I<T>),
+       ((I<T>),
         (Some ([9:34-38],
                (Happly (([9:34-35], "\\I"), [([9:36-37], (Habstr "T"))])))));
        f_name = ([9:10-11], "\\f");
@@ -77,7 +77,7 @@
   (Fun
      { f_span = [13:1-14:2]; f_annotation = (); f_mode = <opaque>;
        f_ret =
-       (([Pos.none], E<T>),
+       ((E<T>),
         (Some ([13:22-26],
                (Happly (([13:22-23], "\\E"), [([13:24-25], (Habstr "T"))])))));
        f_name = ([13:10-11], "\\g");
@@ -101,7 +101,7 @@
        f_static = false });
   (Fun
      { f_span = [16:1-18:2]; f_annotation = (); f_mode = <opaque>;
-       f_ret = (([Pos.none], void), (Some ([16:18-22], (Hprim Tvoid))));
+       f_ret = ((void), (Some ([16:18-22], (Hprim Tvoid))));
        f_name = ([16:10-14], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =

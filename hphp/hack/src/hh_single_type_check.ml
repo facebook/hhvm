@@ -797,9 +797,11 @@ let print_tasts tasts tcopt =
   in
   let pp_en fmt _ = Format.pp_print_string fmt "()" in
   let pp_ex fmt ex = Format.pp_print_string fmt (print_pos_and_ty ex) in
+  let pp_hi fmt ty = Format.asprintf "(%s)" (Typing_print.full_strip_ns env ty)
+                      |> Format.pp_print_string fmt in
 
   Relative_path.Map.iter tasts (fun _k (tast : Tast.program) ->
-    Printf.printf "%s\n" (Aast.show_program pp_ex pp_fb pp_en tast))
+    Printf.printf "%s\n" (Aast.show_program pp_ex pp_fb pp_en pp_hi tast))
 
 let typecheck_tasts tasts tcopt (filename:Relative_path.t) =
   let env = Typing_env.empty tcopt filename ~droot:None in

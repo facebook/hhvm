@@ -45,7 +45,7 @@ let process_class_enum fields =
 let simple_typ pos name = (pos, Happly ((pos, name), []))
 
 let create_mixed_type_hint pos =
-  (Pos.none, Typing_make_type.mixed (Typing_defs.Reason.Rhint pos)), Some (simple_typ pos "mixed")
+  Typing_make_type.mixed (Typing_defs.Reason.Rhint pos), Some (simple_typ pos "mixed")
 
 (* Error formatter *)
 let error_msg cls field name =
@@ -236,6 +236,7 @@ class ['self] erase_body_visitor = object (_self: 'self)
   method on_'fb _env fb = fb
   method on_'ex _env ex = ex
   method on_'en _env en = en
+  method on_'hi _env hi = hi
 
   method! on_PU_atom _ _ s = String s
   method! on_PU_identifier _ _ qual (pos, field) (_, name) =

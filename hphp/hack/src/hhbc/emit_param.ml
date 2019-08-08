@@ -28,6 +28,7 @@ object(_)
   method on_'ex _ ex = ex
   method on_'fb _ fb = fb
   method on_'en _ en = en
+  method on_'hi _ hi = hi
 
   method! on_CIexpr scope this e =
     match expr_to_class_expr ~resolve_self:false scope e with

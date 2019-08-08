@@ -40,7 +40,7 @@
              ];
            fb_annotation = No unsafe blocks };
          m_fun_kind = FSync; m_user_attributes = [];
-         m_ret = (([Pos.none], void), (Some ([6:26-30], (Hprim Tvoid))));
+         m_ret = ((void), (Some ([6:26-30], (Hprim Tvoid))));
          m_external = false; m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];

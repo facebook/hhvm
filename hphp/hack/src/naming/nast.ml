@@ -26,29 +26,29 @@ let show_func_body_ann = function
 let pp_func_body_ann fmt fba =
   Format.pp_print_string fmt (show_func_body_ann fba)
 
-type program = (Pos.t, func_body_ann, unit) Aast.program [@@deriving show]
-type def = (Pos.t, func_body_ann, unit) Aast.def
-type expr = (Pos.t, func_body_ann, unit) Aast.expr [@@deriving show]
-type expr_ = (Pos.t, func_body_ann, unit) Aast.expr_
-type stmt = (Pos.t, func_body_ann, unit) Aast.stmt
-type block = (Pos.t, func_body_ann, unit) Aast.block
-type user_attribute = (Pos.t, func_body_ann, unit) Aast.user_attribute [@@deriving show]
-type class_id_ = (Pos.t, func_body_ann, unit) Aast.class_id_
-type class_ = (Pos.t, func_body_ann, unit) Aast.class_
-type method_ = (Pos.t, func_body_ann, unit) Aast.method_
-type fun_ = (Pos.t, func_body_ann, unit) Aast.fun_
-type fun_def = (Pos.t, func_body_ann, unit) Aast.fun_def
-type func_body = (Pos.t, func_body_ann, unit) Aast.func_body
-type fun_param = (Pos.t, func_body_ann, unit) Aast.fun_param
-type fun_variadicity = (Pos.t, func_body_ann, unit) Aast.fun_variadicity
-type typedef = (Pos.t, func_body_ann, unit) Aast.typedef
-type tparam = (Pos.t, func_body_ann, unit) Aast.tparam
-type gconst = (Pos.t, func_body_ann, unit) Aast.gconst
-type class_id = (Pos.t, func_body_ann, unit) Aast.class_id
-type catch = (Pos.t, func_body_ann, unit) Aast.catch
-type case = (Pos.t, func_body_ann, unit) Aast.case
-type field = (Pos.t, func_body_ann, unit) Aast.field
-type afield = (Pos.t, func_body_ann, unit) Aast.afield
+type program = (Pos.t, func_body_ann, unit, unit) Aast.program [@@deriving show]
+type def = (Pos.t, func_body_ann, unit, unit) Aast.def
+type expr = (Pos.t, func_body_ann, unit, unit) Aast.expr [@@deriving show]
+type expr_ = (Pos.t, func_body_ann, unit, unit) Aast.expr_
+type stmt = (Pos.t, func_body_ann, unit, unit) Aast.stmt
+type block = (Pos.t, func_body_ann, unit, unit) Aast.block
+type user_attribute = (Pos.t, func_body_ann, unit, unit) Aast.user_attribute [@@deriving show]
+type class_id_ = (Pos.t, func_body_ann, unit, unit) Aast.class_id_
+type class_ = (Pos.t, func_body_ann, unit, unit) Aast.class_
+type method_ = (Pos.t, func_body_ann, unit, unit) Aast.method_
+type fun_ = (Pos.t, func_body_ann, unit, unit) Aast.fun_
+type fun_def = (Pos.t, func_body_ann, unit, unit) Aast.fun_def
+type func_body = (Pos.t, func_body_ann, unit, unit) Aast.func_body
+type fun_param = (Pos.t, func_body_ann, unit, unit) Aast.fun_param
+type fun_variadicity = (Pos.t, func_body_ann, unit, unit) Aast.fun_variadicity
+type typedef = (Pos.t, func_body_ann, unit, unit) Aast.typedef
+type tparam = (Pos.t, func_body_ann, unit, unit) Aast.tparam
+type gconst = (Pos.t, func_body_ann, unit, unit) Aast.gconst
+type class_id = (Pos.t, func_body_ann, unit, unit) Aast.class_id
+type catch = (Pos.t, func_body_ann, unit, unit) Aast.catch
+type case = (Pos.t, func_body_ann, unit, unit) Aast.case
+type field = (Pos.t, func_body_ann, unit, unit) Aast.field
+type afield = (Pos.t, func_body_ann, unit, unit) Aast.afield
 type sid = Aast.sid
 
 module ShapeMap = Ast_defs.ShapeMap
@@ -187,6 +187,8 @@ let ast_deregister_attributes_mapper = object (self)
 
   method on_'en _ (en: unit) = en
 
+  method on_'hi _ (hi: unit) = hi
+
   method ignored_attr env l =
     List.exists l
       (fun attr -> List.mem (env.ignored_attributes) (snd attr.ua_name) ~equal:(=))
@@ -232,6 +234,8 @@ let ast_no_pos_or_docblock_mapper = object
   method on_'ex _ _ex = Pos.none
 
   method on_'en _ (en: unit) = en
+
+  method on_'hi _ (hi: unit) = hi
 
   method! on_fun_ env f = super#on_fun_ env { f with f_doc_comment = None}
   method! on_class_ env c = super#on_class_ env { c with c_doc_comment = None}
@@ -338,7 +342,7 @@ class type ['a] visitor_type = object
   method on_for :
       'a -> expr -> expr -> expr -> block -> 'a
   method on_foreach :
-      'a -> expr -> (Pos.t, func_body_ann, unit) as_expr -> block -> 'a
+      'a -> expr -> (Pos.t, func_body_ann, unit, unit) as_expr -> block -> 'a
   method on_if : 'a -> expr -> block -> block -> 'a
   method on_noop : 'a -> 'a
   method on_fallthrough : 'a -> 'a
@@ -347,15 +351,15 @@ class type ['a] visitor_type = object
   method on_goto : 'a -> pstring -> 'a
   method on_awaitall : 'a -> (id option * expr) list -> block -> 'a
   method on_stmt : 'a -> stmt -> 'a
-  method on_stmt_ : 'a -> (Pos.t, func_body_ann, unit) stmt_ -> 'a
+  method on_stmt_ : 'a -> (Pos.t, func_body_ann, unit, unit) stmt_ -> 'a
   method on_switch : 'a -> expr -> case list -> 'a
   method on_throw : 'a -> expr -> 'a
   method on_try : 'a -> block -> catch list -> block -> 'a
   method on_def_inline : 'a -> def -> 'a
   method on_let : 'a -> id -> hint option -> expr -> 'a
   method on_while : 'a -> expr -> block -> 'a
-  method on_using : 'a -> (Pos.t, func_body_ann, unit) using_stmt -> 'a
-  method on_as_expr : 'a -> (Pos.t, func_body_ann, unit) as_expr -> 'a
+  method on_using : 'a -> (Pos.t, func_body_ann, unit, unit) using_stmt -> 'a
+  method on_as_expr : 'a -> (Pos.t, func_body_ann, unit, unit) as_expr -> 'a
   method on_array : 'a -> afield list -> 'a
   method on_shape : 'a -> (Ast_defs.shape_field_name * expr) list -> 'a
   method on_valCollection : 'a -> vc_kind -> targ option -> expr list -> 'a
@@ -372,7 +376,7 @@ class type ['a] visitor_type = object
   method on_method_caller : 'a -> sid -> pstring -> 'a
   method on_obj_get : 'a -> expr -> expr -> 'a
   method on_array_get : 'a -> expr -> expr option -> 'a
-  method on_class_get : 'a -> class_id -> (Pos.t, func_body_ann, unit) class_get_expr -> 'a
+  method on_class_get : 'a -> class_id -> (Pos.t, func_body_ann, unit, unit) class_get_expr -> 'a
   method on_class_const : 'a -> class_id -> pstring -> 'a
   method on_call : 'a -> call_type -> expr -> expr list -> expr list -> 'a
   method on_true : 'a -> 'a
@@ -382,7 +386,7 @@ class type ['a] visitor_type = object
   method on_null : 'a -> 'a
   method on_string : 'a -> string -> 'a
   method on_string2 : 'a -> expr list -> 'a
-  method on_special_func : 'a -> (Pos.t, func_body_ann, unit) special_func -> 'a
+  method on_special_func : 'a -> (Pos.t, func_body_ann, unit, unit) special_func -> 'a
   method on_yield_break : 'a -> 'a
   method on_yield : 'a -> afield -> 'a
   method on_yield_from : 'a -> expr -> 'a
@@ -405,16 +409,16 @@ class type ['a] visitor_type = object
   method on_record : 'a -> class_id -> (expr * expr) list -> 'a
   method on_efun : 'a -> fun_ -> id list -> 'a
   method on_lfun : 'a -> fun_ -> id list -> 'a
-  method on_xml : 'a -> sid -> (Pos.t, func_body_ann, unit) xhp_attribute list -> expr list -> 'a
+  method on_xml : 'a -> sid -> (Pos.t, func_body_ann, unit, unit) xhp_attribute list -> expr list -> 'a
   method on_param_kind : 'a -> Ast_defs.param_kind -> 'a
   method on_callconv : 'a -> Ast_defs.param_kind -> expr -> 'a
-  method on_assert : 'a -> (Pos.t, func_body_ann, unit) assert_expr -> 'a
+  method on_assert : 'a -> (Pos.t, func_body_ann, unit, unit) assert_expr -> 'a
   method on_clone : 'a -> expr -> 'a
   method on_field: 'a -> field -> 'a
   method on_afield: 'a -> afield -> 'a
-  method on_class_typeconst: 'a -> (Pos.t, func_body_ann, unit) class_typeconst -> 'a
-  method on_class_c_const: 'a -> (Pos.t, func_body_ann, unit) class_const -> 'a
-  method on_class_var: 'a -> (Pos.t, func_body_ann, unit) class_var -> 'a
+  method on_class_typeconst: 'a -> (Pos.t, func_body_ann, unit, unit) class_typeconst -> 'a
+  method on_class_c_const: 'a -> (Pos.t, func_body_ann, unit, unit) class_const -> 'a
+  method on_class_var: 'a -> (Pos.t, func_body_ann, unit, unit) class_var -> 'a
   method on_class_use: 'a -> hint -> 'a
   method on_class_req: 'a -> (hint * bool) -> 'a
 

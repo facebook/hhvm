@@ -57,31 +57,30 @@ type func_body_ann =
   | NoUnsafeBlocks
   [@@deriving show] (* True if there are any UNSAFE blocks *)
 
-type program = ((Pos.t * ty), func_body_ann, saved_env) Aast.program [@@deriving show]
-type def = ((Pos.t * ty), func_body_ann, saved_env) Aast.def
-type expr = ((Pos.t * ty), func_body_ann, saved_env) Aast.expr
-type expr_ = ((Pos.t * ty), func_body_ann, saved_env) Aast.expr_
-type stmt = ((Pos.t * ty), func_body_ann, saved_env) Aast.stmt
-type block = ((Pos.t * ty), func_body_ann, saved_env) Aast.block
-type class_ = ((Pos.t * ty), func_body_ann, saved_env) Aast.class_
-type class_id = ((Pos.t * ty), func_body_ann, saved_env) Aast.class_id
-type class_get_expr = ((Pos.t * ty), func_body_ann, saved_env) Aast.class_get_expr
-type class_typeconst = ((Pos.t * ty), func_body_ann, saved_env) Aast.class_typeconst
-type user_attribute = ((Pos.t * ty), func_body_ann, saved_env) Aast.user_attribute
-type fun_ = ((Pos.t * ty), func_body_ann, saved_env) Aast.fun_
-type fun_def = ((Pos.t * ty), func_body_ann, saved_env) Aast.fun_def
-type fun_param = ((Pos.t * ty), func_body_ann, saved_env) Aast.fun_param
-type func_body = ((Pos.t * ty), func_body_ann, saved_env) Aast.func_body
-type method_ = ((Pos.t * ty), func_body_ann, saved_env) Aast.method_
-type method_redeclaration = ((Pos.t * ty), func_body_ann, saved_env) Aast.method_redeclaration
-type class_var = ((Pos.t * ty), func_body_ann, saved_env) Aast.class_var
-type class_tparams = ((Pos.t * ty), func_body_ann, saved_env) Aast.class_tparams
-type class_const = ((Pos.t * ty), func_body_ann, saved_env) Aast.class_const
-type tparam = ((Pos.t * ty), func_body_ann, saved_env) Aast.tparam
-type typedef = ((Pos.t * ty), func_body_ann, saved_env) Aast.typedef
-type gconst = ((Pos.t * ty), func_body_ann, saved_env) Aast.gconst
-type pu_enum = ((Pos.t * ty), func_body_ann, saved_env) Aast.pu_enum
-
+type program = ((Pos.t * ty), func_body_ann, saved_env, ty) Aast.program [@@deriving show]
+type def = ((Pos.t * ty), func_body_ann, saved_env, ty) Aast.def
+type expr = ((Pos.t * ty), func_body_ann, saved_env, ty) Aast.expr
+type expr_ = ((Pos.t * ty), func_body_ann, saved_env, ty) Aast.expr_
+type stmt = ((Pos.t * ty), func_body_ann, saved_env, ty) Aast.stmt
+type block = ((Pos.t * ty), func_body_ann, saved_env, ty) Aast.block
+type class_ = ((Pos.t * ty), func_body_ann, saved_env, ty) Aast.class_
+type class_id = ((Pos.t * ty), func_body_ann, saved_env, ty) Aast.class_id
+type class_get_expr = ((Pos.t * ty), func_body_ann, saved_env, ty) Aast.class_get_expr
+type class_typeconst = ((Pos.t * ty), func_body_ann, saved_env, ty) Aast.class_typeconst
+type user_attribute = ((Pos.t * ty), func_body_ann, saved_env, ty) Aast.user_attribute
+type fun_ = ((Pos.t * ty), func_body_ann, saved_env, ty) Aast.fun_
+type fun_def = ((Pos.t * ty), func_body_ann, saved_env, ty) Aast.fun_def
+type fun_param = ((Pos.t * ty), func_body_ann, saved_env, ty) Aast.fun_param
+type func_body = ((Pos.t * ty), func_body_ann, saved_env, ty) Aast.func_body
+type method_ = ((Pos.t * ty), func_body_ann, saved_env, ty) Aast.method_
+type method_redeclaration = ((Pos.t * ty), func_body_ann, saved_env, ty) Aast.method_redeclaration
+type class_var = ((Pos.t * ty), func_body_ann, saved_env, ty) Aast.class_var
+type class_tparams = ((Pos.t * ty), func_body_ann, saved_env, ty) Aast.class_tparams
+type class_const = ((Pos.t * ty), func_body_ann, saved_env, ty) Aast.class_const
+type tparam = ((Pos.t * ty), func_body_ann, saved_env, ty) Aast.tparam
+type typedef = ((Pos.t * ty), func_body_ann, saved_env, ty) Aast.typedef
+type gconst = ((Pos.t * ty), func_body_ann, saved_env, ty) Aast.gconst
+type pu_enum = ((Pos.t * ty), func_body_ann, saved_env, ty) Aast.pu_enum
 
 let empty_saved_env tcopt : saved_env = {
   tcopt;
@@ -98,7 +97,7 @@ let empty_saved_env tcopt : saved_env = {
  * TODO: (arkumar,wilfred,thomasjiang) T42509373 Fix when when needed
  *)
 let dummy_saved_env = empty_saved_env GlobalOptions.default
-let dummy_type_hint = (Pos.none, (Typing_reason.Rnone, Typing_defs.Tany)), None
+let dummy_type_hint = (Typing_reason.Rnone, Typing_defs.Tany), None
 
 (* Helper function to create an annotation for a typed and positioned expression.
  * Do not construct this tuple directly - at some point we will build
@@ -132,6 +131,9 @@ let nast_converter =
       | _ -> Nast.Named
 
     method on_'en _ _ = ()
+
+    method on_'hi _ _ = ()
+
   end
 
 let to_nast p =

@@ -102,6 +102,7 @@ let expand_ty ?pos env ty =
 let expander = object
   inherit Tast_visitor.endo
   method! on_'ex env (pos, ty) = (pos, expand_ty ~pos env ty)
+  method! on_'hi env  ty = expand_ty env ty
 end
 
 (* Replace all types in a program AST by their expansions *)

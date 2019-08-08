@@ -4,7 +4,7 @@ Errors:
 [(Fun
     { f_span = [4:1-6:2]; f_annotation = (); f_mode = <opaque>;
       f_ret =
-      (([Pos.none], Awaitable<shape()>),
+      ((Awaitable<shape()>),
        (Some ([4:35-53],
               (Happly (([4:35-44], "\\Awaitable"),
                  [([4:45-52],
@@ -25,7 +25,7 @@ Errors:
   (Fun
      { f_span = [8:1-16:2]; f_annotation = (); f_mode = <opaque>;
        f_ret =
-       (([Pos.none], Awaitable<void>),
+       ((Awaitable<void>),
         (Some ([8:24-39],
                (Happly (([8:24-33], "\\Awaitable"),
                   [([8:34-38], (Hprim Tvoid))])))));

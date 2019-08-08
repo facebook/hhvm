@@ -551,6 +551,7 @@ let is_strict_code code = ISet.mem code !error_codes_treated_strictly
 let use_new_type_errors = ref false
 let disable_linter_fixmes = ref false
 
+(* The 'phps FixmeAllHackErrors' tool must be kept in sync with this list *)
 let default_ignored_fixme_codes = ISet.of_list [
   Typing.err_code Typing.InvalidIsAsExpressionHint;
   Typing.err_code Typing.InvalidEnforceableTypeArgument;

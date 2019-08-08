@@ -403,6 +403,11 @@ void conjureBeginInlining(IRGS& env,
   always_assert(hasFPushEffects(env.context.callerFPushOp));
   auto const numParams = static_cast<uint32_t>(args.size());
 
+  // Push space for out parameters
+  for (auto i = 0; i < func->numInOutParams(); i++) {
+    push(env, cns(env, TUninit));
+  }
+
   allocActRec(env);
   for (auto const argType : args) {
     push(env, conjure(argType));

@@ -630,6 +630,11 @@ bool shouldInline(const irgen::IRGS& irgs,
   // Ignore cost computation for functions marked __ALWAYS_INLINE
   if (!RuntimeOption::EvalHHIRInliningIgnoreHints &&
       callee->userAttributes().count(s_AlwaysInline.get())) {
+    // In debug builds compute the cost anyway to catch bugs in the inlining
+    // machinery. Many inlining tests utilize the __ALWAYS_INLINE attribute.
+    if (debug) {
+      computeTranslationCost(callerSk, callerFPushOp, region, annotations);
+    }
     return accept("callee marked as __ALWAYS_INLINE");
   }
 

@@ -721,8 +721,8 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   static const FlavorDesc inputSigs[][kMaxHhbcImms] = {
   #define NOV { },
   #define CUMANY { },
+  #define CMANY_U3 { },
   #define CALLNATIVE { },
-  #define FPUSH(nin, nobj) { nobj ? CV : UV },
   #define FCALL(nin, nobj) { nobj ? CV : UV },
   #define FCALLO { },
   #define CMANY { },
@@ -740,8 +740,8 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef MFINAL
   #undef C_MFINAL
   #undef CUMANY
+  #undef CMANY_U3
   #undef CALLNATIVE
-  #undef FPUSH
   #undef FCALL
   #undef FCALLO
   #undef CMANY
@@ -764,18 +764,6 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
       m_tmp_sig[i] = CV;
     }
     return m_tmp_sig;
-  case Op::PopFrame: { // IVA..., FPUSH, FPUSH
-    auto const numArgs = getImm(pc, 0).u_IVA;
-    auto const numPops = instrNumPops(pc);
-    auto idx = 0;
-    m_tmp_sig[idx++] = inputSigs[size_t(peek_op(pc))][0];
-    m_tmp_sig[idx++] = UV;
-    m_tmp_sig[idx++] = UV;
-    for (int i = 0; i < numArgs; ++i) m_tmp_sig[idx++] = CVV;
-    assertx(idx == numPops || idx + 1 == numPops || idx + 2 == numPops);
-    while (idx < numPops) m_tmp_sig[idx++] = CV;
-    return m_tmp_sig;
-  }
   case Op::FCallClsMethod:
   case Op::FCallClsMethodD:
   case Op::FCallClsMethodRD:
@@ -826,6 +814,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     return m_tmp_sig;
   }
   case Op::CreateCl:  // TWO(IVA,SA),  CUMANY,   ONE(CV)
+  case Op::PopFrame:  // ONE(IVA),     CMANY_U3, CMANY
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CUV;
     }
@@ -1438,7 +1427,7 @@ bool FuncChecker::checkIterBreak(State* cur, PC pc) {
 bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   static const FlavorDesc outputSigs[][kMaxHhbcImms] = {
   #define NOV { },
-  #define FPUSH { },
+  #define CMANY { },
   #define FCALL { },
   #define CALLNATIVE { },
   #define ONE(a) { a },
@@ -1454,7 +1443,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   #undef THREE
   #undef TWO
   #undef ONE
-  #undef FPUSH
+  #undef CMANY
   #undef FCALL
   #undef NOV
   };

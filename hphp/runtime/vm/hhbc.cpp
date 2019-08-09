@@ -403,8 +403,8 @@ int instrNumPops(PC pc) {
 #define MFINAL -3
 #define C_MFINAL(n) -10 - (n)
 #define CUMANY -3
+#define CMANY_U3 C_MFINAL(3)
 #define CALLNATIVE -5
-#define FPUSH(nin, nobj) C_MFINAL(nin + 3)
 #define FCALL(nin, nobj) -20 - (nin)
 #define FCALLO -4
 #define CMANY -3
@@ -420,8 +420,8 @@ int instrNumPops(PC pc) {
 #undef MFINAL
 #undef C_MFINAL
 #undef CUMANY
+#undef CMANY_U3
 #undef CALLNATIVE
-#undef FPUSH
 #undef FCALL
 #undef FCALLO
 #undef CMANY
@@ -476,7 +476,7 @@ int instrNumPushes(PC pc) {
 #define THREE(...) 3
 #define FOUR(...) 4
 #define FIVE(...) 5
-#define FPUSH -2
+#define CMANY -2
 #define FCALL -1
 #define CALLNATIVE -3
 #define O(name, imm, pop, push, flags) push,
@@ -487,7 +487,7 @@ int instrNumPushes(PC pc) {
 #undef THREE
 #undef FOUR
 #undef FIVE
-#undef FPUSH
+#undef CMANY
 #undef FCALL
 #undef CALLNATIVE
 #undef O
@@ -517,18 +517,6 @@ FlavorDesc doFlavor(uint32_t i, FlavorDesc f, Args&&... args) {
 FlavorDesc manyFlavor(PC op, uint32_t i, FlavorDesc flavor) {
   always_assert(i < uint32_t(instrNumPops(op)));
   return flavor;
-}
-
-template<int nin, int nobj>
-FlavorDesc fpushFlavor(PC op, uint32_t i) {
-  always_assert(i < uint32_t(instrNumPops(op)));
-  if (i < nin) return CV;
-  i -= nin;
-  auto const numArgs = getImm(op, 0).u_IVA;
-  if (i < numArgs) return CVV;
-  i -= numArgs;
-  if (i < 2) return UV;
-  return nobj ? CV : UV;
 }
 
 template<int nin, int nobj>
@@ -573,8 +561,8 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #define MFINAL return manyFlavor(op, idx, CV);
 #define C_MFINAL(n) return manyFlavor(op, idx, CV);
 #define CUMANY return manyFlavor(op, idx, CUV);
+#define CMANY_U3 return manyFlavor(op, idx, CUV);
 #define CALLNATIVE return fcallBuiltinFlavor(op, idx);
-#define FPUSH(nin, nobj) return fpushFlavor<nin, nobj>(op, idx);
 #define FCALL(nin, nobj) return fcallFlavor<nin, nobj>(op, idx);
 #define FCALLO return fcallOldFlavor(op, idx);
 #define CMANY return manyFlavor(op, idx, CV);
@@ -593,8 +581,8 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #undef MFINAL
 #undef C_MFINAL
 #undef CUMANY
+#undef CMANY_U3
 #undef CALLNATIVE
-#undef FPUSH
 #undef FCALL
 #undef FCALLO
 #undef CMANY

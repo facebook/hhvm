@@ -17,7 +17,9 @@
 #pragma once
 
 #include <boost/variant.hpp>
+#include <folly/Range.h>
 
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
@@ -125,4 +127,15 @@ struct HackcUnitCompiler : public UnitCompiler {
   virtual const char* getName() const override { return "HackC"; }
 };
 
+using HhasHandler = std::string (*)(
+  const char*,
+  const SHA1&,
+  folly::StringPiece::size_type,
+  const StructuredLogEntry&,
+  std::function<void(const char *)>,
+  std::function<std::string()>,
+  const RepoOptions&
+);
+
+extern HhasHandler g_hhas_handler;
 }

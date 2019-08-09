@@ -51,6 +51,8 @@ namespace HPHP {
 
 TRACE_SET_MOD(extern_compiler);
 
+HhasHandler g_hhas_handler = nullptr;
+
 namespace {
 
 bool createHackc(const std::string& path, const std::string& binary) {
@@ -370,11 +372,35 @@ struct ExternCompiler {
       m_compilations++;
       StructuredLogEntry log;
       log.setStr("filename", filename);
-      int64_t t = logTime(log, 0, nullptr, true);
-      writeProgram(filename, sha1, code, forDebuggerEval, options);
-      t = logTime(log, t, "send_source");
-      prog = readResult(&log);
-      t = logTime(log, t, "receive_hhas");
+      int64_t startTime = logTime(log, 0, nullptr, true);
+      int64_t t = startTime;
+
+      auto statefulLogTime = [&](const char* name) {
+        t = logTime(log, t, name);
+      };
+
+      auto generateHhas = [&]() {
+        writeProgram(filename, sha1, code, forDebuggerEval, options);
+        statefulLogTime("send_source");
+        auto hhas = readResult(&log);
+        statefulLogTime("receive_hhas");
+        return hhas;
+      };
+
+      if (nullptr != g_hhas_handler) {
+        prog = g_hhas_handler(
+          filename,
+          sha1,
+          code.size(),
+          log,
+          statefulLogTime,
+          generateHhas,
+          options
+        );
+      } else {
+        prog = generateHhas();
+      }
+
       auto ue = assemble_string(prog.data(),
                                 prog.length(),
                                 filename,
@@ -383,7 +409,8 @@ struct ExternCompiler {
                                 false /* swallow errors */,
                                 wantsSymbolRefs
                               );
-      logTime(log, t, "assemble_hhas");
+      statefulLogTime("assemble_hhas");
+      log.setInt("total_time", t - startTime);
       if (RuntimeOption::EvalLogExternCompilerPerf) {
         StructuredLog::log("hhvm_detailed_frontend_performance", log);
       }

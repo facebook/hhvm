@@ -126,6 +126,7 @@ def run_batch_tests(
     program: str,
     default_expect_regex,
     ignore_error_text,
+    no_stderr: bool,
     get_flags: Callable[[str], List[str]],
     out_extension: str,
     only_compare_error_lines: bool = False,
@@ -159,7 +160,10 @@ def run_batch_tests(
             print("Executing", " ".join(cmd))
         try:
             subprocess.call(
-                cmd, stderr=subprocess.STDOUT, cwd=test_dir, universal_newlines=True
+                cmd,
+                stderr=None if no_stderr else subprocess.STDOUT,
+                cwd=test_dir,
+                universal_newlines=True,
             )
         except subprocess.CalledProcessError:
             # we don't care about nonzero exit codes... for instance, type
@@ -202,6 +206,7 @@ def run_test_program(
     program: str,
     default_expect_regex,
     ignore_error_text,
+    no_stderr,
     get_flags: Callable[[str], List[str]],
     timeout=None,
 ) -> List[Result]:
@@ -223,7 +228,7 @@ def run_test_program(
         try:
             output = subprocess.check_output(
                 cmd,
-                stderr=subprocess.STDOUT,
+                stderr=None if no_stderr else subprocess.STDOUT,
                 cwd=test_dir,
                 universal_newlines=True,
                 input=test_case.input,
@@ -466,6 +471,7 @@ def run_tests(
     default_expect_regex: Optional[str],
     batch_mode: str,
     ignore_error_text: str,
+    no_stderr: bool,
     get_flags: Callable[[str], List[str]],
     timeout=None,
     only_compare_error_lines: bool = False,
@@ -486,6 +492,7 @@ def run_tests(
             program,
             default_expect_regex,
             ignore_error_text,
+            no_stderr,
             get_flags,
             out_extension,
             only_compare_error_lines,
@@ -496,6 +503,7 @@ def run_tests(
             program,
             default_expect_regex,
             ignore_error_text,
+            no_stderr,
             get_flags,
             timeout=timeout,
         )
@@ -542,7 +550,7 @@ def run_idempotence_tests(
     ]
 
     idempotence_results = run_test_program(
-        idempotence_test_cases, program, default_expect_regex, False, get_flags
+        idempotence_test_cases, program, default_expect_regex, False, False, get_flags
     )
 
     num_idempotence_results = len(idempotence_results)
@@ -620,6 +628,11 @@ if __name__ == "__main__":
         "--stdin", action="store_true", help="Pass test input file via stdin"
     )
     parser.add_argument(
+        "--no-stderr",
+        action="store_true",
+        help="Do not include stderr output in the output file",
+    )
+    parser.add_argument(
         "--batch", action="store_true", help="Run tests in batches to the test program"
     )
     parser.add_argument(
@@ -674,6 +687,7 @@ if __name__ == "__main__":
         args.default_expect_regex,
         args.batch,
         args.ignore_error_text,
+        args.no_stderr,
         get_flags,
         timeout=args.timeout,
         only_compare_error_lines=args.only_compare_error_lines,

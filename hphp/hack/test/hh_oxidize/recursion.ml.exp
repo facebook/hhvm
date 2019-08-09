@@ -1,0 +1,11 @@
+#[derive(Clone, Debug)]
+pub enum IntList {
+    Nil,
+    Cons(isize, Box<IntList>),
+}
+
+#[derive(Clone, Debug)]
+pub enum NAryTree<A> {
+    Leaf(A),
+    Children(Vec<NAryTree<A>>),
+}

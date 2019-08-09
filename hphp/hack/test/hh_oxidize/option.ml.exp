@@ -1,0 +1,5 @@
+#[derive(Clone, Debug)]
+pub enum Option<A> {
+    None,
+    Some(A),
+}

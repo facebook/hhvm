@@ -1,0 +1,6 @@
+#[derive(Clone, Debug)]
+pub enum A {
+    I,
+    J(isize),
+    K((isize, isize)),
+}

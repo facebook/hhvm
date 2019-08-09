@@ -1,0 +1,5 @@
+#[derive(Clone, Debug)]
+pub struct A {
+    pub x: isize,
+    pub y: isize,
+}

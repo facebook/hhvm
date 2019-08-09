@@ -1,0 +1,5 @@
+#[derive(Clone, Debug)]
+pub enum TypeTRecursion {
+    Nil,
+    Cons(isize, Box<TypeTRecursion>),
+}

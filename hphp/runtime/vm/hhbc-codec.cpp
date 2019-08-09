@@ -109,7 +109,7 @@ void encodeFCallArgsBase(UnitEmitter& ue, const FCallArgsBase& fca,
 }
 
 FCallArgs decodeFCallArgs(Op thisOpcode, PC& pc) {
-  assertx(hasFCallEffects(thisOpcode));
+  assertx(isFCall(thisOpcode));
   bool lockWhileUnwinding = false;
   auto const flags = [&]() {
     auto rawFlags = decode_byte(pc);

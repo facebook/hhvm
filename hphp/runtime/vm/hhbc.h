@@ -208,9 +208,6 @@ enum InstrFlags {
    * not affect what vmpc() is set to after the instruction completes. */
   CF = 0x2,
 
-  /* Instruction pushes an FPI */
-  PF = 0x4,
-
   /* Shorthand for common combinations. */
   CF_TF = (CF | TF),
 };
@@ -647,7 +644,6 @@ constexpr uint32_t kMaxConcatN = 4;
                                        FCALL(0, 1),     FCALL,      CF) \
   O(FCallObjMethodRD,FOUR(FCA,SA,OA(ObjMethodOp),SA),                   \
                                        FCALL(1, 1),     FCALL,      CF) \
-  O(FCall,           THREE(FCA,SA,SA), FCALLO,          FCALL,      CF) \
   O(FCallBuiltin,    FOUR(IVA,IVA,IVA,SA),CALLNATIVE,   CALLNATIVE, NF) \
   O(IterInit,        THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
   O(LIterInit,       FOUR(IA,LA,BA,LA),NOV,             NOV,        CF) \
@@ -957,7 +953,7 @@ OffsetSet instrSuccOffsets(PC opc, const Func* func);
  * creates the illusion that the instruction fell through normally to the
  * instruction after it, within the context of its execution frame.
  *
- * The canonical example of this behavior is the FCall instruction, so we use
+ * The canonical example of this behavior are the FCall* instructions, so we use
  * "non-call control flow" to describe the set of CF instruction that do not
  * exhibit this behavior. This function returns true if `opcode' is a non-call
  * control flow instruction.
@@ -1020,28 +1016,12 @@ constexpr bool isFCallObjMethod(Op opcode) {
     opcode == OpFCallObjMethodRD;
 }
 
-constexpr bool isNewFCall(Op opcode) {
+constexpr bool isFCall(Op opcode) {
   return
     opcode == OpFCallCtor ||
     isFCallClsMethod(opcode) ||
     isFCallFunc(opcode) ||
     isFCallObjMethod(opcode);
-}
-
-constexpr bool isLegacyFPush(Op opcode) {
-  return (instrFlags(opcode) & PF) != 0;
-}
-
-constexpr bool hasFPushEffects(Op opcode) {
-  return isLegacyFPush(opcode) || isNewFCall(opcode);
-}
-
-constexpr bool isLegacyFCall(Op opcode) {
-  return opcode == Op::FCall;
-}
-
-constexpr bool hasFCallEffects(Op opcode) {
-  return isLegacyFCall(opcode) || isNewFCall(opcode);
 }
 
 constexpr bool isRet(Op op) {

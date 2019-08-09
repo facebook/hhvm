@@ -62,23 +62,15 @@ bool checkUnit(const UnitEmitter*, ErrorMode mode = kStderr);
  * 3.  Empty stack at try-region starts (but not ends).
  * 4.  |stack| == 1 before Ret*.
  * 5.  The body must end with a terminal.
- * 6.  each fpi starts with FPush* and ends with FCall; each FPush must be
- *     the first instr in exactly 1 fpi region.
- * 7.  no back-jumps in FPI; no forward jumps out of FPI; no jumps into
- *     FPI from outside; no terminals inside FPI region.
- * 8.  FPI depth same for all ctrl paths. every path must push N values.
- * 9.  stack depth @FPush == depth @FCall.  No instr can pop past depth of
- *     FPush.
- * 10. State of each iterator variable known everywhere.
- * 11. initialized state of iterators correct for Iter* instructions.
- * 12. Asserts not separated from following instruction by control flow
- * 13. Member instruction sequences are consistent and continuous
+ * 6.  State of each iterator variable known everywhere.
+ * 7.  initialized state of iterators correct for Iter* instructions.
+ * 8.  Asserts not separated from following instruction by control flow
+ * 9.  Member instruction sequences are consistent and continuous
  * -- All region and branch offsets must refer to valid instruction starts.
  * -- every string table index in-bounds
  * -- every array table index in-bounds
  * -- Local variable ids must be < Func.numLocals
  * -- iter variable ids must be < Func.numIterators
- * -- FCall <num params> <unpack>  == FPush* <num params + unpack>
  * -- init-state of every iterator must be known everywhere
  *
  * Not Checked:

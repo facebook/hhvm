@@ -645,8 +645,7 @@ dynamic getTrans(TransID transId) {
     if (unit) {
       auto const newFunc = unit->getFunc(block.bcStart);
       always_assert(newFunc);
-      newFunc->prettyPrint(byteInfo, HPHP::Func::PrintOpts().noFpi()
-                                                            .noMetadata());
+      newFunc->prettyPrint(byteInfo, HPHP::Func::PrintOpts().noMetadata());
       unit->prettyPrint(byteInfo, HPHP::Unit::PrintOpts().range(block.bcStart,
                                                                 block.bcPast)
                                                          .noFuncs());
@@ -733,7 +732,7 @@ void printTrans(TransID transId) {
       always_assert(newFunc);
       if (newFunc != curFunc) {
         byteInfo << '\n';
-        newFunc->prettyPrint(byteInfo, Func::PrintOpts().noFpi().noMetadata());
+        newFunc->prettyPrint(byteInfo, Func::PrintOpts().noMetadata());
       }
       curFunc = newFunc;
 

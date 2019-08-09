@@ -112,16 +112,6 @@ void pretty_print(const FuncEmitter* fe, std::ostream& out) {
     }
     out << std::endl;
   }
-
-  for (auto& fpi : fe->fpitab) {
-    out << " FPI " << fpi.m_fpushOff << "-" << fpi.m_fpiEndOff
-        << "; fpOff = " << fpi.m_fpOff;
-    if (fpi.m_parentIndex != -1) {
-      out << " parentIndex = " << fpi.m_parentIndex
-          << " (depth " << fpi.m_fpiDepth << ")";
-    }
-    out << '\n';
-  }
 }
 
 static void pretty_print(
@@ -192,20 +182,9 @@ std::string blockToString(const Block* b, const Graph*, const UnitEmitter* u) {
   return out.str();
 }
 
-void printFPI(const FuncEmitter* func) {
-  auto const unit = &func->ue();
-  PC bc = unit->bc();
-  for (auto& fpi : func->fpitab) {
-    printf("  FPI[%d:%d] fpoff=%d parent=%d fpiDepth=%d\n",
-           fpiBase(fpi, bc), fpiPast(fpi, bc), fpi.m_fpOff, fpi.m_parentIndex,
-           fpi.m_fpiDepth);
-  }
-}
-
 void printBlocks(const FuncEmitter* func, const Graph* g) {
   auto const unit = &func->ue();
   pretty_print(func, std::cout);
-  printFPI(func);
   for (LinearBlocks i(g->first_linear, 0); !i.empty(); i.popFront()) {
     const Block* b = i.front();
     std::cout << blockToString(b, g, unit) << std::endl;

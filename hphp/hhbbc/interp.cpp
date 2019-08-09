@@ -3730,21 +3730,12 @@ bool fcallOptimizeChecks(
   ISS& env,
   const FCallArgs& fca,
   const res::Func& func,
-  FCallWithFCA fcallWithFCA,
-  const ActRec* legacyAR = nullptr
+  FCallWithFCA fcallWithFCA
 ) {
   if (fca.enforceReffiness()) {
     bool match = true;
     for (auto i = 0; i < fca.numArgs; ++i) {
       auto const kind = env.index.lookup_param_prep(env.ctx, func, i);
-      if (legacyAR && legacyAR->foldable && kind != PrepKind::Val) {
-        fpiNotFoldable(env);
-        fpiPop(env);
-        discard(env, fca.numArgsInclUnpack());
-        for (auto j = uint32_t{0}; j < fca.numRets; ++j) push(env, TBottom);
-        return true;
-      }
-
       if (kind == PrepKind::Unknown) {
         match = false;
         break;
@@ -3809,18 +3800,11 @@ bool fcallTryFold(
   const res::Func& func,
   Type context,
   bool maybeDynamic,
-  uint32_t numExtraInputs,
-  const ActRec* legacyAR = nullptr
+  uint32_t numExtraInputs
 ) {
   auto const foldableFunc = func.exactFunc();
-  if (!foldableFunc) {
-    assertx(!legacyAR || !legacyAR->foldable);
-    return false;
-  }
-
-  if (legacyAR) {
-    if (!legacyAR->foldable) return false;
-  } else if (!canFold(env, foldableFunc, fca.numArgs, context, maybeDynamic)) {
+  if (!foldableFunc) return false;
+  if (!canFold(env, foldableFunc, fca.numArgs, context, maybeDynamic)) {
     return false;
   }
 
@@ -3866,20 +3850,9 @@ bool fcallTryFold(
         repl.push_back(bc::PopU {});
       }
       repl.push_back(gen_constant(*v));
-      if (legacyAR) fpiPop(env);
       reduce(env, std::move(repl));
       return true;
     }
-  }
-
-  if (legacyAR) {
-    assertx(legacyAR->foldable);
-    assertx(numExtraInputs == 0);
-    fpiNotFoldable(env);
-    fpiPop(env);
-    discard(env, fca.numArgsInclUnpack());
-    for (auto i = uint32_t{0}; i < fca.numRets; ++i) push(env, TBottom);
-    return true;
   }
 
   if (tried_lookup) {
@@ -3944,8 +3917,7 @@ void fcallKnownImpl(
   Type context,
   bool nullsafe,
   uint32_t numExtraInputs,
-  FCallWithFCA fcallWithFCA,
-  bool legacy = false
+  FCallWithFCA fcallWithFCA
 ) {
   auto returnType = [&] {
     CompactVector<Type> args(fca.numArgs);
@@ -3994,26 +3966,18 @@ void fcallKnownImpl(
   for (auto i = uint32_t{0}; i < numExtraInputs; ++i) popC(env);
   if (fca.hasUnpack()) popC(env);
   for (auto i = uint32_t{0}; i < fca.numArgs; ++i) popCV(env);
-  if (legacy) {
-    fpiPop(env);
-  } else {
-    popU(env);
-    popU(env);
-    popCU(env);
-  }
+  popU(env);
+  popU(env);
+  popCU(env);
   pushCallReturnType(env, std::move(returnType), fca);
 }
 
-void fcallUnknownImpl(ISS& env, const FCallArgs& fca, bool legacy = false) {
+void fcallUnknownImpl(ISS& env, const FCallArgs& fca) {
   if (fca.hasUnpack()) popC(env);
   for (auto i = uint32_t{0}; i < fca.numArgs; ++i) popCV(env);
-  if (legacy) {
-    fpiPop(env);
-  } else {
-    popU(env);
-    popU(env);
-    popCU(env);
-  }
+  popU(env);
+  popU(env);
+  popCU(env);
   if (fca.asyncEagerTarget != NoBlockId) {
     assertx(fca.numRets == 1);
     push(env, TInitCell);
@@ -4680,10 +4644,6 @@ void in(ISS& env, const bc::LockObj& op) {
     return bail();
   }
   reduce(env);
-}
-
-void in(ISS& env, const bc::FCall& op) {
-  fcallUnknownImpl(env, op.fca, /* legacy */ true);
 }
 
 namespace {

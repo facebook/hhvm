@@ -536,7 +536,7 @@ static void traceCallback(ActRec* fp, Cell* sp, Offset bcOff) {
            fp->m_func->fullName()->data(), bcOff, fp, sp,
            __builtin_return_address(0));
   }
-  checkFrame(fp, sp, true /* fullCheck */, bcOff);
+  checkFrame(fp, sp, true /* fullCheck */);
 }
 
 void cgDbgTraceCall(IRLS& env, const IRInstruction* inst) {

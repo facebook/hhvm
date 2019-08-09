@@ -160,16 +160,6 @@ CollectedInfo::CollectedInfo(const Index& index,
 
 //////////////////////////////////////////////////////////////////////
 
-bool operator==(const ActRec& a, const ActRec& b) {
-  auto const fsame =
-    a.func.hasValue() != b.func.hasValue() ? false :
-    a.func.hasValue() ? a.func->same(*b.func) :
-    true;
-  return a.kind == b.kind && fsame &&
-         equivalently_refined(a.context, b.context);
-}
-bool operator!=(const ActRec& a, const ActRec& b) { return !(a == b); }
-
 State with_throwable_only(const Index& index, const State& src) {
   auto throwable = subObj(index.builtin_class(s_Throwable.get()));
   auto ret          = State{};
@@ -262,22 +252,6 @@ void widen_props(PropState& props) {
   }
 }
 
-bool merge_into(ActRec& dst, const ActRec& src) {
-  if (dst != src) {
-    if (dst.kind != src.kind) {
-      dst = ActRec { FPIKind::Unknown, TTop };
-    } else {
-      dst = ActRec { src.kind, union_of(dst.context, src.context) };
-    }
-    return true;
-  }
-  if (dst.foldable != src.foldable) {
-    dst.foldable = false;
-    return true;
-  }
-  return false;
-}
-
 template<class JoinOp>
 bool merge_impl(State& dst, const State& src, JoinOp join) {
   if (!dst.initialized) {
@@ -289,7 +263,6 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
   assert(dst.locals.size() == src.locals.size());
   assert(dst.iters.size() == src.iters.size());
   assert(dst.stack.size() == src.stack.size());
-  assert(dst.fpiStack.size() + src.fpiStack.size() == 0);
 
   if (src.unreachable) {
     // If we're coming from unreachable code and the dst is already
@@ -341,12 +314,6 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
 
   for (auto i = size_t{0}; i < dst.iters.size(); ++i) {
     if (merge_into(dst.iters[i], src.iters[i], join)) {
-      changed = true;
-    }
-  }
-
-  for (auto i = size_t{0}; i < dst.fpiStack.size(); ++i) {
-    if (merge_into(dst.fpiStack[i], src.fpiStack[i])) {
       changed = true;
     }
   }
@@ -534,27 +501,6 @@ void InterpStack::peek(int numPop,
 }
 
 //////////////////////////////////////////////////////////////////////
-
-static std::string fpiKindStr(FPIKind k) {
-  switch (k) {
-  case FPIKind::Unknown:     return "unk";
-  }
-  not_reached();
-}
-
-std::string show(const ActRec& a) {
-  return folly::to<std::string>(
-    "ActRec { ",
-    fpiKindStr(a.kind),
-    a.cls || a.func ? ": " : "",
-    a.cls ? show(*a.cls) : "",
-    a.cls && a.func ? "::" : "",
-    a.func ? show(*a.func) : "",
-    a.foldable ? " (foldable)" : "",
-    " ", show(a.context),
-    " }"
-  );
-}
 
 std::string show(const php::Func& f, const Base& b) {
   auto const locName = [&]{

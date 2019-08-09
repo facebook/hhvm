@@ -155,55 +155,6 @@ bool merge_into(FrameState& dst, const FrameState& src) {
 
   changed |= merge_into(dst.mbase, src.mbase);
 
-  // The tracked FPI state must always be the same, notice that the size of the
-  // FPI stacks may differ as the FPush associated with one of the merged blocks
-  // may be outside the region. In this case we must drop the unknown state.
-  dst.fpiStack.resize(std::min(dst.fpiStack.size(), src.fpiStack.size()));
-  for (int i = 0; i < dst.fpiStack.size(); ++i) {
-    auto& dstInfo = dst.fpiStack[i];
-    auto const& srcInfo = src.fpiStack[i];
-
-    always_assert(dstInfo.returnSP == srcInfo.returnSP);
-    always_assert(hasFPushEffects(dstInfo.fpushOpc) &&
-                  dstInfo.fpushOpc == srcInfo.fpushOpc);
-
-    // If one of the merged edges is not eligible for inlining, mark the result
-    // as not eligibile.
-    if (dstInfo.inlineEligible && !srcInfo.inlineEligible) {
-      dstInfo.inlineEligible = false;
-      changed = true;
-    }
-
-    // If one of the merged edges spans a call then mark them both as spanning
-    if (!dstInfo.spansCall && srcInfo.spansCall) {
-      dstInfo.spansCall = true;
-      changed = true;
-    }
-
-    // Merge the contexts from the respective spills
-    if (dstInfo.ctx != srcInfo.ctx) {
-      dstInfo.ctx = least_common_ancestor(dstInfo.ctx, srcInfo.ctx);
-      changed = true;
-    }
-
-    if (dstInfo.ctxType != srcInfo.ctxType) {
-      dstInfo.ctxType |= srcInfo.ctxType;
-      changed = true;
-    }
-
-    // Merge the Funcs
-    if (dstInfo.func != nullptr && dstInfo.func != srcInfo.func) {
-      dstInfo.func = nullptr;
-      changed = true;
-    }
-
-    if (dstInfo.dynamicCall != nullptr &&
-        dstInfo.dynamicCall != srcInfo.dynamicCall) {
-      dstInfo.dynamicCall = nullptr;
-      changed = true;
-    }
-  }
-
   // The frame may span a call if it could have done so in either state.
   changed |= merge_util(dst.frameMaySpanCall,
                         dst.frameMaySpanCall || src.frameMaySpanCall);
@@ -412,13 +363,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
       // We consider popping an ActRec and args to be synced to memory.
       assertx(cur().bcSPOff == inst->marker().spOff());
       cur().bcSPOff -= extra->numParams + kNumActRecCells;
-
-      if (!cur().fpiStack.empty()) {
-        cur().fpiStack.pop_back();
-      }
-      for (auto& st : m_stack) {
-        for (auto& fpi : st.fpiStack) fpi.spansCall = true;
-      }
     }
     break;
 
@@ -443,13 +387,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
       // A CallUnpack pops the ActRec, actual args, and an array arg.
       assertx(cur().bcSPOff == inst->marker().spOff());
       cur().bcSPOff -= numCells;
-
-      if (!cur().fpiStack.empty()) {
-        cur().fpiStack.pop_back();
-      }
-      for (auto& st : m_stack) {
-        for (auto& fpi : st.fpiStack) fpi.spansCall = true;
-      }
     }
     break;
 
@@ -619,39 +556,12 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     );
     break;
 
-  case SpillFrame:
-    spillFrameStack(inst);
-    break;
+  case SpillFrame: {
+    assertx(inst->is(SpillFrame));
+    auto const extra = inst->extra<SpillFrame>();
 
-  case AssertARFunc: {
-    auto funcTmp = inst->src(1);
-    if (funcTmp->hasConstVal(TFunc)) {
-      auto sp = inst->src(0);
-      auto irSPOff = inst->extra<AssertARFunc>()->offset;
-      auto func = funcTmp->funcVal();
-      for (auto& fpi : cur().fpiStack) {
-        if (fpi.returnSP == sp && fpi.irSPOff == irSPOff) {
-          if (fpi.func == nullptr) {
-            fpi.func = func;
-            // we know the func, so it's eligible for inlining
-            fpi.inlineEligible = true;
-            if (func->isStaticInPrologue()) {
-              fpi.ctxType = TCctx;
-            } else if (func->cls() != nullptr) {
-              fpi.ctxType -= TNullptr;
-            } else {
-              fpi.ctxType = TNullptr;
-            }
-            ITRACE(3, "FrameStateMgr::update(AssertARFunc): setting function "
-                   "to {}\n", func->fullName());
-          } else {
-            always_assert_flog(
-                fpi.func == func, "fpi.func = {} (@ {}) ; func = {} (@ {})\n",
-                fpi.func->fullName(), fpi.func, func->fullName(), func
-            );
-          }
-        }
-      }
+    for (auto i = uint32_t{0}; i < kNumActRecCells; ++i) {
+      setValue(stk(extra->spOffset + i), nullptr);
     }
     break;
   }
@@ -659,20 +569,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   case InterpOne:
   case InterpOneCF: {
     auto const& extra = *inst->extra<InterpOneData>();
-    if (isLegacyFPush(extra.opcode)) {
-      cur().fpiStack.push_back(FPIInfo { cur().spValue,
-                                         extra.spOffset,
-                                         TCtx,
-                                         nullptr,
-                                         extra.opcode,
-                                         nullptr,
-                                         nullptr,
-                                         false /* inlineEligible */,
-                                         false /* spansCall */});
-    } else if (isLegacyFCall(extra.opcode) && !cur().fpiStack.empty()) {
-      cur().fpiStack.pop_back();
-    }
-
     assertx(!extra.smashesAllLocals || extra.nChangedLocals == 0);
     if (extra.smashesAllLocals || inst->marker().func()->isPseudoMain()) {
       clearLocals();
@@ -1219,7 +1115,6 @@ void FrameStateMgr::clearForUnprocessedPred() {
   cur().mbr = MBRState{};
   cur().mbase = MBaseState{};
 
-  cur().fpiStack.clear();
   clearLocals();
 }
 
@@ -1233,11 +1128,6 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
   auto const calleeSP   = inst->src(0);
 
   always_assert(calleeSP == cur().spValue);
-
-  /*
-   * Remove the callee from the FPI Stack.
-   */
-  cur().fpiStack.pop_back();
 
   /*
    * Push a new state for the inlined callee; saving the state we'll need to
@@ -1647,52 +1537,6 @@ void FrameStateMgr::refinePredictedTmpType(SSATmp* tmp, Type predicted) {
   FTRACE(3, "Prediction for {} refined from {} to ", *tmp->inst(), it->second);
   it->second = refinePrediction(it->second, predicted, tmp->type());
   FTRACE(3, "{}\n", it->second);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-static const Func* getSpillFrameKnownCallee(const IRInstruction* inst) {
-  if (!inst->is(SpillFrame)) return nullptr;
-
-  const auto funcTmp = inst->src(1);
-  if (!funcTmp->hasConstVal(TFunc)) return nullptr;
-
-  return funcTmp->funcVal();
-}
-
-void FrameStateMgr::spillFrameStack(const IRInstruction* inst) {
-  assertx(inst->is(SpillFrame));
-  auto const extra = inst->extra<SpillFrame>();
-
-  for (auto i = uint32_t{0}; i < kNumActRecCells; ++i) {
-    setValue(stk(extra->spOffset + i), nullptr);
-  }
-  auto const ctx = inst->src(2);
-  auto const dynamicCall = inst->src(4);
-
-  const Func* func = getSpillFrameKnownCallee(inst);
-  auto const opc = m_fpushOverride ?
-    *m_fpushOverride : inst->marker().sk().op();
-  m_fpushOverride.clear();
-
-  auto const inlineEligible = [&] {
-    if (func && !func->hasReifiedGenerics()) return true;
-    auto const tsList = inst->src(5);
-    if (tsList->isA(TNullptr)) return true;
-    return false;
-  }();
-
-  cur().fpiStack.push_back(FPIInfo {
-    cur().spValue,
-    extra->spOffset,
-    ctx ? ctx->type() : TCtx,
-    ctx,
-    opc,
-    func,
-    dynamicCall,
-    inlineEligible,
-    false /* spans */
-  });
 }
 
 ///////////////////////////////////////////////////////////////////////////////

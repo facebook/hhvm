@@ -112,10 +112,9 @@ void FuncEmitter::init(int l1, int l2, Offset base_, Attr attrs_, bool top_,
   }
 }
 
-void FuncEmitter::finish(Offset past_, bool load) {
+void FuncEmitter::finish(Offset past_) {
   past = past_;
   sortEHTab();
-  sortFPITab(load);
 }
 
 void FuncEmitter::commit(RepoTxn& txn) const {
@@ -228,7 +227,6 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_numIterators = m_numIterators;
   f->m_maxStackCells = maxStackCells;
   f->shared()->m_ehtab = ehtab;
-  f->shared()->m_fpitab = fpitab;
   f->shared()->m_isClosureBody = isClosureBody;
   f->shared()->m_isAsync = isAsync;
   f->shared()->m_isGenerator = isGenerator;
@@ -354,11 +352,6 @@ EHEnt& FuncEmitter::addEHEnt() {
   return ehtab.back();
 }
 
-FPIEnt& FuncEmitter::addFPIEnt() {
-  fpitab.push_back(FPIEnt());
-  return fpitab.back();
-}
-
 namespace {
 
 /*
@@ -396,34 +389,6 @@ void FuncEmitter::sortEHTab() {
   }
 
   setEHTabIsSorted();
-}
-
-void FuncEmitter::sortFPITab(bool load) {
-  // Sort it and fill in parent info
-  std::sort(
-    begin(fpitab), end(fpitab),
-    [&] (const FPIEnt& a, const FPIEnt& b) {
-      return a.m_fpushOff < b.m_fpushOff;
-    }
-  );
-  for (unsigned int i = 0; i < fpitab.size(); i++) {
-    fpitab[i].m_parentIndex = -1;
-    fpitab[i].m_fpiDepth = 1;
-    for (int j = i - 1; j >= 0; j--) {
-      if (fpitab[j].m_fpiEndOff >= fpitab[i].m_fpiEndOff) {
-        fpitab[i].m_parentIndex = j;
-        fpitab[i].m_fpiDepth = fpitab[j].m_fpiDepth + 1;
-        break;
-      }
-    }
-    if (!load) {
-      // m_fpOff does not include the space taken up by locals, iterators and
-      // the AR itself. Fix it here.
-      fpitab[i].m_fpOff += m_numLocals
-        + m_numIterators * kNumIterCells
-        + (fpitab[i].m_fpiDepth) * kNumActRecCells;
-    }
-  }
 }
 
 void FuncEmitter::setEHTabIsSorted() {
@@ -545,18 +510,6 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (params)
     (localNames)
     (ehtab)
-    (fpitab,
-      [&](const FPIEnt& prev, FPIEnt cur) -> FPIEnt {
-        cur.m_fpiEndOff -= cur.m_fpushOff;
-        cur.m_fpushOff -= prev.m_fpushOff;
-        return cur;
-      },
-      [&](const FPIEnt& prev, FPIEnt delta) -> FPIEnt {
-        delta.m_fpushOff += prev.m_fpushOff;
-        delta.m_fpiEndOff += delta.m_fpushOff;
-        return delta;
-      }
-    )
     (userAttributes)
     (retTypeConstraint)
     (retUserType)
@@ -660,7 +613,7 @@ void FuncRepoProxy::GetFuncsStmt
         }
       }
       fe->setEHTabIsSorted();
-      fe->finish(fe->past, true);
+      fe->finish(fe->past);
     }
   } while (!query.done());
   txn.commit();

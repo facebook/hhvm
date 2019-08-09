@@ -306,15 +306,6 @@ private:
  */
 struct Func {
   /*
-   * Returns whether two res::Funcs definitely mean the func at
-   * runtime.
-   *
-   * Note: this is potentially pessimistic for its use in ActRec state
-   * merging right now, but not incorrect.
-   */
-  bool same(const Func&) const;
-
-  /*
    * Returns the name of this function.  Non-null guarantee.
    */
   SString name() const;

@@ -50,8 +50,9 @@ using ReifiedGenericsPtr = CompactTaggedPtr<ArrayData,uint16_t>;
  * For most purposes, an ActRec can be considered to be in one of three
  * possible states:
  *   Pre-live:
- *     After the FPush* instruction which materialized the ActRec on the stack
- *     but before the corresponding FCall instruction.
+ *     In the middle of the FCall instruction and function prologues, when the
+ *     ActRec is materialized on the stack, but the rest of the frame (such as
+ *     locals) is not yet initialized.
  *   Live:
  *     After the corresponding FCall instruction but before the ActRec fields
  *     and locals/iters have been decref'd (either by return or unwinding).

@@ -201,7 +201,7 @@ void UnitEmitter::addTrivialPseudoMain() {
   emitInt64(1);
   emitOp(OpRetC);
   mfe->maxStackCells = 1;
-  mfe->finish(bcPos(), false);
+  mfe->finish(bcPos());
 
   TypedValue mainReturn;
   mainReturn.m_data.num = 1;
@@ -1458,7 +1458,7 @@ createFatalUnit(StringData* filename, const SHA1& sha1, FatalOp /*op*/,
   FuncEmitter* fe = ue->getMain();
   fe->maxStackCells = 1;
   // XXX line numbers are bogus
-  fe->finish(ue->bcPos(), false);
+  fe->finish(ue->bcPos());
   return ue;
 }
 

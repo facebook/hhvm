@@ -171,7 +171,7 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
     auto const breaksBB =
       instrIsNonCallControlFlow(op) ||
       instrFlags(op) & TF ||
-      (hasFCallEffects(op) && !instrJumpOffsets(pc).empty());
+      (isFCall(op) && !instrJumpOffsets(pc).empty());
 
     if (options.TraceBytecodes.count(op)) traceBc = true;
 
@@ -379,14 +379,6 @@ void populate_block(ParseUnitState& puState,
       puState.constPassFuncs.insert(&func);
     }
   };
-  UNUSED auto has_call_unpack = [&] {
-    auto const fpi = Func::findFPI(&*fe.fpitab.begin(),
-                                   &*fe.fpitab.end(), pc - ue.bc());
-    auto pc = ue.bc() + fpi->m_fpiEndOff;
-    auto const op = decode_op(pc);
-    if (!isLegacyFCall(op)) return false;
-    return decodeFCallArgs(op, pc).hasUnpack();
-  };
 
 #define IMM_BLA(n)     auto targets = decode_switch(opPC);
 #define IMM_SLA(n)     auto targets = decode_sswitch(opPC);
@@ -463,7 +455,6 @@ void populate_block(ParseUnitState& puState,
 #define FLAGS_TF
 #define FLAGS_CF
 #define FLAGS_FF
-#define FLAGS_PF auto hu = has_call_unpack();
 #define FLAGS_CF_TF
 #define FLAGS_CF_FF
 
@@ -471,7 +462,6 @@ void populate_block(ParseUnitState& puState,
 #define FLAGS_ARG_TF
 #define FLAGS_ARG_CF
 #define FLAGS_ARG_FF
-#define FLAGS_ARG_PF ,hu
 #define FLAGS_ARG_CF_TF
 #define FLAGS_ARG_CF_FF
 
@@ -549,7 +539,6 @@ void populate_block(ParseUnitState& puState,
 #undef FLAGS_TF
 #undef FLAGS_CF
 #undef FLAGS_FF
-#undef FLAGS_PF
 #undef FLAGS_CF_TF
 #undef FLAGS_CF_FF
 
@@ -557,7 +546,6 @@ void populate_block(ParseUnitState& puState,
 #undef FLAGS_ARG_TF
 #undef FLAGS_ARG_CF
 #undef FLAGS_ARG_FF
-#undef FLAGS_ARG_PF
 #undef FLAGS_ARG_CF_TF
 #undef FLAGS_ARG_CF_FF
 

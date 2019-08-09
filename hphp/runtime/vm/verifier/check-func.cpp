@@ -42,29 +42,12 @@ namespace HPHP {
 namespace Verifier {
 
 /**
- * State for one entry on the FPI stack which corresponds to one call-site
- * in progress.
- */
-struct FpiState {
-  Offset fpush;   // offset of fpush (can get num_params from this)
-  int stkmin;     // stklen before FPush repushes args
-  bool operator==(const FpiState& s) const {
-    return fpush == s.fpush && stkmin == s.stkmin;
-  }
-  bool operator!=(const FpiState& s) const {
-    return !(*this == s);
-  }
-};
-
-/**
  * Facts about a Func's current frame at various program points
  */
 struct State {
   FlavorDesc* stk{};  // Evaluation stack.
-  FpiState* fpi{};    // FPI stack.
   bool* iters{};      // defined/not-defined state of each iter var.
   int stklen{0};       // length of evaluation stack.
-  int fpilen{0};       // length of FPI stack.
   bool mbr_live{false};    // liveness of member base register
   folly::Optional<MOpMode> mbr_mode; // mode of member base register
   boost::dynamic_bitset<> silences; // set of silenced local variables
@@ -125,9 +108,7 @@ struct FuncChecker {
   bool checkOutputs(State* cur, PC, Block* b);
   bool checkRxOp(State* cur, PC, Op);
   bool checkSig(PC pc, int len, const FlavorDesc* args, const FlavorDesc* sig);
-  bool checkEHStack(const EHEnt&, Block* b);
   bool checkTerminal(State* cur, PC pc);
-  bool checkLegacyFCall(State* cur, PC pc);
   bool checkIter(State* cur, PC pc);
   bool checkIterBreak(State* cur, PC pc);
   bool checkLocal(PC pc, int val);
@@ -140,7 +121,6 @@ struct FuncChecker {
   std::string stateToString(const State& cur) const;
   std::string sigToString(int len, const FlavorDesc* sig) const;
   std::string stkToString(int len, const FlavorDesc* args) const;
-  std::string fpiToString(const FpiState&) const;
   std::string iterToString(const State& cur) const;
   std::string slotsToString(const boost::dynamic_bitset<>&) const;
   void copyState(State* to, const State* from);
@@ -149,7 +129,6 @@ struct FuncChecker {
   Offset offset(PC pc) const { return pc - unit()->bc(); }
   PC at(Offset off) const { return unit()->bc() + off; }
   int maxStack() const { return m_func->maxStackCells; }
-  int maxFpi() const { return m_func->fpitab.size(); }
   int numIters() const { return m_func->numIterators(); }
   int numLocals() const { return m_func->numLocals(); }
   int numParams() const { return m_func->params.size(); }
@@ -235,7 +214,6 @@ bool checkFunc(const FuncEmitter* func, ErrorMode mode) {
     if (!func->pce()) {
       printf("  FuncId %d\n", func->id());
     }
-    printFPI(func);
   }
   FuncChecker v(func, mode);
   return v.checkOffsets() &&
@@ -278,7 +256,6 @@ Offset findSection(SectionMap& sections, Offset off) {
 bool FuncChecker::checkOffsets() {
   bool ok = true;
   assertx(unit()->bcPos() >= 0);
-  PC bc = unit()->bc();
   Offset base = m_func->base;
   Offset past = m_func->past;
   checkRegion("func", base, past, "unit", 0, unit()->bcPos(), false);
@@ -290,12 +267,6 @@ bool FuncChecker::checkOffsets() {
       ok &= checkOffset("dv-entry", param.funcletOff, "func body", base,
                         past);
     }
-  }
-  // Every FPI region must be contained within the primary body
-  for (auto& fpi : m_func->fpitab) {
-    Offset fpi_base = fpiBase(fpi, bc);
-    Offset fpi_past = fpiPast(fpi, bc);
-    ok &= checkRegion("fpi", fpi_base, fpi_past, "func", base, past);
   }
   return ok;
 }
@@ -418,7 +389,7 @@ bool FuncChecker::checkImmSLA(PC& pc, PC const /*instr*/) {
 bool FuncChecker::checkImmI32LA(PC& pc, PC const instr) {
   auto inst_copy = instr;
   auto const op = decode_op(inst_copy);
-  assertx(isNewFCall(op));
+  assertx(isFCall(op));
   auto const fca = decodeFCallArgs(op, inst_copy);
   auto const count = decode_iva(pc);
   for (int i = 0; i < count; ++i) {
@@ -724,7 +695,6 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #define CMANY_U3 { },
   #define CALLNATIVE { },
   #define FCALL(nin, nobj) { nobj ? CV : UV },
-  #define FCALLO { },
   #define CMANY { },
   #define SMANY { },
   #define ONE(a) { a },
@@ -743,7 +713,6 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef CMANY_U3
   #undef CALLNATIVE
   #undef FCALL
-  #undef FCALLO
   #undef CMANY
   #undef SMANY
   #undef FIVE
@@ -789,16 +758,6 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     if (fca.hasUnpack()) m_tmp_sig[idx++] = CV;
     assertx(idx == numPops || idx + 1 == numPops || idx + 2 == numPops);
     while (idx < numPops) m_tmp_sig[idx++] = CV;
-    return m_tmp_sig;
-  }
-  case Op::FCall: {      // THREE(FCA,SA,SA), FCALLO, FCALL
-    auto const fca = getImm(pc, 0).u_FCA;
-    assertx(fca.numRets != 0);
-    auto idx = 0;
-    for (int i = 0; i < fca.numRets - 1; ++i) m_tmp_sig[idx++] = UV;
-    for (int i = 0; i < fca.numArgs; ++i) m_tmp_sig[idx++] = CVV;
-    if (fca.hasUnpack()) m_tmp_sig[idx++] = CV;
-    assertx(idx == instrNumPops(pc));
     return m_tmp_sig;
   }
   case Op::FCallBuiltin: { //TWO(IVA, SA), CALLNATIVE,  CALLNATIVE
@@ -896,11 +855,7 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
 
 bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
   auto const numPops = instrNumPops(pc);
-  auto fpiAdj = isLegacyFCall(peek_op(pc)) ? 2 : 1;
-  int min = cur->fpilen > fpiAdj - 1
-    ? cur->fpi[cur->fpilen - fpiAdj].stkmin
-    : 0;
-  if (numPops > 0 && cur->stklen - numPops < min) {
+  if (numPops > cur->stklen) {
     reportStkUnderflow(b, *cur, pc);
     cur->stklen = 0;
     return false;
@@ -959,15 +914,6 @@ bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
     cur->mbr_mode = op_mode;
   }
 
-  if (cur->fpilen > 0 && isJmp(op)) {
-    auto offset = getImm(pc, 0).u_BA;
-    if (offset < 0) {
-      error("FPI contains backwards jump at %s\n",
-            opcodeToName(op));
-      ok = false;
-    }
-  }
-
   return ok;
 }
 
@@ -980,34 +926,6 @@ bool FuncChecker::checkTerminal(State* cur, PC pc) {
     }
   }
   return true;
-}
-
-bool FuncChecker::checkLegacyFCall(State* cur, PC pc) {
-  assertx(isLegacyFCall(peek_op(pc)));
-
-  if (cur->fpilen <= 0) {
-    error("%s", "cannot access empty FPI stack\n");
-    return false;
-  }
-  bool ok = true;
-  FpiState& fpi = cur->fpi[cur->fpilen - 1];
-  --cur->fpilen;
-  auto const fca = getImm(pc, 0).u_FCA;
-  int call_params = fca.numArgsInclUnpack();
-  int push_params = getImmIva(at(fpi.fpush));
-  if (call_params != push_params) {
-    error("FCall* param_count (%d) doesn't match FPush* (%d)\n",
-           call_params, push_params);
-    ok = false;
-  }
-  if (cur->stklen != fpi.stkmin - fca.numRets + 1) {
-    error("wrong # of params were passed; got %d expected %d\n",
-          push_params + cur->stklen + fca.numRets - 1 - fpi.stkmin,
-          push_params);
-    ok = false;
-  }
-
-  return ok;
 }
 
 // Check that the initialization state of the iterator referenced by the current
@@ -1330,11 +1248,6 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
         ferror("{} may only appear in an async function\n", opcodeToName(op));
         return false;
       }
-      if (cur->fpilen != 0) {
-        ferror("{} may not appear in the middle of an FPI region\n",
-               opcodeToName(op));
-        return false;
-      }
       if (cur->stklen != instrNumPops(pc)) {
         ferror("{} may not be used with non-empty stack\n", opcodeToName(op));
         return false;
@@ -1453,22 +1366,9 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   if (cur->stklen + pushes > maxStack()) reportStkOverflow(b, *cur, pc);
   FlavorDesc *outs = &cur->stk[cur->stklen];
   cur->stklen += pushes;
-  if (isLegacyFPush(op)) {
-    for (int i = 0; i < pushes; ++i) {
-      outs[i] = outs[i + 3];
-    }
-
-    if (cur->fpilen >= maxFpi()) {
-      error("%s", "more FPush* instructions than FPI regions\n");
-      return false;
-    }
-    FpiState& fpi = cur->fpi[cur->fpilen];
-    cur->fpilen++;
-    fpi.fpush = offset(pc);
-    fpi.stkmin = cur->stklen - pushes;
-  } else if (op == OpPopFrame) {
+  if (op == OpPopFrame) {
     for (int i = 0; i < pushes; ++i) outs[i] = outs[i + 3];
-  } else if (hasFCallEffects(op) || op == OpFCallBuiltin) {
+  } else if (isFCall(op) || op == OpFCallBuiltin) {
     for (int i = 0; i < pushes; ++i) {
       outs[i] = CV;
     }
@@ -1489,13 +1389,6 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   } else if (isMemberFinalOp(op)) {
     cur->mbr_live = false;
     cur->mbr_mode.clear();
-  }
-
-  if (cur->fpilen > 0 && (op == Op::RetC || op == Op::RetCSuspended ||
-                          op == Op::RetM)) {
-    error("%s instruction encountered inside of FPI region\n",
-          opcodeToName(op));
-    ok = false;
   }
 
   return ok;
@@ -1694,7 +1587,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
       return true;
 
     // function calling and object construction
-    case Op::FCall:
     case Op::FCallBuiltin:
     case Op::FCallClsMethod:
     case Op::FCallClsMethodD:
@@ -1970,19 +1862,11 @@ std::string FuncChecker::stateToString(const State& cur) const {
   );
 }
 
-std::string FuncChecker::fpiToString(const FpiState& fpi) const {
-  std::stringstream out;
-  out << '(' << fpi.fpush << ':' << fpi.stkmin << ')';
-  return out.str();
-}
-
 void FuncChecker::initState(State* s) {
   s->stk = new (m_arena) FlavorDesc[maxStack()];
-  s->fpi = new (m_arena) FpiState[maxFpi()];
   s->iters = new (m_arena) bool[numIters()];
   for (int i = 0, n = numIters(); i < n; ++i) s->iters[i] = false;
   s->stklen = 0;
-  s->fpilen = 0;
   s->mbr_live = false;
   s->mbr_mode.clear();
   s->silences.clear();
@@ -1996,10 +1880,8 @@ void FuncChecker::copyState(State* to, const State* from) {
   assertx(from->stk);
   if (!to->stk) initState(to);
   memcpy(to->stk, from->stk, from->stklen * sizeof(*to->stk));
-  memcpy(to->fpi, from->fpi, from->fpilen * sizeof(*to->fpi));
   memcpy(to->iters, from->iters, numIters() * sizeof(*to->iters));
   to->stklen = from->stklen;
-  to->fpilen = from->fpilen;
   to->mbr_live = from->mbr_live;
   to->mbr_mode = from->mbr_mode;
   to->silences = from->silences;
@@ -2016,14 +1898,11 @@ bool FuncChecker::checkExnEdge(State cur, Block* b) {
   // bytecode table which instructions can actually throw.
   auto save_stklen = cur.stklen;
   auto save_stktop = cur.stklen ? cur.stk[0] : CV;
-  auto save_fpilen = cur.fpilen;
   cur.stklen = 1;
   cur.stk[0] = CV;
-  cur.fpilen = 0;
   auto const ok = checkEdge(b, cur, b->exn);
   cur.stklen = save_stklen;
   cur.stk[0] = save_stktop;
-  cur.fpilen = save_fpilen;
   return ok;
 }
 
@@ -2060,7 +1939,6 @@ bool FuncChecker::checkBlock(State& cur, Block* b) {
     ok &= checkInputs(&cur, pc, b);
     auto const flags = instrFlags(op);
     if (flags & TF) ok &= checkTerminal(&cur, pc);
-    if (isLegacyFCall(op)) ok &= checkLegacyFCall(&cur, pc);
     if (isIter(pc)) ok &= checkIter(&cur, pc);
     if (op == Op::IterBreak) ok &= checkIterBreak(&cur, pc);
     ok &= checkOutputs(&cur, pc, b);
@@ -2094,10 +1972,6 @@ bool FuncChecker::checkFlow() {
     m_last_rpo_id = b->rpo_id;
     copyState(&cur, &m_info[b->id].state_in);
     ok &= checkBlock(cur, b);
-  }
-  // Make sure eval stack is correct at start of each try region
-  for (auto& handler : m_func->ehtab) {
-    ok &= checkEHStack(handler, builder.at(handler.m_base));
   }
 
   return ok;
@@ -2184,16 +2058,6 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
   return ok;
 }
 
-bool FuncChecker::checkEHStack(const EHEnt& /*handler*/, Block* b) {
-  const State& state = m_info[b->id].state_in;
-  if (!state.stk) return true; // ignore unreachable block
-  if (state.fpilen != 0) {
-    error("EH region starts with non-empty FPI stack at B%d\n", b->id);
-    return false;
-  }
-  return true;
-}
-
 /**
  * Check the edge b->t, given the current state at the end of b.
  * If this is the first edge ->t we've seen, copy the state to t.
@@ -2250,20 +2114,6 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
       }
     }
   }
-  // Check FPI stack.
-  if (state.fpilen != cur.fpilen) {
-    error("FPI stack depth mismatch on edge B%d->B%d, "
-           "current %d target %d\n", b->id, t->id, cur.fpilen, state.fpilen);
-    return false;
-  }
-  for (int i = 0, n = cur.fpilen; i < n; i++) {
-    if (state.fpi[i] != cur.fpi[i]) {
-      error("FPI mismatch on edge B%d->B%d, current %s target %s\n",
-             b->id, t->id, fpiToString(cur.fpi[i]).c_str(),
-             fpiToString(state.fpi[i]).c_str());
-      return false;
-    }
-  }
   // Check iterator variable state.
   if (false /* TODO(#1097182): Iterator verification disabled */) {
     for (int i = 0, n = numIters(); i < n; i++) {
@@ -2289,9 +2139,7 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
 }
 
 void FuncChecker::reportStkUnderflow(Block*, const State& cur, PC pc) {
-  int min = cur.fpilen > 0 ? cur.fpi[cur.fpilen - 1].stkmin : 0;
-  error("Rule2: Stack underflow at PC %d, min depth %d\n",
-         offset(pc), min);
+  error("Rule2: Stack underflow at PC %d\n", offset(pc));
 }
 
 void FuncChecker::reportStkOverflow(Block*, const State& /*cur*/, PC pc) {

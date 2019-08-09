@@ -311,23 +311,6 @@ inline LinearBlocks linearBlocks(const Graph* g) {
   return LinearBlocks(g->first_linear, 0);
 }
 
-// A callsite pushes 0 or more arguments on the stack, followed by a FPush* and
-// FCall opcodes. The FPI Region protects the range of instructions that execute
-// with the partial activation on the stack, which is the instruction after
-// FPush* up to and including FCall. FPush* is not in the protected region. In
-// other words, only FCall is part of the FPI region. This mechanism is being
-// actively dismantled.
-
-inline Offset fpiBase(const FPIEnt& fpi, PC bc) {
-  PC fpush = bc + fpi.m_fpushOff;
-  return fpush + instrLen(fpush) - bc;
-}
-
-inline Offset fpiPast(const FPIEnt& fpi, PC bc) {
-  PC endFpiOp = bc + fpi.m_fpiEndOff;
-  return endFpiOp + instrLen(endFpiOp) - bc;
-}
-
 }} // HPHP::Verifier
 
 #endif // incl_HPHP_VM_VERIFIER_CFG_H_

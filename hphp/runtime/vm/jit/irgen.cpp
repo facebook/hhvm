@@ -229,12 +229,8 @@ void endBlock(IRGS& env, Offset next) {
   jmpImpl(env, next);
 }
 
-void prepareForNextHHBC(IRGS& env,
-                        const NormalizedInstruction* ni,
-                        SrcKey newSk) {
+void prepareForNextHHBC(IRGS& env, SrcKey newSk) {
   FTRACE(1, "------------------- prepareForNextHHBC ------------------\n");
-  env.currentNormalizedInstruction = ni;
-
   always_assert_flog(
     IMPLIES(isInlining(env), !env.firstBcInst),
     "Inlining while still at the first region instruction."

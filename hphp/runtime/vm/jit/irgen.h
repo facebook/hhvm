@@ -163,7 +163,7 @@ void ringbufferMsg(IRGS&, Trace::RingBufferType, const StringData*,
  * of the irgen module calls this function to move to the next
  * bytecode instruction (`newSk') to translate.
  */
-void prepareForNextHHBC(IRGS&, const NormalizedInstruction*, SrcKey newSk);
+void prepareForNextHHBC(IRGS&, SrcKey newSk);
 
 /*
  * After translating each bytecode instruction, the driver of the
@@ -208,10 +208,9 @@ uint16_t inlineDepth(const IRGS& env);
  *   sp   = DefSP<offset>
  *
  *   // ... normal stuff happens ...
- *
- *   // FPI region:
+ *   // ... probably some StStks due to argument expressions
+ *   // FCall*:
  *     SpillFrame sp, ...
- *     // ... probably some StStks due to argument expressions
  *             BeginInlining<offset> sp
  *     fp2   = DefInlineFP<func,retBC,retSP,off> sp
  *

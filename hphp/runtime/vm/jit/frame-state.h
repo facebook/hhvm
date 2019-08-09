@@ -44,44 +44,6 @@ namespace irgen {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct FPIInfo {
-  /*
-   * Value of IRSP after the call returns.
-   */
-  SSATmp* returnSP;
-
-  /*
-   * Offset relative to IR SP where this frame is located.
-   */
-  IRSPRelOffset irSPOff;
-
-  /*
-   * Union of observed context Class* types, and its value if known.
-   */
-  Type ctxType;
-  SSATmp* ctx;
-
-  /*
-   * Bytecode for the FPush* of the call.
-   */
-  Op fpushOpc;
-
-  /*
-   * Function being called.
-   */
-  const Func* func;
-
-  /*
-   * Whether this func was pushed as part of a dynamic call
-   */
-  SSATmp* dynamicCall;
-
-  bool inlineEligible;
-  bool spansCall;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
 /*
  * Information about a Location in the current function; used by FrameState.
  */
@@ -213,13 +175,6 @@ struct FrameState {
   bool stackModified{false};
 
   /*
-   * The FPI stack is used for inlining---when we start inlining at an FCall,
-   * we look in here to find a definition of the StkPtr,offset that can be used
-   * after the inlined callee "returns".
-   */
-  jit::vector<FPIInfo> fpiStack;
-
-  /*
    * The values in the eval stack in memory, either above or below the current
    * spValue pointer.  These are indexed relative to the base of the eval stack
    * for the whole function.
@@ -341,12 +296,6 @@ struct FrameStateMgr final {
    */
   const PostConditions& postConds(Block* exitBlock) const;
 
-  /*
-   * Set an override for the next FPI region's fpushOp.
-   */
-  void setFPushOverride(Op op)  { m_fpushOverride = op; }
-  bool hasFPushOverride() const { return m_fpushOverride.hasValue(); }
-
   /////////////////////////////////////////////////////////////////////////////
 
   /*
@@ -364,7 +313,6 @@ struct FrameStateMgr final {
   bool        needRatchet()       const { return cur().needRatchet; }
   bool        frameMaySpanCall()  const { return cur().frameMaySpanCall; }
   bool        stackModified()     const { return cur().stackModified; }
-  const jit::vector<FPIInfo>& fpiStack() const { return cur().fpiStack; }
 
   /*
    * Current inlining depth (not including the toplevel frame).
@@ -496,12 +444,6 @@ private:
   void dropLocalRefsInnerTypes();
   void clearLocals();
 
-  /*
-   * Stack state update helpers.
-   */
-  void spillFrameStack(const IRInstruction*);
-  void writeToSpilledFrame(IRSPRelOffset, const SSATmp*);
-
 private:
   struct BlockState {
     // Mandatory in-state computed from predecessors.
@@ -532,12 +474,6 @@ private:
    * Post-conditions for exit blocks.
    */
   jit::hash_map<Block*,PostConditions> m_exitPostConds;
-
-  /*
-   * Override for the current fpush* bytecode so we can convert bytecodes
-   * to php calls.
-   */
-  folly::Optional<Op> m_fpushOverride;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

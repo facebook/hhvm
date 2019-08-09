@@ -819,14 +819,6 @@ Func::Func(const Index* idx, Rep val)
   , val(val)
 {}
 
-bool Func::same(const Func& o) const {
-  /*
-   * TODO(#3666699): function name case sensitivity here shouldn't
-   * break equality.
-   */
-  return val == o.val;
-}
-
 SString Func::name() const {
   return match<SString>(
     val,
@@ -2571,8 +2563,8 @@ bool define_func_family(IndexData& index, ClassInfo* cinfo,
             [&] (const MethTabEntryPair* a, const MethTabEntryPair* b) {
               // We want a canonical order for the family. Putting the
               // one corresponding to cinfo first makes sense, because
-              // the first one is used as the name for FCall hint, after
-              // that, sort by name so that different case spellings
+              // the first one is used as the name for FCall*Method* hint,
+              // after that, sort by name so that different case spellings
               // come in the same order.
               if (a->second.func == b->second.func)   return false;
               if (func) {

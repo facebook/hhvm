@@ -64,7 +64,7 @@ Flow of execution
 HipHop bytecode models the flow of execution using a stack of frames referred
 to as the "call stack". A "frame" is a structure that logically consists of a
 header, a program counter (PC), a local variable store, an iterator variable
-store, an evaluation stack, and a function parameter info (FPI) stack.
+store, and an evaluation stack.
 
 The frame at the top of the call stack is referred to as the "current frame".
 The current frame represents the function that is currently executing. The
@@ -310,50 +310,18 @@ be multiple rows that are marked as being hoisted with the same class name.
 Each class id must be between 0 and 2^31 - 2 inclusive.
 
 
-Function parameter info (FPI) structures and the FPI stack
-----------------------------------------------------------
-
-Every function has a function parameter info (FPI) structure associated with it
-that can be retrieved at run time. The FPI structure contains the bytecode
-address of the function, the number of parameters the function has, and a
-parameter table that indicates whether each parameter is pass by value or pass
-by reference.
-
-In addition to the evaluation stack, each frame also contains another stack
-called the FPI stack. Each entry on the FPI stack consists of a reference to an
-FPI structure and a bytecode address of entry point into the corresponding
-function. The entry on the top of the FPI stack is called the "current FPI".
-
-Arguments are pushed on the stack either as cells or as refs, but they may be
-refs only if the parameter is passed by ref. Then, the FPush* instructions push
-a new entry onto the FPI stack, initializing the entry with a reference to the
-FPI structure for a given function and the bytecode address of the appropriate
-entry point. Finally, the FCall instruction look at the current FPI to get the
-bytecode address of the function (the callee), transfers the parameters from the
-evaluation stack to the callee, pops the current FPI off of the FPI stack, and
-then invokes the dispatcher to call the function.
-
-Calls to builtin functions may be optimized to avoid pushing an entry on the
-FPI stack if it is known that the builtin function does not need access to the
-call stack. In this case, the arguments to the builtin are pushed on stack as
-Cells and Vars, and the builtin can be invoked with the FCallBuiltin
-instruction. Unless otherwise noted, subsequent references to the FCall
-instruction should be meant to refer to non-optimized FCall instruction, i.e.
-all FCall instructions other than FCallBuiltin.
-
-
 Calling convention
 ------------------
 
 The caller may pass any number of parameters to the callee by pushing zero or
-more cells or refs on the stack prior to executing an FPush*/FCall instruction
-sequence. The caller must pass the parameters in forward order, i.e. the first
-pushed value corresponds to the first parameter, and so forth.
+more cells or refs on the stack prior to executing a FCall* instruction. The
+caller must pass the parameters in forward order, i.e. the first pushed value
+corresponds to the first parameter, and so forth.
 
-The FPush*/FCall instructions can be used to call a global function, a method
-on an object, or a method from a class. The caller is responsible for
-evaluating all of the parameters in forward order. When the caller executes the
-FCall instruction, the dispatcher creates a new frame and moves the parameters
+The FCall* instructions can be used to call a global function, a method on
+an object, or a method from a class. The caller is responsible for evaluating
+all of the parameters in forward order. When the caller executes the FCall*
+instruction, the dispatcher creates a new frame and moves the parameters
 prepared by the caller into the callee's variable environment. The dispatcher
 then transfers control to the appropriate entry point of the callee (either the
 main entry point or a DV entry point) based on the number of parameters passed.
@@ -586,21 +554,6 @@ Note that instructions cannot create new static properties in a class that were
 not declared in the class definition.
 
 
-FPI regions
------------
-
-An FPI region is a contiguous range of bytecode that constitutes a call site.
-Each FPI region begins immediately after an FPush* instruction that pushes an
-FPI structure onto the FPI stack and should normally end with the corresponding
-FCall instruction that pops that FPI structure off of the FPI stack. Since there
-are no other instructions between FPush* and FCall, only the FCall instruction
-is considered to be a part of the FPI region.
-
-Each function has an "FPI region table". Each row in the FPI region table
-consists of offset of the FPush* instruction that begins the region, the FCall
-instruction that ends the region, and the number of parameters being passed.
-
-
 Flavor descriptors
 ------------------
 
@@ -673,39 +626,27 @@ be empty.
 7) The last instruction of the function body must be either a control flow
 without fallthrough or a terminal instruction.
 
-8) Each FPI region enumerated in the FPI region table must start immediately
-after an FPush* instruction and it must end with the FCall instruction. Each
-use of the FPush* instruction must be the instruction immediately before
-exactly one FPI region. Likewise, each use of the FCall instruction must be
-the last instruction in exactly one FPI region.
-
-9) Each FPI region may not contain any other instruction than FCall, with the
-exception of assertion instructions. There may not be jumps anywhere in the
-function that transfer control from the outside of a given FPI region to the
-inside of that region. Finally, an entry point may not point to an instruction
-inside an FPI region.
-
-10) The initialization state of each iterator variable must be known at every
+8) The initialization state of each iterator variable must be known at every
 point in the code and must be the same for all control paths. There are two
 possible states: (1) uninitialized, and (2) "iter-initialized" (initialized
 via IterInit*). Every range of bytecode for which an iterator variable i is
 initialized must be protected by an EH entry with a catch handler that unsets
 i by calling IterFree.
 
-11) The iterator variable referenced by IterInit* must be in the uninitialized
+9) The iterator variable referenced by IterInit* must be in the uninitialized
 state when the instruction executes. An iterator variable referenced by
 IterNext* and IterFree must be in the "iter-initialized" state. Note that
 IterInit* conditionally initialize the iterator variable, and IterNext*
 conditionally free the iterator variable.
 
-12) Each EH table must follow all of the rules specified in the "Exception
+10) Each EH table must follow all of the rules specified in the "Exception
 handler (EH) table" section.
 
-13) Assertion (AssertRATL and AssertRATStk) instructions cannot be separated
+11) Assertion (AssertRATL and AssertRATStk) instructions cannot be separated
 from the following instruction by control flow. Practically speaking, this means
 that the instruction immediately following an assertion cannot be a jump target.
 
-14) Sequences of member instructions should be consistent and continuous. That
+12) Sequences of member instructions should be consistent and continuous. That
 is, only member instructions and asserts may appear in the sequence, control
 flow cannot interrupt the sequence, and the member op mode should be consistent
 across all instructions in the sequence. This is because in the case of
@@ -1464,7 +1405,7 @@ RetM <num returns> [C..C] -> []
 
   RetM is a variant of RetC that allows multiple cells to be returned. The RetM
   bytecode must be the only form of return used in a single function, and all
-  callers must use FCall with the matching number of returned values to invoke
+  callers must use FCall* with the matching number of returned values to invoke
   the function.
 
 Throw    [C]  ->  []
@@ -1875,7 +1816,7 @@ FCall* opcodes
   If %5 was specified and the callee raised an exception, the exception will
   continue to propagate thru the caller instead of being wrapped into Awaitable.
   Note that for the purposes of exception handling inside the caller, the PC
-  will point after the FCall rather than %5 so it is not advised to have
+  will point after the FCall* rather than %5 so it is not advised to have
   different EH entries for these two locations.
 
   Async eager offset feature is used to avoid the cost of construction of short
@@ -1890,18 +1831,6 @@ FCall* opcodes
 
   SupportsAER: hint from static analysis indicating whether the callee is known
   to support async eager return. Requires specified async eager offset in %5.
-
-FCall <fca> <class name> <func name>  [C|V..C|V]  ->  [C..C]
-
-  FPI call. This instruction pops the current FPI off the FPI stack and calls
-  the function associated with it. The strings in %2 and %3 provide hints from
-  static analysis to assist the region selector in determining the callee:
-
-    %2          %3          callee
-    ----------+-----------+--------------
-    empty     | empty     | unknown
-    empty     | non-empty | function %3
-    non-empty | non-empty | method %2::%3
 
 FCallFunc <fca>                 [U U U C|V..C|V C]  ->  [C..C]
 FCallFuncD <fca> <litstr id>    [U U U C|V..C|V]  ->  [C..C]
@@ -3367,8 +3296,7 @@ OODeclExists <Class|Interface|Trait> [C C]  ->  [C:Bool]
 VerifyParamType <parameter id>    []  ->  []
 
   Verify parameter type. Functions and methods can optionally specify the types
-  of arguments they will accept. These type constraints are memoized into each
-  function's FPI structure.
+  of arguments they will accept.
 
   VerifyParamType checks the specified parameter against the enclosing
   function's corresponding parameter constraints. In case of a mismatch, a

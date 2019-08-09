@@ -224,12 +224,6 @@ void write_region_block(ProfDataSerializer& ser,
   write_raw(ser, block->profTransID());
   write_container(ser, block->typePredictions(), write_typed_location);
   write_container(ser, block->typePreConditions(), write_guarded_location);
-  write_container(ser, block->knownFuncs(),
-                  [] (ProfDataSerializer& s,
-                      std::pair<SrcKey, const Func*> knownFunc) {
-                    write_srckey(s, knownFunc.first);
-                    write_func(s, knownFunc.second);
-                  });
   write_container(ser, block->postConds().changed, write_typed_location);
   write_container(ser, block->postConds().refined, write_typed_location);
 }
@@ -258,13 +252,6 @@ RegionDesc::BlockPtr read_region_block(ProfDataDeserializer& ser) {
   read_container(ser,
                  [&] {
                    block->addPreCondition(read_guarded_location(ser));
-                 });
-
-  read_container(ser,
-                 [&] {
-                   auto const sk = read_srckey(ser);
-                   auto const func = read_func(ser);
-                   block->setKnownFunc(sk, func);
                  });
 
   PostConditions postConds;

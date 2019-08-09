@@ -525,44 +525,6 @@ bool Func::isImmutableFrom(const Class* cls) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Unit table entries.
-
-const FPIEnt* Func::findFPI(const FPIEnt* b, const FPIEnt* e, Offset o) {
-  /*
-   * We consider the "FCall" instruction part of the FPI region, but
-   * the corresponding push is not considered part of it.  (This
-   * means all offsets in the FPI region will have the partial
-   * ActRec on the stack.)
-   */
-
-  auto it =
-    std::lower_bound(b, e, o, [](const FPIEnt& f, Offset o) {
-      return f.m_fpushOff < o;
-    });
-
-  // Didn't find any candidates.
-  if (it == b) {
-    return nullptr;
-  }
-
-  const FPIEnt* fe = --it;
-
-  // Iterate through parents until we find a valid region.
-  while (true) {
-    if (fe->m_fpiEndOff >= o) {
-      return fe;
-    }
-
-    if (fe->m_parentIndex < 0) {
-      return nullptr;
-    }
-
-    fe = &b[fe->m_parentIndex];
-  }
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
 // JIT data.
 
 int Func::numPrologues() const {
@@ -706,18 +668,6 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
       out << " parentIndex " << it->m_parentIndex;
     }
     out << std::endl;
-  }
-
-  if (opts.fpi) {
-    for (auto& fpi : fpitab()) {
-      out << " FPI " << fpi.m_fpushOff << "-" << fpi.m_fpiEndOff
-          << "; fpOff = " << fpi.m_fpOff;
-      if (fpi.m_parentIndex != -1) {
-        out << " parentIndex = " << fpi.m_parentIndex
-            << " (depth " << fpi.m_fpiDepth << ")";
-      }
-      out << '\n';
-    }
   }
 }
 

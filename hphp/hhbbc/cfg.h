@@ -105,10 +105,7 @@ void forEachNonThrowSuccessor(const php::Block& block, Fun f) {
  * Obtain the blocks for a function in a reverse post order, starting
  * with the specified block.  The exact order is not specified.
  */
-std::vector<BlockId> rpoSortFromBlock(
-    const php::Func&,
-    BlockId,
-    hphp_fast_map<BlockId, std::vector<BlockId>>* = nullptr);
+std::vector<BlockId> rpoSortFromBlock(const php::Func&, BlockId);
 
 /*
  * Obtain the blocks for a function in a reverse post order, starting
@@ -116,9 +113,7 @@ std::vector<BlockId> rpoSortFromBlock(
  *
  * DV initializer blocks will not appear in this list.
  */
-std::vector<BlockId> rpoSortFromMain(
-    const php::Func&,
-    hphp_fast_map<BlockId, std::vector<BlockId>>* = nullptr);
+std::vector<BlockId> rpoSortFromMain(const php::Func&);
 
 /*
  * Obtain the blocks for a function in a reverse post order, taking

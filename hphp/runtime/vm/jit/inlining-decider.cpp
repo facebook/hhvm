@@ -99,12 +99,12 @@ const StaticString
   s_NeverInline("__NEVER_INLINE");
 
 /*
- * Check if the funcd of `inst' has any characteristics which prevent inlining,
+ * Check if the `callee' has any characteristics which prevent inlining,
  * without peeking into its bytecode or regions.
  */
 bool isCalleeInlinable(SrcKey callSK, const Func* callee,
                        Annotations* annotations) {
-  assertx(hasFCallEffects(callSK.op()));
+  assertx(isFCall(callSK.op()));
   auto refuse = [&] (const char* why) {
     return traceRefusal(callSK, callee, why, annotations);
   };
@@ -153,7 +153,7 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee,
  * Check that we don't have any missing or extra arguments.
  */
 bool checkNumArgs(SrcKey callSK, const Func* callee, Annotations* annotations) {
-  assertx(hasFCallEffects(callSK.op()));
+  assertx(isFCall(callSK.op()));
   assertx(callee);
 
   auto refuse = [&] (const char* why) {
@@ -197,7 +197,7 @@ bool checkNumArgs(SrcKey callSK, const Func* callee, Annotations* annotations) {
 }
 
 bool canInlineAt(SrcKey callSK, const Func* callee, Annotations* annotations) {
-  assertx(hasFCallEffects(callSK.op()));
+  assertx(isFCall(callSK.op()));
 
   if (!callee) {
     return traceRefusal(callSK, callee, "unknown callee", annotations);
@@ -828,7 +828,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
                                  Op writeArOpc,
                                  const SrcKey& sk,
                                  Annotations& annotations) {
-  assertx(hasFCallEffects(sk.op()));
+  assertx(isFCall(sk.op()));
   auto static inlineAttempts = ServiceData::createTimeSeries(
     "jit.inline.attempts", {ServiceData::StatsType::COUNT});
   inlineAttempts->addValue(1);

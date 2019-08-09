@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/translate-region.h"
 
 #include "hphp/util/arch.h"
-#include "hphp/util/map-walker.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
@@ -266,12 +265,9 @@ void initNormalizedInstruction(
   irgen::IRGS& irgs,
   const RegionDesc& region,
   RegionDesc::BlockId blockId,
-  const Func* topFunc,
   bool lastInstr,
   bool toInterp
 ) {
-  inst.funcd = topFunc;
-
   if (lastInstr) {
     inst.endsRegion  = region.isExit(blockId);
   }
@@ -339,7 +335,7 @@ RegionDescPtr getInlinableCalleeRegion(const irgen::IRGS& irgs,
                                        const ProfSrcKey& psk,
                                        int& calleeCost,
                                        Annotations& annotations) {
-  assertx(hasFCallEffects(psk.srcKey.op()));
+  assertx(isFCall(psk.srcKey.op()));
   if (isProfiling(irgs.context.kind) || irgs.inlineState.conjure) {
     return nullptr;
   }
@@ -451,16 +447,14 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     auto const blockId = optBlockId.value();
     auto const& block  = *region.block(blockId);
     auto sk            = block.start();
-    auto knownFuncs    = makeMapWalker(block.knownFuncs());
     bool emitedSurpriseCheck = false;
 
     SCOPE_ASSERT_DETAIL("IRGS") { return show(irgs); };
 
-    const Func* topFunc = nullptr;
     irgs.profTransID = hasTransID(blockId) ? getTransID(blockId)
                                            : kInvalidTransID;
     irgs.firstBcInst = inEntryRetransChain(blockId, region) && !inlining;
-    irgen::prepareForNextHHBC(irgs, nullptr, sk);
+    irgen::prepareForNextHHBC(irgs, sk);
 
     // Prepare to start translating this region block.  This loads the
     // FrameState for the IR block corresponding to the start of this
@@ -508,26 +502,13 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
 
       // Update bcOff here so any guards or assertions from metadata are
       // attributed to this instruction.
-      irgen::prepareForNextHHBC(irgs, nullptr, sk);
-
-      // Update the current funcd, if we have a new one.
-      if (knownFuncs.hasNext(sk)) {
-        topFunc = knownFuncs.next();
-      }
-      // HHIR may have figured the topFunc even though the RegionDesc
-      // didn't know it.  When that happens, update topFunc.
-      if (!topFunc && !irb.fs().fpiStack().empty()) {
-        auto const& fpiInfo = irb.fs().fpiStack().back();
-        if (fpiInfo.func) {
-          topFunc = fpiInfo.func;
-        }
-      }
+      irgen::prepareForNextHHBC(irgs, sk);
 
       // Create and initialize the instruction.
       NormalizedInstruction inst(sk, block.unit());
       bool toInterpInst = irgs.retryContext->toInterp.count(psk);
       initNormalizedInstruction(inst, irgs, region, blockId,
-                                topFunc, lastInstr, toInterpInst);
+                                lastInstr, toInterpInst);
 
       if (penultimateInst && isCmp(inst.op())) {
           SrcKey nextSk = inst.nextSk();
@@ -593,8 +574,6 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     }
 
     processedBlocks.insert(blockId);
-
-    assertx(!knownFuncs.hasNext());
   }
 
   if (!inlining) {

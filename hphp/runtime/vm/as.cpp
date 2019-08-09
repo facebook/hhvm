@@ -427,12 +427,6 @@ private:
 
 struct StackDepth;
 
-struct FPIReg {
-  Offset fpushOff;
-  StackDepth* stackDepth;
-  int fpOff;
-};
-
 /*
  * Tracks the depth of the stack in a given block of instructions.
  *
@@ -646,41 +640,6 @@ struct AsmState {
     labelMap[name].stackDepth.setBase(*this, 0);
   }
 
-  void beginFpi(Offset fpushOff) {
-    fpiRegs.push_back(FPIReg{
-      fpushOff,
-      currentStackDepth,
-      currentStackDepth->currentOffset
-    });
-    fdescDepth += kNumActRecCells;
-    currentStackDepth->adjust(*this, 0);
-  }
-
-  void endFpi() {
-    if (fpiRegs.empty()) {
-      error("endFpi called with no active fpi region");
-    }
-
-    auto& ent = fe->addFPIEnt();
-    const auto& reg = fpiRegs.back();
-    ent.m_fpushOff = reg.fpushOff;
-    ent.m_fpiEndOff = ue->bcPos();
-    ent.m_fpOff = reg.fpOff;
-    if (reg.stackDepth->baseValue) {
-      ent.m_fpOff += *reg.stackDepth->baseValue;
-    } else {
-      // Base value still unknown, this will need to be updated later.
-
-      // Store the FPIEnt's index in the FuncEmitter's entry table.
-      assertx(&fe->fpitab[fe->fpitab.size()-1] == &ent);
-      fpiToUpdate.emplace_back(fe->fpitab.size() - 1, reg.stackDepth);
-    }
-
-    fpiRegs.pop_back();
-    always_assert(fdescDepth >= kNumActRecCells);
-    fdescDepth -= kNumActRecCells;
-  }
-
   void finishClass() {
     assertx(!fe && !re);
     ue->addPreClassEmitter(pce);
@@ -719,15 +678,6 @@ struct AsmState {
 
       patchLabelOffsets(label.second);
     }
-
-    // Patch the FPI structures
-    for (auto& kv : fpiToUpdate) {
-      if (!kv.second->baseValue) {
-        error("created a FPI from an unreachable instruction");
-      }
-
-      fe->fpitab[kv.first].m_fpOff += *kv.second->baseValue;
-    }
   }
 
   void finishFunction() {
@@ -746,19 +696,16 @@ struct AsmState {
       fe->numLocals() +
       fe->numIterators() * kNumIterCells;
 
-    fe->finish(ue->bcPos(), false);
+    fe->finish(ue->bcPos());
 
     fe = 0;
-    fpiRegs.clear();
     labelMap.clear();
     numItersSet = false;
     initStackDepth = StackDepth();
     initStackDepth.setBase(*this, 0);
     currentStackDepth = &initStackDepth;
     unnamedStackDepths.clear();
-    fdescDepth = 0;
     maxUnnamed = -1;
-    fpiToUpdate.clear();
   }
 
   int getLocalId(const std::string& name) {
@@ -822,17 +769,14 @@ struct AsmState {
 
   // When we're doing a function or method body, this state is active.
   FuncEmitter* fe{nullptr};
-  std::vector<FPIReg> fpiRegs;
   std::map<std::string,Label> labelMap;
   bool numItersSet{false};
   bool enumTySet{false};
   StackDepth initStackDepth;
   StackDepth* currentStackDepth{&initStackDepth};
   std::vector<std::unique_ptr<StackDepth>> unnamedStackDepths;
-  int fdescDepth{0};
   int minStackDepth{0};
   int maxUnnamed{-1};
-  std::vector<std::pair<size_t, StackDepth*>> fpiToUpdate;
   std::set<std::string,stdltistr> hoistables;
   std::unordered_map<uint32_t,Offset> defClsOffsets;
   Location::Range srcLoc{-1,-1,-1,-1};
@@ -849,7 +793,7 @@ void StackDepth::adjust(AsmState& as, int delta) {
     // The absolute stack depth is unknown. We only store the min
     // and max offsets, and we will take a decision later, when the
     // base value will be known.
-    maxOffset = std::max(currentOffset + as.fdescDepth, maxOffset);
+    maxOffset = std::max(currentOffset, maxOffset);
     if (currentOffset < minOffset) {
       minOffsetLine = as.in.getLineNumber();
       minOffset = currentOffset;
@@ -861,7 +805,7 @@ void StackDepth::adjust(AsmState& as, int delta) {
     as.error("opcode sequence caused stack depth to go negative");
   }
 
-  as.adjustStackHighwater(*baseValue + currentOffset + as.fdescDepth);
+  as.adjustStackHighwater(*baseValue + currentOffset);
 }
 
 void StackDepth::addListener(AsmState& as, StackDepth* target) {
@@ -1599,7 +1543,6 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define NUM_POP_CALLNATIVE (immIVA[0] + immIVA[2]) /* number of args + nout */
 #define NUM_POP_FCALL(nin, nobj) \
   (nin + immFCA.numArgsInclUnpack() + 2 + immFCA.numRets)
-#define NUM_POP_FCALLO (immFCA.numArgsInclUnpack() + immFCA.numRets - 1)
 #define NUM_POP_CMANY immIVA[0] /* number of arguments */
 #define NUM_POP_SMANY vecImmStackValues
 
@@ -1625,20 +1568,12 @@ std::map<std::string,ParserFunc> opcode_parsers;
       as.enterReachableRegion(0);                                      \
     }                                                                  \
                                                                        \
-    if (isLegacyFCall(Op##name)) {                                     \
-      as.endFpi();                                                     \
-    }                                                                  \
-                                                                       \
     as.ue->emitOp(Op##name);                                           \
                                                                        \
     UNUSED size_t immIdx = 0;                                          \
     IMM_##imm;                                                         \
                                                                        \
     as.adjustStack(-NUM_POP_##pop);                                    \
-                                                                       \
-    if (isLegacyFPush(Op##name)) {                                     \
-      as.beginFpi(curOpcodeOff);                                       \
-    }                                                                  \
                                                                        \
     if (thisOpcode == OpMemoGet) {                                     \
       /* MemoGet pushes after branching */                             \
@@ -1666,7 +1601,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
     }                                                                  \
                                                                        \
     /* FCalls with unpack perform their own bounds checking. */        \
-    if (hasFCallEffects(Op##name) && !immFCA.hasUnpack()) {            \
+    if (isFCall(Op##name) && !immFCA.hasUnpack()) {                    \
       as.fe->containsCalls = true;                                     \
     }                                                                  \
                                                                        \
@@ -1737,7 +1672,6 @@ OPCODES
 #undef NUM_POP_CMANY_U3
 #undef NUM_POP_CALLNATIVE
 #undef NUM_POP_FCALL
-#undef NUM_POP_FCALLO
 #undef NUM_POP_CMANY
 #undef NUM_POP_SMANY
 

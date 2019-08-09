@@ -227,7 +227,7 @@ dynamic getIRInstruction(const IRInstruction& inst,
     markerObj = dynamic(nullptr);
   } else {
     auto func = newMarker.func();
-    func->prettyPrint(mStr, Func::PrintOpts().noFpi());
+    func->prettyPrint(mStr, Func::PrintOpts());
     mStr << std::string(kIndent, ' ')
          << newMarker.show()
          << '\n';
@@ -710,7 +710,7 @@ void printIRInstruction(std::ostream& os,
     } else {
       auto func = newMarker.func();
       if (!curMarker.hasFunc() || func != curMarker.func()) {
-        func->prettyPrint(mStr, Func::PrintOpts().noFpi());
+        func->prettyPrint(mStr, Func::PrintOpts());
       }
       mStr << std::string(kIndent, ' ')
            << newMarker.show()

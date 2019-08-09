@@ -158,7 +158,7 @@ int64_t switchDoubleHelper(double val, int64_t base, int64_t nTargets);
 int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets);
 int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets);
 
-void checkFrame(ActRec* fp, Cell* sp, bool fullCheck, Offset bcOff);
+void checkFrame(ActRec* fp, Cell* sp, bool fullCheck);
 
 void loadArrayFunctionContext(ArrayData*, ActRec* preLiveAR, ActRec* fp);
 

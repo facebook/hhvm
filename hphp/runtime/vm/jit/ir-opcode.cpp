@@ -573,7 +573,6 @@ bool opcodeMayRaise(Opcode opc) {
   case AssertNonNull:
   case AssertStk:
   case AssertType:
-  case AssertARFunc:
   case AsyncFuncRet:
   case AsyncFuncRetSlow:
   case AsyncSwitchFast:
@@ -805,7 +804,6 @@ bool opcodeMayRaise(Opcode opc) {
   case KillARReifiedGenerics:
   case LdAFWHActRec:
   case LdARCtx:
-  case LdARFuncPtr:
   case LdARInvName:
   case LdARNumArgsAndFlags:
   case LdARNumParams:

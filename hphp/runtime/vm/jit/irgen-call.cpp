@@ -414,24 +414,6 @@ void prepareToCallUnknown(IRGS& env, SSATmp* callee, SSATmp* objOrClass,
   fsetActRec(env, callee, objOrClass, numArgs, invName, dynamicCall, tsList);
 }
 
-template<class Fn>
-SSATmp* prepareToCallCustom(IRGS& env, SSATmp* objOrClass, uint32_t numArgs,
-                            bool dynamicCall, SSATmp* tsList, Fn prepare) {
-  auto const arOffset = fsetActRec(
-    env, cns(env, TNullptr), objOrClass, numArgs, nullptr, dynamicCall, tsList);
-
-  // This is special. We need to sync SP in case prepare() reenters. Otherwise
-  // it would clobber the ActRec we just pushed.
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
-
-  // Responsible for:
-  // - performing caller checks
-  // - populating missing ActRec fields (m_func at minimum)
-  // - returning SSATmp* of the resolved func pointer
-  return prepare(arOffset);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
@@ -441,7 +423,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
   if (!emitCallerReffinessChecksKnown(env, callee, fca)) return;
   prepareToCallKnown(env, callee, objOrClass, fca.numArgsInclUnpack(), invName,
                      dynamicCall, tsList);
-  if (invName == nullptr && hasFPushEffects(curSrcKey(env).op())) {
+  if (invName == nullptr && isFCall(curSrcKey(env).op())) {
     auto const ctx = objOrClass ? objOrClass : cns(env, TNullptr);
     auto const inlined = irGenTryInlineFCall(
       env, callee, fca, ctx, ctx->type(), curSrcKey(env).op());
@@ -1726,79 +1708,6 @@ void emitFCallClsMethodSRD(IRGS& env, FCallArgs fca, const StringData* clsHint,
 
 //////////////////////////////////////////////////////////////////////
 
-namespace {
-
-SSATmp* ldPreLiveFunc(IRGS& env, IRSPRelOffset actRecOff) {
-  if (env.currentNormalizedInstruction->funcd) {
-    return cns(env, env.currentNormalizedInstruction->funcd);
-  }
-
-  // Try to load Func* from fpiStack, but only if we are not forming a region.
-  // Otherwise we may have inferred the target of the call based on specialized
-  // type information that won't be available when the region is translated.
-  // If we allow the FCall to specialize using this information, we may infer
-  // narrower type for the return value, erroneously preventing the region from
-  // breaking on unknown type.
-  if (!env.formingRegion) {
-    auto const& fpiStack = env.irb->fs().fpiStack();
-    if (!fpiStack.empty() && fpiStack.back().func) {
-      return cns(env, fpiStack.back().func);
-    }
-  }
-
-  return gen(env, LdARFuncPtr, TFunc, IRSPRelOffsetData { actRecOff }, sp(env));
-}
-
-} // namespace
-
-void emitFCall(IRGS& env, FCallArgs fca, const StringData*, const StringData*) {
-  auto const numStackInputs = fca.numArgsInclUnpack();
-  auto const actRecOff = spOffBCFromIRSP(env) + numStackInputs;
-  auto const callee = ldPreLiveFunc(env, actRecOff);
-
-  auto const tryInline = [&] (const Func* knownCallee) {
-    // Make sure the FPushOp was in the region.
-    auto const& fpiStack = env.irb->fs().fpiStack();
-    if (fpiStack.empty()) return false;
-
-    // Make sure the FPushOp wasn't interpreted, based on a spanned another
-    // call, or marked as not eligible for inlining by frame-state.
-    auto const& info = fpiStack.back();
-    if (!info.inlineEligible || info.spansCall) return false;
-
-    // Its possible that we have an "FCall T2 meth" guarded by eg an
-    // InstanceOfD T2, and that we know the object has type T1, and we
-    // also know that T1::meth exists. The FCall is actually
-    // unreachable, but we might not have figured that out yet - so we
-    // could be trying to inline T1::meth while the fpiStack has
-    // T2::meth.
-    if (info.func && info.func != knownCallee) return false;
-
-    return irGenTryInlineFCall(env, knownCallee, fca, info.ctx, info.ctxType,
-                               info.fpushOpc);
-  };
-
-  auto const doCallKnown = [&] (const Func* knownCallee) {
-    if (!callee->hasConstVal()) {
-      auto const data = IRSPRelOffsetData{ actRecOff };
-      gen(env, AssertARFunc, data, sp(env), cns(env, knownCallee));
-    }
-    if (!emitCallerReffinessChecksKnown(env, knownCallee, fca)) return;
-
-    if (tryInline(knownCallee)) return;
-    callKnown(env, knownCallee, fca);
-  };
-
-  if (callee->hasConstVal()) return doCallKnown(callee->funcVal());
-
-  auto const doCallUnknown = [&] (bool unlikely) {
-    emitCallerReffinessChecksUnknown(env, callee, fca);
-    callUnknown(env, callee, fca, unlikely, false);
-  };
-
-  callProfiledFunc(env, callee, doCallKnown, doCallUnknown);
-}
-
 void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
                     SSATmp* const* const args) {
   allocActRec(env);
@@ -1806,11 +1715,9 @@ void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
     push(env, args[i]);
   }
 
-  env.irb->fs().setFPushOverride(Op::FCallFuncD);
   auto const fca = FCallArgs(FCallArgs::Flags::None, numParams, 1, nullptr,
                              kInvalidOffset, false);
   prepareAndCallKnown(env, callee, fca, nullptr, nullptr, false, nullptr);
-  assertx(!env.irb->fs().hasFPushOverride());
 }
 
 //////////////////////////////////////////////////////////////////////

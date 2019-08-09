@@ -796,16 +796,16 @@ DceActionMap& commitUis(Env& env, bool linked,
  *
  *   $a ? f() : 42
  *
- * If f() is known to return a non-counted type, we have FCall -> PopC on one
- * path, and Int 42 -> PopC on another, and the PopC marks its value Use::Not.
- * When we get to the Int 42 it thinks both instructions can be killed; but when
- * we get to the FCall it does nothing. So any time we decide to ignore a
- * Use::Not , we have to record that fact so we can prevent the other paths from
- * trying to use that information. We communicate this via the ui.location
- * field, and the forcedLiveLocations set.
+ * If f() is known to return a non-counted type, we have FCallFuncD -> PopC
+ * on one path, and Int 42 -> PopC on another, and the PopC marks its value
+ * Use::Not. When we get to the Int 42 it thinks both instructions can be
+ * killed; but when we get to the FCallFuncD it does nothing. So any time we
+ * decide to ignore a Use::Not, we have to record that fact so we can prevent
+ * the other paths from trying to use that information. We communicate this
+ * via the ui.location field, and the forcedLiveLocations set.
  *
  * [ We deal with this case now by inserting a PopC after the
- *   FCall, which allows the 42/PopC to be removed - but there are
+ *   FCallFuncD, which allows the 42/PopC to be removed - but there are
  *   other cases that are not yet handled. ]
  */
 void markUisLive(Env& env, bool linked, const UseInfo& ui) {
@@ -1589,7 +1589,6 @@ void dce(Env& env, const bc::EmptyL& op) { no_dce(env, op); }
 void dce(Env& env, const bc::EmptyS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::EntryNop& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Eval& op) { no_dce(env, op); }
-void dce(Env& env, const bc::FCall& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FCallBuiltin& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FCallClsMethod& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FCallClsMethodD& op) { no_dce(env, op); }

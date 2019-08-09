@@ -1606,10 +1606,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return PureLoad {
       actrec_ctx(inst.src(0), inst.extra<LdARCtx>()->offset)
     };
-  case LdARFuncPtr:
-    return PureLoad {
-      actrec_func(inst.src(0), inst.extra<LdARFuncPtr>()->offset)
-    };
 
   case DbgAssertARFunc:
     return may_load_store(
@@ -1647,7 +1643,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AssertLoc:
   case AssertStk:
   case AssertMBase:
-  case AssertARFunc:
   case FuncGuard:
   case DefFP:
   case DefSP:

@@ -252,10 +252,6 @@ void debuggerPreventReturnsToTC();
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline ActRec* arAtOffset(const ActRec* ar, int32_t offset) {
-  return (ActRec*)(intptr_t(ar) + intptr_t(offset * sizeof(TypedValue)));
-}
-
 void frame_free_locals_no_hook(ActRec* fp);
 
 #define tvReturn(x)                                                     \
@@ -794,58 +790,21 @@ public:
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Visit all the slots and pre-live ActRecs on a live eval stack,
- * handling FPI regions and resumables correctly, and stopping when we
- * reach the supplied activation record.
+ * Visit all the slots on a live eval stack, stopping when we reach
+ * the supplied activation record.
  *
- * The stack elements are visited from lower address to higher, with
- * ActRecs visited after the stack slots below them.
+ * The stack elements are visited from lower address to higher.
  *
  * This will not read the VM registers (pc, fp, sp), so it will
  * perform the requested visitation independent of modifications to
  * the VM stack or frame pointer.
  */
-template<class TV, class ARFun, class TVFun>
+template<class TV, class TVFun>
 typename maybe_const<TV, TypedValue>::type
-visitStackElems(const ActRec* const fp,
-                TV* const stackTop,
-                Offset const bcOffset,
-                ARFun arFun,
-                TVFun tvFun) {
+visitStackElems(const ActRec* const fp, TV* const stackTop, TVFun tvFun) {
   const TypedValue* const base = Stack::anyFrameStackBase(fp);
   auto cursor = stackTop;
   assertx(cursor <= base);
-
-  if (auto fe = fp->m_func->findFPI(bcOffset)) {
-    for (;;) {
-      ActRec* ar;
-      if (!fp->resumed()) {
-        ar = arAtOffset(fp, -fe->m_fpOff);
-      } else {
-        // fp is pointing into the Resumable struct. Since fpOff is
-        // given as an offset from the frame pointer as if it were in
-        // the normal place on the main stack, we have to reconstruct
-        // that "normal place".
-        auto const fakePrevFP = reinterpret_cast<const ActRec*>(
-          base + fp->m_func->numSlotsInFrame()
-        );
-        ar = arAtOffset(fakePrevFP, -fe->m_fpOff);
-      }
-
-      while (cursor < reinterpret_cast<TypedValue*>(ar)) {
-        tvFun(cursor++);
-      }
-
-      if (cursor == reinterpret_cast<TypedValue*>(ar)) {
-        arFun(ar);
-        cursor += kNumActRecCells;
-      }
-
-      assertx(cursor >= reinterpret_cast<TypedValue*>(ar) + kNumActRecCells);
-      if (fe->m_parentIndex == -1) break;
-      fe = &fp->m_func->fpitab()[fe->m_parentIndex];
-    }
-  }
 
   while (cursor < base) {
     tvFun(cursor++);

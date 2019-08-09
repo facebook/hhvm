@@ -137,11 +137,6 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
     if (op) gen(*op);
   };
 
-  /*
-   * This doesn't need to account for ActRecs on the fpiStack, because
-   * no instruction in an FPI region can ever consume a stack value
-   * from above the pre-live ActRec.
-   */
   for (auto i = size_t{0}; i < bcode.numPop(); ++i) assert_stack(i);
 
   // The base instructions are special in that they may read from the

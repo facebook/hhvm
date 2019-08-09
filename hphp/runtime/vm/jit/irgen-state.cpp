@@ -82,42 +82,11 @@ std::string show(const IRGS& irgs) {
     --spOffset;
   };
 
-  auto fpi = curFunc(irgs)->findFPI(bcOff(irgs));
-  auto checkFpi = [&]() {
-    if (fpi && spOffset + frameCells == fpi->m_fpOff) {
-      auto fpushOff = fpi->m_fpushOff;
-      auto after = fpushOff + instrLen(curUnit(irgs)->at(fpushOff));
-      std::ostringstream msg;
-      msg << "ActRec from ";
-      curUnit(irgs)->prettyPrint(
-        msg,
-        Unit::PrintOpts().range(fpushOff, after)
-                         .noLineNumbers()
-                         .indent(0)
-                         .noFuncs()
-      );
-      auto msgStr = msg.str();
-      assertx(msgStr.back() == '\n');
-      msgStr.erase(msgStr.size() - 1);
-      for (unsigned i = 0; i < kNumActRecCells; ++i) elem(msgStr);
-      fpi = fpi->m_parentIndex != -1
-        ? &curFunc(irgs)->fpitab()[fpi->m_parentIndex]
-        : nullptr;
-      return true;
-    }
-    return false;
-  };
-
   header(folly::format(" {} stack element(s): ",
                        stackDepth).str());
   assertx(spOffset <= curFunc(irgs)->maxStackCells());
 
   for (auto i = 0; i < stackDepth; ) {
-    if (checkFpi()) {
-      i += kNumActRecCells;
-      continue;
-    }
-
     auto const spRel = offsetFromIRSP(irgs, BCSPRelOffset{i});
     auto const stkTy  = irgs.irb->stack(spRel, DataTypeGeneric).type;
     auto const stkVal = irgs.irb->stack(spRel, DataTypeGeneric).value;

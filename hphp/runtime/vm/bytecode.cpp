@@ -939,12 +939,7 @@ static void toStringFrame(std::ostream& os, const ActRec* fp,
 
   std::vector<std::string> stackElems;
   visitStackElems(
-    fp, ftop, offset,
-    [&](const ActRec* ar) {
-      stackElems.push_back(
-        folly::format("{{func:{}}}", ar->m_func->fullName()->data()).str()
-      );
-    },
+    fp, ftop,
     [&](const TypedValue* tv) {
       stackElems.push_back(toStringElm(tv));
     }
@@ -5436,49 +5431,17 @@ OPTBLD_INLINE void iopLockObj() {
   c1->m_data.pobj->lockObject();
 }
 
-namespace {
-
-// Find the AR for the current FPI region by indexing from sp
-inline ActRec* arFromSp(int32_t n) {
-  return reinterpret_cast<ActRec*>(vmStack().top() + n);
-}
-
-}
-
 bool doFCallUnpackTC(PC origpc, int32_t numArgsInclUnpack, void* retAddr) {
   assert_native_stack_aligned();
   assertx(tl_regState == VMRegState::DIRTY);
   tl_regState = VMRegState::CLEAN;
-  auto const ar = arFromSp(numArgsInclUnpack);
+  auto const ar = vmStack().indA(numArgsInclUnpack);
   assertx(ar->numArgs() == numArgsInclUnpack);
   ar->setReturn(vmfp(), origpc, jit::tc::ustubs().retHelper);
   ar->setJitReturn(retAddr);
   auto const ret = doFCall(ar, numArgsInclUnpack - 1, true);
   tl_regState = VMRegState::DIRTY;
   return ret;
-}
-
-OPTBLD_FLT_INLINE
-void iopFCall(PC origpc, PC& pc, FCallArgs fca,
-              const StringData* /*clsName*/, const StringData* funcName) {
-  auto const ar = arFromSp(fca.numArgsInclUnpack());
-  auto const func = ar->func();
-  assertx(
-    funcName->empty() ||
-    RuntimeOption::EvalJitEnableRenameFunction ||
-    (func->attrs() & AttrInterceptable) ||
-    func->name()->isame(funcName)
-  );
-  assertx(fca.numArgsInclUnpack() == ar->numArgs());
-  if (fca.enforceReffiness()) callerReffinessChecks(func, fca);
-  checkStack(vmStack(), func, 0);
-  if (fca.numRets != 1) ar->setFCallM();
-  auto const asyncEagerReturn =
-    fca.asyncEagerOffset != kInvalidOffset && func->supportsAsyncEagerReturn();
-  if (asyncEagerReturn) ar->setAsyncEagerReturn();
-  ar->setReturn(vmfp(), origpc, jit::tc::ustubs().retHelper);
-  doFCall(ar, fca.numArgs, fca.hasUnpack());
-  pc = vmpc();
 }
 
 OPTBLD_FLT_INLINE
@@ -6822,7 +6785,6 @@ struct litstr_id {
 #define FLAG_NF
 #define FLAG_TF
 #define FLAG_CF , pc
-#define FLAG_PF
 #define FLAG_CF_TF FLAG_CF
 
 #define DECODE_IVA decode_iva(pc)
@@ -6872,7 +6834,6 @@ OPCODES
 #undef FLAG_NF
 #undef FLAG_TF
 #undef FLAG_CF
-#undef FLAG_PF
 #undef FLAG_CF_TF
 
 #undef DECODE_IVA

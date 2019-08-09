@@ -75,10 +75,7 @@ RegionContext getContext(SrcKey sk) {
   // Track stack types.
   int32_t stackOff = 0;
   visitStackElems(
-    fp, sp, ctx.bcOffset,
-    [&] (const ActRec* ar) {
-      stackOff += kNumActRecCells;
-    },
+    fp, sp,
     [&] (const TypedValue* tv) {
       ctx.liveTypes.push_back(
         { Location::Stack{ctx.spOffset - stackOff}, typeFromTV(tv, ctxClass) }

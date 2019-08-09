@@ -143,111 +143,9 @@ php::SrcLoc srcLoc(const php::Func& func, int32_t ix) {
 }
 
 /*
- * We need to ensure that all blocks in an fpi region are
- * contiguous. This will normally be guaranteed by rpo order (since
- * the blocks are dominated by the FPush and post-dominated by the
- * FCall). If there are exceptional edges from the fpi region,
- * however, but the FCall is still reachable its possible that the
- * block(s) ending in the exceptional edge get sorted after the block
- * containing the FCall.
- *
- * To solve this, we need to find all exceptional exits from fpi
- * regions, and insert "fake" edges to the block containing the
- * corresponding call.
- */
-std::vector<BlockId> initial_sort(const php::Func& f) {
-  auto sorted = rpoSortFromMain(f);
-
-  FTRACE(4, "Initial sort {}\n", f.name);
-
-  // We give each fpi region a unique id
-  auto nextFpi = 0;
-  // Map from fpi region id to the block containing its FCall.
-  // Needs value stability because extraEdges holds pointers into this map.
-  hphp_hash_map<int, BlockId> fpiToCallBlkMap;
-  // Map from the ids of terminal blocks within fpi regions to the
-  // entries in fpiToCallBlkMap corresponding to the active fpi regions.
-  hphp_fast_map<BlockId, std::vector<BlockId*>> extraEdges;
-  // The fpi state at the start of each block
-  std::vector<folly::Optional<std::vector<int>>> blkFpiState(f.blocks.size());
-  for (auto const bid : sorted) {
-    auto& fpiState = blkFpiState[bid];
-    if (!fpiState) fpiState.emplace();
-    auto curState = *fpiState;
-    for (auto const& bc : f.blocks[bid]->hhbcs) {
-      if (isLegacyFPush(bc.op)) {
-        FTRACE(4, "blk:{} legacy FPush {} (nesting {})\n",
-               bid, nextFpi, curState.size());
-        curState.push_back(nextFpi++);
-      } else if (isLegacyFCall(bc.op)) {
-        FTRACE(4, "blk:{} legacy FCall {} (nesting {})\n",
-               bid, curState.back(), curState.size() - 1);
-        fpiToCallBlkMap[curState.back()] = bid;
-        curState.pop_back();
-      }
-    }
-    auto hasNormalSucc = false;
-    forEachNormalSuccessor(
-      *f.blocks[bid],
-      [&] (BlockId id) {
-        hasNormalSucc = true;
-        auto &succState = blkFpiState[id];
-        FTRACE(4, "blk:{} propagate state to {}\n",
-               bid, id);
-        if (!succState) {
-          succState = curState;
-        } else {
-          assertx(succState == curState);
-        }
-      }
-    );
-    if (!hasNormalSucc) {
-      for (auto fpi : curState) {
-        // We may or may not have seen the FCall yet; if we've not
-        // seen it, either there is none (in which case there's
-        // nothing to do), or the blocks happen to be in the right
-        // order anyway (so again there's apparently nothing to
-        // do). But in the latter case its possible that adding edges
-        // for another fpi region (or another exceptional exit in this
-        // fpi region) might perturb the order; so we record a pointer
-        // to the unordered_map element, in case it gets filled in
-        // later.
-        auto const res = fpiToCallBlkMap.emplace(fpi, NoBlockId);
-        extraEdges[bid].push_back(&res.first->second);
-      }
-    }
-  }
-
-  if (!extraEdges.empty()) {
-    hphp_fast_map<BlockId, std::vector<BlockId>> extraIds;
-    for (auto& elm : extraEdges) {
-      for (auto const bidPtr : elm.second) {
-        if (*bidPtr == NoBlockId) {
-          // There was no FCall, so no need to do anything
-          continue;
-        }
-        FTRACE(4, "blk:{} add extra edge to {}\n",
-               elm.first, *bidPtr);
-        extraIds[elm.first].push_back(*bidPtr);
-      }
-    }
-    if (extraIds.size()) {
-      // redo the sort with the extra edges in place
-      sorted = rpoSortFromMain(f, &extraIds);
-    }
-  }
-
-  return sorted;
-}
-
-/*
  * Order the blocks for bytecode emission.
  *
  * Rules about block order:
- *
- *   - All bytecodes corresponding to a given FPI region must be
- *     contiguous. Note that an FPI region can start or end part way
- *     through a block, so this constraint is on bytecodes, not blocks
  *
  *   - Each DV funclet must have all of its blocks contiguous, with the
  *     entry block first.
@@ -260,7 +158,7 @@ std::vector<BlockId> initial_sort(const php::Func& f) {
  * next, with the block jumping back to the main entry point.
  */
 std::vector<BlockId> order_blocks(const php::Func& f) {
-  auto sorted = initial_sort(f);
+  auto sorted = rpoSortFromMain(f);
 
   // Get the DV blocks, without the rest of the primary function body,
   // and then add them to the end of sorted.
@@ -290,12 +188,6 @@ std::vector<BlockId> order_blocks(const php::Func& f) {
 // While emitting bytecode, we learn about some metadata that will
 // need to be registered in the FuncEmitter.
 struct EmitBcInfo {
-  struct FPI {
-    Offset fpushOff;
-    Offset fpiEndOff;
-    int32_t fpDelta;
-  };
-
   struct JmpFixup { Offset instrOff; Offset jmpImmedOff; };
 
   struct BlockInfo {
@@ -327,16 +219,11 @@ struct EmitBcInfo {
     // currentStackDepth correctly (and we also assert all the jumps
     // have the same depth).
     folly::Optional<uint32_t> expectedStackDepth;
-
-    // Similar to expectedStackDepth, for the fpi stack. Needed to deal with
-    // terminal instructions that end an fpi region.
-    folly::Optional<uint32_t> expectedFPIDepth;
   };
 
   std::vector<BlockId> blockOrder;
   uint32_t maxStackDepth;
   bool containsCalls;
-  std::vector<FPI> fpiRegions;
   std::vector<BlockInfo> blockInfo;
 };
 
@@ -388,9 +275,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
   // Track the stack depth while emitting to determine maxStackDepth.
   int32_t currentStackDepth { 0 };
-
-  // Stack of in-progress fpi regions.
-  std::vector<EmitBcInfo::FPI> fpiStack;
 
   // Temporary buffer for vector immediates.  (Hoisted so it's not
   // allocated in the loop.)
@@ -492,13 +376,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     return loc.id;
   };
 
-  auto end_fpi = [&] (Offset off) {
-    auto& fpi = fpiStack.back();
-    fpi.fpiEndOff = off;
-    ret.fpiRegions.push_back(fpi);
-    fpiStack.pop_back();
-  };
-
   auto set_expected_depth = [&] (BlockId block) {
     auto& info = blockInfo[block];
 
@@ -506,12 +383,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       assert(*info.expectedStackDepth == currentStackDepth);
     } else {
       info.expectedStackDepth = currentStackDepth;
-    }
-
-    if (info.expectedFPIDepth) {
-      assert(*info.expectedFPIDepth == fpiStack.size());
-    } else {
-      info.expectedFPIDepth = fpiStack.size();
     }
   };
 
@@ -616,14 +487,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     };
     auto push = [&] (int32_t n) {
       currentStackDepth += n;
-      auto const depth = currentStackDepth + fpiStack.size() * kNumActRecCells;
-      ret.maxStackDepth = std::max<uint32_t>(ret.maxStackDepth, depth);
-    };
-
-    auto begin_fpi = [&] {
-      fpiStack.push_back({startOffset, kInvalidOffset, currentStackDepth});
-      auto const depth = currentStackDepth + fpiStack.size() * kNumActRecCells;
-      ret.maxStackDepth = std::max<uint32_t>(ret.maxStackDepth, depth);
+      ret.maxStackDepth =
+        std::max<uint32_t>(ret.maxStackDepth, currentStackDepth);
     };
 
     auto ret_assert = [&] { assert(currentStackDepth == inst.numPop()); };
@@ -706,7 +571,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define POP_FCALL(nin, nobj) \
                        pop(nin + data.fca.numArgsInclUnpack() + 2 + \
                            data.fca.numRets);
-#define POP_FCALLO     pop(data.fca.numArgsInclUnpack() + data.fca.numRets - 1);
 
 #define PUSH_NOV
 #define PUSH_ONE(x)            push(1);
@@ -736,8 +600,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       if (isRet(Op::opcode)) ret_assert();                      \
       ue.emitOp(Op::opcode);                                    \
       POP_##inputs                                              \
-      if (isLegacyFPush(Op::opcode)) begin_fpi();               \
-      if (isLegacyFCall(Op::opcode)) end_fpi(startOffset);      \
                                                                 \
       size_t numTargets = 0;                                    \
       std::array<BlockId, kMaxHhbcImms> targets;                \
@@ -808,7 +670,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef POP_CMANY_U3
 #undef POP_CALLNATIVE
 #undef POP_FCALL
-#undef POP_FCALLO
 #undef POP_MFINAL
 #undef POP_C_MFINAL
 
@@ -849,15 +710,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     }
 
     currentStackDepth = *info.expectedStackDepth;
-
-    if (!info.expectedFPIDepth) {
-      // unreachable, or an entry block
-      info.expectedFPIDepth = 0;
-    }
-
-    // deal with fpiRegions that were ended by terminal instructions
-    assert(*info.expectedFPIDepth <= fpiStack.size());
-    while (*info.expectedFPIDepth < fpiStack.size()) end_fpi(lastOff);
 
     auto fallthrough = b->fallthrough;
     auto end = b->hhbcs.end();
@@ -931,8 +783,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     }
     FTRACE(2, "      block {} end: {}\n", bid, info.past);
   }
-
-  while (fpiStack.size()) end_fpi(lastOff);
 
   if (traceBc) {
     FTRACE(0, "TraceBytecode (emit): {}::{} in {}\n",
@@ -1311,13 +1161,6 @@ void emit_finish_func(EmitUnitState& state,
                       const EmitBcInfo& info) {
   if (info.containsCalls) fe.containsCalls = true;;
 
-  for (auto& fpi : info.fpiRegions) {
-    auto& e = fe.addFPIEnt();
-    e.m_fpushOff = fpi.fpushOff;
-    e.m_fpiEndOff = fpi.fpiEndOff;
-    e.m_fpOff    = fpi.fpDelta;
-  }
-
   emit_locals_and_params(fe, func, info);
   emit_ehent_tree(fe, func, info);
 
@@ -1367,7 +1210,7 @@ void emit_finish_func(EmitUnitState& state,
                      fe.numLocals() +
                      fe.numIterators() * kNumIterCells;
 
-  fe.finish(fe.ue().bcPos(), false /* load */);
+  fe.finish(fe.ue().bcPos());
 }
 
 void renumber_locals(const php::Func& func) {

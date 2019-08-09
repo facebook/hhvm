@@ -31,7 +31,6 @@
 #include <folly/MapUtil.h>
 
 #include "hphp/util/arch.h"
-#include "hphp/util/map-walker.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
@@ -50,7 +49,6 @@
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-profile.h"
 
-#include "hphp/runtime/vm/jit/annotation.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/irgen-basic.h"
@@ -281,9 +279,8 @@ static const struct {
   { OpLockObj,     {Stack1,           Stack1,       OutSameAsInput1 }},
 
   /*
-   * FPush* and FCall are special. Like the Ret* instructions, their
-   * manipulation of the runtime stack are outside the boundaries of
-   * the tracelet abstraction.
+   * FCall* are special. Like the Ret* instructions, their manipulation of
+   * the runtime stack are outside the boundaries of the tracelet abstraction.
    */
   { OpFCallClsMethod,
                    {StackTop2,        StackN,       OutUnknown      }},
@@ -307,7 +304,6 @@ static const struct {
                    {None,             StackN,       OutUnknown      }},
   { OpFCallObjMethodRD,
                    {Stack1,           StackN,       OutUnknown      }},
-  { OpFCall,       {FStack,           StackN,       OutUnknown      }},
   { OpFCallBuiltin,{BStackN|DontGuardAny,
                                       StackN,       OutUnknown      }},
 
@@ -484,7 +480,6 @@ int64_t countOperands(uint64_t mask) {
     {Stack2,       1},
     {Stack1,       1},
     {StackIns1,    2},
-    {FStack,       kNumActRecCells},
   };
 
   int64_t count = 0;
@@ -518,11 +513,6 @@ int64_t getStackPopped(PC pc) {
       auto const fca = getImm(pc, 0).u_FCA;
       auto const nin = countOperands(getInstrInfo(op).in);
       return nin + fca.numArgsInclUnpack() + kNumActRecCells - 1 + fca.numRets;
-    }
-
-    case Op::FCall: {
-      auto const fca = getImm(pc, 0).u_FCA;
-      return fca.numArgsInclUnpack() + fca.numRets + kNumActRecCells - 1;
     }
 
     case Op::QueryM:
@@ -568,7 +558,6 @@ int64_t getStackPopped(PC pc) {
 int64_t getStackPushed(PC pc) {
   auto const op = peek_op(pc);
   switch (op) {
-    case Op::FCall:
     case Op::FCallClsMethod:
     case Op::FCallClsMethodD:
     case Op::FCallClsMethodRD:
@@ -719,11 +708,6 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
   auto const flags = info.in;
   auto stackOff = bcSPOff;
 
-  if (isLegacyFCall(ni.op())) {
-    stackOff -= ni.imm[0].u_FCA.numArgsInclUnpack();  // arguments consumed
-    stackOff -= kNumActRecCells;  // ActRec is torn down as well
-  }
-
   if (flags & Stack1) {
     SKTRACE(1, sk, "getInputs: Stack1 %d\n", stackOff.offset);
     inputs.emplace_back(Location::Stack { stackOff-- });
@@ -786,9 +770,8 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
       inputs.emplace_back(Location::Stack { stackOff-- });
     }
   }
-  if (hasFPushEffects(ni.op())) {
-    auto const numArgs = isLegacyFPush(ni.op())
-      ? ni.imm[0].u_IVA : ni.imm[0].u_FCA.numArgsInclUnpack();
+  if (isFCall(ni.op())) {
+    auto const numArgs = ni.imm[0].u_FCA.numArgsInclUnpack();
 
     SKTRACE(1, sk, "getInputs: %s %d %d\n",
             opcodeToName(ni.op()), stackOff.offset, numArgs);
@@ -886,7 +869,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::JmpNZ:
   case Op::Jmp:
   case Op::JmpNS:
-  case Op::FCall:
   case Op::ClsCnsD:
   case Op::FCallBuiltin:
   case Op::NewStructArray:
@@ -1132,7 +1114,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
 }
 
 bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
-  if (hasFCallEffects(inst->op())) return true;
+  if (isFCall(inst->op())) return true;
 
   if (instrIsNonCallControlFlow(inst->op()) ||
       inst->op() == OpAwait || // may branch to scheduler and suspend execution
@@ -1237,7 +1219,7 @@ Type flavorToType(FlavorDesc f) {
 void translateInstr(irgen::IRGS& irgs, const NormalizedInstruction& ni,
                     bool /*checkOuterTypeOnly*/, bool /*firstInst*/
                     ) {
-  irgen::prepareForNextHHBC(irgs, &ni, ni.source);
+  irgen::prepareForNextHHBC(irgs, ni.source);
 
   const Func* builtinFunc = nullptr;
   if (ni.op() == OpFCallBuiltin) {
@@ -1246,7 +1228,7 @@ void translateInstr(irgen::IRGS& irgs, const NormalizedInstruction& ni,
   }
   auto pc = ni.pc();
   for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {
-    if (hasFCallEffects(ni.op()) && instrInputFlavor(pc, i) == UV) {
+    if (isFCall(ni.op()) && instrInputFlavor(pc, i) == UV) {
       // This is a hack to deal with the fact that this instruction is
       // actually popping an ActRec in the middle of its "pops." We could
       // assert on the Uninit values on the stack, but the call is going to

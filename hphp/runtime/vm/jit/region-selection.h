@@ -271,7 +271,6 @@ struct PostConditions {
 struct RegionDesc::Block {
   using TypedLocVec   = jit::vector<TypedLocation>;
   using GuardedLocVec = jit::vector<GuardedLocation>;
-  using KnownFuncMap  = boost::container::flat_map<SrcKey,const Func*>;
 
   Block(BlockId id, const Func* func, ResumeMode resumeMode, bool hasThis,
         Offset start, int length, FPInvOffset initSpOff);
@@ -326,13 +325,6 @@ struct RegionDesc::Block {
   void addPreCondition(const GuardedLocation&);
 
   /*
-   * Update the statically known Func*. It remains active until another is
-   * specified, so pass nullptr to indicate that there is no longer a known
-   * Func*.
-   */
-  void setKnownFunc(SrcKey, const Func*);
-
-  /*
    * Set the post-conditions for this Block.
    */
   void setPostConds(const PostConditions&);
@@ -350,7 +342,6 @@ struct RegionDesc::Block {
    */
   const TypedLocVec&    typePredictions()   const { return m_typePredictions;  }
   const GuardedLocVec&  typePreConditions() const { return m_typePreConditions;}
-  const KnownFuncMap&   knownFuncs()        const { return m_knownFuncs;       }
   const PostConditions& postConds()         const { return m_postConds;        }
 
 private:
@@ -370,7 +361,6 @@ private:
   TransID          m_profTransID;
   TypedLocVec      m_typePredictions;
   GuardedLocVec    m_typePreConditions;
-  KnownFuncMap     m_knownFuncs;
   PostConditions   m_postConds;
 };
 

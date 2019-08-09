@@ -620,16 +620,6 @@ namespace imm {
                       return Flavor::U;                                        \
                     }
 
-#define POP_FCALLO  uint32_t numPop() const {                                  \
-                      return fca.numArgsInclUnpack() + fca.numRets - 1;        \
-                    }                                                          \
-                    Flavor popFlavor(uint32_t i) const {                       \
-                      assert(i < numPop());                                    \
-                      if (i == 0 && fca.hasUnpack()) return Flavor::C;         \
-                      auto const cv = fca.numArgsInclUnpack();                 \
-                      return i < cv ? Flavor::CV : Flavor::U;                  \
-                    }
-
 #define PUSH_NOV          uint32_t numPush() const { return 0; }
 
 #define PUSH_ONE(x)       uint32_t numPush() const { return 1; }
@@ -644,7 +634,6 @@ namespace imm {
 #define FLAGS_TF
 #define FLAGS_CF
 #define FLAGS_FF
-#define FLAGS_PF bool has_unpack;
 #define FLAGS_CF_TF
 #define FLAGS_CF_FF
 
@@ -652,7 +641,6 @@ namespace imm {
 #define FLAGS_CTOR_TF
 #define FLAGS_CTOR_CF
 #define FLAGS_CTOR_FF
-#define FLAGS_CTOR_PF ,bool hu
 #define FLAGS_CTOR_CF_TF
 #define FLAGS_CTOR_CF_FF
 
@@ -660,7 +648,6 @@ namespace imm {
 #define FLAGS_INIT_TF
 #define FLAGS_INIT_CF
 #define FLAGS_INIT_FF
-#define FLAGS_INIT_PF ,has_unpack(hu)
 #define FLAGS_INIT_CF_TF
 #define FLAGS_INIT_CF_FF
 
@@ -719,7 +706,6 @@ OPCODES
 #undef FLAGS_TF
 #undef FLAGS_CF
 #undef FLAGS_FF
-#undef FLAGS_PF
 #undef FLAGS_CF_TF
 #undef FLAGS_CF_FF
 
@@ -727,7 +713,6 @@ OPCODES
 #undef FLAGS_CTOR_TF
 #undef FLAGS_CTOR_CF
 #undef FLAGS_CTOR_FF
-#undef FLAGS_CTOR_PF
 #undef FLAGS_CTOR_CF_TF
 #undef FLAGS_CTOR_CF_FF
 
@@ -735,7 +720,6 @@ OPCODES
 #undef FLAGS_INIT_TF
 #undef FLAGS_INIT_CF
 #undef FLAGS_INIT_FF
-#undef FLAGS_INIT_PF
 #undef FLAGS_INIT_CF_TF
 #undef FLAGS_INIT_CF_FF
 
@@ -762,7 +746,6 @@ OPCODES
 #undef POP_CMANY_U3
 #undef POP_CALLNATIVE
 #undef POP_FCALL
-#undef POP_FCALLO
 
 #undef IMM_TY_MA
 #undef IMM_TY_BLA

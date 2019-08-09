@@ -312,15 +312,6 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgAssertARFunc(IRLS&, const IRInstruction*) {}
-
-void cgLdARFuncPtr(IRLS& env, const IRInstruction* inst) {
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto const sp = srcLoc(env, inst, 0).reg();
-  auto const off = cellsToBytes(inst->extra<LdARFuncPtr>()->offset.offset);
-  vmain(env) << load{sp[off + AROFF(m_func)], dst};
-}
-
 void cgLdARCtx(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const sp = srcLoc(env, inst, 0).reg();

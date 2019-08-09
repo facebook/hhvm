@@ -419,7 +419,7 @@ folly::Optional<Type> parentClsExact(ISS& env) {
 }
 
 //////////////////////////////////////////////////////////////////////
-// fpi
+// folding
 
 bool canFold(ISS& env, const php::Func* func, int32_t nArgs,
              Type context, bool maybeDynamic) {
@@ -494,76 +494,6 @@ bool canFold(ISS& env, const php::Func* func, int32_t nArgs,
   }
 
   return false;
-}
-
-/*
- * Push an ActRec.
- *
- * nArgs should either be the number of parameters that will be passed
- * to the call, or -1 for unknown. We only need the number of args
- * when we know the exact function being called, in order to determine
- * eligibility for folding.
- *
- * returns the foldable flag as a convenience.
- */
-bool fpiPush(ISS& env, ActRec ar, int32_t nArgs, bool maybeDynamic) {
-  ar.foldable =
-    nArgs >= 0 &&
-    ar.func &&
-    canFold(env, ar.func->exactFunc(), nArgs, ar.context, maybeDynamic);
-  ar.pushBlk = env.bid;
-  FTRACE(2, "    fpi+: {} {}\n", env.state.fpiStack.size(), show(ar));
-  env.state.fpiStack.push_back(std::move(ar));
-  return ar.foldable;
-}
-
-void fpiPushNoFold(ISS& env, ActRec ar) {
-  ar.foldable = false;
-  ar.pushBlk = env.bid;
-
-  FTRACE(2, "    fpi+: {} {}\n", env.state.fpiStack.size(), show(ar));
-  env.state.fpiStack.push_back(std::move(ar));
-}
-
-ActRec fpiPop(ISS& env) {
-  assert(!env.state.fpiStack.empty());
-  auto const ret = env.state.fpiStack.back();
-  FTRACE(2, "    fpi-: {} {}\n", env.state.fpiStack.size() - 1, show(ret));
-  env.state.fpiStack.pop_back();
-  return ret;
-}
-
-ActRec& fpiTop(ISS& env) {
-  assert(!env.state.fpiStack.empty());
-  return env.state.fpiStack.back();
-}
-
-void unfoldable(ISS& env, ActRec& ar) {
-  env.propagate(ar.pushBlk, nullptr);
-  ar.foldable = false;
-  // we're going to reprocess the whole fpi region; any results we've
-  // got so far are bogus, so stop prevent further useless work by
-  // marking the next bytecode unreachable
-  unreachable(env);
-  // This also means we shouldn't reprocess any changes to the
-  // bytecode, since we're pretending the block ends here, and we may
-  // have already thrown away the FPush.
-  env.reprocess = false;
-  FTRACE(2, "     fpi: not foldable\n");
-}
-
-void fpiNotFoldable(ISS& env) {
-  // By the time we're optimizing, we should know up front which funcs
-  // are foldable (the analyze phase iterates to convergence, the
-  // optimize phase does not - so its too late to fix now).
-  assertx(!any(env.collect.opts & CollectionOpts::Optimizing));
-
-  auto& ar = fpiTop(env);
-  assertx(ar.func && ar.foldable);
-  auto const func = ar.func->exactFunc();
-  assertx(func);
-  env.collect.unfoldableFuncs.emplace(func, ar.pushBlk);
-  unfoldable(env, ar);
 }
 
 //////////////////////////////////////////////////////////////////////

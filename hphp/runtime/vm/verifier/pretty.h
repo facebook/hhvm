@@ -38,11 +38,6 @@ struct Block;
 void printBlocks(const FuncEmitter*, const Graph*);
 
 /**
- * Print one FPI entry to stdout.
- */
-void printFPI(const FuncEmitter*);
-
-/**
  * Print one instr to stdout.  The format is similar to Unit.prettyPrint(),
  * except we annotate instructions with their flags (C|T|F).
  */

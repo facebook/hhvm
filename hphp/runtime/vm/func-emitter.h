@@ -75,7 +75,6 @@ struct FuncEmitter {
   typedef std::vector<ParamInfo> ParamInfoVec;
   typedef std::vector<Func::SVInfo> SVInfoVec;
   typedef std::vector<EHEnt> EHEntVec;
-  typedef std::vector<FPIEnt> FPIEntVec;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -91,7 +90,7 @@ struct FuncEmitter {
    */
   void init(int l1, int l2, Offset base_, Attr attrs_, bool top_,
             const StringData* docComment_);
-  void finish(Offset past, bool load);
+  void finish(Offset past);
 
   /*
    * Commit this function to a repo.
@@ -180,17 +179,15 @@ struct FuncEmitter {
   // Unit tables.
 
   /*
-   * Add entries to the EH and FPI tables, and return them by reference.
+   * Add entries to the EH table, and return them by reference.
    */
   EHEnt& addEHEnt();
-  FPIEnt& addFPIEnt();
 
 private:
   /*
    * Private table sort routines; called at finish()-time.
    */
   void sortEHTab();
-  void sortFPITab(bool load);
 
 public:
   /*
@@ -274,7 +271,6 @@ public:
   LowStringPtr retUserType;
 
   EHEntVec ehtab;
-  FPIEntVec fpitab;
 
   union {
     uint16_t m_repoBoolBitset{0};

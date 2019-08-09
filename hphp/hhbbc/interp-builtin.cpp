@@ -538,8 +538,8 @@ bool can_emit_builtin(const php::Func* func,
   // Only allowed to overrun the signature if we have somewhere to put it
   if (numArgs > func->params.size() && !variadic) return false;
 
-  // Don't convert an FCall with unpack unless we're calling a variadic function
-  // with the unpack in the right place to pass it directly.
+  // Don't convert an FCall* with unpack unless we're calling a variadic
+  // function with the unpack in the right place to pass it directly.
   if (hasUnpack &&
       (!variadic || numArgs != func->params.size())) {
     return false;

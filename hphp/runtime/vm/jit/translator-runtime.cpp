@@ -779,7 +779,7 @@ int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets) {
 
 //////////////////////////////////////////////////////////////////////
 
-void checkFrame(ActRec* fp, Cell* sp, bool fullCheck, Offset bcOff) {
+void checkFrame(ActRec* fp, Cell* sp, bool fullCheck) {
   const Func* func = fp->m_func;
   func->validate();
   if (func->cls()) {
@@ -802,10 +802,7 @@ void checkFrame(ActRec* fp, Cell* sp, bool fullCheck, Offset bcOff) {
   }
 
   visitStackElems(
-    fp, sp, bcOff,
-    [](const ActRec* ar) {
-      ar->func()->validate();
-    },
+    fp, sp,
     [](const TypedValue* tv) {
       assertx(tvIsPlausible(*tv));
     }

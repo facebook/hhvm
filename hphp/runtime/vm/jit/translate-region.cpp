@@ -669,14 +669,15 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
 }
 
 bool irGenTryInlineFCall(irgen::IRGS& irgs, const Func* callee,
-                         const FCallArgs& fca, SSATmp* ctx, Type ctxType,
-                         Op writeArOpc) {
+                         const FCallArgs& fca, SSATmp* ctx, Op writeArOpc) {
   auto const psk = ProfSrcKey { irgs.profTransID, curSrcKey(irgs) };
   int calleeCost{0};
 
   // See if we have a callee region we can inline.
+  ctx = ctx ? ctx : cns(irgs, TNullptr);
   auto const calleeRegion = getInlinableCalleeRegion(
-    irgs, callee, fca, ctxType, writeArOpc, psk, calleeCost, irgs.annotations);
+    irgs, callee, fca, ctx->type(), writeArOpc, psk, calleeCost,
+    irgs.annotations);
   if (!calleeRegion) return false;
 
   // We shouldn't be inlining profiling translations.
@@ -700,7 +701,7 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, const Func* callee,
   };
   auto callFuncOff = bcOff(irgs) - curFunc(irgs)->base();
 
-  irgen::beginInlining(irgs, callee, fca, ctx, ctxType, writeArOpc,
+  irgen::beginInlining(irgs, callee, fca, ctx, ctx->type(), writeArOpc,
                        calleeRegion->start(),
                        callFuncOff,
                        returnTarget,

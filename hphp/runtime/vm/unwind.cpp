@@ -359,10 +359,9 @@ void unwindPhp(ObjectData* phpException) {
     if (fromTearDownFrame) {
       fromTearDownFrame = false;
       lockObjectWhileUnwinding(pc, stack);
-      discardStackTemps(fp, stack);
-    } else {
-      discardStackTemps(fp, stack);
     }
+
+    discardStackTemps(fp, stack);
 
     // Note: we skip catch/finally clauses if we have a pending C++
     // exception as part of our efforts to avoid running more PHP

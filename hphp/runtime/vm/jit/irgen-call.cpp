@@ -173,12 +173,13 @@ void emitCallerRxChecksUnknown(IRGS& env, SSATmp* callee) {
 IRSPRelOffset fsetActRec(
   IRGS& env,
   SSATmp* func,
+  const FCallArgs& fca,
   SSATmp* objOrClass,
-  uint32_t numArgs,
   SSATmp* invName,
   bool dynamicCall,
   SSATmp* tsList
 ) {
+  auto const numArgs = fca.numArgsInclUnpack();
   auto const arOffset =
     offsetFromIRSP(env, BCSPRelOffset{static_cast<int32_t>(numArgs)});
 
@@ -379,54 +380,23 @@ void callProfiledFunc(IRGS& env, SSATmp* callee,
 
 //////////////////////////////////////////////////////////////////////
 
-void prepareToCallKnown(IRGS& env, const Func* callee, SSATmp* objOrClass,
-                        uint32_t numArgs, const StringData* invName,
-                        bool dynamicCall, SSATmp* tsList) {
-  assertx(callee);
-
-  // Caller checks
-  if (dynamicCall) emitCallerDynamicCallChecksKnown(env, callee);
-  emitCallerRxChecksKnown(env, callee);
-
-  auto const func = cns(env, callee);
-  fsetActRec(env, func, objOrClass, numArgs,
-             invName ? cns(env, invName) : nullptr,
-             dynamicCall, tsList);
-}
-
-void prepareToCallUnknown(IRGS& env, SSATmp* callee, SSATmp* objOrClass,
-                          uint32_t numArgs, SSATmp* invName,
-                          bool dynamicCall, bool mightCareAboutDynCall,
-                          SSATmp* tsList) {
-  assertx(callee->isA(TFunc));
-  if (callee->hasConstVal() && (invName == nullptr || invName->hasConstVal())) {
-    return prepareToCallKnown(env, callee->funcVal(), objOrClass, numArgs,
-                              invName ? invName->strVal() : nullptr,
-                              dynamicCall, tsList);
-  }
-
-  // Caller checks
-  if (dynamicCall) {
-    emitCallerDynamicCallChecksUnknown(env, callee, mightCareAboutDynCall);
-  }
-  emitCallerRxChecksUnknown(env, callee);
-
-  fsetActRec(env, callee, objOrClass, numArgs, invName, dynamicCall, tsList);
-}
-
-//////////////////////////////////////////////////////////////////////
-
 void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
                          SSATmp* objOrClass, const StringData* invName,
                          bool dynamicCall, SSATmp* tsList) {
   assertx(callee);
+
+  // Caller checks
   if (!emitCallerReffinessChecksKnown(env, callee, fca)) return;
-  prepareToCallKnown(env, callee, objOrClass, fca.numArgsInclUnpack(), invName,
-                     dynamicCall, tsList);
+  if (dynamicCall) emitCallerDynamicCallChecksKnown(env, callee);
+  emitCallerRxChecksKnown(env, callee);
+
+  fsetActRec(env, cns(env, callee), fca, objOrClass,
+             invName ? cns(env, invName) : nullptr,
+             dynamicCall, tsList);
+
   if (invName == nullptr && isFCall(curSrcKey(env).op())) {
-    auto const ctx = objOrClass ? objOrClass : cns(env, TNullptr);
     auto const inlined = irGenTryInlineFCall(
-      env, callee, fca, ctx, ctx->type(), curSrcKey(env).op());
+      env, callee, fca, objOrClass, curSrcKey(env).op());
     if (inlined) return;
   }
 
@@ -458,9 +428,14 @@ void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
                                dynamicCall, tsList);
   }
 
+  // Caller checks
   emitCallerReffinessChecksUnknown(env, callee, fca);
-  prepareToCallUnknown(env, callee, objOrClass, fca.numArgsInclUnpack(),
-                       invName, dynamicCall, mightCareAboutDynCall, tsList);
+  if (dynamicCall) {
+    emitCallerDynamicCallChecksUnknown(env, callee, mightCareAboutDynCall);
+  }
+  emitCallerRxChecksUnknown(env, callee);
+
+  fsetActRec(env, callee, fca, objOrClass, invName, dynamicCall, tsList);
 
   // We just wrote to the stack, make sure Call opcode can set up its Catch.
   updateMarker(env);

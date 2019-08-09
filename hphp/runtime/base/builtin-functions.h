@@ -99,7 +99,8 @@ inline bool is_string(const Cell* c) {
 inline bool is_array(const Cell* c) {
   assertx(cellIsPlausible(*c));
   if (tvIsClsMeth(c)) {
-    if (!RuntimeOption::EvalHackArrDVArrs) {
+    if (RuntimeOption::EvalIsCompatibleClsMethType &&
+        !RuntimeOption::EvalHackArrDVArrs) {
       if (RuntimeOption::EvalIsVecNotices) {
         raise_notice(Strings::CLSMETH_COMPAT_IS_ARR);
       }

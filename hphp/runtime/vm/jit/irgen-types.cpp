@@ -777,7 +777,8 @@ SSATmp* isArrayImpl(IRGS& env, SSATmp* src) {
             return gen(env, CheckType, TClsMeth, taken, src);
           },
           [&] (SSATmp*) {
-            if (!RuntimeOption::EvalHackArrDVArrs) {
+            if (RuntimeOption::EvalIsCompatibleClsMethType &&
+                !RuntimeOption::EvalHackArrDVArrs) {
               if (RuntimeOption::EvalIsVecNotices) {
                 gen(env, RaiseNotice, cns(env,
                   makeStaticString(Strings::CLSMETH_COMPAT_IS_ARR)));
@@ -831,7 +832,8 @@ SSATmp* isArrayImpl(IRGS& env, SSATmp* src) {
           return gen(env, CheckType, TClsMeth, taken, src);
         },
         [&] (SSATmp*) {
-          if (!RuntimeOption::EvalHackArrDVArrs) {
+          if (RuntimeOption::EvalIsCompatibleClsMethType &&
+              !RuntimeOption::EvalHackArrDVArrs) {
             if (RuntimeOption::EvalIsVecNotices) {
               gen(env, RaiseNotice, cns(env,
                 makeStaticString(Strings::CLSMETH_COMPAT_IS_ARR)));

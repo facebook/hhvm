@@ -24,6 +24,7 @@ const StaticString s_allows_unknown_fields("allows_unknown_fields");
 const StaticString s_elem_types("elem_types");
 const StaticString s_param_types("param_types");
 const StaticString s_return_type("return_type");
+const StaticString s_variadic_type("variadic_type");
 const StaticString s_fields("fields");
 const StaticString s_kind("kind");
 const StaticString s_value("value");
@@ -55,6 +56,14 @@ ALWAYS_INLINE const ArrayData* get_ts_array(const ArrayData* ts,
                                             const String& s) {
   auto const field = ts->rval(s.get());
   assertx(field != nullptr && isVecOrArrayType(field.type()));
+  return field.val().parr;
+}
+
+ALWAYS_INLINE const ArrayData* get_ts_darray_opt(const ArrayData* ts,
+                                                 const String& s) {
+  auto const field = ts->rval(s.get());
+  if (!field.is_set()) return nullptr;
+  assertx(isDictOrArrayType(field.type()));
   return field.val().parr;
 }
 
@@ -99,6 +108,10 @@ ALWAYS_INLINE const ArrayData* get_ts_param_types(const ArrayData* ts) {
 
 ALWAYS_INLINE const ArrayData* get_ts_return_type(const ArrayData* ts) {
   return detail::get_ts_array(ts, s_return_type);
+}
+
+ALWAYS_INLINE const ArrayData* get_ts_variadic_type_opt(const ArrayData* ts) {
+  return detail::get_ts_darray_opt(ts, s_variadic_type);
 }
 
 ALWAYS_INLINE const ArrayData* get_ts_fields(const ArrayData* ts) {

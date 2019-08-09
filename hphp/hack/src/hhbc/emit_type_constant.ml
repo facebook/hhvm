@@ -189,17 +189,20 @@ and hint_to_type_constant_list ~tparams ~namespace ~targ_map (h : Aast.hint) =
   | Aast.Haccess _ -> failwith "Structure not translated according to ast_to_nast"
   | Aast.Hfun (_, true (* is_coroutine *), _, _, _, _, _, _ ) ->
     failwith "Codegen for coroutine functions is not supported"
-  | Aast.Hfun (_, false (* is_coroutine *), hl, _kl, _, _b, h, _) ->
+  | Aast.Hfun (_, false (* is_coroutine *), hl, _kl, _, vh, h, _) ->
     (* TODO(mqian): Implement for inout parameters *)
-    (* TODO: Bool indicates variadic argument. What to do? *)
     let kind = get_kind ~tparams "fun" in
-    let return_type =
-      [(TV.String "return_type"
-        , hint_to_type_constant ~tparams ~namespace ~targ_map h)] in
+    let single_hint name h =
+      [(TV.String name, hint_to_type_constant ~tparams ~namespace ~targ_map h)]
+    in
+    let return_type = single_hint "return_type" h in
+    let variadic_type =
+      Option.value_map vh ~f:(single_hint "variadic_type") ~default:[]
+    in
     let param_types =
       [(TV.String "param_types"
         , hints_to_type_constant ~tparams ~namespace ~targ_map hl)] in
-    kind @ return_type @ param_types
+    kind @ return_type @ param_types @ variadic_type
   | Aast.Hoption h ->
     [(TV.String "nullable", TV.Bool true)] @
       hint_to_type_constant_list ~tparams ~namespace ~targ_map h

@@ -709,16 +709,22 @@ resolveTSStatically(ISS& env, SArray ts, const php::Class* declaringCls,
       return finish(addModifiers(typeCnsVal));
     }
     case TypeStructure::Kind::T_fun: {
-      // TODO(T46022709): Handle variadic args
       auto rreturn = resolveTSStatically(env, get_ts_return_type(ts),
                                          declaringCls, checkArrays);
       if (!rreturn) return nullptr;
       auto rparams = resolveTSListStatically(env, get_ts_param_types(ts),
                                              declaringCls, checkArrays);
       if (!rparams) return nullptr;
-      auto const result = const_cast<ArrayData*>(ts)
+      auto result = const_cast<ArrayData*>(ts)
         ->set(s_return_type.get(), Variant(rreturn))
         ->set(s_param_types.get(), Variant(rparams));
+      auto const variadic = get_ts_variadic_type_opt(ts);
+      if (variadic) {
+        auto rvariadic = resolveTSStatically(env, variadic, declaringCls,
+                                             checkArrays);
+        if (!rvariadic) return nullptr;
+        result = result->set(s_variadic_type.get(), Variant(rvariadic));
+      }
       return finish(result);
     }
     case TypeStructure::Kind::T_array:
@@ -3329,10 +3335,12 @@ bool canReduceToDontResolve(SArray ts) {
       );
       return result;
     }
-    case TypeStructure::Kind::T_fun:
-      // TODO(T46022709): Handle variadic args
+    case TypeStructure::Kind::T_fun: {
+      auto const variadicType = get_ts_variadic_type_opt(ts);
       return canReduceToDontResolve(get_ts_return_type(ts))
-        && canReduceToDontResolveList(get_ts_param_types(ts));
+        && canReduceToDontResolveList(get_ts_param_types(ts))
+        && (!variadicType || canReduceToDontResolve(variadicType));
+    }
     // Following needs to be resolved
     case TypeStructure::Kind::T_unresolved:
     case TypeStructure::Kind::T_typeaccess:

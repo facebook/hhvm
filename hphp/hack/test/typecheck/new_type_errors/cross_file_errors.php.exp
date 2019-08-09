@@ -1,0 +1,8 @@
+File "cross_file_errors.php--foo_impl.php", line 0, characters 0-0:
+Type checking of this file produced an error with the primary position in a different file. This is a bug in the type checker. Please report it by clicking the bug button in Nuclide or by creating a diff preview and posting it in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4341])
+File "cross_file_errors.php--foo.php", line 4, characters 19-21:
+Member bar has the wrong type
+File "cross_file_errors.php--foo_impl.php", line 4, characters 27-30:
+Expected void
+File "cross_file_errors.php--foo.php", line 4, characters 27-29:
+But got int

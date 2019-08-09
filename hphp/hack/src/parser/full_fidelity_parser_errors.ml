@@ -3613,7 +3613,7 @@ let const_decl_errors env node namespace_name names errors =
   | _ -> names, errors
 
 
-let class_property_visibility_errors env node errors =
+let class_property_modifiers_errors env node errors =
   match syntax node with
   | PropertyDeclaration { property_modifiers; _ } ->
     let first_parent_name = Option.value (first_parent_class_name env.context)
@@ -3633,15 +3633,12 @@ let class_property_visibility_errors env node errors =
         is_empty_list_or_missing property_modifiers
         SyntaxError.property_requires_visibility node
     in
+    let errors =
+      produce_error errors
+        methodish_contains_abstract node
+        SyntaxError.error2058 node
+    in
     errors
-  | _ -> errors
-
-let class_property_abstract_errors node errors =
-  match syntax node with
-  | PropertyDeclaration _ ->
-    if methodish_contains_abstract node then
-      make_error_from_node node SyntaxError.error2058 :: errors
-    else errors
   | _ -> errors
 
 let class_property_const_errors node errors =
@@ -4056,9 +4053,8 @@ let find_syntax_errors env =
             (namespace_name = global_namespace_name) names errors in
         trait_require_clauses, names, errors
       | PropertyDeclaration _ ->
-        let errors = class_property_visibility_errors env node errors in
+        let errors = class_property_modifiers_errors env node errors in
         let errors = class_reified_param_errors env node errors in
-        let errors = class_property_abstract_errors node errors in
         let errors = class_property_const_errors node errors in
         trait_require_clauses, names, errors
       | EnumDeclaration _ ->

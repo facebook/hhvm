@@ -338,6 +338,7 @@ final class Set<Tv as arraykey> implements MutableSet<Tv> {
   public function zip<Tu>(
     <<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable
   /* HH_FIXME[4110] need bottom type as generic */
+  /* HH_FIXME[4323] need bottom type as generic */
   /* HH_FIXME[4322] */
   ): Set<Pair<Tv, Tu>>;
 

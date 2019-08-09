@@ -74,6 +74,7 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    */
   <<__Rx, __MaybeMutable>>
   /* HH_FIXME[4110] pair needs to extend ConstVector<Tv1|Tv2> */
+  /* HH_FIXME[4341] pair needs to extend ConstVector<Tv1|Tv2> */
   public function toValuesArray<Tu>(): varray<Tu>
     where Tv1 as Tu, Tv2 as Tu;
 

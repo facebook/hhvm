@@ -227,21 +227,37 @@ let check_call env method_info pos reason ft arg_types =
           true in
       allow_call &&
       (* check that conditions for all arguments are met *)
-      begin match List.zip ft.ft_params arg_types with
-      | None -> false
-      | Some l ->
-        List.for_all l ~f:begin function
-        | { fp_rx_annotation = Some Param_rx_if_impl ty; fp_type; _ }, arg_ty ->
-          let ty =
-            if Typing_utils.is_option env fp_type
-            then fst ty, Toption ty
-            else ty
-          in
-          check_only_rx_if_impl env ~is_receiver:false ~is_self:false pos reason arg_ty ty
-        (* | { fp_rx_condition = Some Param_rxfunc; fp_type; _ }, arg_ty ->
-          check_only_rx_if_rx_func env pos reason caller_reactivity arg_ty fp_type *)
-        | { fp_rx_annotation = _; _ }, _ ->  true
-        end
+      begin
+        let rec check_params ft_params arg_types =
+          match ft_params, arg_types with
+          | [], _ -> true
+          | { fp_rx_annotation = Some Param_rx_if_impl ty; fp_type; _ } :: tl, arg_ty::arg_tl ->
+            let ty =
+              if Typing_utils.is_option env fp_type
+              then MakeType.nullable (fst ty) ty
+              else ty
+            in
+            (* check if argument type matches condition *)
+            check_only_rx_if_impl env ~is_receiver:false ~is_self:false pos reason arg_ty ty &&
+            (* check the rest of arguments *)
+            check_params tl arg_tl
+          | { fp_rx_annotation = Some Param_rx_if_impl ty; fp_type; _ } :: tl, []
+            when Typing_utils.is_option env fp_type ->
+            (* if there are more parameters than actual arguments - assume that remaining parameters
+            have default values (actual arity check is performed elsewhere).  *)
+            let ty = MakeType.nullable (fst ty) ty in
+            (* Treat missing arguments as if null was provided explicitly *)
+            let arg_ty = (MakeType.null Reason.none)  in
+            check_only_rx_if_impl env ~is_receiver:false ~is_self:false pos reason arg_ty ty &&
+            check_params tl []
+          | { fp_rx_annotation = Some Param_rx_if_impl _; _ } :: _, [] ->
+            (* Missing argument for non-nulalble RxIfImpl parameter - no reasonable defaults are expected.
+            TODO: add check that type of parameter annotated with RxIfImpl is class or interface *)
+            false
+          | _::tl, _::arg_tl -> check_params tl arg_tl
+          | _:: tl, [] -> check_params tl []
+        in
+        check_params ft.ft_params arg_types
       end
     end
     else true in

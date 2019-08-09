@@ -656,7 +656,13 @@ let check_implements env removals parent_type type_ =
                   let name_pos, _ = name in
                   Errors.bad_enum_decl name_pos errorl)
             else
-              check_class_implements env removals (parent_class, parent_type) (class_, type_)
+              Errors.try_unless_error_in_different_file
+                (Env.get_file env)
+                (fun () -> check_class_implements env removals (parent_class, parent_type) (class_, type_))
+                (fun errorl ->
+                  let p_name_pos, p_name_str = parent_name in
+                  let name_pos, name_str = name in
+                  Errors.bad_decl_override p_name_pos p_name_str name_pos name_str errorl)
         end
       else
         Errors.try_

@@ -3549,6 +3549,19 @@ let try_add_err pos err f1 f2 =
 let has_no_errors f =
   try_ (fun () -> let _ = f () in true) (fun _ -> false)
 
+let try_unless_error_in_different_file file f error_file_mismatch_handler =
+  try_with_result f (fun r err ->
+    (match err with
+    | _, first :: _ ->
+      let err_pos, _ = first in
+      if Pos.filename err_pos <> file
+      then error_file_mismatch_handler err
+      else add_error err
+    | _ ->
+      (* No errors? This fun shouldn't even get called... *)
+      ());
+    r)
+
 (*****************************************************************************)
 (* Do. *)
 (*****************************************************************************)

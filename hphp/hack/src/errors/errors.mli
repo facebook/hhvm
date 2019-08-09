@@ -399,6 +399,7 @@ val try_ : (unit -> 'a) -> (error -> 'a) -> 'a
 val try_with_result : (unit -> 'a) -> ('a -> error -> 'a) -> 'a
 val try_with_error : (unit -> 'a) -> (unit -> 'a) -> 'a
 val try_add_err : Pos.t -> string -> (unit -> 'a) -> (unit -> 'a) -> 'a
+val try_unless_error_in_different_file : Relative_path.t -> (unit -> 'a) -> (error -> unit) -> 'a
 
 (* The type of collections of errors *)
 type t

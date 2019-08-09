@@ -155,7 +155,7 @@ struct Options {
 
   /*
    * Whether to replace bytecode with less expensive bytecodes when we can.
-   * E.g. InstanceOf -> InstanceOfD or FPushFunc -> FPushFuncD.
+   * E.g. InstanceOf -> InstanceOfD or FCallFunc -> FCallFuncD.
    */
   bool StrengthReduce = true;
 

@@ -7,8 +7,7 @@
   NullUninit
   NullUninit
     String "thrower"
-  FPushFuncD 1 "set_error_handler"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "set_error_handler"
   PopC
 
   # If get_undefined_var is inlined then the context passed to handler will
@@ -27,8 +26,7 @@
     NullUninit
     NullUninit
     NullUninit
-    FPushFuncD 0 "test_unwind_dirty_stack_regs"
-    FCall <> 0 1 "" - "" ""
+    FCallFuncD <> 0 1 "" - "test_unwind_dirty_stack_regs"
     RetC
   } .catch {
     SetL _1
@@ -114,24 +112,21 @@
   NullUninit
   NullUninit
     Int 0
-  FPushFuncD 1 "make_obj"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "make_obj"
   SetL $k_0
   PopC
   NullUninit
   NullUninit
   NullUninit
     Int 1
-  FPushFuncD 1 "make_obj"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "make_obj"
   SetL $k_1
   PopC
   NullUninit
   NullUninit
   NullUninit
     Int 2
-  FPushFuncD 1 "make_obj"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "make_obj"
   SetL $k_2
   PopC
 
@@ -142,8 +137,7 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "get_undefined_var"
-  FCall <> 0 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "get_undefined_var"
   PopC
 
   # This code isn't reached---but let's Pop this junk just so

@@ -7,8 +7,7 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "main"
-  FCall <> 0 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "main"
   PopC
   Null
   RetC
@@ -20,8 +19,7 @@
   NullUninit
   CGetL $arg
   CGetL $who
-  FPushFunc 1
-  FCall <> 1 1 "" - "" ""
+  FCallFunc <> 1 1 "" -
 
   SetL $ret
   PopC
@@ -30,8 +28,7 @@
   NullUninit
   NullUninit
   CGetL $ret
-  FPushFunc 0
-  FCall <> 0 1 "" - "" ""
+  FCallFunc <> 0 1 "" -
   PopC
 
   True
@@ -70,8 +67,7 @@
   NullUninit
   String "a"
   String "b"
-  FPushFuncD 2 "caller"
-  FCall <> 2 1 "" - "" ""
+  FCallFuncD <> 2 1 "" - "caller"
   PopC
 
   String "strval"
@@ -81,8 +77,7 @@
   NullUninit
   NullUninit
   VGetL $funk
-  FPushFuncD 1 "byref"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "byref"
   PopC
   CGetL $funk
   Print

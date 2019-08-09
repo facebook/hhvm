@@ -44,6 +44,9 @@ let get_regular_labels instr =
   | ICall (FCallClsMethodS ((_, _, _, _, Some l), _))
   | ICall (FCallClsMethodSD ((_, _, _, _, Some l), _, _))
   | ICall (FCallClsMethodSRD ((_, _, _, _, Some l), _, _))
+  | ICall (FCallFunc ((_, _, _, _, Some l), _))
+  | ICall (FCallFuncD ((_, _, _, _, Some l), _))
+  | ICall (FCallFuncRD ((_, _, _, _, Some l), _))
   | ICall (FCallObjMethod ((_, _, _, _, Some l), _, _))
   | ICall (FCallObjMethodD ((_, _, _, _, Some l), _, _))
   | ICall (FCallObjMethodRD ((_, _, _, _, Some l), _, _))
@@ -120,6 +123,12 @@ let relabel_instr instr relabel =
     ICall (FCallClsMethodSD ((fl, na, nr, br, Some (relabel l)), c, m))
   | ICall (FCallClsMethodSRD ((fl, na, nr, br, Some l), c, m)) ->
     ICall (FCallClsMethodSRD ((fl, na, nr, br, Some (relabel l)), c, m))
+  | ICall (FCallFunc ((fl, na, nr, br, Some l), p)) ->
+    ICall (FCallFunc ((fl, na, nr, br, Some (relabel l)), p))
+  | ICall (FCallFuncD ((fl, na, nr, br, Some l), f)) ->
+    ICall (FCallFuncD ((fl, na, nr, br, Some (relabel l)), f))
+  | ICall (FCallFuncRD ((fl, na, nr, br, Some l), f)) ->
+    ICall (FCallFuncRD ((fl, na, nr, br, Some (relabel l)), f))
   | ICall (FCallObjMethod ((fl, na, nr, br, Some l), f, p)) ->
     ICall (FCallObjMethod ((fl, na, nr, br, Some (relabel l)), f, p))
   | ICall (FCallObjMethodD ((fl, na, nr, br, Some l), f, m)) ->

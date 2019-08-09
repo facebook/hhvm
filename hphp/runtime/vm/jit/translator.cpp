@@ -285,9 +285,6 @@ static const struct {
    * manipulation of the runtime stack are outside the boundaries of
    * the tracelet abstraction.
    */
-  { OpFPushFunc,   {Stack1,           FStack,       OutFDesc        }},
-  { OpFPushFuncD,  {None,             FStack,       OutFDesc        }},
-  { OpFPushFuncRD, {Stack1,           FStack,       OutFDesc        }},
   { OpFCallClsMethod,
                    {StackTop2,        StackN,       OutUnknown      }},
   { OpFCallClsMethodD,
@@ -301,6 +298,9 @@ static const struct {
   { OpFCallClsMethodSRD,
                    {Stack1,           StackN,       OutUnknown      }},
   { OpFCallCtor,   {None,             StackN,       OutUnknown      }},
+  { OpFCallFunc,   {Stack1,           StackN,       OutUnknown      }},
+  { OpFCallFuncD,  {None,             StackN,       OutUnknown      }},
+  { OpFCallFuncRD, {Stack1,           StackN,       OutUnknown      }},
   { OpFCallObjMethod,
                    {Stack1,           StackN,       OutUnknown      }},
   { OpFCallObjMethodD,
@@ -502,11 +502,6 @@ int64_t countOperands(uint64_t mask) {
 int64_t getStackPopped(PC pc) {
   auto const op = peek_op(pc);
   switch (op) {
-    case Op::FPushFunc:
-    case Op::FPushFuncD:
-    case Op::FPushFuncRD:
-      return getImm(pc, 0).u_IVA + countOperands(getInstrInfo(op).in) + 3;
-
     case Op::FCallClsMethod:
     case Op::FCallClsMethodD:
     case Op::FCallClsMethodRD:
@@ -514,6 +509,9 @@ int64_t getStackPopped(PC pc) {
     case Op::FCallClsMethodSD:
     case Op::FCallClsMethodSRD:
     case Op::FCallCtor:
+    case Op::FCallFunc:
+    case Op::FCallFuncD:
+    case Op::FCallFuncRD:
     case Op::FCallObjMethod:
     case Op::FCallObjMethodD:
     case Op::FCallObjMethodRD: {
@@ -570,10 +568,6 @@ int64_t getStackPopped(PC pc) {
 int64_t getStackPushed(PC pc) {
   auto const op = peek_op(pc);
   switch (op) {
-    case Op::FPushFunc:
-    case Op::FPushFuncD:
-    case Op::FPushFuncRD:
-      return getImm(pc, 0).u_IVA + kNumActRecCells;
     case Op::FCall:
     case Op::FCallClsMethod:
     case Op::FCallClsMethodD:
@@ -582,6 +576,9 @@ int64_t getStackPushed(PC pc) {
     case Op::FCallClsMethodSD:
     case Op::FCallClsMethodSRD:
     case Op::FCallCtor:
+    case Op::FCallFunc:
+    case Op::FCallFuncD:
+    case Op::FCallFuncRD:
     case Op::FCallObjMethod:
     case Op::FCallObjMethodD:
     case Op::FCallObjMethodRD:
@@ -996,9 +993,9 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::FCallClsMethodSD:
   case Op::FCallClsMethodSRD:
   case Op::FCallCtor:
-  case Op::FPushFunc:
-  case Op::FPushFuncD:
-  case Op::FPushFuncRD:
+  case Op::FCallFunc:
+  case Op::FCallFuncD:
+  case Op::FCallFuncRD:
   case Op::FCallObjMethodD:
   case Op::FCallObjMethodRD:
   case Op::ResolveFunc:

@@ -437,12 +437,6 @@ let string_of_param_locations pl =
 
 let string_of_call instruction =
   match instruction with
-  | FPushFunc (n, pl) ->
-    sep ["FPushFunc"; string_of_int n; string_of_param_locations pl]
-  | FPushFuncD (n, id) ->
-    sep ["FPushFuncD"; string_of_int n; string_of_function_id id]
-  | FPushFuncRD (n, id) ->
-    sep ["FPushFuncRD"; string_of_int n; string_of_function_id id]
   | NewObj -> "NewObj"
   | NewObjR -> "NewObjR"
   | NewObjD cid ->
@@ -488,6 +482,21 @@ let string_of_call instruction =
     ]
   | FCallCtor fcall_args ->
     sep ["FCallCtor"; string_of_fcall_args fcall_args; "\"\""]
+  | FCallFunc (fcall_args, pl) ->
+    sep [
+      "FCallFunc"; string_of_fcall_args fcall_args;
+      string_of_param_locations pl
+    ]
+  | FCallFuncD (fcall_args, id) ->
+    sep [
+      "FCallFuncD"; string_of_fcall_args fcall_args;
+      string_of_function_id id
+    ]
+  | FCallFuncRD (fcall_args, id) ->
+    sep [
+      "FCallFuncRD"; string_of_fcall_args fcall_args;
+      string_of_function_id id
+    ]
   | FCallObjMethod (fcall_args, nf, pl) ->
     sep [
       "FCallObjMethod"; string_of_fcall_args fcall_args; "\"\"";

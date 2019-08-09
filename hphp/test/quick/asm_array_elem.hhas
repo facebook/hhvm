@@ -4,8 +4,7 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "main"
-  FCall <> 0 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "main"
   PopC
   Int 1
   RetC
@@ -22,8 +21,7 @@
   NullUninit
   NullUninit
   CGetL $foo
-  FPushFuncD 1 "var_dump"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "var_dump"
   PopC
 
   Int 1

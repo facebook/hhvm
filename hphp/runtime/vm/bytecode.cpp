@@ -4607,6 +4607,8 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool unpack) {
 
 namespace {
 
+// FIXME: unify FCallFuncRD with other FCall*RD opcodes
+template<bool errOnFail>
 ArrayData* getReifiedGenerics(const Func* func, const StringData* funcName,
                               Array&& tsList) {
   if (!func->hasReifiedGenerics()) return nullptr;
@@ -4615,9 +4617,10 @@ ArrayData* getReifiedGenerics(const Func* func, const StringData* funcName,
     // method name. The array-data passed on the stack may not be static.
     return ArrayData::GetScalarArray(std::move(tsList));
   }
-  if (isReifiedName(funcName)) {
+  if (funcName != nullptr && isReifiedName(funcName)) {
     return getReifiedTypeList(stripClsOrFnNameFromReifiedName(funcName));
   }
+  if (!errOnFail) return nullptr;
   raise_error(Strings::REIFIED_GENERICS_NOT_GIVEN, func->fullName()->data());
 }
 
@@ -4648,18 +4651,6 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
   pc = vmpc();
 }
 
-OPTBLD_INLINE ActRec* fPushFuncImpl(
-  const Func* func, int numArgs, ArrayData* reifiedGenerics
-) {
-  assertx(kNumActRecCells == 3);
-  ActRec* ar = vmStack().indA(numArgs);
-  ar->m_func = func;
-  ar->initNumArgs(numArgs);
-  ar->trashVarEnv();
-  if (reifiedGenerics != nullptr) ar->setReifiedGenerics(reifiedGenerics);
-  return ar;
-}
-
 ALWAYS_INLINE std::string concat_arg_list(imm_array<uint32_t> args) {
   auto const n = args.size;
   assertx(n != 0);
@@ -4667,6 +4658,237 @@ ALWAYS_INLINE std::string concat_arg_list(imm_array<uint32_t> args) {
   folly::toAppend(args[0], &ret);
   for (int i = 1; i != n; ++i) folly::toAppend(";", args[i], &ret);
   return ret;
+}
+
+ALWAYS_INLINE StringData* mangleInOutName(const StringData* name,
+                                          imm_array<uint32_t> args) {
+  return StringData::Make(
+    name, folly::sformat("${}$inout", concat_arg_list(args)));
+}
+
+const StaticString s___invoke("__invoke");
+
+// This covers both closures and functors.
+OPTBLD_INLINE void fcallFuncObj(PC origpc, PC& pc, const FCallArgs& fca,
+                                imm_array<uint32_t> args) {
+  assertx(tvIsObject(vmStack().topC()));
+  auto obj = Object::attach(vmStack().topC()->m_data.pobj);
+  vmStack().discard();
+
+  auto const cls = obj->getVMClass();
+  auto const func = LIKELY(!args.size)
+    ? cls->lookupMethod(s___invoke.get())
+    : cls->lookupMethod(makeStaticString(
+        folly::sformat("__invoke${}$inout", concat_arg_list(args))
+      ));
+
+  if (func == nullptr) {
+    raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
+  }
+
+  fcallImpl<false>(origpc, pc, fca, func, nullptr, [&] (ActRec* ar) {
+    if (func->isStaticInPrologue()) {
+      ar->setClass(cls);
+    } else {
+      // Teleport the reference from the destroyed stack cell to the
+      // ActRec. Don't try this at home.
+      ar->setThis(obj.detach());
+    }
+  });
+}
+
+/*
+ * Supports callables:
+ *   array($instance, 'method')
+ *   array('Class', 'method'),
+ *   vec[$instance, 'method'],
+ *   vec['Class', 'method'],
+ *   array(Class*, Func*),
+ *   array(ObjectData*, Func*),
+ */
+OPTBLD_INLINE void fcallFuncArr(PC origpc, PC& pc, const FCallArgs& fca,
+                                imm_array<uint32_t> args) {
+  assertx(tvIsArrayLike(vmStack().topC()));
+  auto arr = Array::attach(vmStack().topC()->m_data.parr);
+  vmStack().discard();
+
+  // Handle inout name mangling
+  if (UNLIKELY(args.size) && arr->size() == 2) {
+    auto const methName = [&]() -> const StringData* {
+      auto const meth = arr->at(int64_t{1});
+      if (tvIsString(meth)) return meth.m_data.pstr;
+      if (tvIsFunc(meth)) return meth.m_data.pfunc->fullDisplayName();
+      return nullptr;
+    }();
+    if (methName) {
+      VArrayInit ai{2};
+      ai.append(arr->at(int64_t{0}));
+      ai.append(Variant::attach(mangleInOutName(methName, args)));
+      arr = ai.toArray();
+    }
+  }
+
+  ObjectData* thiz = nullptr;
+  HPHP::Class* cls = nullptr;
+  StringData* invName = nullptr;
+  bool dynamic = false;
+  ArrayData* reifiedGenerics = nullptr;
+
+  auto const func = vm_decode_function(const_variant_ref{arr}, vmfp(), thiz,
+                                       cls, invName, dynamic, reifiedGenerics,
+                                       DecodeFlags::NoWarn);
+  assertx(dynamic);
+  if (UNLIKELY(func == nullptr)) {
+    raise_error("Invalid callable (array)");
+  }
+
+  fcallImpl<true>(origpc, pc, fca, func, reifiedGenerics, [&] (ActRec* ar) {
+    if (thiz) {
+      thiz->incRefCount();
+      ar->setThis(thiz);
+    } else if (cls) {
+      ar->setClass(cls);
+    } else {
+      ar->trashThis();
+    }
+
+    if (UNLIKELY(invName != nullptr)) {
+      assertx(!func->hasReifiedGenerics());
+      ar->setMagicDispatch(invName);
+    }
+
+    arr.reset();
+  });
+}
+
+/*
+ * Supports callables:
+ *   'func_name'
+ *   'class::method'
+ */
+OPTBLD_INLINE void fcallFuncStr(PC origpc, PC& pc, const FCallArgs& fca,
+                                imm_array<uint32_t> args) {
+  assertx(tvIsString(vmStack().topC()));
+  auto str = String::attach(vmStack().topC()->m_data.pstr);
+  vmStack().discard();
+
+  // Handle inout name mangling
+  if (UNLIKELY(args.size)) {
+    str = String::attach(mangleInOutName(str.get(), args));
+  }
+
+  ObjectData* thiz = nullptr;
+  HPHP::Class* cls = nullptr;
+  StringData* invName = nullptr;
+  bool dynamic = false;
+  ArrayData* reifiedGenerics = nullptr;
+
+  auto const func = vm_decode_function(const_variant_ref{str}, vmfp(), thiz,
+                                       cls, invName, dynamic, reifiedGenerics,
+                                       DecodeFlags::NoWarn);
+  assertx(dynamic);
+  if (UNLIKELY(func == nullptr)) {
+    raise_call_to_undefined(
+      args.size ? stripInOutSuffix(str.get()) : str.get());
+  }
+
+  fcallImpl<true>(origpc, pc, fca, func, reifiedGenerics, [&] (ActRec* ar) {
+    if (thiz) {
+      thiz->incRefCount();
+      ar->setThis(thiz);
+    } else if (cls) {
+      ar->setClass(cls);
+    } else {
+      ar->trashThis();
+    }
+
+    if (UNLIKELY(invName != nullptr)) {
+      assertx(!func->hasReifiedGenerics());
+      ar->setMagicDispatch(invName);
+    }
+
+    str.reset();
+  });
+}
+
+OPTBLD_INLINE void fcallFuncFunc(PC origpc, PC& pc, const FCallArgs& fca,
+                                 imm_array<uint32_t> args) {
+  assertx(tvIsFunc(vmStack().topC()));
+  auto func = vmStack().topC()->m_data.pfunc;
+  vmStack().discard();
+
+  if (func->cls()) {
+    raise_error(Strings::CALL_ILLFORMED_FUNC);
+  }
+
+  // FIXME: can this ever be non-null?
+  ArrayData* reifiedGenerics = nullptr;
+
+  // Handle inout name mangling
+  if (UNLIKELY(args.size)) {
+    auto const funcName = func->fullDisplayName();
+    auto const v = Variant::attach(mangleInOutName(funcName, args));
+    ObjectData* thiz = nullptr;
+    Class* cls = nullptr;
+    StringData* invName = nullptr;
+    bool dynamic = false;
+    func = vm_decode_function(v, vmfp(), thiz, cls, invName, dynamic,
+                              reifiedGenerics, DecodeFlags::NoWarn);
+    if (func == nullptr) raise_call_to_undefined(funcName);
+    assertx(!thiz && !cls && !invName);
+  }
+
+  fcallImpl<false>(origpc, pc, fca, func, reifiedGenerics, [&] (ActRec* ar) {
+    ar->trashThis();
+  });
+}
+
+OPTBLD_INLINE void fcallFuncClsMeth(PC origpc, PC& pc, const FCallArgs& fca,
+                                    imm_array<uint32_t> args) {
+  assertx(tvIsClsMeth(vmStack().topC()));
+  auto const clsMeth = vmStack().topC()->m_data.pclsmeth;
+  vmStack().discard();
+
+  const Func* func = clsMeth->getFunc();
+  auto const cls = clsMeth->getCls();
+  assertx(func && cls);
+
+  // FIXME: can this ever be non-null?
+  ArrayData* reifiedGenerics = nullptr;
+
+  // Handle inout name mangling
+  if (UNLIKELY(args.size)) {
+    auto const funcName = func->fullDisplayName();
+    auto const v = Variant::attach(mangleInOutName(funcName, args));
+    ObjectData* thiz = nullptr;
+    Class* cls2 = nullptr;
+    StringData* invName = nullptr;
+    bool dynamic = false;
+    func = vm_decode_function(v, vmfp(), thiz, cls2, invName, dynamic,
+                              reifiedGenerics, DecodeFlags::NoWarn);
+    if (func == nullptr) raise_call_to_undefined(funcName);
+    assertx(!thiz && cls == cls2 && !invName);
+  }
+
+  fcallImpl<false>(origpc, pc, fca, func, reifiedGenerics, [&] (ActRec* ar) {
+    ar->setClass(cls);
+  });
+}
+
+void fcallFuncDImpl(PC origpc, PC& pc, const FCallArgs& fca, Id id,
+                    Array&& tsList) {
+  auto const nep = vmfp()->unit()->lookupNamedEntityPairId(id);
+  auto const func = Unit::loadFunc(nep.second, nep.first);
+  if (UNLIKELY(func == nullptr)) {
+    raise_call_to_undefined(vmfp()->unit()->lookupLitstrId(id));
+  }
+
+  auto const reifiedGenerics = getReifiedGenerics<false>(
+    func, nullptr, std::move(tsList));
+
+  fcallImpl<false>(origpc, pc, fca, func, reifiedGenerics, [&] (ActRec* ar) {
+    ar->trashThis();
+  });
 }
 
 } // namespace
@@ -4679,248 +4901,27 @@ OPTBLD_INLINE void iopResolveFunc(Id id) {
   vmStack().pushFunc(func);
 }
 
-OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
-  auto const n = args.size;
-  std::string arglist;
-  if (UNLIKELY(n)) {
-    arglist = concat_arg_list(args);
-  }
-
-  Cell* c1 = vmStack().topC();
-  if (c1->m_type == KindOfObject) {
-    // this covers both closures and functors
-    static StringData* invokeName = makeStaticString("__invoke");
-    ObjectData* origObj = c1->m_data.pobj;
-    const Class* cls = origObj->getVMClass();
-    auto const func = LIKELY(!n)
-      ? cls->lookupMethod(invokeName)
-      : cls->lookupMethod(
-        makeStaticString(folly::sformat("__invoke${}$inout", arglist))
-      );
-    if (func == nullptr) {
-      raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
-    }
-
-    callerRxChecks(vmfp(), func);
-
-    vmStack().discard();
-    ActRec* ar = fPushFuncImpl(func, numArgs, nullptr);
-    if (func->isStaticInPrologue()) {
-      ar->setClass(origObj->getVMClass());
-      decRefObj(origObj);
-    } else {
-      ar->setThis(origObj);
-      // Teleport the reference from the destroyed stack cell to the
-      // ActRec. Don't try this at home.
-    }
-    return;
-  }
-
-  auto appendSuffix = [&] (const StringData* s) {
-    return StringData::Make(s, folly::sformat("${}$inout", arglist));
-  };
-
-  if (isArrayLikeType(c1->m_type) || isStringType(c1->m_type)) {
-    Variant v = Variant::wrap(*c1);
-
-    auto wrapInOutName = [&] (Cell* c, const StringData* mth) {
-      VArrayInit ai{2};
-      ai.append(c->m_data.parr->at(int64_t(0)));
-      ai.append(Variant::attach(appendSuffix(mth)));
-      return ai.toVariant();
-    };
-
-    // Handle inout name mangling
-    if (UNLIKELY(n)) {
-      if (isStringType(c1->m_type)) {
-        v = Variant::attach(appendSuffix(c1->m_data.pstr));
-      } else if (c1->m_data.parr->size() == 2){
-        auto s = c1->m_data.parr->at(1);
-        if (isStringType(s.m_type)) {
-          v = wrapInOutName(c1, s.m_data.pstr);
-        } else if (isFuncType(s.m_type)) {
-          v = wrapInOutName(c1, s.m_data.pfunc->fullDisplayName());
-        }
-      }
-    }
-
-    // support:
-    //   array($instance, 'method')
-    //   array('Class', 'method'),
-    //   vec[$instance, 'method'],
-    //   vec['Class', 'method'],
-    //   array(Class*, Func*),
-    //   array(ObjectData*, Func*),
-    //   Func*,
-    //   'func_name'
-    //   'class::method'
-    // which are all valid callables
-    auto origCell = *c1;
-    ObjectData* thiz = nullptr;
-    HPHP::Class* cls = nullptr;
-    StringData* invName = nullptr;
-    bool dynamic = false;
-    ArrayData* reifiedGenerics = nullptr;
-
-    auto const func = vm_decode_function(
-      v,
-      vmfp(),
-      thiz,
-      cls,
-      invName,
-      dynamic,
-      reifiedGenerics,
-      DecodeFlags::NoWarn
-    );
-    assertx(dynamic);
-    if (func == nullptr) {
-      if (isArrayLikeType(origCell.m_type)) {
-        raise_error("Invalid callable (array)");
-      } else {
-        assertx(isStringType(origCell.m_type));
-        raise_call_to_undefined(origCell.m_data.pstr);
-      }
-    }
-
-    callerDynamicCallChecks(func);
-    callerRxChecks(vmfp(), func);
-
-    vmStack().discard();
-    auto const ar = fPushFuncImpl(func, numArgs, reifiedGenerics);
-    if (thiz) {
-      thiz->incRefCount();
-      ar->setThis(thiz);
-    } else if (cls) {
-      ar->setClass(cls);
-    } else {
-      ar->trashThis();
-    }
-
-    ar->setDynamicCall();
-
-    if (UNLIKELY(invName != nullptr)) {
-      ar->setMagicDispatch(invName);
-    }
-    if (isArrayLikeType(origCell.m_type)) {
-      decRefArr(origCell.m_data.parr);
-    } else if (origCell.m_type == KindOfString) {
-      decRefStr(origCell.m_data.pstr);
-    }
-    return;
-  }
-
-  if (c1->m_type == KindOfFunc) {
-    const Func* func = c1->m_data.pfunc;
-    assertx(func != nullptr);
-    if (func->cls()) {
-      raise_error(Strings::CALL_ILLFORMED_FUNC);
-    }
-    ArrayData* reifiedGenerics = nullptr;
-
-    // Handle inout name mangling
-    if (UNLIKELY(n)) {
-      auto const func_name = func->fullDisplayName();
-      auto const v = Variant::attach(appendSuffix(func_name));
-      ObjectData* thiz = nullptr;
-      Class* cls = nullptr;
-      StringData* invName = nullptr;
-      bool dynamic = false;
-      func = vm_decode_function(
-        v,
-        vmfp(),
-        thiz,
-        cls,
-        invName,
-        dynamic,
-        reifiedGenerics,
-        DecodeFlags::NoWarn
-      );
-      if (func == nullptr) raise_call_to_undefined(func_name);
-    }
-
-    callerRxChecks(vmfp(), func);
-
-    vmStack().discard();
-    auto const ar = fPushFuncImpl(func, numArgs, reifiedGenerics);
-    ar->trashThis();
-    return;
-  }
-
-  if (isClsMethType(c1->m_type)) {
-    auto const clsMeth = c1->m_data.pclsmeth;
-    assertx(clsMeth->getCls());
-    assertx(clsMeth->getFunc());
-
-    ArrayData* reifiedGenerics = nullptr;
-    const Func* func = clsMeth->getFunc();
-    ObjectData* thiz = nullptr;
-    Class* cls = clsMeth->getCls();
-
-    // Handle inout name mangling
-    if (UNLIKELY(n)) {
-      auto const func_name = func->fullDisplayName();
-      auto const v = Variant::attach(appendSuffix(func_name));
-      bool dynamic = false;
-      StringData* invName = nullptr;
-      func = vm_decode_function(
-        v,
-        vmfp(),
-        thiz,
-        cls,
-        invName,
-        dynamic,
-        reifiedGenerics,
-        DecodeFlags::NoWarn
-      );
-      if (func == nullptr) raise_call_to_undefined(func_name);
-    }
-
-    callerRxChecks(vmfp(), func);
-
-    vmStack().popC();
-    auto const ar = fPushFuncImpl(func, numArgs, reifiedGenerics);
-    if (thiz) {
-      ar->setThis(thiz);
-    } else if (cls) {
-      ar->setClass(cls);
-    } else {
-      ar->trashThis();
-    }
-
-    return;
-  }
+OPTBLD_INLINE void iopFCallFunc(PC origpc, PC& pc, FCallArgs fca,
+                                imm_array<uint32_t> args) {
+  auto const type = vmStack().topC()->m_type;
+  if (isObjectType(type)) return fcallFuncObj(origpc, pc, fca, args);
+  if (isArrayLikeType(type)) return fcallFuncArr(origpc, pc, fca, args);
+  if (isStringType(type)) return fcallFuncStr(origpc, pc, fca, args);
+  if (isFuncType(type)) return fcallFuncFunc(origpc, pc, fca, args);
+  if (isClsMethType(type)) return fcallFuncClsMeth(origpc, pc, fca, args);
 
   raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
 }
 
-namespace {
-
-void fPushFuncDImpl(uint32_t numArgs, Id id, ArrayData* tsList) {
-  const NamedEntityPair nep =
-    vmfp()->m_func->unit()->lookupNamedEntityPairId(id);
-  Func* func = Unit::loadFunc(nep.second, nep.first);
-  if (func == nullptr) {
-    raise_call_to_undefined(vmfp()->m_func->unit()->lookupLitstrId(id));
-  }
-
-  callerRxChecks(vmfp(), func);
-
-  ActRec* ar = fPushFuncImpl(func, numArgs, tsList);
-  ar->trashThis();
+OPTBLD_FLT_INLINE void iopFCallFuncD(PC origpc, PC& pc, FCallArgs fca, Id id) {
+  fcallFuncDImpl(origpc, pc, fca, id, Array());
 }
 
-} // namespace
-
-OPTBLD_FLT_INLINE void iopFPushFuncD(uint32_t numArgs, Id id) {
-  fPushFuncDImpl(numArgs, id, nullptr);
-}
-
-OPTBLD_FLT_INLINE void iopFPushFuncRD(uint32_t numArgs, Id id) {
-  auto const tsList = *vmStack().topC();
-  assertx(tvIsVecOrVArray(tsList));
-  // no need to decref since it will will be stored on actrec
+OPTBLD_FLT_INLINE void iopFCallFuncRD(PC origpc, PC& pc, FCallArgs fca, Id id) {
+  assertx(tvIsVecOrVArray(vmStack().topC()));
+  auto tsList = Array::attach(vmStack().topC()->m_data.parr);
   vmStack().discard();
-  fPushFuncDImpl(numArgs, id, tsList.m_data.parr);
+  fcallFuncDImpl(origpc, pc, fca, id, std::move(tsList));
 }
 
 namespace {
@@ -4944,7 +4945,7 @@ void fcallObjMethodImpl(PC origpc, PC& pc, const FCallArgs& fca,
   assertx(res == LookupResult::MethodFoundWithThis ||
           res == LookupResult::MagicCallFound);
 
-  auto const reifiedGenerics = getReifiedGenerics(
+  auto const reifiedGenerics = getReifiedGenerics<true>(
     func, methName, std::move(tsList));
 
   fcallImpl<dynamic>(origpc, pc, fca, func, reifiedGenerics, [&] (ActRec* ar) {
@@ -4980,16 +4981,6 @@ static void throw_call_non_object(const char* methodName,
     SystemLib::throwBadMethodCallExceptionObject(String(msg));
   }
   raise_fatal_error(msg.c_str());
-}
-
-ALWAYS_INLINE StringData* mangleInOutName(
-  const StringData* name,
-  imm_array<uint32_t> args
-) {
-  return
-    StringData::Make(
-      name, folly::sformat("${}$inout", concat_arg_list(args))
-    );
 }
 
 ALWAYS_INLINE bool
@@ -5176,7 +5167,7 @@ void fcallClsMethodImpl(PC origpc, PC& pc, const FCallArgs& fca, Class* cls,
             res == LookupResult::MagicCallFound);
   }
 
-  auto const reifiedGenerics = getReifiedGenerics(
+  auto const reifiedGenerics = getReifiedGenerics<true>(
     func, methName, std::move(tsList));
 
   fcallImpl<dynamic>(origpc, pc, fca, func, reifiedGenerics, [&] (ActRec* ar) {

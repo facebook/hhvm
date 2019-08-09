@@ -132,7 +132,7 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
       v << store{cctx, ar + AROFF(m_thisUnsafe)};
     }
   } else if (ctxTmp->isA(TNullptr)) {
-    // No $this or class; this happens in FPushFunc.
+    // No $this or class; this happens in FCallFunc*.
     if (RuntimeOption::EvalHHIRGenerateAsserts) {
       emitImmStoreq(v, ActRec::kTrashedThisSlot, ar + AROFF(m_thisUnsafe));
     }

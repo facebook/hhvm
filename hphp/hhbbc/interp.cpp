@@ -4024,85 +4024,114 @@ void fcallUnknownImpl(ISS& env, const FCallArgs& fca, bool legacy = false) {
   for (auto i = uint32_t{0}; i < fca.numRets; ++i) push(env, TInitCell);
 }
 
-namespace {
+void in(ISS& env, const bc::FCallFuncD& op) {
+  auto const rfunc = env.index.resolve_func(env.ctx, op.str2);
+  auto const updateBC = [&] (FCallArgs fca) {
+    return bc::FCallFuncD { std::move(fca), op.str2 };
+  };
 
-void fPushFuncDImpl(ISS& env, const res::Func& rfunc, int32_t nArgs,
-                    bool has_unpack, bool extra_arg) {
-  if (!any(env.collect.opts & CollectionOpts::Speculating)) {
-    if (auto const func = rfunc.exactFunc()) {
-      if (will_reduce(env) && can_emit_builtin(func, nArgs, has_unpack)) {
-        fpiPushNoFold(
-          env,
-          ActRec { FPIKind::Builtin, TBottom, folly::none, rfunc }
-        );
-        if (extra_arg) return reduce(env, bc::PopC {});
-        return reduce(env);
-      }
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC) ||
+      fcallTryFold(env, op.fca, rfunc, TBottom, false, 0)) {
+    return;
+  }
+
+  if (auto const func = rfunc.exactFunc()) {
+    if (will_reduce(env) &&
+        !any(env.collect.opts & CollectionOpts::Speculating) &&
+        can_emit_builtin(func, op.fca.numArgsInclUnpack(), op.fca.hasUnpack())) {
+      return finish_builtin(
+        env, func, op.fca.numArgs, op.fca.numRets - 1, op.fca.hasUnpack());
     }
   }
-  if (fpiPush(env, ActRec { FPIKind::Func, TBottom, folly::none, rfunc },
-              nArgs, false)) {
-    if (extra_arg) return reduce(env, bc::PopC {});
-    return reduce(env);
-  }
-  if (extra_arg) popC(env);
-  discardAR(env, nArgs);
+
+  fcallKnownImpl(env, op.fca, rfunc, TBottom, false, 0, updateBC);
 }
 
-} // namespace
-
-void in(ISS& env, const bc::FPushFuncD& op) {
-  auto const rfunc = env.index.resolve_func(env.ctx, op.str2);
-  fPushFuncDImpl(env, rfunc, op.arg1, op.has_unpack, false);
-}
-
-void in(ISS& env, const bc::FPushFuncRD& op) {
+void in(ISS& env, const bc::FCallFuncRD& op) {
   auto const tsList = topC(env);
   if (!tsList.couldBe(RuntimeOption::EvalHackArrDVArrs ? BVec : BVArr)) {
     return unreachable(env);
   }
+
   auto const rfunc = env.index.resolve_func(env.ctx, op.str2);
   if (!rfunc.couldHaveReifiedGenerics()) {
     return reduce(
       env,
       bc::PopC {},
-      bc::FPushFuncD { op.arg1, op.str2, op.has_unpack }
+      bc::FCallFuncD { op.fca, op.str2, }
     );
   }
-  fPushFuncDImpl(env, rfunc, op.arg1, op.has_unpack, true);
+
+  auto const updateBC = [&] (FCallArgs fca) {
+    return bc::FCallFuncRD { std::move(fca), op.str2 };
+  };
+
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC)) return;
+  fcallKnownImpl(env, op.fca, rfunc, TBottom, false, 1, updateBC);
 }
 
-void in(ISS& env, const bc::FPushFunc& op) {
-  auto const t1 = topC(env);
-  folly::Optional<res::Func> rfunc;
-  // FPushFuncD requires that the names of inout functions be
-  // mangled, so skip those for now.
-  auto const name = getNameFromType(t1);
-  if (name && op.argv.size() == 0) {
-    auto const nname = normalizeNS(name);
-    // FPushFuncD doesn't support class-method pair strings yet.
-    if (isNSNormalized(nname) && notClassMethodPair(nname)) {
-      rfunc = env.index.resolve_func(env.ctx, nname);
-      // If the function might distinguish being called dynamically from not,
-      // don't turn a dynamic call into a static one.
-      if (rfunc && !rfunc->mightCareAboutDynCalls() &&
-          !rfunc->couldHaveReifiedGenerics()) {
-        return reduce(env, bc::PopC {},
-                      bc::FPushFuncD { op.arg1, nname, op.has_unpack });
-      }
-    }
-  }
+namespace {
+
+void fcallFuncUnknown(ISS& env, const bc::FCallFunc& op) {
   popC(env);
-  discardAR(env, op.arg1);
-  if (t1.subtypeOf(BObj)) {
-    fpiPushNoFold(env, ActRec { FPIKind::ObjInvoke, t1 });
-  } else if (t1.subtypeOf(BArr)) {
-    fpiPushNoFold(env, ActRec { FPIKind::CallableArr, TTop });
-  } else if (t1.subtypeOf(BStr)) {
-    fpiPushNoFold(env, ActRec { FPIKind::Func, TTop, folly::none, rfunc });
-  } else {
-    fpiPushNoFold(env, ActRec { FPIKind::Unknown, TTop });
+  fcallUnknownImpl(env, op.fca);
+}
+
+void fcallFuncClsMeth(ISS& env, const bc::FCallFunc& op) {
+  assertx(topC(env).subtypeOf(BClsMeth));
+
+  // TODO: optimize me
+  fcallFuncUnknown(env, op);
+}
+
+void fcallFuncFunc(ISS& env, const bc::FCallFunc& op) {
+  assertx(topC(env).subtypeOf(BFunc));
+
+  // TODO: optimize me
+  fcallFuncUnknown(env, op);
+}
+
+void fcallFuncObj(ISS& env, const bc::FCallFunc& op) {
+  assertx(topC(env).subtypeOf(BObj));
+
+  // TODO: optimize me
+  fcallFuncUnknown(env, op);
+}
+
+void fcallFuncStr(ISS& env, const bc::FCallFunc& op) {
+  assertx(topC(env).subtypeOf(BStr));
+  auto funcName = getNameFromType(topC(env));
+  if (!funcName) return fcallFuncUnknown(env, op);
+
+  funcName = normalizeNS(funcName);
+  if (!isNSNormalized(funcName) || !notClassMethodPair(funcName)) {
+    return fcallFuncUnknown(env, op);
   }
+
+  auto const rfunc = env.index.resolve_func(env.ctx, funcName);
+  if (!rfunc.mightCareAboutDynCalls()) {
+    return reduce(env, bc::PopC {}, bc::FCallFuncD { op.fca, funcName });
+  }
+
+  auto const updateBC = [&] (FCallArgs fca) {
+    return bc::FCallFunc { std::move(fca), op.argv };
+  };
+
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC)) return;
+  fcallKnownImpl(env, op.fca, rfunc, TBottom, false, 1, updateBC);
+}
+
+} // namespace
+
+void in(ISS& env, const bc::FCallFunc& op) {
+  if (op.argv.size() != 0) return fcallFuncUnknown(env, op);
+
+  auto const callable = topC(env);
+  if (callable.subtypeOf(BFunc)) return fcallFuncFunc(env, op);
+  if (callable.subtypeOf(BClsMeth)) return fcallFuncClsMeth(env, op);
+  if (callable.subtypeOf(BObj)) return fcallFuncObj(env, op);
+  if (callable.subtypeOf(BStr)) return fcallFuncStr(env, op);
+  fcallFuncUnknown(env, op);
 }
 
 void in(ISS& env, const bc::ResolveFunc& op) {
@@ -4654,44 +4683,7 @@ void in(ISS& env, const bc::LockObj& op) {
 }
 
 void in(ISS& env, const bc::FCall& op) {
-  auto const fca = op.fca;
-  auto const ar = fpiTop(env);
-  if (ar.func) {
-    auto const updateFCA = [&] (FCallArgs&& fca) {
-      return bc::FCall { std::move(fca), op.str2, op.str3 };
-    };
-
-    if (fcallOptimizeChecks(env, fca, *ar.func, updateFCA, &ar) ||
-        fcallTryFold(env, fca, *ar.func, ar.context, false /* unused */, 0,
-                     &ar)) {
-      return;
-    }
-
-    switch (ar.kind) {
-    case FPIKind::Unknown:
-    case FPIKind::CallableArr:
-    case FPIKind::ObjInvoke:
-      not_reached();
-    case FPIKind::Func:
-      assertx(op.str2->empty());
-      if (ar.func->name() != op.str3) {
-        // We've found a more precise type for the call, so update it
-        return reduce(env, bc::FCall {
-          fca, staticEmptyString(), ar.func->name() });
-      }
-      fcallKnownImpl(env, fca, *ar.func, ar.context, false /* nullsafe */, 0,
-                     updateFCA, true /* legacy */);
-      return;
-    case FPIKind::Builtin:
-      finish_builtin(
-        env, ar.func->exactFunc(), fca.numArgs, fca.numRets - 1, fca.hasUnpack()
-      );
-      fpiPop(env);
-      return;
-    }
-  }
-
-  fcallUnknownImpl(env, fca, /* legacy */ true);
+  fcallUnknownImpl(env, op.fca, /* legacy */ true);
 }
 
 namespace {

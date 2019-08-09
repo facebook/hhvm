@@ -12,8 +12,7 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "bar"
-  FCall <> 0 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "bar"
   PopC
   Int 1
   RetC

@@ -94,6 +94,9 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op, bool inlining) {
     case Op::FCallClsMethodSD:
     case Op::FCallClsMethodSRD:
     case Op::FCallCtor:
+    case Op::FCallFunc:
+    case Op::FCallFuncD:
+    case Op::FCallFuncRD:
     case Op::FCallObjMethod:
     case Op::FCallObjMethodD:
     case Op::FCallObjMethodRD:

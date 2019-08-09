@@ -625,28 +625,28 @@ constexpr uint32_t kMaxConcatN = 4;
   O(NewObjS,         ONE(OA(SpecialClsRef)),                            \
                                        NOV,             ONE(CV),    NF) \
   O(LockObj,         NA,               ONE(CV),         ONE(CV),    NF) \
-  O(FPushFunc,       TWO(IVA,I32LA),   FPUSH(1, 0),     FPUSH,      PF) \
-  O(FPushFuncD,      TWO(IVA,SA),      FPUSH(0, 0),     FPUSH,      PF) \
-  O(FPushFuncRD,     TWO(IVA,SA),      FPUSH(1, 0),     FPUSH,      PF) \
-  O(FCallCtor,       TWO(FCA,SA),      FCALL(0, 1),     FCALL,      CF) \
-  O(FCallObjMethod,  FOUR(FCA,SA,OA(ObjMethodOp),I32LA),                \
-                                       FCALL(1, 1),     FCALL,      CF) \
-  O(FCallObjMethodD, FOUR(FCA,SA,OA(ObjMethodOp),SA),                   \
-                                       FCALL(0, 1),     FCALL,      CF) \
-  O(FCallObjMethodRD,FOUR(FCA,SA,OA(ObjMethodOp),SA),                   \
-                                       FCALL(1, 1),     FCALL,      CF) \
   O(FCallClsMethod,  THREE(FCA,SA,I32LA),                               \
                                        FCALL(2, 0),     FCALL,      CF) \
+  O(FCallClsMethodD, FOUR(FCA,SA,SA,SA),                                \
+                                       FCALL(0, 0),     FCALL,      CF) \
+  O(FCallClsMethodRD,FOUR(FCA,SA,SA,SA),                                \
+                                       FCALL(1, 0),     FCALL,      CF) \
   O(FCallClsMethodS, FOUR(FCA,SA,OA(SpecialClsRef),I32LA),              \
                                        FCALL(1, 0),     FCALL,      CF) \
   O(FCallClsMethodSD,FOUR(FCA,SA,OA(SpecialClsRef),SA),                 \
                                        FCALL(0, 0),     FCALL,      CF) \
   O(FCallClsMethodSRD,FOUR(FCA,SA,OA(SpecialClsRef),SA),                \
                                        FCALL(1, 0),     FCALL,      CF) \
-  O(FCallClsMethodD, FOUR(FCA,SA,SA,SA),                                \
-                                       FCALL(0, 0),     FCALL,      CF) \
-  O(FCallClsMethodRD,FOUR(FCA,SA,SA,SA),                                \
-                                       FCALL(1, 0),     FCALL,      CF) \
+  O(FCallCtor,       TWO(FCA,SA),      FCALL(0, 1),     FCALL,      CF) \
+  O(FCallFunc,       TWO(FCA,I32LA),   FCALL(1, 0),     FCALL,      CF) \
+  O(FCallFuncD,      TWO(FCA,SA),      FCALL(0, 0),     FCALL,      CF) \
+  O(FCallFuncRD,     TWO(FCA,SA),      FCALL(1, 0),     FCALL,      CF) \
+  O(FCallObjMethod,  FOUR(FCA,SA,OA(ObjMethodOp),I32LA),                \
+                                       FCALL(1, 1),     FCALL,      CF) \
+  O(FCallObjMethodD, FOUR(FCA,SA,OA(ObjMethodOp),SA),                   \
+                                       FCALL(0, 1),     FCALL,      CF) \
+  O(FCallObjMethodRD,FOUR(FCA,SA,OA(ObjMethodOp),SA),                   \
+                                       FCALL(1, 1),     FCALL,      CF) \
   O(FCall,           THREE(FCA,SA,SA), FCALLO,          FCALL,      CF) \
   O(FCallBuiltin,    FOUR(IVA,IVA,IVA,SA),CALLNATIVE,   CALLNATIVE, NF) \
   O(IterInit,        THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
@@ -1006,6 +1006,13 @@ constexpr bool isFCallClsMethod(Op opcode) {
     opcode == OpFCallClsMethodSRD;
 }
 
+constexpr bool isFCallFunc(Op opcode) {
+  return
+    opcode == OpFCallFunc ||
+    opcode == OpFCallFuncD ||
+    opcode == OpFCallFuncRD;
+}
+
 constexpr bool isFCallObjMethod(Op opcode) {
   return
     opcode == OpFCallObjMethod ||
@@ -1017,6 +1024,7 @@ constexpr bool isNewFCall(Op opcode) {
   return
     opcode == OpFCallCtor ||
     isFCallClsMethod(opcode) ||
+    isFCallFunc(opcode) ||
     isFCallObjMethod(opcode);
 }
 
@@ -1026,11 +1034,6 @@ constexpr bool isLegacyFPush(Op opcode) {
 
 constexpr bool hasFPushEffects(Op opcode) {
   return isLegacyFPush(opcode) || isNewFCall(opcode);
-}
-
-constexpr bool isFPushFunc(Op opcode) {
-  return opcode == OpFPushFunc || opcode == OpFPushFuncD ||
-         opcode == OpFPushFuncRD;
 }
 
 constexpr bool isLegacyFCall(Op opcode) {

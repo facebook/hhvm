@@ -1,6 +1,7 @@
 <?hh
 
 function test(...$x) {
+  echo "not folding\n";
 }
 
 function main() {

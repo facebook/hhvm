@@ -9,6 +9,7 @@ array(1) {
     int(3)
   }
 }
+not folding
 array(1) {
   ["args"]=>
   array(3) {
@@ -20,3 +21,4 @@ array(1) {
     int(6)
   }
 }
+not folding

@@ -33,23 +33,6 @@ namespace {
 
 const void annotate(NormalizedInstruction* i,
                     const StringData* funcName) {
-  auto const fpi      = i->func()->findFPI(i->source.offset());
-  auto pc             = i->m_unit->at(fpi->m_fpushOff);
-  auto const pushOp   = decode_op(pc);
-
-  auto decode_litstr = [&] {
-    Id id;
-    std::memcpy(&id, pc, sizeof id);
-    pc += sizeof id;
-    return i->m_unit->lookupLitstrId(id);
-  };
-
-  if (funcName->empty() &&
-      (pushOp == Op::FPushFuncD || pushOp == Op::FPushFuncRD)) {
-    decode_iva(pc);
-    funcName = decode_litstr();
-  }
-
   auto const func = lookupImmutableFunc(i->source.unit(), funcName).func;
 
   if (func) {

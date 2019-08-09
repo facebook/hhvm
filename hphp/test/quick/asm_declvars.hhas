@@ -8,8 +8,7 @@
   NullUninit
   NullUninit
   Int 12
-  FPushFuncD 1 "main"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "main"
   PopC
   Null
   RetC

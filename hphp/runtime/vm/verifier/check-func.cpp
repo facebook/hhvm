@@ -417,12 +417,13 @@ bool FuncChecker::checkImmSLA(PC& pc, PC const /*instr*/) {
 
 bool FuncChecker::checkImmI32LA(PC& pc, PC const instr) {
   auto inst_copy = instr;
-  decode_op(inst_copy);
-  auto const nargs = decode_iva(inst_copy);
+  auto const op = decode_op(inst_copy);
+  assertx(isNewFCall(op));
+  auto const fca = decodeFCallArgs(op, inst_copy);
   auto const count = decode_iva(pc);
   for (int i = 0; i < count; ++i) {
     auto const num = decode_raw<uint32_t>(pc);
-    if (nargs <= num) {
+    if (fca.numArgs <= num) {
       error("invalid argument number (%i) in inout argument vector\n", i);
       return false;
     }
@@ -763,10 +764,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
       m_tmp_sig[i] = CV;
     }
     return m_tmp_sig;
-  case Op::PopFrame:
-  case Op::FPushFunc:
-  case Op::FPushFuncD:
-  case Op::FPushFuncRD: {  // IVA..., FPUSH, FPUSH
+  case Op::PopFrame: { // IVA..., FPUSH, FPUSH
     auto const numArgs = getImm(pc, 0).u_IVA;
     auto const numPops = instrNumPops(pc);
     auto idx = 0;
@@ -785,6 +783,9 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::FCallClsMethodSD:
   case Op::FCallClsMethodSRD:
   case Op::FCallCtor:
+  case Op::FCallFunc:
+  case Op::FCallFuncD:
+  case Op::FCallFuncRD:
   case Op::FCallObjMethod:
   case Op::FCallObjMethodD:
   case Op::FCallObjMethodRD: {  // FCA..., FCALL, FCALL
@@ -1704,9 +1705,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
       return true;
 
     // function calling and object construction
-    case Op::FPushFunc:
-    case Op::FPushFuncD:
-    case Op::FPushFuncRD:
     case Op::FCall:
     case Op::FCallBuiltin:
     case Op::FCallClsMethod:
@@ -1716,6 +1714,9 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::FCallClsMethodSD:
     case Op::FCallClsMethodSRD:
     case Op::FCallCtor:
+    case Op::FCallFunc:
+    case Op::FCallFuncD:
+    case Op::FCallFuncRD:
     case Op::FCallObjMethod:
     case Op::FCallObjMethodD:
     case Op::FCallObjMethodRD:

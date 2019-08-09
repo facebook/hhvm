@@ -44,11 +44,6 @@ struct FuncAnalysis;
  */
 enum class FPIKind {
   Unknown,     // Nothing is known.
-  CallableArr, // May be an ObjMeth or a ClsMeth.
-  Func,        // Definitely a non-member function.
-  ObjInvoke,   // Closure invoke or __invoke on an object.
-  Builtin,     // Resolved builtin call; we will convert params and FCall as
-               // we go
 };
 
 /*

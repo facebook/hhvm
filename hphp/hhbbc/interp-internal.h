@@ -509,7 +509,6 @@ bool canFold(ISS& env, const php::Func* func, int32_t nArgs,
 bool fpiPush(ISS& env, ActRec ar, int32_t nArgs, bool maybeDynamic) {
   ar.foldable =
     nArgs >= 0 &&
-    ar.kind != FPIKind::Builtin &&
     ar.func &&
     canFold(env, ar.func->exactFunc(), nArgs, ar.context, maybeDynamic);
   ar.pushBlk = env.bid;

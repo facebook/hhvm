@@ -7,15 +7,13 @@
   NullUninit
   NullUninit
   ClsCnsD "FOO" "Foo"
-  FPushFuncD 1 "test"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "test"
   PopC
   NullUninit
   NullUninit
   NullUninit
   String "hi"
-  FPushFuncD 1 "test"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "test"
   PopC
   Int 1
   RetC

@@ -193,37 +193,31 @@ let instr_verifyOutType i = instr (IMisc (VerifyOutType i))
 let instr_dim op key = instr (IBase (Dim (op, key)))
 let instr_dim_warn_pt key = instr_dim MemberOpMode.Warn (MemberKey.PT key)
 let instr_dim_define_pt key = instr_dim MemberOpMode.Define (MemberKey.PT key)
-let instr_fcallfunc fcall_args param_locs = gather [
-  instr (ICall (FPushFunc ((num_args_of fcall_args), param_locs)));
-  instr (ICall (FCall (fcall_args)))
-]
-let instr_fcallfuncd fcall_args id = gather [
-  instr (ICall (FPushFuncD ((num_args_of fcall_args), id)));
-  instr (ICall (FCall (fcall_args)))
-]
-let instr_fcallfuncrd fcall_args id = gather [
-  instr (ICall (FPushFuncRD ((num_args_of fcall_args), id)));
-  instr (ICall (FCall (fcall_args)))
-]
-let instr_fcallctor fcall_args = instr (ICall (FCallCtor (fcall_args)))
-let instr_fcallobjmethod fcall_args flavor pl =
-  instr (ICall (FCallObjMethod (fcall_args, flavor, pl)))
-let instr_fcallobjmethodd fcall_args method_ flavor =
-  instr (ICall (FCallObjMethodD (fcall_args, flavor, method_)))
-let instr_fcallobjmethodrd fcall_args method_ flavor =
-  instr (ICall (FCallObjMethodRD (fcall_args, flavor, method_)))
+let instr_fcallclsmethod fcall_args pl =
+  instr (ICall (FCallClsMethod (fcall_args, pl)))
 let instr_fcallclsmethodd fcall_args method_name class_name =
   instr (ICall (FCallClsMethodD (fcall_args, class_name, method_name)))
 let instr_fcallclsmethodrd fcall_args method_name class_name =
   instr (ICall (FCallClsMethodRD (fcall_args, class_name, method_name)))
-let instr_fcallclsmethod fcall_args pl =
-  instr (ICall (FCallClsMethod (fcall_args, pl)))
 let instr_fcallclsmethods fcall_args scref =
   instr (ICall (FCallClsMethodS (fcall_args, scref)))
 let instr_fcallclsmethodsd fcall_args scref method_name =
   instr (ICall (FCallClsMethodSD (fcall_args, scref, method_name)))
 let instr_fcallclsmethodsrd fcall_args scref method_name =
   instr (ICall (FCallClsMethodSRD (fcall_args, scref, method_name)))
+let instr_fcallctor fcall_args = instr (ICall (FCallCtor (fcall_args)))
+let instr_fcallfunc fcall_args param_locs =
+  instr (ICall (FCallFunc (fcall_args, param_locs)))
+let instr_fcallfuncd fcall_args id =
+  instr (ICall (FCallFuncD (fcall_args, id)))
+let instr_fcallfuncrd fcall_args id =
+  instr (ICall (FCallFuncRD (fcall_args, id)))
+let instr_fcallobjmethod fcall_args flavor pl =
+  instr (ICall (FCallObjMethod (fcall_args, flavor, pl)))
+let instr_fcallobjmethodd fcall_args method_ flavor =
+  instr (ICall (FCallObjMethodD (fcall_args, flavor, method_)))
+let instr_fcallobjmethodrd fcall_args method_ flavor =
+  instr (ICall (FCallObjMethodRD (fcall_args, flavor, method_)))
 let instr_fcallobjmethodd_nullthrows fcall_args method_ =
   instr_fcallobjmethodd fcall_args method_ Ast_defs.OG_nullthrows
 let instr_querym num_params op key =

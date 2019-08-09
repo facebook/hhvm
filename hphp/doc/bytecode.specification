@@ -1843,48 +1843,6 @@ LockObj                                    [C:Obj] -> [C:Obj]
 
   Clears the IsBeingConstructed flag on the object, leaving it on the stack.
 
-FPush* opcodes
---------------
-
-FPushFunc <num params>                 [U U U C|V..C|V C]  ->  [C|V..C|V]
-FPushFuncD <num params> <litstr id>    [U U U C|V..C|V]  ->  [C|V..C|V]
-
-  FPI push function. First, these instructions load a value into x as given by
-  the following table:
-
-    instruction      x
-    --------------+----
-      FPushFunc   | $1
-      FPushFuncD  | %2
-
-  If x is a string, this instruction attempts to lookup a function named x. If
-  no function named x is defined, this instruction throws a fatal error.
-  Otherwise this instruction pushes a new entry on the FPI stack, initializing
-  it with the number of parameters being passed (given by %1) and a reference
-  to the FPI structure for the function named x. With FPushFuncD the litstr in
-  %2 must not start with a '\' character, or be of the form "Class::Method".
-  Function names should be normalized with respect to namespace and never start
-  with a '\'.
-
-  If x is an object, this instruction checks if the object has an __invoke
-  method. If the object does not have an __invoke method, this instruction
-  throws a fatal error. Otherwise this instruction pushes a new entry on the
-  FPI stack, initializing it with the number of parameters being passed (given
-  by %1) and a reference to the FPI structure for the __invoke method from
-  object x.
-
-  if x is an array, this instruction will check that the first array element is
-  either the name of a class, or an instance of one, and that the second array
-  element is the name of a method.  If no such class exists, or no such method
-  on that class exists, then this instruction throws a fatal error.  Otherwise
-  this instruction does the same FPI manipulation mentioned above.
-
-  If x is a func, this instruction will push a new entry on the FPI stack using
-  the function pointer contained in x.
-
-  If x is not a string, object, array, or func, this instruction throws a fatal
-  error.
-
 FCall* opcodes
 --------------
 
@@ -1944,6 +1902,41 @@ FCall <fca> <class name> <func name>  [C|V..C|V]  ->  [C..C]
     empty     | empty     | unknown
     empty     | non-empty | function %3
     non-empty | non-empty | method %2::%3
+
+FCallFunc <fca>                 [U U U C|V..C|V C]  ->  [C..C]
+FCallFuncD <fca> <litstr id>    [U U U C|V..C|V]  ->  [C..C]
+FCallFuncRD <fca> <litstr id>   [U U U C|V..C|V C]  ->  [C..C]
+
+  Call a callable. First, these instructions load a value into x as given by
+  the following table:
+
+    instruction      x
+    --------------+----
+      FCallFunc   | $1
+      FCallFuncD  | %2
+      FCallFuncRD | %2
+
+  If x is a string, this instruction attempts to lookup a function named x. If
+  a function named x is defined, this instruction calls it. Otherwise it throws
+  a fatal error. With FCallFunc*D the litstr in %2 must not start with a '\'
+  character, or be of the form "Class::Method". Function names should be
+  normalized with respect to namespace and never start with a '\'.
+
+  If x is an object, this instruction checks if the object has an __invoke
+  method. If the object does have an __invoke method, this instruction calls
+  it. Otherwise it throws a fatal error.
+
+  if x is an array, this instruction will check that the first array element is
+  either the name of a class, or an instance of one, and that the second array
+  element is the name of a method implemented by the class. If a method exists,
+  this instruction calls it. Otherwise it throws a fatal error.
+
+  If x is a func or a clsmeth, this instruction calls it.
+
+  If x is not a string, object, array, func, or clsmeth, this instruction
+  throws a fatal error.
+
+  FCallFuncRD's $1 contains a list of reified generics.
 
 FCallObjMethod <fca> <class hint> <nullsafe>
   [C U U C|V..C|V C]  ->  [C..C]

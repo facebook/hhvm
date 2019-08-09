@@ -3,8 +3,7 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "foo"
-  FCall <> 0 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "foo"
   PopC
   String "done.\n"
   Print
@@ -20,8 +19,7 @@ L2:
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "bar"
-  FCall <> 0 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "bar"
   PopC
 L1:
   Jmp L2

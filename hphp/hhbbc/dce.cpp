@@ -1598,9 +1598,9 @@ void dce(Env& env, const bc::FCallClsMethodS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FCallClsMethodSD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FCallClsMethodSRD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FCallCtor& op) { no_dce(env, op); }
-void dce(Env& env, const bc::FPushFunc& op) { no_dce(env, op); }
-void dce(Env& env, const bc::FPushFuncD& op) { no_dce(env, op); }
-void dce(Env& env, const bc::FPushFuncRD& op) { no_dce(env, op); }
+void dce(Env& env, const bc::FCallFunc& op) { no_dce(env, op); }
+void dce(Env& env, const bc::FCallFuncD& op) { no_dce(env, op); }
+void dce(Env& env, const bc::FCallFuncRD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FCallObjMethod& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FCallObjMethodD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FCallObjMethodRD& op) { no_dce(env, op); }

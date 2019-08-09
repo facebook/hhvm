@@ -378,9 +378,6 @@ type instruct_mutator =
   | InitProp of prop_id * initprop_op
 
 type instruct_call =
-  | FPushFunc of num_params * param_locations
-  | FPushFuncD of num_params * function_id
-  | FPushFuncRD of num_params * function_id
   | NewObj
   | NewObjR
   | NewObjD of class_id
@@ -395,6 +392,9 @@ type instruct_call =
   | FCallClsMethodSD of fcall_args * SpecialClsRef.t * method_id
   | FCallClsMethodSRD of fcall_args * SpecialClsRef.t * method_id
   | FCallCtor of fcall_args
+  | FCallFunc of fcall_args * param_locations
+  | FCallFuncD of fcall_args * function_id
+  | FCallFuncRD of fcall_args * function_id
   | FCallObjMethod of fcall_args * Ast_defs.og_null_flavor * param_locations
   | FCallObjMethodD of fcall_args * Ast_defs.og_null_flavor * method_id
   | FCallObjMethodRD of fcall_args * Ast_defs.og_null_flavor * method_id

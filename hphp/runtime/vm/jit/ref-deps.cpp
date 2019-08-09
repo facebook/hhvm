@@ -30,14 +30,7 @@ void
 ActRecState::pushFunc(const NormalizedInstruction& inst) {
   assertx(isLegacyFPush(inst.op()));
 
-  const Unit& unit = *inst.unit();
   const Func* func = nullptr;
-
-  if (inst.op() == OpFPushFuncD || inst.op() == OpFPushFuncRD) {
-    Id funcId = inst.imm[1].u_SA;
-    auto const& nep = unit.lookupNamedEntityPairId(funcId);
-    func = lookupImmutableFunc(&unit, nep.first).func;
-  }
 
   if (func) {
     TRACE(2, "ActRecState: pushFunc %p(%s)\n", func, func->name()->data());

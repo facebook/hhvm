@@ -72,9 +72,6 @@ let stk_data : instruct -> stack_sig = function
   | IIncludeEvalDefine DefCls _
   | IIncludeEvalDefine DefTypeAlias _
   | IGenerator ContCheck _                 -> [], []
-  | ICall FPushFuncD _
-  | ICall FPushFuncRD _                    -> ["U"; "U"; "U"], []
-  | ICall FPushFunc _                      -> ["U"; "U"; "U"; "C"], []
   | IOp Fatal _
   | IContFlow JmpZ _
   | IContFlow JmpNZ _

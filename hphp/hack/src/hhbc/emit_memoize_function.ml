@@ -81,9 +81,7 @@ let make_memoize_function_with_params_code
     then instr_fcallfuncd fcall_args renamed_method_id
     else gather [
       instr_cgetl (Local.Named R.reified_generics_local_name);
-      instr_reified_name
-        (Hhbc_id.Function.to_raw_string renamed_method_id);
-      instr_fcallfunc fcall_args []
+      instr_fcallfuncrd fcall_args renamed_method_id
     ]
   in
   let reified_memokeym =

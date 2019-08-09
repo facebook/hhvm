@@ -538,10 +538,6 @@ void InterpStack::peek(int numPop,
 static std::string fpiKindStr(FPIKind k) {
   switch (k) {
   case FPIKind::Unknown:     return "unk";
-  case FPIKind::CallableArr: return "arr";
-  case FPIKind::Func:        return "func";
-  case FPIKind::ObjInvoke:   return "invoke";
-  case FPIKind::Builtin:     return "builtin";
   }
   not_reached();
 }

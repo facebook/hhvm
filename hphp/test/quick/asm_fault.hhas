@@ -5,8 +5,7 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "main"
-  FCall <> 0 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "main"
   PopC
   Int 1
   RetC
@@ -53,8 +52,7 @@
     NullUninit
     NullUninit
     String "the message"
-    FPushFuncD 1 "throw_stuff"
-    FCall <> 1 1 "" - "" ""
+    FCallFuncD <> 1 1 "" - "throw_stuff"
     PopC
 
     String "unreached\n"
@@ -156,8 +154,7 @@ on_three:    String "three\n"
          String "foo"
 
 resume:  .try {
-           FPushFunc 0
-           FCall <> 0 1 "" - "" ""
+           FCallFunc <> 0 1 "" -
            PopC
            Jmp resume2
          } .catch {

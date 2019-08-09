@@ -7,15 +7,13 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "init_test"
-  FCall <> 0 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "init_test"
   PopC
 
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 0 "uninit_test"
-  FCall <> 0 1 "" - "" ""
+  FCallFuncD <> 0 1 "" - "uninit_test"
   PopC
 
   Int 1
@@ -116,8 +114,7 @@
   NullUninit
   NullUninit
     String "Init"
-  FPushFuncD 1 "do_test"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "do_test"
   RetC
 }
 
@@ -126,7 +123,6 @@
   NullUninit
   NullUninit
     String "Uninit"
-  FPushFuncD 1 "do_test"
-  FCall <> 1 1 "" - "" ""
+  FCallFuncD <> 1 1 "" - "do_test"
   RetC
 }

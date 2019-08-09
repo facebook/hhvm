@@ -309,7 +309,7 @@ enum Operands {
   Stack2          = 1 << 1,
   Stack1          = 1 << 2,
   StackIns1       = 1 << 3,  // Insert an element under top of stack
-  FStack          = 1 << 5,  // output of FPushFuncD and friends
+  FStack          = 1 << 5,  // output of FPush* and friends
   Local           = 1 << 6,  // Writes to a local
   Iter            = 1 << 7,  // Iterator in imm[0]
   DontGuardStack1 = 1 << 9, // Dont force a guard on behalf of stack1 input

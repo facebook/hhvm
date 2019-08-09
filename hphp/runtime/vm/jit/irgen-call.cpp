@@ -442,8 +442,9 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
   prepareToCallKnown(env, callee, objOrClass, fca.numArgsInclUnpack(), invName,
                      dynamicCall, tsList);
   if (invName == nullptr && hasFPushEffects(curSrcKey(env).op())) {
+    auto const ctx = objOrClass ? objOrClass : cns(env, TNullptr);
     auto const inlined = irGenTryInlineFCall(
-      env, callee, fca, objOrClass, objOrClass->type(), curSrcKey(env).op());
+      env, callee, fca, ctx, ctx->type(), curSrcKey(env).op());
     if (inlined) return;
   }
 
@@ -1023,24 +1024,47 @@ SSATmp* getReifiedGenerics(IRGS& env, SSATmp* funcName) {
   );
 }
 
-void fpushFuncObj(IRGS& env, uint32_t numParams) {
+void fcallFuncObj(IRGS& env, const FCallArgs& fca) {
+  auto const obj = topC(env);
+  assertx(obj->isA(TObj));
+
   auto const slowExit = makeExitSlow(env);
-  auto const obj      = popC(env);
-  auto const cls      = gen(env, LdObjClass, obj);
-  auto const func     = gen(env, LdObjInvoke, slowExit, cls);
-  prepareToCallUnknown(env, func, obj, numParams, nullptr, false, false,
-                       nullptr);
+  auto const cls = gen(env, LdObjClass, obj);
+  auto const func = gen(env, LdObjInvoke, slowExit, cls);
+  discard(env);
+  prepareAndCallProfiled(env, func, fca, obj, false, false, nullptr);
 }
 
-void fpushFuncClsMeth(IRGS& env, uint32_t numParams) {
+void fcallFuncFunc(IRGS& env, const FCallArgs& fca) {
+  auto const func = popC(env);
+  assertx(func->isA(TFunc));
+
+  ifElse(
+    env,
+    [&] (Block* taken) {
+      gen(env, CheckNonNull, taken, gen(env, LdFuncCls, func));
+      auto const attr = AttrData {static_cast<int32_t>(AttrIsMethCaller)};
+      gen(env, JmpNZero, taken, gen(env, FuncHasAttr, attr, func));
+    },
+    [&] { // next, attrs & IsMethCaller == 0 && Func has Cls
+      hint(env, Block::Hint::Unlikely);
+      auto const err = cns(env, makeStaticString(Strings::CALL_ILLFORMED_FUNC));
+      gen(env, RaiseError, err);
+    }
+  );
+  prepareAndCallProfiled(env, func, fca, nullptr, false, false, nullptr);
+}
+
+void fcallFuncClsMeth(IRGS& env, const FCallArgs& fca) {
   auto const clsMeth = popC(env);
+  assertx(clsMeth->isA(TClsMeth));
+
   auto const cls = gen(env, LdClsFromClsMeth, clsMeth);
   auto const func = gen(env, LdFuncFromClsMeth, clsMeth);
-  prepareToCallUnknown(env, func, cls, numParams, nullptr, false, false,
-                       nullptr);
+  prepareAndCallProfiled(env, func, fca, cls, false, false, nullptr);
 }
 
-void fpushFuncStr(IRGS& env, uint32_t numParams) {
+void fcallFuncStr(IRGS& env, const FCallArgs& fca) {
   auto const str = topC(env);
   assertx(str->isA(TStr));
 
@@ -1051,42 +1075,63 @@ void fpushFuncStr(IRGS& env, uint32_t numParams) {
   popDecRef(env);
   auto const mightCareAboutDynCall =
     RuntimeOption::EvalForbidDynamicCallsToFunc > 0;
-  prepareToCallUnknown(env, func, nullptr, numParams, nullptr, true,
-                       mightCareAboutDynCall, tsList);
+  prepareAndCallProfiled(env, func, fca, nullptr, true, mightCareAboutDynCall,
+                         tsList);
 }
 
-void fpushFuncArr(IRGS& env, uint32_t numParams) {
+void fcallFuncArr(IRGS& env, const FCallArgs& fca) {
   UNUSED auto const arr = topC(env);
   assertx(arr->isA(TArr) || arr->isA(TVec));
 
   return interpOne(env);
 }
 
-void fPushFuncDImpl(IRGS& env, uint32_t numParams, const StringData* name,
-                    SSATmp* tsList) {
-  auto const lookup = lookupImmutableFunc(curUnit(env), name);
+void fcallFuncD(IRGS& env, const FCallArgs& fca, const StringData* funcName,
+                SSATmp* tsList) {
+  auto const lookup = lookupImmutableFunc(curUnit(env), funcName);
   if (lookup.func) {
     // We know the function, but we have to ensure its unit is loaded. Use
     // LdFuncCached, ignoring the result to ensure this.
-    if (lookup.needsUnitLoad) gen(env, LdFuncCached, FuncNameData { name });
-    prepareToCallKnown(env, lookup.func, nullptr, numParams, nullptr, false,
-                       tsList);
+    if (lookup.needsUnitLoad) gen(env, LdFuncCached, FuncNameData { funcName });
+    prepareAndCallKnown(env, lookup.func, fca, nullptr, nullptr, false, tsList);
     return;
   }
 
-  auto const func = gen(env, LdFuncCached, FuncNameData { name });
-  prepareToCallUnknown(env, func, nullptr, numParams, nullptr, false, false,
-                       tsList);
+  auto const func = gen(env, LdFuncCached, FuncNameData { funcName });
+  prepareAndCallProfiled(env, func, fca, nullptr, false, false, tsList);
 }
 
 } // namespace
 
-void emitFPushFuncD(IRGS& env, uint32_t numParams, const StringData* name) {
-  fPushFuncDImpl(env, numParams, name, nullptr);
+void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
+  fcallFuncD(env, fca, funcName, nullptr);
 }
 
-void emitFPushFuncRD(IRGS& env, uint32_t numParams, const StringData* name) {
-  fPushFuncDImpl(env, numParams, name, popC(env));
+void emitFCallFuncRD(IRGS& env, FCallArgs fca, const StringData* funcName) {
+  fcallFuncD(env, fca, funcName, popC(env));
+}
+
+void emitFCallFunc(IRGS& env, FCallArgs fca, const ImmVector& v) {
+  if (v.size() != 0) return interpOne(env);
+  auto const callee = topC(env);
+  if (callee->isA(TObj)) return fcallFuncObj(env, fca);
+  if (callee->isA(TFunc)) return fcallFuncFunc(env, fca);
+  if (callee->isA(TClsMeth)) return fcallFuncClsMeth(env, fca);
+  if (callee->isA(TStr)) return fcallFuncStr(env, fca);
+  if (callee->isA(TArr)) return fcallFuncArr(env, fca);
+  if (callee->isA(TVec)) return fcallFuncArr(env, fca);
+  return interpOne(env);
+}
+
+void emitResolveFunc(IRGS& env, const StringData* name) {
+  auto const lookup = lookupImmutableFunc(curUnit(env), name);
+  auto func = lookup.func;
+  if (!func) {
+    push(env, gen(env, LookupFuncCached, FuncNameData { name }));
+    return;
+  }
+  if (lookup.needsUnitLoad) gen(env, LookupFuncCached, FuncNameData { name });
+  push(env, cns(env, func));
 }
 
 namespace {
@@ -1285,54 +1330,6 @@ void emitLockObj(IRGS& env) {
   auto obj = topC(env);
   if (!obj->isA(TObj)) PUNT(LockObj-NonObj);
   gen(env, LockObj, obj);
-}
-
-void emitFPushFunc(IRGS& env, uint32_t numParams, const ImmVector& v) {
-  if (v.size() != 0) PUNT(InOut-FPushFunc);
-  auto const callee = topC(env);
-
-  if (callee->isA(TObj)) return fpushFuncObj(env, numParams);
-  if (callee->isA(TArr) || callee->isA(TVec)) {
-    return fpushFuncArr(env, numParams);
-  }
-  if (callee->isA(TFunc)) {
-    popC(env);
-    ifElse(
-      env,
-      [&] (Block* taken) {
-        gen(env, CheckNonNull, taken, gen(env, LdFuncCls, callee));
-        auto const attr = AttrData {static_cast<int32_t>(AttrIsMethCaller)};
-        gen(env, JmpNZero, taken, gen(env, FuncHasAttr, attr, callee));
-      },
-      [&] { // next, attrs & IsMethCaller == 0 && Func has Cls
-        hint(env, Block::Hint::Unlikely);
-        gen(
-          env,
-          RaiseError,
-          cns(env, makeStaticString(Strings::CALL_ILLFORMED_FUNC))
-        );
-      }
-    );
-    prepareToCallUnknown(env, callee, nullptr, numParams, nullptr, false, false,
-                         nullptr);
-    return;
-  }
-  if (topC(env)->isA(TClsMeth)) {
-    return fpushFuncClsMeth(env, numParams);
-  }
-  if (callee->isA(TStr)) return fpushFuncStr(env, numParams);
-  return interpOne(env);
-}
-
-void emitResolveFunc(IRGS& env, const StringData* name) {
-  auto const lookup = lookupImmutableFunc(curUnit(env), name);
-  auto func = lookup.func;
-  if (!func) {
-    push(env, gen(env, LookupFuncCached, FuncNameData { name }));
-    return;
-  }
-  if (lookup.needsUnitLoad) gen(env, LookupFuncCached, FuncNameData { name });
-  push(env, cns(env, func));
 }
 
 namespace {
@@ -1809,7 +1806,7 @@ void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
     push(env, args[i]);
   }
 
-  env.irb->fs().setFPushOverride(Op::FPushFuncD);
+  env.irb->fs().setFPushOverride(Op::FCallFuncD);
   auto const fca = FCallArgs(FCallArgs::Flags::None, numParams, 1, nullptr,
                              kInvalidOffset, false);
   prepareAndCallKnown(env, callee, fca, nullptr, nullptr, false, nullptr);

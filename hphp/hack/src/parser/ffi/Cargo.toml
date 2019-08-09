@@ -1,0 +1,14 @@
+[package]
+name = "hack_parser_ffi"
+version = "3.49.0"
+edition = "2018"
+
+[dependencies]
+parser_rust = { path = "..", package = "hack_parser" }
+libc = "^0.2.60"
+ocaml = "^0.7"
+
+[lib]
+name = "rust_parser_ffi"
+path = "../rust_parser_ffi.rs"
+crate-type = ["lib", "staticlib"]

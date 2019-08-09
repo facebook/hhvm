@@ -548,7 +548,6 @@ LocalId equivLocalRange(ISS& env, const LocalRange& range) {
 
 SString getNameFromType(const Type& t) {
   if (!t.subtypeOf(BStr)) return nullptr;
-  if (is_specialized_reifiedname(t)) return dreifiedname_of(t).name;
   if (is_specialized_string(t)) return sval_of(t);
   return nullptr;
 }
@@ -3467,7 +3466,7 @@ void in(ISS& env, const bc::ReifiedName& op) {
   auto const required = RuntimeOption::EvalHackArrDVArrs ? BVec : BVArr;
   if (!t.couldBe(required)) return unreachable(env);
   if (t.subtypeOf(required)) nothrow(env);
-  return push(env, rname(op.str1));
+  return push(env, TSStr);
 }
 
 void in(ISS& env, const bc::CheckReifiedGenericMismatch& op) {

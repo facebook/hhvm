@@ -823,7 +823,6 @@ template <typename T>
 struct DataTagTrait {};
 
 template<> struct DataTagTrait<SString>      { using tag = SString; };
-template<> struct DataTagTrait<DReifiedName> { using tag = SString; };
 
 template<> struct DataTagTrait<DArrLikePacked>  { using tag = SArray; };
 template<> struct DataTagTrait<DArrLikePackedN> { using tag = SArray; };
@@ -918,9 +917,6 @@ struct DualDispatchEqImpl {
   bool operator()(const DArrLikeMap&, const DArrLikeMapN&) const {
     return false;
   }
-  bool operator()(const DReifiedName& a, const SString b) const {
-    return false;
-  }
 };
 
 struct DualDispatchCouldBeImpl {
@@ -997,12 +993,6 @@ struct DualDispatchCouldBeImpl {
   operator()(const DArrLikePackedN& /*a*/, const DArrLikeMap& /*b*/) const {
     // Map does not contain any packed arrays.
     return false;
-  }
-
-  bool operator()(const DReifiedName& a, const SString b) const {
-    if (!isReifiedName(b)) return false;
-    auto const name = stripTypeFromReifiedName(b);
-    return name->isame(a.name);
   }
 };
 
@@ -1119,16 +1109,6 @@ struct DualDispatchIntersectionImpl {
     }, intersectProvTag(a.provenance, b.provenance));
   }
 
-  Type operator()(const DReifiedName& a, const SString b) const {
-    // Due to the subtypeof checks in intersection_of, we can assume that
-    // they are not the same
-    assertx(!isReifiedName(b) || !stripTypeFromReifiedName(b)->isame(a.name));
-    return TBottom;
-  }
-
-  Type operator()(const DReifiedName& /*a*/, const DReifiedName& /*b*/) const {
-    not_reached();
-  }
   Type operator()(const SString /*a*/, const SString /*b*/) const {
     not_reached();
   }
@@ -1302,14 +1282,6 @@ struct DualDispatchUnionImpl {
     );
   }
 
-  Type operator()(const DReifiedName& a, const SString b) const {
-    // We should never get here since nothing calls the dualdispatch for this
-    not_reached();
-  }
-
-  Type operator()(const DReifiedName& /*a*/, const DReifiedName& /*b*/) const {
-    not_reached();
-  }
   Type operator()(const SString /*a*/, const SString /*b*/) const {
     not_reached();
   }
@@ -1448,18 +1420,6 @@ struct DualDispatchSubtype {
   bool operator()(const DArrLikeMapN&, SArray) const {
     // MapN contains arrays with an arbitrary number of keys, while SArray is
     // just a single array.
-    return false;
-  }
-
-  bool operator()(const SString a, const DReifiedName& b) const {
-    if (!isReifiedName(a)) return false;
-    auto const name = stripTypeFromReifiedName(a);
-    return name->isame(b.name);
-  }
-
-  bool operator()(const DReifiedName &a, const SString& b) const {
-    // Reified name can never be a subtype of a string as it contains less
-    // information
     return false;
   }
 };
@@ -1645,7 +1605,6 @@ Type Type::unctxHelper(Type t, bool& changed) {
   case DataTag::Str:
   case DataTag::RefInner:
   case DataTag::ArrLikeVal:
-  case DataTag::ReifiedName:
     break;
   }
   return t;
@@ -1785,7 +1744,6 @@ Ret Type::dd2nd(const Type& o, DDHelperFn<Ret,T,Function> f) const {
   case DataTag::Cls:            return f();
   case DataTag::RefInner:       return f();
   case DataTag::Str:            return f(o.m_data.sval);
-  case DataTag::ReifiedName:    return f(o.m_data.rname);
   case DataTag::ArrLikeVal:     return f(o.m_data.aval);
   case DataTag::ArrLikePacked:  return f(*o.m_data.packed);
   case DataTag::ArrLikePackedN: return f(*o.m_data.packedn);
@@ -1812,7 +1770,6 @@ Type::dualDispatchDataFn(const Type& o, Function f) const {
   case DataTag::Cls:            return f();
   case DataTag::RefInner:       return f();
   case DataTag::Str:            return dd2nd(o, ddbind<R>(f, m_data.sval));
-  case DataTag::ReifiedName:    return dd2nd(o, ddbind<R>(f, m_data.rname));
   case DataTag::ArrLikeVal:     return dd2nd(o, ddbind<R>(f, m_data.aval));
   case DataTag::ArrLikePacked:  return dd2nd(o, ddbind<R>(f, *m_data.packed));
   case DataTag::ArrLikePackedN: return dd2nd(o, ddbind<R>(f, *m_data.packedn));
@@ -1870,8 +1827,6 @@ bool Type::equivData(const Type& o) const {
            contextSensitiveCheck(m_data.dcls, o.m_data.dcls);
   case DataTag::RefInner:
     return m_data.inner->equivImpl<contextSensitive>(*o.m_data.inner);
-  case DataTag::ReifiedName:
-    return m_data.rname.name == o.m_data.rname.name;
   case DataTag::ArrLikePacked:
     if (m_data.packed->elems.size() != o.m_data.packed->elems.size()) {
       return false;
@@ -1958,7 +1913,6 @@ bool Type::subtypeData(const Type& o) const {
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::None:
-  case DataTag::ReifiedName:
     // Context sensitivity should not matter here.
     return equivData<contextSensitive>(o);
   case DataTag::RefInner:
@@ -2024,7 +1978,6 @@ bool Type::couldBeData(const Type& o) const {
   case DataTag::Str:
   case DataTag::Int:
   case DataTag::Dbl:
-  case DataTag::ReifiedName:
     return equivData<false>(o);
   case DataTag::ArrLikePacked:
     return couldBePacked(*m_data.packed, *o.m_data.packed);
@@ -2085,8 +2038,6 @@ size_t Type::hash() const {
           return m_data.dval;
         case DataTag::ArrLikeVal:
           return (uintptr_t)m_data.aval;
-        case DataTag::ReifiedName:
-          return (uintptr_t)m_data.rname.name;
         case DataTag::ArrLikePacked:
           return m_data.packed->elems.size();
         case DataTag::ArrLikePackedN:
@@ -2215,7 +2166,6 @@ bool Type::checkInvariants() const {
     break;
   case DataTag::Cls:    break;
   case DataTag::Obj:    break;
-  case DataTag::ReifiedName: break;
   case DataTag::ArrLikeVal:
     assert(m_data.aval->isStatic());
     assert(!m_data.aval->empty());
@@ -2503,13 +2453,6 @@ Type clsExact(res::Class val) {
   return r;
 }
 
-Type rname(SString name) {
-  auto r        = Type { BSStr };
-  construct(r.m_data.rname, name);
-  r.m_dataTag   = DataTag::ReifiedName;
-  return r;
-}
-
 Type ref_to(Type t) {
   assert(t.subtypeOf(BInitCell));
   auto r = Type{BRef};
@@ -2531,7 +2474,6 @@ bool is_specialized_array_like(const Type& t) {
   case DataTag::Dbl:
   case DataTag::Cls:
   case DataTag::RefInner:
-  case DataTag::ReifiedName:
     return false;
   case DataTag::ArrLikeVal:
   case DataTag::ArrLikePacked:
@@ -2801,10 +2743,6 @@ bool is_specialized_cls(const Type& t) {
   return t.m_dataTag == DataTag::Cls;
 }
 
-bool is_specialized_reifiedname(const Type& t) {
-  return t.m_dataTag == DataTag::ReifiedName;
-}
-
 bool is_specialized_string(const Type& t) {
   return t.m_dataTag == DataTag::Str;
 }
@@ -2857,7 +2795,6 @@ folly::Optional<int64_t> arr_size(const Type& t) {
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
     case DataTag::Cls:
-    case DataTag::ReifiedName:
       return folly::none;
   }
   not_reached();
@@ -2915,7 +2852,6 @@ Type::ArrayCat categorize_array(const Type& t) {
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
     case DataTag::Cls:
-    case DataTag::ReifiedName:
       return {};
   }
 
@@ -2955,7 +2891,6 @@ CompactVector<LSString> get_string_keys(const Type& t) {
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
     case DataTag::Cls:
-    case DataTag::ReifiedName:
       always_assert(false);
   }
 
@@ -3129,7 +3064,6 @@ R tvImpl(const Type& t) {
     case DataTag::Obj:
     case DataTag::Cls:
     case DataTag::None:
-    case DataTag::ReifiedName:
       break;
     }
   }
@@ -3174,7 +3108,6 @@ Type scalarize(Type t) {
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
     case DataTag::Cls:
-    case DataTag::ReifiedName:
       break;
   }
   not_reached();
@@ -3194,7 +3127,6 @@ folly::Optional<size_t> array_size(const Type& t) {
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
     case DataTag::Cls:
-    case DataTag::ReifiedName:
       return folly::none;
     case DataTag::ArrLikeVal:
       return t.m_data.aval->size();
@@ -3219,7 +3151,6 @@ array_get_by_index(const Type& t, ssize_t index) {
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
     case DataTag::Cls:
-    case DataTag::ReifiedName:
       return folly::none;
 
     case DataTag::ArrLikeVal: {
@@ -3422,12 +3353,6 @@ DCls dcls_of(Type t) {
   assert(t.checkInvariants());
   assert(is_specialized_cls(t));
   return t.m_data.dcls;
-}
-
-DReifiedName dreifiedname_of(const Type& t) {
-  assert(t.checkInvariants());
-  assert(is_specialized_reifiedname(t));
-  return t.m_data.rname;
 }
 
 SString sval_of(const Type& t) {
@@ -3648,7 +3573,6 @@ Type intersection_of(Type a, Type b) {
         case DataTag::ArrLikeVal:
         case DataTag::Int:
         case DataTag::Dbl:
-        case DataTag::ReifiedName:
           // Neither is a subtype of the other, so the intersection is empty
           return TBottom;
         case DataTag::RefInner:
@@ -3959,7 +3883,6 @@ void widen_type_impl(Type& t, uint32_t depth) {
     case DataTag::Dbl:
     case DataTag::Cls:
     case DataTag::ArrLikeVal:
-    case DataTag::ReifiedName:
       return;
 
     case DataTag::Obj:
@@ -4060,7 +3983,6 @@ Type loosen_staticness(Type t) {
     case DataTag::Dbl:
     case DataTag::Cls:
     case DataTag::ArrLikeVal:
-    case DataTag::ReifiedName:
       break;
 
     case DataTag::Obj:
@@ -4218,7 +4140,6 @@ Type loosen_values(Type a) {
     case DataTag::ArrLikePackedN:
     case DataTag::ArrLikeMap:
     case DataTag::ArrLikeMapN:
-    case DataTag::ReifiedName:
       return Type { a.m_bits };
     case DataTag::None:
     case DataTag::Obj:
@@ -4818,7 +4739,6 @@ std::pair<Type, ThrowMode> array_like_elem(const Type& arr,
     case DataTag::Dbl:
     case DataTag::Cls:
     case DataTag::RefInner:
-    case DataTag::ReifiedName:
       not_reached();
 
     case DataTag::None: {
@@ -4962,7 +4882,6 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
   case DataTag::Dbl:
   case DataTag::Cls:
   case DataTag::RefInner:
-  case DataTag::ReifiedName:
     not_reached();
 
   case DataTag::None:
@@ -5095,7 +5014,6 @@ std::pair<Type,Type> array_like_newelem(Type arr,
   case DataTag::Dbl:
   case DataTag::Cls:
   case DataTag::RefInner:
-  case DataTag::ReifiedName:
     not_reached();
 
   case DataTag::None:
@@ -5260,7 +5178,6 @@ IterTypes iter_types(const Type& iterable) {
   case DataTag::Dbl:
   case DataTag::Cls:
   case DataTag::RefInner:
-  case DataTag::ReifiedName:
     always_assert(0);
   case DataTag::ArrLikeVal: {
     auto kv = val_key_values(iterable.m_data.aval);
@@ -5334,7 +5251,6 @@ bool could_contain_objects(const Type& t) {
   case DataTag::Dbl:
   case DataTag::Cls:
   case DataTag::RefInner:
-  case DataTag::ReifiedName:
     return true;
   case DataTag::ArrLikeVal: return false;
   case DataTag::ArrLikePacked:
@@ -5422,7 +5338,6 @@ bool inner_types_might_raise(const Type& t1, const Type& t2) {
       case DataTag::Dbl:
       case DataTag::Cls:
       case DataTag::RefInner:
-      case DataTag::ReifiedName:
         not_reached();
 
       case DataTag::ArrLikeVal:
@@ -5471,7 +5386,6 @@ bool inner_types_might_raise(const Type& t1, const Type& t2) {
         case DataTag::Dbl:
         case DataTag::Cls:
         case DataTag::RefInner:
-        case DataTag::ReifiedName:
           not_reached();
 
         case DataTag::ArrLikeVal:
@@ -5684,7 +5598,6 @@ RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder& arrTable,
     case DataTag::Dbl:
     case DataTag::Cls:
     case DataTag::RefInner:
-    case DataTag::ReifiedName:
     case DataTag::ArrLikeVal:
     case DataTag::ArrLikeMap:
     case DataTag::ArrLikeMapN:

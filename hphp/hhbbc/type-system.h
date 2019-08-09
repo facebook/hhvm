@@ -437,7 +437,6 @@ constexpr auto BSArrLike = BSArr | BSVec | BSDict | BSKeyset;
   DT(Obj, DObj, dobj)                                           \
   DT(Cls, DCls, dcls)                                           \
   DT(RefInner, copy_ptr<Type>, inner)                           \
-  DT(ReifiedName, DReifiedName, rname)                          \
   DT(ArrLikePacked, copy_ptr<DArrLikePacked>, packed)           \
   DT(ArrLikePackedN, copy_ptr<DArrLikePackedN>, packedn)        \
   DT(ArrLikeMap, copy_ptr<DArrLikeMap>, map)                    \
@@ -489,25 +488,6 @@ struct DObj {
   bool isCtx = false;
   res::Class cls;
   copy_ptr<Type> whType;
-};
-
-#ifndef NDEBUG
-constexpr int kReifiedMagic = 0xaabbff11;
-#endif
-
-/*
- * Information about a string that represents a reified name.
- */
-struct DReifiedName {
-  explicit DReifiedName(SString name)
-    : name(name)
-  {}
-
-#ifndef NDEBUG
-  // To make sure t.m_data.sval does not return t.m_data.rname.name
-  uint32_t magic = kReifiedMagic;
-#endif
-  SString name;
 };
 
 struct DArrLikePacked;
@@ -667,7 +647,6 @@ private:
   friend bool is_specialized_obj(const Type&);
   friend bool is_specialized_cls(const Type&);
   friend bool is_ref_with_inner(const Type&);
-  friend bool is_specialized_reifiedname(const Type&);
   friend bool is_specialized_string(const Type&);
   friend Type wait_handle_inner(const Type&);
   friend Type sval(SString);
@@ -688,7 +667,6 @@ private:
   friend Type mapn_impl_from_map(trep bits, Type k, Type v, ProvTag);
   friend DObj dobj_of(const Type&);
   friend DCls dcls_of(Type);
-  friend DReifiedName dreifiedname_of(const Type&);
   friend SString sval_of(const Type&);
   friend Type union_of(Type, Type);
   friend Type intersection_of(Type, Type);
@@ -1104,11 +1082,6 @@ Type subCls(res::Class);
 Type clsExact(res::Class);
 
 /*
- * Create a type for strings that are known to represent reified names.
- */
-Type rname(SString);
-
-/*
  * Packed array types with known size.
  *
  * Pre: !v.empty()
@@ -1268,12 +1241,6 @@ bool is_specialized_obj(const Type&);
 bool is_specialized_cls(const Type&);
 
 /*
- * Returns true if type 't' represents a "specialized" reified name
- * --- i.e. a string with a DReifiedName structure.
- */
-bool is_specialized_reifiedname(const Type&);
-
-/*
  * Returns whether `t' is a WaitH<T> or ?WaitH<T> for some T.
  *
  * Note that this function returns false for Obj<=WaitHandle with no
@@ -1392,13 +1359,6 @@ DObj dobj_of(const Type& t);
  * Pre: is_specialized_cls(t)
  */
 DCls dcls_of(Type t);
-
-/*
- * Return the DReifiedName structure for a strict subtype of TStr.
- *
- * Pre: is_specialized_reifiedname(t)
- */
-DReifiedName dreifiedname_of(const Type& t);
 
 /*
  * Return the SString for a strict subtype of TStr.

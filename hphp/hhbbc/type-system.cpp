@@ -4061,7 +4061,6 @@ Type loosen_provenance(Type t) {
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Cls:
-    case DataTag::ReifiedName:
       break;
 
     case DataTag::ArrLikeVal:

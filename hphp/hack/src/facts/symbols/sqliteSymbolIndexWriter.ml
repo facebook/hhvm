@@ -93,14 +93,14 @@ let record_in_db
 
   (* Open the database and do basic prep *)
   let db = Sqlite3.db_open filename in
-  Sqlite3.exec db "PRAGMA synchronous = OFF;" |> check_rc;
-  Sqlite3.exec db "PRAGMA journal_mode = MEMORY;" |> check_rc;
-  Sqlite3.exec db sql_create_symbols_table |> check_rc;
-  Sqlite3.exec db sql_create_indexes |> check_rc;
-  Sqlite3.exec db sql_create_kinds_table |> check_rc;
-  Sqlite3.exec db sql_create_namespaces_table |> check_rc;
-  Sqlite3.exec db sql_insert_kinds |> check_rc;
-  Sqlite3.exec db sql_begin_transaction |> check_rc;
+  Sqlite3.exec db "PRAGMA synchronous = OFF;" |> check_rc db;
+  Sqlite3.exec db "PRAGMA journal_mode = MEMORY;" |> check_rc db;
+  Sqlite3.exec db sql_create_symbols_table |> check_rc db;
+  Sqlite3.exec db sql_create_indexes |> check_rc db;
+  Sqlite3.exec db sql_create_kinds_table |> check_rc db;
+  Sqlite3.exec db sql_create_namespaces_table |> check_rc db;
+  Sqlite3.exec db sql_insert_kinds |> check_rc db;
+  Sqlite3.exec db sql_begin_transaction |> check_rc db;
 
   (* Insert symbols and link them to namespaces *)
   begin
@@ -113,39 +113,39 @@ let record_in_db
       let file_hash = Caml.Hashtbl.find symbols.sisr_filepaths symbol.sif_filepath in
 
       (* Insert this symbol *)
-      Sqlite3.reset stmt |> check_rc;
-      Sqlite3.bind stmt 1 (Sqlite3.Data.INT (Int64.of_int nsid)) |> check_rc;
-      Sqlite3.bind stmt 2 (Sqlite3.Data.INT file_hash) |> check_rc;
-      Sqlite3.bind stmt 3 (Sqlite3.Data.TEXT symbol.sif_name) |> check_rc;
+      Sqlite3.reset stmt |> check_rc db;
+      Sqlite3.bind stmt 1 (Sqlite3.Data.INT (Int64.of_int nsid)) |> check_rc db;
+      Sqlite3.bind stmt 2 (Sqlite3.Data.INT file_hash) |> check_rc db;
+      Sqlite3.bind stmt 3 (Sqlite3.Data.TEXT symbol.sif_name) |> check_rc db;
       Sqlite3.bind stmt 4 (Sqlite3.Data.INT
-        (Int64.of_int (kind_to_int symbol.sif_kind))) |> check_rc;
-      Sqlite3.bind stmt 5 (bool_to_sqlite (SearchUtils.valid_for_acid symbol)) |> check_rc;
-      Sqlite3.bind stmt 6 (bool_to_sqlite (SearchUtils.valid_for_acnew symbol)) |> check_rc;
-      Sqlite3.bind stmt 7 (bool_to_sqlite (SearchUtils.valid_for_actype symbol)) |> check_rc;
-      Sqlite3.bind stmt 8 (bool_to_sqlite symbol.sif_is_abstract) |> check_rc;
-      Sqlite3.bind stmt 9 (bool_to_sqlite symbol.sif_is_final) |> check_rc;
-      Sqlite3.step stmt |> check_rc;
+        (Int64.of_int (kind_to_int symbol.sif_kind))) |> check_rc db;
+      Sqlite3.bind stmt 5 (bool_to_sqlite (SearchUtils.valid_for_acid symbol)) |> check_rc db;
+      Sqlite3.bind stmt 6 (bool_to_sqlite (SearchUtils.valid_for_acnew symbol)) |> check_rc db;
+      Sqlite3.bind stmt 7 (bool_to_sqlite (SearchUtils.valid_for_actype symbol)) |> check_rc db;
+      Sqlite3.bind stmt 8 (bool_to_sqlite symbol.sif_is_abstract) |> check_rc db;
+      Sqlite3.bind stmt 9 (bool_to_sqlite symbol.sif_is_final) |> check_rc db;
+      Sqlite3.step stmt |> check_rc db;
     end);
-    Sqlite3.finalize stmt |> check_rc;
+    Sqlite3.finalize stmt |> check_rc db;
   end;
 
   (* We've seen all namespaces, now insert them and their IDs *)
   begin
     let stmt = Sqlite3.prepare db sql_insert_namespace in
     Caml.Hashtbl.iter (fun ns id -> begin
-      Sqlite3.reset stmt |> check_rc;
-      Sqlite3.bind stmt 1 (Sqlite3.Data.INT (Int64.of_int id)) |> check_rc;
-      Sqlite3.bind stmt 2 (Sqlite3.Data.TEXT ns) |> check_rc;
-      Sqlite3.step stmt |> check_rc;
+      Sqlite3.reset stmt |> check_rc db;
+      Sqlite3.bind stmt 1 (Sqlite3.Data.INT (Int64.of_int id)) |> check_rc db;
+      Sqlite3.bind stmt 2 (Sqlite3.Data.TEXT ns) |> check_rc db;
+      Sqlite3.step stmt |> check_rc db;
     end) symbols.sisr_namespaces;
-    Sqlite3.finalize stmt |> check_rc;
+    Sqlite3.finalize stmt |> check_rc db;
   end;
 
   (* Finish up *)
-  Sqlite3.exec db sql_commit_transaction |> check_rc;
+  Sqlite3.exec db sql_commit_transaction |> check_rc db;
 
   (* Reduces database size by 10% even when we have only one transaction *)
-  Sqlite3.exec db "VACUUM;" |> check_rc;
+  Sqlite3.exec db "VACUUM;" |> check_rc db;
 
   (* We are done *)
   if not (Sqlite3.db_close db) then

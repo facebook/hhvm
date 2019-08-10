@@ -126,6 +126,9 @@ let read_si_results (stmt: Sqlite3.stmt): si_results =
   done;
   !results
 
+let check_rc (sienv: si_env) =
+  check_rc (Option.value_exn !(sienv.sql_symbolindex_db))
+
 (* Find all symbols matching a specific kind *)
 let search_symbols_by_kind
     ~(sienv: si_env)
@@ -135,9 +138,9 @@ let search_symbols_by_kind
   : si_results =
   let stmt = prepare_or_reset_statement sienv.sql_symbolindex_db
     sienv.sql_select_symbols_by_kind_stmt sql_select_symbols_by_kind in
-  Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT (query_text ^ "%")) |> check_rc;
-  Sqlite3.bind stmt 2 (Sqlite3.Data.INT (Int64.of_int (kind_to_int kind_filter))) |> check_rc;
-  Sqlite3.bind stmt 3 (Sqlite3.Data.INT (Int64.of_int max_results)) |> check_rc;
+  Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT (query_text ^ "%")) |> check_rc sienv;
+  Sqlite3.bind stmt 2 (Sqlite3.Data.INT (Int64.of_int (kind_to_int kind_filter))) |> check_rc sienv;
+  Sqlite3.bind stmt 3 (Sqlite3.Data.INT (Int64.of_int max_results)) |> check_rc sienv;
   read_si_results stmt
 
 (* Symbol search for all symbols. *)
@@ -147,8 +150,8 @@ let search_all_symbols
     ~(max_results: int): si_results =
   let stmt = prepare_or_reset_statement sienv.sql_symbolindex_db
     sienv.sql_select_symbols_stmt sql_select_all_symbols in
-  Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT (query_text ^ "%")) |> check_rc;
-  Sqlite3.bind stmt 2 (Sqlite3.Data.INT (Int64.of_int max_results)) |> check_rc;
+  Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT (query_text ^ "%")) |> check_rc sienv;
+  Sqlite3.bind stmt 2 (Sqlite3.Data.INT (Int64.of_int max_results)) |> check_rc sienv;
   read_si_results stmt
 
 (* Symbol search for symbols valid in ACID context *)
@@ -158,8 +161,8 @@ let search_acid
     ~(max_results: int): si_results =
   let stmt = prepare_or_reset_statement sienv.sql_symbolindex_db
     sienv.sql_select_acid_stmt sql_select_acid in
-  Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT (query_text ^ "%")) |> check_rc;
-  Sqlite3.bind stmt 2 (Sqlite3.Data.INT (Int64.of_int max_results)) |> check_rc;
+  Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT (query_text ^ "%")) |> check_rc sienv;
+  Sqlite3.bind stmt 2 (Sqlite3.Data.INT (Int64.of_int max_results)) |> check_rc sienv;
   read_si_results stmt
 
 (* Symbol search for symbols valid in ACNEW context *)
@@ -169,8 +172,8 @@ let search_acnew
     ~(max_results: int): si_results =
   let stmt = prepare_or_reset_statement sienv.sql_symbolindex_db
     sienv.sql_select_acnew_stmt sql_select_acnew in
-  Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT (query_text ^ "%")) |> check_rc;
-  Sqlite3.bind stmt 2 (Sqlite3.Data.INT (Int64.of_int max_results)) |> check_rc;
+  Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT (query_text ^ "%")) |> check_rc sienv;
+  Sqlite3.bind stmt 2 (Sqlite3.Data.INT (Int64.of_int max_results)) |> check_rc sienv;
   read_si_results stmt
 
 (* Symbol search for symbols valid in ACTYPE context *)
@@ -180,8 +183,8 @@ let search_actype
     ~(max_results: int): si_results =
   let stmt = prepare_or_reset_statement sienv.sql_symbolindex_db
     sienv.sql_select_actype_stmt sql_select_actype in
-  Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT (query_text ^ "%")) |> check_rc;
-  Sqlite3.bind stmt 2 (Sqlite3.Data.INT (Int64.of_int max_results)) |> check_rc;
+  Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT (query_text ^ "%")) |> check_rc sienv;
+  Sqlite3.bind stmt 2 (Sqlite3.Data.INT (Int64.of_int max_results)) |> check_rc sienv;
   read_si_results stmt
 
 (* Main entry point *)

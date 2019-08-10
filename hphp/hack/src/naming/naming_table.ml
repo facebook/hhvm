@@ -248,9 +248,9 @@ end = struct
     let prime db =
       let insert_stmt = Sqlite3.prepare db insert_sqlite in
       let empty = Marshal.to_string Relative_path.Map.empty [Marshal.No_sharing] in
-      Sqlite3.bind insert_stmt 1 (Sqlite3.Data.BLOB empty) |> check_rc;
-      Sqlite3.step insert_stmt |> check_rc;
-      Sqlite3.finalize insert_stmt |> check_rc
+      Sqlite3.bind insert_stmt 1 (Sqlite3.Data.BLOB empty) |> check_rc db;
+      Sqlite3.step insert_stmt |> check_rc db;
+      Sqlite3.finalize insert_stmt |> check_rc db
 
     let update db (local_changes : local_changes) =
       let local_changes_saved = Relative_path.Map.map local_changes ~f:begin fun delta ->
@@ -260,9 +260,9 @@ end = struct
       end in
       let local_changes_blob = Marshal.to_string local_changes_saved [Marshal.No_sharing] in
       let update_stmt = Sqlite3.prepare db update_sqlite in
-      Sqlite3.bind update_stmt 1 (Sqlite3.Data.BLOB local_changes_blob) |> check_rc;
-      Sqlite3.step update_stmt |> check_rc;
-      Sqlite3.finalize update_stmt |> check_rc
+      Sqlite3.bind update_stmt 1 (Sqlite3.Data.BLOB local_changes_blob) |> check_rc db;
+      Sqlite3.step update_stmt |> check_rc db;
+      Sqlite3.finalize update_stmt |> check_rc db
 
     let get db =
       let get_stmt = Sqlite3.prepare db get_sqlite in
@@ -331,18 +331,18 @@ end = struct
       let suffix = Relative_path.suffix relative_path in
       let file_info_blob = Marshal.to_string (FileInfo.to_saved file_info) [Marshal.No_sharing] in
       let insert_stmt = Sqlite3.prepare db insert_sqlite in
-      Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT (Int64.of_int prefix_type)) |> check_rc;
-      Sqlite3.bind insert_stmt 2 (Sqlite3.Data.TEXT suffix) |> check_rc;
-      Sqlite3.bind insert_stmt 3 (Sqlite3.Data.BLOB file_info_blob) |> check_rc;
-      Sqlite3.step insert_stmt |> check_rc;
-      Sqlite3.finalize insert_stmt |> check_rc
+      Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT (Int64.of_int prefix_type)) |> check_rc db;
+      Sqlite3.bind insert_stmt 2 (Sqlite3.Data.TEXT suffix) |> check_rc db;
+      Sqlite3.bind insert_stmt 3 (Sqlite3.Data.BLOB file_info_blob) |> check_rc db;
+      Sqlite3.step insert_stmt |> check_rc db;
+      Sqlite3.finalize insert_stmt |> check_rc db
 
     let get_file_info db path =
       let get_stmt = Sqlite3.prepare db get_sqlite in
       let prefix_type = Relative_path.prefix_to_enum (Relative_path.prefix path) in
       let suffix = Relative_path.suffix path in
-      Sqlite3.bind get_stmt 1 (Sqlite3.Data.INT (Int64.of_int prefix_type)) |> check_rc;
-      Sqlite3.bind get_stmt 2 (Sqlite3.Data.TEXT suffix) |> check_rc;
+      Sqlite3.bind get_stmt 1 (Sqlite3.Data.INT (Int64.of_int prefix_type)) |> check_rc db;
+      Sqlite3.bind get_stmt 2 (Sqlite3.Data.TEXT suffix) |> check_rc db;
       match Sqlite3.step get_stmt with
       | Sqlite3.Rc.DONE -> None
       | Sqlite3.Rc.ROW ->
@@ -403,38 +403,38 @@ end = struct
       (Str.global_replace (Str.regexp "{hash}") "HASH" base,
         Str.global_replace (Str.regexp "{hash}") "CANON_HASH" base)
 
-    let insert db ~name ~flags ~file_info_id =
-      let hash = SharedMem.get_hash name in
-      let canon_hash = SharedMem.get_hash (to_canon_name_key name) in
-      let insert_stmt = Sqlite3.prepare db insert_sqlite in
-      Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc;
-      Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT canon_hash) |> check_rc;
-      Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT flags) |> check_rc;
-      Sqlite3.bind insert_stmt 4 (Sqlite3.Data.INT file_info_id) |> check_rc;
-      Sqlite3.step insert_stmt |> check_rc;
-      Sqlite3.finalize insert_stmt |> check_rc
+  let insert db ~name ~flags ~file_info_id =
+    let hash = SharedMem.get_hash name in
+    let canon_hash = SharedMem.get_hash (to_canon_name_key name) in
+    let insert_stmt = Sqlite3.prepare db insert_sqlite in
+    Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
+    Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT canon_hash) |> check_rc db;
+    Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT flags) |> check_rc db;
+    Sqlite3.bind insert_stmt 4 (Sqlite3.Data.INT file_info_id) |> check_rc db;
+    Sqlite3.step insert_stmt |> check_rc db;
+    Sqlite3.finalize insert_stmt |> check_rc db
 
-    let insert_class db ~name ~file_info_id =
-      insert db ~name ~flags:class_flag ~file_info_id
+  let insert_class db ~name ~file_info_id =
+    insert db ~name ~flags:class_flag ~file_info_id
 
-    let insert_typedef db ~name ~file_info_id =
-      insert db ~name ~flags:typedef_flag ~file_info_id
+  let insert_typedef db ~name ~file_info_id =
+    insert db ~name ~flags:typedef_flag ~file_info_id
 
-    let get db ~name ~case_insensitive =
-      let name = if case_insensitive then String.lowercase_ascii name else name in
-      let hash = SharedMem.get_hash name in
-      let get_sqlite = if case_insensitive then get_sqlite_case_insensitive else get_sqlite in
-      let get_stmt = Sqlite3.prepare db get_sqlite in
-      Sqlite3.bind get_stmt 1 (Sqlite3.Data.INT hash) |> check_rc;
-      match Sqlite3.step get_stmt with
-      | Sqlite3.Rc.DONE -> None
-      | Sqlite3.Rc.ROW ->
-        let prefix_type = column_int64 get_stmt 0 in
-        let suffix = column_str get_stmt 1 in
-        let flags = Int64.to_int (column_int64 get_stmt 2) in
-        let class_type = Core_kernel.Option.value_exn (type_of_type_of_enum flags) in
-        Some (make_relative_path prefix_type suffix, class_type)
-      | rc -> failwith (Printf.sprintf "Failure retrieving row: %s" (Sqlite3.Rc.to_string rc))
+  let get db ~name ~case_insensitive =
+    let name = if case_insensitive then String.lowercase_ascii name else name in
+    let hash = SharedMem.get_hash name in
+    let get_sqlite = if case_insensitive then get_sqlite_case_insensitive else get_sqlite in
+    let get_stmt = Sqlite3.prepare db get_sqlite in
+    Sqlite3.bind get_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
+    match Sqlite3.step get_stmt with
+    | Sqlite3.Rc.DONE -> None
+    | Sqlite3.Rc.ROW ->
+      let prefix_type = column_int64 get_stmt 0 in
+      let suffix = column_str get_stmt 1 in
+      let flags = Int64.to_int (column_int64 get_stmt 2) in
+      let class_type = Core_kernel.Option.value_exn (type_of_type_of_enum flags) in
+      Some (make_relative_path prefix_type suffix, class_type)
+    | rc -> failwith (Printf.sprintf "Failure retrieving row: %s" (Sqlite3.Rc.to_string rc))
   end
 
 
@@ -477,18 +477,18 @@ end = struct
       let hash = SharedMem.get_hash name in
       let canon_hash = SharedMem.get_hash (to_canon_name_key name) in
       let insert_stmt = Sqlite3.prepare db insert_sqlite in
-      Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc;
-      Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT canon_hash) |> check_rc;
-      Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT file_info_id) |> check_rc;
-      Sqlite3.step insert_stmt |> check_rc;
-      Sqlite3.finalize insert_stmt |> check_rc
+      Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
+      Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT canon_hash) |> check_rc db;
+      Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT file_info_id) |> check_rc db;
+      Sqlite3.step insert_stmt |> check_rc db;
+      Sqlite3.finalize insert_stmt |> check_rc db
 
     let get db ~name ~case_insensitive =
       let name = if case_insensitive then String.lowercase_ascii name else name in
       let hash = SharedMem.get_hash name in
       let get_sqlite = if case_insensitive then get_sqlite_case_insensitive else get_sqlite in
       let get_stmt = Sqlite3.prepare db (get_sqlite) in
-      Sqlite3.bind get_stmt 1 (Sqlite3.Data.INT hash) |> check_rc;
+      Sqlite3.bind get_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
       match Sqlite3.step get_stmt with
       | Sqlite3.Rc.DONE -> None
       | Sqlite3.Rc.ROW ->
@@ -529,15 +529,15 @@ end = struct
     let insert db ~name ~file_info_id =
       let hash = SharedMem.get_hash name in
       let insert_stmt = Sqlite3.prepare db insert_sqlite in
-      Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc;
-      Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT file_info_id) |> check_rc;
-      Sqlite3.step insert_stmt |> check_rc;
-      Sqlite3.finalize insert_stmt |> check_rc
+      Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
+      Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT file_info_id) |> check_rc db;
+      Sqlite3.step insert_stmt |> check_rc db;
+      Sqlite3.finalize insert_stmt |> check_rc db
 
     let get db ~name =
       let hash = SharedMem.get_hash name in
       let get_stmt = Sqlite3.prepare db get_sqlite in
-      Sqlite3.bind get_stmt 1 (Sqlite3.Data.INT hash) |> check_rc;
+      Sqlite3.bind get_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
       match Sqlite3.step get_stmt with
       | Sqlite3.Rc.DONE -> None
       | Sqlite3.Rc.ROW ->
@@ -569,8 +569,8 @@ end = struct
       | None -> None
       | Some path ->
         let db = Sqlite3.db_open path in
-        Sqlite3.exec db "PRAGMA synchronous = OFF;" |> check_rc;
-        Sqlite3.exec db "PRAGMA journal_mode = MEMORY;" |> check_rc;
+        Sqlite3.exec db "PRAGMA synchronous = OFF;" |> check_rc db;
+        Sqlite3.exec db "PRAGMA journal_mode = MEMORY;" |> check_rc db;
         Some db
 
     let db = ref (lazy (open_db ()))
@@ -601,7 +601,7 @@ end = struct
       | [|row_id|] -> file_info_id := Some (Int64.of_string row_id)
       | [||] -> failwith "Got no columns when querying last inserted row ID"
       | _ -> failwith "Got too many columns when querying last inserted row ID"
-    end |> check_rc;
+    end |> check_rc db;
     let file_info_id = match !file_info_id with
       | Some id -> id
       | None -> failwith "Could not get last inserted row ID"
@@ -635,12 +635,13 @@ end = struct
 
   let save_file_infos db_name file_info_map =
     let db = Sqlite3.db_open db_name in
-    Sqlite3.exec db "BEGIN TRANSACTION;" |> check_rc;
-    Sqlite3.exec db LocalChanges.create_table_sqlite |> check_rc;
-    Sqlite3.exec db FileInfoTable.create_table_sqlite |> check_rc;
-    Sqlite3.exec db ConstsTable.create_table_sqlite |> check_rc;
-    Sqlite3.exec db TypesTable.create_table_sqlite |> check_rc;
-    Sqlite3.exec db FunsTable.create_table_sqlite |> check_rc;
+    Sqlite3.exec db "BEGIN TRANSACTION;" |> check_rc db;
+    try
+    Sqlite3.exec db LocalChanges.create_table_sqlite |> check_rc db;
+    Sqlite3.exec db FileInfoTable.create_table_sqlite |> check_rc db;
+    Sqlite3.exec db ConstsTable.create_table_sqlite |> check_rc db;
+    Sqlite3.exec db TypesTable.create_table_sqlite |> check_rc db;
+    Sqlite3.exec db FunsTable.create_table_sqlite |> check_rc db;
 
     (* Incremental updates only update the single row in this table, so we need
      * to write in some dummy data to start. *)
@@ -653,14 +654,15 @@ end = struct
         }
       end
     in
-    Sqlite3.exec db FileInfoTable.create_index_sqlite |> check_rc;
-    Sqlite3.exec db TypesTable.create_index_sqlite |> check_rc;
-    Sqlite3.exec db FunsTable.create_index_sqlite |> check_rc;
-    Sqlite3.exec db "END TRANSACTION;" |> check_rc;
+    Sqlite3.exec db FileInfoTable.create_index_sqlite |> check_rc db;
+    Sqlite3.exec db TypesTable.create_index_sqlite |> check_rc db;
+    Sqlite3.exec db FunsTable.create_index_sqlite |> check_rc db;
+    Sqlite3.exec db "END TRANSACTION;" |> check_rc db;
     if not @@ Sqlite3.db_close db
     then failwith @@ Printf.sprintf "Could not close database at %s" db_name;
     Database_handle.set_db_path db_name;
     save_result
+    with e -> (Sqlite3.exec db "END TRANSACTION;" |> check_rc db; raise e)
 
   let update_file_infos db_name local_changes =
     Database_handle.set_db_path db_name;

@@ -9,11 +9,12 @@
 open Core_kernel
 
 (* Check a sqlite result, and crash if it is invalid *)
-let check_rc (rc: Sqlite3.Rc.t): unit =
+let check_rc (db: Sqlite3.db) (rc: Sqlite3.Rc.t): unit =
   if rc <> Sqlite3.Rc.OK && rc <> Sqlite3.Rc.DONE
   then failwith
-    (Printf.sprintf "SQLite operation failed: %s"
-      (Sqlite3.Rc.to_string rc))
+    (Printf.sprintf "SQLite operation failed: %s (%s)"
+      (Sqlite3.Rc.to_string rc)
+      (Sqlite3.errmsg db))
 
 (* Gather a database and prepared statement into a tuple *)
 let prepare_or_reset_statement
@@ -23,7 +24,7 @@ let prepare_or_reset_statement
   let db = Option.value_exn !db_opt_ref in
   let stmt = match !stmt_ref with
     | Some s ->
-      Sqlite3.reset s |> check_rc;
+      Sqlite3.reset s |> check_rc db;
       s
     | None ->
       let s = Sqlite3.prepare db sql_command_text in

@@ -322,9 +322,10 @@ Array HHVM_FUNCTION(headers_list) {
   return ret;
 }
 
-bool HHVM_FUNCTION(headers_sent, VRefParam file /* = null */,
-                                 VRefParam line /* = null */) {
-  Transport *transport = g_context->getTransport();
+bool HHVM_FUNCTION(headers_sent_with_file_line,
+                   VRefParam file,
+                   VRefParam line) {
+ Transport *transport = g_context->getTransport();
   if (transport) {
     file.assignIfRef(String(transport->getFirstHeaderFile()));
     line.assignIfRef(transport->getFirstHeaderLine());
@@ -333,6 +334,11 @@ bool HHVM_FUNCTION(headers_sent, VRefParam file /* = null */,
     return g_context->getStdoutBytesWritten() > 0;
   }
   return false;
+}
+
+bool HHVM_FUNCTION(headers_sent, VRefParam file /* = null */,
+                                 VRefParam line /* = null */) {
+  return HHVM_FN(headers_sent_with_file_line)(file, line);
 }
 
 Variant HHVM_FUNCTION(header_register_callback, const Variant& callback) {
@@ -476,6 +482,7 @@ void StandardExtension::initNetwork() {
   HHVM_FE(http_response_code);
   HHVM_FE(headers_list);
   HHVM_FE(headers_sent);
+  HHVM_FE(headers_sent_with_file_line);
   HHVM_FE(header_register_callback);
   HHVM_FE(header_remove);
   HHVM_FE(get_http_request_size);

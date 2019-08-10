@@ -364,6 +364,10 @@ function headers_list(): varray<string>;
 function headers_sent(mixed &$file = null,
                       mixed &$line = null): bool;
 
+<<__Native>>
+function headers_sent_with_file_line(mixed &$file,
+                                     mixed &$line): bool;
+
 /**
  * Get or Set the HTTP response code
  *

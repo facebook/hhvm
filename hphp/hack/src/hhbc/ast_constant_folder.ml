@@ -127,8 +127,8 @@ let rec expr_to_typed_value
   | A.Darray (_, fields) -> darray_to_typed_value ns fields
   | A.Collection ((_, "vec"), _, fields) ->
      TV.Vec (List.map fields (value_afield_to_typed_value ns))
-  | A.ValCollection (`Vec, _, el)
-  | A.ValCollection (`Vector, _, el) ->
+  | A.ValCollection (A.Vec, _, el)
+  | A.ValCollection (A.Vector, _, el) ->
      let fields = List.map el ~f:(fun e -> Aast.AFvalue e) in
      TV.Vec (List.map fields (value_afield_to_typed_value ns))
   | A.Collection ((_, "keyset"), _, fields) ->
@@ -136,7 +136,7 @@ let rec expr_to_typed_value
       ~f:(fun l x -> TVL.add l (keyset_value_afield_to_typed_value ns x))
       ~init:TVL.empty in
     TV.Keyset (TVL.items l)
-  | A.ValCollection (`Keyset, _, el) ->
+  | A.ValCollection (A.Keyset, _, el) ->
     let fields = List.map el ~f:(fun e -> Aast.AFvalue e) in
     let l = List.fold_left fields
       ~f:(fun l x -> TVL.add l (keyset_value_afield_to_typed_value ns x))
@@ -152,9 +152,9 @@ let rec expr_to_typed_value
     in
     let d = update_duplicates_in_map values in
     TV.Dict d
-  | A.KeyValCollection (`Dict, _, fields)
-  | A.KeyValCollection (`Map, _, fields)
-  | A.KeyValCollection (`ImmMap, _, fields) ->
+  | A.KeyValCollection (A.Dict, _, fields)
+  | A.KeyValCollection (A.Map, _, fields)
+  | A.KeyValCollection (A.ImmMap, _, fields) ->
     let fields = List.map fields ~f:(fun (e1, e2) -> Aast.AFkvalue (e1, e2)) in
     let values =
       List.map fields ~f:(afield_to_typed_value_pair ~restrict_keys ns) in
@@ -167,8 +167,8 @@ let rec expr_to_typed_value
     let values = List.map fields ~f:(set_afield_to_typed_value_pair ns) in
     let d = update_duplicates_in_map values in
     TV.Dict d
-  | A.ValCollection (`Set, _, el)
-  | A.ValCollection (`ImmSet, _, el) ->
+  | A.ValCollection (A.Set, _, el)
+  | A.ValCollection (A.ImmSet, _, el) ->
     let fields = List.map el ~f:(fun e -> Aast.AFvalue e) in
     let values =
       List.map fields ~f:(set_afield_to_typed_value_pair ns)

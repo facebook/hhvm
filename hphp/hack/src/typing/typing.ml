@@ -1641,9 +1641,9 @@ and expr_
       let class_name = Nast.vc_kind_to_name kind in
       let subtype_val =
         match kind with
-        | `Set | `ImmSet | `Keyset ->
+        | Set | ImmSet | Keyset ->
           arraykey_value p class_name
-        | `Vector | `ImmVector | `Vec | `Pair ->
+        | Vector | ImmVector | Vec | Pair_ ->
           array_value in
 
       let env, tel, elem_ty =

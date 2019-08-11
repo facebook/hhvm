@@ -287,8 +287,8 @@ let enforce_mutable_constructor_call env ctor_fty el =
 let is_valid_rx_mutable_arg env e =
   match snd e with
   | New _
-  | KeyValCollection ((`Map | `ImmMap), _, _)
-  | ValCollection ((`Vector | `ImmVector | `Set | `ImmSet), _, _)
+  | KeyValCollection ((Map | ImmMap), _, _)
+  | ValCollection ((Vector | ImmVector | Set | ImmSet), _, _)
   | Pair _
   | Clone _
   | Xml _ ->

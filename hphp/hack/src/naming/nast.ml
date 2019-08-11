@@ -89,18 +89,18 @@ let is_kvc_kind name =
   name = SN.Collections.cDict
 
 let get_kvc_kind name = match name with
-  | x when x = SN.Collections.cMap -> `Map
-  | x when x = SN.Collections.cImmMap -> `ImmMap
-  | x when x = SN.Collections.cDict -> `Dict
+  | x when x = SN.Collections.cMap -> Map
+  | x when x = SN.Collections.cImmMap -> ImmMap
+  | x when x = SN.Collections.cDict -> Dict
   | _ -> begin
     Errors.internal_error Pos.none ("Invalid KeyValueCollection name: "^name);
-    `Map
+    Map
   end
 
 let kvc_kind_to_name kind = match kind with
-  | `Map -> SN.Collections.cMap
-  | `ImmMap -> SN.Collections.cImmMap
-  | `Dict -> SN.Collections.cDict
+  | Map -> SN.Collections.cMap
+  | ImmMap -> SN.Collections.cImmMap
+  | Dict -> SN.Collections.cDict
 
 let is_vc_kind name =
   name = SN.Collections.cVector ||
@@ -111,25 +111,25 @@ let is_vc_kind name =
   name = SN.Collections.cVec
 
 let get_vc_kind name = match name with
-  | x when x = SN.Collections.cVector -> `Vector
-  | x when x = SN.Collections.cImmVector -> `ImmVector
-  | x when x = SN.Collections.cVec -> `Vec
-  | x when x = SN.Collections.cSet -> `Set
-  | x when x = SN.Collections.cImmSet -> `ImmSet
-  | x when x = SN.Collections.cKeyset -> `Keyset
+  | x when x = SN.Collections.cVector -> Vector
+  | x when x = SN.Collections.cImmVector -> ImmVector
+  | x when x = SN.Collections.cVec -> Vec
+  | x when x = SN.Collections.cSet -> Set
+  | x when x = SN.Collections.cImmSet -> ImmSet
+  | x when x = SN.Collections.cKeyset -> Keyset
   | _ -> begin
     Errors.internal_error Pos.none ("Invalid ValueCollection name: "^name);
-    `Set
+    Set
   end
 
 let vc_kind_to_name kind = match kind with
-  | `Vector -> SN.Collections.cVector
-  | `ImmVector -> SN.Collections.cImmVector
-  | `Vec -> SN.Collections.cVec
-  | `Set -> SN.Collections.cSet
-  | `ImmSet -> SN.Collections.cImmSet
-  | `Keyset -> SN.Collections.cKeyset
-  | `Pair -> SN.Collections.cPair
+  | Vector -> SN.Collections.cVector
+  | ImmVector -> SN.Collections.cImmVector
+  | Vec -> SN.Collections.cVec
+  | Set -> SN.Collections.cSet
+  | ImmSet -> SN.Collections.cImmSet
+  | Keyset -> SN.Collections.cKeyset
+  | Pair_ -> SN.Collections.cPair
 
 (* XHP attribute helpers *)
 let map_xhp_attr (f: pstring -> pstring) (g: expr -> expr) = function

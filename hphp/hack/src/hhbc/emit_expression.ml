@@ -1577,33 +1577,26 @@ and emit_expr (env : Emit_env.t) (expr: Tast.expr) =
     emit_collection env varray_e es2
   | A.Collection ((pos, name), _, fields) ->
     emit_named_collection env expr pos name fields
-  | A.ValCollection (`Vector as name, _, el)
-  | A.ValCollection (`ImmVector as name, _, el)
-  | A.ValCollection (`Set as name, _, el)
-  | A.ValCollection (`ImmSet as name, _, el) ->
-    let name = match name with
-      | `Vector -> "Vector"
-      | `ImmVector -> "ImmVector"
-      | `Set -> "Set"
-      | `ImmSet -> "ImmSet" in
+  | A.ValCollection (name, _, el) ->
     let fields = List.map el ~f:(fun e -> A.AFvalue e) in
-    emit_named_collection env expr pos name fields
-  | A.ValCollection (_, _, el) ->
-    let fields = List.map el ~f:(fun e -> A.AFvalue e) in
-    emit_collection env expr fields
+    let emit n = emit_named_collection env expr pos n fields in
+    (match name with
+      | A.Vector -> emit "Vector"
+      | A.ImmVector -> emit "ImmVector"
+      | A.Set -> emit "Set"
+      | A.ImmSet -> emit "ImmSet"
+      | _ -> emit_collection env expr fields)
   | A.Pair (e1, e2) ->
     let fields = [A.AFvalue e1; A.AFvalue e2] in
     emit_named_collection env expr pos "Pair" fields
-  | A.KeyValCollection (`Map as name, _, fields)
-  | A.KeyValCollection (`ImmMap as name, _, fields) ->
+  | A.KeyValCollection (name, _, fields) ->
     let fields = List.map fields ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2)) in
-    let name = match name with
-      | `Map -> "Map"
-      | `ImmMap -> "ImmMap" in
-    emit_named_collection env expr pos name fields
-  | A.KeyValCollection (_, _, fields) ->
-    let fields = List.map fields ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2)) in
-    emit_collection env expr fields
+    let emit n = emit_named_collection env expr pos n fields in
+    (match name with
+      | A.Map -> emit "Map"
+      | A.ImmMap -> emit "ImmMap"
+      | _ -> emit_collection env expr fields
+    )
   | A.Clone e ->
     emit_pos_then pos @@ emit_clone env e
   | A.Shape fl ->
@@ -1807,19 +1800,19 @@ and emit_dynamic_collection env (expr : Tast.expr) es =
   let ((pos, _), expr_) = expr in
   let count = List.length es in
   match expr_ with
-  | A.ValCollection (`Vec, _, _)
+  | A.ValCollection (A.Vec, _, _)
   | A.Collection ((_, "vec"), _, _) ->
     emit_value_only_collection env pos es (fun n -> NewVecArray n)
-  | A.ValCollection (`Keyset, _, _)
+  | A.ValCollection (A.Keyset, _, _)
   | A.Collection ((_, "keyset"), _, _) ->
     emit_value_only_collection env pos es (fun n -> NewKeysetArray n)
-  | A.KeyValCollection (`Dict, _, _)
+  | A.KeyValCollection (A.Dict, _, _)
   | A.Collection ((_, "dict"), _, _) ->
      if is_struct_init env es true then
        emit_struct_array env pos es instr_newstructdict
      else
        emit_keyvalue_collection "dict" env pos es (NewDictArray count)
-  | A.ValCollection (`Set, _, _) ->
+  | A.ValCollection (A.Set, _, _) ->
      if is_struct_init env es true then
        gather [
            emit_struct_array env pos es instr_newstructdict;
@@ -1828,7 +1821,7 @@ and emit_dynamic_collection env (expr : Tast.expr) es =
          ]
      else
        emit_keyvalue_collection "Set" env pos es (NewDictArray count)
-  | A.ValCollection (`ImmSet, _, _) ->
+  | A.ValCollection (A.ImmSet, _, _) ->
      if is_struct_init env es true then
        gather [
            emit_struct_array env pos es instr_newstructdict;
@@ -1837,7 +1830,7 @@ and emit_dynamic_collection env (expr : Tast.expr) es =
          ]
      else
        emit_keyvalue_collection "ImmSet" env pos es (NewDictArray count)
-  | A.KeyValCollection (`Map, _, _) ->
+  | A.KeyValCollection (A.Map, _, _) ->
      if is_struct_init env es true then
        gather [
            emit_struct_array env pos es instr_newstructdict;
@@ -1846,7 +1839,7 @@ and emit_dynamic_collection env (expr : Tast.expr) es =
          ]
      else
        emit_keyvalue_collection "Map" env pos es (NewDictArray count)
-  | A.KeyValCollection (`ImmMap, _, _) ->
+  | A.KeyValCollection (A.ImmMap, _, _) ->
      if is_struct_init env es true then
        gather [
            emit_struct_array env pos es instr_newstructdict;

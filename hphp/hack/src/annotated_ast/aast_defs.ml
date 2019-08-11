@@ -147,20 +147,20 @@ and nast_shape_info = {
 }
 
 and kvc_kind =
-  ([ `Map
-   | `ImmMap
-   | `Dict
-   ][@visitors.opaque])
+  | Map
+  | ImmMap
+  | Dict
+[@@visitors.opaque]
 
 and vc_kind =
-  ([ `Vector
-   | `ImmVector
-   | `Vec
-   | `Set
-   | `ImmSet
-   | `Pair
-   | `Keyset
-   ][@visitors.opaque])
+  | Vector
+  | ImmVector
+  | Vec
+  | Set
+  | ImmSet
+  | Pair_
+  | Keyset
+[@@visitors.opaque]
 
 and visibility =
   | Private [@visitors.name "visibility_Private"]

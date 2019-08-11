@@ -6,7 +6,7 @@ edition = "2018"
 [lib]
 name = "parser_rust"
 path = "lib.rs"
-crate-type = ["lib", "staticlib"]
 
 [dependencies]
+deps_rust = { path = "../deps", package = "hack_deps" }
 ocaml = "^0.7"

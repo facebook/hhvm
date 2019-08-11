@@ -6,7 +6,6 @@ edition = "2018"
 [lib]
 name = "facts_rust"
 path = "lib.rs"
-crate-type = ["lib", "staticlib"]
 
 [dependencies]
 parser_rust = { path = "../parser", package = "hack_parser" }

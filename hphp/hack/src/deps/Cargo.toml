@@ -1,0 +1,8 @@
+[package]
+name = "hack_deps"
+version = "3.49.0"
+edition = "2018"
+
+[lib]
+name = "deps_rust"
+path = "lib.rs"

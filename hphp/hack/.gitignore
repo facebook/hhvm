@@ -1,3 +1,6 @@
+/.cargo_vendor/
+/facebook/cargo/.package-cache
+/facebook/cargo/registry/
 bin/
 src/inotify-1.0/
 src/_build/

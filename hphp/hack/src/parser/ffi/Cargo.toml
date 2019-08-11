@@ -5,6 +5,7 @@ edition = "2018"
 
 [dependencies]
 parser_rust = { path = "..", package = "hack_parser" }
+deps_rust = { path = "../../deps", package = "hack_deps" }
 libc = "^0.2.60"
 ocaml = "^0.7"
 

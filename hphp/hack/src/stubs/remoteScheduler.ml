@@ -18,4 +18,8 @@ type schedule_env = {
   workers: MultiWorker.worker list option;
 }
 
+let default_env ~bin_root ~root =
+  ignore (bin_root, root);
+  failwith "not implemented"
+
 let go _ = failwith "not implemented"

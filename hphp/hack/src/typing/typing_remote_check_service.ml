@@ -44,15 +44,16 @@ let go
   let t = Unix.gettimeofday() in
   let num_remote_workers = TypecheckerOptions.num_remote_workers opts in
   let open RemoteScheduler in
-  let errors = RemoteScheduler.go {
-    bin_root = Path.make (Filename.dirname Sys.argv.(0));
+  let default_env = default_env
+    ~bin_root:(Path.make (Filename.dirname Sys.argv.(0)))
+    ~root:(Path.make (Relative_path.path_of_prefix Relative_path.Root))
+  in
+  let errors = go { default_env with
     eden_threshold;
     files = Some fnl;
     naming_sqlite_path;
     naming_table;
     num_remote_workers;
-    root = Path.make (Relative_path.path_of_prefix Relative_path.Root);
-    timeout = 9999;
     workers;
   }
   in

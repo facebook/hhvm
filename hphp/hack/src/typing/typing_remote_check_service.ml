@@ -43,6 +43,7 @@ let go
     : Errors.t =
   let t = Unix.gettimeofday() in
   let num_remote_workers = TypecheckerOptions.num_remote_workers opts in
+  let version_specifier = TypecheckerOptions.remote_version_specifier opts in
   let open RemoteScheduler in
   let default_env = default_env
     ~bin_root:(Path.make (Filename.dirname Sys.argv.(0)))
@@ -54,6 +55,7 @@ let go
     naming_sqlite_path;
     naming_table;
     num_remote_workers;
+    version_specifier;
     workers;
   }
   in

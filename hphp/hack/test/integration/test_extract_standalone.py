@@ -88,6 +88,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
                     "\\with_enum_and_constant",
                     "\\with_traits",
                     "\\with_requiring_trait",
+                    "\\with_nontrivial_fun_decls",
                 ],
             )
         )

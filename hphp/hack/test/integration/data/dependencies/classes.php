@@ -26,12 +26,26 @@ class ImplementingBase extends AbstractBase {
 }
 
 final class Derived extends ImplementingBase {
-  public function overridden(): int {
-    return 0;
+  public function __construct(int $num) {
+    $this->result = $num;
   }
+
+  public function overridden(): int {
+    return $this->result;
+  }
+
+  private int $result;
 }
 
 function with_overriding(Derived $arg): int {
   $arg->inherited();
   return $arg->overridden();
+}
+
+function variadic(inout int $arg, int ...$args): void{}
+
+function with_nontrivial_fun_decls(): void {
+  $num = 17;
+  variadic(inout $num, 18, 19);
+  $d = new Derived($num);
 }

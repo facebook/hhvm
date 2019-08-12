@@ -49,3 +49,16 @@ function with_nontrivial_fun_decls(): void {
   variadic(inout $num, 18, 19);
   $d = new Derived($num);
 }
+
+class WithProperties {
+  public function __construct(int $arg) {
+    $this->first = $arg;
+  }
+
+  public int $first;
+  public int $second = 0;
+}
+
+function use_properties(WithProperties $arg): int {
+  return $arg->first + $arg->second;
+}

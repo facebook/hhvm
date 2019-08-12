@@ -1,3 +1,8 @@
+////toplevel.php
+<?hh
+function extract_standalone_make_default<T>(): T {
+  throw new Exception();
+}
 ////namespaces.php
 <?hh
 namespace Test1 {

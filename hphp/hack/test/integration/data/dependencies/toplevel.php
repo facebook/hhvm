@@ -39,3 +39,11 @@ function with_generics<Tfirst, Tsecond>(D<Tfirst, Tsecond> $d, E<Tfirst> $e): in
 function with_typedefs(Complex $c, shape('x' => int, 'y' => C) $pair) : Point {
   return shape('x' => $pair['x'], 'y' => $c['first']);
 }
+
+function with_defaults(int $arg = 42, float $argf = 4.2): void {
+}
+
+function call_defaulted(int $arg): void {
+  with_defaults($arg);
+  with_defaults();
+}

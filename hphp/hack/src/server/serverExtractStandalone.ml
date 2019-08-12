@@ -60,19 +60,31 @@ let list_items items = String.concat items ~sep:", "
 
 let tparam_name (tp: Typing_defs.decl Typing_defs.tparam) = snd tp.tp_name
 
+let function_make_default = "extract_standalone_make_default"
+
+let call_make_default tcopt typ =
+  Printf.sprintf "%s<%s>()" function_make_default (Typing_print.full_decl tcopt typ)
+
 let print_fun_args tcopt fun_type =
-  let print_arg ?is_variadic:(var=false) arg =
+  let with_default arg_idx = match fun_type.ft_arity with
+    | Fstandard(min, _) -> arg_idx >= min
+    | Fvariadic _ | Fellipsis _ -> false in
+  let print_arg ?is_variadic:(var=false) idx arg =
     let name = match arg.fp_name with
     | Some n -> n
     | None -> "" in
     let inout = if arg.fp_kind = FPinout then "inout " else "" in
     let typ = Typing_print.full_decl tcopt arg.fp_type in
+    let default = if (with_default idx)
+    then Printf.sprintf " = %s" (call_make_default tcopt arg.fp_type)
+    else "" in
     if var then Printf.sprintf "%s ...%s" typ name
-    else Printf.sprintf "%s%s %s" inout typ name in
-  let args = String.concat ~sep:", " @@ List.map fun_type.ft_params print_arg in
+    else Printf.sprintf "%s%s %s%s" inout typ name default in
+  let args = String.concat ~sep:", " @@ List.mapi fun_type.ft_params print_arg in
   let variadic = match fun_type.ft_arity with
     (* variadic argument comes last *)
-    | Fvariadic (_, arg) -> Printf.sprintf ", %s" @@ print_arg ~is_variadic:true arg
+    | Fvariadic (arity, arg) ->
+      Printf.sprintf ", %s" @@ print_arg ~is_variadic:true arity arg
     | Fstandard _ | Fellipsis _ -> "" in
   args ^ variadic
 
@@ -189,11 +201,8 @@ let get_method_declaration tcopt (meth: Typing_defs.class_elt) ~is_static method
   let rtype = match snd method_type.ft_ret with
   | Typing_defs.Tany -> ""
   | _ -> Printf.sprintf ": %s" (Typing_print.full_decl tcopt method_type.ft_ret) in
-  let body = if meth.ce_abstract then ";" else "{throw new Exception();}" in
-  Printf.sprintf "%s%s %sfunction %s(%s)%s%s" abstract visibility static method_name args rtype body
+  Printf.sprintf "%s%s %sfunction %s(%s)%s" abstract visibility static method_name args rtype
 
-(* TODO: properties have to be initialized. Therefore we need to retrieve the initializer
-expression (which is not part of class_elt) or the relevant part of the constructor *)
 let get_property_declaration tcopt (prop: Typing_defs.class_elt) ~is_static name =
   let visibility = Typing_utils.string_of_visibility prop.ce_visibility in
   let static = if is_static then "static " else "" in
@@ -243,16 +252,18 @@ let extract_field_declaration tcopt (cls: Decl_provider.class_decl)
   | Const(_, const_name) ->
     let cons = value_exn DependencyNotFound @@ Class.get_const cls const_name in
     get_class_const_declaration tcopt cons const_name
-  | Cstr _ -> let (cstr, _) = Class.construct cls in
-    (match cstr with
-    | None -> ""
-    | Some cstr -> get_method_declaration tcopt cstr ~is_static:false "__construct")
+  (* Constructor should've been tackled earlier *)
+  | Cstr _ -> raise UnexpectedDependency
   | Method(_, method_name) ->
     let m = value_exn DependencyNotFound @@ Class.get_method cls method_name in
-    get_method_declaration tcopt m ~is_static:false method_name
+    let decl = get_method_declaration tcopt m ~is_static:false method_name in
+    let body = if m.ce_abstract then ";" else "{throw new Exception();}" in
+    decl ^ body
   | SMethod(_, smethod_name) ->
     let m = value_exn DependencyNotFound @@ Class.get_smethod cls smethod_name in
-    get_method_declaration tcopt m ~is_static:true smethod_name
+    let decl = get_method_declaration tcopt m ~is_static:true smethod_name in
+    let body = if m.ce_abstract then ";" else "{throw new Exception();}" in
+    decl ^ body
   | Prop(_, prop_name) ->
     let p = value_exn DependencyNotFound @@ Class.get_prop cls prop_name in
     get_property_declaration tcopt p ~is_static:false prop_name
@@ -279,8 +290,29 @@ let construct_class_declaration tcopt cls fields =
   else
     let decl = get_class_declaration cls in
     let open Typing_deps.Dep in
+    let properties = HashSet.fold
+    (fun field acc -> match field with
+      | Prop(_, p) -> (value_exn DependencyNotFound @@ Decl_provider.Class.get_prop cls p, p)::acc
+      | SProp(_, sp) -> (value_exn DependencyNotFound @@ Decl_provider.Class.get_sprop cls sp, sp)::acc
+      | _ -> acc) fields [] in
+    (* If we depend on properties, we have to initialize them. We do not have access
+       to the original initialization expression and therefore init them in the constructor.
+       Thus we add a dependency on the constructor even if the extracted function
+       does not use it directly. *)
+    if not (List.is_empty properties) then HashSet.add fields (Cstr (Decl_provider.Class.name cls));
     let process_field f = match f with
     | AllMembers _ | Extends _ -> raise UnexpectedDependency
+    (* Constructor needs special treatment because we need information about properties *)
+    | Cstr _ -> let (cstr, _) = Decl_provider.Class.construct cls in
+      let properties = List.map properties (fun (p, name) ->
+        Printf.sprintf "$this->%s = %s;" name (call_make_default tcopt @@ Lazy.force p.ce_type)) in
+      (match cstr with
+      | None -> if List.is_empty properties then ""
+      else Printf.sprintf "public function __construct() {%s}" (String.concat ~sep:"\n" properties)
+      | Some cstr ->
+        let decl = get_method_declaration tcopt cstr ~is_static:false "__construct" in
+        let body = Printf.sprintf "{%s}" @@ String.concat ~sep:"\n" properties in
+        decl ^ body)
     | _ -> extract_field_declaration tcopt cls f in
     let body = HashSet.fold (fun f accum -> accum^"\n"^(process_field f)) fields "" in
     Printf.sprintf "%s\n%s}" decl body
@@ -479,7 +511,8 @@ let get_code (decl_names: string HashSet.t) declarations =
     List.append (Caml.Hashtbl.find_all declarations name) acc in
   let hh_prefix = "<?hh" in
   (* Toplevel code has to be in a separate file *)
-  let toplevel = HashSet.fold code_from_namespace_decls global_namespace.decls [] in
+  let helper = Printf.sprintf "function %s<T>(): T {throw new Exception();}" function_make_default in
+  let toplevel = HashSet.fold code_from_namespace_decls global_namespace.decls [helper] in
   let toplevel = format @@ String.concat ~sep:"\n" @@ hh_prefix :: toplevel in
   let rec code_from_namespace nspace_name nspace_content code =
     let code = "}\n"::code in

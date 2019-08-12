@@ -14,5 +14,8 @@ class A extends A0 implements I1 {
 }
 interface I1 {
 }
+function extract_standalone_make_default<T>(): T {
+  throw new Exception();
+}
 
 

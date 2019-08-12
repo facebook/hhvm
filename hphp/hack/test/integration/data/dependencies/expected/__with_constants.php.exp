@@ -1,0 +1,32 @@
+<?hh
+class WithConst {
+
+  const float CFLOAT = 0.0;
+  const \SomeEnum CENUM = \SomeEnum::SECOND;
+}
+function with_constants(): void {
+  $a = WithConst::CFLOAT;
+  $b = WithConst::CENUM;
+  $c = SHAPE;
+  $d = OPTION;
+  $e = ARR;
+  $f = AGE_RANGE;
+  $g = MAP_INDEX;
+}
+const array<string, int> ARR = [];
+const varray<string> MAP_INDEX = varray[];
+const shape('x' => int, 'y' => \SecondEnum) SHAPE =
+  shape('y' => \SecondEnum::SECOND, 'x' => 0);
+const darray<string, int> AGE_RANGE = darray[];
+const (int, ?(string, float)) OPTION = tuple(0, null);
+enum SomeEnum: int {
+  SECOND = 0;
+}
+enum SecondEnum: string {
+  SECOND = "";
+}
+function extract_standalone_make_default<T>(): T {
+  throw new Exception();
+}
+
+

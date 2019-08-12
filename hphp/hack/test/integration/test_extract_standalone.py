@@ -98,6 +98,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
                     "\\call_defaulted",
                     "\\use_properties",
                     "\\call_constructors",
+                    "\\with_constants",
                 ],
             )
         )

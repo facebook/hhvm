@@ -13,6 +13,7 @@ module SourceText = Full_fidelity_source_text
 module Syntax = Full_fidelity_positioned_syntax
 module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(Syntax)
 module SyntaxError = Full_fidelity_syntax_error
+module SN = Naming_special_names
 
 exception FunctionNotFound
 (* Internal error: for example, we are generating code for a dependency on an enum,
@@ -100,18 +101,10 @@ let get_function_declaration tcopt fun_name fun_type =
   let rtype = Typing_print.full_decl tcopt fun_type.ft_ret in
   Printf.sprintf "function %s%s(%s): %s" (strip_ns fun_name) tparams args rtype
 
-let extract_object_declaration tcopt obj =
-  let open Typing_deps.Dep in
-  let obj_string = to_string obj in
-  match obj with
-  | Fun f | FunName f ->
-    let fun_type = value_or_not_found obj_string @@ Decl_provider.get_fun f in
-    let declaration = get_function_declaration tcopt f fun_type in
-    declaration ^ "{throw new \\Exception();}"
-  | _ -> raise Unsupported
-
-let rec name_from_hint hint = match hint with
-  | (_, Aast.Happly((_, s), params)) -> if List.is_empty params then s
+let rec name_from_hint hint =
+  let open Aast in
+  match snd hint with
+  | Happly((_, s), params) -> if List.is_empty params then s
     else Printf.sprintf "%s<%s>" s (list_items @@ List.map params name_from_hint)
   | _ -> raise Unsupported
 
@@ -215,40 +208,83 @@ let get_property_declaration tcopt (prop: Typing_defs.class_elt) ~is_static name
   let prop_type = Typing_print.full_decl tcopt @@ Lazy.force prop.ce_type in
   Printf.sprintf "%s %s%s $%s;" visibility static prop_type name
 
-let bop_to_string = function
-  | Ast_defs.Plus -> "+"
-  | Ast_defs.Minus -> "-"
-  | Ast_defs.Star -> "*"
-  | _ -> raise Unsupported
+let get_init_for_prim = function
+  | Aast_defs.Tnull -> "null"
+  | Aast_defs.Tint | Aast_defs.Tnum  -> "0"
+  | Aast_defs.Tbool -> "false"
+  | Aast_defs.Tfloat -> "0.0"
+  | Aast_defs.Tstring | Aast_defs.Tarraykey -> "\"\""
+  | Aast_defs.Tvoid | Aast_defs.Tresource | Aast_defs.Tnoreturn -> raise Unsupported
 
-let unop_to_string = function
-  | Ast_defs.Unot -> "!"
-  | Ast_defs.Uplus -> "+"
-  | Ast_defs.Uminus -> "-"
-  | _ -> raise Unsupported
+let get_enum_value enum_name =
+  Hh_logger.log "getting enum value";
+  let enum = value_exn UnexpectedDependency @@ Decl_provider.get_class enum_name in
+  if Decl_provider.Class.kind enum <> Ast_defs.Cenum then raise Unsupported
+  else
+    let values = Decl_provider.Class.consts enum in
+    (* Pick one of the constants, defined in the enum *)
+    match Sequence.fold values
+      ~f:(fun acc (name, _) -> if name = "class" then acc else name :: acc) ~init:[] with
+    | [] -> raise UnexpectedDependency
+    | some_const::_ -> some_const
 
-let rec expr_to_string (expr:Nast.expr) =
-  let (_, expr) = expr in
-  match expr with
-  | Aast.Null -> "null"
-  | Aast.This -> "this"
-  | Aast.True -> "true"
-  | Aast.False -> "false"
-  | Aast.Int i -> i
-  | Aast.Float f -> f
-  | Aast.String s -> s
-  | Aast.Unop (op, expr) -> Printf.sprintf "(%s%s)" (unop_to_string op) (expr_to_string expr)
-  | Aast.Binop (op, expr1, expr2) ->
-    Printf.sprintf "(%s%s%s)" (expr_to_string expr1) (bop_to_string op) (expr_to_string expr2)
-  | _ -> raise Unsupported
+let get_init_from_type tcopt ty =
+  let open Typing_defs in
+  let rec get_ (_, ty) =
+    match ty with
+    | Tprim prim -> get_init_for_prim prim
+    | Toption _ -> "null"
+    | Tarray _ -> "[]"
+    | Tdarray _ -> "darray[]"
+    | Tvarray _ -> "varray[]"
+    | Ttuple elems -> Printf.sprintf "tuple(%s)" @@ list_items (List.map elems get_)
+    (* Must be an enum, a containter type or a typedef for another supported type since those are the only
+       cases we can have a constant value of some class *)
+    | Tapply ((_, name), targs) -> (match name with
+      | x when x = SN.Collections.cVec || x = SN.Collections.cKeyset || x = SN.Collections.cDict ->
+        Printf.sprintf "%s[]" (strip_ns name)
+      | x when x = SN.Classes.cClassname -> (match targs with
+        | [cls] -> Printf.sprintf "%s::class" (Typing_print.full_decl tcopt cls)
+        | _ -> raise Unsupported)
+      | _ -> if Option.is_some (Decl_provider.get_class name) then
+          Printf.sprintf "%s::%s" name (get_enum_value name)
+        else
+          let typedef = value_exn UnexpectedDependency @@ Decl_provider.get_typedef name in
+          get_ typedef.td_type)
+    | Tshape (kind, fields) ->
+      let print_shape_field name sft acc =
+        (* Omit all optional fields *)
+        if sft.sft_optional then acc
+        else
+          let name = match name with
+          | Ast_defs.SFlit_int(_, s) -> s
+          | Ast_defs.SFlit_str(_, s) -> Printf.sprintf "'%s'" s
+          | Ast_defs.SFclass_const((_, c), (_, s)) -> Printf.sprintf "%s::%s" c s in
+          Printf.sprintf "%s => %s" name (get_ sft.sft_ty) :: acc in
+      let open_shape = if kind = Open_shape then "..." else "" in
+      Printf.sprintf "shape(%s%s)"
+        (list_items @@ Nast.ShapeMap.fold print_shape_field fields []) open_shape;
+    | _ -> raise Unsupported in
+  get_ ty
 
-let get_class_const_declaration tcopt (cons: Typing_defs.class_const) name =
-  let abstract = if cons.cc_abstract then "abstract " else "" in
-  let typ = Typing_print.full_decl tcopt cons.cc_type in
-  let init = match cons.cc_expr with
-  | None -> ""
-  | Some expr -> " = " ^ expr_to_string expr in
-  Printf.sprintf "%sconst %s %s%s;" abstract typ name init
+let get_const_declaration tcopt ?abstract:(is_abstract=false) ty name =
+  let abstract = if is_abstract then "abstract " else "" in
+  let typ = Typing_print.full_decl tcopt ty in
+  let init = get_init_from_type tcopt ty in
+  Printf.sprintf "%sconst %s %s = %s;" abstract typ name init
+
+let extract_object_declaration tcopt obj =
+  let open Typing_deps.Dep in
+  match obj with
+  | Fun f | FunName f ->
+    let fun_type = value_exn (DependencyNotFound f) @@ Decl_provider.get_fun f in
+    let declaration = get_function_declaration tcopt f fun_type in
+    declaration ^ "{throw new \\Exception();}"
+  | GConst c | GConstName c ->
+    let (const_type, _) = value_exn (DependencyNotFound c) @@ Decl_provider.get_gconst c in
+    get_const_declaration tcopt const_type (strip_ns c)
+  (* No other global declarations *)
+  | _ -> raise UnexpectedDependency
 
 let extract_field_declaration tcopt (cls: Decl_provider.class_decl)
                               (field: Typing_deps.Dep.variant) =
@@ -258,8 +294,12 @@ let extract_field_declaration tcopt (cls: Decl_provider.class_decl)
   let description = to_string field in
   match field with
   | Const(_, const_name) ->
-    let cons = value_or_not_found description @@ Class.get_const cls const_name in
-    get_class_const_declaration tcopt cons const_name
+    if (Class.has_typeconst cls const_name) then
+      (* TODO: typeconst *)
+      raise Unsupported
+    else
+      let cons = value_or_not_found description @@ Class.get_const cls const_name in
+      get_const_declaration tcopt ~abstract:cons.cc_abstract cons.cc_type const_name
   (* Constructor should've been tackled earlier *)
   | Cstr _ -> raise UnexpectedDependency
   | Method(_, method_name) ->
@@ -281,13 +321,29 @@ let extract_field_declaration tcopt (cls: Decl_provider.class_decl)
   | _ -> ""
 
 let construct_enum tcopt enum fields =
+  let enum_name = (Decl_provider.Class.name enum) in
+  let enum_type = value_exn UnexpectedDependency @@ Decl_provider.Class.enum_type enum in
   let string_enum_const = function
-    | Typing_deps.Dep.Const(e, name) ->
-      let description = Typing_deps.Dep.to_string (Typing_deps.Dep.Const(e, name)) in
-      let enum_const = value_or_not_found description @@ Decl_provider.Class.get_const enum name in
-      Printf.sprintf "%s = %s;" name (expr_to_string @@ value_or_not_found "enum expression" enum_const.cc_expr)
+    | Typing_deps.Dep.Const(_, name) ->
+      (* Say we have an
+         enum MyEnum {
+           FIRST = 1;
+         }
+         To generate an initializer for FIRST, we should pass MyEnum's base type (int),
+         and not FIRST's type (MyEnum) *)
+      Printf.sprintf "%s = %s;" name (get_init_from_type tcopt enum_type.te_base)
     | _ -> raise UnexpectedDependency in
-  let enum_decl = get_enum_declaration tcopt enum in
+  let base = Typing_print.full_decl tcopt enum_type.te_base in
+  let cons = match enum_type.te_constraint with
+  | Some c -> " as " ^ (Typing_print.full_decl tcopt c)
+  | None -> "" in
+  let enum_decl = Printf.sprintf "enum %s: %s%s" (strip_ns enum_name) base cons in
+  (* Always try to generate a value: if the code contains a constant of this enum type,
+     this will be the value, assigned to that constant in the generated code *)
+  let _: unit = try
+    let special_init_constant = get_enum_value enum_name in
+    HashSet.add fields (Typing_deps.Dep.Const (enum_name, special_init_constant));
+  with UnexpectedDependency -> () in
   let constants = HashSet.fold (fun f acc -> (string_enum_const f) :: acc) fields [] in
   Printf.sprintf "%s {\n%s\n}" enum_decl (String.concat ~sep:"\n" constants)
 

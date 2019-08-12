@@ -4,10 +4,11 @@ function with_enum_and_constant(Mode $arg): int {
 }
 class GenericBase<Tfirst, Tsecond> {
 
-  const int GENERIC_CONSTANT = (-(1 + 2));
+  const int GENERIC_CONSTANT = 0;
 }
 enum Mode: int as int {
-  One = 1;
+  One = 0;
+  Two = 0;
 }
 function extract_standalone_make_default<T>(): T {
   throw new Exception();

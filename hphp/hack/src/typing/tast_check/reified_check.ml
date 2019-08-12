@@ -91,6 +91,11 @@ end
 let tparams_has_reified tparams =
   List.exists tparams ~f:(fun tparam -> tparam.tp_reified <> Nast.Erased)
 
+let check_explicit expr_pos tparams =
+  List.iter tparams ~f:(fun tparam ->
+    if Attributes.mem UA.uaExplicit tparam.tp_user_attributes
+    then Errors.require_generic_explicit tparam.tp_name expr_pos)
+
 let valid_newable_hint env tp (pos, hint) =
   match hint with
   | Aast.Happly ((p, h), _) ->
@@ -127,6 +132,15 @@ let verify_has_consistent_bound env (tparam: Tast.tparam) =
  * where Tf does not exist at runtime.
  *)
 let verify_targ_valid env tparam targ =
+  if Attributes.mem UA.uaExplicit tparam.tp_user_attributes
+  then
+    match targ with
+    | pos, Aast.Happly ((_, class_id), _targs)
+      when class_id = SN.Typehints.wildcard ->
+      Errors.require_generic_explicit tparam.tp_name pos
+    | _ -> ()
+  else ();
+
   (* There is some subtlety here. If a type *parameter* is declared reified,
    * even if it is soft, we require that the argument be concrete or reified, not soft
    * reified or erased *)
@@ -150,6 +164,7 @@ let verify_call_targs env expr_pos decl_pos tparams targs =
   if tparams_has_reified tparams &&
      List.is_empty targs then
     Errors.require_args_reify decl_pos expr_pos;
+  if List.is_empty targs then check_explicit expr_pos tparams;
   (* Unequal_lengths case handled elsewhere *)
   List.iter2 tparams targs ~f:begin fun tparam targ ->
     verify_targ_valid env tparam targ

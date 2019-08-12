@@ -142,6 +142,7 @@ module UserAttributes = struct
   let uaNonRx                    = "__NonRx"
   let uaNewable                  = "__Newable"
   let uaEnforceable              = "__Enforceable"
+  let uaExplicit                 = "__Explicit"
   let uaSoft                     = "__Soft"
   let uaWarn                     = "__Warn"
   let uaMockClass                = "__MockClass"
@@ -182,6 +183,7 @@ module UserAttributes = struct
       uaNonRx;
       uaNewable;
       uaEnforceable;
+      uaExplicit;
       uaSoft;
       uaWarn;
       uaMockClass;

@@ -570,6 +570,7 @@ val move_in_nonreactive_context : Pos.t -> unit
 val invalid_move_target : Pos.t -> Pos.t -> string -> unit
 val invalid_move_use : Pos.t -> unit
 val require_args_reify : Pos.t -> Pos.t -> unit
+val require_generic_explicit : Pos.t * string -> Pos.t -> unit
 val invalid_reified_argument : Pos.t * string -> Pos.t -> Pos.t -> string -> unit
 val invalid_reified_argument_reifiable : Pos.t * string -> Pos.t -> Pos.t -> string -> unit
 val new_static_class_reified : Pos.t -> unit

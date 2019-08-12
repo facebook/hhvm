@@ -2588,6 +2588,12 @@ let require_args_reify def_pos arg_pos =
     def_pos, "Definition is here"
   ]
 
+let require_generic_explicit (def_pos, def_name) arg_pos =
+  add_list (Typing.err_code Typing.RequireGenericExplicit) [
+    arg_pos, "Generic type parameter " ^ def_name ^ " must be specified explicitly";
+    def_pos, "Definition is here"
+  ]
+
 let invalid_reified_argument (def_pos, def_name) hint_pos arg_pos arg_kind =
   add_list (Typing.err_code Typing.InvalidReifiedArgument) [
     hint_pos, "Invalid reified hint";

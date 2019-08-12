@@ -290,7 +290,6 @@ let load config_filename options =
     ?tco_disallow_unset_on_varray:(bool_opt "disallow_unset_on_varray" config)
     ?tco_disallow_scrutinee_case_value_type_mismatch:
       (bool_opt "disallow_scrutinee_case_value_type_mismatch" config)
-    ?tco_disallow_stringish_magic:(bool_opt "disallow_stringish_magic" config)
     ?tco_new_inference_lambda:(bool_opt "new_inference_lambda" config)
     ?tco_timeout:(int_opt "timeout" config)
     ?tco_disallow_invalid_arraykey:(bool_opt "disallow_invalid_arraykey" config)

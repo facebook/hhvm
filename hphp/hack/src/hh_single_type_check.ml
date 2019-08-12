@@ -174,7 +174,6 @@ let parse_options () =
   let disallow_unset_on_varray = ref None in
   let auto_namespace_map = ref None in
   let unsafe_rx = ref (Some false) in
-  let disallow_stringish_magic = ref None in
   let log_inference_constraints = ref None in
   let new_inference_lambda = ref (Some false) in
   let timeout = ref None in
@@ -362,9 +361,6 @@ let parse_options () =
     "--mro",
         Arg.Unit (set_mode Linearization),
         " Grabs the linearization of all classes in a file.";
-    "--disallow-stringish-magic",
-        Arg.Unit (set_bool disallow_stringish_magic),
-        " Disallow using objects in contexts where strings are required.";
     "--log-inference-constraints",
         Arg.Unit (set_bool log_inference_constraints),
         " Log inference constraints to Scuba.";
@@ -500,7 +496,6 @@ let parse_options () =
     ?tco_dynamic_view:(!dynamic_view)
     ?tco_disallow_array_as_tuple:(not_ !allow_array_as_tuple)
     ?tco_disallow_unset_on_varray:(!disallow_unset_on_varray)
-    ?tco_disallow_stringish_magic:(!disallow_stringish_magic)
     ?tco_log_inference_constraints:(!log_inference_constraints)
     ?tco_new_inference_lambda:(!new_inference_lambda)
     ?tco_timeout:(!timeout)

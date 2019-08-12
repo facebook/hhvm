@@ -15,9 +15,6 @@ module Env = Tast_env
 module TCO = TypecheckerOptions
 module SN = Naming_special_names
 
-let should_enforce env =
-  TCO.disallow_stringish_magic (Env.get_tcopt env)
-
 (** Produce an error on (string) casts of objects. Currently it is allowed in HHVM to
     cast an object if it is Stringish (i.e., has a __toString() method), but all
     (string) casts of objects will be banned in the future. Eventually,
@@ -56,7 +53,7 @@ let handler = object
 
   method! at_expr env ((p, _), expr) =
     match expr with
-    | Cast ((_, Hprim Tstring), te) when should_enforce env ->
+    | Cast ((_, Hprim Tstring), te) ->
       let ((_, ty), _) = te in
       if not (is_stringish env ty)
       then Errors.string_cast p (Env.print_ty env ty)

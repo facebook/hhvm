@@ -40,7 +40,6 @@ type t = {
   tco_disallow_implicit_returns_in_non_void_functions : bool;
   tco_disallow_unset_on_varray: bool;
   tco_disallow_scrutinee_case_value_type_mismatch : bool;
-  tco_disallow_stringish_magic : bool;
   tco_new_inference_lambda : bool;
   tco_timeout : int;
   tco_disallow_invalid_arraykey : bool;
@@ -193,7 +192,6 @@ let default = {
   tco_disallow_implicit_returns_in_non_void_functions = true;
   tco_disallow_unset_on_varray = false;
   tco_disallow_scrutinee_case_value_type_mismatch = false;
-  tco_disallow_stringish_magic = false;
   tco_new_inference_lambda = false;
   tco_timeout = 0;
   tco_disallow_invalid_arraykey = false;
@@ -265,7 +263,6 @@ let make
   ?(tco_disallow_implicit_returns_in_non_void_functions = default.tco_disallow_implicit_returns_in_non_void_functions)
   ?(tco_disallow_unset_on_varray = default.tco_disallow_unset_on_varray)
   ?(tco_disallow_scrutinee_case_value_type_mismatch = default.tco_disallow_scrutinee_case_value_type_mismatch)
-  ?(tco_disallow_stringish_magic = default.tco_disallow_stringish_magic)
   ?(tco_new_inference_lambda = default.tco_new_inference_lambda)
   ?(tco_timeout = default.tco_timeout)
   ?(tco_disallow_invalid_arraykey = default.tco_disallow_invalid_arraykey)
@@ -339,7 +336,6 @@ let make
   tco_disallow_implicit_returns_in_non_void_functions;
   tco_disallow_unset_on_varray;
   tco_disallow_scrutinee_case_value_type_mismatch;
-  tco_disallow_stringish_magic;
   tco_new_inference_lambda;
   tco_timeout;
   tco_disallow_invalid_arraykey;
@@ -424,7 +420,6 @@ let tco_disallow_implicit_returns_in_non_void_functions t =
 let tco_disallow_unset_on_varray t = t.tco_disallow_unset_on_varray
 let tco_disallow_scrutinee_case_value_type_mismatch t =
   t.tco_disallow_scrutinee_case_value_type_mismatch
-let tco_disallow_stringish_magic t = t.tco_disallow_stringish_magic
 let tco_new_inference_lambda t = t.tco_new_inference_lambda
 let tco_timeout t = t.tco_timeout
 let tco_disallow_invalid_arraykey t = t.tco_disallow_invalid_arraykey

@@ -3,4 +3,4 @@ Invalid return type (Typing[4110])
 File "anon8.php", line 12, characters 18-37:
 Expected ~(function(): string) because it is an unenforceable type
 File "anon8.php", line 13, characters 8-43:
-But got (function(~?(bool | float | resource | arraykey | FormatString<[unresolved]> | HH\FormatString<[unresolved]> | Stringish) $y): string)
+But got (function(~?(bool | float | resource | arraykey | FormatString<[unresolved]> | HH\FormatString<[unresolved]>) $y): string)

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9a2c1fc76112111d5de98d63d39b7c50>>
+// @generated SignedSource<<c3a1200a9dc662e93b58a6782f5bd794>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -86,9 +86,9 @@ pub enum AbstractKind {
 
 #[derive(Clone, Debug)]
 pub enum DependentType {
-    This,
-    Cls(String),
-    Expr(ident::Ident),
+    DTthis,
+    DTcls(String),
+    DTexpr(ident::Ident),
 }
 
 #[derive(Clone, Debug)]

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<63b2199a8c44bef182139f93fef73168>>
+// @generated SignedSource<<d1a70c9d0ac9772c84b5a603da3d2bd5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -163,7 +163,7 @@ pub enum VcKind {
     Vec,
     Set,
     ImmSet,
-    Pair,
+    Pair_,
     Keyset,
 }
 

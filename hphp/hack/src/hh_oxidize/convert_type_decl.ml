@@ -92,15 +92,6 @@ let variant_constructor_declaration cd =
   let args = constructor_arguments cd.pcd_args in
   sprintf "%s%s,\n" name args
 
-let polymorphic_variant rf =
-  match rf with
-  | Rinherit _ ->
-    raise (Skip_type_decl "polymorphic variant inheritance is not supported")
-  | Rtag (name, _, _, tys) ->
-    let name = convert_type_name name.txt in
-    let args = tuple tys in
-    sprintf "%s%s,\n" name args
-
 let type_declaration name td =
   let derive_attr =
     derived_traits |> String.concat ~sep:", " |> sprintf "#[derive(%s)]"
@@ -140,9 +131,8 @@ let type_declaration name td =
        Other_module.foo. *)
     (match ty.ptyp_desc with
     (* Polymorphic variants. *)
-    | Ptyp_variant (row_fields, _, _) ->
-      let row_fields = map_and_concat row_fields polymorphic_variant in
-      sprintf "%s enum %s%s {\n%s}" attrs_and_vis name tparams row_fields
+    | Ptyp_variant _ ->
+      raise (Skip_type_decl "polymorphic variants not supported")
     (* In the case of `type t = prefix * string ;; type relative_path = t`, we
        have already defined a RelativePath type because we renamed t in the
        first declaration to the name of the module. We can just skip the second

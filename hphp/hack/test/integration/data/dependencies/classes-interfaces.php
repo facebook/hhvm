@@ -3,9 +3,13 @@
 
 interface BaseInterface {}
 
-interface DerivedInterface extends BaseInterface {}
+interface DerivedInterface extends BaseInterface {
+  public function routine(): void;
+}
 
-function with_interface(DerivedInterface $arg): void {}
+function with_interface(DerivedInterface $arg): void {
+  $arg->routine();
+}
 
 interface SimpleInterface {
   require extends AbstractBase;
@@ -17,6 +21,9 @@ trait RequiringTrait {
 }
 
 class Implementing extends AbstractBase implements DerivedInterface {
+  public function routine(): void {
+    $this->must_implement();
+  }
   protected function must_implement(): void {}
 }
 

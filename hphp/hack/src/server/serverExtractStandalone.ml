@@ -190,8 +190,9 @@ let get_class_declaration (cls: Decl_provider.class_decl) =
   (* TODO: traits, records *)
   Printf.sprintf "%s %s%s %s %s {%s%s%s" kind name tparams extends implements req_extends req_implements uses
 
-let get_method_declaration tcopt (meth: Typing_defs.class_elt) ~is_static method_name =
-  let abstract = if meth.ce_abstract then "abstract " else "" in
+let get_method_declaration tcopt (meth: Typing_defs.class_elt)
+  ?from_interface:(no_declare_abstract=false) ~is_static method_name =
+  let abstract = if (not meth.ce_abstract || no_declare_abstract) then "" else "abstract " in
   let visibility = Typing_utils.string_of_visibility meth.ce_visibility in
   let static = if is_static then "static " else "" in
   let method_type = match Lazy.force meth.ce_type with
@@ -248,6 +249,7 @@ let extract_field_declaration tcopt (cls: Decl_provider.class_decl)
                               (field: Typing_deps.Dep.variant) =
   let open Typing_deps.Dep in
   let open Decl_provider in
+  let from_interface = (Class.kind cls) = Ast_defs.Cinterface in
   match field with
   | Const(_, const_name) ->
     let cons = value_exn DependencyNotFound @@ Class.get_const cls const_name in
@@ -256,12 +258,12 @@ let extract_field_declaration tcopt (cls: Decl_provider.class_decl)
   | Cstr _ -> raise UnexpectedDependency
   | Method(_, method_name) ->
     let m = value_exn DependencyNotFound @@ Class.get_method cls method_name in
-    let decl = get_method_declaration tcopt m ~is_static:false method_name in
+    let decl = get_method_declaration tcopt m ~from_interface ~is_static:false method_name in
     let body = if m.ce_abstract then ";" else "{throw new Exception();}" in
     decl ^ body
   | SMethod(_, smethod_name) ->
     let m = value_exn DependencyNotFound @@ Class.get_smethod cls smethod_name in
-    let decl = get_method_declaration tcopt m ~is_static:true smethod_name in
+    let decl = get_method_declaration tcopt m ~from_interface ~is_static:true smethod_name in
     let body = if m.ce_abstract then ";" else "{throw new Exception();}" in
     decl ^ body
   | Prop(_, prop_name) ->

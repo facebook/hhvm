@@ -4,17 +4,20 @@ namespace Test1 {
   function f(int $x): \Test1\A {
     throw new \Exception();
   }
-  class A {}
+  class A {
+  }
   namespace NestedTest {
     function g(int $x): \Test1\NestedTest\A {
       throw new \Exception();
     }
-    class A extends UltraNested\B {}
+    class A extends UltraNested\B {
+    }
     namespace UltraNested {
       function noop(): void {
         throw new \Exception();
       }
-      class B {}
+      class B {
+      }
     }
 
   }

@@ -23,6 +23,8 @@ let value_exn ex opt = match opt with
 | Some s -> s
 | None -> raise ex
 
+let get_class_exn name = value_exn DependencyNotFound @@ Decl_provider.get_class name
+
 let get_filename func =
   let f = value_exn FunctionNotFound @@ Decl_provider.get_fun func  in
   Pos.filename f.ft_pos
@@ -79,18 +81,33 @@ let rec name_from_hint hint = match hint with
     else Printf.sprintf "%s<%s>" s (list_items @@ List.map params name_from_hint)
   | _ -> raise UnexpectedDependency
 
-let list_direct_ancestors cls =
+type ancestors = {
+  extends: string list;
+  implements: string list;
+  uses: string list;
+  req_extends: string list;
+  req_implements: string list;
+}
+
+let get_direct_ancestors cls =
   let cls_pos = Decl_provider.Class.pos cls in
   let cls_name = Decl_provider.Class.name cls in
   let filename = Pos.filename cls_pos in
-  let ast_class = value_exn DependencyNotFound @@ Ast_provider.find_class_in_file_nast filename cls_name in
+  let aast_class = value_exn DependencyNotFound @@ Ast_provider.find_class_in_file_nast filename cls_name in
   let get_namespaced_class_name hint = strip_ns_prefix cls_name @@ name_from_hint hint in
-  let list_types hints = list_items @@ List.map hints get_namespaced_class_name in
+  let get_names hints = List.map hints get_namespaced_class_name in
   let open Aast in
-  let extends = list_types ast_class.c_extends in
-  let implements = list_types ast_class.c_implements in
-  let prefix_if_nonempty prefix s = if s = "" then "" else prefix ^ s in
-  (prefix_if_nonempty "extends " extends) ^ (prefix_if_nonempty " implements " implements)
+  let (req_extends_hints, req_implements_hints) =
+    List.fold
+    ~f:(fun (acc_ext, acc_impl) (hint, ext) -> if ext then (hint::acc_ext, acc_impl) else (acc_ext, hint::acc_impl))
+    ~init:([], []) aast_class.c_reqs in
+  {
+    extends = get_names aast_class.c_extends;
+    implements = get_names aast_class.c_implements;
+    uses = get_names aast_class.c_uses;
+    req_extends = get_names req_extends_hints;
+    req_implements = get_names req_implements_hints;
+  }
 
 let print_error source_text error =
   let text = SyntaxError.to_positioned_string
@@ -132,8 +149,17 @@ let get_class_declaration (cls: Decl_provider.class_decl) =
   let name = strip_ns @@ Class.name cls in
   let tparams = if List.is_empty @@ Class.tparams cls then ""
   else Printf.sprintf "<%s>" (list_items @@ List.map (Class.tparams cls) tparam_name) in
+  let {extends; implements; uses; req_extends; req_implements} = get_direct_ancestors cls in
+  let prefix_if_nonempty prefix s = if s = "" then "" else prefix^s in
+  let extends = prefix_if_nonempty "extends " @@ list_items extends in
+  let implements = prefix_if_nonempty "implements " @@ list_items implements in
+  let uses = if (list_items uses) = "" then "" else Printf.sprintf "use %s;\n" (list_items uses) in
+  let req_extends = String.concat @@
+    List.map req_extends (fun s -> Printf.sprintf "require extends %s;\n" s) in
+  let req_implements = String.concat @@
+    List.map req_implements (fun s -> Printf.sprintf "require implements %s;\n" s) in
   (* TODO: traits, records *)
-  kind^" "^name^tparams^" "^(list_direct_ancestors cls)
+  Printf.sprintf "%s %s%s %s %s {%s%s%s" kind name tparams extends implements req_extends req_implements uses
 
 let get_method_declaration tcopt (meth: Typing_defs.class_elt) ~is_static method_name =
   let abstract = if meth.ce_abstract then "abstract " else "" in
@@ -225,17 +251,18 @@ let construct_enum tcopt enum fields =
   Printf.sprintf "%s {\n%s\n}" enum_decl (String.concat ~sep:"\n" constants)
 
 let construct_class_declaration tcopt cls fields =
-  let decl = get_class_declaration cls in
   (* Enum declaration have a very different format: for example, no 'const' keyword
      for values, which are actually just class constants *)
-  if Decl_provider.Class.kind cls = Ast_defs.Cenum then (construct_enum tcopt cls fields)
+  if Decl_provider.Class.kind cls = Ast_defs.Cenum then
+    (construct_enum tcopt cls fields)
   else
-  let open Typing_deps.Dep in
-  let process_field f = match f with
-  | AllMembers _ | Extends _ -> raise UnexpectedDependency
-  | _ -> extract_field_declaration tcopt cls f in
-  let body = HashSet.fold (fun f accum -> accum^"\n"^(process_field f)) fields "" in
-  decl^" {"^body^"}"
+    let decl = get_class_declaration cls in
+    let open Typing_deps.Dep in
+    let process_field f = match f with
+    | AllMembers _ | Extends _ -> raise UnexpectedDependency
+    | _ -> extract_field_declaration tcopt cls f in
+    let body = HashSet.fold (fun f accum -> accum^"\n"^(process_field f)) fields "" in
+    Printf.sprintf "%s\n%s}" decl body
 
 let construct_typedef_declaration tcopt t =
   let td = value_exn DependencyNotFound @@ Decl_provider.get_typedef t in
@@ -260,23 +287,23 @@ let get_signature_dependencies obj deps =
   let open Typing_deps.Dep in
   match obj with
   | Prop (cls, name) ->
-    let cls = value_exn DependencyNotFound @@ Decl_provider.get_class cls in
+    let cls = get_class_exn cls in
     let p = value_exn DependencyNotFound @@ Decl_provider.Class.get_prop cls name in
     add_dep deps @@ Lazy.force p.ce_type
   | SProp (cls, name) ->
-    let cls = value_exn DependencyNotFound @@ Decl_provider.get_class cls in
+    let cls = get_class_exn cls in
     let sp = value_exn DependencyNotFound @@ Decl_provider.Class.get_prop cls name in
     add_dep deps @@ Lazy.force sp.ce_type
   | Method (cls, name) ->
-    let cls = value_exn DependencyNotFound @@ Decl_provider.get_class cls in
+    let cls = get_class_exn cls in
     let m = value_exn DependencyNotFound @@ Decl_provider.Class.get_method cls name in
     add_dep deps @@ Lazy.force m.ce_type
   | SMethod (cls, name) ->
-    let cls = value_exn DependencyNotFound @@ Decl_provider.get_class cls in
+    let cls = get_class_exn cls in
     let sm = value_exn DependencyNotFound @@ Decl_provider.Class.get_smethod cls name in
     add_dep deps @@ Lazy.force sm.ce_type
   | Const (cls, name) ->
-    let cls = value_exn DependencyNotFound @@ Decl_provider.get_class cls in
+    let cls = get_class_exn cls in
     let c = value_exn DependencyNotFound @@ Decl_provider.Class.get_const cls name in
     add_dep deps c.cc_type
   | Cstr cls ->

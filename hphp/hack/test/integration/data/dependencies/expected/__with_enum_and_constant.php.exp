@@ -4,6 +4,7 @@ function with_enum_and_constant(Mode $arg): int {
   return $arg + Mode::One + GenericBase::GENERIC_CONSTANT;
 }
 class GenericBase<Tfirst, Tsecond> {
+
   const int GENERIC_CONSTANT = (-(1 + 2));
 }
 enum Mode: int as int {

@@ -418,9 +418,7 @@ let get_dependency_origin cls (dep: Typing_deps.Dep.variant) =
   | Const (_, name) ->
     let c = value_or_not_found description @@ Class.get_const cls name in
     c.cc_origin
-  | Cstr _ ->
-    let c = value_or_not_found description @@ fst @@ Class.construct cls in
-    c.ce_origin
+  | Cstr cls -> cls
   | _ -> raise UnexpectedDependency
 
 let collect_dependencies tcopt func =

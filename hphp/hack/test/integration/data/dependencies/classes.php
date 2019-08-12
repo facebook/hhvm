@@ -42,6 +42,11 @@ function with_overriding(Derived $arg): int {
   return $arg->overridden();
 }
 
+function call_constructors(): void {
+  $a = new ImplementingBase();
+  $b = new Derived(0);
+}
+
 function variadic(inout int $arg, int ...$args): void{}
 
 function with_nontrivial_fun_decls(): void {

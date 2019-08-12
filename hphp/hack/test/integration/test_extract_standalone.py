@@ -97,6 +97,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
                     "\\with_nontrivial_fun_decls",
                     "\\call_defaulted",
                     "\\use_properties",
+                    "\\call_constructors",
                 ],
             )
         )

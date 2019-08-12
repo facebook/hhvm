@@ -8,6 +8,7 @@ break-sequences = true
 break-string-literals = never
 cases-exp-indent = 2
 disambiguate-non-breaking-match = true
+exp-grouping = preserve
 field-space = tight-decl
 if-then-else = k-r
 indicate-nested-or-patterns = unsafe-no

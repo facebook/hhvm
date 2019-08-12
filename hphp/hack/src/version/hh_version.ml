@@ -21,9 +21,8 @@ let version : string =
   | None -> Build_id.build_revision ^ " " ^ Build_id.build_commit_time_string
 
 let version_json =
-  let open Hh_json in
-  JSON_Object [
-    "commit", JSON_String Build_id.build_revision;
-    "commit_time", int_ Build_id.build_commit_time;
-    "api_version", int_ api_version;
-  ]
+  Hh_json.(
+    JSON_Object
+      [ ("commit", JSON_String Build_id.build_revision);
+        ("commit_time", int_ Build_id.build_commit_time);
+        ("api_version", int_ api_version) ])

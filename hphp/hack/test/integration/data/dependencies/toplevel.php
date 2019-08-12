@@ -47,3 +47,5 @@ function call_defaulted(int $arg): void {
   with_defaults($arg);
   with_defaults();
 }
+
+function nonexistent_dependency(BogusType $arg): void {}

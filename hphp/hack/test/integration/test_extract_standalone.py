@@ -23,7 +23,24 @@ class ExtractStandaloneDriver(CommonTestDriver):
     def function_to_filename(func) -> str:
         return str.replace(func, "\\", "__")
 
-    def check_extract_standalone(self, function_to_extract: str) -> None:
+    def equals_to_expected(self, output: str, fname_expected: str) -> bool:
+        expected_file = os.path.join(
+            self.repo_dir, "expected/{}.php.exp".format(fname_expected)
+        )
+        with open(expected_file) as expected:
+            expected = expected.read().strip()
+            output = output.strip()
+            if output != expected:
+                print("Generated code is not equal to expected:", file=stderr)
+                print(
+                    "\n".join(ndiff(expected.splitlines(), output.splitlines())),
+                    file=stderr,
+                )
+            return output == expected
+
+    def check_extract_standalone(
+        self, function_to_extract: str, typecheck=True
+    ) -> None:
         generated_code, _, retcode = self.run_check(
             options=["--extract-standalone", function_to_extract]
         )
@@ -38,27 +55,16 @@ class ExtractStandaloneDriver(CommonTestDriver):
 
         extracted_file = os.path.join(self.repo_dir, "extracted.php.out")
         # Check if the generated code typechecks
-        with open(extracted_file, "w") as f:
-            print(generated_code, file=f, flush=True)
-        assert self.run_single_typecheck(extracted_file) == 0
+        if typecheck:
+            with open(extracted_file, "w") as f:
+                print(generated_code, file=f, flush=True)
+            assert self.run_single_typecheck(extracted_file) == 0
         # Check if the generated code is the same as expected
         expected_fname = self.function_to_filename(function_to_extract)
-        expected_file = os.path.join(
-            self.repo_dir, "expected/{}.php.exp".format(expected_fname)
-        )
-        with open(expected_file) as expected:
-            expected_code = expected.read()
-            expected_code = expected_code.strip()
-            generated_code = generated_code.strip()
-            if expected_code != generated_code:
-                print("Generated code is not equal to expected:", file=stderr)
-                print(
-                    "\n".join(
-                        ndiff(expected_code.splitlines(), generated_code.splitlines())
-                    ),
-                    file=stderr,
-                )
-            assert expected_code == generated_code
+        assert self.equals_to_expected(generated_code, expected_fname)
+
+    def check_failing(self, function_to_extract: str) -> None:
+        self.check_extract_standalone(function_to_extract, typecheck=False)
 
 
 class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
@@ -94,3 +100,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
                 ],
             )
         )
+
+    def test_failing(self) -> None:
+        self.test_driver.check_failing("\\nonexistent_function")
+        self.test_driver.check_failing("\\nonexistent_dependency")

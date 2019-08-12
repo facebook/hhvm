@@ -15,15 +15,19 @@ module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(Syntax)
 module SyntaxError = Full_fidelity_syntax_error
 
 exception FunctionNotFound
+(* Internal error: for example, we are generating code for a dependency on an enum,
+   but the passed dependency is not an enum *)
 exception UnexpectedDependency
-exception DependencyNotFound
+exception DependencyNotFound of string
 exception Unsupported
 
 let value_exn ex opt = match opt with
 | Some s -> s
 | None -> raise ex
 
-let get_class_exn name = value_exn DependencyNotFound @@ Decl_provider.get_class name
+let value_or_not_found err_msg opt = value_exn (DependencyNotFound err_msg) opt
+
+let get_class_exn name = value_or_not_found name @@ Decl_provider.get_class name
 
 let get_filename func =
   let f = value_exn FunctionNotFound @@ Decl_provider.get_fun func  in
@@ -98,17 +102,18 @@ let get_function_declaration tcopt fun_name fun_type =
 
 let extract_object_declaration tcopt obj =
   let open Typing_deps.Dep in
+  let obj_string = to_string obj in
   match obj with
   | Fun f | FunName f ->
-    let fun_type = value_exn DependencyNotFound @@ Decl_provider.get_fun f in
+    let fun_type = value_or_not_found obj_string @@ Decl_provider.get_fun f in
     let declaration = get_function_declaration tcopt f fun_type in
     declaration ^ "{throw new \\Exception();}"
-  | _ -> to_string obj
+  | _ -> raise Unsupported
 
 let rec name_from_hint hint = match hint with
   | (_, Aast.Happly((_, s), params)) -> if List.is_empty params then s
     else Printf.sprintf "%s<%s>" s (list_items @@ List.map params name_from_hint)
-  | _ -> raise UnexpectedDependency
+  | _ -> raise Unsupported
 
 type ancestors = {
   extends: string list;
@@ -122,7 +127,7 @@ let get_direct_ancestors cls =
   let cls_pos = Decl_provider.Class.pos cls in
   let cls_name = Decl_provider.Class.name cls in
   let filename = Pos.filename cls_pos in
-  let aast_class = value_exn DependencyNotFound @@ Ast_provider.find_class_in_file_nast filename cls_name in
+  let aast_class = value_or_not_found cls_name @@ Ast_provider.find_class_in_file_nast filename cls_name in
   let get_namespaced_class_name hint = strip_ns_prefix cls_name @@ name_from_hint hint in
   let get_names hints = List.map hints get_namespaced_class_name in
   let open Aast in
@@ -250,35 +255,37 @@ let extract_field_declaration tcopt (cls: Decl_provider.class_decl)
   let open Typing_deps.Dep in
   let open Decl_provider in
   let from_interface = (Class.kind cls) = Ast_defs.Cinterface in
+  let description = to_string field in
   match field with
   | Const(_, const_name) ->
-    let cons = value_exn DependencyNotFound @@ Class.get_const cls const_name in
+    let cons = value_or_not_found description @@ Class.get_const cls const_name in
     get_class_const_declaration tcopt cons const_name
   (* Constructor should've been tackled earlier *)
   | Cstr _ -> raise UnexpectedDependency
   | Method(_, method_name) ->
-    let m = value_exn DependencyNotFound @@ Class.get_method cls method_name in
+    let m = value_or_not_found description @@ Class.get_method cls method_name in
     let decl = get_method_declaration tcopt m ~from_interface ~is_static:false method_name in
     let body = if m.ce_abstract then ";" else "{throw new Exception();}" in
     decl ^ body
   | SMethod(_, smethod_name) ->
-    let m = value_exn DependencyNotFound @@ Class.get_smethod cls smethod_name in
+    let m = value_or_not_found description @@ Class.get_smethod cls smethod_name in
     let decl = get_method_declaration tcopt m ~from_interface ~is_static:true smethod_name in
     let body = if m.ce_abstract then ";" else "{throw new Exception();}" in
     decl ^ body
   | Prop(_, prop_name) ->
-    let p = value_exn DependencyNotFound @@ Class.get_prop cls prop_name in
+    let p = value_or_not_found description @@ Class.get_prop cls prop_name in
     get_property_declaration tcopt p ~is_static:false prop_name
   | SProp(_, sprop_name) ->
-    let sp = value_exn DependencyNotFound @@ Class.get_sprop cls sprop_name in
+    let sp = value_or_not_found description @@ Class.get_sprop cls sprop_name in
     get_property_declaration tcopt sp ~is_static:true (String.lstrip ~drop:(fun c -> c = '$') sprop_name)
   | _ -> ""
 
 let construct_enum tcopt enum fields =
   let string_enum_const = function
-    | Typing_deps.Dep.Const(_, name) ->
-      let enum_const = value_exn DependencyNotFound @@ Decl_provider.Class.get_const enum name in
-      Printf.sprintf "%s = %s;" name (expr_to_string @@ value_exn DependencyNotFound enum_const.cc_expr)
+    | Typing_deps.Dep.Const(e, name) ->
+      let description = Typing_deps.Dep.to_string (Typing_deps.Dep.Const(e, name)) in
+      let enum_const = value_or_not_found description @@ Decl_provider.Class.get_const enum name in
+      Printf.sprintf "%s = %s;" name (expr_to_string @@ value_or_not_found "enum expression" enum_const.cc_expr)
     | _ -> raise UnexpectedDependency in
   let enum_decl = get_enum_declaration tcopt enum in
   let constants = HashSet.fold (fun f acc -> (string_enum_const f) :: acc) fields [] in
@@ -293,9 +300,11 @@ let construct_class_declaration tcopt cls fields =
     let decl = get_class_declaration cls in
     let open Typing_deps.Dep in
     let properties = HashSet.fold
-    (fun field acc -> match field with
-      | Prop(_, p) -> (value_exn DependencyNotFound @@ Decl_provider.Class.get_prop cls p, p)::acc
-      | SProp(_, sp) -> (value_exn DependencyNotFound @@ Decl_provider.Class.get_sprop cls sp, sp)::acc
+    (fun field acc ->
+      let desc = to_string field in
+      match field with
+      | Prop(_, p) -> (value_or_not_found desc @@ Decl_provider.Class.get_prop cls p, p)::acc
+      | SProp(_, sp) -> (value_or_not_found desc @@ Decl_provider.Class.get_sprop cls sp, sp)::acc
       | _ -> acc) fields [] in
     (* If we depend on properties, we have to initialize them. We do not have access
        to the original initialization expression and therefore init them in the constructor.
@@ -320,7 +329,7 @@ let construct_class_declaration tcopt cls fields =
     Printf.sprintf "%s\n%s}" decl body
 
 let construct_typedef_declaration tcopt t =
-  let td = value_exn DependencyNotFound @@ Decl_provider.get_typedef t in
+  let td = value_or_not_found t @@ Decl_provider.get_typedef t in
   let typ = if td.td_vis = Aast_defs.Transparent then "type" else "newtype" in
   Printf.sprintf "%s %s = %s;" typ (strip_ns t) (Typing_print.full_decl tcopt td.td_type)
 
@@ -340,49 +349,50 @@ let add_dep deps ty : unit =
 
 let get_signature_dependencies obj deps =
   let open Typing_deps.Dep in
+  let description = to_string obj in
   match obj with
   | Prop (cls, name) ->
     let cls = get_class_exn cls in
-    let p = value_exn DependencyNotFound @@ Decl_provider.Class.get_prop cls name in
+    let p = value_or_not_found description @@ Decl_provider.Class.get_prop cls name in
     add_dep deps @@ Lazy.force p.ce_type
   | SProp (cls, name) ->
     let cls = get_class_exn cls in
-    let sp = value_exn DependencyNotFound @@ Decl_provider.Class.get_prop cls name in
+    let sp = value_or_not_found description @@ Decl_provider.Class.get_sprop cls name in
     add_dep deps @@ Lazy.force sp.ce_type
   | Method (cls, name) ->
     let cls = get_class_exn cls in
-    let m = value_exn DependencyNotFound @@ Decl_provider.Class.get_method cls name in
+    let m = value_or_not_found description @@ Decl_provider.Class.get_method cls name in
     add_dep deps @@ Lazy.force m.ce_type
   | SMethod (cls, name) ->
     let cls = get_class_exn cls in
-    let sm = value_exn DependencyNotFound @@ Decl_provider.Class.get_smethod cls name in
+    let sm = value_or_not_found description @@ Decl_provider.Class.get_smethod cls name in
     add_dep deps @@ Lazy.force sm.ce_type
   | Const (cls, name) ->
     let cls = get_class_exn cls in
-    let c = value_exn DependencyNotFound @@ Decl_provider.Class.get_const cls name in
+    let c = value_or_not_found description @@ Decl_provider.Class.get_const cls name in
     add_dep deps c.cc_type
   | Cstr cls ->
-    let cls = value_exn DependencyNotFound @@ Decl_provider.get_class cls in
+    let cls = value_or_not_found description @@ Decl_provider.get_class cls in
     (match Decl_provider.Class.construct cls with
     | (Some constr, _) -> add_dep deps @@ Lazy.force constr.ce_type
     | _ -> ())
   | Class cls ->
       (match Decl_provider.get_class cls with
       | None ->
-        let td = value_exn DependencyNotFound @@ Decl_provider.get_typedef cls in
+        let td = value_or_not_found description @@ Decl_provider.get_typedef cls in
         add_dep deps td.td_type
       | Some c ->
         Sequence.iter (Decl_provider.Class.all_ancestors c) (fun (_, ty) -> add_dep deps ty)
       )
   | Fun f | FunName f ->
-    let func = value_exn DependencyNotFound @@ Decl_provider.get_fun f in
+    let func = value_or_not_found description @@ Decl_provider.get_fun f in
     add_dep deps @@ (Typing_reason.Rnone, Tfun func)
   | GConst c | GConstName c ->
-    (let (ty, _) = value_exn DependencyNotFound @@ Decl_provider.get_gconst c in
+    (let (ty, _) = value_or_not_found description @@ Decl_provider.get_gconst c in
     add_dep deps ty)
   | AllMembers cls ->
     (* AllMembers is used for dependencies on enums, so we should depend on all constants *)
-    let cls = value_exn DependencyNotFound @@ Decl_provider.get_class cls in
+    let cls = value_or_not_found description @@ Decl_provider.get_class cls in
     Sequence.iter (Decl_provider.Class.consts cls) (fun (_, c) -> add_dep deps c.cc_type)
     (* We are extracting functions, they cannot Extend *)
   | Extends _ -> raise UnexpectedDependency
@@ -390,27 +400,28 @@ let get_signature_dependencies obj deps =
 let get_dependency_origin cls (dep: Typing_deps.Dep.variant) =
   let open Decl_provider in
   let open Typing_deps.Dep in
-  let cls = value_exn DependencyNotFound @@ get_class cls in
+  let description = to_string dep in
+  let cls = value_or_not_found description @@ get_class cls in
   match dep with
   | Prop (_, name) ->
-    let p = value_exn DependencyNotFound @@ Class.get_prop cls name in
+    let p = value_or_not_found description @@ Class.get_prop cls name in
     p.ce_origin
   | SProp (_, name) ->
-    let sp = value_exn DependencyNotFound @@ Class.get_sprop cls name in
+    let sp = value_or_not_found description @@ Class.get_sprop cls name in
     sp.ce_origin
   | Method (_, name) ->
-    let m = value_exn DependencyNotFound @@ Class.get_method cls name in
+    let m = value_or_not_found description @@ Class.get_method cls name in
     m.ce_origin
   | SMethod (_, name) ->
-    let sm = value_exn DependencyNotFound @@ Class.get_smethod cls name in
+    let sm = value_or_not_found description @@ Class.get_smethod cls name in
     sm.ce_origin
   | Const (_, name) ->
-    let c = value_exn DependencyNotFound @@ Class.get_const cls name in
+    let c = value_or_not_found description @@ Class.get_const cls name in
     c.cc_origin
   | Cstr _ ->
-    let c = value_exn DependencyNotFound @@ fst @@ Class.construct cls in
+    let c = value_or_not_found description @@ fst @@ Class.construct cls in
     c.ce_origin
-  | _ -> assert false
+  | _ -> raise UnexpectedDependency
 
 let collect_dependencies tcopt func =
   let dependencies = HashSet.create 0 in
@@ -455,8 +466,9 @@ let collect_dependencies tcopt func =
       | Some set -> HashSet.add set obj
       | None -> let set = HashSet.create 0 in HashSet.add set obj;
                 Caml.Hashtbl.add types cls set)
+    (* We already added the members when adding signature dependencies, omit it from generation *)
+    | AllMembers _ -> ()
     | Extends _ -> raise UnexpectedDependency
-    | AllMembers _ -> raise UnexpectedDependency
     | _ -> HashSet.add globals obj in
   HashSet.iter group_by_type dependencies;
   (types, globals)
@@ -546,4 +558,7 @@ let go tcopt function_name =
     Caml.Hashtbl.add declarations function_name function_text;
     HashSet.add decl_names function_name;
     get_code decl_names declarations
-  with FunctionNotFound -> "Function not found!"
+  with
+  | FunctionNotFound -> "Function not found!"
+  | DependencyNotFound d -> Printf.sprintf "Dependency not found: %s" d
+  | Unsupported | UnexpectedDependency -> Printexc.get_backtrace ()

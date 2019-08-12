@@ -11,6 +11,8 @@ open Printf
 open Reordered_argument_collections
 open Utils
 
+type env = { rustfmt: string }
+
 let header =
   "// Copyright (c) Facebook, Inc. and its affiliates.
 //
@@ -56,10 +58,10 @@ let write filename contents =
   fprintf oc "%s%!" contents;
   Out_channel.close oc
 
-let write_format_and_sign filename contents =
+let write_format_and_sign env filename contents =
   log "Writing %s" filename;
   write filename contents;
-  if Sys.command (sprintf "rustfmt %S" filename) <> 0 then
+  if Sys.command (sprintf "%S %S" env.rustfmt filename) <> 0 then
     failwith ("Could not format Rust output in " ^ filename);
   let contents = read filename in
   let contents =
@@ -67,7 +69,7 @@ let write_format_and_sign filename contents =
   in
   write filename contents
 
-let convert_files out_dir files regen_command =
+let convert_files env out_dir files regen_command =
   ignore (Sys.command (sprintf "rm %S/*.rs" out_dir));
   let header =
     match regen_command with
@@ -81,7 +83,7 @@ let convert_files out_dir files regen_command =
     |> SMap.iter ~f:(fun name src ->
            let src = sprintf "%s\n\n%s" header src in
            let out_filename = Filename.concat out_dir (name ^ ".rs") in
-           write_format_and_sign out_filename src)
+           write_format_and_sign env out_filename src)
   in
   let manifest_filename = Filename.concat out_dir "mod.rs" in
   let module_names = SMap.ordered_keys modules in
@@ -89,15 +91,15 @@ let convert_files out_dir files regen_command =
     map_and_concat module_names ~f:(sprintf "pub mod %s;") ~sep:"\n"
   in
   let manifest = header ^ "\n\n" ^ manifest_mods in
-  write_format_and_sign manifest_filename manifest
+  write_format_and_sign env manifest_filename manifest
 
-let convert_single_file filename =
+let convert_single_file env filename =
   with_tempfile
   @@ fun out_filename ->
   let (module_name, oxidized_module) = oxidize filename in
   let modules = SMap.of_list [(module_name, oxidized_module)] in
   let src = Stringify.stringify modules oxidized_module in
-  write_format_and_sign out_filename src;
+  write_format_and_sign env out_filename src;
   printf "%s" (read out_filename)
 
 let usage =
@@ -112,9 +114,15 @@ type mode =
       regen_command: string option;
     }
 
+type options = {
+  mode: mode;
+  rustfmt_path: string;
+}
+
 let parse_args () =
   let out_dir = ref None in
   let regen_command = ref None in
+  let rustfmt_path = ref None in
   let files = ref [] in
   let options =
     [ ( "--out-dir",
@@ -122,9 +130,13 @@ let parse_args () =
         " Output directory for conversion of multiple files" );
       ( "--regen-command",
         Arg.String (fun s -> regen_command := Some s),
-        " Include this command in file headers" ) ]
+        " Include this command in file headers" );
+      ( "--rustfmt-path",
+        Arg.String (fun s -> rustfmt_path := Some s),
+        " Path to rustfmt binary used to format output" ) ]
   in
   Arg.parse options (fun file -> files := file :: !files) usage;
+  let rustfmt_path = Option.value !rustfmt_path ~default:"rustfmt" in
   match !files with
   | [] ->
     eprintf "%s\n" usage;
@@ -134,7 +146,7 @@ let parse_args () =
       failwith "Cannot set output directory in single-file mode";
     if Option.is_some !regen_command then
       failwith "Cannot set regen command in single-file mode";
-    File file
+    { mode = File file; rustfmt_path }
   | files ->
     let out_dir =
       match !out_dir with
@@ -143,10 +155,12 @@ let parse_args () =
         failwith "Cannot convert multiple files without output directory"
     in
     let regen_command = !regen_command in
-    Files { out_dir; files; regen_command }
+    { mode = Files { out_dir; files; regen_command }; rustfmt_path }
 
 let () =
-  match parse_args () with
-  | File file -> convert_single_file file
+  let { mode; rustfmt_path } = parse_args () in
+  let env = { rustfmt = rustfmt_path } in
+  match mode with
+  | File file -> convert_single_file env file
   | Files { out_dir; files; regen_command } ->
-    convert_files out_dir files regen_command
+    convert_files env out_dir files regen_command

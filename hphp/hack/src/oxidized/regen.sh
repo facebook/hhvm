@@ -10,9 +10,13 @@ set -x # echo every statement in the script
 cd "$( dirname "${BASH_SOURCE[0]}" )/../../../.." >/dev/null
 REGEN_COMMAND="$(realpath --relative-to=. "${BASH_SOURCE[0]}")"
 
+# rustfmt is committed at fbsource/tools/third-party/rustfmt/rustfmt
+RUSTFMT_PATH="$(realpath ../tools/third-party/rustfmt/rustfmt)"
+
 buck run hphp/hack/src/hh_oxidize --                                          \
   --out-dir hphp/hack/src/oxidized/gen                                        \
   --regen-command "$REGEN_COMMAND"                                            \
+  --rustfmt-path "$RUSTFMT_PATH"                                              \
   hphp/hack/src/annotated_ast/aast_defs.ml                                    \
   hphp/hack/src/annotated_ast/aast.ml                                         \
   hphp/hack/src/ast/ast_defs.ml                                               \

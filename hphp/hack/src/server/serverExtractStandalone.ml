@@ -106,7 +106,11 @@ let rec name_from_hint hint =
   match snd hint with
   | Happly((_, s), params) -> if List.is_empty params then s
     else Printf.sprintf "%s<%s>" s (list_items @@ List.map params name_from_hint)
-  | _ -> raise Unsupported
+  | Haccess(cls, tconsts) ->
+    (* TODO: add dependencies on these? *)
+    Printf.sprintf "%s::%s" (name_from_hint cls) (String.concat ~sep:"::" (List.map tconsts snd))
+  | Htuple els -> Printf.sprintf "(%s)" (String.concat ~sep:", " @@ List.map els name_from_hint)
+  | _ -> raise UnexpectedDependency
 
 type ancestors = {
   extends: string list;

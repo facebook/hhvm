@@ -273,9 +273,6 @@ type t = {
   (* Split 4110 into a variety of more specific errors *)
   use_new_type_errors : bool;
 
-  (* Disable ${x} syntax for string interpolation in Hack and only allow {$x} *)
-  po_disable_outside_dollar_str_interp : bool;
-
   (* Force 5000s to be @lint-ignored rather than fixme'd *)
   disable_linter_fixmes : bool;
 
@@ -364,7 +361,6 @@ val make :
   ?po_disable_legacy_soft_typehints: bool ->
   ?tco_use_lru_workers : bool ->
   ?use_new_type_errors : bool ->
-  ?po_disable_outside_dollar_str_interp: bool ->
   ?disable_linter_fixmes : bool ->
   ?po_disallowed_decl_fixmes: ISet.t ->
   ?po_allow_new_attribute_syntax : bool ->
@@ -451,7 +447,6 @@ val po_enable_class_level_where_clauses : t -> bool
 val po_disable_legacy_soft_typehints : t -> bool
 val tco_use_lru_workers : t -> bool
 val use_new_type_errors : t -> bool
-val po_disable_outside_dollar_str_interp : t -> bool
 val disable_linter_fixmes : t -> bool
 val po_disallowed_decl_fixmes : t -> ISet.t
 val po_allow_new_attribute_syntax : t -> bool

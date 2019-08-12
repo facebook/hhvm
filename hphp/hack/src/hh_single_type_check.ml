@@ -200,7 +200,6 @@ let parse_options () =
   let enable_constant_visibility_modifiers = ref false in
   let disable_legacy_soft_typehints = ref false in
   let use_new_type_errors = ref false in
-  let disable_outside_dollar_str_interp = ref true in
   let disable_linter_fixmes = ref false in
   let allow_new_attribute_syntax = ref false in
   let allow_toplevel_requires = ref false in
@@ -445,9 +444,6 @@ let parse_options () =
     "--use-new-type-errors",
       Arg.Set use_new_type_errors,
       "Splits off some categories of type errors into new error codes";
-    "--disable-outside-dollar-str-interp",
-      Arg.Set disable_outside_dollar_str_interp,
-      "Disables ${x} syntax for string interpolation (use {$x} instead)";
     "--disable-linter-fixmes",
       Arg.Set disable_linter_fixmes,
       "Disables HH_FIXME and HH_IGNORE_ERROR for 5000-5999 error codes";
@@ -518,7 +514,6 @@ let parse_options () =
     ~po_enable_constant_visibility_modifiers:!enable_constant_visibility_modifiers
     ~po_disable_legacy_soft_typehints:!disable_legacy_soft_typehints
     ~use_new_type_errors:!use_new_type_errors
-    ~po_disable_outside_dollar_str_interp:!disable_outside_dollar_str_interp
     ~disable_linter_fixmes:!disable_linter_fixmes
     ~po_allow_new_attribute_syntax:!allow_new_attribute_syntax
     ~po_disallow_toplevel_requires:(not !allow_toplevel_requires)

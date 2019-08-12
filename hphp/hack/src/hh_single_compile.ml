@@ -462,7 +462,6 @@ let make_popt () =
     ~enable_class_level_where_clauses:(enable_class_level_where_clauses co)
     ~rust:(use_rust_parser co)
     ~disable_legacy_soft_typehints:(disable_legacy_soft_typehints co)
-    ~disable_outside_dollar_str_interp:(disable_outside_dollar_str_interp co)
     ~allow_new_attribute_syntax:(allow_new_attribute_syntax co)
     ~disable_legacy_attribute_syntax:(disable_legacy_attribute_syntax co)
     ~const_default_func_args:(const_default_func_args co)

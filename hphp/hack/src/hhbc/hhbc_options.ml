@@ -60,7 +60,6 @@ type t = {
   option_enable_constant_visibility_modifiers : bool;
   option_enable_class_level_where_clauses : bool;
   option_disable_legacy_soft_typehints    : bool;
-  option_disable_outside_dollar_str_interp : bool;
   option_allow_new_attribute_syntax       : bool;
   option_disable_legacy_attribute_syntax  : bool;
   option_const_default_func_args          : bool;
@@ -118,7 +117,6 @@ let default = {
   option_enable_class_level_where_clauses = false;
   option_disable_legacy_soft_typehints = false;
   option_allow_new_attribute_syntax = false;
-  option_disable_outside_dollar_str_interp = true;
   option_disable_legacy_attribute_syntax = false;
   option_const_default_func_args = false;
 }
@@ -171,7 +169,6 @@ let use_rust_parser o = o.option_use_rust_parser
 let enable_constant_visibility_modifiers o = o.option_enable_constant_visibility_modifiers
 let enable_class_level_where_clauses o = o.option_enable_class_level_where_clauses
 let disable_legacy_soft_typehints o = o.option_disable_legacy_soft_typehints
-let disable_outside_dollar_str_interp o = o.option_disable_outside_dollar_str_interp
 let allow_new_attribute_syntax o = o.option_allow_new_attribute_syntax
 let disable_legacy_attribute_syntax o = o.option_disable_legacy_attribute_syntax
 let const_default_func_args o = o.option_const_default_func_args
@@ -229,7 +226,6 @@ let to_string o =
     ; Printf.sprintf "enable_constant_visibility_modifiers: %B" @@ enable_constant_visibility_modifiers o
     ; Printf.sprintf "enable_class_level_where_clauses: %B" @@ enable_class_level_where_clauses o
     ; Printf.sprintf "disable_legacy_soft_typehints: %B" @@ disable_legacy_soft_typehints o
-    ; Printf.sprintf "disable_outside_dollar_str_interp: %B" @@ disable_outside_dollar_str_interp o
     ; Printf.sprintf "allow_new_attribute_syntax: %B" @@ allow_new_attribute_syntax o
     ; Printf.sprintf "disable_legacy_attribute_syntax: %B" @@ disable_legacy_attribute_syntax o
     ; Printf.sprintf "const_default_func_args: %B" @@ const_default_func_args o
@@ -344,8 +340,6 @@ let set_option options name value =
     { options with option_enable_class_level_where_clauses = as_bool value }
   | "hhvm.lang.disable_legacy_soft_typehints" ->
     { options with option_disable_legacy_soft_typehints = as_bool value }
-  | "hhvm.lang.disable_outside_dollar_str_interp" ->
-    { options with option_disable_outside_dollar_str_interp = as_bool value }
   | "hhvm.lang.allow_new_attribute_syntax" ->
     { options with option_allow_new_attribute_syntax = as_bool value }
   | "hhvm.lang.disable_legacy_attribute_syntax" ->
@@ -504,8 +498,6 @@ let value_setters = [
      fun opts v -> { opts with option_enable_class_level_where_clauses = (v = 1) });
   (set_value "hhvm.hack.lang.disable_legacy_soft_typehints" get_value_from_config_int @@
      fun opts v -> { opts with option_disable_legacy_soft_typehints = (v = 1) });
-  (set_value "hhvm.hack.lang.disable_outside_dollar_str_interp" get_value_from_config_int @@
-     fun opts v -> { opts with option_disable_outside_dollar_str_interp = (v = 1) });
   (set_value "hhvm.hack.lang.allow_new_attribute_syntax" get_value_from_config_int @@
      fun opts v -> { opts with option_allow_new_attribute_syntax = (v = 1) });
   (set_value "hhvm.hack.lang.disable_legacy_attribute_syntax" get_value_from_config_int @@

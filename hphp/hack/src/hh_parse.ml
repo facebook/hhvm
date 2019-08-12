@@ -69,7 +69,6 @@ module FullFidelityParseArgs = struct
     enable_constant_visibility_modifiers: bool;
     enable_class_level_where_clauses : bool;
     disable_legacy_soft_typehints : bool;
-    disable_outside_dollar_str_interp : bool;
     allow_new_attribute_syntax : bool;
     disable_legacy_attribute_syntax : bool;
   }
@@ -104,7 +103,6 @@ module FullFidelityParseArgs = struct
     enable_constant_visibility_modifiers
     enable_class_level_where_clauses
     disable_legacy_soft_typehints
-    disable_outside_dollar_str_interp
     allow_new_attribute_syntax
     disable_legacy_attribute_syntax
     = {
@@ -137,7 +135,6 @@ module FullFidelityParseArgs = struct
     enable_constant_visibility_modifiers;
     enable_class_level_where_clauses;
     disable_legacy_soft_typehints;
-    disable_outside_dollar_str_interp;
     allow_new_attribute_syntax;
     disable_legacy_attribute_syntax;
   }
@@ -189,7 +186,6 @@ module FullFidelityParseArgs = struct
     let enable_class_level_where_clauses = ref false in
     let disable_legacy_soft_typehints = ref false in
     let allow_new_attribute_syntax = ref false in
-    let disable_outside_dollar_str_interp = ref true in
     let disable_legacy_attribute_syntax = ref false in
     let options =  [
       (* modes *)
@@ -309,9 +305,6 @@ No errors are filtered out.";
       "--disable-legacy-soft-typehints",
         Arg.Set disable_legacy_soft_typehints,
         "Disables the legacy @ syntax for soft typehints (use __Soft instead)";
-      "--disable-outside-dollar-str-interp",
-        Arg.Set disable_outside_dollar_str_interp,
-        "Disables ${x} syntax for string interpolation (use {$x} instead)";
       "--allow-new-attribute-syntax",
         Arg.Set allow_new_attribute_syntax,
         "Allow the new @ attribute syntax (disables legacy soft typehints)";
@@ -363,7 +356,6 @@ No errors are filtered out.";
       !enable_constant_visibility_modifiers
       !enable_class_level_where_clauses
       !disable_legacy_soft_typehints
-      !disable_outside_dollar_str_interp
       !allow_new_attribute_syntax
       !disable_legacy_attribute_syntax
 end
@@ -390,8 +382,6 @@ let handle_existing_file args filename =
   in
   let popt = ParserOptions.with_disable_legacy_soft_typehints popt
     args.disable_legacy_soft_typehints in
-  let popt = ParserOptions.with_disable_outside_dollar_str_interp popt
-    args.disable_outside_dollar_str_interp in
   let popt = ParserOptions.with_allow_new_attribute_syntax popt args.allow_new_attribute_syntax in
   let popt = ParserOptions.with_disable_legacy_attribute_syntax popt
     args.disable_legacy_attribute_syntax in

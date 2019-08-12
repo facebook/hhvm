@@ -67,7 +67,6 @@ type t = {
   po_disable_legacy_soft_typehints : bool;
   tco_use_lru_workers: bool;
   use_new_type_errors: bool;
-  po_disable_outside_dollar_str_interp : bool;
   disable_linter_fixmes: bool;
   po_disallowed_decl_fixmes: ISet.t;
   po_allow_new_attribute_syntax : bool;
@@ -219,7 +218,6 @@ let default = {
   po_disable_legacy_soft_typehints = false;
   tco_use_lru_workers = true;
   use_new_type_errors = false;
-  po_disable_outside_dollar_str_interp = true;
   disable_linter_fixmes = false;
   po_disallowed_decl_fixmes = ISet.of_list [];
   po_allow_new_attribute_syntax = false;
@@ -290,7 +288,6 @@ let make
   ?(po_disable_legacy_soft_typehints = default.po_disable_legacy_soft_typehints)
   ?(tco_use_lru_workers = default.tco_use_lru_workers)
   ?(use_new_type_errors = default.use_new_type_errors)
-  ?(po_disable_outside_dollar_str_interp = default.po_disable_outside_dollar_str_interp)
   ?(disable_linter_fixmes = default.disable_linter_fixmes)
   ?(po_disallowed_decl_fixmes = default.po_disallowed_decl_fixmes)
   ?(po_allow_new_attribute_syntax = default.po_allow_new_attribute_syntax)
@@ -361,7 +358,6 @@ let make
   po_disable_legacy_soft_typehints;
   tco_use_lru_workers;
   use_new_type_errors;
-  po_disable_outside_dollar_str_interp;
   disable_linter_fixmes;
   po_disallowed_decl_fixmes;
   po_allow_new_attribute_syntax;
@@ -455,8 +451,6 @@ let po_disable_legacy_soft_typehints t = t.po_disable_legacy_soft_typehints
 let tco_use_lru_workers t = t.tco_use_lru_workers
 
 let use_new_type_errors t = t.use_new_type_errors
-
-let po_disable_outside_dollar_str_interp t = t.po_disable_outside_dollar_str_interp
 
 let disable_linter_fixmes t = t.disable_linter_fixmes
 

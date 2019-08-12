@@ -1165,46 +1165,17 @@ and pAField : afield parser = fun node env ->
     AFkvalue (pExpr element_key env, pExpr element_value env)
   | _ -> AFvalue (pExpr node env)
 and pString2: expr_location -> node list -> env -> expr list =
-  let rec convert_name_to_lvar location env n =
-    match syntax n with
-    | Token token when Token.kind token = TK.Name ->
-      let pos, name = pos_name n env in
-      let id = Lvar (pos, "$" ^ name) in
-      Some (pos, id)
-    | SubscriptExpression { subscript_receiver; subscript_index; _ } ->
-      begin match convert_name_to_lvar location env subscript_receiver with
-      | Some recv ->
-        let index = mpOptional (pExpr ~location) subscript_index env in
-        Some (pPos n env, Array_get (recv, index))
-      | _ -> None
-      end
-    | _ -> None in
-
   let rec aux loc l env acc =
-    (* in PHP "${x}" in strings is treated as if it was written "$x",
-       here we recognize pattern: Dollar; EmbeddedBracedExpression { QName (Token.Name) }
-       produced by FFP and lower it into Lvar.
-       We are looking to remove "${x}" syntax in Hack in favor of "{$x}".
-       Currently this is a parser option.
-    *)
+    (* "${x}" syntax is banned in Hack in favor of "{$x}". *)
     match l with
     | [] -> List.rev acc
     | ({ syntax = Token token; _ })::
-      ({ syntax = EmbeddedBracedExpression {
-          embedded_braced_expression_expression = e; _ }; _
+      ({ syntax = EmbeddedBracedExpression _ ; _
         } as expr_with_braces)::
       tl when Token.kind token = TK.Dollar ->
-        if (ParserOptions.disable_outside_dollar_str_interp env.parser_options) then
-          raise_parsing_error env (`Node expr_with_braces) SyntaxError.outside_dollar_str_interp;
-        let e =
-          begin match convert_name_to_lvar loc env e with
-          | Some e -> e
-          | None ->
-            raise_parsing_error env (`Node expr_with_braces)
-              SyntaxError.invalid_variable_variable;
-            pPos expr_with_braces env, Omitted
-          end in
-        aux loc tl env (e::acc)
+        raise_parsing_error env (`Node expr_with_braces)
+          SyntaxError.outside_dollar_str_interp;
+        aux loc tl env ((pExpr ~location:loc expr_with_braces env)::acc)
     | x::xs -> aux loc xs env ((pExpr ~location:loc x env)::acc)
   in
   fun loc l env -> aux loc l env []
@@ -3613,14 +3584,14 @@ let scour_comments_and_add_fixmes (env : env) source_text script =
       ~collect_fixmes:env.keep_errors
       ~include_line_comments:env.include_line_comments
       in
-  let () = if env.keep_errors then 
-    begin 
+  let () = if env.keep_errors then
+    begin
       Fixme_provider.provide_disallowed_fixmes env.file misuses;
       if env.quick_mode then
         Fixme_provider.provide_decl_hh_fixmes env.file fixmes
       else
         Fixme_provider.provide_hh_fixmes env.file fixmes
-      end 
+      end
     in
   comments
 

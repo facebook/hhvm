@@ -458,7 +458,7 @@ and simplify_subtype
     then simplify_subtype ~seen_generic_params ~this_ty bound_sub bound_super env
     else simplify_subtype ~seen_generic_params ~this_ty bound_sub ty_super env
 
-  | Tabstract (AKdependent (`expr _), Some ty), Toption arg_ty_super ->
+  | Tabstract (AKdependent (DTexpr _), Some ty), Toption arg_ty_super ->
     let this_ty = Option.first_some this_ty (Some ety_sub) in
     env |>
     simplify_subtype ~seen_generic_params ~this_ty ty ty_super |||
@@ -648,7 +648,7 @@ and simplify_subtype
       simplify_subtype ~seen_generic_params ~this_ty ty_sub ty env
 
   | Tclass _,
-    Tabstract (AKdependent `this, Some (_, Tclass ((_, x), _, tyl_super)))
+    Tabstract (AKdependent DTthis, Some (_, Tclass ((_, x), _, tyl_super)))
     when has_lower_bounds x ->
     let class_def = Env.get_class env x in
     begin match class_def with
@@ -697,7 +697,7 @@ and simplify_subtype
       Errors.try_ fail
         (fun error ->
            let p = Reason.to_pos (fst ety_sub) in
-           if expr_dep = `cls x
+           if expr_dep = DTcls x
            then Errors.exact_class_final id p error
            else Errors.this_final id p error))
     | _ -> invalid ()

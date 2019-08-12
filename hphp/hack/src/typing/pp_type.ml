@@ -280,13 +280,13 @@ and pp_dependent_type : Format.formatter -> dependent_type -> unit =
 fun fmt a0 ->
   Format.fprintf fmt "(@[";
   (match a0 with
-  | `this -> Format.pp_print_string fmt "`this"
-  | `cls x ->
-    Format.fprintf fmt "`cls (@[<hov>";
+  | DTthis -> Format.pp_print_string fmt "DTthis"
+  | DTcls x ->
+    Format.fprintf fmt "DTcls (@[<hov>";
     Format.fprintf fmt "%S" x;
     Format.fprintf fmt "@])"
-  | `expr x ->
-    Format.fprintf fmt "`expr (@[<hov>";
+  | DTexpr x ->
+    Format.fprintf fmt "DTexpr (@[<hov>";
     Ident.pp fmt x;
     Format.fprintf fmt "@])"
   )

@@ -115,7 +115,7 @@ let (can_coerce_ref : can_coerce ref) = ref (not_implemented "can_coerce")
 let can_coerce x = !can_coerce_ref x
 
 (* Convenience function for creating `this` types *)
-let this_of ty = Tabstract (AKdependent `this, Some ty)
+let this_of ty = Tabstract (AKdependent DTthis, Some ty)
 
 (*****************************************************************************)
 (* Returns true if a type is optional *)

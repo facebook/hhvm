@@ -665,9 +665,9 @@ module ErrorString = struct
     | AKgeneric s, _ when AbstractKind.is_generic_dep_ty s ->
       "the expression dependent type "^s
     | AKgeneric _, _ -> "a value of generic type "^x
-    | AKdependent (`cls c), Some ty ->
+    | AKdependent (DTcls c), Some ty ->
         to_string env ty^" (known to be exactly the class '"^strip_ns c^"')"
-    | AKdependent (`this | `expr _), _ ->
+    | AKdependent (DTthis | DTexpr _), _ ->
         "the expression dependent type "^x
     | AKdependent _, _ ->
         "the type '"^x^"'"
@@ -803,13 +803,13 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
     obj @@ kind "enum" @ name s @ as_type opt_ty
   | Tabstract (AKnewtype (s, tys), opt_ty) ->
     obj @@ kind "newtype" @ name s @ args tys @ as_type opt_ty
-  | Tabstract (AKdependent (`cls c), opt_ty) ->
+  | Tabstract (AKdependent (DTcls c), opt_ty) ->
     obj @@ kind "path" @ ["type", obj @@ kind "class" @ name c @ args []]
       @ as_type opt_ty
-  | Tabstract (AKdependent (`expr _), opt_ty) ->
+  | Tabstract (AKdependent (DTexpr _), opt_ty) ->
     obj @@ kind "path" @ ["type", obj @@ kind "expr"]
       @ as_type opt_ty
-  | Tabstract (AKdependent (`this), opt_ty) ->
+  | Tabstract (AKdependent (DTthis), opt_ty) ->
     obj @@ kind "path" @ ["type", obj @@ kind "this"]
       @ as_type opt_ty
   | Toption (_, Tnonnull) ->
@@ -1005,7 +1005,7 @@ let to_locl_ty
         get_string "name" (type_json, type_keytrace)
           >>= fun (class_name, _class_name_keytrace) ->
         aux_as json ~keytrace >>= fun as_opt ->
-        ty (Tabstract (AKdependent (`cls class_name), as_opt))
+        ty (Tabstract (AKdependent (DTcls class_name), as_opt))
 
       | "expr" ->
         not_supported
@@ -1014,7 +1014,7 @@ let to_locl_ty
 
       | "this" ->
         aux_as json ~keytrace >>= fun as_opt ->
-        ty (Tabstract (AKdependent `this, as_opt))
+        ty (Tabstract (AKdependent DTthis, as_opt))
 
       | path_kind ->
         deserialization_error

@@ -17,7 +17,7 @@ module ExprDepTy = struct
 
   let new_() =
     let eid = Ident.tmp() in
-    Reason.ERexpr eid, `expr eid
+    Reason.ERexpr eid, DTexpr eid
 
   let from_cid env reason cid =
     let pos = Reason.to_pos reason in
@@ -25,7 +25,7 @@ module ExprDepTy = struct
       | N.CIparent ->
           (match Env.get_parent env with
           | _, Tapply ((_, cls), _) ->
-              pos, Reason.ERparent cls, `cls cls
+              pos, Reason.ERparent cls, DTcls cls
           | _, _ ->
               let ereason, dep = new_() in
               pos, ereason, dep
@@ -33,17 +33,17 @@ module ExprDepTy = struct
       | N.CIself ->
           (match Env.get_self env with
           | _, Tclass ((_, cls), _, _) ->
-              pos, Reason.ERself cls, `cls cls
+              pos, Reason.ERself cls, DTcls cls
           | _, _ ->
               let ereason, dep = new_() in
               pos, ereason, dep
           )
       | N.CI (p, cls) ->
-          p, Reason.ERclass cls, `cls cls
+          p, Reason.ERclass cls, DTcls cls
       | N.CIstatic ->
-          pos, Reason.ERstatic, `this
+          pos, Reason.ERstatic, DTthis
       | N.CIexpr (p, N.This) ->
-          p, Reason.ERstatic, `this
+          p, Reason.ERstatic, DTthis
       (* If it is a local variable then we look up the expression id associated
        * with it. If one doesn't exist we generate a new one. We are being
        * conservative here because the new expression id we create isn't
@@ -51,7 +51,7 @@ module ExprDepTy = struct
        *)
       | N.CIexpr (p, N.Lvar (_, x)) ->
           let ereason, dep = match Env.get_local_expr_id env x with
-            | Some eid -> Reason.ERexpr eid, `expr eid
+            | Some eid -> Reason.ERexpr eid, DTexpr eid
             | None -> new_() in
           p, ereason, dep
       (* If all else fails we generate a new identifier for our expression
@@ -82,7 +82,7 @@ module ExprDepTy = struct
       let (r, dep_ty) = dep_ty in
       match dep_ty, ety with
         (* Always represent exact types without an access path as Tclass(_,Exact,_) *)
-      | `cls n, (_, Tclass (c, _, tyl)) when n = snd c ->
+      | DTcls n, (_, Tclass (c, _, tyl)) when n = snd c ->
         env, (r, Tclass (c, Exact, tyl))
       | dep_ty, _ ->
         env, (r, Tabstract (AKdependent dep_ty, Some ety))
@@ -94,15 +94,15 @@ module ExprDepTy = struct
    * generate a new dependent type. For example:
    *
    *  if ($cond) {
-   *    $x = new A(); // Dependent type (`cls '\A')
+   *    $x = new A(); // Dependent type (DTcls '\A')
    *  } else {
-   *    $x = new B(); // Dependent type (`cls '\B')
+   *    $x = new B(); // Dependent type (DTcls '\B')
    *  }
-   *  $x; // Tunion[(`cls '\A', `cls '\B')]
+   *  $x; // Tunion[(DTcls '\A', DTcls '\B')]
    *
    *  // When we call the function below, we need to generate
    *  // A new expression dependent type since
-   *  // (`cls '\A') <> (\cls '\B')
+   *  // (DTcls '\A') <> (\cls '\B')
    *  $x->expression_dependent_function();
    *)
   let rec should_apply env ty =

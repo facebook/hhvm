@@ -277,14 +277,14 @@ and abstract_kind =
  *)
 and dependent_type =
   (* Type that is the subtype of the late bound type within a class. *)
-  [ `this
+  | DTthis
   (* A class name, new type, or generic, i.e.
    *
    * abstract class C { abstract const type T }
    *
    * The type C::T is (`cls '\C', ['T'])
    *)
-  | `cls of string
+  | DTcls of string
   (* A reference to some expression. For example:
    *
    *  $x->foo()
@@ -292,8 +292,7 @@ and dependent_type =
    *  The expression $x would have a reference Ident.t
    *  The expression $x->foo() would have a different one
    *)
-  | `expr of Ident.t
-  ]
+  | DTexpr of Ident.t
 
 and taccess_type = decl ty * Nast.sid list
 
@@ -611,9 +610,9 @@ module AbstractKind = struct
     | AKdependent dt ->
        let dt =
          match dt with
-         | `this -> SN.Typehints.this
-         | `cls c -> c
-         | `expr i ->
+         | DTthis -> SN.Typehints.this
+         | DTcls c -> c
+         | DTexpr i ->
              let display_id = Reason.get_expr_display_id i in
              "<expr#"^string_of_int display_id^">" in
        dt

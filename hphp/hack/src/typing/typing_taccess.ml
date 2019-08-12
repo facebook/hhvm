@@ -71,7 +71,7 @@ and expand_with_env_ ety_env env ~as_tyvar_with_cnstr root id =
        for the receiver - check if condition type has type constant at the same path.
        If yes - attach a condition type ROOTCOND_TY::ID to a result type *)
        begin match root, id, TR.condition_type_from_reactivity (Env.env_reactivity tenv) with
-       | (_, Tabstract (AKdependent (`this), _)),
+       | (_, Tabstract (AKdependent (DTthis), _)),
          (_, tconst),
          Some cond_ty ->
          begin match CT.try_get_class_for_condition_type tenv cond_ty with
@@ -161,7 +161,7 @@ and expand env ~as_tyvar_with_cnstr root id =
   let env = { env with tenv = tenv } in
   match root_ty with
   | Tany | Terr -> env, root
-  | Tabstract (AKdependent (`cls _), Some ty)
+  | Tabstract (AKdependent (DTcls _), Some ty)
   | Tabstract (AKnewtype (_, _), Some ty) -> expand env ty
   | Tclass ((class_pos, class_name), _, _) ->
     create_root_from_type_constant

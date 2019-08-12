@@ -30,7 +30,7 @@ let make_call_info ~receiver_is_self ~is_static receiver_type method_name =
 let type_to_str: type a. Env.env -> a ty -> string = fun env ty ->
   (* strip expression dependent types to make error message clearer *)
   let rec unwrap: type a. a ty -> a ty = function
-  | _, Tabstract (AKdependent `this, Some ty) -> unwrap ty
+  | _, Tabstract (AKdependent DTthis, Some ty) -> unwrap ty
   | ty -> ty in
   Typing_print.full env (unwrap ty)
 
@@ -55,7 +55,7 @@ let get_associated_condition_type env ~is_self ty =
   match ty with
   | _, Tabstract (AKgeneric n, _) ->
     Env.get_condition_type env n
-  | _, Tabstract (AKdependent `this, _) ->
+  | _, Tabstract (AKdependent DTthis, _) ->
     condition_type_from_reactivity (Env.env_reactivity env)
   | _ when is_self ->
     condition_type_from_reactivity (Env.env_reactivity env)

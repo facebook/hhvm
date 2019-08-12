@@ -51,7 +51,7 @@ let rec walk_and_gather_xhp_ ~env ~pos cty =
       (* ok to have non_xhp if there are some xhp *)
       let non_xhp = match xhp with _::_ -> [] | _ -> non_xhp in
       env, xhp, non_xhp
-  | Tabstract (AKdependent (`this), _) ->
+  | Tabstract (AKdependent (DTthis), _) ->
       (* This is unsound, but we want to do best-effort checking
        * of attribute spreads even on XHP classes not marked `final`. We should
        * implement <<__ConsistentAttributes>> as a way to make this hacky

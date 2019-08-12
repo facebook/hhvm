@@ -75,7 +75,7 @@ let validator = object(this) inherit type_validator
   method! on_tabstract acc r ak _ty_opt =
     match ak with
     | AKnewtype (cid, _) when Env.is_enum acc.env cid -> acc
-    | AKdependent (`this) -> acc
+    | AKdependent (DTthis) -> acc
     | AKgeneric name when Env.is_fresh_generic_parameter name  ||
                           AbstractKind.is_generic_dep_ty name -> acc
     | AKgeneric name ->

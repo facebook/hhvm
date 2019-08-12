@@ -81,7 +81,7 @@ let validator = object(this) inherit type_validator as super
 
   method! on_tabstract acc r ak _ty_opt =
     match ak with
-    | AKdependent (`this) -> this#invalid acc r "the late static bound this type"
+    | AKdependent (DTthis) -> this#invalid acc r "the late static bound this type"
     | AKgeneric _
     | AKnewtype _
     | AKdependent _ -> acc

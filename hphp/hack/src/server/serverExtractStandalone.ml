@@ -247,36 +247,63 @@ let construct_type_declaration tcopt t fields =
   | Some cls -> construct_class_declaration tcopt cls fields
   | None -> construct_typedef_declaration tcopt t
 
-(* TODO: Tfun? Any other cases? *)
-let add_dep ty deps = match ty with
-  | (_, Tapply((_, str), _)) -> HashSet.add deps (Typing_deps.Dep.Class str)
-  | _ -> ()
+let add_dep deps ty : unit =
+  let visitor = object(this)
+    inherit [unit] Type_visitor.type_visitor
+      method! on_tapply _ _ (_, name) tyl =
+        HashSet.add deps (Typing_deps.Dep.Class name);
+        List.fold_left tyl ~f:this#on_type ~init:()
+    end in
+  visitor#on_type () ty
 
 let get_signature_dependencies obj deps =
   let open Typing_deps.Dep in
   match obj with
-  | Prop (cls, _)
-  | SProp (cls, _)
-  | Method (cls, _)
-  | SMethod (cls, _)
-  | Const (cls, _)
-  | Cstr cls -> ignore cls;
+  | Prop (cls, name) ->
+    let cls = value_exn DependencyNotFound @@ Decl_provider.get_class cls in
+    let p = value_exn DependencyNotFound @@ Decl_provider.Class.get_prop cls name in
+    add_dep deps @@ Lazy.force p.ce_type
+  | SProp (cls, name) ->
+    let cls = value_exn DependencyNotFound @@ Decl_provider.get_class cls in
+    let sp = value_exn DependencyNotFound @@ Decl_provider.Class.get_prop cls name in
+    add_dep deps @@ Lazy.force sp.ce_type
+  | Method (cls, name) ->
+    let cls = value_exn DependencyNotFound @@ Decl_provider.get_class cls in
+    let m = value_exn DependencyNotFound @@ Decl_provider.Class.get_method cls name in
+    add_dep deps @@ Lazy.force m.ce_type
+  | SMethod (cls, name) ->
+    let cls = value_exn DependencyNotFound @@ Decl_provider.get_class cls in
+    let sm = value_exn DependencyNotFound @@ Decl_provider.Class.get_smethod cls name in
+    add_dep deps @@ Lazy.force sm.ce_type
+  | Const (cls, name) ->
+    let cls = value_exn DependencyNotFound @@ Decl_provider.get_class cls in
+    let c = value_exn DependencyNotFound @@ Decl_provider.Class.get_const cls name in
+    add_dep deps c.cc_type
+  | Cstr cls ->
+    let cls = value_exn DependencyNotFound @@ Decl_provider.get_class cls in
+    (match Decl_provider.Class.construct cls with
+    | (Some constr, _) -> add_dep deps @@ Lazy.force constr.ce_type
+    | _ -> ())
   | Class cls ->
       (match Decl_provider.get_class cls with
       | None ->
         let td = value_exn DependencyNotFound @@ Decl_provider.get_typedef cls in
-        add_dep td.td_type deps
+        add_dep deps td.td_type
       | Some c ->
-        Sequence.iter (Decl_provider.Class.all_ancestors c) (fun (_, ty) -> add_dep ty deps)
+        Sequence.iter (Decl_provider.Class.all_ancestors c) (fun (_, ty) -> add_dep deps ty)
       )
   | Fun f | FunName f ->
     let func = value_exn DependencyNotFound @@ Decl_provider.get_fun f in
-    add_dep func.ft_ret deps;
-    List.iter func.ft_params (fun p -> add_dep p.fp_type deps)
+    add_dep deps @@ (Typing_reason.Rnone, Tfun func)
   | GConst c | GConstName c ->
     (let (ty, _) = value_exn DependencyNotFound @@ Decl_provider.get_gconst c in
-    add_dep ty deps)
-  | AllMembers _ | Extends _ -> raise UnexpectedDependency
+    add_dep deps ty)
+  | AllMembers cls ->
+    (* AllMembers is used for dependencies on enums, so we should depend on all constants *)
+    let cls = value_exn DependencyNotFound @@ Decl_provider.get_class cls in
+    Sequence.iter (Decl_provider.Class.consts cls) (fun (_, c) -> add_dep deps c.cc_type)
+    (* We are extracting functions, they cannot Extend *)
+  | Extends _ -> raise UnexpectedDependency
 
 let get_dependency_origin cls (dep: Typing_deps.Dep.variant) =
   let open Decl_provider in

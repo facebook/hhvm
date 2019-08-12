@@ -1,4 +1,3 @@
-////toplevel.php
 <?hh
 abstract class AbstractBase {
 }

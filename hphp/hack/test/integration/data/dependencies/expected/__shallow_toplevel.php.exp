@@ -1,4 +1,3 @@
-////toplevel.php
 <?hh
 class C extends A {
 }

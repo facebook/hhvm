@@ -1,4 +1,3 @@
-////toplevel.php
 <?hh
 function generic<T>(): int {
   throw new \Exception();

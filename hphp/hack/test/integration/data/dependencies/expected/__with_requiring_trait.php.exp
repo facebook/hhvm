@@ -1,4 +1,3 @@
-////toplevel.php
 <?hh
 class DerivedImplementing extends Implementing implements SimpleInterface {
   use RequiringTrait;

@@ -1,4 +1,3 @@
-////toplevel.php
 <?hh
 function call_defaulted(int $arg): void {
   with_defaults($arg);

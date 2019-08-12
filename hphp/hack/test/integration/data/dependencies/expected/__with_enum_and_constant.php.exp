@@ -1,4 +1,3 @@
-////toplevel.php
 <?hh
 function with_enum_and_constant(Mode $arg): int {
   return $arg + Mode::One + GenericBase::GENERIC_CONSTANT;

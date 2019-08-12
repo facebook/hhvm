@@ -1,4 +1,3 @@
-////toplevel.php
 <?hh
 class TraitBase extends AbstractBase {
   use ImplementingAbstractBase, T;

@@ -1,4 +1,3 @@
-////toplevel.php
 <?hh
 function call_constructors(): void {
   $a = new ImplementingBase();

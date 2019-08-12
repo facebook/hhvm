@@ -531,12 +531,13 @@ let get_code (decl_names: string HashSet.t) declarations =
     let code = Caml.Hashtbl.fold code_from_namespace nspace_content.namespaces code in
     let code = HashSet.fold code_from_namespace_decls nspace_content.decls code in
     Printf.sprintf "namespace %s {" nspace_name :: code in
-  let code = Caml.Hashtbl.fold code_from_namespace global_namespace.namespaces [] in
-  let code = format @@ String.concat ~sep:"\n" @@ hh_prefix :: code in
-  let file_or_ignore filename code =
-    if (String.strip code) = hh_prefix then ""
-    else Printf.sprintf "////%s\n%s" filename code in
-  (file_or_ignore "toplevel.php" toplevel) ^ (file_or_ignore "namespaces.php" code)
+  let namespaced = Caml.Hashtbl.fold code_from_namespace global_namespace.namespaces [] in
+  let namespaced = format @@ String.concat ~sep:"\n" @@ hh_prefix :: namespaced in
+  let has_code text = (String.strip text <> hh_prefix) in
+  if has_code toplevel && has_code namespaced then
+    Printf.sprintf "////toplevel.php\n%s\n////namespaces.php\n%s" toplevel namespaced
+  else if has_code toplevel then toplevel
+  else namespaced
 
 let go tcopt function_name =
   try

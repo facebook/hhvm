@@ -13,4 +13,4 @@ Invalid return type (Typing[4110])
 File "tparam_constraints.php", line 4, characters 56-58:
 Expected int
 File "tparam_constraints.php", line 4, characters 46-49:
-But got null
+But got ~?int

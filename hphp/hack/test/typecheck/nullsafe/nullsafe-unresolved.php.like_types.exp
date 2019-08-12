@@ -3,22 +3,10 @@ Invalid argument (Typing[4110])
 File "nullsafe-unresolved.php", line 15, characters 25-40:
 Expected Container<mixed>
 File "nullsafe-unresolved.php", line 5, characters 8-15:
-But got null (use of ?-> operator)
-File "nullsafe-unresolved.php", line 6, characters 18-19:
-Invalid argument (Typing[4110])
-File "nullsafe-unresolved.php", line 15, characters 25-40:
-Expected Container<mixed>
-File "nullsafe-unresolved.php", line 5, characters 8-15:
-But got dynamic, the result of calling a dynamic type as a function
+But got ?dynamic (use of ?-> operator)
 File "nullsafe-unresolved.php", line 8, characters 18-19:
 Invalid argument (Typing[4110])
 File "nullsafe-unresolved.php", line 15, characters 25-40:
 Expected Container<mixed>
 File "nullsafe-unresolved.php", line 7, characters 8-13:
-But got null (use of ?-> operator)
-File "nullsafe-unresolved.php", line 8, characters 18-19:
-Invalid argument (Typing[4110])
-File "nullsafe-unresolved.php", line 15, characters 25-40:
-Expected Container<mixed>
-File "nullsafe-unresolved.php", line 7, characters 13-13:
-But got dynamic, the result of accessing a property of a dynamic type
+But got ?dynamic (use of ?-> operator)

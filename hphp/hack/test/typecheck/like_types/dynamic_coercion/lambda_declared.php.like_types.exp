@@ -10,9 +10,3 @@ File "lambda_declared.php", line 14, characters 9-21:
 Expected (int, string)
 File "lambda_declared.php", line 14, characters 9-21:
 But got dynamic because it is an unenforceable type
-File "lambda_declared.php", line 14, characters 9-21:
-Wrong type hint (Typing[4110])
-File "lambda_declared.php", line 14, characters 10-12:
-Expected int
-File "lambda_declared.php", line 14, characters 10-12:
-But got dynamic because it is an unenforceable type

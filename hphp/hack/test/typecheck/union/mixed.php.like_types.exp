@@ -35,13 +35,7 @@ Invalid argument (Typing[4110])
 File "mixed.php", line 102, characters 19-19:
 Expected A
 File "mixed.php", line 11, characters 34-38:
-But got null
-File "mixed.php", line 36, characters 12-13:
-Invalid argument (Typing[4110])
-File "mixed.php", line 102, characters 19-19:
-Expected A
-File "mixed.php", line 11, characters 34-38:
-But got nonnull
+But got mixed
 File "mixed.php", line 44, characters 17-18:
 Invalid argument (Typing[4110])
 File "mixed.php", line 101, characters 24-29:

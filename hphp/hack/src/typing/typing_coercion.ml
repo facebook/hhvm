@@ -185,5 +185,10 @@ let try_coerce ?sub_fn:(sub=Typing_ops.sub_type) p ur env ty_have ty_expect =
   Errors.is_hh_fixme := f;
   result
 
+let coerce_type p ?sub_fn:(sub=Typing_ops.sub_type) ur env ty_have ?ty_expect_decl ty_expect on_error =
+  Errors.try_ 
+    (fun () -> coerce_type p ~sub_fn:sub ur env ty_have ?ty_expect_decl ty_expect on_error)
+    (fun _ -> sub p ur env ty_have ty_expect on_error)
+
 let () = Typing_utils.can_coerce_ref := can_coerce
 let () = Typing_utils.coerce_type_ref := coerce_type

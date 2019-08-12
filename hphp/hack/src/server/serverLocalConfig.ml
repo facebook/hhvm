@@ -98,6 +98,8 @@ type t = {
   remote_worker_eden_checkout_threshold : int;
   (* Dictates the number of remote type checking workers *)
   num_remote_workers : int;
+  (* The version of the package the remote worker is to install *)
+  remote_version_specifier : string option;
   (* Enables the reverse naming table to fall back to SQLite for queries. *)
   naming_sqlite_path : string option;
   enable_naming_table_fallback : bool;
@@ -170,6 +172,7 @@ let default = {
   remote_worker_key = None;
   remote_check_id = None;
   num_remote_workers = 4;
+  remote_version_specifier = None;
   remote_worker_eden_checkout_threshold = 10000;
   naming_sqlite_path = None;
   enable_naming_table_fallback = false;
@@ -326,6 +329,7 @@ let load_ fn ~silent ~current_version overrides =
     string_opt "remote_check_id" config in
   let num_remote_workers = int_ "num_remote_workers"
     ~default:default.num_remote_workers config in
+  let remote_version_specifier = string_opt "remote_version_specifier" config in
   let remote_worker_eden_checkout_threshold = int_
     "remote_worker_eden_checkout_threshold"
     ~default:default.remote_worker_eden_checkout_threshold
@@ -408,6 +412,7 @@ let load_ fn ~silent ~current_version overrides =
     remote_worker_key;
     remote_check_id;
     num_remote_workers;
+    remote_version_specifier;
     naming_sqlite_path;
     enable_naming_table_fallback;
     symbolindex_search_provider;

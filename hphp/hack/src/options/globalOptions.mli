@@ -81,6 +81,9 @@ type t = {
   (* Dictates the number of remote type checking workers *)
   tco_num_remote_workers : int;
 
+  (* The version specifier that is used to identify the remote worker package version to install *)
+  so_remote_version_specifier : string option;
+
   (* Above this threshold of files to check, the remote type checking worker will not use Eden *)
   so_remote_worker_eden_checkout_threshold : int;
 
@@ -326,6 +329,7 @@ val make :
   ?tco_remote_worker_key: string ->
   ?tco_remote_check_id: string ->
   ?tco_num_remote_workers: int ->
+  ?so_remote_version_specifier: string ->
   ?so_remote_worker_eden_checkout_threshold: int ->
   ?so_naming_sqlite_path: string ->
   ?tco_disallow_array_as_tuple: bool ->
@@ -390,6 +394,7 @@ val tco_remote_type_check : t -> bool
 val tco_remote_worker_key : t -> string option
 val tco_remote_check_id : t -> string option
 val tco_num_remote_workers : t -> int
+val so_remote_version_specifier : t -> string option
 val so_remote_worker_eden_checkout_threshold : t -> int
 val so_naming_sqlite_path : t -> string option
 val tco_disallow_array_as_tuple : t -> bool

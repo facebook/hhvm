@@ -17,6 +17,7 @@ let remote_type_check = GlobalOptions.tco_remote_type_check
 let remote_worker_key = GlobalOptions.tco_remote_worker_key
 let remote_check_id = GlobalOptions.tco_remote_check_id
 let num_remote_workers = GlobalOptions.tco_num_remote_workers
+let remote_version_specifier = GlobalOptions.so_remote_version_specifier
 let disallow_array_typehint = GlobalOptions.tco_disallow_array_typehint
 let disallow_array_literal = GlobalOptions.tco_disallow_array_literal
 let language_feature_logging = GlobalOptions.tco_language_feature_logging

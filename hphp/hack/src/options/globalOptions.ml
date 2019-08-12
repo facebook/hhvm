@@ -19,6 +19,7 @@ type t = {
   tco_remote_worker_key : string option;
   tco_remote_check_id : string option;
   tco_num_remote_workers : int;
+  so_remote_version_specifier : string option;
   so_remote_worker_eden_checkout_threshold : int;
   so_naming_sqlite_path : string option;
   tco_disallow_array_as_tuple : bool;
@@ -171,6 +172,7 @@ let default = {
   tco_remote_worker_key = None;
   tco_remote_check_id = None;
   tco_num_remote_workers = 4;
+  so_remote_version_specifier = None;
   so_remote_worker_eden_checkout_threshold = 10000;
   so_naming_sqlite_path = None;
   tco_disallow_array_as_tuple = false;
@@ -250,6 +252,7 @@ let make
   ?tco_remote_worker_key
   ?tco_remote_check_id
   ?(tco_num_remote_workers = default.tco_num_remote_workers)
+  ?so_remote_version_specifier
   ?(so_remote_worker_eden_checkout_threshold = default.so_remote_worker_eden_checkout_threshold)
   ?so_naming_sqlite_path
   ?(tco_disallow_array_as_tuple = default.tco_disallow_array_as_tuple)
@@ -313,6 +316,7 @@ let make
   tco_remote_worker_key;
   tco_remote_check_id;
   tco_num_remote_workers;
+  so_remote_version_specifier;
   so_remote_worker_eden_checkout_threshold;
   so_naming_sqlite_path;
   tco_disallow_array_as_tuple;
@@ -393,6 +397,8 @@ let tco_remote_check_id t =
   t.tco_remote_check_id
 let tco_num_remote_workers t =
   t.tco_num_remote_workers
+let so_remote_version_specifier t =
+  t.so_remote_version_specifier
 let so_remote_worker_eden_checkout_threshold t =
   t.so_remote_worker_eden_checkout_threshold
 let so_naming_sqlite_path t =

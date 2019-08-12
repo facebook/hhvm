@@ -553,7 +553,7 @@ function getrandmax(): int;
  * @param mixed $seed - Optional seed value
  *
  */
-<<__Native>>
+<<__Native, __NonRx('Randomness')>>
 function srand(mixed $seed = null): void;
 
 /**
@@ -564,7 +564,7 @@ function srand(mixed $seed = null): void;
  *   getrandmax(), inclusive).
  *
  */
-<<__Native>>
+<<__Native, __NonRx('Randomness')>>
 function rand(int $min = 0, ?int $max = null): int;
 
 /**
@@ -582,7 +582,7 @@ function mt_getrandmax(): int;
  * @param mixed $seed - An optional seed value
  *
  */
-<<__Native>>
+<<__Native, __NonRx('Randomness')>>
 function mt_srand(mixed $seed = null): void;
 
 /**
@@ -594,7 +594,7 @@ function mt_srand(mixed $seed = null): void;
  *   mt_getrandmax(), inclusive)
  *
  */
-<<__Native>>
+<<__Native, __NonRx('Randomness')>>
 function mt_rand(int $min = 0, ?int $max = null): int;
 
 /**
@@ -605,7 +605,7 @@ function mt_rand(int $min = 0, ?int $max = null): int;
  * @return float - A pseudo random float value in the range of (0, 1)
  *
  */
-<<__Native>>
+<<__Native, __NonRx('Randomness')>>
 function lcg_value(): float;
 
 /**

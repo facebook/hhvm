@@ -113,17 +113,17 @@ function fmod(float $x, float $y);
 function sqrt(float $arg);
 <<__PHPStdLib, __Rx>>
 function getrandmax();
-<<__PHPStdLib>>
+<<__PHPStdLib, __NonRx('Randomness')>>
 function srand($seed = null);
-<<__PHPStdLib>>
+<<__PHPStdLib, __NonRx('Randomness')>>
 function rand(int $min = 0, $max = -1 /* getrandmax */ );
 <<__PHPStdLib, __Rx>>
 function mt_getrandmax();
-<<__PHPStdLib>>
+<<__PHPStdLib, __NonRx('Randomness')>>
 function mt_srand($seed = null);
-<<__PHPStdLib>>
+<<__PHPStdLib, __NonRx('Randomness')>>
 function mt_rand(int $min = 0, $max = -1 /* mt_getrandmax */ );
-<<__PHPStdLib>>
+<<__PHPStdLib, __NonRx('Randomness')>>
 function lcg_value();
 <<__PHPStdLib, __Rx>>
 function intdiv(int $numerator, int $denominator): int;

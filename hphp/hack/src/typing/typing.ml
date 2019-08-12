@@ -2655,7 +2655,7 @@ and expr_
   | PU_identifier _ -> failwith "TODO(T36532263): Pocket Universes"
 
 and class_const ?(incl_tc=false) env p ((cpos, cid), mid) =
-  let env, ce, cty = static_class_id ~check_constraints:false cpos env [] cid in
+  let env, ce, cty = static_class_id ~check_constraints:true cpos env [] cid in
   let env, const_ty =
     class_get ~is_method:false ~is_const:true ~incl_tc env cty mid cid (fun x -> x) in
   make_result env p (T.Class_const (ce, mid)) const_ty

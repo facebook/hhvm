@@ -58,7 +58,7 @@ struct Instr {
   const folly::Optional<std::string> typeParam;
   const folly::Optional<std::string> guard;
   const folly::Optional<std::string> extra;
-  const folly::Optional<uint32_t> id;
+  const uint32_t id;
   const folly::Optional<BlockId> taken;
   const folly::Optional<std::vector<TCRange>> tcRanges;
   const std::vector<SSATmp> dsts;

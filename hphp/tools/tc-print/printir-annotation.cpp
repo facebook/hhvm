@@ -151,7 +151,7 @@ convert(const dynamic& d) {
     d.getDefault("typeParam", {}));
   auto const guard = convertTo<Optional<string>>(d.getDefault("guard", {}));
   auto const extra = convertTo<Optional<string>>(d.getDefault("extra", {}));
-  auto const id = convertTo<Optional<uint32_t>>(d.getDefault("id", {}));
+  auto const id = convertTo<uint32_t>(d.getDefault("id", {}));
   auto const dsts = convertTo<vector<printir::SSATmp>>(
     d.getDefault("dsts", {}));
   auto const tcRanges = convertTo<Optional<vector<printir::TCRange>>>(
@@ -320,12 +320,17 @@ construct(const printir::Instr& i) {
 
 dynamic DynamicConstructor<printir::Block>::
 construct(const printir::Block& b) {
+  dynamic instrMap = dynamic::object();
+  for (auto const& item: b.instrs) {
+    instrMap[sformat("{}", item.id)] = toDynamic(item);
+  }
+
   return dynamic::object("id", b.id)
                         ("isCatch", b.isCatch)
                         ("hint", jit::blockHintName(b.hint))
                         ("profCount", b.profCount)
                         ("next", toDynamic(b.next))
-                        ("instrs", toDynamic(b.instrs));
+                        ("instrs", instrMap);
 }
 
 dynamic DynamicConstructor<printir::SrcKey>::

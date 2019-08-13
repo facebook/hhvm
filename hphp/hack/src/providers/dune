@@ -47,6 +47,7 @@
     heap_shared_mem
     nast
     parser
+    provider_context
     relative_path
     server_command_types
     utils_find))

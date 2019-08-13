@@ -152,33 +152,33 @@ let get_gconst defs name =
    if the file does not exist
 *)
 let get_nast ?(full = false) file_name =
-  let get_ast ?(full = false) file_name =
-    match Provider_config.get_backend () with
-    | Provider_config.Lru_shared_memory
-    | Provider_config.Shared_memory ->
-      begin match ParserHeap.get file_name with
-        | None ->
-          let ast = get_from_local_cache ~full file_name in
-          (* Only store decl asts *)
-          if not full then
-          ParserHeap.add file_name (ast, Decl);
-          ast
-        | Some (_, Decl) when full ->
-          let ast = get_from_local_cache ~full file_name in
-          ast
-        | Some (defs, _) -> defs
-      end
-    | Provider_config.Local_memory _ ->
-      let ast =
-        parse_file_input ~full file_name
-          (ServerCommandTypes.FileName (Relative_path.to_absolute file_name))
-      in
-      ast
-  in
-  get_ast ~full file_name
-
-
-
+  match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory
+  | Provider_config.Shared_memory ->
+    begin match ParserHeap.get file_name with
+      | None ->
+        let ast = get_from_local_cache ~full file_name in
+        (* Only store decl asts *)
+        if not full then
+        ParserHeap.add file_name (ast, Decl);
+        ast
+      | Some (_, Decl) when full ->
+        let ast = get_from_local_cache ~full file_name in
+        ast
+      | Some (defs, _) -> defs
+    end
+  | Provider_config.Local_memory _ ->
+    let ast_opt =
+      let open Option.Monad_infix in
+      Provider_context.get_global_context () >>= fun ctx ->
+      Relative_path.Map.get ctx file_name >>| fun entry ->
+      entry.Provider_context.ast
+    in
+    match ast_opt with
+    | Some ast -> ast
+    | None ->
+      parse_file_input ~full file_name
+        (ServerCommandTypes.FileName (Relative_path.to_absolute file_name))
 
 let find_class_in_file_nast ?(full = false) ?(case_insensitive=false) file_name class_name =
   get_class (get_nast ~full file_name) ~case_insensitive class_name

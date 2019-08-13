@@ -185,9 +185,10 @@
     ast
     core_kernel
     errors
-    naming
+    nast
     parser
-    typing_defs)
+    typing_defs
+    typechecker_options)
   (preprocess (pps ppx_deriving.std)))
 
 (library

@@ -28,6 +28,68 @@ File "instance_of_refinement.php", line 39, characters 12-12:
 This is why I think it is an object of type B
 File "instance_of_refinement.php", line 12, characters 7-7:
 Declaration of B is here
+File "instance_of_refinement.php", line 42, characters 16-24:
+Invalid argument (Typing[4110])
+File "instance_of_refinement.php", line 15, characters 21-23:
+Expected int
+File "instance_of_refinement.php", line 40, characters 13-16:
+But got T#1 from this is expression test
+File "instance_of_refinement.php", line 5, characters 26-26:
+  via this generic T
+File "instance_of_refinement.php", line 42, characters 20-22:
+No method 'get' in B (Typing[4053])
+File "instance_of_refinement.php", line 39, characters 12-12:
+This is why I think it is an object of type B
+File "instance_of_refinement.php", line 12, characters 7-7:
+Declaration of B is here
+File "instance_of_refinement.php", line 49, characters 19-27:
+Invalid argument (Typing[4110])
+File "instance_of_refinement.php", line 3, characters 9-9:
+Some type constraint(s) are violated here
+File "instance_of_refinement.php", line 3, characters 9-9:
+T is a constrained type parameter
+File "instance_of_refinement.php", line 54, characters 24-29:
+Expected string
+File "instance_of_refinement.php", line 3, characters 9-9:
+But got dynamic
+File "instance_of_refinement.php", line 49, characters 19-27:
+Invalid argument (Typing[4110])
+File "instance_of_refinement.php", line 54, characters 24-29:
+Expected string
+File "instance_of_refinement.php", line 48, characters 13-16:
+But got T#1 from this is expression test
+File "instance_of_refinement.php", line 5, characters 26-26:
+  via this generic T
+File "instance_of_refinement.php", line 49, characters 19-27:
+Invalid argument (Typing[4110])
+File "instance_of_refinement.php", line 54, characters 24-29:
+Expected string
+File "instance_of_refinement.php", line 48, characters 13-16:
+But got ([unresolved] & T#1) from this is expression test
+File "instance_of_refinement.php", line 50, characters 16-24:
+Invalid argument (Typing[4110])
+File "instance_of_refinement.php", line 3, characters 9-9:
+Some type constraint(s) are violated here
+File "instance_of_refinement.php", line 3, characters 9-9:
+T is a constrained type parameter
+File "instance_of_refinement.php", line 15, characters 21-23:
+Expected int
+File "instance_of_refinement.php", line 3, characters 9-9:
+But got dynamic
+File "instance_of_refinement.php", line 50, characters 16-24:
+Invalid argument (Typing[4110])
+File "instance_of_refinement.php", line 15, characters 21-23:
+Expected int
+File "instance_of_refinement.php", line 48, characters 13-16:
+But got T#1 from this is expression test
+File "instance_of_refinement.php", line 5, characters 26-26:
+  via this generic T
+File "instance_of_refinement.php", line 50, characters 16-24:
+Invalid argument (Typing[4110])
+File "instance_of_refinement.php", line 15, characters 21-23:
+Expected int
+File "instance_of_refinement.php", line 48, characters 13-16:
+But got ([unresolved] & T#1) from this is expression test
 File "instance_of_refinement.php", line 64, characters 10-11:
 Invalid return type (Typing[4110])
 File "instance_of_refinement.php", line 3, characters 9-9:

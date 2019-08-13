@@ -1,0 +1,6 @@
+File "generic_type_parameter_constrained_by_nonnull.php", line 4, characters 10-11:
+Invalid return type (Typing[4110])
+File "generic_type_parameter_constrained_by_nonnull.php", line 3, characters 36-42:
+Expected nonnull
+File "generic_type_parameter_constrained_by_nonnull.php", line 3, characters 29-29:
+But got T

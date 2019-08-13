@@ -1,8 +1,6 @@
 File "graph.php", line 34, characters 21-29:
 Invalid argument (Typing[4110])
-File "graph.php", line 17, characters 19-22:
-Expected Tkey
-File "graph.php", line 17, characters 19-22:
-Considering that this type argument is invariant with respect to Graph
-File "graph.php", line 17, characters 27-34:
-But got arraykey
+File "graph.php", line 25, characters 17-22:
+Expected ~([unresolved], Set<[unresolved]>) because type parameter Tv of Map could not be determined. Please add explicit type parameters to the invocation of Map
+File "graph.php", line 20, characters 23-40:
+But got ([unresolved], ~Set<[unresolved]>)

@@ -1,0 +1,8 @@
+File "merge_is_good_2.php", line 21, characters 10-11:
+Invalid return type (Typing[4110])
+File "merge_is_good_2.php", line 11, characters 56-56:
+Expected B
+File "merge_is_good_2.php", line 16, characters 21-24:
+But got T#4 from this is expression test
+File "merge_is_good_2.php", line 6, characters 25-25:
+  via this generic T

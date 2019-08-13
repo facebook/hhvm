@@ -1,3 +1,8 @@
 File "acts_as_string.php", line 11, characters 3-13:
   ~classname<~exact Tr>
-No errors
+File "acts_as_string.php", line 12, characters 19-27:
+Invalid argument (Typing[4110])
+File "acts_as_string.php", line 29, characters 26-34:
+Expected Stringish
+File "classname.hhi", line 15, characters 26-36:
+But got dynamic because it is an unenforceable type

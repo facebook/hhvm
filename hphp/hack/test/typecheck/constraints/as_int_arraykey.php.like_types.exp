@@ -1,0 +1,6 @@
+File "as_int_arraykey.php", line 7, characters 16-17:
+Invalid argument (Typing[4110])
+File "as_int_arraykey.php", line 5, characters 23-31:
+Expected ?arraykey
+File "as_int_arraykey.php", line 6, characters 23-23:
+But got T

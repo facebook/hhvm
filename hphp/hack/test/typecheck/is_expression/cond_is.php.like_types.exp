@@ -16,3 +16,13 @@ File "cond_is.php", line 21, characters 24-24:
 Expected A
 File "cond_is.php", line 3, characters 10-10:
 But got dynamic
+File "cond_is.php", line 22, characters 12-13:
+Invalid argument (Typing[4110])
+File "cond_is.php", line 8, characters 20-20:
+Some type constraint(s) are violated here
+File "cond_is.php", line 8, characters 20-20:
+T is a constrained type parameter
+File "cond_is.php", line 17, characters 19-19:
+Expected A
+File "cond_is.php", line 8, characters 20-20:
+But got dynamic

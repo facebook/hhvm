@@ -1,0 +1,6 @@
+File "generic_primitive_option_return.php", line 4, characters 10-11:
+Invalid return type (Typing[4110])
+File "generic_primitive_option_return.php", line 3, characters 29-32:
+Expected ?int
+File "generic_primitive_option_return.php", line 3, characters 22-22:
+But got T

@@ -13,8 +13,14 @@ let with_context
     : 'a =
   let make_then_revert_local_changes f () =
     Utils.with_context
-      ~enter:ServerIdeUtils.make_local_changes
-      ~exit:ServerIdeUtils.revert_local_changes
+      ~enter:(fun () ->
+        Provider_context.set_global_context_internal ctx;
+        ServerIdeUtils.make_local_changes ()
+      )
+      ~exit:(fun () ->
+        ServerIdeUtils.revert_local_changes ();
+        Provider_context.unset_global_context_internal ()
+      )
       ~do_:f
   in
   let (_errors, result) =

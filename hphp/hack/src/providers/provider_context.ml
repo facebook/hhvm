@@ -6,6 +6,8 @@
  *
  *)
 
+open Core_kernel
+
 type entry = {
   file_input: ServerCommandTypes.file_input;
   path: Relative_path.t;
@@ -16,6 +18,8 @@ type entry = {
 type t = entry Relative_path.Map.t
 
 let empty = Relative_path.Map.empty
+
+let global_context: t option ref = ref None
 
 let get_file_input
     ~(ctx: t)
@@ -35,3 +39,20 @@ let get_fileinfo ~(entry: entry): FileInfo.t =
     typedefs;
     consts;
   }
+
+let get_global_context (): t option =
+  !global_context
+
+let set_global_context_internal (t: t): unit =
+  match !global_context with
+  | Some _ ->
+    failwith "set_global_context_internal: a global context is already set"
+  | None ->
+    global_context := Some t
+
+let unset_global_context_internal (): unit =
+  match !global_context with
+  | Some _ ->
+    global_context := None
+  | None ->
+    failwith "unset_global_context_internal: no global context is set"

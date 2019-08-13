@@ -36,3 +36,18 @@ If the [path] is in the context, returns its associated
 
 val get_fileinfo : entry:entry -> FileInfo.t
 (** Get the [FileInfo.t] associated with the given [entry]. *)
+
+val get_global_context : unit -> t option
+(** Get the current global context (which is set with
+[ServerIdeUtils.with_context]), if any. Only one global context can be set at a
+time. *)
+
+(** Internal functions **)
+
+val set_global_context_internal : t -> unit
+(** Set the current global context. Should not be used directly; use
+[ServerIdeUtils.with_context] instead. *)
+
+val unset_global_context_internal : unit -> unit
+(** Unset the current global context. Should not be used directly; use
+[ServerIdeUtils.with_context] instead. *)

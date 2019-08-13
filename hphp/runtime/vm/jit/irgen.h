@@ -226,12 +226,13 @@ void beginInlining(IRGS& env,
                    const FCallArgs& fca,
                    SSATmp* ctx,
                    Type ctxType,
+                   bool dynamicCall,
+                   SSATmp* tsList,
                    Op writeArOpc,
                    SrcKey startSk,
                    Offset callBcOffset,
                    InlineReturnTarget returnTarget,
-                   int cost,
-                   bool conjure);
+                   int cost);
 
 /*
  * End the current inlined frame, after all its blocks have been emitted.

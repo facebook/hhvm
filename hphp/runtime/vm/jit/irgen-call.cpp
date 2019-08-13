@@ -390,14 +390,15 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
   if (dynamicCall) emitCallerDynamicCallChecksKnown(env, callee);
   emitCallerRxChecksKnown(env, callee);
 
+  if (invName == nullptr && isFCall(curSrcKey(env).op())) {
+    auto const inlined = irGenTryInlineFCall(
+      env, callee, fca, objOrClass, dynamicCall, tsList);
+    if (inlined) return;
+  }
+
   fsetActRec(env, cns(env, callee), fca, objOrClass,
              invName ? cns(env, invName) : nullptr,
              dynamicCall, tsList);
-
-  if (invName == nullptr && isFCall(curSrcKey(env).op())) {
-    auto const inlined = irGenTryInlineFCall(env, callee, fca, objOrClass);
-    if (inlined) return;
-  }
 
   // We just wrote to the stack, make sure Call opcode can set up its Catch.
   updateMarker(env);

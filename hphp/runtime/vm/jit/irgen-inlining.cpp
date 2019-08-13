@@ -215,12 +215,13 @@ void beginInlining(IRGS& env,
                    const FCallArgs& fca,
                    SSATmp* ctx,
                    Type ctxType,
+                   bool dynamicCall,
+                   SSATmp* tsList,
                    Op writeArOpc,
                    SrcKey startSk,
                    Offset callBcOffset,
                    InlineReturnTarget returnTarget,
-                   int cost,
-                   bool conjure) {
+                   int cost) {
   assertx(callBcOffset >= 0 && "callBcOffset before beginning of caller");
   // curFunc is null when called from conjureBeginInlining
   assertx((!curFunc(env) ||
@@ -233,6 +234,11 @@ void beginInlining(IRGS& env,
   // parameter, so we need to add numArgs to get to the ActRec
   assertx(!fca.hasUnpack());
   IRSPRelOffset calleeAROff = spOffBCFromIRSP(env) + fca.numArgs;
+
+  auto const arInfo = ActRecInfo { calleeAROff, fca.numArgs };
+  gen(env, SpillFrame, arInfo, sp(env), cns(env, target), ctx,
+      cns(env, TNullptr), cns(env, dynamicCall),
+      tsList ? tsList : cns(env, TNullptr));
 
   ctx = [&] () -> SSATmp* {
     if (!target->implCls()) {
@@ -401,6 +407,7 @@ void conjureBeginInlining(IRGS& env,
   };
 
   always_assert(isFCall(env.context.srcKey().op()));
+  always_assert(thisType != TBottom);
   auto const numParams = static_cast<uint32_t>(args.size());
 
   // Push space for out parameters
@@ -412,14 +419,7 @@ void conjureBeginInlining(IRGS& env,
   for (auto const argType : args) {
     push(env, conjure(argType));
   }
-  auto const ctx = thisType != TBottom ? conjure(thisType) : nullptr;
-
-  auto const arInfo = ActRecInfo {
-    offsetFromIRSP(env, BCSPRelOffset{static_cast<int32_t>(numParams)}),
-    numParams
-  };
-  gen(env, SpillFrame, arInfo, sp(env), cns(env, func), ctx,
-      cns(env, TNullptr), cns(env, false), cns(env, TNullptr));
+  auto const ctx = conjure(thisType);
 
   beginInlining(
     env,
@@ -427,13 +427,14 @@ void conjureBeginInlining(IRGS& env,
     FCallArgs(FCallArgs::Flags::None, numParams, 1, nullptr, kInvalidOffset,
               false),
     ctx,
-    ctx ? ctx->type() : TCtx,
+    ctx->type(),
+    false,
+    cns(env, TNullptr),
     env.context.srcKey().op(),
     startSk,
     0 /* callBcOffset */,
     returnTarget,
-    9, /* cost */
-    true
+    9 /* cost */
   );
 }
 

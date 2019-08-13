@@ -1019,13 +1019,13 @@ let handle_mode
     let path = expect_single_file () in
     let file_input =
       ServerCommandTypes.FileName (Relative_path.to_absolute path) in
-    let (ctx, entry) = ServerIdeContext.update
+    let (ctx, entry) = Provider_utils.update_context
       ~tcopt
-      ~ctx:ServerIdeContext.empty
+      ~ctx:Provider_context.empty
       ~path
       ~file_input
     in
-    let result = ServerIdeContext.with_context ~ctx ~f:(fun () ->
+    let result = Provider_utils.with_context ~ctx ~f:(fun () ->
       ServerIdentifyFunction.go_ctx_absolute
         ~entry
         ~line

@@ -57,9 +57,9 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, ServerTypedAst.go env filename
     | IDE_HOVER (path, line, column) ->
         let relative_path = Relative_path.create_detect_prefix path in
-        let (ctx, entry) = ServerIdeContext.update
+        let (ctx, entry) = Provider_utils.update_context
           ~tcopt:env.ServerEnv.tcopt
-          ~ctx:ServerIdeContext.empty
+          ~ctx:Provider_context.empty
           ~path:relative_path
           ~file_input:(ServerCommandTypes.FileName path)
         in
@@ -295,13 +295,13 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | GO_TO_DEFINITION (labelled_file, line, column) ->
         let (path, file_input) =
           ServerCommandTypesUtils.extract_labelled_file labelled_file in
-        let (ctx, entry) = ServerIdeContext.update
+        let (ctx, entry) = Provider_utils.update_context
           ~tcopt:env.ServerEnv.tcopt
-          ~ctx:ServerIdeContext.empty
+          ~ctx:Provider_context.empty
           ~path
           ~file_input
         in
-        ServerIdeContext.with_context ~ctx ~f:(fun () ->
+        Provider_utils.with_context ~ctx ~f:(fun () ->
           env, ServerGoToDefinition.go_ctx ~entry ~line ~column
         )
     | BIGCODE filename ->

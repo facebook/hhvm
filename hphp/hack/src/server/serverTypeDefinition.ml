@@ -42,12 +42,11 @@ let go_common
 
 (* For serverless ide *)
 let go_ctx
-    ~(entry: ServerIdeContext.entry)
+    ~(entry: Provider_context.entry)
     ~(line: int)
     ~(column: int)
     : ServerCommandTypes.Go_to_type_definition.result =
-    let tast = ServerIdeContext.get_tast ~entry in
-    go_common tast ~line ~column
+    go_common entry.Provider_context.tast ~line ~column
 
 let go
   (env: ServerEnv.env)

@@ -10,8 +10,8 @@
 (** Returns detailed information about the symbol or expression at the given
     location. *)
 val go_ctx :
-  ctx:ServerIdeContext.t ->
-  entry:ServerIdeContext.entry ->
+  ctx:Provider_context.t ->
+  entry:Provider_context.entry ->
   line:int ->
   column:int ->
   HoverService.result

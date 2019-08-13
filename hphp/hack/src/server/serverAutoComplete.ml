@@ -121,16 +121,15 @@ let auto_complete_at_position_ctx
   let content = File_content.edit_file_unsafe file_content edits in
 
   (* Assemble the server IDE context *)
-  let (_, entry) = ServerIdeContext.update
+  let (_, entry) = Provider_utils.update_context
     ~tcopt
-    ~ctx:ServerIdeContext.empty
+    ~ctx:Provider_context.empty
     ~path
     ~file_input:(ServerCommandTypes.FileContent content)
   in
 
   (* Use the server env and the param to contact autocomplete service *)
-  let tast = ServerIdeContext.get_tast entry in
-  let fileinfo = ServerIdeContext.get_fileinfo entry in
+  let fileinfo = Provider_context.get_fileinfo entry in
   let autocomplete_context =
     get_autocomplete_context content pos ~is_manually_invoked in
   AutocompleteService.go
@@ -139,5 +138,5 @@ let auto_complete_at_position_ctx
     ~content_classes:((Core_kernel.List.map fileinfo.FileInfo.classes ~f:snd) |> SSet.of_list)
     ~autocomplete_context
     ~sienv
-    tast
+    entry.Provider_context.tast
 ;;

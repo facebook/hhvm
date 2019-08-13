@@ -5,27 +5,10 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-
 open Core_kernel
 
-type entry = {
-  file_input: ServerCommandTypes.file_input;
-  path: Relative_path.t;
-  ast: Nast.program;
-  tast: Tast.program;
-}
-
-type t = entry Relative_path.Map.t
-
-let empty = Relative_path.Map.empty
-
-let extract_symbols
-    (ast: Nast.program):
-    FileInfo.id list * FileInfo.id list * FileInfo.id list * FileInfo.id list =
-      Nast.get_defs ast
-
 let with_context
-    ~(ctx: t)
+    ~(ctx: Provider_context.t)
     ~(f: unit -> 'a)
     : 'a =
   let make_then_revert_local_changes f () =
@@ -36,8 +19,11 @@ let with_context
   in
   let (_errors, result) =
     Errors.do_ @@ make_then_revert_local_changes begin fun () ->
-      Relative_path.Map.iter ctx ~f:begin fun _path { ast; _ } ->
-        let (funs, classes, typedefs, consts) = extract_symbols ast in
+      Relative_path.Map.iter ctx ~f:begin fun _path {
+        Provider_context.ast;
+        _
+      } ->
+        let (funs, classes, typedefs, consts) = Nast.get_defs ast in
 
         (* Update the positions of the symbols present in the AST by redeclaring
         them. Note that this doesn't handle *removing* any entries from the
@@ -57,12 +43,12 @@ let with_context
   in
   result
 
-let update
+let update_context
     ~(tcopt: TypecheckerOptions.t)
-    ~(ctx: t)
+    ~(ctx: Provider_context.t)
     ~(path: Relative_path.t)
     ~(file_input: ServerCommandTypes.file_input)
-    : (t * entry) =
+    : (Provider_context.t * Provider_context.entry) =
   let ast = Ast_provider.parse_file_input
     ~full:true
     path
@@ -73,7 +59,7 @@ let update
     let nast = Naming.program ast in
     Typing.nast_to_tast tcopt nast
   ) in
-  let entry = {
+  let entry = { Provider_context.
     path;
     file_input;
     ast;
@@ -81,32 +67,3 @@ let update
   } in
   let ctx = Relative_path.Map.add ctx path entry in
   (ctx, entry)
-
-let get_file_input
-    ~(ctx: t)
-    ~(path: Relative_path.t)
-    : ServerCommandTypes.file_input =
-  match Relative_path.Map.get ctx path with
-  | Some { file_input; _ } ->
-    file_input
-  | None ->
-    ServerCommandTypes.FileName (Relative_path.to_absolute path)
-
-let get_path ~(entry: entry): Relative_path.t =
-  entry.path
-
-let get_ast ~(entry: entry): Nast.program =
-  entry.ast
-
-let get_tast ~(entry: entry): Tast.program =
-  entry.tast
-
-let get_fileinfo ~(entry:entry): FileInfo.t =
-  let ast = get_ast entry in
-  let (funs, classes, typedefs, consts) = extract_symbols ast in
-  { FileInfo.empty_t with
-    FileInfo.funs;
-    classes;
-    typedefs;
-    consts;
-  }

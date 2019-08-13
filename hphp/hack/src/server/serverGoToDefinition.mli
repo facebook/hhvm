@@ -7,7 +7,7 @@
  *)
 
 val go_ctx:
-  entry:ServerIdeContext.entry ->
+  entry:Provider_context.entry ->
   line:int ->
   column:int ->
   ServerCommandTypes.Go_to_definition.result

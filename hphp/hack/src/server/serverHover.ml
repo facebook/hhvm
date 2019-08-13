@@ -84,18 +84,18 @@ let make_hover_info env_and_ty file (occurrence, def_opt) =
   HoverService.{ snippet; addendum; pos = Some occurrence.SymbolOccurrence.pos }
 
 let go_ctx
-    ~(ctx: ServerIdeContext.t)
-    ~(entry: ServerIdeContext.entry)
+    ~(ctx: Provider_context.t)
+    ~(entry: Provider_context.entry)
     ~(line: int)
     ~(column: int)
     : HoverService.result =
-  let tast = ServerIdeContext.get_tast entry in
   let identities =
     ServerIdentifyFunction.go_ctx
       ~entry
       ~line
       ~column in
-  let env_and_ty = ServerInferType.type_at_pos tast line column
+  let env_and_ty =
+    ServerInferType.type_at_pos entry.Provider_context.tast line column
     |> Option.map ~f:(fun (env, ty) -> (env, Tast_expand.expand_ty env ty)) in
   (* There are legitimate cases where we expect to have no identities returned,
      so just format the type. *)
@@ -113,9 +113,9 @@ let go_ctx
       let path = def_opt
         |> Option.map ~f:(fun def -> def.SymbolDefinition.pos)
         |> Option.map ~f:Pos.filename
-        |> Option.value ~default:(ServerIdeContext.get_path entry)
+        |> Option.value ~default:(entry.Provider_context.path)
       in
-      let file_input = ServerIdeContext.get_file_input ~ctx ~path in
+      let file_input = Provider_context.get_file_input ~ctx ~path in
       make_hover_info env_and_ty file_input (occurrence, def_opt)
     )
     |> List.remove_consecutive_duplicates ~equal:(=)

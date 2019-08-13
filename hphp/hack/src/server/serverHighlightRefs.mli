@@ -12,7 +12,7 @@ val go: (string * int * int) -> TypecheckerOptions.t ->
 
 (* For serverless IDE *)
 val go_ctx:
-  entry: ServerIdeContext.entry ->
+  entry: Provider_context.entry ->
   line: int ->
   column: int ->
   tcopt: TypecheckerOptions.t ->

@@ -196,7 +196,7 @@ let shutdown (state: state): unit Lwt.t =
 let make_context_from_document_location
     (server_env: ServerEnv.env)
     (document_location: ClientIdeMessage.document_location)
-    : (ServerIdeContext.t * ServerIdeContext.entry) =
+    : (Provider_context.t * Provider_context.entry) =
   let (file_path, file_input) = match document_location with
     | { ClientIdeMessage.file_contents = None; file_path; _ } ->
       let file_input =
@@ -209,9 +209,9 @@ let make_context_from_document_location
   let file_path = file_path
     |> Path.to_string
     |> Relative_path.create_detect_prefix in
-  ServerIdeContext.update
+  Provider_utils.update_context
     ~tcopt:server_env.ServerEnv.tcopt
-    ~ctx:ServerIdeContext.empty
+    ~ctx:Provider_context.empty
     ~path:file_path
     ~file_input
 
@@ -266,7 +266,7 @@ let handle_message: type a.
   | (Initialized { server_env; _ }, Hover document_location) ->
     let (ctx, entry) =
       make_context_from_document_location server_env document_location in
-    let result = ServerIdeContext.with_context ~ctx ~f:(fun () ->
+    let result = Provider_utils.with_context ~ctx ~f:(fun () ->
       ServerHover.go_ctx
         ~ctx
         ~entry
@@ -336,7 +336,7 @@ let handle_message: type a.
   | (Initialized { server_env; _ }, Document_highlight document_location) ->
     let (ctx, entry) =
       make_context_from_document_location server_env document_location in
-    let results = ServerIdeContext.with_context ~ctx ~f:(fun () ->
+    let results = Provider_utils.with_context ~ctx ~f:(fun () ->
       ServerHighlightRefs.go_ctx
         ~entry
         ~line:document_location.line
@@ -348,7 +348,7 @@ let handle_message: type a.
   | (Initialized { server_env; _ }, Definition document_location) ->
     let (ctx, entry) =
       make_context_from_document_location server_env document_location in
-    let result = ServerIdeContext.with_context ~ctx ~f:(fun () ->
+    let result = Provider_utils.with_context ~ctx ~f:(fun () ->
       ServerGoToDefinition.go_ctx
       ~entry
       ~line:document_location.ClientIdeMessage.line
@@ -360,7 +360,7 @@ let handle_message: type a.
   | (Initialized { server_env; _ }, Type_definition document_location) ->
     let (ctx, entry) =
       make_context_from_document_location server_env document_location in
-    let result = ServerIdeContext.with_context ~ctx ~f:(fun () ->
+    let result = Provider_utils.with_context ~ctx ~f:(fun () ->
       ServerTypeDefinition.go_ctx
       ~entry
       ~line:document_location.ClientIdeMessage.line

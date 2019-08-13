@@ -227,7 +227,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       // For "callable", if `dt' is not string/array/object/func we know
       // it's not compatible, otherwise more checks are required
       return (isStringType(dt) || isArrayType(dt) || isVecType(dt) ||
-              isFuncType(dt) || dt == KindOfObject)
+              isFuncType(dt) || dt == KindOfObject || isClsMethType(dt))
         ? AnnotAction::CallableCheck : AnnotAction::Fail;
     case AnnotMetaType::VArray:
       if (isClsMethType(dt)) {

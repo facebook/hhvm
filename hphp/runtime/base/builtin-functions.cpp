@@ -144,6 +144,15 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
     return true;
   }
 
+  if (isClsMethType(tv_func->m_type)) {
+    auto const clsmeth = tv_func->m_data.pclsmeth;
+    if (name) {
+      *name->var() = concat3(
+        clsmeth->getCls()->nameStr(), "::", clsmeth->getFunc()->nameStr());
+    }
+    return true;
+  }
+
   if (isStringType(tv_func->m_type)) {
     if (name) *name->var() = v;
     return ret;

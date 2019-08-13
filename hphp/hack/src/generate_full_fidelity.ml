@@ -21,11 +21,11 @@ type comment_style =
 
 let make_header comment_style (header_comment : string) : string =
   let open_char, close_char = match comment_style with
-  | CStyle -> "/", '/'
+  | CStyle -> "/*", '/'
   | MLStyle -> "(", ')'
   in
   sprintf
-"%s**
+"%s*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *

@@ -7,16 +7,16 @@
  *
  *)
 
-val find_class_in_file_nast :
+val find_class_in_file :
   ?full:bool -> ?case_insensitive:bool -> Relative_path.t -> string -> Nast.class_ option
-val find_fun_in_file_nast :
+val find_fun_in_file :
   ?full:bool -> ?case_insensitive:bool -> Relative_path.t -> string -> Nast.fun_ option
-val find_typedef_in_file_nast :
+val find_typedef_in_file :
   ?full:bool -> ?case_insensitive:bool -> Relative_path.t -> string -> Nast.typedef option
-val find_gconst_in_file_nast :
+val find_gconst_in_file :
   ?full:bool -> Relative_path.t -> string -> Nast.gconst option
 
-val get_nast : ?full:bool -> Relative_path.t -> Nast.program
+val get_ast : ?full:bool -> Relative_path.t -> Nast.program
 
 val parse_file_input :
   ?full:bool ->

@@ -38,7 +38,7 @@ let extract_function_body func =
   let filename = get_filename func in
   let abs_filename = Relative_path.to_absolute filename in
   let file_content = In_channel.read_all abs_filename in
-  let ast_function = value_exn FunctionNotFound @@ Ast_provider.find_fun_in_file_nast filename func in
+  let ast_function = value_exn FunctionNotFound @@ Ast_provider.find_fun_in_file filename func in
   let open Aast in
   let pos = ast_function.f_span in
   let include_first_whsp = Pos.merge (Pos.first_char_of_line pos) pos in
@@ -124,7 +124,7 @@ let get_direct_ancestors cls =
   let cls_pos = Decl_provider.Class.pos cls in
   let cls_name = Decl_provider.Class.name cls in
   let filename = Pos.filename cls_pos in
-  let aast_class = value_or_not_found cls_name @@ Ast_provider.find_class_in_file_nast filename cls_name in
+  let aast_class = value_or_not_found cls_name @@ Ast_provider.find_class_in_file filename cls_name in
   let get_namespaced_class_name hint = strip_ns_prefix cls_name @@ name_from_hint hint in
   let get_names hints = List.map hints get_namespaced_class_name in
   let open Aast in

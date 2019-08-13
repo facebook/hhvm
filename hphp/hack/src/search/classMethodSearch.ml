@@ -33,7 +33,7 @@ let query_class_methods
     end else true
   in
   get_class_definition_file class_name
-  >>= (fun file -> Ast_provider.find_class_in_file_nast file class_name)
+  >>= (fun file -> Ast_provider.find_class_in_file file class_name)
   >>| (fun class_ -> class_.Aast.c_methods)
   >>| List.filter_map ~f:begin fun m ->
     let (pos, name) = m.Aast.m_name in

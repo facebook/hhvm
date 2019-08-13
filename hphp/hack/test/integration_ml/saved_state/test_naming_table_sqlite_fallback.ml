@@ -136,7 +136,7 @@ let test () =
       let hashes =
         List.map (("qux.php", "") :: base_disk_state) ~f:(fun (name, _) ->
             let relative_path = Relative_path.from_root name in
-            let ast = Ast_provider.get_nast relative_path in
+            let ast = Ast_provider.get_ast relative_path in
             (name, Nast.generate_ast_decl_hash ast))
         |> SMap.of_list
       in

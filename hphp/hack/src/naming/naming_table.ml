@@ -1039,10 +1039,10 @@ module Types = struct
       let _path_str = Relative_path.S.to_string path in
       let id = match entry_type with
         | TClass ->
-          let class_opt = Ast_provider.find_class_in_file_nast ~case_insensitive:true path id in
+          let class_opt = Ast_provider.find_class_in_file ~case_insensitive:true path id in
           (Option.value_exn class_opt).Aast.c_name
         | TTypedef ->
-          let typedef_opt = Ast_provider.find_typedef_in_file_nast ~case_insensitive:true path id in
+          let typedef_opt = Ast_provider.find_typedef_in_file ~case_insensitive:true path id in
           (Option.value_exn typedef_opt).Aast.t_name
       in
       snd id
@@ -1115,7 +1115,7 @@ module Funs = struct
   let get_canon_name name =
     let open Core_kernel in
     let map_result path =
-      let fun_opt = Ast_provider.find_fun_in_file_nast ~case_insensitive:true path name in
+      let fun_opt = Ast_provider.find_fun_in_file ~case_insensitive:true path name in
       snd (Option.value_exn fun_opt).Aast.f_name
     in
     get_and_cache

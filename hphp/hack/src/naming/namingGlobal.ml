@@ -29,19 +29,19 @@ module GEnv = struct
     match pos with
       | FileInfo.Full p -> p, name
       | FileInfo.File (FileInfo.Class, fn) ->
-        let res = unsafe_opt (Ast_provider.find_class_in_file_nast fn name) in
+        let res = unsafe_opt (Ast_provider.find_class_in_file fn name) in
         let (p', _) = res.Aast.c_name in
         p', name
       | FileInfo.File (FileInfo.Typedef, fn) ->
-        let res = unsafe_opt (Ast_provider.find_typedef_in_file_nast fn name) in
+        let res = unsafe_opt (Ast_provider.find_typedef_in_file fn name) in
         let (p', _) = res.Aast.t_name in
         p', name
       | FileInfo.File (FileInfo.Const, fn) ->
-        let res = unsafe_opt (Ast_provider.find_gconst_in_file_nast fn name) in
+        let res = unsafe_opt (Ast_provider.find_gconst_in_file fn name) in
         let (p', _) = res.Aast.cst_name in
         p', name
       | FileInfo.File (FileInfo.Fun, fn) ->
-        let res = unsafe_opt (Ast_provider.find_fun_in_file_nast fn name) in
+        let res = unsafe_opt (Ast_provider.find_fun_in_file fn name) in
         let (p', _) = res.Aast.f_name in
         p', name
     with Invalid_argument _ ->

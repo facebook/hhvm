@@ -108,7 +108,7 @@ let type_fun
     (fn: Relative_path.t)
     (x: string)
     : Tast.def option =
-  match Ast_provider.find_fun_in_file_nast ~full:true fn x with
+  match Ast_provider.find_fun_in_file ~full:true fn x with
   | Some f ->
     let fun_ = Naming.fun_ f in
     Nast_check.def (Aast.Fun fun_);
@@ -123,7 +123,7 @@ let type_class
     (fn: Relative_path.t)
     (x: string)
     : Tast.def option =
-  match Ast_provider.find_class_in_file_nast ~full:true fn x with
+  match Ast_provider.find_class_in_file ~full:true fn x with
   | Some cls ->
     let class_ = Naming.class_ cls in
     Nast_check.def (Aast.Class class_);
@@ -140,7 +140,7 @@ let check_typedef
     (fn: Relative_path.t)
     (x: Decl_provider.typedef_key)
     : Tast.def option =
-  match Ast_provider.find_typedef_in_file_nast ~full:true fn x with
+  match Ast_provider.find_typedef_in_file ~full:true fn x with
   | Some t ->
     let typedef = Naming.typedef t in
     Nast_check.def (Aast.Typedef typedef);
@@ -156,7 +156,7 @@ let check_const
     (fn: Relative_path.t)
     (x: string)
     : Tast.def option =
-  match Ast_provider.find_gconst_in_file_nast ~full:true fn x with
+  match Ast_provider.find_gconst_in_file ~full:true fn x with
   | None -> None
   | Some cst ->
     let cst = Naming.global_const cst in

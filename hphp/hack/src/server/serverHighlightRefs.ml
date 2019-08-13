@@ -80,7 +80,7 @@ let rec combine_result l l1 l2 =
 let go (content, line, char) tcopt =
   ServerIdentifyFunction.get_occurrence_and_map tcopt content line char
     ~f:begin fun path file_info symbols ->
-      let ast = (Ast_provider.get_nast path) in
+      let ast = (Ast_provider.get_ast path) in
       match symbols with
       | symbol::_ ->
         let symbols = filter_result symbols symbol in

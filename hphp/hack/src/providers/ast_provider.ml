@@ -148,10 +148,7 @@ let get_gconst defs name =
   end in
   get None defs
 
-(* Get an AST directly from the parser heap. Will return empty AProgram
-   if the file does not exist
-*)
-let get_nast ?(full = false) file_name =
+let get_ast ?(full = false) file_name =
   match Provider_config.get_backend () with
   | Provider_config.Lru_shared_memory
   | Provider_config.Shared_memory ->
@@ -180,17 +177,17 @@ let get_nast ?(full = false) file_name =
       parse_file_input ~full file_name
         (ServerCommandTypes.FileName (Relative_path.to_absolute file_name))
 
-let find_class_in_file_nast ?(full = false) ?(case_insensitive=false) file_name class_name =
-  get_class (get_nast ~full file_name) ~case_insensitive class_name
+let find_class_in_file ?(full = false) ?(case_insensitive=false) file_name class_name =
+  get_class (get_ast ~full file_name) ~case_insensitive class_name
 
-let find_fun_in_file_nast ?(full = false) ?(case_insensitive=false) file_name fun_name =
-  get_fun (get_nast ~full file_name) ~case_insensitive fun_name
+let find_fun_in_file ?(full = false) ?(case_insensitive=false) file_name fun_name =
+  get_fun (get_ast ~full file_name) ~case_insensitive fun_name
 
-let find_typedef_in_file_nast ?(full = false) ?(case_insensitive=false) file_name name =
-  get_typedef (get_nast ~full file_name) ~case_insensitive name
+let find_typedef_in_file ?(full = false) ?(case_insensitive=false) file_name name =
+  get_typedef (get_ast ~full file_name) ~case_insensitive name
 
-let find_gconst_in_file_nast ?(full = false) file_name name =
-  get_gconst (get_nast ~full file_name) name
+let find_gconst_in_file ?(full = false) file_name name =
+  get_gconst (get_ast ~full file_name) name
 
 let local_changes_push_stack () =
   ParserHeap.LocalChanges.push_stack ()

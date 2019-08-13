@@ -346,7 +346,7 @@ and class_type_decl class_env hint =
       | Some (pos, Naming_table.TClass) when not (Decl_heap.Classes.mem cid) ->
         let fn = FileInfo.get_pos_filename pos in
         (* We are supposed to redeclare the class *)
-        let class_opt = Ast_provider.find_class_in_file_nast fn cid in
+        let class_opt = Ast_provider.find_class_in_file fn cid in
         Errors.run_in_context fn Errors.Decl begin fun () ->
           let open Option.Monad_infix in
           class_opt
@@ -934,7 +934,7 @@ let rec name_and_declare_types_program prog =
 
 
 let make_env fn =
-  let ast = Ast_provider.get_nast fn in
+  let ast = Ast_provider.get_ast fn in
   name_and_declare_types_program ast
 
 let err_not_found file name =
@@ -943,7 +943,7 @@ let err_not_found file name =
 raise (Decl_not_found err_str)
 
 let declare_class_in_file file name =
-  match Ast_provider.find_class_in_file_nast file name with
+  match Ast_provider.find_class_in_file file name with
   | Some cls ->
     let class_env = { stack = SSet.empty; } in
     class_decl_if_missing class_env cls
@@ -951,19 +951,19 @@ let declare_class_in_file file name =
     err_not_found file name
 
 let declare_fun_in_file file name =
-  match Ast_provider.find_fun_in_file_nast file name with
+  match Ast_provider.find_fun_in_file file name with
   | Some f -> ifun_decl f
   | None ->
     err_not_found file name
 
 let declare_typedef_in_file file name =
-  match Ast_provider.find_typedef_in_file_nast file name with
+  match Ast_provider.find_typedef_in_file file name with
   | Some t -> type_typedef_naming_and_decl t
   | None ->
     err_not_found file name
 
 let declare_const_in_file file name =
-  match Ast_provider.find_gconst_in_file_nast file name with
+  match Ast_provider.find_gconst_in_file file name with
   | Some cst -> iconst_decl cst
   | None ->
     err_not_found file name

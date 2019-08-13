@@ -35,19 +35,19 @@ let get_class_by_name x =
   Naming_table.Types.get_pos x >>= fun (pos, _) ->
   let fn = FileInfo.get_pos_filename pos in
   Ide_parser_cache.with_ide_cache @@ fun () ->
-    Ast_provider.find_class_in_file_nast fn x
+    Ast_provider.find_class_in_file fn x
 
 let get_function_by_name x =
   Naming_table.Funs.get_pos x >>= fun pos ->
   let fn = FileInfo.get_pos_filename pos in
   Ide_parser_cache.with_ide_cache @@ fun () ->
-    Ast_provider.find_fun_in_file_nast fn x
+    Ast_provider.find_fun_in_file fn x
 
 let get_gconst_by_name x =
   Naming_table.Consts.get_pos x >>= fun pos ->
   let fn = FileInfo.get_pos_filename pos in
   Ide_parser_cache.with_ide_cache @@ fun () ->
-    Ast_provider.find_gconst_in_file_nast fn x
+    Ast_provider.find_gconst_in_file fn x
 
 (* Span information is stored only in parsing AST *)
 let get_member_def (x : class_element) =
@@ -93,9 +93,9 @@ let summarize_class_typedef x =
   Naming_table.Types.get_pos x >>= fun (pos, ct) ->
     let fn = FileInfo.get_pos_filename pos in
     match ct with
-      | Naming_table.TClass -> (Ast_provider.find_class_in_file_nast fn x >>=
+      | Naming_table.TClass -> (Ast_provider.find_class_in_file fn x >>=
                 fun c -> Some (FileOutline.summarize_class c ~no_children:true))
-      | Naming_table.TTypedef -> (Ast_provider.find_typedef_in_file_nast fn x >>=
+      | Naming_table.TTypedef -> (Ast_provider.find_typedef_in_file fn x >>=
                 fun tdef -> Some (FileOutline.summarize_typedef tdef))
 
 let go ast result =

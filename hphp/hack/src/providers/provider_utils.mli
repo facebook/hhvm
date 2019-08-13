@@ -12,7 +12,6 @@ val compute_tast:
 the given context. *)
 
 val update_context:
-  tcopt:TypecheckerOptions.t ->
   ctx:Provider_context.t ->
   path:Relative_path.t ->
   file_input:ServerCommandTypes.file_input ->

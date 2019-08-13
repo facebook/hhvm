@@ -25,7 +25,7 @@ let with_context
   in
   let (_errors, result) =
     Errors.do_ @@ make_then_revert_local_changes begin fun () ->
-      Relative_path.Map.iter ctx ~f:begin fun _path {
+      Relative_path.Map.iter ctx.Provider_context.entries ~f:begin fun _path {
         Provider_context.ast;
         _
       } ->
@@ -50,7 +50,6 @@ let with_context
   result
 
 let update_context
-    ~(tcopt: TypecheckerOptions.t)
     ~(ctx: Provider_context.t)
     ~(path: Relative_path.t)
     ~(file_input: ServerCommandTypes.file_input)
@@ -61,29 +60,30 @@ let update_context
     file_input
   in
   Ast_provider.provide_ast_hint path ast Ast_provider.Full;
-  let tast = lazy (
-    let nast = Naming.program ast in
-    Typing.nast_to_tast tcopt nast
-  ) in
   let entry = { Provider_context.
     path;
     file_input;
     ast;
-    tast;
   } in
-  let ctx = Relative_path.Map.add ctx path entry in
+  let ctx = {
+    ctx with
+    Provider_context.entries =
+      Relative_path.Map.add ctx.Provider_context.entries path entry
+  } in
   (ctx, entry)
 
 let compute_tast
     ~(ctx: Provider_context.t)
     ~(entry: Provider_context.entry)
     : Tast.program =
+  let make_tast () =
+    let nast = Naming.program entry.Provider_context.ast in
+    Typing.nast_to_tast ctx.Provider_context.tcopt nast
+  in
   match Provider_context.get_global_context () with
   | None ->
-    with_context ~ctx ~f:(fun () ->
-      Lazy.force entry.Provider_context.tast
-    )
+    with_context ~ctx ~f:make_tast
   | Some _ ->
     (* No need for [with_context] -- assume that's already the context we're
     operating under. *)
-    Lazy.force entry.Provider_context.tast
+    make_tast ()

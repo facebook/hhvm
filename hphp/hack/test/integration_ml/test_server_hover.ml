@@ -886,8 +886,7 @@ let test () =
         let file_input = ServerCommandTypes.FileName ("/" ^ file) in
         let (ctx, entry) =
           Provider_utils.update_context
-            ~tcopt:env.ServerEnv.tcopt
-            ~ctx:Provider_context.empty
+            ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
             ~path
             ~file_input
         in

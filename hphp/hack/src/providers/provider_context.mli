@@ -10,11 +10,13 @@ type entry = {
   file_input: ServerCommandTypes.file_input;
   path: Relative_path.t;
   ast: Nast.program;
-  tast: Tast.program Lazy.t;
 } [@@deriving show]
 (** The information associated with a given file. *)
 
-type t = entry Relative_path.Map.t
+type t = {
+  tcopt: TypecheckerOptions.t;
+  entries: entry Relative_path.Map.t
+}
 (** A context mapping from file to the [entry] for that file.
 
 This acts as an "overlay" or "delta" on the state of the world, relative to the
@@ -23,7 +25,7 @@ files that exist in the repo on disk.
 To load this state of the world for use in a given operation, use
 [ServerIdeUtils.with_context]. *)
 
-val empty : t
+val empty : tcopt:TypecheckerOptions.t -> t
 (** The empty context, denoting no delta from the current state of the world. *)
 
 val get_file_input :

@@ -58,12 +58,11 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | IDE_HOVER (path, line, column) ->
         let relative_path = Relative_path.create_detect_prefix path in
         let (ctx, entry) = Provider_utils.update_context
-          ~tcopt:env.ServerEnv.tcopt
-          ~ctx:Provider_context.empty
+          ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
           ~path:relative_path
           ~file_input:(ServerCommandTypes.FileName path)
         in
-        let result  = ServerHover.go_ctx
+        let result = ServerHover.go_ctx
           ~ctx
           ~entry
           ~line
@@ -296,8 +295,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let (path, file_input) =
           ServerCommandTypesUtils.extract_labelled_file labelled_file in
         let (ctx, entry) = Provider_utils.update_context
-          ~tcopt:env.ServerEnv.tcopt
-          ~ctx:Provider_context.empty
+          ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
           ~path
           ~file_input
         in

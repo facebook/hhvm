@@ -210,8 +210,7 @@ let make_context_from_document_location
     |> Path.to_string
     |> Relative_path.create_detect_prefix in
   Provider_utils.update_context
-    ~tcopt:server_env.ServerEnv.tcopt
-    ~ctx:Provider_context.empty
+    ~ctx:(Provider_context.empty ~tcopt:server_env.ServerEnv.tcopt)
     ~path:file_path
     ~file_input
 

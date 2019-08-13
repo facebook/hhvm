@@ -1020,8 +1020,7 @@ let handle_mode
     let file_input =
       ServerCommandTypes.FileName (Relative_path.to_absolute path) in
     let (ctx, entry) = Provider_utils.update_context
-      ~tcopt
-      ~ctx:Provider_context.empty
+      ~ctx:(Provider_context.empty ~tcopt)
       ~path
       ~file_input
     in

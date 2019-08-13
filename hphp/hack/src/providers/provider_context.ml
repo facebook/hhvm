@@ -12,12 +12,17 @@ type entry = {
   file_input: ServerCommandTypes.file_input;
   path: Relative_path.t;
   ast: Nast.program;
-  tast: Tast.program Lazy.t;
 } [@@deriving show]
 
-type t = entry Relative_path.Map.t
+type t = {
+  tcopt: TypecheckerOptions.t;
+  entries: entry Relative_path.Map.t;
+}
 
-let empty = Relative_path.Map.empty
+let empty ~tcopt = {
+  tcopt;
+  entries = Relative_path.Map.empty;
+}
 
 let global_context: t option ref = ref None
 
@@ -25,7 +30,7 @@ let get_file_input
     ~(ctx: t)
     ~(path: Relative_path.t)
     : ServerCommandTypes.file_input =
-  match Relative_path.Map.get ctx path with
+  match Relative_path.Map.get ctx.entries path with
   | Some { file_input; _ } ->
     file_input
   | None ->

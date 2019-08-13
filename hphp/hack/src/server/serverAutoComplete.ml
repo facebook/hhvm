@@ -122,8 +122,7 @@ let auto_complete_at_position_ctx
 
   (* Assemble the server IDE context *)
   let (ctx, entry) = Provider_utils.update_context
-    ~tcopt
-    ~ctx:Provider_context.empty
+    ~ctx:(Provider_context.empty ~tcopt)
     ~path
     ~file_input:(ServerCommandTypes.FileContent content)
   in

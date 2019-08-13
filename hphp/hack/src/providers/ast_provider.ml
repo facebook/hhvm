@@ -167,9 +167,10 @@ let get_ast ?(full = false) file_name =
   | Provider_config.Local_memory _ ->
     let ast_opt =
       let open Option.Monad_infix in
+      let open Provider_context in
       Provider_context.get_global_context () >>= fun ctx ->
-      Relative_path.Map.get ctx file_name >>| fun entry ->
-      entry.Provider_context.ast
+      Relative_path.Map.get ctx.Provider_context.entries file_name  >>| fun entry ->
+      entry.ast
     in
     match ast_opt with
     | Some ast -> ast

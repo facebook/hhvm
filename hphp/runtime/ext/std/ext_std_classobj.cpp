@@ -366,8 +366,9 @@ Variant HHVM_FUNCTION(call_user_method_array, const String& method_name,
 
 String HHVM_FUNCTION(HH_class_meth_get_class, TypedValue v) {
   if (!tvIsClsMeth(v)) {
-    raise_error("Argument 1 passed to %s must be a class_meth",
-                __FUNCTION__+5);
+    SystemLib::throwInvalidArgumentExceptionObject(
+      folly::sformat("Argument 1 passed to {}() must be a class_meth",
+      __FUNCTION__+5));
   }
   auto const c = val(v).pclsmeth->getCls();
   return String::attach(const_cast<StringData*>(classToStringHelper(c)));
@@ -375,8 +376,9 @@ String HHVM_FUNCTION(HH_class_meth_get_class, TypedValue v) {
 
 String HHVM_FUNCTION(HH_class_meth_get_method, TypedValue v) {
   if (!tvIsClsMeth(v)) {
-    raise_error("Argument 1 passed to %s must be a class_meth",
-                __FUNCTION__+5);
+    SystemLib::throwInvalidArgumentExceptionObject(
+      folly::sformat("Argument 1 passed to {}() must be a class_meth",
+      __FUNCTION__+5));
   }
   auto const c = val(v).pclsmeth->getFunc();
   return String::attach(const_cast<StringData*>(funcToStringHelper(c)));

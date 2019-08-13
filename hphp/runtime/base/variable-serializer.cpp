@@ -1519,11 +1519,11 @@ void VariableSerializer::serializeClsMeth(
 
     case Type::VarExport:
     case Type::PHPOutput:
-      m_buf->append("classMeth{\n    class(");
+      m_buf->append("class_meth(");
       write(clsName->data(), clsName->size());
-      m_buf->append(")\n    fun(");
+      m_buf->append(", ");
       write(funcName->data(), funcName->size());
-      m_buf->append(")\n}");
+      m_buf->append(')');
       break;
 
     case Type::VarDump:

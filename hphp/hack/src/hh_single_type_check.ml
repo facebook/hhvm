@@ -189,6 +189,7 @@ let parse_options () =
   let out_extension = ref ".out" in
   let like_types = ref false in
   let pessimize_types = ref false in
+  let simple_pessimize = ref 0.0 in
   let coercion_from_dynamic = ref false in
   let disable_partially_abstract_typeconsts = ref false in
   let search_provider = ref "TrieIndex" in
@@ -416,6 +417,9 @@ let parse_options () =
     "--pessimize-types",
       Arg.Set pessimize_types,
       "When unenforceable types are encountered, convert them to like types";
+    "--simple-pessimize",
+      Arg.Set_float simple_pessimize,
+      "At coercion points, if a type is not enforceable, wrap it in like. Float argument 0.0 to 1.0 sets frequency";
     "--coercion-from-dynamic",
       Arg.Set coercion_from_dynamic,
       "Allows coercion from dynamic and like types to enforceable types at positions that \
@@ -506,6 +510,7 @@ let parse_options () =
     ~tco_shallow_class_decl:(!shallow_class_decl)
     ~tco_like_types:(!like_types)
     ~tco_pessimize_types:(!pessimize_types)
+    ~tco_simple_pessimize:(!simple_pessimize)
     ~tco_coercion_from_dynamic:(!coercion_from_dynamic)
     ~tco_disable_partially_abstract_typeconsts:(!disable_partially_abstract_typeconsts)
     ~log_levels:(!log_levels)

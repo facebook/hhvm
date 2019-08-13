@@ -236,6 +236,10 @@ type t = {
      i.e. vec<string> => vec<~string> *)
   tco_pessimize_types : bool;
 
+  (* A simpler form of pessimization, only wraps the outermost type in like
+   * if the type is not enforceable *)
+  tco_simple_pessimize : float;
+
   (* Enables coercion from dynamic and like types to enforceable types
      i.e. dynamic ~> int, ~string ~> string *)
   tco_coercion_from_dynamic : bool;
@@ -350,6 +354,7 @@ val make :
   ?profile_type_check_duration_threshold: float ->
   ?tco_like_types: bool ->
   ?tco_pessimize_types: bool ->
+  ?tco_simple_pessimize: float ->
   ?tco_coercion_from_dynamic: bool ->
   ?tco_disable_partially_abstract_typeconsts: bool ->
   ?error_codes_treated_strictly: ISet.t ->
@@ -436,6 +441,7 @@ val po_rust : t -> bool
 val profile_type_check_duration_threshold : t -> float
 val tco_like_types : t -> bool
 val tco_pessimize_types : t -> bool
+val tco_simple_pessimize : t -> float
 val tco_coercion_from_dynamic : t -> bool
 val tco_disable_partially_abstract_typeconsts : t -> bool
 val error_codes_treated_strictly : t -> ISet.t

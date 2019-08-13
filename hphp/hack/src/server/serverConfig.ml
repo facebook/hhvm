@@ -309,6 +309,7 @@ let load config_filename options =
     ~profile_type_check_duration_threshold:(local_config.ServerLocalConfig.profile_type_check_duration_threshold)
     ?tco_like_types:(bool_opt "like_types" config)
     ?tco_pessimize_types:(bool_opt "pessimize_types" config)
+    ?tco_simple_pessimize:(float_opt "simple_pessimize" config)
     ?tco_coercion_from_dynamic:(bool_opt "coercion_from_dynamic" config)
     ?tco_disable_partially_abstract_typeconsts:(bool_opt "disable_partially_abstract_typeconsts" config)
     ~error_codes_treated_strictly:(prepare_error_codes_treated_strictly config)

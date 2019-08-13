@@ -99,7 +99,7 @@ const StaticString s_cmpWithNonRecord(
 ///////////////////////////////////////////////////////////////////////////////
 
 bool array_is_valid_callback(const Array& arr) {
-  if (!arr.isPHPArray() && !arr.isVecArray()) return false;
+  if (!arr.isPHPArray() && !arr.isVecArray() && !arr.isDict()) return false;
   if (arr.size() != 2 || !arr.exists(int64_t(0)) || !arr.exists(int64_t(1))) {
     return false;
   }
@@ -149,7 +149,9 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
     return ret;
   }
 
-  if (isArrayType(tv_func->m_type) || isVecType(tv_func->m_type)) {
+  if (isArrayType(tv_func->m_type) ||
+      isVecType(tv_func->m_type) ||
+      isDictType(tv_func->m_type)) {
     auto const arr = Array(tv_func->m_data.parr);
     auto const clsname = arr.rvalAt(int64_t(0)).unboxed();
     auto const mthname = arr.rvalAt(int64_t(1)).unboxed();

@@ -17,27 +17,23 @@ array(1) {
   int(6)
 }
 ====================================================
-
-Fatal error: Invalid callable (array) in %s on line 9
+int(7)
 ====================================================
-
-Fatal error: Invalid callable (array) in %s on line 9
+int(8)
 ====================================================
-
-Warning: Invalid argument: function: not a valid callback array in %s on line 10
-NULL
+int(9)
 ====================================================
-
-Warning: Invalid argument: function: not a valid callback array in %s on line 10
-NULL
+int(10)
 ====================================================
-
-Warning: array_map() expects parameter 1 to be a valid callback in %s on line 11
-NULL
+array(1) {
+  [0]=>
+  int(11)
+}
 ====================================================
-
-Warning: array_map() expects parameter 1 to be a valid callback in %s on line 11
-NULL
+array(1) {
+  [0]=>
+  int(12)
+}
 ====================================================
 
 Fatal error: Invalid callable (array) in %s on line 9

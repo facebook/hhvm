@@ -1037,7 +1037,7 @@ void fcallFuncStr(IRGS& env, const FCallArgs& fca) {
 
 void fcallFuncArr(IRGS& env, const FCallArgs& fca) {
   UNUSED auto const arr = topC(env);
-  assertx(arr->isA(TArr) || arr->isA(TVec));
+  assertx(arr->isA(TArr) || arr->isA(TVec) || arr->isA(TDict));
 
   return interpOne(env);
 }
@@ -1076,6 +1076,7 @@ void emitFCallFunc(IRGS& env, FCallArgs fca, const ImmVector& v) {
   if (callee->isA(TStr)) return fcallFuncStr(env, fca);
   if (callee->isA(TArr)) return fcallFuncArr(env, fca);
   if (callee->isA(TVec)) return fcallFuncArr(env, fca);
+  if (callee->isA(TDict)) return fcallFuncArr(env, fca);
   return interpOne(env);
 }
 

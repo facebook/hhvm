@@ -4698,6 +4698,8 @@ OPTBLD_INLINE void fcallFuncObj(PC origpc, PC& pc, const FCallArgs& fca,
  *   array('Class', 'method'),
  *   vec[$instance, 'method'],
  *   vec['Class', 'method'],
+ *   dict[0 => $instance, 1 => 'method'],
+ *   dict[0 => 'Class', 1 => 'method'],
  *   array(Class*, Func*),
  *   array(ObjectData*, Func*),
  */

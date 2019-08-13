@@ -50,10 +50,10 @@ end = struct
       | Toption x -> ty x
       | Tlike x -> ty x
       | Tfun fty ->
-          List.iter (List.map fty.ft_params (fun x -> x.fp_type)) ty;
-          ty fty.ft_ret;
+          List.iter (List.map fty.ft_params (fun x -> x.fp_type.et_type)) ty;
+          ty fty.ft_ret.et_type;
           (match fty.ft_arity with
-            | Fvariadic (_min, { fp_type = var_ty; _ }) -> ty var_ty
+            | Fvariadic (_min, { fp_type = var_ty; _ }) -> ty var_ty.et_type
             | _ -> ())
       | Tabstract (AKnewtype (_, tyl), x) ->
           List.iter tyl ty; ty_opt x

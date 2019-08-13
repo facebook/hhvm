@@ -142,15 +142,15 @@ and pessimize_fun_type env (ft: decl fun_type) =
   let trust_awaitable = match ft_fun_kind with
   | Ast_defs.FAsync | Ast_defs.FAsyncGenerator -> true
   | _ -> false in
-  let ft_ret = pessimize_type env ~trust_awaitable ft_ret in
+  let ft_ret_type = pessimize_type env ~trust_awaitable ft_ret.et_type in
   let ft_params = List.map ft_params ~f:(fun param ->
-    let ty = pessimize_type env param.fp_type in
-    { param with fp_type = ty }
+    let ty = pessimize_type env param.fp_type.et_type in
+    { param with fp_type = { param.fp_type with et_type = ty } }
   ) in
   let ft_tparams = Tuple.T2.map_fst ft_tparams
     ~f:(List.map ~f:(pessimize_tparam_constraints env)) in
   { ft with
     ft_params;
-    ft_ret;
+    ft_ret = { ft_ret with et_type = ft_ret_type };
     ft_tparams;
   }

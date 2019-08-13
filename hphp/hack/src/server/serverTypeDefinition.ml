@@ -30,7 +30,7 @@ let go_common
       | Tunion ty_lst ->
         List.fold ty_lst ~init:acc ~f:(fun a (_,y) -> handle_type a y)
       | Tfun fn_type ->
-        let (_, ret_type) = fn_type.ft_ret in begin
+        let (_, ret_type) = fn_type.ft_ret.et_type in begin
           match ret_type with
           | Tprim _ -> (* default to function definition *)
             (fn_type.ft_pos, Tast_env.print_ty env (reason, ty))::acc

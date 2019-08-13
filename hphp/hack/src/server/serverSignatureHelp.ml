@@ -113,7 +113,7 @@ let go env (file, line, char) =
       let parinfo_label =
         match param.fp_name with
         | Some s -> s
-        | None -> Tast_env.print_ty typing_env ft.ft_ret
+        | None -> Tast_env.print_ty typing_env ft.ft_ret.et_type
       in
       { parinfo_label; parinfo_documentation = None }
     end

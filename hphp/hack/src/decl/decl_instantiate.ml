@@ -76,16 +76,16 @@ and instantiate_ subst x =
         SMap.remove (snd t.tp_name) subst
       end ~init:subst tparams in
       let params = List.map ft.ft_params begin fun param ->
-        let ty = instantiate subst param.fp_type in
+        let ty = instantiate_possibly_enforced_ty subst param.fp_type in
         { param with fp_type = ty }
       end in
       let arity = match ft.ft_arity with
         | Fvariadic (min, ({ fp_type = var_ty; _ } as param)) ->
-          let var_ty = instantiate subst var_ty in
+          let var_ty = instantiate_possibly_enforced_ty subst var_ty in
           Fvariadic (min, { param with fp_type = var_ty })
         | Fellipsis _ | Fstandard _ as x -> x
       in
-      let ret = instantiate subst ft.ft_ret in
+      let ret = instantiate_possibly_enforced_ty subst ft.ft_ret in
       let tparams = List.map tparams begin fun t -> { t with
         tp_constraints = List.map t.tp_constraints (fun (ck, ty) -> (ck, instantiate subst ty))
       } end in
@@ -101,6 +101,10 @@ and instantiate_ subst x =
   | Tshape (shape_kind, fdm) ->
       let fdm = ShapeFieldMap.map (instantiate subst) fdm in
       Tshape (shape_kind, fdm)
+
+and instantiate_possibly_enforced_ty subst et =
+  { et_type = instantiate subst et.et_type;
+    et_enforced = et.et_enforced }
 
 let instantiate_ce subst ({ ce_type = x; _ } as ce) =
   { ce with ce_type = lazy (instantiate subst (Lazy.force x)) }

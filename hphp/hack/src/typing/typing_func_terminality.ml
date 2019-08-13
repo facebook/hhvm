@@ -30,7 +30,7 @@ let get_static_meth (cls_name:string) (meth_name:string) =
     end
 
 let funopt_is_noreturn = function
-  | Some ({ Typing_defs.ft_ret = (_r, Typing_defs.Tprim Tnoreturn); _})
+  | Some ({ Typing_defs.ft_ret = { Typing_defs.et_type = (_r, Typing_defs.Tprim Tnoreturn); _}; _ })
     -> true
   | _ -> false
 
@@ -68,6 +68,6 @@ let static_meth_is_noreturn env ci meth_id =
     | _ -> false
 
   let is_noreturn env =
-  match (Env.get_return env).Typing_env_return_info.return_type with
+  match (Env.get_return env).Typing_env_return_info.return_type.et_type with
   | _, Tprim Tnoreturn -> true
   | _ -> false

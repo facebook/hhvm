@@ -353,7 +353,7 @@ and 'phase fun_type = {
   ft_tparams    : ('phase tparam) list * fun_tparams_kind;
   ft_where_constraints : 'phase where_constraint list  ;
   ft_params     : 'phase fun_params   ;
-  ft_ret        : 'phase ty           ;
+  ft_ret        : 'phase possibly_enforced_ty ;
   (* Carries through the sync/async information from the aast *)
   ft_fun_kind   : Ast_defs.fun_kind        ;
   ft_reactive   : reactivity          ;
@@ -384,10 +384,16 @@ and param_rx_annotation =
   | Param_rx_var
   | Param_rx_if_impl of decl ty
 
+and 'phase possibly_enforced_ty = {
+  (* True if consumer of this type enforces it at runtime *)
+  et_enforced : bool;
+  et_type : 'phase ty;
+}
+
 and 'phase fun_param = {
   fp_pos  : Pos.t;
   fp_name : string option;
-  fp_type : 'phase ty;
+  fp_type : 'phase possibly_enforced_ty;
   fp_kind : param_mode;
   fp_accept_disposable : bool;
   fp_mutability           : param_mutability option;
@@ -778,7 +784,7 @@ let rec ty_compare ?(normalize_lists = false) ty1 ty2 =
       | n -> n
 
     and tfun_compare fty1 fty2 =
-      begin match ty_compare fty1.ft_ret fty2.ft_ret with
+      begin match possibly_enforced_ty_compare fty1.ft_ret fty2.ft_ret with
       | 0 ->
         begin match ft_params_compare fty1.ft_params fty2.ft_params with
         | 0 ->
@@ -820,14 +826,18 @@ and tyl_compare ~sort ?(normalize_lists = false) tyl1 tyl2 =
     else (tyl1, tyl2) in
   List.compare (ty_compare ~normalize_lists) tyl1 tyl2
 
-and ft_params_compare ?(normalize_lists = false) params1 params2 =
-  let ty_compare = ty_compare ~normalize_lists in
+and possibly_enforced_ty_compare ?(normalize_lists = false) ety1 ety2 =
+  begin match ty_compare ~normalize_lists ety1.et_type ety2.et_type with
+  | 0 -> Bool.compare ety1.et_enforced ety2.et_enforced
+  | n -> n
+end
 
+and ft_params_compare ?(normalize_lists = false) params1 params2 =
   let rec ft_params_compare params1 params2 =
     List.compare ft_param_compare params1 params2
 
   and ft_param_compare param1 param2 =
-    match ty_compare param1.fp_type param2.fp_type with
+    match possibly_enforced_ty_compare ~normalize_lists param1.fp_type param2.fp_type with
     | 0 ->
       compare
         (param1.fp_kind, param1.fp_accept_disposable, param1.fp_mutability)

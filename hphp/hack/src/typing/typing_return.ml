@@ -14,33 +14,37 @@ open Typing_env_return_info
 module Env = Typing_env
 module TUtils = Typing_utils
 module MakeType = Typing_make_type
+module Phase = Typing_phase
 
 (* The regular strip_awaitable function depends on expand_type and only works on locl types *)
-let strip_awaitable_decl env (ty: decl ty) =
+let strip_awaitable_decl fun_kind env (ty: decl ty) =
+  if fun_kind <> Ast_defs.FAsync then ty
+  else
   match Env.get_fn_kind env, ty with
   | Ast_defs.FAsync, (_, Tapply ((_, class_name), [inner_ty]))
     when class_name = Naming_special_names.Classes.cAwaitable ->
       inner_ty
   | _ -> ty
 
-let strip_awaitable fun_kind env ty =
-  if fun_kind <> Ast_defs.FAsync then ty
+let strip_awaitable fun_kind env et =
+  if fun_kind <> Ast_defs.FAsync then et
   else
-  match Env.expand_type env ty with
+  match Env.expand_type env et.et_type with
   | _env, (_, Tclass ((_, class_name), _, [ty]))
     when class_name = Naming_special_names.Classes.cAwaitable ->
-    ty
+    { et with et_type = ty }
     (* In non-strict code we might find Awaitable without type arguments. Assume Tany *)
   | _env, (_, Tclass ((_, class_name), _, []))
     when class_name = Naming_special_names.Classes.cAwaitable ->
-    (Reason.Rnone, TUtils.tany env)
+    { et with et_type = (Reason.Rnone, TUtils.tany env) }
   | _ ->
-    ty
+    et
 
-let enforce_return_not_disposable fun_kind env ty =
-  match Typing_disposable.is_disposable_type env (strip_awaitable fun_kind env ty) with
+let enforce_return_not_disposable fun_kind env et =
+  let stripped_et = strip_awaitable fun_kind env et in
+  match Typing_disposable.is_disposable_type env stripped_et.et_type with
   | Some class_name ->
-    Errors.invalid_disposable_return_hint (Reason.to_pos (fst ty))
+    Errors.invalid_disposable_return_hint (Reason.to_pos (fst et.et_type))
       (Utils.strip_ns class_name)
   | None ->
     ()
@@ -57,16 +61,21 @@ let has_mutable_return_attribute attrs =
 let has_return_void_to_rx_attribute attrs =
   has_attribute SN.UserAttributes.uaReturnsVoidToRx attrs
 
-
 let make_info fun_kind attributes env ~is_explicit locl_ty decl_ty =
   let return_disposable = has_return_disposable_attribute attributes in
   let return_mutable = has_mutable_return_attribute attributes in
   let return_void_to_rx = has_return_void_to_rx_attribute attributes in
+  let et_enforced =
+    match decl_ty with
+    | None -> false
+    | Some decl_ty ->
+      let stripped_decl_ty = strip_awaitable_decl fun_kind env decl_ty in
+      Phase.is_enforceable env stripped_decl_ty in
+  let return_type = { et_type = locl_ty; et_enforced } in
   if not return_disposable
-  then enforce_return_not_disposable fun_kind env locl_ty;
+  then enforce_return_not_disposable fun_kind env return_type;
   {
-    return_type = locl_ty;
-    return_type_decl = decl_ty;
+    return_type;
     return_disposable;
     return_mutable;
     return_explicit = is_explicit;
@@ -85,7 +94,6 @@ let wrap_awaitable env p rty =
       (Reason.Rnone, TUtils.terr env)
     | Ast_defs.FAsync ->
       MakeType.awaitable (Reason.Rret_fun_kind (p, Ast_defs.FAsync)) rty
-
 
 let make_return_type localize env (ty: decl ty) =
   match Env.get_fn_kind env, ty with
@@ -152,4 +160,4 @@ let implicit_return env pos ~expected ~actual =
     if TypecheckerOptions.disallow_implicit_returns_in_non_void_functions (Env.get_tcopt env)
     then Typing_ops.sub_type pos Reason.URreturn env expected actual Errors.missing_return
     else env in
-  Typing_ops.coerce_type pos Reason.URreturn env actual expected Errors.missing_return
+  Typing_ops.coerce_type pos Reason.URreturn env actual { et_type = expected; et_enforced = false } Errors.missing_return

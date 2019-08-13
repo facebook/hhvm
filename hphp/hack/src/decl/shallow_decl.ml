@@ -185,7 +185,7 @@ let method_type env m =
     ft_tparams  = (tparams, FTKtparams);
     ft_where_constraints = where_constraints;
     ft_params   = params;
-    ft_ret      = ret;
+    ft_ret      = { et_type = ret; et_enforced = false; };
     ft_reactive = reactivity;
     ft_mutability = mut;
     ft_returns_mutable = returns_mutable;
@@ -222,7 +222,7 @@ let method_redeclaration_type env m =
     ft_tparams  = (tparams, FTKtparams);
     ft_where_constraints = where_constraints;
     ft_params   = params;
-    ft_ret      = ret;
+    ft_ret      = { et_type = ret; et_enforced = false; };
     ft_reactive = Nonreactive;
     ft_mutability = None;
     ft_returns_mutable = false;

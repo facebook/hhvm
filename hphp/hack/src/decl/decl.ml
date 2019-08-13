@@ -245,7 +245,7 @@ and fun_decl_in_env env f =
     ft_tparams     = (tparams, FTKtparams);
     ft_where_constraints = where_constraints;
     ft_params      = params;
-    ft_ret         = ret_ty;
+    ft_ret         = { et_type = ret_ty; et_enforced = false; };
     ft_fun_kind    = f.f_fun_kind;
     ft_reactive    = reactivity;
     ft_mutability     = None; (* Functions can't be mutable because they don't have "this" *)

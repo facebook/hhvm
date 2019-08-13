@@ -118,34 +118,34 @@ let force_null_union env r t =
 *)
 
 (* checks coercion that isn't just subtyping *)
-let rec can_coerce p env ?(ur=Reason.URnone) ty_have ?ty_expect_decl ty_expect on_error =
-  let env, ety_expect = Env.expand_type env ty_expect in
+let rec can_coerce p env ?(ur=Reason.URnone) ty_have ty_expect on_error =
+  Typing_log.(log_with_level env "sub" 1 (fun () ->
+    log_types p env
+    [Log_head ("can_coerce",
+     [Log_type ("ty_have", ty_have);
+      Log_type ("ty_expect", ty_expect.et_type)])]));
+  let env, ety_expect = Env.expand_type env ty_expect.et_type in
   let env, ety_have = Env.expand_type env ty_have in
   match ety_have, ety_expect with
 
   | _, (_, Tdynamic) -> Some env
 
   (* dynamic ~> T if T is enforceable
-   *
-   * We only allow coercion if the coercion function was provided a decl ty
-   * target for coercion. The reason is because locl tys lose information about
-   * their origin, which can distinguish enforceable and unenforceable types. *)
+   *)
   | (_, Tdynamic), _
     when (TypecheckerOptions.coercion_from_dynamic (Env.get_tcopt env)) ->
-    let open Option in
-    ty_expect_decl >>= (supports_coercion_from_dynamic env)
+    if ty_expect.et_enforced then Some env
+    else None
 
   (* T1 ~> T2 if T1 is bounded above by T3, T2 is enforceable, and T3 ~> T2 *)
   | (_, Tabstract _), _
     when (TypecheckerOptions.coercion_from_dynamic (Env.get_tcopt env)) ->
-    let open Option in
-    ty_expect_decl >>= (supports_coercion_from_dynamic env) >>| (fun env ->
-      let env, upper_bounds = Typing_utils.get_concrete_supertypes env ety_have in
-      Typing_utils.run_on_intersection env ~f:(fun env upper_bound ->
-        let env = coerce_type p ur env upper_bound ?ty_expect_decl ty_expect on_error in
+      if not ty_expect.et_enforced then None
+      else let env, upper_bounds = Typing_utils.get_concrete_supertypes env ety_have in
+      Some (Typing_utils.run_on_intersection env ~f:(fun env upper_bound ->
+        let env = coerce_type p ur env upper_bound ty_expect on_error in
         env, ()
-      ) upper_bounds |> fst
-    )
+      ) upper_bounds |> fst)
 
   (* T1|T2 ~> T if T1 ~> T and T2 ~> T *)
   | (_, Tunion tyl), _
@@ -153,25 +153,26 @@ let rec can_coerce p env ?(ur=Reason.URnone) ty_have ?ty_expect_decl ty_expect o
     (* If coercion and subtyping fail for any of the elements of the union,
      * errors will be emitted *)
     Some (List.fold tyl ~init:env ~f:(fun env ty ->
-      coerce_type p ur env ty ?ty_expect_decl ty_expect on_error
+      coerce_type p ur env ty ty_expect on_error
     ))
 
   (* TODO: remove in accordance with T45650596 *)
   | (r, Toption t), _
     when (TypecheckerOptions.coercion_from_dynamic (Env.get_tcopt env)) ->
     let union: locl ty = force_null_union env r t in
-    can_coerce p env ~ur union ?ty_expect_decl ty_expect on_error
+    can_coerce p env ~ur union ty_expect on_error
 
   (* TODO: remove in accordance with T45650596 *)
-  | _, (_, Toption ty) -> can_coerce p env ty_have ?ty_expect_decl ty on_error
+  | _, (_, Toption ty) ->
+    can_coerce p env ty_have { et_type = ty; et_enforced = ty_expect.et_enforced } on_error
 
   | _ -> None
 
 (* does coercion, including subtyping *)
-and coerce_type p ?sub_fn:(sub=Typing_ops.sub_type) ur env ty_have ?ty_expect_decl ty_expect on_error =
-  match can_coerce p env ~ur ty_have ?ty_expect_decl ty_expect on_error with
+and coerce_type p ?sub_fn:(sub=Typing_ops.sub_type) ur env ty_have ty_expect on_error =
+  match can_coerce p env ~ur ty_have ty_expect on_error with
   | Some e -> e
-  | None -> sub p ur env ty_have ty_expect on_error
+  | None -> sub p ur env ty_have ty_expect.et_type on_error
 
 (* does coercion if possible, returning Some env with resultant coercion constraints
  * otherwise suppresses errors from attempted coercion and returns None *)
@@ -185,10 +186,10 @@ let try_coerce ?sub_fn:(sub=Typing_ops.sub_type) p ur env ty_have ty_expect =
   Errors.is_hh_fixme := f;
   result
 
-let coerce_type p ?sub_fn:(sub=Typing_ops.sub_type) ur env ty_have ?ty_expect_decl ty_expect on_error =
-  Errors.try_ 
-    (fun () -> coerce_type p ~sub_fn:sub ur env ty_have ?ty_expect_decl ty_expect on_error)
-    (fun _ -> sub p ur env ty_have ty_expect on_error)
+let coerce_type p ?sub_fn:(sub=Typing_ops.sub_type) ur env ty_have ty_expect on_error =
+  Errors.try_
+    (fun () -> coerce_type p ~sub_fn:sub ur env ty_have ty_expect on_error)
+    (fun _ -> sub p ur env ty_have ty_expect.et_type on_error)
 
 let () = Typing_utils.can_coerce_ref := can_coerce
 let () = Typing_utils.coerce_type_ref := coerce_type

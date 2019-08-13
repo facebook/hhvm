@@ -382,10 +382,10 @@ and class_method tcopt root static env (_method_name, method_) =
           List.iter ft_params ~f:(fun_param tcopt root (Vcovariant []) static env);
           List.iter tparams ~f:(fun_tparam tcopt root env);
           List.iter ft_where_constraints ~f:(fun_where_constraint tcopt root env);
-          fun_ret tcopt root (Vcovariant []) static env ft_ret
+          fun_ret tcopt root (Vcovariant []) static env ft_ret.et_type
       | _ -> assert false
 
-and fun_param tcopt root variance static env { fp_type = (reason, _ as ty); fp_kind; _ } =
+and fun_param tcopt root variance static env { fp_type = { et_type = (reason, _ as ty); _ }; fp_kind; _ } =
   let pos = Reason.to_pos reason in
   match fp_kind with
   | FPnormal ->
@@ -510,7 +510,7 @@ and type_ tcopt root variance env (reason, ty) =
   | Tprim _ -> ()
   | Tfun ft ->
       List.iter ft.ft_params ~f:(fun_param tcopt root variance `Instance env);
-      fun_ret tcopt root variance `Instance env ft.ft_ret
+      fun_ret tcopt root variance `Instance env ft.ft_ret.et_type
   | Tapply (_, []) -> ()
   | Tapply ((_, name as pos_name), tyl) ->
       let variancel = get_class_variance root pos_name in
@@ -630,7 +630,7 @@ and get_typarams root env (ty: decl ty) =
   | Tfun ft ->
     let params = List.fold_left ft.ft_params ~init:empty
       ~f:(fun res {fp_type; fp_kind; _} ->
-        let tp = get_typarams root env fp_type in
+        let tp = get_typarams root env fp_type.et_type in
         let tp =
           match fp_kind with
           (* Parameters behave contravariantly *)
@@ -638,7 +638,7 @@ and get_typarams root env (ty: decl ty) =
           (* Inout/ref parameters behave both co- and contra-variantly *)
           | FPref | FPinout -> union tp (flip tp) in
         union res tp) in
-    let ret = get_typarams root env ft.ft_ret in
+    let ret = get_typarams root env ft.ft_ret.et_type in
     let get_typarams_constraint acc (ck, ty) =
       union acc (
       match ck with

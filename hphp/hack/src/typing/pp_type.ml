@@ -357,6 +357,19 @@ and pp_reactivity : Format.formatter -> reactivity -> unit = fun fmt r ->
 and show_reactivity : reactivity -> string = fun x ->
   Format.asprintf "%a" pp_reactivity x
 
+and pp_possibly_enforced_ty :
+  type a. Format.formatter -> a possibly_enforced_ty -> unit = fun fmt x ->
+  Format.fprintf fmt "@[<2>{ ";
+
+  Format.fprintf fmt "@[%s =@ " "et_enforced";
+  Format.fprintf fmt "%B" x.et_enforced;
+  Format.fprintf fmt "@]";
+
+  Format.fprintf fmt "@[%s =@ " "et_type";
+  pp_ty fmt x.et_type;
+  Format.fprintf fmt "@]";
+  Format.fprintf fmt "@ }@]"
+
 and pp_fun_type : type a. Format.formatter -> a fun_type -> unit = fun fmt x ->
   Format.fprintf fmt "@[<2>{ ";
 
@@ -425,7 +438,7 @@ and pp_fun_type : type a. Format.formatter -> a fun_type -> unit = fun fmt x ->
   Format.fprintf fmt ";@ ";
 
   Format.fprintf fmt "@[%s =@ " "ft_ret";
-  pp_ty fmt x.ft_ret;
+  pp_possibly_enforced_ty fmt x.ft_ret;
   Format.fprintf fmt "@]";
   Format.fprintf fmt ";@ ";
 
@@ -518,7 +531,7 @@ fun fmt x ->
   Format.fprintf fmt ";@ ";
 
   Format.fprintf fmt "@[%s =@ " "fp_type";
-  pp_ty fmt x.fp_type;
+  pp_possibly_enforced_ty fmt x.fp_type;
   Format.fprintf fmt "@]";
   Format.fprintf fmt ";@ ";
 
@@ -1065,6 +1078,7 @@ let show_shape_field_type _ x = show_shape_field_type x
 let pp_ty_ _ fmt x = pp_ty_ fmt x
 let show_ty_ _ x = show_ty_ x
 let pp_fun_type _ fmt x = pp_fun_type fmt x
+let pp_possibly_enforced_ty _ fmt x = pp_possibly_enforced_ty fmt x
 let show_fun_type _ x = show_fun_type x
 let pp_fun_arity _ fmt x = pp_fun_arity fmt x
 let show_fun_arity _ x = show_fun_arity x

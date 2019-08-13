@@ -51,11 +51,7 @@ val make_return_type:
 val strip_awaitable:
   Ast_defs.fun_kind ->
   Env.env ->
-  Typing_defs.locl Typing_defs.ty -> Typing_defs.locl Typing_defs.ty
-
-val strip_awaitable_decl:
-  Env.env ->
-  Typing_defs.decl Typing_defs.ty -> Typing_defs.decl Typing_defs.ty
+  Typing_defs.locl Typing_defs.possibly_enforced_ty -> Typing_defs.locl Typing_defs.possibly_enforced_ty
 
 val force_awaitable:
   Env.env ->

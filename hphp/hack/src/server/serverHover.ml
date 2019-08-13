@@ -38,7 +38,7 @@ let make_hover_return_type env_and_ty occurrence =
   let open Typing_defs in
   match occurrence, env_and_ty with
   | { type_ = Function | Method _; _ }, Some (env, (_, Tfun ft)) ->
-    [Printf.sprintf "Return type: `%s`" (Tast_env.print_ty env ft.ft_ret)]
+    [Printf.sprintf "Return type: `%s`" (Tast_env.print_ty env ft.ft_ret.et_type)]
   | _ -> []
 
 let make_hover_full_name env_and_ty occurrence def_opt =

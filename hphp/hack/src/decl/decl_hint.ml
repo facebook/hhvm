@@ -81,7 +81,7 @@ and hint_ p env = function
         | _ -> None in
       { fp_pos = p;
         fp_name = None;
-        fp_type = hint env x;
+        fp_type = possibly_enforced_hint env x;
         fp_kind = get_param_mode ~is_ref:false k;
         fp_accept_disposable = false;
         fp_mutability;
@@ -89,7 +89,7 @@ and hint_ p env = function
       }
     in
     let paraml = List.map3_exn hl kl muts ~f:make_param in
-    let ret = hint env h in
+    let ret = possibly_enforced_hint env h in
     let arity_min = List.length paraml in
     let arity = match vh with
       | Some t -> Fvariadic (arity_min, make_param t None None)
@@ -145,3 +145,9 @@ and hint_ p env = function
     Tshape (shape_kind, fdm)
   | Hsoft (p, h_) ->
     hint_ p env h_
+
+and possibly_enforced_hint env h =
+  (* Initially we assume that a type is not enforced at runtime.
+   * We refine this during localization
+   *)
+  { et_enforced = false; et_type = hint env h }

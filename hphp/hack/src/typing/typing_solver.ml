@@ -70,12 +70,12 @@ let rec freshen_inside_ty env ((r, ty_) as ty) =
     env, (r, Tshape (shape_kind, fdm))
     (* Functions are covariant in return type, contravariant in parameter types *)
   | Tfun ft ->
-    let env, ft_ret = freshen_ty env ft.ft_ret in
+    let env, ft_ret = freshen_possibly_enforced_ty env ft.ft_ret in
     let env, ft_params = List.map_env env ft.ft_params
       (fun env p ->
-       let env, fp_type = freshen_ty env p.fp_type in
+       let env, fp_type = freshen_possibly_enforced_ty env p.fp_type in
        env, { p with fp_type = fp_type }) in
-    env, (r, Tfun { ft with ft_ret = ft_ret; ft_params = ft_params })
+    env, (r, Tfun { ft with ft_ret; ft_params })
   | Tabstract (AKnewtype (name, tyl), tyopt) ->
     begin match Env.get_typedef env name with
     | None ->
@@ -122,6 +122,10 @@ let rec freshen_inside_ty env ((r, ty_) as ty) =
 
 and freshen_ty env ty =
   Env.fresh_invariant_type_var env (Reason.to_pos (fst ty))
+
+and freshen_possibly_enforced_ty env ety =
+  let env, et_type = freshen_ty env ety.et_type in
+  env, { ety with et_type }
 
 and freshen_tparams env variancel tyl =
     match variancel, tyl with

@@ -561,8 +561,7 @@ let empty ?(mode = FileInfo.Mstrict) tcopt file ~droot = {
     tcopt   = tcopt;
     return  = {
       (* Actually should get set straight away anyway *)
-      return_type = (Reason.Rnone, Tunion []);
-      return_type_decl = None;
+      return_type = { et_type = (Reason.Rnone, Tunion []); et_enforced = false; };
       return_disposable = false;
       return_mutable = false;
       return_explicit = false;
@@ -1197,7 +1196,7 @@ let rec get_tyvars env ty =
     let env, params_positive, params_negative =
       List.fold_left ft.ft_params ~init:(env, ISet.empty, ISet.empty)
         ~f:(fun (env, acc_positive, acc_negative) {fp_type; fp_kind; _} ->
-          let env, positive, negative = get_tyvars env fp_type in
+          let env, positive, negative = get_tyvars env fp_type.et_type in
           match fp_kind with
           (* Parameters are treated contravariantly *)
           | FPnormal ->
@@ -1206,7 +1205,7 @@ let rec get_tyvars env ty =
           | FPinout | FPref ->
             let tyvars = ISet.union negative positive in
             env, ISet.union tyvars acc_positive, ISet.union tyvars acc_negative) in
-    let env, ret_positive, ret_negative = get_tyvars env ft.ft_ret in
+    let env, ret_positive, ret_negative = get_tyvars env ft.ft_ret.et_type in
     env, ISet.union ret_positive params_positive, ISet.union ret_negative params_negative
   | Tabstract (AKnewtype (name, tyl), _) ->
     begin match get_typedef env name with

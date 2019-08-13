@@ -28,11 +28,11 @@ let sub_type p ur env ty_sub ty_super on_error =
     (fun () -> Typing_utils.sub_type env ty_sub ty_super on_error)
     (fun () -> env)
 
-let coerce_type ?sub_fn:(sub=sub_type) p ur env ty_have ?ty_expect_decl ty_expect =
-  Typing_utils.coerce_type ~sub_fn:sub p ur env ty_have ?ty_expect_decl ty_expect
+let coerce_type ?sub_fn:(sub=sub_type) p ur env ty_have ty_expect =
+  Typing_utils.coerce_type ~sub_fn:sub p ur env ty_have ty_expect
 
-let can_coerce p env ty_have ?ty_expect_decl ty_expect =
-  Typing_utils.can_coerce p env ty_have ?ty_expect_decl ty_expect
+let can_coerce p env ty_have ty_expect =
+  Typing_utils.can_coerce p env ty_have ty_expect
 
 let sub_type_decl p ur env ty_sub ty_super =
   let env, ty_super = Typing_utils.localize_with_self env ty_super in

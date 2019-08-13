@@ -60,7 +60,7 @@ let expand_ty ?pos env ty =
     ft_return_disposable; ft_mutability; ft_returns_mutable;
     ft_tparams = Tuple.T2.map_fst ~f:(List.map ~f:exp_tparam) ft_tparams;
     ft_where_constraints = List.map ~f:exp_where_constraint ft_where_constraints;
-    ft_ret = exp_ty ft_ret;
+    ft_ret = exp_possibly_enforced_ty ft_ret;
     ft_params = List.map ~f:exp_fun_param ft_params;
     ft_decl_errors; ft_returns_void_to_rx;
   }
@@ -68,8 +68,11 @@ let expand_ty ?pos env ty =
   and exp_fun_param { fp_pos; fp_name; fp_kind; fp_type; fp_mutability;
                       fp_accept_disposable; fp_rx_annotation; } =
   { fp_pos; fp_name; fp_kind; fp_accept_disposable; fp_mutability;
-    fp_type = exp_ty fp_type; fp_rx_annotation;
+    fp_type = exp_possibly_enforced_ty fp_type; fp_rx_annotation;
   }
+
+  and exp_possibly_enforced_ty { et_type; et_enforced; } =
+  { et_type = exp_ty et_type; et_enforced = et_enforced; }
 
   and exp_sft { sft_optional; sft_ty } =
   { sft_optional;

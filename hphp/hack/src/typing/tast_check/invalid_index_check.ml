@@ -13,6 +13,7 @@ open Typing_defs
 
 module Env = Tast_env
 module TCO = TypecheckerOptions
+module MakeType = Typing_make_type
 
 let should_enforce env = TCO.disallow_invalid_arraykey (Env.get_tcopt env)
 
@@ -26,7 +27,7 @@ let should_enforce env = TCO.disallow_invalid_arraykey (Env.get_tcopt env)
  *)
 let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
   let type_index env ty_have ty_expect reason =
-    match Env.can_coerce index_pos env ty_have ty_expect Errors.index_type_mismatch with
+    match Env.can_coerce index_pos env ty_have (MakeType.unenforced ty_expect) Errors.index_type_mismatch with
     | Some _ -> ()
     | None ->
       if (Env.can_subtype env ty_have (fst ty_have, Tdynamic)

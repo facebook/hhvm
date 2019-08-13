@@ -235,7 +235,7 @@ let get_constructor_ty c =
           | lazy (_ as r, Tfun fun_) ->
               (* We have a constructor defined, but the return type is void
                * make it the object *)
-              let fun_ = { fun_ with Typing_defs.ft_ret = return_ty } in
+              let fun_ = { fun_ with Typing_defs.ft_ret = { et_type = return_ty; et_enforced = false; } } in
               r, Tfun fun_
           | _ -> (* how can a constructor not be a function? *) assert false
         end
@@ -251,7 +251,7 @@ let get_constructor_ty c =
         ft_tparams  = ([], FTKtparams);
         ft_where_constraints = [];
         ft_params   = [];
-        ft_ret      = return_ty;
+        ft_ret      = { et_type = return_ty; et_enforced = false; };
         ft_fun_kind = Ast_defs.FSync;
         ft_reactive = Nonreactive;
         ft_return_disposable = false;
@@ -483,13 +483,13 @@ let get_func_details_for env ty =
       param_name     = (match param.fp_name with
                          | Some n -> n
                          | None -> "");
-      param_ty       = Tast_env.print_ty env param.fp_type;
+      param_ty       = Tast_env.print_ty env param.fp_type.et_type;
       param_variadic = is_variadic;
     }
   in
   let tfun_to_func_details ft =
     Some {
-      return_ty = Tast_env.print_ty env ft.ft_ret;
+      return_ty = Tast_env.print_ty env ft.ft_ret.et_type;
       min_arity = arity_min ft.ft_arity;
       params    = List.map ft.ft_params param_to_record @
         (match ft.ft_arity with

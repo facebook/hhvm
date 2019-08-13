@@ -130,7 +130,7 @@ let check_arraykey_index env pos container_ty index_ty =
     let ty_arraykey = MakeType.arraykey (Reason.Ridx_dict pos) in
     (* Wrap generic type mismatch error with special error code *)
     Errors.try_
-      (fun () -> Typing_coercion.coerce_type pos reason env index_ty ty_arraykey Errors.unify_error)
+      (fun () -> Typing_coercion.coerce_type pos reason env index_ty { et_type = ty_arraykey; et_enforced = true } Errors.unify_error)
       (fun _ ->
         Errors.invalid_arraykey pos (info_of_type container_ty) (info_of_type index_ty);
         env)
@@ -174,7 +174,7 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false) is_lvalue e
       [Log_head ("array_get/type_index",
        [Log_type ("ty_have", ty_have); Log_type("ty_expect", ty_expect)])]));
       (* coerce if possible *)
-      match Typing_coercion.try_coerce p reason env ty_have ty_expect with
+      match Typing_coercion.try_coerce p reason env ty_have { et_type = ty_expect; et_enforced = true } with
       | Some env -> env
       | None ->
           (* if subtype of dynamic, allow it to be used *)
@@ -541,7 +541,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
       Errors.array_get_arity expr_pos name (Reason.to_pos r) in
     let type_index env p ty_have ty_expect reason =
       (* coerce if possible *)
-      match Typing_coercion.try_coerce p reason env ty_have ty_expect with
+      match Typing_coercion.try_coerce p reason env ty_have { et_type = ty_expect; et_enforced = true } with
       | Some e -> e
       | None ->
         (* if subtype of dynamic, allow it to be used *)

@@ -19,6 +19,7 @@ open Core_kernel
  * identifiers.
  *)
 type ty = Typing_defs.locl Typing_defs.ty
+type possibly_enforced_ty = Typing_defs.locl Typing_defs.possibly_enforced_ty
 type decl_ty = Typing_defs.decl Typing_defs.ty
 type reactivity = Typing_defs.reactivity
 type mutability_env = Typing_mutability_env.mutability_env

@@ -104,12 +104,13 @@ type coerce_type =
   Pos.t ->
   ?sub_fn:(Pos.t -> Reason.ureason -> Env.env -> locl ty -> locl ty ->
     Errors.typing_error_callback -> Env.env) ->
-  Reason.ureason -> Env.env -> locl ty -> ?ty_expect_decl: decl ty -> locl ty ->
+  Reason.ureason -> Env.env -> locl ty -> locl possibly_enforced_ty ->
     Errors.typing_error_callback -> Env.env
 let (coerce_type_ref : coerce_type ref) = ref (not_implemented "coerce_type")
 let coerce_type x = !coerce_type_ref x
 
-type can_coerce = Pos.t -> Env.env -> ?ur:Reason.ureason -> locl ty -> ?ty_expect_decl: decl ty -> locl ty ->
+type can_coerce = Pos.t -> Env.env -> ?ur:Reason.ureason -> locl ty ->
+  locl possibly_enforced_ty ->
   Errors.typing_error_callback -> Env.env option
 let (can_coerce_ref : can_coerce ref) = ref (not_implemented "can_coerce")
 let can_coerce x = !can_coerce_ref x
@@ -497,7 +498,7 @@ end
 let default_fun_param ?(pos=Pos.none) ty : 'a fun_param = {
   fp_pos = pos;
   fp_name = None;
-  fp_type = ty;
+  fp_type = { et_type = ty; et_enforced = false; };
   fp_kind = FPnormal;
   fp_accept_disposable = false;
   fp_mutability = None;

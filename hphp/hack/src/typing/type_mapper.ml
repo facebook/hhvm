@@ -173,13 +173,13 @@ class deep_type_mapper = object(this)
     env, (r, Toption ty)
   method! on_tfun env r ft =
     let on_param env param =
-      let env, ty = this#on_type env param.fp_type in
+      let env, ty = this#on_possibly_enforced_ty env param.fp_type in
       env, { param with fp_type = ty } in
     let env, params = List.map_env env ft.ft_params on_param in
-    let env, ret = this#on_type env ft.ft_ret in
+    let env, ret = this#on_possibly_enforced_ty env ft.ft_ret in
     let env, arity = match ft.ft_arity with
       | Fvariadic (min, ({ fp_type = p_ty; _ } as param)) ->
-        let env, p_ty = this#on_type env p_ty in
+        let env, p_ty = this#on_possibly_enforced_ty env p_ty in
         env, Fvariadic (min, { param with fp_type = p_ty })
       | x -> env, x
     in
@@ -212,6 +212,10 @@ class deep_type_mapper = object(this)
     | Some x ->
        let env, x = this#on_type env x in
        env, Some x
+
+  method private on_possibly_enforced_ty env x =
+    let env, et_type = this#on_type env x.et_type in
+    env, { x with et_type }
 end
 
 (* Mixin that expands type variables. *)

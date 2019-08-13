@@ -99,7 +99,7 @@ let make_param_ty env param =
   {
     fp_pos  = param.param_pos;
     fp_name = Some param.param_name;
-    fp_type = ty;
+    fp_type = { et_type = ty; et_enforced = false; };
     fp_kind = mode;
     fp_mutability = get_param_mutability param.param_user_attributes;
     fp_accept_disposable =

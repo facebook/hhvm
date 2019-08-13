@@ -426,7 +426,7 @@ let default_constructor_ce class_ =
              ft_tparams  = ([], FTKtparams);
              ft_where_constraints = [];
              ft_params   = [];
-             ft_ret      = MakeType.void r;
+             ft_ret      = { et_type = MakeType.void r; et_enforced = false; };
              ft_fun_kind = Ast_defs.FSync;
              ft_reactive = Nonreactive;
              ft_mutability = None;

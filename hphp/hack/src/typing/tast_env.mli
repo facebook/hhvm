@@ -245,7 +245,7 @@ val typing_env_as_tast_env : Typing_env.env -> env
 val tast_env_as_typing_env : env -> Typing_env.env
 
 val can_coerce : Pos.t -> env -> Tast.ty ->
-  ?ty_expect_decl: Typing_defs.decl Typing_defs.ty -> Tast.ty -> Errors.typing_error_callback -> env option
+  Tast.possibly_enforced_ty -> Errors.typing_error_callback -> env option
 (** Return None when coercion cannot occur from the second arg to the third,
     otherwise return Some env where env is the first arg updated with coercion
     constraints. *)

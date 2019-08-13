@@ -99,3 +99,6 @@ let intersection r tyl =
   | [] -> mixed r
   | [ty] -> ty
   | _ -> (r, Tintersection tyl)
+
+let unenforced ty =
+  { et_type = ty; et_enforced = false }

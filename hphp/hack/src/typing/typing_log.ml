@@ -214,14 +214,16 @@ and log_key_delta k d =
 
 let type_as_value env ty = Atom (Typing_print.debug env ty)
 
+let possibly_enforced_type_as_value env et =
+  Atom (if et.et_enforced then "enforced " else "" ^
+    Typing_print.debug env et.et_type)
+
 let return_info_as_value env return_info =
     let Typing_env_return_info.
-      {return_type; return_type_decl; return_disposable; return_mutable; return_explicit;
+      {return_type; return_disposable; return_mutable; return_explicit;
        return_void_to_rx; } = return_info in
     make_map [
-      "return_type", type_as_value env return_type;
-      "return_type_decl", Option.value_map ~f:(type_as_value env)
-        ~default:(Atom "") return_type_decl;
+      "return_type", possibly_enforced_type_as_value env return_type;
       "return_disposable", Bool return_disposable;
       "return_mutable", Bool return_mutable;
       "return_explicit", Bool return_explicit;

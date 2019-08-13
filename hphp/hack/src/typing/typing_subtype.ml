@@ -531,7 +531,7 @@ and simplify_subtype
         (fun (env, prop) ->
           let env, _, ret = anon env ft.ft_params ft.ft_arity in
           (env, prop) &&&
-          simplify_subtype ~seen_generic_params ~this_ty ret ft.ft_ret)
+          simplify_subtype ~seen_generic_params ~this_ty ret ft.ft_ret.et_type)
     end
   | Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tfun _ ->
     let this_ty = Option.first_some this_ty (Some ety_sub) in
@@ -1297,12 +1297,13 @@ and simplify_subtype_params
   ?(check_params_mutability = false)
   (subl : locl fun_param list)
   (superl : locl fun_param list)
-  (variadic_sub_ty : locl ty option)
-  (variadic_super_ty : locl ty option)
+  (variadic_sub_ty : locl possibly_enforced_ty option)
+  (variadic_super_ty : locl possibly_enforced_ty option)
   ~(on_error : Errors.typing_error_callback)
   env =
 
-  let simplify_subtype = simplify_subtype ~seen_generic_params ~no_top_bottom ~on_error in
+  let simplify_subtype_possibly_enforced =
+    simplify_subtype_possibly_enforced ~seen_generic_params ~no_top_bottom ~on_error in
   let simplify_subtype_params = simplify_subtype_params ~seen_generic_params
     ~no_top_bottom ~on_error in
   let simplify_subtype_params_with_variadic = simplify_subtype_params_with_variadic
@@ -1369,11 +1370,11 @@ and simplify_subtype_params
       | FPinout, FPinout ->
         (* Inout parameters are invariant wrt subtyping for function types. *)
         env |>
-        simplify_subtype ty_super ty_sub &&&
-        simplify_subtype ty_sub ty_super
+        simplify_subtype_possibly_enforced ty_super ty_sub &&&
+        simplify_subtype_possibly_enforced ty_sub ty_super
       | _ ->
         env |>
-        simplify_subtype ty_sub ty_super
+        simplify_subtype_possibly_enforced ty_sub ty_super
       end &&&
     simplify_subtype_params ~is_method subl superl
       variadic_sub_ty variadic_super_ty
@@ -1382,34 +1383,34 @@ and simplify_subtype_params_with_variadic
   ~(seen_generic_params : SSet.t option)
   ~(no_top_bottom : bool)
   (subl : locl fun_param list)
-  (variadic_ty : locl ty)
+  (variadic_ty : locl possibly_enforced_ty)
   (on_error : Errors.typing_error_callback)
   env =
-  let simplify_subtype = simplify_subtype ~seen_generic_params ~no_top_bottom ~on_error in
+  let simplify_subtype_possibly_enforced = simplify_subtype_possibly_enforced ~seen_generic_params ~no_top_bottom ~on_error in
   let simplify_subtype_params_with_variadic = simplify_subtype_params_with_variadic
     ~seen_generic_params ~no_top_bottom in
   match subl with
   | [] -> valid env
   | { fp_type = sub; _ } :: subl ->
     env |>
-    simplify_subtype sub variadic_ty &&&
+    simplify_subtype_possibly_enforced sub variadic_ty &&&
     simplify_subtype_params_with_variadic subl variadic_ty on_error
 
 and simplify_supertype_params_with_variadic
   ~(seen_generic_params : SSet.t option)
   ~(no_top_bottom : bool)
   (superl : locl fun_param list)
-  (variadic_ty : locl ty)
+  (variadic_ty : locl possibly_enforced_ty)
   (on_error : Errors.typing_error_callback)
   env =
-  let simplify_subtype = simplify_subtype ~seen_generic_params ~no_top_bottom ~on_error in
+  let simplify_subtype_possibly_enforced = simplify_subtype_possibly_enforced ~seen_generic_params ~no_top_bottom ~on_error in
   let simplify_supertype_params_with_variadic = simplify_supertype_params_with_variadic
     ~seen_generic_params ~no_top_bottom in
   match superl with
   | [] -> valid env
   | { fp_type = super; _ } :: superl ->
     env |>
-    simplify_subtype variadic_ty super &&&
+    simplify_subtype_possibly_enforced variadic_ty super &&&
     simplify_supertype_params_with_variadic superl variadic_ty on_error
 
 and subtype_reactivity
@@ -1670,7 +1671,7 @@ and subtype_fun_params_reactivity
     }
     It will be safe if parameter in super will be completely reactive,
     hence check below *)
-    let _, p_sub_type = Env.expand_type env p_sub.fp_type in
+    let _, p_sub_type = Env.expand_type env p_sub.fp_type.et_type in
     begin match p_sub_type with
     | _, Tfun tfun when tfun.ft_reactive <> Nonreactive -> valid env
     | _, Tfun _ ->
@@ -1689,7 +1690,7 @@ and subtype_fun_params_reactivity
       | Some (Param_rx_if_impl t) -> Some t
       | _ -> None in
     let ok =
-      subtype_param_rx_if_impl ~is_param:true env cond_type_sub (Some p_sub.fp_type)
+      subtype_param_rx_if_impl ~is_param:true env cond_type_sub (Some p_sub.fp_type.et_type)
       cond_type_super in
     check_with ok (fun () ->
       Errors.rx_parameter_condition_mismatch
@@ -1786,6 +1787,13 @@ and check_subtype_funs_attributes
     | _, _ -> res
   )
 
+and simplify_subtype_possibly_enforced
+  ~(seen_generic_params : SSet.t option)
+  ~(no_top_bottom : bool)
+  et_sub et_super on_error =
+  simplify_subtype ~seen_generic_params ~no_top_bottom
+  et_sub.et_type et_super.et_type on_error
+
 (* This implements basic subtyping on non-generic function types:
  *   (1) return type behaves covariantly
  *   (2) parameter types behave contravariantly
@@ -1810,9 +1818,10 @@ and check_subtype_funs_attributes
     | Fvariadic (_, {fp_type = var_super; _ }) -> Some var_super
     | _ -> None in
 
-  let simplify_subtype = simplify_subtype ~seen_generic_params ~no_top_bottom ~on_error in
-  let simplify_subtype_params = simplify_subtype_params ~seen_generic_params
-    ~no_top_bottom ~on_error in
+  let simplify_subtype_possibly_enforced =
+    simplify_subtype_possibly_enforced ~seen_generic_params ~no_top_bottom ~on_error in
+  let simplify_subtype_params =
+    simplify_subtype_params ~seen_generic_params ~no_top_bottom ~on_error in
 
   (* First apply checks on attributes, coroutine-ness and variadic arity *)
   env |>
@@ -1821,7 +1830,7 @@ and check_subtype_funs_attributes
   (* Now do contravariant subtyping on parameters *)
   begin
     match variadic_subtype, variadic_supertype with
-    | Some var_sub, Some var_super -> simplify_subtype var_super var_sub
+    | Some var_sub, Some var_super -> simplify_subtype_possibly_enforced var_super var_sub
     | _ -> valid
   end &&&
 
@@ -1840,7 +1849,7 @@ and check_subtype_funs_attributes
 
   (* Finally do covariant subtryping on return type *)
   if check_return
-  then simplify_subtype ft_sub.ft_ret ft_super.ft_ret
+  then simplify_subtype_possibly_enforced ft_sub.ft_ret ft_super.ft_ret
   else valid
 
 (* One of the main entry points to this module *)

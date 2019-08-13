@@ -17,6 +17,7 @@ module TUtils = Typing_utils
 module TGenConstraint = Typing_generic_constraint
 module Subst = Decl_subst
 module MakeType = Typing_make_type
+module Cls = Decl_provider.Class
 
 (* Here is the general problem the delayed application of the phase solves.
  * Let's say you have a function that you want to operate generically across
@@ -93,6 +94,74 @@ let env_with_self env =
     from_class = None;
     validate_dty = None;
   }
+
+let rec is_enforceable (env: Env.env) (ty: decl ty) =
+  match snd ty with
+  | Tthis -> false
+  | Tapply ((_, name), tyl) ->
+    (* TODO(T45690473): follow type aliases in the `type` case and allow enforceable targets *)
+    let not_class = Env.is_typedef name || Env.is_enum env name in
+    if not_class then false else
+
+    begin match Env.get_class env name with
+    | Some tc ->
+      let tparams = Cls.tparams tc in
+      begin match tyl with
+      | [] -> true
+      | targs ->
+        let open List.Or_unequal_lengths in
+        begin match List.fold2 ~init:true targs tparams ~f:(fun acc targ tparam ->
+          match targ with
+          | _, Tdynamic (* We accept the inner type being dynamic regardless of reification *)
+          | _, Tlike _ ->
+            acc
+          | _ ->
+            match tparam.tp_reified with
+            | Aast.Erased -> false
+            | Aast.SoftReified -> false
+            | Aast.Reified -> is_enforceable env targ && acc
+        ) with
+        | Ok new_acc -> new_acc
+        | Unequal_lengths -> true
+        end
+      end
+    | None -> true
+    end
+  | Tgeneric name ->
+    begin match Env.get_reified env name, Env.get_enforceable env name with
+    | Aast.Erased, _ -> false
+    | Aast.SoftReified, _ -> false
+    | Aast.Reified, false -> false
+    | Aast.Reified, true ->
+      true
+    end
+  | Taccess _ -> false
+  | Tlike _ -> false
+  | Tarray (None, None) -> true
+  | Tarray _ -> false
+  | Tprim prim ->
+    begin match prim with
+      | Aast.Tvoid
+      | Aast.Tnoreturn -> false
+      | _ -> true
+    end
+  | Tany -> true
+  | Terr -> true
+  | Tnonnull -> true
+  | Tdynamic -> true
+  | Tfun _ -> false
+  | Ttuple _ -> false
+  | Tshape _ -> false
+  | Tmixed -> true
+  | Tnothing -> true
+  | Tdarray _ -> false
+  | Tvarray _ -> false
+  (* With no parameters, we enforce varray_or_darray just like array *)
+  | Tvarray_or_darray (_, Tany) -> true
+  | Tvarray_or_darray _ -> false
+  | Toption ty ->
+    is_enforceable env ty
+
 (*****************************************************************************)
 (* Transforms a declaration phase type into a localized type. This performs
  * common operations that are necessary for this operation, specifically:
@@ -282,6 +351,11 @@ and tyl_contains_wildcard tyl =
     | _ -> false
   end
 
+and localize_possibly_enforced_ty ~ety_env env ety =
+  let env, et_type = localize ~ety_env env ety.et_type in
+  let et_enforced = is_enforceable env ety.et_type in
+  env, { et_type; et_enforced; }
+
 and localize_cstr_ty ~ety_env env ty tp_name =
   let env, (r, ty_) = localize ~ety_env env ty in
   let ty = (Reason.Rcstr_on_generics (Reason.to_pos r, tp_name), ty_) in
@@ -342,7 +416,7 @@ and localize_ft ?(instantiation) ~ety_env env ft =
   in
   let ety_env = {ety_env with substs = substs} in
   let env, params = List.map_env env ft.ft_params begin fun env param ->
-    let env, ty = localize ~ety_env env param.fp_type in
+    let env, ty = localize_possibly_enforced_ty ~ety_env env param.fp_type in
     env, { param with fp_type = ty }
   end in
   (* restore reactivity *)
@@ -416,10 +490,11 @@ and localize_ft ?(instantiation) ~ety_env env ft =
 
   let env, arity = match ft.ft_arity with
     | Fvariadic (min, ({ fp_type = var_ty; _ } as param)) ->
-       let env, var_ty = localize ~ety_env env var_ty in
-       env, Fvariadic (min, { param with fp_type = var_ty })
+       let env, var_ty = localize ~ety_env env var_ty.et_type in
+       (* HHVM does not enforce types on vararg parameters yet *)
+       env, Fvariadic (min, { param with fp_type = { et_type = var_ty; et_enforced = false } })
     | Fellipsis _ | Fstandard (_, _) as x -> env, x in
-  let env, ret = localize ~ety_env env ft.ft_ret in
+  let env, ret = localize_possibly_enforced_ty ~ety_env env ft.ft_ret in
   env, { ft with ft_arity = arity; ft_params = params;
                  ft_ret = ret; ft_tparams = ft_tparams;
                  ft_where_constraints = where_constraints }
@@ -567,6 +642,11 @@ let localize_with_self env ty =
 let localize ~ety_env env ty =
   let ty = Typing_enforceability.pessimize_type env ty in
   localize ~ety_env env ty
+
+let localize_with_self_possibly_enforceable env ty =
+  let et_enforced = is_enforceable env ty in
+  let env, et_type = localize_with_self env ty in
+  env, { et_type; et_enforced }
 
 let localize_ft ?instantiation ~ety_env env ft =
   let ft = Typing_enforceability.pessimize_fun_type env ft in

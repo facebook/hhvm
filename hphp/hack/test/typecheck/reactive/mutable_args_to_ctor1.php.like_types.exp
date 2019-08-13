@@ -1,10 +1,1 @@
-File "mutable_args_to_ctor1.php", line 19, characters 15-16:
-Invalid argument (Typing[4110])
-File "rx/functions.hhi", line 26, characters 18-18:
-Some type constraint(s) are violated here
-File "rx/functions.hhi", line 26, characters 18-18:
-T is a constrained type parameter
-File "mutable_args_to_ctor1.php", line 11, characters 31-31:
-Expected B
-File "rx/functions.hhi", line 26, characters 18-18:
-But got dynamic
+No errors

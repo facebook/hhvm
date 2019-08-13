@@ -49,9 +49,9 @@ end = struct
       let params = match ft.ft_arity with
         | Fstandard _ -> params
         | Fellipsis _ -> raise Non_denotable
-        | Fvariadic (_, p) -> params @ [print_ty_exn p.fp_type ^ "..."] in
+        | Fvariadic (_, p) -> params @ [print_ty_exn p.fp_type.et_type ^ "..."] in
       Printf.sprintf "(function(%s): %s)"
-        (String.concat ~sep:", " params) (print_ty_exn ft.ft_ret)
+        (String.concat ~sep:", " params) (print_ty_exn ft.ft_ret.et_type)
     | Ttuple tyl ->
       "(" ^ print_tyl_exn tyl ^ ")"
     | Tdestructure tyl ->
@@ -85,8 +85,8 @@ end = struct
 
   and print_fun_param_exn param =
     match param.fp_kind with
-    | FPinout -> "inout " ^ print_ty_exn param.fp_type
-    | _ -> print_ty_exn param.fp_type
+    | FPinout -> "inout " ^ print_ty_exn param.fp_type.et_type
+    | _ -> print_ty_exn param.fp_type.et_type
 
   and print_shape_field_exn (name, {sft_optional; sft_ty; _}) =
     Printf.sprintf "%s%s => %s"

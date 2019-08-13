@@ -233,7 +233,7 @@ let check_call env method_info pos reason ft arg_types =
           | [], _ -> true
           | { fp_rx_annotation = Some Param_rx_if_impl ty; fp_type; _ } :: tl, arg_ty::arg_tl ->
             let ty =
-              if Typing_utils.is_option env fp_type
+              if Typing_utils.is_option env fp_type.et_type
               then MakeType.nullable (fst ty) ty
               else ty
             in
@@ -242,7 +242,7 @@ let check_call env method_info pos reason ft arg_types =
             (* check the rest of arguments *)
             check_params tl arg_tl
           | { fp_rx_annotation = Some Param_rx_if_impl ty; fp_type; _ } :: tl, []
-            when Typing_utils.is_option env fp_type ->
+            when Typing_utils.is_option env fp_type.et_type ->
             (* if there are more parameters than actual arguments - assume that remaining parameters
             have default values (actual arity check is performed elsewhere).  *)
             let ty = MakeType.nullable (fst ty) ty in
@@ -362,5 +362,5 @@ let get_adjusted_return_type env receiver_info ret_ty =
   match try_get_method_from_condition_type env receiver_info with
   | None -> env, ret_ty
   | Some cond_fty ->
-    try_substitute_type_with_condition env cond_fty.ft_ret ret_ty
+    try_substitute_type_with_condition env cond_fty.ft_ret.et_type ret_ty
     |> Option.value ~default:(env, ret_ty)

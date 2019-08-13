@@ -159,12 +159,16 @@ let rec ty (p, x) =
 
   and constraint_ x = List.map ~f:(fun (ck, x) -> (ck, ty x)) x
 
+  and possibly_enforced_ty et =
+    { et with
+      et_type = ty et.et_type }
+
   and fun_type ft =
     { ft with
       ft_tparams = Tuple.T2.map_fst ~f:(List.map ~f:type_param) ft.ft_tparams  ;
       ft_where_constraints = List.map ft.ft_where_constraints where_constraint ;
       ft_params  = List.map ft.ft_params fun_param                             ;
-      ft_ret     = ty ft.ft_ret                                                ;
+      ft_ret     = possibly_enforced_ty ft.ft_ret                                                ;
       ft_pos     = pos ft.ft_pos                                               ;
       ft_arity   = fun_arity ft.ft_arity                                       ;
       ft_reactive = fun_reactive ft.ft_reactive                                ;
@@ -187,7 +191,7 @@ let rec ty (p, x) =
   and fun_param param =
     { param with
       fp_pos = pos param.fp_pos;
-      fp_type = ty param.fp_type;
+      fp_type = possibly_enforced_ty param.fp_type;
       fp_rx_annotation = param_rx_annotation param.fp_rx_annotation
     }
 

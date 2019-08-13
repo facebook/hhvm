@@ -71,7 +71,7 @@ let lookup_magic_type (env:Env.env) (class_:locl ty) (fname:string) :
         | _ -> None
       ) in
     begin match ce_type with
-    | Some (env, { ft_params = pars; ft_ret = ty; _; }) ->
+    | Some (env, { ft_params = pars; ft_ret = { et_type = ty; _ }; _; }) ->
       let ty_opt =
         match ty with
         | (_, Tprim Tstring) -> None
@@ -93,8 +93,8 @@ let parse_printf_string env s pos (class_:locl ty) : Env.env * locl fun_params =
     let fname = magic_method_name (get_char s i) in
     let snippet = String.sub s i0 ((min (i+1) (String.length s)) - i0) in
     let add_reason = List.map ~f:begin fun p ->
-      let why, ty = p.fp_type in
-      { p with fp_type = Reason.Rformat (pos, snippet, why), ty }
+      let why, ty = p.fp_type.et_type in
+      { p with fp_type = { p.fp_type with et_type = Reason.Rformat (pos, snippet, why), ty } }
     end in
     match lookup_magic_type env class_ fname with
       | env, Some (good_args, None) ->
@@ -147,20 +147,20 @@ let rec const_string_of (env:Env.env) (e:Nast.expr) : Env.env * (Pos.t, string) 
 let retype_magic_func (env:Env.env) (ft:locl fun_type) (el:Nast.expr list) : Env.env * locl fun_type =
   let rec f env param_types args : Env.env * locl fun_params option =
     (match param_types, args with
-      | [ { fp_type = (_, Toption (_, Tclass ((_, fs), _, [_]))); _ }], [(_, Null)]
+      | [ { fp_type = { et_type = (_, Toption (_, Tclass ((_, fs), _, [_]))); _ }; _}], [(_, Null)]
         when SN.Classes.is_format_string fs -> env, None
-      | [({ fp_type = (why, Toption (_, Tclass ((_, fs), _, [type_arg]))); _ } as fp)], (arg :: _)
-      | [({ fp_type = (why,             Tclass ((_, fs), _, [type_arg] )); _ } as fp)], (arg :: _)
-      | [({ fp_type = (why, Tunion [
+      | [({ fp_type = { et_type = (why, Toption (_, Tclass ((_, fs), _, [type_arg]))); _ }; _} as fp)], (arg :: _)
+      | [({ fp_type = { et_type = (why,             Tclass ((_, fs), _, [type_arg] )); _ }; _} as fp)], (arg :: _)
+      | [({ fp_type = { et_type = (why, Tunion [
           (_, Tdynamic);
           (_, Tclass ((_, fs), _, [type_arg]));
-        ]); _ } as fp)], (arg :: _)
+        ]); _ }; _ } as fp)], (arg :: _)
         when SN.Classes.is_format_string fs ->
           (match const_string_of env arg with
              |  env, Right str ->
                   let env, argl =
                     parse_printf_string env str (fst arg) type_arg in
-                  env, Some ({ fp with fp_type = (why, Tprim Tstring) } :: argl)
+                  env, Some ({ fp with fp_type = { et_type = (why, Tprim Tstring); et_enforced = false; } } :: argl)
              |  env, Left pos ->
                   if Partial.should_check_error (Env.get_mode env) 4027
                   then Errors.expected_literal_format_string pos;

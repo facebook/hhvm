@@ -250,7 +250,7 @@ module Full = struct
         text "function";
         fun_type to_doc st env ft;
         text ")";
-        (match ft.ft_ret with
+        (match ft.ft_ret.et_type with
           | (Reason.Rdynamic_yield _, _) -> Space ^^ text "[DynamicYield]"
           | _ -> Nothing)
       ]
@@ -402,7 +402,7 @@ module Full = struct
       | Fellipsis _ -> Some (text "...")
       | Fvariadic (_, p) ->
         Some (Concat [
-          (match p.fp_type with
+          (match p.fp_type.et_type with
           | _, Tany -> Nothing
           | _ -> fun_param to_doc st env p
           );
@@ -424,7 +424,14 @@ module Full = struct
       );
       list "(" id params "):";
       Space;
-      ty to_doc st env ft.ft_ret
+      possibly_enforced_ty to_doc st env ft.ft_ret
+    ]
+
+  and possibly_enforced_ty: type a. _ -> _ -> _ -> a possibly_enforced_ty -> _ =
+    fun to_doc st env { et_enforced; et_type; } ->
+    Concat [
+      (if show_verbose env && et_enforced then text "enforced" ^^ Space else Nothing);
+      ty to_doc st env et_type
     ]
 
   and fun_param: type a. _ -> _ -> _ -> a fun_param -> _ =
@@ -435,10 +442,10 @@ module Full = struct
       | _ -> Nothing
       );
       match fp_name, fp_type with
-      | None, _ -> ty to_doc st env fp_type
-      | Some param_name, (_, Tany) -> text param_name
+      | None, _ -> possibly_enforced_ty to_doc st env fp_type
+      | Some param_name, { et_type = (_, Tany); _ } -> text param_name
       | Some param_name, _ ->
-          Concat [ty to_doc st env fp_type; Space; text param_name]
+          Concat [possibly_enforced_ty to_doc st env fp_type; Space; text param_name]
     ]
 
   and tparam: type a. _ -> _ -> _ -> a Typing_defs.tparam -> _ =
@@ -857,9 +864,9 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
       then kind "coroutine"
       else kind "function" in
     let callconv cc = ["callConvention", JSON_String (param_mode_to_string cc)] in
-    let param fp = obj @@ callconv fp.fp_kind @ typ fp.fp_type in
+    let param fp = obj @@ callconv fp.fp_kind @ typ fp.fp_type.et_type in
     let params fps = ["params", JSON_Array (List.map fps param)] in
-    obj @@ fun_kind @ params ft.ft_params @ result ft.ft_ret
+    obj @@ fun_kind @ params ft.ft_params @ result ft.ft_ret.et_type
   | Tanon _ ->
     obj @@ kind "anon"
   | Tdarray (ty1, ty2) ->
@@ -1263,7 +1270,7 @@ let to_locl_ty
           aux param_type ~keytrace:param_type_keytrace
             >>= fun param_type ->
           Ok {
-            fp_type = param_type;
+            fp_type = { et_type = param_type; et_enforced = false; };
             fp_kind = callconv;
 
             (* Dummy values: these aren't currently serialized. *)
@@ -1282,7 +1289,7 @@ let to_locl_ty
       ty (Tfun {
         ft_is_coroutine;
         ft_params;
-        ft_ret;
+        ft_ret = { et_type = ft_ret; et_enforced = false; };
 
         (* Dummy values: these aren't currently serialized. *)
         ft_pos = Pos.none;
@@ -1560,7 +1567,7 @@ end
 
 module PrintFun = struct
 
-  let fparam tcopt { fp_name = sopt; fp_type = ty; _ } =
+  let fparam tcopt { fp_name = sopt; fp_type = { et_type = ty; _ }; _ } =
     let s = match sopt with
       | None -> "[None]"
       | Some s -> s in
@@ -1584,7 +1591,7 @@ module PrintFun = struct
     | FTKtparams -> "FTKtparams"
     | FTKinstantiated_targs -> "FTKinstantiated_targs" in
     let ft_params = fparams tcopt f.ft_params in
-    let ft_ret = Full.to_string_decl tcopt f.ft_ret in
+    let ft_ret = Full.to_string_decl tcopt f.ft_ret.et_type in
     "ft_pos: "^ft_pos^"\n"^
     "ft_abstract: "^ft_abstract^"\n"^
     "ft_arity: "^ft_arity^"\n"^

@@ -14,9 +14,7 @@ type t = {
    * type is determined by context or is a type variable that may get resolved
    * when checking the body of the lambda.
    *)
-  return_type: Typing_defs.locl Typing_defs.ty;
-
-  return_type_decl: Typing_defs.decl Typing_defs.ty option;
+  return_type: Typing_defs.locl Typing_defs.possibly_enforced_ty;
 
   (* Does the function or function type have the <<__ReturnDisposable>> attribute? *)
   return_disposable : bool;

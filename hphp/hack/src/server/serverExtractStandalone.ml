@@ -79,9 +79,9 @@ let print_fun_args tcopt fun_type =
     | Some n -> n
     | None -> "" in
     let inout = if arg.fp_kind = FPinout then "inout " else "" in
-    let typ = Typing_print.full_decl tcopt arg.fp_type in
+    let typ = Typing_print.full_decl tcopt arg.fp_type.et_type in
     let default = if (with_default idx)
-    then Printf.sprintf " = %s" (call_make_default tcopt arg.fp_type)
+    then Printf.sprintf " = %s" (call_make_default tcopt arg.fp_type.et_type)
     else "" in
     if var then Printf.sprintf "%s ...%s" typ name
     else Printf.sprintf "%s%s %s%s" inout typ name default in
@@ -98,7 +98,7 @@ let get_function_declaration tcopt fun_name fun_type =
   | ([], _) -> ""
   | (tparams, _) -> Printf.sprintf "<%s>" @@ list_items @@ List.map tparams tparam_name in
   let args = print_fun_args tcopt fun_type in
-  let rtype = Typing_print.full_decl tcopt fun_type.ft_ret in
+  let rtype = Typing_print.full_decl tcopt fun_type.ft_ret.et_type in
   Printf.sprintf "function %s%s(%s): %s" (strip_ns fun_name) tparams args rtype
 
 let rec name_from_hint hint =
@@ -201,9 +201,9 @@ let get_method_declaration tcopt (meth: Typing_defs.class_elt)
   | (_, Typing_defs.Tfun f) -> f
   | _ -> raise UnexpectedDependency in
   let args = print_fun_args tcopt method_type in
-  let rtype = match snd method_type.ft_ret with
+  let rtype = match snd method_type.ft_ret.et_type with
   | Typing_defs.Tany -> ""
-  | _ -> Printf.sprintf ": %s" (Typing_print.full_decl tcopt method_type.ft_ret) in
+  | _ -> Printf.sprintf ": %s" (Typing_print.full_decl tcopt method_type.ft_ret.et_type) in
   Printf.sprintf "%s%s %sfunction %s(%s)%s" abstract visibility static method_name args rtype
 
 let get_property_declaration tcopt (prop: Typing_defs.class_elt) ~is_static name =

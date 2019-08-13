@@ -18,11 +18,15 @@
 
 #include <stdio.h>
 #include <assert.h>
+#include <unistd.h>
 
 #include <cstdint>
 #include <string>
 #include <vector>
 #include <sstream>
+
+#include <boost/uuid/uuid_io.hpp>
+#include <boost/uuid/uuid_generators.hpp>
 
 #include <folly/Format.h>
 #include <folly/dynamic.h>
@@ -45,6 +49,7 @@
 #include "hphp/tools/tc-print/std-logger.h"
 #include "hphp/tools/tc-print/tc-print-logger.h"
 #ifdef FACEBOOK
+#include "hphp/facebook/extensions/scribe/ext_scribe.h"
 #include "hphp/tools/tc-print/facebook/db-logger.h"
 #endif
 
@@ -78,6 +83,7 @@ TCA             maxAddr         = (TCA)-1;
 uint32_t        annotationsVerbosity = 2;
 #ifdef FACEBOOK
 bool            printToDB       = false;
+std::string     hiveTable;
 #endif
 
 std::vector<uint32_t> transPrintOrder;
@@ -165,6 +171,8 @@ void usage() {
     "some other flags).\n"
     // TODO(elijahrivera) - investigate compatibility with other flags
     #ifdef FACEBOOK
+    "    -H <HIVE_TABLE> : used with -j, write the JSON output to Hive in the "
+    "table <HIVE_TABLE>\n"
     "    -x              : log translations to database\n"
     #endif
     "    -h              : prints help message\n",
@@ -194,7 +202,8 @@ void parseOptions(int argc, char *argv[]) {
   int c;
   opterr = 0;
   char* sortByArg = nullptr;
-  while ((c = getopt(argc, argv, "hc:Dd:f:g:ip:st:u:S:T:o:e:E:bB:v:k:a:A:n:jx"))
+  while ((c = getopt(argc, argv, "hc:Dd:f:g:ip:st:u:S:T:o:e:E:bB:v:k:a:A:n:jH:"
+                                 "x"))
          != -1) {
     switch (c) {
       case 'A':
@@ -328,6 +337,9 @@ void parseOptions(int argc, char *argv[]) {
       #ifdef FACEBOOK
       case 'x':
         printToDB = true;
+        break;
+      case 'H':
+        hiveTable = optarg;
         break;
       #endif
       default:
@@ -690,7 +702,8 @@ dynamic getTrans(TransID transId) {
                         ("blocks", blocks)
                         ("archName", transCode->getArchName())
                         ("regions", disasmObj)
-                        ("perfEvents", perfEvents);
+                        ("perfEvents", perfEvents)
+                        ("transId", transId);
 }
 
 dynamic getTC() {
@@ -1118,7 +1131,32 @@ int main(int argc, char *argv[]) {
                       sortBy,
                       filterByOpcode);
   } else if (useJSON) {
-    std::cout << get_json::getTC() << std::endl;
+    auto const tcObj = get_json::getTC();
+
+    auto const jsonStr = folly::toJson(tcObj);
+    std::cout << jsonStr << std::endl;
+
+    #ifdef FACEBOOK
+    if (!hiveTable.empty()) {
+      auto const uuid = boost::uuids::random_generator()();
+      auto const uuidStr = boost::uuids::to_string(uuid);
+
+      for (auto const& translation : tcObj["translations"]) {
+        StructuredLogEntry entry;
+        entry.force_init = true;
+
+        entry.setStr("translation_json", folly::toJson(translation));
+        entry.setInt("trans_id", translation["transId"].asInt());
+        entry.setStr("repoSchema", repoSchemaId().begin());
+        entry.setStr("func_name",
+                     translation["transRec"]["src"]["funcName"].asString());
+        entry.setStr("username" , std::string(getlogin()));
+        entry.setStr("uuid", uuidStr);
+
+        writeStructLogLazyInit(hiveTable, entry);
+      }
+    }
+    #endif
   } else {
     // Print all translations in original order, filtered by unit if desired.
     for (uint32_t t = 0; t < NTRANS; t++) {

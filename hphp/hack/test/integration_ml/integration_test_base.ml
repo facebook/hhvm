@@ -100,7 +100,7 @@ let setup_server ?custom_config ?(hhi_files = []) () =
       ~globalrev_opt:None
       ~namespace_map:[]
       ~provider_name:"TrieIndex"
-      ~quiet:false
+      ~quiet:true
       ~savedstate_file_opt:None
       ~workers:None
   in

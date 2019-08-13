@@ -338,3 +338,9 @@ let default_si_env = {
     nss_children = Hashtbl.create 0;
   };
 }
+
+(* Default provider, but no logging *)
+let quiet_si_env = { default_si_env with
+  sie_quiet_mode = true;
+  sie_log_timings = false;
+}

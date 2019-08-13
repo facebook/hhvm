@@ -2925,9 +2925,9 @@ let dollardollar_lvalue pos =
   add (Typing.err_code Typing.DollardollarLvalue) pos
     "Cannot assign a value to the special pipe variable ($$)"
 
-let assigning_to_const pos =
+let mutating_const_property pos =
   add (Typing.err_code Typing.AssigningToConst) pos
-    "Cannot assign to a __Const property"
+    "Cannot mutate a __Const property"
 
 let self_const_parent_not pos =
   add (Typing.err_code Typing.SelfConstParentNot) pos

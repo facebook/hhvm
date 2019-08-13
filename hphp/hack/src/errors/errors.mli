@@ -78,7 +78,7 @@ val missing_arrow : Pos.t -> string -> unit
 val disallowed_xhp_type : Pos.t -> string -> unit
 val name_is_reserved : string -> Pos.t -> unit
 val dollardollar_unused : Pos.t -> unit
-val assigning_to_const : Pos.t -> unit
+val mutating_const_property : Pos.t -> unit
 val self_const_parent_not : Pos.t -> unit
 val overriding_prop_const_mismatch : Pos.t -> bool -> Pos.t -> bool -> unit
 val method_name_already_bound : Pos.t -> string -> unit

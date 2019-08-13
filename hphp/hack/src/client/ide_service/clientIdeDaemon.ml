@@ -338,6 +338,7 @@ let handle_message: type a.
       make_context_from_document_location server_env document_location in
     let results = Provider_utils.with_context ~ctx ~f:(fun () ->
       ServerHighlightRefs.go_ctx
+        ~ctx
         ~entry
         ~line:document_location.line
         ~column:document_location.column
@@ -350,9 +351,10 @@ let handle_message: type a.
       make_context_from_document_location server_env document_location in
     let result = Provider_utils.with_context ~ctx ~f:(fun () ->
       ServerGoToDefinition.go_ctx
-      ~entry
-      ~line:document_location.ClientIdeMessage.line
-      ~column:document_location.ClientIdeMessage.column
+        ~ctx
+        ~entry
+        ~line:document_location.ClientIdeMessage.line
+        ~column:document_location.ClientIdeMessage.column
     ) in
     Lwt.return (state, Handle_message_result.Response result)
 
@@ -362,9 +364,10 @@ let handle_message: type a.
       make_context_from_document_location server_env document_location in
     let result = Provider_utils.with_context ~ctx ~f:(fun () ->
       ServerTypeDefinition.go_ctx
-      ~entry
-      ~line:document_location.ClientIdeMessage.line
-      ~column:document_location.ClientIdeMessage.column
+        ~ctx
+        ~entry
+        ~line:document_location.ClientIdeMessage.line
+        ~column:document_location.ClientIdeMessage.column
     ) in
     Lwt.return (state, Handle_message_result.Response result)
 

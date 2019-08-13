@@ -1027,6 +1027,7 @@ let handle_mode
     in
     let result = Provider_utils.with_context ~ctx ~f:(fun () ->
       ServerIdentifyFunction.go_ctx_absolute
+        ~ctx
         ~entry
         ~line
         ~column

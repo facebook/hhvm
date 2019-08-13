@@ -880,47 +880,6 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
                 wait=True,
             )
-            .notification(
-                comment="make local, unsaved change to the file",
-                method="textDocument/didChange",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}", "version": 2},
-                    "contentChanges": [
-                        {
-                            "text": """\
-<?hh  //strict
-// comment
-function a_hover(): int {
-  return b_hover();
-}
-# Another comment describing b_hover.
-function b_hover(): int {
-  return 42;
-}
-"""
-                        }
-                    ],
-                },
-            )
-            .request(
-                comment="another hover over function invocation",
-                method="textDocument/hover",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 3, "character": 16},
-                },
-                result={
-                    "contents": [
-                        {"language": "hack", "value": "int"},
-                        "Another comment describing b_hover.",
-                    ],
-                    "range": {
-                        "start": {"line": 3, "character": 9},
-                        "end": {"line": 3, "character": 16},
-                    },
-                },
-                powered_by="serverless_ide",
-            )
             .request(method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
@@ -1048,3 +1007,89 @@ function b_hover(): int {
         variables = self.setup_php_file("non_blocking.php")
         self.test_driver.start_hh_loop_forever_assert_timeout()
         self.load_and_run("non_blocking", variables, wait_for_server=False)
+
+    def test_serverless_ide_decl_in_unsaved_buffer_changed(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("hover.php"))
+        self.test_driver.stop_hh_server()
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("serverless_ide_decl_in_unsaved_buffer_changed"),
+                use_serverless_ide=True,
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .request(
+                comment="hover over function invocation",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 16},
+                },
+                result={
+                    "contents": [
+                        {"language": "hack", "value": "int"},
+                        "A comment describing b_hover.",
+                    ],
+                    "range": {
+                        "start": {"line": 3, "character": 9},
+                        "end": {"line": 3, "character": 16},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            .notification(
+                comment="make local, unsaved change to the file",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}", "version": 2},
+                    "contentChanges": [
+                        {
+                            "text": """\
+<?hh // strict
+// comment
+function a_hover(): int {
+  return b_hover();
+}
+# A comment describing b_hover.
+function b_hover(): string {
+  return 42;
+}
+"""
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="another hover over function invocation, should be string now",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 16},
+                },
+                result={
+                    "contents": [
+                        {"language": "hack", "value": "string"},
+                        "A comment describing b_hover.",
+                    ],
+                    "range": {
+                        "start": {"line": 3, "character": 9},
+                        "end": {"line": 3, "character": 16},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            .request(method="shutdown", params={}, result=None)
+        )
+
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)

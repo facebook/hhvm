@@ -7,10 +7,11 @@
  *)
 
 val go_ctx:
-    entry:Provider_context.entry ->
-    line:int ->
-    column:int ->
-    ServerCommandTypes.Go_to_type_definition.result
+  ctx:Provider_context.t ->
+  entry:Provider_context.entry ->
+  line:int ->
+  column:int ->
+  ServerCommandTypes.Go_to_type_definition.result
 
 val go:
   ServerEnv.env ->

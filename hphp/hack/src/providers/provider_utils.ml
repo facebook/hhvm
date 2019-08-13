@@ -61,7 +61,7 @@ let update_context
     file_input
   in
   Ast_provider.provide_ast_hint path ast Ast_provider.Full;
-  let tast = with_context ~ctx ~f:(fun () ->
+  let tast = lazy (
     let nast = Naming.program ast in
     Typing.nast_to_tast tcopt nast
   ) in
@@ -73,3 +73,17 @@ let update_context
   } in
   let ctx = Relative_path.Map.add ctx path entry in
   (ctx, entry)
+
+let compute_tast
+    ~(ctx: Provider_context.t)
+    ~(entry: Provider_context.entry)
+    : Tast.program =
+  match Provider_context.get_global_context () with
+  | None ->
+    with_context ~ctx ~f:(fun () ->
+      Lazy.force entry.Provider_context.tast
+    )
+  | Some _ ->
+    (* No need for [with_context] -- assume that's already the context we're
+    operating under. *)
+    Lazy.force entry.Provider_context.tast

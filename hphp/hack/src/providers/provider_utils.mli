@@ -6,6 +6,11 @@
  *
  *)
 
+val compute_tast:
+  ctx:Provider_context.t -> entry:Provider_context.entry -> Tast.program
+(** Compute the TAST by doing typechecking/type inference for the given entry in
+the given context. *)
+
 val update_context:
   tcopt:TypecheckerOptions.t ->
   ctx:Provider_context.t ->

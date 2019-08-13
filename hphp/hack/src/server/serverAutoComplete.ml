@@ -121,7 +121,7 @@ let auto_complete_at_position_ctx
   let content = File_content.edit_file_unsafe file_content edits in
 
   (* Assemble the server IDE context *)
-  let (_, entry) = Provider_utils.update_context
+  let (ctx, entry) = Provider_utils.update_context
     ~tcopt
     ~ctx:Provider_context.empty
     ~path
@@ -138,5 +138,5 @@ let auto_complete_at_position_ctx
     ~content_classes:((Core_kernel.List.map fileinfo.FileInfo.classes ~f:snd) |> SSet.of_list)
     ~autocomplete_context
     ~sienv
-    entry.Provider_context.tast
+    (Provider_utils.compute_tast ~ctx ~entry)
 ;;

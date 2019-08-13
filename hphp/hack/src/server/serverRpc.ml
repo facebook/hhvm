@@ -302,7 +302,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           ~file_input
         in
         Provider_utils.with_context ~ctx ~f:(fun () ->
-          env, ServerGoToDefinition.go_ctx ~entry ~line ~column
+          env, ServerGoToDefinition.go_ctx ~ctx ~entry ~line ~column
         )
     | BIGCODE filename ->
         env, ServerBigCode.go env filename

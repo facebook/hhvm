@@ -7,6 +7,7 @@
  *)
 
 val go_ctx:
+  ctx:Provider_context.t ->
   entry:Provider_context.entry ->
   line:int ->
   column:int ->

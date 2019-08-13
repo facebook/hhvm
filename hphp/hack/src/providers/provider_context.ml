@@ -12,7 +12,7 @@ type entry = {
   file_input: ServerCommandTypes.file_input;
   path: Relative_path.t;
   ast: Nast.program;
-  tast: Tast.program;
+  tast: Tast.program Lazy.t;
 } [@@deriving show]
 
 type t = entry Relative_path.Map.t

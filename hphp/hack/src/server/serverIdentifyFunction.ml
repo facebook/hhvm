@@ -69,24 +69,28 @@ let go_absolute content line char tcopt =
   end
 
 let go_ctx
+    ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(line : int)
     ~(column : int) =
-  let { Provider_context.ast; tast; _ } = entry in
-  let symbols = IdentifySymbolService.go tast line column in
+  let symbols = IdentifySymbolService.go
+    (Provider_utils.compute_tast ~ctx ~entry) line column in
   let symbols = take_best_suggestions (List.sort by_nesting symbols) in
   List.map symbols ~f:(fun symbol ->
-    let symbol_definition = ServerSymbolDefinition.go (Some ast) symbol in
+    let symbol_definition =
+      ServerSymbolDefinition.go (Some entry.Provider_context.ast) symbol in
     (symbol, symbol_definition)
   )
 
 let go_ctx_absolute
+    ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(line : int)
     ~(column : int)
     : (string SymbolOccurrence.t *
        string SymbolDefinition.t option) list =
   go_ctx
+    ~ctx
     ~entry
     ~line
     ~column

@@ -91,13 +91,16 @@ let go (content, line, char) tcopt =
     end
 
 let go_ctx
+    ~(ctx: Provider_context.t)
     ~(entry: Provider_context.entry)
     ~(line: int)
     ~(column: int)
     ~(tcopt: TypecheckerOptions.t)
     : ServerHighlightRefsTypes.result =
-  let { Provider_context.path; ast; tast; _ } = entry in
-  let symbol_to_highlight = IdentifySymbolService.go tast line column in
+  let { Provider_context.path; ast; _ } = entry in
+  let symbol_to_highlight =
+    IdentifySymbolService.go
+      (Provider_utils.compute_tast ~ctx ~entry) line column in
   let file_info = Provider_context.get_fileinfo entry in
   let results = List.fold symbol_to_highlight ~init:[] ~f:(fun acc s ->
     let stuff = highlight_symbol tcopt ast (line, column) path file_info s in

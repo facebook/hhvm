@@ -4,7 +4,8 @@
   (modules provider_config)
   (libraries
     heap_shared_mem
-    memory_bounded_lru_cache))
+    memory_bounded_lru_cache)
+  (preprocess (pps ppx_deriving.std)))
 
 (library
   (name provider_context)
@@ -17,14 +18,16 @@
     server_command_types
     typing_ast
     typing_deps
-    relative_path))
+    relative_path)
+  (preprocess (pps ppx_deriving.std)))
 
 (library
   (name memory_bounded_lru_cache)
   (wrapped false)
   (modules memory_bounded_lru_cache)
   (libraries
-    core_kernel))
+    core_kernel)
+  (preprocess (pps ppx_deriving.std)))
 
 (library
   (name file_provider)
@@ -35,7 +38,8 @@
     heap_shared_mem
     provider_config
     relative_path
-    sys_utils))
+    sys_utils)
+  (preprocess (pps ppx_deriving.std)))
 
 (library
   (name ast_provider)
@@ -50,7 +54,8 @@
     provider_context
     relative_path
     server_command_types
-    utils_find))
+    utils_find)
+  (preprocess (pps ppx_deriving.std)))
 
 (library
   (name decl_provider)
@@ -61,7 +66,8 @@
   (libraries
     lru_worker_stubs
     provider_config
-    typing_heap))
+    typing_heap)
+  (preprocess (pps ppx_deriving.std)))
 
 (library
   (name fixme_provider)
@@ -71,7 +77,8 @@
     collections
     errors
     heap_shared_mem
-    pos))
+    pos)
+  (preprocess (pps ppx_deriving.std)))
 
 (library
   (name partial_provider)
@@ -79,7 +86,8 @@
   (modules partial_provider)
   (libraries
     errors
-    file_info))
+    file_info)
+  (preprocess (pps ppx_deriving.std)))
 
 (library
   (name provider_utils)
@@ -97,4 +105,5 @@
     server_command_types
     server_ide_utils
     typechecker_options
-    typing))
+    typing)
+  (preprocess (pps ppx_deriving.std)))

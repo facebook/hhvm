@@ -11,7 +11,7 @@ type entry = {
   path: Relative_path.t;
   ast: Nast.program;
   tast: Tast.program;
-}
+} [@@deriving show]
 (** The information associated with a given file. *)
 
 type t = entry Relative_path.Map.t

@@ -13,7 +13,7 @@ type entry = {
   path: Relative_path.t;
   ast: Nast.program;
   tast: Tast.program;
-}
+} [@@deriving show]
 
 type t = entry Relative_path.Map.t
 

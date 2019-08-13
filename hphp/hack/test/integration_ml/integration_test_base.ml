@@ -392,13 +392,14 @@ let ide_autocomplete env (path, line, column) =
                   is_manually_invoked )));
     }
 
-let status ?(ignore_ide = false) env =
+let status ?(ignore_ide = false) ?(max_errors = None) env =
   run_loop_once
     env
     {
       default_loop_input with
       new_client =
-        Some (RequestResponse (ServerCommandTypes.STATUS ignore_ide));
+        Some
+          (RequestResponse (ServerCommandTypes.STATUS (ignore_ide, max_errors)));
     }
 
 let full_check env =
@@ -798,6 +799,21 @@ let assert_status loop_output expected =
   in
   let results_as_string = errors_to_string error_list in
   assertEqual expected results_as_string
+
+let assert_error_count loop_output ~expected_count =
+  let { Server_status.error_list; _ } =
+    match loop_output.new_client_response with
+    | Some res -> res
+    | _ -> fail "Expected status response"
+  in
+  let actual_count = List.length error_list in
+  Asserter.Int_asserter.assert_equals
+    expected_count
+    actual_count
+    (Printf.sprintf
+       "Expected %d errors, but got %d"
+       expected_count
+       actual_count)
 
 let assert_needs_retry loop_output =
   Done_or_retry.(

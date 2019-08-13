@@ -428,7 +428,7 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
         then rpc args (Rpc.NO_PRECHECKED_FILES)
         else Lwt.return_unit
       in
-      let%lwt status = rpc args (Rpc.STATUS ignore_ide) in
+      let%lwt status = rpc args (Rpc.STATUS (ignore_ide, args.max_errors)) in
       let exit_status =
         ClientCheckStatus.go status args.output_json args.from args.error_format args.max_errors in
       Lwt.return exit_status
@@ -439,9 +439,10 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
         | _ ->
           ServerCommandTypes.FileName (expand_path filename)
       in
-      let%lwt error_list = rpc args (Rpc.STATUS_SINGLE file_input) in
+      let%lwt (error_list, dropped_count) = rpc args (Rpc.STATUS_SINGLE (file_input, args.max_errors)) in
       let status = {
         error_list;
+        dropped_count;
         Rpc.Server_status.liveness = Rpc.Live_status;
         has_unsaved_changes = false;
         last_recheck_stats = None;

@@ -432,18 +432,18 @@ let format_messages (msgs: Pos.absolute message list): string =
   String.concat ~sep:"\n" (aux sorted_msgs None) ^ "\n"
 
 (* E.g. "10 errors found." *)
-let format_summary format errors max_errors : string option =
+let format_summary format errors dropped_count max_errors : string option =
   match format with
   | Context ->
-     let total = List.length errors in
+     let total = (List.length errors) + dropped_count in
      let formatted_total =
        Printf.sprintf "%d error%s found"
          total
          (if total = 1 then "" else "s")
      in
      let truncated = match max_errors with
-       | Some max_errors when total > max_errors ->
-          Printf.sprintf " (only showing first %d).\n" max_errors
+       | Some max_errors when dropped_count > 0 ->
+          Printf.sprintf " (only showing first %d, dropped %d).\n" max_errors dropped_count
        | _ -> ".\n"
      in
      Some (formatted_total ^ truncated)

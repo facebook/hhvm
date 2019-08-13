@@ -194,7 +194,7 @@ else
   env
 
 let ignore_ide = function
-  | Rpc (STATUS true) -> true
+  | Rpc (STATUS (true, _)) -> true
   | _ -> false
 
 let apply_changes env changes =

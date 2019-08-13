@@ -22,11 +22,11 @@ function foo(): int {
 |}
 
 let status_single_request =
-  ServerCommandTypes.(STATUS_SINGLE (FileName "/foo.php"))
+  ServerCommandTypes.(STATUS_SINGLE (FileName "/foo.php", None))
 
 let check_status_single_response = function
   | None -> Test.fail "Expected STATUS_SINGLE response"
-  | Some [] -> ()
+  | Some ([], _) -> ()
   | Some _ -> Test.fail "Expected no errors"
 
 let test () =

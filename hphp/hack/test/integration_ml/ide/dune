@@ -24,6 +24,7 @@
     test_ide_status
     test_ide_typing_deps
     test_ide_utils_ide
+    test_max_errors
     test_naming_errors
     test_override
     test_remove_function
@@ -111,6 +112,11 @@
   (name error_throttling)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/error_throttling)))
+
+(alias
+  (name max_errors)
+  (deps ../test_all.exe)
+  (action (run ../test_all.exe ide/max_errors)))
 
 (alias
   (name naming_errors)

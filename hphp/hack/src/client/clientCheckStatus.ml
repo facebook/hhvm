@@ -81,6 +81,7 @@ let go status output_json from error_format max_errors =
     Server_status.liveness;
     has_unsaved_changes;
     error_list;
+    dropped_count;
     last_recheck_stats;
   } = status in
   let stale_msg = is_stale_msg liveness in
@@ -102,7 +103,7 @@ let go status output_json from error_format max_errors =
       | Errors.Raw -> print_error_color
     in
     List.iter error_list f;
-    Option.iter (Errors.format_summary error_format error_list max_errors)
+    Option.iter (Errors.format_summary error_format error_list dropped_count max_errors)
       ~f:(fun msg -> Printf.printf "%s" msg);
     Option.iter stale_msg ~f:(fun msg -> Printf.printf "%s" msg);
     if has_unsaved_changes then warn_unsaved_changes ()

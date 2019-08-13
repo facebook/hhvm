@@ -19,21 +19,22 @@ function foo {
 (* Computing this will consume HH_FIXMEs in the file. Computing it twice will check if
  * those FIXME's are properly cached along with AST. *)
 let status_single_request =
-  ServerCommandTypes.(STATUS_SINGLE (FileContent foo_contents))
+  ServerCommandTypes.(STATUS_SINGLE (FileContent foo_contents, None))
 
 (* Computing this will generate errors. Computing it twice will check if
  * those errors are properly cached along with AST. *)
 let parse_error_by_contents =
-  ServerCommandTypes.(STATUS_SINGLE (FileContent bar_contents))
+  ServerCommandTypes.(STATUS_SINGLE (FileContent bar_contents, None))
 
 (* This will parse the same file contents, but under different name. We embed filenames in
  * AST positions and errors, so need to be careful not to cache them together *)
 let parse_error_by_filename =
-  ServerCommandTypes.(STATUS_SINGLE (FileName (Test.prepend_root bar_name)))
+  ServerCommandTypes.(
+    STATUS_SINGLE (FileName (Test.prepend_root bar_name), None))
 
 let check_no_errors = function
   | None -> Test.fail "Expected STATUS_SINGLE response"
-  | Some [] -> ()
+  | Some ([], _) -> ()
   | Some _ -> Test.fail "Expected no errors"
 
 let expected_errors_by_contents =
@@ -56,8 +57,8 @@ Encountered unexpected text '{', was expecting a type hint. (Parsing[1002])
 
 let check_errors expected_errors = function
   | None -> Test.fail "Expected STATUS_SINGLE response"
-  | Some [] -> Test.fail "Expected errors"
-  | Some errors ->
+  | Some ([], _) -> Test.fail "Expected errors"
+  | Some (errors, _) ->
     Test.assertEqual expected_errors (Test.errors_to_string errors)
 
 let test () =

@@ -35,6 +35,7 @@ let tests =
     ("ide/ide_status", run Test_ide_status.test);
     ("ide/ide_typing_deps", run Test_ide_typing_deps.test);
     ("ide/ide_utils", run Test_ide_utils.test);
+    ("ide/max_errors", run Test_max_errors.test);
     ("ide/naming_errors", run Test_naming_errors.test);
     ("ide/override", run Test_override.test);
     ("ide/remove_function", run Test_remove_function.test);

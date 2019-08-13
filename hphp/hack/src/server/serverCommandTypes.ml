@@ -23,6 +23,7 @@ module Server_status = struct
     liveness : status_liveness;
     has_unsaved_changes : bool;
     error_list : Pos.absolute Errors.error_ list;
+    dropped_count : int;
     last_recheck_stats: Recheck_stats.t option;
   }
 end
@@ -209,8 +210,8 @@ type cst_search_input = {
 (* The following datatypes can be interpreted as follows:
  * MESSAGE_TAG : Argument type (sent from client to server) -> return type t *)
 type _ t =
-  | STATUS : bool -> Server_status.t t
-  | STATUS_SINGLE : file_input -> Pos.absolute Errors.error_ list t
+  | STATUS : bool * int option -> Server_status.t t
+  | STATUS_SINGLE : file_input * int option -> (Pos.absolute Errors.error_ list * int) t
   | INFER_TYPE : file_input * int * int * bool ->
       InferAtPosService.result t
   | INFER_TYPE_BATCH : (string * int * int * (int * int) option) list * bool -> string list t

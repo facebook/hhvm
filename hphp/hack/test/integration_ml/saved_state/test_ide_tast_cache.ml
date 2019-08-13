@@ -17,17 +17,17 @@ function bar(): int {
 |}
 
 let typing_error_by_content =
-  ServerCommandTypes.(STATUS_SINGLE (FileContent bar_contents))
+  ServerCommandTypes.(STATUS_SINGLE (FileContent bar_contents, None))
 
 let check_no_errors = function
   | None -> Test.fail "Expected STATUS_SINGLE response"
-  | Some [] -> ()
+  | Some ([], _) -> ()
   | Some _ -> Test.fail "Expected no errors"
 
 let check_errors expected_errors = function
   | None -> Test.fail "Expected STATUS_SINGLE response"
-  | Some [] -> Test.fail "Expected errors"
-  | Some errors ->
+  | Some ([], _) -> Test.fail "Expected errors"
+  | Some (errors, _) ->
     Test.assertEqual expected_errors (Test.errors_to_string errors)
 
 let expected_typing_error =

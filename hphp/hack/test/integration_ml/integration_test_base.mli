@@ -100,6 +100,7 @@ val ide_autocomplete :
 
 val status :
   ?ignore_ide:bool ->
+  ?max_errors:int option ->
   ServerEnv.env ->
   ServerEnv.env * (ServerCommandTypes.Server_status.t, 'a) loop_outputs
 
@@ -153,6 +154,11 @@ val assert_ide_autocomplete :
 
 val assert_status :
   (ServerCommandTypes.Server_status.t, 'a) loop_outputs -> string -> unit
+
+val assert_error_count :
+  (ServerCommandTypes.Server_status.t, 'a) loop_outputs ->
+  expected_count:int ->
+  unit
 
 val assert_needs_retry :
   ('a, 'b ServerCommandTypes.Done_or_retry.t) loop_outputs -> unit

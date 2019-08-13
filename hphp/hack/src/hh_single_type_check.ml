@@ -115,28 +115,28 @@ let print_error format ?(oc = stderr) l =
   Out_channel.output_string oc (formatter (Errors.to_absolute_for_test l))
 
 let write_error_list format errors oc max_errors =
-  let shown_errors = match max_errors with
-    | Some max_errors -> List.take errors max_errors
-    | None -> errors
+  let shown_errors, dropped_errors = match max_errors with
+    | Some max_errors -> List.split_n errors max_errors
+    | None -> errors, []
   in
   (if errors <> []
    then
      (List.iter ~f:(print_error format ~oc) shown_errors;
-      match Errors.format_summary format errors max_errors with
+      match Errors.format_summary format errors (List.length dropped_errors) max_errors with
       | Some summary -> Out_channel.output_string oc summary
       | None -> ())
   else Out_channel.output_string oc "No errors\n");
   Out_channel.close oc
 
 let print_error_list format errors max_errors =
-  let shown_errors = match max_errors with
-    | Some max_errors -> List.take errors max_errors
-    | None -> errors
+  let shown_errors, dropped_errors = match max_errors with
+    | Some max_errors -> List.split_n errors max_errors
+    | None -> errors, []
   in
   if errors <> []
   then
     (List.iter ~f:(print_error format) shown_errors;
-     match Errors.format_summary format errors max_errors with
+     match Errors.format_summary format errors (List.length dropped_errors) max_errors with
      | Some summary -> Out_channel.output_string stderr summary
      | None -> ())
   else Printf.printf "No errors\n"

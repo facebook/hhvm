@@ -17,12 +17,20 @@ let remove_dead_fixme_warning = (
   "Please run 'hh_client restart --no-load' to restart it."
 )
 
+let take_max_errors error_list max_errors =
+  match max_errors with
+    | Some max_errors ->
+      let error_list, dropped_errors = List.split_n error_list max_errors in
+      error_list, (List.length dropped_errors)
+    | None -> error_list, 0
+
 let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   fun genv env ~is_stale -> function
-    | STATUS _ ->
+    | STATUS (_, max_errors) ->
         HackEventLogger.check_response (Errors.get_error_list env.errorl);
         let error_list = Errors.get_sorted_error_list env.errorl in
         let error_list = List.map ~f:Errors.to_absolute error_list in
+        let (error_list, dropped_count) = take_max_errors error_list max_errors in
         let liveness = (if is_stale then Stale_status else Live_status) in
         let has_unsaved_changes = ServerFileSync.has_unsaved_changes env in
         let last_recheck_info = env.ServerEnv.last_recheck_info in
@@ -33,8 +41,9 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
             time = info.recheck_time;
           }
         in
-        env, { Server_status.liveness; has_unsaved_changes; error_list; last_recheck_stats; }
-    | STATUS_SINGLE fn -> env, ServerStatusSingle.go fn env.tcopt
+        env, { Server_status.liveness; has_unsaved_changes; error_list; dropped_count; last_recheck_stats; }
+    | STATUS_SINGLE (fn, max_errors) ->
+      env, (take_max_errors (ServerStatusSingle.go fn env.tcopt) max_errors)
     | COVERAGE_LEVELS fn ->
         env, ServerColorFile.go env.ServerEnv.tcopt env.ServerEnv.naming_table fn
     | INFER_TYPE (fn, line, char, dynamic_view) ->

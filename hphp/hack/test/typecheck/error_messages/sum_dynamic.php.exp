@@ -1,6 +1,1 @@
-File "sum_dynamic.php", line 4, characters 10-16:
-Invalid return type (Typing[4110])
-File "sum_dynamic.php", line 3, characters 27-32:
-Expected string
-File "sum_dynamic.php", line 4, characters 10-16:
-But got dynamic because this is the sum of two arguments typed dynamic
+No errors

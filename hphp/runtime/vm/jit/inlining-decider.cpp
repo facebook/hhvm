@@ -373,7 +373,7 @@ using InlineCostCache = jit::fast_map<
   InlineRegionKey::Eq
 >;
 
-Vcost computeTranslationCostSlow(SrcKey at, Op callerFPushOp,
+Vcost computeTranslationCostSlow(SrcKey at,
                                  const RegionDesc& region,
                                  Annotations& annotations) {
   TransContext ctx {
@@ -384,8 +384,7 @@ Vcost computeTranslationCostSlow(SrcKey at, Op callerFPushOp,
     // We can pretend the stack is empty, but we at least need to account for
     // the locals, iters, and slots, etc.
     FPInvOffset{at.func()->numSlotsInFrame()},
-    0,
-    callerFPushOp
+    0
   };
 
   rqtrace::DisableTracing notrace;
@@ -399,7 +398,7 @@ Vcost computeTranslationCostSlow(SrcKey at, Op callerFPushOp,
 
 folly::Synchronized<InlineCostCache, folly::RWSpinLock> s_inlCostCache;
 
-int computeTranslationCost(SrcKey at, Op callerFPushOp,
+int computeTranslationCost(SrcKey at,
                            const RegionDesc& region,
                            Annotations& annotations) {
   InlineRegionKey irk{region};
@@ -408,8 +407,7 @@ int computeTranslationCost(SrcKey at, Op callerFPushOp,
     if (f != s_inlCostCache.end()) return f->second;
   }
 
-  auto const info = computeTranslationCostSlow(at, callerFPushOp, region,
-                                              annotations);
+  auto const info = computeTranslationCostSlow(at, region, annotations);
   auto cost = info.cost;
 
   // We normally store the computed cost into the cache.  However, if the region
@@ -496,7 +494,6 @@ uint64_t adjustedMaxVasmCost(const irgen::IRGS& env,
  * Return the cost of inlining the given callee.
  */
 int costOfInlining(SrcKey callerSk,
-                   Op callerFPushOp,
                    const Func* callee,
                    const RegionDesc& region,
                    Annotations& annotations) {
@@ -505,14 +502,11 @@ int costOfInlining(SrcKey callerSk,
     callee->userAttributes().count(s_AlwaysInline.get());
 
   // Functions marked as always inline don't contribute to overall cost
-  return alwaysInl
-    ? 0
-    : computeTranslationCost(callerSk, callerFPushOp, region, annotations);
+  return alwaysInl ? 0 : computeTranslationCost(callerSk, region, annotations);
 }
 
 bool shouldInline(const irgen::IRGS& irgs,
                   SrcKey callerSk,
-                  Op callerFPushOp,
                   const Func* callee,
                   const RegionDesc& region,
                   uint32_t maxTotalCost,
@@ -636,7 +630,7 @@ bool shouldInline(const irgen::IRGS& irgs,
     // In debug builds compute the cost anyway to catch bugs in the inlining
     // machinery. Many inlining tests utilize the __ALWAYS_INLINE attribute.
     if (debug) {
-      computeTranslationCost(callerSk, callerFPushOp, region, annotations);
+      computeTranslationCost(callerSk, region, annotations);
     }
     return accept("callee marked as __ALWAYS_INLINE");
   }
@@ -645,8 +639,7 @@ bool shouldInline(const irgen::IRGS& irgs,
   // We measure the cost of inlining each callstack and stop when it exceeds a
   // certain threshold.  (Note that we do not measure the total cost of all the
   // inlined calls for a given caller---just the cost of each nested stack.)
-  const int cost = computeTranslationCost(callerSk, callerFPushOp, region,
-                                          annotations);
+  const int cost = computeTranslationCost(callerSk, region, annotations);
   if (cost <= RuntimeOption::EvalHHIRAlwaysInlineVasmCostLimit) {
     return accept(folly::sformat("cost={} within always-inline limit", cost));
   }
@@ -825,7 +818,6 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
                                  const Func* callee,
                                  const FCallArgs& fca,
                                  Type ctxType,
-                                 Op writeArOpc,
                                  const SrcKey& sk,
                                  Annotations& annotations) {
   assertx(isFCall(sk.op()));
@@ -853,7 +845,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
     // Bail out if calling a static methods with an object ctx.
     if (ctxType.maybe(TObj) &&
         (callee->isStaticInPrologue() ||
-         (!sk.hasThis() && isFCallClsMethod(writeArOpc)))) {
+         (!sk.hasThis() && isFCallClsMethod(sk.op())))) {
       traceRefusal(sk, callee, "calling static method with an object",
                    annotationsPtr);
       return nullptr;
@@ -885,7 +877,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
     auto region = selectCalleeCFG(sk, callee, fca.numArgs, ctxType, argTypes,
                                   irgs.budgetBCInstrs, annotationsPtr);
     if (region &&
-        shouldInline(irgs, sk, writeArOpc, callee, *region,
+        shouldInline(irgs, sk, callee, *region,
                      adjustedMaxVasmCost(irgs, *region, depth), annotations)) {
       return region;
     }
@@ -896,7 +888,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
                                      irgs.budgetBCInstrs);
 
   if (region &&
-      shouldInline(irgs, sk, writeArOpc, callee, *region,
+      shouldInline(irgs, sk, callee, *region,
                    adjustedMaxVasmCost(irgs, *region, depth), annotations)) {
     return region;
   }

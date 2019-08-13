@@ -331,7 +331,6 @@ RegionDescPtr getInlinableCalleeRegion(const irgen::IRGS& irgs,
                                        const Func* callee,
                                        const FCallArgs& fca,
                                        Type ctxType,
-                                       Op writeArOpc,
                                        const ProfSrcKey& psk,
                                        int& calleeCost,
                                        Annotations& annotations) {
@@ -352,13 +351,12 @@ RegionDescPtr getInlinableCalleeRegion(const irgen::IRGS& irgs,
   }
 
   auto calleeRegion = selectCalleeRegion(
-    irgs, callee, fca, ctxType, writeArOpc, psk.srcKey, annotations);
+    irgs, callee, fca, ctxType, psk.srcKey, annotations);
   if (!calleeRegion || calleeRegion->instrSize() > irgs.budgetBCInstrs) {
     return nullptr;
   }
 
-  calleeCost = costOfInlining(psk.srcKey, writeArOpc, callee,
-                              *calleeRegion, annotations);
+  calleeCost = costOfInlining(psk.srcKey, callee, *calleeRegion, annotations);
   return calleeRegion;
 }
 
@@ -669,15 +667,14 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
 }
 
 bool irGenTryInlineFCall(irgen::IRGS& irgs, const Func* callee,
-                         const FCallArgs& fca, SSATmp* ctx, Op writeArOpc) {
+                         const FCallArgs& fca, SSATmp* ctx) {
   auto const psk = ProfSrcKey { irgs.profTransID, curSrcKey(irgs) };
   int calleeCost{0};
 
   // See if we have a callee region we can inline.
   ctx = ctx ? ctx : cns(irgs, TNullptr);
   auto const calleeRegion = getInlinableCalleeRegion(
-    irgs, callee, fca, ctx->type(), writeArOpc, psk, calleeCost,
-    irgs.annotations);
+    irgs, callee, fca, ctx->type(), psk, calleeCost, irgs.annotations);
   if (!calleeRegion) return false;
 
   // We shouldn't be inlining profiling translations.
@@ -701,7 +698,7 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, const Func* callee,
   };
   auto callFuncOff = bcOff(irgs) - curFunc(irgs)->base();
 
-  irgen::beginInlining(irgs, callee, fca, ctx, ctx->type(), writeArOpc,
+  irgen::beginInlining(irgs, callee, fca, ctx, ctx->type(), psk.srcKey.op(),
                        calleeRegion->start(),
                        callFuncOff,
                        returnTarget,

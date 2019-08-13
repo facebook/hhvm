@@ -25,13 +25,12 @@ namespace HPHP { namespace jit {
 
 inline TransContext::TransContext(
   TransID id, TransKind kind, TransFlags flags,
-  SrcKey sk, FPInvOffset spOff, int optIndex, Op fpushOff)
+  SrcKey sk, FPInvOffset spOff, int optIndex)
   : transID(id)
   , optIndex(optIndex)
   , kind(kind)
   , flags(flags)
   , initSpOffset(spOff)
-  , callerFPushOp(fpushOff)
   , func(sk.valid() ? sk.func() : nullptr)
   , initBcOffset(sk.offset())
   , hasThis(sk.hasThis())

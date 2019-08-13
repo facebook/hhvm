@@ -400,7 +400,7 @@ void conjureBeginInlining(IRGS& env,
     return t.admitsSingleVal() ? cns(env, t) : gen(env, Conjure, t);
   };
 
-  always_assert(isFCall(env.context.callerFPushOp));
+  always_assert(isFCall(env.context.srcKey().op()));
   auto const numParams = static_cast<uint32_t>(args.size());
 
   // Push space for out parameters
@@ -428,7 +428,7 @@ void conjureBeginInlining(IRGS& env,
               false),
     ctx,
     ctx ? ctx->type() : TCtx,
-    env.context.callerFPushOp,
+    env.context.srcKey().op(),
     startSk,
     0 /* callBcOffset */,
     returnTarget,

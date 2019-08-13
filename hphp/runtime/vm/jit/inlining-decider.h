@@ -82,15 +82,13 @@ bool canInlineAt(SrcKey callSK, const Func* callee, Annotations* annotations);
  * moreover, based on global inlining heuristics, we submit that the tracelet
  * selector /ought/ to do so.
  */
-bool shouldInline(const irgen::IRGS& irgs, SrcKey callerSk, Op callerFPushOp,
-                  const Func* callee, const RegionDesc& region,
-                  uint32_t maxTotalCost);
+bool shouldInline(const irgen::IRGS& irgs, SrcKey callerSk, const Func* callee,
+                  const RegionDesc& region, uint32_t maxTotalCost);
 
 /*
  * Return the cost of inlining the given callee.
  */
 int costOfInlining(SrcKey callerSk,
-                   Op callerFPushOp,
                    const Func* callee,
                    const RegionDesc& region,
                    Annotations& annotations);
@@ -102,7 +100,6 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
                                  const Func* callee,
                                  const FCallArgs& fca,
                                  Type ctxType,
-                                 Op writeArOpc,
                                  const SrcKey& sk,
                                  Annotations& annotations);
 

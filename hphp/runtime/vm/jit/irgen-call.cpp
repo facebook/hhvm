@@ -395,8 +395,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
              dynamicCall, tsList);
 
   if (invName == nullptr && isFCall(curSrcKey(env).op())) {
-    auto const inlined = irGenTryInlineFCall(
-      env, callee, fca, objOrClass, curSrcKey(env).op());
+    auto const inlined = irGenTryInlineFCall(env, callee, fca, objOrClass);
     if (inlined) return;
   }
 

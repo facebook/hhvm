@@ -260,6 +260,7 @@ let using_st_function_scoped_top_level =
 let const_in_trait = "Traits cannot have constants"
 let const_visibility = "Class constants cannot have visibility modifiers in " ^
   "Hack files"
+let type_const_visibility = "Type constants cannot have visibility modifiers"
 let strict_namespace_hh =
   "To use strict Hack, place // strict after the open tag. " ^
   "If it's already there, remove this line. " ^

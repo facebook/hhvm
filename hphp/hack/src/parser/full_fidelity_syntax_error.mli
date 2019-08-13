@@ -179,6 +179,7 @@ val uppercase_kw : string -> string
 val using_st_function_scoped_top_level : string
 val const_in_trait : string
 val const_visibility : string
+val type_const_visibility : string
 val strict_namespace_hh : string
 val original_definition : string
 val name_is_already_in_use_php :

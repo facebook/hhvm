@@ -478,6 +478,8 @@ let get_modifiers_of_declaration node =
     Some (property_modifiers)
   | ConstDeclaration { const_modifiers; _ } ->
     Some (const_modifiers)
+  | TypeConstDeclaration { type_const_modifiers; _ } ->
+    Some (type_const_modifiers)
   | _ -> None
 
 (* tests whether the methodish contains a modifier that satisfies [p] *)
@@ -3217,6 +3219,17 @@ let classish_errors env node namespace_name names errors =
           errors
       | _ -> errors
 
+let type_const_modifier_errors env node errors =
+  match syntax node with
+  | TypeConstDeclaration _ ->
+    if methodish_contains_visibility node &&
+      not @@ ParserOptions.enable_constant_visibility_modifiers env.parser_options &&
+      is_typechecker env then
+      make_error_from_node node SyntaxError.type_const_visibility :: errors
+    else
+      errors
+  | _ -> errors
+
 let alias_errors env node namespace_name names errors =
   match syntax node with
   | AliasDeclaration ad ->
@@ -4031,6 +4044,10 @@ let find_syntax_errors env =
       | ConstDeclaration _ ->
         let errors =
           class_constant_modifier_errors env node errors in
+        trait_require_clauses, names, errors
+      | TypeConstDeclaration _ ->
+        let errors =
+          type_const_modifier_errors env node errors in
         trait_require_clauses, names, errors
       | AliasDeclaration _ ->
         let names, errors = alias_errors env node namespace_name names errors in

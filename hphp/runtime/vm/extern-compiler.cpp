@@ -379,7 +379,7 @@ struct ExternCompiler {
         t = logTime(log, t, name);
       };
 
-      auto generateHhas = [&]() {
+      auto compile = [&]() {
         writeProgram(filename, sha1, code, forDebuggerEval, options);
         statefulLogTime("send_source");
         auto hhas = readResult(&log);
@@ -394,11 +394,11 @@ struct ExternCompiler {
           code.size(),
           log,
           statefulLogTime,
-          generateHhas,
+          compile,
           options
         );
       } else {
-        prog = generateHhas();
+        prog = compile();
       }
 
       auto ue = assemble_string(prog.data(),

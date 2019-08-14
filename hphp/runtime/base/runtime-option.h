@@ -1191,6 +1191,7 @@ struct RuntimeOption {
      1 - raise a warning
      2 - throw */                                                       \
   F(uint64_t, DynamicClsMethLevel, 1)                                   \
+  F(bool, APCSerializeFuncs, true)                                      \
   /* */
 
 private:

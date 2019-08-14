@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/apc-object.h"
 #include "hphp/runtime/base/apc-collection.h"
+#include "hphp/runtime/base/apc-named-entity.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/base/apc-local-array.h"
@@ -57,7 +58,24 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
       auto const value = new APCTypedValue(val(cell).dbl);
       return {value->getHandle(), sizeof(APCTypedValue)};
     }
-    case KindOfFunc:
+    case KindOfFunc: {
+      auto const func = val(cell).pfunc;
+      auto const serialize_func =
+        RuntimeOption::EvalAPCSerializeFuncs &&
+        // Right now cls_meth() can serialize as an array, and attempting to
+        // recursively serialize elements in the array will eventually attempt
+        // to serialize a method pointer.
+        !func->isMethod();
+      if (serialize_func) {
+        if (func->isPersistent()) {
+          auto const value = new APCTypedValue(func);
+          return {value->getHandle(), sizeof(APCTypedValue)};
+        }
+        auto const value = new APCNamedEntity(func);
+        return {value->getHandle(), sizeof(APCNamedEntity)};
+      }
+      // fallthrough to string serialization
+    }
     case KindOfClass:
     case KindOfPersistentString:
     case KindOfString: {
@@ -167,6 +185,7 @@ Variant APCHandle::toLocalHelper() const {
     case APCKind::Bool:
     case APCKind::Int:
     case APCKind::Double:
+    case APCKind::PersistentFunc:
     case APCKind::StaticString:
     case APCKind::UncountedString:
     case APCKind::StaticArray:
@@ -180,6 +199,10 @@ Variant APCHandle::toLocalHelper() const {
     case APCKind::StaticKeyset:
     case APCKind::UncountedKeyset:
       not_reached();
+
+    case APCKind::FuncEntity:
+      return APCNamedEntity::fromHandle(this)->getEntityOrNull();
+
     case APCKind::SharedString:
       return Variant::attach(
         StringData::MakeProxy(APCString::fromHandle(this))
@@ -272,7 +295,12 @@ void APCHandle::deleteShared() {
     case APCKind::StaticDict:
     case APCKind::StaticShape:
     case APCKind::StaticKeyset:
+    case APCKind::PersistentFunc:
       delete APCTypedValue::fromHandle(this);
+      return;
+
+    case APCKind::FuncEntity:
+      delete APCNamedEntity::fromHandle(this);
       return;
 
     case APCKind::SharedString:
@@ -334,6 +362,9 @@ bool APCHandle::checkInvariants() const {
     case APCKind::Double:
       assertx(m_type == KindOfDouble);
       return true;
+    case APCKind::PersistentFunc:
+      assertx(m_type == KindOfFunc);
+      return true;
     case APCKind::StaticString:
     case APCKind::UncountedString:
       assertx(m_type == KindOfPersistentString);
@@ -361,6 +392,7 @@ bool APCHandle::checkInvariants() const {
     case APCKind::SharedVArray:
     case APCKind::SharedDArray:
       assertx(!RuntimeOption::EvalHackArrDVArrs);
+    case APCKind::FuncEntity:
     case APCKind::SharedString:
     case APCKind::SharedArray:
     case APCKind::SharedPackedArray:

@@ -65,6 +65,8 @@ size_t getMemSize(const APCHandle* handle) {
     case APCKind::Bool:
     case APCKind::Int:
     case APCKind::Double:
+    case APCKind::PersistentFunc:
+    case APCKind::FuncEntity:
     case APCKind::StaticString:
     case APCKind::StaticArray:
     case APCKind::StaticVec:
@@ -577,6 +579,8 @@ APCDetailedStats::counterFor(const APCHandle* handle) {
     case APCKind::Bool:
     case APCKind::Int:
     case APCKind::Double:
+    case APCKind::PersistentFunc:
+    case APCKind::FuncEntity:
     case APCKind::StaticString:
     case APCKind::StaticArray:
     case APCKind::StaticVec:

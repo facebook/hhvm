@@ -290,6 +290,10 @@ void ConvertTvToUncounted(
   // Thus we only need to deal with strings/arrays.
   switch (type) {
     case KindOfFunc:
+    if (RuntimeOption::EvalAPCSerializeFuncs) {
+      assertx(data.pfunc->isPersistent());
+      break;
+    }
     case KindOfClass:
       data.pstr = isFuncType(type)
         ? const_cast<StringData*>(funcToStringHelper(data.pfunc))

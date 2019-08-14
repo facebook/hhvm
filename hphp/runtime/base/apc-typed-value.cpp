@@ -50,6 +50,7 @@ bool APCTypedValue::checkInvariants() const {
     case APCKind::Bool:
     case APCKind::Int:
     case APCKind::Double: break;
+    case APCKind::PersistentFunc: assertx(m_data.func->isPersistent()); break;
     case APCKind::StaticString: assertx(m_data.str->isStatic()); break;
     case APCKind::UncountedString: assertx(m_data.str->isUncounted()); break;
     case APCKind::StaticArray:
@@ -92,6 +93,7 @@ bool APCTypedValue::checkInvariants() const {
       assertx(m_data.keyset->isKeyset());
       assertx(m_data.keyset->isUncounted());
       break;
+    case APCKind::FuncEntity:
     case APCKind::SharedString:
     case APCKind::SharedArray:
     case APCKind::SharedPackedArray:

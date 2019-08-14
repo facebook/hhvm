@@ -42,6 +42,14 @@ struct APCTypedValue {
     m_data.dbl = data;
   }
 
+  explicit APCTypedValue(const Func* data)
+    : m_handle(APCKind::PersistentFunc, KindOfFunc) {
+    assertx(data->isPersistent());
+    assertx(!data->isMethod());
+    m_data.func = data;
+    assertx(checkInvariants());
+  }
+
   enum class StaticStr {};
   APCTypedValue(StaticStr, StringData* data)
     : m_handle(APCKind::StaticString, KindOfPersistentString) {
@@ -276,6 +284,7 @@ private:
     ArrayData* dict;
     ArrayData* shape;
     ArrayData* keyset;
+    const Func* func;
   } m_data;
   APCHandle m_handle;
 };

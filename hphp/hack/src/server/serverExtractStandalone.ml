@@ -448,7 +448,9 @@ let construct_class_declaration tcopt cls ?full_method:(meth=None) fields =
 let construct_typedef_declaration tcopt t =
   let td = value_or_not_found t @@ Decl_provider.get_typedef t in
   let typ = if td.td_vis = Aast_defs.Transparent then "type" else "newtype" in
-  Printf.sprintf "%s %s = %s;" typ (strip_ns t) (Typing_print.full_decl tcopt td.td_type)
+  let tparams = if List.is_empty td.td_tparams then ""
+  else Printf.sprintf "<%s>" (list_items @@ List.map td.td_tparams tparam_name) in
+  Printf.sprintf "%s %s%s = %s;" typ (strip_ns t) tparams (Typing_print.full_decl tcopt td.td_type)
 
 let construct_type_declaration tcopt t ?full_method:(full_method=None) fields =
   match Decl_provider.get_class t with

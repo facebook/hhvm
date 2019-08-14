@@ -6,6 +6,8 @@ class GenericBase<Tfirst, Tsecond> {
   public function __construct(public Tfirst $first, public Tsecond $second) {}
 }
 
+type GenericType<T> = GenericBase<T, int>;
+
 enum Mode: int as int {
   One = 1;
   Two = 2;
@@ -27,4 +29,7 @@ class GenericDerived<Tfirst> extends GenericBase<Tfirst, Mode> {
 function with_properties<T>(GenericDerived<T> $arg) : Mode {
   $x = new GenericDerived<int>(1, Mode::Two);
   return $arg->second;
+}
+
+function with_generic_type<T>(GenericType<T> $arg): void {
 }

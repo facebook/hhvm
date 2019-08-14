@@ -1,0 +1,12 @@
+<?hh
+type GenericType<T> = \GenericBase<T, int>;
+function with_generic_type<T>(GenericType<T> $arg): void {
+}
+class GenericBase<Tfirst, Tsecond> {
+
+}
+function extract_standalone_make_default<T>(): T {
+  throw new Exception();
+}
+
+

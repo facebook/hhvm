@@ -680,6 +680,10 @@ function each(mixed &$array): mixed;
 <<__Native>>
 function current(mixed &$array): mixed;
 
+function current_ref(mixed &$array): mixed {
+  return current(&$array);
+}
+
 /**
  * next() behaves like current(), with one difference. It advances the
  *   internal array pointer one place forward before returning the element
@@ -764,6 +768,10 @@ function end(mixed &$array): mixed;
  */
 <<__Native>>
 function key(mixed &$array): mixed;
+
+function key_ref(mixed &$array): mixed {
+  return key(&$array);
+}
 
 /**
  * Searches haystack for needle.

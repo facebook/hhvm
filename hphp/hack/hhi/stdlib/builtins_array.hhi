@@ -241,6 +241,8 @@ function each(&$array);
 <<__PHPStdLib>>
 function current(&$array);
 <<__PHPStdLib>>
+function current_ref(&$array);
+<<__PHPStdLib>>
 function hphp_current_ref(&$array);
 <<__PHPStdLib>>
 function next(&$array);
@@ -254,6 +256,8 @@ function reset(&$array);
 function end(&$array);
 <<__PHPStdLib>>
 function key(&$array);
+<<__PHPStdLib>>
+function key_ref(&$array);
 <<__PHPStdLib>>
 function hphp_get_iterator($iterable);
 <<__PHPStdLib>>

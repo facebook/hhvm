@@ -46,6 +46,7 @@
 #include "hphp/runtime/vm/jit/type-profile.h"
 #include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/vm/named-entity.h"
+#include "hphp/runtime/vm/property-profile.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -1341,6 +1342,7 @@ std::string serializeProfData(const std::string& filename) {
       Func::s_treadmill = false;
     };
 
+    PropertyProfile::serialize(ser);
     InstanceBits::init();
     InstanceBits::serialize(ser);
     write_global_array_map(ser);
@@ -1407,6 +1409,7 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
                          buildTime, currTime).c_str());
     }
 
+    PropertyProfile::deserialize(ser);
     InstanceBits::deserialize(ser);
     read_global_array_map(ser);
 

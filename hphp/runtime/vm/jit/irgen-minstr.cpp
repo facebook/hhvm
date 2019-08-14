@@ -191,6 +191,16 @@ PropInfo getPropertyOffset(IRGS& env,
   // offset.
 
   auto const& prop = baseClass->declProperties()[idx];
+
+  // If we're going to serialize the profile data, we emit a ProfileProp here to
+  // profile property accesses.  We only do this here, when we can resolve the
+  // property at JIT time, in order to make profiling simpler and cheaper.  And
+  // this should cover the vast majority of the property accesses anyway.
+  if (env.context.kind == TransKind::Profile &&
+      isJitSerializing(RuntimeOption::EvalJitSerdesMode)) {
+    gen(env, ProfileProp, cns(env, prop.baseCls->name()), cns(env, name));
+  }
+
   // If we want the AttrLateInitSoft default value behavior here, resort to the
   // runtime helpers to handle it.
   if ((prop.attrs & AttrLateInitSoft) && !ignoreLateInit) return PropInfo();

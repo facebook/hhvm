@@ -3398,6 +3398,10 @@ fields of that struct for holding intermediate values.
 
   Profile the method S1 called with class context S0.
 
+| ProfileProp, ND, C(StaticStr) C(StaticStr), NF
+
+  Profile the access to property S(1) with base class S(0).
+
 | CheckPackedArrayDataBounds, ND, S(AK(Packed),Vec) S(Int), B
 
   Checks that the index in S1 is within the bounds of the packed array or

@@ -61,5 +61,18 @@ struct StringDataHashICompare {
     return s->hash();
   }
 };
+
+struct StringDataPairHashICompare {
+  bool equal(const std::pair<const StringData*, const StringData*>& p1,
+             const std::pair<const StringData*, const StringData*>& p2) const {
+    assertx(p1.first && p1.second && p2.first && p2.second);
+    return p1.first->isame(p2.first) && p1.second->isame(p2.second);
+  }
+  size_t hash(const std::pair<const StringData*, const StringData*>& p) const {
+    assertx(p.first && p.second);
+    return folly::hash::hash_combine(p.first->hash(), p.second->hash());
+  }
+};
+
 }
 #endif

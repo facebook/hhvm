@@ -257,6 +257,8 @@ void cgEmptyProp(IRLS& env, const IRInstruction* i) {
   implIssetEmptyProp(env, i);
 }
 
+IMPL_OPCODE_CALL(ProfileProp);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {

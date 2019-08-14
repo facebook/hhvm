@@ -759,6 +759,7 @@ bool canDCE(IRInstruction* inst) {
   case ResolveTypeStruct:
   case CheckRDSInitialized:
   case MarkRDSInitialized:
+  case ProfileProp:
     return false;
 
   case SameShape:

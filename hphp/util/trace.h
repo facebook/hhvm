@@ -163,6 +163,7 @@ namespace Trace {
       TM(printir_json)  \
       TM(prof_branch)   \
       TM(prof_array)    \
+      TM(prof_prop)     \
       TM(rat)           \
       TM(refcount)      \
       TM(regalloc)      \

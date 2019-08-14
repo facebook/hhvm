@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/memo-cache.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/native-prop-handler.h"
+#include "hphp/runtime/vm/property-profile.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/trait-method-import-data.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -2261,7 +2262,12 @@ void Class::sortOwnProps(const PropMap::Builder& curPropMap,
                          uint32_t first,
                          uint32_t past,
                          std::vector<uint16_t>& slotIndex) {
-  FTRACE(3, "PreClass: {}\n", m_preClass->name()->data());
+  auto const serverMode = RuntimeOption::ServerExecutionMode();
+  FTRACE(3, "Class::sortOwnProps: PreClass: {}\n", m_preClass->name()->data());
+  if (serverMode && RuntimeOption::ServerLogReorderProps) {
+    Logger::FInfo("Class::sortOwnProps: PreClass: {}",
+                  m_preClass->name()->data());
+  }
   auto const size = past - first;
   if (size == 0) return; // no own props
   std::vector<uint32_t> order(size);
@@ -2270,7 +2276,21 @@ void Class::sortOwnProps(const PropMap::Builder& curPropMap,
   }
   // We don't change the order of the properties for closures.
   if (c_Closure::initialized() && parent() != c_Closure::classof()) {
-    if (RuntimeOption::EvalReorderProps == "alphabetical") {
+    if (RuntimeOption::EvalReorderProps == "hotness") {
+      std::sort(
+        order.begin(), order.end(),
+        [&] (uint32_t a, uint32_t b) {
+          auto const& propa = curPropMap[a];
+          auto const& propb = curPropMap[b];
+          auto const counta = PropertyProfile::getCount(propa.cls->name(),
+                                                        propa.name);
+          auto const countb = PropertyProfile::getCount(propb.cls->name(),
+                                                        propb.name);
+          if (countb != counta) return countb < counta;
+          return a < b;
+        }
+      );
+    } else if (RuntimeOption::EvalReorderProps == "alphabetical") {
       std::sort(order.begin(), order.end(),
                 [&] (uint32_t a, uint32_t b) {
                   auto const& propa = curPropMap[a];
@@ -2284,8 +2304,20 @@ void Class::sortOwnProps(const PropMap::Builder& curPropMap,
     auto slot = order[i];
     auto index = first + i;
     slotIndex[slot] = index;
-    FTRACE(3, "  index={}: slot={}, prop={}\n",
-           index, slot, curPropMap[slot].name->data());
+    FTRACE(
+      3, "  index={}: slot={}, prop={}, count={}\n",
+      index, slot, curPropMap[slot].name->data(),
+      PropertyProfile::getCount(curPropMap[slot].cls->name(),
+                                curPropMap[slot].name)
+    );
+    if (serverMode && RuntimeOption::ServerLogReorderProps) {
+      Logger::FInfo(
+        "  index={}: slot={}, prop={}, count={}",
+        index, slot, curPropMap[slot].name->data(),
+        PropertyProfile::getCount(curPropMap[slot].cls->name(),
+                                  curPropMap[slot].name)
+      );
+    }
   }
   sortOwnPropsInitVec(first, past, slotIndex);
 }
@@ -2326,6 +2358,7 @@ void Class::setProperties() {
       Prop prop;
       prop.preProp             = parentProp.preProp;
       prop.cls                 = parentProp.cls;
+      prop.baseCls             = parentProp.baseCls;
       prop.mangledName         = parentProp.mangledName;
       prop.attrs               = parentProp.attrs | AttrNoBadRedeclare;
       prop.typeConstraint      = parentProp.typeConstraint;
@@ -2735,6 +2768,7 @@ void Class::importTraitInstanceProp(Prop& traitProp,
   if (prevIt == curPropMap.end()) {
     // New prop, go ahead and add it
     auto prop = traitProp;
+    prop.baseCls = this;
     // private props' mangled names contain the class name, so regenerate them
     if (prop.attrs & AttrPrivate) {
       prop.mangledName = PreClass::manglePropName(m_preClass->name(),
@@ -2891,6 +2925,7 @@ void Class::initProp(XProp& prop, const PreClass::Prop* preProp) {
 void Class::initProp(Prop& prop, const PreClass::Prop* preProp) {
   initProp<Prop>(prop, preProp);
   prop.mangledName = preProp->mangledName();
+  prop.baseCls     = this;
 }
 
 void Class::initProp(SProp& prop, const PreClass::Prop* preProp) {

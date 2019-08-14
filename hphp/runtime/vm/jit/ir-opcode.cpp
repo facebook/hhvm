@@ -962,6 +962,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ProfileKeysetAccess:
   case ProfileMethod:
   case ProfileMixedArrayAccess:
+  case ProfileProp:
   case ProfileSubClsCns:
   case ProfileSwitchDest:
   case ProfileType:

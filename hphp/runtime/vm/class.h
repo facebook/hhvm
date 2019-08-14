@@ -175,6 +175,9 @@ struct Class : AtomicCountable {
     /* Most derived class that declared this property. */
     LowPtr<Class> cls;
 
+    /* Least derived class that declared this property. */
+    LowPtr<Class> baseCls;
+
     Attr attrs;
     Slot serializationIdx;
   };

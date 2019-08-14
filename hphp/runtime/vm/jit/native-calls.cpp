@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/timestamp.h"
 #include "hphp/runtime/base/tv-conversions.h"
 
+#include "hphp/runtime/vm/property-profile.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit-util.h"
@@ -478,6 +479,9 @@ static CallMap s_callMap {
     {LdClsPropAddrOrRaise,
                          getSPropOrRaise, DSSA, SSync,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}, {SSA, 4}}},
+
+    {ProfileProp,        &PropertyProfile::incCount, DNone, SNone,
+                           {{SSA, 0}, {SSA, 1}}},
 
     /* Global helpers */
     {LdGblAddrDef,       ldGblAddrDefHelper, DSSA, SNone,

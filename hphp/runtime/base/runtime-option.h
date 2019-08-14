@@ -251,6 +251,7 @@ struct RuntimeOption {
   static bool ServerFixPathInfo;
   static bool ServerAddVaryEncoding;
   static bool ServerLogSettingsOnStartup;
+  static bool ServerLogReorderProps;
   static bool ServerForkEnabled;
   static bool ServerForkLogging;
   static bool ServerWarmupConcurrently;

@@ -586,6 +586,7 @@ bool RuntimeOption::ServerStatCache = false;
 bool RuntimeOption::ServerFixPathInfo = false;
 bool RuntimeOption::ServerAddVaryEncoding = true;
 bool RuntimeOption::ServerLogSettingsOnStartup = false;
+bool RuntimeOption::ServerLogReorderProps = false;
 bool RuntimeOption::ServerForkEnabled = true;
 bool RuntimeOption::ServerForkLogging = false;
 bool RuntimeOption::ServerWarmupConcurrently = false;
@@ -977,6 +978,9 @@ static inline uint32_t hotTextHugePagesDefault() {
 }
 
 static inline std::string reorderPropsDefault() {
+  if (isJitDeserializing(RuntimeOption::EvalJitSerdesMode)) {
+    return "hotness";
+  }
   return debug ? "alphabetical" : "";
 }
 
@@ -2005,6 +2009,8 @@ void RuntimeOption::Load(
                  ServerAddVaryEncoding);
     Config::Bind(ServerLogSettingsOnStartup, ini, config,
                  "Server.LogSettingsOnStartup", false);
+    Config::Bind(ServerLogReorderProps, ini, config,
+                 "Server.LogReorderProps", false);
     Config::Bind(ServerWarmupConcurrently, ini, config,
                  "Server.WarmupConcurrently", false);
     Config::Bind(ServerWarmupThreadCount, ini, config,

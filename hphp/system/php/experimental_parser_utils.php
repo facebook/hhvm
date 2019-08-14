@@ -18,7 +18,8 @@ namespace HH\ExperimentalParserUtils {
           return null; // forces traversal to continue to end
         }
         return null;
-      }
+      },
+      $_ ==> false,
     );
     return \HH\dict($funs);
   }
@@ -422,7 +423,8 @@ namespace HH\ExperimentalParserUtils {
           return null; // forces traversal to continue to end
         }
         return null;
-      }
+      },
+      $_ ==> false,
     );
 
     $comments = vec[];
@@ -443,7 +445,7 @@ namespace HH\ExperimentalParserUtils {
     mixed $json, // this can be any value type valid in JSON
     bool $right,
     (function (array): array) $predicate,
-    (function (array): bool) $skip_node = (($_) ==> false),
+    (function (array): bool) $skip_node,
   ) {
     if (!\is_array($json)) {
       return null;

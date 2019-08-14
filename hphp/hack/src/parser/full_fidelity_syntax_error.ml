@@ -497,9 +497,6 @@ let invalid_await_use = "Await cannot be used as an expression"
 
 let toplevel_await_use = "Await cannot be used in a toplevel statement"
 
-let invalid_default_argument s = s ^ " expression is not permitted \
-  as the default value to a function parameter"
-
 let invalid_constructor_method_call = "Method call following immediate constructor call \
   requires parentheses around constructor call."
 

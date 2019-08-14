@@ -280,7 +280,6 @@ val instanceof_disabled: string
 val invalid_await_use: string
 val toplevel_await_use: string
 val invalid_constructor_method_call: string
-val invalid_default_argument: string -> string
 val invalid_foreach_element: string
 val invalid_scope_resolution_qualifier : string
 val invalid_variable_name : string

@@ -71,6 +71,7 @@ module FullFidelityParseArgs = struct
     disable_legacy_soft_typehints : bool;
     allow_new_attribute_syntax : bool;
     disable_legacy_attribute_syntax : bool;
+    const_default_func_args : bool;
   }
 
   let make
@@ -105,6 +106,7 @@ module FullFidelityParseArgs = struct
     disable_legacy_soft_typehints
     allow_new_attribute_syntax
     disable_legacy_attribute_syntax
+    const_default_func_args
     = {
     full_fidelity_json;
     full_fidelity_dot;
@@ -137,6 +139,7 @@ module FullFidelityParseArgs = struct
     disable_legacy_soft_typehints;
     allow_new_attribute_syntax;
     disable_legacy_attribute_syntax;
+    const_default_func_args;
   }
 
   let parse_args () =
@@ -187,6 +190,7 @@ module FullFidelityParseArgs = struct
     let disable_legacy_soft_typehints = ref false in
     let allow_new_attribute_syntax = ref false in
     let disable_legacy_attribute_syntax = ref false in
+    let const_default_func_args = ref false in
     let options =  [
       (* modes *)
       "--full-fidelity-json",
@@ -311,6 +315,9 @@ No errors are filtered out.";
       "--disable-legacy-attribute-syntax",
         Arg.Set disable_legacy_attribute_syntax,
         "Disable the legacy <<...>> user attribute syntax";
+      "--const-default-func-args",
+        Arg.Set const_default_func_args,
+        "Statically check default function arguments are constant initializers";
       ] in
     Arg.parse options push_file usage;
     let modes = [
@@ -358,6 +365,7 @@ No errors are filtered out.";
       !disable_legacy_soft_typehints
       !allow_new_attribute_syntax
       !disable_legacy_attribute_syntax
+      !const_default_func_args
 end
 
 open FullFidelityParseArgs
@@ -385,6 +393,8 @@ let handle_existing_file args filename =
   let popt = ParserOptions.with_allow_new_attribute_syntax popt args.allow_new_attribute_syntax in
   let popt = ParserOptions.with_disable_legacy_attribute_syntax popt
     args.disable_legacy_attribute_syntax in
+  let popt = ParserOptions.with_const_default_func_args popt
+    args.const_default_func_args in
 
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in

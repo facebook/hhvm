@@ -1030,19 +1030,8 @@ and pSimpleInitializer node env =
 and pFunParamDefaultValue node env =
   match syntax node with
   | SimpleInitializer { simple_initializer_value; _ } ->
-    begin match syntax simple_initializer_value with
-    | ListExpression _ ->
-      raise_parsing_error env (`Node node) (SyntaxError.invalid_default_argument "A list destructuring")
-    | YieldExpression _
-    | YieldFromExpression _ ->
-      raise_parsing_error env (`Node node) (SyntaxError.invalid_default_argument "A yield")
-    | PrefixUnaryExpression {
-      prefix_unary_operator = { syntax = Token t; _ }; _ } when Token.kind t = TK.Await ->
-      raise_parsing_error env (`Node node) (SyntaxError.invalid_default_argument "An await")
-    | _ -> () end;
     mpOptional pExpr simple_initializer_value env
   | _ -> None
-
 
 and pFunParam : fun_param parser = fun node env ->
   match syntax node with

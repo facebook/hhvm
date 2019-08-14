@@ -809,7 +809,6 @@ let multiple_modifiers_errors modifiers msg errors =
      make_error_from_node duplicate msg :: errors
   | None -> errors
 
-
 (* helper since there are so many kinds of errors *)
 let produce_error acc check node error error_node =
   if check node then
@@ -1802,69 +1801,67 @@ let parameter_rx_errors context errors node =
     | LvalTypeNonFinal ->
       make_error_from_node syntax_node SyntaxError.lval_as_expression :: errors
 
-
-let parameter_errors env node namespace_name names errors =
-  match syntax node with
-  | ParameterDeclaration p ->
-
-    let callconv_text = Option.value (extract_callconv_node node) ~default:node
-      |> text in
-    let errors =
-      produce_error_from_check errors param_with_callconv_has_default
-      node (SyntaxError.error2074 callconv_text) in
-    let errors = parameter_rx_errors env.context errors node in
-    let errors =
-      produce_error_from_check errors param_with_callconv_is_byref
-      node (SyntaxError.error2075 callconv_text) in
-    let names, errors =
-      check_type_hint env p.parameter_type names errors in
-    let errors = if is_parameter_with_callconv node then
-      begin
-        let errors =
-          if is_inside_async_method env.context then
-          make_error_from_node ~error_type:SyntaxError.RuntimeError
-            node SyntaxError.inout_param_in_async :: errors
-          else errors in
-        let errors =
-          if is_in_construct_method env.context then
-          make_error_from_node
-            node SyntaxError.inout_param_in_construct :: errors
-          else errors in
-        let inMemoize = first_parent_function_attributes_contains
-          env.context SN.UserAttributes.uaMemoize in
-        let inMemoizeLSB = first_parent_function_attributes_contains
-          env.context SN.UserAttributes.uaMemoizeLSB in
-        let errors = if (inMemoize || inMemoizeLSB) &&
-              not @@ is_immediately_in_lambda env.context then
-          make_error_from_node ~error_type:SyntaxError.RuntimeError
-            node SyntaxError.memoize_with_inout :: errors
-          else errors in
-        errors
-      end else errors
-    in
-    let errors =
-      if is_reference_variadic p.parameter_name then
-        make_error_from_node node SyntaxError.variadic_reference :: errors
-      else if is_variadic_reference p.parameter_name then
-        make_error_from_node node SyntaxError.reference_variadic :: errors
-      else if is_reference_expression p.parameter_name &&
-              is_in_construct_method env.context then
-        make_error_from_node node SyntaxError.reference_param_in_construct :: errors
-      else errors in
-    names, errors
-  | FunctionDeclarationHeader { function_parameter_list = params; _ }
-  | AnonymousFunction { anonymous_parameters = params; _ }
-  | ClosureTypeSpecifier { closure_parameter_list = params; _ }
-  | LambdaExpression
-    { lambda_signature = {syntax = LambdaSignature { lambda_parameters = params; _ }; _}
-    ; _
-    } ->
-    let errors =
-      syntax_to_list_no_separators params
-      |> List.fold_left ~init:errors ~f:(parameter_rx_errors env.context) in
-    params_errors env params namespace_name names errors
-  | DecoratedExpression _ -> names, decoration_errors node errors
-  | _ -> names, errors
+  let parameter_errors env node namespace_name names errors =
+    match syntax node with
+    | ParameterDeclaration p ->
+      let callconv_text = Option.value (extract_callconv_node node) ~default:node
+        |> text in
+      let errors =
+        produce_error_from_check errors param_with_callconv_has_default
+        node (SyntaxError.error2074 callconv_text) in
+      let errors = parameter_rx_errors env.context errors node in
+      let errors =
+        produce_error_from_check errors param_with_callconv_is_byref
+        node (SyntaxError.error2075 callconv_text) in
+      let names, errors =
+        check_type_hint env p.parameter_type names errors in
+      let errors = if is_parameter_with_callconv node then
+        begin
+          let errors =
+            if is_inside_async_method env.context then
+            make_error_from_node ~error_type:SyntaxError.RuntimeError
+              node SyntaxError.inout_param_in_async :: errors
+            else errors in
+          let errors =
+            if is_in_construct_method env.context then
+            make_error_from_node
+              node SyntaxError.inout_param_in_construct :: errors
+            else errors in
+          let inMemoize = first_parent_function_attributes_contains
+            env.context SN.UserAttributes.uaMemoize in
+          let inMemoizeLSB = first_parent_function_attributes_contains
+            env.context SN.UserAttributes.uaMemoizeLSB in
+          let errors = if (inMemoize || inMemoizeLSB) &&
+                not @@ is_immediately_in_lambda env.context then
+            make_error_from_node ~error_type:SyntaxError.RuntimeError
+              node SyntaxError.memoize_with_inout :: errors
+            else errors in
+          errors
+        end else errors
+      in
+      let errors =
+        if is_reference_variadic p.parameter_name then
+          make_error_from_node node SyntaxError.variadic_reference :: errors
+        else if is_variadic_reference p.parameter_name then
+          make_error_from_node node SyntaxError.reference_variadic :: errors
+        else if is_reference_expression p.parameter_name &&
+                is_in_construct_method env.context then
+          make_error_from_node node SyntaxError.reference_param_in_construct :: errors
+        else errors in
+      names, errors
+    | FunctionDeclarationHeader { function_parameter_list = params; _ }
+    | AnonymousFunction { anonymous_parameters = params; _ }
+    | ClosureTypeSpecifier { closure_parameter_list = params; _ }
+    | LambdaExpression
+      { lambda_signature = {syntax = LambdaSignature { lambda_parameters = params; _ }; _}
+      ; _
+      } ->
+      let errors =
+        syntax_to_list_no_separators params
+        |> List.fold_left ~init:errors ~f:(parameter_rx_errors env.context) in
+      params_errors env params namespace_name names errors
+    | DecoratedExpression _ -> names, decoration_errors node errors
+    | _ -> names, errors
 
 let redeclaration_errors env node parents namespace_name names errors =
   match syntax node with
@@ -3512,6 +3509,11 @@ let rec check_constant_expression errors node =
     let errors = check_constant_expression errors conditional_consequence in
     let errors = check_constant_expression errors conditional_alternative in
     errors
+  | SimpleInitializer { simple_initializer_value = { syntax =
+      LiteralExpression { literal_expression = { syntax =
+        SyntaxList _; _}}; _}; _} ->
+    make_error_from_node node
+      SyntaxError.invalid_constant_initializer :: errors
   | SimpleInitializer { simple_initializer_value = e; _ }
   | ParenthesizedExpression { parenthesized_expression_expression = e; _} ->
     check_constant_expression errors e
@@ -3549,7 +3551,6 @@ let rec check_constant_expression errors node =
   | ScopeResolutionExpression
     { scope_resolution_qualifier
     ; scope_resolution_name
-
     ; _ } when is_good_scope_resolution_qualifier scope_resolution_qualifier &&
                is_good_scope_resolution_name scope_resolution_name
       -> errors
@@ -3591,14 +3592,6 @@ let const_decl_errors env node namespace_name names errors =
     let errors =
       produce_error errors check_static_in_initializer cd.constant_declarator_initializer
       SyntaxError.parent_static_const_decl cd.constant_declarator_initializer in
-    let errors =
-      match syntax cd.constant_declarator_initializer with
-      | SimpleInitializer { simple_initializer_value = { syntax =
-          LiteralExpression { literal_expression = { syntax =
-            SyntaxList _; _}}; _}; _} ->
-            make_error_from_node
-              node SyntaxError.invalid_constant_initializer :: errors
-      | _ -> errors in
     if is_missing cd.constant_declarator_name
     then names, errors
     else
@@ -3624,7 +3617,6 @@ let const_decl_errors env node namespace_name names errors =
         strmap_add constant_name def names.t_constants } in
     names, errors
   | _ -> names, errors
-
 
 let class_property_modifiers_errors env node errors =
   match syntax node with
@@ -3925,6 +3917,13 @@ let disabled_legacy_attribute_syntax_errors env node errors =
     make_error_from_node node SyntaxError.no_legacy_attribute_syntax :: errors
   | _ -> errors
 
+let param_default_decl_errors env node errors =
+  match syntax node with
+  | ParameterDeclaration {parameter_default_value; _} when
+    ParserOptions.const_default_func_args env.parser_options ->
+    check_constant_expression errors parameter_default_value
+  | _ -> errors
+
 let find_syntax_errors env =
   let has_rx_attr_mutable_hack attrs =
     attribute_first_reactivity_annotation attrs
@@ -4031,6 +4030,10 @@ let find_syntax_errors env =
           expression_errors env is_in_concurrent_block namespace_name node parents errors in
         let errors = check_nonrx_annotation node errors in
         let errors = assignment_errors env node errors in
+        trait_require_clauses, names, errors
+      | ParameterDeclaration _ ->
+        let errors =
+          param_default_decl_errors env node errors in
         trait_require_clauses, names, errors
       | RequireClause _ ->
         let trait_require_clauses, errors =

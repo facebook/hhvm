@@ -101,3 +101,6 @@ let find_or_add (t: ('k, 'v) t) ~(key: 'k) ~(default: unit -> 'v): 'v =
   in
   trim_to_memory_limit t;
   entry.value
+
+let remove (t: ('k, 'v) t) ~(key: 'k): unit =
+  Hashtbl.remove t.entries key

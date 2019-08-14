@@ -25,5 +25,10 @@ val get_class : class_key -> class_decl option
 val get_typedef : typedef_key -> typedef_decl option
 val get_gconst : gconst_key -> gconst_decl option
 
+val invalidate_fun : fun_key -> unit
+val invalidate_class : class_key -> unit
+val invalidate_typedef : typedef_key -> unit
+val invalidate_gconst : gconst_key -> unit
+
 val local_changes_push_stack : unit -> unit
 val local_changes_pop_stack : unit -> unit

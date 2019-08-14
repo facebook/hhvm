@@ -884,7 +884,7 @@ class TestLsp(TestCase[LspTestDriver]):
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
-    def test_serverless_ide_file_on_disk_change(self) -> None:
+    def test_serverless_ide_file_touched_on_disk(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("hover.php"))
         self.test_driver.stop_hh_server()
@@ -1007,6 +1007,92 @@ class TestLsp(TestCase[LspTestDriver]):
         variables = self.setup_php_file("non_blocking.php")
         self.test_driver.start_hh_loop_forever_assert_timeout()
         self.load_and_run("non_blocking", variables, wait_for_server=False)
+
+    def test_serverless_ide_hierarchy_file_change_on_disk(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("incremental_derived.php"))
+        changed_php_file_uri = self.repo_file("incremental_base.php")
+        variables.update({"changed_php_file_uri": changed_php_file_uri})
+        self.test_driver.stop_hh_server()
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("serverless_ide_hierarchy_file_change_on_disk"),
+                use_serverless_ide=True,
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .request(
+                comment="hover before change to class hierarchy should be `int`",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 7, "character": 14},
+                },
+                result={
+                    "contents": [
+                        {"language": "hack", "value": "public function foo(): int"},
+                        "Return type: `int`",
+                        "Full name: `BaseClassIncremental::foo`",
+                    ],
+                    "range": {
+                        "start": {"line": 7, "character": 12},
+                        "end": {"line": 7, "character": 15},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            .write_to_disk(
+                uri=changed_php_file_uri,
+                contents="""\
+<?hh // strict
+class BaseClassIncremental {
+  public function foo(): string { return ''; }
+}
+""",
+                notify=True,
+            )
+            .wait_for_notification(
+                comment="wait for sIDE to process file change",
+                method="telemetry/event",
+                params={
+                    "type": 4,
+                    "message": "[client-ide] Done processing file changes",
+                },
+            )
+            .request(
+                comment="hover after change to class hierarchy should be `string`",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 7, "character": 14},
+                },
+                result={
+                    "contents": [
+                        {"language": "hack", "value": "public function foo(): string"},
+                        "Return type: `string`",
+                        "Full name: `BaseClassIncremental::foo`",
+                    ],
+                    "range": {
+                        "start": {"line": 7, "character": 12},
+                        "end": {"line": 7, "character": 15},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            .request(method="shutdown", params={}, result=None)
+        )
+
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def test_serverless_ide_decl_in_unsaved_buffer_changed(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())

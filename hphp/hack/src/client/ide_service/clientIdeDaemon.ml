@@ -155,6 +155,16 @@ let initialize
     None (* no lru_workers *)
   in
   let server_env = ServerEnvBuild.make_env genv.ServerEnv.config in
+  (* We need shallow class declarations so that we can invalidate individual
+  members in a class hierarchy. *)
+  let server_env = {
+    server_env with
+    ServerEnv.tcopt = {
+      server_env.ServerEnv.tcopt with
+      GlobalOptions.tco_shallow_class_decl = true
+    }
+  } in
+
   GlobalParserOptions.set server_env.ServerEnv.popt;
   GlobalNamingOptions.set server_env.ServerEnv.tcopt;
 

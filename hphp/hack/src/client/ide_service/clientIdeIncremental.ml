@@ -8,6 +8,7 @@
  *)
 
 open Core_kernel
+open Reordered_argument_collections
 
 let log s =
   Hh_logger.log ("[ide-incremental] " ^^ s)
@@ -15,7 +16,7 @@ let log s =
 
 let strip_positions symbols =
   List.fold symbols ~init:SSet.empty ~f:(fun acc (_, x) ->
-    SSet.add x acc
+    SSet.add acc x
   )
 ;;
 
@@ -262,6 +263,27 @@ let update_naming_table
   { env with ServerEnv.naming_table }
 ;;
 
+let invalidate_decls
+    ~(old_file_info: FileInfo.t option)
+    : unit =
+  match old_file_info with
+  | None ->
+    ()
+  | Some { FileInfo.funs; classes; typedefs; consts; _ } ->
+    funs
+      |> strip_positions
+      |> SSet.iter ~f:Decl_provider.invalidate_fun;
+    classes
+      |> strip_positions
+      |> SSet.iter ~f:Decl_provider.invalidate_class;
+    typedefs
+      |> strip_positions
+      |> SSet.iter ~f:Decl_provider.invalidate_typedef;
+    consts
+      |> strip_positions
+      |> SSet.iter ~f:Decl_provider.invalidate_gconst;
+    ()
+
 let process_changed_file
     (env: ServerEnv.env)
     (path: Path.t)
@@ -277,6 +299,7 @@ let process_changed_file
     then Lwt.return env
     else
       let%lwt (old_file_info, new_file_info) = compute_fileinfo_for_path env path in
+      invalidate_decls ~old_file_info;
       let env = update_naming_table ~env ~path ~old_file_info ~new_file_info in
       Lwt.return env
 ;;

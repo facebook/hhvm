@@ -7,6 +7,8 @@
  *
  *)
 
+open Core_kernel
+
 module Class = Typing_classes_heap.Api
 
 type fun_key = string
@@ -126,6 +128,62 @@ let get_gconst (gconst_name: string): gconst_decl option =
     let result: gconst_decl option = Obj.obj result in
     result
 
+let invalidate_fun (fun_name: fun_key): unit =
+  match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory ->
+    failwith "Function decl invalidation not yet supported with LRU shared memory"
+  | Provider_config.Shared_memory ->
+    Decl_heap.Funs.remove_batch (SSet.singleton fun_name)
+  | Provider_config.Local_memory { decl_cache } ->
+    Memory_bounded_lru_cache.remove
+      decl_cache (Provider_config.Fun_decl fun_name)
+
+let invalidate_class (class_name: class_key): unit =
+  match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory ->
+    failwith "Class decl invalidation not yet supported with LRU shared memory"
+  | Provider_config.Shared_memory ->
+    Decl_heap.Classes.remove_batch (SSet.singleton class_name)
+  | Provider_config.Local_memory { decl_cache } ->
+    Memory_bounded_lru_cache.remove
+      decl_cache (Provider_config.Class_decl class_name)
+
+let invalidate_typedef (typedef_name: typedef_key): unit =
+  match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory ->
+    failwith "Typedef decl invalidation not yet supported with LRU shared memory"
+  | Provider_config.Shared_memory ->
+    Decl_heap.Typedefs.remove_batch (SSet.singleton typedef_name)
+  | Provider_config.Local_memory { decl_cache } ->
+    Memory_bounded_lru_cache.remove
+      decl_cache (Provider_config.Typedef_decl typedef_name)
+
+let invalidate_gconst (gconst_name: gconst_key): unit =
+  match Provider_config.get_backend () with
+  | Provider_config.Lru_shared_memory ->
+    failwith "Constant decl invalidation not yet supported with LRU shared memory"
+  | Provider_config.Shared_memory ->
+    Decl_heap.GConsts.remove_batch (SSet.singleton gconst_name)
+  | Provider_config.Local_memory { decl_cache } ->
+    Memory_bounded_lru_cache.remove
+      decl_cache (Provider_config.Gconst_decl gconst_name)
+
+let invalidate_context_decls ~(ctx: Provider_context.t) =
+  match Provider_config.get_backend () with
+  | Provider_config.Local_memory _ ->
+    Relative_path.Map.iter ctx.Provider_context.entries ~f:(fun _ entry ->
+      let (funs, classes, typedefs, gconsts) =
+        Nast.get_defs entry.Provider_context.ast in
+      List.iter funs ~f:(fun (_, fun_name) -> invalidate_fun fun_name);
+      List.iter classes ~f:(fun (_, class_name) -> invalidate_class class_name);
+      List.iter typedefs ~f:(fun (_, typedef_name) -> invalidate_typedef typedef_name);
+      List.iter gconsts ~f:(fun (_, gconst_name) -> invalidate_gconst gconst_name)
+    )
+  | Provider_config.Shared_memory | Provider_config.Lru_shared_memory ->
+    (* Don't attempt to invalidate decls with shared memory, as we may not be
+    running in the master process where that's allowed. *)
+    ()
+
 
 let local_changes_push_stack () =
   (* For now, decl production still writes into shared memory, even when we're
@@ -146,12 +204,11 @@ let local_changes_push_stack () =
   Shallow_classes_heap.push_local_changes ();
   Decl_linearize.push_local_changes ();
 
-  match Provider_config.get_backend () with
-  | Provider_config.Lru_shared_memory
-  | Provider_config.Shared_memory ->
+  match Provider_context.get_global_context () with
+  | Some ctx ->
+    invalidate_context_decls ~ctx
+  | None ->
     ()
-  | Provider_config.Local_memory { decl_cache } ->
-    Memory_bounded_lru_cache.clear decl_cache
 
 let local_changes_pop_stack () =
   (* See comment in [local_changes_push_stack] above. *)
@@ -168,9 +225,8 @@ let local_changes_pop_stack () =
   Shallow_classes_heap.pop_local_changes ();
   Decl_linearize.pop_local_changes ();
 
-  match Provider_config.get_backend () with
-  | Provider_config.Lru_shared_memory
-  | Provider_config.Shared_memory ->
+  match Provider_context.get_global_context () with
+  | Some ctx ->
+    invalidate_context_decls ~ctx
+  | None ->
     ()
-  | Provider_config.Local_memory { decl_cache } ->
-    Memory_bounded_lru_cache.clear decl_cache

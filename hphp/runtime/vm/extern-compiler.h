@@ -131,7 +131,7 @@ using HhasHandler = std::string (*)(
   const char*,
   const SHA1&,
   folly::StringPiece::size_type,
-  const StructuredLogEntry&,
+  StructuredLogEntry&,
   std::function<void(const char *)>,
   std::function<std::string()>,
   const RepoOptions&

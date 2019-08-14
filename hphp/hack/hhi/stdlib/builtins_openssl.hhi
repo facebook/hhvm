@@ -135,6 +135,8 @@ function openssl_cipher_iv_length(string $method);
 <<__PHPStdLib>>
 function openssl_encrypt(string $data, string $method, string $password, int $options = 0, string $iv = "", &$tag_out = null, string $aad = "", int $tag_length = 16);
 <<__PHPStdLib>>
+function openssl_encrypt_with_tag(string $data, string $method, string $password, int $options, string $iv, &$tag_out, string $aad = "", int $tag_length = 16);
+<<__PHPStdLib>>
 function openssl_decrypt(string $data, string $method, string $password, int $options = 0, string $iv = "", string $tag = "", string $aad = "");
 <<__PHPStdLib>>
 function openssl_digest(string $data, string $method, bool $raw_output = false);

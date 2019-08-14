@@ -2963,13 +2963,16 @@ static bool php_openssl_validate_iv(
   return true;
 }
 
-Variant HHVM_FUNCTION(openssl_encrypt, const String& data, const String& method,
-                                       const String& password,
-                                       int options /* = 0 */,
-                                       const String& iv /* = null_string */,
-                                       VRefParam tag_out /* = null_string */,
-                                       const String& aad /* = null_string */,
-                                       int tag_length /* = 16 */) {
+namespace {
+
+Variant openssl_encrypt_impl(const String& data,
+                                    const String& method,
+                                    const String& password,
+                                    int options,
+                                    const String& iv,
+                                    VRefParam tag_out,
+                                    const String& aad,
+                                    int tag_length) {
   const EVP_CIPHER *cipher_type = EVP_get_cipherbyname(method.c_str());
   if (!cipher_type) {
     raise_warning("Unknown cipher algorithm");
@@ -3110,6 +3113,34 @@ Variant HHVM_FUNCTION(openssl_encrypt, const String& data, const String& method,
     }
   }
   return false;
+}
+
+} // anonymous namespace
+
+Variant HHVM_FUNCTION(openssl_encrypt,
+                      const String& data,
+                      const String& method,
+                      const String& password,
+                      int options /* = 0 */,
+                      const String& iv /* = null_string */,
+                      VRefParam tag_out /* = null_string */,
+                      const String& aad /* = null_string */,
+                      int tag_length /* = 16 */) {
+  return openssl_encrypt_impl(data, method, password, options, iv,
+                              tag_out, aad, tag_length);
+}
+
+Variant HHVM_FUNCTION(openssl_encrypt_with_tag,
+                      const String& data,
+                      const String& method,
+                      const String& password,
+                      int options,
+                      const String& iv,
+                      VRefParam tag_out,
+                      const String& aad /* = null_string */,
+                      int tag_length /* = 16 */) {
+  return openssl_encrypt_impl(data, method, password, options, iv,
+                              tag_out, aad, tag_length);
 }
 
 Variant HHVM_FUNCTION(openssl_decrypt, const String& data, const String& method,
@@ -3443,6 +3474,7 @@ struct opensslExtension final : Extension {
     HHVM_FE(openssl_random_pseudo_bytes);
     HHVM_FE(openssl_cipher_iv_length);
     HHVM_FE(openssl_encrypt);
+    HHVM_FE(openssl_encrypt_with_tag);
     HHVM_FE(openssl_decrypt);
     HHVM_FE(openssl_digest);
     HHVM_FE(openssl_get_cipher_methods);

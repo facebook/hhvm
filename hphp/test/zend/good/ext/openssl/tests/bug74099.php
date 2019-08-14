@@ -6,6 +6,6 @@ $key = random_bytes(32);
 $plaintext = '';
 $tag = null;
 
-$ciphertext = openssl_encrypt($plaintext, 'aes-256-gcm', $key, \OPENSSL_RAW_DATA, $iv, &$tag, $aad);
+$ciphertext = openssl_encrypt_with_tag($plaintext, 'aes-256-gcm', $key, \OPENSSL_RAW_DATA, $iv, &$tag, $aad);
 var_dump($ciphertext);
 }

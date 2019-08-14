@@ -700,6 +700,16 @@ function openssl_encrypt(string $data,
                          string $aad = "",
                          int $tag_length = 16): mixed;
 
+<<__Native>>
+function openssl_encrypt_with_tag(string $data,
+                                  string $method,
+                                  string $password,
+                                  int $options,
+                                  string $iv,
+                                  mixed &$tag_out,
+                                  string $aad = "",
+                                  int $tag_length = 16): mixed;
+
 /* Takes a raw or base64 encoded string and decrypts it using a given method
  * and key.
  * @param string $data - The data.

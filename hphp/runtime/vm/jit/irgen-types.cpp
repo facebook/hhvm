@@ -743,6 +743,7 @@ SSATmp* isArrayImpl(IRGS& env, SSATmp* src) {
     VecLogging = 1 << 1,
     DictLogging = 1 << 2,
     KeysetLogging = 1 << 3,
+    ProvLogging = 1 << 4,
   };
 
   using RO = RuntimeOption;
@@ -751,7 +752,8 @@ SSATmp* isArrayImpl(IRGS& env, SSATmp* src) {
     (RO::EvalIsVecNotices ? ClsMethNotice : None) |
     (RO::EvalHackArrCompatIsArrayNotices ?
        VecLogging | DictLogging | KeysetLogging :
-       None);
+       None) |
+    (RO::EvalLogArrayProvenance ? ProvLogging : None);
 
   static auto const tycheck = InstrumentedTypecheck<IsArrayLogging>{
     {TArr,     true,  None},
@@ -761,8 +763,8 @@ SSATmp* isArrayImpl(IRGS& env, SSATmp* src) {
     {!RO::EvalHackArrDVArrs,
      TShape,   true,  None},
     /* HAC logging */
-    {TVec,     false, mask & VecLogging},
-    {TDict,    false, mask & DictLogging},
+    {TVec,     false, mask & (ProvLogging | VecLogging)},
+    {TDict,    false, mask & (ProvLogging | DictLogging)},
     {TKeyset,  false, mask & KeysetLogging}
   };
 
@@ -791,6 +793,11 @@ SSATmp* isArrayImpl(IRGS& env, SSATmp* src) {
     if (type & KeysetLogging) {
       gen(env, RaiseHackArrCompatNotice,
           cns(env, makeStaticString(Strings::HACKARR_COMPAT_KEYSET_IS_ARR)));
+    }
+    if (type & ProvLogging) {
+      gen(env, RaiseArraySerializeNotice,
+          cns(env, s_is_array.get()),
+          src);
     }
   };
 

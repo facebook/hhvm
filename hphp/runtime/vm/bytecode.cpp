@@ -4093,20 +4093,32 @@ OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
   case IsTypeOp::Int:    return is_int(val);
   case IsTypeOp::Dbl:    return is_double(val);
   case IsTypeOp::Arr:
-    if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices &&
-        !vmfp()->m_func->isBuiltin())) {
-      if (isArrayOrShapeType(val->m_type)) {
-        return true;
-      } else if (isVecType(val->m_type)) {
+    if (LIKELY(!RuntimeOption::EvalHackArrCompatIsArrayNotices &&
+               !RuntimeOption::EvalLogArrayProvenance) ||
+        vmfp()->m_func->isBuiltin()) {
+      return is_array(val);
+    } else if (isArrayOrShapeType(val->m_type)) {
+      return true;
+    } else if (isVecType(val->m_type)) {
+      if (RuntimeOption::EvalHackArrCompatIsArrayNotices) {
         raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VEC_IS_ARR);
-      } else if (isDictOrShapeType(val->m_type)) {
+      }
+      if (RuntimeOption::EvalLogArrayProvenance) {
+        raise_array_serialization_notice("is_array", val->m_data.parr);
+      }
+    } else if (isDictOrShapeType(val->m_type)) {
+      if (RuntimeOption::EvalHackArrCompatIsArrayNotices) {
         raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DICT_IS_ARR);
-      } else if (isKeysetType(val->m_type)) {
+      }
+      if (RuntimeOption::EvalLogArrayProvenance) {
+        raise_array_serialization_notice("is_array", val->m_data.parr);
+      }
+    } else if (isKeysetType(val->m_type)) {
+      if (RuntimeOption::EvalHackArrCompatIsArrayNotices) {
         raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_KEYSET_IS_ARR);
       }
-      return false;
     }
-    return is_array(val);
+    return false;
   case IsTypeOp::Vec: {
     if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
       if (isArrayType(val->m_type)) {

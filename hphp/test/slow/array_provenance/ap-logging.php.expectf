@@ -22,3 +22,6 @@ string(11) "hello"
 
 Notice: Observing vec in gettype from %s/ap-logging.php:6 in %s/ap-logging.php on line 12
 string(3) "vec"
+
+Notice: Observing vec in is_array from %s/ap-logging.php:6 in %s/ap-logging.php on line 13
+bool(false)

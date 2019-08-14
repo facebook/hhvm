@@ -205,6 +205,7 @@ bool mutate_add_elem_array(ISS& env, ProvTag tag, Fn&& mutate) {
   // We need to propagate the provenance info in case we promote *arr from
   // static to counted (or if its representation changes in some other
   // way) ...
+  assertx(!RuntimeOption::EvalArrayProvenance || tag);
   auto const oldTag = RuntimeOption::EvalArrayProvenance ?
     arrprov::getTag(*arr) :
     folly::none;

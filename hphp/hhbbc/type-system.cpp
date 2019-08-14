@@ -2182,11 +2182,15 @@ bool Type::checkInvariants() const {
     assertx(!m_data.aval->hasProvenanceData() ||
             RuntimeOption::EvalArrayProvenance);
     assertx(!m_data.aval->hasProvenanceData() || isVector || isDict);
+    assertx(!m_data.aval->hasProvenanceData() ||
+            arrprov::getTag(m_data.aval)->filename());
     break;
   case DataTag::ArrLikePacked: {
     assert(!m_data.packed->elems.empty());
     assertx(!m_data.packed->provenance || RuntimeOption::EvalArrayProvenance);
     assertx(!m_data.packed->provenance || couldBe(BVec) || couldBe(BDict));
+    assertx(!m_data.packed->provenance ||
+            m_data.packed->provenance->filename());
     DEBUG_ONLY auto idx = size_t{0};
     for (DEBUG_ONLY auto const& v : m_data.packed->elems) {
       assert(v.subtypeOf(valBits) && v != TBottom);
@@ -2200,6 +2204,7 @@ bool Type::checkInvariants() const {
     assert(!m_data.map->map.empty());
     assertx(!m_data.map->provenance || RuntimeOption::EvalArrayProvenance);
     assertx(!m_data.map->provenance || couldBe(BDict));
+    assertx(!m_data.map->provenance || m_data.map->provenance->filename());
     DEBUG_ONLY auto idx = size_t{0};
     DEBUG_ONLY auto packed = true;
     for (DEBUG_ONLY auto const& kv : m_data.map->map) {

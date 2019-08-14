@@ -145,7 +145,6 @@ let rec name_from_hint hint =
   | Happly((_, s), params) -> if List.is_empty params then s
     else Printf.sprintf "%s<%s>" s (list_items @@ List.map params name_from_hint)
   | Haccess(cls, tconsts) ->
-    (* TODO: add dependencies on these? *)
     Printf.sprintf "%s::%s" (name_from_hint cls) (String.concat ~sep:"::" (List.map tconsts snd))
   | Htuple els -> Printf.sprintf "(%s)" (String.concat ~sep:", " @@ List.map els name_from_hint)
   | _ -> raise UnexpectedDependency
@@ -259,7 +258,6 @@ let get_init_for_prim = function
   | Aast_defs.Tvoid | Aast_defs.Tresource | Aast_defs.Tnoreturn -> raise Unsupported
 
 let get_enum_value enum_name =
-  Hh_logger.log "getting enum value";
   let enum = value_exn UnexpectedDependency @@ Decl_provider.get_class enum_name in
   if Decl_provider.Class.kind enum <> Ast_defs.Cenum then raise Unsupported
   else
@@ -328,6 +326,18 @@ let extract_object_declaration tcopt obj =
   (* No other global declarations *)
   | _ -> raise UnexpectedDependency
 
+let get_typeconst_declaration tcopt tconst name =
+  let abstract = match tconst.ttc_abstract with
+  | Typing_defs.TCAbstract _ -> "abstract "
+  | TCPartiallyAbstract | TCConcrete -> "" in
+  let typ = match tconst.ttc_type with
+  | Some t -> Printf.sprintf " = %s" (Typing_print.full_decl tcopt t)
+  | None -> "" in
+  let constr = match tconst.ttc_constraint with
+  | Some t -> Printf.sprintf " as %s" (Typing_print.full_decl tcopt t)
+  | None -> "" in
+  Printf.sprintf "%s const type %s%s%s;" abstract name constr typ
+
 let extract_field_declaration tcopt (cls: Decl_provider.class_decl)
                               (field: Typing_deps.Dep.variant) =
   let open Typing_deps.Dep in
@@ -337,8 +347,8 @@ let extract_field_declaration tcopt (cls: Decl_provider.class_decl)
   match field with
   | Const(_, const_name) ->
     if (Class.has_typeconst cls const_name) then
-      (* TODO: typeconst *)
-      raise Unsupported
+      let tconst = value_or_not_found description  @@ Class.get_typeconst cls const_name in
+      get_typeconst_declaration tcopt tconst const_name
     else
       let cons = value_or_not_found description @@ Class.get_const cls const_name in
       get_const_declaration tcopt ~abstract:cons.cc_abstract cons.cc_type const_name
@@ -445,12 +455,38 @@ let construct_type_declaration tcopt t ?full_method:(full_method=None) fields =
   | Some cls -> construct_class_declaration tcopt cls ~full_method fields
   | None -> construct_typedef_declaration tcopt t
 
-let add_dep deps ty : unit =
+let rec add_dep deps ?cls:(this_cls=None) ty : unit =
+  let add_ dep =
+    HashSet.add deps dep in
   let visitor = object(this)
     inherit [unit] Type_visitor.type_visitor
       method! on_tapply _ _ (_, name) tyl =
-        HashSet.add deps (Typing_deps.Dep.Class name);
+        add_ (Typing_deps.Dep.Class name);
         List.fold_left tyl ~f:this#on_type ~init:()
+      method! on_taccess _ _ ((_, cls_type), tconsts) =
+        let class_name = match cls_type with
+          | Tapply((_, name), _) -> name
+          | Tthis -> Option.value_exn this_cls
+          | _ -> raise UnexpectedDependency in
+        let cls = get_class_exn class_name in
+        match tconsts with
+        | [] -> raise UnexpectedDependency
+        (* Unfold Class::TConst1::TConst2[::...]: get TConst1 in Class, get its type T,
+           continue adding dependencies of T::TConst2[::...] *)
+        | (_, tconst)::tconsts ->
+          add_ (Typing_deps.Dep.Const(class_name, tconst));
+          let typeconst = value_or_not_found tconst @@ Decl_provider.Class.get_typeconst cls tconst
+          in
+          let _:unit = Option.fold ~f:this#on_type ~init:() typeconst.ttc_type in
+          if not (List.is_empty tconsts) then
+            if Option.is_some typeconst.ttc_type then
+              let tc_type = Option.value_exn typeconst.ttc_type in
+              (* What 'this' refers to inside of T? *)
+              let tc_this = match snd tc_type with
+              | Tapply((_, name), _) -> Some name
+              | _ -> None in
+              let taccess = Typing_defs.Taccess(tc_type, tconsts) in
+              add_dep ~cls:tc_this deps (Typing_reason.Rnone, taccess)
     end in
   visitor#on_type () ty
 
@@ -458,38 +494,39 @@ let get_signature_dependencies obj deps =
   let open Typing_deps.Dep in
   let description = to_string obj in
   match obj with
-  | Prop (cls, name) ->
-    let cls = get_class_exn cls in
+  | Prop (cls_name, name) ->
+    let cls = get_class_exn cls_name in
     let p = value_or_not_found description @@ Decl_provider.Class.get_prop cls name in
-    add_dep deps @@ Lazy.force p.ce_type
-  | SProp (cls, name) ->
-    let cls = get_class_exn cls in
-    let sp = value_or_not_found description @@ Decl_provider.Class.get_sprop cls name in
-    add_dep deps @@ Lazy.force sp.ce_type
-  | Method (cls, name) ->
-    let cls = get_class_exn cls in
+    add_dep deps ~cls:(Some cls_name) @@ Lazy.force p.ce_type
+  | SProp (cls_name, name) ->
+    let cls = get_class_exn cls_name in
+    let sp = value_or_not_found description @@ Decl_provider.Class.get_prop cls name in
+    add_dep deps ~cls:(Some cls_name) @@ Lazy.force sp.ce_type
+  | Method (cls_name, name) ->
+    let cls = get_class_exn cls_name in
     let m = value_or_not_found description @@ Decl_provider.Class.get_method cls name in
-    add_dep deps @@ Lazy.force m.ce_type
-  | SMethod (cls, name) ->
-    let cls = get_class_exn cls in
+    add_dep deps ~cls:(Some cls_name) @@ Lazy.force m.ce_type
+  | SMethod (cls_name, name) ->
+    let cls = get_class_exn cls_name in
     let sm = value_or_not_found description @@ Decl_provider.Class.get_smethod cls name in
-    add_dep deps @@ Lazy.force sm.ce_type
-  | Const (cls, name) ->
-    let cls = get_class_exn cls in
+    add_dep deps ~cls:(Some cls_name) @@ Lazy.force sm.ce_type
+  | Const (cls_name, name) ->
+    let cls = get_class_exn cls_name in
     let c = value_or_not_found description @@ Decl_provider.Class.get_const cls name in
-    add_dep deps c.cc_type
-  | Cstr cls ->
-    let cls = value_or_not_found description @@ Decl_provider.get_class cls in
+    add_dep deps ~cls:(Some cls_name) c.cc_type
+  | Cstr cls_name ->
+    let cls = value_or_not_found description @@ Decl_provider.get_class cls_name in
     (match Decl_provider.Class.construct cls with
     | (Some constr, _) -> add_dep deps @@ Lazy.force constr.ce_type
     | _ -> ())
-  | Class cls ->
-      (match Decl_provider.get_class cls with
+  | Class cls_name ->
+      (match Decl_provider.get_class cls_name with
       | None ->
-        let td = value_or_not_found description @@ Decl_provider.get_typedef cls in
+        let td = value_or_not_found description @@ Decl_provider.get_typedef cls_name in
         add_dep deps td.td_type
       | Some c ->
-        Sequence.iter (Decl_provider.Class.all_ancestors c) (fun (_, ty) -> add_dep deps ty)
+        Sequence.iter (Decl_provider.Class.all_ancestors c)
+          (fun (_, ty) -> add_dep deps ~cls:(Some cls_name) ty)
       )
   | Fun f | FunName f ->
     let func = value_or_not_found description @@ Decl_provider.get_fun f in
@@ -497,10 +534,11 @@ let get_signature_dependencies obj deps =
   | GConst c | GConstName c ->
     (let (ty, _) = value_or_not_found description @@ Decl_provider.get_gconst c in
     add_dep deps ty)
-  | AllMembers cls ->
+  | AllMembers cls_name ->
     (* AllMembers is used for dependencies on enums, so we should depend on all constants *)
-    let cls = value_or_not_found description @@ Decl_provider.get_class cls in
-    Sequence.iter (Decl_provider.Class.consts cls) (fun (_, c) -> add_dep deps c.cc_type)
+    let cls = value_or_not_found description @@ Decl_provider.get_class cls_name in
+    Sequence.iter (Decl_provider.Class.consts cls)
+      (fun (_, c) -> add_dep deps ~cls:(Some cls_name) c.cc_type)
     (* Ignore, we fetch class hierarchy when we call get_signature_dependencies on a class dep *)
   | Extends _ -> ()
 

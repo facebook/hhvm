@@ -11,9 +11,24 @@ enum SecondEnum: string {
   SECOND = "5";
 }
 
+abstract class WithAbstractConst {
+  abstract const type ABS_WO_CONSTRAINT;
+  abstract const type ABS_WITH_CONSTRAINT as string;
+  const type NESTED = WithConst;
+
+  abstract public function with_abstract_type_constants(this::ABS_WO_CONSTRAINT $arg)
+  : this::ABS_WITH_CONSTRAINT;
+}
+
 class WithConst {
   const float CFLOAT = 1.2;
   const SomeEnum CENUM = SomeEnum::SECOND;
+  const type WITH_CONSTRAINT = A0;
+  const type WITH_THIS = this::WITH_CONSTRAINT;
+  const type TYPECONST as num = int;
+
+  public function with_type_constants(this::TYPECONST $arg1,
+                                      this::WITH_CONSTRAINT $arg2): void {}
 }
 
 const shape('x' => int, 'y' => SecondEnum) SHAPE =
@@ -31,4 +46,9 @@ function with_constants(): void {
   $e = ARR;
   $f = AGE_RANGE;
   $g = MAP_INDEX;
+}
+
+function with_type_constants(WithAbstractConst::NESTED::WITH_THIS $arg)
+: WithConst::TYPECONST {
+  return 1;
 }

@@ -1,5 +1,6 @@
 <?hh
 abstract class AbstractBase {
+
 }
 class ImplementingBase extends AbstractBase {
 

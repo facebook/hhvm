@@ -67,3 +67,11 @@ class WithProperties {
 function use_properties(WithProperties $arg): int {
   return $arg->first + $arg->second;
 }
+
+class SimpleClass {
+  public function simple_method(): void {}
+  public function another_method(): void {
+    $this->coarse_grained_dependency();
+  }
+  public function coarse_grained_dependency(): void {}
+}

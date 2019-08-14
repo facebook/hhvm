@@ -2,11 +2,13 @@
 class TraitBase extends AbstractBase {
   use ImplementingAbstractBase, T;
 
+
 }
 function with_traits(TraitBase $arg): void {
   $arg->routine();
 }
 abstract class AbstractBase {
+
 }
 trait T {
   require extends AbstractBase;
@@ -17,6 +19,7 @@ trait T {
   }
 }
 trait ImplementingAbstractBase {
+
 }
 function extract_standalone_make_default<T>(): T {
   throw new Exception();

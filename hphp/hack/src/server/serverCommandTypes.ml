@@ -277,7 +277,7 @@ type _ t =
   | LIST_FILES_WITH_ERRORS : string list t
   | FILE_DEPENDENCIES : string list -> string list t
   | IDENTIFY_TYPES : file_input * int * int -> (Pos.absolute * string) list t
-  | EXTRACT_STANDALONE : string -> string t
+  | EXTRACT_STANDALONE : Find_refs.action -> string t
   | GO_TO_DEFINITION : labelled_file * int * int -> Go_to_definition.result t
   | BIGCODE : string -> string t
   | PAUSE : bool -> unit t

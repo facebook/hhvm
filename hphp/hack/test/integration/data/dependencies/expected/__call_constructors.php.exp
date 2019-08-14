@@ -5,8 +5,10 @@ function call_constructors(): void {
 }
 class ImplementingBase extends AbstractBase {
 
+
 }
 abstract class AbstractBase {
+
 }
 class Derived extends ImplementingBase {
 

@@ -21,7 +21,8 @@ class ExtractStandaloneDriver(CommonTestDriver):
 
     @staticmethod
     def function_to_filename(func) -> str:
-        return str.replace(func, "\\", "__")
+        func = func.replace("::", "++")
+        return func.replace("\\", "__")
 
     def equals_to_expected(self, output: str, fname_expected: str) -> bool:
         expected_file = os.path.join(
@@ -99,6 +100,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
                     "\\use_properties",
                     "\\call_constructors",
                     "\\with_constants",
+                    "\\SimpleClass::simple_method",
                 ],
             )
         )

@@ -268,8 +268,17 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
         ClientRefactor.go_ide conn args filename line char new_name in
       Lwt.return Exit_status.No_error
     | MODE_EXTRACT_STANDALONE name ->
+      let open ServerCommandTypes.Find_refs in
+      let action =
+        parse_function_or_method_id
+          ~meth_action:(fun class_name method_name ->
+            Member
+              (class_name, Method method_name))
+          ~func_action:(fun fun_name -> Function fun_name)
+          name
+      in
       let%lwt pretty_printed_dependencies =
-        rpc args @@ Rpc.EXTRACT_STANDALONE name in
+        rpc args @@ Rpc.EXTRACT_STANDALONE action in
       print_endline pretty_printed_dependencies;
       Lwt.return Exit_status.No_error
     | MODE_IDENTIFY_SYMBOL1 arg

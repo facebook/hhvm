@@ -8,6 +8,7 @@
 
 open Core_kernel
 open Typing_defs
+open ServerCommandTypes.Find_refs
 
 module SourceText = Full_fidelity_source_text
 module Syntax = Full_fidelity_positioned_syntax
@@ -15,12 +16,13 @@ module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(Syntax)
 module SyntaxError = Full_fidelity_syntax_error
 module SN = Naming_special_names
 
-exception FunctionNotFound
+exception NotFound
 (* Internal error: for example, we are generating code for a dependency on an enum,
    but the passed dependency is not an enum *)
 exception UnexpectedDependency
 exception DependencyNotFound of string
 exception Unsupported
+exception InvalidInput
 
 let value_exn ex opt = match opt with
 | Some s -> s
@@ -30,19 +32,55 @@ let value_or_not_found err_msg opt = value_exn (DependencyNotFound err_msg) opt
 
 let get_class_exn name = value_or_not_found name @@ Decl_provider.get_class name
 
-let get_filename func =
-  let f = value_exn FunctionNotFound @@ Decl_provider.get_fun func  in
-  Pos.filename f.ft_pos
+let get_class_name (dep:Typing_deps.Dep.variant) =
+  let open Typing_deps.Dep in
+  match dep with
+  | Const(cls, _) | Method(cls, _) | SMethod(cls, _) | Prop(cls, _) | SProp(cls, _)
+  | Cstr cls | Class cls | AllMembers cls | Extends cls -> cls
+  | Fun _ | FunName _ | GConst _ | GConstName _ -> raise UnexpectedDependency
 
-let extract_function_body func =
-  let filename = get_filename func in
+let is_class_dependency = function
+  | Typing_deps.Dep.Fun _ | Typing_deps.Dep.FunName _
+  | Typing_deps.Dep.GConst _ | Typing_deps.Dep.GConstName _ -> false
+  | _ -> true
+
+let is_relevant_dependency (e:action) (dep:Typing_deps.Dep.variant) =
+  match e with
+  | Function f -> dep = Typing_deps.Dep.Fun(f) || dep = Typing_deps.Dep.FunName(f)
+  (* We have to collect dependencies of the entire class because dependency collection is
+     coarse-grained: if cls's member depends on D, we get a dependency edge cls --> D,
+     not (cls, member) --> D *)
+  | Member(cls, Method _) -> ((is_class_dependency dep) && (get_class_name dep) = cls)
+  | _ -> raise Unsupported
+
+let get_filename to_extract =
+  let pos = match to_extract with
+  | Function func -> let f = value_exn NotFound @@ Decl_provider.get_fun func in
+    f.ft_pos
+  | Member(cls, Method _) -> let cls = value_exn NotFound @@ Decl_provider.get_class cls in
+    Decl_provider.Class.pos cls
+  | _ -> raise Unsupported in
+  Pos.filename pos
+
+let extract_body to_extract =
+  let filename = get_filename to_extract in
   let abs_filename = Relative_path.to_absolute filename in
   let file_content = In_channel.read_all abs_filename in
-  let ast_function = value_exn FunctionNotFound @@ Ast_provider.find_fun_in_file filename func in
   let open Aast in
-  let pos = ast_function.f_span in
-  let include_first_whsp = Pos.merge (Pos.first_char_of_line pos) pos in
-  Pos.get_text_from_pos file_content include_first_whsp
+  let pos = match to_extract with
+  | Function func ->
+    let ast_function = value_exn NotFound @@ Ast_provider.find_fun_in_file filename func in
+    ast_function.f_span
+  | Member(cls, Method(name)) ->
+    let ast_class = value_exn NotFound @@ Ast_provider.find_class_in_file filename cls in
+    let m = value_exn NotFound @@ List.find ast_class.c_methods (fun meth -> snd meth.m_name = name) in
+    m.m_span
+  | _ -> raise Unsupported in
+  Pos.get_text_from_pos file_content pos
+
+let get_ns obj_name =
+  let (ns, _) = String.rsplit2_exn obj_name '\\' in
+  ns
 
 let strip_ns obj_name =
   let (_, name) = String.rsplit2_exn obj_name '\\' in
@@ -351,30 +389,30 @@ let construct_enum tcopt enum fields =
   let constants = HashSet.fold (fun f acc -> (string_enum_const f) :: acc) fields [] in
   Printf.sprintf "%s {\n%s\n}" enum_decl (String.concat ~sep:"\n" constants)
 
-let construct_class_declaration tcopt cls fields =
+let construct_class_declaration tcopt cls ?full_method:(meth=None) fields =
   (* Enum declaration have a very different format: for example, no 'const' keyword
      for values, which are actually just class constants *)
   if Decl_provider.Class.kind cls = Ast_defs.Cenum then
     (construct_enum tcopt cls fields)
   else
     let decl = get_class_declaration cls in
-    let open Typing_deps.Dep in
+    let open Typing_deps in
     let properties = HashSet.fold
     (fun field acc ->
-      let desc = to_string field in
+      let desc = Dep.to_string field in
       match field with
-      | Prop(_, p) -> (value_or_not_found desc @@ Decl_provider.Class.get_prop cls p, p)::acc
-      | SProp(_, sp) -> (value_or_not_found desc @@ Decl_provider.Class.get_sprop cls sp, sp)::acc
+      | Dep.Prop(_, p) -> (value_or_not_found desc @@ Decl_provider.Class.get_prop cls p, p)::acc
+      | Dep.SProp(_, sp) -> (value_or_not_found desc @@ Decl_provider.Class.get_sprop cls sp, sp)::acc
       | _ -> acc) fields [] in
     (* If we depend on properties, we have to initialize them. We do not have access
        to the original initialization expression and therefore init them in the constructor.
        Thus we add a dependency on the constructor even if the extracted function
        does not use it directly. *)
-    if not (List.is_empty properties) then HashSet.add fields (Cstr (Decl_provider.Class.name cls));
+    if not (List.is_empty properties) then HashSet.add fields (Dep.Cstr (Decl_provider.Class.name cls));
     let process_field f = match f with
-    | AllMembers _ | Extends _ -> raise UnexpectedDependency
+    | Dep.AllMembers _ | Dep.Extends _ -> raise UnexpectedDependency
     (* Constructor needs special treatment because we need information about properties *)
-    | Cstr _ -> let (cstr, _) = Decl_provider.Class.construct cls in
+    | Dep.Cstr _ -> let (cstr, _) = Decl_provider.Class.construct cls in
       let properties = List.map properties (fun (p, name) ->
         Printf.sprintf "$this->%s = %s;" name (call_make_default tcopt @@ Lazy.force p.ce_type)) in
       (match cstr with
@@ -384,18 +422,27 @@ let construct_class_declaration tcopt cls fields =
         let decl = get_method_declaration tcopt cstr ~is_static:false "__construct" in
         let body = Printf.sprintf "{%s}" @@ String.concat ~sep:"\n" properties in
         decl ^ body)
-    | _ -> extract_field_declaration tcopt cls f in
+      | _ -> extract_field_declaration tcopt cls f in
     let body = HashSet.fold (fun f accum -> accum^"\n"^(process_field f)) fields "" in
-    Printf.sprintf "%s\n%s}" decl body
+    (* If we are extracting a method of this class, we should declare it here, with stubs
+       of other class fields. *)
+    let extracted_method = match meth with
+    | Some(Member(cls, Method(m))) ->
+      (* We don't want to redeclare the method we're extracting *)
+      HashSet.remove fields (Dep.Method(cls, m));
+      HashSet.remove fields (Dep.SMethod(cls, m));
+      extract_body (Option.value_exn meth)
+    | _ -> "" in
+    Printf.sprintf "%s\n%s\n%s}" decl body extracted_method
 
 let construct_typedef_declaration tcopt t =
   let td = value_or_not_found t @@ Decl_provider.get_typedef t in
   let typ = if td.td_vis = Aast_defs.Transparent then "type" else "newtype" in
   Printf.sprintf "%s %s = %s;" typ (strip_ns t) (Typing_print.full_decl tcopt td.td_type)
 
-let construct_type_declaration tcopt t fields =
+let construct_type_declaration tcopt t ?full_method:(full_method=None) fields =
   match Decl_provider.get_class t with
-  | Some cls -> construct_class_declaration tcopt cls fields
+  | Some cls -> construct_class_declaration tcopt cls ~full_method fields
   | None -> construct_typedef_declaration tcopt t
 
 let add_dep deps ty : unit =
@@ -454,8 +501,8 @@ let get_signature_dependencies obj deps =
     (* AllMembers is used for dependencies on enums, so we should depend on all constants *)
     let cls = value_or_not_found description @@ Decl_provider.get_class cls in
     Sequence.iter (Decl_provider.Class.consts cls) (fun (_, c) -> add_dep deps c.cc_type)
-    (* We are extracting functions, they cannot Extend *)
-  | Extends _ -> raise UnexpectedDependency
+    (* Ignore, we fetch class hierarchy when we call get_signature_dependencies on a class dep *)
+  | Extends _ -> ()
 
 let get_dependency_origin cls (dep: Typing_deps.Dep.variant) =
   let open Decl_provider in
@@ -481,19 +528,24 @@ let get_dependency_origin cls (dep: Typing_deps.Dep.variant) =
   | Cstr cls -> cls
   | _ -> raise UnexpectedDependency
 
-let collect_dependencies tcopt func =
+let collect_dependencies tcopt to_extract =
   let dependencies = HashSet.create 0 in
+  let _ = match to_extract with
+    (* We depend on the class which the method belongs to *)
+    | Member(cls, Method _) -> HashSet.add dependencies (Typing_deps.Dep.Class cls)
+    | Function _ -> ()
+    | _ -> raise Unsupported in
   let open Typing_deps.Dep in
   let add_dependency root obj =
-    match root with
-    | Fun f | FunName f -> if f = func then begin
-      HashSet.add dependencies obj;
-      get_signature_dependencies obj dependencies;
-    end
-    | _ -> () in
+    if is_relevant_dependency to_extract root then
+      (HashSet.add dependencies obj;
+      get_signature_dependencies obj dependencies) in
   Typing_deps.add_dependency_callback "add_dependency" add_dependency;
-  let filename = get_filename func in
-  let _ : Tast.def option = Typing_check_service.type_fun tcopt filename func in
+  let filename = get_filename to_extract in
+  let _ : Tast.def option = match to_extract with
+    | Function func -> Typing_check_service.type_fun tcopt filename func
+    | Member(cls, Method _) -> Typing_check_service.type_class tcopt filename cls
+    | _ -> raise Unsupported in
   let types = Caml.Hashtbl.create 0 in
   let globals = HashSet.create 0 in
   let group_by_type obj =
@@ -526,7 +578,7 @@ let collect_dependencies tcopt func =
                 Caml.Hashtbl.add types cls set)
     (* We already added the members when adding signature dependencies, omit it from generation *)
     | AllMembers _ -> ()
-    | Extends _ -> raise UnexpectedDependency
+    | Extends _ -> ()
     | _ -> HashSet.add globals obj in
   HashSet.iter group_by_type dependencies;
   (types, globals)
@@ -599,25 +651,42 @@ let get_code (decl_names: string HashSet.t) declarations =
   else if has_code toplevel then toplevel
   else namespaced
 
-let go tcopt function_name =
+let make_extraction_pass tcopt to_extract =
+  let (types, globals) = collect_dependencies tcopt to_extract in
+  let declarations = Caml.Hashtbl.create 0 in
+  let decl_names = HashSet.create 0 in
+  let add_global_declaration dep =
+    let name = global_dep_name dep in
+    HashSet.add decl_names name;
+    Caml.Hashtbl.add declarations name (extract_object_declaration tcopt dep) in
+  let add_class_declaration cls fields =
+    HashSet.add decl_names cls;
+    match to_extract with
+    | Function _ ->
+      Caml.Hashtbl.add declarations cls (construct_type_declaration tcopt cls fields)
+    | Member(c, Method _) -> if c = cls then
+        Caml.Hashtbl.add declarations cls
+          (construct_type_declaration tcopt cls ~full_method:(Some to_extract) fields)
+      else
+        Caml.Hashtbl.add declarations cls (construct_type_declaration tcopt cls fields)
+    | _ -> raise Unsupported in
+  HashSet.iter add_global_declaration globals;
+  Caml.Hashtbl.iter add_class_declaration types;
+  let _:unit = match to_extract with
+    | Function function_name ->
+      let function_text = extract_body to_extract in
+      Caml.Hashtbl.add declarations function_name function_text;
+      HashSet.add decl_names function_name;
+    | Member(_, Method _) -> ()
+    | _ -> raise Unsupported in
+  get_code decl_names declarations
+
+let go tcopt to_extract =
   try
-    let (types, globals) = collect_dependencies tcopt function_name in
-    let declarations = Caml.Hashtbl.create 0 in
-    let decl_names = HashSet.create 0 in
-    let add_global_declaration dep =
-      let name = global_dep_name dep in
-      HashSet.add decl_names name;
-      Caml.Hashtbl.add declarations name (extract_object_declaration tcopt dep) in
-    let add_class_declaration cls fields =
-      HashSet.add decl_names cls;
-      Caml.Hashtbl.add declarations cls (construct_type_declaration tcopt cls fields) in
-    HashSet.iter add_global_declaration globals;
-    Caml.Hashtbl.iter add_class_declaration types;
-    let function_text = extract_function_body function_name in
-    Caml.Hashtbl.add declarations function_name function_text;
-    HashSet.add decl_names function_name;
-    get_code decl_names declarations
+    make_extraction_pass tcopt to_extract
   with
-  | FunctionNotFound -> "Function not found!"
+  | NotFound -> "Not found!"
+  | InvalidInput -> "Unrecognized input. " ^
+    "Expected: fully qualified function name or [fully qualified class name]::[method_name]"
   | DependencyNotFound d -> Printf.sprintf "Dependency not found: %s" d
   | Unsupported | UnexpectedDependency -> Printexc.get_backtrace ()

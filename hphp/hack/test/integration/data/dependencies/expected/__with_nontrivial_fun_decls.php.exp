@@ -1,7 +1,9 @@
 <?hh
 abstract class AbstractBase {
+
 }
 class ImplementingBase extends AbstractBase {
+
 }
 function with_nontrivial_fun_decls(): void {
   $num = 17;

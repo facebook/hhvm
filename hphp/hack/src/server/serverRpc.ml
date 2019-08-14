@@ -289,8 +289,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, files
     | IDENTIFY_TYPES (filename, line, char) ->
         env, ServerTypeDefinition.go env (filename, line, char)
-    | EXTRACT_STANDALONE name ->
-        env, ServerExtractStandalone.go env.tcopt name
+    | EXTRACT_STANDALONE to_extract ->
+        env, ServerExtractStandalone.go env.tcopt to_extract
     | GO_TO_DEFINITION (labelled_file, line, column) ->
         let (path, file_input) =
           ServerCommandTypesUtils.extract_labelled_file labelled_file in

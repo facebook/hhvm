@@ -540,11 +540,8 @@ struct SparseHeap {
 
  protected:
   struct SlabInfo {
-    SlabInfo(void* p, size_t s, uint16_t v)
-      : ptr(p), size(s), version(v) {}
-
+    SlabInfo(void* p, uint16_t v) : ptr(p), version(v) {}
     void* ptr;
-    uint32_t size;
     uint16_t version{0};                // tag used with SlabManager
   };
   std::vector<SlabInfo> m_pooled_slabs;

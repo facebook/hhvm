@@ -237,6 +237,9 @@ struct Class : AtomicCountable {
    * This is a vector which contains default values for all of a Class's
    * declared instance properties.  It is used when instantiating new objects
    * from a Class.
+   *
+   * This vector is indexed by the physical index of the property within the
+   * objects (and not by its logical slot).
    */
   struct PropInitVec {
     PropInitVec();
@@ -778,6 +781,8 @@ public:
    * Vector of 86pinit non-scalar instance property initializer functions.
    *
    * These are invoked during initProps() to populate the copied PropInitVec.
+   *
+   * This vector is indexed by the properties' logical slot number.
    */
   const VMFixedVector<const Func*>& pinitVec() const;
 
@@ -830,6 +835,16 @@ public:
    */
   TypedValue* getSPropData(Slot index) const;
 
+  /*
+   * Map the logical slot of a property to its physical index within the object
+   * in memory.
+   */
+  uint16_t propSlotToIndex(Slot slot) const { return m_slotIndex[slot]; }
+
+  /*
+   * Map the physical index of a property within the object to its logical slot.
+   */
+  Slot propIndexToSlot(uint16_t index) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Property lookup and accessibility.                                 [const]
@@ -858,10 +873,10 @@ public:
    * this class or any ancestor.  Note that if the return is marked as
    * accessible, then the property must exist.
    */
-  PropSlotLookup getDeclPropIndex(const Class*, const StringData*) const;
+  PropSlotLookup getDeclPropSlot(const Class*, const StringData*) const;
 
   /*
-   * The equivalent of getDeclPropIndex(), but for static properties.
+   * The equivalent of getDeclPropSlot(), but for static properties.
    */
   PropSlotLookup findSProp(const Class*, const StringData*) const;
 
@@ -1008,10 +1023,10 @@ public:
   // Objects.                                                           [const]
 
   /*
-   * Offset of the declared instance property at `index' on an ObjectData
+   * Offset of the declared instance property at `slot' on an ObjectData
    * instantiated from this class.
    */
-  size_t declPropOffset(Slot index) const;
+  size_t declPropOffset(Slot slot) const;
 
   /*
    * Whether instances of this class implement Throwable interface, which
@@ -1376,9 +1391,17 @@ private:
   void initProp(SProp& prop, const PreClass::Prop* preProp);
   template<typename XProp>
   void checkPrePropVal(XProp& prop, const PreClass::Prop* preProp);
+  void sortOwnProps(const PropMap::Builder& curPropMap,
+                    uint32_t first,
+                    uint32_t past,
+                    std::vector<uint16_t>& slotIndex);
+  void sortOwnPropsInitVec(uint32_t first,
+                           uint32_t past,
+                           const std::vector<uint16_t>& slotIndex);
   void importTraitProps(int traitIdx,
                         PropMap::Builder& curPropMap,
                         SPropMap::Builder& curSPropMap,
+                        std::vector<uint16_t>& slotIndex,
                         Slot& serializationIdx,
                         std::vector<bool>& serializationVisited,
                         Slot& staticSerializationIdx,
@@ -1387,6 +1410,7 @@ private:
                                const TypedValue& traitPropVal,
                                PropMap::Builder& curPropMap,
                                SPropMap::Builder& curSPropMap,
+                               std::vector<uint16_t>& slotIndex,
                                Slot& serializationIdx,
                                std::vector<bool>& serializationVisited);
   void importTraitStaticProp(SProp&   traitProp,
@@ -1559,8 +1583,9 @@ private:
    * property index is already known (as may be the case when executing via the
    * TC), property metadata in m_declPropInfo can be directly accessed.
    *
-   * m_declPropInit is indexed by the Slot values from m_declProperties, and
-   * contains initialization information.
+   * m_declPropInit is indexed by the physical index of the property within the
+   * objects (and not by the logical slot), and contains initialization
+   * information.
    *
    * There are two ways to index m_declProperties.
    * 1. Key can be either name or Slot, value is Prop. When used this way,
@@ -1597,6 +1622,10 @@ private:
   mutable bool m_serialized : 1;
 
   mutable rds::Link<PropInitVec*, rds::Mode::Normal> m_propDataCache;
+
+  /* Indexed by logical Slot number, gives the corresponding index within the
+   * objects in memory. */
+  VMFixedVector<uint16_t> m_slotIndex;
 
   /*
    * Cache of m_preClass->attrs().

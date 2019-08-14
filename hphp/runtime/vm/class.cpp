@@ -203,9 +203,9 @@ struct assert_sizeof_class {
   // If this static_assert fails, the compiler error will have the real value
   // of sizeof_Class in it since it's in this struct's type.
 #ifndef NDEBUG
-  static_assert(sz == (use_lowptr ? 272 : 312), "Change this only on purpose");
+  static_assert(sz == (use_lowptr ? 280 : 320), "Change this only on purpose");
 #else
-  static_assert(sz == (use_lowptr ? 264 : 304), "Change this only on purpose");
+  static_assert(sz == (use_lowptr ? 272 : 312), "Change this only on purpose");
 #endif
 };
 template struct assert_sizeof_class<sizeof_Class>;
@@ -777,9 +777,9 @@ void Class::initProps() const {
   // have to do any refcounting.
   // For properties that require "deep" initialization, we have to do a little
   // more work at object creation time.
-  Slot slot = 0;
-  for (auto it = propVec->begin(); it != propVec->end(); ++it, ++slot) {
-    TypedValueAux* tv = &(*it);
+  for (Slot slot = 0; slot < propVec->size(); slot++) {
+    auto index = propSlotToIndex(slot);
+    TypedValueAux* tv = &(*propVec)[index];
     assertx(!tv->deepInit());
     // Set deepInit if the property requires "deep" initialization.
     if (m_declProperties[slot].attrs & AttrDeepInit) {
@@ -884,7 +884,8 @@ void Class::checkPropInitialValues() const {
     if (prop.attrs & (AttrInitialSatisfiesTC|AttrSystemInitialValue)) continue;
     auto const& tc = prop.typeConstraint;
     if (!tc.isCheckable()) continue;
-    auto const& tv = m_declPropInit[slot];
+    auto index = propSlotToIndex(slot);
+    auto const& tv = m_declPropInit[index];
     if (tv.m_type == KindOfUninit) continue;
     tc.verifyProperty(&tv, this, prop.cls, prop.name);
   }
@@ -1038,29 +1039,29 @@ TypedValue* Class::getSPropData(Slot index) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Property lookup and accessibility.
 
-Class::PropSlotLookup Class::getDeclPropIndex(
+Class::PropSlotLookup Class::getDeclPropSlot(
   const Class* ctx,
   const StringData* key
 ) const {
-  auto const propInd = lookupDeclProp(key);
+  auto const propSlot = lookupDeclProp(key);
 
   auto accessible = false;
 
-  if (propInd != kInvalidSlot) {
-    auto const attrs = m_declProperties[propInd].attrs;
+  if (propSlot != kInvalidSlot) {
+    auto const attrs = m_declProperties[propSlot].attrs;
     if ((attrs & (AttrProtected|AttrPrivate)) &&
         (g_context.isNull() || !g_context->debuggerSettings.bypassCheck)) {
       // Fetch the class in the inheritance tree which first declared the
       // property
-      auto const baseClass = m_declProperties[propInd].cls;
+      auto const baseClass = m_declProperties[propSlot].cls;
       assertx(baseClass);
 
       // If ctx == baseClass, we have the right property and we can stop here.
-      if (ctx == baseClass) return PropSlotLookup { propInd, true };
+      if (ctx == baseClass) return PropSlotLookup { propSlot, true };
 
       // The anonymous context cannot access protected or private properties, so
       // we can fail fast here.
-      if (ctx == nullptr) return PropSlotLookup { propInd, false };
+      if (ctx == nullptr) return PropSlotLookup { propSlot, false };
 
       assertx(ctx);
       if (attrs & AttrPrivate) {
@@ -1075,7 +1076,7 @@ Class::PropSlotLookup Class::getDeclPropIndex(
           // ctx is derived from baseClass, so we know this protected
           // property is accessible and we know ctx cannot have private
           // property with the same name, so we're done.
-          return PropSlotLookup { propInd, true };
+          return PropSlotLookup { propSlot, true };
         }
         if (!baseClass->classof(ctx)) {
           // ctx is not the same, an ancestor, or a descendent of baseClass,
@@ -1083,7 +1084,7 @@ Class::PropSlotLookup Class::getDeclPropIndex(
           // be the same or an ancestor of this, so we don't need to check if
           // ctx declares a private property with the same name and we can
           // fail fast here.
-          return PropSlotLookup { propInd, false };
+          return PropSlotLookup { propSlot, false };
         }
         // We now know this protected property is accessible, but we need to
         // keep going because ctx may define a private property with the same
@@ -1097,7 +1098,7 @@ Class::PropSlotLookup Class::getDeclPropIndex(
       accessible = true;
       // If ctx == this, we don't have to check if ctx defines a private
       // property with the same name and we can stop here.
-      if (ctx == this) return PropSlotLookup { propInd, true };
+      if (ctx == this) return PropSlotLookup { propSlot, true };
 
       // We still need to check if ctx defines a private property with the same
       // name.
@@ -1110,18 +1111,18 @@ Class::PropSlotLookup Class::getDeclPropIndex(
   // If ctx is an ancestor of this, check if ctx has a private property with the
   // same name.
   if (ctx && ctx != (Class*)-1 && classof(ctx)) {
-    auto const ctxPropInd = ctx->lookupDeclProp(key);
+    auto const ctxPropSlot = ctx->lookupDeclProp(key);
 
-    if (ctxPropInd != kInvalidSlot &&
-        ctx->m_declProperties[ctxPropInd].cls == ctx &&
-        (ctx->m_declProperties[ctxPropInd].attrs & AttrPrivate)) {
+    if (ctxPropSlot != kInvalidSlot &&
+        ctx->m_declProperties[ctxPropSlot].cls == ctx &&
+        (ctx->m_declProperties[ctxPropSlot].attrs & AttrPrivate)) {
       // A private property from ctx trumps any other property we may
       // have found.
-      return PropSlotLookup { ctxPropInd, true };
+      return PropSlotLookup { ctxPropSlot, true };
     }
   }
 
-  if (propInd == kInvalidSlot &&
+  if (propSlot == kInvalidSlot &&
       !g_context.isNull() &&
       g_context->debuggerSettings.bypassCheck &&
       m_parent) {
@@ -1129,10 +1130,10 @@ Class::PropSlotLookup Class::getDeclPropIndex(
     // class has a parent class, and the current evaluation is a debugger
     // eval with bypassCheck == true, search for the property as a member of
     // the parent class. The debugger access is not subject to visibilty checks.
-    return m_parent->getDeclPropIndex(ctx, key);
+    return m_parent->getDeclPropSlot(ctx, key);
   }
 
-  return PropSlotLookup { propInd, accessible };
+  return PropSlotLookup { propSlot, accessible };
 }
 
 Class::PropSlotLookup Class::findSProp(
@@ -1262,6 +1263,13 @@ bool Class::IsPropAccessible(const Prop& prop, Class* ctx) {
   return prop.cls->classof(ctx) || ctx->classof(prop.cls);
 }
 
+Slot Class::propIndexToSlot(uint16_t index) const {
+  auto const nprops = m_declProperties.size();
+  for (Slot slot = 0; slot < nprops; slot++) {
+    if (m_slotIndex[slot] == index) return slot;
+  }
+  always_assert_flog(0, "propIndexToSlot: no slot found for index = {}", index);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constants.
@@ -1463,9 +1471,10 @@ DataType Class::clsCnsType(const StringData* cnsName) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Objects.
 
-size_t Class::declPropOffset(Slot index) const {
+size_t Class::declPropOffset(Slot slot) const {
   static_assert(std::is_unsigned<Slot>::value,
                 "Slot is supposed to be unsigned");
+  auto index = m_slotIndex[slot];
   return sizeof(ObjectData) + index * sizeof(TypedValue);
 }
 
@@ -2248,11 +2257,59 @@ static void copyDeepInitAttr(const PreClass::Prop* pclsProp,
   }
 }
 
+void Class::sortOwnProps(const PropMap::Builder& curPropMap,
+                         uint32_t first,
+                         uint32_t past,
+                         std::vector<uint16_t>& slotIndex) {
+  FTRACE(3, "PreClass: {}\n", m_preClass->name()->data());
+  auto const size = past - first;
+  if (size == 0) return; // no own props
+  std::vector<uint32_t> order(size);
+  for (uint32_t i = 0; i < size; i++) {
+    order[i] = first + i;
+  }
+  // We don't change the order of the properties for closures.
+  if (c_Closure::initialized() && parent() != c_Closure::classof()) {
+    if (RuntimeOption::EvalReorderProps == "alphabetical") {
+      std::sort(order.begin(), order.end(),
+                [&] (uint32_t a, uint32_t b) {
+                  auto const& propa = curPropMap[a];
+                  auto const& propb = curPropMap[b];
+                  return strcmp(propa.name->data(), propb.name->data()) < 0;
+                });
+    }
+  }
+  assertx(slotIndex.size() == past);
+  for (uint32_t i = 0; i < size; i++) {
+    auto slot = order[i];
+    auto index = first + i;
+    slotIndex[slot] = index;
+    FTRACE(3, "  index={}: slot={}, prop={}\n",
+           index, slot, curPropMap[slot].name->data());
+  }
+  sortOwnPropsInitVec(first, past, slotIndex);
+}
+
+void Class::sortOwnPropsInitVec(uint32_t first, uint32_t past,
+                                const std::vector<uint16_t>& slotIndex) {
+  auto const size = past - first;
+  std::vector<TypedValueAux> tmpPropInitVec(size);
+  for (uint32_t i = first; i < past; i++) {
+    tmpPropInitVec[i - first] = m_declPropInit[i];
+  }
+  for (uint32_t slot = first; slot < past; slot++) {
+    auto index = slotIndex[slot];
+    FTRACE(3, "  - placing propInit for slot {} at index {}\n", slot, index);
+    m_declPropInit[index] = tmpPropInitVec[slot - first];
+  }
+}
+
 void Class::setProperties() {
   int numInaccessible = 0;
   PropMap::Builder curPropMap;
   SPropMap::Builder curSPropMap;
   m_hasDeepInitProps = false;
+  std::vector<uint16_t> slotIndex;
 
   if (m_parent.get() != nullptr) {
     // m_hasDeepInitProps indicates if there are properties that require
@@ -2284,6 +2341,9 @@ void Class::setProperties() {
     }
     m_declPropInit = m_parent->m_declPropInit;
     m_needsPropInitialCheck = m_parent->m_needsPropInitialCheck;
+    auto& parentSlotIndex = m_parent->m_slotIndex;
+    slotIndex.insert(slotIndex.end(),
+                     parentSlotIndex.begin(), parentSlotIndex.end());
     for (auto const& parentProp : m_parent->staticProperties()) {
       if ((parentProp.attrs & AttrPrivate) &&
           !(parentProp.attrs & AttrLSB)) continue;
@@ -2315,6 +2375,8 @@ void Class::setProperties() {
   std::vector<bool> staticSerializationVisited(curSPropMap.size(), false);
 
   static_assert(AttrPublic < AttrProtected && AttrProtected < AttrPrivate, "");
+  auto const firstOwnPropSlot = curPropMap.size();
+
   for (Slot slot = 0; slot < traitIdx; ++slot) {
     const PreClass::Prop* preProp = &m_preClass->properties()[slot];
 
@@ -2359,8 +2421,8 @@ void Class::setProperties() {
         curPropMap.add(preProp->name(), prop);
         curPropMap[serializationIdx++].serializationIdx = curPropMap.size() - 1;
         serializationVisited.push_back(true);
-
         m_declPropInit.push_back(preProp->val());
+        slotIndex.push_back(slotIndex.size());
       };
 
       auto const lateInitCheck = [&] (const Class::Prop& prop) {
@@ -2438,7 +2500,8 @@ void Class::setProperties() {
         }
 
         checkPrePropVal(prop, preProp);
-        TypedValueAux& tvaux = m_declPropInit[slot];
+        auto index = slotIndex[slot];
+        TypedValueAux& tvaux = m_declPropInit[index];
         auto const& tv = preProp->val();
         tvaux.m_data = tv.m_data;
         tvaux.m_type = tv.m_type;
@@ -2533,9 +2596,13 @@ void Class::setProperties() {
     }
   }
 
-  importTraitProps(traitIdx, curPropMap, curSPropMap,
+  importTraitProps(traitIdx, curPropMap, curSPropMap, slotIndex,
                    serializationIdx, serializationVisited,
                    staticSerializationIdx, staticSerializationVisited);
+
+  auto const pastOwnPropSlot = curPropMap.size();
+  sortOwnProps(curPropMap, firstOwnPropSlot, pastOwnPropSlot, slotIndex);
+  assertx(slotIndex.size() == curPropMap.size());
 
   // set serialization index for parent properties at the end
   if (m_parent.get() != nullptr) {
@@ -2581,6 +2648,7 @@ void Class::setProperties() {
 
   m_declProperties.create(curPropMap);
   m_staticProperties.create(curSPropMap);
+  m_slotIndex = slotIndex;
 
   if (unsigned n = numStaticProperties()) {
     using LinkT = std::remove_pointer<decltype(m_sPropCache)>::type;
@@ -2648,6 +2716,7 @@ void Class::importTraitInstanceProp(Prop& traitProp,
                                     const TypedValue& traitPropVal,
                                     PropMap::Builder& curPropMap,
                                     SPropMap::Builder& curSPropMap,
+                                    std::vector<uint16_t>& slotIndex,
                                     Slot& serializationIdx,
                                     std::vector<bool>& serializationVisited) {
   // Check if prop already declared as static
@@ -2691,12 +2760,13 @@ void Class::importTraitInstanceProp(Prop& traitProp,
     curPropMap.add(prop.name, prop);
     curPropMap[serializationIdx++].serializationIdx = curPropMap.size() - 1;
     serializationVisited.push_back(true);
-
+    slotIndex.push_back(slotIndex.size());
     m_declPropInit.push_back(traitPropVal);
   } else {
     // Redeclared prop, make sure it matches previous declarations
     auto& prevProp    = curPropMap[prevIt->second];
-    auto& prevPropVal = m_declPropInit[prevIt->second];
+    auto  prevPropIndex = slotIndex[prevIt->second];
+    auto& prevPropVal = m_declPropInit[prevPropIndex];
     if (((prevProp.attrs ^ traitProp.attrs) & kRedeclarePropAttrMask) ||
         (!(prevProp.attrs & AttrSystemInitialValue) &&
          !(traitProp.attrs & AttrSystemInitialValue) &&
@@ -2831,6 +2901,7 @@ void Class::initProp(SProp& prop, const PreClass::Prop* preProp) {
 void Class::importTraitProps(int traitIdx,
                              PropMap::Builder& curPropMap,
                              SPropMap::Builder& curSPropMap,
+                             std::vector<uint16_t>& slotIndex,
                              Slot& serializationIdx,
                              std::vector<bool>& serializationVisited,
                              Slot& staticSerializationIdx,
@@ -2842,7 +2913,8 @@ void Class::importTraitProps(int traitIdx,
       if (!(preProp->attrs() & AttrStatic)) {
         Prop prop;
         initProp(prop, preProp);
-        importTraitInstanceProp(prop, preProp->val(), curPropMap, curSPropMap,
+        importTraitInstanceProp(prop, preProp->val(),
+                                curPropMap, curSPropMap, slotIndex,
                                 serializationIdx, serializationVisited);
       } else {
         SProp prop;
@@ -2863,8 +2935,10 @@ void Class::importTraitProps(int traitIdx,
     // instance properties
     for (Slot p = 0; p < trait->m_declProperties.size(); p++) {
       auto& traitProp    = trait->m_declProperties[p];
-      auto& traitPropVal = trait->m_declPropInit[p];
-      importTraitInstanceProp(traitProp, traitPropVal, curPropMap, curSPropMap,
+      auto  traitPropIndex = trait->propSlotToIndex(p);
+      auto& traitPropVal = trait->m_declPropInit[traitPropIndex];
+      importTraitInstanceProp(traitProp, traitPropVal,
+                              curPropMap, curSPropMap, slotIndex,
                               serializationIdx, serializationVisited);
     }
 

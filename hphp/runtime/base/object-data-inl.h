@@ -221,8 +221,9 @@ inline void ObjectData::verifyPropTypeHints(size_t end) const {
 
   auto const declProps = m_cls->declProperties();
   auto const props = propVec();
-  for (size_t idx = 0; idx < end; ++idx) {
-    verifyPropTypeHintImpl(&props[idx], declProps[idx]);
+  for (size_t slot = 0; slot < end; ++slot) {
+    auto index = m_cls->propSlotToIndex(slot);
+    verifyPropTypeHintImpl(&props[index], declProps[slot]);
   }
 }
 
@@ -233,14 +234,16 @@ inline void ObjectData::verifyPropTypeHints() const {
 inline void ObjectData::verifyPropTypeHint(Slot slot) const {
   assertx(slot < m_cls->declProperties().size());
   if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
-  verifyPropTypeHintImpl(&propVec()[slot], m_cls->declProperties()[slot]);
+  auto index = m_cls->propSlotToIndex(slot);
+  verifyPropTypeHintImpl(&propVec()[index], m_cls->declProperties()[slot]);
 }
 
 inline bool ObjectData::assertPropTypeHints() const {
   auto const props = propVec();
   auto const end = m_cls->declProperties().size();
-  for (size_t idx = 0; idx < end; ++idx) {
-    if (!assertTypeHint(&props[idx], idx)) return false;
+  for (size_t slot = 0; slot < end; ++slot) {
+    auto index = m_cls->propSlotToIndex(slot);
+    if (!assertTypeHint(&props[index], slot)) return false;
   }
   return true;
 }
@@ -368,15 +371,17 @@ inline const TypedValue* ObjectData::propVec() const {
   return reinterpret_cast<const TypedValue*>(uintptr_t(this + 1));
 }
 
-inline tv_lval ObjectData::propLvalAtOffset(Slot idx) {
-  assertx(idx < m_cls->numDeclProperties());
-  assertx(!(m_cls->declProperties()[idx].attrs & AttrIsConst));
-  return tv_lval { const_cast<TypedValue*>(&propVec()[idx]) };
+inline tv_lval ObjectData::propLvalAtOffset(Slot slot) {
+  assertx(slot < m_cls->numDeclProperties());
+  assertx(!(m_cls->declProperties()[slot].attrs & AttrIsConst));
+  auto index = m_cls->propSlotToIndex(slot);
+  return tv_lval { const_cast<TypedValue*>(&propVec()[index]) };
 }
 
-inline tv_rval ObjectData::propRvalAtOffset(Slot idx) const {
-  assertx(idx < m_cls->numDeclProperties());
-  return tv_rval { &propVec()[idx] };
+inline tv_rval ObjectData::propRvalAtOffset(Slot slot) const {
+  assertx(slot < m_cls->numDeclProperties());
+  auto index = m_cls->propSlotToIndex(slot);
+  return tv_rval { &propVec()[index] };
 }
 
 inline bool ObjectData::hasDynProps() const {

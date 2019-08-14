@@ -1542,8 +1542,9 @@ static Array HHVM_STATIC_METHOD(
   auto ret = Array::Create();
   for (auto const& declProp : properties) {
     auto slot = declProp.serializationIdx;
+    auto index = cls->propSlotToIndex(slot);
     auto const& prop = properties[slot];
-    auto const& default_val = tvAsCVarRef(&propInitVec[slot]);
+    auto const& default_val = tvAsCVarRef(&propInitVec[index]);
     if (((prop.attrs & AttrPrivate) == AttrPrivate) && (prop.cls != cls)) {
       continue;
     }
@@ -1746,7 +1747,7 @@ static void HHVM_METHOD(ReflectionProperty, __construct,
   auto data = Native::data<ReflectionPropHandle>(this_);
 
   // is there a declared instance property?
-  auto lookup = cls->getDeclPropIndex(cls, prop_name.get());
+  auto lookup = cls->getDeclPropSlot(cls, prop_name.get());
   auto propIdx = lookup.slot;
   if (propIdx != kInvalidSlot) {
     auto const prop = &cls->declProperties()[propIdx];
@@ -1942,14 +1943,16 @@ static TypedValue HHVM_METHOD(ReflectionProperty, getDefaultValue) {
       // the prop vector of a child class but it will always point to the class
       // it was declared in); so if we don't want to store propIdx we have to
       // look it up by name.
-      auto lookup = prop->cls->getDeclPropIndex(prop->cls, prop->name);
-      auto propIdx = lookup.slot;
-      assertx(propIdx != kInvalidSlot);
-      prop->cls->initialize();
-      auto const& propInitVec = prop->cls->getPropData()
-        ? *prop->cls->getPropData()
-        : prop->cls->declPropInit();
-      return tvReturn(tvAsCVarRef(&propInitVec[propIdx]));
+      auto cls = prop->cls;
+      auto lookup = cls->getDeclPropSlot(cls, prop->name);
+      auto propSlot = lookup.slot;
+      assertx(propSlot != kInvalidSlot);
+      auto propIndex = cls->propSlotToIndex(propSlot);
+      cls->initialize();
+      auto const& propInitVec = cls->getPropData()
+        ? *cls->getPropData()
+        : cls->declPropInit();
+      return tvReturn(tvAsCVarRef(&propInitVec[propIndex]));
     }
     case ReflectionPropHandle::Type::Static: {
       auto const prop = data->getSProp();
@@ -2418,9 +2421,10 @@ Array get_class_info(const String& name) {
     auto const& propInitVec = cls->declPropInit();
     auto const nProps = cls->numDeclProperties();
 
-    for (Slot i = 0; i < nProps; ++i) {
-      auto const& prop = properties[i];
-      auto const& default_val = tvAsCVarRef(&propInitVec[i]);
+    for (Slot slot = 0; slot < nProps; ++slot) {
+      auto index = cls->propSlotToIndex(slot);
+      auto const& prop = properties[slot];
+      auto const& default_val = tvAsCVarRef(&propInitVec[index]);
       auto info = Array::Create();
       if ((prop.attrs & AttrPrivate) == AttrPrivate) {
         if (prop.cls == cls) {

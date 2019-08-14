@@ -399,7 +399,8 @@ void emitCheckProp(IRGS& env, const StringData* propName) {
   auto const propInitVec = gen(env, LdClsInitData, cls);
 
   auto const ctx = curClass(env);
-  auto const idx = ctx->lookupDeclProp(propName);
+  auto const slot = ctx->lookupDeclProp(propName);
+  auto const idx = ctx->propSlotToIndex(slot);
 
   auto const curVal = gen(env, LdElem, propInitVec,
     cns(env, idx * sizeof(TypedValue)));
@@ -411,7 +412,7 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
   auto const ctx = curClass(env);
 
   SSATmp* base;
-  Slot idx = 0;
+  uint32_t idx = 0;
   switch (op) {
   case InitPropOp::Static:
     {
@@ -451,15 +452,16 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
       auto const cctx = gen(env, LdCctx, fp(env));
       auto const cls = gen(env, LdClsCtx, cctx);
 
-      idx = ctx->lookupDeclProp(propName);
-      auto const& prop = ctx->declProperties()[idx];
+      const auto slot = ctx->lookupDeclProp(propName);
+      idx = ctx->propSlotToIndex(slot);
+      auto const& prop = ctx->declProperties()[slot];
       assertx(!(prop.attrs & AttrSystemInitialValue));
       if (!(prop.attrs & AttrInitialSatisfiesTC)) {
         verifyPropType(
           env,
           cls,
           &prop.typeConstraint,
-          idx,
+          slot,
           val,
           cns(env, propName),
           false

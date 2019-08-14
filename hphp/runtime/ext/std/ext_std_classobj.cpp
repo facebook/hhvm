@@ -176,12 +176,13 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
 
   ArrayInit arr(numDeclProps + numSProps, ArrayInit::Map{});
 
-  for (size_t i = 0; i < numDeclProps; ++i) {
-    auto const name = const_cast<StringData*>(propInfo[i].name.get());
+  for (size_t slot = 0; slot < numDeclProps; ++slot) {
+    auto index = cls->propSlotToIndex(slot);
+    auto const name = const_cast<StringData*>(propInfo[slot].name.get());
     // Empty names are used for invisible/private parent properties; skip them.
     assertx(name->size() != 0);
-    if (Class::IsPropAccessible(propInfo[i], ctx)) {
-      auto const value = &((*propVals)[i]);
+    if (Class::IsPropAccessible(propInfo[slot], ctx)) {
+      auto const value = &((*propVals)[index]);
       arr.set(name, tvAsCVarRef(value));
     }
   }
@@ -333,7 +334,7 @@ Variant HHVM_FUNCTION(property_exists, const Variant& class_or_object,
     return Variant(Variant::NullInit());
   }
 
-  auto const lookup = cls->getDeclPropIndex(cls, property.get());
+  auto const lookup = cls->getDeclPropSlot(cls, property.get());
   if (lookup.slot != kInvalidSlot) return true;
 
   if (obj &&

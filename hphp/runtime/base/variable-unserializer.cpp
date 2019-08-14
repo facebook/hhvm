@@ -597,7 +597,7 @@ void VariableUnserializer::unserializeProp(ObjectData* obj,
                                            int nProp) {
 
   auto const cls = obj->getVMClass();
-  auto const lookup = cls->getDeclPropIndex(ctx, key.get());
+  auto const lookup = cls->getDeclPropSlot(ctx, key.get());
   auto const slot = lookup.slot;
   tv_lval t;
 
@@ -1094,6 +1094,7 @@ void VariableUnserializer::unserializeVariant(
             auto const declProps = objCls->declProperties();
             for (auto const& p : declProps) {
               auto slot = p.serializationIdx;
+              auto index = objCls->propSlotToIndex(slot);
               auto const& prop = declProps[slot];
               if (prop.name == s_86reified_prop.get()) continue;
               if (!matchString(prop.mangledName->slice())) {
@@ -1104,7 +1105,7 @@ void VariableUnserializer::unserializeVariant(
               // don't need to worry about overwritten list, because
               // this is definitely the first time we're setting this
               // property.
-              TypedValue* tv = objProps + slot;
+              TypedValue* tv = objProps + index;
               auto const t = tv_lval{tv};
               unserializePropertyValue(t, remainingProps--);
 

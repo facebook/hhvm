@@ -94,10 +94,10 @@ void unsetTypeHint(const Class::Prop* prop) {
 //////////////////////////////////////////////////////////////////////
 
 // Check that the given property's type matches its type-hint.
-bool ObjectData::assertTypeHint(tv_rval prop, Slot propIdx) const {
+bool ObjectData::assertTypeHint(tv_rval prop, Slot slot) const {
   assertx(tvIsPlausible(*prop));
-  assertx(propIdx < m_cls->numDeclProperties());
-  auto const& propDecl = m_cls->declProperties()[propIdx];
+  assertx(slot < m_cls->numDeclProperties());
+  auto const& propDecl = m_cls->declProperties()[slot];
 
   // AttrLateInitSoft properties can be potentially anything due to default
   // values, so don't assume anything.
@@ -898,9 +898,10 @@ ObjectData* ObjectData::clone() {
   }
 
   auto const clonePropVec = clone->propVecForConstruct();
-  for (auto i = Slot{0}; i < nProps; i++) {
-    tvDupWithRef(propVec()[i], clonePropVec[i]);
-    assertx(assertTypeHint(&clonePropVec[i], i));
+  for (auto slot = Slot{0}; slot < nProps; slot++) {
+    auto index = m_cls->propSlotToIndex(slot);
+    tvDupWithRef(propVec()[index], clonePropVec[index]);
+    assertx(assertTypeHint(&clonePropVec[index], slot));
   }
 
   if (UNLIKELY(getAttribute(HasDynPropArr))) {
@@ -1231,16 +1232,17 @@ ObjectData::PropLookup ObjectData::getPropImpl(
   const Class* ctx,
   const StringData* key
 ) {
-  auto const lookup = m_cls->getDeclPropIndex(ctx, key);
-  auto const propIdx = lookup.slot;
+  auto const lookup = m_cls->getDeclPropSlot(ctx, key);
+  auto const propSlot = lookup.slot;
 
-  if (LIKELY(propIdx != kInvalidSlot)) {
+  if (LIKELY(propSlot != kInvalidSlot)) {
     // We found a visible property, but it might not be accessible.  No need to
     // check if there is a dynamic property with this name.
-    auto const prop = const_cast<TypedValue*>(&propVec()[propIdx]);
-    assertx(assertTypeHint(prop, propIdx));
+    auto const propIndex = m_cls->propSlotToIndex(propSlot);
+    auto const prop = const_cast<TypedValue*>(&propVec()[propIndex]);
+    assertx(assertTypeHint(prop, propSlot));
 
-    auto const& declProp = m_cls->declProperties()[propIdx];
+    auto const& declProp = m_cls->declProperties()[propSlot];
     if (!ignoreLateInit && lookup.accessible) {
       if (UNLIKELY(prop->m_type == KindOfUninit) &&
           (declProp.attrs & AttrLateInit)) {
@@ -1259,7 +1261,7 @@ ObjectData::PropLookup ObjectData::getPropImpl(
     return {
      prop,
      &declProp,
-     propIdx,
+     propSlot,
      lookup.accessible,
      // we always return true in the !forWrite case; this way the compiler
      // may optimize away this value, and if a caller intends to write but
@@ -1568,8 +1570,8 @@ tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
 
     // Property exists, but it is either protected or private since accessible
     // is false.
-    auto const propInd = m_cls->lookupDeclProp(key);
-    auto const attrs = m_cls->declProperties()[propInd].attrs;
+    auto const propSlot = m_cls->lookupDeclProp(key);
+    auto const attrs = m_cls->declProperties()[propSlot].attrs;
     auto const priv = (attrs & AttrPrivate) ? "private" : "protected";
 
     raise_error(

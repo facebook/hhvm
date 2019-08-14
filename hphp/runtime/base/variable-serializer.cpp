@@ -1994,7 +1994,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
           }
         }
 
-        auto const lookup = obj_cls->getDeclPropIndex(ctx, memberName.get());
+        auto const lookup = obj_cls->getDeclPropSlot(ctx, memberName.get());
         auto const slot = lookup.slot;
 
         if (slot != kInvalidSlot && lookup.accessible) {

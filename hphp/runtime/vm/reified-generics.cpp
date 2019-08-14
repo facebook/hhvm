@@ -67,7 +67,8 @@ ArrayData* getClsReifiedGenericsProp(Class* cls, ObjectData* obj) {
   }
   auto const slot = cls->lookupReifiedInitProp();
   assertx(slot != kInvalidSlot);
-  auto tv = obj->propVec()[slot];
+  auto index = cls->propSlotToIndex(slot);
+  auto tv = obj->propVec()[index];
   assertx(tvIsVecOrVArray(tv));
   return tv.m_data.parr;
 }

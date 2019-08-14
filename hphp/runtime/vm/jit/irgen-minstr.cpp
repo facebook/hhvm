@@ -179,7 +179,7 @@ PropInfo getPropertyOffset(IRGS& env,
   }
 
   // Lookup the index of the property based on ctx and baseClass
-  auto const lookup = baseClass->getDeclPropIndex(ctx, name);
+  auto const lookup = baseClass->getDeclPropSlot(ctx, name);
   auto const idx = lookup.slot;
 
   // If we couldn't find a property that is accessible in the current context,
@@ -227,7 +227,7 @@ bool prop_ignores_tvref(IRGS& env, SSATmp* base, const SSATmp* key) {
   if (key->hasConstVal(TStr)) {
     auto const keyStr = key->strVal();
     auto const ctx = curClass(env);
-    auto const lookup = cls->getDeclPropIndex(ctx, keyStr);
+    auto const lookup = cls->getDeclPropSlot(ctx, keyStr);
     if (lookup.slot != kInvalidSlot && lookup.accessible) {
       isDeclared = true;
       auto const& prop = cls->declProperties()[lookup.slot];

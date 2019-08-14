@@ -87,8 +87,9 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData) {
   const TypedValueAux* propInit = nullptr;
 
   auto propsDontNeedCheck = RuntimeOption::EvalCheckPropTypeHints > 0;
-  for (unsigned i = 0; i < numRealProps; ++i) {
-    auto const attrs = propInfo[i].attrs;
+  for (unsigned slot = 0; slot < numRealProps; ++slot) {
+    auto index = cls->propSlotToIndex(slot);
+    auto const attrs = propInfo[slot].attrs;
     assertx((attrs & AttrStatic) == 0);
 
     tv_rval objProp;
@@ -100,44 +101,46 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData) {
                                            : &(*cls->getPropData())[0];
       }
 
-      objProp = propInit + i;
+      objProp = propInit + index;
     } else {
-      objProp = objPropVec + i;
+      objProp = objPropVec + index;
     }
 
     if (UNLIKELY(type(objProp) == KindOfUninit) && (attrs & AttrLateInit)) {
       if (attrs & AttrLateInitSoft) {
         assertx(!(attrs & AttrBuiltin));
         raise_soft_late_init_prop(
-          propInfo[i].cls,
-          propInfo[i].name,
+          propInfo[slot].cls,
+          propInfo[slot].name,
           false
         );
         tvDup(
           *g_context->getSoftLateInitDefault().asTypedValue(),
-          *const_cast<TypedValue*>(objPropVec + i)
+          *const_cast<TypedValue*>(objPropVec + index)
         );
       } else {
-        auto const origI = i;
-        while (i > 0) {
-          --i;
-          apcPropVec[i]->unreferenceRoot();
+        auto const origSlot = slot;
+        while (slot > 0) {
+          --slot;
+          auto idx = cls->propSlotToIndex(slot);
+          apcPropVec[idx]->unreferenceRoot();
         }
         apc_sized_free(apcObj, size);
-        throw_late_init_prop(propInfo[origI].cls, propInfo[origI].name, false);
+        throw_late_init_prop(propInfo[origSlot].cls, propInfo[origSlot].name,
+                             false);
       }
     }
 
     // If the property value satisfies its type-hint in all contexts, we don't
     // need to do any validation when we re-create the object.
     if (propsDontNeedCheck) {
-      propsDontNeedCheck = propInfo[i].typeConstraint.alwaysPasses(objProp);
+      propsDontNeedCheck = propInfo[slot].typeConstraint.alwaysPasses(objProp);
     }
 
     auto val = APCHandle::Create(const_variant_ref{objProp}, false,
                                  APCHandleLevel::Inner, true);
     size += val.size;
-    apcPropVec[i] = val.handle;
+    apcPropVec[index] = val.handle;
   }
 
   if (RuntimeOption::EvalCheckPropTypeHints <= 0 || propsDontNeedCheck) {

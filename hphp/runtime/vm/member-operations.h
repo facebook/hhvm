@@ -928,7 +928,7 @@ inline tv_lval ElemDObject(TypedValue& tvRef, tv_lval base,
       // ArrayObject should always have the 'storage' property, it shouldn't
       // have a type-hint on it, nor should it be LateInit.
       always_assert(storage);
-      auto const slot = obj->getVMClass()->getDeclPropIndex(
+      auto const slot = obj->getVMClass()->getDeclPropSlot(
         SystemLib::s_ArrayObjectClass,
         s_storage.get()
       ).slot;

@@ -249,33 +249,34 @@ struct CompactWriter {
       const size_t numProps = cls->numDeclProperties();
       const size_t numFields = fields.size();
       // Write each member
-      for (int i = 0; i < numFields; ++i) {
-        if (i < numProps && fields[i].name == prop[i].name) {
-          auto const& fieldVal = tvAsCVarRef(&objProp[i]);
+      for (int slot = 0; slot < numFields; ++slot) {
+        if (slot < numProps && fields[slot].name == prop[slot].name) {
+          auto index = cls->propSlotToIndex(slot);
+          auto const& fieldVal = tvAsCVarRef(&objProp[index]);
           if (!fieldVal.isNull()) {
-            TType fieldType = fields[i].type;
-            ArrNR fieldSpec(fields[i].spec);
-            writeFieldBegin(fields[i].fieldNum, fieldType);
+            TType fieldType = fields[slot].type;
+            ArrNR fieldSpec(fields[slot].spec);
+            writeFieldBegin(fields[slot].fieldNum, fieldType);
             writeField(fieldVal, fieldSpec.asArray(), fieldType,
-                FieldInfo{cls, fields[i].fieldNum});
+                FieldInfo{cls, fields[slot].fieldNum});
             writeFieldEnd();
           } else if (UNLIKELY(fieldVal.is(KindOfUninit)) &&
-                     (prop[i].attrs & AttrLateInit)) {
-            if (prop[i].attrs & AttrLateInitSoft) {
-              raise_soft_late_init_prop(prop[i].cls, prop[i].name, false);
+                     (prop[slot].attrs & AttrLateInit)) {
+            if (prop[slot].attrs & AttrLateInitSoft) {
+              raise_soft_late_init_prop(prop[slot].cls, prop[slot].name, false);
               tvDup(
                 *g_context->getSoftLateInitDefault().asTypedValue(),
-                *const_cast<TypedValue*>(&objProp[i])
+                *const_cast<TypedValue*>(&objProp[index])
               );
               // Loop over this property again
-              --i;
+              --slot;
               continue;
             } else {
-              throw_late_init_prop(prop[i].cls, prop[i].name, false);
+              throw_late_init_prop(prop[slot].cls, prop[slot].name, false);
             }
           }
         } else {
-          writeSlow(fields[i], obj);
+          writeSlow(fields[slot], obj);
         }
       }
 
@@ -687,28 +688,31 @@ struct CompactReader {
       }
       auto objProp = dest->propVecForConstruct();
       auto prop = cls->declProperties().begin();
-      int i = -1;
+      int slot = -1;
       while (fieldType != T_STOP) {
         do {
-          ++i;
-        } while (i < numFields && fields[i].fieldNum != fieldNum);
-        if (i == numFields ||
-            prop[i].name != fields[i].name ||
-            !typesAreCompatible(fieldType, fields[i].type)) {
+          ++slot;
+        } while (slot < numFields && fields[slot].fieldNum != fieldNum);
+        if (slot == numFields ||
+            prop[slot].name != fields[slot].name ||
+            !typesAreCompatible(fieldType, fields[slot].type)) {
           return readStructSlow(dest, spec, fieldNum, fieldType);
         }
-        if (fields[i].isUnion) {
+        if (fields[slot].isUnion) {
           if (s__type.equal(prop[numFields].name)) {
-            tvAsVariant(&objProp[numFields]) = Variant(fieldNum);
+            auto index = cls->propSlotToIndex(numFields);
+            tvAsVariant(&objProp[index]) = Variant(fieldNum);
           } else {
             return readStructSlow(dest, spec, fieldNum, fieldType);
           }
         }
-        ArrNR fieldSpec(fields[i].spec);
-        tvAsVariant(&objProp[i]) = readField(fieldSpec.asArray(), fieldType);
-        if (!fields[i].noTypeCheck) {
-          dest->verifyPropTypeHint(i);
-          if (fields[i].isUnion) dest->verifyPropTypeHint(numFields);
+        ArrNR fieldSpec(fields[slot].spec);
+        auto index = cls->propSlotToIndex(slot);
+        tvAsVariant(&objProp[index]) = readField(fieldSpec.asArray(),
+                                                 fieldType);
+        if (!fields[slot].noTypeCheck) {
+          dest->verifyPropTypeHint(slot);
+          if (fields[slot].isUnion) dest->verifyPropTypeHint(numFields);
         }
         readFieldEnd();
         readFieldBegin(fieldNum, fieldType);

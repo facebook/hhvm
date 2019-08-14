@@ -976,6 +976,10 @@ static inline uint32_t hotTextHugePagesDefault() {
   return arch() == Arch::ARM ? 12 : 8;
 }
 
+static inline std::string reorderPropsDefault() {
+  return debug ? "alphabetical" : "";
+}
+
 static inline uint32_t profileRequestsDefault() {
   return debug ? std::numeric_limits<uint32_t>::max() : 2500;
 }

@@ -772,6 +772,7 @@ struct RuntimeOption {
   F(bool, ProfileHWFastReads,          false)                           \
   F(bool, ProfileHWStructLog,          false)                           \
   F(int32_t, ProfileHWExportInterval,  30)                              \
+  F(string, ReorderProps,              reorderPropsDefault())           \
   F(bool, JitAlwaysInterpOne,          false)                           \
   F(int32_t, JitNopInterval,           0)                               \
   F(uint32_t, JitMaxTranslations,      10)                              \

@@ -6564,9 +6564,10 @@ OPTBLD_INLINE void iopCheckProp(const StringData* propName) {
   always_assert(propVec);
 
   auto* ctx = arGetContextClass(vmfp());
-  auto idx = ctx->lookupDeclProp(propName);
+  auto slot = ctx->lookupDeclProp(propName);
+  auto index = cls->propSlotToIndex(slot);
 
-  auto& tv = (*propVec)[idx];
+  auto& tv = (*propVec)[index];
   vmStack().pushBool(tv.m_type != KindOfUninit);
 }
 
@@ -6595,11 +6596,12 @@ OPTBLD_INLINE void iopInitProp(const StringData* propName, InitPropOp propOp) {
     case InitPropOp::NonStatic: {
       auto* propVec = cls->getPropData();
       always_assert(propVec);
-      auto const idx = ctx->lookupDeclProp(propName);
-      assertx(idx != kInvalidSlot);
-      tv = &(*propVec)[idx];
+      auto const slot = ctx->lookupDeclProp(propName);
+      auto const index = cls->propSlotToIndex(slot);
+      assertx(slot != kInvalidSlot);
+      tv = &(*propVec)[index];
       if (RuntimeOption::EvalCheckPropTypeHints > 0) {
-        auto const& prop = cls->declProperties()[idx];
+        auto const& prop = cls->declProperties()[slot];
         auto const& tc = prop.typeConstraint;
         if (tc.isCheckable()) tc.verifyProperty(fr, cls, prop.cls, prop.name);
       }

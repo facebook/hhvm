@@ -56,6 +56,10 @@ let const_static_props = GlobalOptions.tco_const_static_props
 let with_const_static_props po b =
   { po with GlobalOptions.tco_const_static_props = b }
 
+let abstract_static_props = GlobalOptions.po_abstract_static_props
+let with_abstract_static_props po b =
+  { po with GlobalOptions.po_abstract_static_props = b }
+
 let make
   ~auto_namespace_map
   ~codegen
@@ -72,6 +76,7 @@ let make
   ~const_default_func_args
   ~disallow_silence
   ~const_static_props
+  ~abstract_static_props
 = GlobalOptions.{
   default with
   po_auto_namespace_map = auto_namespace_map;
@@ -89,4 +94,5 @@ let make
   po_const_default_func_args = const_default_func_args;
   po_disallow_silence = disallow_silence;
   tco_const_static_props = const_static_props;
+  po_abstract_static_props = abstract_static_props;
 }

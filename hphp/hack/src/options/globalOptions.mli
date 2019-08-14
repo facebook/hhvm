@@ -303,7 +303,10 @@ type t = {
   po_const_default_func_args : bool;
 
   (* Flag to disable the error suppression operator *)
-  po_disallow_silence: bool;
+  po_disallow_silence : bool;
+
+  (* Static properties can be abstract *)
+  po_abstract_static_props : bool;
 } [@@deriving show]
 
 val make :
@@ -375,6 +378,7 @@ val make :
   ?tco_const_attribute : bool ->
   ?po_const_default_func_args : bool ->
   ?po_disallow_silence : bool ->
+  ?po_abstract_static_props : bool ->
   unit ->
   t
 
@@ -462,3 +466,4 @@ val po_disable_legacy_attribute_syntax : t -> bool
 val tco_const_attribute : t -> bool
 val po_const_default_func_args : t -> bool
 val po_disallow_silence : t -> bool
+val po_abstract_static_props : t -> bool

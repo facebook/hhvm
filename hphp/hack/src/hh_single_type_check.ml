@@ -211,6 +211,7 @@ let parse_options () =
   let disallow_goto = ref false in
   let const_default_func_args = ref false in
   let disallow_silence = ref false in
+  let abstract_static_props = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -478,6 +479,9 @@ let parse_options () =
     "--disallow-silence",
       Arg.Set disallow_silence,
       "Disallow the error suppression operator, @";
+    "--abstract-static-props",
+      Arg.Set abstract_static_props,
+      "Static properties can be abstract";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -529,6 +533,7 @@ let parse_options () =
     ~po_allow_goto:(not !disallow_goto)
     ~po_const_default_func_args:!const_default_func_args
     ~po_disallow_silence:!disallow_silence
+    ~po_abstract_static_props:!abstract_static_props
     ()
   in
   let tcopt = {
@@ -793,7 +798,7 @@ let print_tasts tasts tcopt =
   let pp_en fmt _ = Format.pp_print_string fmt "()" in
   let pp_ex fmt ex = Format.pp_print_string fmt (print_pos_and_ty ex) in
   let pp_hi fmt ty = Format.asprintf "(%s)" (Typing_print.full_strip_ns env ty)
-                      |> Format.pp_print_string fmt in
+                    |> Format.pp_print_string fmt in
 
   Relative_path.Map.iter tasts (fun _k (tast : Tast.program) ->
     Printf.printf "%s\n" (Aast.show_program pp_ex pp_fb pp_en pp_hi tast))

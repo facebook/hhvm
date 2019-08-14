@@ -467,6 +467,7 @@ let make_popt () =
     ~const_default_func_args:(const_default_func_args co)
     ~disallow_silence:false
     ~const_static_props:(const_static_props co)
+    ~abstract_static_props:(abstract_static_props co)
 
 let process_single_source_unit compiler_options
   handle_output handle_exception filename source_text source_root =

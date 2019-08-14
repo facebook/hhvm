@@ -77,6 +77,7 @@ type t = {
   tco_const_attribute : bool;
   po_const_default_func_args : bool;
   po_disallow_silence : bool;
+  po_abstract_static_props : bool;
 } [@@deriving show]
 
 let tco_experimental_isarray = "is_array"
@@ -229,6 +230,7 @@ let default = {
   tco_const_attribute = false;
   po_const_default_func_args = false;
   po_disallow_silence = false;
+  po_abstract_static_props = false;
 }
 
 let make
@@ -300,6 +302,7 @@ let make
   ?(tco_const_attribute = default.tco_const_attribute)
   ?(po_const_default_func_args = default.po_const_default_func_args)
   ?(po_disallow_silence = default.po_disallow_silence)
+  ?(po_abstract_static_props = default.po_abstract_static_props)
   ()
 = {
   tco_safe_array;
@@ -371,6 +374,7 @@ let make
   tco_const_attribute;
   po_const_default_func_args;
   po_disallow_silence;
+  po_abstract_static_props;
 }
 let tco_safe_array t = t.tco_safe_array
 let tco_safe_vector_array t = t.tco_safe_vector_array
@@ -474,6 +478,8 @@ let tco_const_attribute t = t.tco_const_attribute
 let po_const_default_func_args t = t.po_const_default_func_args
 
 let po_disallow_silence t = t.po_disallow_silence
+
+let po_abstract_static_props t = t.po_abstract_static_props
 
 let setup_pocket_universes env enabled =
   let exp_features = env.tco_experimental_features in

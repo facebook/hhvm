@@ -3658,13 +3658,27 @@ let class_property_modifiers_errors env node errors =
     errors
   | _ -> errors
 
-let class_property_const_errors node errors =
+let class_property_const_errors env node errors =
   match syntax node with
-  | PropertyDeclaration { property_attribute_spec; _ } ->
+  | PropertyDeclaration { property_attribute_spec; property_declarators; _ } ->
     if attr_spec_contains_const property_attribute_spec then
-      if attribute_specification_contains property_attribute_spec SN.UserAttributes.uaLateInit then
-        (* __LateInit together with const just doesn't make sense. *)
-        make_error_from_node node SyntaxError.no_const_late_init_props :: errors
+      let errors =
+        if attribute_specification_contains property_attribute_spec SN.UserAttributes.uaLateInit then
+          (* __LateInit together with const just doesn't make sense. *)
+          make_error_from_node node SyntaxError.no_const_late_init_props :: errors
+        else errors
+      in
+      if ParserOptions.const_static_props env.parser_options &&
+        methodish_contains_static node then
+          let declarators = syntax_to_list_no_separators property_declarators in
+          let check_decl errors decl =
+            match syntax decl with
+            | PropertyDeclarator { property_initializer; _ }
+              when is_missing property_initializer ->
+              make_error_from_node node SyntaxError.const_static_prop_init :: errors
+            | _ -> errors
+          in
+          List.fold_left declarators ~f:check_decl ~init:errors
       else errors
     else errors
   | _ -> errors
@@ -4087,7 +4101,7 @@ let find_syntax_errors env =
       | PropertyDeclaration _ ->
         let errors = class_property_modifiers_errors env node errors in
         let errors = class_reified_param_errors env node errors in
-        let errors = class_property_const_errors node errors in
+        let errors = class_property_const_errors env node errors in
         trait_require_clauses, names, errors
       | EnumDeclaration _ ->
         let errors = enum_decl_errors node errors in

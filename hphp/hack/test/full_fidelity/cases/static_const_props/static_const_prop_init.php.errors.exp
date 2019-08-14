@@ -1,0 +1,4 @@
+(5,3)-(5,28) A const static property must have an initializer.
+(7,3)-(7,36) A const static property must have an initializer.
+(8,14)-(8,14) A concrete constant declaration must have an initializer.
+(10,14)-(10,14) A concrete constant declaration must have an initializer.

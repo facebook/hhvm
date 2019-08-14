@@ -1,5 +1,5 @@
 <?hh
 
 class A {
-  <<__Const, __LateInit>> public static int $a;
+  <<__Const, __LateInit>> public static int $a = 5;
 }

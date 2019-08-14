@@ -146,6 +146,7 @@ val error2048 : string
 val error2049 : string
 val error2050 : string
 val error2051 : string
+val const_static_prop_init : string
 val error2052 : string
 val error2053 : string
 val error2054 : string

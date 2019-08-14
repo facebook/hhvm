@@ -875,8 +875,6 @@ SSATmp* opt_container_last_key(IRGS& env, const ParamPrep& params) {
 
 namespace {
 const StaticString
-  s_CLASS_CONVERSION("Class to string conversion"),
-  s_FUNC_CONVERSION("Func to string conversion"),
   s_MCHELPER_ON_GET_CLS("MethCallerHelper is used on meth_caller_get_class()"),
   s_MCHELPER_ON_GET_METH(
     "MethCallerHelper is used on meth_caller_get_method()"),
@@ -970,11 +968,7 @@ SSATmp* meth_caller_get_name(IRGS& env, SSATmp *value) {
 SSATmp* opt_class_meth_get_class(IRGS& env, const ParamPrep& params) {
   if (params.size() != 1) return nullptr;
   auto const value = params[0].value;
-  auto const type = value->type();
-  if (type <= TClsMeth) {
-    if (RuntimeOption::EvalRaiseClassConversionWarning) {
-      gen(env, RaiseNotice, cns(env, s_CLASS_CONVERSION.get()));
-    }
+  if (value->type() <= TClsMeth) {
     return gen(env, LdClsName, gen(env, LdClsFromClsMeth, value));
   }
   return nullptr;
@@ -983,11 +977,7 @@ SSATmp* opt_class_meth_get_class(IRGS& env, const ParamPrep& params) {
 SSATmp* opt_class_meth_get_method(IRGS& env, const ParamPrep& params) {
   if (params.size() != 1) return nullptr;
   auto const value = params[0].value;
-  auto const type = value->type();
-  if (type <= TClsMeth) {
-    if (RuntimeOption::EvalRaiseFuncConversionWarning) {
-      gen(env, RaiseNotice, cns(env, s_FUNC_CONVERSION.get()));
-    }
+  if (value->type() <= TClsMeth) {
     return gen(env, LdFuncName, gen(env, LdFuncFromClsMeth, value));
   }
   return nullptr;

@@ -370,8 +370,7 @@ String HHVM_FUNCTION(HH_class_meth_get_class, TypedValue v) {
       folly::sformat("Argument 1 passed to {}() must be a class_meth",
       __FUNCTION__+5));
   }
-  auto const c = val(v).pclsmeth->getCls();
-  return String::attach(const_cast<StringData*>(classToStringHelper(c)));
+  return val(v).pclsmeth->getCls()->nameStr();
 }
 
 String HHVM_FUNCTION(HH_class_meth_get_method, TypedValue v) {
@@ -380,8 +379,7 @@ String HHVM_FUNCTION(HH_class_meth_get_method, TypedValue v) {
       folly::sformat("Argument 1 passed to {}() must be a class_meth",
       __FUNCTION__+5));
   }
-  auto const c = val(v).pclsmeth->getFunc();
-  return String::attach(const_cast<StringData*>(funcToStringHelper(c)));
+  return val(v).pclsmeth->getFunc()->nameStr();
 }
 
 namespace {

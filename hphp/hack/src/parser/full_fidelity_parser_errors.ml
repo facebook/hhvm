@@ -3124,6 +3124,18 @@ let classish_errors env node namespace_name names errors =
       then make_error_from_node node
         SyntaxError.no_const_abstract_final_class :: errors
       else errors in
+    let errors =
+      if list_contains_predicate is_final cd.classish_modifiers then
+        match token_kind cd.classish_keyword with
+        | Some TokenKind.Interface ->
+          make_error_from_node node
+            (SyntaxError.declared_final "Interfaces") :: errors
+        | Some TokenKind.Trait ->
+          make_error_from_node node
+            (SyntaxError.declared_final "Traits") :: errors
+        | _ -> errors
+      else errors
+    in
     let name = text cd.classish_name in
     let errors =
       match syntax cd.classish_body with

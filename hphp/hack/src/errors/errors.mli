@@ -215,8 +215,6 @@ val extend_sealed : Pos.t -> Pos.t -> string -> string -> string -> unit
 val trait_prop_const_class : Pos.t -> string -> unit
 val extend_ppl : Pos.t -> string -> bool -> Pos.t -> string -> string -> string -> unit
 val read_before_write : Pos.t * string -> unit
-val interface_final : Pos.t -> unit
-val trait_final : Pos.t -> unit
 val implement_abstract : is_final:bool -> Pos.t -> Pos.t -> string -> string -> unit
 val generic_static : Pos.t -> string -> unit
 val fun_too_many_args : Pos.t -> Pos.t -> unit

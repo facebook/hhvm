@@ -2590,7 +2590,8 @@ and pClassElt : class_elt list parser = fun node env ->
       let typecheck = is_typechecker env in (* so we don't capture the env in the closure *)
       let check_modifier node =
         if is_final node
-        then raise_parsing_error env (`Node node) SyntaxError.final_property;
+        then raise_parsing_error env (`Node node)
+          (SyntaxError.declared_final "Properties");
         if typecheck && is_var node
         then raise_parsing_error env (`Node node) SyntaxError.var_property in
       let cv_user_attributes = pUserAttributes env property_attribute_spec in

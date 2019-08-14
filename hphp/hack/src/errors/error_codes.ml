@@ -295,7 +295,7 @@ module Typing                               = struct
   | GenericArrayStrict
   | GenericStatic
   | ImplementAbstract
-  | InterfaceFinal
+  | InterfaceFinalDEPRECATED
   | InvalidShapeFieldConst
   | InvalidShapeFieldLiteral
   | InvalidShapeFieldName
@@ -343,7 +343,7 @@ module Typing                               = struct
   | RetiredError4093DEPRECATED
   | ThisInStaticDEPRECATED
   | ThisVarOutsideClass
-  | TraitFinal
+  | TraitFinalDEPRECATED
   | TupleArityDEPRECATED
   | TupleArityMismatchDEPRECATED
   | TupleIndexTooLargeDEPRECATED

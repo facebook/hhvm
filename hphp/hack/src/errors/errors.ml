@@ -2245,14 +2245,6 @@ let read_before_write (pos, v) =
   "Read access to $this->"; v; " before initialization"
 ])
 
-let interface_final pos =
-  add (Typing.err_code Typing.InterfaceFinal) pos
-    "Interfaces cannot be final"
-
-let trait_final pos =
-  add (Typing.err_code Typing.TraitFinal) pos
-    "Traits cannot be final"
-
 let final_property pos =
   add (Typing.err_code Typing.FinalProperty) pos "Properties cannot be declared final"
 

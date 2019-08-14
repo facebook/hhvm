@@ -246,7 +246,6 @@ val interface_has_private_method : string
 val redeclaration_of_function : name:string -> loc:string -> string
 val redeclaration_of_method : name:string -> string
 val self_or_parent_colon_colon_class_outside_of_class : string -> string
-val final_property : string
 val var_property : string
 val invalid_is_as_expression_hint : string -> string -> string
 val elvis_operator_space : string
@@ -376,3 +375,4 @@ val no_const_static_props : string
 val no_const_abstract_final_class : string
 val no_legacy_attribute_syntax : string
 val no_silence : string
+val declared_final : string -> string

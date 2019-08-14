@@ -6256,17 +6256,6 @@ and class_def_ tcopt env c tc =
   let env = match parent_id with
     | None -> env
     | Some parent_id -> Env.set_parent_id env parent_id in
-  if (Cls.final tc) then begin
-    match c.c_kind with
-    | Ast_defs.Cinterface -> Errors.interface_final (fst c.c_name)
-    | Ast_defs.Cabstract -> ()
-    | Ast_defs.Ctrait -> Errors.trait_final (fst c.c_name)
-    | Ast_defs.Cenum
-    | Ast_defs.Crecord ->
-      Errors.internal_error pc ("The parser should not parse final on" ^
-        (if c.c_kind = Ast_defs.Cenum then "enums" else "records"))
-    | Ast_defs.Cnormal -> ()
-  end;
   if Cls.const tc then
     List.iter c.c_uses (check_const_trait_members pc env);
   let static_vars, vars = split_vars c in

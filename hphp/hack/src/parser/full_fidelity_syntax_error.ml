@@ -425,7 +425,6 @@ let redeclaration_of_method ~name =
   "Redeclared method " ^ name
 let self_or_parent_colon_colon_class_outside_of_class name =
   "Cannot access " ^ name ^ "::class when no class scope is active"
-let final_property = "Properties cannot be declared final"
 let var_property = "Properties cannot be declared as var; a type is required"
 let property_has_multiple_visibilities name =
   "Multiple access type modifiers are not allowed: properties of " ^ name
@@ -758,3 +757,5 @@ let no_legacy_attribute_syntax =
 
 let no_silence =
   "The error suppression operator @ is not allowed"
+
+let declared_final elt = elt ^ " cannot be declared final."

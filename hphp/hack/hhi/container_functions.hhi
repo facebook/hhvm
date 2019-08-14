@@ -54,15 +54,21 @@ function krsort<T as KeyedContainer<arraykey, mixed>>(
   <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> inout T $arg,
   int $sort_flags = SORT_REGULAR,
 ): bool;
-// $c is a callable of type (function(Tv,Tv): bool)
 <<__PHPStdLib>>
-function usort<T as KeyedContainer<arraykey, mixed>>(inout T $arg, mixed $c): bool;
-// $c is a callable of type (function(Tv,Tv): bool)
+function usort<Tv, T as Container<Tv>>(
+  inout T $arg,
+  (function(Tv, Tv): int) $c,
+): bool;
 <<__PHPStdLib>>
-function uasort<T as KeyedContainer<arraykey, mixed>>(inout T $arg, mixed $c): bool;
-// $c is a callable of type (function(Tk,Tk): bool)
+function uasort<Tv, T as KeyedContainer<arraykey, Tv>>(
+  inout T $arg,
+  (function(Tv, Tv): int) $c,
+): bool;
 <<__PHPStdLib>>
-function uksort<T as KeyedContainer<arraykey, mixed>>(inout T $arg, mixed $c): bool;
+function uksort<Tk as arraykey, T as KeyedContainer<Tk, mixed>>(
+  inout T $arg,
+  (function(Tk, Tk): int) $c,
+): bool;
 
 }
 

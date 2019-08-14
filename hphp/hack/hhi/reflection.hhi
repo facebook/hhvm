@@ -226,6 +226,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function hasReturnType(): bool;
   <<__Rx, __MaybeMutable>>
   public function getReturnType(): ?ReflectionType;
+  <<__Rx, __MaybeMutable>>
+  public function getReifiedTypeParamInfo(): varray<darray<string, bool>>;
 }
 
 class ReflectionFunction extends ReflectionFunctionAbstract implements Reflector {

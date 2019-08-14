@@ -1,0 +1,60 @@
+array(0) {
+}
+array(3) {
+  [0]=>
+  array(3) {
+    ["is_reified"]=>
+    bool(true)
+    ["is_soft"]=>
+    bool(false)
+    ["is_warn"]=>
+    bool(false)
+  }
+  [1]=>
+  array(3) {
+    ["is_reified"]=>
+    bool(false)
+    ["is_soft"]=>
+    bool(false)
+    ["is_warn"]=>
+    bool(false)
+  }
+  [2]=>
+  array(3) {
+    ["is_reified"]=>
+    bool(true)
+    ["is_soft"]=>
+    bool(true)
+    ["is_warn"]=>
+    bool(true)
+  }
+}
+array(3) {
+  [0]=>
+  array(3) {
+    ["is_reified"]=>
+    bool(true)
+    ["is_soft"]=>
+    bool(false)
+    ["is_warn"]=>
+    bool(false)
+  }
+  [1]=>
+  array(3) {
+    ["is_reified"]=>
+    bool(false)
+    ["is_soft"]=>
+    bool(false)
+    ["is_warn"]=>
+    bool(false)
+  }
+  [2]=>
+  array(3) {
+    ["is_reified"]=>
+    bool(true)
+    ["is_soft"]=>
+    bool(true)
+    ["is_warn"]=>
+    bool(true)
+  }
+}

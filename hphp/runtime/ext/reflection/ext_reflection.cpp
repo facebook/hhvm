@@ -113,7 +113,10 @@ const StaticString
   s_reflectionextension("ReflectionExtension"),
   s_type_hint("type_hint"),
   s_type_hint_builtin("type_hint_builtin"),
-  s_type_hint_nullable("type_hint_nullable");
+  s_type_hint_nullable("type_hint_nullable"),
+  s_is_reified("is_reified"),
+  s_is_soft("is_soft"),
+  s_is_warn("is_warn");
 
 Class* Reflection::s_ReflectionExceptionClass = nullptr;
 Class* Reflection::s_ReflectionExtensionClass = nullptr;
@@ -843,6 +846,20 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getRetTypeInfo) {
   }
   retTypeInfo.set(s_type_hint, name);
   return retTypeInfo;
+}
+
+static Array HHVM_METHOD(ReflectionFunctionAbstract, getReifiedTypeParamInfo) {
+  auto const func = ReflectionFuncHandle::GetFuncFor(this_);
+  auto const& info = func->getReifiedGenericsInfo();
+  VArrayInit arr(info.m_typeParamInfo.size());
+  for (auto tparam : info.m_typeParamInfo) {
+    DArrayInit tparamArr(3);
+    tparamArr.set(s_is_reified, make_tv<KindOfBoolean>(tparam.m_isReified));
+    tparamArr.set(s_is_soft, make_tv<KindOfBoolean>(tparam.m_isSoft));
+    tparamArr.set(s_is_warn, make_tv<KindOfBoolean>(tparam.m_isWarn));
+    arr.append(tparamArr.toArray());
+  }
+  return arr.toArray();
 }
 
 ALWAYS_INLINE
@@ -2061,6 +2078,7 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionFunctionAbstract, getParamInfo);
     HHVM_ME(ReflectionFunctionAbstract, getAttributesNamespaced);
     HHVM_ME(ReflectionFunctionAbstract, getRetTypeInfo);
+    HHVM_ME(ReflectionFunctionAbstract, getReifiedTypeParamInfo);
 
     HHVM_ME(ReflectionMethod, __init);
     HHVM_ME(ReflectionMethod, isFinal);

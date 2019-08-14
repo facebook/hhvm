@@ -253,6 +253,8 @@ ArrayData* PackedArray::Grow(ArrayData* adIn, bool copy) {
     adIn->m_sizeAndPos = 0; // old is a zombie now
   }
 
+  ad->m_aux16 &= ~ArrayData::kHasProvenanceData;
+
   assertx(ad->kind() == adIn->kind());
   assertx(ad->dvArray() == adIn->dvArray());
   assertx(capacity(ad) > capacity(adIn));
@@ -1412,6 +1414,8 @@ ArrayData* PackedArray::MakeUncounted(ArrayData* array,
     (withApcTypedValue ? ArrayData::kHasApcTv : 0)
   );
   ad->m_sizeAndPos = array->m_sizeAndPos;
+
+  ad->m_aux16 &= ~ArrayData::kHasProvenanceData;
 
   // Do a raw copy without worrying about refcounts, and convert the values to
   // uncounted later.

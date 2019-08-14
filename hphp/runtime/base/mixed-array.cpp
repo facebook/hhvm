@@ -1016,6 +1016,7 @@ MixedArray* MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
   ad->m_sizeAndPos   = old->m_sizeAndPos;
   ad->initHeader_16(old->m_kind, OneReference, old->m_aux16);
   ad->m_scale_used   = newScale | uint64_t{oldUsed} << 32;
+  ad->m_aux16 &= ~ArrayData::kHasProvenanceData;
 
   copyElmsNextUnsafe(ad, old, oldUsed);
 
@@ -1421,7 +1422,9 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   auto const ad    = reqAlloc(scale);
   auto const oldUsed = src->m_used;
 
-  auto const aux = src->m_aux16 & ~(static_cast<uint16_t>(kTombstoneKey) << 8);
+  auto const aux = src->m_aux16 &
+    ~(static_cast<uint16_t>(kTombstoneKey) << 8) &
+    ~ArrayData::kHasProvenanceData;
 
   ad->m_sizeAndPos      = src->m_sizeAndPos;
   ad->initHeader_16(src->m_kind, OneReference, aux);

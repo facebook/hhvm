@@ -5,3 +5,9 @@
 
 #[derive(Clone, Debug)]
 pub struct Lazy<T>(T);
+
+impl<T: Into<ocamlrep::Value>> Into<ocamlrep::Value> for Lazy<T> {
+    fn into(self) -> ocamlrep::Value {
+        ().into()
+    }
+}

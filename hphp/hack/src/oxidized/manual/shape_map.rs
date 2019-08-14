@@ -5,9 +5,11 @@
 
 use std::cmp::Ordering;
 
+use ocamlrep_derive::IntoOcamlRep;
+
 use crate::ast_defs::{Id, ShapeFieldName};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct ShapeField(ShapeFieldName);
 
 impl Ord for ShapeField {

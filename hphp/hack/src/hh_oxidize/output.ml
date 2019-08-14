@@ -20,6 +20,9 @@ let with_output_context ~module_name f =
       output := Oxidized_module.empty;
       oxidized_module)
 
+let add_extern_use ty =
+  output := { !output with extern_uses = SSet.add !output.extern_uses ty }
+
 let add_mod_use mod_name =
   output := { !output with uses = SSet.add !output.uses mod_name }
 

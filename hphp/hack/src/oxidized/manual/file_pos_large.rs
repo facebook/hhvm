@@ -3,7 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+use ocamlrep_derive::IntoOcamlRep;
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, IntoOcamlRep)]
 pub struct FilePosLarge {
     lnum: u64,
     bol: u64,

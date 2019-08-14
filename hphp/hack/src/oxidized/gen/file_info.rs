@@ -3,10 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<38c4874c36a8cb2efda2674d51d1fe66>>
+// @generated SignedSource<<0c17746c08689bb45150d7cf60baec2a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
+
+use ocamlrep_derive::IntoOcamlRep;
 
 use crate::opaque_digest;
 use crate::pos;
@@ -15,7 +17,7 @@ use crate::s_set;
 
 use crate::prim_defs::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum Mode {
     Mphp,
     Mdecl,
@@ -24,7 +26,7 @@ pub enum Mode {
     Mexperimental,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum NameType {
     Fun,
     Class,
@@ -32,18 +34,18 @@ pub enum NameType {
     Const,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum Pos {
     Full(pos::Pos),
     File(NameType, relative_path::RelativePath),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct Id(pub Pos, pub String);
 
 pub type HashType = Option<opaque_digest::OpaqueDigest>;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct FileInfo {
     pub hash: HashType,
     pub file_mode: Option<Mode>,
@@ -54,7 +56,7 @@ pub struct FileInfo {
     pub comments: Option<Vec<(pos::Pos, Comment)>>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct Names {
     pub funs: s_set::SSet,
     pub classes: s_set::SSet,
@@ -62,7 +64,7 @@ pub struct Names {
     pub consts: s_set::SSet,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct Saved {
     pub names: Names,
     pub hash: Option<opaque_digest::OpaqueDigest>,

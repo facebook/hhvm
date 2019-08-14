@@ -3,10 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-#[derive(Clone, Debug)]
+use ocamlrep_derive::IntoOcamlRep;
+
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct Error(());
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct Errors(Vec<Error>);
 
 impl Errors {

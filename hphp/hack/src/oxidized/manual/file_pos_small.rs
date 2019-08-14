@@ -5,6 +5,8 @@
 
 use std::fmt;
 
+use ocamlrep_derive::IntoOcamlRep;
+
 // Three values packed into one 64-bit integer:
 //
 //    6         5         4         3         2         1         0
@@ -23,7 +25,7 @@ use std::fmt;
 // - (col)  column number starts at 0, maximum is 2^9-1 = 511
 //            This is saturating, i.e. every column past 511 has column
 //            number 511 (so as not to raise exceptions).
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, IntoOcamlRep)]
 pub struct FilePosSmall(u64);
 
 const COLUMN_BITS: u64 = 9;

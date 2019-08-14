@@ -3,12 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<42cb5f2bed3e6d689289e2115487fa0e>>
+// @generated SignedSource<<82d073c5836b1a6fec5a01f877ff8269>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
-#[derive(Clone, Debug)]
+use ocamlrep_derive::IntoOcamlRep;
+
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum Prefix {
     Root,
     Hhi,
@@ -16,5 +18,5 @@ pub enum Prefix {
     Tmp,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct RelativePath(pub Prefix, pub String);

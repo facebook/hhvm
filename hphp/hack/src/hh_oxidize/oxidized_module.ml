@@ -9,6 +9,8 @@
 open Reordered_argument_collections
 
 type t = {
+  extern_uses: SSet.t;
+  (* names of types (or derive macros) to import from other Rust crates *)
   uses: SSet.t;
   (* names of referenced modules (need to be explicitly imported in Rust) *)
   glob_uses: SSet.t;
@@ -28,6 +30,7 @@ type t = {
 
 let empty =
   {
+    extern_uses = SSet.empty;
     uses = SSet.empty;
     glob_uses = SSet.empty;
     aliases = [];

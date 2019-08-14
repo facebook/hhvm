@@ -3,10 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1ce2e3cf1d57b3ed2f885581f855eb3e>>
+// @generated SignedSource<<51351bd6a0331db9a0d59aac6a58d3d0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
+
+use ocamlrep_derive::IntoOcamlRep;
 
 use crate::aast;
 use crate::ast_defs;
@@ -19,7 +21,7 @@ use crate::pos;
 
 use crate::typing_defs::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct ShallowClassConst {
     pub abstract_: bool,
     pub expr: Option<nast::Expr>,
@@ -28,7 +30,7 @@ pub struct ShallowClassConst {
     pub visibility: aast::Visibility,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct ShallowTypeconst {
     pub abstract_: TypeconstAbstractKind,
     pub constraint: Option<Ty>,
@@ -39,7 +41,7 @@ pub struct ShallowTypeconst {
     pub reifiable: Option<pos::Pos>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct ShallowProp {
     pub const_: bool,
     pub xhp_attr: Option<XhpAttr>,
@@ -52,7 +54,7 @@ pub struct ShallowProp {
     pub fixme_codes: i_set::ISet,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct ShallowMethod {
     pub abstract_: bool,
     pub final_: bool,
@@ -65,7 +67,7 @@ pub struct ShallowMethod {
     pub fixme_codes: i_set::ISet,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct ShallowMethodRedeclaration {
     pub abstract_: bool,
     pub final_: bool,
@@ -78,7 +80,7 @@ pub struct ShallowMethodRedeclaration {
     pub fixme_codes: i_set::ISet,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct ShallowClass {
     pub mode: file_info::Mode,
     pub final_: bool,

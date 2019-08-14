@@ -3,10 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c3a1200a9dc662e93b58a6782f5bd794>>
+// @generated SignedSource<<fff9f0a9b2239b595d06c2bab5f2ba1e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
+
+use ocamlrep_derive::IntoOcamlRep;
 
 use crate::aast;
 use crate::ast_defs;
@@ -20,29 +22,29 @@ use crate::s_set;
 
 pub use crate::typing_reason as reason;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum Visibility {
     Vpublic,
     Vprivate(String),
     Vprotected(String),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum Exact {
     Exact,
     Nonexact,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct Ty(pub reason::Reason, pub Box<Ty_>);
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct ShapeFieldType {
     pub optional: bool,
     pub ty: Ty,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum Ty_ {
     Tthis,
     Tapply(nast::Sid, Vec<Ty>),
@@ -66,7 +68,7 @@ pub enum Ty_ {
     Tshape(ShapeKind, nast::shape_map::ShapeMap<ShapeFieldType>),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum ArrayKind {
     AKany,
     AKvarray(Ty),
@@ -77,30 +79,30 @@ pub enum ArrayKind {
     AKempty,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum AbstractKind {
     AKnewtype(String, Vec<Ty>),
     AKgeneric(String),
     AKdependent(DependentType),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum DependentType {
     DTthis,
     DTcls(String),
     DTexpr(ident::Ident),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct TaccessType(pub Ty, pub Vec<nast::Sid>);
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum ShapeKind {
     ClosedShape,
     OpenShape,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum Reactivity {
     Nonreactive,
     Local(Option<Ty>),
@@ -110,27 +112,27 @@ pub enum Reactivity {
     RxVar(Option<Box<Reactivity>>),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum ValKind {
     Lval,
     LvalSubexpr,
     Other,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum ParamMutability {
     ParamOwnedMutable,
     ParamBorrowedMutable,
     ParamMaybeMutable,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum FunTparamsKind {
     FTKtparams,
     FTKinstantiatedTargs,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct FunType {
     pub pos: pos::Pos,
     pub deprecated: Option<String>,
@@ -150,27 +152,27 @@ pub struct FunType {
     pub returns_void_to_rx: bool,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum FunArity {
     Fstandard(isize, isize),
     Fvariadic(isize, FunParam),
     Fellipsis(isize, pos::Pos),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum ParamMode {
     FPnormal,
     FPref,
     FPinout,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum ParamRxAnnotation {
     ParamRxVar,
     ParamRxIfImpl(Ty),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct FunParam {
     pub pos: pos::Pos,
     pub name: Option<String>,
@@ -183,19 +185,19 @@ pub struct FunParam {
 
 pub type FunParams = Vec<FunParam>;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum XhpAttrTag {
     Required,
     Lateinit,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct XhpAttr {
     pub tag: Option<XhpAttrTag>,
     pub has_default: bool,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct ClassElt {
     pub abstract_: bool,
     pub final_: bool,
@@ -211,7 +213,7 @@ pub struct ClassElt {
     pub origin: String,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct ClassConst {
     pub synthesized: bool,
     pub abstract_: bool,
@@ -222,17 +224,17 @@ pub struct ClassConst {
     pub origin: String,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct Requirement(pub pos::Pos, pub Ty);
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum ConsistentKind {
     Inconsistent,
     ConsistentConstruct,
     FinalClass,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct ClassType {
     pub need_init: bool,
     pub members_fully_known: bool,
@@ -264,14 +266,14 @@ pub struct ClassType {
     pub decl_errors: Option<errors::Errors>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum TypeconstAbstractKind {
     TCAbstract(Option<Ty>),
     TCPartiallyAbstract,
     TCConcrete,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct TypeconstType {
     pub abstract_: TypeconstAbstractKind,
     pub visibility: Visibility,
@@ -283,13 +285,13 @@ pub struct TypeconstType {
     pub reifiable: Option<pos::Pos>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct EnumType {
     pub base: Ty,
     pub constraint: Option<Ty>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct TypedefType {
     pub pos: pos::Pos,
     pub vis: aast::TypedefVisibility,
@@ -299,7 +301,7 @@ pub struct TypedefType {
     pub decl_errors: Option<errors::Errors>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct Tparam {
     pub variance: ast_defs::Variance,
     pub name: ast_defs::Id,
@@ -308,10 +310,10 @@ pub struct Tparam {
     pub user_attributes: Vec<nast::UserAttribute>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct WhereConstraint(pub Ty, pub ast_defs::ConstraintKind, pub Ty);
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum DeserializationError {
     WrongPhase(String),
     NotSupported(String),

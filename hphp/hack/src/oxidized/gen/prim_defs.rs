@@ -3,12 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<26e025d687af99d3c382253848a694f2>>
+// @generated SignedSource<<d603e2cf84a70a66850a707149206492>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
-#[derive(Clone, Debug)]
+use ocamlrep_derive::IntoOcamlRep;
+
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum Comment {
     CmtLine(String),
     CmtBlock(String),

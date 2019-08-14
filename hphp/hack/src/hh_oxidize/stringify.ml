@@ -42,8 +42,16 @@ let postprocess modules uses aliases includes =
   (uses, includes)
 
 let stringify modules m =
-  let { uses; glob_uses; aliases; includes; ty_uses; decls } = m in
+  let { uses; extern_uses; glob_uses; aliases; includes; ty_uses; decls } =
+    m
+  in
   let (uses, includes) = postprocess modules uses aliases includes in
+  let extern_uses =
+    extern_uses
+    |> SSet.elements
+    |> List.map ~f:(sprintf "use %s;")
+    |> String.concat ~sep:"\n"
+  in
   let uses =
     uses |> List.map ~f:(sprintf "use crate::%s;") |> String.concat ~sep:"\n"
   in
@@ -72,7 +80,8 @@ let stringify modules m =
   in
   let decls = decls |> List.rev_map ~f:snd |> String.concat ~sep:"\n\n" in
   sprintf
-    "%s\n\n%s\n\n%s\n\n%s%s\n\n%s\n"
+    "%s\n\n%s\n\n%s\n\n%s\n\n%s%s\n\n%s\n"
+    extern_uses
     uses
     glob_uses
     aliases

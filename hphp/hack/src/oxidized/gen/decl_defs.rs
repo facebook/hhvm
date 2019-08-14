@@ -3,10 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4ea77f12c34cc53c46b36845e24b9d28>>
+// @generated SignedSource<<602b3d5cabcf4d2ccf69720d2da1809f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
+
+use ocamlrep_derive::IntoOcamlRep;
 
 use crate::ast_defs;
 use crate::errors;
@@ -18,14 +20,14 @@ use crate::sequence;
 
 use crate::typing_defs::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct SubstContext {
     pub subst: s_map::SMap<Ty>,
     pub class_context: String,
     pub from_req_extends: bool,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum SourceType {
     Child,
     Parent,
@@ -36,7 +38,7 @@ pub enum SourceType {
     ReqExtends,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct MroElement {
     pub name: String,
     pub use_pos: pos::Pos,
@@ -56,7 +58,7 @@ pub struct MroElement {
 
 pub type Linearization = sequence::Sequence<MroElement>;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct DeclClassType {
     pub need_init: bool,
     pub members_fully_known: bool,
@@ -93,14 +95,14 @@ pub struct DeclClassType {
 
 pub type ConditionTypeName = Option<String>;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum MethodReactivity {
     MethodReactive(ConditionTypeName),
     MethodShallow(ConditionTypeName),
     MethodLocal(ConditionTypeName),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct Element {
     pub final_: bool,
     pub synthesized: bool,

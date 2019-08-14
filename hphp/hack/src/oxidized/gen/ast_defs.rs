@@ -3,10 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<89853e7709b71a0cf6f23772d5780ab9>>
+// @generated SignedSource<<464b2024159e9b97c95ed8e21946b49f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
+
+use ocamlrep_derive::IntoOcamlRep;
 
 use crate::pos;
 
@@ -14,26 +16,26 @@ pub use crate::shape_map;
 
 pub use pos::Pos;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct Id(pub Pos, pub String);
 
 pub type Pstring = (Pos, String);
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum ShapeFieldName {
     SFlitInt(Pstring),
     SFlitStr(Pstring),
     SFclassConst(Id, Pstring),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum Variance {
     Covariant,
     Contravariant,
     Invariant,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum ConstraintKind {
     ConstraintAs,
     ConstraintEq,
@@ -43,7 +45,7 @@ pub enum ConstraintKind {
 
 pub type Reified = bool;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum ClassKind {
     Cabstract,
     Cnormal,
@@ -53,18 +55,18 @@ pub enum ClassKind {
     Crecord,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum ParamKind {
     Pinout,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum OgNullFlavor {
     OGNullthrows,
     OGNullsafe,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum FunKind {
     FSync,
     FAsync,
@@ -73,7 +75,7 @@ pub enum FunKind {
     FCoroutine,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum Bop {
     Plus,
     Minus,
@@ -103,7 +105,7 @@ pub enum Bop {
     Eq(Option<Box<Bop>>),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum Uop {
     Utild,
     Unot,
@@ -117,7 +119,7 @@ pub enum Uop {
     Usilence,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub enum FunDeclKind {
     FDeclAsync,
     FDeclSync,

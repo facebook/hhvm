@@ -17,7 +17,8 @@ open State
 open Convert_longident
 open Convert_type
 
-let derived_traits = ["Clone"; "Debug"]
+let derived_traits =
+  [(None, "Clone"); (None, "Debug"); (Some "ocamlrep_derive", "IntoOcamlRep")]
 
 (* HACK: ignore phases since we are only considering decl tys *)
 let blacklisted_types =
@@ -93,10 +94,17 @@ let variant_constructor_declaration cd =
   sprintf "%s%s,\n" name args
 
 let type_declaration name td =
-  let derive_attr =
-    derived_traits |> String.concat ~sep:", " |> sprintf "#[derive(%s)]"
+  let attrs_and_vis () =
+    let derive_attr =
+      derived_traits
+      |> List.map ~f:(fun (m, trait) ->
+             Option.iter m ~f:(fun m -> add_extern_use (m ^ "::" ^ trait));
+             trait)
+      |> String.concat ~sep:", "
+      |> sprintf "#[derive(%s)]"
+    in
+    derive_attr ^ "\npub"
   in
-  let attrs_and_vis = derive_attr ^ "\npub" in
   let tparams =
     match (td.ptype_params, td.ptype_name.txt) with
     (* HACK: eliminate tparam from `type _ ty_` and phase-parameterized types *)
@@ -157,7 +165,7 @@ let type_declaration name td =
           | Ptyp_tuple tys -> tuple tys ~pub:true
           | _ -> sprintf "(pub %s)" @@ core_type ty
         in
-        sprintf "%s struct %s%s %s;" attrs_and_vis name tparams ty)
+        sprintf "%s struct %s%s %s;" (attrs_and_vis ()) name tparams ty)
   (* Variant types, including GADTs. *)
   | (Ptype_variant ctors, None) ->
     let ctors =
@@ -186,11 +194,11 @@ let type_declaration name td =
             | _ -> true)
     in
     let ctors = map_and_concat ctors variant_constructor_declaration in
-    sprintf "%s enum %s%s {\n%s}" attrs_and_vis name tparams ctors
+    sprintf "%s enum %s%s {\n%s}" (attrs_and_vis ()) name tparams ctors
   (* Record types. *)
   | (Ptype_record labels, None) ->
     let labels = record_declaration labels ~pub:true in
-    sprintf "%s struct %s%s %s" attrs_and_vis name tparams labels
+    sprintf "%s struct %s%s %s" (attrs_and_vis ()) name tparams labels
   (* `type foo`; an abstract type with no specified implementation. This doesn't
      mean much outside of an .mli, I don't think. *)
   | (Ptype_abstract, None) ->

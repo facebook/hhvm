@@ -9,6 +9,8 @@
 val with_output_context :
   module_name:string -> (unit -> unit) -> Oxidized_module.t
 
+val add_extern_use : string -> unit
+
 val add_mod_use : string -> unit
 
 val add_glob_use : string -> unit

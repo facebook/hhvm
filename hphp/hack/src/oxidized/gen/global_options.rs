@@ -3,16 +3,18 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<22bf612a351ebc3c5291756d2abe0bf9>>
+// @generated SignedSource<<241dba66f734d2defe7042bb4cd2be91>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
+
+use ocamlrep_derive::IntoOcamlRep;
 
 use crate::i_set;
 use crate::s_map;
 use crate::s_set;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct GlobalOptions {
     pub tco_safe_array: bool,
     pub tco_safe_vector_array: bool,
@@ -25,6 +27,7 @@ pub struct GlobalOptions {
     pub tco_remote_worker_key: Option<String>,
     pub tco_remote_check_id: Option<String>,
     pub tco_num_remote_workers: isize,
+    pub so_remote_version_specifier: Option<String>,
     pub so_remote_worker_eden_checkout_threshold: isize,
     pub so_naming_sqlite_path: Option<String>,
     pub tco_disallow_array_as_tuple: bool,
@@ -45,7 +48,6 @@ pub struct GlobalOptions {
     pub tco_disallow_implicit_returns_in_non_void_functions: bool,
     pub tco_disallow_unset_on_varray: bool,
     pub tco_disallow_scrutinee_case_value_type_mismatch: bool,
-    pub tco_disallow_stringish_magic: bool,
     pub tco_new_inference_lambda: bool,
     pub tco_timeout: isize,
     pub tco_disallow_invalid_arraykey: bool,
@@ -73,7 +75,6 @@ pub struct GlobalOptions {
     pub po_disable_legacy_soft_typehints: bool,
     pub tco_use_lru_workers: bool,
     pub use_new_type_errors: bool,
-    pub po_disable_outside_dollar_str_interp: bool,
     pub disable_linter_fixmes: bool,
     pub po_disallowed_decl_fixmes: i_set::ISet,
     pub po_allow_new_attribute_syntax: bool,

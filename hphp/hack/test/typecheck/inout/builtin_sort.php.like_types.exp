@@ -10,13 +10,13 @@ File "builtin_sort.php", line 4, characters 17-17:
 But got dynamic
 File "builtin_sort.php", line 19, characters 20-21:
 Invalid argument (Typing[4110])
-File "container_functions.hhi", line 38, characters 17-17:
+File "container_functions.hhi", line 53, characters 17-17:
 Some type constraint(s) are violated here
-File "container_functions.hhi", line 38, characters 17-17:
+File "container_functions.hhi", line 53, characters 17-17:
 T is a constrained type parameter
 File "builtin_sort.php", line 4, characters 20-33:
 Expected Traversable<[unresolved]>
-File "container_functions.hhi", line 38, characters 17-17:
+File "container_functions.hhi", line 53, characters 17-17:
 But got dynamic
 File "builtin_sort.php", line 20, characters 16-29:
 Invalid argument (Typing[4110])
@@ -30,11 +30,11 @@ File "builtin_sort.php", line 8, characters 21-22:
 But got dynamic
 File "builtin_sort.php", line 20, characters 27-28:
 Invalid argument (Typing[4110])
-File "container_functions.hhi", line 38, characters 17-17:
+File "container_functions.hhi", line 53, characters 17-17:
 Some type constraint(s) are violated here
-File "container_functions.hhi", line 38, characters 17-17:
+File "container_functions.hhi", line 53, characters 17-17:
 T is a constrained type parameter
 File "builtin_sort.php", line 8, characters 29-52:
 Expected KeyedTraversable<[unresolved], [unresolved]>
-File "container_functions.hhi", line 38, characters 17-17:
+File "container_functions.hhi", line 53, characters 17-17:
 But got dynamic

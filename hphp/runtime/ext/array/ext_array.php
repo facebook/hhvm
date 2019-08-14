@@ -1165,8 +1165,11 @@ function array_intersect_ukey(
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
-function sort(mixed &$array, int $sort_flags = 0): bool;
+<<__Native, __Rx, __AtMostRxAsArgs>>
+function sort(
+  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed &$array,
+  int $sort_flags = 0,
+): bool;
 
 /**
  * This function sorts an array in reverse order (highest to lowest).
@@ -1178,8 +1181,11 @@ function sort(mixed &$array, int $sort_flags = 0): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
-function rsort(mixed &$array, int $sort_flags = 0): bool;
+<<__Native, __Rx, __AtMostRxAsArgs>>
+function rsort(
+  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed &$array,
+  int $sort_flags = 0,
+): bool;
 
 /**
  * This function sorts an array such that array indices maintain their
@@ -1194,8 +1200,11 @@ function rsort(mixed &$array, int $sort_flags = 0): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
-function asort(mixed &$array, int $sort_flags = 0): bool;
+<<__Native, __Rx, __AtMostRxAsArgs>>
+function asort(
+  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> mixed &$array,
+  int $sort_flags = 0,
+): bool;
 
 /**
  * This function sorts an array such that array indices maintain their
@@ -1210,8 +1219,11 @@ function asort(mixed &$array, int $sort_flags = 0): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
-function arsort(mixed &$array, int $sort_flags = 0): bool;
+<<__Native, __Rx, __AtMostRxAsArgs>>
+function arsort(
+  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> mixed &$array,
+  int $sort_flags = 0,
+): bool;
 
 /**
  * Sorts an array by key, maintaining key to data correlations. This is useful
@@ -1224,8 +1236,11 @@ function arsort(mixed &$array, int $sort_flags = 0): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
-function ksort(mixed &$array, int $sort_flags = 0): bool;
+<<__Native, __Rx, __AtMostRxAsArgs>>
+function ksort(
+  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> mixed &$array,
+  int $sort_flags = 0,
+): bool;
 
 /**
  * Sorts an array by key in reverse order, maintaining key to data
@@ -1238,8 +1253,11 @@ function ksort(mixed &$array, int $sort_flags = 0): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
-function krsort(mixed &$array, int $sort_flags = 0): bool;
+<<__Native, __Rx, __AtMostRxAsArgs>>
+function krsort(
+  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> mixed &$array,
+  int $sort_flags = 0,
+): bool;
 
 /**
  * This function will sort an array by its values using a user-supplied

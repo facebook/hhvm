@@ -52,6 +52,9 @@ let with_disable_legacy_attribute_syntax po b =
   { po with GlobalOptions.po_disable_legacy_attribute_syntax = b }
 
 let disallow_silence = GlobalOptions.po_disallow_silence
+let const_static_props = GlobalOptions.tco_const_static_props
+let with_const_static_props po b =
+  { po with GlobalOptions.tco_const_static_props = b }
 
 let make
   ~auto_namespace_map
@@ -68,6 +71,7 @@ let make
   ~disable_legacy_attribute_syntax
   ~const_default_func_args
   ~disallow_silence
+  ~const_static_props
 = GlobalOptions.{
   default with
   po_auto_namespace_map = auto_namespace_map;
@@ -84,4 +88,5 @@ let make
   po_disable_legacy_attribute_syntax = disable_legacy_attribute_syntax;
   po_const_default_func_args = const_default_func_args;
   po_disallow_silence = disallow_silence;
+  tco_const_static_props = const_static_props;
 }

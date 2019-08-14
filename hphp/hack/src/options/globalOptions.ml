@@ -72,7 +72,7 @@ type t = {
   po_disallowed_decl_fixmes: ISet.t;
   po_allow_new_attribute_syntax : bool;
   tco_global_inference : bool;
-  tco_enable_const_static_props : bool;
+  tco_const_static_props : bool;
   po_disable_legacy_attribute_syntax : bool;
   tco_const_attribute : bool;
   po_const_default_func_args : bool;
@@ -224,7 +224,7 @@ let default = {
   po_disallowed_decl_fixmes = ISet.of_list [];
   po_allow_new_attribute_syntax = false;
   tco_global_inference = false;
-  tco_enable_const_static_props = false;
+  tco_const_static_props = false;
   po_disable_legacy_attribute_syntax = false;
   tco_const_attribute = false;
   po_const_default_func_args = false;
@@ -295,7 +295,7 @@ let make
   ?(po_disallowed_decl_fixmes = default.po_disallowed_decl_fixmes)
   ?(po_allow_new_attribute_syntax = default.po_allow_new_attribute_syntax)
   ?(tco_global_inference = default.tco_global_inference)
-  ?(tco_enable_const_static_props = default.tco_enable_const_static_props)
+  ?(tco_const_static_props = default.tco_const_static_props)
   ?(po_disable_legacy_attribute_syntax = default.po_disable_legacy_attribute_syntax)
   ?(tco_const_attribute = default.tco_const_attribute)
   ?(po_const_default_func_args = default.po_const_default_func_args)
@@ -366,7 +366,7 @@ let make
   po_disallowed_decl_fixmes;
   po_allow_new_attribute_syntax;
   tco_global_inference;
-  tco_enable_const_static_props;
+  tco_const_static_props;
   po_disable_legacy_attribute_syntax;
   tco_const_attribute;
   po_const_default_func_args;
@@ -465,7 +465,7 @@ let po_allow_new_attribute_syntax t = t.po_allow_new_attribute_syntax
 
 let tco_global_inference t = t.tco_global_inference
 
-let tco_enable_const_static_props t = t.tco_enable_const_static_props
+let tco_const_static_props t = t.tco_const_static_props
 
 let po_disable_legacy_attribute_syntax t = t.po_disable_legacy_attribute_syntax
 

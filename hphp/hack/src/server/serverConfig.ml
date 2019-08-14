@@ -330,7 +330,7 @@ let load config_filename options =
     ?po_const_default_func_args:(bool_opt "const_default_func_args" config)
     ?po_disallow_silence:(bool_opt "disallow_silence" config)
     ?tco_global_inference:(bool_opt "global_inference" config)
-    ?tco_enable_const_static_props:(bool_opt "enable_const_static_props" config)
+    ?tco_const_static_props:(bool_opt "const_static_props" config)
     ()
   in
   Errors.ignored_fixme_codes :=

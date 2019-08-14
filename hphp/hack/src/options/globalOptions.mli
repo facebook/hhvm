@@ -291,7 +291,7 @@ type t = {
   tco_global_inference : bool;
 
   (* Enable const static properties *)
-  tco_enable_const_static_props : bool;
+  tco_const_static_props : bool;
 
   (* Disable <<...>> attribute syntax *)
   po_disable_legacy_attribute_syntax : bool;
@@ -370,7 +370,7 @@ val make :
   ?po_disallowed_decl_fixmes: ISet.t ->
   ?po_allow_new_attribute_syntax : bool ->
   ?tco_global_inference : bool ->
-  ?tco_enable_const_static_props : bool ->
+  ?tco_const_static_props : bool ->
   ?po_disable_legacy_attribute_syntax : bool ->
   ?tco_const_attribute : bool ->
   ?po_const_default_func_args : bool ->
@@ -457,7 +457,7 @@ val disable_linter_fixmes : t -> bool
 val po_disallowed_decl_fixmes : t -> ISet.t
 val po_allow_new_attribute_syntax : t -> bool
 val tco_global_inference : t -> bool
-val tco_enable_const_static_props : t -> bool
+val tco_const_static_props : t -> bool
 val po_disable_legacy_attribute_syntax : t -> bool
 val tco_const_attribute : t -> bool
 val po_const_default_func_args : t -> bool

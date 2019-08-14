@@ -72,6 +72,7 @@ module FullFidelityParseArgs = struct
     allow_new_attribute_syntax : bool;
     disable_legacy_attribute_syntax : bool;
     const_default_func_args : bool;
+    const_static_props : bool;
   }
 
   let make
@@ -107,6 +108,7 @@ module FullFidelityParseArgs = struct
     allow_new_attribute_syntax
     disable_legacy_attribute_syntax
     const_default_func_args
+    const_static_props
     = {
     full_fidelity_json;
     full_fidelity_dot;
@@ -140,6 +142,7 @@ module FullFidelityParseArgs = struct
     allow_new_attribute_syntax;
     disable_legacy_attribute_syntax;
     const_default_func_args;
+    const_static_props;
   }
 
   let parse_args () =
@@ -191,6 +194,7 @@ module FullFidelityParseArgs = struct
     let allow_new_attribute_syntax = ref false in
     let disable_legacy_attribute_syntax = ref false in
     let const_default_func_args = ref false in
+    let const_static_props = ref false in
     let options =  [
       (* modes *)
       "--full-fidelity-json",
@@ -318,6 +322,9 @@ No errors are filtered out.";
       "--const-default-func-args",
         Arg.Set const_default_func_args,
         "Statically check default function arguments are constant initializers";
+      "--const-static-props",
+        Arg.Set const_static_props,
+        "Enable static properties to be const";
       ] in
     Arg.parse options push_file usage;
     let modes = [
@@ -366,6 +373,7 @@ No errors are filtered out.";
       !allow_new_attribute_syntax
       !disable_legacy_attribute_syntax
       !const_default_func_args
+      !const_static_props
 end
 
 open FullFidelityParseArgs
@@ -395,6 +403,8 @@ let handle_existing_file args filename =
     args.disable_legacy_attribute_syntax in
   let popt = ParserOptions.with_const_default_func_args popt
     args.const_default_func_args in
+  let popt = ParserOptions.with_const_static_props popt
+    args.const_static_props in
 
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in

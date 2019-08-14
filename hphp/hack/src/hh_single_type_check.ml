@@ -205,7 +205,7 @@ let parse_options () =
   let allow_new_attribute_syntax = ref false in
   let allow_toplevel_requires = ref false in
   let global_inference = ref false in
-  let enable_const_static_props = ref false in
+  let const_static_props = ref false in
   let disable_legacy_attribute_syntax = ref false in
   let const_attribute = ref false in
   let disallow_goto = ref false in
@@ -460,9 +460,9 @@ let parse_options () =
     "--global-inference",
       Arg.Set global_inference,
       "Use inference results as the types of unannotated parameters / functions in the tast";
-    "--enable-const-static-props",
-      Arg.Set enable_const_static_props,
-      "Enable const props to be static";
+    "--const-static-props",
+      Arg.Set const_static_props,
+      "Enable static properties to be const";
     "--disable-legacy-attribute-syntax",
       Arg.Set disable_legacy_attribute_syntax,
       "Disable the legacy <<...>> user attribute syntax";
@@ -523,7 +523,7 @@ let parse_options () =
     ~po_allow_new_attribute_syntax:!allow_new_attribute_syntax
     ~po_disallow_toplevel_requires:(not !allow_toplevel_requires)
     ~tco_global_inference:!global_inference
-    ~tco_enable_const_static_props:!enable_const_static_props
+    ~tco_const_static_props:!const_static_props
     ~po_disable_legacy_attribute_syntax:!disable_legacy_attribute_syntax
     ~tco_const_attribute:!const_attribute
     ~po_allow_goto:(not !disallow_goto)

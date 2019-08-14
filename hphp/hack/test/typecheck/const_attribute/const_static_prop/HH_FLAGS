@@ -1,2 +1,2 @@
---enable-const-static-props
+--const-static-props
 --const-attribute

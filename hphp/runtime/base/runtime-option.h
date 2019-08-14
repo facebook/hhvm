@@ -87,6 +87,7 @@ struct RepoOptions {
   H(bool,           HackCompilerUseRustParser,      facebook)         \
   H(bool,           AllowNewAttributeSyntax,        false)            \
   H(bool,           ConstDefaultFuncArgs,           false)            \
+  H(bool,           ConstStaticProps,               false)            \
   E(bool,           CreateInOutWrapperFunctions,    true)             \
   E(std::string,    HHJSAdditionalTransform,        "")               \
   E(bool,           HHJSNoBabel,                    false)            \

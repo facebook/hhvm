@@ -2227,13 +2227,17 @@ To string conversions:
 | RaiseHackArrParamNotice<type,id,isReturn>, ND, S(Arr) S(Func), NF
 
   Raise a HackArrCompatNotice corresponding to a parameter or return type-hint
-  d/varray mismatch. S0 is the array being passed in. S1 is the function being
+  d/varray check.  S0 is the array being passed in.  S1 is the function being
   called.
+
+  This instruction performs the appropriate check based on `type', and logs
+  either on the failure branch or on both branches depending on the value of
+  RuntimeOption::EvalHackArrCompatTypeHintPolymorphism.
 
 | RaiseHackArrPropNotice<type>, ND, S(Cls) S(Arr) S(Int) C(Bool), NF
 
   Raise a HackArrCompatNotice corresponding to a property type-hint d/varray
-  mismatch.
+  mismatch.  Behaves like RaiseHackArrParamNotice.
 
 | RaiseArraySerializeNotice, ND, CStr S(Vec|Dict), NF
 

@@ -315,18 +315,19 @@ void coerceFCallArgs(TypedValue* args,
     // Check if we have the right type, or if its a Variant.
     if (!targetType || equivDataTypes(args[-i].m_type, *targetType)) {
       auto const c = &args[-i];
+
+      if (LIKELY(!RuntimeOption::EvalHackArrCompatTypeHintNotices) ||
+          !tc.isArray() ||
+          !isArrayOrShapeType(c->m_type)) continue;
+
       auto const raise = [&] {
-        if (LIKELY(!RuntimeOption::EvalHackArrCompatTypeHintNotices)) {
-          return false;
-        }
-        if (!tc.isArray()) return false;
-        if (!isArrayOrShapeType(c->m_type)) return false;
         if (tc.isVArray()) {
           return !c->m_data.parr->isVArray();
         } else if (tc.isDArray()) {
           return !c->m_data.parr->isDArray();
         } else if (tc.isVArrayOrDArray()) {
-          return c->m_data.parr->isNotDVArray();
+          return c->m_data.parr->isNotDVArray() ||
+                 RuntimeOption::EvalHackArrCompatTypeHintPolymorphism;
         } else {
           return !c->m_data.parr->isNotDVArray();
         }

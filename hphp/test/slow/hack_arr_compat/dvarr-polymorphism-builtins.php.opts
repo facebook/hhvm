@@ -1,0 +1,3 @@
+-vEval.HackArrCompatTypeHintNotices=1
+-vEval.HackArrCompatTypeHintPolymorphism=1
+-vEval.JitPGOThreshold=2000

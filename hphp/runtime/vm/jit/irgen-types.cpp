@@ -175,7 +175,7 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
  * - FuncToStr: Emit code to deal with any func to string conversions.
  * - ClsMethToVec: Emit code to deal with any ClsMeth to array conversions
  * - Fail:      Emit code to deal with the type check failing.
- * - HackArr:   Emit code to deal with a d/varray mismatch.
+ * - DVArr:     Emit code to deal with a dvarray mismatch.
  * - Callable:  Emit code to verify that the given value is callable.
  * - VerifyCls: Emit code to verify that the given value is an instance of the
  *              given Class.
@@ -193,7 +193,7 @@ template <typename GetVal,
           typename ClassToStr,
           typename ClsMethToVec,
           typename Fail,
-          typename HackArr,
+          typename DVArr,
           typename Callable,
           typename VerifyCls,
           typename VerifyRecordDesc,
@@ -208,7 +208,7 @@ void verifyTypeImpl(IRGS& env,
                     ClassToStr classToStr,
                     ClsMethToVec clsMethToVec,
                     Fail fail,
-                    HackArr hackArr,
+                    DVArr dvArr,
                     Callable callable,
                     VerifyCls verifyCls,
                     VerifyRecordDesc verifyRecDesc,
@@ -260,11 +260,6 @@ void verifyTypeImpl(IRGS& env,
     return fail(valType, failHard);
   };
 
-  auto const genDVArrFail = [&]{
-    hint(env, Block::Hint::Unlikely);
-    hackArr(val);
-  };
-
   auto const result =
     annotCompat(valType.toDataType(), tc.type(), tc.typeName());
   switch (result) {
@@ -275,41 +270,11 @@ void verifyTypeImpl(IRGS& env,
     case AnnotAction::ObjectCheck:
       break;
     case AnnotAction::VArrayCheck:
-      assertx(valType <= TArr);
-      ifThen(
-        env,
-        [&] (Block* taken) { gen(env, CheckVArray, taken, val); },
-        genDVArrFail
-      );
-      return;
     case AnnotAction::DArrayCheck:
-      assertx(valType <= TArr);
-      ifThen(
-        env,
-        [&] (Block* taken) { gen(env, CheckDArray, taken, val); },
-        genDVArrFail
-      );
-      return;
     case AnnotAction::VArrayOrDArrayCheck:
-      assertx(valType <= TArr);
-      ifThen(
-        env,
-        [&] (Block* taken) {
-          gen(env, JmpZero, taken, gen(env, IsDVArray, val));
-        },
-        genDVArrFail
-      );
-      return;
     case AnnotAction::NonVArrayOrDArrayCheck:
       assertx(valType <= TArr);
-      ifThen(
-        env,
-        [&] (Block* taken) {
-          gen(env, JmpNZero, taken, gen(env, IsDVArray, val));
-        },
-        genDVArrFail
-      );
-      return;
+      return dvArr(val);
     case AnnotAction::WarnFunc:
       assertx(valType <= TFunc);
       if (!funcToStr(val)) return genFail();
@@ -1505,7 +1470,7 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
         ldStkAddr(env, BCSPRelOffset { ind })
       );
     },
-    [&] (SSATmp* val) { // d/varray mismatch notice
+    [&] (SSATmp* val) { // dvarray mismatch notice
       gen(
         env,
         RaiseHackArrParamNotice,
@@ -1595,7 +1560,7 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
         cns(env, id)
       );
     },
-    [&] (SSATmp* val) { // d/varray mismatch
+    [&] (SSATmp* val) { // dvarray mismatch
       gen(
         env,
         RaiseHackArrParamNotice,
@@ -1684,7 +1649,7 @@ void verifyPropType(IRGS& env,
         cns(env, isSProp)
       );
     },
-    [&] (SSATmp* val) { // d/varray mismatch
+    [&] (SSATmp* val) { // dvarray mismatch
       gen(
         env,
         RaiseHackArrPropNotice,

@@ -513,7 +513,10 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
         return Assert || val.val().parr->isDArray();
       case AnnotAction::VArrayOrDArrayCheck:
         assertx(tvIsArrayOrShape(val));
-        return Assert || !val.val().parr->isNotDVArray();
+        return (Assert || (
+          !RuntimeOption::EvalHackArrCompatTypeHintPolymorphism &&
+          !val.val().parr->isNotDVArray()
+        ));
       case AnnotAction::NonVArrayOrDArrayCheck:
         assertx(tvIsArrayOrShape(val));
         return Assert || val.val().parr->isNotDVArray();
@@ -766,7 +769,10 @@ bool TypeConstraint::checkImpl(tv_rval val,
       return isAssert || val.val().parr->isDArray();
     case AnnotAction::VArrayOrDArrayCheck:
       assertx(tvIsArrayOrShape(val));
-      return isAssert || !val.val().parr->isNotDVArray();
+      return (isAssert || (
+        !RuntimeOption::EvalHackArrCompatTypeHintPolymorphism &&
+        !val.val().parr->isNotDVArray()
+      ));
     case AnnotAction::NonVArrayOrDArrayCheck:
       assertx(tvIsArrayOrShape(val));
       return isAssert || val.val().parr->isNotDVArray();
@@ -1023,7 +1029,8 @@ folly::Optional<AnnotType> TypeConstraint::checkDVArray(tv_rval val) const {
         assertx(!val.val().parr->isDArray());
         break;
       case AnnotType::VArrOrDArr:
-        assertx(val.val().parr->isNotDVArray());
+        assertx(RuntimeOption::EvalHackArrCompatTypeHintPolymorphism ||
+                val.val().parr->isNotDVArray());
         break;
       default:
         return folly::none;
@@ -1049,7 +1056,8 @@ void TypeConstraint::verifyParamFail(const Func* func, TypedValue* tv,
     isSoft() ||
     (isThis() && couldSeeMockObject()) ||
     (RuntimeOption::EvalHackArrCompatTypeHintNotices &&
-     isArrayType(tvToCell(tv)->m_type)) ||
+     (RuntimeOption::EvalHackArrCompatTypeHintPolymorphism ||
+      isArrayType(tvToCell(tv)->m_type))) ||
     check(tv, func->cls())
   );
 }

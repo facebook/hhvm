@@ -23,10 +23,9 @@
     full_fidelity))
 
 (library
-  (name rust_facts_ffi_stubs)
+  (name rust_ffi_stubs)
   (wrapped false)
-  (modules
-    rust_facts_ffi))
+  (modules ))
 
 (library
   (name hackc_parse_delegator_stubs)
@@ -95,13 +94,6 @@
   (libraries
     hg
     server_monitor))
-
-(library
-  (name rust_parser_ffi_stubs)
-  (wrapped false)
-  (modules
-    rust_parser_ffi
-    rust_lazy_trivia_ffi))
 
 (library
   (name shared_lru_stubs)

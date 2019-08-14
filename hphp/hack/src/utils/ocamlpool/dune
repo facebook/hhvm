@@ -1,0 +1,5 @@
+(library
+  (name ocamlpool)
+  (wrapped false)
+  (modules )
+  (c_names ocamlpool))

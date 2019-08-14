@@ -37,6 +37,8 @@ const (int, ?(string, float)) OPTION = tuple(7, null);
 const array<string, int> ARR = array('a' => 1, 'b' => 2);
 const darray<string, int> AGE_RANGE = darray['min' => 21];
 const varray<string> MAP_INDEX = varray['MAP_1', 'MAP_2'];
+const classname<WithConst> CLASSNAME = WithConst::class;
+const keyset<string> KEYSET = keyset['a', 'b'];
 
 function with_constants(): void {
   $a = WithConst::CFLOAT;
@@ -46,6 +48,8 @@ function with_constants(): void {
   $e = ARR;
   $f = AGE_RANGE;
   $g = MAP_INDEX;
+  $h = CLASSNAME;
+  $i = KEYSET;
 }
 
 function with_type_constants(WithAbstractConst::NESTED::WITH_THIS $arg)

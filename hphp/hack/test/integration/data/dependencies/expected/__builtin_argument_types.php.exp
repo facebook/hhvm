@@ -1,0 +1,7 @@
+<?hh
+function builtin_argument_types(Exception $e, keyset<string> $k): void {}
+function extract_standalone_make_default<T>(): T {
+  throw new Exception();
+}
+
+

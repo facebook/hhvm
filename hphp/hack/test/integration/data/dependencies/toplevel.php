@@ -49,3 +49,5 @@ function call_defaulted(int $arg): void {
 }
 
 function nonexistent_dependency(BogusType $arg): void {}
+
+function builtin_argument_types(Exception $e, keyset<string> $k): void {}

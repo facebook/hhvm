@@ -460,9 +460,27 @@ let construct_type_declaration tcopt t ?full_method:(full_method=None) fields =
   | Some cls -> construct_class_declaration tcopt cls ~full_method fields
   | None -> construct_typedef_declaration tcopt t
 
+let is_builtin_dep dep =
+  let is_in_hhi pos =
+    String_utils.string_ends_with (Relative_path.suffix (Pos.filename pos)) ".hhi" in
+  if is_class_dependency dep then
+    let cls_name = get_class_name dep in
+    match Decl_provider.get_class cls_name with
+    | Some cls -> is_in_hhi (Decl_provider.Class.pos cls)
+    | None -> let td = value_or_not_found cls_name @@ Decl_provider.get_typedef cls_name in
+      is_in_hhi td.td_pos
+  else
+    let open Typing_deps.Dep in
+    match dep with
+    | Fun f | FunName f -> let func = value_or_not_found f @@ Decl_provider.get_fun f in
+      is_in_hhi func.ft_pos
+    | GConst c | GConstName c -> Naming_special_names.PseudoConsts.is_pseudo_const c
+    | _ -> raise UnexpectedDependency
+
 let rec add_dep deps ?cls:(this_cls=None) ty : unit =
   let add_ dep =
-    HashSet.add deps dep in
+    if not (is_builtin_dep dep) then
+      HashSet.add deps dep in
   let visitor = object(this)
     inherit [unit] Type_visitor.type_visitor
       method! on_tapply _ _ (_, name) tyl =
@@ -494,6 +512,7 @@ let rec add_dep deps ?cls:(this_cls=None) ty : unit =
               add_dep ~cls:tc_this deps (Typing_reason.Rnone, taccess)
     end in
   visitor#on_type () ty
+
 
 let get_signature_dependencies obj deps =
   let open Typing_deps.Dep in
@@ -581,8 +600,11 @@ let collect_dependencies tcopt to_extract =
   let open Typing_deps.Dep in
   let add_dependency root obj =
     if is_relevant_dependency to_extract root then
-      (HashSet.add dependencies obj;
-      get_signature_dependencies obj dependencies) in
+      (* We don't necessarily add this to dependencies as it might be a builtin,
+         but it might contain nested dependencies -- e.g. Vector<UserType> *)
+      (get_signature_dependencies obj dependencies;
+      if not (is_builtin_dep obj) then
+        HashSet.add dependencies obj) in
   Typing_deps.add_dependency_callback "add_dependency" add_dependency;
   let filename = get_filename to_extract in
   let _ : Tast.def option = match to_extract with
@@ -645,7 +667,6 @@ let subnamespace index name =
   let nspaces = String.split ~on:'\\' nspaces in
   List.nth nspaces index
 
-(* TODO: to be continued? *)
 let is_builtin name = String.is_prefix ~prefix:"\\HH" name
 
 (* Build the recursive hack_namespace data structure for given declarations *)

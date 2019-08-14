@@ -66,7 +66,6 @@ bool arrayWantsTag(const ArrayData* ad) {
 
 void setTag(ArrayData* ad, const Tag& tag) {
   if (!arrayWantsTag(ad)) return;
-  assertx(ad->hasExactlyOneRef() || !ad->empty());
   assertx(!getTag(ad));
   ad->markHasProvenanceData();
   if (ad->isRefCounted()) {

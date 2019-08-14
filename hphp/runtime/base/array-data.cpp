@@ -187,13 +187,17 @@ void ArrayData::GetScalarArray(ArrayData** parr) {
     s_cachedHash.first = nullptr;
   };
 
-  if (arr->empty()) {
-    if (arr->isVecArray()) return replace(staticEmptyVecArray());
-    if (arr->isDict())     return replace(staticEmptyDictArray());
+  auto const provenanceEnabled =
+    RuntimeOption::EvalArrayProvenance &&
+    arr->hasProvenanceData();
+
+  if (arr->empty() && LIKELY(!provenanceEnabled)) {
     if (arr->isShape())    return replace(staticEmptyShapeArray());
     if (arr->isKeyset())   return replace(staticEmptyKeysetArray());
     if (arr->isVArray())   return replace(staticEmptyVArray());
     if (arr->isDArray())   return replace(staticEmptyDArray());
+    if (arr->isVecArray()) return replace(staticEmptyVecArray());
+    if (arr->isDict())     return replace(staticEmptyDictArray());
     return replace(staticEmptyArray());
   }
 

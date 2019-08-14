@@ -80,10 +80,15 @@ void setTag(ArrayData* ad, const Tag& tag) {
 folly::Optional<Tag> getTag(const ArrayData* ad) {
   if (!ad->hasProvenanceData()) return {};
   if (ad->isRefCounted()) {
-    return rl_array_provenance->tags[ad];
+    auto const iter = rl_array_provenance->tags.find(ad);
+    assertx(iter != rl_array_provenance->tags.cend());
+    assertx(iter->second.filename());
+    return iter->second;
   } else {
     std::lock_guard<std::mutex> g{s_static_provenance_lock};
-    return s_static_array_provenance.find(ad)->second;
+    auto const ret = s_static_array_provenance.find(ad)->second;
+    assertx(ret.filename());
+    return ret;
   }
 }
 

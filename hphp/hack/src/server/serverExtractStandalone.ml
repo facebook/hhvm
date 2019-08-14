@@ -133,8 +133,8 @@ let print_fun_args tcopt fun_type =
 
 let get_function_declaration tcopt fun_name fun_type =
   let tparams = match fun_type.ft_tparams with
-  | ([], _) -> ""
-  | (tparams, _) -> Printf.sprintf "<%s>" @@ list_items @@ List.map tparams tparam_name in
+    | ([], _) -> ""
+    | (tparams, _) -> Printf.sprintf "<%s>" @@ list_items @@ List.map tparams tparam_name in
   let args = print_fun_args tcopt fun_type in
   let rtype = Typing_print.full_decl tcopt fun_type.ft_ret.et_type in
   Printf.sprintf "function %s%s(%s): %s" (strip_ns fun_name) tparams args rtype
@@ -235,13 +235,16 @@ let get_method_declaration tcopt (meth: Typing_defs.class_elt)
   let visibility = Typing_utils.string_of_visibility meth.ce_visibility in
   let static = if is_static then "static " else "" in
   let method_type = match Lazy.force meth.ce_type with
-  | (_, Typing_defs.Tfun f) -> f
-  | _ -> raise UnexpectedDependency in
+    | (_, Typing_defs.Tfun f) -> f
+    | _ -> raise UnexpectedDependency in
+  let tparams = match method_type.ft_tparams with
+    | ([], _) -> ""
+    | (tparams, _) -> Printf.sprintf "<%s>" @@ list_items @@ List.map tparams tparam_name in
   let args = print_fun_args tcopt method_type in
   let rtype = match snd method_type.ft_ret.et_type with
   | Typing_defs.Tany -> ""
   | _ -> Printf.sprintf ": %s" (Typing_print.full_decl tcopt method_type.ft_ret.et_type) in
-  Printf.sprintf "%s%s %sfunction %s(%s)%s" abstract visibility static method_name args rtype
+  Printf.sprintf "%s%s %sfunction %s%s(%s)%s" abstract visibility static method_name tparams args rtype
 
 let get_property_declaration tcopt (prop: Typing_defs.class_elt) ~is_static name =
   let visibility = Typing_utils.string_of_visibility prop.ce_visibility in

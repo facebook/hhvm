@@ -105,6 +105,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
                     "\\WithAbstractConst::with_abstract_type_constants",
                     "\\WithConst::with_type_constants",
                     "\\with_generic_type",
+                    "\\with_generic_method",
                 ],
             )
         )

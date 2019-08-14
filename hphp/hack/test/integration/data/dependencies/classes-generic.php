@@ -26,6 +26,15 @@ class GenericDerived<Tfirst> extends GenericBase<Tfirst, Mode> {
   protected int $property;
 }
 
+class Regular {
+  public function generic_method<T>(T $arg): void {}
+}
+
+function with_generic_method(int $arg): void {
+  $r = new Regular();
+  $r->generic_method($arg);
+}
+
 function with_properties<T>(GenericDerived<T> $arg) : Mode {
   $x = new GenericDerived<int>(1, Mode::Two);
   return $arg->second;

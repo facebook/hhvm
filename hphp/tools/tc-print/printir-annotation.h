@@ -96,7 +96,6 @@ struct TransContext {
 
 struct Unit {
   const TransContext transContext;
-  const std::unordered_map<const jit::Opcode, uint32_t> opcodeStats;
   const std::unordered_map<BlockId, Block> blocks;
 };
 

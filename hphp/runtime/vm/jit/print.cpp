@@ -441,22 +441,6 @@ dynamic getBlock(const Block* block,
   return result;
 }
 
-dynamic getOpcodeStats(const BlockList& blocks) {
-  std::array<uint32_t, kNumOpcodes> counts;
-
-  for (auto const block : blocks) {
-    for (auto const& inst : *block) ++counts[static_cast<size_t>(inst.op())];
-  }
-
-  dynamic result = dynamic::object;
-  for (unsigned i = 0; i < kNumOpcodes; ++i) {
-    if (counts[i] == 0) continue;
-    auto const op = safe_cast<Opcode>(i);
-    result[opcodeName(op)] = counts[i];
-  }
-  return result;
-}
-
 dynamic getSrcKey(const SrcKey& sk) {
   return dynamic::object("func", sk.func()->name()->slice())
                         ("unit", sk.unit()->filepath()->slice())
@@ -492,8 +476,6 @@ dynamic getUnit(const IRUnit& unit,
   auto const frozen = std::stable_partition(cold, blocks.end(),
     [&] (Block* b) { return b->hint() == Block::Hint::Unlikely; }
   );
-
-  result["opcodeStats"] = getOpcodeStats(blocks);
 
   dynamic blockObjs = dynamic::array;
 

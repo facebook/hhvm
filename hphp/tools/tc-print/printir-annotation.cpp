@@ -253,9 +253,6 @@ convert(const dynamic& d) {
 
   auto const transContext = convertTo<printir::TransContext>(
     d.getDefault("translation", {}));
-  auto const opcodeStats =
-  convertTo<std::unordered_map<const jit::Opcode, uint32_t>>(
-    d.getDefault("opcodeStats", {}));
 
   std::unordered_map<unsigned int, printir::Block> blocks;
   for (auto const& block : d.getDefault("blocks", {})) {
@@ -269,7 +266,7 @@ convert(const dynamic& d) {
     }
   }
 
-  return printir::Unit{transContext, opcodeStats, blocks};
+  return printir::Unit{transContext, blocks};
 }
 
 template <typename T> dynamic DynamicConstructor<Optional<T>>::
@@ -359,7 +356,6 @@ construct(const printir::Unit &u) {
   }
 
   return dynamic::object("transContext", toDynamic(u.transContext))
-                        ("opcodeStats", toDynamic(u.opcodeStats))
                         ("blocks", blockMap);
 }
 

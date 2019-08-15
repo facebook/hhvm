@@ -1285,8 +1285,11 @@ function krsort(
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
-function usort(mixed &$array, mixed $cmp_function): bool;
+<<__Native, __Rx, __AtMostRxAsArgs>>
+function usort(
+  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed &$array,
+  <<__AtMostRxAsFunc>> mixed $cmp_function,
+): bool;
 
 /**
  * This function sorts an array such that array indices maintain their
@@ -1301,8 +1304,11 @@ function usort(mixed &$array, mixed $cmp_function): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
-function uasort(mixed &$array, mixed $cmp_function): bool;
+<<__Native, __Rx, __AtMostRxAsArgs>>
+function uasort(
+  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> mixed &$array,
+  <<__AtMostRxAsFunc>> mixed $cmp_function,
+): bool;
 
 /**
  * uksort() will sort the keys of an array using a user-supplied comparison
@@ -1319,8 +1325,11 @@ function uasort(mixed &$array, mixed $cmp_function): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
-function uksort(mixed &$array, mixed $cmp_function): bool;
+<<__Native, __Rx, __AtMostRxAsArgs>>
+function uksort(
+  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> mixed &$array,
+  <<__AtMostRxAsFunc>> mixed $cmp_function,
+): bool;
 
 /**
  * This function implements a sort algorithm that orders alphanumeric strings

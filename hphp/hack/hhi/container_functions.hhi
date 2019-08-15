@@ -54,20 +54,20 @@ function krsort<T as KeyedContainer<arraykey, mixed>>(
   <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> inout T $arg,
   int $sort_flags = SORT_REGULAR,
 ): bool;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx, __AtMostRxAsArgs>>
 function usort<Tv, T as Container<Tv>>(
-  inout T $arg,
-  (function(Tv, Tv): int) $c,
+  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> inout T $arg,
+  <<__AtMostRxAsFunc>> (function(Tv, Tv): int) $c,
 ): bool;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx, __AtMostRxAsArgs>>
 function uasort<Tv, T as KeyedContainer<arraykey, Tv>>(
-  inout T $arg,
-  (function(Tv, Tv): int) $c,
+  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> inout T $arg,
+  <<__AtMostRxAsFunc>> (function(Tv, Tv): int) $c,
 ): bool;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx, __AtMostRxAsArgs>>
 function uksort<Tk as arraykey, T as KeyedContainer<Tk, mixed>>(
-  inout T $arg,
-  (function(Tk, Tk): int) $c,
+  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> inout T $arg,
+  <<__AtMostRxAsFunc>> (function(Tk, Tk): int) $c,
 ): bool;
 
 }

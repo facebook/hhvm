@@ -393,7 +393,7 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
   if (dest.reg0.isValid()) dest.reg0 = tmpData;
   if (dest.reg1.isValid()) dest.reg1 = tmpType;
 
-  auto const isInlined = env.unit.context().func != callee;
+  auto const isInlined = env.unit.context().initSrcKey.func() != callee;
   if (isInlined) v << inlinestart{callee, 0};
 
   // Call epilogue: handle array provenance and inlining accounting.

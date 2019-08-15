@@ -406,7 +406,7 @@ void conjureBeginInlining(IRGS& env,
     return t.admitsSingleVal() ? cns(env, t) : gen(env, Conjure, t);
   };
 
-  always_assert(isFCall(env.context.srcKey().op()));
+  always_assert(isFCall(env.context.initSrcKey.op()));
   always_assert(thisType != TBottom);
   auto const numParams = static_cast<uint32_t>(args.size());
 
@@ -430,7 +430,7 @@ void conjureBeginInlining(IRGS& env,
     ctx->type(),
     false,
     cns(env, TNullptr),
-    env.context.srcKey().op(),
+    env.context.initSrcKey.op(),
     startSk,
     0 /* callBcOffset */,
     returnTarget,

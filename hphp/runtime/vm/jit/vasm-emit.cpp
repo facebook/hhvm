@@ -195,11 +195,12 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
   assertx(code.isLocal() || cold_in.frontier() == cold_start);
   assertx(code.isLocal() || main_in.frontier() == main_start);
 
-  assertx(!isPrologue(unit.context().kind) ||
-          funcGuardMatches(
-            funcGuardFromPrologue(unit.prologueStart, unit.context().func),
-            unit.context().func
-          ));
+  assertx(
+    !isPrologue(unit.context().kind) ||
+    funcGuardMatches(
+      funcGuardFromPrologue(
+        unit.prologueStart, unit.context().initSrcKey.func()),
+      unit.context().initSrcKey.func()));
 
   if (do_relocate) {
     tc::relocateTranslation(&unit,

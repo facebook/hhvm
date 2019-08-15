@@ -31,20 +31,8 @@ inline TransContext::TransContext(
   , kind(kind)
   , flags(flags)
   , initSpOffset(spOff)
-  , func(sk.valid() ? sk.func() : nullptr)
-  , initBcOffset(sk.offset())
-  , hasThis(sk.hasThis())
-  , prologue(sk.prologue())
-  , resumeMode(sk.resumeMode())
+  , initSrcKey(sk)
 {}
-
-inline SrcKey TransContext::srcKey() const {
-  if (prologue) {
-    assertx(resumeMode == ResumeMode::None);
-    return SrcKey { func, initBcOffset, SrcKey::PrologueTag{} };
-  }
-  return SrcKey { func, initBcOffset, resumeMode, hasThis };
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Control flow information.

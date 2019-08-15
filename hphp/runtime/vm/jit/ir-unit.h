@@ -156,9 +156,8 @@ struct IRUnit {
   // TODO(#3538578): The above should return `const Block*'.
 
   /*
-   * Starting positions, from the TransContext.
+   * Starting position, from the TransContext.
    */
-  uint32_t bcOff() const;
   SrcKey initSrcKey() const;
 
   /*

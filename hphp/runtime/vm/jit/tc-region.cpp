@@ -82,7 +82,7 @@ bool mcGenUnit(TransEnv& env, CodeCache::View codeView, CGMeta& fixups) {
     }
   }
 
-  auto const startSk = unit.context().srcKey();
+  auto const startSk = unit.context().initSrcKey;
   if (unit.context().kind == TransKind::Profile) {
     profData()->setProfiling(startSk.func()->getFuncId());
   }

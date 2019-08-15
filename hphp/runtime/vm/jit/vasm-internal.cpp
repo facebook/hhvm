@@ -358,7 +358,7 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
  * replaced by jmp instructions.
  */
 void computeFrames(Vunit& unit) {
-  auto const topFunc = unit.context ? unit.context->func : nullptr;
+  auto const topFunc = unit.context ? unit.context->initSrcKey.func() : nullptr;
 
   auto const rpo = sortBlocks(unit);
 

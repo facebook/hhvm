@@ -333,7 +333,7 @@ void init_locals(IRGS& env, const Func* func) {
  * Emit raise-warnings for any missing or too many arguments.
  */
 void warn_argument_arity(IRGS& env, uint32_t argc) {
-  auto const func = env.context.func;
+  auto const func = curFunc(env);
   auto const nparams = func->numNonVariadicParams();
 
   if (!func->isCPPBuiltin()) {
@@ -401,7 +401,7 @@ StackCheck stack_check_kind(const Func* func, uint32_t argc) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void emitPrologueEntry(IRGS& env, uint32_t argc) {
-  auto const func = env.context.func;
+  auto const func = curFunc(env);
 
   // Emit debug code.
   if (Trace::moduleEnabled(Trace::ringbuffer) && !func->isMagicCallMethod()) {
@@ -419,7 +419,7 @@ void emitPrologueEntry(IRGS& env, uint32_t argc) {
 }
 
 void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
-  auto const func = env.context.func;
+  auto const func = curFunc(env);
 
   // Increment profiling counter.
   if (isProfiling(env.context.kind)) {
@@ -469,10 +469,9 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void emitMagicFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
-  DEBUG_ONLY auto const func = env.context.func;
-  assertx(func->isMagicCallMethod());
-  assertx(func->numParams() == 2);
-  assertx(!func->hasVariadicCaptureParam());
+  assertx(curFunc(env)->isMagicCallMethod());
+  assertx(curFunc(env)->numParams() == 2);
+  assertx(!curFunc(env)->hasVariadicCaptureParam());
 
   Block* two_arg_prologue = nullptr;
 
@@ -545,7 +544,7 @@ void emitPrologueLocals(IRGS& env, uint32_t argc,
 }
 
 void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
-  if (env.context.func->isMagicCallMethod()) {
+  if (curFunc(env)->isMagicCallMethod()) {
     return emitMagicFuncPrologue(env, argc, transID);
   }
   emitPrologueEntry(env, argc);
@@ -553,7 +552,7 @@ void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
 }
 
 void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs) {
-  auto const func = env.context.func;
+  auto const func = curFunc(env);
   auto const num_args = gen(env, LdARNumParams, fp(env));
 
   if (isProfiling(env.context.kind)) {

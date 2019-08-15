@@ -125,7 +125,7 @@ TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,
     auto& frozen = code.frozen();
     tc::recordPerfRelocMap(start, main.frontier(),
                            frozen.frontier(), frozen.frontier(),
-                           context.srcKey(), 0, ibs, fixups);
+                           context.initSrcKey, 0, ibs, fixups);
   }
   fixups.process(nullptr);
 

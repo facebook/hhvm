@@ -111,11 +111,6 @@ struct TransContext {
                SrcKey sk, FPInvOffset spOff, int optIndex);
 
   /*
-   * The SrcKey for this translation.
-   */
-  SrcKey srcKey() const;
-
-  /*
    * Data members.
    *
    * The contents of SrcKey are re-laid out to avoid func table lookups.
@@ -125,11 +120,7 @@ struct TransContext {
   TransKind kind{TransKind::Invalid};
   TransFlags flags;
   FPInvOffset initSpOffset;
-  const Func* func;
-  Offset initBcOffset;
-  bool hasThis;
-  bool prologue;
-  ResumeMode resumeMode;
+  SrcKey initSrcKey;
 };
 
 

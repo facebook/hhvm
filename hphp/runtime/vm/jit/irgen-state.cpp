@@ -27,7 +27,7 @@ namespace HPHP { namespace jit { namespace irgen {
 namespace {
 
 BCMarker initial_marker(TransContext ctx) {
-  return BCMarker { ctx.srcKey(), ctx.initSpOffset, ctx.transID, nullptr };
+  return BCMarker { ctx.initSrcKey, ctx.initSpOffset, ctx.transID, nullptr };
 }
 
 }
@@ -41,14 +41,15 @@ IRGS::IRGS(IRUnit& unit, const RegionDesc* region, int32_t budgetBCInstrs,
   , region(region)
   , unit(unit)
   , irb(new IRBuilder(unit, initial_marker(context)))
-  , bcState(context.srcKey())
+  , bcState(context.initSrcKey)
   , budgetBCInstrs(budgetBCInstrs)
   , retryContext(retryContext)
 {
   updateMarker(*this);
   auto const frame = gen(*this, DefFP);
-  if (context.prologue) {
-    gen(*this, FuncGuard, FuncGuardData { context.func, &unit.prologueStart });
+  if (bcState.prologue()) {
+    gen(*this, FuncGuard,
+        FuncGuardData { bcState.func(), &unit.prologueStart });
   }
   // Now that we've defined the FP, update the BC marker appropriately.
   updateMarker(*this);
@@ -56,7 +57,7 @@ IRGS::IRGS(IRUnit& unit, const RegionDesc* region, int32_t budgetBCInstrs,
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     // Assert that we're in the correct function.
-    gen(*this, DbgAssertFunc, frame, cns(*this, context.func));
+    gen(*this, DbgAssertFunc, frame, cns(*this, bcState.func()));
   }
 }
 

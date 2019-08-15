@@ -233,12 +233,8 @@ inline Block* IRUnit::entry() const {
   return m_entry;
 }
 
-inline uint32_t IRUnit::bcOff() const {
-  return m_context.initBcOffset;
-}
-
 inline SrcKey IRUnit::initSrcKey() const {
-  return m_context.srcKey();
+  return m_context.initSrcKey;
 }
 
 inline uint32_t IRUnit::numTmps() const {

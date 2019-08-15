@@ -454,7 +454,7 @@ dynamic getTransContext(const TransContext& ctx) {
   return dynamic::object("kind", show(ctx.kind))
                         ("id", ctx.transID)
                         ("optIndex", ctx.optIndex)
-                        ("srcKey", getSrcKey(ctx.srcKey()));
+                        ("srcKey", getSrcKey(ctx.initSrcKey));
 }
 
 dynamic getUnit(const IRUnit& unit,

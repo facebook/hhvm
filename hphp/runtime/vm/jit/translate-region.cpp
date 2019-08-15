@@ -602,7 +602,7 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
   while (true) {
     int32_t budgetBCInstrs = RuntimeOption::EvalJitMaxRegionInstrs;
     unit = std::make_unique<IRUnit>(context);
-    unit->initLogEntry(context.func);
+    unit->initLogEntry(context.initSrcKey.func());
     irgen::IRGS irgs{*unit, &region, budgetBCInstrs, &retryContext};
     tries++;
 

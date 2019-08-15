@@ -128,18 +128,47 @@ void OfflineCode::printDisasm(std::ostream& os,
          perfEvents, BCMappingInfo(tcr, bcMap), true, hostOpcodes);
 }
 
+void OfflineCode::setAnnotationRanges(BCMappingInfo& bc, printir::Unit unit) {
+  vector<printir::TCRange> annotations;
+
+  for (auto const& block : unit.blocks) {
+    for (auto const& instr: block.second.instrs) {
+      for (auto const& tcr: instr.tcRanges) {
+        if (tcr.start != nullptr &&
+            tcr.end != nullptr &&
+            tcr.start != tcr.end) {
+          annotations.push_back(tcr);
+        }
+      }
+    }
+  }
+
+  std::sort(annotations.begin(),
+            annotations.end(),
+            [](const printir::TCRange& a, const printir::TCRange& b) {
+              return a.start < b.start;
+            });
+
+  bc.annotations = annotations;
+}
+
 folly::dynamic OfflineCode::getDisasm(TCA startAddr,
                                       uint32_t len,
                                       const vector<TransBCMapping>& bcMap,
                                       const PerfEventsMap<TCA>& perfEvents,
-                                      bool hostOpcodes) {
+                                      bool hostOpcodes,
+                                      folly::Optional<printir::Unit> unit) {
   auto const tcr = findTCRegionContaining(startAddr);
+  auto mappingInfo = BCMappingInfo(tcr, bcMap);
+
+  if (unit) setAnnotationRanges(mappingInfo, *unit);
+
   auto const regionInfo = getRegionInfo(tcRegions[tcr].file,
                                         tcRegions[tcr].baseAddr,
                                         startAddr,
                                         len,
                                         perfEvents,
-                                        BCMappingInfo(tcr, bcMap));
+                                        mappingInfo);
   return regionInfo.toDynamic();
 }
 
@@ -301,6 +330,78 @@ void OfflineCode::printDisasmInfo(std::ostream& os,
     os << folly::format("{}{}\n", disasmInfo.codeStr, disasmInfo.callDest);
 }
 
+vector<TCRangeInfo> annotateRanges(const vector<TCRangeInfo>& ranges,
+                                   const vector<printir::TCRange>& annotations){
+  if (ranges.empty() || annotations.empty()) return ranges;
+
+  vector<TCRangeInfo> annotatedRanges;
+
+  auto currRangeItr = ranges.begin();
+  TCRangeInfo lastRange = *currRangeItr;
+  auto const progressRangeItr = [&]() {
+    if (currRangeItr != ranges.end()) ++currRangeItr;
+    if (currRangeItr != ranges.end()) lastRange = *currRangeItr;
+  };
+
+  auto currAnnotItr = annotations.begin();
+  auto const progressAnnotItr = [&](const TCA tcStart) {
+    while (tcStart >= currAnnotItr->end) {
+      if (currAnnotItr == annotations.end()) return;
+      ++currAnnotItr;
+    }
+  };
+
+  while (currRangeItr != ranges.end()) {
+    progressAnnotItr(lastRange.start);
+    if (currAnnotItr == annotations.end()) break;
+
+    auto const tcStart = lastRange.start;
+    auto const tcEnd = lastRange.end;
+    auto const annotStart = currAnnotItr->start;
+    auto const annotEnd = currAnnotItr->end;
+
+    if (tcStart < annotStart) {
+      if (tcEnd <= annotStart) {
+        // this range both starts and ends before our next annotation, so this
+        // range gets added annotationless
+        annotatedRanges.push_back(lastRange);
+        progressRangeItr();
+      } else {
+        // the first part of this range happened before our next annotation, so
+        // split that part off and add it annotationless, then reprocess the
+        // second part
+        auto const splitTCRange = lastRange.split(annotStart);
+        annotatedRanges.push_back(splitTCRange.first);
+        lastRange = splitTCRange.second;
+      }
+    } else {
+      if (tcEnd <= annotEnd) {
+        // this range ends before our next annotation, so this
+        // range gets added with the current annotation
+        lastRange.annotation = *currAnnotItr;
+        annotatedRanges.push_back(lastRange);
+        progressRangeItr();
+      } else {
+        // the range is split among multiple annotations, so split this first
+        // part off and annotate it, then process the rest
+        auto splitTCRange = lastRange.split(annotEnd);
+        splitTCRange.first.annotation = *currAnnotItr;
+        annotatedRanges.push_back(splitTCRange.first);
+        lastRange = splitTCRange.second;
+      }
+    }
+  }
+
+  // Whatever ranges might be left after we're done with our annotations, make
+  // sure that we add those as well
+  while (currRangeItr != ranges.end()) {
+    annotatedRanges.push_back(lastRange);
+    progressRangeItr();
+  }
+
+  return annotatedRanges;
+}
+
 vector<TCRangeInfo>
 OfflineCode::getRanges(const BCMappingInfo& bcMappingInfo,
                        const TCA start,
@@ -328,7 +429,12 @@ OfflineCode::getRanges(const BCMappingInfo& bcMappingInfo,
       ranges.push_back(getRangeInfo(curr, tcaStart, tcaEnd));
     }
   }
-  return ranges;
+
+  if (ranges.empty() || bcMappingInfo.annotations.empty()) {
+    return ranges;
+  }
+
+  return annotateRanges(ranges, bcMappingInfo.annotations);
 }
 
 TCRangeInfo OfflineCode::getRangeInfo(const TransBCMapping& transBCMap,

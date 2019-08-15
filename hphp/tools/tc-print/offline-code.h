@@ -27,6 +27,7 @@
 
 #include "hphp/tools/tc-print/offline-trans-data.h"
 #include "hphp/tools/tc-print/perf-events.h"
+#include "hphp/tools/tc-print/printir-annotation.h"
 
 extern "C" {
 #if defined(HAVE_LIBXED)
@@ -74,12 +75,12 @@ struct TCDisasmInfo {
                           ("instrLen", instrLen);
   }
 
-  const std::string binaryStr;
-  const std::string callDest;
-  const std::string codeStr;
-  const EventCounts eventCounts;
-  const TCA ip;
-  const uint32_t instrLen;
+  std::string binaryStr;
+  std::string callDest;
+  std::string codeStr;
+  EventCounts eventCounts;
+  TCA ip;
+  uint32_t instrLen;
 };
 
 /*
@@ -88,37 +89,63 @@ struct TCDisasmInfo {
  */
 struct TCRangeInfo {
   folly::dynamic toDynamic() const {
-      using folly::dynamic;
+    using folly::dynamic;
 
-      dynamic disasmObjs = dynamic::array;
-      for (auto const& disasmInfo : disasm) {
-        disasmObjs.push_back(disasmInfo.toDynamic());
-      }
+    dynamic disasmObjs = dynamic::array;
+    for (auto const& disasmInfo : disasm) {
+      disasmObjs.push_back(disasmInfo.toDynamic());
+    }
 
-      auto const startStr = folly::sformat("{}", static_cast<void*>(start));
-      auto const endStr = folly::sformat("{}", static_cast<void*>(end));
+    auto const formatTCA = [](auto x) {
+      return folly::sformat("{}", static_cast<void*>(x));
+    };
 
-      // TODO(elijahrivera) - maybe also include func and unit info?
-      return dynamic::object("start", startStr)
-                            ("end", endStr)
-                            ("bc", bc ? *bc : dynamic())
-                            ("sha1", sha1 ? sha1->toString() : dynamic())
-                            ("instrStr", instrStr ? *instrStr : dynamic())
-                            ("lineNum", lineNum ? *lineNum : dynamic())
-                            ("disasm", disasmObjs);
+    // TODO(elijahrivera) - maybe also include func and unit info?
+    dynamic info = dynamic::object("start", formatTCA(start))
+                                  ("end", formatTCA(end))
+                                  ("bc", bc ? *bc : dynamic())
+                                  ("sha1", sha1 ? sha1->toString() : dynamic())
+                                  ("instrStr", instrStr ? *instrStr : dynamic())
+                                  ("lineNum", lineNum ? *lineNum : dynamic())
+                                  ("disasm", disasmObjs);
+
+    if (annotation) {
+      info["ir_annotation"] =
+        dynamic::object("area", jit::areaAsString(annotation->area))
+                       ("start", formatTCA(annotation->start))
+                       ("end", formatTCA(annotation->end))
+                       ("instrId", annotation->parentInstrId)
+                       ("blockId", annotation->parentBlockId);
+    }
+
+    return info;
   }
 
-  const TCA start;
-  const TCA end;
+  /*
+   * This functions does NOT split the associated disasm info, because it
+   * expects to be called before the disasm is added to this struct.
+   */
+  std::pair<TCRangeInfo, TCRangeInfo> split(const TCA pos) const {
+    always_assert(start <= pos && pos <= end);
+    auto const firstRange = TCRangeInfo{start, pos, bc, sha1, func, instrStr,
+                                        lineNum, unit, annotation};
+    auto const secondRange = TCRangeInfo{pos, end, bc, sha1, func, instrStr,
+                                         lineNum, unit, annotation};
+    return std::pair<TCRangeInfo, TCRangeInfo>(firstRange, secondRange);
+  }
 
-  const folly::Optional<Offset> bc;
-  const folly::Optional<SHA1> sha1;
+  TCA start;
+  TCA end;
+
+  folly::Optional<Offset> bc;
+  folly::Optional<SHA1> sha1;
 
   folly::Optional<const Func*> func;
   folly::Optional<std::string> instrStr;
   folly::Optional<int> lineNum;
   folly::Optional<const Unit*> unit;
 
+  folly::Optional<printir::TCRange> annotation;
   std::vector<TCDisasmInfo> disasm;
 };
 
@@ -182,7 +209,8 @@ struct OfflineCode {
                            uint32_t len,
                            const std::vector<TransBCMapping>& bcMap,
                            const PerfEventsMap<TCA>& perfEvents,
-                           bool hostOpcodes);
+                           bool hostOpcodes,
+                           folly::Optional<printir::Unit> = folly::none);
 
   // Returns the fall-thru successor from 'a', if any
   TCA getTransJmpTargets(const TransRec *transRec,
@@ -196,6 +224,7 @@ private:
   struct BCMappingInfo {
     TCRegion tcRegion;
     const std::vector<TransBCMapping>& bcMapping;
+    std::vector<printir::TCRange> annotations;
 
     BCMappingInfo() = delete;
     BCMappingInfo(TCRegion tcr,
@@ -237,6 +266,13 @@ private:
    * `code`. Throws an error if the file is unable to be read at that location.
    */
   void readDisasmFile(FILE*, const Offset, const uint64_t codeLen, void* code);
+
+  /*
+   * Sort the different instructions within the Unit based on address range,
+   * filtering out null ranges, and store it in the BCMappingInfo in the correct
+   * areas
+   */
+  void setAnnotationRanges(BCMappingInfo&, printir::Unit);
 
   /*
    * Get all of the disassembly information for the region

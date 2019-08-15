@@ -29,6 +29,11 @@
 
 namespace HPHP { namespace printir {
 using BlockId = unsigned int;
+using InstrId = uint32_t;
+
+struct Instr;
+struct Block;
+struct Unit;
 
 struct ParseError : std::runtime_error {
   explicit ParseError(const std::string& errStr) : std::runtime_error(errStr) {}
@@ -42,29 +47,37 @@ struct SSATmp {
 struct PhiPseudoInstr {
   const std::vector<std::pair<SSATmp, BlockId>> srcs;
   const SSATmp dst;
+
+  InstrId parentInstrId;
+  BlockId parentBlockId;
 };
 
 struct TCRange {
-  const jit::AreaIndex area;
-  const jit::TCA start;
-  const jit::TCA end;
-  const std::string disasm;
+  jit::AreaIndex area;
+  jit::TCA start;
+  jit::TCA end;
+  std::string disasm;
+
+  InstrId parentInstrId;
+  BlockId parentBlockId;
 };
 
 struct Instr {
+  const InstrId id;
   const folly::Optional<std::string> rawMarker;
-  const std::vector<PhiPseudoInstr> phiPseudoInstrs;
+  std::vector<PhiPseudoInstr> phiPseudoInstrs;
   const jit::Opcode opcode;
   const folly::Optional<std::string> typeParam;
   const folly::Optional<std::string> guard;
   const folly::Optional<std::string> extra;
-  const uint32_t id;
   const folly::Optional<BlockId> taken;
-  const folly::Optional<std::vector<TCRange>> tcRanges;
+  std::vector<TCRange> tcRanges;
   const std::vector<SSATmp> dsts;
   // Only one of these two should be present, they are mutually exclusive
   const folly::Optional<std::vector<SSATmp>> srcs;
   const folly::Optional<std::string> counterName;
+
+  BlockId parentBlockId;
 };
 
 struct Block {
@@ -74,7 +87,7 @@ struct Block {
   const uint64_t profCount;
   const std::vector<BlockId> preds;
   const folly::Optional<BlockId> next;
-  const std::vector<Instr> instrs;
+  std::vector<Instr> instrs;
   const jit::AreaIndex area;
 };
 

@@ -548,36 +548,29 @@ std::string show(TCA tca) {
   return folly::sformat("{}", static_cast<void*>(tca));
 }
 
-dynamic getAnnotations(const Annotations& annotations) {
-  dynamic annotationObjs = dynamic::array;
+dynamic getAnnotation(const Annotations& annotations) {
+  // for JSON outputs, we only care about the annotation "after code gen"
+  std::string annotationStr;
   for (auto const& annotation : annotations) {
-    auto const rawValue = g_annotations->getAnnotation(annotation.second);
-    dynamic annotationValue;
-    if (rawValue.subpiece(0, 5) == "json:") {
-      try {
-        auto const parsedJson = folly::parseJson(rawValue.subpiece(5));
-        auto const coercedUnit = folly::convertTo<printir::Unit>(parsedJson);
-        annotationValue = folly::toDynamic(coercedUnit);
-        // Benefits to making the round-trip:
-        // 1. Checking for specific JSON format
-        // 2. Restructuring
-        // 3. TODO(elijahrivera) - fixed structure to work with when merging
-        //    annotation information into regular information
-      }
-      catch (const std::runtime_error& re){
-        std::cerr << re.what() << std::endl;
-        std::cerr << "Parsing annotation as JSON failed. "
-                  << "Annotation included as raw value" << std::endl;
-        annotationValue = rawValue;
-      }
-      annotationObjs.push_back(dynamic::object("caption", annotation.first)
-                                              ("value", annotationValue));
-    } else {
-      annotationObjs.push_back(dynamic::object("caption", annotation.first)
-                                              ("value", rawValue));
+    if (annotation.first == " after code gen ") {
+      annotationStr = annotation.second;
+      break;
     }
   }
-  return annotationObjs;
+  if (annotationStr.empty()) return dynamic();
+
+  auto const rawValue = g_annotations->getAnnotation(annotationStr);
+  if (rawValue.subpiece(0, 5) != "json:") return rawValue;
+
+  try {
+    return folly::parseJson(rawValue.subpiece(5));
+  }
+  catch (const std::runtime_error& re){
+    std::cerr << re.what() << std::endl;
+    std::cerr << "Parsing annotation as JSON failed. "
+              << "Annotation included as raw value\n";
+    return rawValue;
+  }
 }
 
 dynamic getTransRec(const TransRec* tRec,
@@ -612,9 +605,7 @@ dynamic getTransRec(const TransRec* tRec,
                                         ("coldLen", tRec->acoldLen)
                                         ("frozenStart",
                                          show(tRec->afrozenStart))
-                                        ("frozenLen", tRec->afrozenLen)
-                                        ("annotations",
-                                         getAnnotations(tRec->annotations));
+                                        ("frozenLen", tRec->afrozenLen);
 
   return result;
 }
@@ -671,12 +662,26 @@ dynamic getTrans(TransID transId) {
                                              dynamic()));
   }
 
+  auto const annotationDynamic = getAnnotation(tRec->annotations);
+
+  auto const maybeUnit = [&]() -> folly::Optional<printir::Unit> {
+    if (!annotationDynamic.isObject()) return folly::none;
+    try {
+      return folly::convertTo<printir::Unit>(annotationDynamic);
+    }
+    catch (const printir::ParseError& pe) {
+      std::cerr << pe.what() << std::endl;
+      return folly::none;
+    }
+  }();
+
   const dynamic mainDisasm = tRec->aLen ?
                              transCode->getDisasm(tRec->aStart,
                                                   tRec->aLen,
                                                   tRec->bcMapping,
                                                   tcaPerfEvents,
-                                                  hostOpcodes) :
+                                                  hostOpcodes,
+                                                  maybeUnit) :
                              dynamic();
 
   auto const coldIsFrozen = tRec->acoldStart == tRec->afrozenStart;
@@ -685,14 +690,16 @@ dynamic getTrans(TransID transId) {
                                                   tRec->acoldLen,
                                                   tRec->bcMapping,
                                                   tcaPerfEvents,
-                                                  hostOpcodes) :
+                                                  hostOpcodes,
+                                                  maybeUnit) :
                              dynamic();
   const dynamic frozenDisasm = tRec -> afrozenLen ?
                                transCode->getDisasm(tRec->afrozenStart,
                                                     tRec->afrozenLen,
                                                     tRec->bcMapping,
                                                     tcaPerfEvents,
-                                                    hostOpcodes) :
+                                                    hostOpcodes,
+                                                    maybeUnit) :
                                dynamic();
   const dynamic disasmObj = dynamic::object("main", mainDisasm)
                                            ("cold", coldDisasm)
@@ -703,7 +710,11 @@ dynamic getTrans(TransID transId) {
                         ("archName", transCode->getArchName())
                         ("regions", disasmObj)
                         ("perfEvents", perfEvents)
-                        ("transId", transId);
+                        ("transId", transId)
+                        ("ir_annotation", maybeUnit ?
+                          folly::toDynamic(*maybeUnit) :
+                          annotationDynamic);
+  // if annotation fails to parse, give raw to the user in annotation field
 }
 
 dynamic getTC() {

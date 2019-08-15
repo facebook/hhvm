@@ -93,9 +93,9 @@ convert(const dynamic& d) {
   }
 
   auto const id = convertTo<uint32_t>(d.getDefault("id", {}));
-  auto const typeStr = convertTo<string>(d.getDefault("type", {}));
+  auto typeStr = convertTo<string>(d.getDefault("type", {}));
 
-  return printir::SSATmp{id, typeStr};
+  return printir::SSATmp{id, std::move(typeStr)};
 }
 
 printir::PhiPseudoInstr DynamicConverter<printir::PhiPseudoInstr>::
@@ -106,16 +106,16 @@ convert(const dynamic& d) {
 
   vector<std::pair<printir::SSATmp, printir::BlockId>> srcs;
   for (auto const& item : d.getDefault("srcs", {})) {
-    auto const src = convertTo<printir::SSATmp>(item["src"]);
+    auto src = convertTo<printir::SSATmp>(item["src"]);
     auto const id = convertTo<printir::BlockId>(
       item.getDefault("label").getDefault("id", {}));
 
-    srcs.emplace_back(src, id);
+    srcs.emplace_back(std::move(src), id);
   }
 
-  auto const dst = convertTo<printir::SSATmp>(d.getDefault("dst", {}));
+  auto dst = convertTo<printir::SSATmp>(d.getDefault("dst", {}));
 
-  return printir::PhiPseudoInstr{srcs, dst};
+  return printir::PhiPseudoInstr{std::move(srcs), std::move(dst)};
 }
 
 printir::TCRange DynamicConverter<printir::TCRange>::
@@ -131,9 +131,9 @@ convert(const dynamic& d) {
 
   auto const start = parseTCA(convertTo<string>(d.getDefault("start", {})));
   auto const end = parseTCA(convertTo<string>(d.getDefault("end", {})));
-  auto const disasm = convertTo<string>(d.getDefault("disasm",{}));
+  auto disasm = convertTo<string>(d.getDefault("disasm",{}));
 
-  return printir::TCRange{area, start, end, disasm};
+  return printir::TCRange{area, start, end, std::move(disasm)};
 }
 
 printir::Instr DynamicConverter<printir::Instr>::
@@ -142,23 +142,25 @@ convert(const dynamic& d) {
     typeError("Instr", dynamic::Type::OBJECT, d.type());
   }
 
-  auto const maybeMarker = convertTo<Optional<string>>(
+  auto maybeMarker = convertTo<Optional<string>>(
     d.getDefault("marker").getDefault("raw", {}));
-  auto const phiPseudoInstrs = convertTo<vector<printir::PhiPseudoInstr>>(
+  auto phiPseudoInstrs = convertTo<vector<printir::PhiPseudoInstr>>(
     d.getDefault("phiPseudoInstrs", dynamic::array));
   auto const opcode = convertTo<jit::Opcode>(d.getDefault("opcodeName", {}));
-  auto const typeParam = convertTo<Optional<string>>(
+  auto typeParam = convertTo<Optional<string>>(
     d.getDefault("typeParam", {}));
-  auto const guard = convertTo<Optional<string>>(d.getDefault("guard", {}));
-  auto const extra = convertTo<Optional<string>>(d.getDefault("extra", {}));
+  auto guard = convertTo<Optional<string>>(d.getDefault("guard", {}));
+  auto extra = convertTo<Optional<string>>(d.getDefault("extra", {}));
   auto const id = convertTo<uint32_t>(d.getDefault("id", {}));
-  auto const dsts = convertTo<vector<printir::SSATmp>>(
+  auto dsts = convertTo<vector<printir::SSATmp>>(
     d.getDefault("dsts", {}));
-  auto const tcRanges = convertTo<Optional<vector<printir::TCRange>>>(
-    d.getDefault("tc_ranges", {}));
   auto const maybeTaken = d.getDefault("taken", {});
-  auto const taken = convertTo<Optional<printir::BlockId>>(
+  auto taken = convertTo<Optional<printir::BlockId>>(
     (maybeTaken.isNull() ? dynamic() : maybeTaken.getDefault("id", {})));
+
+  auto tcRanges = convertTo<vector<printir::TCRange>>(
+    d.getDefault("tc_ranges", dynamic::array));
+  for (auto& tcr : tcRanges) tcr.parentInstrId = id;
 
   // TODO(elijahrivera) - rewrite to maybe use boost::variant?
   //                      other options to standardize?
@@ -177,8 +179,11 @@ convert(const dynamic& d) {
       sformat("Field \"srcs\" has incorrect type {}", d_srcs.typeName()));
   }
 
-  return printir::Instr{maybeMarker, phiPseudoInstrs, opcode, typeParam, guard,
-                        extra, id, taken, tcRanges, dsts, srcs, counterName};
+  return printir::Instr{id, std::move(maybeMarker), std::move(phiPseudoInstrs),
+                        opcode, std::move(typeParam), std::move(guard),
+                        std::move(extra), std::move(taken), std::move(tcRanges),
+                        std::move(dsts), std::move(srcs),
+                        std::move(counterName)};
 }
 
 printir::Block DynamicConverter<printir::Block>::
@@ -200,24 +205,29 @@ convert(const dynamic& d) {
   auto const area = *maybeArea;
 
   auto const profCount = convertTo<uint64_t>(d.getDefault("profCount", {}));
-  auto const preds = convertTo<vector<printir::BlockId>>(
+  auto preds = convertTo<vector<printir::BlockId>>(
     d.getDefault("preds", {}));
-  auto const instrs = convertTo<vector<printir::Instr>>(
-    d.getDefault("instrs", {}));
   auto const maybeNext = d.getDefault("next", {});
-  auto const maybeNextId = convertTo<Optional<printir::BlockId>>(
+  auto maybeNextId = convertTo<Optional<printir::BlockId>>(
     (maybeNext.isNull() ? dynamic() : maybeNext.getDefault("id", {})));
 
-  return printir::Block{id, isCatch, hint, profCount, preds, maybeNextId,
-                        instrs, area};
+  auto instrs = convertTo<vector<printir::Instr>>(d.getDefault("instrs", {}));
+  for (auto& instr : instrs) {
+    instr.parentBlockId = id;
+    for (auto& phi : instr.phiPseudoInstrs) phi.parentBlockId = id;
+    for (auto& tcr : instr.tcRanges) tcr.parentBlockId = id;
+  }
+
+  return printir::Block{id, isCatch, hint, profCount, std::move(preds),
+                        std::move(maybeNextId), std::move(instrs), area};
 }
 
 printir::SrcKey DynamicConverter<printir::SrcKey>::
 convert(const dynamic& d) {
   if (!d.isObject()) typeError("SrcKey", dynamic::Type::OBJECT, d.type());
 
-  auto const funcStr = convertTo<string>(d.getDefault("func", {}));
-  auto const unitStr = convertTo<string>(d.getDefault("unit", {}));
+  auto funcStr = convertTo<string>(d.getDefault("func", {}));
+  auto unitStr = convertTo<string>(d.getDefault("unit", {}));
   auto const prologue = convertTo<bool>(d.getDefault("prologue", {}));
   auto const offset = convertTo<int>(d.getDefault("offset", {}));
   auto const hasThis = convertTo<bool>(d.getDefault("hasThis", {}));
@@ -227,8 +237,8 @@ convert(const dynamic& d) {
   if (!maybeResumeMode) enumError("ResumeMode", rawResumeMode);
   auto const resumeMode = *maybeResumeMode;
 
-  return printir::SrcKey{funcStr, unitStr, prologue, offset, resumeMode,
-                         hasThis};
+  return printir::SrcKey{std::move(funcStr), std::move(unitStr), prologue,
+                         offset, resumeMode, hasThis};
 }
 
 printir::TransContext DynamicConverter<printir::TransContext>::
@@ -238,20 +248,21 @@ convert(const dynamic& d) {
   auto const rawTransKind = convertTo<string>(d.getDefault("kind", {}));
   auto const maybeTransKind = jit::nameToTransKind(rawTransKind);
   if (!maybeTransKind) enumError("TransKind", rawTransKind);
-  auto const transKind = *maybeTransKind;
+  auto transKind = *maybeTransKind;
 
   auto const id = convertTo<TransID>(d.getDefault("id", {}));
   auto const optIndex = convertTo<int>(d.getDefault("optIndex", {}));
-  auto const srcKey = convertTo<printir::SrcKey>(d.getDefault("srcKey", {}));
+  auto srcKey = convertTo<printir::SrcKey>(d.getDefault("srcKey", {}));
 
-  return printir::TransContext{transKind, id, optIndex, srcKey};
+  return printir::TransContext{std::move(transKind), id, optIndex,
+                               std::move(srcKey)};
 }
 
 printir::Unit DynamicConverter<printir::Unit>::
 convert(const dynamic& d) {
   if (!d.isObject()) typeError("Unit", dynamic::Type::OBJECT, d.type());
 
-  auto const transContext = convertTo<printir::TransContext>(
+  auto transContext = convertTo<printir::TransContext>(
     d.getDefault("translation", {}));
 
   std::unordered_map<unsigned int, printir::Block> blocks;
@@ -266,7 +277,7 @@ convert(const dynamic& d) {
     }
   }
 
-  return printir::Unit{transContext, blocks};
+  return printir::Unit{std::move(transContext), std::move(blocks)};
 }
 
 template <typename T> dynamic DynamicConstructor<Optional<T>>::

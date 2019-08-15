@@ -765,9 +765,20 @@ wangle::SSLContextConfig ProxygenServer::createContextConfig(
     const CertKeyPair& path,
     bool isDefault) {
   wangle::SSLContextConfig sslCtxConfig;
-  // TODO add config to request a client cert
-  sslCtxConfig.clientVerification =
-    folly::SSLContext::SSLVerifyPeerEnum::NO_VERIFY;
+
+  if (RuntimeOption::SSLClientAuthLevel == 2) {
+    sslCtxConfig.clientCAFile = RuntimeOption::SSLClientCAFile;
+    sslCtxConfig.clientVerification =
+      folly::SSLContext::SSLVerifyPeerEnum::VERIFY_REQ_CLIENT_CERT;
+  } else if (RuntimeOption::SSLClientAuthLevel == 1) {
+    sslCtxConfig.clientCAFile = RuntimeOption::SSLClientCAFile;
+    sslCtxConfig.clientVerification =
+      folly::SSLContext::SSLVerifyPeerEnum::VERIFY;
+  } else {
+    sslCtxConfig.clientVerification =
+      folly::SSLContext::SSLVerifyPeerEnum::NO_VERIFY;
+  }
+
   try {
     sslCtxConfig.setCertificate(path.certPath, path.keyPath, "");
     sslCtxConfig.sslVersion = folly::SSLContext::TLSv1;

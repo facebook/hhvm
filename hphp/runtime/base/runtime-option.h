@@ -365,6 +365,13 @@ struct RuntimeOption {
   static bool TLSDisableTLS1_2;
   static std::string TLSClientCipherSpec;
   static bool EnableSSLWithPlainText;
+  // Level of TLS client auth. Valid values are
+  // 0 => disabled (default)
+  // 1 => optional (verify if client presents a cert)
+  // 2 => required (client must present a valid cert)
+  static int SSLClientAuthLevel;
+  // CA file to verify client cert against.
+  static std::string SSLClientCAFile;
 
   static int XboxServerThreadCount;
   static int XboxServerMaxQueueLength;

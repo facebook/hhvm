@@ -468,6 +468,7 @@ let make_popt () =
     ~disallow_silence:false
     ~const_static_props:(const_static_props co)
     ~abstract_static_props:(abstract_static_props co)
+    ~disable_unset_class_const:(disable_unset_class_const co)
 
 let process_single_source_unit compiler_options
   handle_output handle_exception filename source_text source_root =

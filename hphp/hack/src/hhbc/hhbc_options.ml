@@ -65,6 +65,7 @@ type t = {
   option_const_default_func_args          : bool;
   option_const_static_props               : bool;
   option_abstract_static_props            : bool;
+  option_disable_unset_class_const        : bool;
 }
 
 let default = {
@@ -123,6 +124,7 @@ let default = {
   option_const_default_func_args = false;
   option_const_static_props = false;
   option_abstract_static_props = false;
+  option_disable_unset_class_const = false;
 }
 
 let constant_folding o = o.option_constant_folding
@@ -178,6 +180,7 @@ let disable_legacy_attribute_syntax o = o.option_disable_legacy_attribute_syntax
 let const_default_func_args o = o.option_const_default_func_args
 let const_static_props o = o.option_const_static_props
 let abstract_static_props o = o.option_abstract_static_props
+let disable_unset_class_const o = o.option_disable_unset_class_const
 
 let to_string o =
   let dynamic_invokes =
@@ -237,6 +240,7 @@ let to_string o =
     ; Printf.sprintf "const_default_func_args: %B" @@ const_default_func_args o
     ; Printf.sprintf "const_static_props: %B" @@ const_static_props o
     ; Printf.sprintf "abstract_static_props: %B" @@ abstract_static_props o
+    ; Printf.sprintf "disable_unset_class_const: %B" @@ disable_unset_class_const o
     ]
 
 let as_bool s =
@@ -358,6 +362,8 @@ let set_option options name value =
     { options with option_const_static_props = as_bool value }
   | "hhvm.lang.abstractstaticprops" ->
     { options with option_abstract_static_props = as_bool value }
+  | "hhvm.lang.disableunsetclassconst" ->
+    { options with option_disable_unset_class_const = as_bool value }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -520,6 +526,8 @@ let value_setters = [
     fun opts v -> { opts with option_const_static_props = (v = 1) });
   (set_value "hhvm.hack.lang.abstract_static_props" get_value_from_config_int @@
     fun opts v -> { opts with option_abstract_static_props = (v = 1) });
+  (set_value "hhvm.hack.lang.disable_unset_class_const" get_value_from_config_int @@
+    fun opts v -> { opts with option_disable_unset_class_const = (v = 1) });
 ]
 
 let extract_config_options_from_json ~init config_json =

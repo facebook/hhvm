@@ -332,6 +332,7 @@ let load config_filename options =
     ?tco_global_inference:(bool_opt "global_inference" config)
     ?tco_const_static_props:(bool_opt "const_static_props" config)
     ?po_abstract_static_props:(bool_opt "abstract_static_props" config)
+    ?po_disable_unset_class_const:(bool_opt "disable_unset_class_const" config)
     ()
   in
   Errors.ignored_fixme_codes :=

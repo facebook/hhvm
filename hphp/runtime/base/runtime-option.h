@@ -89,6 +89,7 @@ struct RepoOptions {
   H(bool,           ConstDefaultFuncArgs,           false)            \
   H(bool,           ConstStaticProps,               false)            \
   H(bool,           AbstractStaticProps,            false)            \
+  H(bool,           DisableUnsetClassConst,         false)            \
   E(bool,           CreateInOutWrapperFunctions,    true)             \
   E(std::string,    HHJSAdditionalTransform,        "")               \
   E(bool,           HHJSNoBabel,                    false)            \

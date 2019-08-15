@@ -307,6 +307,9 @@ type t = {
 
   (* Static properties can be abstract *)
   po_abstract_static_props : bool;
+
+  (* Make unsetting a class constant a parse error *)
+  po_disable_unset_class_const : bool;
 } [@@deriving show]
 
 val make :
@@ -379,6 +382,7 @@ val make :
   ?po_const_default_func_args : bool ->
   ?po_disallow_silence : bool ->
   ?po_abstract_static_props : bool ->
+  ?po_disable_unset_class_const : bool ->
   unit ->
   t
 
@@ -467,3 +471,4 @@ val tco_const_attribute : t -> bool
 val po_const_default_func_args : t -> bool
 val po_disallow_silence : t -> bool
 val po_abstract_static_props : t -> bool
+val po_disable_unset_class_const : t -> bool

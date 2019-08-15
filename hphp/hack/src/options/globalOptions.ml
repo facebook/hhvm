@@ -78,6 +78,7 @@ type t = {
   po_const_default_func_args : bool;
   po_disallow_silence : bool;
   po_abstract_static_props : bool;
+  po_disable_unset_class_const : bool;
 } [@@deriving show]
 
 let tco_experimental_isarray = "is_array"
@@ -231,6 +232,7 @@ let default = {
   po_const_default_func_args = false;
   po_disallow_silence = false;
   po_abstract_static_props = false;
+  po_disable_unset_class_const = false;
 }
 
 let make
@@ -303,6 +305,7 @@ let make
   ?(po_const_default_func_args = default.po_const_default_func_args)
   ?(po_disallow_silence = default.po_disallow_silence)
   ?(po_abstract_static_props = default.po_abstract_static_props)
+  ?(po_disable_unset_class_const = default.po_disable_unset_class_const)
   ()
 = {
   tco_safe_array;
@@ -375,6 +378,7 @@ let make
   po_const_default_func_args;
   po_disallow_silence;
   po_abstract_static_props;
+  po_disable_unset_class_const;
 }
 let tco_safe_array t = t.tco_safe_array
 let tco_safe_vector_array t = t.tco_safe_vector_array
@@ -480,6 +484,8 @@ let po_const_default_func_args t = t.po_const_default_func_args
 let po_disallow_silence t = t.po_disallow_silence
 
 let po_abstract_static_props t = t.po_abstract_static_props
+
+let po_disable_unset_class_const t = t.po_disable_unset_class_const
 
 let setup_pocket_universes env enabled =
   let exp_features = env.tco_experimental_features in

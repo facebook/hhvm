@@ -71,8 +71,12 @@ using FfpResult = boost::variant<FfpJSONString, std::string>;
 ParseFactsResult extract_facts(const FactsParser&,
                                const std::string& filename,
                                const char* code,
-                               int len);
-FfpResult ffp_parse_file(std::string file, const char* contents, int size);
+                               int len,
+                               const RepoOptions& options);
+FfpResult ffp_parse_file(std::string file,
+                         const char* contents,
+                         int size,
+                         const RepoOptions& options);
 
 std::string hackc_version();
 

@@ -66,7 +66,8 @@ struct HackCFactsExtractor {
     result_type& res,
     const state_type& state
   ) {
-    auto result = extract_facts(*state, path, code.data(), code.size());
+    auto result = extract_facts(*state, path, code.data(), code.size(),
+                                RepoOptions::forFile(path.data()));
     match<void>(
       result,
       [&](FactsJSONString& r) {

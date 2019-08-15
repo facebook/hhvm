@@ -37,6 +37,7 @@ fn parse(file_path: String, parse_only: bool) {
     let opts = ExtractAsJsonOpts {
         php5_compat_mode: true,
         hhvm_compat_mode: true,
+        allow_new_attribute_syntax: false,
         filename: file_path.clone(),
     };
 

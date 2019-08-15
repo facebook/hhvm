@@ -426,6 +426,8 @@ let do_compile filename compiler_options popt fail_or_ast debug_time =
   hhas
 
 let extract_facts ~rust ~filename ~source_root text = [
+  let open Hhbc_options in
+  let co = !compiler_options in
   match Hackc_parse_delegator.extract_facts filename source_root with
     | Some result -> Hh_json.json_to_multiline ~sort_keys:true result
     | None ->
@@ -433,14 +435,32 @@ let extract_facts ~rust ~filename ~source_root text = [
         ~rust
         ~php5_compat_mode:true
         ~hhvm_compat_mode:true
+        ~disable_nontoplevel_declarations:(phpism_disable_nontoplevel_declarations co)
+        ~disable_legacy_soft_typehints:(disable_legacy_soft_typehints co)
+        ~allow_new_attribute_syntax:(allow_new_attribute_syntax co)
+        ~disable_legacy_attribute_syntax:(disable_legacy_attribute_syntax co)
         ~filename ~text
       |> Option.value ~default:""
 ]
 
 let parse_hh_file filename body =
+  let open Hhbc_options in
+  let co = !compiler_options in
+  let rust = use_rust_parser co in
   let file = Relative_path.create Relative_path.Dummy filename in
   let source_text = SourceText.make file body in
-  let syntax_tree = SyntaxTree.make source_text in
+  let mode = Full_fidelity_parser.parse_mode ~rust source_text in
+  let env = Full_fidelity_parser_env.make
+    ~codegen:true
+    ~php5_compat_mode:true
+    ~hhvm_compat_mode:true
+    ~disable_nontoplevel_declarations:(phpism_disable_nontoplevel_declarations co)
+    ~disable_legacy_soft_typehints:(disable_legacy_soft_typehints co)
+    ~allow_new_attribute_syntax:(allow_new_attribute_syntax co)
+    ~disable_legacy_attribute_syntax:(disable_legacy_attribute_syntax co)
+    ?mode
+  () in
+  let syntax_tree = SyntaxTree.make ~env source_text in
   let json = SyntaxTree.to_json syntax_tree in
   [Hh_json.json_to_string json]
 
@@ -604,9 +624,17 @@ let decl_and_run_mode compiler_options =
             else body in
           let path = Relative_path.create Relative_path.Dummy filename in
           let rust = Hhbc_options.use_rust_parser !Hhbc_options.compiler_options in
-          handle_output
+          let old_config = !Hhbc_options.compiler_options in
+          let config_overrides = get_field
+            (get_obj "config_overrides")
+            (fun _af -> JSON_Object [])
+            header in
+          set_compiler_options (Some config_overrides);
+          let result = handle_output
             path
-            (extract_facts ~rust ~filename:path ~source_root body)
+            (extract_facts ~rust ~filename:path ~source_root body) in
+          Hhbc_options.set_compiler_options old_config;
+          result
         ) (new_debug_time ()))
         ; parse = (fun header body -> (
           let filename = get_field
@@ -617,10 +645,18 @@ let decl_and_run_mode compiler_options =
             if String.length body = 0
             then Sys_utils.cat filename
             else body in
-          handle_output
+          let old_config = !Hhbc_options.compiler_options in
+          let config_overrides = get_field
+            (get_obj "config_overrides")
+            (fun _af -> JSON_Object [])
+            header in
+          set_compiler_options (Some config_overrides);
+          let result = handle_output
             (Relative_path.create Relative_path.Dummy filename)
-            (parse_hh_file filename body))
-            (new_debug_time ()))
+            (parse_hh_file filename body) in
+          Hhbc_options.set_compiler_options old_config;
+          result
+          ) (new_debug_time ()))
         } in
       dispatch_loop handlers
 

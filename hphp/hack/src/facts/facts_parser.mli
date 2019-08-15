@@ -14,6 +14,10 @@ val flags_final: int
 val extract_as_json_string:
   php5_compat_mode: bool ->
   hhvm_compat_mode: bool ->
+  disable_nontoplevel_declarations: bool ->
+  disable_legacy_soft_typehints: bool ->
+  allow_new_attribute_syntax: bool ->
+  disable_legacy_attribute_syntax: bool ->
   filename: Relative_path.t ->
   text:string ->
   rust: bool ->
@@ -22,6 +26,10 @@ val extract_as_json_string:
 val from_text:
   php5_compat_mode: bool ->
   hhvm_compat_mode: bool ->
+  disable_nontoplevel_declarations: bool ->
+  disable_legacy_soft_typehints: bool ->
+  allow_new_attribute_syntax: bool ->
+  disable_legacy_attribute_syntax: bool ->
   filename: Relative_path.t ->
   text:string ->
   Facts.facts option

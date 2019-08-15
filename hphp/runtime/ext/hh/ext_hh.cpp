@@ -451,7 +451,12 @@ bool HHVM_FUNCTION(clear_static_memoization,
 String HHVM_FUNCTION(ffp_parse_string_native, const String& str) {
   std::string program = str.get()->data();
 
-  auto result = ffp_parse_file("", program.c_str(), program.size());
+  auto const file = fromCaller(
+    [] (const ActRec* fp, Offset) { return fp->unit()->filepath()->data(); }
+  );
+
+  auto result = ffp_parse_file("", program.c_str(), program.size(),
+                               RepoOptions::forFile(file));
 
   FfpJSONString res;
   match<void>(

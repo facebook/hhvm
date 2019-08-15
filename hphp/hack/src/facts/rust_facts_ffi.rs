@@ -11,11 +11,18 @@ use facts_rust as facts;
 
 use facts::facts_parser::*;
 
-caml!(extract_as_json_ffi(php5_compat_mode, hhvm_compat_mode, filename, text) {
+caml!(extract_as_json_ffi(
+    php5_compat_mode,
+    hhvm_compat_mode,
+    allow_new_attribute_syntax,
+    filename,
+    text
+) {
     use ocaml::ToValue;
     return extract_as_json_ffi0(
         php5_compat_mode.i32_val() != 0,
         hhvm_compat_mode.i32_val() != 0,
+        allow_new_attribute_syntax.i32_val() != 0,
         ocaml::Str::from(filename).as_str(),
         ocaml::Str::from(text).as_str(),
     ).to_value();
@@ -24,12 +31,14 @@ caml!(extract_as_json_ffi(php5_compat_mode, hhvm_compat_mode, filename, text) {
 fn extract_as_json_ffi0(
     php5_compat_mode: bool,
     hhvm_compat_mode: bool,
+    allow_new_attribute_syntax: bool,
     filename: &str,
     text: &str,
 ) -> String {
     let opts = ExtractAsJsonOpts {
         php5_compat_mode,
         hhvm_compat_mode,
+        allow_new_attribute_syntax,
         filename: String::from(filename),
     };
     // return empty string in case of failure (ambiguous because "" is not a valid JSON)

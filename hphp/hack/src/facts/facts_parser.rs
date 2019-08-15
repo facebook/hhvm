@@ -19,6 +19,7 @@ pub type FactsParser<'a> = Parser<'a, WithKind<FactsSmartConstructors<'a>>, HasS
 pub struct ExtractAsJsonOpts {
     pub php5_compat_mode: bool,
     pub hhvm_compat_mode: bool,
+    pub allow_new_attribute_syntax: bool,
     pub filename: String, // TODO(leoo,kasper) should eventually be Relative_path
 }
 
@@ -30,6 +31,7 @@ pub fn from_text(text: &str, opts: ExtractAsJsonOpts) -> Option<Facts> {
     let env = ParserEnv {
         php5_compat_mode: opts.php5_compat_mode,
         hhvm_compat_mode: opts.hhvm_compat_mode,
+        allow_new_attribute_syntax: opts.allow_new_attribute_syntax,
         ..ParserEnv::default()
     };
     let text = SourceText::make(&opts.filename, text.as_bytes());

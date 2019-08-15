@@ -312,10 +312,24 @@ let rec collect (ns, facts as acc) n =
 let from_text
     ~(php5_compat_mode:bool)
     ~(hhvm_compat_mode:bool)
+    ~(disable_nontoplevel_declarations:bool)
+    ~(disable_legacy_soft_typehints:bool)
+    ~(allow_new_attribute_syntax:bool)
+    ~(disable_legacy_attribute_syntax:bool)
     ~(filename: Relative_path.t)
     ~(text: string): facts option =
-  let env = Full_fidelity_parser_env.make ~codegen:true ~php5_compat_mode ~hhvm_compat_mode () in
   let text = Full_fidelity_source_text.make filename text in
+  let mode = Full_fidelity_parser.parse_mode ~rust:false text in
+  let env = Full_fidelity_parser_env.make
+    ~codegen:true
+    ~php5_compat_mode
+    ~hhvm_compat_mode
+    ~disable_nontoplevel_declarations
+    ~disable_legacy_soft_typehints
+    ~allow_new_attribute_syntax
+    ~disable_legacy_attribute_syntax
+    ?mode
+  () in
   let (parser, root) =
     let p = FactsParser.make env text in
     FactsParser.parse_script p in
@@ -331,9 +345,21 @@ let from_text
 let extract_as_json
     ~(php5_compat_mode:bool)
     ~(hhvm_compat_mode:bool)
+    ~(disable_nontoplevel_declarations:bool)
+    ~(disable_legacy_soft_typehints:bool)
+    ~(allow_new_attribute_syntax:bool)
+    ~(disable_legacy_attribute_syntax:bool)
     ~(filename: Relative_path.t)
     ~(text: string): Hh_json.json option =
-  from_text php5_compat_mode hhvm_compat_mode filename text
+  from_text
+    ~php5_compat_mode
+    ~hhvm_compat_mode
+    ~disable_nontoplevel_declarations
+    ~disable_legacy_soft_typehints
+    ~allow_new_attribute_syntax
+    ~disable_legacy_attribute_syntax
+    ~filename
+    ~text
   |> Option.map ~f:(fun facts ->
       let md5 = OpaqueDigest.to_hex @@ OpaqueDigest.string text in
       let sha1 = Sha1.digest text in
@@ -342,6 +368,10 @@ let extract_as_json
 let extract_as_json_string
     ~(php5_compat_mode:bool)
     ~(hhvm_compat_mode:bool)
+    ~(disable_nontoplevel_declarations:bool)
+    ~(disable_legacy_soft_typehints:bool)
+    ~(allow_new_attribute_syntax:bool)
+    ~(disable_legacy_attribute_syntax:bool)
     ~(filename: Relative_path.t)
     ~(text: string)
     ~(rust: bool): string option =
@@ -351,6 +381,7 @@ let extract_as_json_string
     let unnormalized = Rust_facts_ffi.extract_as_json_ffi
       php5_compat_mode
       hhvm_compat_mode
+      allow_new_attribute_syntax
       (Relative_path.suffix filename)
       text
     in
@@ -362,5 +393,13 @@ let extract_as_json_string
       Some (unnormalized |> Hh_json.json_of_string |> Hh_json.json_to_multiline)
   end
   else
-    extract_as_json ~php5_compat_mode ~hhvm_compat_mode ~filename ~text
+    extract_as_json
+      ~php5_compat_mode
+      ~hhvm_compat_mode
+      ~disable_nontoplevel_declarations
+      ~disable_legacy_soft_typehints
+      ~allow_new_attribute_syntax
+      ~disable_legacy_attribute_syntax
+      ~filename
+      ~text
     |> Option.map ~f:(Hh_json.json_to_multiline ~sort_keys:true)

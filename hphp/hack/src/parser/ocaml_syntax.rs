@@ -14,6 +14,8 @@ use parser::syntax::{SyntaxTypeBase, SyntaxValueType};
 use parser::syntax_kind::SyntaxKind;
 use parser_rust as parser;
 
+use ocamlpool_rust::utils::*;
+
 pub use crate::ocaml_syntax_generated::*;
 
 #[derive(Debug, Clone)]

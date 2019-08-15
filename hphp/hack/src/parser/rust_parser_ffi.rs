@@ -25,7 +25,8 @@ use parser::parser_env::ParserEnv;
 use parser::source_text::SourceText;
 use parser::stack_limit::StackLimit;
 
-use rust_to_ocaml::{caml_tuple, to_list, SerializationContext, ToOcaml};
+use ocamlpool_rust::utils::caml_tuple;
+use rust_to_ocaml::{to_list, SerializationContext, ToOcaml};
 
 use parser::parser::Parser;
 use parser::positioned_smart_constructors::*;

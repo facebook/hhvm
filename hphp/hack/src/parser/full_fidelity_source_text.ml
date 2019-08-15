@@ -53,16 +53,13 @@ let from_file file =
     try Sys_utils.cat (Relative_path.to_absolute file) with _ -> "" in
   make file content
 
-let text source_text =
-  source_text.text
-
 let file_path source_text =
   source_text.file_path
 
 let length source_text =
   source_text.length
 
-let get_text t =
+let text t =
   t.text
 
 let get source_text index =

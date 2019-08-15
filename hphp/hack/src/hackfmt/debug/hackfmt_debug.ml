@@ -107,7 +107,7 @@ let debug_chunk_groups env ~range source_text chunk_groups =
   )
 
 let debug_full_text source_text =
-  Printf.printf "%s\n" (SourceText.get_text source_text)
+  Printf.printf "%s\n" (SourceText.text source_text)
 
 let debug_ast syntax_tree =
   let root = SyntaxTree.root syntax_tree in

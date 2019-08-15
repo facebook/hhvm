@@ -25,20 +25,17 @@ val empty : t
 (** read a relative path into a source_text.t with the contents at that path *)
 val from_file : Relative_path.t -> t
 
-(** get the contents as a string *)
-val text : t -> string
-
 (** get the relative path *)
 val file_path : t -> Relative_path.t
 
 (** get the length of the contents *)
 val length : t -> int
 
-(** get the contents as a string *)
-val get_text : t -> string
-
 (** get the ith character *)
 val get : t -> int -> char
+
+(** get the contents as a string *)
+val text : t -> string
 
 (** get a substring start at the ith char and continuing for length *)
 val sub : t -> int -> int -> string

@@ -34,7 +34,6 @@ val make_env
   -> ?parser_options:ParserOptions.t
   -> ?fi_mode:FileInfo.mode
   -> ?is_hh_file:bool
-  -> ?stats:Stats_container.t
   -> ?hacksperimental:bool
   (* Required parts *)
   -> Relative_path.t

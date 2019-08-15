@@ -45,7 +45,6 @@ type env =
   ; parser_options           : ParserOptions.t
   ; fi_mode                  : FileInfo.mode
   ; file                     : Relative_path.t
-  ; stats                    : Stats_container.t option
   ; hacksperimental          : bool
   ; top_level_statements     : bool (* Whether we are (still) considering TLSs*)
   (* Changing parts; should disappear in future. `mutable` saves allocations. *)
@@ -89,7 +88,6 @@ let make_env
   ?(parser_options           = ParserOptions.default   )
   ?(fi_mode                  = FileInfo.Mpartial       )
   ?(is_hh_file               = false                   )
-  ?stats
   ?(hacksperimental          = false                   )
   (file : Relative_path.t)
   : env
@@ -114,7 +112,6 @@ let make_env
     ; fi_mode
     ; fail_open
     ; file
-    ; stats
     ; hacksperimental
     ; top_level_statements = true
     ; ignore_pos

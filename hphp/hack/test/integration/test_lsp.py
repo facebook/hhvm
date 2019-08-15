@@ -589,12 +589,17 @@ class TestLsp(TestCase[LspTestDriver]):
     def initialize_spec(
         self, spec: LspTestSpec, use_serverless_ide: bool
     ) -> LspTestSpec:
+        if use_serverless_ide:
+            initialization_options = {
+                "namingTableSavedStatePath": "${naming_table_saved_state_path}"
+            }
+        else:
+            initialization_options = {}
+
         spec = spec.ignore_notifications(method="telemetry/event").request(
             method="initialize",
             params={
-                "initializationOptions": {
-                    "namingTableSavedStatePath": "${naming_table_saved_state_path}"
-                },
+                "initializationOptions": initialization_options,
                 "processId": None,
                 "rootPath": "${root_path}",
                 "capabilities": {},
@@ -1003,7 +1008,49 @@ class TestLsp(TestCase[LspTestDriver]):
         self.prepare_server_environment()
         variables = self.setup_php_file("non_blocking.php")
         self.test_driver.start_hh_loop_forever_assert_timeout()
-        self.load_and_run("non_blocking", variables, wait_for_server=False)
+        spec = (
+            self.initialize_spec(LspTestSpec("non_blocking"), use_serverless_ide=False)
+            .wait_for_hh_server_ready()
+            .request(
+                method="textDocument/definition",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 7, "character": 11},
+                },
+                result=[
+                    {
+                        "uri": "file://${root_path}/non_blocking.php",
+                        "range": {
+                            "start": {"line": 2, "character": 9},
+                            "end": {"line": 2, "character": 32},
+                        },
+                        "title": "non_blocking_definition",
+                    }
+                ],
+                wait_id="definition request",
+            )
+            .notification(
+                comment="remove hh_loop_forever() invocation to break the infinite loop",
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${root_path}/__hh_loop_forever_foo.php",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": """\
+<?hh // strict
+
+function __hh_loop_forever_foo(): int {
+  return 4;
+}
+""",
+                    }
+                },
+            )
+            .wait_for_response(wait_id="definition request")
+            .request(method="shutdown", params={}, result=None)
+        )
+        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
 
     def test_serverless_ide_hierarchy_file_change_on_disk(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())

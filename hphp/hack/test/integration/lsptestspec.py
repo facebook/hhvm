@@ -26,6 +26,7 @@ _MessageSpec = Union[
     "_WaitForNotificationSpec",
     "_WaitForRequestSpec",
     "_WaitForResponseSpec",
+    "_WaitForHhServerReadySpec",
 ]
 
 
@@ -132,6 +133,11 @@ class LspTestSpec:
     def wait_for_response(self, wait_id: str) -> "LspTestSpec":
         messages = list(self._messages)
         messages.append(_WaitForResponseSpec(wait_id=wait_id))
+        return self._update(messages=messages)
+
+    def wait_for_hh_server_ready(self) -> "LspTestSpec":
+        messages = list(self._messages)
+        messages.append(_WaitForHhServerReadySpec())
         return self._update(messages=messages)
 
     def write_to_disk(
@@ -300,6 +306,14 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                         "params": {"id": lsp_id},
                     }
                 )
+            elif isinstance(message, _WaitForHhServerReadySpec):
+                json_commands.append(
+                    {
+                        "jsonrpc": "2.0",
+                        "method": "$test/waitForHhServerReady",
+                        "params": {},
+                    }
+                )
             else:
                 raise ValueError(f"unhandled message type {message.__class__.__name__}")
         return (json_commands, lsp_id_map)
@@ -346,7 +360,12 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 pass
             elif isinstance(
                 message,
-                (_WaitForRequestSpec, _WaitForNotificationSpec, _WaitForResponseSpec),
+                (
+                    _WaitForRequestSpec,
+                    _WaitForNotificationSpec,
+                    _WaitForResponseSpec,
+                    _WaitForHhServerReadySpec,
+                ),
             ):
                 # Nothing needs to be done here -- if we failed to wait for the
                 # message, an exception will have been thrown at the
@@ -804,6 +823,10 @@ class _WaitForResponseSpec:
 
     def __init__(self, *, wait_id: str) -> None:
         self.wait_id = wait_id
+
+
+class _WaitForHhServerReadySpec:
+    pass
 
 
 class _ErrorDescription:

@@ -237,6 +237,10 @@ void raise_dynamically_sampled_notice(folly::StringPiece fmt, Args&& ... args) {
 }
 
 void raise_array_serialization_notice(const char* src, const ArrayData* arr) {
+  assertx(RuntimeOption::EvalLogArrayProvenance);
+  if (UNLIKELY(g_context->getThrowAllErrors())) {
+    throw Exception("Would have logged provenance");
+  }
   static auto const sampl_threshold =
     RAND_MAX / RuntimeOption::EvalLogArrayProvenanceSampleRatio;
   if (std::rand() >= sampl_threshold) return;
@@ -276,7 +280,6 @@ void raise_array_serialization_notice(const char* src, const ArrayData* arr) {
       src);
   };
 
-  assertx(RuntimeOption::EvalLogArrayProvenance);
   auto const ann = arrprov::getTag(arr);
   if (!ann) { bail(); return; }
 

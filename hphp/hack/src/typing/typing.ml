@@ -4258,8 +4258,8 @@ and class_get_ ~is_method ~is_const ~this_ty ~coerce_from_ty ?(explicit_tparams=
               end;
               k (env, cc_locl_type)
         end else begin
-          let smethod = Env.get_static_member is_method env class_ mid in
-          match smethod with
+          let static_member_opt = Env.get_static_member is_method env class_ mid in
+          match static_member_opt with
           | None when (Cls.has_upper_bounds_on_this_from_constraints class_) ->
             try_get_smember_from_constraints env class_ k
           | None ->
@@ -4268,15 +4268,15 @@ and class_get_ ~is_method ~is_const ~this_ty ~coerce_from_ty ?(explicit_tparams=
           | Some {
               ce_visibility = vis;
               ce_lsb = lsb;
-              ce_type = lazy decl_method_;
+              ce_type = lazy member_decl_ty;
               _
             } ->
-            let p_vis = Reason.to_pos (fst decl_method_) in
+            let p_vis = Reason.to_pos (fst member_decl_ty) in
             TVis.check_class_access p env (p_vis, vis, lsb) cid class_;
-            let env, method_ =
-              begin match decl_method_ with
+            let env, member_ty =
+              begin match member_decl_ty with
                 (* We special case Tfun here to allow passing in explicit tparams to localize_ft. *)
-                | r, Tfun ft ->
+                | r, Tfun ft when is_method ->
                   let explicit_targs = List.map explicit_tparams
                     ~f:(Decl_hint.hint env.Env.decl_env) in
                   let env, ft =
@@ -4284,12 +4284,12 @@ and class_get_ ~is_method ~is_const ~this_ty ~coerce_from_ty ?(explicit_tparams=
                       ~ety_env env ft)
                   in env, (r, Tfun ft)
                 | _ ->
-                  Phase.localize ~ety_env env decl_method_
+                  Phase.localize ~ety_env env member_decl_ty
               end in
 
-            let env, method_ =
+            let env, member_ty =
             if (Cls.has_upper_bounds_on_this_from_constraints class_) then
-              let (env, method_'), succeed =
+              let (env, member_ty'), succeed =
                 Errors.try_with_result
                   (fun () ->
                     get_smember_from_constraints env class_ (fun x -> x), true)
@@ -4298,18 +4298,18 @@ and class_get_ ~is_method ~is_const ~this_ty ~coerce_from_ty ?(explicit_tparams=
                     (env, MakeType.mixed Reason.Rnone), false)
               in
               if (succeed) then
-                Inter.intersect env (Reason.Rwitness p) method_ method_'
+                Inter.intersect env (Reason.Rwitness p) member_ty member_ty'
 
-              else env, method_
-            else env, method_ in
+              else env, member_ty
+            else env, member_ty in
 
             let env =
               match coerce_from_ty with
               | None -> env
               | Some (p, ur, ty) ->
-                let et_enforced = Phase.is_enforceable env decl_method_ in
-                Type.coerce_type p ur env ty { et_type = method_; et_enforced } Errors.unify_error in
-            k (env, method_)
+                let et_enforced = Phase.is_enforceable env member_decl_ty in
+                Type.coerce_type p ur env ty { et_type = member_ty; et_enforced } Errors.unify_error in
+            k (env, member_ty)
 
         end
       )

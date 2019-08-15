@@ -10,7 +10,7 @@
       c_where_constraints = []; c_consts = []; c_typeconsts = [];
       c_vars =
       [{ cv_final = false; cv_xhp_attr = (Some { xai_tag = None });
-         cv_visibility = Public;
+         cv_abstract = false; cv_visibility = Public;
          cv_type = (Some ([4:13-34], (Hoption ([4:13-34], (Hprim Tstring)))));
          cv_id = ([4:35-38], ":bar"); cv_expr = None;
          cv_user_attributes = []; cv_doc_comment = None;

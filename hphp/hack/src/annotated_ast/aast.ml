@@ -448,6 +448,7 @@ and xhp_attr_info = { xai_tag: xhp_attr_tag option }
 and ('ex, 'fb, 'en, 'hi) class_var = {
   cv_final: bool;
   cv_xhp_attr: xhp_attr_info option;
+  cv_abstract: bool;
   cv_visibility: visibility;
   cv_type: hint option;
   cv_id: sid;

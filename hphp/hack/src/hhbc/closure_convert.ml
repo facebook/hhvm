@@ -484,6 +484,7 @@ let make_closure ~class_num
   let make_class_var name: class_var = {
       cv_final = false;
       cv_xhp_attr = None;
+      cv_abstract = false;
       cv_visibility = Aast.Private;
       cv_type = None;
       cv_id = (p, name);
@@ -1428,6 +1429,7 @@ and add_reified_property cd c_vars =
         cv_xhp_attr = None;
         cv_is_promoted_variadic = false;
         cv_doc_comment = None;
+        cv_abstract = false;
         cv_visibility = Aast.Private;
         cv_type = hint;
         cv_id = (p, SU.Reified.reified_prop_name);

@@ -31,8 +31,12 @@ let get_full_name class_name name =
   | Some class_name -> class_name ^ "::" ^ name
 
 let summarize_property class_name var =
-  let is_abstract = false in
-  let modifiers = modifiers_to_list ~is_final:var.cv_final ~visibility:var.cv_visibility ~is_abstract ~is_static:var.cv_is_static in
+  let modifiers = modifiers_to_list
+    ~is_final:var.cv_final
+    ~visibility:var.cv_visibility
+    ~is_abstract:var.cv_abstract
+    ~is_static:var.cv_is_static
+  in
   let (pos, name) = var.cv_id in
   let kind = Property in
   let id = get_symbol_id kind (Some class_name) name in

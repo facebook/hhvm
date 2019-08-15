@@ -116,6 +116,7 @@ let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
     sp_name;
     sp_needs_init = _;
     sp_type;
+    sp_abstract;
     sp_visibility;
     sp_fixme_codes = _;
   } = prop in
@@ -132,7 +133,7 @@ let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
     id = snd sp_name;
     inherit_when_private = mro.mro_copy_private_members;
     elt = {
-      ce_abstract = false;
+      ce_abstract = sp_abstract;
       ce_final = true;
       ce_xhp_attr;
       ce_const;

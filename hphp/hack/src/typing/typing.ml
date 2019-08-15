@@ -6517,6 +6517,7 @@ and class_var_def ~is_static env cv =
     {
       T.cv_final = cv.cv_final;
       T.cv_xhp_attr = cv.cv_xhp_attr;
+      T.cv_abstract = cv.cv_abstract;
       T.cv_visibility = cv.cv_visibility;
       T.cv_type = cv.cv_type;
       T.cv_id = cv.cv_id;

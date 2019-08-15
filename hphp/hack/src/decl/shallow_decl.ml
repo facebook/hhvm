@@ -120,6 +120,7 @@ let prop env cv =
     sp_name = cv.cv_id;
     sp_needs_init = Option.is_none cv.cv_expr;
     sp_type = ty;
+    sp_abstract = cv.cv_abstract;
     sp_visibility = cv.cv_visibility;
     sp_fixme_codes = Fixme_provider.get_fixme_codes_for_pos cv_pos;
   }
@@ -148,6 +149,7 @@ and static_prop env c cv =
     sp_name = cv_pos, id;
     sp_needs_init = Option.is_none cv.cv_expr;
     sp_type = ty;
+    sp_abstract = cv.cv_abstract;
     sp_visibility = cv.cv_visibility;
     sp_fixme_codes = Fixme_provider.get_fixme_codes_for_pos cv_pos;
   }

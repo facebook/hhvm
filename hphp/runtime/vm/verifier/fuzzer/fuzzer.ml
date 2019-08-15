@@ -655,6 +655,7 @@ let mutate_metadata (input : HP.t)  =
       Hhas_property.make
         (prop |> Hhas_property.attributes)
         (prop |> Hhas_property.visibility         |> mutate_visibility)
+        (prop |> Hhas_property.is_abstract        |> mutate_bool)
         (prop |> Hhas_property.is_static          |> mutate_bool)
         (prop |> Hhas_property.is_deep_init       |> mutate_bool)
         (prop |> Hhas_property.is_const           |> mutate_bool)

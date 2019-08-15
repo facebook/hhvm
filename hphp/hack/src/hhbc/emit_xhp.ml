@@ -136,6 +136,7 @@ let properties_for_cache ~ns class_ class_is_const =
     Emit_property.from_ast
       class_
       []
+      false (* is_not_abstract *)
       true (* is_static *)
       Aast.Private
       class_is_const

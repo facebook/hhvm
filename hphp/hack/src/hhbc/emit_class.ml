@@ -137,6 +137,7 @@ let from_class_elt_classvars
     Emit_property.from_ast
       ast_class
       cv.A.cv_user_attributes
+      cv.A.cv_abstract
       cv.A.cv_is_static
       cv.A.cv_visibility (* This used to be cv_kinds *)
       class_is_const

@@ -105,6 +105,7 @@ let valid_tc_prop_field tc class_is_record =
 let from_ast
     class_
     cv_user_attributes
+    is_abstract
     is_static
     cv_visibility
     class_is_const
@@ -208,6 +209,7 @@ let from_ast
   Hhas_property.make
     attributes
     visibility
+    is_abstract
     is_static
     is_deep_init
     is_const

@@ -552,12 +552,14 @@ let converter
       kinds
   and on_class_var xhp_info h attrs kinds variadic doc_com (span, id, eopt) =
     let cv_final = mem kinds Final in
+    let cv_abstract = mem kinds Abstract in
     let cv_visibility = get_visibility_from_kinds kinds in
     let cv_is_static = mem kinds Static in
     Aast.
       {
         cv_final;
         cv_xhp_attr = xhp_info;
+        cv_abstract;
         cv_visibility;
         cv_type = h;
         cv_id = id;

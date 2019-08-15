@@ -36,6 +36,7 @@ type shallow_prop = {
   sp_name        : Aast.sid;
   sp_needs_init  : bool;
   sp_type        : decl ty option;
+  sp_abstract    : bool;
   sp_visibility  : Aast.visibility;
   sp_fixme_codes : ISet.t;
 } [@@deriving show]

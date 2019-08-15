@@ -9,7 +9,8 @@
       c_implements = []; c_where_constraints = []; c_consts = [];
       c_typeconsts = [];
       c_vars =
-      [{ cv_final = false; cv_xhp_attr = None; cv_visibility = Private;
+      [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false;
+         cv_visibility = Private;
          cv_type = (Some ([4:11-15], (Hoption ([4:12-15], (Hprim Tint)))));
          cv_id = ([4:16-20], "foo");
          cv_expr = (Some (([4:23-27], null), Null)); cv_user_attributes = [];

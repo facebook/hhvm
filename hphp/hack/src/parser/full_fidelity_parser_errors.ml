@@ -3218,7 +3218,8 @@ let classish_errors env node namespace_name names errors =
             else errors in
           let errors =
             if has_abstract && has_private then
-              make_error_from_node node SyntaxError.const_abstract_private :: errors
+              make_error_from_node node
+                (SyntaxError.elt_abstract_private "constants") :: errors
             else errors in
           let errors =
             multiple_visibility_errors
@@ -3656,10 +3657,16 @@ let class_property_modifiers_errors env node errors =
           methodish_contains_abstract node
           SyntaxError.error2058 node
       else
-        produce_error errors
-          (fun n -> methodish_contains_abstract n &&
-            not (methodish_contains_static n)) node
-            SyntaxError.abstract_instance_property node
+        let errors =
+          produce_error errors
+            (fun n -> methodish_contains_abstract n &&
+              not (methodish_contains_static n)) node
+              SyntaxError.abstract_instance_property node
+        in
+        if methodish_contains_abstract node && methodish_contains_private node then
+          make_error_from_node node
+            (SyntaxError.elt_abstract_private "properties") :: errors
+        else errors
     in
     errors
   | _ -> errors

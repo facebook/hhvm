@@ -721,7 +721,7 @@ let type_keyword =
 let non_public_const_in_interface =
 "Constants inside of interfaces must have 'public' visibility."
 
-let const_abstract_private = "Cannot declare abstract constants private."
+let elt_abstract_private elt = "Cannot declare abstract " ^ elt ^ " private."
 
 let const_has_multiple_visibilities =
   "A constant cannot have multiple visibility modifiers."

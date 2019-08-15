@@ -1,0 +1,4 @@
+(5,3)-(5,48) An abstract property must not have an initializer.
+(6,24)-(6,26) An abstract constant declaration must not have an initializer.
+(9,3)-(9,35) A const static property must have an initializer.
+(10,14)-(10,14) A concrete constant declaration must have an initializer.

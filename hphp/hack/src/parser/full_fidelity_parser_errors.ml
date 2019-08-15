@@ -3664,29 +3664,42 @@ let class_property_modifiers_errors env node errors =
     errors
   | _ -> errors
 
-let class_property_const_errors env node errors =
+let class_property_const_errors node errors =
   match syntax node with
-  | PropertyDeclaration { property_attribute_spec; property_declarators; _ } ->
-    if attr_spec_contains_const property_attribute_spec then
-      let errors =
-        if attribute_specification_contains property_attribute_spec SN.UserAttributes.uaLateInit then
-          (* __LateInit together with const just doesn't make sense. *)
-          make_error_from_node node SyntaxError.no_const_late_init_props :: errors
-        else errors
-      in
-      if ParserOptions.const_static_props env.parser_options &&
-        methodish_contains_static node then
-          let declarators = syntax_to_list_no_separators property_declarators in
-          let check_decl errors decl =
-            match syntax decl with
-            | PropertyDeclarator { property_initializer; _ }
-              when is_missing property_initializer ->
-              make_error_from_node node SyntaxError.const_static_prop_init :: errors
-            | _ -> errors
-          in
-          List.fold_left declarators ~f:check_decl ~init:errors
-      else errors
+  | PropertyDeclaration { property_attribute_spec; _ } ->
+    if attr_spec_contains_const property_attribute_spec &&
+      attribute_specification_contains property_attribute_spec
+      SN.UserAttributes.uaLateInit
+    then
+      (* __LateInit together with const just doesn't make sense. *)
+      make_error_from_node node SyntaxError.no_const_late_init_props :: errors
     else errors
+  | _ -> errors
+
+let class_property_declarator_errors env node errors =
+  let check_decls f error property_declarators =
+    let check_decl errors decl =
+      match syntax decl with
+      | PropertyDeclarator { property_initializer; _ }
+        when f property_initializer ->
+        make_error_from_node node error :: errors
+      | _ -> errors
+    in
+    let declarators = syntax_to_list_no_separators property_declarators in
+    List.fold_left declarators ~init:errors ~f:check_decl
+  in
+  match syntax node with
+  | PropertyDeclaration { property_attribute_spec; property_declarators; _ }
+    when ParserOptions.const_static_props env.parser_options &&
+      methodish_contains_static node ->
+      if methodish_contains_abstract node &&
+        ParserOptions.abstract_static_props env.parser_options then
+        check_decls (fun n -> not (is_missing n))
+          SyntaxError.abstract_prop_init property_declarators
+      else if attr_spec_contains_const property_attribute_spec then
+        check_decls is_missing SyntaxError.const_static_prop_init
+          property_declarators
+      else errors
   | _ -> errors
 
 let mixed_namespace_errors _env node parents namespace_type errors =
@@ -4107,7 +4120,8 @@ let find_syntax_errors env =
       | PropertyDeclaration _ ->
         let errors = class_property_modifiers_errors env node errors in
         let errors = class_reified_param_errors env node errors in
-        let errors = class_property_const_errors env node errors in
+        let errors = class_property_const_errors node errors in
+        let errors = class_property_declarator_errors env node errors in
         trait_require_clauses, names, errors
       | EnumDeclaration _ ->
         let errors = enum_decl_errors node errors in

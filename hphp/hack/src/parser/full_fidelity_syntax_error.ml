@@ -210,8 +210,9 @@ let error2047 visibility_modifier = "Methods inside of interfaces may not be " ^
 let error2048 = "Expected group use prefix to end with '\\'"
 let error2049 = "A namespace use clause may not specify the kind here."
 let error2050 = "A concrete constant declaration must have an initializer."
-let error2051 = "An abstract constant declaration must not have an initializer."
 let const_static_prop_init = "A const static property must have an initializer."
+let error2051 = "An abstract constant declaration must not have an initializer."
+let abstract_prop_init = "An abstract property must not have an initializer."
 let error2052 = "Cannot mix bracketed namespace declarations with " ^
   "unbracketed namespace declarations"
 let error2053 = "Use of 'var' as synonym for 'public' in declaration disallowed in Hack. " ^

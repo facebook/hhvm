@@ -10,12 +10,13 @@ type entry = {
   file_input: ServerCommandTypes.file_input;
   path: Relative_path.t;
   ast: Nast.program;
-} [@@deriving show]
+}
+[@@deriving show]
 (** The information associated with a given file. *)
 
 type t = {
   tcopt: TypecheckerOptions.t;
-  entries: entry Relative_path.Map.t
+  entries: entry Relative_path.Map.t;
 }
 (** A context mapping from file to the [entry] for that file.
 

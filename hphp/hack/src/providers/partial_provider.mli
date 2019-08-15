@@ -7,4 +7,4 @@
  *
  *)
 
- val should_check_error : FileInfo.mode -> int -> bool
+val should_check_error : FileInfo.mode -> int -> bool

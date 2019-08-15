@@ -377,3 +377,4 @@ val no_const_abstract_final_class : string
 val no_legacy_attribute_syntax : string
 val no_silence : string
 val declared_final : string -> string
+val abstract_instance_property : string

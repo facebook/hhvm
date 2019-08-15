@@ -222,6 +222,7 @@ let error2055 = "At least one enumerated item is expected."
 let error2056 = "First unbracketed namespace occurrence here"
 let error2057 = "First bracketed namespace occurrence here"
 let error2058 = "Property may not be abstract."
+let abstract_instance_property = "Instance property may not be abstract."
 let invalid_shape_field_name = "Shape field name must be a nonempty single-quoted string or a class constant"
 let shape_field_int_like_string = "Shape field name must not be an int-like string (i.e. \"123\")"
 let error2061 = "Non-static instance variables are not allowed in abstract " ^

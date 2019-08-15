@@ -3651,9 +3651,15 @@ let class_property_modifiers_errors env node errors =
         SyntaxError.property_requires_visibility node
     in
     let errors =
-      produce_error errors
-        methodish_contains_abstract node
-        SyntaxError.error2058 node
+      if not (ParserOptions.abstract_static_props env.parser_options) then
+        produce_error errors
+          methodish_contains_abstract node
+          SyntaxError.error2058 node
+      else
+        produce_error errors
+          (fun n -> methodish_contains_abstract n &&
+            not (methodish_contains_static n)) node
+            SyntaxError.abstract_instance_property node
     in
     errors
   | _ -> errors

@@ -130,6 +130,7 @@ and static_prop env c cv =
   let ty = Option.map cv.cv_type ~f:(Decl_hint.hint env) in
   let id = "$" ^ cv_name in
   let lateinit = Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes in
+  let abstract = cv.cv_abstract in
   let lsb = Attrs.mem SN.UserAttributes.uaLSB cv.cv_user_attributes in
   let const = Attrs.mem SN.UserAttributes.uaConst cv.cv_user_attributes in
   if cv.cv_expr = None && FileInfo.(is_strict c.c_mode || c.c_mode = Mpartial)
@@ -137,7 +138,7 @@ and static_prop env c cv =
     | None
     | Some (_, Hmixed)
     | Some (_, Hoption _) -> ()
-    | _ when not lateinit -> Errors.missing_assign cv_pos
+    | _ when not lateinit && not abstract -> Errors.missing_assign cv_pos
     | _ -> ()
   end;
   if lateinit && cv.cv_expr <> None then Errors.lateinit_with_default cv_pos;
@@ -149,7 +150,7 @@ and static_prop env c cv =
     sp_name = cv_pos, id;
     sp_needs_init = Option.is_none cv.cv_expr;
     sp_type = ty;
-    sp_abstract = cv.cv_abstract;
+    sp_abstract = abstract;
     sp_visibility = cv.cv_visibility;
     sp_fixme_codes = Fixme_provider.get_fixme_codes_for_pos cv_pos;
   }

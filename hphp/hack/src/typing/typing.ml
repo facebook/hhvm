@@ -6243,6 +6243,7 @@ and class_def_ tcopt env c tc =
   then begin
     check_extend_abstract_meth ~is_final pc (Cls.methods tc);
     check_extend_abstract_meth ~is_final pc (Cls.smethods tc);
+    check_extend_abstract_prop ~is_final pc (Cls.sprops tc);
     check_extend_abstract_const ~is_final pc (Cls.consts tc);
     check_extend_abstract_typeconst ~is_final pc (Cls.typeconsts tc);
   end;
@@ -6373,6 +6374,13 @@ and check_extend_abstract_meth ~is_final p seq =
     | lazy (r, Tfun { ft_abstract = true; _ }) ->
         Errors.implement_abstract ~is_final p (Reason.to_pos r) "method" x
     | _ -> ()
+  end
+
+and check_extend_abstract_prop ~is_final p seq =
+  Sequence.iter seq begin fun (x, ce) ->
+    if ce.ce_abstract then
+      let ce_pos = Lazy.force ce.ce_type |> fst |> Reason.to_pos in
+      Errors.implement_abstract ~is_final p ce_pos "property" x
   end
 
 (* Type constants must be bound to a concrete type for non-abstract classes.

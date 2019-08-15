@@ -23,6 +23,7 @@ let with_buck =
 
 (rule
   (targets librust_parser_ffi_stubs.a)
+  (deps (source_tree %{workspace_root}/src))
   (locks /cargo)
   (action
     (run %{workspace_root}/scripts/build_rust_to_ocaml.sh

@@ -191,15 +191,15 @@ let attributes_from_decl ns attributes =
   let open FSC in
   let attributes_value_aux node l =
     match node with
-    | Name s -> l @ [s()] (* TODO(T47593892) fold constant *)
-    | String s -> l @ [s()] (* TODO(T47593892) fold constant *)
+    | Name s -> l @ [s()]
+    | String s -> l @ [s ~unescape:true ()]
     | ScopeResolutionExpression (Name name, Class) ->
       l @ [if ns = "" then name() else ns ^ "\\" ^ name()]
     | _ -> l in
     let attributes_values_aux node =
     match node with
     | Name s -> [s()]
-    | String s -> [s()]
+    | String s -> [s ~unescape:true ()]
     | List l -> List.fold_right ~f:attributes_value_aux ~init:[] l
     | _ -> [] in
     let attributes_name_aux acc l2 node =

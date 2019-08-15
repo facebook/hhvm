@@ -87,11 +87,13 @@ fn qualified_name(namespace: &str, name: Node) -> Option<String> {
         let mut leading_backslash = false;
         for (index, part) in parts.into_iter().enumerate() {
             match part {
-                Name(name) => qualified_name.push_str(&String::from_utf8_lossy(name.as_slice())),
+                Name(name) => {
+                    qualified_name.push_str(&String::from_utf8_lossy(name.get().as_slice()))
+                }
                 Backslash if index == 0 => leading_backslash = true,
                 ListItem(listitem) => {
                     if let (Name(name), Backslash) = *listitem {
-                        qualified_name.push_str(&String::from_utf8_lossy(name.as_slice()));
+                        qualified_name.push_str(&String::from_utf8_lossy(name.get().as_slice()));
                         qualified_name.push_str("\\");
                     }
                 }
@@ -108,7 +110,7 @@ fn qualified_name(namespace: &str, name: Node) -> Option<String> {
     match name {
         Name(name) => {
             // always a simple name
-            let name = String::from_utf8_lossy(&name).to_string();
+            let name = name.to_string();
             Some(if namespace.is_empty() {
                 name
             } else {
@@ -117,7 +119,7 @@ fn qualified_name(namespace: &str, name: Node) -> Option<String> {
         }
         XhpName(name) => {
             // xhp names are always unqualified
-            let name = String::from_utf8_lossy(&name).to_string();
+            let name = name.to_string();
             Some(mangle_xhp_id(name))
         }
         Node::QualifiedName(parts) => qualified_name_from_parts(namespace, parts),
@@ -162,7 +164,7 @@ fn defines_from_method_body(constants: Vec<String>, body: Node) -> Vec<String> {
             Node::List(nodes) => nodes.into_iter().fold(acc, aux),
             Node::Define(define) => {
                 if let Node::Name(name) = *define {
-                    acc.push(define_name(&name));
+                    acc.push(define_name(&name.get()));
                 }
                 acc
             }
@@ -219,12 +221,12 @@ fn attributes_into_facts(namespace: &str, attributes: Node) -> Attributes {
                     let attribute_values_aux = |attribute_node| match attribute_node {
                         Node::Name(name) => {
                             let mut attribute_values = Vec::new();
-                            attribute_values.push(String::from_utf8_lossy(&name).to_string());
+                            attribute_values.push(name.to_string());
                             attribute_values
                         }
                         Node::String(name) => {
                             let mut attribute_values = Vec::new();
-                            attribute_values.push(String::from_utf8_lossy(&name).to_string());
+                            attribute_values.push(name.to_unescaped_string());
                             attribute_values
                         }
                         Node::List(nodes) => {
@@ -232,25 +234,20 @@ fn attributes_into_facts(namespace: &str, attributes: Node) -> Attributes {
                                 .into_iter()
                                 .fold(Vec::new(), |mut attribute_values, node| match node {
                                     Node::Name(name) => {
-                                        // TODO(T47593892) fold constant
-                                        attribute_values
-                                            .push(String::from_utf8_lossy(&name).to_string());
+                                        attribute_values.push(name.to_string());
                                         attribute_values
                                     }
                                     Node::String(name) => {
                                         // TODO(T47593892) fold constant
-                                        attribute_values
-                                            .push(String::from_utf8_lossy(&name).to_string());
+                                        attribute_values.push(name.to_unescaped_string());
                                         attribute_values
                                     }
                                     Node::ScopeResolutionExpression(expr) => {
                                         if let (Node::Name(name), Node::Class) = *expr {
                                             attribute_values.push(if namespace.is_empty() {
-                                                String::from_utf8_lossy(&name).to_string()
+                                                name.to_string()
                                             } else {
-                                                namespace.to_owned()
-                                                    + "\\"
-                                                    + &String::from_utf8_lossy(&name).to_string()
+                                                namespace.to_owned() + "\\" + &name.to_string()
                                             });
                                         }
                                         attribute_values
@@ -262,17 +259,12 @@ fn attributes_into_facts(namespace: &str, attributes: Node) -> Attributes {
                     };
                     match &(item.0) {
                         Node::Name(name) => {
-                            attributes.insert(
-                                String::from_utf8_lossy(name).to_string(),
-                                attribute_values_aux(item.1),
-                            );
+                            attributes.insert(name.to_string(), attribute_values_aux(item.1));
                             attributes
                         }
                         Node::String(name) => {
-                            attributes.insert(
-                                String::from_utf8_lossy(name).to_string(),
-                                attribute_values_aux(item.1),
-                            );
+                            attributes
+                                .insert(name.to_unescaped_string(), attribute_values_aux(item.1));
                             attributes
                         }
                         _ => attributes,
@@ -390,7 +382,7 @@ fn collect(mut acc: CollectAcc, node: Node) -> CollectAcc {
         Define(define) => {
             if acc.0.is_empty() {
                 if let Node::String(ref name) = *define {
-                    acc.1.constants.push(define_name(name));
+                    acc.1.constants.push(define_name(&name.get()));
                 }
             }
         }

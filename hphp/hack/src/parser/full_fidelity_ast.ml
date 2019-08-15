@@ -625,36 +625,11 @@ let prepString2 env : node list -> node list =
     if width s > 0 then s :: unwind ss else unwind ss
   | x -> x (* unchanged *)
 
-let extract_unquoted_string ~start ~len content =
-  try (* Using String.sub; Invalid_argument when str too short *)
-    if len >= 3 && String.sub content start 3 = "<<<" (* The heredoc case *)
-    then
-       (* These types of strings begin with an opening line containing <<<
-        * followed by a string to use as a terminator (which is optionally
-        * quoted) and end with a line containing only the terminator and a
-        * semicolon followed by a blank line. We need to drop the opening line
-        * as well as the blank line and preceding terminator line.
-        *)
-       let start_ = String.index_from_exn content start '\n' + 1 in
-       let end_ = String.rindex_from_exn content (start + len - 2) '\n' in
-       (* An empty heredoc, this way, will have start >= end *)
-       if start_ >= end_ then "" else String.sub content start_ (end_ - start_)
-    else
-      match String.get content start, String.get content (start + len - 1) with
-        | '"', '"' | '\'', '\'' | '`', '`' ->
-            String.sub content (start + 1) (len - 2)
-        | _ ->
-            if start = 0 && len = String.length content then
-              content
-            else
-              String.sub content start len
-  with Invalid_argument _ | Not_found_s _ | Caml.Not_found -> content
-
 let mkStr env node : (string -> string) -> string -> string = fun unescaper content ->
   let content = if String.length content > 0 && content.[0] = 'b'
     then String.sub content 1 (String.length content - 1) else content in
   let len = String.length content in
-  let no_quotes = extract_unquoted_string ~start:0 ~len content in
+  let no_quotes = Php_escaping.extract_unquoted_string ~start:0 ~len content in
   try unescaper no_quotes with
   | Php_escaping.Invalid_string _ ->
     raise_parsing_error env
@@ -1343,7 +1318,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         expr
           |> source_text
           |> SourceText.text
-          |> extract_unquoted_string
+          |> Php_escaping.extract_unquoted_string
               ~start:(start_offset expr)
               ~len:(width expr) in
       Call (

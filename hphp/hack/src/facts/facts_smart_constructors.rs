@@ -12,6 +12,9 @@ use parser::flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
 use parser::lexable_token::LexableToken;
 use parser::source_text::SourceText;
 use parser::token_kind::TokenKind;
+use utils_rust::extract_unquoted_string;
+use utils_rust::unescape_double;
+use utils_rust::unescape_single;
 
 pub use crate::facts_smart_constructors_generated::*;
 
@@ -19,7 +22,29 @@ pub type HasScriptContent<'a> = (bool, SourceText<'a>);
 
 // TODO(leoo) consider avoiding always materializing substrings using something like (hard):
 // type GetName<'a> = Box<Fn() -> &'a [u8]>;  // would require lifetime 'a param everywhere
-type GetName = Vec<u8>;
+pub struct GetName {
+    string: Vec<u8>,
+    unescape: fn(String) -> String,
+}
+
+impl GetName {
+    pub fn get(&self) -> &Vec<u8> {
+        &self.string
+    }
+    pub fn to_string(&self) -> String {
+        String::from_utf8_lossy(&self.string).to_string()
+    }
+    pub fn to_unescaped_string(&self) -> String {
+        let unescape = self.unescape;
+        unescape(self.to_string())
+    }
+}
+
+impl std::fmt::Debug for GetName {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "GetName {{ string: {}, unescape:? }}", self.to_string())
+    }
+}
 
 #[derive(Debug)]
 pub enum Node {
@@ -145,11 +170,32 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
         };
         let kind = token.kind();
         let result = match kind {
-            TokenKind::Name => Node::Name(token_text()),
-            TokenKind::DecimalLiteral => Node::String(token_text()),
-            TokenKind::SingleQuotedStringLiteral => Node::String(token_text()),
-            TokenKind::DoubleQuotedStringLiteral => Node::String(token_text()),
-            TokenKind::XHPClassName => Node::XhpName(token_text()),
+            TokenKind::Name => Node::Name(GetName {
+                string: token_text(),
+                unescape: |string| string,
+            }),
+            TokenKind::DecimalLiteral => Node::String(GetName {
+                string: token_text(),
+                unescape: |string| string,
+            }),
+            TokenKind::SingleQuotedStringLiteral => Node::String(GetName {
+                string: token_text(),
+                unescape: |string| {
+                    let tmp = unescape_single(string.as_str()).ok().unwrap();
+                    extract_unquoted_string(&tmp, 0, tmp.len()).ok().unwrap()
+                },
+            }),
+            TokenKind::DoubleQuotedStringLiteral => Node::String(GetName {
+                string: token_text(),
+                unescape: |string| {
+                    let tmp = unescape_double(string.as_str()).ok().unwrap();
+                    extract_unquoted_string(&tmp, 0, tmp.len()).ok().unwrap()
+                },
+            }),
+            TokenKind::XHPClassName => Node::XhpName(GetName {
+                string: token_text(),
+                unescape: |string| string,
+            }),
             TokenKind::Backslash => Node::Backslash,
             TokenKind::Class => Node::Class,
             TokenKind::Trait => Node::Trait,

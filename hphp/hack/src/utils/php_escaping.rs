@@ -304,7 +304,7 @@ fn unescape_single_or_nowdoc(is_nowdoc: bool, s: &str) -> Result<String, Invalid
     Ok(output)
 }
 
-fn unescape_single(s: &str) -> Result<String, InvalidString> {
+pub fn unescape_single(s: &str) -> Result<String, InvalidString> {
     unescape_single_or_nowdoc(false, s)
 }
 
@@ -314,6 +314,63 @@ fn unescape_nowdoc(s: &str) -> Result<String, InvalidString> {
 
 fn unescape_long_string(s: &str) -> Result<String, InvalidString> {
     unescape_literal(LiteralKind::LiteralLongString, s)
+}
+
+pub fn extract_unquoted_string(
+    content: &str,
+    start: usize,
+    len: usize,
+) -> Result<String, InvalidString> {
+    if len == 0 {
+        Ok("".to_string())
+    } else if content.len() > 3 && content.starts_with("<<<") {
+        // The heredoc case
+        // These types of strings begin with an opening line containing <<<
+        // followed by a string to use as a terminator (which is optionally
+        // quoted) and end with a line containing only the terminator and a
+        // semicolon followed by a blank line. We need to drop the opening line
+        // as well as the blank line and preceding terminator line.
+        match (content.find('\n'), content.rfind('\n')) {
+            (Some(start_), Some(end_)) =>
+            // An empty heredoc, this way, will have start >= end
+            {
+                if start_ >= end_ {
+                    Ok("".to_string())
+                } else {
+                    Ok(content[start_ + 1..end_].to_string())
+                }
+            }
+            _ => Err(InvalidString {
+                msg: String::from("out of bounds"),
+            }),
+        }
+    } else {
+        static SINGLE_QUOTE: u8 = '\'' as u8;
+        static DOUBLE_QUOTE: u8 = '"' as u8;
+        static BACK_TICK: u8 = '`' as u8;
+        match (
+            content.as_bytes().get(start),
+            content.as_bytes().get(start + len - 1),
+        ) {
+            (Some(&c1), Some(&c2))
+                if (c1 == DOUBLE_QUOTE && c2 == DOUBLE_QUOTE)
+                    || c1 == SINGLE_QUOTE && c2 == SINGLE_QUOTE
+                    || c1 == BACK_TICK && c2 == BACK_TICK =>
+            {
+                Ok(content[start + 1..len - 1].to_string())
+            }
+            (Some(_), Some(_)) => {
+                if start == 0 && content.len() == len {
+                    Ok(content.to_string())
+                } else {
+                    Ok(content[start..start + len].to_string())
+                }
+            }
+            _ => Err(InvalidString {
+                msg: String::from("out of bounds"),
+            }),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -375,6 +432,25 @@ mod tests {
         assert_eq!(escape("red\n\t\r$?"), "red\\n\\t\\r$\\?");
         assert_eq!(is_oct('5'), true);
         assert_eq!(is_oct('a'), false);
+    }
+
+    #[test]
+    fn extract_unquoted_string_test() {
+        assert_eq!(extract_unquoted_string("'a'", 0, 3).unwrap(), "a");
+        assert_eq!(extract_unquoted_string("\"a\"", 0, 3).unwrap(), "a");
+        assert_eq!(extract_unquoted_string("`a`", 0, 3).unwrap(), "a");
+        assert_eq!(extract_unquoted_string("", 0, 0).unwrap(), "");
+        assert_eq!(extract_unquoted_string("''", 0, 2).unwrap(), "");
+        assert_eq!(extract_unquoted_string("'a", 0, 2).unwrap(), "'a");
+        assert_eq!(extract_unquoted_string("a", 0, 1).unwrap(), "a");
+        assert_eq!(
+            extract_unquoted_string("<<<EOT\n\nEOT;", 0, 12).unwrap(),
+            ""
+        );
+        assert_eq!(
+            extract_unquoted_string("<<<EOT\na\nEOT;", 0, 13).unwrap(),
+            "a"
+        );
     }
 
 }

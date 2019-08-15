@@ -15,7 +15,7 @@ module TK = Full_fidelity_token_kind
 
 (* result of parsing: simplified AST *)
 
-type get_name = unit -> string [@@deriving show]
+type get_name = ?unescape:bool -> unit -> string [@@deriving show]
 
 type has_script_content = bool [@@deriving show]
 
@@ -117,11 +117,23 @@ module SC = struct
     let kind = Token.kind token in
     let result =
       match Token.kind token with
-      | TK.Name -> Name (fun () -> Token.text token)
-      | TK.DecimalLiteral -> String (fun () -> Token.text token)
-      | TK.SingleQuotedStringLiteral
-      | TK.DoubleQuotedStringLiteral -> String (fun () -> Token.text token)
-      | TK.XHPClassName -> XhpName (fun () -> Token.text token)
+      | TK.Name -> Name (fun ?unescape:(_unescape=false) () -> Token.text token)
+      | TK.DecimalLiteral -> String (fun ?unescape:(_unescape=false) () -> Token.text token)
+      | TK.SingleQuotedStringLiteral -> String (fun ?unescape:(unescape=false) () ->
+        match unescape with
+          | true ->
+            let text = Token.text token in
+            let unescaped_text = Php_escaping.unescape_single text in
+            let unescaped_text_len = String.length unescaped_text in
+            Php_escaping.extract_unquoted_string ~start:0 ~len:unescaped_text_len unescaped_text
+          | false -> Token.text token)
+      | TK.DoubleQuotedStringLiteral -> String (fun ?unescape:(unescape=false) () ->
+        match unescape with
+          | true ->
+            let text = Token.text token in
+            Php_escaping.unescape_double (String.sub text 1 (String.length text - 2))
+          | false -> Token.text token)
+      | TK.XHPClassName -> XhpName (fun ?unescape:(_unescape=false) () -> Token.text token)
       | TK.Backslash -> Backslash
       | TK.Class -> Class
       | TK.Trait -> Trait

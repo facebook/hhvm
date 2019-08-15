@@ -14,7 +14,6 @@ open Typing_env_return_info
 module Env = Typing_env
 module TUtils = Typing_utils
 module MakeType = Typing_make_type
-module Phase = Typing_phase
 
 (* The regular strip_awaitable function depends on expand_type and only works on locl types *)
 let strip_awaitable_decl fun_kind env (ty: decl ty) =
@@ -70,7 +69,7 @@ let make_info fun_kind attributes env ~is_explicit locl_ty decl_ty =
     | None -> false
     | Some decl_ty ->
       let stripped_decl_ty = strip_awaitable_decl fun_kind env decl_ty in
-      Phase.is_enforceable env stripped_decl_ty in
+      Typing_enforceability.is_enforceable env stripped_decl_ty in
   let return_type = { et_type = locl_ty; et_enforced } in
   if not return_disposable
   then enforce_return_not_disposable fun_kind env return_type;

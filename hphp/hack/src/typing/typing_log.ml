@@ -442,6 +442,7 @@ let env_as_value env =
     tyvars_stack;
     allow_wildcards;
     big_envs = _;
+    pessimize = _;
   } = env in
   make_map [
     "function_pos", pos_as_value function_pos;

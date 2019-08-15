@@ -154,3 +154,77 @@ and pessimize_fun_type env (ft: decl fun_type) =
     ft_ret = { ft_ret with et_type = ft_ret_type };
     ft_tparams;
   }
+
+let rec is_enforceable (env: Env.env) (ty: decl ty) =
+  match snd ty with
+  | Tthis -> false
+  | Tapply ((_, name), tyl) ->
+    (* TODO(T45690473): follow type aliases in the `type` case and allow enforceable targets *)
+    let not_class = Env.is_typedef name || Env.is_enum env name in
+    if not_class then false else
+
+    begin match Env.get_class env name with
+    | Some tc ->
+      let tparams = Cls.tparams tc in
+      begin match tyl with
+      | [] -> true
+      | targs ->
+        let open List.Or_unequal_lengths in
+        begin match List.fold2 ~init:true targs tparams ~f:(fun acc targ tparam ->
+          match targ with
+          | _, Tdynamic (* We accept the inner type being dynamic regardless of reification *)
+          | _, Tlike _ ->
+            acc
+          | _ ->
+            match tparam.tp_reified with
+            | Aast.Erased -> false
+            | Aast.SoftReified -> false
+            | Aast.Reified -> is_enforceable env targ && acc
+        ) with
+        | Ok new_acc -> new_acc
+        | Unequal_lengths -> true
+        end
+      end
+    | None -> true
+    end
+  | Tgeneric name ->
+    begin match Env.get_reified env name, Env.get_enforceable env name with
+    | Aast.Erased, _ -> false
+    | Aast.SoftReified, _ -> false
+    | Aast.Reified, false -> false
+    | Aast.Reified, true ->
+      true
+    end
+  | Taccess _ -> false
+  | Tlike _ -> false
+  | Tarray (None, None) -> true
+  | Tarray _ -> false
+  | Tprim prim ->
+    begin match prim with
+      | Aast.Tvoid
+      | Aast.Tnoreturn -> false
+      | _ -> true
+    end
+  | Tany -> true
+  | Terr -> true
+  | Tnonnull -> true
+  | Tdynamic -> true
+  | Tfun _ -> false
+  | Ttuple _ -> false
+  | Tshape _ -> false
+  | Tmixed -> true
+  | Tnothing -> true
+  | Tdarray _ -> false
+  | Tvarray _ -> false
+  (* With no parameters, we enforce varray_or_darray just like array *)
+  | Tvarray_or_darray (_, Tany) -> true
+  | Tvarray_or_darray _ -> false
+  | Toption ty ->
+    is_enforceable env ty
+
+let pessimize_type_simple env (ty: decl ty) =
+  if not env.Env.pessimize then ty else
+  match ty with
+  | _, Tprim (Aast.Tvoid | Aast.Tnoreturn) -> ty
+  | _ when is_enforceable env ty -> ty
+  | _ -> wrap_like ty

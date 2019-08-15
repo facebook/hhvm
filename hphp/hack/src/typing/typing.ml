@@ -382,6 +382,7 @@ let make_param_local_ty env param =
       env, (r, TUtils.tany env)
     | Some x ->
       let ty = Decl_hint.hint env.Env.decl_env x in
+      let ty = Typing_enforceability.pessimize_type_simple env ty in
       let condition_type =
         Decl_fun_utils.condition_type_from_attributes env.Env.decl_env param.param_user_attributes in
       begin match condition_type with
@@ -429,7 +430,7 @@ let rec bind_param env (ty1, param) =
         let enforced =
           match decl_hint with
           | None -> false
-          | Some ty -> Phase.is_enforceable env ty in
+          | Some ty -> Typing_enforceability.is_enforceable env ty in
         let expected = ExpectedTy.make_and_allow_coercion
           param.param_pos Reason.URparam { et_type = ty1; et_enforced = enforced } in
         let env, te, ty2 = expr ~expected env e in
@@ -527,6 +528,7 @@ and fun_def tcopt f : Tast.fun_def option =
     ~f:(fun x -> Option.value_exn x.ft_decl_errors)
   );
   let env = Env.set_env_function_pos env pos in
+  let env = Env.set_env_pessimize env in
   let env = Typing_attributes.check_def env new_object SN.AttributeKinds.fn f.f_user_attributes in
   let reactive = fun_reactivity env.Env.decl_env f.f_user_attributes f.f_params in
   let mut = TUtils.fun_mutable f.f_user_attributes in
@@ -555,7 +557,10 @@ and fun_def tcopt f : Tast.fun_def option =
         ~is_global_inference_on:(TCO.global_inference tcopt)
         env f.f_name
     | Some ty ->
-      Typing_return.make_return_type Phase.localize_with_self env ty in
+      let localize = fun env ty ->
+        Typing_enforceability.pessimize_type_simple env ty |>
+        Phase.localize_with_self env in
+      Typing_return.make_return_type localize env ty in
   let return = Typing_return.make_info f.f_fun_kind f.f_user_attributes env
     ~is_explicit:(Option.is_some (hint_of_type_hint f.f_ret)) locl_ty decl_ty in
   let env, param_tys =
@@ -4307,7 +4312,7 @@ and class_get_ ~is_method ~is_const ~this_ty ~coerce_from_ty ?(explicit_tparams=
               match coerce_from_ty with
               | None -> env
               | Some (p, ur, ty) ->
-                let et_enforced = Phase.is_enforceable env member_decl_ty in
+                let et_enforced = Typing_enforceability.is_enforceable env member_decl_ty in
                 Type.coerce_type p ur env ty { et_type = member_ty; et_enforced } Errors.unify_error in
             k (env, member_ty)
 
@@ -4554,7 +4559,7 @@ and obj_get_concrete_ty ~inst_meth ~is_method ~coerce_from_ty ?(explicit_tparams
         else
           env, member_ty, Some member_decl_ty in
         let et_enforced =
-          match member_decl_ty with None -> false | Some t -> Phase.is_enforceable env t in
+          match member_decl_ty with None -> false | Some t -> Typing_enforceability.is_enforceable env t in
         let env =
           match coerce_from_ty with
           | None -> env

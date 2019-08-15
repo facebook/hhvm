@@ -26,11 +26,6 @@ val localize_with_self_possibly_enforceable:
   Env.env ->
   decl ty ->
   Env.env * locl possibly_enforced_ty
-
-val is_enforceable:
-  Env.env ->
-  decl ty ->
-  bool
 val localize:
   ety_env:expand_env ->
   Env.env ->

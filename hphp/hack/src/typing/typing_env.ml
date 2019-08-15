@@ -587,10 +587,22 @@ let empty ?(mode = FileInfo.Mstrict) tcopt file ~droot = {
   tyvars_stack = [];
   allow_wildcards = false;
   big_envs = ref [];
+  pessimize = false;
 }
 
 let set_env_reactive env reactive =
   { env with lenv = {env.lenv with local_reactive = reactive }}
+
+let set_env_pessimize env =
+  let pessimize_coefficient = TypecheckerOptions.simple_pessimize (get_tcopt env) in
+  let path = Pos.filename env.function_pos in
+  let open Relative_path in
+  let pessimize = match prefix path with
+    | Root when pessimize_coefficient > 0.0 ->
+      let hash = Hashtbl.hash (suffix path) in
+      ((Float.of_int hash) /. (Float.of_int Int.max_value)) <= pessimize_coefficient
+    | _ -> pessimize_coefficient = 1.0 (* hack for test cases *) in
+  { env with pessimize }
 
 let set_env_function_pos env function_pos =
   { env with function_pos }

@@ -187,6 +187,7 @@ val get_tpenv_size : env -> int
 val get_tpenv_tparams : env -> SSet.t
 val set_env_reactive : env -> reactivity -> env
 val set_env_function_pos: env -> Pos.t -> env
+val set_env_pessimize: env -> env
 val env_reactivity: env -> reactivity
 val env_local_reactive : env -> bool
 val add_mutable_var : env -> Local_id.t -> Typing_mutability_env.mutability -> env

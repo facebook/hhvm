@@ -53,6 +53,7 @@
    tyvars_stack : (Pos.t * Ident.t list) list;
    allow_wildcards : bool;
    big_envs : (Pos.t * env) list ref ;
+   pessimize : bool;
  }
 and genv = {
   tcopt   : TypecheckerOptions.t;

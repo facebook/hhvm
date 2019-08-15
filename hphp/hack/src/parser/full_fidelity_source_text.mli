@@ -37,6 +37,9 @@ val get : t -> int -> char
 (** get the contents as a string *)
 val text : t -> string
 
+(** get just one line as a string *)
+val line_text : t -> int -> string
+
 (** get a substring start at the ith char and continuing for length *)
 val sub : t -> int -> int -> string
 

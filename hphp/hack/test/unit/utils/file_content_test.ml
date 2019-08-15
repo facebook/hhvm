@@ -243,6 +243,44 @@ let test_large () =
   let edited_content = edit_file_unsafe content_to_edit [edit] in
   expect_has_content edited_content content
 
+let assert_line expected f l =
+  let s = Full_fidelity_source_text.line_text f l in
+  Printf.printf "Expected: [%s] Actual: [%s]\n" expected s;
+  if s <> expected then
+    failwith "Assertion failed"
+  else
+    ()
+
+(* Verify that we're able to capture lines of text from a file *)
+let test_line_text () =
+  (* First round of tests on a file with no ending newline *)
+  let test_file_no_newline_at_end =
+    Full_fidelity_source_text.make
+      Relative_path.default
+      "hi\nhello\ngood morning\ngood night\nfinal line"
+  in
+  assert_line "hi" test_file_no_newline_at_end 1;
+  assert_line "hello" test_file_no_newline_at_end 2;
+  assert_line "good morning" test_file_no_newline_at_end 3;
+  assert_line "good night" test_file_no_newline_at_end 4;
+  assert_line "final line" test_file_no_newline_at_end 5;
+  assert_line "" test_file_no_newline_at_end 6;
+
+  (* Second round of tests, same, but with ending newline *)
+  let test_file_end_newline =
+    Full_fidelity_source_text.make
+      Relative_path.default
+      "hi\nhello\ngood morning\ngood night\nfinal line\n"
+  in
+  assert_line "hi" test_file_end_newline 1;
+  assert_line "hello" test_file_end_newline 2;
+  assert_line "good morning" test_file_end_newline 3;
+  assert_line "good night" test_file_end_newline 4;
+  assert_line "final line" test_file_end_newline 5;
+  assert_line "" test_file_end_newline 6;
+  assert_line "" test_file_end_newline 7;
+  true
+
 let tests =
   [ ("test_basic_edit", test_basic_edit);
     ("test_basic_edit2", test_basic_edit2);
@@ -255,6 +293,7 @@ let tests =
     ("test_end_of_line_edit", test_end_of_line_edit);
     ("test-utf8", test_utf8);
     ("test-offsets", test_offsets);
-    ("test_large", test_large) ]
+    ("test_large", test_large);
+    ("test_line_text", test_line_text) ]
 
 let () = Unit_test.run_all tests

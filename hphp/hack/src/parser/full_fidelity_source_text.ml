@@ -66,6 +66,7 @@ let get source_text index =
   if index < source_text.length
   then String.unsafe_get source_text.text index
   else '\x00'
+
 let sub source_text start length =
   let len = source_text.length in
   if start >= len then
@@ -74,6 +75,24 @@ let sub source_text start length =
     String.sub source_text.text start (len - start)
   else
     String.sub source_text.text start length
+
+(* Fetch the contents of just one line of text *)
+let line_text (source_text: t) (line_number: int): string =
+  try
+    let offset_start = OffsetMap.position_to_offset source_text.offset_map (line_number, 1) in
+    let offset_end = OffsetMap.position_to_offset source_text.offset_map ((line_number + 1), 1) in
+
+    (* Strip off the newline if one exists. If we're getting the very last line of the file, and
+     * the very last line doesn't end in a newline, this unsafe_get won't return a \n char. *)
+    let offset_end = if String.unsafe_get source_text.text (offset_end - 1) = '\n' then
+      offset_end - 1
+    else
+      offset_end
+    in
+    sub source_text offset_start (offset_end - offset_start)
+
+  (* If the line was outside the boundaries of the file, just return a blank string *)
+  with _ -> ""
 
 (* Take a zero-based offset, produce a one-based (line, char) pair. *)
 let offset_to_position source_text offset =

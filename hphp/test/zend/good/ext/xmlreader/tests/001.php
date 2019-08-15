@@ -11,8 +11,5 @@ $reader->XML($xmlstring);
 while ($reader->read()) {
     echo $reader->name."\n";
 }
-$xmlstring = '';
-$reader = new XMLReader();
-$reader->XML($xmlstring);
 echo "===DONE===\n";
 }

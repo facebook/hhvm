@@ -3,6 +3,8 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+#[macro_use]
+extern crate lazy_static;
 
 pub mod token_kind;
 pub mod trivia_kind;
@@ -19,6 +21,7 @@ mod syntax_type;
 
 pub mod syntax_error;
 
+pub mod hh_autoimport;
 pub mod lexer;
 pub mod mode_parser;
 pub mod operator;

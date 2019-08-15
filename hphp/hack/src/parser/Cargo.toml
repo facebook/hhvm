@@ -10,3 +10,4 @@ path = "lib.rs"
 [dependencies]
 deps_rust = { path = "../deps", package = "hack_deps" }
 ocaml = "^0.7"
+lazy_static = "^1.3.0"

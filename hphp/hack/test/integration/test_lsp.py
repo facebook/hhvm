@@ -599,7 +599,6 @@ class TestLsp(TestCase[LspTestDriver]):
                 "rootPath": "${root_path}",
                 "capabilities": {},
             },
-            wait=True,
             result={
                 "capabilities": {
                     "textDocumentSync": {
@@ -784,7 +783,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     }
                 ],
                 powered_by="serverless_ide",
-                wait=True,
             )
             .request(method="shutdown", params={}, result=None)
         )
@@ -878,7 +876,6 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 result=None,
                 powered_by="serverless_ide",
-                wait=True,
             )
             .request(method="shutdown", params={}, result=None)
         )

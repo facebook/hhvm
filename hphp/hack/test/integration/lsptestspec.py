@@ -25,6 +25,7 @@ _MessageSpec = Union[
     "_NotificationSpec",
     "_WaitForNotificationSpec",
     "_WaitForRequestSpec",
+    "_WaitForResponseSpec",
 ]
 
 
@@ -57,7 +58,7 @@ class LspTestSpec:
         params: Json,
         *,
         result: Json,
-        wait: bool = True,
+        wait_id: Optional[str] = None,
         comment: Optional[str] = None,
         powered_by: Optional[str] = None,
     ) -> "LspTestSpec":
@@ -65,12 +66,18 @@ class LspTestSpec:
         assert traceback is not None, "Failed to get traceback info"
 
         messages = list(self._messages)
+        if wait_id is not None and any(
+            isinstance(message, _RequestSpec) and message.wait_id == wait_id
+            for message in messages
+        ):
+            raise ValueError(f"Duplicate wait ID: {wait_id}")
+
         messages.append(
             _RequestSpec(
                 method=method,
                 params=params,
                 result=result,
-                wait=wait,
+                wait_id=wait_id,
                 comment=comment,
                 powered_by=powered_by,
                 traceback=traceback,
@@ -120,6 +127,11 @@ class LspTestSpec:
         messages.append(
             _WaitForNotificationSpec(method=method, params=params, comment=comment)
         )
+        return self._update(messages=messages)
+
+    def wait_for_response(self, wait_id: str) -> "LspTestSpec":
+        messages = list(self._messages)
+        messages.append(_WaitForResponseSpec(wait_id=wait_id))
         return self._update(messages=messages)
 
     def write_to_disk(
@@ -222,7 +234,9 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     }
                 )
 
-                if message.wait:
+                if message.wait_id is None:
+                    # Assume that if no wait ID was explicitly passed, we want
+                    # to wait on the response before sending the next message.
                     json_commands.append(
                         {
                             "jsonrpc": "2.0",
@@ -272,6 +286,20 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                         "params": {"method": message.method, "params": message.params},
                     }
                 )
+            elif isinstance(message, _WaitForResponseSpec):
+                [lsp_id] = [
+                    lsp_id
+                    for previous_message, lsp_id in lsp_id_map.items()
+                    if isinstance(previous_message, _RequestSpec)
+                    and previous_message.wait_id == message.wait_id
+                ]
+                json_commands.append(
+                    {
+                        "jsonrpc": "2.0",
+                        "method": "$test/waitForResponse",
+                        "params": {"id": lsp_id},
+                    }
+                )
             else:
                 raise ValueError(f"unhandled message type {message.__class__.__name__}")
         return (json_commands, lsp_id_map)
@@ -316,7 +344,10 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 # Nothing needs to be done here, since we sent the notification
                 # and don't expect a response.
                 pass
-            elif isinstance(message, (_WaitForRequestSpec, _WaitForNotificationSpec)):
+            elif isinstance(
+                message,
+                (_WaitForRequestSpec, _WaitForNotificationSpec, _WaitForResponseSpec),
+            ):
                 # Nothing needs to be done here -- if we failed to wait for the
                 # message, an exception will have been thrown at the
                 # `LspCommandProcessor` layer.
@@ -509,9 +540,9 @@ This was the associated request:
         method={method!r},
         params={params!r},
         result={result!r},"""
-        if not request.wait:
+        if request.wait_id is not None:
             request_snippet += f"""
-        wait=False,"""
+        wait_id={request.wait_id!r},"""
         if powered_by is not None:
             request_snippet += f"""
         powered_by={powered_by!r},"""
@@ -708,7 +739,7 @@ class _RequestSpec:
         "method",
         "params",
         "result",
-        "wait",
+        "wait_id",
         "comment",
         "powered_by",
         "traceback",
@@ -720,7 +751,7 @@ class _RequestSpec:
         method: str,
         params: Json,
         result: Json,
-        wait: bool,
+        wait_id: Optional[str],
         comment: Optional[str],
         powered_by: Optional[str],
         traceback: _Traceback,
@@ -728,7 +759,7 @@ class _RequestSpec:
         self.method = method
         self.params = params
         self.result = result
-        self.wait = wait
+        self.wait_id = wait_id
         self.comment = comment
         self.powered_by = powered_by
         self.traceback = traceback
@@ -766,6 +797,13 @@ class _WaitForNotificationSpec:
         self.method = method
         self.params = params
         self.comment = comment
+
+
+class _WaitForResponseSpec:
+    __slots__ = ["wait_id"]
+
+    def __init__(self, *, wait_id: str) -> None:
+        self.wait_id = wait_id
 
 
 class _ErrorDescription:

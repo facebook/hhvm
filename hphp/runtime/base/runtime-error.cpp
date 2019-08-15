@@ -298,16 +298,6 @@ raise_hack_arr_compat_array_producing_func_notice(const std::string& name) {
 
 namespace {
 
-const char* arrayAnnotTypeToName(AnnotType at) {
-  switch (at) {
-    case AnnotType::VArray:     return "varray";
-    case AnnotType::DArray:     return "darray";
-    case AnnotType::VArrOrDArr: return "varray_or_darray";
-    case AnnotType::Array:      return "array";
-    default:                    always_assert(false);
-  }
-}
-
 const char* arrayToName(const ArrayData* ad) {
   if (ad->isVArray()) return "varray";
   if (ad->isDArray()) return "darray";
@@ -316,9 +306,8 @@ const char* arrayToName(const ArrayData* ad) {
 
 void raise_hackarr_compat_type_hint_impl(const Func* func,
                                          const ArrayData* ad,
-                                         AnnotType at,
+                                         const char* name,
                                          folly::Optional<int> param) {
-  auto const name = arrayAnnotTypeToName(at);
   auto const given = arrayToName(ad);
 
   if (param) {
@@ -365,22 +354,21 @@ void raise_func_undefined(const char* prefix, const StringData* name,
 
 void raise_hackarr_compat_type_hint_param_notice(const Func* func,
                                                  const ArrayData* ad,
-                                                 AnnotType at,
+                                                 const char* name,
                                                  int param) {
-  raise_hackarr_compat_type_hint_impl(func, ad, at, param);
+  raise_hackarr_compat_type_hint_impl(func, ad, name, param);
 }
 
 void raise_hackarr_compat_type_hint_ret_notice(const Func* func,
                                                const ArrayData* ad,
-                                               AnnotType at) {
-  raise_hackarr_compat_type_hint_impl(func, ad, at, folly::none);
+                                               const char* name) {
+  raise_hackarr_compat_type_hint_impl(func, ad, name, folly::none);
 }
 
 void raise_hackarr_compat_type_hint_outparam_notice(const Func* func,
                                                     const ArrayData* ad,
-                                                    AnnotType at,
+                                                    const char* name,
                                                     int param) {
-  auto const name = arrayAnnotTypeToName(at);
   auto const given = arrayToName(ad);
   raise_notice(
     "Hack Array Compat: Argument %d returned from %s() as an inout parameter "
@@ -391,10 +379,9 @@ void raise_hackarr_compat_type_hint_outparam_notice(const Func* func,
 
 void raise_hackarr_compat_type_hint_property_notice(const Class* declCls,
                                                     const ArrayData* ad,
-                                                    AnnotType at,
+                                                    const char* name,
                                                     const StringData* propName,
                                                     bool isStatic) {
-  auto const name = arrayAnnotTypeToName(at);
   auto const given = arrayToName(ad);
   raise_notice(
     "Hack Array Compat: %s '%s::%s' declared as type %s, %s assigned",
@@ -409,15 +396,14 @@ void raise_hackarr_compat_type_hint_property_notice(const Class* declCls,
 void raise_hackarr_compat_type_hint_rec_field_notice(
     const StringData* recName,
     const ArrayData* ad,
-    AnnotType at,
+    const char* typeName,
     const StringData* fieldName) {
-  auto const name = arrayAnnotTypeToName(at);
   auto const given = arrayToName(ad);
   raise_notice(
     "Hack Array Compat: Record field '%s::%s' declared as type %s, %s assigned",
     recName->data(),
     fieldName->data(),
-    name,
+    typeName,
     given
   );
 }

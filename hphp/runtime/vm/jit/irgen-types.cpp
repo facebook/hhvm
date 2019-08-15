@@ -1448,7 +1448,7 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
       gen(
         env,
         RaiseHackArrParamNotice,
-        RaiseHackArrParamNoticeData { tc.type(), id, true },
+        RaiseHackArrParamNoticeData { tc, id, true },
         val,
         cns(env, func)
       );
@@ -1538,7 +1538,7 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
       gen(
         env,
         RaiseHackArrParamNotice,
-        RaiseHackArrParamNoticeData { tc.type(), id, false },
+        RaiseHackArrParamNoticeData { tc, id, false },
         val,
         cns(env, func)
       );
@@ -1627,7 +1627,7 @@ void verifyPropType(IRGS& env,
       gen(
         env,
         RaiseHackArrPropNotice,
-        RaiseHackArrNoticeData { tc->type(), },
+        RaiseHackArrTypehintNoticeData { *tc },
         cls,
         val,
         cns(env, slot),

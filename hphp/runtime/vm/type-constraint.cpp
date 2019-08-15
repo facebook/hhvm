@@ -1084,9 +1084,9 @@ void TypeConstraint::verifyOutParamFail(const Func* func,
   }
 
   auto c = tvToCell(tv);
-  if (auto const at = checkDVArray(c)) {
+  if (checkDVArray(c)) {
     raise_hackarr_compat_type_hint_outparam_notice(
-      func, c->m_data.parr, *at, paramNum
+      func, c->m_data.parr, displayName(func->cls()).c_str(), paramNum
     );
     return;
   }
@@ -1152,9 +1152,9 @@ void TypeConstraint::verifyRecFieldFail(tv_rval val,
                                      const StringData* fieldName) const {
   assertx(validForRecField());
 
-  if (auto const at = checkDVArray(val)) {
+  if (checkDVArray(val)) {
     raise_hackarr_compat_type_hint_rec_field_notice(
-      recordName, val.val().parr, *at, fieldName
+      recordName, val.val().parr, displayName().c_str(), fieldName
     );
     return;
   }
@@ -1179,9 +1179,9 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
   assertx(validForProp());
 
   val = tvToCell(val);
-  if (auto const at = checkDVArray(val)) {
+  if (checkDVArray(val)) {
     raise_hackarr_compat_type_hint_property_notice(
-      declCls, val.val().parr, *at, propName, isStatic
+      declCls, val.val().parr, displayName().c_str(), propName, isStatic
     );
     return;
   }
@@ -1237,18 +1237,18 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
 
   auto const c = tvToCell(tv);
 
-  if (auto const at = checkDVArray(c)) {
+  if (checkDVArray(c)) {
     if (id == ReturnId) {
       raise_hackarr_compat_type_hint_ret_notice(
         func,
         c->m_data.parr,
-        *at
+        name.c_str()
       );
     } else {
       raise_hackarr_compat_type_hint_param_notice(
         func,
         c->m_data.parr,
-        *at,
+        name.c_str(),
         id
       );
     }

@@ -336,7 +336,7 @@ void coerceFCallArgs(TypedValue* args,
         raise_hackarr_compat_type_hint_param_notice(
           func,
           c->m_data.parr,
-          tc.type(),
+          tc.displayName().c_str(),
           i
         );
       }

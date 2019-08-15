@@ -6065,10 +6065,8 @@ and check_implements_tparaml (env: Env.env) ht =
 and class_def_parent env class_def class_type =
   match class_def.c_extends with
   | (_, Happly ((_, x), _) as parent_ty) :: _ ->
-      let parent_type = Env.get_class_dep env x in
-      (match parent_type with
-      | Some parent_type -> check_parent class_def class_type parent_type
-      | None -> ());
+      Option.iter (Env.get_class_dep env x)
+        ~f:(check_parent class_def class_type);
       let parent_ty = Decl_hint.hint env.Env.decl_env parent_ty in
       env, Some x, parent_ty
   (* The only case where we have more than one parent class is when
@@ -6081,11 +6079,6 @@ and check_parent class_def class_type parent_type =
   let position = fst class_def.c_name in
   if Cls.const class_type && not (Cls.const parent_type)
   then Errors.self_const_parent_not position;
-  (* Are all the parents in Hack? Do we know all their methods?
-   * If so, let's check that the abstract methods have been implemented.
-   *)
-  if (Cls.members_fully_known class_type)
-  then check_parent_abstract position parent_type class_type;
   if Cls.final parent_type
   then Errors.extend_final position (Cls.pos parent_type) (Cls.name parent_type)
   else ()
@@ -6121,19 +6114,6 @@ and check_parents_sealed env child_def child_type =
       end
     | _ -> ()
   end
-
-and check_parent_abstract position parent_type class_type =
-  let is_final = (Cls.final class_type) in
-  if Cls.kind parent_type = Ast_defs.Cabstract &&
-    ((Cls.kind class_type) <> Ast_defs.Cabstract || is_final)
-  then begin
-    check_extend_abstract_meth ~is_final position (Cls.methods class_type);
-    check_extend_abstract_meth ~is_final position (Cls.smethods class_type);
-    check_extend_abstract_const ~is_final position (Cls.consts class_type);
-    check_extend_abstract_typeconst
-      ~is_final position (Cls.typeconsts class_type);
-  end else ()
-
 and check_const_trait_members pos env use_list =
   let _, trait, _ = Decl_utils.unwrap_class_hint use_list in
   match Env.get_class env trait with

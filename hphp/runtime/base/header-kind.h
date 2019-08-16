@@ -140,10 +140,10 @@ enum class GCBits : uint8_t {};
  * padding with ONE_BIT_REFCOUNT.
  *
  * 0       32     40      48        53  56
- * [ cnt | kind | marks | arrBits | X  | sizeClass ] Packed, VecArray
+ * [ cnt | kind | marks | arrBits | X  | sizeClass ] Packed, VecArray,
+ *                                                   APCLocalArray, RecordArray
  * [ cnt | kind | marks | arrBits | X  | keyTypes  ] Mixed, Dict
- * [ cnt | kind | marks |                          ] Empty, Apc, Globals, Keyset
-                                                     , RecordArray
+ * [ cnt | kind | marks |                          ] Empty, Globals, Keyset
  * [ cnt | kind | marks | sizeClass:16             ] String
  * [ cnt | kind | marks | heapSize:16              ] Resource (ResourceHdr)
  * [ cnt | kind | marks |                          ] Ref (RefData)

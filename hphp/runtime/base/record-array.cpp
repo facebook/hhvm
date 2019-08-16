@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/record-array.h"
 #include "hphp/runtime/base/tv-refcount.h"
 
@@ -22,12 +23,14 @@ RecordArray::RecordArray(const RecordDesc* record)
   : ArrayData(ArrayData::kRecordKind)
   , RecordBase(record) {
   new (const_cast<ExtraFieldMap*>(extraFieldMap())) ExtraFieldMap();
+  auto const sizeIdx = MemoryManager::size2Index(sizeWithFields(record));
+  m_aux16 = static_cast<uint16_t>(sizeIdx) << 8;
   static_assert(sizeof(RecordArray) == sizeof(RecordBase) + sizeof(ArrayData),
                 "RecordArray must not have any fields of its own");
 }
 
 size_t RecordArray::heapSize() const {
-  return sizeWithFields(m_record);
+  return PackedArray::heapSize(this);
 }
 
 inline bool RecordArray::kindIsValid() const {

@@ -149,7 +149,7 @@ public:
   size_t heapSize() const;
 
 private:
-  explicit APCLocalArray(const APCArray* source);
+  explicit APCLocalArray(const APCArray* source, size_t heapSize);
   ~APCLocalArray() = delete;
 
   static bool checkInvariants(const ArrayData*);

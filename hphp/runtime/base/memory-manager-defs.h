@@ -348,24 +348,17 @@ inline size_t allocSize(const HeapObject* h) {
   switch (kind) {
     case HeaderKind::Packed:
     case HeaderKind::VecArray:
+    case HeaderKind::Apc:
+    case HeaderKind::RecordArray:
       // size = kSizeIndex2Size[h->aux16>>8]
       size = PackedArray::heapSize(static_cast<const ArrayData*>(h));
       assertx(size == MemoryManager::sizeClass(size));
       return size;
-    case HeaderKind::Apc:
-      // size = h->m_size * 16 + sizeof(APCLocalArray)
-      size = static_cast<const APCLocalArray*>(h)->heapSize();
-      break;
     case HeaderKind::Mixed:
     case HeaderKind::Shape:
     case HeaderKind::Dict:
       // size = fn of h->m_scale
       size = static_cast<const MixedArray*>(h)->heapSize();
-      break;
-    case HeaderKind::RecordArray:
-      // size = h->m_record->numFields() * sz(TV) + sz(HM) + sz(RD) + sz(AD)
-      // [ArrayData][RecordData][fields][extra field map]
-      size = static_cast<const RecordArray*>(h)->heapSize();
       break;
     case HeaderKind::Keyset:
       // size = fn of h->m_scale

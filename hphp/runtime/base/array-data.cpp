@@ -259,6 +259,7 @@ static_assert(ArrayFunctions::NK == ArrayData::ArrayKind::kNumKinds,
     EmptyArray::entry,                          \
     APCLocalArray::entry,                       \
     GlobalsArray::entry,                        \
+    RecordArray::entry,                         \
     MixedArray::entry##Shape,  /* Shape */      \
     MixedArray::entry##Dict,   /* Dict */       \
     PackedArray::entry##Vec,   /* Vec */        \
@@ -1139,12 +1140,13 @@ tv_rval ArrayData::getNotFound(const StringData* k, bool error) const {
 }
 
 const char* ArrayData::kindToString(ArrayKind kind) {
-  std::array<const char*,9> names = {{
+  std::array<const char*,10> names = {{
     "PackedKind",
     "MixedKind",
     "EmptyKind",
     "ApcKind",
     "GlobalsKind",
+    "RecordKind",
     "ShapeKind",
     "DictKind",
     "VecKind",

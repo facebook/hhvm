@@ -568,6 +568,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
 #define DKeysetLastElem
 #define DArrPacked
 #define DArrMixed
+#define DArrRecord
 #define DVArr
 #define DVArrOrNull
 #define DDArr
@@ -631,6 +632,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
 #undef DKeysetLastElem
 #undef DArrPacked
 #undef DArrMixed
+#undef DArrRecord
 #undef DVArr
 #undef DVArrOrNull
 #undef DDArr

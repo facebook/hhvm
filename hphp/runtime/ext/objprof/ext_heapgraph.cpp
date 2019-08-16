@@ -315,6 +315,7 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
         // just provide raw prop_offset
         break;
       case HeaderKind::Record:  // TODO(T41026982)
+      case HeaderKind::RecordArray:
         raise_error(Strings::RECORD_NOT_SUPPORTED);
     }
   }

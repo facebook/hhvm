@@ -18,27 +18,32 @@
 #define incl_HPHP_RECORD_DATA_H_
 
 #include "hphp/runtime/base/countable.h"
+#include "hphp/runtime/base/record-common.h"
 #include "hphp/runtime/base/req-vector.h"
 #include "hphp/runtime/base/tv-val.h"
-#include "hphp/runtime/vm/record.h"
 
 #include "hphp/util/type-scan.h"
 
 namespace HPHP {
-
-struct StringData;
-
-struct RecordData : Countable, type_scan::MarkCollectable<RecordData> {
+struct RecordData : Countable,
+                    RecordBase,
+                    type_scan::MarkCollectable<RecordData> {
   explicit RecordData(const RecordDesc*);
-  const RecordDesc* record() const;
 
+  RecordData(const RecordData&) = delete;
+  RecordData& operator=(const RecordData&) = delete;
+  ~RecordData() = delete;
+
+  static size_t sizeWithFields(const RecordDesc* rec) {
+    return sizeof(RecordData) + fieldSize(rec);
+  }
   size_t heapSize() const;
   bool kindIsValid() const;
 
-  void scan(type_scan::Scanner&) const;
+  static constexpr ptrdiff_t getVMRecordOffset() {
+    return offsetof(RecordData, m_record);
+  }
 
-  tv_rval fieldRval(const StringData*) const;
-  tv_lval fieldLval(const StringData*);
 
   /* Given a Record type, an array of keys and an array of corresponding
    * initial values, return a fully initialized instance of that Record.
@@ -62,17 +67,13 @@ struct RecordData : Countable, type_scan::MarkCollectable<RecordData> {
     return m_record->recordDescOf(rec);
   }
 
-  static constexpr ptrdiff_t getVMRecordOffset() {
-    return offsetof(RecordData, m_record);
-  }
+  void scan(type_scan::Scanner&) const;
 
 private:
-  const TypedValue* fieldVec() const;
 
   template<bool (*fieldEq)(TypedValue, TypedValue)>
   static bool equalImpl(const RecordData*, const RecordData*);
 
-  const RecordDesc* const m_record;
 };
 
 ALWAYS_INLINE void decRefRec(RecordData* rec) {
@@ -85,4 +86,4 @@ ALWAYS_INLINE void decRefRec(RecordData* rec) {
 #include "hphp/runtime/base/record-data-inl.h"
 #undef incl_HPHP_RECORD_DATA_INL_H_
 
-#endif
+#endif // incl_HPHP_RECORD_DATA_H_

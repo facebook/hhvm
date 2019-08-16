@@ -334,7 +334,9 @@ void newStructImpl(IRLS& env,
 
 }
 
-void cgNewRecord(IRLS& env, const IRInstruction* inst) {
+namespace {
+template<typename Fn>
+void newRecordImpl(IRLS& env, const IRInstruction* inst, Fn creatorFn) {
   auto const rec = srcLoc(env, inst, 0).reg();
   auto const sp = srcLoc(env, inst, 1).reg();
   auto const extra = inst->extra<NewStructData>();
@@ -349,9 +351,18 @@ void cgNewRecord(IRLS& env, const IRInstruction* inst) {
     .dataPtr(table)
     .addr(sp, cellsToBytes(extra->offset.offset));
 
-  cgCallHelper(v, env, CallSpec::direct(RecordData::newRecord),
+  cgCallHelper(v, env, CallSpec::direct(creatorFn),
                callDest(env, inst),
                SyncOptions::Sync, args);
+}
+}
+
+void cgNewRecord(IRLS& env, const IRInstruction* inst) {
+  newRecordImpl(env, inst, RecordData::newRecord);
+}
+
+void cgNewRecordArray(IRLS& env, const IRInstruction* inst) {
+  newRecordImpl(env, inst, RecordArray::newRecordArray);
 }
 
 void cgNewStructArray(IRLS& env, const IRInstruction* inst) {

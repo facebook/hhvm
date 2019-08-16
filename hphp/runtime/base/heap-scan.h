@@ -125,6 +125,8 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
       return static_cast<const APCLocalArray*>(h)->scan(scanner);
     case HeaderKind::Globals:
       return static_cast<const GlobalsArray*>(h)->scan(scanner);
+    case HeaderKind::RecordArray:
+      return static_cast<const RecordArray*>(h)->scan(scanner);
     case HeaderKind::Closure:
       scanner.scan(*static_cast<const c_Closure*>(h)->hdr());
       return static_cast<const c_Closure*>(h)->scan(scanner);
@@ -220,9 +222,19 @@ inline void c_Awaitable::scan(type_scan::Scanner& scanner) const {
   ObjectData::scan(scanner);
 }
 
-inline void RecordData::scan(type_scan::Scanner& scanner) const {
+inline void RecordBase::scan(type_scan::Scanner& scanner) const {
   auto fields = fieldVec();
   scanner.scan(*fields, m_record->numFields() * sizeof(*fields));
+}
+
+inline void RecordData::scan(type_scan::Scanner& scanner) const {
+  RecordBase::scan(scanner);
+}
+
+inline void RecordArray::scan(type_scan::Scanner& scanner) const {
+  RecordBase::scan(scanner);
+  auto const extraMap = extraFieldMap();
+  scanner.scan(*extraMap);
 }
 
 inline void ObjectData::scan(type_scan::Scanner& scanner) const {

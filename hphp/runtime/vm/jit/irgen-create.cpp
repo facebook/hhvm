@@ -607,7 +607,9 @@ void emitNewPair(IRGS& env) {
   push(env, gen(env, NewPair, c2, c1));
 }
 
-void emitNewRecord(IRGS& env, const StringData* name, const ImmVector& immVec) {
+void emitNewRecordImpl(IRGS& env, const StringData* name,
+                       const ImmVector& immVec,
+                       Opcode newRecordOp) {
   auto const cachedRec = gen(env, LdRecDescCached, RecNameData{name});
   auto const numArgs = immVec.size();
   auto const ids = immVec.vec32();
@@ -618,9 +620,18 @@ void emitNewRecord(IRGS& env, const StringData* name, const ImmVector& immVec) {
   for (auto i = size_t{0}; i < numArgs; ++i) {
     extra.keys[i] = curUnit(env)->lookupLitstrId(ids[i]);
   }
-  auto const recData = gen(env, NewRecord, extra, cachedRec, sp(env));
+  auto const recData = gen(env, newRecordOp, extra, cachedRec, sp(env));
   discard(env, numArgs);
   push(env, recData);
+}
+
+void emitNewRecord(IRGS& env, const StringData* name, const ImmVector& immVec) {
+  emitNewRecordImpl(env, name, immVec, NewRecord);
+}
+
+void emitNewRecordArray(IRGS& env, const StringData* name,
+                        const ImmVector& immVec) {
+  emitNewRecordImpl(env, name, immVec, NewRecordArray);
 }
 
 void emitColFromArray(IRGS& env, CollectionType type) {

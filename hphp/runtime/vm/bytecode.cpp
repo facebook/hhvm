@@ -2099,8 +2099,11 @@ OPTBLD_INLINE void iopNewDArray(uint32_t capacity) {
   }
 }
 
-// TODO (T29595301): Use id instead of StringData
-OPTBLD_INLINE void iopNewRecord(const StringData* s, imm_array<int32_t> ids) {
+namespace {
+template<typename CreatorFn, typename PushFn>
+void newRecordImpl(const StringData* s,
+                   const imm_array<int32_t>& ids,
+                   CreatorFn creatorFn, PushFn pushFn) {
   auto rec = Unit::getRecordDesc(s, true);
   if (!rec) {
     raise_error(Strings::UNKNOWN_RECORD, s->data());
@@ -2114,10 +2117,22 @@ OPTBLD_INLINE void iopNewRecord(const StringData* s, imm_array<int32_t> ids) {
     auto name = unit->lookupLitstrId(ids[i]);
     names.push_back(name);
   }
-  auto recdata =
-    RecordData::newRecord(rec, names.size(), names.data(), vmStack().topC());
+  auto recdata = creatorFn(rec, names.size(), names.data(), vmStack().topC());
   vmStack().ndiscard(n);
-  vmStack().pushRecordNoRc(recdata);
+  pushFn(vmStack(), recdata);
+}
+}
+
+// TODO (T29595301): Use id instead of StringData
+OPTBLD_INLINE void iopNewRecord(const StringData* s, imm_array<int32_t> ids) {
+  newRecordImpl(s, ids, RecordData::newRecord,
+                [] (Stack& st, RecordData* r) { st.pushRecordNoRc(r); });
+}
+
+OPTBLD_INLINE void iopNewRecordArray(const StringData* s,
+                                     imm_array<int32_t> ids) {
+  newRecordImpl(s, ids, RecordArray::newRecordArray,
+                [] (Stack& st, RecordArray* r) { st.pushRecordArrayNoRc(r); });
 }
 
 OPTBLD_INLINE void iopAddElemC() {

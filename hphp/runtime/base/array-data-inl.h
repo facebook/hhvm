@@ -180,6 +180,7 @@ inline bool ArrayData::isDictOrShape() const {
 inline bool ArrayData::isVecArray() const { return kind() == kVecKind; }
 inline bool ArrayData::isKeyset() const { return kind() == kKeysetKind; }
 inline bool ArrayData::isShape() const { return kind() == kShapeKind; }
+inline bool ArrayData::isRecordArray() const { return kind() == kRecordKind; }
 
 inline bool ArrayData::hasPackedLayout() const {
   return isPacked() || isVecArray();

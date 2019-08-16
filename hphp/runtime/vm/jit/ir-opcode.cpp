@@ -67,6 +67,7 @@ TRACE_SET_MOD(hhir);
 #define DKeysetLastElem   HasDest
 #define DArrPacked     HasDest
 #define DArrMixed      HasDest
+#define DArrRecord     HasDest
 #define DVArr          HasDest
 #define DVArrOrNull    HasDest
 #define DDArr          HasDest
@@ -145,6 +146,7 @@ OpInfo g_opInfo[] = {
 #undef DKeysetLastElem
 #undef DArrPacked
 #undef DArrMixed
+#undef DArrRecord
 #undef DVArr
 #undef DVArrOrNull
 #undef DDArr
@@ -467,6 +469,7 @@ bool opcodeMayRaise(Opcode opc) {
   case NeqVec:
   case NewKeysetArray:
   case NewRecord:
+  case NewRecordArray:
   case OODeclExists:
   case OrdStrIdx:
   case PrintBool:

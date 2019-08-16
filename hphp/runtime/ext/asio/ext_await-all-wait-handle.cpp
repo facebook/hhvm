@@ -202,6 +202,10 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
       // Shouldn't get Hack arrays
       not_reached();
 
+    case ArrayData::kRecordKind:
+      // TODO: T47449944
+      not_reached();
+
     case ArrayData::kNumKinds:
       not_reached();
   }

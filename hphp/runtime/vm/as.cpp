@@ -3222,7 +3222,7 @@ void parse_class(AsmState& as) {
  *                  ;
  */
 void parse_record(AsmState& as) {
-  if (!RuntimeOption::EvalHackRecords) {
+  if (!RuntimeOption::EvalHackRecords && !RuntimeOption::EvalHackRecordArrays) {
     as.error("Records not supported");
   }
 

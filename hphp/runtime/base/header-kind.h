@@ -45,6 +45,8 @@ namespace HPHP {
 enum class HeaderKind : uint8_t {
   // ArrayKind aliases
   Packed, Mixed, Empty, Apc, Globals,
+  // Record array
+  RecordArray,
   // Shape
   Shape,
   // Hack arrays
@@ -141,6 +143,7 @@ enum class GCBits : uint8_t {};
  * [ cnt | kind | marks | arrBits | X  | sizeClass ] Packed, VecArray
  * [ cnt | kind | marks | arrBits | X  | keyTypes  ] Mixed, Dict
  * [ cnt | kind | marks |                          ] Empty, Apc, Globals, Keyset
+                                                     , RecordArray
  * [ cnt | kind | marks | sizeClass:16             ] String
  * [ cnt | kind | marks | heapSize:16              ] Resource (ResourceHdr)
  * [ cnt | kind | marks |                          ] Ref (RefData)

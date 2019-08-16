@@ -322,6 +322,9 @@ bool record_request_heap_mem_event(const void* addr,
       break;
     case HeaderKind::Empty:
       break;
+    case HeaderKind::RecordArray:
+      // TODO: T47449944
+      break;
 
     case HeaderKind::Object:
     case HeaderKind::NativeObject:

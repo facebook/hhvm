@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/apc-local-array-defs.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/packed-array-defs.h"
+#include "hphp/runtime/base/record-array.h"
 #include "hphp/runtime/base/set-array.h"
 
 #include "hphp/runtime/vm/class-meth-data.h"
@@ -257,6 +258,7 @@ inline size_t allocSize(const HeapObject* h) {
     sizeClass<ArrayData>(), /* Empty */
     0, /* APCLocalArray */
     sizeClass<GlobalsArray>(),
+    0, /* RecordArray */
     0, /* Shape */
     0, /* Dict */
     0, /* VecArray */
@@ -311,6 +313,7 @@ inline size_t allocSize(const HeapObject* h) {
   CHECKSIZE(Packed)
   CHECKSIZE(Mixed)
   CHECKSIZE(Apc)
+  CHECKSIZE(RecordArray)
   CHECKSIZE(Dict)
   CHECKSIZE(VecArray)
   CHECKSIZE(Keyset)
@@ -358,6 +361,11 @@ inline size_t allocSize(const HeapObject* h) {
     case HeaderKind::Dict:
       // size = fn of h->m_scale
       size = static_cast<const MixedArray*>(h)->heapSize();
+      break;
+    case HeaderKind::RecordArray:
+      // size = h->m_record->numFields() * sz(TV) + sz(HM) + sz(RD) + sz(AD)
+      // [ArrayData][RecordData][fields][extra field map]
+      size = static_cast<const RecordArray*>(h)->heapSize();
       break;
     case HeaderKind::Keyset:
       // size = fn of h->m_scale

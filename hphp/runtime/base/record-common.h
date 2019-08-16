@@ -14,28 +14,35 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RECORD_DATA_INL_H_
-#error "record-data-inl.h should only be included by record-data.h"
-#endif
+#ifndef incl_HPHP_RECORD_COMMON_H_
+#define incl_HPHP_RECORD_COMMON_H_
 
 #include "hphp/runtime/vm/record.h"
 
 namespace HPHP {
+struct StringData;
 
-inline size_t RecordData::heapSize() const {
-  return sizeWithFields(m_record);
-}
+struct RecordBase {
+  const RecordDesc* record() const;
 
-inline const RecordDesc* RecordBase::record() const {
-  return m_record;
-}
+  tv_rval fieldRval(const StringData*) const;
+  tv_lval fieldLval(const StringData*);
 
-inline bool RecordData::kindIsValid() const {
-  return m_kind == HeaderKind::Record;
-}
+  static size_t fieldSize(const RecordDesc* rec) {
+    return sizeof(TypedValue) * rec->numFields();
+  }
 
-inline const TypedValue* RecordBase::fieldVec() const {
-  return reinterpret_cast<const TypedValue*>(uintptr_t(this + 1));
-}
+protected:
+  explicit RecordBase(const RecordDesc*);
+  const TypedValue* fieldVec() const;
+  void scan(type_scan::Scanner&) const;
+  const RecordDesc* const m_record;
 
-}
+  template<class RecordType>
+  static RecordType* newRecordImpl(const RecordDesc*,
+                                   uint32_t initSize,
+                                   const StringData* const* keys,
+                                   const TypedValue* values);
+};
+} // namespace HPHP
+#endif // incl_HPHP_RECORD_COMMON_H_

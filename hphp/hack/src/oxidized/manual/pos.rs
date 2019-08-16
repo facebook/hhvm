@@ -20,8 +20,8 @@ enum PosImpl {
     },
     Large {
         file: RelativePath,
-        start: FilePosLarge,
-        end: FilePosLarge,
+        start: Box<FilePosLarge>,
+        end: Box<FilePosLarge>,
     },
 }
 
@@ -43,8 +43,12 @@ impl Pos {
         match (start, end) {
             (Some(start), Some(end)) => Pos(Small { file, start, end }),
             _ => {
-                let start = FilePosLarge::from_lnum_bol_cnum(start_line, start_bol, start_cnum);
-                let end = FilePosLarge::from_lnum_bol_cnum(end_line, end_bol, end_cnum);
+                let start = Box::new(FilePosLarge::from_lnum_bol_cnum(
+                    start_line, start_bol, start_cnum,
+                ));
+                let end = Box::new(FilePosLarge::from_lnum_bol_cnum(
+                    end_line, end_bol, end_cnum,
+                ));
                 Pos(Large { file, start, end })
             }
         }
@@ -66,12 +70,16 @@ impl Pos {
         match (start, end) {
             (Some(start), Some(end)) => Pos(Small { file, start, end }),
             _ => {
-                let start = FilePosLarge::from_line_column_offset(line, cols.start, start_offset);
-                let end = FilePosLarge::from_line_column_offset(
+                let start = Box::new(FilePosLarge::from_line_column_offset(
+                    line,
+                    cols.start,
+                    start_offset,
+                ));
+                let end = Box::new(FilePosLarge::from_line_column_offset(
                     line,
                     cols.end,
                     start_offset + (cols.end - cols.start),
-                );
+                ));
                 Pos(Large { file, start, end })
             }
         }

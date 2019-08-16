@@ -71,3 +71,7 @@ pub fn str_to_ocaml(s: &[u8]) -> Value {
         value
     }
 }
+
+pub fn ocaml_to_isize(i: Value) -> isize {
+    ((i >> 1) | (std::isize::MIN as usize & i)) as isize
+}

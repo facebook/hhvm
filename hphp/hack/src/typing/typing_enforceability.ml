@@ -158,11 +158,15 @@ and pessimize_fun_type env (ft: decl fun_type) =
 let rec is_enforceable (env: Env.env) (ty: decl ty) =
   match snd ty with
   | Tthis -> false
+  | Tapply ((_, name), _) when Env.is_enum env name -> false
+  | Tapply ((_, name), _) when Env.is_typedef name ->
+    begin match Env.get_typedef env name with
+    | Some { td_vis = Aast.Transparent; td_tparams; td_type; _ } ->
+      (* So that the check does not collide with reified generics *)
+      let env = Env.add_generic_parameters env td_tparams in
+      is_enforceable env td_type
+    | _ -> false end
   | Tapply ((_, name), tyl) ->
-    (* TODO(T45690473): follow type aliases in the `type` case and allow enforceable targets *)
-    let not_class = Env.is_typedef name || Env.is_enum env name in
-    if not_class then false else
-
     begin match Env.get_class env name with
     | Some tc ->
       let tparams = Cls.tparams tc in

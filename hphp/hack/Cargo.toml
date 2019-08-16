@@ -4,5 +4,7 @@ members = [
     "src/facts/ffi",
     "src/parser",
     "src/parser/ffi",
+    "src/utils",
+    "src/utils/ocamlpool_rust",
     "test",
 ]

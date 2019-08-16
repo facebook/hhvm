@@ -308,11 +308,11 @@ pub fn unescape_single(s: &str) -> Result<String, InvalidString> {
     unescape_single_or_nowdoc(false, s)
 }
 
-fn unescape_nowdoc(s: &str) -> Result<String, InvalidString> {
+pub fn unescape_nowdoc(s: &str) -> Result<String, InvalidString> {
     unescape_single_or_nowdoc(true, s)
 }
 
-fn unescape_long_string(s: &str) -> Result<String, InvalidString> {
+pub fn unescape_long_string(s: &str) -> Result<String, InvalidString> {
     unescape_literal(LiteralKind::LiteralLongString, s)
 }
 

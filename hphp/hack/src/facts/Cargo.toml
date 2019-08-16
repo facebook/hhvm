@@ -9,6 +9,7 @@ path = "lib.rs"
 
 [dependencies]
 parser_rust = { path = "../parser", package = "hack_parser" }
+utils_rust = { path = "../utils", package = "hack_utils" }
 rust-crypto = "^0.2"
 serde = "^1.0.98"
 serde_derive = "^1.0.98"

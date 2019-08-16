@@ -1,0 +1,8 @@
+[package]
+name = "hack_utils"
+version = "3.49.0"
+edition = "2018"
+
+[lib]
+name = "utils_rust"
+path = "lib.rs"

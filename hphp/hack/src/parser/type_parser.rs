@@ -638,7 +638,7 @@ where
             let left_angle = self.assert_left_angle_in_type_list_with_possible_attribute();
             let value_type = self.parse_type_specifier(false, true);
             let optional_comma = self.optional_token(TokenKind::Comma);
-            let right_angle = self.fetch_token();
+            let right_angle = self.require_right_angle();
             S!(
                 make_varray_type_specifier,
                 self,

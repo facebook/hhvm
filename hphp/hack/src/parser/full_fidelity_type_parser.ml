@@ -522,7 +522,7 @@ and parse_varray_type_specifier parser =
     let (parser, left_angle) = assert_left_angle_in_type_list_with_possible_attribute parser in
     let (parser, value_type) = parse_type_specifier parser in
     let (parser, optional_comma) = optional_token parser Comma in
-    let (parser, right_angle) = fetch_token parser in
+    let (parser, right_angle) = require_right_angle parser in
     Make.varray_type_specifier
       parser
       array_token

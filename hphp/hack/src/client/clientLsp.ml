@@ -2996,6 +2996,24 @@ let handle_event
 
   (* server busy status *)
   | _, Server_message {push=ServerCommandTypes.BUSY_STATUS status; _} ->
+    let should_send_status =
+      match Lwt.poll initialize_params_promise with
+      | None -> false
+      | Some p -> Lsp.Initialize.(p.initializationOptions.sendServerStatusEvents)
+    in
+    if should_send_status
+    then begin
+      let status_message =
+        let open ServerCommandTypes in
+        match status with
+        | Needs_local_typecheck -> "needs_local_typecheck"
+        | Doing_local_typecheck -> "doing_local_typecheck"
+        | Done_local_typecheck -> "done_local_typecheck"
+        | Doing_global_typecheck _ -> "doing_global_typecheck"
+        | Done_global_typecheck _ -> "done_global_typecheck"
+      in
+      Lsp_helpers.telemetry_log to_stdout status_message
+    end;
     state := do_server_busy !state status;
     Lwt.return_unit
 

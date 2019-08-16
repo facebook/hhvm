@@ -372,18 +372,25 @@ and class_method tcopt root static env (_method_name, method_) =
     else
       match method_.ce_type with
       | lazy (_, Tfun { ft_tparams = (tparams, _);
-                          ft_params;
-                          ft_ret;
-                          ft_where_constraints; _ }) ->
+                        ft_params;
+                        ft_arity;
+                        ft_ret;
+                        ft_where_constraints; _ }) ->
           let env = List.fold_left tparams
             ~f:begin fun env t ->
               SMap.remove (snd t.tp_name) env
             end ~init:env in
           List.iter ft_params ~f:(fun_param tcopt root (Vcovariant []) static env);
+          fun_arity tcopt root (Vcovariant []) static env ft_arity;
           List.iter tparams ~f:(fun_tparam tcopt root env);
           List.iter ft_where_constraints ~f:(fun_where_constraint tcopt root env);
           fun_ret tcopt root (Vcovariant []) static env ft_ret.et_type
       | _ -> assert false
+
+and fun_arity tcopt root variance static env arity =
+  match arity with
+  | Fstandard _ | Fellipsis _ -> ()
+  | Fvariadic (_, fp) -> fun_param tcopt root variance static env fp
 
 and fun_param tcopt root variance static env { fp_type = { et_type = (reason, _ as ty); _ }; fp_kind; _ } =
   let pos = Reason.to_pos reason in
@@ -510,6 +517,7 @@ and type_ tcopt root variance env (reason, ty) =
   | Tprim _ -> ()
   | Tfun ft ->
       List.iter ft.ft_params ~f:(fun_param tcopt root variance `Instance env);
+      fun_arity tcopt root variance `Instance env ft.ft_arity;
       fun_ret tcopt root variance `Instance env ft.ft_ret.et_type
   | Tapply (_, []) -> ()
   | Tapply ((_, name as pos_name), tyl) ->
@@ -628,16 +636,21 @@ and get_typarams root env (ty: decl ty) =
   | Tshape (_, m) ->
     Nast.ShapeMap.fold (fun _ {sft_ty; _} res -> get_typarams_union res sft_ty) m empty
   | Tfun ft ->
-    let params = List.fold_left ft.ft_params ~init:empty
-      ~f:(fun res {fp_type; fp_kind; _} ->
-        let tp = get_typarams root env fp_type.et_type in
-        let tp =
-          match fp_kind with
-          (* Parameters behave contravariantly *)
-          | FPnormal -> flip tp
-          (* Inout/ref parameters behave both co- and contra-variantly *)
-          | FPref | FPinout -> union tp (flip tp) in
-        union res tp) in
+    let get_typarams_param acc fp =
+      let tp = get_typarams root env fp.fp_type.et_type in
+      let tp =
+        match fp.fp_kind with
+        (* Parameters behave contravariantly *)
+        | FPnormal -> flip tp
+        (* Inout/ref parameters behave both co- and contra-variantly *)
+        | FPref | FPinout -> union tp (flip tp) in
+      union acc tp in
+    let get_typarams_arity acc arity =
+      match arity with
+      | Fstandard _ | Fellipsis _ -> acc
+      | Fvariadic (_, fp) -> get_typarams_param acc fp in
+    let params = List.fold_left ft.ft_params
+      ~init:(get_typarams_arity empty ft.ft_arity) ~f:get_typarams_param in
     let ret = get_typarams root env ft.ft_ret.et_type in
     let get_typarams_constraint acc (ck, ty) =
       union acc (

@@ -1190,6 +1190,16 @@ let rec get_tyvars env ty =
   let get_tyvars_union (env, acc_positive, acc_negative) ty =
     let env, positive, negative = get_tyvars env ty in
     env, ISet.union acc_positive positive, ISet.union acc_negative negative in
+  let get_tyvars_param (env, acc_positive, acc_negative) {fp_type; fp_kind; _} =
+    let env, positive, negative = get_tyvars env fp_type.et_type in
+    match fp_kind with
+    (* Parameters are treated contravariantly *)
+    | FPnormal ->
+      env, ISet.union negative acc_positive, ISet.union positive acc_negative
+    (* Inout/ref parameters are both co- and contra-variant *)
+    | FPinout | FPref ->
+      let tyvars = ISet.union negative positive in
+      env, ISet.union tyvars acc_positive, ISet.union tyvars acc_negative in
   let env, ety = expand_type env ty in
   match snd ety with
   | Tvar v ->
@@ -1206,17 +1216,12 @@ let rec get_tyvars env ty =
       m (env, ISet.empty, ISet.empty)
   | Tfun ft ->
     let env, params_positive, params_negative =
-      List.fold_left ft.ft_params ~init:(env, ISet.empty, ISet.empty)
-        ~f:(fun (env, acc_positive, acc_negative) {fp_type; fp_kind; _} ->
-          let env, positive, negative = get_tyvars env fp_type.et_type in
-          match fp_kind with
-          (* Parameters are treated contravariantly *)
-          | FPnormal ->
-            env, ISet.union negative acc_positive, ISet.union positive acc_negative
-          (* Inout/ref parameters are both co- and contra-variant *)
-          | FPinout | FPref ->
-            let tyvars = ISet.union negative positive in
-            env, ISet.union tyvars acc_positive, ISet.union tyvars acc_negative) in
+      match ft.ft_arity with
+      | Fstandard _ | Fellipsis _ -> (env, ISet.empty, ISet.empty)
+      | Fvariadic (_, fp) -> get_tyvars_param (env, ISet.empty, ISet.empty) fp in
+    let env, params_positive, params_negative =
+      List.fold_left ft.ft_params ~init:(env, params_positive, params_negative)
+        ~f:get_tyvars_param in
     let env, ret_positive, ret_negative = get_tyvars env ft.ft_ret.et_type in
     env, ISet.union ret_positive params_positive, ISet.union ret_negative params_negative
   | Tabstract (AKnewtype (name, tyl), _) ->

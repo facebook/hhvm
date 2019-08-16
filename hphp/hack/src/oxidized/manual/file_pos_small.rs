@@ -25,28 +25,35 @@ use ocamlrep_derive::IntoOcamlRep;
 // - (col)  column number starts at 0, maximum is 2^9-1 = 511
 //            This is saturating, i.e. every column past 511 has column
 //            number 511 (so as not to raise exceptions).
+//
+// The astute reader may note that this type is defined using `usize` rather
+// than `u64`. This is obviously a problem, but it's one which already exists in
+// our OCaml source--it appears that the File_pos_small module will silently
+// behave incorrectly on a 32-bit machine. We use `usize` here to match its
+// behavior, but once parity is no longer necessary, we may want to switch to
+// `u64`.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, IntoOcamlRep)]
-pub struct FilePosSmall(u64);
+pub struct FilePosSmall(usize);
 
-const COLUMN_BITS: u64 = 9;
-const LINE_BITS: u64 = 24;
-const BOL_BITS: u64 = 30;
+const COLUMN_BITS: usize = 9;
+const LINE_BITS: usize = 24;
+const BOL_BITS: usize = 30;
 
 #[inline]
-const fn mask(bits: u64) -> u64 {
+const fn mask(bits: usize) -> usize {
     (1 << bits) - 1
 }
 
 #[inline]
-const fn mask_by(bits: u64, x: u64) -> u64 {
+const fn mask_by(bits: usize, x: usize) -> usize {
     x & mask(bits)
 }
 
-const MAX_COLUMN: u64 = mask(COLUMN_BITS);
-const MAX_LINE: u64 = mask(LINE_BITS);
-const MAX_BOL: u64 = mask(BOL_BITS);
+const MAX_COLUMN: usize = mask(COLUMN_BITS);
+const MAX_LINE: usize = mask(LINE_BITS);
+const MAX_BOL: usize = mask(BOL_BITS);
 
-const DUMMY: u64 = u64::max_value();
+const DUMMY: usize = usize::max_value();
 
 impl FilePosSmall {
     #[inline]
@@ -55,7 +62,7 @@ impl FilePosSmall {
     }
 
     #[inline]
-    pub fn beg_of_line(self) -> u64 {
+    pub fn beg_of_line(self) -> usize {
         if self.is_dummy() {
             0
         } else {
@@ -64,7 +71,7 @@ impl FilePosSmall {
     }
 
     #[inline]
-    pub fn line(self) -> u64 {
+    pub fn line(self) -> usize {
         if self.is_dummy() {
             0
         } else {
@@ -73,7 +80,7 @@ impl FilePosSmall {
     }
 
     #[inline]
-    pub fn column(self) -> u64 {
+    pub fn column(self) -> usize {
         if self.is_dummy() {
             DUMMY
         } else {
@@ -82,12 +89,12 @@ impl FilePosSmall {
     }
 
     #[inline]
-    const fn bol_line_col_unchecked(bol: u64, line: u64, col: u64) -> Self {
+    const fn bol_line_col_unchecked(bol: usize, line: usize, col: usize) -> Self {
         FilePosSmall((bol << (COLUMN_BITS + LINE_BITS)) + (line << COLUMN_BITS) + col)
     }
 
     #[inline]
-    fn bol_line_col(bol: u64, line: u64, col: u64) -> Option<Self> {
+    fn bol_line_col(bol: usize, line: usize, col: usize) -> Option<Self> {
         if col > MAX_COLUMN || line > MAX_LINE || bol > MAX_BOL {
             None
         } else {
@@ -103,49 +110,49 @@ impl FilePosSmall {
     // constructors
 
     #[inline]
-    pub fn from_line_column_offset(line: u64, column: u64, offset: u64) -> Option<Self> {
+    pub fn from_line_column_offset(line: usize, column: usize, offset: usize) -> Option<Self> {
         Self::bol_line_col(offset - column, line, column)
     }
 
     #[inline]
-    pub fn from_lnum_bol_cnum(lnum: u64, bol: u64, cnum: u64) -> Option<Self> {
+    pub fn from_lnum_bol_cnum(lnum: usize, bol: usize, cnum: usize) -> Option<Self> {
         Self::bol_line_col(bol, lnum, cnum - bol)
     }
 
     // accessors
 
     #[inline]
-    pub fn offset(self) -> u64 {
+    pub fn offset(self) -> usize {
         self.beg_of_line() + self.column()
     }
 
     #[inline]
-    pub fn line_beg(self) -> (u64, u64) {
+    pub fn line_beg(self) -> (usize, usize) {
         (self.line(), self.beg_of_line())
     }
 
     #[inline]
-    pub fn line_column(self) -> (u64, u64) {
+    pub fn line_column(self) -> (usize, usize) {
         (self.line(), self.column())
     }
 
     #[inline]
-    pub fn line_column_beg(self) -> (u64, u64, u64) {
+    pub fn line_column_beg(self) -> (usize, usize, usize) {
         (self.line(), self.column(), self.beg_of_line())
     }
 
     #[inline]
-    pub fn line_column_offset(self) -> (u64, u64, u64) {
+    pub fn line_column_offset(self) -> (usize, usize, usize) {
         (self.line(), self.column(), self.offset())
     }
 
     #[inline]
-    pub fn line_beg_offset(self) -> (u64, u64, u64) {
+    pub fn line_beg_offset(self) -> (usize, usize, usize) {
         (self.line(), self.beg_of_line(), self.offset())
     }
 
     #[inline]
-    pub fn with_column(self, col: u64) -> Self {
+    pub fn with_column(self, col: usize) -> Self {
         match Self::bol_line_col(self.beg_of_line(), self.line(), col) {
             None => FilePosSmall(DUMMY),
             Some(pos) => pos,

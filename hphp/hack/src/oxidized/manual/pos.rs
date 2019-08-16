@@ -33,8 +33,8 @@ pub struct Pos(PosImpl);
 impl Pos {
     pub fn from_lnum_bol_cnum(
         file: RelativePath,
-        start: (u64, u64, u64),
-        end: (u64, u64, u64),
+        start: (usize, usize, usize),
+        end: (usize, usize, usize),
     ) -> Self {
         let (start_line, start_bol, start_cnum) = start;
         let (end_line, end_bol, end_cnum) = end;
@@ -57,9 +57,9 @@ impl Pos {
     /// For single-line spans only.
     pub fn from_line_cols_offset(
         file: RelativePath,
-        line: u64,
-        cols: Range<u64>,
-        start_offset: u64,
+        line: usize,
+        cols: Range<usize>,
+        start_offset: usize,
     ) -> Self {
         let start = FilePosSmall::from_line_column_offset(line, cols.start, start_offset);
         let end = FilePosSmall::from_line_column_offset(

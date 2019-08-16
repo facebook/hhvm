@@ -223,8 +223,14 @@ function array_search($needle, $haystack, bool $strict = false);
 function array_shift(&$array);
 <<__PHPStdLib, __Rx>>
 function array_slice($array, int $offset, $length = null, bool $preserve_keys = false);
-<<__PHPStdLib>>
-function array_splice(&$input, int $offset, $length = null, $replacement = null);
+<<__PHPStdLib, __Rx, __AtMostRxAsArgs>>
+/* HH_FIXME[2088] reference will be inout eventually */
+function array_splice(
+  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed &$input,
+  int $offset,
+  mixed $length = null,
+  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed $replacement = null,
+);
 <<__PHPStdLib, __Rx>>
 function array_unique($array, int $sort_flags = 2);
 <<__PHPStdLib>>

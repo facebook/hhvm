@@ -512,12 +512,12 @@ function array_slice(
  * @return mixed - Returns the array consisting of the extracted elements.
  *
  */
-<<__Native>>
+<<__Native, __Rx, __AtMostRxAsArgs>>
 function array_splice(
-  mixed &$input,
+  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed &$input,
   int $offset,
   mixed $length = null,
-  mixed $replacement = null,
+  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed $replacement = null,
 ): mixed;
 
 /**

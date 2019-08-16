@@ -7,6 +7,21 @@
  *
  *)
 
+type foo1 =
+  | AA
+  | BB of bool * string
+  | CC
+  | DD of int
+
+and foo2 = bool
+
+and foo3 = {
+  aa: int;
+  bb: bool;
+}
+
+and foo4 = bool * string
+
 external getString : unit -> string list = "getString"
 
 external getIsize : unit -> int list = "getIsize"
@@ -18,6 +33,14 @@ external getVec : unit -> int list list = "getVec"
 external getBool : unit -> bool list = "getBool"
 
 external getBox : unit -> string list = "getBox"
+
+external getFoo1 : unit -> foo1 list = "getFoo1"
+
+external getFoo2 : unit -> foo2 list = "getFoo2"
+
+external getFoo3 : unit -> foo3 list = "getFoo3"
+
+external getFoo4 : unit -> foo4 list = "getFoo4"
 
 let run f expected () =
   let rust_values = f () in
@@ -36,6 +59,10 @@ let tests = [
   ("getVec", run getVec [ []; [0] ]);
   ("getBool", run getBool [true; false]);
   ("getBox", run getBox [""; "A"]);
+  ("getFoo1", run getFoo1 [AA; BB (true, "A");  CC;  DD 2]);
+  ("getFoo2", run getFoo2 [true; false]);
+  ("getFoo3", run getFoo3 [{aa = 2; bb = true}]);
+  ("getFoo4", run getFoo4 [(true, "C")]);
 ]
 
 let () =

@@ -85,3 +85,9 @@ impl Ocamlvalue for isize {
         ((*self << 1) + 1) as usize
     }
 }
+
+impl<K, V> Ocamlvalue for ::std::iter::Map<K, V> {
+    fn ocamlvalue(&self) -> Value {
+        panic!("Not Implemented")
+    }
+}

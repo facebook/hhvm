@@ -13,20 +13,9 @@ extern "C" {
     fn ocamlpool_leave();
 }
 
+use ocaml_ffi_test_utils::test_case;
 use ocamlpool_rust::ocamlvalue::*;
-
-macro_rules! test_case {
-    ($name:ident, $($code:block)*) => {
-        caml!($name, | |, <r>, {
-            ocamlpool_enter();
-            let list = vec![
-                $($code),*
-            ];
-            r = ocaml::Value::new(list.ocamlvalue());
-            ocamlpool_leave();
-        } -> r);
-    }
-}
+use ocamlvalue_macro::Ocamlvalue;
 
 test_case!(
     getString,
@@ -65,3 +54,46 @@ test_case!(
     { Box::new("".to_string())}
     { Box::new("A".to_string())}
 );
+
+#[derive(Ocamlvalue)]
+enum Foo1 {
+    AA,
+    BB(bool, String),
+    CC,
+    DD(isize),
+}
+
+#[derive(Ocamlvalue)]
+struct Foo2(bool);
+
+#[derive(Ocamlvalue)]
+struct Foo3 {
+    aa: isize,
+    bb: bool,
+}
+
+#[derive(Ocamlvalue)]
+struct Foo4(bool, String);
+
+test_case!(
+    getFoo1,
+    { Foo1::AA }
+    { Foo1::BB(true, "A".to_string())}
+    { Foo1::CC }
+    { Foo1::DD(2isize) }
+);
+
+test_case!(
+    getFoo2,
+    { Foo2(true) }
+    { Foo2(false) }
+);
+
+test_case!(getFoo3, {
+    Foo3 {
+        aa: 2isize,
+        bb: true,
+    }
+});
+
+test_case!(getFoo4, { Foo4(true, "C".to_string()) });

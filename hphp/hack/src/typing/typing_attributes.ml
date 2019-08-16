@@ -17,12 +17,23 @@ module Cls = Decl_provider.Class
 let check_implements check_new_object attr_interface
   { Aast.ua_name = (attr_pos, attr_name)
   ; ua_params = params } env =
+  let expr_kind =
+    match SMap.get attr_interface SN.AttributeKinds.plain_english_map  with
+    | Some ek -> ek
+    | None -> "this expression" (* this case should never execute *)
+  in
   if String_utils.string_starts_with attr_name "__"
   then begin
     (* Check against builtins *)
-    if not (SSet.mem attr_name SN.UserAttributes.as_set)
-    then Errors.unbound_attribute_name attr_pos attr_name; env end
-  else
+    let () = match SMap.get attr_name SN.UserAttributes.as_map with
+      | Some intfs ->
+        if not @@ List.mem intfs attr_interface ~equal:String.equal then
+          Errors.wrong_expression_kind_builtin_attribute expr_kind attr_pos attr_name
+      | None ->
+        Errors.unbound_attribute_name attr_pos attr_name
+    in
+    env
+  end else
     match Typing_env.get_class env attr_name, Typing_env.get_class env attr_interface with
     | Some attr_class, Some intf_class ->
       (* Found matching class *)
@@ -35,10 +46,6 @@ let check_implements check_new_object attr_interface
        MakeType.class_type (Rwitness (Cls.pos intf_class)) (Cls.name intf_class) [] in
       if not (Typing_subtype.is_sub_type env attr_locl_ty interface_locl_ty)
       then begin
-        let expr_kind =
-          match SMap.get attr_interface SN.AttributeKinds.plain_english_map  with
-          | Some ek -> ek
-          | None -> "this expression" (* this case should never execute *) in
         Errors.wrong_expression_kind_attribute expr_kind
           attr_pos attr_name (Cls.pos attr_class) (Cls.name attr_class) (Cls.name intf_class);
         env end

@@ -111,6 +111,43 @@ module Members = struct
     (String_utils.string_starts_with s ":aria-")
 end
 
+module AttributeKinds = struct
+  let clsLike = "\\HH\\ClassLikeAttribute"
+  let cls = "\\HH\\ClassAttribute"
+  let enum = "\\HH\\EnumAttribute"
+
+  let typealias = "\\HH\\TypeAliasAttribute"
+
+  let fn = "\\HH\\FunctionAttribute"
+  let mthd = "\\HH\\MethodAttribute"
+
+  let property = "\\HH\\PropertyAttribute"
+  let instProperty = "\\HH\\InstancePropertyAttribute"
+  let staticProperty = "\\HH\\StaticPropertyAttribute"
+
+  let parameter = "\\HH\\ParameterAttribute"
+  let typeparam = "\\HH\\TypeParameterAttribute"
+  let file = "\\HH\\FileAttribute"
+  let typeconst = "\\HH\\TypeConstantAttribute"
+
+  let plain_english_map =
+    SMap.of_list
+      [ (clsLike, "a class or enum")
+      ; (cls, "a class")
+      ; (enum, "an enum")
+      ; (typealias, "a typealias")
+      ; (fn, "a function")
+      ; (mthd, "a method")
+      ; (property, "a property")
+      ; (instProperty, "an instance property")
+      ; (staticProperty, "a static property")
+      ; (parameter, "a parameter")
+      ; (typeparam, "a type parameter")
+      ; (file, "a file")
+      ; (typeconst, "a type constant")
+      ]
+end
+
 module UserAttributes = struct
 
   let uaOverride                 = "__Override"
@@ -152,80 +189,48 @@ module UserAttributes = struct
   let uaReifiable                = "__Reifiable"
   let uaNeverInline              = "__NEVER_INLINE"
 
-  let as_set = List.fold_right ~f:SSet.add ~init:SSet.empty
-    [
-      uaOverride;
-      uaConsistentConstruct;
-      uaConst;
-      uaDeprecated;
-      uaEntryPoint;
-      uaMemoize;
-      uaMemoizeLSB;
-      uaPHPStdLib;
-      uaHipHopSpecific;
-      uaAcceptDisposable;
-      uaReturnDisposable;
-      uaReactive;
-      uaLocalReactive;
-      uaMutable;
-      uaMutableReturn;
-      uaShallowReactive;
-      uaOnlyRxIfImpl;
-      uaProbabilisticModel;
-      uaLSB;
-      uaSealed;
-      uaReturnsVoidToRx;
-      uaMaybeMutable;
-      uaLateInit;
-      uaAtMostRxAsFunc;
-      uaAtMostRxAsArgs;
-      uaOwnedMutable;
-      uaNonRx;
-      uaNewable;
-      uaEnforceable;
-      uaExplicit;
-      uaSoft;
-      uaWarn;
-      uaMockClass;
-      uaProvenanceSkipFrame;
-      uaDynamicallyCallable;
-      uaDynamicallyConstructible;
-      uaReifiable;
-      uaNeverInline;
+  let as_map =
+    let open AttributeKinds in
+    SMap.of_list [
+      uaOverride,                 [mthd];
+      uaConsistentConstruct,      [cls];
+      uaConst,                    [cls; instProperty; parameter; staticProperty];
+      uaDeprecated,               [clsLike; cls; enum; typealias; fn; mthd; property];
+      uaEntryPoint,               [fn];
+      uaMemoize,                  [fn; mthd];
+      uaMemoizeLSB,               [fn; mthd];
+      uaPHPStdLib,                [cls; fn; mthd];
+      uaHipHopSpecific,           [cls];
+      uaAcceptDisposable,         [parameter];
+      uaReturnDisposable,         [fn; mthd];
+      uaReactive,                 [fn; mthd];
+      uaLocalReactive,            [fn; mthd];
+      uaMutable,                  [fn; mthd; parameter; instProperty; staticProperty];
+      uaMutableReturn,            [fn; mthd];
+      uaShallowReactive,          [fn; mthd];
+      uaOnlyRxIfImpl,             [parameter; fn; mthd];
+      uaProbabilisticModel,       [cls];
+      uaLSB,                      [staticProperty];
+      uaSealed,                   [cls];
+      uaReturnsVoidToRx,          [fn; mthd];
+      uaMaybeMutable,             [fn; mthd; parameter];
+      uaLateInit,                 [instProperty; parameter; staticProperty];
+      uaAtMostRxAsFunc,           [cls; fn; parameter];
+      uaAtMostRxAsArgs,           [cls; fn; mthd];
+      uaOwnedMutable,             [parameter];
+      uaNonRx,                    [fn; mthd];
+      uaNewable,                  [typeparam];
+      uaEnforceable,              [typeconst; typeparam];
+      uaExplicit,                 [typeparam];
+      uaSoft,                     [instProperty; parameter; staticProperty; typeparam];
+      uaWarn,                     [typeparam];
+      uaMockClass,                [cls];
+      uaProvenanceSkipFrame,      [fn; mthd];
+      uaDynamicallyCallable,      [fn; mthd];
+      uaDynamicallyConstructible, [cls];
+      uaReifiable,                [typeconst];
+      uaNeverInline,              [fn; mthd];
     ]
-end
-
-module AttributeKinds = struct
-  let cls = "\\HH\\ClassAttribute"
-  let enum = "\\HH\\EnumAttribute"
-
-  let typealias = "\\HH\\TypeAliasAttribute"
-
-  let fn = "\\HH\\FunctionAttribute"
-  let mthd = "\\HH\\MethodAttribute"
-
-  let instProperty = "\\HH\\InstancePropertyAttribute"
-  let staticProperty = "\\HH\\StaticPropertyAttribute"
-
-  let parameter = "\\HH\\ParameterAttribute"
-  let typeparam = "\\HH\\TypeParameterAttribute"
-  let file = "\\HH\\FileAttribute"
-  let typeconst = "\\HH\\TypeConstantAttribute"
-
-  let plain_english_map =
-    List.fold_left ~init:SMap.empty ~f:(fun acc (k, v) -> SMap.add k v acc)
-      [ (cls, "a class")
-      ; (enum, "an enum")
-      ; (typealias, "a typealias")
-      ; (fn, "a function")
-      ; (mthd, "a method")
-      ; (instProperty, "an instance property")
-      ; (staticProperty, "a static property")
-      ; (parameter, "a parameter")
-      ; (typeparam, "a type parameter")
-      ; (file, "a file")
-      ; (typeconst, "a type constant")
-      ]
 end
 
 (* Tested before \\-prepending name-canonicalization *)

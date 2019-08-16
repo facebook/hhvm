@@ -508,6 +508,7 @@ val superglobal_in_reactive_context : Pos.t -> string -> unit
 val rx_is_enabled_invalid_location : Pos.t -> unit
 val wrong_expression_kind_attribute :
   string -> Pos.t -> string -> Pos.t -> string -> string -> unit
+val wrong_expression_kind_builtin_attribute : string -> Pos.t -> string -> unit
 val cannot_return_borrowed_value_as_immutable : Pos.t -> Pos.t -> unit
 val decl_override_missing_hint : Pos.t -> unit
 val let_var_immutability_violation : Pos.t -> string -> unit

@@ -85,9 +85,15 @@ let check_only_rx_if_impl env ~is_receiver ~is_self pos reason ty cond_ty =
     - ty is a subtype of condition type
     - type has linked condition type which is a subtype of condition type *)
   let cond_ty = CT.localize_condition_type env cond_ty in
-  let ok =
-    SubType.is_sub_type_LEGACY_DEPRECATED env ty cond_ty ||
-    condition_type_matches ~is_self env ty cond_ty in
+  let rec check env ty =
+    (* TODO: move caller to be TAST check  *)
+    match Env.expand_type env ty with
+    | env, (_, Tintersection tyl) -> List.exists tyl ~f:(check env)
+    | env, ty ->
+      SubType.is_sub_type_LEGACY_DEPRECATED env ty cond_ty ||
+      condition_type_matches ~is_self env ty cond_ty
+  in
+  let ok = check env ty in
   if not ok
   then begin
     let condition_type_str = type_to_str env cond_ty in

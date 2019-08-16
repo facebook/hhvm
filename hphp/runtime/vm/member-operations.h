@@ -906,9 +906,13 @@ template <KeyType keyType>
 inline tv_lval ElemDRecord(tv_lval base, key_type<keyType> key) {
   assertx(tvIsRecord(base));
   assertx(tvIsPlausible(base.tv()));
-  auto const recData = val(base).prec;
+  auto const oldRecData = val(base).prec;
+  if (oldRecData->cowCheck()) {
+    val(base).prec = oldRecData->copyRecord();
+    decRefRec(oldRecData);
+  }
   auto const fieldName = tvCastToString(initScratchKey(key));
-  return recData->fieldLval(fieldName.get());
+  return val(base).prec->fieldLval(fieldName.get());
 }
 /**
  * ElemD when base is an Object
@@ -1537,14 +1541,18 @@ template <KeyType keyType>
 inline void SetElemRecord(tv_lval base, key_type<keyType> key,
                           Cell* value) {
   auto const fieldName = tvCastToString(initScratchKey(key));
-  auto const recData = val(base).prec;
-  auto const rec = recData->record();
+  auto const oldRecData = val(base).prec;
+  auto const rec = oldRecData->record();
   auto const& field = rec->field(fieldName.get());
   auto const& tc = field.typeConstraint();
   if (tc.isCheckable()) {
     tc.verifyRecField(value, rec->name(), field.name());
   }
-  auto const& tv = recData->fieldLval(fieldName.get());
+  if (oldRecData->cowCheck()) {
+    val(base).prec = oldRecData->copyRecord();
+    decRefRec(oldRecData);
+  }
+  auto const& tv = val(base).prec->fieldLval(fieldName.get());
   tvSet(*value, tv);
 }
 

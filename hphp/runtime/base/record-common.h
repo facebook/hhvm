@@ -43,6 +43,8 @@ protected:
                                    uint32_t initSize,
                                    const StringData* const* keys,
                                    const TypedValue* values);
+  template<class RecordType>
+  static RecordType* copyRecordImpl(const RecordType*);
 };
 } // namespace HPHP
 #endif // incl_HPHP_RECORD_COMMON_H_

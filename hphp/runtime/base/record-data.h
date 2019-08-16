@@ -53,6 +53,7 @@ struct RecordData : Countable,
                                uint32_t initSize,
                                const StringData* const* keys,
                                const TypedValue* values);
+  RecordData* copyRecord() const;
   // Decrement ref-counts of all fields of the record and free the memory.
   void release() noexcept;
   ALWAYS_INLINE void decRefAndRelease() {

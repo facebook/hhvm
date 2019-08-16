@@ -37,6 +37,10 @@ RecordData* RecordData::newRecord(const RecordDesc* rec,
   return newRecordImpl<RecordData>(rec, initSize, keys, values);
 }
 
+RecordData* RecordData::copyRecord() const {
+  return copyRecordImpl(this);
+}
+
 NEVER_INLINE
 void RecordData::release() noexcept {
   assertx(kindIsValid());

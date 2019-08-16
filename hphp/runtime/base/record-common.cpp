@@ -29,6 +29,22 @@ RecordBase::RecordBase(const RecordDesc* record)
 }
 
 template
+RecordData* RecordBase::copyRecordImpl<RecordData>(const RecordData*);
+
+template<class RecordType>
+RecordType* RecordBase::copyRecordImpl(const RecordType* old) {
+  auto const size = RecordType::sizeWithFields(old->record());
+  auto const newRec = static_cast<RecordType*>(tl_heap->objMalloc(size));
+  memcpy(newRec, old, size);
+  newRec->initHeader(old->kind(), OneReference);
+  auto const fields = newRec->fieldVec();
+  for (auto i = 0; i < old->record()->numFields(); ++i) {
+    tvIncRefGen(fields[i]);
+  }
+  return newRec;
+}
+
+template
 RecordData* RecordBase::newRecordImpl<RecordData>(const RecordDesc* rec,
                                                   uint32_t initSize,
                                                   const StringData* const *keys,

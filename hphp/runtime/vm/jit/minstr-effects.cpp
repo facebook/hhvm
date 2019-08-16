@@ -70,7 +70,7 @@ void getBaseType(Opcode rawOp, bool predict,
   }
 
   if ((op == SetElem || op == SetRange || op == UnsetElem) &&
-      baseType.maybe(TArrLike | TStr)) {
+      baseType.maybe(TArrLike | TStr | TRecord)) {
     /* Modifying an array or string element, even when COW doesn't kick in,
      * produces a new SSATmp for the base. StaticArr/StaticStr may be promoted
      * to CountedArr/CountedStr. */

@@ -1,5 +1,5 @@
 File "pass_by_ref_annotation5.php", line 8, characters 14-14:
-Only variables and the results of function calls can be used as references (Parsing[1002])
+Only variables can be used as references (Parsing[1002])
 File "pass_by_ref_annotation5.php", line 7, characters 7-12:
 $this cannot be passed by reference (NastCheck[3067])
 File "pass_by_ref_annotation5.php", line 8, characters 13-15:

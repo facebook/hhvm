@@ -96,7 +96,7 @@ function main() {
     $b,
     inout $c[0],
     ref(&$a),
-    ref(&ref(&ref(&$c))),
+    ref(&$c),
   );
   var_dump($a[0], $b[0], $c[0]);
 

@@ -7,8 +7,9 @@ function f($a) {
  return g($a);
  }
 function test($a) {
-  return reset(&(f($a)));
-  }
+  $f = f($a);
+  return reset(&$f);
+}
 
 <<__EntryPoint>>
 function main_1833() {

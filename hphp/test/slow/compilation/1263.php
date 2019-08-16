@@ -1,7 +1,7 @@
 <?hh
 
 function test() {
- return array();
+  return array();
 }
 
  <<__EntryPoint>>

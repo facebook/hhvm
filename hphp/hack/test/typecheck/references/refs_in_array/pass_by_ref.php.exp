@@ -1,2 +1,2 @@
 File "pass_by_ref.php", line 7, characters 14-17:
-Only variables and the results of function calls can be used as references (Parsing[1002])
+Only variables can be used as references (Parsing[1002])

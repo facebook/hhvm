@@ -998,6 +998,35 @@ and simplify_subtype
       invalid ()
     end
 
+  (* List destructuring *)
+  | Ttuple tyl, Tdestructure tyl_dest ->
+    if List.length tyl <> List.length tyl_dest then invalid () else
+    List.fold2_exn tyl tyl_dest ~init:(env, TL.valid) ~f:(fun res ty ty_dest ->
+      res &&& simplify_subtype ~seen_generic_params ~this_ty ty ty_dest)
+  | Tclass ((_, x), _, [elt_type]), Tdestructure tyl_dest
+    when x = SN.Collections.cVector
+      || x = SN.Collections.cImmVector
+      || x = SN.Collections.cVec
+      || x = SN.Collections.cConstVector ->
+    List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
+      res &&& simplify_subtype ~seen_generic_params ~this_ty elt_type ty_dest)
+  | Tclass ((_, x), _, tyl), Tdestructure tyl_dest when x = SN.Collections.cPair ->
+    if List.length tyl <> List.length tyl_dest then invalid () else
+    List.fold2_exn tyl tyl_dest ~init:(env, TL.valid) ~f:(fun res ty ty_dest ->
+      res &&& simplify_subtype ~seen_generic_params ~this_ty ty ty_dest)
+  | Tarraykind (AKvec elt_type), Tdestructure tyl_dest
+  | Tarraykind (AKvarray elt_type), Tdestructure tyl_dest ->
+    List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
+      res &&& simplify_subtype ~seen_generic_params ~this_ty elt_type ty_dest)
+  | Tdynamic, Tdestructure tyl_dest ->
+    List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
+      res &&& simplify_subtype ~seen_generic_params ~this_ty ty_sub ty_dest)
+  (* TODO: should remove these any cases *)
+  | Tarraykind (AKany | AKempty), Tdestructure tyl_dest
+  | Tany, Tdestructure tyl_dest ->
+    let any = (fst ty_super, Tany) in
+    List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
+      res &&& simplify_subtype ~seen_generic_params ~this_ty any ty_dest)
   (* ty_sub <: union{ty_super'} iff ty_sub <: ty_super' *)
   | _, Tunion [ty_super'] ->
     simplify_subtype ~seen_generic_params ~this_ty ty_sub ty_super' env
@@ -1134,35 +1163,6 @@ and simplify_subtype
   | Tintersection tyl, _ ->
     List.fold_left tyl ~init:(env, TL.invalid ~fail) ~f:(fun res ty_sub ->
       res ||| simplify_subtype ~seen_generic_params ~this_ty ty_sub ty_super)
-
-  | Ttuple tyl, Tdestructure tyl_dest ->
-    if List.length tyl <> List.length tyl_dest then invalid () else
-    List.fold2_exn tyl tyl_dest ~init:(env, TL.valid) ~f:(fun res ty ty_dest ->
-      res &&& simplify_subtype ~seen_generic_params ~this_ty ty ty_dest)
-  | Tclass ((_, x), _, [elt_type]), Tdestructure tyl_dest
-    when x = SN.Collections.cVector
-      || x = SN.Collections.cImmVector
-      || x = SN.Collections.cVec
-      || x = SN.Collections.cConstVector ->
-    List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
-      res &&& simplify_subtype ~seen_generic_params ~this_ty elt_type ty_dest)
-  | Tclass ((_, x), _, tyl), Tdestructure tyl_dest when x = SN.Collections.cPair ->
-    if List.length tyl <> List.length tyl_dest then invalid () else
-    List.fold2_exn tyl tyl_dest ~init:(env, TL.valid) ~f:(fun res ty ty_dest ->
-      res &&& simplify_subtype ~seen_generic_params ~this_ty ty ty_dest)
-  | Tarraykind (AKvec elt_type), Tdestructure tyl_dest
-  | Tarraykind (AKvarray elt_type), Tdestructure tyl_dest ->
-    List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
-      res &&& simplify_subtype ~seen_generic_params ~this_ty elt_type ty_dest)
-  | Tdynamic, Tdestructure tyl_dest ->
-    List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
-      res &&& simplify_subtype ~seen_generic_params ~this_ty ty_sub ty_dest)
-  (* TODO: should remove these any cases *)
-  | Tarraykind (AKany | AKempty), Tdestructure tyl_dest
-  | Tany, Tdestructure tyl_dest ->
-    let any = (fst ty_super, Tany) in
-    List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
-      res &&& simplify_subtype ~seen_generic_params ~this_ty any ty_dest)
 
   | Tany, Tany ->
     valid ()

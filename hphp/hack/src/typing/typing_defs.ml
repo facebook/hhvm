@@ -716,6 +716,8 @@ let abstract_kind_con_ordinal ak =
  * aliases.
  * But if ty_compare ty1 ty2 = 0, then the types must not be distinguishable
  * by any typing rules.
+ *
+ * TODO(T52611361): Make this comparison exhaustive on ty1 to remove the _ catchall
  *)
 let rec ty_compare ?(normalize_lists = false) ty1 ty2 =
   let rec ty_compare ty1 ty2 =
@@ -727,6 +729,7 @@ let rec ty_compare ?(normalize_lists = false) ty1 ty2 =
         ty_compare ty ty2
       | Tfun fty, Tfun fty2 ->
         tfun_compare fty fty2
+      | Tdestructure tyl1, Tdestructure tyl2
       | Tunion tyl1, Tunion tyl2
       | Tintersection tyl1, Tintersection tyl2 ->
         tyl_compare ~sort:normalize_lists ~normalize_lists tyl1 tyl2

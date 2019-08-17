@@ -6,6 +6,7 @@
 
 use parser_rust as parser;
 
+use parser::mode_parser::parse_mode;
 use parser::parser::Parser;
 use parser::parser_env::ParserEnv;
 use parser::smart_constructors_wrappers::WithKind;
@@ -13,6 +14,7 @@ use parser::source_text::SourceText;
 
 use crate::facts::*;
 use crate::facts_smart_constructors::*;
+use deps_rust::file_mode::FileMode;
 
 pub type FactsParser<'a> = Parser<'a, WithKind<FactsSmartConstructors<'a>>, HasScriptContent<'a>>;
 
@@ -28,13 +30,18 @@ pub fn extract_as_json(text: &str, opts: ExtractAsJsonOpts) -> Option<String> {
 }
 
 pub fn from_text(text: &str, opts: ExtractAsJsonOpts) -> Option<Facts> {
+    let text = SourceText::make(&opts.filename, text.as_bytes());
+    let is_experimental = match parse_mode(&text) {
+        Some(FileMode::Mexperimental) => true,
+        _ => false,
+    };
     let env = ParserEnv {
         php5_compat_mode: opts.php5_compat_mode,
         hhvm_compat_mode: opts.hhvm_compat_mode,
+        is_experimental_mode: is_experimental,
         allow_new_attribute_syntax: opts.allow_new_attribute_syntax,
         ..ParserEnv::default()
     };
-    let text = SourceText::make(&opts.filename, text.as_bytes());
     let mut parser = FactsParser::make(&text, env);
     let root = parser.parse_script(None);
 

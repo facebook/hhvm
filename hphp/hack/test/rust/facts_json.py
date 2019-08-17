@@ -46,7 +46,23 @@ def parse_args():
         action="store_false",
         help="do not show diff of OCaml vs Rust output, respectively",
     )
+    ap.add_argument(
+        "--no-progress",
+        dest="progress",
+        action="store_false",
+        help="do not show progress (including what commands are run)",
+    )
     ap.add_argument("--show-ok", action="store_true", help="show passing tests")
+    ap.add_argument(
+        "--caml-binary",
+        default=locate_binary_under_test("facts_parse_ocaml/facts_parse_ocaml.opt"),
+        help="path to OCaml binary under test",
+    )
+    ap.add_argument(
+        "--rust-binary",
+        default=locate_binary_under_test("facts_parse_rust#binary/facts_parse_rust"),
+        help="path to Rust binary under test",
+    )
     ap.add_argument(
         "--skip-re",
         default=r"^$",
@@ -71,27 +87,33 @@ def locate_binary_under_test(suffix) -> str:
     return path[0]
 
 
-def test_all(paths: Iterable[str], args: List[str], on_failure, on_success):
-    def binary_output_as_pretty_json(suffix: str, path: str) -> List[str]:
-        cmd = [locate_binary_under_test(suffix)] + args + ["--file-path", path]
-        print("RUN: " + " ".join(map(shlex.quote, cmd)))
+def test_all(
+    paths: Iterable[str],
+    args: List[str],
+    caml_binary: str,
+    rust_binary: str,
+    on_failure,
+    on_success,
+    progress: bool,
+):
+    def binary_output_as_pretty_json(binary: str, path: str) -> List[str]:
+        cmd = [binary] + args + ["--file-path", path]
+        if progress:
+            print("RUN: " + " ".join(map(shlex.quote, cmd)))
         obj = json.loads(subprocess.check_output(cmd))
         return json.dumps(obj, sort_keys=False, indent=2).split("\n")
 
     correct, total = 0, 0
     for path in paths:
         total += 1
-        caml_output = binary_output_as_pretty_json(
-            "facts_parse_ocaml/facts_parse_ocaml.opt", path
-        )
-        rust_output = binary_output_as_pretty_json(
-            "facts_parse_rust#binary/facts_parse_rust", path
-        )
+        caml_output = binary_output_as_pretty_json(caml_binary, path)
+        rust_output = binary_output_as_pretty_json(rust_binary, path)
         ok = rust_output == caml_output
         if ok:
             correct += 1
 
-        print("%d/%d" % (correct, total))
+        if progress:
+            print("%d/%d" % (correct, total))
         if not ok:
             print("FAILED:", path)
             on_failure(caml_output, rust_output)
@@ -100,15 +122,18 @@ def test_all(paths: Iterable[str], args: List[str], on_failure, on_success):
 
 
 if __name__ == "__main__":
+    exit_code = 0
     args = parse_args()
 
     def on_failed(caml_output, rust_output):
+        global exit_code
+        exit_code = 1
         if args.diff:
             for line in unified_diff(caml_output, rust_output):
                 if not (line.startswith("---") or line.startswith("+++")):
                     print(line)
         if not args.keep_going:
-            sys.exit(1)
+            sys.exit(exit_code)
 
     def on_success(path):
         if args.show_ok:
@@ -116,4 +141,14 @@ if __name__ == "__main__":
 
     dir_skip_re = re.compile(args.skip_re)
     paths = args.file if args.file else find_hack_files(args.dir, dir_skip_re)
-    test_all(paths, args.passthrough_args, on_failed, on_success)
+    test_all(
+        paths,
+        args.passthrough_args,
+        args.caml_binary,
+        args.rust_binary,
+        on_failed,
+        on_success,
+        args.progress,
+    )
+
+    sys.exit(exit_code)

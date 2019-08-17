@@ -8,6 +8,7 @@ name = "facts_rust"
 path = "lib.rs"
 
 [dependencies]
+deps_rust = { path = "../deps", package = "hack_deps" }
 parser_rust = { path = "../parser", package = "hack_parser" }
 utils_rust = { path = "../utils", package = "hack_utils" }
 rust-crypto = "^0.2"

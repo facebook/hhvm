@@ -68,6 +68,7 @@ version = "3.49.0"
 name = "hack_facts"
 version = "3.49.0"
 dependencies = [
+ "hack_deps 3.49.0",
  "hack_parser 3.49.0",
  "hack_utils 3.49.0",
  "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",

@@ -1907,6 +1907,7 @@ and expr_
         match ty with
         | (r, Tfun ft) ->
           begin
+            let ft = Typing_enforceability.compute_enforced_fun_type_simple env ft in
             let env, ft = Phase.(localize_ft
               ~instantiation:Phase.{ use_name = strip_ns (snd meth); use_pos = p; explicit_targs = [] }
               ~ety_env env ft) in
@@ -2381,6 +2382,7 @@ and expr_
       (* This is the function type as declared on the lambda itself.
        * If type hints are absent then use Tany instead. *)
       let declared_ft = Decl.fun_decl_in_env env.Env.decl_env f in
+      let declared_ft = Typing_enforceability.compute_enforced_fun_type_simple env declared_ft in
       (* When creating a closure, the 'this' type will mean the late bound type
        * of the current enclosing class
        *)
@@ -4125,6 +4127,7 @@ and fun_type_of_id env x tal =
   | Some decl_fty ->
       let ety_env = Phase.env_with_self env in
       let tal = List.map ~f:(Decl_hint.hint env.Env.decl_env) tal in
+      let decl_fty = Typing_enforceability.compute_enforced_fun_type_simple env decl_fty in
       let env, fty =
         Phase.(localize_ft
           ~instantiation: { use_name = strip_ns (snd x); use_pos = fst x; explicit_targs = tal }
@@ -4284,6 +4287,7 @@ and class_get_ ~is_method ~is_const ~this_ty ~coerce_from_ty ?(explicit_tparams=
                 | r, Tfun ft when is_method ->
                   let explicit_targs = List.map explicit_tparams
                     ~f:(Decl_hint.hint env.Env.decl_env) in
+                  let ft = Typing_enforceability.compute_enforced_fun_type_simple env ft in
                   let env, ft =
                     Phase.(localize_ft ~instantiation: { use_name=strip_ns mid; use_pos=p; explicit_targs }
                       ~ety_env env ft)
@@ -4486,6 +4490,7 @@ and obj_get_concrete_ty ~inst_meth ~is_method ~coerce_from_ty ?(explicit_tparams
 
           (* the return type of __call can depend on the class params or be this *)
           let ety_env = mk_ety_env r class_info x exact paraml in
+          (* TODO: possibly support coercion from dynamic in __call *)
           let env, ft = Phase.(localize_ft
             ~instantiation:{use_pos=id_pos; use_name=strip_ns id_str; explicit_targs=[]}
             ~ety_env env ft) in
@@ -4529,10 +4534,11 @@ and obj_get_concrete_ty ~inst_meth ~is_method ~coerce_from_ty ?(explicit_tparams
         let ety_env = mk_ety_env r class_info x exact paraml in
         let env, member_ty =
           begin match member_decl_ty with
-            | (r, Tfun ft) ->
+            | (r, Tfun ft) when is_method ->
               (* We special case function types here to be able to pass explicit type
                * parameters. *)
               let explicit_targs = List.map ~f:(Decl_hint.hint env.Env.decl_env) explicit_tparams in
+              let ft = Typing_enforceability.compute_enforced_fun_type_simple env ft in
               let env, ft =
                 Phase.(localize_ft ~instantiation:{ use_name=strip_ns id_str; use_pos=id_pos; explicit_targs }
                   ~ety_env env ft) in
@@ -4982,6 +4988,10 @@ and call_construct p env class_ params el uel cid =
       env, tcid, tel, [], (Reason.Rnone, TUtils.terr env)
     | Some { ce_visibility = vis; ce_type = lazy m; _ } ->
       TVis.check_obj_access p env (Reason.to_pos (fst m), vis);
+      let m =
+        match m with
+        | r, Tfun ft -> r, Tfun (Typing_enforceability.compute_enforced_fun_type_simple env ft)
+        | _ -> m in
       let env, m = Phase.localize ~ety_env env m in
       let env, (tel, tuel, _ty) = call ~expected:None p env m el uel in
       env, tcid, tel, tuel, m

@@ -1,6 +1,1 @@
-File "solve_nothing.php", line 10, characters 38-49:
-Invalid assignment (Typing[4110])
-File "solve_nothing.php", line 10, characters 13-36:
-Expected (function(Tv): arraykey)
-File "solve_nothing.php", line 10, characters 13-36:
-But got dynamic because it is an unenforceable type
+No errors

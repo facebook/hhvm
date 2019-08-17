@@ -4,9 +4,3 @@ File "function_apply_nothing.php", line 5, characters 51-54:
 Expected bool
 File "function_apply_nothing.php", line 12, characters 39-47:
 But got dynamic, the result of calling a dynamic type as a function
-File "function_apply_nothing.php", line 5, characters 57-61:
-Invalid assignment (Typing[4110])
-File "function_apply_nothing.php", line 5, characters 38-55:
-Expected (function(T): bool)
-File "function_apply_nothing.php", line 5, characters 38-55:
-But got dynamic because it is an unenforceable type

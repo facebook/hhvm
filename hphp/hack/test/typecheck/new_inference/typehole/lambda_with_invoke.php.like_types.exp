@@ -4,9 +4,3 @@ File "lambda_with_invoke.php", line 14, characters 39-57:
 Expected ~(function(~dynamic): void) because it is an unenforceable type
 File "lambda_with_invoke.php", line 21, characters 29-48:
 But got (function(~dynamic $m): dynamic)
-File "lambda_with_invoke.php", line 14, characters 59-63:
-Invalid assignment (Typing[4110])
-File "lambda_with_invoke.php", line 14, characters 39-57:
-Expected (function(T): void)
-File "lambda_with_invoke.php", line 14, characters 39-57:
-But got dynamic because it is an unenforceable type

@@ -16,3 +16,23 @@ File "array_append_good.php", line 8, characters 25-32:
 Expected arraykey
 File "array_append_good.php", line 42, characters 7-9:
 But got dynamic because it is an unenforceable type
+File "array_append_good.php", line 68, characters 26-28:
+Invalid argument (Typing[4110])
+File "array_append_good.php", line 34, characters 11-11:
+Some type constraint(s) are violated here
+File "array_append_good.php", line 34, characters 11-11:
+T is a constrained type parameter
+File "array_append_good.php", line 12, characters 33-48:
+Expected keyset<~arraykey>
+File "array_append_good.php", line 34, characters 11-11:
+But got dynamic
+File "array_append_good.php", line 71, characters 18-21:
+Invalid argument (Typing[4110])
+File "array_append_good.php", line 34, characters 11-11:
+Some type constraint(s) are violated here
+File "array_append_good.php", line 34, characters 11-11:
+T is a constrained type parameter
+File "array_append_good.php", line 13, characters 25-32:
+Expected Set<~int>
+File "array_append_good.php", line 34, characters 11-11:
+But got dynamic

@@ -10,15 +10,3 @@ File "lambda_bad_as_vec_argument.php", line 22, characters 23-29:
 This is why I think it is an object of type MyClass
 File "lambda_bad_as_vec_argument.php", line 4, characters 7-13:
 Declaration of MyClass is here
-File "lambda_bad_as_vec_argument.php", line 11, characters 61-68:
-Invalid assignment (Typing[4110])
-File "lambda_bad_as_vec_argument.php", line 11, characters 39-59:
-Expected (function(T): string)
-File "lambda_bad_as_vec_argument.php", line 11, characters 39-59:
-But got dynamic because it is an unenforceable type
-File "lambda_bad_as_vec_argument.php", line 18, characters 67-74:
-Invalid assignment (Typing[4110])
-File "lambda_bad_as_vec_argument.php", line 18, characters 39-65:
-Expected (function(MyClass): string)
-File "lambda_bad_as_vec_argument.php", line 18, characters 39-65:
-But got dynamic because it is an unenforceable type

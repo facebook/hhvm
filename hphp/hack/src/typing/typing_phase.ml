@@ -283,10 +283,10 @@ and tyl_contains_wildcard tyl =
     | _ -> false
   end
 
+(* Recursive localizations of function types do not make judgements about enforceability *)
 and localize_possibly_enforced_ty ~ety_env env ety =
   let env, et_type = localize ~ety_env env ety.et_type in
-  let et_enforced = Typing_enforceability.is_enforceable env ety.et_type in
-  env, { et_type; et_enforced; }
+  env, { ety with et_type } 
 
 and localize_cstr_ty ~ety_env env ty tp_name =
   let env, (r, ty_) = localize ~ety_env env ty in

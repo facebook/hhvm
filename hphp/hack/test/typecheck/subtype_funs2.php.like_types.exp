@@ -1,0 +1,6 @@
+File "subtype_funs2.php", line 15, characters 5-17:
+Invalid assignment (Typing[4110])
+File "subtype_funs2.php", line 13, characters 11-27:
+Expected ~(function(): int) because it is an unenforceable type
+File "subtype_funs2.php", line 14, characters 31-49:
+But got (function(): mixed)

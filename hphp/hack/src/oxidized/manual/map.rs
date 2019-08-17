@@ -6,8 +6,9 @@
 use std::cmp::Ord;
 
 use ocamlrep_derive::IntoOcamlRep;
+use ocamlvalue_macro::Ocamlvalue;
 
-#[derive(Clone, Debug, IntoOcamlRep)]
+#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
 enum MapImpl<K: Ord, V> {
     Empty,
     Node {
@@ -21,7 +22,7 @@ enum MapImpl<K: Ord, V> {
 
 use MapImpl::*;
 
-#[derive(Clone, Debug, IntoOcamlRep)]
+#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
 pub struct Map<K: Ord, V>(MapImpl<K, V>);
 
 impl<K: Ord, V> Map<K, V> {

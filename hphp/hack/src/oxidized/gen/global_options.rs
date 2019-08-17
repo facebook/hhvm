@@ -3,18 +3,19 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<241dba66f734d2defe7042bb4cd2be91>>
+// @generated SignedSource<<db95f044b0886a1904e674fca52bc151>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
 use ocamlrep_derive::IntoOcamlRep;
+use ocamlvalue_macro::Ocamlvalue;
 
 use crate::i_set;
 use crate::s_map;
 use crate::s_set;
 
-#[derive(Clone, Debug, IntoOcamlRep)]
+#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
 pub struct GlobalOptions {
     pub tco_safe_array: bool,
     pub tco_safe_vector_array: bool,
@@ -64,6 +65,7 @@ pub struct GlobalOptions {
     pub profile_type_check_duration_threshold: f64,
     pub tco_like_types: bool,
     pub tco_pessimize_types: bool,
+    pub tco_simple_pessimize: f64,
     pub tco_coercion_from_dynamic: bool,
     pub tco_disable_partially_abstract_typeconsts: bool,
     pub error_codes_treated_strictly: i_set::ISet,
@@ -79,9 +81,11 @@ pub struct GlobalOptions {
     pub po_disallowed_decl_fixmes: i_set::ISet,
     pub po_allow_new_attribute_syntax: bool,
     pub tco_global_inference: bool,
-    pub tco_enable_const_static_props: bool,
+    pub tco_const_static_props: bool,
     pub po_disable_legacy_attribute_syntax: bool,
     pub tco_const_attribute: bool,
     pub po_const_default_func_args: bool,
     pub po_disallow_silence: bool,
+    pub po_abstract_static_props: bool,
+    pub po_disable_unset_class_const: bool,
 }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fff9f0a9b2239b595d06c2bab5f2ba1e>>
+// @generated SignedSource<<ba056df1b5addc42c4f6034ccb8b3bc5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -142,7 +142,7 @@ pub struct FunType {
     pub tparams: (Vec<Tparam>, FunTparamsKind),
     pub where_constraints: Vec<WhereConstraint>,
     pub params: FunParams,
-    pub ret: Ty,
+    pub ret: PossiblyEnforcedTy,
     pub fun_kind: ast_defs::FunKind,
     pub reactive: Reactivity,
     pub return_disposable: bool,
@@ -173,10 +173,16 @@ pub enum ParamRxAnnotation {
 }
 
 #[derive(Clone, Debug, IntoOcamlRep)]
+pub struct PossiblyEnforcedTy {
+    pub enforced: bool,
+    pub type_: Ty,
+}
+
+#[derive(Clone, Debug, IntoOcamlRep)]
 pub struct FunParam {
     pub pos: pos::Pos,
     pub name: Option<String>,
-    pub type_: Ty,
+    pub type_: PossiblyEnforcedTy,
     pub kind: ParamMode,
     pub accept_disposable: bool,
     pub mutability: Option<ParamMutability>,

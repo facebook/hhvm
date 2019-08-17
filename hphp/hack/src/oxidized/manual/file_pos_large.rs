@@ -4,8 +4,19 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ocamlrep_derive::IntoOcamlRep;
+use ocamlvalue_macro::Ocamlvalue;
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, IntoOcamlRep)]
+#[derive(
+    Copy,
+    Clone,
+    Debug,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    IntoOcamlRep,
+    Ocamlvalue
+)]
 pub struct FilePosLarge {
     lnum: usize,
     bol: usize,

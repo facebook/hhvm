@@ -18,11 +18,33 @@ open Convert_longident
 open Convert_type
 
 let derived_traits =
-  [(None, "Clone"); (None, "Debug"); (Some "ocamlrep_derive", "IntoOcamlRep")]
+  [ (None, "Clone");
+    (None, "Debug");
+    (Some "ocamlrep_derive", "IntoOcamlRep");
+    (Some "ocamlvalue_macro", "Ocamlvalue") ]
 
 (* HACK: ignore phases since we are only considering decl tys *)
 let blacklisted_types =
   [("typing_defs", "Decl"); ("typing_defs", "Locl"); ("typing_defs", "PhaseTy")]
+
+let ocamlvalue_derive_whitelist =
+  [ "aast_defs";
+    "aast";
+    "ast_defs";
+    "relative_path";
+    "namespace_env";
+    "file_info";
+    "global_options";
+    "prim_defs" ]
+
+let ocamlvalue_derive_filter (derive : string option * string) : bool =
+  snd derive <> "Ocamlvalue"
+  || List.mem
+       ocamlvalue_derive_whitelist
+       ~equal:( = )
+       (State.curr_module_name ())
+
+let derives_filters = [ocamlvalue_derive_filter]
 
 (* HACK: Typing_reason is usually aliased to Reason, so we have lots of
    instances of Reason.t. Since we usually convert an identifier like Reason.t
@@ -95,8 +117,9 @@ let variant_constructor_declaration cd =
 
 let type_declaration name td =
   let attrs_and_vis () =
+    let filter a f = List.filter a ~f in
     let derive_attr =
-      derived_traits
+      List.fold derives_filters ~init:derived_traits ~f:filter
       |> List.map ~f:(fun (m, trait) ->
              Option.iter m ~f:(fun m -> add_extern_use (m ^ "::" ^ trait));
              trait)

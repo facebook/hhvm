@@ -4,11 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ocamlrep_derive::IntoOcamlRep;
+use ocamlvalue_macro::Ocamlvalue;
 
-#[derive(Clone, Debug, IntoOcamlRep)]
+#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
 pub struct Error(());
 
-#[derive(Clone, Debug, IntoOcamlRep)]
+#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
 pub struct Errors(Vec<Error>);
 
 impl Errors {

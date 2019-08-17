@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<51351bd6a0331db9a0d59aac6a58d3d0>>
+// @generated SignedSource<<b1dadc778dc7707fa96bb2c99199327b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -50,6 +50,7 @@ pub struct ShallowProp {
     pub name: aast::Sid,
     pub needs_init: bool,
     pub type_: Option<Ty>,
+    pub abstract_: bool,
     pub visibility: aast::Visibility,
     pub fixme_codes: i_set::ISet,
 }

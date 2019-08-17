@@ -6,12 +6,13 @@
 use std::ops::Range;
 
 use ocamlrep_derive::IntoOcamlRep;
+use ocamlvalue_macro::Ocamlvalue;
 
 use crate::file_pos_large::FilePosLarge;
 use crate::file_pos_small::FilePosSmall;
 use crate::relative_path::RelativePath;
 
-#[derive(Clone, Debug, IntoOcamlRep)]
+#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
 enum PosImpl {
     Small {
         file: RelativePath,
@@ -27,7 +28,7 @@ enum PosImpl {
 
 use PosImpl::*;
 
-#[derive(Clone, Debug, IntoOcamlRep)]
+#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
 pub struct Pos(PosImpl);
 
 impl Pos {

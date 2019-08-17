@@ -7,8 +7,11 @@
 extern crate ocaml;
 
 use crate::utils::*;
-use ocaml::core::mlvalues::{empty_list, Value};
+
+use ocaml::core::mlvalues::{empty_list, Value, UNIT};
 use std::borrow::Cow;
+
+const DOUBLE_TAG: u8 = 253;
 
 pub trait Ocamlvalue {
     fn ocamlvalue(&self) -> Value;
@@ -58,6 +61,12 @@ impl Ocamlvalue for bool {
     }
 }
 
+impl Ocamlvalue for () {
+    fn ocamlvalue(&self) -> Value {
+        UNIT
+    }
+}
+
 impl<T1: Ocamlvalue, T2: Ocamlvalue> Ocamlvalue for (T1, T2) {
     fn ocamlvalue(&self) -> Value {
         caml_tuple(&[self.0.ocamlvalue(), self.1.ocamlvalue()])
@@ -74,7 +83,26 @@ impl<T1: Ocamlvalue, T2: Ocamlvalue, T3: Ocamlvalue> Ocamlvalue for (T1, T2, T3)
     }
 }
 
+impl<T1: Ocamlvalue, T2: Ocamlvalue, T3: Ocamlvalue, T4: Ocamlvalue> Ocamlvalue
+    for (T1, T2, T3, T4)
+{
+    fn ocamlvalue(&self) -> Value {
+        caml_tuple(&[
+            self.0.ocamlvalue(),
+            self.1.ocamlvalue(),
+            self.2.ocamlvalue(),
+            self.3.ocamlvalue(),
+        ])
+    }
+}
+
 impl Ocamlvalue for i8 {
+    fn ocamlvalue(&self) -> Value {
+        usize_to_ocaml(*self as usize)
+    }
+}
+
+impl Ocamlvalue for usize {
     fn ocamlvalue(&self) -> Value {
         usize_to_ocaml(*self as usize)
     }
@@ -86,8 +114,14 @@ impl Ocamlvalue for isize {
     }
 }
 
-impl<K, V> Ocamlvalue for ::std::iter::Map<K, V> {
+impl Ocamlvalue for u64 {
     fn ocamlvalue(&self) -> Value {
-        panic!("Not Implemented")
+        ((*self << 1) + 1) as usize
+    }
+}
+
+impl Ocamlvalue for f64 {
+    fn ocamlvalue(&self) -> Value {
+        caml_block(DOUBLE_TAG, &[(*self).to_bits() as usize])
     }
 }

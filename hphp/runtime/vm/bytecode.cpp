@@ -145,10 +145,8 @@ using jit::TCA;
 // go overboard with that version.
 #if !defined(NDEBUG) || ((__GNUC__ == 4) && (__GNUC_MINOR__ == 8))
 #define OPTBLD_INLINE
-#define OPTBLD_FLT_INLINE
 #else
 #define OPTBLD_INLINE       ALWAYS_INLINE
-#define OPTBLD_FLT_INLINE   INLINE_FLATTEN
 #endif
 
 Class* arGetContextClass(const ActRec* ar) {
@@ -2253,7 +2251,7 @@ OPTBLD_INLINE void iopClsCnsD(const StringData* clsCnsName, Id classId) {
   cellDup(clsCns, *c1);
 }
 
-OPTBLD_FLT_INLINE void iopConcat() {
+OPTBLD_INLINE void iopConcat() {
   auto const c1 = vmStack().topC();
   auto const c2 = vmStack().indC(1);
   auto const s2 = cellAsVariant(*c2).toString();
@@ -3345,7 +3343,7 @@ OPTBLD_INLINE void cgetl_body(ActRec* fp,
   }
 }
 
-OPTBLD_FLT_INLINE void iopCGetL(local_var fr) {
+OPTBLD_INLINE void iopCGetL(local_var fr) {
   Cell* to = vmStack().allocC();
   cgetl_body(vmfp(), fr.ptr, to, fr.index, true);
 }
@@ -3698,7 +3696,7 @@ OPTBLD_INLINE void iopQueryM(uint32_t nDiscard, QueryMOp subop, MemberKey mk) {
   queryMImpl(mk, nDiscard, subop);
 }
 
-OPTBLD_FLT_INLINE void iopSetM(uint32_t nDiscard, MemberKey mk) {
+OPTBLD_INLINE void iopSetM(uint32_t nDiscard, MemberKey mk) {
   auto& mstate = vmMInstrState();
   auto const topC = vmStack().topC();
 
@@ -4092,7 +4090,7 @@ OPTBLD_INLINE void iopIssetS() {
   ss.output->m_type = KindOfBoolean;
 }
 
-OPTBLD_FLT_INLINE void iopIssetL(local_var tv) {
+OPTBLD_INLINE void iopIssetL(local_var tv) {
   bool ret = !is_null(tvToCell(tv.ptr));
   TypedValue* topTv = vmStack().allocTV();
   topTv->m_data.num = ret;
@@ -4213,7 +4211,7 @@ OPTBLD_INLINE void iopIsTypeC(IsTypeOp op) {
   vmStack().replaceC(make_tv<KindOfBoolean>(isTypeHelper(val, op)));
 }
 
-OPTBLD_FLT_INLINE void iopAssertRATL(local_var loc, RepoAuthType rat) {
+OPTBLD_INLINE void iopAssertRATL(local_var loc, RepoAuthType rat) {
   if (debug) {
     auto const tv = *loc.ptr;
     auto const func = vmfp()->func();
@@ -4937,11 +4935,11 @@ OPTBLD_INLINE void iopFCallFunc(PC origpc, PC& pc, FCallArgs fca,
   raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
 }
 
-OPTBLD_FLT_INLINE void iopFCallFuncD(PC origpc, PC& pc, FCallArgs fca, Id id) {
+OPTBLD_INLINE void iopFCallFuncD(PC origpc, PC& pc, FCallArgs fca, Id id) {
   fcallFuncDImpl(origpc, pc, fca, id, Array());
 }
 
-OPTBLD_FLT_INLINE void iopFCallFuncRD(PC origpc, PC& pc, FCallArgs fca, Id id) {
+OPTBLD_INLINE void iopFCallFuncRD(PC origpc, PC& pc, FCallArgs fca, Id id) {
   assertx(tvIsVecOrVArray(vmStack().topC()));
   auto tsList = Array::attach(vmStack().topC()->m_data.parr);
   vmStack().discard();
@@ -5473,7 +5471,7 @@ bool doFCallUnpackTC(PC origpc, int32_t numArgsInclUnpack, void* retAddr) {
   return ret;
 }
 
-OPTBLD_FLT_INLINE
+OPTBLD_INLINE
 void iopFCallBuiltin(
   uint32_t numArgs, uint32_t numNonDefault, uint32_t numOut, Id id
 ) {

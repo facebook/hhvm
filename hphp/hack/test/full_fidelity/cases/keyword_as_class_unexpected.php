@@ -69,6 +69,7 @@ new as();
 new break();
 new case();
 new catch();
+// new class(); // can't test this; error recovery makes us stop parsing the new expression when we see the class token; then we start parsing from the class token as if we have a classish declaration, and the entire rest of the test is seen as a classish body
 new clone();
 new const();
 new continue();
@@ -101,7 +102,7 @@ new include_once();
 new inout();
 new instanceof();
 new insteadof();
-new interface();
+// new interface(); // can't test this; error recovery makes us stop parsing the new expression when we see the interface token; then we start parsing from the interface token as if we have a classish declaration, and the entire rest of the test is seen as a classish body
 new isset();
 new list();
 new namespace();
@@ -117,7 +118,7 @@ new shape();
 new static();
 new switch();
 new throw();
-new trait();
+// new trait(); // can't test this; error recovery makes us stop parsing the new expression when we see the trait token; then we start parsing from the trait token as if we have a classish declaration, and the entire rest of the test is seen as a classish body
 new try();
 new unset();
 new use();

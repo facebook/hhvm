@@ -1,5 +1,5 @@
-((script 1876
-  ((list 1876
+((script 2641
+  ((list 2641
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
@@ -473,7 +473,7 @@
        (() ";" 1 ((end_of_line 1)))))
      (expression_statement 12
       ((object_creation_expression 11
-        ((() new 3 ((whitespace 1)))
+        ((((single_line_comment 260) (end_of_line 1)) new 3 ((whitespace 1)))
          (constructor_call 7
           ((prefix_unary_expression 7
             ((() clone 5 ())
@@ -684,134 +684,164 @@
          (constructor_call 11
           ((() insteadof 9 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
        (() ";" 1 ((end_of_line 1)))))
-     (expression_statement 3
-      ((object_creation_expression 3
+     (expression_statement 12
+      ((object_creation_expression 11
+        ((((single_line_comment 272) (end_of_line 1)) new 3 ((whitespace 1)))
+         (constructor_call 7
+          ((isset_expression 7
+            ((() isset 5 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))
+           (missing 0 ()) (missing 0 ()) (missing 0 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (expression_statement 11
+      ((object_creation_expression 10
         ((() new 3 ((whitespace 1)))
-         (constructor_call 0
-          ((missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())))))
-       (missing 0 ())))
-     (classish_declaration 231
-      ((missing 0 ()) (missing 0 ()) (() interface 9 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ())
-       (classish_body 222
-        ((missing 0 ())
-         (list 222
-          ((error 1 ((() "(" 1 ()))) (error 1 ((() ")" 1 ())))
-           (error 1 ((() ";" 1 ((end_of_line 1)))))
-           (error 3 ((() new 3 ((whitespace 1)))))
-           (error 5 ((() isset 5 ()))) (error 1 ((() "(" 1 ())))
-           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
-           (error 3 ((() new 3 ((whitespace 1))))) (error 4 ((() list 4 ())))
-           (error 1 ((() "(" 1 ()))) (error 1 ((() ")" 1 ())))
-           (error 1 ((() ";" 1 ((end_of_line 1)))))
-           (error 3 ((() new 3 ((whitespace 1)))))
-           (error 9 ((() namespace 9 ()))) (error 1 ((() "(" 1 ())))
-           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
-           (error 3 ((() new 3 ((whitespace 1))))) (error 3 ((() new 3 ())))
-           (error 1 ((() "(" 1 ()))) (error 1 ((() ")" 1 ())))
-           (error 1 ((() ";" 1 ((end_of_line 1)))))
-           (error 3 ((() new 3 ((whitespace 1)))))
-           (error 5 ((() print 5 ()))) (error 1 ((() "(" 1 ())))
-           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
-           (error 3 ((() new 3 ((whitespace 1)))))
-           (property_declaration 10
-            ((missing 0 ()) (list 7 ((() private 7 ())))
-             (tuple_type_specifier 2
-              ((() "(" 1 ())
-               (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
-               (() ")" 1 ())))
-             (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
-             (() ";" 1 ((end_of_line 1)))))
-           (error 3 ((() new 3 ((whitespace 1)))))
-           (property_declaration 12
-            ((missing 0 ()) (list 9 ((() protected 9 ())))
-             (tuple_type_specifier 2
-              ((() "(" 1 ())
-               (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
-               (() ")" 1 ())))
-             (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
-             (() ";" 1 ((end_of_line 1)))))
-           (error 3 ((() new 3 ((whitespace 1)))))
-           (property_declaration 9
-            ((missing 0 ()) (list 6 ((() public 6 ())))
-             (tuple_type_specifier 2
-              ((() "(" 1 ())
-               (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
-               (() ")" 1 ())))
-             (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
-             (() ";" 1 ((end_of_line 1)))))
-           (error 3 ((() new 3 ((whitespace 1)))))
-           (require_clause 7
-            ((() require 7 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())))
-           (error 1 ((() "(" 1 ()))) (error 1 ((() ")" 1 ())))
-           (error 1 ((() ";" 1 ((end_of_line 1)))))
-           (error 3 ((() new 3 ((whitespace 1)))))
-           (error 12 ((() require_once 12 ()))) (error 1 ((() "(" 1 ())))
-           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
-           (error 3 ((() new 3 ((whitespace 1)))))
-           (error 6 ((() return 6 ()))) (error 1 ((() "(" 1 ())))
-           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
-           (error 3 ((() new 3 ((whitespace 1)))))
-           (error 5 ((() shape 5 ()))) (error 1 ((() "(" 1 ())))
-           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
-           (error 3 ((() new 3 ((whitespace 1)))))
-           (property_declaration 9
-            ((missing 0 ()) (list 6 ((() static 6 ())))
-             (tuple_type_specifier 2
-              ((() "(" 1 ())
-               (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
-               (() ")" 1 ())))
-             (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
-             (() ";" 1 ((end_of_line 1)))))
-           (error 3 ((() new 3 ((whitespace 1)))))
-           (error 6 ((() switch 6 ()))) (error 1 ((() "(" 1 ())))
-           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
-           (error 3 ((() new 3 ((whitespace 1)))))
-           (error 5 ((() throw 5 ()))) (error 1 ((() "(" 1 ())))
-           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
-           (error 3 ((() new 3 ((whitespace 1))))) (missing 0 ())))
-         (missing 0 ())))))
-     (classish_declaration 93
-      ((missing 0 ()) (missing 0 ()) (() trait 5 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ())
-       (classish_body 88
-        ((missing 0 ())
-         (list 88
-          ((error 1 ((() "(" 1 ()))) (error 1 ((() ")" 1 ())))
-           (error 1 ((() ";" 1 ((end_of_line 1)))))
-           (error 3 ((() new 3 ((whitespace 1))))) (error 3 ((() try 3 ())))
-           (error 1 ((() "(" 1 ()))) (error 1 ((() ")" 1 ())))
-           (error 1 ((() ";" 1 ((end_of_line 1)))))
-           (error 3 ((() new 3 ((whitespace 1)))))
-           (error 5 ((() unset 5 ()))) (error 1 ((() "(" 1 ())))
-           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
-           (error 3 ((() new 3 ((whitespace 1)))))
-           (trait_use 3
-            ((() use 3 ())
-             (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
-             (missing 0 ())))
-           (error 1 ((() "(" 1 ()))) (error 1 ((() ")" 1 ())))
-           (error 1 ((() ";" 1 ((end_of_line 1)))))
-           (error 3 ((() new 3 ((whitespace 1)))))
-           (error 5 ((() using 5 ()))) (error 1 ((() "(" 1 ())))
-           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
-           (error 3 ((() new 3 ((whitespace 1)))))
-           (property_declaration 6
-            ((missing 0 ()) (() var 3 ())
-             (tuple_type_specifier 2
-              ((() "(" 1 ())
-               (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
-               (() ")" 1 ())))
-             (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
-             (() ";" 1 ((end_of_line 1)))))
-           (error 3 ((() new 3 ((whitespace 1)))))
-           (error 5 ((() while 5 ()))) (error 1 ((() "(" 1 ())))
-           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
-           (error 3 ((() new 3 ((whitespace 1)))))
-           (error 5 ((() yield 5 ()))) (error 1 ((() "(" 1 ())))
-           (error 1 ((() ")" 1 ())))
-           (error 1 ((() ";" 1 ((end_of_line 1)))))))
-         (missing 0 ())))))
+         (constructor_call 6
+          ((list_expression 6
+            ((() list 4 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))
+           (missing 0 ()) (missing 0 ()) (missing 0 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (expression_statement 16
+      ((object_creation_expression 15
+        ((() new 3 ((whitespace 1)))
+         (constructor_call 11
+          ((() name 9 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (expression_statement 10
+      ((object_creation_expression 9
+        ((() new 3 ((whitespace 1)))
+         (constructor_call 5
+          ((object_creation_expression 5
+            ((() new 3 ())
+             (constructor_call 2
+              ((parenthesized_expression 2
+                ((() "(" 1 ()) (() ")" 1 ()) (missing 0 ())))
+               (missing 0 ()) (missing 0 ()) (missing 0 ())))))
+           (missing 0 ()) (missing 0 ()) (missing 0 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (expression_statement 12
+      ((object_creation_expression 11
+        ((() new 3 ((whitespace 1)))
+         (constructor_call 7
+          ((prefix_unary_expression 7
+            ((() print 5 ())
+             (parenthesized_expression 2
+              ((() "(" 1 ()) (() ")" 1 ()) (missing 0 ())))))
+           (missing 0 ()) (missing 0 ()) (missing 0 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (expression_statement 14
+      ((object_creation_expression 13
+        ((() new 3 ((whitespace 1)))
+         (constructor_call 9
+          ((() private 7 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (expression_statement 16
+      ((object_creation_expression 15
+        ((() new 3 ((whitespace 1)))
+         (constructor_call 11
+          ((() protected 9 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (expression_statement 13
+      ((object_creation_expression 12
+        ((() new 3 ((whitespace 1)))
+         (constructor_call 8
+          ((() public 6 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (expression_statement 14
+      ((object_creation_expression 13
+        ((() new 3 ((whitespace 1)))
+         (constructor_call 9
+          ((inclusion_expression 9
+            ((() require 7 ())
+             (parenthesized_expression 2
+              ((() "(" 1 ()) (() ")" 1 ()) (missing 0 ())))))
+           (missing 0 ()) (missing 0 ()) (missing 0 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (expression_statement 19
+      ((object_creation_expression 18
+        ((() new 3 ((whitespace 1)))
+         (constructor_call 14
+          ((inclusion_expression 14
+            ((() require_once 12 ())
+             (parenthesized_expression 2
+              ((() "(" 1 ()) (() ")" 1 ()) (missing 0 ())))))
+           (missing 0 ()) (missing 0 ()) (missing 0 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (expression_statement 13
+      ((object_creation_expression 12
+        ((() new 3 ((whitespace 1)))
+         (constructor_call 8
+          ((() return 6 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (expression_statement 12
+      ((object_creation_expression 11
+        ((() new 3 ((whitespace 1)))
+         (constructor_call 7
+          ((shape_expression 7
+            ((() shape 5 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))
+           (missing 0 ()) (missing 0 ()) (missing 0 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (expression_statement 13
+      ((object_creation_expression 12
+        ((() new 3 ((whitespace 1)))
+         (constructor_call 8
+          ((() static 6 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (expression_statement 13
+      ((object_creation_expression 12
+        ((() new 3 ((whitespace 1)))
+         (constructor_call 8
+          ((() switch 6 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (expression_statement 12
+      ((object_creation_expression 11
+        ((() new 3 ((whitespace 1)))
+         (constructor_call 7
+          ((() throw 5 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (expression_statement 10
+      ((object_creation_expression 9
+        ((((single_line_comment 260) (end_of_line 1)) new 3 ((whitespace 1)))
+         (constructor_call 5
+          ((() try 3 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (expression_statement 12
+      ((object_creation_expression 11
+        ((() new 3 ((whitespace 1)))
+         (constructor_call 7
+          ((() unset 5 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (expression_statement 10
+      ((object_creation_expression 9
+        ((() new 3 ((whitespace 1)))
+         (constructor_call 5
+          ((() use 3 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (expression_statement 12
+      ((object_creation_expression 11
+        ((() new 3 ((whitespace 1)))
+         (constructor_call 7
+          ((() using 5 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (expression_statement 10
+      ((object_creation_expression 9
+        ((() new 3 ((whitespace 1)))
+         (constructor_call 5
+          ((() var 3 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (expression_statement 12
+      ((object_creation_expression 11
+        ((() new 3 ((whitespace 1)))
+         (constructor_call 7
+          ((() while 5 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (expression_statement 12
+      ((object_creation_expression 11
+        ((() new 3 ((whitespace 1)))
+         (constructor_call 7
+          ((yield_expression 7
+            ((() yield 5 ())
+             (parenthesized_expression 2
+              ((() "(" 1 ()) (() ")" 1 ()) (missing 0 ())))))
+           (missing 0 ()) (missing 0 ()) (missing 0 ())))))
+       (() ";" 1 ((end_of_line 1)))))
      (end_of_file 0 ((() end_of_file 0 ()))))))))

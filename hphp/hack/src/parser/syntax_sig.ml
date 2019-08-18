@@ -1454,7 +1454,6 @@ module type Syntax_S = sig
   val is_ellipsis       : t -> bool
   val is_comma          : t -> bool
   val is_array          : t -> bool
-  val is_var            : t -> bool
   val is_ampersand      : t -> bool
   val is_inout          : t -> bool
 

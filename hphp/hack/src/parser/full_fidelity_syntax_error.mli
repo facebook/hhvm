@@ -248,7 +248,6 @@ val interface_has_private_method : string
 val redeclaration_of_function : name:string -> loc:string -> string
 val redeclaration_of_method : name:string -> string
 val self_or_parent_colon_colon_class_outside_of_class : string -> string
-val var_property : string
 val invalid_is_as_expression_hint : string -> string -> string
 val elvis_operator_space : string
 val property_has_multiple_visibilities : string -> string

@@ -2559,13 +2559,10 @@ and pClassElt : class_elt list parser = fun node env ->
     ; property_declarators
     ; _
     } ->
-      let typecheck = is_typechecker env in (* so we don't capture the env in the closure *)
       let check_modifier node =
         if is_final node
         then raise_parsing_error env (`Node node)
-          (SyntaxError.declared_final "Properties");
-        if typecheck && is_var node
-        then raise_parsing_error env (`Node node) SyntaxError.var_property in
+          (SyntaxError.declared_final "Properties") in
       let cv_user_attributes = pUserAttributes env property_attribute_spec in
       let cv_hint =
         mpOptional pHint property_type env

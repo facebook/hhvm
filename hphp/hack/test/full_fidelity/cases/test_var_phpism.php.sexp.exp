@@ -30,9 +30,9 @@
        (classish_body 15
         ((() { 1 ((end_of_line 1)))
          (list 9
-          ((property_declaration 9
-            ((missing 0 ()) (((whitespace 2)) var 3 ((whitespace 1)))
-             (missing 0 ())
+          ((error 3 ((((whitespace 2)) var 3 ((whitespace 1)))))
+           (property_declaration 5
+            ((missing 0 ()) (missing 0 ()) (missing 0 ())
              (list 4
               ((list_item 4
                 ((property_declarator 4 ((() variable 4 ()) (missing 0 ())))

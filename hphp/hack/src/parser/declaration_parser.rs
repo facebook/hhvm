@@ -2185,19 +2185,10 @@ where
                 let missing2 = S!(make_missing, self, self.pos());
                 self.parse_methodish(missing1, missing2)
             }
-            TokenKind::Var => {
-                // We allow "var" as a synonym for "public" in a property; this
-                // is a PHP-ism that we do not support in Hack, but we parse anyways
-                // so as to give an error later.
-                let missing = S!(make_missing, self, self.pos());
-                let var = self.assert_token(TokenKind::Var);
-                self.parse_property_declaration(missing, var)
-            }
             kind if self.expects(kind) => S!(make_missing, self, self.pos()),
             _ => {
                 // If this is a property declaration which is missing its visibility
-                // modifier (or the "var" keyword), accept it here, but emit an error in a
-                // later pass.
+                // modifier, accept it here, but emit an error in a later pass.
                 let mut parser1 = self.clone();
                 let missing1 = S!(make_missing, parser1, self.pos());
                 let missing2 = S!(make_missing, parser1, self.pos());

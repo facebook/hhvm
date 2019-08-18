@@ -745,19 +745,11 @@ module WithExpressionAndStatementAndTypeParser
       let (parser, missing1) = Make.missing parser (pos parser) in
       let (parser, missing2) = Make.missing parser (pos parser) in
       parse_methodish parser missing1 missing2
-    | Var ->
-      (* We allow "var" as a synonym for "public" in a property; this
-      is a PHP-ism that we do not support in Hack, but we parse anyways
-      so as to give an error later. *)
-      let (parser, missing) = Make.missing parser (pos parser) in
-      let (parser, var) = assert_token parser Var in
-      parse_property_declaration parser missing var
     | kind when Parser.expects parser kind ->
       Make.missing parser (pos parser)
     | _ ->
       (* If this is a property declaration which is missing its visibility
-         modifier (or the "var" keyword), accept it here, but emit an error in a
-         later pass. *)
+         modifier, accept it here, but emit an error in a later pass. *)
       let (parser1, property) =
         let (parser, missing1) = Make.missing parser (pos parser) in
         let (parser, missing2) = Make.missing parser (pos parser) in

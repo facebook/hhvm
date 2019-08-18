@@ -25,24 +25,10 @@ class C
     protected $prop3;
     private $prop4;
 
-    var $vprop1a;           // OK; implies public
-    var $vprop1b = 123;     // OK; implies public
-//  public var $vprop2;     // can't combine var with visibility modifiers
-//  var public  $vprop2;
-//  protected var $vprop3;
-//  var protected  $vprop3;
-//  var private $vprop4;
-
     static $sprop1;
     public static $sprop2;
     static protected $sprop3;   // visibility and static ordering unimportant
     private static $sprop4;
-
-//  static var $vsprop1;    // can't combine var with static modifier
-//  var static $vsprop1;
-//  var public static $vsprop2;
-//  protected var static $vsprop3;
-//  private static var $vsprop4;
 
 // methods
 
@@ -72,8 +58,7 @@ class C
 echo "CON1: " . C::CON1 . "\n"; // use :: notation, as a const is implicitly static
 
 $c = new C;     // calls public constructor
-$c->vprop1a;    // accesses public instance method
-$c->vprop1b;    // accesses public instance method
+$c->prop2;      // accesses public instance prop
 
 abstract class D1
 {

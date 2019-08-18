@@ -10,76 +10,78 @@
 */
 
 //define a class
-class test
-{
-  var $t = 10;
-  function __toString()
-  {
+class test {
+  public $t = 10;
+  function __toString() {
     return "3object";
   }
 }
-<<__EntryPoint>> function main(): void {
-echo "*** Testing array_rand() : unexpected values for 'num_req' parameter ***\n";
 
-// Initialise function arguments
-$input = array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13);
+<<__EntryPoint>>
+function main(): void {
+  echo "*** Testing array_rand() : unexpected values for 'num_req' parameter ***\n";
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
+  // Initialise function arguments
+  $input = array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13);
 
-//array of values to iterate over
-$values = array(
+  //get an unset variable
+  $unset_var = 10;
+  unset($unset_var);
 
-        // int data
-/*1*/   0,
-        1,
-        12345,
-        -2345,
+  //array of values to iterate over
+  $values = array(
+          // int data
+  /*1*/   0,
+          1,
+          12345,
+          -2345,
 
-        // float data
-/*5*/   10.5,
-        -10.5,
-        12.3456789000e10,
-        12.3456789000E-10,
-        .5,
+          // float data
+  /*5*/   10.5,
+          -10.5,
+          12.3456789000e10,
+          12.3456789000E-10,
+          .5,
 
-        // null data
-/*10*/  NULL,
-        null,
+          // null data
+  /*10*/  NULL,
+          null,
 
-        // boolean data
-/*12*/  true,
-        false,
-        TRUE,
-        FALSE,
+          // boolean data
+  /*12*/  true,
+          false,
+          TRUE,
+          FALSE,
 
-        // empty data
-/*16*/  "",
-        '',
+          // empty data
+  /*16*/  "",
+          '',
 
-        // string data
-/*18*/  "string",
-        'string',
+          // string data
+  /*18*/  "string",
+          'string',
 
-        // object data
-/*20*/  new test(),
+          // object data
+  /*20*/  new test(),
 
-        // undefined data
-/*21*/  @$undefined_var,
+          // undefined data
+  /*21*/  @$undefined_var,
 
-        // unset data
-/*22*/  @$unset_var,
-);
+          // unset data
+  /*22*/  @$unset_var,
+  );
 
+  // loop through each element of the array for different values for 'num_req' argument
+  $count = 1;
+  foreach ($values as $value) {
+    echo "\n-- Iteration $count --\n";
+    try {
+      var_dump(array_rand($input, $value));
+    } catch (Exception $e) {
+      echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n";
+    }
+    $count++;
+  }
 
-// loop through each element of the array for different values for 'num_req' argument
-$count = 1;
-foreach($values as $value) {
-  echo "\n-- Iteration $count --\n";
-  try { var_dump( array_rand($input,$value) );   } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-  $count++;
-};
-
-echo "Done";
+  echo "Done";
 }

@@ -276,7 +276,7 @@ trait T10
 {
     private $prop1 = 1000;
     protected static $prop2;
-    var $prop3;
+    public $prop3;
     public function compute() {}
     public static function getData() {}
 }

@@ -10,8 +10,8 @@ function h() {
 }
 
 class C {
-  var $a;
-  var $b;
+  public $a;
+  public $b;
   function f($x) {
     list($this->a, $this->b) = g($x) ? h() : tuple(null, null);
   }
@@ -19,10 +19,10 @@ class C {
 
 
 <<__EntryPoint>>
-function main_bug_5127251() {
-$obj = new C;
-for ($i = 0; $i < 5; $i++) {
-  $obj->f(!$i);
-  var_dump($obj);
-}
+function main() {
+  $obj = new C;
+  for ($i = 0; $i < 5; $i++) {
+    $obj->f(!$i);
+    var_dump($obj);
+  }
 }

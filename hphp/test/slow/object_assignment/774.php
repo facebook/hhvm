@@ -15,14 +15,14 @@ class foo {
     $ref4->val = 5;
     echo $x->val;
   }
-  var $val;
+  public $val;
 }
 
 <<__EntryPoint>>
-function main_774() {
-$x = new foo();
-$x->bar();
-$ref5 = $x;
-$ref5->val = 6;
-echo $x->val;
+function main() {
+  $x = new foo();
+  $x->bar();
+  $ref5 = $x;
+  $ref5->val = 6;
+  echo $x->val;
 }

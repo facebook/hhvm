@@ -6,22 +6,22 @@ if (__hhvm_intrinsics\launder_value(true)) {
   include '685-2.inc';
 }
 class B extends A {
-  var $b0 = 3;
+  public $b0 = 3;
   static $b1 = 4;
   static $b2 = 5;
 }
 class Y extends X {
-  var $y0 = 3;
+  public $y0 = 3;
   static $y1 = 4;
   static $y2 = 5;
 }
 class C {
-  var $c0;
+  public $c0;
   static $c1 = 1;
   static $c2 = 2;
 }
 class Z {
-  var $z0;
+  public $z0;
   static $z1 = 1;
   static $z2 = 2;
 }

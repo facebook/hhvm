@@ -1,72 +1,72 @@
 *** Testing pathinfo() with miscelleneous input arguments ***
 
-Notice: Undefined variable: fp in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 59
+Notice: Undefined variable: fp in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 61
 -- Iteration 1 --
 
-Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 80
+Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 85
 
-Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 81
+Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 90
 
-Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 82
+Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 95
 
-Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 83
+Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 100
 
-Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 84
+Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 105
 -- Iteration 2 --
 
-Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 80
+Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 85
 
-Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 81
+Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 90
 
-Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 82
+Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 95
 
-Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 83
+Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 100
 
-Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 84
+Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 105
 -- Iteration 3 --
 
-Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 80
+Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 85
 
-Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 81
+Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 90
 
-Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 82
+Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 95
 
-Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 83
+Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 100
 
-Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 84
+Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 105
 -- Iteration 4 --
 
-Warning: pathinfo() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 80
+Warning: pathinfo() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 85
 
-Warning: pathinfo() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 81
+Warning: pathinfo() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 90
 
-Warning: pathinfo() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 82
+Warning: pathinfo() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 95
 
-Warning: pathinfo() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 83
+Warning: pathinfo() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 100
 
-Warning: pathinfo() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 84
+Warning: pathinfo() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 105
 -- Iteration 5 --
 
-Warning: pathinfo() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 80
+Warning: pathinfo() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 85
 
-Warning: pathinfo() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 81
+Warning: pathinfo() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 90
 
-Warning: pathinfo() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 82
+Warning: pathinfo() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 95
 
-Warning: pathinfo() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 83
+Warning: pathinfo() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 100
 
-Warning: pathinfo() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 84
+Warning: pathinfo() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 105
 -- Iteration 6 --
 
-Warning: pathinfo() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 80
+Warning: pathinfo() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 85
 
-Warning: pathinfo() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 81
+Warning: pathinfo() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 90
 
-Warning: pathinfo() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 82
+Warning: pathinfo() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 95
 
-Warning: pathinfo() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 83
+Warning: pathinfo() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 100
 
-Warning: pathinfo() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 84
+Warning: pathinfo() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 105
 -- Iteration 7 --
 array(3) {
   ["dirname"]=>
@@ -95,15 +95,15 @@ string(0) ""
 string(21) "array( array(), null)"
 -- Iteration 9 --
 
-Warning: pathinfo() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 80
+Warning: pathinfo() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 85
 
-Warning: pathinfo() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 81
+Warning: pathinfo() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 90
 
-Warning: pathinfo() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 82
+Warning: pathinfo() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 95
 
-Warning: pathinfo() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 83
+Warning: pathinfo() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 100
 
-Warning: pathinfo() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 84
+Warning: pathinfo() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 105
 -- Iteration 10 --
 array(3) {
   ["dirname"]=>
@@ -154,37 +154,37 @@ string(0) ""
 string(0) ""
 -- Iteration 14 --
 
-Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 80
+Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 85
 
-Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 81
+Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 90
 
-Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 82
+Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 95
 
-Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 83
+Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 100
 
-Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 84
+Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 105
 -- Iteration 15 --
 
-Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 80
+Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 85
 
-Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 81
+Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 90
 
-Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 82
+Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 95
 
-Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 83
+Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 100
 
-Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 84
+Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 105
 -- Iteration 16 --
 
-Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 80
+Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 85
 
-Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 81
+Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 90
 
-Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 82
+Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 95
 
-Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 83
+Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 100
 
-Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 84
+Warning: pathinfo() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 105
 -- Iteration 17 --
 array(4) {
   ["dirname"]=>
@@ -245,15 +245,15 @@ string(4) "link"
 string(7) "symlink"
 -- Iteration 21 --
 
-Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 80
+Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 85
 
-Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 81
+Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 90
 
-Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 82
+Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 95
 
-Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 83
+Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 100
 
-Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 84
+Warning: pathinfo() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 105
 -- Iteration 22 --
 array(4) {
   ["dirname"]=>
@@ -314,13 +314,13 @@ string(3) "tmp"
 string(4) "test"
 -- Iteration 26 --
 
-Warning: pathinfo() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 80
+Warning: pathinfo() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 85
 
-Warning: pathinfo() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 81
+Warning: pathinfo() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 90
 
-Warning: pathinfo() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 82
+Warning: pathinfo() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 95
 
-Warning: pathinfo() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 83
+Warning: pathinfo() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 100
 
-Warning: pathinfo() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 84
+Warning: pathinfo() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/pathinfo_variaton.php on line 105
 Done

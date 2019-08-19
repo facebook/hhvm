@@ -509,6 +509,14 @@ module GenerateFFRustSyntax = struct
     }\n\n")
     x.type_name args x.kind_name x.kind_name fields
 
+  let to_syntax_from_children x =
+    let mapper (f,_) = sprintf "%s_%s: ts.pop().unwrap(),\n                 " x.prefix f in
+    let fields = map_and_concat mapper (List.rev x.fields) in
+    sprintf "             (SyntaxKind::%s, %d) => SyntaxVariant::%s(Box::new(%sChildren {
+                 %s
+             })),\n"
+    x.kind_name (List.length x.fields) x.kind_name x.kind_name fields
+
   let full_fidelity_syntax_template = make_header CStyle "" ^ "
 use crate::lexable_token::LexableToken;
 use crate::syntax::*;
@@ -551,6 +559,14 @@ FOLD_OVER_CHILDREN
             SyntaxVariant::SyntaxList (_) => SyntaxKind::SyntaxList,
 TO_KIND        }
     }
+
+    pub fn from_children(kind : SyntaxKind, mut ts : Vec<Self>) -> SyntaxVariant<T, V> {
+         match (kind, ts.len()) {
+             (SyntaxKind::Missing, 0) => SyntaxVariant::Missing,
+             (SyntaxKind::SyntaxList, _) => SyntaxVariant::SyntaxList(ts),
+SYNTAX_FROM_CHILDREN             _ => panic!(\"from_children called with wrong number of children\"),
+         }
+    }
 }
 
 SYNTAX_CHILDREN
@@ -568,6 +584,7 @@ SYNTAX_VARIANT}
       { pattern = "SYNTAX_CONSTRUCTORS"; func = to_syntax_constructors };
       { pattern = "FOLD_OVER_CHILDREN"; func = fold_over};
       { pattern = "TO_KIND"; func = to_kind };
+      { pattern = "SYNTAX_FROM_CHILDREN"; func = to_syntax_from_children };
     ]
     ~filename: (full_fidelity_path_prefix ^ "syntax_generated.rs")
     ~template: full_fidelity_syntax_template

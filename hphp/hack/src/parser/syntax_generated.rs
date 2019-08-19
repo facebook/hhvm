@@ -3292,6 +3292,1199 @@ where
             SyntaxVariant::PocketMappingTypeDeclaration {..} => SyntaxKind::PocketMappingTypeDeclaration,
         }
     }
+
+    pub fn from_children(kind : SyntaxKind, mut ts : Vec<Self>) -> SyntaxVariant<T, V> {
+         match (kind, ts.len()) {
+             (SyntaxKind::Missing, 0) => SyntaxVariant::Missing,
+             (SyntaxKind::SyntaxList, _) => SyntaxVariant::SyntaxList(ts),
+             (SyntaxKind::EndOfFile, 1) => SyntaxVariant::EndOfFile(Box::new(EndOfFileChildren {
+                 end_of_file_token: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::Script, 1) => SyntaxVariant::Script(Box::new(ScriptChildren {
+                 script_declarations: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::QualifiedName, 1) => SyntaxVariant::QualifiedName(Box::new(QualifiedNameChildren {
+                 qualified_name_parts: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::SimpleTypeSpecifier, 1) => SyntaxVariant::SimpleTypeSpecifier(Box::new(SimpleTypeSpecifierChildren {
+                 simple_type_specifier: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::LiteralExpression, 1) => SyntaxVariant::LiteralExpression(Box::new(LiteralExpressionChildren {
+                 literal_expression: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::PrefixedStringExpression, 2) => SyntaxVariant::PrefixedStringExpression(Box::new(PrefixedStringExpressionChildren {
+                 prefixed_string_str: ts.pop().unwrap(),
+                 prefixed_string_name: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::VariableExpression, 1) => SyntaxVariant::VariableExpression(Box::new(VariableExpressionChildren {
+                 variable_expression: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::PipeVariableExpression, 1) => SyntaxVariant::PipeVariableExpression(Box::new(PipeVariableExpressionChildren {
+                 pipe_variable_expression: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::FileAttributeSpecification, 5) => SyntaxVariant::FileAttributeSpecification(Box::new(FileAttributeSpecificationChildren {
+                 file_attribute_specification_right_double_angle: ts.pop().unwrap(),
+                 file_attribute_specification_attributes: ts.pop().unwrap(),
+                 file_attribute_specification_colon: ts.pop().unwrap(),
+                 file_attribute_specification_keyword: ts.pop().unwrap(),
+                 file_attribute_specification_left_double_angle: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::EnumDeclaration, 9) => SyntaxVariant::EnumDeclaration(Box::new(EnumDeclarationChildren {
+                 enum_right_brace: ts.pop().unwrap(),
+                 enum_enumerators: ts.pop().unwrap(),
+                 enum_left_brace: ts.pop().unwrap(),
+                 enum_type: ts.pop().unwrap(),
+                 enum_base: ts.pop().unwrap(),
+                 enum_colon: ts.pop().unwrap(),
+                 enum_name: ts.pop().unwrap(),
+                 enum_keyword: ts.pop().unwrap(),
+                 enum_attribute_spec: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::Enumerator, 4) => SyntaxVariant::Enumerator(Box::new(EnumeratorChildren {
+                 enumerator_semicolon: ts.pop().unwrap(),
+                 enumerator_value: ts.pop().unwrap(),
+                 enumerator_equal: ts.pop().unwrap(),
+                 enumerator_name: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::RecordDeclaration, 9) => SyntaxVariant::RecordDeclaration(Box::new(RecordDeclarationChildren {
+                 record_right_brace: ts.pop().unwrap(),
+                 record_fields: ts.pop().unwrap(),
+                 record_left_brace: ts.pop().unwrap(),
+                 record_extends_list: ts.pop().unwrap(),
+                 record_extends_keyword: ts.pop().unwrap(),
+                 record_name: ts.pop().unwrap(),
+                 record_keyword: ts.pop().unwrap(),
+                 record_modifier: ts.pop().unwrap(),
+                 record_attribute_spec: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::RecordField, 5) => SyntaxVariant::RecordField(Box::new(RecordFieldChildren {
+                 record_field_comma: ts.pop().unwrap(),
+                 record_field_init: ts.pop().unwrap(),
+                 record_field_type: ts.pop().unwrap(),
+                 record_field_colon: ts.pop().unwrap(),
+                 record_field_name: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::AliasDeclaration, 8) => SyntaxVariant::AliasDeclaration(Box::new(AliasDeclarationChildren {
+                 alias_semicolon: ts.pop().unwrap(),
+                 alias_type: ts.pop().unwrap(),
+                 alias_equal: ts.pop().unwrap(),
+                 alias_constraint: ts.pop().unwrap(),
+                 alias_generic_parameter: ts.pop().unwrap(),
+                 alias_name: ts.pop().unwrap(),
+                 alias_keyword: ts.pop().unwrap(),
+                 alias_attribute_spec: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::PropertyDeclaration, 5) => SyntaxVariant::PropertyDeclaration(Box::new(PropertyDeclarationChildren {
+                 property_semicolon: ts.pop().unwrap(),
+                 property_declarators: ts.pop().unwrap(),
+                 property_type: ts.pop().unwrap(),
+                 property_modifiers: ts.pop().unwrap(),
+                 property_attribute_spec: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::PropertyDeclarator, 2) => SyntaxVariant::PropertyDeclarator(Box::new(PropertyDeclaratorChildren {
+                 property_initializer: ts.pop().unwrap(),
+                 property_name: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::NamespaceDeclaration, 3) => SyntaxVariant::NamespaceDeclaration(Box::new(NamespaceDeclarationChildren {
+                 namespace_body: ts.pop().unwrap(),
+                 namespace_name: ts.pop().unwrap(),
+                 namespace_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::NamespaceBody, 3) => SyntaxVariant::NamespaceBody(Box::new(NamespaceBodyChildren {
+                 namespace_right_brace: ts.pop().unwrap(),
+                 namespace_declarations: ts.pop().unwrap(),
+                 namespace_left_brace: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::NamespaceEmptyBody, 1) => SyntaxVariant::NamespaceEmptyBody(Box::new(NamespaceEmptyBodyChildren {
+                 namespace_semicolon: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::NamespaceUseDeclaration, 4) => SyntaxVariant::NamespaceUseDeclaration(Box::new(NamespaceUseDeclarationChildren {
+                 namespace_use_semicolon: ts.pop().unwrap(),
+                 namespace_use_clauses: ts.pop().unwrap(),
+                 namespace_use_kind: ts.pop().unwrap(),
+                 namespace_use_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::NamespaceGroupUseDeclaration, 7) => SyntaxVariant::NamespaceGroupUseDeclaration(Box::new(NamespaceGroupUseDeclarationChildren {
+                 namespace_group_use_semicolon: ts.pop().unwrap(),
+                 namespace_group_use_right_brace: ts.pop().unwrap(),
+                 namespace_group_use_clauses: ts.pop().unwrap(),
+                 namespace_group_use_left_brace: ts.pop().unwrap(),
+                 namespace_group_use_prefix: ts.pop().unwrap(),
+                 namespace_group_use_kind: ts.pop().unwrap(),
+                 namespace_group_use_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::NamespaceUseClause, 4) => SyntaxVariant::NamespaceUseClause(Box::new(NamespaceUseClauseChildren {
+                 namespace_use_alias: ts.pop().unwrap(),
+                 namespace_use_as: ts.pop().unwrap(),
+                 namespace_use_name: ts.pop().unwrap(),
+                 namespace_use_clause_kind: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::FunctionDeclaration, 3) => SyntaxVariant::FunctionDeclaration(Box::new(FunctionDeclarationChildren {
+                 function_body: ts.pop().unwrap(),
+                 function_declaration_header: ts.pop().unwrap(),
+                 function_attribute_spec: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::FunctionDeclarationHeader, 10) => SyntaxVariant::FunctionDeclarationHeader(Box::new(FunctionDeclarationHeaderChildren {
+                 function_where_clause: ts.pop().unwrap(),
+                 function_type: ts.pop().unwrap(),
+                 function_colon: ts.pop().unwrap(),
+                 function_right_paren: ts.pop().unwrap(),
+                 function_parameter_list: ts.pop().unwrap(),
+                 function_left_paren: ts.pop().unwrap(),
+                 function_type_parameter_list: ts.pop().unwrap(),
+                 function_name: ts.pop().unwrap(),
+                 function_keyword: ts.pop().unwrap(),
+                 function_modifiers: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::WhereClause, 2) => SyntaxVariant::WhereClause(Box::new(WhereClauseChildren {
+                 where_clause_constraints: ts.pop().unwrap(),
+                 where_clause_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::WhereConstraint, 3) => SyntaxVariant::WhereConstraint(Box::new(WhereConstraintChildren {
+                 where_constraint_right_type: ts.pop().unwrap(),
+                 where_constraint_operator: ts.pop().unwrap(),
+                 where_constraint_left_type: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::MethodishDeclaration, 4) => SyntaxVariant::MethodishDeclaration(Box::new(MethodishDeclarationChildren {
+                 methodish_semicolon: ts.pop().unwrap(),
+                 methodish_function_body: ts.pop().unwrap(),
+                 methodish_function_decl_header: ts.pop().unwrap(),
+                 methodish_attribute: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::MethodishTraitResolution, 5) => SyntaxVariant::MethodishTraitResolution(Box::new(MethodishTraitResolutionChildren {
+                 methodish_trait_semicolon: ts.pop().unwrap(),
+                 methodish_trait_name: ts.pop().unwrap(),
+                 methodish_trait_equal: ts.pop().unwrap(),
+                 methodish_trait_function_decl_header: ts.pop().unwrap(),
+                 methodish_trait_attribute: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ClassishDeclaration, 11) => SyntaxVariant::ClassishDeclaration(Box::new(ClassishDeclarationChildren {
+                 classish_body: ts.pop().unwrap(),
+                 classish_where_clause: ts.pop().unwrap(),
+                 classish_implements_list: ts.pop().unwrap(),
+                 classish_implements_keyword: ts.pop().unwrap(),
+                 classish_extends_list: ts.pop().unwrap(),
+                 classish_extends_keyword: ts.pop().unwrap(),
+                 classish_type_parameters: ts.pop().unwrap(),
+                 classish_name: ts.pop().unwrap(),
+                 classish_keyword: ts.pop().unwrap(),
+                 classish_modifiers: ts.pop().unwrap(),
+                 classish_attribute: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ClassishBody, 3) => SyntaxVariant::ClassishBody(Box::new(ClassishBodyChildren {
+                 classish_body_right_brace: ts.pop().unwrap(),
+                 classish_body_elements: ts.pop().unwrap(),
+                 classish_body_left_brace: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::TraitUsePrecedenceItem, 3) => SyntaxVariant::TraitUsePrecedenceItem(Box::new(TraitUsePrecedenceItemChildren {
+                 trait_use_precedence_item_removed_names: ts.pop().unwrap(),
+                 trait_use_precedence_item_keyword: ts.pop().unwrap(),
+                 trait_use_precedence_item_name: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::TraitUseAliasItem, 4) => SyntaxVariant::TraitUseAliasItem(Box::new(TraitUseAliasItemChildren {
+                 trait_use_alias_item_aliased_name: ts.pop().unwrap(),
+                 trait_use_alias_item_modifiers: ts.pop().unwrap(),
+                 trait_use_alias_item_keyword: ts.pop().unwrap(),
+                 trait_use_alias_item_aliasing_name: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::TraitUseConflictResolution, 5) => SyntaxVariant::TraitUseConflictResolution(Box::new(TraitUseConflictResolutionChildren {
+                 trait_use_conflict_resolution_right_brace: ts.pop().unwrap(),
+                 trait_use_conflict_resolution_clauses: ts.pop().unwrap(),
+                 trait_use_conflict_resolution_left_brace: ts.pop().unwrap(),
+                 trait_use_conflict_resolution_names: ts.pop().unwrap(),
+                 trait_use_conflict_resolution_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::TraitUse, 3) => SyntaxVariant::TraitUse(Box::new(TraitUseChildren {
+                 trait_use_semicolon: ts.pop().unwrap(),
+                 trait_use_names: ts.pop().unwrap(),
+                 trait_use_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::RequireClause, 4) => SyntaxVariant::RequireClause(Box::new(RequireClauseChildren {
+                 require_semicolon: ts.pop().unwrap(),
+                 require_name: ts.pop().unwrap(),
+                 require_kind: ts.pop().unwrap(),
+                 require_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ConstDeclaration, 5) => SyntaxVariant::ConstDeclaration(Box::new(ConstDeclarationChildren {
+                 const_semicolon: ts.pop().unwrap(),
+                 const_declarators: ts.pop().unwrap(),
+                 const_type_specifier: ts.pop().unwrap(),
+                 const_keyword: ts.pop().unwrap(),
+                 const_modifiers: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ConstantDeclarator, 2) => SyntaxVariant::ConstantDeclarator(Box::new(ConstantDeclaratorChildren {
+                 constant_declarator_initializer: ts.pop().unwrap(),
+                 constant_declarator_name: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::TypeConstDeclaration, 10) => SyntaxVariant::TypeConstDeclaration(Box::new(TypeConstDeclarationChildren {
+                 type_const_semicolon: ts.pop().unwrap(),
+                 type_const_type_specifier: ts.pop().unwrap(),
+                 type_const_equal: ts.pop().unwrap(),
+                 type_const_type_constraint: ts.pop().unwrap(),
+                 type_const_type_parameters: ts.pop().unwrap(),
+                 type_const_name: ts.pop().unwrap(),
+                 type_const_type_keyword: ts.pop().unwrap(),
+                 type_const_keyword: ts.pop().unwrap(),
+                 type_const_modifiers: ts.pop().unwrap(),
+                 type_const_attribute_spec: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::DecoratedExpression, 2) => SyntaxVariant::DecoratedExpression(Box::new(DecoratedExpressionChildren {
+                 decorated_expression_expression: ts.pop().unwrap(),
+                 decorated_expression_decorator: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ParameterDeclaration, 6) => SyntaxVariant::ParameterDeclaration(Box::new(ParameterDeclarationChildren {
+                 parameter_default_value: ts.pop().unwrap(),
+                 parameter_name: ts.pop().unwrap(),
+                 parameter_type: ts.pop().unwrap(),
+                 parameter_call_convention: ts.pop().unwrap(),
+                 parameter_visibility: ts.pop().unwrap(),
+                 parameter_attribute: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::VariadicParameter, 3) => SyntaxVariant::VariadicParameter(Box::new(VariadicParameterChildren {
+                 variadic_parameter_ellipsis: ts.pop().unwrap(),
+                 variadic_parameter_type: ts.pop().unwrap(),
+                 variadic_parameter_call_convention: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::OldAttributeSpecification, 3) => SyntaxVariant::OldAttributeSpecification(Box::new(OldAttributeSpecificationChildren {
+                 old_attribute_specification_right_double_angle: ts.pop().unwrap(),
+                 old_attribute_specification_attributes: ts.pop().unwrap(),
+                 old_attribute_specification_left_double_angle: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::AttributeSpecification, 1) => SyntaxVariant::AttributeSpecification(Box::new(AttributeSpecificationChildren {
+                 attribute_specification_attributes: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::Attribute, 2) => SyntaxVariant::Attribute(Box::new(AttributeChildren {
+                 attribute_attribute_name: ts.pop().unwrap(),
+                 attribute_at: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::InclusionExpression, 2) => SyntaxVariant::InclusionExpression(Box::new(InclusionExpressionChildren {
+                 inclusion_filename: ts.pop().unwrap(),
+                 inclusion_require: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::InclusionDirective, 2) => SyntaxVariant::InclusionDirective(Box::new(InclusionDirectiveChildren {
+                 inclusion_semicolon: ts.pop().unwrap(),
+                 inclusion_expression: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::CompoundStatement, 3) => SyntaxVariant::CompoundStatement(Box::new(CompoundStatementChildren {
+                 compound_right_brace: ts.pop().unwrap(),
+                 compound_statements: ts.pop().unwrap(),
+                 compound_left_brace: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ExpressionStatement, 2) => SyntaxVariant::ExpressionStatement(Box::new(ExpressionStatementChildren {
+                 expression_statement_semicolon: ts.pop().unwrap(),
+                 expression_statement_expression: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::MarkupSection, 4) => SyntaxVariant::MarkupSection(Box::new(MarkupSectionChildren {
+                 markup_expression: ts.pop().unwrap(),
+                 markup_suffix: ts.pop().unwrap(),
+                 markup_text: ts.pop().unwrap(),
+                 markup_prefix: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::MarkupSuffix, 2) => SyntaxVariant::MarkupSuffix(Box::new(MarkupSuffixChildren {
+                 markup_suffix_name: ts.pop().unwrap(),
+                 markup_suffix_less_than_question: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::UnsetStatement, 5) => SyntaxVariant::UnsetStatement(Box::new(UnsetStatementChildren {
+                 unset_semicolon: ts.pop().unwrap(),
+                 unset_right_paren: ts.pop().unwrap(),
+                 unset_variables: ts.pop().unwrap(),
+                 unset_left_paren: ts.pop().unwrap(),
+                 unset_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::LetStatement, 6) => SyntaxVariant::LetStatement(Box::new(LetStatementChildren {
+                 let_statement_semicolon: ts.pop().unwrap(),
+                 let_statement_initializer: ts.pop().unwrap(),
+                 let_statement_type: ts.pop().unwrap(),
+                 let_statement_colon: ts.pop().unwrap(),
+                 let_statement_name: ts.pop().unwrap(),
+                 let_statement_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::UsingStatementBlockScoped, 6) => SyntaxVariant::UsingStatementBlockScoped(Box::new(UsingStatementBlockScopedChildren {
+                 using_block_body: ts.pop().unwrap(),
+                 using_block_right_paren: ts.pop().unwrap(),
+                 using_block_expressions: ts.pop().unwrap(),
+                 using_block_left_paren: ts.pop().unwrap(),
+                 using_block_using_keyword: ts.pop().unwrap(),
+                 using_block_await_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::UsingStatementFunctionScoped, 4) => SyntaxVariant::UsingStatementFunctionScoped(Box::new(UsingStatementFunctionScopedChildren {
+                 using_function_semicolon: ts.pop().unwrap(),
+                 using_function_expression: ts.pop().unwrap(),
+                 using_function_using_keyword: ts.pop().unwrap(),
+                 using_function_await_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::WhileStatement, 5) => SyntaxVariant::WhileStatement(Box::new(WhileStatementChildren {
+                 while_body: ts.pop().unwrap(),
+                 while_right_paren: ts.pop().unwrap(),
+                 while_condition: ts.pop().unwrap(),
+                 while_left_paren: ts.pop().unwrap(),
+                 while_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::IfStatement, 7) => SyntaxVariant::IfStatement(Box::new(IfStatementChildren {
+                 if_else_clause: ts.pop().unwrap(),
+                 if_elseif_clauses: ts.pop().unwrap(),
+                 if_statement: ts.pop().unwrap(),
+                 if_right_paren: ts.pop().unwrap(),
+                 if_condition: ts.pop().unwrap(),
+                 if_left_paren: ts.pop().unwrap(),
+                 if_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ElseifClause, 5) => SyntaxVariant::ElseifClause(Box::new(ElseifClauseChildren {
+                 elseif_statement: ts.pop().unwrap(),
+                 elseif_right_paren: ts.pop().unwrap(),
+                 elseif_condition: ts.pop().unwrap(),
+                 elseif_left_paren: ts.pop().unwrap(),
+                 elseif_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ElseClause, 2) => SyntaxVariant::ElseClause(Box::new(ElseClauseChildren {
+                 else_statement: ts.pop().unwrap(),
+                 else_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::TryStatement, 4) => SyntaxVariant::TryStatement(Box::new(TryStatementChildren {
+                 try_finally_clause: ts.pop().unwrap(),
+                 try_catch_clauses: ts.pop().unwrap(),
+                 try_compound_statement: ts.pop().unwrap(),
+                 try_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::CatchClause, 6) => SyntaxVariant::CatchClause(Box::new(CatchClauseChildren {
+                 catch_body: ts.pop().unwrap(),
+                 catch_right_paren: ts.pop().unwrap(),
+                 catch_variable: ts.pop().unwrap(),
+                 catch_type: ts.pop().unwrap(),
+                 catch_left_paren: ts.pop().unwrap(),
+                 catch_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::FinallyClause, 2) => SyntaxVariant::FinallyClause(Box::new(FinallyClauseChildren {
+                 finally_body: ts.pop().unwrap(),
+                 finally_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::DoStatement, 7) => SyntaxVariant::DoStatement(Box::new(DoStatementChildren {
+                 do_semicolon: ts.pop().unwrap(),
+                 do_right_paren: ts.pop().unwrap(),
+                 do_condition: ts.pop().unwrap(),
+                 do_left_paren: ts.pop().unwrap(),
+                 do_while_keyword: ts.pop().unwrap(),
+                 do_body: ts.pop().unwrap(),
+                 do_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ForStatement, 9) => SyntaxVariant::ForStatement(Box::new(ForStatementChildren {
+                 for_body: ts.pop().unwrap(),
+                 for_right_paren: ts.pop().unwrap(),
+                 for_end_of_loop: ts.pop().unwrap(),
+                 for_second_semicolon: ts.pop().unwrap(),
+                 for_control: ts.pop().unwrap(),
+                 for_first_semicolon: ts.pop().unwrap(),
+                 for_initializer: ts.pop().unwrap(),
+                 for_left_paren: ts.pop().unwrap(),
+                 for_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ForeachStatement, 10) => SyntaxVariant::ForeachStatement(Box::new(ForeachStatementChildren {
+                 foreach_body: ts.pop().unwrap(),
+                 foreach_right_paren: ts.pop().unwrap(),
+                 foreach_value: ts.pop().unwrap(),
+                 foreach_arrow: ts.pop().unwrap(),
+                 foreach_key: ts.pop().unwrap(),
+                 foreach_as: ts.pop().unwrap(),
+                 foreach_await_keyword: ts.pop().unwrap(),
+                 foreach_collection: ts.pop().unwrap(),
+                 foreach_left_paren: ts.pop().unwrap(),
+                 foreach_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::SwitchStatement, 7) => SyntaxVariant::SwitchStatement(Box::new(SwitchStatementChildren {
+                 switch_right_brace: ts.pop().unwrap(),
+                 switch_sections: ts.pop().unwrap(),
+                 switch_left_brace: ts.pop().unwrap(),
+                 switch_right_paren: ts.pop().unwrap(),
+                 switch_expression: ts.pop().unwrap(),
+                 switch_left_paren: ts.pop().unwrap(),
+                 switch_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::SwitchSection, 3) => SyntaxVariant::SwitchSection(Box::new(SwitchSectionChildren {
+                 switch_section_fallthrough: ts.pop().unwrap(),
+                 switch_section_statements: ts.pop().unwrap(),
+                 switch_section_labels: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::SwitchFallthrough, 2) => SyntaxVariant::SwitchFallthrough(Box::new(SwitchFallthroughChildren {
+                 fallthrough_semicolon: ts.pop().unwrap(),
+                 fallthrough_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::CaseLabel, 3) => SyntaxVariant::CaseLabel(Box::new(CaseLabelChildren {
+                 case_colon: ts.pop().unwrap(),
+                 case_expression: ts.pop().unwrap(),
+                 case_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::DefaultLabel, 2) => SyntaxVariant::DefaultLabel(Box::new(DefaultLabelChildren {
+                 default_colon: ts.pop().unwrap(),
+                 default_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ReturnStatement, 3) => SyntaxVariant::ReturnStatement(Box::new(ReturnStatementChildren {
+                 return_semicolon: ts.pop().unwrap(),
+                 return_expression: ts.pop().unwrap(),
+                 return_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::GotoLabel, 2) => SyntaxVariant::GotoLabel(Box::new(GotoLabelChildren {
+                 goto_label_colon: ts.pop().unwrap(),
+                 goto_label_name: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::GotoStatement, 3) => SyntaxVariant::GotoStatement(Box::new(GotoStatementChildren {
+                 goto_statement_semicolon: ts.pop().unwrap(),
+                 goto_statement_label_name: ts.pop().unwrap(),
+                 goto_statement_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ThrowStatement, 3) => SyntaxVariant::ThrowStatement(Box::new(ThrowStatementChildren {
+                 throw_semicolon: ts.pop().unwrap(),
+                 throw_expression: ts.pop().unwrap(),
+                 throw_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::BreakStatement, 3) => SyntaxVariant::BreakStatement(Box::new(BreakStatementChildren {
+                 break_semicolon: ts.pop().unwrap(),
+                 break_level: ts.pop().unwrap(),
+                 break_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ContinueStatement, 3) => SyntaxVariant::ContinueStatement(Box::new(ContinueStatementChildren {
+                 continue_semicolon: ts.pop().unwrap(),
+                 continue_level: ts.pop().unwrap(),
+                 continue_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::EchoStatement, 3) => SyntaxVariant::EchoStatement(Box::new(EchoStatementChildren {
+                 echo_semicolon: ts.pop().unwrap(),
+                 echo_expressions: ts.pop().unwrap(),
+                 echo_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ConcurrentStatement, 2) => SyntaxVariant::ConcurrentStatement(Box::new(ConcurrentStatementChildren {
+                 concurrent_statement: ts.pop().unwrap(),
+                 concurrent_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::SimpleInitializer, 2) => SyntaxVariant::SimpleInitializer(Box::new(SimpleInitializerChildren {
+                 simple_initializer_value: ts.pop().unwrap(),
+                 simple_initializer_equal: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::AnonymousClass, 9) => SyntaxVariant::AnonymousClass(Box::new(AnonymousClassChildren {
+                 anonymous_class_body: ts.pop().unwrap(),
+                 anonymous_class_implements_list: ts.pop().unwrap(),
+                 anonymous_class_implements_keyword: ts.pop().unwrap(),
+                 anonymous_class_extends_list: ts.pop().unwrap(),
+                 anonymous_class_extends_keyword: ts.pop().unwrap(),
+                 anonymous_class_right_paren: ts.pop().unwrap(),
+                 anonymous_class_argument_list: ts.pop().unwrap(),
+                 anonymous_class_left_paren: ts.pop().unwrap(),
+                 anonymous_class_class_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::AnonymousFunction, 12) => SyntaxVariant::AnonymousFunction(Box::new(AnonymousFunctionChildren {
+                 anonymous_body: ts.pop().unwrap(),
+                 anonymous_use: ts.pop().unwrap(),
+                 anonymous_type: ts.pop().unwrap(),
+                 anonymous_colon: ts.pop().unwrap(),
+                 anonymous_right_paren: ts.pop().unwrap(),
+                 anonymous_parameters: ts.pop().unwrap(),
+                 anonymous_left_paren: ts.pop().unwrap(),
+                 anonymous_function_keyword: ts.pop().unwrap(),
+                 anonymous_coroutine_keyword: ts.pop().unwrap(),
+                 anonymous_async_keyword: ts.pop().unwrap(),
+                 anonymous_static_keyword: ts.pop().unwrap(),
+                 anonymous_attribute_spec: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::AnonymousFunctionUseClause, 4) => SyntaxVariant::AnonymousFunctionUseClause(Box::new(AnonymousFunctionUseClauseChildren {
+                 anonymous_use_right_paren: ts.pop().unwrap(),
+                 anonymous_use_variables: ts.pop().unwrap(),
+                 anonymous_use_left_paren: ts.pop().unwrap(),
+                 anonymous_use_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::LambdaExpression, 6) => SyntaxVariant::LambdaExpression(Box::new(LambdaExpressionChildren {
+                 lambda_body: ts.pop().unwrap(),
+                 lambda_arrow: ts.pop().unwrap(),
+                 lambda_signature: ts.pop().unwrap(),
+                 lambda_coroutine: ts.pop().unwrap(),
+                 lambda_async: ts.pop().unwrap(),
+                 lambda_attribute_spec: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::LambdaSignature, 5) => SyntaxVariant::LambdaSignature(Box::new(LambdaSignatureChildren {
+                 lambda_type: ts.pop().unwrap(),
+                 lambda_colon: ts.pop().unwrap(),
+                 lambda_right_paren: ts.pop().unwrap(),
+                 lambda_parameters: ts.pop().unwrap(),
+                 lambda_left_paren: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::CastExpression, 4) => SyntaxVariant::CastExpression(Box::new(CastExpressionChildren {
+                 cast_operand: ts.pop().unwrap(),
+                 cast_right_paren: ts.pop().unwrap(),
+                 cast_type: ts.pop().unwrap(),
+                 cast_left_paren: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ScopeResolutionExpression, 3) => SyntaxVariant::ScopeResolutionExpression(Box::new(ScopeResolutionExpressionChildren {
+                 scope_resolution_name: ts.pop().unwrap(),
+                 scope_resolution_operator: ts.pop().unwrap(),
+                 scope_resolution_qualifier: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::MemberSelectionExpression, 3) => SyntaxVariant::MemberSelectionExpression(Box::new(MemberSelectionExpressionChildren {
+                 member_name: ts.pop().unwrap(),
+                 member_operator: ts.pop().unwrap(),
+                 member_object: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::SafeMemberSelectionExpression, 3) => SyntaxVariant::SafeMemberSelectionExpression(Box::new(SafeMemberSelectionExpressionChildren {
+                 safe_member_name: ts.pop().unwrap(),
+                 safe_member_operator: ts.pop().unwrap(),
+                 safe_member_object: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::EmbeddedMemberSelectionExpression, 3) => SyntaxVariant::EmbeddedMemberSelectionExpression(Box::new(EmbeddedMemberSelectionExpressionChildren {
+                 embedded_member_name: ts.pop().unwrap(),
+                 embedded_member_operator: ts.pop().unwrap(),
+                 embedded_member_object: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::YieldExpression, 2) => SyntaxVariant::YieldExpression(Box::new(YieldExpressionChildren {
+                 yield_operand: ts.pop().unwrap(),
+                 yield_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::YieldFromExpression, 3) => SyntaxVariant::YieldFromExpression(Box::new(YieldFromExpressionChildren {
+                 yield_from_operand: ts.pop().unwrap(),
+                 yield_from_from_keyword: ts.pop().unwrap(),
+                 yield_from_yield_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::PrefixUnaryExpression, 2) => SyntaxVariant::PrefixUnaryExpression(Box::new(PrefixUnaryExpressionChildren {
+                 prefix_unary_operand: ts.pop().unwrap(),
+                 prefix_unary_operator: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::PostfixUnaryExpression, 2) => SyntaxVariant::PostfixUnaryExpression(Box::new(PostfixUnaryExpressionChildren {
+                 postfix_unary_operator: ts.pop().unwrap(),
+                 postfix_unary_operand: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::BinaryExpression, 3) => SyntaxVariant::BinaryExpression(Box::new(BinaryExpressionChildren {
+                 binary_right_operand: ts.pop().unwrap(),
+                 binary_operator: ts.pop().unwrap(),
+                 binary_left_operand: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::IsExpression, 3) => SyntaxVariant::IsExpression(Box::new(IsExpressionChildren {
+                 is_right_operand: ts.pop().unwrap(),
+                 is_operator: ts.pop().unwrap(),
+                 is_left_operand: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::AsExpression, 3) => SyntaxVariant::AsExpression(Box::new(AsExpressionChildren {
+                 as_right_operand: ts.pop().unwrap(),
+                 as_operator: ts.pop().unwrap(),
+                 as_left_operand: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::NullableAsExpression, 3) => SyntaxVariant::NullableAsExpression(Box::new(NullableAsExpressionChildren {
+                 nullable_as_right_operand: ts.pop().unwrap(),
+                 nullable_as_operator: ts.pop().unwrap(),
+                 nullable_as_left_operand: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ConditionalExpression, 5) => SyntaxVariant::ConditionalExpression(Box::new(ConditionalExpressionChildren {
+                 conditional_alternative: ts.pop().unwrap(),
+                 conditional_colon: ts.pop().unwrap(),
+                 conditional_consequence: ts.pop().unwrap(),
+                 conditional_question: ts.pop().unwrap(),
+                 conditional_test: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::EvalExpression, 4) => SyntaxVariant::EvalExpression(Box::new(EvalExpressionChildren {
+                 eval_right_paren: ts.pop().unwrap(),
+                 eval_argument: ts.pop().unwrap(),
+                 eval_left_paren: ts.pop().unwrap(),
+                 eval_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::DefineExpression, 4) => SyntaxVariant::DefineExpression(Box::new(DefineExpressionChildren {
+                 define_right_paren: ts.pop().unwrap(),
+                 define_argument_list: ts.pop().unwrap(),
+                 define_left_paren: ts.pop().unwrap(),
+                 define_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::HaltCompilerExpression, 4) => SyntaxVariant::HaltCompilerExpression(Box::new(HaltCompilerExpressionChildren {
+                 halt_compiler_right_paren: ts.pop().unwrap(),
+                 halt_compiler_argument_list: ts.pop().unwrap(),
+                 halt_compiler_left_paren: ts.pop().unwrap(),
+                 halt_compiler_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::IssetExpression, 4) => SyntaxVariant::IssetExpression(Box::new(IssetExpressionChildren {
+                 isset_right_paren: ts.pop().unwrap(),
+                 isset_argument_list: ts.pop().unwrap(),
+                 isset_left_paren: ts.pop().unwrap(),
+                 isset_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::FunctionCallExpression, 5) => SyntaxVariant::FunctionCallExpression(Box::new(FunctionCallExpressionChildren {
+                 function_call_right_paren: ts.pop().unwrap(),
+                 function_call_argument_list: ts.pop().unwrap(),
+                 function_call_left_paren: ts.pop().unwrap(),
+                 function_call_type_args: ts.pop().unwrap(),
+                 function_call_receiver: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ParenthesizedExpression, 3) => SyntaxVariant::ParenthesizedExpression(Box::new(ParenthesizedExpressionChildren {
+                 parenthesized_expression_right_paren: ts.pop().unwrap(),
+                 parenthesized_expression_expression: ts.pop().unwrap(),
+                 parenthesized_expression_left_paren: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::BracedExpression, 3) => SyntaxVariant::BracedExpression(Box::new(BracedExpressionChildren {
+                 braced_expression_right_brace: ts.pop().unwrap(),
+                 braced_expression_expression: ts.pop().unwrap(),
+                 braced_expression_left_brace: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::EmbeddedBracedExpression, 3) => SyntaxVariant::EmbeddedBracedExpression(Box::new(EmbeddedBracedExpressionChildren {
+                 embedded_braced_expression_right_brace: ts.pop().unwrap(),
+                 embedded_braced_expression_expression: ts.pop().unwrap(),
+                 embedded_braced_expression_left_brace: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ListExpression, 4) => SyntaxVariant::ListExpression(Box::new(ListExpressionChildren {
+                 list_right_paren: ts.pop().unwrap(),
+                 list_members: ts.pop().unwrap(),
+                 list_left_paren: ts.pop().unwrap(),
+                 list_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::CollectionLiteralExpression, 4) => SyntaxVariant::CollectionLiteralExpression(Box::new(CollectionLiteralExpressionChildren {
+                 collection_literal_right_brace: ts.pop().unwrap(),
+                 collection_literal_initializers: ts.pop().unwrap(),
+                 collection_literal_left_brace: ts.pop().unwrap(),
+                 collection_literal_name: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ObjectCreationExpression, 2) => SyntaxVariant::ObjectCreationExpression(Box::new(ObjectCreationExpressionChildren {
+                 object_creation_object: ts.pop().unwrap(),
+                 object_creation_new_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ConstructorCall, 4) => SyntaxVariant::ConstructorCall(Box::new(ConstructorCallChildren {
+                 constructor_call_right_paren: ts.pop().unwrap(),
+                 constructor_call_argument_list: ts.pop().unwrap(),
+                 constructor_call_left_paren: ts.pop().unwrap(),
+                 constructor_call_type: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::RecordCreationExpression, 5) => SyntaxVariant::RecordCreationExpression(Box::new(RecordCreationExpressionChildren {
+                 record_creation_right_bracket: ts.pop().unwrap(),
+                 record_creation_members: ts.pop().unwrap(),
+                 record_creation_left_bracket: ts.pop().unwrap(),
+                 record_creation_array_token: ts.pop().unwrap(),
+                 record_creation_type: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ArrayCreationExpression, 3) => SyntaxVariant::ArrayCreationExpression(Box::new(ArrayCreationExpressionChildren {
+                 array_creation_right_bracket: ts.pop().unwrap(),
+                 array_creation_members: ts.pop().unwrap(),
+                 array_creation_left_bracket: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ArrayIntrinsicExpression, 4) => SyntaxVariant::ArrayIntrinsicExpression(Box::new(ArrayIntrinsicExpressionChildren {
+                 array_intrinsic_right_paren: ts.pop().unwrap(),
+                 array_intrinsic_members: ts.pop().unwrap(),
+                 array_intrinsic_left_paren: ts.pop().unwrap(),
+                 array_intrinsic_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::DarrayIntrinsicExpression, 5) => SyntaxVariant::DarrayIntrinsicExpression(Box::new(DarrayIntrinsicExpressionChildren {
+                 darray_intrinsic_right_bracket: ts.pop().unwrap(),
+                 darray_intrinsic_members: ts.pop().unwrap(),
+                 darray_intrinsic_left_bracket: ts.pop().unwrap(),
+                 darray_intrinsic_explicit_type: ts.pop().unwrap(),
+                 darray_intrinsic_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::DictionaryIntrinsicExpression, 5) => SyntaxVariant::DictionaryIntrinsicExpression(Box::new(DictionaryIntrinsicExpressionChildren {
+                 dictionary_intrinsic_right_bracket: ts.pop().unwrap(),
+                 dictionary_intrinsic_members: ts.pop().unwrap(),
+                 dictionary_intrinsic_left_bracket: ts.pop().unwrap(),
+                 dictionary_intrinsic_explicit_type: ts.pop().unwrap(),
+                 dictionary_intrinsic_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::KeysetIntrinsicExpression, 5) => SyntaxVariant::KeysetIntrinsicExpression(Box::new(KeysetIntrinsicExpressionChildren {
+                 keyset_intrinsic_right_bracket: ts.pop().unwrap(),
+                 keyset_intrinsic_members: ts.pop().unwrap(),
+                 keyset_intrinsic_left_bracket: ts.pop().unwrap(),
+                 keyset_intrinsic_explicit_type: ts.pop().unwrap(),
+                 keyset_intrinsic_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::VarrayIntrinsicExpression, 5) => SyntaxVariant::VarrayIntrinsicExpression(Box::new(VarrayIntrinsicExpressionChildren {
+                 varray_intrinsic_right_bracket: ts.pop().unwrap(),
+                 varray_intrinsic_members: ts.pop().unwrap(),
+                 varray_intrinsic_left_bracket: ts.pop().unwrap(),
+                 varray_intrinsic_explicit_type: ts.pop().unwrap(),
+                 varray_intrinsic_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::VectorIntrinsicExpression, 5) => SyntaxVariant::VectorIntrinsicExpression(Box::new(VectorIntrinsicExpressionChildren {
+                 vector_intrinsic_right_bracket: ts.pop().unwrap(),
+                 vector_intrinsic_members: ts.pop().unwrap(),
+                 vector_intrinsic_left_bracket: ts.pop().unwrap(),
+                 vector_intrinsic_explicit_type: ts.pop().unwrap(),
+                 vector_intrinsic_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ElementInitializer, 3) => SyntaxVariant::ElementInitializer(Box::new(ElementInitializerChildren {
+                 element_value: ts.pop().unwrap(),
+                 element_arrow: ts.pop().unwrap(),
+                 element_key: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::SubscriptExpression, 4) => SyntaxVariant::SubscriptExpression(Box::new(SubscriptExpressionChildren {
+                 subscript_right_bracket: ts.pop().unwrap(),
+                 subscript_index: ts.pop().unwrap(),
+                 subscript_left_bracket: ts.pop().unwrap(),
+                 subscript_receiver: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::EmbeddedSubscriptExpression, 4) => SyntaxVariant::EmbeddedSubscriptExpression(Box::new(EmbeddedSubscriptExpressionChildren {
+                 embedded_subscript_right_bracket: ts.pop().unwrap(),
+                 embedded_subscript_index: ts.pop().unwrap(),
+                 embedded_subscript_left_bracket: ts.pop().unwrap(),
+                 embedded_subscript_receiver: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::AwaitableCreationExpression, 4) => SyntaxVariant::AwaitableCreationExpression(Box::new(AwaitableCreationExpressionChildren {
+                 awaitable_compound_statement: ts.pop().unwrap(),
+                 awaitable_coroutine: ts.pop().unwrap(),
+                 awaitable_async: ts.pop().unwrap(),
+                 awaitable_attribute_spec: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::XHPChildrenDeclaration, 3) => SyntaxVariant::XHPChildrenDeclaration(Box::new(XHPChildrenDeclarationChildren {
+                 xhp_children_semicolon: ts.pop().unwrap(),
+                 xhp_children_expression: ts.pop().unwrap(),
+                 xhp_children_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::XHPChildrenParenthesizedList, 3) => SyntaxVariant::XHPChildrenParenthesizedList(Box::new(XHPChildrenParenthesizedListChildren {
+                 xhp_children_list_right_paren: ts.pop().unwrap(),
+                 xhp_children_list_xhp_children: ts.pop().unwrap(),
+                 xhp_children_list_left_paren: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::XHPCategoryDeclaration, 3) => SyntaxVariant::XHPCategoryDeclaration(Box::new(XHPCategoryDeclarationChildren {
+                 xhp_category_semicolon: ts.pop().unwrap(),
+                 xhp_category_categories: ts.pop().unwrap(),
+                 xhp_category_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::XHPEnumType, 5) => SyntaxVariant::XHPEnumType(Box::new(XHPEnumTypeChildren {
+                 xhp_enum_right_brace: ts.pop().unwrap(),
+                 xhp_enum_values: ts.pop().unwrap(),
+                 xhp_enum_left_brace: ts.pop().unwrap(),
+                 xhp_enum_keyword: ts.pop().unwrap(),
+                 xhp_enum_optional: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::XHPLateinit, 2) => SyntaxVariant::XHPLateinit(Box::new(XHPLateinitChildren {
+                 xhp_lateinit_keyword: ts.pop().unwrap(),
+                 xhp_lateinit_at: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::XHPRequired, 2) => SyntaxVariant::XHPRequired(Box::new(XHPRequiredChildren {
+                 xhp_required_keyword: ts.pop().unwrap(),
+                 xhp_required_at: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::XHPClassAttributeDeclaration, 3) => SyntaxVariant::XHPClassAttributeDeclaration(Box::new(XHPClassAttributeDeclarationChildren {
+                 xhp_attribute_semicolon: ts.pop().unwrap(),
+                 xhp_attribute_attributes: ts.pop().unwrap(),
+                 xhp_attribute_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::XHPClassAttribute, 4) => SyntaxVariant::XHPClassAttribute(Box::new(XHPClassAttributeChildren {
+                 xhp_attribute_decl_required: ts.pop().unwrap(),
+                 xhp_attribute_decl_initializer: ts.pop().unwrap(),
+                 xhp_attribute_decl_name: ts.pop().unwrap(),
+                 xhp_attribute_decl_type: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::XHPSimpleClassAttribute, 1) => SyntaxVariant::XHPSimpleClassAttribute(Box::new(XHPSimpleClassAttributeChildren {
+                 xhp_simple_class_attribute_type: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::XHPSimpleAttribute, 3) => SyntaxVariant::XHPSimpleAttribute(Box::new(XHPSimpleAttributeChildren {
+                 xhp_simple_attribute_expression: ts.pop().unwrap(),
+                 xhp_simple_attribute_equal: ts.pop().unwrap(),
+                 xhp_simple_attribute_name: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::XHPSpreadAttribute, 4) => SyntaxVariant::XHPSpreadAttribute(Box::new(XHPSpreadAttributeChildren {
+                 xhp_spread_attribute_right_brace: ts.pop().unwrap(),
+                 xhp_spread_attribute_expression: ts.pop().unwrap(),
+                 xhp_spread_attribute_spread_operator: ts.pop().unwrap(),
+                 xhp_spread_attribute_left_brace: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::XHPOpen, 4) => SyntaxVariant::XHPOpen(Box::new(XHPOpenChildren {
+                 xhp_open_right_angle: ts.pop().unwrap(),
+                 xhp_open_attributes: ts.pop().unwrap(),
+                 xhp_open_name: ts.pop().unwrap(),
+                 xhp_open_left_angle: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::XHPExpression, 3) => SyntaxVariant::XHPExpression(Box::new(XHPExpressionChildren {
+                 xhp_close: ts.pop().unwrap(),
+                 xhp_body: ts.pop().unwrap(),
+                 xhp_open: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::XHPClose, 3) => SyntaxVariant::XHPClose(Box::new(XHPCloseChildren {
+                 xhp_close_right_angle: ts.pop().unwrap(),
+                 xhp_close_name: ts.pop().unwrap(),
+                 xhp_close_left_angle: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::TypeConstant, 3) => SyntaxVariant::TypeConstant(Box::new(TypeConstantChildren {
+                 type_constant_right_type: ts.pop().unwrap(),
+                 type_constant_separator: ts.pop().unwrap(),
+                 type_constant_left_type: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::VectorTypeSpecifier, 5) => SyntaxVariant::VectorTypeSpecifier(Box::new(VectorTypeSpecifierChildren {
+                 vector_type_right_angle: ts.pop().unwrap(),
+                 vector_type_trailing_comma: ts.pop().unwrap(),
+                 vector_type_type: ts.pop().unwrap(),
+                 vector_type_left_angle: ts.pop().unwrap(),
+                 vector_type_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::KeysetTypeSpecifier, 5) => SyntaxVariant::KeysetTypeSpecifier(Box::new(KeysetTypeSpecifierChildren {
+                 keyset_type_right_angle: ts.pop().unwrap(),
+                 keyset_type_trailing_comma: ts.pop().unwrap(),
+                 keyset_type_type: ts.pop().unwrap(),
+                 keyset_type_left_angle: ts.pop().unwrap(),
+                 keyset_type_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::TupleTypeExplicitSpecifier, 4) => SyntaxVariant::TupleTypeExplicitSpecifier(Box::new(TupleTypeExplicitSpecifierChildren {
+                 tuple_type_right_angle: ts.pop().unwrap(),
+                 tuple_type_types: ts.pop().unwrap(),
+                 tuple_type_left_angle: ts.pop().unwrap(),
+                 tuple_type_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::VarrayTypeSpecifier, 5) => SyntaxVariant::VarrayTypeSpecifier(Box::new(VarrayTypeSpecifierChildren {
+                 varray_right_angle: ts.pop().unwrap(),
+                 varray_trailing_comma: ts.pop().unwrap(),
+                 varray_type: ts.pop().unwrap(),
+                 varray_left_angle: ts.pop().unwrap(),
+                 varray_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::VectorArrayTypeSpecifier, 4) => SyntaxVariant::VectorArrayTypeSpecifier(Box::new(VectorArrayTypeSpecifierChildren {
+                 vector_array_right_angle: ts.pop().unwrap(),
+                 vector_array_type: ts.pop().unwrap(),
+                 vector_array_left_angle: ts.pop().unwrap(),
+                 vector_array_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::TypeParameter, 5) => SyntaxVariant::TypeParameter(Box::new(TypeParameterChildren {
+                 type_constraints: ts.pop().unwrap(),
+                 type_name: ts.pop().unwrap(),
+                 type_variance: ts.pop().unwrap(),
+                 type_reified: ts.pop().unwrap(),
+                 type_attribute_spec: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::TypeConstraint, 2) => SyntaxVariant::TypeConstraint(Box::new(TypeConstraintChildren {
+                 constraint_type: ts.pop().unwrap(),
+                 constraint_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::DarrayTypeSpecifier, 7) => SyntaxVariant::DarrayTypeSpecifier(Box::new(DarrayTypeSpecifierChildren {
+                 darray_right_angle: ts.pop().unwrap(),
+                 darray_trailing_comma: ts.pop().unwrap(),
+                 darray_value: ts.pop().unwrap(),
+                 darray_comma: ts.pop().unwrap(),
+                 darray_key: ts.pop().unwrap(),
+                 darray_left_angle: ts.pop().unwrap(),
+                 darray_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::MapArrayTypeSpecifier, 6) => SyntaxVariant::MapArrayTypeSpecifier(Box::new(MapArrayTypeSpecifierChildren {
+                 map_array_right_angle: ts.pop().unwrap(),
+                 map_array_value: ts.pop().unwrap(),
+                 map_array_comma: ts.pop().unwrap(),
+                 map_array_key: ts.pop().unwrap(),
+                 map_array_left_angle: ts.pop().unwrap(),
+                 map_array_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::DictionaryTypeSpecifier, 4) => SyntaxVariant::DictionaryTypeSpecifier(Box::new(DictionaryTypeSpecifierChildren {
+                 dictionary_type_right_angle: ts.pop().unwrap(),
+                 dictionary_type_members: ts.pop().unwrap(),
+                 dictionary_type_left_angle: ts.pop().unwrap(),
+                 dictionary_type_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ClosureTypeSpecifier, 9) => SyntaxVariant::ClosureTypeSpecifier(Box::new(ClosureTypeSpecifierChildren {
+                 closure_outer_right_paren: ts.pop().unwrap(),
+                 closure_return_type: ts.pop().unwrap(),
+                 closure_colon: ts.pop().unwrap(),
+                 closure_inner_right_paren: ts.pop().unwrap(),
+                 closure_parameter_list: ts.pop().unwrap(),
+                 closure_inner_left_paren: ts.pop().unwrap(),
+                 closure_function_keyword: ts.pop().unwrap(),
+                 closure_coroutine: ts.pop().unwrap(),
+                 closure_outer_left_paren: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ClosureParameterTypeSpecifier, 2) => SyntaxVariant::ClosureParameterTypeSpecifier(Box::new(ClosureParameterTypeSpecifierChildren {
+                 closure_parameter_type: ts.pop().unwrap(),
+                 closure_parameter_call_convention: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ClassnameTypeSpecifier, 5) => SyntaxVariant::ClassnameTypeSpecifier(Box::new(ClassnameTypeSpecifierChildren {
+                 classname_right_angle: ts.pop().unwrap(),
+                 classname_trailing_comma: ts.pop().unwrap(),
+                 classname_type: ts.pop().unwrap(),
+                 classname_left_angle: ts.pop().unwrap(),
+                 classname_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::FieldSpecifier, 4) => SyntaxVariant::FieldSpecifier(Box::new(FieldSpecifierChildren {
+                 field_type: ts.pop().unwrap(),
+                 field_arrow: ts.pop().unwrap(),
+                 field_name: ts.pop().unwrap(),
+                 field_question: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::FieldInitializer, 3) => SyntaxVariant::FieldInitializer(Box::new(FieldInitializerChildren {
+                 field_initializer_value: ts.pop().unwrap(),
+                 field_initializer_arrow: ts.pop().unwrap(),
+                 field_initializer_name: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ShapeTypeSpecifier, 5) => SyntaxVariant::ShapeTypeSpecifier(Box::new(ShapeTypeSpecifierChildren {
+                 shape_type_right_paren: ts.pop().unwrap(),
+                 shape_type_ellipsis: ts.pop().unwrap(),
+                 shape_type_fields: ts.pop().unwrap(),
+                 shape_type_left_paren: ts.pop().unwrap(),
+                 shape_type_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ShapeExpression, 4) => SyntaxVariant::ShapeExpression(Box::new(ShapeExpressionChildren {
+                 shape_expression_right_paren: ts.pop().unwrap(),
+                 shape_expression_fields: ts.pop().unwrap(),
+                 shape_expression_left_paren: ts.pop().unwrap(),
+                 shape_expression_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::TupleExpression, 4) => SyntaxVariant::TupleExpression(Box::new(TupleExpressionChildren {
+                 tuple_expression_right_paren: ts.pop().unwrap(),
+                 tuple_expression_items: ts.pop().unwrap(),
+                 tuple_expression_left_paren: ts.pop().unwrap(),
+                 tuple_expression_keyword: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::GenericTypeSpecifier, 2) => SyntaxVariant::GenericTypeSpecifier(Box::new(GenericTypeSpecifierChildren {
+                 generic_argument_list: ts.pop().unwrap(),
+                 generic_class_type: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::NullableTypeSpecifier, 2) => SyntaxVariant::NullableTypeSpecifier(Box::new(NullableTypeSpecifierChildren {
+                 nullable_type: ts.pop().unwrap(),
+                 nullable_question: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::LikeTypeSpecifier, 2) => SyntaxVariant::LikeTypeSpecifier(Box::new(LikeTypeSpecifierChildren {
+                 like_type: ts.pop().unwrap(),
+                 like_tilde: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::SoftTypeSpecifier, 2) => SyntaxVariant::SoftTypeSpecifier(Box::new(SoftTypeSpecifierChildren {
+                 soft_type: ts.pop().unwrap(),
+                 soft_at: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::AttributizedSpecifier, 2) => SyntaxVariant::AttributizedSpecifier(Box::new(AttributizedSpecifierChildren {
+                 attributized_specifier_type: ts.pop().unwrap(),
+                 attributized_specifier_attribute_spec: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ReifiedTypeArgument, 2) => SyntaxVariant::ReifiedTypeArgument(Box::new(ReifiedTypeArgumentChildren {
+                 reified_type_argument_type: ts.pop().unwrap(),
+                 reified_type_argument_reified: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::TypeArguments, 3) => SyntaxVariant::TypeArguments(Box::new(TypeArgumentsChildren {
+                 type_arguments_right_angle: ts.pop().unwrap(),
+                 type_arguments_types: ts.pop().unwrap(),
+                 type_arguments_left_angle: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::TypeParameters, 3) => SyntaxVariant::TypeParameters(Box::new(TypeParametersChildren {
+                 type_parameters_right_angle: ts.pop().unwrap(),
+                 type_parameters_parameters: ts.pop().unwrap(),
+                 type_parameters_left_angle: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::TupleTypeSpecifier, 3) => SyntaxVariant::TupleTypeSpecifier(Box::new(TupleTypeSpecifierChildren {
+                 tuple_right_paren: ts.pop().unwrap(),
+                 tuple_types: ts.pop().unwrap(),
+                 tuple_left_paren: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ErrorSyntax, 1) => SyntaxVariant::ErrorSyntax(Box::new(ErrorSyntaxChildren {
+                 error_error: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ListItem, 2) => SyntaxVariant::ListItem(Box::new(ListItemChildren {
+                 list_separator: ts.pop().unwrap(),
+                 list_item: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::PocketAtomExpression, 2) => SyntaxVariant::PocketAtomExpression(Box::new(PocketAtomExpressionChildren {
+                 pocket_atom_expression: ts.pop().unwrap(),
+                 pocket_atom_glyph: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::PocketIdentifierExpression, 5) => SyntaxVariant::PocketIdentifierExpression(Box::new(PocketIdentifierExpressionChildren {
+                 pocket_identifier_name: ts.pop().unwrap(),
+                 pocket_identifier_operator: ts.pop().unwrap(),
+                 pocket_identifier_field: ts.pop().unwrap(),
+                 pocket_identifier_pu_operator: ts.pop().unwrap(),
+                 pocket_identifier_qualifier: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::PocketAtomMappingDeclaration, 6) => SyntaxVariant::PocketAtomMappingDeclaration(Box::new(PocketAtomMappingDeclarationChildren {
+                 pocket_atom_mapping_semicolon: ts.pop().unwrap(),
+                 pocket_atom_mapping_right_paren: ts.pop().unwrap(),
+                 pocket_atom_mapping_mappings: ts.pop().unwrap(),
+                 pocket_atom_mapping_left_paren: ts.pop().unwrap(),
+                 pocket_atom_mapping_name: ts.pop().unwrap(),
+                 pocket_atom_mapping_glyph: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::PocketEnumDeclaration, 6) => SyntaxVariant::PocketEnumDeclaration(Box::new(PocketEnumDeclarationChildren {
+                 pocket_enum_right_brace: ts.pop().unwrap(),
+                 pocket_enum_fields: ts.pop().unwrap(),
+                 pocket_enum_left_brace: ts.pop().unwrap(),
+                 pocket_enum_name: ts.pop().unwrap(),
+                 pocket_enum_enum: ts.pop().unwrap(),
+                 pocket_enum_modifiers: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::PocketFieldTypeExprDeclaration, 4) => SyntaxVariant::PocketFieldTypeExprDeclaration(Box::new(PocketFieldTypeExprDeclarationChildren {
+                 pocket_field_type_expr_semicolon: ts.pop().unwrap(),
+                 pocket_field_type_expr_name: ts.pop().unwrap(),
+                 pocket_field_type_expr_type: ts.pop().unwrap(),
+                 pocket_field_type_expr_case: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::PocketFieldTypeDeclaration, 4) => SyntaxVariant::PocketFieldTypeDeclaration(Box::new(PocketFieldTypeDeclarationChildren {
+                 pocket_field_type_semicolon: ts.pop().unwrap(),
+                 pocket_field_type_name: ts.pop().unwrap(),
+                 pocket_field_type_type: ts.pop().unwrap(),
+                 pocket_field_type_case: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::PocketMappingIdDeclaration, 2) => SyntaxVariant::PocketMappingIdDeclaration(Box::new(PocketMappingIdDeclarationChildren {
+                 pocket_mapping_id_initializer: ts.pop().unwrap(),
+                 pocket_mapping_id_name: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::PocketMappingTypeDeclaration, 4) => SyntaxVariant::PocketMappingTypeDeclaration(Box::new(PocketMappingTypeDeclarationChildren {
+                 pocket_mapping_type_type: ts.pop().unwrap(),
+                 pocket_mapping_type_equal: ts.pop().unwrap(),
+                 pocket_mapping_type_name: ts.pop().unwrap(),
+                 pocket_mapping_type_keyword: ts.pop().unwrap(),
+                 
+             })),
+             _ => panic!("from_children called with wrong number of children"),
+         }
+    }
 }
 
 #[derive(Debug, Clone)]

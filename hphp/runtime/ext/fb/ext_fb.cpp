@@ -1135,7 +1135,24 @@ void HHVM_FUNCTION(fb_enable_code_coverage) {
     raise_notice("Calling fb_enable_code_coverage from a nested "
                  "VM instance may cause unpredicable results");
   }
-  throw VMSwitchModeBuiltin();
+  if (RuntimeOption::EvalEnableCodeCoverage < 0) {
+    throw VMSwitchModeBuiltin();
+  }
+  if (RuntimeOption::EvalEnableCodeCoverage == 0) {
+    raise_notice("Calling fb_enable_code_coverage without enabling the setting "
+                 "Eval.EnableCodeCoverage");
+    throw VMSwitchModeBuiltin();
+  } else if (RuntimeOption::EvalEnableCodeCoverage == 1) {
+    auto const tport = g_context->getTransport();
+    if (!tport ||
+        tport->getParam("enable_code_coverage").compare("true") != 0) {
+      raise_notice("Calling fb_enable_code_coverage without adding "
+                    "'enable_code_coverage' in request params");
+      throw VMSwitchModeBuiltin();
+    }
+  }
+  // Otherwise we should have forced interp aleady,
+  // so no need to throw exception
 }
 
 Array disable_code_coverage_helper(bool report_frequency) {

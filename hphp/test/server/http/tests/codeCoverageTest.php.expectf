@@ -1,0 +1,58 @@
+Enable Code Coverage = 0
+Requesting 'test_code_coverage.php'
+string(130) "Calling fb_enable_code_coverage without enabling the setting Eval.EnableCodeCoverage
+string(32) "Failed to generate code coverage""
+Enable Code Coverage = 1
+Requesting 'test_code_coverage.php'
+string(133) "Calling fb_enable_code_coverage without adding 'enable_code_coverage' in request params
+string(32) "Failed to generate code coverage""
+Requesting 'test_code_coverage.php?enable_code_coverage=false'
+string(154) "Code coverage: false
+Calling fb_enable_code_coverage without adding 'enable_code_coverage' in request params
+string(32) "Failed to generate code coverage""
+Requesting 'test_code_coverage.php?enable_code_coverage=true'
+string(%s) "Code coverage: true
+I'm FOOO
+array(2) {
+  ["/:systemlib.phpfb"]=>
+  array(1) {
+    [139]=>
+    int(1)
+  }
+  [%s]=>
+  array(5) {
+    [9]=>
+    int(1)
+    [10]=>
+    int(1)
+    [20]=>
+    int(1)
+    [21]=>
+    int(2)
+    [22]=>
+    int(1)
+  }
+}"
+Enable Code Coverage = 2
+Requesting 'test_code_coverage.php'
+string(%s) "I'm FOOO
+array(2) {
+  ["/:systemlib.phpfb"]=>
+  array(1) {
+    [139]=>
+    int(1)
+  }
+  [%s]=>
+  array(5) {
+    [9]=>
+    int(1)
+    [10]=>
+    int(1)
+    [20]=>
+    int(1)
+    [21]=>
+    int(2)
+    [22]=>
+    int(1)
+  }
+}"

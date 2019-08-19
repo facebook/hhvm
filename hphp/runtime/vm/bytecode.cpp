@@ -7035,6 +7035,13 @@ TCA dispatchImpl() {
     }                                                         \
     retAddr = iopWrap##name(pc);                              \
     vmpc() = pc;                                              \
+    if ((isFCallFunc(Op::name) ||                             \
+         Op::name == Op::NativeImpl ||                        \
+         Op::name == Op::FCallBuiltin) &&                     \
+        !collectCoverage && RID().getCoverage()) {            \
+      optab = optabCover;                                     \
+      collectCoverage = true;                                 \
+    }                                                         \
     if (breakOnCtlFlow) {                                     \
       isCtlFlow = instrIsControlFlow(Op::name);               \
     }                                                         \

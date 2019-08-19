@@ -4,13 +4,14 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ocamlpool_rust::ocamlvalue::*;
+use ocamlrep::IntoOcamlRep;
 
 #[derive(Clone, Debug)]
 pub struct Lazy<T>(T);
 
-impl<T: Into<ocamlrep::Value>> Into<ocamlrep::Value> for Lazy<T> {
-    fn into(self) -> ocamlrep::Value {
-        ().into()
+impl<T: IntoOcamlRep> IntoOcamlRep for Lazy<T> {
+    fn into_ocamlrep<'a>(self, arena: &ocamlrep::Arena<'a>) -> ocamlrep::Value<'a> {
+        ().into_ocamlrep(arena)
     }
 }
 

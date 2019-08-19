@@ -3,13 +3,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::mem;
+
 use ocaml::caml;
-use ocamlrep;
+use ocamlrep::IntoOcamlRep;
 use ocamlrep_derive::IntoOcamlRep;
 
-fn val<T: Into<ocamlrep::Value>>(value: T) -> ocaml::Value {
-    let value: ocamlrep::Value = value.into();
-    value.into()
+fn val<T: IntoOcamlRep>(value: T) -> ocaml::Value {
+    let arena = ocamlrep::Arena::new_with_size(8);
+    let value = value.into_ocamlrep(&arena);
+    mem::forget(arena);
+    ocaml::Value::new(unsafe { value.as_usize() })
 }
 
 // Primitive Tests

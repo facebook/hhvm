@@ -24,19 +24,19 @@ fn derive_ocamlrep(mut s: synstructure::Structure) -> proc_macro2::TokenStream {
 
             match struct_data.fields {
                 syn::Fields::Unit => s.gen_impl(quote! {
-                    gen impl ::std::convert::Into<::ocamlrep::Value> for @Self {
-                        fn into(self) -> ::ocamlrep::Value {
-                            ().into()
+                    gen impl ::ocamlrep::IntoOcamlRep for @Self {
+                        fn into_ocamlrep<'a>(self, arena: &::ocamlrep::Arena<'a>) -> ::ocamlrep::Value<'a> {
+                            ().into_ocamlrep(arena)
                         }
                     }
                 }),
                 // For the newtype pattern (a tuple struct with a single field),
                 // don't allocate a block--just use the inner value directly.
                 syn::Fields::Unnamed(_) if size == 1 => {
-                    let body = s.each(|bi| quote! { #bi.into() });
+                    let body = s.each(|bi| quote! { #bi.into_ocamlrep(arena) });
                     s.gen_impl(quote! {
-                        gen impl ::std::convert::Into<::ocamlrep::Value> for @Self {
-                            fn into(self) -> ::ocamlrep::Value {
+                        gen impl ::ocamlrep::IntoOcamlRep for @Self {
+                            fn into_ocamlrep<'a>(self, arena: &::ocamlrep::Arena<'a>) -> ::ocamlrep::Value<'a> {
                                 match self { #body }
                             }
                         }
@@ -45,17 +45,17 @@ fn derive_ocamlrep(mut s: synstructure::Structure) -> proc_macro2::TokenStream {
                 syn::Fields::Named(_) | syn::Fields::Unnamed(_) => {
                     let body = s.each(|bi| {
                         quote! {
-                            block[idx] = #bi.into();
+                            block[idx] = #bi.into_ocamlrep(arena);
                             idx += 1;
                         }
                     });
                     s.gen_impl(quote! {
-                        gen impl ::std::convert::Into<::ocamlrep::Value> for @Self {
-                            fn into(self) -> ::ocamlrep::Value {
-                                let mut block = ::ocamlrep::Block::with_size(#size);
+                        gen impl ::ocamlrep::IntoOcamlRep for @Self {
+                            fn into_ocamlrep<'a>(self, arena: &::ocamlrep::Arena<'a>) -> ::ocamlrep::Value<'a> {
+                                let mut block = arena.block_with_size(#size);
                                 let mut idx = 0;
                                 match self { #body }
-                                block.into()
+                                block.build()
                             }
                         }
                     })
@@ -87,23 +87,23 @@ fn derive_ocamlrep(mut s: synstructure::Structure) -> proc_macro2::TokenStream {
 
             let body = s.each(|bi| {
                 quote! {
-                    block[idx] = #bi.into();
+                    block[idx] = #bi.into_ocamlrep(arena);
                     idx += 1;
                 }
             });
 
             s.gen_impl(quote! {
-                gen impl ::std::convert::Into<::ocamlrep::Value> for @Self {
-                    fn into(self) -> ::ocamlrep::Value {
+                gen impl ::ocamlrep::IntoOcamlRep for @Self {
+                    fn into_ocamlrep<'a>(self, arena: &::ocamlrep::Arena<'a>) -> ::ocamlrep::Value<'a> {
                         let size = match self { #num_fields };
                         let tag = match self { #tags };
                         if size == 0 {
                             ::ocamlrep::Value::int(tag as isize)
                         } else {
-                            let mut block = ::ocamlrep::Block::with_size_and_tag(size, tag);
+                            let mut block = arena.block_with_size_and_tag(size, tag);
                             let mut idx = 0;
                             match self { #body }
-                            block.into()
+                            block.build()
                         }
                     }
                 }

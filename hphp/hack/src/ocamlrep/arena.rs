@@ -4,63 +4,79 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::cell::RefCell;
-use std::rc::Rc;
 
-#[derive(Clone, PartialEq)]
-struct Chunk {
-    data: Box<[usize]>,
-    index: RefCell<usize>,
+use crate::{BlockBuilder, Value};
+
+struct Chunk<'a> {
+    data: Box<[Value<'a>]>,
+    index: usize,
 
     /// Pointer to the prev arena segment.
-    prev: Option<Rc<Chunk>>,
+    prev: Option<Box<Chunk<'a>>>,
 }
 
-impl Chunk {
+impl<'a> Chunk<'a> {
     fn new_with_size(size: usize) -> Self {
         Self {
-            index: RefCell::new(0),
-            data: vec![0; size].into_boxed_slice(),
+            index: 0,
+            data: vec![Value::int(0); size].into_boxed_slice(),
             prev: None,
         }
     }
 
-    fn new_with_size_and_prev(size: usize, prev: Rc<Chunk>) -> Self {
-        Self {
-            index: RefCell::new(0),
-            data: vec![0; size].into_boxed_slice(),
-            prev: Some(prev),
-        }
+    fn capacity(&self) -> usize {
+        self.data.len()
+    }
+
+    fn can_fit(&self, requested_size: usize) -> bool {
+        self.index + requested_size <= self.data.len()
     }
 
     #[inline]
-    pub fn alloc(&self, requested_size: usize) -> &[usize] {
-        let previous_index = (*self.index.borrow_mut()).clone();
-        *self.index.borrow_mut() += requested_size;
-        &self.data[previous_index..(previous_index + requested_size)]
+    pub fn alloc(&mut self, requested_size: usize) -> *mut Value<'a> {
+        let previous_index = self.index;
+        self.index += requested_size;
+        &mut self.data[previous_index] as *mut Value<'a>
     }
 }
 
-pub struct Arena {
-    current_chunk: Rc<Chunk>,
+pub struct Arena<'a> {
+    current_chunk: RefCell<Chunk<'a>>,
 }
 
-impl Arena {
+impl<'a> Arena<'a> {
     /// Allocates a new Arena with `initial_size` bytes preallocated.
     pub fn new_with_size(initial_size: usize) -> Self {
         Self {
-            current_chunk: Rc::new(Chunk::new_with_size(initial_size)),
+            current_chunk: RefCell::new(Chunk::new_with_size(initial_size)),
         }
     }
 
     #[inline]
-    pub fn alloc(&mut self, requested_size: usize) -> &[usize] {
-        if (*self.current_chunk.index.borrow()) + requested_size >= self.current_chunk.data.len() {
-            self.current_chunk = Rc::new(Chunk::new_with_size_and_prev(
-                std::cmp::max(requested_size * 2, self.current_chunk.data.len()),
-                Rc::clone(&self.current_chunk),
-            ));
+    fn alloc(&self, requested_size: usize) -> &mut [Value<'a>] {
+        if !self.current_chunk.borrow().can_fit(requested_size) {
+            let prev_chunk_capacity = self.current_chunk.borrow().capacity();
+            let prev_chunk = self
+                .current_chunk
+                .replace(Chunk::new_with_size(std::cmp::max(
+                    requested_size * 2,
+                    prev_chunk_capacity,
+                )));
+            self.current_chunk.borrow_mut().prev = Some(Box::new(prev_chunk));
         }
-        self.current_chunk.alloc(requested_size)
+        let ptr = self.current_chunk.borrow_mut().alloc(requested_size);
+        unsafe { std::slice::from_raw_parts_mut(ptr, requested_size) }
+    }
+
+    #[inline]
+    pub fn block_with_size<'b>(&'b self, size: usize) -> BlockBuilder<'a, 'b> {
+        self.block_with_size_and_tag(size, 0)
+    }
+
+    #[inline]
+    pub fn block_with_size_and_tag<'b>(&'b self, size: usize, tag: u8) -> BlockBuilder<'a, 'b> {
+        let slice = self.alloc(size + 1);
+        BlockBuilder::new(size, tag, slice)
     }
 }
 
@@ -71,30 +87,36 @@ mod tests {
     use std::time::Instant;
 
     #[test]
-    fn test_alloc_ten() {
-        let mut arena = Arena::new_with_size(1000);
-        let get_ten = arena.alloc(10);
+    fn test_alloc_block_of_three_fields() {
+        let arena = Arena::new_with_size(1000);
+        let mut block = arena.block_with_size(3);
+        block[0] = Value::int(1);
+        block[1] = Value::int(2);
+        block[2] = Value::int(3);
+        let block = block.build().as_block().unwrap();
 
-        assert_eq!(get_ten.len(), 10);
-        assert_eq!(get_ten, &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+        assert_eq!(block.size(), 3);
+        assert_eq!(block[0].as_int(), 1);
+        assert_eq!(block[1].as_int(), 2);
+        assert_eq!(block[2].as_int(), 3);
     }
 
     #[test]
     fn test_large_allocs() {
-        let mut arena = Arena::new_with_size(1000);
-        let get_max = arena.alloc(1000);
-        assert_eq!(get_max.len(), 1000);
+        let arena = Arena::new_with_size(1000);
+        let max = arena.block_with_size(1000).build().as_block().unwrap();
+        assert_eq!(max.size(), 1000);
 
-        let get_two_thousand = arena.alloc(2000);
-        assert_eq!(get_two_thousand.len(), 2000);
+        let two_thousand = arena.block_with_size(2000).build().as_block().unwrap();
+        assert_eq!(two_thousand.size(), 2000);
 
-        let get_four_thousand = arena.alloc(4000);
-        assert_eq!(get_four_thousand.len(), 4000);
+        let four_thousand = arena.block_with_size(4000).build().as_block().unwrap();
+        assert_eq!(four_thousand.size(), 4000);
     }
 
     #[test]
     fn perf_test() {
-        let mut arena = Arena::new_with_size(10_000);
+        let arena = Arena::new_with_size(10_000);
 
         println!("Benchmarks for allocating [1] 200,000 times");
         let now = Instant::now();
@@ -105,7 +127,7 @@ mod tests {
 
         let now = Instant::now();
         for _ in 0..200_000 {
-            arena.alloc(1);
+            arena.block_with_size(1).build().as_block().unwrap();
         }
         println!("Arena: {:?}", now.elapsed());
 
@@ -118,7 +140,7 @@ mod tests {
 
         let now = Instant::now();
         for _ in 0..200_000 {
-            arena.alloc(5);
+            arena.block_with_size(5).build().as_block().unwrap();
         }
         println!("Arena: {:?}", now.elapsed());
 
@@ -131,7 +153,7 @@ mod tests {
 
         let now = Instant::now();
         for _ in 0..200_000 {
-            arena.alloc(10);
+            arena.block_with_size(10).build().as_block().unwrap();
         }
         println!("Arena: {:?}", now.elapsed());
     }

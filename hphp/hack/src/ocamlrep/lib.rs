@@ -5,31 +5,58 @@
 
 use std::borrow::Cow;
 use std::fmt::{self, Debug};
+use std::marker::PhantomData;
 use std::mem;
 use std::ops::{Index, IndexMut};
+
+pub mod arena;
+
+pub use arena::Arena;
 
 const STRING_TAG: u8 = 252;
 const DOUBLE_TAG: u8 = 253;
 
-#[derive(Clone)]
-pub struct Block(Box<[Value]>);
+pub trait IntoOcamlRep {
+    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a>;
+}
 
-impl Block {
-    pub fn with_size(size: usize) -> Block {
-        Block::with_size_and_tag(size, 0)
-    }
+#[repr(transparent)]
+pub struct BlockBuilder<'arena: 'builder, 'builder>(&'builder mut [Value<'arena>]);
 
-    pub fn with_size_and_tag(size: usize, tag: u8) -> Block {
+impl<'a, 'b> BlockBuilder<'a, 'b> {
+    pub fn new(size: usize, tag: u8, block: &'b mut [Value<'a>]) -> Self {
         if size == 0 {
             panic!()
         }
         let header_bytes = size << 10 | (tag as usize);
-        let header = Value(header_bytes);
-        let mut block = vec![Value::int(0); size + 1].into_boxed_slice();
+        let header = Value::bits(header_bytes);
         block[0] = header;
-        Block(block)
+        BlockBuilder(block)
     }
 
+    pub fn build(self) -> Value<'a> {
+        Value::bits(unsafe { mem::transmute(self.0.as_ptr().offset(1)) })
+    }
+}
+
+impl<'a, 'b> Index<usize> for BlockBuilder<'a, 'b> {
+    type Output = Value<'a>;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.0[index + 1]
+    }
+}
+
+impl IndexMut<usize> for BlockBuilder<'_, '_> {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.0[index + 1]
+    }
+}
+
+#[repr(transparent)]
+pub struct Block<'arena>(&'arena [Value<'arena>]);
+
+impl<'a> Block<'a> {
     fn header_bits(&self) -> usize {
         self.0[0].0
     }
@@ -63,52 +90,50 @@ impl Block {
         }
         Some(f64::from_bits(self.0[1].0 as u64))
     }
+
+    fn as_values(&self) -> Option<&[Value]> {
+        if self.tag() == STRING_TAG || self.tag() == DOUBLE_TAG {
+            return None;
+        }
+        Some(&self.0[1..])
+    }
 }
 
-impl Index<usize> for Block {
-    type Output = Value;
+impl<'a> Index<usize> for Block<'a> {
+    type Output = Value<'a>;
 
     fn index(&self, index: usize) -> &Self::Output {
         &self.0[index + 1]
     }
 }
 
-impl IndexMut<usize> for Block {
-    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        &mut self.0[index + 1]
-    }
-}
-
-impl Debug for Block {
+impl Debug for Block<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if self.tag() == STRING_TAG {
             write!(f, "{:?}", self.as_str().unwrap())
         } else if self.tag() == DOUBLE_TAG {
             write!(f, "{:?}", self.as_float().unwrap())
         } else {
-            write!(f, "{:?}", &self.0[1..])
+            write!(f, "{:?}", self.as_values().unwrap())
         }
     }
 }
 
-impl Into<Value> for Block {
-    fn into(self) -> Value {
-        let ptr = unsafe { self.0.as_ptr().offset(1) };
-        mem::forget(self);
-        Value(unsafe { mem::transmute(ptr) })
-    }
-}
-
 #[repr(transparent)]
-pub struct Value(usize);
+#[derive(Clone, Copy)]
+pub struct Value<'arena>(usize, PhantomData<&'arena ()>);
 
-impl Value {
+impl<'a> Value<'a> {
     fn is_immediate(&self) -> bool {
         self.0 & 1 == 1
     }
 
-    pub fn int(value: isize) -> Value {
-        Value(((value as usize) << 1) | 1)
+    pub fn int(value: isize) -> Value<'static> {
+        Value(((value as usize) << 1) | 1, PhantomData)
+    }
+
+    fn bits(value: usize) -> Value<'a> {
+        Value(value, PhantomData)
     }
 
     fn as_int(&self) -> isize {
@@ -118,316 +143,296 @@ impl Value {
         (self.0 as isize) >> 1
     }
 
-    // This method is unsafe because it aliases the contents of the block.
-    // For use by Clone/Drop only.
-    unsafe fn as_block(&self) -> Option<Block> {
+    fn as_block(&self) -> Option<Block<'a>> {
         if self.is_immediate() {
             return None;
         }
-        let ptr: *const Value = mem::transmute(self.0);
-        let header = ptr.offset(-1);
-        let size = ((*header).0 >> 10) + 1;
-        let slice = std::slice::from_raw_parts(header, size);
-        let block: Block = mem::transmute(slice);
-        Some(block)
+        let block = unsafe {
+            let ptr: *const Value = mem::transmute(self.0);
+            let header = ptr.offset(-1);
+            let size = ((*header).0 >> 10) + 1;
+            std::slice::from_raw_parts(header, size)
+        };
+        Some(Block(block))
+    }
+
+    /// This method is unsafe because it decouples the value from the lifetime
+    /// of the arena. Take care that the returned value does not outlive the
+    /// arena.
+    pub unsafe fn as_usize(&self) -> usize {
+        self.0
     }
 }
 
-impl Into<ocaml::Value> for Value {
-    fn into(self) -> ocaml::Value {
-        ocaml::Value::new(unsafe { mem::transmute(self) })
-    }
-}
-
-impl Clone for Value {
-    fn clone(&self) -> Self {
-        match unsafe { self.as_block() } {
-            None => Value(self.0),
-            Some(block1) => {
-                let block2 = block1.clone();
-                mem::forget(block1);
-                block2.into()
-            }
-        }
-    }
-}
-
-impl Drop for Value {
-    fn drop(&mut self) {
-        mem::drop(unsafe { self.as_block() })
-    }
-}
-
-impl Debug for Value {
+impl Debug for Value<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match unsafe { self.as_block() } {
+        match self.as_block() {
             None => write!(f, "{}", self.as_int()),
-            Some(block) => {
-                write!(f, "{:?}", block)?;
-                mem::forget(block);
-                Ok(())
-            }
+            Some(block) => write!(f, "{:?}", block),
         }
     }
 }
 
-impl From<bool> for Value {
-    fn from(x: bool) -> Value {
-        Value::int(x as isize)
+impl IntoOcamlRep for bool {
+    fn into_ocamlrep<'a>(self, _arena: &Arena<'a>) -> Value<'a> {
+        Value::int(self as isize)
     }
 }
 
-impl From<char> for Value {
-    fn from(x: char) -> Value {
-        Value::int(x as isize)
+impl IntoOcamlRep for char {
+    fn into_ocamlrep<'a>(self, _arena: &Arena<'a>) -> Value<'a> {
+        Value::int(self as isize)
     }
 }
 
-impl From<isize> for Value {
-    fn from(x: isize) -> Value {
-        Value::int(x)
+impl IntoOcamlRep for isize {
+    fn into_ocamlrep<'a>(self, _arena: &Arena<'a>) -> Value<'a> {
+        Value::int(self)
     }
 }
 
-impl From<usize> for Value {
-    fn from(x: usize) -> Value {
-        Value::int(x as isize)
+impl IntoOcamlRep for usize {
+    fn into_ocamlrep<'a>(self, _arena: &Arena<'a>) -> Value<'a> {
+        Value::int(self as isize)
     }
 }
 
-impl From<u64> for Value {
-    fn from(x: u64) -> Value {
-        Value::int(x as isize)
+impl IntoOcamlRep for u64 {
+    fn into_ocamlrep<'a>(self, _arena: &Arena<'a>) -> Value<'a> {
+        Value::int(self as isize)
     }
 }
 
-impl From<i64> for Value {
-    fn from(x: i64) -> Value {
-        Value::int(x as isize)
+impl IntoOcamlRep for i64 {
+    fn into_ocamlrep<'a>(self, _arena: &Arena<'a>) -> Value<'a> {
+        Value::int(self as isize)
     }
 }
 
-impl From<u32> for Value {
-    fn from(x: u32) -> Value {
-        Value::int(x as isize)
+impl IntoOcamlRep for u32 {
+    fn into_ocamlrep<'a>(self, _arena: &Arena<'a>) -> Value<'a> {
+        Value::int(self as isize)
     }
 }
 
-impl From<i32> for Value {
-    fn from(x: i32) -> Value {
-        Value::int(x as isize)
+impl IntoOcamlRep for i32 {
+    fn into_ocamlrep<'a>(self, _arena: &Arena<'a>) -> Value<'a> {
+        Value::int(self as isize)
     }
 }
 
-impl<T: Into<Value>> From<Option<T>> for Value {
-    fn from(opt: Option<T>) -> Self {
-        match opt {
+impl<T: IntoOcamlRep> IntoOcamlRep for Option<T> {
+    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+        match self {
             None => Value::int(0),
             Some(val) => {
-                let mut block = Block::with_size(1);
-                block[0] = val.into();
-                block.into()
+                let mut block = arena.block_with_size(1);
+                block[0] = val.into_ocamlrep(arena);
+                block.build()
             }
         }
     }
 }
 
-impl<T: Into<Value>> From<Vec<T>> for Value {
-    fn from(v: Vec<T>) -> Self {
-        if v.len() == 0 {
+impl<T: IntoOcamlRep> IntoOcamlRep for Vec<T> {
+    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+        if self.len() == 0 {
             Value::int(0)
         } else {
-            let mut current_block = Block::with_size(2);
+            let mut current_block = arena.block_with_size(2);
+            current_block[1] = ().into_ocamlrep(arena);
 
-            let mut iter = v.into_iter();
+            let mut iter = self.into_iter();
             let first_val = iter.next().unwrap();
 
             for val in iter.rev() {
-                current_block[0] = val.into();
+                current_block[0] = val.into_ocamlrep(arena);
 
-                let mut new_block = Block::with_size(2);
-                new_block[1] = current_block.into();
+                let mut new_block = arena.block_with_size(2);
+                new_block[1] = current_block.build();
                 current_block = new_block;
             }
 
-            current_block[0] = first_val.into();
-            current_block.into()
+            current_block[0] = first_val.into_ocamlrep(arena);
+            current_block.build()
         }
     }
 }
 
-impl From<String> for Value {
-    fn from(s: String) -> Self {
-        s.as_str().into()
+impl IntoOcamlRep for String {
+    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+        self.as_str().into_ocamlrep(arena)
     }
 }
 
-impl From<&str> for Value {
-    fn from(s: &str) -> Self {
+impl IntoOcamlRep for &str {
+    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
         let bytes_in_word = mem::size_of::<usize>();
-        let blocks_length = 1 + (s.len() / bytes_in_word);
-        let padding: usize = bytes_in_word - 1 - (s.len() % bytes_in_word);
-        let mut block = Block::with_size_and_tag(blocks_length, STRING_TAG);
+        let blocks_length = 1 + (self.len() / bytes_in_word);
+        let padding: usize = bytes_in_word - 1 - (self.len() % bytes_in_word);
+        let mut block = arena.block_with_size_and_tag(blocks_length, STRING_TAG);
 
-        block[blocks_length - 1] = Value(padding << ((bytes_in_word - 1) * 8));
+        block[blocks_length - 1] = Value::bits(padding << ((bytes_in_word - 1) * 8));
 
-        let ptr: *mut u8 = unsafe { mem::transmute(block.0.as_ptr().offset(1)) };
-        let slice: &mut [u8] = unsafe { std::slice::from_raw_parts_mut(ptr, s.len()) };
-        slice.copy_from_slice(s.as_bytes());
+        let slice: &mut [u8] = unsafe {
+            let ptr: *mut u8 = mem::transmute(block.0.as_ptr().offset(1));
+            std::slice::from_raw_parts_mut(ptr, self.len())
+        };
+        slice.copy_from_slice(self.as_bytes());
 
-        block.into()
+        block.build()
     }
 }
 
-impl From<f64> for Value {
-    fn from(f: f64) -> Self {
-        let mut block = Block::with_size_and_tag(1, DOUBLE_TAG);
-        block[0] = Value(f.to_bits() as usize);
-        block.into()
+impl IntoOcamlRep for f64 {
+    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+        let mut block = arena.block_with_size_and_tag(1, DOUBLE_TAG);
+        block[0] = Value::bits(self.to_bits() as usize);
+        block.build()
     }
 }
 
-impl From<()> for Value {
-    fn from(_: ()) -> Self {
-        0isize.into()
+impl IntoOcamlRep for () {
+    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+        0isize.into_ocamlrep(arena)
     }
 }
 
-impl<T: Into<Value>> From<Box<T>> for Value {
-    fn from(b: Box<T>) -> Self {
-        (*b).into()
+impl<T: IntoOcamlRep> IntoOcamlRep for Box<T> {
+    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+        (*self).into_ocamlrep(arena)
     }
 }
 
-impl<T0, T1> From<(T0, T1)> for Value
+impl<T0, T1> IntoOcamlRep for (T0, T1)
 where
-    T0: Into<Value>,
-    T1: Into<Value>,
+    T0: IntoOcamlRep,
+    T1: IntoOcamlRep,
 {
-    fn from(x: (T0, T1)) -> Self {
-        let mut block = Block::with_size(2);
-        block[0] = x.0.into();
-        block[1] = x.1.into();
-        block.into()
+    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+        let mut block = arena.block_with_size(2);
+        block[0] = self.0.into_ocamlrep(arena);
+        block[1] = self.1.into_ocamlrep(arena);
+        block.build()
     }
 }
 
-impl<T0, T1, T2> From<(T0, T1, T2)> for Value
+impl<T0, T1, T2> IntoOcamlRep for (T0, T1, T2)
 where
-    T0: Into<Value>,
-    T1: Into<Value>,
-    T2: Into<Value>,
+    T0: IntoOcamlRep,
+    T1: IntoOcamlRep,
+    T2: IntoOcamlRep,
 {
-    fn from(x: (T0, T1, T2)) -> Self {
-        let mut block = Block::with_size(3);
-        block[0] = x.0.into();
-        block[1] = x.1.into();
-        block[2] = x.2.into();
-        block.into()
+    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+        let mut block = arena.block_with_size(3);
+        block[0] = self.0.into_ocamlrep(arena);
+        block[1] = self.1.into_ocamlrep(arena);
+        block[2] = self.2.into_ocamlrep(arena);
+        block.build()
     }
 }
 
-impl<T0, T1, T2, T3> From<(T0, T1, T2, T3)> for Value
+impl<T0, T1, T2, T3> IntoOcamlRep for (T0, T1, T2, T3)
 where
-    T0: Into<Value>,
-    T1: Into<Value>,
-    T2: Into<Value>,
-    T3: Into<Value>,
+    T0: IntoOcamlRep,
+    T1: IntoOcamlRep,
+    T2: IntoOcamlRep,
+    T3: IntoOcamlRep,
 {
-    fn from(x: (T0, T1, T2, T3)) -> Self {
-        let mut block = Block::with_size(4);
-        block[0] = x.0.into();
-        block[1] = x.1.into();
-        block[2] = x.2.into();
-        block[3] = x.3.into();
-        block.into()
+    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+        let mut block = arena.block_with_size(4);
+        block[0] = self.0.into_ocamlrep(arena);
+        block[1] = self.1.into_ocamlrep(arena);
+        block[2] = self.2.into_ocamlrep(arena);
+        block[3] = self.3.into_ocamlrep(arena);
+        block.build()
     }
 }
 
-impl<T0, T1, T2, T3, T4> From<(T0, T1, T2, T3, T4)> for Value
+impl<T0, T1, T2, T3, T4> IntoOcamlRep for (T0, T1, T2, T3, T4)
 where
-    T0: Into<Value>,
-    T1: Into<Value>,
-    T2: Into<Value>,
-    T3: Into<Value>,
-    T4: Into<Value>,
+    T0: IntoOcamlRep,
+    T1: IntoOcamlRep,
+    T2: IntoOcamlRep,
+    T3: IntoOcamlRep,
+    T4: IntoOcamlRep,
 {
-    fn from(x: (T0, T1, T2, T3, T4)) -> Self {
-        let mut block = Block::with_size(5);
-        block[0] = x.0.into();
-        block[1] = x.1.into();
-        block[2] = x.2.into();
-        block[3] = x.3.into();
-        block[4] = x.4.into();
-        block.into()
+    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+        let mut block = arena.block_with_size(5);
+        block[0] = self.0.into_ocamlrep(arena);
+        block[1] = self.1.into_ocamlrep(arena);
+        block[2] = self.2.into_ocamlrep(arena);
+        block[3] = self.3.into_ocamlrep(arena);
+        block[4] = self.4.into_ocamlrep(arena);
+        block.build()
     }
 }
 
-impl<T0, T1, T2, T3, T4, T5> From<(T0, T1, T2, T3, T4, T5)> for Value
+impl<T0, T1, T2, T3, T4, T5> IntoOcamlRep for (T0, T1, T2, T3, T4, T5)
 where
-    T0: Into<Value>,
-    T1: Into<Value>,
-    T2: Into<Value>,
-    T3: Into<Value>,
-    T4: Into<Value>,
-    T5: Into<Value>,
+    T0: IntoOcamlRep,
+    T1: IntoOcamlRep,
+    T2: IntoOcamlRep,
+    T3: IntoOcamlRep,
+    T4: IntoOcamlRep,
+    T5: IntoOcamlRep,
 {
-    fn from(x: (T0, T1, T2, T3, T4, T5)) -> Self {
-        let mut block = Block::with_size(6);
-        block[0] = x.0.into();
-        block[1] = x.1.into();
-        block[2] = x.2.into();
-        block[3] = x.3.into();
-        block[4] = x.4.into();
-        block[5] = x.5.into();
-        block.into()
+    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+        let mut block = arena.block_with_size(6);
+        block[0] = self.0.into_ocamlrep(arena);
+        block[1] = self.1.into_ocamlrep(arena);
+        block[2] = self.2.into_ocamlrep(arena);
+        block[3] = self.3.into_ocamlrep(arena);
+        block[4] = self.4.into_ocamlrep(arena);
+        block[5] = self.5.into_ocamlrep(arena);
+        block.build()
     }
 }
 
-impl<T0, T1, T2, T3, T4, T5, T6> From<(T0, T1, T2, T3, T4, T5, T6)> for Value
+impl<T0, T1, T2, T3, T4, T5, T6> IntoOcamlRep for (T0, T1, T2, T3, T4, T5, T6)
 where
-    T0: Into<Value>,
-    T1: Into<Value>,
-    T2: Into<Value>,
-    T3: Into<Value>,
-    T4: Into<Value>,
-    T5: Into<Value>,
-    T6: Into<Value>,
+    T0: IntoOcamlRep,
+    T1: IntoOcamlRep,
+    T2: IntoOcamlRep,
+    T3: IntoOcamlRep,
+    T4: IntoOcamlRep,
+    T5: IntoOcamlRep,
+    T6: IntoOcamlRep,
 {
-    fn from(x: (T0, T1, T2, T3, T4, T5, T6)) -> Self {
-        let mut block = Block::with_size(7);
-        block[0] = x.0.into();
-        block[1] = x.1.into();
-        block[2] = x.2.into();
-        block[3] = x.3.into();
-        block[4] = x.4.into();
-        block[5] = x.5.into();
-        block[6] = x.6.into();
-        block.into()
+    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+        let mut block = arena.block_with_size(7);
+        block[0] = self.0.into_ocamlrep(arena);
+        block[1] = self.1.into_ocamlrep(arena);
+        block[2] = self.2.into_ocamlrep(arena);
+        block[3] = self.3.into_ocamlrep(arena);
+        block[4] = self.4.into_ocamlrep(arena);
+        block[5] = self.5.into_ocamlrep(arena);
+        block[6] = self.6.into_ocamlrep(arena);
+        block.build()
     }
 }
 
-impl<T0, T1, T2, T3, T4, T5, T6, T7> From<(T0, T1, T2, T3, T4, T5, T6, T7)> for Value
+impl<T0, T1, T2, T3, T4, T5, T6, T7> IntoOcamlRep for (T0, T1, T2, T3, T4, T5, T6, T7)
 where
-    T0: Into<Value>,
-    T1: Into<Value>,
-    T2: Into<Value>,
-    T3: Into<Value>,
-    T4: Into<Value>,
-    T5: Into<Value>,
-    T6: Into<Value>,
-    T7: Into<Value>,
+    T0: IntoOcamlRep,
+    T1: IntoOcamlRep,
+    T2: IntoOcamlRep,
+    T3: IntoOcamlRep,
+    T4: IntoOcamlRep,
+    T5: IntoOcamlRep,
+    T6: IntoOcamlRep,
+    T7: IntoOcamlRep,
 {
-    fn from(x: (T0, T1, T2, T3, T4, T5, T6, T7)) -> Self {
-        let mut block = Block::with_size(8);
-        block[0] = x.0.into();
-        block[1] = x.1.into();
-        block[2] = x.2.into();
-        block[3] = x.3.into();
-        block[4] = x.4.into();
-        block[5] = x.5.into();
-        block[6] = x.6.into();
-        block[7] = x.7.into();
-        block.into()
+    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+        let mut block = arena.block_with_size(8);
+        block[0] = self.0.into_ocamlrep(arena);
+        block[1] = self.1.into_ocamlrep(arena);
+        block[2] = self.2.into_ocamlrep(arena);
+        block[3] = self.3.into_ocamlrep(arena);
+        block[4] = self.4.into_ocamlrep(arena);
+        block[5] = self.5.into_ocamlrep(arena);
+        block[6] = self.6.into_ocamlrep(arena);
+        block[7] = self.7.into_ocamlrep(arena);
+        block.build()
     }
 }

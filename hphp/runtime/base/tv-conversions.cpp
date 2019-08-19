@@ -882,6 +882,7 @@ namespace {
 void tagResultHackArr(const ArrayData* src, ArrayData* dst) {
   if (!RuntimeOption::EvalArrayProvenance) return;
   if (dst->hasProvenanceData()) return;
+  if (!dst->isRefCounted()) return;
   if (src) {
     arrprov::copyTag(src, dst);
   } else {

@@ -242,6 +242,7 @@ namespace {
 void tagResult(ArrayData* res, const ArrayData* adIn) {
   if (!RuntimeOption::EvalArrayProvenance) return;
   if (res->hasProvenanceData()) return;
+  if (!res->isRefCounted()) return;
   arrprov::copyTag(adIn, res);
 }
 
@@ -285,7 +286,8 @@ ArrayData* convKeysetToVecHelper(ArrayData* adIn) {
 ArrayData* convObjToVecHelper(ObjectData* obj) {
   auto a = castObjToVec(obj);
   assertx(a->isVecArray());
-  if (RuntimeOption::EvalArrayProvenance) {
+  if (RuntimeOption::EvalArrayProvenance &&
+      a->isRefCounted()) {
     arrprov::setTag(a, *arrprov::tagFromProgramCounter());
   }
   decRefObj(obj);
@@ -328,7 +330,8 @@ ArrayData* convKeysetToDictHelper(ArrayData* adIn) {
 ArrayData* convObjToDictHelper(ObjectData* obj) {
   auto a = castObjToDict(obj);
   assertx(a->isDict());
-  if (RuntimeOption::EvalArrayProvenance) {
+  if (RuntimeOption::EvalArrayProvenance &&
+      a->isRefCounted()) {
     arrprov::setTag(a, *arrprov::tagFromProgramCounter());
   }
   decRefObj(obj);

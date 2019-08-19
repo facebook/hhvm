@@ -7,6 +7,7 @@ pub mod file_pos_large;
 pub mod file_pos_small;
 pub mod i_map;
 pub mod i_set;
+pub mod infer_missing;
 pub mod local_id;
 pub mod map;
 pub mod pos;

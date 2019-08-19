@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c64ab953c46a436e2986714be6492c05>>
+// @generated SignedSource<<872d36c1ded9372f34a340431a1af994>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -279,7 +279,7 @@ pub type IsVariadic = bool;
 #[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
 pub struct FunParam<Ex, Fb, En, Hi> {
     pub annotation: Ex,
-    pub hint: Option<Hint>,
+    pub type_hint: TypeHint<Hi>,
     pub is_reference: IsReference,
     pub is_variadic: IsVariadic,
     pub pos: Pos,

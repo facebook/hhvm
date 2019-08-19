@@ -29,7 +29,20 @@ let module_blacklist =
     "utils";
     "core_kernel" ]
 
+(* HACK: These submodules are defined inline in another module. We don't convert
+   nested modules (I think it would be a bit of work to handle imports
+   properly), so we convert them manually and re-export them when we see their
+   OCaml definition. *)
+let nested_modules =
+  [("ast_defs", "ShapeMap"); ("global_options", "InferMissing")]
+
 let blacklisted = List.mem module_blacklist ~equal:String.equal
+
+let is_manually_converted_nested_module mod_name =
+  List.mem
+    nested_modules
+    (State.curr_module_name (), mod_name)
+    ~equal:(Tuple.T2.equal ~eq1:String.equal ~eq2:String.equal)
 
 let string_of_module_desc = function
   | Pmod_structure _ -> "Pmod_structure"
@@ -73,17 +86,19 @@ let structure_item si =
       log "Not including %s: it is blacklisted" mod_name
     else
       add_include mod_name
-  (* HACK: The ShapeMap module is defined inside ast_defs, but we don't convert
-     nested modules, so we convert it manually and re-export it here. *)
   | Pstr_module
       {
-        pmb_name = { txt = "ShapeMap"; _ };
+        pmb_name = { txt = mod_name; _ };
         pmb_expr = { pmod_desc = Pmod_structure _; _ };
         _;
       }
-    when State.curr_module_name () = "ast_defs" ->
-    log "Not converting submodule ShapeMap: importing crate::shape_map instead";
-    add_alias "shape_map" "shape_map"
+    when is_manually_converted_nested_module mod_name ->
+    let rust_mod_name = convert_module_name mod_name in
+    log
+      "Not converting submodule %s: importing crate::%s instead"
+      mod_name
+      rust_mod_name;
+    add_alias rust_mod_name rust_mod_name
   | Pstr_module
       { pmb_name = { txt = name; _ }; pmb_expr = { pmod_desc; _ }; _ } ->
     let kind = string_of_module_desc pmod_desc in

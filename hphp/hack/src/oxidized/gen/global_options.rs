@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<db95f044b0886a1904e674fca52bc151>>
+// @generated SignedSource<<5a577f7605e42d46e6f5381fed843381>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -14,6 +14,8 @@ use ocamlvalue_macro::Ocamlvalue;
 use crate::i_set;
 use crate::s_map;
 use crate::s_set;
+
+pub use crate::infer_missing;
 
 #[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
 pub struct GlobalOptions {
@@ -80,7 +82,7 @@ pub struct GlobalOptions {
     pub disable_linter_fixmes: bool,
     pub po_disallowed_decl_fixmes: i_set::ISet,
     pub po_allow_new_attribute_syntax: bool,
-    pub tco_global_inference: bool,
+    pub tco_infer_missing: infer_missing::InferMissing,
     pub tco_const_static_props: bool,
     pub po_disable_legacy_attribute_syntax: bool,
     pub tco_const_attribute: bool,

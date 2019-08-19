@@ -63,6 +63,12 @@ module Document_highlight = struct
   type result = Ide_api_types.range list
 end
 
+(* Handles "textDocument/signatureHelp" LSP messages *)
+module Signature_help = struct
+  type request = document_location
+  type result = Lsp.SignatureHelp.result
+end
+
 (* GADT for request/response types. See [ServerCommandTypes] for a discussion on
    using GADTs in this way. *)
 type _ t =
@@ -87,6 +93,9 @@ type _ t =
   | Type_definition:
     Type_definition.request ->
     Type_definition.result t
+  | Signature_help:
+    Signature_help.request ->
+    Signature_help.result t
 
 type notification =
   | Done_processing

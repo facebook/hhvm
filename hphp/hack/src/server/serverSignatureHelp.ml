@@ -82,7 +82,11 @@ let get_occurrence_info ast tast (line, char) occurrence =
   end
   >>| fun ft -> (occurrence, env, ft, def_opt)
 
-let go env (file, line, char) =
+let go
+    ~(env: ServerEnv.env)
+    ~(file: ServerCommandTypes.file_input)
+    ~(line: int)
+    ~(column: int): Lsp.SignatureHelp.result =
   let ServerEnv.{tcopt; _} = env in
   let tcopt = {
     tcopt with
@@ -96,7 +100,7 @@ let go env (file, line, char) =
   let ast = results.Full_fidelity_ast.ast in
   let ast = Ast_to_nast.convert ast in
   let tast = ServerIdeUtils.check_ast tcopt ast in
-  let offset = SourceText.position_to_offset source_text (line, char) in
+  let offset = SourceText.position_to_offset source_text (line, column) in
   get_positional_info (Full_fidelity_ast.PositionedSyntaxTree.root tree) offset
   >>= fun ((symbol_line, symbol_char), argument_idx) ->
   let results = IdentifySymbolService.go tast symbol_line symbol_char in

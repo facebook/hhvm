@@ -86,8 +86,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           (env, Some (loc.dbs_filename, loc.dbs_line, loc.dbs_column, loc.dbs_base_class))
         in
         r
-    | IDE_SIGNATURE_HELP (fn, line, char) ->
-        env, ServerSignatureHelp.go env (fn, line, char)
+    | IDE_SIGNATURE_HELP (file, line, column) ->
+        env, ServerSignatureHelp.go ~env ~file ~line ~column
     | AUTOCOMPLETE content ->
         let autocomplete_context = { AutocompleteTypes.
           is_manually_invoked = false;

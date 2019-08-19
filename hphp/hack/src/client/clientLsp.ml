@@ -1716,6 +1716,22 @@ let do_signatureHelp
   in
   rpc conn ref_unblocked_time command
 
+(* Serverless IDE version of signature help *)
+let do_signatureHelp_local
+    (ide_service: ClientIdeService.t)
+    (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
+    (params: SignatureHelp.params): SignatureHelp.result Lwt.t =
+  Hh_logger.log "SIGNATUREHELP: Beginning process";
+  let document_location = get_document_location editor_open_files params in
+  let%lwt result = ClientIdeService.rpc
+    ide_service (ClientIdeMessage.Signature_help document_location) in
+  match result with
+  | Ok signatures ->
+    Hh_logger.log "SIGNATUREHELP: Found results";
+    Lwt.return signatures
+  | Error error_message ->
+    Hh_logger.log "SIGNATUREHELP: Errored out: [%s]" error_message;
+    failwith (Printf.sprintf "Local highlight failed: %s" error_message)
 
 let patch_to_workspace_edit_change
   (patch: ServerRefactorTypes.patch)
@@ -2770,6 +2786,21 @@ let handle_event
     in
    result |> print_definition |> respond_jsonrpc ~powered_by:Serverless_ide c;
    Lwt.return_unit
+
+   (* Resolve documentation for a symbol: "Autocomplete Docblock!" *)
+   | (In_init { In_init_env.editor_open_files; _ }
+       | Lost_server { Lost_env.editor_open_files; _ }),
+       Client_message c
+     when env.use_serverless_ide
+       && c.method_ = "textDocument/signatureHelp" ->
+     let%lwt () = cancel_if_stale client c short_timeout in
+     let%lwt result = parse_textDocumentPositionParams c.params
+       |> do_signatureHelp_local ide_service editor_open_files
+     in
+     result
+     |> print_signatureHelp
+     |> respond_jsonrpc ~powered_by:Serverless_ide c;
+     Lwt.return_unit
 
   (* any request/notification if we're not yet ready *)
   | In_init ienv, Client_message c ->

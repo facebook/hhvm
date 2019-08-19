@@ -355,6 +355,20 @@ let handle_message: type a.
     ) in
     Lwt.return (state, Handle_message_result.Response results)
 
+  (* Signature help *)
+  | (Initialized { server_env; _ }, Signature_help document_location) ->
+    let (ctx, entry) =
+      make_context_from_document_location server_env document_location in
+    let results = Provider_utils.with_context ~ctx ~f:(fun () ->
+      ServerSignatureHelp.go
+        ~env:server_env
+        ~file:entry.Provider_context.file_input
+        ~line:document_location.line
+        ~column:document_location.column
+    ) in
+    Lwt.return (state, Handle_message_result.Response results)
+
+  (* Go to definition *)
   | (Initialized { server_env; _ }, Definition document_location) ->
     let (ctx, entry) =
       make_context_from_document_location server_env document_location in

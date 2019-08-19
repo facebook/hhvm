@@ -19,6 +19,7 @@ module SourceText = Full_fidelity_source_text
 module SyntaxError = Full_fidelity_syntax_error
 module MinimalSyntax = Full_fidelity_minimal_syntax
 module PositionedSyntax = Full_fidelity_positioned_syntax
+module EditablePositionedSyntax = Full_fidelity_editable_positioned_syntax
 module Env = Full_fidelity_parser_env
 
 let user =
@@ -33,6 +34,7 @@ type parser =
   | POSITIONED
   | COROUTINE
   | DECL_MODE
+  | PPL_REWRITER
 
 type mode =
   | RUST
@@ -53,6 +55,12 @@ type args = {
   dir: string option;
 }
 
+module type TreeBuilder_S = sig
+  type t
+
+  val make : env:Env.t -> SourceText.t -> t
+end
+
 module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
   module WithSmartConstructors
       (SC : SmartConstructors.SmartConstructors_S
@@ -62,177 +70,192 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
     module SyntaxTree_ = Full_fidelity_syntax_tree.WithSyntax (Syntax)
     module SyntaxTree = SyntaxTree_.WithSmartConstructors (SC)
 
-    let syntax_tree_into_parts tree =
-      let (mode, root, errors, state) =
-        SyntaxTree.(mode tree, root tree, errors tree, sc_state tree)
-      in
-      (mode, root, errors, state)
-
-    let to_json x =
-      Syntax.to_json ~with_value:true x |> Hh_json.json_to_string ~pretty:true
-
-    let print_full_fidelity_error source_text error =
-      let text =
-        SyntaxError.to_positioned_string
-          error
-          (SourceText.offset_to_position source_text)
-      in
-      Printf.printf "%s\n" text
-
-    let reachable x = Obj.(x |> repr |> reachable_words)
-
-    let mode_to_string = function
-      | None -> "None"
-      | Some mode -> FileInfo.string_of_mode mode
-
-    let total = ref 0
-
-    let correct = ref 0
-
-    let crashed = ref 0
-
-    (* not all parse modes are supposed to work with all test files *)
-
-    let test args ~ocaml_env ~rust_env file contents =
-      let source_text = SourceText.make file contents in
-      let path = Relative_path.to_absolute file in
-      let (ok_ocaml, from_ocaml) =
-        match args.mode with
-        | OCAML
-        | COMPARE ->
-          Printf.printf "CAML: %s\n" path;
-          (try (true, Some (SyntaxTree.make ~env:ocaml_env source_text))
-           with _ -> (false, None))
-        | RUST -> (true, None)
-      in
-      let (ok_rust, from_rust) =
-        match args.mode with
-        | RUST
-        | COMPARE ->
-          Printf.printf "RUST: %s\n" path;
-          flush stdout;
-
-          (* make sure OCaml output is shown before Rust output *)
-          (try (true, Some (SyntaxTree.make ~env:rust_env source_text))
-           with _ -> (false, None))
-        | OCAML -> (true, None)
-      in
-      flush stdout;
-
-      (* ensure that Rust output precedes the rest of OCaml output *)
-      let failed = ref false in
-      (match (from_rust, from_ocaml) with
-      | (Some from_rust, Some from_ocaml) ->
-        let ( mode_from_rust,
-              syntax_from_rust,
-              errors_from_rust,
-              state_from_rust ) =
-          syntax_tree_into_parts from_rust
+    module WithTreeBuilder
+        (TreeBuilder : TreeBuilder_S with type t = SyntaxTree.t) =
+    struct
+      let syntax_tree_into_parts tree =
+        let (mode, root, errors, state) =
+          SyntaxTree.(mode tree, root tree, errors tree, sc_state tree)
         in
-        let ( mode_from_ocaml,
-              syntax_from_ocaml,
-              errors_from_ocaml,
-              state_from_ocaml ) =
-          syntax_tree_into_parts from_ocaml
+        (mode, root, errors, state)
+
+      let to_json x =
+        Syntax.to_json ~with_value:true x
+        |> Hh_json.json_to_string ~pretty:true
+
+      let print_full_fidelity_error source_text error =
+        let text =
+          SyntaxError.to_positioned_string
+            error
+            (SourceText.offset_to_position source_text)
         in
-        let rust_reachable_words = reachable syntax_from_rust in
-        let ocaml_reachable_words = reachable syntax_from_ocaml in
-        if syntax_from_rust <> syntax_from_ocaml then (
-          let syntax_from_rust_as_json = to_json syntax_from_rust in
-          let syntax_from_ocaml_as_json = to_json syntax_from_ocaml in
-          let oc = Pervasives.open_out "/tmp/rust.json" in
-          Printf.fprintf oc "%s\n" syntax_from_rust_as_json;
-          close_out oc;
-          let oc = Pervasives.open_out "/tmp/ocaml.json" in
-          Printf.fprintf oc "%s\n" syntax_from_ocaml_as_json;
-          close_out oc;
+        Printf.printf "%s\n" text
 
-          if syntax_from_rust_as_json <> syntax_from_ocaml_as_json then (
-            Printf.printf "JSONs not equal: %s\n" path;
-            failed := true
-          ) else
-            Printf.printf "Structurally not equal: %s\n" path;
-          failed := not @@ args.check_json_equal_only
-        );
-        if state_from_rust <> state_from_ocaml then (
-          failed := true;
-          Printf.printf "States not equal: %s\n" path
-        );
-        if args.check_sizes && rust_reachable_words <> ocaml_reachable_words
-        then (
-          failed := true;
+      let reachable x = Obj.(x |> repr |> reachable_words)
+
+      let mode_to_string = function
+        | None -> "None"
+        | Some mode -> FileInfo.string_of_mode mode
+
+      let total = ref 0
+
+      let correct = ref 0
+
+      let crashed = ref 0
+
+      (* not all parse modes are supposed to work with all test files *)
+
+      let test args ~ocaml_env ~rust_env file contents =
+        let source_text = SourceText.make file contents in
+        let path = Relative_path.to_absolute file in
+        let (ok_ocaml, from_ocaml) =
+          match args.mode with
+          | OCAML
+          | COMPARE ->
+            Printf.printf "CAML: %s\n" path;
+            (try (true, Some (TreeBuilder.make ~env:ocaml_env source_text))
+             with _ -> (false, None))
+          | RUST -> (true, None)
+        in
+        let (ok_rust, from_rust) =
+          match args.mode with
+          | RUST
+          | COMPARE ->
+            Printf.printf "RUST: %s\n" path;
+            flush stdout;
+
+            (* make sure OCaml output is shown before Rust output *)
+            (try (true, Some (TreeBuilder.make ~env:rust_env source_text))
+             with _ -> (false, None))
+          | OCAML -> (true, None)
+        in
+        flush stdout;
+
+        (* ensure that Rust output precedes the rest of OCaml output *)
+        let failed = ref false in
+        (match (from_rust, from_ocaml) with
+        | (Some from_rust, Some from_ocaml) ->
+          let ( mode_from_rust,
+                syntax_from_rust,
+                errors_from_rust,
+                state_from_rust ) =
+            syntax_tree_into_parts from_rust
+          in
+          let ( mode_from_ocaml,
+                syntax_from_ocaml,
+                errors_from_ocaml,
+                state_from_ocaml ) =
+            syntax_tree_into_parts from_ocaml
+          in
+          let rust_reachable_words = reachable syntax_from_rust in
+          let ocaml_reachable_words = reachable syntax_from_ocaml in
+          if syntax_from_rust <> syntax_from_ocaml then (
+            let syntax_from_rust_as_json = to_json syntax_from_rust in
+            let syntax_from_ocaml_as_json = to_json syntax_from_ocaml in
+            let oc = Pervasives.open_out "/tmp/rust.json" in
+            Printf.fprintf oc "%s\n" syntax_from_rust_as_json;
+            close_out oc;
+            let oc = Pervasives.open_out "/tmp/ocaml.json" in
+            Printf.fprintf oc "%s\n" syntax_from_ocaml_as_json;
+            close_out oc;
+
+            if syntax_from_rust_as_json <> syntax_from_ocaml_as_json then (
+              Printf.printf "JSONs not equal: %s\n" path;
+              failed := true
+            ) else
+              Printf.printf "Structurally not equal: %s\n" path;
+            failed := not @@ args.check_json_equal_only
+          );
+          if state_from_rust <> state_from_ocaml then (
+            failed := true;
+            Printf.printf "States not equal: %s\n" path
+          );
+          if args.check_sizes && rust_reachable_words <> ocaml_reachable_words
+          then (
+            failed := true;
+            Printf.printf
+              "Sizes not equal: %s (%d vs %d)\n"
+              path
+              rust_reachable_words
+              ocaml_reachable_words
+          );
+          if mode_from_rust <> mode_from_ocaml then (
+            failed := true;
+            Printf.printf
+              "Modes not equal: %s (%s vs %s)\n"
+              path
+              (mode_to_string mode_from_ocaml)
+              (mode_to_string mode_from_rust)
+          );
+
+          (* Unlike other cases, errors make little sense when parse trees don't match *)
+          if (not !failed) && errors_from_rust <> errors_from_ocaml then (
+            failed := true;
+            Printf.printf
+              "Errors not equal: %s (counts: %d vs %d)\n"
+              path
+              (List.length errors_from_rust)
+              (List.length errors_from_ocaml);
+            Printf.printf "---OCaml errors---\n";
+            List.iter
+              ~f:(print_full_fidelity_error source_text)
+              errors_from_ocaml;
+            Printf.printf "---Rust erors---\n";
+            List.iter
+              ~f:(print_full_fidelity_error source_text)
+              errors_from_rust
+          )
+        | _ when ok_rust <> ok_ocaml ->
+          (* some parsers other than positioned fail on some inputs; report failure if comparing *)
+          failed := args.parser = POSITIONED || args.mode = COMPARE;
           Printf.printf
-            "Sizes not equal: %s (%d vs %d)\n"
+            "Either crashed: %s (%b vs %b)\n"
             path
-            rust_reachable_words
-            ocaml_reachable_words
-        );
-        if mode_from_rust <> mode_from_ocaml then (
-          failed := true;
+            (not ok_ocaml)
+            (not ok_rust)
+        | _ -> ());
+        flush stdout;
+
+        incr total;
+        if (not ok_ocaml) || not ok_rust then
+          incr crashed
+        else if not !failed then
+          incr correct
+        else
+          Printf.printf "FAILED %s\n" path;
+
+        let is_compare = args.mode = COMPARE in
+        if is_compare || !crashed <> 0 then
           Printf.printf
-            "Modes not equal: %s (%s vs %s)\n"
-            path
-            (mode_to_string mode_from_ocaml)
-            (mode_to_string mode_from_rust)
-        );
+            "%s/%d (crashed=%d)\n"
+            ( if is_compare then
+              string_of_int !correct
+            else
+              "?" )
+            !total
+            !crashed;
+        if !failed && not args.keep_going then exit 1
 
-        (* Unlike other cases, errors make little sense when parse trees don't match *)
-        if (not !failed) && errors_from_rust <> errors_from_ocaml then (
-          failed := true;
-          Printf.printf
-            "Errors not equal: %s (counts: %d vs %d)\n"
-            path
-            (List.length errors_from_rust)
-            (List.length errors_from_ocaml);
-          Printf.printf "---OCaml errors---\n";
-          List.iter
-            ~f:(print_full_fidelity_error source_text)
-            errors_from_ocaml;
-          Printf.printf "---Rust erors---\n";
-          List.iter ~f:(print_full_fidelity_error source_text) errors_from_rust
-        )
-      | _ when ok_rust <> ok_ocaml ->
-        (* some parsers other than positioned fail on some inputs; report failure if comparing *)
-        failed := args.parser = POSITIONED || args.mode = COMPARE;
-        Printf.printf
-          "Either crashed: %s (%b vs %b)\n"
-          path
-          (not ok_ocaml)
-          (not ok_rust)
-      | _ -> ());
-      flush stdout;
+      let test_multi args ~ocaml_env ~rust_env path =
+        (* Some typechecked files embed multiple files; they're invalid without a split *)
+        Relative_path.(create Dummy path)
+        |> Multifile.file_to_files
+        |> Relative_path.Map.iter ~f:(test args ~ocaml_env ~rust_env)
 
-      incr total;
-      if (not ok_ocaml) || not ok_rust then
-        incr crashed
-      else if not !failed then
-        incr correct
-      else
-        Printf.printf "FAILED %s\n" path;
+      let test_batch args ~ocaml_env ~rust_env paths =
+        List.iter paths ~f:(test_multi args ~ocaml_env ~rust_env)
 
-      let is_compare = args.mode = COMPARE in
-      if is_compare || !crashed <> 0 then
-        Printf.printf
-          "%s/%d (crashed=%d)\n"
-          ( if is_compare then
-            string_of_int !correct
-          else
-            "?" )
-          !total
-          !crashed;
-      if !failed && not args.keep_going then exit 1
+      (* WithTreeBuilder *)
+    end
 
-    let test_multi args ~ocaml_env ~rust_env path =
-      (* Some typechecked files embed multiple files; they're invalid without a split *)
-      Relative_path.(create Dummy path)
-      |> Multifile.file_to_files
-      |> Relative_path.Map.iter ~f:(test args ~ocaml_env ~rust_env)
+    include WithTreeBuilder (struct
+      type t = SyntaxTree.t
 
-    let test_batch args ~ocaml_env ~rust_env paths =
-      List.iter paths ~f:(test_multi args ~ocaml_env ~rust_env)
+      let make ~env source_text = SyntaxTree.make ~env source_text
+    end)
+
+    (* WithSmartConstructors *)
   end
-
-  (* WithSmartConstructors *)
 
   include WithSmartConstructors (SyntaxSmartConstructors.WithSyntax (Syntax))
 end
@@ -297,6 +320,7 @@ let parse_args () =
             parser := DECL_MODE;
             check_json_equal_only := true),
         "" );
+      ("--ppl-rewriter", Arg.Unit (fun () -> parser := PPL_REWRITER), "");
       ("--experimental", Arg.Set is_experimental, "");
       ("--codegen", Arg.Set codegen, "");
       ("--hhvm-compat-mode", Arg.Set hhvm_compat_mode, "");
@@ -333,6 +357,29 @@ module CoroutineTest = CoroutineTest_.WithSmartConstructors (CoroutineSC)
 module DeclModeTest_ = WithSyntax (PositionedSyntax)
 module DeclModeSC = DeclModeSmartConstructors.WithSyntax (PositionedSyntax)
 module DeclModeTest = DeclModeTest_.WithSmartConstructors (DeclModeSC)
+module EditablePositionedSyntaxSC =
+  SyntaxSmartConstructors.WithSyntax (EditablePositionedSyntax)
+module PPLRewriterTest__ = WithSyntax (EditablePositionedSyntax)
+module PPLRewriterTest_ =
+  PPLRewriterTest__.WithSmartConstructors (EditablePositionedSyntaxSC)
+
+module PPLRewriterTest = PPLRewriterTest_.WithTreeBuilder (struct
+  module EditableSyntaxTree = PPLRewriterTest_.SyntaxTree
+
+  type t = EditableSyntaxTree.t
+
+  let make ~env source_text =
+    let root =
+      if Env.rust env then
+        Ppl_class_rewriter_ffi.parse_and_rewrite_ppl_classes source_text
+      else
+        PositionedTest.SyntaxTree.(make source_text |> root)
+        |> EditablePositionedSyntax.from_positioned_syntax
+        |> Ppl_class_rewriter.rewrite_ppl_classes
+    in
+    (* We don't care about errors / mode / state here *)
+    EditableSyntaxTree.build source_text root [] None ()
+end)
 
 (*
 Tool comparing outputs of Rust and OCaml parsers. Example usage:
@@ -367,6 +414,7 @@ let () =
     | POSITIONED -> PositionedTest.test_batch args ~ocaml_env ~rust_env
     | COROUTINE -> CoroutineTest.test_batch args ~ocaml_env ~rust_env
     | DECL_MODE -> DeclModeTest.test_batch args ~ocaml_env ~rust_env
+    | PPL_REWRITER -> PPLRewriterTest.test_batch args ~ocaml_env ~rust_env
   in
   let (user, runs, _mem) =
     Profile.profile_longer_than (fun () -> f files) ~retry:false 0.

@@ -1,0 +1,3 @@
+--coercion-from-dynamic
+--like-types
+--simple-pessimize 1.0

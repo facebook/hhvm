@@ -233,17 +233,21 @@ let pessimize_type_simple env (ty: decl ty) =
   | _ when is_enforceable env ty -> ty
   | _ -> wrap_like ty
 
-let compute_enforced_ty_simple env (ety: decl possibly_enforced_ty) =
+let compute_enforced_and_pessimize_ty_simple env (ety: decl possibly_enforced_ty) =
   let { et_type; _ } = ety in
   let et_enforced = is_enforceable env et_type in
-  { ety with et_enforced }
+  let et_type = 
+    if not et_enforced 
+    then pessimize_type_simple env et_type 
+    else et_type in
+  { et_type; et_enforced }
 
-let compute_enforced_fun_type_simple env (ft: decl fun_type) =
+let compute_enforced_and_pessimize_fun_type_simple env (ft: decl fun_type) =
   let { ft_params; ft_ret; _ } = ft in
   let ft_params = List.map ~f:(fun fp ->
     let { fp_type; _ } = fp in
-    let fp_type = compute_enforced_ty_simple env fp_type in
+    let fp_type = compute_enforced_and_pessimize_ty_simple env fp_type in
     { fp with fp_type }
   ) ft_params in
-  let ft_ret = compute_enforced_ty_simple env ft_ret in
+  let ft_ret = compute_enforced_and_pessimize_ty_simple env ft_ret in
   { ft with ft_params; ft_ret }

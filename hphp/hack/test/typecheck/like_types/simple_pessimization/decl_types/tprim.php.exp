@@ -1,0 +1,15 @@
+File "tprim.php", line 5, characters 3-13:
+  null
+File "tprim.php", line 9, characters 3-13:
+  int
+File "tprim.php", line 13, characters 3-13:
+  bool
+File "tprim.php", line 17, characters 3-13:
+  string
+File "tprim.php", line 21, characters 3-13:
+  resource
+File "tprim.php", line 25, characters 3-13:
+  num
+File "tprim.php", line 29, characters 3-13:
+  arraykey
+No errors

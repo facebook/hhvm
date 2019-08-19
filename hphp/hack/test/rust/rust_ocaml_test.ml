@@ -50,6 +50,7 @@ type args = {
   codegen: bool;
   check_sizes: bool;
   check_json_equal_only: bool;
+  check_printed_tree: bool;
   keep_going: bool;
   filter: string;
   dir: string option;
@@ -149,6 +150,26 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
           in
           let rust_reachable_words = reachable syntax_from_rust in
           let ocaml_reachable_words = reachable syntax_from_ocaml in
+          ( if args.check_printed_tree then
+            match
+              Syntax.
+                (extract_text syntax_from_ocaml, extract_text syntax_from_rust)
+            with
+            | (Some text_from_ocaml, Some text_from_rust)
+              when text_from_ocaml <> text_from_rust ->
+              let oc = Pervasives.open_out "/tmp/rust.php" in
+              Printf.fprintf oc "%s\n" text_from_rust;
+              close_out oc;
+              let oc = Pervasives.open_out "/tmp/ocaml.php" in
+              Printf.fprintf oc "%s\n" text_from_ocaml;
+              close_out oc;
+              Printf.printf "Printed tree not equal: %s\n" path;
+              failed := true
+            | (Some _, Some _) -> () (* equal *)
+            | _ ->
+              Printf.printf
+                "Tree to source transformation is not supported for this syntax type\n";
+              failed := true );
           if syntax_from_rust <> syntax_from_ocaml then (
             let syntax_from_rust_as_json = to_json syntax_from_rust in
             let syntax_from_ocaml_as_json = to_json syntax_from_ocaml in
@@ -306,6 +327,7 @@ let parse_args () =
   let php5_compat_mode = ref false in
   let check_sizes = ref false in
   let check_json_equal_only = ref false in
+  let check_printed_tree = ref false in
   let keep_going = ref false in
   let filter = ref "" in
   let dir = ref None in
@@ -327,6 +349,7 @@ let parse_args () =
       ("--php5-compat-mode", Arg.Set php5_compat_mode, "");
       ("--check-sizes", Arg.Set check_sizes, "");
       ("--check-json-equal-only", Arg.Set check_json_equal_only, "");
+      ("--check-printed-tree", Arg.Set check_printed_tree, "");
       ("--keep-going", Arg.Set keep_going, "");
       ("--filter", Arg.String (fun s -> filter := s), "");
       ("--dir", Arg.String (fun s -> dir := Some s), "");
@@ -344,6 +367,7 @@ let parse_args () =
     php5_compat_mode = !php5_compat_mode;
     check_sizes = !check_sizes;
     check_json_equal_only = !check_json_equal_only;
+    check_printed_tree = !check_printed_tree;
     keep_going = !keep_going;
     filter = !filter;
     dir = !dir;

@@ -71,6 +71,35 @@ let get_class (class_name : class_key) : class_decl option =
     let result : class_decl option = Obj.obj result in
     result
 
+let convert_class_elt_to_fun_decl class_elt_opt : fun_decl option =
+  match class_elt_opt with
+  | Some { Typing_defs.ce_type = (lazy (_, Typing_defs.Tfun ft)); _ } ->
+    Some ft
+  | _ -> None
+
+let get_class_constructor (class_name : class_key) : fun_decl option =
+  match get_class class_name with
+  | None -> None
+  | Some cls ->
+    let (class_elt_option, _) = Typing_classes_heap.Api.construct cls in
+    convert_class_elt_to_fun_decl class_elt_option
+
+let get_class_method (class_name : class_key) (method_name : fun_key) :
+    fun_decl option =
+  match get_class class_name with
+  | None -> None
+  | Some cls ->
+    let meth = Class.get_method cls method_name in
+    convert_class_elt_to_fun_decl meth
+
+let get_static_method (class_name : class_key) (method_name : fun_key) :
+    fun_decl option =
+  match get_class class_name with
+  | None -> None
+  | Some cls ->
+    let smeth = Class.get_smethod cls method_name in
+    convert_class_elt_to_fun_decl smeth
+
 let get_type_id_filename x expected_kind =
   match Naming_table.Types.get_pos x with
   | Some (pos, kind) when kind = expected_kind ->

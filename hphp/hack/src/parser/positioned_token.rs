@@ -133,6 +133,14 @@ impl PositionedToken {
         self.start_offset() + w
     }
 
+    pub fn leading_text<'a>(&self, source_text: &SourceText<'a>) -> &'a [u8] {
+        source_text.sub(self.leading_start_offset().unwrap(), self.leading_width())
+    }
+
+    pub fn trailing_text<'a>(&self, source_text: &SourceText<'a>) -> &'a [u8] {
+        source_text.sub(self.end_offset() + 1, self.trailing_width())
+    }
+
     // Similar convention to calling Rc::clone(x) instead of x.clone() to make it more explicit
     // that we are only cloning the reference, not the value
     pub fn clone_rc(x: &Self) -> Self {

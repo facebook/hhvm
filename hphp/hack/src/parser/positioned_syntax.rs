@@ -56,6 +56,22 @@ impl PositionedValue {
         }
     }
 
+    fn leading_width(&self) -> usize {
+        use PositionedValue::*;
+        match self {
+            TokenValue(t) | TokenSpan { left: t, .. } => t.leading_width(),
+            Missing { .. } => 0,
+        }
+    }
+
+    fn trailing_width(&self) -> usize {
+        use PositionedValue::*;
+        match self {
+            TokenValue(t) | TokenSpan { right: t, .. } => t.trailing_width(),
+            Missing { .. } => 0,
+        }
+    }
+
     fn value_from_outer_children(first: &Self, last: &Self) -> Self {
         use PositionedValue::*;
         match (first, last) {
@@ -213,3 +229,28 @@ impl SyntaxValueType<PositionedToken> for PositionedValue {
 }
 
 pub type PositionedSyntax = Syntax<PositionedToken, PositionedValue>;
+
+pub trait PositionedSyntaxTrait {
+    fn leading_start_offset(&self) -> usize;
+    fn leading_width(&self) -> usize;
+    fn width(&self) -> usize;
+    fn trailing_width(&self) -> usize;
+}
+
+impl PositionedSyntaxTrait for PositionedSyntax {
+    fn leading_start_offset(&self) -> usize {
+        self.value.start_offset()
+    }
+
+    fn leading_width(&self) -> usize {
+        self.value.leading_width()
+    }
+
+    fn width(&self) -> usize {
+        self.value.width()
+    }
+
+    fn trailing_width(&self) -> usize {
+        self.value.trailing_width()
+    }
+}

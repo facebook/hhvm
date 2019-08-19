@@ -7,7 +7,7 @@
 use crate::lexable_trivia::LexableTrivia;
 use crate::token_kind::TokenKind;
 
-pub trait LexableToken: Clone {
+pub trait LexableToken<'a>: Clone {
     type Trivia: LexableTrivia;
     fn make(
         kind: TokenKind,

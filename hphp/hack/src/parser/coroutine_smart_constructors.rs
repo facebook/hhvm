@@ -88,9 +88,9 @@ where
     }
 }
 
-fn is_coroutine<S, T>(r: &S) -> bool
+fn is_coroutine<'a, S, T>(r: &S) -> bool
 where
-    S: SyntaxType<T>,
+    S: SyntaxType<'a, T>,
     S::Value: SyntaxValueWithKind,
 {
     let value = r.value();
@@ -103,7 +103,7 @@ where
 impl<'a, S, T> SyntaxSmartConstructors<'a, S, T> for CoroutineSmartConstructors<'a, S, T>
 where
     T: StateType<'a, S> + CoroutineStateType,
-    S: SyntaxType<T>,
+    S: SyntaxType<'a, T>,
     S::Value: SyntaxValueWithKind,
 {
     fn new(env: &ParserEnv, src: &SourceText<'a>) -> Self {

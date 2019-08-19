@@ -30,8 +30,8 @@ struct LexerPostSnapshot {
     errors: Vec<SyntaxError>,
 }
 
-impl<'a, Token: LexableToken> PartialEq<Lexer<'a, Token>> for LexerPreSnapshot {
-    fn eq(&self, other: &Lexer<Token>) -> bool {
+impl<'a, Token: LexableToken<'a>> PartialEq<Lexer<'a, Token>> for LexerPreSnapshot {
+    fn eq(&self, other: &Lexer<'a, Token>) -> bool {
         self.start == other.start && self.offset == other.offset && self.in_type == other.in_type
     }
 }
@@ -62,7 +62,7 @@ prove no new error added. Actually it is observed that new errors are added betw
 struct LexerCache<Token>(LexerPreSnapshot, Token, LexerPostSnapshot);
 
 #[derive(Debug, Clone)]
-pub struct Lexer<'a, Token: LexableToken> {
+pub struct Lexer<'a, Token: LexableToken<'a>> {
     source: SourceText<'a>,
     start: usize,
     offset: usize,
@@ -86,7 +86,7 @@ pub enum KwSet {
     NoKeywords,
 }
 
-impl<'a, Token: LexableToken> Lexer<'a, Token> {
+impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
     fn to_lexer_pre_snapshot(&self) -> LexerPreSnapshot {
         LexerPreSnapshot {
             start: self.start,
@@ -120,7 +120,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         Self::make_at(source, is_experimental_mode, 0)
     }
 
-    fn continue_from(&mut self, l: Lexer<Token>) {
+    fn continue_from(&mut self, l: Lexer<'a, Token>) {
         self.start = l.start;
         self.offset = l.offset;
         self.errors = l.errors

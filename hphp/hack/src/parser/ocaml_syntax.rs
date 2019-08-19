@@ -45,7 +45,7 @@ where
     }
 }
 
-impl<V, C> SyntaxTypeBase<C> for OcamlSyntax<V>
+impl<V, C> SyntaxTypeBase<'_, C> for OcamlSyntax<V>
 where
     C: Context,
     V: SyntaxValueType<PositionedToken> + ToOcaml,

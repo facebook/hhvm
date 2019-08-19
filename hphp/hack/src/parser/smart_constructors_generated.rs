@@ -23,7 +23,7 @@ use parser_core_types::{
 use crate::parser_env::ParserEnv;
 
 pub trait SmartConstructors<'src, State>: Clone {
-    type Token: LexableToken;
+    type Token: LexableToken<'src>;
     type R;
 
     fn new(env: &ParserEnv, src: &SourceText<'src>) -> Self;

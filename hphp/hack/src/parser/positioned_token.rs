@@ -33,7 +33,7 @@ pub struct PositionedTokenImpl {
 #[derive(Debug, Clone)]
 pub struct PositionedToken(pub Rc<PositionedTokenImpl>);
 
-impl LexableToken for PositionedToken {
+impl<'a> LexableToken<'a> for PositionedToken {
     type Trivia = PositionedTrivia;
 
     fn make(

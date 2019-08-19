@@ -187,18 +187,20 @@ where
 
     fn next_token_with_tokenizer(
         &mut self,
-        tokenizer: &dyn Fn(&mut Lexer<S::Token>) -> S::Token,
+        tokenizer: &dyn Fn(&mut Lexer<'a, S::Token>) -> S::Token,
     ) -> S::Token {
         let token = tokenizer(self.lexer_mut());
         if !self.skipped_tokens().is_empty() {
             let mut leading = vec![];
             for t in self.skipped_tokens().iter() {
                 leading.extend(t.leading().iter().rev().cloned());
-                leading.push(<S::Token as LexableToken>::Trivia::make_extra_token_error(
-                    self.lexer().source(),
-                    self.lexer().start(),
-                    t.width(),
-                ));
+                leading.push(
+                    <S::Token as LexableToken<'a>>::Trivia::make_extra_token_error(
+                        self.lexer().source(),
+                        self.lexer().start(),
+                        t.width(),
+                    ),
+                );
                 leading.extend(t.trailing().iter().rev().cloned());
             }
             leading.extend(token.leading().to_vec());
@@ -294,7 +296,9 @@ where
     }
 
     fn assert_xhp_body_token(&mut self, kind: TokenKind) -> S::R {
-        self.assert_token_with_tokenizer(kind, &|x: &mut Lexer<S::Token>| x.next_xhp_body_token())
+        self.assert_token_with_tokenizer(kind, &|x: &mut Lexer<'a, S::Token>| {
+            x.next_xhp_body_token()
+        })
     }
 
     fn peek_token_with_lookahead(&self, lookahead: usize) -> S::Token {
@@ -331,7 +335,7 @@ where
     fn assert_token_with_tokenizer(
         &mut self,
         kind: TokenKind,
-        tokenizer: &dyn Fn(&mut Lexer<S::Token>) -> S::Token,
+        tokenizer: &dyn Fn(&mut Lexer<'a, S::Token>) -> S::Token,
     ) -> S::R {
         let token = self.next_token_with_tokenizer(tokenizer);
         if token.kind() != kind {

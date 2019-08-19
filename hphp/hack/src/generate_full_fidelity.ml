@@ -514,16 +514,16 @@ use crate::lexable_token::LexableToken;
 use crate::syntax::*;
 use crate::syntax_kind::SyntaxKind;
 
-impl<T, V, C> SyntaxType<C> for Syntax<T, V>
+impl<'src, T, V, C> SyntaxType<'src, C> for Syntax<T, V>
 where
-    T: LexableToken,
+    T: LexableToken<'src>,
     V: SyntaxValueType<T>,
 {
 SYNTAX_CONSTRUCTORS }
 
-impl<T, V> Syntax<T, V>
+impl<'src, T, V> Syntax<T, V>
 where
-    T: LexableToken,
+    T: LexableToken<'src>,
 {
     pub fn fold_over_children<'a, U>(
         f: &dyn Fn(&'a Self, U) -> U,
@@ -615,7 +615,7 @@ module GenerateFFRustSyntaxType = struct
   let full_fidelity_syntax_template = make_header CStyle "" ^ "
 use crate::syntax::*;
 
-pub trait SyntaxType<C>: SyntaxTypeBase<C>
+pub trait SyntaxType<'a, C>: SyntaxTypeBase<'a, C>
 {
 SYNTAX_CONSTRUCTORS
 }
@@ -827,7 +827,7 @@ use parser_core_types::{
 use crate::parser_env::ParserEnv;
 
 pub trait SmartConstructors<'src, State>: Clone {
-    type Token: LexableToken;
+    type Token: LexableToken<'src>;
     type R;
 
     fn new(env: &ParserEnv, src: &SourceText<'src>) -> Self;
@@ -1091,9 +1091,9 @@ use crate::syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
 impl<'src, S, T, Token, Value> SmartConstructors<'src, T>
     for CoroutineSmartConstructors<'src, S, T>
 where
-    Token: LexableToken,
+    Token: LexableToken<'src>,
     Value: SyntaxValueType<Token> + SyntaxValueWithKind,
-    S: SyntaxType<T, Token=Token, Value=Value>,
+    S: SyntaxType<'src, T, Token=Token, Value=Value>,
     T: StateType<'src, S> + CoroutineStateType,
 {
     type Token = Token;
@@ -1397,7 +1397,7 @@ use crate::parser_env::ParserEnv;
 use crate::smart_constructors::{NoState, SmartConstructors};
 use crate::syntax_smart_constructors::StateType;
 
-pub trait SyntaxSmartConstructors<'src, S: SyntaxType<State>, State = NoState>:
+pub trait SyntaxSmartConstructors<'src, S: SyntaxType<'src, State>, State = NoState>:
     SmartConstructors<'src, State, R=S, Token=S::Token>
 where
     State: StateType<'src, S>,
@@ -1474,7 +1474,7 @@ use parser::syntax_kind::SyntaxKind;
 use parser::syntax::{SyntaxType, SyntaxValueType};
 use parser::positioned_token::PositionedToken;
 
-impl<V, C> SyntaxType<C> for OcamlSyntax<V>
+impl<V, C> SyntaxType<_, C> for OcamlSyntax<V>
 where
     C: Context,
     V: SyntaxValueType<PositionedToken> + ToOcaml,
@@ -1520,7 +1520,7 @@ impl<'src, Token, Value>
 SmartConstructors<'src, State<'src, Syntax<Token, Value>>>
     for DeclModeSmartConstructors<'src, Syntax<Token, Value>, Token, Value>
 where
-    Token: LexableToken,
+    Token: LexableToken<'src>,
     Value: SyntaxValueType<Token>,
 {
     type Token = Token;

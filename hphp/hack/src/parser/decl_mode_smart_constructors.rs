@@ -87,7 +87,7 @@ impl<'a, Token, Value>
     SyntaxSmartConstructors<'a, Syntax<Token, Value>, State<'a, Syntax<Token, Value>>>
     for DeclModeSmartConstructors<'a, Syntax<Token, Value>, Token, Value>
 where
-    Token: LexableToken,
+    Token: LexableToken<'a>,
     Value: SyntaxValueType<Token>,
 {
     fn new(env: &ParserEnv, src: &SourceText<'a>) -> Self {
@@ -195,13 +195,13 @@ where
     }
 }
 
-fn replace_body<Token, Value>(
+fn replace_body<'a, Token, Value>(
     st: &State<Syntax<Token, Value>>,
     body: Syntax<Token, Value>,
     saw_yield: bool,
 ) -> Syntax<Token, Value>
 where
-    Token: LexableToken,
+    Token: LexableToken<'a>,
     Value: SyntaxValueType<Token>,
 {
     match body.syntax {

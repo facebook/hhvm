@@ -136,9 +136,9 @@ impl ToOcaml for MinimalValue {
     }
 }
 
-impl<Token, SyntaxValue> ToOcaml for Syntax<Token, SyntaxValue>
+impl<'a, Token, SyntaxValue> ToOcaml for Syntax<Token, SyntaxValue>
 where
-    Token: LexableToken + ToOcaml,
+    Token: LexableToken<'a> + ToOcaml,
     SyntaxValue: SyntaxValueType<Token> + ToOcaml,
 {
     unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {

@@ -16,7 +16,7 @@ pub struct MinimalToken {
     pub trailing: Vec<MinimalTrivia>,
 }
 
-impl LexableToken for MinimalToken {
+impl<'a> LexableToken<'a> for MinimalToken {
     type Trivia = MinimalTrivia;
 
     fn kind(&self) -> TokenKind {

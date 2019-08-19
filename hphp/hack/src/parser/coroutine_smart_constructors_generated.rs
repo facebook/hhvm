@@ -29,9 +29,9 @@ use crate::syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
 impl<'src, S, T, Token, Value> SmartConstructors<'src, T>
     for CoroutineSmartConstructors<'src, S, T>
 where
-    Token: LexableToken,
+    Token: LexableToken<'src>,
     Value: SyntaxValueType<Token> + SyntaxValueWithKind,
-    S: SyntaxType<T, Token=Token, Value=Value>,
+    S: SyntaxType<'src, T, Token=Token, Value=Value>,
     T: StateType<'src, S> + CoroutineStateType,
 {
     type Token = Token;

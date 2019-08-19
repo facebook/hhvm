@@ -24,7 +24,7 @@ use crate::parser_env::ParserEnv;
 use crate::smart_constructors::{NoState, SmartConstructors};
 use crate::syntax_smart_constructors::StateType;
 
-pub trait SyntaxSmartConstructors<'src, S: SyntaxType<State>, State = NoState>:
+pub trait SyntaxSmartConstructors<'src, S: SyntaxType<'src, State>, State = NoState>:
     SmartConstructors<'src, State, R=S, Token=S::Token>
 where
     State: StateType<'src, S>,

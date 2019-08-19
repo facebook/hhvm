@@ -1278,6 +1278,7 @@ public:
   static int DebuggerSignalTimeout;
   static std::string DebuggerAuthTokenScriptBin;
   static std::string DebuggerSessionAuthScriptBin;
+  static bool ForceDebuggerBpToInterp;
 
   // Mail options
   static std::string SendmailPath;

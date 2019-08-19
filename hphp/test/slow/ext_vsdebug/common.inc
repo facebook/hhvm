@@ -258,6 +258,7 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = []) 
     $cmd = vec[
       getHhvmPath(),
       '-d', 'hhvm.hack.lang.look_for_typechecker=0',
+      '-d', 'hhvm.debugger.force_debugger_bp_to_interp=true',
       '--mode', 'vsdebug',
       '--vsDebugPort', (string) $port,
       $scriptPath,
@@ -268,6 +269,7 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = []) 
     $cmd = vec[
       getHhvmPath(),
       '-d', 'hhvm.hack.lang.look_for_typechecker=0',
+      '-d', 'hhvm.debugger.force_debugger_bp_to_interp=true',
       '--mode', 'vsdebug',
       '--vsDebugDomainSocketPath', $sockfile,
       $scriptPath,

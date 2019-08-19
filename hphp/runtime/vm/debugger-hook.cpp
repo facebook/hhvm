@@ -487,7 +487,7 @@ void phpDebuggerNext() {
 void phpAddBreakPoint(const Unit* unit, Offset offset) {
   PC pc = unit->at(offset);
   getBreakPointFilter()->addPC(pc);
-  if (RuntimeOption::EvalJit) {
+  if (RuntimeOption::EvalJit && !RuntimeOption::ForceDebuggerBpToInterp) {
     auto const func = unit->getFunc(offset);
     always_assert(func);
     if (jit::addDbgBLFunc(func)) {
@@ -518,7 +518,7 @@ void phpAddBreakPointFuncEntry(const Func* f) {
   RID().m_callBreakPointFilter.addPC(pc);
 
   // Blacklist the location
-  if (RuntimeOption::EvalJit) {
+  if (RuntimeOption::EvalJit && !RuntimeOption::ForceDebuggerBpToInterp) {
     if (jit::addDbgBLFunc(f)) {
       // if a new entry is added in blacklist
       if (!jit::tc::addDbgGuards(f)) {
@@ -543,7 +543,8 @@ void phpAddBreakPointFuncExit(const Func* f) {
     RID().m_retBreakPointFilter.addPC(pc);
 
     // Blacklist the location
-    if (RuntimeOption::EvalJit && jit::addDbgBLFunc(f)) {
+    if (RuntimeOption::EvalJit && !RuntimeOption::ForceDebuggerBpToInterp &&
+        jit::addDbgBLFunc(f)) {
       if (!jit::tc::addDbgGuards(f)) {
         Logger::Warning("Failed to set breakpoints in Jitted code");
       }

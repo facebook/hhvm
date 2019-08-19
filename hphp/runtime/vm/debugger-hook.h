@@ -20,7 +20,9 @@
 #include <functional>
 
 #include "hphp/runtime/base/request-info.h"
+#include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/surprise-flags.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/unit.h"  // OffsetRangeVec
@@ -44,6 +46,13 @@ struct ObjectData;
 inline bool isDebuggerAttached(RequestInfo* ti = nullptr) {
   ti = (ti != nullptr) ? ti : &RI();
   return ti->m_reqInjectionData.getDebuggerAttached();
+}
+
+inline bool requestHasBreakpoints(RequestInjectionData& rid) {
+  return !rid.m_breakPointFilter.isNull() ||
+         !rid.m_lineBreakPointFilter.isNull() ||
+         !rid.m_callBreakPointFilter.isNull() ||
+         !rid.m_retBreakPointFilter.isNull();
 }
 
 // Executes the passed code only if there is a debugger attached to the current
@@ -110,6 +119,14 @@ struct DebuggerHook {
 
       s_numAttached++;
       ti->m_reqInjectionData.setDebuggerAttached(true);
+      if (RuntimeOption::ForceDebuggerBpToInterp &&
+          (requestHasBreakpoints(ti->m_reqInjectionData) ||
+           (!RuntimeOption::ServerExecutionMode() || is_cli_mode()))) {
+        ti->m_reqInjectionData.setJittingDisabled(true);
+        rl_typeProfileLocals->forceInterpret = true;
+        ti->m_reqInjectionData.updateJit();
+      }
+
     }
 
     // Event hooks need to be enabled to receive function entry and exit events.

@@ -7,6 +7,25 @@
  *
  *)
 
+ module InferMissing = struct
+   type t =
+     | Deactivated
+     | Infer_return
+     | Infer_params
+     [@@deriving show]
+
+   let can_infer_return t = t = Infer_return
+   let can_infer_params t = t = Infer_params
+   let is_on t = t <> Deactivated
+
+   let from_string str = match str with
+    | "return" -> Infer_return
+    | "params" -> Infer_params
+    | _ -> Deactivated
+   let from_string_opt opt =
+    from_string @@ match opt with | None -> "" | Some s -> s
+ end
+
 type t = {
   tco_safe_array : bool;
   tco_safe_vector_array : bool;
@@ -71,7 +90,7 @@ type t = {
   disable_linter_fixmes: bool;
   po_disallowed_decl_fixmes: ISet.t;
   po_allow_new_attribute_syntax : bool;
-  tco_global_inference : bool;
+  tco_infer_missing : InferMissing.t;
   tco_const_static_props : bool;
   po_disable_legacy_attribute_syntax : bool;
   tco_const_attribute : bool;
@@ -225,7 +244,7 @@ let default = {
   disable_linter_fixmes = false;
   po_disallowed_decl_fixmes = ISet.of_list [];
   po_allow_new_attribute_syntax = false;
-  tco_global_inference = false;
+  tco_infer_missing = InferMissing.Deactivated;
   tco_const_static_props = false;
   po_disable_legacy_attribute_syntax = false;
   tco_const_attribute = false;
@@ -298,7 +317,7 @@ let make
   ?(disable_linter_fixmes = default.disable_linter_fixmes)
   ?(po_disallowed_decl_fixmes = default.po_disallowed_decl_fixmes)
   ?(po_allow_new_attribute_syntax = default.po_allow_new_attribute_syntax)
-  ?(tco_global_inference = default.tco_global_inference)
+  ?(tco_infer_missing = default.tco_infer_missing)
   ?(tco_const_static_props = default.tco_const_static_props)
   ?(po_disable_legacy_attribute_syntax = default.po_disable_legacy_attribute_syntax)
   ?(tco_const_attribute = default.tco_const_attribute)
@@ -371,7 +390,7 @@ let make
   disable_linter_fixmes;
   po_disallowed_decl_fixmes;
   po_allow_new_attribute_syntax;
-  tco_global_inference;
+  tco_infer_missing;
   tco_const_static_props;
   po_disable_legacy_attribute_syntax;
   tco_const_attribute;
@@ -471,7 +490,7 @@ let po_disallowed_decl_fixmes t = t.po_disallowed_decl_fixmes
 
 let po_allow_new_attribute_syntax t = t.po_allow_new_attribute_syntax
 
-let tco_global_inference t = t.tco_global_inference
+let tco_infer_missing t = t.tco_infer_missing
 
 let tco_const_static_props t = t.tco_const_static_props
 
@@ -495,4 +514,4 @@ let setup_pocket_universes env enabled =
       SSet.remove tco_experimental_pocket_universes exp_features
   in { env with tco_experimental_features = exp_features }
 
-let set_global_inference_on t = {t with tco_global_inference = true}
+let set_infer_missing t w = {t with tco_infer_missing = w}

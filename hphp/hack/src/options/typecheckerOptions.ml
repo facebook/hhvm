@@ -8,6 +8,8 @@
  *)
 
 type t = GlobalOptions.t [@@deriving show]
+module InferMissing = GlobalOptions.InferMissing
+
 let safe_array = GlobalOptions.tco_safe_array
 let safe_vector_array = GlobalOptions.tco_safe_vector_array
 let disallow_ambiguous_lambda = GlobalOptions.tco_disallow_ambiguous_lambda
@@ -75,7 +77,7 @@ let disallow_invalid_arraykey_constraint = GlobalOptions.tco_disallow_invalid_ar
 let enable_constant_visibility_modifiers = GlobalOptions.po_enable_constant_visibility_modifiers
 let const_static_props = GlobalOptions.tco_const_static_props
 let use_lru_workers = GlobalOptions.tco_use_lru_workers
-let global_inference = GlobalOptions.tco_global_inference
+let infer_missing = GlobalOptions.tco_infer_missing
 let const_attribute = GlobalOptions.tco_const_attribute
 let abstract_static_props = GlobalOptions.po_abstract_static_props
-let set_global_inference_on = GlobalOptions.set_global_inference_on
+let set_infer_missing = GlobalOptions.set_infer_missing

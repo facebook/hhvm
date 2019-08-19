@@ -39,6 +39,7 @@ module Phase        = Typing_phase
 module Subst        = Decl_subst
 module ExprDepTy    = Typing_dependent_type.ExprDepTy
 module TCO          = TypecheckerOptions
+module IM           = TCO.InferMissing
 module EnvFromDef   = Typing_env_from_def
 module C            = Typing_continuations
 module CMap         = C.Map
@@ -379,7 +380,7 @@ let make_param_local_ty env param =
     match hint_of_type_hint param.param_type_hint with
     | None ->
       let r = Reason.Rwitness param.param_pos in
-      if TCO.global_inference (Env.get_tcopt env) then
+      if IM.can_infer_params @@ TCO.infer_missing (Env.get_tcopt env) then
         Env.fresh_type_reason ~variance:Ast_defs.Contravariant env r
       else
         env, (r, TUtils.tany env)
@@ -444,7 +445,7 @@ let rec bind_param env (ty1, param) =
         Typing_sequencing.sequence_check_expr e;
         let env, ty1 =
           if  Option.is_none (hint_of_type_hint param.param_type_hint)
-              && not @@ TCO.global_inference (Env.get_tcopt env)
+              && not @@ IM.can_infer_params @@ TCO.infer_missing (Env.get_tcopt env)
           (* ty1 will be Tany iff we have no type hint and we are not in
            * 'infer missing mode'. When it ty1 is Tany we just union it with
            * the type of the default expression *)
@@ -564,7 +565,7 @@ and fun_def tcopt f : Tast.fun_def option =
     | None ->
       Typing_return.make_default_return
         ~is_method:false
-        ~is_global_inference_on:(TCO.global_inference (Env.get_tcopt env))
+        ~is_infer_missing_on:(IM.can_infer_return @@ TCO.infer_missing (Env.get_tcopt env))
         env f.f_name
     | Some ty ->
       let localize = fun env ty ->
@@ -6698,7 +6699,7 @@ and method_def env m =
     | None ->
       Typing_return.make_default_return
         ~is_method:true
-        ~is_global_inference_on:(TCO.global_inference (Env.get_tcopt env))
+        ~is_infer_missing_on:(IM.can_infer_return @@ TCO.infer_missing (Env.get_tcopt env))
         env m.m_name
     | Some ret ->
       (* If a 'this' type appears it needs to be compatible with the

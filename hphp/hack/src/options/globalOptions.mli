@@ -13,6 +13,20 @@
   - so_<feature/flag/setting> - server option
 *)
 
+module InferMissing : sig
+  type t =
+    | Deactivated
+    | Infer_return
+    | Infer_params
+    [@@deriving show]
+
+  val can_infer_return : t -> bool
+  val can_infer_params : t -> bool
+  val is_on : t -> bool
+  val from_string : string -> t
+  val from_string_opt : string option -> t
+end
+
 type t = {
   (**
    * Enforces array subtyping relationships.
@@ -288,7 +302,7 @@ type t = {
 
   (* Trigger the use of inferred types in the tast for non annotated
     arguments and return types *)
-  tco_global_inference : bool;
+  tco_infer_missing : InferMissing.t;
 
   (* Enable const static properties *)
   tco_const_static_props : bool;
@@ -375,7 +389,7 @@ val make :
   ?disable_linter_fixmes : bool ->
   ?po_disallowed_decl_fixmes: ISet.t ->
   ?po_allow_new_attribute_syntax : bool ->
-  ?tco_global_inference : bool ->
+  ?tco_infer_missing : InferMissing.t ->
   ?tco_const_static_props : bool ->
   ?po_disable_legacy_attribute_syntax : bool ->
   ?tco_const_attribute : bool ->
@@ -464,7 +478,7 @@ val use_new_type_errors : t -> bool
 val disable_linter_fixmes : t -> bool
 val po_disallowed_decl_fixmes : t -> ISet.t
 val po_allow_new_attribute_syntax : t -> bool
-val tco_global_inference : t -> bool
+val tco_infer_missing : t -> InferMissing.t
 val tco_const_static_props : t -> bool
 val po_disable_legacy_attribute_syntax : t -> bool
 val tco_const_attribute : t -> bool
@@ -472,4 +486,4 @@ val po_const_default_func_args : t -> bool
 val po_disallow_silence : t -> bool
 val po_abstract_static_props : t -> bool
 val po_disable_unset_class_const : t -> bool
-val set_global_inference_on : t -> t
+val set_infer_missing : t -> InferMissing.t -> t

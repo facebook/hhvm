@@ -122,13 +122,13 @@ let force_awaitable env p ty =
   | _ ->
     env, ty
 
-let make_default_return ~is_method ~is_global_inference_on env name =
+let make_default_return ~is_method ~is_infer_missing_on env name =
   let pos = fst name in
   if is_method && snd name = SN.Members.__construct
   then env, MakeType.void (Reason.Rwitness pos)
   else begin
-    if is_global_inference_on then
-      (* When global inference is turned on we create a fresh variable for the
+    if is_infer_missing_on then
+      (* When infer missing is turned on we create a fresh variable for the
         returned type. Later on it will be reused to get back the inferred type
         of the function. *)
       let env, ty = Env.fresh_type_reason ~variance:Ast_defs.Covariant env (Reason.Rwitness pos) in

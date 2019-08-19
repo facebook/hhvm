@@ -116,7 +116,7 @@ end
 
 let get_patches tcopt file =
   let nast = Ast_provider.get_ast ~full:true file in
-  let tcopt = TypecheckerOptions.set_global_inference_on tcopt in
+  let tcopt = TypecheckerOptions.set_infer_missing tcopt TypecheckerOptions.InferMissing.Infer_return in
   let tast = Typing.nast_to_tast tcopt (Naming.program nast) in
   let ret_collector = Collector.make tast in
   let source_text = Full_fidelity_source_text.from_file file in

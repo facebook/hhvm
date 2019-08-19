@@ -204,7 +204,7 @@ let parse_options () =
   let disable_linter_fixmes = ref false in
   let allow_new_attribute_syntax = ref false in
   let allow_toplevel_requires = ref false in
-  let global_inference = ref false in
+  let infer_missing = ref GlobalOptions.InferMissing.Deactivated in
   let const_static_props = ref false in
   let disable_legacy_attribute_syntax = ref false in
   let const_attribute = ref false in
@@ -458,9 +458,9 @@ let parse_options () =
     "--allow-toplevel-requires",
       Arg.Set allow_toplevel_requires,
       "Allow `require()` and similar at the top-level";
-    "--global-inference",
-      Arg.Set global_inference,
-      "Use inference results as the types of unannotated parameters / functions in the tast";
+    "--infer-missing",
+      Arg.String (fun s -> infer_missing := GlobalOptions.InferMissing.from_string s),
+      "<return|params> Deduce more information about unannotated types in the tast";
     "--const-static-props",
       Arg.Set const_static_props,
       "Enable static properties to be const";
@@ -526,8 +526,8 @@ let parse_options () =
     ~disable_linter_fixmes:!disable_linter_fixmes
     ~po_allow_new_attribute_syntax:!allow_new_attribute_syntax
     ~po_disallow_toplevel_requires:(not !allow_toplevel_requires)
-    ~tco_global_inference:!global_inference
     ~tco_const_static_props:!const_static_props
+    ~tco_infer_missing:!infer_missing
     ~po_disable_legacy_attribute_syntax:!disable_legacy_attribute_syntax
     ~tco_const_attribute:!const_attribute
     ~po_allow_goto:(not !disallow_goto)

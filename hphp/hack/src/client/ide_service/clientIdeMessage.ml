@@ -23,6 +23,13 @@ type document_location = {
 (** Denotes a location of the cursor in a document at which an IDE request is
 being executed (e.g. hover). *)
 
+module File_opened = struct
+  type request = {
+    file_path: Path.t;
+    file_contents: string;
+  }
+end
+
 module Hover = struct
   type request = document_location
   type result = HoverService.result
@@ -75,6 +82,7 @@ type _ t =
   | Initialize_from_saved_state: Initialize_from_saved_state.t -> unit t
   | Shutdown: unit -> unit t
   | File_changed: Path.t -> unit t
+  | File_opened: File_opened.request -> unit t
   | Hover:
     Hover.request ->
     Hover.result t

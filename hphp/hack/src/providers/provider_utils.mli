@@ -16,8 +16,8 @@ val update_context :
   path:Relative_path.t ->
   file_input:ServerCommandTypes.file_input ->
   Provider_context.t * Provider_context.entry
-(** Parse and typecheck the given AST for the given path, and return an updated
-[t] containing that entry. *)
+(** Compute the given AST for the given path, and return an updated [t]
+containing that entry. *)
 
 val with_context : ctx:Provider_context.t -> f:(unit -> 'a) -> 'a
 (** Load the declarations of [t] and call [f], then unload those declarations.

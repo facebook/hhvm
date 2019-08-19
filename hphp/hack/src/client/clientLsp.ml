@@ -2456,6 +2456,29 @@ let track_edits_if_necessary (state: state) (event: event) : state =
   | Lost_server lenv -> Lost_server { lenv with Lost_env.uris_with_unsaved_changes; }
   | _ -> state
 
+let track_ide_service_open_files
+    (ide_service: ClientIdeService.t)
+    (event: event)
+    : unit Lwt.t =
+  let open Jsonrpc in
+  match event with
+  | Client_message ({ method_ = "textDocument/didOpen"; params; _ }) ->
+    let params = parse_didOpen params in
+    let file_path = params.DidOpen.textDocument.TextDocumentItem.uri
+      |> lsp_uri_to_path
+      |> Path.make in
+    let file_contents = params.DidOpen.textDocument.TextDocumentItem.text in
+    let%lwt (_: (unit, string) result) = ClientIdeService.rpc ide_service
+      (ClientIdeMessage.File_opened {
+        ClientIdeMessage.File_opened.file_path;
+        file_contents;
+      }) in
+    Lwt.return_unit
+  | _ ->
+    (* Don't handle other events for now. When we show typechecking errors for
+    the open file, we'll start handling them. *)
+    Lwt.return_unit
+
 let log_response_if_necessary
     (event: event)
     (response: Hh_json.json option)
@@ -3210,6 +3233,15 @@ let main (env: env) : Exit_status.t Lwt.t =
       state := track_edits_if_necessary !state event;
       (* if a message comes from the server, maybe update our record of server state *)
       update_hh_server_state_if_necessary event;
+
+      let%lwt () =
+        (* update the IDE service with the new file contents, if any *)
+        if env.use_serverless_ide then
+          let%lwt () = track_ide_service_open_files ide_service event in
+          Lwt.return_unit
+        else
+          Lwt.return_unit
+      in
 
       (* this is the main handler for each message*)
       Jsonrpc.clear_last_sent ();

@@ -272,6 +272,21 @@ let handle_message: type a.
     Lwt.return (state, Handle_message_result.Error (Printf.sprintf
       "IDE services failed to initialize: %s" error_message))
 
+  | (Initialized { server_env; _ },
+     File_opened { File_opened.file_path; file_contents }) ->
+    let path = file_path
+      |> Path.to_string
+      |> Relative_path.create_detect_prefix in
+    let (ctx, entry) = Provider_utils.update_context
+      ~ctx:(Provider_context.empty ~tcopt:server_env.ServerEnv.tcopt)
+      ~path
+      ~file_input:(ServerCommandTypes.FileContent file_contents) in
+
+    (* Do a typecheck just to warm up the caches when you open a file. In the
+    future, we'll actually surface typechecking errors. *)
+    let _tast: Tast.program = Provider_utils.compute_tast ~ctx ~entry in
+    Lwt.return (state, Handle_message_result.Response ())
+
   | (Initialized { server_env; _ }, Hover document_location) ->
     let (ctx, entry) =
       make_context_from_document_location server_env document_location in

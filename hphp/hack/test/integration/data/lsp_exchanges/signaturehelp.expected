@@ -230,6 +230,52 @@
   },
   {
     "jsonrpc": "2.0",
+    "id": 140,
+    "result": null
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 150,
+    "result": null
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 160,
+    "result": {
+      "signatures": [
+        {
+          "label": "function Herp\\aliased_global_func(string $s): void",
+          "parameters": [
+            {
+              "label": "$s"
+            }
+          ]
+        }
+      ],
+      "activeSignature": 0,
+      "activeParameter": 0
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 170,
+    "result": {
+      "signatures": [
+        {
+          "label": "function Herp\\aliased_global_func(string $s): void",
+          "parameters": [
+            {
+              "label": "$s"
+            }
+          ]
+        }
+      ],
+      "activeSignature": 0,
+      "activeParameter": 0
+    }
+  },
+  {
+    "jsonrpc": "2.0",
     "id": 999,
     "result": null
   }

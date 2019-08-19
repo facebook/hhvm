@@ -18,4 +18,5 @@ function test_signature_help(): void
   $x->instanceMethod(1,2);
   MyClass::staticMethod("hi");
   global_function("hi", 1);
+  Herp\aliased_global_func("hi");
 }

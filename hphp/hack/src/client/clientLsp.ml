@@ -1721,17 +1721,12 @@ let do_signatureHelp_local
     (ide_service: ClientIdeService.t)
     (editor_open_files: Lsp.TextDocumentItem.t SMap.t)
     (params: SignatureHelp.params): SignatureHelp.result Lwt.t =
-  Hh_logger.log "SIGNATUREHELP: Beginning process";
   let document_location = get_document_location editor_open_files params in
   let%lwt result = ClientIdeService.rpc
     ide_service (ClientIdeMessage.Signature_help document_location) in
   match result with
-  | Ok signatures ->
-    Hh_logger.log "SIGNATUREHELP: Found results";
-    Lwt.return signatures
-  | Error error_message ->
-    Hh_logger.log "SIGNATUREHELP: Errored out: [%s]" error_message;
-    failwith (Printf.sprintf "Local highlight failed: %s" error_message)
+  | Ok signatures -> Lwt.return signatures
+  | Error error_message -> failwith (Printf.sprintf "Local highlight failed: %s" error_message)
 
 let patch_to_workspace_edit_change
   (patch: ServerRefactorTypes.patch)

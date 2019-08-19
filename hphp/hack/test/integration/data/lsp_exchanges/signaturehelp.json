@@ -223,6 +223,66 @@
     }
   },
   {
+    "comment": "signature help for 1-argument namespace-aliased global function (left of open paren)",
+    "jsonrpc": "2.0",
+    "method": "textDocument/signatureHelp",
+    "id": 140,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 20,
+        "character": 26
+      }
+    }
+  },
+  {
+    "comment": "signature help for 1-argument namespace-aliased global function (right of open paren)",
+    "jsonrpc": "2.0",
+    "method": "textDocument/signatureHelp",
+    "id": 150,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 20,
+        "character": 26
+      }
+    }
+  },
+  {
+    "comment": "signature help for 1-argument namespace-aliased global function (right of open paren)",
+    "jsonrpc": "2.0",
+    "method": "textDocument/signatureHelp",
+    "id": 160,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 20,
+        "character": 27
+      }
+    }
+  },
+  {
+    "comment": "signature help for 1-argument namespace-aliased global function (right of open paren)",
+    "jsonrpc": "2.0",
+    "method": "textDocument/signatureHelp",
+    "id": 170,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 20,
+        "character": 28
+      }
+    }
+  },
+  {
     "jsonrpc": "2.0",
     "id": 999,
     "method": "shutdown",

@@ -106,7 +106,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
 
     pub fn make_at(source: &SourceText<'a>, is_experimental_mode: bool, offset: usize) -> Self {
         Self {
-            source: *source,
+            source: source.clone(),
             start: offset,
             offset,
             errors: vec![],

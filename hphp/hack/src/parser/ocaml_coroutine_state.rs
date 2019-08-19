@@ -51,7 +51,7 @@ impl<'src, S: Clone> StateType<'src, S> for OcamlCoroutineState<'src, S> {
     fn initial(env: &ParserEnv, src: &SourceText<'src>) -> Self {
         Self {
             seen_ppl: false,
-            source: *src,
+            source: src.clone(),
             is_codegen: env.codegen,
             context: Rc::new(SerializationContext::new(src.ocaml_source_text())),
             phantom_s: PhantomData,

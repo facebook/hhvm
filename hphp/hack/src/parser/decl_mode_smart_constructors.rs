@@ -49,7 +49,7 @@ impl<'a, S> State<'a, S> {
 impl<'src, S> StateType<'src, S> for State<'src, S> {
     fn initial(_: &ParserEnv, source: &SourceText<'src>) -> Self {
         Self {
-            source: *source,
+            source: source.clone(),
             stack: vec![],
             phantom_s: std::marker::PhantomData,
         }

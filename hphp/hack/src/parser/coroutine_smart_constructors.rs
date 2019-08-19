@@ -61,7 +61,7 @@ impl<'src, S> StateType<'src, S> for State<'src, S> {
     fn initial(env0: &ParserEnv, src: &SourceText<'src>) -> Self {
         State {
             seen_ppl: false,
-            source: *src,
+            source: src.clone(),
             is_codegen: env0.codegen,
             phantom_s: PhantomData,
         }

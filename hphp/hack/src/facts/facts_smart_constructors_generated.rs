@@ -34,7 +34,7 @@ impl<'src> SmartConstructors<'src, HasScriptContent<'src>> for FactsSmartConstru
     type R = Node;
 
     fn new(_: &ParserEnv, src: &SourceText<'src>) -> Self {
-        Self { state: (false, *src) }
+        Self { state: (false, src.clone()) }
     }
 
     fn state_mut(&mut self) -> &mut HasScriptContent<'src> {

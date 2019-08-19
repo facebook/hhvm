@@ -13,6 +13,7 @@ use crate::operator::{Assoc, Operator};
 use crate::parser_env::ParserEnv;
 use crate::parser_trait::{Context, ParserTrait};
 use crate::smart_constructors::{NodeType, SmartConstructors};
+use crate::source_text::SourceText;
 use crate::statement_parser::StatementParser;
 use crate::type_parser::TypeParser;
 use parser_core_types::lexable_token::LexableToken;
@@ -810,7 +811,7 @@ where
         //
         //
 
-        let merge = |token: S::Token, head: Option<S::Token>| {
+        let merge = |token: S::Token, head: Option<S::Token>, source: &SourceText<'a>| {
             // TODO: Assert that new head has no leading trivia, old head has no
             // trailing trivia.
             // Invariant: A token inside a list of string fragments is always a head,
@@ -855,7 +856,7 @@ where
                     let l = head.leading().to_vec();
                     let t = token.trailing().to_vec();
                     // TODO: Make a "position" type that is a tuple of source and offset.
-                    Some(S::Token::make(k, o, w, l, t))
+                    Some(S::Token::make(k, source, o, w, l, t))
                 }
                 None => {
                     let token = match token.kind() {
@@ -998,7 +999,7 @@ where
                     // We got a { not followed by a $. Ignore it.
                     // TODO: Give a warning?
                     parser.continue_from(parser1);
-                    merge(left_brace, head)
+                    merge(left_brace, head, parser.lexer.source())
                 }
             }
         };
@@ -1037,7 +1038,7 @@ where
                     _ => {
                         // We got a $ not followed by a { or variable name. Ignore it.
                         // TODO: Give a warning?
-                        merge(dollar, head)
+                        merge(dollar, head, parser.lexer.source())
                     }
                 }
             };
@@ -1051,7 +1052,7 @@ where
             match token.kind() {
                 TokenKind::HeredocStringLiteralTail | TokenKind::DoubleQuotedStringLiteralTail => {
                     self.continue_from(parser1);
-                    let head = merge(token, head);
+                    let head = merge(token, head, self.lexer.source());
                     put_opt(self, head, &mut acc);
                     break;
                 }
@@ -1069,7 +1070,7 @@ where
                 }
                 _ => {
                     self.continue_from(parser1);
-                    head = merge(token, head)
+                    head = merge(token, head, self.lexer.source())
                 }
             }
         }

@@ -5,12 +5,14 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::lexable_trivia::LexableTrivia;
+use crate::source_text::SourceText;
 use crate::token_kind::TokenKind;
 
 pub trait LexableToken<'a>: Clone {
     type Trivia: LexableTrivia;
     fn make(
         kind: TokenKind,
+        source_text: &SourceText<'a>,
         offset: usize,
         width: usize,
         leading: Vec<Self::Trivia>,

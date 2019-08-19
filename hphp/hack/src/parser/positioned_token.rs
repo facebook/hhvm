@@ -9,6 +9,7 @@ use std::rc::Rc;
 
 use crate::positioned_trivia::PositionedTrivia;
 use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::source_text::SourceText;
 use parser_core_types::token_kind::TokenKind;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -38,6 +39,7 @@ impl<'a> LexableToken<'a> for PositionedToken {
 
     fn make(
         kind: TokenKind,
+        _source: &SourceText,
         offset: usize,
         width: usize,
         leading: Vec<Self::Trivia>,

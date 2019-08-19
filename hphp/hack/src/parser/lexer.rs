@@ -2038,7 +2038,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
             }
             _ => self.scan_trailing_php_trivia(),
         };
-        Token::make(kind, token_start, w, leading, trailing)
+        Token::make(kind, self.source(), token_start, w, leading, trailing)
     }
 
     fn scan_assert_progress(&mut self, tokenizer: impl Fn(&mut Self) -> Token) -> Token {
@@ -2132,7 +2132,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
             let token_start = x.offset;
             let (kind, w, leading) =
                 x.scan_token_and_leading_trivia(&Self::scan_token_outside_type, KwSet::NoKeywords);
-            Token::make(kind, token_start, w, leading, vec![])
+            Token::make(kind, x.source(), token_start, w, leading, vec![])
         };
         self.scan_assert_progress(&tokenizer)
     }
@@ -2150,7 +2150,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
             }
             _ => vec![],
         };
-        Token::make(kind, token_start, w, vec![], trailing)
+        Token::make(kind, self.source(), token_start, w, vec![], trailing)
     }
 
     pub fn next_docstring_header(&mut self) -> (Token, &'a [u8]) {
@@ -2163,6 +2163,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
         let w = self.width();
         let token = Token::make(
             TokenKind::HeredocStringLiteralHead,
+            self.source(),
             token_start,
             w,
             leading,
@@ -2190,11 +2191,11 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
             // of the body token.
             match kind {
                 TokenKind::GreaterThan | TokenKind::SlashGreaterThan if no_trailing => {
-                    Token::make(kind, token_start, w, leading, vec![])
+                    Token::make(kind, lexer.source(), token_start, w, leading, vec![])
                 }
                 _ => {
                     let trailing = lexer.scan_trailing_php_trivia();
-                    Token::make(kind, token_start, w, leading, trailing)
+                    Token::make(kind, lexer.source(), token_start, w, leading, trailing)
                 }
             }
         };
@@ -2222,7 +2223,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
              if kind == TokenKind::XHPBody
              { lexer.scan_trailing_xhp_trivia() }
              else  { vec!() };
-            Token::make(kind, token_start, w, leading, trailing)
+            Token::make(kind, lexer.source(), token_start, w, leading, trailing)
         };
         self.scan_assert_progress(&scanner)
     }
@@ -2237,7 +2238,14 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
     }
 
     fn make_markup_token(&self) -> Token {
-        Token::make(TokenKind::Markup, self.start, self.width(), vec![], vec![])
+        Token::make(
+            TokenKind::Markup,
+            self.source(),
+            self.start,
+            self.width(),
+            vec![],
+            vec![],
+        )
     }
 
     fn make_long_tag(
@@ -2253,14 +2261,27 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
         // determine the file check mode, read the trailing trivia and attach it
         // to the language token
         let trailing = self.scan_trailing_php_trivia();
-        let name = Token::make(TokenKind::Name, name_token_offset, size, vec![], trailing);
+        let name = Token::make(
+            TokenKind::Name,
+            self.source(),
+            name_token_offset,
+            size,
+            vec![],
+            trailing,
+        );
         (markup_text, Some((less_than_question_token, Some(name))))
     }
 
     fn make_markup_and_suffix(&mut self) -> (Token, Option<(Token, Option<Token>)>) {
         let markup_text = self.make_markup_token();
-        let less_than_question_token =
-            Token::make(TokenKind::LessThanQuestion, self.offset, 2, vec![], vec![]);
+        let less_than_question_token = Token::make(
+            TokenKind::LessThanQuestion,
+            self.source(),
+            self.offset,
+            2,
+            vec![],
+            vec![],
+        );
         // skip <?
         self.advance(2);
         let name_token_offset = self.offset;
@@ -2277,7 +2298,14 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
             ('=', _, _) => {
                 // skip =
                 self.advance(1);
-                let equal = Token::make(TokenKind::Equal, name_token_offset, 1, vec![], vec![]);
+                let equal = Token::make(
+                    TokenKind::Equal,
+                    self.source(),
+                    name_token_offset,
+                    1,
+                    vec![],
+                    vec![],
+                );
 
                 (markup_text, Some((less_than_question_token, Some(equal))))
             }

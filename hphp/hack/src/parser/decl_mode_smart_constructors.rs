@@ -196,7 +196,7 @@ where
 }
 
 fn replace_body<'a, Token, Value>(
-    st: &State<Syntax<Token, Value>>,
+    st: &State<'a, Syntax<Token, Value>>,
     body: Syntax<Token, Value>,
     saw_yield: bool,
 ) -> Syntax<Token, Value>
@@ -207,7 +207,7 @@ where
     match body.syntax {
         SyntaxVariant::CompoundStatement(children) => {
             let stmts = if saw_yield {
-                let token = Token::make(TokenKind::Yield, 0, 0, vec![], vec![]);
+                let token = Token::make(TokenKind::Yield, &st.source, 0, 0, vec![], vec![]);
                 let yield_ = Syntax::<Token, Value>::make_token(st, token);
                 Syntax::make_list(st, vec![yield_], 0)
             } else {

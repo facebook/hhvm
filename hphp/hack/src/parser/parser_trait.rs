@@ -287,7 +287,14 @@ where
         let attr2 = lexer.peek_char(2);
         if tparam_open == '<' && attr1 == '<' && attr2 == '<' {
             lexer.advance(1);
-            let token = S::Token::make(TokenKind::LessThan, lexer.start(), 1, vec![], vec![]);
+            let token = S::Token::make(
+                TokenKind::LessThan,
+                lexer.source(),
+                lexer.start(),
+                1,
+                vec![],
+                vec![],
+            );
             S!(make_token, self, token)
         } else {
             self.continue_from(parser1);

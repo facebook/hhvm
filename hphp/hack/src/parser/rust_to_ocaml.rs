@@ -41,7 +41,7 @@ extern "C" {
 }
 
 pub struct SerializationContext {
-    source_text: Value,
+    pub source_text: Value,
 }
 
 impl SerializationContext {

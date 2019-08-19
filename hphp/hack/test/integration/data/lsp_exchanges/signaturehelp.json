@@ -28,7 +28,7 @@
     }
   },
   {
-    "comment": "signature help for 0-argument method invocation (left of opening paren)",
+    "comment": "signature help for 0-argument constructor (left of opening paren)",
     "jsonrpc": "2.0",
     "method": "textDocument/signatureHelp",
     "id": 10,
@@ -37,13 +37,13 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 4,
-        "character": 23
+        "line": 16,
+        "character": 18
       }
     }
   },
   {
-    "comment": "signature help for 0-argument method invocation",
+    "comment": "signature help for 0-argument constructor",
     "jsonrpc": "2.0",
     "method": "textDocument/signatureHelp",
     "id": 20,
@@ -52,13 +52,13 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 4,
-        "character": 24
+        "line": 16,
+        "character": 19
       }
     }
   },
   {
-    "comment": "signature help for 0-argument method invocation (right of closing paren)",
+    "comment": "signature help for 0-argument constructor (right of closing paren)",
     "jsonrpc": "2.0",
     "method": "textDocument/signatureHelp",
     "id": 30,
@@ -67,13 +67,13 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 4,
-        "character": 25
+        "line": 16,
+        "character": 20
       }
     }
   },
   {
-    "comment": "signature help for non-0-argument function invocation (left of opening paren)",
+    "comment": "signature help for 2-argument instance method (left of opening paren)",
     "jsonrpc": "2.0",
     "method": "textDocument/signatureHelp",
     "id": 40,
@@ -82,13 +82,13 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 5,
-        "character": 15
+        "line": 17,
+        "character": 20
       }
     }
   },
   {
-    "comment": "signature help for non-0-argument function invocation (right of opening paren)",
+    "comment": "signature help for 2-argument instance method (right of opening paren)",
     "jsonrpc": "2.0",
     "method": "textDocument/signatureHelp",
     "id": 50,
@@ -97,13 +97,13 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 5,
-        "character": 16
+        "line": 17,
+        "character": 21
       }
     }
   },
   {
-    "comment": "signature help for non-0-argument function invocation (left of first comma)",
+    "comment": "signature help for 2-argument instance method (left of first comma)",
     "jsonrpc": "2.0",
     "method": "textDocument/signatureHelp",
     "id": 60,
@@ -112,13 +112,13 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 5,
-        "character": 26
+        "line": 17,
+        "character": 22
       }
     }
   },
   {
-    "comment": "signature help for non-0-argument function invocation (right of first comma)",
+    "comment": "signature help for 2-argument instance method (right of first comma)",
     "jsonrpc": "2.0",
     "method": "textDocument/signatureHelp",
     "id": 70,
@@ -127,13 +127,13 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 5,
-        "character": 27
+        "line": 17,
+        "character": 23
       }
     }
   },
   {
-    "comment": "signature help for non-0-argument function invocation (left of closing paren)",
+    "comment": "signature help for 2-argument instance method (left of closing paren)",
     "jsonrpc": "2.0",
     "method": "textDocument/signatureHelp",
     "id": 80,
@@ -142,13 +142,13 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 5,
-        "character": 30
+        "line": 17,
+        "character": 24
       }
     }
   },
   {
-    "comment": "signature help for non-0-argument function invocation (right of closing paren)",
+    "comment": "signature help for 2-argument instance method (right of closing paren)",
     "jsonrpc": "2.0",
     "method": "textDocument/signatureHelp",
     "id": 90,
@@ -157,8 +157,68 @@
         "uri": "${php_file_uri}"
       },
       "position": {
-        "line": 5,
-        "character": 31
+        "line": 17,
+        "character": 25
+      }
+    }
+  },
+  {
+    "comment": "signature help for 1-argument static method (left of open paren)",
+    "jsonrpc": "2.0",
+    "method": "textDocument/signatureHelp",
+    "id": 100,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 18,
+        "character": 23
+      }
+    }
+  },
+  {
+    "comment": "signature help for 1-argument static method (right of open paren)",
+    "jsonrpc": "2.0",
+    "method": "textDocument/signatureHelp",
+    "id": 110,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 18,
+        "character": 24
+      }
+    }
+  },
+  {
+    "comment": "signature help for 2-argument global function (left of open paren)",
+    "jsonrpc": "2.0",
+    "method": "textDocument/signatureHelp",
+    "id": 120,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 19,
+        "character": 17
+      }
+    }
+  },
+  {
+    "comment": "signature help for 2-argument global function (right of open paren)",
+    "jsonrpc": "2.0",
+    "method": "textDocument/signatureHelp",
+    "id": 130,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 19,
+        "character": 18
       }
     }
   },

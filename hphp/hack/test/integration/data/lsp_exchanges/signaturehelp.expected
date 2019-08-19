@@ -65,8 +65,8 @@
     "result": {
       "signatures": [
         {
-          "label": "public function methodCall(): void",
-          "documentation": "Method doc block",
+          "label": "public function __construct(): _",
+          "documentation": "Constructor with doc block",
           "parameters": []
         }
       ],
@@ -90,14 +90,14 @@
     "result": {
       "signatures": [
         {
-          "label": "function function_call(MyClass $myObject, int $x): void",
-          "documentation": "Function doc block",
+          "label": "public function instanceMethod(int $x1, int $x2): void",
+          "documentation": "Instance method with doc block",
           "parameters": [
             {
-              "label": "$myObject"
+              "label": "$x1"
             },
             {
-              "label": "$x"
+              "label": "$x2"
             }
           ]
         }
@@ -112,20 +112,20 @@
     "result": {
       "signatures": [
         {
-          "label": "function function_call(MyClass $myObject, int $x): void",
-          "documentation": "Function doc block",
+          "label": "public function instanceMethod(int $x1, int $x2): void",
+          "documentation": "Instance method with doc block",
           "parameters": [
             {
-              "label": "$myObject"
+              "label": "$x1"
             },
             {
-              "label": "$x"
+              "label": "$x2"
             }
           ]
         }
       ],
       "activeSignature": 0,
-      "activeParameter": 0
+      "activeParameter": 1
     }
   },
   {
@@ -134,14 +134,14 @@
     "result": {
       "signatures": [
         {
-          "label": "function function_call(MyClass $myObject, int $x): void",
-          "documentation": "Function doc block",
+          "label": "public function instanceMethod(int $x1, int $x2): void",
+          "documentation": "Instance method with doc block",
           "parameters": [
             {
-              "label": "$myObject"
+              "label": "$x1"
             },
             {
-              "label": "$x"
+              "label": "$x2"
             }
           ]
         }
@@ -156,14 +156,14 @@
     "result": {
       "signatures": [
         {
-          "label": "function function_call(MyClass $myObject, int $x): void",
-          "documentation": "Function doc block",
+          "label": "public function instanceMethod(int $x1, int $x2): void",
+          "documentation": "Instance method with doc block",
           "parameters": [
             {
-              "label": "$myObject"
+              "label": "$x1"
             },
             {
-              "label": "$x"
+              "label": "$x2"
             }
           ]
         }
@@ -176,6 +176,57 @@
     "jsonrpc": "2.0",
     "id": 90,
     "result": null
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 100,
+    "result": null
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 110,
+    "result": {
+      "signatures": [
+        {
+          "label": "public static function staticMethod(string $z): void",
+          "documentation": "Static method with doc block",
+          "parameters": [
+            {
+              "label": "$z"
+            }
+          ]
+        }
+      ],
+      "activeSignature": 0,
+      "activeParameter": 0
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 120,
+    "result": null
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 130,
+    "result": {
+      "signatures": [
+        {
+          "label": "function global_function(string $s, int $x): void",
+          "documentation": "Global function with doc block",
+          "parameters": [
+            {
+              "label": "$s"
+            },
+            {
+              "label": "$x"
+            }
+          ]
+        }
+      ],
+      "activeSignature": 0,
+      "activeParameter": 0
+    }
   },
   {
     "jsonrpc": "2.0",

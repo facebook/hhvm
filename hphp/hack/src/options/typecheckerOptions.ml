@@ -78,3 +78,4 @@ let use_lru_workers = GlobalOptions.tco_use_lru_workers
 let global_inference = GlobalOptions.tco_global_inference
 let const_attribute = GlobalOptions.tco_const_attribute
 let abstract_static_props = GlobalOptions.po_abstract_static_props
+let set_global_inference_on = GlobalOptions.set_global_inference_on

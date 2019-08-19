@@ -145,6 +145,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, (`Error remove_dead_fixme_warning)
     | REWRITE_LAMBDA_PARAMETERS files ->
         env, ServerRefactor.get_lambda_parameter_rewrite_patches env files
+    | REWRITE_RETURN_TYPE files ->
+        env, ServerRefactor.get_return_type_rewrite_patches env files
     | DUMP_SYMBOL_INFO file_list ->
         env, SymbolInfoService.go genv.workers file_list env
     | IN_MEMORY_DEP_TABLE_SIZE ->

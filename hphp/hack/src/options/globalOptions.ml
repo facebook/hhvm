@@ -494,3 +494,5 @@ let setup_pocket_universes env enabled =
     else
       SSet.remove tco_experimental_pocket_universes exp_features
   in { env with tco_experimental_features = exp_features }
+
+let set_global_inference_on t = {t with tco_global_inference = true}

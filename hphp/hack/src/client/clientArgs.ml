@@ -477,6 +477,17 @@ let parse_check_args cmd =
       Arg.String (fun x -> set_mode (MODE_SAVE_NAMING x) ()),
       (" (mode) Save the naming table to the given file." ^
       " Returns the number of files and symbols written to disk.");
+    "--rewrite-return-type",
+       Arg.Rest begin fun fn ->
+         mode := match !mode with
+          | None ->
+            Some (MODE_REWRITE_RETURN_TYPE [fn])
+          | Some (MODE_REWRITE_RETURN_TYPE fnl) ->
+            Some (MODE_REWRITE_RETURN_TYPE (fn :: fnl))
+          | _ -> raise (Arg.Bad "only a single mode should be specified")
+         end,
+      " (mode) rewrite return types of function in the files from the given list" ^
+      " with suggested return types";
     "--save-state",
       Arg.String (fun x -> set_mode (MODE_SAVE_STATE x) ()),
       (" (mode) Save a saved state to the given file." ^

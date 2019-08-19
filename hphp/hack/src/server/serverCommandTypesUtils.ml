@@ -24,6 +24,7 @@ let debug_describe_t : type a. a t -> string = function
   | DUMP_SYMBOL_INFO         _ -> "DUMP_SYMBOL_INFO"
   | REMOVE_DEAD_FIXMES       _ -> "REMOVE_DEAD_FIXMES"
   | REWRITE_LAMBDA_PARAMETERS _ -> "REWRITE_LAMBDA_PARAMETERS"
+  | REWRITE_RETURN_TYPE      _ -> "REWRITE_RETURN_TYPE"
   | SEARCH                   _ -> "SEARCH"
   | COVERAGE_COUNTS          _ -> "COVERAGE_COUNTS"
   | LINT                     _ -> "LINT"

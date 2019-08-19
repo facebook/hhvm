@@ -564,6 +564,14 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       then print_patches_json patches
       else apply_patches patches;
       Lwt.return Exit_status.No_error
+    | MODE_REWRITE_RETURN_TYPE files ->
+      let%lwt conn = connect args in
+      let%lwt patches = ClientConnect.rpc conn @@
+          Rpc.REWRITE_RETURN_TYPE files in
+      if args.output_json
+      then print_patches_json patches
+      else apply_patches patches;
+      Lwt.return Exit_status.No_error
     | MODE_FORMAT (from, to_) ->
       let content = Sys_utils.read_stdin_to_string () in
       let%lwt result =

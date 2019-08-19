@@ -472,3 +472,4 @@ val po_const_default_func_args : t -> bool
 val po_disallow_silence : t -> bool
 val po_abstract_static_props : t -> bool
 val po_disable_unset_class_const : t -> bool
+val set_global_inference_on : t -> t

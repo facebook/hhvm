@@ -28,6 +28,10 @@ let get_lambda_parameter_rewrite_patches env files =
   List.concat_map files (fun file ->
     ServerRewriteLambdaParameters.get_patches env.tcopt (Relative_path.from_root file))
 
+let get_return_type_rewrite_patches env files =
+  List.concat_map files (fun file ->
+    ServerRewriteReturnType.get_patches env.tcopt (Relative_path.from_root file))
+
 let find_def_filename current_filename definition =
   let open SymbolDefinition in
   if Pos.filename definition.pos = ServerIdeUtils.path then

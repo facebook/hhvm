@@ -223,6 +223,7 @@
     serverRevisionTracker
     serverRewriteLambdaParameters
     codemodTypePrinter
+    serverRewriteReturnType
     serverSearch
     serverSignatureHelp
     serverStamp

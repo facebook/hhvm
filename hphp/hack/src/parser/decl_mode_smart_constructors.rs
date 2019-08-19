@@ -11,20 +11,22 @@ use parser_core_types::source_text::SourceText;
 use parser_core_types::syntax::*;
 use parser_core_types::token_kind::TokenKind;
 
-pub struct State<S> {
+pub struct State<'src, S> {
+    source: SourceText<'src>,
     stack: Vec<bool>,
     phantom_s: std::marker::PhantomData<*const S>,
 }
-impl<S> Clone for State<S> {
+impl<'a, S> Clone for State<'a, S> {
     fn clone(&self) -> Self {
         Self {
+            source: self.source.clone(),
             stack: self.stack.clone(),
             phantom_s: self.phantom_s,
         }
     }
 }
 
-impl<S> State<S> {
+impl<'a, S> State<'a, S> {
     /// Pops n times and returns the first popped element
     fn pop_n(&mut self, n: usize) -> bool {
         if self.stack.len() < n {
@@ -44,9 +46,10 @@ impl<S> State<S> {
     }
 }
 
-impl<'src, S> StateType<'src, S> for State<S> {
-    fn initial(_: &ParserEnv, _: &SourceText<'src>) -> Self {
+impl<'src, S> StateType<'src, S> for State<'src, S> {
+    fn initial(_: &ParserEnv, source: &SourceText<'src>) -> Self {
         Self {
+            source: *source,
             stack: vec![],
             phantom_s: std::marker::PhantomData,
         }
@@ -65,12 +68,12 @@ impl<'src, S> StateType<'src, S> for State<S> {
 
 pub use crate::decl_mode_smart_constructors_generated::*;
 
-pub struct DeclModeSmartConstructors<S, Token, Value> {
-    pub state: State<S>,
+pub struct DeclModeSmartConstructors<'src, S, Token, Value> {
+    pub state: State<'src, S>,
     phantom_token: std::marker::PhantomData<*const Token>,
     phantom_value: std::marker::PhantomData<*const Value>,
 }
-impl<'a, S, Token, Value> Clone for DeclModeSmartConstructors<S, Token, Value> {
+impl<'a, S, Token, Value> Clone for DeclModeSmartConstructors<'a, S, Token, Value> {
     fn clone(&self) -> Self {
         Self {
             state: self.state.clone(),
@@ -81,8 +84,8 @@ impl<'a, S, Token, Value> Clone for DeclModeSmartConstructors<S, Token, Value> {
 }
 
 impl<'a, Token, Value>
-    SyntaxSmartConstructors<'a, Syntax<Token, Value>, State<Syntax<Token, Value>>>
-    for DeclModeSmartConstructors<Syntax<Token, Value>, Token, Value>
+    SyntaxSmartConstructors<'a, Syntax<Token, Value>, State<'a, Syntax<Token, Value>>>
+    for DeclModeSmartConstructors<'a, Syntax<Token, Value>, Token, Value>
 where
     Token: LexableToken,
     Value: SyntaxValueType<Token>,

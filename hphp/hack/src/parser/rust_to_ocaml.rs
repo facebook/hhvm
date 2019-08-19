@@ -78,7 +78,7 @@ impl ToOcaml for Vec<bool> {
     }
 }
 
-impl<S> ToOcaml for DeclModeState<S> {
+impl<S> ToOcaml for DeclModeState<'_, S> {
     unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
         self.stack().to_ocaml(context)
     }

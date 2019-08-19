@@ -58,8 +58,8 @@ use parser::decl_mode_smart_constructors::State as DeclModeState;
 
 type DeclModeParser<'a> = Parser<
     'a,
-    WithKind<DeclModeSmartConstructors<PositionedSyntax, PositionedToken, PositionedValue>>,
-    DeclModeState<PositionedSyntax>,
+    WithKind<DeclModeSmartConstructors<'a, PositionedSyntax, PositionedToken, PositionedValue>>,
+    DeclModeState<'a, PositionedSyntax>,
 >;
 
 use parser::verify_smart_constructors::State as VerifyState;

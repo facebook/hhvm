@@ -30,8 +30,8 @@ use crate::smart_constructors::SmartConstructors;
 use crate::syntax_smart_constructors::SyntaxSmartConstructors;
 
 impl<'src, Token, Value>
-SmartConstructors<'src, State<Syntax<Token, Value>>>
-    for DeclModeSmartConstructors<Syntax<Token, Value>, Token, Value>
+SmartConstructors<'src, State<'src, Syntax<Token, Value>>>
+    for DeclModeSmartConstructors<'src, Syntax<Token, Value>, Token, Value>
 where
     Token: LexableToken,
     Value: SyntaxValueType<Token>,
@@ -43,7 +43,7 @@ where
         <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::new(env, src)
     }
 
-    fn state_mut(&mut self) -> &mut State<Syntax<Token, Value>> {
+    fn state_mut(&mut self) -> &mut State<'src, Syntax<Token, Value>> {
         &mut self.state
     }
 

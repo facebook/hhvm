@@ -15,12 +15,13 @@
          m_where_constraints = []; m_variadic = FVnonVariadic;
          m_params =
          [{ param_annotation = ([6:49-51], dict<string, int>);
-            param_hint =
-            (Some ([6:31-48],
-                   (Happly (([6:31-35], "\\dict"),
-                      [([6:36-42], (Hprim Tstring));
-                        ([6:44-47], (Hprim Tint))]
-                      ))));
+            param_type_hint =
+            ((dict<string, int>),
+             (Some ([6:31-48],
+                    (Happly (([6:31-35], "\\dict"),
+                       [([6:36-42], (Hprim Tstring));
+                         ([6:44-47], (Hprim Tint))]
+                       )))));
             param_is_reference = false; param_is_variadic = false;
             param_pos = [6:49-51]; param_name = "$_"; param_expr = None;
             param_callconv = None; param_user_attributes = [];
@@ -351,7 +352,7 @@
        f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params =
        [{ param_annotation = ([20:48-50], int);
-          param_hint = (Some ([20:44-47], (Hprim Tint)));
+          param_type_hint = ((int), (Some ([20:44-47], (Hprim Tint))));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [20:48-50]; param_name = "$i"; param_expr = None;
           param_callconv = None;

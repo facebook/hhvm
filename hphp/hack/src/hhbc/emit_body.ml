@@ -14,7 +14,7 @@ module SU = Hhbc_string_utils
 module RGH = Reified_generics_helpers
 
 let has_type_constraint env ti ast_param =
-  match ti, ast_param.A.param_hint with
+  match ti, A.hint_of_type_hint ast_param.A.param_type_hint with
   | Some ti, Some h when Hhas_type_info.has_type_constraint ti ->
     let h = RGH.remove_erased_generics env h in
     RGH.has_reified_type_constraint env h, Some h

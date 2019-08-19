@@ -372,11 +372,11 @@ type array_ctx = NoArray | ElementAssignment | ElementAccess
  *
  * A similar line of reasoning is applied for the static method create.
  *)
-let make_param_local_ty env param =
+ let make_param_local_ty env param =
   let ety_env =
     { (Phase.env_with_self env) with from_class = Some CIstatic; } in
   let env, ty =
-    match param.param_hint with
+    match hint_of_type_hint param.param_type_hint with
     | None ->
       let r = Reason.Rwitness param.param_pos in
       env, (r, TUtils.tany env)
@@ -426,7 +426,11 @@ let rec bind_param env (ty1, param) =
     | None ->
         env, None, ty1
     | Some e ->
-        let decl_hint = Option.map ~f:(Decl_hint.hint env.Env.decl_env) param.param_hint in
+        let decl_hint =
+          Option.map
+          ~f:(Decl_hint.hint env.Env.decl_env)
+          (hint_of_type_hint param.param_type_hint)
+        in
         let enforced =
           match decl_hint with
           | None -> false
@@ -436,7 +440,7 @@ let rec bind_param env (ty1, param) =
         let env, te, ty2 = expr ~expected env e in
         Typing_sequencing.sequence_check_expr e;
         let env, ty1 =
-          if Option.is_none param.param_hint
+          if Option.is_none (hint_of_type_hint param.param_type_hint)
           (* In this case ty1 must be Tany, so just union it with the type of
            * the default expression *)
           then Union.union env ty1 ty2
@@ -452,7 +456,7 @@ let rec bind_param env (ty1, param) =
     List.map_env env param.param_user_attributes user_attribute in
   let tparam = {
     T.param_annotation = Tast.make_expr_annotation param.param_pos ty1;
-    T.param_hint = param.param_hint;
+    T.param_type_hint = ty1, hint_of_type_hint param.param_type_hint;
     T.param_is_reference = param.param_is_reference;
     T.param_is_variadic = param.param_is_variadic;
     T.param_pos = param.param_pos;
@@ -486,7 +490,7 @@ let rec bind_param env (ty1, param) =
 and check_param env param ty is_code_error =
   let env = if is_code_error 4231 then Typing_attributes.check_def env new_object
     SN.AttributeKinds.parameter param.param_user_attributes else env in
-  match param.param_hint with
+  match hint_of_type_hint param.param_type_hint with
   | None -> suggest env param.param_pos ty is_code_error
   | Some _ when is_code_error 4010 ->
     (* We do not permit hints to implement IDisposable or IAsyncDisposable *)
@@ -563,8 +567,7 @@ and fun_def tcopt f : Tast.fun_def option =
       Typing_return.make_return_type localize env ty in
   let return = Typing_return.make_info f.f_fun_kind f.f_user_attributes env
     ~is_explicit:(Option.is_some (hint_of_type_hint f.f_ret)) locl_ty decl_ty in
-  let env, param_tys =
-    List.map_env env f.f_params make_param_local_ty in
+  let env, param_tys = List.map_env env f.f_params make_param_local_ty in
   let partial_callback = Partial.should_check_error (Env.get_mode env) in
   let param_fn = fun p t -> (check_param env p t partial_callback) in
   List.iter2_exn ~f:(param_fn) f.f_params param_tys;
@@ -2437,9 +2440,11 @@ and expr_
           | param::params, declared_ft_param::declared_ft_params,
             expected_ft_param::expected_ft_params ->
             let rest = replace_non_declared_types params declared_ft_params expected_ft_params in
-            let resolved_ft_param = if Option.is_some param.param_hint
+            let resolved_ft_param =
+              if Option.is_some (hint_of_type_hint param.param_type_hint)
               then declared_ft_param
-              else { declared_ft_param with fp_type = expected_ft_param.fp_type } in
+              else { declared_ft_param with fp_type = expected_ft_param.fp_type }
+            in
             resolved_ft_param :: rest
           | _, _, _ ->
             (* This means the expected_ft params list can have more parameters
@@ -2450,7 +2455,7 @@ and expr_
         in
         let replace_non_declared_arity variadic declared_arity expected_arity =
           match variadic with
-          | FVvariadicArg {param_hint = Some(_); _} -> declared_arity
+          | FVvariadicArg {param_type_hint = _, Some(_); _} -> declared_arity
           | FVvariadicArg _ ->
               begin
                 match declared_arity, expected_arity with
@@ -2475,7 +2480,8 @@ and expr_
       | _ ->
         let explicit_variadic_param_or_non_variadic =
           begin match f.f_variadic with
-          | FVvariadicArg {param_hint; _} -> Option.is_some param_hint
+          | FVvariadicArg {param_type_hint; _} ->
+            Option.is_some (hint_of_type_hint param_type_hint)
           | FVellipsis _ -> false
           | _ -> true
           end
@@ -2483,7 +2489,9 @@ and expr_
         (* If all parameters are annotated with explicit types, then type-check
          * the body under those assumptions and pick up the result type *)
         let all_explicit_params =
-          List.for_all f.f_params (fun param -> Option.is_some param.param_hint) in
+          List.for_all f.f_params
+            (fun param -> Option.is_some (hint_of_type_hint param.param_type_hint))
+          in
         if all_explicit_params && explicit_variadic_param_or_non_variadic
         then begin
           Typing_log.increment_feature_count env
@@ -2723,7 +2731,7 @@ and anon_bind_param params (env, t_params) ty : Env.env * Tast.fun_param list =
       env, t_params
   | param :: paraml ->
       params := paraml;
-      match param.param_hint with
+      match hint_of_type_hint param.param_type_hint with
       | Some h ->
 
         let h = Decl_hint.hint env.Env.decl_env h in
@@ -2754,7 +2762,7 @@ and anon_bind_param params (env, t_params) ty : Env.env * Tast.fun_param list =
 
 and anon_bind_variadic env vparam variadic_ty =
   let env, ty, pos =
-    match vparam.param_hint with
+    match hint_of_type_hint vparam.param_type_hint with
     | None ->
       (* if the hint is missing, use the type we expect *)
       env, variadic_ty, Reason.to_pos (fst variadic_ty)
@@ -2787,7 +2795,7 @@ and anon_bind_opt_param env param : Env.env =
       env
 
 and anon_check_param env param =
-  match param.param_hint with
+  match hint_of_type_hint param.param_type_hint with
   | None -> env
   | Some hty ->
       let env, hty = Phase.localize_hint_with_self env hty in
@@ -6693,8 +6701,7 @@ and method_def tcopt env m =
       Typing_return.make_return_type (Phase.localize ~ety_env) env ret in
   let return = Typing_return.make_info m.m_fun_kind m.m_user_attributes env
     ~is_explicit:(Option.is_some (hint_of_type_hint m.m_ret)) locl_ty decl_ty in
-  let env, param_tys =
-    List.map_env env m.m_params make_param_local_ty in
+  let env, param_tys = List.map_env env m.m_params make_param_local_ty in
   let partial_callback = Partial.should_check_error (Env.get_mode env) in
   let param_fn = fun p t -> (check_param env p t partial_callback) in
   List.iter2_exn ~f:(param_fn) m.m_params param_tys;

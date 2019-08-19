@@ -5,7 +5,7 @@
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
       [{ param_annotation = ([3:30-32], string);
-         param_hint = (Some ([3:23-29], (Hprim Tstring)));
+         param_type_hint = ((string), (Some ([3:23-29], (Hprim Tstring))));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [3:30-32]; param_name = "$s"; param_expr = None;
          param_callconv = None; param_user_attributes = [];
@@ -23,7 +23,8 @@
        f_variadic =
        (FVvariadicArg
           { param_annotation = ([5:22-27], varray<string>);
-            param_hint = (Some ([5:12-18], (Hprim Tstring)));
+            param_type_hint =
+            ((varray<string>), (Some ([5:12-18], (Hprim Tstring))));
             param_is_reference = false; param_is_variadic = true;
             param_pos = [5:22-27]; param_name = "$args"; param_expr = None;
             param_callconv = None; param_user_attributes = [];
@@ -67,7 +68,8 @@
           m_where_constraints = [];
           m_variadic =
           (FVvariadicArg
-             { param_annotation = ([12:27-32], varray<_>); param_hint = None;
+             { param_annotation = ([12:27-32], varray<_>);
+               param_type_hint = ((varray<_>), None);
                param_is_reference = false; param_is_variadic = true;
                param_pos = [12:27-32]; param_name = "$args";
                param_expr = None; param_callconv = None;

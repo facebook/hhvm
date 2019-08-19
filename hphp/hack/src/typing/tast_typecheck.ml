@@ -231,7 +231,7 @@ let gamma_from_params env (params:ETast.fun_param list) =
   let add_param_to_gamma gamma param =
     if param.param_user_attributes <> [] then raise Not_implemented;
     let name = make_local_id param.param_name in
-    let ty = localize env param.param_hint in
+    let ty = localize env (hint_of_type_hint param.param_type_hint) in
     (* TODO can we avoid this? *)
     let reas_ty_to_pos_reas_ty (r, _ as ty) = (Typing_reason.to_pos r, ty) in
     let ty = reas_ty_to_pos_reas_ty ty in

@@ -921,7 +921,10 @@ and string_of_fun ~env f use_list =
     | name ->
       let inout = if p.A.param_callconv = Some Ast_defs.Pinout then "inout " else "" in
       let hint =
-        Option.value_map p.A.param_hint ~default:"" ~f:(string_of_hint ~ns:true) in
+        Option.value_map
+          (A.hint_of_type_hint p.A.param_type_hint)
+          ~default:"" ~f:(string_of_hint ~ns:true)
+      in
       let default_val =
         Option.value_map
           p.A.param_expr

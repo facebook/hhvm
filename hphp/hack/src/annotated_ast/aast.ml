@@ -13,6 +13,8 @@ include Aast_defs
  ex: Expression annotation type (when typechecking, the inferred dtype)
  fb: Function body tag (e.g. has naming occurred)
  en: Environment (tracking state inside functions and classes)
+ hi: Hint annotation (when typechecking it will be the localized type hint or the
+     inferred missing type if the hint is missing)
  *)
 type ('ex, 'fb, 'en, 'hi) program = ('ex, 'fb, 'en, 'hi) def list
 [@@deriving
@@ -257,7 +259,7 @@ and is_variadic = bool
 
 and ('ex, 'fb, 'en, 'hi) fun_param = {
   param_annotation: 'ex;
-  param_hint: hint option;
+  param_type_hint: 'hi type_hint;
   param_is_reference: is_reference;
   param_is_variadic: is_variadic;
   param_pos: pos;

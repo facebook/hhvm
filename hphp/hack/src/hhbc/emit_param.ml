@@ -107,9 +107,10 @@ let from_ast ~tparams ~namespace ~generate_defaults ~scope p =
   let param_user_attributes =
     Emit_attribute.from_asts namespace p.A.param_user_attributes in
   let param_hint =
+    let param_hint = A.hint_of_type_hint p.A.param_type_hint in
     if param_is_variadic
-    then from_variadic_param_hint_opt p.A.param_hint
-    else p.A.param_hint in
+    then from_variadic_param_hint_opt param_hint
+    else param_hint in
   let tparams = if param_is_variadic then "array"::tparams else tparams in
   let nullable =
     match p.A.param_expr with

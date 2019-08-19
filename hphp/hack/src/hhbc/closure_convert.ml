@@ -627,7 +627,7 @@ let rec get_scope_fmode scope =
 let make_fn_param (p, lid) is_variadic =
   {
     param_annotation = Tast_annotate.null_annotation p;
-    param_hint = None;
+    param_type_hint = Typing_make_type.null Tast_annotate.witness, None;
     param_is_reference = false;
     param_is_variadic = is_variadic;
     param_pos = p;
@@ -1079,7 +1079,8 @@ and convert_lambda env st p fd use_vars_opt =
             else env_with_lambda env fd in
   let st, block, function_state = convert_function_like_body env st fd.f_body in
   let st = { st with closure_cnt_per_fun = st.closure_cnt_per_fun + 1 } in
-  let st = List.filter_map ~f:(fun p -> p.param_hint) fd.f_params
+  let st =
+    List.filter_map ~f:(fun p -> hint_of_type_hint p.param_type_hint) fd.f_params
     |> convert_hints env st |> fst in
   let st = match hint_of_type_hint fd.f_ret with
     | None -> st

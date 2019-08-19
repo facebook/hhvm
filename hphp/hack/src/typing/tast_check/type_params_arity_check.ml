@@ -74,7 +74,7 @@ and check_arity env pos tname arity size c_pos =
   Errors.type_arity pos tname num_args c_pos
 
 let check_param env p =
-  Option.iter p.param_hint (check_hint env)
+  Option.iter (hint_of_type_hint p.param_type_hint) (check_hint env)
 
 let check_tparam env t =
   List.iter t.tp_constraints (fun (_, h) -> check_hint env h)

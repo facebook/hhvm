@@ -122,7 +122,11 @@ let summarize_typeconst class_name t =
 let summarize_param param =
   let pos = param.param_pos in
   let name = param.param_name in
-  let param_start = Option.value_map param.param_hint ~f:fst ~default:pos in
+  let param_start =
+    Option.value_map
+      (hint_of_type_hint param.param_type_hint)
+      ~f:fst ~default:pos
+  in
   let param_end = Option.value_map param.param_expr ~f:fst ~default:pos in
   let modifiers = modifier_of_param_kind [] param.param_callconv in
   let modifiers = match param.param_visibility with

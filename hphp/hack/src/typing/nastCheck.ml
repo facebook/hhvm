@@ -250,7 +250,7 @@ and method_ env m =
   maybe hint env (hint_of_type_hint m.m_ret)
 
 and fun_param env param =
-  maybe hint env param.param_hint
+  maybe hint env (hint_of_type_hint param.param_type_hint)
 
 let typedef tenv t =
   let env = { (* Since typedefs cannot have constraints we shouldn't check

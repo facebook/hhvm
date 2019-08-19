@@ -28,7 +28,7 @@ Errors:
          m_where_constraints = []; m_variadic = FVnonVariadic;
          m_params =
          [{ param_annotation = ([5:47-58], string);
-            param_hint = (Some ([5:40-46], (Hprim Tstring)));
+            param_type_hint = ((string), (Some ([5:40-46], (Hprim Tstring))));
             param_is_reference = false; param_is_variadic = false;
             param_pos = [5:47-58]; param_name = "$attr_value";
             param_expr = None; param_callconv = None;

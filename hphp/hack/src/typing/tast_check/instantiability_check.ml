@@ -104,7 +104,7 @@ let check_tparams env tparams =
   end
 
 let check_param env param =
-  Option.iter param.param_hint (check_hint env)
+  Option.iter (hint_of_type_hint param.param_type_hint) (check_hint env)
 
 let check_variadic_param env param =
   match param with

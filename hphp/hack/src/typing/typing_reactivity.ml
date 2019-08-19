@@ -286,7 +286,7 @@ let disallow_atmost_rx_as_rxfunc_on_non_functions env param param_ty =
   let module UA = Naming_special_names.UserAttributes in
   if Attributes.mem UA.uaAtMostRxAsFunc param.Aast.param_user_attributes
   then begin
-    if param.Aast.param_hint = None
+    if Aast.hint_of_type_hint param.Aast.param_type_hint = None
     then Errors.missing_annotation_for_atmost_rx_as_rxfunc_parameter param.Aast.param_pos
     else
       let rec err_if_not_fun ty =

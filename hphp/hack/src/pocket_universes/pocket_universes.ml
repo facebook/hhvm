@@ -110,7 +110,7 @@ let gen_pu_accessor
     m_name = (pos, fun_name);
     m_params = [ {
       param_annotation = annotation pos;
-      param_hint = Some (simple_typ pos "string");
+      param_type_hint = snd (annotation pos), Some (simple_typ pos "string");
       param_is_reference = false;
       param_is_variadic = false;
       param_pos = pos;

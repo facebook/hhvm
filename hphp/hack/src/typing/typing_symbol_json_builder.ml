@@ -139,7 +139,7 @@ let json_of_fun tcopt fn_id fn json_data_progress =
     List.fold fn.f_params
       ~init:([], json_data_progress)
       ~f:begin fun (param_acc, progress_acc) f_param ->
-        let ty = match f_param.param_hint with
+        let ty = match hint_of_type_hint f_param.param_type_hint with
           | None -> Typing_reason.Rhint f_param.param_pos, Typing_defs.Tnothing
           | Some h -> hint tcopt h
         in

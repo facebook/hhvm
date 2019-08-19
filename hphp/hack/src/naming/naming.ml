@@ -1603,12 +1603,12 @@ module Make (GetLocals : GetLocals) = struct
     let name = param.Aast.param_name in
     let ident = Local_id.make_unscoped name in
     Env.add_lvar env (p, name) (p, ident);
-    let ty = Option.map param.Aast.param_hint (hint env) in
+    let tyhi = Aast.type_hint_option_map param.Aast.param_type_hint ~f:(hint env) in
     let eopt = Option.map param.Aast.param_expr (expr env) in
     if param.Aast.param_is_reference && Partial.should_check_error ((fst env).in_mode) 2087
     then Errors.reference_in_strict_mode p;
     { N.param_annotation = p;
-      param_hint = ty;
+      param_type_hint = tyhi;
       param_is_reference = param.Aast.param_is_reference;
       param_is_variadic = param.Aast.param_is_variadic;
       param_pos = p;

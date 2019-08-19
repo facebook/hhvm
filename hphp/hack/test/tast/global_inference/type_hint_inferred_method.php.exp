@@ -15,7 +15,7 @@
          m_where_constraints = []; m_variadic = FVnonVariadic;
          m_params =
          [{ param_annotation = ([4:27-29], int);
-            param_hint = (Some ([4:23-26], (Hprim Tint)));
+            param_type_hint = ((int), (Some ([4:23-26], (Hprim Tint))));
             param_is_reference = false; param_is_variadic = false;
             param_pos = [4:27-29]; param_name = "$x"; param_expr = None;
             param_callconv = None; param_user_attributes = [];

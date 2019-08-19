@@ -67,7 +67,7 @@ let get_param_mutability user_attributes =
   else None
 
 let make_param_ty env param =
-  let ty = match param.param_hint with
+  let ty = match hint_of_type_hint param.param_type_hint with
     | None ->
       let r = Reason.Rwitness param.param_pos in
       (r, Tany)

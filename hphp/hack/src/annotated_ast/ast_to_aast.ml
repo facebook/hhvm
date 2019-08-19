@@ -424,7 +424,7 @@ let converter
     in
     {
       Aast.param_annotation = expr_annotation p;
-      param_hint = optional on_hint param.param_hint;
+      param_type_hint = on_type_hint param.param_hint;
       param_is_reference = param.param_is_reference;
       param_is_variadic = param.param_is_variadic;
       param_pos = p;

@@ -16,7 +16,7 @@ module SubType = Typing_subtype
 module MakeType = Typing_make_type
 
 let check_param : Env.env -> Nast.fun_param -> unit =
-  fun env {param_hint; param_pos; _} ->
+  fun env {param_type_hint; param_pos; _} ->
   let error ty =
     let ty_str = Typing_print.error env ty in
     let msgl = Reason.to_string ("This is "^ty_str) (fst ty) in
@@ -94,7 +94,7 @@ let check_param : Env.env -> Nast.fun_param -> unit =
     | _, Tdestructure _
     | _, Tobject -> error ty
   in
-  match param_hint with
+  match hint_of_type_hint param_type_hint with
   | None -> ()
   | Some hint ->
     let env, ty = Typing_phase.localize_hint_with_self env hint in

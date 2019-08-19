@@ -17,7 +17,7 @@ const STRING_TAG: u8 = 252;
 const DOUBLE_TAG: u8 = 253;
 
 pub trait IntoOcamlRep {
-    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a>;
+    fn into_ocamlrep<'a>(self, arena: &mut Arena<'a>) -> Value<'a>;
 }
 
 #[repr(transparent)]
@@ -174,60 +174,61 @@ impl Debug for Value<'_> {
 }
 
 impl IntoOcamlRep for bool {
-    fn into_ocamlrep<'a>(self, _arena: &Arena<'a>) -> Value<'a> {
+    fn into_ocamlrep<'a>(self, _arena: &mut Arena<'a>) -> Value<'a> {
         Value::int(self as isize)
     }
 }
 
 impl IntoOcamlRep for char {
-    fn into_ocamlrep<'a>(self, _arena: &Arena<'a>) -> Value<'a> {
+    fn into_ocamlrep<'a>(self, _arena: &mut Arena<'a>) -> Value<'a> {
         Value::int(self as isize)
     }
 }
 
 impl IntoOcamlRep for isize {
-    fn into_ocamlrep<'a>(self, _arena: &Arena<'a>) -> Value<'a> {
+    fn into_ocamlrep<'a>(self, _arena: &mut Arena<'a>) -> Value<'a> {
         Value::int(self)
     }
 }
 
 impl IntoOcamlRep for usize {
-    fn into_ocamlrep<'a>(self, _arena: &Arena<'a>) -> Value<'a> {
+    fn into_ocamlrep<'a>(self, _arena: &mut Arena<'a>) -> Value<'a> {
         Value::int(self as isize)
     }
 }
 
 impl IntoOcamlRep for u64 {
-    fn into_ocamlrep<'a>(self, _arena: &Arena<'a>) -> Value<'a> {
+    fn into_ocamlrep<'a>(self, _arena: &mut Arena<'a>) -> Value<'a> {
         Value::int(self as isize)
     }
 }
 
 impl IntoOcamlRep for i64 {
-    fn into_ocamlrep<'a>(self, _arena: &Arena<'a>) -> Value<'a> {
+    fn into_ocamlrep<'a>(self, _arena: &mut Arena<'a>) -> Value<'a> {
         Value::int(self as isize)
     }
 }
 
 impl IntoOcamlRep for u32 {
-    fn into_ocamlrep<'a>(self, _arena: &Arena<'a>) -> Value<'a> {
+    fn into_ocamlrep<'a>(self, _arena: &mut Arena<'a>) -> Value<'a> {
         Value::int(self as isize)
     }
 }
 
 impl IntoOcamlRep for i32 {
-    fn into_ocamlrep<'a>(self, _arena: &Arena<'a>) -> Value<'a> {
+    fn into_ocamlrep<'a>(self, _arena: &mut Arena<'a>) -> Value<'a> {
         Value::int(self as isize)
     }
 }
 
 impl<T: IntoOcamlRep> IntoOcamlRep for Option<T> {
-    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+    fn into_ocamlrep<'a>(self, arena: &mut Arena<'a>) -> Value<'a> {
         match self {
             None => Value::int(0),
             Some(val) => {
+                let val = arena.add(val);
                 let mut block = arena.block_with_size(1);
-                block[0] = val.into_ocamlrep(arena);
+                block[0] = val;
                 block.build()
             }
         }
@@ -235,38 +236,27 @@ impl<T: IntoOcamlRep> IntoOcamlRep for Option<T> {
 }
 
 impl<T: IntoOcamlRep> IntoOcamlRep for Vec<T> {
-    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
-        if self.len() == 0 {
-            Value::int(0)
-        } else {
+    fn into_ocamlrep<'a>(self, arena: &mut Arena<'a>) -> Value<'a> {
+        let mut hd = arena.add(());
+        for val in self.into_iter().rev() {
+            let val = arena.add(val);
             let mut current_block = arena.block_with_size(2);
-            current_block[1] = ().into_ocamlrep(arena);
-
-            let mut iter = self.into_iter();
-            let first_val = iter.next().unwrap();
-
-            for val in iter.rev() {
-                current_block[0] = val.into_ocamlrep(arena);
-
-                let mut new_block = arena.block_with_size(2);
-                new_block[1] = current_block.build();
-                current_block = new_block;
-            }
-
-            current_block[0] = first_val.into_ocamlrep(arena);
-            current_block.build()
+            current_block[0] = val;
+            current_block[1] = hd;
+            hd = current_block.build();
         }
+        hd
     }
 }
 
 impl IntoOcamlRep for String {
-    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+    fn into_ocamlrep<'a>(self, arena: &mut Arena<'a>) -> Value<'a> {
         self.as_str().into_ocamlrep(arena)
     }
 }
 
 impl IntoOcamlRep for &str {
-    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+    fn into_ocamlrep<'a>(self, arena: &mut Arena<'a>) -> Value<'a> {
         let bytes_in_word = mem::size_of::<usize>();
         let blocks_length = 1 + (self.len() / bytes_in_word);
         let padding: usize = bytes_in_word - 1 - (self.len() % bytes_in_word);
@@ -285,7 +275,7 @@ impl IntoOcamlRep for &str {
 }
 
 impl IntoOcamlRep for f64 {
-    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+    fn into_ocamlrep<'a>(self, arena: &mut Arena<'a>) -> Value<'a> {
         let mut block = arena.block_with_size_and_tag(1, DOUBLE_TAG);
         block[0] = Value::bits(self.to_bits() as usize);
         block.build()
@@ -293,13 +283,13 @@ impl IntoOcamlRep for f64 {
 }
 
 impl IntoOcamlRep for () {
-    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+    fn into_ocamlrep<'a>(self, arena: &mut Arena<'a>) -> Value<'a> {
         0isize.into_ocamlrep(arena)
     }
 }
 
 impl<T: IntoOcamlRep> IntoOcamlRep for Box<T> {
-    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+    fn into_ocamlrep<'a>(self, arena: &mut Arena<'a>) -> Value<'a> {
         (*self).into_ocamlrep(arena)
     }
 }
@@ -309,10 +299,12 @@ where
     T0: IntoOcamlRep,
     T1: IntoOcamlRep,
 {
-    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+    fn into_ocamlrep<'a>(self, arena: &mut Arena<'a>) -> Value<'a> {
+        let v0 = arena.add(self.0);
+        let v1 = arena.add(self.1);
         let mut block = arena.block_with_size(2);
-        block[0] = self.0.into_ocamlrep(arena);
-        block[1] = self.1.into_ocamlrep(arena);
+        block[0] = v0;
+        block[1] = v1;
         block.build()
     }
 }
@@ -323,11 +315,14 @@ where
     T1: IntoOcamlRep,
     T2: IntoOcamlRep,
 {
-    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+    fn into_ocamlrep<'a>(self, arena: &mut Arena<'a>) -> Value<'a> {
+        let v0 = arena.add(self.0);
+        let v1 = arena.add(self.1);
+        let v2 = arena.add(self.2);
         let mut block = arena.block_with_size(3);
-        block[0] = self.0.into_ocamlrep(arena);
-        block[1] = self.1.into_ocamlrep(arena);
-        block[2] = self.2.into_ocamlrep(arena);
+        block[0] = v0;
+        block[1] = v1;
+        block[2] = v2;
         block.build()
     }
 }
@@ -339,12 +334,16 @@ where
     T2: IntoOcamlRep,
     T3: IntoOcamlRep,
 {
-    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+    fn into_ocamlrep<'a>(self, arena: &mut Arena<'a>) -> Value<'a> {
+        let v0 = arena.add(self.0);
+        let v1 = arena.add(self.1);
+        let v2 = arena.add(self.2);
+        let v3 = arena.add(self.3);
         let mut block = arena.block_with_size(4);
-        block[0] = self.0.into_ocamlrep(arena);
-        block[1] = self.1.into_ocamlrep(arena);
-        block[2] = self.2.into_ocamlrep(arena);
-        block[3] = self.3.into_ocamlrep(arena);
+        block[0] = v0;
+        block[1] = v1;
+        block[2] = v2;
+        block[3] = v3;
         block.build()
     }
 }
@@ -357,13 +356,18 @@ where
     T3: IntoOcamlRep,
     T4: IntoOcamlRep,
 {
-    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+    fn into_ocamlrep<'a>(self, arena: &mut Arena<'a>) -> Value<'a> {
+        let v0 = arena.add(self.0);
+        let v1 = arena.add(self.1);
+        let v2 = arena.add(self.2);
+        let v3 = arena.add(self.3);
+        let v4 = arena.add(self.4);
         let mut block = arena.block_with_size(5);
-        block[0] = self.0.into_ocamlrep(arena);
-        block[1] = self.1.into_ocamlrep(arena);
-        block[2] = self.2.into_ocamlrep(arena);
-        block[3] = self.3.into_ocamlrep(arena);
-        block[4] = self.4.into_ocamlrep(arena);
+        block[0] = v0;
+        block[1] = v1;
+        block[2] = v2;
+        block[3] = v3;
+        block[4] = v4;
         block.build()
     }
 }
@@ -377,14 +381,20 @@ where
     T4: IntoOcamlRep,
     T5: IntoOcamlRep,
 {
-    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+    fn into_ocamlrep<'a>(self, arena: &mut Arena<'a>) -> Value<'a> {
+        let v0 = arena.add(self.0);
+        let v1 = arena.add(self.1);
+        let v2 = arena.add(self.2);
+        let v3 = arena.add(self.3);
+        let v4 = arena.add(self.4);
+        let v5 = arena.add(self.5);
         let mut block = arena.block_with_size(6);
-        block[0] = self.0.into_ocamlrep(arena);
-        block[1] = self.1.into_ocamlrep(arena);
-        block[2] = self.2.into_ocamlrep(arena);
-        block[3] = self.3.into_ocamlrep(arena);
-        block[4] = self.4.into_ocamlrep(arena);
-        block[5] = self.5.into_ocamlrep(arena);
+        block[0] = v0;
+        block[1] = v1;
+        block[2] = v2;
+        block[3] = v3;
+        block[4] = v4;
+        block[5] = v5;
         block.build()
     }
 }
@@ -399,15 +409,22 @@ where
     T5: IntoOcamlRep,
     T6: IntoOcamlRep,
 {
-    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+    fn into_ocamlrep<'a>(self, arena: &mut Arena<'a>) -> Value<'a> {
+        let v0 = arena.add(self.0);
+        let v1 = arena.add(self.1);
+        let v2 = arena.add(self.2);
+        let v3 = arena.add(self.3);
+        let v4 = arena.add(self.4);
+        let v5 = arena.add(self.5);
+        let v6 = arena.add(self.6);
         let mut block = arena.block_with_size(7);
-        block[0] = self.0.into_ocamlrep(arena);
-        block[1] = self.1.into_ocamlrep(arena);
-        block[2] = self.2.into_ocamlrep(arena);
-        block[3] = self.3.into_ocamlrep(arena);
-        block[4] = self.4.into_ocamlrep(arena);
-        block[5] = self.5.into_ocamlrep(arena);
-        block[6] = self.6.into_ocamlrep(arena);
+        block[0] = v0;
+        block[1] = v1;
+        block[2] = v2;
+        block[3] = v3;
+        block[4] = v4;
+        block[5] = v5;
+        block[6] = v6;
         block.build()
     }
 }
@@ -423,16 +440,24 @@ where
     T6: IntoOcamlRep,
     T7: IntoOcamlRep,
 {
-    fn into_ocamlrep<'a>(self, arena: &Arena<'a>) -> Value<'a> {
+    fn into_ocamlrep<'a>(self, arena: &mut Arena<'a>) -> Value<'a> {
+        let v0 = arena.add(self.0);
+        let v1 = arena.add(self.1);
+        let v2 = arena.add(self.2);
+        let v3 = arena.add(self.3);
+        let v4 = arena.add(self.4);
+        let v5 = arena.add(self.5);
+        let v6 = arena.add(self.6);
+        let v7 = arena.add(self.7);
         let mut block = arena.block_with_size(8);
-        block[0] = self.0.into_ocamlrep(arena);
-        block[1] = self.1.into_ocamlrep(arena);
-        block[2] = self.2.into_ocamlrep(arena);
-        block[3] = self.3.into_ocamlrep(arena);
-        block[4] = self.4.into_ocamlrep(arena);
-        block[5] = self.5.into_ocamlrep(arena);
-        block[6] = self.6.into_ocamlrep(arena);
-        block[7] = self.7.into_ocamlrep(arena);
+        block[0] = v0;
+        block[1] = v1;
+        block[2] = v2;
+        block[3] = v3;
+        block[4] = v4;
+        block[5] = v5;
+        block[6] = v6;
+        block[7] = v7;
         block.build()
     }
 }

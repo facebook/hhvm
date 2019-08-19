@@ -5,110 +5,109 @@
 
 #![recursion_limit = "128"]
 
+use proc_macro2::{Span, TokenStream};
 use quote::quote;
+use syn::Ident;
 use synstructure::decl_derive;
 
 decl_derive!([IntoOcamlRep] => derive_ocamlrep);
 
-fn derive_ocamlrep(mut s: synstructure::Structure) -> proc_macro2::TokenStream {
+fn derive_ocamlrep(mut s: synstructure::Structure) -> TokenStream {
+    // By default, if you are deriving an impl of trait Foo for generic type
+    // X<T>, synstructure will add Foo as a bound not only for the type
+    // parameter T, but also for every type which appears as a field in X. This
+    // is not necessary for our use case--we can just require that the type
+    // parameters implement our trait.
     s.add_bounds(synstructure::AddBounds::Generics);
 
-    let num_fields = s.fold(0usize, |acc, _| quote! { #acc + 1 });
+    // Generate pattern bindings for match arms such that the fields are moved
+    // out of the scrutinee. This is what we want for an "into" method (which
+    // consumes `self`)--we want to move the fields into local variables (so
+    // that we can then convert them into Values, etc).
+    s.bind_with(|_| synstructure::BindStyle::Move);
 
-    match &s.ast().data {
-        syn::Data::Struct(struct_data) => {
-            s.bind_with(|_| synstructure::BindStyle::Move);
+    let body = match &s.ast().data {
+        syn::Data::Struct(struct_data) => struct_impl(&s, struct_data),
+        syn::Data::Enum(_) => enum_impl(&s),
+        syn::Data::Union(_) => panic!("untagged unions not supported"),
+    };
 
-            let variant = &s.variants()[0];
-            let size = variant.bindings().len();
-
-            match struct_data.fields {
-                syn::Fields::Unit => s.gen_impl(quote! {
-                    gen impl ::ocamlrep::IntoOcamlRep for @Self {
-                        fn into_ocamlrep<'a>(self, arena: &::ocamlrep::Arena<'a>) -> ::ocamlrep::Value<'a> {
-                            ().into_ocamlrep(arena)
-                        }
-                    }
-                }),
-                // For the newtype pattern (a tuple struct with a single field),
-                // don't allocate a block--just use the inner value directly.
-                syn::Fields::Unnamed(_) if size == 1 => {
-                    let body = s.each(|bi| quote! { #bi.into_ocamlrep(arena) });
-                    s.gen_impl(quote! {
-                        gen impl ::ocamlrep::IntoOcamlRep for @Self {
-                            fn into_ocamlrep<'a>(self, arena: &::ocamlrep::Arena<'a>) -> ::ocamlrep::Value<'a> {
-                                match self { #body }
-                            }
-                        }
-                    })
-                }
-                syn::Fields::Named(_) | syn::Fields::Unnamed(_) => {
-                    let body = s.each(|bi| {
-                        quote! {
-                            block[idx] = #bi.into_ocamlrep(arena);
-                            idx += 1;
-                        }
-                    });
-                    s.gen_impl(quote! {
-                        gen impl ::ocamlrep::IntoOcamlRep for @Self {
-                            fn into_ocamlrep<'a>(self, arena: &::ocamlrep::Arena<'a>) -> ::ocamlrep::Value<'a> {
-                                let mut block = arena.block_with_size(#size);
-                                let mut idx = 0;
-                                match self { #body }
-                                block.build()
-                            }
-                        }
-                    })
-                }
+    s.gen_impl(quote! {
+        gen impl ::ocamlrep::IntoOcamlRep for @Self {
+            fn into_ocamlrep<'a>(self, arena: &mut ::ocamlrep::Arena<'a>) -> ::ocamlrep::Value<'a> {
+                match self { #body }
             }
         }
-        syn::Data::Enum(_) => {
-            let mut nullary_variants = vec![];
-            let mut block_variants = vec![];
-            for variant in s.variants().iter() {
-                let ident = variant.ast().ident.to_string();
-                let num_bindings = variant.bindings().len();
-                if num_bindings == 0 {
-                    nullary_variants.push((ident, num_bindings, nullary_variants.len() as u8));
-                } else {
-                    block_variants.push((ident, num_bindings, block_variants.len() as u8));
-                };
-            }
-            nullary_variants.append(&mut block_variants);
-            let all_variants = nullary_variants;
+    })
+}
 
-            let tags = s.each_variant(|v| {
-                let ident = v.ast().ident.to_string();
-                let (_, _, tag) = all_variants.iter().find(|(id, _, _)| *id == ident).unwrap();
-                quote! { #tag }
-            });
-
-            s.bind_with(|_| synstructure::BindStyle::Move);
-
-            let body = s.each(|bi| {
-                quote! {
-                    block[idx] = #bi.into_ocamlrep(arena);
-                    idx += 1;
-                }
-            });
-
-            s.gen_impl(quote! {
-                gen impl ::ocamlrep::IntoOcamlRep for @Self {
-                    fn into_ocamlrep<'a>(self, arena: &::ocamlrep::Arena<'a>) -> ::ocamlrep::Value<'a> {
-                        let size = match self { #num_fields };
-                        let tag = match self { #tags };
-                        if size == 0 {
-                            ::ocamlrep::Value::int(tag as isize)
-                        } else {
-                            let mut block = arena.block_with_size_and_tag(size, tag);
-                            let mut idx = 0;
-                            match self { #body }
-                            block.build()
-                        }
-                    }
-                }
-            })
+fn struct_impl(s: &synstructure::Structure, struct_data: &syn::DataStruct) -> TokenStream {
+    match struct_data.fields {
+        syn::Fields::Unit => {
+            // Represent unit structs with unit.
+            s.each_variant(|_| quote! { arena.add(()) })
         }
-        syn::Data::Union(_) => panic!(),
+        syn::Fields::Unnamed(ref fields) if fields.unnamed.len() == 1 => {
+            // For the newtype pattern (a tuple struct with a single field),
+            // don't allocate a block--just use the inner value directly.
+            s.each(|bi| quote! { arena.add(#bi) })
+        }
+        syn::Fields::Named(_) | syn::Fields::Unnamed(_) => {
+            // Otherwise, we have a record-like struct or a tuple struct. Both
+            // are represented with a block.
+            s.each_variant(|v| allocate_block(v, 0))
+        }
+    }
+}
+
+fn enum_impl(s: &synstructure::Structure) -> TokenStream {
+    // For tagging purposes, variant constructors of zero arguments are numbered
+    // separately from variant constructors of one or more arguments, so we need
+    // to count them separately to learn their tags.
+    let mut nullary_variants = vec![];
+    let mut block_variants = vec![];
+    for variant in s.variants().iter() {
+        let ident = variant.ast().ident.to_string();
+        if variant.bindings().len() == 0 {
+            nullary_variants.push((ident, nullary_variants.len() as u8));
+        } else {
+            block_variants.push((ident, block_variants.len() as u8));
+        };
+    }
+    nullary_variants.append(&mut block_variants);
+    let all_variants = nullary_variants;
+
+    s.each_variant(|v| {
+        let size = v.bindings().len();
+        let tag = {
+            let ident = v.ast().ident.to_string();
+            all_variants
+                .iter()
+                .find(|(id, _)| *id == ident)
+                .map(|(_, tag)| *tag)
+                .unwrap()
+        };
+        if size == 0 {
+            quote!(::ocamlrep::Value::int(#tag as isize))
+        } else {
+            allocate_block(v, tag)
+        }
+    })
+}
+
+fn allocate_block(variant: &synstructure::VariantInfo, tag: u8) -> TokenStream {
+    let size = variant.bindings().len();
+    let mut locals = TokenStream::new();
+    let mut fields = TokenStream::new();
+    for (i, bi) in variant.bindings().iter().enumerate() {
+        let ident = Ident::new(&format!("__field_{}", i), Span::call_site());
+        locals.extend(quote! { let #ident = arena.add(#bi); });
+        fields.extend(quote! { block[#i] = #ident; });
+    }
+    quote! {
+        #locals
+        let mut block = arena.block_with_size_and_tag(#size, #tag);
+        #fields
+        block.build()
     }
 }

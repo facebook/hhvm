@@ -70,17 +70,32 @@ let get_positional_info (cst : Syntax.t) (file_offset : int) : ((int * int) * in
       if matches_end then Some (pos, idx) else None
     end
 
-let get_occurrence_info ast tast (line, char) occurrence =
-  let ast = Some ast in
-  let def_opt = ServerSymbolDefinition.go ast occurrence in
-  ServerInferType.type_at_pos tast line char
-  >>= fun (env, ty) ->
-  let open Typing_defs in
-  begin match snd ty with
-  | Tfun ft -> Some ft
-  | _ -> None
-  end
-  >>| fun ft -> (occurrence, env, ft, def_opt)
+let get_occurrence_info
+    (nast: Nast.program)
+    (occurrence: Relative_path.t SymbolOccurrence.t) =
+  let ft_opt =
+
+    (* Handle static methods, instance methods, and constructors *)
+    match occurrence.SymbolOccurrence.type_ with
+    | SymbolOccurrence.Method (classname, methodname) ->
+      let classname = Utils.add_ns classname in
+      let ft = if methodname = "__construct" then begin
+        Decl_provider.get_class_constructor classname
+      end else begin
+        Option.first_some
+          (Decl_provider.get_class_method classname methodname)
+          (Decl_provider.get_static_method classname methodname)
+      end in
+      ft
+    | _ ->
+      let fun_name = occurrence.SymbolOccurrence.name in
+      let ft = Decl_provider.get_fun fun_name in
+      ft
+  in
+  let def_opt = ServerSymbolDefinition.go (Some nast) occurrence in
+  match ft_opt with
+  | None -> None
+  | Some ft -> Some (occurrence, ft, def_opt)
 
 let go
     ~(env: ServerEnv.env)
@@ -98,15 +113,22 @@ let go
   let (mode, tree) = Full_fidelity_ast.parse_text parser_env source_text in
   let results = Full_fidelity_ast.lower_tree parser_env source_text mode tree in
   let ast = results.Full_fidelity_ast.ast in
-  let ast = Ast_to_nast.convert ast in
-  let tast = ServerIdeUtils.check_ast tcopt ast in
+  let nast = Ast_to_nast.convert ast in
+  let tast = ServerIdeUtils.check_ast tcopt nast in
+  let typing_env = Tast_env.empty tcopt in
   let offset = SourceText.position_to_offset source_text (line, column) in
   get_positional_info (Full_fidelity_ast.PositionedSyntaxTree.root tree) offset
   >>= fun ((symbol_line, symbol_char), argument_idx) ->
   let results = IdentifySymbolService.go tast symbol_line symbol_char in
-  List.hd results
-  >>= get_occurrence_info ast tast (symbol_line, symbol_char)
-  >>| fun (occurrence, typing_env, ft, def_opt) ->
+  let results = List.filter results ~f:(fun r ->
+    match r.SymbolOccurrence.type_ with
+    | SymbolOccurrence.Method _
+    | SymbolOccurrence.Function -> true
+    | _ -> false
+  ) in
+  let head_result = List.hd results in
+  let r2 = head_result >>= get_occurrence_info nast in
+  r2 >>| fun (occurrence, ft, def_opt) ->
   let open Typing_defs in
   let open Lsp.SignatureHelp in
   let siginfo_label =

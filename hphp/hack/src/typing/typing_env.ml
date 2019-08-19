@@ -101,19 +101,26 @@ let empty_tyvar_info =
     type_constants = SMap.empty;
     }
 
-let add_current_tyvar env p v =
+let add_current_tyvar ?variance env p v =
   match env.tyvars_stack with
   | (expr_pos, tyvars) :: rest ->
+    let tyvar =
+      match variance with
+      | Some Ast_defs.Invariant -> {empty_tyvar_info with appears_covariantly = true; appears_contravariantly = true}
+      | Some Ast_defs.Covariant -> {empty_tyvar_info with appears_covariantly = true}
+      | Some Ast_defs.Contravariant -> {empty_tyvar_info with appears_contravariantly = true}
+      | None -> empty_tyvar_info
+    in
     let env = env_with_tvenv env
-      (IMap.add v { empty_tyvar_info with tyvar_pos = p } env.tvenv) in
+      (IMap.add v { tyvar with tyvar_pos = p } env.tvenv) in
     { env with tyvars_stack = (expr_pos, (v :: tyvars)) :: rest }
   | _ -> env
 
-let fresh_type_reason env r =
+let fresh_type_reason ?variance env r =
   let v = Ident.tmp () in
   let env =
     log_env_change "fresh_type" env @@
-    add_current_tyvar env (Reason.to_pos r) v in
+    add_current_tyvar ?variance env (Reason.to_pos r) v in
   env, (r, Tvar v)
 
 let fresh_type env p =

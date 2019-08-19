@@ -372,14 +372,17 @@ type array_ctx = NoArray | ElementAssignment | ElementAccess
  *
  * A similar line of reasoning is applied for the static method create.
  *)
- let make_param_local_ty env param =
+let make_param_local_ty env param =
   let ety_env =
     { (Phase.env_with_self env) with from_class = Some CIstatic; } in
   let env, ty =
     match hint_of_type_hint param.param_type_hint with
     | None ->
       let r = Reason.Rwitness param.param_pos in
-      env, (r, TUtils.tany env)
+      if TCO.global_inference (Env.get_tcopt env) then
+        Env.fresh_type_reason ~variance:Ast_defs.Contravariant env r
+      else
+        env, (r, TUtils.tany env)
     | Some x ->
       let ty = Decl_hint.hint env.Env.decl_env x in
       let ty = Typing_enforceability.pessimize_type_simple env ty in
@@ -440,9 +443,11 @@ let rec bind_param env (ty1, param) =
         let env, te, ty2 = expr ~expected env e in
         Typing_sequencing.sequence_check_expr e;
         let env, ty1 =
-          if Option.is_none (hint_of_type_hint param.param_type_hint)
-          (* In this case ty1 must be Tany, so just union it with the type of
-           * the default expression *)
+          if  Option.is_none (hint_of_type_hint param.param_type_hint)
+              && not @@ TCO.global_inference (Env.get_tcopt env)
+          (* ty1 will be Tany iff we have no type hint and we are not in
+           * 'infer missing mode'. When it ty1 is Tany we just union it with
+           * the type of the default expression *)
           then Union.union env ty1 ty2
           (* Otherwise we have an explicit type, and the default expression type
            * must be a subtype *)
@@ -531,6 +536,7 @@ and fun_def tcopt f : Tast.fun_def option =
     (Env.get_fun env (snd f.f_name))
     ~f:(fun x -> Option.value_exn x.ft_decl_errors)
   );
+  let env = Env.open_tyvars env (fst f.f_name) in
   let env = Env.set_env_function_pos env pos in
   let env = Env.set_env_pessimize env in
   let env = Typing_attributes.check_def env new_object SN.AttributeKinds.fn f.f_user_attributes in
@@ -558,7 +564,7 @@ and fun_def tcopt f : Tast.fun_def option =
     | None ->
       Typing_return.make_default_return
         ~is_method:false
-        ~is_global_inference_on:(TCO.global_inference tcopt)
+        ~is_global_inference_on:(TCO.global_inference (Env.get_tcopt env))
         env f.f_name
     | Some ty ->
       let localize = fun env ty ->
@@ -599,7 +605,9 @@ and fun_def tcopt f : Tast.fun_def option =
   let env, tparams =
     List.map_env env f.f_tparams type_param in
   let env, user_attributes =
-    List.map_env env f.f_user_attributes user_attribute in
+    List.map_env env f.f_user_attributes user_attribute
+  in
+  let env = Typing_solver.close_tyvars_and_solve env Errors.bad_function_typevar in
   let env = Typing_solver.solve_all_unsolved_tyvars env Errors.bad_function_typevar in
   let fundef = {
     T.f_annotation = Env.save local_tpenv env;
@@ -6165,9 +6173,9 @@ and class_def tcopt c =
     Typing_requirements.check_class env tc;
     if shallow_decl_enabled () then
       Typing_inheritance.check_class env tc;
-    Some (class_def_ tcopt env c tc)
+    Some (class_def_ env c tc)
 
-and class_def_ tcopt env c tc =
+and class_def_ env c tc =
   let env =
     let kind = match c.c_kind with
       | Ast_defs.Cenum -> SN.AttributeKinds.enum
@@ -6282,16 +6290,16 @@ and class_def_ tcopt env c tc =
     then List.iter (c.c_extends @ c.c_uses) (Typing_disposable.enforce_is_disposable env);
   let env, typed_vars = List.map_env env vars (class_var_def ~is_static:false) in
   let typed_method_redeclarations = [] in
-  let typed_methods = List.filter_map methods (method_def tcopt env) in
+  let typed_methods = List.filter_map methods (method_def env) in
   let env, typed_typeconsts = List.map_env env c.c_typeconsts typeconst_def in
   let env, consts = List.map_env env c.c_consts class_const_def in
   let typed_consts, const_types = List.unzip consts in
   let env = Typing_enum.enum_class_check env tc c.c_consts const_types in
-  let typed_constructor = class_constr_def tcopt env constructor in
+  let typed_constructor = class_constr_def env constructor in
   let env = Env.set_static env in
   let env, typed_static_vars =
     List.map_env env static_vars (class_var_def ~is_static:true) in
-  let typed_static_methods = List.filter_map static_methods (method_def tcopt env) in
+  let typed_static_methods = List.filter_map static_methods (method_def env) in
   let env, file_attrs = file_attributes env c.c_file_attributes in
   let methods =
     match typed_constructor with
@@ -6468,9 +6476,9 @@ and class_const_def env cc =
       T.cc_doc_comment = cc.cc_doc_comment
     }, ty)
 
-and class_constr_def tcopt env constructor =
+and class_constr_def env constructor =
   let env = { env with Env.inside_constructor = true } in
-  Option.bind constructor (method_def tcopt env)
+  Option.bind constructor (method_def env)
 
 and class_implements_type env c1 removals ctype2 =
   let params =
@@ -6641,11 +6649,12 @@ and class_type_param env ct =
     T.c_tparam_constraints = SMap.map (Tuple.T2.map_fst ~f:reify_kind) ct.c_tparam_constraints;
   }
 
-and method_def tcopt env m =
+and method_def env m =
   with_timeout env m.m_name ~do_:begin fun env ->
   (* reset the expression dependent display ids for each method body *)
   Reason.expr_display_id_map := IMap.empty;
   let pos = fst m.m_name in
+  let env = Env.open_tyvars env (fst m.m_name) in
   let env = Env.reinitialize_locals env in
   let env = Env.set_env_function_pos env pos in
   let env = Typing_attributes.check_def env new_object
@@ -6689,7 +6698,7 @@ and method_def tcopt env m =
     | None ->
       Typing_return.make_default_return
         ~is_method:true
-        ~is_global_inference_on:(TCO.global_inference tcopt)
+        ~is_global_inference_on:(TCO.global_inference (Env.get_tcopt env))
         env m.m_name
     | Some ret ->
       (* If a 'this' type appears it needs to be compatible with the
@@ -6744,6 +6753,7 @@ and method_def tcopt env m =
     List.map_env env m.m_tparams type_param in
   let env, user_attributes =
     List.map_env env m.m_user_attributes user_attribute in
+  let env = Typing_solver.close_tyvars_and_solve env Errors.bad_method_typevar in
   let env = Typing_solver.solve_all_unsolved_tyvars env Errors.bad_method_typevar in
   let method_def = {
     T.m_annotation = Env.save local_tpenv env;

@@ -131,7 +131,7 @@ let make_default_return ~is_method ~is_global_inference_on env name =
       (* When global inference is turned on we create a fresh variable for the
         returned type. Later on it will be reused to get back the inferred type
         of the function. *)
-      let env, ty = Env.fresh_type_reason env (Reason.Rwitness pos) in
+      let env, ty = Env.fresh_type_reason ~variance:Ast_defs.Covariant env (Reason.Rwitness pos) in
       env, wrap_awaitable env pos ty
     else
       env, (Reason.Rwitness pos, Typing_utils.tany env)

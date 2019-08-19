@@ -16,11 +16,11 @@ val show_env : env -> string
 val pp_env : Format.formatter -> env -> unit
 val get_tcopt : env -> TypecheckerOptions.t
 val fresh_type : env -> Pos.t -> env * locl ty
-val fresh_type_reason : env -> Reason.t -> env * locl ty
+val fresh_type_reason : ?variance:Ast_defs.variance -> env -> Reason.t -> env * locl ty
 val fresh_invariant_type_var : env -> Pos.t -> env * locl ty
 val open_tyvars : env -> Pos.t -> env
 val get_current_tyvars : env -> Ident.t list
-val add_current_tyvar : env -> Pos.t -> Ident.t -> env
+val add_current_tyvar : ?variance:Ast_defs.variance -> env -> Pos.t -> Ident.t -> env
 val close_tyvars : env -> env
 val get_var : env -> int -> env * int
 val rename : env -> int -> int -> env

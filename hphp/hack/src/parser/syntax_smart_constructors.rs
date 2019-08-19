@@ -5,7 +5,7 @@
 
 use crate::parser_env::ParserEnv;
 use crate::smart_constructors::NoState;
-use crate::source_text::SourceText;
+use parser_core_types::source_text::SourceText;
 
 pub use crate::syntax_smart_constructors_generated::*;
 

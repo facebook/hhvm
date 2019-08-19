@@ -6,14 +6,14 @@
 
 use crate::declaration_parser::DeclarationParser;
 use crate::expression_parser::ExpressionParser;
-use crate::lexable_token::LexableToken;
 use crate::lexer::Lexer;
 use crate::parser_env::ParserEnv;
 use crate::parser_trait::Context;
 use crate::parser_trait::ParserTrait;
 use crate::smart_constructors::{NodeType, SmartConstructors};
-use crate::syntax_error::{self as Errors, SyntaxError};
-use crate::token_kind::TokenKind;
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::syntax_error::{self as Errors, SyntaxError};
+use parser_core_types::token_kind::TokenKind;
 
 pub struct TypeParser<'a, S, T>
 where

@@ -5,17 +5,17 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::expression_parser::ExpressionParser;
-use crate::lexable_token::LexableToken;
-use crate::lexable_trivia::LexableTrivia;
 use crate::lexer::Lexer;
 use crate::parser_env::ParserEnv;
 use crate::parser_trait::{Context, ExpectedTokens, ParserTrait, SeparatedListKind};
 use crate::smart_constructors::{NodeType, SmartConstructors};
 use crate::statement_parser::StatementParser;
-use crate::syntax_error::{self as Errors, SyntaxError};
-use crate::token_kind::TokenKind;
-use crate::trivia_kind::TriviaKind;
 use crate::type_parser::TypeParser;
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::lexable_trivia::LexableTrivia;
+use parser_core_types::syntax_error::{self as Errors, SyntaxError};
+use parser_core_types::token_kind::TokenKind;
+use parser_core_types::trivia_kind::TriviaKind;
 
 #[derive(Debug)]
 pub struct DeclarationParser<'a, S, T>

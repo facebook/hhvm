@@ -4,8 +4,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::syntax_kind::SyntaxKind;
-use crate::token_kind::TokenKind;
+use parser_core_types::syntax_kind::SyntaxKind;
+use parser_core_types::token_kind::TokenKind;
 
 pub use crate::smart_constructors_generated::*;
 pub use crate::smart_constructors_wrappers::*;

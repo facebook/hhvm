@@ -8,16 +8,16 @@ use std::borrow::Cow;
 use std::marker::PhantomData;
 
 use crate::declaration_parser::DeclarationParser;
-use crate::lexable_token::LexableToken;
 use crate::lexer::{Lexer, StringLiteralKind};
 use crate::operator::{Assoc, Operator};
 use crate::parser_env::ParserEnv;
 use crate::parser_trait::{Context, ParserTrait};
 use crate::smart_constructors::{NodeType, SmartConstructors};
 use crate::statement_parser::StatementParser;
-use crate::syntax_error::{self as Errors, SyntaxError};
-use crate::token_kind::TokenKind;
 use crate::type_parser::TypeParser;
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::syntax_error::{self as Errors, SyntaxError};
+use parser_core_types::token_kind::TokenKind;
 
 #[derive(PartialEq)]
 pub enum BinaryExpressionPrefixKind<P> {

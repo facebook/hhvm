@@ -9,9 +9,9 @@ use crate::lexer::Lexer;
 use crate::parser_env::ParserEnv;
 use crate::parser_trait::{Context, ParserTrait};
 use crate::smart_constructors::{NodeType, SmartConstructors};
-use crate::source_text::SourceText;
 use crate::stack_limit::StackLimit;
-use crate::syntax_error::SyntaxError;
+use parser_core_types::source_text::SourceText;
+use parser_core_types::syntax_error::SyntaxError;
 
 pub struct Parser<'a, S, T>
 where

@@ -20,11 +20,13 @@
  // build AST.
 
 
-use crate::lexable_token::LexableToken;
+use parser_core_types::{
+  lexable_token::LexableToken,
+  source_text::SourceText,
+  syntax_kind::SyntaxKind,
+};
 use crate::parser_env::ParserEnv;
 use crate::smart_constructors::SmartConstructors;
-use crate::source_text::SourceText;
-use crate::syntax_kind::SyntaxKind;
 
 #[derive(Clone)]
 pub struct WithKind<S> {

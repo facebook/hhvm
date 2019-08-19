@@ -7,9 +7,9 @@
 use std::hash::{Hash, Hasher};
 use std::rc::Rc;
 
-use crate::lexable_token::LexableToken;
 use crate::positioned_trivia::PositionedTrivia;
-use crate::token_kind::TokenKind;
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::token_kind::TokenKind;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct PositionedTokenImpl {

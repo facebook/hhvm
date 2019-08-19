@@ -16,11 +16,13 @@
  **
  *
  */
-use crate::minimal_syntax::MinimalSyntax;
-use crate::minimal_token::MinimalToken;
+use parser_core_types::{
+  minimal_syntax::MinimalSyntax,
+  minimal_token::MinimalToken,
+  source_text::SourceText,
+};
 use crate::parser_env::ParserEnv;
 use crate::smart_constructors::{NoState, SmartConstructors};
-use crate::source_text::SourceText;
 use crate::syntax_smart_constructors::SyntaxSmartConstructors;
 
 #[derive(Clone)]

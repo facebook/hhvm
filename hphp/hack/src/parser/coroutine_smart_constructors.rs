@@ -1,9 +1,9 @@
-use crate::lexable_token::LexableToken;
 use crate::parser_env::ParserEnv;
-use crate::source_text::SourceText;
-use crate::syntax::*;
 use crate::syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
-use crate::token_kind::TokenKind;
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::source_text::SourceText;
+use parser_core_types::syntax::*;
+use parser_core_types::token_kind::TokenKind;
 
 use std::marker::PhantomData;
 

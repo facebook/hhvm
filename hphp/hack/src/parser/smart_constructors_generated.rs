@@ -16,9 +16,11 @@
  **
  *
  */
-use crate::lexable_token::LexableToken;
+use parser_core_types::{
+  lexable_token::LexableToken,
+  source_text::SourceText,
+};
 use crate::parser_env::ParserEnv;
-use crate::source_text::SourceText;
 
 pub trait SmartConstructors<'src, State>: Clone {
     type Token: LexableToken;

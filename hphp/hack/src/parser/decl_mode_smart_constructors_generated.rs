@@ -16,14 +16,18 @@
  **
  *
  */
+use parser_core_types::{
+  lexable_token::LexableToken,
+  source_text::SourceText,
+  syntax::{
+    Syntax,
+    SyntaxValueType,
+  },
+};
 use crate::decl_mode_smart_constructors::*;
-use crate::lexable_token::LexableToken;
 use crate::parser_env::ParserEnv;
 use crate::smart_constructors::SmartConstructors;
-use crate::source_text::SourceText;
-use crate::syntax::Syntax;
 use crate::syntax_smart_constructors::SyntaxSmartConstructors;
-use crate::syntax::SyntaxValueType;
 
 impl<'src, Token, Value>
 SmartConstructors<'src, State<Syntax<Token, Value>>>

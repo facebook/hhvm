@@ -6,11 +6,11 @@
 
 use std::rc::Rc;
 
-use crate::lexable_token::LexableToken;
 use crate::positioned_token::PositionedToken;
-use crate::syntax::*;
-use crate::syntax_kind::SyntaxKind;
-use crate::token_kind::TokenKind;
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::syntax::*;
+use parser_core_types::syntax_kind::SyntaxKind;
+use parser_core_types::token_kind::TokenKind;
 
 #[derive(Debug, Clone)]
 pub enum PositionedValue {

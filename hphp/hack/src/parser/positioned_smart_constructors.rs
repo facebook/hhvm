@@ -16,11 +16,11 @@
  **
  *
  */
+use parser_core_types::source_text::SourceText;
 use crate::parser_env::ParserEnv;
 use crate::positioned_syntax::PositionedSyntax;
 use crate::positioned_token::PositionedToken;
 use crate::smart_constructors::{NoState, SmartConstructors};
-use crate::source_text::SourceText;
 use crate::syntax_smart_constructors::{SyntaxSmartConstructors, StateType};
 
 #[derive(Clone)]

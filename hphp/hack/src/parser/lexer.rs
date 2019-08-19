@@ -4,12 +4,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::lexable_token::LexableToken;
-use crate::lexable_trivia::LexableTrivia;
-use crate::source_text::{SourceText, INVALID};
-use crate::syntax_error::{self as Errors, Error, SyntaxError};
-use crate::token_kind::TokenKind;
-use crate::trivia_kind::TriviaKind;
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::lexable_trivia::LexableTrivia;
+use parser_core_types::source_text::{SourceText, INVALID};
+use parser_core_types::syntax_error::{self as Errors, Error, SyntaxError};
+use parser_core_types::token_kind::TokenKind;
+use parser_core_types::trivia_kind::TriviaKind;
 
 use std::cell::RefCell;
 use std::ops::DerefMut;

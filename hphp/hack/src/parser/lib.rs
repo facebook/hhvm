@@ -6,21 +6,6 @@
 #[macro_use]
 extern crate lazy_static;
 
-pub mod token_kind;
-pub mod trivia_kind;
-
-pub mod source_text;
-
-pub mod lexable_token;
-pub mod lexable_trivia;
-
-pub mod syntax;
-mod syntax_generated;
-pub mod syntax_kind;
-mod syntax_type;
-
-pub mod syntax_error;
-
 pub mod hh_autoimport;
 pub mod lexer;
 pub mod mode_parser;
@@ -54,11 +39,17 @@ pub mod type_parser;
 
 pub mod minimal_parser;
 mod minimal_smart_constructors;
-pub mod minimal_syntax;
-pub mod minimal_token;
-pub mod minimal_trivia;
 
 pub mod positioned_smart_constructors;
 pub mod positioned_syntax;
 pub mod positioned_token;
 pub mod positioned_trivia;
+
+// The "parser_core_types" crate contains data definitions for a variety of data structures
+// and types used by the parser and consumers of the parser. These data types were recently
+// split out from this crate. In order to keep the same library facade, the relevant modules
+// are re-exported here so that consumers do not need to be made aware of the data-code split.
+pub use parser_core_types::{
+    lexable_token, minimal_syntax, minimal_token, minimal_trivia, source_text, syntax,
+    syntax_error, syntax_kind, token_kind, trivia_kind,
+};

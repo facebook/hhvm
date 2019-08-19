@@ -4,14 +4,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::lexable_token::LexableToken;
-use crate::lexable_trivia::LexableTrivia;
 use crate::lexer::{self, Lexer};
 use crate::parser_env::ParserEnv;
 use crate::smart_constructors::{NodeType, SmartConstructors};
 use crate::stack_limit::StackLimit;
-use crate::syntax_error::{self as Errors, Error, SyntaxError};
-use crate::token_kind::TokenKind;
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::lexable_trivia::LexableTrivia;
+use parser_core_types::syntax_error::{self as Errors, Error, SyntaxError};
+use parser_core_types::token_kind::TokenKind;
 
 #[derive(PartialEq)]
 pub enum SeparatedListKind {

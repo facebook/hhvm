@@ -1,0 +1,8 @@
+[package]
+name = "hack_parser_core_types"
+version = "3.49.0"
+edition = "2018"
+
+[lib]
+name = "parser_core_types"
+path = "../parser_core_types_lib.rs"

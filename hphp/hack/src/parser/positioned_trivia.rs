@@ -4,9 +4,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::lexable_trivia::LexableTrivia;
-use crate::source_text::SourceText;
-use crate::trivia_kind::TriviaKind;
+use parser_core_types::lexable_trivia::LexableTrivia;
+use parser_core_types::source_text::SourceText;
+use parser_core_types::trivia_kind::TriviaKind;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct PositionedTrivia {

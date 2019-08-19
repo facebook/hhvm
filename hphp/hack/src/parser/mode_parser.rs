@@ -4,12 +4,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::lexable_token::LexableToken;
 use crate::parser_env::ParserEnv;
-use crate::source_text::SourceText;
-use crate::syntax::{self, SyntaxVariant};
-use crate::token_kind::TokenKind;
 use deps_rust::file_mode::FileMode;
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::source_text::SourceText;
+use parser_core_types::syntax::{self, SyntaxVariant};
+use parser_core_types::token_kind::TokenKind;
 
 use crate::minimal_parser::MinimalSyntaxParser;
 

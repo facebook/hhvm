@@ -72,7 +72,7 @@ extern "C" {
     fn ocamlpool_leave();
 }
 
-unsafe fn block_field(block: &ocaml::Value, field: usize) -> ocaml::Value {
+pub unsafe fn block_field(block: &ocaml::Value, field: usize) -> ocaml::Value {
     ocaml::Value::new(*ocaml::core::mlvalues::field(block.0, field))
 }
 
@@ -80,7 +80,7 @@ unsafe fn bool_field(block: &ocaml::Value, field: usize) -> bool {
     ocaml::Value::new(*ocaml::core::mlvalues::field(block.0, field)).i32_val() != 0
 }
 
-unsafe fn str_field(block: &ocaml::Value, field: usize) -> ocaml::Str {
+pub unsafe fn str_field(block: &ocaml::Value, field: usize) -> ocaml::Str {
     ocaml::Str::from(ocaml::Value::new(*ocaml::core::mlvalues::field(
         block.0, field,
     )))

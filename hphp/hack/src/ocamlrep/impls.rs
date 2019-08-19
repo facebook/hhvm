@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::convert::TryInto;
 use std::mem;
 
 use crate::arena::Arena;
@@ -24,42 +25,45 @@ impl IntoOcamlRep for isize {
 
 impl IntoOcamlRep for usize {
     fn into_ocamlrep<'a>(self, _arena: &mut Arena<'a>) -> Value<'a> {
-        Value::int(self as isize)
+        Value::int(self.try_into().unwrap())
     }
 }
 
 impl IntoOcamlRep for i64 {
     fn into_ocamlrep<'a>(self, _arena: &mut Arena<'a>) -> Value<'a> {
-        Value::int(self as isize)
+        Value::int(self.try_into().unwrap())
     }
 }
 
 impl IntoOcamlRep for u64 {
     fn into_ocamlrep<'a>(self, _arena: &mut Arena<'a>) -> Value<'a> {
-        Value::int(self as isize)
+        Value::int(self.try_into().unwrap())
     }
 }
 
 impl IntoOcamlRep for i32 {
     fn into_ocamlrep<'a>(self, _arena: &mut Arena<'a>) -> Value<'a> {
-        Value::int(self as isize)
+        Value::int(self.try_into().unwrap())
     }
 }
 
 impl IntoOcamlRep for u32 {
     fn into_ocamlrep<'a>(self, _arena: &mut Arena<'a>) -> Value<'a> {
-        Value::int(self as isize)
+        Value::int(self.try_into().unwrap())
     }
 }
 
 impl IntoOcamlRep for bool {
     fn into_ocamlrep<'a>(self, _arena: &mut Arena<'a>) -> Value<'a> {
-        Value::int(self as isize)
+        Value::int(self.into())
     }
 }
 
 impl IntoOcamlRep for char {
     fn into_ocamlrep<'a>(self, _arena: &mut Arena<'a>) -> Value<'a> {
+        if self as u32 > 255 {
+            panic!("char out of range: {}", self.to_string())
+        }
         Value::int(self as isize)
     }
 }

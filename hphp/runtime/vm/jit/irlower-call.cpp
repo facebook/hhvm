@@ -128,7 +128,6 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   auto const callOff = safe_cast<int32_t>(extra->callOffset);
 
   auto& v = vmain(env);
-  auto& vc = vcold(env);
   auto const catchBlock = label(env, inst->taken());
 
   auto const calleeSP = sp[cellsToBytes(extra->spOffset.offset)];
@@ -153,67 +152,6 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
       calleeAR + AROFF(m_numArgsAndFlags),
       v.makeReg()
     };
-  }
-
-  auto const isNativeImplCall = callee &&
-                                callee->arFuncPtr() &&
-                                !callee->nativeFuncPtr() &&
-                                argc == callee->numParams();
-  if (isNativeImplCall) {
-    // The assumption here is that for builtins, the generated func contains
-    // only a single opcode (NativeImpl), and there are no non-argument locals.
-    if (debug) {
-      assertx(argc == callee->numLocals());
-      assertx(callee->numIterators() == 0);
-
-      auto addr = callee->getEntry();
-      while (peek_op(addr) == Op::AssertRATL) {
-        addr += instrLen(addr);
-      }
-      assertx(peek_op(addr) == Op::NativeImpl);
-      assertx(addr + instrLen(addr) ==
-              callee->unit()->entry() + callee->past());
-    }
-
-    v << store{v.cns(tc::ustubs().retHelper), calleeAR + AROFF(m_savedRip)};
-    if (callee->attrs() & AttrMayUseVV) {
-      v << storeqi{0, calleeAR + AROFF(m_invName)};
-    }
-    v << lea{calleeAR, rvmfp()};
-
-    emitCheckSurpriseFlagsEnter(v, vc, fp, Fixup(0, argc), catchBlock);
-
-    auto const arFuncPtr = callee->arFuncPtr();
-    TRACE(2, "Calling builtin preClass %p func %p\n",
-          callee->preClass(), arFuncPtr);
-
-    // We sometimes call this while curFunc() isn't really the builtin, so make
-    // sure to record the sync point as if we are inside the builtin.
-    if (FixupMap::eagerRecord(callee)) {
-      auto const syncSP = v.makeReg();
-      v << lea{calleeSP, syncSP};
-      emitEagerSyncPoint(v, callee->getEntry(), rvmtl(), rvmfp(), syncSP);
-    }
-
-    // Call the ArFunction. This will free the locals for us in the
-    // normal case. In the case where an exception is thrown, the VM unwinder
-    // will handle it for us.
-    auto const done = v.makeBlock();
-    v << vinvoke{CallSpec::direct(arFuncPtr, nullptr),
-                 v.makeVcallArgs({{rvmfp()}}),
-                 v.makeTuple({}), {done, catchBlock}, Fixup(0, argc)};
-
-    v = done;
-    // The native implementation already put the return value on the stack for
-    // us, and handled cleaning up the arguments.  We have to update the frame
-    // pointer and the stack pointer, and load the return value into the return
-    // register so the trace we are returning to has it where it expects.
-    // TODO(#1273094): We should probably modify the actual builtins to return
-    // values via registers using the C ABI and do a reg-to-reg move.
-    loadTV(v, inst->dst(), dstLoc(env, inst, 0), rvmfp()[kArRetOff], true);
-    v << load{rvmfp()[AROFF(m_sfp)], rvmfp()};
-    emitRB(v, Trace::RBTypeFuncExit, callee->fullName()->data());
-    return;
   }
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {

@@ -106,8 +106,8 @@ let download_and_load_state_exn
     let (downloaded_naming_table_path, dirty_naming_files) = match naming_table_saved_state with
       | None -> (None, [])
       | Some future ->
-        begin match Future.get ~timeout:100 future with
-        | Ok (Ok (naming_table_info, changed_files)) ->
+        begin match State_loader_futures.wait_for_finish future with
+        | Ok (naming_table_info, changed_files) ->
           let _ : float =
             Hh_logger.log_duration "Finished downloading naming table." (Future.start_t future)
           in
@@ -119,13 +119,8 @@ let download_and_load_state_exn
             changed_files
           in
           (Some (Path.to_string path), changed_files)
-        | Ok (Error inner_err) ->
-          Hh_logger.warn "Failed to download naming table saved state: %s"
-            (Saved_state_loader.load_error_to_string inner_err);
-          (None, [])
         | Error err ->
-          Hh_logger.warn "Failed to download naming table saved state: %s"
-            (Future.error_to_string err);
+          Hh_logger.warn "Failed to download naming table saved state: %s" err;
           (None, [])
         end
     in
@@ -225,6 +220,38 @@ let naming_with_fast (fast: FileInfo.names Relative_path.Map.t) (t: float) : flo
   let hs = SharedMem.heap_size () in
   Hh_logger.log "Heap size: %d" hs;
   (Hh_logger.log_duration "Naming fast" t)
+
+let naming_from_saved_state
+  (old_naming_table: Naming_table.t)
+  (parsing_files: Relative_path.Set.t)
+  (naming_table_fn: string option)
+  (t: float)
+: float =
+  (* If we're falling back to SQLite we don't need to explicitly do a naming
+     pass, but if we're not then we do. *)
+    match naming_table_fn with
+    | Some _ ->
+      (* Set the SQLite fallback path for the reverse naming table, then block out all entries in
+      any dirty files to make sure we properly handle file deletes. *)
+      Relative_path.Set.iter parsing_files begin fun k ->
+        match Naming_table.get_file_info old_naming_table k with
+        | None ->
+          (* If we can't find the file in [old_naming_table] we don't consider that an error, since
+           * it could be a new file that was added. *)
+          ()
+        | Some v ->
+          Naming_table.Types.remove_batch (v.FileInfo.classes |> List.map ~f:snd |> SSet.of_list);
+          Naming_table.Types.remove_batch (v.FileInfo.typedefs |> List.map ~f:snd |> SSet.of_list);
+          Naming_table.Funs.remove_batch (v.FileInfo.funs |> List.map ~f:snd |> SSet.of_list);
+          Naming_table.Consts.remove_batch (v.FileInfo.consts |> List.map ~f:snd |> SSet.of_list)
+      end;
+      Unix.gettimeofday ()
+    | None ->
+      (* Name all the files from the old fast (except the new ones we parsed) *)
+      let old_hack_names = Naming_table.filter old_naming_table begin fun k _v ->
+          not (Relative_path.Set.mem parsing_files k)
+      end in
+      naming_with_fast (Naming_table.to_fast old_hack_names) t
 
 (*
  * In eager initialization, this is done at the parsing step with
@@ -451,20 +478,67 @@ let get_updates_exn
     SSet.filter updates ~f:filter
     |> Relative_path.relativize_set Relative_path.Root
 
-let index_and_parse
+let initialize_naming_table
   (progress_message: string)
+  ?(fnl: Relative_path.t list option = None)
+  ?(do_naming: bool = false)
   (genv: ServerEnv.genv)
   (env: ServerEnv.env)
 : ServerEnv.env * float =
   SharedMem.cleanup_sqlite ();
   ServerProgress.send_progress_to_monitor "%s" progress_message;
-  let get_next, t = indexing genv in
+  let get_next, count, t = match fnl with
+    | Some fnl -> MultiWorker.next genv.workers fnl, Some (List.length fnl), (Unix.gettimeofday ())
+    | None ->
+      let get_next, t = indexing genv in
+      get_next, None, t
+  in
   (* The full_fidelity_parser currently works better in both memory and time
      with a full parse rather than parsing decl asts and then parsing full ones *)
   let lazy_parse = not genv.local_config.SLC.use_full_fidelity_parser in
   (* full init - too many files to trace all of them *)
   let trace = false in
-  parsing ~lazy_parse genv env ~get_next t ~trace
+  let env, t = parsing ~lazy_parse genv env ~get_next ?count t ~trace in
+  if not do_naming then env, t else
+  let t = update_files genv env.naming_table t in
+  naming env t
+
+let load_naming_table (genv: ServerEnv.genv) (env: ServerEnv.env): ServerEnv.env * float =
+  let loader_future = State_loader_futures.load
+    ~repo:(Path.make (Relative_path.(path_of_prefix Root)))
+    ~saved_state_type:Saved_state_loader.Naming_table
+  in
+  match State_loader_futures.wait_for_finish loader_future with
+  | Ok (info, fnl) ->
+    let { Saved_state_loader.Naming_table_saved_state_info.naming_table_path } = info in
+    let naming_table_path = Path.to_string naming_table_path in
+    let naming_table = Naming_table.load_from_sqlite
+      ~update_reverse_entries:true
+      naming_table_path
+    in
+    let fnl = List.map fnl ~f:(fun path -> Relative_path.from_root (Path.to_string path)) in
+
+    let env, t = initialize_naming_table
+      ~fnl:(Some fnl)
+      ~do_naming:true
+      "full initialization (with loaded naming table)"
+      genv
+      env
+    in
+    let t = naming_from_saved_state
+      env.naming_table
+      (Relative_path.set_of_list fnl)
+      (Some naming_table_path)
+      t
+    in
+    { env with naming_table = Naming_table.combine naming_table env.naming_table }, t
+  | Error e ->
+    Hh_logger.log "Failed to load naming table: %s" e;
+    initialize_naming_table
+      ~do_naming:true
+      "full initialization (failed to load naming table)"
+      genv
+      env
 
 let write_symbol_info_init
     (genv: ServerEnv.genv)
@@ -474,7 +548,7 @@ let write_symbol_info_init
     | None -> failwith "No write directory specified for --write-symbol-info"
     | Some s -> s
   in
-  let env, t = index_and_parse "write symbol info initialization" genv env in
+  let env, t = initialize_naming_table "write symbol info initialization" genv env in
   let t = update_files genv env.naming_table t in
   let env, t = naming env t in
   let fast = Naming_table.to_fast env.naming_table in
@@ -510,13 +584,15 @@ let full_init
     (genv: ServerEnv.genv)
     (env: ServerEnv.env)
   : ServerEnv.env * float =
-  let env, t = index_and_parse "full initialization" genv env in
+  let (env, t) =
+    if genv.ServerEnv.local_config.SLC.remote_type_check_threshold = None
+    then initialize_naming_table ~do_naming:true "full initialization" genv env
+    else load_naming_table genv env
+  in
   if not (ServerArgs.check_mode genv.options) then
     SearchServiceRunner.update_fileinfo_map env.naming_table SearchUtils.Init;
-  let t = update_files genv env.naming_table t in
-  let env, t = naming env t in
   let fast = Naming_table.to_fast env.naming_table in
-  let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing  in
+  let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
   let fast = Relative_path.Set.fold failed_parsing
       ~f:(fun x m -> Relative_path.Map.remove m x) ~init:fast in
   type_check genv env fast t
@@ -525,7 +601,7 @@ let parse_only_init
   (genv: ServerEnv.genv)
   (env: ServerEnv.env)
 : ServerEnv.env * float =
-  index_and_parse "parse-only initialization" genv env
+  initialize_naming_table "parse-only initialization" genv env
 
 let post_saved_state_initialization
     ~(genv: ServerEnv.genv)
@@ -602,33 +678,7 @@ let post_saved_state_initialization
 
   let t = update_files genv env.naming_table t in
 
-  (* If we're falling back to SQLite we don't need to explicitly do a naming
-     pass. *)
-  let t =
-    match naming_table_fn with
-    | Some _ ->
-      (* Set the SQLite fallback path for the reverse naming table, then block out all entries in
-      any dirty files to make sure we properly handle file deletes. *)
-      Relative_path.Set.iter parsing_files begin fun k ->
-        match Naming_table.get_file_info old_naming_table k with
-        | None ->
-          (* If we can't find the file in [old_naming_table] we don't consider that an error, since
-           * it could be a new file that was added. *)
-          ()
-        | Some v ->
-          Naming_table.Types.remove_batch (v.FileInfo.classes |> List.map ~f:snd |> SSet.of_list);
-          Naming_table.Types.remove_batch (v.FileInfo.typedefs |> List.map ~f:snd |> SSet.of_list);
-          Naming_table.Funs.remove_batch (v.FileInfo.funs |> List.map ~f:snd |> SSet.of_list);
-          Naming_table.Consts.remove_batch (v.FileInfo.consts |> List.map ~f:snd |> SSet.of_list)
-      end;
-      t
-    | None ->
-      (* Name all the files from the old fast (except the new ones we parsed) *)
-      let old_hack_names = Naming_table.filter old_naming_table begin fun k _v ->
-          not (Relative_path.Set.mem parsing_files k)
-      end in
-      naming_with_fast (Naming_table.to_fast old_hack_names) t
-  in
+  let t = naming_from_saved_state old_naming_table parsing_files naming_table_fn t in
   (* Do global naming on all dirty files *)
   let env, t = naming env t in
 

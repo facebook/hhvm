@@ -6,4 +6,5 @@
  *
  *)
 
- let load ~repo:_ ~saved_state_type:_ = failwith "Not implemented"
+let load ~repo:_ ~saved_state_type:_ = failwith "Not implemented"
+let wait_for_finish _ = failwith "Not implemented"

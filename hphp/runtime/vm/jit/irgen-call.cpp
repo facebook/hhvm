@@ -313,43 +313,36 @@ void callUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca, bool unlikely,
 
 /*
  * In PGO mode, we use profiling to try to determine the most likely target
- * function at each call site.  profiledCalledFunc() returns the most likely
- * called function based on profiling, as long as it was seen at least
- * Eval.JitPGOCalledFuncCheckThreshold percent of the times during profiling.
- * When a callee satisfies this condition, profiledCalledFunc() returns such
- * callee and it also returns the probability of seeing that callee.
+ * function at each call site. In profiling translations, this function profiles
+ * callees. If the most likely called function based on profiling was seen
+ * at least Eval.JitPGOCalledFuncCheckThreshold percent of the times during
+ * profiling, optimized translations emit a runtime check whether the callee
+ * is the given profiled function and if so, emit a code to invoke it directly.
  */
-const Func* profiledCalledFunc(IRGS& env, double& probability) {
-  probability = 0;
-  if (!RuntimeOption::RepoAuthoritative) return nullptr;
+template<class TKnown, class TUnknown>
+void callProfiledFunc(IRGS& env, SSATmp* callee,
+                      TKnown callKnown, TUnknown callUnknown) {
+  if (!RuntimeOption::RepoAuthoritative) return callUnknown(false);
 
   auto profile = TargetProfile<CallTargetProfile>(
     env.unit.context(), env.irb->curMarker(), callTargetProfileKey());
 
-  // NB: the profiling used here is shared and done in getCallTarget() in
-  // irlower-call.cpp, so we only handle the optimization phase here.
-  if (!profile.optimizing()) return nullptr;
+  if (profile.profiling()) {
+    gen(env, ProfileCall, ProfileCallTargetData { profile.handle() }, callee);
+  }
 
+  if (!profile.optimizing()) return callUnknown(false);
+
+  double probability = 0;
   auto const data = profile.data();
-  auto profiledFunc = data.choose(probability);
-
-  if (profiledFunc == nullptr) return nullptr;
+  auto const profiledFunc = data.choose(probability);
 
   // Don't emit the check if the probability of it succeeding is below the
   // threshold.
-  if (probability * 100 < RuntimeOption::EvalJitPGOCalledFuncCheckThreshold) {
-    return nullptr;
+  if (profiledFunc == nullptr ||
+      probability * 100 < RuntimeOption::EvalJitPGOCalledFuncCheckThreshold) {
+    return callUnknown(false);
   }
-
-  return profiledFunc;
-}
-
-template<class TKnown, class TUnknown>
-void callProfiledFunc(IRGS& env, SSATmp* callee,
-                      TKnown callKnown, TUnknown callUnknown) {
-  double profiledFuncBias{0};
-  auto const profiledFunc = profiledCalledFunc(env, profiledFuncBias);
-  if (!profiledFunc) return callUnknown(false);
 
   ifThenElse(
     env,
@@ -365,7 +358,7 @@ void callProfiledFunc(IRGS& env, SSATmp* callee,
       updateMarker(env);
       env.irb->exceptionStackBoundary();
 
-      auto const unlikely = profiledFuncBias * 100 >=
+      auto const unlikely = probability * 100 >=
         RuntimeOption::EvalJitPGOCalledFuncExitThreshold;
       if (unlikely) {
         hint(env, Block::Hint::Unlikely);

@@ -3401,6 +3401,10 @@ fields of that struct for holding intermediate values.
 
   Profile the type of S0.
 
+| ProfileCall<rdsHandle>, ND, S(Func), NF
+
+  Profile the call to a function S0.
+
 | ProfileMethod<rdsHandle>, ND, S(Cls) S(Func), NF
 
   Profile the method S1 called with class context S0.

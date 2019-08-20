@@ -18,7 +18,6 @@
 #define incl_HPHP_JIT_CALL_TARGET_PROFILE_H_
 
 #include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/func.h"
 
 namespace HPHP {
@@ -38,7 +37,7 @@ struct ProfDataDeserializer;
  */
 struct CallTargetProfile {
 
-  void report(const ActRec* ar);
+  void report(const Func* ar);
 
   static void reduce(CallTargetProfile& profile,
                      const CallTargetProfile& other);

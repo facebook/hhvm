@@ -41,9 +41,8 @@ void CallTargetProfile::init() {
   }
 }
 
-void CallTargetProfile::report(const ActRec* ar) {
-  assertx(ar);
-  auto const func = ar->func();
+void CallTargetProfile::report(const Func* func) {
+  assertx(func);
   auto const funcId = func->getFuncId();
   FTRACE(5, "CallTargetProfile::report: funcId {} ({})\n", funcId,
          func->fullName());

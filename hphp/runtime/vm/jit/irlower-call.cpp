@@ -78,16 +78,8 @@ TCA getCallTarget(IRLS& env, const IRInstruction* inst, Vreg sp) {
   auto profile = TargetProfile<CallTargetProfile>(env.unit.context(),
                                                   inst->marker(),
                                                   callTargetProfileKey());
-  if (profile.profiling()) {
-    auto const spOff = cellsToBytes(extra->spOffset.offset + extra->numParams);
-    auto const args = argGroup(env, inst)
-      .addr(rvmtl(), safe_cast<int32_t>(profile.handle()))
-      .addr(sp, spOff);
-    cgCallHelper(vmain(env), env, CallSpec::method(&CallTargetProfile::report),
-                 kVoidDest, SyncOptions::Sync, args);
-    return tc::ustubs().bindCallStub;
-  }
-
+  // NB: the profiling used here is shared and done in callProfiledFunc() in
+  // irgen-call.cpp, so we only handle the optimization phase here.
   if (profile.optimizing()) {
     auto const data = profile.data();
 
@@ -494,6 +486,19 @@ void cgDbgTraceCall(IRLS& env, const IRInstruction* inst) {
 void cgEnterFrame(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   vmain(env) << phplogue{fp};
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void cgProfileCall(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<ProfileCallTargetData>();
+
+  auto const args = argGroup(env, inst)
+    .addr(rvmtl(), safe_cast<int32_t>(extra->handle))
+    .ssa(0);
+
+  cgCallHelper(vmain(env), env, CallSpec::method(&CallTargetProfile::report),
+               kVoidDest, SyncOptions::None, args);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1934,6 +1934,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case PackMagicArgs:
   case StrictlyIntegerConv:
   case DbgAssertFunc:
+  case ProfileCall:
   case ProfileMethod:
     return may_load_store(AEmpty, AEmpty);
 

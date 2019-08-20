@@ -83,8 +83,7 @@ TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc,
 
   printUnit(2, unit, "After initial prologue generation");
 
-  auto vunit = irlower::lowerUnit(env.unit, nullptr /* annotations */,
-                                  CodeKind::Prologue);
+  auto vunit = irlower::lowerUnit(env.unit, CodeKind::Prologue);
   emitVunit(*vunit, env.unit, code, fixups);
 
   // In order to find the start of the (post guard) prologue after
@@ -112,8 +111,7 @@ TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,
   irgen::sealUnit(env);
 
   CGMeta fixups;
-  auto vunit = irlower::lowerUnit(env.unit, nullptr /* annotations */,
-                                  CodeKind::Prologue);
+  auto vunit = irlower::lowerUnit(env.unit, CodeKind::Prologue);
 
   auto& main = code.main();
   auto const start = main.frontier();

@@ -1389,14 +1389,17 @@ where
         self.context_mut().stack_limit = Some(shared.clone());
     }
 
-    fn check_stack_limit(&mut self) {
+    fn check_stack_limit(&mut self) -> Option<S::R> {
         if self
             .context()
             .stack_limit
             .as_ref()
             .map_or(false, |limit| limit.check_exceeded())
         {
-            self.lexer_mut().skip_to_end();
+            let error_token = self.lexer_mut().skip_to_end();
+            Some(S!(make_token, self, error_token))
+        } else {
+            None
         }
     }
 }

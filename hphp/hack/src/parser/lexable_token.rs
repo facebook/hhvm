@@ -36,3 +36,5 @@ pub trait LexableToken<'a>: Clone {
     fn with_trailing(self, trailing: Vec<Self::Trivia>) -> Self;
     fn with_kind(self, kind: TokenKind) -> Self;
 }
+
+pub trait LexablePositionedToken<'a>: LexableToken<'a> {}

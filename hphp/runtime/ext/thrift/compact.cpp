@@ -47,6 +47,10 @@
 namespace HPHP { namespace thrift {
 /////////////////////////////////////////////////////////////////////////////
 
+namespace {
+const StaticString SKIP_CHECKS_ATTR("ThriftDeprecatedSkipSerializerChecks");
+}
+
 const uint8_t VERSION_MASK = 0x1f;
 const uint8_t VERSION = 2;
 const uint8_t VERSION_LOW = 1;
@@ -177,7 +181,21 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(CompactRequestData, s_compact_request_data);
 namespace {
 struct FieldInfo {
   Class* cls = nullptr;
+  // A pointer to a property which may be set lazily by calling
+  // cls->lookupDeclProp(fieldName) first time we need the property.
+  const Class::Prop *prop = nullptr;
+  const StringData* fieldName = nullptr;
   int16_t fieldNum = 0;
+
+  const Class::Prop* getProp() {
+    if (!prop) {
+      auto slot = cls->lookupDeclProp(fieldName);
+      if (slot != kInvalidSlot) {
+        prop = &cls->declProperties()[slot];
+      }
+    }
+    return prop;
+  }
 };
 }
 
@@ -227,8 +245,11 @@ struct CompactWriter {
         TType fieldType = field.type;
         writeFieldBegin(field.fieldNum, fieldType);
         ArrNR fieldSpec(field.spec);
-        writeField(fieldVal, fieldSpec.asArray(), fieldType,
-            FieldInfo{obj->getVMClass(), field.fieldNum});
+        auto fieldInfo = FieldInfo();
+        fieldInfo.cls = obj->getVMClass();
+        fieldInfo.fieldName = field.name;
+        fieldInfo.fieldNum = field.fieldNum;
+        writeField(fieldVal, fieldSpec.asArray(), fieldType, fieldInfo);
         writeFieldEnd();
       }
     }
@@ -257,8 +278,11 @@ struct CompactWriter {
             TType fieldType = fields[slot].type;
             ArrNR fieldSpec(fields[slot].spec);
             writeFieldBegin(fields[slot].fieldNum, fieldType);
-            writeField(fieldVal, fieldSpec.asArray(), fieldType,
-                FieldInfo{cls, fields[slot].fieldNum});
+            auto fieldInfo = FieldInfo();
+            fieldInfo.cls = cls;
+            fieldInfo.prop = &prop[slot];
+            fieldInfo.fieldNum = fields[slot].fieldNum;
+            writeField(fieldVal, fieldSpec.asArray(), fieldType, fieldInfo);
             writeFieldEnd();
           } else if (UNLIKELY(fieldVal.is(KindOfUninit)) &&
                      (prop[slot].attrs & AttrLateInit)) {
@@ -321,7 +345,7 @@ struct CompactWriter {
     void writeField(const Variant& value,
                     const Array& valueSpec,
                     TType type,
-                    const FieldInfo& fieldInfo) {
+                    FieldInfo& fieldInfo) {
       switch (type) {
         case T_STOP:
         case T_VOID:
@@ -423,7 +447,7 @@ struct CompactWriter {
     }
 
     void writeMap(
-        const Variant& map, const Array& spec, const FieldInfo& fieldInfo) {
+        const Variant& map, const Array& spec, FieldInfo& fieldInfo) {
       TType keyType = (TType)(char)tvCastToInt64(
         spec.rvalAt(s_ktype, AccessFlags::ErrorKey).tv()
       );
@@ -461,7 +485,7 @@ struct CompactWriter {
         const Variant& list,
         const Array& spec,
         CListType listType,
-        const FieldInfo& fieldInfo) {
+        FieldInfo& fieldInfo) {
       TType valueType = (TType)(char)tvCastToInt64(
         spec.rvalAt(s_etype, AccessFlags::ErrorKey).tv()
       );
@@ -544,19 +568,26 @@ struct CompactWriter {
     }
 
     template <typename T>
-    void writeIChecked(const Variant& value, const FieldInfo& fieldInfo) {
+    void writeIChecked(const Variant& value, FieldInfo& fieldInfo) {
       static_assert(std::is_integral<T>::value, "not an integral type");
       auto n = value.toInt64();
       using limits = std::numeric_limits<T>;
       auto forbidInvalid =
         RuntimeOption::EvalForbidThriftIntegerValuesOutOfRange;
       if (forbidInvalid != 0 && (n < limits::min() || n > limits::max())) {
+        const auto& structName = fieldInfo.cls->nameStr();
         std::string message = folly::sformat(
             "Value {} is out of range in field {} of {}",
             n,
             fieldInfo.fieldNum,
-            fieldInfo.cls->nameStr().c_str());
-        if (forbidInvalid == 1) {
+            structName.c_str());
+        auto hasSkipChecksAttr = [&]() {
+          const Class::Prop* prop = fieldInfo.getProp();
+          return prop &&
+            prop->preProp->userAttributes().count(
+                LowStringPtr(SKIP_CHECKS_ATTR.get())) != 0;
+        };
+        if (forbidInvalid == 1 || hasSkipChecksAttr()) {
           raise_warning(message);
         } else {
           thrift_error(message, ERR_INVALID_DATA);

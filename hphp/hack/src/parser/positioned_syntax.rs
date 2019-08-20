@@ -7,7 +7,9 @@
 use std::rc::Rc;
 
 use crate::positioned_token::PositionedToken;
+use oxidized::pos::Pos;
 use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::source_text::SourceText;
 use parser_core_types::syntax::*;
 use parser_core_types::syntax_kind::SyntaxKind;
 use parser_core_types::token_kind::TokenKind;
@@ -234,7 +236,15 @@ pub trait PositionedSyntaxTrait {
     fn leading_start_offset(&self) -> usize;
     fn leading_width(&self) -> usize;
     fn width(&self) -> usize;
+    fn start_offset(&self) -> usize;
+    fn end_offset(&self) -> usize;
+
+    /**
+     * Similar to position except that the end_offset does not include
+     * the last character. (the end offset is one larger than given by position)
+     */
     fn trailing_width(&self) -> usize;
+    fn position_exclusive(&self, source_text: &SourceText) -> Option<Pos>;
 }
 
 impl PositionedSyntaxTrait for PositionedSyntax {
@@ -252,5 +262,20 @@ impl PositionedSyntaxTrait for PositionedSyntax {
 
     fn trailing_width(&self) -> usize {
         self.value.trailing_width()
+    }
+
+    fn start_offset(&self) -> usize {
+        self.leading_start_offset() + self.leading_width()
+    }
+
+    fn end_offset(&self) -> usize {
+        let w = self.width() - 1;
+        self.start_offset() + w
+    }
+
+    fn position_exclusive(&self, source_text: &SourceText) -> Option<Pos> {
+        let start_offset = self.start_offset();
+        let end_offset = self.end_offset() + 1;
+        Some(source_text.relative_pos(start_offset, end_offset))
     }
 }

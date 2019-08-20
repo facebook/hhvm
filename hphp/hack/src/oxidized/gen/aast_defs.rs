@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e4c4209e13e43760d2360583549f3c31>>
+// @generated SignedSource<<049a0927302ce9bd02d3863f57303d1c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -31,7 +31,7 @@ pub type IsTerminal = bool;
 
 pub type IsReified = bool;
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
 pub enum CallType {
     Cnormal,
     CuserFunc,
@@ -39,7 +39,7 @@ pub enum CallType {
 
 pub type IsCoroutine = bool;
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
 pub enum FuncReactive {
     FReactive,
     FLocal,
@@ -55,14 +55,14 @@ pub enum CollectionTarg {
     CollectionTKV(Targ, Targ),
 }
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
 pub enum ParamMutability {
     PMutable,
     POwnedMutable,
     PMaybeMutable,
 }
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
 pub enum ImportFlavor {
     Include,
     Require,
@@ -78,7 +78,7 @@ pub enum XhpChild {
     ChildBinary(Box<XhpChild>, Box<XhpChild>),
 }
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
 pub enum XhpChildOp {
     ChildStar,
     ChildPlus,
@@ -125,7 +125,7 @@ pub enum Hint_ {
     Hnothing,
 }
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
 pub enum Tprim {
     Tnull,
     Tvoid,
@@ -152,14 +152,14 @@ pub struct NastShapeInfo {
     pub field_map: Vec<ShapeFieldInfo>,
 }
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
 pub enum KvcKind {
     Map,
     ImmMap,
     Dict,
 }
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
 pub enum VcKind {
     Vector,
     ImmVector,
@@ -170,14 +170,14 @@ pub enum VcKind {
     Keyset,
 }
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
 pub enum Visibility {
     Private,
     Public,
     Protected,
 }
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
 pub enum UseAsVisibility {
     UseAsPublic,
     UseAsPrivate,
@@ -185,7 +185,7 @@ pub enum UseAsVisibility {
     UseAsFinal,
 }
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
 pub enum TypedefVisibility {
     Transparent,
     Opaque,

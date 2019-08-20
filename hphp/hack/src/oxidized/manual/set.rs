@@ -5,7 +5,6 @@
 
 use std::cmp::Ord;
 
-use ocamlpool_rust::ocamlvalue::*;
 use ocamlrep_derive::IntoOcamlRep;
 use ocamlvalue_macro::Ocamlvalue;
 

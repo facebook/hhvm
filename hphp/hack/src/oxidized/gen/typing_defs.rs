@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ba056df1b5addc42c4f6034ccb8b3bc5>>
+// @generated SignedSource<<f31baa85a411d33ee7ac8d72f1cc03ca>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -29,7 +29,7 @@ pub enum Visibility {
     Vprotected(String),
 }
 
-#[derive(Clone, Debug, IntoOcamlRep)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, PartialEq)]
 pub enum Exact {
     Exact,
     Nonexact,
@@ -96,7 +96,7 @@ pub enum DependentType {
 #[derive(Clone, Debug, IntoOcamlRep)]
 pub struct TaccessType(pub Ty, pub Vec<nast::Sid>);
 
-#[derive(Clone, Debug, IntoOcamlRep)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, PartialEq)]
 pub enum ShapeKind {
     ClosedShape,
     OpenShape,
@@ -112,21 +112,21 @@ pub enum Reactivity {
     RxVar(Option<Box<Reactivity>>),
 }
 
-#[derive(Clone, Debug, IntoOcamlRep)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, PartialEq)]
 pub enum ValKind {
     Lval,
     LvalSubexpr,
     Other,
 }
 
-#[derive(Clone, Debug, IntoOcamlRep)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, PartialEq)]
 pub enum ParamMutability {
     ParamOwnedMutable,
     ParamBorrowedMutable,
     ParamMaybeMutable,
 }
 
-#[derive(Clone, Debug, IntoOcamlRep)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, PartialEq)]
 pub enum FunTparamsKind {
     FTKtparams,
     FTKinstantiatedTargs,
@@ -159,7 +159,7 @@ pub enum FunArity {
     Fellipsis(isize, pos::Pos),
 }
 
-#[derive(Clone, Debug, IntoOcamlRep)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, PartialEq)]
 pub enum ParamMode {
     FPnormal,
     FPref,
@@ -191,7 +191,7 @@ pub struct FunParam {
 
 pub type FunParams = Vec<FunParam>;
 
-#[derive(Clone, Debug, IntoOcamlRep)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, PartialEq)]
 pub enum XhpAttrTag {
     Required,
     Lateinit,
@@ -233,7 +233,7 @@ pub struct ClassConst {
 #[derive(Clone, Debug, IntoOcamlRep)]
 pub struct Requirement(pub pos::Pos, pub Ty);
 
-#[derive(Clone, Debug, IntoOcamlRep)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, PartialEq)]
 pub enum ConsistentKind {
     Inconsistent,
     ConsistentConstruct,

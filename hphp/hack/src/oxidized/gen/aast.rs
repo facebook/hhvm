@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<872d36c1ded9372f34a340431a1af994>>
+// @generated SignedSource<<62d1f6540580a017e178fafad9557290>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -404,7 +404,7 @@ pub struct Class_<Ex, Fb, En, Hi> {
     pub doc_comment: Option<String>,
 }
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
 pub enum XhpAttrTag {
     Required,
     LateInit,
@@ -583,7 +583,7 @@ pub enum Def<Ex, Fb, En, Hi> {
     FileAttributes(FileAttribute<Ex, Fb, En, Hi>),
 }
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
 pub enum NsKind {
     NSNamespace,
     NSClass,
@@ -592,7 +592,7 @@ pub enum NsKind {
     NSConst,
 }
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
 pub enum ReifyKind {
     Erased,
     SoftReified,

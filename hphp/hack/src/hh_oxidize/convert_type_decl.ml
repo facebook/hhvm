@@ -114,11 +114,18 @@ let variant_constructor_declaration cd =
   let args = constructor_arguments cd.pcd_args in
   sprintf "%s%s,\n" name args
 
+let ctor_arg_len (ctor_args : constructor_arguments) : int =
+  match ctor_args with
+  | Pcstr_tuple x -> List.length x
+  | Pcstr_record x -> List.length x
+
 let type_declaration name td =
-  let attrs_and_vis () =
+  let attrs_and_vis init_derives =
     let filter a f = List.filter a ~f in
     let derive_attr =
-      List.fold derives_filters ~init:derived_traits ~f:filter
+      List.fold derives_filters ~init:(derived_traits @ init_derives) ~f:filter
+      |> List.sort ~compare:(fun (_, t1) (_, t2) -> String.compare t1 t2)
+      |> List.sort ~compare:(fun (_, t1) (_, t2) -> String.compare t1 t2)
       |> List.map ~f:(fun (m, trait) ->
              Option.iter m ~f:(fun m -> add_extern_use (m ^ "::" ^ trait));
              trait)
@@ -187,7 +194,7 @@ let type_declaration name td =
           | Ptyp_tuple tys -> tuple tys ~pub:true
           | _ -> sprintf "(pub %s)" @@ core_type ty
         in
-        sprintf "%s struct %s%s %s;" (attrs_and_vis ()) name tparams ty)
+        sprintf "%s struct %s%s %s;" (attrs_and_vis []) name tparams ty)
   (* Variant types, including GADTs. *)
   | (Ptype_variant ctors, None) ->
     let ctors =
@@ -215,12 +222,21 @@ let type_declaration name td =
               false
             | _ -> true)
     in
+    let all_nullary =
+      List.for_all ctors (fun c -> 0 = ctor_arg_len c.pcd_args)
+    in
+    let derives =
+      if all_nullary then
+        [(None, "Copy"); (None, "Eq"); (None, "PartialEq")]
+      else
+        []
+    in
     let ctors = map_and_concat ctors variant_constructor_declaration in
-    sprintf "%s enum %s%s {\n%s}" (attrs_and_vis ()) name tparams ctors
+    sprintf "%s enum %s%s {\n%s}" (attrs_and_vis derives) name tparams ctors
   (* Record types. *)
   | (Ptype_record labels, None) ->
     let labels = record_declaration labels ~pub:true in
-    sprintf "%s struct %s%s %s" (attrs_and_vis ()) name tparams labels
+    sprintf "%s struct %s%s %s" (attrs_and_vis []) name tparams labels
   (* `type foo`; an abstract type with no specified implementation. This doesn't
      mean much outside of an .mli, I don't think. *)
   | (Ptype_abstract, None) ->

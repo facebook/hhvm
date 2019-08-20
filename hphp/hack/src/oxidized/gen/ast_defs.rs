@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2c751a98cfac3db81041d201398978c1>>
+// @generated SignedSource<<5e7c5b68cfe7424fdb6e09c3a0e540d6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -29,14 +29,14 @@ pub enum ShapeFieldName {
     SFclassConst(Id, Pstring),
 }
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
 pub enum Variance {
     Covariant,
     Contravariant,
     Invariant,
 }
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
 pub enum ConstraintKind {
     ConstraintAs,
     ConstraintEq,
@@ -46,7 +46,7 @@ pub enum ConstraintKind {
 
 pub type Reified = bool;
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
 pub enum ClassKind {
     Cabstract,
     Cnormal,
@@ -56,18 +56,18 @@ pub enum ClassKind {
     Crecord,
 }
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
 pub enum ParamKind {
     Pinout,
 }
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
 pub enum OgNullFlavor {
     OGNullthrows,
     OGNullsafe,
 }
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
 pub enum FunKind {
     FSync,
     FAsync,
@@ -106,7 +106,7 @@ pub enum Bop {
     Eq(Option<Box<Bop>>),
 }
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
 pub enum Uop {
     Utild,
     Unot,
@@ -120,7 +120,7 @@ pub enum Uop {
     Usilence,
 }
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
 pub enum FunDeclKind {
     FDeclAsync,
     FDeclSync,

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0c0370b4f7bf8b4dd9285bda93b81c8d>>
+// @generated SignedSource<<080a85de4e8c5d37666aacfdc36e0129>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -18,7 +18,7 @@ use crate::s_set;
 
 use crate::prim_defs::*;
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
 pub enum Mode {
     Mphp,
     Mdecl,
@@ -27,7 +27,7 @@ pub enum Mode {
     Mexperimental,
 }
 
-#[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]
 pub enum NameType {
     Fun,
     Class,

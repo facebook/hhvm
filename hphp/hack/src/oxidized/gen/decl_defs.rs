@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<602b3d5cabcf4d2ccf69720d2da1809f>>
+// @generated SignedSource<<e09efc98d64f27eb0391819275f5eb5c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -27,7 +27,7 @@ pub struct SubstContext {
     pub from_req_extends: bool,
 }
 
-#[derive(Clone, Debug, IntoOcamlRep)]
+#[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, PartialEq)]
 pub enum SourceType {
     Child,
     Parent,

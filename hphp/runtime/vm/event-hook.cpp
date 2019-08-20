@@ -155,6 +155,9 @@ void addFramePointers(const ActRec* ar, Array& frameinfo, bool isEnter) {
   if ((g_context->m_setprofileFlags & EventHook::ProfileFramePointers) == 0) {
     return;
   }
+  if (frameinfo.isNull()) {
+    frameinfo = Array::CreateDArray();
+  }
 
   if (isEnter) {
     auto this_ = ar->func()->cls() && ar->hasThis() ?

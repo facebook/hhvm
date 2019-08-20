@@ -167,11 +167,6 @@ type t = {
   tco_unsafe_rx : bool;
 
   (*
-   * Flag to disallow implicit and expressionless returns in non-void functions.
-   *)
-  tco_disallow_implicit_returns_in_non_void_functions: bool;
-
-  (*
    * Flag to disable unsetting on varray / varray_or_darray.
    *)
   tco_disallow_unset_on_varray : bool;
@@ -355,7 +350,6 @@ val make :
   ?tco_disallow_array_literal: bool ->
   ?tco_language_feature_logging: bool ->
   ?tco_unsafe_rx: bool ->
-  ?tco_disallow_implicit_returns_in_non_void_functions: bool ->
   ?tco_disallow_unset_on_varray: bool ->
   ?tco_disallow_scrutinee_case_value_type_mismatch: bool ->
   ?tco_new_inference_lambda: bool ->
@@ -429,7 +423,6 @@ val tco_disallow_array_typehint : t -> bool
 val tco_disallow_array_literal : t -> bool
 val tco_language_feature_logging : t -> bool
 val tco_unsafe_rx : t -> bool
-val tco_disallow_implicit_returns_in_non_void_functions : t -> bool
 val tco_disallow_unset_on_varray : t -> bool
 val tco_disallow_scrutinee_case_value_type_mismatch : t -> bool
 val tco_new_inference_lambda : t -> bool

@@ -8,7 +8,7 @@ let dune_file s =
     ; "(include dune.inc)"
     ]
 
-let with_buck =
+let rust =
 {|
 ; FFI OCaml to Rust (../../target/*/librust_facts_ffi.a)
 ; contains "external" function definition in .ml and
@@ -32,24 +32,6 @@ let with_buck =
 )
 |}
 
-let with_oss = {|
-; No support for rust at the moment, only use the stub
-(library
-  (name rust_facts_ffi)
-  (wrapped false)
-  (modules)
-  (preprocess (pps ppx_deriving.std)) ; See T41851208
-)
-|}
 
 let () =
-  (* test presence of fb subfolder *)
-  let current_dir = Sys.getcwd () in
-  (* we are in src/facts, locate src/facebook *)
-  let src_dir = Filename.dirname current_dir in
-  let fb_dir = Filename.concat src_dir "facebook" in
-  (* locate src/facebook/dune *)
-  let fb_dune = Filename.concat fb_dir "dune" in
-  let is_fb = Sys.file_exists fb_dune in
-  let rust = if is_fb then with_buck else with_oss in
   Jbuild_plugin.V1.send @@ dune_file rust

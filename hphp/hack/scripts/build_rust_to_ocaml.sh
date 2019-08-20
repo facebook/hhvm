@@ -1,8 +1,8 @@
 #!/bin/bash
 hack_root="${HACKDIR}"
 
-if [ -z "$HACKDIR" ] || ! [ -e "$HACKDIR/src/facebook/dune" ]; then
-   echo >&2 "ERROR: only stubs for Rust FFI are supported in OSS build"
+if [ -z "$HACKDIR" ]; then
+   echo >&2 "ERROR: must set HACKDIR to point to hphp/hack source dir"
    exit 1
 fi
 

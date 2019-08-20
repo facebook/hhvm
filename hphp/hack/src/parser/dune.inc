@@ -82,18 +82,11 @@
     relative_path
 
     rust_parser_ffi
-    ; Note: the following doesn't link librust_parser_ffi_stubs.a properly:
-    ; (select rust_parser_ffi from
-    ;   (facebook -> rust_parser_ffi)
-    ;   (-> rust_ffi_stubs)
-    ; )
     (select rust_lazy_trivia_ffi.ml from
-      (facebook -> ffi/rust_lazy_trivia_ffi.ml)
-      (-> ffi/rust_lazy_trivia_ffi_stubs.ml)
+      (-> ffi/rust_lazy_trivia_ffi.ml)
     )
     (select rust_parser_ffi.ml from
-      (facebook -> ffi/rust_parser_ffi.ml)
-      (-> ffi/rust_parser_ffi_stubs.ml)
+      (-> ffi/rust_parser_ffi.ml)
     )
   )
   (preprocess (pps visitors.ppx ppx_deriving.std)))

@@ -372,6 +372,9 @@ struct RuntimeOption {
   static int SSLClientAuthLevel;
   // CA file to verify client cert against.
   static std::string SSLClientCAFile;
+  // Sampling ratio for client auth logging. Must be an int within [0, 100].
+  // 0 => disabled; 100 => log all connections.
+  static uint32_t SSLClientAuthLoggingSampleRatio;
 
   static int XboxServerThreadCount;
   static int XboxServerMaxQueueLength;

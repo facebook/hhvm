@@ -683,6 +683,7 @@ std::string RuntimeOption::TLSClientCipherSpec;
 bool RuntimeOption::EnableSSLWithPlainText = false;
 int RuntimeOption::SSLClientAuthLevel = 0;
 std::string RuntimeOption::SSLClientCAFile = "";
+uint32_t RuntimeOption::SSLClientAuthLoggingSampleRatio = 0;
 
 std::vector<std::shared_ptr<VirtualHost>> RuntimeOption::VirtualHosts;
 std::shared_ptr<IpBlockMap> RuntimeOption::IpBlocks;
@@ -2155,6 +2156,15 @@ void RuntimeOption::Load(
     } else if (SSLClientCAFile.empty()) {
       throw std::runtime_error(
           "SSLClientCAFile is required to enable client auth");
+    }
+
+    Config::Bind(SSLClientAuthLoggingSampleRatio, ini, config,
+                 "Server.SSLClientAuthLoggingSampleRatio", 0);
+    if (SSLClientAuthLoggingSampleRatio < 0) {
+      SSLClientAuthLoggingSampleRatio = 0;
+    }
+    if (SSLClientAuthLoggingSampleRatio > 100) {
+      SSLClientAuthLoggingSampleRatio = 100;
     }
 
     // SourceRoot has been default to: Process::GetCurrentDirectory() + '/'

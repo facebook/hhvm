@@ -261,6 +261,11 @@ void ProxygenServer::removeTakeoverListener(TakeoverListener* listener) {
   }
 }
 
+std::unique_ptr<HPHPSessionAcceptor> ProxygenServer::createAcceptor(
+    const proxygen::AcceptorConfiguration& config) {
+  return std::make_unique<HPHPSessionAcceptor>(config, this);
+}
+
 void ProxygenServer::start() {
   m_httpServerSocket.reset(new AsyncServerSocket(m_worker.getEventBase()));
   bool needListen = true;
@@ -325,7 +330,7 @@ void ProxygenServer::start() {
                                     m_httpServerSocket->getNetworkSocket().toFd(), this);
   }
 
-  m_httpAcceptor.reset(new HPHPSessionAcceptor(m_httpConfig, this));
+  m_httpAcceptor = createAcceptor(m_httpConfig);
   m_httpAcceptor->init(m_httpServerSocket.get(), m_worker.getEventBase());
 
   if (m_httpConfig.isSSL() || m_httpsConfig.isSSL()) {
@@ -367,7 +372,7 @@ void ProxygenServer::start() {
       failedToListen(ex, m_httpsConfig.bindAddress);
     }
 
-    m_httpsAcceptor.reset(new HPHPSessionAcceptor(m_httpsConfig, this));
+    m_httpsAcceptor = createAcceptor(m_httpsConfig);
     try {
       m_httpsAcceptor->init(m_httpsServerSocket.get(), m_worker.getEventBase());
     } catch (const std::exception& ex) {

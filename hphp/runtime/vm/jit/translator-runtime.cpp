@@ -287,7 +287,8 @@ ArrayData* convObjToVecHelper(ObjectData* obj) {
   auto a = castObjToVec(obj);
   assertx(a->isVecArray());
   if (RuntimeOption::EvalArrayProvenance &&
-      a->isRefCounted()) {
+      a->isRefCounted() &&
+      !a->hasProvenanceData()) {
     arrprov::setTag(a, *arrprov::tagFromProgramCounter());
   }
   decRefObj(obj);
@@ -331,7 +332,8 @@ ArrayData* convObjToDictHelper(ObjectData* obj) {
   auto a = castObjToDict(obj);
   assertx(a->isDict());
   if (RuntimeOption::EvalArrayProvenance &&
-      a->isRefCounted()) {
+      a->isRefCounted() &&
+      !a->hasProvenanceData()) {
     arrprov::setTag(a, *arrprov::tagFromProgramCounter());
   }
   decRefObj(obj);

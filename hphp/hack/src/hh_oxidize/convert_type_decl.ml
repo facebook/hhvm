@@ -31,7 +31,6 @@ let ocamlvalue_derive_whitelist =
   [ "aast_defs";
     "aast";
     "ast_defs";
-    "relative_path";
     "namespace_env";
     "file_info";
     "global_options";

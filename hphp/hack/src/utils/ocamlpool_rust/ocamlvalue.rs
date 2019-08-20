@@ -10,6 +10,8 @@ use crate::utils::*;
 
 use ocaml::core::mlvalues::{empty_list, Value, UNIT};
 use std::borrow::Cow;
+use std::path::PathBuf;
+use std::rc::Rc;
 
 const DOUBLE_TAG: u8 = 253;
 
@@ -50,6 +52,12 @@ impl Ocamlvalue for String {
 }
 
 impl Ocamlvalue for Cow<'static, str> {
+    fn ocamlvalue(&self) -> Value {
+        str_to_ocaml(self.as_bytes())
+    }
+}
+
+impl Ocamlvalue for &str {
     fn ocamlvalue(&self) -> Value {
         str_to_ocaml(self.as_bytes())
     }
@@ -123,5 +131,17 @@ impl Ocamlvalue for u64 {
 impl Ocamlvalue for f64 {
     fn ocamlvalue(&self) -> Value {
         caml_block(DOUBLE_TAG, &[(*self).to_bits() as usize])
+    }
+}
+
+impl<T: Ocamlvalue> Ocamlvalue for Rc<T> {
+    fn ocamlvalue(&self) -> Value {
+        self.as_ref().ocamlvalue()
+    }
+}
+
+impl Ocamlvalue for PathBuf {
+    fn ocamlvalue(&self) -> Value {
+        self.to_str().unwrap().ocamlvalue()
     }
 }

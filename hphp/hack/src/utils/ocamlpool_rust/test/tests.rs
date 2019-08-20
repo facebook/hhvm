@@ -97,3 +97,16 @@ test_case!(getFoo3, {
 });
 
 test_case!(getFoo4, { Foo4(true, "C".to_string()) });
+
+test_case!(getStrRef,
+    {""}
+    { "TEST" }
+);
+
+test_case!(getRc, { std::rc::Rc::new(Foo2(true)) });
+
+test_case!(
+    getPathBuf,
+    { std::path::Path::new("foo.txt").to_path_buf() }
+    { std::path::Path::new("").to_path_buf() }
+);

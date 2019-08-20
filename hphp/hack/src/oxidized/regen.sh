@@ -32,7 +32,6 @@ buck run hphp/hack/src/hh_oxidize --                                          \
   hphp/hack/src/typing/typing_defs.ml                                         \
   hphp/hack/src/typing/typing_reason.ml                                       \
   hphp/hack/src/utils/core/prim_defs.ml                                       \
-  hphp/hack/src/utils/relative_path.ml
 
 # Re-export generated modules (listed in gen/mod.rs) in the crate root, lib.rs
 cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null

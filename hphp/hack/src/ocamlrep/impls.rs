@@ -5,6 +5,8 @@
 
 use std::convert::TryInto;
 use std::mem;
+use std::path::PathBuf;
+use std::rc::Rc;
 
 use crate::arena::Arena;
 use crate::block;
@@ -82,6 +84,12 @@ impl<T: IntoOcamlRep> IntoOcamlRep for Box<T> {
     }
 }
 
+impl<T: IntoOcamlRep + Clone> IntoOcamlRep for Rc<T> {
+    fn into_ocamlrep<'a>(self, arena: &mut Arena<'a>) -> Value<'a> {
+        arena.add(self.as_ref().clone())
+    }
+}
+
 impl<T: IntoOcamlRep> IntoOcamlRep for Option<T> {
     fn into_ocamlrep<'a>(self, arena: &mut Arena<'a>) -> Value<'a> {
         match self {
@@ -107,6 +115,12 @@ impl<T: IntoOcamlRep> IntoOcamlRep for Vec<T> {
             hd = current_block.build();
         }
         hd
+    }
+}
+
+impl IntoOcamlRep for PathBuf {
+    fn into_ocamlrep<'a>(self, arena: &mut Arena<'a>) -> Value<'a> {
+        arena.add(self.to_str().unwrap())
     }
 }
 

@@ -42,6 +42,12 @@ external getFoo3 : unit -> foo3 list = "getFoo3"
 
 external getFoo4 : unit -> foo4 list = "getFoo4"
 
+external getStrRef : unit -> string list = "getStrRef"
+
+external getRc : unit -> foo2 list = "getRc"
+
+external getPathBuf : unit -> string list = "getPathBuf"
+
 let run f expected () =
   let rust_values = f () in
   if List.length expected <> List.length rust_values then
@@ -63,6 +69,9 @@ let tests = [
   ("getFoo2", run getFoo2 [true; false]);
   ("getFoo3", run getFoo3 [{aa = 2; bb = true}]);
   ("getFoo4", run getFoo4 [(true, "C")]);
+  ("getStrRef", run getStrRef [""; "TEST"]);
+  ("getRc", run getRc [true]);
+  ("getPathBuf", run getPathBuf ["foo.txt"; ""]);
 ]
 
 let () =

@@ -23,6 +23,31 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+/**
+ * Admin Command Ext allow you to register more admin commands that are not
+ * located in the admin command file.
+ */
+struct AdminCommandExt {
+  AdminCommandExt() {
+    next = s_head;
+    s_head = this;
+  }
+
+  virtual std::string usage() = 0;
+  virtual bool handleRequest(Transport* transport) = 0;
+
+  template <typename L>
+  static bool iterate(L lambda) {
+    for (auto p = s_head; p; p = p->next) {
+      if (lambda(p)) return true;
+    }
+    return false;
+  }
+
+  AdminCommandExt* next{nullptr};
+  static AdminCommandExt* s_head;
+};
+
 struct AdminRequestHandler : RequestHandler {
   static AccessLog &GetAccessLog() { return s_accessLog; }
 

@@ -104,6 +104,8 @@ using std::string;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+AdminCommandExt* AdminCommandExt::s_head{nullptr};
+
 THREAD_LOCAL(AccessLog::ThreadData, AdminRequestHandler::s_accessLogThreadData);
 
 AccessLog AdminRequestHandler::s_accessLog(
@@ -433,6 +435,11 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 #endif // ENABLE_HHPROF
         }
 #endif // USE_JEMALLOC
+
+      AdminCommandExt::iterate([&](AdminCommandExt* ace) {
+        usage.append(ace->usage());
+        return false;
+      });
 
       transport->sendString(usage);
       break;
@@ -977,6 +984,12 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       );
       out << "}" << endl;
       transport->sendString(out.str());
+      break;
+    }
+
+    if (AdminCommandExt::iterate([&](AdminCommandExt* ace) {
+          return ace->handleRequest(transport);
+       })) {
       break;
     }
 

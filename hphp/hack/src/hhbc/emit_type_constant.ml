@@ -220,6 +220,7 @@ and hint_to_type_constant_list ~tparams ~namespace ~targ_map (h : Aast.hint) =
     @ hint_to_type_constant_list ~tparams ~namespace ~targ_map h
   (* TAST hints not found on the legacy AST *)
   | Aast.Hany
+  | Aast.Herr
   | Aast.Hmixed
   | Aast.Hnonnull
   | Aast.Habstr _

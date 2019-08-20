@@ -55,7 +55,7 @@ let rec check_hint env (pos, hint) =
   | Aast.Hshape Aast.{ nsi_allows_unknown_fields=_; nsi_field_map } ->
     List.iter ~f:(fun v -> check_hint env v.Aast.sfi_hint) nsi_field_map
   | Aast.Haccess _ -> ()
-  | Aast.Hany  | Aast.Hmixed | Aast.Hnonnull | Aast.Hprim _
+  | Aast.Hany  | Aast.Herr | Aast.Hmixed | Aast.Hnonnull | Aast.Hprim _
   | Aast.Hthis | Aast.Habstr _  | Aast.Hdynamic | Aast.Hnothing -> ()
 
 and check_tparams env p x tparams hl c_pos =

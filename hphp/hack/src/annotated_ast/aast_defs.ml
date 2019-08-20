@@ -110,6 +110,7 @@ and hint_ =
   | Hsoft of hint
   (* The following constructors don't exist in the AST hint type *)
   | Hany
+  | Herr
   | Hmixed
   | Hnonnull
   | Habstr of string

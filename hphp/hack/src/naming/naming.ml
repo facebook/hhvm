@@ -771,11 +771,11 @@ module Make (GetLocals : GetLocals) = struct
         | Aast.Happly ((pos, x), _) when x = SN.Classes.cSelf ->
           begin
             match (fst env).current_cls with
-            | None -> Errors.self_outside_class pos; N.Hany
+            | None -> Errors.self_outside_class pos; N.Herr
             | Some (cid, _) -> N.Happly (cid, [])
           end
         | Aast.Happly ((pos, x), _) when x = SN.Classes.cStatic || x = SN.Classes.cParent ->
-          Errors.invalid_type_access_root (pos, x); N.Hany
+          Errors.invalid_type_access_root (pos, x); N.Herr
         | Aast.Happly (root, _) ->
           let h = hint_id ~forbid_this ~allow_retonly ~allow_typedef
             ~allow_wildcard:false ~tp_depth env root [] in
@@ -791,13 +791,13 @@ module Make (GetLocals : GetLocals) = struct
             *)
             | N.Habstr _ when in_where_clause && not pu_enabled -> h
             | N.Habstr _ when pu_enabled -> h
-            | _ -> Errors.invalid_type_access_root root; N.Hany
+            | _ -> Errors.invalid_type_access_root root; N.Herr
           end
         | _ ->
           Errors.internal_error
             pos
             "Malformed hint: expected Haccess (Happly ...) from ast_to_nast";
-          N.Hany
+          N.Herr
       in
       N.Haccess ((pos, root_ty), ids)
     | Aast.Hshape { Aast.nsi_allows_unknown_fields; nsi_field_map } ->
@@ -813,6 +813,7 @@ module Make (GetLocals : GetLocals) = struct
             new_field)
           nsi_field_map in
       N.Hshape { N.nsi_allows_unknown_fields; nsi_field_map }
+    | Aast.Herr
     | Aast.Hany
     | Aast.Hmixed
     | Aast.Hnonnull
@@ -826,7 +827,7 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Hdynamic
     | Aast.Hnothing ->
       Errors.internal_error Pos.none "Unexpected hint not present on legacy AST";
-      N.Hany
+      N.Herr
 
   and hint_id ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard ~tp_depth
     env (p, x as id) hl =
@@ -843,12 +844,12 @@ module Make (GetLocals : GetLocals) = struct
           then
             if hl <> [] then
               (Errors.tparam_with_tparam p x;
-              N.Hany)
+              N.Herr)
             else
               N.Happly(id, [])
           else
             (Errors.wildcard_disallowed p;
-            N.Hany)
+            N.Herr)
         | x when
           (  x = ("\\"^SN.Typehints.void)
           || x = ("\\"^SN.Typehints.null)
@@ -868,18 +869,18 @@ module Make (GetLocals : GetLocals) = struct
           || x = ("\\"^SN.Typehints.double)
           ) ->
           Errors.primitive_toplevel p;
-          N.Hany
+          N.Herr
       | x when x = "\\"^SN.Typehints.nothing ->
          Errors.primitive_toplevel p;
-         N.Hany
+         N.Herr
       | x when x = SN.Typehints.void && allow_retonly -> N.Hprim N.Tvoid
       | x when x = SN.Typehints.void ->
          Errors.return_only_typehint p `void;
-         N.Hany
+         N.Herr
       | x when x = SN.Typehints.noreturn && allow_retonly -> N.Hprim N.Tnoreturn
       | x when x = SN.Typehints.noreturn ->
         Errors.return_only_typehint p `noreturn;
-        N.Hany
+        N.Herr
       | x when x = SN.Typehints.null -> N.Hprim N.Tnull
       | x when x = SN.Typehints.num  -> N.Hprim N.Tnum
       | x when x = SN.Typehints.resource -> N.Hprim N.Tresource
@@ -894,13 +895,13 @@ module Make (GetLocals : GetLocals) = struct
           N.Hthis
       | x when x = SN.Typehints.this ->
           Errors.this_type_forbidden p;
-          N.Hany
+          N.Herr
       | x when x = SN.Classes.cClassname && (List.length hl) <> 1 ->
           Errors.classname_param p;
           N.Hprim N.Tstring
       | _ when String.lowercase x = SN.Typehints.this ->
           Errors.lowercase_this p x;
-          N.Hany
+          N.Herr
       | _ when SMap.mem x params ->
           if hl <> [] then
           Errors.tparam_with_tparam p x;
@@ -938,7 +939,7 @@ module Make (GetLocals : GetLocals) = struct
           | [val_] -> N.Harray (Some (hint env val_), None)
           | [key_; val_] ->
             N.Harray (Some (hint env key_), Some (hint env val_))
-          | _ -> Errors.too_many_type_arguments p; N.Hany
+          | _ -> Errors.too_many_type_arguments p; N.Herr
         )
       | nm when nm = SN.Typehints.darray ->
         Some (match hl with
@@ -962,6 +963,9 @@ module Make (GetLocals : GetLocals) = struct
           | [] ->
               if Partial.should_check_error ((fst env).in_mode) 2071 then
                 Errors.too_few_type_arguments p;
+              (* Warning: These Hanys are here because they produce subtle
+                errors because of interaction with tco_experimental_isarray
+                if you change them to Herr *)
               N.Hvarray_or_darray (p, N.Hany)
           | [val_] -> N.Hvarray_or_darray (hint env val_)
           | _ -> Errors.too_many_type_arguments p; N.Hany)
@@ -2275,14 +2279,19 @@ module Make (GetLocals : GetLocals) = struct
             match x with
             | x when x = SN.Typehints.object_cast ->
               (* (object) is a valid cast but not a valid type annotation *)
-              if Partial.should_check_error ((fst env).in_mode) 2055 then Errors.object_cast p None;
-              p, N.Hany
+              if Partial.should_check_error ((fst env).in_mode) 2055 then
+                begin
+                  Errors.object_cast p None;
+                  p, N.Herr
+                end
+              else
+                p, N.Hany
             | x when x = SN.Typehints.void ->
               Errors.void_cast p;
-              p, N.Hany
+              p, N.Herr
             | x when x = SN.Typehints.unset_cast ->
               Errors.unset_cast p;
-              p, N.Hany
+              p, N.Herr
             | _       ->
               (* Let's just assume that any other invalid cases are attempts to
               * cast to specific objects *)

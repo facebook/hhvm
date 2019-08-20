@@ -62,6 +62,7 @@ let rec has_reified_type_constraint env h =
   | Aast.Hfun _
   | Aast.Haccess _ -> NotReified
   (* Not found in the original AST *)
+  | Aast.Herr
   | Aast.Hany -> failwith "Should be a naming error"
   | Aast.Habstr _ ->
      failwith "TODO Unimplemented: Not in the original AST"
@@ -80,6 +81,7 @@ let rec remove_awaitable (pos, h_ as h) =
   | Aast.Hfun _
   | Aast.Haccess _
   | Aast.Happly _ -> h
+  | Aast.Herr
   | Aast.Hany
   | Aast.Hmixed
   | Aast.Hnonnull
@@ -133,6 +135,7 @@ let remove_erased_generics env h =
                   ; Aast.nsi_field_map = fields }
     | Aast.Hfun _
     | Aast.Haccess _ -> h
+    | Aast.Herr
     | Aast.Hany
     | Aast.Hmixed
     | Aast.Hnonnull

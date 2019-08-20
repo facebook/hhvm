@@ -91,6 +91,7 @@ and fmt_hint ~tparams ~namespace ?(strip_tparams=false) (pos, h) =
       String.concat ~sep:", " shape_fields ^ ")"
   | Aast.Hprim p -> fmt_name_or_prim (pos, prim_to_string p)
   (* Didn't exist in the AST *)
+  | Aast.Herr
   | Aast.Hany -> failwith "I'm convinced that this should be an error caught in naming"
   | Aast.Hmixed -> fmt_name_or_prim (pos, SN.Typehints.mixed)
   | Aast.Hnonnull -> fmt_name_or_prim (pos, SN.Typehints.nonnull)
@@ -127,6 +128,7 @@ let can_be_nullable (_, h) =
   (* HHVM does not emit nullable for type consts that are set to null by default
    * function(Class::Type $a = null) unless it is explicitly marked as nullable
    *)
+  | Aast.Herr
   | Aast.Hany -> failwith "I'm convinced that this should be an error caught in naming"
   (* Naming converted the following from Happly's so assuming it should be true *)
   | Aast.Habstr _
@@ -209,6 +211,7 @@ let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable ~namespace (p, h) 
   | Aast.Hsoft t ->
     make_tc_with_flags_if_non_empty_flags ~kind ~tparams ~skipawaitable ~namespace
     t [TC.Soft; TC.HHType; TC.ExtendedHint]
+  | Aast.Herr
   | Aast.Hany -> failwith "I'm convinced that this should be an error caught in naming"
   (* Naming converted the following from Happly's so use the Happly logic here*)
   | Aast.Hnonnull -> happly_helper (p, SN.Typehints.nonnull)
@@ -260,6 +263,7 @@ let param_hint_to_type_info ~kind ~skipawaitable ~nullable ~tparams ~namespace h
     (* I think Happly where id is in tparams is translated into Habstr *)
     | Aast.Habstr s when List.mem ~equal:(=) tparams s -> false
     | Aast.Happly ((_, id), _) when List.mem ~equal:(=) tparams id -> false
+    | Aast.Herr
     | Aast.Hany -> failwith "Expected error on Tany in naming: param_hint_to_type_info"
     (* The following are based on Happly conversions in naming *)
     | Aast.Harray (Some _, Some _) -> false

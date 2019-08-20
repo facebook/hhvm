@@ -357,7 +357,8 @@ let emit_class (ast_class, hoisted) =
       | Aast.Happly ((_, trait), _) -> trait
       (* Happly converted from naming *)
       | Aast.Hprim p -> Emit_type_hint.prim_to_string p
-      | Aast.Hany -> failwith "I'm convinced that this should be an error caught in naming"
+      | Aast.Hany
+      | Aast.Herr -> failwith "I'm convinced that this should be an error caught in naming"
       | Aast.Hmixed -> SN.Typehints.mixed
       | Aast.Hnonnull -> SN.Typehints.nonnull
       | Aast.Habstr s -> s

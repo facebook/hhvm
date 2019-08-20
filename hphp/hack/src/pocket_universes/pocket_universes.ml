@@ -268,6 +268,7 @@ class ['self] erase_body_visitor = object (_self: 'self)
     | Hsoft h -> Hsoft (super#on_hint from_cstrs h)
     | Haccess (_, []) -> failwith "PocketUniverses: Encountered unexpected use of Haccess"
     (* The following hints do not exist on the legacy AST *)
+    | Herr -> failwith "PocketUniverses: Encountered unexpected Herr"
     | Hany -> failwith "PocketUniverses: Encountered unexpected Hany"
     | Hmixed -> failwith "PocketUniverses: Encountered unexpected Hmixed"
     | Hnonnull -> failwith "PocketUniverses: Encountered unexpected Hnonnull"

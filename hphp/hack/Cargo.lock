@@ -95,6 +95,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "hack_line_break_map"
+version = "3.49.0"
+
+[[package]]
 name = "hack_parser"
 version = "3.49.0"
 dependencies = [
@@ -108,6 +112,9 @@ dependencies = [
 [[package]]
 name = "hack_parser_core_types"
 version = "3.49.0"
+dependencies = [
+ "hack_line_break_map 3.49.0",
+]
 
 [[package]]
 name = "hack_parser_ffi"

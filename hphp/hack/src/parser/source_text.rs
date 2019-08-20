@@ -3,12 +3,13 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use line_break_map::LineBreakMap;
 use std::rc::Rc;
 
 pub const INVALID: char = '\x00';
 
-#[derive(Debug, Clone, Copy)]
-pub struct SourceTextImpl<'a> {
+#[derive(Debug)]
+struct SourceTextImpl<'a> {
     // All the indices in existing implementation are byte based, instead of unicode
     // char boundary based. This is bad experience for non-ASCII source files, but don't want to
     // change it now and deal with tracking all the dependencies of it.
@@ -20,10 +21,12 @@ pub struct SourceTextImpl<'a> {
     // TODO(kasper) This eventually should be a RelativePath
     file_path: &'a str,
 
+    offset_map: LineBreakMap,
+
     ocaml_source_text: usize,
 }
 #[derive(Debug, Clone)]
-pub struct SourceText<'a>(pub Rc<SourceTextImpl<'a>>);
+pub struct SourceText<'a>(Rc<SourceTextImpl<'a>>);
 
 impl<'a> SourceText<'a> {
     pub fn make(file_path: &'a str, text: &'a [u8]) -> Self {
@@ -35,6 +38,7 @@ impl<'a> SourceText<'a> {
             file_path,
             text,
             ocaml_source_text,
+            offset_map: LineBreakMap::new(text),
         }))
     }
 

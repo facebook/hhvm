@@ -7,6 +7,7 @@
 use std::cell::Cell;
 use std::result::Result;
 
+#[derive(Debug)]
 pub struct LineBreakMap {
     lines: Box<[usize]>,
     last_offset: Cell<usize>,

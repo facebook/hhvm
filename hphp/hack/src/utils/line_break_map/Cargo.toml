@@ -1,0 +1,8 @@
+[package]
+name = "hack_line_break_map"
+version = "3.49.0"
+edition = "2018"
+
+[lib]
+name = "line_break_map"
+path = "../line_break_map.rs"

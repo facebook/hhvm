@@ -128,51 +128,53 @@ let go
   let ast = results.Full_fidelity_ast.ast in
   let nast = Ast_to_nast.convert ast in
   let tast = ServerIdeUtils.check_ast tcopt nast in
-  let typing_env = Tast_env.empty tcopt in
   let offset = SourceText.position_to_offset source_text (line, column) in
-  get_positional_info (Full_fidelity_ast.PositionedSyntaxTree.root tree) offset
-  >>= fun ((symbol_line, symbol_char), argument_idx) ->
-  let results = IdentifySymbolService.go tast symbol_line symbol_char in
-  let results = List.filter results ~f:(fun r ->
-    match r.SymbolOccurrence.type_ with
-    | SymbolOccurrence.Method _
-    | SymbolOccurrence.Function -> true
-    | _ -> false
-  ) in
-  let head_result = List.hd results in
-  let r2 = head_result >>= get_occurrence_info env nast in
-  r2 >>| fun (occurrence, ft, def_opt) ->
-  let open Typing_defs in
-  let open Lsp.SignatureHelp in
-  let siginfo_label =
-    Tast_env.print_ty_with_identity typing_env (Reason.Rnone, Tfun ft) occurrence def_opt in
-  let params =
-    ft.ft_params
-    |> List.map ~f:begin fun param ->
-      let parinfo_label =
-        match param.fp_name with
-        | Some s -> s
-        | None -> Tast_env.print_ty typing_env ft.ft_ret.et_type
-      in
-      { parinfo_label; parinfo_documentation = None }
-    end
-  in
-  let siginfo_documentation =
-    let base_class_name = SymbolOccurrence.enclosing_class occurrence in
-    def_opt
-    >>= fun def ->
-    let file =
-      ServerCommandTypes.FileName (def.SymbolDefinition.pos |> Pos.to_absolute |> Pos.filename) in
-    ServerDocblockAt.go_comments_for_symbol ~def ~base_class_name ~file
-  in
-  let signature_information = {
-    siginfo_label;
-    siginfo_documentation;
-    parameters = params;
-  }
-  in
-  {
-    signatures = [signature_information];
-    activeSignature = 0;
-    activeParameter = argument_idx;
-  }
+  match get_positional_info (Full_fidelity_ast.PositionedSyntaxTree.root tree) offset with
+  | None -> None
+  | Some ((symbol_line, symbol_char), argument_idx) ->
+    let results = IdentifySymbolService.go tast symbol_line symbol_char in
+    let results = List.filter results ~f:(fun r ->
+      match r.SymbolOccurrence.type_ with
+      | SymbolOccurrence.Method _
+      | SymbolOccurrence.Function -> true
+      | _ -> false
+    ) in
+    match List.hd results with
+    | None -> None
+    | Some head_result ->
+      match get_occurrence_info env nast head_result with
+      | None -> None
+      | Some (occurrence, ft, def_opt) ->
+        let open Typing_defs in
+        let open Lsp.SignatureHelp in
+        let tast_env = Tast_env.empty tcopt in
+        let siginfo_label =
+          Tast_env.print_ty_with_identity tast_env (Reason.Rnone, Tfun ft) occurrence def_opt in
+        let params = List.map ft.ft_params ~f:begin fun param ->
+          let parinfo_label =
+            match param.fp_name with
+            | Some s -> s
+            | None -> Tast_env.print_ty tast_env ft.ft_ret.et_type
+          in
+          { parinfo_label; parinfo_documentation = None }
+        end
+        in
+        let siginfo_documentation =
+          let base_class_name = SymbolOccurrence.enclosing_class occurrence in
+          def_opt
+          >>= fun def ->
+          let file =
+            ServerCommandTypes.FileName (def.SymbolDefinition.pos |> Pos.to_absolute |> Pos.filename) in
+          ServerDocblockAt.go_comments_for_symbol ~def ~base_class_name ~file
+        in
+        let signature_information = {
+          siginfo_label;
+          siginfo_documentation;
+          parameters = params;
+        }
+        in
+        Some {
+          signatures = [signature_information];
+          activeSignature = 0;
+          activeParameter = argument_idx;
+        }

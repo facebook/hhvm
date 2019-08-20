@@ -4298,7 +4298,7 @@ and class_get_ ~is_method ~is_const ~this_ty ~coerce_from_ty ?(explicit_tparams=
             } ->
             let p_vis = Reason.to_pos (fst member_decl_ty) in
             TVis.check_class_access p env (p_vis, vis, lsb) cid class_;
-            let env, member_ty =
+            let env, member_ty, et_enforced =
               begin match member_decl_ty with
                 (* We special case Tfun here to allow passing in explicit tparams to localize_ft. *)
                 | r, Tfun ft when is_method ->
@@ -4308,9 +4308,14 @@ and class_get_ ~is_method ~is_const ~this_ty ~coerce_from_ty ?(explicit_tparams=
                   let env, ft =
                     Phase.(localize_ft ~instantiation: { use_name=strip_ns mid; use_pos=p; explicit_targs }
                       ~ety_env env ft)
-                  in env, (r, Tfun ft)
+                  in env, (r, Tfun ft), false (* unused *)
                 | _ ->
-                  Phase.localize ~ety_env env member_decl_ty
+                  let { et_type; et_enforced } = 
+                    Typing_enforceability.compute_enforced_and_pessimize_ty_simple env member_decl_ty in
+                  let env, member_ty = Phase.localize ~ety_env env et_type in
+                  (* TODO(T52753871) make function just return possibly_enforced_ty 
+                   * after considering intersection case *)
+                  env, member_ty, et_enforced
               end in
 
             let env, member_ty =
@@ -4333,7 +4338,6 @@ and class_get_ ~is_method ~is_const ~this_ty ~coerce_from_ty ?(explicit_tparams=
               match coerce_from_ty with
               | None -> env
               | Some (p, ur, ty) ->
-                let et_enforced = Typing_enforceability.is_enforceable env member_decl_ty in
                 Type.coerce_type p ur env ty { et_type = member_ty; et_enforced } Errors.unify_error in
             k (env, member_ty)
 
@@ -4549,7 +4553,7 @@ and obj_get_concrete_ty ~inst_meth ~is_method ~coerce_from_ty ?(explicit_tparams
         TVis.check_obj_access id_pos env (mem_pos, vis);
         let member_decl_ty = Typing_enum.member_type env member_ce in
         let ety_env = mk_ety_env r class_info x exact paraml in
-        let env, member_ty =
+        let env, member_ty, et_enforced =
           begin match member_decl_ty with
             | (r, Tfun ft) when is_method ->
               (* We special case function types here to be able to pass explicit type
@@ -4559,14 +4563,18 @@ and obj_get_concrete_ty ~inst_meth ~is_method ~coerce_from_ty ?(explicit_tparams
               let env, ft =
                 Phase.(localize_ft ~instantiation:{ use_name=strip_ns id_str; use_pos=id_pos; explicit_targs }
                   ~ety_env env ft) in
-              env, (r, Tfun ft)
+              env, (r, Tfun ft), false
             | _ ->
-              Phase.localize ~ety_env env member_decl_ty
+              let { et_type; et_enforced } =
+                Typing_enforceability.compute_enforced_and_pessimize_ty_simple env member_decl_ty in
+              let env, member_ty = Phase.localize ~ety_env env et_type in
+              (* TODO(T52753871): same as for class_get *)
+              env, member_ty, et_enforced
           end in
 
         if inst_meth
         then TVis.check_inst_meth_access id_pos (mem_pos, vis);
-        let env, member_ty, member_decl_ty =
+        let env, member_ty =
         if (Cls.has_upper_bounds_on_this_from_constraints class_info) then
           let (env, ty), succeed =
             Errors.try_with_result
@@ -4576,13 +4584,11 @@ and obj_get_concrete_ty ~inst_meth ~is_method ~coerce_from_ty ?(explicit_tparams
                 (env, MakeType.mixed Reason.Rnone), false) in
           if (succeed) then
             let env, member_ty = Inter.intersect env (Reason.Rwitness id_pos) member_ty ty in
-            env, member_ty, Some member_decl_ty
+            env, member_ty
           else
-           env, member_ty, Some member_decl_ty
+           env, member_ty
         else
-          env, member_ty, Some member_decl_ty in
-        let et_enforced =
-          match member_decl_ty with None -> false | Some t -> Typing_enforceability.is_enforceable env t in
+          env, member_ty in
         let env =
           match coerce_from_ty with
           | None -> env

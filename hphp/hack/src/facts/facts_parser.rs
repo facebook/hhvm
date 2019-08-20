@@ -6,6 +6,7 @@
 
 use parser_rust as parser;
 
+use oxidized::relative_path::RelativePath;
 use parser::mode_parser::parse_mode;
 use parser::parser::Parser;
 use parser::parser_env::ParserEnv;
@@ -22,7 +23,7 @@ pub struct ExtractAsJsonOpts {
     pub php5_compat_mode: bool,
     pub hhvm_compat_mode: bool,
     pub allow_new_attribute_syntax: bool,
-    pub filename: String, // TODO(leoo,kasper) should eventually be Relative_path
+    pub filename: RelativePath,
 }
 
 pub fn extract_as_json(text: &str, opts: ExtractAsJsonOpts) -> Option<String> {

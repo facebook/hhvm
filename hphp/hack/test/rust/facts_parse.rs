@@ -11,6 +11,8 @@ use clap::{App, Arg};
 
 extern crate facts_rust;
 use facts_rust::facts_parser::*;
+use oxidized::relative_path::*;
+use std::path::PathBuf;
 
 fn main() {
     let args = App::new("Facts JSON test (Rust)")
@@ -34,11 +36,12 @@ fn main() {
 }
 
 fn parse(file_path: String, parse_only: bool) {
+    let path = RelativePath::make(Prefix::Dummy, PathBuf::from(file_path.clone()));
     let opts = ExtractAsJsonOpts {
         php5_compat_mode: true,
         hhvm_compat_mode: true,
         allow_new_attribute_syntax: false,
-        filename: file_path.clone(),
+        filename: path,
     };
 
     let content = fs::read(&file_path).expect("failed to read file");

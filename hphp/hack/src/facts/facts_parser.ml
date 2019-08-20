@@ -382,7 +382,7 @@ let extract_as_json_string
       php5_compat_mode
       hhvm_compat_mode
       allow_new_attribute_syntax
-      (Relative_path.suffix filename)
+      filename
       text
     in
     if unnormalized = "" then

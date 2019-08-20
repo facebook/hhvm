@@ -18,8 +18,9 @@ use parser_rust as parser;
 
 use rust_editable_positioned_syntax::{EditablePositionedSyntax, EditablePositionedSyntaxTrait};
 
+use ocamlpool_rust::utils::{block_field, str_field};
+use oxidized::relative_path::RelativePath;
 use rust_to_ocaml::rust_to_ocaml::{SerializationContext, ToOcaml};
-use rust_to_ocaml::{block_field, str_field};
 
 type PositionedSyntaxParser<'a> = Parser<'a, WithKind<PositionedSmartConstructors>, NoState>;
 
@@ -32,10 +33,10 @@ caml!(parse_and_rewrite_ppl_classes, |ocaml_source_text|, <res>, {
 
     let ocaml_source_text_value = ocaml_source_text.0;
 
-    let relative_path = block_field(&ocaml_source_text, 0);
-    let file_path = str_field(&relative_path, 1);
+    let relative_path_raw = block_field(&ocaml_source_text, 0);
+    let relative_path = RelativePath::from_ocamlvalue(&relative_path_raw);
     let content = str_field(&ocaml_source_text, 2);
-    let source_text = SourceText::make_with_raw(&file_path.as_str(), &content.data(), ocaml_source_text_value);
+    let source_text = SourceText::make_with_raw(&relative_path, &content.data(), ocaml_source_text_value);
 
     let env = ParserEnv {
         is_experimental_mode : false,

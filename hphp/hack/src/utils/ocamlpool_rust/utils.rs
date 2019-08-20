@@ -75,3 +75,21 @@ pub fn str_to_ocaml(s: &[u8]) -> Value {
 pub fn ocaml_to_isize(i: Value) -> isize {
     ((i >> 1) | (std::isize::MIN as usize & i)) as isize
 }
+
+pub unsafe fn block_field(block: &ocaml::Value, field: usize) -> ocaml::Value {
+    ocaml::Value::new(*ocaml::core::mlvalues::field(block.0, field))
+}
+
+pub unsafe fn bool_field(block: &ocaml::Value, field: usize) -> bool {
+    ocaml::Value::new(*ocaml::core::mlvalues::field(block.0, field)).i32_val() != 0
+}
+
+pub unsafe fn usize_field(block: &ocaml::Value, field: usize) -> usize {
+    ocaml::Value::new(*ocaml::core::mlvalues::field(block.0, field)).i32_val() as usize
+}
+
+pub unsafe fn str_field(block: &ocaml::Value, field: usize) -> ocaml::Str {
+    ocaml::Str::from(ocaml::Value::new(*ocaml::core::mlvalues::field(
+        block.0, field,
+    )))
+}

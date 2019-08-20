@@ -69,6 +69,7 @@ name = "hack_facts"
 version = "3.49.0"
 dependencies = [
  "hack_deps 3.49.0",
+ "hack_oxidized 3.49.0",
  "hack_parser 3.49.0",
  "hack_utils 3.49.0",
  "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -83,6 +84,7 @@ name = "hack_facts_ffi"
 version = "3.49.0"
 dependencies = [
  "hack_facts 3.49.0",
+ "hack_oxidized 3.49.0",
  "ocaml 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -99,10 +101,40 @@ name = "hack_line_break_map"
 version = "3.49.0"
 
 [[package]]
+name = "hack_ocamlrep"
+version = "3.49.0"
+dependencies = [
+ "hack_ocamlrep_derive 3.49.0",
+ "ocaml 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "hack_ocamlrep_derive"
+version = "3.49.0"
+dependencies = [
+ "proc-macro2 0.4.30 (registry+https://github.com/rust-lang/crates.io-index)",
+ "quote 0.6.13 (registry+https://github.com/rust-lang/crates.io-index)",
+ "syn 0.15.42 (registry+https://github.com/rust-lang/crates.io-index)",
+ "synstructure 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "hack_oxidized"
+version = "3.49.0"
+dependencies = [
+ "hack_ocamlrep 3.49.0",
+ "hack_ocamlrep_derive 3.49.0",
+ "hack_utils_ocamlpool 3.49.0",
+ "hack_utils_ocamlvalue_macro 3.49.0",
+ "ocaml 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "hack_parser"
 version = "3.49.0"
 dependencies = [
  "hack_deps 3.49.0",
+ "hack_oxidized 3.49.0",
  "hack_parser_core_types 3.49.0",
  "hack_utils_ocamlpool 3.49.0",
  "lazy_static 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -114,6 +146,7 @@ name = "hack_parser_core_types"
 version = "3.49.0"
 dependencies = [
  "hack_line_break_map 3.49.0",
+ "hack_oxidized 3.49.0",
 ]
 
 [[package]]
@@ -121,6 +154,7 @@ name = "hack_parser_ffi"
 version = "3.49.0"
 dependencies = [
  "hack_deps 3.49.0",
+ "hack_oxidized 3.49.0",
  "hack_parser 3.49.0",
  "hack_utils_ocamlpool 3.49.0",
  "libc 0.2.60 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -136,6 +170,16 @@ name = "hack_utils_ocamlpool"
 version = "3.49.0"
 dependencies = [
  "ocaml 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "hack_utils_ocamlvalue_macro"
+version = "3.49.0"
+dependencies = [
+ "proc-macro2 0.4.30 (registry+https://github.com/rust-lang/crates.io-index)",
+ "quote 0.6.13 (registry+https://github.com/rust-lang/crates.io-index)",
+ "syn 0.15.42 (registry+https://github.com/rust-lang/crates.io-index)",
+ "synstructure 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -303,6 +347,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "synstructure"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "proc-macro2 0.4.30 (registry+https://github.com/rust-lang/crates.io-index)",
+ "quote 0.6.13 (registry+https://github.com/rust-lang/crates.io-index)",
+ "syn 0.15.42 (registry+https://github.com/rust-lang/crates.io-index)",
+ "unicode-xid 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "textwrap"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -385,6 +440,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum serde_json 1.0.40 (registry+https://github.com/rust-lang/crates.io-index)" = "051c49229f282f7c6f3813f8286cc1e3323e8051823fce42c7ea80fe13521704"
 "checksum strsim 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)" = "8ea5119cdb4c55b55d432abb513a0429384878c15dde60cc77b1c99de1a95a6a"
 "checksum syn 0.15.42 (registry+https://github.com/rust-lang/crates.io-index)" = "eadc09306ca51a40555dd6fc2b415538e9e18bc9f870e47b1a524a79fe2dcf5e"
+"checksum synstructure 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)" = "8a31c862c910b86af7938de3a4f176e89c4dfcb484d119593d456b86c3f0f8ea"
 "checksum textwrap 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)" = "d326610f408c7a4eb6f51c37c330e496b08506c9457c9d34287ecc38809fb060"
 "checksum time 0.1.42 (registry+https://github.com/rust-lang/crates.io-index)" = "db8dcfca086c1143c9270ac42a2bbd8a7ee477b78ac8e45b19abfb0cbede4b6f"
 "checksum unicode-width 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)" = "882386231c45df4700b275c7ff55b6f3698780a650026380e72dabe76fa46526"

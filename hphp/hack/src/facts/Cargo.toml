@@ -15,6 +15,7 @@ rust-crypto = "^0.2"
 serde = "^1.0.98"
 serde_derive = "^1.0.98"
 serde_json = "^1.0.40"
+oxidized = {path = "../oxidized", package = "hack_oxidized" }
 
 [dev-dependencies]
 pretty_assertions = "^0.6.1"

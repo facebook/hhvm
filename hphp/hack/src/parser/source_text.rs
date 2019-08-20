@@ -4,6 +4,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use line_break_map::LineBreakMap;
+use oxidized::relative_path::RelativePath;
 use std::rc::Rc;
 
 pub const INVALID: char = '\x00';
@@ -18,8 +19,8 @@ struct SourceTextImpl<'a> {
     // Using byte slice instead of &str looks ugly, but prevents us from constantly fighting
     // with compiler trying to guide us towards unicode semantics.
     text: &'a [u8],
-    // TODO(kasper) This eventually should be a RelativePath
-    file_path: &'a str,
+
+    file_path: RelativePath,
 
     offset_map: LineBreakMap,
 
@@ -29,21 +30,25 @@ struct SourceTextImpl<'a> {
 pub struct SourceText<'a>(Rc<SourceTextImpl<'a>>);
 
 impl<'a> SourceText<'a> {
-    pub fn make(file_path: &'a str, text: &'a [u8]) -> Self {
+    pub fn make(file_path: &RelativePath, text: &'a [u8]) -> Self {
         Self::make_with_raw(file_path, text, 0)
     }
 
-    pub fn make_with_raw(file_path: &'a str, text: &'a [u8], ocaml_source_text: usize) -> Self {
+    pub fn make_with_raw(
+        file_path: &RelativePath,
+        text: &'a [u8],
+        ocaml_source_text: usize,
+    ) -> Self {
         Self(Rc::new(SourceTextImpl {
-            file_path,
+            file_path: file_path.clone(),
             text,
             ocaml_source_text,
             offset_map: LineBreakMap::new(text),
         }))
     }
 
-    pub fn file_path(&self) -> &'a str {
-        self.0.file_path
+    pub fn file_path(&self) -> &RelativePath {
+        &self.0.file_path
     }
 
     pub fn text(&self) -> &'a [u8] {

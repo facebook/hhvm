@@ -10,7 +10,9 @@ use ocamlvalue_macro::Ocamlvalue;
 
 use crate::file_pos_large::FilePosLarge;
 use crate::file_pos_small::FilePosSmall;
-use crate::relative_path::RelativePath;
+use crate::relative_path::{Prefix, RelativePath};
+
+use std::path::PathBuf;
 
 #[derive(Clone, Debug, IntoOcamlRep, Ocamlvalue)]
 enum PosImpl {
@@ -32,6 +34,15 @@ use PosImpl::*;
 pub struct Pos(PosImpl);
 
 impl Pos {
+    pub fn make_none() -> Self {
+        // TODO: shiqicao make NONE static, lazy_static doesn't allow Rc
+        Pos(PosImpl::Small {
+            file: RelativePath::make(Prefix::Dummy, PathBuf::from("")),
+            start: FilePosSmall::make_dummy(),
+            end: FilePosSmall::make_dummy(),
+        })
+    }
+
     pub fn from_lnum_bol_cnum(
         file: RelativePath,
         start: (usize, usize, usize),

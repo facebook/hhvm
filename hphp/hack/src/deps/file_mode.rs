@@ -4,7 +4,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum FileMode {
     Mphp,          // Do the best you can to support legacy PHP
     Mdecl,         // just declare signatures, don't check anything

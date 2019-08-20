@@ -9,3 +9,4 @@ path = "../parser_core_types_lib.rs"
 
 [dependencies]
 line_break_map = {path = "../../utils/line_break_map", package = "hack_line_break_map"}
+oxidized = {path = "../../oxidized", package = "hack_oxidized"}

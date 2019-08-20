@@ -25,7 +25,7 @@ use parser::parser_env::ParserEnv;
 use parser::source_text::SourceText;
 use parser::stack_limit::StackLimit;
 
-use ocamlpool_rust::utils::caml_tuple;
+use ocamlpool_rust::utils::*;
 use rust_to_ocaml::{to_list, SerializationContext, ToOcaml};
 
 use parser::parser::Parser;
@@ -34,6 +34,8 @@ use parser::positioned_syntax::{PositionedSyntax, PositionedValue};
 use parser::positioned_token::PositionedToken;
 use parser::smart_constructors::NoState;
 use parser::smart_constructors_wrappers::WithKind;
+
+use oxidized::relative_path::RelativePath;
 
 type PositionedSyntaxParser<'a> = Parser<'a, WithKind<PositionedSmartConstructors>, NoState>;
 
@@ -70,20 +72,6 @@ type VerifyParser<'a> = Parser<'a, WithKind<VerifySmartConstructors>, VerifyStat
 extern "C" {
     fn ocamlpool_enter();
     fn ocamlpool_leave();
-}
-
-pub unsafe fn block_field(block: &ocaml::Value, field: usize) -> ocaml::Value {
-    ocaml::Value::new(*ocaml::core::mlvalues::field(block.0, field))
-}
-
-unsafe fn bool_field(block: &ocaml::Value, field: usize) -> bool {
-    ocaml::Value::new(*ocaml::core::mlvalues::field(block.0, field)).i32_val() != 0
-}
-
-pub unsafe fn str_field(block: &ocaml::Value, field: usize) -> ocaml::Str {
-    ocaml::Str::from(ocaml::Value::new(*ocaml::core::mlvalues::field(
-        block.0, field,
-    )))
 }
 
 macro_rules! caml_raise {
@@ -165,17 +153,16 @@ macro_rules! parse {
                 // (https://github.com/facebook/hhvm/blob/master/hphp/runtime/base/request-info.h)
                 let relative_stack_size = stack_size - stack_size*6/10;
                 stack_size = next_stack_size;
-
-                let relative_path = block_field(&ocaml_source_text, 0);
-                let file_path = str_field(&relative_path, 1);
                 let content = str_field(&ocaml_source_text, 2);
-                let env = env.clone();
+                let relative_path_raw = block_field(&ocaml_source_text, 0);
 
+                let env = env.clone();
                 let try_parse = move || {
                     let stack_limit = std::rc::Rc::new(StackLimit::relative(relative_stack_size));
                     stack_limit.reset();
+                    let relative_path = RelativePath::from_ocamlvalue(&relative_path_raw);
                     let source_text = SourceText::make_with_raw(
-                        &file_path.as_str(),
+                        &relative_path,
                         &content.data(),
                         ocaml_source_text_value,
                     );
@@ -190,7 +177,7 @@ macro_rules! parse {
                         if istty || std::env::var_os("HH_TEST_MODE").is_some() {
                             eprintln!("[hrust] warning: parser exceeded stack of {} KiB on: {}",
                                       stack_limit.get() / KI,
-                                      file_path.as_str(),
+                                      relative_path.path_str()
                             );
                         }
                         None
@@ -239,10 +226,10 @@ parse!(parse_positioned_with_decl_mode_sc, DeclModeParser);
 parse!(parse_positioned_with_verify_sc, VerifyParser);
 
 caml_raise!(rust_parse_mode, |ocaml_source_text|, <l>, {
-    let relative_path = block_field(&ocaml_source_text, 0);
-    let file_path = str_field(&relative_path, 1);
+    let relative_path_raw = block_field(&ocaml_source_text, 0);
+    let relative_path = RelativePath::from_ocamlvalue(&relative_path_raw);
     let content = str_field(&ocaml_source_text, 2);
-    let source_text = SourceText::make(&file_path.as_str(), &content.data());
+    let source_text = SourceText::make(&relative_path, &content.data());
 
     let mode = parse_mode(&source_text);
 
@@ -256,10 +243,10 @@ caml_raise!(rust_parse_mode, |ocaml_source_text|, <l>, {
 macro_rules! scan_trivia {
     ($name:ident) => {
         caml_raise!($name, |ocaml_source_text, offset|, <l>, {
-            let relative_path = block_field(&ocaml_source_text, 0);
-            let file_path = str_field(&relative_path, 1);
+            let relative_path_raw = block_field(&ocaml_source_text, 0);
+            let relative_path = RelativePath::from_ocamlvalue(&relative_path_raw);
             let content = str_field(&ocaml_source_text, 2);
-            let source_text = SourceText::make(&file_path.as_str(), &content.data());
+            let source_text = SourceText::make(&relative_path, &content.data());
 
             let offset = offset.usize_val();
 

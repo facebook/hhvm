@@ -58,6 +58,11 @@ const DUMMY: usize = usize::max_value();
 
 impl FilePosSmall {
     #[inline]
+    pub const fn make_dummy() -> Self {
+        FilePosSmall(DUMMY)
+    }
+
+    #[inline]
     pub const fn is_dummy(self) -> bool {
         self.0 == DUMMY
     }

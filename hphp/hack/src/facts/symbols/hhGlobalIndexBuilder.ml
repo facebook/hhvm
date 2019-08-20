@@ -43,6 +43,7 @@ let parse_options (): index_builder_context option =
   let custom_repo_name = ref None in
   let repository = ref None in
   let include_builtins = ref true in
+  let silent = ref false in
   let options = ref [
       "--sqlite",
       Arg.String (fun x -> sqlite_filename := (Some x)),
@@ -74,7 +75,11 @@ let parse_options (): index_builder_context option =
 
       "--no-builtins",
       Arg.Unit (fun () -> include_builtins := false),
-      "Disable processing of built-in HHI files"
+      "Disable processing of built-in HHI files";
+
+      "--silent",
+      Arg.Unit (fun () -> silent := true),
+      "Build without logging timing data"
 
     ] in
   Arg.parse_dynamic options (fun anonymous_arg -> repository := (Some anonymous_arg)) usage;
@@ -85,7 +90,9 @@ let parse_options (): index_builder_context option =
     Printf.printf "%s" usage;
     None
   | Some repo ->
-    Printf.printf "Building global symbol index for [%s]\n%!" repo;
+    if not !silent then begin
+      Printf.printf "Building global symbol index for [%s]\n%!" repo;
+    end;
     Some {
       repo_folder = repo;
       sqlite_filename = !sqlite_filename;
@@ -96,6 +103,7 @@ let parse_options (): index_builder_context option =
       custom_service = !custom_service;
       custom_repo_name = !custom_repo_name;
       include_builtins = !include_builtins;
+      silent = !silent;
     }
 ;;
 

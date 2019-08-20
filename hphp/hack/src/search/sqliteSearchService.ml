@@ -57,6 +57,7 @@ let find_saved_symbolindex (): (string, string) Core_kernel.result =
 
 (* Determine the correct filename to use for the db_path or build it *)
 let find_or_build_sqlite_file
+    (silent: bool)
     (workers: MultiWorker.worker list option)
     (savedstate_file_opt: string option): string =
   match savedstate_file_opt with
@@ -68,10 +69,13 @@ let find_or_build_sqlite_file
     | Error errmsg ->
       let repo_path = Relative_path.to_absolute
         (Relative_path.from_root "") in
-      Hh_logger.log "Unable to fetch sqlite symbol index: %s" errmsg;
+      if not silent then begin
+        Hh_logger.log "Unable to fetch sqlite symbol index: %s" errmsg;
+      end;
       let tempfilename = get_filename_for_symbol_index ".db" in
-      Hh_logger.log "Sqlite saved state not specified, generating on the fly";
-      Hh_logger.log "Generating [%s] from repository [%s]" tempfilename repo_path;
+      if not silent then begin
+        Hh_logger.log "Generating [%s] from repository [%s]" tempfilename repo_path;
+      end;
       let ctxt = { IndexBuilderTypes.
         repo_folder = repo_path;
         sqlite_filename = Some tempfilename;
@@ -82,6 +86,7 @@ let find_or_build_sqlite_file
         custom_service = None;
         custom_repo_name = None;
         include_builtins = true;
+        silent;
       } in
       IndexBuilder.go ctxt workers;
       tempfilename
@@ -98,11 +103,13 @@ let initialize
     ~(savedstate_file_opt: string option): si_env =
 
   (* Find the database and open it *)
-  let db_path = find_or_build_sqlite_file workers savedstate_file_opt in
+  let db_path = find_or_build_sqlite_file sienv.sie_quiet_mode workers savedstate_file_opt in
   let db = Sqlite3.db_open db_path in
 
   (* Report that the database has been loaded *)
-  Hh_logger.log "Initialized symbol index sqlite: [%s]" db_path;
+  if not sienv.sie_quiet_mode then begin
+    Hh_logger.log "Initialized symbol index sqlite: [%s]" db_path;
+  end;
 
   (* Here's the updated environment *)
   { sienv with

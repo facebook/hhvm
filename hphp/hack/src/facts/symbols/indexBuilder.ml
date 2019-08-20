@@ -176,11 +176,13 @@ let gather_file_list (path: string): string list =
 ;;
 
 (* Run something and measure its duration *)
-let measure_time ~f ~(name: string) =
+let measure_time ~(silent:bool) ~f ~(name: string) =
   let start_time = Unix.gettimeofday () in
   let result = f () in
   let end_time = Unix.gettimeofday () in
-  Hh_logger.log "%s [%0.1f secs]" name (end_time -. start_time);
+  if not silent then begin
+    Hh_logger.log "%s [%0.1f secs]" name (end_time -. start_time);
+  end;
   result
 ;;
 
@@ -220,7 +222,7 @@ let export_to_custom_writer json_exported_files ctxt =
   | Some service, Some repo_name ->
     let name = Printf.sprintf "Exported to custom symbol index writer [%s] [%s] in "
       service repo_name in
-    measure_time ~f:(fun () ->
+    measure_time ~silent:ctxt.silent ~f:(fun () ->
         CustomSymbolIndexWriter.send_to_custom_writer
           json_exported_files service repo_name ctxt.repo_folder;
       ) ~name;
@@ -246,14 +248,14 @@ let go (ctxt: index_builder_context) (workers: MultiWorker.worker list option): 
 
   (* Gather list of files *)
   let name = Printf.sprintf "Scanned repository folder [%s] in " ctxt.repo_folder in
-  let files = measure_time ~f:(fun () -> gather_file_list ctxt.repo_folder) ~name in
+  let files = measure_time ~silent:ctxt.silent ~f:(fun () -> gather_file_list ctxt.repo_folder) ~name in
 
   (* If desired, get the HHI root folder and add all HHI files from there *)
   let files = if ctxt.include_builtins then begin
     let hhi_root_folder = Hhi.get_hhi_root () in
     let hhi_root_folder_path = Path.to_string hhi_root_folder in
     let name = Printf.sprintf "Scanned HHI folder [%s] in " hhi_root_folder_path in
-    let hhi_files = measure_time ~f:(fun () -> gather_file_list hhi_root_folder_path) ~name in
+    let hhi_files = measure_time ~silent:ctxt.silent ~f:(fun () -> gather_file_list hhi_root_folder_path) ~name in
 
     (* Merge lists *)
     List.append files hhi_files
@@ -262,7 +264,7 @@ let go (ctxt: index_builder_context) (workers: MultiWorker.worker list option): 
 
   (* Spawn the parallel parser *)
   let name = Printf.sprintf "Parsed %d files in " (List.length files) in
-  let capture = measure_time ~f:(fun () -> parallel_parse ~workers files ctxt) ~name in
+  let capture = measure_time ~silent:ctxt.silent ~f:(fun () -> parallel_parse ~workers files ctxt) ~name in
 
   (* Convert the raw capture into results *)
   let results = convert_capture capture in
@@ -275,7 +277,7 @@ let go (ctxt: index_builder_context) (workers: MultiWorker.worker list option): 
     | Some filename ->
       let name = Printf.sprintf "Wrote %d symbols to sqlite in "
         (List.length results.sisr_capture) in
-      measure_time ~f:(fun () ->
+      measure_time ~silent:ctxt.silent ~f:(fun () ->
           SqliteSymbolIndexWriter.record_in_db filename results;
         ) ~name;
   end;
@@ -288,7 +290,7 @@ let go (ctxt: index_builder_context) (workers: MultiWorker.worker list option): 
     | Some filename ->
       let name = Printf.sprintf "Wrote %d symbols to text in "
         (List.length results.sisr_capture) in
-      measure_time ~f:(fun () ->
+      measure_time ~silent:ctxt.silent ~f:(fun () ->
           TextSymbolIndexWriter.record_in_textfile filename results;
         ) ~name;
   end;
@@ -300,7 +302,7 @@ let go (ctxt: index_builder_context) (workers: MultiWorker.worker list option): 
     | Some filename ->
       let name = Printf.sprintf "Wrote %d symbols to json in "
         (List.length results.sisr_capture) in
-      measure_time ~f:(fun () ->
+      measure_time ~silent:ctxt.silent ~f:(fun () ->
           JsonSymbolIndexWriter.record_in_jsonfiles
             ctxt.json_chunk_size filename results;
         ) ~name

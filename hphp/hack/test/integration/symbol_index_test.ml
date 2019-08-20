@@ -95,6 +95,7 @@ let run_index_builder (harness : Test_harness.t) : si_env =
       custom_service = None;
       custom_repo_name = None;
       include_builtins = true;
+      silent = true;
     }
   in
   (* Scan the repo folder and produce answers in sqlite *)

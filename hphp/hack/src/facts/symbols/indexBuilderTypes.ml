@@ -18,6 +18,7 @@ type index_builder_context = {
   custom_service: string option;
   custom_repo_name: string option;
   include_builtins: bool;
+  silent: bool;
 }
 
 (* Fully parsed data structure *)

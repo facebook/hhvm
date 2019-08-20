@@ -337,6 +337,15 @@ void callProfiledFunc(IRGS& env, SSATmp* callee,
   auto const data = profile.data();
   auto const profiledFunc = data.choose(probability);
 
+  // Dump annotations if requested.
+  if (RuntimeOption::EvalDumpCallTargets) {
+    auto const fnName = curFunc(env)->fullName()->data();
+    env.annotations.emplace_back(
+      "CallTargets",
+      folly::sformat("BC={} FN={}: {}\n", bcOff(env), fnName, data.toString())
+    );
+  }
+
   // Don't emit the check if the probability of it succeeding is below the
   // threshold.
   if (profiledFunc == nullptr ||

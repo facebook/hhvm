@@ -83,16 +83,6 @@ TCA getCallTarget(IRLS& env, const IRInstruction* inst, Vreg sp) {
   if (profile.optimizing()) {
     auto const data = profile.data();
 
-    // Dump annotations if requested.
-    if (env.annotations != nullptr && RuntimeOption::EvalDumpCallTargets &&
-        mcgen::dumpTCAnnotation(TransKind::Optimize)) {
-      env.annotations->emplace_back(
-        "CallTargets",
-        folly::sformat("BC={} IR={}: {}\n",
-                       inst->marker().bcOff(), inst->id(), data.toString())
-      );
-    }
-
     // Get the result of the profiling data.  If it's strongly biased towards
     // one function, bind the call.  Otherwise, call funcPrologueRedispatch
     // directly.

@@ -4,9 +4,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-#[macro_use]
-extern crate ocaml;
-
 extern crate libc;
 
 mod ocaml_coroutine_state;
@@ -25,7 +22,7 @@ use parser::parser_env::ParserEnv;
 use parser::source_text::SourceText;
 use parser::stack_limit::StackLimit;
 
-use ocamlpool_rust::utils::*;
+use ocamlpool_rust::{caml_raise, utils::*};
 use rust_to_ocaml::{to_list, SerializationContext, ToOcaml};
 
 use parser::parser::Parser;
@@ -72,38 +69,6 @@ type VerifyParser<'a> = Parser<'a, WithKind<VerifySmartConstructors>, VerifyStat
 extern "C" {
     fn ocamlpool_enter();
     fn ocamlpool_leave();
-}
-
-macro_rules! caml_raise {
-    ($name:ident, |$($param:ident),*|, <$($local:ident),*>, $code:block -> $retval:ident) => {
-        caml!($name, |$($param),*|, <caml_raise_ret, $($local),*>, {
-            let result = std::panic::catch_unwind(
-                || {
-                    $code;
-                    return $retval;
-                }
-            );
-            match result {
-                Ok (value) => {
-                    caml_raise_ret = value;
-                },
-                Err (err) => {
-                    let msg: &str;
-                    if let Some (str) = err.downcast_ref::<&str>() {
-                        msg = str;
-                    } else if let Some (string) = err.downcast_ref::<String>() {
-                        msg = &string[..];
-                    } else {
-                        msg = "Unknown panic type, only support string type.";
-                    }
-                    ocaml::runtime::raise_with_string(
-                        &ocaml::named_value("rust exception").unwrap(),
-                        msg,
-                    );
-                },
-            };
-        } -> caml_raise_ret);
-    };
 }
 
 macro_rules! parse {

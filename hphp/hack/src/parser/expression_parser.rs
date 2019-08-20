@@ -309,6 +309,7 @@ where
     }
 
     fn parse_term(&mut self) -> S::R {
+        self.check_stack_limit();
         let mut parser1 = self.clone();
         let token = parser1.next_xhp_class_name_or_other_token();
         let allow_new_attr = self.env.allow_new_attribute_syntax;

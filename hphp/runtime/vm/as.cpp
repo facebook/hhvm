@@ -956,9 +956,8 @@ std::pair<ArrayData*, std::string> read_litarray(AsmState& as) {
       auto data = var.detach().m_data.parr;
       if (RuntimeOption::EvalArrayProvenance &&
           !data->empty() &&
-          arrprov::arrayWantsTag(data) &&
           !(as.fe->attrs & AttrProvenanceSkipFrame)) {
-        arrprov::setTag(data, {filename, line});
+        arrprov::setTagRecursive(data, {filename, line});
       }
       ArrayData::GetScalarArray(&data);
       as.adataMap[name] = std::make_pair(data, std::move(overrides));

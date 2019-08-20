@@ -76,6 +76,24 @@ void setTag(ArrayData* ad, const Tag& tag) {
   }
 }
 
+void setTagRecursive(ArrayData* ad, const Tag& tag) {
+  assertx(RuntimeOption::EvalArrayProvenance);
+  assertx(ad->isRefCounted());
+  assertx(!ad->empty());
+
+  setTag(ad, tag);
+  IterateVNoInc(
+    ad,
+    [&](TypedValue tv) {
+      if (!isArrayLikeType(tv.m_type)) return;
+      auto ad = tv.m_data.parr;
+      if (ad->empty()) return;
+      if (!arrayWantsTag(ad)) return;
+      setTagRecursive(tv.m_data.parr, tag);
+    }
+  );
+}
+
 folly::Optional<Tag> getTag(const ArrayData* ad) {
   if (!ad->hasProvenanceData()) return {};
   if (ad->isRefCounted()) {

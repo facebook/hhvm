@@ -122,6 +122,11 @@ void copyTag(const ArrayData* src, ArrayData* dest);
 void copyTagStatic(const ArrayData* src, ArrayData* dest);
 
 /*
+ * Tag an array and all of its subarrays
+ */
+void setTagRecursive(ArrayData* ad, const Tag& tag);
+
+/*
  * Clear a tag for a released array---only call this if the array is henceforth
  * unreachable.
  */

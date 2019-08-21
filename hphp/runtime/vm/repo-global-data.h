@@ -135,6 +135,7 @@ struct Repo::GlobalData {
   int32_t ForbidDynamicCallsToClsMeth = 0;
   int32_t ForbidDynamicCallsToInstMeth = 0;
   int32_t ForbidDynamicConstructs = 0;
+  bool ForbidDynamicCallsWithAttr = false;
 
   /*
    * Should the runtime emit notices whenever a builtin is called dynamically?
@@ -211,6 +212,7 @@ struct Repo::GlobalData {
       (ForbidDynamicCallsToClsMeth)
       (ForbidDynamicCallsToInstMeth)
       (ForbidDynamicConstructs)
+      (ForbidDynamicCallsWithAttr)
       (NoticeOnBuiltinDynamicCalls)
       (Signature)
       (AbortBuildOnVerifyError)

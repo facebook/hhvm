@@ -117,7 +117,10 @@ auto constexpr HACKARR_COMPAT_VARR_IS_VEC = "is_vec() called on varray";
 auto constexpr HACKARR_COMPAT_VEC_IS_VARR = "is_varray() called on vec";
 auto constexpr HACKARR_COMPAT_DARR_IS_DICT = "is_dict() called on darray";
 auto constexpr HACKARR_COMPAT_DICT_IS_DARR = "is_darray() called on dict";
-auto constexpr FUNCTION_CALLED_DYNAMICALLY = "'%s' called dynamically";
+auto constexpr FUNCTION_CALLED_DYNAMICALLY_WITHOUT_ATTRIBUTE =
+  "'%s' called dynamically but is not __DynamicallyCallable";
+auto constexpr FUNCTION_CALLED_DYNAMICALLY_WITH_ATTRIBUTE =
+  "'%s' called dynamically without using a function pointer";
 auto constexpr CLASS_CONSTRUCTED_DYNAMICALLY = "'%s' constructed dynamically";
 auto constexpr REIFIED_GENERICS_NOT_GIVEN =
   "Cannot call the reified function '%s' without the reified generics";

@@ -1,136 +1,136 @@
 =============== positive tests =====================
 
-Notice: 'func' called dynamically in %s on line 171
+Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 171
 
-Notice: 'async_func' called dynamically in %s on line 172
+Notice: 'async_func' called dynamically but is not __DynamicallyCallable in %s on line 172
 
 Warning: Decoding instance method func without $this! in %s on line 173
 
-Notice: 'A::func' called dynamically in %s on line 173
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 173
 
-Notice: 'A::static_func' called dynamically in %s on line 174
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 174
 
 Warning: Decoding instance method async_func without $this! in %s on line 175
 
-Notice: 'A::async_func' called dynamically in %s on line 175
+Notice: 'A::async_func' called dynamically but is not __DynamicallyCallable in %s on line 175
 
-Notice: 'A::static_async_func' called dynamically in %s on line 176
+Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 176
 
 Warning: Decoding instance method func without $this! in %s on line 178
 
-Notice: 'A::func' called dynamically in %s on line 178
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 178
 
-Notice: 'A::static_func' called dynamically in %s on line 179
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 179
 
 Warning: Decoding instance method async_func without $this! in %s on line 180
 
-Notice: 'A::async_func' called dynamically in %s on line 180
+Notice: 'A::async_func' called dynamically but is not __DynamicallyCallable in %s on line 180
 
-Notice: 'A::static_async_func' called dynamically in %s on line 181
+Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 181
 
-Notice: 'A::func' called dynamically in %s on line 183
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 183
 
-Notice: 'A::static_func' called dynamically in %s on line 184
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 184
 
-Notice: 'A::async_func' called dynamically in %s on line 185
+Notice: 'A::async_func' called dynamically but is not __DynamicallyCallable in %s on line 185
 
-Notice: 'A::static_async_func' called dynamically in %s on line 186
+Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 186
 
-Notice: 'C::__call' called dynamically in %s on line 187
+Notice: 'C::__call' called dynamically but is not __DynamicallyCallable in %s on line 187
 
-Notice: 'A::static_func' called dynamically in %s on line 189
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 189
 
-Notice: 'A::static_async_func' called dynamically in %s on line 191
+Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 191
 
-Notice: 'A::static_func' called dynamically in %s on line 194
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 194
 
-Notice: 'A::static_async_func' called dynamically in %s on line 196
+Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 196
 
-Notice: 'A::static_func' called dynamically in %s on line 107
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 107
 
-Notice: 'A::static_func' called dynamically in %s on line 108
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 108
 
-Notice: 'B::static_func' called dynamically in %s on line 109
+Notice: 'B::static_func' called dynamically but is not __DynamicallyCallable in %s on line 109
 
-Notice: 'A::static_async_func' called dynamically in %s on line 117
+Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 117
 
-Notice: 'A::static_async_func' called dynamically in %s on line 118
+Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 118
 
-Notice: 'B::static_async_func' called dynamically in %s on line 119
+Notice: 'B::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 119
 
 Notice: 'A' constructed dynamically in %s on line 202
 
-Notice: 'A::func' called dynamically in %s on line 203
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 203
 
-Notice: 'A::async_func' called dynamically in %s on line 205
+Notice: 'A::async_func' called dynamically but is not __DynamicallyCallable in %s on line 205
 
-Notice: 'C::__call' called dynamically in %s on line 207
+Notice: 'C::__call' called dynamically but is not __DynamicallyCallable in %s on line 207
 
-Notice: 'func' called dynamically in %s on line 209
+Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 209
 
 Warning: Decoding instance method func without $this! in %s on line 210
 
-Notice: 'A::func' called dynamically in %s on line 210
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 210
 
-Notice: 'A::static_func' called dynamically in %s on line 211
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 211
 
 Warning: Decoding instance method func without $this! in %s on line 213
 
-Notice: 'A::func' called dynamically in %s on line 213
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 213
 
-Notice: 'A::static_func' called dynamically in %s on line 214
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 214
 
-Notice: 'A::func' called dynamically in %s on line 216
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 216
 
-Notice: 'A::static_func' called dynamically in %s on line 217
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 217
 
-Notice: 'C::__call' called dynamically in %s on line 218
+Notice: 'C::__call' called dynamically but is not __DynamicallyCallable in %s on line 218
 
-Notice: 'func' called dynamically in %s on line 221
+Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 221
 
-Notice: 'A::static_func' called dynamically in %s on line 223
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 223
 
-Notice: 'A::static_func' called dynamically in %s on line 226
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 226
 
-Notice: 'A::func' called dynamically in %s on line 228
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 228
 
-Notice: 'A::static_func' called dynamically in %s on line 229
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 229
 
-Notice: 'C::__call' called dynamically in %s on line 230
+Notice: 'C::__call' called dynamically but is not __DynamicallyCallable in %s on line 230
 
-Notice: 'func' called dynamically in %s on line 232
+Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 232
 
-Notice: 'A::static_func' called dynamically in %s on line 234
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 234
 
-Notice: 'A::static_func' called dynamically in %s on line 237
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 237
 
-Notice: 'A::func' called dynamically in %s on line 239
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 239
 
-Notice: 'A::static_func' called dynamically in %s on line 240
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 240
 
-Notice: 'C::__call' called dynamically in %s on line 241
+Notice: 'C::__call' called dynamically but is not __DynamicallyCallable in %s on line 241
 
-Notice: 'func' called dynamically in %s on line 243
+Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 243
 
-Notice: 'A::static_func' called dynamically in %s on line 245
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 245
 
-Notice: 'A::static_func' called dynamically in %s on line 247
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 247
 
-Notice: 'A::func' called dynamically in %s on line 248
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 248
 
-Notice: 'A::static_func' called dynamically in %s on line 249
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 249
 
-Notice: 'cmp' called dynamically in %s on line 251
+Notice: 'cmp' called dynamically but is not __DynamicallyCallable in %s on line 251
 
-Notice: 'A::static_cmp' called dynamically in %s on line 253
+Notice: 'A::static_cmp' called dynamically but is not __DynamicallyCallable in %s on line 253
 
-Notice: 'A::static_cmp' called dynamically in %s on line 256
+Notice: 'A::static_cmp' called dynamically but is not __DynamicallyCallable in %s on line 256
 
-Notice: 'A::cmp' called dynamically in %s on line 258
+Notice: 'A::cmp' called dynamically but is not __DynamicallyCallable in %s on line 258
 
-Notice: 'A::static_cmp' called dynamically in %s on line 259
+Notice: 'A::static_cmp' called dynamically but is not __DynamicallyCallable in %s on line 259
 
-Notice: 'CCmp::__call' called dynamically in %s on line 260
+Notice: 'CCmp::__call' called dynamically but is not __DynamicallyCallable in %s on line 260
 =============== negative tests =====================
 
 Warning: Decoding instance method func2 without $this! in %s on line 349
@@ -145,63 +145,63 @@ Warning: Decoding instance method func2 without $this! in %s on line 383
 
 Warning: Decoding instance method func2 without $this! in %s on line 386
 =============== positive tests (exceptions) ========
-Exception: 'func' called dynamically
-Exception: 'async_func' called dynamically
+Exception: 'func' called dynamically but is not __DynamicallyCallable
+Exception: 'async_func' called dynamically but is not __DynamicallyCallable
 Exception: Decoding instance method func without $this!
-Exception: 'A::static_func' called dynamically
+Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
 Exception: Decoding instance method async_func without $this!
-Exception: 'A::static_async_func' called dynamically
+Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
 Exception: Decoding instance method func without $this!
-Exception: 'A::static_func' called dynamically
+Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
 Exception: Decoding instance method async_func without $this!
-Exception: 'A::static_async_func' called dynamically
-Exception: 'A::func' called dynamically
-Exception: 'A::static_func' called dynamically
-Exception: 'A::async_func' called dynamically
-Exception: 'A::static_async_func' called dynamically
-Exception: 'C::__call' called dynamically
-Exception: 'A::static_func' called dynamically
-Exception: 'A::static_async_func' called dynamically
-Exception: 'A::static_func' called dynamically
-Exception: 'A::static_async_func' called dynamically
-Exception: 'A::static_func' called dynamically
-Exception: 'A::static_func' called dynamically
-Exception: 'B::static_func' called dynamically
-Exception: 'A::static_async_func' called dynamically
-Exception: 'A::static_async_func' called dynamically
-Exception: 'B::static_async_func' called dynamically
+Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::async_func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
+Exception: 'C::__call' called dynamically but is not __DynamicallyCallable
+Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
+Exception: 'B::static_func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::static_async_func' called dynamically but is not __DynamicallyCallable
+Exception: 'B::static_async_func' called dynamically but is not __DynamicallyCallable
 Exception: 'A' constructed dynamically
-Exception: 'A::func' called dynamically
-Exception: 'A::async_func' called dynamically
-Exception: 'C::__call' called dynamically
-Exception: 'func' called dynamically
+Exception: 'A::func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::async_func' called dynamically but is not __DynamicallyCallable
+Exception: 'C::__call' called dynamically but is not __DynamicallyCallable
+Exception: 'func' called dynamically but is not __DynamicallyCallable
 Exception: Decoding instance method func without $this!
-Exception: 'A::static_func' called dynamically
+Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
 Exception: Decoding instance method func without $this!
-Exception: 'A::static_func' called dynamically
-Exception: 'A::func' called dynamically
-Exception: 'A::static_func' called dynamically
-Exception: 'C::__call' called dynamically
-Exception: 'func' called dynamically
-Exception: 'A::static_func' called dynamically
-Exception: 'A::static_func' called dynamically
-Exception: 'A::func' called dynamically
-Exception: 'A::static_func' called dynamically
-Exception: 'C::__call' called dynamically
-Exception: 'func' called dynamically
-Exception: 'A::static_func' called dynamically
-Exception: 'A::static_func' called dynamically
-Exception: 'A::func' called dynamically
-Exception: 'A::static_func' called dynamically
-Exception: 'C::__call' called dynamically
-Exception: 'func' called dynamically
-Exception: 'A::static_func' called dynamically
-Exception: 'A::static_func' called dynamically
-Exception: 'A::func' called dynamically
-Exception: 'A::static_func' called dynamically
-Exception: 'cmp' called dynamically
-Exception: 'A::static_cmp' called dynamically
-Exception: 'A::static_cmp' called dynamically
-Exception: 'A::cmp' called dynamically
-Exception: 'A::static_cmp' called dynamically
-Exception: 'CCmp::__call' called dynamically
+Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
+Exception: 'C::__call' called dynamically but is not __DynamicallyCallable
+Exception: 'func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
+Exception: 'C::__call' called dynamically but is not __DynamicallyCallable
+Exception: 'func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
+Exception: 'C::__call' called dynamically but is not __DynamicallyCallable
+Exception: 'func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable
+Exception: 'cmp' called dynamically but is not __DynamicallyCallable
+Exception: 'A::static_cmp' called dynamically but is not __DynamicallyCallable
+Exception: 'A::static_cmp' called dynamically but is not __DynamicallyCallable
+Exception: 'A::cmp' called dynamically but is not __DynamicallyCallable
+Exception: 'A::static_cmp' called dynamically but is not __DynamicallyCallable
+Exception: 'CCmp::__call' called dynamically but is not __DynamicallyCallable

@@ -106,7 +106,10 @@ void emitCallerDynamicCallChecksKnown(IRGS& env, const Func* callee) {
     ) :
     RuntimeOption::EvalForbidDynamicCallsToFunc;
   if (dynCallErrorLevel <= 0) return;
-  if (callee->isDynamicallyCallable()) return;
+  if (callee->isDynamicallyCallable() &&
+      !RuntimeOption::EvalForbidDynamicCallsWithAttr) {
+        return;
+  }
   gen(env, RaiseForbiddenDynCall, cns(env, callee));
 }
 
@@ -115,21 +118,26 @@ void emitCallerDynamicCallChecksUnknown(IRGS& env, SSATmp* callee,
   assertx(!callee->hasConstVal());
   if (!mightCareAboutDynCall) return;
 
-  ifElse(
-    env,
-    [&] (Block* skip) {
-      auto const dynCallable = gen(
-        env,
-        FuncHasAttr,
-        AttrData {static_cast<int32_t>(AttrDynamicallyCallable)},
-        callee);
-      gen(env, JmpNZero, skip, dynCallable);
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      gen(env, RaiseForbiddenDynCall, callee);
-    }
-  );
+  if(RuntimeOption::EvalForbidDynamicCallsWithAttr) {
+    gen(env, RaiseForbiddenDynCall, callee);
+  } else {
+    ifElse(
+      env,
+      [&] (Block* skip) {
+        auto const dynCallable = gen(
+          env,
+          FuncHasAttr,
+          AttrData {static_cast<int32_t>(AttrDynamicallyCallable)},
+          callee);
+        gen(env, JmpNZero, skip, dynCallable);
+      },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        gen(env, RaiseForbiddenDynCall, callee);
+      }
+    );
+  }
+
 }
 
 } // namespace

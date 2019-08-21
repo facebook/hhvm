@@ -55,19 +55,25 @@ inline bool callerDynamicCallChecks(const Func* func) {
     ) :
     RuntimeOption::EvalForbidDynamicCallsToFunc;
   if (dynCallErrorLevel <= 0) return true;
-  if (func->isDynamicallyCallable()) return true;
+  if (func->isDynamicallyCallable() &&
+      !RuntimeOption::EvalForbidDynamicCallsWithAttr) {
+    return true;
+  }
 
+  auto error_msg = func->isDynamicallyCallable() ?
+    Strings::FUNCTION_CALLED_DYNAMICALLY_WITH_ATTRIBUTE :
+    Strings::FUNCTION_CALLED_DYNAMICALLY_WITHOUT_ATTRIBUTE;
   if (dynCallErrorLevel >= 2) {
     std::string msg;
     string_printf(
       msg,
-      Strings::FUNCTION_CALLED_DYNAMICALLY,
+      error_msg,
       func->fullDisplayName()->data()
     );
     throw_invalid_operation_exception(makeStaticString(msg));
   } else {
     raise_notice(
-      Strings::FUNCTION_CALLED_DYNAMICALLY,
+      error_msg,
       func->fullDisplayName()->data()
     );
     return false;
@@ -97,10 +103,13 @@ inline void callerDynamicConstructChecks(const Class* cls) {
 inline void calleeDynamicCallChecks(const ActRec* ar) {
   if (!ar->isDynamicCall()) return;
   auto const func = ar->func();
+  auto error_msg = func->isDynamicallyCallable() ?
+    Strings::FUNCTION_CALLED_DYNAMICALLY_WITH_ATTRIBUTE :
+    Strings::FUNCTION_CALLED_DYNAMICALLY_WITHOUT_ATTRIBUTE;
 
   if (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && func->isBuiltin()) {
     raise_notice(
-      Strings::FUNCTION_CALLED_DYNAMICALLY,
+      error_msg,
       func->fullDisplayName()->data()
     );
   }

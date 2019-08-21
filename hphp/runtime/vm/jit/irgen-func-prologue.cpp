@@ -623,9 +623,12 @@ void emitCalleeDynamicCallCheck(IRGS& env) {
       hint(env, Block::Hint::Unlikely);
 
       std::string str;
+      auto error_msg = func->isDynamicallyCallable() ?
+        Strings::FUNCTION_CALLED_DYNAMICALLY_WITH_ATTRIBUTE :
+        Strings::FUNCTION_CALLED_DYNAMICALLY_WITHOUT_ATTRIBUTE;
       string_printf(
         str,
-        Strings::FUNCTION_CALLED_DYNAMICALLY,
+        error_msg,
         func->fullDisplayName()->data()
       );
       auto const msg = cns(env, makeStaticString(str));

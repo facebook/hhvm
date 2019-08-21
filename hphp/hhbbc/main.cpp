@@ -291,6 +291,8 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
   RuntimeOption::EvalForbidDynamicCallsToInstMeth =
     gd.ForbidDynamicCallsToInstMeth;
   RuntimeOption::EvalForbidDynamicConstructs = gd.ForbidDynamicConstructs;
+  RuntimeOption::EvalForbidDynamicCallsWithAttr =
+    gd.ForbidDynamicCallsWithAttr;
   RuntimeOption::EvalNoticeOnBuiltinDynamicCalls =
     gd.NoticeOnBuiltinDynamicCalls;
   RuntimeOption::EvalHackArrCompatIsArrayNotices =
@@ -376,6 +378,8 @@ void write_global_data(
   gd.ForbidDynamicCallsToInstMeth =
     RuntimeOption::EvalForbidDynamicCallsToInstMeth;
   gd.ForbidDynamicConstructs     = RuntimeOption::EvalForbidDynamicConstructs;
+  gd.ForbidDynamicCallsWithAttr =
+    RuntimeOption::EvalForbidDynamicCallsWithAttr;
   gd.AbortBuildOnVerifyError     = RuntimeOption::EvalAbortBuildOnVerifyError;
   gd.EnableArgsInBacktraces      = RuntimeOption::EnableArgsInBacktraces;
   gd.NoticeOnBuiltinDynamicCalls =

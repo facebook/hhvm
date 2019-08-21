@@ -835,6 +835,7 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + std::to_string(RuntimeOption::EvalForbidDynamicCallsToClsMeth)
     + std::to_string(RuntimeOption::EvalForbidDynamicCallsToInstMeth)
     + std::to_string(RuntimeOption::EvalForbidDynamicConstructs)
+    + (RuntimeOption::EvalForbidDynamicCallsWithAttr ? '1' : '0')
     + (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls ? '1' : '0')
     + (RuntimeOption::EvalHackArrDVArrs ? '1' : '0')
     + (RuntimeOption::EvalAssemblerFoldDefaultValues ? '1' : '0')

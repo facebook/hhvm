@@ -1122,6 +1122,11 @@ struct RuntimeOption {
   F(int32_t, ForbidDynamicCallsToInstMeth, 0)                           \
   F(int32_t, ForbidDynamicConstructs, 0)                                \
   /*                                                                    \
+   * Keep logging dynamic calls according to options above even if      \
+   * __DynamicallyCallable attribute is present at declaration.         \
+   */                                                                   \
+  F(bool, ForbidDynamicCallsWithAttr, false)                            \
+  /*                                                                    \
    * Control handling of out-of-range integer values in the compact     \
    * Thrift serializer.                                                 \
    *                                                                    \

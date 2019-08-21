@@ -521,6 +521,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ThrowAsTypeStructException:
   case ThrowArrayIndexException:
   case ThrowArrayKeyException:
+  case ThrowCallReifiedFunctionWithoutGenerics:
   case ThrowDivisionByZeroError:
   case ThrowDivisionByZeroException:
   case ThrowHasThisNeedStatic:

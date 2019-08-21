@@ -756,6 +756,14 @@ void throw_instance_method_fatal(const char *name) {
   raise_error("Non-static method %s() cannot be called statically", name);
 }
 
+void throw_call_reified_func_without_generics(const Func* f) {
+  auto const msg = folly::sformat(
+    "Cannot call the reified function '{}' without the reified generics",
+    f->fullName()->data()
+  );
+  SystemLib::throwBadMethodCallExceptionObject(msg);
+}
+
 void throw_iterator_not_valid() {
   SystemLib::throwInvalidOperationExceptionObject(
     "Iterator is not valid");

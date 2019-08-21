@@ -1569,8 +1569,7 @@ namespace {
 void checkForReifiedGenericsErrors(const ActRec* ar) {
   if (!ar->m_func->hasReifiedGenerics()) return;
   if (!ar->hasReifiedGenerics()) {
-    raise_error(Strings::REIFIED_GENERICS_NOT_GIVEN,
-      ar->m_func->fullName()->data());
+    throw_call_reified_func_without_generics(ar->m_func);
   }
   auto const tv = frame_local(ar, ar->m_func->numParams());
   assertx(tv && (RuntimeOption::EvalHackArrDVArrs ? tvIsVec(tv)
@@ -4641,7 +4640,7 @@ ArrayData* getReifiedGenerics(const Func* func, const StringData* funcName,
     return getReifiedTypeList(stripClsOrFnNameFromReifiedName(funcName));
   }
   if (!errOnFail) return nullptr;
-  raise_error(Strings::REIFIED_GENERICS_NOT_GIVEN, func->fullName()->data());
+  throw_call_reified_func_without_generics(func);
 }
 
 template<bool dynamic, class InitActRec>

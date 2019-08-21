@@ -123,12 +123,9 @@ void emitARHasReifiedGenericsCheck(IRGS& env) {
     [&] {
       if (!func->hasReifiedGenerics()) return;
       hint(env, Block::Hint::Unlikely);
-      auto const msg = folly::sformat(
-        "Cannot call the reified function '{}' without the reified generics",
-        func->fullName());
       updateMarker(env);
       env.irb->exceptionStackBoundary();
-      gen(env, RaiseError, cns(env, makeStaticString(msg)));
+      gen(env, ThrowCallReifiedFunctionWithoutGenerics, cns(env, curFunc(env)));
     }
   );
   // Now that we know that first local is not Tuninit,

@@ -720,6 +720,7 @@ bool canDCE(IRInstruction* inst) {
   case ThrowInvalidArrayKey:
   case ThrowInvalidOperation:
   case ThrowArithmeticError:
+  case ThrowCallReifiedFunctionWithoutGenerics:
   case ThrowDivisionByZeroError:
   case ThrowDivisionByZeroException:
   case ThrowHasThisNeedStatic:

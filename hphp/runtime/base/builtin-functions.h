@@ -54,6 +54,9 @@ String concat4(const String& s1, const String& s2, const String& s3,
 void NEVER_INLINE throw_invalid_property_name(const String& name);
 
 [[noreturn]]
+void NEVER_INLINE throw_call_reified_func_without_generics(const Func* f);
+
+[[noreturn]]
 void throw_exception(const Object& e);
 
 ///////////////////////////////////////////////////////////////////////////////

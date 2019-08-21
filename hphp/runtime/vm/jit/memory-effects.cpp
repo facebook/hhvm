@@ -2108,6 +2108,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ThrowInvalidArrayKey:
   case ThrowInvalidOperation:
   case ThrowArithmeticError:
+  case ThrowCallReifiedFunctionWithoutGenerics:
   case ThrowDivisionByZeroError:
   case ThrowDivisionByZeroException:
   case ThrowHasThisNeedStatic:

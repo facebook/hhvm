@@ -129,11 +129,12 @@ void checkReifiedGenericMismatchHelper(
   auto const generics = info.m_typeParamInfo;
   auto const len = generics.size();
   if (len != reified_generics->size()) {
-    raise_error("%s %s requires %zu generics but %zu given",
-                fun ? "Function" : "Class",
-                name->data(),
-                len,
-                reified_generics->size());
+    SystemLib::throwBadMethodCallExceptionObject(
+      folly::sformat("{} {} requires {} generics but {} given",
+                     fun ? "Function" : "Class",
+                     name->data(),
+                     len,
+                     reified_generics->size()));
   }
   auto it = generics.begin();
   IterateKV(
@@ -144,10 +145,11 @@ void checkReifiedGenericMismatchHelper(
       auto const i = k.m_data.num;
       if (isWildCard(v.m_data.parr) && it->m_isReified) {
         if (!it->m_isSoft) {
-          raise_error("%s %s expects a reified generic at index %zu",
-                      fun ? "Function" : "Class",
-                      name->data(),
-                      i);
+          SystemLib::throwBadMethodCallExceptionObject(
+            folly::sformat("{} {} expects a reified generic at index {}",
+                           fun ? "Function" : "Class",
+                           name->data(),
+                           i));
         }
         raise_warning("Generic at index %zu to %s %s must be reified,"
                       " erased given",

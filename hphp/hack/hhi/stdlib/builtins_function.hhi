@@ -17,6 +17,7 @@ function function_exists(string $function_name, bool $autoload = true): bool;
 <<__PHPStdLib, __Rx>>
 /* HH_FIXME[2088] byref arg is not Rx */
 function is_callable($v, bool $syntax = false, &$name = null): bool;
+<<__PHPStdLib, __Rx>>
 /* HH_FIXME[2088] byref arg is not Rx */
 function is_callable_with_name($v, bool $syntax, &$name): bool;
 function call_user_func_array($function, Container<mixed> $params);

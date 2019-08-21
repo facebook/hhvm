@@ -402,6 +402,7 @@ struct ExternCompiler {
       } else {
         prog = compile();
       }
+      t = logTime(log, startTime, "total_hhas_retrieval");
 
       auto ue = assemble_string(prog.data(),
                                 prog.length(),

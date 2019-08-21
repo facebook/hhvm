@@ -147,6 +147,7 @@ version = "3.49.0"
 dependencies = [
  "hack_deps 3.49.0",
  "hack_line_break_map 3.49.0",
+ "hack_utils_ocamlpool 3.49.0",
  "hack_oxidized 3.49.0",
 ]
 

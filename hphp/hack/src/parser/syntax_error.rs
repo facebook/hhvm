@@ -7,6 +7,10 @@
 //
 
 use crate::token_kind::TokenKind;
+use ocamlpool_rust::{
+    ocamlvalue::Ocamlvalue,
+    utils::{caml_tuple, usize_to_ocaml},
+};
 use std::borrow::Cow;
 
 // many errors are static strings, but not all of them
@@ -26,6 +30,27 @@ impl SyntaxError {
             end_offset,
             message,
         }
+    }
+}
+
+impl Ocamlvalue for SyntaxError {
+    fn ocamlvalue(&self) -> usize {
+        // type error_type = ParseError | RuntimeError
+        //
+        // type t = {
+        //   child        : t option;
+        //   start_offset : int;
+        //   end_offset   : int;
+        //   error_type   : error_type;
+        //   message      : string;
+        // }
+        let child = usize_to_ocaml(0); // None
+        let start_offset = usize_to_ocaml(self.start_offset);
+        let end_offset = usize_to_ocaml(self.end_offset);
+        let error_type = usize_to_ocaml(0); // ParseError
+
+        let message = self.message.ocamlvalue();
+        caml_tuple(&[child, start_offset, end_offset, error_type, message])
     }
 }
 

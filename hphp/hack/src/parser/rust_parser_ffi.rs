@@ -22,7 +22,7 @@ use parser::parser_env::ParserEnv;
 use parser::source_text::SourceText;
 use parser::stack_limit::StackLimit;
 
-use ocamlpool_rust::{caml_raise, utils::*};
+use ocamlpool_rust::{caml_raise, ocamlvalue::Ocamlvalue, utils::*};
 use rust_to_ocaml::{to_list, SerializationContext, ToOcaml};
 
 use parser::parser::Parser;
@@ -150,7 +150,7 @@ macro_rules! parse {
                         // traversing the parsed syntax tree uses about 1/3 of the stack
                         let context = SerializationContext::new(ocaml_source_text_value);
                         let ocaml_root = root.to_ocaml(&context);
-                        let ocaml_errors = to_list(&errors, &context);
+                        let ocaml_errors = errors.ocamlvalue();
                         let ocaml_state = state.to_ocaml(&context);
                         let res = caml_tuple(&[
                             ocaml_state,

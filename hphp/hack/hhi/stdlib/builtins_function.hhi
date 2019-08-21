@@ -8,6 +8,8 @@
  *
  */
 
+namespace {
+
 <<__PHPStdLib>>
 function get_defined_functions(): array<string, array<string>>;
 <<__PHPStdLib, __Rx>>
@@ -23,3 +25,9 @@ function call_user_func($function, ...$args);
 function register_postsend_function($function, ...$args);
 <<__PHPStdLib>>
 function register_shutdown_function($function, ...$args);
+}
+
+namespace HH {
+<<__Rx>>
+function fun_get_function(mixed $fun): string;
+}

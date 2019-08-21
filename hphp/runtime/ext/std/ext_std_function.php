@@ -103,3 +103,13 @@ function register_postsend_function(mixed $callback,
                                     ...$parameters): void;
 
 }
+
+namespace HH {
+  /**
+   * Get function name from fun
+   * @param mixed $fun
+   * @return function name
+   */
+  <<__Native, __Rx>>
+  function fun_get_function(mixed $fun): string;
+}

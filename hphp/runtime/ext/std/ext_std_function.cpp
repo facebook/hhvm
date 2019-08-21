@@ -165,8 +165,21 @@ void StandardExtension::initFunction() {
   HHVM_FE(call_user_func_array);
   HHVM_FE(register_postsend_function);
   HHVM_FE(register_shutdown_function);
+  HHVM_FALIAS(HH\\fun_get_function, HH_fun_get_function);
 
   loadSystemlib("std_function");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+String HHVM_FUNCTION(HH_fun_get_function, TypedValue v) {
+  if (!tvIsFunc(v)) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      folly::sformat("Argument 1 passed to {}() must be a fun",
+      __FUNCTION__+5));
+  }
+  auto const f = val(v).pfunc;
+  return f->nameStr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

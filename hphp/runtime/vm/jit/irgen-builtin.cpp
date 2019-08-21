@@ -83,6 +83,7 @@ const StaticString
   s_container_last("HH\\Lib\\_Private\\Native\\last"),
   s_container_first_key("HH\\Lib\\_Private\\Native\\first_key"),
   s_container_last_key("HH\\Lib\\_Private\\Native\\last_key"),
+  s_fun_get_function("HH\\fun_get_function"),
   s_class_meth_get_class("HH\\class_meth_get_class"),
   s_class_meth_get_method("HH\\class_meth_get_method"),
   s_shapes_idx("HH\\Shapes::idx"),
@@ -888,6 +889,16 @@ const StaticString
 const Slot s_cls_idx{0};
 const Slot s_meth_idx{1};
 
+SSATmp* opt_fun_get_function(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  auto const value = params[0].value;
+  auto const type = value->type();
+  if (type <= TFunc) {
+    return gen(env, LdFuncName, value);
+  }
+  return nullptr;
+}
+
 DEBUG_ONLY bool meth_caller_has_expected_prop(const Class *mcCls) {
   return mcCls->lookupDeclProp(s_cls_prop.get()) == s_cls_idx &&
         mcCls->lookupDeclProp(s_meth_prop.get()) == s_meth_idx &&
@@ -1102,6 +1113,7 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
     X(container_last)
     X(container_first_key)
     X(container_last_key)
+    X(fun_get_function)
     X(class_meth_get_class)
     X(class_meth_get_method)
     X(shapes_idx)

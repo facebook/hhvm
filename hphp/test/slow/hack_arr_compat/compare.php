@@ -35,7 +35,7 @@ function do_compares($a, $b) {
 }
 
 function main() {
-  set_error_handler('handler');
+  set_error_handler(fun('handler'));
 
   $x1 = [
     [],

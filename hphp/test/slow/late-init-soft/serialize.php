@@ -84,7 +84,7 @@ function unserialize_test($s) {
 }
 
 <<__EntryPoint>> function main(): void {
-  set_error_handler('error_handler');
+  set_error_handler(fun('error_handler'));
 
   run_serialize_tests('A');
   run_serialize_tests('B');

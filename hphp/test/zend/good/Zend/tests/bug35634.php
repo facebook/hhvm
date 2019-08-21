@@ -10,7 +10,7 @@ if (defined("pass3")) {
 } else if (defined("pass2")) {
   include 'bug35634-2.inc';
 } else {
-  set_error_handler('errorHandler');
+  set_error_handler(fun('errorHandler'));
   include(__FILE__);
   print "ok\n";
 }

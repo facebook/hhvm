@@ -17,7 +17,7 @@ function handler($errno, $errmsg) {
     return false;
   }
 }
-set_error_handler('handler');
+set_error_handler(fun('handler'));
 
 type my_t = int;
 

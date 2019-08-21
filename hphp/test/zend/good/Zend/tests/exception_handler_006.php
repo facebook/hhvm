@@ -1,7 +1,7 @@
 <?hh
 
-set_exception_handler("foo");
-set_exception_handler("foo1");
+set_exception_handler(fun("foo"));
+set_exception_handler(fun("foo1"));
 
 restore_exception_handler();
 

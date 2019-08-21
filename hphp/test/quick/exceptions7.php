@@ -31,14 +31,14 @@ function frap($arg) {
 // Intercept a function
 fb_intercept('frap', 'handler', 'data');
 try {
-  call_user_func('frap', 'callfunc');
+  call_user_func(fun('frap'), 'callfunc');
 } catch (Exception $e) {
   echo "caught call user func 1\n";
 }
 
 fb_intercept('frap', 'passthrough_handler');
 try {
-  call_user_func('frap', 'callfunc');
+  call_user_func(fun('frap'), 'callfunc');
 } catch (Exception $e) {
   echo "caught call user func 2\n";
 }
@@ -49,7 +49,7 @@ fb_intercept('frap', function () {
                        throw new Exception;
                      });
 try {
-  call_user_func("frap", 'claptrap');
+  call_user_func(fun("frap"), 'claptrap');
 } catch (Exception $e) {
   echo "caught closure 1\n";
 }
@@ -58,7 +58,7 @@ try {
 $mc = new MagicCall();
 fb_intercept('frap', array($mc, 'i_dont_exist'));
 try {
-  call_user_func("frap", 'claptrap');
+  call_user_func(fun("frap"), 'claptrap');
 } catch (Exception $e) {
   echo "caught magic call 1\n";
 }
@@ -122,7 +122,7 @@ try {
 fb_intercept('frap', 'handler');
 fb_intercept('handler', 'passthrough_handler');
 try {
-  call_user_func("frap", 'claptrap');
+  call_user_func(fun("frap"), 'claptrap');
 } catch (Exception $e) {
   echo "caught double intercept 1\n";
 }

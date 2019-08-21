@@ -57,7 +57,7 @@ $single_quoted_values = array(
   5 => '', 6 => '\t', 7 => '0', 8 => '123Hello', 9 => '\'', 10 => '@#$%'
 );
 echo "-- Sorting Single Quoted String values --\n";
-var_dump( uasort(&$single_quoted_values, 'cmp_function') );  // expecting: bool(true)
+var_dump( uasort(&$single_quoted_values, fun('cmp_function')) );  // expecting: bool(true)
 var_dump($single_quoted_values);
 
 // Double quoted strings
@@ -66,13 +66,13 @@ $double_quoted_values = array(
   5 => "", 6 => "\t", 7 => "0", 8 => "123Hello", 9 => "\"", 10 => "@#$%"
 );
 echo "-- Sorting Double Quoted String values --\n";
-var_dump( uasort(&$double_quoted_values, 'cmp_function') );  // expecting: bool(true)
+var_dump( uasort(&$double_quoted_values, fun('cmp_function')) );  // expecting: bool(true)
 var_dump($double_quoted_values);
 
 // Heredoc strings
 $heredoc_values = array(0 => $empty_heredoc, 1 => $simple_heredoc1, 2 => $simple_heredoc2, 3 => $multiline_heredoc);
 echo "-- Sorting Heredoc String values --\n";
-var_dump( uasort(&$heredoc_values, 'cmp_function') );  // expecting: bool(true)
+var_dump( uasort(&$heredoc_values, fun('cmp_function')) );  // expecting: bool(true)
 var_dump($heredoc_values);
 
 echo "Done";

@@ -3,7 +3,7 @@
 function err() {
   return true;
 }
-set_error_handler('err');
+set_error_handler(fun('err'));
 
 function doswitch($foo) {
   echo "--------------------------------\n";

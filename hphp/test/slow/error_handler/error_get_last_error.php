@@ -13,8 +13,8 @@ function shutdownFunc() {
   var_dump(error_get_last()['line']);
 }
 
-set_error_handler('handleError');
-register_shutdown_function('shutdownFunc');
+set_error_handler(fun('handleError'));
+register_shutdown_function(fun('shutdownFunc'));
 
 if ($x) {
   echo "x\n";

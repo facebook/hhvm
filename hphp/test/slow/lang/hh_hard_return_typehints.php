@@ -10,7 +10,7 @@ function handler($errno, $errmsg) {
   }
   return true;
 }
-set_error_handler('handler');
+set_error_handler(fun('handler'));
 class Foo {
   public function go() { echo "Foo::go()\n"; }
 }

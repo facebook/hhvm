@@ -62,7 +62,7 @@ function test5() {
 }
 
 function main() {
-  set_error_handler('error_handler');
+  set_error_handler(fun('error_handler'));
 
   $count = __hhvm_intrinsics\apc_fetch_no_check('test-count');
   if ($count === false) $count = 0;

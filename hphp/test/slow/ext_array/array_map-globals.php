@@ -14,5 +14,5 @@ abstract final class ExtArrayArrayMapGlobals {
 $x = 0;
 ExtArrayArrayMapGlobals::$x = 0;
 
-array_map('check_global', $GLOBALS);
+array_map(fun('check_global'), $GLOBALS);
 print ExtArrayArrayMapGlobals::$x."\n";

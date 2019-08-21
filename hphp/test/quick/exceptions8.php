@@ -3,7 +3,7 @@ error_reporting(-1);
 function doThrow() {
   throw new Exception("f you!");
 }
-set_error_handler('doThrow');
+set_error_handler(fun('doThrow'));
 function f($a1, $a2) {
   if (false) {
     var_dump($b1);

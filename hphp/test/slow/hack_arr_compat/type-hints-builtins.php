@@ -60,7 +60,7 @@ function test2($a, $b, $c, $d, $e) {
   __hhvm_intrinsics\dummy_array_builtin($d);
   __hhvm_intrinsics\dummy_array_builtin($e);
 
-  set_error_handler('handler');
+  set_error_handler(fun('handler'));
 
   try {
     __hhvm_intrinsics\dummy_varray_builtin($b);

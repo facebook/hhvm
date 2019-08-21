@@ -96,7 +96,7 @@ function call_wrapper($fn, $arg) {
 
 <<__EntryPoint>> function main(): void {
   error_reporting(-1);
-  set_error_handler('handler');
+  set_error_handler(fun('handler'));
   for ($i = 1; $i <= 20; $i++) {
     foreach (array('', '_soft') as $suffix) {
       if ($suffix !== '' && $i === 1) {

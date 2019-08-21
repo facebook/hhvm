@@ -37,7 +37,7 @@ class Overloaded
     }
 }
 <<__EntryPoint>> function main(): void {
-set_error_handler('my_error_handler');
+set_error_handler(fun('my_error_handler'));
 $y = new Overloaded(2);
 var_dump($y->x);
 var_dump($y->x->x);

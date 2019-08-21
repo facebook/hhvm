@@ -25,7 +25,7 @@ function bar($a) {
 
 function foo2($a) {
   try {
-    call_user_func("bar", $a);
+    call_user_func(fun("bar"), $a);
   } catch (Ex1 $e) {
     print "caught 1\n";
   }
@@ -45,7 +45,7 @@ function main1() {
 
   foreach ($b as $c) {
     try {
-      array_map("foo", $a);
+      array_map(fun("foo"), $a);
     } catch (Ex2 $e) {
       print "caught 2\n";
     }
@@ -70,7 +70,7 @@ class A {
 
 function main2() {
   try {
-    call_user_func("hphp_create_object", "A", NULL);
+    call_user_func(fun("hphp_create_object"), "A", NULL);
   } catch (Exception $e) {
     print "caught exception\n";
   }
@@ -102,7 +102,7 @@ function main3() {
 
   $b = array(3);
   try {
-    array_map("foo", $b);
+    array_map(fun("foo"), $b);
   } catch (Ex3 $e) {
     print "caught 3\n";
     throw $e;

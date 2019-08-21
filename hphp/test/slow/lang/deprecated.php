@@ -11,7 +11,7 @@ function err_handler($errno, $errstr, $file, $line) {
   throw new Exception($errstr);
 }
 error_reporting(-1);
-set_error_handler('err_handler');
+set_error_handler(fun('err_handler'));
 
 trait Tr {
   <<__Deprecated('message')>>

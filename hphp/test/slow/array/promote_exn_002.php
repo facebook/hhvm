@@ -24,6 +24,6 @@ function foo() {
 <<__EntryPoint>>
 function main_promote_exn_002() {
 foo();
-set_error_handler('err');
+set_error_handler(fun('err'));
 foo();
 }

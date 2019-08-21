@@ -9,7 +9,7 @@ function my_errorhandler($errno,$errormsg) {
 }
 <<__EntryPoint>>
 function ZendBug54265() {
-set_error_handler("my_errorhandler");
+set_error_handler(fun("my_errorhandler"));
 try {
   ZendBug54265::$my_var = str_repeat("A",ZendBug54265::$my_var[0]->errormsg = "xyz");
 } catch (Exception $e) {

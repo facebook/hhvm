@@ -1,6 +1,6 @@
 <?hh
 
-set_exception_handler("foo");
+set_exception_handler(fun("foo"));
 
 function foo($e) {
 	var_dump(get_class($e)." thrown!");

@@ -18,7 +18,7 @@ class V extends U {
 
 <<__EntryPoint>>
 function test() {
-  set_error_handler('nop');
+  set_error_handler(fun('nop'));
 
   $x = new X;
   $x->bar();

@@ -65,7 +65,7 @@ function process_logs($uniquify = true) {
 
 <<__EntryPoint>>
 function main_type_hints_builtins() {
-  set_error_handler('handler');
+  set_error_handler(fun('handler'));
 
   test1();
   test2(

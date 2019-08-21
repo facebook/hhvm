@@ -16,7 +16,7 @@ class b1 {
 
 <<__EntryPoint>>
 function main_1894() {
-set_error_handler('h');
+set_error_handler(fun('h'));
 $obj = new b1;
 $obj->test();
 var_dump('end');

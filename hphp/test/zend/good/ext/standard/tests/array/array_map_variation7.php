@@ -21,11 +21,11 @@ function callback($a, $b)
 echo "*** Testing array_map() : arrays with diff. size ***\n";
 
 // calling array_map with different arrays
-var_dump( array_map('callback', array(1, 2, 3), array()) );
-var_dump( array_map('callback', array(), array('a', 'b', 'c')) );
-var_dump( array_map('callback', array(1, 2, 3), array('a', 'b')) );
-var_dump( array_map('callback', array(012, 0x2F, 0X1A), array(2.3, 12.4e2)) );
-var_dump( array_map('callback', array(), array(1, 2, 3), array('a', 'b')) );  // passing more no. of arrays than callback function argument
+var_dump( array_map(fun('callback'), array(1, 2, 3), array()) );
+var_dump( array_map(fun('callback'), array(), array('a', 'b', 'c')) );
+var_dump( array_map(fun('callback'), array(1, 2, 3), array('a', 'b')) );
+var_dump( array_map(fun('callback'), array(012, 0x2F, 0X1A), array(2.3, 12.4e2)) );
+var_dump( array_map(fun('callback'), array(), array(1, 2, 3), array('a', 'b')) );  // passing more no. of arrays than callback function argument
 
 echo "Done";
 }

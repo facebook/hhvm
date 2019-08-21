@@ -329,7 +329,7 @@ function test() {
 
 <<__EntryPoint>>
 function main_type_hints() {
-  set_error_handler('handler');
+  set_error_handler(fun('handler'));
 
   test();
 

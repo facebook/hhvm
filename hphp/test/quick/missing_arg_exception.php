@@ -1,5 +1,5 @@
 <?hh
-set_error_handler('handler');
+set_error_handler(fun('handler'));
 function handler() { throw new Exception; }
 function foo(&$r) {}
 function test() {

@@ -57,11 +57,11 @@ function with_keyset($k1) {
   echo "array_uintersect: ";
   var_dump(array_uintersect($k1, $k3, 'nocase'));
   echo "array_filter: ";
-  var_dump(array_filter($k1, 'vowel'));
+  var_dump(array_filter($k1, fun('vowel')));
   echo "array_flip: ";
   var_dump(array_flip($k1));
   echo "array_map: ";
-  var_dump(array_map('concat', keyset['H', 'A', 'L']));
+  var_dump(array_map(fun('concat'), keyset['H', 'A', 'L']));
   echo "array_merge: ";
   var_dump(array_merge(keyset[1, 2, 3], keyset['a', 'b', 'c']));
   echo "array_reverse: ";

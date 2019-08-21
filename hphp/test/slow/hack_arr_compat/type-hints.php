@@ -338,7 +338,7 @@ function test() {
   dsoft(darray[]);
   dsoft([]);
 
-  set_error_handler('handler');
+  set_error_handler(fun('handler'));
 
   try {
     throws1(darray[]);

@@ -1,7 +1,7 @@
 <?hh
 
 function handler() {}
-set_error_handler('handler');
+set_error_handler(fun('handler'));
 
 function foo() {
   $go = function($start) {

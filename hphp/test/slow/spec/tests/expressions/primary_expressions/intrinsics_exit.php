@@ -18,8 +18,8 @@ function cleanup2()
     echo "Inside " . __METHOD__ . "\n";
 }
 
-register_shutdown_function('cleanup2');
-register_shutdown_function('cleanup1');
+register_shutdown_function(fun('cleanup2'));
+register_shutdown_function(fun('cleanup1'));
 
 echo "--------- test with/without string -------------\n";
 

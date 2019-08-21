@@ -17,7 +17,7 @@ function h() {
 
 <<__EntryPoint>>
 function main_1891() {
-set_error_handler('h');
+set_error_handler(fun('h'));
 $obj = new c2;
 $obj->test1a();
 var_dump('end');

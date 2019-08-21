@@ -21,6 +21,7 @@
 
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
@@ -28,6 +29,9 @@
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/typed-value.h"
+
+#include "hphp/runtime/vm/vm-regs.h"
+
 #include "hphp/util/match.h"
 
 namespace HPHP {
@@ -89,32 +93,17 @@ struct ArrayInitBase {
    *
    * These all invalidate the ArrayInit and return the initialized array.
    */
-
   Variant toVariant() {
-    assertx(m_arr->hasExactlyOneRef());
-    assertx(m_arr->toDataType() == DT);
-    auto const ptr = m_arr;
-    m_arr = nullptr;
-#ifndef NDEBUG
-    m_expectedCount = 0; // reset; no more adds allowed
-#endif
-    return Variant(ptr, DT, Variant::ArrayInitCtor{});
+    return Variant(create(), DT, Variant::ArrayInitCtor{});
   }
-
   Array toArray() {
-    assertx(m_arr->hasExactlyOneRef());
-    assertx(m_arr->toDataType() == DT);
-    auto const ptr = m_arr;
-    m_arr = nullptr;
-#ifndef NDEBUG
-    m_expectedCount = 0; // reset; no more adds allowed
-#endif
-    return Array(ptr, Array::ArrayInitCtor::Tag);
+    return Array(create(), Array::ArrayInitCtor::Tag);
   }
 
   ArrayData* create() {
     assertx(m_arr->hasExactlyOneRef());
     assertx(m_arr->toDataType() == DT);
+    if (RuntimeOption::EvalArrayProvenance) trySetProvenance();
     auto const ptr = m_arr;
     m_arr = nullptr;
 #ifndef NDEBUG
@@ -145,6 +134,16 @@ protected:
     assertx(newp == m_arr);
     // You cannot add/set more times than you reserved with ArrayInit.
     assertx(++m_addCount <= m_expectedCount);
+  }
+
+  void trySetProvenance() {
+    if (DT != KindOfVec && DT != KindOfDict) return;
+    assertx(arrprov::arrayWantsTag(m_arr));
+
+    VMRegAnchor _(VMRegAnchor::Soft);
+    if (tl_regState != VMRegState::CLEAN || vmfp() == nullptr) return;
+
+    arrprov::setTag(m_arr, *arrprov::tagFromProgramCounter());
   }
 
 protected:

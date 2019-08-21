@@ -25,11 +25,11 @@ namespace HPHP {
 // Register dirtiness: thread-private.
 __thread VMRegState tl_regState = VMRegState::CLEAN;
 
-VMRegAnchor::VMRegAnchor()
+VMRegAnchor::VMRegAnchor(Mode mode)
   : m_old(tl_regState)
 {
   assert_native_stack_aligned();
-  jit::syncVMRegs();
+  jit::syncVMRegs(mode == Soft);
 }
 
 VMRegAnchor::VMRegAnchor(ActRec* ar)

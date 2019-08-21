@@ -166,9 +166,16 @@ ActRec* callerFrameHelper();
  * assert or crash if it attempts to parse a part of the stack with no frame
  * pointers. VMRegAnchor forces the stack traversal to be done when it is
  * constructed.
+ *
+ * A VMRegAnchor in "soft" mode will look for stashed VM metadata and only sync
+ * VM state if it finds it.  (The default behavior is "hard" mode, where we
+ * assert if we don't find the fixup state).
  */
 struct VMRegAnchor {
-  VMRegAnchor();
+  enum Mode { Hard, Soft };
+
+  explicit VMRegAnchor(Mode mode = Hard);
+
   /*
    * Some C++ entry points have an ActRec prepared from after a call
    * instruction.  Instantiating a VMRegAnchor with an ActRec argument syncs us

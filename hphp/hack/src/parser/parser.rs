@@ -6,12 +6,14 @@
 
 use crate::declaration_parser::DeclarationParser;
 use crate::lexer::Lexer;
+use crate::mode_parser::parse_mode;
 use crate::parser_env::ParserEnv;
 use crate::parser_trait::{Context, ParserTrait};
 use crate::smart_constructors::{NodeType, SmartConstructors};
 use crate::stack_limit::StackLimit;
 use parser_core_types::source_text::SourceText;
 use parser_core_types::syntax_error::SyntaxError;
+use parser_core_types::syntax_tree::SyntaxTree;
 
 pub struct Parser<'a, S, T>
 where
@@ -37,6 +39,17 @@ where
             env,
             sc,
         }
+    }
+
+    pub fn make_syntax_tree(
+        source: &'a SourceText<'a>,
+        env: ParserEnv,
+    ) -> SyntaxTree<<S::R as NodeType>::R, S> {
+        let mode = parse_mode(&source);
+        let mut parser = Parser::make(&source, env);
+        let root = parser.parse_script(None);
+        let (_, errors, _, state) = parser.into_parts();
+        SyntaxTree::create(source, root, errors, mode, state)
     }
 
     fn into_parts(self) -> (Lexer<'a, S::Token>, Vec<SyntaxError>, ParserEnv, S) {

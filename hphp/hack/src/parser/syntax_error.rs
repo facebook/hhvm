@@ -12,7 +12,7 @@ use std::borrow::Cow;
 // many errors are static strings, but not all of them
 pub type Error = Cow<'static, str>;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SyntaxError {
     pub start_offset: usize,
     pub end_offset: usize,
@@ -91,8 +91,7 @@ pub const error1038: Error =
 pub const error1039: Error = Cow::Borrowed("A closing XHP tag is expected here.");
 pub const error1041: Error =
     Cow::Borrowed("A function body or a semicolon (';') is expected here.");
-pub const error1044: Error =
-    Cow::Borrowed("A name or __construct keyword is expected here.");
+pub const error1044: Error = Cow::Borrowed("A name or __construct keyword is expected here.");
 pub const error1045: Error =
     Cow::Borrowed("An 'extends' or 'implements' keyword is expected here.");
 pub const error1046: Error = Cow::Borrowed("A lambda arrow ('==>') is expected here.");
@@ -165,8 +164,7 @@ pub const error2013: Error = Cow::Borrowed("A method declaration cannot have dup
 pub const error2014: Error = Cow::Borrowed("An abstract method cannot have a method body.");
 pub const error2017: Error =
     Cow::Borrowed("A method declaration cannot have multiple visibility modifiers.");
-pub const error2018: Error =
-    Cow::Borrowed("A constructor cannot have a non-void type annotation.");
+pub const error2018: Error = Cow::Borrowed("A constructor cannot have a non-void type annotation.");
 pub const error2020: Error = Cow::Borrowed(concat!(
     "Use of the '{}' subscript operator is deprecated; ",
     " use '[]' instead."

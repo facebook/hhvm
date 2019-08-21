@@ -13,8 +13,7 @@
     parser
     rust_facts_ffi
     (select rust_facts_ffi.ml from
-      (facebook -> ffi/rust_facts_ffi.ml)
-      (-> ffi/rust_facts_ffi_stubs.ml)
+      (-> ffi/rust_facts_ffi.ml)
     )
     utils_hash)
   (preprocess (pps ppx_deriving.std)))

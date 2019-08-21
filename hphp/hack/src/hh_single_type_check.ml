@@ -212,6 +212,7 @@ let parse_options () =
   let const_default_func_args = ref false in
   let disallow_silence = ref false in
   let abstract_static_props = ref false in
+  let disable_unset_class_const  = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -482,6 +483,9 @@ let parse_options () =
     "--abstract-static-props",
       Arg.Set abstract_static_props,
       "Static properties can be abstract";
+    "--disable-unset-class-const",
+      Arg.Set disable_unset_class_const,
+      "Make unsetting a class const a parse error";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -534,6 +538,7 @@ let parse_options () =
     ~po_const_default_func_args:!const_default_func_args
     ~po_disallow_silence:!disallow_silence
     ~po_abstract_static_props:!abstract_static_props
+    ~po_disable_unset_class_const:!disable_unset_class_const
     ()
   in
   let tcopt = {

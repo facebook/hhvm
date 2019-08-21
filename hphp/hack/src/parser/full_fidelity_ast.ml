@@ -2137,7 +2137,19 @@ and pStmt : stmt parser = fun node env ->
     pos, Goto  (pos_name goto_statement_label_name env)
   | EchoStatement  { echo_keyword  = kw; echo_expressions = exprs; _ }
   | UnsetStatement { unset_keyword = kw; unset_variables  = exprs; _ }
-    -> lift_awaits_in_statement env pos (fun () -> pos, Expr
+   ->
+   let rec check_mutate_class_const e =
+      match snd e with
+      | Array_get (e, Some _) ->
+        check_mutate_class_const e
+      | Class_const _ ->
+        raise_parsing_error env (`Node node) SyntaxError.const_mutation;
+      | _ -> ()
+    in
+    let el = couldMap ~f:pExpr exprs env in
+    if ParserOptions.disable_unset_class_const env.parser_options then
+      List.iter ~f:check_mutate_class_const el;
+    lift_awaits_in_statement env pos (fun () -> pos, Expr
       ( pPos node env
       , Call
         ( (match syntax kw with
@@ -2148,7 +2160,7 @@ and pStmt : stmt parser = fun node env ->
           | _ -> missing_syntax "id" kw env
           )
         , []
-        , couldMap ~f:pExpr exprs env
+        , el
         , []
       )))
   | BreakStatement { break_level=level; _ } ->

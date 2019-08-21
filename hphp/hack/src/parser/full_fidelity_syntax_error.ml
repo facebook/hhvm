@@ -760,3 +760,5 @@ let no_silence =
   "The error suppression operator @ is not allowed"
 
 let declared_final elt = elt ^ " cannot be declared final."
+
+let const_mutation = "Cannot mutate a class constant"

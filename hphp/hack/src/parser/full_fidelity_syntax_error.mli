@@ -378,3 +378,4 @@ val no_legacy_attribute_syntax : string
 val no_silence : string
 val declared_final : string -> string
 val abstract_instance_property : string
+val const_mutation : string

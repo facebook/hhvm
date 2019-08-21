@@ -3,9 +3,9 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
-#![feature(custom_inner_attributes)]
-#![rustfmt::skip]
+//
+// This file is not generated, using generated to avoid formatter remove code.
+// @generated
 
 use quote::quote;
 use synstructure::decl_derive;

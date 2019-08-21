@@ -91,7 +91,8 @@ static void flag_maybe_intercepted(std::vector<int8_t*> &flags) {
 }
 
 bool register_intercept(const String& name, const Variant& callback,
-                        const Variant& data, bool checkForDebugger) {
+                        const Variant& data, bool checkForDebugger,
+                        bool newCallback) {
 
   SCOPE_EXIT {
     if (checkForDebugger) {
@@ -127,7 +128,7 @@ bool register_intercept(const String& name, const Variant& callback,
 
   EventHook::EnableIntercept();
 
-  Array handler = make_vec_array(callback, data);
+  Array handler = make_vec_array(callback, data, newCallback);
 
   if (name.empty()) {
     s_intercept_data->global_handler() = handler;

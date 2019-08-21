@@ -35,7 +35,8 @@ Variant HHVM_FUNCTION(fb_compact_unserialize,
                       const Variant& thing, VRefParam success,
                       VRefParam errcode = uninit_variant);
 bool HHVM_FUNCTION(fb_intercept, const String& name, const Variant& handler,
-                    const Variant& data = uninit_variant);
+                   const Variant& data = uninit_variant);
+bool HHVM_FUNCTION(fb_intercept2, const String& name, const Variant& handler);
 bool HHVM_FUNCTION(fb_rename_function, const String& orig_func_name,
                           const String& new_func_name);
 bool HHVM_FUNCTION(fb_utf8ize, VRefParam input);

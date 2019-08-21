@@ -1582,7 +1582,8 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
                                             bool dynamic,
                                             FStackCheck doStackCheck,
                                             FInitArgs doInitArgs,
-                                            FEnterVM doEnterVM) {
+                                            FEnterVM doEnterVM,
+                                            Array&& reifiedGenerics) {
   assertx(f);
   // If `f' is a regular function, `thiz' and `cls' must be null.
   assertx(IMPLIES(!f->implCls(), (!thiz && !cls)));
@@ -1652,6 +1653,8 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
     vmStack().popAR();
     throw;
   }
+
+  if (reifiedGenerics.get()) ar->setReifiedGenerics(reifiedGenerics.detach());
 
   {
     pushVMState(reentrySP);
@@ -1729,7 +1732,9 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
                                         StringData* invName /* = NULL */,
                                         InvokeFlags flags /* = InvokeNormal */,
                                         bool dynamic /* = true */,
-                                        bool checkRefAnnot /* = false */) {
+                                        bool checkRefAnnot /* = false */,
+                                        Array&& reifiedGenerics
+                                                              /* = Array() */) {
   const auto& args = *args_.toCell();
   assertx(isContainerOrNull(args));
 
@@ -1791,7 +1796,8 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
 
   return invokeFuncImpl(f, thiz, cls, argc, invName,
                         dynamic && !(flags & InvokePseudoMain),
-                        doCheckStack, doInitArgs, doEnterVM);
+                        doCheckStack, doInitArgs, doEnterVM,
+                        std::move(reifiedGenerics));
 }
 
 TypedValue ExecutionContext::invokeFuncFew(const Func* f,
@@ -1831,7 +1837,7 @@ TypedValue ExecutionContext::invokeFuncFew(const Func* f,
                         ActRec::decodeThis(thisOrCls),
                         ActRec::decodeClass(thisOrCls),
                         argc, invName, dynamic,
-                        doCheckStack, doInitArgs, doEnterVM);
+                        doCheckStack, doInitArgs, doEnterVM, Array());
 }
 
 static void prepareAsyncFuncEntry(ActRec* enterFnAr, Resumable* resumable) {

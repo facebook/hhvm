@@ -419,7 +419,8 @@ vm_decode_function(const_variant_ref function,
                    StringData*& invName,
                    bool& dynamic,
                    ArrayData*& reifiedGenerics,
-                   DecodeFlags flags /* = DecodeFlags::Warn */) {
+                   DecodeFlags flags /* = DecodeFlags::Warn */,
+                   bool genericsAlreadyGiven /* = false */) {
   bool forwarding = false;
   invName = nullptr;
   dynamic = true;
@@ -586,14 +587,23 @@ vm_decode_function(const_variant_ref function,
       }
       assertx(f && f->preClass() == nullptr);
       if (f->hasReifiedGenerics()) {
-        if (!isReifiedName(name.get())) {
+        auto const reifiedName = isReifiedName(name.get());
+        if (reifiedName) {
+          if (genericsAlreadyGiven) {
+            throw_invalid_argument("You may not add more generics to the "
+                                   "function '%s' that already has reified "
+                                   "arguments",
+                                   f->fullName()->data());
+            return nullptr;
+          }
+          reifiedGenerics =
+            getReifiedTypeList(stripClsOrFnNameFromReifiedName(name.get()));
+        } else if (!genericsAlreadyGiven) {
           throw_invalid_argument("You may not call the reified function '%s' "
                                  "without reified arguments",
                                  f->fullName()->data());
           return nullptr;
         }
-        reifiedGenerics =
-          getReifiedTypeList(stripClsOrFnNameFromReifiedName(name.get()));
       }
       return f;
     }

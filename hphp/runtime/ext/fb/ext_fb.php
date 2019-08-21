@@ -76,6 +76,36 @@ function fb_intercept(string $name,
                       mixed $handler,
                       mixed $data = null): bool;
 
+/*
+ * As a replacement for fb_intercept, invokes a user handler upon calling a
+ * function or a class method. This handler is expected to have signature
+ * similar to "intercept_handler($name, $obj, $params)" where each
+ * argument is same as fb_intercept. This handler is expected to return a shape
+ * where if the shape contains 'value' field, then this value is returned
+ * as the result of the original function, if the shape contains 'callback'
+ * field, then the callback is called as the result of the original function,
+ * if the shape contains 'prepend_this' field, then 'this' or lsb class
+ * is prepended as the first argument to the callback, if neither value nor
+ * callback is given, then the original function is executed.
+ * If the function does not return a shape, then a runtime exception is raised.
+ * Signature of the callback and the original function are required to be the
+ * same including the arity and parity of reified arguments, otherwise, the
+ * regular error mechanism will raise an error/throw an exception accordingly.
+ * Note that built-in functions are not interceptable.
+ * @param string $name - The function or class method name to intercept. Use
+ * "class::method" for method name. If empty, all functions will be
+ * intercepted by the specified handler and registered individual handlers
+ * will be replaced. To make sure individual handlers not affected by such a
+ * call, call fb_intercept2() with individual names afterwards.
+ * @param mixed $handler - Callback to handle the interception. Use null,
+ * false or empty string to unregister a previously registered handler. If
+ * name is empty, all previously registered handlers, including those that are
+ * set by individual function names, will be removed.
+ * @return bool - TRUE if successful, FALSE otherwise
+ */
+<<__HipHopSpecific, __Native>>
+function fb_intercept2(string $name, mixed $handler): bool;
+
 /* Rename a function, so that a function can be called with the new name.
  * When writing unit tests, one may want to stub out a function. To do so,
  * call fb_rename_function('func_to_stub_out', 'somename') then

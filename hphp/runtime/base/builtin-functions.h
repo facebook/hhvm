@@ -202,15 +202,17 @@ vm_decode_function(const_variant_ref function,
                    StringData*& invName,
                    bool& dynamic,
                    ArrayData*& reifiedGenerics,
-                   DecodeFlags flags = DecodeFlags::Warn);
+                   DecodeFlags flags = DecodeFlags::Warn,
+                   bool genericsAlreadyGiven = false);
 
 inline void
 vm_decode_function(const_variant_ref function,
                    CallCtx& ctx,
-                   DecodeFlags flags = DecodeFlags::Warn) {
+                   DecodeFlags flags = DecodeFlags::Warn,
+                   bool genericsAlreadyGiven = false) {
   ctx.func = vm_decode_function(function, nullptr, ctx.this_, ctx.cls,
                                 ctx.invName, ctx.dynamic, ctx.reifiedGenerics,
-                                flags);
+                                flags, genericsAlreadyGiven);
 }
 
 std::pair<Class*, Func*> decode_for_clsmeth(

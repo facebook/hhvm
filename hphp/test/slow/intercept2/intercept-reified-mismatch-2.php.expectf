@@ -1,0 +1,11 @@
+----HANDLER----
+string(3) "foo"
+NULL
+array(1) {
+  [0]=>
+  string(4) "Hey!"
+}
+---------------
+
+Fatal error: Uncaught exception 'RuntimeException' with message 'Mismatch between reifiedness of callee and callback' in %s:17
+%A

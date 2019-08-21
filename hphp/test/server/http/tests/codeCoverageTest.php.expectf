@@ -16,7 +16,7 @@ I'm FOOO
 array(2) {
   ["/:systemlib.phpfb"]=>
   array(1) {
-    [139]=>
+    [%d]=>
     int(1)
   }
   [%s]=>
@@ -39,7 +39,7 @@ string(%s) "I'm FOOO
 array(2) {
   ["/:systemlib.phpfb"]=>
   array(1) {
-    [139]=>
+    [%d]=>
     int(1)
   }
   [%s]=>

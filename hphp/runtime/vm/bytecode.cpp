@@ -1619,9 +1619,9 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, VarEnv* varEnv) {
     prepareFuncEntry(enterFnAr, stk);
   }
 
+  checkForReifiedGenericsErrors(enterFnAr);
   if (!EventHook::FunctionCall(enterFnAr, EventHook::NormalFunc)) return;
   checkStack(vmStack(), enterFnAr->m_func, 0);
-  checkForReifiedGenericsErrors(enterFnAr);
   calleeDynamicCallChecks(enterFnAr);
   checkForRequiredCallM(enterFnAr);
   assertx(vmfp()->func()->contains(vmpc()));
@@ -4615,10 +4615,10 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool unpack) {
     throw;
   }
 
+  checkForReifiedGenericsErrors(ar);
   if (UNLIKELY(!EventHook::FunctionCall(ar, EventHook::NormalFunc))) {
     return false;
   }
-  checkForReifiedGenericsErrors(ar);
   calleeDynamicCallChecks(ar);
   checkForRequiredCallM(ar);
   return true;

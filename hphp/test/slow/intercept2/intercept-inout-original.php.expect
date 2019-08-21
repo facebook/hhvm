@@ -1,0 +1,14 @@
+----HANDLER----
+string(3) "foo"
+NULL
+array(2) {
+  [0]=>
+  string(4) "Hey!"
+  [1]=>
+  int(1)
+}
+---------------
+In foo!
+Arg is: Hey!
+int(5)
+int(10)

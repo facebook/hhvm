@@ -475,7 +475,8 @@ public:
                         StringData* invName = nullptr,
                         InvokeFlags flags = InvokeNormal,
                         bool dynamic = true,
-                        bool checkRefAnnot = false);
+                        bool checkRefAnnot = false,
+                        Array&& reifiedGenerics = Array());
 
   TypedValue invokeFunc(const CallCtx& ctx,
                         const Variant& args_);
@@ -526,7 +527,8 @@ private:
                             bool dynamic,
                             FStackCheck doStackCheck,
                             FInitArgs doInitArgs,
-                            FEnterVM doEnterVM);
+                            FEnterVM doEnterVM,
+                            Array&& reifiedGenerics);
 
   struct ExcLoggerHook final : LoggerHook {
     explicit ExcLoggerHook(ExecutionContext& ec) : ec(ec) {}

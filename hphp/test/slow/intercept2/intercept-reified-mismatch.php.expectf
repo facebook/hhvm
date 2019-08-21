@@ -1,0 +1,12 @@
+----HANDLER----
+string(3) "foo"
+NULL
+array(1) {
+  [0]=>
+  string(4) "Hey!"
+}
+---------------
+
+Fatal error: Uncaught exception 'BadMethodCallException' with message 'Function bar requires 1 generics but 2 given' in %s:11
+Stack trace:
+%A

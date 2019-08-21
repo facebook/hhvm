@@ -96,6 +96,7 @@
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/bc-pattern.h"
+#include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/native.h"
@@ -3272,7 +3273,10 @@ void parse_record(AsmState& as) {
  */
 void parse_filepath(AsmState& as) {
   auto const str = read_litstr(as);
-  as.ue->m_filepath = str;
+  if (nullptr == g_hhas_handler) {
+    // We don't want to use file path from cached HHAS
+    as.ue->m_filepath = str;
+  }
   as.in.expectWs(';');
 }
 

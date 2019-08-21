@@ -1,0 +1,12 @@
+diff --git a/third-party/folly/src/folly/portability/OpenSSL.h b/third-party/folly/src/folly/portability/OpenSSL.h
+index cc451478..b827006c 100644
+--- a/third-party/folly/src/folly/portability/OpenSSL.h
++++ b/third-party/folly/src/folly/portability/OpenSSL.h
+@@ -129,6 +129,7 @@ int TLS1_get_client_version(const SSL*);
+ #endif
+ 
+ #if FOLLY_OPENSSL_IS_100 || FOLLY_OPENSSL_IS_101
++#define SSL_CTX_add1_chain_cert(ctx, x509) 1 // 0 would imply error
+ int X509_get_signature_nid(X509* cert);
+ #endif
+ 

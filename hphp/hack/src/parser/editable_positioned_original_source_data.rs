@@ -8,10 +8,11 @@ use parser_rust as parser;
 
 use parser::lexable_token::LexableToken;
 use parser::positioned_syntax::PositionedSyntax;
-use parser::positioned_syntax::PositionedSyntaxTrait;
 use parser::positioned_token::PositionedToken;
 use parser::positioned_trivia::PositionedTrivia;
 use parser::source_text::SourceText;
+use parser_core_types::positioned_syntax::PositionedSyntaxTrait;
+use parser_core_types::syntax_trait::SyntaxTrait;
 
 // Data about the token with respect to the original source text.
 #[derive(Clone)]

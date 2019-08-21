@@ -41,15 +41,13 @@ pub mod minimal_parser;
 mod minimal_smart_constructors;
 
 pub mod positioned_smart_constructors;
-pub mod positioned_syntax;
-pub mod positioned_token;
-pub mod positioned_trivia;
 
 // The "parser_core_types" crate contains data definitions for a variety of data structures
 // and types used by the parser and consumers of the parser. These data types were recently
 // split out from this crate. In order to keep the same library facade, the relevant modules
 // are re-exported here so that consumers do not need to be made aware of the data-code split.
 pub use parser_core_types::{
-    lexable_token, minimal_syntax, minimal_token, minimal_trivia, source_text, syntax,
-    syntax_error, syntax_kind, token_kind, trivia_kind,
+    lexable_token, minimal_syntax, minimal_token, minimal_trivia, positioned_syntax,
+    positioned_token, positioned_trivia, source_text, syntax, syntax_error, syntax_kind,
+    token_kind, trivia_kind,
 };

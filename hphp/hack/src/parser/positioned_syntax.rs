@@ -6,13 +6,15 @@
 
 use std::rc::Rc;
 
+use crate::lexable_token::LexableToken;
 use crate::positioned_token::PositionedToken;
+use crate::source_text::SourceText;
+use crate::syntax::*;
+use crate::syntax_kind::SyntaxKind;
+use crate::syntax_trait::SyntaxTrait;
+use crate::token_kind::TokenKind;
+
 use oxidized::pos::Pos;
-use parser_core_types::lexable_token::LexableToken;
-use parser_core_types::source_text::SourceText;
-use parser_core_types::syntax::*;
-use parser_core_types::syntax_kind::SyntaxKind;
-use parser_core_types::token_kind::TokenKind;
 
 #[derive(Debug, Clone)]
 pub enum PositionedValue {
@@ -232,10 +234,22 @@ impl SyntaxValueType<PositionedToken> for PositionedValue {
 
 pub type PositionedSyntax = Syntax<PositionedToken, PositionedValue>;
 
-pub trait PositionedSyntaxTrait {
+impl SyntaxTrait for PositionedSyntax {
+    fn offset(&self) -> Option<usize> {
+        Some(self.start_offset())
+    }
+
+    fn width(&self) -> usize {
+        self.value.width()
+    }
+
+    fn leading_width(&self) -> usize {
+        self.value.leading_width()
+    }
+}
+
+pub trait PositionedSyntaxTrait: SyntaxTrait {
     fn leading_start_offset(&self) -> usize;
-    fn leading_width(&self) -> usize;
-    fn width(&self) -> usize;
     fn start_offset(&self) -> usize;
     fn end_offset(&self) -> usize;
 
@@ -250,14 +264,6 @@ pub trait PositionedSyntaxTrait {
 impl PositionedSyntaxTrait for PositionedSyntax {
     fn leading_start_offset(&self) -> usize {
         self.value.start_offset()
-    }
-
-    fn leading_width(&self) -> usize {
-        self.value.leading_width()
-    }
-
-    fn width(&self) -> usize {
-        self.value.width()
     }
 
     fn trailing_width(&self) -> usize {

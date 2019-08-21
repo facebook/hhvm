@@ -630,8 +630,8 @@ and get_typarams root env (ty: decl ty) =
     if Option.is_some (SMap.get id env)
     then empty
     else single id (fst ty)
-  | Tnonnull | Tdynamic | Tprim _ | Tnothing | Tany | Terr | Tthis | Tmixed | Taccess _ -> empty
-  | Toption ty | Tlike ty -> get_typarams root env ty
+  | Tnonnull | Tdynamic | Tprim _ | Tnothing | Tany | Terr | Tthis | Tmixed -> empty
+  | Toption ty | Tlike ty | Taccess (ty, _) -> get_typarams root env ty
   | Ttuple tyl -> List.fold_left tyl ~init:empty ~f:get_typarams_union
   | Tshape (_, m) ->
     Nast.ShapeMap.fold (fun _ {sft_ty; _} res -> get_typarams_union res sft_ty) m empty

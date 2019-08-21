@@ -183,6 +183,16 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
   <<__Native>>
   public static function fromVector(mixed $dependencies): Awaitable;
 
+  /* Create a wait handle that can, generically, wait for a given Container<_>
+   * of dependencies.
+   *
+   * This should only be used if accepting a generic Container
+   * _and_ it's required to reuse the same container for performance reasons.
+   * otherwise prefer to use `fromVec` or `fromDict`
+   */
+  <<__Native>>
+  public static function fromContainer(mixed $dependencies): Awaitable;
+
   /* Set callback for when a AwaitAllWaitHandle is created
    * @param mixed $callback - A Closure to be called on creation
    */

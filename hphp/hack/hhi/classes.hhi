@@ -165,6 +165,9 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle<void> {
   public static function fromVector(
     ConstVector<Awaitable<mixed>> $deps
   ): Awaitable<void>;
+  public static function fromContainer(
+    Container<Awaitable<mixed>> $deps,
+  ): Awaitable<void>;
   public static function setOnCreateCallback(
     ?(function(AwaitAllWaitHandle, Vector<mixed>): void) $callback
   ): void {}

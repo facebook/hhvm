@@ -172,7 +172,7 @@ const Fixup* findFixup(CTCA tca) {
 
 size_t size() { return s_fixups.size(); }
 
-void fixupWork(ExecutionContext* /*ec*/, ActRec* nextRbp) {
+void fixupWork(ActRec* nextRbp) {
   assertx(RuntimeOption::EvalJit);
 
   TRACE(1, "fixup(begin):\n");
@@ -196,8 +196,10 @@ void fixupWork(ExecutionContext* /*ec*/, ActRec* nextRbp) {
         vmRegs.pc = reinterpret_cast<PC>(regs.pc);
         vmRegs.stack.top() = regs.sp;
         vmRegs.jitReturnAddr = regs.retAddr;
-        return;
+      } else {
+        always_assert(false && "Fixup expected for leafmost VM frame");
       }
+      return;
     }
   }
 }
@@ -236,7 +238,7 @@ void syncVMRegsWork() {
   auto fp = tl_regState >= VMRegState::GUARDED_THRESHOLD ?
     (ActRec*)tl_regState : framePtr;
 
-  FixupMap::fixupWork(g_context.getNoCheck(), fp);
+  FixupMap::fixupWork(fp);
 
   tl_regState = VMRegState::CLEAN;
   Stats::inc(Stats::TC_Sync);

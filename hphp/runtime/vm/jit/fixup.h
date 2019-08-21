@@ -159,10 +159,9 @@ const Fixup* findFixup(CTCA tca);
 size_t size();
 
 /*
- * Perform a fixup of the VM registers of ec for a stack whose first frame is
- * rbp.
+ * Perform a fixup of the VM registers for a stack whose first frame is `rbp`.
  */
-void fixupWork(ExecutionContext* ec, ActRec* rbp);
+void fixupWork(ActRec* rbp);
 
 /*
  * Returns true if calls to func should use an EagerVMRegAnchor.

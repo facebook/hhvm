@@ -78,6 +78,7 @@ ArrayIter::ArrayIter(const Variant& v) {
 ArrayIter::ArrayIter(const ArrayIter& iter) {
   m_data = iter.m_data;
   m_pos = iter.m_pos;
+  m_end = iter.m_end;
   m_itypeAndNextHelperIdx = iter.m_itypeAndNextHelperIdx;
   if (hasArrayData()) {
     const ArrayData* ad = getArrayData();
@@ -122,7 +123,8 @@ bool ArrayIter::checkInvariants(const ArrayData* ad /* = nullptr */) const {
     assertx(m_pos_diff < m_end_diff);
     assertx(m_end_diff == MixedArray::elmOff(arr->getSize()));
   } else {
-    assertx(m_pos < arr->iter_end());
+    assertx(m_pos < m_end);
+    assertx(m_end == arr->iter_end());
   }
   return true;
 }
@@ -209,6 +211,7 @@ ArrayIter& ArrayIter::operator=(const ArrayIter& iter) {
   reset();
   m_data = iter.m_data;
   m_pos = iter.m_pos;
+  m_end = iter.m_end;
   m_itypeAndNextHelperIdx = iter.m_itypeAndNextHelperIdx;
   if (hasArrayData()) {
     const ArrayData* ad = getArrayData();
@@ -225,6 +228,7 @@ ArrayIter& ArrayIter::operator=(ArrayIter&& iter) {
   reset();
   m_data = iter.m_data;
   m_pos = iter.m_pos;
+  m_end = iter.m_end;
   m_itypeAndNextHelperIdx = iter.m_itypeAndNextHelperIdx;
   iter.m_data = nullptr;
   return *this;
@@ -266,6 +270,7 @@ Iter* Iter::escalate() {
   if (arr().m_nextHelperIdx == IterNextIndex::ArrayMixedNoTombstones) {
     auto const base = MixedArray::elmOff(0);
     arr().m_pos = (arr().m_pos_diff - base) / sizeof(MixedArray::Elm);
+    arr().m_end = (arr().m_end_diff - base) / sizeof(MixedArray::Elm);
     arr().setArrayNext(IterNextIndex::ArrayMixed);
   }
   return this;
@@ -530,6 +535,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
 
   if (LIKELY(ad->hasPackedLayout())) {
     aiter.m_pos = 0;
+    aiter.m_end = size;
     aiter.setArrayNext(IterNextIndex::ArrayPacked);
     cellDup(*tvToCell(PackedArray::GetValueRef(ad, 0)), *valOut);
     return 1;
@@ -545,6 +551,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
       return 1;
     }
     aiter.m_pos = mixed->getIterBeginNotEmpty();
+    aiter.m_end = mixed->iterLimit();
     aiter.setArrayNext(IterNextIndex::ArrayMixed);
     mixed->getArrayElm(aiter.m_pos, valOut);
     return 1;
@@ -591,6 +598,7 @@ int64_t new_iter_array_key(Iter*       dest,
 
   if (ad->hasPackedLayout()) {
     aiter.m_pos = 0;
+    aiter.m_end = size;
     aiter.setArrayNext(IterNextIndex::ArrayPacked);
     cellDup(*tvToCell(PackedArray::GetValueRef(ad, 0)), *valOut);
     keyOut->m_type = KindOfInt64;
@@ -608,6 +616,7 @@ int64_t new_iter_array_key(Iter*       dest,
       return 1;
     }
     aiter.m_pos = mixed->getIterBeginNotEmpty();
+    aiter.m_end = mixed->iterLimit();
     aiter.setArrayNext(IterNextIndex::ArrayMixed);
     mixed->getArrayElm(aiter.m_pos, valOut, keyOut);
     return 1;
@@ -785,7 +794,7 @@ static int64_t iter_next_apc_array(Iter* iter,
   auto const arrIter = &iter->arr();
   auto const arr = APCLocalArray::asApcArray(ad);
   ssize_t const pos = arr->iterAdvanceImpl(arrIter->getPos());
-  if (UNLIKELY(pos == ad->getSize())) {
+  if (UNLIKELY(pos == arrIter->getEnd())) {
     if (!Local) {
       if (UNLIKELY(arr->decWillRelease())) {
         return iter_next_free_apc(iter, arr);
@@ -935,7 +944,7 @@ int64_t iter_next_mixed_impl(Iter* it,
   ssize_t pos        = iter.getPos();
 
   do {
-    if ((++pos) == arr->iterLimit()) {
+    if ((++pos) == iter.getEnd()) {
       if (!Local) {
         if (UNLIKELY(arr->decWillRelease())) {
           return iter_next_free_mixed(it, arr->asArrayData());
@@ -982,7 +991,7 @@ int64_t iter_next_packed_impl(Iter* it,
   assertx(PackedArray::checkInvariants(ad));
 
   ssize_t pos = iter.getPos() + 1;
-  if (LIKELY(pos < ad->getSize())) {
+  if (LIKELY(pos < iter.getEnd())) {
     if (isRefcountedType(valOut->m_type)) {
       if (UNLIKELY(valOut->m_data.pcnt->decWillRelease())) {
         return Local

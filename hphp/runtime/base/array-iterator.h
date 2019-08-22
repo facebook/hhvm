@@ -100,6 +100,7 @@ struct ArrayIter {
   ArrayIter(ArrayIter&& iter) noexcept {
     m_data = iter.m_data;
     m_pos = iter.m_pos;
+    m_end = iter.m_end;
     m_itypeAndNextHelperIdx = iter.m_itypeAndNextHelperIdx;
     iter.m_data = nullptr;
   }
@@ -128,8 +129,7 @@ struct ArrayIter {
   void operator++() { next(); }
   bool end() const {
     if (UNLIKELY(!hasArrayData())) return endHelper();
-    auto const ad = getArrayData();
-    return ad == nullptr || m_pos == ad->iter_end();
+    return getArrayData() == nullptr || m_pos == m_end;
   }
   bool endHelper() const;
 
@@ -143,7 +143,7 @@ struct ArrayIter {
   bool nextLocal(const ArrayData* ad) {
     assertx(checkInvariants(ad));
     m_pos = ad->iter_advance(m_pos);
-    return m_pos == ad->iter_end();
+    return m_pos == m_end;
   }
 
   Variant first() {
@@ -215,6 +215,9 @@ struct ArrayIter {
   ssize_t getPos() const {
     return m_pos;
   }
+  ssize_t getEnd() const {
+    return m_end;
+  }
   void setPos(ssize_t newPos) {
     m_pos = newPos;
   }
@@ -273,6 +276,7 @@ private:
         setArrayNext(IterNextIndex::ArrayMixed);
       }
       m_pos = ad->iter_begin();
+      m_end = ad->iter_end();
     }
   }
 
@@ -302,13 +306,14 @@ private:
   };
   // Current position. Beware that when m_data is null, m_pos is uninitialized.
   // Also, iterators with the ArrayMixedNoTombstones next helper use m_pos_diff
-  // and m_end_diff instead of m_pos.
+  // and m_end_diff instead of m_pos and m_end.
   union {
-    ssize_t m_pos;
-    struct {
-      ptrdiff_t m_pos_diff;
-      ptrdiff_t m_end_diff;
-    };
+    size_t m_pos;
+    ptrdiff_t m_pos_diff;
+  };
+  union {
+    size_t m_end;
+    ptrdiff_t m_end_diff;
   };
   // This field is a union so new_iter_array can set it in one instruction.
   union {

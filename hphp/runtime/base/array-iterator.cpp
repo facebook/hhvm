@@ -447,6 +447,13 @@ inline void liter_key_cell_local_impl(Iter* iter,
 
 }
 
+// These release methods are called by the iter_next_* implementations below
+// that know the particular layout of the array they're iterating over. We pull
+// them out into a separate method here so that a) we can inline the destructor
+// for each array type into these methods and b) to make the call a tail call.
+//
+// These methods all return false (= 0) to signify that iteration is over.
+
 NEVER_INLINE int64_t iter_next_free_packed(Iter* iter, ArrayData* arr) {
   assertx(arr->decWillRelease());
   assertx(arr->hasPackedLayout());
@@ -740,6 +747,9 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
     : new_iter_array<false>(dest, arr.detach(), valOut);
 }
 
+// Generic next implementation for non-local iterators. This method is used for
+// both value and key-value iterators; for value iterators, keyOut is nullptr.
+// The result is false (= 0) if iteration is done, or true (= 1) otherwise.
 NEVER_INLINE
 int64_t iter_next_cold(Iter* iter, Cell* valOut, Cell* keyOut) {
   auto const ai = &iter->arr();
@@ -766,6 +776,11 @@ int64_t iter_next_cold(Iter* iter, Cell* valOut, Cell* keyOut) {
   return 1;
 }
 
+// Generic next implementation for non-local iterators. This method is used for
+// both value and key-value iterators; for value iterators, keyOut is nullptr.
+// The result is false (= 0) if iteration is done, or true (= 1) otherwise.
+//
+// Since local iterators are always over arrays, we take an ArrayData here.
 NEVER_INLINE
 int64_t liter_next_cold(Iter* iter,
                         const ArrayData* ad,
@@ -783,6 +798,9 @@ int64_t liter_next_cold(Iter* iter,
   return 1;
 }
 
+// vtable implementation for APC arrays. This method is quite cold, and we
+// might be better off just using the generic implementation instead.
+// The result is false (= 0) if iteration is done, or true (= 1) otherwise.
 template <bool Local>
 NEVER_INLINE
 static int64_t iter_next_apc_array(Iter* iter,
@@ -854,6 +872,12 @@ int64_t liter_next_cold_inc_val(Iter* it,
   return liter_next_cold(it, ad, valOut, keyOut);
 }
 
+// We call this function if valOut->decWillRelease(). It should be relatively
+// cold but it happens if the value is an array which gets COWed in the loop.
+// Not releasing the value here can cause a significant memory regression.
+//
+// This method return trues (= 1) because we only call it after advancing the
+// iterator's position and checking that the new position is in bounds.
 NEVER_INLINE
 int64_t iter_next_mixed_no_tombstones_cold(Iter* it,
                                            Cell* valOut,
@@ -870,6 +894,11 @@ int64_t iter_next_mixed_no_tombstones_cold(Iter* it,
   return 1;
 }
 
+// We call this function if keyOut->decWillRelease() and we've dec-ref-ed
+// valOut already. It should be *very* cold, because the key is rarely changed.
+//
+// This method return trues (= 1) because we only call it after advancing the
+// iterator's position and checking that the new position is in bounds.
 NEVER_INLINE
 int64_t iter_next_mixed_no_tombstones_cold_key(Iter* it,
                                                Cell* valOut,
@@ -886,6 +915,16 @@ int64_t iter_next_mixed_no_tombstones_cold_key(Iter* it,
 
 }
 
+// "virtual" method implementation of *IterNext* for ArrayMixedNoTombstones.
+// Since we know the array is mixed and free of tombstones, we can simply add
+// sizeof(MixedArrayElm) to the pointer offset, and then used MixedArrayElm
+// helpers to extract the key and value.
+//
+// HasKey is true for key-value iters. HasKey is true iff keyOut != nullptr.
+// See array-iterator.cpp for the meaning of a "local" iterator. At this point,
+// we have the base, but we only dec-ref it when non-local iters hit the end.
+//
+// The result is false (= 0) if iteration is done, or true (= 1) otherwise.
 template<bool HasKey, bool Local>
 ALWAYS_INLINE
 int64_t iter_next_mixed_no_tombstones(Iter* it,
@@ -933,6 +972,15 @@ int64_t iter_next_mixed_no_tombstones(Iter* it,
 
 namespace {
 
+// "virtual" method implementation of *IterNext* for ArrayMixed iterators.
+// Since we know the array is mixed, we can do "while (elm[pos].isTombstone())"
+// inline here, and we can use MixedArray helpers to extract the key and value.
+//
+// HasKey is true for key-value iters. HasKey is true iff keyOut != nullptr.
+// See array-iterator.cpp for the meaning of a "local" iterator. At this point,
+// we have the base, but we only dec-ref it when non-local iters hit the end.
+//
+// The result is false (= 0) if iteration is done, or true (= 1) otherwise.
 template<bool HasKey, bool Local>
 ALWAYS_INLINE
 int64_t iter_next_mixed_impl(Iter* it,
@@ -982,6 +1030,15 @@ int64_t iter_next_mixed_impl(Iter* it,
   return 1;
 }
 
+// "virtual" method implementation of *IterNext* for ArrayPacked iterators.
+// Since we know the array is packed, we just need to increment the position
+// and do a bounds check. The key is the position; for the value, we index.
+//
+// HasKey is true for key-value iters. HasKey is true iff keyOut != nullptr.
+// See array-iterator.cpp for the meaning of a "local" iterator. At this point,
+// we have the base, but we only dec-ref it when non-local iters hit the end.
+//
+// The result is false (= 0) if iteration is done, or true (= 1) otherwise.
 template<bool HasKey, bool Local>
 int64_t iter_next_packed_impl(Iter* it,
                               Cell* valOut,
@@ -1202,7 +1259,6 @@ int64_t literNextKArrayMixedNoTombstones(Iter* it, Cell* valOut,
 
 using IterNextHelper  = int64_t (*)(Iter*, Cell*);
 using IterNextKHelper = int64_t (*)(Iter*, Cell*, Cell*);
-
 using LIterNextHelper  = int64_t (*)(Iter*, Cell*, ArrayData*);
 using LIterNextKHelper = int64_t (*)(Iter*, Cell*, Cell*, ArrayData*);
 

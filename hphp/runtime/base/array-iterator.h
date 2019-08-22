@@ -50,16 +50,32 @@ enum class IterNextIndex : uint8_t {
   ArrayMixedNoTombstones,
 };
 
-/**
- * An iteration normally looks like this:
+/*
+ * Iterator over an array, a collection, or an object implementing the Hack
+ * Iterator interface. This iterator is used by both C++ code and by the JIT,
+ * but the JIT usage is mediated through the "Iter" wrapper below.
+ *
+ * Iteration in C++ normally looks like this, where "iter" invokes the "end"
+ * method and "++iter" invokes the "next" method.
  *
  *   for (ArrayIter iter(data); iter; ++iter) {
  *     ...
  *   }
- */
-
-/**
- * Iterator for an immutable array.
+ *
+ * By default, iterators inc-ref their base to ensure that it won't be mutated
+ * during the iteration. HHBBC can do an analysis that marks certain iterators
+ * as "local" iterators, which means that their base only changes in certain
+ * controlled ways during iteration. (Specifically: either the base does not
+ * change at all, or the current key is assigned a new value in the loop.)
+ *
+ * For local iterators, the base is kept in a frame local and passed to the
+ * iterator on each iteration. Local iterators are only used by the interpteter
+ * and by the JIT - they're never used by C++ code. Local iterators are never
+ * used for objects, since we can't constrain writes to them in this way.
+ *
+ * The purpose of the local iter optimization is to try to keep local bases at
+ * a refcount of 1, so that they won't be COWed by the "set the current key"
+ * type of mutating operations. Apparently, this pattern is somewhat common...
  */
 struct ArrayIter {
   enum Type : uint8_t {
@@ -127,12 +143,17 @@ struct ArrayIter {
 
   explicit operator bool() { return !end(); }
   void operator++() { next(); }
+
+  // Returns true if we've reached the end. endHelper is used for iterators
+  // over objects implementing the Iterator interface.
   bool end() const {
     if (UNLIKELY(!hasArrayData())) return endHelper();
     return getArrayData() == nullptr || m_pos == m_end;
   }
   bool endHelper() const;
 
+  // Advance the iterator's position. Assumes that end() is false. nextHelper
+  // is used for iterators over objects implementing the Iterator interface.
   void next() {
     assertx(checkInvariants());
     if (UNLIKELY(!hasArrayData())) return nextHelper();
@@ -146,6 +167,8 @@ struct ArrayIter {
     return m_pos == m_end;
   }
 
+  // Return the key at the current position. firstHelper is used for Objects.
+  // This method and its variants inc-ref the key before returning it.
   Variant first() {
     if (UNLIKELY(!hasArrayData())) return firstHelper();
     return getArrayData()->getKey(m_pos);
@@ -157,20 +180,19 @@ struct ArrayIter {
     return ad->getKey(m_pos);
   }
 
+  // TypedValue versions of first. Used by the JIT iterator helpers.
+  // These methods do NOT inc-ref the key before returning it.
   TypedValue nvFirst() const {
     return getArrayData()->nvGetKey(m_pos);
   }
-
   TypedValue nvFirstLocal(const ArrayData* ad) const {
     assertx(getArrayData() == nullptr);
     return ad->nvGetKey(m_pos);
   }
 
-  /*
-   * Retrieve the value at the current position.
-   */
+  // Return the value at the current position. firstHelper is used for Objects.
+  // This method and its variants inc-ref the value before returning it.
   Variant second();
-
   Variant secondLocal(const ArrayData* ad) const {
     assertx(getArrayData() == nullptr);
     return ad->getValue(m_pos);
@@ -194,16 +216,18 @@ struct ArrayIter {
     return const_variant_ref(secondRval());
   }
 
-  // Inline version of secondRef.  Only for use in iterator helpers.
+  // TypedValue versions of second. Used by the JIT iterator helpers.
+  // These methods do NOT inc-ref the value before returning it.
   tv_rval nvSecond() const {
     return getArrayData()->rvalPos(m_pos);
   }
-
   tv_rval nvSecondLocal(const ArrayData* ad) const {
     assertx(getArrayData() == nullptr);
     return ad->rvalPos(m_pos);
   }
 
+  // This method returns null for local iterators, and for non-local iterators
+  // with an empty array base. It must be checked in end() for this reason.
   bool hasArrayData() const {
     return !((intptr_t)m_data & 1);
   }
@@ -263,6 +287,10 @@ private:
 
   void destruct();
 
+  // Set all ArrayIter fields for iteration over an array:
+  //  - m_data is either the array, or null (for local iterators).
+  //  - The type fields union is set based on the array type.
+  //  - m_pos and m_end are set based on its virtual iter helpers.
   template <bool Local = false>
   void setArrayData(const ArrayData* ad) {
     assertx((intptr_t(ad) & 1) == 0);
@@ -280,6 +308,9 @@ private:
     }
   }
 
+  // Set all ArrayIter fields for iteration over an object:
+  //  - m_data is is always the object, with the lowest bit set as a flag.
+  //  - We set the type fields union here.
   void setObject(ObjectData* obj) {
     assertx((intptr_t(obj) & 1) == 0);
     m_obj = (ObjectData*)((intptr_t)obj | 1);
@@ -290,6 +321,8 @@ private:
     assertx(m_nextHelperIdx == IterNextIndex::Object);
   }
 
+  // Set the type fields of an array. These fields are packed so that we
+  // can set them with a single mov-immediate to the union.
   void setArrayNext(IterNextIndex index) {
     m_itypeAndNextHelperIdx =
       static_cast<uint16_t>(index) << 8 |
@@ -596,6 +629,13 @@ bool IterateKV(const TypedValue& it,
 
 //////////////////////////////////////////////////////////////////////
 
+// Native helpers for the JIT used to implement *IterInit* opcodes.
+// These methods return a boolean which is true if the array has elements.
+//
+// Because native method calls have a GP register output, we extend the return
+// type to an int64_t, which is either 1 (enter the loop) or 0 (jump to done).
+//
+// For non-local iters, if this method returns 0, it will dec-ref the array.
 template <bool Local>
 int64_t new_iter_array(Iter* dest, ArrayData* arr, TypedValue* val);
 template <bool Local>
@@ -605,9 +645,12 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
                         TypedValue* val, TypedValue* key);
 
 
+// Native helpers for the JIT used to implement *IterNext* opcodes.
+// These methods return a boolean which is true if the array has more elements.
+//
+// For non-local iters, if this method returns 0, it will dec-ref the array.
 int64_t iter_next_ind(Iter* iter, Cell* valOut);
 int64_t iter_next_key_ind(Iter* iter, Cell* valOut, Cell* keyOut);
-
 int64_t liter_next_ind(Iter*, Cell*, ArrayData*);
 int64_t liter_next_key_ind(Iter*, Cell*, Cell*, ArrayData*);
 

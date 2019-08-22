@@ -5,14 +5,16 @@
 // LICENSE file in the "hack" directory of this source tree.;
 
 use std::fs;
+use std::path::PathBuf;
 
 extern crate clap;
 use clap::{App, Arg};
 
 extern crate facts_rust;
 use facts_rust::facts_parser::*;
+
+extern crate oxidized;
 use oxidized::relative_path::*;
-use std::path::PathBuf;
 
 fn main() {
     let args = App::new("Facts JSON test (Rust)")

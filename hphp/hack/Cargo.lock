@@ -94,6 +94,7 @@ version = "3.49.0"
 dependencies = [
  "clap 2.33.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "hack_facts 3.49.0",
+ "hack_oxidized 3.49.0",
 ]
 
 [[package]]
@@ -147,8 +148,8 @@ version = "3.49.0"
 dependencies = [
  "hack_deps 3.49.0",
  "hack_line_break_map 3.49.0",
- "hack_utils_ocamlpool 3.49.0",
  "hack_oxidized 3.49.0",
+ "hack_utils_ocamlpool 3.49.0",
 ]
 
 [[package]]
@@ -166,6 +167,9 @@ dependencies = [
 [[package]]
 name = "hack_utils"
 version = "3.49.0"
+dependencies = [
+ "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 
 [[package]]
 name = "hack_utils_ocamlpool"

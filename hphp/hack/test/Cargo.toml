@@ -10,4 +10,5 @@ path = "rust/facts_parse.rs"
 
 [dependencies]
 facts_rust = { path = "../src/facts", package = "hack_facts" }
+oxidized = { path = "../src/oxidized", package = "hack_oxidized" }
 clap = "^2.33.0"

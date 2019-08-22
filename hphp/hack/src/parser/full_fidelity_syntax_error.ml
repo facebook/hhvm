@@ -762,3 +762,6 @@ let no_silence =
 let declared_final elt = elt ^ " cannot be declared final."
 
 let const_mutation = "Cannot mutate a class constant"
+
+let no_attributes_on_variadic_parameter =
+  "Attributes on variadic parameters are not allowed"

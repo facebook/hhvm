@@ -44,7 +44,7 @@ function print_r($expression, bool $ret = false);
 <<__PHPStdLib>>
 function var_export($expression, bool $ret = false);
 <<__PHPStdLib>>
-function var_dump(<<__AcceptDisposable>> $expression, <<__AcceptDisposable>> ...$rest);
+function var_dump(<<__AcceptDisposable>> mixed $expression, mixed ...$rest);
 <<__PHPStdLib>>
 function debug_zval_dump(<<__AcceptDisposable>> $variable);
 <<__PHPStdLib, __Rx>>

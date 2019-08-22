@@ -379,3 +379,4 @@ val no_silence : string
 val declared_final : string -> string
 val abstract_instance_property : string
 val const_mutation : string
+val no_attributes_on_variadic_parameter : string

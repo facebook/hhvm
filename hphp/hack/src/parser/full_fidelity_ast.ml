@@ -1041,6 +1041,8 @@ and pFunParam : fun_param parser = fun node env ->
       mpOptional pHint parameter_type env
       |> Option.map ~f:(soften_hint param_user_attributes)
     in
+    if is_variadic && not (List.is_empty param_user_attributes) then
+      raise_parsing_error env (`Node node) SyntaxError.no_attributes_on_variadic_parameter;
     { param_hint
     ; param_user_attributes
     ; param_is_reference = is_reference

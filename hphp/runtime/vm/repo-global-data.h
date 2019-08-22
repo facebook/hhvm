@@ -138,6 +138,11 @@ struct Repo::GlobalData {
   bool ForbidDynamicCallsWithAttr = false;
 
   /*
+  * If set to true will raise warning on uses of HH\class_meth if arguments
+  * are not string/class constant followed by string.
+  */
+  bool WarnOnNonLiteralClsMeth = false;
+  /*
    * Should the runtime emit notices whenever a builtin is called dynamically?
    */
   bool NoticeOnBuiltinDynamicCalls = false;
@@ -213,6 +218,7 @@ struct Repo::GlobalData {
       (ForbidDynamicCallsToInstMeth)
       (ForbidDynamicConstructs)
       (ForbidDynamicCallsWithAttr)
+      (WarnOnNonLiteralClsMeth)
       (NoticeOnBuiltinDynamicCalls)
       (Signature)
       (AbortBuildOnVerifyError)

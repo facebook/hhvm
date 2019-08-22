@@ -455,6 +455,16 @@ enum class SpecialClsRef : uint8_t {
 #undef REF
 };
 
+#define CLS_METH_RESOLVE_OPS \
+  OP(NoWarn)               \
+  OP(Warn)
+
+enum class ClsMethResolveOp : uint8_t {
+#define OP(name) name,
+  CLS_METH_RESOLVE_OPS
+#undef OP
+};
+
 constexpr uint32_t kMaxConcatN = 4;
 
 //  name             immediates        inputs           outputs     flags
@@ -615,7 +625,8 @@ constexpr uint32_t kMaxConcatN = 4;
                                                                         \
   O(ResolveFunc,     ONE(SA),          NOV,             ONE(CV),    NF) \
   O(ResolveObjMethod,NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(ResolveClsMethod,NA,               TWO(CV,CV),      ONE(CV),    NF) \
+  O(ResolveClsMethod,ONE(OA(ClsMethResolveOp)),                         \
+                                       TWO(CV,CV),      ONE(CV),    NF) \
   O(NewObj,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(NewObjR,         NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(NewObjD,         ONE(SA),          NOV,             ONE(CV),    NF) \
@@ -912,6 +923,7 @@ const char* subopToName(TypeStructResolveOp);
 const char* subopToName(ContCheckOp);
 const char* subopToName(CudOp);
 const char* subopToName(SpecialClsRef);
+const char* subopToName(ClsMethResolveOp);
 
 /*
  * Returns true iff the given SubOp is in the valid range for its type.

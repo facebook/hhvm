@@ -3403,14 +3403,23 @@ and emit_special_function env pos annot id (args : Tast.expr list) (uargs : Tast
 
   | "hh\\class_meth", _ ->
       begin match args with
-        | [class_name; method_name] ->
+        | [(_, A.Class_const _) as class_name; (_, A.String _) as method_name]
+        | [(_, A.String _) as class_name; (_, A.String _) as method_name] ->
           Some (gather [
             emit_expr env class_name;
             emit_expr env method_name;
             if Hhbc_options.emit_cls_meth_pointers !Hhbc_options.compiler_options
-            then instr_resolve_cls_method
+            then instr_resolve_cls_method NoWarn
             else instr (ILitConst (NewVArray 2));
           ])
+        | [class_name; method_name] ->
+          Some (gather [
+              emit_expr env class_name;
+              emit_expr env method_name;
+              if Hhbc_options.emit_cls_meth_pointers !Hhbc_options.compiler_options
+              then instr_resolve_cls_method Warn
+              else instr (ILitConst (NewVArray 2));
+            ])
         | _ ->
           Emit_fatal.raise_fatal_runtime pos
             ("class_meth() expects exactly 2 parameters, " ^

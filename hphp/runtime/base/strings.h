@@ -129,6 +129,10 @@ auto constexpr RECORD_NOT_SUPPORTED =
 auto constexpr CALL_ILLFORMED_FUNC =
   "calling an ill-formed function pointer without resolved "
   "class/object pointer";
+auto constexpr WARN_CLS_METH_WRONG_ARGS =
+  "Arguments to class_meth() must be a literal class name "
+  "followed by a literal string "
+  "that refers to a static method on that class";
 
 auto constexpr CLSMETH_COMPAT_IS_ARR = "is_array() called on clsmeth";
 auto constexpr CLSMETH_COMPAT_IS_VEC = "is_vec() called on clsmeth";

@@ -155,6 +155,10 @@ type typestruct_resolve_op =
   | Resolve
   | DontResolve
 
+type cls_meth_resolve_op =
+  | Warn
+  | NoWarn
+
 type has_generics_op =
   | NoGenerics
   | MaybeGenerics
@@ -258,7 +262,7 @@ type instruct_operator =
   | Fatal of FatalOp.t
   | ResolveFunc of function_id
   | ResolveObjMethod
-  | ResolveClsMethod
+  | ResolveClsMethod of cls_meth_resolve_op
 
 type switchkind =
   | Bounded

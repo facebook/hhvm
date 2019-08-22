@@ -927,12 +927,12 @@ NewDArray <capacity hint>    []  ->  [C:Arr]
 
 NewRecord <record-name><litstr id vector>    [C..C]  ->  [C:Rec]
 
-  New record. Creates a new record of the record type corresponding to the name 
-  in %1. The vector of litstr ids in %2 gives the field names to initialize. 
+  New record. Creates a new record of the record type corresponding to the name
+  in %1. The vector of litstr ids in %2 gives the field names to initialize.
   One initial value for each name is popped from the stack. This instruction
-  throws errors if the initial values do not match their corresponding 
-  type-hints or if a field in %2 is not declared in the record type or if any 
-  field declared in the record type is left uninitialized. 
+  throws errors if the initial values do not match their corresponding
+  type-hints or if a field in %2 is not declared in the record type or if any
+  field declared in the record type is left uninitialized.
 
 NewRecordArray <record-name><litstr id vector>    [C..C]  ->  [C:Arr]
 
@@ -3249,9 +3249,9 @@ DefTypeAlias <litstr id>   []  ->  []
 
 DefRecord <record id>    []  ->  []
 
-  Define record. Bind the record specified by %1. If the record specified by %1 
-  is already bound, this instruction does nothing. If another record or class 
-  or type alias is already bound to the associated name, this instruction throws 
+  Define record. Bind the record specified by %1. If the record specified by %1
+  is already bound, this instruction does nothing. If another record or class
+  or type alias is already bound to the associated name, this instruction throws
   a fatal error.
 
 13. Miscellaneous instructions
@@ -3529,11 +3529,14 @@ ResolveObjMethod [C C] -> [C]
   always $2. Fatal if the function resolves to a magic __call method. When
   resolution fails, raise an error.
 
-ResolveClsMethod [C C] -> [C]
+ResolveClsMethod <cls meth resolve op> [C C] -> [C]
 
   Resolve $1 as a class method of $2 to a method array, then push the array onto
   the top of stack. Fatal if there is an invoke name for PHP magic call. When
   resolution fails, raise an error.
+
+  If the cls meth resolve op is Warn, then raises warning about parameters used
+  in method not being string literals.
 
 14. Generator creation and execution
 ---------------------------------------

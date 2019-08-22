@@ -1126,6 +1126,7 @@ struct RuntimeOption {
    * __DynamicallyCallable attribute is present at declaration.         \
    */                                                                   \
   F(bool, ForbidDynamicCallsWithAttr, false)                            \
+  F(bool, WarnOnNonLiteralClsMeth, false)                               \
   /*                                                                    \
    * Control handling of out-of-range integer values in the compact     \
    * Thrift serializer.                                                 \

@@ -132,6 +132,10 @@ let string_of_typestruct_resolve_op = function
   | Resolve -> "Resolve"
   | DontResolve -> "DontResolve"
 
+let string_of_cls_meth_resolve_op = function
+  | Warn -> "Warn"
+  | NoWarn -> "NoWarn"
+
 let string_of_operator instruction =
   match instruction with
     | Concat -> "Concat"
@@ -190,7 +194,8 @@ let string_of_operator instruction =
     | H.Exit -> "Exit"
     | ResolveFunc id -> sep ["ResolveFunc"; string_of_function_id id]
     | ResolveObjMethod -> sep ["ResolveObjMethod"]
-    | ResolveClsMethod -> sep ["ResolveClsMethod"]
+    | ResolveClsMethod op ->
+      sep ["ResolveClsMethod"; string_of_cls_meth_resolve_op op]
     | Fatal op -> sep ["Fatal"; FatalOp.to_string op]
 
 let string_of_get x =

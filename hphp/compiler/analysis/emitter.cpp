@@ -154,6 +154,8 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   gd.ForbidDynamicCallsToInstMeth =
     RuntimeOption::EvalForbidDynamicCallsToInstMeth;
   gd.ForbidDynamicConstructs     = RuntimeOption::EvalForbidDynamicConstructs;
+  gd.WarnOnNonLiteralClsMeth =
+    RuntimeOption::EvalWarnOnNonLiteralClsMeth;
   gd.EnableArgsInBacktraces      = RuntimeOption::EnableArgsInBacktraces;
   gd.ArrayProvenance             = RuntimeOption::EvalArrayProvenance;
   gd.NoticeOnBuiltinDynamicCalls =

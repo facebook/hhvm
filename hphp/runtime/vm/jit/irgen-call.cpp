@@ -1480,11 +1480,18 @@ void emitResolveObjMethod(IRGS& env) {
 const StaticString s_resolveClsMagicCall(
   "Unable to resolve magic call for class_meth()");
 
-void emitResolveClsMethod(IRGS& env) {
+void emitResolveClsMethod(IRGS& env, ClsMethResolveOp op) {
   auto const classNameTmp = topC(env, BCSPRelOffset { 1 });
   auto const methodNameTmp = topC(env, BCSPRelOffset { 0 });
   if (!classNameTmp->hasConstVal(TStr) || !methodNameTmp->hasConstVal(TStr)) {
     return interpOne(env);
+  } else if (op == ClsMethResolveOp::Warn &&
+      RuntimeOption::EvalWarnOnNonLiteralClsMeth) {
+    gen(
+      env,
+      RaiseWarning,
+      cns(env, makeStaticString(Strings::WARN_CLS_METH_WRONG_ARGS))
+    );
   }
   auto className = classNameTmp->strVal();
   auto methodName = methodNameTmp->strVal();

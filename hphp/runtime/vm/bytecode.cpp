@@ -193,6 +193,7 @@ inline const char* prettytype(CudOp) { return "CudOp"; }
 inline const char* prettytype(ContCheckOp) { return "ContCheckOp"; }
 inline const char* prettytype(SpecialClsRef) { return "SpecialClsRef"; }
 inline const char* prettytype(CollectionType) { return "CollectionType"; }
+inline const char* prettytype(ClsMethResolveOp) { return "ClsMethResolveOp"; }
 
 // load a T value from *pc without incrementing
 template<class T> T peek(PC pc) {
@@ -5118,9 +5119,14 @@ void resolveMethodImpl(Cell* c1, Cell* c2) {
 }
 }
 
-OPTBLD_INLINE void iopResolveClsMethod() {
+OPTBLD_INLINE void iopResolveClsMethod(ClsMethResolveOp op) {
   Cell* func = vmStack().topC();
   Cell* cls = vmStack().indC(1);
+  if (op == ClsMethResolveOp::Warn &&
+      RuntimeOption::EvalWarnOnNonLiteralClsMeth) {
+    raise_warning(Strings::WARN_CLS_METH_WRONG_ARGS);
+  }
+
   if (!isStringType(func->m_type) || !isStringType(cls->m_type)) {
     raise_error(!isStringType(func->m_type) ?
       Strings::METHOD_NAME_MUST_BE_STRING : "class name must be a string.");

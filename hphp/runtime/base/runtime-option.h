@@ -50,6 +50,9 @@ struct IniSettingMap;
 constexpr int kDefaultInitialStaticStringTableSize = 500000;
 
 enum class JitSerdesMode {
+  // NB: if changing the encoding here, make sure to update isJitSerializing()
+  // and isJitDeserializing() as needed.
+  //
   // Bit 0: serialize
   // Bit 1: deserialize
   Off                   = 0x0,
@@ -61,14 +64,6 @@ enum class JitSerdesMode {
   DeserializeAndDelete  = 0xe,          // 01110
   DeserializeAndExit    = 0x12,         // 10010
 };
-
-inline constexpr bool isJitDeserializing(JitSerdesMode m) {
-  return static_cast<std::underlying_type<JitSerdesMode>::type>(m) & 0x2;
-}
-
-inline constexpr bool isJitSerializing(JitSerdesMode m) {
-  return static_cast<std::underlying_type<JitSerdesMode>::type>(m) & 0x1;
-}
 
 struct RepoOptions {
   RepoOptions(const RepoOptions&) = default;
@@ -1329,6 +1324,16 @@ public:
   static bool SetProfileNullThisObject;
 };
 static_assert(sizeof(RuntimeOption) == 1, "no instance variables");
+
+inline bool isJitDeserializing() {
+  auto const m = RuntimeOption::EvalJitSerdesMode;
+  return static_cast<std::underlying_type<JitSerdesMode>::type>(m) & 0x2;
+}
+
+inline bool isJitSerializing() {
+  auto const m = RuntimeOption::EvalJitSerdesMode;
+  return static_cast<std::underlying_type<JitSerdesMode>::type>(m) & 0x1;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

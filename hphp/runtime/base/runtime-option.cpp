@@ -982,7 +982,7 @@ static inline uint32_t hotTextHugePagesDefault() {
 }
 
 static inline std::string reorderPropsDefault() {
-  if (isJitDeserializing(RuntimeOption::EvalJitSerdesMode)) {
+  if (isJitDeserializing()) {
     return "hotness";
   }
   return debug ? "alphabetical" : "";
@@ -1746,7 +1746,7 @@ void RuntimeOption::Load(
     // few places.  The config file should never need to explicitly set
     // DumpPreciseProfileData to true.
     auto const couldDump = !EvalJitSerdesFile.empty() &&
-      (isJitSerializing(EvalJitSerdesMode) ||
+      (isJitSerializing() ||
        (EvalJitSerdesMode == JitSerdesMode::DeserializeOrGenerate));
     Config::Bind(DumpPreciseProfData, ini, config,
                  "Eval.DumpPreciseProfData", couldDump);

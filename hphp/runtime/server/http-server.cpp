@@ -431,7 +431,7 @@ void HttpServer::runOrExitProcess() {
     Lock lock(this);
     BootStats::done();
     // Play extended warmup requests after server starts running.
-    if (isJitSerializing(RuntimeOption::EvalJitSerdesMode) &&
+    if (isJitSerializing() &&
         RuntimeOption::ServerExtendedWarmupThreadCount > 0 &&
         !RuntimeOption::ServerExtendedWarmupRequests.empty()) {
       auto const threadCount = RuntimeOption::ServerExtendedWarmupThreadCount;

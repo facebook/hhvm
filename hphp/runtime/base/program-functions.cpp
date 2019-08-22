@@ -2423,7 +2423,7 @@ void hphp_process_init() {
       !RuntimeOption::EvalJitSerdesFile.empty() &&
       jit::mcgen::retranslateAllEnabled()) {
     auto const mode = RuntimeOption::EvalJitSerdesMode;
-    if (isJitDeserializing(RuntimeOption::EvalJitSerdesMode)) {
+    if (isJitDeserializing()) {
       if (RuntimeOption::ServerExecutionMode()) {
         Logger::FInfo("JitDeserializeFrom: {}",
                       RuntimeOption::EvalJitSerdesFile);

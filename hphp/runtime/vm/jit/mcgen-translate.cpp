@@ -206,7 +206,7 @@ void retranslateAll() {
     auto const mode = RuntimeOption::EvalJitSerdesMode;
     if (RuntimeOption::RepoAuthoritative &&
         !RuntimeOption::EvalJitSerdesFile.empty() &&
-        isJitSerializing(mode)) {
+        isJitSerializing()) {
       if (serverMode) Logger::Info("retranslateAll: serializing profile data");
       std::string errMsg;
       VMWorker([&errMsg] () {
@@ -237,7 +237,7 @@ void retranslateAll() {
     profData()->setFuncOrder(std::move(result.first));
     profData()->setBaseProfCount(result.second);
   } else {
-    assertx(isJitDeserializing(RuntimeOption::EvalJitSerdesMode));
+    assertx(isJitDeserializing());
   }
   setBaseInliningProfCount(globalProfData()->baseProfCount());
   auto const& sortedFuncs = globalProfData()->sortedFuncs();

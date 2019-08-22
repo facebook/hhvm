@@ -196,8 +196,7 @@ PropInfo getPropertyOffset(IRGS& env,
   // profile property accesses.  We only do this here, when we can resolve the
   // property at JIT time, in order to make profiling simpler and cheaper.  And
   // this should cover the vast majority of the property accesses anyway.
-  if (env.context.kind == TransKind::Profile &&
-      isJitSerializing(RuntimeOption::EvalJitSerdesMode)) {
+  if (env.context.kind == TransKind::Profile && isJitSerializing()) {
     gen(env, ProfileProp, cns(env, prop.baseCls->name()), cns(env, name));
   }
 

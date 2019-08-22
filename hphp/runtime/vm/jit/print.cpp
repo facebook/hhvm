@@ -285,11 +285,13 @@ dynamic getIRInstruction(const IRInstruction& inst,
   const Block* taken = inst.taken();
   const dynamic takenObj = taken ? getLabel(taken) : dynamic(nullptr);
 
+  auto const offset = inst.marker().bcOff() + inst.iroff();
   result.update(dynamic::merge(getOpcode(&inst, guards),
                                dynamic::object("id", id)
                                               ("taken", takenObj)
                                               ("srcs", getSrcs(&inst))
-                                              ("dsts", getDsts(&inst))));
+                                              ("dsts", getDsts(&inst))
+                                              ("offset", offset)));
   return result;
 }
 
@@ -306,10 +308,48 @@ dynamic getTCRange(const AreaIndex area,
                         ("disasm", disasmStr.str());
 }
 
+namespace {
+struct TargetProfileVisitor {
+  explicit TargetProfileVisitor(const TransContext& ctx) : ctx(ctx) {}
+
+  template<typename T>
+  dynamic getProfileDynamic(const rds::Profile<T>& prof,
+                            const dynamic& linkObj) {
+    return dynamic::object("offset", prof.bcOff)
+                          ("name", folly::sformat("{}", prof.name))
+                          ("data", linkObj);
+  }
+
+  dynamic operator() (const rds::Profile<jit::SwitchProfile>& prof) {
+    auto const link = rds::bind<jit::SwitchProfile, rds::Mode::Local>(prof);
+    auto const func = ctx.initSrcKey.func();
+    assert(func->contains(prof.bcOff));
+    auto const funcBCOffset = func->unit()->at(func->base() + prof.bcOff);
+    auto const bcSize = getImmVector(funcBCOffset).size();
+    return getProfileDynamic(prof, link.get()->toDynamic(bcSize));
+  }
+
+  template<typename T>
+  dynamic operator() (const rds::Profile<T>& prof) {
+    auto const link = rds::bind<T, rds::Mode::Local>(prof);
+    return getProfileDynamic(prof, link.get()->toDynamic());;
+  }
+
+  template<typename T>
+  dynamic operator() (T&&) {
+    assertx(false);
+    return dynamic();
+  }
+
+  const TransContext& ctx;
+};
+}
+
 dynamic getBlock(const Block* block,
                  const TransKind kind,
                  const AsmInfo* asmInfo,
-                 const GuardConstraints* guards) {
+                 const GuardConstraints* guards,
+                 const TransContext& ctx) {
   dynamic result = dynamic::object;
 
   result["label"] = getLabel(block);
@@ -449,6 +489,16 @@ dynamic getBlock(const Block* block,
     }
   }
 
+  for (auto& inst : result["instrs"]) {
+    auto const& offset = inst["offset"].asInt();
+    dynamic profileObjs = dynamic::array;
+    for (auto const& key : ctx.profileKeys) {
+      auto const profile = boost::apply_visitor(TargetProfileVisitor(ctx), key);
+      if (profile["offset"].asInt() == offset) profileObjs.push_back(profile);
+    }
+    inst["profileData"] = profileObjs;
+  }
+
   return result;
 }
 
@@ -461,55 +511,12 @@ dynamic getSrcKey(const SrcKey& sk) {
                         ("hasThis", sk.hasThis());
 }
 
-namespace {
-struct TargetProfileVisitor {
-  explicit TargetProfileVisitor(const TransContext& ctx) : ctx(ctx) {}
-
-  template<typename T>
-  dynamic getProfileDynamic(const rds::Profile<T>& prof,
-                            const dynamic& linkObj) {
-    return dynamic::object("offset", prof.bcOff)
-                          ("name", folly::sformat("{}", prof.name))
-                          ("data", linkObj);
-  }
-
-  dynamic operator() (const rds::Profile<jit::SwitchProfile>& prof) {
-    auto const link = rds::bind<jit::SwitchProfile, rds::Mode::Local>(prof);
-    auto const func = ctx.initSrcKey.func();
-    assert(func->contains(prof.bcOff));
-    auto const funcBCOffset = func->unit()->at(func->base() + prof.bcOff);
-    auto const bcSize = getImmVector(funcBCOffset).size();
-    return getProfileDynamic(prof, link.get()->toDynamic(bcSize));
-  }
-
-  template<typename T>
-  dynamic operator() (const rds::Profile<T>& prof) {
-    auto const link = rds::bind<T, rds::Mode::Local>(prof);
-    return getProfileDynamic(prof, link.get()->toDynamic());;
-  }
-
-  template<typename T>
-  dynamic operator() (T&&) {
-    assertx(false);
-    return dynamic();
-  }
-
-  const TransContext& ctx;
-};
-}
-
 dynamic getTransContext(const TransContext& ctx) {
-  dynamic profileData = dynamic::array;
-  for (auto const& key : ctx.profileKeys) {
-    profileData.push_back(boost::apply_visitor(TargetProfileVisitor(ctx), key));
-  }
-
   auto const func = ctx.initSrcKey.func();
   return dynamic::object("kind", show(ctx.kind))
                         ("id", ctx.transID)
                         ("optIndex", ctx.optIndex)
                         ("srcKey", getSrcKey(ctx.initSrcKey))
-                        ("profileData", profileData)
                         ("funcName", func->fullDisplayName()->data())
                         ("sourceFile", func->filename()->data())
                         ("startLine", func->line1())
@@ -521,8 +528,9 @@ dynamic getUnit(const IRUnit& unit,
                 const GuardConstraints* guards) {
   dynamic result = dynamic::object;
 
-  auto const kind = unit.context().kind;
-  result["translation"] = getTransContext(unit.context());
+  auto const& ctx = unit.context();
+  auto const kind = ctx.kind;
+  result["translation"] = getTransContext(ctx);
 
   auto blocks = rpoSortCfg(unit);
   // Partition into main, cold and frozen, without changing relative order.
@@ -548,7 +556,7 @@ dynamic getUnit(const IRUnit& unit,
     }
 
     blockObjs.push_back(dynamic::merge(
-                          getBlock(*it, kind, asmInfo, guards),
+                          getBlock(*it, kind, asmInfo, guards, ctx),
                           dynamic::object("area", areaAsString(currArea))));
   }
   result["blocks"] = blockObjs;

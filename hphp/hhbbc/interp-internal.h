@@ -1139,7 +1139,17 @@ bool canSkipMergeOnConstProp(ISS&env, Type tcls, SString propName) {
 
 folly::Optional<arrprov::Tag> provTagHere(ISS& env) {
   if (!RuntimeOption::EvalArrayProvenance) return folly::none;
-  return arrprov::Tag{env.ctx.unit->filename, env.srcLoc};
+  auto const idx = env.srcLoc;
+  // We might have a negative index into the srcLoc table if the
+  // bytecode was copied from another unit, e.g. from a trait ${X}inits
+  if (idx < 0) return arrprov::Tag{env.ctx.unit->filename, -1};
+  auto const unit = env.ctx.func && env.ctx.func->originalUnit
+    ? env.ctx.func->originalUnit
+    : env.ctx.unit;
+  return arrprov::Tag{
+    unit->filename,
+    static_cast<int>(unit->srcLocs[idx].start.line)
+  };
 }
 
 /*

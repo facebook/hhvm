@@ -2139,7 +2139,7 @@ let snot_found_hint = function
   | `no_hint ->
       ""
   | `closest (_pos, v) ->
-      Printf.sprintf " (did you mean method '%s'?)" v
+      Printf.sprintf " (did you mean instance method '%s'?)" v
   | `did_you_mean (_pos, v) ->
      Printf.sprintf " (did you mean '%s'?)" v
 

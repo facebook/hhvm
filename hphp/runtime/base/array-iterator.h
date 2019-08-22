@@ -81,11 +81,9 @@ struct ArrayIter {
   explicit ArrayIter(const ArrayData* data);
   ArrayIter(const ArrayData* data, NoInc) {
     setArrayData<false>(data);
-    if (data) m_pos = data->iter_begin();
   }
   ArrayIter(const ArrayData* data, Local) {
     setArrayData<true>(data);
-    if (data) m_pos = data->iter_begin();
   }
   explicit ArrayIter(const MixedArray*) = delete;
   explicit ArrayIter(const Array& array);
@@ -117,6 +115,10 @@ struct ArrayIter {
     destruct();
   }
 
+  // Pass a non-NULL ad to checkInvariants iff this iterator is local.
+  // These invariants hold as long as the iterator hasn't yet reached the end.
+  bool checkInvariants(const ArrayData* ad = nullptr) const;
+
   void reset() {
     destruct();
     m_data = nullptr;
@@ -125,60 +127,42 @@ struct ArrayIter {
   explicit operator bool() { return !end(); }
   void operator++() { next(); }
   bool end() const {
-    if (LIKELY(hasArrayData())) {
-      auto* ad = getArrayData();
-      return !ad || m_pos == ad->iter_end();
-    }
-    return endHelper();
+    if (UNLIKELY(!hasArrayData())) return endHelper();
+    auto const ad = getArrayData();
+    return ad == nullptr || m_pos == ad->iter_end();
   }
   bool endHelper() const;
 
   void next() {
-    if (LIKELY(hasArrayData())) {
-      const ArrayData* ad = getArrayData();
-      assertx(ad);
-      assertx(m_pos != ad->iter_end());
-      m_pos = ad->iter_advance(m_pos);
-      return;
-    }
-    nextHelper();
+    assertx(checkInvariants());
+    if (UNLIKELY(!hasArrayData())) return nextHelper();
+    m_pos = getArrayData()->iter_advance(m_pos);
   }
   void nextHelper();
 
   bool nextLocal(const ArrayData* ad) {
-    assertx(ad);
-    assertx(!getArrayData());
-    assertx(m_pos != ad->iter_end());
+    assertx(checkInvariants(ad));
     m_pos = ad->iter_advance(m_pos);
     return m_pos == ad->iter_end();
   }
 
   Variant first() {
-    if (LIKELY(hasArrayData())) {
-      const ArrayData* ad = getArrayData();
-      assertx(ad);
-      assertx(m_pos != ad->iter_end());
-      return ad->getKey(m_pos);
-    }
-    return firstHelper();
+    if (UNLIKELY(!hasArrayData())) return firstHelper();
+    return getArrayData()->getKey(m_pos);
   }
   Variant firstHelper();
 
   Variant firstLocal(const ArrayData* ad) const {
-    assertx(!getArrayData());
-    assertx(ad && m_pos != ad->iter_end());
+    assertx(getArrayData() == nullptr);
     return ad->getKey(m_pos);
   }
 
   TypedValue nvFirst() const {
-    auto const ad = getArrayData();
-    assertx(ad && m_pos != ad->iter_end());
-    return ad->nvGetKey(m_pos);
+    return getArrayData()->nvGetKey(m_pos);
   }
 
   TypedValue nvFirstLocal(const ArrayData* ad) const {
-    assertx(!getArrayData());
-    assertx(ad && m_pos != ad->iter_end());
+    assertx(getArrayData() == nullptr);
     return ad->nvGetKey(m_pos);
   }
 
@@ -188,8 +172,7 @@ struct ArrayIter {
   Variant second();
 
   Variant secondLocal(const ArrayData* ad) const {
-    assertx(!getArrayData());
-    assertx(ad && m_pos != ad->iter_end());
+    assertx(getArrayData() == nullptr);
     return ad->getValue(m_pos);
   }
 
@@ -213,14 +196,11 @@ struct ArrayIter {
 
   // Inline version of secondRef.  Only for use in iterator helpers.
   tv_rval nvSecond() const {
-    auto const ad = getArrayData();
-    assertx(ad && m_pos != ad->iter_end());
-    return ad->rvalPos(m_pos);
+    return getArrayData()->rvalPos(m_pos);
   }
 
   tv_rval nvSecondLocal(const ArrayData* ad) const {
-    assertx(!getArrayData());
-    assertx(ad && m_pos != ad->iter_end());
+    assertx(getArrayData() == nullptr);
     return ad->rvalPos(m_pos);
   }
 
@@ -285,20 +265,25 @@ private:
     assertx((intptr_t(ad) & 1) == 0);
     assertx(!Local || ad);
     m_data = Local ? nullptr : ad;
-    m_nextHelperIdx = IterNextIndex::ArrayMixed;
+    setArrayNext(IterNextIndex::Array);
     if (ad != nullptr) {
       if (ad->hasPackedLayout()) {
-        m_nextHelperIdx = IterNextIndex::ArrayPacked;
-      } else if (!ad->hasMixedLayout()) {
-        m_nextHelperIdx = IterNextIndex::Array;
+        setArrayNext(IterNextIndex::ArrayPacked);
+      } else if (ad->hasMixedLayout()) {
+        setArrayNext(IterNextIndex::ArrayMixed);
       }
+      m_pos = ad->iter_begin();
     }
   }
 
   void setObject(ObjectData* obj) {
     assertx((intptr_t(obj) & 1) == 0);
     m_obj = (ObjectData*)((intptr_t)obj | 1);
-    m_nextHelperIdx = IterNextIndex::Object;
+    m_itypeAndNextHelperIdx =
+      static_cast<uint16_t>(IterNextIndex::Object) << 8 |
+      static_cast<uint16_t>(ArrayIter::TypeIterator);
+    assertx(m_itype == ArrayIter::TypeIterator);
+    assertx(m_nextHelperIdx == IterNextIndex::Object);
   }
 
   void setArrayNext(IterNextIndex index) {
@@ -309,7 +294,8 @@ private:
     assertx(m_nextHelperIdx == index);
   }
 
-  // The iterator base. Will be null for local iterators.
+  // The iterator base. Will be null for local iterators. We set the lowest
+  // bit for object iterators to distinguish them from array iterators.
   union {
     const ArrayData* m_data;
     ObjectData* m_obj;
@@ -324,8 +310,7 @@ private:
       ptrdiff_t m_end_diff;
     };
   };
-  // This is unioned so new_iter_array can initialize it more
-  // efficiently.
+  // This field is a union so new_iter_array can set it in one instruction.
   union {
     struct {
       Type m_itype;

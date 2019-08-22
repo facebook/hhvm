@@ -248,7 +248,6 @@ DEBUG_ONLY bool throwable_has_expected_props() {
 
 const StaticString s_hphpd_break("hphpd_break");
 const StaticString s_fb_enable_code_coverage("fb_enable_code_coverage");
-const StaticString s_xdebug_start_code_coverage("xdebug_start_code_coverage");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -460,8 +459,7 @@ void unwindBuiltinFrame() {
   auto& fp = vmfp();
 
   assertx(fp->m_func->name()->isame(s_hphpd_break.get()) ||
-         fp->m_func->name()->isame(s_fb_enable_code_coverage.get()) ||
-         fp->m_func->name()->isame(s_xdebug_start_code_coverage.get()));
+          fp->m_func->name()->isame(s_fb_enable_code_coverage.get()));
 
   // Free any values that may be on the eval stack. We know it can't be
   // a resumable body because it's a builtin frame.

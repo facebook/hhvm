@@ -254,7 +254,7 @@ ALWAYS_INLINE local_var decode_local(PC& pc) {
 
 ALWAYS_INLINE Iter* decode_iter(PC& pc) {
   auto ia = decode_iva(pc);
-  return frame_iter(vmfp(), ia);
+  return frame_iter(vmfp(), ia)->escalate();
 }
 
 template<typename T>
@@ -2800,7 +2800,7 @@ OPTBLD_INLINE void iopSelect() {
 OPTBLD_INLINE
 void iopIterBreak(PC& pc, PC targetpc, const IterTable& iterTab) {
   for (auto const& ent : iterTab) {
-    auto iter = frame_iter(vmfp(), ent.id);
+    auto iter = frame_iter(vmfp(), ent.id)->escalate();
     switch (ent.kind) {
       case KindOfIter:  iter->free();  break;
       case KindOfLIter: iter->free();  break;

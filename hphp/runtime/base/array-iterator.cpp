@@ -78,8 +78,7 @@ ArrayIter::ArrayIter(const Variant& v) {
 ArrayIter::ArrayIter(const ArrayIter& iter) {
   m_data = iter.m_data;
   m_pos = iter.m_pos;
-  m_itype = iter.m_itype;
-  m_nextHelperIdx = iter.m_nextHelperIdx;
+  m_itypeAndNextHelperIdx = iter.m_itypeAndNextHelperIdx;
   if (hasArrayData()) {
     const ArrayData* ad = getArrayData();
     if (ad) const_cast<ArrayData*>(ad)->incRefCount();
@@ -177,8 +176,7 @@ ArrayIter& ArrayIter::operator=(const ArrayIter& iter) {
   reset();
   m_data = iter.m_data;
   m_pos = iter.m_pos;
-  m_itype = iter.m_itype;
-  m_nextHelperIdx = iter.m_nextHelperIdx;
+  m_itypeAndNextHelperIdx = iter.m_itypeAndNextHelperIdx;
   if (hasArrayData()) {
     const ArrayData* ad = getArrayData();
     if (ad) const_cast<ArrayData*>(ad)->incRefCount();
@@ -194,8 +192,7 @@ ArrayIter& ArrayIter::operator=(ArrayIter&& iter) {
   reset();
   m_data = iter.m_data;
   m_pos = iter.m_pos;
-  m_itype = iter.m_itype;
-  m_nextHelperIdx = iter.m_nextHelperIdx;
+  m_itypeAndNextHelperIdx = iter.m_itypeAndNextHelperIdx;
   iter.m_data = nullptr;
   return *this;
 }
@@ -248,6 +245,15 @@ tv_rval ArrayIter::secondRvalPlus() {
 }
 
 //////////////////////////////////////////////////////////////////////
+
+Iter* Iter::escalate() {
+  if (arr().m_nextHelperIdx == IterNextIndex::ArrayMixedNoTombstones) {
+    auto const base = MixedArray::elmOff(0);
+    arr().m_pos = (arr().m_pos_diff - base) / sizeof(MixedArray::Elm);
+    arr().setArrayNext(IterNextIndex::ArrayMixed);
+  }
+  return this;
+}
 
 template <bool Local>
 bool Iter::init(TypedValue* c1) {
@@ -420,37 +426,26 @@ inline void liter_key_cell_local_impl(Iter* iter,
 
 }
 
-static NEVER_INLINE
-int64_t iter_next_free_packed(Iter* iter, ArrayData* arr) {
+NEVER_INLINE int64_t iter_next_free_packed(Iter* iter, ArrayData* arr) {
   assertx(arr->decWillRelease());
   assertx(arr->hasPackedLayout());
-  // Use non-specialized release call so ArrayTracer can track its destruction
-  arr->release();
-  if (debug) {
-    iter->arr().setIterType(ArrayIter::TypeUndefined);
-  }
+  PackedArray::Release(arr);
+  if (debug) iter->arr().setIterType(ArrayIter::TypeUndefined);
   return 0;
 }
 
-static NEVER_INLINE
-int64_t iter_next_free_mixed(Iter* iter, ArrayData* arr) {
+NEVER_INLINE int64_t iter_next_free_mixed(Iter* iter, ArrayData* arr) {
   assertx(arr->hasMixedLayout());
   assertx(arr->decWillRelease());
-  // Use non-specialized release call so ArrayTracer can track its destruction
-  arr->release();
-  if (debug) {
-    iter->arr().setIterType(ArrayIter::TypeUndefined);
-  }
+  MixedArray::Release(arr);
+  if (debug) iter->arr().setIterType(ArrayIter::TypeUndefined);
   return 0;
 }
 
-NEVER_INLINE
-static int64_t iter_next_free_apc(Iter* iter, APCLocalArray* arr) {
+NEVER_INLINE int64_t iter_next_free_apc(Iter* iter, APCLocalArray* arr) {
   assertx(arr->decWillRelease());
   APCLocalArray::Release(arr->asArrayData());
-  if (debug) {
-    iter->arr().setIterType(ArrayIter::TypeUndefined);
-  }
+  if (debug) iter->arr().setIterType(ArrayIter::TypeUndefined);
   return 0;
 }
 
@@ -503,9 +498,8 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
         if (ad->hasMixedLayout()) return iter_next_free_mixed(dest, ad);
       }
       ad->decRefCount();
-    } else if (debug) {
-      dest->arr().setIterType(ArrayIter::TypeUndefined);
     }
+    if (debug) dest->arr().setIterType(ArrayIter::TypeUndefined);
     return 0;
   }
   if (UNLIKELY(isRefcountedType(valOut->m_type))) {
@@ -516,25 +510,25 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   // we do not need to adjust the refcount.
   auto& aiter = dest->arr();
   aiter.m_data = Local ? nullptr : ad;
-  auto const itypeU32 = static_cast<uint32_t>(ArrayIter::TypeArray);
 
   if (LIKELY(ad->hasPackedLayout())) {
     aiter.m_pos = 0;
-    aiter.m_itypeAndNextHelperIdx =
-      static_cast<uint32_t>(IterNextIndex::ArrayPacked) << 16 | itypeU32;
-    assertx(aiter.m_itype == ArrayIter::TypeArray);
-    assertx(aiter.m_nextHelperIdx == IterNextIndex::ArrayPacked);
+    aiter.setArrayNext(IterNextIndex::ArrayPacked);
     cellDup(*tvToCell(PackedArray::GetValueRef(ad, 0)), *valOut);
     return 1;
   }
 
   if (LIKELY(ad->hasMixedLayout())) {
     auto const mixed = MixedArray::asMixed(ad);
+    if (LIKELY(mixed->keyTypes() & MixedArray::kTombstoneKey) == 0) {
+      aiter.m_pos_diff = mixed->elmOff(0);
+      aiter.m_end_diff = mixed->elmOff(mixed->getSize());
+      aiter.setArrayNext(IterNextIndex::ArrayMixedNoTombstones);
+      mixed->getArrayElm(0, valOut);
+      return 1;
+    }
     aiter.m_pos = mixed->getIterBeginNotEmpty();
-    aiter.m_itypeAndNextHelperIdx =
-      static_cast<uint32_t>(IterNextIndex::ArrayMixed) << 16 | itypeU32;
-    assertx(aiter.m_itype == ArrayIter::TypeArray);
-    assertx(aiter.m_nextHelperIdx == IterNextIndex::ArrayMixed);
+    aiter.setArrayNext(IterNextIndex::ArrayMixed);
     mixed->getArrayElm(aiter.m_pos, valOut);
     return 1;
   }
@@ -557,9 +551,8 @@ int64_t new_iter_array_key(Iter*       dest,
         if (ad->hasMixedLayout()) return iter_next_free_mixed(dest, ad);
       }
       ad->decRefCount();
-    } else if (debug) {
-      dest->arr().setIterType(ArrayIter::TypeUndefined);
     }
+    if (debug) dest->arr().setIterType(ArrayIter::TypeUndefined);
     return 0;
   }
   if (UNLIKELY(isRefcountedType(valOut->m_type))) {
@@ -577,14 +570,10 @@ int64_t new_iter_array_key(Iter*       dest,
   // we do not need to adjust the refcount.
   auto& aiter = dest->arr();
   aiter.m_data = Local ? nullptr : ad;
-  auto const itypeU32 = static_cast<uint32_t>(ArrayIter::TypeArray);
 
   if (ad->hasPackedLayout()) {
     aiter.m_pos = 0;
-    aiter.m_itypeAndNextHelperIdx =
-      static_cast<uint32_t>(IterNextIndex::ArrayPacked) << 16 | itypeU32;
-    assertx(aiter.m_itype == ArrayIter::TypeArray);
-    assertx(aiter.m_nextHelperIdx == IterNextIndex::ArrayPacked);
+    aiter.setArrayNext(IterNextIndex::ArrayPacked);
     cellDup(*tvToCell(PackedArray::GetValueRef(ad, 0)), *valOut);
     keyOut->m_type = KindOfInt64;
     keyOut->m_data.num = 0;
@@ -593,11 +582,15 @@ int64_t new_iter_array_key(Iter*       dest,
 
   if (ad->hasMixedLayout()) {
     auto const mixed = MixedArray::asMixed(ad);
+    if (LIKELY(mixed->keyTypes() & MixedArray::kTombstoneKey) == 0) {
+      aiter.m_pos_diff = mixed->elmOff(0);
+      aiter.m_end_diff = mixed->elmOff(mixed->getSize());
+      aiter.setArrayNext(IterNextIndex::ArrayMixedNoTombstones);
+      mixed->getArrayElm(0, valOut, keyOut);
+      return 1;
+    }
     aiter.m_pos = mixed->getIterBeginNotEmpty();
-    aiter.m_itypeAndNextHelperIdx =
-      static_cast<uint32_t>(IterNextIndex::ArrayMixed) << 16 | itypeU32;
-    assertx(aiter.m_itype == ArrayIter::TypeArray);
-    assertx(aiter.m_nextHelperIdx == IterNextIndex::ArrayMixed);
+    aiter.setArrayNext(IterNextIndex::ArrayMixed);
     mixed->getArrayElm(aiter.m_pos, valOut, keyOut);
     return 1;
   }
@@ -781,9 +774,7 @@ static int64_t iter_next_apc_array(Iter* iter,
       }
       arr->decRefCount();
     }
-    if (debug) {
-      iter->arr().setIterType(ArrayIter::TypeUndefined);
-    }
+    if (debug) iter->arr().setIterType(ArrayIter::TypeUndefined);
     return 0;
   }
   arrIter->setPos(pos);
@@ -836,6 +827,85 @@ int64_t liter_next_cold_inc_val(Iter* it,
   return liter_next_cold(it, ad, valOut, keyOut);
 }
 
+NEVER_INLINE
+int64_t iter_next_mixed_no_tombstones_cold(Iter* it,
+                                           Cell* valOut,
+                                           Cell* keyOut,
+                                           MixedArrayElm* elm) {
+  auto const oldVal = *valOut;
+  cellDup(*tvToCell(elm->datatv()), *valOut);
+  tvDecRefGen(oldVal);
+  if (keyOut != nullptr) {
+    auto const oldKey = *keyOut;
+    cellCopy(elm->getKey(), *keyOut);
+    tvDecRefGen(oldKey);
+  }
+  return 1;
+}
+
+NEVER_INLINE
+int64_t iter_next_mixed_no_tombstones_cold_key(Iter* it,
+                                               Cell* valOut,
+                                               Cell* keyOut,
+                                               MixedArrayElm* elm) {
+  cellDup(*tvToCell(elm->datatv()), *valOut);
+  if (keyOut != nullptr) {
+    auto const oldKey = *keyOut;
+    cellCopy(elm->getKey(), *keyOut);
+    tvDecRefGen(oldKey);
+  }
+  return 1;
+}
+
+}
+
+template<bool HasKey, bool Local>
+ALWAYS_INLINE
+int64_t iter_next_mixed_no_tombstones(Iter* it,
+                                      Cell* valOut,
+                                      Cell* keyOut,
+                                      ArrayData* arr) {
+  assertx(arr->hasMixedLayout());
+  assertx(arr->size() == MixedArray::asMixed(arr)->iterLimit());
+
+  ArrayIter& iter = it->arr();
+  auto const diff = iter.m_pos_diff + sizeof(MixedArrayElm);
+  assertx((diff - MixedArray::elmOff(0)) % sizeof(MixedArrayElm) == 0);
+
+  if (diff >= iter.m_end_diff) {
+    if (!Local) {
+      if (UNLIKELY(arr->decWillRelease())) {
+        return iter_next_free_mixed(it, arr);
+      }
+      arr->decRefCount();
+    }
+    if (debug) iter.setIterType(ArrayIter::TypeUndefined);
+    return 0;
+  }
+
+  iter.m_pos_diff = diff;
+  auto const elm = reinterpret_cast<MixedArrayElm*>(uintptr_t(arr) + diff);
+
+  if (isRefcountedType(valOut->m_type)) {
+    if (UNLIKELY(valOut->m_data.pcnt->decWillRelease())) {
+      return iter_next_mixed_no_tombstones_cold(it, valOut, keyOut, elm);
+    }
+    valOut->m_data.pcnt->decRefCount();
+  }
+  if (HasKey && isRefcountedType(keyOut->m_type)) {
+    if (UNLIKELY(keyOut->m_data.pcnt->decWillRelease())) {
+      return iter_next_mixed_no_tombstones_cold_key(it, valOut, keyOut, elm);
+    }
+    keyOut->m_data.pcnt->decRefCount();
+  }
+
+  cellDup(*tvToCell(elm->datatv()), *valOut);
+  if (HasKey) cellCopy(elm->getKey(), *keyOut);
+  return 1;
+}
+
+namespace {
+
 template<bool HasKey, bool Local>
 ALWAYS_INLINE
 int64_t iter_next_mixed_impl(Iter* it,
@@ -854,9 +924,7 @@ int64_t iter_next_mixed_impl(Iter* it,
         }
         arr->decRefCount();
       }
-      if (debug) {
-        iter.setIterType(ArrayIter::TypeUndefined);
-      }
+      if (debug) iter.setIterType(ArrayIter::TypeUndefined);
       return 0;
     }
   } while (UNLIKELY(arr->isTombstone(pos)));
@@ -929,9 +997,7 @@ int64_t iter_next_packed_impl(Iter* it,
     }
     ad->decRefCount();
   }
-  if (debug) {
-    iter.setIterType(ArrayIter::TypeUndefined);
-  }
+  if (debug) iter.setIterType(ArrayIter::TypeUndefined);
   return 0;
 }
 
@@ -1082,6 +1148,31 @@ int64_t literNextKObject(Iter*, Cell*, Cell*, ArrayData*) {
   always_assert(false);
 }
 
+int64_t iterNextArrayMixedNoTombstones(Iter* it, Cell* valOut) {
+  TRACE(2, "iterNextArrayMixedNoTombstones: I %p\n", it);
+  auto const arr = const_cast<ArrayData*>(it->arr().getArrayData());
+  return iter_next_mixed_no_tombstones<false, false>(it, valOut, nullptr, arr);
+}
+
+int64_t iterNextKArrayMixedNoTombstones(Iter* it, Cell* valOut, Cell* keyOut) {
+  TRACE(2, "iterNextKArrayMixedNoTombstones: I %p\n", it);
+  auto const arr = const_cast<ArrayData*>(it->arr().getArrayData());
+  return iter_next_mixed_no_tombstones<true, false>(it, valOut, keyOut, arr);
+}
+
+int64_t literNextArrayMixedNoTombstones(Iter* it, Cell* valOut,
+                                        ArrayData* arr) {
+  TRACE(2, "literNextArrayMixedNoTombstones: I %p\n", it);
+  return iter_next_mixed_no_tombstones<false, true>(it, valOut, nullptr, arr);
+}
+
+int64_t literNextKArrayMixedNoTombstones(Iter* it, Cell* valOut,
+                                         Cell* keyOut, ArrayData* arr) {
+  TRACE(2, "literNextKArrayMixedNoTombstones: I %p\n", it);
+  auto const ad = MixedArray::asMixed(arr);
+  return iter_next_mixed_no_tombstones<true, true>(it, valOut, keyOut, ad);
+}
+
 using IterNextHelper  = int64_t (*)(Iter*, Cell*);
 using IterNextKHelper = int64_t (*)(Iter*, Cell*, Cell*);
 
@@ -1093,6 +1184,7 @@ const IterNextHelper g_iterNextHelpers[] = {
   &iterNextArrayMixed,
   &iterNextArray,
   &iterNextObject,
+  &iterNextArrayMixedNoTombstones,
 };
 
 const IterNextKHelper g_iterNextKHelpers[] = {
@@ -1100,6 +1192,7 @@ const IterNextKHelper g_iterNextKHelpers[] = {
   &iterNextKArrayMixed,
   &iterNextKArray,
   &iter_next_cold, // iterNextKObject
+  &iterNextKArrayMixedNoTombstones,
 };
 
 const LIterNextHelper g_literNextHelpers[] = {
@@ -1107,13 +1200,15 @@ const LIterNextHelper g_literNextHelpers[] = {
   &literNextArrayMixed,
   &literNextArray,
   &literNextObject,
+  &literNextArrayMixedNoTombstones,
 };
 
 const LIterNextKHelper g_literNextKHelpers[] = {
   &literNextKArrayPacked,
   &literNextKArrayMixed,
   &literNextKArray,
-  &literNextKObject
+  &literNextKObject,
+  &literNextKArrayMixedNoTombstones,
 };
 
 int64_t iter_next_ind(Iter* iter, Cell* valOut) {

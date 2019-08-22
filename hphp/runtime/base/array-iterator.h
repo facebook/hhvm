@@ -40,11 +40,14 @@ struct TypedValue;
 struct Iter;
 struct MixedArray;
 
-enum class IterNextIndex : uint16_t {
+enum class IterNextIndex : uint8_t {
   ArrayPacked = 0,
   ArrayMixed,
   Array,
   Object,
+  // Used by the JIT, for MixedArrays without tombstones. For these arrays,
+  // instead of tracking integer indices, we track element pointer offsets.
+  ArrayMixedNoTombstones,
 };
 
 /**
@@ -59,11 +62,10 @@ enum class IterNextIndex : uint16_t {
  * Iterator for an immutable array.
  */
 struct ArrayIter {
-  enum Type : uint16_t {
+  enum Type : uint8_t {
     TypeUndefined = 0,
     TypeArray,
-    TypeIterator  // for objects that implement Iterator or
-                  // IteratorAggregate
+    TypeIterator  // for objects that implement Iterator or IteratorAggregate
   };
 
   enum NoInc { noInc = 0 };
@@ -100,8 +102,7 @@ struct ArrayIter {
   ArrayIter(ArrayIter&& iter) noexcept {
     m_data = iter.m_data;
     m_pos = iter.m_pos;
-    m_itype = iter.m_itype;
-    m_nextHelperIdx = iter.m_nextHelperIdx;
+    m_itypeAndNextHelperIdx = iter.m_itypeAndNextHelperIdx;
     iter.m_data = nullptr;
   }
 
@@ -231,7 +232,7 @@ struct ArrayIter {
     assertx(hasArrayData());
     return m_data;
   }
-  ssize_t getPos() {
+  ssize_t getPos() const {
     return m_pos;
   }
   void setPos(ssize_t newPos) {
@@ -265,6 +266,9 @@ private:
   template<bool Local>
   friend int64_t new_iter_array_key(Iter*, ArrayData*, TypedValue*,
                                     TypedValue*);
+  template<bool HasKey, bool Local>
+  friend int64_t iter_next_mixed_no_tombstones(Iter*, Cell*, Cell*, ArrayData*);
+  friend struct Iter;
 
   template <bool incRef = true>
   void arrInit(const ArrayData* arr);
@@ -297,12 +301,29 @@ private:
     m_nextHelperIdx = IterNextIndex::Object;
   }
 
+  void setArrayNext(IterNextIndex index) {
+    m_itypeAndNextHelperIdx =
+      static_cast<uint16_t>(index) << 8 |
+      static_cast<uint16_t>(ArrayIter::TypeArray);
+    assertx(m_itype == ArrayIter::TypeArray);
+    assertx(m_nextHelperIdx == index);
+  }
+
+  // The iterator base. Will be null for local iterators.
   union {
     const ArrayData* m_data;
     ObjectData* m_obj;
   };
   // Current position. Beware that when m_data is null, m_pos is uninitialized.
-  ssize_t m_pos;
+  // Also, iterators with the ArrayMixedNoTombstones next helper use m_pos_diff
+  // and m_end_diff instead of m_pos.
+  union {
+    ssize_t m_pos;
+    struct {
+      ptrdiff_t m_pos_diff;
+      ptrdiff_t m_end_diff;
+    };
+  };
   // This is unioned so new_iter_array can initialize it more
   // efficiently.
   union {
@@ -316,14 +337,35 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * The iterator API used by the JIT. Unfortunately, this API is very leaky
+ * because we expose the ArrayIter through arr(). We could lock this API down
+ * considerably if we only used iterators for *IterInit* / *IterNext*.
+ *
+ * However, the "delegated continuations" feature also uses iterators, and it
+ * does so in a way that exposes many more of the details of ArrayIter. We'll
+ * have to change how that's implemented to place restrictions here.
+ */
 struct alignas(16) Iter {
   Iter() = delete;
   ~Iter() = delete;
   const ArrayIter& arr() const { return m_iter; }
         ArrayIter& arr()       { return m_iter; }
+
+  // Converts JIT-only ArrayMixedNoTombstones iters to an ArrayMixed iters.
+  // This method is needed so that we can use the native next / nextLocal.
+  Iter* escalate();
+
+  // Returns true if the base is non-empty.
+  // For non-local iterators, if init returns false, it dec-refs the base.
   template <bool Local> bool init(TypedValue* c1);
+
+  // These methods return true if the new position of the cursor is in bounds.
+  // For non-local iterators, if next returns false, it dec-refs the base.
   bool next();
   bool nextLocal(const ArrayData*);
+
+  // Dec-refs the base, for non-local iterators.
   void free();
 
 private:

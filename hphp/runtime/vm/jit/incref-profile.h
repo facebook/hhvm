@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_JIT_INCREF_PROFILE_H_
 #define incl_HPHP_JIT_INCREF_PROFILE_H_
 
+#include <folly/dynamic.h>
 #include <folly/Format.h>
 #include <folly/Optional.h>
 
@@ -60,6 +61,17 @@ struct IncRefProfile {
       persistent(), percent(persistent()),
       incremented,  percent(incremented)
     );
+  }
+
+  folly::dynamic toDynamic() const {
+    return folly::dynamic::object("total", total)
+                                 ("uncounted", uncounted())
+                                 ("percentUncounted", percent(uncounted()))
+                                 ("persistent", persistent())
+                                 ("percentPersistent", percent(persistent()))
+                                 ("incremented", incremented)
+                                 ("percentIncremented", percent(incremented))
+                                 ("profileType", "IncRefProfile");
   }
 
   // overflow handling isn't statistically correct; but its better

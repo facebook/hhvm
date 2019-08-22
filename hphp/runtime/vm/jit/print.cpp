@@ -31,15 +31,26 @@
 #include "hphp/util/text-color.h"
 #include "hphp/util/text-util.h"
 
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/stats.h"
 
+#include "hphp/runtime/vm/jit/array-access-profile.h"
+#include "hphp/runtime/vm/jit/array-kind-profile.h"
 #include "hphp/runtime/vm/jit/asm-info.h"
 #include "hphp/runtime/vm/jit/block.h"
+#include "hphp/runtime/vm/jit/call-target-profile.h"
 #include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/cls-cns-profile.h"
+#include "hphp/runtime/vm/jit/decref-profile.h"
+#include "hphp/runtime/vm/jit/incref-profile.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/guard-constraints.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/meth-profile.h"
+#include "hphp/runtime/vm/jit/release-vv-profile.h"
+#include "hphp/runtime/vm/jit/switch-profile.h"
+#include "hphp/runtime/vm/jit/type-profile.h"
 
 #include "hphp/ppc64-asm/asm-ppc64.h"
 #include "hphp/ppc64-asm/dasm-ppc64.h"
@@ -450,11 +461,59 @@ dynamic getSrcKey(const SrcKey& sk) {
                         ("hasThis", sk.hasThis());
 }
 
+namespace {
+struct TargetProfileVisitor {
+  explicit TargetProfileVisitor(const TransContext& ctx) : ctx(ctx) {}
+
+  template<typename T>
+  dynamic getProfileDynamic(const rds::Profile<T>& prof,
+                            const dynamic& linkObj) {
+    return dynamic::object("offset", prof.bcOff)
+                          ("name", folly::sformat("{}", prof.name))
+                          ("data", linkObj);
+  }
+
+  dynamic operator() (const rds::Profile<jit::SwitchProfile>& prof) {
+    auto const link = rds::bind<jit::SwitchProfile, rds::Mode::Local>(prof);
+    auto const func = ctx.initSrcKey.func();
+    assert(func->contains(prof.bcOff));
+    auto const funcBCOffset = func->unit()->at(func->base() + prof.bcOff);
+    auto const bcSize = getImmVector(funcBCOffset).size();
+    return getProfileDynamic(prof, link.get()->toDynamic(bcSize));
+  }
+
+  template<typename T>
+  dynamic operator() (const rds::Profile<T>& prof) {
+    auto const link = rds::bind<T, rds::Mode::Local>(prof);
+    return getProfileDynamic(prof, link.get()->toDynamic());;
+  }
+
+  template<typename T>
+  dynamic operator() (T&&) {
+    assertx(false);
+    return dynamic();
+  }
+
+  const TransContext& ctx;
+};
+}
+
 dynamic getTransContext(const TransContext& ctx) {
+  dynamic profileData = dynamic::array;
+  for (auto const& key : ctx.profileKeys) {
+    profileData.push_back(boost::apply_visitor(TargetProfileVisitor(ctx), key));
+  }
+
+  auto const func = ctx.initSrcKey.func();
   return dynamic::object("kind", show(ctx.kind))
                         ("id", ctx.transID)
                         ("optIndex", ctx.optIndex)
-                        ("srcKey", getSrcKey(ctx.initSrcKey));
+                        ("srcKey", getSrcKey(ctx.initSrcKey))
+                        ("profileData", profileData)
+                        ("funcName", func->fullDisplayName()->data())
+                        ("sourceFile", func->filename()->data())
+                        ("startLine", func->line1())
+                        ("endLine", func->line2());
 }
 
 dynamic getUnit(const IRUnit& unit,

@@ -22,6 +22,7 @@
 #include <sstream>
 #include <string>
 
+#include <folly/dynamic.h>
 #include <folly/Format.h>
 
 namespace HPHP { namespace jit {
@@ -38,6 +39,8 @@ struct SwitchProfile {
     for (int i = 0; i < nCases; ++i) folly::format(&out, "{},", cases()[i]);
     return out;
   }
+
+  folly::dynamic toDynamic(uint32_t size) const;
 
   static void reduce(SwitchProfile& a, const SwitchProfile& b, uint32_t size) {
     auto const nCases = size / sizeof(uint32_t);

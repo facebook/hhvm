@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_JIT_CALL_TARGET_PROFILE_H_
 #define incl_HPHP_JIT_CALL_TARGET_PROFILE_H_
 
+#include <folly/dynamic.h>
+
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/vm/func.h"
 
@@ -45,6 +47,7 @@ struct CallTargetProfile {
   const Func* choose(double& probability) const;
 
   std::string toString() const;
+  folly::dynamic toDynamic() const;
 
   void serialize(ProfDataSerializer&) const;
 

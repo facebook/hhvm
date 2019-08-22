@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/vm/jit/extra-data.h"
 
+#include <folly/dynamic.h>
 #include <folly/Optional.h>
 
 #include <cstdint>
@@ -71,6 +72,7 @@ struct ArrayAccessProfile {
                      const ArrayAccessProfile& r);
 
   std::string toString() const;
+  folly::dynamic toDynamic() const;
 
 private:
   /*

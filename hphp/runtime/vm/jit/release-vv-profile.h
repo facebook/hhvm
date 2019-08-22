@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_JIT_RELEASE_VV_PROFILE_H_
 #define incl_HPHP_JIT_RELEASE_VV_PROFILE_H_
 
+#include <folly/dynamic.h>
 #include <folly/Format.h>
 
 #include "hphp/runtime/vm/jit/target-profile.h"
@@ -28,6 +29,13 @@ namespace HPHP { namespace jit {
 struct ReleaseVVProfile {
   std::string toString() const {
     return folly::sformat("{}/{} released", released, executed);
+  }
+
+  folly::dynamic toDynamic() const {
+    return folly::dynamic::object("profileType", "ReleaseVVProfile")
+                                 ("released", released)
+                                 ("executed", executed)
+                                 ("percentReleased", percentReleased());
   }
 
   int percentReleased() const {

@@ -133,6 +133,30 @@ std::string MethProfile::toString() const {
   return std::string("none");
 }
 
+folly::dynamic MethProfile::toDynamic() const {
+  using folly::dynamic;
+
+  dynamic baseObj = dynamic::object("profileType", "MethProfile");
+  if (auto cls = uniqueClass()) {
+    return dynamic::merge(baseObj,
+                          dynamic::object("type", "uniqueClass")
+                                         ("name", cls->name()->slice()));
+  } else if (auto meth = uniqueMeth()) {
+    return dynamic::merge(baseObj,
+                          dynamic::object("type", "uniqueMeth")
+                                         ("name", meth->fullName()->slice()));
+  } else if (auto meth = baseMeth()) {
+    return dynamic::merge(baseObj,
+                          dynamic::object("type", "baseMeth")
+                                         ("name", meth->fullName()->slice()));
+  } else if (auto meth = interfaceMeth()) {
+    return dynamic::merge(baseObj,
+                          dynamic::object("type", "interfaceMeth")
+                                         ("name", meth->fullName()->slice()));
+  }
+  return dynamic();
+}
+
 void MethProfile::serialize(ProfDataSerializer& ser) const {
   write_raw(ser, curTag());
   write_func(ser, rawMeth());

@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_JIT_ARRAY_KIND_PROFILE_H_
 #define incl_HPHP_JIT_ARRAY_KIND_PROFILE_H_
 
+#include <folly/dynamic.h>
+
 #include "hphp/runtime/base/array-data.h"
 
 namespace HPHP { namespace jit {
@@ -62,6 +64,7 @@ struct ArrayKindProfile {
   }
 
   std::string toString() const;
+  folly::dynamic toDynamic() const;
 
 private:
   uint32_t m_count[kNumProfiledArrayKinds];

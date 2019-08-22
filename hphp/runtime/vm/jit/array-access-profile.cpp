@@ -66,6 +66,24 @@ std::string ArrayAccessProfile::toString() const {
   return out.str();
 }
 
+folly::dynamic ArrayAccessProfile::toDynamic() const {
+  using folly::dynamic;
+  if (!m_init) return dynamic();
+
+  uint32_t total = 0;
+  dynamic hits = dynamic::array;
+  for (auto const& line : m_hits) {
+    hits.push_back(dynamic::object("position", line.pos)
+                                  ("count", line.count));
+    total += line.count;
+  }
+  return dynamic::object("hits", hits)
+                        ("untracked", m_untracked)
+                        ("small", m_small)
+                        ("total", total)
+                        ("profileType", "ArrayAccessProfile");
+}
+
 ArrayAccessProfile::Result ArrayAccessProfile::choose() const {
   if (!m_init) return Result{};
 

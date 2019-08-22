@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/types.h"
 
 #include "hphp/runtime/vm/jit/bc-marker.h"
+#include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/types.h"
 
@@ -138,7 +139,13 @@ struct TargetProfile {
                     marker.bcOff(),
                     name,
                     extraSize)
-  {}
+  {
+    if (dumpIREnabled(context.kind)) {
+      context.profileKeys.push_back(rds::Profile<T>{m_key.transId,
+                                                    marker.bcOff(),
+                                                    name});
+    }
+  }
 
   /*
    * Calls T::reduce to fold the data from each local RDS slot.

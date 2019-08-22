@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_JIT_METH_PROFILE_H_
 #define incl_HPHP_JIT_METH_PROFILE_H_
 
+#include <folly/dynamic.h>
+
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/func.h"
@@ -55,6 +57,7 @@ struct MethProfile {
   {}
 
   std::string toString() const;
+  folly::dynamic toDynamic() const;
 
   /*
    * Obtain the profiled Class* or method Func*.

@@ -58,6 +58,13 @@ std::string ArrayKindProfile::toString() const {
   return out.str();
 }
 
+folly::dynamic ArrayKindProfile::toDynamic() const {
+  folly::dynamic counts = folly::dynamic::array;
+  for (auto const c : m_count) counts.push_back(c);
+  return folly::dynamic::object("counts", counts)
+                               ("profileType", "ArrayKindProfile");
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

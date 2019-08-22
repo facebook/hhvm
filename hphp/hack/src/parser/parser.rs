@@ -68,10 +68,7 @@ where
             .map(|r| r.extract())
     }
 
-    pub fn parse_script(
-        &mut self,
-        stack_limit: Option<std::rc::Rc<StackLimit>>,
-    ) -> <S::R as NodeType>::R {
+    pub fn parse_script(&mut self, stack_limit: Option<&'a StackLimit>) -> <S::R as NodeType>::R {
         let mut decl_parser: DeclarationParser<S, T> = DeclarationParser::make(
             self.lexer.clone(),
             self.env.clone(),

@@ -123,7 +123,7 @@ macro_rules! parse {
 
                 let env = env.clone();
                 let try_parse = move || {
-                    let stack_limit = std::rc::Rc::new(StackLimit::relative(relative_stack_size));
+                    let stack_limit = StackLimit::relative(relative_stack_size);
                     stack_limit.reset();
                     let relative_path = RelativePath::from_ocamlvalue(&relative_path_raw);
                     let source_text = SourceText::make_with_raw(
@@ -133,10 +133,10 @@ macro_rules! parse {
                     );
                     ocamlpool_enter();
                     let mut parser = $parser::make(&source_text, env);
-                    let root = parser.parse_script(Some(stack_limit.clone()));
+                    let root = parser.parse_script(Some(&stack_limit));
                     let errors = parser.errors();
                     let state = parser.sc_state();
-                    let result = if (*stack_limit).exceeded() {
+                    let result = if stack_limit.exceeded() {
                         // Not always printing warning here because this would fail some HHVM tests
                         let istty = libc::isatty(libc::STDERR_FILENO as i32) != 0;
                         if istty || std::env::var_os("HH_TEST_MODE").is_some() {

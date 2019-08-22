@@ -78,14 +78,14 @@ impl ExpectedTokenVec {
 }
 
 #[derive(Debug, Clone)]
-pub struct Context<T> {
+pub struct Context<'a, T> {
     pub expected: ExpectedTokenVec,
     pub skipped_tokens: Vec<T>,
-    stack_limit: Option<std::rc::Rc<StackLimit>>,
+    stack_limit: Option<&'a StackLimit>,
 }
 
-impl<T> Context<T> {
-    pub fn empty(stack_limit: Option<std::rc::Rc<StackLimit>>) -> Self {
+impl<'a, T> Context<'a, T> {
+    pub fn empty(stack_limit: Option<&'a StackLimit>) -> Self {
         Self {
             expected: ExpectedTokenVec(vec![]),
             skipped_tokens: vec![],
@@ -119,12 +119,19 @@ where
     fn make(
         _: Lexer<'a, S::Token>,
         _: ParserEnv,
-        _: Context<S::Token>,
+        _: Context<'a, S::Token>,
         _: Vec<SyntaxError>,
         _: S,
     ) -> Self;
     fn add_error(&mut self, _: SyntaxError);
-    fn into_parts(self) -> (Lexer<'a, S::Token>, Context<S::Token>, Vec<SyntaxError>, S);
+    fn into_parts(
+        self,
+    ) -> (
+        Lexer<'a, S::Token>,
+        Context<'a, S::Token>,
+        Vec<SyntaxError>,
+        S,
+    );
     fn lexer(&self) -> &Lexer<'a, S::Token>;
     fn lexer_mut(&mut self) -> &mut Lexer<'a, S::Token>;
     fn continue_from<P: ParserTrait<'a, S, T>>(&mut self, _: P)
@@ -138,8 +145,8 @@ where
     fn skipped_tokens(&self) -> &[S::Token];
     fn skipped_tokens_mut(&mut self) -> &mut Vec<S::Token>;
 
-    fn context_mut(&mut self) -> &mut Context<S::Token>;
-    fn context(&self) -> &Context<S::Token>;
+    fn context_mut(&mut self) -> &mut Context<'a, S::Token>;
+    fn context(&self) -> &Context<'a, S::Token>;
 
     fn pos(&self) -> usize {
         self.lexer().offset()
@@ -1383,10 +1390,6 @@ where
             TokenKind::QuestionGreaterThan => S!(make_missing, self, self.pos()),
             _ => self.require_token(TokenKind::Semicolon, Errors::error1010),
         }
-    }
-
-    fn set_stack_limit(&mut self, shared: std::rc::Rc<StackLimit>) {
-        self.context_mut().stack_limit = Some(shared.clone());
     }
 
     fn check_stack_limit(&mut self) -> Option<S::R> {

@@ -18,19 +18,23 @@ pub struct StackLimit {
 ///
 /// # Usage:
 /// ```
-/// let limit = std::sync::Arc::new(StackLimit::relative(3_000_000)); // some thread
+/// extern crate parser_rust;
+/// use parser_rust::stack_limit::StackLimit;
+/// let limit = std::sync::Arc::new(StackLimit::relative(3_000_000));
 /// limit.reset(); // set the baseline (when the stack is low)
-/// let deeply_recursive_task = || {
-///      if limit.check_exceeded() {
-///          // terminate (*resets* the internal state but not the "exceeded" flag)
-///          ... // e.g., panic!
+/// let limit_ref = limit.clone();
+/// let deeply_recursive_task = move || {
+///      if limit_ref.check_exceeded() {
+///          // abort early
 ///      }
 ///  };
 ///  deeply_recursive_task();  // detect if it would consume >3MB of stack
 ///  if limit.exceeded() {
 ///      // handle stack overflow preemptively (e.g., retry with custom stack space)
-///      std::thread::Builder::new().stack_size(...)
-///          .spawn(deeply_recursive_task).join()
+///      std::thread::Builder::new().stack_size(16_000_000)
+///          .spawn(deeply_recursive_task)
+///          .expect("ERROR: thread::spawn")
+///          .join();
 ///  }
 ///  ```
 /// *Notes*:

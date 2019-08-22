@@ -37,23 +37,11 @@ module Cls = Decl_provider.Class
 
 type env = {
   typedef_tparams : Nast.tparam list;
-  is_reactive: bool; (* The enclosing function is reactive *)
   tenv: Env.env;
 }
-
-let is_some_reactivity_attribute { ua_name = (_, name); _ } =
-  name = SN.UserAttributes.uaReactive ||
-  name = SN.UserAttributes.uaLocalReactive ||
-  name = SN.UserAttributes.uaShallowReactive
-
-(* During NastCheck, all reactivity kinds are the same *)
-let fun_is_reactive user_attributes =
-  List.exists user_attributes ~f:is_some_reactivity_attribute
-
 let rec fun_ tenv f =
   let env = { typedef_tparams = [];
               tenv = tenv;
-              is_reactive = fun_is_reactive f.f_user_attributes;
               } in
   let p, _ = f.f_name in
   (* Add type parameters to typing environment and localize the bounds
@@ -69,7 +57,6 @@ let rec fun_ tenv f =
     Phase.localize_where_constraints ~ety_env tenv f.f_where_constraints in
   let env = { env with
     tenv;
-    is_reactive = env.is_reactive || fun_is_reactive f.f_user_attributes;
   } in
   maybe hint env (hint_of_type_hint f.f_ret);
 
@@ -188,7 +175,6 @@ and check_happly unchecked_tparams env h =
 
 and class_ tenv c =
   let env = { typedef_tparams = [];
-              is_reactive = false;
               tenv = tenv;
             } in
   (* Add type parameters to typing environment and localize the bounds *)
@@ -231,8 +217,6 @@ and add_constraints pos tenv (cstrs: locl where_constraint list) =
   List.fold_left cstrs ~init:tenv ~f:(add_constraint pos)
 
 and method_ env m =
-  let env =
-    { env with is_reactive = fun_is_reactive m.m_user_attributes } in
   (* Add method type parameters to environment and localize the bounds
      and where constraints *)
   let ety_env = Phase.env_with_self env.tenv in
@@ -259,7 +243,6 @@ let typedef tenv t =
                *)
               typedef_tparams = t.t_tparams;
               tenv = tenv;
-              is_reactive = false;
               } in
   maybe hint env t.t_constraint;
   hint env t.t_kind

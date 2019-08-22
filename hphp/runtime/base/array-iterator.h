@@ -573,11 +573,11 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
                         TypedValue* val, TypedValue* key);
 
 
-int64_t iter_next_ind(Iter* iter, TypedValue* valOut);
-int64_t iter_next_key_ind(Iter* iter, TypedValue* valOut, TypedValue* keyOut);
+int64_t iter_next_ind(Iter* iter, Cell* valOut);
+int64_t iter_next_key_ind(Iter* iter, Cell* valOut, Cell* keyOut);
 
-int64_t liter_next_ind(Iter*, TypedValue*, ArrayData*);
-int64_t liter_next_key_ind(Iter*, TypedValue*, TypedValue*, ArrayData*);
+int64_t liter_next_ind(Iter*, Cell*, ArrayData*);
+int64_t liter_next_key_ind(Iter*, Cell*, Cell*, ArrayData*);
 
 //////////////////////////////////////////////////////////////////////
 

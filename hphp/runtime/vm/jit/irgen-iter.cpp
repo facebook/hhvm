@@ -26,6 +26,16 @@ namespace HPHP { namespace jit { namespace irgen {
 
 namespace {
 
+// We only JIT IterNext bytecodes if FrameState knows that their output locals
+// are cells. HHBBC almost always makes these assertions in repo mode.
+bool areLocalsCells(IRGS& env, const IterData& data) {
+  auto const cell = [&](uint32_t local) {
+    if (local == uint32_t(-1)) return true;
+    return env.irb->fs().local(local).type <= TCell;
+  };
+  return cell(data.valId) && cell(data.keyId);
+}
+
 // `relOffset` is the offset from the IterInit to the end of the loop.
 // `result` is a TBool that is true if the iterator has more items.
 void implIterInitJmp(IRGS& env, Offset relOffset, SSATmp* result) {
@@ -86,6 +96,8 @@ void emitIterNext(IRGS& env,
                   Offset relOffset,
                   int32_t valLocalId) {
   auto const data = IterData(iterId, uint32_t(-1), valLocalId);
+  if (!areLocalsCells(env, data)) PUNT(IterNext-refs);
+
   auto const result = gen(env, IterNext, data, fp(env));
   implIterNextJmp(env, relOffset, result);
 }
@@ -96,6 +108,8 @@ void emitIterNextK(IRGS& env,
                    int32_t valLocalId,
                    int32_t keyLocalId) {
   auto const data = IterData(iterId, keyLocalId, valLocalId);
+  if (!areLocalsCells(env, data)) PUNT(IterNextK-refs);
+
   auto const result = gen(env, IterNextK, data, fp(env));
   implIterNextJmp(env, relOffset, result);
 }
@@ -141,6 +155,7 @@ void emitLIterNext(IRGS& env,
   if (curFunc(env)->isPseudoMain()) PUNT(LIterNext-pseudomain);
   auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
   auto const data = IterData(iterId, uint32_t(-1), valLocalId);
+  if (!areLocalsCells(env, data)) PUNT(LIterNext-refs);
 
   auto const result = base->isA(TArrLike)
     ? gen(env, LIterNext, data, base, fp(env))
@@ -157,6 +172,7 @@ void emitLIterNextK(IRGS& env,
   if (curFunc(env)->isPseudoMain()) PUNT(LIterNextK-pseudomain);
   auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
   auto const data = IterData(iterId, keyLocalId, valLocalId);
+  if (!areLocalsCells(env, data)) PUNT(LIterNextK-refs);
 
   auto const result = base->isA(TArrLike)
     ? gen(env, LIterNextK, data, base, fp(env))

@@ -238,7 +238,6 @@ and parse_remaining_simple_type_or_generic parser name =
 and parse_generic_type_constraint_opt parser =
   let (parser1, token) = next_token parser in
   match (Token.kind token) with
-  | From
   | As
   | Super ->
     let (parser, constraint_token) = Make.token parser1 token in

@@ -469,7 +469,6 @@ module Full = struct
           | Ast_defs.Constraint_as -> "as"
           | Ast_defs.Constraint_super -> "super"
           | Ast_defs.Constraint_eq -> "="
-          | Ast_defs.Constraint_pu_from -> "from"
           );
         Space;
         ty to_doc st env cty
@@ -1400,7 +1399,6 @@ module PrintClass = struct
     | (Ast_defs.Constraint_as, ty) -> "as " ^ (Full.to_string_decl tcopt ty)
     | (Ast_defs.Constraint_eq, ty) -> "= " ^ (Full.to_string_decl tcopt ty)
     | (Ast_defs.Constraint_super, ty) -> "super " ^ (Full.to_string_decl tcopt ty)
-    | (Ast_defs.Constraint_pu_from, ty) -> "from " ^ (Full.to_string_decl tcopt ty)
 
   let variance = function
     | Ast_defs.Covariant -> "+"

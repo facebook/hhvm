@@ -44,7 +44,6 @@ let check_constraint env ck ty ~cstr_ty =
        * ty's list of unresolved types. Thus we pass the expanded
        * constraint type. *)
       TUtils.sub_type env ecstr_ty ty Errors.unify_error
-  | Ast_defs.Constraint_pu_from -> failwith "TODO(T36532263): Pocket Universes"
 
 let add_check_constraint_todo (env:Env.env) ~use_pos (pos,name) ck cstr_ty ty =
     Errors.try_

@@ -324,7 +324,7 @@ where
         let mut parser1 = self.clone();
         let token = parser1.next_token();
         match token.kind() {
-            TokenKind::As | TokenKind::Super | TokenKind::From => {
+            TokenKind::As | TokenKind::Super => {
                 self.continue_from(parser1);
                 let constraint_token = S!(make_token, self, token);
                 let matched_type = self.parse_type_specifier(false, true);

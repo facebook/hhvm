@@ -375,7 +375,7 @@ and localize_ft ?(instantiation) ~ety_env env ft =
         Env.add_lower_bound env name_str ty
       | Ast_defs.Constraint_eq ->
         Env.add_upper_bound (Env.add_lower_bound env name_str ty) name_str ty
-      | Ast_defs.Constraint_pu_from -> failwith "TODO(T36532263): Pocket Universes" in
+      in
       env, (ck, ty)
     end in
     env, { t with tp_constraints = cstrl }

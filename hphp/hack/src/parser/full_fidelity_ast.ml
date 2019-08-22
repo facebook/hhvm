@@ -2299,7 +2299,6 @@ and pTConstraint : (constraint_kind * hint) parser = fun node env ->
       | Some TK.As    -> Constraint_as
       | Some TK.Super -> Constraint_super
       | Some TK.Equal -> Constraint_eq
-      | Some TK.From  -> Constraint_pu_from
       | _ -> missing_syntax "constraint operator" constraint_keyword env
       )
     , pHint constraint_type env

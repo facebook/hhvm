@@ -8,15 +8,15 @@ abstract class Foo
     case T default_value;
   }
 
-  public function get<TF from this::Field>(TF $f): TF::T
-  {
-    return static:@Field::default_value($f);
-  }
+  /* public function get<TF from this::Field>(TF $f): TF::T */
+  /* { */
+  /*   return static:@Field::default_value($f); */
+  /* } */
 
-  public function getID<TF from this::Field>(TF $f): string
-  {
-    return static:@Field::ident($f);
-  }
+  /* public function getID<TF from this::Field>(TF $f): string */
+  /* { */
+  /*   return static:@Field::ident($f); */
+  /* } */
 
 
   public static function introspect_fields() : void

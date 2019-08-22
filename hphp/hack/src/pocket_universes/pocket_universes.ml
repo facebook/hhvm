@@ -192,47 +192,13 @@ let gen_pu_accessors
       hd :: acc
     ) info []
 
-(* Gather all the 'from' constraints from a `constraint_kind * hint` list *)
-let from_cstr l =
-  let is_from_cstr = function
-  | (Constraint_pu_from, _) -> true
-  | _ -> false
-  in
-  let f { tp_name = (_, id); tp_constraints = l; _ } =
-    if List.exists ~f:is_from_cstr l
-    then Some id
-    else None
-  in
-  List.filter_map ~f l
-
-(* Remove instances of PU types in a `tparam` list. We don't use the
-   regular visitor because we might end up removing some part of the list
-   instead of just erase part of it *)
-let erase_tparams clean_hint on_user_attribute (params: tparam list) =
-  let erase_tparam_cst l =
-    let f = function
-      | (Constraint_pu_from, _) -> None
-      | (cst, h) -> Some (cst, clean_hint h)
-    in
-    List.filter_map ~f l
-  in
-  let f tp = {
-    tp with
-    tp_constraints = erase_tparam_cst tp.tp_constraints;
-    tp_user_attributes = List.map ~f:on_user_attribute tp.tp_user_attributes
-  }
-  in
-  List.map ~f params
-
 (* Instance of an AST visitor which:
    - updates PU_atom and PU_identifier
-   - remove 'from' constraints
-   - replace PU "dependent types" like `TF::T` with `mixed`
 
   This only do erasure. The generated code is done in a second path
 *)
 class ['self] erase_body_visitor = object (_self: 'self)
-  inherit [_] endo as super
+  inherit [_] endo
   method on_'fb _env fb = fb
   method on_'ex _env ex = ex
   method on_'en _env en = en
@@ -243,102 +209,13 @@ class ['self] erase_body_visitor = object (_self: 'self)
     let fun_name = (pos, gen_fun_name field name) in
     Class_const (qual, fun_name)
 
-  method! on_hint_ from_cstrs = function
-    | Hoption h -> Hoption (super#on_hint from_cstrs h)
-    | Hlike h -> Hlike (super#on_hint from_cstrs h)
-    | Hfun (fun_reactive, ic, hlist, plist, param_mutability_list, vhint, h, mut_return) ->
-      Hfun (
-        fun_reactive, ic, List.map ~f:(super#on_hint from_cstrs) hlist, plist,
-        param_mutability_list,
-        super#on_variadic_hint from_cstrs vhint,
-        super#on_hint from_cstrs h,
-        mut_return)
-    | Htuple hlist ->
-      Htuple (List.map ~f:(super#on_hint from_cstrs) hlist)
-    | Happly ((pos, id), hlist) ->
-      let hlist = List.map ~f:(super#on_hint from_cstrs) hlist in
-      if List.mem ~equal:String.equal from_cstrs id
-      then Happly ((pos, "mixed"), hlist)
-      else Happly ((pos, id), hlist)
-    | Hshape si -> Hshape (super#on_nast_shape_info from_cstrs si)
-    | Haccess (_, (pos, id) :: _) as h ->
-      if List.mem ~equal:String.equal from_cstrs id
-      then Happly ((pos, "mixed"), [])
-      else h
-    | Hsoft h -> Hsoft (super#on_hint from_cstrs h)
-    | Haccess (_, []) -> failwith "PocketUniverses: Encountered unexpected use of Haccess"
-    (* The following hints do not exist on the legacy AST *)
-    | Herr -> failwith "PocketUniverses: Encountered unexpected Herr"
-    | Hany -> failwith "PocketUniverses: Encountered unexpected Hany"
-    | Hmixed -> failwith "PocketUniverses: Encountered unexpected Hmixed"
-    | Hnonnull -> failwith "PocketUniverses: Encountered unexpected Hnonnull"
-    | Habstr _ -> failwith "PocketUniverses: Encountered unexpected Habstr"
-    | Harray _ -> failwith "PocketUniverses: Encountered unexpected Harray"
-    | Hdarray _ -> failwith "PocketUniverses: Encountered unexpected Hdarray"
-    | Hvarray _ -> failwith "PocketUniverses: Encountered unexpected Hvarray"
-    | Hvarray_or_darray _ ->
-      failwith "PocketUniverses: Encountered unexpected Hvarray_or_darray"
-    | Hprim _ -> failwith "PocketUniverses: Encountered unexpected Hprim"
-    | Hthis -> failwith "PocketUniverses: Encountered unexpected Hthis"
-    | Hdynamic -> failwith "PocketUniverses: Encountered unexpected Hdynamic"
-    | Hnothing -> failwith "PocketUniverses: Encountered unexpected Hnothing"
-
-  method! on_fun_ _ f =
-    let from_cstrs = from_cstr f.f_tparams in
-    (* erase f_tparams. Since we'll need to remove some of them, we don't
-       recurse with the visitor, but by hand *)
-    let f_tparams =
-      erase_tparams (super#on_hint from_cstrs)
-        (super#on_user_attribute from_cstrs) f.f_tparams in
-    (* erase f_constrs. Since pattern *)
-    let erase_constrs = function
-      | (_, Constraint_pu_from, _) -> None
-      | (h1, c, h2) ->
-        Some (super#on_hint from_cstrs h1, c, super#on_hint from_cstrs h2)
-    in
-    let f_where_constraints = List.filter_map ~f:erase_constrs f.f_where_constraints in
-    let f_ret = type_hint_option_map ~f:(super#on_hint from_cstrs) f.f_ret in
-    let f_params =
-      List.map ~f:(super#on_fun_param from_cstrs) f.f_params in
-    let f_body = {
-      fb_ast = super#on_block from_cstrs f.f_body.fb_ast;
-      fb_annotation = f.f_body.fb_annotation
-    }
-    in
-    let f_user_attributes =
-      List.map ~f:(super#on_user_attribute from_cstrs)
-        f.f_user_attributes in
-    let f_file_attributes =
-      List.map ~f:(super#on_file_attribute from_cstrs)
-        f.f_file_attributes in
-    { f with f_tparams; f_where_constraints; f_ret; f_params; f_body;
-                 f_user_attributes; f_file_attributes }
-
-  method! on_class_ _ c =
-    let from_cstrs = from_cstr c.c_tparams.c_tparam_list in
-    let c_user_attributes =
-      List.map ~f:(super#on_user_attribute from_cstrs)
-        c.c_user_attributes in
-    let c_file_attributes =
-      List.map ~f:(super#on_file_attribute from_cstrs)
-        c.c_file_attributes in
-    let c_tparam_list = erase_tparams (super#on_hint from_cstrs)
-        (super#on_user_attribute from_cstrs) c.c_tparams.c_tparam_list in
-    let c_tparams = { c.c_tparams with c_tparam_list } in
-    let c_extends = List.map ~f:(super#on_hint from_cstrs) c.c_extends in
-    let c_implements =
-      List.map ~f:(super#on_hint from_cstrs) c.c_implements in
-    let c_methods = List.map ~f:(super#on_method_ from_cstrs) c.c_methods in
-    let c_enum = Option.map ~f:(super#on_enum_ from_cstrs) c.c_enum in
-    { c with c_user_attributes; c_file_attributes; c_tparams;
-                 c_extends; c_implements; c_methods; c_enum }
 end
 
 (* Wrapper around the AST visitor *)
 let visitor = new erase_body_visitor
 
-let erase_stmt stmt = visitor#on_stmt [] stmt
-let erase_fun f = visitor#on_fun_ [] f
+let erase_stmt stmt = visitor#on_stmt () stmt
+let erase_fun f = visitor#on_fun_ () f
 
 let process_pufields class_name extends (pu_enums: pu_enum list) =
   List.concat_map ~f:(gen_pu_accessors class_name extends) pu_enums
@@ -347,7 +224,7 @@ let update_class c =
   let pu_methods =
     process_pufields (snd c.c_name) (not (List.is_empty c.c_extends))
       c.c_pu_enums in
-  let c = visitor#on_class_ [] c in
+  let c = visitor#on_class_ () c in
   { c with c_pu_enums = []; c_methods = c.c_methods @ pu_methods }
 
 let update_def d = match d with

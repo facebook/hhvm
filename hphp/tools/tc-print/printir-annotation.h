@@ -62,6 +62,12 @@ struct TCRange {
   BlockId parentBlockId;
 };
 
+struct Profile {
+  const Offset offset;
+  const std::string name;
+  const folly::dynamic data;
+};
+
 struct Instr {
   const InstrId id;
   const folly::Optional<std::string> rawMarker;
@@ -73,6 +79,8 @@ struct Instr {
   const folly::Optional<BlockId> taken;
   std::vector<TCRange> tcRanges;
   const std::vector<SSATmp> dsts;
+  const Offset offset;
+  const std::vector<Profile> profileData;
   // Only one of these two should be present, they are mutually exclusive
   const folly::Optional<std::vector<SSATmp>> srcs;
   const folly::Optional<std::string> counterName;
@@ -105,6 +113,10 @@ struct TransContext {
   const TransID id;
   const int optIndex;
   const SrcKey srcKey;
+  const std::string funcName;
+  const std::string sourceFile;
+  const int startLine;
+  const int endLine;
 };
 
 struct Unit {
@@ -135,6 +147,10 @@ template <> struct DynamicConverter<printir::PhiPseudoInstr> {
 
 template <> struct DynamicConverter<printir::TCRange> {
   static printir::TCRange convert(const dynamic&);
+};
+
+template <> struct DynamicConverter<printir::Profile> {
+  static printir::Profile convert(const dynamic&);
 };
 
 template <> struct DynamicConverter<printir::Instr> {
@@ -175,6 +191,10 @@ template <> struct DynamicConstructor<printir::PhiPseudoInstr> {
 
 template <> struct DynamicConstructor<printir::TCRange> {
   static dynamic construct(const printir::TCRange&);
+};
+
+template <> struct DynamicConstructor<printir::Profile> {
+  static dynamic construct(const printir::Profile&);
 };
 
 template <> struct DynamicConstructor<printir::Instr> {

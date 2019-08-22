@@ -136,6 +136,15 @@ convert(const dynamic& d) {
   return printir::TCRange{area, start, end, std::move(disasm)};
 }
 
+printir::Profile DynamicConverter<printir::Profile>::
+convert(const dynamic& d) {
+  auto const offset = convertTo<Offset>(d.getDefault("offset", {}));
+  auto const name = convertTo<string>(d.getDefault("name", {}));
+  auto const& data = d.getDefault("data");
+
+  return printir::Profile{offset, name, data};
+}
+
 printir::Instr DynamicConverter<printir::Instr>::
 convert(const dynamic& d) {
   if (!d.isObject()) {
@@ -157,6 +166,9 @@ convert(const dynamic& d) {
   auto const maybeTaken = d.getDefault("taken", {});
   auto taken = convertTo<Optional<printir::BlockId>>(
     (maybeTaken.isNull() ? dynamic() : maybeTaken.getDefault("id", {})));
+  auto const offset = convertTo<Offset>(d.getDefault("offset", {}));
+  auto profileData = convertTo<vector<printir::Profile>>(
+    d.getDefault("profileData", {}));
 
   auto tcRanges = convertTo<vector<printir::TCRange>>(
     d.getDefault("tc_ranges", dynamic::array));
@@ -182,8 +194,8 @@ convert(const dynamic& d) {
   return printir::Instr{id, std::move(maybeMarker), std::move(phiPseudoInstrs),
                         opcode, std::move(typeParam), std::move(guard),
                         std::move(extra), std::move(taken), std::move(tcRanges),
-                        std::move(dsts), std::move(srcs),
-                        std::move(counterName)};
+                        std::move(dsts), offset, std::move(profileData),
+                        std::move(srcs), std::move(counterName)};
 }
 
 printir::Block DynamicConverter<printir::Block>::
@@ -253,9 +265,18 @@ convert(const dynamic& d) {
   auto const id = convertTo<TransID>(d.getDefault("id", {}));
   auto const optIndex = convertTo<int>(d.getDefault("optIndex", {}));
   auto srcKey = convertTo<printir::SrcKey>(d.getDefault("srcKey", {}));
+  auto funcName = convertTo<string>(d.getDefault("funcName", {}));
+  auto sourceFile = convertTo<string>(d.getDefault("sourceFile", {}));
+  auto const startLine = convertTo<int>(d.getDefault("startLine", {}));
+  auto const endLine = convertTo<int>(d.getDefault("endLine", {}));
+
+
+
+
 
   return printir::TransContext{std::move(transKind), id, optIndex,
-                               std::move(srcKey)};
+                               std::move(srcKey), std::move(funcName),
+                               std::move(sourceFile), startLine, endLine};
 }
 
 printir::Unit DynamicConverter<printir::Unit>::
@@ -310,6 +331,13 @@ construct(const printir::TCRange& t) {
                         ("disasm", t.disasm);
 }
 
+dynamic DynamicConstructor<printir::Profile>::
+construct(const printir::Profile& p) {
+  return dynamic::object("offset", p.offset)
+                        ("name", p.name)
+                        ("data", p.data);
+}
+
 dynamic DynamicConstructor<printir::Instr>::
 construct(const printir::Instr& i) {
   return dynamic::object("rawMarker", toDynamic(i.rawMarker))
@@ -322,6 +350,8 @@ construct(const printir::Instr& i) {
                         ("taken", toDynamic(i.taken))
                         ("tcRanges", toDynamic(i.tcRanges))
                         ("dsts", toDynamic(i.dsts))
+                        ("offset", i.offset)
+                        ("profileData", toDynamic(i.profileData))
                         ("srcs", toDynamic(i.srcs))
                         ("counterName", toDynamic(i.counterName));
 }
@@ -356,7 +386,11 @@ construct(const printir::TransContext& t) {
   return dynamic::object("kind", show(t.kind))
                         ("id", t.id)
                         ("optIndex", t.optIndex)
-                        ("srcKey", toDynamic(t.srcKey));
+                        ("srcKey", toDynamic(t.srcKey))
+                        ("funcName", t.funcName)
+                        ("sourceFile", t.sourceFile)
+                        ("startLine", t.startLine)
+                        ("endLine", t.endLine);
 }
 
 dynamic DynamicConstructor<printir::Unit>::

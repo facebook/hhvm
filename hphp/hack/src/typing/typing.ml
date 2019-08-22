@@ -5102,10 +5102,16 @@ and call ~(expected: ExpectedTy.t option) ?method_call_info pos env fty el uel =
     | _, (Terr | Tany | Tunion [] | Tdynamic) ->
       let el = el @ uel in
       let env, tel = List.map_env env el begin fun env elt ->
-        let env, te, _ =
+        let env, te, ty =
           let expected = ExpectedTy.make pos Reason.URparam (Reason.Rnone, Typing_utils.tany env) in
           expr ~expected ~is_func_arg:true env elt
         in
+        let env = if IM.is_on @@ TCO.infer_missing (Env.get_tcopt env) then
+            match efty with
+            | _, (Terr | Tany | Tdynamic) ->
+              Typing_ops.coerce_type pos Reason.URparam env ty (MakeType.unenforced efty) Errors.unify_error
+            | _ -> env
+          else env in
         let env =
           match elt with
           | _, Callconv (Ast_defs.Pinout, e1) ->

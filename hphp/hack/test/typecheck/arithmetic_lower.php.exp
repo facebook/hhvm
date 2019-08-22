@@ -1,1 +1,6 @@
-No errors
+File "arithmetic_lower.php", line 88, characters 3-12:
+Invalid assignment (Typing[4110])
+File "arithmetic_lower.php", line 87, characters 13-21:
+Expected int because this is used in an arithmetic operation
+File "arithmetic_lower.php", line 88, characters 10-12:
+But got float

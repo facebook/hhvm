@@ -5460,6 +5460,16 @@ and is_float env t = Typing_solver.is_sub_type env t (MakeType.float Reason.Rnon
 
 and is_int env t = Typing_solver.is_sub_type env t (MakeType.int Reason.Rnone)
 
+and is_num env t =
+  let is_tyvar_with_num_upper_bound ty =
+    let env, ty = Env.expand_type env ty in
+    match ty with
+    | _, Tvar v ->
+      Typing_set.mem (MakeType.num Reason.Rnone) (Env.get_tyvar_upper_bounds env v)
+    | _ -> false in
+  Typing_solver.is_sub_type env t (MakeType.num Reason.Rnone) ||
+    is_tyvar_with_num_upper_bound t
+
 and is_super_num env t = SubType.is_sub_type_for_union env (MakeType.num Reason.Rnone) t
 
 and unop ~is_func_arg ~array_ref_ctx p env uop te ty =
@@ -5599,6 +5609,14 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
     else
     if is_super_num env ty2
     then make_result env te1 te2 (MakeType.num (Reason.Rarith_ret_num (p, fst ty2, Reason.Asecond)))
+    else
+    let is_infer_missing_mode = IM.is_on @@ TCO.infer_missing (Env.get_tcopt env) in
+    (* If ty1 is int, the result has the same type as ty2. *)
+    if is_infer_missing_mode && is_int env ty1 && is_num env ty2
+    then make_result env te1 te2 ty2
+    else
+    if is_infer_missing_mode && is_int env ty2 && is_num env ty1
+    then make_result env te1 te2 ty1
     else
     (* Otherwise try narrowing any type variable, with default int *)
     let env, ty1 = expand_type_and_narrow_to_int env p ty1 in

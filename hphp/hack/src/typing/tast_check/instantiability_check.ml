@@ -36,7 +36,8 @@ let validate_classname (pos, hint) =
     | Aast.Hprim _
     | Aast.Hoption _
     | Aast.Hfun _
-    | Aast.Hshape _ ->
+    | Aast.Hshape _
+    | Aast.Hpu_access _ ->
       Errors.invalid_classname pos
 
 let rec check_hint env (pos, hint) =
@@ -89,6 +90,7 @@ let rec check_hint env (pos, hint) =
     check_hint env h
   | Aast.Htuple hl ->
     List.iter hl (check_hint env)
+  | Aast.Hpu_access (h, _) -> check_hint env h
 
 and check_shape env Aast.{ nsi_allows_unknown_fields=_; nsi_field_map } =
   List.iter ~f:(fun v -> check_hint env v.Aast.sfi_hint) nsi_field_map

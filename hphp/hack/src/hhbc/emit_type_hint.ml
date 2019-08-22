@@ -103,6 +103,7 @@ and fmt_hint ~tparams ~namespace ?(strip_tparams=false) (pos, h) =
   | Aast.Hthis -> fmt_name_or_prim (pos, SN.Typehints.this)
   | Aast.Hdynamic -> fmt_name_or_prim (pos, SN.Typehints.dynamic)
   | Aast.Hnothing -> fmt_name_or_prim (pos, SN.Typehints.nothing)
+  | Aast.Hpu_access _ -> failwith "TODO(T36532263) fmt_hint"
 
 and fmt_hints ~tparams ~namespace hints =
   String.concat ~sep:", " (List.map hints (fmt_hint ~tparams ~namespace))
@@ -223,6 +224,7 @@ let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable ~namespace (p, h) 
   | Aast.Hthis -> happly_helper (p, SN.Typehints.this)
   | Aast.Hnothing -> happly_helper (p, SN.Typehints.nothing)
   | Aast.Habstr s -> happly_helper (p, s)
+  | Aast.Hpu_access _ -> failwith "TODO(T36532263) hint_to_type_constraint"
 
 and make_tc_with_flags_if_non_empty_flags
     ~kind ~tparams ~skipawaitable ~namespace t flags =

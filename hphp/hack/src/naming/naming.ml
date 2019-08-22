@@ -828,6 +828,8 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Hnothing ->
       Errors.internal_error Pos.none "Unexpected hint not present on legacy AST";
       N.Herr
+    | Aast.Hpu_access (h, id) ->
+      N.Hpu_access (hint ~allow_retonly env h, id)
 
   and hint_id ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard ~tp_depth
     env (p, x as id) hl =

@@ -115,6 +115,7 @@ and hint_ env p = function
       let compute_hint_for_shape_field_info { sfi_hint; _; } =
         hint env sfi_hint in
       List.iter ~f:compute_hint_for_shape_field_info nsi_field_map
+  | Hpu_access (h, _) -> hint env h
 
 and check_happly unchecked_tparams env h =
   let decl_ty = Decl_hint.hint env.Env.decl_env h in

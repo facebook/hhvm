@@ -60,7 +60,8 @@ let rec has_reified_type_constraint env h =
   | Aast.Htuple _
   | Aast.Hshape _
   | Aast.Hfun _
-  | Aast.Haccess _ -> NotReified
+  | Aast.Haccess _
+  | Aast.Hpu_access _ -> NotReified
   (* Not found in the original AST *)
   | Aast.Herr
   | Aast.Hany -> failwith "Should be a naming error"
@@ -94,6 +95,8 @@ let rec remove_awaitable (pos, h_ as h) =
   | Aast.Hthis
   | Aast.Hnothing
   | Aast.Hdynamic -> failwith "TODO Unimplemented Did not exist on legacy AST"
+  | Aast.Hpu_access _ ->
+    failwith "TODO(T36532263) awaitable in pocket universe type hint"
 
 let convert_awaitable env h =
   if Ast_scope.Scope.is_in_async (Emit_env.get_scope env)
@@ -148,4 +151,6 @@ let remove_erased_generics env h =
     | Aast.Hthis
     | Aast.Hnothing
     | Aast.Hdynamic -> failwith "TODO Unimplemented Did not exist on legacy AST"
+    | Aast.Hpu_access _ ->
+      failwith "TODO(T36532263) erased generics in pocket universe type hint"
   in aux h

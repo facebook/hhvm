@@ -7,7 +7,7 @@ let bar_name = Printf.sprintf "bar%d.php"
 
 let foo_contents =
   Printf.sprintf "<?hh //strict
-/* HH_FIXME[4110] */
+/* HH_FIXME[4336] */
 function foo() : %s {
 }
 "

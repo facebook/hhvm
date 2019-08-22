@@ -1,5 +1,5 @@
 File "lambda_arithmetic_bad.php", line 16, characters 30-35:
-Typing error (Typing[4110])
+Typing error (Typing[4323])
 File "lambda_arithmetic_bad.php", line 2, characters 18-19:
 Some type constraint(s) are violated here
 File "lambda_arithmetic_bad.php", line 2, characters 18-19:
@@ -9,7 +9,7 @@ Expected num because this is used in an arithmetic operation
 File "lambda_arithmetic_bad.php", line 2, characters 18-19:
 But got dynamic
 File "lambda_arithmetic_bad.php", line 17, characters 30-35:
-Typing error (Typing[4110])
+Typing error (Typing[4323])
 File "lambda_arithmetic_bad.php", line 2, characters 18-19:
 Some type constraint(s) are violated here
 File "lambda_arithmetic_bad.php", line 2, characters 18-19:
@@ -19,7 +19,7 @@ Expected num because this is used in an arithmetic operation
 File "lambda_arithmetic_bad.php", line 2, characters 18-19:
 But got dynamic
 File "lambda_arithmetic_bad.php", line 18, characters 30-35:
-Typing error (Typing[4110])
+Typing error (Typing[4323])
 File "lambda_arithmetic_bad.php", line 2, characters 18-19:
 Some type constraint(s) are violated here
 File "lambda_arithmetic_bad.php", line 2, characters 18-19:
@@ -29,7 +29,7 @@ Expected num because this is used in an arithmetic operation
 File "lambda_arithmetic_bad.php", line 2, characters 18-19:
 But got dynamic
 File "lambda_arithmetic_bad.php", line 19, characters 37-43:
-Typing error (Typing[4110])
+Typing error (Typing[4323])
 File "lambda_arithmetic_bad.php", line 5, characters 19-20:
 Some type constraint(s) are violated here
 File "lambda_arithmetic_bad.php", line 5, characters 19-20:
@@ -39,7 +39,7 @@ Expected num because this is used in an arithmetic operation
 File "lambda_arithmetic_bad.php", line 5, characters 19-20:
 But got dynamic
 File "lambda_arithmetic_bad.php", line 19, characters 37-43:
-Typing error (Typing[4110])
+Typing error (Typing[4323])
 File "lambda_arithmetic_bad.php", line 5, characters 22-23:
 Some type constraint(s) are violated here
 File "lambda_arithmetic_bad.php", line 5, characters 22-23:

@@ -1,5 +1,5 @@
 File "bad_constraint.php", line 12, characters 16-28:
-A 'where' type constraint is violated here (Typing[4110])
+A 'where' type constraint is violated here (Typing[4323])
 File "bad_constraint.php", line 12, characters 16-28:
 This is the class with 'where' type constraints
 File "bad_constraint.php", line 12, characters 36-38:

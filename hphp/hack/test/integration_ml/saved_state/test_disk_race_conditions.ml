@@ -10,7 +10,7 @@ let foo_name = "foo.php"
 
 let foo_contents =
   Printf.sprintf {|<?hh
-/* HH_FIXME[4110] */
+/* HH_FIXME[4336] */
 function foo(): %s {
 }
 |}

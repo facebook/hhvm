@@ -1,5 +1,5 @@
 File "valid_targ_tpenv_bounds_test3.php", line 7, characters 34-41:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "valid_targ_tpenv_bounds_test3.php", line 6, characters 18-19:
 'Tc' is a constrained type parameter
 File "valid_targ_tpenv_bounds_test3.php", line 6, characters 24-24:
@@ -7,7 +7,7 @@ Expected A
 File "valid_targ_tpenv_bounds_test3.php", line 7, characters 39-40:
 But got Tf
 File "valid_targ_tpenv_bounds_test3.php", line 8, characters 16-19:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "valid_targ_tpenv_bounds_test3.php", line 6, characters 18-19:
 'Tc' is a constrained type parameter
 File "valid_targ_tpenv_bounds_test3.php", line 6, characters 24-24:

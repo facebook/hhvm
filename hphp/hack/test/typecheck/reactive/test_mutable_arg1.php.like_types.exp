@@ -1,5 +1,5 @@
 File "test_mutable_arg1.php", line 17, characters 7-32:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "rx/functions.hhi", line 26, characters 18-18:
 Some type constraint(s) are violated here
 File "rx/functions.hhi", line 26, characters 18-18:

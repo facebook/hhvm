@@ -1,5 +1,5 @@
 File "class_type_constant2.php", line 6, characters 35-52:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "class_type_constant2.php", line 3, characters 22-22:
 'T' is a constrained type parameter
 File "class_type_constant2.php", line 3, characters 27-29:

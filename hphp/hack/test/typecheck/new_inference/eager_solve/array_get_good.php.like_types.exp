@@ -1,5 +1,5 @@
 File "array_get_good.php", line 28, characters 14-25:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "array_get_good.php", line 4, characters 29-30:
 Some type constraint(s) are violated here
 File "array_get_good.php", line 4, characters 29-30:
@@ -9,7 +9,7 @@ Expected bool
 File "array_get_good.php", line 4, characters 29-30:
 But got dynamic
 File "array_get_good.php", line 29, characters 14-24:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "array_get_good.php", line 4, characters 29-30:
 Some type constraint(s) are violated here
 File "array_get_good.php", line 4, characters 29-30:
@@ -19,7 +19,7 @@ Expected bool
 File "array_get_good.php", line 4, characters 29-30:
 But got dynamic
 File "array_get_good.php", line 30, characters 14-29:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "array_get_good.php", line 4, characters 29-30:
 Some type constraint(s) are violated here
 File "array_get_good.php", line 4, characters 29-30:
@@ -29,7 +29,7 @@ Expected bool
 File "array_get_good.php", line 4, characters 29-30:
 But got dynamic
 File "array_get_good.php", line 31, characters 14-30:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "array_get_good.php", line 4, characters 29-30:
 Some type constraint(s) are violated here
 File "array_get_good.php", line 4, characters 29-30:
@@ -39,7 +39,7 @@ Expected bool
 File "array_get_good.php", line 4, characters 29-30:
 But got dynamic
 File "array_get_good.php", line 32, characters 14-30:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "array_get_good.php", line 4, characters 29-30:
 Some type constraint(s) are violated here
 File "array_get_good.php", line 4, characters 29-30:
@@ -49,7 +49,7 @@ Expected bool
 File "array_get_good.php", line 4, characters 29-30:
 But got dynamic
 File "array_get_good.php", line 33, characters 15-27:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "array_get_good.php", line 4, characters 29-30:
 Some type constraint(s) are violated here
 File "array_get_good.php", line 4, characters 29-30:
@@ -59,7 +59,7 @@ Expected float
 File "array_get_good.php", line 4, characters 29-30:
 But got dynamic
 File "array_get_good.php", line 34, characters 15-26:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "array_get_good.php", line 4, characters 29-30:
 Some type constraint(s) are violated here
 File "array_get_good.php", line 4, characters 29-30:
@@ -69,7 +69,7 @@ Expected float
 File "array_get_good.php", line 4, characters 29-30:
 But got dynamic
 File "array_get_good.php", line 35, characters 15-28:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "array_get_good.php", line 4, characters 29-30:
 Some type constraint(s) are violated here
 File "array_get_good.php", line 4, characters 29-30:
@@ -79,7 +79,7 @@ Expected float
 File "array_get_good.php", line 4, characters 29-30:
 But got dynamic
 File "array_get_good.php", line 36, characters 15-29:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "array_get_good.php", line 4, characters 29-30:
 Some type constraint(s) are violated here
 File "array_get_good.php", line 4, characters 29-30:
@@ -89,7 +89,7 @@ Expected float
 File "array_get_good.php", line 4, characters 29-30:
 But got dynamic
 File "array_get_good.php", line 37, characters 15-29:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "array_get_good.php", line 4, characters 29-30:
 Some type constraint(s) are violated here
 File "array_get_good.php", line 4, characters 29-30:
@@ -99,7 +99,7 @@ Expected float
 File "array_get_good.php", line 4, characters 29-30:
 But got dynamic
 File "array_get_good.php", line 38, characters 16-28:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "array_get_good.php", line 4, characters 29-30:
 Some type constraint(s) are violated here
 File "array_get_good.php", line 4, characters 29-30:

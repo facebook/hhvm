@@ -1,6 +1,6 @@
 File "t28704048.php", line 14, characters 8-13:
-Invalid index type for this dict (Typing[4110])
-  File "t28704048.php", line 8, characters 13-15:
-  This is a string
-  File "t28704048.php", line 12, characters 14-14:
-  It is incompatible with an object of exactly the class B
+Invalid index type for this dict (Typing[4324])
+File "t28704048.php", line 8, characters 13-15:
+This is a string
+File "t28704048.php", line 12, characters 14-14:
+It is incompatible with an object of exactly the class B

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5e7c5b68cfe7424fdb6e09c3a0e540d6>>
+// @generated SignedSource<<f29ea026b4db32341092c7292e173894>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -41,7 +41,6 @@ pub enum ConstraintKind {
     ConstraintAs,
     ConstraintEq,
     ConstraintSuper,
-    ConstraintPuFrom,
 }
 
 pub type Reified = bool;

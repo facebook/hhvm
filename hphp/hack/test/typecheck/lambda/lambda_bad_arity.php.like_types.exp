@@ -1,5 +1,5 @@
 File "lambda_bad_arity.php", line 14, characters 12-130:
-Invalid return type (Typing[4110])
+Invalid return type (Typing[4323])
 File "lambda_bad_arity.php", line 5, characters 36-42:
 Some type constraint(s) are violated here
 File "lambda_bad_arity.php", line 5, characters 36-42:

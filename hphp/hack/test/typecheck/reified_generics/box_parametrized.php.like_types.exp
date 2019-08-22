@@ -1,5 +1,5 @@
 File "box_parametrized.php", line 11, characters 7-12:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "box_parametrized.php", line 7, characters 14-14:
 'T' is a constrained type parameter
 File "box_parametrized.php", line 7, characters 14-14:
@@ -11,7 +11,7 @@ Expected Erased
 File "box_parametrized.php", line 7, characters 14-14:
 But got dynamic
 File "box_parametrized.php", line 13, characters 7-12:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "box_parametrized.php", line 7, characters 14-14:
 'T' is a constrained type parameter
 File "box_parametrized.php", line 7, characters 14-14:
@@ -23,7 +23,7 @@ Expected Reified
 File "box_parametrized.php", line 7, characters 14-14:
 But got dynamic
 File "box_parametrized.php", line 14, characters 7-12:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "box_parametrized.php", line 7, characters 14-14:
 'T' is a constrained type parameter
 File "box_parametrized.php", line 7, characters 14-14:
@@ -43,7 +43,7 @@ All type arguments must be specified because a type parameter is reified (Typing
 File "box_parametrized.php", line 8, characters 7-13:
 Definition is here
 File "box_parametrized.php", line 26, characters 7-12:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "box_parametrized.php", line 7, characters 14-14:
 'T' is a constrained type parameter
 File "box_parametrized.php", line 7, characters 14-14:
@@ -55,7 +55,7 @@ Expected Erased<Erased>
 File "box_parametrized.php", line 7, characters 14-14:
 But got dynamic
 File "box_parametrized.php", line 27, characters 7-12:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "box_parametrized.php", line 7, characters 14-14:
 'T' is a constrained type parameter
 File "box_parametrized.php", line 7, characters 14-14:
@@ -67,7 +67,7 @@ Expected Erased<Erased<Reified>>
 File "box_parametrized.php", line 7, characters 14-14:
 But got dynamic
 File "box_parametrized.php", line 28, characters 7-12:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "box_parametrized.php", line 7, characters 14-14:
 'T' is a constrained type parameter
 File "box_parametrized.php", line 7, characters 14-14:

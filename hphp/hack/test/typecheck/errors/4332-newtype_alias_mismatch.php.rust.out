@@ -1,0 +1,6 @@
+File "4332-newtype_alias_mismatch.php", line 4, characters 9-11:
+Invalid constraint on newtype (Typing[4332])
+File "4332-newtype_alias_mismatch.php", line 4, characters 16-18:
+Expected int
+File "4332-newtype_alias_mismatch.php", line 4, characters 22-27:
+But got string

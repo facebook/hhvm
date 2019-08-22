@@ -1,5 +1,5 @@
 File "class_soft_reification.php", line 10, characters 7-12:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "class_soft_reification.php", line 4, characters 14-14:
 'T' is a constrained type parameter
 File "class_soft_reification.php", line 4, characters 14-14:
@@ -11,7 +11,7 @@ Expected int
 File "class_soft_reification.php", line 4, characters 14-14:
 But got dynamic
 File "class_soft_reification.php", line 13, characters 7-17:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "class_soft_reification.php", line 5, characters 36-36:
 'T' is a constrained type parameter
 File "class_soft_reification.php", line 5, characters 36-36:
@@ -31,7 +31,7 @@ All type arguments must be specified because a type parameter is reified (Typing
 File "class_soft_reification.php", line 6, characters 7-13:
 Definition is here
 File "class_soft_reification.php", line 26, characters 7-12:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "class_soft_reification.php", line 4, characters 14-14:
 'T' is a constrained type parameter
 File "class_soft_reification.php", line 4, characters 14-14:
@@ -43,7 +43,7 @@ Expected Thard
 File "class_soft_reification.php", line 4, characters 14-14:
 But got dynamic
 File "class_soft_reification.php", line 30, characters 7-17:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "class_soft_reification.php", line 5, characters 36-36:
 'T' is a constrained type parameter
 File "class_soft_reification.php", line 5, characters 36-36:

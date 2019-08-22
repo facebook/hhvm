@@ -5,7 +5,7 @@ Expected ~(function([unresolved]): void) because it is an unenforceable type
 File "contravariance_constraint_bad_2.php", line 39, characters 7-55:
 But got (function(NAC\AAA $arg): void)
 File "contravariance_constraint_bad_2.php", line 43, characters 12-13:
-Invalid return type (Typing[4110])
+Invalid return type (Typing[4323])
 File "contravariance_constraint_bad_2.php", line 14, characters 17-19:
 Some type constraint(s) are violated here
 File "contravariance_constraint_bad_2.php", line 14, characters 12-12:

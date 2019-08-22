@@ -1,5 +1,5 @@
 File "tparam_constraints.php", line 5, characters 10-36:
-Invalid return type (Typing[4110])
+Invalid return type (Typing[4323])
 File "tparam_constraints.php", line 8, characters 20-21:
 Some type constraint(s) are violated here
 File "tparam_constraints.php", line 8, characters 20-21:

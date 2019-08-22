@@ -5,7 +5,7 @@ let bar_contents =
   Printf.sprintf
     {|<?hh
 class %s {
-  /* HH_FIXME[4110] */
+  /* HH_FIXME[4336] */
   public function bar() : int {
   }
 }
@@ -14,7 +14,7 @@ class %s {
 
 let foo_contents =
   Printf.sprintf {|<?hh
-/* HH_FIXME[4110] */
+/* HH_FIXME[4336] */
 function foo() : %s {
 }
 |}

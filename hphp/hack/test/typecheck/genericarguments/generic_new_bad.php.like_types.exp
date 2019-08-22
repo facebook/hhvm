@@ -1,5 +1,5 @@
 File "generic_new_bad.php", line 9, characters 12-12:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "generic_new_bad.php", line 4, characters 9-9:
 'T' is a constrained type parameter
 File "generic_new_bad.php", line 4, characters 9-9:

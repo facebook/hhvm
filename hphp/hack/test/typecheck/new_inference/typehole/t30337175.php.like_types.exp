@@ -9,7 +9,7 @@ Expected string
 File "t30337175.php", line 14, characters 31-32:
 But got Tx
 File "t30337175.php", line 18, characters 3-5:
-Some type constraint(s) here are violated (Typing[4062])
+Some type constraint(s) here are violated (Typing[4323])
 File "t30337175.php", line 14, characters 14-14:
 'T' is a constrained type parameter
 File "t30337175.php", line 14, characters 57-58:
@@ -17,7 +17,7 @@ You are trying to access the member Tc but this is not an object, it is a dynami
 File "t30337175.php", line 14, characters 14-14:
 Definition is here
 File "t30337175.php", line 18, characters 3-5:
-Some type constraint(s) here are violated (Typing[4062])
+Some type constraint(s) here are violated (Typing[4323])
 File "t30337175.php", line 14, characters 14-14:
 'T' is a constrained type parameter
 File "t30337175.php", line 14, characters 57-58:
@@ -25,7 +25,7 @@ You are trying to access the member Tc but this is not an object, it is a dynami
 File "t30337175.php", line 14, characters 19-19:
 Definition is here
 File "t30337175.php", line 18, characters 3-5:
-Some type constraint(s) here are violated (Typing[4062])
+Some type constraint(s) here are violated (Typing[4323])
 File "t30337175.php", line 14, characters 14-14:
 'T' is a constrained type parameter
 File "t30337175.php", line 14, characters 57-58:

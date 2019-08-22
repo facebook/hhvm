@@ -1,0 +1,6 @@
+File "4331-parameter_default_wrong_type.php", line 6, characters 27-28:
+Wrong type hint (Typing[4331])
+File "4331-parameter_default_wrong_type.php", line 6, characters 23-25:
+Expected int
+File "4331-parameter_default_wrong_type.php", line 6, characters 32-35:
+But got bool

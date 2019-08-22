@@ -1,5 +1,5 @@
 File "generic_tc_invalid1.php", line 27, characters 11-13:
-Some type constraint(s) here are violated (Typing[4062])
+Some type constraint(s) here are violated (Typing[4323])
 File "generic_tc_invalid1.php", line 16, characters 30-31:
 'T1' is a constrained type parameter
 File "generic_tc_invalid1.php", line 16, characters 74-74:
@@ -7,7 +7,7 @@ You are trying to access the member T but this is not an object, it is a dynamic
 File "generic_tc_invalid1.php", line 16, characters 30-31:
 Definition is here
 File "generic_tc_invalid1.php", line 27, characters 11-13:
-Some type constraint(s) here are violated (Typing[4062])
+Some type constraint(s) here are violated (Typing[4323])
 File "generic_tc_invalid1.php", line 16, characters 30-31:
 'T1' is a constrained type parameter
 File "generic_tc_invalid1.php", line 16, characters 74-74:
@@ -15,7 +15,7 @@ You are trying to access the member T but this is not an object, it is a dynamic
 File "generic_tc_invalid1.php", line 16, characters 36-38:
 Definition is here
 File "generic_tc_invalid1.php", line 27, characters 15-16:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "generic_tc_invalid1.php", line 16, characters 41-42:
 Some type constraint(s) are violated here
 File "generic_tc_invalid1.php", line 16, characters 41-42:
@@ -29,7 +29,7 @@ File "generic_tc_invalid1.php", line 23, characters 12-17:
 File "generic_tc_invalid1.php", line 16, characters 41-42:
 But got dynamic
 File "generic_tc_invalid1.php", line 28, characters 10-11:
-Invalid return type (Typing[4110])
+Invalid return type (Typing[4323])
 File "generic_tc_invalid1.php", line 16, characters 41-42:
 Some type constraint(s) are violated here
 File "generic_tc_invalid1.php", line 16, characters 41-42:

@@ -1,5 +1,5 @@
 File "valid_targ_tpenv_bounds_test.php", line 16, characters 3-3:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "valid_targ_tpenv_bounds_test.php", line 11, characters 9-16:
 'Tassuper' is a constrained type parameter
 File "valid_targ_tpenv_bounds_test.php", line 11, characters 21-21:

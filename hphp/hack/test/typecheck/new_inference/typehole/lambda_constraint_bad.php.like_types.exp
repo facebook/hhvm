@@ -5,7 +5,7 @@ Expected ~(function([unresolved]): int) because it is an unenforceable type
 File "lambda_constraint_bad.php", line 17, characters 17-28:
 But got (function(C $x): int)
 File "lambda_constraint_bad.php", line 18, characters 15-21:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "lambda_constraint_bad.php", line 11, characters 17-17:
 Some type constraint(s) are violated here
 File "lambda_constraint_bad.php", line 11, characters 12-12:

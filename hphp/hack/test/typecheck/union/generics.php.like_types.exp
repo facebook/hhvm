@@ -74,7 +74,7 @@ File "generics.php--file2.php", line 28, characters 5-15:
 File "generics.php--file2.php", line 31, characters 5-15:
   ~?int
 File "generics.php--file2.php", line 67, characters 18-18:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "generics.php--file2.php", line 7, characters 9-9:
 'T' is a constrained type parameter
 File "generics.php--file2.php", line 7, characters 9-9:
@@ -86,7 +86,7 @@ Expected int
 File "generics.php--file2.php", line 7, characters 9-9:
 But got dynamic
 File "generics.php--file2.php", line 67, characters 33-33:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "generics.php--file2.php", line 7, characters 9-9:
 'T' is a constrained type parameter
 File "generics.php--file2.php", line 7, characters 9-9:
@@ -98,7 +98,7 @@ Expected int
 File "generics.php--file2.php", line 7, characters 9-9:
 But got dynamic
 File "generics.php--file2.php", line 73, characters 28-28:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "generics.php--file2.php", line 7, characters 9-9:
 'T' is a constrained type parameter
 File "generics.php--file2.php", line 7, characters 9-9:
@@ -110,7 +110,7 @@ Expected int
 File "generics.php--file2.php", line 7, characters 9-9:
 But got dynamic
 File "generics.php--file2.php", line 76, characters 18-18:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "generics.php--file2.php", line 35, characters 9-9:
 'T' is a constrained type parameter
 File "generics.php--file2.php", line 35, characters 9-9:
@@ -122,7 +122,7 @@ Expected int
 File "generics.php--file2.php", line 35, characters 9-9:
 But got dynamic
 File "generics.php--file2.php", line 76, characters 34-34:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "generics.php--file2.php", line 35, characters 9-9:
 'T' is a constrained type parameter
 File "generics.php--file2.php", line 35, characters 9-9:
@@ -134,7 +134,7 @@ Expected int
 File "generics.php--file2.php", line 35, characters 9-9:
 But got dynamic
 File "generics.php--file2.php", line 82, characters 26-26:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "generics.php--file2.php", line 7, characters 9-9:
 'T' is a constrained type parameter
 File "generics.php--file2.php", line 7, characters 9-9:
@@ -146,7 +146,7 @@ Expected int
 File "generics.php--file2.php", line 7, characters 9-9:
 But got dynamic
 File "generics.php--file2.php", line 91, characters 24-24:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "generics.php--file2.php", line 7, characters 9-9:
 'T' is a constrained type parameter
 File "generics.php--file2.php", line 7, characters 9-9:
@@ -158,7 +158,7 @@ Expected int
 File "generics.php--file2.php", line 7, characters 9-9:
 But got dynamic
 File "generics.php--file2.php", line 100, characters 18-18:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "generics.php--file2.php", line 7, characters 9-9:
 'T' is a constrained type parameter
 File "generics.php--file2.php", line 7, characters 9-9:
@@ -170,7 +170,7 @@ Expected int
 File "generics.php--file2.php", line 7, characters 9-9:
 But got dynamic
 File "generics.php--file2.php", line 100, characters 33-33:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "generics.php--file2.php", line 7, characters 9-9:
 'T' is a constrained type parameter
 File "generics.php--file2.php", line 7, characters 9-9:
@@ -190,7 +190,7 @@ File "generics.php--file2.php", line 16, characters 36-36:
 File "generics.php--file2.php", line 102, characters 32-33:
 But got string
 File "generics.php--file2.php", line 104, characters 18-18:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "generics.php--file2.php", line 7, characters 9-9:
 'T' is a constrained type parameter
 File "generics.php--file2.php", line 7, characters 9-9:
@@ -202,7 +202,7 @@ Expected num
 File "generics.php--file2.php", line 7, characters 9-9:
 But got dynamic
 File "generics.php--file2.php", line 104, characters 33-33:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "generics.php--file2.php", line 7, characters 9-9:
 'T' is a constrained type parameter
 File "generics.php--file2.php", line 7, characters 9-9:
@@ -214,7 +214,7 @@ Expected arraykey
 File "generics.php--file2.php", line 7, characters 9-9:
 But got dynamic
 File "generics.php--file2.php", line 108, characters 18-18:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "generics.php--file2.php", line 7, characters 9-9:
 'T' is a constrained type parameter
 File "generics.php--file2.php", line 7, characters 9-9:
@@ -226,7 +226,7 @@ Expected int
 File "generics.php--file2.php", line 7, characters 9-9:
 But got dynamic
 File "generics.php--file2.php", line 115, characters 18-18:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "generics.php--file2.php", line 45, characters 10-10:
 'T' is a constrained type parameter
 File "generics.php--file2.php", line 45, characters 10-10:
@@ -238,7 +238,7 @@ Expected int
 File "generics.php--file2.php", line 45, characters 10-10:
 But got dynamic
 File "generics.php--file2.php", line 115, characters 34-34:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "generics.php--file2.php", line 45, characters 10-10:
 'T' is a constrained type parameter
 File "generics.php--file2.php", line 45, characters 10-10:
@@ -250,7 +250,7 @@ Expected string
 File "generics.php--file2.php", line 45, characters 10-10:
 But got dynamic
 File "generics.php--file2.php", line 118, characters 26-26:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "generics.php--file2.php", line 45, characters 10-10:
 'T' is a constrained type parameter
 File "generics.php--file2.php", line 45, characters 10-10:

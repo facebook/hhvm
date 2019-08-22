@@ -1,5 +1,5 @@
 File "lambda_bad_pos.php", line 26, characters 34-35:
-Invalid return type (Typing[4110])
+Invalid return type (Typing[4323])
 File "lambda_bad_pos.php", line 6, characters 27-34:
 Some type constraint(s) are violated here
 File "lambda_bad_pos.php", line 6, characters 21-22:

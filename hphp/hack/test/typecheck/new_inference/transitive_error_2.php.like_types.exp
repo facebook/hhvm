@@ -1,5 +1,5 @@
 File "transitive_error_2.php", line 12, characters 5-6:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "transitive_error_2.php", line 8, characters 17-22:
 Some type constraint(s) are violated here
 File "transitive_error_2.php", line 8, characters 12-12:

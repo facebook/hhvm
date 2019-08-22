@@ -70,7 +70,7 @@ let x_name = "x.php"
 
 let x_contents =
   Printf.sprintf {|<?hh // strict
-/* HH_FIXME[4110] */
+/* HH_FIXME[4336] */
 function x(): %s {
 }
 |}

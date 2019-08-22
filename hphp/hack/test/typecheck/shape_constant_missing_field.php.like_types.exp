@@ -1,5 +1,5 @@
 File "shape_constant_missing_field.php", line 9, characters 18-20:
-Wrong type hint (Typing[4110])
+Wrong type hint (Typing[4338])
 File "shape_constant_missing_field.php", line 9, characters 9-16:
 Expected ~shape('bar' => ~string, 'foo' => ~int)
 File "shape_constant_missing_field.php", line 9, characters 24-40:

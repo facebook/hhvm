@@ -1,5 +1,5 @@
 File "fc_enum_case_8.php", line 10, characters 10-16:
-Invalid return type (Typing[4110])
+Invalid return type (Typing[4336])
 File "fc_enum_case_8.php", line 10, characters 10-16:
 Expected void because this function implicitly returns void
 File "fc_enum_case_8.php", line 10, characters 23-25:

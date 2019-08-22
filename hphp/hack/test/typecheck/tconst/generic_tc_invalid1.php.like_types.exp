@@ -1,5 +1,5 @@
 File "generic_tc_invalid1.php", line 24, characters 11-13:
-Some type constraint(s) here are violated (Typing[4062])
+Some type constraint(s) here are violated (Typing[4323])
 File "generic_tc_invalid1.php", line 16, characters 30-31:
 'T1' is a constrained type parameter
 File "generic_tc_invalid1.php", line 16, characters 74-74:

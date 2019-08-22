@@ -1,5 +1,5 @@
 File "variance_transfer.php", line 25, characters 21-29:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "variance_transfer.php", line 9, characters 10-11:
 Some type constraint(s) are violated here
 File "variance_transfer.php", line 9, characters 10-11:
@@ -9,7 +9,7 @@ Expected arraykey
 File "variance_transfer.php", line 9, characters 10-11:
 But got dynamic
 File "variance_transfer.php", line 26, characters 15-17:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "variance_transfer.php", line 3, characters 12-12:
 'T' is a constrained type parameter
 File "variance_transfer.php", line 3, characters 12-12:
@@ -21,7 +21,7 @@ Expected int
 File "variance_transfer.php", line 3, characters 12-12:
 But got dynamic
 File "variance_transfer.php", line 27, characters 15-17:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "variance_transfer.php", line 3, characters 12-12:
 'T' is a constrained type parameter
 File "variance_transfer.php", line 3, characters 12-12:

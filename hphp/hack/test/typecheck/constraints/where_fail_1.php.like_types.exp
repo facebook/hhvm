@@ -1,5 +1,5 @@
 File "where_fail_1.php", line 14, characters 12-26:
-A 'where' type constraint is violated here (Typing[4110])
+A 'where' type constraint is violated here (Typing[4323])
 File "where_fail_1.php", line 10, characters 19-33:
 This is the method with 'where' type constraints
 File "where_fail_1.php", line 10, characters 35-35:

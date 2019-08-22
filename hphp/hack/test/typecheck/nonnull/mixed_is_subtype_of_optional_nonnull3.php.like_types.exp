@@ -1,5 +1,5 @@
 File "mixed_is_subtype_of_optional_nonnull3.php", line 12, characters 10-40:
-Invalid return type (Typing[4110])
+Invalid return type (Typing[4323])
 File "mixed_is_subtype_of_optional_nonnull3.php", line 3, characters 22-22:
 Some type constraint(s) are violated here
 File "mixed_is_subtype_of_optional_nonnull3.php", line 3, characters 22-22:

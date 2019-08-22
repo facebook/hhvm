@@ -1,5 +1,5 @@
 File "box_arity.php", line 10, characters 7-12:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "box_arity.php", line 4, characters 14-14:
 'T' is a constrained type parameter
 File "box_arity.php", line 4, characters 14-14:
@@ -11,7 +11,7 @@ Expected Erased<int>
 File "box_arity.php", line 4, characters 14-14:
 But got dynamic
 File "box_arity.php", line 11, characters 7-12:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "box_arity.php", line 4, characters 14-14:
 'T' is a constrained type parameter
 File "box_arity.php", line 4, characters 14-14:
@@ -23,7 +23,7 @@ Expected Erased<int, string>
 File "box_arity.php", line 4, characters 14-14:
 But got dynamic
 File "box_arity.php", line 13, characters 7-12:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "box_arity.php", line 4, characters 14-14:
 'T' is a constrained type parameter
 File "box_arity.php", line 4, characters 14-14:
@@ -35,7 +35,7 @@ Expected Reified<int>
 File "box_arity.php", line 4, characters 14-14:
 But got dynamic
 File "box_arity.php", line 14, characters 7-12:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "box_arity.php", line 4, characters 14-14:
 'T' is a constrained type parameter
 File "box_arity.php", line 4, characters 14-14:

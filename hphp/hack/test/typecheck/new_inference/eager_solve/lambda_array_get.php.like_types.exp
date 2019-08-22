@@ -55,7 +55,7 @@ File "lambda_array_get.php", line 16, characters 20-20:
 File "lambda_array_get.php", line 11, characters 65-74:
 But got Contra<~shape('a' => [unresolved])>
 File "lambda_array_get.php", line 117, characters 36-37:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "lambda_array_get.php", line 11, characters 25-26:
 Some type constraint(s) are violated here
 File "lambda_array_get.php", line 11, characters 25-26:

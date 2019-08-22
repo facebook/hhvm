@@ -6,7 +6,7 @@ module Test = Integration_test_base
 
 let x_contents =
   Printf.sprintf {|<?hh
-/* HH_FIXME[4110] */
+/* HH_FIXME[4336] */
 function %s(): %s {
 }
 |}

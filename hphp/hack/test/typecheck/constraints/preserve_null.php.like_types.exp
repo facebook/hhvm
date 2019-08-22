@@ -1,5 +1,5 @@
 File "preserve_null.php", line 9, characters 10-26:
-Invalid return type (Typing[4110])
+Invalid return type (Typing[4323])
 File "preserve_null.php", line 4, characters 24-24:
 Some type constraint(s) are violated here
 File "preserve_null.php", line 4, characters 24-24:
@@ -9,7 +9,7 @@ Expected int
 File "preserve_null.php", line 4, characters 24-24:
 But got dynamic
 File "preserve_null.php", line 13, characters 10-26:
-Invalid return type (Typing[4110])
+Invalid return type (Typing[4323])
 File "preserve_null.php", line 4, characters 24-24:
 Some type constraint(s) are violated here
 File "preserve_null.php", line 4, characters 24-24:

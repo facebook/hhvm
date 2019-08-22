@@ -1,5 +1,5 @@
 File "lambda_variadic_generic.php", line 17, characters 10-10:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "lambda_variadic_generic.php", line 9, characters 9-9:
 'T' is a constrained type parameter
 File "lambda_variadic_generic.php", line 9, characters 9-9:

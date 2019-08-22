@@ -16,7 +16,7 @@ let foo_contents =
   Printf.sprintf
     "<?hh // strict
 %s
-/* HH_FIXME[4110] */
+/* HH_FIXME[4336] */
 function foo(): string {
 }"
 

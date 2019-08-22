@@ -1,5 +1,5 @@
 File "super_constraint_12.php", line 13, characters 10-20:
-Invalid return type (Typing[4110])
+Invalid return type (Typing[4323])
 File "super_constraint_12.php", line 8, characters 23-24:
 Some type constraint(s) are violated here
 File "super_constraint_12.php", line 8, characters 23-24:

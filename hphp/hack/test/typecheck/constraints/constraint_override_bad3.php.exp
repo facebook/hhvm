@@ -1,10 +1,5 @@
-File "constraint_override_bad3.php", line 23, characters 7-12:
-Class BadSub does not correctly implement all required members  (Typing[4110])
-File "constraint_override_bad3.php", line 23, characters 26-30:
-Some members are incompatible with those declared in type Super
-Read the following to see why:
 File "constraint_override_bad3.php", line 24, characters 19-21:
-Member foo has the wrong type
+Member foo has the wrong type (Typing[4341])
 File "constraint_override_bad3.php", line 24, characters 73-73:
 Expected B
 File "constraint_override_bad3.php", line 23, characters 14-15:

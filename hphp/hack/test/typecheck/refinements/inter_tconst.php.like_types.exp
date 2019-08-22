@@ -7,7 +7,7 @@ You are trying to access the member get but this is not an object, it is a dynam
 File "inter_tconst.php", line 10, characters 20-20:
 Definition is here
 File "inter_tconst.php", line 16, characters 5-8:
-Some type constraint(s) here are violated (Typing[4062])
+Some type constraint(s) here are violated (Typing[4323])
 File "inter_tconst.php", line 10, characters 15-15:
 'T' is a constrained type parameter
 File "inter_tconst.php", line 10, characters 51-52:
@@ -15,7 +15,7 @@ You are trying to access the member Ta but this is not an object, it is a dynami
 File "inter_tconst.php", line 10, characters 15-15:
 Definition is here
 File "inter_tconst.php", line 16, characters 5-8:
-Some type constraint(s) here are violated (Typing[4062])
+Some type constraint(s) here are violated (Typing[4323])
 File "inter_tconst.php", line 10, characters 15-15:
 'T' is a constrained type parameter
 File "inter_tconst.php", line 10, characters 51-52:

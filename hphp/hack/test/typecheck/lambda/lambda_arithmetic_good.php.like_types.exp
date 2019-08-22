@@ -1,5 +1,5 @@
 File "lambda_arithmetic_good.php", line 16, characters 21-24:
-Typing error (Typing[4110])
+Typing error (Typing[4323])
 File "lambda_arithmetic_good.php", line 4, characters 16-17:
 Some type constraint(s) are violated here
 File "lambda_arithmetic_good.php", line 4, characters 16-17:
@@ -9,7 +9,7 @@ Expected num because this is used in an arithmetic operation
 File "lambda_arithmetic_good.php", line 4, characters 16-17:
 But got dynamic
 File "lambda_arithmetic_good.php", line 18, characters 21-24:
-Typing error (Typing[4110])
+Typing error (Typing[4323])
 File "lambda_arithmetic_good.php", line 4, characters 16-17:
 Some type constraint(s) are violated here
 File "lambda_arithmetic_good.php", line 4, characters 16-17:
@@ -19,7 +19,7 @@ Expected num because this is used in an arithmetic operation
 File "lambda_arithmetic_good.php", line 4, characters 16-17:
 But got dynamic
 File "lambda_arithmetic_good.php", line 20, characters 21-24:
-Typing error (Typing[4110])
+Typing error (Typing[4323])
 File "lambda_arithmetic_good.php", line 4, characters 16-17:
 Some type constraint(s) are violated here
 File "lambda_arithmetic_good.php", line 4, characters 16-17:
@@ -29,7 +29,7 @@ Expected num because this is used in an arithmetic operation
 File "lambda_arithmetic_good.php", line 4, characters 16-17:
 But got dynamic
 File "lambda_arithmetic_good.php", line 22, characters 21-26:
-Typing error (Typing[4110])
+Typing error (Typing[4323])
 File "lambda_arithmetic_good.php", line 4, characters 16-17:
 Some type constraint(s) are violated here
 File "lambda_arithmetic_good.php", line 4, characters 16-17:
@@ -39,7 +39,7 @@ Expected num because this is used in an arithmetic operation
 File "lambda_arithmetic_good.php", line 4, characters 16-17:
 But got dynamic
 File "lambda_arithmetic_good.php", line 24, characters 21-25:
-Typing error (Typing[4110])
+Typing error (Typing[4323])
 File "lambda_arithmetic_good.php", line 4, characters 16-17:
 Some type constraint(s) are violated here
 File "lambda_arithmetic_good.php", line 4, characters 16-17:
@@ -49,7 +49,7 @@ Expected num because this is used in an arithmetic operation
 File "lambda_arithmetic_good.php", line 4, characters 16-17:
 But got dynamic
 File "lambda_arithmetic_good.php", line 27, characters 21-24:
-Typing error (Typing[4110])
+Typing error (Typing[4323])
 File "lambda_arithmetic_good.php", line 7, characters 16-17:
 Some type constraint(s) are violated here
 File "lambda_arithmetic_good.php", line 7, characters 16-17:
@@ -67,7 +67,7 @@ File "lambda_arithmetic_good.php", line 14, characters 20-20:
 File "lambda_arithmetic_good.php", line 7, characters 45-61:
 But got (function(mixed): ~int)
 File "lambda_arithmetic_good.php", line 29, characters 21-25:
-Typing error (Typing[4110])
+Typing error (Typing[4323])
 File "lambda_arithmetic_good.php", line 7, characters 16-17:
 Some type constraint(s) are violated here
 File "lambda_arithmetic_good.php", line 7, characters 16-17:
@@ -77,7 +77,7 @@ Expected num because this is used in an arithmetic operation
 File "lambda_arithmetic_good.php", line 7, characters 16-17:
 But got dynamic
 File "lambda_arithmetic_good.php", line 29, characters 21-25:
-Typing error (Typing[4110])
+Typing error (Typing[4323])
 File "lambda_arithmetic_good.php", line 7, characters 16-17:
 Some type constraint(s) are violated here
 File "lambda_arithmetic_good.php", line 7, characters 16-17:
@@ -95,7 +95,7 @@ File "lambda_arithmetic_good.php", line 14, characters 20-20:
 File "lambda_arithmetic_good.php", line 7, characters 45-61:
 But got (function(mixed): ~int)
 File "lambda_arithmetic_good.php", line 31, characters 21-26:
-Typing error (Typing[4110])
+Typing error (Typing[4323])
 File "lambda_arithmetic_good.php", line 7, characters 16-17:
 Some type constraint(s) are violated here
 File "lambda_arithmetic_good.php", line 7, characters 16-17:

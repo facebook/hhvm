@@ -643,35 +643,22 @@ let check_implements env removals parent_type type_ =
       let parent_class =
         (Reason.to_pos parent_r), parent_class, parent_tparaml in
       let class_ = (Reason.to_pos r), class_, tparaml in
-      if !Errors.use_new_type_errors
-      then
-        begin
-          if snd parent_name = SN.Classes.cHH_BuiltinEnum
-            then
-              (* sadly, enum error reporting requires this to keep the error in the file
-                 with the enum *)
-              Errors.try_
-                (fun () -> check_class_implements env removals (parent_class, parent_type) (class_, type_))
-                (fun errorl ->
-                  let name_pos, _ = name in
-                  Errors.bad_enum_decl name_pos errorl)
-            else
-              Errors.try_unless_error_in_different_file
-                (Env.get_file env)
-                (fun () -> check_class_implements env removals (parent_class, parent_type) (class_, type_))
-                (fun errorl ->
-                  let p_name_pos, p_name_str = parent_name in
-                  let name_pos, name_str = name in
-                  Errors.bad_decl_override p_name_pos p_name_str name_pos name_str errorl)
-        end
-      else
-        Errors.try_
-          (fun () ->
-            check_class_implements env removals (parent_class, parent_type) (class_, type_))
-          (fun errorl ->
-            let p_name_pos, p_name_str = parent_name in
-            let name_pos, name_str = name in
-            if snd parent_name = SN.Classes.cHH_BuiltinEnum
-              then Errors.bad_enum_decl name_pos errorl
-              else Errors.bad_decl_override p_name_pos p_name_str name_pos name_str
-              errorl)
+      begin
+        if snd parent_name = SN.Classes.cHH_BuiltinEnum
+          then
+            (* sadly, enum error reporting requires this to keep the error in the file
+               with the enum *)
+            Errors.try_
+              (fun () -> check_class_implements env removals (parent_class, parent_type) (class_, type_))
+              (fun errorl ->
+                let name_pos, _ = name in
+                Errors.bad_enum_decl name_pos errorl)
+          else
+            Errors.try_unless_error_in_different_file
+              (Env.get_file env)
+              (fun () -> check_class_implements env removals (parent_class, parent_type) (class_, type_))
+              (fun errorl ->
+                let p_name_pos, p_name_str = parent_name in
+                let name_pos, name_str = name in
+                Errors.bad_decl_override p_name_pos p_name_str name_pos name_str errorl)
+      end

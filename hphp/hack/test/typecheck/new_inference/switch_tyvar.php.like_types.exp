@@ -1,5 +1,5 @@
 File "switch_tyvar.php", line 19, characters 5-148:
-Invalid return type (Typing[4110])
+Invalid return type (Typing[4323])
 File "switch_tyvar.php", line 9, characters 40-42:
 Some type constraint(s) are violated here
 File "switch_tyvar.php", line 9, characters 40-42:

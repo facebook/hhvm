@@ -1,5 +1,5 @@
 File "circular_bug_2.php", line 27, characters 36-38:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "circular_bug_2.php", line 14, characters 22-23:
 Some type constraint(s) are violated here
 File "circular_bug_2.php", line 14, characters 22-23:

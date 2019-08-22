@@ -1,6 +1,6 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
-/* HH_FIXME[4110] */
+/* HH_FIXME[4336] */
 function filterInstance<Tu, Tv super Tu>(
   Traversable<Tv> $vector,
   classname<Tu> $classname,

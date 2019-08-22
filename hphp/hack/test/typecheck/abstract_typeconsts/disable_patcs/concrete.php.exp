@@ -1,10 +1,5 @@
-File "concrete.php", line 7, characters 7-7:
-Class D does not correctly implement all required members  (Typing[4110])
-File "concrete.php", line 7, characters 17-17:
-Some members are incompatible with those declared in type C
-Read the following to see why:
 File "concrete.php", line 8, characters 14-14:
-The assigned type of this type constant is inconsistent with its parent
+The assigned type of this type constant is inconsistent with its parent (Typing[4110])
 File "concrete.php", line 8, characters 27-29:
 Expected int
 File "concrete.php", line 4, characters 18-25:

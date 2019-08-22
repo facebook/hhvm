@@ -1,5 +1,5 @@
 File "staticgeneric_good.php", line 15, characters 10-29:
-Invalid return type (Typing[4110])
+Invalid return type (Typing[4323])
 File "staticgeneric_good.php", line 4, characters 9-9:
 Some type constraint(s) are violated here
 File "staticgeneric_good.php", line 4, characters 9-9:

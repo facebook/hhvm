@@ -1,5 +1,5 @@
 File "tconst_on_generics6.php", line 43, characters 14-17:
-Some type constraint(s) here are violated (Typing[4062])
+Some type constraint(s) here are violated (Typing[4323])
 File "tconst_on_generics6.php", line 30, characters 31-32:
 'T1' is a constrained type parameter
 File "tconst_on_generics6.php", line 30, characters 86-86:
@@ -7,7 +7,7 @@ You are trying to access the member T but this is not an object, it is a dynamic
 File "tconst_on_generics6.php", line 30, characters 31-32:
 Definition is here
 File "tconst_on_generics6.php", line 43, characters 14-17:
-Some type constraint(s) here are violated (Typing[4062])
+Some type constraint(s) here are violated (Typing[4323])
 File "tconst_on_generics6.php", line 30, characters 31-32:
 'T1' is a constrained type parameter
 File "tconst_on_generics6.php", line 30, characters 86-86:
@@ -15,7 +15,7 @@ You are trying to access the member T but this is not an object, it is a dynamic
 File "tconst_on_generics6.php", line 30, characters 37-39:
 Definition is here
 File "tconst_on_generics6.php", line 43, characters 14-17:
-A 'where' type constraint is violated here (Typing[4110])
+A 'where' type constraint is violated here (Typing[4323])
 File "tconst_on_generics6.php", line 30, characters 26-29:
 This method's where constraints contain a generic type access
 File "tconst_on_generics6.php", line 30, characters 55-56:
@@ -31,7 +31,7 @@ File "tconst_on_generics6.php", line 30, characters 47-52:
 File "tconst_on_generics6.php", line 30, characters 55-56:
 But got dynamic
 File "tconst_on_generics6.php", line 43, characters 19-20:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4326])
 File "tconst_on_generics6.php", line 10, characters 18-20:
 Expected int
 File "tconst_on_generics6.php", line 30, characters 86-86:
@@ -45,7 +45,7 @@ File "tconst_on_generics6.php", line 30, characters 86-86:
 File "tconst_on_generics6.php", line 39, characters 12-20:
   on an object of exactly the class StringBox
 File "tconst_on_generics6.php", line 44, characters 15-18:
-Some type constraint(s) here are violated (Typing[4062])
+Some type constraint(s) here are violated (Typing[4323])
 File "tconst_on_generics6.php", line 30, characters 31-32:
 'T1' is a constrained type parameter
 File "tconst_on_generics6.php", line 30, characters 86-86:
@@ -53,7 +53,7 @@ You are trying to access the member T but this is not an object, it is a dynamic
 File "tconst_on_generics6.php", line 30, characters 31-32:
 Definition is here
 File "tconst_on_generics6.php", line 44, characters 15-18:
-Some type constraint(s) here are violated (Typing[4062])
+Some type constraint(s) here are violated (Typing[4323])
 File "tconst_on_generics6.php", line 30, characters 31-32:
 'T1' is a constrained type parameter
 File "tconst_on_generics6.php", line 30, characters 86-86:
@@ -61,7 +61,7 @@ You are trying to access the member T but this is not an object, it is a dynamic
 File "tconst_on_generics6.php", line 30, characters 37-39:
 Definition is here
 File "tconst_on_generics6.php", line 44, characters 15-18:
-A 'where' type constraint is violated here (Typing[4110])
+A 'where' type constraint is violated here (Typing[4323])
 File "tconst_on_generics6.php", line 30, characters 26-29:
 This method's where constraints contain a generic type access
 File "tconst_on_generics6.php", line 30, characters 55-56:
@@ -77,7 +77,7 @@ File "tconst_on_generics6.php", line 30, characters 47-52:
 File "tconst_on_generics6.php", line 30, characters 55-56:
 But got dynamic
 File "tconst_on_generics6.php", line 44, characters 20-21:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4326])
 File "tconst_on_generics6.php", line 10, characters 18-20:
 Expected int
 File "tconst_on_generics6.php", line 30, characters 86-86:
@@ -92,7 +92,7 @@ on the expression dependent type <expr#1>
 File "tconst_on_generics6.php", line 44, characters 20-21:
   where '<expr#1>' is a reference to this expression
 File "tconst_on_generics6.php", line 45, characters 14-17:
-Some type constraint(s) here are violated (Typing[4062])
+Some type constraint(s) here are violated (Typing[4323])
 File "tconst_on_generics6.php", line 33, characters 31-32:
 'T1' is a constrained type parameter
 File "tconst_on_generics6.php", line 33, characters 73-73:
@@ -100,7 +100,7 @@ You are trying to access the member T but this is not an object, it is a dynamic
 File "tconst_on_generics6.php", line 33, characters 31-32:
 Definition is here
 File "tconst_on_generics6.php", line 45, characters 14-17:
-Some type constraint(s) here are violated (Typing[4062])
+Some type constraint(s) here are violated (Typing[4323])
 File "tconst_on_generics6.php", line 33, characters 31-32:
 'T1' is a constrained type parameter
 File "tconst_on_generics6.php", line 33, characters 73-73:
@@ -108,7 +108,7 @@ You are trying to access the member T but this is not an object, it is a dynamic
 File "tconst_on_generics6.php", line 33, characters 37-39:
 Definition is here
 File "tconst_on_generics6.php", line 45, characters 19-20:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "tconst_on_generics6.php", line 33, characters 42-43:
 Some type constraint(s) are violated here
 File "tconst_on_generics6.php", line 33, characters 42-43:
@@ -123,7 +123,7 @@ File "tconst_on_generics6.php", line 45, characters 19-20:
 File "tconst_on_generics6.php", line 33, characters 42-43:
 But got dynamic
 File "tconst_on_generics6.php", line 47, characters 17-18:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "tconst_on_generics6.php", line 33, characters 42-43:
 Some type constraint(s) are violated here
 File "tconst_on_generics6.php", line 33, characters 42-43:

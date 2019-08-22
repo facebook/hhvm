@@ -1,5 +1,5 @@
 File "array_get_generic_non_lvalue.php", line 12, characters 10-14:
-Invalid return type (Typing[4110])
+Invalid return type (Typing[4323])
 File "array_get_generic_non_lvalue.php", line 6, characters 12-13:
 Some type constraint(s) are violated here
 File "array_get_generic_non_lvalue.php", line 6, characters 12-13:

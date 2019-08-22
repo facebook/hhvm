@@ -1,5 +1,5 @@
 File "constraint_on_construct_good.php", line 16, characters 20-23:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "constraint_on_construct_good.php", line 12, characters 13-13:
 'T' is a constrained type parameter
 File "constraint_on_construct_good.php", line 12, characters 13-13:

@@ -1,4 +1,6 @@
-File "instantiate_from_unresolved_class_id_type.php", line 5, characters 45-45:
-You are trying to access the member T but this is not an object, it is a dynamic value (Typing[4062])
-File "instantiate_from_unresolved_class_id_type.php", line 21, characters 23-23:
-Definition is here
+File "instantiate_from_unresolved_class_id_type.php", line 13, characters 36-51:
+Invalid argument (Typing[4110])
+File "instantiate_from_unresolved_class_id_type.php", line 21, characters 36-47:
+Expected ~classname<[unresolved]> because it is an unenforceable type
+File "typestructure.hhi", line 58, characters 18-30:
+But got ~?classname<~this::TConstType>

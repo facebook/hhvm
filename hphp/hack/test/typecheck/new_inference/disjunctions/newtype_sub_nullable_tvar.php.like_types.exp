@@ -1,5 +1,5 @@
 File "newtype_sub_nullable_tvar.php--file2.php", line 24, characters 14-22:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "newtype_sub_nullable_tvar.php--file2.php", line 3, characters 9-9:
 Some type constraint(s) are violated here
 File "newtype_sub_nullable_tvar.php--file2.php", line 3, characters 9-9:
@@ -15,7 +15,7 @@ Expected ~M because it is an unenforceable type
 File "newtype_sub_nullable_tvar.php--file1.php", line 4, characters 15-15:
 But got N
 File "newtype_sub_nullable_tvar.php--file2.php", line 33, characters 12-20:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "newtype_sub_nullable_tvar.php--file2.php", line 3, characters 9-9:
 Some type constraint(s) are violated here
 File "newtype_sub_nullable_tvar.php--file2.php", line 3, characters 9-9:
@@ -25,7 +25,7 @@ Expected B
 File "newtype_sub_nullable_tvar.php--file2.php", line 3, characters 9-9:
 But got dynamic
 File "newtype_sub_nullable_tvar.php--file2.php", line 34, characters 16-24:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "newtype_sub_nullable_tvar.php--file2.php", line 3, characters 9-9:
 Some type constraint(s) are violated here
 File "newtype_sub_nullable_tvar.php--file2.php", line 3, characters 9-9:
@@ -35,7 +35,7 @@ Expected B
 File "newtype_sub_nullable_tvar.php--file2.php", line 3, characters 9-9:
 But got dynamic
 File "newtype_sub_nullable_tvar.php--file2.php", line 39, characters 16-24:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "newtype_sub_nullable_tvar.php--file2.php", line 3, characters 9-9:
 Some type constraint(s) are violated here
 File "newtype_sub_nullable_tvar.php--file2.php", line 3, characters 9-9:
@@ -45,7 +45,7 @@ Expected B
 File "newtype_sub_nullable_tvar.php--file2.php", line 3, characters 9-9:
 But got dynamic
 File "newtype_sub_nullable_tvar.php--file2.php", line 43, characters 12-20:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "newtype_sub_nullable_tvar.php--file2.php", line 3, characters 9-9:
 Some type constraint(s) are violated here
 File "newtype_sub_nullable_tvar.php--file2.php", line 3, characters 9-9:
@@ -55,7 +55,7 @@ Expected B
 File "newtype_sub_nullable_tvar.php--file2.php", line 3, characters 9-9:
 But got dynamic
 File "newtype_sub_nullable_tvar.php--file2.php", line 48, characters 14-22:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "newtype_sub_nullable_tvar.php--file2.php", line 3, characters 9-9:
 Some type constraint(s) are violated here
 File "newtype_sub_nullable_tvar.php--file2.php", line 3, characters 9-9:

@@ -1,5 +1,5 @@
 File "new_expression.php", line 10, characters 7-7:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "new_expression.php", line 4, characters 18-19:
 'Tu' is a constrained type parameter
 File "new_expression.php", line 4, characters 18-19:

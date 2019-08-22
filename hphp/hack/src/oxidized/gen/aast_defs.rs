@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<049a0927302ce9bd02d3863f57303d1c>>
+// @generated SignedSource<<58b80c9b60dd1455e7700f90f9011b1f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -112,6 +112,7 @@ pub enum Hint_ {
     Haccess(Hint, Vec<Sid>),
     Hsoft(Hint),
     Hany,
+    Herr,
     Hmixed,
     Hnonnull,
     Habstr(String),
@@ -123,6 +124,7 @@ pub enum Hint_ {
     Hthis,
     Hdynamic,
     Hnothing,
+    HpuAccess(Hint, Sid),
 }
 
 #[derive(Clone, Copy, Debug, Eq, IntoOcamlRep, Ocamlvalue, PartialEq)]

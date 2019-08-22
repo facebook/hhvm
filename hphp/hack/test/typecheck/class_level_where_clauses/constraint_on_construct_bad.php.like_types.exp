@@ -1,5 +1,5 @@
 File "constraint_on_construct_bad.php", line 16, characters 19-22:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "constraint_on_construct_bad.php", line 12, characters 13-13:
 'T' is a constrained type parameter
 File "constraint_on_construct_bad.php", line 12, characters 13-13:
@@ -11,7 +11,7 @@ Expected string
 File "constraint_on_construct_bad.php", line 12, characters 13-13:
 But got dynamic
 File "constraint_on_construct_bad.php", line 16, characters 19-22:
-A 'where' type constraint is violated here (Typing[4110])
+A 'where' type constraint is violated here (Typing[4323])
 File "constraint_on_construct_bad.php", line 12, characters 7-10:
 This is the class with 'where' type constraints
 File "constraint_on_construct_bad.php", line 12, characters 27-29:

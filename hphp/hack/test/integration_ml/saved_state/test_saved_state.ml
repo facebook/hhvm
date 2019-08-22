@@ -4,7 +4,7 @@ let a_contents =
   Printf.sprintf
     {|<?hh
 class A {
-  /* HH_FIXME[4110] */
+  /* HH_FIXME[4336] */
   public function foo(): %s {
   }
 }

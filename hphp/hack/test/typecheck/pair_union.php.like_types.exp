@@ -1,5 +1,5 @@
 File "pair_union.php", line 12, characters 10-138:
-Invalid return type (Typing[4110])
+Invalid return type (Typing[4323])
 File "pair_union.php", line 7, characters 20-21:
 Some type constraint(s) are violated here
 File "pair_union.php", line 7, characters 20-21:

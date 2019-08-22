@@ -5,7 +5,7 @@ Expected ~(function([unresolved]): [unresolved]) because it is an unenforceable 
 File "sort_by.php", line 20, characters 21-54:
 But got (function(TimePeriod $u): [unresolved])
 File "sort_by.php", line 20, characters 70-76:
-Typing error (Typing[4110])
+Typing error (Typing[4323])
 File "sort_by.php", line 10, characters 22-23:
 Some type constraint(s) are violated here
 File "sort_by.php", line 10, characters 22-23:
@@ -15,7 +15,7 @@ Expected num because this is used in an arithmetic operation
 File "sort_by.php", line 10, characters 22-23:
 But got dynamic
 File "sort_by.php", line 20, characters 70-76:
-Typing error (Typing[4110])
+Typing error (Typing[4323])
 File "sort_by.php", line 10, characters 22-23:
 Some type constraint(s) are violated here
 File "sort_by.php", line 10, characters 22-23:

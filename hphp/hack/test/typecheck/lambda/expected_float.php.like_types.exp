@@ -1,5 +1,5 @@
 File "expected_float.php", line 6, characters 25-30:
-Typing error (Typing[4110])
+Typing error (Typing[4323])
 File "collections/Vector.hhi", line 48, characters 20-21:
 Some type constraint(s) are violated here
 File "collections/Vector.hhi", line 48, characters 20-21:

@@ -1,5 +1,5 @@
 File "enforceable_targ_new.php", line 10, characters 7-7:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "enforceable_targ_new.php", line 7, characters 27-28:
 'Tc' is a constrained type parameter
 File "enforceable_targ_new.php", line 7, characters 27-28:
@@ -11,7 +11,7 @@ Expected Erased<int>
 File "enforceable_targ_new.php", line 7, characters 27-28:
 But got dynamic
 File "enforceable_targ_new.php", line 11, characters 7-7:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "enforceable_targ_new.php", line 7, characters 27-28:
 'Tc' is a constrained type parameter
 File "enforceable_targ_new.php", line 7, characters 27-28:
@@ -23,7 +23,7 @@ Expected Reified<int>
 File "enforceable_targ_new.php", line 7, characters 27-28:
 But got dynamic
 File "enforceable_targ_new.php", line 12, characters 7-7:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "enforceable_targ_new.php", line 7, characters 27-28:
 'Tc' is a constrained type parameter
 File "enforceable_targ_new.php", line 7, characters 27-28:

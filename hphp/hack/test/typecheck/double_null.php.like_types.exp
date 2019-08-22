@@ -1,5 +1,5 @@
 File "double_null.php", line 39, characters 12-21:
-Invalid return type (Typing[4110])
+Invalid return type (Typing[4323])
 File "double_null.php", line 26, characters 16-16:
 Some type constraint(s) are violated here
 File "double_null.php", line 26, characters 16-16:

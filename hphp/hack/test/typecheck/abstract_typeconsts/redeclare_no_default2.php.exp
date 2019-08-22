@@ -1,19 +1,9 @@
-File "redeclare_no_default2.php", line 7, characters 16-16:
-Class B does not correctly implement all required members  (Typing[4320])
-File "redeclare_no_default2.php", line 7, characters 26-26:
-Some members are incompatible with those declared in type A
-Read the following to see why:
 File "redeclare_no_default2.php", line 8, characters 23-23:
-This abstract type constant does not have a default type
+This abstract type constant does not have a default type (Typing[4320])
 File "redeclare_no_default2.php", line 4, characters 23-23:
 It cannot override an abstract type constant that has a default type
-File "redeclare_no_default2.php", line 11, characters 16-16:
-Class C does not correctly implement all required members  (Typing[4110])
-File "redeclare_no_default2.php", line 11, characters 26-26:
-Some members are incompatible with those declared in type B
-Read the following to see why:
 File "redeclare_no_default2.php", line 4, characters 23-23:
-The constraint on this type constant is inconsistent with its parent
+The constraint on this type constant is inconsistent with its parent (Typing[4110])
 File "redeclare_no_default2.php", line 8, characters 28-33:
 Expected string
 File "redeclare_no_default2.php", line 4, characters 28-32:

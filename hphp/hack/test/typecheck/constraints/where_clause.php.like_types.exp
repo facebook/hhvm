@@ -1,5 +1,5 @@
 File "where_clause.php", line 32, characters 16-24:
-A 'where' type constraint is violated here (Typing[4110])
+A 'where' type constraint is violated here (Typing[4323])
 File "where_clause.php", line 22, characters 19-27:
 This is the method with 'where' type constraints
 File "where_clause.php", line 22, characters 29-34:
@@ -11,7 +11,7 @@ Expected Bar<[unresolved]>
 File "where_clause.php", line 22, characters 29-34:
 But got dynamic
 File "where_clause.php", line 32, characters 12-28:
-Invalid return type (Typing[4110])
+Invalid return type (Typing[4323])
 File "where_clause.php", line 22, characters 29-34:
 Some type constraint(s) are violated here
 File "where_clause.php", line 22, characters 29-34:

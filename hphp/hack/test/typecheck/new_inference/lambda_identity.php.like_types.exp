@@ -1,5 +1,5 @@
 File "lambda_identity.php", line 24, characters 20-21:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "lambda_identity.php", line 4, characters 23-24:
 Some type constraint(s) are violated here
 File "lambda_identity.php", line 4, characters 23-24:
@@ -9,7 +9,7 @@ Expected arraykey
 File "lambda_identity.php", line 4, characters 23-24:
 But got dynamic
 File "lambda_identity.php", line 25, characters 20-21:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "lambda_identity.php", line 4, characters 23-24:
 Some type constraint(s) are violated here
 File "lambda_identity.php", line 4, characters 23-24:

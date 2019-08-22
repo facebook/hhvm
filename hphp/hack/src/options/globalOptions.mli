@@ -283,9 +283,6 @@ type t = {
   (* Use shared_lru workers instead of MultiWorker workers *)
   tco_use_lru_workers : bool;
 
-  (* Split 4110 into a variety of more specific errors *)
-  use_new_type_errors : bool;
-
   (* Force 5000s to be @lint-ignored rather than fixme'd *)
   disable_linter_fixmes : bool;
 
@@ -379,7 +376,6 @@ val make :
   ?po_enable_class_level_where_clauses: bool ->
   ?po_disable_legacy_soft_typehints: bool ->
   ?tco_use_lru_workers : bool ->
-  ?use_new_type_errors : bool ->
   ?disable_linter_fixmes : bool ->
   ?po_disallowed_decl_fixmes: ISet.t ->
   ?po_allow_new_attribute_syntax : bool ->
@@ -467,7 +463,6 @@ val po_enable_constant_visibility_modifiers : t -> bool
 val po_enable_class_level_where_clauses : t -> bool
 val po_disable_legacy_soft_typehints : t -> bool
 val tco_use_lru_workers : t -> bool
-val use_new_type_errors : t -> bool
 val disable_linter_fixmes : t -> bool
 val po_disallowed_decl_fixmes : t -> ISet.t
 val po_allow_new_attribute_syntax : t -> bool

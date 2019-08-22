@@ -1,5 +1,5 @@
 File "let_subtype_covariance.php", line 12, characters 30-32:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "let_subtype_covariance.php", line 3, characters 12-12:
 'T' is a constrained type parameter
 File "let_subtype_covariance.php", line 3, characters 12-12:

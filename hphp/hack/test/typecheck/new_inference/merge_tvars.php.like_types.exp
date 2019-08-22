@@ -1,5 +1,5 @@
 File "merge_tvars.php", line 12, characters 26-34:
-Invalid argument (Typing[4110])
+Invalid argument (Typing[4323])
 File "merge_tvars.php", line 3, characters 10-11:
 Some type constraint(s) are violated here
 File "merge_tvars.php", line 3, characters 10-11:

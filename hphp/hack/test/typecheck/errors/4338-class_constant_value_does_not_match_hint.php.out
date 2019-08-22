@@ -1,0 +1,6 @@
+File "4338-class_constant_value_does_not_match_hint.php", line 5, characters 13-13:
+Wrong type hint (Typing[4338])
+File "4338-class_constant_value_does_not_match_hint.php", line 5, characters 9-11:
+Expected int
+File "4338-class_constant_value_does_not_match_hint.php", line 5, characters 17-22:
+But got string

@@ -1,5 +1,5 @@
 File "valid_targ_tpenv_bounds_test2.php", line 7, characters 31-38:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "valid_targ_tpenv_bounds_test2.php", line 6, characters 18-19:
 'Tc' is a constrained type parameter
 File "valid_targ_tpenv_bounds_test2.php", line 6, characters 24-24:

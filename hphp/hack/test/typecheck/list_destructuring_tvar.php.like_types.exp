@@ -3,7 +3,7 @@ File "list_destructuring_tvar.php", line 38, characters 7-18:
 File "list_destructuring_tvar.php", line 39, characters 7-18:
   ~?(A2 | B2)
 File "list_destructuring_tvar.php", line 29, characters 5-177:
-Invalid return type (Typing[4110])
+Invalid return type (Typing[4323])
 File "list_destructuring_tvar.php", line 8, characters 24-26:
 Some type constraint(s) are violated here
 File "list_destructuring_tvar.php", line 8, characters 24-26:

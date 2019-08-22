@@ -1,5 +1,5 @@
 File "functional_type_arity.php", line 14, characters 17-22:
-Some type constraint(s) here are violated (Typing[4110])
+Some type constraint(s) here are violated (Typing[4323])
 File "functional_type_arity.php", line 12, characters 9-10:
 'T1' is a constrained type parameter
 File "functional_type_arity.php", line 14, characters 19-21:

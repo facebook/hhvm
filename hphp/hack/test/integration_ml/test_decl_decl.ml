@@ -16,7 +16,7 @@ let a_contents =
   "<?hh // strict
 
 class A {
-  /* HH_FIXME[4110] */
+  /* HH_FIXME[4336] */
   final public function f() : C {
   }
 }

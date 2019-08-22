@@ -1,0 +1,6 @@
+File "4341-bad_method_override.php", line 9, characters 19-21:
+Member foo has the wrong type (Typing[4341])
+File "4341-bad_method_override.php", line 9, characters 23-28:
+Expected string
+File "4341-bad_method_override.php", line 5, characters 23-25:
+But got int

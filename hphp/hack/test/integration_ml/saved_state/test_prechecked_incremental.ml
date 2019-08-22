@@ -8,7 +8,7 @@ let x_contents =
   Printf.sprintf
     {|<?hh
 class %s {
-    /* HH_FIXME[4110] */
+    /* HH_FIXME[4336] */
     public function bar() : %s {
     }
 }
@@ -16,7 +16,7 @@ class %s {
 
 let foo_contents =
   Printf.sprintf {|<?hh
-/* HH_FIXME[4110] */
+/* HH_FIXME[4336] */
 function foo(): %s {
 }
 |}

@@ -548,7 +548,6 @@ end
 let error_codes_treated_strictly = ref (ISet.of_list [])
 let is_strict_code code = ISet.mem code !error_codes_treated_strictly
 
-let use_new_type_errors = ref false
 let disable_linter_fixmes = ref false
 
 (* The 'phps FixmeAllHackErrors' tool must be kept in sync with this list *)
@@ -1605,20 +1604,14 @@ let bad_decl_override parent_pos parent_name pos name (error: error) =
     ) in
   (* This is a cascading error message *)
   let msgl = (to_list error) in
-  let code = if !use_new_type_errors
-    then (Typing.err_code Typing.BadDeclOverride)
-    else get_code error in
-  add_list code (msg1 :: msg2 :: msgl)
+  add_list (Typing.err_code Typing.BadDeclOverride) (msg1 :: msg2 :: msgl)
 
 let bad_method_override pos member_name (error: error) =
   let msg = pos, ("Member " ^ (strip_ns member_name)
       ^ " has the wrong type") in
   (* This is a cascading error message *)
   let msgl = (to_list error) in
-  let code = if !use_new_type_errors
-    then (Typing.err_code Typing.BadMethodOverride)
-    else get_code error in
-  add_list code (msg :: msgl)
+  add_list (Typing.err_code Typing.BadMethodOverride) (msg :: msgl)
 
 let bad_enum_decl pos (error: error) =
   let msg = pos,
@@ -1627,10 +1620,7 @@ let bad_enum_decl pos (error: error) =
   in
   (* This is a cascading error message *)
   let msgl = (to_list error) in
-  let code = if !use_new_type_errors
-    then (Typing.err_code Typing.BadEnumExtends)
-    else get_code error in
-  add_list code (msg :: msgl)
+  add_list (Typing.err_code Typing.BadEnumExtends) (msg :: msgl)
 
 let missing_constructor pos =
   add (Typing.err_code Typing.MissingConstructor) pos
@@ -1744,10 +1734,7 @@ let unification_cycle pos ty =
        "is necessary for a type [rec] to be equal to type " ^ ty]
 
 let violated_constraint p_cstr (p_tparam, tparam) left right =
-  let code = if !use_new_type_errors
-    then (Typing.err_code Typing.TypeConstraintViolation)
-    else (Typing.err_code Typing.UnifyError) in
-  add_list code
+  add_list (Typing.err_code Typing.TypeConstraintViolation)
     ([(p_cstr, "Some type constraint(s) are violated here");
     (p_tparam, Printf.sprintf "%s is a constrained type parameter" tparam)]
     @ left
@@ -1767,10 +1754,7 @@ let explain_constraint ~use_pos ~definition_pos ~param_name (error : error) =
     | (p, x) :: rest when x = inst_msg && p = use_pos -> rest
     | _ -> msgl in
   let name = Utils.strip_ns param_name in
-  let code = if !use_new_type_errors
-    then (Typing.err_code Typing.TypeConstraintViolation)
-    else get_code error in
-  add_list code begin
+  add_list (Typing.err_code Typing.TypeConstraintViolation) begin
     [use_pos, inst_msg;
      definition_pos, "'" ^ name ^ "' is a constrained type parameter"] @ msgl
   end
@@ -1781,10 +1765,7 @@ let explain_where_constraint ~in_class ~use_pos ~definition_pos (error : error) 
     Printf.sprintf "This is the %s with 'where' type constraints" callsite_ty in
   let inst_msg = "A 'where' type constraint is violated here" in
   let msgl = (to_list error) in
-  let code = if !use_new_type_errors
-    then (Typing.err_code Typing.TypeConstraintViolation)
-    else get_code error in
-  add_list code begin
+  add_list (Typing.err_code Typing.TypeConstraintViolation) begin
     [use_pos, inst_msg;
      definition_pos, definition_head] @ msgl
   end
@@ -1792,10 +1773,7 @@ let explain_where_constraint ~in_class ~use_pos ~definition_pos (error : error) 
 let explain_tconst_where_constraint ~use_pos ~definition_pos (error: error) =
   let inst_msg = "A 'where' type constraint is violated here" in
   let msgl = (to_list error) in
-  let code = if !use_new_type_errors
-    then (Typing.err_code Typing.TypeConstraintViolation)
-    else get_code error in
-  add_list code begin
+  add_list (Typing.err_code Typing.TypeConstraintViolation) begin
     [use_pos, inst_msg;
      definition_pos,
      "This method's where constraints contain a generic type access"] @ msgl
@@ -2643,10 +2621,8 @@ let unify_error left right =
   add_list (Typing.err_code Typing.UnifyError) (left @ right)
 
 let maybe_unify_error specific_code left right =
-  let code = if !use_new_type_errors
-    then (Typing.err_code specific_code)
-    else (Typing.err_code Typing.UnifyError) in
-  add_list code (left @ right)
+  add_list (Typing.err_code specific_code) (left @ right)
+
 let index_type_mismatch = maybe_unify_error Typing.IndexTypeMismatch
 
 let expected_stringlike = maybe_unify_error Typing.ExpectedStringlike

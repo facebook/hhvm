@@ -1,9 +1,4 @@
-File "lsb_disallow_override_subclass.php", line 10, characters 7-7:
-Class C does not correctly implement all required members  (Typing[4284])
-File "lsb_disallow_override_subclass.php", line 10, characters 17-17:
-Some members are incompatible with those declared in type B
-Read the following to see why:
 File "lsb_disallow_override_subclass.php", line 11, characters 18-20:
-Member $x may not override __LSB member of parent
+Member $x may not override __LSB member of parent (Typing[4284])
 File "lsb_disallow_override_subclass.php", line 4, characters 28-30:
 This is being overridden

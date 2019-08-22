@@ -9,7 +9,7 @@ function testit(Super $tf, Sub $s):void {
   bar(async (C<Super> $step) ==> $s);
 }
 
-/* HH_FIXME[4110] */
+/* HH_FIXME[4336] */
 function bar<Tv>((function (C<Tv>): Awaitable<Tv>) $f): Tv {
 }
 

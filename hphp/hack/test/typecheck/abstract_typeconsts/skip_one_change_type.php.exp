@@ -1,9 +1,4 @@
-File "skip_one_change_type.php", line 10, characters 16-16:
-Class C does not correctly implement all required members  (Typing[4142])
-File "skip_one_change_type.php", line 10, characters 26-26:
-Some members are incompatible with those declared in type B
-Read the following to see why:
 File "skip_one_change_type.php", line 11, characters 23-23:
-Cannot re-declare this type constant as abstract
+Cannot re-declare this type constant as abstract (Typing[4142])
 File "skip_one_change_type.php", line 5, characters 23-23:
 Previously defined here

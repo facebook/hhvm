@@ -21,7 +21,7 @@
 */
 function password_hash(?string $password,
                        int $algo,
-                       array $options = array()) : mixed {
+                       darray $options = darray[]) : mixed {
   if (!function_exists('crypt')) {
     trigger_error("Crypt must be loaded for password_hash to function",
                   E_WARNING);
@@ -170,11 +170,17 @@ function password_hash(?string $password,
 *
 * @return array The array of information about the hash.
 */
-function password_get_info(string $hash) : array {
-  $return = array(
+function password_get_info(string $hash) : shape(
+  'algo' => int,
+  'algoname' => string,
+  'options' => shape(
+    ?'cost' => string,
+  ),
+) {
+  $return = shape(
     'algo' => 0,
     'algoName' => 'unknown',
-    'options' => array(),
+    'options' => darray[],
   );
   if (substr($hash, 0, 4) == '$2y$' && strlen($hash) == 60) {
     $return['algo'] = PASSWORD_BCRYPT;
@@ -199,7 +205,7 @@ function password_get_info(string $hash) : array {
 * @return boolean True if the password needs to be rehashed.
 */
 function password_needs_rehash(string $hash,
-                               int $algo, array $options = array()) : boolean {
+                               int $algo, darray $options = darray[]): bool {
   $info = password_get_info($hash);
   if ($info['algo'] != $algo) {
     return true;
@@ -223,7 +229,7 @@ function password_needs_rehash(string $hash,
 *
 * @return boolean If the password matches the hash
 */
-function password_verify(string $password, string $hash) : boolean {
+function password_verify(string $password, string $hash): bool {
   if (!function_exists('crypt')) {
     trigger_error("Crypt must be loaded for password_verify to function",
                   E_WARNING);

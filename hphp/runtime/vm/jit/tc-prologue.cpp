@@ -229,21 +229,12 @@ void smashFuncCallers(TCA start, ProfTransRec* rec) {
   assertOwnsMetadataLock();
   assertx(rec->isProflogue());
 
-  const auto func = rec->func();
   auto lock = rec->lockCallerList();
 
   for (auto toSmash : rec->mainCallers()) {
     smashCall(toSmash, start);
   }
 
-  // If the prologue has a matching guard, then smash its guard-callers as
-  // well.
-  auto const guard = funcGuardFromPrologue(start, func);
-  if (funcGuardMatches(guard, func)) {
-    for (auto toSmash : rec->guardCallers()) {
-      smashCall(toSmash, guard);
-    }
-  }
   rec->clearAllCallers();
 }
 

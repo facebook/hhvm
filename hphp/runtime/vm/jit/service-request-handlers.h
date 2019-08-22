@@ -47,7 +47,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept;
  * If we can't find or make a translation, may return fcallHelperThunk instead,
  * which uses C++ helpers to act like a prologue.
  */
-TCA handleBindCall(TCA toSmash, ActRec* calleeFrame, bool isImmutable);
+TCA handleBindCall(TCA toSmash, ActRec* calleeFrame);
 
 /*
  * Look up (or create) and return the address of a translation for the current

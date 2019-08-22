@@ -332,7 +332,6 @@ void adjustProfiledCallers(RelocationInfo& rel) {
     if (rec->kind() != TransKind::ProfPrologue) return;
     auto lock = rec->lockCallerList();
     updateCallers(rec->mainCallers());
-    updateCallers(rec->guardCallers());
   });
 }
 

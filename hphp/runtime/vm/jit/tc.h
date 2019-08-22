@@ -531,7 +531,7 @@ TCA bindAddr(TCA toSmash, SrcKey destSk, TransFlags trflags, bool& smashed);
  * Bind a call to start at toSmash, where start is the prologue for callee, when
  * invoked with nArgs.
  */
-void bindCall(TCA toSmash, TCA start, Func* callee, int nArgs, bool immutable);
+void bindCall(TCA toSmash, TCA start, Func* callee, int nArgs);
 
 }}}
 

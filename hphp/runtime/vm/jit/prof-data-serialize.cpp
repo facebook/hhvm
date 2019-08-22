@@ -342,7 +342,6 @@ void write_prof_trans_rec(ProfDataSerializer& ser,
       callers.push_back(callerTransId);
     };
     for (auto const caller : ptr->mainCallers()) addCaller(caller);
-    for (auto const caller : ptr->guardCallers()) addCaller(caller);
     write_container(ser, callers, write_raw<TransID>);
     write_raw(ser, ptr->asmSize());
   }

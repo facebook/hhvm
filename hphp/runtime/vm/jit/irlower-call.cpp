@@ -72,29 +72,7 @@ TCA getCallTarget(IRLS& env, const IRInstruction* inst, Vreg sp) {
   auto const extra = inst->extra<Call>();
   auto const callee = extra->callee;
   if (callee != nullptr) return tc::ustubs().immutableBindCallStub;
-
-  if (!RuntimeOption::RepoAuthoritative) return tc::ustubs().bindCallStub;
-
-  auto profile = TargetProfile<CallTargetProfile>(env.unit.context(),
-                                                  inst->marker(),
-                                                  callTargetProfileKey());
-  // NB: the profiling used here is shared and done in callProfiledFunc() in
-  // irgen-call.cpp, so we only handle the optimization phase here.
-  if (profile.optimizing()) {
-    auto const data = profile.data();
-
-    // Get the result of the profiling data.  If it's strongly biased towards
-    // one function, bind the call.  Otherwise, call funcPrologueRedispatch
-    // directly.
-    double bias = 0;
-    data.choose(bias);
-    if (bias * 100 >= RuntimeOption::EvalJitPGOBindCallThreshold) {
-      return tc::ustubs().bindCallStub;
-    }
-    return tc::ustubs().funcPrologueRedispatch;
-  }
-
-  return tc::ustubs().bindCallStub;
+  return tc::ustubs().funcPrologueRedispatch;
 }
 
 }

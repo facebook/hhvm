@@ -2277,6 +2277,12 @@ void Class::sortOwnProps(const PropMap::Builder& curPropMap,
   // We don't change the order of the properties for closures.
   if (c_Closure::initialized() && parent() != c_Closure::classof()) {
     if (RuntimeOption::EvalReorderProps == "hotness") {
+      /* Sort the properties in decreasing order of their profile counts,
+       * according to the serialized JIT profile data.  In case of ties, we
+       * preserve the logical order among the properties.  Note that, in the
+       * absence of profile data (e.g. if jumpstart failed to deserialize the
+       * JIT profile data), then the physical layout of the properties in memory
+       * will match their logical order. */
       std::sort(
         order.begin(), order.end(),
         [&] (uint32_t a, uint32_t b) {

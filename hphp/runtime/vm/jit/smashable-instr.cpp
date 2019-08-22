@@ -53,10 +53,6 @@ TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
                       PhysReg d) {
   return ARCH_SWITCH_CALL(emitSmashableMovq, cb, fixups, imm, d);
 }
-TCA emitSmashableCmpq(CodeBlock& cb, CGMeta& fixups, int32_t imm,
-                      PhysReg r, int8_t disp) {
-  return ARCH_SWITCH_CALL(emitSmashableCmpq, cb, fixups, imm, r, disp);
-}
 TCA emitSmashableCall(CodeBlock& cb, CGMeta& fixups, TCA target) {
   return ARCH_SWITCH_CALL(emitSmashableCall, cb, fixups, target);
 }

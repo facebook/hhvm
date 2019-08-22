@@ -38,7 +38,6 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-util.h"
 
-#include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -130,11 +129,6 @@ Func::~Func() {
   if (m_fullName != nullptr && m_maybeIntercepted != -1) {
     unregister_intercept_flag(fullNameStr(), &m_maybeIntercepted);
   }
-  if (jit::mcgen::initialized() && !RuntimeOption::EvalEnableReusableTC) {
-    // If Reusable TC is enabled then the prologue may have already been smashed
-    // and the memory may now be in use by another function.
-    jit::clobberFuncGuards(this);
-  }
 #ifndef NDEBUG
   validate();
   m_magic = ~m_magic;
@@ -184,8 +178,6 @@ void Func::freeClone() {
   if (jit::mcgen::initialized() && RuntimeOption::EvalEnableReusableTC) {
     // Free TC-space associated with func
     jit::tc::reclaimFunction(this);
-  } else {
-    jit::clobberFuncGuards(this);
   }
 
   if (m_funcId != InvalidFuncId) {

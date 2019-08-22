@@ -123,7 +123,6 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::mcprep:
     case Vinstr::phidef:
     case Vinstr::phijmp:
-    case Vinstr::funcguard:
     case Vinstr::inlinestart:
     case Vinstr::inlineend:
     case Vinstr::pushframe:

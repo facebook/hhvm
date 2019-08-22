@@ -52,21 +52,6 @@ TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
                    true);
 }
 
-TCA emitSmashableCmpq(CodeBlock& cb, CGMeta& fixups, int32_t imm,
-                      PhysReg r, int8_t disp) {
-  auto const start = cb.frontier();
-  fixups.smashableLocations.insert(start);
-  Assembler a { cb };
-
-  // don't use cmpqim because of smashableCmpqImm implementation. A "load 32bits
-  // immediate" is mandatory
-  a.limmediate (rfuncln(), imm, ImmType::TocOnly, true);
-  a.lwz  (rAsm, r[disp]); // base + displacement
-  a.extsw(rAsm, rAsm);
-  a.cmpd (rfuncln(), rAsm);
-  return start;
-}
-
 TCA emitSmashableCall(CodeBlock& cb, CGMeta& fixups, TCA target,
     Assembler::CallArg ca) {
   return EMIT_BODY(cb, fixups, call, target, ca);

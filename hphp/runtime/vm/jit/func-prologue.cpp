@@ -21,7 +21,6 @@
 
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
-#include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/irgen-func-prologue.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irlower.h"
@@ -84,21 +83,9 @@ TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc,
   printUnit(2, unit, "After initial prologue generation");
 
   auto vunit = irlower::lowerUnit(env.unit, CodeKind::Prologue);
+  auto const start = code.main().frontier();
   emitVunit(*vunit, env.unit, code, fixups);
-
-  // In order to find the start of the (post guard) prologue after
-  // possibly relocating the code, we add a watchpoint that points to
-  // &unit.prologueStart. In some situations (eg tc-relocate) we will
-  // relocate the code again - but at that point, unit has gone (and
-  // tc-relocate tracks the start of the prologue for itself). So we
-  // need to remove it here, to prevent wild writes to dead stack
-  // locations.
-  auto it = std::find_if(fixups.watchpoints.begin(), fixups.watchpoints.end(),
-                         [&] (TCA* p) { return p == &unit.prologueStart; });
-  assertx(it != fixups.watchpoints.end());
-  fixups.watchpoints.erase(it);
-
-  return unit.prologueStart;
+  return start;
 }
 
 TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,

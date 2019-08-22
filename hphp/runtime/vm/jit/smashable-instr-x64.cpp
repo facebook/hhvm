@@ -66,11 +66,6 @@ TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
   return start;
 }
 
-TCA emitSmashableCmpq(CodeBlock& cb, CGMeta& fixups, int32_t imm,
-                      PhysReg r, int8_t disp) {
-  return EMIT_BODY(cb, cmpq, Cmpq, imm, r[disp]);
-}
-
 TCA emitSmashableCall(CodeBlock& cb, CGMeta& fixups, TCA target) {
   return EMIT_BODY(cb, call, Call, target);
 }

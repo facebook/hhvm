@@ -1421,22 +1421,6 @@ struct ProfileCallTargetData : IRExtraData {
   rds::Handle handle;
 };
 
-struct FuncGuardData : IRExtraData {
-  FuncGuardData(const Func* func, TCA* prologueAddrPtr)
-    : func(func)
-    , prologueAddrPtr(prologueAddrPtr)
-  {}
-
-  std::string show() const {
-    return folly::sformat("{}=>{}",
-      func->fullName(), prologueAddrPtr
-    );
-  }
-
-  const Func* func;
-  TCA* prologueAddrPtr;
-};
-
 struct BeginInliningData : IRExtraData {
   BeginInliningData(IRSPRelOffset offset, const Func* func, int cost)
     : offset(offset)
@@ -1763,7 +1747,6 @@ X(DecRef,                       DecRefData);
 X(DecRefNZ,                     DecRefData);
 X(LdTVAux,                      LdTVAuxData);
 X(CheckRefs,                    CheckRefsData);
-X(FuncGuard,                    FuncGuardData);
 X(RaiseHackArrParamNotice,      RaiseHackArrParamNoticeData);
 X(RaiseHackArrPropNotice,       RaiseHackArrTypehintNoticeData);
 X(DbgAssertRefCount,            AssertReason);

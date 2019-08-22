@@ -23,7 +23,6 @@
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
-#include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/func-prologue.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -130,7 +129,6 @@ void emitFuncPrologueImpl(Func* func, int argc, TransKind kind,
 
   info.finalView = std::make_unique<CodeCache::View>(codeView);
 
-  assertx(funcGuardMatches(funcGuardFromPrologue(info.start, func), func));
   assertx(code().isValidCodeAddress(info.start));
 }
 
@@ -191,7 +189,6 @@ bool publishFuncPrologueMeta(Func* func, int nArgs, TransKind kind,
   }
   meta.process(nullptr);
 
-  assertx(funcGuardMatches(funcGuardFromPrologue(start, func), func));
   assertx(code().isValidCodeAddress(start));
   assertx(isPrologue(kind));
 

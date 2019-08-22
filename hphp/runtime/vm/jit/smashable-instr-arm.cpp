@@ -58,12 +58,6 @@ TCA emitSmashableMovq(CodeBlock& cb, CGMeta& meta, uint64_t imm,
   return the_start;
 }
 
-TCA emitSmashableCmpq(CodeBlock& /*cb*/, CGMeta& /*meta*/, int32_t /*imm*/,
-                      PhysReg /*r*/, int8_t /*disp*/) {
-  // FIXME: This is used in func-guard*
-  not_implemented();
-}
-
 // SmashableCalls don't embed the target at the end, because the
 // BLR must be the last instruction of the sequence.
 TCA emitSmashableCall(CodeBlock& cb, CGMeta& meta, TCA target) {

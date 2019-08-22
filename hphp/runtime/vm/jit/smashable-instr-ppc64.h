@@ -56,8 +56,6 @@ constexpr size_t smashableAlignTo() { return cache_line_size(); }
 
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
                       PhysReg d);
-TCA emitSmashableCmpq(CodeBlock& cb, CGMeta& fixups, int32_t imm,
-                      PhysReg r, int8_t disp);
 TCA emitSmashableCall(CodeBlock& cb, CGMeta& fixups, TCA target,
                       ppc64_asm::Assembler::CallArg ca =
                         ppc64_asm::Assembler::CallArg::SmashInt);

@@ -53,8 +53,6 @@ constexpr size_t smashableAlignTo() { return 0; }
 
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& meta, uint64_t imm,
                       PhysReg d);
-TCA emitSmashableCmpq(CodeBlock& cb, CGMeta& meta, int32_t imm,
-                      PhysReg r, int8_t disp);
 TCA emitSmashableCall(CodeBlock& cb, CGMeta& meta, TCA target);
 TCA emitSmashableJmp(CodeBlock& cb, CGMeta& meta, TCA target);
 TCA emitSmashableJcc(CodeBlock& cb, CGMeta& meta, TCA target,

@@ -22,7 +22,6 @@
 
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
@@ -463,7 +462,6 @@ void recordJump(TCA toSmash, SrcRec* sr) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void reclaimFunction(const Func* func) {
-  clobberFuncGuards(func); // do this before func is freed
   enqueueJob(FuncJob {func->name(), func->getFuncId()});
 }
 

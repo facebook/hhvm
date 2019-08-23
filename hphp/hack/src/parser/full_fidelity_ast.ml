@@ -2653,7 +2653,8 @@ and pClassElt : class_elt list parser = fun node env ->
       env.in_static_method := (List.exists kind ~f:(function Static -> true | _ -> false));
       let body, body_has_yield = mpYielding pBody methodish_function_body env in
       env.in_static_method := false;
-      let is_external = is_external methodish_function_body in
+      let is_abstract = List.exists kind ~f:(function Abstract -> true | _ -> false) in
+      let is_external = not is_abstract && is_external methodish_function_body in
       let user_attributes = pUserAttributes env methodish_attribute in
       member_def @ [Method
       { m_kind            = kind

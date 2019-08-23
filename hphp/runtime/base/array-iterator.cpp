@@ -106,16 +106,27 @@ bool ArrayIter::checkInvariants(const ArrayData* ad /* = nullptr */) const {
   // Exactly one of the ArrayData pointers {ad, m_data} should be nullptr.
   assertx(m_itype == ArrayIter::TypeArray);
   assertx((ad == nullptr) != (m_data == nullptr));
-  auto const arr = ad ? ad : m_data;
+  DEBUG_ONLY auto const arr = ad ? ad : m_data;
 
-  // Check that the array's layout is reflected in its next vtable index.
-  if (arr->hasPackedLayout()) {
-    assertx(m_nextHelperIdx == IterNextIndex::ArrayPacked);
-  } else if (arr->hasMixedLayout()) {
-    assertx(m_nextHelperIdx == IterNextIndex::ArrayMixed ||
-            m_nextHelperIdx == IterNextIndex::ArrayMixedNoTombstones);
+  // Check that array's vtable index is compatible with the array's layout.
+  if (m_nextHelperIdx == IterNextIndex::ArrayPacked) {
+    assertx(arr->hasPackedLayout());
+  } else if (m_nextHelperIdx == IterNextIndex::ArrayMixed) {
+    assertx(arr->hasMixedLayout());
+  } else if (m_nextHelperIdx == IterNextIndex::ArrayMixedNoTombstones) {
+    assertx(arr->hasMixedLayout());
+    assertx(arr->getSize() == MixedArray::asMixed(arr)->iterLimit());
   } else {
+    // We'd like to assert the converse, too: a packed or mixed array should
+    // a next helper that makes use of its layout. However, this condition
+    // can fail for local iters: e.g. an APC array base can be promoted to a
+    // packed or mixed array, with iteration still using array-generic code.
+    // We check it for non-local iters.
     assertx(m_nextHelperIdx == IterNextIndex::Array);
+    if (m_data != nullptr) {
+      assertx(!m_data->hasPackedLayout());
+      assertx(!m_data->hasMixedLayout());
+    }
   }
 
   // Check the consistency of the pos and end fields.
@@ -1089,18 +1100,12 @@ int64_t iter_next_packed_impl(Iter* it,
 
 int64_t iterNextArrayPacked(Iter* it, Cell* valOut) {
   TRACE(2, "iterNextArrayPacked: I %p\n", it);
-  assertx(it->arr().getIterType() == ArrayIter::TypeArray &&
-         it->arr().hasArrayData() &&
-         it->arr().getArrayData()->hasPackedLayout());
   auto const ad = const_cast<ArrayData*>(it->arr().getArrayData());
   return iter_next_packed_impl<false, false>(it, valOut, nullptr, ad);
 }
 
 int64_t literNextArrayPacked(Iter* it, Cell* valOut, ArrayData* ad) {
   TRACE(2, "literNextArrayPacked: I %p\n", it);
-  assertx(it->arr().getIterType() == ArrayIter::TypeArray);
-  assertx(!it->arr().getArrayData());
-  assertx(ad->hasPackedLayout());
   return iter_next_packed_impl<false, true>(it, valOut, nullptr, ad);
 }
 
@@ -1108,9 +1113,6 @@ int64_t iterNextKArrayPacked(Iter* it,
                              Cell* valOut,
                              Cell* keyOut) {
   TRACE(2, "iterNextKArrayPacked: I %p\n", it);
-  assertx(it->arr().getIterType() == ArrayIter::TypeArray &&
-         it->arr().hasArrayData() &&
-         it->arr().getArrayData()->hasPackedLayout());
   auto const ad = const_cast<ArrayData*>(it->arr().getArrayData());
   return iter_next_packed_impl<true, false>(it, valOut, keyOut, ad);
 }
@@ -1120,34 +1122,22 @@ int64_t literNextKArrayPacked(Iter* it,
                               Cell* keyOut,
                               ArrayData* ad) {
   TRACE(2, "literNextKArrayPacked: I %p\n", it);
-  assertx(it->arr().getIterType() == ArrayIter::TypeArray);
-  assertx(!it->arr().getArrayData());
-  assertx(ad->hasPackedLayout());
   return iter_next_packed_impl<true, true>(it, valOut, keyOut, ad);
 }
 
 int64_t iterNextArrayMixed(Iter* it, Cell* valOut) {
   TRACE(2, "iterNextArrayMixed: I %p\n", it);
-  assertx(it->arr().getIterType() == ArrayIter::TypeArray &&
-         it->arr().hasArrayData() &&
-         it->arr().getArrayData()->hasMixedLayout());
   auto const ad = const_cast<ArrayData*>(it->arr().getArrayData());
   return iter_next_mixed_impl<false, false>(it, valOut, nullptr, ad);
 }
 
 int64_t literNextArrayMixed(Iter* it, Cell* valOut, ArrayData* ad) {
   TRACE(2, "literNextArrayMixed: I %p\n", it);
-  assertx(it->arr().getIterType() == ArrayIter::TypeArray);
-  assertx(!it->arr().getArrayData());
-  assertx(ad->hasMixedLayout());
   return iter_next_mixed_impl<false, true>(it, valOut, nullptr, ad);
 }
 
 int64_t iterNextKArrayMixed(Iter* it, Cell* valOut, Cell* keyOut) {
   TRACE(2, "iterNextKArrayMixed: I %p\n", it);
-  assertx(it->arr().getIterType() == ArrayIter::TypeArray &&
-         it->arr().hasArrayData() &&
-         it->arr().getArrayData()->hasMixedLayout());
   auto const ad = const_cast<ArrayData*>(it->arr().getArrayData());
   return iter_next_mixed_impl<true, false>(it, valOut, keyOut, ad);
 }
@@ -1157,19 +1147,11 @@ int64_t literNextKArrayMixed(Iter* it,
                              Cell* keyOut,
                              ArrayData* ad) {
   TRACE(2, "literNextKArrayMixed: I %p\n", it);
-  assertx(it->arr().getIterType() == ArrayIter::TypeArray);
-  assertx(!it->arr().getArrayData());
-  assertx(ad->hasMixedLayout());
   return iter_next_mixed_impl<true, true>(it, valOut, keyOut, ad);
 }
 
 int64_t iterNextArray(Iter* it, Cell* valOut) {
   TRACE(2, "iterNextArray: I %p\n", it);
-  assertx(it->arr().getIterType() == ArrayIter::TypeArray &&
-         it->arr().hasArrayData());
-  assertx(!it->arr().getArrayData()->hasPackedLayout());
-  assertx(!it->arr().getArrayData()->hasMixedLayout());
-
   ArrayIter& iter = it->arr();
   auto const ad = const_cast<ArrayData*>(iter.getArrayData());
   if (ad->isApcArray()) {
@@ -1180,10 +1162,6 @@ int64_t iterNextArray(Iter* it, Cell* valOut) {
 
 int64_t literNextArray(Iter* it, Cell* valOut, ArrayData* ad) {
   TRACE(2, "literNextArray: I %p\n", it);
-  assertx(it->arr().getIterType() == ArrayIter::TypeArray);
-  assertx(!it->arr().getArrayData());
-  // NB: We could have an APC local array which then promotes to a packed/mixed
-  // array, so we can't assert that the array isn't packed or mixed layout here.
   if (ad->isApcArray()) {
     return iter_next_apc_array<true>(it, valOut, nullptr, ad);
   }
@@ -1192,11 +1170,6 @@ int64_t literNextArray(Iter* it, Cell* valOut, ArrayData* ad) {
 
 int64_t iterNextKArray(Iter* it, Cell* valOut, Cell* keyOut) {
   TRACE(2, "iterNextKArray: I %p\n", it);
-  assertx(it->arr().getIterType() == ArrayIter::TypeArray &&
-         it->arr().hasArrayData());
-  assertx(!it->arr().getArrayData()->hasMixedLayout());
-  assertx(!it->arr().getArrayData()->hasPackedLayout());
-
   ArrayIter& iter = it->arr();
   auto const ad = const_cast<ArrayData*>(iter.getArrayData());
   if (ad->isApcArray()) {
@@ -1207,10 +1180,6 @@ int64_t iterNextKArray(Iter* it, Cell* valOut, Cell* keyOut) {
 
 int64_t literNextKArray(Iter* it, Cell* valOut, Cell* keyOut, ArrayData* ad) {
   TRACE(2, "literNextKArray: I %p\n", it);
-  assertx(it->arr().getIterType() == ArrayIter::TypeArray);
-  assertx(!it->arr().getArrayData());
-  // NB: We could have an APC local array which then promotes to a packed/mixed
-  // array, so we can't assert that the array isn't packed or mixed layout here.
   if (ad->isApcArray()) {
     return iter_next_apc_array<true>(it, valOut, keyOut, ad);
   }

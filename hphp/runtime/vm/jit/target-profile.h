@@ -129,21 +129,21 @@ struct TargetProfile {
     , m_key{profTransID, bcOff, name}
   {}
 
-  TargetProfile(const TransContext& context,
+  TargetProfile(const IRUnit& unit,
                 BCMarker marker,
                 const StringData* name,
                 size_t extraSize = 0)
-    : TargetProfile(context.kind == TransKind::Profile ? context.transID
-                                                       : marker.profTransID(),
-                    context.kind,
+    : TargetProfile(unit.context().kind == TransKind::Profile ?
+                      unit.context().transID :
+                      marker.profTransID(),
+                    unit.context().kind,
                     marker.bcOff(),
                     name,
                     extraSize)
   {
-    if (dumpIREnabled(context.kind)) {
-      context.profileKeys.push_back(rds::Profile<T>{m_key.transId,
-                                                    marker.bcOff(),
-                                                    name});
+    if (dumpIREnabled(unit.context().kind)) {
+      auto const profile = rds::Profile<T>{m_key.transId, marker.bcOff(), name};
+      unit.annotationData->profileKeys.push_back(profile);
     }
   }
 

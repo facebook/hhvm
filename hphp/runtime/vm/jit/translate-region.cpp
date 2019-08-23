@@ -332,8 +332,7 @@ RegionDescPtr getInlinableCalleeRegion(const irgen::IRGS& irgs,
                                        const FCallArgs& fca,
                                        Type ctxType,
                                        const ProfSrcKey& psk,
-                                       int& calleeCost,
-                                       Annotations& annotations) {
+                                       int& calleeCost) {
   assertx(isFCall(psk.srcKey.op()));
   if (isProfiling(irgs.context.kind) || irgs.inlineState.conjure) {
     return nullptr;
@@ -342,7 +341,7 @@ RegionDescPtr getInlinableCalleeRegion(const irgen::IRGS& irgs,
     return nullptr;
   }
   auto annotationsPtr = mcgen::dumpTCAnnotation(irgs.context.kind) ?
-                        &annotations : nullptr;
+                        irgs.unit.annotationData.get() : nullptr;
   if (!canInlineAt(psk.srcKey, callee, annotationsPtr)) return nullptr;
 
   auto const& inlineBlacklist = irgs.retryContext->inlineBlacklist;
@@ -351,12 +350,13 @@ RegionDescPtr getInlinableCalleeRegion(const irgen::IRGS& irgs,
   }
 
   auto calleeRegion = selectCalleeRegion(
-    irgs, callee, fca, ctxType, psk.srcKey, annotations);
+    irgs, callee, fca, ctxType, psk.srcKey);
   if (!calleeRegion || calleeRegion->instrSize() > irgs.budgetBCInstrs) {
     return nullptr;
   }
 
-  calleeCost = costOfInlining(psk.srcKey, callee, *calleeRegion, annotations);
+  calleeCost = costOfInlining(psk.srcKey, callee, *calleeRegion,
+                              annotationsPtr);
   return calleeRegion;
 }
 
@@ -587,8 +587,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
 
 std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
                                     const TransContext& context,
-                                    PostConditions& pConds,
-                                    Annotations& annotations) noexcept {
+                                    PostConditions& pConds) noexcept {
   Timer irGenTimer(Timer::irGenRegion);
   SCOPE_ASSERT_DETAIL("RegionDesc") { return show(region); };
 
@@ -601,7 +600,8 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
 
   while (true) {
     int32_t budgetBCInstrs = RuntimeOption::EvalJitMaxRegionInstrs;
-    unit = std::make_unique<IRUnit>(context);
+    unit = std::make_unique<IRUnit>(context,
+                                    std::make_unique<AnnotationData>());
     unit->initLogEntry(context.initSrcKey.func());
     irgen::IRGS irgs{*unit, &region, budgetBCInstrs, &retryContext};
     tries++;
@@ -645,8 +645,6 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
       }
     }
 
-    annotations.insert(
-      annotations.end(), irgs.annotations.begin(), irgs.annotations.end());
     break;
   }
 
@@ -655,7 +653,7 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
   irGenTimer.stop();
 
   auto finishPass = [&](const char* msg, int level) {
-    printUnit(level, *unit, msg, nullptr, nullptr, &annotations);
+    printUnit(level, *unit, msg, nullptr, nullptr);
     assertx(checkCfg(*unit));
   };
 
@@ -675,7 +673,7 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, const Func* callee,
   // See if we have a callee region we can inline.
   ctx = ctx ? ctx : cns(irgs, TNullptr);
   auto const calleeRegion = getInlinableCalleeRegion(
-    irgs, callee, fca, ctx->type(), psk, calleeCost, irgs.annotations);
+    irgs, callee, fca, ctx->type(), psk, calleeCost);
   if (!calleeRegion) return false;
 
   // We shouldn't be inlining profiling translations.
@@ -752,8 +750,7 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, const Func* callee,
 }
 
 std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
-                                          const RegionDesc& region,
-                                          Annotations& annotations) {
+                                          const RegionDesc& region) {
   SCOPE_ASSERT_DETAIL("Inline-RegionDesc") { return show(region); };
 
   std::unique_ptr<IRUnit> unit;
@@ -762,7 +759,7 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
 
   while (true) {
     int32_t budgetBCInstrs = RuntimeOption::EvalJitMaxRegionInstrs;
-    unit = std::make_unique<IRUnit>(ctx);
+    unit = std::make_unique<IRUnit>(ctx, std::make_unique<AnnotationData>());
     irgen::IRGS irgs{*unit, &region, budgetBCInstrs, &retryContext};
     irgs.inlineState.conjure = true;
     if (hasTransID(entryBID)) irgs.profTransID = getTransID(entryBID);
@@ -798,9 +795,6 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
       always_assert_flog(false, "irGenInlineRegion failed with {}\n", e.what());
       continue;
     }
-
-    annotations.insert(
-      annotations.end(), irgs.annotations.begin(), irgs.annotations.end());
 
     if (!irgen::conjureEndInlining(irgs, region, func->isCPPBuiltin())) {
       return nullptr;

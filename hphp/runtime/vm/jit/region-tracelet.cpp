@@ -71,7 +71,8 @@ struct Env {
     // TODO(#5703534): this is using a different TransContext than actual
     // translation will use.
     , unit(TransContext{kInvalidTransID, kind, TransFlags{},
-                        sk, ctx.spOffset, 0})
+                        sk, ctx.spOffset, 0},
+           std::make_unique<AnnotationData>())
     , irgs(unit, nullptr, 0, nullptr)
     , numJmps(0)
     , numBCInstrs(maxBCInstrs)

@@ -787,7 +787,7 @@ SSATmp* emitArrayGet(IRGS& env, SSATmp* base, SSATmp* key, MOpMode mode,
 template<class Finish>
 SSATmp* emitProfiledPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key,
                                    MOpMode mode, Finish finish) {
-  TargetProfile<ArrayKindProfile> prof(env.context,
+  TargetProfile<ArrayKindProfile> prof(env.unit,
                                        env.irb->curMarker(),
                                        s_ArrayKindProfile.get());
   if (prof.profiling()) {

@@ -28,7 +28,10 @@ TRACE_SET_MOD(hhir);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IRUnit::IRUnit(TransContext context) : m_context(context)
+IRUnit::IRUnit(TransContext context,
+               std::unique_ptr<AnnotationData> annotationData)
+  : annotationData(std::move(annotationData))
+  , m_context(context)
 {
   // Setup m_entry after property initialization, since it depends on
   // the value of m_defHint.

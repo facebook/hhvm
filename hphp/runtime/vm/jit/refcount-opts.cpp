@@ -3483,7 +3483,7 @@ void selectiveWeakenDecRefs(IRUnit& unit) {
   for (auto& block : blocks) {
     for (auto& inst : *block) {
       if (inst.is(DecRef)) {
-        const auto profile = decRefProfile(unit.context(), &inst);
+        const auto profile = decRefProfile(unit, &inst);
         if (profile.optimizing()) {
           const auto data = profile.data();
           const auto decrefdPct = data.percent(data.destroyed()) +

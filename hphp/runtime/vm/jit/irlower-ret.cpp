@@ -236,7 +236,7 @@ void cgReleaseVVAndSkip(IRLS& env, const IRInstruction* inst) {
   auto& vc = vcold(env);
 
   auto const profile = TargetProfile<ReleaseVVProfile> {
-    env.unit.context(), inst->marker(), s_ReleaseVV.get()
+    env.unit, inst->marker(), s_ReleaseVV.get()
   };
 
   if (profile.profiling()) {

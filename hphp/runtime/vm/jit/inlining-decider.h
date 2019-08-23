@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_JIT_INLINING_H_
 #define incl_HPHP_JIT_INLINING_H_
 
+#include "hphp/runtime/vm/jit/annotation-data.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 
 #include <vector>
@@ -71,7 +72,9 @@ namespace irgen { struct IRGS; }
  * arguments, recursion, resumable callee, etc.).  It does not peek into the
  * callee's bytecode or regions, and it is insensitive to inlining costs.
  */
-bool canInlineAt(SrcKey callSK, const Func* callee, Annotations* annotations);
+bool canInlineAt(SrcKey callSK,
+                 const Func* callee,
+                 AnnotationData* annotations);
 
 /*
  * Check that `region' of `callee' can be inlined (possibly via other inlined
@@ -91,7 +94,7 @@ bool shouldInline(const irgen::IRGS& irgs, SrcKey callerSk, const Func* callee,
 int costOfInlining(SrcKey callerSk,
                    const Func* callee,
                    const RegionDesc& region,
-                   Annotations& annotations);
+                   AnnotationData* annotationData);
 
 /*
  * Select an inlining region for the call to `callee' at `sk'.
@@ -100,8 +103,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
                                  const Func* callee,
                                  const FCallArgs& fca,
                                  Type ctxType,
-                                 const SrcKey& sk,
-                                 Annotations& annotations);
+                                 const SrcKey& sk);
 
 void setBaseInliningProfCount(uint64_t value);
 

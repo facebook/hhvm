@@ -121,9 +121,6 @@ struct TransContext {
   TransFlags flags;
   FPInvOffset initSpOffset;
   SrcKey initSrcKey;
-
-  // TODO(elijahrivera) - make a separate struct to hold this information
-  mutable std::vector<rds::Symbol> profileKeys;
 };
 
 

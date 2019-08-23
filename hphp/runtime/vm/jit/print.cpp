@@ -309,6 +309,7 @@ dynamic getTCRange(const AreaIndex area,
 }
 
 namespace {
+// TODO(elijahrivera) - move into AnnotationData class
 struct TargetProfileVisitor {
   explicit TargetProfileVisitor(const TransContext& ctx) : ctx(ctx) {}
 
@@ -349,7 +350,7 @@ dynamic getBlock(const Block* block,
                  const TransKind kind,
                  const AsmInfo* asmInfo,
                  const GuardConstraints* guards,
-                 const TransContext& ctx) {
+                 const IRUnit& unit) {
   dynamic result = dynamic::object;
 
   result["label"] = getLabel(block);
@@ -489,10 +490,12 @@ dynamic getBlock(const Block* block,
     }
   }
 
+  auto const& ctx = unit.context();
+
   for (auto& inst : result["instrs"]) {
     auto const& offset = inst["offset"].asInt();
     dynamic profileObjs = dynamic::array;
-    for (auto const& key : ctx.profileKeys) {
+    for (auto const& key : unit.annotationData->profileKeys) {
       auto const profile = boost::apply_visitor(TargetProfileVisitor(ctx), key);
       if (profile["offset"].asInt() == offset) profileObjs.push_back(profile);
     }
@@ -532,6 +535,10 @@ dynamic getUnit(const IRUnit& unit,
   auto const kind = ctx.kind;
   result["translation"] = getTransContext(ctx);
 
+  result["inliningDecisions"] = unit.annotationData ?
+    unit.annotationData->getInliningDynamic() :
+    dynamic();
+
   auto blocks = rpoSortCfg(unit);
   // Partition into main, cold and frozen, without changing relative order.
   auto const cold = std::stable_partition(blocks.begin(), blocks.end(),
@@ -556,7 +563,7 @@ dynamic getUnit(const IRUnit& unit,
     }
 
     blockObjs.push_back(dynamic::merge(
-                          getBlock(*it, kind, asmInfo, guards, ctx),
+                          getBlock(*it, kind, asmInfo, guards, unit),
                           dynamic::object("area", areaAsString(currArea))));
   }
   result["blocks"] = blockObjs;

@@ -1,22 +1,22 @@
 vec(1) {
   string(5) "hello"
 }
-string(%d) "%s/array-provenance.php:5"
+string(%d) "%s/array-provenance.php:40"
 dict(1) {
   [0]=>
   string(5) "hello"
 }
-string(%d) "%s/array-provenance.php:5"
+string(%d) "%s/array-provenance.php:41"
 dict(1) {
   [42]=>
   string(5) "hello"
 }
-string(%d) "%s/array-provenance.php:12"
+string(%d) "%s/array-provenance.php:42"
 dict(1) {
   ["blargh!"]=>
   string(7) "goodbye"
 }
-string(%d) "%s/array-provenance.php:19"
+string(%d) "%s/array-provenance.php:43"
 dict(1) {
   [0]=>
   int(15)
@@ -26,8 +26,8 @@ vec(1) {
   int(15)
 }
 string(%d) "%s/array-provenance.php:45"
+string(%d) "%s/array-provenance.php:47"
 string(%d) "%s/array-provenance.php:48"
-string(%d) "%s/array-provenance.php:49"
 string(%d) "%s/array-provenance.php:53"
 string(%d) "%s/array-provenance.php:54"
 string(%d) "%s/array-provenance.php:58"

@@ -138,6 +138,15 @@ void clearTag(const ArrayData* ad);
  */
 TypedValue tagTV(TypedValue tv);
 
+/*
+ * Produce a static empty array (with the same kind and contents as `base`)
+ * with the given provenance tag.
+ *
+ * You should be calling this with staticEmptyVecArray() or
+ * staticEmptyDictArray()
+ */
+const ArrayData* makeEmptyArray(const ArrayData* base, const Tag& t);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

@@ -135,6 +135,16 @@ TypedValue tagTV(TypedValue tv) {
   return tv;
 }
 
+const ArrayData* makeEmptyArray(const ArrayData* base, const Tag& tag) {
+  assertx(base->empty());
+  assertx(base->isStatic());
+  assertx(arrayWantsTag(base));
+  auto ad = base->copy();
+  arrprov::setTag(ad, tag);
+  ArrayData::GetScalarArray(&ad);
+  return ad;
+}
+
 folly::Optional<Tag> tagFromProgramCounter() {
   auto const tag = fromLeaf(
     [&] (const ActRec* fp, Offset offset) -> folly::Optional<Tag> {

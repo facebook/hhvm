@@ -1960,19 +1960,34 @@ OPTBLD_INLINE void iopArray(const ArrayData* a) {
   vmStack().pushStaticArray(a);
 }
 
+namespace {
+
+const ArrayData* makeEmptyArray(const ArrayData* base) {
+  if (!RuntimeOption::EvalArrayProvenancePromoteEmptyArrays ||
+      !base->empty()) {
+    return base;
+  }
+  assertx(base->empty());
+  assertx(base->isStatic());
+
+  return arrprov::makeEmptyArray(base, *arrprov::tagFromProgramCounter());
+}
+
+}
+
+OPTBLD_INLINE void iopVec(const ArrayData* a) {
+  assertx(a->isVecArray());
+  vmStack().pushStaticVec(makeEmptyArray(a));
+}
+
 OPTBLD_INLINE void iopDict(const ArrayData* a) {
   assertx(a->isDict());
-  vmStack().pushStaticDict(a);
+  vmStack().pushStaticDict(makeEmptyArray(a));
 }
 
 OPTBLD_INLINE void iopKeyset(const ArrayData* a) {
   assertx(a->isKeyset());
   vmStack().pushStaticKeyset(a);
-}
-
-OPTBLD_INLINE void iopVec(const ArrayData* a) {
-  assertx(a->isVecArray());
-  vmStack().pushStaticVec(a);
 }
 
 OPTBLD_INLINE void iopNewArray(uint32_t capacity) {

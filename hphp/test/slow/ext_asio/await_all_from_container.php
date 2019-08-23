@@ -19,18 +19,6 @@ function get_good_cases(): vec<Container<Awaitable<int>>> {
   ];
 }
 
-function has_same_content(
-  KeyedContainer<arraykey, mixed> $a,
-  KeyedContainer<arraykey, mixed> $b,
-): bool {
-  foreach ($a as $k => $v) {
-    if (!array_key_exists($k, $b) || $b[$k] !== $v) {
-      return false;
-    }
-  }
-  return true;
-}
-
 async function await_all(
   Container<Awaitable<mixed>> $c
 ): Awaitable<Container<mixed>> {

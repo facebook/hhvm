@@ -70,14 +70,14 @@ namespace {
   }
 
   [[noreturn]] NEVER_INLINE
-  void failContainer() {
+  void failNotContainer() {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Expected dependencies to be a container");
   }
 
-  void failSet() {
+  void failInvalidContainer() {
     SystemLib::throwInvalidArgumentExceptionObject(
-      "Dependencies cannot be a set-like container");
+      "Dependencies cannot be a set-like container or Pair");
   }
 
   c_StaticWaitHandle* returnEmpty() {
@@ -299,14 +299,14 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromContainer,
         } else if (isMapCollection(obj->collectionType())) {
           return c_AwaitAllWaitHandle_ns_fromMap(self_, dependencies);
         }
-        failSet();
+        failInvalidContainer();
       }
-      failContainer();
+      failNotContainer();
       break;
     }
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-      failSet();
+      failInvalidContainer();
       break;
     case KindOfPersistentString:
     case KindOfString:
@@ -321,7 +321,7 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromContainer,
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
-      failContainer();
+      failNotContainer();
       break;
   }
   not_reached();

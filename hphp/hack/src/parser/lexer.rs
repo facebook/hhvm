@@ -160,22 +160,6 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
         self.offset += i
     }
 
-    pub fn skip_to_end(&mut self) -> Token {
-        let token_start = self.offset;
-        self.start_new_lexeme();
-        let length = self.source.length();
-        self.with_offset(length);
-        let w = self.width();
-        Token::make(
-            TokenKind::ErrorToken,
-            self.source(),
-            token_start,
-            w,
-            vec![],
-            vec![],
-        )
-    }
-
     fn is_experimental_mode(&self) -> bool {
         self.is_experimental_mode
     }

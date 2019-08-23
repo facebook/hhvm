@@ -1392,17 +1392,10 @@ where
         }
     }
 
-    fn check_stack_limit(&mut self) -> Option<S::R> {
-        if self
-            .context()
+    fn check_stack_limit(&mut self) {
+        self.context()
             .stack_limit
             .as_ref()
-            .map_or(false, |limit| limit.check_exceeded())
-        {
-            let error_token = self.lexer_mut().skip_to_end();
-            Some(S!(make_token, self, error_token))
-        } else {
-            None
-        }
+            .map(|limit| limit.panic_if_exceeded());
     }
 }

@@ -96,6 +96,7 @@ macro_rules! parse {
             const MAX_STACK_SIZE: usize = 1024 * MI;
             let mut stack_size = 2 * MI;
             let mut default_stack_size_sufficient = true;
+            parser::stack_limit::init();
             loop {
                 if stack_size > MAX_STACK_SIZE {
                     panic!("Rust FFI exceeded maximum allowed stack of {} KiB", MAX_STACK_SIZE / KI);
@@ -125,28 +126,21 @@ macro_rules! parse {
                 let try_parse = move || {
                     let stack_limit = StackLimit::relative(relative_stack_size);
                     stack_limit.reset();
+                    let stack_limit_ref = &stack_limit;
                     let relative_path = RelativePath::from_ocamlvalue(&relative_path_raw);
-                    let source_text = SourceText::make_with_raw(
-                        &relative_path,
-                        &content.data(),
-                        ocaml_source_text_value,
-                    );
+                    let file_path = relative_path.path_str().to_owned();
                     ocamlpool_enter();
-                    let mut parser = $parser::make(&source_text, env);
-                    let root = parser.parse_script(Some(&stack_limit));
-                    let errors = parser.errors();
-                    let state = parser.sc_state();
-                    let result = if stack_limit.exceeded() {
-                        // Not always printing warning here because this would fail some HHVM tests
-                        let istty = libc::isatty(libc::STDERR_FILENO as i32) != 0;
-                        if istty || std::env::var_os("HH_TEST_MODE").is_some() {
-                            eprintln!("[hrust] warning: parser exceeded stack of {} KiB on: {}",
-                                      stack_limit.get() / KI,
-                                      relative_path.path_str()
-                            );
-                        }
-                        None
-                    } else {
+                    let maybe_l = std::panic::catch_unwind(move || {
+                        let source_text = SourceText::make_with_raw(
+                            &relative_path,
+                            &content.data(),
+                            ocaml_source_text_value,
+                        );
+                        let mut parser = $parser::make(&source_text, env);
+                        let root = parser.parse_script(Some(&stack_limit_ref));
+                        let errors = parser.errors();
+                        let state = parser.sc_state();
+
                         // traversing the parsed syntax tree uses about 1/3 of the stack
                         let context = SerializationContext::new(ocaml_source_text_value);
                         let ocaml_root = root.to_ocaml(&context);
@@ -158,10 +152,24 @@ macro_rules! parse {
                             ocaml_errors
                         ]);
                         let l = ocaml::Value::new(res);
-                        Some(l)
-                    };
-                    ocamlpool_leave();
-                    result
+                        l
+                    });
+                    ocamlpool_leave();  // note: must run even if a panic occurs
+                    match maybe_l {
+                        Ok(l) => Some(l),
+                        Err(_) if stack_limit.exceeded() => {
+                            // Not always printing warning here because this would fail some HHVM tests
+                            let istty = libc::isatty(libc::STDERR_FILENO as i32) != 0;
+                            if istty || std::env::var_os("HH_TEST_MODE").is_some() {
+                                eprintln!("[hrust] warning: parser exceeded stack of {} KiB on: {}",
+                                          stack_limit.get() / KI,
+                                          file_path,
+                                );
+                            }
+                            None
+                        }
+                        Err(msg) => panic!(msg),
+                    }
                 };
 
                 let l_opt = if default_stack_size_sufficient {

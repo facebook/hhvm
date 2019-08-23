@@ -69,6 +69,12 @@ impl StackLimit {
         overflow
     }
 
+    pub fn panic_if_exceeded(&self) {
+        if self.check_exceeded() {
+            panic!("stack overflow prevented by StackLimit");
+        }
+    }
+
     pub fn exceeded(&self) -> bool {
         // Note: need at least Acquire constraint in order for store to be visible across threads
         self.overflow.load(Ordering::Acquire)
@@ -77,6 +83,29 @@ impl StackLimit {
     pub fn reset(&self) {
         StackGuard::reset();
     }
+}
+
+/// Initializes the global state, more precisely modifes panic hook such that:
+/// - panics raised from StackLimit::panic_if_exceeded() are silenced;
+/// - other panics are passed through the original panic hook.
+pub fn init() {
+    use std::sync::Once;
+    static INIT: Once = Once::new();
+    INIT.call_once(|| {
+        let original_hook = std::panic::take_hook();
+        std::panic::set_hook(Box::new(move |panic_info| {
+            let mut swallow = false;
+            if let Some(location) = panic_info.location() {
+                if location.file() == file!() {
+                    // if panic comes from this file, it must be due to StackOverflow
+                    swallow = true;
+                }
+            }
+            if !swallow {
+                original_hook(&panic_info);
+            }
+        }));
+    });
 }
 
 // Implementation details (hidden to facilitate swapping in something less hacky)

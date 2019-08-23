@@ -153,7 +153,10 @@ folly::Optional<Tag> tagFromProgramCounter() {
       auto const line = unit->getLineNumber(offset);
       return Tag { filename, line };
     },
-    [] (const ActRec* fp) { return !fp->func()->isProvenanceSkipFrame(); }
+    [] (const ActRec* fp) {
+      return !fp->func()->isProvenanceSkipFrame() &&
+             !fp->func()->isCPPBuiltin();
+    }
   );
   assertx(!tag || tag->filename() != nullptr);
   return tag;

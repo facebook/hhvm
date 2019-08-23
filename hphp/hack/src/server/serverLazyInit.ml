@@ -175,6 +175,7 @@ let use_precomputed_state_exn
       corresponding_base_revision;
       deptable_fn;
       changes;
+      naming_changes;
       prechecked_changes;
     } = info in
   let ignore_hh_version = ServerArgs.ignore_hh_version genv.ServerEnv.options in
@@ -184,6 +185,7 @@ let use_precomputed_state_exn
     ~ignore_hh_version
     ~fail_if_missing;
   let changes = Relative_path.set_of_list changes in
+  let naming_changes = Relative_path.set_of_list naming_changes in
   let prechecked_changes = Relative_path.set_of_list prechecked_changes in
   let load_decls = genv.local_config.SLC.load_decls_from_saved_state in
   let naming_table_fallback_path = get_naming_table_fallback_path genv None in
@@ -196,7 +198,7 @@ let use_precomputed_state_exn
     naming_table_fn = naming_table_fallback_path;
     corresponding_rev = (Hg.Global_rev (int_of_string (corresponding_base_revision)));
     mergebase_rev  = None;
-    dirty_naming_files = Relative_path.Set.empty;
+    dirty_naming_files = naming_changes;
     dirty_master_files = prechecked_changes;
     dirty_local_files = changes;
     old_naming_table;

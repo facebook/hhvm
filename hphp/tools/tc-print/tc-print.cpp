@@ -169,7 +169,7 @@ void usage() {
     " the more helpers that will show up.\n"
     "    -j              : outputs tc-dump in JSON format (not compatible with "
     "some other flags).\n"
-    // TODO(elijahrivera) - investigate compatibility with other flags
+    // TODO(T52857399) - investigate compatibility with other flags
     #ifdef FACEBOOK
     "    -H <HIVE_TABLE> : used with -j, write the JSON output to Hive in the "
     "table <HIVE_TABLE>\n"
@@ -642,7 +642,7 @@ dynamic getTrans(TransID transId) {
 
   dynamic blocks = dynamic::array;
   for (auto const& block : tRec->blocks) {
-    std::stringstream byteInfo; // TODO(elijahrivera) - translate to actual data
+    std::stringstream byteInfo; // TODO(T52857125) - translate to actual data
 
     auto const unit = g_repo->getUnit(block.sha1);
     if (unit) {

@@ -396,8 +396,8 @@ Vcost computeTranslationCostSlow(SrcKey at,
   auto const unit = irGenInlineRegion(ctx, region);
   if (!unit) return {0, true};
 
-  // TODO(elijahrivera) - annotations should be copied from unit into outer unit
-  // annotationData.copy.....
+  // TODO(T52856776) - annotations should be copied from unit into outer unit
+  // via annotationData
 
   SCOPE_ASSERT_DETAIL("Inline-IRUnit") { return show(*unit); };
   return irlower::computeIRUnitCost(*unit);

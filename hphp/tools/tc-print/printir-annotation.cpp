@@ -169,7 +169,7 @@ printir::Instr DynamicConverter<printir::Instr>::convert(const dynamic& d) {
     d.getDefault("tc_ranges", dynamic::array));
   for (auto& tcr : tcRanges) tcr.parentInstrId = id;
 
-  // TODO(elijahrivera) - rewrite to maybe use boost::variant?
+  // TODO(T52857257) - rewrite to maybe use boost::variant?
   //                      other options to standardize?
   Optional<vector<printir::SSATmp>> srcs;
   Optional<string> counterName;

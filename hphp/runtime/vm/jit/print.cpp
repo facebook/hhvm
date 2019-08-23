@@ -122,7 +122,7 @@ struct InstAreaRange {
   }
 
   bool isContiguous(const InstAreaRange& other) const {
-    // TODO(elijahrivera) - check assertions as described in D16623372
+    // TODO(T52857006) - check assertions as described in D16623372
     return (m_instRange.end() == other.m_instRange.begin() &&
             m_area == other.m_area &&
             m_instIdx == other.m_instIdx);
@@ -208,6 +208,7 @@ dynamic getOpcode(const IRInstruction* inst,
 }
 
 dynamic getSrcs(const IRInstruction* inst) {
+  // TODO(T52857257)
   if (inst->op() == IncStat) {
     return dynamic::object("counterName",
                            Stats::g_counterNames[inst->src(0)->intVal()]);
@@ -309,7 +310,7 @@ dynamic getTCRange(const AreaIndex area,
 }
 
 namespace {
-// TODO(elijahrivera) - move into AnnotationData class
+// TODO(T52856776) - move into AnnotationData class
 struct TargetProfileVisitor {
   explicit TargetProfileVisitor(const TransContext& ctx) : ctx(ctx) {}
 

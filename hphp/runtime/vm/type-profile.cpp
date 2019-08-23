@@ -87,6 +87,7 @@ void profileRequestStart() {
   auto const codeCoverageForceInterp = []{
     if (RuntimeOption::EvalEnableCodeCoverage > 1) return true;
     if (RuntimeOption::EvalEnableCodeCoverage == 1) {
+      if (RuntimeOption::RepoAuthoritative) return false;
       auto const tport = g_context->getTransport();
       return tport &&
              tport->getParam("enable_code_coverage").compare("true") == 0;

@@ -337,6 +337,12 @@ class TestLsp(TestCase[LspTestDriver]):
             options=["--identify-function", "2:21", "--json"],
             stdin="<?hh // partial\nfunction f():void {PHP_EOL;}\n",
         )
+        if retcode == 7:
+            self.skipTest(
+                "Could not discover builtins directory -- "
+                + "got exit code 7 (either Out_of_time or Out_of_retries). "
+                + "The test machine is likely under too much load."
+            )
         self.assertEqual(retcode, 0)
         constants_path = json.loads(output)[0]["definition_pos"]["filename"]
         return {

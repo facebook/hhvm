@@ -1,8 +1,8 @@
 diff --git a/third-party/thrift/src/thrift/lib/cpp2/transport/util/ConnectionThread.cpp b/third-party/thrift/src/thrift/lib/cpp2/transport/util/ConnectionThread.cpp
-index 400f17d18..9337a2329 100644
+index 400f17d18..74f668c21 100644
 --- a/third-party/thrift/src/thrift/lib/cpp2/transport/util/ConnectionThread.cpp
 +++ b/third-party/thrift/src/thrift/lib/cpp2/transport/util/ConnectionThread.cpp
-@@ -58,17 +58,17 @@ void ConnectionThread::maybeCreateConnection(
+@@ -58,17 +58,19 @@ void ConnectionThread::maybeCreateConnection(
        << "Use RSocketClientChannel::newChannel() or"
           " RocketClientChannel::newChannel()";
  
@@ -15,7 +15,9 @@ index 400f17d18..9337a2329 100644
 +          new TAsyncSocket(this->getEventBase(), addr, port));
        if (FLAGS_use_ssl) {
          auto sslContext = std::make_shared<folly::SSLContext>();
++#if FOLLY_OPENSSL_HAS_ALPN
          sslContext->setAdvertisedNextProtocols({"h2", "http"});
++#endif
          auto sslSocket = new TAsyncSSLSocket(
              sslContext,
 -            getEventBase(),

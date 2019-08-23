@@ -2137,9 +2137,22 @@ and pStmt : stmt parser = fun node env ->
     if is_typechecker env && not (ParserOptions.allow_goto env.parser_options)
     then raise_parsing_error env (`Node node) SyntaxError.goto;
     pos, Goto  (pos_name goto_statement_label_name env)
-  | EchoStatement  { echo_keyword  = kw; echo_expressions = exprs; _ }
-  | UnsetStatement { unset_keyword = kw; unset_variables  = exprs; _ }
-   ->
+  | EchoStatement  { echo_keyword  = kw; echo_expressions = exprs; _ } ->
+    lift_awaits_in_statement env pos (fun () -> pos, Expr
+      ( pPos node env
+      , Call
+        ( (match syntax kw with
+         | QualifiedName _
+         | SimpleTypeSpecifier _
+         | Token _
+           -> let name = pos_name kw env in fst name, Id name
+         | _ -> missing_syntax "id" kw env
+         )
+        , []
+        , couldMap ~f:pExpr exprs env
+        , []
+      )))
+  | UnsetStatement { unset_keyword = kw; unset_variables  = exprs; _ } ->
    let rec check_mutate_class_const e =
       match snd e with
       | Array_get (e, Some _) ->

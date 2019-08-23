@@ -128,7 +128,8 @@ TypedValue tagTV(TypedValue tv) {
     ad = ad->copy();
     type(tv) = dt_with_rc(type(tv));
     val(tv).parr = ad;
-  } else if (auto const pctag = tagFromProgramCounter()) {
+  }
+  if (auto const pctag = tagFromProgramCounter()) {
     setTag(ad, *pctag);
   }
   return tv;

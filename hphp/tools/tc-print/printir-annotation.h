@@ -119,9 +119,18 @@ struct TransContext {
   const int endLine;
 };
 
+struct InliningDecision {
+  const bool wasInlined;
+  const Offset offset;
+  const folly::Optional<std::string> callerName;
+  const folly::Optional<std::string> calleeName;
+  const std::string reason;
+};
+
 struct Unit {
   const TransContext transContext;
   const std::unordered_map<BlockId, Block> blocks;
+  const std::vector<InliningDecision> inliningDecisions;
 };
 
 }} // namespace HPHP::printir
@@ -169,6 +178,10 @@ template <> struct DynamicConverter<printir::SrcKey> {
   static printir::SrcKey convert(const dynamic&);
 };
 
+template <> struct DynamicConverter<printir::InliningDecision> {
+  static printir::InliningDecision convert(const dynamic&);
+};
+
 template <> struct DynamicConverter<printir::Unit> {
   static printir::Unit convert(const dynamic&);
 };
@@ -211,6 +224,10 @@ template <> struct DynamicConstructor<printir::TransContext> {
 
 template <> struct DynamicConstructor<printir::SrcKey> {
   static dynamic construct(const printir::SrcKey&);
+};
+
+template <> struct DynamicConstructor<printir::InliningDecision> {
+  static dynamic construct(const printir::InliningDecision&);
 };
 
 template <> struct DynamicConstructor<printir::Unit> {

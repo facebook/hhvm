@@ -72,13 +72,12 @@ HPHP::jit::TCA parseTCA(const std::string& raw) {
 namespace folly {
 using namespace HPHP;
 
-template <typename T> Optional<T> DynamicConverter<Optional<T>>::
-convert(const dynamic& d) {
+template <typename T> Optional<T> DynamicConverter<Optional<T>>::convert(
+  const dynamic& d) {
   return d.isNull() ? none : Optional<T>(convertTo<T>(d));
 }
 
-jit::Opcode DynamicConverter<jit::Opcode>::
-convert(const dynamic& d) {
+jit::Opcode DynamicConverter<jit::Opcode>::convert(const dynamic& d) {
   auto const rawOpcode = convertTo<string>(d);
   auto const maybeOpcode = jit::nameToOpcode(rawOpcode);
   if (!maybeOpcode) enumError("Opcode", rawOpcode);
@@ -86,8 +85,7 @@ convert(const dynamic& d) {
   return *maybeOpcode;
 }
 
-printir::SSATmp DynamicConverter<printir::SSATmp>::
-convert(const dynamic& d) {
+printir::SSATmp DynamicConverter<printir::SSATmp>::convert(const dynamic& d) {
   if (!d.isObject()) {
     typeError("SSATmp", dynamic::Type::OBJECT, d.type());
   }
@@ -98,8 +96,8 @@ convert(const dynamic& d) {
   return printir::SSATmp{id, std::move(typeStr)};
 }
 
-printir::PhiPseudoInstr DynamicConverter<printir::PhiPseudoInstr>::
-convert(const dynamic& d) {
+printir::PhiPseudoInstr DynamicConverter<printir::PhiPseudoInstr>::convert(
+  const dynamic& d) {
   if (!d.isObject()) {
     typeError("PhiPseudoInstr", dynamic::Type::OBJECT, d.type());
   }
@@ -118,8 +116,7 @@ convert(const dynamic& d) {
   return printir::PhiPseudoInstr{std::move(srcs), std::move(dst)};
 }
 
-printir::TCRange DynamicConverter<printir::TCRange>::
-convert(const dynamic& d) {
+printir::TCRange DynamicConverter<printir::TCRange>::convert(const dynamic& d) {
   if (!d.isObject()) {
     typeError("TCRange", dynamic::Type::OBJECT, d.type());
   }
@@ -136,8 +133,7 @@ convert(const dynamic& d) {
   return printir::TCRange{area, start, end, std::move(disasm)};
 }
 
-printir::Profile DynamicConverter<printir::Profile>::
-convert(const dynamic& d) {
+printir::Profile DynamicConverter<printir::Profile>::convert(const dynamic& d) {
   auto const offset = convertTo<Offset>(d.getDefault("offset", {}));
   auto const name = convertTo<string>(d.getDefault("name", {}));
   auto const& data = d.getDefault("data");
@@ -145,8 +141,7 @@ convert(const dynamic& d) {
   return printir::Profile{offset, name, data};
 }
 
-printir::Instr DynamicConverter<printir::Instr>::
-convert(const dynamic& d) {
+printir::Instr DynamicConverter<printir::Instr>::convert(const dynamic& d) {
   if (!d.isObject()) {
     typeError("Instr", dynamic::Type::OBJECT, d.type());
   }
@@ -198,8 +193,7 @@ convert(const dynamic& d) {
                         std::move(srcs), std::move(counterName)};
 }
 
-printir::Block DynamicConverter<printir::Block>::
-convert(const dynamic& d) {
+printir::Block DynamicConverter<printir::Block>::convert(const dynamic& d) {
   if (!d.isObject()) typeError("Block", dynamic::Type::OBJECT, d.type());
 
   auto const& label = d.getDefault("label");
@@ -234,8 +228,7 @@ convert(const dynamic& d) {
                         std::move(maybeNextId), std::move(instrs), area};
 }
 
-printir::SrcKey DynamicConverter<printir::SrcKey>::
-convert(const dynamic& d) {
+printir::SrcKey DynamicConverter<printir::SrcKey>::convert(const dynamic& d) {
   if (!d.isObject()) typeError("SrcKey", dynamic::Type::OBJECT, d.type());
 
   auto funcStr = convertTo<string>(d.getDefault("func", {}));
@@ -253,8 +246,8 @@ convert(const dynamic& d) {
                          offset, resumeMode, hasThis};
 }
 
-printir::TransContext DynamicConverter<printir::TransContext>::
-convert(const dynamic& d) {
+printir::TransContext DynamicConverter<printir::TransContext>::convert(
+  const dynamic& d) {
   if (!d.isObject()) typeError("TransContext", dynamic::Type::OBJECT, d.type());
 
   auto const rawTransKind = convertTo<string>(d.getDefault("kind", {}));
@@ -270,17 +263,28 @@ convert(const dynamic& d) {
   auto const startLine = convertTo<int>(d.getDefault("startLine", {}));
   auto const endLine = convertTo<int>(d.getDefault("endLine", {}));
 
-
-
-
-
   return printir::TransContext{std::move(transKind), id, optIndex,
                                std::move(srcKey), std::move(funcName),
                                std::move(sourceFile), startLine, endLine};
 }
 
-printir::Unit DynamicConverter<printir::Unit>::
-convert(const dynamic& d) {
+printir::InliningDecision DynamicConverter<printir::InliningDecision>::convert(
+  const dynamic& d) {
+  if (!d.isObject()) {
+    typeError("InliningDecision", dynamic::Type::OBJECT, d.type());
+  }
+
+  auto const wasInlined = convertTo<bool>(d.getDefault("wasInlined", {}));
+  auto const offset = convertTo<Offset>(d.getDefault("offset", {}));
+  auto callerName = convertTo<Optional<string>>(d.getDefault("caller", {}));
+  auto calleeName = convertTo<Optional<string>>(d.getDefault("callee", {}));
+  auto reason = convertTo<string>(d.getDefault("reason", {}));
+
+  return printir::InliningDecision{wasInlined, offset, std::move(callerName),
+                                   std::move(calleeName), std::move(reason)};
+}
+
+printir::Unit DynamicConverter<printir::Unit>::convert(const dynamic& d) {
   if (!d.isObject()) typeError("Unit", dynamic::Type::OBJECT, d.type());
 
   auto transContext = convertTo<printir::TransContext>(
@@ -298,48 +302,50 @@ convert(const dynamic& d) {
     }
   }
 
-  return printir::Unit{std::move(transContext), std::move(blocks)};
+  auto inliningDecisions = convertTo<vector<printir::InliningDecision>>(
+    d.getDefault("inliningDecisions", dynamic::array));
+
+  return printir::Unit{std::move(transContext), std::move(blocks),
+                       std::move(inliningDecisions)};
 }
 
-template <typename T> dynamic DynamicConstructor<Optional<T>>::
-construct(const Optional<T>& opt) {
+template <typename T>  dynamic DynamicConstructor<Optional<T>>::construct(
+  const Optional<T>& opt) {
   return opt ? toDynamic(*opt) : dynamic();
 }
 
-dynamic DynamicConstructor<jit::Opcode>::
-construct(const jit::Opcode& opc) {
+dynamic DynamicConstructor<jit::Opcode>::construct(const jit::Opcode& opc) {
   return jit::opcodeName(opc);
 }
 
-dynamic DynamicConstructor<printir::SSATmp>::
-construct(const printir::SSATmp& s) {
+dynamic
+DynamicConstructor<printir::SSATmp>::construct(const printir::SSATmp& s) {
   return dynamic::object("id", s.id)
                         ("type", s.type);
 }
 
-dynamic DynamicConstructor<printir::PhiPseudoInstr>::
-construct(const printir::PhiPseudoInstr& p) {
+dynamic DynamicConstructor<printir::PhiPseudoInstr>::construct(
+  const printir::PhiPseudoInstr& p) {
   return dynamic::object("srcs", toDynamic(p.srcs))
                         ("dst", toDynamic(p.dst));
 }
 
-dynamic DynamicConstructor<printir::TCRange>::
-construct(const printir::TCRange& t) {
+dynamic DynamicConstructor<printir::TCRange>::construct(
+  const printir::TCRange& t) {
   return dynamic::object("area", jit::areaAsString(t.area))
                         ("start", sformat("{}", static_cast<void*>(t.start)))
                         ("end", sformat("{}", static_cast<void*>(t.end)))
                         ("disasm", t.disasm);
 }
 
-dynamic DynamicConstructor<printir::Profile>::
-construct(const printir::Profile& p) {
+dynamic DynamicConstructor<printir::Profile>::construct(
+  const printir::Profile& p) {
   return dynamic::object("offset", p.offset)
                         ("name", p.name)
                         ("data", p.data);
 }
 
-dynamic DynamicConstructor<printir::Instr>::
-construct(const printir::Instr& i) {
+dynamic DynamicConstructor<printir::Instr>::construct(const printir::Instr& i) {
   return dynamic::object("rawMarker", toDynamic(i.rawMarker))
                         ("phiPseudoInstrs", toDynamic(i.phiPseudoInstrs))
                         ("opcode", toDynamic(i.opcode))
@@ -356,8 +362,7 @@ construct(const printir::Instr& i) {
                         ("counterName", toDynamic(i.counterName));
 }
 
-dynamic DynamicConstructor<printir::Block>::
-construct(const printir::Block& b) {
+dynamic DynamicConstructor<printir::Block>::construct(const printir::Block& b) {
   dynamic instrMap = dynamic::object();
   for (auto const& item: b.instrs) {
     instrMap[sformat("{}", item.id)] = toDynamic(item);
@@ -371,8 +376,8 @@ construct(const printir::Block& b) {
                         ("instrs", instrMap);
 }
 
-dynamic DynamicConstructor<printir::SrcKey>::
-construct(const printir::SrcKey& s) {
+dynamic DynamicConstructor<printir::SrcKey>::construct(
+  const printir::SrcKey& s) {
   return dynamic::object("funcStr", s.funcStr)
                         ("unitStr", s.unitStr)
                         ("prologue", s.prologue)
@@ -381,8 +386,8 @@ construct(const printir::SrcKey& s) {
                         ("hasThis", s.hasThis);
 }
 
-dynamic DynamicConstructor<printir::TransContext>::
-construct(const printir::TransContext& t) {
+dynamic DynamicConstructor<printir::TransContext>::construct(
+  const printir::TransContext& t) {
   return dynamic::object("kind", show(t.kind))
                         ("id", t.id)
                         ("optIndex", t.optIndex)
@@ -393,15 +398,24 @@ construct(const printir::TransContext& t) {
                         ("endLine", t.endLine);
 }
 
-dynamic DynamicConstructor<printir::Unit>::
-construct(const printir::Unit &u) {
+dynamic DynamicConstructor<printir::InliningDecision>::construct(
+  const printir::InliningDecision& i) {
+  return dynamic::object("wasInlined", i.wasInlined)
+                        ("offset", i.offset)
+                        ("callerName", toDynamic(i.callerName))
+                        ("calleeName", toDynamic(i.calleeName))
+                        ("reason", i.reason);
+}
+
+dynamic DynamicConstructor<printir::Unit>::construct(const printir::Unit &u) {
   dynamic blockMap = dynamic::object();
   for (auto const& item: u.blocks) {
     blockMap[sformat("{}", item.first)] = toDynamic(item.second);
   }
 
   return dynamic::object("transContext", toDynamic(u.transContext))
-                        ("blocks", blockMap);
+                        ("blocks", blockMap)
+                        ("inliningDecisions", toDynamic(u.inliningDecisions));
 }
 
 } // namespace folly

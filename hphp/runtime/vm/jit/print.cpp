@@ -537,7 +537,7 @@ dynamic getUnit(const IRUnit& unit,
 
   result["inliningDecisions"] = unit.annotationData ?
     unit.annotationData->getInliningDynamic() :
-    dynamic();
+    dynamic::array();
 
   auto blocks = rpoSortCfg(unit);
   // Partition into main, cold and frozen, without changing relative order.

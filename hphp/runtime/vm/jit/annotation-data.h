@@ -55,8 +55,12 @@ struct AnnotationData {
     }
 
     folly::dynamic toDynamic() const {
-      auto const callerName = caller ? caller->fullName()->data() : "(unknown)";
-      auto const calleeName = callee ? callee->fullName()->data() : "(unknown)";
+      auto const callerName = caller ?
+        caller->fullName()->data() :
+        folly::dynamic();
+      auto const calleeName = callee ?
+        callee->fullName()->data() :
+        folly::dynamic();
       return folly::dynamic::object("wasInlined", wasInlined)
                                    ("offset", offset)
                                    ("caller", callerName)

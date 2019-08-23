@@ -22,6 +22,7 @@ macro_rules! caml_raise {
                     caml_raise_ret = value;
                 },
                 Err (err) => {
+                    ocamlpool_leave();
                     let msg: &str;
                     if let Some (str) = err.downcast_ref::<&str>() {
                         msg = str;

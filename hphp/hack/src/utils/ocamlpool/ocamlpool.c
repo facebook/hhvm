@@ -160,6 +160,10 @@ void ocamlpool_enter(void)
 
 void ocamlpool_leave(void)
 {
+  if (ocamlpool_in_section != 1) {
+    return;
+  }
+
   assert_in_section();
 
   ocamlpool_chunk_truncate();

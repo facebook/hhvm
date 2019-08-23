@@ -1,42 +1,22 @@
-diff --git a/third-party/mcrouter/src/mcrouter/routes/McRouteHandleProvider-inl.h b/third-party/mcrouter/src/mcrouter/routes/McRouteHandleProvider-inl.h
-index 3930c6da..e8234cc7 100644
---- a/third-party/mcrouter/src/mcrouter/routes/McRouteHandleProvider-inl.h
-+++ b/third-party/mcrouter/src/mcrouter/routes/McRouteHandleProvider-inl.h
-@@ -23,7 +23,6 @@
- #include "mcrouter/lib/network/AsyncMcClient.h"
- #include "mcrouter/lib/network/NoOpTransport.h"
- #include "mcrouter/lib/network/SecurityOptions.h"
--#include "mcrouter/lib/network/ThriftTransport.h"
- #include "mcrouter/lib/network/gen/MemcacheRouterInfo.h"
- #include "mcrouter/routes/AsynclogRoute.h"
- #include "mcrouter/routes/DestinationRoute.h"
-@@ -38,6 +37,10 @@
- #include "mcrouter/routes/ShardSplitRoute.h"
- #include "mcrouter/routes/ShardSplitter.h"
+diff --git a/third-party/mcrouter/src/mcrouter/lib/network/ThriftTransport.cpp b/third-party/mcrouter/src/mcrouter/lib/network/ThriftTransport.cpp
+index 279136a1..67967446 100644
+--- a/third-party/mcrouter/src/mcrouter/lib/network/ThriftTransport.cpp
++++ b/third-party/mcrouter/src/mcrouter/lib/network/ThriftTransport.cpp
+@@ -111,6 +111,7 @@ ThriftTransportBase::getConnectingSocket() {
+ }
  
-+#ifdef FOLLY_OPENSSL_HAS_ALPN
-+#include "mcrouter/lib/network/ThriftTransport.h"
+ apache::thrift::RocketClientChannel::Ptr ThriftTransportBase::createChannel() {
++#if FOLLY_OPENSSL_HAS_ALPN
+   auto socket = getConnectingSocket();
+   if (!socket) {
+     return nullptr;
+@@ -120,6 +121,9 @@ apache::thrift::RocketClientChannel::Ptr ThriftTransportBase::createChannel() {
+   channel->setProtocolId(apache::thrift::protocol::T_COMPACT_PROTOCOL);
+   channel->setCloseCallback(this);
+   return channel;
++#else
++  return nullptr;
 +#endif
-+
- namespace facebook {
- namespace memcache {
- namespace mcrouter {
-@@ -305,6 +308,7 @@ McRouteHandleProvider<RouterInfo>::makePool(
-       it->second.push_back(ap);
-       folly::StringPiece nameSp = it->first;
+ }
  
-+#ifdef FOLLY_OPENSSL_HAS_ALPN
-       if (ap->getProtocol() == mc_thrift_protocol) {
-         using Transport = ThriftTransport<RouterInfo>;
-         destinations.push_back(createDestinationRoute<Transport>(
-@@ -317,7 +321,9 @@ McRouteHandleProvider<RouterInfo>::makePool(
-             i,
-             poolStatIndex,
-             keepRoutingPrefix));
--      } else if (ap->getProtocol() == mc_noop_protocol) {
-+      } else
-+#endif
-+      if (ap->getProtocol() == mc_noop_protocol) {
-         using Transport = NoOpTransport;
-         destinations.push_back(createDestinationRoute<Transport>(
-             std::move(ap),
+ apache::thrift::RpcOptions ThriftTransportBase::getRpcOptions(

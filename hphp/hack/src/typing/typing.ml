@@ -386,7 +386,8 @@ let make_param_local_ty env param =
         env, (r, TUtils.tany env)
     | Some x ->
       let ty = Decl_hint.hint env.Env.decl_env x in
-      let ty = Typing_enforceability.pessimize_type_simple env ty in
+      let { et_type = ty; _ } =
+        Typing_enforceability.compute_enforced_and_pessimize_ty_simple env ty in
       let condition_type =
         Decl_fun_utils.condition_type_from_attributes env.Env.decl_env param.param_user_attributes in
       begin match condition_type with
@@ -569,8 +570,9 @@ and fun_def tcopt f : Tast.fun_def option =
         env f.f_name
     | Some ty ->
       let localize = fun env ty ->
-        Typing_enforceability.pessimize_type_simple env ty |>
-        Phase.localize_with_self env in
+        let { et_type = ty; _ } =
+          Typing_enforceability.compute_enforced_and_pessimize_ty_simple env ty in
+        Phase.localize_with_self env ty in
       Typing_return.make_return_type localize env ty in
   let return = Typing_return.make_info f.f_fun_kind f.f_user_attributes env
     ~is_explicit:(Option.is_some (hint_of_type_hint f.f_ret)) locl_ty decl_ty in
@@ -4310,10 +4312,10 @@ and class_get_ ~is_method ~is_const ~this_ty ~coerce_from_ty ?(explicit_tparams=
                       ~ety_env env ft)
                   in env, (r, Tfun ft), false (* unused *)
                 | _ ->
-                  let { et_type; et_enforced } = 
+                  let { et_type; et_enforced } =
                     Typing_enforceability.compute_enforced_and_pessimize_ty_simple env member_decl_ty in
                   let env, member_ty = Phase.localize ~ety_env env et_type in
-                  (* TODO(T52753871) make function just return possibly_enforced_ty 
+                  (* TODO(T52753871) make function just return possibly_enforced_ty
                    * after considering intersection case *)
                   env, member_ty, et_enforced
               end in

@@ -226,18 +226,27 @@ let rec is_enforceable (env: Env.env) (ty: decl ty) =
   | Toption ty ->
     is_enforceable env ty
 
+let is_enforced env ty =
+  let enforceable = is_enforceable env ty in
+  let is_hhi =
+    fst ty |>
+    Reason.to_pos |>
+    Pos.filename |>
+    Relative_path.prefix |>
+    (=) Relative_path.Hhi in
+  enforceable && not is_hhi
+
 let pessimize_type_simple env (ty: decl ty) =
   if not env.Env.pessimize then ty else
   match ty with
   | _, Tprim (Aast.Tvoid | Aast.Tnoreturn) -> ty
-  | _ when is_enforceable env ty -> ty
   | _ -> wrap_like ty
 
 let compute_enforced_and_pessimize_ty_simple env (ty: decl ty) =
-  let et_enforced = is_enforceable env ty in
-  let et_type = 
-    if not et_enforced 
-    then pessimize_type_simple env ty 
+  let et_enforced = is_enforced env ty in
+  let et_type =
+    if not et_enforced
+    then pessimize_type_simple env ty
     else ty in
   { et_type; et_enforced }
 

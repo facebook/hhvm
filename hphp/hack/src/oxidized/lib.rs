@@ -5,6 +5,7 @@
 
 mod manual;
 
+pub use manual::file_info_impl;
 pub use manual::file_pos_large;
 pub use manual::file_pos_small;
 pub use manual::i_map;

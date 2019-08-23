@@ -61,14 +61,9 @@ version = "0.3.55"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
-name = "hack_deps"
-version = "3.49.0"
-
-[[package]]
 name = "hack_facts"
 version = "3.49.0"
 dependencies = [
- "hack_deps 3.49.0",
  "hack_oxidized 3.49.0",
  "hack_parser 3.49.0",
  "hack_utils 3.49.0",
@@ -134,7 +129,6 @@ dependencies = [
 name = "hack_parser"
 version = "3.49.0"
 dependencies = [
- "hack_deps 3.49.0",
  "hack_oxidized 3.49.0",
  "hack_parser_core_types 3.49.0",
  "hack_utils_ocamlpool 3.49.0",
@@ -146,7 +140,6 @@ dependencies = [
 name = "hack_parser_core_types"
 version = "3.49.0"
 dependencies = [
- "hack_deps 3.49.0",
  "hack_line_break_map 3.49.0",
  "hack_oxidized 3.49.0",
  "hack_utils_ocamlpool 3.49.0",
@@ -156,7 +149,6 @@ dependencies = [
 name = "hack_parser_ffi"
 version = "3.49.0"
 dependencies = [
- "hack_deps 3.49.0",
  "hack_oxidized 3.49.0",
  "hack_parser 3.49.0",
  "hack_utils_ocamlpool 3.49.0",

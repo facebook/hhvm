@@ -32,7 +32,6 @@ use parser::token_kind::TokenKind;
 use parser::trivia_kind::TriviaKind;
 use parser::verify_smart_constructors::State as VerifyState;
 
-use deps_rust::file_mode::FileMode;
 use ocamlpool_rust::ocamlvalue::Ocamlvalue;
 use ocamlpool_rust::utils::*;
 
@@ -301,24 +300,6 @@ impl ToOcaml for PositionedValue {
                 let offset = usize_to_ocaml(*offset);
                 // Missing of {...}
                 caml_block(MISSING_VALUE_VARIANT, &[context.source_text, offset])
-            }
-        }
-    }
-}
-
-impl ToOcaml for Option<FileMode> {
-    unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
-        match self {
-            None => usize_to_ocaml(0),
-            Some(x) => {
-                let tag: u8 = match x {
-                    FileMode::Mphp => 0,
-                    FileMode::Mdecl => 1,
-                    FileMode::Mstrict => 2,
-                    FileMode::Mpartial => 3,
-                    FileMode::Mexperimental => 4,
-                };
-                caml_tuple(&[u8_to_ocaml(tag)])
             }
         }
     }

@@ -8,7 +8,6 @@ name = "parser_rust"
 path = "lib.rs"
 
 [dependencies]
-deps_rust = { path = "../deps", package = "hack_deps" }
 ocamlpool_rust = { path = "../utils/ocamlpool_rust", package = "hack_utils_ocamlpool" }
 ocaml = "^0.7"
 lazy_static = "^1.3.0"

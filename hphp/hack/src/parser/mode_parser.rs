@@ -5,7 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::parser_env::ParserEnv;
-use deps_rust::file_mode::FileMode;
+use oxidized::file_info::Mode;
 use parser_core_types::lexable_token::LexableToken;
 use parser_core_types::source_text::SourceText;
 use parser_core_types::syntax::{self, SyntaxVariant};
@@ -13,7 +13,7 @@ use parser_core_types::token_kind::TokenKind;
 
 use crate::minimal_parser::MinimalSyntaxParser;
 
-pub fn parse_mode(text: &SourceText) -> Option<FileMode> {
+pub fn parse_mode(text: &SourceText) -> Option<Mode> {
     if let Some(header) = MinimalSyntaxParser::parse_header_only(ParserEnv::default(), text) {
         match header.syntax {
             SyntaxVariant::MarkupSection(section_children) => {
@@ -33,10 +33,8 @@ pub fn parse_mode(text: &SourceText) -> Option<FileMode> {
                         markup_suffix_name: name,
                     } = *suffix_children;
                     return match &name.syntax {
-                        SyntaxVariant::Missing => Some(FileMode::Mphp),
-                        SyntaxVariant::Token(t) if t.kind() == TokenKind::Equal => {
-                            Some(FileMode::Mphp)
-                        }
+                        SyntaxVariant::Missing => Some(Mode::Mphp),
+                        SyntaxVariant::Token(t) if t.kind() == TokenKind::Equal => Some(Mode::Mphp),
                         _ => {
                             let is_hhi = text.file_path().ends_with(".hhi");
                             let skip_length = pfx.value.full_width
@@ -48,9 +46,9 @@ pub fn parse_mode(text: &SourceText) -> Option<FileMode> {
                                 .sub_as_str(skip_length, name.width())
                                 .to_ascii_lowercase();
                             if language == "php" {
-                                Some(FileMode::Mphp)
+                                Some(Mode::Mphp)
                             } else if is_hhi {
-                                Some(FileMode::Mdecl)
+                                Some(Mode::Mdecl)
                             } else {
                                 let skip_length = skip_length + name.width();
                                 let s = text.sub_as_str(skip_length, name.trailing_width()).trim();
@@ -60,7 +58,7 @@ pub fn parse_mode(text: &SourceText) -> Option<FileMode> {
                                 let c1 = chars.next();
 
                                 let mode = if c0 != Some('/') || c1 != Some('/') {
-                                    return FileMode::from_string("");
+                                    return Mode::from_string("");
                                 } else {
                                     chars.as_str()
                                 };
@@ -69,7 +67,7 @@ pub fn parse_mode(text: &SourceText) -> Option<FileMode> {
                                     None => "",
                                     Some(mode) => mode,
                                 };
-                                FileMode::from_string(mode)
+                                Mode::from_string(mode)
                             }
                         }
                     };
@@ -80,5 +78,5 @@ pub fn parse_mode(text: &SourceText) -> Option<FileMode> {
     } else {
         // no header - assume .hack file
     }
-    Some(FileMode::Mstrict)
+    Some(Mode::Mstrict)
 }

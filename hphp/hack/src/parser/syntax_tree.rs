@@ -6,13 +6,13 @@ use std::cmp::Ordering;
 
 use crate::source_text::SourceText;
 use crate::syntax_error::SyntaxError;
-use deps_rust::file_mode::FileMode;
+use oxidized::file_info::Mode;
 
 pub struct SyntaxTree<'a, Syntax, State> {
     text: &'a SourceText<'a>,
     root: Syntax,
     errors: Vec<SyntaxError>,
-    mode: Option<FileMode>,
+    mode: Option<Mode>,
     state: State,
 }
 
@@ -55,7 +55,7 @@ where
         text: &'a SourceText<'a>,
         root: Syntax,
         errors: Vec<SyntaxError>,
-        mode: Option<FileMode>,
+        mode: Option<Mode>,
         state: State,
     ) -> Self {
         Self {
@@ -71,7 +71,7 @@ where
         text: &'a SourceText<'a>,
         root: Syntax,
         errors: Vec<SyntaxError>,
-        mode: Option<FileMode>,
+        mode: Option<Mode>,
         state: State,
     ) -> Self {
         let errors = process_errors(errors);
@@ -90,7 +90,7 @@ where
         &self.errors
     }
 
-    pub fn mode(&self) -> &Option<FileMode> {
+    pub fn mode(&self) -> &Option<Mode> {
         &self.mode
     }
 
@@ -99,19 +99,19 @@ where
     }
 
     pub fn is_hack(&self) -> bool {
-        self.mode != Some(FileMode::Mphp)
+        self.mode != Some(Mode::Mphp)
     }
 
     pub fn is_php(&self) -> bool {
-        self.mode == Some(FileMode::Mphp)
+        self.mode == Some(Mode::Mphp)
     }
 
     pub fn is_strict(&self) -> bool {
-        self.mode == Some(FileMode::Mstrict)
+        self.mode == Some(Mode::Mstrict)
     }
 
     pub fn is_decl(&self) -> bool {
-        self.mode == Some(FileMode::Mdecl)
+        self.mode == Some(Mode::Mdecl)
     }
 
     //TODO: errors and to_json require some unimplemented methods in syntax.rs, particularly

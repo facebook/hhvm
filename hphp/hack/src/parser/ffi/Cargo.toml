@@ -4,7 +4,6 @@ version = "3.49.0"
 edition = "2018"
 
 [dependencies]
-deps_rust = { path = "../../deps", package = "hack_deps" }
 parser_rust = { path = "..", package = "hack_parser" }
 ocamlpool_rust = { path = "../../utils/ocamlpool_rust", package = "hack_utils_ocamlpool" }
 libc = "^0.2.60"

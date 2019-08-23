@@ -6,7 +6,7 @@
 
 use parser_rust as parser;
 
-use oxidized::relative_path::RelativePath;
+use oxidized::{file_info::Mode, relative_path::RelativePath};
 use parser::mode_parser::parse_mode;
 use parser::parser::Parser;
 use parser::parser_env::ParserEnv;
@@ -15,7 +15,6 @@ use parser::source_text::SourceText;
 
 use crate::facts::*;
 use crate::facts_smart_constructors::*;
-use deps_rust::file_mode::FileMode;
 
 pub type FactsParser<'a> = Parser<'a, WithKind<FactsSmartConstructors<'a>>, HasScriptContent<'a>>;
 
@@ -33,7 +32,7 @@ pub fn extract_as_json(text: &str, opts: ExtractAsJsonOpts) -> Option<String> {
 pub fn from_text(text: &str, opts: ExtractAsJsonOpts) -> Option<Facts> {
     let text = SourceText::make(&opts.filename, text.as_bytes());
     let is_experimental = match parse_mode(&text) {
-        Some(FileMode::Mexperimental) => true,
+        Some(Mode::Mexperimental) => true,
         _ => false,
     };
     let env = ParserEnv {

@@ -199,8 +199,7 @@ caml_raise!(rust_parse_mode, |ocaml_source_text|, <l>, {
     let mode = parse_mode(&source_text);
 
     ocamlpool_enter();
-    let context = SerializationContext::new(ocaml_source_text.0);
-    let ocaml_mode = mode.to_ocaml(&context);
+    let ocaml_mode = mode.ocamlvalue();
     l = ocaml::Value::new(ocaml_mode);
     ocamlpool_leave();
 } -> l);

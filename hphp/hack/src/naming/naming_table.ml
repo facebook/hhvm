@@ -162,7 +162,7 @@ let empty_save_result = {
   symbols_added = 0;
 }
 
-(* The canon name (and assorted *Canon heaps) store the canonical name for a
+(* The canonical name (and assorted *Canon heaps) store the canonical name for a
    symbol, keyed off of the lowercase version of its name. We use the canon
    heaps to check for symbols which are redefined using different
    capitalizations so we can throw proper Hack errors for them. *)
@@ -931,7 +931,7 @@ type blocked_entry = Blocked
     @param key the key to request.
 *)
 let get_and_cache
-  ~(map_result : 'fallback_value -> 'value)
+  ~(map_result : 'fallback_value -> 'value option)
   ~(get_func : 'key -> 'value option)
   ~(check_block_func : 'key -> blocked_entry option)
   ~(fallback_get_func : 'key -> 'fallback_value option)
@@ -954,9 +954,12 @@ let get_and_cache
       Measure.sample measure_name 0.0;
       begin match fallback_get_func key with
       | Some res ->
-        let pos = map_result res in
-        add_func key pos;
-        Some pos
+        begin match map_result res with
+        | Some pos ->
+          add_func key pos;
+          Some pos
+        | None -> None
+        end
       | None ->
         None
       end
@@ -1022,7 +1025,7 @@ module Types = struct
         | TClass -> FileInfo.Class
         | TTypedef -> FileInfo.Typedef
       in
-      (FileInfo.File (name_type, path), entry_type)
+      Some (FileInfo.File (name_type, path), entry_type)
     in
     get_and_cache
       ~map_result
@@ -1036,16 +1039,22 @@ module Types = struct
   let get_canon_name id =
     let open Core_kernel in
     let map_result (path, entry_type) =
-      let _path_str = Relative_path.S.to_string path in
-      let id = match entry_type with
+      let path_str = Relative_path.S.to_string path in
+      match entry_type with
         | TClass ->
-          let class_opt = Ast_provider.find_class_in_file ~case_insensitive:true path id in
-          (Option.value_exn class_opt).Aast.c_name
+          begin match Ast_provider.find_class_in_file ~case_insensitive:true path id with
+          | Some cls -> Some (snd cls.Aast.c_name)
+          | None ->
+            Hh_logger.log "Failed to get canonical name for %s in file %s" id path_str;
+            None
+          end
         | TTypedef ->
-          let typedef_opt = Ast_provider.find_typedef_in_file ~case_insensitive:true path id in
-          (Option.value_exn typedef_opt).Aast.t_name
-      in
-      snd id
+          begin match Ast_provider.find_typedef_in_file ~case_insensitive:true path id with
+          | Some typedef -> Some (snd typedef.Aast.t_name)
+          | None ->
+            Hh_logger.log "Failed to get canonical name for %s in file %s" id path_str;
+            None
+          end
     in
     get_and_cache
       ~map_result
@@ -1102,7 +1111,9 @@ module Funs = struct
     FunPosHeap.add id pos
 
   let get_pos ?bypass_cache:(_=false) id =
-    let map_result path = FileInfo.File (FileInfo.Fun, path) in
+    let map_result path =
+      Some (FileInfo.File (FileInfo.Fun, path))
+    in
     get_and_cache
       ~map_result
       ~get_func:FunPosHeap.get
@@ -1115,8 +1126,12 @@ module Funs = struct
   let get_canon_name name =
     let open Core_kernel in
     let map_result path =
-      let fun_opt = Ast_provider.find_fun_in_file ~case_insensitive:true path name in
-      snd (Option.value_exn fun_opt).Aast.f_name
+      match Ast_provider.find_fun_in_file ~case_insensitive:true path name with
+      | Some f -> Some (snd f.Aast.f_name)
+      | None ->
+        let path_str = Relative_path.S.to_string path in
+        Hh_logger.log "Failed to get canonical name for %s in file %s" name path_str;
+        None
     in
     get_and_cache
       ~map_result
@@ -1163,7 +1178,9 @@ module Consts = struct
     ConstPosHeap.add id pos
 
   let get_pos ?bypass_cache:(_=false) id =
-    let map_result path = FileInfo.File (FileInfo.Const, path) in
+    let map_result path =
+      Some (FileInfo.File (FileInfo.Const, path))
+    in
     get_and_cache
       ~map_result
       ~get_func:ConstPosHeap.get

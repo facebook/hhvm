@@ -5,6 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import json
 import os
 import shlex
+import shutil
 import sqlite3
 import stat
 import time
@@ -478,3 +479,23 @@ class ReverseNamingTableSavedStateTests(SavedStateTests):
     @classmethod
     def get_test_driver(cls) -> ReverseNamingTableFallbackTestDriver:
         return ReverseNamingTableFallbackTestDriver()
+
+    def test_file_moved(self) -> None:
+        new_file = os.path.join(self.test_driver.repo_dir, "class_3b.php")
+        self.add_file_that_depends_on_class_a(new_file)
+        self.test_driver.check_cmd(["No errors!"], assert_loaded_saved_state=False)
+        naming_table_path = self.test_driver.dump_naming_saved_state(
+            self.test_driver.repo_dir,
+            saved_state_path=os.path.join(self.test_driver.repo_dir, "new"),
+        )
+
+        self.test_driver.proc_call([hh_client, "stop", self.test_driver.repo_dir])
+        new_file2 = os.path.join(self.test_driver.repo_dir, "class_3c.php")
+        shutil.move(new_file, new_file2)
+
+        self.test_driver.start_hh_server(
+            changed_files=[],
+            changed_naming_files=["class_3c.php"],
+            naming_saved_state_path=naming_table_path,
+        )
+        self.test_driver.check_cmd(["No errors!"], assert_loaded_saved_state=True)

@@ -1501,7 +1501,7 @@ class Status {
             Status::sayColor("$test ", Status::YELLOW, "skipped");
 
             if ($reason !== null) {
-              Status::sayColor(" - $reason");
+              Status::sayColor(" - reason: $reason");
             }
             Status::sayColor(sprintf(" (%.2fs)\n", $time));
             break;

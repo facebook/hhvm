@@ -8,49 +8,63 @@
  *)
 
 open Core_kernel
-
 module Syntax = Full_fidelity_editable_positioned_syntax
-module Rewriter = Full_fidelity_rewriter.WithSyntax(Syntax)
-module PositionedTree = Full_fidelity_syntax_tree
-  .WithSyntax(Full_fidelity_positioned_syntax)
-
+module Rewriter = Full_fidelity_rewriter.WithSyntax (Syntax)
+module PositionedTree =
+  Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
 open Syntax
+
 let is_not_acceptable ty =
-  let finder = object
-    inherit [_] Type_visitor.type_visitor
-    method! on_tprim acc _ = function
-    | Aast.Tnull | Aast.Tvoid | Aast.Tresource | Aast.Tnoreturn -> true
-    | _ -> acc
-  end
-  in finder#on_type false ty
+  let finder =
+    object
+      inherit [_] Type_visitor.type_visitor
+
+      method! on_tprim acc _ =
+        function
+        | Aast.Tnull
+        | Aast.Tvoid
+        | Aast.Tresource
+        | Aast.Tnoreturn ->
+          true
+        | _ -> acc
+    end
+  in
+  finder#on_type false ty
 
 let print_ty ty =
-  if is_not_acceptable ty then None else CodemodTypePrinter.print ty
+  if is_not_acceptable ty then
+    None
+  else
+    CodemodTypePrinter.print ty
 
 let get_first_suggested_type_as_string file type_map node =
-  let open Option.Monad_infix in
-  position file node >>= fun pos ->
-  Tast_type_collector.get_from_pos_map
-    (Pos.to_absolute pos) type_map >>= fun tys ->
-  List.find_map tys ~f:(fun (env, phase_ty) ->
-    match phase_ty with
-    | Typing_defs.LoclTy ty ->
-      let env, ty = Tast_env.fold_unresolved env ty in
-      let env, ty = Tast_env.expand_type env ty in
-      begin match ty with
-      | Typing_reason.Rsolve_fail _, ty_ ->
-        begin match print_ty ty with
-        | Some type_str -> Some type_str
-        | None ->
-          Hh_logger.log "%s failed to rewrite lambda parameter %s: the suggested type %s is non-denotable"
-            (Pos.string (Pos.to_absolute pos))
-            (text node)
-            (Tast_env.print_ty env (Typing_reason.Rnone, ty_));
-          None
-        end
-      | _ -> None
-      end
-    | Typing_defs.DeclTy _ -> None)
+  Option.Monad_infix.(
+    position file node
+    >>= fun pos ->
+    Tast_type_collector.get_from_pos_map (Pos.to_absolute pos) type_map
+    >>= fun tys ->
+    List.find_map tys ~f:(fun (env, phase_ty) ->
+        match phase_ty with
+        | Typing_defs.LoclTy ty ->
+          let (env, ty) = Tast_env.fold_unresolved env ty in
+          let (env, ty) = Tast_env.expand_type env ty in
+          begin
+            match ty with
+            | (Typing_reason.Rsolve_fail _, ty_) ->
+              begin
+                match print_ty ty with
+                | Some type_str -> Some type_str
+                | None ->
+                  Hh_logger.log
+                    "%s failed to rewrite lambda parameter %s: the suggested type %s is non-denotable"
+                    (Pos.string (Pos.to_absolute pos))
+                    (text node)
+                    (Tast_env.print_ty env (Typing_reason.Rnone, ty_));
+                  None
+              end
+            | _ -> None
+          end
+        | Typing_defs.DeclTy _ -> None))
 
 let get_patches tcopt file =
   let nast = Ast_provider.get_ast ~full:true file in
@@ -58,46 +72,61 @@ let get_patches tcopt file =
   let type_map = Tast_type_collector.collect_types tast in
   let source_text = Full_fidelity_source_text.from_file file in
   let positioned_tree = PositionedTree.make source_text in
-  let root = Full_fidelity_editable_positioned_syntax.from_positioned_syntax
-    (PositionedTree.root positioned_tree) in
+  let root =
+    Full_fidelity_editable_positioned_syntax.from_positioned_syntax
+      (PositionedTree.root positioned_tree)
+  in
   let get_lambda_expression_patches node =
     let get_lambda_parameter_patches node =
       let patch =
-        let open Option.Monad_infix in
-        match syntax node with
-        | Token _ ->
-          get_first_suggested_type_as_string file type_map node >>= fun type_str ->
-          position_exclusive file node >>| fun pos ->
-          ServerRefactorTypes.Replace ServerRefactorTypes.{
-            pos = Pos.to_absolute pos;
-            text = Printf.sprintf "(%s %s)" type_str (text node);
-          }
-        | ListItem {list_item; _} ->
-          begin match syntax list_item with
-          | ParameterDeclaration _ ->
-            get_first_suggested_type_as_string file type_map list_item >>= fun type_str ->
-            position file list_item >>| fun pos ->
-            ServerRefactorTypes.Insert ServerRefactorTypes.{
-              pos = Pos.to_absolute pos;
-              text = type_str ^ " ";
-            }
-          | _ -> None
-          end
-        | _ -> None in
-      Option.to_list patch in
+        Option.Monad_infix.(
+          match syntax node with
+          | Token _ ->
+            get_first_suggested_type_as_string file type_map node
+            >>= fun type_str ->
+            position_exclusive file node
+            >>| fun pos ->
+            ServerRefactorTypes.Replace
+              ServerRefactorTypes.
+                {
+                  pos = Pos.to_absolute pos;
+                  text = Printf.sprintf "(%s %s)" type_str (text node);
+                }
+          | ListItem { list_item; _ } ->
+            begin
+              match syntax list_item with
+              | ParameterDeclaration _ ->
+                get_first_suggested_type_as_string file type_map list_item
+                >>= fun type_str ->
+                position file list_item
+                >>| fun pos ->
+                ServerRefactorTypes.Insert
+                  ServerRefactorTypes.
+                    { pos = Pos.to_absolute pos; text = type_str ^ " " }
+              | _ -> None
+            end
+          | _ -> None)
+      in
+      Option.to_list patch
+    in
     match syntax node with
-    | LambdaExpression {lambda_signature; _} ->
-      begin match syntax lambda_signature with
-      | Token _ ->
-        get_lambda_parameter_patches lambda_signature
-      | LambdaSignature {lambda_parameters; _} ->
-        List.concat_map (syntax_node_to_list lambda_parameters)
-          ~f:get_lambda_parameter_patches
-      | _ -> []
+    | LambdaExpression { lambda_signature; _ } ->
+      begin
+        match syntax lambda_signature with
+        | Token _ -> get_lambda_parameter_patches lambda_signature
+        | LambdaSignature { lambda_parameters; _ } ->
+          List.concat_map
+            (syntax_node_to_list lambda_parameters)
+            ~f:get_lambda_parameter_patches
+        | _ -> []
       end
-    | _ -> [] in
-  let patches, _ = Rewriter.aggregating_rewrite_post
-     (fun node patches ->
-       get_lambda_expression_patches node @ patches, Rewriter.Result.Keep)
-     root [] in
+    | _ -> []
+  in
+  let (patches, _) =
+    Rewriter.aggregating_rewrite_post
+      (fun node patches ->
+        (get_lambda_expression_patches node @ patches, Rewriter.Result.Keep))
+      root
+      []
+  in
   patches

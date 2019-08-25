@@ -8,24 +8,25 @@
  *)
 
 type t = {
-    saved_root : Path.t;
-    saved_hhi : Path.t;
-    saved_tmp : Path.t;
-    trace : bool;
-    fuzzy : bool;
-    profile_log : bool;
-    fixme_codes : ISet.t;
-    strict_codes : ISet.t;
-    disable_linter_fixmes : bool;
-    paths_to_ignore : Str.regexp list;
-    no_load : bool;
-    logging_init : unit -> unit;
-  }
+  saved_root: Path.t;
+  saved_hhi: Path.t;
+  saved_tmp: Path.t;
+  trace: bool;
+  fuzzy: bool;
+  profile_log: bool;
+  fixme_codes: ISet.t;
+  strict_codes: ISet.t;
+  disable_linter_fixmes: bool;
+  paths_to_ignore: Str.regexp list;
+  no_load: bool;
+  logging_init: unit -> unit;
+}
 
-let save ~logging_init = {
-    saved_root = Path.make (Relative_path.(path_of_prefix Root));
-    saved_hhi = Path.make (Relative_path.(path_of_prefix Hhi));
-    saved_tmp = Path.make (Relative_path.(path_of_prefix Tmp));
+let save ~logging_init =
+  {
+    saved_root = Path.make Relative_path.(path_of_prefix Root);
+    saved_hhi = Path.make Relative_path.(path_of_prefix Hhi);
+    saved_tmp = Path.make Relative_path.(path_of_prefix Tmp);
     trace = !Typing_deps.trace;
     fuzzy = SymbolIndex.fuzzy_search_enabled ();
     profile_log = !Utils.profile;
@@ -56,16 +57,35 @@ let to_string state =
   let saved_root = Path.to_string state.saved_root in
   let saved_hhi = Path.to_string state.saved_hhi in
   let saved_tmp = Path.to_string state.saved_tmp in
-  let trace = if state.trace then "true" else "false" in
-  let fuzzy = if state.fuzzy then "true" else "false" in
-  let profile_log = if state.profile_log then "true" else "false" in
+  let trace =
+    if state.trace then
+      "true"
+    else
+      "false"
+  in
+  let fuzzy =
+    if state.fuzzy then
+      "true"
+    else
+      "false"
+  in
+  let profile_log =
+    if state.profile_log then
+      "true"
+    else
+      "false"
+  in
   let fixme_codes = ISet.to_string state.fixme_codes in
   let strict_codes = ISet.to_string state.strict_codes in
-  let disable_linter_fixmes = if state.disable_linter_fixmes then "true" else "false" in
+  let disable_linter_fixmes =
+    if state.disable_linter_fixmes then
+      "true"
+    else
+      "false"
+  in
   (* OCaml regexps cannot be re-serialized to strings *)
   let paths_to_ignore = "(...)" in
-  [
-    ("saved_root", saved_root);
+  [ ("saved_root", saved_root);
     ("saved_hhi", saved_hhi);
     ("saved_tmp", saved_tmp);
     ("trace", trace);
@@ -74,8 +94,7 @@ let to_string state =
     ("fixme_codes", fixme_codes);
     ("strict_codes", strict_codes);
     ("disable_linter_fixmes", disable_linter_fixmes);
-    ("paths_to_ignore", paths_to_ignore);
-  ]
-    |> List.map (fun (x, y) -> Printf.sprintf "%s : %s" x y)
-    |> String.concat ", "
-    |> Printf.sprintf "{%s}"
+    ("paths_to_ignore", paths_to_ignore) ]
+  |> List.map (fun (x, y) -> Printf.sprintf "%s : %s" x y)
+  |> String.concat ", "
+  |> Printf.sprintf "{%s}"

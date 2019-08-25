@@ -7,12 +7,12 @@
  *
  *)
 
-val get: unit -> TypecheckerOptions.t
+val get : unit -> TypecheckerOptions.t
 (** Get the global [TypecheckerOptions.t] to be used in Naming and Decl.
 
     Raises [Failure] if [set] has not yet been invoked. *)
 
-val set: TypecheckerOptions.t -> unit
+val set : TypecheckerOptions.t -> unit
 (** Set the global [TypecheckerOptions.t] to be used in Naming and Decl for the
     entire lifetime of the server.
 

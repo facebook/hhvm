@@ -8,5 +8,5 @@
  *)
 
 let message =
-  "Type checking of this file produced an error with the primary position " ^
-  "in a different file. Please file a bug."
+  "Type checking of this file produced an error with the primary position "
+  ^ "in a different file. Please file a bug."

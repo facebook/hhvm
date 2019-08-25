@@ -7,9 +7,14 @@
  *
  *)
 
-type t = NoCost | Base | Moderate | High
+type t =
+  | NoCost
+  | Base
+  | Moderate
+  | High
 
-let get_cost t = match t with
+let get_cost t =
+  match t with
   | NoCost -> 0
   | Base -> 1
   | Moderate -> 2

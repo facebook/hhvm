@@ -6,7 +6,7 @@
  *
  *)
 
- (**
+(**
   * Copyright (c) Facebook, Inc. and its affiliates.
   *
   * This source code is licensed under the MIT license found in the
@@ -18,7 +18,9 @@ type process_success = {
   command_line: string;
   stdout: string;
 }
+
 type process_failure = string
+
 type config = string * string SMap.t
 
 module Regular_saved_state_info = struct
@@ -30,21 +32,17 @@ module Regular_saved_state_info = struct
 end
 
 module Naming_table_saved_state_info = struct
-  type t = {
-    naming_table_path: Path.t;
-  }
+  type t = { naming_table_path: Path.t }
 end
 
 module Symbol_index_saved_state_info = struct
-  type t = {
-    symbol_index_path: Path.t;
-  }
+  type t = { symbol_index_path: Path.t }
 end
 
 type _ saved_state_type =
-  | Regular: Regular_saved_state_info.t saved_state_type
-  | Naming_table: Naming_table_saved_state_info.t saved_state_type
-  | Symbol_index: Symbol_index_saved_state_info.t saved_state_type
+  | Regular : Regular_saved_state_info.t saved_state_type
+  | Naming_table : Naming_table_saved_state_info.t saved_state_type
+  | Symbol_index : Symbol_index_saved_state_info.t saved_state_type
 
 type changed_files = Path.t list
 (** List of files changed since the saved-state's commit. This list of files may
@@ -52,5 +50,5 @@ include files other than Hack files, so the caller should filter the given list
 as necessary. *)
 
 type load_error
-let load_error_to_string _ =
-  failwith "Not implemented"
+
+let load_error_to_string _ = failwith "Not implemented"

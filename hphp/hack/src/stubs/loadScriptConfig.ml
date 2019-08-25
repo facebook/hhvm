@@ -10,7 +10,11 @@
 type t = unit
 
 let createLoadScriptConfig _ _ = ()
+
 let default = ()
+
 let saved_state_load_type_to_string _ = ""
+
 let saved_state_load_type_ _ = ()
+
 let use_sql _ = false

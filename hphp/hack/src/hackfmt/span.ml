@@ -7,8 +7,6 @@
  *
  *)
 
-type t = {
-  id: int;
-}
+type t = { id: int }
 
 let id t = t.id

@@ -15,7 +15,10 @@ type load_state_error =
   (* either the downloader or hg-dirty-files took too long *)
   | Load_state_timeout
   (* any other unhandled exception from lazy_init *)
-  | Load_state_unhandled_exception of {exn: exn; stack: Utils.callstack;}
+  | Load_state_unhandled_exception of {
+      exn: exn;
+      stack: Utils.callstack;
+    }
 
 type load_state_approach =
   | Precomputed of ServerArgs.saved_state_target_info
@@ -41,37 +44,44 @@ type init_result =
   | Load_state_declined of string
 
 (** returns human-readable string, an indication of whether auto-retry is sensible, and stack *)
-let load_state_error_to_verbose_string (err: load_state_error) : string * bool * Utils.callstack =
+let load_state_error_to_verbose_string (err : load_state_error) :
+    string * bool * Utils.callstack =
   match err with
-  | Load_state_loader_failure err ->
-    State_loader.error_string_verbose err
+  | Load_state_loader_failure err -> State_loader.error_string_verbose err
   | Load_state_dirty_files_failure error ->
     let (msg, stack) = Future.error_to_string_verbose error in
-    Printf.sprintf "Problem getting dirty files from hg: %s" msg, false, stack
+    (Printf.sprintf "Problem getting dirty files from hg: %s" msg, false, stack)
   | Load_state_timeout ->
-    "Timed out trying to load state", false, Utils.Callstack ""
-  | Load_state_unhandled_exception {exn; stack;} ->
-    Printf.sprintf "Unexpected bug loading saved state - %s" (Printexc.to_string exn), false, stack
+    ("Timed out trying to load state", false, Utils.Callstack "")
+  | Load_state_unhandled_exception { exn; stack } ->
+    ( Printf.sprintf
+        "Unexpected bug loading saved state - %s"
+        (Printexc.to_string exn),
+      false,
+      stack )
 
 type files_changed_while_parsing = Relative_path.Set.t
 
-type loaded_info =
-{
-  saved_state_fn : string;
-  deptable_fn : string;
-  naming_table_fn : string option;
-  corresponding_rev : Hg.rev;
-  mergebase_rev : Hg.global_rev option;
+type loaded_info = {
+  saved_state_fn: string;
+  deptable_fn: string;
+  naming_table_fn: string option;
+  corresponding_rev: Hg.rev;
+  mergebase_rev: Hg.global_rev option;
   (* Files changed between the loaded naming table saved state and current revision. *)
-  dirty_naming_files : Relative_path.Set.t;
+  dirty_naming_files: Relative_path.Set.t;
   (* Files changed between saved state revision and current public merge base *)
-  dirty_master_files : Relative_path.Set.t;
+  dirty_master_files: Relative_path.Set.t;
   (* Files changed between public merge base and current revision *)
-  dirty_local_files : Relative_path.Set.t;
-  old_naming_table : Naming_table.t;
-  old_errors : SaveStateServiceTypes.saved_state_errors;
+  dirty_local_files: Relative_path.Set.t;
+  old_naming_table: Naming_table.t;
+  old_errors: SaveStateServiceTypes.saved_state_errors;
   state_distance: int option;
 }
 
 (* Laziness *)
-type lazy_level = Off | Decl | Parse | Init
+type lazy_level =
+  | Off
+  | Decl
+  | Parse
+  | Init

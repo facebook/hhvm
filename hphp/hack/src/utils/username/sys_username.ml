@@ -9,14 +9,15 @@ let get_real_user_name () =
     pwd_entry.Unix.pw_name
 
 let get_logged_in_username () =
-  let name = try Unix.getlogin () with
-    | Unix.Unix_error(Unix.ENOENT, m, _) when m = "getlogin" -> begin
-      (** Linux getlogin(3) man page suggests checking LOGNAME. *)
-      try Sys.getenv "LOGNAME" with
-      | Not_found -> begin
-        Sys.getenv "SUDO_USER"
+  let name =
+    try Unix.getlogin ()
+    with Unix.Unix_error (Unix.ENOENT, m, _) when m = "getlogin" ->
+      begin
+        try
+          (* Linux getlogin(3) man page suggests checking LOGNAME. *)
+          Sys.getenv "LOGNAME"
+        with Not_found -> Sys.getenv "SUDO_USER"
       end
-    end
   in
   if name = "root" then
     get_real_user_name ()

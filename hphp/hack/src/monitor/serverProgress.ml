@@ -13,9 +13,11 @@ let make_pipe_from_server fd = fd
 
 let read_from_server fd =
   try
-    let readable, _, _ = Unix.select [fd] [] [] (0.0) in
-    if readable = [] then None else
-    Some (Marshal_tools.from_fd_with_preamble fd)
+    let (readable, _, _) = Unix.select [fd] [] [] 0.0 in
+    if readable = [] then
+      None
+    else
+      Some (Marshal_tools.from_fd_with_preamble fd)
   with e ->
     (* If something went wrong here, the system is likely in broken state
      * (the server died). We'll keep going so that monitor
@@ -25,24 +27,27 @@ let read_from_server fd =
     None
 
 let pipe_to_monitor_ref = ref None
+
 let previous_message = ref (MonitorRpc.PROGRESS None)
 
 let make_pipe_to_monitor fd = pipe_to_monitor_ref := Some fd
 
 let send_to_monitor msg =
   match !pipe_to_monitor_ref with
-  | None -> () (* This function can be invoked in non-server code paths,
-                * when there is no monitor. *)
+  | None -> ()
+  (* This function can be invoked in non-server code paths,
+   * when there is no monitor. *)
   | Some fd ->
     (* Avoid sending the same message repeatedly. *)
-    if msg = !previous_message then () else
-    begin
-      previous_message := msg;
-      let _ : int = Marshal_tools.to_fd_with_preamble fd msg in
+    if msg = !previous_message then
       ()
-    end
+    else (
+      previous_message := msg;
+      let (_ : int) = Marshal_tools.to_fd_with_preamble fd msg in
+      ()
+    )
 
-let send_progress_to_monitor ?(include_in_logs=true) fmt =
+let send_progress_to_monitor ?(include_in_logs = true) fmt =
   let f s =
     if include_in_logs then Hh_logger.log "%s" s;
     send_to_monitor (MonitorRpc.PROGRESS (Some s))
@@ -50,7 +55,18 @@ let send_progress_to_monitor ?(include_in_logs=true) fmt =
   Printf.ksprintf f fmt
 
 let send_percentage_progress_to_monitor s1 x y s2 =
-  let s2 = if s2 = "" then s2 else s2 ^ " " in
-  let percent = (100.0 *. (float_of_int x)) /. (float_of_int y) in
-  send_progress_to_monitor ~include_in_logs:false
-    "%s %d/%d %s(%.1f%%)" s1 x y s2 percent
+  let s2 =
+    if s2 = "" then
+      s2
+    else
+      s2 ^ " "
+  in
+  let percent = 100.0 *. float_of_int x /. float_of_int y in
+  send_progress_to_monitor
+    ~include_in_logs:false
+    "%s %d/%d %s(%.1f%%)"
+    s1
+    x
+    y
+    s2
+    percent

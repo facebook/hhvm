@@ -7,11 +7,8 @@
  *
  *)
 
-let go:
-  ServerEnv.env ->
-  string ->
-  string =
-fun env filename ->
+let go : ServerEnv.env -> string -> string =
+ fun env filename ->
   let _ = env in
   let _ = Hh_logger.info "Hello, world!!!!!" in
   String.concat " " ["Hello!!"; filename]

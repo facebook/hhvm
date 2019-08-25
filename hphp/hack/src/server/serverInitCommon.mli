@@ -19,11 +19,7 @@ val parsing :
   trace:bool ->
   ServerEnv.env * float
 
-val update_files :
-  ServerEnv.genv ->
-  Naming_table.t ->
-  float ->
-  float
+val update_files : ServerEnv.genv -> Naming_table.t -> float -> float
 
 val naming : ServerEnv.env -> float -> ServerEnv.env * float
 

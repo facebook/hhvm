@@ -16,7 +16,8 @@ end
 
 type document_location = {
   file_path: Path.t;
-  file_contents: string option; (* if absent, should read from file on disk *)
+  file_contents: string option;
+  (* if absent, should read from file on disk *)
   line: int;
   column: int;
 }
@@ -32,17 +33,20 @@ end
 
 module Hover = struct
   type request = document_location
+
   type result = HoverService.result
 end
 
 module Definition = struct
   type request = document_location
+
   type result = ServerCommandTypes.Go_to_definition.result
 end
 
 (* Handles "textDocument/typeDefinition" LSP messages *)
 module Type_definition = struct
   type request = document_location
+
   type result = ServerCommandTypes.Go_to_type_definition.result
 end
 
@@ -52,6 +56,7 @@ module Completion = struct
     document_location: document_location;
     is_manually_invoked: bool;
   }
+
   type result = AutocompleteTypes.ide_result
 end
 
@@ -61,53 +66,45 @@ module Completion_resolve = struct
     symbol: string;
     kind: SearchUtils.si_kind;
   }
+
   type result = DocblockService.result
 end
 
 (* Handles "textDocument/documentHighlight" LSP messages *)
 module Document_highlight = struct
   type request = document_location
+
   type result = Ide_api_types.range list
 end
 
 (* Handles "textDocument/signatureHelp" LSP messages *)
 module Signature_help = struct
   type request = document_location
+
   type result = Lsp.SignatureHelp.result
 end
 
 (* GADT for request/response types. See [ServerCommandTypes] for a discussion on
    using GADTs in this way. *)
 type _ t =
-  | Initialize_from_saved_state: Initialize_from_saved_state.t -> unit t
-  | Shutdown: unit -> unit t
-  | File_changed: Path.t -> unit t
-  | File_opened: File_opened.request -> unit t
-  | Hover:
-    Hover.request ->
-    Hover.result t
-  | Definition:
-    Definition.request ->
-    Definition.result t
-  | Completion:
-    Completion.request ->
-    Completion.result t
-  | Completion_resolve:
-    Completion_resolve.request ->
-    Completion_resolve.result t
-  | Document_highlight:
-    Document_highlight.request ->
-    Document_highlight.result t
-  | Type_definition:
-    Type_definition.request ->
-    Type_definition.result t
-  | Signature_help:
-    Signature_help.request ->
-    Signature_help.result t
+  | Initialize_from_saved_state : Initialize_from_saved_state.t -> unit t
+  | Shutdown : unit -> unit t
+  | File_changed : Path.t -> unit t
+  | File_opened : File_opened.request -> unit t
+  | Hover : Hover.request -> Hover.result t
+  | Definition : Definition.request -> Definition.result t
+  | Completion : Completion.request -> Completion.result t
+  | Completion_resolve :
+      Completion_resolve.request
+      -> Completion_resolve.result t
+  | Document_highlight :
+      Document_highlight.request
+      -> Document_highlight.result t
+  | Type_definition : Type_definition.request -> Type_definition.result t
+  | Signature_help : Signature_help.request -> Signature_help.result t
 
-type notification =
-  | Done_processing
+type notification = Done_processing
 
 type message_from_daemon =
   | Notification of notification
-  | Response: ('a, string) result -> message_from_daemon
+  | Response : ('a, string) result -> message_from_daemon

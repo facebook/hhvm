@@ -7,24 +7,25 @@
  *
  *)
 
-
 val fuzzy_search_enabled : unit -> bool
+
 val set_fuzzy_search_enabled : bool -> unit
 
 (* Trie-based search indices need to be built on server initialization *)
-val init_needs_search_updates: provider_name:string -> bool
+val init_needs_search_updates : provider_name:string -> bool
 
 (* Get or set the currently selected search provider *)
-val initialize:
+val initialize :
   globalrev_opt:int option ->
   namespace_map:(string * string) list ->
   provider_name:string ->
   quiet:bool ->
   savedstate_file_opt:string option ->
-  workers:MultiWorker.worker list option -> SearchUtils.si_env
+  workers:MultiWorker.worker list option ->
+  SearchUtils.si_env
 
 (* Log diagnostics for usage of autocomplete and symbol search *)
-val log_symbol_index_search:
+val log_symbol_index_search :
   sienv:SearchUtils.si_env ->
   query_text:string ->
   max_results:int ->
@@ -32,7 +33,8 @@ val log_symbol_index_search:
   kind_filter:SearchUtils.si_kind option ->
   start_time:float ->
   context:SearchUtils.autocomplete_type option ->
-  caller:string -> unit
+  caller:string ->
+  unit
 
 (* This is the proper search function everyone should use *)
 val find_matching_symbols :
@@ -55,8 +57,8 @@ val query_for_symbol_search :
 val query_for_autocomplete :
   string ->
   limit:int option ->
-  filter_map:(
-    string ->
+  filter_map:
+    (string ->
     string ->
     (FileInfo.pos, SearchUtils.si_kind) SearchUtils.term ->
     'a option) ->
@@ -71,22 +73,14 @@ val update_files :
 
 (* Notify the search service that certain files have been removed locally *)
 val remove_files :
-  sienv:SearchUtils.si_env ref ->
-  paths:Relative_path.Set.t ->
-  unit
+  sienv:SearchUtils.si_env ref -> paths:Relative_path.Set.t -> unit
 
 (* Identify the position of an item *)
-val get_position_for_symbol:
-  string ->
-  SearchUtils.si_kind ->
-  (Relative_path.t * int * int) option
+val get_position_for_symbol :
+  string -> SearchUtils.si_kind -> (Relative_path.t * int * int) option
 
 (* Take an item and produce a position, or none if it cannot be found *)
-val get_pos_for_item_opt:
-  SearchUtils.si_item ->
-  Pos.absolute option
+val get_pos_for_item_opt : SearchUtils.si_item -> Pos.absolute option
 
 (* Take an item and produce a position, or a fake one if it cannot be found *)
-val get_pos_for_item:
-  SearchUtils.si_item ->
-  Pos.absolute
+val get_pos_for_item : SearchUtils.si_item -> Pos.absolute

@@ -6,14 +6,14 @@
  *
  *)
 
-val go_ctx:
+val go_ctx :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
   line:int ->
   column:int ->
   ServerCommandTypes.Go_to_type_definition.result
 
-val go:
+val go :
   ServerEnv.env ->
   ServerCommandTypes.file_input * int * int ->
   ServerCommandTypes.Go_to_type_definition.result

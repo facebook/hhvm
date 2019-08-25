@@ -7,12 +7,10 @@
  *
  *)
 
-type t = {
-  next_id: int;
-}
+type t = { next_id: int }
 
 let make () = { next_id = 0 }
 
 let make_span t =
   let id = t.next_id in
-  { next_id = t.next_id + 1 }, { Span.id }
+  ({ next_id = t.next_id + 1 }, { Span.id })

@@ -5,34 +5,35 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
  *
-*)
+ *)
 open Core_kernel
-
 module T = Aast
 
-module ScopeItem =
-struct
+module ScopeItem = struct
   type is_static = bool
-  type is_async = bool
-  type rx_level = Rx.t option
-  type t =
-  (* Named class *)
-  | Class of Tast.class_
-  (* Named function *)
-  | Function of Tast.fun_
-  (* Method in class *)
-  | Method of Tast.method_
-  (* PHP-style closure *)
-  | LongLambda of is_static * is_async * rx_level
-  (* Short lambda *)
-  | Lambda of is_async * rx_level
 
+  type is_async = bool
+
+  type rx_level = Rx.t option
+
+  type t =
+    (* Named class *)
+    | Class of Tast.class_
+    (* Named function *)
+    | Function of Tast.fun_
+    (* Method in class *)
+    | Method of Tast.method_
+    (* PHP-style closure *)
+    | LongLambda of is_static * is_async * rx_level
+    (* Short lambda *)
+    | Lambda of is_async * rx_level
 end
 
-module Scope =
-struct
+module Scope = struct
   type t = ScopeItem.t list
+
   let toplevel : t = []
+
   let rec get_class scope =
     match scope with
     | [] -> None
@@ -50,14 +51,17 @@ struct
   let rec get_tparams scope =
     match scope with
     | [] -> []
-    | ScopeItem.Class cd :: scope -> cd.T.c_tparams.T.c_tparam_list @ get_tparams scope
+    | ScopeItem.Class cd :: scope ->
+      cd.T.c_tparams.T.c_tparam_list @ get_tparams scope
     | ScopeItem.Function fd :: scope -> fd.T.f_tparams @ get_tparams scope
     | ScopeItem.Method md :: scope -> md.T.m_tparams @ get_tparams scope
     | _ :: scope -> get_tparams scope
 
   let rec get_fun_tparams scope =
     match scope with
-    | [] | ScopeItem.Class _ :: _ -> []
+    | []
+    | ScopeItem.Class _ :: _ ->
+      []
     | ScopeItem.Function fd :: _ -> fd.T.f_tparams
     | ScopeItem.Method md :: _ -> md.T.m_tparams
     | _ :: scope -> get_fun_tparams scope
@@ -68,13 +72,15 @@ struct
     | ScopeItem.Class cd :: _ -> cd.T.c_tparams
     | ScopeItem.Function _ :: scope
     | ScopeItem.Method _ :: scope
-    | _ :: scope -> get_class_tparams scope
+    | _ :: scope ->
+      get_class_tparams scope
 
   let rec has_this scope =
     match scope with
     | [] -> true (* Assume top level has this *)
     | ScopeItem.Lambda _ :: scope
-    | ScopeItem.LongLambda _ :: scope -> has_this scope
+    | ScopeItem.LongLambda _ :: scope ->
+      has_this scope
     | ScopeItem.Class _ :: _ -> false
     | ScopeItem.Function _ :: _ -> false
     | ScopeItem.Method _ :: _ -> true
@@ -83,7 +89,8 @@ struct
     match scope with
     | [] -> false
     | ScopeItem.Lambda _ :: scope
-    | ScopeItem.LongLambda _ :: scope -> is_in_async scope
+    | ScopeItem.LongLambda _ :: scope ->
+      is_in_async scope
     | ScopeItem.Class _ :: _ -> false
     | ScopeItem.Function { T.f_fun_kind = kind; _ } :: _
     | ScopeItem.Method { T.m_fun_kind = kind; _ } :: _ ->
@@ -96,7 +103,7 @@ struct
     | ScopeItem.Method md :: _ -> md.T.m_static
     | ScopeItem.Lambda _ :: scope -> is_in_static_method scope
     | ScopeItem.LongLambda (is_static, _, _) :: scope ->
-      not is_static && is_in_static_method scope
+      (not is_static) && is_in_static_method scope
     | _ -> false
 
   let is_in_trait scope =
@@ -105,7 +112,9 @@ struct
     | Some cd -> cd.T.c_kind = Ast_defs.Ctrait
 
   let is_in_lambda = function
-    | ScopeItem.Lambda _ :: _ | ScopeItem.LongLambda _ :: _ -> true
+    | ScopeItem.Lambda _ :: _
+    | ScopeItem.LongLambda _ :: _ ->
+      true
     | _ -> false
 
   let rec rx_of_scope scope =

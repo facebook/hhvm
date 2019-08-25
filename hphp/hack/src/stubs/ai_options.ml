@@ -10,4 +10,5 @@
 type t = unit
 
 let prepare ~server:_ _ = ()
+
 let set_json_mode opt _ = opt

@@ -8,7 +8,9 @@
  *)
 
 exception InvalidSyntax
+
 exception InvalidCliArg of string
+
 exception InvalidDiff of string
 
 let get_exception_exit_value = function

@@ -8,7 +8,9 @@
  *)
 
 module InvStringKey : Map.OrderedType with type t = string
+
 module InvSMap : MyMap.S with type key = InvStringKey.t
+
 module InvSSet : Caml.Set.S with type elt = InvStringKey.t
 
 type type_kind =
@@ -36,7 +38,8 @@ type facts = {
   type_aliases: string list;
 }
 
-val empty: facts
+val empty : facts
 
 val facts_to_json : md5:string -> sha1:string -> facts -> Hh_json.json
+
 val facts_from_json : Hh_json.json -> facts option

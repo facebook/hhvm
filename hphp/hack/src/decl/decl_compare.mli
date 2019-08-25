@@ -35,7 +35,7 @@ val get_funs_deps :
   SSet.t ->
   DepSet.t * DepSet.t * DepSet.t
 
-val get_types_deps : Typedef.t option SMap.t -> SSet.t ->  DepSet.t * DepSet.t
+val get_types_deps : Typedef.t option SMap.t -> SSet.t -> DepSet.t * DepSet.t
 
 val get_gconsts_deps :
   conservative_redecl:bool ->

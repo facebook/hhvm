@@ -8,4 +8,5 @@
  *)
 
 let output_facts _ _ = ()
+
 let go _ _ = ""

@@ -7,5 +7,4 @@
  *
  *)
 
-let go result =
-  print_endline result
+let go result = print_endline result

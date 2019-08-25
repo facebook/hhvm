@@ -10,4 +10,5 @@
 type saved_decls [@@deriving show]
 
 val export_class_decls : SSet.t -> saved_decls
+
 val import_class_decls : saved_decls -> SSet.t

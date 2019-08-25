@@ -9,7 +9,6 @@
 
 open Core_kernel
 open Typing_defs
-
 module Reason = Typing_reason
 
 type 'a subst = 'a ty SMap.t
@@ -33,12 +32,14 @@ let make tparams tyl : 'a subst =
    * all the parameters we can, and bind the remaining ones to "Tany".
    *)
   let make_subst_tparam (subst, tyl) t =
-    let ty, tyl =
+    let (ty, tyl) =
       match tyl with
-      | [] -> (Reason.Rnone, Tany), []
-      | ty :: rl -> ty, rl
+      | [] -> ((Reason.Rnone, Tany), [])
+      | ty :: rl -> (ty, rl)
     in
-    SMap.add (snd t.tp_name) ty subst, tyl
+    (SMap.add (snd t.tp_name) ty subst, tyl)
   in
-  let subst, _ = List.fold tparams ~init:(SMap.empty, tyl) ~f:make_subst_tparam in
+  let (subst, _) =
+    List.fold tparams ~init:(SMap.empty, tyl) ~f:make_subst_tparam
+  in
   subst

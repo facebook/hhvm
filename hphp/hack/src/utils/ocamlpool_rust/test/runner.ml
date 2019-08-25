@@ -57,29 +57,29 @@ let run f expected () =
   else
     None
 
-
-let tests = [
-  ("getString", run getString [""; "TEST"]);
-  ("getIsize", run getIsize [-1; 0; 1; max_int]);
-  ("getOption", run getOption [None; Some 1]);
-  ("getVec", run getVec [ []; [0] ]);
-  ("getBool", run getBool [true; false]);
-  ("getBox", run getBox [""; "A"]);
-  ("getFoo1", run getFoo1 [AA; BB (true, "A");  CC;  DD 2]);
-  ("getFoo2", run getFoo2 [true; false]);
-  ("getFoo3", run getFoo3 [{aa = 2; bb = true}]);
-  ("getFoo4", run getFoo4 [(true, "C")]);
-  ("getStrRef", run getStrRef [""; "TEST"]);
-  ("getRc", run getRc [true]);
-  ("getPathBuf", run getPathBuf ["foo.txt"; ""]);
-]
+let tests =
+  [ ("getString", run getString [""; "TEST"]);
+    ("getIsize", run getIsize [-1; 0; 1; max_int]);
+    ("getOption", run getOption [None; Some 1]);
+    ("getVec", run getVec [[]; [0]]);
+    ("getBool", run getBool [true; false]);
+    ("getBox", run getBox [""; "A"]);
+    ("getFoo1", run getFoo1 [AA; BB (true, "A"); CC; DD 2]);
+    ("getFoo2", run getFoo2 [true; false]);
+    ("getFoo3", run getFoo3 [{ aa = 2; bb = true }]);
+    ("getFoo4", run getFoo4 [(true, "C")]);
+    ("getStrRef", run getStrRef [""; "TEST"]);
+    ("getRc", run getRc [true]);
+    ("getPathBuf", run getPathBuf ["foo.txt"; ""]) ]
 
 let () =
   let results =
-    List.map (fun (name, f) -> (name, f ())) tests |>
-    List.filter (fun (_, result) -> Option.is_some result)
+    List.map (fun (name, f) -> (name, f ())) tests
+    |> List.filter (fun (_, result) -> Option.is_some result)
   in
   if List.length results <> 0 then
-    List.map (fun (name, result) -> name ^ (Option.value ~default:"" result)) results |>
-    String.concat "\n" |>
-    failwith
+    List.map
+      (fun (name, result) -> name ^ Option.value ~default:"" result)
+      results
+    |> String.concat "\n"
+    |> failwith

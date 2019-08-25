@@ -10,4 +10,6 @@
 val ai_check :
   ServerEnv.genv ->
   Naming_table.t ->
-  ServerEnv.env -> float -> ServerEnv.env * float
+  ServerEnv.env ->
+  float ->
+  ServerEnv.env * float

@@ -8,12 +8,15 @@
  *)
 
 let converter =
-  let convert_pos p: Pos.t = p in
+  let convert_pos p : Pos.t = p in
   Ast_to_aast.converter convert_pos Nast.NamedWithUnsafeBlocks () ()
 
 let convert = converter#on_program
 
 let on_class = converter#on_class
-let on_fun : (Ast.fun_ -> Nast.fun_) = converter#on_fun
+
+let on_fun : Ast.fun_ -> Nast.fun_ = converter#on_fun
+
 let on_typedef = converter#on_typedef
+
 let on_constant = converter#on_constant

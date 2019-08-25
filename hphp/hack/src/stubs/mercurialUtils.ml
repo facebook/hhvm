@@ -7,4 +7,4 @@
  *
  *)
 
- let wait_until_stable_repository _ = true
+let wait_until_stable_repository _ = true

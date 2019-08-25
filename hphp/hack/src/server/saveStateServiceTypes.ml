@@ -10,11 +10,9 @@
 (* An alias for the errors type that we marshal to and unmarshal from the saved state *)
 type saved_state_errors = (Errors.phase * Relative_path.Set.t) list
 
-type save_state_result = {
-  dep_table_edges_added : int;
-}
+type save_state_result = { dep_table_edges_added: int }
 
 type save_naming_result = {
-  nt_files_added : int;
-  nt_symbols_added : int;
+  nt_files_added: int;
+  nt_symbols_added: int;
 }

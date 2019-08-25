@@ -7,4 +7,4 @@
  *
  *)
 
- type result = Ide_api_types.range list
+type result = Ide_api_types.range list

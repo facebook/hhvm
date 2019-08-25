@@ -8,4 +8,5 @@
  *)
 
 let delete_corrupted_saved_state _ = ()
+
 let lock_saved_state _ = ()

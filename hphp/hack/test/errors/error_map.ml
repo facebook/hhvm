@@ -10,22 +10,21 @@
 open Printf
 open Buffer
 
-module GenErr(M: Errors.Error_category) = struct
+module GenErr (M : Errors.Error_category) = struct
   let generate_errors buffer name =
     add_string buffer @@ sprintf "%s Errors:\n" name;
     for i = M.min to M.max do
       match M.of_enum i with
-      | Some err -> add_string buffer @@ sprintf "%s = %d\n" (M.show err) i;
-      | None -> ();
+      | Some err -> add_string buffer @@ sprintf "%s = %d\n" (M.show err) i
+      | None -> ()
     done;
     add_string buffer "\n"
-
 end
 
-module P = GenErr(Errors.Parsing)
-module N = GenErr(Errors.Naming)
-module NC = GenErr(Errors.NastCheck)
-module T = GenErr(Errors.Typing)
+module P = GenErr (Errors.Parsing)
+module N = GenErr (Errors.Naming)
+module NC = GenErr (Errors.NastCheck)
+module T = GenErr (Errors.Typing)
 
 let gen_error_map_content () : string =
   let buffer = create 4096 in
@@ -35,14 +34,15 @@ let gen_error_map_content () : string =
   T.generate_errors buffer "Typing";
   contents buffer
 
- (*
+(*
    Please modify the error map below if you have changed the error codes.
   *)
 
 let%expect_test "error_map" =
   let map = gen_error_map_content () in
   Printf.printf "%s\n" map;
-  [%expect {|
+  [%expect
+    {|
 Parsing Errors:
 FixmeFormat = 1001
 ParsingError = 1002

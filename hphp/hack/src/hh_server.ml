@@ -7,7 +7,6 @@
  *
  *)
 
-
 (**
  * Hack for HipHop: type checker daemon code.
  *

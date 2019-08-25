@@ -17,9 +17,10 @@ type version =
   | Version_components of version_components
 
 let version_re_str = {|\^\([0-9]+\)\.\([0-9]+\)\.\([0-9]+\)|}
+
 let version_re = Str.regexp version_re_str
 
-let parse_version (version: string option) =
+let parse_version (version : string option) =
   match version with
   | Some version when Str.string_match version_re version 0 ->
     begin
@@ -27,9 +28,11 @@ let parse_version (version: string option) =
         let major = int_of_string (Str.matched_group 1 version) in
         let minor = int_of_string (Str.matched_group 2 version) in
         let build = int_of_string (Str.matched_group 3 version) in
-        Version_components { major; minor; build; }
+        Version_components { major; minor; build }
       with _ ->
-        Hh_logger.log "Failed to parse server version '%s', treating it as an opaque string" version;
+        Hh_logger.log
+          "Failed to parse server version '%s', treating it as an opaque string"
+          version;
         Opaque_version (Some version)
     end
   | Some version ->
@@ -43,11 +46,13 @@ let parse_version (version: string option) =
     Opaque_version None
 
 let compare_versions v1 v2 =
-  match v1, v2 with
-  | Version_components c1, Version_components c2 -> compare c1 c2
-  | Opaque_version Some s1, Opaque_version Some s2 -> compare s1 s2
-  | Opaque_version None, Opaque_version None -> 0
-  | Opaque_version None, Opaque_version Some _
-  | Opaque_version _, Version_components _ -> -1
-  | Opaque_version Some _, Opaque_version None
-  | Version_components _, Opaque_version _ -> 1
+  match (v1, v2) with
+  | (Version_components c1, Version_components c2) -> compare c1 c2
+  | (Opaque_version (Some s1), Opaque_version (Some s2)) -> compare s1 s2
+  | (Opaque_version None, Opaque_version None) -> 0
+  | (Opaque_version None, Opaque_version (Some _))
+  | (Opaque_version _, Version_components _) ->
+    -1
+  | (Opaque_version (Some _), Opaque_version None)
+  | (Version_components _, Opaque_version _) ->
+    1

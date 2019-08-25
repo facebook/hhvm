@@ -5,143 +5,168 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
  *
-*)
+ *)
 
 type check_started =
   | IgnoreStarted
   | CheckStarted
+
 type free_iterator =
   | IgnoreIter
   | FreeIter
+
 type repo_auth_type = string (* see see runtime/base/repo-auth-type.h *)
+
 type local_id = Local.t
 
 type param_id =
   | Param_unnamed of int
   | Param_named of string
+
 type param_num = int
+
 type stack_index = int
+
 type class_id = Hhbc_id.Class.t
+
 type class_num = int
+
 type record_num = int
+
 type typedef_num = int
+
 type function_id = Hhbc_id.Function.t
+
 type method_id = Hhbc_id.Method.t
+
 type const_id = Hhbc_id.Const.t
+
 type prop_id = Hhbc_id.Prop.t
+
 type num_params = int
+
 type fcall_flags = {
-  has_unpack : bool;
-  supports_async_eager_return : bool;
-  lock_while_unwinding : bool;
+  has_unpack: bool;
+  supports_async_eager_return: bool;
+  lock_while_unwinding: bool;
 }
+
 type by_refs = bool list
+
 type fcall_args =
-  fcall_flags * num_params * num_params * by_refs * (Label.t option)
+  fcall_flags * num_params * num_params * by_refs * Label.t option
+
 type classref_id = int
+
 (* Conventionally this is "A_" followed by an integer *)
 type adata_id = string
+
 type param_locations = int list
 
 module SpecialClsRef = struct
-
   type t =
-  | Static
-  | Self
-  | Parent
+    | Static
+    | Self
+    | Parent
 
   let to_string r =
-  match r with
-  | Static -> "Static"
-  | Self -> "Self"
-  | Parent -> "Parent"
+    match r with
+    | Static -> "Static"
+    | Self -> "Self"
+    | Parent -> "Parent"
+end
 
-end (* of SpecialClsRef *)
+(* of SpecialClsRef *)
 
 module MemberOpMode = struct
-
   type t =
-  | ModeNone
-  | Warn
-  | Define
-  | Unset
-  | InOut
+    | ModeNone
+    | Warn
+    | Define
+    | Unset
+    | InOut
 
   let to_string op =
-  match op with
-  | ModeNone -> "None"
-  | Warn -> "Warn"
-  | Define -> "Define"
-  | Unset -> "Unset"
-  | InOut -> "InOut"
+    match op with
+    | ModeNone -> "None"
+    | Warn -> "Warn"
+    | Define -> "Define"
+    | Unset -> "Unset"
+    | InOut -> "InOut"
+end
 
-end (* of MemberOpMode *)
+(* of MemberOpMode *)
 
 module QueryOp = struct
   type t =
-  | CGet
-  | CGetQuiet
-  | Isset
-  | Empty
-  | InOut
+    | CGet
+    | CGetQuiet
+    | Isset
+    | Empty
+    | InOut
 
   let to_string op =
-  match op with
-  | CGet -> "CGet"
-  | CGetQuiet -> "CGetQuiet"
-  | Isset -> "Isset"
-  | Empty -> "Empty"
-  | InOut -> "InOut"
+    match op with
+    | CGet -> "CGet"
+    | CGetQuiet -> "CGetQuiet"
+    | Isset -> "Isset"
+    | Empty -> "Empty"
+    | InOut -> "InOut"
+end
 
-end (* of QueryOp *)
+(* of QueryOp *)
 
 module CollectionType = struct
   type t =
-  | Vector
-  | Map
-  | Set
-  | Pair
-  | ImmVector
-  | ImmMap
-  | ImmSet
+    | Vector
+    | Map
+    | Set
+    | Pair
+    | ImmVector
+    | ImmMap
+    | ImmSet
 
   let to_string = function
-  | Vector      -> "Vector"
-  | Map         -> "Map"
-  | Set         -> "Set"
-  | Pair        -> "Pair"
-  | ImmVector   -> "ImmVector"
-  | ImmMap      -> "ImmMap"
-  | ImmSet      -> "ImmSet"
+    | Vector -> "Vector"
+    | Map -> "Map"
+    | Set -> "Set"
+    | Pair -> "Pair"
+    | ImmVector -> "ImmVector"
+    | ImmMap -> "ImmMap"
+    | ImmSet -> "ImmSet"
+end
 
-end (* of CollectionType *)
+(* of CollectionType *)
 
 module FatalOp = struct
   type t =
-  | Parse
-  | Runtime
-  | RuntimeOmitFrame
+    | Parse
+    | Runtime
+    | RuntimeOmitFrame
 
   let to_string op =
-  match op with
-  | Parse -> "Parse"
-  | Runtime -> "Runtime"
-  | RuntimeOmitFrame -> "RuntimeOmitFrame"
+    match op with
+    | Parse -> "Parse"
+    | Runtime -> "Runtime"
+    | RuntimeOmitFrame -> "RuntimeOmitFrame"
+end
 
-end (* of FatalOp *)
+(* of FatalOp *)
 
 module MemberKey = struct
   type t =
-  | EC of stack_index
-  | EL of local_id
-  | ET of string
-  | EI of int64
-  | PC of stack_index
-  | PL of local_id
-  | PT of prop_id
-  | QT of prop_id
-  | W
-end (* Of MemberKey *)
+    | EC of stack_index
+    | EL of local_id
+    | ET of string
+    | EI of int64
+    | PC of stack_index
+    | PL of local_id
+    | PT of prop_id
+    | QT of prop_id
+    | W
+end
+
+(* Of MemberKey *)
 
 type instruct_basic =
   | Nop
@@ -416,7 +441,7 @@ type instruct_final =
   | QueryM of num_params * QueryOp.t * MemberKey.t
   | SetM of num_params * MemberKey.t
   | IncDecM of num_params * incdec_op * MemberKey.t
-  | SetOpM of num_params  * eq_op * MemberKey.t
+  | SetOpM of num_params * eq_op * MemberKey.t
   | UnsetM of num_params * MemberKey.t
   | SetRangeM of num_params * setrange_op * int
 
@@ -531,7 +556,13 @@ type instruct_try =
   | TryCatchMiddle
   | TryCatchEnd
 
-type srcloc = { line_begin:int; col_begin:int; line_end:int; col_end:int }
+type srcloc = {
+  line_begin: int;
+  col_begin: int;
+  line_end: int;
+  col_end: int;
+}
+
 type instruct =
   | IBasic of instruct_basic
   | IIterator of instruct_iterator

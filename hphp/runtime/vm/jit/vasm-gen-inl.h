@@ -27,6 +27,7 @@ inline Vout& Vout::operator=(const Vout& v) {
   assertx(&v.m_unit == &m_unit);
   m_block = v.m_block;
   m_irctx = v.m_irctx;
+  m_weight_scale = v.m_weight_scale;
   return *this;
 }
 

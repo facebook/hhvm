@@ -432,7 +432,8 @@ void cgInitPackedLayoutArrayLoop(IRLS& env, const IRInstruction* inst) {
       v << lea{i1[2], i2};
       v << subqi{2, j1, j2, sf};
       return sf;
-    }
+    },
+    count
   );
 }
 

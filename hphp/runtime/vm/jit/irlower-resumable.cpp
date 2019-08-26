@@ -391,7 +391,8 @@ void cgCountWHNotDone(IRLS& env, const IRInstruction* inst) {
       v << phidef{v.makeTuple({cnt_out})};
       v << subqi{2, loc_in, loc_out, sf_cont};
       return sf_cont;
-    }
+    },
+    extra->count
   );
 
   v << copy{out[1], dstLoc(env, inst, 0).reg()};

@@ -573,6 +573,11 @@ jit::vector<Vlabel> layoutBlocks(Vunit& unit) {
 void fixBlockWeights(Vunit& unit) {
   const auto preds(computePreds(unit));
   bool changed = false;
+
+  auto const hasSelfEdge = [] (Vlabel b, auto const& l) {
+    return std::find(l.begin(), l.end(), b) != l.end();
+  };
+
   do {
     changed = false;
     for (size_t b = 0; b < unit.blocks.size(); b++) {
@@ -580,7 +585,7 @@ void fixBlockWeights(Vunit& unit) {
 
       // Rule 1: a block's weight can't exceed the sum of its predecessors,
       // except for the entry block.
-      if (b != unit.entry) {
+      if (b != unit.entry && !hasSelfEdge(Vlabel{b}, preds[b])) {
         uint64_t predsTotal = 0;
         for (auto p : preds[b]) {
           predsTotal += unit.blocks[p].weight;
@@ -593,9 +598,10 @@ void fixBlockWeights(Vunit& unit) {
 
       // Rule 2: a block's weight can't exceed the sum of its successors, except
       // for exit blocks.
-      if (succs(block).size() > 0) {
+      auto const successors = succs(block);
+      if (successors.size() > 0 && !hasSelfEdge(Vlabel{b}, successors)) {
         uint64_t succsTotal = 0;
-        for (auto s : succs(block)) {
+        for (auto s : successors) {
           succsTotal += unit.blocks[s].weight;
         }
         if (block.weight > succsTotal) {

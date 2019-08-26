@@ -29,6 +29,10 @@ Vlabel Vunit::makeBlock(AreaIndex area, uint64_t weight) {
   return Vlabel{i};
 }
 
+Vlabel Vunit::makeBlock(AreaIndex area) {
+  return makeBlock(area, areaWeightFactor(area));
+}
+
 Vlabel Vunit::makeScratchBlock() {
   return makeBlock(AreaIndex::Main, 1);
 }

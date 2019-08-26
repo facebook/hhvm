@@ -96,6 +96,13 @@ struct Vout {
   void setOrigin(const IRInstruction* i) { m_irctx.origin = i; }
 
   /*
+   * Add a scaling factor. The weight of the current block and all
+   * future blocks created from this Vout will be multiplied by the
+   * total scaling factor.
+   */
+  void addWeightScale(uint64_t);
+
+  /*
    * Vunit delegations.
    */
   Vreg makeReg();
@@ -107,9 +114,16 @@ struct Vout {
   template<class T, class... Args> T* allocData(Args&&... args);
 
 private:
+  Vout(Vunit& u, Vlabel b, Vinstr::ir_context irctx, uint64_t scale)
+    : m_unit{u}
+    , m_block{b}
+    , m_irctx{irctx}
+    , m_weight_scale{scale} {}
+
   Vunit& m_unit;
   Vlabel m_block;
   Vinstr::ir_context m_irctx;
+  uint64_t m_weight_scale = 1;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -156,8 +170,8 @@ struct Vauto {
                  bool relocate = false)
     : m_text{main, cold, data}
     , m_fixups(fixups)
-    , m_main{m_unit, m_unit.makeBlock(AreaIndex::Main, 1)}
-    , m_cold{m_unit, m_unit.makeBlock(AreaIndex::Cold, 1)}
+    , m_main{m_unit, m_unit.makeBlock(AreaIndex::Main)}
+    , m_cold{m_unit, m_unit.makeBlock(AreaIndex::Cold)}
     , m_kind{kind}
     , m_relocate{relocate}
   {

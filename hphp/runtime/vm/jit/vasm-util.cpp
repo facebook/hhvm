@@ -105,7 +105,8 @@ bool splitCriticalEdges(Vunit& unit) {
   jit::vector<unsigned> preds(unit.blocks.size());
   jit::flat_set<size_t> catch_blocks;
 
-  for (size_t b = 0; b < unit.blocks.size(); b++) {
+  auto const rpo = sortBlocks(unit);
+  for (auto const b : rpo) {
     auto succlist = succs(unit.blocks[b]);
     for (auto succ : succlist) {
       preds[succ]++;
@@ -113,7 +114,7 @@ bool splitCriticalEdges(Vunit& unit) {
   }
 
   auto changed = false;
-  for (size_t pred = 0; pred < unit.blocks.size(); pred++) {
+  for (auto const pred : rpo) {
     auto succlist = succs(unit.blocks[pred]);
     if (succlist.size() <= 1) continue;
     for (auto& succ : succlist) {

@@ -92,7 +92,8 @@ void cgStLocRange(IRLS& env, const IRInstruction* inst) {
       v << subqi{int32_t{sizeof(Cell)}, i, res, v.makeReg()};
       v << cmpq{res, nreg, sf};
       return sf;
-    }
+    },
+    range->end - range->start
   );
 }
 

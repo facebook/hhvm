@@ -209,7 +209,6 @@ let parse_options () =
   let enable_class_level_where_clauses = ref false in
   let enable_constant_visibility_modifiers = ref false in
   let disable_legacy_soft_typehints = ref false in
-  let disable_linter_fixmes = ref false in
   let allow_new_attribute_syntax = ref false in
   let allow_toplevel_requires = ref false in
   let infer_missing = ref GlobalOptions.InferMissing.Deactivated in
@@ -443,9 +442,6 @@ let parse_options () =
         Arg.Set disable_legacy_soft_typehints,
         "Disables the legacy @ syntax for soft typehints (use __Soft instead)"
       );
-      ( "--disable-linter-fixmes",
-        Arg.Set disable_linter_fixmes,
-        "Disables HH_FIXME and HH_IGNORE_ERROR for 5000-5999 error codes" );
       ( "--allow-new-attribute-syntax",
         Arg.Set allow_new_attribute_syntax,
         "Allow the new @ attribute syntax (disables legacy soft typehints)" );
@@ -527,7 +523,6 @@ let parse_options () =
       ~po_enable_constant_visibility_modifiers:
         !enable_constant_visibility_modifiers
       ~po_disable_legacy_soft_typehints:!disable_legacy_soft_typehints
-      ~disable_linter_fixmes:!disable_linter_fixmes
       ~po_allow_new_attribute_syntax:!allow_new_attribute_syntax
       ~po_disallow_toplevel_requires:(not !allow_toplevel_requires)
       ~tco_const_static_props:!const_static_props
@@ -568,8 +563,6 @@ let parse_options () =
       ~savedstate_file_opt:!symbolindex_file
       ~workers:None
   in
-  Errors.disable_linter_fixmes := !disable_linter_fixmes;
-
   ( {
       files = fns;
       mode = !mode;

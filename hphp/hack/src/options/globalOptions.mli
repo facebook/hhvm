@@ -229,8 +229,6 @@ type t = {
   po_disable_legacy_soft_typehints: bool;
   (* Use shared_lru workers instead of MultiWorker workers *)
   tco_use_lru_workers: bool;
-  (* Force 5000s to be @lint-ignored rather than fixme'd *)
-  disable_linter_fixmes: bool;
   (* Set of error codes disallowed in decl positions *)
   po_disallowed_decl_fixmes: ISet.t;
   (* Enable @ attribute syntax *)
@@ -313,7 +311,6 @@ val make :
   ?po_enable_class_level_where_clauses:bool ->
   ?po_disable_legacy_soft_typehints:bool ->
   ?tco_use_lru_workers:bool ->
-  ?disable_linter_fixmes:bool ->
   ?po_disallowed_decl_fixmes:ISet.t ->
   ?po_allow_new_attribute_syntax:bool ->
   ?tco_infer_missing:InferMissing.t ->
@@ -472,8 +469,6 @@ val po_enable_class_level_where_clauses : t -> bool
 val po_disable_legacy_soft_typehints : t -> bool
 
 val tco_use_lru_workers : t -> bool
-
-val disable_linter_fixmes : t -> bool
 
 val po_disallowed_decl_fixmes : t -> ISet.t
 

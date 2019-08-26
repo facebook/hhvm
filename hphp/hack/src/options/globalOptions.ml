@@ -93,7 +93,6 @@ type t = {
   po_enable_class_level_where_clauses: bool;
   po_disable_legacy_soft_typehints: bool;
   tco_use_lru_workers: bool;
-  disable_linter_fixmes: bool;
   po_disallowed_decl_fixmes: ISet.t;
   po_allow_new_attribute_syntax: bool;
   tco_infer_missing: InferMissing.t;
@@ -244,7 +243,6 @@ let default =
     po_enable_class_level_where_clauses = false;
     po_disable_legacy_soft_typehints = false;
     tco_use_lru_workers = true;
-    disable_linter_fixmes = false;
     po_disallowed_decl_fixmes = ISet.of_list [];
     po_allow_new_attribute_syntax = false;
     tco_infer_missing = InferMissing.Deactivated;
@@ -328,7 +326,6 @@ let make
     ?(po_disable_legacy_soft_typehints =
       default.po_disable_legacy_soft_typehints)
     ?(tco_use_lru_workers = default.tco_use_lru_workers)
-    ?(disable_linter_fixmes = default.disable_linter_fixmes)
     ?(po_disallowed_decl_fixmes = default.po_disallowed_decl_fixmes)
     ?(po_allow_new_attribute_syntax = default.po_allow_new_attribute_syntax)
     ?(tco_infer_missing = default.tco_infer_missing)
@@ -400,7 +397,6 @@ let make
     po_enable_class_level_where_clauses;
     po_disable_legacy_soft_typehints;
     tco_use_lru_workers;
-    disable_linter_fixmes;
     po_disallowed_decl_fixmes;
     po_allow_new_attribute_syntax;
     tco_infer_missing;
@@ -540,8 +536,6 @@ let po_enable_class_level_where_clauses t =
 let po_disable_legacy_soft_typehints t = t.po_disable_legacy_soft_typehints
 
 let tco_use_lru_workers t = t.tco_use_lru_workers
-
-let disable_linter_fixmes t = t.disable_linter_fixmes
 
 let po_disallowed_decl_fixmes t = t.po_disallowed_decl_fixmes
 

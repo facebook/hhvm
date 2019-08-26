@@ -364,7 +364,6 @@ let load config_filename options =
         (Some local_config.ServerLocalConfig.use_lru_workers)
       ?po_disallow_toplevel_requires:
         (bool_opt "disallow_toplevel_requires" config)
-      ?disable_linter_fixmes:(bool_opt "disable_linter_fixmes" config)
       ~po_disallowed_decl_fixmes:(prepare_disallowed_decl_fixmes config)
       ?po_allow_new_attribute_syntax:
         (bool_opt "allow_new_attribute_syntax" config)
@@ -385,8 +384,6 @@ let load config_filename options =
   Errors.ignored_fixme_codes := GlobalOptions.ignored_fixme_codes global_opts;
   Errors.error_codes_treated_strictly :=
     GlobalOptions.error_codes_treated_strictly global_opts;
-  Errors.disable_linter_fixmes :=
-    GlobalOptions.disable_linter_fixmes global_opts;
   ( {
       version;
       load_script_timeout;

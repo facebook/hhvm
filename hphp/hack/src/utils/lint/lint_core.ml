@@ -51,13 +51,10 @@ let add
     message =
   match !lint_list with
   | Some lst ->
-    if (not !Errors.disable_linter_fixmes) && !Errors.is_hh_fixme pos code then
-      ()
-    else
-      let lint =
-        { code; severity; pos; message; bypass_changed_lines; autofix }
-      in
-      lint_list := Some (lint :: lst)
+    let lint =
+      { code; severity; pos; message; bypass_changed_lines; autofix }
+    in
+    lint_list := Some (lint :: lst)
   (* by default, we ignore lint errors *)
   | None -> ()
 

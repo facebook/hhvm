@@ -646,8 +646,6 @@ let error_codes_treated_strictly = ref (ISet.of_list [])
 
 let is_strict_code code = ISet.mem code !error_codes_treated_strictly
 
-let disable_linter_fixmes = ref false
-
 (* The 'phps FixmeAllHackErrors' tool must be kept in sync with this list *)
 let default_ignored_fixme_codes =
   ISet.of_list
@@ -668,8 +666,7 @@ let ignored_fixme_codes = ref default_ignored_fixme_codes
 let set_allow_errors_in_default_path x = allow_errors_in_default_path := x
 
 let is_ignored_code code =
-  ISet.mem code !ignored_fixme_codes
-  || (!disable_linter_fixmes && code / 1000 = 5)
+  ISet.mem code !ignored_fixme_codes || code / 1000 = 5
 
 let is_ignored_fixme code = is_ignored_code code
 

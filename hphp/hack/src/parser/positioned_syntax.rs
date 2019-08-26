@@ -6,9 +6,9 @@
 
 use std::rc::Rc;
 
+use crate::indexed_source_text::IndexedSourceText;
 use crate::lexable_token::LexableToken;
 use crate::positioned_token::PositionedToken;
-use crate::source_text::SourceText;
 use crate::syntax::*;
 use crate::syntax_kind::SyntaxKind;
 use crate::syntax_trait::SyntaxTrait;
@@ -258,7 +258,7 @@ pub trait PositionedSyntaxTrait: SyntaxTrait {
      * the last character. (the end offset is one larger than given by position)
      */
     fn trailing_width(&self) -> usize;
-    fn position_exclusive(&self, source_text: &SourceText) -> Option<Pos>;
+    fn position_exclusive(&self, source_text: &IndexedSourceText) -> Option<Pos>;
 }
 
 impl PositionedSyntaxTrait for PositionedSyntax {
@@ -279,7 +279,7 @@ impl PositionedSyntaxTrait for PositionedSyntax {
         self.start_offset() + w
     }
 
-    fn position_exclusive(&self, source_text: &SourceText) -> Option<Pos> {
+    fn position_exclusive(&self, source_text: &IndexedSourceText) -> Option<Pos> {
         let start_offset = self.start_offset();
         let end_offset = self.end_offset() + 1;
         Some(source_text.relative_pos(start_offset, end_offset))

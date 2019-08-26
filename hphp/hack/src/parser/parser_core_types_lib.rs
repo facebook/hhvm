@@ -15,6 +15,7 @@
 //!  2. Separating the data definitions from the code makes it a little
 //!     easier to reason about the structure of the parser.
 
+pub mod indexed_source_text;
 pub mod lexable_token;
 pub mod lexable_trivia;
 pub mod minimal_syntax;

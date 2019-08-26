@@ -3,8 +3,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use line_break_map::LineBreakMap;
-use oxidized::pos::Pos;
+
 use oxidized::relative_path::RelativePath;
 use std::rc::Rc;
 
@@ -22,8 +21,6 @@ struct SourceTextImpl<'a> {
     text: &'a [u8],
 
     file_path: RelativePath,
-
-    offset_map: LineBreakMap,
 
     ocaml_source_text: usize,
 }
@@ -44,7 +41,6 @@ impl<'a> SourceText<'a> {
             file_path: file_path.clone(),
             text,
             ocaml_source_text,
-            offset_map: LineBreakMap::new(text),
         }))
     }
 
@@ -85,11 +81,5 @@ impl<'a> SourceText<'a> {
 
     pub fn sub_as_str(&self, start: usize, length: usize) -> &'a str {
         unsafe { std::str::from_utf8_unchecked(self.sub(start, length)) }
-    }
-
-    pub fn relative_pos(&self, start_offset: usize, end_offset: usize) -> Pos {
-        let pos_start = self.0.offset_map.offset_to_file_pos_triple(start_offset);
-        let pos_end = self.0.offset_map.offset_to_file_pos_triple(end_offset);
-        Pos::from_lnum_bol_cnum(self.0.file_path.clone(), pos_start, pos_end)
     }
 }

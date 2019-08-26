@@ -203,7 +203,7 @@ let is_final_and_not_contravariant env id =
 let anyfy env r ty =
   let anyfyer = object
       inherit Type_mapper.deep_type_mapper as super
-      method! on_type env _ty = env, (r, Tany)
+      method! on_type env _ty = env, (r, Typing_defs.make_tany ())
       method go ty = let _, ty = super#on_type env ty in ty
     end in
   anyfyer#go ty
@@ -442,7 +442,7 @@ and simplify_subtype
   | (Tprim Nast.(Tint | Tbool | Tfloat | Tstring | Tresource | Tnum |
                  Tarraykey | Tnoreturn) |
      Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject |
-     Tclass _ | Tarraykind _ | Tany),
+     Tclass _ | Tarraykind _ | Tany _),
     Toption ty_super' ->
     simplify_subtype ~seen_generic_params ~this_ty ty_sub ty_super' env
   | Tabstract (AKnewtype (name_sub, _), _),
@@ -657,7 +657,7 @@ and simplify_subtype
         let tyl_super =
           if List.is_empty tyl_super &&
             not (Partial.should_check_error (Env.get_mode env) 4029)
-          then List.map (Cls.tparams class_ty) (fun _ -> (p_super, Tany))
+          then List.map (Cls.tparams class_ty) (fun _ -> (p_super, Typing_defs.make_tany ()))
           else tyl_super in
         if List.length (Cls.tparams class_ty) <> List.length tyl_super
         then
@@ -778,12 +778,12 @@ and simplify_subtype
       let tyl_super =
         if List.is_empty tyl_super &&
           not (Partial.should_check_error (Env.get_mode env) 4101)
-        then List.map tyl_sub (fun _ -> (p_super, Tany))
+        then List.map tyl_sub (fun _ -> (p_super, Typing_defs.make_tany ()))
         else tyl_super in
       let tyl_sub =
         if List.is_empty tyl_sub &&
           not (Partial.should_check_error (Env.get_mode env) 4101)
-        then List.map tyl_super (fun _ -> (p_super, Tany))
+        then List.map tyl_super (fun _ -> (p_super, Typing_defs.make_tany ()))
         else tyl_sub in
       if List.length tyl_sub <> List.length tyl_super
       then begin
@@ -824,7 +824,7 @@ and simplify_subtype
         let tyl_sub =
           if List.is_empty tyl_sub &&
             not (Partial.should_check_error (Env.get_mode env) 4029)
-          then List.map (Cls.tparams class_sub) (fun _ -> (p_sub, Tany))
+          then List.map (Cls.tparams class_sub) (fun _ -> (p_sub, Typing_defs.make_tany ()))
           else tyl_sub in
         if List.length (Cls.tparams class_sub) <> List.length tyl_sub
         then
@@ -881,7 +881,7 @@ and simplify_subtype
         (* array <: Traversable<_> and emptyarray <: Traversable<t> for any t *)
       | AKany ->
         simplify_subtype ~seen_generic_params ~this_ty
-          (fst ety_sub, Tany) tv_super env
+          (fst ety_sub, Typing_defs.make_tany ()) tv_super env
       | AKempty -> valid ()
       (* vec<tv> <: Traversable<tv_super>
        * iff tv <: tv_super
@@ -904,8 +904,8 @@ and simplify_subtype
       (match akind with
       | AKany ->
         env |>
-        simplify_subtype ~seen_generic_params ~this_ty (fst ety_sub, Tany) tk_super &&&
-        simplify_subtype ~seen_generic_params ~this_ty (fst ety_sub, Tany) tv_super
+        simplify_subtype ~seen_generic_params ~this_ty (fst ety_sub, Typing_defs.make_tany ()) tk_super &&&
+        simplify_subtype ~seen_generic_params ~this_ty (fst ety_sub, Typing_defs.make_tany ()) tv_super
       | AKempty -> valid ()
       | AKvarray tv
       | AKvec tv ->
@@ -957,7 +957,7 @@ and simplify_subtype
       valid ()
 
     (* array is a subtype of varray_or_darray<_> *)
-    | AKany, AKvarray_or_darray (_, Tany) ->
+    | AKany, AKvarray_or_darray (_, Tany _) ->
       valid ()
 
     | AKany, _ ->
@@ -1023,8 +1023,8 @@ and simplify_subtype
       res &&& simplify_subtype ~seen_generic_params ~this_ty ty_sub ty_dest)
   (* TODO: should remove these any cases *)
   | Tarraykind (AKany | AKempty), Tdestructure tyl_dest
-  | Tany, Tdestructure tyl_dest ->
-    let any = (fst ty_super, Tany) in
+  | Tany _, Tdestructure tyl_dest ->
+    let any = (fst ty_super, Typing_defs.make_tany ()) in
     List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
       res &&& simplify_subtype ~seen_generic_params ~this_ty any ty_dest)
   (* ty_sub <: union{ty_super'} iff ty_sub <: ty_super' *)
@@ -1164,7 +1164,7 @@ and simplify_subtype
     List.fold_left tyl ~init:(env, TL.invalid ~fail) ~f:(fun res ty_sub ->
       res ||| simplify_subtype ~seen_generic_params ~this_ty ty_sub ty_super)
 
-  | Tany, Tany ->
+  | Tany _, Tany _ ->
     valid ()
 
   (* If ty_sub contains other types, e.g. C<T>, make this a subtype assertion on
@@ -1176,12 +1176,12 @@ and simplify_subtype
     D <: Tany
   if say C is covariant.
   *)
-  | _, Tany ->
+  | _, Tany _ ->
     if no_top_bottom then default () else
     let ety_super = anyfy env (fst ety_super) ety_sub in
     simplify_subtype ~seen_generic_params ~this_ty ety_sub ety_super env
 
-  | Tany, _ ->
+  | Tany _, _ ->
     if no_top_bottom then default () else
     let ety_sub = anyfy env (fst ety_sub) ety_super in
     simplify_subtype ~seen_generic_params ~this_ty ety_sub ety_super env
@@ -2234,7 +2234,7 @@ let decompose_subtype_add_bound
   let env, ty_super = Env.expand_type env ty_super in
   let env, ty_sub = Env.expand_type env ty_sub in
   match ty_sub, ty_super with
-  | _, (_, Tany) ->
+  | _, (_, Tany _) ->
     env
 
   (* name_sub <: ty_super so add an upper bound on name_sub *)

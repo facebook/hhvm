@@ -32,6 +32,17 @@ type exact =
 type decl = private DeclPhase
 type locl = private LoclPhase
 
+(* This abstract type allows us to guard the construction of Tany to the
+ * make_tany function in this module. *)
+module TanySentinel: sig
+  type t
+  val value : t
+end
+= struct
+  type t = ()
+  let value : t = ()
+end
+
 let show_phase_ty _ = "<phase_ty>"
 let pp_phase_ty _ _ = Printf.printf "%s\n" "<phase_ty>"
 
@@ -117,8 +128,11 @@ and _ ty_ =
   | Tlike : decl ty -> decl ty_
 
   (*========== Following Types Exist in Both Phases ==========*)
-  | Tany
+  | Tany : TanySentinel.t -> 'phase ty_
+  | Terr
+
   | Tnonnull
+
   (* A dynamic type is a special type which sometimes behaves as if it were a
    * top type; roughly speaking, where a specific value of a particular type is
    * expected and that type is dynamic, anything can be given. We call this
@@ -130,7 +144,6 @@ and _ ty_ =
    * See tests in typecheck/dynamic/ for more examples.
    *)
   | Tdynamic
-  | Terr
 
   (* Nullable, called "option" in the ML parlance. *)
   | Toption : 'phase ty -> 'phase ty_
@@ -599,6 +612,11 @@ let has_expanded {type_expansions; _} x =
 (* The identifier for this *)
 let this = Local_id.make_scoped "$this"
 
+(* This should be the ONLY way that Tany is constructed anywhere in the
+ * codebase. *)
+let make_tany () =
+  Tany TanySentinel.value
+
 let arity_min ft_arity : int = match ft_arity with
   | Fstandard (min, _) | Fvariadic (min, _) | Fellipsis (min, _) -> min
 
@@ -673,7 +691,7 @@ let is_suggest_mode = ref false
 (* Ordinal value for type constructor, for localized types *)
 let ty_con_ordinal ty =
   match snd ty with
-  | Tany | Terr -> 0
+  | Tany _ | Terr -> 0
   | Toption (_, Tnonnull) -> 1
   | Tnonnull -> 2
   | Tdynamic -> 3

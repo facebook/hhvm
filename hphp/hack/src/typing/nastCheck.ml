@@ -132,7 +132,8 @@ and check_happly unchecked_tparams env h =
         tp_user_attributes = t.tp_user_attributes;
       }
     end in
-  let tyl = List.map unchecked_tparams (fun t -> Reason.Rwitness (fst t.tp_name), Tany) in
+  let tyl = List.map unchecked_tparams
+    (fun t -> Reason.Rwitness (fst t.tp_name), Typing_defs.make_tany ()) in
   let subst = Inst.make_subst unchecked_tparams tyl in
   let decl_ty = Inst.instantiate subst decl_ty in
   match decl_ty with

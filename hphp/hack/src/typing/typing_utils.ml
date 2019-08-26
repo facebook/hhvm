@@ -257,7 +257,7 @@ let is_dynamic env ty =
 
 let rec is_any env ty =
   match Env.expand_type env ty with
-  | (_, (_, (Tany | Terr))) -> true
+  | (_, (_, (Tany _ | Terr))) -> true
   | (_, (_, Tunion tyl)) -> List.for_all tyl (is_any env)
   | (_, (_, Tintersection tyl)) -> List.exists tyl (is_any env)
   | _ -> false
@@ -386,7 +386,7 @@ let flatten_unresolved env ty acc =
   let res = match ety with
     (* flatten Tunion[Tunion[...]] *)
     | (_, Tunion tyl) -> tyl @ acc
-    | (_, Tany) -> acc
+    | (_, Tany _) -> acc
     | _ -> ty :: acc in
   env, res
 
@@ -397,7 +397,7 @@ let flatten_unresolved env ty acc =
 let rec fold_unresolved env ty =
   let env, ety = Env.expand_type env ty in
   match ety with
-  | r, Tunion [] -> env, (r, Tany)
+  | r, Tunion [] -> env, (r, Typing_defs.make_tany ())
   | _, Tunion [x] -> fold_unresolved env x
   (* We don't want to use unification if new_inference is set.
    * Just return the type unchanged: better would be to remove redundant
@@ -421,7 +421,7 @@ let unwrap_class_type = function
     (
       Terr
       | Tdynamic
-      | Tany
+      | Tany _
       | Tmixed
       | Tnonnull
       | Tnothing

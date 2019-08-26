@@ -39,7 +39,7 @@ let rec walk_and_gather_xhp_ ~env ~pos cty =
   let env, cty = Typing_solver.expand_type_and_solve
     ~description_of_expected:"an XHP instance" env pos cty Errors.unify_error in
   match (snd cty) with
-  | Tany
+  | Tany _
   | Terr
   | Tdynamic -> env, [], []
   | Tunion tyl ->

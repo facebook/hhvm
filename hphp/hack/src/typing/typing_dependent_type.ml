@@ -137,7 +137,7 @@ module ExprDepTy = struct
           ~f:(fun class_ty ->
               not (TUtils.class_is_final_and_not_contravariant class_ty))
     | Tanon _ | Tobject | Tnonnull | Tprim _ | Tshape _ | Ttuple _ | Tdynamic
-    | Tarraykind _ | Tfun _ | Tabstract (_, None) | Tany | Tvar _ | Terr | Tdestructure _ ->
+    | Tarraykind _ | Tfun _ | Tabstract (_, None) | Tany _ | Tvar _ | Terr | Tdestructure _ ->
         false
 
   (****************************************************************************)

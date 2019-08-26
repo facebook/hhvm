@@ -731,7 +731,7 @@ and prop_decl c acc sp =
   let (sp_pos, sp_name) = sp.sp_name in
   let ty =
     match sp.sp_type with
-    | None -> (Reason.Rwitness sp_pos, Tany)
+    | None -> (Reason.Rwitness sp_pos, Typing_defs.make_tany ())
     | Some ty' -> ty'
   in
   let vis = visibility (snd c.sc_name) sp.sp_visibility in
@@ -760,7 +760,7 @@ and static_prop_decl c acc sp =
   let (sp_pos, sp_name) = sp.sp_name in
   let ty =
     match sp.sp_type with
-    | None -> (Reason.Rwitness sp_pos, Tany)
+    | None -> (Reason.Rwitness sp_pos, Typing_defs.make_tany ())
     | Some ty' -> ty'
   in
   let vis = visibility (snd c.sc_name) sp.sp_visibility in
@@ -1024,7 +1024,7 @@ let const_decl cst =
     | None when Partial.should_check_error cst.cst_mode 2035 ->
       Errors.missing_typehint cst_pos;
       (Reason.Rwitness cst_pos, Terr)
-    | None -> (Reason.Rwitness cst_pos, Tany))
+    | None -> (Reason.Rwitness cst_pos, Typing_defs.make_tany ()))
 
 let iconst_decl cst =
   let cst = Errors.ignore_ (fun () -> Naming.global_const cst) in

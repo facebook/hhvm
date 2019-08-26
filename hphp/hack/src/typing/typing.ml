@@ -185,7 +185,7 @@ let get_value_collection_inst ty =
      * that the element type is mixed *)
   | (_, Tnonnull) ->
     Some (MakeType.mixed Reason.Rnone)
-  | (_, Tany) ->
+  | (_, Tany _) ->
     Some ty
   | _ ->
     None
@@ -205,7 +205,7 @@ let get_key_value_collection_inst ty =
   | (_, Tnonnull) ->
     let mixed = MakeType.mixed Reason.Rnone in
     Some (mixed, mixed)
-  | (_, Tany) ->
+  | (_, Tany _) ->
     Some (ty, ty)
   | _ ->
     None
@@ -1435,7 +1435,7 @@ and expr_
         }) -> env, ty in
     match supertype with
       (* No need to check individual subtypes if expected type is mixed or any! *)
-      | (_, Tany) -> env, supertype
+      | (_, Tany _) -> env, supertype
       | _ ->
       let subtype_value env ty = Type.sub_type p reason env ty supertype Errors.unify_error in
       let env = List.fold_left tys ~init:env ~f:subtype_value in
@@ -2512,7 +2512,7 @@ and expr_
         else begin
           match expected with
           | Some ExpectedTy.({
-              ty = { et_type = (_, Tany); _ };
+              ty = { et_type = (_, Tany _); _ };
               _
             }) ->
             (* If the expected type is Tany env then we're passing a lambda to an untyped
@@ -2545,10 +2545,10 @@ and expr_
               let freshen_ftype env ft =
                 let freshen_ty env pos et =
                   match snd et.et_type with
-                  | Tany ->
+                  | Tany _ ->
                     let env, ty = Env.fresh_type env pos in
                     env, { et with et_type = ty; }
-                  | Tclass(id, e, [(_, Tany)]) when snd id = SN.Classes.cAwaitable ->
+                  | Tclass(id, e, [(_, Tany _)]) when snd id = SN.Classes.cAwaitable ->
                     let env, t = Env.fresh_type env pos in
                     env, { et with et_type = (fst et.et_type, Tclass(id, e, [t])) }
                   | _ ->
@@ -2906,7 +2906,7 @@ and anon_make tenv p f ft idl is_anon =
             let var_param = match f.f_variadic with
               | FVellipsis pos ->
                 let param = TUtils.default_fun_param ~pos
-                  (Reason.Rvar_param pos, Tany) in
+                  (Reason.Rvar_param pos, Typing_defs.make_tany ()) in
                 Some param
               | _ -> None in
             let rec iter l1 l2 =
@@ -3446,7 +3446,7 @@ and call_parent_construct pos env el uel =
       check_parent_construct pos env el uel parent
     | _,
       (
-          Tany
+          Tany _
         | Tdynamic
         | Tmixed
         | Tnonnull
@@ -3483,7 +3483,7 @@ and call_parent_construct pos env el uel =
               else Errors.undefined_parent pos;
               default
             | None -> assert false)
-        | _, (Terr | Tany | Tnonnull | Tarraykind _ | Toption _ | Tdestructure _
+        | _, (Terr | Tany _ | Tnonnull | Tarraykind _ | Toption _ | Tdestructure _
               | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tvar _ | Tdynamic
               | Tabstract (_, _) | Tanon (_, _) | Tunion _ | Tintersection _ | Tobject
              ) ->
@@ -3683,7 +3683,7 @@ and call_parent_construct pos env el uel =
         | (r, Tintersection tyl) ->
             let env, tyl = List.map_env env tyl get_array_filter_return_type in
             Inter.intersect_list env r tyl
-        | (r, Tany) ->
+        | (r, Tany _) ->
             env, (r, Typing_utils.tany env)
         | (r, Terr) ->
             env, (r, Typing_utils.terr env)
@@ -3830,7 +3830,7 @@ and call_parent_construct pos env el uel =
                 env, (fun _ -> array_type)
               | (r, Tarraykind (AKvec _ | AKvarray _)) ->
                 env, (fun tr -> (r, Tarraykind (AKvec(tr))) )
-              | (r, Tany) ->
+              | (r, Tany _) ->
                 env, (fun _ -> (r, Typing_utils.tany env))
               | (r, Terr) ->
                 env, (fun _ -> (r, Typing_utils.terr env))
@@ -4185,7 +4185,7 @@ and class_get_ ~is_method ~is_const ~this_ty ~coerce_from_ty ?(explicit_tparams=
                ?(incl_tc=false) env cid cty (p, mid) k =
   let env, cty = Env.expand_type env cty in
   match cty with
-  | r, Tany -> k (env, (r, Typing_utils.tany env))
+  | r, Tany _ -> k (env, (r, Typing_utils.tany env))
   | r, Terr -> k (env, err_witness env (Reason.to_pos r))
   | _, Tdynamic -> k (env, cty)
   | _, Tunion tyl ->
@@ -4604,7 +4604,7 @@ and obj_get_concrete_ty ~inst_meth ~is_method ~coerce_from_ty ?(explicit_tparams
     let ty = MakeType.dynamic (Reason.Rdynamic_prop id_pos) in
     env, ty
   | _, Tobject
-  | _, Tany
+  | _, Tany _
   | _, Terr ->
     default ()
   | _ ->
@@ -4773,7 +4773,7 @@ and class_id_for_new ~exact p env cid tal =
               | _ ->
                 get_info ((sid, class_info, ty)::res) tyl
           end
-        | _, (Tany | Terr | Tnonnull | Tarraykind _ | Toption _
+        | _, (Tany _ | Terr | Tnonnull | Tarraykind _ | Toption _
               | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Ttuple _
               | Tanon (_, _) | Tunion _ | Tintersection _ | Tobject | Tshape _
               | Tdynamic | Tdestructure _) ->
@@ -4909,7 +4909,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
             (* parent is still technically the same object. *)
             make_result env T.CIparent (r, TUtils.this_of (r, snd parent))
           )
-      | _, (Terr | Tany | Tnonnull | Tarraykind _ | Toption _ | Tprim _
+      | _, (Terr | Tany _ | Tnonnull | Tarraykind _ | Toption _ | Tprim _
             | Tfun _ | Ttuple _ | Tshape _ | Tvar _ | Tdynamic | Tdestructure _
             | Tanon (_, _) | Tunion _ | Tintersection _ | Tabstract (_, _) | Tobject
            ) ->
@@ -4965,7 +4965,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
           let env, tyl = TUtils.run_on_intersection env tyl ~f:resolve_ety in
           Inter.intersect_list env r tyl
         | _, Tdynamic as ty -> env, ty
-        | _, (Tany | Tprim Tstring | Tabstract (_, None) | Tobject)
+        | _, (Tany _ | Tprim Tstring | Tabstract (_, None) | Tobject)
               when not (Env.is_strict env) ->
           env, (Reason.Rwitness p, Typing_utils.tany env)
         | _, Terr ->
@@ -4974,7 +4974,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
           Errors.unknown_type "an object" p (Reason.to_string "It is unknown" r);
           env, (Reason.Rwitness p, Typing_utils.terr env)
 
-        | (_, (Tany | Tnonnull | Tarraykind _ | Toption _
+        | (_, (Tany _ | Tnonnull | Tarraykind _ | Toption _
                  | Tprim _ | Tfun _ | Ttuple _ | Tdestructure _
                  | Tabstract ((AKdependent _ | AKnewtype _), _)
                  | Tanon (_, _) | Tobject | Tshape _)) as ty
@@ -5054,7 +5054,7 @@ and variadic_param env ft =
   match ft.ft_arity with
     | Fvariadic (_, param) -> env, Some param
     | Fellipsis (_, pos) ->
-      env, Some (TUtils.default_fun_param ~pos (Reason.Rvar_param pos, Tany))
+      env, Some (TUtils.default_fun_param ~pos (Reason.Rvar_param pos, Typing_defs.make_tany ()))
     | Fstandard _ -> env, None
 
 and param_modes ?(is_variadic=false) { fp_pos; fp_kind; _ } (pos, e) =
@@ -5101,7 +5101,7 @@ and call ~(expected: ExpectedTy.t option) ?method_call_info pos env fty el uel =
     let env, efty = Typing_solver.expand_type_and_solve
       ~description_of_expected:"a function value" env pos fty Errors.unify_error in
     match efty with
-    | _, (Terr | Tany | Tunion [] | Tdynamic) ->
+    | _, (Terr | Tany _ | Tunion [] | Tdynamic) ->
       let el = el @ uel in
       let env, tel = List.map_env env el begin fun env elt ->
         let env, te, ty =
@@ -5110,7 +5110,7 @@ and call ~(expected: ExpectedTy.t option) ?method_call_info pos env fty el uel =
         in
         let env = if IM.is_on @@ TCO.infer_missing (Env.get_tcopt env) then
             match efty with
-            | _, (Terr | Tany | Tdynamic) ->
+            | _, (Terr | Tany _ | Tdynamic) ->
               Typing_ops.coerce_type pos Reason.URparam env ty (MakeType.unenforced efty) Errors.unify_error
             | _ -> env
           else env in
@@ -5814,7 +5814,7 @@ and condition ?lhs_of_null_coalesce env tparamet
       (match ety with
       | _, Tarraykind (AKany | AKempty)
       | _, Tprim Tbool -> env
-      | _, (Terr | Tany | Tnonnull | Tarraykind _ | Toption _ | Tdynamic
+      | _, (Terr | Tany _ | Tnonnull | Tarraykind _ | Toption _ | Tdynamic
         | Tprim _ | Tvar _ | Tfun _ | Tabstract _ | Tclass _ | Tdestructure _
         | Ttuple _ | Tanon (_, _) | Tunion _ | Tintersection _ | Tobject | Tshape _
         ) ->
@@ -5909,7 +5909,7 @@ and class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
         class_for_refinement env p reason ivar_pos ivar_ty hint_ty
       end in
     env, (reason, Ttuple tyl)
-  | _, (Tany | Tprim _ | Toption _ | Ttuple _ | Tnonnull
+  | _, (Tany _ | Tprim _ | Toption _ | Ttuple _ | Tnonnull
         | Tshape _ | Tvar _ | Tabstract _ | Tarraykind _ | Tanon _ | Tdestructure _
         | Tunion _ | Tintersection _ | Tobject | Terr | Tfun _  | Tdynamic) ->
     env, hint_ty

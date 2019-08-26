@@ -160,7 +160,7 @@ and expand env ~as_tyvar_with_cnstr root id =
   in
   let env = { env with tenv = tenv } in
   match root_ty with
-  | Tany | Terr -> env, root
+  | Tany _ | Terr -> env, root
   | Tabstract (AKdependent (DTcls _), Some ty)
   | Tabstract (AKnewtype (_, _), Some ty) -> expand env ty
   | Tclass ((class_pos, class_name), _, _) ->

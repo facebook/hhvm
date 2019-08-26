@@ -23,7 +23,7 @@ let conditionally_reactive_attribute_to_hint env { ua_params = l; _ } =
   | _ ->
     (* error for invalid argument list was already reported during the
        naming step, do nothing *)
-    (Reason.none, Tany)
+    (Reason.none, Typing_defs.make_tany ())
 
 let condition_type_from_attributes env user_attributes =
   Attributes.find SN.UserAttributes.uaOnlyRxIfImpl user_attributes
@@ -74,7 +74,7 @@ let make_param_ty env param =
     match hint_of_type_hint param.param_type_hint with
     | None ->
       let r = Reason.Rwitness param.param_pos in
-      (r, Tany)
+      (r, Typing_defs.make_tany ())
     (* if the code is strict, use the type-hint *)
     | Some x -> Decl_hint.hint env x
   in
@@ -117,7 +117,7 @@ let make_param_ty env param =
   }
 
 let ret_from_fun_kind pos kind =
-  let ty_any = (Reason.Rwitness pos, Tany) in
+  let ty_any = (Reason.Rwitness pos, Typing_defs.make_tany ()) in
   match kind with
   | Ast_defs.FGenerator ->
     let r = Reason.Rret_fun_kind (pos, kind) in

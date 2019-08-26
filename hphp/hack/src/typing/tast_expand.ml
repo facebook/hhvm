@@ -23,7 +23,7 @@ let expand_ty ?pos env ty =
   let rec exp_ty ty =
     let _, ety = Tast_env.expand_type env ty in
     let ety = match ety with
-      | (_, (Tany | Tnonnull | Tprim _ | Tobject | Tdynamic)) -> ety
+      | (_, (Tany _ | Tnonnull | Tprim _ | Tobject | Tdynamic)) -> ety
       | (p, Tclass(n, e, tyl)) -> (p, Tclass(n, e, exp_tys tyl))
       | (p, Tunion tyl) -> (p, Tunion (exp_tys tyl))
       | (p, Tintersection tyl) -> (p, Tintersection (exp_tys tyl))

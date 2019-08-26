@@ -109,7 +109,7 @@ let force_awaitable env p ty =
   | env, (_, Tclass ((_, class_name), _, _))
     when fun_kind = Ast_defs.FAsync && class_name = Naming_special_names.Classes.cAwaitable ->
     env, ty
-  | env, (_, Tany) when fun_kind = Ast_defs.FAsync ->
+  | env, (_, Tany _) when fun_kind = Ast_defs.FAsync ->
     env, wrap_awaitable env p ty
   | _ when fun_kind = Ast_defs.FAsync ->
     let env, underlying_ty = Env.fresh_type env p in

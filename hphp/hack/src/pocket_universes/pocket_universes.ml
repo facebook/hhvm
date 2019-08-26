@@ -12,7 +12,7 @@ open Aast
 open Tast
 open Ast_defs
 
-let annotation pos = (pos, (Typing_reason.Rnone, Typing_defs.Tany))
+let annotation pos = (pos, (Typing_reason.Rnone, Typing_defs.make_tany ()))
 
 let gen_fun_name field name = field ^ "##" ^ name
 

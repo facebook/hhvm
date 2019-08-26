@@ -176,7 +176,7 @@ let autocomplete_shape_key env fields id =
         | Ast_defs.SFclass_const ((pos, cid), (_, mid)) ->
           ( Printf.sprintf "%s::%s" cid mid,
             SI_ClassConstant,
-            (Reason.Rwitness pos, Typing_defs.Tany) )
+            (Reason.Rwitness pos, Typing_defs.make_tany ()) )
       in
       if (not have_prefix) || string_starts_with code prefix then
         add_partial_result code (Phase.decl ty) kind None
@@ -565,7 +565,9 @@ let get_func_details_for env ty =
           @
           match ft.ft_arity with
           | Fellipsis _ ->
-            let empty = TUtils.default_fun_param (Reason.none, Tany) in
+            let empty =
+              TUtils.default_fun_param (Reason.none, Typing_defs.make_tany ())
+            in
             [param_to_record ~is_variadic:true empty]
           | Fvariadic (_, p) -> [param_to_record ~is_variadic:true p]
           | Fstandard _ -> [] );

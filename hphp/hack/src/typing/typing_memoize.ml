@@ -30,7 +30,7 @@ let check_param : Env.env -> Nast.fun_param -> unit =
       Typing_tdef.force_expand_typedef ~ety_env env ty in
     match ty with
     | _, (Tprim (Tnull | Tarraykey | Tbool | Tint | Tfloat | Tstring | Tnum)
-         | Tnonnull | Tany | Terr | Tdynamic) ->
+         | Tnonnull | Tany _ | Terr | Tdynamic) ->
        ()
     | _, Tprim (Tvoid | Tresource | Tnoreturn) -> error ty
     | _, Toption ty -> check_memoizable env ty

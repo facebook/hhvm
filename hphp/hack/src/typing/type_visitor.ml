@@ -114,7 +114,7 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
   method on_tlist acc _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
   method on_type: type a. _ -> a ty -> _ = fun acc (r, x) ->
     match x with
-    | Tany -> this#on_tany acc r
+    | Tany _ -> this#on_tany acc r
     | Terr -> this#on_terr acc r
     | Tmixed -> this#on_tmixed acc r
     | Tnonnull -> this#on_tnonnull acc r

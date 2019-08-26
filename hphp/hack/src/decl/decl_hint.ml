@@ -34,7 +34,7 @@ and aast_tparam_to_decl_tparam env t =
   }
 
 and hint_ p env = function
-  | Hany -> Tany
+  | Hany -> Typing_defs.make_tany ()
   | Herr -> Terr
   | Hmixed -> Tmixed
   | Hnonnull -> Tnonnull

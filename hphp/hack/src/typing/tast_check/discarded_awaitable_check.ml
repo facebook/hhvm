@@ -31,7 +31,7 @@ let rec enforce_not_awaitable env p ty =
   | r, Tclass ((_, awaitable), _, _) when
       awaitable = SN.Classes.cAwaitable ->
     Errors.discarded_awaitable p (Typing_reason.to_pos r)
-  | _, (Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Toption _
+  | _, (Terr | Tany _ | Tnonnull | Tarraykind _ | Tprim _ | Toption _
     | Tvar _ | Tfun _ | Tabstract _ | Tclass _ | Ttuple _
     | Tanon _ | Tobject | Tshape _ | Tdynamic | Tdestructure _) -> ()
 

@@ -50,7 +50,7 @@ and show_shape_field_type : type a. a shape_field_type -> string = fun x ->
 
 and pp_ty_ : type a. Format.formatter -> a ty_ -> unit = fun fmt ty ->
   match ty with
-  | Tany -> Format.pp_print_string fmt "Tany"
+  | Tany _ -> Format.pp_print_string fmt "Tany"
   | Terr -> Format.pp_print_string fmt "Terr"
   | Tthis -> Format.pp_print_string fmt "Tthis"
   | Tmixed -> Format.pp_print_string fmt "Tmixed"

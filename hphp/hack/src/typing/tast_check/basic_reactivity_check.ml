@@ -45,7 +45,7 @@ let rec is_byval_collection_or_string_or_any_type env ty =
       -> true
     | _, Tprim Tstring
     | _, Tdynamic
-    | _, Tany -> true
+    | _, Tany _ -> true
     | _, Tunion tl -> List.for_all tl ~f:(is_byval_collection_or_string_or_any_type env)
     | _ -> false in
   let _, tl = Tast_env.get_concrete_supertypes env ty in

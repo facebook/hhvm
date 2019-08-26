@@ -269,7 +269,7 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false) is_lvalue e
       env, v
     | Terr -> env, err_witness env expr_pos
     | Tdynamic -> env, ety1
-    | Tany ->
+    | Tany _ ->
       env, (Reason.Rnone, TUtils.tany env)
     | Tarraykind (AKany | AKempty) ->
       let env = check_arraykey_index env expr_pos ety1 ty2 in
@@ -426,7 +426,7 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
   GenericRules.apply_rules env ty1
   begin fun env ty1 ->
     match ty1 with
-    | _, (Tany | Tarraykind (AKany | AKempty)) ->
+    | _, (Tany _ | Tarraykind (AKany | AKempty)) ->
       env, ty1
     | _, Terr ->
       env, ty1
@@ -624,7 +624,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
     | Terr -> error
     | Tdynamic ->
       env, ety1
-    | (Tany | Tarraykind AKany) ->
+    | (Tany _ | Tarraykind AKany) ->
       env, ety1
     | Tarraykind AKempty ->
       let env = check_arraykey_index env expr_pos ety1 tkey in

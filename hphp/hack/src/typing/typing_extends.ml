@@ -286,10 +286,10 @@ let check_override env ~check_member_unique member_name mem_source ?(ignore_fun_
         (Reason.to_pos r_child) class_ class_elt.ce_origin
     | lazy fty_parent, _ ->
       begin match snd fty_parent, snd fty_child with
-        | Tany, Tany -> ()
-        | Tany, _ ->
+        | Tany _, Tany _ -> ()
+        | Tany _, _ ->
           Errors.decl_override_missing_hint @@ Reason.to_pos (fst fty_parent)
-        | _, Tany ->
+        | _, Tany _ ->
           Errors.decl_override_missing_hint @@ Reason.to_pos (fst fty_child)
         | _, _ -> ()
       end;

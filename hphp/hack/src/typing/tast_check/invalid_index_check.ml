@@ -68,7 +68,7 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
     array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty
   | Tnonnull | Tprim _ | Tfun _ | Tvar _
   | Tclass _ | Tanon (_, _) | Ttuple _ | Tshape _ | Tobject
-  | Terr | Tdynamic | Tany | Tarraykind _ | Tabstract _
+  | Terr | Tdynamic | Tany _ | Tarraykind _ | Tabstract _
   | _ -> ()
 
 let index_visitor = object(this)

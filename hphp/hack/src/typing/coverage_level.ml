@@ -108,7 +108,7 @@ let merge_and_sum cs1 cs2 =
   ) cs1 cs2
 
 let rec is_tany ty = match ty with
-  | r, (Tany | Terr) -> Some r
+  | r, (Tany _ | Terr) -> Some r
   | _, Tunion [] -> None
   | _, Tunion (h::tl) -> begin match is_tany h with
     | Some r when

@@ -57,14 +57,14 @@ let check_valid_array_key_type f_fail ~allow_any:allow_any env p t =
     | Tprim (Tint | Tstring) -> env, None
     (* Enums have to be valid array keys *)
     | Tabstract (AKnewtype (id, _), _) when Typing_env.is_enum env id -> env, None
-    | Terr | Tany when allow_any -> env, None
+    | Terr | Tany _ when allow_any -> env, None
     | Tintersection tyl ->
       (* Ok if at least one element of the intersection is ok. *)
       let env, errors = List.fold_map tyl ~init:env ~f:check_valid_array_key_type in
       if List.exists errors ~f:Option.is_none
       then env, None
       else env, Option.value ~default:None (List.find errors ~f:Option.is_some)
-    | Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic
+    | Terr | Tany _ | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic
       | Tvar _ | Tabstract _ | Tclass _ | Ttuple _ | Tanon _ | Tdestructure _
       | Tfun _ | Tunion _ | Tobject | Tshape _ ->
       env, Some (fun () -> f_fail p (Reason.to_pos r) (Typing_print.error env (r, t')) trail) in

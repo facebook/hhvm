@@ -136,7 +136,7 @@ let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
       begin
         let ty =
           match sp_type with
-          | None -> (Reason.Rwitness (fst sp_name), Tany)
+          | None -> (Reason.Rwitness (fst sp_name), Typing_defs.make_tany ())
           | Some ty -> ty
         in
         if child_class = mro.mro_name then

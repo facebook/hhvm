@@ -64,14 +64,15 @@ let intersect_truthiness tr1 tr2 =
 
 let tclass_is_falsy_when_empty, is_traversable =
   let r = Typing_reason.Rnone in
+  let tany r = (r, Typing_defs.make_tany ()) in
   let simple_xml_el = MakeType.class_type r "\\SimpleXMLElement" [] in
-  let container_type = MakeType.container r (r, Tany) in
-  let pair_type = MakeType.pair r (r, Tany) (r, Tany) in
+  let container_type = MakeType.container r (tany r) in
+  let pair_type = MakeType.pair r (tany r) (tany r) in
   let tclass_is_falsy_when_empty env ty =
     Env.can_subtype env ty simple_xml_el ||
     Env.can_subtype env ty container_type && not (Env.can_subtype env ty pair_type)
   in
-  let trv = MakeType.traversable r (r, Tany) in
+  let trv = MakeType.traversable r (tany r) in
   let is_traversable env ty = Env.can_subtype env ty trv in
   tclass_is_falsy_when_empty, is_traversable
 
@@ -83,7 +84,7 @@ let tclass_is_falsy_when_empty, is_traversable =
 let rec truthiness env ty =
   let env, ty = Env.fold_unresolved env ty in
   match snd ty with
-  | Tany | Terr | Tdynamic | Tvar _ -> Unknown
+  | Tany _ | Terr | Tdynamic | Tvar _ -> Unknown
 
   | Tnonnull
   | Tarraykind _
@@ -189,7 +190,7 @@ let rec find_sketchy_types env acc ty =
     let env, tyl = Env.get_concrete_supertypes env ty in
     List.fold tyl ~init:acc ~f:(find_sketchy_types env)
 
-  | Tany | Tnonnull | Tdynamic | Terr | Tobject | Tprim _ | Tfun _ | Ttuple _
+  | Tany _ | Tnonnull | Tdynamic | Terr | Tobject | Tprim _ | Tfun _ | Ttuple _
   | Tshape _ | Tvar _ | Tanon _ | Tarraykind _ | Tdestructure _ -> acc
 
 let find_sketchy_types env ty = find_sketchy_types env [] ty

@@ -54,7 +54,7 @@ module Suggest = struct
     | Tunion _               -> "..."
     | Tintersection _               -> "..."
     | Ttuple (l)             -> "("^list l^")"
-    | Tany                   -> "..."
+    | Tany _                 -> "..."
     | Terr                   -> "..."
     | Tmixed                 -> "mixed"
     | Tnonnull               -> "nonnull"
@@ -181,7 +181,7 @@ module Full = struct
     fun to_doc st env x ->
     let k: type b. b ty -> _ = fun x -> ty to_doc st env x in
     match x with
-    | Tany -> text "_"
+    | Tany _ -> text "_"
     | Terr -> text (if !debug_mode then "err" else "_")
     | Tthis -> text SN.Typehints.this
     | Tmixed -> text "mixed"
@@ -403,7 +403,7 @@ module Full = struct
       | Fvariadic (_, p) ->
         Some (Concat [
           (match p.fp_type.et_type with
-          | _, Tany -> Nothing
+          | _, Tany _ -> Nothing
           | _ -> fun_param to_doc st env p
           );
           text "..."
@@ -443,7 +443,7 @@ module Full = struct
       );
       match fp_name, fp_type with
       | None, _ -> possibly_enforced_ty to_doc st env fp_type
-      | Some param_name, { et_type = (_, Tany); _ } -> text param_name
+      | Some param_name, { et_type = (_, Tany _); _ } -> text param_name
       | Some param_name, _ ->
           Concat [possibly_enforced_ty to_doc st env fp_type; Space; text param_name]
     ]
@@ -611,7 +611,7 @@ module ErrorString = struct
   let varray_or_darray = "a varray_or_darray"
 
   let rec type_: _ -> locl ty_ -> _ = function env -> function
-    | Tany               -> "an untyped value"
+    | Tany _             -> "an untyped value"
     | Terr               -> "a type error"
     | Tdynamic           -> "a dynamic value"
     | Tunion l           -> union env l
@@ -791,7 +791,7 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
     obj @@ kind "this"
   | Ttuple tys ->
     obj @@ kind "tuple" @ is_array false @ args tys
-  | Tany | Terr ->
+  | Tany _ | Terr ->
     obj @@ kind "any"
   | Tmixed ->
     obj @@ kind "mixed"
@@ -937,7 +937,7 @@ let to_locl_ty
         ~keytrace
 
     | "any" ->
-      ty Tany
+      ty (Typing_defs.make_tany ())
     | "mixed" ->
       ty (Toption (reason, Tnonnull))
     | "nonnull" ->

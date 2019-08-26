@@ -397,7 +397,7 @@ let get_method_declaration
   let args = print_fun_args tcopt method_type in
   let rtype =
     match snd method_type.ft_ret.et_type with
-    | Typing_defs.Tany -> ""
+    | Typing_defs.Tany _ -> ""
     | _ ->
       Printf.sprintf
         ": %s"

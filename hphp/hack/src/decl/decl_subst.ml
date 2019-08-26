@@ -34,7 +34,7 @@ let make tparams tyl : 'a subst =
   let make_subst_tparam (subst, tyl) t =
     let (ty, tyl) =
       match tyl with
-      | [] -> ((Reason.Rnone, Tany), [])
+      | [] -> ((Reason.Rnone, Typing_defs.make_tany ()), [])
       | ty :: rl -> (ty, rl)
     in
     (SMap.add (snd t.tp_name) ty subst, tyl)

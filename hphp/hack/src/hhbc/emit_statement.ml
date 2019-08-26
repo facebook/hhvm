@@ -591,7 +591,7 @@ and emit_for (env : Emit_env.t) p (e1 : Tast.expr) e2 e3 b =
       match tl with
       | [] ->
         [ final
-          @@ ( (Pos.none, (Typing_reason.none, Typing_defs.Tany)),
+          @@ ( (Pos.none, (Typing_reason.none, Typing_defs.make_tany ())),
                A.Expr_list [h] ) ]
       | h1 :: t1 -> emit_ignored_expr env ~pop_pos:p h :: expr_list h1 t1
     in

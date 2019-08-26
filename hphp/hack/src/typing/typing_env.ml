@@ -150,7 +150,7 @@ let get_type_unsafe env x =
   let ty = IMap.get x env.tenv in
   match ty with
   | None ->
-      env, (Reason.none, Tany)
+      env, (Reason.none, Typing_defs.make_tany ())
   | Some ty -> env, ty
 
 let get_tyvar_info env var =
@@ -577,11 +577,11 @@ let empty ?(mode = FileInfo.Mstrict) tcopt file ~droot = {
     params  = LID.Map.empty;
     condition_types = SMap.empty;
     self_id = "";
-    self    = Reason.none, Tany;
+    self    = Reason.none, Typing_defs.make_tany ();
     static  = false;
     val_kind = Other;
     parent_id = "";
-    parent  = Reason.none, Tany;
+    parent  = Reason.none, Typing_defs.make_tany ();
     fun_kind = Ast_defs.FSync;
     fun_mutable = None;
     anons   = IMap.empty;
@@ -949,7 +949,7 @@ let local_is_mutable ~include_borrowed env id =
 
 let tany env =
   let dynamic_view_enabled = TypecheckerOptions.dynamic_view (get_tcopt env) in
-  if dynamic_view_enabled then Tdynamic else Tany
+  if dynamic_view_enabled then Tdynamic else Typing_defs.make_tany ()
 
 let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx_opt =
   let not_found_is_ok x ctx =
@@ -1211,7 +1211,7 @@ let rec get_tyvars env ty =
   match snd ety with
   | Tvar v ->
     env, ISet.singleton v, ISet.empty
-  | Tany | Tnonnull | Terr | Tdynamic | Tobject | Tprim _ | Tanon _ ->
+  | Tany _ | Tnonnull | Terr | Tdynamic | Tobject | Tprim _ | Tanon _ ->
     env, ISet.empty, ISet.empty
   | Toption ty ->
     get_tyvars env ty

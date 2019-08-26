@@ -22,7 +22,7 @@ let rec pessimize_type env ?(trust_awaitable=false) (ty: decl ty) =
   if not (TypecheckerOptions.pessimize_types (Env.get_tcopt env)) then ty else
   match ty with
   | _, Terr
-  | _, Tany
+  | _, Tany _
   | _, Tnonnull
   | _, Tprim _
   | _, Tdynamic
@@ -104,7 +104,7 @@ and pessimize_wrap env ty =
   let ty = pessimize_type env ty in
   match ty with
   | _, Terr
-  | _, Tany -> ty (* like Tany is useless *)
+  | _, Tany _ -> ty (* like Tany is useless *)
   | _, Tlike _ -> ty
   | _, Tgeneric x when Env.get_reified env x <> Aast.Reified -> ty
   | _, Tapply ((_, x), []) when x = Naming_special_names.Typehints.wildcard -> ty
@@ -209,7 +209,7 @@ let rec is_enforceable (env: Env.env) (ty: decl ty) =
       | Aast.Tnoreturn -> false
       | _ -> true
     end
-  | Tany -> true
+  | Tany _ -> true
   | Terr -> true
   | Tnonnull -> true
   | Tdynamic -> true
@@ -221,7 +221,7 @@ let rec is_enforceable (env: Env.env) (ty: decl ty) =
   | Tdarray _ -> false
   | Tvarray _ -> false
   (* With no parameters, we enforce varray_or_darray just like array *)
-  | Tvarray_or_darray (_, Tany) -> true
+  | Tvarray_or_darray (_, Tany _) -> true
   | Tvarray_or_darray _ -> false
   | Toption ty ->
     is_enforceable env ty

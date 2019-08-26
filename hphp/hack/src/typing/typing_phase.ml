@@ -115,7 +115,7 @@ let rec localize ~ety_env env (dty: decl ty) =
   match dty with
   | r, Terr ->
       env, (r, TUtils.terr env)
-  | r, Tany ->
+  | r, Tany _ ->
       env, (r, TUtils.tany env)
   | _, (Tnonnull | Tprim _ | Tdynamic) as x ->
       env, x
@@ -286,7 +286,7 @@ and tyl_contains_wildcard tyl =
 (* Recursive localizations of function types do not make judgements about enforceability *)
 and localize_possibly_enforced_ty ~ety_env env ety =
   let env, et_type = localize ~ety_env env ety.et_type in
-  env, { ety with et_type } 
+  env, { ety with et_type }
 
 and localize_cstr_ty ~ety_env env ty tp_name =
   let env, (r, ty_) = localize ~ety_env env ty in

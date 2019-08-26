@@ -45,7 +45,7 @@ module MakeType = Typing_make_type
 let rec freshen_inside_ty env ((r, ty_) as ty) =
   let default () = env, ty in
   match ty_ with
-  | Tany | Tnonnull | Terr | Tdynamic | Tobject | Tprim _ | Tanon _ | Tabstract(_, None) ->
+  | Tany _ | Tnonnull | Terr | Tdynamic | Tobject | Tprim _ | Tanon _ | Tabstract(_, None) ->
     default ()
     (* Nullable is covariant *)
   | Toption ty ->
@@ -351,7 +351,7 @@ let tyvar_is_solved env var =
  *)
 let ty_equal_shallow ty1 ty2 =
   match snd ty1, snd ty2 with
-  | Tany, Tany
+  | Tany _, Tany _
   | Tnonnull, Tnonnull
   | Terr, Terr
   | Tdynamic, Tdynamic
@@ -386,7 +386,7 @@ let ty_equal_shallow ty1 ty2 =
   | _ -> false
 
 let union_any_if_any_in_lower_bounds env ty lower_bounds =
-  let r = Reason.none in let any = (r, Tany) and err = (r, Terr) in
+  let r = Reason.none in let any = (r, Typing_defs.make_tany ()) and err = (r, Terr) in
   let env, ty = match TySet.find_opt any lower_bounds with
     | Some any -> Union.union env ty any
     | None -> env, ty in
@@ -407,7 +407,7 @@ let try_bind_to_equal_bound ~freshen env r var on_error =
   let lower_bounds = expand_all tyvar_info.Env.lower_bounds in
   let upper_bounds = expand_all tyvar_info.Env.upper_bounds in
   let equal_bounds = Typing_set.inter lower_bounds upper_bounds in
-  let r = Reason.none in let any = (r, Tany) and err = (r, Terr) in
+  let r = Reason.none in let any = (r, Typing_defs.make_tany ()) and err = (r, Terr) in
   let equal_bounds = equal_bounds |> TySet.remove any |> TySet.remove err in
   match Typing_set.choose_opt equal_bounds with
   | Some ty ->
@@ -721,7 +721,7 @@ let rec push_option_out pos env ty =
       push_option_out pos env ty
     end
     else env, ty
-  | _, (Terr | Tany | Tnonnull | Tarraykind _ | Tprim _
+  | _, (Terr | Tany _ | Tnonnull | Tarraykind _ | Tprim _
     | Tclass _ | Ttuple _ | Tanon _ | Tfun _
     | Tobject | Tshape _ | Tdynamic | Tdestructure _) -> env, ty
 

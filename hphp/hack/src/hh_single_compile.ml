@@ -346,14 +346,13 @@ let log_fail compiler_options filename exc ~stack =
 (* Maps an Ast to a Tast where every type is Tany
  * Used to produce a Tast for unsafe code without inferring types for it. *)
 let ast_to_tast_tany =
-  let get_expr_annotation (p : Ast_defs.pos) =
-    (p, (Typing_reason.Rnone, Typing_defs.Tany))
-  in
+  let tany = (Typing_reason.Rnone, Typing_defs.make_tany ()) in
+  let get_expr_annotation (p : Ast_defs.pos) = (p, tany) in
   Ast_to_aast.convert_program
     get_expr_annotation
     Tast.HasUnsafeBlocks
     Tast.dummy_saved_env
-    (Typing_reason.Rnone, Typing_defs.Tany)
+    tany
 
 (**
  * Converts a legacy ast (ast.ml) into a typed ast (tast.ml / aast.ml)

@@ -22,10 +22,11 @@ let is_private_visible env x self_id =
     let their_class = Env.get_class env x in
     match my_class, their_class with
     | Some my_class, Some their_class ->
+      let make_tany _ = (Reason.Rnone, Typing_defs.make_tany ()) in
       let my_class_ty = Typing_make_type.class_type Reason.Rnone self_id
-        (List.map (Cls.tparams my_class) (fun _ -> (Reason.Rnone, Tany))) in
+        (List.map (Cls.tparams my_class) make_tany) in
       let their_class_ty = Typing_make_type.class_type Reason.Rnone x
-        (List.map (Cls.tparams their_class) (fun _ -> (Reason.Rnone, Tany))) in
+        (List.map (Cls.tparams their_class) make_tany) in
       if (Typing_subtype.is_sub_type env my_class_ty their_class_ty) &&
          (Typing_subtype.is_sub_type env their_class_ty my_class_ty) then
         None
@@ -42,10 +43,11 @@ let is_protected_visible env x self_id =
     (* Children can call parent's protected methods and
      * parents can call children's protected methods (like a
      * constructor) *)
+    let make_tany _ = (Reason.Rnone, Typing_defs.make_tany ()) in
     let my_class_ty = Typing_make_type.class_type Reason.Rnone self_id
-      (List.map (Cls.tparams my_class) (fun _ -> (Reason.Rnone, Tany))) in
+      (List.map (Cls.tparams my_class) make_tany) in
     let their_class_ty = Typing_make_type.class_type Reason.Rnone x
-      (List.map (Cls.tparams their_class) (fun _ -> (Reason.Rnone, Tany))) in
+      (List.map (Cls.tparams their_class) make_tany) in
     if Typing_subtype.is_sub_type env my_class_ty their_class_ty
        || Cls.extends their_class self_id
        || not (Cls.members_fully_known my_class)

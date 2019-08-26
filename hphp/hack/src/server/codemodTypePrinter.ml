@@ -20,7 +20,7 @@ let print_tprim =
 let rec print_ty_exn ty =
   match snd ty with
   | Tprim p -> print_tprim p
-  | Tany
+  | Tany _
   | Terr
   | Tvar _
   | Tabstract (AKdependent _, _)

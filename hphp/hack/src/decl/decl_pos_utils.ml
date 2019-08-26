@@ -138,7 +138,8 @@ struct
   let rec ty (p, x) = (reason p, ty_ x)
 
   and ty_ : decl ty_ -> decl ty_ = function
-    | (Tany | Tthis | Terr | Tmixed | Tnonnull | Tdynamic | Tnothing) as x -> x
+    | (Tany _ | Tthis | Terr | Tmixed | Tnonnull | Tdynamic | Tnothing) as x ->
+      x
     | Tarray (ty1, ty2) -> Tarray (ty_opt ty1, ty_opt ty2)
     | Tdarray (ty1, ty2) -> Tdarray (ty ty1, ty ty2)
     | Tvarray root_ty -> Tvarray (ty root_ty)

@@ -25,7 +25,7 @@ let rec strip_ty : type a. a ty -> a ty = fun ty ->
       ty
     | Tnothing ->
       ty
-    | Tany
+    | Tany _
     | Tnonnull
     | Tdynamic
     | Terr ->

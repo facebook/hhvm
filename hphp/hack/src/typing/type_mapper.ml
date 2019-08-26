@@ -68,7 +68,7 @@ class shallow_type_mapper: type_mapper_type = object(this)
   method on_infinite_tvar = this#on_tvar
   method on_tnonnull env r = env, (r, Tnonnull)
   method on_tdynamic env r = env, (r, Tdynamic)
-  method on_tany env r = env, (r, Tany)
+  method on_tany env r = env, (r, Typing_defs.make_tany ())
   method on_terr env r = env, (r, Terr)
   method on_tanon env r fun_arity id = env, (r, Tanon (fun_arity, id))
   method on_tprim env r p = env, (r, Tprim p)
@@ -96,7 +96,7 @@ class shallow_type_mapper: type_mapper_type = object(this)
   method on_type env (r, ty) = match ty with
     | Tvar n -> this#on_tvar env r n
     | Tnonnull -> this#on_tnonnull env r
-    | Tany -> this#on_tany env r
+    | Tany _ -> this#on_tany env r
     | Terr -> this#on_terr env r
     | Tanon (fun_arity, id) -> this#on_tanon env r fun_arity id
     | Tprim p -> this#on_tprim env r p
@@ -221,7 +221,7 @@ end
 (* Mixin that expands type variables. *)
 class virtual tvar_expanding_type_mapper = object(this)
   method on_infinite_tvar (env : env) (r : Reason.t) (_ : int) : result =
-    env, (r, Tany)
+    env, (r, Typing_defs.make_tany ())
 
   method on_tvar env (r : Reason.t) n =
     let env, ty = Env.get_type env r n in

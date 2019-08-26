@@ -1411,8 +1411,8 @@ SSATmp* maybeCoerceValue(
           cns(
             env,
             makeStaticString(
-              isCls ? "Implicit Class to string conversion for type-hint"
-                    : "Implicit Func to string conversion for type-hint"
+              isCls ? Strings::CLASS_TO_STRING_IMPLICIT
+                    : Strings::FUNC_TO_STRING_IMPLICIT
             )
           )
         );

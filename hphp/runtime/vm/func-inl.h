@@ -157,7 +157,7 @@ inline const StringData* Func::fullDisplayName() const {
 
 inline const StringData* funcToStringHelper(const Func* func) {
   if (RuntimeOption::EvalRaiseFuncConversionWarning) {
-    raise_warning("Func to string conversion");
+    raise_warning(Strings::FUNC_TO_STRING);
   }
   return func->name();
 }

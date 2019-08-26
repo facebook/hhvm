@@ -696,8 +696,8 @@ void implShapeCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
 }
 
 const StaticString
-  s_funcToStringWarning("Func to string conversion"),
-  s_clsToStringWarning("Class to string conversion");
+  s_funcToStringWarning(Strings::FUNC_TO_STRING),
+  s_clsToStringWarning(Strings::CLASS_TO_STRING);
 
 namespace {
 

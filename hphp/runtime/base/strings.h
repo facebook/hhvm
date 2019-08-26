@@ -139,6 +139,13 @@ auto constexpr CLSMETH_COMPAT_IS_VEC = "is_vec() called on clsmeth";
 auto constexpr CLSMETH_COMPAT_IS_VARR = "is_varray() called on clsmeth";
 auto constexpr CLSMETH_COMPAT_IS_ANY_ARR = "is_any_array() called on clsmeth";
 
+auto constexpr FUNC_TO_STRING_IMPLICIT =
+  "Implicit Func to string conversion for type-hint";
+auto constexpr FUNC_TO_STRING = "Func to string conversion";
+auto constexpr CLASS_TO_STRING_IMPLICIT =
+  "Implicit Class to string conversion for type-hint";
+auto constexpr CLASS_TO_STRING = "Class to string conversion";
+
 } // namespace Strings
 } // namespace HPHP
 

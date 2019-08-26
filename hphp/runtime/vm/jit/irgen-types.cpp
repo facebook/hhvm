@@ -283,7 +283,7 @@ void verifyTypeImpl(IRGS& env,
         RaiseNotice,
         cns(
           env,
-          makeStaticString("Implicit Func to string conversion for type-hint")
+          makeStaticString(Strings::FUNC_TO_STRING_IMPLICIT)
         )
       );
       return;
@@ -301,7 +301,7 @@ void verifyTypeImpl(IRGS& env,
         RaiseNotice,
         cns(
           env,
-          makeStaticString("Implicit Class to string conversion for type-hint")
+          makeStaticString(Strings::CLASS_TO_STRING_IMPLICIT)
         )
       );
       return;
@@ -673,10 +673,10 @@ SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
   });
 }
 
-const StaticString s_FUNC_CONVERSION("Func to string conversion");
+const StaticString s_FUNC_CONVERSION(Strings::FUNC_TO_STRING);
 const StaticString s_FUNC_IS_STRING("Func used in is_string");
+const StaticString s_CLASS_CONVERSION(Strings::CLASS_TO_STRING);
 const StaticString s_CLASS_IS_STRING("Class used in is_string");
-const StaticString s_CLASS_CONVERSION("Class to string conversion");
 
 SSATmp* isStrImpl(IRGS& env, SSATmp* src) {
   using RO = RuntimeOption;

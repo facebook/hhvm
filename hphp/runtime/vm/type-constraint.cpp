@@ -1095,9 +1095,9 @@ void TypeConstraint::verifyOutParamFail(const Func* func,
     if (isString() || (isObject() && interface_supports_string(m_typeName))) {
       if (RuntimeOption::EvalStringHintNotices) {
         if (isFuncType(c->m_type)) {
-          raise_notice("Implicit Func to string conversion for type-hint");
+          raise_notice(Strings::FUNC_TO_STRING_IMPLICIT);
         } else {
-          raise_notice("Implicit Class to string conversion for type-hint");
+          raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
         }
       }
       c->m_data.pstr = isFuncType(c->m_type)
@@ -1268,9 +1268,9 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
     if (isString() || (isObject() && interface_supports_string(m_typeName))) {
       if (RuntimeOption::EvalStringHintNotices) {
         if (isFuncType(c->m_type)) {
-          raise_notice("Implicit Func to string conversion for type-hint");
+          raise_notice(Strings::FUNC_TO_STRING_IMPLICIT);
         } else {
-          raise_notice("Implicit Class to string conversion for type-hint");
+          raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
         }
       }
       c->m_data.pstr = isFuncType(c->m_type)

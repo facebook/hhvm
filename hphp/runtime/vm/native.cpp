@@ -349,7 +349,7 @@ void coerceFCallArgs(TypedValue* args,
       );
       args[-i].m_type = KindOfPersistentString;
       if (RuntimeOption::EvalStringHintNotices) {
-        raise_notice("Implicit Func to string conversion for type-hint");
+        raise_notice(Strings::FUNC_TO_STRING_IMPLICIT);
       }
       continue;
     }
@@ -359,7 +359,7 @@ void coerceFCallArgs(TypedValue* args,
       );
       args[-i].m_type = KindOfPersistentString;
       if (RuntimeOption::EvalStringHintNotices) {
-        raise_notice("Implicit Class to string conversion for type-hint");
+        raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
       }
       continue;
     }

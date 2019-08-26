@@ -78,17 +78,18 @@ void setTag(ArrayData* ad, const Tag& tag) {
 
 void setTagRecursive(ArrayData* ad, const Tag& tag) {
   assertx(RuntimeOption::EvalArrayProvenance);
-  assertx(ad->isRefCounted());
-  assertx(!ad->empty());
+  if (ad->empty()) return;
+  if (!ad->isRefCounted()) return;
 
-  setTag(ad, tag);
+  if (arrayWantsTag(ad) &&
+      !ad->hasProvenanceData()) {
+    setTag(ad, tag);
+  }
+
   IterateVNoInc(
     ad,
     [&](TypedValue tv) {
       if (!isArrayLikeType(tv.m_type)) return;
-      auto ad = tv.m_data.parr;
-      if (ad->empty()) return;
-      if (!arrayWantsTag(ad)) return;
       setTagRecursive(tv.m_data.parr, tag);
     }
   );

@@ -122,7 +122,9 @@ void copyTag(const ArrayData* src, ArrayData* dest);
 void copyTagStatic(const ArrayData* src, ArrayData* dest);
 
 /*
- * Tag an array and all of its subarrays
+ * Tag an array and all of its subarrays.
+ *
+ * If an empty or static array is encountered, it will not be tagged.
  */
 void setTagRecursive(ArrayData* ad, const Tag& tag);
 

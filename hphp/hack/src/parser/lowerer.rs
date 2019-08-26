@@ -4,8 +4,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use deps_rust::file_mode::FileMode;
 use oxidized as o;
+use oxidized::file_info;
 use oxidized::parser_options::ParserOptions;
 use oxidized::pos::Pos;
 use oxidized::prim_defs::Comment;
@@ -68,7 +68,7 @@ pub struct Env<'a> {
     lower_coroutines: bool,
     fail_open: bool,
     parser_options: &'a ParserOptions,
-    fi_mode: FileMode,
+    fi_mode: file_info::Mode,
     file: RelativePath,
     hacksperimental: bool,
     top_level_statements: bool, /* Whether we are (still) considering TLSs*/
@@ -106,7 +106,7 @@ impl<'a> Env<'a> {
         self.is_hh_file
     }
 
-    fn fi_mode(&self) -> FileMode {
+    fn fi_mode(&self) -> file_info::Mode {
         self.fi_mode.clone()
     }
 
@@ -125,7 +125,7 @@ pub enum Error<Node> {
 }
 
 pub struct Result<'a> {
-    fi_mode: FileMode,
+    fi_mode: file_info::Mode,
     is_hh_file: bool,
     ast: aast!(Program<,>),
     content: &'a [u8],

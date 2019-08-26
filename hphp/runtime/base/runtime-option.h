@@ -835,10 +835,10 @@ struct RuntimeOption {
   F(uint32_t, HHIRInliningCostFactorMain, 100)                          \
   F(uint32_t, HHIRInliningCostFactorCold, 32)                           \
   F(uint32_t, HHIRInliningCostFactorFrozen, 10)                         \
-  F(uint32_t, HHIRInliningVasmCostLimit, 17500)                         \
+  F(uint32_t, HHIRInliningVasmCostLimit, 10500)                         \
   F(uint32_t, HHIRInliningMinVasmCostLimit, 10000)                      \
   F(uint32_t, HHIRInliningMaxVasmCostLimit, 40000)                      \
-  F(uint32_t, HHIRAlwaysInlineVasmCostLimit, 8000)                      \
+  F(uint32_t, HHIRAlwaysInlineVasmCostLimit, 4800)                      \
   F(uint32_t, HHIRInliningMaxDepth,    1000)                            \
   F(double,   HHIRInliningVasmCallerExp, .5)                            \
   F(double,   HHIRInliningVasmCalleeExp, .5)                            \
@@ -848,7 +848,7 @@ struct RuntimeOption {
   F(uint32_t, HHIRInliningMaxInitObjProps, 12)                          \
   F(bool,     HHIRInliningIgnoreHints, !debug)                          \
   F(bool,     HHIRInliningUseStackedCost, true)                         \
-  F(bool,     HHIRInliningUseReachableCost, false)                      \
+  F(bool,     HHIRInliningUseReachableCost, true)                       \
   F(bool,     HHIRInliningUseLayoutBlocks, false)                       \
   F(bool, HHIRInlineFrameOpts,         true)                            \
   F(bool, HHIRPartialInlineFrameOpts,  true)                            \

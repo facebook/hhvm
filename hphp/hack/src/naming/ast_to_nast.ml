@@ -15,7 +15,7 @@ let convert = converter#on_program
 
 let on_class = converter#on_class
 
-let on_fun : Ast.fun_ -> Nast.fun_ = converter#on_fun
+let on_fun = converter#on_fun
 
 let on_typedef = converter#on_typedef
 

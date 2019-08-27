@@ -3644,6 +3644,7 @@ let lower_tree
       in
       match PositionedSyntaxTree.errors tree with
       | [] when env.quick_mode -> ()
+      | [] when (ParserOptions.parser_errors_only env.parser_options) -> ()
       | [] ->
         let error_env = ParserErrors.make_env tree
           ~hhvm_compat_mode:ParserErrors.HHVMCompat

@@ -250,6 +250,9 @@ type t = {
   po_abstract_static_props: bool;
   (* Make unsetting a class constant a parse error *)
   po_disable_unset_class_const: bool;
+  (* Ignore all errors except those that can influence the shape of syntax tree
+   * (skipping post parse error checks) *)
+  po_parser_errors_only: bool;
 }
 [@@deriving show]
 
@@ -321,6 +324,7 @@ val make :
   ?po_disallow_silence:bool ->
   ?po_abstract_static_props:bool ->
   ?po_disable_unset_class_const:bool ->
+  ?po_parser_errors_only:bool ->
   unit ->
   t
 
@@ -491,3 +495,5 @@ val po_abstract_static_props : t -> bool
 val po_disable_unset_class_const : t -> bool
 
 val set_infer_missing : t -> InferMissing.t -> t
+
+val po_parser_errors_only : t -> bool

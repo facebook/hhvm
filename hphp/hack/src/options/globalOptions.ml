@@ -103,6 +103,7 @@ type t = {
   po_disallow_silence: bool;
   po_abstract_static_props: bool;
   po_disable_unset_class_const: bool;
+  po_parser_errors_only: bool;
 }
 [@@deriving show]
 
@@ -253,6 +254,7 @@ let default =
     po_disallow_silence = false;
     po_abstract_static_props = false;
     po_disable_unset_class_const = false;
+    po_parser_errors_only = false;
   }
 
 let make
@@ -337,6 +339,7 @@ let make
     ?(po_disallow_silence = default.po_disallow_silence)
     ?(po_abstract_static_props = default.po_abstract_static_props)
     ?(po_disable_unset_class_const = default.po_disable_unset_class_const)
+    ?(po_parser_errors_only = default.po_parser_errors_only)
     () =
   {
     tco_safe_array;
@@ -407,6 +410,7 @@ let make
     po_disallow_silence;
     po_abstract_static_props;
     po_disable_unset_class_const;
+    po_parser_errors_only;
   }
 
 let tco_safe_array t = t.tco_safe_array
@@ -568,3 +572,5 @@ let setup_pocket_universes env enabled =
   { env with tco_experimental_features = exp_features }
 
 let set_infer_missing t w = { t with tco_infer_missing = w }
+
+let po_parser_errors_only t = t.po_parser_errors_only

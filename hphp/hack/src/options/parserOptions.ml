@@ -89,6 +89,8 @@ let with_abstract_static_props po b =
 
 let disable_unset_class_const = GlobalOptions.po_disable_unset_class_const
 
+let parser_errors_only = GlobalOptions.po_parser_errors_only
+
 let make
     ~auto_namespace_map
     ~codegen

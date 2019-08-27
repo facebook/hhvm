@@ -506,9 +506,6 @@ struct RuntimeOption {
 
   static bool DisableSmallAllocator;
 
-  static int PerAllocSampleF;
-  static int TotalAllocSampleF;
-
   static std::map<std::string, std::string> ServerVariables;
 
   static std::map<std::string, std::string> EnvVariables;

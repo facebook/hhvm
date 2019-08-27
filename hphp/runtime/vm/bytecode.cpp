@@ -255,7 +255,7 @@ ALWAYS_INLINE local_var decode_local(PC& pc) {
 
 ALWAYS_INLINE Iter* decode_iter(PC& pc) {
   auto ia = decode_iva(pc);
-  return frame_iter(vmfp(), ia)->escalate();
+  return frame_iter(vmfp(), ia);
 }
 
 template<typename T>
@@ -845,19 +845,6 @@ static std::string toStringElm(const TypedValue* tv) {
   return os.str();
 }
 
-static std::string toStringIter(const Iter* it) {
-  switch (it->arr().getIterType()) {
-  case ArrayIter::TypeUndefined:
-    return "I:Undefined";
-  case ArrayIter::TypeArray:
-    return "I:Array";
-  case ArrayIter::TypeIterator:
-    return "I:Iterator";
-  }
-  assertx(false);
-  return "I:?";
-}
-
 /*
  * Return true if Offset o is inside the protected region of a fault
  * funclet for iterId, otherwise false.
@@ -928,7 +915,7 @@ static void toStringFrame(std::ostream& os, const ActRec* fp,
         os << " ";
       }
       if (checkIterScope(func, offset, i)) {
-        os << toStringIter(it);
+        os << it->toString();
       } else {
         os << "I:Undefined";
       }
@@ -2816,7 +2803,7 @@ OPTBLD_INLINE void iopSelect() {
 OPTBLD_INLINE
 void iopIterBreak(PC& pc, PC targetpc, const IterTable& iterTab) {
   for (auto const& ent : iterTab) {
-    auto iter = frame_iter(vmfp(), ent.id)->escalate();
+    auto iter = frame_iter(vmfp(), ent.id);
     switch (ent.kind) {
       case KindOfIter:  iter->free();  break;
       case KindOfLIter: iter->free();  break;
@@ -5537,83 +5524,102 @@ void iopFCallBuiltin(
 
 namespace {
 
-template <bool Local, bool Pop>
-bool initIterator(PC& pc, PC targetpc, Iter* it, Cell* c1) {
-  if (isClsMethType(type(c1))) {
-    raise_error(
-      "Invalid operand type was used: expects iterable, clsmeth was given");
+template <bool HasKey, bool Local>
+void initIterator(PC& pc, PC targetpc, Iter* it, TypedValue* base,
+                  TypedValue* val, TypedValue* key) {
+  // WARNING: This code requires caution regarding cells vs. refs. It takes
+  // some case analysis to show that it is correct:
+  //
+  //  - For IterInit / IterInitK bytecodes, the base is popped from the stack
+  //    and is always a cell. We can check for array-like before "unboxing".
+  //
+  //  - For LIterInit / LIterInitK bytecodes, we must do the array-like check
+  //    prior to unboxing ref bases. The local iterator optimization should
+  //    not kick in if the base is a ref to an array - these are non-local
+  //    iterators handled by the generic iterator init code below.
+  //
+  if (isArrayLikeType(type(base))) {
+    auto const arr = base->m_data.parr;
+    auto const res = HasKey ? new_iter_array_key<Local>(it, arr, val, key)
+                            : new_iter_array<Local>(it, arr, val);
+    if (res == 0) pc = targetpc;
+    if (!Local) vmStack().discard();
+    return;
   }
-  auto const hasElems = it->init<Local>(c1);
-  if (!hasElems) pc = targetpc;
-  if (Pop) vmStack().popC();
-  return hasElems;
+
+  // Now we can unbox the base and fall back to generic Iter methods.
+  //
+  // NOTE: It looks like we could call new_iter_object at this point. However,
+  // doing so is incorrect, for two reasons:
+  //
+  //  1. We may have unboxed an array-like. (This is the ref-to-array case
+  //     noted in the comment above.) As a result, we need to redo all checks
+  //     on the base again here to account for unboxing.
+  //
+  //  2. new_iter_array / new_iter_object only handle array-like and object
+  //     bases, respectively. We may have some other kind of base which the
+  //     generic Iter::init handles correctly.
+  //
+  // As a result, the simplest code we could have here is the generic case.
+  // It's also about as fast as it can get, because at this point, we're almost
+  // always going to create an object iter, which can't really be optimized.
+  //
+  base = Local ? tvToCell(base) : tvAssertCell(base);
+  if (isClsMethType(type(base))) {
+    raise_error("Invalid operand type was used: "
+                "expects iterable, clsmeth was given");
+  }
+
+  if (it->init(base)) {
+    tvAsVariant(val) = it->val();
+    if (HasKey) tvAsVariant(key) = it->key();
+  } else {
+    pc = targetpc;
+  }
+  if (!Local) vmStack().popC();
 }
 
 }
 
 OPTBLD_INLINE void iopIterInit(PC& pc, Iter* it, PC targetpc, local_var val) {
-  Cell* c1 = vmStack().topC();
-  if (initIterator<false, true>(pc, targetpc, it, c1)) {
-    tvAsVariant(val.ptr) = it->arr().second();
-  }
+  auto const base = vmStack().topC();
+  auto constexpr HasKey = false, Local = false;
+  initIterator<HasKey, Local>(pc, targetpc, it, base, val.ptr, nullptr);
 }
 
 OPTBLD_INLINE
 void iopIterInitK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
-  Cell* c1 = vmStack().topC();
-  if (initIterator<false, true>(pc, targetpc, it, c1)) {
-    tvAsVariant(val.ptr) = it->arr().second();
-    tvAsVariant(key.ptr) = it->arr().first();
-  }
+  auto const base = vmStack().topC();
+  auto constexpr HasKey = true, Local = false;
+  initIterator<HasKey, Local>(pc, targetpc, it, base, val.ptr, key.ptr);
 }
 
 OPTBLD_INLINE void iopLIterInit(PC& pc, Iter* it, local_var local,
                                 PC targetpc, local_var val) {
-  if (isArrayLikeType(local.ptr->m_type)) {
-    if (initIterator<true, false>(pc, targetpc, it, tvAssertCell(local.ptr))) {
-      tvAsVariant(val.ptr) = it->arr().secondLocal(local.ptr->m_data.parr);
-    }
-    return;
-  }
-
-  if (initIterator<false, false>(pc, targetpc, it, tvToCell(local.ptr))) {
-    tvAsVariant(val.ptr) = it->arr().second();
-  }
+  auto constexpr HasKey = false, Local = true;
+  initIterator<HasKey, Local>(pc, targetpc, it, local.ptr, val.ptr, nullptr);
 }
 
 OPTBLD_INLINE void iopLIterInitK(PC& pc, Iter* it, local_var local,
                                  PC targetpc, local_var val, local_var key) {
-  if (isArrayLikeType(local.ptr->m_type)) {
-    if (initIterator<true, false>(pc, targetpc, it, tvAssertCell(local.ptr))) {
-      tvAsVariant(val.ptr) = it->arr().secondLocal(local.ptr->m_data.parr);
-      tvAsVariant(key.ptr) = it->arr().firstLocal(local.ptr->m_data.parr);
-    }
-    return;
-  }
-
-  if (initIterator<false, false>(pc, targetpc, it, tvToCell(local.ptr))) {
-    tvAsVariant(val.ptr) = it->arr().second();
-    tvAsVariant(key.ptr) = it->arr().first();
-  }
+  auto constexpr HasKey = true, Local = true;
+  initIterator<HasKey, Local>(pc, targetpc, it, local.ptr, val.ptr, key.ptr);
 }
 
 OPTBLD_INLINE void iopIterNext(PC& pc, Iter* it, PC targetpc, local_var val) {
-  if (it->next()) {
+  if (iter_next_ind(it, tvToCell(val.ptr))) {
     vmpc() = targetpc;
     jmpSurpriseCheck(targetpc - pc);
     pc = targetpc;
-    tvAsVariant(val.ptr) = it->arr().second();
   }
 }
 
 OPTBLD_INLINE
 void iopIterNextK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
-  if (it->next()) {
+  if (iter_next_key_ind(it, tvToCell(val.ptr), tvToCell(key.ptr))) {
     vmpc() = targetpc;
     jmpSurpriseCheck(targetpc - pc);
     pc = targetpc;
-    tvAsVariant(val.ptr) = it->arr().second();
-    tvAsVariant(key.ptr) = it->arr().first();
   }
 }
 
@@ -5622,18 +5628,14 @@ OPTBLD_INLINE void iopLIterNext(PC& pc,
                                 local_var base,
                                 PC targetpc,
                                 local_var val) {
-  if (isArrayLikeType(base.ptr->m_type)) {
-    if (it->nextLocal(base.ptr->m_data.parr)) {
-      vmpc() = targetpc;
-      jmpSurpriseCheck(targetpc - pc);
-      pc = targetpc;
-      tvAsVariant(val.ptr) = it->arr().secondLocal(base.ptr->m_data.parr);
-    }
-  } else if (it->next()) {
+  auto valOut = tvToCell(val.ptr);
+  auto const hasMore = isArrayLikeType(base.ptr->m_type)
+    ? liter_next_ind(it, valOut, base.ptr->m_data.parr)
+    : iter_next_ind(it, valOut);
+  if (hasMore) {
     vmpc() = targetpc;
     jmpSurpriseCheck(targetpc - pc);
     pc = targetpc;
-    tvAsVariant(val.ptr) = it->arr().second();
   }
 }
 
@@ -5643,20 +5645,15 @@ OPTBLD_INLINE void iopLIterNextK(PC& pc,
                                  PC targetpc,
                                  local_var val,
                                  local_var key) {
-  if (isArrayLikeType(base.ptr->m_type)) {
-    if (it->nextLocal(base.ptr->m_data.parr)) {
-      vmpc() = targetpc;
-      jmpSurpriseCheck(targetpc - pc);
-      pc = targetpc;
-      tvAsVariant(val.ptr) = it->arr().secondLocal(base.ptr->m_data.parr);
-      tvAsVariant(key.ptr) = it->arr().firstLocal(base.ptr->m_data.parr);
-    }
-  } else if (it->next()) {
+  auto valOut = tvToCell(val.ptr);
+  auto keyOut = tvToCell(key.ptr);
+  auto const hasMore = isArrayLikeType(base.ptr->m_type)
+    ? liter_next_key_ind(it, valOut, keyOut, base.ptr->m_data.parr)
+    : iter_next_key_ind(it, valOut, keyOut);
+  if (hasMore) {
     vmpc() = targetpc;
     jmpSurpriseCheck(targetpc - pc);
     pc = targetpc;
-    tvAsVariant(val.ptr) = it->arr().second();
-    tvAsVariant(key.ptr) = it->arr().first();
   }
 }
 
@@ -6221,7 +6218,7 @@ OPTBLD_INLINE void iopContAssignDelegate(Iter* iter) {
   // returns false then we know that we have an empty iterator (like `[]`) in
   // which case just set our delegate to Null so that ContEnterDelegate and
   // YieldFromDelegate know something is up.
-  if (tvIsGenerator(param) || iter->init<false>(&param)) {
+  if (tvIsGenerator(param) || iter->init(&param)) {
     cellSet(param, gen->m_delegate);
   } else {
     cellSetNull(gen->m_delegate);
@@ -6320,10 +6317,8 @@ TCA yieldFromIterator(PC& pc, Generator* gen, Iter* it, Offset resumeOffset) {
     return nullptr;
   }
 
-  // Otherwise, if iteration is finished we just return null.
-  auto arr = it->arr();
-  if (arr.end()) {
-    // Push our null return value onto the stack
+  // If iteration is complete, then this bytecode pushes null on the stack.
+  if (it->end()) {
     tvWriteNull(*vmStack().topTV());
     return nullptr;
   }
@@ -6334,9 +6329,9 @@ TCA yieldFromIterator(PC& pc, Generator* gen, Iter* it, Offset resumeOffset) {
   auto const sfp = fp->sfp();
   auto const callOff = fp->m_callOff;
 
-  auto key = *(arr.first().asTypedValue());
-  auto value = *(arr.second().asTypedValue());
-  gen->yield(resumeOffset, &key, value);
+  auto key = *it->key().asTypedValue();
+  auto val = *it->val().asTypedValue();
+  gen->yield(resumeOffset, &key, val);
 
   returnToCaller(pc, sfp, callOff);
 

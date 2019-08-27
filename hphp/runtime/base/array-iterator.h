@@ -34,11 +34,10 @@
 #include "hphp/util/type-scan.h"
 
 namespace HPHP {
+
 ///////////////////////////////////////////////////////////////////////////////
 
-struct TypedValue;
 struct Iter;
-struct MixedArray;
 
 enum class IterNextIndex : uint8_t {
   ArrayPacked = 0,
@@ -79,7 +78,6 @@ enum class IterNextIndex : uint8_t {
  */
 struct ArrayIter {
   enum Type : uint8_t {
-    TypeUndefined = 0,
     TypeArray,
     TypeIterator  // for objects that implement Iterator or IteratorAggregate
   };
@@ -254,9 +252,10 @@ struct ArrayIter {
   Type getIterType() const {
     return m_itype;
   }
-  void setIterType(Type iterType) {
-    m_itype = iterType;
-  }
+
+  // It's valid to call end() on a killed iter, but the iter is otherwise dead.
+  // In debug builds, this method will overwrite the iterator with garbage.
+  void kill();
 
   IterNextIndex getHelperIndex() {
     return m_nextHelperIdx;
@@ -275,7 +274,6 @@ private:
                                     TypedValue*);
   template<bool HasKey, bool Local>
   friend int64_t iter_next_mixed_no_tombstones(Iter*, Cell*, Cell*, ArrayData*);
-  friend struct Iter;
 
   template <bool incRef = true>
   void arrInit(const ArrayData* arr);
@@ -359,41 +357,6 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-
-/*
- * The iterator API used by the JIT. Unfortunately, this API is very leaky
- * because we expose the ArrayIter through arr(). We could lock this API down
- * considerably if we only used iterators for *IterInit* / *IterNext*.
- *
- * However, the "delegated continuations" feature also uses iterators, and it
- * does so in a way that exposes many more of the details of ArrayIter. We'll
- * have to change how that's implemented to place restrictions here.
- */
-struct alignas(16) Iter {
-  Iter() = delete;
-  ~Iter() = delete;
-  const ArrayIter& arr() const { return m_iter; }
-        ArrayIter& arr()       { return m_iter; }
-
-  // Converts JIT-only ArrayMixedNoTombstones iters to an ArrayMixed iters.
-  // This method is needed so that we can use the native next / nextLocal.
-  Iter* escalate();
-
-  // Returns true if the base is non-empty.
-  // For non-local iterators, if init returns false, it dec-refs the base.
-  template <bool Local> bool init(TypedValue* c1);
-
-  // These methods return true if the new position of the cursor is in bounds.
-  // For non-local iterators, if next returns false, it dec-refs the base.
-  bool next();
-  bool nextLocal(const ArrayData*);
-
-  // Dec-refs the base, for non-local iterators.
-  void free();
-
-private:
-  ArrayIter m_iter;
-};
 
 //////////////////////////////////////////////////////////////////////
 // Template based iteration, bypassing ArrayIter where possible
@@ -629,30 +592,99 @@ bool IterateKV(const TypedValue& it,
 
 //////////////////////////////////////////////////////////////////////
 
-// Native helpers for the JIT used to implement *IterInit* opcodes.
-// These methods return a boolean which is true if the array has elements.
+/*
+ * The iterator API used by the interpreter and the JIT. This API is relatively
+ * limited, because there are only two ways to interact with iterators in Hack:
+ *  1. In a "foreach" loop, using the *IterInit* / *IterNext* bytecodes.
+ *  2. As a delegated generator ("yield from").
+ *
+ * (*IterInit* here refers to {IterInit, IterInitK, LIterInit, LIterInitK}).
+ *
+ * The methods exposed here should be sufficient to implement both kinds of
+ * iterator behavior. To speed up "foreach" loops, we also provide helpers
+ * implementing *IterInit* / *IterNext* through helpers below.
+ *
+ * These helpers are faster than using the Iter class's methods directly
+ * because they do one vtable lookup on the array type and then execute the
+ * advance / bounds check / output key-value sequence based on that lookup,
+ * rather than doing a separate vtable lookup for each step.
+ *
+ * NOTE: If you initialize an iterator using the faster init helpers, you MUST
+ * use the faster next helpers for IterNext ops. That's because the helpers may
+ * create ArrayMixedNoTombstones-type iterators that Iter::next doesn't handle.
+ * doesn't handle. This invariant is checked in debug builds.
+ *
+ * In practice, this constraint shouldn't be a problem, because we always use
+ * the helpers to do IterNext. That's true both in the interpreter and the JIT.
+ */
+struct alignas(16) Iter {
+  Iter() = delete;
+  ~Iter() = delete;
+
+  // Returns true if the base is non-empty. Only used for non-local iterators.
+  // For local iterators, use new_iter_array / new_iter_array_key below.
+  bool init(Cell* base);
+
+  // Returns true if there are more elems. Only used for non-local iterators.
+  // For local iterators, use liter_next_ind / liter_next_key_ind below.
+  bool next();
+
+  // Returns true if the iterator is at its end.
+  bool end() const { return m_iter.end(); }
+
+  // Get the current key and value. Assumes that the iter is not at its end.
+  // These methods will inc-ref the key and value before returning it.
+  Variant key() { return m_iter.first(); }
+  Variant val() { return m_iter.second(); };
+
+  // It's valid to call end() on a killed iter, but the iter is otherwise dead.
+  // In debug builds, this method will overwrite the iterator with garbage.
+  void kill() { m_iter.kill(); }
+
+  // Dec-refs the base, for non-local iters. Safe to call for local iters.
+  void free();
+
+  // Debug string, used when printing a frame.
+  std::string toString() const;
+
+private:
+  // Used to implement the separate helper functions below. These functions
+  // peek into the Iter and directly manipulate m_iter's fields.
+  friend ArrayIter* unwrap(Iter*);
+
+  ArrayIter m_iter;
+};
+
+// Native helpers for the interpreter + JIT used to implement *IterInit* ops.
+// These helpers return 1 if the base has any elements and 0 otherwise.
+// (They would return a bool, but native method calls from the JIT produce GP
+// register outputs, so we extend the return type to an int64_t.)
 //
-// Because native method calls have a GP register output, we extend the return
-// type to an int64_t, which is either 1 (enter the loop) or 0 (jump to done).
+// If these helpers return 1, they set `val` (and `key`, for key-value iters)
+// from the first key-value pair of the base.
 //
-// For non-local iters, if this method returns 0, it will dec-ref the array.
-template <bool Local>
+// For non-local iters, if these helpers return 0, they also dec-ref the base.
+template <bool Local> NEVER_INLINE
 int64_t new_iter_array(Iter* dest, ArrayData* arr, TypedValue* val);
-template <bool Local>
+template <bool Local> NEVER_INLINE
 int64_t new_iter_array_key(Iter* dest, ArrayData* arr, TypedValue* val,
                            TypedValue* key);
 int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
                         TypedValue* val, TypedValue* key);
 
 
-// Native helpers for the JIT used to implement *IterNext* opcodes.
-// These methods return a boolean which is true if the array has more elements.
+// Native helpers for the interpreter + JIT used to implement *IterInit* ops.
+// These helpers return 1 if the base has more elements and 0 otherwise.
+// (As above, they return a logical bool which we extend to a GP register.)
 //
-// For non-local iters, if this method returns 0, it will dec-ref the array.
-int64_t iter_next_ind(Iter* iter, Cell* valOut);
-int64_t iter_next_key_ind(Iter* iter, Cell* valOut, Cell* keyOut);
-int64_t liter_next_ind(Iter*, Cell*, ArrayData*);
-int64_t liter_next_key_ind(Iter*, Cell*, Cell*, ArrayData*);
+// If these helpers return 1, they set `val` (and `key`, for key-value iters)
+// from the next key-value pair of the base.
+//
+// For non-local iters, if these helpers return 0, they also dec-ref the base.
+NEVER_INLINE int64_t iter_next_ind(Iter* iter, Cell* valOut);
+NEVER_INLINE int64_t iter_next_key_ind(Iter* iter, Cell* valOut, Cell* keyOut);
+NEVER_INLINE int64_t liter_next_ind(Iter*, Cell*, ArrayData*);
+NEVER_INLINE int64_t liter_next_key_ind(Iter*, Cell*, Cell*, ArrayData*);
 
 //////////////////////////////////////////////////////////////////////
 

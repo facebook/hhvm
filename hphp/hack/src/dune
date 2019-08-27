@@ -32,6 +32,7 @@
   (modules
     hh_server)
   (ocamlc_flags (:standard -custom))
+  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
   (libraries
     ai
     client
@@ -55,6 +56,7 @@
   (modules
     hh_client)
   (ocamlc_flags (:standard -custom))
+  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
   (libraries
     ai
     client
@@ -92,6 +94,7 @@
     pocket_universes
     typing)
   (ocamlc_flags (:standard -custom))
+  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
   (flags (:standard -unsafe-string)))
 
 (executable
@@ -99,6 +102,7 @@
   (modules
     hh_parse)
   (ocamlc_flags (:standard -custom))
+  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
   (libraries
     debug
     default_injector_config
@@ -113,6 +117,7 @@
   (modules
     hackfmt)
   (ocamlc_flags (:standard -custom))
+  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
   (libraries
     default_injector_config
     hackfmt
@@ -125,6 +130,7 @@
   (modules
     hh_single_parse)
   (ocamlc_flags (:standard -custom))
+  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
   (libraries
     debug
     default_injector_config
@@ -138,6 +144,7 @@
   (modules
     generate_full_fidelity)
   (ocamlc_flags (:standard -custom))
+  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
   (libraries
     procs_procs_lwt
     core_kernel

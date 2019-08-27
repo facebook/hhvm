@@ -5,7 +5,6 @@
     ast
     ast_defs
     ast_defs_visitors_ancestors
-    ast_utils
     ast_visitor)
   (libraries
     file_info

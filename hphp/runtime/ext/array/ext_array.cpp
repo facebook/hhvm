@@ -1170,8 +1170,14 @@ TypedValue HHVM_FUNCTION(array_unshift,
       ref_array->asArrRef().prepend(var);
     } else {
       {
-        auto newArray = Array::attach(
-          MixedArray::MakeReserveSame(cell_array->m_data.parr, 0));
+        Array newArray;
+        if (cell_array->m_data.parr->isHackArray()) {
+          newArray = Array::attach(
+            MixedArray::MakeReserveSame(cell_array->m_data.parr, 0));
+        } else {
+          newArray = Array::attach(
+            MixedArray::MakeReserveDArray(cell_array->m_data.parr->size()));
+        }
         newArray.append(var);
         if (!args.empty()) {
           auto pos_limit = args->iter_end();

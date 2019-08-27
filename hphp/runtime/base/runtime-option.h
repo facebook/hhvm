@@ -79,7 +79,7 @@ struct RepoOptions {
   H(bool,           EnableCoroutines,               true)             \
   H(bool,           Hacksperimental,                false)            \
   H(bool,           DisableLvalAsAnExpression,      false)            \
-  H(bool,           HackCompilerUseRustParser,      facebook)         \
+  H(bool,           HackCompilerUseRustParser,      true)             \
   H(bool,           AllowNewAttributeSyntax,        false)            \
   H(bool,           ConstDefaultFuncArgs,           false)            \
   H(bool,           ConstStaticProps,               false)            \

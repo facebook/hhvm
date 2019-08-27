@@ -530,6 +530,18 @@ let get_class_deps
       else
         to_redecl
     in
+    (* If just the type of an element has changed, we don't need to
+       _redeclare_ descendants (the type is not copied, so descendant
+       declarations do not need recomputing), but we do need to recheck them
+       to verify that their declarations are still valid. Running type
+       inference on them and rechecking method bodies may not be necessary,
+       but decl-validation and typechecking happen in the same step. *)
+    let to_recheck =
+      if (not conservative_redecl) && is_changed = `Changed then
+        Typing_deps.get_extend_deps trace cid_hash to_recheck
+      else
+        to_recheck
+    in
     (changed, to_redecl, DepSet.union deps to_recheck)
 
 let get_classes_deps ~conservative_redecl old_classes new_classes classes =

@@ -16,16 +16,19 @@ open Syntax
 
 let is_not_acceptable ty =
   let finder =
-    object
+    object (this)
       inherit [_] Type_visitor.type_visitor
 
       method! on_tprim acc _ prim = prim = Aast.Tresource || acc
 
-      (* We consider both dynamic and mixed to be non acceptable as
+      (* We consider both dynamic and mixed to be unacceptable as
       they are "too broad" and imprecise *)
       method! on_tdynamic _ _ = true
 
-      method! on_toption acc _ (_, ty_) = ty_ = Typing_defs.Tnonnull || acc
+      method! on_toption acc _ ty =
+        match ty with
+        | (_, Typing_defs.Tnonnull) -> true
+        | _ -> this#on_type acc ty
     end
   in
   finder#on_type false ty

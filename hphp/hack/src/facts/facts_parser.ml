@@ -437,6 +437,7 @@ let from_text
       ~disable_legacy_soft_typehints
       ~allow_new_attribute_syntax
       ~disable_legacy_attribute_syntax
+      ~rust:false
       ?mode
       ()
   in

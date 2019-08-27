@@ -430,7 +430,7 @@ let () =
       ~codegen:args.codegen
       ?mode
   in
-  let ocaml_env = make_env () in
+  let ocaml_env = make_env ~rust:false () in
   let rust_env = make_env ~rust:true () in
   let f =
     match args.parser with

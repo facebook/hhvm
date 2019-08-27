@@ -187,7 +187,7 @@ module FullFidelityParseArgs = struct
     let pocket_universes = ref false in
     let files = ref [] in
     let push_file file = files := file :: !files in
-    let rust = ref false in
+    let rust = ref true in
     let enable_constant_visibility_modifiers = ref false in
     let enable_class_level_where_clauses = ref false in
     let disable_legacy_soft_typehints = ref false in
@@ -303,7 +303,7 @@ No errors are filtered out."
           Arg.Set pocket_universes,
           "Enables support for Pocket Universes" );
         ( "--rust",
-          Arg.Set rust,
+          Arg.Bool (fun x -> rust := x),
           "Use the parser written in Rust instead of OCaml one" );
         ( "--enable-constant-visibility-modifiers",
           Arg.Set enable_constant_visibility_modifiers,

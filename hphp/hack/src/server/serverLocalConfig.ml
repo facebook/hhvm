@@ -113,8 +113,8 @@ type t = {
   symbolindex_file: string option;
   (* Allows hh_server to invalidate units in hhvm based on local changes *)
   tico_invalidate_files: bool;
-  tico_invalidate_smart: bool;
   (* Use finer grain hh_server dependencies *)
+  tico_invalidate_smart: bool;
   (* Use rust parser *)
   rust: bool;
   profile_type_check_duration_threshold: float;
@@ -187,7 +187,7 @@ let default =
     symbolindex_file = None;
     tico_invalidate_files = false;
     tico_invalidate_smart = false;
-    rust = false;
+    rust = true;
     profile_type_check_duration_threshold = 0.05;
     (* seconds *)
     use_lru_workers = false;

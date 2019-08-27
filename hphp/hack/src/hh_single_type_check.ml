@@ -202,7 +202,7 @@ let parse_options () =
   let coercion_from_dynamic = ref false in
   let disable_partially_abstract_typeconsts = ref false in
   let search_provider = ref "TrieIndex" in
-  let rust = ref false in
+  let rust = ref true in
   let symbolindex_file = ref None in
   let check_xhp_attribute = ref false in
   let disallow_invalid_arraykey_constraint = ref None in
@@ -428,7 +428,7 @@ let parse_options () =
       ( "--search-provider",
         Arg.String (fun str -> search_provider := str),
         "Configure the symbol index search provider" );
-      ("--rust", Arg.Set rust, "Use rust parser");
+      ("--rust", Arg.Bool (fun x -> rust := x), "Use rust parser");
       ( "--symbolindex-file",
         Arg.String (fun str -> symbolindex_file := Some str),
         "Load the symbol index from this file" );

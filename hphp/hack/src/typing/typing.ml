@@ -142,9 +142,9 @@ let with_type ty env (e : Nast.expr) : Tast.expr =
   in
   visitor#on_expr () e
 
-let expr_error env p r =
+let expr_error env (r : Reason.t) (e : Nast.expr) =
   let ty = (r, Typing_utils.terr env) in
-  env, Tast.make_typed_expr p ty T.Any, ty
+  env, with_type ty Tast.dummy_saved_env e, ty
 
 let expr_any env r e =
   let ty = (r, Typing_utils.tany env) in
@@ -167,10 +167,10 @@ let unbound_name env (pos, name) e =
   match Env.get_mode env with
   | FileInfo.Mstrict | FileInfo.Mexperimental ->
     (Errors.unbound_name_typing pos name;
-      expr_error env pos (Reason.Rwitness pos))
+      expr_error env (Reason.Rwitness pos) e)
   | FileInfo.Mpartial when strictish ->
     (Errors.unbound_name_typing pos name;
-      expr_error env pos (Reason.Rwitness pos))
+      expr_error env (Reason.Rwitness pos) e)
   | FileInfo.Mdecl | FileInfo.Mpartial | FileInfo.Mphp ->
     expr_any env (Reason.Rwitness pos) e
 
@@ -1492,7 +1492,7 @@ and expr_
   | ParenthesizedExpr e ->
     let env, te, ty = expr env e in
     make_result env p (T.ParenthesizedExpr te) ty
-  | Any -> expr_error env p (Reason.Rwitness p)
+  | Any -> expr_error env (Reason.Rwitness p) outer
   | Array [] ->
     (* TODO: use expected type to determine expected element type *)
     make_result env p (T.Array []) (Reason.Rwitness p, Tarraykind AKempty)
@@ -1745,7 +1745,7 @@ and expr_
       then begin
         Errors.experimental_feature p
           "String prefixes other than `re` are not yet supported.";
-        expr_error env p (Reason.Rnone)
+        expr_error env (Reason.Rnone) outer
       end else
         let env, te, ty = expr env e in
         let pe = fst e in
@@ -1758,23 +1758,23 @@ and expr_
               | Pcre.Error (Pcre.BadPattern (s, i)) ->
                 let s = s ^ " [" ^ (string_of_int i) ^ "]" in
                 Errors.bad_regex_pattern pe s;
-                expr_error env pe (Reason.Rregex pe)
+                expr_error env (Reason.Rregex pe) e
               | Typing_regex.Empty_regex_pattern ->
                 Errors.bad_regex_pattern pe "This pattern is empty";
-                expr_error env pe (Reason.Rregex pe)
+                expr_error env (Reason.Rregex pe) e
               | Typing_regex.Missing_delimiter ->
                 Errors.bad_regex_pattern pe "Missing delimiter(s)";
-                expr_error env pe (Reason.Rregex pe)
+                expr_error env (Reason.Rregex pe) e
               | Typing_regex.Invalid_global_option ->
                 Errors.bad_regex_pattern pe "Invalid global option(s)";
-                expr_error env pe (Reason.Rregex pe)
+                expr_error env (Reason.Rregex pe) e
             end
         | String2 _ ->
           Errors.re_prefixed_non_string pe "Strings with embedded expressions";
-          expr_error env pe (Reason.Rregex pe)
+          expr_error env (Reason.Rregex pe) e
         | _ ->
           Errors.re_prefixed_non_string pe "Non-strings";
-          expr_error env pe (Reason.Rregex pe))
+          expr_error env (Reason.Rregex pe) e)
   | Fun_id x ->
       let env, fty = fun_type_of_id env x [] in
       begin match fty with
@@ -1902,7 +1902,7 @@ and expr_
       (match smethod with
       | None -> (* The static method wasn't found. *)
         smember_not_found p ~is_const:false ~is_method:true class_ (snd meth);
-        expr_error env p Reason.Rnone
+        expr_error env Reason.Rnone outer
       | Some { ce_type = lazy ty; ce_visibility; _ } ->
         let cid = CI c in
         let env, _te, cid_ty =
@@ -1932,14 +1932,14 @@ and expr_
               make_result env p (T.Smethod_id(c, meth)) ty
             | Vprivate _ ->
               Errors.private_class_meth ~def_pos:(Reason.to_pos r) ~use_pos:(fst meth);
-              expr_error env p r
+              expr_error env r outer
             | Vprotected _ ->
               Errors.protected_class_meth ~def_pos:(Reason.to_pos r) ~use_pos:(fst meth);
-              expr_error env p r
+              expr_error env r outer
           end
         | (r, _) ->
           Errors.internal_error p "We have a method which isn't callable";
-          expr_error env p r
+          expr_error env r outer
       )
     )
   | Lplaceholder p ->
@@ -1948,7 +1948,7 @@ and expr_
       make_result env p (T.Lplaceholder p) ty
   | Dollardollar _ when valkind = `lvalue ->
       Errors.dollardollar_lvalue p;
-      expr_error env p (Reason.Rwitness p)
+      expr_error env (Reason.Rwitness p) outer
   | Dollardollar id ->
       let ty = Env.get_local_check_defined env id in
       let env = might_throw env in
@@ -2068,7 +2068,7 @@ and expr_
       | Ast_defs.QuestionQuestion, Class_get _ ->
         Errors.experimental_feature p
           "null coalesce assignment operator with static properties";
-        expr_error env p (Reason.Rnone)
+        expr_error env (Reason.Rnone) outer
       | _ ->
       let e_fake = (p, Binop (Ast_defs.Eq None, e1, (p, Binop (op, e1, e2)))) in
       let env, te_fake, ty = raw_expr env e_fake in
@@ -2153,7 +2153,7 @@ and expr_
   | Unop (uop, e) ->
       let env, te, ty = raw_expr env e in
       let env = might_throw env in
-      unop ~is_func_arg ~array_ref_ctx p env uop te ty
+      unop ~is_func_arg ~array_ref_ctx p env uop te ty outer
   | Eif (c, e1, e2) -> eif env ~expected p c e1 e2
   | Typename sid ->
       begin match Env.get_typedef env (snd sid) with
@@ -2177,7 +2177,7 @@ and expr_
             (* Should never hit this case since we only construct this AST node
              * if in the expression Foo::class, Foo is a type def.
              *)
-            expr_error env p (Reason.Rwitness p)
+            expr_error env (Reason.Rwitness p) outer
       end
   | Class_const (cid, mid) -> class_const env p (cid, mid)
   | Class_get ((cpos, cid), CGstring mid)
@@ -2262,7 +2262,7 @@ and expr_
       let rty = match Env.get_fn_kind env with
         | Ast_defs.FCoroutine ->
             (* yield in coroutine is already reported as error in NastCheck *)
-            let _, _, ty = expr_error env p (Reason.Rwitness p) in
+            let _, _, ty = expr_error env (Reason.Rwitness p) outer in
             ty
         | Ast_defs.FGenerator ->
             MakeType.generator (Reason.Ryield_gen p) key value send
@@ -2292,7 +2292,7 @@ and expr_
     let rty = match Env.get_fn_kind env with
       | Ast_defs.FCoroutine ->
         (* yield in coroutine is already reported as error in NastCheck *)
-        let _, _, ty = expr_error env p (Reason.Rwitness p) in
+        let _, _, ty = expr_error env (Reason.Rwitness p) outer in
         ty
       | Ast_defs.FGenerator ->
         if from_dynamic
@@ -2338,12 +2338,12 @@ and expr_
       let env = Env.forget_members env (Fake.Blame_call p) in
       make_result env p (T.New(tc, tal, tel, tuel, (p1, ctor_fty))) ty
   | Record _ ->
-    expr_error env p (Reason.Rwitness p)
+    expr_error env (Reason.Rwitness p) outer
   | Cast ((_, Harray (None, None)), _)
     when Partial.should_check_error (Env.get_mode env) 4007
     || TCO.migration_flag_enabled (Env.get_tcopt env) "array_cast" ->
       Errors.array_cast p;
-      expr_error env p (Reason.Rwitness p)
+      expr_error env (Reason.Rwitness p) outer
   | Cast (hint, e) ->
       let env, te, ty2 = expr env e in
       let env = might_throw env in
@@ -2423,7 +2423,7 @@ and expr_
         let old_inside_ppl_class = env.Typing_env.inside_ppl_class in
         let env = { env with Typing_env.inside_ppl_class = false } in
         let ft = { ft with ft_reactive = reactivity } in
-        let (is_coroutine, _counter, _, anon) = anon_make env p f ft idl is_anon in
+        let (is_coroutine, _counter, _, anon) = anon_make env p f ft idl is_anon outer in
         let ft = { ft with ft_is_coroutine = is_coroutine } in
         let env, tefun, ty = anon ?ret_ty env ft.ft_params ft.ft_arity in
         let env = Env.set_env_reactive env old_reactivity in
@@ -2570,7 +2570,7 @@ and expr_
               let reactivity = fun_reactivity env.Env.decl_env f.f_user_attributes f.f_params in
               let old_reactivity = Env.env_reactivity env in
               let env = Env.set_env_reactive env reactivity in
-              let is_coroutine, counter, pos, anon = anon_make env p f declared_ft idl is_anon in
+              let is_coroutine, counter, pos, anon = anon_make env p f declared_ft idl is_anon outer in
               let env, tefun, _, anon_id = Errors.try_with_error
                 (fun () ->
                   let (_, tefun, ty) = anon env declared_ft.ft_params declared_ft.ft_arity in
@@ -2839,7 +2839,7 @@ and stash_conts_for_anon env p is_anon captured f =
   env, tfun, result
 
 (* Make a type-checking function for an anonymous function. *)
-and anon_make tenv p f ft idl is_anon =
+and anon_make tenv p f ft idl is_anon outer =
   let anon_lenv = tenv.Env.lenv in
   let is_typing_self = ref false in
   let nb = Nast.assert_named_body f.f_body in
@@ -2852,7 +2852,7 @@ and anon_make tenv p f ft idl is_anon =
     if !is_typing_self
     then begin
       Errors.anonymous_recursive p;
-      expr_error env p (Reason.Rwitness p)
+      expr_error env (Reason.Rwitness p) outer
     end
     else begin
       is_typing_self := true;
@@ -3731,7 +3731,7 @@ and call_parent_construct pos env el uel =
           class_const ~incl_tc:true env p (cid, (p, cst))
         | _ ->
           Errors.illegal_type_structure p "second argument is not a string";
-          expr_error env p (Reason.Rwitness p))
+          expr_error env (Reason.Rwitness p) e)
      | _ -> assert false)
   (* Special function `array_map` *)
   | Id ((_, array_map) as x)
@@ -5474,7 +5474,7 @@ and is_num env t =
 
 and is_super_num env t = SubType.is_sub_type_for_union env (MakeType.num Reason.Rnone) t
 
-and unop ~is_func_arg ~array_ref_ctx p env uop te ty =
+and unop ~is_func_arg ~array_ref_ctx p env uop te ty outer =
   let make_result env te result_ty =
     env, Tast.make_typed_expr p result_ty (T.Unop(uop, te)), result_ty in
   let is_any = TUtils.is_any env in
@@ -5506,7 +5506,7 @@ and unop ~is_func_arg ~array_ref_ctx p env uop te ty =
         match te with
         | _, T.ImmutableVar (p, x) ->
             Errors.let_var_immutability_violation p (Local_id.get_name x);
-            expr_error env p (Reason.Rwitness p)
+            expr_error env (Reason.Rwitness p) outer
         | _ ->
         if is_any ty
         then make_result env te ty

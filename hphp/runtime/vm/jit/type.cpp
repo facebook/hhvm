@@ -1062,6 +1062,7 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
       case A::VecOrDict:  return TVec | TDict;
       case A::ArrayLike:  return TArrLike;
       case A::This:
+        always_assert(propCls != nullptr);
         return (isSProp && !tc.couldSeeMockObject())
           ? Type::ExactObj(propCls)
           : Type::SubObj(propCls);

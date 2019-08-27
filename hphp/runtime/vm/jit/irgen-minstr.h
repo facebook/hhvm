@@ -36,6 +36,18 @@ namespace HPHP { namespace jit { namespace irgen {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
+ * Returns true if the given property may have a countable type. This check
+ * is allowed to have false positives; in particular: if property type-hint
+ * enforcement is disabled, it will usually return true. (It may still return
+ * false in RepoAuthoritative mode if HHBBC can prove a property is uncounted.)
+ *
+ * It is safe to call this method during Class initialization.
+ */
+bool propertyMayBeCountable(const Class::Prop& prop);
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
  * Use profiling data from an ArrayAccessProfile to conditionally optimize
  * the array access represented by `generic' as `direct'.
  *

@@ -994,6 +994,10 @@ using OptType = folly::Optional<Type>;
 /*
  * Return the most refined Type that can be used to represent the type of a
  * live TypedValue or a RepoAuthType.
+ *
+ * For these methods, ctx may be null in general. propCls may be null during
+ * Class initialization, but only if the type-hints involved are not "this",
+ * "self", or other hints that use propCls. We always check this constraint.
  */
 Type typeFromTV(tv_rval tv, const Class* ctx);
 Type typeFromRAT(RepoAuthType ty, const Class* ctx);

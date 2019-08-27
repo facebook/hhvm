@@ -2038,6 +2038,22 @@ SSATmp* memberKey(IRGS& env, MemberKey mk) {
 
 }
 
+//////////////////////////////////////////////////////////////////////
+
+bool propertyMayBeCountable(const Class::Prop& prop) {
+  // We can't call `knownTypeForProp` for type-hints that involve objects
+  // here because the classes they refer to may not yet be defined. We return
+  // `true` for these cases. Doing so doesn't cause unnecessary pessimization,
+  // because subtypes of Object are going to be countable anyway.
+  auto const& tc = prop.typeConstraint;
+  if (tc.isObject() || tc.isThis()) return true;
+  if (prop.repoAuthType.hasClassName()) return true;
+  auto const type = knownTypeForProp(prop, nullptr, nullptr, true);
+  return type.maybe(jit::TCounted);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void emitBaseGC(IRGS& env, uint32_t idx, MOpMode mode) {
   initTvRefs(env);
   auto name = top(env, BCSPRelOffset{safe_cast<int32_t>(idx)});

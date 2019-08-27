@@ -659,6 +659,12 @@ public:
   size_t numStaticProperties() const;
 
   /*
+   * An exclusive upper limit on the post-sort indices of properties of this
+   * class that may be countable. See m_countablePropsEnd for more details.
+   */
+  uint32_t countablePropsEnd() const { return m_countablePropsEnd; }
+
+  /*
    * Number of declared instance properties that are actually accessible from
    * this class's context.
     *
@@ -1639,6 +1645,17 @@ private:
    * Function to release object instances of this class type.
    */
   ObjReleaseFunc m_release;
+
+  /*
+   * An exclusive upper limit on the post-sort indices of properties of this
+   * class that may be countable. Properties that may be countable will have
+   * indices less than this bound. If we can guarantee that all properties of
+   * this class are uncounted, the bound will be 0.
+   *
+   * (Note that there may still be uncounted properties with indices less than
+   * this bound; in particular, we can't sort parent class properties freely.)
+   */
+  uint32_t m_countablePropsEnd;
 
   /*
    * Vector of Class pointers that encodes the inheritance hierarchy, including

@@ -980,9 +980,9 @@ static inline uint32_t hotTextHugePagesDefault() {
 
 static inline std::string reorderPropsDefault() {
   if (isJitDeserializing()) {
-    return "hotness";
+    return "countedness-hotness";
   }
-  return debug ? "alphabetical" : "";
+  return debug ? "alphabetical" : "countedness";
 }
 
 static inline uint32_t profileRequestsDefault() {

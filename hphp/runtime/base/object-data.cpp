@@ -191,19 +191,15 @@ void ObjectData::release(ObjectData* obj, const Class* cls) noexcept {
   // `obj' is being torn down now---be careful about where/how you dereference
   // it from here on.
 
-  auto const nProps = size_t{cls->numDeclProperties()};
   auto prop = reinterpret_cast<TypedValue*>(obj + 1);
-  auto const stop = prop + nProps;
+  auto const stop = prop + cls->countablePropsEnd();
   for (; prop != stop; ++prop) {
     tvDecRefGen(prop);
   }
 
   if (UNLIKELY(obj->slowDestroyCheck())) obj->slowDestroyCases();
 
-  auto const size =
-    reinterpret_cast<char*>(stop) - reinterpret_cast<char*>(obj);
-  assertx(size == sizeForNProps(nProps));
-
+  auto const size = sizeForNProps(cls->numDeclProperties());
   if (cls->hasMemoSlots()) {
     auto const memoSize = objOffFromMemoNode(cls);
     assertx(

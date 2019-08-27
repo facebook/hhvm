@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/vm/jit/irgen-minstr.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/instance-bits.h"
@@ -204,9 +205,9 @@ struct assert_sizeof_class {
   // If this static_assert fails, the compiler error will have the real value
   // of sizeof_Class in it since it's in this struct's type.
 #ifndef NDEBUG
-  static_assert(sz == (use_lowptr ? 280 : 320), "Change this only on purpose");
+  static_assert(sz == (use_lowptr ? 284 : 328), "Change this only on purpose");
 #else
-  static_assert(sz == (use_lowptr ? 272 : 312), "Change this only on purpose");
+  static_assert(sz == (use_lowptr ? 276 : 320), "Change this only on purpose");
 #endif
 };
 template struct assert_sizeof_class<sizeof_Class>;
@@ -2249,13 +2250,27 @@ void Class::setConstants() {
   m_constants.create(builder);
 }
 
-static void copyDeepInitAttr(const PreClass::Prop* pclsProp,
-                             Class::Prop* clsProp) {
+namespace {
+
+void copyDeepInitAttr(const PreClass::Prop* pclsProp, Class::Prop* clsProp) {
   if (pclsProp->attrs() & AttrDeepInit) {
     clsProp->attrs = (Attr)(clsProp->attrs | AttrDeepInit);
   } else {
     clsProp->attrs = (Attr)(clsProp->attrs & ~AttrDeepInit);
   }
+}
+
+/*
+ * KeyFn should be a function that takes an index and returns a key to sort by.
+ * To sort lexicographically by multiple fields, the key can be a tuple type.
+ */
+template<typename KeyFn>
+void sortByKey(std::vector<uint32_t>& indices, KeyFn keyFn) {
+  std::sort(indices.begin(), indices.end(), [&](uint32_t a, uint32_t b) {
+    return keyFn(a) < keyFn(b);
+  });
+}
+
 }
 
 void Class::sortOwnProps(const PropMap::Builder& curPropMap,
@@ -2283,19 +2298,11 @@ void Class::sortOwnProps(const PropMap::Builder& curPropMap,
        * absence of profile data (e.g. if jumpstart failed to deserialize the
        * JIT profile data), then the physical layout of the properties in memory
        * will match their logical order. */
-      std::sort(
-        order.begin(), order.end(),
-        [&] (uint32_t a, uint32_t b) {
-          auto const& propa = curPropMap[a];
-          auto const& propb = curPropMap[b];
-          auto const counta = PropertyProfile::getCount(propa.cls->name(),
-                                                        propa.name);
-          auto const countb = PropertyProfile::getCount(propb.cls->name(),
-                                                        propb.name);
-          if (countb != counta) return countb < counta;
-          return a < b;
-        }
-      );
+      sortByKey(order, [&](uint32_t index) {
+        auto const& prop = curPropMap[index];
+        int64_t count = PropertyProfile::getCount(prop.cls->name(), prop.name);
+        return std::make_tuple(-count, index);
+      });
     } else if (RuntimeOption::EvalReorderProps == "alphabetical") {
       std::sort(order.begin(), order.end(),
                 [&] (uint32_t a, uint32_t b) {
@@ -2303,6 +2310,22 @@ void Class::sortOwnProps(const PropMap::Builder& curPropMap,
                   auto const& propb = curPropMap[b];
                   return strcmp(propa.name->data(), propb.name->data()) < 0;
                 });
+    } else if (RuntimeOption::EvalReorderProps == "countedness") {
+      // Countable properties come earlier. Break ties by logical order.
+      sortByKey(order, [&](uint32_t index) {
+        auto const& prop = curPropMap[index];
+        int64_t countable = jit::irgen::propertyMayBeCountable(prop);
+        return std::make_tuple(-countable, index);
+      });
+    } else if (RuntimeOption::EvalReorderProps == "countedness-hotness") {
+      // Countable properties come earlier. Break ties by profile counts
+      // (assuming that we have them from jumpstart), then by logical order.
+      sortByKey(order, [&](uint32_t index) {
+        auto const& prop = curPropMap[index];
+        int64_t count = PropertyProfile::getCount(prop.cls->name(), prop.name);
+        int64_t countable = jit::irgen::propertyMayBeCountable(prop);
+        return std::make_tuple(-countable, -count, index);
+      });
     }
   }
   assertx(slotIndex.size() == past);
@@ -2310,18 +2333,19 @@ void Class::sortOwnProps(const PropMap::Builder& curPropMap,
     auto slot = order[i];
     auto index = first + i;
     slotIndex[slot] = index;
+    auto const& prop = curPropMap[slot];
     FTRACE(
-      3, "  index={}: slot={}, prop={}, count={}\n",
-      index, slot, curPropMap[slot].name->data(),
-      PropertyProfile::getCount(curPropMap[slot].cls->name(),
-                                curPropMap[slot].name)
+      3, "  index={}: slot={}, prop={}, count={}, countable={}\n",
+      index, slot, prop.name->data(),
+      PropertyProfile::getCount(prop.cls->name(), prop.name),
+      jit::irgen::propertyMayBeCountable(prop)
     );
     if (serverMode && RuntimeOption::ServerLogReorderProps) {
       Logger::FInfo(
-        "  index={}: slot={}, prop={}, count={}",
-        index, slot, curPropMap[slot].name->data(),
-        PropertyProfile::getCount(curPropMap[slot].cls->name(),
-                                  curPropMap[slot].name)
+        "  index={}: slot={}, prop={}, count={}, countable={}",
+        index, slot, prop.name->data(),
+        PropertyProfile::getCount(prop.cls->name(), prop.name),
+        jit::irgen::propertyMayBeCountable(prop)
       );
     }
   }
@@ -2698,6 +2722,19 @@ void Class::setProperties() {
   }
 
   m_declPropNumAccessible = m_declProperties.size() - numInaccessible;
+
+  // To speed up ObjectData::release, we only iterate over property indices
+  // up to the last countable property index. Here, "index" refers to the
+  // position of the property in memory, and "slot" to its logical slot.
+  m_countablePropsEnd = 0;
+  for (Slot slot = 0; slot < m_declProperties.size(); ++slot) {
+    if (jit::irgen::propertyMayBeCountable(m_declProperties[slot])) {
+      auto const index = propSlotToIndex(slot) + uint32_t{1};
+      m_countablePropsEnd = std::max(m_countablePropsEnd, index);
+    }
+  }
+  FTRACE(3, "numDeclProperties = {}\n", m_declProperties.size());
+  FTRACE(3, "countablePropsEnd = {}\n", m_countablePropsEnd);
 }
 
 bool Class::compatibleTraitPropInit(const TypedValue& tv1,

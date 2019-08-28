@@ -1014,6 +1014,7 @@ struct RuntimeOption {
   F(bool, HackArrCompatCheckCompare, false)                             \
   F(bool, HackArrCompatCheckArrayPlus, false)                           \
   F(bool, HackArrCompatCheckArrayKeyCast, false)                        \
+  F(bool, HackArrCompatCheckNullHackArrayKey, false)                    \
   /* Raise notices when is_array is called with any hack array */       \
   F(bool, HackArrCompatIsArrayNotices, false)                           \
   /* Raise notices when is_vec or is_dict  is called with a v/darray */ \

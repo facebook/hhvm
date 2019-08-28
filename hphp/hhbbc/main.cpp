@@ -284,6 +284,7 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
     RuntimeOption::EvalHackArrCompatCheckCompare =
     RuntimeOption::EvalHackArrCompatCheckArrayPlus =
     RuntimeOption::EvalHackArrCompatCheckArrayKeyCast =
+    RuntimeOption::EvalHackArrCompatCheckNullHackArrayKey =
       gd.HackArrCompatNotices;
   RuntimeOption::EvalForbidDynamicCallsToFunc = gd.ForbidDynamicCallsToFunc;
   RuntimeOption::EvalForbidDynamicCallsToClsMeth =

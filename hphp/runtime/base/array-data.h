@@ -1012,12 +1012,15 @@ void raiseHackArrCompatMissingSetOp();
 std::string makeHackArrCompatImplicitArrayKeyMsg(const TypedValue* key);
 void raiseHackArrCompatImplicitArrayKey(const TypedValue* key);
 
+StringData* getHackArrCompatNullHackArrayKeyMsg();
+
 bool checkHACRefBind();
 bool checkHACFalseyPromote();
 bool checkHACEmptyStringPromote();
 bool checkHACCompare();
 bool checkHACArrayPlus();
 bool checkHACArrayKeyCast();
+bool checkHACNullHackArrayKey();
 
 /*
  * Like isStrictlyInteger() but changes behavior with the value of `ic'.

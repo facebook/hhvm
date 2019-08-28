@@ -2417,6 +2417,19 @@ void emitAKExists(IRGS& env) {
   auto key = popC(env);
   if (key->isA(TFunc) || key->isA(TCls)) PUNT(AKExists_func_cls_key);
 
+  if (checkHACNullHackArrayKey() &&
+      arr->isA(TVec | TDict | TKeyset) &&
+      key->isA(TNull)) {
+    gen(
+      env,
+      RaiseHackArrCompatNotice,
+      cns(
+        env,
+        getHackArrCompatNullHackArrayKeyMsg()
+      )
+    );
+  }
+
   auto throwBadKey = [&] {
     // TODO(T11019533): Fix the underlying issue with unreachable code rather
     // than papering over it by pushing an unused value here.

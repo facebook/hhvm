@@ -344,7 +344,10 @@ bool HHVM_FUNCTION(array_key_exists,
   switch (cell->m_type) {
     case KindOfUninit:
     case KindOfNull:
-      if (checkHACArrayKeyCast() && ad->useWeakKeys()) {
+      if (checkHACNullHackArrayKey() && ad->isHackArray()) {
+        raise_hackarr_compat_notice(
+          getHackArrCompatNullHackArrayKeyMsg()->data());
+      } else if (checkHACArrayKeyCast() && ad->useWeakKeys()) {
         raiseHackArrCompatImplicitArrayKey(cell);
       }
       return ad->useWeakKeys() && ad->exists(staticEmptyString());

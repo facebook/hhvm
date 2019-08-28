@@ -18,11 +18,14 @@ module InferMissing : sig
     | Deactivated
     | Infer_return
     | Infer_params
+    | Infer_global
   [@@deriving show]
 
   val can_infer_return : t -> bool
 
   val can_infer_params : t -> bool
+
+  val global_inference : t -> bool
 
   val is_on : t -> bool
 

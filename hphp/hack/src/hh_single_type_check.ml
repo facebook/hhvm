@@ -451,7 +451,7 @@ let parse_options () =
       ( "--infer-missing",
         Arg.String
           (fun s -> infer_missing := GlobalOptions.InferMissing.from_string s),
-        "<return|params> Deduce more information about unannotated types in the tast"
+        "<return|params|global> Deduce more information about unannotated types in the tast"
       );
       ( "--const-static-props",
         Arg.Set const_static_props,

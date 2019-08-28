@@ -140,10 +140,9 @@ protected:
     if (DT != KindOfVec && DT != KindOfDict) return;
     assertx(arrprov::arrayWantsTag(m_arr));
 
-    VMRegAnchor _(VMRegAnchor::Soft);
-    if (tl_regState != VMRegState::CLEAN || vmfp() == nullptr) return;
-
-    arrprov::setTag(m_arr, *arrprov::tagFromProgramCounter());
+    if (auto const tag = arrprov::tagFromProgramCounter()) {
+      arrprov::setTag(m_arr, *tag);
+    }
   }
 
 protected:

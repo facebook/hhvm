@@ -147,6 +147,11 @@ const ArrayData* makeEmptyArray(const ArrayData* base, const Tag& tag) {
 }
 
 folly::Optional<Tag> tagFromProgramCounter() {
+  VMRegAnchor _(VMRegAnchor::Soft);
+  if (tl_regState != VMRegState::CLEAN || vmfp() == nullptr) {
+    return folly::none;
+  }
+
   auto const tag = fromLeaf(
     [&] (const ActRec* fp, Offset offset) -> folly::Optional<Tag> {
       auto const unit = fp->unit();

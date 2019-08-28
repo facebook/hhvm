@@ -108,6 +108,12 @@ folly::Optional<Tag> getTag(const ArrayData* ad);
 void setTag(ArrayData* ad, const Tag& tag);
 
 /*
+ * Set the provenance tag for `ad`, overriding any previous value that may have
+ * been recorded.
+ */
+void setTagReplace(ArrayData* ad, const Tag& tag);
+
+/*
  * Copy the provenance tag from `src` to `dest`.
  */
 void copyTag(const ArrayData* src, ArrayData* dest);

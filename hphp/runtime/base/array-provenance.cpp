@@ -64,9 +64,12 @@ bool arrayWantsTag(const ArrayData* ad) {
          kind == ArrayData::ArrayKind::kDictKind;
 }
 
-void setTag(ArrayData* ad, const Tag& tag) {
+namespace {
+
+template <bool allow_overwrite>
+void setTagImpl(ArrayData* ad, const Tag& tag) {
   if (!arrayWantsTag(ad)) return;
-  assertx(!getTag(ad));
+  assertx(allow_overwrite || !getTag(ad));
   ad->markHasProvenanceData();
   if (ad->isRefCounted()) {
     rl_array_provenance->tags[ad] = tag;
@@ -74,6 +77,16 @@ void setTag(ArrayData* ad, const Tag& tag) {
     std::lock_guard<std::mutex> g{s_static_provenance_lock};
     s_static_array_provenance[ad] = tag;
   }
+}
+
+} // namespace
+
+void setTag(ArrayData* ad, const Tag& tag) {
+  setTagImpl<false>(ad, tag);
+}
+
+void setTagReplace(ArrayData* ad, const Tag& tag) {
+  setTagImpl<true>(ad, tag);
 }
 
 void setTagRecursive(ArrayData* ad, const Tag& tag) {

@@ -1399,7 +1399,7 @@ Array VariableUnserializer::unserializeDict() {
 
   check_non_safepoint_surprise();
   expectChar('}');
-  if (provTag) arrprov::setTag(arr.get(), *provTag);
+  if (provTag) arrprov::setTagReplace(arr.get(), *provTag);
   return arr;
 }
 
@@ -1448,7 +1448,7 @@ Array VariableUnserializer::unserializeVec() {
   }
   check_non_safepoint_surprise();
   expectChar('}');
-  if (provTag) arrprov::setTag(arr.get(), *provTag);
+  if (provTag) arrprov::setTagReplace(arr.get(), *provTag);
   return arr;
 }
 

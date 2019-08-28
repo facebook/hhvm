@@ -226,10 +226,15 @@ inline ExtraArgsAction extra_args_action(const Func* func, uint32_t argc) {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Returns true iff ar represents a frame on the VM eval stack or a Resumable
+ * Returns true iff `ar` represents a frame on the VM eval stack or a Resumable
  * object on the PHP heap.
+ *
+ * The `may_be_non_runtime` flag should be set if we aren't guaranteed to be
+ * running in a "Hack runtime" context---e.g., if we're in the JIT or an
+ * extension thread, etc.  This function is pretty much guaranteed to return
+ * false if we're not in the runtime, but the caller might be runtime-agnostic.
  */
-bool isVMFrame(const ActRec* ar);
+bool isVMFrame(const ActRec* ar, bool may_be_non_runtime = false);
 
 /*
  * Returns true iff the given address is one of the special debugger return

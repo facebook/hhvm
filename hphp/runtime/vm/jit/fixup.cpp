@@ -28,13 +28,17 @@
 
 namespace HPHP {
 
-bool isVMFrame(const ActRec* ar) {
+bool isVMFrame(const ActRec* ar, bool may_be_non_runtime) {
   assertx(ar);
   // Determine whether the frame pointer is outside the native stack, cleverly
   // using a single unsigned comparison to do both halves of the bounds check.
-  bool ret = uintptr_t(ar) - s_stackLimit >= s_stackSize;
-  assertx(!ret || isValidVMStackAddress(ar) ||
-         (ar->m_func->validate(), ar->resumed()));
+  auto const ret = uintptr_t(ar) - s_stackLimit >= s_stackSize;
+  assertx(
+    !ret ||
+    may_be_non_runtime ||
+    isValidVMStackAddress(ar) ||
+    (ar->m_func->validate(), ar->resumed())
+  );
   return ret;
 }
 
@@ -186,7 +190,7 @@ bool fixupWork(ActRec* nextRbp, bool soft) {
 
     TRACE(2, "considering frame %p, %p\n", rbp, (void*)rbp->m_savedRip);
 
-    if (isVMFrame(nextRbp)) {
+    if (isVMFrame(nextRbp, soft)) {
       TRACE(2, "fixup checking vm frame %s\n",
             nextRbp->m_func->name()->data());
       VMRegs regs;

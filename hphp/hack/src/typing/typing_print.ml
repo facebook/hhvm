@@ -97,8 +97,14 @@ module Suggest = struct
               ~f:(fun acc (_, sid) -> acc^"::"^sid)
               ~init:(strip_ns x)
         )
-    | Tpu _ -> "..."
-    | Tpu_access _ -> "..."
+    | Tpu (ty, (_, enum), kind) ->
+      let suffix = match kind with
+        | Pu_plain -> ""
+        | Pu_atom atom -> atom
+      in
+      type_ ty ^ ":@" ^ enum ^ suffix
+    | Tpu_access (ty, (_, access)) ->
+      type_ ty ^ ":@" ^ access
 
   and list: type a. a ty list -> string = function
     | []      -> ""
@@ -383,8 +389,14 @@ module Full = struct
         | Open_shape -> fields @ [text "..."]
       in
         list "shape(" id fields ")"
-    | Tpu _ -> text "doc ..."
-    | Tpu_access _ -> text "doc ..."
+    | Tpu (ty', (_, enum), kind) ->
+      let suffix = match kind with
+        | Pu_atom atom -> atom
+        | Pu_plain -> ""
+      in
+      k ty' ^^ text (":@" ^ enum ^ suffix)
+    | Tpu_access (ty', (_, access)) ->
+      k ty' ^^ text (":@" ^ access)
 
   and prim x =
     match x with
@@ -657,10 +669,31 @@ module ErrorString = struct
     | Tshape _           -> "a shape"
     | Tdestructure l     ->
       "a list destructuring assignment of length " ^ string_of_int (List.length l)
-    (* TODO(T36532263) make a better message *)
-    | Tpu _ -> "some PU stuff"
-    (* TODO(T36532263) make a better message *)
-    | Tpu_access _ -> "some more PU stuff"
+    | Tpu ((_, ty), (_, enum), kind) ->
+      let ty = match ty with
+        | Tclass ((_, x), _, tyl) -> strip_ns x ^ inst env tyl
+        | _ -> "..."
+      in
+      let prefix = match kind with
+        | Pu_atom atom -> "member " ^ atom
+        | Pu_plain -> "a member"
+      in
+      prefix ^ " of pocket universe " ^ ty ^ ":@" ^ enum
+    | Tpu_access ((_, ty), (_, access)) ->
+      let ty = match ty with
+        | Tpu ((_, ty), (_, enum), kind) ->
+          let ty = match ty with
+            | Tclass ((_, x), _, tyl) -> strip_ns x ^ inst env tyl
+            | _ -> "..."
+          in
+          let kind = match kind with
+            | Pu_plain -> ""
+            | Pu_atom atom -> atom
+          in
+          ty ^ ":@" ^ enum ^ kind
+        | _ -> "..."
+      in
+      "pocket universe dependent type " ^ ty ^ ":@" ^ access
 
   and array: type a. a ty option * a ty option -> _ = function
     | None, None     -> "an untyped array"
@@ -903,10 +936,15 @@ let rec from_type: type a. env -> a ty -> json =
     obj @@ kind "array" @ empty true @ args []
   | Tdestructure tyl ->
     obj @@ kind "union" @ args tyl
-  | Tpu _ ->
-    obj @@ kind "Tpu"
-  | Tpu_access _ ->
-    obj @@ kind "Tpu_access"
+  | Tpu (base, enum, pukind) ->
+    let pukind = match pukind with
+      | Pu_plain -> string_ "plain"
+      | Pu_atom atom -> JSON_Array [string_ "atom"; string_ atom]
+    in
+    obj @@ kind "pocket universe" @
+      args [base] @ name (snd enum) @ ["pukind", pukind]
+  | Tpu_access (base, access) ->
+    obj @@ kind "pocket universe access" @ args [base] @ name (snd access)
 
 type 'a deserialized_result = ('a ty, deserialization_error) result
 

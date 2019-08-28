@@ -185,6 +185,7 @@
     ast
     core_kernel
     errors
+    naming_attributes
     nast
     parser
     typing_defs

@@ -64,7 +64,7 @@ let join_upper_bounds env u1 u2 =
     env, TySet.singleton new_upper
 
 let join env tpenv1 tpenv2 =
-    SMap.merge_env env tpenv1 tpenv2 ~combine:(fun env _tparam info1 info2 ->
+    TP.merge_env env tpenv1 tpenv2 ~combine:(fun env _tparam info1 info2 ->
       match info1, info2 with
       | Some (TP.{ lower_bounds = l1; upper_bounds = u1; _ } as info1),
         Some TP.{ lower_bounds = l2; upper_bounds = u2; _ } ->
@@ -75,45 +75,9 @@ let join env tpenv1 tpenv2 =
       | _, Some info -> env, Some info
       | _, _ -> env, None)
 
-let remove_upper_bound tpenv tparam bound =
-  match SMap.get tparam tpenv with
-  | None -> tpenv
-  | Some tparam_info ->
-    let bounds = tparam_info.TP.upper_bounds in
-    let bounds = TySet.remove bound bounds in
-    let tparam_info = TP.{ tparam_info with upper_bounds = bounds } in
-    SMap.add tparam tparam_info tpenv
-
-let remove_lower_bound tpenv tparam bound =
-  match SMap.get tparam tpenv with
-  | None -> tpenv
-  | Some tparam_info ->
-    let bounds = tparam_info.TP.lower_bounds in
-    let bounds = TySet.remove bound bounds in
-    let tparam_info = TP.{ tparam_info with lower_bounds = bounds } in
-    SMap.add tparam tparam_info tpenv
-
-let remove_from_tpenv tpenv tparam =
-  let tparam_ty = (Reason.Rnone, Tabstract (AKgeneric tparam, None)) in
-  let lower_bounds = Env.get_tpenv_lower_bounds tpenv tparam in
-  let remove_tparam_from_upper_bounds_of tparam tpenv =
-    match tparam with
-    | _, Tabstract (AKgeneric tparam, _) ->
-      remove_upper_bound tpenv tparam tparam_ty
-    | _ -> tpenv in
-  let tpenv = TySet.fold remove_tparam_from_upper_bounds_of lower_bounds tpenv in
-  let upper_bounds = Env.get_tpenv_upper_bounds tpenv tparam in
-  let remove_tparam_from_lower_bounds_of tparam tpenv =
-    match tparam with
-    | _, Tabstract (AKgeneric tparam, _) ->
-      remove_lower_bound tpenv tparam tparam_ty
-    | _ -> tpenv in
-  let tpenv = TySet.fold remove_tparam_from_lower_bounds_of upper_bounds tpenv in
-  SMap.remove tparam tpenv
-
 let get_tpenv_equal_bounds env name =
-  let lower = Env.get_tpenv_lower_bounds env name in
-  let upper = Env.get_tpenv_upper_bounds env name in
+  let lower = TP.get_lower_bounds env name in
+  let upper = TP.get_upper_bounds env name in
   TySet.inter lower upper
 
 (** Given a list of type parameter names, attempt to simplify away those
@@ -137,8 +101,8 @@ let simplify_tpenv env (tparams : ((_ * string) option * locl ty) list) r =
         tpenv, substs
       | Some (tp, tparam_name) ->
       let equal_bounds = get_tpenv_equal_bounds tpenv tparam_name in
-      let lower_bounds = Env.get_tpenv_lower_bounds tpenv tparam_name in
-      let upper_bounds = Env.get_tpenv_upper_bounds tpenv tparam_name in
+      let lower_bounds = TP.get_lower_bounds tpenv tparam_name in
+      let upper_bounds = TP.get_upper_bounds tpenv tparam_name in
       let _env, lower_bound = single_lower_bound env reason lower_bounds in
       let _env, upper_bound = single_upper_bound env reason upper_bounds in
       (* remove tparam_name from tpenv, and in any lower/upper bound set
@@ -150,15 +114,15 @@ let simplify_tpenv env (tparams : ((_ * string) option * locl ty) list) r =
        * Typing_subtype.add_constraint. *)
       match tp.tp_variance, TySet.choose_opt equal_bounds with
       | _, Some bound ->
-        let tpenv = remove_from_tpenv tpenv tparam_name in
+        let tpenv = TP.remove tpenv tparam_name in
         let substs = SMap.add tparam_name bound substs in
         tpenv, substs
       | Ast_defs.Covariant, _ ->
-        let tpenv = remove_from_tpenv tpenv tparam_name in
+        let tpenv = TP.remove tpenv tparam_name in
         let substs = SMap.add tparam_name upper_bound substs in
         tpenv, substs
       | Ast_defs.Contravariant, _->
-        let tpenv = remove_from_tpenv tpenv tparam_name in
+        let tpenv = TP.remove tpenv tparam_name in
         let substs = SMap.add tparam_name lower_bound substs in
         tpenv, substs
       | _ ->

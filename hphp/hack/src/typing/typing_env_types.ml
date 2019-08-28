@@ -10,7 +10,7 @@
 (* cf: typing_env_types_sig.mli - These files should be the same *)
 open Core_kernel
 open Typing_defs
-open Type_parameter_env
+module TPEnv = Type_parameter_env
 module TySet = Typing_set
 
 type locl_ty = locl ty
@@ -91,7 +91,7 @@ type env = {
   inside_constructor: bool;
   inside_ppl_class: bool;
   (* A set of constraints that are global to a given method *)
-  global_tpenv : tpenv ;
+  global_tpenv : TPEnv.t;
   subtype_prop : Typing_logic.subtype_prop;
   log_levels : int SMap.t ;
   tvenv : tvenv;

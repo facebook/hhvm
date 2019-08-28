@@ -261,7 +261,7 @@ let tparam_info_as_value env tpinfo =
   ]
 
 let tpenv_as_value env tpenv =
-  Map (SMap.fold (fun name tpinfo m ->
+  Map (TPEnv.fold (fun name tpinfo m ->
     SMap.add name (tparam_info_as_value env tpinfo) m) tpenv SMap.empty)
 
 let per_cont_entry_as_value env f entry =

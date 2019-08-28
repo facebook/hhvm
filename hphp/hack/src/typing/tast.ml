@@ -87,7 +87,7 @@ let empty_saved_env tcopt : saved_env = {
   tcopt;
   tenv = IMap.empty;
   subst = IMap.empty;
-  tpenv = SMap.empty;
+  tpenv = Type_parameter_env.empty;
   reactivity = Typing_defs.Nonreactive;
   local_mutability = Local_id.Map.empty;
   fun_mutable = None;

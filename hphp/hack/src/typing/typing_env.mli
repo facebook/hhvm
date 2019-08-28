@@ -10,7 +10,8 @@ include Typing_env_types_sig.S
 
 open Decl_provider
 open Typing_defs
-open Type_parameter_env
+
+module TPEnv = Type_parameter_env
 
 val show_env : env -> string
 val pp_env : Format.formatter -> env -> unit
@@ -111,14 +112,9 @@ val is_local_defined : env -> Local_id.t -> bool
 val get_local_check_defined : env -> Aast.lid -> locl ty
 val set_local_expr_id : env -> Local_id.t -> Typing_local_types.expression_id -> env
 val get_local_expr_id : env -> Local_id.t -> Typing_local_types.expression_id option
-val get_tpenv : env -> tpenv
-val get_tpenv_lower_bounds : tpenv -> string -> tparam_bounds
-val get_tpenv_upper_bounds : tpenv -> string -> tparam_bounds
-val get_tpenv_reified: tpenv -> string -> Aast.reify_kind
-val get_tpenv_enforceable: tpenv -> string -> bool
-val get_tpenv_newable: tpenv -> string -> bool
-val get_lower_bounds : env -> string -> tparam_bounds
-val get_upper_bounds : env -> string -> tparam_bounds
+val get_tpenv : env -> TPEnv.t
+val get_lower_bounds : env -> string -> TPEnv.tparam_bounds
+val get_upper_bounds : env -> string -> TPEnv.tparam_bounds
 val get_reified: env -> string -> Aast.reify_kind
 val get_enforceable: env -> string -> bool
 val get_newable: env -> string -> bool
@@ -128,22 +124,22 @@ val add_upper_bound :
 val add_lower_bound :
   ?union:(locl ty -> locl ty list -> locl ty list) ->
   env -> string -> locl ty -> env
-val get_equal_bounds : env -> string -> tparam_bounds
+val get_equal_bounds : env -> string -> TPEnv.tparam_bounds
 val get_tparams : env -> 'a ty -> SSet.t
 val add_upper_bound_global : env -> string -> locl ty -> env
-val env_with_tpenv : env -> tpenv -> env
+val env_with_tpenv : env -> TPEnv.t -> env
 val env_with_mut : env -> Typing_mutability_env.mutability_env -> env
 val get_env_mutability : env -> Typing_mutability_env.mutability_env
-val env_with_global_tpenv : env -> tpenv -> env
+val env_with_global_tpenv : env -> TPEnv.t -> env
 val add_generic_parameters : env -> decl tparam list -> env
 val get_generic_parameters : env -> string list
 val is_generic_parameter: env -> string -> bool
 
 (* Get or add to bounds on type variables *)
-val get_tyvar_lower_bounds : env -> Ident.t -> tparam_bounds
-val get_tyvar_upper_bounds : env -> Ident.t -> tparam_bounds
-val set_tyvar_lower_bounds : env -> Ident.t -> tparam_bounds -> env
-val set_tyvar_upper_bounds : env -> Ident.t -> tparam_bounds -> env
+val get_tyvar_lower_bounds : env -> Ident.t -> TPEnv.tparam_bounds
+val get_tyvar_upper_bounds : env -> Ident.t -> TPEnv.tparam_bounds
+val set_tyvar_lower_bounds : env -> Ident.t -> TPEnv.tparam_bounds -> env
+val set_tyvar_upper_bounds : env -> Ident.t -> TPEnv.tparam_bounds -> env
 (* Optionally supply intersection or union operations to simplify the bounds *)
 val add_tyvar_upper_bound :
   ?intersect:(locl ty -> locl ty list -> locl ty list) ->
@@ -200,7 +196,7 @@ val anon : local_env -> env -> (env -> env * Tast.expr * locl ty) -> env * Tast.
 val in_loop : env -> (env -> env * 'a) -> env * 'a
 val in_try : env -> (env -> env * 'a) -> env * 'a
 val in_case : env -> (env -> env * 'a) -> env * 'a
-val save : tpenv -> env -> Tast.saved_env
+val save : TPEnv.t -> env -> Tast.saved_env
 val set_condition_type: env -> SMap.key -> Typing_defs.decl Typing_defs.ty -> env
 val get_condition_type: env -> SMap.key -> Typing_defs.decl Typing_defs.ty option
 val add_subtype_prop: env -> Typing_logic.subtype_prop -> env

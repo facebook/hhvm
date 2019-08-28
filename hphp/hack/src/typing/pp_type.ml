@@ -23,6 +23,12 @@ open Typing_defs
  * representations of types.
  *)
 
+let pp_pu_kind fmt = function
+  | Pu_plain ->
+    Format.pp_print_string fmt "Pu_plain"
+  | Pu_atom id ->
+    Format.fprintf fmt "(@[<2>Pu_atom@ %S@])" id
+
 let rec pp_ty : type a. Format.formatter -> a ty -> unit = fun fmt (a0,a1) ->
   Format.fprintf fmt "(@[";
   Reason.pp fmt a0;
@@ -198,6 +204,16 @@ and pp_ty_ : type a. Format.formatter -> a ty_ -> unit = fun fmt ty ->
   | Tdestructure tyl ->
     Format.fprintf fmt "(@[<2>Tdestructure@ ";
     pp_ty_list fmt tyl
+  | Tpu (base, enum, kind) ->
+    Format.fprintf fmt "(@[<2>Tpu (%a@,,%a@,,%a)@])"
+      pp_ty base Aast.pp_sid enum pp_pu_kind kind;
+    Format.fprintf fmt "@])"
+  | Tpu_access (base, sid) ->
+    Format.fprintf fmt "(@[<2>Tpu_access (@,";
+    pp_ty fmt base;
+    Format.fprintf fmt ",@ ";
+    Aast.pp_sid fmt sid;
+    Format.fprintf fmt "@,))@]"
 
 and pp_ty_list : type a. Format.formatter -> a ty list -> unit = fun fmt tyl ->
   Format.fprintf fmt "@[<2>[";

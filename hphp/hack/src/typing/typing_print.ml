@@ -97,6 +97,8 @@ module Suggest = struct
               ~f:(fun acc (_, sid) -> acc^"::"^sid)
               ~init:(strip_ns x)
         )
+    | Tpu _ -> "..."
+    | Tpu_access _ -> "..."
 
   and list: type a. a ty list -> string = function
     | []      -> ""
@@ -114,6 +116,7 @@ module Suggest = struct
     | Nast.Tresource -> "resource"
     | Nast.Tarraykey -> "arraykey (int/string)"
     | Nast.Tnoreturn -> "noreturn"
+    | Nast.Tatom s -> ":@ " ^ s
 
 end
 
@@ -380,6 +383,8 @@ module Full = struct
         | Open_shape -> fields @ [text "..."]
       in
         list "shape(" id fields ")"
+    | Tpu _ -> text "doc ..."
+    | Tpu_access _ -> text "doc ..."
 
   and prim x =
     match x with
@@ -393,6 +398,7 @@ module Full = struct
     | Nast.Tresource -> "resource"
     | Nast.Tarraykey -> "arraykey"
     | Nast.Tnoreturn -> "noreturn"
+    | Nast.Tatom s -> ":@" ^ s
 
   and fun_type: type a. _ -> _ -> _ -> a fun_type -> _ =
     fun to_doc st env ft ->
@@ -606,6 +612,7 @@ module ErrorString = struct
     | Nast.Tresource   -> "a resource"
     | Nast.Tarraykey   -> "an array key (int | string)"
     | Nast.Tnoreturn   -> "noreturn (throws or exits)"
+    | Nast.Tatom s     -> "a PU atom " ^ s
 
   let varray = "a varray"
   let darray = "a darray"
@@ -650,6 +657,10 @@ module ErrorString = struct
     | Tshape _           -> "a shape"
     | Tdestructure l     ->
       "a list destructuring assignment of length " ^ string_of_int (List.length l)
+    (* TODO(T36532263) make a better message *)
+    | Tpu _ -> "some PU stuff"
+    (* TODO(T36532263) make a better message *)
+    | Tpu_access _ -> "some more PU stuff"
 
   and array: type a. a ty option * a ty option -> _ = function
     | None, None     -> "an untyped array"
@@ -731,6 +742,7 @@ let prim = function
   | Nast.Tresource -> "resource"
   | Nast.Tarraykey -> "arraykey"
   | Nast.Tnoreturn -> "noreturn"
+  | Nast.Tatom s -> s
 
 let param_mode_to_string = function
    | FPnormal -> "normal"
@@ -891,6 +903,10 @@ let rec from_type: type a. env -> a ty -> json =
     obj @@ kind "array" @ empty true @ args []
   | Tdestructure tyl ->
     obj @@ kind "union" @ args tyl
+  | Tpu _ ->
+    obj @@ kind "Tpu"
+  | Tpu_access _ ->
+    obj @@ kind "Tpu_access"
 
 type 'a deserialized_result = ('a ty, deserialization_error) result
 

@@ -69,6 +69,8 @@ let rec walk_and_gather_xhp_ ~env ~pos cty =
   | (Tnonnull | Tarraykind _ | Toption _
        | Tprim _ | Tvar _ | Tfun _ | Ttuple _ | Tanon (_, _) | Tobject
        | Tshape _ | Tdestructure _) -> env, [], [cty]
+  | Tpu_access _
+  | Tpu _ -> env, [], [cty]
 
 and walk_list_and_gather_xhp env pos tyl =
   List.fold ~init:(env, [], []) tyl ~f:(fun (env, xhp_acc, non_xhp_acc) ty ->

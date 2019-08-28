@@ -376,7 +376,8 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false) is_lvalue e
         let ty = r, Tshape (shape_kind, fields) in
         array_get ~array_pos ~expr_pos ~lhs_of_null_coalesce is_lvalue env ty e2 ty2
     | Tnonnull | Tprim _ | Tfun _ | Tdestructure _
-    | Tclass _ | Tanon _ | Tabstract _ | Tunion _ | Tintersection _ ->
+    | Tclass _ | Tanon _ | Tabstract _ | Tunion _ | Tintersection _ | Tpu _
+    | Tpu_access _ ->
         error_array env expr_pos ety1
     (* Type-check array access as though it is the method
      * array_get<Tk,Tv>(KeyedContainer<Tk,Tv> $array, Tk $key): Tv
@@ -466,7 +467,7 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
       else env, ty1
     | _, (Tnonnull | Tarraykind _ | Toption _ | Tprim _ | Tvar _ |
           Tfun _ | Tclass _ | Ttuple _ | Tanon _ | Tshape _ | Tdestructure _
-          | Tunion _ | Tintersection _ | Tabstract _) ->
+          | Tunion _ | Tintersection _ | Tabstract _ | Tpu _ | Tpu_access _) ->
       error_assign_array_append env expr_pos ty1
   end (* of begin fun *)
 
@@ -666,8 +667,9 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
         error)
       else
         env, ety1
-    | (Toption _ | Tnonnull | Tprim _ | Tdestructure _ | Tunion _ | Tintersection _ |
-       Tabstract _ | Tvar _ | Tfun _ | Tclass _ | Tanon _) ->
+    | (Toption _ | Tnonnull | Tprim _ | Tdestructure _ | Tunion _ | Tintersection _
+      | Tabstract _ | Tvar _ | Tfun _ | Tclass _ | Tanon _ | Tpu _
+      | Tpu_access _) ->
       Errors.array_access expr_pos (Reason.to_pos r) (Typing_print.error env ety1);
       error
   end (* of begin fun *)

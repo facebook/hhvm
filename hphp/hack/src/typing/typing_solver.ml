@@ -120,6 +120,10 @@ let rec freshen_inside_ty env ((r, ty_) as ty) =
     end
   | Tvar _ ->
     default ()
+  | Tpu _
+  | Tpu_access _ ->
+    (* TODO(T36532263) suggested by Catherine, might be updated next *)
+    default()
 
 and freshen_ty env ty =
   Env.fresh_invariant_type_var env (Reason.to_pos (fst ty))
@@ -724,7 +728,8 @@ let rec push_option_out pos env ty =
     else env, ty
   | _, (Terr | Tany _ | Tnonnull | Tarraykind _ | Tprim _
     | Tclass _ | Ttuple _ | Tanon _ | Tfun _
-    | Tobject | Tshape _ | Tdynamic | Tdestructure _) -> env, ty
+    | Tobject | Tshape _ | Tdynamic | Tdestructure _ | Tpu _
+    | Tpu_access _) -> env, ty
 
 (**
  * Strips away all Toption that we possible can in a type, expanding type

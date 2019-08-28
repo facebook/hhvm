@@ -85,6 +85,7 @@ let rec pessimize_type env ?(trust_awaitable=false) (ty: decl ty) =
       { shape_field_ty with sft_ty }
     ) fields_map in
     wrap_like (r, Tshape (shape_kind, fields_map))
+  | _, Tpu_access _ -> wrap_like ty
 
 and pessimize_targs env targs tparams =
   if not (TypecheckerOptions.pessimize_types (Env.get_tcopt env)) then targs else
@@ -226,6 +227,8 @@ let rec is_enforceable (env: env) (ty: decl ty) =
   | Tvarray_or_darray _ -> false
   | Toption ty ->
     is_enforceable env ty
+  (* TODO(T36532263) make sure that this is what we want *)
+  | Tpu_access _ -> false
 
 let is_enforced env ty =
   let enforceable = is_enforceable env ty in

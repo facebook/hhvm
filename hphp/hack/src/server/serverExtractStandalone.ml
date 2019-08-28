@@ -435,6 +435,7 @@ let get_init_for_prim = function
   | Aast_defs.Tstring
   | Aast_defs.Tarraykey ->
     "\"\""
+  | Aast_defs.Tatom _
   | Aast_defs.Tvoid
   | Aast_defs.Tresource
   | Aast_defs.Tnoreturn ->

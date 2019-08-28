@@ -1134,6 +1134,8 @@ let rec get_tyvars env ty =
       let env, positive2, negative2 = get_tyvars env ty2 in
       env, ISet.union positive1 positive2, ISet.union negative1 negative2
     end
+  | Tpu (base, _, _) -> get_tyvars env base
+  | Tpu_access (base, _) -> get_tyvars env base
 
 and get_tyvars_variance_list (env, acc_positive, acc_negative) variancel tyl =
   match variancel, tyl with

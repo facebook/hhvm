@@ -147,4 +147,6 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
     | Tclass (cls, exact, tyl) -> this#on_tclass acc r cls exact tyl
     | Tarraykind akind -> this#on_tarraykind acc r akind
     | Tdestructure tyl -> this#on_tlist acc r tyl
+    | Tpu (base, _, _) -> this#on_type acc base
+    | Tpu_access (base, _) -> this#on_type acc base
 end

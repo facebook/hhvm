@@ -114,6 +114,8 @@ let rec truthiness env ty =
   | Tprim Tvoid -> Always_falsy
   | Tprim Tnoreturn -> Unknown
   | Tprim (Tint | Tbool | Tfloat | Tstring | Tnum | Tarraykey) -> Possibly_falsy
+  (* Tatom are string at runtine, but neither "0" nor "" are valid atom names *)
+  | Tprim (Tatom _) -> Always_truthy
 
   | Tunion tyl ->
     begin match List.map tyl (truthiness env) with
@@ -142,6 +144,8 @@ let rec truthiness env ty =
 
   | Ttuple [] -> Always_falsy
   | Tobject | Tfun _ | Ttuple _ | Tanon _ | Tdestructure _ -> Always_truthy
+  | Tpu _ -> Always_truthy (* TODO(T36532263) check if that's ok *)
+  | Tpu_access (_, _) -> Unknown (* TODO(T36532263) check if that's ok *)
 
 (** When a type represented by one of these variants is used in a truthiness
     test, it indicates a potential logic error, since the truthiness of some
@@ -192,6 +196,8 @@ let rec find_sketchy_types env acc ty =
 
   | Tany _ | Tnonnull | Tdynamic | Terr | Tobject | Tprim _ | Tfun _ | Ttuple _
   | Tshape _ | Tvar _ | Tanon _ | Tarraykind _ | Tdestructure _ -> acc
+  | Tpu _ -> acc
+  | Tpu_access _ -> acc
 
 let find_sketchy_types env ty = find_sketchy_types env [] ty
 

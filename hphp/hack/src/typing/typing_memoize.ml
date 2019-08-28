@@ -30,7 +30,8 @@ let check_param : env -> Nast.fun_param -> unit =
     let env, ty, _ =
       Typing_tdef.force_expand_typedef ~ety_env env ty in
     match ty with
-    | _, (Tprim (Tnull | Tarraykey | Tbool | Tint | Tfloat | Tstring | Tnum)
+    | _, (Tprim (Tnull | Tarraykey | Tbool | Tint | Tfloat | Tstring | Tnum |
+                 Tatom _)
          | Tnonnull | Tany _ | Terr | Tdynamic) ->
        ()
     | _, Tprim (Tvoid | Tresource | Tnoreturn) -> error ty
@@ -89,6 +90,8 @@ let check_param : env -> Nast.fun_param -> unit =
         if Typing_solver.is_sub_type env ty memoizable_type
         then ()
         else error ty;
+    | _ , Tpu_access _
+    | _, Tpu (_, _, (Pu_plain | Pu_atom _)) -> ()
     | _, Tfun _
     | _, Tvar _
     | _, Tanon (_, _)

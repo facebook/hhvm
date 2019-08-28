@@ -136,6 +136,9 @@ and tprim =
   | Tnum
   | Tarraykey
   | Tnoreturn
+  (* plain Pocket Universe atom when we don't know which enum it is in.
+   * E.g. `:@MyAtom` *)
+  | Tatom of string
 
 and shape_field_info = {
   sfi_optional: bool;

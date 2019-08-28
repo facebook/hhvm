@@ -71,6 +71,8 @@ end = struct
       | Tshape (_, fdm) ->
           ShapeFieldMap.iter (fun _ v -> ty v) fdm
       | Tdestructure _ -> () (* Only apperas in assignment lhs position *)
+      | Tpu (base, _, _) -> ty base
+      | Tpu_access (base, _) -> ty base
 
     and ty_opt : type a . a ty option -> _ =
       function None -> () | Some x -> ty x in

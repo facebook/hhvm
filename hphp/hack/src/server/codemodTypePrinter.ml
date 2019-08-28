@@ -15,7 +15,8 @@ let print_tprim =
     | Tnull -> "null"
     | Tvoid -> "void"
     | Tresource -> "resource"
-    | Tnoreturn -> "noreturn")
+    | Tnoreturn -> "noreturn"
+    | Tatom s -> ":@" ^ s)
 
 let rec print_ty_exn ty =
   match snd ty with
@@ -73,6 +74,11 @@ let rec print_ty_exn ty =
     Printf.sprintf "darray<%s, %s>" (print_ty_exn ty1) (print_ty_exn ty2)
   | Tarraykind (AKmap (ty1, ty2)) ->
     Printf.sprintf "array<%s, %s>" (print_ty_exn ty1) (print_ty_exn ty2)
+  | Tpu (ty, id, Pu_plain)
+  | Tpu_access (ty, id) ->
+    Printf.sprintf "%s:@%s)" (print_ty_exn ty) (snd id)
+  | Tpu (ty, id, Pu_atom s) ->
+    Printf.sprintf "%s:@%s:@%s)" (print_ty_exn ty) (snd id) s
 
 and print_tyl_exn tyl = String.concat ~sep:", " (List.map tyl ~f:print_ty_exn)
 

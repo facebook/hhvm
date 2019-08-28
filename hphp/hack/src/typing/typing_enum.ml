@@ -66,7 +66,7 @@ let check_valid_array_key_type f_fail ~allow_any:allow_any env p t =
       else env, Option.value ~default:None (List.find errors ~f:Option.is_some)
     | Terr | Tany _ | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic
       | Tvar _ | Tabstract _ | Tclass _ | Ttuple _ | Tanon _ | Tdestructure _
-      | Tfun _ | Tunion _ | Tobject | Tshape _ ->
+      | Tfun _ | Tunion _ | Tobject | Tshape _ | Tpu _ | Tpu_access _ ->
       env, Some (fun () -> f_fail p (Reason.to_pos r) (Typing_print.error env (r, t')) trail) in
   let env, err = check_valid_array_key_type env t in
   Option.iter err (fun f -> f ());

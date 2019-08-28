@@ -242,6 +242,9 @@ let rec localize ~ety_env env (dty: decl ty) =
   | r, Tshape (shape_kind, tym) ->
       let env, tym = ShapeFieldMap.map_env (localize ~ety_env) env tym in
       env, (r, Tshape (shape_kind, tym))
+  | r, Tpu_access (base, sid) ->
+    let (env, base) = localize ~ety_env env base in
+    env, (r, Tpu_access (base, sid))
 
 and localize_tparams ~ety_env env pos tyl tparams =
   let length = min (List.length tyl) (List.length tparams) in

@@ -534,6 +534,8 @@ and type_ tcopt root variance env (reason, ty) =
   | Tshape (_, ty_map) ->
       Nast.ShapeMap.iter begin fun _ { sft_ty; _ } ->
         type_ tcopt root variance env sft_ty end ty_map
+  | Tpu_access (base, _) ->
+      type_ tcopt root variance env base
 
 (* `as` constraints on method type parameters must be contravariant
  * and `super` constraints on method type parameters are covariant. To
@@ -701,3 +703,5 @@ and get_typarams root env (ty: decl ty) =
     union (get_typarams root env ty1) (get_typarams root env ty2)
   | Tvarray ty | Tvarray_or_darray ty ->
     get_typarams root env ty
+  | Tpu_access (base, _) ->
+    get_typarams root env base

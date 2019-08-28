@@ -43,9 +43,11 @@ let rec is_stringish env ty =
     List.for_all ~f:(is_stringish env) tyl
   | Tclass (x, _, _) ->
     Option.is_none (Env.get_class env (snd x))
-  | Tany _ | Terr | Tdynamic | Tobject | Tnonnull | Tprim _ ->
+  | Tany _ | Terr | Tdynamic | Tobject | Tnonnull | Tprim _
+  | Tpu (_, _, (Pu_plain | Pu_atom _)) ->
     true
-  | Tarraykind _ | Tvar _ | Ttuple _ | Tanon (_, _) | Tfun _ | Tshape _ | Tdestructure _ ->
+  | Tarraykind _ | Tvar _ | Ttuple _ | Tanon (_, _) | Tfun _ | Tshape _
+  | Tdestructure _ | Tpu_access _ ->
     false
 
 let handler = object

@@ -46,6 +46,10 @@ end
 let show_phase_ty _ = "<phase_ty>"
 let pp_phase_ty _ _ = Printf.printf "%s\n" "<phase_ty>"
 
+type pu_kind =
+  | Pu_plain (* all atoms of an enumeration *)
+  | Pu_atom  of string (* single atom of an enumeration *)
+
 type 'phase ty = ( Reason.t * 'phase ty_ )
 
 (* A shape may specify whether or not fields are required. For example, consider
@@ -242,6 +246,21 @@ and _ ty_ =
   (* The type of a list destructructuring assignment.
    * Implements valid destructuring operations via subtyping *)
   | Tdestructure : locl ty list -> locl ty_
+
+  (* Typing of Pocket Universe Expressions
+   * - first parameter is the enclosing class
+   * - second parameter is the name of the Pocket Universe Enumeration
+   * - third parameter is  either Pu_plain (the enumeration as the set of
+   *   all its atoms) or Pu_atom (a specific atom in the enumeration)
+   *)
+  | Tpu: locl ty * Nast.sid * pu_kind -> locl ty_
+
+  (* Access to a Pocket Universe Expression or Atom, denoted by
+   * Foo:@Bar or Foo:@Bar:@X.
+   * It might be unresolved at first (e.g. if Foo is a generic variable).
+   * Will be refined to Tpu once typechecking is successful
+   *)
+  | Tpu_access : 'a ty * Nast.sid -> 'a ty_
 
 and array_kind =
   (* Those three types directly correspond to their decl level counterparts:
@@ -709,6 +728,8 @@ let ty_con_ordinal ty =
   | Tclass _ -> 15
   | Tarraykind _ -> 16
   | Tdestructure _ -> 17
+  | Tpu _ -> 18
+  | Tpu_access _ -> 19
 
 let array_kind_con_ordinal ak =
   match ak with

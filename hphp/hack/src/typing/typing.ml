@@ -3465,6 +3465,7 @@ and call_parent_construct pos env el uel =
         | Tshape _
         | Taccess (_, _)
         | Tthis
+        | Tpu_access _ (* TODO(T36532263) not sure this is the right thing *)
       ) -> (* continue here *)
       let ty = (Reason.Rwitness pos, Typing_utils.tany env) in
       let default = env, [], [], ty, ty, ty in
@@ -3486,6 +3487,7 @@ and call_parent_construct pos env el uel =
         | _, (Terr | Tany _ | Tnonnull | Tarraykind _ | Toption _ | Tdestructure _
               | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tvar _ | Tdynamic
               | Tabstract (_, _) | Tanon (_, _) | Tunion _ | Tintersection _ | Tobject
+              | Tpu _ | Tpu_access _
              ) ->
            Errors.parent_outside_class pos;
            let ty = (Reason.Rwitness pos, Typing_utils.terr env) in
@@ -4347,7 +4349,7 @@ and class_get_ ~is_method ~is_const ~this_ty ~coerce_from_ty ?(explicit_tparams=
       )
   | _, (Tvar _ | Tnonnull | Tarraykind _ | Toption _
         | Tprim _ | Tfun _ | Ttuple _ | Tanon (_, _) | Tobject
-       | Tshape _ | Tdestructure _) ->
+       | Tshape _ | Tdestructure _ | Tpu _ | Tpu_access _) ->
       (* should never happen; static_class_id takes care of these *)
       k (env, (Reason.Rnone, Typing_utils.tany env))
 
@@ -4776,7 +4778,7 @@ and class_id_for_new ~exact p env cid tal =
         | _, (Tany _ | Terr | Tnonnull | Tarraykind _ | Toption _
               | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Ttuple _
               | Tanon (_, _) | Tunion _ | Tintersection _ | Tobject | Tshape _
-              | Tdynamic | Tdestructure _) ->
+              | Tdynamic | Tdestructure _ | Tpu _ | Tpu_access _) ->
           get_info res tyl in
   get_info [] [cid_ty]
 
@@ -4912,6 +4914,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
       | _, (Terr | Tany _ | Tnonnull | Tarraykind _ | Toption _ | Tprim _
             | Tfun _ | Ttuple _ | Tshape _ | Tvar _ | Tdynamic | Tdestructure _
             | Tanon (_, _) | Tunion _ | Tintersection _ | Tabstract (_, _) | Tobject
+            | Tpu _ | Tpu_access _
            ) ->
         let parent = Env.get_parent env in
         let parent_defined = snd parent <> Typing_utils.tany env in
@@ -4977,7 +4980,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
         | (_, (Tany _ | Tnonnull | Tarraykind _ | Toption _
                  | Tprim _ | Tfun _ | Ttuple _ | Tdestructure _
                  | Tabstract ((AKdependent _ | AKnewtype _), _)
-                 | Tanon (_, _) | Tobject | Tshape _)) as ty
+                 | Tanon (_, _) | Tobject | Tshape _ | Tpu _ | Tpu_access _)) as ty
           ->
           Errors.expected_class ~suffix:(", but got "^Typing_print.error env ty) p;
           env, (Reason.Rwitness p, Typing_utils.terr env) in
@@ -5817,6 +5820,7 @@ and condition ?lhs_of_null_coalesce env tparamet
       | _, (Terr | Tany _ | Tnonnull | Tarraykind _ | Toption _ | Tdynamic
         | Tprim _ | Tvar _ | Tfun _ | Tabstract _ | Tclass _ | Tdestructure _
         | Ttuple _ | Tanon (_, _) | Tunion _ | Tintersection _ | Tobject | Tshape _
+        | Tpu _ | Tpu_access _
         ) ->
           condition_nullity ~nonnull:tparamet env te)
   | T.Binop ((Ast_defs.Diff | Ast_defs.Diff2 as op), e1, e2) ->
@@ -5911,7 +5915,8 @@ and class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
     env, (reason, Ttuple tyl)
   | _, (Tany _ | Tprim _ | Toption _ | Ttuple _ | Tnonnull
         | Tshape _ | Tvar _ | Tabstract _ | Tarraykind _ | Tanon _ | Tdestructure _
-        | Tunion _ | Tintersection _ | Tobject | Terr | Tfun _  | Tdynamic) ->
+        | Tunion _ | Tintersection _ | Tobject | Terr | Tfun _  | Tdynamic
+        | Tpu _ | Tpu_access _) ->
     env, hint_ty
 
 (** If we are dealing with a refinement like

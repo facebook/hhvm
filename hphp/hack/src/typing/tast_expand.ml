@@ -44,7 +44,11 @@ let expand_ty ?pos env ty =
                                 (p, Tvar v))
         (* TODO TAST: replace with Tfun type *)
       | (p, Tanon(x, y)) -> (p, Tanon(x,y))
-      | (p, Terr) -> (p, Terr) in
+      | (p, Terr) -> (p, Terr)
+      (* TODO(T36532263) see if that needs updating *)
+      | (p, Tpu (base, enum, kind)) -> (p, Tpu (exp_ty base, enum, kind))
+      | (p, Tpu_access (base, sid)) -> (p, Tpu_access (exp_ty base, sid))
+    in
     let _env, ety = Tast_env.simplify_unions env ety in
     ety
 

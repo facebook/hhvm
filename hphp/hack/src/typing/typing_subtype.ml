@@ -391,9 +391,9 @@ and simplify_subtype
   | _, Tabstract ((AKnewtype _ | AKdependent _), None) -> assert false
 
   | (Tprim Nast.(Tint | Tbool | Tfloat | Tstring | Tresource | Tnum |
-                 Tarraykey | Tnoreturn) |
+                 Tarraykey | Tnoreturn | Tatom _) |
      Tnonnull | Tfun _ | Ttuple _ | Tshape _ |
-     Tanon _ | Tobject | Tclass _ | Tarraykind _),
+     Tanon _ | Tobject | Tclass _ | Tarraykind _ | Tpu _),
     Tnonnull ->
     valid ()
   | (Tdynamic | Toption _ | Tprim Nast.(Tnull | Tvoid)),
@@ -441,9 +441,9 @@ and simplify_subtype
    * of solutions.
    *)
   | (Tprim Nast.(Tint | Tbool | Tfloat | Tstring | Tresource | Tnum |
-                 Tarraykey | Tnoreturn) |
+                 Tarraykey | Tnoreturn | Tatom _) |
      Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject |
-     Tclass _ | Tarraykind _ | Tany _),
+     Tclass _ | Tarraykind _ | Tany _ | Tpu _),
     Toption ty_super' ->
     simplify_subtype ~seen_generic_params ~this_ty ty_sub ty_super' env
   | Tabstract (AKnewtype (name_sub, _), _),
@@ -494,7 +494,7 @@ and simplify_subtype
     invalid ()
   | Toption _,
     Tprim Nast.(Tvoid | Tint | Tbool | Tfloat | Tstring | Tresource | Tnum |
-                Tarraykey | Tnoreturn) ->
+                Tarraykey | Tnoreturn | Tatom _) ->
     invalid ()
   | Toption ty_sub', Tprim Nast.Tnull ->
     simplify_subtype ~seen_generic_params ~this_ty ty_sub' ty_super env
@@ -749,8 +749,9 @@ and simplify_subtype
     else invalid ()
   | Tprim Nast.(Tarraykey | Tint | Tfloat | Tnum), Tclass ((_, class_name), exact, _) ->
     if class_name = SN.Classes.cXHPChild && exact = Nonexact then valid () else invalid ()
-  | (Tnonnull | Tdynamic | Tprim Nast.(Tnull | Tvoid | Tbool | Tresource | Tnoreturn) |
-     Toption _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _),
+  | (Tnonnull | Tdynamic | Tprim Nast.(Tnull | Tvoid | Tbool | Tresource
+                                      | Tnoreturn | Tatom _) |
+     Toption _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tpu _),
     Tclass _ ->
     invalid ()
   (* Match what's done in unify for non-strict code *)
@@ -1254,6 +1255,11 @@ and simplify_subtype
     invalid ()
   | _, Tdestructure _ ->
     invalid ()
+  | Tpu _, _
+  | _, Tpu _
+  | Tpu_access _, _
+  | _, Tpu_access _ -> (* TODO(T36532263) implement subtyping *)
+    invalid()
 
 and simplify_subtype_variance
   ~(seen_generic_params : SSet.t option)

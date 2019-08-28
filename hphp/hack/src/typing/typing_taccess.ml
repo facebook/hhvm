@@ -230,6 +230,12 @@ and expand env ~as_tyvar_with_cnstr root id =
   | Tvar n ->
     let tenv, ty = Typing_subtype_tconst.get_tyvar_type_const env.tenv n id in
     { env with tenv }, ty
+  | Tpu _ ->
+    failwithf "TODO(T36532263) expand_ty: Tpu type access %s"
+      (Pp_type.show_ty () root) ()
+  | Tpu_access _ ->
+    failwithf "TODO(T36532263) expand_ty: Tpu_access type access %s"
+      (Pp_type.show_ty () root) ()
   | Tanon _ | Tobject | Tnonnull | Tprim _ | Tshape _ | Ttuple _
   | Tarraykind _ | Tfun _ | Tabstract (_, _)  | Tdynamic | Toption _ | Tdestructure _ ->
     let pos, tconst = id in

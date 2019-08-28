@@ -139,6 +139,8 @@ module ExprDepTy = struct
     | Tanon _ | Tobject | Tnonnull | Tprim _ | Tshape _ | Ttuple _ | Tdynamic
     | Tarraykind _ | Tfun _ | Tabstract (_, None) | Tany _ | Tvar _ | Terr | Tdestructure _ ->
         false
+    | Tpu _ -> failwith "T36532263: typing_dependent_type Tpu"
+    | Tpu_access _ -> failwith "T36532263: typing_dependent_type Tpu_access"
 
   (****************************************************************************)
   (* A type access "this::T" is translated to "<this>::T" during the

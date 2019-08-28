@@ -44,6 +44,7 @@ and prim_to_string prim =
   | Aast.Tnum -> SN.Typehints.num
   | Aast.Tarraykey -> SN.Typehints.arraykey
   | Aast.Tnoreturn -> SN.Typehints.noreturn
+  | Aast.Tatom s -> ":@" ^ s
 
 and fmt_hint ~tparams ~namespace ?(strip_tparams = false) (pos, h) =
   let fmt_name_or_prim = fmt_name_or_prim ~tparams ~namespace in

@@ -330,9 +330,11 @@ CachedUnit createUnitFromString(const char* path,
                                 const RepoOptions& options,
                                 FileLoadFlags& flags,
                                 copy_ptr<CachedUnitWithFree> orig = {}) {
+  LogTimer generateSha1Timer("generate_sha1_ms", ent);
   folly::StringPiece path_sp = path;
   auto const sha1 = SHA1{mangleUnitSha1(string_sha1(contents.slice()), path_sp,
                                         options)};
+  generateSha1Timer.stop();
   if (orig && orig->cu.unit && sha1 == orig->cu.unit->sha1()) return orig->cu;
   auto const check = [&] (Unit* unit) {
     if (orig && orig->cu.unit && unit &&
@@ -385,7 +387,9 @@ CachedUnit createUnitFromFile(const StringData* const path,
                               const RepoOptions& options,
                               FileLoadFlags& flags,
                               copy_ptr<CachedUnitWithFree> orig = {}) {
+  LogTimer readUnitTimer("read_unit_ms", ent);
   auto const contents = readFileAsString(w, path);
+  readUnitTimer.stop();
   return contents
     ? createUnitFromString(path->data(), *contents, releaseUnit, ent,
                            nativeFuncs, options, flags, orig)

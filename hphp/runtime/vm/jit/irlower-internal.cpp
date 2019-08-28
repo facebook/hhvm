@@ -121,7 +121,8 @@ Fixup makeFixup(const BCMarker& marker, SyncOptions sync) {
       case SyncOptions::None:
         // We can get here if we are memory profiling, since we override the
         // normal sync settings and sync anyway.
-        always_assert(RuntimeOption::HHProfEnabled);
+        always_assert(RuntimeOption::EvalJitForceVMRegSync ||
+                      RuntimeOption::HHProfEnabled);
         // fallthru
       case SyncOptions::Sync:
         return marker.spOff();
@@ -153,7 +154,9 @@ void cgCallHelper(Vout& v, IRLS& env, CallSpec call, const CallDest& dstInfo,
   }
 
   auto const syncFixup = [&] {
-    if (RuntimeOption::HHProfEnabled || sync != SyncOptions::None) {
+    if (RuntimeOption::HHProfEnabled ||
+        RuntimeOption::EvalJitForceVMRegSync ||
+        sync != SyncOptions::None) {
       // If we are profiling the heap, we always need to sync because regs need
       // to be correct during allocations no matter what.
       return makeFixup(inst->marker(), sync);

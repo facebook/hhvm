@@ -824,6 +824,8 @@ struct RuntimeOption {
   F(uint32_t, JitWarmupRateSeconds,    64)                              \
   F(uint32_t, JitWriteLeaseExpiration, 1500) /* in microseconds */      \
   F(int, JitRetargetJumps,             1)                               \
+  /* Sync VM reg state for all native calls. */                         \
+  F(bool, JitForceVMRegSync,           false)                           \
   F(bool, HHIRLICM,                    false)                           \
   F(bool, HHIRSimplification,          true)                            \
   F(bool, HHIRGenOpts,                 true)                            \

@@ -183,7 +183,6 @@ IRSPRelOffset fsetActRec(
   SSATmp* func,
   const FCallArgs& fca,
   SSATmp* objOrClass,
-  SSATmp* invName,
   bool dynamicCall,
   SSATmp* tsList
 ) {
@@ -198,7 +197,7 @@ IRSPRelOffset fsetActRec(
     sp(env),
     func,
     objOrClass ? objOrClass : cns(env, TNullptr),
-    invName ? invName : cns(env, TNullptr),
+    cns(env, TNullptr),
     cns(env, dynamicCall),
     tsList ? tsList : cns(env, TNullptr)
   );
@@ -391,8 +390,7 @@ void callProfiledFunc(IRGS& env, SSATmp* callee,
 //////////////////////////////////////////////////////////////////////
 
 void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
-                         SSATmp* objOrClass, const StringData* invName,
-                         bool dynamicCall, SSATmp* tsList) {
+                         SSATmp* objOrClass, bool dynamicCall, SSATmp* tsList) {
   assertx(callee);
 
   // Caller checks
@@ -400,15 +398,13 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
   if (dynamicCall) emitCallerDynamicCallChecksKnown(env, callee);
   emitCallerRxChecksKnown(env, callee);
 
-  if (invName == nullptr && isFCall(curSrcKey(env).op())) {
+  if (isFCall(curSrcKey(env).op())) {
     auto const inlined = irGenTryInlineFCall(
       env, callee, fca, objOrClass, dynamicCall, tsList);
     if (inlined) return;
   }
 
-  fsetActRec(env, cns(env, callee), fca, objOrClass,
-             invName ? cns(env, invName) : nullptr,
-             dynamicCall, tsList);
+  fsetActRec(env, cns(env, callee), fca, objOrClass, dynamicCall, tsList);
 
   // We just wrote to the stack, make sure Call opcode can set up its Catch.
   updateMarker(env);
@@ -433,7 +429,7 @@ void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
                            bool unlikely) {
   assertx(callee->isA(TFunc));
   if (callee->hasConstVal()) {
-    return prepareAndCallKnown(env, callee->funcVal(), fca, objOrClass, nullptr,
+    return prepareAndCallKnown(env, callee->funcVal(), fca, objOrClass,
                                dynamicCall, tsList);
   }
 
@@ -444,7 +440,7 @@ void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
   }
   emitCallerRxChecksUnknown(env, callee);
 
-  fsetActRec(env, callee, fca, objOrClass, nullptr, dynamicCall, tsList);
+  fsetActRec(env, callee, fca, objOrClass, dynamicCall, tsList);
 
   // We just wrote to the stack, make sure Call opcode can set up its Catch.
   updateMarker(env);
@@ -458,8 +454,7 @@ void prepareAndCallProfiled(IRGS& env, SSATmp* callee, const FCallArgs& fca,
                             bool mightCareAboutDynCall, SSATmp* tsList) {
   assertx(callee->isA(TFunc));
   auto const handleKnown = [&] (const Func* knownCallee) {
-    prepareAndCallKnown(env, knownCallee, fca, objOrClass, nullptr, dynamicCall,
-                        tsList);
+    prepareAndCallKnown(env, knownCallee, fca, objOrClass, dynamicCall, tsList);
   };
   if (callee->hasConstVal()) return handleKnown(callee->funcVal());
 
@@ -529,21 +524,6 @@ void fcallObjMethodUnknown(
   } else {
     prepareAndCallProfiled(env, func, fca, obj, dynamic,
                            mightCareAboutDynCall, ts);
-  }
-}
-
-void lookupObjMethodExactFunc(IRGS& env, SSATmp* obj, const Func* func) {
-  /*
-   * Static function: throw an exception; obj will be decref'd via stack.
-   *
-   * Static closure body: we still need to pass the object instance for the
-   * closure prologue to properly do its dispatch (and extract use vars). It
-   * will decref it and set up the alternative class pointer before entering the
-   * "real" cloned closure body.
-   */
-  implIncStat(env, Stats::ObjMethod_known);
-  if (func->isStaticInPrologue()) {
-    gen(env, ThrowHasThisNeedStatic, cns(env, func));
   }
 }
 
@@ -705,8 +685,7 @@ void optimizeProfiledCallMethod(IRGS& env,
           env.irb->constrainValue(refined, GuardConstraint(uniqueClass));
           auto const ctx = getCtx(uniqueMeth, refined, uniqueClass);
           discard(env, numExtraInputs);
-          prepareAndCallKnown(env, uniqueMeth, fca, ctx, nullptr, dynamic,
-                              nullptr);
+          prepareAndCallKnown(env, uniqueMeth, fca, ctx, dynamic, nullptr);
         },
         fallback
       );
@@ -733,8 +712,7 @@ void optimizeProfiledCallMethod(IRGS& env,
         gen(env, JmpZero, sideExit, same);
         auto const ctx = getCtx(uniqueMeth, objOrCls, nullptr);
         discard(env, numExtraInputs);
-        prepareAndCallKnown(env, uniqueMeth, fca, ctx, nullptr, dynamic,
-                            nullptr);
+        prepareAndCallKnown(env, uniqueMeth, fca, ctx, dynamic, nullptr);
       },
       fallback
     );
@@ -821,6 +799,39 @@ void optimizeProfiledCallMethod(IRGS& env,
   emitFCall();
 }
 
+void fcallObjMethodMagic(IRGS& env, const Func* callee, const FCallArgs& fca,
+                         SSATmp* obj, const StringData* methodName,
+                         bool dynamic, SSATmp* tsList,
+                         uint32_t numExtraInputs) {
+  if (fca.hasUnpack() || fca.numRets != 1) return interpOne(env);
+  if (fca.enforceReffiness()) {
+    for (auto i = 0; i < fca.numArgs; ++i) {
+      if (fca.byRef(i)) {
+        gen(env, ThrowParamRefMismatch, ParamData { i }, cns(env, callee));
+        return;
+      }
+    }
+  }
+
+  discard(env, numExtraInputs);
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    emitNewVecArray(env, fca.numArgs);
+  } else {
+    emitNewVArray(env, fca.numArgs);
+  }
+  auto const arr = popC(env);
+  push(env, cns(env, methodName));
+  push(env, arr);
+
+  // We just wrote to the stack, make sure the function call can proceed.
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
+
+  assertx(!fca.supportsAsyncEagerReturn());
+  auto const fca2 = FCallArgs(fca.flags, 2, 1, nullptr, kInvalidOffset, false);
+  prepareAndCallKnown(env, callee, fca2, obj, dynamic, tsList);
+}
+
 void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
                        const StringData* clsHint, SSATmp* methodName,
                        bool dynamic, SSATmp* tsList, uint32_t numExtraInputs) {
@@ -867,15 +878,19 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
   // If we know which exact or overridden method to call, we don't need PGO.
   switch (lookup.type) {
     case ImmutableObjMethodLookup::Type::MagicFunc:
-      lookupObjMethodExactFunc(env, obj, lookup.func);
-      discard(env, numExtraInputs);
-      prepareAndCallKnown(env, lookup.func, fca, obj, methodName->strVal(),
-                          dynamic, tsList);
+      implIncStat(env, Stats::ObjMethod_known);
+      assertx(!lookup.func->isStaticInPrologue());
+      fcallObjMethodMagic(env, lookup.func, fca, obj, methodName->strVal(),
+                          dynamic, tsList, numExtraInputs);
       return;
     case ImmutableObjMethodLookup::Type::Func:
-      lookupObjMethodExactFunc(env, obj, lookup.func);
+      implIncStat(env, Stats::ObjMethod_known);
+      if (lookup.func->isStaticInPrologue()) {
+        gen(env, ThrowHasThisNeedStatic, cns(env, lookup.func));
+        return;
+      }
       discard(env, numExtraInputs);
-      prepareAndCallKnown(env, lookup.func, fca, obj, nullptr, dynamic, tsList);
+      prepareAndCallKnown(env, lookup.func, fca, obj, dynamic, tsList);
       return;
     case ImmutableObjMethodLookup::Type::Class: {
       auto const func = lookupObjMethodNonExactFunc(env, obj, lookup.func);
@@ -1036,7 +1051,7 @@ void fcallFuncD(IRGS& env, const FCallArgs& fca, const StringData* funcName,
     // We know the function, but we have to ensure its unit is loaded. Use
     // LdFuncCached, ignoring the result to ensure this.
     if (lookup.needsUnitLoad) gen(env, LdFuncCached, FuncNameData { funcName });
-    prepareAndCallKnown(env, lookup.func, fca, nullptr, nullptr, false, tsList);
+    prepareAndCallKnown(env, lookup.func, fca, nullptr, false, tsList);
     return;
   }
 
@@ -1261,7 +1276,7 @@ void emitFCallCtor(IRGS& env, FCallArgs fca, const StringData* clsHint) {
   }();
   if (exactCls) {
     if (auto const ctor = lookupImmutableCtor(exactCls, curClass(env))) {
-      return prepareAndCallKnown(env, ctor, fca, obj, nullptr, false, nullptr);
+      return prepareAndCallKnown(env, ctor, fca, obj, false, nullptr);
     }
   }
 
@@ -1372,7 +1387,7 @@ void fcallClsMethodD(IRGS& env,
       }
       auto const ctx = ldCtxForClsMethod(env, func, cns(env, cls), cls, true);
       auto const tsList = isRFlavor ? popC(env) : nullptr;
-      return prepareAndCallKnown(env, func, fca, ctx, nullptr, false, tsList);
+      return prepareAndCallKnown(env, func, fca, ctx, false, tsList);
     }
   }
 
@@ -1431,7 +1446,10 @@ void emitResolveObjMethod(IRGS& env) {
       gen(env, ThrowInvalidOperation, cns(env, s_resolveMagicCall.get()));
       return;
     case ImmutableObjMethodLookup::Type::Func:
-      lookupObjMethodExactFunc(env, obj, lookup.func);
+      if (lookup.func->isStaticInPrologue()) {
+        gen(env, ThrowHasThisNeedStatic, cns(env, lookup.func));
+        return;
+      }
       func = cns(env, lookup.func);
       break;
     case ImmutableObjMethodLookup::Type::Class:
@@ -1686,7 +1704,7 @@ void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
 
   auto const fca = FCallArgs(FCallArgs::Flags::None, numParams, 1, nullptr,
                              kInvalidOffset, false);
-  prepareAndCallKnown(env, callee, fca, nullptr, nullptr, false, nullptr);
+  prepareAndCallKnown(env, callee, fca, nullptr, false, nullptr);
 }
 
 //////////////////////////////////////////////////////////////////////

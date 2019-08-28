@@ -130,9 +130,6 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee,
   if (callee->hasReifiedGenerics() && !callee->cls()) {
     return refuse("reified generics on non-method");
   }
-  if (callee->isMagicCallMethod()) {
-    return refuse("magic callee");
-  }
   if (callee->isGenerator()) {
     return refuse("callee is generator");
   }

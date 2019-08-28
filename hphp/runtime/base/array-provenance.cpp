@@ -116,23 +116,35 @@ void clearTag(const ArrayData* ad) {
   rl_array_provenance->tags.erase(ad);
 }
 
-TypedValue tagTV(TypedValue tv) {
-  using namespace arrprov;
+namespace {
 
+void tagTVImpl(TypedValue& tv, folly::Optional<Tag> tag) {
   assertx(RuntimeOption::EvalArrayProvenance);
-  if (!tvWantsTag(tv)) return tv;
+
+  if (!tvWantsTag(tv)) return;
 
   auto ad = val(tv).parr;
-  if (getTag(ad)) return tv;
+  if (ad->hasProvenanceData()) return;
+
+  if (!tag) tag = tagFromProgramCounter();
+  if (!tag) return;
 
   if (!ad->hasExactlyOneRef()) {
     ad = ad->copy();
-    type(tv) = dt_with_rc(type(tv));
-    val(tv).parr = ad;
+
+    TypedValue tmp;
+    type(tmp) = dt_with_rc(type(tv));
+    val(tmp).parr = ad;
+
+    tvMove(tmp, tv);
   }
-  if (auto const pctag = tagFromProgramCounter()) {
-    setTag(ad, *pctag);
-  }
+  setTag(ad, *tag);
+}
+
+}
+
+TypedValue tagTV(TypedValue tv) {
+  tagTVImpl(tv, folly::none);
   return tv;
 }
 

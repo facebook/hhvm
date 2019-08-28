@@ -1700,7 +1700,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AssertNonNull:
   case CheckNonNull:
   case CheckNullptr:
-  case CheckFuncMMNonMagic:
   case CheckSmashableClass:
   case Ceil:
   case Floor:
@@ -1740,7 +1739,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case FuncHasAttr:
   case IsFunReifiedGenericsMatched:
   case IsClsDynConstructible:
-  case LdFuncMFunc:
   case LdFuncRxLevel:
   case LdSmashable:
   case LdSmashableFunc:

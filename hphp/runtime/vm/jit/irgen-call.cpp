@@ -284,12 +284,12 @@ void callKnown(IRGS& env, const Func* callee, const FCallArgs& fca) {
   return callRegular(env, callee, fca, false /* unlikely */);
 }
 
-void callUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca, bool unlikely,
-                 bool noAsyncEagerReturn) {
+void callUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
+                 bool unlikely) {
   assertx(!callee->hasConstVal() || env.formingRegion);
   if (fca.hasUnpack()) return callUnpack(env, nullptr, fca, unlikely);
 
-  if (noAsyncEagerReturn || fca.asyncEagerOffset == kInvalidOffset) {
+  if (fca.asyncEagerOffset == kInvalidOffset) {
     return callRegular(env, nullptr, fca, unlikely);
   }
 
@@ -423,18 +423,17 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     // FCall to specialize using this information, we may infer narrower type
     // for the return value, erroneously preventing the region from breaking
     // on unknown type.
-    callUnknown(env, cns(env, callee), fca, false, false);
+    callUnknown(env, cns(env, callee), fca, false);
   }
 }
 
 void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
-                           SSATmp* objOrClass, SSATmp* invName,
-                           bool dynamicCall, bool mightCareAboutDynCall,
-                           SSATmp* tsList, bool unlikely) {
+                           SSATmp* objOrClass, bool dynamicCall,
+                           bool mightCareAboutDynCall, SSATmp* tsList,
+                           bool unlikely) {
   assertx(callee->isA(TFunc));
-  if (callee->hasConstVal() && (invName == nullptr || invName->hasConstVal())) {
-    return prepareAndCallKnown(env, callee->funcVal(), fca, objOrClass,
-                               invName ? invName->strVal() : nullptr,
+  if (callee->hasConstVal()) {
+    return prepareAndCallKnown(env, callee->funcVal(), fca, objOrClass, nullptr,
                                dynamicCall, tsList);
   }
 
@@ -445,13 +444,13 @@ void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
   }
   emitCallerRxChecksUnknown(env, callee);
 
-  fsetActRec(env, callee, fca, objOrClass, invName, dynamicCall, tsList);
+  fsetActRec(env, callee, fca, objOrClass, nullptr, dynamicCall, tsList);
 
   // We just wrote to the stack, make sure Call opcode can set up its Catch.
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  callUnknown(env, callee, fca, unlikely, invName != nullptr /* no AER */);
+  callUnknown(env, callee, fca, unlikely);
 }
 
 void prepareAndCallProfiled(IRGS& env, SSATmp* callee, const FCallArgs& fca,
@@ -465,7 +464,7 @@ void prepareAndCallProfiled(IRGS& env, SSATmp* callee, const FCallArgs& fca,
   if (callee->hasConstVal()) return handleKnown(callee->funcVal());
 
   auto const handleUnknown = [&] (bool unlikely) {
-    prepareAndCallUnknown(env, callee, fca, objOrClass, nullptr, dynamicCall,
+    prepareAndCallUnknown(env, callee, fca, objOrClass, dynamicCall,
                           mightCareAboutDynCall, tsList, unlikely);
   };
   callProfiledFunc(env, callee, handleKnown, handleUnknown);
@@ -482,6 +481,7 @@ void fcallObjMethodUnknown(
   SSATmp* methodName,
   bool dynamic,
   SSATmp* ts,
+  uint32_t numExtraInputs,
   TProfile profileMethod,
   bool noCallProfiling
 ) {
@@ -490,69 +490,46 @@ void fcallObjMethodUnknown(
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  auto const magicCallBlock = defBlock(env, Block::Hint::Unlikely);
-  auto const doneBlock = defBlock(env, Block::Hint::Likely);
+  auto const func = [&] {
+    auto const cls = gen(env, LdObjClass, obj);
+    if (!methodName->hasConstVal()) {
+      auto const func = gen(env, LdObjMethodD, cls, methodName);
+      return gen(env, CheckNonNull, makeExitSlow(env), func);
+    }
 
-  SSATmp* funcMM;
-  SSATmp* funcWoM;
-
-  auto const cls = gen(env, LdObjClass, obj);
-
-  if (methodName->hasConstVal()) {
-    auto const regularCallBlock = defBlock(env, Block::Hint::Likely);
-    auto const slowCheckBlock = defBlock(env, Block::Hint::Unlikely);
-
-    // check for TC cache hit; go to slow check on miss
     auto const tcCache = gen(env, LdSmashable);
-    gen(env, CheckSmashableClass, slowCheckBlock, tcCache, cls);
+    return cond(
+      env,
+      [&] (Block* taken) {
+        // check for TC cache hit; go to the slow check on miss
+        gen(env, CheckSmashableClass, taken, tcCache, cls);
+      },
+      [&] {
+        // fast path: load func from TC cache and proceed to regular call
+        return gen(env, LdSmashableFunc, tcCache);
+      },
+      [&] {
+        // slow path: run C++ helper to determine Func*, exit if we can't handle
+        // the call in the JIT
+        auto const fnData = FuncNameData { methodName->strVal() };
+        auto const func = gen(env, LdObjMethodS, fnData, cls, tcCache);
+        return gen(env, CheckNonNull, makeExitSlow(env), func);
+      }
+    );
+  }();
 
-    // fast path: load func from TC cache and proceed to regular call
-    auto const funcS = gen(env, LdSmashableFunc, tcCache);
-    gen(env, Jmp, regularCallBlock, funcS);
-
-    // slow path: run C++ helper to determine Func*, then check for magic call
-    env.irb->appendBlock(slowCheckBlock);
-    auto const fnData = FuncNameData { methodName->strVal() };
-    funcMM = gen(env, LdObjMethodS, fnData, cls, tcCache);
-    auto const funcNM = gen(env, CheckFuncMMNonMagic, magicCallBlock, funcMM);
-    gen(env, Jmp, regularCallBlock, funcNM);
-
-    // set up dst for a regular (non-magic) call
-    env.irb->appendBlock(regularCallBlock);
-    auto const label = env.unit.defLabel(1, env.irb->nextBCContext());
-    regularCallBlock->push_back(label);
-    funcWoM = label->dst(0);
-    funcWoM->setType(TFunc);
-  } else {
-    funcMM = gen(env, LdObjMethodD, cls, methodName);
-    funcWoM = gen(env, CheckFuncMMNonMagic, magicCallBlock, funcMM);
-  }
-
-  // prepare to do a regular (non-magic) call
   auto const mightCareAboutDynCall =
     RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0
     || RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0;
-  profileMethod(funcWoM);
+  profileMethod(func);
+  discard(env, numExtraInputs);
   if (noCallProfiling) {
-    prepareAndCallUnknown(env, funcWoM, fca, obj, nullptr, dynamic,
-                          mightCareAboutDynCall, ts, true);
+    prepareAndCallUnknown(env, func, fca, obj, dynamic, mightCareAboutDynCall,
+                          ts, true);
   } else {
-    prepareAndCallProfiled(env, funcWoM, fca, obj, dynamic,
+    prepareAndCallProfiled(env, func, fca, obj, dynamic,
                            mightCareAboutDynCall, ts);
   }
-  gen(env, Jmp, doneBlock);
-
-  // prepare to do a magic call (no profiling, as inlining is not supported)
-  env.irb->appendBlock(magicCallBlock);
-  auto const funcM = gen(env, AssertType, TFuncM, funcMM);
-  auto const funcWM = gen(env, LdFuncMFunc, funcM);
-  profileMethod(funcWM);
-  prepareAndCallUnknown(env, funcWM, fca, obj, methodName, dynamic,
-                        mightCareAboutDynCall, ts, true);
-  assertx(env.irb->curBlock()->back().isTerminal());
-
-  // done
-  env.irb->appendBlock(doneBlock);
 }
 
 void lookupObjMethodExactFunc(IRGS& env, SSATmp* obj, const Func* func) {
@@ -715,7 +692,7 @@ void optimizeProfiledCallMethod(IRGS& env,
   MethProfile data = profile.data();
 
   if (auto const uniqueMeth = data.uniqueMeth()) {
-    bool isMagic = !uniqueMeth->name()->isame(methodName);
+    assertx(uniqueMeth->name()->isame(methodName));
     if (auto const uniqueClass = data.uniqueClass()) {
       // Profiling saw a unique class.
       // Check for it, then burn in the func
@@ -728,17 +705,11 @@ void optimizeProfiledCallMethod(IRGS& env,
           env.irb->constrainValue(refined, GuardConstraint(uniqueClass));
           auto const ctx = getCtx(uniqueMeth, refined, uniqueClass);
           discard(env, numExtraInputs);
-          prepareAndCallKnown(env, uniqueMeth, fca, ctx,
-                              isMagic ? methodName : nullptr,
-                              dynamic, nullptr);
+          prepareAndCallKnown(env, uniqueMeth, fca, ctx, nullptr, dynamic,
+                              nullptr);
         },
         fallback
       );
-      return;
-    }
-
-    if (isMagic) {
-      emitFCall();
       return;
     }
 
@@ -852,7 +823,7 @@ void optimizeProfiledCallMethod(IRGS& env,
 
 void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
                        const StringData* clsHint, SSATmp* methodName,
-                       bool dynamic, SSATmp* tsList) {
+                       bool dynamic, SSATmp* tsList, uint32_t numExtraInputs) {
   assertx(obj->isA(TObj));
   assertx(methodName->isA(TStr));
 
@@ -897,11 +868,13 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
   switch (lookup.type) {
     case ImmutableObjMethodLookup::Type::MagicFunc:
       lookupObjMethodExactFunc(env, obj, lookup.func);
+      discard(env, numExtraInputs);
       prepareAndCallKnown(env, lookup.func, fca, obj, methodName->strVal(),
                           dynamic, tsList);
       return;
     case ImmutableObjMethodLookup::Type::Func:
       lookupObjMethodExactFunc(env, obj, lookup.func);
+      discard(env, numExtraInputs);
       prepareAndCallKnown(env, lookup.func, fca, obj, nullptr, dynamic, tsList);
       return;
     case ImmutableObjMethodLookup::Type::Class: {
@@ -909,6 +882,7 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
       auto const mightCareAboutDynCall =
         RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0
         || RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0;
+      discard(env, numExtraInputs);
       prepareAndCallProfiled(env, func, fca, obj, dynamic,
                              mightCareAboutDynCall, tsList);
       return;
@@ -932,15 +906,16 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
 
     if (knownIfaceFunc == nullptr) {
       fcallObjMethodUnknown(env, fca, obj, methodName, dynamic, tsList,
-                            profileMethod, noCallProfiling);
+                            numExtraInputs, profileMethod, noCallProfiling);
     } else {
       auto const func = lookupObjMethodInterfaceFunc(env, obj, knownIfaceFunc);
       auto const mightCareAboutDynCall =
         RuntimeOption::EvalForbidDynamicCallsToInstMeth > 0
         || RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0;
       profileMethod(func);
+      discard(env, numExtraInputs);
       if (noCallProfiling) {
-        prepareAndCallUnknown(env, func, fca, obj, nullptr, dynamic,
+        prepareAndCallUnknown(env, func, fca, obj, dynamic,
                               mightCareAboutDynCall, tsList, true);
       } else {
         prepareAndCallProfiled(env, func, fca, obj, dynamic,
@@ -958,7 +933,8 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
   // If we don't know anything about the object's class, or all we know is an
   // interface that it implements, then enable PGO.
   optimizeProfiledCallMethod(env, fca, obj, knownIfaceFunc != nullptr,
-                             methodName->strVal(), dynamic, 0, emitFCall);
+                             methodName->strVal(), dynamic, numExtraInputs,
+                             emitFCall);
 }
 
 SSATmp* getReifiedGenerics(IRGS& env, SSATmp* funcName) {
@@ -1310,8 +1286,8 @@ void fcallObjMethod(IRGS& env, const FCallArgs& fca, const StringData* clsHint,
   auto const obj = topC(env, BCSPRelOffset { static_cast<int32_t>(objPos) });
 
   if (obj->type() <= TObj) {
-    if (extraInput) popC(env);
-    fcallObjMethodObj(env, fca, obj, clsHint, methodName, dynamic, tsList);
+    fcallObjMethodObj(env, fca, obj, clsHint, methodName, dynamic, tsList,
+                      extraInput ? 1 : 0);
     return;
   }
 
@@ -1601,8 +1577,8 @@ void fcallClsMethodCommon(IRGS& env,
     decRef(env, methVal);
     discard(env, numExtraInputs);
     if (noCallProfiling) {
-      prepareAndCallUnknown(env, func, fca, ctx, nullptr, dynamic,
-                            mightCareAboutDynCall, tsList, true);
+      prepareAndCallUnknown(env, func, fca, ctx, dynamic, mightCareAboutDynCall,
+                            tsList, true);
     } else {
       prepareAndCallProfiled(env, func, fca, ctx, dynamic,
                              mightCareAboutDynCall, tsList);

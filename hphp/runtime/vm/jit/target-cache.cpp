@@ -166,26 +166,24 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 NEVER_INLINE
-uintptr_t lookup(const Class* cls, const StringData* name, const Class* ctx) {
+const Func* lookup(const Class* cls, const StringData* name, const Class* ctx) {
   auto const func = lookupMethodCtx(cls, name, ctx, CallType::ObjMethod, false);
   if (LIKELY(func != nullptr)) {
     if (UNLIKELY(func->isStaticInPrologue())) {
       throw_has_this_need_static(func);
     }
-    return reinterpret_cast<uintptr_t>(func);
+    return func;
   }
 
+  // Handle magic calls in the interpreter.
   auto const magicFunc = cls->lookupMethod(s_call.get());
-  if (LIKELY(magicFunc != nullptr)) {
-    assertx(!magicFunc->isStatic());
-    return reinterpret_cast<uintptr_t>(magicFunc) | 0x1u;
-  }
+  if (LIKELY(magicFunc != nullptr)) return nullptr;
 
   lookupMethodCtx(cls, name, ctx, CallType::ObjMethod, true /* raise */);
   not_reached();
 }
 
-void smashImmediate(TCA movAddr, const Class* cls, uintptr_t funcVal) {
+void smashImmediate(TCA movAddr, const Class* cls, const Func* func) {
   // The inline cache is a 64-bit immediate, and we need to atomically
   // set both the Func* and the Class*.  We also can only cache these
   // values if the Func* and Class* can't be deallocated, so this is
@@ -209,16 +207,17 @@ void smashImmediate(TCA movAddr, const Class* cls, uintptr_t funcVal) {
   //
   // If the situation is not cacheable, we just put a value into the
   // immediate that will cause it to always call out to handleStaticCall.
-  assertx(cls && funcVal);
+  assertx(cls);
   auto const clsVal = reinterpret_cast<uintptr_t>(cls);
-  bool const cacheable =
+  auto const funcVal = reinterpret_cast<uintptr_t>(func);
+  auto const cacheable =
     RuntimeOption::RepoAuthoritative &&
-    !(funcVal & 0x1) &&
+    funcVal &&
     clsVal < std::numeric_limits<uint32_t>::max() &&
     funcVal < std::numeric_limits<uint32_t>::max();
 
   if (cacheable) {
-    assertx(!(funcVal & 0x1));
+    assertx(funcVal);
     smashMovq(movAddr, funcVal << 32 | clsVal);
   } else {
     smashMovq(movAddr, 0x1);
@@ -228,13 +227,13 @@ void smashImmediate(TCA movAddr, const Class* cls, uintptr_t funcVal) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-EXTERNALLY_VISIBLE uintptr_t
+EXTERNALLY_VISIBLE const Func*
 handleDynamicCall(const Class* cls, const StringData* name, const Class* ctx) {
   // Perform lookup without any caching.
   return lookup(cls, name, ctx);
 }
 
-EXTERNALLY_VISIBLE uintptr_t
+EXTERNALLY_VISIBLE const Func*
 handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
                  rds::Handle mceHandle, uintptr_t mcePrime) {
   assertx(name->isStatic());
@@ -256,21 +255,20 @@ handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
     }
 
     // Otherwise, use TC's mcePrime as a starting point for request local cache.
-    mce = Entry { nullptr, mcePrime >> 32 };
+    mce = Entry { nullptr, reinterpret_cast<const Func*>(mcePrime >> 32) };
     rds::initHandle(mceHandle);
   } else if (LIKELY(mce.m_key == cls)) {
     // Fast path -- hit in the request local cache.
     return mce.m_value;
-  } else if (UNLIKELY(mce.m_value & 0x1)) {
+  } else if (UNLIKELY(mce.m_value == nullptr)) {
     // Snail path -- the cache missed func is magic, can't use it.
     auto const func = lookup(cls, name, ctx);
     mce = Entry { cls, func };
     return func;
   }
 
-  assertx(mce.m_value && !(mce.m_value & 0x1));
-  auto const oldFunc = reinterpret_cast<const Func*>(mce.m_value);
-  assertx(!oldFunc->isStaticInPrologue());
+  auto const oldFunc = mce.m_value;
+  assertx(oldFunc && !oldFunc->isStaticInPrologue());
 
   // Note: if you manually CSE oldFunc->methodSlot() here, gcc 4.8
   // will strangely generate two loads instead of one.
@@ -290,7 +288,7 @@ handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
   // the method, but neither overrode the method.
   if (LIKELY(cand == oldFunc)) {
     mce.m_key = cls;
-    return reinterpret_cast<uintptr_t>(oldFunc);
+    return oldFunc;
   }
 
   // If the previously called function (oldFunc) was private, then
@@ -310,7 +308,7 @@ handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
         cls->classVec()[oldCls->classVecLen() - 1] == oldCls) {
       // cls <: oldCls -- choose the same function as last time.
       mce.m_key = cls;
-      return reinterpret_cast<uintptr_t>(oldFunc);
+      return oldFunc;
     }
   }
 
@@ -338,9 +336,8 @@ handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
         throw_has_this_need_static(cand);
       }
 
-      auto const func = reinterpret_cast<uintptr_t>(cand);
-      mce = Entry { cls, func };
-      return func;
+      mce = Entry { cls, cand };
+      return cand;
     }
 
     // If the candidate function and the old function are originally
@@ -354,9 +351,8 @@ handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
     // can't be static, because the last one wasn't.
     if (LIKELY(cand->baseCls() == oldFunc->baseCls())) {
       assertx(!cand->isStaticInPrologue());
-      auto const func = reinterpret_cast<uintptr_t>(cand);
-      mce = Entry { cls, func };
-      return func;
+      mce = Entry { cls, cand };
+      return cand;
     }
   }
 

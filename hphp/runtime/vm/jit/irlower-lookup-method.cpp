@@ -102,24 +102,6 @@ void cgLdSmashableFunc(IRLS& env, const IRInstruction* inst) {
   v << shrqi{32, smashable, dst, v.makeReg()};
 }
 
-void cgCheckFuncMMNonMagic(IRLS& env, const IRInstruction* inst) {
-  auto const funcmm = srcLoc(env, inst, 0).reg();
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-
-  auto const sf = v.makeReg();
-  v << testqi{0x1, funcmm, sf};
-  fwdJcc(v, env, CC_NZ, sf, inst->taken());
-  v << copy{funcmm, dst};
-}
-
-void cgLdFuncMFunc(IRLS& env, const IRInstruction* inst) {
-  auto const cls = srcLoc(env, inst, 0).reg();
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-  v << decq{cls, dst, v.makeReg()};
-}
-
 void cgLdObjMethodD(IRLS& env, const IRInstruction* inst) {
   assertx(inst->taken() && inst->taken()->isCatch()); // must have catch block
   using namespace MethodCache;

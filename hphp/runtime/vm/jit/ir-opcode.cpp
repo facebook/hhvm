@@ -591,7 +591,6 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckCtxThis:
   case CheckDArray:
   case CheckDictOffset:
-  case CheckFuncMMNonMagic:
   case CheckInit:
   case CheckInitMem:
   case CheckKeysetOffset:
@@ -840,7 +839,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdElem:
   case LdFuncCls:
   case LdFuncFromClsMeth:
-  case LdFuncMFunc:
   case LdFuncNumParams:
   case LdFuncName:
   case LdFuncRxLevel:

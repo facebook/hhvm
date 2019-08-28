@@ -179,7 +179,6 @@ bool canDCE(IRInstruction* inst) {
   case LdClosure:
   case LdClsCtx:
   case LdClsCctx:
-  case LdFuncMFunc:
   case LdSmashable:
   case LdSmashableFunc:
   case LdClsFromClsMeth:
@@ -376,7 +375,6 @@ bool canDCE(IRInstruction* inst) {
   case CheckTypeMem:
   case CheckVArray:
   case CheckDArray:
-  case CheckFuncMMNonMagic:
   case CheckSmashableClass:
   case HintLocInner:
   case HintStkInner:

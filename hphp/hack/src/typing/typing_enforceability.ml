@@ -230,7 +230,7 @@ let rec is_enforceable (env: env) (ty: decl ty) =
   (* TODO(T36532263) make sure that this is what we want *)
   | Tpu_access _ -> false
 
-let is_enforced env ty =
+let is_enforced env ~is_xhp_attr ty =
   let enforceable = is_enforceable env ty in
   let is_hhi =
     fst ty |>
@@ -238,7 +238,7 @@ let is_enforced env ty =
     Pos.filename |>
     Relative_path.prefix |>
     (=) Relative_path.Hhi in
-  enforceable && not is_hhi
+  enforceable && not is_hhi && not is_xhp_attr
 
 let pessimize_type_simple env (ty: decl ty) =
   if not env.pessimize then ty else
@@ -246,8 +246,8 @@ let pessimize_type_simple env (ty: decl ty) =
   | _, Tprim (Aast.Tvoid | Aast.Tnoreturn) -> ty
   | _ -> wrap_like ty
 
-let compute_enforced_and_pessimize_ty_simple env (ty: decl ty) =
-  let et_enforced = is_enforced env ty in
+let compute_enforced_and_pessimize_ty_simple env ?(is_xhp_attr = false) (ty: decl ty) =
+  let et_enforced = is_enforced env ~is_xhp_attr ty in
   let et_type =
     if not et_enforced
     then pessimize_type_simple env ty

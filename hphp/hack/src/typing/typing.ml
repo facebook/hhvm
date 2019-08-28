@@ -4542,7 +4542,7 @@ and obj_get_concrete_ty ~inst_meth ~is_method ~coerce_from_ty ?(explicit_tparams
 
         end (* match Env.get_member is_method env class_info SN.Members.__call *)
 
-      | Some ({ce_visibility = vis; ce_type = lazy member_; _ } as member_ce) ->
+      | Some ({ce_visibility = vis; ce_type = lazy member_; ce_xhp_attr; _ } as member_ce) ->
         let mem_pos = Reason.to_pos (fst member_) in
         if shadowed then begin match old_member_info with
           | Some ({ce_visibility = old_vis; ce_type = lazy old_member; _ }) ->
@@ -4569,8 +4569,9 @@ and obj_get_concrete_ty ~inst_meth ~is_method ~coerce_from_ty ?(explicit_tparams
                   ~ety_env env ft) in
               env, (r, Tfun ft), false
             | _ ->
+              let is_xhp_attr = Option.is_some ce_xhp_attr in
               let { et_type; et_enforced } =
-                Typing_enforceability.compute_enforced_and_pessimize_ty_simple env member_decl_ty in
+                Typing_enforceability.compute_enforced_and_pessimize_ty_simple env member_decl_ty ~is_xhp_attr in
               let env, member_ty = Phase.localize ~ety_env env et_type in
               (* TODO(T52753871): same as for class_get *)
               env, member_ty, et_enforced

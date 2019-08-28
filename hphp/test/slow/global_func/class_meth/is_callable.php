@@ -13,15 +13,16 @@ function typehint(callable $m) {
 }
 
 function check($m) {
+  $n = null;
   \var_dump($m, is_callable($m));
   \var_dump(is_callable($m, true));
-  \var_dump(is_callable($m, false, &$n));
+  \var_dump(is_callable_with_name($m, false, inout $n));
   \var_dump($n);
-  \var_dump(is_callable($m, true, &$n));
+  \var_dump(is_callable_with_name($m, true, inout $n));
   \var_dump($n);
-  \var_dump(is_callable_with_name($m, false, &$n));
+  \var_dump(is_callable_with_name($m, false, inout $n));
   \var_dump($n);
-  \var_dump(is_callable_with_name($m, true, &$n));
+  \var_dump(is_callable_with_name($m, true, inout $n));
   \var_dump($n);
 }
 

@@ -130,7 +130,7 @@ bool is_callable(const Variant& v) {
   return ctx.func != nullptr && !ctx.func->isAbstract();
 }
 
-bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
+bool is_callable(const Variant& v, bool syntax_only, Variant* name) {
   bool ret = true;
   if (LIKELY(!syntax_only)) {
     ret = is_callable(v);
@@ -140,21 +140,21 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
   auto const tv_func = v.toCell();
   if (isFuncType(tv_func->m_type)) {
     auto func_name = tv_func->m_data.pfunc->fullDisplayName();
-    if (name) *name->var() = Variant{func_name, Variant::PersistentStrInit{}};
+    if (name) *name = Variant{func_name, Variant::PersistentStrInit{}};
     return true;
   }
 
   if (isClsMethType(tv_func->m_type)) {
     auto const clsmeth = tv_func->m_data.pclsmeth;
     if (name) {
-      *name->var() = concat3(
+      *name = concat3(
         clsmeth->getCls()->nameStr(), "::", clsmeth->getFunc()->nameStr());
     }
     return true;
   }
 
   if (isStringType(tv_func->m_type)) {
-    if (name) *name->var() = v;
+    if (name) *name = v;
     return ret;
   }
 
@@ -168,7 +168,7 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
     if (arr.size() != 2 ||
         clsname.is_dummy() ||
         (!isStringType(mthname.type()) && !isFuncType(mthname.type()))) {
-      if (name) *name->var() = array_string;
+      if (name) *name = array_string;
       return false;
     }
 
@@ -180,20 +180,20 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
     } else if (isClassType(clsname.type())) {
       clsString = const_cast<StringData*>(clsname.val().pclass->name());
     } else {
-      if (name) *name->var() = array_string;
+      if (name) *name = array_string;
       return false;
     }
 
     if (isFuncType(mthname.type())) {
       if (name) {
-        *name->var() = Variant{mthname.val().pfunc->fullDisplayName(),
+        *name = Variant{mthname.val().pfunc->fullDisplayName(),
                                Variant::PersistentStrInit{}};
       }
       return true;
     }
 
     if (name) {
-      *name->var() = concat3(String{clsString},
+      *name = concat3(String{clsString},
                              s_colon2,
                              String{mthname.val().pstr});
     }
@@ -206,9 +206,9 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
     if (name) {
       if (d->instanceof(c_Closure::classof())) {
         // Hack to stop the mangled name from showing up
-        *name->var() = s_Closure__invoke;
+        *name = s_Closure__invoke;
       } else {
-        *name->var() = d->getClassName().asString() + "::__invoke";
+        *name = d->getClassName().asString() + "::__invoke";
       }
     }
     return invoke != nullptr;

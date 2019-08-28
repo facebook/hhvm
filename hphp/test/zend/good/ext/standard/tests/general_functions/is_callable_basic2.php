@@ -16,9 +16,10 @@ function check_iscallable_objects($methods, $loop_counter) {
     var_dump(is_callable($method));
     var_dump(is_callable($method, true));
     var_dump(is_callable($method, false));
-    var_dump(is_callable_with_name($method, true, &$callable_name));
+    $callable_name = null;
+    var_dump(is_callable_with_name($method, true, inout $callable_name));
     echo $callable_name, "\n";
-    var_dump(is_callable_with_name($method, false, &$callable_name));
+    var_dump(is_callable_with_name($method, false, inout $callable_name));
     echo $callable_name, "\n";
     $counter++;
   }

@@ -186,7 +186,7 @@ inline bool is_empty_string(const Cell* c) {
  * Semantics of is_callable defined here:
  * http://php.net/manual/en/function.is-callable.php
  */
-bool is_callable(const Variant& v, bool syntax_only, RefData* name);
+bool is_callable(const Variant& v, bool syntax_only, Variant* name);
 /*
  * Equivalent to is_callable(v, false, nullptr)
  */

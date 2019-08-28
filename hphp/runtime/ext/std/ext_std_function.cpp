@@ -55,14 +55,13 @@ bool HHVM_FUNCTION(function_exists, const String& function_name,
      function_exists(function_name));
 }
 
-bool HHVM_FUNCTION(is_callable, const Variant& v, bool syntax /* = false */,
-                   OutputArg name /* = null */) {
-  return is_callable(v, syntax, name.get());
+bool HHVM_FUNCTION(is_callable, const Variant& v, bool syntax /* = false */) {
+  return is_callable(v, syntax, nullptr);
 }
 
 bool HHVM_FUNCTION(is_callable_with_name, const Variant& v, bool syntax,
-                   OutputArg name) {
-  return is_callable(v, syntax, name.get());
+                   Variant& name) {
+  return is_callable(v, syntax, &name);
 }
 
 Variant HHVM_FUNCTION(call_user_func, const Variant& function,

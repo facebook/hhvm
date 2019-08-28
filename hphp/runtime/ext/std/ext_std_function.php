@@ -16,13 +16,13 @@ namespace {
  * @return mixed -  Returns TRUE if name is callable, FALSE otherwise.
  */
 <<__Native, __Rx>>
-function is_callable(mixed $callback, bool $syntax_only = false,
-                     mixed &$callable_name = null): bool;
+function is_callable(mixed $callback, bool $syntax_only = false): bool;
 
 <<__Native, __Rx>>
 function is_callable_with_name(mixed $callback,
                                bool $syntax_only,
-                               mixed &$callable_name): bool;
+                               <<__OutOnly>>
+                               inout mixed $callable_name): bool;
 
 /**
  * Call a callback with an array of parameters

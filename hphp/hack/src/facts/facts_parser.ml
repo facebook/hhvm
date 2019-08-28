@@ -417,7 +417,7 @@ let rec collect ((ns, facts) as acc) n =
       end
     | _ -> acc)
 
-let from_text
+let from_text_
     ~(php5_compat_mode : bool)
     ~(hhvm_compat_mode : bool)
     ~(disable_nontoplevel_declarations : bool)
@@ -463,7 +463,7 @@ let extract_as_json
     ~(disable_legacy_attribute_syntax : bool)
     ~(filename : Relative_path.t)
     ~(text : string) : Hh_json.json option =
-  from_text
+  from_text_
     ~php5_compat_mode
     ~hhvm_compat_mode
     ~disable_nontoplevel_declarations
@@ -514,3 +514,24 @@ let extract_as_json_string
       ~filename
       ~text
     |> Option.map ~f:(Hh_json.json_to_multiline ~sort_keys:true)
+
+let from_text
+    ~(php5_compat_mode : bool)
+    ~(hhvm_compat_mode : bool)
+    ~(disable_nontoplevel_declarations : bool)
+    ~(disable_legacy_soft_typehints : bool)
+    ~(allow_new_attribute_syntax : bool)
+    ~(disable_legacy_attribute_syntax : bool)
+    ~(filename : Relative_path.t)
+    ~(text : string) : facts option =
+  Option.bind
+    (extract_as_json
+       ~php5_compat_mode
+       ~hhvm_compat_mode
+       ~disable_nontoplevel_declarations
+       ~disable_legacy_soft_typehints
+       ~allow_new_attribute_syntax
+       ~disable_legacy_attribute_syntax
+       ~filename
+       ~text)
+    facts_from_json

@@ -9,6 +9,7 @@
 
 open Core_kernel
 open Typing_defs
+open Typing_env_types
 
 module Phase   = Typing_phase
 module Env     = Typing_env
@@ -27,7 +28,7 @@ type method_call_info = {
 let make_call_info ~receiver_is_self ~is_static receiver_type method_name =
   { receiver_type; receiver_is_self; is_static; method_name; }
 
-let type_to_str: type a. Env.env -> a ty -> string = fun env ty ->
+let type_to_str: type a. env -> a ty -> string = fun env ty ->
   (* strip expression dependent types to make error message clearer *)
   let rec unwrap: type a. a ty -> a ty = function
   | _, Tabstract (AKdependent DTthis, Some ty) -> unwrap ty
@@ -56,9 +57,9 @@ let get_associated_condition_type env ~is_self ty =
   | _, Tabstract (AKgeneric n, _) ->
     Env.get_condition_type env n
   | _, Tabstract (AKdependent DTthis, _) ->
-    condition_type_from_reactivity (Env.env_reactivity env)
+    condition_type_from_reactivity (env_reactivity env)
   | _ when is_self ->
-    condition_type_from_reactivity (Env.env_reactivity env)
+    condition_type_from_reactivity (env_reactivity env)
   | _ -> None
 
 (* removes condition type from given reactivity flavor *)
@@ -188,7 +189,7 @@ let check_call env method_info pos reason ft arg_types =
   (* do nothing if unsafe_rx is set *)
   if TypecheckerOptions.unsafe_rx (Env.get_tcopt env) then ()
   else
-  match Env.env_reactivity env with
+  match env_reactivity env with
   (* non reactive and locally reactive functions can call pretty much anything
      - do nothing *)
   | Nonreactive | Local _ -> ()
@@ -207,7 +208,7 @@ let check_call env method_info pos reason ft arg_types =
     | MaybeReactive (Local (Some _)) -> MaybeReactive (Local None)
     | MaybeReactive (RxVar (Some v)) -> MaybeReactive (RxVar (Some (go v)))
     | r -> r in
-    go (Env.env_reactivity env) in
+    go (env_reactivity env) in
   (* check that all conditions are met if we are calling something
      conditionally reactive *)
   let callee_is_conditionally_reactive =
@@ -353,7 +354,7 @@ let try_substitute_type_with_condition env cond_ty ty =
    and it is not assignable to fresh type parameter. To handle this for returns we reduce
    return type to its upper bound if return type is TFresh and current context is non-reactive *)
 let strip_condition_type_in_return env ty =
-  if Env.env_reactivity env <> Nonreactive then ty
+  if env_reactivity env <> Nonreactive then ty
   else begin match ty with
   | _, Tabstract ((AKgeneric n), _)
     when Option.is_some (Env.get_condition_type env n) ->

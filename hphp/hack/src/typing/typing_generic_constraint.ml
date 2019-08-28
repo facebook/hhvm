@@ -12,6 +12,7 @@ module TUtils = Typing_utils
 module Reason = Typing_reason
 module Env = Typing_env
 open Typing_defs
+open Typing_env_types
 
 let check_constraint env ck ty ~cstr_ty =
   Typing_log.(log_with_level env "sub" 1 (fun () ->
@@ -45,7 +46,7 @@ let check_constraint env ck ty ~cstr_ty =
        * constraint type. *)
       TUtils.sub_type env ecstr_ty ty Errors.unify_error
 
-let add_check_constraint_todo (env:Env.env) ~use_pos (pos,name) ck cstr_ty ty =
+let add_check_constraint_todo (env:env) ~use_pos (pos,name) ck cstr_ty ty =
     Errors.try_
       (fun () ->
         check_constraint env ck ty ~cstr_ty)
@@ -54,7 +55,7 @@ let add_check_constraint_todo (env:Env.env) ~use_pos (pos,name) ck cstr_ty ty =
        env
       )
 
-let add_check_where_constraint_todo ~in_class (env:Env.env) ~use_pos ~definition_pos ck cstr_ty ty =
+let add_check_where_constraint_todo ~in_class (env:env) ~use_pos ~definition_pos ck cstr_ty ty =
     Errors.try_
       (fun () ->
         check_constraint env ck ty ~cstr_ty)
@@ -103,7 +104,7 @@ let handle_eq_tconst_constraint env ck ty cstr_ty =
   end
 
 let add_check_tconst_where_constraint_todo
-  (env:Env.env) ~use_pos ~definition_pos ck ty_from_env cstr_ty ty =
+  (env:env) ~use_pos ~definition_pos ck ty_from_env cstr_ty ty =
     Errors.try_
       (fun () ->
         let env, ty = ty_from_env env ty in

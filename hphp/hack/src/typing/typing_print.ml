@@ -14,6 +14,7 @@
 
 open Core_kernel
 open Typing_defs
+open Typing_env_types
 open Typing_logic
 open Utils
 
@@ -276,9 +277,9 @@ module Full = struct
     | Tdestructure tyl -> list "list(" k tyl ")"
     | Tanon (_, id) ->
       begin match Env.get_anonymous env id with
-      | Some { Env. rx = Reactive _; is_coroutine = true; _ } -> text "[coroutine rx fun]"
-      | Some { Env. rx = Nonreactive; is_coroutine = true; _ } -> text "[coroutine fun]"
-      | Some { Env. rx = Reactive _; is_coroutine = false; _ } -> text "[rx fun]"
+      | Some { rx = Reactive _; is_coroutine = true; _ } -> text "[coroutine rx fun]"
+      | Some { rx = Nonreactive; is_coroutine = true; _ } -> text "[coroutine fun]"
+      | Some { rx = Reactive _; is_coroutine = false; _ } -> text "[rx fun]"
       | _ -> text "[fun]"
       end
     | Tunion [] ->
@@ -742,7 +743,7 @@ let string_to_param_mode = function
   | "inout" -> Some FPinout
   | _ -> None
 
-let rec from_type: type a. Typing_env.env -> a ty -> json =
+let rec from_type: type a. env -> a ty -> json =
   function env -> function ty ->
   (* Helpers to construct fields that appear in JSON rendering of type *)
   let kind k = ["kind", JSON_String k] in

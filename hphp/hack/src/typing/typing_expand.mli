@@ -18,6 +18,6 @@
 (*****************************************************************************)
 
 val fully_expand:
-  Typing_env.env ->
+  Typing_env_types.env ->
   Typing_defs.locl Typing_defs.ty ->
   Typing_defs.locl Typing_defs.ty

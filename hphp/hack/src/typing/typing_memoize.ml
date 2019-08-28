@@ -9,20 +9,21 @@
 open Core_kernel
 open Aast
 open Typing_defs
+open Typing_env_types
 
 module Env = Typing_env
 module SN = Naming_special_names
 module SubType = Typing_subtype
 module MakeType = Typing_make_type
 
-let check_param : Env.env -> Nast.fun_param -> unit =
+let check_param : env -> Nast.fun_param -> unit =
   fun env {param_type_hint; param_pos; _} ->
   let error ty =
     let ty_str = Typing_print.error env ty in
     let msgl = Reason.to_string ("This is "^ty_str) (fst ty) in
     Errors.invalid_memoized_param param_pos msgl
   in
-  let rec check_memoizable: Env.env -> locl ty -> unit =
+  let rec check_memoizable: env -> locl ty -> unit =
     fun env ty ->
     let env, ty = Env.expand_type env ty in
     let ety_env = Typing_phase.env_with_self env in
@@ -100,7 +101,7 @@ let check_param : Env.env -> Nast.fun_param -> unit =
     let env, ty = Typing_phase.localize_hint_with_self env hint in
     check_memoizable env ty
 
-let check: Env.env -> Nast.user_attribute list ->
+let check: env -> Nast.user_attribute list ->
     Nast.fun_param list -> Nast.fun_variadicity -> unit =
   fun env user_attributes params variadic ->
   if Attributes.mem SN.UserAttributes.uaMemoize user_attributes ||
@@ -113,10 +114,10 @@ let check: Env.env -> Nast.user_attribute list ->
     | FVnonVariadic -> ()
   end
 
-let check_function: Env.env -> Nast.fun_ -> unit =
+let check_function: env -> Nast.fun_ -> unit =
   fun env {f_user_attributes; f_params; f_variadic; _ } ->
   check env f_user_attributes f_params f_variadic
 
-let check_method: Env.env -> Nast.method_ -> unit =
+let check_method: env -> Nast.method_ -> unit =
   fun env {m_user_attributes; m_params; m_variadic; _ } ->
   check env m_user_attributes m_params m_variadic

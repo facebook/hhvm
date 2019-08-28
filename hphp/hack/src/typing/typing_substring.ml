@@ -9,6 +9,7 @@
 
 open Core_kernel
 open Typing_defs
+open Typing_env_types
 
 module Reason = Typing_reason
 module Env = Typing_env
@@ -20,8 +21,8 @@ let is_object env ty =
 
 let sub_string
   (p : Pos.Map.key)
-  (env : Env.env)
-  (ty : locl ty) : Env.env =
+  (env : env)
+  (ty : locl ty) : env =
   (* Under constraint-based inference, we implement sub_string as a subtype test.
    * All the cases in the legacy implementation just fall out from subtyping rules.
    * We test against ?(arraykey | bool | float | resource | object | dynamic |

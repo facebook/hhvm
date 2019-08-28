@@ -10,6 +10,7 @@
 open Core_kernel
 open Common
 open Typing_defs
+open Typing_env_types
 open Type_mapper
 
 module Env = Typing_env

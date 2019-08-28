@@ -24,6 +24,7 @@
 open Core_kernel
 open Aast
 open Typing_defs
+open Typing_env_types
 open Utils
 
 module Env = Typing_env
@@ -37,7 +38,7 @@ module Cls = Decl_provider.Class
 
 type env = {
   typedef_tparams : Nast.tparam list;
-  tenv: Env.env;
+  tenv: Typing_env_types.env;
 }
 let rec fun_ tenv f =
   let env = { typedef_tparams = [];
@@ -48,7 +49,7 @@ let rec fun_ tenv f =
      and where constraints *)
   let ety_env = Phase.env_with_self env.tenv in
   let f_tparams : decl tparam list = List.map f.f_tparams
-    ~f:(Decl_hint.aast_tparam_to_decl_tparam env.tenv.Env.decl_env) in
+    ~f:(Decl_hint.aast_tparam_to_decl_tparam env.tenv.decl_env) in
   let tenv, constraints =
     Phase.localize_generic_parameters_with_bounds env.tenv f_tparams
       ~ety_env in
@@ -118,11 +119,11 @@ and hint_ env p = function
   | Hpu_access (h, _) -> hint env h
 
 and check_happly unchecked_tparams env h =
-  let decl_ty = Decl_hint.hint env.Env.decl_env h in
+  let decl_ty = Decl_hint.hint env.decl_env h in
   let unchecked_tparams =
     List.map unchecked_tparams begin fun t ->
       let cstrl = List.map t.tp_constraints (fun (ck, cstr) ->
-        let cstr = Decl_hint.hint env.Env.decl_env cstr in
+        let cstr = Decl_hint.hint env.decl_env cstr in
         (ck, cstr)) in
       {
         Typing_defs.tp_variance = t.tp_variance;
@@ -181,7 +182,7 @@ and class_ tenv c =
             } in
   (* Add type parameters to typing environment and localize the bounds *)
   let c_tparam_list : decl tparam list = List.map c.c_tparams.c_tparam_list
-    ~f:(Decl_hint.aast_tparam_to_decl_tparam env.tenv.Env.decl_env) in
+    ~f:(Decl_hint.aast_tparam_to_decl_tparam env.tenv.decl_env) in
   let tenv, constraints = Phase.localize_generic_parameters_with_bounds
     tenv c_tparam_list ~ety_env:(Phase.env_with_self tenv) in
   let tenv = add_constraints (fst c.c_name) tenv constraints in
@@ -223,7 +224,7 @@ and method_ env m =
      and where constraints *)
   let ety_env = Phase.env_with_self env.tenv in
   let m_tparams : decl tparam list = List.map m.m_tparams
-    ~f:(Decl_hint.aast_tparam_to_decl_tparam env.tenv.Env.decl_env) in
+    ~f:(Decl_hint.aast_tparam_to_decl_tparam env.tenv.decl_env) in
   let tenv, constraints =
     Phase.localize_generic_parameters_with_bounds env.tenv m_tparams ~ety_env in
   let tenv = add_constraints (fst m.m_name) tenv constraints in

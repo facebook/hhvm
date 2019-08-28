@@ -9,7 +9,6 @@
 
  open Typing_defs
  module TySet = Typing_set
- module type S = sig
 
  (* Local environment includes types of locals and bounds on type parameters. *)
  type local_env = {
@@ -101,4 +100,5 @@ and anon = {
     env * Tast.expr * locl ty;
 }
 
-end
+val get_fun : env -> Decl_provider.fun_key -> Decl_provider.fun_decl option
+val env_reactivity: env -> reactivity

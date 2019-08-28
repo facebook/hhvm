@@ -24,7 +24,7 @@ open Aast
 let show_env _ = "<env>"
 let pp_env _ _ = Printf.printf "%s\n" "<env>"
 
-type env = Typing_env.env
+type env = Typing_env_types.env
 type t = env [@@deriving show]
 
 exception Not_in_class
@@ -65,10 +65,10 @@ let get_tcopt = Typing_env.get_tcopt
 let expand_type = Typing_env.expand_type
 let set_static = Typing_env.set_static
 let set_val_kind = Typing_env.set_val_kind
-let set_inside_constructor env = { env with Typing_env.inside_constructor = true }
-let get_inside_constructor env = env.Typing_env.inside_constructor
-let get_decl_env env = env.Typing_env.decl_env
-let get_inside_ppl_class env = env.Typing_env.inside_ppl_class
+let set_inside_constructor env = { env with Typing_env_types.inside_constructor = true }
+let get_inside_constructor env = env.Typing_env_types.inside_constructor
+let get_decl_env env = env.Typing_env_types.decl_env
+let get_inside_ppl_class env = env.Typing_env_types.inside_ppl_class
 let get_val_kind = Typing_env.get_val_kind
 let get_file = Typing_env.get_file
 let fully_expand = Typing_expand.fully_expand
@@ -80,7 +80,7 @@ let get_concrete_supertypes = Typing_utils.get_concrete_supertypes
 let is_visible = Typing_visibility.is_visible
 let assert_nontrivial = Typing_equality_check.assert_nontrivial
 let assert_nullable = Typing_equality_check.assert_nullable
-let hint_to_ty env = Decl_hint.hint env.Typing_env.decl_env
+let hint_to_ty env = Decl_hint.hint env.Typing_env_types.decl_env
 let localize env ety_env = Typing_phase.localize ~ety_env env
 let localize_with_self = Typing_phase.localize_with_self
 let localize_with_dty_validator = Typing_phase.localize_with_dty_validator
@@ -112,7 +112,7 @@ let referenced_typeconsts env root ids =
 let empty tcopt = Typing_env.empty tcopt Relative_path.default ~droot:None
 
 let restore_saved_env env saved_env =
-  let module Env = Typing_env in
+  let module Env = Typing_env_types in
   {env with
     Env.genv = {
       env.Env.genv with
@@ -170,11 +170,11 @@ let def_env d =
   | FileAttributes _ -> empty GlobalOptions.default
 
 let set_ppl_lambda env =
-  { env with Typing_env.inside_ppl_class = false }
+  { env with Typing_env_types.inside_ppl_class = false }
 
 let get_anonymous_lambda_types env id =
   match Typing_env.get_anonymous env id with
-  | Some { Typing_env. counter = ftys; _ } ->
+  | Some { Typing_env_types. counter = ftys; _ } ->
     let (untyped, typed) = !ftys in
     untyped @ typed
   | _ ->
@@ -191,7 +191,7 @@ let get_enum = Typing_env.get_enum
 
 let is_enum = Typing_env.is_enum
 
-let env_reactivity = Typing_env.env_reactivity
+let env_reactivity = Typing_env_types.env_reactivity
 
 let function_is_mutable = Typing_env.function_is_mutable
 
@@ -199,11 +199,11 @@ let local_is_mutable = Typing_env.local_is_mutable
 
 let get_env_mutability = Typing_env.get_env_mutability
 
-let get_fun = Typing_env.get_fun
+let get_fun = Typing_env_types.get_fun
 let set_env_reactive = Typing_env.set_env_reactive
 
-let set_allow_wildcards env = { env with Typing_env.allow_wildcards = true }
+let set_allow_wildcards env = { env with Typing_env_types.allow_wildcards = true }
 
-let get_allow_wildcards env = env.Typing_env.allow_wildcards
+let get_allow_wildcards env = env.Typing_env_types.allow_wildcards
 
 let condition_type_matches = Typing_reactivity.condition_type_matches

@@ -10,6 +10,7 @@
 open Core_kernel
 open Common
 open Typing_defs
+open Typing_env_types
 
 module Nast = Aast
 module SN = Naming_special_names
@@ -38,47 +39,47 @@ let ty_size env ty =
 (*****************************************************************************)
 let not_implemented s _ = failwith (Printf.sprintf "Function %s not implemented" s)
 type expand_typedef =
-    expand_env -> Env.env -> Reason.t -> string -> locl ty list -> Env.env * locl ty
+    expand_env -> env -> Reason.t -> string -> locl ty list -> env * locl ty
 let (expand_typedef_ref : expand_typedef ref) = ref (not_implemented "expand_typedef")
 let expand_typedef x = !expand_typedef_ref x
 
-type sub_type = Env.env -> locl ty -> locl ty -> Errors.typing_error_callback -> Env.env
+type sub_type = env -> locl ty -> locl ty -> Errors.typing_error_callback -> env
 let (sub_type_ref: sub_type ref) = ref (not_implemented "sub_type")
 let sub_type x = !sub_type_ref x
 
 type is_sub_type_type =
-  Env.env -> locl ty -> locl ty -> bool
+  env -> locl ty -> locl ty -> bool
 (*let (is_sub_type_ref: is_sub_type_type ref) = ref not_implemented*)
 let (is_sub_type_for_union_ref: is_sub_type_type ref) = ref (not_implemented "is_sub_type_for_union")
 let is_sub_type_for_union x = !is_sub_type_for_union_ref x
 
-type add_constraint = Pos.Map.key -> Env.env -> Ast_defs.constraint_kind -> locl ty -> locl ty -> Env.env
+type add_constraint = Pos.Map.key -> env -> Ast_defs.constraint_kind -> locl ty -> locl ty -> env
 let (add_constraint_ref: add_constraint ref) = ref (not_implemented "add_constraint")
 let add_constraint x = !add_constraint_ref x
 
 type expand_typeconst =
-  expand_env -> Env.env -> ?as_tyvar_with_cnstr:bool -> locl ty ->
-  Aast.sid -> Env.env * locl ty
+  expand_env -> env -> ?as_tyvar_with_cnstr:bool -> locl ty ->
+  Aast.sid -> env * locl ty
 let (expand_typeconst_ref: expand_typeconst ref) = ref (not_implemented "expand_typeconst")
 let expand_typeconst x = !expand_typeconst_ref x
 
-type union = Env.env -> locl ty -> locl ty -> Env.env * locl ty
+type union = env -> locl ty -> locl ty -> env * locl ty
 let (union_ref: union ref) = ref (not_implemented "union")
 let union x = !union_ref x
 
-type union_list = Env.env -> Reason.t -> locl ty list -> (Env.env * locl ty)
+type union_list = env -> Reason.t -> locl ty list -> (env * locl ty)
 let (union_list_ref : union_list ref) = ref (not_implemented "union_list")
 let union_list x = !union_list_ref x
 
-type fold_union = Env.env -> Reason.t -> locl ty list -> Env.env * locl ty
+type fold_union = env -> Reason.t -> locl ty list -> env * locl ty
 let (fold_union_ref : fold_union ref) = ref (not_implemented "fold_union")
 let fold_union x = !fold_union_ref x
 
 type simplify_unions =
-  Env.env ->
-  ?on_tyvar:(Env.env -> Reason.t -> Ident.t -> Env.env * locl ty) ->
+  env ->
+  ?on_tyvar:(env -> Reason.t -> Ident.t -> env * locl ty) ->
   locl ty ->
-  Env.env * locl ty
+  env * locl ty
 let (simplify_unions_ref : simplify_unions ref) = ref (not_implemented "simplify_unions")
 let simplify_unions x = !simplify_unions_ref x
 
@@ -87,31 +88,31 @@ let (diff_ref : diff ref) = ref (not_implemented "diff")
 let diff x = !diff_ref x
 
 type approx = ApproxUp | ApproxDown
-type non = Env.env -> Reason.t -> locl ty -> approx:approx -> (Env.env * locl ty)
+type non = env -> Reason.t -> locl ty -> approx:approx -> (env * locl ty)
 let (non_ref : non ref) = ref (not_implemented "non")
 let non x = !non_ref x
 
-type simplify_intersections = Env.env ->
-  ?on_tyvar:(Env.env -> Reason.t -> int -> Env.env * locl ty) -> locl ty -> Env.env * locl ty
+type simplify_intersections = env ->
+  ?on_tyvar:(env -> Reason.t -> int -> env * locl ty) -> locl ty -> env * locl ty
 let (simplify_intersections_ref : simplify_intersections ref) = ref (not_implemented "simplify_intersections")
 let simplify_intersections x = !simplify_intersections_ref x
 
-type localize_with_self = Env.env -> decl ty -> Env.env * locl ty
+type localize_with_self = env -> decl ty -> env * locl ty
 let (localize_with_self_ref : localize_with_self ref) = ref (not_implemented "localize_with_self")
 let localize_with_self x = !localize_with_self_ref x
 
 type coerce_type =
   Pos.t ->
-  ?sub_fn:(Pos.t -> Reason.ureason -> Env.env -> locl ty -> locl ty ->
-    Errors.typing_error_callback -> Env.env) ->
-  Reason.ureason -> Env.env -> locl ty -> locl possibly_enforced_ty ->
-    Errors.typing_error_callback -> Env.env
+  ?sub_fn:(Pos.t -> Reason.ureason -> env -> locl ty -> locl ty ->
+    Errors.typing_error_callback -> env) ->
+  Reason.ureason -> env -> locl ty -> locl possibly_enforced_ty ->
+    Errors.typing_error_callback -> env
 let (coerce_type_ref : coerce_type ref) = ref (not_implemented "coerce_type")
 let coerce_type x = !coerce_type_ref x
 
-type can_coerce = Pos.t -> Env.env -> ?ur:Reason.ureason -> locl ty ->
+type can_coerce = Pos.t -> env -> ?ur:Reason.ureason -> locl ty ->
   locl possibly_enforced_ty ->
-  Errors.typing_error_callback -> Env.env option
+  Errors.typing_error_callback -> env option
 let (can_coerce_ref : can_coerce ref) = ref (not_implemented "can_coerce")
 let can_coerce x = !can_coerce_ref x
 

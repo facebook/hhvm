@@ -18,17 +18,17 @@ module Shared(Env: Env_S): sig
 end
 
 val handle_assignment_mutability :
-  Typing_env.env ->
+  Typing_env_types.env ->
   Tast.expr ->
   Tast.expr_ option ->
-  Typing_env.env
-val freeze_local : Pos.t -> Typing_env.env -> Tast.expr list -> Typing_env.env
-val move_local : Pos.t -> Typing_env.env -> Tast.expr list -> Typing_env.env
+  Typing_env_types.env
+val freeze_local : Pos.t -> Typing_env_types.env -> Tast.expr list -> Typing_env_types.env
+val move_local : Pos.t -> Typing_env_types.env -> Tast.expr list -> Typing_env_types.env
 val handle_value_in_return:
   function_returns_mutable: bool ->
   function_returns_void_for_rx: bool ->
-  Typing_env.env ->
+  Typing_env_types.env ->
   Pos.t ->
   Tast.expr ->
-  Typing_env.env
+  Typing_env_types.env
 val is_move_or_mutable_call: ?allow_move: bool -> Tast.expr_ -> bool

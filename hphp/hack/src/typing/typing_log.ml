@@ -9,10 +9,11 @@
 
 open Core_kernel
 open Typing_defs
+open Typing_env_types
 module Env = Typing_env
 module Pr = Typing_print
+module TPEnv = Type_parameter_env
 module TySet = Typing_set
-open Env
 open Tty
 open Typing_log_value
 

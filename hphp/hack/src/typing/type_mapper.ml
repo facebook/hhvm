@@ -12,13 +12,10 @@ open Core_kernel
 [@@@warning "+33"]
 open Common
 open Typing_defs
+open Typing_env_types
 
 module Env = Typing_env
 module Reason = Typing_reason
-
-(* Mapping environment threaded through all function calls:
- * - typing environment *)
-type env = Env.env
 
 (* Mapping result - updated environment, mapped type *)
 type result = env * locl ty

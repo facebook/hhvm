@@ -26,8 +26,8 @@ exception NoTypeConst of (unit -> unit)
 let raise_error error = raise_notrace @@ NoTypeConst error
 
 type env = {
-  tenv : Env.env;
-  ety_env : Phase.env;
+  tenv : Typing_env_types.env;
+  ety_env : expand_env;
   choose_assigned_type : bool;
   (* A list of generics we've seen while expanding. *)
   gen_seen : TySet.t;
@@ -70,7 +70,7 @@ and expand_with_env_ ety_env env ~as_tyvar_with_cnstr root id =
     (* if type constant has type this::ID and method has associated condition type ROOTCOND_TY
        for the receiver - check if condition type has type constant at the same path.
        If yes - attach a condition type ROOTCOND_TY::ID to a result type *)
-       begin match root, id, TR.condition_type_from_reactivity (Env.env_reactivity tenv) with
+       begin match root, id, TR.condition_type_from_reactivity (Typing_env_types.env_reactivity tenv) with
        | (_, Tabstract (AKdependent (DTthis), _)),
          (_, tconst),
          Some cond_ty ->

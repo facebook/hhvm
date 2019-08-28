@@ -11,6 +11,7 @@ open Core_kernel
 open Common
 open Utils
 open Typing_defs
+open Typing_env_types
 
 module Reason = Typing_reason
 module Unify = Typing_unify
@@ -42,7 +43,7 @@ let empty_extra_info = {
 }
 
 module ConditionTypes = struct
-  let try_get_class_for_condition_type (env: Env.env) (ty: decl ty) =
+  let try_get_class_for_condition_type (env: env) (ty: decl ty) =
     match TUtils.try_unwrap_class_type ty with
     | None -> None
     | Some (_, ((_, x) as sid), _) ->
@@ -52,7 +53,7 @@ module ConditionTypes = struct
     end
 
   let try_get_method_from_condition_type
-    (env: Env.env)
+    (env: env)
     (ty: decl ty)
     (is_static: bool)
     (method_name: string) =
@@ -63,7 +64,7 @@ module ConditionTypes = struct
     | None -> None
 
 
-  let localize_condition_type (env: Env.env) (ty: decl ty): locl ty =
+  let localize_condition_type (env: env) (ty: decl ty): locl ty =
     (* if condition type is generic - we cannot specify type argument in attribute.
        For cases when we check if containing type is a subtype of condition type
        if condition type is generic instantiate it with TAny's *)
@@ -117,23 +118,23 @@ end
  *   If assertion is unsatisfiable (e.g. arraykey <: string) then
  *     we record this in the failed field of the result.
  *)
-let with_error (f : unit -> unit) ((env, p) : (Env.env * TL.subtype_prop))
-  : Env.env * TL.subtype_prop =
+let with_error (f : unit -> unit) ((env, p) : (env * TL.subtype_prop))
+  : env * TL.subtype_prop =
   env, TL.conj p (TL.invalid ~fail:f)
 
 (* If `b` is false then fail with error function `f` *)
 let check_with b f r = if not b then with_error f r else r
 
-let valid env : Env.env * TL.subtype_prop = env, TL.valid
+let valid env : env * TL.subtype_prop = env, TL.valid
 
-let (&&&) (env, p1) (f : Env.env -> Env.env * TL.subtype_prop) =
+let (&&&) (env, p1) (f : env -> env * TL.subtype_prop) =
   if TL.is_unsat p1
   then env, p1
   else
     let env, p2 = f env in
     env, TL.conj p1 p2
 
-let if_unsat (f : unit -> Env.env * TL.subtype_prop) (env, p) =
+let if_unsat (f : unit -> env * TL.subtype_prop) (env, p) =
   if TL.is_unsat p
   then f ()
   else env, p
@@ -261,7 +262,7 @@ and simplify_subtype
   (ty_sub : locl ty)
   (ty_super : locl ty)
   ~(on_error : Errors.typing_error_callback)
-  env : Env.env * TL.subtype_prop =
+  env : env * TL.subtype_prop =
   log_subtype ~level:2 ~this_ty ~function_name:"simplify_subtype" env ty_sub ty_super;
   let env, ety_super = Env.expand_type env ty_super in
   let env, ety_sub = Env.expand_type env ty_sub in
@@ -273,7 +274,7 @@ and simplify_subtype
       (fst ety_sub)
       (snd ety_sub)
       on_error in
-  let (|||) (env, p1) (f : Env.env -> Env.env * TL.subtype_prop) =
+  let (|||) (env, p1) (f : env -> env * TL.subtype_prop) =
     if TL.is_valid p1
     then env, p1
     else
@@ -512,7 +513,7 @@ and simplify_subtype
     begin match Env.get_anonymous env id with
       | None ->
         invalid_with (fun () -> Errors.anonymous_recursive_call (Reason.to_pos r_sub))
-      | Some { Env. rx = reactivity; is_coroutine; counter = ftys; typecheck = anon; _ } ->
+      | Some { rx = reactivity; is_coroutine; counter = ftys; typecheck = anon; _ } ->
         let p_super = Reason.to_pos r_super in
         let p_sub = Reason.to_pos r_sub in
         (* Add function type to set of types seen so far *)
@@ -1262,7 +1263,7 @@ and simplify_subtype_variance
   (children_tyl : locl ty list)
   (super_tyl : locl ty list)
   ~(on_error : Errors.typing_error_callback)
-  : Env.env -> Env.env * TL.subtype_prop
+  : env -> env * TL.subtype_prop
   = fun env ->
   let simplify_subtype = simplify_subtype ~no_top_bottom ~seen_generic_params ~on_error
     ~this_ty:None in
@@ -1416,7 +1417,7 @@ and simplify_supertype_params_with_variadic
 and subtype_reactivity
   ?(extra_info: reactivity_extra_info option)
   ?(is_call_site = false)
-  (env : Env.env)
+  (env : env)
   (r_sub : reactivity)
   (r_super : reactivity) : bool =
 
@@ -1536,7 +1537,7 @@ and should_check_fun_params_reactivity
 (* checks condition described by OnlyRxIfImpl condition on parameter is met  *)
 and subtype_param_rx_if_impl
   ~is_param
-  (env: Env.env)
+  (env: env)
   (cond_type_sub: decl ty option)
   (declared_type_sub: locl ty option)
   (cond_type_super: decl ty option) =
@@ -1810,7 +1811,7 @@ and simplify_subtype_possibly_enforced
   (ft_super : locl fun_type)
   (on_error : Errors.typing_error_callback)
   env
-   : Env.env * TL.subtype_prop =
+   : env * TL.subtype_prop =
   let variadic_subtype = match ft_sub.ft_arity with
     | Fvariadic (_, {fp_type = var_sub; _ }) -> Some var_sub
     | _ -> None in
@@ -1854,11 +1855,11 @@ and simplify_subtype_possibly_enforced
 
 (* One of the main entry points to this module *)
 and sub_type
-  (env : Env.env)
+  (env : env)
   (ty_sub : locl ty)
   (ty_super : locl ty)
   (on_error : Errors.typing_error_callback)
-  : Env.env =
+  : env =
     Env.log_env_change "sub_type" env @@
     sub_type_inner env ~this_ty:None ty_sub ty_super on_error
 
@@ -1947,11 +1948,11 @@ and prop_to_env env prop on_error =
   env, TL.conj_list props'
 
 and env_to_prop env =
-  TL.conj (tvenv_to_prop env.Env.tvenv) env.Env.subtype_prop
+  TL.conj (tvenv_to_prop env.tvenv) env.subtype_prop
 
 and tvenv_to_prop tvenv =
   let props_per_tvar = IMap.mapi (
-    fun id { Env.lower_bounds; Env.upper_bounds; _ } ->
+    fun id { lower_bounds; upper_bounds; _ } ->
       let tyvar = (Reason.Rnone, Tvar id) in
       let lower_bounds = TySet.elements lower_bounds in
       let upper_bounds = TySet.elements upper_bounds in
@@ -1977,12 +1978,12 @@ and tvenv_to_prop tvenv =
   TL.conj_list props
 
 and sub_type_inner
-  (env : Env.env)
+  (env : env)
   ~(this_ty : locl ty option)
   (ty_sub: locl ty)
   (ty_super: locl ty)
   (on_error : Errors.typing_error_callback)
-   : Env.env =
+   : env =
   log_subtype ~level:1 ~this_ty ~function_name:"sub_type_inner" env ty_sub ty_super;
   let env, prop = simplify_subtype
     ~seen_generic_params:empty_seen
@@ -2001,7 +2002,7 @@ and sub_type_inner
  * before calling sub_type and then re-enable it afterwards.
  *)
 and is_sub_type_LEGACY_DEPRECATED
-  (env : Env.env)
+  (env : env)
   (ty_sub : locl ty)
   (ty_super : locl ty) : bool =
   (* quick short circuit to help perf *)
@@ -2147,12 +2148,12 @@ and try_union env ty tyl =
 let subtype_method
   ~(check_return : bool)
   ~(extra_info: reactivity_extra_info)
-  (env : Env.env)
+  (env : env)
   (r_sub : Reason.t)
   (ft_sub : decl fun_type)
   (r_super : Reason.t)
   (ft_super : decl fun_type)
-  (on_error : Errors.typing_error_callback) : Env.env =
+  (on_error : Errors.typing_error_callback) : env =
   if not ft_super.ft_abstract && ft_sub.ft_abstract then
     (* It is valid for abstract class to extend a concrete class, but it cannot
      * redefine already concrete members as abstract.
@@ -2227,10 +2228,10 @@ let subtype_method
   Env.env_with_tpenv env old_tpenv
 
 let decompose_subtype_add_bound
-  (env : Env.env)
+  (env : env)
   (ty_sub : locl ty)
   (ty_super : locl ty)
-  : Env.env =
+  : env =
   let env, ty_super = Env.expand_type env ty_super in
   let env, ty_sub = Env.expand_type env ty_sub in
   match ty_sub, ty_super with
@@ -2276,11 +2277,11 @@ let decompose_subtype_add_bound
  *)
 let rec decompose_subtype
   p
-  (env : Env.env)
+  (env : env)
   (ty_sub : locl ty)
   (ty_super : locl ty)
   (on_error : Errors.typing_error_callback)
-  : Env.env =
+  : env =
   log_subtype ~level:2 ~this_ty:None ~function_name:"decompose_subtype" env ty_sub ty_super;
   let env, prop =
     simplify_subtype ~seen_generic_params:None
@@ -2294,7 +2295,7 @@ and decompose_subtype_add_prop p env prop =
   | TL.Disj (_, [prop']) ->
     decompose_subtype_add_prop p env prop'
   | TL.Disj _ ->
-    Typing_log.log_prop 2 env.Env.function_pos "decompose_subtype_add_prop" env prop;
+    Typing_log.log_prop 2 env.function_pos "decompose_subtype_add_prop" env prop;
     env
   | TL.IsSubtype (ty1, ty2) ->
     decompose_subtype_add_bound env ty1 ty2
@@ -2302,11 +2303,11 @@ and decompose_subtype_add_prop p env prop =
 (* Decompose a general constraint *)
 and decompose_constraint
   p
-  (env : Env.env)
+  (env : env)
   (ck : Ast_defs.constraint_kind)
   (ty_sub : locl ty)
   (ty_super : locl ty)
-  : Env.env =
+  : env =
   (* constraints are caught based on reason, not error callback. Using unify_error *)
   match ck with
   | Ast_defs.Constraint_as ->
@@ -2340,10 +2341,10 @@ and decompose_constraint
 let constraint_iteration_limit = 20
 let add_constraint
   p
-  (env : Env.env)
+  (env : env)
   (ck : Ast_defs.constraint_kind)
   (ty_sub : locl ty)
-  (ty_super : locl ty) : Env.env =
+  (ty_super : locl ty) : env =
   log_subtype ~level:1 ~this_ty:None ~function_name:"add_constraint" env ty_sub ty_super;
   let oldsize = Env.get_tpenv_size env in
   let env' = decompose_constraint p env ck ty_sub ty_super in
@@ -2369,19 +2370,19 @@ let add_constraint
     iter 0 env'
 
 let log_prop env =
-  let filename = Pos.filename (Pos.to_absolute env.Env.function_pos) in
+  let filename = Pos.filename (Pos.to_absolute env.function_pos) in
   if Str.string_match (Str.regexp {|.*\.hhi|}) filename 0 then () else
   let prop = env_to_prop env in
   if TypecheckerOptions.log_inference_constraints (Env.get_tcopt env) then (
     let p_as_string = Typing_print.subtype_prop env prop in
-    let pos = Pos.string (Pos.to_absolute env.Env.function_pos) in
+    let pos = Pos.string (Pos.to_absolute env.function_pos) in
     let size = TL.size prop in
     let n_disj = TL.n_disj prop in
     let n_conj = TL.n_conj prop in
     TypingLogger.InferenceCnstr.log p_as_string ~pos ~size ~n_disj ~n_conj);
   if not (Errors.currently_has_errors ()) &&
     not (TL.is_valid prop)
-  then Typing_log.log_prop 1 env.Env.function_pos
+  then Typing_log.log_prop 1 env.function_pos
     "There are remaining unsolved constraints!" env prop
 
 (*****************************************************************************)

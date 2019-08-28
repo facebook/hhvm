@@ -15,6 +15,8 @@ module TySet = Typing_set
 
 type locl_ty = locl ty
 
+[@@@warning "-32"]
+
 let show_local_id_set_t _ = "<local_id_set_t>"
 let pp_local_id_set_t _ _ = Printf.printf "%s\n" "<local_id_set_t>"
 type local_id_set_t = Local_id.Set.t
@@ -45,6 +47,8 @@ let pp_anon _ _ = Printf.printf "%s\n" "<anon>"
 
 let show_tfun _ = "<tfun>"
 let pp_tfun _ _ = Printf.printf "%s\n" "<tfun>"
+
+[@@@warning "+32"]
 
 type tyvar_info = {
   (* Where was the type variable introduced? (e.g. generic method invocation,
@@ -146,3 +150,11 @@ and anon = {
     locl fun_arity ->
     env * Tast.expr * locl_ty;
 }
+
+let get_fun env x =
+  let dep = Typing_deps.Dep.Fun x in
+  Option.iter env.decl_env.Decl_env.droot (fun root -> Typing_deps.add_idep root dep);
+  Decl_provider.get_fun x
+
+let env_reactivity env =
+  env.lenv.local_reactive

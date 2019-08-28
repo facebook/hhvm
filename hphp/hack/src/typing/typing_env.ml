@@ -9,7 +9,7 @@
 
 open Core_kernel
 open Common
-include Typing_env_types
+open Typing_env_types
 open Decl_env
 open Typing_defs
 open Aast
@@ -23,6 +23,7 @@ module C = Typing_continuations
 module TL = Typing_logic
 module Cls = Decl_provider.Class
 module Fake = Typing_fake_members
+module TPEnv = Type_parameter_env
 
 let show_env _ = "<env>"
 let pp_env _ _ = Printf.printf "%s\n" "<env>"
@@ -507,9 +508,6 @@ let set_condition_type env n ty =
 let get_condition_type env n =
   SMap.get n env.genv.condition_types
 
-let env_reactivity env =
-  env.lenv.local_reactive
-
 (* Some form (strict/shallow/local) of reactivity *)
 let env_local_reactive env =
   env_reactivity env <> Nonreactive
@@ -709,11 +707,6 @@ let get_parent_id env = env.genv.parent_id
 let get_fn_kind env = env.genv.fun_kind
 
 let get_file env = env.genv.file
-
-let get_fun env x =
-  let dep = Dep.Fun x in
-  Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
-  Decl_provider.get_fun x
 
 let set_fn_kind env fn_type =
   let genv = env.genv in

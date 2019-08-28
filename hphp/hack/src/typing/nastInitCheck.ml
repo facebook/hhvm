@@ -100,7 +100,7 @@ module Env = struct
   type t = {
     methods : method_status ref SMap.t ;
     props   : SSet.t ;
-    tenv    : Typing_env.env ;
+    tenv    : Typing_env_types.env ;
     class_init_props: SSet.t;
   }
 
@@ -130,7 +130,7 @@ module Env = struct
         DeferredMembers.parent_props tenv,
         DeferredMembers.parent tenv
       else
-        let decl_env = tenv.Typing_env.decl_env in
+        let decl_env = tenv.Typing_env_types.decl_env in
         DICheck.initialized_props,
         DICheck.trait_props decl_env,
         DICheck.parent_props decl_env,

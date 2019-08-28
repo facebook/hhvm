@@ -9,7 +9,7 @@
 
 open Core_kernel
 module Env = Typing_env
-open Typing_env
+open Typing_env_types
 module C = Typing_continuations
 module LEnvC = Typing_per_cont_env
 module LEnvOps = Typing_per_cont_ops
@@ -122,7 +122,7 @@ let union_lenvs_ env parent_lenv lenv1 lenv2 =
     parent_lenv.local_mutability lenv1.local_mutability lenv2.local_mutability in
   let local_reactive = merge_reactivity parent_lenv lenv1 lenv2 in
   let env = union_by_cont env lenv1 lenv2 in
-  let lenv = { env.Env.lenv with
+  let lenv = { env.lenv with
     local_using_vars;
     local_mutability;
     local_reactive;

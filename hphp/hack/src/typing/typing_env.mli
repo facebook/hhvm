@@ -6,8 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-include Typing_env_types_sig.S
-
+open Typing_env_types
 open Decl_provider
 open Typing_defs
 
@@ -70,7 +69,6 @@ val get_parent_id : env -> string
 val get_parent : env -> decl ty
 val get_fn_kind : env -> Ast_defs.fun_kind
 val get_file : env -> Relative_path.t
-val get_fun : env -> fun_key -> fun_decl option
 val set_fn_kind : env -> Ast_defs.fun_kind -> env
 val set_inside_ppl_class : env -> bool -> env
 val add_anonymous : env -> anon -> env * int
@@ -184,7 +182,6 @@ val get_tpenv_tparams : env -> SSet.t
 val set_env_reactive : env -> reactivity -> env
 val set_env_function_pos: env -> Pos.t -> env
 val set_env_pessimize: env -> env
-val env_reactivity: env -> reactivity
 val env_local_reactive : env -> bool
 val add_mutable_var : env -> Local_id.t -> Typing_mutability_env.mutability -> env
 val local_is_mutable : include_borrowed: bool -> env -> Local_id.t -> bool

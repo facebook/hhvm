@@ -14,7 +14,7 @@
 
 open Core_kernel
 val check_implements:
-    Typing_env.env ->
+    Typing_env_types.env ->
     string list String.Map.t ->
     Typing_defs.decl Typing_defs.ty ->
     Typing_defs.decl Typing_defs.ty -> unit

@@ -43,7 +43,7 @@ let print_ty ty =
 It indexes those types with the span of the associated function (or method)
 declaration *)
 module Collector = struct
-  type t = (Aast.pos * (Typing_env.env * Tast.ty)) array
+  type t = (Aast.pos * (Typing_env_types.env * Tast.ty)) array
 
   (* retrieve a type from a type_hint *)
   let type_of_type_hint env (ty, _) = (Pos.none, Tast_expand.expand_ty env ty)

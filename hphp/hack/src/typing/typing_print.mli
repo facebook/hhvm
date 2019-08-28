@@ -7,35 +7,36 @@
  *
  *)
 
+open Typing_env_types
 
 (*****************************************************************************)
 (* Pretty printing of types *)
 (*****************************************************************************)
 
-val error: Typing_env.env -> Typing_defs.locl Typing_defs.ty -> string
+val error: env -> Typing_defs.locl Typing_defs.ty -> string
 val suggest: 'a Typing_defs.ty -> string
-val full: Typing_env.env -> 'a Typing_defs.ty -> string
-val full_rec: Typing_env.env -> int -> 'a Typing_defs.ty -> string
-val full_strip_ns: Typing_env.env -> 'a Typing_defs.ty -> string
+val full: env -> 'a Typing_defs.ty -> string
+val full_rec: env -> int -> 'a Typing_defs.ty -> string
+val full_strip_ns: env -> 'a Typing_defs.ty -> string
 val full_decl: TypecheckerOptions.t -> Typing_defs.decl Typing_defs.ty -> string
 val fun_type: TypecheckerOptions.t -> Typing_defs.decl Typing_defs.fun_type -> string
 
 (** Pretty print a type and all of its associated declaration information. *)
 val full_with_identity:
-  Typing_env.env ->
+  env ->
   'a Typing_defs.ty ->
   'b SymbolOccurrence.t ->
   'b SymbolDefinition.t option ->
   string
-val debug: Typing_env.env -> 'a Typing_defs.ty -> string
+val debug: env -> 'a Typing_defs.ty -> string
 val with_blank_tyvars: (unit -> 'a) -> 'a
 val class_: TypecheckerOptions.t -> Decl_provider.class_decl -> string
 val gconst: TypecheckerOptions.t -> Decl_provider.gconst_decl -> string
 val fun_: TypecheckerOptions.t -> Decl_provider.fun_decl -> string
 val typedef: TypecheckerOptions.t -> Decl_provider.typedef_decl -> string
-val constraints_for_type: Typing_env.env -> 'a Typing_defs.ty -> string option
+val constraints_for_type: env -> 'a Typing_defs.ty -> string option
 val class_kind: Ast_defs.class_kind -> bool -> string
-val subtype_prop: Typing_env.env -> Typing_logic.subtype_prop -> string
+val subtype_prop: env -> Typing_logic.subtype_prop -> string
 
 (* Convert a type to a structured JSON value, as follows:
  * <prim> ::= "int" | "bool" | "float" | "string" | "num" | "arraykey"
@@ -82,7 +83,7 @@ val subtype_prop: Typing_env.env -> Typing_logic.subtype_prop -> string
  *       Expression-dependent type
  *         { "kind":"expr" }
  *)
-val to_json: Typing_env.env -> 'a Typing_defs.ty -> Hh_json.json
+val to_json: env -> 'a Typing_defs.ty -> Hh_json.json
 
 (* Attempt to deserialize a previously-serialized type back into a type we can
 manipulate. Note that this function accesses the global state in

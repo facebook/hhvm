@@ -7,6 +7,8 @@
  *
  *)
 
+open Typing_env_types
+
 (**
  * This is used in computing all possible attributes for XHP spreads.
  *
@@ -15,17 +17,17 @@
  * XHP onto which we are spreading.
  *)
 val get_spread_attributes :
-  Typing_env.env ->
+  env ->
   Pos.t ->
   Decl_provider.class_decl ->
   Typing_defs.locl Typing_defs.ty ->
-  Typing_env.env * (Aast.pstring * (Pos.t * Typing_defs.locl Typing_defs.ty)) list
+  env * (Aast.pstring * (Pos.t * Typing_defs.locl Typing_defs.ty)) list
 
 (**
  * Verify that an XHP body expression is legal.
  *)
 val is_xhp_child :
-  Typing_env.env ->
+  env ->
   Pos.t ->
   Typing_defs.locl Typing_defs.ty ->
   bool

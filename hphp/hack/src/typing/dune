@@ -56,7 +56,6 @@
     typing_env_from_def
     typing_env_return_info
     typing_env_types
-    typing_env_types_sig
     typing_equality_check
     typing_expand
     typing_fake_members
@@ -88,8 +87,6 @@
     typing_variance
     typing_visibility
     typing_xhp)
-  (modules_without_implementation
-    typing_env_types_sig)
   (libraries
     common
     decl

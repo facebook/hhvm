@@ -9,6 +9,7 @@
 
 open Core_kernel
 open Typing_defs
+open Typing_env_types
 
 module Cls = Decl_provider.Class
 module MakeType = Typing_make_type
@@ -155,7 +156,7 @@ and pessimize_fun_type env (ft: decl fun_type) =
     ft_tparams;
   }
 
-let rec is_enforceable (env: Env.env) (ty: decl ty) =
+let rec is_enforceable (env: env) (ty: decl ty) =
   match snd ty with
   | Tthis -> false
   | Tapply ((_, name), _) when Env.is_enum env name -> false
@@ -237,7 +238,7 @@ let is_enforced env ty =
   enforceable && not is_hhi
 
 let pessimize_type_simple env (ty: decl ty) =
-  if not env.Env.pessimize then ty else
+  if not env.pessimize then ty else
   match ty with
   | _, Tprim (Aast.Tvoid | Aast.Tnoreturn) -> ty
   | _ -> wrap_like ty

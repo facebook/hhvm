@@ -11,6 +11,7 @@ open Hh_core
 
 open Delta
 open Typing_defs
+open Typing_env_types
 open Aast
 
 module ETast = Tast
@@ -223,7 +224,7 @@ let localize env hint =
   match hint with
   | None -> failwith "There should be a hint in strict mode."
   | Some decl_ty ->
-    let ty = Decl_hint.hint env.Env.decl_env decl_ty in
+    let ty = Decl_hint.hint env.decl_env decl_ty in
     let _env, ty = Phase.localize ~ety_env:(Phase.env_with_self env) env ty in
     ty
 

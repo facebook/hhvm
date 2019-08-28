@@ -10,6 +10,7 @@
 open Core_kernel
 open Common
 open Typing_defs
+open Typing_env_types
 open Typing_dependent_type
 
 module Env = Typing_env
@@ -74,8 +75,6 @@ module MakeType = Typing_make_type
  *)
 let decl ty = DeclTy ty
 let locl ty = LoclTy ty
-
-type env = expand_env
 
 type method_instantiation =
 {
@@ -305,7 +304,7 @@ and localize_cstr_ty ~ety_env env ty tp_name =
 and localize_ft ?(instantiation) ~ety_env env ft =
   (* set reactivity to Nonreactive to prevent occasional setting
      of condition types when expanding type constants *)
-  let saved_r = Env.env_reactivity env in
+  let saved_r = env_reactivity env in
   let env = Env.set_env_reactive env Nonreactive in
   (* If no explicit type parameters are provided, set the instantiated type parameter to
    * initially point to unresolved, so that it can grow and eventually be a subtype of
@@ -353,7 +352,7 @@ and localize_ft ?(instantiation) ~ety_env env ft =
   end in
   (* restore reactivity *)
   let env =
-    if saved_r <> Env.env_reactivity env
+    if saved_r <> env_reactivity env
     then Env.set_env_reactive env saved_r
     else env
   in
@@ -389,7 +388,7 @@ and localize_ft ?(instantiation) ~ety_env env ft =
 
   (* Grab and store the old tpenvs *)
   let old_tpenv = Env.get_tpenv env in
-  let old_global_tpenv = env.Env.global_tpenv in
+  let old_global_tpenv = env.global_tpenv in
 
   (* Always localize tparams so they are available for later Tast check *)
   let env, tparams = List.map_env env (fst ft.ft_tparams) localize_tparam in
@@ -516,11 +515,11 @@ and localize_with_dty_validator env ty validate_dty =
   localize ~ety_env env ty
 
 and localize_hint_with_self env h =
-  let h = Decl_hint.hint env.Env.decl_env h in
+  let h = Decl_hint.hint env.decl_env h in
   localize_with_self env h
 
 and localize_hint ~ety_env env hint =
-  let hint_ty = Decl_hint.hint env.Env.decl_env hint in
+  let hint_ty = Decl_hint.hint env.decl_env hint in
   localize ~ety_env env hint_ty
 
 (* Add generic parameters to the environment, localize their bounds, and
@@ -528,7 +527,7 @@ and localize_hint ~ety_env env hint =
  * where ck is as, super or =
  *)
 let localize_generic_parameters_with_bounds
-    ~ety_env (env:Env.env) (tparams:decl tparam list) =
+    ~ety_env (env:env) (tparams:decl tparam list) =
   let env = Env.add_generic_parameters env tparams in
   let localize_bound env ({ tp_name = (pos,name); tp_constraints = cstrl; _ }: decl tparam) =
     let tparam_ty = (Reason.Rwitness pos, Tabstract(AKgeneric name, None)) in
@@ -539,12 +538,12 @@ let localize_generic_parameters_with_bounds
   env, List.concat cstrss
 
 let localize_where_constraints
-    ~ety_env (env:Env.env) where_constraints =
+    ~ety_env (env:env) where_constraints =
   let add_constraint env (h1, ck, h2) =
     let env, ty1 =
-      localize env (Decl_hint.hint env.Env.decl_env h1) ~ety_env in
+      localize env (Decl_hint.hint env.decl_env h1) ~ety_env in
     let env, ty2 =
-      localize env (Decl_hint.hint env.Env.decl_env h2) ~ety_env in
+      localize env (Decl_hint.hint env.decl_env h2) ~ety_env in
     TUtils.add_constraint (fst h1) env ck ty1 ty2
   in
   List.fold_left where_constraints ~f:add_constraint ~init:env

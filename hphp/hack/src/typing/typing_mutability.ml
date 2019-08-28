@@ -47,14 +47,14 @@ let is_fun_call_returning_mutable (env : Env.env) (e : Tast.expr): bool =
   | _ -> false
 end
 
-include Shared(Env)
+include Shared(Typing_env_types)
 
 let handle_value_in_return
   ~function_returns_mutable
   ~function_returns_void_for_rx
-  (env: Env.env)
+  (env: Typing_env_types.env)
   fun_pos
-  (e: Tast.expr): Env.env =
+  (e: Tast.expr): Typing_env_types.env =
   let error_mutable e mut_opt =
     let kind =
       match mut_opt with
@@ -122,11 +122,11 @@ let handle_value_in_return
   aux e
 let freeze_or_move_local
   (p : Pos.t)
-  (env : Typing_env.env)
+  (env : Typing_env_types.env)
   (tel : Tast.expr list)
   (invalid_target : Pos.t -> Pos.t -> string -> unit)
   (invalid_use : Pos.t -> unit)
-  : Typing_env.env =
+  : Typing_env_types.env =
   match tel with
   | [_, T.Any] -> env
   | [(_, T.Lvar (id_pos, id));] ->
@@ -152,17 +152,17 @@ let freeze_or_move_local
 
 let freeze_local
   (p : Pos.t)
-  (env : Typing_env.env)
+  (env : Typing_env_types.env)
   (tel : Tast.expr list)
-  : Typing_env.env =
+  : Typing_env_types.env =
   freeze_or_move_local p env tel
     Errors.invalid_freeze_target Errors.invalid_freeze_use
 
 let move_local
   (p : Pos.t)
-  (env : Typing_env.env)
+  (env : Typing_env_types.env)
   (tel : Tast.expr list)
-  : Typing_env.env =
+  : Typing_env_types.env =
   freeze_or_move_local p env tel
     Errors.invalid_move_target Errors.invalid_move_use
 
@@ -175,8 +175,8 @@ let rec is_move_or_mutable_call ?(allow_move=true) te =
 
 (* Checks for assignment errors as a pass on the TAST *)
 let handle_assignment_mutability
- (env : Typing_env.env) (te1 : Tast.expr) (te2 : Tast.expr_ option)
- : Typing_env.env =
+ (env : Typing_env_types.env) (te1 : Tast.expr) (te2 : Tast.expr_ option)
+ : Typing_env_types.env =
  (* If e2 is a mutable expression, then e1 is added to the mutability env *)
  let mut_env = Env.get_env_mutability env in
  let mut_env = match snd te1, te2 with

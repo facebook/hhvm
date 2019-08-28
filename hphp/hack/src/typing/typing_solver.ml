@@ -10,6 +10,7 @@
 open Core_kernel
 open Common
 open Typing_defs
+open Typing_env_types
 
 module Reason = Typing_reason
 module Env = Typing_env
@@ -142,7 +143,7 @@ and freshen_tparams env variancel tyl =
 
 let var_occurs_in_ty env var ty =
   let finder = object
-    inherit [Env.env * bool] Type_visitor.type_visitor
+    inherit [env * bool] Type_visitor.type_visitor
     method! on_tvar (env, occurs) _r v =
       if occurs then env, occurs else
       let env, v = Env.get_var env v in
@@ -404,8 +405,8 @@ let try_bind_to_equal_bound ~freshen env r var on_error =
   let expand_all tyset = Typing_set.map
     (fun ty -> let _, ty = Env.expand_type env ty in ty) tyset in
   let tyvar_info = Env.get_tyvar_info env var in
-  let lower_bounds = expand_all tyvar_info.Env.lower_bounds in
-  let upper_bounds = expand_all tyvar_info.Env.upper_bounds in
+  let lower_bounds = expand_all tyvar_info.lower_bounds in
+  let upper_bounds = expand_all tyvar_info.upper_bounds in
   let equal_bounds = Typing_set.inter lower_bounds upper_bounds in
   let r = Reason.none in let any = (r, Typing_defs.make_tany ()) and err = (r, Terr) in
   let equal_bounds = equal_bounds |> TySet.remove any |> TySet.remove err in
@@ -445,8 +446,8 @@ let rec always_solve_tyvar ~freshen env r var on_error =
   then env
   else
   let tyvar_info = Env.get_tyvar_info env var in
-  let r = if r = Reason.Rnone then Reason.Rwitness tyvar_info.Env.tyvar_pos else r in
-  let env = bind_to_lower_bound ~freshen env r var tyvar_info.Env.lower_bounds on_error in
+  let r = if r = Reason.Rnone then Reason.Rwitness tyvar_info.tyvar_pos else r in
+  let env = bind_to_lower_bound ~freshen env r var tyvar_info.lower_bounds on_error in
   let env, ety = Env.expand_var env r var in
   match ety with
   | _, Tvar var' when var <> var' -> always_solve_tyvar ~freshen env r var on_error
@@ -478,9 +479,9 @@ let solve_tyvar_wrt_variance env r var on_error =
   then env
   else
   let tyvar_info = Env.get_tyvar_info env var in
-  let r = if r = Reason.Rnone then Reason.Rwitness tyvar_info.Env.tyvar_pos else r in
-  let lower_bounds = tyvar_info.Env.lower_bounds and upper_bounds = tyvar_info.Env.upper_bounds in
-  match tyvar_info.Env.appears_covariantly, tyvar_info.Env.appears_contravariantly with
+  let r = if r = Reason.Rnone then Reason.Rwitness tyvar_info.tyvar_pos else r in
+  let lower_bounds = tyvar_info.lower_bounds and upper_bounds = tyvar_info.upper_bounds in
+  match tyvar_info.appears_covariantly, tyvar_info.appears_contravariantly with
   | true, false
   | false, false ->
     (* As in Local Type Inference by Pierce & Turner, if type variable does
@@ -511,7 +512,7 @@ let solve_all_unsolved_tyvars env on_error =
     Env.log_env_change "solve_all_unsolved_tyvars" env @@
     IMap.fold
     (fun tyvar _ env ->
-      always_solve_tyvar ~freshen:false env Reason.Rnone tyvar on_error) env.Env.tvenv env in
+      always_solve_tyvar ~freshen:false env Reason.Rnone tyvar on_error) env.tvenv env in
   Typing_subtype.log_prop env;
   env
 

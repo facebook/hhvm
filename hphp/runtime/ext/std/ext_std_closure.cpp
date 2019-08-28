@@ -243,7 +243,7 @@ void StandardExtension::initClosure() {
   extraData.m_instanceCtor = extraData.m_instanceCtorUnlocked =
     closureInstanceCtor;
   extraData.m_instanceDtor = closureInstanceDtor;
-  c_Closure::cls_Closure->m_release = closureInstanceDtor;
+  c_Closure::cls_Closure->m_releaseFunc = closureInstanceDtor;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

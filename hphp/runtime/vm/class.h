@@ -1124,6 +1124,18 @@ public:
    */
   std::pair<Slot, bool> memoSlotForFunc(FuncId func) const;
 
+  /*
+   * Returns an offset from the object base pointer to be used for memory
+   * free routines
+   */
+  uint32_t memoSize() const;
+
+  /*
+   * Returns an index that represent the size bin of the MemoryManager
+   */
+  uint8_t sizeIdx() const;
+
+
   /////////////////////////////////////////////////////////////////////////////
   // LSB Memoize methods
   //
@@ -1226,7 +1238,7 @@ public:
   OFF(vtableVec)
   OFF(funcVecLen)
   OFF(RTAttrs)
-  OFF(release)
+  OFF(releaseFunc)
 #undef OFF
 
   static constexpr ptrdiff_t constantsVecOff() {
@@ -1451,6 +1463,7 @@ private:
   void setNativeDataInfo();
   void setInstanceMemoCacheInfo();
   void setLSBMemoCacheInfo();
+  void setReleaseFunc();
 
   template<bool setParents> void setInstanceBitsImpl();
   void addInterfacesFromUsedTraits(InterfaceMap::Builder& builder) const;
@@ -1641,10 +1654,12 @@ private:
    */
   unsigned m_attrCopy;
 
-  /*
-   * Function to release object instances of this class type.
-   */
-  ObjReleaseFunc m_release;
+  // Pointer to a function that releases object instances of this class type.
+  ObjReleaseFunc m_releaseFunc;
+  // Determines the offset to the base pointer to be released
+  uint32_t m_memoSize;
+  // An index that represent the size bin in the MemoryManager
+  uint8_t m_sizeIdx;
 
   /*
    * An exclusive upper limit on the post-sort indices of properties of this
@@ -1659,7 +1674,7 @@ private:
 
   /*
    * Vector of Class pointers that encodes the inheritance hierarchy, including
-   * this Class as the last element.
+    * this Class as the last element.
    */
   LowPtr<Class> m_classVec[1]; // Dynamically sized; must come last.
 };

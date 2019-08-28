@@ -205,9 +205,9 @@ struct assert_sizeof_class {
   // If this static_assert fails, the compiler error will have the real value
   // of sizeof_Class in it since it's in this struct's type.
 #ifndef NDEBUG
-  static_assert(sz == (use_lowptr ? 284 : 328), "Change this only on purpose");
+  static_assert(sz == (use_lowptr ? 292 : 336), "Change this only on purpose");
 #else
-  static_assert(sz == (use_lowptr ? 276 : 320), "Change this only on purpose");
+  static_assert(sz == (use_lowptr ? 284 : 328), "Change this only on purpose");
 #endif
 };
 template struct assert_sizeof_class<sizeof_Class>;
@@ -1599,8 +1599,8 @@ void Class::setParent() {
     m_extra.raw()->m_instanceCtorUnlocked =
       m_parent->m_extra->m_instanceCtorUnlocked;
     m_extra.raw()->m_instanceDtor = m_parent->m_extra->m_instanceDtor;
-    assertx(m_parent->m_release == m_parent->m_extra->m_instanceDtor);
-    m_release = m_parent->m_extra->m_instanceDtor;
+    assertx(m_parent->m_releaseFunc == m_parent->m_extra->m_instanceDtor);
+    m_releaseFunc = m_parent->m_extra->m_instanceDtor;
     // XXX: should this be copying over the clsInfo also?  Might be broken...
   }
 }
@@ -1856,8 +1856,9 @@ Class::Class(PreClass* preClass, Class* parent,
   , m_classVecLen(always_safe_cast<decltype(m_classVecLen)>(classVecLen))
   , m_funcVecLen(always_safe_cast<decltype(m_funcVecLen)>(funcVecLen))
   , m_serialized(false)
-    // Will be overwritten if the class has a native dtor
-  , m_release{ObjectData::release}
+  , m_releaseFunc{nullptr} // These fields are set in setReleaseFunc,
+  , m_memoSize{0}          // except that m_releaseFunc is set specially
+  , m_sizeIdx{0}           // for native classes.
 {
   if (usedTraits.size()) {
     allocExtraData();
@@ -1883,6 +1884,10 @@ Class::Class(PreClass* preClass, Class* parent,
   // we'll fatal trying to define that class, so this has to happen after all
   // of those fatals could be thrown.
   setInterfaceVtables();
+
+  // Sets object release function if not already set, also calculates the base
+  // pointer offset and the MemoryManager index of the class size.
+  setReleaseFunc();
 }
 
 void Class::methodOverrideCheck(const Func* parentMethod, const Func* method) {
@@ -3658,7 +3663,7 @@ void Class::setNativeDataInfo() {
       m_extra.raw()->m_instanceCtorUnlocked =
         Native::nativeDataInstanceCtor<true>;
       m_extra.raw()->m_instanceDtor = Native::nativeDataInstanceDtor;
-      m_release = Native::nativeDataInstanceDtor;
+      m_releaseFunc = Native::nativeDataInstanceDtor;
       m_RTAttrs |= ndi->rt_attrs;
       break;
     }
@@ -3797,6 +3802,35 @@ void Class::setFuncVec(MethodMapBuilder& builder) {
     assertx(builder[i]->methodSlot() < builder.size());
     funcVec[-((int32_t)builder[i]->methodSlot() + 1)] = builder[i];
   }
+}
+
+extern template NEVER_INLINE void ObjectData::release<true>(
+  ObjectData* obj,
+  const Class* cls
+) noexcept;
+extern template NEVER_INLINE void ObjectData::release<false>(
+  ObjectData* obj,
+  const Class* cls
+) noexcept;
+
+void Class::setReleaseFunc() {
+  auto const numSlots = numMemoSlots();
+  if (numSlots > 0) {
+    m_memoSize = numSlots * sizeof(MemoSlot) + sizeof(MemoNode);
+  }
+  auto const nProps = numDeclProperties();
+  auto const size = m_memoSize + ObjectData::sizeForNProps(nProps);
+  m_sizeIdx = MemoryManager::size2Index(size);
+  /*
+   * m_releaseFunc is initialized to nullptr and might be updated to
+   * a specialized version, e.g. Native::nativeDataInstanceDtor.
+   * If the pointer is not set, it should be initialized to the default
+   * ObjectData release function.
+   */
+  if (m_releaseFunc) return;
+  m_releaseFunc = m_sizeIdx < kNumSmallSizes ?
+                    ObjectData::release<true> :
+                    ObjectData::release<false>;
 }
 
 void Class::getMethodNames(const Class* cls,

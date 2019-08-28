@@ -223,7 +223,15 @@ inline BuiltinDtorFunction Class::instanceDtor() const {
 // Object release.
 
 inline ObjReleaseFunc Class::releaseFunc() const {
-  return m_release;
+  return m_releaseFunc;
+}
+
+inline uint32_t Class::memoSize() const {
+  return m_memoSize;
+}
+
+inline uint8_t Class::sizeIdx() const {
+  return m_sizeIdx;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

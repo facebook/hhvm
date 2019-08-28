@@ -253,6 +253,12 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
                                              size_t index, size_t objoff);
   static ObjectData* newInstanceRawMemoBig(Class*, size_t size, size_t objoff);
 
+  /*
+   * Templated release() method, which makes different calls to free memory
+   * MemoryManager::freeBigSize() - for big object, or
+   * MemoryManager::freeSmallIndex() - for small objects
+   */
+  template<bool isSmallObject>
   static void release(ObjectData* obj, const Class* cls) noexcept;
 
   Class* getVMClass() const;

@@ -167,13 +167,13 @@ inline bool ObjectData::slowDestroyCheck() const {
   return m_aux16 & (HasDynPropArr | IsWeakRefed | UsedMemoCache);
 }
 
-NEVER_INLINE
+template<bool isSmallObject>
 void ObjectData::release(ObjectData* obj, const Class* cls) noexcept {
   assertx(obj->kindIsValid());
   assertx(!obj->hasInstanceDtor());
   assertx(!obj->hasNativeData());
   assertx(obj->getVMClass() == cls);
-  assertx(cls->releaseFunc() == &ObjectData::release);
+  assertx(isSmallObject == (cls->sizeIdx() < kNumSmallSizes));
 
   // Note: cleanups done in this function are only run for classes without an
   // instanceDtor. Some of these cleanups are duplicated in ~ObjectData, and
@@ -199,21 +199,23 @@ void ObjectData::release(ObjectData* obj, const Class* cls) noexcept {
 
   if (UNLIKELY(obj->slowDestroyCheck())) obj->slowDestroyCases();
 
-  auto const size = sizeForNProps(cls->numDeclProperties());
-  if (cls->hasMemoSlots()) {
-    auto const memoSize = objOffFromMemoNode(cls);
-    assertx(
-      reinterpret_cast<const MemoNode*>(
-        reinterpret_cast<const char*>(obj) - memoSize
-      )->objOff() == memoSize
-    );
-    tl_heap->objFree(reinterpret_cast<char*>(obj) - memoSize,
-                     size + memoSize);
+  auto const memoSize = cls->memoSize();
+  auto const ptr = reinterpret_cast<char*>(obj) - memoSize;
+  assertx(memoSize == 0 ||
+          reinterpret_cast<const MemoNode*>(ptr)->objOff() == memoSize);
+  if (isSmallObject) {
+    tl_heap->freeSmallIndex(ptr, cls->sizeIdx());
   } else {
-    tl_heap->objFree(obj, size);
+    tl_heap->freeBigSize(ptr);
   }
+
   AARCH64_WALKABLE_FRAME();
 }
+
+template NEVER_INLINE void ObjectData::release<true>(ObjectData*,
+                                                     const Class*) noexcept;
+template NEVER_INLINE void ObjectData::release<false>(ObjectData*,
+                                                      const Class*) noexcept;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class info

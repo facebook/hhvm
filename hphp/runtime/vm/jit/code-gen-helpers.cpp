@@ -437,7 +437,7 @@ void emitCall(Vout& v, CallSpec target, RegSet args) {
       auto const func = v.makeReg();
       emitLdLowPtr(
         v,
-        target.reg()[Class::releaseOff()],
+        target.reg()[Class::releaseFuncOff()],
         func,
         sizeof(ObjReleaseFunc)
       );

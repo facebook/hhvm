@@ -3510,7 +3510,7 @@ and call_parent_construct pos env el uel =
       | _, Tfun ft -> ft.ft_ret.et_type
       | _ -> (Reason.Rwitness p, ty_) in
     make_call env (Tast.make_typed_expr fpos fty (T.Id id)) [] tel [] ty in
-  let overload_function = overload_function make_call fpos in
+  let overload_function = overload_function e make_call fpos in
 
   let check_coroutine_call env fty =
     let () = if is_return_disposable_fun_type env fty && not is_using_clause
@@ -6881,7 +6881,7 @@ and gconst_def tcopt cst =
 
 (* Calls the method of a class, but allows the f callback to override the
  * return value type *)
-and overload_function make_call fpos p env (cpos, class_id) method_id el uel f =
+and overload_function outer make_call fpos p env (cpos, class_id) method_id el uel f =
   let env, tcid, ty = static_class_id ~check_constraints:false cpos env [] class_id in
   let env, _tel, _ = exprs ~is_func_arg:true env el in
   let env, fty =
@@ -6896,7 +6896,7 @@ and overload_function make_call fpos p env (cpos, class_id) method_id el uel f =
   (* if there are errors already stop here - going forward would
    * report them twice *)
   if has_error
-  then env, Tast.make_typed_expr p res T.Any, res
+  then env, with_type res Tast.dummy_saved_env outer, res
   else
     let env, ty = f env fty res el in
     let fty =

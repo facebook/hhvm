@@ -234,6 +234,29 @@ struct
       ttc_reifiable = Option.map tc.ttc_reifiable pos;
     }
 
+  and pu_enum_member pum =
+    {
+      tpum_atom = string_id pum.tpum_atom;
+      tpum_types =
+        SMap.map begin
+                   fun (id, t) -> (string_id id, ty t)
+                 end pum.tpum_types;
+    }
+
+  and pu_enum pu =
+    {
+      tpu_name = string_id pu.tpu_name;
+      tpu_is_final = pu.tpu_is_final;
+      tpu_case_types = SMap.map string_id pu.tpu_case_types;
+      tpu_case_values =
+        SMap.map
+          begin
+            fun (id, t) -> (string_id id, ty t)
+          end
+          pu.tpu_case_values;
+      tpu_members = SMap.map pu_enum_member pu.tpu_members;
+    }
+
   and user_attribute ua =
     {
       Aast.ua_name = string_id ua.Aast.ua_name;
@@ -278,6 +301,7 @@ struct
           dc.dc_substs;
       dc_consts = SMap.map class_const dc.dc_consts;
       dc_typeconsts = SMap.map typeconst dc.dc_typeconsts;
+      dc_pu_enums = SMap.map pu_enum dc.dc_pu_enums;
       dc_props = dc.dc_props;
       dc_sprops = dc.dc_sprops;
       dc_methods = dc.dc_methods;

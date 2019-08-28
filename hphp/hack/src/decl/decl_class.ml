@@ -80,6 +80,7 @@ let to_class_type
       dc_substs;
       dc_consts;
       dc_typeconsts;
+      dc_pu_enums;
       dc_props;
       dc_sprops;
       dc_methods;
@@ -156,6 +157,7 @@ let to_class_type
     tc_consts = dc_consts;
     tc_typeconsts = dc_typeconsts;
     tc_props = map_elements Decl_heap.Props.find_unsafe dc_props;
+    tc_pu_enums = dc_pu_enums;
     tc_sprops = map_elements Decl_heap.StaticProps.find_unsafe dc_sprops;
     tc_methods = ft_map_elements Decl_heap.Methods.find_unsafe dc_methods;
     tc_smethods =

@@ -30,6 +30,21 @@ type shallow_typeconst = {
 }
 [@@deriving show]
 
+type shallow_pu_member = {
+  spum_atom: Aast.sid;
+  spum_types: (Aast.sid * decl ty) list;
+}
+[@@deriving show]
+
+type shallow_pu_enum = {
+  spu_name: Aast.sid;
+  spu_is_final: bool;
+  spu_case_types: Aast.sid list;
+  spu_case_values: (Aast.sid * decl ty) list;
+  spu_members: shallow_pu_member list;
+}
+[@@deriving show]
+
 type shallow_prop = {
   sp_const: bool;
   sp_xhp_attr: xhp_attr option;
@@ -87,6 +102,7 @@ type shallow_class = {
   sc_implements: decl ty list;
   sc_consts: shallow_class_const list;
   sc_typeconsts: shallow_typeconst list;
+  sc_pu_enums: shallow_pu_enum list;
   sc_props: shallow_prop list;
   sc_sprops: shallow_prop list;
   sc_constructor: shallow_method option;

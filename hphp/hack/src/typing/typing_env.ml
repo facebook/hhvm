@@ -576,6 +576,12 @@ let get_typeconst env class_ mid =
   Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
   Cls.get_typeconst class_ mid
 
+let get_pu_enum env class_ mid =
+  add_wclass env (Cls.name class_);
+  let dep = Dep.Const ((Cls.name class_), mid) in
+  Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
+  Cls.get_pu_enum class_ mid
+
 (* Used to access class constants. *)
 let get_const env class_ mid =
   add_wclass env (Cls.name class_);

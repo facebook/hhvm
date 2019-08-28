@@ -371,6 +371,11 @@ module Api = struct
     | Lazy lc -> LSTable.get lc.ih.typeconsts id
     | Eager c -> SMap.get id c.tc_typeconsts
 
+  let get_pu_enum t id =
+    match t with
+    | Lazy lc -> LSTable.get lc.ih.pu_enums id
+    | Eager c -> SMap.get id c.tc_pu_enums
+
   let get_prop t id =
     match t with
     | Lazy lc -> LSTable.get lc.ih.props id
@@ -430,6 +435,11 @@ module Api = struct
     match t with
     | Lazy lc -> LSTable.to_seq lc.ih.typeconsts |> sort_by_key
     | Eager c -> Sequence.of_list (SMap.bindings c.tc_typeconsts)
+
+  let pu_enums t =
+    match t with
+    | Lazy lc -> LSTable.to_seq lc.ih.pu_enums |> sort_by_key
+    | Eager c -> Sequence.of_list (SMap.bindings c.tc_pu_enums)
 
   let props t =
     match t with

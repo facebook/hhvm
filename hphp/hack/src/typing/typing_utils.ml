@@ -12,11 +12,10 @@ open Common
 open Typing_defs
 open Typing_env_types
 
-module Nast = Aast
 module SN = Naming_special_names
 module Reason = Typing_reason
 module Env = Typing_env
-module ShapeMap = Nast.ShapeMap
+module ShapeMap = Aast.ShapeMap
 module TySet = Typing_set
 module Cls = Decl_provider.Class
 module MakeType = Typing_make_type
@@ -175,7 +174,7 @@ let get_concrete_supertypes env ty =
       let env, ty = Env.expand_type env ty in
       match snd ty with
       (* Enums with arraykey upper bound are treated as "abstract" *)
-      | Tabstract (AKnewtype (cid, _), Some (_, Tprim Nast.Tarraykey)) when Env.is_enum env cid ->
+      | Tabstract (AKnewtype (cid, _), Some (_, Tprim Aast.Tarraykey)) when Env.is_enum env cid ->
         iter seen env acc tyl
 
       (* Don't expand enums or newtype; just return the type itself *)
@@ -510,9 +509,9 @@ let default_fun_param ?(pos=Pos.none) ty : 'a fun_param = {
 let fun_mutable user_attributes =
   let rec go = function
   | [] -> None
-  | { Nast.ua_name = (_, n); _ } :: _ when n = SN.UserAttributes.uaMutable ->
+  | { Aast.ua_name = (_, n); _ } :: _ when n = SN.UserAttributes.uaMutable ->
     Some Param_borrowed_mutable
-  | { Nast.ua_name = (_, n); _ } :: _ when n = SN.UserAttributes.uaMaybeMutable ->
+  | { Aast.ua_name = (_, n); _ } :: _ when n = SN.UserAttributes.uaMaybeMutable ->
     Some Param_maybe_mutable
   | _ :: tl -> go tl in
   go user_attributes
@@ -540,3 +539,13 @@ in
   if HasTany.check fty
   then (try_intersect env fty untyped_ftys, ftys)
   else (untyped_ftys, try_intersect env fty ftys)
+
+type class_get_pu =
+  ?from_class:Nast.class_id_ -> Env.env -> locl ty -> string ->
+  Env.env * (expand_env * pu_enum_type) option
+
+let (class_get_pu_ref : class_get_pu ref) =
+  ref (fun ?from_class:_ -> not_implemented "Typing_utils.class_get_pu")
+
+let class_get_pu ?from_class env ty name =
+  !class_get_pu_ref ?from_class env ty name

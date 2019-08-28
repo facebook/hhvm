@@ -6930,6 +6930,43 @@ and update_array_type ?lhs_of_null_coalesce p env e1 e2 valkind  =
     | _ ->
       raw_expr ?lhs_of_null_coalesce env e1
 
+and class_get_pu ?from_class env ty name =
+  match class_get_pu_ env ty name with
+  | env, None -> (env, None)
+  | env, Some (this_ty, substs, et) ->
+    let ety_env = {
+      type_expansions = [];
+      this_ty; substs; from_class;
+      validate_dty = None;
+    } in
+    (env, Some (ety_env, et))
+
+and class_get_pu_ env cty name =
+  let env, cty = Env.expand_type env cty in
+  match snd cty with
+  | Tany _ | Terr | Tdynamic | Tunion _ | Tabstract (_, None) ->
+    env, None
+  | Tvar _ | Tnonnull | Tarraykind _ | Toption _ | Tprim _ | Tfun _ | Ttuple _
+  | Tanon (_, _) | Tobject | Tshape _ ->
+    env, None
+  | Tdestructure _
+  | Tintersection _ ->
+    env, None
+  | Tpu_access _
+  | Tpu _ ->
+    env, None
+  | Tabstract (_, Some ty) ->
+    class_get_pu_ env ty name
+  | Tclass ((_, c), _, paraml) ->
+    let class_ = Env.get_class env c in
+    begin match class_ with
+     | None -> env, None
+     | Some class_ ->
+       match Env.get_pu_enum env class_ name with
+       | Some et -> env, Some (cty, Subst.make (Cls.tparams class_) paraml, et)
+       | None -> env, None
+    end
+
 let nast_to_tast opts nast =
   let convert_def = function
     | Fun f ->
@@ -6963,3 +7000,5 @@ let nast_to_tast opts nast =
   let tast = List.map nast convert_def in
   Tast_check.program opts tast;
   tast
+
+let () = TUtils.class_get_pu_ref := class_get_pu

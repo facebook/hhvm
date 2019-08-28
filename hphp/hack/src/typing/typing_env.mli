@@ -43,6 +43,7 @@ val get_class_dep : env -> class_key -> class_decl option
 val get_typedef : env -> typedef_key -> typedef_decl option
 val get_const : env -> class_decl -> string -> class_const option
 val get_typeconst : env -> class_decl -> string -> typeconst_type option
+val get_pu_enum : env -> class_decl -> string -> pu_enum_type option
 val get_gconst : env -> gconst_key -> gconst_decl option
 val get_static_member : bool -> env -> class_decl -> string -> class_elt option
 val suggest_static_member :

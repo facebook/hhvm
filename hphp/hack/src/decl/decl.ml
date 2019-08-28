@@ -315,6 +315,48 @@ let check_if_cyclic class_env (pos, cid) =
 let shallow_decl_enabled () =
   TypecheckerOptions.shallow_class_decl (GlobalNamingOptions.get ())
 
+let pu_enum_fold acc spu =
+  let tpu =
+    match SMap.find_opt (snd spu.spu_name) acc with
+    | None -> Decl_to_typing.shallow_pu_enum_to_pu_enum_type spu
+    | Some tpu ->
+      {
+        tpu_name = spu.spu_name;
+        tpu_is_final = spu.spu_is_final;
+        tpu_case_types =
+          List.fold_left
+            spu.spu_case_types
+            ~init:tpu.tpu_case_types
+            ~f:(fun acc ((_, k) as item) -> SMap.add k item acc);
+        tpu_case_values =
+          List.fold_left
+            spu.spu_case_values
+            ~init:tpu.tpu_case_values
+            ~f:(fun acc (((_, k), _) as item) -> SMap.add k item acc);
+        tpu_members =
+          List.fold_left
+            spu.spu_members
+            ~init:tpu.tpu_members
+            ~f:(fun acc sm ->
+              let tm =
+                match SMap.find_opt (snd sm.spum_atom) acc with
+                | None -> SMap.empty
+                | Some tm -> tm.tpum_types
+              in
+              let tm =
+                List.fold_left
+                  sm.spum_types
+                  ~init:tm
+                  ~f:(fun acc (((_, k), _) as item) -> SMap.add k item acc)
+              in
+              SMap.add
+                (snd sm.spum_atom)
+                { tpum_atom = sm.spum_atom; tpum_types = tm }
+                acc);
+      }
+  in
+  SMap.add (snd spu.spu_name) tpu acc
+
 let rec class_decl_if_missing class_env (c : Nast.class_) =
   let ((_, cid) as c_name) = c.c_name in
   if check_if_cyclic class_env c_name then
@@ -479,6 +521,8 @@ and class_decl c =
     else
       (typeconsts, consts)
   in
+  let pu_enums = inherited.Decl_inherit.ih_pu_enums in
+  let pu_enums = List.fold_left c.sc_pu_enums ~f:pu_enum_fold ~init:pu_enums in
   let sclass_var = static_prop_decl c in
   let sprops = inherited.Decl_inherit.ih_sprops in
   let sprops = List.fold_left c.sc_sprops ~f:sclass_var ~init:sprops in
@@ -582,6 +626,7 @@ and class_decl c =
       dc_substs = inherited.Decl_inherit.ih_substs;
       dc_consts = consts;
       dc_typeconsts = typeconsts;
+      dc_pu_enums = pu_enums;
       dc_props = props;
       dc_sprops = sprops;
       dc_methods = m;

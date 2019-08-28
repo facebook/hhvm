@@ -528,6 +528,7 @@ and class_type = {
   tc_where_constraints   : decl where_constraint list;
   tc_consts              : class_const SMap.t;
   tc_typeconsts          : typeconst_type SMap.t;
+  tc_pu_enums            : pu_enum_type SMap.t;
   tc_props               : class_elt SMap.t;
   tc_sprops              : class_elt SMap.t;
   tc_methods             : class_elt SMap.t;
@@ -559,6 +560,19 @@ and typeconst_type = {
   ttc_origin      : string;
   ttc_enforceable : Pos.t * bool;
   ttc_reifiable : Pos.t option;
+}
+
+and pu_enum_type = {
+  tpu_name : Nast.sid;
+  tpu_is_final : bool;
+  tpu_case_types : Nast.sid SMap.t;
+  tpu_case_values : (Nast.sid * decl ty) SMap.t;
+  tpu_members: pu_member_type SMap.t;
+}
+
+and pu_member_type = {
+  tpum_atom: Nast.sid;
+  tpum_types: (Nast.sid * decl ty) SMap.t;
 }
 
 and enum_type = {

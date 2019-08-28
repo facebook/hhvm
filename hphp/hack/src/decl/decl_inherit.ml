@@ -29,6 +29,7 @@ type inherited = {
   ih_cstr: element option * consistent_kind;
   ih_consts: class_const SMap.t;
   ih_typeconsts: typeconst_type SMap.t;
+  ih_pu_enums: pu_enum_type SMap.t;
   ih_props: element SMap.t;
   ih_sprops: element SMap.t;
   ih_methods: element SMap.t;
@@ -41,6 +42,7 @@ let empty =
     ih_cstr = (None, Inconsistent);
     ih_consts = SMap.empty;
     ih_typeconsts = SMap.empty;
+    ih_pu_enums = SMap.empty;
     ih_props = SMap.empty;
     ih_sprops = SMap.empty;
     ih_methods = SMap.empty;
@@ -162,6 +164,10 @@ let add_typeconst name sig_ typeconsts =
        *)
       SMap.add name sig_ typeconsts)
 
+let add_pu_enum name pu pu_enums =
+  (* TODO(T36532263) deal with multiple inheritance *)
+  SMap.add name pu pu_enums
+
 let add_constructor (cstr, cstr_consist) (acc, acc_consist) =
   let ce =
     match (cstr, acc) with
@@ -205,6 +211,7 @@ let add_inherited inherited acc =
     ih_consts = SMap.fold add_const inherited.ih_consts acc.ih_consts;
     ih_typeconsts =
       SMap.fold add_typeconst inherited.ih_typeconsts acc.ih_typeconsts;
+    ih_pu_enums = SMap.fold add_pu_enum inherited.ih_pu_enums acc.ih_pu_enums;
     ih_props = add_members inherited.ih_props acc.ih_props;
     ih_sprops = add_members inherited.ih_sprops acc.ih_sprops;
     ih_methods = add_methods inherited.ih_methods acc.ih_methods;
@@ -328,6 +335,7 @@ let inherit_hack_class env c class_name class_type argl =
   let typeconsts =
     SMap.map (Inst.instantiate_typeconst subst) class_type.dc_typeconsts
   in
+  let pu_enums = class_type.dc_pu_enums in
   let consts = SMap.map (Inst.instantiate_cc subst) class_type.dc_consts in
   let props = class_type.dc_props in
   let sprops = class_type.dc_sprops in
@@ -348,6 +356,7 @@ let inherit_hack_class env c class_name class_type argl =
       ih_cstr = cstr;
       ih_consts = consts;
       ih_typeconsts = typeconsts;
+      ih_pu_enums = pu_enums;
       ih_props = props;
       ih_sprops = sprops;
       ih_methods = methods;

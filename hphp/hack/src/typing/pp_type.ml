@@ -974,6 +974,11 @@ fun fmt x ->
 and show_typeconst_type : typeconst_type -> string = fun x ->
   Format.asprintf "%a" pp_typeconst_type x
 
+and pp_pu_enum_type : Format.formatter -> pu_enum_type -> unit =
+  fun fmt _ -> Format.fprintf fmt "PUENUM PP"
+
+and show_pu_enum_type : pu_enum_type -> string = fun _ -> "PUENUM"
+
 and pp_enum_type : Format.formatter -> enum_type -> unit = fun fmt x ->
   Format.fprintf fmt "@[<2>{ ";
 

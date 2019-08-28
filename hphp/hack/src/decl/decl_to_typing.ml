@@ -302,3 +302,47 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
       }
   in
   (snd ttc_name, typeconst)
+
+let shallow_pu_enum_to_pu_enum_type spu =
+  let to_member { spum_atom; spum_types } =
+    {
+      tpum_atom = spum_atom;
+      tpum_types =
+        List.fold
+          ~init:SMap.empty
+          ~f:begin
+               fun acc (k, t) -> SMap.add (snd k) (k, t) acc
+             end
+          spum_types;
+    }
+  in
+  let { spu_name; spu_is_final; spu_case_types; spu_case_values; spu_members }
+      =
+    spu
+  in
+  {
+    tpu_name = spu_name;
+    tpu_is_final = spu_is_final;
+    tpu_case_types =
+      List.fold
+        ~init:SMap.empty
+        ~f:begin
+             fun acc k -> SMap.add (snd k) k acc
+           end
+        spu_case_types;
+    tpu_case_values =
+      List.fold
+        ~init:SMap.empty
+        ~f:begin
+             fun acc (k, t) -> SMap.add (snd k) (k, t) acc
+           end
+        spu_case_values;
+    tpu_members =
+      List.fold
+        ~init:SMap.empty
+        ~f:
+          begin
+            fun acc pum -> SMap.add (snd pum.spum_atom) (to_member pum) acc
+          end
+        spu_members;
+  }

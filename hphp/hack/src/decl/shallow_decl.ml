@@ -125,6 +125,25 @@ let typeconst env c tc =
         stc_reifiable = reifiable;
       }
 
+let pu_enum
+    env { pu_name; pu_is_final; pu_case_types; pu_case_values; pu_members } =
+  let spu_case_types = pu_case_types in
+  let hint_assoc (k, hint) = (k, Decl_hint.hint env hint) in
+  let spu_case_values = List.map ~f:hint_assoc pu_case_values in
+  let spu_members =
+    let case_member { pum_atom; pum_types; _ } =
+      { spum_atom = pum_atom; spum_types = List.map ~f:hint_assoc pum_types }
+    in
+    List.map ~f:case_member pu_members
+  in
+  {
+    spu_name = pu_name;
+    spu_is_final = pu_is_final;
+    spu_case_types;
+    spu_case_values;
+    spu_members;
+  }
+
 let make_xhp_attr cv =
   Option.map cv.cv_xhp_attr (fun xai ->
       {
@@ -379,6 +398,7 @@ let class_ env c =
     sc_implements;
     sc_consts = List.filter_map c.c_consts (class_const env c);
     sc_typeconsts = List.filter_map c.c_typeconsts (typeconst env c);
+    sc_pu_enums = List.map c.c_pu_enums (pu_enum env);
     sc_props = List.map ~f:(prop env) vars;
     sc_sprops = List.map ~f:(static_prop env c) static_vars;
     sc_constructor = Option.map ~f:(method_ env c) constructor;

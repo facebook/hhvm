@@ -541,8 +541,8 @@ in
   else (untyped_ftys, try_intersect env fty ftys)
 
 type class_get_pu =
-  ?from_class:Nast.class_id_ -> Env.env -> locl ty -> string ->
-  Env.env * (expand_env * pu_enum_type) option
+  ?from_class:Nast.class_id_ -> env -> locl ty -> string ->
+  env * (expand_env * pu_enum_type) option
 
 let (class_get_pu_ref : class_get_pu ref) =
   ref (fun ?from_class:_ -> not_implemented "Typing_utils.class_get_pu")

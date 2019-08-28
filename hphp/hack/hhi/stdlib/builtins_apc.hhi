@@ -13,7 +13,7 @@ function apc_add($key, $var, int $ttl = 0) { }
 <<__PHPStdLib, __NonRx('APC')>>
 function apc_store($key, $var, int $ttl = 0) { }
 <<__PHPStdLib, __NonRx('APC')>>
-function apc_fetch($key, &$success = null) { }
+function apc_fetch($key, inout $success) { }
 <<__PHPStdLib, __NonRx('APC')>>
 function apc_delete($key) { }
 <<__PHPStdLib, __NonRx('APC')>>

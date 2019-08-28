@@ -6680,6 +6680,7 @@ and method_def env m =
   let env = Env.open_tyvars env (fst m.m_name) in
   let env = Env.reinitialize_locals env in
   let env = Env.set_env_function_pos env pos in
+  let env = Env.set_env_pessimize env in
   let env = Typing_attributes.check_def env new_object
     SN.AttributeKinds.mthd m.m_user_attributes in
   let reactive = fun_reactivity env.decl_env m.m_user_attributes m.m_params in
@@ -6730,7 +6731,11 @@ and method_def env m =
       let ety_env =
         { (Phase.env_with_self env) with
           from_class = Some CIstatic } in
-      Typing_return.make_return_type (Phase.localize ~ety_env) env ret in
+      let localize = fun env ty ->
+        let { et_type = ty; _ } =
+          Typing_enforceability.compute_enforced_and_pessimize_ty_simple env ty in
+        Phase.localize ~ety_env env ty in
+      Typing_return.make_return_type localize env ret in
   let return = Typing_return.make_info m.m_fun_kind m.m_user_attributes env
     ~is_explicit:(Option.is_some (hint_of_type_hint m.m_ret)) locl_ty decl_ty in
   let env, param_tys = List.map_env env m.m_params make_param_local_ty in

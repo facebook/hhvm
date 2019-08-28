@@ -7,6 +7,6 @@
 //test passing in the same variable where 1 is by value, the other is a different
 //type and by reference so should be updated to the new type.
 $string = "-1";
-preg_match_with_matches('/[\-\+]?[0-9\.]*/', $string, &$string);
+preg_match_with_matches('/[\-\+]?[0-9\.]*/', $string, inout $string);
 var_dump($string);
 echo "===Done===";

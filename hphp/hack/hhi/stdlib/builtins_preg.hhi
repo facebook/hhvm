@@ -20,16 +20,16 @@ function preg_grep(string $pattern, $input, int $flags = 0);
  * This will eventually be fixed with more type inference magic.
  */
 <<__PHPStdLib>>
-function preg_match(string $pattern, string $subject, &$matches = array(),
+function preg_match(string $pattern, string $subject,
                     int $flags = 0, int $offset = 0): int;
 <<__PHPStdLib>>
-function preg_match_with_matches(string $pattern, string $subject, &$matches,
+function preg_match_with_matches(string $pattern, string $subject, inout $matches,
                                  int $flags = 0, int $offset = 0): int;
 <<__PHPStdLib>>
-function preg_match_all(string $pattern, string $subject, &$matches = array(),
+function preg_match_all(string $pattern, string $subject,
                         int $flags = 0, int $offset = 0);
 <<__PHPStdLib>>
-function preg_match_all_with_matches(string $pattern, string $subject, &$matches,
+function preg_match_all_with_matches(string $pattern, string $subject, inout $matches,
                                      int $flags = 0, int $offset = 0);
 
 <<__PHPStdLib>>

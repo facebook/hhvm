@@ -47,42 +47,36 @@ Variant HHVM_FUNCTION(preg_grep, const String& pattern, const Variant& input,
 
 TypedValue HHVM_FUNCTION(preg_match,
                          StringArg pattern, StringArg subject,
-                         OutputArg matches /* = null */,
                          int flags /* = 0 */, int offset /* = 0 */) {
   return tvReturn(preg_match(pattern.get(), subject.get(),
-                             matches.get() ? matches->var() : nullptr,
-                             flags, offset));
+                             nullptr, flags, offset));
 }
 
 TypedValue HHVM_FUNCTION(preg_match_with_matches,
                          StringArg pattern, StringArg subject,
-                         OutputArg matches,
+                         Variant& matches,
                          int flags /* = 0 */, int offset /* = 0 */) {
   return tvReturn(preg_match(pattern.get(), subject.get(),
-                             matches.get() ? matches->var() : nullptr,
-                             flags, offset));
+                             &matches, flags, offset));
 }
 
 TypedValue HHVM_FUNCTION(preg_match_all,
                          StringArg pattern,
                          StringArg subject,
-                         OutputArg matches /* = null */,
                          int flags /* = 0 */,
                          int offset /* = 0 */) {
   return tvReturn(preg_match_all(pattern.get(), subject.get(),
-                                 matches.get() ? matches->var() : nullptr,
-                                 flags, offset));
+                                 nullptr, flags, offset));
 }
 
 TypedValue HHVM_FUNCTION(preg_match_all_with_matches,
                          StringArg pattern,
                          StringArg subject,
-                         OutputArg matches,
+                         Variant& matches,
                          int flags /* = 0 */,
                          int offset /* = 0 */) {
   return tvReturn(preg_match_all(pattern.get(), subject.get(),
-                                 matches.get() ? matches->var() : nullptr,
-                                 flags, offset));
+                                 &matches, flags, offset));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

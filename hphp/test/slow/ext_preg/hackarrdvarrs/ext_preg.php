@@ -34,17 +34,17 @@ function test_preg_match() {
   preg_match_with_matches(
     "@^(?:http://)?([^/]+)@i",
     "http://www.php.net/index.html",
-    &$matches,
+    inout $matches,
   );
   $host = $matches[1];
   VS($host, "www.php.net");
 
   // get last two segments of host name
-  preg_match_with_matches("/[^.]+\\.[^.]+$/", $host, &$matches);
+  preg_match_with_matches("/[^.]+\\.[^.]+$/", $host, inout $matches);
   VS($matches[0], "php.net");
 
   $str = "foobar: 2008";
-  preg_match_with_matches("/(?<name>\\w+): (?<digit>\\d+)/", $str, &$matches);
+  preg_match_with_matches("/(?<name>\\w+): (?<digit>\\d+)/", $str, inout $matches);
   VS(print_r($matches, true),
      "Dict\n".
      "(\n".
@@ -58,10 +58,11 @@ function test_preg_match() {
 
 
 function test_preg_match_all() {
+  $matches = null;
   preg_match_all_with_matches(
     "/\\(?  (\\d{3})?  \\)?  (?(1)  [\\-\\s] ) \\d{3}-\\d{4}/x",
     "Call 555-1212 or 1-800-555-1212",
-    &$matches,
+    inout $matches,
   );
   VS(print_r($matches, true),
      "Dict\n".
@@ -88,7 +89,7 @@ function test_preg_match_all() {
   preg_match_all_with_matches(
     "/(<([\\w]+)[^>]*>)(.*)(<\\/\\2>)/",
     $html,
-    &$matches,
+    inout $matches,
     PREG_SET_ORDER,
   );
   VS(print_r($matches, true),
@@ -118,7 +119,7 @@ function test_preg_match_all() {
   preg_match_all_with_matches(
     "/(?<name>\\w+): (?<digit>\\d+)/",
     $str,
-    &$matches,
+    inout $matches,
   );
   VS(print_r($matches, true),
      "Dict\n".

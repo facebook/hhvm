@@ -181,7 +181,8 @@ function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
 function checkServerId($serverPort, $expectedIds) {
   $host = 'localhost';
   $r = request($host, $serverPort, "hello.php");
-  if (preg_match('/Hello, World!(.*+)/', $r ?? '', &$matches)) {
+  $matches = null;
+  if (preg_match_with_matches('/Hello, World!(.*+)/', $r ?? '', inout $matches)) {
     foreach ((array)$expectedIds as $id) {
       if ($matches[1] == $id) return true;
     }

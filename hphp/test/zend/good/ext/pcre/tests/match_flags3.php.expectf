@@ -1,5 +1,5 @@
 
-Warning: Empty regular expression in %s/match_flags3.php on line 3
+Warning: Empty regular expression in %s/match_flags3.php on line %d
 bool(false)
 int(1)
 array(1) {

@@ -1,6 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 foreach (array('2006-05-13', '06-12-12', 'data: "12-Aug-87"') as $s) {
+    $m = null;
     var_dump(preg_match_with_matches(
       '~
 		(?P<date>
@@ -9,7 +10,7 @@ foreach (array('2006-05-13', '06-12-12', 'data: "12-Aug-87"') as $s) {
 		(?P<day>[0-3]?\d))
 	~x',
       $s,
-      &$m,
+      inout $m,
     ));
 
     var_dump($m);

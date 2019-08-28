@@ -1,6 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-  var_dump(preg_match_all_with_matches('/\b/', "a'", &$m, PREG_OFFSET_CAPTURE));
+  $m = null;
+  var_dump(preg_match_all_with_matches('/\b/', "a'", inout $m, PREG_OFFSET_CAPTURE));
   var_dump($m);
 
 var_dump(preg_split('/\b/', "a'"));

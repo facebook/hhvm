@@ -114,19 +114,20 @@ class RegexIterator extends FilterIterator
 
     switch ($this->mode) {
       case self::MATCH:
-        $ret = (preg_match($this->regex, $subject, &$matches,
-                           $this->pregFlags) > 0);
+        $ret = (preg_match_with_matches($this->regex, $subject, inout $matches,
+                                        $this->pregFlags) > 0);
         break;
       case self::GET_MATCH:
         $__current = array();
-        $ret = (preg_match($this->regex, $subject, &$__current,
+        $ret = (preg_match_with_matches($this->regex, $subject, inout $__current,
                            $this->pregFlags) > 0);
         $this->current = $__current;
         break;
       case self::ALL_MATCHES:
         $__current = array();
-        $count = preg_match_all($this->regex, $subject, &$__current,
-                                $this->pregFlags);
+        $count = preg_match_all_with_matches($this->regex, $subject,
+                                             inout $__current,
+                                             $this->pregFlags);
 
         $this->current = $__current;
 

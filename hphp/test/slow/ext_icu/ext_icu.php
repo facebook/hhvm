@@ -41,8 +41,9 @@ function test_icu_match() {
   VERIFY(icu_match("(\\bPHP\\b)", $subject) != false);
   VERIFY(icu_match("(\\bPHP\\b))", $subject) == false);
 
+  $matches = null;
   // Test returning matches functionality.
-  VERIFY(icu_match_with_matches("(PHP) is", $subject, &$matches) != false);
+  VERIFY(icu_match_with_matches("(PHP) is", $subject, inout $matches) != false);
   VS(print_r($matches, true),
     "Array\n".
     "(\n".
@@ -53,7 +54,7 @@ function test_icu_match() {
     icu_match_with_matches(
       "is (a)",
       $subject,
-      &$matches,
+      inout $matches,
       UREGEX_OFFSET_CAPTURE,
     ) !=
       false,
@@ -78,7 +79,7 @@ function test_icu_match() {
     icu_match_with_matches(
       "\\. \xef\xba\xb0",
       $subject,
-      &$matches,
+      inout $matches,
       UREGEX_OFFSET_CAPTURE,
     ) !=
       false,
@@ -99,7 +100,7 @@ function test_icu_match() {
     icu_match_with_matches(
       "$junk1 ($junk2)",
       $subject_ar,
-      &$matches,
+      inout $matches,
       UREGEX_OFFSET_CAPTURE,
     ) !=
       false,
@@ -122,7 +123,7 @@ function test_icu_match() {
     ")\n");
 
   // Test match for 32-bit code points.
-  VERIFY(icu_match_with_matches(".*", $subject_32, &$matches) != false);
+  VERIFY(icu_match_with_matches(".*", $subject_32, inout $matches) != false);
   $expected="\xf0\x90\xa4\x85\xf0\x90\xa4\x85\xf0\x90\xa4".
     "\x85\xf0\x90\xa4\x85\xf0\x90\xa4\x85\xf0\x90\xa4\x85";
   VS(print_r($matches, true),
@@ -133,10 +134,9 @@ function test_icu_match() {
 
   // Test regex caching functionality.
   VERIFY(
-    icu_match_with_matches(
+    icu_match(
       "(php)",
       $subject,
-      &$ignore,
       UREGEX_CASE_INSENSITIVE,
     ) !=
       false,

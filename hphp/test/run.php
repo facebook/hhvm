@@ -1914,12 +1914,13 @@ function generate_array_diff($ar1, $ar2, $is_reg, $w) {
 
 function generate_diff($wanted, $wanted_re, $output)
 {
+  $m = null;
   $w = explode("\n", $wanted);
   $o = explode("\n", $output);
   if (is_null($wanted_re)) {
     $r = $w;
   } else {
-    if (preg_match('/^\((.*)\)\{(\d+)\}$/s', $wanted_re, &$m)) {
+    if (preg_match_with_matches('/^\((.*)\)\{(\d+)\}$/s', $wanted_re, inout $m)) {
       $t = explode("\n", $m[1]);
       $r = array();
       $w2 = array();
@@ -2528,10 +2529,11 @@ function msg_loop($num_tests, $queue) {
 
   if ($do_progress) {
     $stty = strtolower(Status::getSTTY());
-    preg_match_all("/columns ([0-9]+);/", $stty, &$output);
+    $output = null;
+    preg_match_all_with_matches("/columns ([0-9]+);/", $stty, inout $output);
     if (!isset($output[1][0])) {
       // because BSD has to be different
-      preg_match_all("/([0-9]+) columns;/", $stty, &$output);
+      preg_match_all_with_matches("/([0-9]+) columns;/", $stty, inout $output);
     }
     if (!isset($output[1][0])) {
       $do_progress = false;

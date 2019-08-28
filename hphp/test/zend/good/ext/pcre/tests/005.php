@@ -68,8 +68,9 @@ ext/ming/ming.o(.text+0x851): In function `zif_ming_setSWFCompression':
         '/mS';
 
 
+  $m = null;
   var_dump(
-    preg_match_all_with_matches($gcc_regex, $sampledata, &$m, PREG_SET_ORDER),
+    preg_match_all_with_matches($gcc_regex, $sampledata, inout $m, PREG_SET_ORDER),
   );
   print_r($m);
 }

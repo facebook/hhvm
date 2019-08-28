@@ -17,5 +17,5 @@ array(3) {
   string(4) "blub"
 }
 
-Warning: Compilation failed: group name must start with a non-digit at offset 4 in %s/bug37911.php on line 14
+Warning: Compilation failed: group name must start with a non-digit at offset 4 in %s/bug37911.php on line %d
 NULL

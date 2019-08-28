@@ -41,14 +41,18 @@ typedef tbb::concurrent_hash_map<const StringData*,const RegexPattern*,
 
 static PatternStringMap s_patternCacheMap;
 
-static Variant HHVM_FUNCTION(icu_match, const String& pattern,
-                                        const String& subject,
-                                        VRefParam matches /* = null */,
-                                        int64_t flags /* = 0 */) {
+static Variant icu_match_impl(const String& pattern,
+                              const String& subject,
+                              Array* matches,
+                              int64_t flags) {
   UErrorCode status = U_ZERO_ERROR;
 
   Array matchesArr = Array::Create();
-  SCOPE_EXIT { matches.assignIfRef(matchesArr); };
+  SCOPE_EXIT {
+    if (matches) {
+      *matches = matchesArr;
+    }
+  };
 
   // Create hash map key by concatenating pattern and flags.
   StringBuffer bpattern;
@@ -92,7 +96,7 @@ static Variant HHVM_FUNCTION(icu_match, const String& pattern,
   if (matcher->find()) {
     matched = 1;
 
-    if (matches.isReferenced()) {
+    if (matches) {
       int32_t count = matcher->groupCount();
 
       for (int32_t i = 0; i <= count; i++) {
@@ -127,12 +131,19 @@ static Variant HHVM_FUNCTION(icu_match, const String& pattern,
   return matched;
 }
 
+static Variant HHVM_FUNCTION(icu_match,
+                             const String& pattern,
+                             const String& subject,
+                             int64_t flags /* = 0 */) {
+  return icu_match_impl(pattern, subject, nullptr, flags);
+}
+
 static Variant HHVM_FUNCTION(icu_match_with_matches,
                              const String& pattern,
                              const String& subject,
-                             VRefParam matches,
+                             Array& matches,
                              int64_t flags /* = 0 */) {
-  return HHVM_FN(icu_match)(pattern, subject, matches, flags);
+  return icu_match_impl(pattern, subject, &matches, flags);
 }
 
 // Need to have a valid installation of the transliteration data in /lib64.

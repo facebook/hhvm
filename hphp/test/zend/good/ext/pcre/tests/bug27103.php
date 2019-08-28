@@ -7,5 +7,6 @@ function iter($ar)
 }
 $teststr = "\xe2\x82\xac hi there";
 iter(preg_split('//u', $teststr, -1, PREG_SPLIT_NO_EMPTY));
-preg_match_all_with_matches('/./u', $teststr, &$matches);
+$matches = null;
+preg_match_all_with_matches('/./u', $teststr, inout $matches);
 iter($matches[0]);

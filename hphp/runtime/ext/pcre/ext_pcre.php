@@ -83,14 +83,14 @@ function preg_last_error(): int;
 <<__Native, __Rx>>
 function preg_match_all(string $pattern,
                         string $subject,
-                        ?array &$matches = null,
                         int $flags = 0,
                         int $offset = 0): mixed;
 
 <<__Native, __Rx>>
 function preg_match_all_with_matches(string $pattern,
                                      string $subject,
-                                     ?array &$matches,
+                                     <<__OutOnly>>
+                                     inout mixed $matches,
                                      int $flags = 0,
                                      int $offset = 0): mixed;
 
@@ -123,14 +123,14 @@ function preg_match_all_with_matches(string $pattern,
 <<__Native, __Rx>>
 function preg_match(string $pattern,
                     string $subject,
-                    ?array &$matches = null,
                     int $flags = 0,
                     int $offset = 0): mixed;
 
 <<__Native, __Rx>>
 function preg_match_with_matches(string $pattern,
                                  string $subject,
-                                 ?array &$matches,
+                                 <<__OutOnly>>
+                                 inout mixed $matches,
                                  int $flags = 0,
                                  int $offset = 0): mixed;
 

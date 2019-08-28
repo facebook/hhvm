@@ -4,10 +4,11 @@
 function test_preg_match() {
   echo "====================== preg_match ============================\n";
 
+  $m = null;
   preg_match_all_with_matches(
     '/((?:(?:unsigned|struct)\s+)?\w+)(?:\s*(\*+)\s+|\s+(\**))(\w+(?:\[\s*\w*\s*\])?)\s*(?:(=)[^,;]+)?((?:\s*,\s*\**\s*\w+(?:\[\s*\w*\s*\\])?\s\*(?:=[^,;]+)?)*)\s*;/S',
     'unsigned int xpto = 124; short a, b;',
-    &$m,
+    inout $m,
     PREG_SET_ORDER | PREG_FB_HACK_ARRAYS,
   );
   var_dump($m);
@@ -15,7 +16,7 @@ function test_preg_match() {
   preg_match_all_with_matches(
     '/((?:(?:unsigned|struct)\s+)?\w+)(?:\s*(\*+)\s+|\s+(\**))(\w+(?:\[\s*\w*\s*\])?)\s*(?:(=)[^,;]+)?((?:\s*,\s*\**\s*\w+(?:\[\s*\w*\s*\\])?\s\*(?:=[^,;]+)?)*)\s*;/S',
     'unsigned int xpto = 124; short a, b;',
-    &$m,
+    inout $m,
     PREG_SET_ORDER | PREG_OFFSET_CAPTURE | PREG_FB_HACK_ARRAYS,
   );
   var_dump($m);
@@ -23,7 +24,7 @@ function test_preg_match() {
   preg_match_all_with_matches(
     '/((?:(?:unsigned|struct)\s+)?\w+)(?:\s*(\*+)\s+|\s+(\**))(\w+(?:\[\s*\w*\s*\])?)\s*(?:(=)[^,;]+)?((?:\s*,\s*\**\s*\w+(?:\[\s*\w*\s*\\])?\s\*(?:=[^,;]+)?)*)\s*;/S',
     'unsigned int xpto = 124; short a, b;',
-    &$m,
+    inout $m,
     PREG_OFFSET_CAPTURE | PREG_FB_HACK_ARRAYS,
   );
   var_dump($m);
@@ -31,7 +32,7 @@ function test_preg_match() {
   preg_match_all_with_matches(
     '/((?:(?:unsigned|struct)\s+)?\w+)(?:\s*(\*+)\s+|\s+(\**))(\w+(?:\[\s*\w*\s*\])?)\s*(?:(=)[^,;]+)?((?:\s*,\s*\**\s*\w+(?:\[\s*\w*\s*\\])?\s\*(?:=[^,;]+)?)*)\s*;/S',
     'unsigned int xpto = 124; short a, b;',
-    &$m,
+    inout $m,
     PREG_PATTERN_ORDER | PREG_FB_HACK_ARRAYS,
   );
   var_dump($m);
@@ -39,7 +40,7 @@ function test_preg_match() {
   preg_match_all_with_matches(
     '/((?P<foobaz1>(?:unsigned|struct)\s+)?\w+)(?P<foobaz2>\s*(\*+)\s+|\s+(\**))(\w+(?:\[\s*\w*\s*\])?)\s*(?:(=)[^,;]+)?((?:\s*,\s*\**\s*\w+(?:\\[\s*\w*\s*\\])?\s*(?:=[^,;]+)?)*)\s*;/S',
     'unsigned int xpto = 124; short a, b;',
-    &$m,
+    inout $m,
     PREG_PATTERN_ORDER | PREG_FB_HACK_ARRAYS,
   );
   var_dump($m);
@@ -47,7 +48,7 @@ function test_preg_match() {
   preg_match_with_matches(
     '/((?:(?:unsigned|struct)\s+)?\w+)(?:\s*(\*+)\s+|\s+(\**))(\w+(?:\[\s*\w*\s*\])?)\s*(?:(=)[^,;]+)?((?:\s*,\s*\**\s*\w+(?:\[\s*\w*\s*\\])?\s*(?:\=[^,;]+)?)*)\s*;/S',
     'unsigned int xpto = 124; short a, b;',
-    &$m,
+    inout $m,
     PREG_FB_HACK_ARRAYS,
   );
   var_dump($m);
@@ -55,7 +56,7 @@ function test_preg_match() {
   preg_match_with_matches(
     '/((?:(?:unsigned|struct)\s+)?\w+)(?:\s*(\*+)\s+|\s+(\**))(\w+(?:\[\s*\w*\s*\])?)\s*(?:(=)[^,;]+)?((?:\s*,\s*\**\s*\w+(?:\[\s*\w*\s*\\])?\s*(?:\=[^,;]+)?)*)\s*;/S',
     'unsigned int xpto = 124; short a, b;',
-    &$m,
+    inout $m,
     PREG_OFFSET_CAPTURE | PREG_FB_HACK_ARRAYS,
   );
   var_dump($m);

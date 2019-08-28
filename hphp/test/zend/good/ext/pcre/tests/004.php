@@ -1,9 +1,10 @@
 <?hh
 <<__EntryPoint>> function main(): void {
+  $m = null;
   var_dump(preg_match_all_with_matches(
     '/((?:(?:unsigned|struct)\s+)?\w+)(?:\s*(\*+)\s+|\s+(\**))(\w+(?:\[\s*\w*\s*\])?)\s*(?:(=)[^,;]+)?((?:\s*,\s*\**\s*\w+(?:\[\s*\w*\s*\])?\s*(?:=[^,;]+)?)*)\s*;/S',
     'unsigned int xpto = 124; short a, b;',
-    &$m,
+    inout $m,
     PREG_SET_ORDER,
   ));
   var_dump($m);
@@ -11,7 +12,7 @@
   var_dump(preg_match_all_with_matches(
     '/(?:\([^)]+\))?(&?)([\w>.()-]+(?:\[\w+\])?)\s*,?((?:\)*\s*=)?)/S',
     '&a, b, &c',
-    &$m,
+    inout $m,
     PREG_SET_ORDER,
   ));
   var_dump($m);
@@ -19,7 +20,7 @@
   var_dump(preg_match_all_with_matches(
     '/zend_parse_parameters(?:_ex\s*\([^,]+,[^,]+|\s*\([^,]+),\s*"([^"]*)"\s*,\s*([^{;]*)/S',
     'zend_parse_parameters( 0, "addd|s/", a, b, &c);',
-    &$m,
+    inout $m,
     PREG_SET_ORDER | PREG_OFFSET_CAPTURE,
   ));
   var_dump($m);

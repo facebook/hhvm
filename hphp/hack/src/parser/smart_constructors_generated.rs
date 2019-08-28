@@ -168,6 +168,7 @@ pub trait SmartConstructors<'src, State>: Clone {
     fn make_xhp_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
     fn make_xhp_close(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
     fn make_type_constant(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
+    fn make_pu_access(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
     fn make_vector_type_specifier(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R;
     fn make_keyset_type_specifier(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R;
     fn make_tuple_type_explicit_specifier(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R;

@@ -603,6 +603,10 @@ where
         <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_type_constant(self, arg0, arg1, arg2)
     }
 
+    fn make_pu_access(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
+        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_pu_access(self, arg0, arg1, arg2)
+    }
+
     fn make_vector_type_specifier(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> Self::R {
         <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_vector_type_specifier(self, arg0, arg1, arg2, arg3, arg4)
     }

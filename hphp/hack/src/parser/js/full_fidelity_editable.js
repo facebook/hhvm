@@ -352,6 +352,8 @@ class EditableSyntax
       return XHPClose.from_json(json, position, source);
     case 'type_constant':
       return TypeConstant.from_json(json, position, source);
+    case 'pu_access':
+      return PUAccess.from_json(json, position, source);
     case 'vector_type_specifier':
       return VectorTypeSpecifier.from_json(json, position, source);
     case 'keyset_type_specifier':
@@ -17327,6 +17329,89 @@ class TypeConstant extends EditableSyntax
     return TypeConstant._children_keys;
   }
 }
+class PUAccess extends EditableSyntax
+{
+  constructor(
+    left_type,
+    separator,
+    right_type)
+  {
+    super('pu_access', {
+      left_type: left_type,
+      separator: separator,
+      right_type: right_type });
+  }
+  get left_type() { return this.children.left_type; }
+  get separator() { return this.children.separator; }
+  get right_type() { return this.children.right_type; }
+  with_left_type(left_type){
+    return new PUAccess(
+      left_type,
+      this.separator,
+      this.right_type);
+  }
+  with_separator(separator){
+    return new PUAccess(
+      this.left_type,
+      separator,
+      this.right_type);
+  }
+  with_right_type(right_type){
+    return new PUAccess(
+      this.left_type,
+      this.separator,
+      right_type);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var left_type = this.left_type.rewrite(rewriter, new_parents);
+    var separator = this.separator.rewrite(rewriter, new_parents);
+    var right_type = this.right_type.rewrite(rewriter, new_parents);
+    if (
+      left_type === this.left_type &&
+      separator === this.separator &&
+      right_type === this.right_type)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new PUAccess(
+        left_type,
+        separator,
+        right_type), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let left_type = EditableSyntax.from_json(
+      json.pu_access_left_type, position, source);
+    position += left_type.width;
+    let separator = EditableSyntax.from_json(
+      json.pu_access_separator, position, source);
+    position += separator.width;
+    let right_type = EditableSyntax.from_json(
+      json.pu_access_right_type, position, source);
+    position += right_type.width;
+    return new PUAccess(
+        left_type,
+        separator,
+        right_type);
+  }
+  get children_keys()
+  {
+    if (PUAccess._children_keys == null)
+      PUAccess._children_keys = [
+        'left_type',
+        'separator',
+        'right_type'];
+    return PUAccess._children_keys;
+  }
+}
 class VectorTypeSpecifier extends EditableSyntax
 {
   constructor(
@@ -21480,6 +21565,7 @@ exports.XHPOpen = XHPOpen;
 exports.XHPExpression = XHPExpression;
 exports.XHPClose = XHPClose;
 exports.TypeConstant = TypeConstant;
+exports.PUAccess = PUAccess;
 exports.VectorTypeSpecifier = VectorTypeSpecifier;
 exports.KeysetTypeSpecifier = KeysetTypeSpecifier;
 exports.TupleTypeExplicitSpecifier = TupleTypeExplicitSpecifier;

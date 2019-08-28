@@ -172,6 +172,7 @@ module type SmartConstructors_S = sig
   val make_xhp_expression : r -> r -> r -> t -> t * r
   val make_xhp_close : r -> r -> r -> t -> t * r
   val make_type_constant : r -> r -> r -> t -> t * r
+  val make_pu_access : r -> r -> r -> t -> t * r
   val make_vector_type_specifier : r -> r -> r -> r -> r -> t -> t * r
   val make_keyset_type_specifier : r -> r -> r -> r -> r -> t -> t * r
   val make_tuple_type_explicit_specifier : r -> r -> r -> r -> t -> t * r
@@ -360,6 +361,7 @@ end) = struct
     let xhp_expression parser arg0 arg1 arg2 = call parser (SCI.make_xhp_expression arg0 arg1 arg2)
     let xhp_close parser arg0 arg1 arg2 = call parser (SCI.make_xhp_close arg0 arg1 arg2)
     let type_constant parser arg0 arg1 arg2 = call parser (SCI.make_type_constant arg0 arg1 arg2)
+    let pu_access parser arg0 arg1 arg2 = call parser (SCI.make_pu_access arg0 arg1 arg2)
     let vector_type_specifier parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_vector_type_specifier arg0 arg1 arg2 arg3 arg4)
     let keyset_type_specifier parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_keyset_type_specifier arg0 arg1 arg2 arg3 arg4)
     let tuple_type_explicit_specifier parser arg0 arg1 arg2 arg3 = call parser (SCI.make_tuple_type_explicit_specifier arg0 arg1 arg2 arg3)

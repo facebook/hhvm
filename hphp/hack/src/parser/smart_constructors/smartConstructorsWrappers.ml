@@ -169,6 +169,7 @@ module type SyntaxKind_S = sig
   val is_xhp_expression : r -> bool
   val is_xhp_close : r -> bool
   val is_type_constant : r -> bool
+  val is_pu_access : r -> bool
   val is_vector_type_specifier : r -> bool
   val is_keyset_type_specifier : r -> bool
   val is_tuple_type_explicit_specifier : r -> bool
@@ -373,6 +374,7 @@ module SyntaxKind(SC : SC_S)
   let make_xhp_expression arg0 arg1 arg2 state = compose SK.XHPExpression (SC.make_xhp_expression (snd arg0) (snd arg1) (snd arg2) state)
   let make_xhp_close arg0 arg1 arg2 state = compose SK.XHPClose (SC.make_xhp_close (snd arg0) (snd arg1) (snd arg2) state)
   let make_type_constant arg0 arg1 arg2 state = compose SK.TypeConstant (SC.make_type_constant (snd arg0) (snd arg1) (snd arg2) state)
+  let make_pu_access arg0 arg1 arg2 state = compose SK.PUAccess (SC.make_pu_access (snd arg0) (snd arg1) (snd arg2) state)
   let make_vector_type_specifier arg0 arg1 arg2 arg3 arg4 state = compose SK.VectorTypeSpecifier (SC.make_vector_type_specifier (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) state)
   let make_keyset_type_specifier arg0 arg1 arg2 arg3 arg4 state = compose SK.KeysetTypeSpecifier (SC.make_keyset_type_specifier (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) state)
   let make_tuple_type_explicit_specifier arg0 arg1 arg2 arg3 state = compose SK.TupleTypeExplicitSpecifier (SC.make_tuple_type_explicit_specifier (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
@@ -553,6 +555,7 @@ module SyntaxKind(SC : SC_S)
   let is_xhp_expression                       = has_kind SK.XHPExpression
   let is_xhp_close                            = has_kind SK.XHPClose
   let is_type_constant                        = has_kind SK.TypeConstant
+  let is_pu_access                            = has_kind SK.PUAccess
   let is_vector_type_specifier                = has_kind SK.VectorTypeSpecifier
   let is_keyset_type_specifier                = has_kind SK.KeysetTypeSpecifier
   let is_tuple_type_explicit_specifier        = has_kind SK.TupleTypeExplicitSpecifier

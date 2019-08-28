@@ -1776,6 +1776,18 @@ let schema : schema_node list =
       ; "right_type", Token
       ]
     }
+  ; { kind_name   = "PUAccess"
+    ; type_name   = "pu_access"
+    ; func_name   = "pu_access"
+    ; description = "pu_access"
+    ; prefix      = "pu_access"
+    ; aggregates  = [ Statement ]
+    ; fields =
+      [ "left_type", Aggregate Specifier
+      ; "separator", Token
+      ; "right_type", Token
+      ]
+    }
   ; { kind_name   = "VectorTypeSpecifier"
     ; type_name   = "vector_type_specifier"
     ; func_name   = "vector_type_specifier"

@@ -17,7 +17,7 @@
  *
  * This module contains smart constructors implementation that does nothing
  * and can be used as initial stubs.
- 
+
  *)
 
 module type Op_S = sig
@@ -1193,6 +1193,12 @@ module WithOp (Op : Op_S) = struct
       (state, Op.flatten [arg0; arg1; arg2])
 
   let make_type_constant arg0 arg1 arg2 state =
+    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 then
+      (state, Op.zero)
+    else
+      (state, Op.flatten [arg0; arg1; arg2])
+
+  let make_pu_access arg0 arg1 arg2 state =
     if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 then
       (state, Op.zero)
     else

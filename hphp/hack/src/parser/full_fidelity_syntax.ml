@@ -196,6 +196,7 @@ module WithToken(Token: TokenType) = struct
       | XHPExpression                     _ -> SyntaxKind.XHPExpression
       | XHPClose                          _ -> SyntaxKind.XHPClose
       | TypeConstant                      _ -> SyntaxKind.TypeConstant
+      | PUAccess                          _ -> SyntaxKind.PUAccess
       | VectorTypeSpecifier               _ -> SyntaxKind.VectorTypeSpecifier
       | KeysetTypeSpecifier               _ -> SyntaxKind.KeysetTypeSpecifier
       | TupleTypeExplicitSpecifier        _ -> SyntaxKind.TupleTypeExplicitSpecifier
@@ -383,6 +384,7 @@ module WithToken(Token: TokenType) = struct
     let is_xhp_expression                       = has_kind SyntaxKind.XHPExpression
     let is_xhp_close                            = has_kind SyntaxKind.XHPClose
     let is_type_constant                        = has_kind SyntaxKind.TypeConstant
+    let is_pu_access                            = has_kind SyntaxKind.PUAccess
     let is_vector_type_specifier                = has_kind SyntaxKind.VectorTypeSpecifier
     let is_keyset_type_specifier                = has_kind SyntaxKind.KeysetTypeSpecifier
     let is_tuple_type_explicit_specifier        = has_kind SyntaxKind.TupleTypeExplicitSpecifier
@@ -1957,6 +1959,15 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc type_constant_left_type in
          let acc = f acc type_constant_separator in
          let acc = f acc type_constant_right_type in
+         acc
+      | PUAccess {
+        pu_access_left_type;
+        pu_access_separator;
+        pu_access_right_type;
+      } ->
+         let acc = f acc pu_access_left_type in
+         let acc = f acc pu_access_separator in
+         let acc = f acc pu_access_right_type in
          acc
       | VectorTypeSpecifier {
         vector_type_keyword;
@@ -3818,6 +3829,15 @@ module WithToken(Token: TokenType) = struct
         type_constant_separator;
         type_constant_right_type;
       ]
+      | PUAccess {
+        pu_access_left_type;
+        pu_access_separator;
+        pu_access_right_type;
+      } -> [
+        pu_access_left_type;
+        pu_access_separator;
+        pu_access_right_type;
+      ]
       | VectorTypeSpecifier {
         vector_type_keyword;
         vector_type_left_angle;
@@ -5678,6 +5698,15 @@ module WithToken(Token: TokenType) = struct
         "type_constant_left_type";
         "type_constant_separator";
         "type_constant_right_type";
+      ]
+      | PUAccess {
+        pu_access_left_type;
+        pu_access_separator;
+        pu_access_right_type;
+      } -> [
+        "pu_access_left_type";
+        "pu_access_separator";
+        "pu_access_right_type";
       ]
       | VectorTypeSpecifier {
         vector_type_keyword;
@@ -7730,6 +7759,16 @@ module WithToken(Token: TokenType) = struct
           type_constant_left_type;
           type_constant_separator;
           type_constant_right_type;
+        }
+      | (SyntaxKind.PUAccess, [
+          pu_access_left_type;
+          pu_access_separator;
+          pu_access_right_type;
+        ]) ->
+        PUAccess {
+          pu_access_left_type;
+          pu_access_separator;
+          pu_access_right_type;
         }
       | (SyntaxKind.VectorTypeSpecifier, [
           vector_type_keyword;
@@ -10208,6 +10247,19 @@ module WithToken(Token: TokenType) = struct
           type_constant_left_type;
           type_constant_separator;
           type_constant_right_type;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_pu_access
+        pu_access_left_type
+        pu_access_separator
+        pu_access_right_type
+      =
+        let syntax = PUAccess {
+          pu_access_left_type;
+          pu_access_separator;
+          pu_access_right_type;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

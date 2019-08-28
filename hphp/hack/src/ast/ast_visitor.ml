@@ -367,6 +367,10 @@ class virtual ['a] ast_visitor : ['a] ast_visitor_type =
         let acc = this#on_id acc id2 in
         let acc = List.fold_left this#on_id acc idl in
         acc
+      | Hpu_access (h, id) ->
+        let acc = this#on_id acc id in
+        let acc = this#on_hint acc h in
+        acc
 
     method on_targ acc h =
       let acc = this#on_hint acc h in

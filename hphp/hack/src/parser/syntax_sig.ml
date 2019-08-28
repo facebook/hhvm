@@ -829,6 +829,11 @@ module type Syntax_S = sig
     ; type_constant_separator                            : t
     ; type_constant_right_type                           : t
     }
+  | PUAccess                          of
+    { pu_access_left_type                                : t
+    ; pu_access_separator                                : t
+    ; pu_access_right_type                               : t
+    }
   | VectorTypeSpecifier               of
     { vector_type_keyword                                : t
     ; vector_type_left_angle                             : t
@@ -1218,6 +1223,7 @@ module type Syntax_S = sig
   val make_xhp_expression : t -> t -> t -> t
   val make_xhp_close : t -> t -> t -> t
   val make_type_constant : t -> t -> t -> t
+  val make_pu_access : t -> t -> t -> t
   val make_vector_type_specifier : t -> t -> t -> t -> t -> t
   val make_keyset_type_specifier : t -> t -> t -> t -> t -> t
   val make_tuple_type_explicit_specifier : t -> t -> t -> t -> t
@@ -1397,6 +1403,7 @@ module type Syntax_S = sig
   val is_xhp_expression : t -> bool
   val is_xhp_close : t -> bool
   val is_type_constant : t -> bool
+  val is_pu_access : t -> bool
   val is_vector_type_specifier : t -> bool
   val is_keyset_type_specifier : t -> bool
   val is_tuple_type_explicit_specifier : t -> bool

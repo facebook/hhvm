@@ -397,6 +397,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.EchoStatement _ -> tag validate_echo_statement (fun x -> StmtEcho x) x
     | Syntax.ConcurrentStatement _ -> tag validate_concurrent_statement (fun x -> StmtConcurrent x) x
     | Syntax.TypeConstant _ -> tag validate_type_constant (fun x -> StmtTypeConstant x) x
+    | Syntax.PUAccess _ -> tag validate_pu_access (fun x -> StmtPUAccess x) x
     | s -> aggregation_fail Def.Statement s
   and invalidate_statement : statement invalidator = fun (value, thing) ->
     match thing with
@@ -426,6 +427,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | StmtEcho                         thing -> invalidate_echo_statement                 (value, thing)
     | StmtConcurrent                   thing -> invalidate_concurrent_statement           (value, thing)
     | StmtTypeConstant                 thing -> invalidate_type_constant                  (value, thing)
+    | StmtPUAccess                     thing -> invalidate_pu_access                      (value, thing)
   and validate_switch_label : switch_label validator = fun x ->
     match Syntax.syntax x with
     | Syntax.CaseLabel _ -> tag validate_case_label (fun x -> SwitchCase x) x
@@ -3116,6 +3118,22 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       { type_constant_left_type = invalidate_specifier x.type_constant_left_type
       ; type_constant_separator = invalidate_token x.type_constant_separator
       ; type_constant_right_type = invalidate_token x.type_constant_right_type
+      }
+    ; Syntax.value = v
+    }
+  and validate_pu_access : pu_access validator = function
+  | { Syntax.syntax = Syntax.PUAccess x; value = v } -> v,
+    { pu_access_right_type = validate_token x.pu_access_right_type
+    ; pu_access_separator = validate_token x.pu_access_separator
+    ; pu_access_left_type = validate_specifier x.pu_access_left_type
+    }
+  | s -> validation_fail (Some SyntaxKind.PUAccess) s
+  and invalidate_pu_access : pu_access invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.PUAccess
+      { pu_access_left_type = invalidate_specifier x.pu_access_left_type
+      ; pu_access_separator = invalidate_token x.pu_access_separator
+      ; pu_access_right_type = invalidate_token x.pu_access_right_type
       }
     ; Syntax.value = v
     }

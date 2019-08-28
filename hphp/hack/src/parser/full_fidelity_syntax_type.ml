@@ -942,6 +942,11 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; type_constant_separator                            : t
     ; type_constant_right_type                           : t
     }
+  | PUAccess                          of
+    { pu_access_left_type                                : t
+    ; pu_access_separator                                : t
+    ; pu_access_right_type                               : t
+    }
   | VectorTypeSpecifier               of
     { vector_type_keyword                                : t
     ; vector_type_left_angle                             : t
@@ -1319,6 +1324,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | StmtEcho                         of echo_statement
   | StmtConcurrent                   of concurrent_statement
   | StmtTypeConstant                 of type_constant
+  | StmtPUAccess                     of pu_access
   and switch_label =
   | SwitchCase    of case_label
   | SwitchDefault of default_label
@@ -2241,6 +2247,11 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { type_constant_left_type: specifier value
     ; type_constant_separator: Token.t value
     ; type_constant_right_type: Token.t value
+    }
+  and pu_access =
+    { pu_access_left_type: specifier value
+    ; pu_access_separator: Token.t value
+    ; pu_access_right_type: Token.t value
     }
   and vector_type_specifier =
     { vector_type_keyword: Token.t value

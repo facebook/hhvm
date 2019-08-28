@@ -157,6 +157,7 @@ type t =
   | XHPExpression
   | XHPClose
   | TypeConstant
+  | PUAccess
   | VectorTypeSpecifier
   | KeysetTypeSpecifier
   | TupleTypeExplicitSpecifier
@@ -338,6 +339,7 @@ let to_string kind =
   | XHPExpression                     -> "xhp_expression"
   | XHPClose                          -> "xhp_close"
   | TypeConstant                      -> "type_constant"
+  | PUAccess                          -> "pu_access"
   | VectorTypeSpecifier               -> "vector_type_specifier"
   | KeysetTypeSpecifier               -> "keyset_type_specifier"
   | TupleTypeExplicitSpecifier        -> "tuple_type_explicit_specifier"

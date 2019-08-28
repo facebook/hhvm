@@ -174,6 +174,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
     | Syntax.LikeTypeSpecifier _
     | Syntax.SoftTypeSpecifier _
     | Syntax.ListItem _
+    | Syntax.PUAccess _
     | Syntax.PocketAtomExpression _
     | Syntax.PocketIdentifierExpression _
     | Syntax.PocketAtomMappingDeclaration _

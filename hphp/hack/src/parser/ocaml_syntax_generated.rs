@@ -2985,6 +2985,26 @@ where
       Self { syntax, value }
     }
 
+    fn make_pu_access(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
+      let children = [
+          &arg0.value, 
+          &arg1.value, 
+          &arg2.value
+      ];
+      let value = V::from_values(&children);
+      let syntax = Self::make(
+          ctx,
+          SyntaxKind::PUAccess,
+          &value,
+          &[
+              arg0.syntax, 
+              arg1.syntax, 
+              arg2.syntax
+          ],
+      );
+      Self { syntax, value }
+    }
+
     fn make_vector_type_specifier(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
       let children = [
           &arg0.value, 

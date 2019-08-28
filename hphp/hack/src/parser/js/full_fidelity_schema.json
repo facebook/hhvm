@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2019-07-23-0001",
+  "version" : "2019-08-22-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -1781,6 +1781,15 @@
       "type_name" : "type_constant",
       "description" : "type_constant",
       "prefix" : "type_constant",
+      "fields" : [
+        { "field_name" : "left_type" },
+        { "field_name" : "separator" },
+        { "field_name" : "right_type" }
+      ] },
+    { "kind_name" : "PUAccess",
+      "type_name" : "pu_access",
+      "description" : "pu_access",
+      "prefix" : "pu_access",
       "fields" : [
         { "field_name" : "left_type" },
         { "field_name" : "separator" },

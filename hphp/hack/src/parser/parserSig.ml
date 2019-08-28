@@ -185,6 +185,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val xhp_expression : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val xhp_close : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val type_constant : t -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val pu_access : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val vector_type_specifier : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val keyset_type_specifier : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val tuple_type_explicit_specifier : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r

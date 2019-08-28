@@ -1128,6 +1128,14 @@ pub trait FlattenSmartConstructors<'src, State>
         }
     }
 
+    fn make_pu_access(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
+        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
+          Self::zero()
+        } else {
+          Self::flatten(vec!(arg0, arg1, arg2))
+        }
+    }
+
     fn make_vector_type_specifier(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> Self::R {
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()

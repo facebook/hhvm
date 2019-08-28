@@ -156,6 +156,7 @@ pub trait SyntaxType<'a, C>: SyntaxTypeBase<'a, C>
     fn make_xhp_expression(ctx: &C, xhp_open: Self, xhp_body: Self, xhp_close: Self) -> Self;
     fn make_xhp_close(ctx: &C, xhp_close_left_angle: Self, xhp_close_name: Self, xhp_close_right_angle: Self) -> Self;
     fn make_type_constant(ctx: &C, type_constant_left_type: Self, type_constant_separator: Self, type_constant_right_type: Self) -> Self;
+    fn make_pu_access(ctx: &C, pu_access_left_type: Self, pu_access_separator: Self, pu_access_right_type: Self) -> Self;
     fn make_vector_type_specifier(ctx: &C, vector_type_keyword: Self, vector_type_left_angle: Self, vector_type_type: Self, vector_type_trailing_comma: Self, vector_type_right_angle: Self) -> Self;
     fn make_keyset_type_specifier(ctx: &C, keyset_type_keyword: Self, keyset_type_left_angle: Self, keyset_type_type: Self, keyset_type_trailing_comma: Self, keyset_type_right_angle: Self) -> Self;
     fn make_tuple_type_explicit_specifier(ctx: &C, tuple_type_keyword: Self, tuple_type_left_angle: Self, tuple_type_types: Self, tuple_type_right_angle: Self) -> Self;

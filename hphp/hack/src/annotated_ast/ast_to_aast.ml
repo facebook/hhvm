@@ -138,6 +138,7 @@ let converter
     | Haccess (root, id, ids) -> (p, on_haccess root id ids)
     | Hsoft h -> (p, Aast.Hsoft (on_hint h))
     | Hlike h -> (p, Aast.Hlike (on_hint h))
+    | Hpu_access (h, id) -> (p, Aast.Hpu_access (on_hint h, id))
   and on_class_elt body elt =
     match elt with
     | Attributes attrs ->

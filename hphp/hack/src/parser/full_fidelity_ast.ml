@@ -978,6 +978,14 @@ let rec pHint : hint parser = fun node env ->
       | Happly (b, []) -> Haccess (b, child, [])
       | _ -> missing_syntax "type constant base" node env
       )
+    | PUAccess { pu_access_left_type; pu_access_right_type; _ } ->
+      let pos = pPos pu_access_left_type env in
+      let child = pos_name pu_access_right_type env in
+      (match pHint_ pu_access_left_type env with
+       | Hpu_access (h, id) -> Hpu_access ((pos, Hpu_access (h, id)), child)
+       | Happly (_, []) as head -> Hpu_access ((pos, head), child)
+       | _ -> missing_syntax "pocket universe access base" node env
+      )
     | ReifiedTypeArgument _ ->
       raise_parsing_error env (`Node node) SyntaxError.invalid_reified;
       missing_syntax "reified type" node env

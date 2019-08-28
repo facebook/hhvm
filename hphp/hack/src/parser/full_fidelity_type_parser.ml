@@ -186,6 +186,36 @@ and parse_remaining_type_constant parser left =
     let (parser, missing) = Make.missing parser (pos parser) in
     Make.type_constant parser left separator missing
 
+(* SPEC
+  pocket-universe-access:
+    name  :@  name
+    self  :@  name
+    this  :@  name
+    parent  :@  name
+    pocket-universe-access :@  name
+*)
+
+and parse_remaining_pocket_universe_access parser left =
+  let (parser, separator) = fetch_token parser in
+  let (parser1, right) = next_token_as_name parser in
+  if (Token.kind right) = Name then
+    begin
+      let (parser, right) = Make.token parser1 right in
+      let (parser, syntax) = Make.pu_access parser left separator right in
+      let token = peek_token parser in
+      if (Token.kind token) = ColonAt then
+        parse_remaining_pocket_universe_access parser syntax
+      else
+        (parser, syntax)
+    end
+  else
+    (* ERROR RECOVERY: Assume that the thing following the :@
+       that is not a name belongs to the next thing to be
+       parsed; treat the name as missing. *)
+    let parser = with_error parser1 SyntaxError.error1004 in
+    let (parser, missing) = Make.missing parser (pos parser) in
+    Make.pu_access parser left separator missing
+
 and parse_remaining_generic parser name =
   let (parser, arguments, _) = parse_generic_type_argument_list parser in
   Make.generic_type_specifier parser name arguments
@@ -213,6 +243,7 @@ and parse_remaining_simple_type_or_type_constant_or_generic parser name =
 and parse_remaining_simple_type_or_type_constant parser name =
   match peek_token_kind parser with
   | ColonColon -> parse_remaining_type_constant parser name
+  | ColonAt -> parse_remaining_pocket_universe_access parser name
   | _ -> Make.simple_type_specifier parser name
 
 and parse_remaining_simple_type_or_generic parser name =

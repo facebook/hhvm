@@ -111,9 +111,8 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<SpillFrame>();
   auto const funcTmp = inst->src(1);
   auto const ctxTmp = inst->src(2);
-  auto const invNameTmp = inst->src(3);
-  auto const isDynamic = inst->src(4);
-  auto const tsListTmp = inst->src(5);
+  auto const isDynamic = inst->src(3);
+  auto const tsListTmp = inst->src(4);
   auto& v = vmain(env);
 
   auto const ar = sp[cellsToBytes(extra->spOffset.offset)];
@@ -160,31 +159,9 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
     }
   }
 
-  // Set m_invName.
-  if (invNameTmp->isA(TNullptr)) {
-    if (RuntimeOption::EvalHHIRGenerateAsserts) {
-      emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, ar + AROFF(m_invName));
-    }
-  } else {
-    assertx(invNameTmp->isA(TStr | TNullptr));
-
-    // We don't have to incref here
-    auto const invName = srcLoc(env, inst, 3).reg();
-    v << store{invName, ar + AROFF(m_invName)};
-    if (invNameTmp->type().maybe(TNullptr)) {
-      if (RuntimeOption::EvalHHIRGenerateAsserts) {
-        auto const sf = v.makeReg();
-        v << testq{invName, invName, sf};
-        ifThen(
-          v,
-          CC_Z,
-          sf,
-          [&] (Vout& v) {
-            emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, ar + AROFF(m_invName));
-          }
-        );
-      }
-    }
+  // Trash m_varEnv.
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, ar + AROFF(m_varEnv));
   }
 
   // Set m_func.
@@ -212,7 +189,7 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
   }
 
   auto const createCompactReifiedPtr = [&] (Vout& v) {
-    auto const tsListReg = srcLoc(env, inst, 5).reg();
+    auto const tsListReg = srcLoc(env, inst, 4).reg();
     auto const bits = getTSBits(env, inst, tsListTmp, tsListReg);
     if (!bits) return tsListReg;
     auto const bits_shifted = v.makeReg();
@@ -231,18 +208,11 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
   auto flags = ActRec::Flags::None;
 
   bool dynamicCheck = false;
-  bool magicCheck = false;
   bool reifiedCheck = false;
   if (!isDynamic->hasConstVal()) {
     dynamicCheck = true;
   } else if (isDynamic->hasConstVal(true)) {
     flags = static_cast<ActRec::Flags>(flags | ActRec::Flags::DynamicCall);
-  }
-
-  if (!invNameTmp->type().maybe(TNullptr)) {
-    flags = static_cast<ActRec::Flags>(flags | ActRec::Flags::MagicDispatch);
-  } else if (!invNameTmp->isA(TNullptr)) {
-    magicCheck = true;
   }
 
   if (!tsListTmp->type().maybe(TNullptr)) {
@@ -258,24 +228,8 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
     static_cast<int32_t>(ActRec::encodeNumArgsAndFlags(extra->numArgs, flags))
   );
 
-  if (magicCheck) {
-    auto const invName = srcLoc(env, inst, 3).reg();
-    auto const sf = v.makeReg();
-    auto const naaf2 = v.makeReg();
-    auto const dst = v.makeReg();
-    v << orli{
-      static_cast<int32_t>(ActRec::Flags::MagicDispatch),
-      naaf,
-      dst,
-      v.makeReg()
-    };
-    v << testb{invName, invName, sf};
-    v << cmovl{CC_NZ, sf, naaf, dst, naaf2};
-    naaf = naaf2;
-  }
-
   if (dynamicCheck) {
-    auto const dynamicReg = srcLoc(env, inst, 4).reg();
+    auto const dynamicReg = srcLoc(env, inst, 3).reg();
     auto const sf = v.makeReg();
     auto const naaf2 = v.makeReg();
     auto const dst = v.makeReg();
@@ -376,16 +330,6 @@ void cgLdARNumArgsAndFlags(IRLS& env, const IRInstruction* inst) {
   vmain(env) << loadzlq{fp[AROFF(m_numArgsAndFlags)], dst};
 }
 
-void cgStARNumArgsAndFlags(IRLS& env, const IRInstruction* inst) {
-  auto const fp = srcLoc(env, inst, 0).reg();
-  auto const val = srcLoc(env, inst, 1).reg();
-  auto &v = vmain(env);
-
-  auto const tmp = v.makeReg();
-  v << movtql{val, tmp};
-  v << storel{tmp, fp[AROFF(m_numArgsAndFlags)]};
-}
-
 void cgLdARNumParams(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const fp = srcLoc(env, inst, 0).reg();
@@ -394,28 +338,6 @@ void cgLdARNumParams(IRLS& env, const IRInstruction* inst) {
   auto const naaf = v.makeReg();
   v << loadzlq{fp[AROFF(m_numArgsAndFlags)], naaf};
   v << andqi{ActRec::kNumArgsMask, naaf, dst, v.makeReg()};
-}
-
-void cgCheckARMagicFlag(IRLS& env, const IRInstruction* inst) {
-  auto const fp = srcLoc(env, inst, 0).reg();
-
-  auto& v = vmain(env);
-  auto const sf = v.makeReg();
-
-  auto const mask = static_cast<int32_t>(ActRec::Flags::MagicDispatch);
-
-  if (mask & (mask - 1)) {
-    auto const tmp = v.makeReg();
-    auto const naaf = v.makeReg();
-    // We need to test multiple bits.
-    v << loadl{fp[AROFF(m_numArgsAndFlags)], naaf};
-    v << andli{mask, naaf, tmp, v.makeReg()};
-    v << cmpli{mask, tmp, sf};
-    v << jcc{CC_NZ, sf, {label(env, inst->next()), label(env, inst->taken())}};
-  } else {
-    v << testlim{mask, fp[AROFF(m_numArgsAndFlags)], sf};
-    v << jcc{CC_Z, sf, {label(env, inst->next()), label(env, inst->taken())}};
-  }
 }
 
 void cgLdCtx(IRLS& env, const IRInstruction* inst) {
@@ -434,18 +356,6 @@ void cgInitCtx(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const ctx = srcLoc(env, inst, 1).reg();
   vmain(env) << store{ctx, fp[AROFF(m_thisUnsafe)]};
-}
-
-void cgLdARInvName(IRLS& env, const IRInstruction* inst) {
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto const fp = srcLoc(env, inst, 0).reg();
-  vmain(env) << load{fp[AROFF(m_invName)], dst};
-}
-
-void cgStARInvName(IRLS& env, const IRInstruction* inst) {
-  auto const fp = srcLoc(env, inst, 0).reg();
-  auto const val = srcLoc(env, inst, 1).reg();
-  vmain(env) << store{val, fp[AROFF(m_invName)]};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -671,41 +581,6 @@ void cgInitExtraArgs(IRLS& env, const IRInstruction* inst) {
     callDest(env, inst),
     SyncOptions::Sync,
     argGroup(env, inst).reg(fp)
-  );
-}
-
-void cgPackMagicArgs(IRLS& env, const IRInstruction* inst) {
-  auto const fp = srcLoc(env, inst, 0).reg();
-
-  auto& v = vmain(env);
-  auto const naaf = v.makeReg();
-  auto const num_args = v.makeReg();
-
-  v << loadl{fp[AROFF(m_numArgsAndFlags)], naaf};
-  v << andli{ActRec::kNumArgsMask, naaf, num_args, v.makeReg()};
-
-  auto const offset = v.makeReg();
-  auto const offsetq = v.makeReg();
-  auto const values = v.makeReg();
-
-  static_assert(sizeof(Cell) == 16, "");
-  v << shlli{4, num_args, offset, v.makeReg()};
-  v << movzlq{offset, offsetq};
-  v << subq{offsetq, fp, values, v.makeReg()};
-
-  auto const args = argGroup(env, inst)
-    .reg(num_args)
-    .reg(values);
-
-  cgCallHelper(
-    v,
-    env,
-    RuntimeOption::EvalHackArrDVArrs
-      ? CallSpec::direct(PackedArray::MakeVec)
-      : CallSpec::direct(PackedArray::MakeVArray),
-    callDest(env, inst),
-    SyncOptions::Sync,
-    args
   );
 }
 

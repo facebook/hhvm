@@ -585,7 +585,6 @@ bool opcodeMayRaise(Opcode opc) {
   case Box:
   case BoxPtr:
   case Ceil:
-  case CheckARMagicFlag:
   case CheckArrayCOW:
   case CheckCold:
   case CheckCtxThis:
@@ -806,7 +805,6 @@ bool opcodeMayRaise(Opcode opc) {
   case KillARReifiedGenerics:
   case LdAFWHActRec:
   case LdARCtx:
-  case LdARInvName:
   case LdARNumArgsAndFlags:
   case LdARNumParams:
   case LdARReifiedGenerics:
@@ -955,7 +953,6 @@ bool opcodeMayRaise(Opcode opc) {
   case NSameStr:
   case OrdStr:
   case OrInt:
-  case PackMagicArgs:
   case PairIsset:
   case ProfileArrayKind:
   case ProfileCall:
@@ -985,8 +982,6 @@ bool opcodeMayRaise(Opcode opc) {
   case Shr:
   case SpillFrame:
   case Sqrt:
-  case StARInvName:
-  case StARNumArgsAndFlags:
   case StArResumeAddr:
   case StClosureArg:
   case StClosureCtx:

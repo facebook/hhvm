@@ -251,8 +251,6 @@ bool canDCE(IRInstruction* inst) {
   case OrdStr:
   case ChrInt:
   case CheckRange:
-  case LdARInvName:
-  case PackMagicArgs:
   case LdMBase:
   case MethodExists:
   case LdTVAux:
@@ -709,9 +707,6 @@ bool canDCE(IRInstruction* inst) {
   case InitExtraArgs:
   case InitCtx:
   case CheckSurpriseFlagsEnter:
-  case CheckARMagicFlag:
-  case StARNumArgsAndFlags:
-  case StARInvName:
   case ExitPlaceholder:
   case ThrowOutOfBounds:
   case ThrowInvalidArrayKey:

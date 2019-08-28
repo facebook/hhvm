@@ -1739,8 +1739,7 @@ To string conversions:
 
 | SpillFrame<offset,numArgs>,
 |   ND,
-|   S(StkPtr) S(Func,Nullptr) S(Ctx,Cls,Nullptr) S(Str,Nullptr) S(Bool)
-|   S(Arr|Vec,Nullptr),
+|   S(StkPtr) S(Func,Nullptr) S(Ctx,Cls,Nullptr) S(Bool) S(Arr|Vec,Nullptr),
 |   NF
 
   Operands:
@@ -1749,9 +1748,8 @@ To string conversions:
      S1 - callee Func or nullptr
      S2 - object (for FCallObjMethod*), class (for FCallClsMethod*), context
           (for FCallClsMethod*), or nullptr (for FCallFunc*).
-     S3 - invoke name for magic dispatch
-     S4 - whether this is a "dynamic" call
-     S5 - reified generics type structure list
+     S3 - whether this is a "dynamic" call
+     S4 - reified generics type structure list
 
   Defines the fields for an activation record and writes them to the stack
   pointed to by S0, at `offset'.
@@ -3549,36 +3547,10 @@ fields of that struct for holding intermediate values.
 
   Test surprise flags and stack overflow at the same time.
 
-| CheckARMagicFlag, ND, S(FramePtr), B
-
-  If the MagicDispatch flags on the ActRec pointed to by the frame pointer S0
-  are not set, branch to block B.
-
 | LdARNumArgsAndFlags, D(Int), S(FramePtr), NF
 
   Load the value of m_numArgsAndFlags on the ActRec pointed to by the frame
   pointer S0.
-
-| StARNumArgsAndFlags, ND, S(FramePtr) S(Int), NF
-
-  Store S1 to m_numArgsAndFlags on the ActRec pointed to by the frame pointer
-  S0.
-
-| LdARInvName, D(Str), S(FramePtr), NF
-
-  Load the value of m_invName off the ActRec pointed to by the frame pointer S0.
-  The compiler should generate this only if it knows that m_invName is a
-  StringData* (rather than, e.g., a VarEnv*).
-
-| StARInvName, ND, S(FramePtr) S(Str,Nullptr), CRc
-
-  Store S1 to m_invName on the ActRec pointed to by the frame pointer S0.
-
-| PackMagicArgs, DVArr, S(FramePtr), PRc
-
-  Call PackedArray::MakeVArray() with the value of numArgs() on the ActRec
-  pointed to by the frame pointer S0 as the first argument, and the pointer to
-  the first parameter in the frame as the second argument.
 
 | LdTVAux<ValidBits>, D(Int), S(Gen), NF
 

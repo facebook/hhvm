@@ -237,8 +237,7 @@ void beginInlining(IRGS& env,
 
   auto const arInfo = ActRecInfo { calleeAROff, fca.numArgs };
   gen(env, SpillFrame, arInfo, sp(env), cns(env, target), ctx,
-      cns(env, TNullptr), cns(env, dynamicCall),
-      tsList ? tsList : cns(env, TNullptr));
+      cns(env, dynamicCall), tsList ? tsList : cns(env, TNullptr));
 
   ctx = [&] () -> SSATmp* {
     if (!target->implCls()) {

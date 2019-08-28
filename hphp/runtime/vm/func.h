@@ -857,11 +857,6 @@ struct Func final {
   bool isGenerated() const;
 
   /*
-   * Is this function __call()?
-   */
-  bool isMagicCallMethod() const;
-
-  /*
    * Is `name' the name of a special initializer function?
    */
   static bool isSpecial(const StringData* name);

@@ -1750,14 +1750,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ProfileType:
   case LdIfaceMethod:
   case InstanceOfIfaceVtable:
-  case CheckARMagicFlag:
   case LdARNumArgsAndFlags:
-  case StARNumArgsAndFlags:
   case LdARReifiedGenerics:
   case KillARReifiedGenerics:
   case LdTVAux:
-  case LdARInvName:
-  case StARInvName:
   case MethodExists:
   case GetTime:
   case GetTimeNs:
@@ -1928,7 +1924,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LookupClsMethod:
   case LookupClsRDS:
   case InitCtx:
-  case PackMagicArgs:
   case StrictlyIntegerConv:
   case DbgAssertFunc:
   case ProfileCall:

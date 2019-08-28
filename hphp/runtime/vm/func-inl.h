@@ -538,10 +538,6 @@ inline bool Func::isGenerated() const {
   return shared()->m_isGenerated;
 }
 
-inline bool Func::isMagicCallMethod() const {
-  return m_name->isame(s___call.get());
-}
-
 inline bool Func::isSpecial(const StringData* name) {
   return strncmp("86", name->data(), 2) == 0;
 }

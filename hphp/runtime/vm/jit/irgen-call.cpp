@@ -197,7 +197,6 @@ IRSPRelOffset fsetActRec(
     sp(env),
     func,
     objOrClass ? objOrClass : cns(env, TNullptr),
-    cns(env, TNullptr),
     cns(env, dynamicCall),
     tsList ? tsList : cns(env, TNullptr)
   );

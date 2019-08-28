@@ -401,7 +401,7 @@ void emitPrologueEntry(IRGS& env, uint32_t argc) {
   auto const func = curFunc(env);
 
   // Emit debug code.
-  if (Trace::moduleEnabled(Trace::ringbuffer) && !func->isMagicCallMethod()) {
+  if (Trace::moduleEnabled(Trace::ringbuffer)) {
     auto msg = RBMsgData { Trace::RBTypeFuncPrologue, func->fullName() };
     gen(env, RBTraceMsg, msg);
   }
@@ -465,67 +465,6 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void emitMagicFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
-  assertx(curFunc(env)->isMagicCallMethod());
-  assertx(curFunc(env)->numParams() == 2);
-  assertx(!curFunc(env)->hasVariadicCaptureParam());
-
-  Block* two_arg_prologue = nullptr;
-
-  emitPrologueEntry(env, argc);
-
-  // If someone just called __call() directly, branch to a normal non-magic
-  // prologue.
-  ifThen(
-    env,
-    [&] (Block* taken) {
-      gen(env, CheckARMagicFlag, taken, fp(env));
-      if (argc == 2) two_arg_prologue = taken;
-    },
-    [&] {
-      emitPrologueBody(env, argc, transID);
-    }
-  );
-
-  // Pack the passed args into an array, then store it as the second param.
-  // This has to happen before we write the first param.
-  auto const args_arr = (argc == 0)
-    ? cns(env, staticEmptyVArray())
-    : gen(env, PackMagicArgs, fp(env));
-  gen(env, StLoc, LocalId{1}, fp(env), args_arr);
-
-  // Store the name of the called function to the first param, then null it out
-  // on the ActRec.
-  auto const inv_name = gen(env, LdARInvName, fp(env));
-  gen(env, StLoc, LocalId{0}, fp(env), inv_name);
-  gen(env, StARInvName, fp(env), cns(env, nullptr));
-
-  // Reset all the flags except for the dynamic call flag and set the argument
-  // count to 2.
-  auto const flag = gen(
-    env,
-    AndInt,
-    gen(env, LdARNumArgsAndFlags, fp(env)),
-    cns(env, static_cast<int32_t>(ActRec::Flags::DynamicCall))
-  );
-  auto combined = gen(
-    env,
-    OrInt,
-    flag,
-    cns(env, ActRec::encodeNumArgsAndFlags(2, ActRec::Flags::None))
-  );
-  gen(env, StARNumArgsAndFlags, fp(env), combined);
-
-  // Jmp to the two-argument prologue, or emit it if it doesn't exist yet.
-  if (two_arg_prologue) {
-    gen(env, Jmp, two_arg_prologue);
-  } else {
-    emitPrologueBody(env, 2, transID);
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -541,9 +480,6 @@ void emitPrologueLocals(IRGS& env, uint32_t argc,
 }
 
 void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
-  if (curFunc(env)->isMagicCallMethod()) {
-    return emitMagicFuncPrologue(env, argc, transID);
-  }
   emitPrologueEntry(env, argc);
   emitPrologueBody(env, argc, transID);
 }

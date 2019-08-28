@@ -224,6 +224,7 @@
     serverRewriteLambdaParameters
     codemodTypePrinter
     serverRewriteReturnType
+    serverRewriteParameterTypes
     serverSearch
     serverSignatureHelp
     serverStamp

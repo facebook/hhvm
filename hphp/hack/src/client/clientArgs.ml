@@ -523,6 +523,19 @@ let parse_check_args cmd =
           end,
         " (mode) rewrite return types of function in the files from the given list"
         ^ " with suggested return types" );
+      ( "--rewrite-parameter-types",
+        Arg.Rest
+          begin
+            fun fn ->
+            mode :=
+              match !mode with
+              | None -> Some (MODE_REWRITE_PARAMETER_TYPES [fn])
+              | Some (MODE_REWRITE_PARAMETER_TYPES fnl) ->
+                Some (MODE_REWRITE_PARAMETER_TYPES (fn :: fnl))
+              | _ -> raise (Arg.Bad "only a single mode should be specified")
+          end,
+        " (mode) add type annotation of unannotated parameters in the files from the given list"
+        ^ " with suggested types" );
       ( "--save-state",
         Arg.String (fun x -> set_mode (MODE_SAVE_STATE x) ()),
         " (mode) Save a saved state to the given file."

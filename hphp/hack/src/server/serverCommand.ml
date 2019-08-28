@@ -24,6 +24,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | REMOVE_DEAD_FIXMES _ -> true (* needs same information as STATUS *)
   | REWRITE_LAMBDA_PARAMETERS _ -> true
   | REWRITE_RETURN_TYPE _ -> true
+  | REWRITE_PARAMETER_TYPES _ -> true
   (* some Ai stuff - calls to those will likely never be interleaved with IDE
    * file sync commands (and resulting small checks), but putting it here just
    * to be safe *)
@@ -110,6 +111,7 @@ let get_description : type a. a command -> string = function
   | Rpc (REMOVE_DEAD_FIXMES _) -> "REMOVE_DEAD_FIXMES"
   | Rpc (REWRITE_LAMBDA_PARAMETERS _) -> "REWRITE_LAMBDA_PARAMETERS"
   | Rpc (REWRITE_RETURN_TYPE _) -> "REWRITE_RETURN_TYPE"
+  | Rpc (REWRITE_PARAMETER_TYPES _) -> "REWRITE_PARAMETER_TYPES"
   | Rpc (AI_QUERY _) -> "AI_QUERY"
   | Rpc (FIND_REFS _) -> "FIND_REFS"
   | Rpc (IDE_FIND_REFS _) -> "IDE_FIND_REFS"

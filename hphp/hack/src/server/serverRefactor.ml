@@ -40,6 +40,12 @@ let get_return_type_rewrite_patches env files =
         env.tcopt
         (Relative_path.from_root file))
 
+let get_parameter_types_rewrite_patches env files =
+  List.concat_map files (fun file ->
+      ServerRewriteParameterTypes.get_patches
+        env.tcopt
+        (Relative_path.from_root file))
+
 let find_def_filename current_filename definition =
   SymbolDefinition.(
     if Pos.filename definition.pos = ServerIdeUtils.path then

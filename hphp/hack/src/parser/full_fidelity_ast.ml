@@ -2169,9 +2169,8 @@ and pStmt : stmt parser = fun node env ->
         raise_parsing_error env (`Node node) SyntaxError.const_mutation;
       | _ -> ()
     in
-    let el = couldMap ~f:pExpr exprs env in
     if ParserOptions.disable_unset_class_const env.parser_options then
-      List.iter ~f:check_mutate_class_const el;
+      List.iter ~f:check_mutate_class_const @@ couldMap ~f:pExpr exprs env;
     lift_awaits_in_statement env pos (fun () -> pos, Expr
       ( pPos node env
       , Call
@@ -2183,7 +2182,7 @@ and pStmt : stmt parser = fun node env ->
           | _ -> missing_syntax "id" kw env
           )
         , []
-        , el
+        , couldMap ~f:pExpr exprs env
         , []
       )))
   | BreakStatement { break_level=level; _ } ->

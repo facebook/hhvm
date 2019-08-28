@@ -3421,9 +3421,9 @@ and arraykey_value p class_name ~(expected: ExpectedTy.t option) env ((pos, _) a
 
 and array_field_key ~(expected: ExpectedTy.t option) env = function
   (* This shouldn't happen *)
-  | AFvalue (p, _) ->
-      let ty = MakeType.int (Reason.Rwitness p) in
-      env, (Tast.make_typed_expr p ty T.Any, ty)
+  | AFvalue (p, _ as e) ->
+     let ty = MakeType.int (Reason.Rwitness p) in
+     env, (with_type ty Tast.dummy_saved_env e, ty)
   | AFkvalue (x, _) ->
       array_value ~expected env x
 
